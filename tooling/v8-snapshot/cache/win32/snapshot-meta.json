@@ -1676,6 +1676,7 @@
     "./node_modules/base64url/dist/base64url.js",
     "./node_modules/base64url/dist/pad-string.js",
     "./node_modules/base64url/index.js",
+    "./node_modules/baseline-browser-mapping/dist/index.cjs",
     "./node_modules/basic-auth/index.js",
     "./node_modules/bcrypt-pbkdf/index.js",
     "./node_modules/better-sqlite3/lib/database.js",
@@ -3859,7 +3860,6 @@
     "./packages/errors/cjs/errorTypes.js",
     "./packages/errors/cjs/normalizeNetworkErrorMessage.js",
     "./packages/errors/cjs/stripIndent.js",
-    "./packages/errors/node_modules/chalk/node_modules/ansi-styles/index.js",
     "./packages/errors/node_modules/chalk/source/templates.js",
     "./packages/errors/node_modules/chalk/source/util.js",
     "./packages/example/index.js",
@@ -4327,5 +4327,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "937c8f96b397665d77547a80a73b067c1bbbe51d12e3bc174a69852cd4bad3de"
+  "deferredHash": "01985fa0faf6f2bf5e67c271109520d064272018b2055730ea1723c09481db64"
 }
