@@ -16,7 +16,7 @@
     const tryFrame = (index) => {
       try {
         if (index >= window[TOP].frames.length) {
-          return null
+          throw new Error('Spec frame not found')
         }
 
         // will throw if cross-origin
