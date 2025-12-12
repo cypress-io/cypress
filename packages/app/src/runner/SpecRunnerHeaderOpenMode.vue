@@ -71,14 +71,21 @@
       <Button
         data-cy="playground-activator"
         :disabled="isDisabled"
-        :variant="selectorPlaygroundStore.show ? 'purple-dark' : 'outline-dark'"
+        :variant="isDisabled ? 'purple-dark' : (selectorPlaygroundStore.show ? 'purple-dark' : 'outline-dark')"
         size="32"
         square
         :aria-label="t('runner.selectorPlayground.toggle')"
-        :class="{ 'playground-button-purple': selectorPlaygroundStore.show }"
+        :class="{
+          'playground-button-purple': selectorPlaygroundStore.show && !isDisabled,
+          'playground-button-disabled': isDisabled
+        }"
         @click="togglePlayground"
       >
-        <i-cy-crosshairs_x16 :class="selectorPlaygroundStore.show ? 'icon-dark-white' : 'icon-dark-gray-300'" />
+        <i-cy-crosshairs_x16
+          :class="isDisabled
+            ? 'icon-dark-gray-700'
+            : (selectorPlaygroundStore.show ? 'icon-dark-white' : 'icon-dark-gray-300')"
+        />
       </Button>
       <StudioButton
         v-if="shouldShowStudioButton"
@@ -281,5 +288,13 @@ function openExternally () {
 .playground-button-purple:focus {
   border-color: rgba(255, 255, 255, 0.6) !important; /* hocus:border-white/60 */
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important; /* hocus:shadow-white/20 */
+}
+
+/* Manually style disabled state to match RecordButton's disabled appearance */
+.playground-button-disabled {
+  background-color: #343855 !important;
+  border-color: #343855 !important;
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
 }
 </style>
