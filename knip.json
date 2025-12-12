@@ -75,6 +75,9 @@
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "tslib"
       ]
     },
     "packages/launchpad": {
