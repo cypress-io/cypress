@@ -1,6 +1,31 @@
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
+import { useStudioStore } from '../../store/studio-store'
 import { getMethodPrefix, getMethodPrefixLength, SELECTOR_METHODS, closePlayground, openPlayground, togglePlayground } from './utils'
 import type { AutIframe } from '../aut-iframe'
+
+// Helper to create a mock jQuery-like object that matches the interface expected by closeStudioAssertionsMenu
+const createMock$Body = () => {
+  return {
+    length: 1,
+    get: (index: number) => index === 0 ? document.body : undefined,
+  } as any
+}
+
+// Helper to create a mock AutIframe for testing
+const createMockAutIframe = (options?: { withBody?: boolean }) => {
+  const autIframe = {
+    toggleSelectorPlayground: cy.stub(),
+    toggleSelectorHighlight: cy.stub(),
+  } as any
+
+  if (options?.withBody) {
+    autIframe._body = cy.stub().returns(createMock$Body())
+  } else {
+    autIframe._body = cy.stub()
+  }
+
+  return autIframe as unknown as AutIframe
+}
 
 describe('selector-playground/utils', () => {
   describe('SELECTOR_METHODS', () => {
@@ -46,10 +71,7 @@ describe('selector-playground/utils', () => {
   describe('closePlayground', () => {
     it('closes playground and turns off all highlighting', () => {
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
-      const autIframe = {
-        toggleSelectorPlayground: cy.stub(),
-        toggleSelectorHighlight: cy.stub(),
-      } as unknown as AutIframe
+      const autIframe = createMockAutIframe()
 
       // Set initial state to open
       selectorPlaygroundStore.setShow(true)
@@ -69,10 +91,7 @@ describe('selector-playground/utils', () => {
   describe('openPlayground', () => {
     it('opens playground and enables highlighting', () => {
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
-      const autIframe = {
-        toggleSelectorPlayground: cy.stub(),
-        toggleSelectorHighlight: cy.stub(),
-      } as unknown as AutIframe
+      const autIframe = createMockAutIframe({ withBody: true })
 
       // Set initial state to closed
       selectorPlaygroundStore.setShow(false)
@@ -87,15 +106,44 @@ describe('selector-playground/utils', () => {
       expect(autIframe.toggleSelectorPlayground).to.have.been.calledWith(true)
       expect(autIframe.toggleSelectorHighlight).to.have.been.calledWith(true)
     })
+
+    it('closes assertions menu when Studio is active', () => {
+      const studioStore = useStudioStore()
+      const selectorPlaygroundStore = useSelectorPlaygroundStore()
+      const autIframe = createMockAutIframe({ withBody: true })
+
+      // Set Studio to active
+      studioStore.setActive(true)
+      selectorPlaygroundStore.setShow(false)
+
+      openPlayground(autIframe)
+
+      // Verify body was accessed (indicating we tried to close the menu)
+      expect(autIframe._body).to.have.been.called
+      expect(selectorPlaygroundStore.show).to.be.true
+    })
+
+    it('does not try to close assertions menu when Studio is not active', () => {
+      const studioStore = useStudioStore()
+      const selectorPlaygroundStore = useSelectorPlaygroundStore()
+      const autIframe = createMockAutIframe()
+
+      // Set Studio to inactive
+      studioStore.setActive(false)
+      selectorPlaygroundStore.setShow(false)
+
+      openPlayground(autIframe)
+
+      // Verify body was NOT accessed (since Studio is not active)
+      expect(autIframe._body).not.to.have.been.called
+      expect(selectorPlaygroundStore.show).to.be.true
+    })
   })
 
   describe('togglePlayground', () => {
     it('closes playground when it is currently open', () => {
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
-      const autIframe = {
-        toggleSelectorPlayground: cy.stub(),
-        toggleSelectorHighlight: cy.stub(),
-      } as unknown as AutIframe
+      const autIframe = createMockAutIframe()
 
       // Set initial state to open
       selectorPlaygroundStore.setShow(true)
@@ -109,10 +157,7 @@ describe('selector-playground/utils', () => {
 
     it('opens playground when it is currently closed', () => {
       const selectorPlaygroundStore = useSelectorPlaygroundStore()
-      const autIframe = {
-        toggleSelectorPlayground: cy.stub(),
-        toggleSelectorHighlight: cy.stub(),
-      } as unknown as AutIframe
+      const autIframe = createMockAutIframe()
 
       // Set initial state to closed
       selectorPlaygroundStore.setShow(false)

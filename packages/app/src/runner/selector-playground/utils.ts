@@ -1,5 +1,7 @@
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
+import { closeStudioAssertionsMenu } from '../studio/mounter'
+import { useStudioStore } from '../../store/studio-store'
 
 export type SelectorMethod = 'get' | 'contains'
 
@@ -34,7 +36,7 @@ export const closePlayground = (autIframe: AutIframe) => {
   autIframe.toggleSelectorHighlight(false)
 }
 
-export const openPlayground = (autIframe: AutIframe) => {
+const _openPlaygroundCore = (autIframe: AutIframe) => {
   const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
   selectorPlaygroundStore.setShow(true)
@@ -42,6 +44,21 @@ export const openPlayground = (autIframe: AutIframe) => {
   selectorPlaygroundStore.setEnabled(true)
   selectorPlaygroundStore.setShowingHighlight(true)
   autIframe.toggleSelectorHighlight(true)
+}
+
+export const openPlayground = (autIframe: AutIframe) => {
+  const studioStore = useStudioStore()
+
+  // Close assertions menu if Studio is active and menu is open
+  if (studioStore.isActive) {
+    const $body = autIframe._body()
+
+    if ($body && $body.length > 0) {
+      closeStudioAssertionsMenu($body)
+    }
+  }
+
+  _openPlaygroundCore(autIframe)
 }
 
 export const togglePlayground = (autIframe: AutIframe) => {
