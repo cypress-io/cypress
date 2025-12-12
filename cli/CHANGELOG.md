@@ -18,7 +18,7 @@ _Released 12/16/2025 (PENDING)_
 
 **Dependency Updates:**
 
-- Remove some dependencies that are no longer used. Addressed in [#33098](https://github.com/cypress-io/cypress/pull/33098).
+- Removed extraneous dependencies that are no longer used. Addressed in [#33098](https://github.com/cypress-io/cypress/pull/33098).
 
 ## 15.7.1
 
