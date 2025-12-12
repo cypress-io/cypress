@@ -19,6 +19,10 @@
         "lib/**/*.{ts,js}",
         "scripts/**/*.{ts,js}",
         "types/**/*.ts"
+      ],
+      "ignoreDependencies": [
+        "buffer",
+        "process"
       ]
     },
     "packages/app": {
@@ -331,6 +335,13 @@
       "project": [
         "**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "buffer",
+        "process",
+        "@babel/plugin-transform-class-properties",
+        "@babel/plugin-transform-object-rest-spread",
+        "babel-plugin-add-module-exports"
       ]
     },
     "npm/webpack-preprocessor": {
