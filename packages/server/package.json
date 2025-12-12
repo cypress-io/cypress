@@ -126,7 +126,6 @@
     "trash": "7.2.0",
     "ts-node": "^10.9.2",
     "tslib": "2.3.1",
-    "underscore.string": "3.3.6",
     "url-parse": "1.5.10",
     "uuid": "8.3.2",
     "webdriver": "9.14.0",

@@ -9,7 +9,6 @@ const express = require('express')
 const http = require('http')
 const url = require('url')
 let zlib = require('zlib')
-const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
 const { SocketE2E } = require(`../../lib/socket-e2e`)
@@ -49,8 +48,10 @@ const replaceAbsolutePaths = (content) => {
 }
 
 const removeWhitespace = function (c) {
-  c = str.clean(c)
-  c = str.lines(c).join(' ')
+  // trims and collapses whitespace
+  c = c.trim().replace(/\s+/g, ' ')
+  // split by newlines then join with space
+  c = c.split('\n').join(' ')
 
   return c
 }
