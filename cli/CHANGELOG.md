@@ -18,6 +18,7 @@ _Released 12/16/2025 (PENDING)_
 
 **Dependency Updates:**
 
+- Removed extraneous dependencies that are no longer used. Addressed in [#33098](https://github.com/cypress-io/cypress/pull/33098).
 - Upgraded `brace-expansion`. This removes the [CVE-2025-5889](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-9789073) vulnerability being reported in security scans. Addressed in [#33112](https://github.com/cypress-io/cypress/pull/33112).
 
 ## 15.7.1

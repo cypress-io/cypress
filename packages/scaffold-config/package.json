@@ -19,7 +19,6 @@
     "watch": "yarn build:cjs --watch & yarn build:esm --watch"
   },
   "dependencies": {
-    "compare-versions": "4.1.3",
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "find-up": "^5.0.0",

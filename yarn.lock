@@ -11477,7 +11477,7 @@ axios@1.8.2:
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
-axios@^1.11.0, axios@^1.7.4, axios@^1.7.9, axios@^1.8.3:
+axios@^1.11.0, axios@^1.7.4, axios@^1.8.3:
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.11.0.tgz#c2ec219e35e414c025b2095e8b8280278478fdb6"
   integrity sha512-1Lx3WLFQWm3ooKDYZD1eXmoGO9fxYQjrycfHFC8P0sCfQVXyROp0p9PFWBehewBOdCwHc+f/b8I0fMto5eSfwA==
@@ -12364,13 +12364,6 @@ bundle-name@^4.1.0:
   integrity sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==
   dependencies:
     run-applescript "^7.0.0"
-
-bundle-require@3.0.4:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/bundle-require/-/bundle-require-3.0.4.tgz#2b52ba77d99c0a586b5854cd21d36954e63cc110"
-  integrity sha512-VXG6epB1yrLAvWVQpl92qF347/UXmncQj7J3U8kZEbdVZ1ZkQyr4hYeL/9RvcE8vVVdp53dY78Fd/3pqfRqI1A==
-  dependencies:
-    load-tsconfig "^0.2.0"
 
 busboy@^1.6.0:
   version "1.6.0"
@@ -13612,11 +13605,6 @@ compare-version@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/compare-version/-/compare-version-0.1.2.tgz#0162ec2d9351f5ddd59a9202cba935366a725080"
   integrity sha1-AWLsLZNR9d3VmpICy6k1NmpyUIA=
-
-compare-versions@4.1.3:
-  version "4.1.3"
-  resolved "https://registry.yarnpkg.com/compare-versions/-/compare-versions-4.1.3.tgz#8f7b8966aef7dc4282b45dfa6be98434fc18a1a4"
-  integrity sha512-WQfnbDcrYnGr55UwbxKiQKASnTtNnaAWVi8jZyy8NTpVAXWACSne8lMD1iaIo9AiU6mnuLvSVshCzewVuWxHUg==
 
 component-emitter@1.3.0, component-emitter@^1.2.0, component-emitter@^1.2.1, component-emitter@^1.3.0, component-emitter@~1.3.0:
   version "1.3.0"
@@ -15587,15 +15575,6 @@ end-of-stream@^1.0.0, end-of-stream@^1.1.0, end-of-stream@^1.4.1:
   dependencies:
     once "^1.4.0"
 
-endent@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/endent/-/endent-2.0.1.tgz#fb18383a3f37ae3213a5d9f6c4a880d1061eb4c5"
-  integrity sha512-mADztvcC+vCk4XEZaCz6xIPO2NHQuprv5CAEjuVAu6aZwqAj7nVNlMyl1goPFYqCCpS2OJV9jwpumJLkotZrNw==
-  dependencies:
-    dedent "^0.7.0"
-    fast-json-parse "^1.0.3"
-    objectorarray "^1.0.4"
-
 engine.io-client@~5.0.0:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/engine.io-client/-/engine.io-client-5.0.1.tgz#9470fc6655c9789c5c0aa1a0e7e7d9ae9753a798"
@@ -17163,11 +17142,6 @@ fast-glob@^3.0.3, fast-glob@^3.1.1, fast-glob@^3.2.11, fast-glob@^3.2.12, fast-g
     merge2 "^1.3.0"
     micromatch "^4.0.8"
 
-fast-json-parse@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/fast-json-parse/-/fast-json-parse-1.0.3.tgz#43e5c61ee4efa9265633046b770fb682a7577c4d"
-  integrity sha512-FRWsaZRWEJ1ESVNbDWmsAlqDk96gPQezzLghafp5J4GUKjbCz3OkAHuZs5TuPEtkbVQERysLp9xv6c24fBm8Aw==
-
 fast-json-stable-stringify@2.x, fast-json-stable-stringify@^2.0.0, fast-json-stable-stringify@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/fast-json-stable-stringify/-/fast-json-stable-stringify-2.1.0.tgz#874bf69c6f404c2b5d99c481341399fd55892633"
@@ -17302,11 +17276,6 @@ fetch-blob@^3.1.2, fetch-blob@^3.1.4:
   dependencies:
     node-domexception "^1.0.0"
     web-streams-polyfill "^3.0.3"
-
-fetch-retry-ts@^1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/fetch-retry-ts/-/fetch-retry-ts-1.3.1.tgz#a1572ebe28657fe8b89af0e130820a01feb1e753"
-  integrity sha512-0QW6UP1nnnBkN6WWo4s0FmvsmdF8PfB1bY4qrAwp5JC4dn/Ad93SMRvdMQLCm9LxjaLx+OnkUEV8pUcsi5lz6g==
 
 figures@3.2.0, figures@^3.0.0, figures@^3.2.0:
   version "3.2.0"
@@ -22643,11 +22612,6 @@ load-json-file@^4.0.0:
     pify "^3.0.0"
     strip-bom "^3.0.0"
 
-load-tsconfig@^0.2.0:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/load-tsconfig/-/load-tsconfig-0.2.3.tgz#08af3e7744943caab0c75f8af7f1703639c3ef1f"
-  integrity sha512-iyT2MXws+dc2Wi6o3grCFtGXpeMvHmJqS27sMPGtV2eUu4PeFnG+33I8BlFK1t1NWMjOpcx9bridn5yxLDX2gQ==
-
 loader-runner@^4.2.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/loader-runner/-/loader-runner-4.3.0.tgz#c1b4a163b99f614830353b16755e7149ac2314e1"
@@ -25451,11 +25415,6 @@ object.values@^1.1.0, object.values@^1.1.1, object.values@^1.1.5, object.values@
     call-bound "^1.0.3"
     define-properties "^1.2.1"
     es-object-atoms "^1.0.0"
-
-objectorarray@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/objectorarray/-/objectorarray-1.0.4.tgz#d69b2f0ff7dc2701903d308bb85882f4ddb49483"
-  integrity sha512-91k8bjcldstRz1bG6zJo8lWD7c6QXcB4nTDUqiEvIL1xAsLoZlOOZZG+nd6YPz+V7zY1580J4Xxh1vZtyv4i/w==
 
 obuf@^1.0.0, obuf@^1.1.2:
   version "1.1.2"
