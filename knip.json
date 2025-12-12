@@ -151,6 +151,11 @@
     "packages/config": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@babel/parser",
+        "@babel/plugin-syntax-typescript",
+        "@babel/plugin-transform-typescript"
       ]
     },
     "packages/driver": {
