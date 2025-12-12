@@ -5,7 +5,6 @@ import { getEventManager } from '../runner'
 import type { StudioSavePayload } from '../runner/event-manager-types'
 import { closeStudioAssertionsMenu, openStudioAssertionsMenu } from '../runner/studio/mounter'
 import { useAutStore } from './aut-store'
-import { useSelectorPlaygroundStore } from './selector-playground-store'
 import type { PossibleAssertions, AssertionArgs } from '../runner/studio/types'
 
 function getCypress () {
@@ -663,10 +662,6 @@ export const useStudioStore = defineStore('studioRecorder', {
     },
 
     _shouldRecordEvent (event, $el) {
-      if (this._isRecordingDisabled) {
-        return false
-      }
-
       const tagName = $el.prop('tagName')
 
       // only want to record keystrokes within input elements
@@ -961,18 +956,6 @@ export const useStudioStore = defineStore('studioRecorder', {
         id: state.testId,
         state: 'failed',
       }
-    },
-
-    _isRecordingDisabled () {
-      const selectorPlaygroundStore = useSelectorPlaygroundStore()
-      const autStore = useAutStore()
-
-      // Recording is disabled when Selector Playground is open or tests are running
-      return selectorPlaygroundStore.show || autStore.isRunning || autStore.isLoading
-    },
-
-    canRecord () {
-      return !this._isRecordingDisabled
     },
   },
 })
