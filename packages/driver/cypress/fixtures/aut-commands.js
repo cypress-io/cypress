@@ -16,12 +16,16 @@
     const tryFrame = (index) => {
       try {
         // will throw if cross-origin
-        window[TOP].frames[index].location.href
+        const location = window[TOP].frames[index].location
 
-        return window[TOP].frames[index]
+        if (location.pathname.startsWith('/__cypress')) {
+          return window[TOP].frames[index]
+        }
       } catch (err) {
-        return tryFrame(index + 1)
+        // skip if the frame is cross-origin
       }
+
+      return tryFrame(index + 1)
     }
 
     return tryFrame(1)
