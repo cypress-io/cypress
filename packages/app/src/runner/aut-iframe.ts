@@ -56,17 +56,12 @@ export class AutIframe {
   }
 
   destroy () {
-    if (!this.$iframe) {
+    if (!this.$iframe || !this.$snapshotIframe) {
       throw Error(`Cannot call #remove without first calling #create`)
     }
 
     this.$iframe.remove()
-
-    // Also remove the snapshot iframe if it exists
-    if (this.$snapshotIframe) {
-      this.$snapshotIframe.remove()
-      this.$snapshotIframe = undefined
-    }
+    this.$snapshotIframe.remove()
   }
 
   _showInitialBlankPage () {

@@ -459,10 +459,11 @@ export class BrowserCriClient {
     //
     // otherwise it means the the browser itself was closed
 
-    // always close the connection to the page target because it was destroyed
+    // always close the connection to the page targets because it was destroyed
     browserCriClient.currentlyAttachedTarget.close().catch(() => { })
     browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => { })
     browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(() => { })
+    browserCriClient.currentlyAttachedStudioTarget?.close().catch(() => { })
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
@@ -708,6 +709,7 @@ export class BrowserCriClient {
         this.currentlyAttachedTarget.close(),
         this.currentlyAttachedProtocolTarget?.close(),
         this.currentlyAttachedCyPromptTarget?.close(),
+        this.currentlyAttachedStudioTarget?.close(),
       ])
     }
 
