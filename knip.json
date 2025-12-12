@@ -250,7 +250,8 @@
       ],
       "ignoreDependencies": [
         "engine.io",
-        "engine.io-client"
+        "engine.io-client",
+        "flatted"
       ]
     },
     "packages/packherd-require": {
@@ -422,11 +423,16 @@
     },
     "tooling/v8-snapshot": {
       "entry": [
+        "src/v8-snapshot.ts",
+        "src/setup/index.ts",
         "src/generator/blueprint.ts",
         "src/blueprint/**/*.js"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "tslib"
       ]
     },
     "tooling/electron-mksnapshot": {
