@@ -33064,7 +33064,7 @@ w3c-xmlserializer@^5.0.0:
   dependencies:
     xml-name-validator "^5.0.0"
 
-wait-port@1.1.0, wait-port@^1.1.0:
+wait-port@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/wait-port/-/wait-port-1.1.0.tgz#e5d64ee071118d985e2b658ae7ad32b2ce29b6b5"
   integrity sha512-3e04qkoN3LxTMLakdqeWth8nih8usyg+sf1Bgdf9wwUkp05iuK1eSY/QpLvscT/+F/gA89+LpUmmgBtesbqI2Q==
