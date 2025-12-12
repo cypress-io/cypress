@@ -183,6 +183,7 @@
     "packages/data-context": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
+        "graphql/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ]
     },
@@ -492,7 +493,8 @@
     "@percy/cypress",
     "@vue/compiler-core",
     "@vue/compiler-dom",
-    "@vue/compiler-sfc"
+    "@vue/compiler-sfc",
+    "edgedriver"
   ],
   "ignoreBinaries": [
     "circleci",

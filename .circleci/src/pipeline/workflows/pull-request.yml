@@ -11,6 +11,8 @@ when:
         matches:
             pattern: /^develop/
             value: << pipeline.git.branch >>
+    - not:
+        equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
 jobs:
   - node_modules_install:

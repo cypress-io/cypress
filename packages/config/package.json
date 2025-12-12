@@ -28,7 +28,6 @@
     "@babel/plugin-transform-typescript": "^7.28.0",
     "@babel/traverse": "^7.28.0",
     "@babel/types": "^7.28.0",
-    "bluebird": "^3.7.2",
     "common-tags": "1.8.0",
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
