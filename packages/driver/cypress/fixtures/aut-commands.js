@@ -15,6 +15,10 @@
   const specFrame = window.__isSpecFrame ? window : (() => {
     const tryFrame = (index) => {
       try {
+        if (index >= window[TOP].frames.length) {
+          return null
+        }
+
         // will throw if cross-origin
         const location = window[TOP].frames[index].location
 
