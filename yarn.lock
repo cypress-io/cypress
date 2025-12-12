@@ -3202,13 +3202,12 @@
     tar "^6.0.5"
     yargs "^17.0.1"
 
-"@electron/rebuild@4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@electron/rebuild/-/rebuild-4.0.1.tgz#0620d5bb71a0b8b09a86fb9fa979244e1fcc10bf"
-  integrity sha512-iMGXb6Ib7H/Q3v+BKZJoETgF9g6KMNZVbsO4b7Dmpgb5qTFqyFTzqW9F3TOSHdybv2vKYKzSS9OiZL+dcJb+1Q==
+"@electron/rebuild@4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@electron/rebuild/-/rebuild-4.0.2.tgz#e303996a57057b4f8e9f383868eb6be0a188f9e8"
+  integrity sha512-8iZWVPvOpCdIc5Pj5udQV3PeO7liJVC7BBUSizl1HCfP7ZxYc9Kqz0c3PDNj2HQ5cQfJ5JaBeJIYKPjAvLn2Rg==
   dependencies:
     "@malept/cross-spawn-promise" "^2.0.0"
-    chalk "^4.0.0"
     debug "^4.1.1"
     detect-libc "^2.0.1"
     got "^11.7.0"
