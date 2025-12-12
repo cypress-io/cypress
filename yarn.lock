@@ -17803,7 +17803,6 @@ form-data@~2.3.2:
     hasown "^2.0.2"
     mime-types "^2.1.35"
     safe-buffer "^5.2.1"
-    mime-types "^2.1.12"
 
 formatly@^0.3.0:
   version "0.3.0"
