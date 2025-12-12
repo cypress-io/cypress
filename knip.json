@@ -247,6 +247,10 @@
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "engine.io",
+        "engine.io-client"
       ]
     },
     "packages/packherd-require": {
