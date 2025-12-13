@@ -56,7 +56,7 @@
     "@urql/exchange-execute": "1.1.0",
     "@urql/exchange-graphcache": "4.3.6",
     "@urql/vue": "0.6.4",
-    "@vitejs/plugin-vue": "6.0.2",
+    "@vitejs/plugin-vue": "6.0.3",
     "@vitejs/plugin-vue-jsx": "5.0.1",
     "@vue/compiler-core": "3.2.47",
     "@vue/compiler-dom": "3.2.47",
