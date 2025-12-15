@@ -14,11 +14,11 @@
   // should be the first same-origin one we come across
   const specFrame = window.__isSpecFrame ? window : (() => {
     const tryFrame = (index) => {
-      try {
-        if (index >= window[TOP].frames.length) {
-          throw new Error('Spec frame not found')
-        }
+      if (index >= window[TOP].frames.length) {
+        throw new Error('Spec frame not found')
+      }
 
+      try {
         // will throw if cross-origin
         const location = window[TOP].frames[index].location
 
