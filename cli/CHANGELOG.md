@@ -20,6 +20,12 @@ _Released 12/16/2025 (PENDING)_
 - Fixed an issue where the error message for `not.have.length` was not correctly displaying the expected length in the Command Log. Addressed in [#18927](https://github.com/cypress-io/cypress/issues/18927).
 - Fixed an issue where `removeAttribute()` would not work for attributes other than `target` on anchor or form elements after clicking links with `target="_top"` or `target="_parent"`. Fixes [#26206](https://github.com/cypress-io/cypress/issues/26206). Addressed in [#33051](https://github.com/cypress-io/cypress/pull/33051).
 
+**Dependency Updates:**
+
+- Removed extraneous dependencies that are no longer used. Addressed in [#33098](https://github.com/cypress-io/cypress/pull/33098).
+- Upgraded `brace-expansion`. This removes the [CVE-2025-5889](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-9789073) vulnerability being reported in security scans. Addressed in [#33112](https://github.com/cypress-io/cypress/pull/33112).
+- Upgraded `form-data`. This removes the [CVE-2025-7783](https://security.snyk.io/vuln/SNYK-JS-FORMDATA-10841150) vulnerability being reported in security scans. Addressed in [#33113](https://github.com/cypress-io/cypress/pull/33113).
+
 ## 15.7.1
 
 _Released 12/02/2025_
