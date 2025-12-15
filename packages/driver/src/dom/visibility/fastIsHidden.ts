@@ -1,16 +1,11 @@
 import $elements from '../elements'
 import { memoize } from './memoize'
 import { unwrap, wrap, isJquery } from '../jquery'
+import Debug from 'debug'
+
+const debug = Debug('cypress:driver:dom:visibility:fastIsHidden')
+
 const { isOption, isOptgroup, isBody, isHTML } = $elements
-
-const DEBUG = false
-
-function debug (...args: any[]) {
-  if (DEBUG) {
-    // eslint-disable-next-line no-console
-    console.log('DEBUG:', ...args)
-  }
-}
 
 const getBoundingClientRect = memoize((el: HTMLElement) => el.getBoundingClientRect())
 
