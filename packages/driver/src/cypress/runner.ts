@@ -390,6 +390,57 @@ const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
+// Helper function to find a test for a hook when the normal test lookup fails.
+// This handles cases where tests are skipped due to before hook failures.
+// The _ALREADY_RAN flag is cleared if found, as it prevents events from firing
+// but we need the event to fire for protocol data capture.
+const findTestForHook = (hookName, suite, test, getTestFromHookOrFindTest, getTestById, getTests, hook) => {
+  // First try the existing test or getTestFromHookOrFindTest
+  if (!test && getTestFromHookOrFindTest && hook) {
+    test = getTestFromHookOrFindTest(hook)
+  }
+
+  if (test) {
+    return test
+  }
+
+  // Try to find a test that was associated with a hook failure
+  // This test will have failedFromHookId set and is the one that was supposed to run
+  // when the before hook failed
+  const allTests = getTests()
+  const testWithHookFailure = allTests.find((t) => t.failedFromHookId && suiteHasTest(suite, t.id))
+
+  if (testWithHookFailure) {
+    return testWithHookFailure
+  }
+
+  // Fallback: find a test from the suite structure
+  // This happens when tests were skipped due to before hook failure
+  let foundTest
+
+  if (hookName === 'afterAll') {
+    foundTest = findLastTestInSuite(suite, () => true)
+  } else if (hookName === 'afterEach') {
+    foundTest = findTestInSuite(suite, () => true)
+  }
+
+  if (foundTest) {
+    // Try to get the test from _testsById first (if it was run)
+    // If not found, use the test directly from the suite structure
+    const resolvedTest = getTestById(foundTest.id) || foundTest
+
+    // Clear _ALREADY_RAN flag if set, as it prevents events from firing
+    // but we need the event to fire for protocol data capture
+    if (resolvedTest && resolvedTest._ALREADY_RAN) {
+      resolvedTest._ALREADY_RAN = false
+    }
+
+    return resolvedTest
+  }
+
+  return null
+}
+
 const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests, cy, abort, getTestFromHookOrFindTest) => {
   // bail if our _runner doesn't have a hook.
   // useful in tests
@@ -407,14 +458,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
       return
     }
 
-    // Try to get the test from getTest() first, but if it's null (which can happen
-    // when a before hook fails and tests are skipped), try to find it from the hook
     let test = getTest()
-
-    if (!test && getTestFromHookOrFindTest) {
-      test = getTestFromHookOrFindTest(this)
-    }
-
     const allTests = getTests()
 
     let shouldFireTestAfterRun = () => false
@@ -422,17 +466,12 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
     switch (name) {
       case 'afterEach':
         shouldFireTestAfterRun = () => {
-          // If we still don't have a test, we can't determine if we should fire
-          // but we should still try to fire the event to ensure protocol data is captured
           if (!test) {
             // For afterEach, if we can't find a test, we should still fire the event
             // to ensure protocol can capture data even when hooks fail
             return true
           }
 
-          // find all of the grep'd tests which share
-          // the same parent suite as our current test
-          // test.parent should exist if test exists, but guard against it just in case
           if (!test.parent) {
             return true
           }
@@ -442,8 +481,6 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           if (this.suite.root) {
             _runner._shouldBufferSuiteEnd = true
 
-            // make sure this test isnt the last test overall but also
-            // isnt the last test in our filtered parent suite's tests array
             if (test.final === false || (test !== _.last(allTests)) && (test !== _.last(tests))) {
               return true
             }
@@ -456,45 +493,17 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
       case 'afterAll':
         shouldFireTestAfterRun = () => {
-          // If we don't have a test, try to find one associated with hook failure
-          // This can happen when a before hook fails and tests are skipped
+          // Try to find a test if we don't have one
           if (!test) {
-            // First, try to find a test that was associated with a hook failure
-            // This test will have failedFromHookId set and is the one that was supposed to run
-            // when the before hook failed. This test should be in _testsById.
-            const allTests = getTests()
-            const testWithHookFailure = allTests.find((t) => t.failedFromHookId && suiteHasTest(this.suite, t.id))
+            test = findTestForHook(name, this.suite, test, getTestFromHookOrFindTest, getTestById, getTests, this)
 
-            if (testWithHookFailure) {
-              test = testWithHookFailure
+            if (test) {
               setTest(test)
-            } else {
-              // Fallback: For afterAll hooks, find the last test that would have run in this suite
-              // This ensures we can still fire test:after:run:async even when tests were skipped
-              const foundTest = findLastTestInSuite(this.suite, () => true)
-
-              if (foundTest) {
-                // Try to get the test from _testsById first (if it was run)
-                // If not found, use the test directly from the suite structure
-                // (this happens when tests were skipped due to before hook failure)
-                test = getTestById(foundTest.id) || foundTest
-
-                // If the test has _ALREADY_RAN set, temporarily clear it so the event can fire
-                if (test && test._ALREADY_RAN) {
-                  test._ALREADY_RAN = false
-                }
-
-                // If we found a test, set it so the rest of the code can use it
-                if (test) {
-                  setTest(test)
-                }
-              }
             }
           }
 
           if (test) {
             const siblings = getAllSiblingTests(test.parent, getTestById)
-
             const testIsActuallyInSuite = suiteHasTest(this.suite, test.id)
 
             // we ensure the test actually belongs to this suite.
@@ -509,7 +518,6 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
             //    we wait until the root suite fires
             // 2. else if we arent the last nested suite we fire if we're
             //    the last test that will run
-
             if (
               (isRootSuite(this.suite) && isLastTest(test, allTests)) ||
               (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(test, siblings))
@@ -521,17 +529,13 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           // For root suite's afterAll, always try to fire the event if we can find any test
           // This ensures protocol data is captured even when both hooks fail
           if (isRootSuite(this.suite)) {
-            // Try one more time to find a test from the suite
-            const foundTest = findLastTestInSuite(this.suite, () => true)
+            const foundTest = findTestForHook(name, this.suite, test, getTestFromHookOrFindTest, getTestById, getTests, this)
 
             if (foundTest) {
-              test = getTestById(foundTest.id) || foundTest
+              test = foundTest
+              setTest(test)
 
-              if (test) {
-                setTest(test)
-
-                return true
-              }
+              return true
             }
           }
 
@@ -548,67 +552,13 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
       async function () {
         // Re-evaluate test in case it was found in shouldFireTestAfterRun
         // Note: test may have been modified by shouldFireTestAfterRun closure for afterAll
-        // We need to check the closure's test variable first since it may have been set
         let currentTest = test
 
-        // If test was found in shouldFireTestAfterRun closure, use it
-        // Otherwise, try to find it using other methods
-        if (!currentTest && getTestFromHookOrFindTest) {
-          currentTest = getTestFromHookOrFindTest(this)
-        }
-
-        // If still no test, try to find it from the suite
-        // This is important when both before and after hooks fail
+        // If we still don't have a test, try to find it using the helper
         if (!currentTest) {
-          if (name === 'afterAll') {
-            // For afterAll, try to find a test that was associated with a hook failure
-            // This test will have failedFromHookId set and is the one that was supposed to run
-            // when the before hook failed. This test should be in _testsById.
-            const allTests = getTests()
-            const testWithHookFailure = allTests.find((t) => t.failedFromHookId && suiteHasTest(this.suite, t.id))
-
-            if (testWithHookFailure) {
-              currentTest = testWithHookFailure
-            } else {
-              // Fallback: find the last test that would have run in this suite
-              const foundTest = findLastTestInSuite(this.suite, () => true)
-
-              if (foundTest) {
-                // Try to get the test from _testsById first (if it was run)
-                // If not found, use the test directly from the suite structure
-                // (this happens when tests were skipped due to before hook failure)
-                currentTest = getTestById(foundTest.id) || foundTest
-
-                // If the test has _ALREADY_RAN set, temporarily clear it so the event can fire
-                // This is necessary when tests were skipped due to before hook failure
-                // The _ALREADY_RAN flag prevents events from firing, but we need the event
-                // to fire for protocol data capture even when tests were skipped
-                if (currentTest && currentTest._ALREADY_RAN) {
-                  currentTest._ALREADY_RAN = false
-                }
-              }
-            }
-          } else if (name === 'afterEach') {
-            // For afterEach, try to find the first test in the suite
-            // This can happen when a before hook fails and the test was skipped
-            const foundTest = findTestInSuite(this.suite, () => true)
-
-            if (foundTest) {
-              // Try to get the test from _testsById first (if it was run)
-              // If not found, use the test directly from the suite structure
-              currentTest = getTestById(foundTest.id) || foundTest
-
-              // If the test has _ALREADY_RAN set, temporarily clear it so the event can fire
-              if (currentTest && currentTest._ALREADY_RAN) {
-                currentTest._ALREADY_RAN = false
-              }
-            }
-          }
+          currentTest = findTestForHook(name, this.suite, test, getTestFromHookOrFindTest, getTestById, getTests, this)
         }
 
-        // Check if we should fire the event
-        // Note: shouldFireTestAfterRun may have modified the test variable in its closure
-        // so we need to re-check test after calling it
         const shouldFire = shouldFireTestAfterRun()
 
         // Re-check test in case shouldFireTestAfterRun found and set it
@@ -617,7 +567,6 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         }
 
         if (!shouldFire) {
-          // Allow the hook to complete normally
           return
         }
 
@@ -628,9 +577,6 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         // If we don't have a test, we still need to allow the hook to complete
         // to prevent hanging, but we can't fire test:after:run:async without a test
         if (!currentTest) {
-          // Allow the hook to complete normally even without a test
-          // This prevents hanging when both before and after hooks fail
-          // The hook will complete, but test:after:run:async won't fire
           return
         }
 
