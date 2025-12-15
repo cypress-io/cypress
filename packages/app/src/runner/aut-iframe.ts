@@ -19,6 +19,7 @@ const jQueryRe = /jquery/i
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
+  // the iframe used to display a snapshot of the AUT (currently used to display the studio snapshots)
   $snapshotIframe?: JQuery<HTMLIFrameElement>
   _highlightedEl?: Element
   private _currentHighlightingId: number = 0
