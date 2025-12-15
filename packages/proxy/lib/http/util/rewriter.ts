@@ -22,7 +22,7 @@ export type InjectionOpts = {
   shouldInjectDocumentDomain: boolean
 }
 
-const toplevelScriptRe = /^\s*<script.*?>/i
+const toplevelScriptRe = /^\s*<script[\s\S]*?>/i
 const headRe = /<head(?!er).*?>/i
 const bodyRe = /<body.*?>/i
 const htmlRe = /<html.*?>/i
