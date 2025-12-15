@@ -71,7 +71,7 @@
       <Button
         data-cy="playground-activator"
         :disabled="isDisabled"
-        :variant="isDisabled ? 'purple-dark' : (selectorPlaygroundStore.show ? 'purple-dark' : 'outline-dark')"
+        :variant="isDisabled ? 'purple-dark-mode' : (selectorPlaygroundStore.show ? 'purple-dark-mode' : 'outline-dark')"
         size="32"
         square
         :aria-label="t('runner.selectorPlayground.toggle')"
@@ -277,24 +277,5 @@ function openExternally () {
 /* Override Tag component border-radius with higher specificity */
 .viewport-tag {
   border-radius: 12px !important;
-}
-
-/* Apply outline-dark hover styles to purple-dark button */
-.playground-button-purple:hover {
-  border-color: rgba(255, 255, 255, 0.6) !important; /* hocus:border-white/60 */
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important; /* hocus:shadow-white/20 */
-}
-
-.playground-button-purple:focus {
-  border-color: rgba(255, 255, 255, 0.6) !important; /* hocus:border-white/60 */
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) !important; /* hocus:shadow-white/20 */
-}
-
-/* Manually style disabled state to match RecordButton's disabled appearance */
-.playground-button-disabled {
-  background-color: #343855 !important;
-  border-color: #343855 !important;
-  cursor: not-allowed !important;
-  opacity: 0.5 !important;
 }
 </style>

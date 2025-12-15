@@ -2767,10 +2767,10 @@
     tailwindcss "^3.4.3"
     tailwindcss-hocus "^0.0.7"
 
-"@cypress-design/constants-button@^1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-1.10.0.tgz#854172de87c1e63ff8309849c42e5d26ba386fff"
-  integrity sha512-I/NAurZriTdioqH9NVpzv0MVzqPGFZADVL8LNlYP5fcWcBZ/gCB+gViHrCe5juE5tp1zYRXXAjQflcx0qvl1mw==
+"@cypress-design/constants-button@^1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/constants-button/-/constants-button-1.12.0.tgz#35a4a8230467ce723cbdd0e7f190737ce5777869"
+  integrity sha512-YhVSj/mfWTgg8y+RIrdSzbeTKMy2lg455ld5bJmOBUyeYSyyoO5Hy5FYFfeuvV+bEbAyDxu6eCZK2uArLM/Epw==
 
 "@cypress-design/constants-spinner@^1.0.0":
   version "1.0.1"
@@ -2807,10 +2807,10 @@
   dependencies:
     "@cypress-design/color-constants" "^1.1.0"
 
-"@cypress-design/react-button@^1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/react-button/-/react-button-1.11.0.tgz#368a48b3cf4ce2a4c0e84a75f599e59456cfef9b"
-  integrity sha512-PEp/che82N6wuH6wyc9uLF6gzg/GZO8l1H7+niP/2sWGf1toVtvecZI6/y570YaStyHnkPpBwHpO630iByrz+Q==
+"@cypress-design/react-button@^1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/react-button/-/react-button-1.13.0.tgz#fe2fc6a6fb637665d78b9d486b7a8b349f3b4c79"
+  integrity sha512-b/x3CAJ8c093jsezeljcGghEKCG1SehlsatYKfK/LTWL85McozjSlNMw3EixMOLM+1WxU3akcO2M8pFEUM+67w==
   dependencies:
     clsx "^2.1.1"
 
@@ -2822,10 +2822,10 @@
     "@cypress-design/icon-registry" "^1.31.0"
     clsx "^2.1.1"
 
-"@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.12.0.tgz#75d70da0b479811643cdb6eff88e8b27a9fe49ab"
-  integrity sha512-3LGixoEToBQ0GZgpadwGFg0UHHX451Dm5D9bGyIvKuRNUSGPekRj9WZMXrbZ15XUjE0QQRxprq8KFpq67Y4Pjg==
+"@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.13.0":
+  version "1.13.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.13.0.tgz#e81d3bc5bcc15d89cd5d56ca757faa7b897c8084"
+  integrity sha512-HoXiJ0QIawfR6uh81LYU3BjOF16LYYskbmMXNdD/3s1qFYQ2FDYX6JM7BLmIiIp6vgp76miqUZPXCPRqSODBkQ==
 
 "@cypress-design/vue-icon@^1.0.0", "@cypress-design/vue-icon@^1.18.0", "@cypress-design/vue-icon@^1.33.0":
   version "1.33.0"
