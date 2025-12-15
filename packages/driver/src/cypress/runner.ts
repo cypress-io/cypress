@@ -61,7 +61,7 @@ const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
 
-const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, ...args) => {
+const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, forceFire = false, ...args) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
@@ -69,8 +69,8 @@ const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, ...args) =
 
   runnable._fired[event] = true
 
-  // don't fire anything again if we are skipped
-  if (runnable._ALREADY_RAN) {
+  // don't fire anything again if we are skipped, unless forceFire is true
+  if (runnable._ALREADY_RAN && !forceFire) {
     return
   }
 
@@ -97,10 +97,10 @@ const testBeforeAfterRunAsync = (test, Cypress, ...args) => {
   })
 }
 
-const testAfterRunAsync = (test, Cypress) => {
+const testAfterRunAsync = (test, Cypress, forceFire = false) => {
   return Promise.try(() => {
     if (!fired(TEST_AFTER_RUN_ASYNC_EVENT, test)) {
-      return fire(TEST_AFTER_RUN_ASYNC_EVENT, test, Cypress)
+      return fire(TEST_AFTER_RUN_ASYNC_EVENT, test, Cypress, forceFire)
     }
   })
 }
@@ -114,12 +114,12 @@ const runnableAfterRunAsync = (runnable, Cypress) => {
   })
 }
 
-const testAfterRun = (test, Cypress) => {
+const testAfterRun = (test, Cypress, forceFire = false) => {
   test.clearTimeout()
   if (!fired(TEST_AFTER_RUN_EVENT, test)) {
     setWallClockDuration(test)
     try {
-      fire(TEST_AFTER_RUN_EVENT, test, Cypress)
+      fire(TEST_AFTER_RUN_EVENT, test, Cypress, forceFire)
     } catch (e) {
       // if the test:after:run listener throws it's likely spec code
       // Since the test status has already been emitted this can't affect the test status.
@@ -667,23 +667,11 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           await testBeforeAfterRunAsync(currentTest, Cypress, { nextTestHasTestIsolationOn })
         }
 
-        // Clear _ALREADY_RAN flag if set, as it prevents events from firing
-        // but we need the event to fire for protocol data capture
-        // We do this right before firing the events to minimize side effects
-        const wasAlreadyRan = currentTest._ALREADY_RAN
-
-        if (wasAlreadyRan) {
-          currentTest._ALREADY_RAN = false
-        }
-
-        testAfterRun(currentTest, Cypress)
-        await testAfterRunAsync(currentTest, Cypress)
-
-        // Restore _ALREADY_RAN flag after firing events to prevent side effects
-        // if this test object is used elsewhere
-        if (wasAlreadyRan) {
-          currentTest._ALREADY_RAN = true
-        }
+        // Force fire the events even if _ALREADY_RAN is set, as we need
+        // the event to fire for protocol data capture when tests are skipped
+        // due to hook failures
+        testAfterRun(currentTest, Cypress, true)
+        await testAfterRunAsync(currentTest, Cypress, true)
 
         // if the user has stopped the run and we are in run mode, we need to abort,
         // this needs to happen after the test:after:run events have fired
