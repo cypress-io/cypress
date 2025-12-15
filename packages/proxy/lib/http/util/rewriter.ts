@@ -23,10 +23,10 @@ export type InjectionOpts = {
 }
 
 const toplevelScriptRe = /^\s*<script.*?>/i
-const doctypeRe = /<\!doctype.*?>/i
 const headRe = /<head(?!er).*?>/i
 const bodyRe = /<body.*?>/i
 const htmlRe = /<html.*?>/i
+const doctypeRe = /<\!doctype.*?>/i
 
 function getRewriter (useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
