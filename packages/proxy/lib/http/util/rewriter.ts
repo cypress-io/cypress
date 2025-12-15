@@ -22,6 +22,7 @@ export type InjectionOpts = {
   shouldInjectDocumentDomain: boolean
 }
 
+const toplevelScriptRe = /^\s*<script.*?>/i
 const doctypeRe = /<\!doctype.*?>/i
 const headRe = /<head(?!er).*?>/i
 const bodyRe = /<body.*?>/i
@@ -92,6 +93,12 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
   }
 
   // TODO: move this into regex-rewriting and have ast-rewriting handle this in its own way
+
+  const toplevelScriptMatch = html.match(toplevelScriptRe)
+
+  if (toplevelScriptMatch) {
+    return insertBefore(html, toplevelScriptMatch, htmlToInject)
+  }
 
   const headMatch = html.match(headRe)
 
