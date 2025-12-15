@@ -79,15 +79,7 @@ const insertAfter = (originalString, match, stringToInsert) => {
   return `${originalString.slice(0, index)} ${stringToInsert}${originalString.slice(index)}`
 }
 
-export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
-  const htmlToInject = await Promise.resolve(getHtmlToInject(opts))
-
-  // strip clickjacking and framebusting
-  // from the HTML if we've been told to
-  if (opts.wantsSecurityRemoved) {
-    html = await Promise.resolve(getRewriter(opts.useAstSourceRewriting).strip(html, opts))
-  }
-
+export function htmlHelper (html: string, htmlToInject: string | undefined) {
   if (!htmlToInject) {
     return html
   }
@@ -124,6 +116,18 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
   }
 
   return `<head> ${htmlToInject} </head>${html}`
+}
+
+export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
+  const htmlToInject = await Promise.resolve(getHtmlToInject(opts))
+
+  // strip clickjacking and framebusting
+  // from the HTML if we've been told to
+  if (opts.wantsSecurityRemoved) {
+    html = await Promise.resolve(getRewriter(opts.useAstSourceRewriting).strip(html, opts))
+  }
+
+  return htmlHelper(html, htmlToInject)
 }
 
 export function security (opts: SecurityOpts) {
