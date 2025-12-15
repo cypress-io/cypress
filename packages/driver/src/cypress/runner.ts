@@ -400,7 +400,9 @@ const findTestForHook = (hookName, suite, test, getTestFromHookOrFindTest, getTe
   }
 
   // Try to get test from hook
-  if (getTestFromHookOrFindTest && hook) {
+  // Only call getTestFromHookOrFindTest if hook has a ctx property (is actually a hook object)
+  // The runner context (this) doesn't have ctx, so we skip this path to avoid TypeError
+  if (getTestFromHookOrFindTest && hook && hook.ctx) {
     test = getTestFromHookOrFindTest(hook)
 
     if (test) {
