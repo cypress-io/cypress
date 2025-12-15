@@ -9,10 +9,6 @@ describe('http/util/rewriter', () => {
       expect(htmlHelper('HTML', undefined)).toEqual('HTML')
     })
 
-    it('HTML text with no injection', () => {
-      expect(htmlHelper('HTML', undefined)).toEqual('HTML')
-    })
-
     it('toplevel script tag and html tag', () => {
       expect(htmlHelper(`
         <script>
