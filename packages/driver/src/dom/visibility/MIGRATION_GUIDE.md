@@ -1,14 +1,17 @@
 # Fast Visibility Algorithm Migration Guide
 
-_(note: this file or content similar to it will be added to cy docs, when language / details are finalized)_
-
 ## Overview
+
+This is an in-depth record of the differences between the experimental "fast" visibility algorithm, compared with the legacy algorithm.
 
 The fast visibility algorithm is designed to resolve severe performance issues with DOM visibility detection while maintaining compatibility with existing test code. This guide helps you understand the differences between legacy and fast algorithms and provides solutions for any compatibility issues that arise.
 
 ## Why Migrate?
 
 ### Performance Benefits
+
+Even if you are not regularly asserting on the visibility of elements, Cypress inherently uses the active visibility algorithm to determine _actionability_, as well. That means every time you `cy.click()` on an element, Cypress runs this visibility algorithm under the hood.
+
 - **Significantly faster** visibility calculations for complex DOM structures
 - **Reduced CPU usage** during test execution
 - **Better scalability** for applications with many DOM elements
@@ -53,7 +56,7 @@ While comprehensive, this list may not be complete. Additional discrepancies may
 | **[overflow-scroll-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element outside clip-path inset | ✅ Yes | ❌ No | ❌ No | Child element of `clip-path: inset(25% 25% 25% 25%)` |
 | **[viewport-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Absolutely positioned element outside of the viewport | ✅ Yes | ❌ No | ❌ No | Elements that are outside of the viewport must be scrolled to before the fast algorithm will consider them visible. This is aligned with scroll-container visibility. |
 | **[z-index-coverage](../../../cypress/fixtures/visibility/positioning.html)** | Covered by higher z-index element |  ✅ Yes | ❌ No | ❌ No | Element covered by another element with higher z-index |
-| **[clip-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element clipped by CSS clip property |  ✅ Yes | ❌ No | ❌ No | Element with `clip: rect(0, 0, 0, 0)` or similar clipping |
+| **[clip-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element clipped by CSS clip property | ✅ Yes | ❌ No | ❌ No | Element with `clip: rect(0, 0, 0, 0)` or similar clipping |
 | **[transform](../../../cypress/fixtures/visibility/transforms.html)** | Element transformed outside viewport | ✅ Yes | ❌ No | ❌ No | Element with `transform: translateX(-9999px)` or similar |
 | **[contain](../../../cypress/fixtures/visibility/basic-css-properties.html)** | Element with CSS contain:paint property | ✅ Yes | ❌ No | ❌ No | Element positioned outside of a parent that has the `contain: paint` property |
 | **[backdrop-filter](../../../cypress/fixtures/visibility/basic-css-properties.html)** | Element covered by an element with with backdrop-filter opacity(0) | ✅ Yes | ❌ No | ❌ No|  |
@@ -65,9 +68,7 @@ While comprehensive, this list may not be complete. Additional discrepancies may
 ```javascript
 // cypress.config.js
 module.exports = {
-  e2e: {
-    experimentalFastVisibility: true
-  }
+  experimentalFastVisibility: true
 }
 ```
 
@@ -77,7 +78,7 @@ module.exports = {
 Run your existing test suite to identify any failures:
 
 ```bash
-npm run test
+npx run cypress # or your specific cypress command
 ```
 
 ### Step 3: Analyze Failures
@@ -106,7 +107,7 @@ describe('My Test Suite', { experimentalFastVisibility: false }, () => {
 This allows you to gradually migrate specs while keeping failing ones working.
 
 ### Step 5: Fix Tests with Visibility-Related Failures
-For specs that fail due to visibility algorithm differences, update the test expectations to match the correct behavior (see solutions below).
+For specs that fail due to visibility algorithm differences, visually inspect the application under test at the failing assertion. If you can both see and click on the element in the browser, this algorithm should consider it visible.
 
 ## Common Compatibility Issues and Solutions
 
@@ -211,9 +212,9 @@ cy.get('.clipping-container').should('be.visible')
 
 ### Issue 7: Shadow DOM incompatibilities
 
-**Problem:**: Elements inside shadow DOMs may not be detected properly as visible or hidden.
+**Problem:**: Elements inside a Shadow DOM may not be detected properly as visible or hidden.
 
-**Solution:**: Test shadow dom components in isolation with component testing, and only test if the public interface of the shadow dom component is visible. You wouldn't assert on the visibility of the browser's default video play controls by querying its shadow dom: you would assert on the properties of the video element itself.
+**Solution:**: Disable the `experimentalFastVisibility` setting for Shadow DOM tests.
 
 ## Rollback Plan
 
@@ -223,9 +224,7 @@ If you encounter issues that can't be easily resolved:
 ```javascript
 // cypress.config.js
 module.exports = {
-  e2e: {
-    experimentalFastVisibility: false // Disable fast visibility
-  }
+  experimentalFastVisibility: false // Disable fast visibility
 }
 ```
 
@@ -290,22 +289,15 @@ cy.get('.modal').should('have.css', 'display', 'block')
 
 ## Troubleshooting
 
-### Common Error Messages
-
-**"Element is not visible"**
-- Check if element is covered by another element
-- Verify element is not positioned outside viewport
-- Ensure element has proper dimensions
-
-**"Element should be hidden but is visible"**
-- Check for CSS transforms that might hide the element
-- Verify element is not clipped by CSS
-- Ensure element is not covered by other elements
+**If the element should be visible, but Cypress determines that it is hidden:**
+- Verify that the element is actually visible, and within the browser viewport. If you have to scroll to view the element, Cypress will not consider it visible.
+- Verify that the element has proper dimensions. If either its height or width are zero, re-assess if this is the best element to be interacting with.
+- Verify that the element does not have `pointer-events:none`
+- In some extreme CSS `transform` scenarios, the element can be so distorted that Cypress fails to sample a visible point. If you hit this edge case, re-assess the usefulness of the assertion and/or interaction.
 
 **Shadow DOM Related Errors**
-- If you see errors with Shadow DOM elements, disable fast visibility
-- Shadow DOM support is not yet available in the fast algorithm
-- Use legacy algorithm for Shadow DOM testing until support is added
+
+Shadow DOM support is not yet available in the fast algorithm. Disable fast visibility for tests that rely on Shadow DOM support.
 
 ### Debug Visibility Issues
 ```javascript

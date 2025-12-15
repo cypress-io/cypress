@@ -314,11 +314,8 @@ describe('src/cypress/dom/visibility', {
           })
 
           assertVisibilityForSections([
-
             'zero-dimensions-with-overflow-hidden',
-            // Firefox has incongruous behavior with point sampling zero-width elements that have text content.
-            // Chromium consider these elements visible, but Firefox considers them hidden. Should defer to browser
-            // behavior, maybe?
+            // TODO: Firefox has slightly different behavior than chromium - address with test harness changes in https://github.com/cypress-io/cypress/issues/33127
             Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'text-content-with-zero-dimensions' : undefined,
             'positive-dimensions-with-overflow-hidden',
             'overflow-auto-with-zero-dimensions',
