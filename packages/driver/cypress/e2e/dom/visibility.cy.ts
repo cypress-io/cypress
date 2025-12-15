@@ -323,9 +323,7 @@ describe('src/cypress/dom/visibility', {
             'overflow-hidden',
             'overflow-y-hidden',
             'overflow-x-hidden',
-
             'overflow-auto-scenarios',
-
             'overflow-scroll-scenarios',
             'overflow-relative-positioning',
             'overflow-flex-container',
@@ -357,7 +355,6 @@ describe('src/cypress/dom/visibility', {
 
           assertVisibilityForSections([
             'scaling',
-            // Firefox has incongruous behavior with point sampling 2D translations
             Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'translation' : undefined,
             'rotation',
             'skew',
