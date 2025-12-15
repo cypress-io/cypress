@@ -16,7 +16,7 @@ jobs:
     if: github.repository == 'cypress-io/cypress'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
