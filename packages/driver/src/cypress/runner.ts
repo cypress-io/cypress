@@ -92,7 +92,7 @@ const testBeforeRunAsync = (test, Cypress) => {
 const testBeforeAfterRunAsync = (test, Cypress, ...args) => {
   return Promise.try(() => {
     if (!fired(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test)) {
-      return fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress, ...args)
+      return fire(TEST_BEFORE_AFTER_RUN_ASYNC_EVENT, test, Cypress, false, ...args)
     }
   })
 }
