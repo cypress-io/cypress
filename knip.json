@@ -527,7 +527,10 @@
       "ignoreDependencies": [
         "@babel/core",
         "@babel/preset-env",
-        "babel-loader"
+        "babel-loader",
+        "semver",
+        "systeminformation",
+        "https-proxy-agent"
       ]
     }
   },
