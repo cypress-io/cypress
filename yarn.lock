@@ -2811,7 +2811,7 @@
     "@cypress-design/icon-registry" "^1.31.0"
     clsx "^2.1.1"
 
-"@cypress-design/vue-button@^1.1.0", "@cypress-design/vue-button@^1.13.0":
+"@cypress-design/vue-button@^1.13.0":
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/@cypress-design/vue-button/-/vue-button-1.13.0.tgz#e81d3bc5bcc15d89cd5d56ca757faa7b897c8084"
   integrity sha512-HoXiJ0QIawfR6uh81LYU3BjOF16LYYskbmMXNdD/3s1qFYQ2FDYX6JM7BLmIiIp6vgp76miqUZPXCPRqSODBkQ==
