@@ -197,6 +197,9 @@
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "webpack-cli"
       ]
     },
     "packages/errors": {
