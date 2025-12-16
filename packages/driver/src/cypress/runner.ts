@@ -669,11 +669,13 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           await testBeforeAfterRunAsync(currentTest, Cypress, { nextTestHasTestIsolationOn })
         }
 
-        // Force fire the events even if _ALREADY_RAN is set, as we need
+        // Force fire the events only if _ALREADY_RAN is set, as we need
         // the event to fire for protocol data capture when tests are skipped
-        // due to hook failures
-        testAfterRun(currentTest, Cypress, true)
-        await testAfterRunAsync(currentTest, Cypress, true)
+        // due to hook failures. Otherwise, use the normal fire behavior.
+        const shouldForceFire = !!currentTest._ALREADY_RAN
+
+        testAfterRun(currentTest, Cypress, shouldForceFire)
+        await testAfterRunAsync(currentTest, Cypress, shouldForceFire)
 
         // if the user has stopped the run and we are in run mode, we need to abort,
         // this needs to happen after the test:after:run events have fired
