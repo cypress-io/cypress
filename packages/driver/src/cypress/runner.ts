@@ -399,6 +399,12 @@ const findTestForHook = (hookName, suite, test, getTestFromHookOrFindTest, getTe
     return test
   }
 
+  // Guard against undefined/null suite to prevent TypeError
+  // This can happen when this.suite is undefined in the runner context
+  if (!suite) {
+    return null
+  }
+
   // Try to get test from hook
   // Only call getTestFromHookOrFindTest if hook has a ctx property (is actually a hook object)
   // The runner context (this) doesn't have ctx, so we skip this path to avoid TypeError
