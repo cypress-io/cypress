@@ -72,10 +72,12 @@
         "lib/cloud/network/nonretriable_cert_error_codes.ts",
         "lib/plugins/child/default_plugins_file.js",
         "lib/privileged-commands/privileged-channel.js",
-        "lib/util/**/*.{ts,js}"
+        "lib/util/**/*.{ts,js}",
+        "test/**/*.{ts,js}"
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
