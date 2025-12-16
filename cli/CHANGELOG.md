@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.8.0
 
-_Released 12/16/2025 (PENDING)_
+_Released 12/16/2025_
 
 **Performance:**
 
