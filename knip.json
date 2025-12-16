@@ -81,7 +81,10 @@
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
-        "tslib"
+        "tslib",
+        "xvfb-maybe",
+        "ts-loader",
+        "tsconfig-paths"
       ]
     },
     "packages/launchpad": {
