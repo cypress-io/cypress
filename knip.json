@@ -159,6 +159,10 @@
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@fortawesome/fontawesome-free",
+        "@fontsource/open-sans"
       ]
     },
     "packages/config": {
