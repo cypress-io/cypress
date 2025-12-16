@@ -282,7 +282,7 @@
     "**/ua-parser-js": "0.7.33",
     "@definitelytyped/typescript-versions": "0.1.9",
     "@types/react": "18.3.12",
-    "browserify-sign": "4.2.2",
+    "browserify-sign": "4.2.5",
     "devtools-protocol": "0.0.1528500",
     "node-abi": "4.9.0",
     "vue-template-compiler": "2.6.12",
