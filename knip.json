@@ -152,7 +152,9 @@
       ],
       "ignoreDependencies": [
         "@babel/helper-define-map",
-        "@babel/plugin-transform-object-rest-spread"
+        "@babel/plugin-transform-object-rest-spread",
+        "@svgr/webpack",
+        "assert"
       ]
     },
     "packages/reporter": {
