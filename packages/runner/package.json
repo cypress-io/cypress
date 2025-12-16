@@ -29,7 +29,6 @@
     "@packages/web-config": "0.0.0-development",
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",
-    "common-tags": "1.8.0",
     "cross-env": "7.0.3",
     "lodash": "^4.17.21",
     "mobx": "6.13.6",
