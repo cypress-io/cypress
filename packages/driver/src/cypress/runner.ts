@@ -574,6 +574,12 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         break
     }
 
+    // Capture suite and runner context before the async function
+    // The async function is a regular function, so 'this' inside it will be the Mocha execution context,
+    // not the runner context. We need to capture these values from the runner context.
+    const suite = this.suite
+    const runnerContext = this
+
     const newArgs = [name, $utils.monkeypatchBeforeAsync(fn,
       async function () {
         // Re-evaluate test in case it was found in shouldFireTestAfterRun
@@ -582,7 +588,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
         // If we still don't have a test, try to find it using the helper
         if (!currentTest) {
-          currentTest = findTestForHook(name, this.suite, test, getTestFromHookOrFindTest, getTestById, getTests, this)
+          currentTest = findTestForHook(name, suite, test, getTestFromHookOrFindTest, getTestById, getTests, runnerContext)
         }
 
         const shouldFire = shouldFireTestAfterRun()
