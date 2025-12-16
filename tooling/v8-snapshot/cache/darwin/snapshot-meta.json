@@ -77,6 +77,7 @@
     "./packages/server/lib/util/process_profiler.ts",
     "./packages/server/lib/util/suppress_warnings.js",
     "./packages/server/node_modules/axios/lib/adapters/http.js",
+    "./packages/server/node_modules/glob/node_modules/minimatch/minimatch.js",
     "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
     "./packages/socket/node_modules/flatted/cjs/index.js",
@@ -982,6 +983,7 @@
     "./node_modules/@babel/generator/lib/printer.js",
     "./node_modules/@babel/generator/lib/source-map.js",
     "./node_modules/@babel/generator/lib/token-map.js",
+    "./node_modules/@babel/generator/node_modules/jsesc/jsesc.js",
     "./node_modules/@babel/helper-annotate-as-pure/lib/index.js",
     "./node_modules/@babel/helper-compilation-targets/lib/debug.js",
     "./node_modules/@babel/helper-compilation-targets/lib/filter-items.js",
@@ -2436,7 +2438,6 @@
     "./node_modules/jose/dist/node/cjs/util/errors.js",
     "./node_modules/jose/dist/node/cjs/util/runtime.js",
     "./node_modules/js-tokens/index.js",
-    "./node_modules/jsesc/jsesc.js",
     "./node_modules/json-parse-even-better-errors/lib/index.js",
     "./node_modules/json-schema/lib/validate.js",
     "./node_modules/json-stringify-safe/stringify.js",
@@ -4184,6 +4185,7 @@
     "./packages/server/node_modules/axios/lib/platform/index.js",
     "./packages/server/node_modules/axios/lib/platform/node/classes/FormData.js",
     "./packages/server/node_modules/axios/lib/platform/node/classes/URLSearchParams.js",
+    "./packages/server/node_modules/brace-expansion/index.js",
     "./packages/server/node_modules/content-type/index.js",
     "./packages/server/node_modules/cross-fetch/dist/node-ponyfill.js",
     "./packages/server/node_modules/glob/common.js",
@@ -4328,5 +4330,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "12c353d55e5c325ce83bb78148b311e9d6bcd3668a4b2f7a2a3b6f5b7a691069"
+  "deferredHash": "aa0e65c8f0171e864583be97f9c4ead24facc2d0948bdba35e5ab1de92ded57d"
 }
