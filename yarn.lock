@@ -3801,11 +3801,6 @@
   dependencies:
     "@floating-ui/core" "^0.3.0"
 
-"@fontsource/mulish@4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@fontsource/mulish/-/mulish-4.3.0.tgz#cab651cc6f4cb4f532358e3a4958fdef610e9583"
-  integrity sha512-vuAGOwzx0TyukLEI2hZvl6Njx/ECns6rTyH08v8r1suUCAe9NPr5OzPbWwdxQXWPwg8TPido50KesCzLyrbAxw==
-
 "@fontsource/open-sans@4.3.0":
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/@fontsource/open-sans/-/open-sans-4.3.0.tgz#960c3d9df5e841369e47d775dbb1a80212ff08d1"
@@ -26707,11 +26702,6 @@ pngjs@^6.0.0:
   resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-6.0.0.tgz#ca9e5d2aa48db0228a52c419c3308e87720da821"
   integrity sha512-TRzzuFRRmEoSW/p1KVAmiOgPco2Irlah+bGFCeNfJXxxYGwSw7YwAOAcd7X28K/m5bjBWKsC29KyoMfHbypayg==
 
-pngjs@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-7.0.0.tgz#a8b7446020ebbc6ac739db6c5415a65d17090e26"
-  integrity sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==
-
 popper.js@^1.15.0:
   version "1.16.1"
   resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.16.1.tgz#2a223cb3dc7b6213d740e40372be40de43e65b1b"
@@ -33823,7 +33813,7 @@ xtend@~3.0.0:
   resolved "https://registry.yarnpkg.com/xtend/-/xtend-3.0.0.tgz#5cce7407baf642cba7becda568111c493f59665a"
   integrity sha1-XM50B7r2Qsunvs2laBEcST9ZZlo=
 
-xvfb-maybe@0.2.1, xvfb-maybe@^0.2.1:
+xvfb-maybe@0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/xvfb-maybe/-/xvfb-maybe-0.2.1.tgz#ed8cb132957b7848b439984c66f010ea7f24361b"
   integrity sha1-7YyxMpV7eEi0OZhMZvAQ6n8kNhs=
