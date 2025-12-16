@@ -3,6 +3,10 @@
 
 _Released 12/16/2025 (PENDING)_
 
+**Performance:**
+
+- Introduced a new `experimentalFastVisibility` experiment. Enabling this experiment changes how Cypress performs visibility checks and assertions. Read more about [experimental fast visibility](https://on.cypress.io/experiments/#experimental-fast-visibility). Addresses [#33044](https://github.com/cypress-io/cypress/issues/33044). Addressed in [#32801](https://github.com/cypress-io/cypress/pull/32801).
+
 **Features:**
 
 - `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).

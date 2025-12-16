@@ -17,7 +17,7 @@
     "@types/webpack": "^5.28.1",
     "arraybuffer-loader": "1.0.8",
     "assert": "2.0.0",
-    "autoprefixer": "10.4.22",
+    "autoprefixer": "10.4.23",
     "babel-loader": "10.0.0",
     "browser-resolve": "2.0.0",
     "buffer": "6.0.3",

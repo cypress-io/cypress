@@ -4,25 +4,31 @@ import $document from './document'
 import $elements from './elements'
 import $coordinates from './coordinates'
 import * as $transform from './transform'
-
 const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isDetached, isFocusable, stringify: stringifyElement } = $elements
-
+import { fastIsHidden } from './visibility/fastIsHidden'
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
 
+const { wrap } = $jquery
+
 const isVisible = (el) => {
   return !isHidden(el, 'isVisible()')
 }
-
-const { wrap } = $jquery
 
 // TODO: we should prob update dom
 // to be passed in $utils as a dependency
 // because of circular references
 // the ignoreOpacity option exists for checking actionability
 // as elements with `opacity: 0` are hidden yet actionable
+
 const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
+  if (Cypress.config('experimentalFastVisibility')) {
+    ensureEl(el, methodName)
+
+    return fastIsHidden(el, options)
+  }
+
   if (isStrictlyHidden(el, methodName, options, isHidden)) {
     return true
   }
