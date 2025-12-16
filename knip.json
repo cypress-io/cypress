@@ -84,7 +84,10 @@
         "tslib",
         "xvfb-maybe",
         "ts-loader",
-        "tsconfig-paths"
+        "tsconfig-paths",
+        "@babel/core",
+        "@babel/preset-env",
+        "babel-loader"
       ]
     },
     "packages/launchpad": {
