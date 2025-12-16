@@ -162,7 +162,9 @@
       ],
       "ignoreDependencies": [
         "@fortawesome/fontawesome-free",
-        "@fontsource/open-sans"
+        "@fontsource/open-sans",
+        "cypress-multi-reporters",
+        "webpack-cli"
       ]
     },
     "packages/config": {
