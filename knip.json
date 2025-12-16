@@ -154,7 +154,12 @@
         "@babel/helper-define-map",
         "@babel/plugin-transform-object-rest-spread",
         "@svgr/webpack",
-        "assert"
+        "assert",
+        "browser-resolve",
+        "webpack-cli",
+        "buffer",
+        "process",
+        "url"
       ]
     },
     "packages/reporter": {
