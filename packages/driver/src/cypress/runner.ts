@@ -522,6 +522,13 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           }
 
           if (test) {
+            // test.parent should exist if test exists, but guard against it just in case
+            if (!test.parent) {
+              // Can't determine siblings without a parent, skip sibling-based logic
+              // and let the root suite logic below handle it
+              return false
+            }
+
             const siblings = getAllSiblingTests(test.parent, getTestById)
             const testIsActuallyInSuite = suiteHasTest(this.suite, test.id)
 
