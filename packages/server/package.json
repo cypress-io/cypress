@@ -137,7 +137,7 @@
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@electron/rebuild": "4.0.2",
-    "@ffprobe-installer/ffprobe": "1.1.0",
+    "@ffprobe-installer/ffprobe": "2.1.2",
     "@packages/config": "0.0.0-development",
     "@packages/data-context": "0.0.0-development",
     "@packages/electron": "0.0.0-development",
