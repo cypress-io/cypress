@@ -196,7 +196,6 @@
     "socket.io": "4.0.1",
     "ssestream": "1.0.1",
     "supertest": "4.0.2",
-    "supertest-session": "4.0.0",
     "through2": "2.0.5",
     "ts-loader": "9.5.2",
     "tsconfig-paths": "3.10.1",
