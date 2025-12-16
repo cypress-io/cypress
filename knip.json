@@ -149,6 +149,10 @@
       "project": [
         "**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@babel/helper-define-map",
+        "@babel/plugin-transform-object-rest-spread"
       ]
     },
     "packages/reporter": {
