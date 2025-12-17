@@ -39,8 +39,51 @@ if (supportFile) {
 
   const relativeUrl = `${devServerPublicPathBase}${supportRelativeToProjectRoot}`
 
+  // Add retry logic for support file imports to handle intermittent failures
+  // when Vite hasn't finished processing the module yet.
+  //
+  // Vite's optimizeDeps runs asynchronously in the background, and even though
+  // the support file is added to optimizeDeps.entries for pre-bundling, there's
+  // a race condition where the dynamic import may execute before Vite has finished
+  // processing the module. Vite doesn't provide an API to wait for optimizeDeps
+  // completion, so retry logic is the most practical solution.
   importsToLoad.push({
-    load: () => import(relativeUrl),
+    load: async () => {
+      const maxRetries = 3
+      const initialRetryDelay = 50 // milliseconds - start with a short delay since Vite is usually fast
+      let lastError
+
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          return await import(relativeUrl)
+        } catch (error) {
+          lastError = error
+          // Only retry on network/module loading errors, not syntax errors
+          // Check both message and name properties for better error detection
+          const errorMessage = error?.message || ''
+          const errorName = error?.name || ''
+          const isRetryableError = (
+            errorMessage.includes('Failed to fetch') ||
+            errorMessage.includes('dynamically imported module') ||
+            errorMessage.includes('NetworkError') ||
+            errorMessage.includes('Load failed') ||
+            errorName === 'TypeError' && errorMessage.includes('fetch')
+          )
+
+          if (!isRetryableError || attempt === maxRetries - 1) {
+            throw error
+          }
+
+          // Wait before retrying with exponential backoff
+
+          const delay = initialRetryDelay * Math.pow(2, attempt)
+
+          await new Promise((resolve) => setTimeout(resolve, delay))
+        }
+      }
+
+      throw lastError
+    },
     absolute: supportFile,
     relative: supportRelativeToProjectRoot,
     relativeUrl,
