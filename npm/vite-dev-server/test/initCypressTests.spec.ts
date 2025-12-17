@@ -209,7 +209,9 @@ describe('initCypressTests', () => {
     // The retry logic is tested through:
     // - Integration tests in system-tests that exercise the actual Vite dev server
     //
-    // This test verifies that the retry logic structure is in place.
+    // These tests verify that the retry logic structure is in place.
+    // The cache-busting query parameter (_cypress_retry) is added on retry attempts
+    // to work around browser module map caching of failed imports.
     beforeEach(() => {
       vi.useFakeTimers()
     })
@@ -229,10 +231,53 @@ describe('initCypressTests', () => {
       expect(typeof supportFileLoader).toBe('function')
 
       // The load function should return a promise
-
       const loadPromise = supportFileLoader()
 
       expect(loadPromise).toBeInstanceOf(Promise)
+    })
+
+    it('uses cache-busting query parameter on retry attempts', async () => {
+      const importCalls: string[] = []
+
+      // Mock import before module loads to capture URLs
+      // @ts-expect-error
+      global.import = vi.fn((url: string) => {
+        importCalls.push(url)
+        // Simulate a retryable error on first two attempts, success on third
+        if (importCalls.length <= 2) {
+          return Promise.reject(new Error('Failed to fetch dynamically imported module'))
+        }
+
+        return Promise.resolve({ default: {} })
+      })
+
+      await import('../client/initCypressTests.js')
+
+      const calls = mockCypressInstance.onSpecWindow.mock.calls
+      const supportFileLoader = calls[0][1][0].load
+
+      // Advance timers to allow retries to complete
+      await vi.runAllTimersAsync()
+
+      try {
+        await supportFileLoader()
+      } catch (error) {
+        // Expected to fail after all retries
+      }
+
+      // Verify first attempt uses original URL (no cache-busting)
+      expect(importCalls[0]).toBe('/__cypress/src/cypress/support/component.js')
+
+      expect(importCalls[0]).not.toContain('_cypress_retry')
+
+      // Verify retry attempts use cache-busting query parameter
+      if (importCalls.length > 1) {
+        expect(importCalls[1]).toContain('_cypress_retry=1')
+      }
+
+      if (importCalls.length > 2) {
+        expect(importCalls[2]).toContain('_cypress_retry=2')
+      }
     })
   })
 })

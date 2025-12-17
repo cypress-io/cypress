@@ -47,6 +47,10 @@ if (supportFile) {
   // a race condition where the dynamic import may execute before Vite has finished
   // processing the module. Vite doesn't provide an API to wait for optimizeDeps
   // completion, so retry logic is the most practical solution.
+  //
+  // IMPORTANT: Failed module imports are cached in the browser's module map, so
+  // retrying with the same URL will immediately reject with the cached error.
+  // To work around this, we append a cache-busting query parameter on retry attempts.
   importsToLoad.push({
     load: async () => {
       const maxRetries = 3
@@ -55,7 +59,13 @@ if (supportFile) {
 
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-          return await import(relativeUrl)
+          // Use cache-busting query parameter on retries to bypass cached failures
+          // The first attempt uses the original URL, retries append ?_cypress_retry=<attempt>
+          const importUrl = attempt === 0
+            ? relativeUrl
+            : `${relativeUrl}${relativeUrl.includes('?') ? '&' : '?'}_cypress_retry=${attempt}`
+
+          return await import(importUrl)
         } catch (error) {
           lastError = error
           // Only retry on network/module loading errors, not syntax errors
