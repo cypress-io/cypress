@@ -2,9 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": [
+      "cypress"
+    ]
   },
   "include": [
-    "src/**/*.ts"
+    "**/*.ts"
   ]
 }
