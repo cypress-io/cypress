@@ -234,6 +234,15 @@ describe('initCypressTests', () => {
       const loadPromise = supportFileLoader()
 
       expect(loadPromise).toBeInstanceOf(Promise)
+
+      // Await and catch any errors to prevent unhandled promise rejections
+      // In this unit test environment, the import will likely fail since the URL
+      // won't resolve, but we just need to verify the function returns a promise
+      try {
+        await loadPromise
+      } catch (error) {
+        // Expected to fail in unit test environment - ignore
+      }
     })
 
     it('uses cache-busting query parameter on retry attempts', async () => {
