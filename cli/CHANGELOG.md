@@ -1,4 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.8.1
+
+_Released 12/30/2025 (PENDING)_
+
+**Misc:**
+- Command execution can be benchmarked by setting the `CYPRESS_INTERNAL_COMMAND_PERFORMANCE_LOGGING` environment variable to `1` or `true`. The performance log is recorded to `./cypress/logs/performance-{UUID_V4}.log`, a new uuid generated at the beginning of each run. Addressed in [#32938](https://github.com/cypress-io/cypress/pull/32938)
+
 ## 15.8.0
 
 _Released 12/16/2025_
@@ -66,7 +73,6 @@ _Released 11/19/2025_
 
 - The keyboard shortcuts modal now displays the keyboard shortcut for saving Studio changes - `⌘` + `s` for Mac or `Ctrl` + `s` for Windows/Linux. Addressed [#32862](https://github.com/cypress-io/cypress/issues/32862). Addressed in [#32864](https://github.com/cypress-io/cypress/pull/32864).
 - The Cursor logo now correctly displays in the External editor dropdown. Addresses [#32062](https://github.com/cypress-io/cypress/issues/32062). Addressed in [#32911](https://github.com/cypress-io/cypress/pull/32911).
-- Command execution can be benchmarked by setting the `CYPRESS_INTERNAL_COMMAND_PERFORMANCE_LOGGING` environment variable to `1` or `true`. The performance log is recorded to `./cypress/logs/performance.log` by default. Addressed in [#32938](https://github.com/cypress-io/cypress/pull/32938)
 
 ## 15.6.0
 
