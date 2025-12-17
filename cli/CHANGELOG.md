@@ -5,7 +5,7 @@ _Released 12/17/2025 (PENDING)_
 
 **Dependency Updates:**
 
-- Upgraded `systeminformation` to `5.27.14`. This removes the [CVE-2025-68154](https://github.com/advisories/GHSA-wphj-fx3q-84ch) vulnerability being reported in security scans. Fixes [#33146](https://github.com/cypress-io/cypress/issues/33146).
+- Upgraded `systeminformation` to `5.27.14`. This removes the [CVE-2025-68154](https://github.com/advisories/GHSA-wphj-fx3q-84ch) vulnerability being reported in security scans. Fixes [#33146](https://github.com/cypress-io/cypress/issues/33146). Addressed in [#33150](https://github.com/cypress-io/cypress/pull/33150).
 
 ## 15.8.0
 
