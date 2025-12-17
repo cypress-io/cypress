@@ -1,9 +1,8 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions, StudioCDPClient } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
-import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
 import exception from '../exception'
@@ -76,6 +75,12 @@ export class StudioManager implements StudioManagerShape {
     return !!(await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser))
   }
 
+  connectToBrowser (target: StudioCDPClient): void {
+    if (this._studioServer) {
+      return this.invokeSync('connectToBrowser', { isEssential: true }, target)
+    }
+  }
+
   async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {
     // Only create a studio electron instance when studio AI is enabled
     if (!this._studioElectron) {
@@ -119,6 +124,8 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
+      debug('invoking sync method %s with args %o', method, args)
+
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
@@ -152,6 +159,8 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
+      debug('invoking async method %s with args %o', method, args)
+
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return await this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {

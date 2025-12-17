@@ -141,7 +141,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
     const middlewareName = _.keys(middlewares)[0]
 
     if (!middlewareName) {
-      return Bluebird.resolve()
+      return Promise.resolve()
     }
 
     const middleware = middlewares[middlewareName]

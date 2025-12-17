@@ -109,5 +109,27 @@
     </div>
   </div>
 
+  <div class="test-section" cy-section="positioning-cousin-coverage" >
+    <h3>Positioning Cousin Coverage</h3>
+
+    <!-- Element covered by an absolutely positioned cousin -->
+     <div style="position: relative;">
+      <div style="width: 200px; height: 100px; background: lightblue;">
+        <span class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" cy-label="Target element to be covered" style="display: block; width: 100px; height: 50px; background: lightgreen;">Target element</span>
+      </div>
+      <div class="testCase" cy-expect="visible" cy-label="Absolutely positioned cousin covering target" style="position: absolute; top: 0px; left: 0px; width: 100px; height: 50px; background: lightcoral;">Covering cousin</div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="z-index-coverage">
+    <h3>Z-Index Coverage</h3>
+    
+    <!-- Element covered by higher z-index element -->
+    <div style="position: relative; width: 300px; height: 150px; background: lightgray;">
+      <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Element covered by higher z-index" style="position: absolute; top: 20px; left: 20px; width: 100px; height: 100px; background: lightgreen; z-index: 1;">Lower z-index element</div>
+      <div class="testCase" cy-expect="visible" cy-label="Higher z-index covering element" style="position: absolute; top: 20px; left: 20px; width: 100px; height: 100px; background: lightcoral; z-index: 2;">Higher z-index element</div>
+    </div>
+  </div>
+
 </body>
 </html>

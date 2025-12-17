@@ -11,6 +11,8 @@ when:
         matches:
             pattern: /^develop/
             value: << pipeline.git.branch >>
+    - not:
+        equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
 jobs:
   - node_modules_install:
@@ -31,6 +33,10 @@ jobs:
         branches:
           only: /^pull\/[0-9]+/
   - check-ts:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+  - health-check:
       requires:
         - internal-pr-build
         - external-pr-build
@@ -282,6 +288,11 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - npm-angular:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-angular-zoneless:
       requires:
         - internal-pr-build
         - external-pr-build

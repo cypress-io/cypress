@@ -27,7 +27,6 @@
   },
   "dependencies": {
     "ansi_up": "5.0.0",
-    "axios": "^1.7.9",
     "chalk": "^4.1.2",
     "lodash": "^4.17.21",
     "pluralize": "8.0.0",
@@ -39,8 +38,7 @@
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/node": "22.18.7",
-    "@types/pngjs": "^6.0.1",
-    "ansi-styles": "^5",
+    "@types/pngjs": "^6.0.5",
     "ci-info": "^4.1.0",
     "eslint": "^9.31.0",
     "globby": "^11.1.0",

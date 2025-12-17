@@ -3194,6 +3194,11 @@ declare namespace Cypress {
      */
     experimentalMemoryManagement: boolean
     /**
+     * Enables an alternative, performance-optimized visibility algorithm.
+     * @default false
+     */
+    experimentalFastVisibility: boolean
+    /**
      * Allows for just-in-time compiling of a component test, which will only compile assets related to the component.
      * This results in a smaller bundle under test, reducing resource constraints on a given machine. This option is recommended
      * for users with large component testing projects and those who are running into webpack 'chunk load error' issues.
@@ -3365,14 +3370,14 @@ declare namespace Cypress {
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalFastVisibility' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalFastVisibility' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number

@@ -95,7 +95,7 @@
     <h3>Overflow Auto with Zero Dimensions</h3>
     
     <!-- Zero dimensions with overflow auto -->
-    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Zero dimensions with overflow auto" style="width: 0; height: 0px; overflow: auto; background: lightgreen;">
+    <div class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" cy-label="Zero dimensions with overflow auto" style="width: 0; height: 0px; overflow: auto; background: lightgreen;">
       <span class="testCase" cy-expect="hidden" cy-label="Self under zero dimensions with overflow auto">parent no size, overflow: auto</span>
     </div>
   </div>
@@ -105,15 +105,14 @@
     
     <!-- Zero width, positive height -->
     <div class="testCase" cy-expect="visible" cy-label="Zero width with text content" style="width: 0; height: 100px; background: lightgreen;">Zero width</div>
+    
     <div class="testCase" cy-expect="visible" cy-label="Zero width with text content (blue)" style="width: 0; height: 100px; background: lightgreen;">Has text content</div>
     <div class="testCase" cy-expect="hidden" cy-label="Zero width with whitespace only" style="width: 0; height: 50px; background: lightcoral;">      </div>
 
-    <!-- Positive width, zero height -->
     <div class="testCase" cy-expect="hidden" cy-label="Zero height without text content" style="width: 100px; height: 0; background: lightcoral;"></div>
     <div class="testCase" cy-expect="visible" cy-label="Zero height with text content" style="width: 100px; height: 0; background: lightgreen;">Has text content</div>
     <div class="testCase" cy-expect="hidden" cy-label="Zero height with whitespace only" style="width: 50px; height: 0; background: lightcoral;">        </div>
 
-    <!-- Zero dimensions -->
     <div style="width: 10; height: 10; background: lightyellow">
       <div class="testCase" cy-expect="hidden" cy-label="Zero dimensions without content" style="width:0; height:0"></div>
     </div>
@@ -267,6 +266,23 @@
     <div class="testCase" cy-expect="visible" cy-label="Parent with clip-path path" style="position: relative; clip-path: path('M 0 0 L 100 0 L 100 100 L 0 100 Z');">
       <span class="testCase" cy-expect="visible" cy-label="Element inside clip-path path" style="background: lightgreen;">path content</span>
     </div>
+
+    <!-- CSS clip property -->
+    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Element clipped by CSS clip property" style="position: absolute; clip: rect(0, 0, 0, 0); background: lightcoral; width: 100px; height: 100px;">clipped by clip: rect(0,0,0,0)</div>
+
+    <!-- CSS mask property note: this yields an element that is not rendered as visible, but has a box model that is visible and is clickable -->
+    <div class="testCase" cy-expect="visible" cy-label="Element masked by CSS mask" style="width: 100px; height: 100px; background: lightcoral; mask: linear-gradient(black, black); mask-size: 0 0;">masked by CSS mask</div>
+  </div>
+
+  <div cy-section="viewport-scenarios">
+    <h3>Viewport Scenarios</h3>
+    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Position absolute element outside viewport" style="position: absolute; top: -100px; left: -100px; width: 100px; height: 100px; background: lightcoral;">Element outside viewport</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Position fixed element outside of viewport" style="position: fixed; top: -100px; left: -100px; width: 100px; height: 100px; background: lightcoral;">Position fixed element outside of viewport</div>
+    <iframe style="display:none;">
+      <body>
+        <div class="testCase" cy-expect="hidden" cy-label="Element inside hidden iframe" style="width: 100px; height: 100px; background: lightcoral;">Element inside hidden iframe</div>
+      </body>
+    </iframe>
   </div>
 </body>
 </html>

@@ -584,6 +584,10 @@
         "name": "CSP Allow List",
         "description": "Enables Cypress to selectively permit Content-Security-Policy and Content-Security-Policy-Report-Only header directives, including those that might otherwise block Cypress from running."
       },
+      "experimentalFastVisibility": {
+        "name": "Fast visibility",
+        "description": "Enables a new [visibility algorithm](https://on.cypress.io/experiments/#experimental-fast-visibility) that is faster and more accurate, but may break some tests that rely on specialized semantics of the legacy visibility algorithm."
+      },
       "experimentalInteractiveRunEvents": {
         "name": "Interactive run events",
         "description": "Allows listening to the [`before:run`](https://on.cypress.io/before-run), [`after:run`](https://on.cypress.io/after-run), [`before:spec`](https://on.cypress.io/before-spec), and [`after:spec`](https://on.cypress.io/after-spec) events in plugins during interactive mode."

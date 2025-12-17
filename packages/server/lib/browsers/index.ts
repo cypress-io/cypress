@@ -6,7 +6,7 @@ import * as errors from '../errors'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape } from '@packages/types'
+import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
@@ -150,6 +150,12 @@ export = {
     const browserLauncher = await getBrowserLauncher(options.browser, options.foundBrowsers || [])
 
     await browserLauncher.connectCyPromptToBrowser(options)
+  },
+
+  async connectStudioToBrowser (options: { browser: Browser, foundBrowsers?: FoundBrowser[], studioManager?: StudioManagerShape }) {
+    const browserLauncher = await getBrowserLauncher(options.browser, options.foundBrowsers || [])
+
+    await browserLauncher.connectStudioToBrowser(options)
   },
 
   async closeProtocolConnection (options: { browser: Browser, foundBrowsers?: FoundBrowser[] }) {
