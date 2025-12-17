@@ -28,7 +28,7 @@
     "eslint": "^9.31.0",
     "execa": "4.1.0",
     "mocha": "3.5.3",
-    "systeminformation": "^5.27.7",
+    "systeminformation": "^5.27.14",
     "vitest": "^3.2.4"
   },
   "files": [
