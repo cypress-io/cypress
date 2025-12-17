@@ -4,6 +4,7 @@
 _Released 12/30/2025 (PENDING)_
 
 **Misc:**
+
 - Command execution can be benchmarked by setting the `CYPRESS_INTERNAL_COMMAND_PERFORMANCE_LOGGING` environment variable to `1` or `true`. The performance log is recorded to `./cypress/logs/performance-{UUID_V4}.log`, a new uuid generated at the beginning of each run. Addressed in [#32938](https://github.com/cypress-io/cypress/pull/32938)
 
 ## 15.8.0
