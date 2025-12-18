@@ -296,11 +296,17 @@ describe('cy/retries', () => {
 
       const promise = retries.retry(fn, options)
 
-      // Advance timers
+      // Set up expectation first to ensure rejection handler is attached
+      const expectation = expect(promise).rejects.toThrow('Retry ended: promise was canceled or runnable changed')
+
+      // Wait for a microtask to ensure the expectation's rejection handler is attached
+      await Promise.resolve()
+
+      // Advance timers to trigger the delay and ended() check
       await vi.advanceTimersByTimeAsync(20)
 
-      // Should reject on second ended() check
-      await expect(promise).rejects.toThrow('Retry ended: promise was canceled or runnable changed')
+      // Wait for the expectation to complete
+      await expectation
 
       expect(fn).not.toHaveBeenCalled()
     })
