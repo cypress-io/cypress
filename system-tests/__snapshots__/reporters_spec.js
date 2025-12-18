@@ -12,8 +12,6 @@ Error: Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-e
 Require stack:
 - lib/reporter.js
       [stack trace lines]
-
-
 `
 
 exports['e2e reporters supports junit reporter and reporter options 1'] = `
