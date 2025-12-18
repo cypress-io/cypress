@@ -54,7 +54,7 @@
     "proxy-from-env": "1.0.0",
     "request-progress": "^3.0.0",
     "supports-color": "^8.1.1",
-    "systeminformation": "5.27.7",
+    "systeminformation": "^5.27.14",
     "tmp": "~0.2.4",
     "tree-kill": "1.2.2",
     "untildify": "^4.0.0",
