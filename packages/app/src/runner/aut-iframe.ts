@@ -19,6 +19,8 @@ const jQueryRe = /jquery/i
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
+  // the iframe used to display a snapshot of the AUT (currently used to display the studio snapshots)
+  $snapshotIframe?: JQuery<HTMLIFrameElement>
   _highlightedEl?: Element
   private _currentHighlightingId: number = 0
 
@@ -30,7 +32,7 @@ export class AutIframe {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
-  create (): JQuery<HTMLIFrameElement> {
+  create (): { autIframe: JQuery<HTMLIFrameElement>, autSnapshotIframe: JQuery<HTMLIFrameElement> } {
     const $iframe = this.$('<iframe>', {
       id: `Your project: '${this.projectName}'`,
       title: `Your project: '${this.projectName}'`,
@@ -39,15 +41,28 @@ export class AutIframe {
 
     this.$iframe = $iframe
 
-    return $iframe
+    const $snapshotIframe: JQuery<HTMLIFrameElement> = this.$('<iframe>', {
+      id: `AUT Snapshot: '${this.projectName}'`,
+      title: `AUT Snapshot: '${this.projectName}'`,
+      class: 'aut-snapshot-iframe',
+    })
+
+    $snapshotIframe.hide() // Auto-hide the snapshot iframe
+    this.$snapshotIframe = $snapshotIframe
+
+    return {
+      autIframe: $iframe,
+      autSnapshotIframe: $snapshotIframe,
+    }
   }
 
   destroy () {
-    if (!this.$iframe) {
+    if (!this.$iframe || !this.$snapshotIframe) {
       throw Error(`Cannot call #remove without first calling #create`)
     }
 
     this.$iframe.remove()
+    this.$snapshotIframe.remove()
   }
 
   _showInitialBlankPage () {

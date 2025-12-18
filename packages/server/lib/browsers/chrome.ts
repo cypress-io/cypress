@@ -20,7 +20,7 @@ import type { CriClient } from './cri-client'
 import type { Automation } from '../automation'
 import memory from './memory'
 
-import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, BrowserNewTabOpts, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 
@@ -462,6 +462,18 @@ export = {
     }
 
     await options.cyPromptManager?.connectToBrowser(browserCriClient.currentlyAttachedCyPromptTarget)
+  },
+
+  async connectStudioToBrowser (options: { studioManager?: StudioManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectStudioToBrowser')
+
+    if (!browserCriClient.currentlyAttachedStudioTarget) {
+      browserCriClient.currentlyAttachedStudioTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.studioManager?.connectToBrowser(browserCriClient.currentlyAttachedStudioTarget)
   },
 
   async closeProtocolConnection () {

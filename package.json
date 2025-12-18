@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "15.8.0",
+  "version": "15.8.1",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -282,7 +282,7 @@
     "**/ua-parser-js": "0.7.33",
     "@definitelytyped/typescript-versions": "0.1.9",
     "@types/react": "18.3.12",
-    "browserify-sign": "4.2.2",
+    "browserify-sign": "4.2.5",
     "devtools-protocol": "0.0.1528500",
     "node-abi": "4.9.0",
     "vue-template-compiler": "2.6.12",

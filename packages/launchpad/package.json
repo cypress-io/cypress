@@ -22,7 +22,7 @@
   "dependencies": {},
   "devDependencies": {
     "@cypress-design/icon-registry": "^1.5.1",
-    "@cypress-design/vue-button": "^1.1.0",
+    "@cypress-design/vue-button": "^1.13.0",
     "@faker-js/faker": "9.6.0",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
