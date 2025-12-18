@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.8.2
+
+_Released 12/30/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where the ffprobe path was not properly configured for video operations. The path is now set at module load time, ensuring it's available for all video operations. Upgraded `@ffprobe-installer/ffprobe` from `1.1.0` to `2.1.2` to support darwin-arm64 (Apple Silicon). Addressed in [#33136](https://github.com/cypress-io/cypress/pull/33136).
+
 ## 15.8.1
 
 _Released 12/18/2025_
