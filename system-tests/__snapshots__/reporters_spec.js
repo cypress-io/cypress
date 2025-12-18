@@ -11,14 +11,6 @@ Learn more at https://on.cypress.io/reporters
 Error: Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
 - lib/reporter.js
-- lib/project-base.ts
-- lib/open_project.ts
-- lib/makeDataContext.ts
-- lib/modes/index.ts
-- lib/cypress.ts
-- start-cypress.js
-- index.js
-- 
       [stack trace lines]
 
 
@@ -153,8 +145,6 @@ Learn more at https://on.cypress.io/reporters
 
 Error: this reporter threw an error
       [stack trace lines]
-
-
 `
 
 exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
