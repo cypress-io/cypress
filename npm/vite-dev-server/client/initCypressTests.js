@@ -80,15 +80,21 @@ if (supportFile) {
             errorName === 'TypeError' && errorMessage.includes('fetch')
           )
 
-          if (!isRetryableError || attempt === maxRetries - 1) {
+          if (!isRetryableError) {
             throw error
           }
 
           // Wait before retrying with exponential backoff
-
+          // Apply delay even on the last attempt to give Vite maximum time
+          // to finish optimizeDeps before throwing
           const delay = initialRetryDelay * Math.pow(2, attempt)
 
           await new Promise((resolve) => setTimeout(resolve, delay))
+
+          // After waiting, check if this was the last attempt
+          if (attempt === maxRetries - 1) {
+            throw error
+          }
         }
       }
 
