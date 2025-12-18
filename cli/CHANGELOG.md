@@ -5,7 +5,7 @@ _Released 12/30/2025 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed a bug where `cy.wait()` with multiple aliases could crash with `TypeError: Cannot read properties of undefined` when a retry was canceled (e.g., via `Cypress.stop()`) or when retry logic executed between test runnables due to a Bluebird cancellation propagation bug, instead of properly failing the test. 
+- Fixed a bug where `cy.wait()` with multiple aliases could crash with `TypeError: Cannot read properties of undefined` when a retry was canceled (e.g., via `Cypress.stop()`) or when retry logic executed between test runnables due to a Bluebird cancellation propagation bug, instead of properly failing the test. Fixed in [#33157](https://github.com/cypress-io/cypress/pull/33157).
 
 ## 15.8.1
 
