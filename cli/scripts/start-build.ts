@@ -23,8 +23,7 @@ includeTypes.forEach((folder: string) => {
 })
 
 // build the project and copy the build files over to the build directory
-shell.exec('tsc -p tsconfig.build.json')
-shell.exec('tsc -p tsconfig.esm.json')
+shell.exec('rollup -c')
 
 shell.mkdir('-p', 'build/dist')
 shell.cp('dist/*.js', 'build/dist/')

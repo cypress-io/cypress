@@ -1,7 +1,7 @@
 import minimist from 'minimist'
 import debug from 'debug'
 import util from './util'
-import CLI from './cypress'
+import * as CLI from './cypress'
 import installModule from './tasks/install'
 import { start as verifyStart } from './tasks/verify'
 
@@ -43,4 +43,4 @@ if (args.exec) {
 
 // this is how the module needs to be exported to avoid a breaking change
 // default exports WILL BREAK in a CJS context through a require('cypress') call
-export = CLI
+export * from './cypress'
