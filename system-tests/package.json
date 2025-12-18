@@ -57,7 +57,7 @@
     "dayjs": "^1.9.3",
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
-    "dockerode": "3.3.5",
+    "dockerode": "4.0.9",
     "esbuild": "^0.25.2",
     "execa": "4.1.0",
     "express": "4.21.0",
