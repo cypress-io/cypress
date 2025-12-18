@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.8.2
+
+_Released 12/30/2025 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed a bug where `cy.wait()` with multiple aliases could crash with `TypeError: Cannot read properties of undefined` when a retry was canceled (e.g., via `Cypress.stop()`) or when retry logic executed between test runnables due to a Bluebird cancellation propagation bug, instead of properly failing the test. 
+
 ## 15.8.1
 
 _Released 12/18/2025_

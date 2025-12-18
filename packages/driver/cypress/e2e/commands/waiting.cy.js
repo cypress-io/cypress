@@ -465,7 +465,15 @@ describe('src/cy/commands/waiting', () => {
         it('does not retry after 1 alias times out', {
           requestTimeout: 1000,
         }, (done) => {
-          Promise.onPossiblyUnhandledRejection(done)
+          let doneCalled = false
+          const callDoneOnce = () => {
+            if (!doneCalled) {
+              doneCalled = true
+              done()
+            }
+          }
+
+          Promise.onPossiblyUnhandledRejection(callDoneOnce)
 
           cy.on('command:retry', (options) => {
             // force bar to time out before foo
@@ -475,7 +483,7 @@ describe('src/cy/commands/waiting', () => {
           })
 
           cy.on('fail', (err) => {
-            done()
+            callDoneOnce()
           })
 
           cy

@@ -82,19 +82,24 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
         return `${msg2}${msg1}`
       })
 
-      if (error) {
-        const retryErr = mergeErrProps(error, retryErrProps)
-
-        throwErr(retryErr, {
-          onFail: (err) => {
-            if (onFail) {
-              err = onFail(err)
-            }
-
-            finishAssertions(err)
-          },
+      // Always throw an error when timeout is exceeded, even if error is not set
+      // This handles edge cases where _runnableTimeout is manipulated (e.g., in tests)
+      // and ensures Promise.map correctly rejects instead of treating undefined as success
+      const retryErr = error
+        ? mergeErrProps(error, retryErrProps)
+        : errByPath('miscellaneous.retry_timed_out', {
+          ms: options._runnableTimeout,
         })
-      }
+
+      throwErr(retryErr, {
+        onFail: (err) => {
+          if (onFail) {
+            err = onFail(err)
+          }
+
+          finishAssertions(err)
+        },
+      })
     }
 
     const runnableHasChanged = () => {
@@ -122,13 +127,17 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
     .delay(interval)
     .then(() => {
       if (ended()) {
-        return
+        // Reject the promise instead of returning undefined
+        // This prevents Promise.map from treating it as a successful resolution
+        // when one promise in the map should have failed
+        return Promise.reject(new Error('Retry ended: promise was canceled or runnable changed'))
       }
 
       Cypress.action('cy:command:retry', options)
 
       if (ended()) {
-        return
+        // Reject the promise instead of returning undefined
+        return Promise.reject(new Error('Retry ended: promise was canceled or runnable changed'))
       }
 
       // if we are unstable then remove
