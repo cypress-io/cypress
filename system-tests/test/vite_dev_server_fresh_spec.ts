@@ -17,7 +17,7 @@ describe('@cypress/vite-dev-server', function () {
           project,
           configFile: 'cypress-vite.config.ts',
           testingType: 'component',
-          browser: 'chrome',
+          browser: 'electron',
           snapshot: true,
           expectedExitCode: 7,
         })
@@ -28,7 +28,7 @@ describe('@cypress/vite-dev-server', function () {
         configFile: 'cypress-vite-port.config.ts',
         spec: 'src/port.cy.jsx',
         testingType: 'component',
-        browser: 'chrome',
+        browser: 'electron',
         snapshot: true,
         expectedExitCode: 0,
       })

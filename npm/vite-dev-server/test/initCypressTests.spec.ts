@@ -58,9 +58,13 @@ describe('initCypressTests', () => {
 
     mockCypressInstance = createMockCypress()
 
-    global.import = vi.fn()
+    ;(global as any).import = vi.fn()
     // @ts-expect-error
-    global.window = {}
+    global.window = {
+      addEventListener: vi.fn(),
+      location: { reload: vi.fn() } as any,
+    }
+
     // @ts-expect-error
     global.parent = {}
     // @ts-expect-error
@@ -200,37 +204,24 @@ describe('initCypressTests', () => {
     })
   })
 
-  describe('support file retry logic', () => {
-    // Note: Full retry logic testing is difficult in this environment because:
-    // 1. The module executes at import time and Vite's test runner resolves imports
-    // 2. The load function is a closure that captures the import function at module load time
-    // 3. Mocking global.import doesn't work reliably with Vite's module resolution
-    //
-    // The retry logic is tested through:
+  describe('support file vite:preloadError handling', () => {
+    // The vite:preloadError handling is tested through:
     // - Integration tests in system-tests that exercise the actual Vite dev server
     //
-    // These tests verify that the retry logic structure is in place.
-    // The cache-busting query parameter (_cypress_retry) is added on retry attempts
-    // to work around browser module map caching of failed imports.
-    beforeEach(() => {
-      vi.useFakeTimers()
-    })
+    // These tests verify that the event listener structure is in place and the
+    // load function is simplified (no retry logic).
 
-    afterEach(() => {
-      vi.useRealTimers()
-    })
-
-    it('creates a load function with retry logic for support file', async () => {
+    it('creates a simple load function for support file (no retry logic)', async () => {
       await import('../client/initCypressTests.js')
 
       const calls = mockCypressInstance.onSpecWindow.mock.calls
       const supportFileLoader = calls[0][1][0].load
 
-      // Verify the load function exists and is async
+      // Verify the load function exists and is a function
       expect(supportFileLoader).toBeDefined()
       expect(typeof supportFileLoader).toBe('function')
 
-      // The load function should return a promise
+      // The load function should return a promise (from import())
       const loadPromise = supportFileLoader()
 
       expect(loadPromise).toBeInstanceOf(Promise)
@@ -245,34 +236,114 @@ describe('initCypressTests', () => {
       }
     })
 
-    it('retries on retryable errors with exponential backoff', async () => {
+    it('registers vite:preloadError event listener', async () => {
       await import('../client/initCypressTests.js')
 
-      const calls = mockCypressInstance.onSpecWindow.mock.calls
-      const supportFileLoader = calls[0][1][0].load
+      // Verify that addEventListener was called with 'vite:preloadError'
+      expect((global.window as any).addEventListener).toHaveBeenCalledWith(
+        'vite:preloadError',
+        expect.any(Function),
+        { once: false },
+      )
+    })
 
-      // Start the load function (it will fail since the URL won't resolve in test env)
-      // The function will schedule retry delays using setTimeout
-      const loadPromise = supportFileLoader()
+    it('handles vite:preloadError for support file imports', async () => {
+      await import('../client/initCypressTests.js')
 
-      // The retry logic uses exponential backoff: 50ms, 100ms, 200ms
-      // We need to advance timers after the function has started and scheduled delays
-      // Use runAllTimersAsync to advance all pending timers
-      await vi.runAllTimersAsync()
+      // Get the event listener that was registered
+      const addEventListenerCalls = ((global.window as any).addEventListener as any).mock.calls
+      const preloadErrorHandler = addEventListenerCalls.find(
+        (call: any[]) => call[0] === 'vite:preloadError',
+      )?.[1]
 
-      // Wait for the promise to settle (it should fail after all retries)
-      try {
-        await loadPromise
-        // If it succeeds, that's also valid (though unlikely in test env)
-      } catch (error) {
-        // Expected to fail after retries - verify it's an error
-        expect(error).toBeDefined()
+      expect(preloadErrorHandler).toBeDefined()
+      expect(typeof preloadErrorHandler).toBe('function')
 
-        // The error should be related to module loading
-        const errorMessage = (error as Error)?.message || ''
-
-        expect(errorMessage).toBeTruthy()
+      // Create a mock event with payload matching support file URL
+      const mockEvent = {
+        payload: {
+          url: '/__cypress/src/cypress/support/component.js',
+          message: 'Failed to fetch dynamically imported module',
+        },
+        preventDefault: vi.fn(),
       }
+
+      // Call the handler
+      preloadErrorHandler(mockEvent)
+
+      // Verify preventDefault was called
+      expect(mockEvent.preventDefault).toHaveBeenCalled()
+
+      // Verify reload was called
+      expect((global.window as any).location.reload).toHaveBeenCalled()
+    })
+
+    it('ignores vite:preloadError for non-support file imports', async () => {
+      await import('../client/initCypressTests.js')
+
+      // Get the event listener that was registered
+      const addEventListenerCalls = ((global.window as any).addEventListener as any).mock.calls
+      const preloadErrorHandler = addEventListenerCalls.find(
+        (call: any[]) => call[0] === 'vite:preloadError',
+      )?.[1]
+
+      expect(preloadErrorHandler).toBeDefined()
+
+      // Create a mock event with payload for a different file
+      const mockEvent = {
+        payload: {
+          url: '/__cypress/src/@fs/some/other/file.js',
+          message: 'Failed to fetch dynamically imported module',
+        },
+        preventDefault: vi.fn(),
+      }
+
+      // Call the handler
+      preloadErrorHandler(mockEvent)
+
+      // Verify preventDefault was NOT called (error not for support file)
+      expect(mockEvent.preventDefault).not.toHaveBeenCalled()
+
+      // Verify reload was NOT called
+      expect((global.window as any).location.reload).not.toHaveBeenCalled()
+    })
+
+    it('prevents infinite reload loops by only handling first error', async () => {
+      await import('../client/initCypressTests.js')
+
+      // Get the event listener that was registered
+      const addEventListenerCalls = ((global.window as any).addEventListener as any).mock.calls
+      const preloadErrorHandler = addEventListenerCalls.find(
+        (call: any[]) => call[0] === 'vite:preloadError',
+      )?.[1]
+
+      expect(preloadErrorHandler).toBeDefined()
+
+      const mockEvent1 = {
+        payload: {
+          url: '/__cypress/src/cypress/support/component.js',
+        },
+        preventDefault: vi.fn(),
+      }
+
+      const mockEvent2 = {
+        payload: {
+          url: '/__cypress/src/cypress/support/component.js',
+        },
+        preventDefault: vi.fn(),
+      }
+
+      // Call handler twice with same support file error
+      preloadErrorHandler(mockEvent1)
+      preloadErrorHandler(mockEvent2)
+
+      // First call should handle it
+      expect(mockEvent1.preventDefault).toHaveBeenCalled()
+      expect((global.window as any).location.reload).toHaveBeenCalledTimes(1)
+
+      // Second call should be ignored (preloadErrorHandled flag)
+      expect(mockEvent2.preventDefault).not.toHaveBeenCalled()
+      expect((global.window as any).location.reload).toHaveBeenCalledTimes(1)
     })
   })
 })
