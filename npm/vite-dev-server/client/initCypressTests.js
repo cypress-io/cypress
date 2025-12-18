@@ -84,17 +84,16 @@ if (supportFile) {
             throw error
           }
 
-          // Wait before retrying with exponential backoff
-          // Apply delay even on the last attempt to give Vite maximum time
-          // to finish optimizeDeps before throwing
-          const delay = initialRetryDelay * Math.pow(2, attempt)
-
-          await new Promise((resolve) => setTimeout(resolve, delay))
-
-          // After waiting, check if this was the last attempt
+          // Check if this was the last attempt before applying delay
+          // No need to wait if we're not going to retry
           if (attempt === maxRetries - 1) {
             throw error
           }
+
+          // Wait before retrying with exponential backoff
+          const delay = initialRetryDelay * Math.pow(2, attempt)
+
+          await new Promise((resolve) => setTimeout(resolve, delay))
         }
       }
 
