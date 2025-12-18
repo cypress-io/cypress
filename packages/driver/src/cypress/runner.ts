@@ -438,14 +438,15 @@ const findTestForHook = (hookName, suite, test, getTestFromHookOrFindTest, getTe
 
   // Fallback: Find a test from the suite structure when we can't find one with failedFromHookId
   // This happens when tests were skipped due to before hook failure
+  // Only return tests that actually ran (are in _testsById), not skipped tests
   const foundTest = hookName === 'afterAll'
     ? findLastTestInSuite(suite, () => true) // afterAll runs after all tests, so use last test
     : findTestInSuite(suite, () => true) // afterEach runs after each test, so use first test
 
   if (foundTest) {
-    // Try to get the test from _testsById first (if it was run)
-    // If not found, use the test directly from the suite structure
-    return getTestById(foundTest.id) || foundTest
+    // Only return tests from _testsById which ensures they actually ran
+    // Don't return tests directly from suite structure as they may have been skipped
+    return getTestById(foundTest.id)
   }
 
   return null
@@ -490,6 +491,15 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
             return false
           }
 
+          // Verify the test actually ran by checking it exists in _testsById
+          // Tests that were skipped won't be in _testsById
+          const testFromById = getTestById(test.id)
+
+          if (!testFromById) {
+            // Test was skipped, don't fire the event
+            return false
+          }
+
           // find all of the grep'd tests which share
           // the same parent suite as our current test
           // test.parent should exist if test exists, but guard against it just in case
@@ -530,6 +540,15 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           }
 
           if (test) {
+            // Verify the test actually ran by checking it exists in _testsById
+            // Tests that were skipped won't be in _testsById
+            const testFromById = getTestById(test.id)
+
+            if (!testFromById) {
+              // Test was skipped, don't fire the event
+              return false
+            }
+
             // test.parent should exist if test exists, but guard against it just in case
             if (!test.parent) {
               // Can't determine siblings without a parent, skip sibling-based logic
@@ -560,16 +579,23 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
             }
           }
 
-          // For root suite's afterAll, always try to fire the event if we can find any test
+          // For root suite's afterAll, try to fire the event if we can find a test that actually ran
           // This ensures protocol data is captured even when both hooks fail
+          // Only fire for tests that actually ran (are in _testsById) or failed due to hooks
           if (isRootSuite(this.suite)) {
             const foundTest = findTestForHook(name, this.suite, test, getTestFromHookOrFindTest, getTestById, getTests, this)
 
             if (foundTest) {
-              test = foundTest
-              setTest(test)
+              // Verify the test actually ran by checking it exists in _testsById
+              // OR it has failedFromHookId (was supposed to run but failed due to hook)
+              const testFromById = getTestById(foundTest.id)
 
-              return true
+              if (testFromById || foundTest.failedFromHookId) {
+                test = foundTest
+                setTest(test)
+
+                return true
+              }
             }
           }
 
@@ -690,10 +716,10 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           await testBeforeAfterRunAsync(currentTest, Cypress, { nextTestHasTestIsolationOn })
         }
 
-        // Force fire the events only if _ALREADY_RAN is set, as we need
-        // the event to fire for protocol data capture when tests are skipped
-        // due to hook failures. Otherwise, use the normal fire behavior.
-        const shouldForceFire = !!currentTest._ALREADY_RAN
+        // Force fire the events only if _ALREADY_RAN is set AND failedFromHookId is set,
+        // as we need the event to fire for protocol data capture when tests failed due to hook failures.
+        // Don't force fire for tests that were simply skipped (_ALREADY_RAN without failedFromHookId).
+        const shouldForceFire = !!(currentTest._ALREADY_RAN && currentTest.failedFromHookId)
 
         testAfterRun(currentTest, Cypress, shouldForceFire)
         await testAfterRunAsync(currentTest, Cypress, shouldForceFire)
