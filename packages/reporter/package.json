@@ -20,7 +20,6 @@
     "@cypress-design/react-button": "^1.13.0",
     "@cypress-design/react-icon": "^1.31.0",
     "@cypress/react-tooltip": "0.5.4",
-    "@fontsource/mulish": "4.3.0",
     "@fontsource/open-sans": "4.3.0",
     "@fortawesome/fontawesome-free": "6.0.0",
     "@packages/app": "0.0.0-development",
