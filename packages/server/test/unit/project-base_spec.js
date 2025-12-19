@@ -870,6 +870,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
         sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
         sinon.stub(this.project, 'protocolManager').get(() => {
           return this.project['_protocolManager']
         }).set((protocolManager) => {
@@ -905,6 +906,12 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           protocolManager: studioManager.protocolManager,
         })
 
+        expect(browsers.connectStudioToBrowser).to.be.calledWith({
+          browser: this.project.browser,
+          foundBrowsers: this.project.options.browsers,
+          studioManager: studioManager,
+        })
+
         expect(this.project['_protocolManager']).to.eq(studioManager.protocolManager)
 
         expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_START)
@@ -913,6 +920,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_END)
         expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
         expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_END)
         expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_START)
         expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_END)
         expect(reportTelemetryStub).to.be.calledWith(TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
@@ -967,6 +976,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
         sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
         sinon.stub(this.project, 'protocolManager').get(() => {
           return this.project['_protocolManager']
         }).set((protocolManager) => {
@@ -1032,6 +1042,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
         sinon.stub(browsers, 'closeProtocolConnection').resolves()
         sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
         sinon.stub(this.project, 'protocolManager').get(() => {
           return this.project['_protocolManager']
         }).set((protocolManager) => {
@@ -1087,6 +1098,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
         sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
         sinon.stub(this.project, 'protocolManager').get(() => {
           return this.project['_protocolManager']
         }).set((protocolManager) => {
@@ -1166,6 +1178,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         sinon.stub(browsers, 'closeProtocolConnection').resolves()
 
         sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
         sinon.stub(this.project, 'protocolManager').get(() => {
           return this.project['_protocolManager']
         }).set((protocolManager) => {
@@ -1187,6 +1200,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(mockSetupProtocol).not.to.be.called
         expect(mockBeforeSpec).not.to.be.called
         expect(browsers.connectProtocolToBrowser).not.to.be.called
+        expect(browsers.connectStudioToBrowser).not.to.be.called
         expect(this.project['_protocolManager']).to.be.undefined
 
         expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_START)
@@ -1195,68 +1209,14 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_END)
         expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
         expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_END)
         expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_START)
         expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_END)
         expect(reportTelemetryStub).to.be.calledWith(TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
           status: 'success',
           canAccessStudioAI: false,
         })
-      })
-
-      it('does not capture studio started event if the user is accessing cloud studio', async function () {
-        process.env.CYPRESS_LOCAL_STUDIO_PATH = 'false'
-
-        const mockAccessStudioAI = sinon.stub().resolves(true)
-        const mockCaptureStudioEvent = sinon.stub().resolves()
-
-        this.project.spec = {}
-
-        this.project._cfg = this.project._cfg || {}
-        this.project._cfg.projectId = 'test-project-id'
-        this.project.ctx.coreData.user = { email: 'test@example.com' }
-        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
-
-        const studioManager = new StudioManager()
-
-        studioManager.canAccessStudioAI = mockAccessStudioAI
-        studioManager.captureStudioEvent = mockCaptureStudioEvent
-        const studioLifecycleManager = new StudioLifecycleManager()
-
-        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
-
-        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
-
-        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
-
-        // Create a browser object
-        this.project.browser = {
-          name: 'chrome',
-          family: 'chromium',
-        }
-
-        this.project.options = { browsers: [this.project.browser] }
-
-        sinon.stub(browsers, 'closeProtocolConnection').resolves()
-
-        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
-        sinon.stub(this.project, 'protocolManager').get(() => {
-          return this.project['_protocolManager']
-        }).set((protocolManager) => {
-          this.project['_protocolManager'] = protocolManager
-        })
-
-        let studioInitPromise
-
-        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
-          studioInitPromise = callbacks.onStudioInit()
-        })
-
-        this.project.startWebsockets({}, {})
-
-        const { canAccessStudioAI } = await studioInitPromise
-
-        expect(canAccessStudioAI).to.be.false
-        expect(mockCaptureStudioEvent).not.to.be.called
       })
 
       it('onStudioDestroy destroys studio when it is initialized', async function () {

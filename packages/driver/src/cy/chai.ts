@@ -329,13 +329,16 @@ chai.use((chai, u) => {
           length = $utils.normalizeNumber(length)
 
           // filter out anything not currently in our document
-          if ($dom.isDetached(obj)) {
-            obj = (this._obj = obj.filter((index, el) => {
+          // Cast to JQuery since we've already checked isJquery || isElement above
+          const $obj = (obj as JQuery<any>)
+
+          if ($dom.isDetached($obj)) {
+            obj = (this._obj = $obj.filter((index, el) => {
               return $dom.isAttached(el)
             }))
           }
 
-          const node = obj && obj.length ? $dom.stringify(obj, 'short') : obj.selector
+          const node = $obj.length ? $dom.stringify($obj, 'short') : ($obj as any).selector
 
           // if our length assertion fails we need to check to
           // ensure that the length argument is a finite number
@@ -399,16 +402,18 @@ chai.use((chai, u) => {
           }
         } else {
           let isAttached
+          // Cast to JQuery since we've already checked isJquery || isElement above
+          const $obj = (obj as JQuery<any>)
 
-          if (!obj.length) {
+          if (!$obj.length) {
             this._obj = null
           }
 
-          const node = obj && obj.length ? $dom.stringify(obj, 'short') : obj.selector
+          const node = $obj.length ? $dom.stringify($obj, 'short') : ($obj as any).selector
 
           try {
             return this.assert(
-              (isAttached = $dom.isAttached(obj)),
+              (isAttached = $dom.isAttached($obj)),
               'expected \#{act} to exist in the DOM',
               'expected \#{act} not to exist in the DOM',
               node,

@@ -2,8 +2,8 @@
   "name": "react19",
   "version": "0.0.0-test",
   "dependencies": {
-    "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

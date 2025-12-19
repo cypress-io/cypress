@@ -65,6 +65,9 @@ export interface StudioPanelProps {
   hasRequestedProjectAccess: boolean
   requestProjectAccessMutation: RequestProjectAccessMutation
   specDirtyDataStore: SpecDirtyDataStore
+  isSelectorPlaygroundOpen?: boolean
+  // Callback to close the Selector Playground
+  onCloseSelectorPlayground?: () => void
 }
 
 export type StudioPanelShape = (props: StudioPanelProps) => JSX.Element

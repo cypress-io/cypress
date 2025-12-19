@@ -4,18 +4,7 @@
     ref="autHeaderEl"
     class="h-full bg-gray-1100 border-l-[1px] border-gray-900 min-h-[64px] text-[14px]"
   >
-    <div class="flex flex-wrap grow p-[16px] gap-[12px] h-[64px] flex-nowrap">
-      <button
-        v-if="!studioBetaAvailable"
-        data-cy="playground-activator"
-        :disabled="isDisabled"
-        class="bg-gray-1100 border rounded-md flex h-full border-gray-800 outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
-        :aria-label="t('runner.selectorPlayground.toggle')"
-        :class="[selectorPlaygroundStore.show ? 'bg-gray-800 border-gray-700' : 'bg-gray-1100']"
-        @click="togglePlayground"
-      >
-        <i-cy-crosshairs_x16 class="icon-dark-gray-300" />
-      </button>
+    <div class="flex grow p-[16px] gap-[12px] h-[64px] flex-nowrap">
       <div
         data-cy="aut-url"
         class="aut-url-container border rounded flex bg-gray-950 grow border-gray-800 h-[32px] align-middle"
@@ -79,6 +68,25 @@
           </span>
         </Tag>
       </div>
+      <Button
+        data-cy="playground-activator"
+        :disabled="isDisabled"
+        :variant="isDisabled ? 'purple-dark-mode' : (selectorPlaygroundStore.show ? 'purple-dark-mode' : 'outline-dark')"
+        size="32"
+        square
+        :aria-label="t('runner.selectorPlayground.toggle')"
+        :class="{
+          'playground-button-purple': selectorPlaygroundStore.show && !isDisabled,
+          'playground-button-disabled': isDisabled
+        }"
+        @click="togglePlayground"
+      >
+        <i-cy-crosshairs_x16
+          :class="isDisabled
+            ? 'icon-dark-gray-700'
+            : (selectorPlaygroundStore.show ? 'icon-dark-white' : 'icon-dark-gray-300')"
+        />
+      </Button>
       <StudioButton
         v-if="shouldShowStudioButton"
         :event-manager="eventManager"
@@ -116,8 +124,9 @@ import { useI18n } from 'vue-i18n'
 import type { SpecRunnerHeaderFragment } from '../generated/graphql'
 import type { EventManager } from './event-manager'
 import type { AutIframe } from './aut-iframe'
-import { togglePlayground as _togglePlayground } from './utils'
+import { togglePlayground as _togglePlayground } from './selector-playground/utils'
 import Tag from '@cypress-design/vue-tag'
+import Button from '@cypress-design/vue-button'
 import SelectorPlayground from './selector-playground/SelectorPlayground.vue'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
@@ -163,7 +172,6 @@ const props = defineProps<{
   eventManager: EventManager
   getAutIframe: () => AutIframe
   shouldShowStudioButton: boolean
-  studioBetaAvailable: boolean
 }>()
 
 const showAlert = ref(false)

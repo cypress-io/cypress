@@ -75,7 +75,6 @@
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
             :should-show-studio-button="shouldShowStudioButton"
-            :studio-beta-available="studioBetaAvailable"
           />
         </HideDuringScreenshot>
 
@@ -328,10 +327,6 @@ const cloudStudioRequested = computed(() => {
   studioStore.setCloudStudioRequested(props.gql.cloudStudioRequested || false)
 
   return props.gql.cloudStudioRequested
-})
-
-const studioBetaAvailable = computed(() => {
-  return !!cloudStudioRequested.value
 })
 
 const shouldShowStudioButton = computed(() => {

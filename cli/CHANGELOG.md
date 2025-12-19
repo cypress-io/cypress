@@ -1,13 +1,33 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.9.0
+
+_Released 12/30/2025 (PENDING)_
+
+**Features:**
+
+- The `experimentalRunAllSpecs` option can now be used for component testing as well as e2e testing. Addresses [#25636](https://github.com/cypress-io/cypress/issues/25636).
+
+## 15.8.1
+
+_Released 12/18/2025_
+
+**Dependency Updates:**
+
+- Upgraded `systeminformation` to `5.27.14`. This removes the [CVE-2025-68154](https://github.com/advisories/GHSA-wphj-fx3q-84ch) vulnerability being reported in security scans. Fixes [#33146](https://github.com/cypress-io/cypress/issues/33146). Addressed in [#33150](https://github.com/cypress-io/cypress/pull/33150).
+
 ## 15.8.0
 
-_Released 12/16/2025 (PENDING)_
+_Released 12/16/2025_
+
+**Performance:**
+
+- Introduced a new `experimentalFastVisibility` experiment. Enabling this experiment changes how Cypress performs visibility checks and assertions. Read more about [experimental fast visibility](https://on.cypress.io/experiments/#experimental-fast-visibility). Addresses [#33044](https://github.com/cypress-io/cypress/issues/33044). Addressed in [#32801](https://github.com/cypress-io/cypress/pull/32801).
 
 **Features:**
 
 - `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
 - Adds zoneless support for `Angular` Component Testing through the `angular-zoneless` mount function. Addresses [#31504](https://github.com/cypress-io/cypress/issues/31504) and [#30070](https://github.com/cypress-io/cypress/issues/30070).
- - The `experimentalRunAllSpecs` option can now be used for component testing as well as e2e testing. Addresses [#25636](https://github.com/cypress-io/cypress/issues/25636).
+- After receiving feedback on its usefulness outside of Studio, the Selector Playground is now available for all users in open mode. When opened, the playground automatically enables interactive mode to help you build and test selectors directly in your application. Addresses [#32672](https://github.com/cypress-io/cypress/issues/32672). Addressed in [#33073](https://github.com/cypress-io/cypress/pull/33073).
 
 **Bugfixes:**
 
@@ -16,6 +36,12 @@ _Released 12/16/2025 (PENDING)_
 - Fixed an issue where `Next.js` Component Testing would not load correctly without a TypeScript-based Next config in versions 16.0.3 and up. Fixes [#32968](https://github.com/cypress-io/cypress/issues/32968).
 - Fixed an issue where the error message for `not.have.length` was not correctly displaying the expected length in the Command Log. Addressed in [#18927](https://github.com/cypress-io/cypress/issues/18927).
 - Fixed an issue where `removeAttribute()` would not work for attributes other than `target` on anchor or form elements after clicking links with `target="_top"` or `target="_parent"`. Fixes [#26206](https://github.com/cypress-io/cypress/issues/26206). Addressed in [#33051](https://github.com/cypress-io/cypress/pull/33051).
+
+**Dependency Updates:**
+
+- Removed extraneous dependencies that are no longer used. Addressed in [#33098](https://github.com/cypress-io/cypress/pull/33098).
+- Upgraded `brace-expansion`. This removes the [CVE-2025-5889](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-9789073) vulnerability being reported in security scans. Addressed in [#33112](https://github.com/cypress-io/cypress/pull/33112).
+- Upgraded `form-data`. This removes the [CVE-2025-7783](https://security.snyk.io/vuln/SNYK-JS-FORMDATA-10841150) vulnerability being reported in security scans. Addressed in [#33113](https://github.com/cypress-io/cypress/pull/33113).
 
 ## 15.7.1
 

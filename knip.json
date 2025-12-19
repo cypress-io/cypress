@@ -19,6 +19,10 @@
         "lib/**/*.{ts,js}",
         "scripts/**/*.{ts,js}",
         "types/**/*.ts"
+      ],
+      "ignoreDependencies": [
+        "buffer",
+        "process"
       ]
     },
     "packages/app": {
@@ -29,7 +33,8 @@
         "src/layouts/**/*.vue",
         "src/**/*.cy.{ts,tsx,js,jsx}",
         "src/generated/**/*.ts",
-        "cypress/**/*.{ts,tsx,js,jsx}"
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "cypress.config.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx,vue}",
@@ -45,7 +50,8 @@
         "src/utils/**/*.ts",
         "src/graphql/urqlDetailedDebugExchange.ts",
         "cypress/**/*.{ts,tsx,js,jsx}",
-        "script/**/*.{ts,tsx,js,jsx}"
+        "script/**/*.{ts,tsx,js,jsx}",
+        "cypress.config.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx,vue}",
@@ -66,11 +72,22 @@
         "lib/cloud/network/nonretriable_cert_error_codes.ts",
         "lib/plugins/child/default_plugins_file.js",
         "lib/privileged-commands/privileged-channel.js",
-        "lib/util/**/*.{ts,js}"
+        "lib/util/**/*.{ts,js}",
+        "test/**/*.{ts,js}"
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "tslib",
+        "xvfb-maybe",
+        "ts-loader",
+        "tsconfig-paths",
+        "@babel/core",
+        "@babel/preset-env",
+        "babel-loader"
       ]
     },
     "packages/launchpad": {
@@ -79,7 +96,8 @@
         "src/Main.vue",
         "src/**/*.cy.{ts,tsx,js,jsx}",
         "src/generated/**/*.ts",
-        "cypress/**/*.{ts,tsx,js,jsx}"
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "cypress.config.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx,vue}",
@@ -96,6 +114,9 @@
         "lib/**/*.{ts,tsx,js,jsx}",
         "bin/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "cypress-example-kitchensink"
       ]
     },
     "packages/icons": {
@@ -112,6 +133,9 @@
     "packages/ts": {
       "project": [
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "typescript-cached-transpile"
       ]
     },
     "packages/extension": {
@@ -133,32 +157,68 @@
       "project": [
         "**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@babel/helper-define-map",
+        "@babel/plugin-transform-object-rest-spread",
+        "@svgr/webpack",
+        "assert",
+        "browser-resolve",
+        "webpack-cli",
+        "buffer",
+        "process",
+        "url"
       ]
     },
     "packages/reporter": {
       "entry": [
-        "src/**/*.cy.{ts,tsx,js,jsx}"
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "cypress.config.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@fortawesome/fontawesome-free",
+        "@fontsource/open-sans",
+        "cypress-multi-reporters",
+        "webpack-cli"
       ]
     },
     "packages/config": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@babel/parser",
+        "@babel/plugin-syntax-typescript",
+        "@babel/plugin-transform-typescript"
       ]
     },
     "packages/driver": {
+      "entry": [
+        "cypress/plugins/server.js",
+        "cypress/plugins/index.js",
+        "cypress.config.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "cypress-multi-reporters"
       ]
     },
     "packages/runner": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "webpack-cli"
       ]
     },
     "packages/errors": {
@@ -183,6 +243,7 @@
     "packages/data-context": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
+        "graphql/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ]
     },
@@ -198,11 +259,19 @@
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "tsx"
       ]
     },
     "packages/network": {
+      "entry": [
+        "test/support/servers.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
-        "lib/**/*.{ts,tsx,js,jsx}"
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}"
       ]
     },
     "packages/v8-snapshot-require": {
@@ -225,6 +294,9 @@
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@electron/packager"
       ]
     },
     "packages/socket": {
@@ -234,6 +306,11 @@
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "engine.io",
+        "engine.io-client",
+        "flatted"
       ]
     },
     "packages/packherd-require": {
@@ -330,6 +407,13 @@
       "project": [
         "**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "buffer",
+        "process",
+        "@babel/plugin-transform-class-properties",
+        "@babel/plugin-transform-object-rest-spread",
+        "babel-plugin-add-module-exports"
       ]
     },
     "npm/webpack-preprocessor": {
@@ -398,11 +482,16 @@
     },
     "tooling/v8-snapshot": {
       "entry": [
+        "src/v8-snapshot.ts",
+        "src/setup/index.ts",
         "src/generator/blueprint.ts",
         "src/blueprint/**/*.js"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "tslib"
       ]
     },
     "tooling/electron-mksnapshot": {
@@ -434,6 +523,14 @@
         "lib/**/*.{ts,js}",
         "scripts/**/*.{ts,js}",
         "projects/**/*.{ts,js}"
+      ],
+      "ignoreDependencies": [
+        "@babel/core",
+        "@babel/preset-env",
+        "babel-loader",
+        "semver",
+        "systeminformation",
+        "https-proxy-agent"
       ]
     }
   },
@@ -492,7 +589,15 @@
     "@percy/cypress",
     "@vue/compiler-core",
     "@vue/compiler-dom",
-    "@vue/compiler-sfc"
+    "@vue/compiler-sfc",
+    "edgedriver",
+    "react-15.6.1",
+    "react-16.0.0",
+    "react-dom-15.6.1",
+    "react-dom-16.0.0",
+    "text-mask-addons",
+    "vanilla-text-mask",
+    "zone.js"
   ],
   "ignoreBinaries": [
     "circleci",

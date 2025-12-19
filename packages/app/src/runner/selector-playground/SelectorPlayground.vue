@@ -1,24 +1,8 @@
 <template>
   <div
     id="selector-playground"
-    class="border-t border-b bg-gray-1000 border-gray-800 h-[56px] grid py-[12px] px-[16px] gap-[12px] grid-cols-[40px,1fr,auto] items-center "
+    class="border-t border-b bg-gray-1000 border-gray-800 h-[56px] grid py-[12px] px-[16px] gap-[12px] grid-cols-[1fr,auto] items-center "
   >
-    <SelectorPlaygroundTooltip
-      color="light"
-      placement="top"
-      :hover-text="t('runner.selectorPlayground.playgroundTooltip')"
-      class="flex h-full"
-    >
-      <button
-        class="border rounded-md flex h-full outline-solid outline-indigo-500 transition w-[40px] duration-150 items-center justify-center hover:bg-gray-800"
-        :aria-label="selectorPlaygroundStore.isEnabled ? 'click to interact with the application and build test cases' : 'click to exit interactive test building mode'"
-        data-cy="playground-toggle"
-        :class="{ 'bg-gray-800 border-gray-700': selectorPlaygroundStore.isEnabled, 'bg-gray-900 border-gray-800': !selectorPlaygroundStore.isEnabled }"
-        @click="toggleEnabled"
-      >
-        <i-cy-selector_x16 class="icon-dark-gray-300" />
-      </button>
-    </SelectorPlaygroundTooltip>
     <div
       class="flex h-full flex-1 w-full relative items-center"
       @mouseover="setShowingHighlight"
@@ -136,10 +120,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSelectorPlaygroundStore } from '../../store/selector-playground-store'
 import type { AutIframe } from '../aut-iframe'
 import type { EventManager } from '../event-manager'
+import { openPlayground, closePlayground, SELECTOR_METHODS, getMethodPrefixLength } from './utils'
 import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue'
 import { useElementSize } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
@@ -153,15 +138,7 @@ const props = defineProps<{
   getAutIframe: () => AutIframe
 }>()
 
-const methods = [
-  {
-    display: 'cy.get',
-    value: 'get',
-  }, {
-    display: 'cy.contains',
-    value: 'contains',
-  },
-] as const
+const methods = SELECTOR_METHODS
 
 const selectorPlaygroundStore = useSelectorPlaygroundStore()
 const match = ref<HTMLDivElement>()
@@ -169,7 +146,7 @@ const { width: matcherWidth } = useElementSize(match)
 
 // Text that is printed to the LEFT of the input
 const leftOfInputText = computed(() => {
-  return (selectorPlaygroundStore.method === 'get' ? 'cy.get(‘' : 'cy.contains(’').length + 1
+  return getMethodPrefixLength(selectorPlaygroundStore.method)
 })
 
 const widthOfMatchesHelperText = computed(() => {
@@ -179,6 +156,24 @@ const widthOfMatchesHelperText = computed(() => {
 
 const leftOffsetForClosingParens = computed(() => {
   return leftOfInputText.value + selector.value.length
+})
+
+// Ensure the playground is always enabled when it's open (visible)
+onMounted(() => {
+  if (!selectorPlaygroundStore.isEnabled) {
+    openPlayground(props.getAutIframe())
+  }
+})
+
+// Defensive cleanup in case component is unmounted without going through togglePlayground
+onUnmounted(() => {
+  if (selectorPlaygroundStore.isEnabled) {
+    closePlayground(props.getAutIframe())
+  }
+
+  // Always reset show state when component unmounts to prevent inconsistent state
+  // where show=true but component is not rendered, causing unexpected re-appearance
+  selectorPlaygroundStore.setShow(false)
 })
 
 watch(() => selectorPlaygroundStore.method, () => {
@@ -207,14 +202,6 @@ const selector = computed({
 function setShowingHighlight () {
   selectorPlaygroundStore.setShowingHighlight(true)
   props.getAutIframe().toggleSelectorHighlight(true)
-}
-
-function toggleEnabled () {
-  const newVal = !selectorPlaygroundStore.isEnabled
-
-  selectorPlaygroundStore.setEnabled(newVal)
-
-  props.getAutIframe().toggleSelectorPlayground(newVal)
 }
 
 function printSelected () {

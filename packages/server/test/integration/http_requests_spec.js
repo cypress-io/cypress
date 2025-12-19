@@ -9,7 +9,6 @@ const express = require('express')
 const http = require('http')
 const url = require('url')
 let zlib = require('zlib')
-const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
 const { SocketE2E } = require(`../../lib/socket-e2e`)
@@ -38,9 +37,6 @@ const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-
 
 zlib = Promise.promisifyAll(zlib)
 
-// force supertest-session to use promises provided in supertest
-const session = proxyquire('supertest-session', { supertest })
-
 const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
@@ -49,8 +45,10 @@ const replaceAbsolutePaths = (content) => {
 }
 
 const removeWhitespace = function (c) {
-  c = str.clean(c)
-  c = str.lines(c).join(' ')
+  // trims and collapses whitespace
+  c = c.trim().replace(/\s+/g, ' ')
+  // split by newlines then join with space
+  c = c.split('\n').join(' ')
 
   return c
 }
@@ -183,8 +181,6 @@ describe('Routes', () => {
 
                 this.srv = this.server.getHttpServer()
 
-                this.session = session(this.srv)
-
                 this.proxy = `http://localhost:${port}`
 
                 this.networkProxy = this.server._networkProxy
@@ -212,7 +208,6 @@ describe('Routes', () => {
   afterEach(function () {
     evilDns.clear()
     nock.cleanAll()
-    this.session.destroy()
     preprocessor.close()
     this.project = null
 

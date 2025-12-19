@@ -477,7 +477,15 @@ export class EventManager {
     return getRunnerConfigFromWindow()?.browser?.family === family
   }
 
-  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
+  initialize ({
+    $autIframe,
+    $autSnapshotIframe,
+    config,
+  }: {
+    $autIframe: JQuery<HTMLIFrameElement>
+    $autSnapshotIframe?: JQuery<HTMLIFrameElement>
+    config: Record<string, any>
+  }) {
     performance.mark('initialize-start')
 
     const testFilter = this.specStore.testFilter
@@ -507,6 +515,7 @@ export class EventManager {
 
     return Cypress.initialize({
       $autIframe,
+      $autSnapshotIframe,
       // defining this indicates that the test run should wait for Studio to
       // be initialized before running the test
       waitForStudio: isStudio ? waitForStudio : undefined,

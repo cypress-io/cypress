@@ -1,34 +1,8 @@
 import _ from 'lodash'
-import $ from 'jquery'
 import $dom from '../dom'
 import $elements from '../dom/elements'
-
-type Accessors = keyof typeof accessors
-type Selectors = keyof typeof selectors
-type Methods = Accessors | Selectors | 'data' | 'class' | 'empty' | 'id' | 'html' | 'text' | 'value' | 'descendants' | 'match'
-
-const selectors = {
-  visible: 'visible',
-  hidden: 'hidden',
-  selected: 'selected',
-  checked: 'checked',
-  enabled: 'enabled',
-  disabled: 'disabled',
-  focus: 'focused',
-  focused: 'focused',
-} as const
-
-const accessors = {
-  attr: 'attribute',
-  css: 'CSS property',
-  prop: 'property',
-} as const
-
-// reset the obj under test
-// to be re-wrapped in our own
-// jquery, so we can control
-// the methods on it
-const wrap = (ctx) => $(ctx._obj)
+import type { Methods, PartialAssertionArgs } from './assertions/assert'
+import { assert, assertDom, accessors, selectors, wrap } from './assertions/assert'
 
 const maybeCastNumberToString = (num: number | string) => {
   // if this is a finite number (no Infinity or NaN)
@@ -44,55 +18,20 @@ interface Callbacks {
 export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks: Callbacks) => {
   const { inspect, flag } = chaiUtils
 
-  const assertDom = (ctx, method: Methods, ...args) => {
-    if (!$dom.isDom(ctx._obj) && !$dom.isJquery(ctx._obj)) {
-      try {
-        // always fail the assertion
-        // if we aren't a DOM like object
-        // depends on the "negate" flag
-        return ctx.assert(!!ctx.__flags.negate, ...args)
-      } catch (err) {
-        return callbacks.onInvalid(method, ctx._obj)
-      }
-    }
-  }
-
-  const assert = (ctx, method: Methods, bool: boolean, ...args) => {
-    assertDom(ctx, method, ...args)
-
-    try {
-      // reset obj to wrapped
-      const orig = ctx._obj
-      const selector = ctx._obj.selector
-
-      ctx._obj = wrap(ctx)
-
-      if (ctx._obj.length === 0) {
-        // From jQuery 3.x .selector API is deprecated. (https://api.jquery.com/selector/)
-        // Because of that, wrap() above removes selector property.
-        // That's why we're caching the value of selector above and using it here.
-        ctx._obj = selector ?? 'subject'
-        // if no element found, fail the existence check
-        // depends on the negate flag
-        ctx.assert(!!ctx.__flags.negate, ...args)
-      }
-
-      // apply the assertion
-      const ret = ctx.assert(bool, ...args)
-
-      ctx._obj = orig
-
-      return ret
-    } catch (err) {
-      // send it up with the obj and whether it was negated
-      return callbacks.onError(err, method, ctx._obj, flag(ctx, 'negate'))
-    }
-  }
-
-  const assertPartial = (ctx, method: Methods, actual, expected, message: string, notMessage: string, ...args) => {
-    if (ctx.__flags.contains || ctx.__flags.includes) {
+  const assertPartial = (
+    ctx: Chai.AssertionStatic,
+    chaiUtils: Chai.ChaiUtils,
+    callbacks: Callbacks,
+    method: Methods,
+    actual: any,
+    expected: any,
+    ...[message, notMessage, ...args]: PartialAssertionArgs
+  ) => {
+    if (chaiUtils.flag(ctx, 'contains') || chaiUtils.flag(ctx, 'includes')) {
       return assert(
         ctx,
+        chaiUtils,
+        callbacks,
         method,
         _.includes(actual, expected),
         `expected #{this} to contain ${message}`,
@@ -103,6 +42,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
 
     return assert(
       ctx,
+      chaiUtils,
+      callbacks,
       method,
       actual === expected,
       `expected #{this} to have ${message}`,
@@ -112,7 +53,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
   }
 
   chai.Assertion.addMethod('data', function (...args) {
-    assertDom(this, 'data')
+    // @ts-expect-error - Custom assertions expect messages for failures
+    assertDom(this, chaiUtils, callbacks, 'data')
 
     let a = new chai.Assertion(wrap(this).data())
 
@@ -127,6 +69,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
   chai.Assertion.addMethod('class', function (className: string) {
     return assert(
       this,
+      chaiUtils,
+      callbacks,
       'class',
       wrap(this).hasClass(className),
       'expected #{this} to have class #{exp}',
@@ -140,6 +84,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
 
     return assert(
       this,
+      chaiUtils,
+      callbacks,
       'id',
       wrap(this).prop('id') === id,
       'expected #{this} to have id #{exp}',
@@ -151,6 +97,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
   chai.Assertion.addMethod('html', function (html: string) {
     assertDom(
       this,
+      chaiUtils,
+      callbacks,
       'html',
       'expected #{this} to have HTML #{exp}',
       'expected #{this} not to have HTML #{exp}',
@@ -161,6 +109,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
 
     return assertPartial(
       this,
+      chaiUtils,
+      callbacks,
       'html',
       actual,
       html,
@@ -176,6 +126,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
 
     assertDom(
       this,
+      chaiUtils,
+      callbacks,
       'text',
       'expected #{this} to have text #{exp}',
       'expected #{this} not to have text #{exp}',
@@ -186,6 +138,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
 
     return assertPartial(
       this,
+      chaiUtils,
+      callbacks,
       'text',
       actual,
       text,
@@ -207,6 +161,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
 
     assertDom(
       this,
+      chaiUtils,
+      callbacks,
       'value',
       'expected #{this} to have value #{exp}',
       'expected #{this} not to have value #{exp}',
@@ -217,6 +173,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
 
     return assertPartial(
       this,
+      chaiUtils,
+      callbacks,
       'value',
       actual,
       value,
@@ -230,6 +188,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
   chai.Assertion.addMethod('descendants', function (selector: string) {
     return assert(
       this,
+      chaiUtils,
+      callbacks,
       'descendants',
       wrap(this).has(selector).length > 0,
       'expected #{this} to have descendants #{exp}',
@@ -243,6 +203,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
       if ($dom.isDom(this._obj)) {
         return assert(
           this,
+          chaiUtils,
+          callbacks,
           'empty',
           wrap(this).is(':empty'),
           'expected #{this} to be #{exp}',
@@ -262,6 +224,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
       if ($dom.isDom(this._obj)) {
         return assert(
           this,
+          chaiUtils,
+          callbacks,
           'match',
           wrap(this).is(selector),
           'expected #{this} to match #{exp}',
@@ -280,6 +244,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
     return chai.Assertion.addProperty(sel, function () {
       return assert(
         this,
+        chaiUtils,
+        callbacks,
         sel,
         wrap(this).is(`:${sel}`),
         'expected #{this} to be #{exp}',
@@ -295,6 +261,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
     return chai.Assertion.addMethod(acc, function (name, val) {
       assertDom(
         this,
+        chaiUtils,
+        callbacks,
         acc,
         `expected #{this} to have ${description} #{exp}`,
         `expected #{this} not to have ${description} #{exp}`,
@@ -307,6 +275,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
       if (arguments.length === 1) {
         assert(
           this,
+          chaiUtils,
+          callbacks,
           acc,
           actual !== undefined,
           `expected #{this} to have ${description} #{exp}`,
@@ -342,6 +312,8 @@ export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, ca
 
         assert(
           this,
+          chaiUtils,
+          callbacks,
           acc,
           (actual != null) && (actual === val),
           message,

@@ -346,4 +346,38 @@ describe('lib/cloud/studio', () => {
       expect(studio.destroy).to.be.called
     })
   })
+
+  describe('connectToBrowser', () => {
+    it('calls connectToBrowser on the studio server', () => {
+      const mockCDPClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+
+      sinon.stub(studio, 'connectToBrowser')
+
+      studioManager.connectToBrowser(mockCDPClient as any)
+
+      expect(studio.connectToBrowser).to.be.calledWith(mockCDPClient)
+    })
+
+    it('does not call connectToBrowser when studio server is not defined', () => {
+      // Set _studioServer to undefined
+      (studioManager as any)._studioServer = undefined
+
+      // Create a spy on invokeSync to verify it's not called
+      const invokeSyncSpy = sinon.spy(studioManager, 'invokeSync')
+
+      const mockCDPClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+
+      studioManager.connectToBrowser(mockCDPClient as any)
+
+      expect(invokeSyncSpy).to.not.be.called
+    })
+  })
 })

@@ -7,7 +7,8 @@ describe('src/cypress/dom/visibility', {
   function assertVisibilityForEl (el: HTMLElement) {
     // once experimentalFastVisibility is added, switch based on the config value
     // and use `cy-fast-expect` instead of `cy-legacy-expect` when it is enabled.
-    const expected = el.getAttribute('cy-expect') ?? el.getAttribute('cy-legacy-expect')
+    const breakingChangeExpectedProp = Cypress.config('experimentalFastVisibility') ? 'cy-fast-expect' : 'cy-legacy-expect'
+    const expected = el.getAttribute('cy-expect') ?? el.getAttribute(breakingChangeExpectedProp)
 
     if (!expected) {
       throw new Error(`Expected attribute 'cy-expect' or 'cy-legacy-expect' not found on test case_ element ${el.outerHTML}`)
@@ -40,8 +41,12 @@ describe('src/cypress/dom/visibility', {
     cy.get(`[cy-section="${section}"]`).scrollIntoView()
   }
 
-  function assertVisibilityForSections (sections: string[]) {
+  function assertVisibilityForSections (sections: (string | undefined)[]) {
     for (const section of sections) {
+      if (!section) {
+        continue
+      }
+
       it(`detects visibility for ${section} test cases`, () => {
         prepareFixtureSection(section)
         cy.get(`[cy-section="${section}"] .testCase`).then((els) => {
@@ -51,108 +56,114 @@ describe('src/cypress/dom/visibility', {
     }
   }
 
-  beforeEach(() => {
-    cy.visit('/fixtures/generic.html')
-  })
+  const modes = ['fast', 'legacy']
 
-  context('isHidden', () => {
-    it('exposes isHidden', () => {
-      expect(dom.isHidden).to.be.a('function')
-    })
+  for (const mode of modes) {
+    describe(`${mode}`, {
+      experimentalFastVisibility: mode === 'fast',
+    }, () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/generic.html')
+      })
 
-    it('throws when not passed a DOM element', () => {
-      const fn = () => {
-        dom.isHidden(null!)
-      }
+      context('isHidden', () => {
+        it('exposes isHidden', () => {
+          expect(dom.isHidden).to.be.a('function')
+        })
 
-      expect(fn).to.throw('`Cypress.dom.isHidden()` failed because it requires a DOM element. The subject received was: `null`')
-    })
-  })
+        it('throws when not passed a DOM element', () => {
+          const fn = () => {
+            dom.isHidden(null!)
+          }
 
-  context('isVisible', () => {
-    it('exposes isVisible', () => {
-      expect(dom.isVisible).to.be.a('function')
-    })
+          expect(fn).to.throw('`Cypress.dom.isHidden()` failed because it requires a DOM element. The subject received was: `null`')
+        })
+      })
 
-    it('throws when not passed a DOM element', () => {
-      const fn = () => {
-        // @ts-ignore
-        dom.isVisible('form')
-      }
+      context('isVisible', () => {
+        it('exposes isVisible', () => {
+          expect(dom.isVisible).to.be.a('function')
+        })
 
-      expect(fn).to.throw('`Cypress.dom.isVisible()` failed because it requires a DOM element. The subject received was: `form`')
-    })
-  })
+        it('throws when not passed a DOM element', () => {
+          const fn = () => {
+            // @ts-ignore
+            dom.isVisible('form')
+          }
 
-  context('#isScrollable', () => {
-    beforeEach(function () {
-      this.add = (el) => {
-        return $(el).appendTo(cy.$$('body'))
-      }
-    })
+          expect(fn).to.throw('`Cypress.dom.isVisible()` failed because it requires a DOM element. The subject received was: `form`')
+        })
+      })
 
-    it('returns true if window and body > window height', function () {
-      this.add('<div style="height: 1000px; width: 10px;" />')
-      const win = cy.state('window')
+      context('#isScrollable', () => {
+        beforeEach(function () {
+          this.add = (el) => {
+            return $(el).appendTo(cy.$$('body'))
+          }
+        })
 
-      const fn = () => {
-        return dom.isScrollable(win)
-      }
+        it('returns true if window and body > window height', function () {
+          this.add('<div style="height: 1000px; width: 10px;" />')
+          const win = cy.state('window')
 
-      expect(fn()).to.be.true
-    })
+          const fn = () => {
+            return dom.isScrollable(win)
+          }
 
-    it('returns false if window and body < window height', () => {
-      cy.$$('body').html('<div>foo</div>')
+          expect(fn()).to.be.true
+        })
 
-      const win = cy.state('window')
+        it('returns false if window and body < window height', () => {
+          cy.$$('body').html('<div>foo</div>')
 
-      const fn = () => {
-        return dom.isScrollable(win)
-      }
+          const win = cy.state('window')
 
-      expect(fn()).to.be.false
-    })
+          const fn = () => {
+            return dom.isScrollable(win)
+          }
 
-    it('returns true if document element and body > window height', function () {
-      this.add('<div style="height: 1000px; width: 10px;" />')
-      const documentElement = Cypress.dom.wrap(cy.state('document').documentElement)
+          expect(fn()).to.be.false
+        })
 
-      const fn = () => {
-        return dom.isScrollable(documentElement)
-      }
+        it('returns true if document element and body > window height', function () {
+          this.add('<div style="height: 1000px; width: 10px;" />')
+          const documentElement = Cypress.dom.wrap(cy.state('document').documentElement)
 
-      expect(fn()).to.be.true
-    })
+          const fn = () => {
+            return dom.isScrollable(documentElement)
+          }
 
-    it('returns false if document element and body < window height', () => {
-      cy.$$('body').html('<div>foo</div>')
+          expect(fn()).to.be.true
+        })
 
-      const documentElement = Cypress.dom.wrap(cy.state('document').documentElement)
+        it('returns false if document element and body < window height', () => {
+          cy.$$('body').html('<div>foo</div>')
 
-      const fn = () => {
-        return dom.isScrollable(documentElement)
-      }
+          const documentElement = Cypress.dom.wrap(cy.state('document').documentElement)
 
-      expect(fn()).to.be.false
-    })
+          const fn = () => {
+            return dom.isScrollable(documentElement)
+          }
 
-    it('returns false el is not scrollable', function () {
-      const noScroll = this.add(`\
+          expect(fn()).to.be.false
+        })
+
+        it('returns false el is not scrollable', function () {
+          const noScroll = this.add(`\
 <div style="height: 100px; overflow: auto;">
   <div>No Scroll</div>
 </div>\
 `)
 
-      const fn = () => {
-        return dom.isScrollable(noScroll)
-      }
+          const fn = () => {
+            return dom.isScrollable(noScroll)
+          }
 
-      expect(fn()).to.be.false
-    })
+          expect(fn()).to.be.false
+        })
 
-    it('returns false el has no overflow', function () {
-      const noOverflow = this.add(`\
+        it('returns false el has no overflow', function () {
+          const noOverflow = this.add(`\
 <div style="height: 100px; width: 100px; border: 1px solid green;">
   <div style="height: 150px;">
     No Overflow Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Etiam porta sem malesuada magna mollis euismod.
@@ -160,201 +171,203 @@ describe('src/cypress/dom/visibility', {
 </div>\
 `)
 
-      const fn = () => {
-        return dom.isScrollable(noOverflow)
-      }
+          const fn = () => {
+            return dom.isScrollable(noOverflow)
+          }
 
-      expect(fn()).to.be.false
-    })
+          expect(fn()).to.be.false
+        })
 
-    it('returns true when vertically scrollable', function () {
-      const vertScrollable = this.add(`\
+        it('returns true when vertically scrollable', function () {
+          const vertScrollable = this.add(`\
 <div style="height: 100px; width: 100px; overflow: auto;">
   <div style="height: 150px;">Vertical Scroll</div>
 </div>\
 `)
 
-      const fn = () => {
-        return dom.isScrollable(vertScrollable)
-      }
+          const fn = () => {
+            return dom.isScrollable(vertScrollable)
+          }
 
-      expect(fn()).to.be.true
-    })
+          expect(fn()).to.be.true
+        })
 
-    it('returns true when horizontal scrollable', function () {
-      const horizScrollable = this.add(`\
+        it('returns true when horizontal scrollable', function () {
+          const horizScrollable = this.add(`\
 <div style="height: 100px; width: 100px; overflow: auto; ">
   <div style="height: 150px;">Horizontal Scroll</div>
 </div>\
 `)
 
-      const fn = () => {
-        return dom.isScrollable(horizScrollable)
-      }
+          const fn = () => {
+            return dom.isScrollable(horizScrollable)
+          }
 
-      expect(fn()).to.be.true
-    })
+          expect(fn()).to.be.true
+        })
 
-    it('returns true when overflow scroll forced and content larger', function () {
-      const forcedScroll = this.add(`\
+        it('returns true when overflow scroll forced and content larger', function () {
+          const forcedScroll = this.add(`\
 <div style="height: 100px; width: 100px; overflow: scroll; border: 1px solid yellow;">
   <div style="height: 300px; width: 300px;">Forced Scroll</div>
 </div>\
 `)
 
-      const fn = () => {
-        return dom.isScrollable(forcedScroll)
-      }
+          const fn = () => {
+            return dom.isScrollable(forcedScroll)
+          }
 
-      expect(fn()).to.be.true
-    })
-  })
-
-  describe('visibility scenarios', () => {
-    describe('html and body overrides', () => {
-      beforeEach(() => {
-        cy.visit('/fixtures/empty.html')
+          expect(fn()).to.be.true
+        })
       })
 
-      describe('when display none', () => {
-        beforeEach(() => {
-          cy.get('html').then(($el) => {
-            $el.css('display', 'none')
+      describe('visibility scenarios', () => {
+        describe('html and body overrides', () => {
+          beforeEach(() => {
+            cy.visit('/fixtures/empty.html')
           })
 
-          cy.get('body').then(($el) => {
-            $el.css('display', 'none')
+          describe('when display none', () => {
+            beforeEach(() => {
+              cy.get('html').then(($el) => {
+                $el.css('display', 'none')
+              })
+
+              cy.get('body').then(($el) => {
+                $el.css('display', 'none')
+              })
+            })
+
+            it('is always visible', () => {
+              expect(cy.$$('html').is(':hidden')).to.be.false
+              expect(cy.$$('html').is(':visible')).to.be.true
+
+              expect(cy.$$('html')).not.to.be.hidden
+              expect(cy.$$('html')).to.be.visible
+
+              cy.wrap(cy.$$('html')).should('not.be.hidden')
+              cy.wrap(cy.$$('html')).should('be.visible')
+              expect(cy.$$('body').is(':hidden')).to.be.false
+              expect(cy.$$('body').is(':visible')).to.be.true
+
+              expect(cy.$$('body')).not.to.be.hidden
+              expect(cy.$$('body')).to.be.visible
+
+              cy.wrap(cy.$$('body')).should('not.be.hidden')
+              cy.wrap(cy.$$('body')).should('be.visible')
+            })
+          })
+
+          describe('when not display none', () => {
+            it('is visible', () => {
+              expect(cy.$$('html').is(':hidden')).to.be.false
+              expect(cy.$$('html').is(':visible')).to.be.true
+
+              expect(cy.$$('html')).not.to.be.hidden
+              expect(cy.$$('html')).to.be.visible
+
+              cy.wrap(cy.$$('html')).should('not.be.hidden')
+              cy.wrap(cy.$$('html')).should('be.visible')
+              expect(cy.$$('body').is(':hidden')).to.be.false
+              expect(cy.$$('body').is(':visible')).to.be.true
+
+              expect(cy.$$('body')).not.to.be.hidden
+              expect(cy.$$('body')).to.be.visible
+
+              cy.wrap(cy.$$('body')).should('not.be.hidden')
+              cy.wrap(cy.$$('body')).should('be.visible')
+            })
           })
         })
 
-        it('is always visible', () => {
-          expect(cy.$$('html').is(':hidden')).to.be.false
-          expect(cy.$$('html').is(':visible')).to.be.true
+        describe('basic CSS properties', () => {
+          beforeEach(() => {
+            cy.visit('/fixtures/visibility/basic-css-properties.html')
+          })
 
-          expect(cy.$$('html')).not.to.be.hidden
-          expect(cy.$$('html')).to.be.visible
+          assertVisibilityForSections([
+            'visibility-property',
+            'display-property',
+            'opacity-property',
+            'table-elements',
+            'box-interactions',
+          ])
+        })
 
-          cy.wrap(cy.$$('html')).should('not.be.hidden')
-          cy.wrap(cy.$$('html')).should('be.visible')
-          expect(cy.$$('body').is(':hidden')).to.be.false
-          expect(cy.$$('body').is(':visible')).to.be.true
+        describe('form elements', () => {
+          beforeEach(() => {
+            cy.visit('/fixtures/visibility/form-elements.html')
+          })
 
-          expect(cy.$$('body')).not.to.be.hidden
-          expect(cy.$$('body')).to.be.visible
+          assertVisibilityForSections([
+            'select-and-option-elements',
+            'optgroup-elements',
+            'options-outside-select',
+            'hidden-options-within-visible-select',
+            'input-elements',
+          ])
+        })
 
-          cy.wrap(cy.$$('body')).should('not.be.hidden')
-          cy.wrap(cy.$$('body')).should('be.visible')
+        describe('overflow', () => {
+          beforeEach(() => {
+            cy.visit('/fixtures/visibility/overflow.html')
+          })
+
+          assertVisibilityForSections([
+            'zero-dimensions-with-overflow-hidden',
+            // TODO: Firefox has slightly different behavior than chromium - address with test harness changes in https://github.com/cypress-io/cypress/issues/33127
+            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'text-content-with-zero-dimensions' : undefined,
+            'positive-dimensions-with-overflow-hidden',
+            'overflow-auto-with-zero-dimensions',
+            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'mixed-dimension-scenarios' : undefined,
+            'overflow-hidden',
+            'overflow-y-hidden',
+            'overflow-x-hidden',
+            'overflow-auto-scenarios',
+            'overflow-scroll-scenarios',
+            'overflow-relative-positioning',
+            'overflow-flex-container',
+            'overflow-complex-scenarios',
+            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'clip-path-scenarios' : undefined,
+          ])
+        })
+
+        describe('positioning', () => {
+          beforeEach(() => {
+            cy.visit('/fixtures/visibility/positioning.html')
+          })
+
+          assertVisibilityForSections([
+            'position-fixed-element-covered-by-another',
+            'static-ancestor-fixed-descendant',
+            'static-parent-fixed-child',
+            'positioning-with-zero-dimensions',
+            'fixed-positioning-with-zero-dimensions',
+            'position-absolute-scenarios',
+            'position-sticky-scenarios',
+          ])
+        })
+
+        describe('transforms', () => {
+          beforeEach(() => {
+            cy.visit('/fixtures/visibility/transforms.html')
+          })
+
+          assertVisibilityForSections([
+            'scaling',
+            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'translation' : undefined,
+            'rotation',
+            'skew',
+            'matrix',
+            'perspective',
+            'multiple',
+            'multiple-3d',
+            'backface-visibility',
+          ])
         })
       })
-
-      describe('when not display none', () => {
-        it('is visible', () => {
-          expect(cy.$$('html').is(':hidden')).to.be.false
-          expect(cy.$$('html').is(':visible')).to.be.true
-
-          expect(cy.$$('html')).not.to.be.hidden
-          expect(cy.$$('html')).to.be.visible
-
-          cy.wrap(cy.$$('html')).should('not.be.hidden')
-          cy.wrap(cy.$$('html')).should('be.visible')
-          expect(cy.$$('body').is(':hidden')).to.be.false
-          expect(cy.$$('body').is(':visible')).to.be.true
-
-          expect(cy.$$('body')).not.to.be.hidden
-          expect(cy.$$('body')).to.be.visible
-
-          cy.wrap(cy.$$('body')).should('not.be.hidden')
-          cy.wrap(cy.$$('body')).should('be.visible')
-        })
-      })
     })
-
-    describe('basic CSS properties', () => {
-      beforeEach(() => {
-        cy.visit('/fixtures/visibility/basic-css-properties.html')
-      })
-
-      assertVisibilityForSections([
-        'visibility-property',
-        'display-property',
-        'opacity-property',
-        'input-elements',
-        'table-elements',
-        'box-interactions',
-      ])
-    })
-
-    describe('form elements', () => {
-      beforeEach(() => {
-        cy.visit('/fixtures/visibility/form-elements.html')
-      })
-
-      assertVisibilityForSections([
-        'select-and-option-elements',
-        'optgroup-elements',
-        'options-outside-select',
-        'hidden-options-within-visible-select',
-        'input-elements',
-      ])
-    })
-
-    describe('overflow', () => {
-      beforeEach(() => {
-        cy.visit('/fixtures/visibility/overflow.html')
-      })
-
-      assertVisibilityForSections([
-        'zero-dimensions-with-overflow-hidden',
-        'text-content-with-zero-dimensions',
-        'positive-dimensions-with-overflow-hidden',
-        'overflow-auto-with-zero-dimensions',
-        'mixed-dimension-scenarios',
-        'overflow-hidden',
-        'overflow-y-hidden',
-        'overflow-x-hidden',
-        'overflow-auto-scenarios',
-        'overflow-scroll-scenarios',
-        'overflow-relative-positioning',
-        'overflow-flex-container',
-        'overflow-complex-scenarios',
-        'clip-path-scenarios',
-      ])
-    })
-
-    describe('positioning', () => {
-      beforeEach(() => {
-        cy.visit('/fixtures/visibility/positioning.html')
-      })
-
-      assertVisibilityForSections([
-        'position-fixed-element-covered-by-another',
-        'static-ancestor-fixed-descendant',
-        'static-parent-fixed-child',
-        'positioning-with-zero-dimensions',
-        'fixed-positioning-with-zero-dimensions',
-        'position-absolute-scenarios',
-        'position-sticky-scenarios',
-      ])
-    })
-
-    describe('transforms', () => {
-      beforeEach(() => {
-        cy.visit('/fixtures/visibility/transforms.html')
-      })
-
-      assertVisibilityForSections([
-        'scaling',
-        'translation',
-        'rotation',
-        'skew',
-        'matrix',
-        'perspective',
-        'multiple',
-        'multiple-3d',
-        'backface-visibility',
-      ])
-    })
-  })
+  }
 
   context('#getReasonIsHidden', () => {
     const reasonIs = ($el: JQuery, str: string) => {
