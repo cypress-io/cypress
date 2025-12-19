@@ -476,9 +476,13 @@ describe('initCypressTests', () => {
 
     it('falls back to in-memory flag when sessionStorage.setItem throws', async () => {
       // Simulate sessionStorage.setItem throwing (e.g., Safari private browsing with QuotaExceededError)
-      const setItemError = new DOMException('QuotaExceededError', 'QuotaExceededError')(global.window as any).sessionStorage.setItem = vi.fn().mockImplementation(() => {
+      const setItemError = new DOMException('QuotaExceededError', 'QuotaExceededError')
+
+      ;(global.window as any).sessionStorage.setItem = vi.fn().mockImplementation(() => {
         throw setItemError
-      })(global.window as any).sessionStorage.getItem = vi.fn().mockReturnValue(null)
+      })
+
+      ;(global.window as any).sessionStorage.getItem = vi.fn().mockReturnValue(null)
 
       await import('../client/initCypressTests.js')
 
