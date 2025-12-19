@@ -455,7 +455,8 @@
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
-        "vite"
+        "vite",
+        "tslib"
       ]
     },
     "npm/puppeteer": {
