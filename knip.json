@@ -390,6 +390,11 @@
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@angular-devkit/core",
+        "next",
+        "html-webpack-plugin"
       ]
     },
     "npm/cypress-schematic": {
@@ -399,6 +404,11 @@
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@angular-devkit/schematics-cli",
+        "@angular/cli",
+        "@schematics/angular"
       ]
     },
     "npm/webpack-batteries-included-preprocessor": {
@@ -415,15 +425,18 @@
         "process",
         "@babel/plugin-transform-class-properties",
         "@babel/plugin-transform-object-rest-spread",
-        "babel-plugin-add-module-exports"
+        "babel-plugin-add-module-exports",
+        "@paths/.+"
       ]
     },
     "npm/webpack-preprocessor": {
       "entry": [
-        "index.ts"
+        "index.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
@@ -440,6 +453,9 @@
         "src/**/*.{ts,tsx,js,jsx}",
         "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "vite"
       ]
     },
     "npm/puppeteer": {
