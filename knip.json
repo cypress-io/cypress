@@ -383,7 +383,9 @@
       "entry": [
         "src/browser.ts",
         "src/loader.ts",
-        "src/aut-runner.ts"
+        "src/aut-runner.ts",
+        "cypress/e2e/webpack-dev-server.cy.ts",
+        "cypress/e2e/react.cy.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
@@ -423,6 +425,11 @@
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@babel/core",
+        "@babel/preset-env",
+        "babel-loader"
       ]
     },
     "npm/vite-dev-server": {
