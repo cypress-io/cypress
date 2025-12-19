@@ -434,6 +434,9 @@
     "npm/puppeteer": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "express"
       ]
     },
     "npm/svelte": {
@@ -442,8 +445,15 @@
       ]
     },
     "npm/react": {
+      "entry": [
+        "cypress/component/**/*.{jsx,tsx,cy.jsx,cy.tsx}"
+      ],
       "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
+        "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "react-router"
       ]
     },
     "npm/grep": {
@@ -464,7 +474,16 @@
     },
     "npm/mount-utils": {
       "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx,mjs}"
+      ],
+      "ignoreDependencies": [
+        "@rollup/plugin-commonjs",
+        "@rollup/plugin-node-resolve",
+        "rollup",
+        "rollup-plugin-dts",
+        "rollup-plugin-typescript2",
+        "eslint"
       ]
     },
     "npm/vite-plugin-cypress-esm": {
