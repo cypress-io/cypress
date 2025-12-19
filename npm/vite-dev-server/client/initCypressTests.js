@@ -39,6 +39,60 @@ if (supportFile) {
 
   const relativeUrl = `${devServerPublicPathBase}${supportRelativeToProjectRoot}`
 
+  // Handle support file import failures using Vite's vite:preloadError event.
+  // This event fires when dynamic imports fail, typically due to stale assets
+  // after switching between spec files (page reloads). When this occurs, we
+  // prevent the default error and reload the page to fetch fresh assets.
+  //
+  // Use sessionStorage to persist the flag across page reloads to prevent
+  // infinite reload loops when errors persist after reload (non-transient errors).
+  const PRELOAD_ERROR_HANDLED_KEY = '__cypress_vite_preload_error_handled'
+  let preloadErrorHandled = window.sessionStorage?.getItem(PRELOAD_ERROR_HANDLED_KEY) === 'true'
+
+  window.addEventListener('vite:preloadError', (event) => {
+    // Only handle the first preload error to avoid infinite reload loops
+    // Check both the in-memory flag and sessionStorage to handle cases where
+    // the page reloads before the flag is set
+    if (preloadErrorHandled || window.sessionStorage?.getItem(PRELOAD_ERROR_HANDLED_KEY) === 'true') {
+      return
+    }
+
+    const error = event.payload
+    // Vite's vite:preloadError event payload is a raw JavaScript Error object.
+    // The Error object doesn't have a `url` property - the URL is embedded in the
+    // error's `message` string. Extract it from the message if `url` is not available.
+    let errorUrl = error?.url || ''
+
+    if (!errorUrl && error?.message) {
+      // Try to extract URL from error message. Common formats:
+      // - "Failed to fetch dynamically imported module: <URL>"
+      // - "Loading chunk <chunk> failed: <URL>"
+      // - Or just a URL in the message
+      const urlMatch = error.message.match(/(?:https?:\/\/[^\s]+|(?:\/|\.\/)[^\s"']+)/)
+
+      if (urlMatch) {
+        errorUrl = urlMatch[0]
+      }
+    }
+
+    // Only handle errors related to the support file import
+    // Check if the error URL matches our support file URL
+    if (errorUrl && (errorUrl.includes(supportRelativeToProjectRoot) || errorUrl === relativeUrl)) {
+      // Set flag in sessionStorage before reloading to persist across page reloads
+      // This prevents infinite reload loops when errors persist after reload
+      try {
+        window.sessionStorage?.setItem(PRELOAD_ERROR_HANDLED_KEY, 'true')
+      } catch (e) {
+        // If sessionStorage is not available (e.g., in private browsing mode),
+        // fall back to in-memory flag only
+        preloadErrorHandled = true
+      }
+      event.preventDefault()
+      // Reload the page to fetch fresh assets
+      window.location.reload()
+    }
+  }, { once: false })
+
   importsToLoad.push({
     load: () => import(relativeUrl),
     absolute: supportFile,
