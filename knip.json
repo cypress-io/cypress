@@ -607,6 +607,7 @@
     "**/postcss.config.{js,ts,cjs,mjs}",
     "**/apollo.config.{js,ts}",
     "**/webpack.config.{js,ts,mjs}",
+    "**/babel.config.{js,ts,cjs,mjs}",
     "**/gulpfile.{js,ts}",
     "scripts/**",
     "**/patches/**",
