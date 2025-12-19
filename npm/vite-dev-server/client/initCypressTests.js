@@ -52,7 +52,22 @@ if (supportFile) {
     }
 
     const error = event.payload
-    const errorUrl = error?.url || ''
+    // Vite's vite:preloadError event payload is a raw JavaScript Error object.
+    // The Error object doesn't have a `url` property - the URL is embedded in the
+    // error's `message` string. Extract it from the message if `url` is not available.
+    let errorUrl = error?.url || ''
+
+    if (!errorUrl && error?.message) {
+      // Try to extract URL from error message. Common formats:
+      // - "Failed to fetch dynamically imported module: <URL>"
+      // - "Loading chunk <chunk> failed: <URL>"
+      // - Or just a URL in the message
+      const urlMatch = error.message.match(/(?:https?:\/\/[^\s]+|(?:\/|\.\/)[^\s"']+)/)
+
+      if (urlMatch) {
+        errorUrl = urlMatch[0]
+      }
+    }
 
     // Only handle errors related to the support file import
     // Check if the error URL matches our support file URL

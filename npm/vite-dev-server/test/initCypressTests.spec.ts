@@ -259,12 +259,11 @@ describe('initCypressTests', () => {
       expect(preloadErrorHandler).toBeDefined()
       expect(typeof preloadErrorHandler).toBe('function')
 
-      // Create a mock event with payload matching support file URL
+      // Vite's vite:preloadError event payload is a raw JavaScript Error object.
+      // The URL is embedded in the error's message string, not as a separate url property.
+      const mockError = new Error('Failed to fetch dynamically imported module: /__cypress/src/cypress/support/component.js')
       const mockEvent = {
-        payload: {
-          url: '/__cypress/src/cypress/support/component.js',
-          message: 'Failed to fetch dynamically imported module',
-        },
+        payload: mockError,
         preventDefault: vi.fn(),
       }
 
@@ -272,6 +271,36 @@ describe('initCypressTests', () => {
       preloadErrorHandler(mockEvent)
 
       // Verify preventDefault was called
+      expect(mockEvent.preventDefault).toHaveBeenCalled()
+
+      // Verify reload was called
+      expect((global.window as any).location.reload).toHaveBeenCalled()
+    })
+
+    it('extracts URL from error message when url property is not available', async () => {
+      await import('../client/initCypressTests.js')
+
+      // Get the event listener that was registered
+      const addEventListenerCalls = ((global.window as any).addEventListener as any).mock.calls
+      const preloadErrorHandler = addEventListenerCalls.find(
+        (call: any[]) => call[0] === 'vite:preloadError',
+      )?.[1]
+
+      expect(preloadErrorHandler).toBeDefined()
+      expect(typeof preloadErrorHandler).toBe('function')
+
+      // Test with Error object that has URL in message (no url property)
+      // This matches the actual Vite vite:preloadError event structure
+      const mockError = new Error('Failed to fetch dynamically imported module: /__cypress/src/cypress/support/component.js')
+      const mockEvent = {
+        payload: mockError,
+        preventDefault: vi.fn(),
+      }
+
+      // Call the handler
+      preloadErrorHandler(mockEvent)
+
+      // Verify preventDefault was called (URL extracted from message)
       expect(mockEvent.preventDefault).toHaveBeenCalled()
 
       // Verify reload was called
@@ -289,12 +318,11 @@ describe('initCypressTests', () => {
 
       expect(preloadErrorHandler).toBeDefined()
 
-      // Create a mock event with payload for a different file
+      // Vite's vite:preloadError event payload is a raw JavaScript Error object.
+      // The URL is embedded in the error's message string, not as a separate url property.
+      const mockError = new Error('Failed to fetch dynamically imported module: /__cypress/src/@fs/some/other/file.js')
       const mockEvent = {
-        payload: {
-          url: '/__cypress/src/@fs/some/other/file.js',
-          message: 'Failed to fetch dynamically imported module',
-        },
+        payload: mockError,
         preventDefault: vi.fn(),
       }
 
@@ -319,17 +347,17 @@ describe('initCypressTests', () => {
 
       expect(preloadErrorHandler).toBeDefined()
 
+      // Vite's vite:preloadError event payload is a raw JavaScript Error object.
+      // The URL is embedded in the error's message string, not as a separate url property.
+      const mockError1 = new Error('Failed to fetch dynamically imported module: /__cypress/src/cypress/support/component.js')
       const mockEvent1 = {
-        payload: {
-          url: '/__cypress/src/cypress/support/component.js',
-        },
+        payload: mockError1,
         preventDefault: vi.fn(),
       }
 
+      const mockError2 = new Error('Failed to fetch dynamically imported module: /__cypress/src/cypress/support/component.js')
       const mockEvent2 = {
-        payload: {
-          url: '/__cypress/src/cypress/support/component.js',
-        },
+        payload: mockError2,
         preventDefault: vi.fn(),
       }
 
