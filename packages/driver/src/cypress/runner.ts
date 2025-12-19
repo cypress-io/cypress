@@ -444,9 +444,13 @@ const findTestForHook = (hookName, suite, test, getTestFromHookOrFindTest, getTe
     : findTestInSuite(suite, () => true) // afterEach runs after each test, so use first test
 
   if (foundTest) {
-    // Only return tests from _testsById which ensures they actually ran
-    // Don't return tests directly from suite structure as they may have been skipped
-    return getTestById(foundTest.id)
+    const testFromById = getTestById(foundTest.id)
+
+    // Only return tests that actually ran OR have failedFromHookId
+    // Tests that are simply skipped (_ALREADY_RAN without failedFromHookId) should not be returned
+    if (testFromById && (!testFromById._ALREADY_RAN || testFromById.failedFromHookId)) {
+      return testFromById
+    }
   }
 
   return null
@@ -492,10 +496,10 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           }
 
           // Verify the test actually ran by checking it exists in _testsById
-          // Tests that were skipped won't be in _testsById
+          // AND that it either ran (!_ALREADY_RAN) or has failedFromHookId (was supposed to run but skipped due to hook)
           const testFromById = getTestById(test.id)
 
-          if (!testFromById) {
+          if (!testFromById || (testFromById._ALREADY_RAN && !testFromById.failedFromHookId)) {
             // Test was skipped, don't fire the event
             return false
           }
@@ -541,10 +545,10 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
           if (test) {
             // Verify the test actually ran by checking it exists in _testsById
-            // Tests that were skipped won't be in _testsById
+            // AND that it either ran (!_ALREADY_RAN) or has failedFromHookId (was supposed to run but skipped due to hook)
             const testFromById = getTestById(test.id)
 
-            if (!testFromById) {
+            if (!testFromById || (testFromById._ALREADY_RAN && !testFromById.failedFromHookId)) {
               // Test was skipped, don't fire the event
               return false
             }
@@ -587,10 +591,10 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
             if (foundTest) {
               // Verify the test actually ran by checking it exists in _testsById
-              // OR it has failedFromHookId (was supposed to run but failed due to hook)
+              // AND that it either ran (!_ALREADY_RAN) or has failedFromHookId (was supposed to run but skipped due to hook)
               const testFromById = getTestById(foundTest.id)
 
-              if (testFromById || foundTest.failedFromHookId) {
+              if (testFromById && (!testFromById._ALREADY_RAN || testFromById.failedFromHookId)) {
                 test = foundTest
                 setTest(test)
 
