@@ -63,6 +63,12 @@ describe('initCypressTests', () => {
     global.window = {
       addEventListener: vi.fn(),
       location: { reload: vi.fn() } as any,
+      sessionStorage: {
+        getItem: vi.fn().mockReturnValue(null),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+      } as any,
     }
 
     // @ts-expect-error
@@ -337,6 +343,22 @@ describe('initCypressTests', () => {
     })
 
     it('prevents infinite reload loops by only handling first error', async () => {
+      // Create a mock sessionStorage that maintains state
+      const storage: Record<string, string> = {}
+
+      ;(global.window as any).sessionStorage = {
+        getItem: vi.fn((key: string) => storage[key] || null),
+        setItem: vi.fn((key: string, value: string) => {
+          storage[key] = value
+        }),
+        removeItem: vi.fn((key: string) => {
+          delete storage[key]
+        }),
+        clear: vi.fn(() => {
+          Object.keys(storage).forEach((key) => delete storage[key])
+        }),
+      }
+
       await import('../client/initCypressTests.js')
 
       // Get the event listener that was registered
@@ -368,10 +390,88 @@ describe('initCypressTests', () => {
       // First call should handle it
       expect(mockEvent1.preventDefault).toHaveBeenCalled()
       expect((global.window as any).location.reload).toHaveBeenCalledTimes(1)
+      // Verify sessionStorage.setItem was called to persist the flag
+      expect((global.window as any).sessionStorage.setItem).toHaveBeenCalledWith(
+        '__cypress_vite_preload_error_handled',
+        'true',
+      )
 
-      // Second call should be ignored (preloadErrorHandled flag)
+      // Second call should be ignored (sessionStorage flag prevents infinite loop)
       expect(mockEvent2.preventDefault).not.toHaveBeenCalled()
       expect((global.window as any).location.reload).toHaveBeenCalledTimes(1)
+    })
+
+    it('prevents infinite reload loops across page reloads using sessionStorage', async () => {
+      // Simulate a page reload scenario: sessionStorage already has the flag set
+      // This would happen if the page reloaded after handling an error, but the error persists
+      (global.window as any).sessionStorage.getItem = vi.fn().mockReturnValue('true')
+
+      await import('../client/initCypressTests.js')
+
+      // Get the event listener that was registered
+      const addEventListenerCalls = ((global.window as any).addEventListener as any).mock.calls
+      const preloadErrorHandler = addEventListenerCalls.find(
+        (call: any[]) => call[0] === 'vite:preloadError',
+      )?.[1]
+
+      expect(preloadErrorHandler).toBeDefined()
+
+      // Vite's vite:preloadError event payload is a raw JavaScript Error object.
+      // The URL is embedded in the error's message string, not as a separate url property.
+      const mockError = new Error('Failed to fetch dynamically imported module: /__cypress/src/cypress/support/component.js')
+      const mockEvent = {
+        payload: mockError,
+        preventDefault: vi.fn(),
+      }
+
+      // Call handler - should be ignored because sessionStorage flag is set
+      preloadErrorHandler(mockEvent)
+
+      // Verify preventDefault was NOT called (flag in sessionStorage prevents handling)
+      expect(mockEvent.preventDefault).not.toHaveBeenCalled()
+
+      // Verify reload was NOT called (prevents infinite loop)
+      expect((global.window as any).location.reload).not.toHaveBeenCalled()
+
+      // Verify sessionStorage.getItem was called to check the flag
+      expect((global.window as any).sessionStorage.getItem).toHaveBeenCalledWith(
+        '__cypress_vite_preload_error_handled',
+      )
+    })
+
+    it('sets sessionStorage flag when handling support file preload error', async () => {
+      await import('../client/initCypressTests.js')
+
+      // Get the event listener that was registered
+      const addEventListenerCalls = ((global.window as any).addEventListener as any).mock.calls
+      const preloadErrorHandler = addEventListenerCalls.find(
+        (call: any[]) => call[0] === 'vite:preloadError',
+      )?.[1]
+
+      expect(preloadErrorHandler).toBeDefined()
+
+      // Vite's vite:preloadError event payload is a raw JavaScript Error object.
+      // The URL is embedded in the error's message string, not as a separate url property.
+      const mockError = new Error('Failed to fetch dynamically imported module: /__cypress/src/cypress/support/component.js')
+      const mockEvent = {
+        payload: mockError,
+        preventDefault: vi.fn(),
+      }
+
+      // Call the handler
+      preloadErrorHandler(mockEvent)
+
+      // Verify sessionStorage.setItem was called to persist the flag across reloads
+      expect((global.window as any).sessionStorage.setItem).toHaveBeenCalledWith(
+        '__cypress_vite_preload_error_handled',
+        'true',
+      )
+
+      // Verify preventDefault was called
+      expect(mockEvent.preventDefault).toHaveBeenCalled()
+
+      // Verify reload was called
+      expect((global.window as any).location.reload).toHaveBeenCalled()
     })
   })
 })

@@ -43,11 +43,17 @@ if (supportFile) {
   // This event fires when dynamic imports fail, typically due to stale assets
   // after switching between spec files (page reloads). When this occurs, we
   // prevent the default error and reload the page to fetch fresh assets.
-  let preloadErrorHandled = false
+  //
+  // Use sessionStorage to persist the flag across page reloads to prevent
+  // infinite reload loops when errors persist after reload (non-transient errors).
+  const PRELOAD_ERROR_HANDLED_KEY = '__cypress_vite_preload_error_handled'
+  const preloadErrorHandled = window.sessionStorage?.getItem(PRELOAD_ERROR_HANDLED_KEY) === 'true'
 
   window.addEventListener('vite:preloadError', (event) => {
     // Only handle the first preload error to avoid infinite reload loops
-    if (preloadErrorHandled) {
+    // Check both the in-memory flag and sessionStorage to handle cases where
+    // the page reloads before the flag is set
+    if (preloadErrorHandled || window.sessionStorage?.getItem(PRELOAD_ERROR_HANDLED_KEY) === 'true') {
       return
     }
 
@@ -72,7 +78,14 @@ if (supportFile) {
     // Only handle errors related to the support file import
     // Check if the error URL matches our support file URL
     if (errorUrl && (errorUrl.includes(supportRelativeToProjectRoot) || errorUrl === relativeUrl)) {
-      preloadErrorHandled = true
+      // Set flag in sessionStorage before reloading to persist across page reloads
+      // This prevents infinite reload loops when errors persist after reload
+      try {
+        window.sessionStorage?.setItem(PRELOAD_ERROR_HANDLED_KEY, 'true')
+      } catch (e) {
+        // If sessionStorage is not available (e.g., in private browsing mode),
+        // fall back to in-memory flag only
+      }
       event.preventDefault()
       // Reload the page to fetch fresh assets
       window.location.reload()
