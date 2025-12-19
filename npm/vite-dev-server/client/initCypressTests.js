@@ -47,7 +47,7 @@ if (supportFile) {
   // Use sessionStorage to persist the flag across page reloads to prevent
   // infinite reload loops when errors persist after reload (non-transient errors).
   const PRELOAD_ERROR_HANDLED_KEY = '__cypress_vite_preload_error_handled'
-  const preloadErrorHandled = window.sessionStorage?.getItem(PRELOAD_ERROR_HANDLED_KEY) === 'true'
+  let preloadErrorHandled = window.sessionStorage?.getItem(PRELOAD_ERROR_HANDLED_KEY) === 'true'
 
   window.addEventListener('vite:preloadError', (event) => {
     // Only handle the first preload error to avoid infinite reload loops
@@ -85,6 +85,7 @@ if (supportFile) {
       } catch (e) {
         // If sessionStorage is not available (e.g., in private browsing mode),
         // fall back to in-memory flag only
+        preloadErrorHandled = true
       }
       event.preventDefault()
       // Reload the page to fetch fresh assets
