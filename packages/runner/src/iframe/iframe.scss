@@ -19,7 +19,8 @@
     display: none;
   }
 
-  .aut-iframe {
+  .aut-iframe,
+  .aut-snapshot-iframe {
     background-color: #fff;
     box-shadow: 0 6px 10px #555;
     border: none;
@@ -52,20 +53,24 @@
     display: block;
   }
 
-  .studio-is-open .aut-iframe {
+  .studio-is-open .aut-iframe,
+  .studio-is-open .aut-snapshot-iframe {
     border: 4px solid #4997e4;
     border-radius: 4px;
   }
 
-  .studio-is-loading .aut-iframe {
+  .studio-is-loading .aut-iframe,
+  .studio-is-loading .aut-snapshot-iframe {
     border: 4px solid #b4d5f8;
   }
 
-  .studio-is-failed .aut-iframe {
+  .studio-is-failed .aut-iframe,
+  .studio-is-failed .aut-snapshot-iframe {
     border: 4px solid $error;
   }
 
-  .studio-is-ready .aut-iframe {
+  .studio-is-ready .aut-iframe,
+  .studio-is-ready .aut-snapshot-iframe {
     animation: flash-iframe-border 1.5s linear infinite;
 
     @keyframes flash-iframe-border {

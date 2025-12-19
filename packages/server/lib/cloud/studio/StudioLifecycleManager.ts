@@ -329,13 +329,16 @@ export class StudioLifecycleManager {
 
     const studioManager = this.studioManager
 
-    debug('Calling all studio ready listeners')
+    debug('Calling %d studio ready listeners', this.listeners.length)
     this.listeners.forEach((listener) => {
       listener(studioManager)
     })
 
-    debug('Clearing %d studio ready listeners after successful initialization', this.listeners.length)
-    this.listeners = []
+    // In local development, keep listeners so they can be called again after Studio reloads
+    if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+      debug('Clearing %d studio ready listeners after successful initialization', this.listeners.length)
+      this.listeners = []
+    }
   }
 
   private setupWatcher ({
@@ -393,7 +396,12 @@ export class StudioLifecycleManager {
     if (this.studioManager) {
       debug('Studio ready - calling listener immediately')
       listener(this.studioManager)
-      this.listeners.push(listener)
+
+      // If the studio bundle is local, we need to register the listener
+      // so that we can reload the studio when the bundle changes
+      if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+        this.listeners.push(listener)
+      }
     } else {
       debug('Studio not ready - registering studio ready listener')
       this.listeners.push(listener)

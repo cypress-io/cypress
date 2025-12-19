@@ -37,9 +37,6 @@ const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-
 
 zlib = Promise.promisifyAll(zlib)
 
-// force supertest-session to use promises provided in supertest
-const session = proxyquire('supertest-session', { supertest })
-
 const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
@@ -184,8 +181,6 @@ describe('Routes', () => {
 
                 this.srv = this.server.getHttpServer()
 
-                this.session = session(this.srv)
-
                 this.proxy = `http://localhost:${port}`
 
                 this.networkProxy = this.server._networkProxy
@@ -213,7 +208,6 @@ describe('Routes', () => {
   afterEach(function () {
     evilDns.clear()
     nock.cleanAll()
-    this.session.destroy()
     preprocessor.close()
     this.project = null
 
