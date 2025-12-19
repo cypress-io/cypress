@@ -27,8 +27,7 @@
     "react-router-dom": "6.28.0",
     "rollup": "3.29.5",
     "typescript": "~5.4.5",
-    "vite": "6.3.5",
-    "vite-plugin-require-transform": "1.0.21"
+    "vite": "6.3.5"
   },
   "peerDependencies": {
     "@types/react": "^18 || ^19",

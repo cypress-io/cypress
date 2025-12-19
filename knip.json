@@ -426,8 +426,12 @@
       ]
     },
     "npm/vite-dev-server": {
+      "entry": [
+        "cypress/e2e/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ]
     },
@@ -462,8 +466,12 @@
       ]
     },
     "npm/vue": {
+      "entry": [
+        "cypress/component/**/*.{vue,js,ts,cy.js,cy.ts}"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{vue,ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ]
     },
@@ -487,9 +495,17 @@
       ]
     },
     "npm/vite-plugin-cypress-esm": {
+      "entry": [
+        "cypress/component/**/*.{ts,tsx,cy.ts,cy.tsx}",
+        "cypress.config.ts"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "react-router"
       ]
     },
     "npm/*": {
