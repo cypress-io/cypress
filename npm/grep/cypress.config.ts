@@ -3,7 +3,6 @@ import { plugin as cypressGrepPlugin } from './src/plugin'
 import assert from 'node:assert'
 import path from 'path'
 import fs from 'fs'
-import _ from 'lodash'
 import debug from 'debug'
 
 const debugInstance = debug('cypress:grep:compare-results')
@@ -55,7 +54,11 @@ export default defineConfig({
           debugInstance('actual results are: %o', actualArr)
           debugInstance('comparing results')
 
-          assert.ok(_.isEqual(actualArr, expectedArr))
+          // Use JSON.stringify for deep equality comparison since both arrays are JSON-serializable
+          assert.strictEqual(
+            JSON.stringify(actualArr, null, 2),
+            JSON.stringify(expectedArr, null, 2),
+          )
         } catch (error) {
           if (process.env.OVERWRITE_EXPECTED) {
             debugInstance('Overwriting expected results')
