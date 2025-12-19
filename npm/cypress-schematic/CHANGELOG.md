@@ -1,15 +1,3 @@
-# [@cypress/schematic-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.3.0...@cypress/schematic-v5.0.0) (2025-12-19)
-
-
-### breaking
-
-* release version 5.0.0 of @cypress/schematic. ([e3c9214](https://github.com/cypress-io/cypress/commit/e3c921412c215ca469f354ab1f4d4c08dd359f58))
-
-
-### BREAKING CHANGES
-
-* release version 5.0.0 of @cypress/schematic, which supports Angular 20 and 21 and adds scaffolding support for @cypress/angular-zoneless for Angular 21+ projects. Since Cypress introduced @cypress/angular-zoneless in Cypress 15.8.0, Cypress ^15.8.0 is now a peer dependency of @cypress/schematic. Additionally, support for Angular 18 and 19 have been removed and will only be supported in @cypress/schematic ^4.0.0.
-
 # [@cypress/schematic-v4.3.0](https://github.com/cypress-io/cypress/compare/@cypress/schematic-v4.2.0...@cypress/schematic-v4.3.0) (2025-12-05)
 
 
