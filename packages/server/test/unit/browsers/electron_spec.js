@@ -28,6 +28,10 @@ describe('lib/browsers/electron', () => {
       connectToBrowser: sinon.stub().resolves(),
     }
 
+    this.studioManager = {
+      connectToBrowser: sinon.stub().resolves(),
+    }
+
     this.url = 'https://foo.com'
     this.state = {}
     this.options = {
@@ -322,6 +326,47 @@ describe('lib/browsers/electron', () => {
 
       expect(electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
       expect(this.cyPromptManager.connectToBrowser).not.to.be.called
+    })
+  })
+
+  context('.connectStudioToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const mockCurrentlyAttachedStudioTarget = {}
+
+      this.browserCriClient.currentlyAttachedStudioTarget = mockCurrentlyAttachedStudioTarget
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectStudioToBrowser({ studioManager: this.studioManager })
+      expect(this.pageCriClient.clone).not.to.be.called
+      expect(this.studioManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedStudioTarget)
+    })
+
+    it('connects to the browser cri client when the studio target has not been created', async function () {
+      const mockCurrentlyAttachedStudioTarget = {}
+
+      this.pageCriClient.clone.resolves(mockCurrentlyAttachedStudioTarget)
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectStudioToBrowser({ studioManager: this.studioManager })
+      expect(this.pageCriClient.clone).to.be.called
+      expect(this.studioManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedStudioTarget)
+      expect(this.browserCriClient.currentlyAttachedStudioTarget).to.eq(mockCurrentlyAttachedStudioTarget)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      sinon.stub(electron, '_getBrowserCriClient').returns(null)
+
+      expect(electron.connectStudioToBrowser({ studioManager: this.studioManager })).to.be.rejectedWith('Missing pageCriClient in connectStudioToBrowser')
+      expect(this.studioManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', async function () {
+      this.browserCriClient.currentlyAttachedTarget = null
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      expect(electron.connectStudioToBrowser({ studioManager: this.studioManager })).to.be.rejectedWith('Missing pageCriClient in connectStudioToBrowser')
+      expect(this.studioManager.connectToBrowser).not.to.be.called
     })
   })
 

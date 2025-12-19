@@ -181,6 +181,7 @@ export class BrowserCriClient {
   currentlyAttachedTarget: CriClient | undefined
   currentlyAttachedProtocolTarget: CriClient | undefined
   currentlyAttachedCyPromptTarget: CriClient | undefined
+  currentlyAttachedStudioTarget: CriClient | undefined
   // whenever we instantiate the instance we're already connected bc
   // we receive an underlying CRI connection
   // TODO: remove "connected" in favor of closing/closed or disconnected
@@ -458,10 +459,11 @@ export class BrowserCriClient {
     //
     // otherwise it means the the browser itself was closed
 
-    // always close the connection to the page target because it was destroyed
+    // always close the connection to the page targets because it was destroyed
     browserCriClient.currentlyAttachedTarget.close().catch(() => { })
     browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => { })
     browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(() => { })
+    browserCriClient.currentlyAttachedStudioTarget?.close().catch(() => { })
 
     new Bluebird((resolve) => {
       // this event could fire either expectedly or unexpectedly
@@ -588,6 +590,7 @@ export class BrowserCriClient {
         this.currentlyAttachedTarget.close().catch(() => {}),
         this.currentlyAttachedProtocolTarget?.close().catch(() => {}),
         this.currentlyAttachedCyPromptTarget?.close().catch(() => {}),
+        this.currentlyAttachedStudioTarget?.close().catch(() => {}),
       ])
 
       debug('target client closed', this.currentlyAttachedTarget.targetId)
@@ -602,6 +605,10 @@ export class BrowserCriClient {
     })
 
     this.currentlyAttachedCyPromptTarget?.queue.subscriptions.forEach((subscription) => {
+      this.browserClient.off(subscription.eventName, subscription.cb as any)
+    })
+
+    this.currentlyAttachedStudioTarget?.queue.subscriptions.forEach((subscription) => {
       this.browserClient.off(subscription.eventName, subscription.cb as any)
     })
 
@@ -626,14 +633,20 @@ export class BrowserCriClient {
         this.currentlyAttachedCyPromptTarget = await currentTarget.clone()
       }
 
+      const createStudioTarget = async () => {
+        this.currentlyAttachedStudioTarget = await currentTarget.clone()
+      }
+
       await Promise.all([
         createProtocolTarget(),
         createCyPromptTarget(),
+        createStudioTarget(),
       ])
     } else {
       this.currentlyAttachedTarget = undefined
       this.currentlyAttachedProtocolTarget = undefined
       this.currentlyAttachedCyPromptTarget = undefined
+      this.currentlyAttachedStudioTarget = undefined
     }
 
     this.resettingBrowserTargets = false
@@ -696,6 +709,7 @@ export class BrowserCriClient {
         this.currentlyAttachedTarget.close(),
         this.currentlyAttachedProtocolTarget?.close(),
         this.currentlyAttachedCyPromptTarget?.close(),
+        this.currentlyAttachedStudioTarget?.close(),
       ])
     }
 
