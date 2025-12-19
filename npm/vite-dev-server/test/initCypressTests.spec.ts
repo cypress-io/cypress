@@ -473,5 +473,61 @@ describe('initCypressTests', () => {
       // Verify reload was called
       expect((global.window as any).location.reload).toHaveBeenCalled()
     })
+
+    it('falls back to in-memory flag when sessionStorage.setItem throws', async () => {
+      // Simulate sessionStorage.setItem throwing (e.g., Safari private browsing with QuotaExceededError)
+      const setItemError = new DOMException('QuotaExceededError', 'QuotaExceededError')(global.window as any).sessionStorage.setItem = vi.fn().mockImplementation(() => {
+        throw setItemError
+      })(global.window as any).sessionStorage.getItem = vi.fn().mockReturnValue(null)
+
+      await import('../client/initCypressTests.js')
+
+      // Get the event listener that was registered
+      const addEventListenerCalls = ((global.window as any).addEventListener as any).mock.calls
+      const preloadErrorHandler = addEventListenerCalls.find(
+        (call: any[]) => call[0] === 'vite:preloadError',
+      )?.[1]
+
+      expect(preloadErrorHandler).toBeDefined()
+
+      // Vite's vite:preloadError event payload is a raw JavaScript Error object.
+      // The URL is embedded in the error's message string, not as a separate url property.
+      const mockError1 = new Error('Failed to fetch dynamically imported module: /__cypress/src/cypress/support/component.js')
+      const mockEvent1 = {
+        payload: mockError1,
+        preventDefault: vi.fn(),
+      }
+
+      const mockError2 = new Error('Failed to fetch dynamically imported module: /__cypress/src/cypress/support/component.js')
+      const mockEvent2 = {
+        payload: mockError2,
+        preventDefault: vi.fn(),
+      }
+
+      // Call handler first time - should handle it and set in-memory flag
+      preloadErrorHandler(mockEvent1)
+
+      // Verify sessionStorage.setItem was called and threw
+      expect((global.window as any).sessionStorage.setItem).toHaveBeenCalledWith(
+        '__cypress_vite_preload_error_handled',
+        'true',
+      )
+
+      // Verify preventDefault was called
+      expect(mockEvent1.preventDefault).toHaveBeenCalled()
+
+      // Verify reload was called
+      expect((global.window as any).location.reload).toHaveBeenCalledTimes(1)
+
+      // Call handler second time - should be ignored due to in-memory flag
+      // (This prevents infinite loops within the same page load when sessionStorage is unavailable)
+      preloadErrorHandler(mockEvent2)
+
+      // Verify preventDefault was NOT called on second event (in-memory flag prevents handling)
+      expect(mockEvent2.preventDefault).not.toHaveBeenCalled()
+
+      // Verify reload was NOT called again (in-memory flag prevents infinite loop)
+      expect((global.window as any).location.reload).toHaveBeenCalledTimes(1)
+    })
   })
 })
