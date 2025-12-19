@@ -1,4 +1,4 @@
-# Contributing to Cypress
+# Contributing to Cypress!
 
 Thanks for taking the time to contribute! :smile:
 
