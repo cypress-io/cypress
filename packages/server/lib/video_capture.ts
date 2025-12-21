@@ -5,6 +5,7 @@ import ffmpeg from 'fluent-ffmpeg'
 import stream from 'stream'
 import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
+import { path as ffprobePath } from '@ffprobe-installer/ffprobe'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
 import type { ProcessOptions, WriteVideoFrame } from '@packages/types'
@@ -17,6 +18,7 @@ const debugFrames = Debug('cypress-verbose:server:video:frames')
 debug('using ffmpeg from %s', ffmpegPath)
 
 ffmpeg.setFfmpegPath(ffmpegPath)
+ffmpeg.setFfprobePath(ffprobePath)
 
 const deferredPromise = function () {
   let reject
