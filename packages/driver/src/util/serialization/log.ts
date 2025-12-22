@@ -219,7 +219,9 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
         const serializableArray: any[] = []
 
         // in the case we are dealing with a jQuery array, preprocess to a native array to nuke any prevObject(s) or unserializable values
-        props.each((key) => serializableArray.push(preprocessLogLikeForSerialization(props[key], attemptToSerializeFunctions)))
+        props.each((key) => {
+          serializableArray.push(preprocessLogLikeForSerialization(props[key], attemptToSerializeFunctions))
+        })
 
         return serializableArray
       }

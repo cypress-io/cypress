@@ -54,7 +54,7 @@
     "proxy-from-env": "1.0.0",
     "request-progress": "^3.0.0",
     "supports-color": "^8.1.1",
-    "systeminformation": "5.27.7",
+    "systeminformation": "^5.27.14",
     "tmp": "~0.2.4",
     "tree-kill": "1.2.2",
     "untildify": "^4.0.0",
@@ -62,6 +62,7 @@
   },
   "devDependencies": {
     "@cypress/angular": "0.0.0-development",
+    "@cypress/angular-zoneless": "0.0.0-development",
     "@cypress/grep": "0.0.0-development",
     "@cypress/mount-utils": "0.0.0-development",
     "@cypress/react": "0.0.0-development",
@@ -79,7 +80,6 @@
     "@types/mocha": "8.0.3",
     "@types/sinon": "9.0.9",
     "@types/sinon-chai": "3.2.12",
-    "cross-env": "7.0.3",
     "dtslint": "4.2.1",
     "eslint": "^9.31.0",
     "execa-wrap": "1.4.0",
@@ -102,6 +102,7 @@
     "vue",
     "react",
     "angular",
+    "angular-zoneless",
     "svelte"
   ],
   "bin": {
@@ -142,6 +143,11 @@
       "types": "./angular/dist/index.d.ts",
       "import": "./angular/dist/index.js",
       "require": "./angular/dist/index.js"
+    },
+    "./angular-zoneless": {
+      "types": "./angular-zoneless/dist/index.d.ts",
+      "import": "./angular-zoneless/dist/index.js",
+      "require": "./angular-zoneless/dist/index.js"
     },
     "./svelte": {
       "types": "./svelte/dist/index.d.ts",

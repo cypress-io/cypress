@@ -140,7 +140,8 @@ const specs = window.__RUN_MODE_SPECS__
 
 <style lang="scss">
 
-iframe.aut-iframe {
+iframe.aut-iframe,
+iframe.aut-snapshot-iframe {
   width: 100%;
   height: 100%;
   background: white;

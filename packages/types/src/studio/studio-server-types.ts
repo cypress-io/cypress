@@ -4,6 +4,7 @@
 
 /// <reference types="cypress" />
 
+import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping.d'
 import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
 import type { Socket } from 'socket.io'
@@ -112,11 +113,36 @@ export interface StudioAddSocketListenersOptions {
   onAfterSave: (options: { error?: Error }) => void
 }
 
+export type StudioCDPCommands = ProtocolMapping.Commands
+
+export type StudioCDPCommand<T extends keyof StudioCDPCommands> =
+  StudioCDPCommands[T]
+
+export type StudioCDPEvents = ProtocolMapping.Events
+
+export type StudioCDPEvent<T extends keyof StudioCDPEvents> = StudioCDPEvents[T]
+
+export interface StudioCDPClient {
+  send<T extends Extract<keyof StudioCDPCommands, string>>(
+    command: T,
+    params?: StudioCDPCommand<T>['paramsType'][0]
+  ): Promise<StudioCDPCommand<T>['returnType']>
+  on<T extends Extract<keyof StudioCDPEvents, string>>(
+    eventName: T,
+    cb: (event: StudioCDPEvent<T>[0]) => void | Promise<unknown>
+  ): void
+  off<T extends Extract<keyof StudioCDPEvents, string>>(
+    eventName: T,
+    cb: (event: StudioCDPEvent<T>[0]) => void | Promise<unknown>
+  ): void
+}
+
 export interface StudioServerShape {
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
   addSocketListeners(options: StudioAddSocketListenersOptions | Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
+  connectToBrowser(cdpClient: StudioCDPClient): void
   updateSessionId(sessionId: string): void
   reportError(
     error: unknown,

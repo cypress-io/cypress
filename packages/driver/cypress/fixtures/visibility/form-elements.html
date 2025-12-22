@@ -11,8 +11,8 @@
   <div class="test-section" cy-section="select-and-option-elements" cy-has-conflicts="true">
     <h3>Select and Option Elements</h3>
     <select class="testCase" cy-expect="visible" id="visible-select">
-      <option class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" id="visible-option" cy-label="first option">Visible Option</option>
-      <option class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" id="visible-option-2">Another Visible Option</option>
+      <option class="testCase" cy-expect="visible" id="visible-option" cy-label="first option">Visible Option</option>
+      <option class="testCase" cy-expect="visible" id="visible-option-2">Another Visible Option</option>
     </select>
     
     <select class="testCase" cy-expect="hidden" id="hidden-select" style="display: none;">
@@ -23,9 +23,9 @@
   <div class="test-section" cy-section="optgroup-elements" cy-has-conflicts="true">
     <h3>Optgroup Elements</h3>
     <select class="testCase" cy-expect="visible" id="select-with-optgroup" cy-label="select with optgroup">
-      <optgroup class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" id="visible-optgroup" cy-label="Visible opt Group">
-        <option class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden">Option 1</option>
-        <option class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden">Option 2</option>
+      <optgroup class="testCase" cy-expect="visible" id="visible-optgroup" cy-label="Visible opt Group">
+        <option class="testCase" cy-expect="visible">Option 1</option>
+        <option class="testCase" cy-expect="visible">Option 2</option>
       </optgroup>
     </select>
     
@@ -50,7 +50,7 @@
   <div class="test-section" cy-section="hidden-options-within-visible-select" cy-has-conflicts="true">
     <h3>Hidden Options Within Visible Select</h3>
     <select class="testCase" cy-expect="visible" id="select-with-hidden-option">
-      <option class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" id="visible-option-in-select">Visible Option</option>
+      <option class="testCase" cy-expect="visible" id="visible-option-in-select">Visible Option</option>
       <option class="testCase" cy-expect="hidden" id="hidden-option-in-select" style="display: none;">Hidden Option</option>
     </select>
   </div>

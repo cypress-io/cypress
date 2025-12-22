@@ -1561,6 +1561,21 @@ export const AllCypressErrors = {
     ${fmt.highlightSecondary(error)}
     `
   },
+  SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED: (url: string) => {
+    return errTemplate`\
+        Warning: Synchronous XHR request was not intercepted: ${fmt.url(url)}. Learn more: ${fmt.url('https://on.cypress.io/synchronous-xhr-requests')}
+      `
+  },
+  SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_APPLIED: (url: string) => {
+    return errTemplate`\
+        Warning: Cookies may not have been applied to synchronous XHR request: ${fmt.url(url)}. Learn more: ${fmt.url('https://on.cypress.io/synchronous-xhr-requests')}
+      `
+  },
+  SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_SET: (url: string) => {
+    return errTemplate`\
+        Warning: Cookies may not have been set for synchronous XHR response: ${fmt.url(url)}. Learn more: ${fmt.url('https://on.cypress.io/synchronous-xhr-requests')}
+      `
+  },
 } as const
 
 const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors

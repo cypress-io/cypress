@@ -122,6 +122,7 @@ class $Cypress {
   downloads: any
   Commands: any
   $autIframe: any
+  $autSnapshotIframe?: JQuery<HTMLIFrameElement> | null
   onSpecReady: any
   waitForStudio: any
   events: any
@@ -215,6 +216,7 @@ class $Cypress {
     this.downloads = null
     this.Commands = null
     this.$autIframe = null
+    this.$autSnapshotIframe = null
     this.onSpecReady = null
     this.waitForStudio = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
@@ -342,8 +344,9 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ({ $autIframe, onSpecReady, waitForStudio }) {
+  initialize ({ $autIframe, $autSnapshotIframe, onSpecReady, waitForStudio }) {
     this.$autIframe = $autIframe
+    this.$autSnapshotIframe = $autSnapshotIframe
     this.onSpecReady = onSpecReady
     this.waitForStudio = waitForStudio
     if (this._onInitialize) {

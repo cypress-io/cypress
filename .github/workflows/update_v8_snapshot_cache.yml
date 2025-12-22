@@ -78,7 +78,7 @@ jobs:
         if: ${{ matrix.platform == 'macos-latest' }}
         run: sudo -H pip install setuptools
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}

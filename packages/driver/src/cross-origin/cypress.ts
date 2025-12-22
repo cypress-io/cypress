@@ -22,8 +22,8 @@ import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 import { patchFormElementSubmit } from './patches/submit'
-import { patchFetch } from '@packages/runner/injection/patches/fetch'
-import { patchXmlHttpRequest } from '@packages/runner/injection/patches/xmlHttpRequest'
+import { patchFetch } from '@packages/runner/injection/patches/cross-origin/fetch'
+import { patchXmlHttpRequest } from '@packages/runner/injection/patches/cross-origin/xmlHttpRequest'
 
 import $Mocha from '../cypress/mocha'
 

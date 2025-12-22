@@ -1,5 +1,3 @@
-import Bluebird from 'bluebird'
-
 describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
   it('sync app visit exception', () => {
     cy.visit('cypress/fixtures/errors.html?error-on-visit')
@@ -73,13 +71,13 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
   })
 
   it('spec Bluebird unhandled rejection', () => {
-    Bluebird.reject(new Error('Unhandled promise rejection from the spec'))
+    Promise.reject(new Error('Unhandled promise rejection from the spec'))
 
     cy.wait(10000)
   })
 
   // eslint-disable-next-line mocha/handle-done-callback
   it('spec Bluebird unhandled rejection with done', (done) => {
-    Bluebird.reject(new Error('Unhandled promise rejection from the spec'))
+    Promise.reject(new Error('Unhandled promise rejection from the spec'))
   })
 })

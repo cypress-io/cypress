@@ -232,7 +232,7 @@ export async function open (projectRoot: string, options: WindowOpenOptions, new
   if (knownWin) {
     knownWin.show()
 
-    return Bluebird.resolve(knownWin)
+    return Promise.resolve(knownWin)
   }
 
   recentlyCreatedWindow = true
