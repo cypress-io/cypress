@@ -49,6 +49,7 @@ if (supportFile) {
 
 const specPath = new URLSearchParams(document.location.search).get('specPath')
 
+// if the specPath is __all, then experimentalRunAllSpecs is set to true.
 if (specPath === '__all' || CypressInstance.spec.relative === '__all') {
   const runAllSpecs = window.parent.__RUN_ALL_SPECS__ || []
   const allSpecs = window.parent.__RUN_MODE_SPECS__ || []

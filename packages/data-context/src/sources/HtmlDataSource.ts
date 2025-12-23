@@ -120,6 +120,7 @@ export class HtmlDataSource {
       <body>
         <script>
           window.__RUN_MODE_SPECS__ = ${JSON.stringify(this.ctx.project.specs)}
+          <!-- __RUN_ALL_SPECS__ is only set if experimentalRunAllSpecs is set to true -->
           window.__RUN_ALL_SPECS__ = ${JSON.stringify(this.ctx.project.runAllSpecs || [])}
           window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode && !process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE ? 'run' : 'open')};
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)};
