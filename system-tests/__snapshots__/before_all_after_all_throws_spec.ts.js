@@ -59,9 +59,9 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/test.cy.js/before all and after all throw -- te    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/test.cy.js/before all and after all throw -- te     (1280x720)
      st 1 -- before all hook (failed).png                                                           
-  -  /XXX/XXX/XXX/cypress/screenshots/test.cy.js/before all and after all throw -- te    (2560x1440)
+  -  /XXX/XXX/XXX/cypress/screenshots/test.cy.js/before all and after all throw -- te     (1280x720)
      st 1 -- after all hook (failed).png                                                            
 
 
