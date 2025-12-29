@@ -36,7 +36,9 @@ const evalScripts = (specWindow, scripts: any = []) => {
     const [script, contents] = _script
 
     if (script.load) {
-      return script.load()
+      return script.load().catch((e) => {
+        debugger
+      })
     }
 
     return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)

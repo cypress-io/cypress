@@ -25,6 +25,16 @@ export default defineConfig({
       bundler: 'vite',
       framework: 'vue',
     },
+    setupNodeEvents (on, config) {
+      // in the case the tests needed to be debugged:
+
+      on('before:browser:launch', (browser, launchOptions) => {
+        console.log('before:browser:launch', browser, launchOptions)
+        launchOptions.args.push('--auto-open-devtools-for-tabs')
+
+        return launchOptions
+      })
+    },
   },
   hosts: {
     'foobar.com': '127.0.0.1',
