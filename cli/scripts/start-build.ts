@@ -29,12 +29,6 @@ shell.mkdir('-p', 'build/dist')
 shell.cp('dist/*.js', 'build/dist/')
 shell.cp('dist/*.mjs', 'build/dist/')
 
-shell.mkdir('-p', 'build/dist/exec')
-shell.cp('dist/exec/*.js', 'build/dist/exec')
-
-shell.mkdir('-p', 'build/dist/tasks')
-shell.cp('dist/tasks/*.js', 'build/dist/tasks')
-
 shell.mkdir('-p', 'build/dist/bin')
 shell.cp('dist/bin/cypress.js', 'build/dist/bin/cypress')
 // because this is a compiled file, it is read only and we need to grant execute permissions

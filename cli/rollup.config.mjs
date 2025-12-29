@@ -7,20 +7,14 @@ import path from 'path'
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf8').toString())
 
-const external = [
-  'lodash',
-  'commander',
-  'debug',
-  'chalk',
-  'fs-extra',
-  'execa',
-  'minimist',
-  'bluebird',
-  'listr2',
-  'systeminformation',
-  'yauzl',
-  'extract-zip',
-]
+function external (id) {
+  // We only want to bundle monorepo packages that aren't published to npm separately
+  if (pkg.dependencies[id] && !id.startsWith('@packages/')) {
+    return true
+  }
+
+  return false
+}
 
 export default [
   {
@@ -30,6 +24,16 @@ export default [
       name: pkg.name,
       format: 'cjs',
       dir: 'dist',
+      entryFileNames: (chunkInfo) => {
+        console.log(chunkInfo)
+        // Preserve directory structure: lib/bin/cypress.ts -> dist/bin/cypress.js
+        if (chunkInfo.moduleIds.some((id) => id.includes('bin/cypress'))) {
+          return 'bin/cypress.js'
+        }
+
+        // Other files: lib/index.ts -> dist/index.js, lib/cli.ts -> dist/cli.js
+        return '[name].js'
+      },
     },
     plugins: [
       typescript({
@@ -42,7 +46,7 @@ export default [
   },
   {
     input: 'lib/index.mts',
-    external,
+
     output: {
       name: pkg.name,
       format: 'esm',
