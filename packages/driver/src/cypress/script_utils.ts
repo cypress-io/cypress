@@ -36,7 +36,21 @@ const evalScripts = (specWindow, scripts: any = []) => {
     const [script, contents] = _script
 
     if (script.load) {
-      return script.load()
+      return new Promise((resolve, reject) => {
+        script.load().then(resolve).catch((e) => {
+          // if we fail to import the script, likely due to the vite dev server optimizing dependencies, then we need to reload the page
+          if (e.message.includes('Failed to fetch dynamically imported module') && script.isViteDevServerImport) {
+            // there could be a syncing issue between the time the dev server takes to reload vs
+            // the hardcoded 1 second timeout, but reloads are unlikely to take longer than 1 second
+            return setTimeout(() => {
+              window.location.reload()
+              resolve(undefined)
+            }, 1000)
+          }
+
+          return reject(e)
+        })
+      })
     }
 
     return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)

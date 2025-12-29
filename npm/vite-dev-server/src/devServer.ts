@@ -3,6 +3,7 @@ import semverMajor from 'semver/functions/major.js'
 import type { UserConfig } from 'vite-7'
 import { getVite, Vite } from './getVite.js'
 import { createViteDevServerConfig } from './resolveConfig.js'
+import express from 'express'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -37,12 +38,32 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
 
   debug('Vite server created')
 
-  await server.listen()
-  const { port } = server.config.server
+  let instance = await server.listen(5678)
+  const port = 5678
 
   if (!port) {
     throw new Error('Missing vite dev server port.')
   }
+
+  let isRunning = true
+
+  // this is working to reproduce the problem of the server "reloading"
+  // instead, we are actually starting/stopping the server dynamically to simulate the reloading scenario.
+  setTimeout(() => {
+    let interval = setInterval(async () => {
+      if (isRunning) {
+        debug('disabling vite server on port', port)
+
+        instance.close()
+        isRunning = false
+      } else {
+        debug('enabling vite server on port', port)
+        instance = await server.listen(port)
+        isRunning = true
+        clearInterval(interval)
+      }
+    }, 1500)
+  }, 5000)
 
   debug('Successfully launched the vite server on port', port)
 
@@ -52,19 +73,28 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
     close (cb) {
       debug('closing dev server')
 
-      return server.close().then(() => {
-        debug('closed dev server')
-        cb?.()
-      }).catch(cb)
+      // no-op for now
     },
   }
 }
 
 devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite) {
   try {
+    const app = express()
     const config = await createViteDevServerConfig(devServerConfig, vite)
 
-    return await vite.createServer(config)
+    config.server!.middlewareMode = true
+    config.appType = 'custom'
+
+    const viteServer = await vite.createServer(config)
+
+    // Use vite's connect instance as middleware
+    app.use(viteServer.middlewares)
+
+    // for testing purposes, use an express server that wraps the the vite server that we can dynamically start/stop
+    // in order to recreate a "optimizing dependencies" scenario that would cause the vite server to reload
+    // and possibly fail to load the scripts requested inside Cypress CT.
+    return app
   } catch (err) {
     if (err instanceof Error) {
       throw err

@@ -25,6 +25,15 @@ export default defineConfig({
       bundler: 'vite',
       framework: 'vue',
     },
+    setupNodeEvents (on, config) {
+      // automatically launch devtools in chrome for component tests inside the app
+
+      on('before:browser:launch', (browser, launchOptions) => {
+        launchOptions.args.push('--auto-open-devtools-for-tabs')
+
+        return launchOptions
+      })
+    },
   },
   hosts: {
     'foobar.com': '127.0.0.1',
