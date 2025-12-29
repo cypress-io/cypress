@@ -134,7 +134,7 @@
     "bluebird-retry": "0.11.0",
     "bytenode": "1.3.7",
     "chai": "4.5.0",
-    "chai-as-promised": "7.1.1",
+    "chai-as-promised": "7.1.2",
     "chalk": "2.4.2",
     "check-more-types": "2.24.0",
     "commander": "6.2.1",
@@ -283,7 +283,7 @@
     "@definitelytyped/typescript-versions": "0.1.9",
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.5",
-    "devtools-protocol": "0.0.1528500",
+    "devtools-protocol": "0.0.1559729",
     "node-abi": "4.9.0",
     "vue-template-compiler": "2.6.12",
     "yargs-unparser": "1.6.4"

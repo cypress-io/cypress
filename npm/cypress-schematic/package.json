@@ -11,15 +11,15 @@
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1",
-    "rxjs": "~7.8.2"
+    "rxjs": "~7.8.2",
+    "semver": "^7.7.3"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "^0.2001.6",
-    "@angular-devkit/core": "^20.1.6",
-    "@angular-devkit/schematics": "^20.1.6",
-    "@angular-devkit/schematics-cli": "^20.1.6",
-    "@angular/cli": "^20.1.6",
-    "@schematics/angular": "^20.1.6",
+    "@angular-devkit/architect": "^0.2100.2",
+    "@angular-devkit/core": "^21.0.2",
+    "@angular-devkit/schematics": "^21.0.2",
+    "@angular-devkit/schematics-cli": "^21.0.2",
+    "@schematics/angular": "^21.0.2",
     "@types/chai-enzyme": "0.6.14",
     "@types/mocha": "8.0.3",
     "@types/node": "^22.18.7",
@@ -28,8 +28,9 @@
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "@angular/cli": ">=18.0.0",
-    "@angular/core": ">=18.0.0"
+    "@angular/cli": ">=20.0.0",
+    "@angular/core": ">=20.0.0",
+    "cypress": "^15.8.0"
   },
   "license": "MIT",
   "repository": {
