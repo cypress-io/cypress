@@ -30,6 +30,56 @@ const extractSourceMap = ([script, contents]) => {
   })
   .then(() => [script, contents])
 }
+/**
+    // if the dynamic import failed, we can't exactly reimport the script as the import result is cached
+          // so we reload the retrigger all requests now that the dev server has restarted
+
+          // however, we could get in a state where the dev server has been terminated and we are constantly reloading the page
+          // to no end, causing an infinite loop. We need to find solutions to mitigate this
+ */
+
+const retryLoadScript = async (script, deferredPromise) => {
+  debugger
+  // window.location.reload()
+
+  fetch(`${script.absolute}?v=${Date.now()}`).then((response) => {
+    debugger
+
+    return response.text()
+  }).then((text) => {
+    debugger
+
+    return window.eval(text)
+  }).catch((e) => {
+    debugger
+    throw e
+  })
+
+  return script.fn(`${script.absolute}?v=${Date.now()}`).then((value) => {
+    // the script has been loaded successfully
+    debugger
+
+    deferredPromise.status = 'fulfilled'
+    deferredPromise.resolver(value)
+  }).catch((e) => {
+    debugger
+    // the retry has effectively timed out
+    if (deferredPromise.status === 'rejected') {
+      debugger
+
+      return
+    }
+
+    if (e.message.includes('Failed to fetch dynamically imported module') && script.retryable) {
+      debugger
+
+      return retryLoadScript(script, deferredPromise)
+    }
+
+    deferredPromise.status = 'rejected'
+    deferredPromise.rejector(e)
+  })
+}
 
 const evalScripts = (specWindow, scripts: any = []) => {
   return Bluebird.each(scripts, (_script: any) => {
@@ -38,6 +88,32 @@ const evalScripts = (specWindow, scripts: any = []) => {
     if (script.load) {
       return script.load().catch((e) => {
         debugger
+        if (e.message.includes('Failed to fetch dynamically imported module') && script.retryable) {
+          let resolver
+          let rejector
+
+          // @ts-expect-error
+          let deferredPromise: { promise: Promise<any>, resolver: (value: any) => void, rejector: (reason?: any) => void, status: 'fulfilled' | 'rejected' } = {}
+
+          debugger
+          deferredPromise.promise = new Promise((resolve, reject) => {
+            deferredPromise.resolver = resolve
+            deferredPromise.rejector = reject
+          })
+
+          debugger
+          retryLoadScript(script, deferredPromise)
+
+          setTimeout(() => {
+            debugger
+            deferredPromise.status = 'rejected'
+            deferredPromise.rejector(e)
+          }, 10000)
+
+          return deferredPromise.promise
+        }
+
+        throw e
       })
     }
 

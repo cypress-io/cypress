@@ -300,7 +300,7 @@ export class ProjectConfigIpc extends EventEmitter {
       // NOTE: The IDE in which you are working likely will not let attach to this process until it is running if using the --inspect option
       // If needing to debug the child process (webpack-dev-server/vite-dev-server/webpack-preprocessor(s)/config loading), you may want to use --inspect-brk instead
       // as it will NOT execute that process until you attach the debugger to it.
-      .push(`--inspect=${process.debugPort + 1}`)
+      .push(`--inspect-brk=${process.debugPort + 1}`)
       .value()
     }
 

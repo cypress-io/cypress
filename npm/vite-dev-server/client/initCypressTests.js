@@ -49,6 +49,7 @@ if (supportFile) {
 
   importsToLoad.push({
     load: () => import(relativeUrl),
+    retryable: true,
     absolute: supportFile,
     relative: supportRelativeToProjectRoot,
     relativeUrl,
@@ -65,6 +66,7 @@ const testFileAbsolutePathRoute = `${devServerPublicPathBase}/@fs/${normalizedAb
 // We need a slash before /src/my-spec.js, this does not happen by default.
 importsToLoad.push({
   load: () => import(testFileAbsolutePathRoute),
+  retryable: true,
   absolute: CypressInstance.spec.absolute,
   relative: CypressInstance.spec.relative,
   relativeUrl: testFileAbsolutePathRoute,
