@@ -1,8 +1,8 @@
-const portCheck = Cypress.env('PORT_CHECK')
-
 it('ensures we have launched at the overridden port', () => {
-  expect(portCheck).to.be.a('number')
-  expect(portCheck).to.be.oneOf([8888, 9999])
+  cy.env(['PORT_CHECK']).then(({ PORT_CHECK }) => {
+    expect(PORT_CHECK).to.be.a('number')
+    expect(PORT_CHECK).to.be.oneOf([8888, 9999])
 
-  expect(window.location.host).to.eq(`localhost:${portCheck}`)
+    expect(window.location.host).to.eq(`localhost:${PORT_CHECK}`)
+  })
 })

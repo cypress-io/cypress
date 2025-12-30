@@ -28,6 +28,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
   'EXPERIMENTAL_STUDIO_REMOVED',
+  'CYPRESS_ENV_DEPRECATION',
 ] as const
 
 type ValidationOptions = {
@@ -91,6 +92,10 @@ export interface BreakingOption {
     * Whether to show the error message in the launchpad
     */
   showInLaunchpad?: boolean
+  /**
+   * Whether to display or throw the error message based on the configuration value present.
+   */
+  shouldDisplayOrThrow?: (value: any) => boolean
 }
 
 const isValidConfig = (testingType: string, config: any, opts: ValidationOptions) => {
@@ -177,6 +182,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: 4000,
     validation: validate.isNumber,
     overrideLevel: 'any',
+  }, {
+    name: 'allowCypressEnv',
+    defaultValue: true,
+    validation: validate.isBoolean,
+    overrideLevel: 'never',
+    requireRestartOnChange: 'server',
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
@@ -641,6 +652,13 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   {
     name: 'experimentalStudio',
     errorKey: 'EXPERIMENTAL_STUDIO_REMOVED',
+    isWarning: true,
+  },
+  {
+    name: 'allowCypressEnv',
+    errorKey: 'CYPRESS_ENV_DEPRECATION',
+    // Display this warning if the value is not present or is explicitly false
+    shouldDisplayOrThrow: (value: any) => value !== false,
     isWarning: true,
   },
 ] as const

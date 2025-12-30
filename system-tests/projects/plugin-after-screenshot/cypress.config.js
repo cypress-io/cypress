@@ -3,6 +3,7 @@ const path = require('path')
 const replacementPath = path.join(__dirname, './screenshot-replacement.png')
 
 module.exports = {
+  'allowCypressEnv': false,
   'e2e': {
     'supportFile': false,
     setupNodeEvents (on, config) {

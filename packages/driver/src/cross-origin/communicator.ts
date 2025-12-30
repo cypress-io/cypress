@@ -272,7 +272,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
   private syncGlobalsToPrimary = () => {
     this.toPrimary('sync:globals', {
       config: preprocessConfig(Cypress.config()),
-      env: preprocessEnv(Cypress.env()),
+      env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
     })
   }
 

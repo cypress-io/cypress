@@ -25,7 +25,9 @@ describe('e2e experimentalSkipDomainInjection=true', () => {
       hosts: {
         '*.foobar.com': '127.0.0.1',
       },
-      e2e: {},
+      e2e: {
+        allowCypressEnv: false,
+      },
     },
   })
 

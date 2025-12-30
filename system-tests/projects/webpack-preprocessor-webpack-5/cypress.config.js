@@ -21,6 +21,7 @@ const { defineConfig } = require('cypress')
 const wp = require('@cypress/webpack-preprocessor')
 
 module.exports = defineConfig({
+  allowCypressEnv: false,
   e2e: {
     supportFile: false,
     setupNodeEvents (on, config) {

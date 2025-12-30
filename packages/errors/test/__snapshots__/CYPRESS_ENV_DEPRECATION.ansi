@@ -1,0 +1,8 @@
+[31mThe use of [33mCypress.env()[39m[31m is deprecated and will be removed in a future major version of Cypress.[39m
+[31m[39m
+[31mCypress recommends migrating to the [33mcy.env()[39m[31m command and disabling [33mallowCypressEnv[39m[31m within your Cypress configuration.[39m
+[31m[39m
+[31mThe use of [33mCypress.env()[39m[31m will warn and throw an error when [33mallowCypressEnv[39m[31m is explicitly set to false.[39m
+[31m[39m
+[31mRead our [33mMigration Guide[39m[31m for the [33mallowCypressEnv[39m[31m configuration option, why [33mCypress.env()[39m[31m is deprecated, and how to migrate to [33mcy.env()[39m[31m: https://on.cypress.io/cypress-env-migration.[39m
+[31m[39m

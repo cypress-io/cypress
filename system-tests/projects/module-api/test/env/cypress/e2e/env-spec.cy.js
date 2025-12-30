@@ -2,10 +2,11 @@
 it('has expected env variables', () => {
   // this test checks environment variables
   // passed via "cypress.run" arguments
-  cy.wrap(Cypress.env()).should('deep.include', {
-    foo: {
+  cy.env(['foo', 'another']).then(({ foo, another }) => {
+    cy.wrap(foo).should('deep.include', {
       bar: 'baz',
-    },
-    another: 42,
+    })
+
+    cy.wrap(another).should('equal', 42)
   })
 })

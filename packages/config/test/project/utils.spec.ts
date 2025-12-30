@@ -1182,6 +1182,7 @@ describe('config/src/project/utils', () => {
           clientCertificates: { value: [], from: 'default' },
           defaultBrowser: { value: null, from: 'default' },
           defaultCommandTimeout: { value: 4000, from: 'default' },
+          allowCypressEnv: { value: true, from: 'default' },
           downloadsFolder: { value: 'cypress/downloads', from: 'default' },
           env: {},
           excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
@@ -1278,6 +1279,7 @@ describe('config/src/project/utils', () => {
           clientCertificates: { value: [], from: 'default' },
           defaultBrowser: { value: null, from: 'default' },
           defaultCommandTimeout: { value: 4000, from: 'default' },
+          allowCypressEnv: { value: true, from: 'default' },
           downloadsFolder: { value: 'cypress/downloads', from: 'default' },
           env: {
             foo: {
