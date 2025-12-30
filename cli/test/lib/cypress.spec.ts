@@ -234,6 +234,7 @@ describe('cypress', function () {
     describe('.parseRunArguments', function () {
       it('parses CLI cypress run arguments', async () => {
         const args = 'cypress run --browser chrome --spec my/test/spec.js'.split(' ')
+
         const options = await cypress.cli.parseRunArguments(args)
 
         expect(options).toEqual({
