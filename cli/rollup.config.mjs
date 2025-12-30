@@ -24,16 +24,8 @@ export default [
       name: pkg.name,
       format: 'cjs',
       dir: 'dist',
-      entryFileNames: (chunkInfo) => {
-        console.log(chunkInfo)
-        // Preserve directory structure: lib/bin/cypress.ts -> dist/bin/cypress.js
-        if (chunkInfo.moduleIds.some((id) => id.includes('bin/cypress'))) {
-          return 'bin/cypress.js'
-        }
-
-        // Other files: lib/index.ts -> dist/index.js, lib/cli.ts -> dist/cli.js
-        return '[name].js'
-      },
+      preserveModules: true,
+      preserveModulesRoot: 'lib',
     },
     plugins: [
       typescript({
