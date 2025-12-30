@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-var cli = require('../dist/cli');
+const CLI = require('../dist/cli')
 
-// declared here in order to avoid consumers who are looking for the binary to be available relative to the dist directory
-cli.init();
+CLI.init()
