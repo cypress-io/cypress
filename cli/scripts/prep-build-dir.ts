@@ -7,5 +7,5 @@ shell.set('-e') // any error is fatal
 shell.cp('NPM_README.md', 'build/README.md')
 shell.cp('.release.json', 'build/.release.json')
 
-shell.cp('bin', 'build')
+shell.cp('-R', 'bin', 'build')
 shell.cp('-R', 'types', 'build')

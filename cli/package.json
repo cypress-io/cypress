@@ -4,7 +4,7 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "build-cli": "rollup -c && postbuild",
+    "build-cli": "rollup -c && yarn postbuild",
     "build": "rollup -c",
     "clean": "rimraf build dist types",
     "dtslint": "dtslint types",
