@@ -18,7 +18,7 @@ function external (id) {
 
 export default [
   {
-    input: ['lib/index.ts', 'lib/cli.ts', 'lib/bin/cypress.ts'],
+    input: ['lib/index.ts', 'lib/cli.ts', 'lib/bin/cypress.ts', 'lib/exec/xvfb.ts'],
     external,
     output: {
       name: pkg.name,
