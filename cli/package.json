@@ -11,7 +11,7 @@
     "lint": "eslint",
     "postinstall": "patch-package && tsx ./scripts/sync-typedefs.ts",
     "prebuild": "yarn clean-cli-build && yarn postinstall && tsx ./scripts/prep-build-dir.ts",
-    "postbuild": "cp -R dist build && tsx ./scripts/build-published-package-json.ts && tsx ./scripts/bundle-ct-frameworks.ts",
+    "postbuild": "cp -R dist build && tsx ./scripts/prepare-package-json.ts && tsx ./scripts/bundle-ct-frameworks.ts",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "npx vitest --inspect-brk --no-file-parallelism --test-timeout=0",

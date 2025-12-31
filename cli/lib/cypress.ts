@@ -10,7 +10,7 @@ import cliImport from './cli'
    * Opens Cypress GUI
    * @see https://on.cypress.io/module-api#cypress-open
    */
-function open (options: any = {}): any {
+export function open (options: any = {}): any {
   options = util.normalizeModuleOptions(options)
 
   return openModule.start(options)
@@ -20,7 +20,7 @@ function open (options: any = {}): any {
  * Runs Cypress tests in the current project
  * @see https://on.cypress.io/module-api#cypress-run
  */
-async function run (options: any = {}): Promise<any> {
+export async function run (options: any = {}): Promise<any> {
   if (!runModule.isValidProject(options.project)) {
     throw new Error(`Invalid project path parameter: ${options.project}`)
   }
@@ -46,7 +46,7 @@ async function run (options: any = {}): Promise<any> {
   return output
 }
 
-const cli = {
+export const cli = {
   /**
    * Parses CLI arguments into an object that you can pass to "cypress.run"
    * @example
@@ -75,7 +75,7 @@ const cli = {
  * @param {Cypress.ConfigOptions} config
  * @returns {Cypress.ConfigOptions} the configuration passed in parameter
  */
-function defineConfig (config: any): any {
+export function defineConfig (config: any): any {
   return config
 }
 
@@ -93,14 +93,6 @@ function defineConfig (config: any): any {
  * @param {Cypress.ThirdPartyComponentFrameworkDefinition} config
  * @returns {Cypress.ThirdPartyComponentFrameworkDefinition} the configuration passed in parameter
  */
-function defineComponentFramework (config: any): any {
+export function defineComponentFramework (config: any): any {
   return config
-}
-
-export = {
-  open,
-  run,
-  cli,
-  defineConfig,
-  defineComponentFramework,
 }
