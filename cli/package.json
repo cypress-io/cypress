@@ -183,6 +183,11 @@
           "{projectRoot}/types",
           "{projectRoot}/build"
         ]
+      },
+      "test": {
+        "dependsOn": [
+          "build-cli"
+        ]
       }
     },
     "implicitDependencies": [
