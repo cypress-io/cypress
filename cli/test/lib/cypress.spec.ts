@@ -5,7 +5,7 @@ import tmp from 'tmp'
 import fs from 'fs-extra'
 import open from '../../lib/exec/open'
 import run from '../../lib/exec/run'
-import cypress from '../../lib/cypress'
+import * as cypress from '../../lib/cypress'
 
 vi.mock('fs-extra', async (importActual) => {
   const actual = await importActual()
