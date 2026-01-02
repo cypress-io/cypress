@@ -1,10 +1,4 @@
-// ffprobe is necessary to extract chapters data from mp4 files.
-// ffprobe is usually installed with ffmpeg.
-// But in our CI, it doesn't. That's why we're installing ffprobe here.
-const ffprobePath = require('@ffprobe-installer/ffprobe').path
 const ffmpeg = require('fluent-ffmpeg')
-
-ffmpeg.setFfprobePath(ffprobePath)
 
 const path = require('path')
 const fs = require('fs-extra')
