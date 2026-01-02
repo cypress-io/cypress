@@ -14583,10 +14583,10 @@ detect-port@^2.1.0:
   dependencies:
     address "^2.0.1"
 
-devtools-protocol@0.0.1159816, devtools-protocol@0.0.1559729, devtools-protocol@0.0.927104:
-  version "0.0.1559729"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1559729.tgz#18520069cb678b3e9e62f897d6f7e81d1c181260"
-  integrity sha512-sk6UgGEYzgdTmlmwrgRmRO1PmiA0ak+2Qu2/XBepzhRIM68HiyQ/AzvEhoXZsXxJJWxscE3ohCcU44JiB4ZjjA==
+devtools-protocol@0.0.1159816, devtools-protocol@0.0.1561482, devtools-protocol@0.0.927104:
+  version "0.0.1561482"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1561482.tgz#631522b0f59d5ef98f803b5dd8c58e035cacf86a"
+  integrity sha512-nSXIMgdQxupOkVN94VPoE01UWJVXPOJ/IkEDQOlDbx3tmGzlKgVd3b54AT1cy8XIb4TQPcYac1nxYntEhiFKAQ==
 
 didyoumean@^1.2.2:
   version "1.2.2"
