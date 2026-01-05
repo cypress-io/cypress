@@ -8,7 +8,7 @@ const pkg = JSON.parse(readFileSync('./package.json', 'utf8').toString())
 
 function external (id, parent, resolved) {
   // We only want to bundle monorepo packages that aren't published to npm separately
-  if (id.includes('node_modules') && !id.startsWith('@packages/') && !id.includes('tslib')) {
+  if (id.includes('node_modules') && !id.startsWith('@packages/')) {
     return true
   }
 
