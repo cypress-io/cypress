@@ -8,6 +8,10 @@ _Released 12/30/2025 (PENDING)_
 - Fixed an issue where the ffprobe path was not properly configured for video operations. The path is now set at module load time, ensuring it's available for all video operations. Upgraded `@ffprobe-installer/ffprobe` from `1.1.0` to `2.1.2` to support darwin-arm64 (Apple Silicon). Addressed in [#33136](https://github.com/cypress-io/cypress/pull/33136).
 - Fixed an issue where `test:after:run` and `test:after:run:async` events were not firing after both a `before all` and `after all` hook failed. Addressed in [#33172](https://github.com/cypress-io/cypress/pull/33172).
 
+**Dependency Updates:**
+
+- Upgraded `@cypress/request` to `3.0.10`. This removes the [CVE-2025-15284](https://security.snyk.io/vuln/SNYK-JS-QS-14724253) vulnerability being reported in security scans. Addressed in [#33188](https://github.com/cypress-io/cypress/pull/33188).
+
 ## 15.8.1
 
 _Released 12/18/2025_
