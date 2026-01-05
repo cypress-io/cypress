@@ -58,6 +58,7 @@
     "supports-color": "^8.1.1",
     "systeminformation": "^5.27.14",
     "tmp": "~0.2.4",
+    "tslib": "1.14.1",
     "tree-kill": "1.2.2",
     "untildify": "^4.0.0",
     "yauzl": "^2.10.0"
