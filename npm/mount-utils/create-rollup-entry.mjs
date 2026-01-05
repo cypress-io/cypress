@@ -2,7 +2,7 @@
 import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-import { mergeWith } from 'lodash'
+import _ from 'lodash'
 import { readFileSync } from 'fs'
 import dts from 'rollup-plugin-dts'
 
@@ -51,7 +51,7 @@ export function createEntries (options) {
       },
     }
 
-    const finalConfig = mergeWith({}, baseConfig, config, (objValue, srcValue) => {
+    const finalConfig = _.mergeWith({}, baseConfig, config, (objValue, srcValue) => {
       if (Array.isArray(objValue)) {
         return objValue.concat(srcValue)
       }

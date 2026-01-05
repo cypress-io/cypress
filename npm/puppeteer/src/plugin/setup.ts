@@ -1,4 +1,4 @@
-import { isPlainObject } from 'lodash'
+import isPlainObject from 'lodash/isPlainObject'
 import defaultPuppeteer, { Browser, PuppeteerNode } from 'puppeteer-core'
 import { pluginError } from './util'
 import { activateMainTab } from './activateMainTab'
