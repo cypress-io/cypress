@@ -43,4 +43,14 @@ if (args.exec) {
 // this is how the module needs to be exported to avoid a breaking change
 // default exports WILL BREAK in a CJS context through a require('cypress') call
 
-exports = cypress
+export const open = cypress.open
+
+export const run = cypress.run
+
+export const cli = cypress.cli
+
+export const defineConfig = cypress.defineConfig
+
+export const defineComponentFramework = cypress.defineComponentFramework
+
+export default cypress
