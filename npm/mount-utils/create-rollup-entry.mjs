@@ -2,7 +2,7 @@
 import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-import mergeWith from 'lodash.mergewith'
+import { mergeWith } from 'lodash'
 import { readFileSync } from 'fs'
 import dts from 'rollup-plugin-dts'
 

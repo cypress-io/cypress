@@ -18,12 +18,11 @@
     "watch": "rimraf dist && tsc --watch"
   },
   "dependencies": {
-    "lodash.isplainobject": "^4.0.6",
+    "lodash": "^4.17.21",
     "puppeteer-core": "^21.2.1"
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "@types/lodash.isplainobject": "^4.0.9",
     "@types/node": "^22.18.7",
     "eslint": "^9.31.0",
     "express": "4.21.0",
