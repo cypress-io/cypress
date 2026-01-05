@@ -1,5 +1,5 @@
 import { createOutputSpy } from 'cypress/angular-zoneless'
-import { EventEmitter, Component } from '@angular/core'
+import { EventEmitter, Component, NgModule } from '@angular/core'
 import type { InputSignal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 
@@ -28,7 +28,12 @@ import { UrlImageComponent } from './components/url-image.component'
   standalone: false,
   template: `<app-projection>Hello World</app-projection>`,
 })
-class WrapperComponent {}
+export class WrapperComponent {}
+
+@NgModule({
+  declarations: [WrapperComponent, ProjectionComponent],
+})
+export class WrapperModule {}
 
 // Starting with Angular v19, standalone = true is the new default behavior.
 // This means that the ng module configurations, including test module configurations,

@@ -4,7 +4,7 @@ import {
   automationCookieToToughCookie,
   SerializableAutomationCookie,
 } from '@packages/server/lib/util/cookies'
-import type { Cookie as ToughCookie } from 'tough-cookie'
+import type { Cookie as ToughCookie } from '@packages/server/lib/util/cookies'
 
 function isHostOnlyCookie (domain) {
   return domain[0] !== '.'

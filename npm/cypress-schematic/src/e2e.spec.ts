@@ -25,7 +25,7 @@ const runCommandInProject = (command: string, projectPath: string) => {
 
 const cypressSchematicPackagePath = path.join(__dirname, '..')
 
-const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-19', 'angular-20']
+const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-20', 'angular-21']
 
 describe('ng add @cypress/schematic / only e2e', { timeout: 1000 * 60 * 5 }, function () {
   for (const project of ANGULAR_PROJECTS) {
@@ -33,7 +33,13 @@ describe('ng add @cypress/schematic / only e2e', { timeout: 1000 * 60 * 5 }, fun
       const projectPath = await scaffoldAngularProject(project)
 
       await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
-      await runCommandInProject('yarn ng add @cypress/schematic --e2e --component false --add-ct-specs false', projectPath)
+      if (project === 'angular-21') {
+        // for angular 21, we have component testing files inside the source directory, so we need the component flag to set up the support file to declare the mount function
+        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component --add-ct-specs false', projectPath)
+      } else {
+        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component false --add-ct-specs false', projectPath)
+      }
+
       await runCommandInProject('yarn ng e2e --watch false', projectPath)
     })
   }

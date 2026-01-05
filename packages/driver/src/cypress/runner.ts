@@ -25,7 +25,7 @@ const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
 
 const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
 const RUNNABLE_PROPS = [
-  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'failedFromHookName', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
 ] as const
 
 const debug = debugFn('cypress:driver:runner')
@@ -363,12 +363,12 @@ const isLastSuite = (suite, tests) => {
 // if we failed from a hook and that hook was 'before'
 // since then mocha skips the remaining tests in the suite
 const lastTestThatWillRunInSuite = (test, tests): boolean => {
-  return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
+  return isLastTest(test, tests) || (test.failedFromHookId && (test.failedFromHookName === 'before all'))
 }
 
 const nextTestThatWillRunInSuite = (test, tests) => {
   // if the test failed in the before all hook, then we are the next test that will run
-  if (test.failedFromHookId && (test.hookName === 'before all')) {
+  if (test.failedFromHookId && (test.failedFromHookName === 'before all')) {
     return null
   }
 
@@ -951,7 +951,10 @@ const setHookFailureProps = (test, hook, err) => {
   test.state = 'failed'
   test.duration = hook.duration // TODO: nope (?)
   test.hookName = hookName // TODO: why are we doing this?
-  test.failedFromHookId = hook.hookId
+  // Only update the failedFromHookId and failedFromHookName if they are not already set. This
+  // is to handle a case where a before hook fails then an after hook fails
+  test.failedFromHookId = test.failedFromHookId ? test.failedFromHookId : hook.hookId
+  test.failedFromHookName = test.failedFromHookName ? test.failedFromHookName : hookName
   // There should never be a case where the outerStatus of a test is set AND the last test attempt failed on a hook and the state is passed.
   // Therefore, if the last test attempt fails on a hook, the outerStatus should also indicate a failure.
   if (test?._cypressTestStatusInfo?.outerStatus) {
