@@ -276,6 +276,7 @@
   "resolutions": {
     "**/@types/cheerio": "0.22.35",
     "**/@types/enzyme": "3.10.19",
+    "**/@types/node": "22.18.7",
     "**/form-data": "^4.0.4",
     "**/jquery": "3.7.1",
     "**/socket.io-parser": "4.0.5",
