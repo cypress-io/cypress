@@ -96,6 +96,7 @@
     "@types/dedent": "^0.7.2",
     "@types/ejs": "^3.1.5",
     "@types/fs-extra": "^8.1.5",
+    "@types/getenv": "^1.0.0",
     "@types/graphql-resolve-batch": "1.1.11",
     "@types/jest": "^30.0.0",
     "@types/micromatch": "4.0.10",
