@@ -7,6 +7,11 @@ import { readFileSync } from 'fs'
 const pkg = JSON.parse(readFileSync('./package.json', 'utf8').toString())
 
 function external (id, parent, resolved) {
+  // Bundle tslib so that we include ts helpers
+  if (id === 'tslib' || id.startsWith('tslib/') || id.includes('tslib/tslib.es6.js')) {
+    return false
+  }
+
   // We only want to bundle monorepo packages that aren't published to npm separately
   if (id.includes('node_modules') && !id.startsWith('@packages/')) {
     return true
