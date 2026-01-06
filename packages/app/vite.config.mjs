@@ -30,7 +30,6 @@ const config = makeConfig({
       'dayjs/plugin/customParseFormat',
       'dayjs/plugin/utc',
       'markdown-it',
-      '@toycode/markdown-it-class',
       '@cypress-design/vue-tabs',
       'gravatar',
       '@opentelemetry/sdk-trace-web',
@@ -43,6 +42,9 @@ const config = makeConfig({
       'semver/functions/major',
       '@vueuse/core',
       'javascript-time-ago',
+    ],
+    exclude: [
+      '@toycode/markdown-it-class',
     ],
     esbuildOptions: {
       target: 'ES2022',
