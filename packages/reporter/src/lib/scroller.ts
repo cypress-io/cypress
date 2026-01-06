@@ -84,15 +84,29 @@ export class Scroller {
       scrollTopGoal = 0
     }
 
+    // Use setScrollTop to get early exit check and avoid unnecessary DOM writes
+    // Check if already at target position before decrementing user scroll count
+    if (this._isScrollPositionNear(this._container.scrollTop, scrollTopGoal)) {
+      return
+    }
+
     this._userScrollCount--
-    this._container.scrollTop = scrollTopGoal
+    this.setScrollTop(scrollTopGoal)
   }
 
   _isFullyVisible (element: HTMLElement) {
     if (!this._container) return false
 
-    return element.offsetTop - this._container.scrollTop > 0
-           && this._container.scrollTop > this._aboveBottom(element)
+    const scrollTop = this._container.scrollTop
+    const elementOffsetTop = element.offsetTop
+
+    // Early exit if element is above the visible area
+    if (elementOffsetTop - scrollTop <= 0) {
+      return false
+    }
+
+    // Check if scroll position is above the calculated bottom position
+    return scrollTop > this._aboveBottom(element)
   }
 
   _aboveBottom (element: HTMLElement) {
@@ -100,9 +114,20 @@ export class Scroller {
     // the offset, causing the running command to be half cut off
     // https://github.com/cypress-io/cypress/issues/228
 
-    const containerHeight = this._container ? this._container.clientHeight : 0
+    if (!this._container) return 0
 
-    return element.offsetTop + element.clientHeight - containerHeight + PADDING
+    const elementOffsetTop = element.offsetTop
+    const elementClientHeight = element.clientHeight
+    const containerHeight = this._container.clientHeight
+
+    return elementOffsetTop + elementClientHeight - containerHeight + PADDING
+  }
+
+  // Check if two scroll positions are within 1px tolerance.
+  // Used to avoid unnecessary DOM writes when scroll position is already at target.
+  // The 1px tolerance accounts for sub-pixel rendering differences.
+  _isScrollPositionNear (current: number, target: number): boolean {
+    return Math.abs(current - target) <= 1
   }
 
   getScrollTop () {
@@ -110,15 +135,37 @@ export class Scroller {
   }
 
   setScrollTop (scrollTop?: number | null) {
-    if (this._container && scrollTop != null) {
-      this._container.scrollTop = scrollTop
+    if (!this._container || scrollTop == null) return
+
+    // Validate scrollTop is a finite number
+    if (!Number.isFinite(scrollTop)) {
+      return
     }
+
+    // Early exit if already at target position (within 1px tolerance for sub-pixel rendering)
+    const currentScrollTop = this._container.scrollTop
+
+    if (this._isScrollPositionNear(currentScrollTop, scrollTop)) {
+      return
+    }
+
+    this._container.scrollTop = scrollTop
   }
 
   scrollToEnd () {
     if (!this._container) return
 
-    this.setScrollTop(this._container.scrollHeight - this._container.clientHeight)
+    const scrollHeight = this._container.scrollHeight
+    const clientHeight = this._container.clientHeight
+    const currentScrollTop = this._container.scrollTop
+    const targetScrollTop = scrollHeight - clientHeight
+
+    // Early exit if already at or near the end (within 1px to account for rounding)
+    if (this._isScrollPositionNear(currentScrollTop, targetScrollTop)) {
+      return
+    }
+
+    this.setScrollTop(targetScrollTop)
   }
 
   // for testing purposes
