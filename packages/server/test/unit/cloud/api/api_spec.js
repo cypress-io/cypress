@@ -1,6 +1,7 @@
 const crypto = require('crypto')
 const jose = require('jose')
 const base64Url = require('base64url')
+const stealthyRequire = require('stealthy-require')
 
 require('../../../spec_helper')
 
@@ -242,13 +243,14 @@ describe('lib/cloud/api', () => {
       process.env.CYPRESS_API_URL = 'https://some.server.com'
 
       if (!prodApi) {
-        // Clear module cache to allow re-evaluation with new environment variables
-        // The routes module reads CYPRESS_CONFIG_ENV at module load time
-        delete require.cache[require.resolve('../../../../lib/cloud/api')]
-        delete require.cache[require.resolve('../../../../lib/cloud/routes')]
-        delete require.cache[require.resolve('../../../../lib/cloud/encryption')]
-
-        prodApi = require('../../../../lib/cloud/api').default
+        // Use stealthy-require to temporarily clear module cache and re-require
+        // with new environment variables. The routes module reads CYPRESS_CONFIG_ENV
+        // at module load time, so we need to re-evaluate it with the new env vars.
+        prodApi = stealthyRequire(require.cache, () => {
+          return require('../../../../lib/cloud/api').default
+        }, () => {
+          require('../../../../lib/cloud/encryption')
+        }, module)
       }
 
       prodApi.resetPreflightResult()
