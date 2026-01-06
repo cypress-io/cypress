@@ -273,6 +273,7 @@
     "./node_modules/chokidar/lib/fsevents-handler.js",
     "./node_modules/chokidar/lib/nodefs-handler.js",
     "./node_modules/chokidar/node_modules/glob-parent/index.js",
+    "./node_modules/chownr/chownr.js",
     "./node_modules/chrome-remote-interface/index.js",
     "./node_modules/chrome-remote-interface/lib/chrome.js",
     "./node_modules/chrome-remote-interface/node_modules/ws/index.js",
@@ -609,7 +610,6 @@
     "./node_modules/tar/lib/types.js",
     "./node_modules/tar/lib/unpack.js",
     "./node_modules/tar/lib/write-entry.js",
-    "./node_modules/tar/node_modules/chownr/chownr.js",
     "./node_modules/tar/node_modules/fs-minipass/index.js",
     "./node_modules/tar/node_modules/fs-minipass/node_modules/minipass/index.js",
     "./node_modules/tar/node_modules/minipass/index.js",
@@ -4310,5 +4310,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "b46e0fedd3b437dcdbfc47287722d5dbaa9c49685e7808db4a0185d60648fa08"
+  "deferredHash": "ff692e20276b8f8d6be3a7f14676895ac17bba4037b31d73232c03510c9178d8"
 }
