@@ -15,7 +15,7 @@ import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser, AutomationCommands } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
-import type { BrowserInstance } from './browsers/types'
+import type { BrowserInstance, Browser } from './browsers/types'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -55,7 +55,7 @@ export class OpenProject {
     return this.projectBase
   }
 
-  async launch (browser, spec: Cypress.Cypress['spec'], prevOptions?: OpenProjectLaunchOpts) {
+  async launch (browser: FoundBrowser & Partial<{ isHeaded: boolean, isHeadless: boolean }>, spec: Cypress.Cypress['spec'], prevOptions?: OpenProjectLaunchOpts) {
     this._ctx = getCtx()
 
     assert(this.projectBase, 'Cannot launch runner if projectBase is undefined!')
@@ -82,7 +82,7 @@ export class OpenProject {
     if (!cfg.proxyServer) throw new Error('Missing proxyServer in launch')
 
     const options: BrowserLaunchOpts = {
-      browser,
+      browser: browser as FoundBrowser & { isHeadless: boolean },
       url,
       // TODO: fix majorVersion discrepancy that causes this to be necessary
       browsers: cfg.browsers as FoundBrowser[],
@@ -173,7 +173,7 @@ export class OpenProject {
 
       // TODO: Stub this so we can detect it being called
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF) {
-        return await browsers.connectToExisting(browser, options, automation, this._ctx?.coreData.servers.cdpSocketServer)
+        return await browsers.connectToExisting(browser as Browser, options, automation, this._ctx?.coreData.servers.cdpSocketServer)
       }
 
       // if we should launch a new tab and we are not running in electron (which does not support connecting to a new spec)
@@ -186,12 +186,12 @@ export class OpenProject {
         // If we do not launch the browser,
         // we tell it that we are ready
         // to receive the next spec
-        return await browsers.connectToNewSpec(browser, { onInitializeNewBrowserTab, ...options }, automation, this._ctx?.coreData.servers.cdpSocketServer)
+        return await browsers.connectToNewSpec(browser as Browser, { onInitializeNewBrowserTab, ...options }, automation, this._ctx?.coreData.servers.cdpSocketServer)
       }
 
       options.relaunchBrowser = this.relaunchBrowser
 
-      return await browsers.open(browser, options, automation, this._ctx!)
+      return await browsers.open(browser as Browser, options, automation, this._ctx!)
     }
 
     return this.relaunchBrowser()

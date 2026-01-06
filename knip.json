@@ -383,11 +383,18 @@
       "entry": [
         "src/browser.ts",
         "src/loader.ts",
-        "src/aut-runner.ts"
+        "src/aut-runner.ts",
+        "cypress/e2e/webpack-dev-server.cy.ts",
+        "cypress/e2e/react.cy.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@angular-devkit/core",
+        "next",
+        "html-webpack-plugin"
       ]
     },
     "npm/cypress-schematic": {
@@ -397,6 +404,11 @@
       ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@angular-devkit/schematics-cli",
+        "@angular/cli",
+        "@schematics/angular"
       ]
     },
     "npm/webpack-batteries-included-preprocessor": {
@@ -413,27 +425,46 @@
         "process",
         "@babel/plugin-transform-class-properties",
         "@babel/plugin-transform-object-rest-spread",
-        "babel-plugin-add-module-exports"
+        "babel-plugin-add-module-exports",
+        "@paths/.+"
       ]
     },
     "npm/webpack-preprocessor": {
       "entry": [
-        "index.ts"
+        "index.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@babel/core",
+        "@babel/preset-env",
+        "babel-loader"
       ]
     },
     "npm/vite-dev-server": {
+      "entry": [
+        "cypress/e2e/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "vite",
+        "tslib"
       ]
     },
     "npm/puppeteer": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "express"
       ]
     },
     "npm/svelte": {
@@ -442,8 +473,15 @@
       ]
     },
     "npm/react": {
+      "entry": [
+        "cypress/component/**/*.{jsx,tsx,cy.jsx,cy.tsx}"
+      ],
       "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
+        "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "react-router"
       ]
     },
     "npm/grep": {
@@ -452,8 +490,12 @@
       ]
     },
     "npm/vue": {
+      "entry": [
+        "cypress/component/**/*.{vue,js,ts,cy.js,cy.ts}"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{vue,ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ]
     },
@@ -464,13 +506,30 @@
     },
     "npm/mount-utils": {
       "project": [
-        "src/**/*.{ts,tsx,js,jsx}"
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx,mjs}"
+      ],
+      "ignoreDependencies": [
+        "@rollup/plugin-commonjs",
+        "@rollup/plugin-node-resolve",
+        "rollup",
+        "rollup-plugin-dts",
+        "rollup-plugin-typescript2",
+        "eslint"
       ]
     },
     "npm/vite-plugin-cypress-esm": {
+      "entry": [
+        "cypress/component/**/*.{ts,tsx,cy.ts,cy.tsx}",
+        "cypress.config.ts"
+      ],
       "project": [
         "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "react-router"
       ]
     },
     "npm/*": {
@@ -549,6 +608,7 @@
     "**/postcss.config.{js,ts,cjs,mjs}",
     "**/apollo.config.{js,ts}",
     "**/webpack.config.{js,ts,mjs}",
+    "**/babel.config.{js,ts,cjs,mjs}",
     "**/gulpfile.{js,ts}",
     "scripts/**",
     "**/patches/**",

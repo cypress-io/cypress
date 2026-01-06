@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "15.8.1",
+  "version": "15.8.2",
   "description": "Cypress is a next generation front end testing tool built for the modern web",
   "private": true,
   "scripts": {
@@ -79,7 +79,7 @@
     "@aws-sdk/client-s3": "3.485.0",
     "@aws-sdk/credential-providers": "3.53.0",
     "@babel/eslint-parser": "7.28.0",
-    "@cypress/request": "^3.0.9",
+    "@cypress/request": "^3.0.10",
     "@cypress/request-promise": "^5.0.0",
     "@electron/fuses": "1.8.0",
     "@electron/notarize": "^2.5.0",
@@ -276,6 +276,7 @@
   "resolutions": {
     "**/@types/cheerio": "0.22.35",
     "**/@types/enzyme": "3.10.19",
+    "**/@types/node": "22.18.7",
     "**/form-data": "^4.0.4",
     "**/jquery": "3.7.1",
     "**/socket.io-parser": "4.0.5",
@@ -283,7 +284,7 @@
     "@definitelytyped/typescript-versions": "0.1.9",
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.5",
-    "devtools-protocol": "0.0.1559729",
+    "devtools-protocol": "0.0.1561482",
     "node-abi": "4.9.0",
     "vue-template-compiler": "2.6.12",
     "yargs-unparser": "1.6.4"
