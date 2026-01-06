@@ -41,6 +41,8 @@ const config = makeConfig({
       '@opentelemetry/exporter-trace-otlp-http',
       '@opentelemetry/core',
       'semver/functions/major',
+      '@vueuse/core',
+      'javascript-time-ago',
     ],
     esbuildOptions: {
       target: 'ES2022',
