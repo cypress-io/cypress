@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-/// <reference types="../../lib" />
 import { Transpiled } from './transpiled.jsx'
 import React from 'react'
 import { mount } from '@cypress/react'
