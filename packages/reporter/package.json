@@ -27,6 +27,7 @@
     "@packages/frontend-shared": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@packages/web-config": "0.0.0-development",
+    "@reach/dialog": "0.10.5",
     "autoprefixer": "10.4.23",
     "classnames": "^2.5.1",
     "cross-env": "7.0.3",

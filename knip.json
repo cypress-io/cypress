@@ -3,7 +3,51 @@
   "workspaces": {
     ".": {
       "entry": [
-        "gulpfile.js"
+        "gulpfile.js",
+        "scripts/after-pack-hook.js",
+        "scripts/after-sign-hook.js",
+        "scripts/gulp/tasks/gulpGraphql.ts",
+        "scripts/add-install-comment.js",
+        "scripts/semantic-commits/get-binary-release-data.js",
+        "scripts/binary/binary-entry-point-source.js",
+        "scripts/binary/binary-byte-node-entry-point-source.js"
+      ],
+      "ignoreDependencies": [
+        "@electron/fuses",
+        "@electron/notarize",
+        "@graphql-codegen/add",
+        "@graphql-codegen/cli",
+        "@graphql-codegen/plugin-helpers",
+        "@graphql-codegen/typed-document-node",
+        "@graphql-codegen/typescript",
+        "@graphql-codegen/typescript-operations",
+        "@graphql-codegen/typescript-resolvers",
+        "@graphql-codegen/typescript-urql-graphcache",
+        "@graphql-tools/delegate",
+        "@graphql-tools/utils",
+        "@graphql-tools/wrap",
+        "@octokit/auth-app",
+        "@octokit/core",
+        "@percy/cli",
+        "bytenode",
+        "chai-as-promised",
+        "detect-port",
+        "mobx",
+        "mocha-banner",
+        "mocha-junit-reporter",
+        "mocha-multi-reporters",
+        "mock-fs",
+        "playwright-webkit",
+        "proxyquire",
+        "react-dom",
+        "semantic-release-monorepo",
+        "shelljs",
+        "snap-shot-it",
+        "tar",
+        "term-to-html",
+        "through",
+        "yaml",
+        "yarn-deduplicate"
       ]
     },
     "cli": {
@@ -87,7 +131,10 @@
         "tsconfig-paths",
         "@babel/core",
         "@babel/preset-env",
-        "babel-loader"
+        "babel-loader",
+        "playwright-core",
+        "playwright-webkit",
+        "tsx"
       ]
     },
     "packages/launchpad": {
@@ -182,6 +229,7 @@
       "ignoreDependencies": [
         "@fortawesome/fontawesome-free",
         "@fontsource/open-sans",
+        "@reach/dialog",
         "cypress-multi-reporters",
         "webpack-cli"
       ]
@@ -209,7 +257,9 @@
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
-        "cypress-multi-reporters"
+        "cypress-multi-reporters",
+        "buffer-es6",
+        "process-es6"
       ]
     },
     "packages/runner": {
@@ -550,6 +600,8 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
+        "cpr",
+        "stealthy-require",
         "tslib"
       ]
     },
@@ -587,6 +639,7 @@
         "@babel/core",
         "@babel/preset-env",
         "babel-loader",
+        "mochawesome-7.1.4",
         "semver",
         "systeminformation",
         "https-proxy-agent"
@@ -631,7 +684,8 @@
     "**/*.gen.ts",
     "**/*.gen.js",
     "**/project-fixtures/**",
-    "**/projects/**"
+    "**/projects/**",
+    "system-tests/lib/validations/**"
   ],
   "ignoreDependencies": [
     "@types/*",
@@ -669,8 +723,9 @@
   ],
   "rules": {
     "files": "warn",
-    "dependencies": "warn",
-    "unlisted": "warn",
+    "dependencies": "error",
+    "unlisted": "error",
+    "unresolved": "warn",
     "exports": "warn",
     "types": "warn",
     "duplicates": "warn",
