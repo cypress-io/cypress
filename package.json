@@ -112,7 +112,7 @@
     "@types/getenv": "^1.0.3",
     "@types/glob": "7.1.1",
     "@types/gulp": "^4.0.18",
-    "@types/lodash": "^4.14.168",
+    "@types/lodash": "^4.17.21",
     "@types/markdown-it": "12.2.3",
     "@types/mocha": "8.0.3",
     "@types/node": "22.18.7",
