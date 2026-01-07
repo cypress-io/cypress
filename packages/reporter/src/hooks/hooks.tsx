@@ -26,10 +26,8 @@ const HookHeader = ({ model, number }: HookHeaderProps) => (
 // Commands per frame to render incrementally
 const COMMANDS_PER_FRAME = 50
 
-/**
- * Hook to render commands incrementally to prevent UI hangs when many commands
- * are added rapidly. Uses requestAnimationFrame to batch renders.
- */
+// Hook to render commands incrementally to prevent UI hangs when many commands
+// are added rapidly. Uses requestAnimationFrame to batch renders.
 const useDeferredCommands = (commands: CommandModel[]): CommandModel[] => {
   const [renderedCount, setRenderedCount] = useState(0)
   const deferredCommands = useDeferredValue(commands)
@@ -38,7 +36,7 @@ const useDeferredCommands = (commands: CommandModel[]): CommandModel[] => {
   const isRenderingRef = useRef(false)
 
   useEffect(() => {
-    // Reset rendered count when commands array length decreases (e.g., test rerun)
+    // Reset rendered count when commands array length decreases
     if (commands.length < lastCommandsLengthRef.current) {
       setRenderedCount(0)
     }
@@ -57,7 +55,6 @@ const useDeferredCommands = (commands: CommandModel[]): CommandModel[] => {
 
     isRenderingRef.current = true
 
-    // Schedule incremental rendering
     const renderNextBatch = () => {
       setRenderedCount((currentCount) => {
         // Always check the current commands length in case new commands were added
@@ -68,9 +65,7 @@ const useDeferredCommands = (commands: CommandModel[]): CommandModel[] => {
         if (nextCount < targetLength) {
           rafRef.current = requestAnimationFrame(renderNextBatch)
         } else {
-          // All current commands rendered, but check if more were added
           isRenderingRef.current = false
-          // If more commands were added (targetLength increased), the effect will restart rendering
         }
 
         return nextCount
