@@ -30,21 +30,23 @@ const COMMANDS_PER_FRAME = 50
 // are added rapidly. Uses requestAnimationFrame to batch renders.
 const useDeferredCommands = (commands: CommandModel[]): CommandModel[] => {
   const [renderedCount, setRenderedCount] = useState(0)
-  const deferredCommands = useDeferredValue(commands)
+  // Guard against undefined/null commands
+  const safeCommands = commands || []
+  const deferredCommands = useDeferredValue(safeCommands)
   const rafRef = useRef<number | null>(null)
-  const lastCommandsLengthRef = useRef(commands.length)
+  const lastCommandsLengthRef = useRef(safeCommands.length)
   const isRenderingRef = useRef(false)
 
   useEffect(() => {
     // Reset rendered count when commands array length decreases
-    if (commands.length < lastCommandsLengthRef.current) {
+    if (safeCommands.length < lastCommandsLengthRef.current) {
       setRenderedCount(0)
     }
 
-    lastCommandsLengthRef.current = commands.length
+    lastCommandsLengthRef.current = safeCommands.length
 
     // If we've already rendered all commands, no need to continue
-    if (renderedCount >= commands.length || isRenderingRef.current) {
+    if (renderedCount >= safeCommands.length || isRenderingRef.current) {
       return
     }
 
@@ -83,11 +85,11 @@ const useDeferredCommands = (commands: CommandModel[]): CommandModel[] => {
       isRenderingRef.current = false
     }
     // Only depend on commands.length - the renderNextBatch callback will handle incremental updates
-  }, [commands.length])
+  }, [commands?.length ?? 0])
 
   // Return subset of commands that should be rendered
   // Always render at least the first command immediately if commands exist
-  const countToRender = commands.length > 0 && renderedCount === 0
+  const countToRender = safeCommands.length > 0 && renderedCount === 0
     ? 1
     : renderedCount
 

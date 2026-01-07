@@ -84,13 +84,17 @@ export class Scroller {
       scrollTopGoal = 0
     }
 
+    // Always decrement user scroll count to mark this as a programmatic scroll
+    // This must happen before checking if we need to scroll, so that any scroll
+    // events that fire are properly accounted for
+    this._userScrollCount--
+
     // Use setScrollTop to get early exit check and avoid unnecessary DOM writes
-    // Check if already at target position before decrementing user scroll count
+    // Check if already at target position to avoid unnecessary DOM writes
     if (this._isScrollPositionNear(this._container.scrollTop, scrollTopGoal)) {
       return
     }
 
-    this._userScrollCount--
     this.setScrollTop(scrollTopGoal)
   }
 
