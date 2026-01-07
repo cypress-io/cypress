@@ -8395,7 +8395,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/getenv@^1.0.0":
+"@types/getenv@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@types/getenv/-/getenv-1.0.3.tgz#9fe071e4143f249309bbea99644ed139ded246ba"
   integrity sha512-aCe60hc2U/xtdnGYbcZBFm6Xkm/MFuWqKMbhupcGt7DJ1QojADIXFKthtlgTwyXkEi6vr8lMXtOI218Ua9qx6w==
