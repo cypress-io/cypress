@@ -157,4 +157,136 @@ describe('hooks/hooks.tsx', () => {
       cy.contains(hookName, { matchCase: false }).should('be.visible')
     })
   })
+
+  describe('deferred commands rendering', () => {
+    it('should render first command immediately', () => {
+      const commands = [createMockCommand(1)]
+      const model = createMockModel({ commands })
+
+      cy.mount(<div className="runnable suite">
+        <div className="hooks-container">
+          <Hook model={model} showNumber={false} scrollIntoView={() => {}} />
+        </div>
+      </div>)
+
+      // First command should render immediately
+      cy.get('.command').should('have.length', 1)
+    })
+
+    it('should render commands incrementally in batches of 50', () => {
+      // Create 120 commands to test incremental rendering
+      const commands = Array.from({ length: 120 }, (_, i) => createMockCommand(i + 1))
+      const model = createMockModel({ commands })
+
+      cy.mount(<div className="runnable suite">
+        <div className="hooks-container">
+          <Hook model={model} showNumber={false} scrollIntoView={() => {}} />
+        </div>
+      </div>)
+
+      // First command should render immediately
+      cy.get('.command').should('have.length', 1)
+
+      // Wait for first batch (1 + 50 = 51 commands)
+      cy.wait(100) // Wait for requestAnimationFrame
+      cy.get('.command', { timeout: 2000 }).should('have.length.at.least', 51)
+
+      // Wait for second batch (51 + 50 = 101 commands)
+      cy.wait(100)
+      cy.get('.command', { timeout: 2000 }).should('have.length.at.least', 101)
+
+      // Wait for final batch (should render all 120)
+      cy.wait(100)
+      cy.get('.command', { timeout: 2000 }).should('have.length', 120)
+    })
+
+    it('should reset rendered count when remounted with fewer commands', () => {
+      // Test that when component is remounted with fewer commands, it starts fresh
+      const initialCommands = Array.from({ length: 100 }, (_, i) => createMockCommand(i + 1))
+      const initialModel = createMockModel({ commands: initialCommands })
+
+      cy.mount(<div className="runnable suite">
+        <div className="hooks-container">
+          <Hook model={initialModel} showNumber={false} scrollIntoView={() => {}} />
+        </div>
+      </div>)
+
+      // Wait for some commands to render
+      cy.wait(200)
+      cy.get('.command', { timeout: 2000 }).should('have.length.at.least', 51)
+
+      // Remount with fewer commands (simulating test rerun)
+      const fewerCommands = [createMockCommand(1), createMockCommand(2)]
+      const newModel = createMockModel({ commands: fewerCommands })
+
+      cy.mount(<div className="runnable suite">
+        <div className="hooks-container">
+          <Hook model={newModel} showNumber={false} scrollIntoView={() => {}} />
+        </div>
+      </div>)
+
+      // Should start fresh and render only 2 commands
+      cy.get('.command', { timeout: 2000 }).should('have.length', 2)
+    })
+
+    it('should continue rendering when new commands are added', () => {
+      const initialCommands = Array.from({ length: 30 }, (_, i) => createMockCommand(i + 1))
+      const model = createMockModel({ commands: initialCommands })
+
+      cy.mount(<div className="runnable suite">
+        <div className="hooks-container">
+          <Hook model={model} showNumber={false} scrollIntoView={() => {}} />
+        </div>
+      </div>)
+
+      // Wait for initial batch to render
+      cy.wait(200)
+      cy.get('.command', { timeout: 2000 }).should('have.length.at.least', 30)
+
+      // Add more commands
+      const newCommands = Array.from({ length: 50 }, (_, i) => createMockCommand(i + 31))
+
+      model.commands = [...initialCommands, ...newCommands]
+
+      // Wait for new commands to render incrementally
+      cy.wait(200)
+      cy.get('.command', { timeout: 2000 }).should('have.length.at.least', 51) // 30 + first batch of new ones
+    })
+
+    it('should handle exactly 50 commands (one full batch)', () => {
+      const commands = Array.from({ length: 50 }, (_, i) => createMockCommand(i + 1))
+      const model = createMockModel({ commands })
+
+      cy.mount(<div className="runnable suite">
+        <div className="hooks-container">
+          <Hook model={model} showNumber={false} scrollIntoView={() => {}} />
+        </div>
+      </div>)
+
+      // First command immediately
+      cy.get('.command').should('have.length', 1)
+
+      // Wait for batch to complete
+      cy.wait(200)
+      cy.get('.command', { timeout: 2000 }).should('have.length', 50)
+    })
+
+    it('should handle 51 commands (one full batch + 1)', () => {
+      const commands = Array.from({ length: 51 }, (_, i) => createMockCommand(i + 1))
+      const model = createMockModel({ commands })
+
+      cy.mount(<div className="runnable suite">
+        <div className="hooks-container">
+          <Hook model={model} showNumber={false} scrollIntoView={() => {}} />
+        </div>
+      </div>)
+
+      // First command immediately
+      cy.get('.command').should('have.length', 1)
+
+      // Wait for first batch (1 + 50 = 51)
+      cy.wait(200)
+      cy.get('.command', { timeout: 2000 }).should('have.length', 51)
+    })
+  })
 })
