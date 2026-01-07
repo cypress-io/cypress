@@ -15,7 +15,7 @@ interface Callbacks {
   onError: (err, method, obj, negated) => void
 }
 
-export const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks: Callbacks) => {
+const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks: Callbacks) => {
   const { inspect, flag } = chaiUtils
 
   const assertPartial = (

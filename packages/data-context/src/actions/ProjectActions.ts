@@ -16,7 +16,7 @@ import type { RunSpecErrorCode } from '../../graphql/schemaTypes'
 import debugLib from 'debug'
 import { logError } from '@packages/stderr-filtering'
 
-export class RunSpecError extends Error {
+class RunSpecError extends Error {
   constructor (public code: typeof RunSpecErrorCode[number], msg: string) {
     super(msg)
   }

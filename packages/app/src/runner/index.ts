@@ -44,7 +44,7 @@ export function createWebsocket (config: Cypress.Config) {
   return ws
 }
 
-export function initializeEventManager (UnifiedRunner: any) {
+function initializeEventManager (UnifiedRunner: any) {
   if (!window.ws) {
     throw Error('Need window.ws to exist before initializing event manager')
   }
@@ -187,7 +187,7 @@ function teardownSpec (isRerun: boolean = false) {
  * This will teardown the reporter, event manager, and
  * any associated events.
  */
-export async function teardown () {
+async function teardown () {
   UnifiedReporterAPI.setInitializedReporter(false)
   _eventManager?.stop()
   await _eventManager?.teardown(getMobxRunnerStore())

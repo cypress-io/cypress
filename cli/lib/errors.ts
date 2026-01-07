@@ -12,7 +12,7 @@ const runDocumentationUrl = `${docsUrl}/cypress-run`
 // TODO it would be nice if all error objects could be enforced via types
 // to only have description + solution properties
 
-export const hr = '----------'
+const hr = '----------'
 
 const genericErrorSolution = stripIndent`
   Search for an existing issue or open a GitHub issue at
@@ -360,7 +360,7 @@ export async function formErrorText (info: any, msg?: string, prevMessage?: stri
   return formatted.join('\n\n')
 }
 
-export const raise = (info: any) => {
+const raise = (info: any) => {
   return (text: string) => {
     const err: any = new Error(text)
 
@@ -391,7 +391,6 @@ export const exitWithError = (info: any) => {
   return async (msg?: string) => {
     const text: string = await formErrorText(info, msg)
 
-    // eslint-disable-next-line no-console
     console.error(text)
     process.exit(info.exitCode || 1)
   }

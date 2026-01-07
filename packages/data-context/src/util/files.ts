@@ -1,17 +1,8 @@
 import { defaultSpecPattern } from '@packages/config'
 import type { TestingType, FoundSpec } from '@packages/types'
 import Debug from 'debug'
-import _ from 'lodash'
 import path from 'path'
 import { getPathFromSpecPattern, getLongestCommonPrefixFromPaths } from '../sources/ProjectDataSource'
-
-export const isDefaultSupportFile = (supportFile: string) => {
-  if (_.isNil(supportFile) || !_.isBoolean(supportFile) && supportFile.match(/(^|\.+\/)cypress\/support($|\/index($|\.(ts|js|coffee)$))/)) {
-    return true
-  }
-
-  return false
-}
 
 export type FileExtension = 'js' | 'ts' | 'jsx' | 'tsx'
 

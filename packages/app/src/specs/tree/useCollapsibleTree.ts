@@ -84,7 +84,7 @@ function getHighlightIndexes <T extends FoundSpec> (node: SpecTreeNode<T>) {
   return res.map((idx) => idx - minIndex)
 }
 
-export function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree: SpecTreeNode<T>, data?: T) {
+function buildSpecTreeRecursive<T extends FoundSpec> (path: string, tree: SpecTreeNode<T>, data?: T) {
   const [firstFile, ...rest] = path.split(getRegexSeparator())
   const id = tree.id ? [tree.id, firstFile].join(getSeparator()) : firstFile
 
@@ -171,7 +171,7 @@ function collectRoots<T extends RawNode<T>> (node: UseCollapsibleTreeNode<T> | n
   return acc
 }
 
-export const useCollapsibleTreeNode = <T extends RawNode<T>>(rawNode: T, options: UseCollapsibleTreeOptions, depth: number, parent: UseCollapsibleTreeNode<T> | null): UseCollapsibleTreeNode<T> => {
+function useCollapsibleTreeNode <T extends RawNode<T>> (rawNode: T, options: UseCollapsibleTreeOptions, depth: number, parent: UseCollapsibleTreeNode<T> | null): UseCollapsibleTreeNode<T> {
   const { cache, expandInitially } = options
   const treeNode = rawNode as UseCollapsibleTreeNode<T>
   const roots = parent ? collectRoots<T>(parent) : []

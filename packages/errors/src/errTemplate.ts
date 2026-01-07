@@ -24,7 +24,7 @@ type AllowedPartialArg = Guard | Format | PartialErr | null
 
 type AllowedTemplateArg = StackTrace | AllowedPartialArg
 
-export class PartialErr {
+class PartialErr {
   constructor (readonly strArr: TemplateStringsArray, readonly args: AllowedTemplateArg[]) {}
 }
 
@@ -220,7 +220,7 @@ function listFlags (
   .value())
 }
 
-export class Guard {
+class Guard {
   constructor (readonly val: string | number) {}
 }
 
@@ -228,7 +228,7 @@ export class Guard {
  * Prevents a string from being colored "blue" when wrapped in the errTemplate
  * tag template literal
  */
-export function guard (val: string | number) {
+function guard (val: string | number) {
   return new Guard(val)
 }
 
@@ -236,7 +236,7 @@ export function guard (val: string | number) {
  * Marks the value as "details". This is when we print out the stack trace to the console
  * (if it's an error), or use the stack trace as the originalError
  */
-export class StackTrace {
+class StackTrace {
   /**
    * @param {string | Error | object} stackTrace
    */

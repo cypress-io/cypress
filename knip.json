@@ -731,5 +731,16 @@
     "duplicates": "warn",
     "classMembers": "warn",
     "enumMembers": "warn"
+  },
+  "ignoreIssues": {
+    "cli/types/cy-blob-util.d.ts": [
+      "exports"
+    ],
+    "cli/types/cy-bluebird.d.ts": [
+      "exports"
+    ],
+    "cli/types/cy-minimatch.d.ts": [
+      "exports"
+    ]
   }
 }
