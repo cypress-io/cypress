@@ -78,6 +78,6 @@ const Hooks: React.FC<HooksProps> = observer(({ state = appState, model, scrollI
 
 Hooks.displayName = 'Hooks'
 
-export { Hook, HookHeader }
+export { Hook }
 
 export default Hooks

@@ -95,6 +95,4 @@ const Routes: React.FC<RoutesProps> = observer(({ model }: RoutesProps) => {
 
 Routes.displayName = 'Routes'
 
-export { Route, RoutesList }
-
 export default Routes

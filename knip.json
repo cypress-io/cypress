@@ -285,8 +285,13 @@
       ]
     },
     "packages/proxy": {
+      "entry": [
+        "lib/http/util/rewriter.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ]
     },
@@ -298,6 +303,10 @@
       ]
     },
     "packages/launcher": {
+      "entry": [
+        "index.ts",
+        "lib/detect.ts"
+      ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
@@ -316,6 +325,7 @@
     },
     "packages/network": {
       "entry": [
+        "lib/index.ts",
         "test/support/servers.ts",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
@@ -393,6 +403,9 @@
       ]
     },
     "packages/network-tools": {
+      "entry": [
+        "lib/index.ts"
+      ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}"
       ]
