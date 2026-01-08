@@ -245,6 +245,8 @@
     },
     "packages/driver": {
       "entry": [
+        "src/main.ts",
+        "src/cypress/commands.ts",
         "cypress/plugins/server.js",
         "cypress/plugins/index.js",
         "cypress.config.ts",
@@ -668,6 +670,8 @@
     "**/__snapshots__/**",
     "**/cypress.config.{ts,js}",
     "**/cypress.config-*.{ts,js}",
+    "**/cypress/support/component.{js,jsx,ts,tsx}",
+    "**/cypress/types.d.ts",
     "**/.releaserc.js",
     "**/index.d.ts",
     "**/postcss.config.{js,ts,cjs,mjs}",
@@ -734,15 +738,19 @@
     "wc"
   ],
   "rules": {
-    "files": "warn",
-    "dependencies": "error",
-    "unlisted": "error",
-    "unresolved": "warn",
-    "exports": "warn",
-    "types": "warn",
-    "duplicates": "warn",
+    "binaries": "warn",
+    "catalog": "warn",
     "classMembers": "warn",
-    "enumMembers": "warn"
+    "dependencies": "error",
+    "duplicates": "warn",
+    "enumMembers": "warn",
+    "exports": "warn",
+    "nsExports": "warn",
+    "nsTypes": "warn",
+    "files": "warn",
+    "types": "warn",
+    "unlisted": "error",
+    "unresolved": "off"
   },
   "ignoreIssues": {
     "cli/types/cy-blob-util.d.ts": [
