@@ -8135,16 +8135,6 @@
   dependencies:
     "@types/chai" "*"
 
-"@types/chai-enzyme@0.6.14":
-  version "0.6.14"
-  resolved "https://registry.yarnpkg.com/@types/chai-enzyme/-/chai-enzyme-0.6.14.tgz#69a94d13dc150e7eda2299b16d8966b910e99341"
-  integrity sha512-bbhadcCOjkXF2XTadQjmqDnhm7XFwwuLUd2SupfEbA5zA5m5XLRjvQw3DkeWWyVAk8dI0jv/yjwMx7R6Q6v7/Q==
-  dependencies:
-    "@types/chai" "*"
-    "@types/cheerio" "<1"
-    "@types/enzyme" "*"
-    "@types/react" "^16"
-
 "@types/chai-jquery@1.1.43":
   version "1.1.43"
   resolved "https://registry.yarnpkg.com/@types/chai-jquery/-/chai-jquery-1.1.43.tgz#ddd09ee6039633c3c1620100d1141dabe296f8dd"
@@ -8177,7 +8167,7 @@
   dependencies:
     "@types/deep-eql" "*"
 
-"@types/cheerio@0.22.35", "@types/cheerio@<1":
+"@types/cheerio@0.22.35":
   version "0.22.35"
   resolved "https://registry.yarnpkg.com/@types/cheerio/-/cheerio-0.22.35.tgz#0d16dc1f24d426231c181b9c31847f673867595f"
   integrity sha512-yD57BchKRvTV+JD53UZ6PD8KWY5g5rvvMLRnZR3EQBCZXiDT/HR+pKpMzFGlWNhFrXlo7VPZXtKvIEwZkAWOIA==
@@ -8283,14 +8273,6 @@
   version "3.1.5"
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.1.5.tgz#49d738257cc73bafe45c13cb8ff240683b4d5117"
   integrity sha512-nv+GSx77ZtXiJzwKdsASqi+YQ5Z7vwHsTP0JY2SiQgjGckkBRKZnk8nIM+7oUZ1VCtuTz0+By4qVR7fqzp/Dfg==
-
-"@types/enzyme@*", "@types/enzyme@3.10.19":
-  version "3.10.19"
-  resolved "https://registry.yarnpkg.com/@types/enzyme/-/enzyme-3.10.19.tgz#a4ae751c13e0428171d53cdc0d3d9f9aca7f7689"
-  integrity sha512-kIfCo6/DdpgCHgmrLgPTugjzbZ46BUK8S2IP0kYo8+62LD2l1k8mSVsc+zQYNTdjDRoh2E9Spxu6F1NnEiW38Q==
-  dependencies:
-    "@types/cheerio" "<1"
-    "@types/react" "^16"
 
 "@types/eslint-scope@^3.7.3", "@types/eslint-scope@^3.7.7":
   version "3.7.7"
@@ -8627,7 +8609,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@16.9.1", "@types/node@22.18.0", "@types/node@22.18.7", "@types/node@>=10.0.0", "@types/node@>=13.7.0", "@types/node@^12.12.29", "@types/node@^12.12.7", "@types/node@^20.1.0", "@types/node@^22.18.7", "@types/node@^22.7.7", "@types/node@^8.0.7":
+"@types/node@*", "@types/node@16.9.1", "@types/node@22.18.7", "@types/node@>=10.0.0", "@types/node@>=13.7.0", "@types/node@^12.12.29", "@types/node@^12.12.7", "@types/node@^20.1.0", "@types/node@^22.18.7", "@types/node@^22.7.7", "@types/node@^8.0.7":
   version "22.18.7"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-22.18.7.tgz#e1d013d5759fa50ff4d334aee3fd6254f1dbae74"
   integrity sha512-3E97nlWEVp2V6J7aMkR8eOnw/w0pArPwf/5/W0865f+xzBoGL/ZuHkTAKAGN7cOWNwd+sG+hZOqj+fjzeHS75g==
@@ -8738,7 +8720,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@18.3.12", "@types/react@^16":
+"@types/react@*", "@types/react@18.3.12":
   version "18.3.12"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.3.12.tgz#99419f182ccd69151813b7ee24b792fe08774f60"
   integrity sha512-D2wOSq/d6Agt28q7rSI3jhU7G6aiuzljDGZ2hTZHIkrTLUI+AF3WMeKkEZ9nN2fkBAlcktT6vcZjDFiIhMYEQw==

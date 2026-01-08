@@ -103,7 +103,6 @@
     "@semantic-release/git": "10.0.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/bluebird": "3.5.29",
-    "@types/chai-enzyme": "0.6.14",
     "@types/debug": "4.1.7",
     "@types/fluent-ffmpeg": "^2.1.18",
     "@types/fs-extra": "^9.0.13",
@@ -264,7 +263,6 @@
   },
   "resolutions": {
     "**/@types/cheerio": "0.22.35",
-    "**/@types/enzyme": "3.10.19",
     "**/@types/node": "22.18.7",
     "**/form-data": "^4.0.4",
     "**/jquery": "3.7.1",
