@@ -12,6 +12,7 @@ _Released 01/27/2026 (PENDING)_
 - Introduced a new [`cy.env()`](https://docs.cypress.io/api/commands/env) command that can be used to asynchronously and securely access Cypress environment variables. Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
 - Added a [`allowCypressEnv`](https://docs.cypress.io/app/references/configuration#Global) configuration option that disallows use of the deprecated `Cypress.env()` API. Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
 - Introduced the new `Cypress.expose()` API, intended for use of public configuration of non-sensitive values. Addressed in [#33238](https://github.com/cypress-io/cypress/pull/33238).
+- Users can now manually inject the Cypress bootstrap script into their application's HTML using a `<script data-cy-bootstrap>` tag. This allows developers to use React's `suppressHydrationWarning` prop to prevent hydration mismatches caused by Cypress's automatic script injection in frameworks like Next.js and React Router 7. Addresses [#27204](https://github.com/cypress-io/cypress/issues/27204). Addressed in [#33295](https://github.com/cypress-io/cypress/pull/33295).
 
 **Misc:**
 
