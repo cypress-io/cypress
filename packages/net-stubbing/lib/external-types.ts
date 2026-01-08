@@ -394,7 +394,7 @@ export interface RouteMatcherOptionsGeneric<S> {
   url?: S
 }
 
-export type RouteHandlerController<TRequest = any, TResponse = any> = HttpRequestInterceptor<TRequest, TResponse>
+type RouteHandlerController<TRequest = any, TResponse = any> = HttpRequestInterceptor<TRequest, TResponse>
 
 export type RouteHandler<TRequest = any, TResponse = any> = string | StaticResponseWithOptions | RouteHandlerController<TRequest, TResponse> | object
 

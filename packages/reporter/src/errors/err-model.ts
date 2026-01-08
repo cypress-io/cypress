@@ -15,7 +15,7 @@ export interface ParsedStackFileLine extends FileDetails {
   whitespace: string
 }
 
-export type ParsedStackLine = ParsedStackMessageLine | ParsedStackFileLine
+type ParsedStackLine = ParsedStackMessageLine | ParsedStackFileLine
 
 export interface CodeFrame extends FileDetails {
   frame: string

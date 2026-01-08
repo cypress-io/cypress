@@ -759,6 +759,27 @@
     ],
     "packages/launcher/lib/windows/index.ts": [
       "exports"
+    ],
+    "packages/server/lib/cloud/protocol.ts": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/child/cross_origin.js": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/child/dev-server.js": [
+      "exports"
+    ],
+    "packages/server/lib/video_capture.ts": [
+      "exports"
+    ],
+    "packages/data-context/graphql/index.ts": [
+      "exports"
+    ],
+    "packages/net-stubbing/lib/external-types.ts": [
+      "exports"
+    ],
+    "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
+      "exports"
     ]
   }
 }

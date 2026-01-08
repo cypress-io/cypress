@@ -41,7 +41,7 @@ type AddInitiatorToServiceWorkerOptions = {
 
 export const serviceWorkerClientEventHandlerName = '__cypressServiceWorkerClientEvent'
 
-export declare type ServiceWorkerEventsPayload = {
+declare type ServiceWorkerEventsPayload = {
   'fetchRequest': { url: string, isControlled: boolean }
   'hasFetchHandler': { hasFetchHandler: boolean }
   'clientsClaimed': { clientUrls: string[] }

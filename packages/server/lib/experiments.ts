@@ -85,12 +85,10 @@ const _names: StringValues = {
 }
 
 /**
- * Export this object for easy stubbing from end-to-end tests.
- * If you cannot easily pass "names" and "summaries" arguments
- * to "getExperimentsFromResolved" function, then use this
- * object to change "experiments.names" and "experimental.summaries" objects.
+ * Internal object containing experiment names and summaries.
+ * Used as default parameters in getExperimentsFromResolved and getExperiments.
 */
-export const experimental = {
+const experimental = {
   names: _names,
   summaries: _summaries,
 }
@@ -139,19 +137,4 @@ export const getExperiments = (project: CypressProject, names = experimental.nam
   const resolvedEnv = get(project, 'resolvedConfig', {})
 
   return getExperimentsFromResolved(resolvedEnv, names, summaries)
-}
-
-/**
- * Allow known experiments here to avoid accidentally showing
- * any config key that starts with "experimental" prefix
-*/
-// @ts-ignore
-export const isKnownExperiment = (experiment, key) => {
-  return Object.keys(experimental.names).includes(key)
-}
-
-// exporting a single default object with methods
-// helps make it is to stub and to test
-export default {
-  getExperiments,
 }

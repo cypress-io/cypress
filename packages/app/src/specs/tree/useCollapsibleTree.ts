@@ -4,7 +4,7 @@ import { useToggle } from '@vueuse/core'
 import type { FoundSpec } from '@packages/types/src'
 import { getRunnerConfigFromWindow } from '../../runner/get-runner-config-from-window'
 
-export type RawNode <T> = {
+type RawNode <T> = {
   id: string
   name: string
   children: RawNode<T>[]
@@ -148,7 +148,7 @@ export type UseCollapsibleTreeNode <T extends RawNode<T>> = {
   children: UseCollapsibleTreeNode<T>[]
 } & { [K in keyof T]: T[K]}
 
-export interface UseCollapsibleTreeOptions {
+interface UseCollapsibleTreeOptions {
   expandInitially?: boolean
   dropRoot?: boolean
   /**

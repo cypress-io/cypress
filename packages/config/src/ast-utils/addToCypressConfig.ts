@@ -55,7 +55,7 @@ export async function addToCypressConfig (filePath: string, code: string, toAdd:
   }
 }
 
-export interface AddProjectIdToCypressConfigOptions {
+interface AddProjectIdToCypressConfigOptions {
   filePath: string
   projectId: string
 }
@@ -81,7 +81,7 @@ export async function addProjectIdToCypressConfig (options: AddProjectIdToCypres
   }
 }
 
-export interface AddToCypressConfigResult {
+interface AddToCypressConfigResult {
   result: 'ADDED' | 'MERGED' | 'NEEDS_MERGE'
   error?: Error
   codeToMerge?: string

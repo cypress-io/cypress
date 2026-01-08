@@ -43,7 +43,7 @@ import { useI18n } from '@cy/i18n'
 import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import { ref } from 'vue'
 
-export interface Experiment {
+interface Experiment {
   key: string
   name: string
   description: string
