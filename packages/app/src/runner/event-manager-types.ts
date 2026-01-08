@@ -43,6 +43,7 @@ export type LocalBusEmitsMap = {
   'studio:cancel': undefined
   'studio:copy:to:clipboard': () => void
   'studio:init:suite': { suiteId: string, entrySource?: EntrySource, showUrlPrompt?: boolean }
+  'studio:init:welcome': undefined
 
   // Reporter Events
   'reporter:log:add': CommandLog

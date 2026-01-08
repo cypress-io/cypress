@@ -11,7 +11,7 @@ import type { ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 const localBus = new EventEmitter()
 
-type StudioEntrySource = 'welcome' | 'new-test-root' | 'new-test-suite' | 'edit'
+type StudioEntrySource = 'new-test-root' | 'new-test-suite' | 'edit'
 
 interface InitEvent {
   appState: AppState

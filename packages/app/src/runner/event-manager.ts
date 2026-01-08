@@ -275,6 +275,7 @@ export class EventManager {
     })
 
     const studioInitTest = ({ testId }: { testId: string }, cb?: () => void) => {
+      this.studioStore.setShowWelcome(false)
       this.studioStore.setTestId(testId)
       rerun()
     }
@@ -283,6 +284,7 @@ export class EventManager {
     this.localBus.on('studio:init:test', studioInitTest)
 
     const studioInitSuite = ({ suiteId, showUrlPrompt = true, entrySource }: { suiteId: string, showUrlPrompt?: boolean, entrySource?: EntrySource }) => {
+      this.studioStore.setShowWelcome(false)
       this.studioStore.setSuiteId(suiteId)
 
       if (entrySource) {
@@ -305,6 +307,24 @@ export class EventManager {
 
     this.reporterBus.on('studio:init:suite', studioInitSuite)
     this.localBus.on('studio:init:suite', studioInitSuite)
+
+    const studioInitWelcome = () => {
+      this.studioStore.setShowWelcome(true)
+      this.studioStore.setShowUrlPrompt(false)
+
+      this.ws.emit('studio:init', { sessionId: this.studioStore.sessionId }, ({ canAccessStudioAI, cloudStudioSessionId, error }) => {
+        if (error) {
+          // eslint-disable-next-line no-console
+          console.error(error)
+        }
+
+        this.studioStore.setCanAccessStudioAI(canAccessStudioAI)
+        this.studioStore.setSessionId(cloudStudioSessionId)
+        this.studioStore.setActive(true)
+      })
+    }
+
+    this.localBus.on('studio:init:welcome', studioInitWelcome)
 
     const maybeCleanUpProtocol = () => {
       const needsReload = this.studioStore.needsProtocolCleanup()

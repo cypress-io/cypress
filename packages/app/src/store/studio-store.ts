@@ -82,7 +82,7 @@ export interface StudioLog {
   isAssertion?: boolean
 }
 
-export type EntrySource = 'welcome' | 'new-test-root' | 'new-test-suite' | 'edit'
+export type EntrySource = 'new-test-root' | 'new-test-suite' | 'edit'
 
 interface StudioRecorderState {
   saveModalIsOpen: boolean
@@ -115,6 +115,7 @@ interface StudioRecorderState {
   newTestLineNumber?: number
   _originalGrepSettings: Record<string, string>
   entrySource?: EntrySource
+  showWelcome: boolean
 }
 
 function getUrlParams () {
@@ -126,8 +127,9 @@ function getUrlParams () {
   const visitUrl = hashParams.get('url')
   const newTestLineNumber = hashParams.get('newTestLineNumber') ? Number(hashParams.get('newTestLineNumber')) : undefined
   const sessionId = hashParams.get('sessionId')
+  const showWelcome = hashParams.has('showWelcome')
 
-  return { testId, suiteId, url: visitUrl, newTestLineNumber, sessionId }
+  return { testId, suiteId, url: visitUrl, newTestLineNumber, sessionId, showWelcome }
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -154,6 +156,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       _isStudioCreatedTest: false,
       _originalGrepSettings: {},
       entrySource: undefined,
+      showWelcome: false,
     }
   },
 
@@ -241,6 +244,15 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.entrySource = entrySource
     },
 
+    setShowWelcome (showWelcome: boolean) {
+      this.showWelcome = showWelcome
+      if (showWelcome) {
+        this._updateUrlParams(['showWelcome'])
+      } else {
+        this._removeUrlParams(['showWelcome'])
+      }
+    },
+
     testFailed () {
       this.isFailed = true
     },
@@ -254,6 +266,10 @@ export const useStudioStore = defineStore('studioRecorder', {
         this.setTestId(studio.testId)
       } else if (studio.suiteId) {
         this.setSuiteId(studio.suiteId)
+      }
+
+      if (studio.showWelcome) {
+        this.showWelcome = true
       }
 
       if (studio.url) {
@@ -273,11 +289,11 @@ export const useStudioStore = defineStore('studioRecorder', {
       }
 
       // if we have an existing test or are creating a new test, we need to start loading
-      // otherwise if we have a suite, we can just set the studio active
+      // otherwise if we have a suite or welcome screen, we can just set the studio active
       if (this.testId || studio.newTestLineNumber) {
         this.setAbsoluteFile(config.spec.absolute)
         this.startLoading()
-      } else if (this.suiteId) {
+      } else if (this.suiteId || this.showWelcome) {
         this.setActive(true)
       }
     },
@@ -403,6 +419,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.showUrlPrompt = true
       this._isStudioCreatedTest = false
       this._originalGrepSettings = {}
+      this.showWelcome = false
 
       this._maybeResetRunnables()
     },
@@ -543,9 +560,9 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     getUrlParams,
 
-    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId']) {
+    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId', 'showWelcome']) {
       // if we don't have studio params, we don't need to update them
-      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber && !this.sessionId) return
+      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber && !this.sessionId && !this.showWelcome) return
 
       // if we have studio params, we need to remove them before adding them back
       this._removeUrlParams(filter)
@@ -556,7 +573,13 @@ export const useStudioStore = defineStore('studioRecorder', {
       // set the studio params
       hashParams.set('studio', '')
       filter.forEach((param) => {
-        if (this[param]) hashParams.set(param, this[param])
+        if (this[param]) {
+          if (param === 'showWelcome') {
+            hashParams.set(param, '')
+          } else {
+            hashParams.set(param, this[param])
+          }
+        }
       })
 
       // update the url
@@ -564,7 +587,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       window.history.replaceState({}, '', url.toString())
     },
 
-    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId']) {
+    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId', 'showWelcome']) {
       const url = new URL(window.location.href)
       const hashParams = new URLSearchParams(url.hash)
 
@@ -577,7 +600,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       })
 
       // if there are no studio specific params left, we can also remove the studio param
-      if (!hashParams.has('testId') && !hashParams.has('suiteId') && !hashParams.has('url') && !hashParams.has('newTestLineNumber') && !hashParams.has('sessionId')) {
+      if (!hashParams.has('testId') && !hashParams.has('suiteId') && !hashParams.has('url') && !hashParams.has('newTestLineNumber') && !hashParams.has('sessionId') && !hashParams.has('showWelcome')) {
         hashParams.delete('studio')
       }
 
@@ -936,7 +959,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
   getters: {
     isOpen: (state) => {
-      return state.isActive || state.isLoading || state._hasStarted
+      return state.isActive || state.isLoading || state._hasStarted || state.showWelcome
     },
 
     isEmpty: (state): boolean => {

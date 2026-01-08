@@ -10,17 +10,17 @@ describe('StudioButton', () => {
   it('should open studio panel when studio panel is closed', () => {
     const eventManager = createEventManager()
 
-    const studioInitSuiteSpy = cy.stub().as('studioInitSuiteSpy')
+    const studioInitWelcomeSpy = cy.stub().as('studioInitWelcomeSpy')
 
     cy.spy(eventManager, 'emit').as('eventManagerSpy')
 
     mountStudioButton(eventManager)
-    eventManager.on('studio:init:suite', () => {
-      studioInitSuiteSpy()
+    eventManager.on('studio:init:welcome', () => {
+      studioInitWelcomeSpy()
     })
 
     cy.get('[data-cy="studio-button"]').click()
-    cy.get('@studioInitSuiteSpy').should('have.been.called')
+    cy.get('@studioInitWelcomeSpy').should('have.been.called')
   })
 
   it('should close studio panel when studio panel is open', () => {
