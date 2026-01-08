@@ -128,7 +128,7 @@ export function urlMatchesPolicyProps ({ policy, frameUrl, topProps }: {
   }
 }
 
-export function urlMatchesPolicy ({ policy, frameUrl, topUrl }: {
+function urlMatchesPolicy ({ policy, frameUrl, topUrl }: {
   policy: Policy
   frameUrl: string
   topUrl: string
@@ -171,27 +171,6 @@ export const policyFromConfig = (config: { injectDocumentDomain: boolean }): Pol
   return config.injectDocumentDomain ?
     'same-super-domain-origin' :
     'same-origin'
-}
-
-/**
- * Checks the supplied url and props against the determined policy.
- * The policy is same-super-domain-origin unless the domain is in the list of strict same origin domains,
- * in which case the policy is 'same-origin'
- * @param frameUrl - The url you are testing the policy for.
- * @param topProps - The props of the url you are testing the policy in context of.
- * @param opts - an options object containing the skipDomainInjectionForDomains config. Default is undefined.
- * @returns boolean, true if matching, false if not.
- */
-export const urlMatchesPolicyBasedOnDomainProps = (frameUrl: string, topProps: ParsedHostWithProtocolAndHost, opts?: {
-  injectDocumentDomain: boolean
-}): boolean => {
-  const policy = opts?.injectDocumentDomain ? 'same-super-domain-origin' : 'same-origin'
-
-  return urlMatchesPolicyProps({
-    policy,
-    frameUrl,
-    topProps,
-  })
 }
 
 declare module 'url' {

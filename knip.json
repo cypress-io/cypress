@@ -741,6 +741,12 @@
     ],
     "cli/types/cy-minimatch.d.ts": [
       "exports"
+    ],
+    "packages/launcher/lib/darwin/index.ts": [
+      "exports"
+    ],
+    "packages/launcher/lib/windows/index.ts": [
+      "exports"
     ]
   }
 }

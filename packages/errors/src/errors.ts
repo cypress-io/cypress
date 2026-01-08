@@ -32,7 +32,7 @@ const getUsedTestsMessage = (limit: number, usedTestsMessage: string) => {
     : fmt.off('')
 }
 
-export const warnIfExplicitCiBuildId = function (ciBuildId?: string | null) {
+export const warnIfExplicitCiBuildId = function (ciBuildId?: string | null): ReturnType<typeof errPartial> | null {
   if (!ciBuildId) {
     return null
   }

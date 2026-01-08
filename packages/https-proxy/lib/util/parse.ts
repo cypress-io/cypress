@@ -1,6 +1,6 @@
 import { parse } from 'url'
 
-export function parseHost (hostString: string, defaultPort: number) {
+function parseHost (hostString: string, defaultPort: number) {
   let m
 
   m = hostString.match(/^http:\/\/(.*)/)
