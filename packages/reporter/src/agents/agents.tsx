@@ -71,6 +71,4 @@ const Agents: React.FC<AgentsProps> = observer(({ model }: AgentsProps) => {
 
 Agents.displayName = 'Agents'
 
-export { Agent }
-
 export default Agents

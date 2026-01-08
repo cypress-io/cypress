@@ -112,7 +112,7 @@ const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studi
 
 RunnablesList.displayName = 'RunnablesList'
 
-export interface RunnablesContentProps {
+interface RunnablesContentProps {
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']
   error?: RunnablesErrorModel
@@ -159,7 +159,7 @@ const RunnablesContent: React.FC<RunnablesContentProps> = observer(({ runnablesS
 
 RunnablesContent.displayName = 'RunnablesContent'
 
-export interface RunnablesProps {
+interface RunnablesProps {
   error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
   statsStore: StatsStore
