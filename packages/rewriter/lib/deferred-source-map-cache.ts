@@ -6,7 +6,7 @@ import url from 'url'
 
 const debug = Debug('cypress:rewriter:deferred-source-map-cache')
 
-export type DeferredSourceMapRequest = {
+type DeferredSourceMapRequest = {
   uniqueId: string
   url: string
   js?: string

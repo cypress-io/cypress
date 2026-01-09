@@ -73,7 +73,7 @@ const normalizeCookieProps = function (automationCookie: SerializableAutomationC
   return cookie as AutomationCookie
 }
 
-export const normalizeGetCookies = (cookies: (AutomationCookie | null)[]): (AutomationCookie | null)[] => {
+const normalizeGetCookies = (cookies: (AutomationCookie | null)[]): (AutomationCookie | null)[] => {
   return _.chain(cookies)
   .map(normalizeGetCookieProps)
   // sort in order of expiration date, ascending
@@ -81,7 +81,7 @@ export const normalizeGetCookies = (cookies: (AutomationCookie | null)[]): (Auto
   .value()
 }
 
-export const normalizeGetCookieProps = (props: AutomationCookie | null) => {
+const normalizeGetCookieProps = (props: AutomationCookie | null) => {
   if (!props) {
     return props
   }

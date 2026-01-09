@@ -1,7 +1,7 @@
 import { find } from 'lodash'
 import type { CyHttpMessages } from '@packages/net-stubbing/lib/types'
 
-export function hasJsonContentType (headers: { [k: string]: string | string[] }) {
+function hasJsonContentType (headers: { [k: string]: string | string[] }) {
   const contentType = find(headers, (v, k) => /^content-type$/i.test(k))
 
   if (Array.isArray(contentType)) {

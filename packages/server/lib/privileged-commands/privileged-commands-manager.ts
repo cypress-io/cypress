@@ -8,12 +8,6 @@ import * as files from '../files'
 import { fs } from '../util/fs'
 import task from '../task'
 
-export interface SpecChannelOptions {
-  isSpecBridge: boolean
-  url: string
-  key: string
-}
-
 interface SpecOriginatedCommand {
   name: string
   args: string[]

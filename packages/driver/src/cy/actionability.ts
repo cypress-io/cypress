@@ -5,7 +5,7 @@ import Promise from 'bluebird'
 import debugFn from 'debug'
 import $dom from '../dom'
 import $utils from './../cypress/utils'
-import type { ElWindowPostion, ElViewportPostion, ElementPositioning } from '../dom/coordinates'
+import type { ElWindowPosition, ElViewportPosition, ElementPositioning } from '../dom/coordinates'
 import $elements from '../dom/elements'
 import $errUtils from '../cypress/error_utils'
 import { callNativeMethod, getNativeProp } from '../dom/elements/nativeProps'
@@ -505,7 +505,7 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
   }
 
   return Promise.try(() => {
-    const coordsHistory: (ElViewportPostion | ElWindowPostion)[] = []
+    const coordsHistory: (ElViewportPosition | ElWindowPosition)[] = []
 
     const runAllChecks = function () {
       let $elAtCoords

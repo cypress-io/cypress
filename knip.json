@@ -3,7 +3,51 @@
   "workspaces": {
     ".": {
       "entry": [
-        "gulpfile.js"
+        "gulpfile.js",
+        "scripts/after-pack-hook.js",
+        "scripts/after-sign-hook.js",
+        "scripts/gulp/tasks/gulpGraphql.ts",
+        "scripts/add-install-comment.js",
+        "scripts/semantic-commits/get-binary-release-data.js",
+        "scripts/binary/binary-entry-point-source.js",
+        "scripts/binary/binary-byte-node-entry-point-source.js"
+      ],
+      "ignoreDependencies": [
+        "@electron/fuses",
+        "@electron/notarize",
+        "@graphql-codegen/add",
+        "@graphql-codegen/cli",
+        "@graphql-codegen/plugin-helpers",
+        "@graphql-codegen/typed-document-node",
+        "@graphql-codegen/typescript",
+        "@graphql-codegen/typescript-operations",
+        "@graphql-codegen/typescript-resolvers",
+        "@graphql-codegen/typescript-urql-graphcache",
+        "@graphql-tools/delegate",
+        "@graphql-tools/utils",
+        "@graphql-tools/wrap",
+        "@octokit/auth-app",
+        "@octokit/core",
+        "@percy/cli",
+        "bytenode",
+        "chai-as-promised",
+        "detect-port",
+        "mobx",
+        "mocha-banner",
+        "mocha-junit-reporter",
+        "mocha-multi-reporters",
+        "mock-fs",
+        "playwright-webkit",
+        "proxyquire",
+        "react-dom",
+        "semantic-release-monorepo",
+        "shelljs",
+        "snap-shot-it",
+        "tar",
+        "term-to-html",
+        "through",
+        "yaml",
+        "yarn-deduplicate"
       ]
     },
     "cli": {
@@ -69,7 +113,6 @@
         "lib/capture.ts",
         "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
-        "lib/cloud/network/nonretriable_cert_error_codes.ts",
         "lib/plugins/child/default_plugins_file.js",
         "lib/privileged-commands/privileged-channel.js",
         "lib/util/**/*.{ts,js}",
@@ -87,7 +130,10 @@
         "tsconfig-paths",
         "@babel/core",
         "@babel/preset-env",
-        "babel-loader"
+        "babel-loader",
+        "playwright-core",
+        "playwright-webkit",
+        "tsx"
       ]
     },
     "packages/launchpad": {
@@ -182,6 +228,7 @@
       "ignoreDependencies": [
         "@fortawesome/fontawesome-free",
         "@fontsource/open-sans",
+        "@reach/dialog",
         "cypress-multi-reporters",
         "webpack-cli"
       ]
@@ -198,6 +245,8 @@
     },
     "packages/driver": {
       "entry": [
+        "src/main.ts",
+        "src/cypress/commands.ts",
         "cypress/plugins/server.js",
         "cypress/plugins/index.js",
         "cypress.config.ts",
@@ -209,7 +258,9 @@
         "*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
-        "cypress-multi-reporters"
+        "cypress-multi-reporters",
+        "buffer-es6",
+        "process-es6"
       ]
     },
     "packages/runner": {
@@ -235,8 +286,13 @@
       ]
     },
     "packages/proxy": {
+      "entry": [
+        "lib/http/util/rewriter.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ]
     },
@@ -248,6 +304,10 @@
       ]
     },
     "packages/launcher": {
+      "entry": [
+        "index.ts",
+        "lib/detect.ts"
+      ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
@@ -266,6 +326,7 @@
     },
     "packages/network": {
       "entry": [
+        "lib/index.ts",
         "test/support/servers.ts",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
@@ -343,6 +404,9 @@
       ]
     },
     "packages/network-tools": {
+      "entry": [
+        "lib/index.ts"
+      ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}"
       ]
@@ -550,6 +614,8 @@
         "src/**/*.{ts,tsx,js,jsx}"
       ],
       "ignoreDependencies": [
+        "cpr",
+        "stealthy-require",
         "tslib"
       ]
     },
@@ -587,6 +653,7 @@
         "@babel/core",
         "@babel/preset-env",
         "babel-loader",
+        "mochawesome-7.1.4",
         "semver",
         "systeminformation",
         "https-proxy-agent"
@@ -603,6 +670,8 @@
     "**/__snapshots__/**",
     "**/cypress.config.{ts,js}",
     "**/cypress.config-*.{ts,js}",
+    "**/cypress/support/component.{js,jsx,ts,tsx}",
+    "**/cypress/types.d.ts",
     "**/.releaserc.js",
     "**/index.d.ts",
     "**/postcss.config.{js,ts,cjs,mjs}",
@@ -631,7 +700,8 @@
     "**/*.gen.ts",
     "**/*.gen.js",
     "**/project-fixtures/**",
-    "**/projects/**"
+    "**/projects/**",
+    "system-tests/lib/validations/**"
   ],
   "ignoreDependencies": [
     "@types/*",
@@ -668,13 +738,56 @@
     "wc"
   ],
   "rules": {
-    "files": "warn",
-    "dependencies": "warn",
-    "unlisted": "warn",
-    "exports": "warn",
-    "types": "warn",
-    "duplicates": "warn",
+    "binaries": "warn",
+    "catalog": "warn",
     "classMembers": "warn",
-    "enumMembers": "warn"
+    "dependencies": "error",
+    "duplicates": "warn",
+    "enumMembers": "warn",
+    "exports": "warn",
+    "nsExports": "warn",
+    "nsTypes": "warn",
+    "files": "warn",
+    "types": "warn",
+    "unlisted": "error",
+    "unresolved": "off"
+  },
+  "ignoreIssues": {
+    "cli/types/cy-blob-util.d.ts": [
+      "exports"
+    ],
+    "cli/types/cy-bluebird.d.ts": [
+      "exports"
+    ],
+    "cli/types/cy-minimatch.d.ts": [
+      "exports"
+    ],
+    "packages/launcher/lib/darwin/index.ts": [
+      "exports"
+    ],
+    "packages/launcher/lib/windows/index.ts": [
+      "exports"
+    ],
+    "packages/server/lib/cloud/protocol.ts": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/child/cross_origin.js": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/child/dev-server.js": [
+      "exports"
+    ],
+    "packages/server/lib/video_capture.ts": [
+      "exports"
+    ],
+    "packages/data-context/graphql/index.ts": [
+      "exports"
+    ],
+    "packages/net-stubbing/lib/external-types.ts": [
+      "exports"
+    ],
+    "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
+      "exports"
+    ]
   }
 }

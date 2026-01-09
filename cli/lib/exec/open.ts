@@ -16,7 +16,7 @@ const debug = Debug('cypress:cli')
  *
  * @returns {string[]} list of CLI arguments
  */
-export const processOpenOptions = (options: any = {}): string[] => {
+const processOpenOptions = (options: any = {}): string[] => {
   // In addition to setting the project directory, setting the project option
   // here ultimately decides whether cypress is run in global mode or not.
   // It's first based off whether it's installed globally by npm/yarn (-g).
@@ -74,7 +74,7 @@ export const processOpenOptions = (options: any = {}): string[] => {
   return args
 }
 
-export const start = async (options: any = {}): Promise<any> => {
+const start = async (options: any = {}): Promise<any> => {
   function open (): any {
     try {
       const args = processOpenOptions(options)

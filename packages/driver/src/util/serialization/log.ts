@@ -110,7 +110,7 @@ export const reifyDomElement = (props: any) => {
  * @param {boolean} [attemptToSerializeFunctions=false] - Whether or not the function should attempt to preprocess a function by invoking it.
  * @returns
  */
-export const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions = false) => {
+const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions = false) => {
   if (_.isArray(props)) {
     return props.map((prop) => preprocessLogLikeForSerialization(prop, attemptToSerializeFunctions))
   }
@@ -154,7 +154,7 @@ export const preprocessObjectLikeForSerialization = (props, attemptToSerializeFu
  * @param {boolean} matchElementsAgainstSnapshotDOM - whether DOM elements within the Object/Array should be matched against
  * @returns {Object|Proxy} - a reified version of the Object or Array (Proxy).
  */
-export const reifyObjectLikeForSerialization = (props, matchElementsAgainstSnapshotDOM) => {
+const reifyObjectLikeForSerialization = (props, matchElementsAgainstSnapshotDOM) => {
   let reifiedObjectOrArray = {}
 
   _.forIn(props, (value, key) => {
@@ -275,7 +275,7 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
  * against the currently rendered DOM (usually against a rendered snapshot) or should be completely recreated from scratch (common with snapshots as they will replace the DOM)
  * @returns {any} the reified version of the generic.
  */
-export const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapshotDOM = true) => {
+const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapshotDOM = true) => {
   try {
     if (props?.serializationKey === 'dom') {
       props.reifyElement = function () {

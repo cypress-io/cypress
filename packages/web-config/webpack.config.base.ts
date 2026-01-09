@@ -53,6 +53,8 @@ const stats = {
 
 const ignoreWarnings = [{
   module: /node_modules\/mocha\/lib\/mocha.js/,
+}, {
+  module: /node_modules\/mocha\/lib\/esm-utils\.js/,
 }]
 
 function makeSassLoaders ({ modules }: { modules: boolean }) {

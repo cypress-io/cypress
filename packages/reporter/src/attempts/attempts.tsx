@@ -111,6 +111,4 @@ const Attempts: React.FC<AttemptsProps> = observer(({ test, isSingleStudioTest, 
 
 Attempts.displayName = 'Attempts'
 
-export { Attempt, AttemptHeader, NoCommands }
-
 export default Attempts
