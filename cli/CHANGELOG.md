@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.9.0
+
+_Released 01/13/2026 (PENDING)_
+
+**Features:**
+
+- The `experimentalRunAllSpecs` option can now be used for component testing as well as e2e testing. Addresses [#25636](https://github.com/cypress-io/cypress/issues/25636).
+
 ## 15.8.2
 
 _Released 01/06/2026_
