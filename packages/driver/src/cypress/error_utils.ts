@@ -556,7 +556,7 @@ const convertErrorEventPropertiesToObject = (args) => {
   })
 }
 
-export interface ErrorFromErrorEvent {
+interface ErrorFromErrorEvent {
   originalErr: Error
   err: Error
 }

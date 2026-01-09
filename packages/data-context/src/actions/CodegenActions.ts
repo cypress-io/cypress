@@ -7,7 +7,7 @@ import templates from '../codegen/templates'
 import type { CodeGenType } from '../gen/graphcache-config.gen'
 import { visit } from 'ast-types'
 
-export interface ReactComponentDescriptor {
+interface ReactComponentDescriptor {
   exportName: string
   isDefault: boolean
 }

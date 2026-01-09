@@ -5,7 +5,7 @@ export interface AppApiShape {
   appData: ApplicationDataApiShape
 }
 
-export interface ApplicationDataApiShape {
+interface ApplicationDataApiShape {
   path(): string
   toHashName(projectRoot: string): string
   ensure(): PromiseLike<unknown>

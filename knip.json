@@ -686,7 +686,6 @@
     "packages/frontend-shared/src/composables/examples/**/*.vue",
     "packages/frontend-shared/src/gql-components/composables/useCohorts.ts",
     "packages/frontend-shared/src/gql-components/composables/usePromptManager.ts",
-    "packages/frontend-shared/src/locales/schema.ts",
     "packages/frontend-shared/src/utils/base64.ts",
     "packages/frontend-shared/src/utils/isAllowedFeature.ts",
     "packages/frontend-shared/src/utils/isRunMode.ts",
@@ -781,13 +780,35 @@
       "exports"
     ],
     "packages/data-context/graphql/index.ts": [
-      "exports"
+      "exports",
+      "types"
     ],
     "packages/net-stubbing/lib/external-types.ts": [
       "exports"
     ],
     "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
       "exports"
+    ],
+    "packages/app/src/prompt/prompt-app-types.ts": [
+      "types"
+    ],
+    "packages/app/src/studio/studio-app-types.ts": [
+      "types"
+    ],
+    "packages/driver/src/cy/commands/prompt/prompt-driver-types.ts": [
+      "types"
+    ],
+    "packages/app/src/store/spec-dirty-data-store.ts": [
+      "types"
+    ],
+    "packages/data-context/graphql/stitching/remoteSchemaWrapped.ts": [
+      "types"
+    ],
+    "packages/data-context/src/data/coreDataShape.ts": [
+      "types"
+    ],
+    "packages/data-context/src/sources/ErrorDataSource.ts": [
+      "types"
     ]
   }
 }

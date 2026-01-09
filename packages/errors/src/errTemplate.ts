@@ -28,7 +28,7 @@ export class PartialErr {
   constructor (readonly strArr: TemplateStringsArray, readonly args: AllowedTemplateArg[]) {}
 }
 
-export interface FormatConfig {
+interface FormatConfig {
   block?: true
   color?: typeof theme[keyof typeof theme]
   stringify?: boolean

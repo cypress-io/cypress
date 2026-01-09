@@ -98,7 +98,7 @@ const modifierValueMap = {
   shift: 8,
 }
 
-export type KeyEventType =
+type KeyEventType =
   | 'keydown'
   | 'keyup'
   | 'keypress'
@@ -687,7 +687,7 @@ const keyToModifierMap = {
   Shift: 'shift',
 }
 
-export interface typeOptions {
+interface typeOptions {
   id: string
   $el: JQuery
   chars: string
