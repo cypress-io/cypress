@@ -28,7 +28,7 @@ export class PartialErr {
   constructor (readonly strArr: TemplateStringsArray, readonly args: AllowedTemplateArg[]) {}
 }
 
-interface FormatConfig {
+export interface FormatConfig {
   block?: true
   color?: typeof theme[keyof typeof theme]
   stringify?: boolean
@@ -36,7 +36,7 @@ interface FormatConfig {
 
 type ToFormat = string | number | Error | object | null | Guard | AllowedTemplateArg
 
-class Format {
+export class Format {
   constructor (
     readonly type: keyof typeof fmtHighlight,
     readonly val: ToFormat,
@@ -45,7 +45,7 @@ class Format {
     this.color = config.color || fmtHighlight[this.type]
   }
 
-  private color: typeof theme[keyof typeof theme]
+  public color: typeof theme[keyof typeof theme]
 
   formatVal (target: 'ansi' | 'markdown'): string {
     if (this.val instanceof Guard) {
@@ -58,7 +58,7 @@ class Format {
     return isMultiLine(str) ? `\n\n${str}` : str
   }
 
-  private formatAnsi () {
+  public formatAnsi () {
     const val = this.prepVal('ansi')
 
     if (this.type === 'terminal') {
@@ -68,7 +68,7 @@ class Format {
     return this.color(val)
   }
 
-  private formatMarkdown () {
+  public formatMarkdown () {
     if (this.type === 'comment') {
       return `${this.val}`
     }
@@ -86,7 +86,7 @@ class Format {
     return mdFence(this.prepVal('markdown'))
   }
 
-  private prepVal (target: 'ansi' | 'markdown'): string {
+  public prepVal (target: 'ansi' | 'markdown'): string {
     if (this.val instanceof PartialErr) {
       return prepMessage(this.val.strArr, this.val.args, target, true)
     }
@@ -220,7 +220,7 @@ function listFlags (
   .value())
 }
 
-export class Guard {
+class Guard {
   constructor (readonly val: string | number) {}
 }
 
@@ -228,7 +228,7 @@ export class Guard {
  * Prevents a string from being colored "blue" when wrapped in the errTemplate
  * tag template literal
  */
-export function guard (val: string | number) {
+function guard (val: string | number) {
   return new Guard(val)
 }
 
@@ -236,7 +236,7 @@ export function guard (val: string | number) {
  * Marks the value as "details". This is when we print out the stack trace to the console
  * (if it's an error), or use the stack trace as the originalError
  */
-export class StackTrace {
+class StackTrace {
   /**
    * @param {string | Error | object} stackTrace
    */

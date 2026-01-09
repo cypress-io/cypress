@@ -156,6 +156,4 @@ const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canS
 
 Runnable.displayName = 'Runnable'
 
-export { Suite }
-
 export default Runnable

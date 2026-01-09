@@ -34,7 +34,7 @@ import isValidHostname from 'is-valid-hostname'
 
 const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
-export function hasOnlyRouteMatcherKeys (obj: any) {
+function hasOnlyRouteMatcherKeys (obj: any) {
   return !_.isEmpty(obj) && !_.isArray(obj) && _.isEmpty(_.omit(obj, _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS)))
 }
 

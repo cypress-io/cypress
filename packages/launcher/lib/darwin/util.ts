@@ -8,7 +8,7 @@ import plist from 'plist'
 const debugVerbose = Debug('cypress-verbose:launcher:darwin:util')
 
 /** parses Info.plist file from given application and returns a property */
-export function parsePlist (p: string, property: string): Promise<string> {
+function parsePlist (p: string, property: string): Promise<string> {
   const pl = path.join(p, 'Contents', 'Info.plist')
 
   debugVerbose('reading property file "%s"', pl)
@@ -30,7 +30,7 @@ export function parsePlist (p: string, property: string): Promise<string> {
 }
 
 /** uses mdfind to find app using Ma app id like 'com.google.Chrome.canary' */
-export function mdfind (id: string): Promise<string> {
+function mdfind (id: string): Promise<string> {
   const cmd = `mdfind 'kMDItemCFBundleIdentifier=="${id}"' | head -1`
 
   debugVerbose('looking for bundle id %s using command: %s', id, cmd)

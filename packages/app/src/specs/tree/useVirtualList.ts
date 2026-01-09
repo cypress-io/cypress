@@ -6,7 +6,7 @@ import { isEqual } from 'lodash'
 
 export type UseVirtualListApi = ReturnType<typeof useVirtualList>['api']
 
-export interface UseVirtualListOptions {
+interface UseVirtualListOptions {
   /**
    * item height, accept a pixel value or a function that returns the height
    *
@@ -21,7 +21,7 @@ export interface UseVirtualListOptions {
   overscan?: number
 }
 
-export type UseVirtualListItem<T> = {
+type UseVirtualListItem<T> = {
   data: T
   index: number
 }

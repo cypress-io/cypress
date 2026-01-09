@@ -9,7 +9,7 @@ export interface AliasObject {
 
 export type Alias = string | Array<string> | null | AliasObject | Array<AliasObject>
 
-export type DefaultCollapsedState = 'closed' | 'open'
+type DefaultCollapsedState = 'closed' | 'open'
 
 export interface InstrumentProps {
   id: number
