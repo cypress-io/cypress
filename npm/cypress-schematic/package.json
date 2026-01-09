@@ -27,7 +27,7 @@
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "@angular/cli": ">=20.3.14",
+    "@angular/cli": ">=20.0.0",
     "@angular/core": ">=20.0.0",
     "cypress": "^15.8.0"
   },
