@@ -14,8 +14,6 @@ export type MessageSchema = typeof enUS
 
 export const defaultMessages: MessageSchema = JSON.parse(rawJsonMessages)
 
-export const VueI18n = createI18n()
-
 export function createI18n (opts = {}) {
   return _createI18n<MessageSchema, 'en-US'>({
     locale: 'en-US',

@@ -49,7 +49,7 @@ export const CLOUD_STATUSES = [
   'allTasksCompleted',
 ] as const
 
-export const PROJECT_STATUSES = [
+const PROJECT_STATUSES = [
   'isComponentTestingCandidate',
   'allTasksCompleted',
 ] as const

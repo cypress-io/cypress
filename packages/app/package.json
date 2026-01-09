@@ -87,10 +87,5 @@
   "files": [
     "dist"
   ],
-  "license": "MIT",
-  "nx": {
-    "implicitDependencies": [
-      "@packages/data-context"
-    ]
-  }
+  "license": "MIT"
 }

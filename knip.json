@@ -113,7 +113,6 @@
         "lib/capture.ts",
         "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
-        "lib/cloud/network/nonretriable_cert_error_codes.ts",
         "lib/plugins/child/default_plugins_file.js",
         "lib/privileged-commands/privileged-channel.js",
         "lib/util/**/*.{ts,js}",
@@ -246,6 +245,8 @@
     },
     "packages/driver": {
       "entry": [
+        "src/main.ts",
+        "src/cypress/commands.ts",
         "cypress/plugins/server.js",
         "cypress/plugins/index.js",
         "cypress.config.ts",
@@ -285,8 +286,13 @@
       ]
     },
     "packages/proxy": {
+      "entry": [
+        "lib/http/util/rewriter.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
       ]
     },
@@ -298,6 +304,10 @@
       ]
     },
     "packages/launcher": {
+      "entry": [
+        "index.ts",
+        "lib/detect.ts"
+      ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}",
         "*.{ts,tsx,js,jsx}"
@@ -316,6 +326,7 @@
     },
     "packages/network": {
       "entry": [
+        "lib/index.ts",
         "test/support/servers.ts",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
@@ -393,6 +404,9 @@
       ]
     },
     "packages/network-tools": {
+      "entry": [
+        "lib/index.ts"
+      ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}"
       ]
@@ -656,6 +670,8 @@
     "**/__snapshots__/**",
     "**/cypress.config.{ts,js}",
     "**/cypress.config-*.{ts,js}",
+    "**/cypress/support/component.{js,jsx,ts,tsx}",
+    "**/cypress/types.d.ts",
     "**/.releaserc.js",
     "**/index.d.ts",
     "**/postcss.config.{js,ts,cjs,mjs}",
@@ -722,14 +738,56 @@
     "wc"
   ],
   "rules": {
-    "files": "warn",
-    "dependencies": "error",
-    "unlisted": "error",
-    "unresolved": "warn",
-    "exports": "warn",
-    "types": "warn",
-    "duplicates": "warn",
+    "binaries": "warn",
+    "catalog": "warn",
     "classMembers": "warn",
-    "enumMembers": "warn"
+    "dependencies": "error",
+    "duplicates": "warn",
+    "enumMembers": "warn",
+    "exports": "warn",
+    "nsExports": "warn",
+    "nsTypes": "warn",
+    "files": "warn",
+    "types": "warn",
+    "unlisted": "error",
+    "unresolved": "off"
+  },
+  "ignoreIssues": {
+    "cli/types/cy-blob-util.d.ts": [
+      "exports"
+    ],
+    "cli/types/cy-bluebird.d.ts": [
+      "exports"
+    ],
+    "cli/types/cy-minimatch.d.ts": [
+      "exports"
+    ],
+    "packages/launcher/lib/darwin/index.ts": [
+      "exports"
+    ],
+    "packages/launcher/lib/windows/index.ts": [
+      "exports"
+    ],
+    "packages/server/lib/cloud/protocol.ts": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/child/cross_origin.js": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/child/dev-server.js": [
+      "exports"
+    ],
+    "packages/server/lib/video_capture.ts": [
+      "exports"
+    ],
+    "packages/data-context/graphql/index.ts": [
+      "exports"
+    ],
+    "packages/net-stubbing/lib/external-types.ts": [
+      "exports"
+    ],
+    "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
+      "exports"
+    ]
   }
 }

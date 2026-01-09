@@ -35,7 +35,7 @@
     "@packages/network-tools": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "@types/concat-stream": "1.6.1",
-    "@types/node": "22.18.0",
+    "@types/node": "22.18.7",
     "@types/proxy-from-env": "1.0.4",
     "cross-fetch": "^4.1.0",
     "express": "4.21.0",

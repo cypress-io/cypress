@@ -35,6 +35,7 @@ import { RemoteStates, RemoteState } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
 import * as fileServer from './file_server'
+import type { FileServer } from './file_server'
 import appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import * as statusCode from './util/status_code'
@@ -133,15 +134,9 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
-export type WarningErr = Record<string, any>
+type WarningErr = Record<string, any>
 
-type FileServer = {
-  token: string
-  port: () => number
-  close: () => void
-}
-
-export interface OpenServerOptions {
+interface OpenServerOptions {
   SocketCtor: typeof SocketE2E | typeof SocketCt
   testingType: Cypress.TestingType
   onError: any

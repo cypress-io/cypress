@@ -13,7 +13,7 @@
 /** eslint-disable */
 import $ from 'jquery'
 
-export function $scrollTo (target, duration, settings) {
+function $scrollTo (target, duration, settings) {
   return $(window).scrollTo(target, duration, settings)
 }
 

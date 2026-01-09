@@ -29,9 +29,21 @@ import type {
   CloudProjectRunsByCommitShasArgs,
 } from '../../src/gen/test-cloud-graphql-types.gen'
 import type { GraphQLResolveInfo } from 'graphql'
-import type { DebugTestingProgress_SpecsSubscription } from '@packages/app/src/generated/graphql'
 
  type ConfigFor<T> = Omit<T, 'id' | '__typename'>
+
+// Local type definition matching DebugTestingProgress_SpecsSubscription
+// to avoid circular dependency with @packages/app
+type DebugTestingProgress_SpecsSubscription = {
+  __typename: 'Subscription'
+  relevantRunSpecChange: {
+    __typename: 'CloudRun'
+    id: string
+    totalSpecs: number
+    completedSpecs: number
+    scheduledToCompleteAt: string | null
+  }
+}
 
 export type CloudTypesWithId = {
   [K in keyof CodegenTypeMap]: 'id' extends keyof CodegenTypeMap[K] ? K : never

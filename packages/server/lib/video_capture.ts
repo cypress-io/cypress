@@ -94,22 +94,6 @@ export function getChapters (fileName) {
   })
 }
 
-export function copy (src, dest) {
-  debug('copying from %s to %s', src, dest)
-
-  return fs
-  .copy(src, dest, { overwrite: true })
-  .catch((err) => {
-    if (err.code === 'ENOENT') {
-      debug('caught ENOENT error on copy, ignoring %o', { src, dest, err })
-
-      return
-    }
-
-    throw err
-  })
-}
-
 export type StartOptions = {
   // Path to write video to.
   videoName: string

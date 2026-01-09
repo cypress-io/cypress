@@ -13,7 +13,7 @@ export * from './scaffold'
 
 export * from './empty'
 
-export const generatorList: SpecGenerator[] = [
+const generatorList: SpecGenerator[] = [
   VueComponentGenerator,
   ReactComponentGenerator,
   ScaffoldGenerator,
