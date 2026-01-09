@@ -7,7 +7,7 @@ import path from 'path'
 
 type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
-export interface CypressCTWebpackPluginOptions {
+interface CypressCTWebpackPluginOptions {
   files: Cypress.Cypress['spec'][]
   projectRoot: string
   supportFile: string | false
@@ -16,7 +16,7 @@ export interface CypressCTWebpackPluginOptions {
   indexHtmlFile: string
 }
 
-export type CypressCTContextOptions = Omit<CypressCTWebpackPluginOptions, 'devServerEvents' | 'webpack'>
+type CypressCTContextOptions = Omit<CypressCTWebpackPluginOptions, 'devServerEvents' | 'webpack'>
 
 export interface CypressCTWebpackContext {
   _cypress: CypressCTContextOptions
@@ -25,7 +25,7 @@ export interface CypressCTWebpackContext {
 /**
  * @internal
  */
-export type Webpack45Compilation = Compilation & {
+type Webpack45Compilation = Compilation & {
   // TODO: Drop these additional Webpack 4 types
   inputFileSystem: {
     fileSystem: {

@@ -11,7 +11,7 @@ export type ModuleClass = typeof Module & {
   _cache: Record<string, Module>
 }
 
-export interface PackageJson {
+interface PackageJson {
   name: string
   version: string
 }
@@ -26,14 +26,14 @@ export interface SourcedWebpack extends SourcedDependency {
   majorVersion: 4 | 5
 }
 
-export interface SourcedWebpackDevServer extends SourcedDependency {
+interface SourcedWebpackDevServer extends SourcedDependency {
   module: {
     new (...args: unknown[]): unknown
   }
   majorVersion: 4 | 5
 }
 
-export interface SourcedHtmlWebpackPlugin extends SourcedDependency {
+interface SourcedHtmlWebpackPlugin extends SourcedDependency {
   module: unknown
   majorVersion: 4 | 5
 }

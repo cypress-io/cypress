@@ -747,7 +747,7 @@
     "nsExports": "warn",
     "nsTypes": "warn",
     "files": "warn",
-    "types": "warn",
+    "types": "error",
     "unlisted": "error",
     "unresolved": "off"
   },
@@ -784,7 +784,8 @@
       "types"
     ],
     "packages/net-stubbing/lib/external-types.ts": [
-      "exports"
+      "exports",
+      "types"
     ],
     "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
       "exports"
@@ -809,6 +810,12 @@
     ],
     "packages/data-context/src/sources/ErrorDataSource.ts": [
       "types"
+    ],
+    "packages/telemetry/src/client.ts": [
+      "types"
+    ],
+    "packages/telemetry/src/node.ts": [
+      "exports"
     ]
   }
 }
