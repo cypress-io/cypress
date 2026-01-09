@@ -15,6 +15,7 @@ export default defineConfig({
   experimentalMemoryManagement: true,
   experimentalCspAllowList: false,
   experimentalInteractiveRunEvents: true,
+  experimentalRunAllSpecs: true,
   component: {
     experimentalSingleTabRunMode: true,
     viewportWidth: 800,
@@ -29,8 +30,7 @@ export default defineConfig({
   hosts: {
     'foobar.com': '127.0.0.1',
   },
-  'e2e': {
-    experimentalRunAllSpecs: true,
+  e2e: {
     experimentalOriginDependencies: true,
     baseUrl: 'http://localhost:5555',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
