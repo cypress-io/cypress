@@ -111,7 +111,7 @@ export function sourceFramework (config: WebpackDevServerConfig): SourcedDepende
 // Source the webpack module from the provided framework or projectRoot. We override the module resolution
 // so that other packages that import webpack resolve to the version we found.
 // If none is found, we fallback to the bundled version in '@cypress/webpack-batteries-included-preprocessor'.
-export function sourceWebpack (config: WebpackDevServerConfig, framework: SourcedDependency | null): SourcedWebpack {
+function sourceWebpack (config: WebpackDevServerConfig, framework: SourcedDependency | null): SourcedWebpack {
   const searchRoot = framework?.importPath ?? config.cypressConfig.projectRoot
 
   debug('Webpack: Attempting to source webpack from %s', searchRoot)

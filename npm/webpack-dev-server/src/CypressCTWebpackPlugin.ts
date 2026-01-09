@@ -34,10 +34,6 @@ type Webpack45Compilation = Compilation & {
   }
 }
 
-export const normalizeError = (error: Error | string) => {
-  return typeof error === 'string' ? error : error.message
-}
-
 /**
  * A webpack 4/5 compatible Cypress Component Testing Plugin
  *

@@ -247,7 +247,7 @@ export function stackTrace (val: string | Error | object) {
   return new StackTrace(val)
 }
 
-export function isErrorLike (err: any): err is SerializedError | Error {
+function isErrorLike (err: any): err is SerializedError | Error {
   return err && typeof err === 'object' && Boolean('name' in err && 'message' in err)
 }
 
