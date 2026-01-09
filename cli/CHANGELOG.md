@@ -1,11 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.8.3
 
-_Released xx/xx/xxxx (PENDING)_
+_Released 1/13/2026 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where output could be cut off when the process exits in CI environments.
+- Fixed an issue where output could be cut off when the process exits in CI environments. Fixed in [#33213](https://github.com/cypress-io/cypress/pull/33213).
 
 ## 15.8.2
 
