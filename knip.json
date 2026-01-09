@@ -790,6 +790,10 @@
     "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
       "exports"
     ],
+    "packages/driver/src/cypress/events.ts": [
+      "exports",
+      "types"
+    ],
     "packages/app/src/prompt/prompt-app-types.ts": [
       "types"
     ],

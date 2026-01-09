@@ -4,8 +4,6 @@
 /// <reference path="./spec-types.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
 
-import type { Events } from '../src/cypress/events'
-
 interface InternalWindowLoadDetails {
   type: 'same:origin' | 'cross:origin' | 'cross:origin:failure'
   error?: Error

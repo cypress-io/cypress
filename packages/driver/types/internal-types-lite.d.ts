@@ -1,9 +1,6 @@
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
 // All of the types needed by packages/app, without any of the additional APIs used in the driver only
-
-import type { Events } from '../src/cypress/events'
-
 declare namespace Cypress {
   interface Cypress {
     runner: any
