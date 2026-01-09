@@ -73,7 +73,7 @@ function createSpawnFunction (
         executable = 'node'
         // if we're in dev then reset
         // the launch cmd to be 'npm run dev'
-        startScriptPath = path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+        startScriptPath = path.resolve(__dirname, '..', '..', 'scripts', 'start.js')
 
         debug('in dev mode the args became %o', args)
       }
