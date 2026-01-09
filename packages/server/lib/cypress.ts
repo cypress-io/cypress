@@ -20,6 +20,24 @@ const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
 
+/**
+ * Waits for a writable stream to drain its buffer.
+ * This is necessary because when stdout/stderr is piped (e.g., in CI environments),
+ * writes are buffered and process.exit() would terminate before the buffer is flushed.
+ */
+const waitForStreamDrain = (stream: NodeJS.WriteStream): Promise<void> => {
+  return new Promise((resolve) => {
+    if (!stream.isTTY && stream.writableLength > 0) {
+      debug('waiting for stream to drain, writableLength: %d', stream.writableLength)
+      stream.once('drain', resolve)
+      // Safety timeout to prevent hanging indefinitely
+      setTimeout(resolve, 5000)
+    } else {
+      setImmediate(resolve)
+    }
+  })
+}
+
 const exit = async (code = 0) => {
   // TODO: we shouldn't have to do this
   // but cannot figure out how null is
@@ -40,6 +58,13 @@ const exit = async (code = 0) => {
   await telemetry.shutdown().catch((err: any) => {
     debug('telemetry shutdown errored with: ', err)
   })
+
+  // Wait for stdout/stderr to drain before exiting to prevent truncated output in CI
+  debug('waiting for stdout/stderr to drain before exit')
+  await Promise.all([
+    waitForStreamDrain(process.stdout),
+    waitForStreamDrain(process.stderr),
+  ])
 
   debug('process.exit', code)
 
