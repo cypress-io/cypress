@@ -21,7 +21,8 @@ function external (id, parent, resolved) {
   return false
 }
 
-const inputFiles = ['lib/index.ts', 'lib/cli.ts', 'lib/bin/cypress.ts', 'lib/exec/xvfb.ts', 'lib/exec/spawn.ts']
+// NOTE: cypress.ts is included here because it is the CJS "entrypoint" used by the ESM build
+const inputFiles = ['lib/index.ts', 'lib/cli.ts', 'lib/cypress.ts', 'lib/bin/cypress.ts', 'lib/exec/xvfb.ts', 'lib/exec/spawn.ts']
 
 export default [
   {
@@ -39,7 +40,6 @@ export default [
         const chunkName = chunkInfo.name || ''
 
         for (const file of inputFiles) {
-        console.log('dirname', path.dirname(file))
           const pathRelativeToLib = path.relative('lib', path.dirname(file))
 
           if (
@@ -66,12 +66,19 @@ export default [
   },
   {
     input: 'lib/index.mts',
-
+    format: 'esm',
     output: {
       name: pkg.name,
       format: 'esm',
       dir: 'dist',
-      entryFileNames: 'index.mjs',
+      entryFileNames (chunkInfo) {
+        console.log('chunkInfo', chunkInfo)
+        if (chunkInfo.name === 'index') {
+          return 'index.mjs'
+        }
+
+        return '[name].mjs'
+      },
     },
     plugins: [
       typescript({
