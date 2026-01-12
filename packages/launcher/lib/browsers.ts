@@ -2,12 +2,8 @@ import Debug from 'debug'
 import type * as cp from 'child_process'
 import { utils } from './utils'
 import type { FoundBrowser } from '@packages/types'
-import type { Readable } from 'stream'
 
 export const debug = Debug('cypress:launcher:browsers')
-
-/** starts a found browser and opens URL if given one */
-export type LaunchedBrowser = cp.ChildProcessByStdio<null, Readable, Readable>
 
 // NOTE: For Firefox, geckodriver is used to launch the browser
 export function launch (

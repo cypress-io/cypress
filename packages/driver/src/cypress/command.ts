@@ -182,4 +182,5 @@ export class $Command {
   }
 }
 
+/** @alias */
 export default $Command

@@ -10,7 +10,7 @@ import path from 'path'
 import _ from 'lodash'
 import fs from 'fs'
 
-import { getError, CypressError, ConfigValidationFailureInfo } from '@packages/errors'
+import { getError, CypressError } from '@packages/errors'
 import type { DataContext } from '..'
 import assert from 'assert'
 import type { AllModeOptions, FoundBrowser, FullConfig, TestingType } from '@packages/types'
@@ -25,15 +25,6 @@ import { validateNeedToRestartOnChange } from '@packages/config'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { telemetry } from '@packages/telemetry'
 
-export interface SetupFullConfigOptions {
-  projectName: string
-  projectRoot: string
-  cliConfig: Partial<Cypress.ConfigOptions>
-  config: Partial<Cypress.ConfigOptions>
-  envFile: Partial<Cypress.ConfigOptions>
-  options: Partial<AllModeOptions>
-}
-
 const POTENTIAL_CONFIG_FILES = [
   'cypress.config.ts',
   'cypress.config.mjs',
@@ -41,19 +32,7 @@ const POTENTIAL_CONFIG_FILES = [
   'cypress.config.js',
 ]
 
-/**
- * All of the APIs injected from @packages/server & @packages/config
- * since these are not strictly typed
- */
-export interface InjectedConfigApi {
-  cypressVersion: string
-  validateConfig<T extends Cypress.ConfigOptions>(config: Partial<T>, onErr: (errMsg: ConfigValidationFailureInfo | string) => never): T
-  allowedConfig(config: Cypress.ConfigOptions): Cypress.ConfigOptions
-  updateWithPluginValues(config: FullConfig, modifiedConfig: Partial<Cypress.ConfigOptions>, testingType: TestingType): FullConfig
-  setupFullConfigWithDefaults(config: SetupFullConfigOptions): Promise<FullConfig>
-}
-
-export interface ProjectMetaState {
+interface ProjectMetaState {
   isUsingTypeScript: boolean
   hasCypressEnvFile: boolean
   hasValidConfigFile: boolean

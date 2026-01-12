@@ -1,7 +1,4 @@
 import type { CreateBundleResult } from '@tooling/packherd'
-import type { RawSourceMap } from 'source-map-js'
-
-type NodeRequireFunction = typeof require
 
 export type Entries<T> = {
   [K in keyof T]: [K, T[K]]
@@ -147,53 +144,4 @@ export type ProcessScriptOpts = {
 export type ProcessScriptResult = {
   outcome: 'failed:assembleScript' | 'failed:verifyScript' | 'completed'
   error?: Error
-}
-
-/** Specifies the signature of the function that represents a module definition
- * and when invoked returns a Node.js `module`.
- *
- * Note that an `exports` parameter which is the same instance as the
- * `module.exports` field.  The module either mutates the `exports` directly or
- * reassigns `module.exports`.  After invoking it, the `module.exports` are
- * considered the exports of the module.
- *
- * These definitions are embedded into the snapshot and invoked at runtime.
- * They are used instead of full-fledged exports when snapshotting would fail
- * were we to initialize them during the snapshot phase.
- *
- * @category snapshot
- * @category loader
- */
-export type ModuleDefinition = (
-  exports: NodeModule['exports'],
-  module: {
-    exports: NodeModule['exports']
-  },
-  __filename: string,
-  __dirname: string,
-  require: NodeRequireFunction
-) => NodeModule
-
-/**
- * The result of snapshotting a snapshot script. Namely it has the
- * `customRequire` function which also references the `exports` containing fully
- * initialized modules as well as `definitions` {@link ModuleDefinition}..
- *
- * @category snapshot
- */
-export type Snapshot = {
-  customRequire: {
-    definitions: Record<string, NodeRequireFunction>
-    exports: Record<string, NodeModule>
-    // Module._cache === require.cache
-    cache: Record<string, NodeModule>
-  }
-}
-
-/**
- * Extra data we include in the snapshot, namely the embedded `sourceMap`.
- * @category snapshot
- */
-export type SnapshotAuxiliaryData = {
-  sourceMap?: RawSourceMap
 }

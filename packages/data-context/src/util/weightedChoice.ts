@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-export type WeightedAlgorithm = {
+type WeightedAlgorithm = {
   pick: (values: string[]) => string
 }
 

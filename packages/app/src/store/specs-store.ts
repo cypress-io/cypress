@@ -1,7 +1,7 @@
 import type { SpecFile, TestFilter } from '@packages/types/src'
 import { defineStore } from 'pinia'
 
-export interface SpecState {
+interface SpecState {
   activeSpec: SpecFile | null | undefined
   specFilter?: string
   testFilter: TestFilter

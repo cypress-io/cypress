@@ -34,6 +34,8 @@ export * from './server'
 
 export * from './util'
 
+export * from './types'
+
 export * from './warning'
 
 export * from './modeOptions'

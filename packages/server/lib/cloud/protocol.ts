@@ -515,4 +515,5 @@ type ProtocolAsyncMethods = {
   [K in keyof AppCaptureProtocolInterface]: ReturnType<AppCaptureProtocolInterface[K]> extends Promise<any> ? K : never
 }[keyof AppCaptureProtocolInterface]
 
+/** @alias */
 export default ProtocolManager
