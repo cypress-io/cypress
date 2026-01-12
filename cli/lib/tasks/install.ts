@@ -16,11 +16,11 @@ import unzip from './unzip'
 import logger from '../logger'
 import { throwFormErrorText, errors } from '../errors'
 import verbose from '../VerboseRenderer'
+import pkg from '../../package.json'
+
+const { buildInfo, version } = pkg as any
 
 const debug = Debug('cypress:cli')
-
-// Import package.json dynamically to avoid TypeScript JSON import issues
-const { buildInfo, version } = require('../../package.json')
 
 function _getBinaryUrlFromBuildInfo (arch: string, { commitSha, commitBranch }: any): string {
   const platform = os.platform()
