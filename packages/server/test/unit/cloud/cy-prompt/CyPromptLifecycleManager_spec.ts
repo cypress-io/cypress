@@ -637,7 +637,7 @@ describe('CyPromptLifecycleManager', () => {
         },
         cyPromptHash: 'abc',
         projectSlug: 'test-project-id',
-        error: aggregateError.errors[aggregateError.errors.length - 1],
+        error: aggregateError,
         cyPromptMethod: 'initializeCyPromptManager',
         cyPromptMethodArgs: [],
         additionalHeaders: {
