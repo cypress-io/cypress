@@ -47,20 +47,43 @@ if (supportFile) {
   })
 }
 
-// Using relative path wouldn't allow to load tests outside Vite project root folder
-// So we use the "@fs" bit to load the test file using its absolute path
-// Normalize path to not include a leading slash (different on Win32 vs Unix)
-const normalizedAbsolutePath = CypressInstance.spec.absolute.replace(/^\//, '')
-const testFileAbsolutePathRoute = `${devServerPublicPathBase}/@fs/${normalizedAbsolutePath}`
+const specPath = new URLSearchParams(document.location.search).get('specPath')
 
-/* Spec file import logic */
-// We need a slash before /src/my-spec.js, this does not happen by default.
-importsToLoad.push({
-  load: () => import(testFileAbsolutePathRoute),
-  absolute: CypressInstance.spec.absolute,
-  relative: CypressInstance.spec.relative,
-  relativeUrl: testFileAbsolutePathRoute,
-})
+// if the specPath is __all, then experimentalRunAllSpecs is set to true.
+if (specPath === '__all' || CypressInstance.spec.relative === '__all') {
+  const runAllSpecs = window.parent.__RUN_ALL_SPECS__ || []
+  const allSpecs = window.parent.__RUN_MODE_SPECS__ || []
+
+  runAllSpecs.forEach((specRelative) => {
+    const specObj = allSpecs.find((s) => s.relative === specRelative)
+
+    if (specObj) {
+      const normalizedPath = specObj.absolute.replace(/^\//, '')
+      const specRoute = `${devServerPublicPathBase}/@fs/${normalizedPath}`
+
+      importsToLoad.push({
+        load: () => import(specRoute),
+        absolute: specObj.absolute,
+        relative: specObj.relative,
+        relativeUrl: specRoute,
+      })
+    }
+  })
+} else {
+  // Using relative path wouldn't allow to load tests outside Vite project root folder
+  // So we use the "@fs" bit to load the test file using its absolute path
+  // Normalize path to not include a leading slash (different on Win32 vs Unix)
+  const normalizedAbsolutePath = CypressInstance.spec.absolute.replace(/^\//, '')
+  const testFileAbsolutePathRoute = `${devServerPublicPathBase}/@fs/${normalizedAbsolutePath}`
+
+  // We need a slash before /src/my-spec.js, this does not happen by default.
+  importsToLoad.push({
+    load: () => import(testFileAbsolutePathRoute),
+    absolute: CypressInstance.spec.absolute,
+    relative: CypressInstance.spec.relative,
+    relativeUrl: testFileAbsolutePathRoute,
+  })
+}
 
 if (!CypressInstance) {
   throw new Error('Tests cannot run without a reference to Cypress!')

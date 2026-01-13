@@ -25,6 +25,7 @@ import { openExternal } from './gui/links'
 import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import type { StudioInitOptions } from './types/studio'
@@ -409,10 +410,20 @@ export class SocketBase {
           const ctx = await getCtx()
           const devServer = await ctx._apis.projectApi.getDevServer()
 
-          // update the dev server with the spec running
-          debug(`updating CT dev-server with spec: ${spec.relative}`)
-          // @ts-expect-error
-          await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
+          if (spec.relative === RUN_ALL_SPECS_KEY) {
+            const specsToCompile = ctx.project.runAllSpecs.map((relPath) => {
+              return ctx.project.specs.find((s) => s.relative === relPath)
+            }).filter(Boolean) as Cypress.Spec[]
+
+            debug(`updating CT dev-server with ${specsToCompile.length} specs`)
+            // @ts-expect-error
+            await devServer.updateSpecs(specsToCompile, { neededForJustInTimeCompile: true })
+          } else {
+            // update the dev server with the spec running
+            debug(`updating CT dev-server with spec: ${spec.relative}`)
+            // @ts-expect-error
+            await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
+          }
 
           return socket.emit('dev-server:on-spec-updated')
         })

@@ -3174,6 +3174,11 @@ declare namespace Cypress {
      */
     injectDocumentDomain: boolean
     /**
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
+     * @default false
+     */
+    experimentalRunAllSpecs?: boolean
+    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
      */
@@ -3274,11 +3279,6 @@ declare namespace Cypress {
   }
 
   interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
-    /**
-     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
-     * @default false
-     */
-    experimentalRunAllSpecs?: boolean
     /**
      * Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.
      * @default false

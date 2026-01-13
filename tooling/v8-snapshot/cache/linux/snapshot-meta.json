@@ -1666,7 +1666,6 @@
     "./node_modules/aws-sign2/index.js",
     "./node_modules/aws4/aws4.js",
     "./node_modules/aws4/lru.js",
-    "./node_modules/babylon/lib/index.js",
     "./node_modules/balanced-match/index.js",
     "./node_modules/base64-js/index.js",
     "./node_modules/base64id/lib/base64id.js",
@@ -4310,5 +4309,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "52517f7b4f3ec304ed3dcf0e7933e9afd221e081b7772e90e60711b795fb36c1"
+  "deferredHash": "7a030aca7aa67a2353f9d19a9d5a3e5ab0e9dac0ff16e0b42f6203a70a13a2c7"
 }

@@ -28,7 +28,7 @@ export class PartialErr {
   constructor (readonly strArr: TemplateStringsArray, readonly args: AllowedTemplateArg[]) {}
 }
 
-export interface FormatConfig {
+interface FormatConfig {
   block?: true
   color?: typeof theme[keyof typeof theme]
   stringify?: boolean
@@ -247,7 +247,7 @@ export function stackTrace (val: string | Error | object) {
   return new StackTrace(val)
 }
 
-export function isErrorLike (err: any): err is SerializedError | Error {
+function isErrorLike (err: any): err is SerializedError | Error {
   return err && typeof err === 'object' && Boolean('name' in err && 'message' in err)
 }
 

@@ -233,7 +233,7 @@ _Released 01/17/2033 (PENDING)_
           }],
         })
 
-        expect(console.log).to.be.calledWith('Does not contain any user-facing changes that impacts the next Cypress release.')
+        expect(console.log).to.be.calledWith('Does not contain any user-facing changes that impact the next Cypress release.')
       })
 
       it('when commit does not include cli or binary file changes', async () => {
@@ -250,7 +250,7 @@ _Released 01/17/2033 (PENDING)_
           }],
         })
 
-        expect(console.log).to.be.calledWith('Does not contain changes that impacts the next Cypress release.')
+        expect(console.log).to.be.calledWith('Does not contain changes that impact the next Cypress release.')
       })
 
       it('when current branch is in SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES env var', async () => {

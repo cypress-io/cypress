@@ -64,7 +64,7 @@
 import type { FunctionalComponent, SVGAttributes, ComputedRef } from 'vue'
 import type { BadgeRowStatus } from '@cy/components/Badge.vue'
 
-export type FileRowStatus = 'changes' | 'valid' | 'skipped' | 'error';
+type FileRowStatus = 'changes' | 'valid' | 'skipped' | 'error';
 
 type StatusInfo = {
   badgeLabel?: string

@@ -1868,9 +1868,9 @@ describe('lib/cypress', () => {
 
         // "pick" out the list of properties that cannot exist on the root level so we can re-add them on the "e2e" object
         // TODO: refactor this part of the test, this is silly and a holdover from pre-split-config
-        const { experimentalRunAllSpecs, experimentalOriginDependencies, supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, testIsolation, ...rest } = json
+        const { experimentalOriginDependencies, supportFile, specPattern, excludeSpecPattern, baseUrl, slowTestThreshold, testIsolation, ...rest } = json
 
-        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { experimentalRunAllSpecs, experimentalOriginDependencies, baseUrl, supportFile, specPattern, testIsolation, excludeSpecPattern } })
+        return settings.writeForTesting(this.todosPath, { ...rest, e2e: { experimentalOriginDependencies, baseUrl, supportFile, specPattern, testIsolation, excludeSpecPattern } })
       }).then(async () => {
         await clearCtx()
 

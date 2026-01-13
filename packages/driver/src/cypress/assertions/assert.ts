@@ -18,15 +18,15 @@ export const accessors = {
   prop: 'property',
 } as const
 
-export type Accessors = keyof typeof accessors
+type Accessors = keyof typeof accessors
 
-export type Selectors = keyof typeof selectors
+type Selectors = keyof typeof selectors
 
 export type Methods = Accessors | Selectors | 'data' | 'class' | 'empty' | 'id' | 'html' | 'text' | 'value' | 'descendants' | 'match'
 
 export type PartialAssertionArgs = [Chai.Message, Chai.Message, any?, any?, boolean?]
 
-export interface Callbacks {
+interface Callbacks {
   onInvalid: (method, obj) => void
   onError: (err, method, obj, negated) => void
 }

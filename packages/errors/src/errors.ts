@@ -1228,21 +1228,6 @@ export const AllCypressErrors = {
         
         You can safely remove this option from your config.`
   },
-  EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
-    const code = errPartial`
-    {
-      e2e: {
-        experimentalRunAllSpecs: true
-      },
-    }`
-
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalRunAllSpecs`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalRunAllSpecs`)}.
-
-        ${fmt.code(code)}
-
-        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/run-all-specs`
-  },
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
     const code = errPartial`
     {

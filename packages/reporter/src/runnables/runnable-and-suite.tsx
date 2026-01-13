@@ -120,7 +120,7 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
 
 Suite.displayName = 'Suite'
 
-export interface RunnableProps {
+interface RunnableComponentProps {
   model: TestModel | SuiteModel
   studioEnabled: boolean
   canSaveStudioLogs: boolean
@@ -132,7 +132,7 @@ export interface RunnableProps {
 // in order to mess with its internal state. converting it to a functional
 // component breaks that, so it needs to stay a Class-based component or
 // else the driver tests need to be refactored to support it being functional
-const Runnable: React.FC<RunnableProps> = observer(({ model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec }) => {
+const Runnable: React.FC<RunnableComponentProps> = observer(({ model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec }) => {
   return (<>
     <li
       className={cs(`${model.type} runnable runnable-${model.state}`, {
