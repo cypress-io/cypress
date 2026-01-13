@@ -4304,6 +4304,7 @@
     "./packages/types/cjs/spec.js",
     "./packages/types/cjs/studio/index.js",
     "./packages/types/cjs/studio/studio-server-types.js",
+    "./packages/types/cjs/types.js",
     "./packages/types/cjs/util.js",
     "./packages/types/cjs/video.js",
     "./packages/types/cjs/warning.js",
