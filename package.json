@@ -151,7 +151,7 @@
     "eslint-plugin-vue": "7.18.0",
     "execa": "4.1.0",
     "fast-xml-parser": "^4.5.3",
-    "filesize": "10.1.1",
+    "filesize": "10.1.6",
     "fs-extra": "9.1.0",
     "glob": "7.1.6",
     "graphql": "^15.5.1",
