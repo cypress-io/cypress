@@ -20,8 +20,8 @@ export function openNewTestFromSpecHeader () {
   cy.get('[data-cy="runnable-popover-new-test"]').click()
 }
 
-export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''], specSelector = 'data-cy-row' } = {}) {
-  loadProjectAndRunSpec({ specName, cliArgs, specSelector })
+export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''] } = {}) {
+  loadProjectAndRunSpec({ specName, cliArgs })
 
   const testTitle = 'visits a basic html page'
 
