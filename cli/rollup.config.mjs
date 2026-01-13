@@ -22,7 +22,7 @@ function external (id, parent, resolved) {
 }
 
 // NOTE: cypress.ts is included here because it is the CJS "entrypoint" used by the ESM build
-const inputFiles = ['lib/index.ts', 'lib/cli.ts', 'lib/cypress.ts', 'lib/exec/xvfb.ts', 'lib/exec/spawn.ts', 'lib/bin/cypress.ts']
+const inputFiles = ['lib/index.ts', 'lib/cli.ts', 'lib/cypress.ts', 'lib/exec/xvfb.ts', 'lib/exec/spawn.ts', 'lib/exec/run.ts', 'lib/bin/cypress.ts', 'lib/']
 
 export default [
   {
