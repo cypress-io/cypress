@@ -163,9 +163,7 @@ describe('studio functionality', () => {
   it('creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
-    cy.waitForSpecToFinish()
-
-    openNewTestFromSpecHeader()
+    cy.contains('Create test with Cypress Studio').click()
 
     inputNewTestName()
 
