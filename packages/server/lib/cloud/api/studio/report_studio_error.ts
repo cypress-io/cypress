@@ -44,26 +44,28 @@ export function reportStudioError ({
     return
   }
 
+  const errorToReport = error instanceof AggregateError ? error.errors[error.errors.length - 1] : error
+
   // When developing locally, do not send to Sentry, but instead log to console.
   if (
     process.env.CYPRESS_LOCAL_STUDIO_PATH ||
     process.env.NODE_ENV === 'development' ||
     process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
   ) {
-    logError(`Error in ${studioMethod}:`, error)
+    logError(`Error in ${studioMethod}:`, errorToReport)
 
     return
   }
 
   let errorObject: Error
 
-  if (!(error instanceof Error)) {
+  if (!(errorToReport instanceof Error)) {
     // Use safe serialization that handles circular references and other edge cases
-    const message = exception.safeErrorSerialize(error)
+    const message = exception.safeErrorSerialize(errorToReport)
 
     errorObject = new Error(message)
   } else {
-    errorObject = error
+    errorObject = errorToReport
   }
 
   let studioMethodArgsString: string | undefined

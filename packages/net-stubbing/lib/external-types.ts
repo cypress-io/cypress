@@ -207,7 +207,12 @@ export namespace CyHttpMessages {
   }
 }
 
-export interface DictMatcher<T> {
+/**
+ * A dictionary/object matcher for matching key-value pairs.
+ * Used for matching HTTP headers and query string parameters.
+ * Keys are strings, values are of type T (typically a StringMatcher).
+ */
+interface DictMatcher<T> {
   [key: string]: T
 }
 

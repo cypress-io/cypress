@@ -21,14 +21,14 @@ const ensureAuth = () => {
  *
  * @param {object} latestReleaseInfo - data of the latest tag published on npm
  * @param {string} latestReleaseInfo.version - version of Cypress
- * @param {string} latestReleaseInfo.commitDate - data of release
+ * @param {string} latestReleaseInfo.commitDate - date of release
  * @param {string} latestReleaseInfo.buildSha - git commit associated with published content
  */
 const getChangedFilesSinceLastRelease = (latestReleaseInfo) => {
   const stdout = childProcess.execSync(`git diff ${latestReleaseInfo.buildSha}.. --name-only`, { encoding: 'utf8' })
 
   if (!stdout) {
-    console.log('no files changes since last release')
+    console.log('no file changes since last release')
 
     return []
   }
@@ -102,7 +102,7 @@ const fetchPullRequest = async (octokit, pullNumber) => {
  *
  * @param {object} latestReleaseInfo - data of the latest tag published on npm
  * @param {string} latestReleaseInfo.version - version of Cypress
- * @param {string} latestReleaseInfo.commitDate - data of release
+ * @param {string} latestReleaseInfo.commitDate - date of release
  * @param {string} latestReleaseInfo.buildSha - git commit associated with published content
  */
 const getReleaseData = async (latestReleaseInfo) => {

@@ -8,7 +8,7 @@ const packherd = require('../package.json').name
 
 export type PathsMapper = (s: string) => string
 
-export const identityMapper: PathsMapper = (s: string) => s
+const identityMapper: PathsMapper = (s: string) => s
 
 /**
  * The EntryGenerator creates an entry file which includes all dependencies reachable from the [entryFilePath] but

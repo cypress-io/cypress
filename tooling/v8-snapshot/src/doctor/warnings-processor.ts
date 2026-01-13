@@ -7,7 +7,7 @@ import path from 'path'
  * includes to indicate that rewriting the module's code resulted in invalid JavaScript.
  * @category snapshot
  */
-export const SNAPSHOT_REWRITE_FAILURE = '[SNAPSHOT_REWRITE_FAILURE]'
+const SNAPSHOT_REWRITE_FAILURE = '[SNAPSHOT_REWRITE_FAILURE]'
 
 /**
  * Marker that the
@@ -16,13 +16,13 @@ export const SNAPSHOT_REWRITE_FAILURE = '[SNAPSHOT_REWRITE_FAILURE]'
  * during snapshot generation and thus needs to be deferred.
  * @category snapshot
  */
-export const SNAPSHOT_CACHE_FAILURE = '[SNAPSHOT_CACHE_FAILURE]'
+const SNAPSHOT_CACHE_FAILURE = '[SNAPSHOT_CACHE_FAILURE]'
 
 /**
  * This error is raised for missing Node.js globals like Buffer
  * @category snapshot
  */
-export const REFERENCE_ERROR_DEFER =
+const REFERENCE_ERROR_DEFER =
   /^(Reference|Type)?Error: (.+ is not defined|Cannot read property|Cannot read properties)/i
 
 /**
@@ -31,7 +31,7 @@ export const REFERENCE_ERROR_DEFER =
  * replacement to be used before defined or similar
  * @category snapshot
  */
-export const REFERENCE_ERROR_NOREWRITE =
+const REFERENCE_ERROR_NOREWRITE =
   /^(Reference|Type)?Error: (.+ is not a function|__.+__ is not defined)/i
 
 /**
@@ -39,7 +39,7 @@ export const REFERENCE_ERROR_NOREWRITE =
  * We keep it in order to avoid logging the same warning over and over
  * @category snapshot
  */
-export type WarningsProcessHistory = {
+type WarningsProcessHistory = {
   deferred: Set<string>
   norewrite: Set<string>
 }
@@ -70,7 +70,7 @@ export type Warning = CreateBundleResult['warnings'][number]
  * file that triggered the warning as well as the consequence.
  * @category snapshot
  */
-export type ProcessedWarning = {
+type ProcessedWarning = {
   location: Warning['location'] & { fullPath: string }
   consequence: WarningConsequence
   text: Warning['text']

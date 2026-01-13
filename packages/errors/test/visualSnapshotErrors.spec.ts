@@ -1064,12 +1064,6 @@ describe('visual error templates', () => {
       }
     },
 
-    EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
-      return {
-        default: [],
-      }
-    },
-
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],
