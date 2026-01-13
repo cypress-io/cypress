@@ -54,6 +54,24 @@ The changelog should include anything that was merged into the `develop` branch 
     - When no issues, but PR: "Addressed in [#12]([https://github.com/cypress-io/cypress/issues/12](https://github.com/cypress-io/cypress/issues/1234))."
     - When multiple issues: "Fixes [#12]([https://github.com/cypress-io/cypress/issues/12](https://github.com/cypress-io/cypress/issues/1234)), [#13]([https://github.com/cypress-io/cypress/issues/13](https://github.com/cypress-io/cypress/issues/1234)) and [#14]([https://github.com/cypress-io/cypress/issues/14](https://github.com/cypress-io/cypress/issues/1234))."
 
+## Formatting
+
+### Package Names and Versions
+
+Enclose the following in backticks (\`):
+
+| Item                                                                                                     | Pattern                                  | Example                      |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ---------------------------- |
+| [npm package name](https://docs.npmjs.com/creating-a-package-json-file#required-name-and-version-fields) | lower case, hyphen / underscore optional | `tar-fs`                     |
+| [semver version](https://semver.org/)                                                                    | `X.Y.Z` (no `v`)                         | `3.1.0`                      |
+| [npm semver ranges](https://github.com/npm/node-semver/blob/main/README.md#ranges)                       | caret `^`, tilde `~`, comparator         | `^3.0.0` `~0.6.1` `>=15.0.4` |
+
+No backticks for:
+
+| Item                      | Pattern | Example |
+| ------------------------- | ------- | ------- |
+| npm package major version | `X`     | 15      |
+
 ## Release
 
 At the time of the release, the releaser will:
