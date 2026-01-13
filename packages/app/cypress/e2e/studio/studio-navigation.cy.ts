@@ -1,4 +1,4 @@
-import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName } from './helper'
+import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName, openNewTestFromSpecHeader } from './helper'
 
 describe('Cypress Studio - Navigation and URL Management', () => {
   it('does not re-enter studio mode when changing pages and then coming back', () => {
@@ -43,7 +43,7 @@ describe('Cypress Studio - Navigation and URL Management', () => {
   it('updates the AUT url when creating a new test', () => {
     launchStudio({ specName: 'navigation.cy.js', createNewTestFromSuite: true })
 
-    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
+    inputNewTestName()
 
     cy.findByTestId('aut-url-input').should('have.focus').type('cypress/e2e/navigation.html{enter}')
 
@@ -79,8 +79,8 @@ describe('Cypress Studio - Navigation and URL Management', () => {
   it('updates the studio url parameters and displays the single test view after creating a new test', () => {
     loadProjectAndRunSpec()
 
-    // open the studio panel to create a new test in the root suite
-    cy.findByTestId('studio-button').click()
+    // open the spec header to create a new test in the root suite
+    openNewTestFromSpecHeader()
     cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=').and('contain', 'sessionId=')
 
     // create a new test in the root suite

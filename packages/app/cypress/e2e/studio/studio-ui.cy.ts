@@ -35,14 +35,13 @@ describe('studio functionality', () => {
     })
   })
 
-  it('opens studio panel to new test when clicking on studio button (from the app) next to url', () => {
+  it('opens studio panel to welcome screen when clicking on studio button (from the app) next to url', () => {
     cy.viewport(1500, 1000)
     loadProjectAndRunSpec()
     // studio button should be visible when using cloud studio
     cy.findByTestId('studio-button').should('be.visible').click()
     cy.findByTestId('studio-panel').should('be.visible')
-
-    cy.contains('New test')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     cy.percySnapshot()
   })
@@ -91,14 +90,14 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-button').click()
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.findByTestId('new-test-button').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     cy.reload()
 
     cy.waitForSpecToFinish()
 
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.findByTestId('new-test-button').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     // verify test body section is visible after refresh
     cy.get('.runnable-instruments').should('be.visible')
@@ -114,14 +113,14 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
   })
 
-  it('stays in new test mode when studio panel is opened when the spec is running', () => {
+  it('stays in the welcome screen when studio panel is opened while the spec is running', () => {
     loadProjectAndRunSpec()
 
     cy.waitForSpecToFinish()
 
     cy.findByTestId('studio-button').click()
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.findByTestId('new-test-button').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     // Verify we're initially in new test mode
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
@@ -136,7 +135,7 @@ describe('studio functionality', () => {
 
     // verify we're still in new test mode
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.findByTestId('new-test-button').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     // these should not exist if we stayed in new test mode
     cy.findByTestId('studio-single-test-title').should('not.exist')

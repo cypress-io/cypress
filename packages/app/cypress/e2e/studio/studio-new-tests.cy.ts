@@ -1,4 +1,4 @@
-import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName } from './helper'
+import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName, openNewTestFromSpecHeader } from './helper'
 
 describe('Cypress Studio - New Test Creation', () => {
   it('does not enter single test mode when creating a new test', () => {
@@ -15,7 +15,7 @@ describe('Cypress Studio - New Test Creation', () => {
   it('creates a new test from spec header', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSpecHeader: true })
 
-    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
+    inputNewTestName()
 
     cy.contains('new-test').click()
 
@@ -128,7 +128,7 @@ describe('studio functionality', () => {
   it('creates a new test for a specific suite with the url already defined', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
-    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
+    inputNewTestName()
 
     // make sure that the visit has run and we're recording studio commands
     cy.get('[data-cy="record-button-recording"]').should('be.visible')
@@ -163,7 +163,9 @@ describe('studio functionality', () => {
   it('creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
-    cy.contains('Create test with Cypress Studio').click()
+    cy.waitForSpecToFinish()
+
+    openNewTestFromSpecHeader()
 
     inputNewTestName()
 
@@ -211,11 +213,10 @@ it('new-test', function() {
 
     cy.get('.test').should('have.length', 1)
     cy.get('.test').contains('should be the only test to run normally').should('be.visible')
+    // create a new test from the spec header
+    openNewTestFromSpecHeader()
 
-    // launch studio and create a new test
-    cy.findByTestId('studio-button').click()
     cy.findByTestId('studio-panel').should('be.visible').within(() => {
-      cy.contains('button', 'New test').click()
       cy.get('[data-cy="test-name-input"]').type('new test{enter}')
     })
 
