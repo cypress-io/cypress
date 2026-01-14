@@ -39,24 +39,23 @@ export default [
         const facadeModuleId = chunkInfo.facadeModuleId || ''
         const chunkName = chunkInfo.name || ''
 
+        console.log('chunkInfo', chunkInfo)
         if (chunkName === 'cypress' && chunkInfo.facadeModuleId.includes('lib/bin')) {
           return 'bin/[name]'
         }
 
-        for (const file of inputFiles) {
-          const pathRelativeToLib = path.relative('lib', path.dirname(file))
+        const pathRelativeToLib = path.relative('lib', path.dirname(chunkInfo.facadeModuleId))
 
-          if (
-            facadeModuleId.includes(file) ||
-            chunkName.includes(`${pathRelativeToLib}/${path.basename(file)}`) ||
-            chunkName === `${path.dirname(file)}/${path.basename(file)}`
-          ) {
-            return pathRelativeToLib ? `${pathRelativeToLib}/[name].js` : '[name].js'
-          }
-        }
+        console.log('chunkInfo.facadeModuleId', chunkInfo.facadeModuleId)
+        console.log('pathRelativeToLib', pathRelativeToLib)
 
-        // Default behavior for other entries
-        return '[name].js'
+        const artifactDestinationPath = (pathRelativeToLib.endsWith('/') || !pathRelativeToLib.length) ? pathRelativeToLib : `${pathRelativeToLib}/`
+
+        console.log('artifactDestinationPath', artifactDestinationPath)
+
+        // for files in lib directory, we want to keep the directory structure and filename as-is -
+        // other packages break through this package's encapsulation and access the dist directory directly
+        return pathRelativeToLib.startsWith('..') ? '[name].js' : `${artifactDestinationPath}[name].js`
       },
     },
     plugins: [
