@@ -21,6 +21,7 @@ exports['module api and after:run results'] = `
     "defaultCommandTimeout": 4000,
     "downloadsFolder": "/path/to/downloadsFolder",
     "env": {},
+    "expose": {},
     "execTimeout": 60000,
     "experimentalCspAllowList": false,
     "experimentalInteractiveRunEvents": false,

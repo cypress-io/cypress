@@ -2,7 +2,7 @@ import type { $Cy } from '../cypress/cy'
 import $errUtils from '../cypress/error_utils'
 import $utils from '../cypress/utils'
 import { $Location } from '../cypress/location'
-import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../util/config'
+import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin, syncExposeToCurrentOrigin } from '../util/config'
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
 
@@ -10,6 +10,7 @@ interface RunOriginFnOptions {
   config: Cypress.Config
   args: any
   env: Cypress.ObjectLike
+  expose: Cypress.ObjectLike
   file?: string
   fn: string
   skipConfigValidation: boolean
@@ -143,7 +144,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
   }
 
   Cypress.specBridgeCommunicator.on('run:origin:fn', async (options: RunOriginFnOptions) => {
-    const { config, args, env, file, fn, state, skipConfigValidation, logCounter } = options
+    const { config, args, env, expose, file, fn, state, skipConfigValidation, logCounter } = options
 
     let queueFinished = false
 
@@ -157,6 +158,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     // resync the config/env before running the origin:fn
     syncConfigToCurrentOrigin(config)
+    syncExposeToCurrentOrigin(expose)
     if (Cypress.config('allowCypressEnv')) {
       syncEnvToCurrentOrigin(env)
     }

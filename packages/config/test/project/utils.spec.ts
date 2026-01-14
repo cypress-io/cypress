@@ -1198,6 +1198,7 @@ describe('config/src/project/utils', () => {
           experimentalSingleTabRunMode: { value: false, from: 'default' },
           experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
+          expose: {},
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
           hosts: { value: null, from: 'default' },
@@ -1241,7 +1242,7 @@ describe('config/src/project/utils', () => {
         })
       })
 
-      it('sets config, envFile and env', async () => {
+      it('sets config, envFile, env, and expose', async () => {
         vi.stubEnv('CYPRESS_quux', 'quux')
         vi.stubEnv('CYPRESS_RECORD_KEY', 'foobarbazquux')
         vi.stubEnv('CYPRESS_PROJECT_ID', 'projectId123')
@@ -1257,11 +1258,17 @@ describe('config/src/project/utils', () => {
           envFile: {
             bar: 'bar',
           },
+          expose: {
+            baz: 'baz',
+          },
         }
 
         const options = {
           env: {
-            baz: 'baz',
+            qux: 'qux',
+          },
+          expose: {
+            quuz: 'quuz',
           },
         }
 
@@ -1290,8 +1297,8 @@ describe('config/src/project/utils', () => {
               value: 'bar',
               from: 'envFile',
             },
-            baz: {
-              value: 'baz',
+            qux: {
+              value: 'qux',
               from: 'cli',
             },
             quux: {
@@ -1316,6 +1323,16 @@ describe('config/src/project/utils', () => {
           experimentalSingleTabRunMode: { value: false, from: 'default' },
           experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
+          expose: {
+            baz: {
+              value: 'baz',
+              from: 'config',
+            },
+            quuz: {
+              value: 'quuz',
+              from: 'cli',
+            },
+          },
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
           hosts: { value: null, from: 'default' },

@@ -1,4 +1,4 @@
-['config', 'env'].forEach((fnName) => {
+['config', 'env', 'expose'].forEach((fnName) => {
   describe(`cy.origin- Cypress.${fnName}()`, { browser: '!webkit' }, () => {
     const USED_KEYS = {
       foo: 'cy-origin-foo',
@@ -113,33 +113,39 @@
         })
       })
 
-      it('overwrites different values in secondary if one exists in the primary', {
-        [USED_KEYS.baz]: 'quux',
-        env: {
+      // Cypress.expose() is not configurable through testConfigOverrides
+      if (fnName !== 'expose') {
+        it('overwrites different values in secondary if one exists in the primary', {
           [USED_KEYS.baz]: 'quux',
-        },
-      }, () => {
-        cy.origin('http://www.foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+          env: {
+            [USED_KEYS.baz]: 'quux',
+          },
+        }, () => {
+          cy.origin('http://www.foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
           // in previous test, 'baz' was set to 'qux' after the callback window was closed.
           // this should be overwritten by 'quux' that exists in the primary
-          const quux = Cypress[fnName](USED_KEYS.baz)
+            const quux = Cypress[fnName](USED_KEYS.baz)
 
-          expect(quux).to.equal('quux')
+            expect(quux).to.equal('quux')
+          })
         })
-      })
+      }
 
-      it(`overwrites different values in secondary, even if the Cypress.${fnName}() value does not exist in the primary`, {
-        [USED_KEYS.baz]: undefined,
-        env: {
+      // Cypress.expose() is not configurable through testConfigOverrides
+      if (fnName !== 'expose') {
+        it(`overwrites different values in secondary, even if the Cypress.${fnName}() value does not exist in the primary`, {
           [USED_KEYS.baz]: undefined,
-        },
-      }, () => {
-        cy.origin('http://www.foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
-          const isNowUndefined = Cypress[fnName](USED_KEYS.baz)
+          env: {
+            [USED_KEYS.baz]: undefined,
+          },
+        }, () => {
+          cy.origin('http://www.foobar.com:3500', { args: { fnName, USED_KEYS } }, ({ fnName, USED_KEYS }) => {
+            const isNowUndefined = Cypress[fnName](USED_KEYS.baz)
 
-          expect(isNowUndefined).to.be.undefined
+            expect(isNowUndefined).to.be.undefined
+          })
         })
-      })
+      }
     })
 
     context('unserializable', () => {

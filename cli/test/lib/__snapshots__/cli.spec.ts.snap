@@ -388,6 +388,10 @@ exports[`cli > unknown option > shows help 1`] = `
                                      multiple values with a comma. overrides any
                                      value in cypress.config.{js,ts,mjs,cjs} or
                                      cypress.env.json
+    -x, --expose <expose>            sets exposed public configuration variables.
+                                     separate multiple values with a comma.
+                                     overrides any value in
+                                     cypress.config.{js,ts,mjs,cjs}
     --global                         force Cypress into global mode as if it were
                                      globally installed
     -p, --port <port>                runs Cypress on a specific port. overrides
@@ -530,6 +534,7 @@ exports[`cli > unknown option > shows help for run command 1`] = `
     -C, --config-file <config-file>                             path to script file where configuration values are set. defaults to "cypress.config.{js,ts,mjs,cjs}".
     --e2e                                                       runs end to end tests
     -e, --env <env>                                             sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs} or cypress.env.json
+    -x, --expose <expose>                                       sets exposed public configuration variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs}
     --group <name>                                              a named group for recorded runs in Cypress Cloud
     -k, --key <record-key>                                      your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.
     --headed                                                    displays the browser instead of running headlessly

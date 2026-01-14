@@ -207,6 +207,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isPlainObject,
     overrideLevel: 'any',
   }, {
+    name: 'expose',
+    defaultValue: {},
+    validation: validate.isPlainObject,
+    overrideLevel: 'any',
+  }, {
     name: 'execTimeout',
     defaultValue: 60000,
     validation: validate.isNumber,
