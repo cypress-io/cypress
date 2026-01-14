@@ -686,7 +686,6 @@
     "packages/frontend-shared/src/composables/examples/**/*.vue",
     "packages/frontend-shared/src/gql-components/composables/useCohorts.ts",
     "packages/frontend-shared/src/gql-components/composables/usePromptManager.ts",
-    "packages/frontend-shared/src/locales/schema.ts",
     "packages/frontend-shared/src/utils/base64.ts",
     "packages/frontend-shared/src/utils/isAllowedFeature.ts",
     "packages/frontend-shared/src/utils/isRunMode.ts",
@@ -738,17 +737,17 @@
     "wc"
   ],
   "rules": {
-    "binaries": "warn",
-    "catalog": "warn",
-    "classMembers": "warn",
+    "binaries": "error",
+    "catalog": "error",
+    "classMembers": "error",
     "dependencies": "error",
-    "duplicates": "warn",
-    "enumMembers": "warn",
-    "exports": "warn",
-    "nsExports": "warn",
-    "nsTypes": "warn",
-    "files": "warn",
-    "types": "warn",
+    "duplicates": "error",
+    "enumMembers": "error",
+    "exports": "error",
+    "nsExports": "error",
+    "nsTypes": "error",
+    "files": "error",
+    "types": "error",
     "unlisted": "error",
     "unresolved": "off"
   },
@@ -781,13 +780,121 @@
       "exports"
     ],
     "packages/data-context/graphql/index.ts": [
-      "exports"
+      "exports",
+      "types"
     ],
     "packages/net-stubbing/lib/external-types.ts": [
-      "exports"
+      "exports",
+      "types"
     ],
     "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
       "exports"
+    ],
+    "packages/driver/src/cypress/events.ts": [
+      "exports",
+      "types"
+    ],
+    "packages/app/src/prompt/prompt-app-types.ts": [
+      "types"
+    ],
+    "packages/app/src/studio/studio-app-types.ts": [
+      "types"
+    ],
+    "packages/driver/src/cy/commands/prompt/prompt-driver-types.ts": [
+      "types"
+    ],
+    "packages/app/src/store/spec-dirty-data-store.ts": [
+      "types"
+    ],
+    "packages/data-context/graphql/stitching/remoteSchemaWrapped.ts": [
+      "types"
+    ],
+    "packages/data-context/src/data/coreDataShape.ts": [
+      "types"
+    ],
+    "packages/data-context/src/sources/ErrorDataSource.ts": [
+      "types"
+    ],
+    "packages/telemetry/src/client.ts": [
+      "types"
+    ],
+    "packages/telemetry/src/node.ts": [
+      "exports"
+    ],
+    "packages/proxy/lib/http/util/ast-rewriter.ts": [
+      "exports"
+    ],
+    "packages/errors/src/errTemplate.ts": [
+      "exports"
+    ],
+    "npm/webpack-dev-server/src/devServer.ts": [
+      "exports"
+    ],
+    "npm/vite-dev-server/cypress/support/commands.ts": [
+      "exports"
+    ],
+    "packages/driver/src/dom/visibility.ts": [
+      "exports"
+    ],
+    "packages/driver/src/config/lodash.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cypress/server.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/click.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/focus.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/hover.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/mount.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/scroll.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/select.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/selectFile.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/submit.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/trigger.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/querying/focused.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/querying/querying.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/querying/root.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/querying/within.ts": [
+      "exports"
+    ],
+    "npm/react/cypress/component/basic/use-render/my-component.jsx": [
+      "exports"
+    ],
+    "packages/driver/src/cypress/command.ts": [
+      "exports"
+    ],
+    "packages/reporter/src/main-runner.scss.d.ts": [
+      "duplicates"
+    ],
+    "packages/reporter/src/main.scss.d.ts": [
+      "duplicates"
+    ],
+    "packages/runner/src/main.scss.d.ts": [
+      "duplicates"
     ]
   }
 }

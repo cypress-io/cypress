@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v5.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.4.1...@cypress/webpack-dev-server-v5.5.0) (2026-01-13)
+
+
+### Features
+
+* experimentalRunAllSpecs for component testing ([#32926](https://github.com/cypress-io/cypress/issues/32926)) ([f25153a](https://github.com/cypress-io/cypress/commit/f25153a58347d4ffffa354270d7e5277c7cdab1d))
+
 # [@cypress/webpack-dev-server-v5.4.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.4.0...@cypress/webpack-dev-server-v5.4.1) (2025-12-08)
 
 

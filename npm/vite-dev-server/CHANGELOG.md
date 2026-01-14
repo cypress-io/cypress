@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v7.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.0.1...@cypress/vite-dev-server-v7.1.0) (2026-01-13)
+
+
+### Features
+
+* experimentalRunAllSpecs for component testing ([#32926](https://github.com/cypress-io/cypress/issues/32926)) ([f25153a](https://github.com/cypress-io/cypress/commit/f25153a58347d4ffffa354270d7e5277c7cdab1d))
+
 # [@cypress/vite-dev-server-v7.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.0.0...@cypress/vite-dev-server-v7.0.1) (2025-11-04)
 
 

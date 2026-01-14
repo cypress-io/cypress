@@ -58,7 +58,7 @@ function mdfind (id: string): Promise<string> {
   .catch(failedToFind)
 }
 
-export type AppInfo = {
+type AppInfo = {
   path: string
   version: string
 }
