@@ -1,6 +1,6 @@
-require('../../spec_helper')
+import '../../spec_helper'
 
-const duration = require(`../../../lib/util/duration`)
+import duration from '../../../lib/util/duration'
 
 describe('lib/util/duration', () => {
   context('.format', () => {

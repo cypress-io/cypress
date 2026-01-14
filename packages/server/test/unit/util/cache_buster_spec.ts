@@ -1,10 +1,10 @@
-require('../../spec_helper')
+import '../../spec_helper'
 
-const CacheBuster = require(`../../../lib/util/cache_buster`)
+import CacheBuster from '../../../lib/util/cache_buster'
 
 describe('lib/cache_buster', () => {
   context('#get', () => {
-    it('returns seperator + 3 characters', () => {
+    it('returns separator + 3 characters', () => {
       expect(CacheBuster.get().length).to.eq(4)
     })
   })
