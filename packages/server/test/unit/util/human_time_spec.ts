@@ -1,7 +1,7 @@
-require('../../spec_helper')
+import '../../spec_helper'
 
-const humanInterval = require('human-interval')
-const humanTime = require(`../../../lib/util/human_time`)
+import humanInterval from 'human-interval'
+import humanTime from '../../../lib/util/human_time'
 
 describe('lib/util/human_time', () => {
   context('.long', () => {
