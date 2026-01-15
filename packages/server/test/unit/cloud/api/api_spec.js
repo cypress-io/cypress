@@ -243,6 +243,9 @@ describe('lib/cloud/api', () => {
       process.env.CYPRESS_API_URL = 'https://some.server.com'
 
       if (!prodApi) {
+        // Use stealthy-require to temporarily clear module cache and re-require
+        // with new environment variables. The routes module reads CYPRESS_CONFIG_ENV
+        // at module load time, so we need to re-evaluate it with the new env vars.
         prodApi = stealthyRequire(require.cache, () => {
           return require('../../../../lib/cloud/api').default
         }, () => {

@@ -18,13 +18,13 @@ const userFacingChanges = {
     release: 'major',
   },
   dependency: {
-    description: 'A change to a dependency that impact the user',
+    description: 'A change to a dependency that impacts the user',
     section: '**Dependency Updates:**',
     message: changeLinkPhrases.default,
     release: 'patch',
   },
   deprecation: {
-    description: 'A API deprecation notice for users',
+    description: 'An API deprecation notice for users',
     section: '**Deprecations:**',
     message: changeLinkPhrases.default,
     release: 'minor',

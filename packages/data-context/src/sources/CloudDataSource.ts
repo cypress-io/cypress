@@ -48,7 +48,7 @@ export interface CloudExecuteQuery {
   operationVariables: any
 }
 
-export interface CloudExecuteRemote extends CloudExecuteQuery {
+interface CloudExecuteRemote extends CloudExecuteQuery {
   fieldName: string
   shouldBatch?: boolean
   operationType?: OperationTypeNode
@@ -56,14 +56,14 @@ export interface CloudExecuteRemote extends CloudExecuteQuery {
   onUpdatedResult?: (data: any) => any
 }
 
-export interface CloudExecuteDelegateFieldParams<F extends CloudQueryField> {
+interface CloudExecuteDelegateFieldParams<F extends CloudQueryField> {
   field: F
   args: core.ArgsValue<'Query', F>
   ctx: DataContext
   info: GraphQLResolveInfo
 }
 
-export interface CloudDataSourceParams {
+interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
   logout(): void

@@ -33,7 +33,7 @@ const logError = debug('cypress:snapgen:error')
  * @property previousNorewrite See {@link GenerationOpts} previousNorewrite
  * @property forceNorewrite See {@link GenerationOpts} forceNorewrite
  */
-export type SnapshotDoctorOpts = Omit<
+type SnapshotDoctorOpts = Omit<
   CreateSnapshotScriptOpts,
   | 'deferred'
   | 'includeStrictVerifiers'

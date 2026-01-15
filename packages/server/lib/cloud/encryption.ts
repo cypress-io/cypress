@@ -32,7 +32,7 @@ function getPublicKey () {
   return keyObjects[env]
 }
 
-export interface EncryptRequestData {
+interface EncryptRequestData {
   jwe: GeneralJWE
   secretKey: crypto.KeyObject
 }

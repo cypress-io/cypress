@@ -20,11 +20,11 @@ export const DEFAULT_SELECTOR_PRIORITIES = [
   'nth-child',
 ] as const
 
-export type Defaults = {
+type Defaults = {
   selectorPriority: Cypress.SelectorPriority[]
 }
 
-export type ElementSelectorDefaultsOptions = {
+type ElementSelectorDefaultsOptions = {
   selectorPriority?: Cypress.SelectorPriority[]
 }
 

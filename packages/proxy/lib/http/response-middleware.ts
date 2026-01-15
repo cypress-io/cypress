@@ -28,7 +28,7 @@ import { injectIntoServiceWorker } from './util/service-worker-injector'
 import { validateHeaderName, validateHeaderValue } from 'http'
 import error from '@packages/errors'
 
-export interface ResponseMiddlewareProps {
+interface ResponseMiddlewareProps {
   /**
    * Before using `res.incomingResStream`, `prepareResStream` can be used
    * to remove any encoding that prevents it from being returned as plain text.

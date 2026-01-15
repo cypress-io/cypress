@@ -15,12 +15,11 @@
     "semver": "^7.7.3"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "^0.2100.2",
-    "@angular-devkit/core": "^21.0.2",
-    "@angular-devkit/schematics": "^21.0.2",
-    "@angular-devkit/schematics-cli": "^21.0.2",
-    "@schematics/angular": "^21.0.2",
-    "@types/chai-enzyme": "0.6.14",
+    "@angular-devkit/architect": "^0.2100.4",
+    "@angular-devkit/core": "^21.0.4",
+    "@angular-devkit/schematics": "^21.0.4",
+    "@angular-devkit/schematics-cli": "^21.0.4",
+    "@schematics/angular": "^21.0.4",
     "@types/mocha": "8.0.3",
     "@types/node": "^22.18.7",
     "eslint": "^9.31.0",

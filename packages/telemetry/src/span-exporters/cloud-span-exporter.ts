@@ -11,7 +11,7 @@ import { OTLPTraceExporter as OTLPTraceExporterHttp } from '@opentelemetry/expor
 
 import { sendWithHttp } from '@opentelemetry/otlp-exporter-base'
 
-export interface OTLPExporterNodeConfigBasePlusEncryption extends OTLPExporterNodeConfigBase {
+interface OTLPExporterNodeConfigBasePlusEncryption extends OTLPExporterNodeConfigBase {
   encryption?: {
     encryptRequest: (requestOptions: {
       url: string

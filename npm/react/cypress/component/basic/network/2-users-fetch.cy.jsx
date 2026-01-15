@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-/// <reference types="../../lib" />
 import { Users } from './2-users-fetch.jsx'
 import React from 'react'
 import { mount } from '@cypress/react'

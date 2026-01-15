@@ -3,12 +3,12 @@ import { getPathForPlatform } from '../../src/paths'
 
 describe('run-all-specs', () => {
   const ALL_SPECS = {
-    spec1: { relative: getPathForPlatform('cypress/e2e/folder-a/spec-a.cy.js'), name: 'runs folder-a/spec-a' },
-    spec2: { relative: getPathForPlatform('cypress/e2e/folder-a/spec-b.cy.js'), name: 'runs folder-a/spec-b' },
-    spec3: { relative: getPathForPlatform('cypress/e2e/folder-b/spec-a.cy.js'), name: 'runs folder-b/spec-a' },
-    spec4: { relative: getPathForPlatform('cypress/e2e/folder-b/spec-b.cy.js'), name: 'runs folder-b/spec-b' },
-    spec5: { relative: getPathForPlatform('folder-c/spec-a.cy.js'), name: 'runs folder-c/spec-a' },
-    spec6: { relative: getPathForPlatform('folder-c/spec-b.cy.js'), name: 'runs folder-c/spec-b' },
+    spec1: { relative: getPathForPlatform('cypress/e2e/folder-a/spec-a.cy.ts'), name: 'runs folder-a/spec-a' },
+    spec2: { relative: getPathForPlatform('cypress/e2e/folder-a/spec-b.cy.ts'), name: 'runs folder-a/spec-b' },
+    spec3: { relative: getPathForPlatform('cypress/e2e/folder-b/spec-a.cy.ts'), name: 'runs folder-b/spec-a' },
+    spec4: { relative: getPathForPlatform('cypress/e2e/folder-b/spec-b.cy.ts'), name: 'runs folder-b/spec-b' },
+    spec5: { relative: getPathForPlatform('folder-c/spec-a.cy.ts'), name: 'runs folder-c/spec-a' },
+    spec6: { relative: getPathForPlatform('folder-c/spec-b.cy.ts'), name: 'runs folder-c/spec-b' },
   }
 
   const clickRunAllSpecs = (directory: string) => {

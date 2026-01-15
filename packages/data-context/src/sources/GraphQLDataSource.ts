@@ -9,21 +9,21 @@ import { DocumentNodeBuilder } from '../util/DocumentNodeBuilder'
 const debug = debugLib('cypress:data-context:sources:GraphQLDataSource')
 const RESOLVED_SOURCE = Symbol('RESOLVED_SOURCE')
 
-export interface PushResultParams {
+interface PushResultParams {
   info: GraphQLResolveInfo
   ctx: DataContext
   result: any
   source?: any
 }
 
-export interface PushQueryFragmentParams {
+interface PushQueryFragmentParams {
   source?: any
   result: any
   ctx: DataContext
   info: GraphQLResolveInfo
 }
 
-export interface PushNodeFragmentParams extends PushQueryFragmentParams {
+interface PushNodeFragmentParams extends PushQueryFragmentParams {
   source: any
 }
 

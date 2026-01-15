@@ -39,7 +39,7 @@ const SIXTY_SECONDS = 60 * 1000
 function ensurePosixPathSeparators (text: string) {
   return text.replace(/\\/g, '/') // normalize \ to /
 }
-export interface GitInfo {
+interface GitInfo {
   author: string | null
   lastModifiedTimestamp: string | null
   lastModifiedHumanReadable: string | null
@@ -48,7 +48,7 @@ export interface GitInfo {
   shortHash: string | null
 }
 
-export interface GitDataSourceConfig {
+interface GitDataSourceConfig {
   /**
    * In run mode, we currently don't need the git info, so we explicitly
    * check and skip if we know we don't

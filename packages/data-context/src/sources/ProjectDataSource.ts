@@ -59,7 +59,7 @@ export function matchedSpecs ({
   return specs
 }
 
-export interface TransformSpec {
+interface TransformSpec {
   projectRoot: string
   absolute: string
   testingType: Cypress.TestingType

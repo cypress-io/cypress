@@ -14,7 +14,7 @@ import $errUtils from '../../cypress/error_utils'
 // user-facing StaticResponse only
 export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay']
 
-export const STATIC_RESPONSE_WITH_OPTIONS_KEYS: (keyof StaticResponseWithOptions)[] = [...STATIC_RESPONSE_KEYS, 'log']
+const STATIC_RESPONSE_WITH_OPTIONS_KEYS: (keyof StaticResponseWithOptions)[] = [...STATIC_RESPONSE_KEYS, 'log']
 
 export function validateStaticResponse (cmd: string, staticResponse: StaticResponse): void {
   const err = (message) => {
@@ -129,7 +129,7 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
   return backendStaticResponse
 }
 
-export function hasStaticResponseKeys (obj: any) {
+function hasStaticResponseKeys (obj: any) {
   return !_.isArray(obj) && (_.intersection(_.keys(obj), STATIC_RESPONSE_KEYS).length || _.isEmpty(obj))
 }
 

@@ -44,7 +44,7 @@ export const BUNDLE_WRAPPER_OPEN = Buffer.from(
  * hash.
  * @category snapshot
  */
-export const BUNDLE_WRAPPER_CLOSE = Buffer.from(
+const BUNDLE_WRAPPER_CLOSE = Buffer.from(
   `
   //
   // </esbuild bundle>
@@ -54,15 +54,6 @@ export const BUNDLE_WRAPPER_CLOSE = Buffer.from(
 `,
   'utf8',
 )
-
-/**
- * The function type to create a snapshot script which receives the {@link
- * CreateSnapshotScriptOpts} as configuration.
- * @category snapshot
- */
-export type CreateSnapshotScript = (
-  opts: CreateSnapshotScriptOpts
-) => Promise<{ snapshotScript: string }>
 
 const requireDefinitions = (bundle: Buffer, entryPoint: string) => {
   const code = Buffer.concat([

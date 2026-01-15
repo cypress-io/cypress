@@ -19,7 +19,7 @@
     "types": "yarn dtslint"
   },
   "dependencies": {
-    "@cypress/request": "^3.0.9",
+    "@cypress/request": "^3.0.10",
     "@cypress/xvfb": "^1.2.4",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
@@ -83,7 +83,7 @@
     "@types/chai": "4.2.15",
     "@types/chai-jquery": "1.1.43",
     "@types/jquery": "3.3.31",
-    "@types/lodash": "4.14.168",
+    "@types/lodash": "4.17.21",
     "@types/minimatch": "3.0.5",
     "@types/mocha": "8.0.3",
     "@types/sinon": "9.0.9",

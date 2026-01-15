@@ -601,6 +601,4 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
 
 Command.displayName = 'Command'
 
-export { Aliases, AliasesReferences, Message, Progress }
-
 export default Command

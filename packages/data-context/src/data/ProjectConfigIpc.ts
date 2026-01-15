@@ -45,7 +45,7 @@ export interface LoadConfigReply {
   requires: string[]
 }
 
-export interface SerializedLoadConfigReply {
+interface SerializedLoadConfigReply {
   initialConfig: string // stringified Cypress.ConfigOptions
   requires: string[]
 }
