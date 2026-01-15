@@ -34,27 +34,21 @@ export default [
       dir: 'dist',
       exports: 'named',
       entryFileNames: (chunkInfo) => {
-        // Preserve directory structure for entries that need it
-        // Check both the chunk name and facadeModuleId to handle different rollup behaviors
+        // for entry files in lib directory, we want to keep the directory structure and filename as-is -
+        // other packages break through this package's encapsulation and access the dist directory directly
         const facadeModuleId = chunkInfo.facadeModuleId || ''
         const chunkName = chunkInfo.name || ''
 
-        console.log('chunkInfo', chunkInfo)
         if (chunkName === 'cypress' && chunkInfo.facadeModuleId.includes('lib/bin')) {
           return 'bin/[name]'
         }
 
         const pathRelativeToLib = path.relative('lib', path.dirname(chunkInfo.facadeModuleId))
 
-        console.log('chunkInfo.facadeModuleId', chunkInfo.facadeModuleId)
-        console.log('pathRelativeToLib', pathRelativeToLib)
-
         const artifactDestinationPath = (pathRelativeToLib.endsWith('/') || !pathRelativeToLib.length) ? pathRelativeToLib : `${pathRelativeToLib}/`
 
         console.log('artifactDestinationPath', artifactDestinationPath)
 
-        // for files in lib directory, we want to keep the directory structure and filename as-is -
-        // other packages break through this package's encapsulation and access the dist directory directly
         return pathRelativeToLib.startsWith('..') ? '[name].js' : `${artifactDestinationPath}[name].js`
       },
     },
