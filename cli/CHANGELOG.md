@@ -1,4 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.9.1
+
+_Released 01/27/2026 (PENDING)_
+
+**Misc:**
+
+- The icon in the 'Open in IDE' button in the command log is now the correct size. Addresses [#32779](https://github.com/cypress-io/cypress/issues/32779). Addressed in [#33217](https://github.com/cypress-io/cypress/pull/33217).
+
+
 ## 15.9.0
 
 _Released 01/13/2026_
