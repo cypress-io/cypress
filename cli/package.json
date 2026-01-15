@@ -75,7 +75,7 @@
     "@types/chai": "4.2.15",
     "@types/chai-jquery": "1.1.43",
     "@types/jquery": "3.3.31",
-    "@types/lodash": "4.17.21",
+    "@types/lodash": "4.17.23",
     "@types/minimatch": "3.0.5",
     "@types/mocha": "8.0.3",
     "@types/sinon": "9.0.9",
