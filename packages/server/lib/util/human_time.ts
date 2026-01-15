@@ -79,7 +79,8 @@ export default {
   short,
 }
 
-module.exports = {
-  long,
-  short,
-}
+// CommonJS compatibility - assign properties individually to avoid conflict with ES6 default export
+// Cannot use module.exports = {} because export default creates a read-only 'default' property
+module.exports.long = long
+
+module.exports.short = short
