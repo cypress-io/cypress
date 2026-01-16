@@ -4,7 +4,7 @@ import _ from 'lodash'
 import path from 'path'
 
 const pluralize = require('pluralize')
-import humanTime from '@packages/server/lib/util/human_time'
+const humanTime = require('@packages/server/lib/util/human_time')
 
 import type { CypressError, ErrorLike } from './errorTypes'
 
