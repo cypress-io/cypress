@@ -1,6 +1,6 @@
 import debugFn from 'debug'
 import type { ModuleNode, PluginOption, ViteDevServer } from 'vite-7'
-import type { Vite } from '../getVite.js'
+import type { Vite_7, Vite_8 } from '../getVite.js'
 import { parse, HTMLElement } from 'node-html-parser'
 import fs from 'fs'
 
@@ -30,7 +30,7 @@ function getSpecsPathsSet (specs: Spec[]) {
 
 export const Cypress = (
   options: ViteDevServerConfig,
-  vite: Vite,
+  vite: Vite_7 | Vite_8,
 ): PluginOption => {
   let base = '/'
 

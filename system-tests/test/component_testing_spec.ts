@@ -3,6 +3,7 @@ import systemTests from '../lib/system-tests'
 describe('component testing projects', function () {
   systemTests.setup()
 
+  // NOTE: update this project / test as well
   systemTests.it('react-vite-ts-configured', {
     project: 'react-vite-ts-configured',
     testingType: 'component',

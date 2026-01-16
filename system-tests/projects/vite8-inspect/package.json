@@ -1,0 +1,14 @@
+{
+  "name": "vite7-inspect",
+  "version": "0.0.0-test",
+  "devDependencies": {
+    "react": "^18.3.1",
+    "vite": "^8.0.0-beta.8",
+    "vite-plugin-inspect": "0.8.8"
+  },
+  "type": "module",
+  "overrides": {
+    "vite": "^8.0.0-beta.8"
+  },
+  "projectFixtureDirectory": "react"
+}

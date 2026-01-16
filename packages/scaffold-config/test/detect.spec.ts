@@ -41,6 +41,9 @@ describe('detectFramework', () => {
     expect(actual.bundler).toEqual('webpack')
   })
 
+  // NOTE: don't forget to update these tests/projects when we support vite 8
+  // react-vite-ts-unconfigured
+  // react-vite-ts-configured
   it(`React with Vite`, async () => {
     const projectPath = await scaffoldMigrationProject('react-vite-ts-unconfigured')
 

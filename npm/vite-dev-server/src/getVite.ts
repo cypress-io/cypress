@@ -7,7 +7,9 @@ import majorVersion from 'semver/functions/major.js'
 
 const debug = debugFn('cypress:vite-dev-server:getVite')
 
-export type Vite = typeof import('vite-7')
+export type Vite_7 = typeof import('vite-7')
+
+export type Vite_8 = typeof import('vite-8')
 
 class CJSNotSupportedError extends Error {
   constructor (message: string) {
@@ -19,7 +21,7 @@ class CJSNotSupportedError extends Error {
 // "vite-dev-server" is bundled in the binary, so we need to require.resolve "vite"
 // from root of the active project since we don't bundle vite internally but rather
 // use the version the user has installed
-export async function getVite (config: ViteDevServerConfig): Promise<Vite> {
+export async function getVite (config: ViteDevServerConfig): Promise<Vite_7 | Vite_8> {
   const filePrefix = os.platform() === 'win32' ? 'file://' : ''
 
   try {
