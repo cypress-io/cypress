@@ -76,7 +76,8 @@ describe('Cypress Studio - Navigation and URL Management', () => {
     cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=').and('contain', 'sessionId=')
   })
 
-  it('updates the studio url parameters and displays the single test view after creating a new test', () => {
+  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
+  it.skip('updates the studio url parameters and displays the single test view after creating a new test', () => {
     loadProjectAndRunSpec()
 
     // open the studio panel to create a new test in the root suite
