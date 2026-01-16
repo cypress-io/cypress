@@ -75,7 +75,7 @@
     "dayjs": "^1.9.3",
     "dedent": "^0.7.0",
     "execa": "4.1.0",
-    "floating-vue": "2.0.0",
+    "floating-vue": "5.2.2",
     "fs-extra": "9.1.0",
     "graphql": "^15.5.1",
     "graphql-ws": "^5.5.5",
