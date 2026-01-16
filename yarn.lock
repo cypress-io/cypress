@@ -2645,10 +2645,10 @@
     tailwindcss "^3.4.3"
     tailwindcss-hocus "^0.0.7"
 
-"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.31.0", "@cypress-design/icon-registry@^1.33.0", "@cypress-design/icon-registry@^1.5.1":
-  version "1.33.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.33.0.tgz#603586109cd5237e58e9913f3f4813c5e2a20c2e"
-  integrity sha512-6Wzhs5IuTbTu7TMT+DygLOaI0CHofYosLJ/2hNXai6l54K4UoWmNMwrGdflfil+L6O4CVajk8NSaH5A0Z8tWVQ==
+"@cypress-design/icon-registry@^1.0.0", "@cypress-design/icon-registry@^1.33.0", "@cypress-design/icon-registry@^1.37.0", "@cypress-design/icon-registry@^1.5.1":
+  version "1.37.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/icon-registry/-/icon-registry-1.37.0.tgz#372a1d226093c798e83ecffa72ed368dc5807bfd"
+  integrity sha512-UbRQsv86VN7DU7O0MBQmae2p4n+0R5PEAp+GrMvVpHEPXFFDQEO888NtJxYr8WCHsuT/CxIey4m2oxnx3YiyyQ==
   dependencies:
     "@cypress-design/color-constants" "^1.1.0"
 
@@ -2659,12 +2659,12 @@
   dependencies:
     clsx "^2.1.1"
 
-"@cypress-design/react-icon@^1.31.0":
-  version "1.31.0"
-  resolved "https://registry.yarnpkg.com/@cypress-design/react-icon/-/react-icon-1.31.0.tgz#aa82413c5a600f85a5648c7f442d416512beafa4"
-  integrity sha512-QXDhP3qf+VXwjysdk366TVomoizkbI4jmtXY1ldztQaSaSRdwvyI6etR9jpn2Pq3XzKJS1zKAvVwiRA9xA9ZUA==
+"@cypress-design/react-icon@^1.37.0":
+  version "1.37.0"
+  resolved "https://registry.yarnpkg.com/@cypress-design/react-icon/-/react-icon-1.37.0.tgz#427fa90bd6c8788f977e63c44d92b289c849b6dc"
+  integrity sha512-PzmNNZE2+JkdYhvrO4HQaveZiHH+AO5lD7e44Vw3adSRcHqNoXfF3fGOe/5RW7YZii6M4VHvSvQRiJCELEpOGQ==
   dependencies:
-    "@cypress-design/icon-registry" "^1.31.0"
+    "@cypress-design/icon-registry" "^1.37.0"
     clsx "^2.1.1"
 
 "@cypress-design/vue-button@^1.13.0":
@@ -8501,10 +8501,10 @@
   resolved "https://registry.yarnpkg.com/@types/linkify-it/-/linkify-it-3.0.0.tgz#c0ca4c253664492dbf47a646f31cfd483a6bbc95"
   integrity sha512-x9OaQQTb1N2hPZ/LWJsqushexDvz7NgzuZxiRmZio44WPuolTZNHDBCrOxCzRVOMwamJRO2dWax5NbygOf1OTQ==
 
-"@types/lodash@4.17.21", "@types/lodash@^4.17.21":
-  version "4.17.21"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.21.tgz#b806831543d696b14f8112db600ea9d3a1df6ea4"
-  integrity sha512-FOvQ0YPD5NOfPgMzJihoT+Za5pdkDJWcbpuj1DjaKZIr/gxodQjY/uWEFlTNqW2ugXHUiL8lRQgw63dzKHZdeQ==
+"@types/lodash@4.17.23", "@types/lodash@^4.17.23":
+  version "4.17.23"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.17.23.tgz#c1bb06db218acc8fc232da0447473fc2fb9d9841"
+  integrity sha512-RDvF6wTulMPjrNdCoYRC8gNR880JNGT8uB+REUpC2Ns4pRqQJhGz90wh7rgdXDPpCczF3VGktDuFGVnz8zP7HA==
 
 "@types/markdown-it@12.2.3":
   version "12.2.3"
@@ -14246,10 +14246,10 @@ default-resolution@^2.0.0:
   resolved "https://registry.yarnpkg.com/default-resolution/-/default-resolution-2.0.0.tgz#bcb82baa72ad79b426a76732f1a81ad6df26d684"
   integrity sha1-vLgrqnKtebQmp2cy8aga1t8m1oQ=
 
-default-shell@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/default-shell/-/default-shell-1.0.1.tgz#752304bddc6174f49eb29cb988feea0b8813c8bc"
-  integrity sha1-dSMEvdxhdPSespy5iP7qC4gTyLw=
+default-shell@^2.0.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/default-shell/-/default-shell-2.2.0.tgz#31481c19747bfe59319b486591643eaf115a1864"
+  integrity sha512-sPpMZcVhRQ0nEMDtuMJ+RtCxt7iHPAMBU+I4tAlo5dU1sjRpNax0crj6nR3qKpvVnckaQ9U38enXcwW9nZJeCw==
 
 defaults@^1.0.3:
   version "1.0.3"
@@ -14468,10 +14468,10 @@ detect-port@^2.1.0:
   dependencies:
     address "^2.0.1"
 
-devtools-protocol@0.0.1159816, devtools-protocol@0.0.1566079, devtools-protocol@0.0.927104:
-  version "0.0.1566079"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1566079.tgz#28049eed025a25cf3aea964f6c6bd517796c44ac"
-  integrity sha512-MJfAEA1UfVhSs7fbSQOG4czavUp1ajfg6prlAN0+cmfa2zNjaIbvq8VneP7do1WAQQIvgNJWSMeP6UyI90gIlQ==
+devtools-protocol@0.0.1159816, devtools-protocol@0.0.1568893, devtools-protocol@0.0.927104:
+  version "0.0.1568893"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1568893.tgz#62c9a976877fd2a9327cb1bfba0cd49f86952234"
+  integrity sha512-jSwwNnDwRQ5CQh5DNhnmQGms/pkdOUIrJDlKf7VR9bl/nRlcifyxe1jieFnP7bL1vUIElTcLzxu3AYB8YBBpjQ==
 
 didyoumean@^1.2.2:
   version "1.2.2"
@@ -16737,10 +16737,10 @@ filenamify@^4.1.0, filenamify@^4.3.0:
     strip-outer "^1.0.1"
     trim-repeated "^1.0.0"
 
-filesize@10.1.1:
-  version "10.1.1"
-  resolved "https://registry.yarnpkg.com/filesize/-/filesize-10.1.1.tgz#eb98ce885aa73741199748e70e5b7339cc22c5ff"
-  integrity sha512-L0cdwZrKlwZQkMSFnCflJ6J2Y+5egO/p3vgRSDQGxQt++QbUZe5gMbRO6kg6gzwQDPvq2Fk9AmoxUNfZ5gdqaQ==
+filesize@10.1.6:
+  version "10.1.6"
+  resolved "https://registry.yarnpkg.com/filesize/-/filesize-10.1.6.tgz#31194da825ac58689c0bce3948f33ce83aabd361"
+  integrity sha512-sJslQKU2uM33qH5nqewAwVB2QgR6w1aMNsYUp3aN5rMRyXEwJGmZvaWzeJFNTOXWlHQyBFCWrdj3fV/fsTOX8w==
 
 fill-keys@^1.0.2:
   version "1.0.2"
@@ -28146,14 +28146,14 @@ shebang-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
 
-shell-env@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/shell-env/-/shell-env-3.0.1.tgz#515a62f6cbd5e139365be2535745e8e53438ce77"
-  integrity sha512-b09fpMipAQ9ObwvIeKoQFLDXcEcCpYUUZanlad4OYQscw2I49C/u97OPQg9jWYo36bRDn62fbe07oWYqovIvKA==
+shell-env@4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/shell-env/-/shell-env-4.0.1.tgz#883302d9426095d398a39b102a851adb306b8cb8"
+  integrity sha512-w3oeZ9qg/P6Lu6qqwavvMnB/bwfsz67gPB3WXmLd/n6zuh7TWQZtGa3iMEdmua0kj8rivkwl+vUjgLWlqZOMPw==
   dependencies:
-    default-shell "^1.0.1"
-    execa "^1.0.0"
-    strip-ansi "^5.2.0"
+    default-shell "^2.0.0"
+    execa "^5.1.1"
+    strip-ansi "^7.0.1"
 
 shell-quote@^1.6.1, shell-quote@^1.7.3, shell-quote@^1.8.1:
   version "1.8.1"
