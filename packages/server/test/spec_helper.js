@@ -1,4 +1,8 @@
 /* eslint-disable no-console */
+// Ensure TypeScript require hook is set up before any modules are loaded
+// This is needed for compiled CommonJS code (like @packages/errors) to require TypeScript files
+require('@packages/ts/register')
+
 const { enable, mockElectron } = require('./mockery_helper')
 
 const { configureLongStackTraces } = require('../lib/environment')
