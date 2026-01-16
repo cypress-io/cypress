@@ -3,8 +3,9 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 
-const pluralize = require('pluralize')
-const humanTime = require('@packages/server/lib/util/human_time')
+// @ts-expect-error - pluralize doesn't have type definitions
+import pluralize from 'pluralize'
+import humanTime from '@packages/server/lib/util/human_time'
 
 import type { CypressError, ErrorLike } from './errorTypes'
 
