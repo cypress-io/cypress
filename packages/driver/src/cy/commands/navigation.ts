@@ -212,10 +212,8 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
     aliasedRequests.forEach(({ request }) => {
       markRequestAsCancelled(request)
     })
-  } catch (_) {
-    // TODO: Should I use `$errUtils.logError` or another method from
-    // `$errUtils` here? Alternatively, should I do nothing, since canceled
-    // requests aren't necessarily a problem in Cypress?
+  } catch {
+    // Ignore errors. Failure to mark requests as canceled is non-critical.
   }
 
   // if we purposefully just caused the page to load
