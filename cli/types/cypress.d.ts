@@ -3174,6 +3174,11 @@ declare namespace Cypress {
      */
     injectDocumentDomain: boolean
     /**
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
+     * @default false
+     */
+    experimentalRunAllSpecs?: boolean
+    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
      */
@@ -3193,6 +3198,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalMemoryManagement: boolean
+    /**
+     * Enables an alternative, performance-optimized visibility algorithm.
+     * @default false
+     */
+    experimentalFastVisibility: boolean
     /**
      * Allows for just-in-time compiling of a component test, which will only compile assets related to the component.
      * This results in a smaller bundle under test, reducing resource constraints on a given machine. This option is recommended
@@ -3269,11 +3279,6 @@ declare namespace Cypress {
   }
 
   interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
-    /**
-     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
-     * @default false
-     */
-    experimentalRunAllSpecs?: boolean
     /**
      * Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.
      * @default false
@@ -3365,14 +3370,14 @@ declare namespace Cypress {
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalFastVisibility' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalFastVisibility' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
@@ -6476,7 +6481,7 @@ declare namespace Cypress {
   }
 
   interface Exec {
-    code: number
+    exitCode: number
     stdout: string
     stderr: string
   }

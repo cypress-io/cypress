@@ -3,16 +3,10 @@ import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 
-import exec from '../exec'
-import files from '../files'
+import * as exec from '../exec'
+import * as files from '../files'
 import { fs } from '../util/fs'
 import task from '../task'
-
-export interface SpecChannelOptions {
-  isSpecBridge: boolean
-  url: string
-  key: string
-}
 
 interface SpecOriginatedCommand {
   name: string

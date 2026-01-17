@@ -15,6 +15,7 @@ import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 import { CookiesHelper } from './util/cookies'
 import * as rewriter from './util/rewriter'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
+import * as errors from '@packages/errors'
 
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
@@ -27,7 +28,7 @@ import { injectIntoServiceWorker } from './util/service-worker-injector'
 import { validateHeaderName, validateHeaderValue } from 'http'
 import error from '@packages/errors'
 
-export interface ResponseMiddlewareProps {
+interface ResponseMiddlewareProps {
   /**
    * Before using `res.incomingResStream`, `prepareResStream` can be used
    * to remove any encoding that prevents it from being returned as plain text.
@@ -714,6 +715,17 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   })
 
   if (!wereSimCookiesAdded) {
+    span?.end()
+
+    return this.next()
+  }
+
+  // if the request is sync, we cannot wait on the cross:origin:cookies:received
+  // event since the sync request is blocking. This means that the cross-origin cookies
+  // may not have been applied.
+  if (this.req.isSyncRequest) {
+    errors.warning('SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_SET', this.req.proxiedUrl)
+
     span?.end()
 
     return this.next()

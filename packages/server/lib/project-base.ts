@@ -15,7 +15,7 @@ import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
-import system from './util/system'
+import * as system from './util/system'
 import type {
   BannersState,
   FoundBrowser,
@@ -522,6 +522,10 @@ export class ProjectBase extends EE {
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
             await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: studio.protocolManager })
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_START)
+            await browsers.connectStudioToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, studioManager: studio })
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_END)
 
             if (!studio.protocolManager.dbPath) {
               debug('Protocol database path is not set after initializing protocol manager')

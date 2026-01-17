@@ -20,9 +20,6 @@ import { toPosix } from './util/to_posix'
 import { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack, stackLineRegex } from '@packages/errors/src/stackUtils'
 
 const whitespaceRegex = /^(\s*)*/
-const customProtocolRegex = /^[^:\/]+:\/{1,3}/
-// Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
-const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
 const percentNotEncodedRegex = /%(?![0-9A-F][0-9A-F])/g
 const webkitStackLineRegex = /(.*)@(.*)(\n?)/g
 
@@ -61,6 +58,57 @@ const stackWithLinesRemoved = (stack, cb) => {
   const remainingStackLines = cb(stackLines)
 
   return unsplitStack(messageLines, remainingStackLines)
+}
+
+const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
+  const modifiedStack = stackWithLinesRemoved(stack, (lines: string[]) => {
+    // Guard against Cypress being undefined/null (can happen when users quickly reload tests)
+    if (!specWindow?.Cypress) {
+      return lines
+    }
+
+    const originalLines = lines
+    let processedLines: string[]
+
+    if (specWindow.Cypress.isBrowser({ family: 'chromium' })) {
+      // The actual test invocation line starts with either 'at eval' or 'at Suite.eval',
+      // so remove all lines until we reach the test invocation line
+      processedLines = _.dropWhile(lines, (line) => {
+        return !(
+          line.trim().startsWith('at eval ') ||
+          line.trim().startsWith('at Suite.eval ')
+        )
+      })
+    } else if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
+      const isTestInvocationLine = (line: string) => {
+        const splitAtAt = line.split('@')
+
+        // firefox stacks traces look like:
+        // functionName@http://localhost:3000/__cypress/tests?p=cypress/support/e2e.js:444:14
+        // @http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:43:3
+        // @http://localhost:3000/__cypress/tests?p=cypress/e2e/spec.cy.js:45:12
+        // evalScripts/<@cypress:///../driver/src/cypress/script_utils.ts:38:23
+        //
+        // the actual invocation details will be at the first line with no function name
+        return splitAtAt.length > 1 && splitAtAt[0].trim().length === 0
+      }
+
+      processedLines = _.dropWhile(lines, (line) => {
+        return !isTestInvocationLine(line)
+      })
+    } else {
+      processedLines = lines
+    }
+
+    // if we removed all the lines then something went wrong with parsing. Return the original lines instead
+    if (processedLines.length === 0) {
+      return originalLines
+    }
+
+    return processedLines
+  })
+
+  return modifiedStack
 }
 
 const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
@@ -117,7 +165,9 @@ const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAnd
   }
 }
 
-type InvocationDetails = {
+export type InvocationDetails = {
+  function?: string
+  fileUrl?: string
   absoluteFile?: string
   column?: number
   line?: number
@@ -127,7 +177,7 @@ type InvocationDetails = {
 }
 
 // used to determine codeframes for hook/test/etc definitions rather than command invocations
-const getInvocationDetails = (specWindow, config): InvocationDetails | undefined => {
+const getInvocationDetails = (specWindow, sourceMapProjectRoot: string, type?: 'test'): InvocationDetails | undefined => {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
@@ -147,11 +197,16 @@ const getInvocationDetails = (specWindow, config): InvocationDetails | undefined
         // CT error contexts include the `__cypress` marker but not the `/tests` portion
         stack = stackWithLinesDroppedFromMarker(stack, '__cypress', true)
       }
+
+      // if the hook is the test, and it's an e2e test, we will try to remove the lines that are not the actual invocation of the test
+      if (type === 'test' && specWindow.Cypress.testingType === 'e2e') {
+        stack = stackTrimmedToTestInvocation(stack, specWindow)
+      }
     }
 
-    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, config('projectRoot')) || {};
+    const details: Omit<InvocationDetails, 'stack'> = getSourceDetailsForFirstLine(stack, sourceMapProjectRoot) || {}
 
-    (details as any).stack = stack
+    ;(details as any).stack = stack
 
     return details as (InvocationDetails & { stack: any })
   }
@@ -307,31 +362,6 @@ const parseLine = (line) => {
   }
 }
 
-const stripCustomProtocol = (filePath) => {
-  if (!filePath) {
-    return
-  }
-
-  // if the file path (after all said and done)
-  // still starts with "http://" or "https://" then
-  // it is an URL and we have no idea how it maps
-  // to a physical file location on disk. Let it be.
-  const httpProtocolRegex = /^https?:\/\//
-
-  if (httpProtocolRegex.test(filePath)) {
-    return
-  }
-
-  // Check the path to see if custom namespaces have been applied and, if so, remove them
-  // For example, in Next.js we end up with paths like `_N_E/pages/index.cy.js`, and we
-  // need to strip off the `_N_E` so that "Open in IDE" links work correctly
-  if (webpackDevtoolNamespaceRegex.test(filePath)) {
-    return filePath.replace(webpackDevtoolNamespaceRegex, '')
-  }
-
-  return filePath.replace(customProtocolRegex, '')
-}
-
 interface MessageLineDetail {
   message: any
   whitespace: any
@@ -364,12 +394,12 @@ const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLi
 
   const originalFile = sourceDetails.file
 
-  let relativeFile = stripCustomProtocol(originalFile)
+  let relativeFile = $utils.stripCustomProtocol(originalFile)
 
   if (relativeFile) {
     relativeFile = path.normalize(relativeFile)
 
-    if (relativeFile.includes(projectRoot)) {
+    if (projectRoot && projectRoot !== '/' && relativeFile.includes(projectRoot)) {
       relativeFile = relativeFile.replace(projectRoot, '').substring(1)
     }
   }
@@ -378,11 +408,10 @@ const getSourceDetailsForLine = (projectRoot, line): MessageLineDetail | StackLi
 
   // WebKit stacks may include an `<unknown>` or `[native code]` location that is not navigable.
   // We ensure that the absolute path is not set in this case.
-  const canBuildAbsolutePath = relativeFile && projectRoot && (
+  if (relativeFile &&
+    projectRoot && (
     !Cypress.isBrowser('webkit') || (relativeFile !== '<unknown>' && relativeFile !== '[native code]')
-  )
-
-  if (canBuildAbsolutePath) {
+  )) {
     absoluteFile = path.resolve(projectRoot, relativeFile)
 
     // rollup-plugin-node-builtins/src/es6/path.js only support POSIX, we have

@@ -12,6 +12,14 @@ workflows:
                 requires:
                   - pack-workflows
 
+parameters:
+  publish-binary-branch:
+    type: string
+    default: main
+  force-persist-artifacts:
+    type: boolean
+    default: false
+
 commands:
   persist:
     steps:
@@ -129,7 +137,8 @@ jobs:
     resource_class: small
     steps:
         - cancel-draft-prs
-        - checkout
+        - checkout:
+            method: blobless
         - restore-src-checksum-cache
         - persist-to-workspace-and-exit-early
         - pack-workflows
@@ -153,7 +162,3 @@ jobs:
                 fi
           - continuation/continue:
               configuration_path: .circleci/packed/pipeline.yml
-
-
-  
-

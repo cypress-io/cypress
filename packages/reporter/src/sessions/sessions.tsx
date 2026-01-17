@@ -9,7 +9,7 @@ import Collapsible from '../collapsible/collapsible'
 import Tag from '../lib/tag'
 import FlashOnClick from '../lib/flash-on-click'
 
-export interface SessionPanelProps {
+interface SessionPanelProps {
   model: Record<string, SessionsModel>
 }
 

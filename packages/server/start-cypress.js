@@ -2,6 +2,13 @@ const electronApp = require('./lib/util/electron-app')
 const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
+const { override: overrideTty } = require('./lib/util/tty')
+
+const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
+
+process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
+configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
+process.env['CYPRESS'] = 'true'
 
 // are we in the main node process or the electron process?
 const isRunningElectron = electronApp.isRunning()
@@ -9,6 +16,13 @@ const isRunningElectron = electronApp.isRunning()
 const pkg = require('@packages/root')
 
 if (isRunningElectron) {
+  // if we are in the electron process, we need to patch the electron switches before Cypress launches the app
+  // @see https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node
+  const { app } = require('electron')
+  const { appendElectronSwitches } = require('./lib/append_electron_switches')
+
+  appendElectronSwitches(app)
+
   // To pass unencrypted telemetry data to an independent open telemetry endpoint,
   // disable the encryption header, update the url, and add any other required headers.
   // For example:
@@ -51,7 +65,7 @@ const fs = require('fs')
 patchFs(fs)
 
 // override tty if we're being forced to
-require('./lib/util/tty').override()
+overrideTty()
 
 if (process.env.CY_NET_PROFILE && isRunningElectron) {
   const netProfiler = require('./lib/util/net_profiler')()

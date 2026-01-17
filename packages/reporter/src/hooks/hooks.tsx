@@ -9,7 +9,7 @@ import type HookModel from './hook-model'
 import type { HookName } from './hook-model'
 import { OpenFileInIDEButton } from '../header/OpenFileInIDEButton'
 
-export interface HookHeaderProps {
+interface HookHeaderProps {
   model: HookModel
   number?: number
 }
@@ -21,13 +21,13 @@ const HookHeader = ({ model, number }: HookHeaderProps) => (
   </span>
 )
 
-export interface HookProps {
+interface HookComponentProps {
   model: HookModel
   showNumber: boolean
   scrollIntoView: Function
 }
 
-const Hook: React.FC<HookProps> = observer(({ model, showNumber, scrollIntoView }: HookProps) => (
+const Hook: React.FC<HookComponentProps> = observer(({ model, showNumber, scrollIntoView }: HookComponentProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed })}>
     <Collapsible
       header={
@@ -52,13 +52,13 @@ const Hook: React.FC<HookProps> = observer(({ model, showNumber, scrollIntoView 
 
 Hook.displayName = 'Hook'
 
-export interface HooksModel {
+interface HooksModel {
   hooks: HookModel[]
   hookCount: { [name in HookName]: number }
   state: string
 }
 
-export interface HooksProps {
+interface HooksProps {
   state?: AppState
   model: HooksModel
   scrollIntoView: Function
@@ -78,6 +78,6 @@ const Hooks: React.FC<HooksProps> = observer(({ state = appState, model, scrollI
 
 Hooks.displayName = 'Hooks'
 
-export { Hook, HookHeader }
+export { Hook }
 
 export default Hooks

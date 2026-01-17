@@ -33,7 +33,7 @@ type TakeScreenshotOptions = {
   timeout?: number
 }
 
-type AutomationOptions = TakeScreenshotOptions & Omit<Cypress.ScreenshotOptions, 'onBeforeScreenshot'| 'onAfterScreenshot' | 'disableTimersAndAnimations' | 'scale' | 'padding'> & Partial<Cypress.ScreenshotOptions>
+type ScreenshotAutomationOptions = TakeScreenshotOptions & Omit<Cypress.ScreenshotOptions, 'onBeforeScreenshot'| 'onAfterScreenshot' | 'disableTimersAndAnimations' | 'scale' | 'padding'> & Partial<Cypress.ScreenshotOptions>
 
 const getViewportHeight = (state: StateFunc) => {
   // TODO this doesn't seem correct
@@ -149,7 +149,7 @@ const scrollOverrides = (win: Window, doc: Document) => {
   }
 }
 
-const validateNumScreenshots = (numScreenshots: number, automationOptions: AutomationOptions) => {
+const validateNumScreenshots = (numScreenshots: number, automationOptions: ScreenshotAutomationOptions) => {
   if (numScreenshots < 1) {
     $errUtils.throwErrByPath('screenshot.invalid_height', {
       log: automationOptions.log,
@@ -157,7 +157,7 @@ const validateNumScreenshots = (numScreenshots: number, automationOptions: Autom
   }
 }
 
-const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFunc, automationOptions: AutomationOptions) => {
+const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
   const scrollAndTake = ({ y, clip, afterScroll }: Scroll, index) => {
     win.scrollTo(0, y)
     if (afterScroll) {
@@ -178,7 +178,7 @@ const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFu
   .then(_.last)
 }
 
-const takeFullPageScreenshot = (state: StateFunc, automationOptions: AutomationOptions) => {
+const takeFullPageScreenshot = (state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
   const win = state('window')
   const doc = state('document')
 
@@ -218,7 +218,7 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: AutomationO
   .finally(resetScrollOverrides)
 }
 
-const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning, automationOptions: AutomationOptions) => {
+const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning, automationOptions: ScreenshotAutomationOptions) => {
   if (!automationOptions.padding) {
     return elPosition
   }
@@ -240,7 +240,7 @@ const applyPaddingToElementPositioning = (elPosition: Cypress.ElementPositioning
   }
 }
 
-const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, automationOptions: AutomationOptions) => {
+const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
   const win = state('window')
   const doc = state('document')
 
@@ -429,7 +429,7 @@ const takeScreenshot = (
     })
   }
 
-  const automationOptions: AutomationOptions = _.extend({}, options, {
+  const automationOptions: ScreenshotAutomationOptions = _.extend({}, options, {
     capture,
     clip: {
       x: 0,

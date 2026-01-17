@@ -1,25 +1,26 @@
 import { cache } from './cache'
 import type { Cohort } from '@packages/types'
-const debug = require('debug')('cypress:server:cohorts')
+import debugModule from 'debug'
+const debug = debugModule('cypress:server:cohorts')
 
-export = {
-  get: (): Promise<Record<string, Cohort>> => {
-    debug('Get cohorts')
+export const get = async (): Promise<Record<string, Cohort>> => {
+  debug('Get cohorts')
 
-    return cache.getCohorts()
-  },
-  getByName: (name: string): Promise<Cohort> => {
-    debug('Get cohort name:', name)
+  return cache.getCohorts()
+}
 
-    return cache.getCohorts().then((cohorts) => {
-      debug('Get cohort returning:', cohorts[name])
+export const getByName = async (name: string): Promise<Cohort> => {
+  debug('Get cohort name:', name)
 
-      return cohorts[name]
-    })
-  },
-  set: (cohort: Cohort) => {
-    debug('Set cohort', cohort)
+  return cache.getCohorts().then((cohorts) => {
+    debug('Get cohort returning:', cohorts[name])
 
-    return cache.insertCohort(cohort)
-  },
+    return cohorts[name]
+  })
+}
+
+export const set = async (cohort: Cohort): Promise<void> => {
+  debug('Set cohort', cohort)
+
+  return cache.insertCohort(cohort)
 }

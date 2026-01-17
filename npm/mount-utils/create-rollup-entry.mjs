@@ -52,7 +52,7 @@ export function createEntries (options) {
     }
 
     const finalConfig = _.mergeWith({}, baseConfig, config, (objValue, srcValue) => {
-      if (_.isArray(objValue)) {
+      if (Array.isArray(objValue)) {
         return objValue.concat(srcValue)
       }
     })

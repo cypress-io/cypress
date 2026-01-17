@@ -53,6 +53,8 @@ const stats = {
 
 const ignoreWarnings = [{
   module: /node_modules\/mocha\/lib\/mocha.js/,
+}, {
+  module: /node_modules\/mocha\/lib\/esm-utils\.js/,
 }]
 
 function makeSassLoaders ({ modules }: { modules: boolean }) {
@@ -108,7 +110,7 @@ function makeSassLoaders ({ modules }: { modules: boolean }) {
 }
 
 // the chrome version should be synced with
-// npm/webpack-batteries-included-preprocessor/index.js and
+// npm/webpack-batteries-included-preprocessor/dist/index.js and
 // packages/server/lib/browsers/chrome.ts
 const babelPresetEnvConfig = [require.resolve('@babel/preset-env'), { targets: { 'chrome': '64' } }]
 const babelPresetTypeScriptConfig = [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }]

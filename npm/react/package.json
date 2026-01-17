@@ -17,7 +17,6 @@
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@types/semver": "7.5.8",
     "@vitejs/plugin-react": "4.6.0",
     "axios": "1.8.2",
     "cypress": "0.0.0-development",
@@ -26,10 +25,9 @@
     "react-dom": "18.3.1",
     "react-router": "6.28.0",
     "react-router-dom": "6.28.0",
-    "semver": "^7.7.1",
+    "rollup": "3.29.5",
     "typescript": "~5.4.5",
-    "vite": "6.3.5",
-    "vite-plugin-require-transform": "1.0.21"
+    "vite": "6.3.5"
   },
   "peerDependencies": {
     "@types/react": "^18 || ^19",

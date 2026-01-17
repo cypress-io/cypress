@@ -18,7 +18,8 @@
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-unit": "vitest run",
     "test:clean": "find ./test/__fixtures__ -depth -name 'output.*' -type f -exec rm {} \\;",
-    "tslint": "tslint --config ../ts/tslint.json --project ."
+    "tslint": "tslint --config ../ts/tslint.json --project .",
+    "watch": "yarn build:cjs --watch & yarn build:esm --watch"
   },
   "dependencies": {
     "@babel/core": "^7.28.0",
@@ -27,14 +28,13 @@
     "@babel/plugin-transform-typescript": "^7.28.0",
     "@babel/traverse": "^7.28.0",
     "@babel/types": "^7.28.0",
-    "bluebird": "^3.7.2",
     "common-tags": "1.8.0",
     "debug": "^4.3.4",
     "dedent": "^0.7.0",
     "fs-extra": "^9.1.0",
     "lodash": "^4.17.21",
     "prettier": "^2.8.8",
-    "recast": "0.20.4",
+    "recast": "0.23.11",
     "return-deep-diff": "0.4.0",
     "underscore.string": "^3.3.6"
   },
@@ -53,7 +53,8 @@
     "cjs/*",
     "esm/*"
   ],
-  "types": "src/index.ts",
+  "types": "cjs/index.d.ts",
+  "license": "MIT",
   "module": "esm/index.js",
   "nx": {}
 }

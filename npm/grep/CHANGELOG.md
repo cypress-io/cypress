@@ -1,3 +1,10 @@
+# [@cypress/grep-v5.0.1](https://github.com/cypress-io/cypress/compare/@cypress/grep-v5.0.0...@cypress/grep-v5.0.1) (2025-12-08)
+
+
+### Bug Fixes
+
+* handle grepFilterSpecs as string "true" from CLI environment variables ([#33060](https://github.com/cypress-io/cypress/issues/33060)) ([d296aad](https://github.com/cypress-io/cypress/commit/d296aad1c9f3598c587ac6e520bd300d9dac1813))
+
 # [@cypress/grep-v5.0.0](https://github.com/cypress-io/cypress/compare/@cypress/grep-v4.1.1...@cypress/grep-v5.0.0) (2025-09-19)
 
 

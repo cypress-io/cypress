@@ -108,6 +108,7 @@ declare namespace Cypress {
 
 declare namespace InternalCypress {
   interface Cypress extends Cypress.Cypress, NodeEventEmitter {
+    sourceMapProjectRoot: string
     backend: (eventName: string, ...args: any[]) => Promise<any>
   }
 

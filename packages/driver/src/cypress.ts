@@ -122,6 +122,7 @@ class $Cypress {
   downloads: any
   Commands: any
   $autIframe: any
+  $autSnapshotIframe?: JQuery<HTMLIFrameElement> | null
   onSpecReady: any
   waitForStudio: any
   events: any
@@ -202,6 +203,7 @@ class $Cypress {
   lolex = fakeTimers
   handlePrimaryOriginSocketEvent = handlePrimaryOriginSocketEvent
   areSourceMapsAvailable: boolean = false
+  sourceMapProjectRoot: string = ''
 
   static $: any
   static utils: any
@@ -214,6 +216,7 @@ class $Cypress {
     this.downloads = null
     this.Commands = null
     this.$autIframe = null
+    this.$autSnapshotIframe = null
     this.onSpecReady = null
     this.waitForStudio = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
@@ -341,8 +344,9 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ({ $autIframe, onSpecReady, waitForStudio }) {
+  initialize ({ $autIframe, $autSnapshotIframe, onSpecReady, waitForStudio }) {
     this.$autIframe = $autIframe
+    this.$autSnapshotIframe = $autSnapshotIframe
     this.onSpecReady = onSpecReady
     this.waitForStudio = waitForStudio
     if (this._onInitialize) {
@@ -406,9 +410,13 @@ class $Cypress {
         scripts,
         specWindow,
         testingType: this.testingType,
+        projectRoot: this.config('projectRoot'),
+        specRelativePath: this.spec.relative,
+        specAbsolutePath: this.spec.absolute,
       })
       .then(() => {
         this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
+        this.sourceMapProjectRoot = $sourceMapUtils.getSourceMapProjectRoot()
         if (this.testingType === 'e2e') {
           return setSpecContentSecurityPolicy(specWindow)
         }
@@ -856,6 +864,7 @@ class $Cypress {
     const tests = this.runner.getTestsState(testId)
     let runState: RunState = {
       currentId: testId,
+      currentRetry: this.currentRetry,
       tests,
       startTime: this.runner.getStartTime(),
       emissions: this.runner.getEmissions(),

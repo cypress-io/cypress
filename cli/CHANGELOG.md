@@ -1,28 +1,148 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.6.0
+## 15.9.1
 
-_Released 10/20/2025 (PENDING)_
-
-**Features:**
-
-- `cy.prompt()` will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
+_Released 01/27/2026 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
-- Fixed an issue where command snapshots were not correctly displayed in Studio. Addressed in [#32808](https://github.com/cypress-io/cypress/pull/32808).
-- Fixed an issue with grouped console prop items having a hard to read blue color in the console log and duplicate `:` characters being displayed. Addressed in [#32776](https://github.com/cypress-io/cypress/pull/32776).
 - Fixed an issue where `cy.wait('@alias')` could time out when the underlying network request was canceled by navigation (e.g., `cy.visit`, `cy.reload`). Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
+
+**Misc:**
+
+- The icon in the 'Open in IDE' button in the command log is now the correct size. Addresses [#32779](https://github.com/cypress-io/cypress/issues/32779). Addressed in [#33217](https://github.com/cypress-io/cypress/pull/33217).
+
+**Dependency Updates:**
+
+- Upgraded `shell-env` to `4.0.1`. This removes the [GMS-2020-2](https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/npm/execa/GMS-2020-2.yml) vulnerability being reported in security scans. Addressed in [#33226](https://github.com/cypress-io/cypress/pull/33226).
+
+## 15.9.0
+
+_Released 01/13/2026_
+
+**Features:**
+
+- The `experimentalRunAllSpecs` option can now be used for component testing as well as e2e testing. Addresses [#25636](https://github.com/cypress-io/cypress/issues/25636).
+
+## 15.8.2
+
+_Released 01/06/2026_
+
+**Bugfixes:**
+
+- Fixed an issue where the ffprobe path was not properly configured for video operations. The path is now set at module load time, ensuring it's available for all video operations. Upgraded `@ffprobe-installer/ffprobe` from `1.1.0` to `2.1.2` to support darwin-arm64 (Apple Silicon). Addressed in [#33136](https://github.com/cypress-io/cypress/pull/33136).
+- Fixed an issue where `test:after:run` and `test:after:run:async` events were not firing after both a `before all` and `after all` hook failed. Addressed in [#33172](https://github.com/cypress-io/cypress/pull/33172).
+
+**Dependency Updates:**
+
+- Upgraded `@cypress/request` to `3.0.10`. This removes the [CVE-2025-15284](https://security.snyk.io/vuln/SNYK-JS-QS-14724253) vulnerability being reported in security scans. Addressed in [#33188](https://github.com/cypress-io/cypress/pull/33188).
+
+## 15.8.1
+
+_Released 12/18/2025_
+
+**Dependency Updates:**
+
+- Upgraded `systeminformation` to `5.27.14`. This removes the [CVE-2025-68154](https://github.com/advisories/GHSA-wphj-fx3q-84ch) vulnerability being reported in security scans. Fixes [#33146](https://github.com/cypress-io/cypress/issues/33146). Addressed in [#33150](https://github.com/cypress-io/cypress/pull/33150).
+
+## 15.8.0
+
+_Released 12/16/2025_
+
+**Performance:**
+
+- Introduced a new `experimentalFastVisibility` experiment. Enabling this experiment changes how Cypress performs visibility checks and assertions. Read more about [experimental fast visibility](https://on.cypress.io/experiments/#experimental-fast-visibility). Addresses [#33044](https://github.com/cypress-io/cypress/issues/33044). Addressed in [#32801](https://github.com/cypress-io/cypress/pull/32801).
+
+**Features:**
+
+- `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
+- Adds zoneless support for `Angular` Component Testing through the `angular-zoneless` mount function. Addresses [#31504](https://github.com/cypress-io/cypress/issues/31504) and [#30070](https://github.com/cypress-io/cypress/issues/30070).
+- After receiving feedback on its usefulness outside of Studio, the Selector Playground is now available for all users in open mode. When opened, the playground automatically enables interactive mode to help you build and test selectors directly in your application. Addresses [#32672](https://github.com/cypress-io/cypress/issues/32672). Addressed in [#33073](https://github.com/cypress-io/cypress/pull/33073).
+
+**Bugfixes:**
+
+- Fixed an issue where a EPIPE error shows up after CTRL+C is done in terminal. Fixes [#30659](https://github.com/cypress-io/cypress/issues/30659). Addressed in [#32873](https://github.com/cypress-io/cypress/pull/32873).
+- Fixed an issue where the browser would freeze when Cypress intercepts a synchronous XHR request and a `routeHandler` is used. Fixes [#32874](https://github.com/cypress-io/cypress/issues/32874). Addressed in [#32925](https://github.com/cypress-io/cypress/pull/32925).
+- Fixed an issue where `Next.js` Component Testing would not load correctly without a TypeScript-based Next config in versions 16.0.3 and up. Fixes [#32968](https://github.com/cypress-io/cypress/issues/32968).
+- Fixed an issue where the error message for `not.have.length` was not correctly displaying the expected length in the Command Log. Addressed in [#18927](https://github.com/cypress-io/cypress/issues/18927).
+- Fixed an issue where `removeAttribute()` would not work for attributes other than `target` on anchor or form elements after clicking links with `target="_top"` or `target="_parent"`. Fixes [#26206](https://github.com/cypress-io/cypress/issues/26206). Addressed in [#33051](https://github.com/cypress-io/cypress/pull/33051).
+
+**Dependency Updates:**
+
+- Removed extraneous dependencies that are no longer used. Addressed in [#33098](https://github.com/cypress-io/cypress/pull/33098).
+- Upgraded `brace-expansion`. This removes the [CVE-2025-5889](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-9789073) vulnerability being reported in security scans. Addressed in [#33112](https://github.com/cypress-io/cypress/pull/33112).
+- Upgraded `form-data`. This removes the [CVE-2025-7783](https://security.snyk.io/vuln/SNYK-JS-FORMDATA-10841150) vulnerability being reported in security scans. Addressed in [#33113](https://github.com/cypress-io/cypress/pull/33113).
+
+## 15.7.1
+
+_Released 12/02/2025_
+
+**Performance:**
+
+- Improved performance when viewing command snapshots in the Command Log. Element highlighting is now significantly faster, especially when highlighting multiple elements or complex pages. This is achieved by reducing redundant style calculations and batching DOM operations to minimize browser reflows. Addressed in [#32951](https://github.com/cypress-io/cypress/pull/32951).
+
+**Bugfixes:**
+
+- Updated the error message shown when the [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
+
+**Dependency Updates:**
+
+- Upgraded `yargs-unparser` from `1.6.0` to `1.6.4` (which upgraded `flat` from `4.1.1` to `5.0.2`) to resolve [CVE-2020-36632](https://github.com/advisories/GHSA-52f5-9888-hmc6). Addressed [#27763](https://github.com/cypress-io/cypress/issues/27763).
+
+## 15.7.0
+
+_Released 11/19/2025_
+
+**Performance:**
+
+- Limits the number of matched elements that are tested for visibility when added to a command log entry. Fixes a crash scenario related to rapid successive DOM additions in conjunction with a large number of elements returned from a query. Addressed in [#32937](https://github.com/cypress-io/cypress/pull/32937).
+
+**Features:**
+
+- `Next.js` version 16 is now supported within component testing. Currently, `webpack` is used to bundle Next.js components. Turbopack, the [new default](https://nextjs.org/docs/app/guides/upgrading/version-16#turbopack-by-default) inside Next.js 16, is not yet supported within Cypress. Addresses [#32857](https://github.com/cypress-io/cypress/issues/32857).
+
+**Bugfixes:**
+
+- Fixed an issue where [`cy.wrap()`](https://docs.cypress.io/api/commands/wrap) would cause infinite recursion and freeze the Cypress App when called with objects containing circular references. Fixes [#24715](https://github.com/cypress-io/cypress/issues/24715). Addressed in [#32917](https://github.com/cypress-io/cypress/pull/32917).
+- Fixed an issue where top changes on test retries could cause attempt numbers to show up more than one time in the reporter and cause attempts to be lost in Test Replay. Addressed in [#32888](https://github.com/cypress-io/cypress/pull/32888).
+- Fixed an issue where stack traces that are used to determine a test's invocation details are sometimes incorrect. Addressed in [#32699](https://github.com/cypress-io/cypress/pull/32699).
+- Fixed an issue where larger than expected config values were causing issues in certain cases when recording to the Cypress Cloud. Addressed in [#32957](https://github.com/cypress-io/cypress/pull/32957).
+
+**Misc:**
+
+- The keyboard shortcuts modal now displays the keyboard shortcut for saving Studio changes - `⌘` + `s` for Mac or `Ctrl` + `s` for Windows/Linux. Addressed [#32862](https://github.com/cypress-io/cypress/issues/32862). Addressed in [#32864](https://github.com/cypress-io/cypress/pull/32864).
+- The Cursor logo now correctly displays in the External editor dropdown. Addresses [#32062](https://github.com/cypress-io/cypress/issues/32062). Addressed in [#32911](https://github.com/cypress-io/cypress/pull/32911).
+
+## 15.6.0
+
+_Released 11/04/2025_
+
+**Features:**
+
+- Added a 'Self-healed' badge to the Command Log when [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) steps automatically recover after the element they need is not found in the cache. Addressed in [#32802](https://github.com/cypress-io/cypress/pull/32802).
+- [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) will now show a warning in the `Get code` modal when there are unsaved changes in `Studio` that will be lost if the user saves the generated code. Addressed in [#32741](https://github.com/cypress-io/cypress/pull/32741).
+
+**Bugfixes:**
+
+- Fixed an issue where command snapshots were not correctly displayed in Studio. Addressed in [#32808](https://github.com/cypress-io/cypress/pull/32808).
+- Chrome's autofill popup is now disabled when filling address and credit card forms during test execution. We also added some other Chrome flags and preferences that are common when automating browsers. Fixes [#25608](https://github.com/cypress-io/cypress/issues/25608). Addressed in [#32811](https://github.com/cypress-io/cypress/pull/32811).
+- Fixed an issue where grouped command text jumps up and down when expanding and collapsing in the command log. Addressed in [#32757](https://github.com/cypress-io/cypress/pull/32757).
+- Fixed an issue with grouped console prop items having a hard to read blue color in the console log and duplicate `:` characters being displayed. Addressed in [#32776](https://github.com/cypress-io/cypress/pull/32776).
+- Added more context to the error message shown when [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) fails to download. Addressed in [#32822](https://github.com/cypress-io/cypress/pull/32822).
+- Fixed an issue where absolute file paths were not correctly determined from the source map when the source map root was updated. Fixes [#32809](https://github.com/cypress-io/cypress/issues/32809).
 
 **Misc:**
 
 - Add top padding for command log labels. Addressed in [#32774](https://github.com/cypress-io/cypress/pull/32774).
 - The hitbox for expanding a grouped command has been widened. Addresses [#32778](https://github.com/cypress-io/cypress/issues/32778). Addressed in [#32783](https://github.com/cypress-io/cypress/pull/32783).
 - Have cursor on hover of the AUT URL to show as pointer. Addresses [#32777](https://github.com/cypress-io/cypress/issues/32777). Addressed in [#32782](https://github.com/cypress-io/cypress/pull/32782).
+- WebKit now prefers a cookie's fully qualified `domain` when requesting a cookie value via [`cy.getCookie()`](https://docs.cypress.io/api/commands/getcookie). If none are found, the cookie's apex domain will be used as a fallback. Addresses [#29954](https://github.com/cypress-io/cypress/issues/29954), [#29973](https://github.com/cypress-io/cypress/issues/29973) and [#30392](https://github.com/cypress-io/cypress/issues/30392). Addressed in [#32852](https://github.com/cypress-io/cypress/pull/32852).
+- Make test name header sticky in studio mode and in the tests list. Addresses [#32591](https://github.com/cypress-io/cypress/issues/32591). Addressed in [#32840](https://github.com/cypress-io/cypress/pull/32840)
+- The [`cy.exec()`](https://docs.cypress.io/api/commands/exec) type now reflects the correct yielded response type of `exitCode`. Addresses [#32875](https://github.com/cypress-io/cypress/issues/32875). Addressed in [#32885](https://github.com/cypress-io/cypress/pull/32885).
 
 **Dependency Updates:**
 
 - Upgraded `better-sqlite3` from `11.10.0` to `12.4.1`. Addressed in [#32755](https://github.com/cypress-io/cypress/pull/32755).
+- Upgraded `recast` from `0.20.4` to `0.23.11`. Addressed in [#32742](https://github.com/cypress-io/cypress/pull/32742).
 
 ## 15.5.0
 
@@ -41,7 +161,7 @@ _Released 10/17/2025_
 **Misc:**
 
 - Browser detection in Cypress now always prefers 64-bit browser installs to 32-bit browser installs. Addressed in [#32656](https://github.com/cypress-io/cypress/pull/32656).
-- Update code button styles and rename Get Code for Code on cy.prompt. Addressed in [#32745](https://github.com/cypress-io/cypress/pull/32745).
+- Update code button styles and rename Get Code for Code on [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt). Addressed in [#32745](https://github.com/cypress-io/cypress/pull/32745).
 
 **Dependency Updates:**
 
@@ -49,7 +169,7 @@ _Released 10/17/2025_
 
 ## 15.4.0
 
-_Released 10/7/2025_
+_Released 10/07/2025_
 
 **Features:**
 
@@ -61,7 +181,7 @@ _Released 10/7/2025_
 **Bugfixes:**
 
 - Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
-- Fixed code frames in `cy.origin` so that failed commands will show the correct line/column within the corresponding spec file. Addressed in [#32597](https://github.com/cypress-io/cypress/pull/32597).
+- Fixed code frames in [`cy.origin()`](https://docs.cypress.io/api/commands/origin) so that failed commands will show the correct line/column within the corresponding spec file. Addressed in [#32597](https://github.com/cypress-io/cypress/pull/32597).
 - Fixed Cypress cloud requests so that they properly verify SSL certificates. Addressed in [#32629](https://github.com/cypress-io/cypress/pull/32629).
 
 **Misc:**
@@ -69,7 +189,7 @@ _Released 10/7/2025_
 - Added a dropdown menu in the Command Log that includes actions like Open in IDE and Add New Test in Studio, along with test preferences such as Auto-Scroll and Hide HTTP Requests. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Updated the Studio test editing header to include a Back button. This change ensures the Specs button remains functional for expanding or collapsing the specs panel. Addresses [#32556](https://github.com/cypress-io/cypress/issues/32556) and [#32558](https://github.com/cypress-io/cypress/issues/32558). Addressed in [#32611](https://github.com/cypress-io/cypress/pull/32611).
 - Fixed the Studio panel resizing when dragging. Addressed in [#32584](https://github.com/cypress-io/cypress/pull/32584).
-- The Next button now maintains consistent visibility during stepping sessions when using `cy.pause`, staying visible but disabled when no immediate next command is available, providing clear visual feedback to users about stepping state. Addresses [#32476](https://github.com/cypress-io/cypress/issues/32476). Addressed in [#32536](https://github.com/cypress-io/cypress/pull/32536).
+- The Next button now maintains consistent visibility during stepping sessions when using [`cy.pause()`](https://docs.cypress.io/api/commands/pause), staying visible but disabled when no immediate next command is available, providing clear visual feedback to users about stepping state. Addresses [#32476](https://github.com/cypress-io/cypress/issues/32476). Addressed in [#32536](https://github.com/cypress-io/cypress/pull/32536).
 
 **Dependency Updates:**
 
@@ -79,7 +199,7 @@ _Released 10/7/2025_
 
 ## 15.3.0
 
-_Released 9/23/2025_
+_Released 09/23/2025_
 
 **Features:**
 
@@ -98,7 +218,7 @@ _Released 9/23/2025_
 
 ## 15.2.0
 
-_Released 9/9/2025_
+_Released 09/09/2025_
 
 **Features:**
 
@@ -106,7 +226,7 @@ _Released 9/9/2025_
 
 **Bugfixes:**
 
-- We now properly partition the `host` with `port` when caching family DNS lookups. This resolves issues where some `localhost` URLs were not resolving in `cy.visit()` in Cypress when they should have. Fixes [#25397](https://github.com/cypress-io/cypress/issues/25397). Addressed in [#32403](https://github.com/cypress-io/cypress/pull/32403).
+- We now properly partition the `host` with `port` when caching family DNS lookups. This resolves issues where some `localhost` URLs were not resolving in [`cy.visit()`](https://docs.cypress.io/api/commands/visit) in Cypress when they should have. Fixes [#25397](https://github.com/cypress-io/cypress/issues/25397). Addressed in [#32403](https://github.com/cypress-io/cypress/pull/32403).
 
 **Dependency Updates:**
 
@@ -118,7 +238,7 @@ _Released 09/02/2025_
 
 **Features:**
 
-- Expanded `cy.press()` to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051) and [#31488](https://github.com/cypress-io/cypress/issues/31488). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
+- Expanded [`cy.press()`](https://docs.cypress.io/api/commands/press) to support more key types. Addresses [#31051](https://github.com/cypress-io/cypress/issues/31051) and [#31488](https://github.com/cypress-io/cypress/issues/31488). Addressed in [#31496](https://github.com/cypress-io/cypress/pull/31496).
 
 **Bugfixes:**
 
@@ -201,7 +321,7 @@ _Released 08/20/2025_
 
 ## 14.5.4
 
-_Released 8/07/2025_
+_Released 08/07/2025_
 
 **Dependency Updates:**
 
@@ -209,7 +329,7 @@ _Released 8/07/2025_
 
 ## 14.5.3
 
-_Released 7/25/2025_
+_Released 07/25/2025_
 
 **Bugfixes:**
 
@@ -223,7 +343,7 @@ _Released 7/25/2025_
 
 ## 14.5.2
 
-_Released 7/15/2025_
+_Released 07/15/2025_
 
 **Bugfixes:**
 
@@ -232,7 +352,7 @@ _Released 7/15/2025_
 
 ## 14.5.1
 
-_Released 7/01/2025_
+_Released 07/01/2025_
 
 **Bugfixes:**
 
@@ -244,7 +364,7 @@ _Released 7/01/2025_
 
 ## 14.5.0
 
-_Released 6/17/2025_
+_Released 06/17/2025_
 
 **Features:**
 
@@ -256,7 +376,7 @@ _Released 6/17/2025_
 
 ## 14.4.1
 
-_Released 6/3/2025_
+_Released 06/03/2025_
 
 **Bugfixes:**
 
@@ -272,7 +392,7 @@ _Released 6/3/2025_
 
 ## 14.4.0
 
-_Released 5/20/2025_
+_Released 05/20/2025_
 
 **Features:**
 
@@ -298,7 +418,7 @@ _Released 5/20/2025_
 
 ## 14.3.3
 
-_Released 5/6/2025_
+_Released 05/06/2025_
 
 **Performance:**
 
@@ -321,7 +441,7 @@ _Released 5/6/2025_
 
 ## 14.3.2
 
-_Released 4/22/2025_
+_Released 04/22/2025_
 
 **Bugfixes:**
 
@@ -330,7 +450,7 @@ _Released 4/22/2025_
 
 ## 14.3.1
 
-_Released 4/17/2025_
+_Released 04/17/2025_
 
 **Performance:**
 
@@ -349,7 +469,7 @@ _Released 4/17/2025_
 
 ## 14.3.0
 
-_Released 4/8/2025_
+_Released 04/08/2025_
 
 **Features:**
 
@@ -374,7 +494,7 @@ _Released 4/8/2025_
 
 ## 14.2.1
 
-_Released 3/26/2025_
+_Released 03/26/2025_
 
 **Bugfixes:**
 
@@ -397,7 +517,7 @@ _Released 3/26/2025_
 
 ## 14.2.0
 
-_Released 3/12/2025_
+_Released 03/12/2025_
 
 **Features:**
 
@@ -416,7 +536,7 @@ _Released 3/12/2025_
 
 ## 14.1.0
 
-_Released 2/25/2025_
+_Released 02/25/2025_
 
 **Features:**
 
@@ -440,7 +560,7 @@ _Released 2/25/2025_
 
 ## 14.0.3
 
-_Released 2/11/2025_
+_Released 02/11/2025_
 
 **Bugfixes:**
 
@@ -453,7 +573,7 @@ _Released 2/11/2025_
 
 ## 14.0.2
 
-_Released 2/05/2025_
+_Released 02/05/2025_
 
 **Bugfixes:**
 
@@ -472,7 +592,7 @@ _Released 2/05/2025_
 
 ## 14.0.1
 
-_Released 1/28/2025_
+_Released 01/28/2025_
 
 **Bugfixes:**
 
@@ -489,7 +609,7 @@ _Released 1/28/2025_
 
 ## 14.0.0
 
-_Released 1/16/2025_
+_Released 01/16/2025_
 
 **Breaking Changes:**
 
@@ -605,7 +725,7 @@ _Released 11/19/2024_
 
 ## 13.15.2
 
-_Released 11/5/2024_
+_Released 11/05/2024_
 
 **Bugfixes:**
 
@@ -642,7 +762,7 @@ _Released 10/24/2024_
 
 ## 13.15.0
 
-_Released 9/25/2024_
+_Released 09/25/2024_
 
 **Features:**
 
@@ -667,7 +787,7 @@ _Released 9/25/2024_
 
 ## 13.14.2
 
-_Released 9/4/2024_
+_Released 09/04/2024_
 
 **Bugfixes:**
 
@@ -676,7 +796,7 @@ _Released 9/4/2024_
 
 ## 13.14.1
 
-_Released 8/29/2024_
+_Released 08/29/2024_
 
 **Bugfixes:**
 
@@ -684,7 +804,7 @@ _Released 8/29/2024_
 
 ## 13.14.0
 
-_Released 8/27/2024_
+_Released 08/27/2024_
 
 **Performance:**
 
@@ -716,7 +836,7 @@ _Released 8/27/2024_
 
 ## 13.13.3
 
-_Released 8/14/2024_
+_Released 08/14/2024_
 
 **Bugfixes:**
 
@@ -733,7 +853,7 @@ _Released 8/14/2024_
 
 ## 13.13.2
 
-_Released 7/31/2024_
+_Released 07/31/2024_
 
 **Performance:**
 
@@ -753,7 +873,7 @@ _Released 7/31/2024_
 
 ## 13.13.1
 
-_Released 7/16/2024_
+_Released 07/16/2024_
 
 **Bugfixes:**
 
@@ -770,7 +890,7 @@ _Released 7/16/2024_
 
 ## 13.13.0
 
-_Released 7/01/2024_
+_Released 07/01/2024_
 
 **Performance:**
 
@@ -794,7 +914,7 @@ _Released 7/01/2024_
 
 ## 13.12.0
 
-_Released 6/18/2024_
+_Released 06/18/2024_
 
 **Features:**
 
@@ -820,7 +940,7 @@ _Released 6/18/2024_
 
 ## 13.11.0
 
-_Released 6/4/2024_
+_Released 06/04/2024_
 
 **Performance:**
 
@@ -842,7 +962,7 @@ _Released 6/4/2024_
 
 ## 13.10.0
 
-_Released 5/21/2024_
+_Released 05/21/2024_
 
 **Features:**
 
@@ -863,7 +983,7 @@ _Released 5/21/2024_
 
 ## 13.9.0
 
-_Released 5/7/2024_
+_Released 05/07/2024_
 
 **Features:**
 
@@ -886,7 +1006,7 @@ _Released 5/7/2024_
 
 ## 13.8.1
 
-_Released 4/23/2024_
+_Released 04/23/2024_
 
 **Performance:**
 
@@ -907,7 +1027,7 @@ _Released 4/23/2024_
 
 ## 13.8.0
 
-_Released 4/18/2024_
+_Released 04/18/2024_
 
 **Features:**
 
@@ -923,7 +1043,7 @@ _Released 4/18/2024_
 
 ## 13.7.3
 
-_Released 4/11/2024_
+_Released 04/11/2024_
 
 **Bugfixes:**
 
@@ -937,7 +1057,7 @@ _Released 4/11/2024_
 
 ## 13.7.2
 
-_Released 4/2/2024_
+_Released 04/02/2024_
 
 **Performance:**
 
@@ -956,7 +1076,7 @@ _Released 4/2/2024_
 
 ## 13.7.1
 
-_Released 3/21/2024_
+_Released 03/21/2024_
 
 **Bugfixes:**
 
@@ -969,7 +1089,7 @@ _Released 3/21/2024_
 
 ## 13.7.0
 
-_Released 3/13/2024_
+_Released 03/13/2024_
 
 **Features:**
 
@@ -1002,7 +1122,7 @@ _Released 3/13/2024_
 
 ## 13.6.6
 
-_Released 2/22/2024_
+_Released 02/22/2024_
 
 **Bugfixes:**
 
@@ -1010,7 +1130,7 @@ _Released 2/22/2024_
 
 ## 13.6.5
 
-_Released 2/20/2024_
+_Released 02/20/2024_
 
 **Bugfixes:**
 
@@ -1036,7 +1156,7 @@ _Released 2/20/2024_
 
 ## 13.6.4
 
-_Released 1/30/2024_
+_Released 01/30/2024_
 
 **Performance:**
 
@@ -1052,7 +1172,7 @@ _Released 1/30/2024_
 
 ## 13.6.3
 
-_Released 1/16/2024_
+_Released 01/16/2024_
 
 **Bugfixes:**
 
@@ -1104,7 +1224,7 @@ _Released 12/26/2023_
 
 ## 13.6.1
 
-_Released 12/5/2023_
+_Released 12/05/2023_
 
 **Bugfixes:**
 
@@ -1156,7 +1276,7 @@ _Released 11/14/2023_
 
 ## 13.5.0
 
-_Released 11/8/2023_
+_Released 11/08/2023_
 
 **Features:**
 
@@ -1692,7 +1812,7 @@ _Released 01/27/2023_
 
 ## 12.4.0
 
-_Released 1/24/2023_
+_Released 01/24/2023_
 
 **Features:**
 

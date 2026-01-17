@@ -15,10 +15,10 @@ import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
 import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
-import env from '../util/env'
+import * as env from '../util/env'
 import trash from '../util/trash'
-import random from '../util/random'
-import system from '../util/system'
+import { id as randomId } from '../util/random'
+import * as system from '../util/system'
 import chromePolicyCheck from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import type { Cfg, ProjectBase } from '../project-base'
@@ -437,7 +437,7 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
 }
 
 async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
-  if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
+  if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Promise.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
 
   // if exit is false, we need to intercept the resolution of tests - whether
   // an early exit with intermediate results, or a full run.
@@ -764,7 +764,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
 function screenshotMetadata (data: any, resp: any) {
   return {
-    screenshotId: random.id(),
+    screenshotId: randomId(),
     name: data.name || null,
     testId: data.testId,
     testAttemptIndex: data.testAttemptIndex,
@@ -1131,6 +1131,7 @@ async function ready (options: ReadyOptions) {
       socketId,
       parallel,
       onError,
+      // @ts-expect-error - browser is not typed correctly
       browser,
       project,
       runUrl,

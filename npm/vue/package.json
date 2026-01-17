@@ -1,7 +1,7 @@
 {
   "name": "@cypress/vue",
   "version": "0.0.0-development",
-  "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
+  "description": "Browser-based Component Testing for Vue.js with Cypress.io",
   "main": "dist/cypress-vue.cjs.js",
   "scripts": {
     "build": "rimraf dist && rollup -c rollup.config.mjs",
@@ -16,14 +16,12 @@
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
-    "@vitejs/plugin-vue": "6.0.0",
+    "@vitejs/plugin-vue": "6.0.3",
     "@vue/compiler-sfc": "3.2.47",
     "@vue/test-utils": "2.4.6",
-    "axios": "0.30.0",
+    "axios": "0.30.2",
     "cypress": "0.0.0-development",
-    "debug": "^4.3.4",
-    "globby": "^11.0.1",
-    "tailwindcss": "1.1.4",
+    "rollup": "3.29.5",
     "typescript": "~5.4.5",
     "vite": "6.3.5",
     "vue": "3.2.47",

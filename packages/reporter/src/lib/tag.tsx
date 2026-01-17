@@ -2,7 +2,7 @@ import cs from 'classnames'
 import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
-export interface Props {
+interface TagProps {
   type?: 'agent' | 'count' | 'dom' | 'failed-status' | 'primitive' | 'route' | 'successful-status'
   content: React.ReactNode | string
   count?: number
@@ -16,7 +16,7 @@ const Tag = ({
   customClassName,
   tooltipMessage,
   type,
-}: Props) => {
+}: TagProps) => {
   if (!content) {
     return null
   }

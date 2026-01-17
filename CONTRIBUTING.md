@@ -215,6 +215,7 @@ Here is a list of the npm packages in this repository:
  | Folder Name                                            | Package Name                       | Purpose                                                                      |
  | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
  | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
+ | [angular-zoneless](./npm/angular-zoneless)             | `@cypress/angular-zoneless`        | Cypress component testing for Angular using zoneless change detection.       |
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
  | [grep](./npm/grep)                                       | `@cypress/grep`                     | Filter tests using substring                        |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
@@ -263,7 +264,7 @@ If you do not disable these restrictions for the affected Ubuntu versions, then 
 
 Follow the instructions in [Using Python on Windows](https://docs.python.org/3/using/windows.html) to install the current [version of Python](https://www.python.org/downloads/) (`3.14`).
 
-Install the [Visual Studio Community 2022](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community) edition, selecting the `Desktop development with C++` workload.
+Install [Visual Studio 2022 Build Tools](https://aka.ms/vs/17/release/vs_buildtools.exe), selecting the `Desktop development with C++` workload.
 
 Refer to the `node-gyp` [Windows](https://github.com/nodejs/node-gyp/blob/main/README.md#on-windows) documentation section for a description of alternate ways of providing the `node-gyp` execution environment and for troubleshooting information.
 
@@ -382,8 +383,6 @@ Each package is responsible for building itself and testing itself and can do so
 When executing top or package level scripts, [Vite](https://vitejs.dev/) may be used to build/host parts of the application. This section is to serve as a general reference for these environment variables that may be leverage throughout the repository.
 ##### `CYPRESS_INTERNAL_VITE_DEV`
 Set to `1` if wanting to leverage [vite's](https://vitejs.dev/guide/#command-line-interface) `vite dev` over `vite build` to avoid a full [production build](https://vitejs.dev/guide/build.html).
-##### `CYPRESS_INTERNAL_VITE_INSPECT`
-Used internally to leverage [vite-plugin-inspect](https://github.com/antfu/vite-plugin-inspect) to view intermediary vite plugin state. The `CYPRESS_INTERNAL_VITE_DEV` is required for this to be applied correctly. Set to `1` to enable.
 ##### `CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING`
 Leveraged only for internal cy-in-cy type tests to access the Cypress instance from the parent frame. Please see the [E2E Open Mode Testing](./guides/e2e-open-testing.md) Guide. Set to `true` when doing
 ##### `CYPRESS_INTERNAL_VITE_APP_PORT`

@@ -1,5 +1,3 @@
-import '../cwd'
-
 import { EventEmitter } from 'events'
 import debug from 'debug'
 import * as plugins from '../plugins'

@@ -32,7 +32,7 @@ const getUsedTestsMessage = (limit: number, usedTestsMessage: string) => {
     : fmt.off('')
 }
 
-export const warnIfExplicitCiBuildId = function (ciBuildId?: string | null) {
+export const warnIfExplicitCiBuildId = function (ciBuildId?: string | null): ReturnType<typeof errPartial> | null {
   if (!ciBuildId) {
     return null
   }
@@ -1228,21 +1228,6 @@ export const AllCypressErrors = {
         
         You can safely remove this option from your config.`
   },
-  EXPERIMENTAL_RUN_ALL_SPECS_E2E_ONLY: () => {
-    const code = errPartial`
-    {
-      e2e: {
-        experimentalRunAllSpecs: true
-      },
-    }`
-
-    return errTemplate`\
-        The ${fmt.highlight(`experimentalRunAllSpecs`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalRunAllSpecs`)}.
-
-        ${fmt.code(code)}
-
-        If you have feedback about the experiment, please join the discussion here: http://on.cypress.io/run-all-specs`
-  },
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
     const code = errPartial`
     {
@@ -1560,6 +1545,21 @@ export const AllCypressErrors = {
     
     ${fmt.highlightSecondary(error)}
     `
+  },
+  SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED: (url: string) => {
+    return errTemplate`\
+        Warning: Synchronous XHR request was not intercepted: ${fmt.url(url)}. Learn more: ${fmt.url('https://on.cypress.io/synchronous-xhr-requests')}
+      `
+  },
+  SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_APPLIED: (url: string) => {
+    return errTemplate`\
+        Warning: Cookies may not have been applied to synchronous XHR request: ${fmt.url(url)}. Learn more: ${fmt.url('https://on.cypress.io/synchronous-xhr-requests')}
+      `
+  },
+  SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_SET: (url: string) => {
+    return errTemplate`\
+        Warning: Cookies may not have been set for synchronous XHR response: ${fmt.url(url)}. Learn more: ${fmt.url('https://on.cypress.io/synchronous-xhr-requests')}
+      `
   },
 } as const
 

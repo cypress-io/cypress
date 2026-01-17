@@ -14,9 +14,8 @@ import exception from '../cloud/exception'
 import { getError } from '@packages/errors'
 import type { AllCypressErrorNames } from '@packages/errors'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
-import capture from '../capture'
-import { getResolvedRuntimeConfig } from '../config'
-import env from '../util/env'
+import * as capture from '../capture'
+import * as env from '../util/env'
 import ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
 import { countStudioUsage } from '../util/spec_writer'
@@ -642,7 +641,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
       const { runUrl, runId, machineId, groupId } = resp
       const protocolCaptureMeta = resp.capture || {}
 
-      let captured = null
+      let captured: ReturnType<typeof capture.stdout> | null = null
       let instanceId = null
 
       const beforeSpecRun = () => {
@@ -754,7 +753,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
         const r = flattenSuiteIntoRunnables(runnables)
         const runtimeConfig = runnables.runtimeConfig
-        const resolvedRuntimeConfig = getResolvedRuntimeConfig(config, runtimeConfig)
+        const resolvedRuntimeConfig = { ...config, ...runtimeConfig }
 
         const tests = _.chain(r[0])
         .uniqBy('id')

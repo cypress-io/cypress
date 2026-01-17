@@ -15,7 +15,7 @@ describe('Cypress Studio - New Test Creation', () => {
   it('creates a new test from spec header', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSpecHeader: true })
 
-    inputNewTestName()
+    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
 
     cy.contains('new-test').click()
 
@@ -128,10 +128,10 @@ describe('studio functionality', () => {
   it('creates a new test for a specific suite with the url already defined', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
-    // create a new test from a specific suite
-    cy.findByTestId('create-new-test-from-suite').click()
+    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
 
-    inputNewTestName()
+    // make sure that the visit has run and we're recording studio commands
+    cy.get('[data-cy="record-button-recording"]').should('be.visible')
 
     cy.percySnapshot()
 
@@ -160,7 +160,8 @@ describe('studio functionality', () => {
     })
   })
 
-  it('creates a new test from an empty spec', () => {
+  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
+  it.skip('creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.contains('Create test with Cypress Studio').click()
@@ -206,7 +207,8 @@ it('new-test', function() {
     cy.findByTestId('studio-single-test-title').should('have.text', 'should be the only test to run normally')
   })
 
-  it('creates and runs new tests in studio mode when there is a .only test in the spec file', () => {
+  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
+  it.skip('creates and runs new tests in studio mode when there is a .only test in the spec file', () => {
     loadProjectAndRunSpec({ specName: 'spec-with-only.cy.js' })
 
     cy.get('.test').should('have.length', 1)

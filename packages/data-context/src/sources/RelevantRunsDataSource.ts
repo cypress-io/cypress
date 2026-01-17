@@ -35,7 +35,7 @@ const RELEVANT_RUN_OPERATION_DOC = gql`
   }
 `
 
-export const RUNS_EMPTY_RETURN: RelevantRun = { commitsAhead: -1, all: [], latest: [] }
+const RUNS_EMPTY_RETURN: RelevantRun = { commitsAhead: -1, all: [], latest: [] }
 
 /**
  * DataSource to encapsulate querying Cypress Cloud for runs that match a list of local Git commit shas

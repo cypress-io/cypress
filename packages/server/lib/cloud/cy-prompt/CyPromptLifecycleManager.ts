@@ -107,7 +107,9 @@ export class CyPromptLifecycleManager {
       // Clean up any registered listeners
       this.listeners = []
 
-      return { error }
+      const lastError = error instanceof AggregateError ? error.errors[error.errors.length - 1] : error
+
+      return { error: lastError }
     })
 
     this.cyPromptManagerPromise = cyPromptManagerPromise

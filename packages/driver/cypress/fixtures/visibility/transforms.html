@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Transform Visibility Tests</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./ux.js"></script>
+</head>
+<body>
+  <h1>CSS Transform Scenarios</h1>
+
+  <div class="test-section" cy-section="scaling">
+    <h3>Scaling</h3>
+    <div class="testCase" cy-expect="hidden" cy-label="Scale to zero dimensions" style="transform: scale(0,0)">
+      <span class="testCase" cy-expect="hidden" cy-label="Child of scale(0,0)">Scaling(0,0)</span>
+    </div>
+    <div class="testCase" cy-expect="visible" cy-label="Scale to normal dimensions" style="display: block; width: 100px; height: 100px; background: lightgreen;transform: scale(1,1)">
+      <span class="testCase" cy-expect="visible" cy-label="Child of scale(1,1)">Scaling(1,1)</span>
+    </div>
+    <div class="testCase" cy-expect="visible" cy-label="Scale up dimensions" style="transform: scale(2, 3)">Scaled</div>
+    
+    <!-- Individual scale axes -->
+    <div class="testCase" cy-expect="hidden" cy-label="ScaleX to zero" style="transform: scaleX(0)">ScaleX(0)</div>
+    <div class="testCase" cy-expect="hidden" cy-label="ScaleY to zero" style="transform: scaleY(0)">ScaleY(0)</div>
+    <div class="testCase" cy-expect="hidden" cy-label="ScaleZ to zero" style="transform: scaleZ(0)">ScaleZ(0)</div>
+    
+    <!-- Multiple transforms with scale to zero -->
+    <div class="testCase" cy-expect="hidden" cy-label="Multiple transforms with scale to zero" style="transform: translate(15px, 30px) skew(20deg) rotate(40deg) scale(0, 0)">Multiple transforms with scale(0,0)</div>
+  </div>
+  <div class="test-section" cy-section="translation">
+    <h3>Translation</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Translate X negative" style="transform: translateX(-10px)">
+      <span class="testCase" cy-expect="visible" cy-label="Child of translateX(-10px)">Translation(-10px)</span>
+    </div>
+    <div class="testCase" cy-expect="visible" cy-label="Translate Y positive" style="transform: translateY(10px)">
+      <span class="testCase" cy-expect="visible" cy-label="Child of translateY(10px)">Translation(10px)</span>
+    </div>
+    <div class="testCase" cy-expect="visible" cy-label="Translate 2D" style="transform: translate(10px, 15px)">Translated in 2 dimensions</div>
+    <div class="testCase" cy-expect="visible" cy-label="Translate Z" style="transform: translateZ(10px)">Translated in 3rd dimension</div>
+    <div class="testCase" cy-expect="visible" cy-label="Translate 3D" style="transform: translate3d(10px, 15px, 20px)">Translated in 3 dimensions</div>
+    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Translate outside viewport" style="transform: translateY(-9999px)">Translated outside viewport</div>
+  </div>
+  <div class="test-section" cy-section="rotation">
+    <h3>Rotation</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Rotate X axis" style="transform: rotateX(45deg)">Rotated on X axis</div>
+    <div class="testCase" cy-expect="visible" cy-label="Rotate Y axis" style="transform: rotateY(45deg)">Rotated on Y axis</div>
+    <div class="testCase" cy-expect="visible" cy-label="Rotate Z axis" style="transform: rotateZ(45deg)">Rotated on Z axis</div>
+    <div class="testCase" cy-expect="visible" cy-label="Rotate 3D" style="transform: rotate3d(1, 1, 1, 45deg)">Rotated on 3 axes</div>
+    
+    <!-- 90° rotations (which should be HIDDEN) -->
+    <div class="testCase" cy-expect="hidden" cy-label="RotateX 90deg" style="transform: rotateX(90deg)">RotateX(90deg)</div>
+    <div class="testCase" cy-expect="hidden" cy-label="RotateY 90deg" style="transform: rotateY(90deg)">RotateY(90deg)</div>
+    <div class="testCase" cy-expect="visible" cy-label="RotateZ 90deg" style="transform: rotateZ(90deg)">RotateZ(90deg)</div>
+    
+    <!-- Combined 90° rotations -->
+    <div class="testCase" cy-expect="hidden" cy-label="RotateX and RotateY 90deg" style="transform: rotateX(90deg) rotateY(90deg)">RotateX(90deg) rotateY(90deg)</div>
+    
+    <!-- Multiple transforms with 90° rotation -->
+    <div class="testCase" cy-expect="hidden" cy-label="Multiple transforms with rotateX 90deg" style="transform: rotateX(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">Multiple with rotateX(90deg)</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Multiple transforms with rotateY 90deg" style="transform: rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">Multiple with rotateY(90deg)</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Multiple transforms with rotateX and rotateY 90deg" style="transform: rotateX(90deg) rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">Multiple with rotateX(90deg) rotateY(90deg)</div>
+  </div>
+  <div class="test-section" cy-section="skew">
+    <h3>Skew</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Skew X axis" style="transform: skewX(45deg)">Skewed on X axis</div>
+    <div class="testCase" cy-expect="visible" cy-label="Skew Y axis" style="transform: skewY(45deg)">Skewed on Y axis</div>
+    <div class="testCase" cy-expect="visible" cy-label="Skew 2D" style="transform: skew(15deg, 15deg)">Skewed on 2 axes</div>
+  </div>
+  <div class="test-section" cy-section="matrix">
+    <h3>Matrix</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Identity matrix 2D" style="transform: matrix(1, 0, 0, 1, 0, 0)">Matrix(1, 0, 0, 1, 0, 0)</div>
+    <div class="testCase" cy-expect="visible" cy-label="Identity matrix 3D" style="transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)">Matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)</div>
+  </div>
+  <div class="test-section" cy-section="perspective">
+    <h3>Perspective</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Perspective only" style="transform: perspective(100px)">Perspective(100px)</div>
+    <div class="testCase" cy-expect="visible" cy-label="Perspective with translateZ" style="transform: perspective(100px) translateZ(10px);background:lightgreen;">Perspective(100px) translateZ(10px)</div>
+    <div class="testCase" cy-expect="visible" cy-label="Perspective with rotateX" style="transform: perspective(100px) rotateX(45deg);background:lightgreen;">Perspective(100px) rotateX(45deg)</div>
+    <div class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" cy-label="Perspective with rotateY" style="transform: perspective(100px) rotateY(45deg); background:red;">Perspective(100px) rotateY(45deg)</div>
+    <div class="testCase" cy-expect="visible" cy-label="Perspective with rotateZ" style="transform: perspective(100px) rotateZ(45deg); background:lightgreen;">Perspective(100px) rotateZ(45deg)</div>
+  </div>
+  <div class="test-section" cy-section="multiple">
+    <h3>Multiple</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Multiple 2D transforms" style="transform: scale(2, 3) translate(1px, 1px) rotate(45deg) skew(15deg, 15deg) perspective(100px);width: 100px;height: 100px;background: lightgreen;">Multiple transforms</div>
+  </div>
+  <div class="test-section" cy-section="multiple-3d">
+    <h3>Multiple 3D</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Multiple 3D transforms" style="transform: scale3d(2, 3, 4) translate3d(10px, 15px, 20px) rotate3d(1, 1, 1, 45deg) skew3d(45deg, 45deg, 45deg) perspective3d(100px)">Multiple 3D transforms</div>
+  </div>
+
+  <div class="test-section" cy-section="transform-edge-cases">
+    <h3>Transform Edge Cases</h3>
+    
+    <!-- Transform with text content -->
+    <div class="testCase" cy-expect="visible" cy-label="Transform with text content" style="transform: translate(10px, 10px)">Translated with text</div>
+    <div class="testCase" cy-expect="visible" cy-label="Transform with skew only" style="transform: skew(10deg, 15deg)">Skewed with text</div>
+    <div class="testCase" cy-expect="visible" cy-label="Transform with rotation only" style="transform: rotate(20deg)">Rotated with text</div>
+    
+    <!-- Transform with zero dimensions but text content -->
+    <div class="testCase" cy-expect="visible" cy-label="Transform with zero height but text content" style="transform: translate(0, 0); height: 0;">Text content</div>
+    <div class="testCase" cy-expect="visible" cy-label="Transform with zero width but text content" style="transform: rotateX(30deg); width: 0;">Text content</div>
+    
+    <!-- Transform with zero dimensions and overflow -->
+    <div class="testCase" cy-expect="hidden" cy-label="ScaleX(0) with height and overflow hidden" style="transform: scaleX(0); height: 10px; overflow: hidden">
+      <p class="testCase" cy-expect="hidden" cy-label="Child of scaleX(0) with overflow hidden">Test</p>
+    </div>
+    
+    <!-- Transform with zero dimensions and overflow (different axes) -->
+    <div class="testCase" cy-expect="hidden" cy-label="Height 0 + transform + overflow hidden" style="height: 0px; transform: translate(1, 2); overflow: hidden">
+      <p class="testCase" cy-expect="hidden" cy-label="Child with height 0 + transform + overflow hidden">Test</p>
+    </div>
+    <div class="testCase" cy-expect="hidden" cy-label="Height 0 + transform + overflow-x hidden" style="height: 0px; transform: translate(1, 2); overflow-x: hidden">
+      <p class="testCase" cy-expect="hidden" cy-label="Child with height 0 + transform + overflow-x hidden">Test</p>
+    </div>
+    <div class="testCase" cy-expect="hidden" cy-label="Height 0 + transform + overflow-y hidden" style="height: 0px; transform: translate(1, 2); overflow-y: hidden">
+      <p class="testCase" cy-expect="hidden" cy-label="Child with height 0 + transform + overflow-y hidden">Test</p>
+    </div>
+    <div class="testCase" cy-expect="hidden" cy-label="Width 0 + transform + overflow hidden" style="width: 0px; transform: translate(1, 2); overflow: hidden">
+      <p class="testCase" cy-expect="hidden" cy-label="Child with width 0 + transform + overflow hidden">Test</p>
+    </div>
+    <div class="testCase" cy-expect="hidden" cy-label="Width 0 + transform + overflow-x hidden" style="width: 0px; transform: translate(1, 2); overflow-x: hidden">
+      <p class="testCase" cy-expect="hidden" cy-label="Child with width 0 + transform + overflow-x hidden">Test</p>
+    </div>
+    <div class="testCase" cy-expect="hidden" cy-label="Width 0 + transform + overflow-y hidden" style="width: 0px; transform: translate(1, 2); overflow-y: hidden">
+      <p class="testCase" cy-expect="hidden" cy-label="Child with width 0 + transform + overflow-y hidden">Test</p>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="backface-visibility">
+    <h3>Backface Visibility</h3>
+    <div class="testCase" cy-expect="hidden" cy-label="RotateX 180deg with hidden backface" style="transform: rotateX(180deg); backface-visibility: hidden">Backface hidden on X axis</div>
+    <div class="testCase" cy-expect="hidden" cy-label="RotateY 180deg with hidden backface" style="transform: rotateY(180deg); backface-visibility: hidden">Backface hidden on Y axis</div>
+    <div class="testCase" cy-expect="visible" cy-label="RotateZ 180deg with hidden backface" style="transform: rotateZ(180deg); backface-visibility: hidden">Backface hidden on Z axis</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Rotate3d 180deg with hidden backface" style="transform: rotate3d(1, 1, 1, 180deg); backface-visibility: hidden">Backface hidden on 3 axes</div>
+    <div class="testCase" cy-expect="visible" cy-label="RotateX 180deg with visible backface" style="transform: rotateX(180deg); backface-visibility: visible">Backface visible</div>
+    <div class="testCase" cy-expect="visible" cy-label="RotateY 45deg with hidden backface and no preserve-3d" style="transform: rotateY(45deg); backface-visibility: hidden;">
+      <div class="testCase" cy-expect="visible" cy-label="Nested rotateY 45deg with hidden backface but no preserve-3d" style="transform: rotateY(45deg); backface-visibility: hidden">Backface hidden on Y axis</div>
+    </div>
+    <div class="testCase" cy-expect="visible" cy-label="RotateY 45deg with visible backface and preserve-3d" style="transform: rotateY(45deg); backface-visibility: visible; transform-style: preserve-3d;">
+      <div>RotateY(45deg) with visible backface and preserve-3d</div>
+      <div class="testCase" cy-expect="hidden" cy-label="Nested rotateY 45deg with hidden backface and preserve-3d" style="transform: rotateY(45deg); backface-visibility: hidden; transform-style: preserve-3d">Backface hidden on Y axis</div>
+     
+      <div class="testCase" cy-expect="visible" cy-label="Nested rotateY -90deg with hidden backface and preserve-3d" style="transform: rotateY(-90deg); backface-visibility: hidden; transform-style: preserve-3d">Backface visible on Y axis</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         ## If you are a customer of Cypress Cloud please utilize our [Support Portal](https://www.cypress.io/support/) for our fastest support!
-        
+
         ### Have a question? 👉 [Ask in chat](https://on.cypress.io/chat) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).
 
         If you're behind a corporate proxy, make sure to [configure it properly](https://on.cypress.io/proxy-configuration) before install.
@@ -14,7 +14,7 @@ body:
     id: current-behavior
     attributes:
       label: Current behavior
-      description: Please provide a description including screenshots, stack traces, DEBUG logs, etc. [Troubleshooting tips](https://on.cypress.io/troubleshooting)
+      description: Please provide a description including screenshots, stack traces, DEBUG logs, etc. [Troubleshooting tips](https://docs.cypress.io/app/references/troubleshooting)
       placeholder: When I try to download Cypress...
     validations:
       required: true
@@ -22,7 +22,7 @@ body:
     id: debug-logs
     attributes:
       label: Debug logs
-      description: Include DEBUG logs setting [`DEBUG=cypress:*`](https://on.cypress.io/troubleshooting#Print-DEBUG-logs/). Include npm/yarn logs if applicable.
+      description: Include DEBUG logs setting [`DEBUG=cypress:*`](https://docs.cypress.io/app/references/troubleshooting#Print-DEBUG-logs/). Include npm/yarn logs if applicable.
       placeholder: Debug logs
       render: Text
   - type: input

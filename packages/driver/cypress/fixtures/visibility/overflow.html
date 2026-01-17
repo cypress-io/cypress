@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Overflow Visibility Tests</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./ux.js"></script>
+</head>
+<body cy-has-conflicts="true">
+  <h1>Overflow Visibility Tests</h1>
+
+  <div class="test-section" cy-section="zero-dimensions-with-overflow-hidden">
+    <h3>Zero Dimensions with Overflow Hidden</h3>
+    
+    <!-- Zero width ancestor, parent, self -->
+    <div class="testCase" cy-expect="hidden" cy-label="Zero width ancestor, parent, self" style="width: 0; height: 100px; overflow: hidden; background: lightcoral;">
+      <div class="testCase" cy-expect="hidden" cy-label="Zero width parent" style="width: 0; height: 100px; overflow: hidden; background: lightcoral;">
+        <span class="testCase" cy-expect="hidden" cy-label="Zero width self">Zero width ancestor, parent, self</span>
+      </div>
+    </div>
+
+    <!-- Zero height ancestor, parent, self -->
+    <div class="testCase" cy-expect="hidden" cy-label="Zero height ancestor, parent, self" style="width: 100px; height: 0; overflow: hidden; background: lightcoral;">
+      <div class="testCase" cy-expect="hidden" cy-label="Zero height parent" style="width: 100px; height: 0; overflow: hidden; background: lightcoral;">
+        <span class="testCase" cy-expect="hidden" cy-label="Zero height self">Zero height ancestor, parent, self</span>
+      </div>
+    </div>
+
+    <!-- Zero width ancestor, positive parent, self -->
+    <div class="testCase" cy-expect="hidden" cy-label="Zero width ancestor with positive parent" style="width: 0; height: 100px; overflow: hidden; background: lightcoral;">
+      <div class="testCase" cy-expect="hidden" cy-label="Positive parent under zero width ancestor" style="width: 100px; height: 100px; overflow: hidden; background: lightcoral;">
+        <span class="testCase" cy-expect="hidden" cy-label="Self under zero width ancestor">Zero width ancestor, positive parent</span>
+      </div>
+    </div>
+
+    <!-- Zero height ancestor, positive parent, self -->
+    <div class="testCase" cy-expect="hidden" cy-label="Zero height ancestor with positive parent" style="width: 100px; height: 0; overflow: hidden; background: lightcoral;">
+      <div class="testCase" cy-expect="hidden" cy-label="Positive parent under zero height ancestor" style="width: 100px; height: 100px; overflow: hidden; background: lightcoral;">
+        <span class="testCase" cy-expect="hidden" cy-label="Self under zero height ancestor">Zero height ancestor, positive parent</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="text-content-with-zero-dimensions">
+    <h3>Text Content with Zero Dimensions</h3>
+    
+    <!-- Self with text content, zero width -->
+    <div class="testCase" cy-expect="visible" cy-label="Self with text content and zero width" style="width: 0; height: 100px; background: lightgreen;">
+      lorem ipsum dolor sit amet
+    </div>
+
+    <!-- Self with text content, zero height -->
+    <div class="testCase" cy-expect="visible" cy-label="Self with text content and zero height" style="width: 50px; height: 0px; background: lightgreen;">
+      lorem ipsum dolor sit amet
+    </div>
+
+    <!-- Self with whitespace only, zero width -->
+    <div class="testCase" cy-expect="hidden" cy-label="Self with only whitespace content and zero width" style="width: 0px; height: 50px; background: lightcoral;">
+      
+    </div>
+
+    <!-- Ancestor with text content, zero width -->
+    <div class="testCase" cy-expect="visible" cy-label="Ancestor with text content and zero width" style="width: 0; height: 100px; background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Parent under zero width ancestor with text">
+        <span class="testCase" cy-expect="visible" cy-label="Self under zero width ancestor with text">ancestor width: 0</span>
+      </div>
+    </div>
+
+    <!-- Ancestor with text content, zero height -->
+    <div class="testCase" cy-expect="visible" cy-label="Ancestor with text content and zero height" style="width: 100px; height: 0px; background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Parent under zero height ancestor with text">
+        <span class="testCase" cy-expect="visible" cy-label="Self under zero height ancestor with text">ancestor height: 0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="positive-dimensions-with-overflow-hidden">
+    <h3>Positive Dimensions with Overflow Hidden</h3>
+    
+    <!-- Positive ancestor, parent, self -->
+    <div class="testCase" cy-expect="visible" cy-label="Positive ancestor with overflow hidden parent" style="width: 100px; height: 100px; background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Positive parent with overflow hidden" style="width: 100px; height: 100px; overflow: hidden; background: lightgreen;">
+        <span class="testCase" cy-expect="visible" cy-label="Self under positive dimensions with overflow hidden">ancestor with size, parent with size &amp; overflow: hidden</span>
+      </div>
+    </div>
+
+    <!-- Positive ancestor, zero parent, self -->
+    <div class="testCase" cy-expect="visible" cy-label="Positive ancestor with zero width parent" style="width: 100px; height: 100px; background: lightgreen;">
+      <div class="testCase" cy-expect="hidden" cy-label="Zero width parent under positive ancestor" style="width: 0; height: 100px; overflow: hidden; background: lightcoral;">
+        <span class="testCase" cy-expect="hidden" cy-label="Self under zero width parent">positive ancestor, zero parent</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="overflow-auto-with-zero-dimensions">
+    <h3>Overflow Auto with Zero Dimensions</h3>
+    
+    <!-- Zero dimensions with overflow auto -->
+    <div class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" cy-label="Zero dimensions with overflow auto" style="width: 0; height: 0px; overflow: auto; background: lightgreen;">
+      <span class="testCase" cy-expect="hidden" cy-label="Self under zero dimensions with overflow auto">parent no size, overflow: auto</span>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="mixed-dimension-scenarios">
+    <h3>Mixed Dimension Scenarios</h3>
+    
+    <!-- Zero width, positive height -->
+    <div class="testCase" cy-expect="visible" cy-label="Zero width with text content" style="width: 0; height: 100px; background: lightgreen;">Zero width</div>
+    
+    <div class="testCase" cy-expect="visible" cy-label="Zero width with text content (blue)" style="width: 0; height: 100px; background: lightgreen;">Has text content</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Zero width with whitespace only" style="width: 0; height: 50px; background: lightcoral;">      </div>
+
+    <div class="testCase" cy-expect="hidden" cy-label="Zero height without text content" style="width: 100px; height: 0; background: lightcoral;"></div>
+    <div class="testCase" cy-expect="visible" cy-label="Zero height with text content" style="width: 100px; height: 0; background: lightgreen;">Has text content</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Zero height with whitespace only" style="width: 50px; height: 0; background: lightcoral;">        </div>
+
+    <div style="width: 10; height: 10; background: lightyellow">
+      <div class="testCase" cy-expect="hidden" cy-label="Zero dimensions without content" style="width:0; height:0"></div>
+    </div>
+  </div>
+  <div class="test-section" cy-section="overflow-hidden">
+    <h3>Overflow Hidden scenarios</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Overflow hidden with positive dimensions" style="width: 100px; height: 100px; overflow: hidden; background: lightgreen; position:relative;">
+      <div class="testCase" cy-expect="hidden" cy-label="Element out of bounds left" style="width:100px; height:100px; background: lightcoral; position:absolute; left: 100px"></div>
+      <div class="testCase" cy-expect="hidden" cy-label="Element out of bounds right" style="width:100px; height:100px; background: lightcoral; position:absolute; right: 100px"></div>
+      <div class="testCase" cy-expect="hidden" cy-label="Element out of bounds top" style="width:100px; height:100px; background: lightcoral; position:absolute; top: 100px"></div>
+      <div class="testCase" cy-expect="hidden" cy-label="Element out of bounds bottom" style="width:100px; height:100px; background: lightcoral; position:absolute; bottom: 100px"></div>
+      <div class="testCase" cy-expect="visible" cy-label="Element in bounds" style="width:50px; height:50px; background: lightgreen; position:absolute; left: 50px; top: 50px;"></div>
+    </div>
+  </div>
+  <div class="test-section" cy-section="overflow-y-hidden">
+    <h3>Overflow Y Hidden scenarios</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Overflow y hidden with positive dimensions" style="width: 100px; height: 100px; overflow-y: hidden; background: lightgreen; position:relative;">
+      <div class="testCase" cy-expect="hidden" cy-label="Element out of bounds top" style="width:100px; height:100px; background: lightcoral; position:absolute; top: 100px"></div>
+      <div class="testCase" cy-expect="hidden" cy-label="Element out of bounds bottom" style="width:100px; height:100px; background: lightcoral; position:absolute; bottom: 100px"></div>
+      <div class="testCase" cy-expect="visible" cy-label="Element in bounds" style="width:50px; height:50px; background: lightgreen; position:absolute; left: 50px; top: 50px;"></div>
+    </div>
+  </div>
+  <div class="test-section" cy-section="overflow-x-hidden">
+    <h3>Overflow X Hidden scenarios</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Overflow x hidden with positive dimensions" style="width: 100px; height: 100px; overflow-x: hidden; background: lightgreen; position:relative;">
+      <div class="testCase" cy-expect="hidden" cy-label="Element out of bounds left" style="width:100px; height:100px; background: lightcoral; position:absolute; left: 100px"></div>
+      <div class="testCase" cy-expect="hidden" cy-label="Element out of bounds right" style="width:100px; height:100px; background: lightcoral; position:absolute; right: 100px"></div>
+      <div class="testCase" cy-expect="visible" cy-label="Element in bounds" style="width:50px; height:50px; background: lightgreen; position:absolute; left: 50px; top: 50px;"></div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="overflow-auto-scenarios">
+    <h3>Overflow Auto Scenarios</h3>
+    
+    <!-- Overflow auto with wide parent -->
+    <div class="testCase" cy-expect="visible" cy-label="Overflow auto container with wide parent" style="width: 100px; height: 100px; overflow: auto; background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Wide parent container" style="width: 1000px; height: 100px; position: relative;">
+        <span class="testCase" cy-expect="hidden" cy-label="Element out of bounds with ancestor overflow auto" style="position: absolute; left: 300px; top: 0px;">out of bounds, parent wide, ancestor overflow: auto</span>
+      </div>
+    </div>
+
+    <!-- Overflow auto with zero dimensions -->
+    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Zero dimensions with overflow auto" style="width: 0; height: 0px; overflow: auto; background: lightgreen;">
+      <span class="testCase" cy-expect="hidden" cy-label="Child under zero dimensions with overflow auto">parent no size, overflow: auto</span>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="overflow-scroll-scenarios">
+    <h3>Overflow Scroll Scenarios</h3>
+    
+    <!-- Overflow scroll out of bounds -->
+    <div class="testCase" cy-expect="visible" cy-label="Overflow scroll container" style="width: 100px; height: 100px; overflow: scroll; position: relative; background: lightgreen;">
+      <div class="testCase" cy-expect="hidden" cy-label="Parent container in scroll scenario">
+        <div class="testCase" cy-expect="hidden" cy-label="Child container in scroll scenario">
+          <span class="testCase" cy-expect="hidden" cy-label="Element out of scrolling bounds" style="position: absolute; left: 300px; top: 0px;">out of scrolling bounds, position: absolute</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="overflow-relative-positioning">
+    <h3>Overflow with Relative Positioning</h3>
+    
+    <!-- Overflow hidden with relative positioning -->
+    <div class="testCase" cy-expect="visible" cy-label="Overflow hidden container" style="overflow: hidden; background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Parent container">
+        <span class="testCase" cy-expect="hidden" cy-label="Relatively positioned element out of bounds" style="position: relative; left: 0; top: -200px;">out of bounds, position: relative</span>
+      </div>
+    </div>
+
+    <!-- Overflow visible with relative positioning -->
+    <div class="testCase" cy-expect="visible" cy-label="Overflow visible container" style="background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Parent container">
+        <span class="testCase" cy-expect="visible" cy-label="Relatively positioned element out of bounds but visible" style="position: relative; left: 0; top: 100px;">out of bounds but visible, position: relative</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="overflow-flex-container">
+    <h3>Overflow with Flex Container</h3>
+    
+    <!-- Flex container with overflow hidden -->
+    <div class="testCase" cy-expect="visible" cy-label="Flex container with overflow hidden" style="display: flex; overflow: hidden; background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Flex item 1" id="red" style="flex: 0 0 80%; background-color: lightgreen;">red</div>
+      <div class="testCase" cy-expect="visible" cy-label="Flex item 2" id="green" style="flex: 0 0 80%; background-color: lightgreen;">green</div>
+      <div class="testCase" cy-expect="hidden" cy-label="Flex item 3 out of bounds" id="blue" style="background-color: lightcoral;">blue</div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="overflow-complex-scenarios">
+    <h3>Complex Overflow Scenarios</h3>
+    
+    <!-- Overflow auto with flex layout -->
+    <div class="testCase" cy-expect="visible" cy-label="Flex layout with overflow auto" style="height: 200px; position: relative; display: flex; background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Flex item with border" style="border: 5px solid red;">
+        <div class="testCase" cy-expect="visible" cy-label="Overflow auto container" id="breaking-container" style="overflow: auto; border: 5px solid green;">
+          <div class="testCase" cy-expect="visible" cy-label="Content container">
+            <h3 class="testCase" cy-expect="visible" cy-label="Heading">Example</h3>
+            <div class="testCase" cy-expect="visible" cy-label="Absolute positioned container" style="position: absolute; bottom: 5px;">
+              <button class="testCase" cy-expect="visible" cy-label="Relatively positioned button" id="visible-button" style="position: relative;">Try me</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid layout with overflow-y auto -->
+    <div class="testCase" cy-expect="visible" cy-label="Grid layout with overflow-y auto" style="display: grid; grid-template-columns: 332px 1fr; grid-template-rows: 62px 1fr; background: lightgreen;">
+      <div class="testCase" cy-expect="visible" cy-label="Grid item with overflow-y auto" style="overflow-y: auto;">
+        <div class="testCase" cy-expect="visible" cy-label="Relative positioned container" style="height: 297px; position: relative;">
+          <div class="testCase" cy-expect="visible" cy-label="Absolute positioned item 1" style="height: 96px; position: absolute; left: 0; top: 0;">
+            <a class="testCase" cy-expect="visible" cy-label="Link 1" href="">test test-1</a>
+          </div>
+          <div class="testCase" cy-expect="hidden" cy-label="Absolute positioned item 2" style="height: 36px; position: absolute; left: 0; top: 96px; background-color: lightcoral;">
+            <a class="testCase" cy-expect="hidden" cy-label="Link 2" href="">test test-2</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section" cy-section="clip-path-scenarios">
+    <h3>Clip-Path Scenarios (note: legacy mode does not support clip-path)</h3>
+    
+    <!-- Clip-path polygon that clips everything -->
+    <div class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" cy-label="Parent with clip-path polygon that clips everything" style="position: relative; clip-path: polygon(0 0, 0 0, 0 0, 0 0); background: lightgreen;">
+      <span class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" cy-label="Element outside clip-path polygon" style="background: lightcoral;">clip-path child of polygon that clips everything</span>
+    </div>
+
+    <!-- Clip-path circle that shows everything -->
+    <div class="testCase" cy-expect="visible" cy-label="Parent with clip-path circle" style="position: relative; clip-path: circle(100%);">
+      <span class="testCase" cy-expect="visible" cy-label="Element inside clip-path circle" style="background: lightgreen;">clip-path</span>
+    </div>
+
+    <!-- Clip-path inset that clips content -->
+    <div class="testCase" cy-expect="visible" cy-label="Parent with clip-path inset" style="position: relative; clip-path: inset(25% 25% 25% 25%);">
+      <span class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" cy-label="Element outside clip-path inset" style="background: lightcoral;">clipped content</span>
+    </div>
+
+    <!-- Clip-path with complex polygon -->
+    <div class="testCase" cy-expect="visible" cy-label="Parent with complex clip-path" style="position: relative; clip-path: polygon(0% 0%, 100% 0%, 50% 100%);">
+      <span class="testCase" cy-expect="visible" cy-label="Element inside complex clip-path" style="background: lightgreen;">visible content</span>
+    </div>
+
+    <!-- Clip-path with ellipse -->
+    <div class="testCase" cy-expect="visible" cy-label="Parent with clip-path ellipse" style="position: relative; clip-path: ellipse(50% 50% at 50% 50%);">
+      <span class="testCase" cy-expect="visible" cy-label="Element inside clip-path ellipse" style="background: lightgreen;">elliptical content</span>
+    </div>
+
+    <!-- Clip-path with path (SVG path) -->
+    <div class="testCase" cy-expect="visible" cy-label="Parent with clip-path path" style="position: relative; clip-path: path('M 0 0 L 100 0 L 100 100 L 0 100 Z');">
+      <span class="testCase" cy-expect="visible" cy-label="Element inside clip-path path" style="background: lightgreen;">path content</span>
+    </div>
+
+    <!-- CSS clip property -->
+    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Element clipped by CSS clip property" style="position: absolute; clip: rect(0, 0, 0, 0); background: lightcoral; width: 100px; height: 100px;">clipped by clip: rect(0,0,0,0)</div>
+
+    <!-- CSS mask property note: this yields an element that is not rendered as visible, but has a box model that is visible and is clickable -->
+    <div class="testCase" cy-expect="visible" cy-label="Element masked by CSS mask" style="width: 100px; height: 100px; background: lightcoral; mask: linear-gradient(black, black); mask-size: 0 0;">masked by CSS mask</div>
+  </div>
+
+  <div cy-section="viewport-scenarios">
+    <h3>Viewport Scenarios</h3>
+    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Position absolute element outside viewport" style="position: absolute; top: -100px; left: -100px; width: 100px; height: 100px; background: lightcoral;">Element outside viewport</div>
+    <div class="testCase" cy-expect="hidden" cy-label="Position fixed element outside of viewport" style="position: fixed; top: -100px; left: -100px; width: 100px; height: 100px; background: lightcoral;">Position fixed element outside of viewport</div>
+    <iframe style="display:none;">
+      <body>
+        <div class="testCase" cy-expect="hidden" cy-label="Element inside hidden iframe" style="width: 100px; height: 100px; background: lightcoral;">Element inside hidden iframe</div>
+      </body>
+    </iframe>
+  </div>
+</body>
+</html>

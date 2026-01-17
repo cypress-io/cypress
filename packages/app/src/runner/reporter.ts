@@ -7,7 +7,7 @@ import { useRunnerUiStore } from '../store/runner-ui-store'
 let hasInitializeReporter = false
 let reactDomRoot: any = null
 
-export function setInitializedReporter (val: boolean) {
+function setInitializedReporter (val: boolean) {
   hasInitializeReporter = val
 }
 

@@ -5,6 +5,7 @@ import ffmpeg from 'fluent-ffmpeg'
 import stream from 'stream'
 import Bluebird from 'bluebird'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg'
+import { path as ffprobePath } from '@ffprobe-installer/ffprobe'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
 import type { ProcessOptions, WriteVideoFrame } from '@packages/types'
@@ -17,6 +18,7 @@ const debugFrames = Debug('cypress-verbose:server:video:frames')
 debug('using ffmpeg from %s', ffmpegPath)
 
 ffmpeg.setFfmpegPath(ffmpegPath)
+ffmpeg.setFfprobePath(ffprobePath)
 
 const deferredPromise = function () {
   let reject
@@ -89,22 +91,6 @@ export function getChapters (fileName) {
 
       resolve(metadata)
     })
-  })
-}
-
-export function copy (src, dest) {
-  debug('copying from %s to %s', src, dest)
-
-  return fs
-  .copy(src, dest, { overwrite: true })
-  .catch((err) => {
-    if (err.code === 'ENOENT') {
-      debug('caught ENOENT error on copy, ignoring %o', { src, dest, err })
-
-      return
-    }
-
-    throw err
   })
 }
 

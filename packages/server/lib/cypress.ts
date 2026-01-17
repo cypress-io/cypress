@@ -1,5 +1,3 @@
-require('./environment')
-
 // we are not requiring everything up front
 // to optimize how quickly electron boots while
 // in dev or linux production. the reasoning is
@@ -9,13 +7,13 @@ require('./environment')
 // essentially do it all again when we boot the correct
 // mode.
 
-import Promise from 'bluebird'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import argsUtils from './util/args'
 import { telemetry } from '@packages/telemetry'
 import { getCtx, hasCtx } from '@packages/data-context'
 import { warning as errorsWarning } from './errors'
+import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
 const debug = Debug('cypress:server:cypress')
@@ -103,7 +101,7 @@ export = {
     // wrap all of this in a promise to force the
     // promise interface - even if it doesn't matter
     // in dev mode due to cp.spawn
-    return Promise.try(() => {
+    return Promise.resolve().then(() => {
       // if we have the electron property on versions
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
@@ -141,7 +139,7 @@ export = {
         debug('electron open arguments %o', args)
 
         // const mainEntryFile = require.main.filename
-        const serverMain = require('./cwd')()
+        const serverMain = getCwd()
 
         return cypressElectron.open(serverMain, args, fn)
       })
@@ -285,7 +283,7 @@ export = {
           return exit(results.totalFailed ?? 0)
         }
         default: {
-            throw new Error(`Cannot start. Invalid mode: '${mode}'`)
+          throw new Error(`Cannot start. Invalid mode: '${mode}'`)
         }
       }
     } catch (err) {

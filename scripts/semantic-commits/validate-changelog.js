@@ -6,7 +6,7 @@ const hasUserFacingChange = (type) => Object.keys(userFacingChanges).includes(ty
 
 /**
  * Formats the resolved message that is appended to the changelog entry to indicate what
- * issues where addressed by a given change. If no issues are addressed, it references the
+ * issues were addressed by a given change. If no issues are addressed, it references the
  * pull request which made the change.
  */
 function _getResolvedMessage (semanticType, prNumber, associatedIssues = []) {
@@ -55,7 +55,7 @@ function _printChangeLogExample (semanticType, prNumber, associatedIssues = []) 
 }
 
 /**
- * Ensures the changelog entry was added to the correct changelog section given it's semantic commit type
+ * Ensures the changelog entry was added to the correct changelog section given its semantic commit type
  * and that it includes the correct reference(s) to the issue(s) or pull request the commit addressed.
  */
 function _validateEntry (changelog, { commitMessage, prNumber, semanticType, associatedIssues }) {
@@ -122,7 +122,7 @@ const _handleErrors = (errors) => {
 }
 
 /**
- * Determines if the Cypress changelog has the correct next version and changelog entires given the provided
+ * Determines if the Cypress changelog has the correct next version and changelog entries given the provided
  * list of commits.
  *
  * Can be skipped by setting the SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES
@@ -143,7 +143,7 @@ async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, c
   const hasUserFacingCommits = commits.some(({ semanticType }) => hasUserFacingChange(semanticType))
 
   if (!hasUserFacingCommits) {
-    console.log('Does not contain any user-facing changes that impacts the next Cypress release.')
+    console.log('Does not contain any user-facing changes that impact the next Cypress release.')
 
     return []
   }
@@ -156,7 +156,7 @@ async function validateChangelog ({ changedFiles, nextVersion, pendingRelease, c
   let errors = []
 
   if (binaryFiles.length === 0) {
-    console.log('Does not contain changes that impacts the next Cypress release.')
+    console.log('Does not contain changes that impact the next Cypress release.')
 
     return []
   }

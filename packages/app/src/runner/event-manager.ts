@@ -477,7 +477,15 @@ export class EventManager {
     return getRunnerConfigFromWindow()?.browser?.family === family
   }
 
-  initialize ($autIframe: JQuery<HTMLIFrameElement>, config: Record<string, any>) {
+  initialize ({
+    $autIframe,
+    $autSnapshotIframe,
+    config,
+  }: {
+    $autIframe: JQuery<HTMLIFrameElement>
+    $autSnapshotIframe?: JQuery<HTMLIFrameElement>
+    config: Record<string, any>
+  }) {
     performance.mark('initialize-start')
 
     const testFilter = this.specStore.testFilter
@@ -507,6 +515,7 @@ export class EventManager {
 
     return Cypress.initialize({
       $autIframe,
+      $autSnapshotIframe,
       // defining this indicates that the test run should wait for Studio to
       // be initialized before running the test
       waitForStudio: isStudio ? waitForStudio : undefined,
@@ -554,7 +563,7 @@ export class EventManager {
             // if we have a currentId it means
             // we need to tell the Cypress to skip
             // ahead to that test
-            Cypress.runner.resumeAtTest(runState.currentId, runState.emissions)
+            Cypress.runner.resumeAtTest(runState.currentId, runState.currentRetry, runState.emissions)
           }
 
           return run()
@@ -582,6 +591,8 @@ export class EventManager {
 
     Cypress.on('collect:run:state', () => {
       if (Cypress.config('hideCommandLog')) {
+        // TODO: Need more refactoring to use native Promise here since
+        // this goes to events.emitThen = map(Bluebird.map) which expect a Bluebird promise
         return Bluebird.resolve()
       }
 

@@ -44,7 +44,7 @@ export function createWebsocket (config: Cypress.Config) {
   return ws
 }
 
-export function initializeEventManager (UnifiedRunner: any) {
+function initializeEventManager (UnifiedRunner: any) {
   if (!window.ws) {
     throw Error('Need window.ws to exist before initializing event manager')
   }
@@ -187,7 +187,7 @@ function teardownSpec (isRerun: boolean = false) {
  * This will teardown the reporter, event manager, and
  * any associated events.
  */
-export async function teardown () {
+async function teardown () {
   UnifiedReporterAPI.setInitializedReporter(false)
   _eventManager?.stop()
   await _eventManager?.teardown(getMobxRunnerStore())
@@ -240,7 +240,10 @@ function runSpecCT (config, spec: SpecFile) {
 
   // create new AUT
   const autIframe = getAutIframeModel()
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+
+  const { autIframe: $autIframe } = autIframe.create()
+
+  $autIframe.appendTo($container)
 
   // the iframe controller will forward the specpath via header to the devserver.
   // using a query parameter allows us to recognize relative requests and proxy them to the devserver.
@@ -255,7 +258,7 @@ function runSpecCT (config, spec: SpecFile) {
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config)
+  getEventManager().initialize({ $autIframe, config })
 }
 
 /**
@@ -302,7 +305,10 @@ async function runSpecE2E (config, spec: SpecFile) {
   // create new AUT
   const autIframe = getAutIframeModel()
 
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+  const { autIframe: $autIframe, autSnapshotIframe: $autSnapshotIframe } = autIframe.create()
+
+  $autIframe.appendTo($container)
+  $autSnapshotIframe.appendTo($container)
 
   // Remove the spec bridge iframe
   document.querySelectorAll('iframe.spec-bridge-iframe').forEach((el) => {
@@ -327,7 +333,7 @@ async function runSpecE2E (config, spec: SpecFile) {
   })
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config)
+  getEventManager().initialize({ $autIframe, $autSnapshotIframe, config })
 }
 
 /**

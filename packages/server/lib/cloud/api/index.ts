@@ -37,9 +37,11 @@ import type { CreateInstanceRequestBody, CreateInstanceResponse } from './create
 import { transformError } from './axios_middleware/transform_error'
 import { DecryptionError } from './cloud_request_errors'
 import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
+import { filterRuntimeConfigForRecording } from '../../config'
 
 const debug = debugModule('cypress:server:cloud:api')
 const debugProtocol = debugModule('cypress:server:protocol')
+const debugVerbose = debugModule('cypress-verbose:server:cloud:api')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -78,7 +80,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
   if (params.cacheable && (resp = getCachedResponse(params))) {
     debug('resolving with cached response for %o', { url: params.url })
 
-    return Bluebird.resolve(resp)
+    return Promise.resolve(resp)
   }
 
   _.defaults(params, {
@@ -164,7 +166,8 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
       cacheResponse(resp, params)
     }
 
-    return debug('response %o', resp)
+    debug(`${params.method} ${params.url} response received`)
+    debugVerbose('response: %o', resp)
   })
 })
 
@@ -255,7 +258,7 @@ function noProxyPreflightTimeout (): number {
   }
 }
 
-export type CreateRunOptions = {
+type CreateRunOptions = {
   projectRoot: string
   ci: {
     params: string
@@ -504,7 +507,7 @@ export default {
   },
 
   postInstanceTests (options) {
-    const { instanceId, runId, timeout, ...body } = options
+    const { instanceId, runId, timeout, config, ...body } = options
 
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
@@ -517,7 +520,10 @@ export default {
           'x-cypress-run-id': runId,
           'x-cypress-request-attempt': attemptIndex,
         },
-        body,
+        body: {
+          ...body,
+          config: filterRuntimeConfigForRecording(config ?? {}),
+        },
       })
       .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)

@@ -11,6 +11,8 @@ when:
         matches:
             pattern: /^develop/
             value: << pipeline.git.branch >>
+    - not:
+        equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
 jobs:
   - node_modules_install:
@@ -31,6 +33,10 @@ jobs:
         branches:
           only: /^pull\/[0-9]+/
   - check-ts:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+  - health-check:
       requires:
         - internal-pr-build
         - external-pr-build
@@ -63,7 +69,7 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - verify-release-readiness:
-      context: test-runner:npm-release
+      context: [test-runner:npm-release, org-npm-credentials]
       requires:
         - internal-pr-build
         - external-pr-build
@@ -286,6 +292,11 @@ jobs:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
+  - npm-angular-zoneless:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
   - npm-mount-utils:
       requires:
         - internal-pr-build
@@ -317,9 +328,10 @@ jobs:
         - publish-binary
       requires:
         - node_modules_install
-        - approve-contributor-pr
         - internal-pr-build
-        - external-pr-build
+      filters:
+        branches:
+          ignore: /^pull\/[0-9]+/
   - wait-for-binary-publish:
       type: approval
       requires:

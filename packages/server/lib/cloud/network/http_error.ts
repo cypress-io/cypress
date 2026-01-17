@@ -1,6 +1,6 @@
 import { scrubUrl } from '../api/scrub_url'
 
-export const HttpErrorKind = 'HttpError'
+const HttpErrorKind = 'HttpError'
 
 export class HttpError extends Error {
   public readonly kind = HttpErrorKind

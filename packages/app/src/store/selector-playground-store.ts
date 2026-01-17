@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-
-type SelectorMethod = 'get' | 'contains'
+import type { SelectorMethod } from '../runner/selector-playground/utils'
 
 interface SelectorPlaygroundStore {
   show: boolean
