@@ -73,6 +73,8 @@ function createSpawnFunction (
         executable = 'node'
         // if we're in dev then reset
         // the launch cmd to be 'npm run dev'
+        // This path is correct in the build output, but not the source code. This file gets bundled into
+        // `dist/spawn-<hash>.js`, which makes this resolution appear incorrect at first glance.
         startScriptPath = path.resolve(__dirname, '..', '..', 'scripts', 'start.js')
 
         debug('in dev mode the args became %o', args)
