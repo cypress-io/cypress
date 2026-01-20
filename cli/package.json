@@ -164,8 +164,8 @@
       "require": "./svelte/dist/cypress-svelte.cjs.js"
     },
     "./bin": {
-      "import": "./dist/bin/cypress.js",
-      "require": "./dist/bin/cypress.js"
+      "import": "./dist/bin/cypress",
+      "require": "./dist/bin/cypress"
     }
   },
   "workspaces": {
