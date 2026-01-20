@@ -87,8 +87,7 @@ describe('Cypress Studio - Navigation and URL Management', () => {
     cy.location().its('hash').should('contain', '/runs').and('not.contain', 'testId=').and('not.contain', 'studio=').and('not.contain', 'entrySource=')
   })
 
-  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
-  it.skip('updates the studio url parameters and displays the single test view after creating a new test', () => {
+  it('updates the studio url parameters and displays the single test view after creating a new test', () => {
     loadProjectAndRunSpec()
 
     // open the spec header to create a new test in the root suite
@@ -104,6 +103,13 @@ describe('Cypress Studio - Navigation and URL Management', () => {
     cy.get('.studio-single-test-container').should('be.visible')
 
     cy.percySnapshot()
+
+    // after reloading, it should still display the single test view
+    cy.reload()
+
+    // the studio url parameters should be removed
+    cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2').and('not.contain', 'entrySource=')
+    cy.get('.studio-single-test-container').should('be.visible')
   })
 
   it('does not remove the studio url parameters when saving test changes', () => {

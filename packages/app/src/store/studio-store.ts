@@ -171,7 +171,8 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.testId = testId
       this.suiteId = undefined
       this.newTestLineNumber = undefined
-      this._updateUrlParams(['testId', 'suiteId', 'newTestLineNumber'])
+      this.entrySource = undefined
+      this._updateUrlParams(['testId', 'suiteId', 'newTestLineNumber', 'entrySource'])
     },
 
     setSuiteId (suiteId: string) {
@@ -196,7 +197,8 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     setNewTestLineNumber (newTestLineNumber: number) {
       this.newTestLineNumber = newTestLineNumber
-      this._updateUrlParams(['newTestLineNumber'])
+      this.entrySource = undefined
+      this._updateUrlParams(['newTestLineNumber', 'entrySource'])
     },
 
     clearRunnableIds () {
@@ -257,10 +259,10 @@ export const useStudioStore = defineStore('studioRecorder', {
         this.setTestId(studio.testId)
       } else if (studio.suiteId) {
         this.setSuiteId(studio.suiteId)
-      }
-
-      if (studio.entrySource) {
-        this.setEntrySource(studio.entrySource as EntrySource)
+        // we only need to set the entry source if we are displaying the welcome screen or creating a new test
+        if (studio.entrySource) {
+          this.setEntrySource(studio.entrySource as EntrySource)
+        }
       }
 
       if (studio.url) {
@@ -410,6 +412,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.showUrlPrompt = true
       this._isStudioCreatedTest = false
       this._originalGrepSettings = {}
+      this.entrySource = undefined
 
       this._maybeResetRunnables()
     },

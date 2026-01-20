@@ -160,8 +160,7 @@ describe('studio functionality', () => {
     })
   })
 
-  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
-  it.skip('creates a new test from an empty spec', () => {
+  it('creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.contains('Create test with Cypress Studio').click()
@@ -239,8 +238,7 @@ it('new-test', function() {
     cy.findByTestId('studio-single-test-title').should('have.text', 'should be the only test to run normally')
   })
 
-  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
-  it.skip('creates and runs new tests in studio mode when there is a .only test in the spec file', () => {
+  it('creates and runs new tests in studio mode when there is a .only test in the spec file', () => {
     loadProjectAndRunSpec({ specName: 'spec-with-only.cy.js' })
 
     cy.get('.test').should('have.length', 1)
