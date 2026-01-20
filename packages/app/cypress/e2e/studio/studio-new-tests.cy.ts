@@ -188,7 +188,7 @@ it('new-test', function() {
     })
   })
 
-  it('opens the name test screen from the welcome screen and creates a new test from an empty spec ', () => {
+  it('opens the name test screen from the welcome screen and creates a new test from an empty spec', () => {
     loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
 
     cy.findByTestId('studio-button').click()
