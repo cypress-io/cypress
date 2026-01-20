@@ -3012,6 +3012,12 @@ declare namespace Cypress {
      */
     taskTimeout: number
     /**
+     * Global test timeout in milliseconds. If a test (including all its hooks) exceeds this duration, it will fail.
+     * Set to 0 to disable global test timeout.
+     * @default 0
+     */
+    testTimeout: number
+    /**
      * Path to folder where application files will attempt to be served from
      * @default root project folder
      */

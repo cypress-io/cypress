@@ -430,6 +430,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isNumber,
     overrideLevel: 'any',
   }, {
+    name: 'testTimeout',
+    defaultValue: 0,
+    validation: validate.isNumber,
+    overrideLevel: 'any',
+  }, {
     name: 'testIsolation',
     defaultValue: true,
     validation: (key: string, value: any, opts: ValidationOptions) => {

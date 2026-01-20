@@ -961,6 +961,10 @@ export default {
     async_timed_out: 'Timed out after `{{ms}}ms`. The `done()` callback was never invoked!',
     invalid_interface: 'Invalid mocha interface `{{name}}`',
     timed_out: 'Cypress command timeout of `{{ms}}ms` exceeded.',
+    global_test_timeout: {
+      message: 'Test exceeded the global timeout of `{{ms}}ms`. The test ran for `{{elapsed}}ms` before being stopped.',
+      docsUrl: 'https://on.cypress.io/test-timeout',
+    },
     overspecified: {
       message: stripIndent`\
         Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.

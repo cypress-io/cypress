@@ -61,6 +61,35 @@ const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
 
+const setupGlobalTestTimeout = (test, Cypress, cy) => {
+  const testTimeout = Cypress.config('testTimeout')
+
+  if (testTimeout > 0 && !test._globalTimeoutId) {
+    debug('setting up global test timeout: %dms', testTimeout)
+    test._globalTimeoutId = setTimeout(() => {
+      const elapsed = duration(new Date(), test.wallClockStartedAt)
+      const err = $errUtils.errByPath('mocha.global_test_timeout', {
+        ms: testTimeout,
+        elapsed,
+      })
+
+      debug('global test timeout exceeded: %dms elapsed', elapsed)
+      test._globalTimeoutId = null
+
+      // fail the test via cy.fail which handles the error properly
+      cy.fail(err)
+    }, testTimeout)
+  }
+}
+
+const clearGlobalTestTimeout = (test) => {
+  if (test._globalTimeoutId) {
+    debug('clearing global test timeout')
+    clearTimeout(test._globalTimeoutId)
+    test._globalTimeoutId = null
+  }
+}
+
 const fire = (event: typeof RUNNER_EVENTS[number], runnable, Cypress, ...args) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
@@ -116,6 +145,7 @@ const runnableAfterRunAsync = (runnable, Cypress) => {
 
 const testAfterRun = (test, Cypress) => {
   test.clearTimeout()
+  clearGlobalTestTimeout(test)
   if (!fired(TEST_AFTER_RUN_EVENT, test)) {
     setWallClockDuration(test)
     try {
@@ -1693,6 +1723,8 @@ export default {
 
         if (test.wallClockStartedAt == null) {
           test.wallClockStartedAt = wallClockStartedAt
+          // Set up global test timeout if configured
+          setupGlobalTestTimeout(test, Cypress, cy)
         }
 
         const isHook = runnable.type === 'hook'
