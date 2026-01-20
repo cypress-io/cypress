@@ -962,7 +962,9 @@ export default {
     invalid_interface: 'Invalid mocha interface `{{name}}`',
     timed_out: 'Cypress command timeout of `{{ms}}ms` exceeded.',
     global_test_timeout: {
-      message: 'Test exceeded the global timeout of `{{ms}}ms`. The test ran for `{{elapsed}}ms` before being stopped.',
+      message: `Test exceeded the global timeout of \`{{ms}}ms\`. The test ran for \`{{elapsed}}ms\` before being stopped.
+
+Check the browser console for detailed diagnostics including the command queue and current state.`,
       docsUrl: 'https://on.cypress.io/test-timeout',
     },
     overspecified: {

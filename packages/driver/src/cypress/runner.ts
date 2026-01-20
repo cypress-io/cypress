@@ -61,6 +61,62 @@ const duration = (before: Date, after: Date) => {
   return Number(before) - Number(after)
 }
 
+const collectTimeoutDiagnostics = (cy, Cypress) => {
+  const diagnostics: Record<string, any> = {}
+
+  try {
+    // Get current command being executed
+    const currentCommand = cy.state('current')
+
+    if (currentCommand) {
+      diagnostics.currentCommand = {
+        name: currentCommand.get('name'),
+        args: currentCommand.get('args'),
+        type: currentCommand.get('type'),
+        timeout: currentCommand.get('timeout'),
+      }
+    }
+
+    // Get command queue state
+    const queue = cy.queue
+    const commands = queue.get()
+
+    diagnostics.commandQueue = {
+      total: commands.length,
+      names: queue.names().slice(-20), // last 20 command names
+      currentIndex: queue.index,
+    }
+
+    // Get all logs from the queue
+    const logs = queue.logs()
+
+    diagnostics.logs = logs.slice(-10).map((log) => ({
+      name: log.get('name'),
+      message: log.get('message'),
+      state: log.get('state'),
+      type: log.get('type'),
+    }))
+
+    // Get current URL
+    const win = cy.state('window')
+
+    if (win) {
+      diagnostics.currentUrl = win.location?.href
+    }
+
+    // Get aliases
+    const aliases = cy.state('aliases') || {}
+
+    diagnostics.aliases = Object.keys(aliases)
+
+  } catch (e) {
+    debug('error collecting timeout diagnostics: %o', e)
+    diagnostics.error = 'Failed to collect some diagnostics'
+  }
+
+  return diagnostics
+}
+
 const setupGlobalTestTimeout = (test, Cypress, cy) => {
   const testTimeout = Cypress.config('testTimeout')
 
@@ -68,12 +124,50 @@ const setupGlobalTestTimeout = (test, Cypress, cy) => {
     debug('setting up global test timeout: %dms', testTimeout)
     test._globalTimeoutId = setTimeout(() => {
       const elapsed = duration(new Date(), test.wallClockStartedAt)
+
+      // Collect diagnostic information before failing
+      const diagnostics = collectTimeoutDiagnostics(cy, Cypress)
+
+      debug('global test timeout exceeded: %dms elapsed, diagnostics: %o', elapsed, diagnostics)
+
+      // Log diagnostics to console for debugging
+      // eslint-disable-next-line no-console
+      console.group('🕐 Global Test Timeout Diagnostics')
+      // eslint-disable-next-line no-console
+      console.log('Test:', test.title)
+      // eslint-disable-next-line no-console
+      console.log('Timeout:', testTimeout, 'ms')
+      // eslint-disable-next-line no-console
+      console.log('Elapsed:', elapsed, 'ms')
+
+      if (diagnostics.currentCommand) {
+        // eslint-disable-next-line no-console
+        console.log('Current Command:', diagnostics.currentCommand.name)
+      }
+
+      if (diagnostics.commandQueue) {
+        // eslint-disable-next-line no-console
+        console.log('Command Queue:', diagnostics.commandQueue.names.join(' → '))
+      }
+
+      if (diagnostics.currentUrl) {
+        // eslint-disable-next-line no-console
+        console.log('Current URL:', diagnostics.currentUrl)
+      }
+
+      // eslint-disable-next-line no-console
+      console.log('Full diagnostics:', diagnostics)
+      // eslint-disable-next-line no-console
+      console.groupEnd()
+
       const err = $errUtils.errByPath('mocha.global_test_timeout', {
         ms: testTimeout,
         elapsed,
       })
 
-      debug('global test timeout exceeded: %dms elapsed', elapsed)
+      // Attach diagnostics to the error for programmatic access
+      ;(err as any).diagnostics = diagnostics
+
       test._globalTimeoutId = null
 
       // fail the test via cy.fail which handles the error properly
