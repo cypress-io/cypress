@@ -21,7 +21,9 @@ describe('e2e cy.origin retries', () => {
       hosts: {
         '*.foobar.com': '127.0.0.1',
       },
-      e2e: {},
+      e2e: {
+        allowCypressEnv: false,
+      },
     },
   })
 

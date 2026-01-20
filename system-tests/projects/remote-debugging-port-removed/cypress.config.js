@@ -1,6 +1,7 @@
 const la = require('lazy-ass')
 
 module.exports = {
+  'allowCypressEnv': false,
   'e2e': {
     'supportFile': false,
     setupNodeEvents (on, config) {

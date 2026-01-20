@@ -1,8 +1,14 @@
 /* eslint-disable no-undef */
-const httpUrl = Cypress.env('httpUrl')
-const httpsUrl = Cypress.env('httpsUrl')
-
 describe('cookies', () => {
+  let httpUrl; let httpsUrl
+
+  before(() => {
+    cy.env(['httpUrl', 'httpsUrl']).then(({ httpUrl: httpUrlEnv, httpsUrl: httpsUrlEnv }) => {
+      httpUrl = httpUrlEnv
+      httpsUrl = httpsUrlEnv
+    })
+  })
+
   it('sends cookies to url', () => {
     cy.visit(`${httpUrl}/`)
     cy.clearCookies()

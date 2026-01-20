@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { setupCyInCyVariables } from '@packages/frontend-shared/cypress/tasks/cy-in-cy-variables'
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -14,6 +15,12 @@ export default defineConfig({
       delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup') as typeof import('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
+      const { setCyInCyVariables, getCyInCyVariables } = setupCyInCyVariables()
+
+      on('task', {
+        setCyInCyVariables,
+        getCyInCyVariables,
+      })
 
       return await e2ePluginSetup(on, config)
     },

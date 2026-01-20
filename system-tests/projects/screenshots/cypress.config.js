@@ -4,6 +4,7 @@ const _ = require('lodash')
 const { useFixedBrowserLaunchSize } = require('@tooling/system-tests/lib/pluginUtils')
 
 module.exports = {
+  'allowCypressEnv': false,
   'e2e': {
     setupNodeEvents (on, config) {
       on('before:browser:launch', (browser, options) => {
