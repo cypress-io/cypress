@@ -93,6 +93,10 @@
   "license": "ISC",
   "author": "",
   "keywords": [],
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
   "nx": {
     "targets": {
       "build": {

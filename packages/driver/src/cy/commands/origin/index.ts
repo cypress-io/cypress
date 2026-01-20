@@ -131,7 +131,9 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
         const onSyncGlobals = ({ config, env }) => {
           syncConfigToCurrentOrigin(config)
-          syncEnvToCurrentOrigin(env)
+          if (Cypress.config('allowCypressEnv')) {
+            syncEnvToCurrentOrigin(env)
+          }
         }
 
         communicator.once('sync:globals', onSyncGlobals)
@@ -184,7 +186,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
             // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
             communicator.toSpecBridge(origin, 'initialize:cypress', {
               config: preprocessConfig(Cypress.config()),
-              env: preprocessEnv(Cypress.env()),
+              env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
               isProtocolEnabled: Cypress.state('isProtocolEnabled'),
             })
 
@@ -229,7 +231,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
                   originUserInvocationStack: userInvocationStack,
                 },
                 config: preprocessConfig(Cypress.config()),
-                env: preprocessEnv(Cypress.env()),
+                env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
                 logCounter: LogUtils.getCounter(),
               })
             } catch (err: any) {

@@ -1,6 +1,7 @@
 const fs = require('fs-extra')
 
 module.exports = {
+  allowCypressEnv: false,
   fixturesFolder: false,
   video: true,
   e2e: {

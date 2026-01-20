@@ -254,7 +254,7 @@ class $Cypress {
     // not we're in a text terminal, but we keep this
     // as a separate property so we can potentially
     // slice up the behavior
-    config.isInteractive = !config.isTextTerminal || config.env.INTERNAL_SIMULATE_OPEN_MODE
+    config.isInteractive = !config.isTextTerminal || config.env?.INTERNAL_SIMULATE_OPEN_MODE
 
     // true if this Cypress belongs to a cross origin spec bridge
     this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
@@ -311,7 +311,17 @@ class $Cypress {
       return validateConfig(this.state, config, skipConfigOverrideValidation)
     })
 
-    this.env = $SetterGetter.create(env)
+    const isAllowCypressEnvEnabled = this.config('allowCypressEnv')
+
+    const failCypressEnvWithWarning = (key) => {
+      const err = $errUtils.errByPath('config.allow_cypress_env', { key })
+
+      $utils.warning(err.message)
+
+      throw err
+    }
+
+    this.env = !isAllowCypressEnvEnabled ? failCypressEnvWithWarning : $SetterGetter.create(env)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
 

@@ -4,6 +4,7 @@ exports['module api and after:run results'] = `
   "browserPath": "",
   "browserVersion": "X.Y.Z",
   "config": {
+    "allowCypressEnv": false,
     "supportFile": false,
     "projectRoot": "/path/to/projectRoot",
     "projectName": "results",

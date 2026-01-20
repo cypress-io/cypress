@@ -1,6 +1,7 @@
 const path = require('path')
 
 module.exports = {
+  allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     devServer: {

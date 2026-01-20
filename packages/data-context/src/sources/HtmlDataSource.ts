@@ -78,6 +78,11 @@ export class HtmlDataSource {
       // Error getting config, we will show an error screen when we render the page
     }
 
+    // If mitigating secrets via setting allowCypressEnv, we need to delete the env object and avoid serializing it completely to the browser
+    if (!cfg.allowCypressEnv) {
+      delete cfg.env
+    }
+
     // for project-base config, the remote state we wish to convey should be whatever top is set to, also known as the primary domain
     // whenever the app is served/re-served
     if (this.ctx.coreData.currentTestingType === 'e2e') {

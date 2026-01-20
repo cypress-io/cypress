@@ -157,7 +157,9 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     // resync the config/env before running the origin:fn
     syncConfigToCurrentOrigin(config)
-    syncEnvToCurrentOrigin(env)
+    if (Cypress.config('allowCypressEnv')) {
+      syncEnvToCurrentOrigin(env)
+    }
 
     cy.state('onQueueEnd', () => {
       queueFinished = true

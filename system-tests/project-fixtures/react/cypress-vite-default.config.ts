@@ -11,6 +11,7 @@ declare global {
 }
 
 export default defineConfig({
+  allowCypressEnv: false,
   videoCompression: false, // turn off video compression for CI
   component: {
     devServer: {
