@@ -5,7 +5,6 @@ import Debug from 'debug'
 import { stripIndent } from 'common-tags'
 import Bluebird from 'bluebird'
 import logSymbols from 'log-symbols'
-import path from 'path'
 import os from 'os'
 import verbose from '../VerboseRenderer'
 import { throwFormErrorText, errors } from '../errors'
@@ -13,6 +12,7 @@ import util from '../util'
 import logger from '../logger'
 import xvfb from '../exec/xvfb'
 import state from './state'
+import { relativeToRepoRoot } from '../relative-to-repo-root'
 
 const debug = Debug('cypress:cli')
 
@@ -76,9 +76,13 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
 
     if (options.dev) {
       executable = 'node'
-      args.unshift(
-        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
-      )
+      const startScriptPath = relativeToRepoRoot('scripts/start.js')
+
+      if (!startScriptPath) {
+        throw new Error(`Cypress start script not found at resolved path: ${startScriptPath}`)
+      }
+
+      args.unshift(startScriptPath)
     }
 
     const smokeTestCommand = `${executable} ${args.join(' ')}`

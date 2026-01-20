@@ -47,8 +47,6 @@ export default [
 
         const artifactDestinationPath = (pathRelativeToLib.endsWith('/') || !pathRelativeToLib.length) ? pathRelativeToLib : `${pathRelativeToLib}/`
 
-        console.log('artifactDestinationPath', artifactDestinationPath)
-
         return pathRelativeToLib.startsWith('..') ? '[name].js' : `${artifactDestinationPath}[name].js`
       },
     },
