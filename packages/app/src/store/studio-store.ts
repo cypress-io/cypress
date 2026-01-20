@@ -126,8 +126,9 @@ function getUrlParams () {
   const visitUrl = hashParams.get('url')
   const newTestLineNumber = hashParams.get('newTestLineNumber') ? Number(hashParams.get('newTestLineNumber')) : undefined
   const sessionId = hashParams.get('sessionId')
+  const entrySource = hashParams.get('entrySource')
 
-  return { testId, suiteId, url: visitUrl, newTestLineNumber, sessionId }
+  return { testId, suiteId, url: visitUrl, newTestLineNumber, sessionId, entrySource }
 }
 
 export const useStudioStore = defineStore('studioRecorder', {
@@ -202,6 +203,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       this.testId = undefined
       this.suiteId = undefined
       this.newTestLineNumber = undefined
+      this.entrySource = undefined
     },
 
     needsProtocolCleanup () {
@@ -239,6 +241,7 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     setEntrySource (entrySource: EntrySource) {
       this.entrySource = entrySource
+      this._updateUrlParams(['entrySource'])
     },
 
     testFailed () {
@@ -254,6 +257,10 @@ export const useStudioStore = defineStore('studioRecorder', {
         this.setTestId(studio.testId)
       } else if (studio.suiteId) {
         this.setSuiteId(studio.suiteId)
+      }
+
+      if (studio.entrySource) {
+        this.setEntrySource(studio.entrySource as EntrySource)
       }
 
       if (studio.url) {
@@ -543,9 +550,9 @@ export const useStudioStore = defineStore('studioRecorder', {
 
     getUrlParams,
 
-    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId']) {
+    _updateUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId', 'entrySource']) {
       // if we don't have studio params, we don't need to update them
-      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber && !this.sessionId) return
+      if (!this.testId && !this.suiteId && !this.url && !this.newTestLineNumber && !this.sessionId && !this.entrySource) return
 
       // if we have studio params, we need to remove them before adding them back
       this._removeUrlParams(filter)
@@ -564,7 +571,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       window.history.replaceState({}, '', url.toString())
     },
 
-    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId']) {
+    _removeUrlParams (filter: string[] = ['testId', 'suiteId', 'url', 'newTestLineNumber', 'sessionId', 'entrySource']) {
       const url = new URL(window.location.href)
       const hashParams = new URLSearchParams(url.hash)
 
@@ -577,7 +584,7 @@ export const useStudioStore = defineStore('studioRecorder', {
       })
 
       // if there are no studio specific params left, we can also remove the studio param
-      if (!hashParams.has('testId') && !hashParams.has('suiteId') && !hashParams.has('url') && !hashParams.has('newTestLineNumber') && !hashParams.has('sessionId')) {
+      if (!hashParams.has('testId') && !hashParams.has('suiteId') && !hashParams.has('url') && !hashParams.has('newTestLineNumber') && !hashParams.has('sessionId') && !hashParams.has('entrySource')) {
         hashParams.delete('studio')
       }
 
