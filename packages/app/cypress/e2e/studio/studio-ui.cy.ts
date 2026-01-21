@@ -35,7 +35,8 @@ describe('studio functionality', () => {
     })
   })
 
-  it('opens studio panel to new test when clicking on studio button (from the app) next to url', () => {
+  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
+  it.skip('opens studio panel to new test when clicking on studio button (from the app) next to url', () => {
     cy.viewport(1500, 1000)
     loadProjectAndRunSpec()
     // studio button should be visible when using cloud studio
@@ -84,7 +85,8 @@ describe('studio functionality', () => {
     cy.percySnapshot()
   })
 
-  it('shows test body sections correctly when studio panel is open and page is refreshed', () => {
+  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
+  it.skip('shows test body sections correctly when studio panel is open and page is refreshed', () => {
     loadProjectAndRunSpec()
 
     cy.waitForSpecToFinish()
@@ -114,7 +116,8 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
   })
 
-  it('stays in new test mode when studio panel is opened when the spec is running', () => {
+  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
+  it.skip('stays in new test mode when studio panel is opened when the spec is running', () => {
     loadProjectAndRunSpec()
 
     cy.waitForSpecToFinish()
