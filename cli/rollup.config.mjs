@@ -13,6 +13,16 @@ function external (id, parent, resolved) {
     return false
   }
 
+  // package.json needs to be loaded dynamically, so we must externalize it
+  if (id.includes('package.json')) {
+    return true
+  }
+
+  // node_modules are externalized by default
+  if (id.includes('node_modules')) {
+    return true
+  }
+
   return false
 }
 
