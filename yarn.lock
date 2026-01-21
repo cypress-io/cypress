@@ -2719,6 +2719,18 @@
     lazy-ass "1.6.0"
     ramda "0.26.1"
 
+"@cypress/commit-info@2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@cypress/commit-info/-/commit-info-2.2.2.tgz#509ccc24f6ae66fbe63fd77f8c0c2d13413868b4"
+  integrity sha512-YR1FkIPMyyfEn6lDRG7JAba1RzcZ1xcovX40QItNdIQ3iqnOzf8tBveTBwewfWu/kXEBU/0ICQR2jXHA+gDeyg==
+  dependencies:
+    bluebird "3.7.2"
+    check-more-types "2.24.0"
+    debug "4.4.1"
+    execa "^2.0.0"
+    lazy-ass "1.6.0"
+    ramda "0.26.1"
+
 "@cypress/debugging-proxy@2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@cypress/debugging-proxy/-/debugging-proxy-2.0.1.tgz#c0ef569af4c2efb6ceb329e5813bc770b133ab9e"
@@ -16122,7 +16134,7 @@ execa@5.0.0:
     signal-exit "^3.0.3"
     strip-final-newline "^2.0.0"
 
-execa@^2.0.1:
+execa@^2.0.0, execa@^2.0.1:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/execa/-/execa-2.1.0.tgz#e5d3ecd837d2a60ec50f3da78fd39767747bbe99"
   integrity sha512-Y/URAVapfbYy2Xp/gb6A0E7iR8xeqOCXsuuaoMn7A5PzrXUK84E1gyiEfq0wQd/GHA6GsoHWwhNq8anb0mleIw==
