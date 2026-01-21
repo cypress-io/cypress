@@ -39,11 +39,11 @@ export default [
         const facadeModuleId = chunkInfo.facadeModuleId || ''
         const chunkName = chunkInfo.name || ''
 
-        if (chunkName === 'cypress' && chunkInfo.facadeModuleId.includes('lib/bin')) {
+        if (chunkName === 'cypress' && facadeModuleId.includes('lib/bin')) {
           return 'bin/[name]'
         }
 
-        const pathRelativeToLib = path.relative('lib', path.dirname(chunkInfo.facadeModuleId))
+        const pathRelativeToLib = path.relative('lib', path.dirname(facadeModuleId))
 
         const artifactDestinationPath = (pathRelativeToLib.endsWith('/') || !pathRelativeToLib.length) ? pathRelativeToLib : `${pathRelativeToLib}/`
 

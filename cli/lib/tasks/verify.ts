@@ -79,7 +79,7 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
       const startScriptPath = relativeToRepoRoot('scripts/start.js')
 
       if (!startScriptPath) {
-        throw new Error(`Cypress start script not found at resolved path: ${startScriptPath}`)
+        throw new Error(`Cypress start script (scripts/start.js) not found in parent directory of ${__dirname}`)
       }
 
       args.unshift(startScriptPath)
