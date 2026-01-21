@@ -156,6 +156,30 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
   return _.extend(configEnv, envFile, processEnvs, cliEnvs)
 }
 
+function parseExposed (cfg: Record<string, any>, cliExposeVars: Record<string, any>, resolved: Record<string, any> = {}) {
+  const exposeVars: any = (resolved.expose = {})
+
+  const resolveFrom = (from: string, obj = {}) => {
+    return _.each(obj, (val, key) => {
+      return exposeVars[key] = {
+        value: val,
+        from,
+      }
+    })
+  }
+
+  const configExpose = cfg.expose != null ? cfg.expose : {}
+
+  cliExposeVars = cliExposeVars != null ? cliExposeVars : {}
+
+  resolveFrom('config', configExpose)
+  resolveFrom('cli', cliExposeVars)
+
+  // configExpose is from cypress.config.{js,ts,mjs,cjs}
+  // cliExposedVars is from CLI arguments
+  return _.extend(configExpose, cliExposeVars)
+}
+
 // combines the default configuration object with values specified in the
 // configuration file like "cypress.{ts|js}". Values in configuration file
 // overwrite the defaults.
@@ -370,6 +394,7 @@ export function mergeDefaults (
   _
   .chain(allowed({ ...cliConfig, ...options }))
   .omit('env')
+  .omit('expose')
   .omit('browsers')
   .each((val: any, key) => {
     // If users pass in testing-type specific keys (eg, specPattern),
@@ -424,6 +449,8 @@ export function mergeDefaults (
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
+
+  config.expose = parseExposed(config, { ...cliConfig.expose, ...options.expose }, resolved)
 
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)

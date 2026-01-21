@@ -127,7 +127,7 @@ commands:
             if [[ "<< pipeline.parameters.force-persist-artifacts >>" == "true" ]]; then
               echo 'export SHOULD_PERSIST_ARTIFACTS=true' >> "$BASH_ENV"
             else
-              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "feat/add_cy_env_and_disallow_cypress_env" ]]; then
+              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* ]]; then
                   export SHOULD_PERSIST_ARTIFACTS=true
               fi' >> "$BASH_ENV"
             fi

@@ -137,6 +137,7 @@ class $Cypress {
   originalConfig: any
   config: any
   env: any
+  expose: any
   getTestRetries: any
   Cookies!: ICookies
   ProxyLogging: any
@@ -271,9 +272,9 @@ class $Cypress {
 
     // TODO: env is unintentionally preserved between soft reruns unlike config.
     // change this in the NEXT_BREAKING
-    const { env } = config
+    const { env, expose } = config
 
-    config = _.omit(config, 'env', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
+    config = _.omit(config, 'env', 'expose', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
 
@@ -322,6 +323,7 @@ class $Cypress {
     }
 
     this.env = !isAllowCypressEnvEnabled ? failCypressEnvWithWarning : $SetterGetter.create(env)
+    this.expose = $SetterGetter.create(expose)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
 

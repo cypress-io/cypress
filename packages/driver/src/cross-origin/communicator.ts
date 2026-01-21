@@ -1,6 +1,6 @@
 import debugFn from 'debug'
 import { EventEmitter } from 'events'
-import { preprocessConfig, preprocessEnv } from '../util/config'
+import { preprocessConfig, preprocessEnv, preprocessExpose } from '../util/config'
 import { preprocessForSerialization, reifySerializedError } from '../util/serialization'
 import { $Location } from '../cypress/location'
 import { preprocessLogForSerialization, reifyLogFromSerialization, preprocessSnapshotForSerialization, reifySnapshotFromSerialization } from '../util/serialization/log'
@@ -273,6 +273,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
     this.toPrimary('sync:globals', {
       config: preprocessConfig(Cypress.config()),
       env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
+      expose: preprocessExpose(Cypress.expose()),
     })
   }
 
