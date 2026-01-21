@@ -13,11 +13,6 @@ function external (id, parent, resolved) {
     return false
   }
 
-  // We only want to bundle monorepo packages that aren't published to npm separately
-  if (id.includes('node_modules') && !id.startsWith('@packages/')) {
-    return true
-  }
-
   return false
 }
 
