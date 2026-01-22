@@ -1,4 +1,6 @@
 it('should validate sourcemaps', () => {
-  expect(Cypress.areSourceMapsAvailable).to.be[Cypress.env('areSourceMapsAvailable')]
-  expect(Cypress.sourceMapProjectRoot).to.match(new RegExp(`${Cypress.env('sourceMapProjectRoot')}$`))
+  cy.env(['areSourceMapsAvailable', 'sourceMapProjectRoot']).then(({ areSourceMapsAvailable, sourceMapProjectRoot }) => {
+    expect(Cypress.areSourceMapsAvailable).to.be[areSourceMapsAvailable]
+    expect(Cypress.sourceMapProjectRoot).to.match(new RegExp(`${sourceMapProjectRoot}$`))
+  })
 })

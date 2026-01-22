@@ -1,0 +1,9 @@
+{
+  "name": "cypress-expose",
+  "version": "0.0.0-test",
+  "description": "Example running specs testing Cypress.expose()",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "type": "module"
+}

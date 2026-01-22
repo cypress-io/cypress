@@ -8,6 +8,7 @@ import debug from 'debug'
 const debugInstance = debug('cypress:grep:compare-results')
 
 export default defineConfig({
+  allowCypressEnv: true,
   e2e: {
     defaultCommandTimeout: 1000,
     setupNodeEvents (on, config) {

@@ -55,6 +55,9 @@
       case 'origin':
         cy.origin('http://barbaz.com:3500', () => {})
         break
+      case 'env':
+        cy.env(['MY_ENV_VAR'])
+        break
       default:
         throw new Error(`Command not supported: ${command}`)
     }
