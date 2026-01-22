@@ -3,7 +3,6 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import path from 'path'
 
-// @ts-expect-error - pluralize doesn't have type definitions
 import pluralize from 'pluralize'
 import humanTime from '@packages/server/lib/util/human_time'
 
