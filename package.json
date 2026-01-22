@@ -263,7 +263,7 @@
   "resolutions": {
     "**/@types/cheerio": "0.22.35",
     "**/@types/node": "22.18.7",
-    "**/form-data": "^4.0.4",
+    "**/form-data": "^4.0.5",
     "**/jquery": "3.7.1",
     "**/socket.io-parser": "4.0.5",
     "**/ua-parser-js": "0.7.33",

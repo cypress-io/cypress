@@ -81,7 +81,7 @@
     "graphql-ws": "^5.5.5",
     "human-interval": "1.0.0",
     "just-my-luck": "3.0.0",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "markdown-it": "13.0.1",
     "nock": "13.2.9",
     "p-defer": "^3.0.0",
