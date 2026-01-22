@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const _ = require('lodash')
 const debug = require('debug')('test')
-const commitInfo = require('@cypress/commit-info')
+const commitInfo = require('../../../lib/util/commit-info')
 const mockedEnv = require('mocked-env')
 
 const errors = require(`../../../lib/errors`)

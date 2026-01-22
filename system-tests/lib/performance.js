@@ -1,5 +1,5 @@
 const ciProvider = require('@packages/server/lib/util/ci_provider')
-const { commitInfo } = require('@cypress/commit-info')
+const { commitInfo } = require('@packages/server/lib/util/commit-info')
 const pkg = require('@packages/root')
 const Promise = require('bluebird')
 const rp = require('@cypress/request-promise')
