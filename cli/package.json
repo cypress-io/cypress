@@ -45,7 +45,7 @@
     "hasha": "5.2.2",
     "is-installed-globally": "~0.4.0",
     "listr2": "^3.8.3",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "log-symbols": "^4.0.0",
     "minimist": "^1.2.8",
     "ospath": "^1.2.2",
