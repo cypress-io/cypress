@@ -228,4 +228,39 @@ describe('lib/util/commit-info', () => {
       })
     })
   })
+
+  context('with large commit message', () => {
+    it('handles very large commit messages without truncation', () => {
+      // Git has no hard limit on commit message size (tests show ~100MB can be accepted)
+      // This test verifies we handle large messages gracefully
+      // Using 50KB as a realistic upper bound for commit messages
+      const largeMessage = 'A'.repeat(50 * 1024) // 50KB message
+
+      execaStub.callsFake(createGitResponses({
+        message: { stdout: largeMessage },
+      }))
+
+      return commitInfo().then((info) => {
+        expect(info.message).to.eq(largeMessage)
+        expect(info.message!.length).to.eq(50 * 1024)
+      })
+    })
+
+    it('handles large commit message from environment variable', () => {
+      const largeMessage = 'B'.repeat(25 * 1024) // 25KB message
+
+      resetEnv = mockedEnv({
+        COMMIT_INFO_MESSAGE: largeMessage,
+      }, { clear: true })
+
+      execaStub.callsFake(() => {
+        return Promise.reject(new Error('Git should not be called'))
+      })
+
+      return commitInfo().then((info) => {
+        expect(info.message).to.eq(largeMessage)
+        expect(info.message!.length).to.eq(25 * 1024)
+      })
+    })
+  })
 })
