@@ -346,7 +346,15 @@ describe('lib/cypress', () => {
 
       sinon.stub(browsers, 'open')
       sinon.stub(browsers, 'connectToNewSpec')
-      sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
+      sinon.stub(commitInfo, 'commitInfo').resolves({
+        branch: 'test-branch',
+        message: 'test message',
+        email: 'test@example.com',
+        author: 'Test Author',
+        sha: 'abc123',
+        timestamp: 1234567890,
+        remote: 'remoteOrigin',
+      })
     })
 
     describe('cloud recommendation message', () => {

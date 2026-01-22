@@ -5,7 +5,68 @@ import mockedEnv from 'mocked-env'
 
 let execaStub: ReturnType<typeof sinon.stub>
 let commitInfo: typeof import('../../../lib/util/commit-info').commitInfo
+let getGitCommands: typeof import('../../../lib/util/commit-info').getGitCommands
 let resetEnv: (() => void) | null = null
+
+// Helper to get git command key string from property name
+function getCommandKey (property: keyof ReturnType<typeof getGitCommands>): string {
+  const commands = getGitCommands()
+
+  return commands[property].gitCmd.join(' ')
+}
+
+// Helper to create git command responses from the actual git commands configuration
+function createGitResponses (overrides: Partial<Record<keyof ReturnType<typeof getGitCommands>, { stdout?: string, reject?: boolean }>> = {}) {
+  const commands = getGitCommands()
+
+  // Generate defaults from the actual git commands configuration
+  const defaults: Record<string, { stdout?: string, reject?: boolean }> = {}
+  const testValues: Record<keyof typeof commands, string> = {
+    branch: 'test-branch',
+    message: 'test message',
+    email: 'test@example.com',
+    author: 'Test Author',
+    sha: 'abc123',
+    timestamp: '123',
+    remote: 'git@github.com/repo',
+  }
+
+  for (const [key, cmd] of Object.entries(commands)) {
+    const commandKey = cmd.gitCmd.join(' ')
+
+    defaults[commandKey] = { stdout: testValues[key as keyof typeof commands] }
+  }
+
+  // Convert property-based overrides to command-key-based overrides
+  const commandKeyOverrides: Record<string, { stdout?: string, reject?: boolean }> = {}
+
+  for (const [property, value] of Object.entries(overrides)) {
+    const commandKey = getCommandKey(property as keyof ReturnType<typeof getGitCommands>)
+
+    commandKeyOverrides[commandKey] = value
+  }
+
+  const responses = { ...defaults, ...commandKeyOverrides }
+
+  return (cmd: string, args: string[]) => {
+    if (cmd !== 'git' || !args) {
+      return Promise.reject(new Error(`Unexpected command: ${cmd}`))
+    }
+
+    const key = args.join(' ')
+    const response = responses[key]
+
+    if (!response) {
+      return Promise.reject(new Error(`Unexpected git command: ${args.join(' ')}`))
+    }
+
+    if (response.reject) {
+      return Promise.reject(new Error(`Git command failed: ${key}`))
+    }
+
+    return Promise.resolve({ stdout: response.stdout || '' })
+  }
+}
 
 describe('lib/util/commit-info', () => {
   beforeEach(() => {
@@ -18,16 +79,14 @@ describe('lib/util/commit-info', () => {
     delete process.env.COMMIT_INFO_TIMESTAMP
     delete process.env.COMMIT_INFO_REMOTE
 
-    // Setup execa stub - reset it for each test
     execaStub = sinon.stub().rejects(new Error('Git command not stubbed'))
 
-    // Use proxyquire to inject the stubbed execa
-    // Note: proxyquire resolves relative to the test file location
     const commitInfoModule = proxyquire('../lib/util/commit-info', {
       execa: execaStub,
     })
 
     commitInfo = commitInfoModule.commitInfo
+    getGitCommands = commitInfoModule.getGitCommands
   })
 
   afterEach(() => {
@@ -39,327 +98,133 @@ describe('lib/util/commit-info', () => {
     sinon.restore()
   })
 
-  context('commitInfo', () => {
-    context('with no environment variables', () => {
-      beforeEach(function () {
-        resetEnv = mockedEnv({}, { clear: true })
-      })
+  context('with no environment variables', () => {
+    beforeEach(() => {
+      resetEnv = mockedEnv({}, { clear: true })
+    })
 
-      it('returns git commit information', () => {
-        execaStub.reset()
-        execaStub.callsFake((cmd: string, args: string[], options?: any) => {
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === '--abbrev-ref' && args[2] === 'HEAD') {
-            return Promise.resolve({ stdout: 'test-branch\n' })
-          }
+    it('returns git commit information', () => {
+      execaStub.callsFake(createGitResponses())
 
-          if (cmd === 'git' && args && args[0] === 'show' && args[1] === '-s' && args[2] === '--pretty=%B') {
-            return Promise.resolve({ stdout: 'important commit\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ae')) {
-            return Promise.resolve({ stdout: 'me@foo.com\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%an')) {
-            return Promise.resolve({ stdout: 'John Doe\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === 'HEAD' && args.length === 2) {
-            return Promise.resolve({ stdout: 'abc123\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ct')) {
-            return Promise.resolve({ stdout: '123\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'config' && args[1] === '--get' && args[2] === 'remote.origin.url') {
-            return Promise.resolve({ stdout: 'git@github.com/repo\n' })
-          }
-
-          return Promise.reject(new Error(`Unexpected git command: ${cmd} ${args ? args.join(' ') : 'no args'}`))
-        })
-
-        return commitInfo().then((info) => {
-          expect(info).to.deep.eq({
-            branch: 'test-branch',
-            message: 'important commit',
-            email: 'me@foo.com',
-            author: 'John Doe',
-            sha: 'abc123',
-            timestamp: 123,
-            remote: 'git@github.com/repo',
-          })
-        })
-      })
-
-      it('returns nulls for missing git fields', () => {
-        execaStub.reset()
-        execaStub.callsFake((cmd: string, args: string[], options?: any) => {
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === '--abbrev-ref' && args[2] === 'HEAD') {
-            return Promise.resolve({ stdout: 'test-branch\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'show' && args[1] === '-s' && args[2] === '--pretty=%B') {
-            return Promise.reject(new Error('No commit found'))
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ae')) {
-            return Promise.resolve({ stdout: 'me@foo.com\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%an')) {
-            return Promise.reject(new Error('No author'))
-          }
-
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === 'HEAD' && args.length === 2) {
-            return Promise.resolve({ stdout: 'abc123\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ct')) {
-            return Promise.resolve({ stdout: '123\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'config' && args[1] === '--get' && args[2] === 'remote.origin.url') {
-            return Promise.reject(new Error('No remote'))
-          }
-
-          return Promise.reject(new Error(`Unexpected git command: ${cmd} ${args ? args.join(' ') : 'no args'}`))
-        })
-
-        return commitInfo().then((info) => {
-          expect(info).to.deep.eq({
-            branch: 'test-branch',
-            message: null,
-            email: 'me@foo.com',
-            author: null,
-            sha: 'abc123',
-            timestamp: 123,
-            remote: null,
-          })
-        })
-      })
-
-      it('returns null for branch when HEAD is detached', () => {
-        execaStub.reset()
-        execaStub.callsFake((cmd: string, args: string[], options?: any) => {
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === '--abbrev-ref' && args[2] === 'HEAD') {
-            return Promise.resolve({ stdout: 'HEAD\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'show' && args[1] === '-s' && args[2] === '--pretty=%B') {
-            return Promise.resolve({ stdout: 'commit message\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ae')) {
-            return Promise.resolve({ stdout: 'email@example.com\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%an')) {
-            return Promise.resolve({ stdout: 'Author Name\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === 'HEAD' && args.length === 2) {
-            return Promise.resolve({ stdout: 'sha123\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ct')) {
-            return Promise.resolve({ stdout: '456\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'config' && args[1] === '--get' && args[2] === 'remote.origin.url') {
-            return Promise.resolve({ stdout: 'remote-url\n' })
-          }
-
-          return Promise.reject(new Error(`Unexpected git command: ${cmd} ${args ? args.join(' ') : 'no args'}`))
-        })
-
-        return commitInfo().then((info) => {
-          expect(info.branch).to.be.null
-          expect(info.message).to.eq('commit message')
+      return commitInfo().then((info) => {
+        expect(info).to.deep.eq({
+          branch: 'test-branch',
+          message: 'test message',
+          email: 'test@example.com',
+          author: 'Test Author',
+          sha: 'abc123',
+          timestamp: 123,
+          remote: 'git@github.com/repo',
         })
       })
     })
 
-    context('with environment variables', () => {
-      it('uses environment variables when provided', () => {
-        const env = {
-          COMMIT_INFO_BRANCH: 'env-branch',
-          COMMIT_INFO_MESSAGE: 'env message',
-          COMMIT_INFO_EMAIL: 'env@example.com',
-          COMMIT_INFO_AUTHOR: 'Env Author',
-          COMMIT_INFO_SHA: 'env-sha-123',
-          COMMIT_INFO_TIMESTAMP: '789',
-          COMMIT_INFO_REMOTE: 'env-remote-url',
-        }
+    it('returns nulls for failed git commands', () => {
+      execaStub.callsFake(createGitResponses({
+        message: { reject: true },
+        author: { reject: true },
+        remote: { reject: true },
+      }))
 
-        resetEnv = mockedEnv(env, { clear: true })
+      return commitInfo().then((info) => {
+        expect(info).to.deep.eq({
+          branch: 'test-branch',
+          message: null,
+          email: 'test@example.com',
+          author: null,
+          sha: 'abc123',
+          timestamp: 123,
+          remote: null,
+        })
+      })
+    })
 
-        // Stub git commands to ensure they're not called
-      execaStub.reset()
+    it('returns null for branch when HEAD is detached', () => {
+      execaStub.callsFake(createGitResponses({
+        branch: { stdout: 'HEAD' },
+      }))
+
+      return commitInfo().then((info) => {
+        expect(info.branch).to.be.null
+        expect(info.message).to.eq('test message')
+      })
+    })
+  })
+
+  context('with environment variables', () => {
+    it('uses environment variables when provided', () => {
+      resetEnv = mockedEnv({
+        COMMIT_INFO_BRANCH: 'env-branch',
+        COMMIT_INFO_MESSAGE: 'env message',
+        COMMIT_INFO_EMAIL: 'env@example.com',
+        COMMIT_INFO_AUTHOR: 'Env Author',
+        COMMIT_INFO_SHA: 'env-sha-123',
+        COMMIT_INFO_TIMESTAMP: '789',
+        COMMIT_INFO_REMOTE: 'env-remote-url',
+      }, { clear: true })
+
       execaStub.callsFake(() => {
         return Promise.reject(new Error('Git should not be called'))
       })
 
-        return commitInfo().then((info) => {
-          expect(info).to.deep.eq({
-            branch: 'env-branch',
-            message: 'env message',
-            email: 'env@example.com',
-            author: 'Env Author',
-            sha: 'env-sha-123',
-            timestamp: 789,
-            remote: 'env-remote-url',
-          })
+      return commitInfo().then((info) => {
+        expect(info).to.deep.eq({
+          branch: 'env-branch',
+          message: 'env message',
+          email: 'env@example.com',
+          author: 'Env Author',
+          sha: 'env-sha-123',
+          timestamp: 789,
+          remote: 'env-remote-url',
         })
       })
+    })
 
     it('handles invalid timestamp in environment variable', () => {
-      const env = {
+      resetEnv = mockedEnv({
         COMMIT_INFO_TIMESTAMP: 'not-a-number',
-      }
+      }, { clear: true })
 
-      resetEnv = mockedEnv(env, { clear: true })
-
-      execaStub.reset()
-      execaStub.callsFake((cmd: string, args: string[], options?: any) => {
-        if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === '--abbrev-ref' && args[2] === 'HEAD') {
-          return Promise.resolve({ stdout: 'branch\n' })
-        }
-
-        if (cmd === 'git' && args && args[0] === 'show' && args[1] === '-s' && args[2] === '--pretty=%B') {
-          return Promise.resolve({ stdout: 'message\n' })
-        }
-
-        if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ae')) {
-          return Promise.resolve({ stdout: 'email@example.com\n' })
-        }
-
-        if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%an')) {
-          return Promise.resolve({ stdout: 'Author\n' })
-        }
-
-        if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === 'HEAD' && args.length === 2) {
-          return Promise.resolve({ stdout: 'sha\n' })
-        }
-
-        if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ct')) {
-          return Promise.resolve({ stdout: '123\n' })
-        }
-
-        if (cmd === 'git' && args && args[0] === 'config' && args[1] === '--get' && args[2] === 'remote.origin.url') {
-          return Promise.resolve({ stdout: 'remote\n' })
-        }
-
-        return Promise.reject(new Error(`Unexpected git command: ${cmd} ${args ? args.join(' ') : 'no args'}`))
-      })
+      execaStub.callsFake(createGitResponses())
 
       return commitInfo().then((info) => {
         expect(info.timestamp).to.be.null
-      })
-    })
-    })
-
-    context('combination of environment variables and git', () => {
-      it('prefers environment variables over git commands', () => {
-        const env = {
-          COMMIT_INFO_BRANCH: 'env-branch',
-          COMMIT_INFO_MESSAGE: 'some git message',
-          // email, author, sha, timestamp, remote will come from git
-        }
-
-        resetEnv = mockedEnv(env, { clear: true })
-
-        execaStub.reset()
-        execaStub.callsFake((cmd: string, args: string[], options?: any) => {
-          // These should not be called because env vars are set
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === '--abbrev-ref' && args[2] === 'HEAD') {
-            return Promise.reject(new Error('Should use env var'))
-          }
-
-          if (cmd === 'git' && args && args[0] === 'show' && args[1] === '-s' && args[2] === '--pretty=%B') {
-            return Promise.reject(new Error('Should use env var'))
-          }
-
-          // These should be called
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ae')) {
-            return Promise.resolve({ stdout: 'user@company.com\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%an')) {
-            return Promise.resolve({ stdout: 'John Doe\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === 'HEAD' && args.length === 2) {
-            return Promise.resolve({ stdout: 'abc123\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ct')) {
-            return Promise.resolve({ stdout: '123\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'config' && args[1] === '--get' && args[2] === 'remote.origin.url') {
-            return Promise.resolve({ stdout: 'git@github.com/repo\n' })
-          }
-
-          return Promise.reject(new Error(`Unexpected git command: ${cmd} ${args ? args.join(' ') : 'no args'}`))
-        })
-
-        return commitInfo().then((info) => {
-          expect(info).to.deep.eq({
-            branch: 'env-branch',
-            message: 'some git message',
-            email: 'user@company.com',
-            author: 'John Doe',
-            sha: 'abc123',
-            timestamp: 123,
-            remote: 'git@github.com/repo',
-          })
-        })
+        expect(info.branch).to.eq('test-branch')
       })
     })
 
-    context('with custom folder', () => {
-      it('uses the provided folder path', () => {
-        const customFolder = '/custom/path'
+    it('prefers environment variables over git commands', () => {
+      resetEnv = mockedEnv({
+        COMMIT_INFO_BRANCH: 'env-branch',
+        COMMIT_INFO_MESSAGE: 'env message',
+      }, { clear: true })
 
-        execaStub.reset()
-        execaStub.callsFake((cmd: string, args: string[], options: any) => {
-          expect(options.cwd).to.eq(customFolder)
+      execaStub.callsFake(createGitResponses({
+        branch: { reject: true },
+        message: { reject: true },
+      }))
 
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === '--abbrev-ref' && args[2] === 'HEAD') {
-            return Promise.resolve({ stdout: 'branch\n' })
-          }
+      return commitInfo().then((info) => {
+        expect(info.branch).to.eq('env-branch')
+        expect(info.message).to.eq('env message')
+        expect(info.email).to.eq('test@example.com')
+        expect(info.author).to.eq('Test Author')
+      })
+    })
+  })
 
-          if (cmd === 'git' && args && args[0] === 'show' && args[1] === '-s' && args[2] === '--pretty=%B') {
-            return Promise.resolve({ stdout: 'message\n' })
-          }
+  context('with custom folder', () => {
+    it('uses the provided folder path', () => {
+      const customFolder = '/custom/path'
 
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ae')) {
-            return Promise.resolve({ stdout: 'email@example.com\n' })
-          }
+      execaStub.callsFake((cmd: string, args: string[], options: any) => {
+        expect(options.cwd).to.eq(customFolder)
 
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%an')) {
-            return Promise.resolve({ stdout: 'Author\n' })
-          }
+        return createGitResponses()(cmd, args)
+      })
 
-          if (cmd === 'git' && args && args[0] === 'rev-parse' && args[1] === 'HEAD' && args.length === 2) {
-            return Promise.resolve({ stdout: 'sha\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'log' && args.includes('--pretty=format:%ct')) {
-            return Promise.resolve({ stdout: '123\n' })
-          }
-
-          if (cmd === 'git' && args && args[0] === 'config' && args[1] === '--get' && args[2] === 'remote.origin.url') {
-            return Promise.resolve({ stdout: 'remote\n' })
-          }
-
-          return Promise.reject(new Error(`Unexpected git command: ${cmd} ${args ? args.join(' ') : 'no args'}`))
-        })
-
-        return commitInfo(customFolder).then(() => {
-          expect(execaStub.called).to.be.true
-        })
+      return commitInfo(customFolder).then(() => {
+        expect(execaStub.called).to.be.true
       })
     })
   })
