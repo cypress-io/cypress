@@ -236,7 +236,7 @@ function getSocketSource (config: UrqlClientConfig) {
   // http: -> ws:  &  https: -> wss:
   const protocol = window.location.protocol.replace('http', 'ws')
   const wsUrl = config.target === 'launchpad'
-    ? `ws://${window.location.host}/__launchpad/graphql-ws`
+    ? `${protocol}//${window.location.host}/__launchpad/graphql-ws`
     : `${protocol}//${window.location.host}${config.socketIoRoute}-graphql`
 
   return createWsClient({
