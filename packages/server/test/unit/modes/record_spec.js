@@ -2,8 +2,6 @@ require('../../spec_helper')
 
 const _ = require('lodash')
 const debug = require('debug')('test')
-const { proxyquire } = require('../../spec_helper')
-const mockedEnv = require('mocked-env')
 
 const errors = require(`../../../lib/errors`)
 const api = require(`../../../lib/cloud/api`).default

@@ -81,7 +81,7 @@ describe('lib/util/commit-info', () => {
 
     execaStub = sinon.stub().rejects(new Error('Git command not stubbed'))
 
-    const commitInfoModule = proxyquire('../lib/util/commit-info', {
+    const commitInfoModule = proxyquire('../../../lib/util/commit-info', {
       execa: execaStub,
     })
 
