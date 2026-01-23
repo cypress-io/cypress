@@ -331,4 +331,16 @@ describe('<ResizablePanels />', { viewportWidth: 1500 }, () => {
       assertWidth('panel3', 1160)
     })
   })
+
+  describe('panel attributes', () => {
+    it('should have the correct aut-panel identifiers', () => {
+      cy.mount(() => (
+        <div class="h-screen">
+          <ResizablePanels maxTotalWidth={1500} v-slots={slotContents} />
+        </div>
+      ))
+
+      cy.get('[data-cy="aut-panel"]').should('have.id', 'aut-panel')
+    })
+  })
 })
