@@ -123,7 +123,7 @@ class $Cypress {
   Commands: any
   $autIframe: any
   $autSnapshotIframes?: JQuery<HTMLIFrameElement>[] | null
-  $autFrameContainer: JQuery<HTMLElement> | null
+  $autFramesContainer: JQuery<HTMLElement> | null
   $autPanelContainer: JQuery<HTMLElement> | null
   onSpecReady: any
   waitForStudio: any
@@ -220,7 +220,7 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.$autSnapshotIframes = null
-    this.$autFrameContainer = null
+    this.$autFramesContainer = null
     this.$autPanelContainer = null
     this.onSpecReady = null
     this.waitForStudio = null
@@ -362,9 +362,18 @@ class $Cypress {
 
   initialize ({ $autIframe, $autSnapshotIframes, onSpecReady, waitForStudio }) {
     this.$autIframe = $autIframe
+
+    // Cypress-provided iframe elements used by Studio to render DOM snapshots
+    // for Studio integrations.
     this.$autSnapshotIframes = $autSnapshotIframes
-    this.$autFrameContainer = $(document.getElementById('unified-runner')!)
-    this.$autPanelContainer = this.$autFrameContainer.parent()
+
+    // The container element holding the scaled AUT iframe and any $autSnapshotIframes.
+    // Used by Studio to portal dynamic content.
+    this.$autFramesContainer = $(document.getElementById('unified-runner')!)
+
+    // The container element holding all AUT panel contents, including the AUT frame, snapshot controls, etc.
+    // Used by Studio to portal dynamic content.
+    this.$autPanelContainer = $(document.getElementById('aut-panel')!)
 
     this.onSpecReady = onSpecReady
     this.waitForStudio = waitForStudio
