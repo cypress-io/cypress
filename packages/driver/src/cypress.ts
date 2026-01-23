@@ -369,7 +369,7 @@ class $Cypress {
 
     // The container element holding the scaled AUT iframe and any $autSnapshotIframes.
     // Used by Studio to portal dynamic content.
-    this.$autFramesContainer = $(document.getElementById('unified-runner')!)
+    this.$autFramesContainer = $(document.getElementById('aut-frames-container')!)
 
     // The container element holding all AUT panel contents, including the AUT frame, snapshot controls, etc.
     // Used by Studio to portal dynamic content.
