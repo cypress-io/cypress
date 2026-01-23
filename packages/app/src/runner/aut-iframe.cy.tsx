@@ -127,9 +127,15 @@ describe('AutIframe', () => {
       const result = autIframe.create()
 
       expect(result).to.have.property('autIframe')
-      expect(result).to.have.property('autSnapshotIframe')
+      expect(result).to.have.property('autSnapshotIframes')
       expect(autIframe.$iframe).to.equal(result.autIframe)
       expect(autIframe.$snapshotIframes).to.equal(result.autSnapshotIframes)
+      expect(result.autSnapshotIframes.length).to.equal(2)
+      result.autSnapshotIframes.forEach((iframe) => {
+        expect(iframe.is(':hidden')).to.be.true
+        expect(iframe.hasClass('aut-snapshot-iframe')).to.be.true
+        expect(iframe.attr('data-snapshot-index')).to.exist
+      })
     })
 
     it('should create aut iframe with correct attributes', () => {
@@ -143,11 +149,12 @@ describe('AutIframe', () => {
 
     it('should create snapshot iframe with correct attributes', () => {
       const result = autIframe.create()
-      const snapshotIframeElement = result.autSnapshotIframes[0][0] as HTMLIFrameElement
 
-      expect(snapshotIframeElement.id).to.equal('AUT Snapshot: \'Test Project\'')
-      expect(snapshotIframeElement.title).to.equal('AUT Snapshot: \'Test Project\'')
-      expect(snapshotIframeElement.className).to.equal('aut-snapshot-iframe')
+      result.autSnapshotIframes.forEach((iframe) => {
+        expect(iframe[0].id).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
+        expect(iframe[0].title).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
+        expect(iframe[0].className).to.equal('aut-snapshot-iframe')
+      })
     })
 
     it('verify the snapshot iframe is hidden', () => {
