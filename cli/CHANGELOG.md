@@ -3,6 +3,10 @@
 
 _Released 01/27/2026 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addresses [#12510](https://github.com/cypress-io/cypress-services/issues/12510). Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
+
 **Misc:**
 
 - The icon in the 'Open in IDE' button in the command log is now the correct size. Addresses [#32779](https://github.com/cypress-io/cypress/issues/32779). Addressed in [#33217](https://github.com/cypress-io/cypress/pull/33217).
