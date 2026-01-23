@@ -122,7 +122,9 @@ class $Cypress {
   downloads: any
   Commands: any
   $autIframe: any
-  $autSnapshotIframe?: JQuery<HTMLIFrameElement> | null
+  $autSnapshotIframes?: JQuery<HTMLIFrameElement>[] | null
+  $autFrameContainer: JQuery<HTMLElement> | null
+  $autPanelContainer: JQuery<HTMLElement> | null
   onSpecReady: any
   waitForStudio: any
   events: any
@@ -217,7 +219,9 @@ class $Cypress {
     this.downloads = null
     this.Commands = null
     this.$autIframe = null
-    this.$autSnapshotIframe = null
+    this.$autSnapshotIframes = null
+    this.$autFrameContainer = null
+    this.$autPanelContainer = null
     this.onSpecReady = null
     this.waitForStudio = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
@@ -356,9 +360,12 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ({ $autIframe, $autSnapshotIframe, onSpecReady, waitForStudio }) {
+  initialize ({ $autIframe, $autSnapshotIframes, onSpecReady, waitForStudio }) {
     this.$autIframe = $autIframe
-    this.$autSnapshotIframe = $autSnapshotIframe
+    this.$autSnapshotIframes = $autSnapshotIframes
+    this.$autFrameContainer = $(document.getElementById('unified-runner')!)
+    this.$autPanelContainer = this.$autFrameContainer.parent()
+
     this.onSpecReady = onSpecReady
     this.waitForStudio = waitForStudio
     if (this._onInitialize) {

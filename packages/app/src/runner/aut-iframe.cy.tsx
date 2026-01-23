@@ -129,7 +129,7 @@ describe('AutIframe', () => {
       expect(result).to.have.property('autIframe')
       expect(result).to.have.property('autSnapshotIframe')
       expect(autIframe.$iframe).to.equal(result.autIframe)
-      expect(autIframe.$snapshotIframe).to.equal(result.autSnapshotIframe)
+      expect(autIframe.$snapshotIframes).to.equal(result.autSnapshotIframes)
     })
 
     it('should create aut iframe with correct attributes', () => {
@@ -143,7 +143,7 @@ describe('AutIframe', () => {
 
     it('should create snapshot iframe with correct attributes', () => {
       const result = autIframe.create()
-      const snapshotIframeElement = result.autSnapshotIframe[0] as HTMLIFrameElement
+      const snapshotIframeElement = result.autSnapshotIframes[0][0] as HTMLIFrameElement
 
       expect(snapshotIframeElement.id).to.equal('AUT Snapshot: \'Test Project\'')
       expect(snapshotIframeElement.title).to.equal('AUT Snapshot: \'Test Project\'')
@@ -153,10 +153,10 @@ describe('AutIframe', () => {
     it('verify the snapshot iframe is hidden', () => {
       const result = autIframe.create()
 
-      result.autSnapshotIframe.appendTo(document.body)
+      result.autSnapshotIframes[0].appendTo(document.body)
       result.autIframe.appendTo(document.body)
 
-      expect(result.autSnapshotIframe.is(':hidden')).to.be.true
+      expect(result.autSnapshotIframes[0].is(':hidden')).to.be.true
       expect(result.autIframe.is(':hidden')).to.be.false
     })
   })
@@ -174,10 +174,10 @@ describe('AutIframe', () => {
         return result.autIframe
       }
 
-      result.autSnapshotIframe.remove = () => {
+      result.autSnapshotIframes[0].remove = () => {
         snapshotIframeRemoved = true
 
-        return result.autSnapshotIframe
+        return result.autSnapshotIframes[0]
       }
 
       autIframe.destroy()
