@@ -46,7 +46,7 @@ export class AutIframe {
       const $snapshotIframe = this.$('<iframe>', {
         id: `AUT Snapshot - ${index}: '${this.projectName}'`,
         title: `AUT Snapshot - ${index}: '${this.projectName}'`,
-        class: `aut-snapshot-iframe aut-snapshot-iframe-${index}`,
+        class: 'aut-snapshot-iframe',
         'data-snapshot-index': index,
       })
 
