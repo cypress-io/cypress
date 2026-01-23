@@ -1,4 +1,5 @@
 export default ({
+  allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     devServer: {

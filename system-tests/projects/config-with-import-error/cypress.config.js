@@ -3,6 +3,7 @@
 const webpackConfig = require('./webpack.config.js')
 
 module.exports = {
+  allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     devServer: {

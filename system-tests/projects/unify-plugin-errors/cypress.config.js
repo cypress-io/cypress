@@ -1,4 +1,5 @@
 module.exports = {
+  'allowCypressEnv': false,
   'e2e': {
     baseUrl: 'https://cypress.com',
     supportFile: false,

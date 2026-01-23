@@ -2,6 +2,7 @@ import { defineConfig } from 'cypress'
 const { projects } = require('./angular.json')
 
 export default defineConfig({
+  allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     devServer: {

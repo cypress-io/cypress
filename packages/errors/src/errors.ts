@@ -1265,6 +1265,17 @@ export const AllCypressErrors = {
       Read the migration guide for Cypress v14.0.0: https://on.cypress.io/migration-guide
     `
   },
+  CYPRESS_ENV_DEPRECATION: () => {
+    return errTemplate`\
+      The use of ${fmt.highlight('Cypress.env()')} is deprecated and will be removed in a future major version of Cypress.
+      
+      Cypress recommends migrating to the ${fmt.highlight('cy.env()')} command and disabling ${fmt.highlight('allowCypressEnv')} within your Cypress configuration.
+      
+      The use of ${fmt.highlight('Cypress.env()')} will warn and throw an error when ${fmt.highlight('allowCypressEnv')} is explicitly set to false.
+    
+      Read our ${fmt.highlight('Migration Guide')} for the ${fmt.highlight('allowCypressEnv')} configuration option, why ${fmt.highlight('Cypress.env()')} is deprecated, and how to migrate to ${fmt.highlight('cy.env()')}: https://on.cypress.io/cypress-env-migration.
+    `
+  },
   // TODO: link to docs on injectDocumentDomain
   INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
     return errTemplate`\

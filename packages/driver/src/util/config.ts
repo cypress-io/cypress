@@ -65,12 +65,22 @@ export const syncEnvToCurrentOrigin = (env: Cypress.ObjectLike) => {
   Cypress.env(shallowConfigDiff)
 }
 
+export const syncExposeToCurrentOrigin = (expose: Cypress.ObjectLike) => {
+  const shallowConfigDiff = syncToCurrentOrigin(expose, Cypress.expose())
+
+  Cypress.expose(shallowConfigDiff)
+}
+
 export const preprocessConfig = (config: Cypress.Config) => {
   return preprocessForSerialization(config) as Cypress.Config
 }
 
 export const preprocessEnv = (env: Cypress.ObjectLike) => {
   return preprocessForSerialization(env) as Cypress.Config
+}
+
+export const preprocessExpose = (expose: Cypress.ObjectLike) => {
+  return preprocessForSerialization(expose) as Cypress.Config
 }
 
 export const getMochaOverrideLevel = (state): MochaOverrideLevel | undefined => {

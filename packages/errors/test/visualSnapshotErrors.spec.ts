@@ -1130,5 +1130,10 @@ describe('visual error templates', () => {
         default: ['http://localhost:8080'],
       }
     },
+    CYPRESS_ENV_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
   })
 })

@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@babel/parser": "7.28.0",
-    "@cypress/commit-info": "2.2.0",
+    "@cypress/commit-info": "2.2.2",
     "@cypress/get-windows-proxy": "1.6.3",
     "@cypress/request": "^3.0.10",
     "@cypress/request-promise": "^5.0.0",

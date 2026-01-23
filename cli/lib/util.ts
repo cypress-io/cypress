@@ -190,6 +190,7 @@ const parseOpts = (opts: any): any => {
     'e2e',
     'exit',
     'env',
+    'expose',
     'force',
     'global',
     'group',

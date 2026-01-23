@@ -55,6 +55,16 @@ namespace CypressEnvTests {
   })
 }
 
+namespace CypressExposeTests {
+  // Just making sure these are valid - no real type safety
+  Cypress.expose('foo')
+  Cypress.expose('foo', 'bar')
+  Cypress.expose().foo
+  Cypress.expose({
+    foo: 'bar',
+  })
+}
+
 namespace CypressStopTests {
   Cypress.stop() // $ExpectType void
   Cypress.stop('foo') // $ExpectError

@@ -11,6 +11,10 @@ function runSpecFunctionCommands () {
   if (!isWebkit) {
     cy.origin('http://foobar.com:3500', () => {})
   }
+
+  cy.env(['MY_ENV_VAR']).then(({ MY_ENV_VAR }) => {
+    expect(MY_ENV_VAR).to.be.undefined
+  })
 }
 
 Cypress.Commands.add('runSpecFileCustomPrivilegedCommands', runSpecFunctionCommands)

@@ -1,12 +1,6 @@
 /* eslint-disable no-undef */
 const { _ } = Cypress
 
-const expectedDomain = Cypress.env('expectedDomain')
-const httpUrl = Cypress.env('httpUrl')
-const httpsUrl = Cypress.env('httpsUrl')
-const otherUrl = Cypress.env('otherUrl')
-const otherHttpsUrl = Cypress.env('otherHttpsUrl')
-
 // chrome defaults to "unspecified"
 let defaultSameSite = undefined
 
@@ -16,16 +10,34 @@ if (Cypress.isBrowser('firefox')) {
   defaultSameSite = Cypress.browser.majorVersion < 140 ? 'no_restriction' : 'unspecified'
 }
 
+let expectedDomain
+let httpUrl
+let httpsUrl
+let otherUrl
+let otherHttpsUrl
+let noBaseUrl
+let baseUrl
+
 describe('cookies', () => {
   before(() => {
-    if (Cypress.env('noBaseUrl')) {
-      return
-    }
+    cy.env(['expectedDomain', 'httpUrl', 'httpsUrl', 'otherUrl', 'otherHttpsUrl', 'noBaseUrl', 'baseUrl']).then(({ expectedDomain: expectedDomainEnv, httpUrl: httpUrlEnv, httpsUrl: httpsUrlEnv, otherUrl: otherUrlEnv, otherHttpsUrl: otherHttpsUrlEnv, noBaseUrl: noBaseUrlEnv, baseUrl: baseUrlEnv }) => {
+      expectedDomain = expectedDomainEnv
+      httpUrl = httpUrlEnv
+      httpsUrl = httpsUrlEnv
+      otherUrl = otherUrlEnv
+      otherHttpsUrl = otherHttpsUrlEnv
+      noBaseUrl = noBaseUrlEnv
+      baseUrl = baseUrlEnv
 
-    // assert we're running on expected baseurl
-    expect(Cypress.env('baseUrl')).to.be.a('string')
-    .and.have.length.gt(0)
-    .and.eq(Cypress.config('baseUrl'))
+      if (noBaseUrl) {
+        return
+      }
+
+      // assert we're running on expected baseurl
+      expect(baseUrl).to.be.a('string')
+      .and.have.length.gt(0)
+      .and.eq(Cypress.config('baseUrl'))
+    })
   })
 
   it('sends set cookies to path', () => {
@@ -241,15 +253,16 @@ describe('cookies', () => {
       });
 
       [
-        ['HTTP', otherUrl],
-        ['HTTPS', otherHttpsUrl],
-      ].forEach(([protocol, altUrl]) => {
+        ['HTTP'],
+        ['HTTPS'],
+      ].forEach(([protocol]) => {
         context(`when redirected to a ${protocol} URL`, () => {
           [
             ['different domain', 7],
             ['same domain', 8],
           ].forEach(([title, n]) => {
             it(`can set cookies on lots of redirects, ending with ${title}`, () => {
+              const altUrl = protocol === 'HTTPS' ? otherHttpsUrl : otherUrl
               const altDomain = (new Cypress.Location(altUrl)).getHostName()
 
               let expectedGetCookiesArray = []
@@ -285,7 +298,7 @@ describe('cookies', () => {
               cy.clearAllCookies()
               cy.getAllCookies().should('have.length', 0)
 
-              cy[cmd](`/setCascadingCookies?n=${n}&a=${altUrl}&b=${Cypress.env('baseUrl')}`)
+              cy[cmd](`/setCascadingCookies?n=${n}&a=${altUrl}&b=${baseUrl}`)
 
               cy.getAllCookies().then((cookies) => {
                 // reverse them so they'll be in the order they were set
