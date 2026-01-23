@@ -1,5 +1,6 @@
 import '../../spec_helper'
 
+import path from 'path'
 import { proxyquire } from '../../spec_helper'
 import mockedEnv from 'mocked-env'
 
@@ -81,7 +82,9 @@ describe('lib/util/commit-info', () => {
 
     execaStub = sinon.stub().rejects(new Error('Git command not stubbed'))
 
-    const commitInfoModule = proxyquire('../../../lib/util/commit-info', {
+    const commitInfoPath = path.resolve(__dirname, '../../../lib/util/commit-info')
+
+    const commitInfoModule = proxyquire(commitInfoPath, {
       execa: execaStub,
     })
 
