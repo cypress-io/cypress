@@ -22,6 +22,9 @@ _Released 01/27/2026 (PENDING)_
 - Upgraded `shell-env` to `4.0.1` and `@cypress/commit-info` to `2.2.2`. This removes the [GMS-2020-2](https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/npm/execa/GMS-2020-2.yml) vulnerability being reported in security scans. Addressed in [#33226](https://github.com/cypress-io/cypress/pull/33226) and [#33263](https://github.com/cypress-io/cypress/pull/33263).
 - Upgraded `lodash` to `4.17.23`. This removes the [CVE-2025-13465](https://github.com/advisories/GHSA-xxjr-mmjv-4gpg) vulnerability being reported in security scans. Addresses [#33269](https://github.com/cypress-io/cypress/issues/33269).
 
+**Bugfixes:**
+
+- Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
 
 ## 15.9.0
 
