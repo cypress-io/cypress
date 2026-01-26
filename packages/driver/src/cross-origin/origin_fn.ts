@@ -149,6 +149,8 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     let queueFinished = false
 
     reset(state)
+    cy.state('originLogGroupLevel', state?.originLogGroupLevel)
+    cy.state('originLogGroupId', state?.originLogGroupId)
 
     // Set the counter for log ids
     LogUtils.setCounter(logCounter)
@@ -166,6 +168,8 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
     cy.state('onQueueEnd', () => {
       queueFinished = true
       setRunnableStateToPassed()
+      cy.state('originLogGroupLevel', undefined)
+      cy.state('originLogGroupId', undefined)
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', {
         subject: cy.subject(),
       }, {
@@ -175,6 +179,8 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     cy.state('onFail', (err) => {
       setRunnableStateToPassed()
+      cy.state('originLogGroupLevel', undefined)
+      cy.state('originLogGroupId', undefined)
       if (queueFinished) {
         // If the queue is already finished, send this event instead because
         // the primary won't be listening for 'queue:finished' anymore

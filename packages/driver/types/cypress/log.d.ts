@@ -94,6 +94,10 @@ declare namespace Cypress {
     functionName?: string
     // whether or not to start a new log group
     groupStart?: boolean
+    // cross-origin log group level offset from the primary origin
+    originLogGroupLevel?: number
+    // cross-origin log group id from the primary origin
+    originLogGroupId?: string
     // whether or not the log should display in the reporter
     hidden?: boolean
     hookId?: number

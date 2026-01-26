@@ -22,6 +22,29 @@ const BLACKLIST_PROPS = 'snapshots'.split(' ')
 const PROTOCOL_MESSAGE_TRUNCATION_LENGTH = 3000
 
 let counter = 0
+const LOG_ID_ORIGIN_RE = /^log-(.+)-\d+$/
+
+const getLogOrigin = (id?: string) => {
+  if (!id) {
+    return window.location.origin
+  }
+
+  const match = LOG_ID_ORIGIN_RE.exec(id)
+
+  return match ? match[1] : window.location.origin
+}
+
+const getCurrentOriginLogGroupIds = (state: StateFunc) => {
+  const logGroupIds = state('logGroupIds') || []
+  const currentOrigin = window.location.origin
+  const effectiveLogGroupIds = logGroupIds.filter((id) => getLogOrigin(id) === currentOrigin)
+
+  if (effectiveLogGroupIds.length !== logGroupIds.length) {
+    state('logGroupIds', effectiveLogGroupIds)
+  }
+
+  return effectiveLogGroupIds
+}
 
 export const LogUtils = {
   // mutate attrs by nulling out
@@ -222,19 +245,95 @@ const defaults = function (state: StateFunc, config, obj) {
     },
   })
 
-  const logGroupIds = state('logGroupIds') || []
-
-  if (logGroupIds.length) {
-    obj.group = _.last(logGroupIds)
-    obj.groupLevel = logGroupIds.length
+  if (Cypress.isCrossOriginSpecBridge) {
+    obj.originLogGroupLevel = state('originLogGroupLevel')
+    obj.originLogGroupId = state('originLogGroupId')
   }
 
-  if (obj.groupEnd) {
-    state('logGroupIds', _.slice(logGroupIds, 0, -1))
+  const logGroupIds = getCurrentOriginLogGroupIds(state)
+  const logOrigin = getLogOrigin(obj.id)
+  const isDifferentOriginLog = logOrigin !== window.location.origin
+  const isCrossOriginId = typeof obj.id === 'string' && !obj.id.startsWith(`log-${window.location.origin}-`)
+  const isPrimaryReceivingCrossOriginLog = !Cypress.isCrossOriginSpecBridge
+    && (obj.isCrossOriginLog || isDifferentOriginLog || isCrossOriginId)
+  let originLogGroupLevel = obj.originLogGroupLevel ?? state('originLogGroupLevel')
+  let originLogGroupId = obj.originLogGroupId ?? state('originLogGroupId')
+
+  if (!Cypress.isCrossOriginSpecBridge && (originLogGroupLevel == null || originLogGroupId == null)) {
+    const originMeta = (Cypress as any)?.primaryOriginCommunicator?.getOriginLogGroupMeta?.(logOrigin) || {}
+
+    if (originLogGroupLevel == null) {
+      originLogGroupLevel = originMeta.level
+    }
+
+    if (originLogGroupId == null) {
+      originLogGroupId = originMeta.id
+    }
   }
 
-  if (obj.groupStart) {
-    state('logGroupIds', (logGroupIds).concat(obj.id))
+  const resolvedOriginLogGroupLevel = originLogGroupLevel ?? 0
+  const effectiveOriginLogGroupLevel = Cypress.isCrossOriginSpecBridge ? resolvedOriginLogGroupLevel : 0
+
+  if (isPrimaryReceivingCrossOriginLog) {
+    if (originLogGroupLevel != null) {
+      obj.originLogGroupLevel = originLogGroupLevel
+    }
+
+    if (originLogGroupId) {
+      obj.originLogGroupId = originLogGroupId
+    }
+
+    if (obj.groupLevel == null) {
+      if (originLogGroupLevel != null) {
+        obj.groupLevel = originLogGroupLevel
+      } else if (logGroupIds.length) {
+        obj.groupLevel = logGroupIds.length
+      }
+    }
+
+    if (!obj.group) {
+      if (originLogGroupId) {
+        obj.group = originLogGroupId
+      } else if (logGroupIds.length) {
+        obj.group = _.last(logGroupIds)
+      }
+    }
+
+    // cross-origin group start/end should not mutate primary log group state
+    if (obj.groupStart) {
+      obj.groupStart = false
+    }
+
+    if (obj.groupEnd) {
+      obj.groupEnd = false
+    }
+
+    // Never let cross-origin logs pollute primary log group state.
+    getCurrentOriginLogGroupIds(state)
+  } else {
+    if (logGroupIds.length) {
+      obj.group = _.last(logGroupIds)
+      obj.groupLevel = logGroupIds.length + effectiveOriginLogGroupLevel
+    } else if (effectiveOriginLogGroupLevel) {
+      obj.groupLevel = effectiveOriginLogGroupLevel
+
+      if (originLogGroupId) {
+        obj.group = originLogGroupId
+      }
+    }
+
+    const shouldTrackGroup = !isDifferentOriginLog && !isCrossOriginId
+      && (!obj.isCrossOriginLog || Cypress.isCrossOriginSpecBridge)
+
+    if (shouldTrackGroup) {
+      if (obj.groupEnd) {
+        state('logGroupIds', _.slice(logGroupIds, 0, -1))
+      }
+
+      if (obj.groupStart) {
+        state('logGroupIds', (logGroupIds).concat(obj.id))
+      }
+    }
   }
 
   return obj
@@ -421,10 +520,11 @@ export class Log {
   }
 
   error (err) {
-    const logGroupIds = this.state('logGroupIds') || []
+    const logGroupIds = getCurrentOriginLogGroupIds(this.state)
+    const logOrigin = getLogOrigin(this.attributes.id)
 
     // current log was responsible for creating the current log group so end the current group
-    if (_.last(logGroupIds) === this.attributes.id) {
+    if (logOrigin === window.location.origin && _.last(logGroupIds) === this.attributes.id) {
       this.endGroup()
     }
 
@@ -458,7 +558,13 @@ export class Log {
   }
 
   endGroup () {
-    this.state('logGroupIds', _.slice(this.state('logGroupIds'), 0, -1))
+    if (getLogOrigin(this.attributes.id) !== window.location.origin) {
+      return
+    }
+
+    const logGroupIds = getCurrentOriginLogGroupIds(this.state)
+
+    this.state('logGroupIds', _.slice(logGroupIds, 0, -1))
   }
 
   getError (err) {

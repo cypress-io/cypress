@@ -62,6 +62,8 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
       }
 
       let log
+      let originLogGroupLevel
+      let originLogGroupId
 
       logGroup(Cypress, {
         name: 'origin',
@@ -71,6 +73,10 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
         // @ts-ignore TODO: revisit once log-grouping has more implementations
       }, (_log) => {
         log = _log
+        originLogGroupId = _log?.get('id')
+        originLogGroupLevel = (Cypress.state('logGroupIds') || []).length || 1
+        Cypress.state('originLogGroupId', originLogGroupId)
+        Cypress.state('originLogGroupLevel', originLogGroupLevel)
       })
 
       const validator = new Validator({
@@ -198,6 +204,10 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
             const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, $sourceMapUtils.getSourceMapProjectRoot())?.absoluteFile
 
             try {
+              originLogGroupId = originLogGroupId ?? log?.get('id')
+              originLogGroupLevel = (Cypress.state('logGroupIds') || []).length || 1
+              Cypress.state('originLogGroupId', originLogGroupId)
+              Cypress.state('originLogGroupLevel', originLogGroupLevel)
               // origin is a privileged command, meaning it has to be invoked
               // from the spec or support file
               await runPrivilegedCommand({
@@ -231,6 +241,8 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
                   crossOriginCookies: Cypress.state('crossOriginCookies'),
                   isProtocolEnabled: Cypress.state('isProtocolEnabled'),
                   originUserInvocationStack: userInvocationStack,
+                  originLogGroupLevel,
+                  originLogGroupId,
                 },
                 config: preprocessConfig(Cypress.config()),
                 env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,

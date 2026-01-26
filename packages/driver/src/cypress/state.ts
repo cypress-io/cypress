@@ -25,6 +25,8 @@ export interface StateFunc {
   (k: 'autLocation', v?: LocationObject): LocationObject
   (k: 'originCommandBaseUrl', v?: string): string
   (k: 'currentActiveOrigin', v?: string): string
+  (k: 'originLogGroupLevel', v?: number): number | undefined
+  (k: 'originLogGroupId', v?: string): string | undefined
   (k: 'duringUserTestExecution', v?: boolean): boolean
   (k: 'onQueueEnd', v?: () => void): () => void
   (k: 'onFail', v?: (err: Error) => void): (err: Error) => void

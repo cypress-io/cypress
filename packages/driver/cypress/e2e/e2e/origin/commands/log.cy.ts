@@ -67,6 +67,38 @@ context('cy.origin log', { browser: '!webkit' }, () => {
     })
   })
 
+  it('resets group level after grouped commands in cy.origin', () => {
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.get('body').within(() => {
+        cy.get('#dom').should('exist')
+      })
+
+      cy.get('body').within(() => {
+        cy.get('#dom').should('exist')
+      })
+    })
+    .then(() => {
+      const withinLogs = logs.filter((log) => log.get('isCrossOriginLog') && log.get('name') === 'within')
+      const getBodyLogs = logs.filter((log) => {
+        return log.get('isCrossOriginLog')
+        && log.get('name') === 'get'
+        && log.get('message') === 'body'
+      })
+
+      expect(withinLogs, 'within logs').to.have.length(2)
+      expect(
+        withinLogs[1].get('groupLevel'),
+        'second within group level',
+      ).to.eq(withinLogs[0].get('groupLevel'))
+
+      expect(getBodyLogs, 'get body logs').to.have.length(2)
+      expect(
+        getBodyLogs[1].get('groupLevel'),
+        'second get body group level',
+      ).to.eq(getBodyLogs[0].get('groupLevel'))
+    })
+  })
+
   it('primary origin does not override secondary origins timestamps', () => {
     logs = []
     const secondaryLogs = {
