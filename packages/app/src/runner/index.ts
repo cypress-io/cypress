@@ -298,7 +298,7 @@ async function runSpecE2E (config, spec: SpecFile) {
   // create root for new AUT
   const $container = document.createElement('div')
 
-  $container.id = 'aut-frames-container'
+  $container.id = 'aut-iframes-container'
   $container.classList.add('screenshot-height-container')
 
   $runnerRoot.append($container)

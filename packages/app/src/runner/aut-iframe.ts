@@ -42,6 +42,8 @@ export class AutIframe {
 
     this.$iframe = $iframe
 
+    // Create two iframes to facilitate before/after snapshot
+    // rendering with a double buffer.
     this.$snapshotIframes = _.times(2, (index) => {
       const $snapshotIframe = this.$('<iframe>', {
         id: `AUT Snapshot - ${index}: '${this.projectName}'`,

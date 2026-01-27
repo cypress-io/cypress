@@ -28,6 +28,7 @@ describe('$Cypress', () => {
 
       expect(Cypress.$autIframe).toBe(mockAutIframe)
       expect(Cypress.$autSnapshotIframes).toBe(mockSnapshotIframes)
+      expect(Cypress.$autSnapshotIframe).toBe(mockSnapshotIframes[0])
       expect(Cypress.onSpecReady).toBe(mockOnSpecReady)
       expect(Cypress.waitForStudio).toBe(mockWaitForStudio)
     })

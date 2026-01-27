@@ -122,8 +122,9 @@ class $Cypress {
   downloads: any
   Commands: any
   $autIframe: any
+  $autSnapshotIframe?: JQuery<HTMLIFrameElement> | null
   $autSnapshotIframes?: JQuery<HTMLIFrameElement>[] | null
-  $autFramesContainer: JQuery<HTMLElement> | null
+  $autIframesContainer?: JQuery<HTMLElement> | null
   $autPanelContainer: JQuery<HTMLElement> | null
   onSpecReady: any
   waitForStudio: any
@@ -219,8 +220,9 @@ class $Cypress {
     this.downloads = null
     this.Commands = null
     this.$autIframe = null
+    this.$autSnapshotIframe = null
     this.$autSnapshotIframes = null
-    this.$autFramesContainer = null
+    this.$autIframesContainer = null
     this.$autPanelContainer = null
     this.onSpecReady = null
     this.waitForStudio = null
@@ -365,15 +367,23 @@ class $Cypress {
 
     // Cypress-provided iframe elements used by Studio to render DOM snapshots
     // for Studio integrations.
+    //
+    // Including the first snapshot as $autSnapshotIframe for compatibility with
+    // some Studio versions.
     this.$autSnapshotIframes = $autSnapshotIframes
+    this.$autSnapshotIframe = $autSnapshotIframes[0]
 
     // The container element holding the scaled AUT iframe and any $autSnapshotIframes.
     // Used by Studio to portal dynamic content.
-    this.$autFramesContainer = $(document.getElementById('aut-frames-container')!)
+    const autIframesContainerElement = document.getElementById('aut-iframes-container')
+
+    this.$autIframesContainer = autIframesContainerElement ? $(autIframesContainerElement) : null
 
     // The container element holding all AUT panel contents, including the AUT frame, snapshot controls, etc.
     // Used by Studio to portal dynamic content.
-    this.$autPanelContainer = $(document.getElementById('aut-panel')!)
+    const autPanelContainerElement = document.getElementById('aut-panel')
+
+    this.$autPanelContainer = autPanelContainerElement ? $(autPanelContainerElement) : null
 
     this.onSpecReady = onSpecReady
     this.waitForStudio = waitForStudio
