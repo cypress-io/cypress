@@ -6,6 +6,11 @@ import { syncConfigToCurrentOrigin, syncEnvToCurrentOrigin, syncExposeToCurrentO
 import type { Runnable, Test } from 'mocha'
 import { LogUtils } from '../cypress/log'
 
+interface RunOriginFnState extends Cypress.ObjectLike {
+  originLogGroupLevel?: number
+  originLogGroupId?: string
+}
+
 interface RunOriginFnOptions {
   config: Cypress.Config
   args: any
@@ -14,7 +19,7 @@ interface RunOriginFnOptions {
   file?: string
   fn: string
   skipConfigValidation: boolean
-  state: {}
+  state: RunOriginFnState
   logCounter: number
 }
 
