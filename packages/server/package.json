@@ -225,7 +225,7 @@
     "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
   },
   "optionalDependencies": {
-    "fsevents": "^2",
+    "fsevents": "^2.3.3",
     "registry-js": "1.15.0"
   },
   "license": "MIT",
