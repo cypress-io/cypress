@@ -1,4 +1,4 @@
-import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName } from './helper'
+import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName, openNewTestFromSpecHeader } from './helper'
 
 describe('Cypress Studio - Navigation and URL Management', () => {
   it('does not re-enter studio mode when changing pages and then coming back', () => {
@@ -43,7 +43,7 @@ describe('Cypress Studio - Navigation and URL Management', () => {
   it('updates the AUT url when creating a new test', () => {
     launchStudio({ specName: 'navigation.cy.js', createNewTestFromSuite: true })
 
-    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
+    inputNewTestName()
 
     cy.findByTestId('aut-url-input').should('have.focus').type('cypress/e2e/navigation.html{enter}')
 
@@ -73,26 +73,43 @@ describe('Cypress Studio - Navigation and URL Management', () => {
   it('update the url with the suiteId and studio parameters when entering studio with a suite', () => {
     launchStudio({ createNewTestFromSuite: true })
 
-    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=').and('contain', 'sessionId=')
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=').and('contain', 'sessionId=').and('contain', 'entrySource=new-test-suite')
   })
 
-  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
-  it.skip('updates the studio url parameters and displays the single test view after creating a new test', () => {
+  it('removes entrySource parameter when going to a different page', () => {
+    launchStudio({ createNewTestFromSuite: true })
+
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=').and('contain', 'entrySource=new-test-suite')
+
+    // go to the runs page
+    cy.findByTestId('sidebar-link-runs-page').click()
+
+    cy.location().its('hash').should('contain', '/runs').and('not.contain', 'testId=').and('not.contain', 'studio=').and('not.contain', 'entrySource=')
+  })
+
+  it('updates the studio url parameters and displays the single test view after creating a new test', () => {
     loadProjectAndRunSpec()
 
-    // open the studio panel to create a new test in the root suite
-    cy.findByTestId('studio-button').click()
-    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=').and('contain', 'sessionId=')
+    // open the spec header to create a new test in the root suite
+    openNewTestFromSpecHeader()
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=').and('contain', 'sessionId=').and('contain', 'entrySource=new-test-root')
 
     // create a new test in the root suite
     inputNewTestName()
 
     // the studio url parameters should be removed
-    cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2')
+    cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2').and('not.contain', 'entrySource=')
 
     cy.get('.studio-single-test-container').should('be.visible')
 
     cy.percySnapshot()
+
+    // after reloading, it should still display the single test view
+    cy.reload()
+
+    // the studio url parameters should be removed
+    cy.location().its('hash').and('not.contain', 'suiteId=').and('contain', 'studio=').and('contain', 'testId=r2').and('not.contain', 'entrySource=')
+    cy.get('.studio-single-test-container').should('be.visible')
   })
 
   it('does not remove the studio url parameters when saving test changes', () => {
@@ -188,10 +205,10 @@ describe('studio functionality', () => {
   it('removes the studio url parameters when closing studio new test', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
-    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=')
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=').and('contain', 'entrySource=new-test-suite')
 
     cy.findByTestId('studio-header-studio-button').click()
 
-    cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=')
+    cy.location().its('hash').and('not.contain', 'suiteId=').and('not.contain', 'studio=').and('not.contain', 'entrySource=')
   })
 })

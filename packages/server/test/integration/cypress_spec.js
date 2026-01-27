@@ -7,7 +7,7 @@ const EE = require('events')
 const http = require('http')
 const Promise = require('bluebird')
 const electron = require('electron')
-const commitInfo = require('@cypress/commit-info')
+const commitInfo = require('../../lib/util/commit-info')
 const Fixtures = require('@tooling/system-tests')
 const { normalizeStdout } = require('@tooling/system-tests/lib/normalizeStdout')
 const snapshot = require('snap-shot-it')
@@ -346,7 +346,15 @@ describe('lib/cypress', () => {
 
       sinon.stub(browsers, 'open')
       sinon.stub(browsers, 'connectToNewSpec')
-      sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
+      sinon.stub(commitInfo, 'commitInfo').resolves({
+        branch: 'test-branch',
+        message: 'test message',
+        email: 'test@example.com',
+        author: 'Test Author',
+        sha: 'abc123',
+        timestamp: 1234567890,
+        remote: 'remoteOrigin',
+      })
     })
 
     describe('cloud recommendation message', () => {

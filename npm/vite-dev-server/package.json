@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc --project tsconfig.build.json || echo 'built, with type errors'",
     "check-ts": "tsc --noEmit --project tsconfig.build.json",
-    "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project .",
-    "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome",
+    "cypress:open": "yarn cypress:run-cypress-in-cypress gulp open --project . --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
+    "cypress:run": "yarn cypress:run-cypress-in-cypress node ../../scripts/cypress run --project . --browser chrome --expose INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=true",
     "cypress:run-cypress-in-cypress": "cross-env CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT=1 HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS=http://localhost:4455 CYPRESS_REMOTE_DEBUGGING_PORT=6666 TZ=America/New_York",
     "lint": "eslint --ext .js,.ts,.json, .",
     "test": "vitest run --no-file-parallelism",

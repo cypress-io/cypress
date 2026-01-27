@@ -72,6 +72,8 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
   }
 
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+  config.expose.INTERNAL_E2E_TESTING_SELF = 'true'
+
   delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_DEV
   delete process.env.CYPRESS_INTERNAL_VITE_APP_PORT
