@@ -21,6 +21,7 @@ webpackConfig.devServer ??= {}
 webpackConfig.devServer.port = port
 
 export default defineConfig({
+  allowCypressEnv: false,
   env: {
     PORT_CHECK: port,
   },

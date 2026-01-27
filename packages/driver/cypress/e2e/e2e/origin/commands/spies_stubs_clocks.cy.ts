@@ -29,20 +29,20 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
   context('resets stubs', () => {
     it('creates the stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
-        const stubEnv = cy.stub(Cypress, 'env').withArgs('foo').returns('bar')
+        const stubExpose = cy.stub(Cypress, 'expose').withArgs('foo').returns('bar')
 
-        expect(Cypress.env('foo')).to.equal('bar')
-        expect(stubEnv).to.be.calledOnce
+        expect(Cypress.expose('foo')).to.equal('bar')
+        expect(stubExpose).to.be.calledOnce
         // @ts-ignore
-        expect(Cypress.env.isSinonProxy).to.be.true
+        expect(Cypress.expose.isSinonProxy).to.be.true
       })
     })
 
     it('verifies the stub got restored', () => {
       cy.origin('http://www.foobar.com:3500', () => {
-        expect(Cypress.env('foo')).to.be.undefined
+        expect(Cypress.expose('foo')).to.be.undefined
         // @ts-ignore
-        expect(Cypress.env.isSinonProxy).to.be.undefined
+        expect(Cypress.expose.isSinonProxy).to.be.undefined
       })
     })
   })
@@ -50,19 +50,19 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
   context('resets spies', () => {
     it('creates the spy', () => {
       cy.origin('http://www.foobar.com:3500', () => {
-        const stubEnv = cy.spy(Cypress, 'env')
+        const stubExpose = cy.spy(Cypress, 'expose')
 
-        Cypress.env()
-        expect(stubEnv).to.be.calledOnce
+        Cypress.expose()
+        expect(stubExpose).to.be.calledOnce
         // @ts-ignore
-        expect(Cypress.env.isSinonProxy).to.be.true
+        expect(Cypress.expose.isSinonProxy).to.be.true
       })
     })
 
     it('verifies the spy got restored', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         // @ts-ignore
-        expect(Cypress.env.isSinonProxy).to.be.undefined
+        expect(Cypress.expose.isSinonProxy).to.be.undefined
       })
     })
   })

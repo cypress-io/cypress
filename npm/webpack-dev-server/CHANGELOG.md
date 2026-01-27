@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v5.6.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.5.0...@cypress/webpack-dev-server-v5.6.0) (2026-01-22)
+
+
+### Features
+
+* add `cy.env()`,` allowCypressEnv`, and deprecate `Cypress.env()` ([#33181](https://github.com/cypress-io/cypress/issues/33181)) ([ebe4a2c](https://github.com/cypress-io/cypress/commit/ebe4a2cab7312df76b28f59c3b0a91fc4a5e2444))
+
 # [@cypress/webpack-dev-server-v5.5.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.4.1...@cypress/webpack-dev-server-v5.5.0) (2026-01-13)
 
 

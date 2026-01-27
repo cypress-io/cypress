@@ -117,6 +117,7 @@ const descriptions: any = {
   dev: 'runs cypress in development and bypasses binary check',
   e2e: 'runs end to end tests',
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs} or cypress.env.json',
+  expose: 'sets exposed public configuration variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs}',
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if it were globally installed',
@@ -252,6 +253,7 @@ const addCypressRunCommand = (program: any): any => {
   .option('-C, --config-file <config-file>', text('configFile'))
   .option('--e2e', text('e2e'))
   .option('-e, --env <env>', text('env'))
+  .option('-x, --expose <expose>', text('expose'))
   .option('--group <name>', text('group'))
   .option('-k, --key <record-key>', text('key'))
   .option('--headed', text('headed'))
@@ -284,6 +286,7 @@ const addCypressOpenCommand = (program: any): any => {
   .option('-d, --detached [bool]', text('detached'), coerceFalse)
   .option('--e2e', text('e2e'))
   .option('-e, --env <env>', text('env'))
+  .option('-x, --expose <expose>', text('expose'))
   .option('--global', text('global'))
   .option('-p, --port <port>', text('port'))
   .option('-P, --project <project-path>', text('project'))

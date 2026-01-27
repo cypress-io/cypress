@@ -7,7 +7,14 @@ import { fs } from '@packages/server/lib/util/fs'
 const downloadsProject = Fixtures.projectPath('downloads')
 
 describe('e2e downloads', () => {
-  systemTests.setup()
+  systemTests.setup({
+    settings: {
+      e2e: {
+        supportFile: false,
+        allowCypressEnv: false,
+      },
+    },
+  })
 
   systemTests.it('handles various file downloads', {
     project: 'downloads',

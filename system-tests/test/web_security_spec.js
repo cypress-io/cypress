@@ -66,7 +66,9 @@ describe('e2e web security', () => {
         '*.bar.com': '127.0.0.1',
         '*.foobar.com': '127.0.0.1',
       },
-      e2e: {},
+      e2e: {
+        allowCypressEnv: false,
+      },
     },
   })
 

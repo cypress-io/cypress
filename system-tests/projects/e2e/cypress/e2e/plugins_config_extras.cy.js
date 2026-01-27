@@ -1,13 +1,17 @@
 describe('plugins config extras', () => {
   it('has correct projectRoot', () => {
-    cy.task('get:config:value', 'projectRoot')
-    .should('not.be.undefined')
-    .and('equal', Cypress.env('projectRoot'))
+    cy.env(['projectRoot']).then(({ projectRoot }) => {
+      cy.task('get:config:value', 'projectRoot')
+      .should('not.be.undefined')
+      .and('equal', projectRoot)
+    })
   })
 
   it('has correct configFile', () => {
-    cy.task('get:config:value', 'configFile')
-    .should('not.be.undefined')
-    .and('equal', Cypress.env('configFile'))
+    cy.env(['configFile']).then(({ configFile }) => {
+      cy.task('get:config:value', 'configFile')
+      .should('not.be.undefined')
+      .and('equal', configFile)
+    })
   })
 })

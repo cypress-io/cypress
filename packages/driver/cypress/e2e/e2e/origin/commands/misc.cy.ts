@@ -218,7 +218,7 @@ it('verifies number of cy commands', () => {
   // @ts-ignore
   const actualCommands = Cypress._.pullAll([...Object.keys(cy.commandFns), ...Object.keys(cy.queryFns)], customCommands)
   const expectedCommands = [
-    'check', 'uncheck', 'click', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
+    'check', 'uncheck', 'click', 'env', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
     'selectFile', 'submit', 'type', 'clear', 'trigger', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
     'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
     'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',

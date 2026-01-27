@@ -1,6 +1,5 @@
 import Promise from 'bluebird'
 import execa from 'execa'
-import shellEnv from 'shell-env'
 import _ from 'lodash'
 import debugModule from 'debug'
 const log = debugModule('cypress:server:exec')
@@ -45,6 +44,22 @@ export const run = (projectRoot: string, options: any) => {
   }
 
   const run = async () => {
+    /**
+     * To address https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/npm/execa/GMS-2020-2.yml
+     * We needed to update shell-env from 3.x.x to 4.x.x. However, shell-env 4.x.x is an ESM-only package and cannot be
+     * used purely in a CJS environment through require().
+     *
+     * To resolve this, we need to use the tsImport function from 'tsx' to import the shell-env package.
+     * This function is a wrapper around the import function that allows us to import ESM-only packages in a CJS environment.
+     * Normally, you can await import() an ESM-only package in a CJS environment. However, since this is TypeScript with a CJS target,
+     * all import statements, even dynamic ones, are compiled down to require() statements and is the reason we cannot leverage that
+     * technique here.
+     *
+     * Once @packages/server is converted to ESM, we can remove this and use import() directly at the top of the file.
+     */
+    const { tsImport } = require('tsx/esm/api')
+    const { shellEnv } = await tsImport('shell-env', __filename) as typeof import('shell-env')
+
     const shellVariables = await shellEnv()
     const env = _.merge({}, shellVariables, process.env, options.env)
 

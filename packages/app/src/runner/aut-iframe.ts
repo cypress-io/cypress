@@ -521,6 +521,11 @@ export class AutIframe {
     const selector = Cypress.ElementSelector._getSelector($el)
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
+    // Skip highlighting if selector is null (element is detached from DOM)
+    if (selector === null) {
+      return
+    }
+
     this._addOrUpdateSelectorPlaygroundHighlight({
       $el,
       $body,

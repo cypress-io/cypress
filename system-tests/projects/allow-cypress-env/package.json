@@ -1,0 +1,9 @@
+{
+  "name": "allow-cypress-env",
+  "version": "0.0.0-test",
+  "description": "Example running specs testing Cypress.env() with the allowCypressEnv configuration option",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "type": "module"
+}

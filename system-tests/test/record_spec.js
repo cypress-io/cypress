@@ -187,7 +187,6 @@ describe('e2e record', () => {
 
       const thirdInstancePostTests = requests[14].body
 
-      expect(thirdInstancePostTests.tests[0].config.env.foo).eq(true)
       expect(thirdInstancePostTests.tests).length(2)
       expect(thirdInstancePostTests.hooks).length(0)
       expect(thirdInstancePostTests.config).is.an('object')
@@ -606,7 +605,6 @@ describe('e2e record', () => {
 
       expect(requests[2].body.tests[0].config).deep.eq({
         defaultCommandTimeout: 1234,
-        env: { foo: true },
         retries: 2,
       })
 
@@ -2906,7 +2904,7 @@ describe('e2e record', () => {
               const errorReport = getRequests().find(({ url }) => url === reportErrorUrl).body
 
               debug(errorReport)
-              expect(errorReport.errors).to.be.length(4)
+              expect(errorReport.errors).to.be.length(5)
 
               errorReport.errors.forEach((e) => {
                 expect(e.captureMethod).to.eq('commandLogAdded')
