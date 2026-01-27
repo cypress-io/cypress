@@ -125,7 +125,7 @@ class $Cypress {
   $autSnapshotIframe?: JQuery<HTMLIFrameElement> | null
   $autSnapshotIframes?: JQuery<HTMLIFrameElement>[] | null
   $autIframesContainer?: JQuery<HTMLElement> | null
-  $autPanelContainer: JQuery<HTMLElement> | null
+  $autPanelContainer?: JQuery<HTMLElement> | null
   onSpecReady: any
   waitForStudio: any
   events: any
@@ -371,7 +371,7 @@ class $Cypress {
     // Including the first snapshot as $autSnapshotIframe for compatibility with
     // some Studio versions.
     this.$autSnapshotIframes = $autSnapshotIframes
-    this.$autSnapshotIframe = $autSnapshotIframes[0]
+    this.$autSnapshotIframe = $autSnapshotIframes?.[0] ?? null
 
     // The container element holding the scaled AUT iframe and any $autSnapshotIframes.
     // Used by Studio to portal dynamic content.

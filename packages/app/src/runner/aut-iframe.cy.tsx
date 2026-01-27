@@ -172,7 +172,7 @@ describe('AutIframe', () => {
     it('should remove both aut iframe and snapshot iframe', () => {
       const result = autIframe.create()
       let autIframeRemoved = false
-      let snapshotIframeRemoved = false
+      let snapshotIframesRemoved = [false, false]
 
       // Mock remove methods
       result.autIframe.remove = () => {
@@ -181,16 +181,18 @@ describe('AutIframe', () => {
         return result.autIframe
       }
 
-      result.autSnapshotIframes[0].remove = () => {
-        snapshotIframeRemoved = true
+      result.autSnapshotIframes.forEach((snapshotIframe, index) => {
+        snapshotIframe.remove = () => {
+          snapshotIframesRemoved[index] = true
 
-        return result.autSnapshotIframes[0]
-      }
+          return result.autSnapshotIframes[index]
+        }
+      })
 
       autIframe.destroy()
 
       expect(autIframeRemoved).to.be.true
-      expect(snapshotIframeRemoved).to.be.true
+      expect(snapshotIframesRemoved.every((removed) => removed)).to.be.true
     })
 
     it('should throw error when destroy is called without create', () => {
