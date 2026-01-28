@@ -19,8 +19,9 @@ const jQueryRe = /jquery/i
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
-  // the iframe used to display a snapshot of the AUT (currently used to display the studio snapshots)
-  $snapshotIframe?: JQuery<HTMLIFrameElement>
+  // the iframes used to display snapshots of the AUT (currently used to display the studio snapshots)
+  $snapshotIframes?: JQuery<HTMLIFrameElement>[]
+
   _highlightedEl?: Element
   private _currentHighlightingId: number = 0
 
@@ -32,7 +33,7 @@ export class AutIframe {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
-  create (): { autIframe: JQuery<HTMLIFrameElement>, autSnapshotIframe: JQuery<HTMLIFrameElement> } {
+  create (): { autIframe: JQuery<HTMLIFrameElement>, autSnapshotIframes: JQuery<HTMLIFrameElement>[] } {
     const $iframe = this.$('<iframe>', {
       id: `Your project: '${this.projectName}'`,
       title: `Your project: '${this.projectName}'`,
@@ -41,28 +42,36 @@ export class AutIframe {
 
     this.$iframe = $iframe
 
-    const $snapshotIframe: JQuery<HTMLIFrameElement> = this.$('<iframe>', {
-      id: `AUT Snapshot: '${this.projectName}'`,
-      title: `AUT Snapshot: '${this.projectName}'`,
-      class: 'aut-snapshot-iframe',
-    })
+    // Create two iframes to facilitate before/after snapshot
+    // rendering with a double buffer.
+    this.$snapshotIframes = _.times(2, (index) => {
+      const $snapshotIframe = this.$('<iframe>', {
+        id: `AUT Snapshot - ${index}: '${this.projectName}'`,
+        title: `AUT Snapshot - ${index}: '${this.projectName}'`,
+        class: 'aut-snapshot-iframe',
+        'data-snapshot-index': index,
+      })
 
-    $snapshotIframe.hide() // Auto-hide the snapshot iframe
-    this.$snapshotIframe = $snapshotIframe
+      $snapshotIframe.hide() // Auto-hide the snapshot iframe
+
+      return $snapshotIframe
+    })
 
     return {
       autIframe: $iframe,
-      autSnapshotIframe: $snapshotIframe,
+      autSnapshotIframes: this.$snapshotIframes,
     }
   }
 
   destroy () {
-    if (!this.$iframe || !this.$snapshotIframe) {
+    if (!this.$iframe || !this.$snapshotIframes) {
       throw Error(`Cannot call #remove without first calling #create`)
     }
 
     this.$iframe.remove()
-    this.$snapshotIframe.remove()
+    this.$snapshotIframes.forEach((iframe) => {
+      iframe.remove()
+    })
   }
 
   _showInitialBlankPage () {
