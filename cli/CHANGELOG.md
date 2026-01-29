@@ -13,18 +13,19 @@ _Released 01/27/2026 (PENDING)_
 - Added a [`allowCypressEnv`](https://docs.cypress.io/app/references/configuration#Global) configuration option that disallows use of the deprecated `Cypress.env()` API. Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
 - Introduced the new `Cypress.expose()` API, intended for use of public configuration of non-sensitive values. Addressed in [#33238](https://github.com/cypress-io/cypress/pull/33238).
 
+**Bugfixes:**
+
+- Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
+
 **Misc:**
 
 - The icon in the 'Open in IDE' button in the command log is now the correct size. Addresses [#32779](https://github.com/cypress-io/cypress/issues/32779). Addressed in [#33217](https://github.com/cypress-io/cypress/pull/33217).
 
 **Dependency Updates:**
 
-- Upgraded `shell-env` to `4.0.1` and `@cypress/commit-info` to `2.2.2`. This removes the [GMS-2020-2](https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/npm/execa/GMS-2020-2.yml) vulnerability being reported in security scans. Addressed in [#33226](https://github.com/cypress-io/cypress/pull/33226) and [#33263](https://github.com/cypress-io/cypress/pull/33263).
+- Upgraded `express` to `4.22.0` and `body-parser` to `1.20.4`. This removes the [CVE-2025-15284](https://github.com/advisories/GHSA-6rw7-vpxm-498p) vulnerability being reported in security scans. Addressed in [#33305](https://github.com/cypress-io/cypress/pull/33305).
 - Upgraded `lodash` to `4.17.23`. This removes the [CVE-2025-13465](https://github.com/advisories/GHSA-xxjr-mmjv-4gpg) vulnerability being reported in security scans. Addresses [#33269](https://github.com/cypress-io/cypress/issues/33269).
-
-**Bugfixes:**
-
-- Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
+- Upgraded `shell-env` to `4.0.1` and `@cypress/commit-info` to `2.2.2`. This removes the [GMS-2020-2](https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/npm/execa/GMS-2020-2.yml) vulnerability being reported in security scans. Addressed in [#33226](https://github.com/cypress-io/cypress/pull/33226) and [#33263](https://github.com/cypress-io/cypress/pull/33263).
 
 ## 15.9.0
 
