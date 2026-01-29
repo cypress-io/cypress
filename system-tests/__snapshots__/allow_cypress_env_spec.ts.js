@@ -72,7 +72,7 @@ https://on.cypress.io/cypress-env-migration
 exports['allowCypressEnv / correctly prints a warning when trying to use Cypress.env() with allowCypressEnv=true'] = `
 Warning: The allowCypressEnv configuration option is enabled. This allows any browser code to read values from Cypress.env(). This is insecure and will be removed in a future major version.
 
-1. Replace Cypress.env() calls with cy.env() (for sensitive values) or Cypress.expose() (for public plugin configuration)
+1. Replace Cypress.env() calls with cy.env() (for sensitive values) or Cypress.expose() (for public configuration)
 2. Set allowCypressEnv: false in your Cypress configuration to disable Cypress.env()
 
 Learn more: https://on.cypress.io/cypress-env-migration

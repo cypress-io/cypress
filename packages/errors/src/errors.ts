@@ -1269,9 +1269,9 @@ export const AllCypressErrors = {
     return errTemplate`\
       ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('allowCypressEnv')} configuration option is enabled. This allows any browser code to read values from ${fmt.highlight('Cypress.env()')}. This is insecure and will be removed in a future major version.
 
-      1. Replace ${fmt.highlight('Cypress.env()')} calls with ${fmt.highlight('cy.env()')} (for sensitive values) or ${fmt.highlight('Cypress.expose()')} (for public plugin configuration)
+      1. Replace ${fmt.highlight('Cypress.env()')} calls with ${fmt.highlight('cy.env()')} (for sensitive values) or ${fmt.highlight('Cypress.expose()')} (for public configuration)
       2. Set ${fmt.highlight('allowCypressEnv: false')} in your Cypress configuration to disable ${fmt.highlight('Cypress.env()')}
-    
+
       Learn more: https://on.cypress.io/cypress-env-migration
     `
   },
