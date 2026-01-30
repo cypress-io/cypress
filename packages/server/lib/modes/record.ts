@@ -5,7 +5,7 @@ import check from 'check-more-types'
 import Debug from 'debug'
 import Promise from 'bluebird'
 import isForkPr from 'is-fork-pr'
-import commitInfo from '@cypress/commit-info'
+import commitInfo from '../util/commit-info'
 import { telemetry } from '@packages/telemetry'
 import { hideKeys } from '@packages/config'
 

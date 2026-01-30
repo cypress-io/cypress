@@ -479,11 +479,11 @@ export class EventManager {
 
   initialize ({
     $autIframe,
-    $autSnapshotIframe,
+    $autSnapshotIframes,
     config,
   }: {
     $autIframe: JQuery<HTMLIFrameElement>
-    $autSnapshotIframe?: JQuery<HTMLIFrameElement>
+    $autSnapshotIframes?: JQuery<HTMLIFrameElement>[]
     config: Record<string, any>
   }) {
     performance.mark('initialize-start')
@@ -515,7 +515,7 @@ export class EventManager {
 
     return Cypress.initialize({
       $autIframe,
-      $autSnapshotIframe,
+      $autSnapshotIframes,
       // defining this indicates that the test run should wait for Studio to
       // be initialized before running the test
       waitForStudio: isStudio ? waitForStudio : undefined,

@@ -548,9 +548,14 @@ export const useStudioStore = defineStore('studioRecorder', {
       // we only replace the previous mouse event if the element is different
       // since we want to use the oldest possible selector
       if (!this._matchPreviousMouseEvent(target)) {
-        this._previousMouseEvent = {
-          element: target,
-          selector: getCypress().ElementSelector._getSelector(window.UnifiedRunner.CypressJQuery(target)),
+        const selector = getCypress().ElementSelector._getSelector(window.UnifiedRunner.CypressJQuery(target))
+
+        // Skip storing selector if it's null (element is detached from DOM)
+        if (selector !== null) {
+          this._previousMouseEvent = {
+            element: target,
+            selector,
+          }
         }
       }
     },

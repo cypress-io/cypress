@@ -123,6 +123,9 @@ class $Cypress {
   Commands: any
   $autIframe: any
   $autSnapshotIframe?: JQuery<HTMLIFrameElement> | null
+  $autSnapshotIframes?: JQuery<HTMLIFrameElement>[] | null
+  $autIframesContainer?: JQuery<HTMLElement> | null
+  $autPanelContainer?: JQuery<HTMLElement> | null
   onSpecReady: any
   waitForStudio: any
   events: any
@@ -218,6 +221,9 @@ class $Cypress {
     this.Commands = null
     this.$autIframe = null
     this.$autSnapshotIframe = null
+    this.$autSnapshotIframes = null
+    this.$autIframesContainer = null
+    this.$autPanelContainer = null
     this.onSpecReady = null
     this.waitForStudio = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
@@ -356,9 +362,29 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ({ $autIframe, $autSnapshotIframe, onSpecReady, waitForStudio }) {
+  initialize ({ $autIframe, $autSnapshotIframes, onSpecReady, waitForStudio }) {
     this.$autIframe = $autIframe
-    this.$autSnapshotIframe = $autSnapshotIframe
+
+    // Cypress-provided iframe elements used by Studio to render DOM snapshots
+    // for Studio integrations.
+    //
+    // Including the first snapshot as $autSnapshotIframe for compatibility with
+    // some Studio versions.
+    this.$autSnapshotIframes = $autSnapshotIframes
+    this.$autSnapshotIframe = $autSnapshotIframes?.[0] ?? null
+
+    // The container element holding the scaled AUT iframe and any $autSnapshotIframes.
+    // Used by Studio to portal dynamic content.
+    const autIframesContainerElement = document.getElementById('aut-iframes-container')
+
+    this.$autIframesContainer = autIframesContainerElement ? $(autIframesContainerElement) : null
+
+    // The container element holding all AUT panel contents, including the AUT frame, snapshot controls, etc.
+    // Used by Studio to portal dynamic content.
+    const autPanelContainerElement = document.getElementById('aut-panel')
+
+    this.$autPanelContainer = autPanelContainerElement ? $(autPanelContainerElement) : null
+
     this.onSpecReady = onSpecReady
     this.waitForStudio = waitForStudio
     if (this._onInitialize) {
