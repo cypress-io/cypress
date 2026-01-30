@@ -1,9 +1,9 @@
 /// <reference lib="dom" />
 import { v4 as uuidv4 } from 'uuid'
 import { decode, encode } from '../utils'
-import Emitter from 'component-emitter'
+import { Emitter, DefaultEventsMap } from '@socket.io/component-emitter'
 
-export type SocketShape = Emitter
+export type SocketShape = Emitter<DefaultEventsMap, DefaultEventsMap>
 
 type CDPSocketNamespaceKey = `cypressSocket-${string}`
 type CDPSendToServerNamespaceKey = `cypressSendToServer-${string}`
@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-export class CDPBrowserSocket extends Emitter implements SocketShape {
+export class CDPBrowserSocket extends Emitter<DefaultEventsMap, DefaultEventsMap> implements SocketShape {
   private _namespace: string
 
   constructor (namespace: string) {
@@ -53,7 +53,7 @@ export class CDPBrowserSocket extends Emitter implements SocketShape {
     }, 0)
   }
 
-  // @ts-expect-error TODO: fix emit type
+  // @ts-ignore - override emit to send via CDP
   emit = async (event: string, ...args: any[]) => {
     // Generate a unique key for this event
     const uuid = uuidv4()

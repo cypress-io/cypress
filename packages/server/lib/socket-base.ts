@@ -128,9 +128,7 @@ export class SocketBase {
   createSocketIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
     return new socketIo.SocketIOServer(server, {
       path,
-      cookie: {
-        name: cookie,
-      },
+      cookie: typeof cookie === 'string' ? { name: cookie as string } : undefined,
       destroyUpgrade: false,
       serveClient: false,
       // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
@@ -430,7 +428,7 @@ export class SocketBase {
 
         getCtx().coreData.studioLifecycleManager?.registerStudioReadyListener((studio) => {
           studio.addSocketListeners({
-            socket,
+            socket: socket as any,
             onBeforeSave: () => {
               this.onBeforeSave(config)
             },
@@ -442,7 +440,7 @@ export class SocketBase {
 
         getCtx().coreData.cyPromptLifecycleManager?.registerCyPromptReadyListener((cyPrompt) => {
           cyPrompt.addSocketListeners({
-            socket,
+            socket: socket as any,
             onBeforeSave: () => {
               this.onBeforeSave(config)
             },
