@@ -72,7 +72,6 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
   }
 
   process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
-  config.expose.INTERNAL_E2E_TESTING_SELF = 'true'
 
   delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_DEV
@@ -446,7 +445,7 @@ async function makeE2ETasks () {
         port = '4456'
       }
 
-      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', port]
+      const openArgv = [...argv, '--project', Fixtures.projectPath(projectName), '--port', port, '--expose', 'INTERNAL_E2E_TESTING_SELF=true']
 
       // Runs the launchArgs through the whole pipeline for the CLI open process,
       // which probably needs a bit of refactoring / consolidating

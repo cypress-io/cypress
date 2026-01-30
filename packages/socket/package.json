@@ -35,7 +35,7 @@
   "devDependencies": {
     "@packages/types": "0.0.0-development",
     "@types/uuid": "8.3.4",
-    "devtools-protocol": "0.0.1573491",
+    "devtools-protocol": "0.0.1575685",
     "resolve-pkg": "2.0.0",
     "rimraf": "6.0.1",
     "vitest": "^3.2.4"
