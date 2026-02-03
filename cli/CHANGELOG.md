@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.10.0
 
-_Released 01/27/2026 (PENDING)_
+_Released 02/03/2026_
 
 **Deprecations:**
 
