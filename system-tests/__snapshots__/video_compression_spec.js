@@ -1,11 +1,10 @@
 exports['video compression 0 / does not compress'] = `
-The use of Cypress.env() is deprecated and will be removed in a future major version of Cypress.
+Warning: The allowCypressEnv configuration option is enabled. This allows any browser code to read values from Cypress.env(). This is insecure and will be removed in a future major version.
 
-Cypress recommends migrating to the cy.env() command and disabling allowCypressEnv within your Cypress configuration.
+1. Replace Cypress.env() calls with cy.env() (for sensitive values) or Cypress.expose() (for public configuration)
+2. Set allowCypressEnv: false in your Cypress configuration to disable Cypress.env()
 
-The use of Cypress.env() will warn and throw an error when allowCypressEnv is explicitly set to false.
-
-Read our Migration Guide for the allowCypressEnv configuration option, why Cypress.env() is deprecated, and how to migrate to cy.env(): https://on.cypress.io/cypress-env-migration.
+Learn more: https://on.cypress.io/cypress-env-migration
 
 
 ====================================================================================================
@@ -63,13 +62,12 @@ Read our Migration Guide for the allowCypressEnv configuration option, why Cypre
 `
 
 exports['video compression true / coerces true to 32 CRF'] = `
-The use of Cypress.env() is deprecated and will be removed in a future major version of Cypress.
+Warning: The allowCypressEnv configuration option is enabled. This allows any browser code to read values from Cypress.env(). This is insecure and will be removed in a future major version.
 
-Cypress recommends migrating to the cy.env() command and disabling allowCypressEnv within your Cypress configuration.
+1. Replace Cypress.env() calls with cy.env() (for sensitive values) or Cypress.expose() (for public configuration)
+2. Set allowCypressEnv: false in your Cypress configuration to disable Cypress.env()
 
-The use of Cypress.env() will warn and throw an error when allowCypressEnv is explicitly set to false.
-
-Read our Migration Guide for the allowCypressEnv configuration option, why Cypress.env() is deprecated, and how to migrate to cy.env(): https://on.cypress.io/cypress-env-migration.
+Learn more: https://on.cypress.io/cypress-env-migration
 
 
 ====================================================================================================

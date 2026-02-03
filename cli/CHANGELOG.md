@@ -5,7 +5,7 @@ _Released 01/27/2026 (PENDING)_
 
 **Deprecations:**
 
-[`Cypress.env()](https://docs.cypress.io/api/cypress-api/env) is now deprecated and will be removed in a future major release of Cypress. To understand why, and how to migrate, please read our [Migration Guide](https://on.cypress.io/cypress-env-migration). Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
+[`Cypress.env()`](https://docs.cypress.io/api/cypress-api/env) is now deprecated and will be removed in a future major release of Cypress. To understand why, and how to migrate, please read our [Migration Guide](https://on.cypress.io/cypress-env-migration). Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
 
 **Features:**
 
