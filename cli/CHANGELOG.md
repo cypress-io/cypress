@@ -16,6 +16,7 @@ _Released 01/27/2026 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
+- Fixed an issue where errors were not always being recorded when running Studio. Fixed in [#33321](https://github.com/cypress-io/cypress/pull/33321). 
 
 **Misc:**
 
