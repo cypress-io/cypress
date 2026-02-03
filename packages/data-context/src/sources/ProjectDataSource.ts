@@ -1,6 +1,6 @@
 import os from 'os'
 import chokidar from 'chokidar'
-import type { ResolvedFromConfig, RESOLVED_FROM, TestingType, SpecWithRelativeRoot } from '@packages/types'
+import type { ResolvedFromConfig, TestingType, SpecWithRelativeRoot } from '@packages/types'
 import minimatch from 'minimatch'
 import _ from 'lodash'
 import path from 'path'
@@ -558,26 +558,13 @@ export class ProjectDataSource {
   async getResolvedConfigFields (): Promise<ResolvedFromConfig[]> {
     const config = this.ctx.lifecycleManager.loadedFullConfig?.resolved ?? {}
 
-    interface ResolvedFromWithField extends ResolvedFromConfig {
-      field: typeof RESOLVED_FROM[number]
-    }
-
-    const mapEnvResolvedConfigToObj = (config: ResolvedFromConfig): ResolvedFromWithField => {
-      return Object.entries(config).reduce<ResolvedFromWithField>((acc, [field, value]) => {
-        return {
-          ...acc,
-          value: { ...acc.value, [field]: value.value },
-        }
-      }, {
-        value: {},
-        field: 'env',
-        from: 'env',
-      })
-    }
-
     return Object.entries(config ?? {}).map(([key, value]) => {
-      if (key === 'env' && value) {
-        return mapEnvResolvedConfigToObj(value)
+      if ((key === 'env' || key === 'expose') && value) {
+        return {
+          field: key,
+          from: key,
+          value: Object.fromEntries(Object.entries(value).map(([field, { value }]) => [field, value])),
+        }
       }
 
       return { ...value, field: key }

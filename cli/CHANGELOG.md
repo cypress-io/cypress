@@ -1,17 +1,18 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.10.0
 
-_Released 01/27/2026 (PENDING)_
+_Released 02/03/2026_
 
 **Deprecations:**
 
-[`Cypress.env()](https://docs.cypress.io/api/cypress-api/env) is now deprecated and will be removed in a future major release of Cypress. To understand why, and how to migrate, please read our [Migration Guide](https://on.cypress.io/cypress-env-migration). Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
+[`Cypress.env()`](https://docs.cypress.io/api/cypress-api/env) is now deprecated and will be removed in a future major release of Cypress. To understand why, and how to migrate, please read our [Migration Guide](https://on.cypress.io/cypress-env-migration). Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
 
 **Features:**
 
 - Introduced a new [`cy.env()`](https://docs.cypress.io/api/commands/env) command that can be used to asynchronously and securely access Cypress environment variables. Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
 - Added a [`allowCypressEnv`](https://docs.cypress.io/app/references/configuration#Global) configuration option that disallows use of the deprecated `Cypress.env()` API. Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
 - Introduced the new `Cypress.expose()` API, intended for use of public configuration of non-sensitive values. Addressed in [#33238](https://github.com/cypress-io/cypress/pull/33238).
+- Displays the resolved `expose` values in the App's resolved configuration user interface. Addressed in [#33322](https://github.com/cypress-io/cypress/pull/33322).
 
 **Bugfixes:**
 
