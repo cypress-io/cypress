@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.11.0
+
+_Released 02/10/2026 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where errors were not always being recorded when running Studio. Fixed in [#33321](https://github.com/cypress-io/cypress/pull/33321). 
+
 ## 15.10.0
 
 _Released 02/03/2026_
@@ -17,7 +25,6 @@ _Released 02/03/2026_
 **Bugfixes:**
 
 - Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
-- Fixed an issue where errors were not always being recorded when running Studio. Fixed in [#33321](https://github.com/cypress-io/cypress/pull/33321). 
 
 **Misc:**
 
