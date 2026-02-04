@@ -14,6 +14,12 @@ export function loadProjectAndRunSpec ({ projectName = 'experimental-studio' as 
   cy.waitForSpecToFinish()
 }
 
+export function openNewTestFromSpecHeader () {
+  cy.get('[data-cy="runnable-options-button"]').click()
+  cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
+  cy.get('[data-cy="runnable-popover-new-test"]').click()
+}
+
 export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite = false, createNewTestFromSpecHeader = false, cliArgs = [''] } = {}) {
   loadProjectAndRunSpec({ specName, cliArgs })
 
@@ -30,9 +36,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
 
   if (createNewTestFromSuite || createNewTestFromSpecHeader) {
     if (createNewTestFromSpecHeader) {
-      cy.get('[data-cy="runnable-options-button"]').click()
-      cy.get('[data-cy="more-options-runnable-popover"]').should('be.visible')
-      cy.get('[data-cy="runnable-popover-new-test"]').click()
+      openNewTestFromSpecHeader()
     } else {
       cy.get('@runnable-wrapper').realHover()
       cy.findByTestId('create-new-test-from-suite').click()
@@ -55,12 +59,7 @@ export function launchStudio ({ specName = 'spec.cy.js', createNewTestFromSuite 
   }
 }
 
-export function inputNewTestName ({ name = 'new-test', creatingNewTestFromWelcomeScreen = true }: { name?: string, creatingNewTestFromWelcomeScreen?: boolean } = {}) {
-  if (creatingNewTestFromWelcomeScreen) {
-    // we only need to click the new test button if we are not creating a new test from a suite or spec header
-    cy.findByTestId('new-test-button').click()
-  }
-
+export function inputNewTestName ({ name = 'new-test' }: { name?: string } = {}) {
   cy.findByTestId('test-name-input').type(name)
   cy.findByTestId('create-test-button').click()
 

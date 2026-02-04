@@ -37,7 +37,7 @@ const RunnablesEmptyState = ({ spec, studioEnabled, eventManager = events }: Run
     e.preventDefault()
 
     // root runnable always has r1 as id
-    eventManager.emit('studio:init:suite', { suiteId: 'r1' })
+    eventManager.emit('studio:init:suite', { suiteId: 'r1', entrySource: 'new-test-root' })
   }, [eventManager])
 
   const isAllSpecs = spec.absolute === '__all' || spec.relative === '__all'

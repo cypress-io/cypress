@@ -66,6 +66,9 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-header-studio-button').click()
 
+    // dismiss unsaved changes modal
+    cy.findByTestId('unsaved-changes-discard-button').click()
+
     assertClosingPanelWithoutChanges()
   })
 
@@ -99,6 +102,9 @@ describe('studio functionality', () => {
     cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
 
     cy.get('button[aria-label="Rerun all tests"]').click()
+
+    // dismiss unsaved changes modal
+    cy.findByTestId('unsaved-changes-discard-button').click()
 
     cy.waitForSpecToFinish()
     // after reloading we should still be in studio mode but the commands should be removed
