@@ -13881,10 +13881,10 @@ csstype@^3.0.2:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.3.tgz#d80ff294d114fb0e6ac500fbf85b60137d7eff81"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
 
-cypress-example-kitchensink@5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-5.1.2.tgz#afbd0abce435f807cf90ea8762e8e941615a0eb6"
-  integrity sha512-FtoEXHXtF8NgDOzSCDlqj68Jn4B48n1PR5MVmkER8tjFKi6gDD2QLag1UAC+sWVzZgKqcPG54m51yQqci3gaaA==
+cypress-example-kitchensink@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-5.2.0.tgz#0a7be481e1e25edbbf98d39de559c983c40f1a42"
+  integrity sha512-Q8dNSJXrR5j/HiuzXK4nPXOG+3s05QxnhV3gfsdV0Rl3uwsf3r38UFk4Fgi6uEd/URQM2Kl5NbZjLj9mj+OE8Q==
   dependencies:
     npm-run-all2 "7.0.2"
     serve "14.2.5"

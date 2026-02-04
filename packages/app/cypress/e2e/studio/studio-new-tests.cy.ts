@@ -299,7 +299,6 @@ it('new-test', function() {
   })
 
   describe('prompt for a new url', () => {
-    const urlPrompt = '// Visit a page by entering a url in the address bar or typing a cy.visit command here'
     const autUrl = 'http://localhost:4455/cypress/e2e/index.html'
     const visitUrl = 'cypress/e2e/index.html'
 
@@ -314,13 +313,13 @@ it('new-test', function() {
 
       cy.findByTestId('aut-url-input').should('have.focus')
 
-      cy.get('.cm-line').should('contain.text', urlPrompt)
+      cy.findByTestId('studio-error-visit-url-banner').should('exist')
     }
 
     const assertAutUrlInput = () => {
       cy.findByTestId('aut-url-input').should('have.value', autUrl)
 
-      cy.get('.cm-line').should('not.contain.text', urlPrompt)
+      cy.findByTestId('studio-error-visit-url-banner').should('not.exist')
 
       cy.get('.cm-line').should('contain.text', `cy.visit('${visitUrl}')`)
     }
