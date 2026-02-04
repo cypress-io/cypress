@@ -160,24 +160,24 @@ expect(Cypress.dom.isHidden(visibleP)).to.be.false</code></pre>
         <div class="col-xs-12"><hr></div>
 
         <div class="col-xs-12">
-          <h4 id="env"><a href="https://on.cypress.io/env">Cypress.env()</a></h4>
-          <p>To get or set environment variable, use <a href="https://on.cypress.io/env"><code>Cypress.env()</code></a>.</p>
+          <h4 id="env"><a href="https://on.cypress.io/env">Cypress.expose()</a></h4>
+          <p>To get or set public configuration in your tests, use <a href="https://on.cypress.io/env"><code>Cypress.expose()</code></a>.</p>
           <pre><code class="javascript">// set multiple environment variables
-Cypress.env({
+Cypress.expose({
   host: 'veronica.dev.local',
   api_server: 'http://localhost:8888/v1/',
 })
 
 // get environment variable
-expect(Cypress.env('host')).to.eq('veronica.dev.local')
+expect(Cypress.expose('host')).to.eq('veronica.dev.local')
 
 // set environment variable
-Cypress.env('api_server', 'http://localhost:8888/v2/')
-expect(Cypress.env('api_server')).to.eq('http://localhost:8888/v2/')
+Cypress.expose('api_server', 'http://localhost:8888/v2/')
+expect(Cypress.expose('api_server')).to.eq('http://localhost:8888/v2/')
 
 // get all environment variable
-expect(Cypress.env()).to.have.property('host', 'veronica.dev.local')
-expect(Cypress.env()).to.have.property('api_server', 'http://localhost:8888/v2/')</code></pre>
+expect(Cypress.expose()).to.have.property('host', 'veronica.dev.local')
+expect(Cypress.expose()).to.have.property('api_server', 'http://localhost:8888/v2/')</code></pre>
         </div>
 
         <div class="col-xs-12"><hr></div>
