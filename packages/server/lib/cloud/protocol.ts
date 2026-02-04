@@ -73,6 +73,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug('preparing protocol via script')
 
     try {
+      this.options = options
       this._runId = options.runId
       if (script) {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
@@ -82,7 +83,6 @@ export class ProtocolManager implements ProtocolManagerShape {
         const { AppCaptureProtocol } = requireScript<{ AppCaptureProtocol: AppCaptureProtocolConstructor }>(script)
 
         this.AppCaptureProtocol = AppCaptureProtocol
-        this.options = options
       }
     } catch (error) {
       if (CAPTURE_ERRORS) {
@@ -409,6 +409,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     osName: string
     projectSlug?: string
     specName?: string
+    mode?: 'record' | 'studio'
   }) {
     const errors = this._errors.filter(({ fatal }) => !fatal)
 
