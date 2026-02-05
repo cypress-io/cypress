@@ -7,7 +7,7 @@ import { parseGrep, shouldTestRun } from './utils'
 const debug = debugModule('@cypress/grep')
 
 interface CypressConfigOptions {
-  expose?: Record<string, any>
+  env?: Record<string, any>
   specPattern?: string | string[]
   excludeSpecPattern?: string | string[]
 }
@@ -17,11 +17,11 @@ interface CypressConfigOptions {
  * @param {Cypress.ConfigOptions} config
  */
 export function plugin (config: CypressConfigOptions): CypressConfigOptions {
-  if (!config || !config.expose) {
+  if (!config || !config.env) {
     return config
   }
 
-  const { expose } = config
+  const { env } = config
 
   if (!config.specPattern) {
     throw new Error(
@@ -30,15 +30,15 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
   }
 
   debug('@cypress/grep plugin version %s', version)
-  debug('Cypress config expose object: %o', expose)
+  debug('Cypress config env object: %o', env)
 
-  const grep = expose.grep ? String(expose.grep) : undefined
+  const grep = env.grep ? String(env.grep) : undefined
 
   if (grep) {
     console.log('@cypress/grep: tests with "%s" in their names', grep.trim())
   }
 
-  const grepTags = expose.grepTags || expose['grep-tags']
+  const grepTags = env.grepTags || env['grep-tags']
 
   if (grepTags) {
     console.log('@cypress/grep: filtering using tag(s) "%s"', grepTags)
@@ -47,28 +47,28 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
     debug('parsed grep tags %o', parsedGrep.tags)
   }
 
-  const grepBurn = expose.grepBurn || expose['grep-burn'] || expose.burn
+  const grepBurn = env.grepBurn || env['grep-burn'] || env.burn
 
   if (grepBurn) {
     console.log('@cypress/grep: running filtered tests %d times', grepBurn)
   }
 
-  const grepUntagged = expose.grepUntagged || expose['grep-untagged']
+  const grepUntagged = env.grepUntagged || env['grep-untagged']
 
   if (grepUntagged) {
     console.log('@cypress/grep: running untagged tests')
   }
 
-  const omitFiltered = expose.grepOmitFiltered || expose['grep-omit-filtered']
+  const omitFiltered = env.grepOmitFiltered || env['grep-omit-filtered']
 
   if (omitFiltered) {
     console.log('@cypress/grep: will omit filtered tests')
   }
 
   const { specPattern, excludeSpecPattern } = config
-  const integrationFolder = expose.grepIntegrationFolder || process.cwd()
+  const integrationFolder = env.grepIntegrationFolder || process.cwd()
 
-  const grepFilterSpecs = expose.grepFilterSpecs === true || String(expose.grepFilterSpecs).toLowerCase() === 'true'
+  const grepFilterSpecs = env.grepFilterSpecs === true || String(env.grepFilterSpecs).toLowerCase() === 'true'
 
   if (grepFilterSpecs) {
     debug('specPattern', specPattern)
