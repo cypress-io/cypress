@@ -6,6 +6,7 @@ _Released 02/08/2026 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
+- Reset command log nesting after grouped commands in `cy.origin()`. Fixed in [#33289](https://github.com/cypress-io/cypress/pull/33289).
 
 ## 15.10.0
 
@@ -25,7 +26,6 @@ _Released 02/03/2026_
 **Bugfixes:**
 
 - Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
-- Reset command log nesting after grouped commands in `cy.origin()`. Fixed in [#33289](https://github.com/cypress-io/cypress/pull/33289).
 
 **Misc:**
 
