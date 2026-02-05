@@ -205,7 +205,8 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
             try {
               originLogGroupId = originLogGroupId ?? log?.get('id')
-              originLogGroupLevel = (Cypress.state('logGroupIds') || []).length || 1
+              originLogGroupLevel = originLogGroupLevel ?? ((Cypress.state('logGroupIds') || []).length || 1)
+
               Cypress.state('originLogGroupId', originLogGroupId)
               Cypress.state('originLogGroupLevel', originLogGroupLevel)
               // origin is a privileged command, meaning it has to be invoked
