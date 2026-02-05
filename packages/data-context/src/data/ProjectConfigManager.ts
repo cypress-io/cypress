@@ -1,6 +1,7 @@
 import { CypressError, getError } from '@packages/errors'
-import { DebugData, PluginIpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
+import { PluginIpcHandler, LoadConfigReply, ProjectConfigIpc, SetupNodeEventsReply } from './ProjectConfigIpc'
 import assert from 'assert'
+import type { DebugData } from '@packages/types/src/debug'
 import type { AllModeOptions, FullConfig, TestingType } from '@packages/types'
 import debugLib from 'debug'
 import path from 'path'

@@ -6,6 +6,7 @@ import path from 'path'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
 import exception from '../exception'
+import type { DebugData } from '@packages/types/src/debug'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -16,6 +17,7 @@ interface SetupOptions {
   cloudApi: StudioCloudApi
   manifest: Record<string, string>
   getProjectOptions: StudioServerOptions['getProjectOptions']
+  debugData?: DebugData
 }
 
 const debug = Debug('cypress:server:studio')
@@ -26,7 +28,7 @@ export class StudioManager implements StudioManagerShape {
   private _studioServer: StudioServerShape | undefined
   private _studioElectron: StudioElectron | undefined
 
-  async setup ({ script, studioPath, studioHash, cloudApi, manifest, getProjectOptions }: SetupOptions): Promise<void> {
+  async setup ({ script, studioPath, studioHash, cloudApi, manifest, getProjectOptions, debugData }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
     this._studioServer = await createStudioServer({
@@ -47,6 +49,7 @@ export class StudioManager implements StudioManagerShape {
         return actualHash === expectedHash
       },
       getProjectOptions,
+      debugData,
     })
 
     this.status = 'ENABLED'

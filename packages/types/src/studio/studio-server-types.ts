@@ -9,6 +9,7 @@ import type { Router } from 'express'
 import type { AxiosInstance } from 'axios'
 import type { Socket } from 'socket.io'
 import type { BinaryLike } from 'crypto'
+import type { DebugData } from '../debug'
 
 export const StudioMetricsTypes = {
   STUDIO_STARTED: 'studio:started',
@@ -100,6 +101,7 @@ export interface StudioServerOptions {
   manifest?: Record<string, string>
   verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
   studioElectron?: StudioElectronApi
+  debugData?: DebugData
 }
 
 export interface StudioAIInitializeOptions {

@@ -32,6 +32,8 @@ export * from './reporter'
 
 export * from './server'
 
+export * from './debug'
+
 export * from './util'
 
 export * from './types'
