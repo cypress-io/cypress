@@ -37,6 +37,7 @@ interface ResponseMiddlewareProps {
    */
   makeResStreamPlainText: () => void
   isGunzipped: boolean
+  isBrotliDecompressed: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
 }
@@ -114,6 +115,10 @@ function resContentTypeIsJavaScript (res: IncomingMessage) {
 
 function resIsGzipped (res: IncomingMessage) {
   return (res.headers['content-encoding'] || '').includes('gzip')
+}
+
+function resIsBrotli (res: IncomingMessage) {
+  return (res.headers['content-encoding'] || '').includes('br')
 }
 
 function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
@@ -206,9 +211,11 @@ const AttachPlainTextStreamFn: ResponseMiddleware = function () {
     this.debug('ensuring resStream is plaintext')
 
     const isResGunzupped = resIsGzipped(this.incomingRes)
+    const isResBrotli = resIsBrotli(this.incomingRes)
 
     span?.setAttributes({
       isResGunzupped,
+      isResBrotli,
     })
 
     if (!this.isGunzipped && isResGunzupped) {
@@ -220,6 +227,16 @@ const AttachPlainTextStreamFn: ResponseMiddleware = function () {
       this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
 
       this.isGunzipped = true
+    }
+
+    if (!this.isBrotliDecompressed && isResBrotli) {
+      this.debug('decompressing Brotli response body')
+
+      const brotliDecompress = zlib.createBrotliDecompress()
+
+      this.incomingResStream = this.incomingResStream.pipe(brotliDecompress).on('error', this.onError)
+
+      this.isBrotliDecompressed = true
     }
 
     span?.end()
@@ -959,6 +976,7 @@ const GzipBody: ResponseMiddleware = async function () {
       requestId,
       responseHeaders: this.incomingRes.headers,
       isAlreadyGunzipped: this.isGunzipped,
+      isAlreadyBrotliDecompressed: this.isBrotliDecompressed,
       responseStream: this.incomingResStream,
       res: this.res,
       timings: {
@@ -985,6 +1003,18 @@ const GzipBody: ResponseMiddleware = async function () {
 
     this.incomingResStream = this.incomingResStream
     .pipe(zlib.createGzip(zlibOptions))
+    .on('error', this.onError)
+    .once('close', () => {
+      span?.end()
+    })
+  }
+
+  if (this.isBrotliDecompressed) {
+    this.debug('re-compressing Brotli response body')
+    const span = telemetry.startSpan({ name: 'brotli:body', parentSpan: this.resMiddlewareSpan, isVerbose })
+
+    this.incomingResStream = this.incomingResStream
+    .pipe(zlib.createBrotliCompress())
     .on('error', this.onError)
     .once('close', () => {
       span?.end()

@@ -1,5 +1,6 @@
 import { describe, expect, beforeEach, afterEach, it, vi, Mock, MockInstance } from 'vitest'
 import _ from 'lodash'
+import zlib from 'zlib'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
 import EventEmitter from 'events'
@@ -1865,7 +1866,7 @@ describe('http/response-middleware', function () {
       }
     }
 
-    function prepareSameOriginContext (props = {}) {
+    function prepareSameOriginContext (props: { req?: object, incomingRes?: object, res?: object } = {}) {
       const appendStub = vi.fn()
 
       const ctx = prepareContext({
@@ -2530,6 +2531,50 @@ describe('http/response-middleware', function () {
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
+    it('calls responseStreamReceived with isAlreadyBrotliDecompressed when isBrotliDecompressed is true', async function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'br' }
+      const res = {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+            cdpRequestWillBeSentTimestamp: 1,
+            cdpRequestWillBeSentReceivedTimestamp: 2,
+            proxyRequestReceivedTimestamp: 3,
+            cdpLagDuration: 4,
+            proxyRequestCorrelationDuration: 5,
+          },
+        },
+        res,
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: false,
+        isBrotliDecompressed: true,
+        incomingResStream: stream,
+      })
+
+      await testMiddleware([GzipBody], ctx)
+      expect(responseStreamReceivedStub).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requestId: '123',
+          responseHeaders: headers,
+          isAlreadyGunzipped: false,
+          isAlreadyBrotliDecompressed: true,
+          responseStream: stream,
+          res,
+        }),
+      )
+    })
+
     function prepareContext (props) {
       ctx = {
         incomingRes: props.incomingRes,
@@ -2537,9 +2582,44 @@ describe('http/response-middleware', function () {
         req: props.req,
         res: props.res,
         isGunzipped: props.isGunzipped,
+        isBrotliDecompressed: props.isBrotliDecompressed,
         incomingResStream: props.incomingResStream,
         makeResStreamPlainText: props.makeResStreamPlainText,
       }
     }
+  })
+
+  describe('AttachPlainTextStreamFn', function () {
+    const { AttachPlainTextStreamFn } = ResponseMiddleware
+
+    it('decompresses Brotli and sets isBrotliDecompressed when content-encoding is br', async function () {
+      const compressed = zlib.brotliCompressSync(Buffer.from('hello'))
+      const stream = Readable.from([compressed])
+      const ctx = {
+        debug: () => {},
+        res: {
+          on: (_event, _listener) => {},
+          off: (_event, _listener) => {},
+        },
+        incomingRes: { headers: { 'content-encoding': 'br' } },
+        incomingResStream: stream,
+        isGunzipped: false,
+        isBrotliDecompressed: false,
+        makeResStreamPlainText: () => {},
+        onError: (err) => {
+          throw err
+        },
+      }
+
+      await testMiddleware([AttachPlainTextStreamFn], ctx)
+      ctx.makeResStreamPlainText()
+      expect(ctx.isBrotliDecompressed).toBe(true)
+      const chunks: Buffer[] = []
+
+      for await (const chunk of ctx.incomingResStream) {
+        chunks.push(Buffer.from(chunk))
+      }
+      expect(Buffer.concat(chunks).toString()).toBe('hello')
+    })
   })
 })

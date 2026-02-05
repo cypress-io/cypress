@@ -410,7 +410,7 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  // Cypress can only support plaintext or gzip, so make sure we don't request anything else, by either filtering down to `gzip` or explicitly specifying `identity`
+  // Cypress supports plaintext, gzip, and Brotli. Filter to only request encodings we support (br, gzip, identity).
   const acceptEncoding = this.req.headers['accept-encoding']
 
   span?.setAttributes({
@@ -418,21 +418,25 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   })
 
   if (acceptEncoding) {
-    const doesAcceptHeadingIncludeGzip = acceptEncoding.includes('gzip')
+    const acceptsGzip = acceptEncoding.includes('gzip')
+    const acceptsBr = acceptEncoding.includes('br')
 
     span?.setAttributes({
-      doesAcceptHeadingIncludeGzip,
+      doesAcceptHeadingIncludeGzip: acceptsGzip,
+      doesAcceptHeadingIncludeBr: acceptsBr,
     })
 
-    if (doesAcceptHeadingIncludeGzip) {
-      this.req.headers['accept-encoding'] = 'gzip'
-    } else {
-      this.req.headers['accept-encoding'] = 'identity'
-    }
+    const supported: string[] = []
+
+    if (acceptsBr) supported.push('br')
+
+    if (acceptsGzip) supported.push('gzip')
+
+    this.req.headers['accept-encoding'] = supported.length ? supported.join(',') : 'identity'
   } else {
     // If there is no accept-encoding header, it means to accept everything (https://www.rfc-editor.org/rfc/rfc9110#name-accept-encoding).
-    // In that case, we want to explicitly filter that down to `gzip` and identity
-    this.req.headers['accept-encoding'] = 'gzip,identity'
+    // In that case, we want to explicitly filter that down to encodings we support.
+    this.req.headers['accept-encoding'] = 'br,gzip,identity'
   }
 
   span?.end()
