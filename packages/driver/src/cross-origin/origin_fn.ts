@@ -170,11 +170,15 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       syncEnvToCurrentOrigin(env)
     }
 
+    const clearOriginLogGroupState = () => {
+      cy.state('originLogGroupLevel', undefined)
+      cy.state('originLogGroupId', undefined)
+    }
+
     cy.state('onQueueEnd', () => {
       queueFinished = true
       setRunnableStateToPassed()
-      cy.state('originLogGroupLevel', undefined)
-      cy.state('originLogGroupId', undefined)
+      clearOriginLogGroupState()
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', {
         subject: cy.subject(),
       }, {
@@ -184,8 +188,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
 
     cy.state('onFail', (err) => {
       setRunnableStateToPassed()
-      cy.state('originLogGroupLevel', undefined)
-      cy.state('originLogGroupId', undefined)
+      clearOriginLogGroupState()
       if (queueFinished) {
         // If the queue is already finished, send this event instead because
         // the primary won't be listening for 'queue:finished' anymore
@@ -239,12 +242,14 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
         if (!hasCommands) {
           queueFinished = true
           setRunnableStateToPassed()
+          clearOriginLogGroupState()
 
           return
         }
       }
     } catch (err) {
       setRunnableStateToPassed()
+      clearOriginLogGroupState()
       Cypress.specBridgeCommunicator.toPrimary('ran:origin:fn', { err }, { syncGlobals: true })
 
       return
