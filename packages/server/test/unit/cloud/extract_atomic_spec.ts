@@ -372,6 +372,139 @@ describe('extractAtomic', () => {
     await expect(extractPromise).to.be.rejectedWith('Write error')
   })
 
+  it('should retry on EPERM and succeed when write succeeds on retry', async () => {
+    const archivePath = '/path/to/archive.tar'
+    const destinationPath = '/path/to/destination'
+    const fileContent = Buffer.from('content')
+    const epermError = Object.assign(new Error('EPERM: operation not permitted, rename \'file.txt.123\' -> \'file.txt\''), { code: 'EPERM' })
+
+    writeFileAtomicStub.onFirstCall().rejects(epermError)
+    writeFileAtomicStub.onSecondCall().resolves()
+
+    const mockEntry = Object.assign(new Readable({
+      read () {
+        this.push(fileContent)
+        this.push(null)
+      },
+    }), {
+      type: 'File',
+      path: 'file.txt',
+      mode: 0o644,
+      resume: sinon.stub(),
+    })
+
+    const extractPromise = extractAtomic(archivePath, destinationPath)
+
+    setImmediate(() => {
+      mockParser.emit('entry', mockEntry)
+      mockParser.emit('end')
+    })
+
+    await extractPromise
+
+    expect(writeFileAtomicStub).to.be.calledTwice
+    expect(writeFileAtomicStub).to.be.calledWith(
+      path.join(destinationPath, 'file.txt'),
+      fileContent,
+      { mode: 0o644 },
+    )
+  })
+
+  it('should retry on EACCES and succeed when write succeeds on retry', async () => {
+    const archivePath = '/path/to/archive.tar'
+    const destinationPath = '/path/to/destination'
+    const fileContent = Buffer.from('content')
+    const eaccesError = Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' })
+
+    writeFileAtomicStub.onFirstCall().rejects(eaccesError)
+    writeFileAtomicStub.onSecondCall().resolves()
+
+    const mockEntry = Object.assign(new Readable({
+      read () {
+        this.push(fileContent)
+        this.push(null)
+      },
+    }), {
+      type: 'File',
+      path: 'file.txt',
+      mode: 0o644,
+      resume: sinon.stub(),
+    })
+
+    const extractPromise = extractAtomic(archivePath, destinationPath)
+
+    setImmediate(() => {
+      mockParser.emit('entry', mockEntry)
+      mockParser.emit('end')
+    })
+
+    await extractPromise
+
+    expect(writeFileAtomicStub).to.be.calledTwice
+  })
+
+  it('should throw when EPERM persists after all retries', async () => {
+    const archivePath = '/path/to/archive.tar'
+    const destinationPath = '/path/to/destination'
+    const fileContent = Buffer.from('content')
+    const epermError = Object.assign(new Error('EPERM: operation not permitted'), { code: 'EPERM' })
+
+    writeFileAtomicStub.rejects(epermError)
+
+    const mockEntry = Object.assign(new Readable({
+      read () {
+        this.push(fileContent)
+        this.push(null)
+      },
+    }), {
+      type: 'File',
+      path: 'file.txt',
+      mode: 0o644,
+      resume: sinon.stub(),
+    })
+
+    const extractPromise = extractAtomic(archivePath, destinationPath)
+
+    setImmediate(() => {
+      mockParser.emit('entry', mockEntry)
+      mockParser.emit('end')
+    })
+
+    await expect(extractPromise).to.be.rejectedWith(epermError)
+    expect(writeFileAtomicStub.callCount).to.equal(4) // initial + 3 retries
+  })
+
+  it('should not retry on non-retryable errors', async () => {
+    const archivePath = '/path/to/archive.tar'
+    const destinationPath = '/path/to/destination'
+    const fileContent = Buffer.from('content')
+    const enospcError = Object.assign(new Error('ENOSPC: no space left'), { code: 'ENOSPC' })
+
+    writeFileAtomicStub.rejects(enospcError)
+
+    const mockEntry = Object.assign(new Readable({
+      read () {
+        this.push(fileContent)
+        this.push(null)
+      },
+    }), {
+      type: 'File',
+      path: 'file.txt',
+      mode: 0o644,
+      resume: sinon.stub(),
+    })
+
+    const extractPromise = extractAtomic(archivePath, destinationPath)
+
+    setImmediate(() => {
+      mockParser.emit('entry', mockEntry)
+      mockParser.emit('end')
+    })
+
+    await expect(extractPromise).to.be.rejectedWith(enospcError)
+    expect(writeFileAtomicStub).to.be.calledOnce
+  })
+
   it('should wait for all file writes to complete before resolving', async () => {
     const archivePath = '/path/to/archive.tar'
     const destinationPath = '/path/to/destination'
