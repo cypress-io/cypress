@@ -258,6 +258,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
         specName: spec.name,
         osName: platform.osName,
         projectSlug: projectId,
+        mode: 'record',
       })
     } catch (err) {
       debug('Failed to send protocol errors %o', err)

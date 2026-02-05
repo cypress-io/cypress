@@ -36,6 +36,7 @@ type AppCaptureProtocolConstructor = new (options: ProtocolManagerOptions) => Ap
 export class ProtocolManager implements ProtocolManagerShape {
   private _runId?: string
   private _instanceId?: string
+  private _specName?: string
   private _db?: Database.Database
   private _dbPath?: string
   private _archivePath?: string
@@ -72,6 +73,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug('preparing protocol via script')
 
     try {
+      this.options = options
       this._runId = options.runId
       if (script) {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
@@ -81,11 +83,10 @@ export class ProtocolManager implements ProtocolManagerShape {
         const { AppCaptureProtocol } = requireScript<{ AppCaptureProtocol: AppCaptureProtocolConstructor }>(script)
 
         this.AppCaptureProtocol = AppCaptureProtocol
-        this.options = options
       }
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({
+        this.captureError({
           error,
           args: [script],
           captureMethod: 'prepareProtocol',
@@ -108,7 +109,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       this._protocol = new this.AppCaptureProtocol(this.options)
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({
+        this.captureError({
           error,
           captureMethod: 'setupProtocol',
           fatal: true,
@@ -134,7 +135,7 @@ export class ProtocolManager implements ProtocolManagerShape {
             await listener(message)
           } catch (error) {
             if (CAPTURE_ERRORS) {
-              this._errors.push({ captureMethod: 'cdpClient.on', fatal: false, error, args: [event, message] })
+              this.captureError({ captureMethod: 'cdpClient.on', fatal: false, error, args: [event, message] })
             } else {
               debug('error in cdpClient.on %o', { error, event, message })
               throw error
@@ -168,7 +169,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       this._protocol = undefined
 
       if (CAPTURE_ERRORS) {
-        this._errors.push({ captureMethod: 'beforeSpec', fatal: true, error, args: [spec], runnableId: this._runnableId })
+        this.captureError({ captureMethod: 'beforeSpec', fatal: true, error, args: [spec], runnableId: this._runnableId })
       } else {
         throw error
       }
@@ -177,6 +178,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   private _beforeSpec (spec: FoundSpec & { instanceId: string }) {
     this._instanceId = spec.instanceId
+    this._specName = spec.name
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
     const archivePath = path.join(cypressProtocolDirectory, `${spec.instanceId}.tar`)
     const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
@@ -284,7 +286,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   addFatalError (captureMethod: ProtocolCaptureMethod, error: Error, args?: any) {
-    this._errors.push({
+    this.captureError({
       fatal: true,
       error,
       captureMethod,
@@ -358,7 +360,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       }
     } catch (e) {
       if (captureErrors) {
-        this._errors.push({
+        this.captureError({
           error: e,
           captureMethod: 'uploadCaptureArtifact',
           fatal: true,
@@ -382,13 +384,53 @@ export class ProtocolManager implements ProtocolManagerShape {
     await this.invokeAsync('cdpReconnect', { isEssential: true })
   }
 
+  /**
+   * Central handling for errors - if we're in studio mode it will
+   * immediately be dispatched to the cloud for recording, otherwise
+   * it will be stored and the batch will be dispatched when protocol assets
+   * are uploaded.
+   *
+   * @param error
+   */
+  private captureError (error: ProtocolError) {
+    if (this.options?.mode === 'studio') {
+      this.dispatchErrors([error], {
+        osName: os.platform(),
+        projectSlug: this.options?.projectId,
+        specName: this._specName,
+        mode: this.options?.mode,
+      })
+    } else {
+      this._errors.push(error)
+    }
+  }
+
   async reportNonFatalErrors (context?: {
     osName: string
-    projectSlug: string
-    specName: string
+    projectSlug?: string
+    specName?: string
+    mode?: 'record' | 'studio'
   }) {
     const errors = this._errors.filter(({ fatal }) => !fatal)
 
+    await this.dispatchErrors(errors, context)
+
+    this._errors = []
+  }
+
+  /**
+   * Transmit errors to the cloud.
+   *
+   * @param errors
+   * @param context
+   * @returns
+   */
+  private async dispatchErrors (errors: ProtocolError[], context?: {
+    osName: string
+    projectSlug?: string
+    specName?: string
+    mode?: 'record' | 'studio'
+  }) {
     if (errors.length === 0) {
       return
     }
@@ -428,8 +470,6 @@ export class ProtocolManager implements ProtocolManagerShape {
     } catch (e) {
       debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, errors)
     }
-
-    this._errors = []
   }
 
   close (): void {
@@ -448,6 +488,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._archivePath = undefined
     this._instanceId = undefined
+    this._specName = undefined
     this._runId = undefined
     this._errors = []
     this._protocol = undefined
@@ -467,7 +508,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
+        this.captureError({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
       } else {
         throw error
       }
@@ -488,7 +529,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return await this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
+        this.captureError({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
       } else {
         throw error
       }
