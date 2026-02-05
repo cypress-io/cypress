@@ -125,7 +125,7 @@ export const LogUtils = {
     return _
     .chain(tests)
     .flatMap((test) => test.prevAttempts ? [test, ...test.prevAttempts] : [test])
-    .flatMap<{id: string}>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
+    .flatMap<{ id: string }>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
     .compact()
     .union([{ id: '0' }])
     // id is a string in the form of 'log-origin-#', grab the number off the end.
@@ -259,18 +259,6 @@ const defaults = function (state: StateFunc, config, obj) {
   let originLogGroupLevel = obj.originLogGroupLevel ?? state('originLogGroupLevel')
   let originLogGroupId = obj.originLogGroupId ?? state('originLogGroupId')
 
-  if (!Cypress.isCrossOriginSpecBridge && (originLogGroupLevel == null || originLogGroupId == null)) {
-    const originMeta = (Cypress as any)?.primaryOriginCommunicator?.getOriginLogGroupMeta?.(logOrigin) || {}
-
-    if (originLogGroupLevel == null) {
-      originLogGroupLevel = originMeta.level
-    }
-
-    if (originLogGroupId == null) {
-      originLogGroupId = originMeta.id
-    }
-  }
-
   const resolvedOriginLogGroupLevel = originLogGroupLevel ?? 0
   const effectiveOriginLogGroupLevel = Cypress.isCrossOriginSpecBridge ? resolvedOriginLogGroupLevel : 0
 
@@ -346,7 +334,7 @@ export class Log {
   fireChangeEvent: DebouncedFunc<((log) => (void | undefined))>
 
   _hasInitiallyLogged: boolean = false
-  private attributes: Record<string, any> = { }
+  private attributes: Record<string, any> = {}
   private _emittedAttrs: Record<string, any> = {}
 
   constructor (createSnapshot, state, config, fireChangeEvent) {
@@ -503,7 +491,7 @@ export class Log {
     if (
       (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
       || (!this.config('isInteractive')
-      || (this.config('numTestsKeptInMemory') === 0)) && !this.state('isProtocolEnabled')) {
+        || (this.config('numTestsKeptInMemory') === 0)) && !this.state('isProtocolEnabled')) {
       return this
     }
 
@@ -639,8 +627,8 @@ export class Log {
     // and a command
     return (this.get('autoEnd') !== false) &&
       (this.get('ended') !== true) &&
-        (this.get('event') === false) &&
-          (this.get('instrument') === 'command')
+      (this.get('event') === false) &&
+      (this.get('instrument') === 'command')
   }
 
   finish () {
