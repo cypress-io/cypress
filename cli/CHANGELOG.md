@@ -25,7 +25,7 @@ _Released 02/03/2026_
 **Bugfixes:**
 
 - Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
-- Fixed an issue where grouped commands inside `cy.origin()` did not reset the Command Log group level after completion. Fixed in [#33289](https://github.com/cypress-io/cypress/pull/33289).
+- Reset command log nesting after grouped commands in `cy.origin()`. Fixed in [#33289](https://github.com/cypress-io/cypress/pull/33289).
 
 **Misc:**
 
