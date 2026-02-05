@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.10.1
+
+_Released 02/08/2026 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
+
 ## 15.10.0
 
 _Released 02/03/2026_
