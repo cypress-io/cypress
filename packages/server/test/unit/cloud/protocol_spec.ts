@@ -131,6 +131,9 @@ describe('lib/cloud/protocol', () => {
       nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
       verbose: sinon.match.func,
     })
+
+    expect(protocolManager['_instanceId']).to.equal('instanceId')
+    expect(protocolManager['_specName']).to.equal('spec')
   })
 
   it('should be able to initialize a new test', async () => {
@@ -585,6 +588,50 @@ describe('lib/cloud/protocol', () => {
             expect(threw).to.be.false
             expect(fs.unlink).to.be.called
           })
+        })
+      })
+    })
+  })
+
+  describe('.captureError', () => {
+    beforeEach(() => {
+      sinon.stub(protocolManager, 'dispatchErrors').resolves()
+    })
+
+    describe('when mode is `record`', () => {
+      beforeEach(() => {
+        protocolManager['options']['mode'] = 'record'
+      })
+
+      it('should store error into array for later reporting', () => {
+        const err = { captureMethod: 'cdpClient.on', error: new Error(), args: { test: 'test1' } }
+
+        protocolManager['captureError'](err)
+
+        expect(protocolManager['_errors']).to.have.length(1)
+        expect(protocolManager['_errors'][0]).to.include(err)
+        expect(protocolManager['dispatchErrors']).not.to.have.been.called
+      })
+    })
+
+    describe('when mode is `studio`', () => {
+      beforeEach(() => {
+        protocolManager['options']['mode'] = 'studio'
+      })
+
+      it('should immediately dispatch errors to the cloud', () => {
+        const err = { captureMethod: 'cdpClient.on', error: new Error(), args: { test: 'test1' } }
+
+        protocolManager['captureError'](err)
+
+        expect(protocolManager['_errors']).to.have.length(0)
+        expect(protocolManager['dispatchErrors']).to.have.been.called
+        expect(protocolManager['dispatchErrors'].getCall(0).args[0]).to.deep.equal([err])
+        expect(protocolManager['dispatchErrors'].getCall(0).args[1]).to.deep.equal({
+          osName: os.platform(),
+          projectSlug: protocolManager['options']['projectId'],
+          specName: protocolManager['_specName'],
+          mode: 'studio',
         })
       })
     })
