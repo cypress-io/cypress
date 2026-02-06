@@ -65,6 +65,89 @@ describe('lib/cloud/studio', () => {
     sinon.restore()
   })
 
+  describe('setup', () => {
+    it('passes debugData to createStudioServer when provided', async () => {
+      const createStudioServerStub = sinon.stub().resolves({
+        initializeRoutes: sinon.stub(),
+        canAccessStudioAI: sinon.stub().resolves(true),
+        initializeStudioAI: sinon.stub().resolves(),
+        reportError: sinon.stub(),
+        destroy: sinon.stub().resolves(),
+        addSocketListeners: sinon.stub(),
+        captureStudioEvent: sinon.stub().resolves(),
+        updateSessionId: sinon.stub(),
+        connectToBrowser: sinon.stub(),
+      })
+
+      const StubbedStudioManager = (proxyquire('../lib/cloud/studio/studio', {
+        '../api/studio/report_studio_error': { reportStudioError: sinon.stub() },
+        './StudioElectron': { StudioElectron: class {} },
+        '../require_script': {
+          requireScript: () => ({
+            default: { createStudioServer: createStudioServerStub },
+          }),
+        },
+      }) as typeof import('@packages/server/lib/cloud/studio/studio')).StudioManager
+
+      const manager = new StubbedStudioManager()
+      const debugData = { filePreprocessorHandlerText: 'handler text' }
+
+      await manager.setup({
+        script: 'script',
+        studioPath: 'path',
+        studioHash: 'abcdefg',
+        getProjectOptions: sinon.stub().resolves({ projectSlug: '1234' }),
+        cloudApi: {} as any,
+        manifest: { 'server/index.js': 'abcdefg' },
+        debugData,
+      })
+
+      expect(createStudioServerStub).to.have.been.calledOnce
+      expect(createStudioServerStub.firstCall.args[0].debugData).to.deep.equal(debugData)
+    })
+
+    it('passes undefined debugData to createStudioServer when not provided', async () => {
+      const createStudioServerStub = sinon.stub().resolves({
+        initializeRoutes: sinon.stub(),
+        canAccessStudioAI: sinon.stub().resolves(true),
+        initializeStudioAI: sinon.stub().resolves(),
+        reportError: sinon.stub(),
+        destroy: sinon.stub().resolves(),
+        addSocketListeners: sinon.stub(),
+        captureStudioEvent: sinon.stub().resolves(),
+        updateSessionId: sinon.stub(),
+        connectToBrowser: sinon.stub(),
+      })
+
+      const StubbedStudioManager = (proxyquire('../lib/cloud/studio/studio', {
+        '../api/studio/report_studio_error': { reportStudioError: sinon.stub() },
+        './StudioElectron': { StudioElectron: class {} },
+        '../require_script': {
+          requireScript: () => ({
+            default: { createStudioServer: createStudioServerStub },
+          }),
+        },
+      }) as typeof import('@packages/server/lib/cloud/studio/studio')).StudioManager
+
+      const manager = new StubbedStudioManager()
+
+      await manager.setup({
+        script: 'script',
+        studioPath: 'path',
+        studioHash: 'abcdefg',
+        getProjectOptions: sinon.stub().resolves({ projectSlug: '1234' }),
+        cloudApi: {} as any,
+        manifest: { 'server/index.js': 'abcdefg' },
+      })
+
+      expect(createStudioServerStub).to.have.been.calledOnce
+      const options = createStudioServerStub.firstCall.args[0]
+
+      expect(options).to.have.property('debugData')
+      expect(options.debugData).to.be.undefined
+    })
+  })
+
   describe('synchronous method invocation', () => {
     it('reports an error when a synchronous method fails', () => {
       const error = new Error('foo')
