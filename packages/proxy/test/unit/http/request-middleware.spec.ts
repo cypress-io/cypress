@@ -926,7 +926,7 @@ describe('http/request-middleware', () => {
       expect(ctx.res.off).toHaveBeenCalledWith('close', expect.any(Function))
     })
 
-    it('errors when the request is destroyed prior to receiving a pre-request', () => {
+    it('errors when the request is destroyed prior to receiving a pre-request', async () => {
       const ctx = {
         req: {
           proxiedUrl: 'https://www.cypress.io/',
@@ -944,7 +944,7 @@ describe('http/request-middleware', () => {
         onError: vi.fn(),
       }
 
-      testMiddleware([CorrelateBrowserPreRequest], ctx)
+      await testMiddleware([CorrelateBrowserPreRequest], ctx)
 
       // call the function handler to invoke the onClose function callback
       ctx.res.once.mock.calls[0][1]()
