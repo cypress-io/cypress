@@ -418,8 +418,8 @@ const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   })
 
   if (acceptEncoding) {
-    const acceptsGzip = acceptEncoding.includes('gzip')
     const acceptsBr = acceptEncoding.includes('br')
+    const acceptsGzip = acceptEncoding.includes('gzip')
 
     span?.setAttributes({
       doesAcceptHeadingIncludeGzip: acceptsGzip,
