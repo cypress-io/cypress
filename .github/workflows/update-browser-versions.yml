@@ -129,4 +129,5 @@ jobs:
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
               description: '${{ steps.get-versions.outputs.description }}',
               body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
+              team_reviewers: ['app']
             })
