@@ -1560,10 +1560,10 @@ describe('Routes', () => {
         })
       })
 
-      it('sets accept-encoding header to "br,gzip,identity" when no header is passed', function () {
+      it('sets accept-encoding header to "gzip,identity" when no header is passed', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/accept')
-        .matchHeader('accept-encoding', 'br,gzip,identity')
+        .matchHeader('accept-encoding', 'gzip,identity')
         .reply(200, '<html>accept</html>')
 
         return this.rp({
