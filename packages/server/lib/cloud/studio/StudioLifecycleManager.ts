@@ -25,7 +25,7 @@ import { INITIALIZATION_TELEMETRY_GROUP_NAMES } from './telemetry/constants/init
 import crypto from 'crypto'
 import { logError } from '@packages/stderr-filtering'
 import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
-import { DebugData } from '@packages/types/src/debug'
+import type { DebugData } from '@packages/types/src/debug'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
