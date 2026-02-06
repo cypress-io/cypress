@@ -4,7 +4,7 @@ describe('plugin', () => {
       cy.task('grep', {
         excludeSpecPattern: ['**/test2.cy.ts', '**/test3.cy.ts'],
         specPattern: '**/*.cy.ts',
-        env: {
+        expose: {
           grepTags: 'smoke',
           grepFilterSpecs: true,
         },
@@ -18,7 +18,7 @@ describe('plugin', () => {
       cy.task('grep', {
         excludeSpecPattern: '**/test2.cy.ts',
         specPattern: '**/*.cy.ts',
-        env: {
+        expose: {
           grepTags: 'smoke',
           grepFilterSpecs: true,
         },
