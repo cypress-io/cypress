@@ -196,7 +196,7 @@ const FilterNonProxiedResponse: ResponseMiddleware = function () {
       'MaybeSendRedirectToClient',
       'CopyResponseStatusCode',
       'MaybeEndWithEmptyBody',
-      'GzipBody',
+      'CompressBody',
       'SendResponseBodyToClient',
     ])
   }
@@ -965,7 +965,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
   })
 }
 
-const GzipBody: ResponseMiddleware = async function () {
+const CompressBody: ResponseMiddleware = async function () {
   if (this.protocolManager && this.req.browserPreRequest?.requestId) {
     const preRequest = this.req.browserPreRequest
     const requestId = getOriginalRequestId(preRequest.requestId)
@@ -1057,6 +1057,6 @@ export default {
   MaybeInjectHtml,
   MaybeRemoveSecurity,
   MaybeInjectServiceWorker,
-  GzipBody,
+  CompressBody,
   SendResponseBodyToClient,
 }

@@ -52,7 +52,7 @@ describe('http/response-middleware', function () {
       'MaybeInjectHtml',
       'MaybeRemoveSecurity',
       'MaybeInjectServiceWorker',
-      'GzipBody',
+      'CompressBody',
       'SendResponseBodyToClient',
     ])
   })
@@ -158,7 +158,7 @@ describe('http/response-middleware', function () {
         'MaybeSendRedirectToClient',
         'CopyResponseStatusCode',
         'MaybeEndWithEmptyBody',
-        'GzipBody',
+        'CompressBody',
         'SendResponseBodyToClient',
       ])
     })
@@ -2386,8 +2386,8 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('GzipBody', function () {
-    const { GzipBody } = ResponseMiddleware
+  describe('CompressBody', function () {
+    const { CompressBody } = ResponseMiddleware
     let ctx
     let responseStreamReceivedStub: Mock
 
@@ -2425,7 +2425,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([GzipBody], ctx)
+      await testMiddleware([CompressBody], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2469,7 +2469,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([GzipBody], ctx)
+      await testMiddleware([CompressBody], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2502,7 +2502,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([GzipBody], ctx)
+      await testMiddleware([CompressBody], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2527,7 +2527,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([GzipBody], ctx)
+      await testMiddleware([CompressBody], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2562,7 +2562,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([GzipBody], ctx)
+      await testMiddleware([CompressBody], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
