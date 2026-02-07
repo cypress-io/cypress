@@ -55,6 +55,13 @@ const zlibOptions = {
   finishFlush: zlib.constants.Z_SYNC_FLUSH,
 }
 
+// Brotli default quality is 11 (slowest). Use quality 1 for fast re-compression in the proxy.
+const brotliOptions = {
+  params: {
+    [zlib.constants.BROTLI_PARAM_QUALITY]: 1,
+  },
+}
+
 // https://github.com/cypress-io/cypress/issues/1543
 function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer, debug: Debug.Debugger) {
   const httpCharset = (charset(headers, body, 1024) || '').toLowerCase()
@@ -1014,7 +1021,7 @@ const CompressBody: ResponseMiddleware = async function () {
     const span = telemetry.startSpan({ name: 'brotli:body', parentSpan: this.resMiddlewareSpan, isVerbose })
 
     this.incomingResStream = this.incomingResStream
-    .pipe(zlib.createBrotliCompress())
+    .pipe(zlib.createBrotliCompress(brotliOptions))
     .on('error', this.onError)
     .once('close', () => {
       span?.end()
