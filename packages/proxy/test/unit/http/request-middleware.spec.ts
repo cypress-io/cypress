@@ -738,11 +738,11 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers!['accept-encoding']).toBe('identity')
     })
 
-    it('sets br,gzip,identity when no accept-encoding header (RFC 9110 accept everything)', async () => {
+    it('sets gzip,identity when no accept-encoding header (RFC 9110 accept everything)', async () => {
       const ctx = prepareContext({})
 
       await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
-      expect(ctx.req.headers!['accept-encoding']).toBe('br,gzip,identity')
+      expect(ctx.req.headers!['accept-encoding']).toBe('gzip,identity')
     })
   })
 
@@ -926,7 +926,7 @@ describe('http/request-middleware', () => {
       expect(ctx.res.off).toHaveBeenCalledWith('close', expect.any(Function))
     })
 
-    it('errors when the request is destroyed prior to receiving a pre-request', async () => {
+    it('errors when the request is destroyed prior to receiving a pre-request', () => {
       const ctx = {
         req: {
           proxiedUrl: 'https://www.cypress.io/',
@@ -944,7 +944,7 @@ describe('http/request-middleware', () => {
         onError: vi.fn(),
       }
 
-      await testMiddleware([CorrelateBrowserPreRequest], ctx)
+      testMiddleware([CorrelateBrowserPreRequest], ctx)
 
       // call the function handler to invoke the onClose function callback
       ctx.res.once.mock.calls[0][1]()
