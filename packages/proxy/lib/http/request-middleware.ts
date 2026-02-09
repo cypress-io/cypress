@@ -10,7 +10,7 @@ import { doesTopNeedToBeSimulated } from './util/top-simulation'
 
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
-import { urlMatchesOriginProtectionSpace } from '@packages/network-tools'
+import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
 import * as errors from '@packages/errors'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
@@ -410,34 +410,20 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  // Cypress supports plaintext, gzip, and Brotli. Filter to only request encodings we support (br, gzip, identity).
   const acceptEncoding = this.req.headers['accept-encoding']
+  const supported = getSupportedAcceptEncoding(acceptEncoding)
 
   span?.setAttributes({
     acceptEncodingHeaderPresent: !!acceptEncoding,
+    doesAcceptHeadingIncludeGzip: !!acceptEncoding?.includes('gzip'),
+    doesAcceptHeadingIncludeBr: !!acceptEncoding?.includes('br'),
   })
 
-  if (acceptEncoding) {
-    const acceptsBr = acceptEncoding.includes('br')
-    const acceptsGzip = acceptEncoding.includes('gzip')
-
-    span?.setAttributes({
-      doesAcceptHeadingIncludeGzip: acceptsGzip,
-      doesAcceptHeadingIncludeBr: acceptsBr,
-    })
-
-    const supported: string[] = []
-
-    if (acceptsBr) supported.push('br')
-
-    if (acceptsGzip) supported.push('gzip')
-
-    this.req.headers['accept-encoding'] = supported.length ? supported.join(',') : 'identity'
-  } else {
-    // If there is no accept-encoding header, it means to accept everything (https://www.rfc-editor.org/rfc/rfc9110#name-accept-encoding).
-    // In that case, we want to explicitly filter that down to `gzip` and identity.
-    this.req.headers['accept-encoding'] = 'gzip,identity'
-  }
+  this.req.headers['accept-encoding'] = supported
+  this.debug(
+    acceptEncoding ? 'accept-encoding header present, setting to %s' : 'no accept-encoding header, setting to %s',
+    supported,
+  )
 
   span?.end()
   this.next()
