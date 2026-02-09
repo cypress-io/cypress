@@ -19,6 +19,7 @@ import * as errors from '@packages/errors'
 
 import type Debug from 'debug'
 import type { CookieOptions } from 'express'
+import type { ResponseStreamOptions } from '@packages/types'
 import type { CypressIncomingRequest, CypressOutgoingResponse } from '../types'
 import type { HttpMiddleware, HttpMiddlewareThis } from '.'
 import type { IncomingMessage, IncomingHttpHeaders } from 'http'
@@ -38,6 +39,11 @@ interface ResponseMiddlewareProps {
   makeResStreamPlainText: () => void
   isGunzipped: boolean
   isBrotliDecompressed: boolean
+  /**
+   * Original content-encoding order (first = innermost). Used to re-compress in the
+   * same order when multiple encodings (e.g. gzip, br) were present.
+   */
+  contentEncodingOrder: SupportedContentEncoding[]
   incomingRes: IncomingMessage
   incomingResStream: Readable
 }
@@ -120,12 +126,31 @@ function resContentTypeIsJavaScript (res: IncomingMessage) {
   )
 }
 
-function resIsGzipped (res: IncomingMessage) {
-  return (res.headers['content-encoding'] || '').includes('gzip')
-}
+const SUPPORTED_CONTENT_ENCODINGS = ['gzip', 'br'] as const
 
-function resIsBrotli (res: IncomingMessage) {
-  return (res.headers['content-encoding'] || '').includes('br')
+export type SupportedContentEncoding = typeof SUPPORTED_CONTENT_ENCODINGS[number]
+
+/**
+ * Returns the content-encoding list in application order (first = applied first = innermost).
+ * Only includes encodings we support (gzip, br). Used so we decompress in reverse order
+ * and re-compress in the same order, preserving layered encoding semantics per RFC 7230.
+ */
+function getOrderedContentEncodings (res: IncomingMessage): SupportedContentEncoding[] {
+  const raw = (res.headers['content-encoding'] || '').toLowerCase()
+
+  if (!raw) return []
+
+  const order: SupportedContentEncoding[] = []
+
+  for (const part of raw.split(',')) {
+    const enc = part.trim()
+
+    if ((enc === 'gzip' || enc === 'br') && !order.includes(enc)) {
+      order.push(enc)
+    }
+  }
+
+  return order
 }
 
 function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
@@ -217,33 +242,38 @@ const AttachPlainTextStreamFn: ResponseMiddleware = function () {
 
     this.debug('ensuring resStream is plaintext')
 
-    const isResGunzupped = resIsGzipped(this.incomingRes)
-    const isResBrotli = resIsBrotli(this.incomingRes)
+    // RFC 7230: content-encoding lists encodings in application order (first = innermost).
+    // Decompress in reverse order (outermost first) so we respect layered encoding.
+    const order = getOrderedContentEncodings(this.incomingRes)
+
+    this.contentEncodingOrder = order
 
     span?.setAttributes({
-      isResGunzupped,
-      isResBrotli,
+      isResGunzupped: order.includes('gzip'),
+      isResBrotli: order.includes('br'),
     })
 
-    if (!this.isGunzipped && isResGunzupped) {
-      this.debug('gunzipping response body')
+    // Decompress outermost first: reverse order (e.g. "gzip, br" → un-br then un-gzip).
+    for (let i = order.length - 1; i >= 0; i--) {
+      const enc = order[i]
 
-      const gunzip = zlib.createGunzip(zlibOptions)
+      if (enc === 'gzip' && !this.isGunzipped) {
+        this.debug('gunzipping response body')
 
-      // TODO: how do we measure the ctx pipe via telemetry?
-      this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
+        const gunzip = zlib.createGunzip(zlibOptions)
 
-      this.isGunzipped = true
-    }
+        this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
 
-    if (!this.isBrotliDecompressed && isResBrotli) {
-      this.debug('decompressing Brotli response body')
+        this.isGunzipped = true
+      } else if (enc === 'br' && !this.isBrotliDecompressed) {
+        this.debug('decompressing Brotli response body')
 
-      const brotliDecompress = zlib.createBrotliDecompress()
+        const brotliDecompress = zlib.createBrotliDecompress()
 
-      this.incomingResStream = this.incomingResStream.pipe(brotliDecompress).on('error', this.onError)
+        this.incomingResStream = this.incomingResStream.pipe(brotliDecompress).on('error', this.onError)
 
-      this.isBrotliDecompressed = true
+        this.isBrotliDecompressed = true
+      }
     }
 
     span?.end()
@@ -979,7 +1009,7 @@ const CompressBody: ResponseMiddleware = async function () {
 
     const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
 
-    const resultingStream = this.protocolManager.responseStreamReceived({
+    const streamOptions: ResponseStreamOptions = {
       requestId,
       responseHeaders: this.incomingRes.headers,
       isAlreadyGunzipped: this.isGunzipped,
@@ -993,7 +1023,9 @@ const CompressBody: ResponseMiddleware = async function () {
         cdpLagDuration: preRequest.cdpLagDuration,
         proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
       },
-    })
+    }
+
+    const resultingStream = this.protocolManager.responseStreamReceived(streamOptions)
 
     if (resultingStream) {
       this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
@@ -1004,28 +1036,33 @@ const CompressBody: ResponseMiddleware = async function () {
     }
   }
 
-  if (this.isGunzipped) {
-    this.debug('regzipping response body')
-    const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: this.resMiddlewareSpan, isVerbose })
+  // Re-compress in the same order as the original content-encoding (innermost first).
+  const order = this.contentEncodingOrder ?? []
 
-    this.incomingResStream = this.incomingResStream
-    .pipe(zlib.createGzip(zlibOptions))
-    .on('error', this.onError)
-    .once('close', () => {
-      span?.end()
-    })
-  }
+  for (const enc of order) {
+    if (enc === 'gzip' && this.isGunzipped) {
+      this.debug('regzipping response body')
 
-  if (this.isBrotliDecompressed) {
-    this.debug('re-compressing Brotli response body')
-    const span = telemetry.startSpan({ name: 'brotli:body', parentSpan: this.resMiddlewareSpan, isVerbose })
+      const span = telemetry.startSpan({ name: 'gzip:body', parentSpan: this.resMiddlewareSpan, isVerbose })
 
-    this.incomingResStream = this.incomingResStream
-    .pipe(zlib.createBrotliCompress(brotliOptions))
-    .on('error', this.onError)
-    .once('close', () => {
-      span?.end()
-    })
+      this.incomingResStream = this.incomingResStream
+      .pipe(zlib.createGzip(zlibOptions))
+      .on('error', this.onError)
+      .once('close', () => {
+        span?.end()
+      })
+    } else if (enc === 'br' && this.isBrotliDecompressed) {
+      this.debug('re-compressing Brotli response body')
+
+      const span = telemetry.startSpan({ name: 'brotli:body', parentSpan: this.resMiddlewareSpan, isVerbose })
+
+      this.incomingResStream = this.incomingResStream
+      .pipe(zlib.createBrotliCompress(brotliOptions))
+      .on('error', this.onError)
+      .once('close', () => {
+        span?.end()
+      })
+    }
   }
 
   this.next()
