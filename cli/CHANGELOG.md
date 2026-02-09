@@ -7,6 +7,10 @@ _Released 02/08/2026 (PENDING)_
 
 - Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
 
+**Misc:**
+
+- The Node.js path is now displayed correctly in run log headers for typical GitHub Actions paths. ANSI escape sequences are no longer incorrectly displayed for longer Node.js paths. Addresses [#32736](https://github.com/cypress-io/cypress/issues/32736).
+
 **Dependency Updates:**
 
 - Upgraded `rimraf` to `6.1.1` to address [CVE-2026-25547](https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2) vulnerability reported in security scans. Addressed in [#33336](https://github.com/cypress-io/cypress/pull/33336).
