@@ -512,6 +512,7 @@ declare namespace Cypress {
      * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.config.{js,ts,mjs,cjs}"
      *
      * @see https://on.cypress.io/env
+     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
      */
     env(): ObjectLike
     /**
@@ -521,6 +522,7 @@ declare namespace Cypress {
      *    // cypress.config.js
      *    { "env": { "foo": "bar" } }
      *    Cypress.env("foo") // => bar
+     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
      */
     env(key: string): any
     /**
@@ -529,6 +531,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/env
      * @example
      *    Cypress.env("host", "http://server.dev.local")
+     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
      */
     env(key: string, value: any): void
     /**
@@ -536,8 +539,40 @@ declare namespace Cypress {
      * @see https://on.cypress.io/env
      * @example
      *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
+     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
      */
     env(object: ObjectLike): void
+    /**
+     * Returns all exposed public configuration variables set with --expose in the CLI or in "expose" object in "cypress.config.{js,ts,mjs,cjs}"
+     *
+     * @see https://on.cypress.io/expose
+     */
+
+    expose(): ObjectLike
+    /**
+     * Returns specific exposed public configuration variable or undefined
+     * @see https://on.cypress.io/expose
+     * @example
+     *    // cypress.config.js
+     *    { "expose": { "foo": "bar" } }
+     *    Cypress.expose("foo") // => bar
+     */
+    expose(key: string): any
+    /**
+     * Set value for an exposed public configuration variable.
+     * Any value you change will be permanently changed for the remainder of your tests.
+     * @see https://on.cypress.io/expose
+     * @example
+     *    Cypress.expose("host", "http://server.dev.local")
+     */
+    expose(key: string, value: any): void
+    /**
+     * Set values for multiple exposed public configuration variables at once. Values are merged with existing values.
+     * @see https://on.cypress.io/expose
+     * @example
+     *    Cypress.expose({ host: "http://server.dev.local", foo: "foo" })
+     */
+    expose(object: ObjectLike): void
 
     /**
      * @returns the number of test retries currently enabled for the run
@@ -2192,6 +2227,25 @@ declare namespace Cypress {
     task<S = unknown>(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
+     * Gets multiple environment variables.
+     * @see https://on.cypress.io/env
+     * @example
+     *    cy.env(['KEY_1', 'KEY_2']).then(({ KEY_1, KEY_2 }) => { ... })
+     */
+    env(keys: string[]): Chainable<Record<string, any>>
+
+    /**
+     * Gets multiple environment variables with a specific type.
+     * @see https://on.cypress.io/env
+     * @example
+     *    cy.env<{ KEY_1: string, KEY_2: number }>(['KEY_1', 'KEY_2']).then(({ KEY_1, KEY_2 }) => {
+     *      expect(KEY_1).to.be.a('string')
+     *      expect(KEY_2).to.be.a('number')
+     *    })
+     */
+    env<T extends object>(keys: string[]): Chainable<T>
+
+    /**
      * Enables you to work with the subject yielded from the previous command.
      *
      * @see https://on.cypress.io/then
@@ -2934,11 +2988,28 @@ declare namespace Cypress {
      * @default null
      */
     baseUrl: string | null
+
+    /**
+     * Whether Cypress should allow [Cypress.env()](https://on.cypress.io/env) API to be available in the browser.
+     *
+     * Cypress recommends migrating to the cy.env() command and disabling this within your Cypress configuration.
+     *
+     * The use of Cypress.env() will warn and throw an error when this is set to false.
+     *
+     * This will be the default behavior in a future major version of Cypress and Cypress.env() will be removed.
+     * @default true
+     */
+    allowCypressEnv: boolean
     /**
      * Any values to be set as [environment variables](https://on.cypress.io/environment-variables)
      * @default {}
      */
     env: { [key: string]: any }
+    /**
+     * Any values to be set as [exposed public configuration variables](https://on.cypress.io/expose).
+     * @default {}
+     */
+    expose: { [key: string]: any }
     /**
      * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using a tool to test what files would match.
      * @default "*.hot-update.js"

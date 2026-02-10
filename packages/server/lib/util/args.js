@@ -24,6 +24,7 @@ const allowList = [
   'configFile',
   'cwd',
   'env',
+  'expose',
   'execPath',
   'exit',
   'exitWithCode',
@@ -414,7 +415,7 @@ module.exports = {
     }
 
     let { spec } = options
-    const { env, config, reporterOptions, outputPath, tag, testingType, autoCancelAfterFailures } = options
+    const { env, expose, config, reporterOptions, outputPath, tag, testingType, autoCancelAfterFailures } = options
     let project = options.project || options.runProject
 
     // only accept project if it is a string
@@ -465,6 +466,10 @@ module.exports = {
 
     if (env) {
       options.env = sanitizeAndConvertNestedArgs(env, 'env')
+    }
+
+    if (expose) {
+      options.expose = sanitizeAndConvertNestedArgs(expose, 'expose')
     }
 
     const proxySource = proxyUtil.loadSystemProxySettings()

@@ -35,7 +35,7 @@ export interface ElementSelectorAPI {
 
 interface ElementSelectorPrivate {
   _reset(): void
-  _getSelector($el: any): string
+  _getSelector($el: any): string | null
 }
 
 const reset = (): Defaults => {
@@ -51,7 +51,7 @@ const ElementSelector: ElementSelectorAPI & ElementSelectorPrivate = {
     defaults = reset()
   },
 
-  _getSelector ($el: any) {
+  _getSelector ($el: any): string | null {
     return uniqueSelector($el.get(0), {
       selectorTypes: defaults.selectorPriority,
     })

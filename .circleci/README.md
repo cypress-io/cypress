@@ -2,6 +2,8 @@
 
 This directory contains CircleCI configuration files that use a dynamic workflow packing system for efficient CI development and execution.
 
+> **Looking for an overview of what our CI does?** See the [Continuous Integration guide](../guides/continuous-integration.md).
+
 ## Prerequisites
 
 ### CircleCI Local CLI

@@ -4,6 +4,7 @@ exports['module api and after:run results'] = `
   "browserPath": "",
   "browserVersion": "X.Y.Z",
   "config": {
+    "allowCypressEnv": false,
     "supportFile": false,
     "projectRoot": "/path/to/projectRoot",
     "projectName": "results",
@@ -20,6 +21,7 @@ exports['module api and after:run results'] = `
     "defaultCommandTimeout": 4000,
     "downloadsFolder": "/path/to/downloadsFolder",
     "env": {},
+    "expose": {},
     "execTimeout": 60000,
     "experimentalCspAllowList": false,
     "experimentalInteractiveRunEvents": false,

@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 import { snapshotCypressDirectory } from './cypress/tasks/snapshotsScaffold'
 import { uninstallDependenciesInScaffoldedProject } from './cypress/tasks/uninstallDependenciesInScaffoldedProject'
+import { setupCyInCyVariables } from '@packages/frontend-shared/cypress/tasks/cy-in-cy-variables'
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -30,11 +31,16 @@ export default defineConfig({
     async setupNodeEvents (on, config) {
       delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
+
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
+
+      const { setCyInCyVariables, getCyInCyVariables } = setupCyInCyVariables()
 
       on('task', {
         snapshotCypressDirectory,
         uninstallDependenciesInScaffoldedProject,
+        setCyInCyVariables,
+        getCyInCyVariables,
       })
 
       return await e2ePluginSetup(on, config)

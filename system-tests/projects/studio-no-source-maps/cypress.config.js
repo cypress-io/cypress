@@ -1,4 +1,5 @@
 module.exports = {
+  'allowCypressEnv': false,
   'experimentalStudio': true,
   'e2e': {
     'supportFile': false,
