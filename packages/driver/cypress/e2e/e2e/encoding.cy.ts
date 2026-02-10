@@ -38,6 +38,12 @@ describe('encoding', () => {
       waitAndAssertInterceptions('br', 'br')
       assertEncodingPage('br')
     })
+
+    it('sets the accept-encoding header in the cy.visit options', () => {
+      cy.visit('encoding/br/html', { headers: { 'Accept-Encoding': 'br' } })
+
+      assertEncodingPage('br')
+    })
   })
 
   context('gzip', () => {
@@ -52,6 +58,12 @@ describe('encoding', () => {
       cy.visit('encoding/gzip/html')
 
       waitAndAssertInterceptions('gzip', 'gzip')
+      assertEncodingPage('gzip')
+    })
+
+    it('sets the accept-encoding header in the cy.visit options', () => {
+      cy.visit('encoding/gzip/html', { headers: { 'Accept-Encoding': 'gzip' } })
+
       assertEncodingPage('gzip')
     })
   })
@@ -70,6 +82,12 @@ describe('encoding', () => {
       waitAndAssertInterceptions('layeredGzipBr', 'gzip, br')
       assertEncodingPage('layered-gzip-br')
     })
+
+    it('sets the accept-encoding header in the cy.visit options', () => {
+      cy.visit('encoding/layered-gzip-br/html', { headers: { 'Accept-Encoding': 'gzip, br' } })
+
+      assertEncodingPage('layered-gzip-br')
+    })
   })
 
   context('layered-br-gzip', () => {
@@ -84,6 +102,12 @@ describe('encoding', () => {
       cy.visit('encoding/layered-br-gzip/html')
 
       waitAndAssertInterceptions('layeredBrGzip', 'br, gzip')
+      assertEncodingPage('layered-br-gzip')
+    })
+
+    it('sets the accept-encoding header in the cy.visit options', () => {
+      cy.visit('encoding/layered-br-gzip/html', { headers: { 'Accept-Encoding': 'br, gzip' } })
+
       assertEncodingPage('layered-br-gzip')
     })
   })
@@ -114,9 +138,17 @@ describe('encoding', () => {
 
   context('insecure host', () => {
     it('decodes gzip for html, js, and css', () => {
+      // in firefox, the browser tries to decode the response as br, which is invalid,
+      // so we need to catch the exception and ignore it
+      if (Cypress.isBrowser({ family: 'firefox' })) {
+        cy.on('uncaught:exception', (err) => {
+          return !err.message.includes('illegal character U+FFFD')
+        })
+      }
+
       cy.intercept('http://www.foobar.com:3500/encoding/br/js').as('brJs')
 
-      cy.visit(`http://www.foobar.com:3500/encoding/gzip/html`)
+      cy.visit('http://www.foobar.com:3500/encoding/gzip/html')
 
       assertEncodingPage('gzip')
 
@@ -141,21 +173,31 @@ describe('encoding', () => {
     })
 
     it('fails when brotli is requested due to insecure host', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.contain('Timed out after waiting `500ms` for your remote page to load.')
-        done()
-      })
-
       cy.visit(`http://www.foobar.com:3500/encoding/br/html`, { timeout: 500 })
+
+      // in firefox, the browser displays the encoded response whereas in other browsers, it fails to load the page
+      if (Cypress.isBrowser({ family: 'firefox' })) {
+        cy.get('body').should('contain.text', '�������t�Ѓ�*��z').then(() => done())
+      } else {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('Timed out after waiting `500ms` for your remote page to load.')
+          done()
+        })
+      }
     })
 
     it('fails even when brotli is explicitly requested in the accept-encoding header', (done) => {
-      cy.on('fail', (err) => {
-        expect(err.message).to.contain('Timed out after waiting `500ms` for your remote page to load.')
-        done()
-      })
-
       cy.visit(`http://www.foobar.com:3500/encoding/br/html`, { timeout: 500, headers: { 'Accept-Encoding': 'br' } })
+
+      // in firefox, the browser displays the encoded response whereas in other browsers, it fails to load the page
+      if (Cypress.isBrowser({ family: 'firefox' })) {
+        cy.get('body').should('contain.text', '�������t�Ѓ�*��z').then(() => done())
+      } else {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('Timed out after waiting `500ms` for your remote page to load.')
+          done()
+        })
+      }
     })
   })
 })

@@ -976,6 +976,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         delete options.body
       }
 
+      // HTTP header names are case-insensitive; convert all keys to lowercase
+      options.headers = _.mapKeys(options.headers, (value, key) => key.toLowerCase())
+
       _.assign(options, {
         // turn off gzip since we need to eventually
         // rewrite these contents
@@ -984,7 +987,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         headers: _.assign({
           accept: 'text/html,*/*',
         }, options.headers, {
-          'accept-encoding': getSupportedAcceptEncoding(options.headers?.['accept-encoding']),
+          'accept-encoding': getSupportedAcceptEncoding(options.headers['accept-encoding']),
         }),
         onBeforeReqInit: runPhase,
         followRedirect (incomingRes) {
