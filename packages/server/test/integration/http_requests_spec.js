@@ -1516,6 +1516,106 @@ describe('Routes', () => {
       })
     })
 
+    context('layered encoding', () => {
+      beforeEach(function () {
+        return this.setup('http://www.github.com')
+      })
+
+      it('decompresses, injects, and recompresses content-encoding "gzip, br" (full injection)', function () {
+        const plaintext = '<html>layered-gzip-br</html>'
+        const gzipThenBr = zlib.brotliCompressSync(zlib.gzipSync(Buffer.from(plaintext, 'utf8')))
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/layered')
+        .matchHeader('accept-encoding', 'br,gzip')
+        .reply(200, gzipThenBr, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'gzip, br',
+        })
+
+        return this.rp({
+          url: 'http://www.github.com/layered',
+          encoding: null,
+          headers: {
+            'Accept-Encoding': 'gzip, br',
+            'Cookie': '__cypress.initial=true',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const afterBr = zlib.brotliDecompressSync(body)
+          const decompressed = zlib.gunzipSync(afterBr).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('gzip, br')
+          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('layered-gzip-br</html>')
+        })
+      })
+
+      it('decompresses, injects, and recompresses content-encoding "br, gzip" (full injection)', function () {
+        const plaintext = '<html>layered-br-gzip</html>'
+        const brThenGzip = zlib.gzipSync(zlib.brotliCompressSync(Buffer.from(plaintext, 'utf8')))
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/layered')
+        .matchHeader('accept-encoding', 'br,gzip')
+        .reply(200, brThenGzip, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'br, gzip',
+        })
+
+        return this.rp({
+          url: 'http://www.github.com/layered',
+          encoding: null,
+          headers: {
+            'Accept-Encoding': 'br, gzip',
+            'Cookie': '__cypress.initial=true',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const afterGzip = zlib.gunzipSync(body)
+          const decompressed = zlib.brotliDecompressSync(afterGzip).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('br, gzip')
+          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('layered-br-gzip</html>')
+        })
+      })
+
+      it('does not inject on layered content (no initial cookie)', function () {
+        const plaintext = '<html>layered-no-inject</html>'
+        const gzipThenBr = zlib.brotliCompressSync(zlib.gzipSync(Buffer.from(plaintext, 'utf8')))
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/layered')
+        .matchHeader('accept-encoding', 'br,gzip')
+        .reply(200, gzipThenBr, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'gzip, br',
+        })
+
+        return this.rp({
+          url: 'http://www.github.com/layered',
+          encoding: null,
+          headers: {
+            'Accept-Encoding': 'gzip, br',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const afterBr = zlib.brotliDecompressSync(body)
+          const decompressed = zlib.gunzipSync(afterBr).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('gzip, br')
+          expect(decompressed).to.eq('<html>layered-no-inject</html>')
+        })
+      })
+    })
+
     context('accept-encoding', () => {
       beforeEach(function () {
         return this.setup('http://www.github.com')
