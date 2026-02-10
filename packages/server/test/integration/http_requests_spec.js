@@ -1527,7 +1527,7 @@ describe('Routes', () => {
 
         nock(this.server.remoteStates.current().origin)
         .get('/layered')
-        .matchHeader('accept-encoding', 'br,gzip')
+        .matchHeader('accept-encoding', 'gzip,br')
         .reply(200, gzipThenBr, {
           'Content-Type': 'text/html',
           'Content-Encoding': 'gzip, br',
@@ -1591,7 +1591,7 @@ describe('Routes', () => {
 
         nock(this.server.remoteStates.current().origin)
         .get('/layered')
-        .matchHeader('accept-encoding', 'br,gzip')
+        .matchHeader('accept-encoding', 'gzip,br')
         .reply(200, gzipThenBr, {
           'Content-Type': 'text/html',
           'Content-Encoding': 'gzip, br',
@@ -1624,7 +1624,7 @@ describe('Routes', () => {
       it('strips unsupported deflate encoding', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/accept')
-        .matchHeader('accept-encoding', 'br,gzip')
+        .matchHeader('accept-encoding', 'gzip,br')
         .reply(200, '<html>accept</html>')
 
         return this.rp({

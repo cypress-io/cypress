@@ -1049,10 +1049,10 @@ describe('Server', () => {
         })
       })
 
-      it('sends accept-encoding: br,gzip when options.headers includes gzip, deflate, br', function () {
+      it('sends accept-encoding: gzip,br when options.headers includes gzip, deflate, br', function () {
         nock('http://www.cypress.io')
         .get('/')
-        .matchHeader('accept-encoding', 'br,gzip')
+        .matchHeader('accept-encoding', 'gzip,br')
         .reply(200, '<html>ok</html>', {
           'Content-Type': 'text/html',
         })
