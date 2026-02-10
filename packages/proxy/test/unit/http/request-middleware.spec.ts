@@ -710,11 +710,11 @@ describe('http/request-middleware', () => {
       }
     }
 
-    it('strips to br,gzip when client sends gzip, deflate, br', async () => {
+    it('strips to gzip,br preserving order when client sends gzip, deflate, br', async () => {
       const ctx = prepareContext({ 'accept-encoding': 'gzip, deflate, br' })
 
       await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
-      expect(ctx.req.headers!['accept-encoding']).toBe('br,gzip')
+      expect(ctx.req.headers!['accept-encoding']).toBe('gzip,br')
     })
 
     it('strips to br only when client sends only br', async () => {
