@@ -1,11 +1,16 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.10.1
 
-_Released 02/08/2026 (PENDING)_
+_Released 02/17/2026 (PENDING)_
 
 **Bugfixes:**
 
 - Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
+
+**Misc:**
+
+- The Node.js path is now displayed correctly in run log headers for typical GitHub Actions paths. ANSI escape sequences are no longer incorrectly displayed for longer Node.js paths. Addresses [#32736](https://github.com/cypress-io/cypress/issues/32736).
+- Fixed an issue that caused a Node.js [DEP0169](https://nodejs.org/docs/latest/api/deprecations.html#DEP0169) deprecation warning to be output when executing `cypress install` to download and install the Cypress binary. Addresses [#33347](https://github.com/cypress-io/cypress/issues/33347).
 
 **Dependency Updates:**
 
