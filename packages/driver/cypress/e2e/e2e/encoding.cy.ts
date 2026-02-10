@@ -17,8 +17,8 @@ function assertEncodingPage (encodingType: string) {
 function waitAndAssertInterceptions (alias: string, contentEncoding: string) {
   cy.wait([`@${alias}`, `@${alias}`, `@${alias}`]).then((interceptions) => {
     interceptions.forEach((interception) => {
-      expect(interception.response.statusCode).to.eq(200)
-      expect(interception.response.headers['content-encoding']).to.eq(contentEncoding)
+      expect(interception.response?.statusCode).to.eq(200)
+      expect(interception.response?.headers?.['content-encoding']).to.eq(contentEncoding)
     })
   })
 }
@@ -131,8 +131,8 @@ describe('encoding', () => {
       // The request will be successful but since the content-encoding is br,
       // the browser will fail to decode
       cy.wait('@brJs').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200)
-        expect(interception.response.headers['content-encoding']).to.eq('br')
+        expect(interception.response?.statusCode).to.eq(200)
+        expect(interception.response?.headers?.['content-encoding']).to.eq('br')
         expect(interception.request.headers['accept-encoding']).to.eq('gzip, deflate')
       })
 
