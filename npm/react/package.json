@@ -11,15 +11,18 @@
     "cy:open:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "cy:run": "node ../../scripts/cypress.js run --component",
     "cy:run:debug": "node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
+    "lint": "eslint",
     "test": "yarn cy:run",
     "watch": "yarn build --watch --watch.exclude ./dist/**/*"
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
+    "@packages/eslint-config": "0.0.0-development",
     "@vitejs/plugin-react": "4.6.0",
     "axios": "1.8.2",
     "cypress": "0.0.0-development",
+    "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "prop-types": "15.8.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -78,6 +81,9 @@
   ],
   "unpkg": "dist/cypress-react.browser.js",
   "module": "dist/cypress-react.esm-bundler.js",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "peerDependenciesMeta": {
     "@types/react": {
       "optional": true

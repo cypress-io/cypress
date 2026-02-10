@@ -8,7 +8,6 @@ export default [
   ...baseConfig,
   ...cliOverrides,
   {
-    files: ['**/*.spec.ts', '**/*.component.ts'],
     languageOptions: {
       parserOptions: {
         tsconfigRootDir: __dirname,

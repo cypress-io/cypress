@@ -8,10 +8,13 @@
     "build": "rollup -c rollup.config.mjs",
     "postbuild": "node ../../scripts/sync-exported-npm-with-cli.js",
     "check-ts": "tsc --noEmit",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, ."
+    "lint": "eslint"
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
+    "@packages/eslint-config": "0.0.0-development",
+    "eslint": "^9.31.0",
+    "jiti": "^2.4.2",
     "rollup": "3.29.5",
     "svelte": "^5.4.0",
     "typescript": "~5.4.5"
@@ -38,6 +41,9 @@
     "component testing"
   ],
   "module": "dist/cypress-svelte.esm-bundler.js",
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+  },
   "publishConfig": {
     "access": "public"
   },

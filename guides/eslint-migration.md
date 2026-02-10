@@ -9,9 +9,9 @@
 - [x] npm/cypress-schematic ✅ **COMPLETED** 
 
 ### Batch 2: Framework adapters
-- [ ] npm/react
-- [ ] npm/vue
-- [ ] npm/svelte
+- [x] npm/react ✅ **COMPLETED**
+- [x] npm/vue ✅ **COMPLETED**
+- [x] npm/svelte ✅ **COMPLETED**
 
 ### Batch 3: Build-related
 - [x] npm/webpack-batteries-included-preprocessor
