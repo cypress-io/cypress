@@ -21,7 +21,8 @@ import isInstalledGlobally from 'is-installed-globally'
 import logger from './logger'
 import Debug from 'debug'
 import fs from 'fs-extra'
-import pkg from '../package.json'
+import { readFile } from 'fs/promises'
+import { relativeToRepoRoot } from './relative-to-repo-root'
 
 const debug = Debug('cypress:cli')
 
@@ -336,12 +337,19 @@ const util = {
   },
 
   pkgBuildInfo (): any {
-    // @ts-expect-error value exists but is not typed
-    return pkg.buildInfo
+    // making this async would require many changes
+    // eslint-disable-next-line no-restricted-syntax
+    const pkgContent = fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8')
+
+    return JSON.parse(pkgContent).version
   },
 
   pkgVersion (): string {
-    return pkg.version
+    // making this async would require many changes
+    // eslint-disable-next-line no-restricted-syntax
+    const pkgContent = fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8')
+
+    return JSON.parse(pkgContent).version
   },
 
   // TODO: remove this method

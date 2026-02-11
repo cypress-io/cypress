@@ -263,9 +263,6 @@ const maybeVerify = async (installedVersion: string, binaryDir: string, options:
 export const start = async (options: any = {}): Promise<void> => {
   debug('verifying Cypress app')
 
-  const packageVersion = util.pkgVersion()
-  let binaryDir = state.getBinaryDir(packageVersion)
-
   _.defaults(options, {
     dev: false,
     force: false,
@@ -279,6 +276,10 @@ export const start = async (options: any = {}): Promise<void> => {
 
     return Promise.resolve()
   }
+
+  const packageVersion = util.pkgVersion()
+
+  let binaryDir = state.getBinaryDir(packageVersion)
 
   if (options.dev) {
     return runSmokeTest('', options)
