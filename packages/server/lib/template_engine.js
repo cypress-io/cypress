@@ -11,8 +11,8 @@ module.exports = {
 
     // if we already have a cachedFn function
     if (cachedFn) {
-      // just return it and move in
-      return cb(null, cachedFn(options, Sqrl))
+      // just return it and move on
+      return cb(null, cachedFn(options, Sqrl.defaultConfig))
     }
 
     // else go read it off the filesystem
@@ -20,9 +20,9 @@ module.exports = {
     .readFileAsync(filePath, 'utf8')
     .then((str) => {
       // and cache the Sqrl compiled template fn
-      const compiledFn = cache[filePath] = Sqrl.Compile(str)
+      const compiledFn = cache[filePath] = Sqrl.compile(str, { useWith: true })
 
-      return compiledFn(options, Sqrl)
+      return compiledFn(options, Sqrl.defaultConfig)
     })
     .asCallback(cb)
   },
