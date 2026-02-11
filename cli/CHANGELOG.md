@@ -15,6 +15,7 @@ _Released 02/17/2026 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded `rimraf` to `6.1.1` to address [CVE-2026-25547](https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2) vulnerability reported in security scans. Addressed in [#33336](https://github.com/cypress-io/cypress/pull/33336).
+- Upgraded `squirrelly` to `9.1.0` to address [CVE-2021-32819](https://nvd.nist.gov/vuln/detail/CVE-2021-32819) vulnerability reported in security scans. Addresses [#33354](https://github.com/cypress-io/cypress/issues/33354).
 
 ## 15.10.0
 
