@@ -28924,10 +28924,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-squirrelly@7.9.2:
-  version "7.9.2"
-  resolved "https://registry.yarnpkg.com/squirrelly/-/squirrelly-7.9.2.tgz#f8b0a08201b73653351afe9f7f24878237d2751a"
-  integrity sha512-QsLQ43p7/p5LfhqMsUM1PP0DU/YuirA/pZ1RQKU8/qZjWHD8uTblpfPoCVkD9VLrS1jCJ+2gqECv3amlPgrLCA==
+squirrelly@^9.1.0:
+  version "9.1.0"
+  resolved "https://registry.yarnpkg.com/squirrelly/-/squirrelly-9.1.0.tgz#399e180033af66ef8e9b9361d36b871e5c099e75"
+  integrity sha512-kvjFqb7qzC4gX4lkqSaU8QPvUHhDLMiDpxpz7a66vjTH0JtjLJqAXbPrc7ST61EefuuuW05sne2rjGskunrF2A==
 
 ssestream@1.0.1:
   version "1.0.1"
