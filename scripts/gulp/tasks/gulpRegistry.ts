@@ -49,6 +49,7 @@ export async function exitAndRemoveProcess (child: ChildProcess) {
 }
 
 export async function exitAllProcesses () {
+  await new Promise(resolve => process.stdin.once('drain', resolve))
   await Promise.all(Array.from(childProcesses).map(exitAndRemoveProcess))
 }
 
