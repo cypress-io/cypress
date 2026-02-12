@@ -3091,7 +3091,7 @@
     "./node_modules/source-map/lib/source-node.js",
     "./node_modules/source-map/lib/util.js",
     "./node_modules/source-map/source-map.js",
-    "./node_modules/squirrelly/dist/squirrelly.min.js",
+    "./node_modules/squirrelly/dist/squirrelly.cjs.js",
     "./node_modules/sshpk/lib/ssh-buffer.js",
     "./node_modules/statuses/codes.json",
     "./node_modules/statuses/index.js",
@@ -3996,5 +3996,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "941b74808f64624b166dfe5b1a4df4105f7a64194dce72f9ccce7e0bf4b97b2f"
+  "deferredHash": "da8a5c814428ac6b24d320f4bde1f769f5950776b89c739351afd3f1c62693e8"
 }
