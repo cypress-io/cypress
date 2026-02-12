@@ -1361,6 +1361,16 @@ describe('lib/cloud/api', () => {
         expect(err).to.have.property('isApiError', true)
       })
     })
+
+    it('caches the response from the first request', () => {
+      return api.getAuthUrls()
+      .then(() => {
+        // nock will throw if this makes a second HTTP call
+        return api.getAuthUrls()
+      }).then((urls) => {
+        expect(urls).to.deep.eq(AUTH_URLS)
+      })
+    })
   })
 
   context('.postLogout', () => {

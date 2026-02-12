@@ -80,7 +80,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
   if (params.cacheable && (resp = getCachedResponse(params))) {
     debug('resolving with cached response for %o', { url: params.url })
 
-    return Promise.resolve(resp)
+    return Bluebird.resolve(resp)
   }
 
   _.defaults(params, {
@@ -380,6 +380,7 @@ export default {
     return rp.get({
       url: apiRoutes.auth(),
       json: true,
+      cacheable: true,
       headers: {
         'x-route-version': '2',
       },
