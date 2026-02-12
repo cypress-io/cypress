@@ -23,6 +23,11 @@
     "register.js",
     "registerDir.js"
   ],
+  "types": [
+    "index.d.ts",
+    "typedefs/cypress-request-promise.d.ts",
+    "typedefs/request-promise.d.ts"
+  ],
   "license": "MIT",
   "nx": {}
 }
