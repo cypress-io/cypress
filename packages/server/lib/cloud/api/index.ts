@@ -380,7 +380,6 @@ export default {
     return rp.get({
       url: apiRoutes.auth(),
       json: true,
-      cacheable: true,
       headers: {
         'x-route-version': '2',
       },
