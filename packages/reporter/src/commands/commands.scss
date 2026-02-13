@@ -102,11 +102,20 @@
       justify-content: space-between;
       width: 100%;
 
-      .command-prompt-get-code {
-        cursor: pointer;
-        font-family: $font-system;
-        font-size: 12px;
+      .command-prompt-get-code-feedback-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        width: 100%;
+
+        .command-prompt-get-code .command-prompt-feedback {
+          cursor: pointer;
+          font-family: $font-system;
+          font-size: 12px;
+        }
       }
+      
     }
   }
 

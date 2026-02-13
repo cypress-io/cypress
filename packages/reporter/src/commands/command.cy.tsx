@@ -3,6 +3,7 @@ import Command from './command'
 import CommandModel from './command-model'
 import type { SessionStatus } from '../sessions/utils'
 import type { TestState } from '@packages/types'
+import events from '../lib/events'
 
 describe('commands', () => {
   describe('test states', () => {
@@ -150,34 +151,6 @@ describe('commands', () => {
       cy.percySnapshot()
     })
 
-    it('should render prompt get code button when state is failed', () => {
-      config.withArgs('experimentalPromptCommand').returns(true)
-      config.withArgs('isTextTerminal').returns(false)
-      cy.mount(
-        <div>
-          <Command
-            model={
-              new CommandModel({
-                name: 'prompt',
-                state: 'failed',
-                numElements: 1,
-                hookId: '1',
-                id: 1,
-                testId: '1',
-              })
-            }
-            scrollIntoView={() => {}}
-            aliasesWithDuplicates={[]}
-          />
-        </div>,
-      )
-
-      cy.get('.command-prompt-get-code').should('be.visible').should('have.text', 'Code')
-      cy.get('.command-prompt-get-code-indicator').should('be.visible')
-
-      cy.percySnapshot()
-    })
-
     it('should not render prompt get code button when state is not passed', () => {
       config.withArgs('experimentalPromptCommand').returns(true)
       config.withArgs('isTextTerminal').returns(false)
@@ -230,6 +203,98 @@ describe('commands', () => {
 
       cy.get('.command-prompt-get-code').should('not.exist')
       cy.get('.command-prompt-get-code-indicator').should('not.exist')
+    })
+
+    describe('Feedback button', () => {
+      const promptCommandModel = () => new CommandModel({
+        name: 'prompt',
+        state: 'passed',
+        numElements: 1,
+        hookId: '1',
+        id: 1,
+        testId: '1',
+      })
+
+      beforeEach(() => {
+        config.withArgs('experimentalPromptCommand').returns(true)
+        config.withArgs('isTextTerminal').returns(false)
+      })
+
+      it('should render Feedback button when state is passed', () => {
+        cy.mount(
+          <div>
+            <Command
+              model={promptCommandModel()}
+              scrollIntoView={() => {}}
+              aliasesWithDuplicates={[]}
+            />
+          </div>,
+        )
+
+        cy.get('.command-prompt-get-feedback').should('be.visible').should('contain.text', 'Feedback')
+        cy.percySnapshot()
+      })
+
+      it('should not render Feedback button when state is failed', () => {
+        cy.mount(
+          <div>
+            <Command
+              model={new CommandModel({
+                name: 'prompt',
+                state: 'failed',
+                numElements: 1,
+                hookId: '1',
+                id: 1,
+                testId: '1',
+              })}
+              scrollIntoView={() => {}}
+              aliasesWithDuplicates={[]}
+            />
+          </div>,
+        )
+
+        cy.get('.command-prompt-get-feedback').should('not.exist')
+      })
+
+      it('should emit external:open with backend URL when Feedback button is clicked', () => {
+        const feedbackUrl = 'https://on.cypress.io/report-cy-prompt-issue'
+
+        cy.stub(Cypress, 'backendRequestHandler').resolves(feedbackUrl)
+        const emitSpy = cy.spy(events, 'emit')
+
+        cy.mount(
+          <div>
+            <Command
+              model={promptCommandModel()}
+              scrollIntoView={() => {}}
+              aliasesWithDuplicates={[]}
+            />
+          </div>,
+        )
+
+        cy.get('.command-prompt-get-feedback').click()
+        cy.wrap(emitSpy).should('be.calledWith', 'external:open', feedbackUrl)
+      })
+
+      it('should emit external:open with fallback URL when backend request fails', () => {
+        const fallbackUrl = 'https://on.cypress.io/report-cy-prompt-issue'
+
+        cy.stub(Cypress, 'backendRequestHandler').rejects(new Error('Backend unavailable'))
+        const emitSpy = cy.spy(events, 'emit')
+
+        cy.mount(
+          <div>
+            <Command
+              model={promptCommandModel()}
+              scrollIntoView={() => {}}
+              aliasesWithDuplicates={[]}
+            />
+          </div>,
+        )
+
+        cy.get('.command-prompt-get-feedback').click()
+        cy.wrap(emitSpy).should('be.calledWith', 'external:open', fallbackUrl)
+      })
     })
   })
 })
