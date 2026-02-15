@@ -210,6 +210,35 @@ describe('per-test config', () => {
     })
   })
 
+  describe('suite env merges with test env', {
+    env: {
+      suiteApi: 'https://staging.dev',
+      commonFlag: 'suite',
+    },
+  }, () => {
+    it('has suite env variables', () => {
+      expect(Cypress.env('suiteApi')).to.equal('https://staging.dev')
+      expect(Cypress.env('commonFlag')).to.equal('suite')
+    })
+
+    it('merges test env with suite env', {
+      env: {
+        testFlag: 42,
+        commonFlag: 'test',
+      },
+    }, () => {
+      expect(Cypress.env('testFlag'), 'test level variable').to.equal(42)
+      expect(Cypress.env('commonFlag'), 'test overrides suite').to.equal('test')
+      expect(Cypress.env('suiteApi'), 'suite level variable').to.equal('https://staging.dev')
+    })
+
+    it('suite env is not affected by previous test env', () => {
+      expect(Cypress.env('suiteApi')).to.equal('https://staging.dev')
+      expect(Cypress.env('commonFlag')).to.equal('suite')
+      expect(Cypress.env('testFlag')).to.not.exist
+    })
+  })
+
   describe('in double nested suite', () => {
     describe('config in suite', {
       foo: true,

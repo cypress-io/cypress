@@ -63,7 +63,14 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
         err.stack = $errUtils.stackWithReplacedProps({ stack: invocationDetails.stack }, err)
         throw err
       }
-      localConfigOverrides = { ...localConfigOverrides, ...testConfigOverride }
+      // Deep merge 'env' so that test-level env variables are merged with
+      // suite-level env variables instead of replacing them entirely.
+      // https://github.com/cypress-io/cypress/issues/8005
+      const mergedEnv = testConfigOverride.env && localConfigOverrides.env
+        ? { ...localConfigOverrides.env, ...testConfigOverride.env }
+        : testConfigOverride.env || localConfigOverrides.env
+
+      localConfigOverrides = { ...localConfigOverrides, ...testConfigOverride, env: mergedEnv }
     }
   })
 
