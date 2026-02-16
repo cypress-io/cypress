@@ -10,13 +10,13 @@ export function relativeToRepoRoot (targetPath: string): string | undefined {
     const resolvedTargetPath = path.join(currentDir, targetPath)
     const rootPackageJson = path.join(currentDir, 'package.json')
 
-    // Check if this is the root package.json with workspaces
+    // Check if this is the `cypress` package.json
     if (existsSync(rootPackageJson)) {
       try {
         const pkg = JSON.parse(readFileSync(rootPackageJson, 'utf8'))
         const targetPathExists = existsSync(resolvedTargetPath)
 
-        if (targetPathExists && pkg.workspaces) {
+        if (targetPathExists && pkg.name === 'cypress') {
           return path.resolve(currentDir, targetPath)
         }
       } catch {
