@@ -1,4 +1,4 @@
-const createPullRequest = async ({ context, github, baseBranch, branchName, description, body, reviewers, addToProjectBoard }) => {
+const createPullRequest = async ({ context, github, baseBranch, branchName, description, body, reviewers, team_reviewers, addToProjectBoard }) => {
   const { data: { number } } = await github.rest.pulls.create({
     owner: context.repo.owner,
     repo: context.repo.repo,
@@ -9,13 +9,18 @@ const createPullRequest = async ({ context, github, baseBranch, branchName, desc
     maintainer_can_modify: true,
   })
 
-  if (reviewers) {
-    await github.rest.pulls.requestReviewers({
+  if (reviewers || team_reviewers) {
+    const requestReviewersParams = {
       owner: context.repo.owner,
       repo: context.repo.repo,
       pull_number: number,
-      reviewers,
-    })
+    }
+
+    if (reviewers) requestReviewersParams.reviewers = reviewers
+
+    if (team_reviewers) requestReviewersParams.team_reviewers = team_reviewers
+
+    await github.rest.pulls.requestReviewers(requestReviewersParams)
   }
 
   //add to firewatch board

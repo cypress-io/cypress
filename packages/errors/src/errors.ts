@@ -1267,16 +1267,14 @@ export const AllCypressErrors = {
   },
   CYPRESS_ENV_DEPRECATION: () => {
     return errTemplate`\
-      The use of ${fmt.highlight('Cypress.env()')} is deprecated and will be removed in a future major version of Cypress.
-      
-      Cypress recommends migrating to the ${fmt.highlight('cy.env()')} command and disabling ${fmt.highlight('allowCypressEnv')} within your Cypress configuration.
-      
-      The use of ${fmt.highlight('Cypress.env()')} will warn and throw an error when ${fmt.highlight('allowCypressEnv')} is explicitly set to false.
-    
-      Read our ${fmt.highlight('Migration Guide')} for the ${fmt.highlight('allowCypressEnv')} configuration option, why ${fmt.highlight('Cypress.env()')} is deprecated, and how to migrate to ${fmt.highlight('cy.env()')}: https://on.cypress.io/cypress-env-migration.
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('allowCypressEnv')} configuration option is enabled. This allows any browser code to read values from ${fmt.highlight('Cypress.env()')}. This is insecure and will be removed in a future major version.
+
+      1. Replace ${fmt.highlight('Cypress.env()')} calls with ${fmt.highlight('cy.env()')} (for sensitive values) or ${fmt.highlight('Cypress.expose()')} (for public configuration)
+      2. Set ${fmt.highlight('allowCypressEnv: false')} in your Cypress configuration to disable ${fmt.highlight('Cypress.env()')}
+
+      Learn more: https://on.cypress.io/cypress-env-migration
     `
   },
-  // TODO: link to docs on injectDocumentDomain
   INJECT_DOCUMENT_DOMAIN_DEPRECATION: () => {
     return errTemplate`\
       The ${fmt.highlight('injectDocumentDomain')} option is deprecated. Interactions with intra-test navigations to differing hostnames must now be wrapped in ${fmt.highlight('cy.origin')} commands, even if the hostname is a subdomain. This configuration option will be removed in a future version of Cypress.
@@ -1285,7 +1283,6 @@ export const AllCypressErrors = {
     `
   },
   INJECT_DOCUMENT_DOMAIN_E2E_ONLY: () => {
-    // TODO: link to docs on injectDocumentDomain
     return errTemplate`\
       The ${fmt.highlight('injectDocumentDomain')} option is only available for E2E testing.
 

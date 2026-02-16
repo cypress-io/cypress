@@ -1,7 +1,7 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
-  allowCypressEnv: true,
+  allowCypressEnv: false,
   e2e: {
     supportFile: false,
     fixturesFolder: false,

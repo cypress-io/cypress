@@ -41,7 +41,7 @@
     "@types/pngjs": "^6.0.5",
     "eslint": "^9.31.0",
     "jiti": "^2.4.2",
-    "rimraf": "6.0.1",
+    "rimraf": "6.1.1",
     "vitest": "^3.2.4"
   },
   "lint-staged": {
