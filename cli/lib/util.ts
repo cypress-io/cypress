@@ -341,7 +341,7 @@ const util = {
     // eslint-disable-next-line no-restricted-syntax
     const pkgContent = fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8')
 
-    return JSON.parse(pkgContent).version
+    return JSON.parse(pkgContent).buildInfo
   },
 
   pkgVersion (): string {

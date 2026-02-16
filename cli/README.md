@@ -15,70 +15,7 @@ The CLI is used to build the [cypress npm module](https://www.npmjs.com/package/
 
 ## Building
 
-For ease of development, `yarn build` will clean and prepare the artifact directories, build the package with rollup, and post-process the build. `yarn build-cli` is used in CI to prevent the clean step from wiping out work from prior steps.
-
-The built npm package includes [NPM_README.md](NPM_README.md) as its public README file, rather than this readme file.
-
-### Build Hooks
-
-When you run `yarn build`, the following hooks execute in order:
-
-#### `prebuild`
-Runs before the main build step:
-- **Cleans previous build artifacts**: Removes `build/`, `dist/`, and type definition directories
-- **Runs postinstall**: Applies patch-package patches and syncs TypeScript type definitions from `@types/*` packages
-- **Prepares build directory**: Creates `build/` folder and copies static files (README, .release.json, bin, types)
-
-#### `build`
-The main build step:
-- **Runs Rollup**: Compiles TypeScript source files from `lib/` to JavaScript in `dist/`
-  - Creates both CommonJS (`.js`) and ESM (`.mjs`) outputs
-  - Preserves directory structure for internal entrypoint modules
-  - Bundles `tslib` but externalizes other `node_modules` dependencies
-
-#### `postbuild`
-Runs after the main build step:
-- **Makes binary executable**: Sets execute permissions on `dist/bin/cypress`
-- **Copies to build directory**: Copies `dist/` contents to `build/`
-- **Prepares package.json**: Generates npm-ready `package.json` in `build/` with:
-  - Version and metadata from root package
-  - Build info (commit branch, SHA, date)
-  - Removed devDependencies and internal-only fields
-- **Bundles component testing frameworks**: Copies mount-utils, react, vue, angular, angular-zoneless, and svelte packages to `build/`
-
-**Note**: `yarn build-cli` explicitly includes `postbuild` in its command, but `yarn build` relies on npm's automatic lifecycle hooks. Both produce the same result.
-
-### Why `dist/` and `build/`?
-
-The build process uses two separate directories:
-
-- **`dist/`**: Raw build output from Rollup. This is the compiled JavaScript that:
-  - Is referenced by the source `package.json` (`"main": "dist/index.js"`) for development
-  - May be imported directly by other packages in the monorepo during development
-  - Contains only the compiled code, no static files or npm packaging artifacts
-
-- **`build/`**: Complete npm package artifact. This directory:
-  - Contains static files added in `prebuild` (README, .release.json, bin, types)
-  - Contains the compiled code copied from `dist/` in `postbuild`
-  - Contains component testing frameworks bundled in `postbuild`
-  - Contains a prepared `package.json` for npm release (with version, build info, etc.)
-
-We can't build directly to `build/` because `prebuild` adds static files there first. The separation ensures:
-1. `dist/` remains available for development imports
-2. `build/` contains the complete, ready-to-publish npm package
-3. The build process doesn't overwrite static files added in `prebuild`
-
-### Build Configuration
-
-**`rollup.config.mjs`**: Defines two Rollup builds:
-- **CommonJS build**: Compiles multiple entry points (`lib/index.ts`, `lib/cli.ts`, `lib/cypress.ts`, `lib/exec/xvfb.ts`, `lib/exec/spawn.ts`, `lib/bin/cypress.ts`) to `dist/` with preserved directory structure. Bundles `tslib` and `@packages/*` monorepo packages, but externalizes other `node_modules` dependencies. `tslib` is bundled to preserve Typescript polyfill helpers, and may eventually be removed as a bundled package.
-- **ESM build**: Compiles single entry point (`lib/index.mts`) to `dist/index.mjs`. This is a thin wrapper that uses Node's `module.createRequire()` to dynamically require the CJS build output (`./cypress`), then re-exports its API. While `external: false` is set, there are no npm dependencies to bundle, as only Node's built-in `module` package is imported.
-
-**`tsconfig.json`**: Base TypeScript configuration for eslint and type checking (ES2022 target, CommonJS module, strict mode, no emit).
-
-**`tsconfig.build.json`**: Extends base config for CJS build (ES2016 target, enables emit, rootDir: `lib`, outDir: `dist`).
-
-**`tsconfig.esm.json`**: Extends build config for ESM build (ES2022 target, ES2022 module, includes only `lib/**/*.mts` files).
+See `scripts/build.js`. Note that the built npm package will include [NPM_README.md](NPM_README.md) as its public README file.
 
 ## Testing
 
