@@ -239,12 +239,13 @@ const parseOpts = (opts: any): any => {
  * because we need same functionality in CLI to show the path :(
  */
 const getApplicationDataFolder = (...paths: string[]): string => {
+  console.log('getApplicationDataFolder', relativeToRepoRoot('package.json'))
   const { env } = process
 
   // allow overriding the app_data folder
   let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
-
-  // @ts-expect-error value exists but is not typed
+  // eslint-disable-next-line no-restricted-syntax
+  const pkg = JSON.parse(fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8'))
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
 
