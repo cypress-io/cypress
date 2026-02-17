@@ -207,7 +207,13 @@ const start = async (options: any = {}): Promise<any> => {
     return
   }
 
-  const { buildInfo, version } = JSON.parse(await readFile(relativeToRepoRoot('package.json') as string, 'utf8'))
+  const pkgPath = relativeToRepoRoot('package.json')
+
+  if (!pkgPath) {
+    return throwFormErrorText('Could not find package.json for Cypress package to determine build information')
+  }
+
+  const { buildInfo, version } = JSON.parse(await readFile(pkgPath, 'utf8'))
 
   _.defaults(options, {
     force: false,
