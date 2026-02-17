@@ -1,13 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.10.1
+## 15.11.0
 
 _Released 02/17/2026 (PENDING)_
+
+**Features:**
+- Introduces manual bootstrap script injection via a `<script data-cy-bootstrap>` tag. This is a workaround to fix React SSR hydration mismatches, and enables React apps to use `suppressHydrationWarning` to ignore the mismatch. Addresses [#27204](https://github.com/cypress-io/cypress/issues/27204). Addressed in [#33295](https://github.com/cypress-io/cypress/pull/33295).
 
 **Bugfixes:**
 
 - Fixed an issue where a cancelled or incomplete login attempt would not properly open a browser window or tab, and required a restart of Cypress to enable a new login attempt. Fixed in [#33366](https://github.com/cypress-io/cypress/pull/33366). Fixes [#33350](https://github.com/cypress-io/cypress/issues/33350).
 - Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
-- Fixed hydration mismatches caused by Cypress's automatic script injection by allowing manual bootstrap script injection via a `<script data-cy-bootstrap>` tag. This enables React apps to use `suppressHydrationWarning` to ignore the mismatch. Addresses [#27204](https://github.com/cypress-io/cypress/issues/27204). Addressed in [#33295](https://github.com/cypress-io/cypress/pull/33295).
 
 **Misc:**
 
