@@ -695,6 +695,57 @@ describe('http/request-middleware', () => {
     })
   })
 
+  describe('StripUnsupportedAcceptEncoding', () => {
+    const { StripUnsupportedAcceptEncoding } = RequestMiddleware
+
+    function prepareContext (headers = {}) {
+      return {
+        req: {
+          headers: { ...headers },
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (_event, _listener) => {},
+          off: (_event, _listener) => {},
+        } as Partial<CypressOutgoingResponse>,
+      }
+    }
+
+    it('strips to gzip,br preserving order when client sends gzip, deflate, br', async () => {
+      const ctx = prepareContext({ 'accept-encoding': 'gzip, deflate, br' })
+
+      await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
+      expect(ctx.req.headers!['accept-encoding']).toBe('gzip,br')
+    })
+
+    it('strips to br only when client sends only br', async () => {
+      const ctx = prepareContext({ 'accept-encoding': 'br' })
+
+      await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
+      expect(ctx.req.headers!['accept-encoding']).toBe('br')
+    })
+
+    it('strips to gzip only when client sends only gzip', async () => {
+      const ctx = prepareContext({ 'accept-encoding': 'gzip' })
+
+      await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
+      expect(ctx.req.headers!['accept-encoding']).toBe('gzip')
+    })
+
+    it('sets identity when client accepts neither gzip nor br', async () => {
+      const ctx = prepareContext({ 'accept-encoding': 'deflate, identity' })
+
+      await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
+      expect(ctx.req.headers!['accept-encoding']).toBe('identity')
+    })
+
+    it('sets gzip,identity when no accept-encoding header (RFC 9110 accept everything)', async () => {
+      const ctx = prepareContext({})
+
+      await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
+      expect(ctx.req.headers!['accept-encoding']).toBe('gzip,identity')
+    })
+  })
+
   describe('MaybeSetBasicAuthHeaders', () => {
     const { MaybeSetBasicAuthHeaders } = RequestMiddleware
 

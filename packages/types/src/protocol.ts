@@ -156,6 +156,7 @@ export type ResponseStreamOptions = {
   requestId: string
   responseHeaders: IncomingHttpHeaders
   isAlreadyGunzipped: boolean
+  isAlreadyBrotliDecompressed?: boolean
   responseStream: Readable
   res: Response
   timings: ProxyTimings

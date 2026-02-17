@@ -1,7 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.10.1
+## 15.11.0
 
 _Released 02/17/2026 (PENDING)_
+
+**Features:**
+
+- Added Brotli compression support to the proxy. Addresses [#6197](https://github.com/cypress-io/cypress/issues/6197).
 
 **Bugfixes:**
 
