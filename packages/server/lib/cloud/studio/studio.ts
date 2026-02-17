@@ -1,4 +1,4 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions, StudioCDPClient } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, StudioConfig, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions, StudioCDPClient } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
@@ -6,7 +6,7 @@ import path from 'path'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
 import exception from '../exception'
-import type { DebugData } from '@packages/types/src/debug'
+import type { DebugData } from '@packages/types'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -76,6 +76,14 @@ export class StudioManager implements StudioManagerShape {
 
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
     return !!(await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser))
+  }
+
+  async getStudioConfig (browser: Cypress.Browser): Promise<StudioConfig> {
+    return (await this.invokeAsync('getStudioConfig', { isEssential: true }, browser))!
+  }
+
+  getCachedStudioConfig (): StudioConfig {
+    return this.invokeSync('getCachedStudioConfig', { isEssential: true })!
   }
 
   connectToBrowser (target: StudioCDPClient): void {
@@ -190,11 +198,13 @@ export class StudioManager implements StudioManagerShape {
   }
 }
 
-// Helper types for invokeSync / invokeAsync
+// Helper types for invokeSync / invokeAsync (only method keys; exclude e.g. sessionId)
+type StudioServerMethodKey = Exclude<keyof StudioServerShape, 'sessionId'>
+
 type StudioServerSyncMethods = {
-  [K in keyof StudioServerShape]: ReturnType<StudioServerShape[K]> extends Promise<any> ? never : K
-}[keyof StudioServerShape]
+  [K in StudioServerMethodKey]: ReturnType<StudioServerShape[K]> extends Promise<any> ? never : K
+}[StudioServerMethodKey]
 
 type StudioServerAsyncMethods = {
-  [K in keyof StudioServerShape]: ReturnType<StudioServerShape[K]> extends Promise<any> ? K : never
-}[keyof StudioServerShape]
+  [K in StudioServerMethodKey]: ReturnType<StudioServerShape[K]> extends Promise<any> ? K : never
+}[StudioServerMethodKey]

@@ -1,7 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import { CypressError, getError } from '@packages/errors'
-import type { DebugData } from '@packages/types/src/debug'
-import type { FullConfig, TestingType } from '@packages/types'
+import type { DebugData, FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
 import EventEmitter from 'events'
 import path from 'path'
