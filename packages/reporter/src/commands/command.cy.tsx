@@ -245,7 +245,7 @@ describe('commands', () => {
         cy.percySnapshot()
       })
 
-      it('should not render Feedback button when state is failed', () => {
+      it('should render Feedback button when state is failed', () => {
         cy.mount(
           <div>
             <Command
@@ -263,7 +263,7 @@ describe('commands', () => {
           </div>,
         )
 
-        cy.get('.command-prompt-get-feedback').should('not.exist')
+        cy.get('.command-prompt-get-feedback').should('exist')
       })
 
       it('should emit external:open with backend URL when Feedback button is clicked', () => {

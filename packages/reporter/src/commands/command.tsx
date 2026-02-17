@@ -565,8 +565,11 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
                 <CommandControls model={model} commandName={commandName} />
               </div>
-              {model.isCyPrompt && model.state === 'passed' && (
-                <div className='command-prompt-get-code-feedback-container'>
+              {model.isCyPrompt && (
+                <div
+                  className='command-prompt-get-code-feedback-container'
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Button
                     variant="outline-purple-dark-mode"
                     size="20"
@@ -576,7 +579,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
 
                       events.emit('external:open', result)
                     }}
-                    className="command-prompt-get-feedback mr-1 whitespace-nowrap"
+                    className="command-prompt-get-feedback mr-1 whitespace-nowrap "
                   >
                     <IconGeneralChatBubble
                       strokeColor="purple-400"
@@ -586,22 +589,24 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                     />
                     <span>Feedback</span>
                   </Button>
-                  <Button
-                    variant="indigo-dark-mode"
-                    size="20"
-                    onClick={async (e) => {
-                      e.stopPropagation()
-                      events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
-                    }}
-                    className="command-prompt-get-code mr-1 whitespace-nowrap"
-                  >
-                    <IconTechnologyAngleBrackets
-                      className='command-prompt-get-code-indicator pr-1'
-                      size='16'
-                      strokeColor='white'
-                    />
-                    <span>Code</span>
-                  </Button>
+                  {model.state === 'passed' && (
+                    <Button
+                      variant="indigo-dark-mode"
+                      size="20"
+                      onClick={async (e) => {
+                        e.stopPropagation()
+                        events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
+                      }}
+                      className="command-prompt-get-code mr-1 whitespace-nowrap"
+                    >
+                      <IconTechnologyAngleBrackets
+                        className='command-prompt-get-code-indicator pr-1'
+                        size='16'
+                        strokeColor='white'
+                      />
+                      <span>Code</span>
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
