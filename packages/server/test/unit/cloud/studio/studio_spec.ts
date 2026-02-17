@@ -300,6 +300,50 @@ describe('lib/cloud/studio', () => {
     })
   })
 
+  describe('getStudioConfig and getCachedStudioConfig', () => {
+    const browser = {
+      name: 'chrome',
+      family: 'chromium' as const,
+      channel: 'stable',
+      displayName: 'Chrome',
+      version: '120.0.0',
+      majorVersion: '120',
+      path: '/path/to/chrome',
+      isHeaded: true,
+      isHeadless: false,
+    }
+
+    it('getStudioConfig returns config when server is initialized', async () => {
+      const config = await studioManager.getStudioConfig(browser as Cypress.Browser)
+
+      expect(config).to.have.property('AI')
+      expect(config.AI).to.have.property('enabled')
+      expect(config).to.have.property('featureFlags')
+    })
+
+    it('getStudioConfig throws when server is not initialized', async () => {
+      const manager = new StudioManager()
+
+      await expect(manager.getStudioConfig(browser as Cypress.Browser))
+        .to.be.rejectedWith('Studio is not available: server not initialized or an error occurred')
+    })
+
+    it('getCachedStudioConfig returns config when server is initialized', () => {
+      const config = studioManager.getCachedStudioConfig()
+
+      expect(config).to.have.property('AI')
+      expect(config.AI).to.have.property('enabled')
+      expect(config).to.have.property('featureFlags')
+    })
+
+    it('getCachedStudioConfig throws when server is not initialized', () => {
+      const manager = new StudioManager()
+
+      expect(() => manager.getCachedStudioConfig())
+        .to.throw('Studio is not available: server not initialized or an error occurred')
+    })
+  })
+
   describe('addSocketListeners', () => {
     it('calls addSocketListeners on the studio server', () => {
       sinon.stub(studio, 'addSocketListeners')

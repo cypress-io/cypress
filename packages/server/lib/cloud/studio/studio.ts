@@ -79,11 +79,23 @@ export class StudioManager implements StudioManagerShape {
   }
 
   async getStudioConfig (browser: Cypress.Browser): Promise<StudioConfig> {
-    return (await this.invokeAsync('getStudioConfig', { isEssential: true }, browser))!
+    const config = await this.invokeAsync('getStudioConfig', { isEssential: true }, browser)
+
+    if (config === undefined) {
+      throw new Error('Studio is not available: server not initialized or an error occurred')
+    }
+
+    return config
   }
 
   getCachedStudioConfig (): StudioConfig {
-    return this.invokeSync('getCachedStudioConfig', { isEssential: true })!
+    const config = this.invokeSync('getCachedStudioConfig', { isEssential: true })
+
+    if (config === undefined) {
+      throw new Error('Studio is not available: server not initialized or an error occurred')
+    }
+
+    return config
   }
 
   connectToBrowser (target: StudioCDPClient): void {
