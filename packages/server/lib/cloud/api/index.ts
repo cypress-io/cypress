@@ -73,14 +73,25 @@ export interface CypressRequestOptions extends OptionsWithUrl {
   cacheable?: boolean
 }
 
+// We extend the RequestPromiseOptions interface with our own properties in an
+// ad-hoc manner. Declaring this extension allows us to use typedefs without
+// having to modify the original type definitions (which would be incorrect)
+declare module '@cypress/request-promise' {
+  interface RequestPromiseOptions {
+    cacheable?: boolean
+    url?: string
+    encrypt?: boolean | 'always' | 'signed'
+  }
+}
+
 // TODO: migrate to fetch from @cypress/request
-const rp = request.defaults((params: CypressRequestOptions, callback) => {
+const rp = request.defaults((params, callback) => {
   let resp
 
   if (params.cacheable && (resp = getCachedResponse(params))) {
     debug('resolving with cached response for %o', { url: params.url })
 
-    return Promise.resolve(resp)
+    return Bluebird.resolve(resp)
   }
 
   _.defaults(params, {
@@ -99,7 +110,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
     'x-cypress-version': pkg.version,
   })
 
-  const method = params.method.toLowerCase()
+  const method = params.method?.toLowerCase()
 
   // use %j argument to ensure deep nested properties are serialized
   debug(
@@ -120,6 +131,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
         const options = this // request promise options
 
         const throwStatusCodeErrWithResp = (message, responseBody) => {
+          // @ts-ignore - server's check-ts fails on this, but driver's check-ts does not, so expect-error is not appropriate
           throw new RequestErrors.StatusCodeError(response.statusCode, message, options, responseBody)
         }
 
@@ -158,7 +170,8 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
       headers['x-cypress-encrypted'] = PUBLIC_KEY_VERSION
     }
 
-    return request[method](params, callback).promise()
+    // @ts-expect-error - we're hoping that the method is valid here
+    return request[method](params, callback).promise() as RequestPromise<any>
   })
   .tap((resp) => {
     if (params.cacheable) {
@@ -597,7 +610,7 @@ export default {
     })
   },
 
-  createCrashReport (body, authToken, timeout = 3000) {
+  createCrashReport (body, authToken, maxTimeout = 3000) {
     return rp.post({
       url: apiRoutes.exceptions(),
       json: true,
@@ -606,7 +619,7 @@ export default {
         bearer: authToken,
       },
     })
-    .timeout(timeout)
+    .timeout(maxTimeout)
     .catch(tagError)
   },
 
