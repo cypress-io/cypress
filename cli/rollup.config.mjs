@@ -44,7 +44,7 @@ export default [
         const facadeModuleId = chunkInfo.facadeModuleId || ''
         const chunkName = chunkInfo.name || ''
 
-        if (chunkName === 'cypress' && facadeModuleId.includes('lib/bin')) {
+        if (chunkName === 'cypress' && facadeModuleId.match(/lib[\/\\]bin/g)) {
           return 'bin/[name]'
         }
 
