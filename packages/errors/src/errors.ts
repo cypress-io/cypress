@@ -92,6 +92,11 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
+  CANNOT_ENABLE_FEATURE_WITH_NO_TESTS: (args: { feature: 'record' | 'parallelize' }) => {
+    return errTemplate`\
+        Because you passed ${fmt.flag('--pass-with-no-tests')} and no tests were found, Cypress will not ${fmt.highlightSecondary(args.feature)} this run.
+      `
+  },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
         Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.

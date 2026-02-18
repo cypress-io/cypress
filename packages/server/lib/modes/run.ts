@@ -1111,8 +1111,55 @@ async function ready (options: ReadyOptions) {
 
   const specs = project.ctx.project.specs
 
-  if (!specs.length && !options.passWithNoTests) {
-    errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+  if (!specs.length) {
+    if (options.passWithNoTests) {
+      const results: CypressRunResult = {
+        status: 'finished',
+        startedTestsAt: new Date().toISOString(),
+        endedTestsAt: new Date().toISOString(),
+        totalDuration: 0,
+        totalSuites: 0,
+        totalTests: 0,
+        totalPassed: 0,
+        totalPending: 0,
+        totalFailed: 0,
+        totalSkipped: 0,
+        runs: [],
+        browserName: browser.name,
+        browserPath: browser.path,
+        browserVersion: browser.version,
+        osName: sys.osName,
+        osVersion: sys.osVersion,
+        cypressVersion: pkg.version,
+        config,
+        runUrl: undefined,
+      }
+
+      printResults.displayRunStarting({
+        config,
+        specs,
+        group,
+        tag,
+        browser,
+        parallel,
+        specPattern,
+        autoCancelAfterFailures,
+      })
+
+      if (options.record) {
+        errors.warning('CANNOT_ENABLE_FEATURE_WITH_NO_TESTS', { feature: 'record' })
+      }
+
+      if (options.parallel) {
+        errors.warning('CANNOT_ENABLE_FEATURE_WITH_NO_TESTS', { feature: 'parallelize' })
+      }
+
+      printResults.renderSummaryTable(undefined, results)
+
+      return results
+    } else {
+      errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+    }
   }
 
   if (browser.unsupportedVersion && browser.warning) {

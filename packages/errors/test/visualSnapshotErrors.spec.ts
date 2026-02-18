@@ -206,6 +206,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    CANNOT_ENABLE_FEATURE_WITH_NO_TESTS: () => {
+      return {
+        default: [{ feature: 'record' }],
+      }
+    },
     CLOUD_CANCEL_SKIPPED_SPEC: () => {
       return {
         default: [],
