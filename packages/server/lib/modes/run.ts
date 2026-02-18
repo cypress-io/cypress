@@ -1035,6 +1035,7 @@ export interface ReadyOptions {
   tag: string
   testingType: TestingType
   webSecurity: boolean
+  passWithNoTests: boolean
 }
 
 async function ready (options: ReadyOptions) {
@@ -1110,7 +1111,7 @@ async function ready (options: ReadyOptions) {
 
   const specs = project.ctx.project.specs
 
-  if (!specs.length) {
+  if (!specs.length && !options.passWithNoTests) {
     errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
   }
 

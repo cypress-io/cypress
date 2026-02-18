@@ -3,7 +3,7 @@ import Debug from 'debug'
 
 const debug = Debug('system-tests:pass-with-no-tests')
 
-describe('pass with no tests', function () {
+describe('cli arg: --pass-with-no-tests', function () {
   systemTests.setup()
 
   it('passes when no tests are found and --pass-with-no-tests is set', function () {
@@ -15,8 +15,9 @@ describe('pass with no tests', function () {
     })
     .then((result) => {
       debug(result.stdout)
-      expect(result.stdout).to.include('No tests were found.')
-      expect(result.stdout).to.include('We searched for specs matching this glob pattern:')
+      expect(result.stdout).to.include('0 found')
+      expect(result.stdout).to.include('Searched:')
+      expect(result.stdout).to.include('cypress/e2e/**/*.cy.js')
     })
   })
 })
