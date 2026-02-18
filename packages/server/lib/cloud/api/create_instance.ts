@@ -59,7 +59,7 @@ export const createInstance = async (runId: string, instanceData: CreateInstance
     onRetry: (delay, err) => {
       errors.warning(
         'CLOUD_API_RESPONSE_FAILED_RETRYING', {
-          delay: humanTime.long(delay),
+          delay: humanTime.long(delay, false),
           tries: MAX_RETRIES - attemptNumber,
           response: isAxiosError(err) ? err : err instanceof Error ? err : new Error(String(err)),
         },
