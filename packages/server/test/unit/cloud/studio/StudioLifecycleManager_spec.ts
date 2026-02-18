@@ -21,6 +21,8 @@ const api = require('../../../../lib/cloud/api').default
 // Helper to wait for next tick in event loop
 const nextTick = () => new Promise((resolve) => process.nextTick(resolve))
 
+const debugData = { filePreprocessorHandlerText: 'handler text' }
+
 describe('StudioLifecycleManager', () => {
   let studioLifecycleManager: StudioLifecycleManager
   let mockStudioManager: StudioManager
@@ -197,7 +199,7 @@ describe('StudioLifecycleManager', () => {
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
-        debugData: {},
+        debugData,
       })
 
       const studioReadyPromise = new Promise((resolve) => {
@@ -234,6 +236,7 @@ describe('StudioLifecycleManager', () => {
           asyncRetry,
         },
         manifest: mockManifest,
+        debugData,
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
@@ -259,7 +262,7 @@ describe('StudioLifecycleManager', () => {
           proxyUrl: 'http://localhost:8888',
         },
         mountVersion: 2,
-        debugData: {},
+        debugData,
         mode: 'studio',
       })
 
@@ -332,6 +335,7 @@ describe('StudioLifecycleManager', () => {
           asyncRetry,
         },
         manifest: {},
+        debugData: {},
       })
 
       expect(postStudioSessionStub).to.be.calledWith({
@@ -350,7 +354,7 @@ describe('StudioLifecycleManager', () => {
           retryWithBackoff: api.retryWithBackoff,
           requestPromise: api.rp,
         },
-        projectConfig: {
+      projectConfig: {
           devServerPublicPathRoute: '/__cypress/src',
           namespace: '__cypress',
           port: 8888,

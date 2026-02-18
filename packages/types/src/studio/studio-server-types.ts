@@ -70,6 +70,19 @@ export type BrowserWindow = {
   show: () => void
 }
 
+export interface BrowserSession {
+  browserWindow: BrowserWindow
+  done: () => Promise<void>
+  isAborted: () => boolean
+}
+
+export interface BrowserManager {
+  createSession(): Promise<BrowserSession>
+  initialize(): Promise<void>
+  destroy(): Promise<void>
+  computeVisibility: boolean
+}
+
 export type StudioElectronApi = {
   createBrowserWindow: () => BrowserWindow
 }
@@ -100,6 +113,7 @@ export interface StudioServerOptions {
   manifest?: Record<string, string>
   verifyHash: (contents: BinaryLike, expectedHash: string) => boolean
   studioElectron?: StudioElectronApi
+  debugData?: DebugData
 }
 
 export interface StudioAIInitializeOptions {
@@ -111,6 +125,31 @@ export interface StudioAddSocketListenersOptions {
   socket: Socket
   onBeforeSave: () => void
   onAfterSave: (options: { error?: Error }) => void
+}
+
+export type AIDisabledReason =
+  | 'ai_disabled_locally'
+  | 'browser_not_supported'
+  | 'studio_ai_feature_flag_disabled'
+  | 'no_project_slug'
+  | 'project_not_found'
+  | 'no_user'
+  | 'org_ai_disabled'
+  | 'not_org_member'
+  | 'not_project_member'
+  | 'error'
+
+export interface StudioConfig {
+  AI: {
+    enabled: boolean
+    disabledReason?: AIDisabledReason
+  }
+  organizationUuid?: string
+  sessionId?: string
+  featureFlags: {
+    studioNonNativeEvents: boolean
+    studioAI: boolean
+  }
 }
 
 export type StudioCDPCommands = ProtocolMapping.Commands
@@ -138,11 +177,13 @@ export interface StudioCDPClient {
 }
 
 export interface StudioServerShape {
+  sessionId?: string
   initializeRoutes(router: Router): void
   canAccessStudioAI(browser: Cypress.Browser): Promise<boolean>
+  getStudioConfig(browser: Cypress.Browser): Promise<StudioConfig>
+  getCachedStudioConfig(): StudioConfig
   addSocketListeners(options: StudioAddSocketListenersOptions | Socket): void
   initializeStudioAI(options: StudioAIInitializeOptions): Promise<void>
-  connectToBrowser(cdpClient: StudioCDPClient): void
   updateSessionId(sessionId: string): void
   reportError(
     error: unknown,
@@ -151,6 +192,7 @@ export interface StudioServerShape {
   ): void
   destroy(): Promise<void>
   captureStudioEvent(event: StudioEvent): Promise<void>
+  connectToBrowser(cdpClient: StudioCDPClient): void
 }
 
 export interface StudioServerDefaultShape {
@@ -158,4 +200,12 @@ export interface StudioServerDefaultShape {
     options: StudioServerOptions
   ) => Promise<StudioServerShape>
   MOUNT_VERSION: number
+}
+
+export type SnapshotRendererVisibilityAlgorithm =
+  | 'default'
+  | 'experimental-fast'
+
+export type DebugData = {
+  filePreprocessorHandlerText?: string
 }

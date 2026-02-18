@@ -183,7 +183,7 @@ describe('studio functionality', () => {
     launchStudio()
 
     // expand the recommendation
-    cy.get('[data-cy="studio-collapsed-reason-display"] [data-cy^="recommendation-expand-collapse"]').click()
+    cy.get('[aria-label="Expand recommendation"]').first().click()
 
     // Verify that the AI output is correct
     cy.get('.cm-is-recommendation-line').should('contain', aiOutput)
