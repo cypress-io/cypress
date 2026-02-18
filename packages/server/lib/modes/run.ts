@@ -28,6 +28,7 @@ import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
+import { passWithNoTests, type EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
@@ -1113,48 +1114,15 @@ async function ready (options: ReadyOptions) {
 
   if (!specs.length) {
     if (options.passWithNoTests) {
-      const results: CypressRunResult = {
-        status: 'finished',
-        startedTestsAt: new Date().toISOString(),
-        endedTestsAt: new Date().toISOString(),
-        totalDuration: 0,
-        totalSuites: 0,
-        totalTests: 0,
-        totalPassed: 0,
-        totalPending: 0,
-        totalFailed: 0,
-        totalSkipped: 0,
-        runs: [],
-        browserName: browser.name,
-        browserPath: browser.path,
-        browserVersion: browser.version,
-        osName: sys.osName,
-        osVersion: sys.osVersion,
-        cypressVersion: pkg.version,
-        config,
-        runUrl: undefined,
-      }
-
-      printResults.displayRunStarting({
-        config,
+      const results = await passWithNoTests({
+        ...options,
         specs,
-        group,
-        tag,
-        browser,
-        parallel,
         specPattern,
-        autoCancelAfterFailures,
-      })
+        config,
+        browser,
+      } as EmptyRunOptions)
 
-      if (options.record) {
-        errors.warning('CANNOT_ENABLE_FEATURE_WITH_NO_TESTS', { feature: 'record' })
-      }
-
-      if (options.parallel) {
-        errors.warning('CANNOT_ENABLE_FEATURE_WITH_NO_TESTS', { feature: 'parallelize' })
-      }
-
-      printResults.renderSummaryTable(undefined, results)
+      await writeOutput(options.outputPath, createPublicRunResults(results))
 
       return results
     } else {
