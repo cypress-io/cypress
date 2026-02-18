@@ -1611,7 +1611,7 @@ describe('lib/cloud/api', () => {
         })
 
         expect(errors.warning.secondCall.args[1]).to.eql({
-          delay: '60 seconds',
+          delay: '1 minute',
           tries: 2,
           response: err,
         })
