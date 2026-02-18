@@ -1,10 +1,16 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.10.1
+## 15.11.0
 
 _Released 02/17/2026 (PENDING)_
 
+**Features:**
+
+- Introduces manual bootstrap script injection via a `<script data-cy-bootstrap>` tag. This is a workaround to fix React SSR hydration mismatches, and enables React apps to use `suppressHydrationWarning` to ignore the mismatch. Addresses [#27204](https://github.com/cypress-io/cypress/issues/27204). Addressed in [#33295](https://github.com/cypress-io/cypress/pull/33295).
+- Added Brotli compression support to the proxy. Addresses [#6197](https://github.com/cypress-io/cypress/issues/6197).
+
 **Bugfixes:**
 
+- Fixed an issue where a cancelled or incomplete login attempt would not properly open a browser window or tab, and required a restart of Cypress to enable a new login attempt. Fixed in [#33366](https://github.com/cypress-io/cypress/pull/33366). Fixes [#33350](https://github.com/cypress-io/cypress/issues/33350).
 - Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
 
 **Misc:**
@@ -14,6 +20,7 @@ _Released 02/17/2026 (PENDING)_
 
 **Dependency Updates:**
 
+- Upgraded `qs` to `6.14.2` to address [CVE-2026-2391](https://github.com/advisories/GHSA-w7fw-mjwx-w883) vulnerability reported in security scans. Addresses [#33363](https://github.com/cypress-io/cypress/issues/33363).
 - Upgraded `rimraf` to `6.1.1` to address [CVE-2026-25547](https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2) vulnerability reported in security scans. Addressed in [#33336](https://github.com/cypress-io/cypress/pull/33336).
 - Upgraded `squirrelly` to `9.1.0` to address [CVE-2021-32819](https://nvd.nist.gov/vuln/detail/CVE-2021-32819) vulnerability reported in security scans. Addresses [#33354](https://github.com/cypress-io/cypress/issues/33354).
 
