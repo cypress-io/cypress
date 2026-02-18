@@ -579,11 +579,11 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
 
                       events.emit('external:open', result)
                     }}
-                    className="command-prompt-get-feedback mr-1 whitespace-nowrap "
+                    className="command-prompt-get-feedback mr-1 whitespace-nowrap"
                   >
                     <IconGeneralChatBubble
                       strokeColor="purple-400"
-                      fillColor="green-900"
+                      fillColor="purple-900"
                       size='16'
                       className='pr-1'
                     />
