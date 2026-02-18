@@ -218,7 +218,7 @@ const retryWithBackoff = (fn, options: { displayRetryErrors?: boolean } = { disp
       if (options.displayRetryErrors) {
         errors.warning(
           'CLOUD_API_RESPONSE_FAILED_RETRYING', {
-            delay: humanTime.long(delayMs),
+            delay: humanTime.long(delayMs, false),
             tries: delays.length - retryIndex,
             response: err,
           },

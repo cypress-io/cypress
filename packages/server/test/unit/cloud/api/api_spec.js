@@ -1611,13 +1611,13 @@ describe('lib/cloud/api', () => {
         })
 
         expect(errors.warning.secondCall.args[1]).to.eql({
-          delayMs: 60000,
+          delay: '60 seconds',
           tries: 2,
           response: err,
         })
 
         expect(errors.warning.thirdCall.args[1]).to.eql({
-          delayMs: 120000,
+          delay: '2 minutes',
           tries: 1,
           response: err,
         })
