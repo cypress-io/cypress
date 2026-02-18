@@ -3529,6 +3529,7 @@
     "./packages/net-stubbing/node_modules/mime/index.js",
     "./packages/net-stubbing/node_modules/mime/types/other.js",
     "./packages/net-stubbing/node_modules/mime/types/standard.js",
+    "./packages/network-tools/cjs/accept-encoding.js",
     "./packages/network-tools/cjs/types.js",
     "./packages/network/cjs/allow-destroy.js",
     "./packages/network/node_modules/proxy-from-env/index.js",
