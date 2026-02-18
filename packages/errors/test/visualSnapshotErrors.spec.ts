@@ -6,10 +6,9 @@ import path from 'path'
 import * as errors from '../src'
 import os from 'os'
 
-// these packages need process.env.CYPRESS_INTERNAL_ENV to be set to 'test' to work, which is set in the global vitest config
-import ciProvider from '@packages/server/lib/util/ci_provider'
-import browsers from '@packages/server/lib/browsers'
-import { knownBrowsers } from '@packages/launcher/lib/known-browsers'
+// Mock data for template params - we only assert template rendering, not real browser/CI data
+const MOCK_FOUND_BROWSERS = ['Chrome 120', 'Firefox 121', 'Edge 119']
+const MOCK_CI_BUILD_ID_PROVIDERS = ['GitHub Actions', 'CircleCI', 'Jenkins']
 
 interface ErrorGenerator<T extends CypressErrorType> {
   default: Parameters<typeof errors.AllCypressErrors[T]>
@@ -184,8 +183,8 @@ describe('visual error templates', () => {
     },
     BROWSER_NOT_FOUND_BY_NAME: () => {
       return {
-        default: ['invalid-browser', browsers.formatBrowsersToOptions(knownBrowsers)],
-        canary: ['canary', browsers.formatBrowsersToOptions(knownBrowsers)],
+        default: ['invalid-browser', MOCK_FOUND_BROWSERS],
+        canary: ['canary', MOCK_FOUND_BROWSERS],
       }
     },
     BROWSER_NOT_FOUND_BY_PATH: () => {
@@ -215,12 +214,12 @@ describe('visual error templates', () => {
       return {
         default: [{
           tries: 3,
-          delayMs: 5000,
+          delay: '5 seconds',
           response: makeApiErr(),
         }],
         lastTry: [{
           tries: 1,
-          delayMs: 5000,
+          delay: '5 seconds',
           response: makeApiErr(),
         }],
       }
@@ -426,7 +425,7 @@ describe('visual error templates', () => {
           group: 'foo',
           parallel: 'false',
         },
-        ciProvider.detectableCiBuildIdProviders()],
+        MOCK_CI_BUILD_ID_PROVIDERS],
       }
     },
     RECORD_PARAMS_WITHOUT_RECORDING: () => {
