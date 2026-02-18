@@ -1111,6 +1111,29 @@ async function ready (options: ReadyOptions) {
   const specs = project.ctx.project.specs
 
   if (!specs.length) {
+    if (config.failIfNoSpecsFound === false) {
+      return {
+        status: 'finished',
+        startedTestsAt: new Date().toISOString(),
+        endedTestsAt: new Date().toISOString(),
+        totalDuration: 0,
+        totalSuites: 0,
+        totalTests: 0,
+        totalPassed: 0,
+        totalPending: 0,
+        totalFailed: 0,
+        totalSkipped: 0,
+        runs: [],
+        browserPath: '',
+        browserName: '',
+        browserVersion: '',
+        osName: sys.osName,
+        osVersion: sys.osVersion,
+        cypressVersion: pkg.version,
+        config,
+      } as CypressRunResult
+    }
+
     errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
   }
 

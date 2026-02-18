@@ -3016,6 +3016,11 @@ declare namespace Cypress {
      */
     excludeSpecPattern: string | string[]
     /**
+     * Whether Cypress should fail if no spec files are found. When set to false, Cypress will exit gracefully with a passing result if no specs match the pattern.
+     * @default true
+     */
+    failIfNoSpecsFound: boolean
+    /**
      * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      * @default 50
      */

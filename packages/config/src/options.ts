@@ -483,6 +483,10 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isString,
     isFolder: true,
   }, {
+    name: 'failIfNoSpecsFound',
+    defaultValue: true,
+    validation: validate.isBoolean,
+  }, {
     name: 'viewportHeight',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
