@@ -918,6 +918,164 @@ describe('Server', () => {
         })
       })
 
+      it('respects Accept-Encoding when passed with Title-Case key in options.headers (HTTP header names are case-insensitive)', function () {
+        nock('http://www.cypress.io')
+        .get('/')
+        .matchHeader('accept-encoding', 'br')
+        .reply(200, '<html>ok</html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {
+          headers: { 'Accept-Encoding': 'br' },
+        })
+        .then((obj = {}) => {
+          return expectToEqDetails(obj, {
+            isOkStatusCode: true,
+            isPrimarySuperDomainOrigin: true,
+            isHtml: true,
+            contentType: 'text/html',
+            url: 'http://www.cypress.io/',
+            originalUrl: 'http://www.cypress.io/',
+            status: 200,
+            statusText: 'OK',
+            redirects: [],
+            cookies: [],
+          })
+        })
+      })
+
+      it('sends accept-encoding: gzip when options.headers includes Accept-Encoding: gzip', function () {
+        nock('http://www.cypress.io')
+        .get('/')
+        .matchHeader('accept-encoding', 'gzip')
+        .reply(200, '<html>ok</html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {
+          headers: { 'Accept-Encoding': 'gzip' },
+        })
+        .then((obj = {}) => {
+          return expectToEqDetails(obj, {
+            isOkStatusCode: true,
+            isPrimarySuperDomainOrigin: true,
+            isHtml: true,
+            contentType: 'text/html',
+            url: 'http://www.cypress.io/',
+            originalUrl: 'http://www.cypress.io/',
+            status: 200,
+            statusText: 'OK',
+            redirects: [],
+            cookies: [],
+          })
+        })
+      })
+
+      it('sends accept-encoding: identity when options.headers includes only unsupported encodings (e.g. deflate, identity)', function () {
+        nock('http://www.cypress.io')
+        .get('/')
+        .matchHeader('accept-encoding', 'identity')
+        .reply(200, '<html>ok</html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {
+          headers: { 'Accept-Encoding': 'deflate, identity' },
+        })
+        .then((obj = {}) => {
+          return expectToEqDetails(obj, {
+            isOkStatusCode: true,
+            isPrimarySuperDomainOrigin: true,
+            isHtml: true,
+            contentType: 'text/html',
+            url: 'http://www.cypress.io/',
+            originalUrl: 'http://www.cypress.io/',
+            status: 200,
+            statusText: 'OK',
+            redirects: [],
+            cookies: [],
+          })
+        })
+      })
+
+      it('sends accept-encoding: gzip,identity when options.headers is empty (no accept-encoding)', function () {
+        nock('http://www.cypress.io')
+        .get('/')
+        .matchHeader('accept-encoding', 'gzip,identity')
+        .reply(200, '<html>ok</html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, { headers: {} })
+        .then((obj = {}) => {
+          return expectToEqDetails(obj, {
+            isOkStatusCode: true,
+            isPrimarySuperDomainOrigin: true,
+            isHtml: true,
+            contentType: 'text/html',
+            url: 'http://www.cypress.io/',
+            originalUrl: 'http://www.cypress.io/',
+            status: 200,
+            statusText: 'OK',
+            redirects: [],
+            cookies: [],
+          })
+        })
+      })
+
+      it('sends accept-encoding: gzip,identity when options has no headers key (normalizes and uses default)', function () {
+        nock('http://www.cypress.io')
+        .get('/')
+        .matchHeader('accept-encoding', 'gzip,identity')
+        .reply(200, '<html>ok</html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {})
+        .then((obj = {}) => {
+          return expectToEqDetails(obj, {
+            isOkStatusCode: true,
+            isPrimarySuperDomainOrigin: true,
+            isHtml: true,
+            contentType: 'text/html',
+            url: 'http://www.cypress.io/',
+            originalUrl: 'http://www.cypress.io/',
+            status: 200,
+            statusText: 'OK',
+            redirects: [],
+            cookies: [],
+          })
+        })
+      })
+
+      it('sends accept-encoding: gzip,br when options.headers includes gzip, deflate, br', function () {
+        nock('http://www.cypress.io')
+        .get('/')
+        .matchHeader('accept-encoding', 'gzip,br')
+        .reply(200, '<html>ok</html>', {
+          'Content-Type': 'text/html',
+        })
+
+        return this.server._onResolveUrl('http://www.cypress.io/', {}, this.automationRequest, {
+          headers: { 'Accept-Encoding': 'gzip, deflate, br' },
+        })
+        .then((obj = {}) => {
+          return expectToEqDetails(obj, {
+            isOkStatusCode: true,
+            isPrimarySuperDomainOrigin: true,
+            isHtml: true,
+            contentType: 'text/html',
+            url: 'http://www.cypress.io/',
+            originalUrl: 'http://www.cypress.io/',
+            status: 200,
+            statusText: 'OK',
+            redirects: [],
+            cookies: [],
+          })
+        })
+      })
+
       context('cross-origin', () => {
         it('adds a remote state and buffers the response when the request is from within cy.origin and the origins match', function () {
           nock('http://www.cypress.io/')
