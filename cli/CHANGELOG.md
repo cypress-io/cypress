@@ -12,6 +12,7 @@ _Released 02/17/2026 (PENDING)_
 
 - Fixed an issue where a cancelled or incomplete login attempt would not properly open a browser window or tab, and required a restart of Cypress to enable a new login attempt. Fixed in [#33366](https://github.com/cypress-io/cypress/pull/33366). Fixes [#33350](https://github.com/cypress-io/cypress/issues/33350).
 - Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
+- Added a `failIfNoSpecsFound` configuration option that allows `cypress run` to exit successfully when no spec files match the `specPattern`, instead of failing with an error. Fixes [#23019](https://github.com/cypress-io/cypress/issues/23019).
 
 **Misc:**
 
