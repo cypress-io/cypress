@@ -201,6 +201,7 @@ const parseOpts = (opts: any): any => {
     'key',
     'path',
     'parallel',
+    'passWithNoTests',
     'port',
     'posixExitCodes',
     'project',
