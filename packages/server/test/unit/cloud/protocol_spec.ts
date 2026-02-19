@@ -112,6 +112,59 @@ describe('lib/cloud/protocol', () => {
     expect(listener).to.have.been.calledOnce
   })
 
+  it('uses event+listener composite key so same listener on multiple events does not leak wrappers', async () => {
+    const mockCdpClient = new TestClient()
+    const onCalls: Array<{ event: string, listener: Function }> = []
+    const offCalls: Array<{ event: string, listener: Function }> = []
+
+    const originalOn = mockCdpClient.on.bind(mockCdpClient)
+    const originalOff = mockCdpClient.off.bind(mockCdpClient)
+
+    mockCdpClient.on = function (event: string, listener: Function) {
+      onCalls.push({ event, listener })
+
+      return originalOn(event, listener)
+    }
+
+    mockCdpClient.off = function (event: string, listener: Function) {
+      offCalls.push({ event, listener })
+
+      return originalOff(event, listener)
+    }
+
+    let capturedWrappedClient: any
+
+    sinon.stub(protocolManager as any, 'invokeAsync').callsFake(async (_method: string, _opts: any, cdpClient: any) => {
+      capturedWrappedClient = cdpClient
+    })
+
+    await protocolManager.connectToBrowser(mockCdpClient as any)
+
+    expect(capturedWrappedClient).to.exist
+
+    const sharedListener = sinon.stub()
+
+    capturedWrappedClient.on('Page.frameAttached', sharedListener)
+    capturedWrappedClient.on('Page.frameDetached', sharedListener)
+
+    expect(onCalls).to.have.length(2)
+
+    const wrapperForAttached = onCalls.find((c) => c.event === 'Page.frameAttached')!.listener
+    const wrapperForDetached = onCalls.find((c) => c.event === 'Page.frameDetached')!.listener
+
+    expect(wrapperForAttached).to.not.equal(wrapperForDetached)
+
+    capturedWrappedClient.off('Page.frameAttached', sharedListener)
+    expect(offCalls).to.have.length(1)
+    expect(offCalls[0].event).to.equal('Page.frameAttached')
+    expect(offCalls[0].listener).to.equal(wrapperForAttached)
+
+    capturedWrappedClient.off('Page.frameDetached', sharedListener)
+    expect(offCalls).to.have.length(2)
+    expect(offCalls[1].event).to.equal('Page.frameDetached')
+    expect(offCalls[1].listener).to.equal(wrapperForDetached)
+  })
+
   it('should call cleanup on existing protocol when setupProtocol is called again', () => {
     const cleanupStub = sinon.stub(protocol, 'cleanup')
 
