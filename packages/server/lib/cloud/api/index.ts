@@ -26,7 +26,7 @@ import type { OptionsWithUrl } from 'request-promise'
 import { fs } from '../../util/fs'
 import ProtocolManager from '../protocol'
 import type { ProjectBase } from '../../project-base'
-
+import * as humanTime from '../../util/human_time'
 import { PUBLIC_KEY_VERSION } from '../constants'
 
 // axios implementation disabled until proxy issues can be diagnosed/fixed
@@ -218,7 +218,7 @@ const retryWithBackoff = (fn, options: { displayRetryErrors?: boolean } = { disp
       if (options.displayRetryErrors) {
         errors.warning(
           'CLOUD_API_RESPONSE_FAILED_RETRYING', {
-            delayMs,
+            delay: humanTime.long(delayMs, false),
             tries: delays.length - retryIndex,
             response: err,
           },

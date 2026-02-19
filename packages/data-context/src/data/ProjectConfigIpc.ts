@@ -1,6 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import { CypressError, getError } from '@packages/errors'
-import type { FullConfig, TestingType } from '@packages/types'
+import type { DebugData, FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
 import EventEmitter from 'events'
 import path from 'path'
@@ -48,10 +48,6 @@ export interface LoadConfigReply {
 interface SerializedLoadConfigReply {
   initialConfig: string // stringified Cypress.ConfigOptions
   requires: string[]
-}
-
-export interface DebugData {
-  filePreprocessorHandlerText?: string
 }
 
 /**

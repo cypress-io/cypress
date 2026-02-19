@@ -60,7 +60,7 @@
     "proxy-from-env": "1.0.0",
     "request-progress": "^3.0.0",
     "supports-color": "^8.1.1",
-    "systeminformation": "^5.27.14",
+    "systeminformation": "^5.31.1",
     "tmp": "~0.2.4",
     "tslib": "1.14.1",
     "tree-kill": "1.2.2",
