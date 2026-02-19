@@ -13,7 +13,7 @@ export = {
     return cache.setUser(user)
   },
 
-  getBaseLoginUrl (): string {
+  getBaseLoginUrl (): Bluebird<string> {
     return api.getAuthUrls().get('dashboardAuthUrl')
   },
 

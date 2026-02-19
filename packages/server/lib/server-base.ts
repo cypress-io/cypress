@@ -15,7 +15,7 @@ import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
-import { DocumentDomainInjection, getPath, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
+import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
@@ -924,7 +924,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
                     && !originsMatchByPolicy
                     || options.isFromSpecBridge
 
-                  debug('urlDoesNotMatchPolicy?', {
+                  debug('urlDoesNotMatchPolicy?: %o', {
                     urlDoesNotMatchPolicyBasedOnDomain,
                     hasAlreadyVisited: options.hasAlreadyVisited,
                     originsMatchByPolicy,
@@ -976,6 +976,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         delete options.body
       }
 
+      // HTTP header names are case-insensitive; convert all keys to lowercase
+      options.headers = _.mapKeys(options.headers, (value, key) => key.toLowerCase())
+
       _.assign(options, {
         // turn off gzip since we need to eventually
         // rewrite these contents
@@ -983,7 +986,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         url: urlFile != null ? urlFile : urlStr,
         headers: _.assign({
           accept: 'text/html,*/*',
-        }, options.headers),
+        }, options.headers, {
+          'accept-encoding': getSupportedAcceptEncoding(options.headers['accept-encoding']),
+        }),
         onBeforeReqInit: runPhase,
         followRedirect (incomingRes) {
           const status = incomingRes.statusCode

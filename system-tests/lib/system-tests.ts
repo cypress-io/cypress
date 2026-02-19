@@ -72,6 +72,10 @@ export type ItOptions = ExecOptions & {
 
 type ExecOptions = {
   /**
+   * If set, Cypress will pass the `--pass-with-no-tests` flag.
+   */
+  passWithNoTests?: boolean
+  /**
    * If set, `docker exec` will be used to run this test. Requires Docker.
    */
   dockerImage?: string
@@ -768,7 +772,9 @@ const systemTests = {
       args.push(`--userNodeVersion=${options.userNodeVersion}`)
     }
 
-    debug('posixExitCodes', options.posixExitCodes)
+    if (options.passWithNoTests) {
+      args.push('--pass-with-no-tests')
+    }
 
     if (options.posixExitCodes) {
       args.push('--posix-exit-codes')
