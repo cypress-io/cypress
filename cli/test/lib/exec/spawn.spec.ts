@@ -303,7 +303,8 @@ describe('lib/exec/spawn', function () {
 
       await startPromise
 
-      const p = path.resolve('..', 'scripts', 'start.js')
+      // gets resolved relative to .<repo-root>/cli when running the test
+      const p = path.resolve('../scripts/start.js')
 
       expect(cp.spawn).toHaveBeenCalledWith('node', [
         p,
@@ -330,7 +331,8 @@ describe('lib/exec/spawn', function () {
 
       await startPromise
 
-      const p = path.resolve('..', 'scripts', 'start.js')
+      // gets resolved relative to .<repo-root>/cli when running the test
+      const p = path.resolve('../scripts/start.js')
 
       expect(cp.spawn).toHaveBeenCalledWith('node', [
         p,

@@ -8,8 +8,6 @@ import shell from 'shelljs'
 import { join } from 'path'
 import resolvePkg from 'resolve-pkg'
 
-import './clean'
-
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
 

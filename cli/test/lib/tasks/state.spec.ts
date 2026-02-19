@@ -74,6 +74,7 @@ vi.mock('../../../lib/util', async (importActual) => {
       // @ts-expect-error
       ...actual.default,
       pkgVersion: vi.fn(),
+      pkgBuildInfo: vi.fn(),
       getCacheDir: vi.fn(),
     },
   }
@@ -100,6 +101,13 @@ describe('lib/tasks/state', function () {
 
     vi.mocked(util.getCacheDir).mockReturnValue(cacheDir)
     vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
+    vi.mocked(util.pkgBuildInfo).mockReturnValue({
+      stable: true,
+      commitBranch: 'main',
+      commitSha: 'abcdef123456',
+      commitDate: '1970-01-01T05:00:00.000Z',
+    })
+
     vi.mocked(os.platform).mockReturnValue('darwin')
 
     // @ts-expect-error - default import
@@ -393,6 +401,7 @@ describe('lib/tasks/state', function () {
 
   describe('.parseRealPlatformBinaryFolderAsync', function () {
     beforeEach(function () {
+      // @ts-expect-error - mock args
       vi.mocked(fs.realpath).mockImplementation((path: string) => Promise.resolve(path))
     })
 

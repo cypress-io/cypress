@@ -4,17 +4,23 @@
   "private": true,
   "main": "dist/index.js",
   "scripts": {
-    "build-cli": "tsc -p tsconfig.build.json && tsc -p tsconfig.esm.json && tsx ./scripts/build.ts && tsx ./scripts/post-build.ts",
-    "clean": "tsx ./scripts/clean.ts",
+    "build-cli": "rollup -c && yarn postbuild",
+    "build": "rollup -c",
+    "clean-cli-build": "rimraf build dist \"types/[!tests]*/\" types/net-stubbing.d.ts --glob",
     "dtslint": "dtslint types",
     "lint": "eslint",
-    "postinstall": "patch-package && tsx ./scripts/post-install.ts",
-    "prebuild": "yarn postinstall && tsx ./scripts/start-build.ts",
+    "postinstall": "patch-package && tsx ./scripts/sync-typedefs.ts",
+    "prebuild": "yarn clean-cli-build && yarn postinstall && tsx ./scripts/prep-build-dir.ts",
+    "postbuild": "yarn make-bin-executable && yarn sync-build-dist && yarn prepare-package-json && yarn bundle-ct-frameworks",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "npx vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-unit": "vitest run",
-    "types": "yarn dtslint"
+    "types": "yarn dtslint",
+    "make-bin-executable": "tsx ./scripts/make-bin-executable.ts",
+    "sync-build-dist": "tsx ./scripts/sync-build-dist.ts",
+    "prepare-package-json": "tsx ./scripts/prepare-package-json.ts",
+    "bundle-ct-frameworks": "tsx ./scripts/bundle-ct-frameworks.ts"
   },
   "dependencies": {
     "@cypress/request": "^3.0.10",
@@ -56,6 +62,7 @@
     "supports-color": "^8.1.1",
     "systeminformation": "^5.31.1",
     "tmp": "~0.2.4",
+    "tslib": "1.14.1",
     "tree-kill": "1.2.2",
     "untildify": "^4.0.0",
     "yauzl": "^2.10.0"
@@ -69,17 +76,23 @@
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/svelte": "0.0.0-development",
     "@cypress/vue": "0.0.0-development",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-json": "^6.1.0",
+    "rollup": "^4.53.5",
     "@packages/eslint-config": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@types/bluebird": "3.5.33",
     "@types/chai": "4.2.15",
     "@types/chai-jquery": "1.1.43",
     "@types/jquery": "3.3.31",
-    "@types/lodash": "4.17.23",
+    "@types/lodash": "4.17.21",
     "@types/minimatch": "3.0.5",
     "@types/mocha": "8.0.3",
     "@types/sinon": "9.0.9",
     "@types/sinon-chai": "3.2.12",
+    "@types/shelljs": "^0.10.0",
     "dtslint": "4.2.1",
     "eslint": "^9.31.0",
     "execa-wrap": "1.4.0",
@@ -87,6 +100,7 @@
     "mock-fs": "5.4.0",
     "nock": "13.2.9",
     "resolve-pkg": "2.0.0",
+    "rimraf": "^6.1.2",
     "semver": "^7.7.3",
     "shelljs": "0.8.5",
     "strip-ansi": "6.0.1",
@@ -153,6 +167,10 @@
       "types": "./svelte/dist/index.d.ts",
       "import": "./svelte/dist/cypress-svelte.esm-bundler.js",
       "require": "./svelte/dist/cypress-svelte.cjs.js"
+    },
+    "./bin": {
+      "import": "./dist/bin/cypress",
+      "require": "./dist/bin/cypress"
     }
   },
   "workspaces": {
@@ -174,6 +192,11 @@
         "outputs": [
           "{projectRoot}/types",
           "{projectRoot}/build"
+        ]
+      },
+      "test": {
+        "dependsOn": [
+          "build-cli"
         ]
       }
     },

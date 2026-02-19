@@ -9,6 +9,7 @@ import { stripIndent } from 'common-tags'
 import timers from 'timers/promises'
 
 import fs from 'fs-extra'
+import { readFile } from 'fs/promises'
 import download from './download'
 import util from '../util'
 import state from './state'
@@ -16,13 +17,10 @@ import unzip from './unzip'
 import logger from '../logger'
 import { throwFormErrorText, errors } from '../errors'
 import verbose from '../VerboseRenderer'
-
+import { relativeToRepoRoot } from '../relative-to-repo-root'
 const debug = Debug('cypress:cli')
 
-// Import package.json dynamically to avoid TypeScript JSON import issues
-const { buildInfo, version } = require('../../package.json')
-
-function _getBinaryUrlFromBuildInfo (arch: string, { commitSha, commitBranch }: any): string {
+function _getBinaryUrlFromBuildInfo (version: string, arch: string, { commitSha, commitBranch }: any): string {
   const platform = os.platform()
 
   if ((platform === 'win32') && (arch === 'arm64')) {
@@ -153,7 +151,7 @@ const validateOS = async (): Promise<RegExpMatchArray | null> => {
  * Returns the version to install - either a string like `1.2.3` to be fetched
  * from the download server or a file path or HTTP URL.
  */
-function getVersionOverride ({ arch, envVarVersion, buildInfo }: any): string | undefined {
+function getVersionOverride (version: string, { arch, envVarVersion, buildInfo }: any): string | undefined {
   // let this environment variable reset the binary version we need
   if (envVarVersion) {
     return envVarVersion
@@ -175,7 +173,7 @@ function getVersionOverride ({ arch, envVarVersion, buildInfo }: any): string | 
 
     logger.log()
 
-    return _getBinaryUrlFromBuildInfo(arch, buildInfo)
+    return _getBinaryUrlFromBuildInfo(version, arch, buildInfo)
   }
 }
 
@@ -209,6 +207,14 @@ const start = async (options: any = {}): Promise<any> => {
     return
   }
 
+  const pkgPath = relativeToRepoRoot('package.json')
+
+  if (!pkgPath) {
+    return throwFormErrorText('Could not find package.json for Cypress package to determine build information')()
+  }
+
+  const { buildInfo, version } = JSON.parse(await readFile(pkgPath, 'utf8'))
+
   _.defaults(options, {
     force: false,
     buildInfo,
@@ -230,7 +236,7 @@ const start = async (options: any = {}): Promise<any> => {
 
   const pkgVersion = util.pkgVersion()
   const arch = await util.getRealArch()
-  const versionOverride = getVersionOverride({ arch, envVarVersion, buildInfo: options.buildInfo })
+  const versionOverride = getVersionOverride(version, { arch, envVarVersion, buildInfo: options.buildInfo })
   const versionToInstall = versionOverride || pkgVersion
 
   debug('version in package.json is %s, version to install is %s', pkgVersion, versionToInstall)
