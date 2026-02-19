@@ -10,7 +10,7 @@ import { needsSandbox } from '../tasks/verify'
 import { throwFormErrorText, getError, errors } from '../errors'
 import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
-
+import { relativeToRepoRoot } from '../relative-to-repo-root'
 const debug = Debug('cypress:cli')
 
 const DBUS_ERROR_PATTERN = /ERROR:dbus\/(bus|object_proxy)\.cc/
@@ -73,9 +73,12 @@ function createSpawnFunction (
         executable = 'node'
         // if we're in dev then reset
         // the launch cmd to be 'npm run dev'
-        startScriptPath = path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
-
-        debug('in dev mode the args became %o', args)
+        // This path is correct in the build output, but not the source code. This file gets bundled into
+        // `dist/spawn-<hash>.js`, which makes this resolution appear incorrect at first glance.
+        startScriptPath = relativeToRepoRoot('scripts/start.js')
+        if (!startScriptPath) {
+          throw new Error(`Cypress start script (scripts/start.js) not found in parent directory of ${__dirname}`)
+        }
       }
 
       if (!options.dev && needsSandbox()) {

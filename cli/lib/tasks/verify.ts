@@ -5,7 +5,6 @@ import Debug from 'debug'
 import { stripIndent } from 'common-tags'
 import Bluebird from 'bluebird'
 import logSymbols from 'log-symbols'
-import path from 'path'
 import os from 'os'
 import verbose from '../VerboseRenderer'
 import { throwFormErrorText, errors } from '../errors'
@@ -13,6 +12,7 @@ import util from '../util'
 import logger from '../logger'
 import xvfb from '../exec/xvfb'
 import state from './state'
+import { relativeToRepoRoot } from '../relative-to-repo-root'
 
 const debug = Debug('cypress:cli')
 
@@ -76,9 +76,13 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
 
     if (options.dev) {
       executable = 'node'
-      args.unshift(
-        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
-      )
+      const startScriptPath = relativeToRepoRoot('scripts/start.js')
+
+      if (!startScriptPath) {
+        throw new Error(`Cypress start script (scripts/start.js) not found in parent directory of ${__dirname}`)
+      }
+
+      args.unshift(startScriptPath)
     }
 
     const smokeTestCommand = `${executable} ${args.join(' ')}`
@@ -259,9 +263,6 @@ const maybeVerify = async (installedVersion: string, binaryDir: string, options:
 export const start = async (options: any = {}): Promise<void> => {
   debug('verifying Cypress app')
 
-  const packageVersion = util.pkgVersion()
-  let binaryDir = state.getBinaryDir(packageVersion)
-
   _.defaults(options, {
     dev: false,
     force: false,
@@ -275,6 +276,10 @@ export const start = async (options: any = {}): Promise<void> => {
 
     return Promise.resolve()
   }
+
+  const packageVersion = util.pkgVersion()
+
+  let binaryDir = state.getBinaryDir(packageVersion)
 
   if (options.dev) {
     return runSmokeTest('', options)
