@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
+import type { DebugData } from './studio/studio-server-types'
 import type { ProxyTimings } from './proxy'
 import type { FoundSpec } from './spec'
 
@@ -105,9 +106,7 @@ export type ProtocolManagerOptions = {
   }
   projectConfig: ProjectConfig
   mountVersion?: number
-  debugData?: {
-    filePreprocessorHandlerText?: string
-  }
+  debugData?: DebugData
   mode?: 'record' | 'studio'
 }
 
@@ -156,6 +155,7 @@ export type ResponseStreamOptions = {
   requestId: string
   responseHeaders: IncomingHttpHeaders
   isAlreadyGunzipped: boolean
+  isAlreadyBrotliDecompressed?: boolean
   responseStream: Readable
   res: Response
   timings: ProxyTimings
