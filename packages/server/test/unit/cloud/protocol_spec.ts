@@ -93,6 +93,33 @@ describe('lib/cloud/protocol', () => {
     ])
   })
 
+  it('should unregister listener when off() is called on wrapped CDP client', async () => {
+    const mockCdpClient = new TestClient()
+
+    sinon.stub(protocol, 'connectToBrowser').resolves()
+
+    await protocolManager.connectToBrowser(mockCdpClient as any)
+
+    const newCdpClient = (protocol.connectToBrowser as SinonStub).getCall(0).args[0]
+    const listener = sinon.stub()
+
+    newCdpClient.on('Page.loadEventFired', listener)
+    mockCdpClient.emit('Page.loadEventFired')
+    expect(listener).to.have.been.calledOnce
+
+    newCdpClient.off('Page.loadEventFired', listener)
+    mockCdpClient.emit('Page.loadEventFired')
+    expect(listener).to.have.been.calledOnce
+  })
+
+  it('should call cleanup on existing protocol when setupProtocol is called again', () => {
+    const cleanupStub = sinon.stub(protocol, 'cleanup')
+
+    protocolManager.setupProtocol()
+
+    expect(cleanupStub).to.have.been.calledOnce
+  })
+
   it('should be able to initialize a new spec', () => {
     sinon.stub(protocol, 'beforeSpec')
 
@@ -362,6 +389,20 @@ describe('lib/cloud/protocol', () => {
       expect(protocolManager['_instanceId']).to.be.undefined
       expect(protocolManager['_runId']).to.be.undefined
       expect(protocolManager['_errors']).to.be.empty
+      expect(protocolManager['_protocol']).to.be.undefined
+    })
+
+    it('calls cleanup on protocol before clearing it', () => {
+      const cleanupStub = sinon.stub(protocol, 'cleanup')
+
+      protocolManager['_db'] = { close: sinon.stub() }
+      protocolManager['_dbPath'] = '/path/to/db'
+      protocolManager['_archivePath'] = '/path/to/archive'
+      sinon.stub(fs, 'unlink').resolves()
+
+      protocolManager.close()
+
+      expect(cleanupStub).to.have.been.calledOnce
       expect(protocolManager['_protocol']).to.be.undefined
     })
   })

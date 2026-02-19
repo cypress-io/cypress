@@ -17,8 +17,6 @@ export interface CDPClient {
   off (eventName: string, cb: (event: any) => void): void
 }
 
-// TODO(protocol): This is basic for now but will evolve as we progress with the protocol work
-
 export interface AppCaptureProtocolCommon {
   cdpReconnect (): Promise<void>
   addRunnables (runnables: any): void
@@ -42,6 +40,7 @@ export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   beforeSpec ({ spec, workingDirectory, archivePath, dbPath, db }: { spec: FoundSpec & { instanceId: string }, workingDirectory: string, archivePath: string, dbPath: string, db: Database.Database }): void
   uploadStallSamplingInterval: () => number
   connectToBrowser (cdpClient: CDPClient): Promise<void>
+  cleanup (): void
 }
 
 export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'prepareProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb' | 'UNKNOWN' | 'createProtocolArtifact' | 'protocolUploadUrl'

@@ -102,6 +102,9 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug('setting up protocol')
 
     try {
+      // Cleanup the previous protocol
+      this.cleanup()
+
       if (!this.AppCaptureProtocol || !this.options) {
         throw new Error('Cannot setup protocol without a prepared protocol')
       }
@@ -126,11 +129,13 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async connectToBrowser (cdpClient: CDPClient) {
-    // Wrap the cdp client listeners so that we can be notified of any errors that may occur
+    const listenerMap = new Map<Function, Function>()
+
     const newCdpClient: CDPClient = {
       ...cdpClient,
       on: (event, listener) => {
-        cdpClient.on(event, async (message) => {
+        // Wrap the cdp client listeners so that we can be notified of any errors that may occur
+        const wrapper = async (message) => {
           try {
             await listener(message)
           } catch (error) {
@@ -141,7 +146,18 @@ export class ProtocolManager implements ProtocolManagerShape {
               throw error
             }
           }
-        })
+        }
+
+        listenerMap.set(listener, wrapper)
+        cdpClient.on(event, wrapper)
+      },
+      off: (event, listener) => {
+        const wrapper = listenerMap.get(listener)
+
+        if (wrapper) {
+          cdpClient.off(event, wrapper as any)
+          listenerMap.delete(listener)
+        }
       },
     }
 
@@ -166,7 +182,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       this._beforeSpec(spec)
     } catch (error) {
       // Clear out protocol since we will not have a valid state when spec has failed
-      this._protocol = undefined
+      this.cleanup()
 
       if (CAPTURE_ERRORS) {
         this.captureError({ captureMethod: 'beforeSpec', fatal: true, error, args: [spec], runnableId: this._runnableId })
@@ -491,6 +507,11 @@ export class ProtocolManager implements ProtocolManagerShape {
     this._specName = undefined
     this._runId = undefined
     this._errors = []
+    this.cleanup()
+  }
+
+  cleanup (): void {
+    this.invokeSync('cleanup', { isEssential: false })
     this._protocol = undefined
   }
 
