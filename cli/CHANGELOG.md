@@ -24,6 +24,7 @@ _Released 02/17/2026 (PENDING)_
 - Upgraded `qs` to `6.14.2` to address [CVE-2026-2391](https://github.com/advisories/GHSA-w7fw-mjwx-w883) vulnerability reported in security scans. Addresses [#33363](https://github.com/cypress-io/cypress/issues/33363).
 - Upgraded `rimraf` to `6.1.1` to address [CVE-2026-25547](https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2) vulnerability reported in security scans. Addressed in [#33336](https://github.com/cypress-io/cypress/pull/33336).
 - Upgraded `squirrelly` to `9.1.0` to address [CVE-2021-32819](https://nvd.nist.gov/vuln/detail/CVE-2021-32819) vulnerability reported in security scans. Addresses [#33354](https://github.com/cypress-io/cypress/issues/33354).
+- Upgraded `systeminformation` to `5.31.1` to address [CVE-2026-26280](https://github.com/advisories/GHSA-9c88-49p5-5ggf) and [CVE-2026-26318](https://github.com/advisories/GHSA-5vv4-hvf7-2h46) vulnerabilities reported in security scans. Addresses [#33389](https://github.com/cypress-io/cypress/issues/33389).
 
 ## 15.10.0
 
