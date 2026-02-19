@@ -240,7 +240,6 @@ const parseOpts = (opts: any): any => {
  * because we need same functionality in CLI to show the path :(
  */
 const getApplicationDataFolder = (...paths: string[]): string => {
-  console.log('getApplicationDataFolder', relativeToRepoRoot('package.json'))
   const { env } = process
 
   // allow overriding the app_data folder
