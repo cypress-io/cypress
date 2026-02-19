@@ -34,7 +34,6 @@
   },
   "devDependencies": {
     "@packages/eslint-config": "0.0.0-development",
-    "@packages/server": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
     "@types/node": "22.18.7",

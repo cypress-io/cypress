@@ -5,6 +5,7 @@ _Released 02/17/2026 (PENDING)_
 
 **Features:**
 
+- Adds `--pass-with-no-tests` command line flag. Addresses [#23019](https://github.com/cypress-io/cypress/issues/23019). Addressed in [#33384](https://github.com/cypress-io/cypress/pull/33384).
 - Introduces manual bootstrap script injection via a `<script data-cy-bootstrap>` tag. This is a workaround to fix React SSR hydration mismatches, and enables React apps to use `suppressHydrationWarning` to ignore the mismatch. Addresses [#27204](https://github.com/cypress-io/cypress/issues/27204). Addressed in [#33295](https://github.com/cypress-io/cypress/pull/33295).
 - Added Brotli compression support to the proxy. Addresses [#6197](https://github.com/cypress-io/cypress/issues/6197).
 
