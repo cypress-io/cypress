@@ -9,7 +9,7 @@ import fs from 'fs-extra'
 import type { SinonStub } from 'sinon'
 
 class TestClient extends EventEmitter {
-  send: sinon.SinonStub = sinon.stub()
+  send: SinonStub = sinon.stub()
 }
 
 const mockDb = sinon.stub()
