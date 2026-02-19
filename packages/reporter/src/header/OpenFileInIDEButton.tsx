@@ -12,7 +12,7 @@ interface Props {
 
 export const OpenFileInIDEButton = ({ fileDetails, className }: Props) => {
   return (<>
-    <Button size='20' variant='outline-dark' className={cx('open-in-ide-button', className)} onClick={() => events.emit('open:file:unified', fileDetails)}><IconWindowCodeEditorSmall strokeColor='gray-500' fillColor='gray-900' /> Open in IDE </Button>
+    <Button size='20' variant='outline-dark' className={cx('open-in-ide-button', className)} onClick={() => events.emit('open:file:unified', fileDetails)}><IconWindowCodeEditorSmall size='12' strokeColor='gray-500' fillColor='gray-900' /> Open in IDE </Button>
     <span className={cx('button-hover-shadow')} />
   </>
   )
