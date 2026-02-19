@@ -593,7 +593,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                     <Button
                       variant="indigo-dark-mode"
                       size="20"
-                      onClick={async (e) => {
+                      onClick={(e) => {
                         e.stopPropagation()
                         events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
                       }}
