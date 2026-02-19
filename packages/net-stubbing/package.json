@@ -26,7 +26,6 @@
     "@packages/errors": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
-    "@packages/server": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
     "@types/mime": "^3.0.1",
     "vitest": "^3.2.4"
