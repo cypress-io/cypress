@@ -109,7 +109,8 @@
         gap: 4px;
         width: 100%;
 
-        .command-prompt-get-code .command-prompt-feedback {
+        .command-prompt-get-code,
+        .command-prompt-get-feedback {
           cursor: pointer;
           font-family: $font-system;
           font-size: 12px;

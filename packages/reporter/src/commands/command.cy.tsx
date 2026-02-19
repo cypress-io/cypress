@@ -267,7 +267,7 @@ describe('commands', () => {
       })
 
       it('should emit external:open with backend URL when Feedback button is clicked', () => {
-        const feedbackUrl = 'https://on.cypress.io/report-cy-prompt-issue'
+        const feedbackUrl = 'https://example.com/feedback-from-backend'
 
         cy.stub(Cypress, 'backendRequestHandler').resolves(feedbackUrl)
         const emitSpy = cy.spy(events, 'emit')
