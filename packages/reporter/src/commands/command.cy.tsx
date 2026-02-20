@@ -270,7 +270,7 @@ describe('commands', () => {
         const feedbackUrl = 'https://example.com/feedback-from-backend'
 
         cy.stub(Cypress, 'backendRequestHandler').resolves(feedbackUrl)
-        const emitSpy = cy.spy(events, 'emit')
+        cy.spy(events, 'emit')
 
         cy.mount(
           <div>
@@ -283,14 +283,16 @@ describe('commands', () => {
         )
 
         cy.get('.command-prompt-get-feedback').click()
-        cy.wrap(emitSpy).should('be.calledWith', 'external:open', feedbackUrl)
+        .then(() => {
+          expect(events.emit).to.be.calledWith('external:open', feedbackUrl)
+        })
       })
 
       it('should emit external:open with fallback URL when backend request fails', () => {
         const fallbackUrl = 'https://on.cypress.io/report-cy-prompt-issue'
 
         cy.stub(Cypress, 'backendRequestHandler').rejects(new Error('Backend unavailable'))
-        const emitSpy = cy.spy(events, 'emit')
+        cy.spy(events, 'emit')
 
         cy.mount(
           <div>
@@ -303,7 +305,9 @@ describe('commands', () => {
         )
 
         cy.get('.command-prompt-get-feedback').click()
-        cy.wrap(emitSpy).should('be.calledWith', 'external:open', fallbackUrl)
+        .then(() => {
+          expect(events.emit).to.be.calledWith('external:open', fallbackUrl)
+        })
       })
     })
   })
