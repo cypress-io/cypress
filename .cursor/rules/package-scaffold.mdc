@@ -1,0 +1,200 @@
+---
+description: Checklist and conventions for scaffolding a new @packages/* monorepo package (TypeScript, Vitest, CJS/ESM, repo wiring).
+globs: ["packages/*/package.json", "packages/*/tsconfig*.json", "packages/*/vitest.config.ts"]
+alwaysApply: false
+---
+
+# Scaffolding a New Monorepo Package
+
+Use this checklist when adding a new `@packages/<name>` package to the Cypress monorepo.
+
+---
+
+## 0. Interview the user (before scaffolding)
+
+When the user says they need a new monorepo package (or similar), **ask these questions first** and only then run through the checklist. Do not assume answers.
+
+1. **Package name** – What should the package be called? (Used as `@packages/<name>`, e.g. `cookie-store` → `@packages/cookie-store`.)
+2. **Runtime** – Will this code run in **Node only**, **browser only**, or **both**? (Affects build and whether you need a browser bundle; most small libs are Node-only or dual.)
+3. **Build** – **Single output** (one `dist/` with one tsconfig) or **dual CJS/ESM** (cjs/ + esm/ with exports map)? Default to dual CJS/ESM for new packages unless the user wants minimal/single.
+4. **Source directory** – Prefer **`src/`** for new packages (or **`lib/`** if they want to match older packages).
+5. **One-line purpose** – What is this package for? (Use to draft README and placeholder barrel.)
+
+Optional: if they already gave a name or "like cookie-store", you can skip or shorten the interview and confirm the rest.
+
+---
+
+## Reference packages
+
+| Package | Build | Source | Notes |
+|---------|-------|--------|--------|
+| **cookie-store** | dual CJS/ESM | `src/` | prebuild, exports map, noEmit split; tests under `src/__spec__/` (preferred) |
+| **stderr-filtering** | single (`dist/`) | `lib/` | One tsconfig, `yarn clean && tsc`; tests under `lib/__spec__/` (preferred) |
+| **network** | dual CJS/ESM | `lib/` | cjs/esm, no prebuild (each build step rimrafs its own dir) |
+| **errors** | dual CJS/ESM | `src/` | Vitest; top-level `test/` (older pattern) |
+| **types** | dual CJS/ESM | `src/` | Vitest; top-level `test/` (older pattern) |
+| **https-proxy** | dual CJS/ESM | `lib/` | Vitest; top-level `test/` (older pattern) |
+| **resolve-dist** | dual CJS/ESM | — | Build order `build:cjs && build:esm` (no test script) |
+| **packherd-require** | single (`dist/`) | — | Minimal: `"build": "tsc"`, types from source |
+
+---
+
+## 1. Create package directory and core files
+
+- [ ] Create `packages/<package-name>/`.
+- [ ] Choose **source directory**: `src/` (recommended for new packages) or `lib/`.
+- [ ] Add **package.json** (see template below).
+- [ ] Add **tsconfig.json** (base; do **not** exclude tests so they pick up project types).
+- [ ] Add **eslint.config.ts** extending `@packages/eslint-config` with `tsconfigRootDir: __dirname`.
+- [ ] Add **vitest.config.ts** (include `**/__spec__/*.spec.ts`, exclude build output dirs).
+- [ ] Add **README.md** (overview and status).
+
+---
+
+## 2. package.json
+
+**Required fields:**
+
+- `name`: `@packages/<package-name>`
+- `version`: `0.0.0-development`
+- `private`: `true`
+- `main`: entry for Node (e.g. `cjs/index.js` or `dist/index.js`)
+- `types`: path to main `.d.ts` (e.g. `cjs/index.d.ts` or `dist/index.d.ts`)
+- `files`: array of dirs to publish (e.g. `["cjs","esm"]` or `["dist"]`)
+- `license`: `MIT`
+- **Scripts**: `build`, `clean`, `lint`, `test`, (optional) `watch`. For dual CJS/ESM, add **`prebuild`** to clear output dirs before build (see below).
+- **devDependencies**: include `@packages/eslint-config`, `@types/node`, `typescript`, `vitest`, `rimraf`, `eslint` (and `@vitest/coverage-v8` if you want coverage).
+
+**Single build (one output dir, e.g. `dist/`):**
+
+- `main`: `dist/index.js`
+- `types`: `dist/index.d.ts`
+- `files`: `["dist"]`
+- Build: `"build": "yarn clean && tsc"`, `"clean": "rimraf dist coverage"`.
+- One tsconfig with `outDir: "./dist"`, `rootDir: "./src"` (or `./lib`). **Exclude** test files in this tsconfig so the build does not emit specs.
+
+**Dual CJS/ESM (two output dirs, e.g. `cjs/` and `esm/`):**
+
+- `main`: `cjs/index.js`
+- `module`: `esm/index.js`
+- `types`: `cjs/index.d.ts`
+- `files`: `["cjs","esm"]`
+- Scripts: **`"prebuild": "rimraf cjs esm"`** (important: clears both output dirs before build so stale artifacts are removed; npm/yarn run this automatically before `build`). Then `"build": "yarn build:esm && yarn build:cjs"`, `"build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json"`, `"build:esm": "rimraf esm && tsc -p tsconfig.esm.json"`, `"clean": "rimraf cjs esm coverage"`.
+- **exports** map for Node/bundlers:
+
+  ```json
+  "exports": {
+    ".": {
+      "types": "./cjs/index.d.ts",
+      "import": "./esm/index.js",
+      "require": "./cjs/index.js",
+      "default": "./cjs/index.js"
+    }
+  }
+  ```
+
+- Base **tsconfig.json**: include source, exclude only output dirs and `node_modules` (do **not** exclude tests). Set **`noEmit: true`** so the base is for type-checking/IDE only.
+- **tsconfig.cjs.json** / **tsconfig.esm.json**: extend base, set `rootDir`, `outDir`, `module`, **`noEmit: false`**; **exclude** `**/__spec__/**`, `**/*.spec.ts`, `**/*.test.ts` so the build does not emit specs.
+
+---
+
+## 3. TypeScript config
+
+- **Base tsconfig**: Include all source (e.g. `src/**/*.ts` or `lib/**/*.ts`). Exclude only build output (`dist` or `cjs`,`esm`) and `node_modules`. **Do not exclude test files** so that specs and IDE use the same project types. Use **`noEmit: true`** so the base config is for type-checking/IDE only; only the build configs emit.
+- **Build tsconfig(s)** (single or cjs/esm): Use **`noEmit: false`** so these configs produce output. Add `exclude` for `**/__spec__/**`, `**/*.spec.ts`, `**/*.test.ts` so built artifacts contain only library code.
+- Use `declaration: true` (and `declarationMap: true` if desired). Use `strict: true` and align with other packages for `target`, `module`, `moduleResolution`.
+
+---
+
+## 4. Tests (Vitest)
+
+**Prefer tests nested under `src/`** (e.g. `src/foo/__spec__/foo.spec.ts` or `src/foo/foo.spec.ts`). That way tests use short relative imports (`import { bar } from '../bar'`) instead of long paths like `import { bar } from '../../../../src/foo/bar'` when using a top-level `test/` dir. Conform to the nested pattern for new packages.
+
+- Put specs next to source: `src/<module>/__spec__/<module>.spec.ts` or `src/<module>/*.spec.ts`. Use `**/__spec__/*.spec.ts` in vitest `include` if you use a `__spec__` subfolder per module.
+- **vitest.config.ts**: `include: ['**/__spec__/*.spec.ts']` (or `**/*.spec.ts` if specs sit beside files), exclude `node_modules` and **build output dirs** (e.g. `cjs`, `esm`, or `dist`).
+- Coverage: `include` source dir (e.g. `src/**/*.ts`), same excludes.
+
+Some older packages (**errors**, **types**, **https-proxy**) use a top-level `test/` directory; for new packages, use the nested-under-src layout.
+
+---
+
+## 5. Source and barrel
+
+- [ ] Add at least one source file (e.g. `src/index.ts` or `lib/index.ts`).
+- [ ] Add a placeholder spec (e.g. `src/__spec__/index.spec.ts`) so `yarn test` passes.
+- [ ] Barrel file should re-export the public API.
+
+---
+
+## 6. Wire into repo scripts and tooling
+
+- [ ] **Root package.json** – `test` script: add the new package to the explicit scope list:
+  - Find: `--scope=@packages/{config,data-context,...}` and add `<package-name>` in alphabetical order (e.g. `config,cookie-store,data-context,...`).
+- [ ] **packages/root/index.js** – Update the same `test` scope string so it matches root package.json.
+- [ ] **knip.json** – Add an entry so the package is included in knip (e.g. for dead code):
+  - `"packages/<package-name>": { "project": ["src/**/*.{ts,tsx,js,jsx}"] }` (or `lib/**/*...` if using `lib/`).
+  - Place it alphabetically with other `packages/` entries.
+
+**No change needed:**
+
+- **build**: `lerna run build` runs build in every package that defines it.
+- **lint**: `lerna run lint` runs for all packages.
+- **CI**: Workflows use root scripts; no workflow file changes needed.
+
+---
+
+## 7. Optional
+
+- **lint-staged**: Add in package.json if the repo uses it: `"**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix"`.
+- **check-ts**: Add a `check-ts` script (e.g. `tsc --noEmit`) if you want the package included in root `yarn check-ts`.
+- **Subpath exports**: If the package will expose subpaths (e.g. `@packages/foo/bar`), add them under `exports` in package.json.
+
+---
+
+## Quick reference: file layout
+
+**Single build (dist):**
+
+```
+packages/<name>/
+  package.json
+  tsconfig.json          # outDir: dist, rootDir: src, exclude tests
+  vitest.config.ts
+  eslint.config.ts
+  README.md
+  src/
+    index.ts
+    __spec__/
+      index.spec.ts
+```
+
+**Dual CJS/ESM:**
+
+```
+packages/<name>/
+  package.json           # main, module, types, exports
+  tsconfig.json          # base; no test exclude
+  tsconfig.cjs.json      # exclude tests, outDir: cjs
+  tsconfig.esm.json      # exclude tests, outDir: esm
+  vitest.config.ts       # exclude cjs, esm
+  eslint.config.ts
+  README.md
+  src/
+    index.ts
+    __spec__/
+      index.spec.ts
+```
+
+---
+
+## Checklist summary
+
+0. **Interview the user** (name, runtime, build type, source dir, one-line purpose) before creating anything.
+1. Create package dir; add package.json, tsconfig(s), eslint.config.ts, vitest.config.ts, README.
+2. Use `src/` (or `lib/`); do not exclude tests in base tsconfig; base `noEmit: true`, build configs `noEmit: false`.
+3. Exclude tests only in build tsconfig(s).
+4. For dual CJS/ESM, add **prebuild** script (`rimraf cjs esm`) so output dirs are cleared before build.
+5. Add barrel and placeholder spec.
+6. Add package to root **test** scope (package.json + packages/root/index.js).
+7. Add package to **knip.json**.
+8. Run `yarn build` and `yarn test` from repo root to confirm the new package is built and tested.

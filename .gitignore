@@ -404,3 +404,4 @@ system-tests/lib/validations
 # IDE files
 .cursor/*
 !.cursor/BUGBOT.md
+!.cursor/rules
