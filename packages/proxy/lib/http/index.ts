@@ -14,6 +14,7 @@ import { ServiceWorkerManager } from './util/service-worker-manager'
 
 import type EventEmitter from 'events'
 import type CyServer from '@packages/server'
+import type { SocketBroadcaster } from '@packages/socket'
 import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
@@ -98,7 +99,7 @@ export type ServerCtx = Readonly<{
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
-  socket: CyServer.Socket
+  socket: SocketBroadcaster
   request: any
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
@@ -275,7 +276,7 @@ export class Http {
   preRequests: PreRequests = new PreRequests()
   getCurrentBrowser: () => FoundBrowser
   request: any
-  socket: CyServer.Socket
+  socket: SocketBroadcaster
   serverBus: EventEmitter
   resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}

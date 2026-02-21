@@ -7,7 +7,7 @@ import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeG
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
-
+import type { SocketBroadcaster } from '@packages/socket'
 import * as errors from './errors'
 import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
@@ -46,7 +46,7 @@ type ExtendedSocketIoNamespace = socketIo.SocketIONamespace & GenericHandler
 
 type ExtendedCDPSocketServer = CDPSocketServer & GenericHandler
 
-export class SocketBase {
+export class SocketBase implements SocketBroadcaster {
   private _sendResetBrowserTabsForNextSpecMessage
   private _sendResetBrowserStateMessage
   private _isRunnerSocketConnected

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import Button from '@cypress-design/react-button'
 
@@ -25,7 +25,7 @@ import ChevronIcon from '@packages/frontend-shared/src/assets/icons/chevron-down
 import HiddenIcon from '@packages/frontend-shared/src/assets/icons/general-eye-closed_x16.svg'
 import PinIcon from '@packages/frontend-shared/src/assets/icons/object-pin_x16.svg'
 import RunningIcon from '@packages/frontend-shared/src/assets/icons/status-running_x16.svg'
-import { IconTechnologyAngleBrackets } from '@cypress-design/react-icon'
+import { IconGeneralChatBubble, IconTechnologyAngleBrackets } from '@cypress-design/react-icon'
 import { SelfHealedBadge } from '../lib/selfHealedBadge'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
@@ -460,6 +460,23 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
     }
   }
 
+  const getFeedbackUrl = useCallback(
+    async () => {
+      try {
+        // @ts-ignore
+        const result = await Cypress.backendRequestHandler(
+          'prompt:backend:request',
+          'prompt:get-feedback-url',
+        )
+
+        return result
+      } catch {
+        return 'https://on.cypress.io/report-cy-prompt-issue'
+      }
+    },
+    [Cypress],
+  )
+
   // snapshot rules
   //
   // 1. when we hover over a command, wait 50 ms
@@ -548,23 +565,49 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
                 <CommandControls model={model} commandName={commandName} />
               </div>
-              {model.isCyPrompt && model.state === 'passed' && (
-                <Button
-                  variant="indigo-dark-mode"
-                  size="20"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
-                  }}
-                  className="command-prompt-get-code mr-1 whitespace-nowrap"
+              {model.isCyPrompt && (
+                <div
+                  className='command-prompt-get-code-feedback-container'
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <IconTechnologyAngleBrackets
-                    className='command-prompt-get-code-indicator pr-1'
-                    size='16'
-                    strokeColor='white'
-                  />
-                  <span>Code</span>
-                </Button>
+                  <Button
+                    variant="outline-purple-dark-mode"
+                    size="20"
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      const result = await getFeedbackUrl()
+
+                      events.emit('external:open', result)
+                    }}
+                    className="command-prompt-get-feedback mr-1 whitespace-nowrap"
+                  >
+                    <IconGeneralChatBubble
+                      strokeColor="purple-400"
+                      fillColor="purple-900"
+                      size='16'
+                      className='pr-1'
+                    />
+                    <span>Feedback</span>
+                  </Button>
+                  {model.state === 'passed' && (
+                    <Button
+                      variant="indigo-dark-mode"
+                      size="20"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        events.emit('prompt:get-code', { testId: model.testId, logId: model.id })
+                      }}
+                      className="command-prompt-get-code mr-1 whitespace-nowrap"
+                    >
+                      <IconTechnologyAngleBrackets
+                        className='command-prompt-get-code-indicator pr-1'
+                        size='16'
+                        strokeColor='white'
+                      />
+                      <span>Code</span>
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           </FlashOnClick>

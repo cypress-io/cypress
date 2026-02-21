@@ -13,6 +13,7 @@ _Released 02/17/2026 (PENDING)_
 
 - Fixed an issue where a cancelled or incomplete login attempt would not properly open a browser window or tab, and required a restart of Cypress to enable a new login attempt. Fixed in [#33366](https://github.com/cypress-io/cypress/pull/33366). Fixes [#33350](https://github.com/cypress-io/cypress/issues/33350).
 - Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
+- The capture protocol is now properly cleaned up when the protocol is re-initialized or when the run closes, ensuring CDP client listeners and resources are removed. Addressed in [#33391](https://github.com/cypress-io/cypress/pull/33391).
 
 **Misc:**
 

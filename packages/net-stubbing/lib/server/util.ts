@@ -10,12 +10,12 @@ import {
   BackendStaticResponse,
 } from '../types'
 import { Readable, PassThrough } from 'stream'
-import type CyServer from '@packages/server'
 import { Socket } from 'net'
 import type { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import type { CypressIncomingRequest } from '@packages/proxy'
 import type { InterceptedRequest } from './intercepted-request'
+import type { SocketBroadcaster } from '@packages/socket'
 import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 
 import type { CyHttpMessages } from '../external-types'
@@ -52,7 +52,7 @@ export function parseContentType (response?: string) {
   return mime.getType('text')
 }
 
-export function emit (socket: CyServer.Socket, eventName: string, data: object) {
+export function emit (socket: SocketBroadcaster, eventName: string, data: object) {
   if (debug.enabled) {
     debug('sending event to driver %o', { eventName, data: _.chain(data).cloneDeep().omit('res.body').value() })
   }
