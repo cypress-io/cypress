@@ -83,7 +83,6 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - googleCloud
  - jenkins
  - semaphore
- - shippable
  - teamfoundation
  - travis
  - netlify
@@ -121,7 +120,6 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - googleCloud
  - jenkins
  - semaphore
- - shippable
  - teamfoundation
  - travis
  - netlify
@@ -160,7 +158,6 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - googleCloud
  - jenkins
  - semaphore
- - shippable
  - teamfoundation
  - travis
  - netlify
