@@ -389,8 +389,7 @@ const _providerCiParams = () => {
       'CHANGE_TARGET',
       'CHANGE_TITLE',
     ]),
-    // https://semaphoreci.com/docs/available-environment-variables.html
-    // some come from v1, some from v2 of semaphore
+    // https://docs.semaphore.io/reference/env-vars
     semaphore: extract([
       'SEMAPHORE_BRANCH_ID',
       'SEMAPHORE_BUILD_NUMBER',
@@ -398,18 +397,28 @@ const _providerCiParams = () => {
       'SEMAPHORE_CURRENT_THREAD',
       'SEMAPHORE_EXECUTABLE_UUID',
       'SEMAPHORE_GIT_BRANCH',
+      'SEMAPHORE_GIT_COMMIT_AUTHOR',
+      'SEMAPHORE_GIT_COMMITTER',
       'SEMAPHORE_GIT_DIR',
+      'SEMAPHORE_GIT_PR_BRANCH',
+      'SEMAPHORE_GIT_PR_NAME',
       'SEMAPHORE_GIT_PR_NUMBER',
+      'SEMAPHORE_GIT_PR_SHA',
+      'SEMAPHORE_GIT_PR_SLUG',
       'SEMAPHORE_GIT_REF',
       'SEMAPHORE_GIT_REF_TYPE',
+      'SEMAPHORE_GIT_REPO_NAME',
       'SEMAPHORE_GIT_REPO_SLUG',
       'SEMAPHORE_GIT_SHA',
+      'SEMAPHORE_GIT_TAG_NAME',
       'SEMAPHORE_GIT_URL',
       'SEMAPHORE_GIT_WORKING_BRANCH',
       'SEMAPHORE_JOB_COUNT',
+      'SEMAPHORE_JOB_INDEX',
       'SEMAPHORE_JOB_ID', // v2
       'SEMAPHORE_JOB_NAME',
       'SEMAPHORE_JOB_UUID', // v1
+      'SEMAPHORE_ORGANIZATION_URL',
       'SEMAPHORE_PIPELINE_ID',
       'SEMAPHORE_PLATFORM',
       'SEMAPHORE_PROJECT_DIR',
@@ -420,6 +429,7 @@ const _providerCiParams = () => {
       'SEMAPHORE_REPO_SLUG',
       'SEMAPHORE_TRIGGER_SOURCE',
       'SEMAPHORE_WORKFLOW_ID',
+      'SEMAPHORE_WORKFLOW_NUMBER',
       'PULL_REQUEST_NUMBER', // pull requests from forks ONLY
     ]),
     teamcity: null,
@@ -615,14 +625,14 @@ const _providerCommitParams = () => {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
-    // Only from forks? https://semaphoreci.com/docs/available-environment-variables.html
+    // https://docs.semaphore.io/reference/env-vars
     semaphore: {
       sha: env.SEMAPHORE_GIT_SHA,
-      branch: env.SEMAPHORE_GIT_WORKING_BRANCH,
+      branch: env.SEMAPHORE_GIT_WORKING_BRANCH || env.SEMAPHORE_GIT_BRANCH,
       // message: ???
-      // authorName: ???
+      authorName: env.SEMAPHORE_GIT_COMMIT_AUTHOR || env.SEMAPHORE_GIT_COMMITTER,
       // authorEmail: ???
-      remoteOrigin: env.SEMAPHORE_GIT_REPO_SLUG,
+      remoteOrigin: env.SEMAPHORE_GIT_URL || env.SEMAPHORE_GIT_REPO_SLUG,
       // defaultBranch: ???
     },
     snap: null,

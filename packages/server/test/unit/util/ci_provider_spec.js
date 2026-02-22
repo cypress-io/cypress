@@ -1010,6 +1010,7 @@ describe('lib/util/ci_provider', () => {
       SEMAPHORE_EXECUTABLE_UUID: 'semaphoreExecutableUuid',
       SEMAPHORE_GIT_BRANCH: 'show-semaphore-v2-266',
       SEMAPHORE_GIT_WORKING_BRANCH: 'show-semaphore-v2-266',
+      SEMAPHORE_GIT_COMMIT_AUTHOR: 'semaphoreGitCommitAuthor',
       SEMAPHORE_GIT_DIR: 'cypress-example-kitchensink',
       SEMAPHORE_GIT_PR_NUMBER: '1',
       SEMAPHORE_GIT_REF: 'refs/heads/show-semaphore-v2-266',
@@ -1020,7 +1021,9 @@ describe('lib/util/ci_provider', () => {
       SEMAPHORE_JOB_ID: '5fb8dd98-3242-4a4e-a8ab-c4eca9db486c',
       SEMAPHORE_JOB_NAME: 'Cypress E2E 2',
       SEMAPHORE_JOB_COUNT: 'semaphoreJobCount',
+      SEMAPHORE_JOB_INDEX: '2',
       SEMAPHORE_JOB_UUID: 'semaphoreJobUuid',
+      SEMAPHORE_ORGANIZATION_URL: 'https://my-org.semaphoreci.com',
       SEMAPHORE_PIPELINE_ID: 'a9219129-951e-4e2c-9354-45534b63fa8b',
       SEMAPHORE_PLATFORM: 'semaphorePlatform',
       SEMAPHORE_PROJECT_DIR: 'semaphoreProjectDir',
@@ -1031,6 +1034,7 @@ describe('lib/util/ci_provider', () => {
       SEMAPHORE_REPO_SLUG: 'semaphoreRepoSlug',
       SEMAPHORE_TRIGGER_SOURCE: 'semaphoreTriggerSource',
       SEMAPHORE_WORKFLOW_ID: '67aecea7-e4e7-405e-a77c-165e1b37a128',
+      SEMAPHORE_WORKFLOW_NUMBER: '42',
       PULL_REQUEST_NUMBER: 'pullRequestNumber',
     }, { clear: true })
 
@@ -1044,6 +1048,7 @@ describe('lib/util/ci_provider', () => {
       semaphoreExecutableUuid: 'semaphoreExecutableUuid',
       semaphoreGitBranch: 'show-semaphore-v2-266',
       semaphoreGitWorkingBranch: 'show-semaphore-v2-266',
+      semaphoreGitCommitAuthor: 'semaphoreGitCommitAuthor',
       semaphoreGitDir: 'cypress-example-kitchensink',
       semaphoreGitPrNumber: '1',
       semaphoreGitRef: 'refs/heads/show-semaphore-v2-266',
@@ -1054,7 +1059,9 @@ describe('lib/util/ci_provider', () => {
       semaphoreJobId: '5fb8dd98-3242-4a4e-a8ab-c4eca9db486c',
       semaphoreJobName: 'Cypress E2E 2',
       semaphoreJobCount: 'semaphoreJobCount',
+      semaphoreJobIndex: '2',
       semaphoreJobUuid: 'semaphoreJobUuid',
+      semaphoreOrganizationUrl: 'https://my-org.semaphoreci.com',
       semaphorePipelineId: 'a9219129-951e-4e2c-9354-45534b63fa8b',
       semaphorePlatform: 'semaphorePlatform',
       semaphoreProjectDir: 'semaphoreProjectDir',
@@ -1065,12 +1072,14 @@ describe('lib/util/ci_provider', () => {
       semaphoreRepoSlug: 'semaphoreRepoSlug',
       semaphoreTriggerSource: 'semaphoreTriggerSource',
       semaphoreWorkflowId: '67aecea7-e4e7-405e-a77c-165e1b37a128',
+      semaphoreWorkflowNumber: '42',
     })
 
     return expectsCommitParams({
       sha: '83ce1df0f8be2767655bb805d20126ee441b71bf',
       branch: 'show-semaphore-v2-266',
-      remoteOrigin: 'cypress-io/cypress-example-kitchensink',
+      authorName: 'semaphoreGitCommitAuthor',
+      remoteOrigin: 'git@github.com:cypress-io/cypress-example-kitchensink.git',
     })
   })
 
