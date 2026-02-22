@@ -34,7 +34,6 @@ appveyor.yml
 circle.yml
 codeship-services.yml
 codeship-steps.yml
-wercker.yml
 .tern-project
 .gitattributes
 .editorconfig

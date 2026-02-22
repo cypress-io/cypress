@@ -76,10 +76,6 @@ const isJenkins = () => {
     process.env.HUDSON_HOME
 }
 
-const isWercker = () => {
-  return process.env.WERCKER || process.env.WERCKER_MAIN_PIPELINE_STARTED
-}
-
 /**
  * We detect CI providers by detecting an environment variable
  * unique to the provider, or by calling a function that returns true
@@ -111,7 +107,6 @@ const CI_PROVIDERS = {
   'teamcity': 'TEAMCITY_VERSION',
   'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
-  'wercker': isWercker,
   netlify: 'NETLIFY',
   webappio: 'WEBAPPIO',
 }
@@ -427,7 +422,6 @@ const _providerCiParams = () => {
       'TRAVIS_PULL_REQUEST_BRANCH',
       'TRAVIS_PULL_REQUEST_SHA',
     ]),
-    wercker: null,
     // https://docs.netlify.com/configure-builds/environment-variables/#deploy-urls-and-metadata
     netlify: extract([
       'BUILD_ID',
@@ -634,7 +628,6 @@ const _providerCommitParams = () => {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
-    wercker: null,
     netlify: {
       sha: env.COMMIT_REF,
       branch: env.BRANCH,

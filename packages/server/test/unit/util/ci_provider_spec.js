@@ -1297,20 +1297,4 @@ describe('lib/util/ci_provider', () => {
       message: 'travisCommitMessage',
     })
   })
-
-  it('wercker', () => {
-    resetEnv = mockedEnv({
-      WERCKER: 'true',
-    }, { clear: true })
-
-    expectsName('wercker')
-    expectsCiParams(null)
-    expectsCommitParams(null)
-
-    resetEnv = mockedEnv({
-      WERCKER_MAIN_PIPELINE_STARTED: 'true',
-    }, { clear: true })
-
-    return expectsName('wercker')
-  })
 })
