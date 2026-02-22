@@ -1035,43 +1035,6 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
-  it('webappio', () => {
-    resetEnv = mockedEnv({
-      WEBAPPIO: 'true',
-
-      JOB_ID: 'jobId',
-      RUNNER_ID: 'runnerId',
-      RETRY_INDEX: 'retryIndex',
-
-      // git info
-      PULL_REQUEST_URL: 'pullRequest',
-      REPOSITORY_NAME: 'repoName',
-      REPOSITORY_OWNER: 'repoOwner',
-      GIT_BRANCH: 'branch',
-      GIT_TAG: 'tag',
-      GIT_COMMIT: 'commit',
-      GIT_COMMIT_TITLE: 'commitTitle',
-    }, { clear: true })
-
-    expectsName('webappio')
-    expectsCiParams({
-      jobId: 'jobId',
-      runnerId: 'runnerId',
-      retryIndex: 'retryIndex',
-      gitTag: 'tag',
-      gitBranch: 'branch',
-      pullRequestUrl: 'pullRequest',
-      repositoryName: 'repoName',
-      repositoryOwner: 'repoOwner',
-    })
-
-    return expectsCommitParams({
-      sha: 'commit',
-      branch: 'branch',
-      message: 'commitTitle',
-    })
-  })
-
   it('azure', () => {
     resetEnv = mockedEnv({
       // these two variables tell us it is Azure CI

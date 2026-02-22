@@ -107,7 +107,6 @@ const CI_PROVIDERS = {
   'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
   netlify: 'NETLIFY',
-  webappio: 'WEBAPPIO',
 }
 
 const _detectProviderName = () => {
@@ -403,17 +402,6 @@ const _providerCiParams = () => {
       'DEPLOY_PRIME_URL',
       'DEPLOY_ID',
     ]),
-    // https://docs.webapp.io/layerfile-reference/build-env
-    webappio: extract([
-      'JOB_ID',
-      'RUNNER_ID',
-      'RETRY_INDEX',
-      'PULL_REQUEST_URL',
-      'REPOSITORY_NAME',
-      'REPOSITORY_OWNER',
-      'GIT_BRANCH',
-      'GIT_TAG', // short hex for commits
-    ]),
   }
 }
 
@@ -595,11 +583,6 @@ const _providerCommitParams = () => {
       sha: env.COMMIT_REF,
       branch: env.BRANCH,
       remoteOrigin: env.REPOSITORY_URL,
-    },
-    webappio: {
-      sha: env.GIT_COMMIT,
-      branch: env.GIT_BRANCH,
-      message: env.GIT_COMMIT_TITLE,
     },
   }
 }
