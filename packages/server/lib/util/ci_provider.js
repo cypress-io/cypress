@@ -310,7 +310,7 @@ const _providerCiParams = () => {
       'DRONE_BUILD_NUMBER',
       'DRONE_PULL_REQUEST',
     ]),
-    // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
+    // https://docs.github.com/en/actions/reference/workflows-and-actions/variables
     githubActions: extract([
       'GITHUB_WORKFLOW',
       'GITHUB_ACTION',
