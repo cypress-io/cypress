@@ -378,11 +378,11 @@ const _providerCiParams = () => {
     ]),
     /**
      * References:
-     * https://ci.eclipse.org/webtools/env-vars.html/
-     * https://www.jenkins.io/doc/book/pipeline/multibranch/#additional-environment-variables
+     * https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
      */
     jenkins: extract([
       'BUILD_ID',
+      'BUILD_TAG',
       'BUILD_URL',
       'BUILD_NUMBER',
       'ghprbPullId',
