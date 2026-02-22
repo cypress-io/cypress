@@ -324,7 +324,7 @@ const _providerCiParams = () => {
       'GITHUB_REF',
       'GITHUB_JOB',
     ]),
-    // see https://docs.gitlab.com/ee/ci/variables/
+    // see https://docs.gitlab.com/ci/variables/predefined_variables/
     gitlab: extract([
     // pipeline is common among all jobs
       'CI_PIPELINE_ID',
