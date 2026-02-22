@@ -107,7 +107,6 @@ describe('lib/util/ci_provider', () => {
       'netlify',
       'semaphore',
       'teamcity',
-      'teamfoundation',
       'travis',
     ])
 
@@ -1258,36 +1257,6 @@ describe('lib/util/ci_provider', () => {
       message: 'message',
       authorName: 'name',
       authorEmail: 'email',
-    })
-  })
-
-  it('teamfoundation', () => {
-    resetEnv = mockedEnv({
-      TF_BUILD: 'true',
-      TF_BUILD_BUILDNUMBER: 'CIBuild_20130613.6',
-
-      BUILD_BUILDID: 'buildId',
-      BUILD_BUILDNUMBER: 'buildNumber',
-      BUILD_CONTAINERID: 'containerId',
-
-      BUILD_SOURCEVERSION: 'commit',
-      BUILD_SOURCEBRANCHNAME: 'branch',
-      BUILD_SOURCEVERSIONMESSAGE: 'message',
-      BUILD_SOURCEVERSIONAUTHOR: 'name',
-    }, { clear: true })
-
-    expectsName('teamfoundation')
-    expectsCiParams({
-      buildBuildid: 'buildId',
-      buildBuildnumber: 'buildNumber',
-      buildContainerid: 'containerId',
-    })
-
-    return expectsCommitParams({
-      sha: 'commit',
-      branch: 'branch',
-      message: 'message',
-      authorName: 'name',
     })
   })
 

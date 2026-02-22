@@ -17,14 +17,6 @@ const extract = (envKeys) => {
 }
 
 /**
- * Returns true if running on TeamFoundation server.
- * @see https://technet.microsoft.com/en-us/hh850448(v=vs.92)
- */
-const isTeamFoundation = () => {
-  return process.env.TF_BUILD && process.env.TF_BUILD_BUILDNUMBER
-}
-
-/**
  * Returns true if running on Azure CI pipeline.
  * See environment variables in the issue #3657
  * @see https://github.com/cypress-io/cypress/issues/3657
@@ -119,7 +111,6 @@ const CI_PROVIDERS = {
   'jenkins': isJenkins,
   'semaphore': 'SEMAPHORE',
   'teamcity': 'TEAMCITY_VERSION',
-  'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
   netlify: 'NETLIFY',
 }
@@ -442,11 +433,6 @@ const _providerCiParams = () => {
       'BUILD_NUMBER',
       'BUILD_URL',
     ]),
-    teamfoundation: extract([
-      'BUILD_BUILDID',
-      'BUILD_BUILDNUMBER',
-      'BUILD_CONTAINERID',
-    ]),
     travis: extract([
       'TRAVIS_JOB_ID',
       'TRAVIS_BUILD_ID',
@@ -652,12 +638,6 @@ const _providerCommitParams = () => {
       // authorEmail: ???
       // remoteOrigin: ???
       // defaultBranch: ???
-    },
-    teamfoundation: {
-      sha: env.BUILD_SOURCEVERSION,
-      branch: env.BUILD_SOURCEBRANCHNAME,
-      message: env.BUILD_SOURCEVERSIONMESSAGE,
-      authorName: env.BUILD_SOURCEVERSIONAUTHOR,
     },
     travis: {
       sha: env.TRAVIS_PULL_REQUEST_SHA || env.TRAVIS_COMMIT,
