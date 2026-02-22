@@ -101,6 +101,7 @@ const CI_PROVIDERS = {
   awsAmplifyConsole: isAWSAmplifyConsole,
   'bamboo': isBamboo,
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
+  bitrise: 'BITRISE_IO',
   'buildkite': 'BUILDKITE',
   'circle': 'CIRCLECI',
   'concourse': isConcourse,
@@ -191,6 +192,17 @@ const _providerCiParams = () => {
       'AWS_PULL_REQUEST_ID',
       'AWS_PULL_REQUEST_SOURCE_BRANCH',
       'AWS_PULL_REQUEST_DESTINATION_BRANCH',
+    ]),
+    // https://docs.bitrise.io/en/bitrise-ci/references/available-environment-variables.html
+    bitrise: extract([
+      'BITRISE_BUILD_NUMBER',
+      'BITRISE_BUILD_URL',
+      'BITRISE_BUILD_SLUG',
+      'BITRISE_APP_SLUG',
+      'GIT_REPOSITORY_URL',
+      'BITRISE_GIT_BRANCH',
+      'BITRISEIO_GIT_BRANCH_DEST',
+      'BITRISE_PULL_REQUEST',
     ]),
     bamboo: extract([
       'bamboo_buildNumber',
@@ -462,6 +474,15 @@ const _providerCommitParams = () => {
       sha: env.AWS_COMMIT_ID,
       branch: env.AWS_PULL_REQUEST_SOURCE_BRANCH || env.AWS_BRANCH,
       remoteOrigin: env.AWS_CLONE_URL,
+      // defaultBranch: ???
+    },
+    bitrise: {
+      sha: env.BITRISE_GIT_COMMIT || env.GIT_CLONE_COMMIT_HASH,
+      branch: env.BITRISE_GIT_BRANCH,
+      message: env.BITRISE_GIT_MESSAGE,
+      authorName: env.GIT_CLONE_COMMIT_AUTHOR_NAME,
+      authorEmail: env.GIT_CLONE_COMMIT_AUTHOR_EMAIL,
+      remoteOrigin: env.GIT_REPOSITORY_URL,
       // defaultBranch: ???
     },
     azure: {

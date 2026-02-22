@@ -318,6 +318,45 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('bitrise', () => {
+    resetEnv = mockedEnv({
+      BITRISE_IO: 'true',
+      BITRISE_BUILD_NUMBER: '123',
+      BITRISE_BUILD_URL: 'https://app.bitrise.io/build/abcd',
+      BITRISE_BUILD_SLUG: 'abcd',
+      BITRISE_APP_SLUG: 'appslug',
+      GIT_REPOSITORY_URL: 'git@github.com:octocat/hello-world.git',
+      BITRISE_GIT_BRANCH: 'main',
+      BITRISEIO_GIT_BRANCH_DEST: 'main',
+      BITRISE_PULL_REQUEST: '42',
+      BITRISE_GIT_COMMIT: 'commitSha',
+      BITRISE_GIT_MESSAGE: 'commit message',
+      GIT_CLONE_COMMIT_AUTHOR_NAME: 'Author Name',
+      GIT_CLONE_COMMIT_AUTHOR_EMAIL: 'author@example.com',
+    }, { clear: true })
+
+    expectsName('bitrise')
+    expectsCiParams({
+      bitriseBuildNumber: '123',
+      bitriseBuildUrl: 'https://app.bitrise.io/build/abcd',
+      bitriseBuildSlug: 'abcd',
+      bitriseAppSlug: 'appslug',
+      gitRepositoryUrl: 'git@github.com:octocat/hello-world.git',
+      bitriseGitBranch: 'main',
+      bitriseioGitBranchDest: 'main',
+      bitrisePullRequest: '42',
+    })
+
+    return expectsCommitParams({
+      sha: 'commitSha',
+      branch: 'main',
+      message: 'commit message',
+      authorName: 'Author Name',
+      authorEmail: 'author@example.com',
+      remoteOrigin: 'git@github.com:octocat/hello-world.git',
+    })
+  })
+
   it('buildkite', () => {
     resetEnv = mockedEnv({
       BUILDKITE: 'true',
