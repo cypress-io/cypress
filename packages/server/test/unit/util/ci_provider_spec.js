@@ -457,10 +457,64 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('harness', () => {
+    resetEnv = mockedEnv({
+      // Ensure we detect Harness even if DRONE_* variables are present
+      // (and without relying on DRONE=true marker)
+
+      // Harness identifiers
+      HARNESS_BUILD_ID: 'harnessBuildId',
+      HARNESS_EXECUTION_ID: 'harnessExecutionId',
+      HARNESS_PIPELINE_ID: 'harnessPipelineId',
+      HARNESS_PROJECT_ID: 'harnessProjectId',
+      HARNESS_ORG_ID: 'harnessOrgId',
+      HARNESS_ACCOUNT_ID: 'harnessAccountId',
+      HARNESS_STAGE_ID: 'harnessStageId',
+
+      // Build metadata
+      DRONE_BUILD_LINK: 'droneBuildLink',
+      DRONE_BUILD_NUMBER: '42',
+      DRONE_PULL_REQUEST: '13',
+      DRONE_REPO: 'octocat/hello-world',
+
+      // Commit metadata
+      DRONE_COMMIT_SHA: 'droneCommitSha',
+      DRONE_SOURCE_BRANCH: 'feature-branch',
+      DRONE_COMMIT_MESSAGE: 'commit message',
+      DRONE_COMMIT_AUTHOR: 'Drone Author',
+      DRONE_COMMIT_AUTHOR_EMAIL: 'drone@author.test',
+      DRONE_GIT_HTTP_URL: 'https://github.com/octocat/hello-world.git',
+      DRONE_REPO_BRANCH: 'main',
+    }, { clear: true })
+
+    expectsName('harness')
+    expectsCiParams({
+      harnessBuildId: 'harnessBuildId',
+      harnessExecutionId: 'harnessExecutionId',
+      harnessPipelineId: 'harnessPipelineId',
+      harnessProjectId: 'harnessProjectId',
+      harnessOrgId: 'harnessOrgId',
+      harnessAccountId: 'harnessAccountId',
+      harnessStageId: 'harnessStageId',
+      droneBuildLink: 'droneBuildLink',
+      droneBuildNumber: '42',
+      dronePullRequest: '13',
+      droneRepo: 'octocat/hello-world',
+    })
+
+    return expectsCommitParams({
+      sha: 'droneCommitSha',
+      branch: 'feature-branch',
+      message: 'commit message',
+      authorName: 'Drone Author',
+      authorEmail: 'drone@author.test',
+      remoteOrigin: 'https://github.com/octocat/hello-world.git',
+      defaultBranch: 'main',
+    })
+  })
+
   it('drone', () => {
     resetEnv = mockedEnv({
-      DRONE: 'true',
-
       DRONE_JOB_NUMBER: 'droneJobNumber',
       DRONE_BUILD_LINK: 'droneBuildLink',
       DRONE_BUILD_NUMBER: 'droneBuildNumber',

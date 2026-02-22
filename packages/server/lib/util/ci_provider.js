@@ -43,6 +43,18 @@ const isBamboo = () => {
   return process.env.bamboo_buildNumber
 }
 
+// Harness CI exposes both HARNESS_* and DRONE_* environment variables.
+// Ref: https://developer.harness.io/docs/continuous-integration/troubleshoot-ci/ci-env-var/#codebase-and-trigger-variables
+const isHarnessCi = () => {
+  return _.some(process.env, (val, key) => /^HARNESS_/.test(key))
+}
+
+const isDroneCi = () => {
+  // Drone (and Harness CI) set DRONE_* env vars.
+  // But Drone standalone has no HARNESS_* env vars.
+  return process.env.DRONE || _.some(process.env, (val, key) => /^DRONE_/.test(key))
+}
+
 const isConcourse = () => {
   return _.some(process.env, (val, key) => {
     return /^CONCOURSE_/.test(key)
@@ -86,7 +98,8 @@ const CI_PROVIDERS = {
   'circle': 'CIRCLECI',
   'concourse': isConcourse,
   codeFresh: 'CF_BUILD_ID',
-  'drone': 'DRONE',
+  harness: isHarnessCi,
+  'drone': isDroneCi,
   githubActions: 'GITHUB_ACTIONS',
   'gitlab': isGitlab,
   'goCD': 'GO_JOB_NAME',
@@ -225,6 +238,24 @@ const _providerCiParams = () => {
       'CF_PULL_REQUEST_IS_FORK',
       'CF_PULL_REQUEST_NUMBER',
       'CF_PULL_REQUEST_TARGET',
+    ]),
+    // https://developer.harness.io/docs/continuous-integration/troubleshoot-ci/ci-env-var/#codebase-and-trigger-variables
+    harness: extract([
+      'HARNESS_BUILD_ID',
+      'HARNESS_EXECUTION_ID',
+      'HARNESS_PIPELINE_ID',
+      'HARNESS_PROJECT_ID',
+      'HARNESS_ORG_ID',
+      'HARNESS_ACCOUNT_ID',
+      'HARNESS_STAGE_ID',
+      // build/run links and identifiers (often exposed as DRONE_* as well)
+      'CI_BUILD_LINK',
+      'CI_BUILD_NUMBER',
+      'DRONE_BUILD_LINK',
+      'DRONE_BUILD_NUMBER',
+      // PR + repo metadata
+      'DRONE_PULL_REQUEST',
+      'DRONE_REPO',
     ]),
     drone: extract([
       'DRONE_JOB_NUMBER',
@@ -455,6 +486,16 @@ const _providerCommitParams = () => {
       branch: env.CF_BRANCH,
       message: env.CF_COMMIT_MESSAGE,
       authorName: env.CF_COMMIT_AUTHOR,
+    },
+    // https://developer.harness.io/docs/continuous-integration/troubleshoot-ci/ci-env-var/#codebase-and-trigger-variables
+    harness: {
+      sha: env.CI_COMMIT_SHA || env.DRONE_COMMIT_SHA || env.DRONE_COMMIT,
+      branch: env.DRONE_SOURCE_BRANCH || env.DRONE_BRANCH || env.CI_COMMIT_BRANCH,
+      message: env.CI_COMMIT_MESSAGE || env.DRONE_COMMIT_MESSAGE,
+      authorName: env.CI_COMMIT_AUTHOR || env.DRONE_COMMIT_AUTHOR || env.CI_COMMIT_AUTHOR_NAME || env.DRONE_COMMIT_AUTHOR_NAME,
+      authorEmail: env.CI_COMMIT_AUTHOR_EMAIL || env.DRONE_COMMIT_AUTHOR_EMAIL,
+      remoteOrigin: env.CI_REPO_REMOTE || env.DRONE_GIT_HTTP_URL || env.DRONE_GIT_SSH_URL,
+      defaultBranch: env.DRONE_REPO_BRANCH,
     },
     drone: {
       sha: env.DRONE_COMMIT_SHA,
