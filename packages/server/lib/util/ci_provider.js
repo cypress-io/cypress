@@ -433,6 +433,7 @@ const _providerCiParams = () => {
       'BUILD_NUMBER',
       'BUILD_URL',
     ]),
+    // // https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
     travis: extract([
       'TRAVIS_JOB_ID',
       'TRAVIS_BUILD_ID',
@@ -446,7 +447,7 @@ const _providerCiParams = () => {
       'TRAVIS_PULL_REQUEST_BRANCH',
       'TRAVIS_PULL_REQUEST_SHA',
     ]),
-    // https://docs.netlify.com/configure-builds/environment-variables/#deploy-urls-and-metadata
+    // https://docs.netlify.com/configure-builds/environment-variables
     netlify: extract([
       'BUILD_ID',
       'CONTEXT',
