@@ -191,14 +191,23 @@ const _providerCiParams = () => {
     ]),
     // https://buddy.works/docs/basics/environment-variables/default-variables
     buddy: extract([
+      // The ID of the current pipeline run: '1'
       'BUDDY_RUN_ID',
+      // The number of the currently run pull request: '27'
       'BUDDY_RUN_PR_NO',
+      // The URL of the current pipeline run
       'BUDDY_RUN_URL',
+      // The name of the Git branch of the current pipeline run
       'BUDDY_RUN_BRANCH',
+      // The SHA1 hash of the commit of the current pipeline run
       'BUDDY_RUN_COMMIT',
+      // The commit message of the currently run commit
       'BUDDY_RUN_COMMIT_MESSAGE',
+      // The name of the committer of the currently run commit
       'BUDDY_RUN_COMMIT_COMMITTER_NAME',
+      // The email address of the committer email of the currently run commit
       'BUDDY_RUN_COMMIT_COMMITTER_EMAIL',
+      // The SSH URL of the repository
       'BUDDY_REPO_SSH_URL',
     ]),
     // https://docs.bitrise.io/en/bitrise-ci/references/available-environment-variables.html
