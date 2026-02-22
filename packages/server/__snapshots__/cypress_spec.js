@@ -72,8 +72,6 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - bitbucket
  - buildkite
  - circle
- - codeshipBasic
- - codeshipPro
  - concourse
  - codeFresh
  - drone
@@ -108,8 +106,6 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - bitbucket
  - buildkite
  - circle
- - codeshipBasic
- - codeshipPro
  - concourse
  - codeFresh
  - drone
@@ -145,8 +141,6 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - bitbucket
  - buildkite
  - circle
- - codeshipBasic
- - codeshipPro
  - concourse
  - codeFresh
  - drone

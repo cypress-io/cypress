@@ -43,14 +43,6 @@ const isBamboo = () => {
   return process.env.bamboo_buildNumber
 }
 
-const isCodeshipBasic = () => {
-  return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && process.env.CODESHIP
-}
-
-const isCodeshipPro = () => {
-  return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && !process.env.CODESHIP
-}
-
 const isConcourse = () => {
   return _.some(process.env, (val, key) => {
     return /^CONCOURSE_/.test(key)
@@ -92,8 +84,6 @@ const CI_PROVIDERS = {
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
   'circle': 'CIRCLECI',
-  'codeshipBasic': isCodeshipBasic,
-  'codeshipPro': isCodeshipPro,
   'concourse': isConcourse,
   codeFresh: 'CF_BUILD_ID',
   'drone': 'DRONE',
@@ -211,23 +201,6 @@ const _providerCiParams = () => {
       'CIRCLE_PIPELINE_ID',
       'CIRCLE_PULL_REQUEST',
       'CIRCLE_REPOSITORY_URL',
-      'CI_PULL_REQUEST',
-    ]),
-    codeshipBasic: extract([
-      'CI_BUILD_ID',
-      'CI_REPO_NAME',
-      'CI_BUILD_URL',
-      'CI_PROJECT_ID',
-      'CI_BUILD_NUMBER',
-      'CI_PULL_REQUEST',
-    ]),
-    // CodeshipPro provides very few CI variables
-    // https://documentation.codeship.com/pro/builds-and-configuration/environment-variables/
-    codeshipPro: extract([
-      'CI_BUILD_ID',
-      'CI_REPO_NAME',
-      'CI_PROJECT_ID',
-      'CI_PR_NUMBER',
       'CI_PULL_REQUEST',
     ]),
     // https://concourse-ci.org/implementing-resource-types.html#resource-metadata
@@ -474,24 +447,6 @@ const _providerCommitParams = () => {
       // message: ???
       authorName: env.CIRCLE_USERNAME,
       // authorEmail: ???
-      // remoteOrigin: ???
-      // defaultBranch: ???
-    },
-    codeshipBasic: {
-      sha: env.CI_COMMIT_ID,
-      branch: env.CI_BRANCH,
-      message: env.CI_COMMIT_MESSAGE,
-      authorName: env.CI_COMMITTER_NAME,
-      authorEmail: env.CI_COMMITTER_EMAIL,
-      // remoteOrigin: ???
-      // defaultBranch: ???
-    },
-    codeshipPro: {
-      sha: env.CI_COMMIT_ID,
-      branch: env.CI_BRANCH,
-      message: env.CI_COMMIT_MESSAGE,
-      authorName: env.CI_COMMITTER_NAME,
-      authorEmail: env.CI_COMMITTER_EMAIL,
       // remoteOrigin: ???
       // defaultBranch: ???
     },
