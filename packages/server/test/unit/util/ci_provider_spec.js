@@ -106,6 +106,7 @@ describe('lib/util/ci_provider', () => {
       'jenkins',
       'netlify',
       'semaphore',
+      'teamcity',
       'teamfoundation',
       'travis',
     ])
@@ -1158,11 +1159,15 @@ describe('lib/util/ci_provider', () => {
 
   it('teamcity', () => {
     resetEnv = mockedEnv({
-      TEAMCITY_VERSION: 'true',
+      BUILD_NUMBER: '42',
+      BUILD_URL: 'https://teamcity.example.com/viewLog.html?buildId=42&buildTypeId=bt1',
     }, { clear: true })
 
     expectsName('teamcity')
-    expectsCiParams(null)
+    expectsCiParams({
+      buildNumber: '42',
+      buildUrl: 'https://teamcity.example.com/viewLog.html?buildId=42&buildTypeId=bt1',
+    })
 
     return expectsCommitParams(null)
   })

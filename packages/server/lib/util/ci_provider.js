@@ -437,7 +437,11 @@ const _providerCiParams = () => {
       'SEMAPHORE_WORKFLOW_NUMBER',
       'PULL_REQUEST_NUMBER', // pull requests from forks ONLY
     ]),
-    teamcity: null,
+    // https://www.jetbrains.com/help/teamcity/predefined-build-parameters.html#Predefined+Server+Build+Parameters
+    teamcity: extract([
+      'BUILD_NUMBER',
+      'BUILD_URL',
+    ]),
     teamfoundation: extract([
       'BUILD_BUILDID',
       'BUILD_BUILDNUMBER',
@@ -641,7 +645,14 @@ const _providerCommitParams = () => {
       // defaultBranch: ???
     },
     snap: null,
-    teamcity: null,
+    teamcity: {
+      // branch: not a predefined env var; may be configured via custom parameters
+      // message: ???
+      // authorName: ???
+      // authorEmail: ???
+      // remoteOrigin: ???
+      // defaultBranch: ???
+    },
     teamfoundation: {
       sha: env.BUILD_SOURCEVERSION,
       branch: env.BUILD_SOURCEBRANCHNAME,
