@@ -318,6 +318,41 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('buddy', () => {
+    resetEnv = mockedEnv({
+      BUDDY: 'true',
+      BUDDY_RUN_ID: '1',
+      BUDDY_RUN_URL: 'https://app.buddy.works/my-workspace/my-project/pipelines/pipeline/1/execution/5d9dc42c422f5a268b389',
+      BUDDY_RUN_BRANCH: 'feature-branch',
+      BUDDY_RUN_COMMIT: 'commitSha',
+      BUDDY_RUN_COMMIT_MESSAGE: 'commit message',
+      BUDDY_RUN_COMMIT_COMMITTER_NAME: 'Committer Name',
+      BUDDY_RUN_COMMIT_COMMITTER_EMAIL: 'committer@example.com',
+      BUDDY_REPO_SSH_URL: 'git@github.com:octocat/hello-world.git',
+    }, { clear: true })
+
+    expectsName('buddy')
+    expectsCiParams({
+      buddyRunId: '1',
+      buddyRunUrl: 'https://app.buddy.works/my-workspace/my-project/pipelines/pipeline/1/execution/5d9dc42c422f5a268b389',
+      buddyRunBranch: 'feature-branch',
+      buddyRunCommit: 'commitSha',
+      buddyRunCommitMessage: 'commit message',
+      buddyRunCommitCommitterName: 'Committer Name',
+      buddyRunCommitCommitterEmail: 'committer@example.com',
+      buddyRepoSshUrl: 'git@github.com:octocat/hello-world.git',
+    })
+
+    return expectsCommitParams({
+      sha: 'commitSha',
+      branch: 'feature-branch',
+      message: 'commit message',
+      authorName: 'Committer Name',
+      authorEmail: 'committer@example.com',
+      remoteOrigin: 'git@github.com:octocat/hello-world.git',
+    })
+  })
+
   it('bitrise', () => {
     resetEnv = mockedEnv({
       BITRISE_IO: 'true',

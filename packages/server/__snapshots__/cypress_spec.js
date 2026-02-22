@@ -71,6 +71,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - awsAmplifyConsole
  - bamboo
  - bitbucket
+ - buddy
  - bitrise
  - buildkite
  - circle
@@ -108,6 +109,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - awsAmplifyConsole
  - bamboo
  - bitbucket
+ - buddy
  - bitrise
  - buildkite
  - circle
@@ -146,6 +148,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
  - awsAmplifyConsole
  - bamboo
  - bitbucket
+ - buddy
  - bitrise
  - buildkite
  - circle

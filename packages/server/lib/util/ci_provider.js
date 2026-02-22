@@ -101,6 +101,7 @@ const CI_PROVIDERS = {
   awsAmplifyConsole: isAWSAmplifyConsole,
   'bamboo': isBamboo,
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
+  buddy: 'BUDDY',
   bitrise: 'BITRISE_IO',
   'buildkite': 'BUILDKITE',
   'circle': 'CIRCLECI',
@@ -192,6 +193,17 @@ const _providerCiParams = () => {
       'AWS_PULL_REQUEST_ID',
       'AWS_PULL_REQUEST_SOURCE_BRANCH',
       'AWS_PULL_REQUEST_DESTINATION_BRANCH',
+    ]),
+    // https://buddy.works/docs/basics/environment-variables/default-variables
+    buddy: extract([
+      'BUDDY_RUN_ID',
+      'BUDDY_RUN_URL',
+      'BUDDY_RUN_BRANCH',
+      'BUDDY_RUN_COMMIT',
+      'BUDDY_RUN_COMMIT_MESSAGE',
+      'BUDDY_RUN_COMMIT_COMMITTER_NAME',
+      'BUDDY_RUN_COMMIT_COMMITTER_EMAIL',
+      'BUDDY_REPO_SSH_URL',
     ]),
     // https://docs.bitrise.io/en/bitrise-ci/references/available-environment-variables.html
     bitrise: extract([
@@ -474,6 +486,15 @@ const _providerCommitParams = () => {
       sha: env.AWS_COMMIT_ID,
       branch: env.AWS_PULL_REQUEST_SOURCE_BRANCH || env.AWS_BRANCH,
       remoteOrigin: env.AWS_CLONE_URL,
+      // defaultBranch: ???
+    },
+    buddy: {
+      sha: env.BUDDY_RUN_COMMIT,
+      branch: env.BUDDY_RUN_BRANCH,
+      message: env.BUDDY_RUN_COMMIT_MESSAGE,
+      authorName: env.BUDDY_RUN_COMMIT_COMMITTER_NAME,
+      authorEmail: env.BUDDY_RUN_COMMIT_COMMITTER_EMAIL,
+      remoteOrigin: env.BUDDY_REPO_SSH_URL,
       // defaultBranch: ???
     },
     bitrise: {
