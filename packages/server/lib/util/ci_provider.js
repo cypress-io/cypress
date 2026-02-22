@@ -39,6 +39,12 @@ const isAWSCodeBuild = () => {
   })
 }
 
+// AWS Amplify Console / Amplify Hosting
+// Ref: https://docs.aws.amazon.com/amplify/latest/userguide/environment-variables.html
+const isAWSAmplifyConsole = () => {
+  return process.env.AWS_APP_ID && process.env.AWS_JOB_ID
+}
+
 const isBamboo = () => {
   return process.env.bamboo_buildNumber
 }
@@ -92,6 +98,7 @@ const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
   'azure': isAzureCi,
   'awsCodeBuild': isAWSCodeBuild,
+  awsAmplifyConsole: isAWSAmplifyConsole,
   'bamboo': isBamboo,
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
@@ -171,6 +178,19 @@ const _providerCiParams = () => {
       'CODEBUILD_RESOLVED_SOURCE_VERSION',
       'CODEBUILD_SOURCE_REPO_URL',
       'CODEBUILD_SOURCE_VERSION',
+    ]),
+    // https://docs.aws.amazon.com/amplify/latest/userguide/environment-variables.html
+    awsAmplifyConsole: extract([
+      'AWS_APP_ID',
+      'AWS_BRANCH',
+      'AWS_BRANCH_ARN',
+      'AWS_JOB_ID',
+      'AWS_CLONE_URL',
+      'AWS_COMMIT_ID',
+      // PR preview builds
+      'AWS_PULL_REQUEST_ID',
+      'AWS_PULL_REQUEST_SOURCE_BRANCH',
+      'AWS_PULL_REQUEST_DESTINATION_BRANCH',
     ]),
     bamboo: extract([
       'bamboo_buildNumber',
@@ -436,6 +456,12 @@ const _providerCommitParams = () => {
       // authorName: ???
       // authorEmail: ???
       remoteOrigin: env.CODEBUILD_SOURCE_REPO_URL,
+      // defaultBranch: ???
+    },
+    awsAmplifyConsole: {
+      sha: env.AWS_COMMIT_ID,
+      branch: env.AWS_PULL_REQUEST_SOURCE_BRANCH || env.AWS_BRANCH,
+      remoteOrigin: env.AWS_CLONE_URL,
       // defaultBranch: ???
     },
     azure: {
