@@ -168,6 +168,7 @@ describe('lib/util/ci_provider', () => {
   it('awsCodeBuild', () => {
     resetEnv = mockedEnv({
       CODEBUILD_BUILD_ID: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
+      CODEBUILD_BUILD_ARN: 'arn:aws:codebuild:us-west-2:123456789012:build/codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
       CODEBUILD_BUILD_NUMBER: '123',
       CODEBUILD_RESOLVED_SOURCE_VERSION: 'commit',
       CODEBUILD_SOURCE_REPO_URL: 'repositoryUrl',
@@ -177,6 +178,7 @@ describe('lib/util/ci_provider', () => {
     expectsName('awsCodeBuild')
     expectsCiParams({
       codebuildBuildId: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
+      codebuildBuildArn: 'arn:aws:codebuild:us-west-2:123456789012:build/codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
       codebuildBuildNumber: '123',
       codebuildResolvedSourceVersion: 'commit',
       codebuildSourceRepoUrl: 'repositoryUrl',
@@ -407,7 +409,8 @@ describe('lib/util/ci_provider', () => {
 
     expectsName('buddy')
     expectsCiParams({
-      buddyRunId: '1',
+      buddyRunId: 'pull/1',
+      buddyRunPrNo: '1',
       buddyRunUrl: 'https://app.buddy.works/my-workspace/my-project/pipelines/pipeline/1/execution/5d9dc42c422f5a268b389',
       buddyRunBranch: 'feature-branch',
       buddyRunCommit: '46c360492d6372e5335300776806af412755871',
@@ -1159,6 +1162,7 @@ describe('lib/util/ci_provider', () => {
 
   it('teamcity', () => {
     resetEnv = mockedEnv({
+      TEAMCITY_VERSION: '2025.12',
       BUILD_NUMBER: '42',
       BUILD_URL: 'https://teamcity.example.com/viewLog.html?buildId=42&buildTypeId=bt1',
     }, { clear: true })
@@ -1169,7 +1173,7 @@ describe('lib/util/ci_provider', () => {
       buildUrl: 'https://teamcity.example.com/viewLog.html?buildId=42&buildTypeId=bt1',
     })
 
-    return expectsCommitParams(null)
+    return expectsCommitParams({})
   })
 
   it('netlify', () => {

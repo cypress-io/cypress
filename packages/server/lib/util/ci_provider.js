@@ -171,6 +171,7 @@ const _providerCiParams = () => {
     ]),
     awsCodeBuild: extract([
       'CODEBUILD_BUILD_ID',
+      'CODEBUILD_BUILD_ARN',
       'CODEBUILD_BUILD_NUMBER',
       'CODEBUILD_RESOLVED_SOURCE_VERSION',
       'CODEBUILD_SOURCE_REPO_URL',
