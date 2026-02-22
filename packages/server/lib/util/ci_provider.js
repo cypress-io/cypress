@@ -97,8 +97,11 @@ const isJenkins = () => {
 const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
   'azure': isAzureCi,
-  'awsCodeBuild': isAWSCodeBuild,
+  // Amplify Console runs on CodeBuild and can expose CODEBUILD_* env vars.
+  // Since provider detection picks the first match, the more specific provider
+  // must be listed before the generic CodeBuild detection.
   awsAmplifyConsole: isAWSAmplifyConsole,
+  'awsCodeBuild': isAWSCodeBuild,
   'bamboo': isBamboo,
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   buddy: 'BUDDY',

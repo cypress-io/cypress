@@ -222,6 +222,45 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('aws amplify console (prefers amplify over codebuild)', () => {
+    resetEnv = mockedEnv({
+      // Real Amplify builds can also expose CODEBUILD_* env vars, since Amplify uses CodeBuild under the hood.
+      // Ensure we detect the more-specific Amplify provider instead of awsCodeBuild.
+      CODEBUILD_BUILD_ID: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
+      CODEBUILD_SOURCE_REPO_URL: 'repositoryUrl',
+      CODEBUILD_RESOLVED_SOURCE_VERSION: 'codebuildCommitSha',
+
+      AWS_APP_ID: 'abcd1234',
+      AWS_BRANCH: 'main',
+      AWS_BRANCH_ARN: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
+      AWS_JOB_ID: '0000000001',
+      AWS_CLONE_URL: 'git@github.com:octocat/hello-world.git',
+      AWS_COMMIT_ID: 'amplifyCommitSha',
+      AWS_PULL_REQUEST_ID: '12',
+      AWS_PULL_REQUEST_SOURCE_BRANCH: 'featureA',
+      AWS_PULL_REQUEST_DESTINATION_BRANCH: 'main',
+    }, { clear: true })
+
+    expectsName('awsAmplifyConsole')
+    expectsCiParams({
+      awsAppId: 'abcd1234',
+      awsBranch: 'main',
+      awsBranchArn: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
+      awsJobId: '0000000001',
+      awsCloneUrl: 'git@github.com:octocat/hello-world.git',
+      awsCommitId: 'amplifyCommitSha',
+      awsPullRequestId: '12',
+      awsPullRequestSourceBranch: 'featureA',
+      awsPullRequestDestinationBranch: 'main',
+    })
+
+    return expectsCommitParams({
+      sha: 'amplifyCommitSha',
+      branch: 'featureA',
+      remoteOrigin: 'git@github.com:octocat/hello-world.git',
+    })
+  })
+
   it('bamboo', () => {
     resetEnv = mockedEnv({
       'bamboo_buildNumber': 'bambooBuildNumber',
