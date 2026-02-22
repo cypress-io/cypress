@@ -394,14 +394,15 @@ describe('lib/util/ci_provider', () => {
   it('buddy', () => {
     resetEnv = mockedEnv({
       BUDDY: 'true',
-      BUDDY_RUN_ID: '1',
+      BUDDY_RUN_ID: 'pull/1',
+      BUDDY_RUN_PR_NO: '1',
       BUDDY_RUN_URL: 'https://app.buddy.works/my-workspace/my-project/pipelines/pipeline/1/execution/5d9dc42c422f5a268b389',
       BUDDY_RUN_BRANCH: 'feature-branch',
-      BUDDY_RUN_COMMIT: 'commitSha',
+      BUDDY_RUN_COMMIT: '46c360492d6372e5335300776806af412755871',
       BUDDY_RUN_COMMIT_MESSAGE: 'commit message',
       BUDDY_RUN_COMMIT_COMMITTER_NAME: 'Committer Name',
       BUDDY_RUN_COMMIT_COMMITTER_EMAIL: 'committer@example.com',
-      BUDDY_REPO_SSH_URL: 'git@github.com:octocat/hello-world.git',
+      BUDDY_REPO_SSH_URL: 'git@github.com:githubaccount/repository',
     }, { clear: true })
 
     expectsName('buddy')
@@ -409,20 +410,20 @@ describe('lib/util/ci_provider', () => {
       buddyRunId: '1',
       buddyRunUrl: 'https://app.buddy.works/my-workspace/my-project/pipelines/pipeline/1/execution/5d9dc42c422f5a268b389',
       buddyRunBranch: 'feature-branch',
-      buddyRunCommit: 'commitSha',
+      buddyRunCommit: '46c360492d6372e5335300776806af412755871',
       buddyRunCommitMessage: 'commit message',
       buddyRunCommitCommitterName: 'Committer Name',
       buddyRunCommitCommitterEmail: 'committer@example.com',
-      buddyRepoSshUrl: 'git@github.com:octocat/hello-world.git',
+      buddyRepoSshUrl: 'git@github.com:githubaccount/repository',
     })
 
     return expectsCommitParams({
-      sha: 'commitSha',
+      sha: '46c360492d6372e5335300776806af412755871',
       branch: 'feature-branch',
       message: 'commit message',
       authorName: 'Committer Name',
       authorEmail: 'committer@example.com',
-      remoteOrigin: 'git@github.com:octocat/hello-world.git',
+      remoteOrigin: 'git@github.com:githubaccount/repository',
     })
   })
 

@@ -192,6 +192,7 @@ const _providerCiParams = () => {
     // https://buddy.works/docs/basics/environment-variables/default-variables
     buddy: extract([
       'BUDDY_RUN_ID',
+      'BUDDY_RUN_PR_NO',
       'BUDDY_RUN_URL',
       'BUDDY_RUN_BRANCH',
       'BUDDY_RUN_COMMIT',
