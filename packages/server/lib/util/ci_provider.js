@@ -734,8 +734,9 @@ const list = () => {
 const detectableCiBuildIdProviders = () => {
   return _
   .chain(_providerCiParams())
-  .omitBy(_.isNull)
+  .omitBy(_.isNil)
   .keys()
+  .sortBy()
   .value()
 }
 

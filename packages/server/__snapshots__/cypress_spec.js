@@ -65,29 +65,8 @@ In order to use either of these features a ciBuildId must be determined.
 
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
- - appveyor
- - azure
- - awsCodeBuild
- - awsAmplifyConsole
- - bamboo
- - bitbucket
- - buddy
- - bitrise
- - buildkite
  - circle
- - concourse
- - codeFresh
- - harness
- - drone
  - githubActions
- - gitlab
- - goCD
- - googleCloud
- - jenkins
- - semaphore
- - teamfoundation
- - travis
- - netlify
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -103,29 +82,8 @@ In order to use either of these features a ciBuildId must be determined.
 
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
- - appveyor
- - azure
- - awsCodeBuild
- - awsAmplifyConsole
- - bamboo
- - bitbucket
- - buddy
- - bitrise
- - buildkite
  - circle
- - concourse
- - codeFresh
- - harness
- - drone
  - githubActions
- - gitlab
- - goCD
- - googleCloud
- - jenkins
- - semaphore
- - teamfoundation
- - travis
- - netlify
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
@@ -142,29 +100,8 @@ In order to use either of these features a ciBuildId must be determined.
 
 The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
- - appveyor
- - azure
- - awsCodeBuild
- - awsAmplifyConsole
- - bamboo
- - bitbucket
- - buddy
- - bitrise
- - buildkite
  - circle
- - concourse
- - codeFresh
- - harness
- - drone
  - githubActions
- - gitlab
- - goCD
- - googleCloud
- - jenkins
- - semaphore
- - teamfoundation
- - travis
- - netlify
 
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 

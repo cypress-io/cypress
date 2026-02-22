@@ -80,6 +80,40 @@ describe('lib/util/ci_provider', () => {
     return expectsCommitParams(null)
   }) // we don't know CI-specific params
 
+  it('detectableCiBuildIdProviders lists supported providers alphabetically', () => {
+    // This list is used in user-facing error messaging.
+    const providers = ciProvider.detectableCiBuildIdProviders()
+
+    expect(providers).to.deep.eq([
+      'appveyor',
+      'awsAmplifyConsole',
+      'awsCodeBuild',
+      'azure',
+      'bamboo',
+      'bitbucket',
+      'bitrise',
+      'buddy',
+      'buildkite',
+      'circle',
+      'codeFresh',
+      'concourse',
+      'drone',
+      'githubActions',
+      'gitlab',
+      'goCD',
+      'googleCloud',
+      'harness',
+      'jenkins',
+      'netlify',
+      'semaphore',
+      'teamfoundation',
+      'travis',
+    ])
+
+    // Confirm the returned list is already sorted (not just matching this test's ordering).
+    expect(providers).to.deep.eq([...providers].sort())
+  })
+
   it('appveyor', () => {
     resetEnv = mockedEnv({
       APPVEYOR: 'true',
