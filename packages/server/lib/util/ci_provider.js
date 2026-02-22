@@ -153,6 +153,7 @@ const _userProvidedProviderCiParams = () => {
 // look at the old commit that was removed to see how we did it
 const _providerCiParams = () => {
   return {
+    // https://www.appveyor.com/docs/environment-variables/
     appveyor: extract([
       'APPVEYOR_JOB_ID',
       'APPVEYOR_ACCOUNT_NAME',
@@ -219,12 +220,14 @@ const _providerCiParams = () => {
       'BITRISEIO_GIT_BRANCH_DEST',
       'BITRISE_PULL_REQUEST',
     ]),
+    // https://confluence.atlassian.com/bamboo/bamboo-variables-289277087.html
     bamboo: extract([
       'bamboo_buildNumber',
       'bamboo_buildResultsUrl',
       'bamboo_planRepository_repositoryUrl',
       'bamboo_buildKey',
     ]),
+    // https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/
     bitbucket: extract([
       'BITBUCKET_REPO_SLUG',
       'BITBUCKET_REPO_OWNER',
@@ -236,6 +239,7 @@ const _providerCiParams = () => {
       'BITBUCKET_PR_DESTINATION_BRANCH',
       'BITBUCKET_PR_DESTINATION_COMMIT',
     ]),
+    // https://buildkite.com/docs/pipelines/configure/environment-variables
     buildkite: extract([
       'BUILDKITE_REPO',
       'BUILDKITE_SOURCE',
@@ -248,6 +252,7 @@ const _providerCiParams = () => {
       'BUILDKITE_PULL_REQUEST_BASE_BRANCH',
       'BUILDKITE_RETRY_COUNT',
     ]),
+    // https://circleci.com/docs/reference/variables/
     circle: extract([
       'CIRCLE_JOB',
       'CIRCLE_BUILD_NUM',
@@ -376,10 +381,7 @@ const _providerCiParams = () => {
       '_PR_NUMBER',
       // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
     ]),
-    /**
-     * References:
-     * https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
-     */
+    // https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
     jenkins: extract([
       'BUILD_ID',
       'BUILD_TAG',
