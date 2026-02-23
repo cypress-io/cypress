@@ -523,8 +523,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
         }
 
         const isRunMode = !Cypress.config('isInteractive')
-        const isHeadedNoExit = Cypress.config('browser').isHeaded && !Cypress.config('exit')
-        const shouldAlwaysResetPage = isRunMode && !isHeadedNoExit
+        const shouldAlwaysResetPage = isRunMode && !Cypress.config('browser').isHeaded
         const isLastTestThatWillRunInSuite = test.final && lastTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))
 
         // If we're not in open mode or we're in open mode and not the last test we reset state.

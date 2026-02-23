@@ -1,8 +1,7 @@
 const shouldAlwaysResetPage = (config) => {
   const isRunMode = !config('isInteractive')
-  const isHeadedNoExit = config('browser').isHeaded && !config('exit')
 
-  return isRunMode && !isHeadedNoExit
+  return isRunMode && !config('browser').isHeaded
 }
 
 const TEST_METADATA = {
