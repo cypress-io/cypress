@@ -34,7 +34,17 @@ const isAWSCodeBuild = () => {
 // AWS Amplify Console / Amplify Hosting
 // Ref: https://docs.aws.amazon.com/amplify/latest/userguide/environment-variables.html
 const isAWSAmplifyConsole = () => {
-  return process.env.AWS_APP_ID && process.env.AWS_JOB_ID
+  // Some Amplify build types/environments may not expose AWS_JOB_ID.
+  // Prefer a more robust detection based on other Amplify-built-in variables
+  // so we don't fall back to generic CodeBuild detection and change metadata.
+  return process.env.AWS_APP_ID && Boolean(
+    process.env.AWS_JOB_ID ||
+    process.env.AWS_BRANCH ||
+    process.env.AWS_COMMIT_ID ||
+    process.env.AWS_BRANCH_ARN ||
+    process.env.AWS_CLONE_URL ||
+    process.env.AWS_PULL_REQUEST_ID,
+  )
 }
 
 const isBamboo = () => {
@@ -102,6 +112,7 @@ const CI_PROVIDERS = {
   'circle': 'CIRCLECI',
   'concourse': isConcourse,
   codeFresh: 'CF_BUILD_ID',
+  // Harness CI check must be before Drone CI check
   harness: isHarnessCi,
   'drone': isDroneCi,
   githubActions: 'GITHUB_ACTIONS',
