@@ -43,10 +43,10 @@ function preparePackageForNpmRelease (json: any, branchName?: string): any {
       stable: false,
     },
     // @packages/ dependencies are internal, and included in the cli bundle via rollup
-    dependencies: Object.fromEntries(
-      Object.entries(json.dependencies)
+    ...(json.dependencies ? { dependencies: Object.fromEntries(
+      Object.entries(json.dependencies || {})
       .filter(([key]) => !key.startsWith('@packages/')),
-    ),
+    ) } : {}),
     description,
     homepage,
     license,
