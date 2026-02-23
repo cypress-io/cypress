@@ -110,6 +110,10 @@ const CI_PROVIDERS = {
   bitrise: 'BITRISE_IO',
   'buildkite': 'BUILDKITE',
   'circle': 'CIRCLECI',
+  // CloudBees Unify runs workflows in a CloudBees-managed workspace directory.
+  // The official CloudBees checkout action checks out repositories under $CLOUDBEES_WORKSPACE.
+  // Ref: https://raw.githubusercontent.com/cloudbees-io/checkout/v1/README.adoc
+  cloudbeesUnify: 'CLOUDBEES_WORKSPACE',
   'concourse': isConcourse,
   codeFresh: 'CF_BUILD_ID',
   // Harness CI check must be before Drone CI check
@@ -280,6 +284,9 @@ const _providerCiParams = () => {
       'CIRCLE_PULL_REQUEST',
       'CIRCLE_REPOSITORY_URL',
       'CI_PULL_REQUEST',
+    ]),
+    cloudbeesUnify: extract([
+      'CLOUDBEES_WORKSPACE',
     ]),
     // https://concourse-ci.org/implementing-resource-types.html#resource-metadata
     concourse: extract([
@@ -577,6 +584,7 @@ const _providerCommitParams = () => {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
+    cloudbeesUnify: {},
     codeFresh: {
       sha: env.CF_REVISION,
       branch: env.CF_BRANCH,
@@ -654,14 +662,14 @@ const _providerCommitParams = () => {
       // defaultBranch: ???
     },
     snap: null,
-    teamcity: {
-      // branch: not a predefined env var; may be configured via custom parameters
-      // message: ???
-      // authorName: ???
-      // authorEmail: ???
-      // remoteOrigin: ???
-      // defaultBranch: ???
-    },
+    // TeamCity does not expose standardized commit metadata via env vars by default.
+    // branch: not a predefined env var; may be configured via custom parameters
+    // message: ???
+    // authorName: ???
+    // authorEmail: ???
+    // remoteOrigin: ???
+    // defaultBranch: ???
+    teamcity: null,
     travis: {
       sha: env.TRAVIS_PULL_REQUEST_SHA || env.TRAVIS_COMMIT,
       // for PRs, TRAVIS_BRANCH is the base branch being merged into

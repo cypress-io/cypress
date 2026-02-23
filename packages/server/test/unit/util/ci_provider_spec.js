@@ -95,6 +95,7 @@ describe('lib/util/ci_provider', () => {
       'buddy',
       'buildkite',
       'circle',
+      'cloudbeesUnify',
       'codeFresh',
       'concourse',
       'drone',
@@ -616,6 +617,19 @@ describe('lib/util/ci_provider', () => {
       branch: 'circleBranch',
       authorName: 'circleUsername',
     })
+  })
+
+  it('cloudbeesUnify', () => {
+    resetEnv = mockedEnv({
+      CLOUDBEES_WORKSPACE: '/cloudbees/workspace',
+    }, { clear: true })
+
+    expectsName('cloudbeesUnify')
+    expectsCiParams({
+      cloudbeesWorkspace: '/cloudbees/workspace',
+    })
+
+    return expectsCommitParams({})
   })
 
   it('concourse', () => {
@@ -1211,7 +1225,7 @@ describe('lib/util/ci_provider', () => {
       buildUrl: 'https://teamcity.example.com/viewLog.html?buildId=42&buildTypeId=bt1',
     })
 
-    return expectsCommitParams({})
+    return expectsCommitParams(null)
   })
 
   it('netlify', () => {
