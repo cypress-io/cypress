@@ -3690,6 +3690,7 @@
     "./packages/server/lib/modes/index.ts",
     "./packages/server/lib/modes/info.ts",
     "./packages/server/lib/modes/interactive.ts",
+    "./packages/server/lib/modes/pass-with-no-tests.ts",
     "./packages/server/lib/modes/pkg.ts",
     "./packages/server/lib/modes/results.ts",
     "./packages/server/lib/modes/smoke_test.ts",
@@ -3997,5 +3998,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8a52a63779da2bccea387c2fcbd40be3ec94f8084cee24c550cadfeb7eda4b34"
+  "deferredHash": "f2aa3d4b4211667ce1553f54e8fcd7980b306279886881180fb5110b868a499d"
 }

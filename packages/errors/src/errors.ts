@@ -6,7 +6,7 @@ import _ from 'lodash'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
 import type { BreakingErrResult, TestingType } from '@packages/types'
-import { humanTime, logError, parseResolvedPattern, pluralize } from './errorUtils'
+import { logError, parseResolvedPattern, pluralize } from './errorUtils'
 import { errPartial, errTemplate, fmt, theme } from './errTemplate'
 import { stackWithoutMessage } from './stackUtils'
 import type { ClonedError, ConfigValidationFailureInfo, CypressError, ErrTemplateResult, ErrorLike } from './errorTypes'
@@ -92,6 +92,11 @@ export const AllCypressErrors = {
 
         ${fmt.stackTrace(arg1)}`
   },
+  CANNOT_ENABLE_FEATURE_WITH_NO_TESTS: (args: { feature: 'record' | 'parallelize' }) => {
+    return errTemplate`\
+        Because you passed ${fmt.flag('--pass-with-no-tests')} and no tests were found, Cypress will not ${fmt.highlightSecondary(args.feature)} this run.
+      `
+  },
   CHROME_WEB_SECURITY_NOT_SUPPORTED: (browser: string) => {
     return errTemplate`\
         Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
@@ -142,11 +147,10 @@ export const AllCypressErrors = {
     return errTemplate`${fmt.off(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
   },
   CLOUD_API_RESPONSE_FAILED_RETRYING: (
-    arg1: { tries: number, delayMs: number, response: Error },
+    arg1: { tries: number, delay: string, response: Error },
   ) => {
     const time = pluralize('time', arg1.tries)
-    const delay = humanTime.long(arg1.delayMs, false)
-
+    const { delay } = arg1
     const message = normalizeNetworkErrorMessage(arg1.response)
 
     return errTemplate`\
