@@ -80,11 +80,6 @@ describe('open', () => {
       pipe: vi.fn(),
     })
 
-    // @ts-expect-error
-    mockFilterWriter = vi.mocked<Writable>({
-      pipe: vi.fn(),
-    })
-
     vi.spyOn(process.stdout, 'pipe').mockReturnValue(mockProcessStdoutWritePipe)
     vi.spyOn(process.stdin, 'pipe').mockReturnValue(mockProcessStdinWritePipe)
 
