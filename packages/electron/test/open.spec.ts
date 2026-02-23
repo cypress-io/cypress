@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest'
 import { access, remove, ensureSymlink } from 'fs-extra'
 import { getPathToResources, getSymlinkType, getPathToExec } from '../src/paths'
+import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
 import { Writable } from 'stream'
 import inspector from 'inspector'
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
@@ -33,6 +34,13 @@ vi.mock('child_process', async () => {
   }
 })
 
+vi.mock('@packages/stderr-filtering', () => {
+  return {
+    filter: vi.fn(),
+    DEBUG_PREFIX: 'DEBUG_PREFIX',
+  }
+})
+
 vi.mock('../src/inspectArgument', () => {
   return {
     getInspectFromUrl: vi.fn(),
@@ -52,6 +60,7 @@ describe('open', () => {
   const appPath = 'path/to/app'
   let mockProcessStdoutWritePipe: Writable
   let mockProcessStdinWritePipe: Writable
+  let mockFilterWriter: Writable
   let mockElectronDebugFn: Mock<ReturnType<typeof Debug>>
   let mockStderrDebugFn: Mock<ReturnType<typeof Debug>>
 
@@ -80,6 +89,11 @@ describe('open', () => {
       pipe: vi.fn(),
     })
 
+    // @ts-expect-error
+    mockFilterWriter = vi.mocked<Writable>({
+      pipe: vi.fn(),
+    })
+
     vi.spyOn(process.stdout, 'pipe').mockReturnValue(mockProcessStdoutWritePipe)
     vi.spyOn(process.stdin, 'pipe').mockReturnValue(mockProcessStdinWritePipe)
 
@@ -93,6 +107,7 @@ describe('open', () => {
     vi.mocked(getPathToExec).mockReturnValue(execPath)
     vi.mocked(getPathToResources).mockReturnValue(resourcesPath)
     vi.mocked(getSymlinkType).mockReturnValue('dir')
+    vi.mocked(filter).mockReturnValue(mockFilterWriter)
     mockElectronDebugFn = vi.fn()
     mockStderrDebugFn = vi.fn()
     // @ts-expect-error
@@ -118,6 +133,7 @@ describe('open', () => {
     const result = await open(appPath, argv)
 
     expect(spawn).toHaveBeenCalledWith(execPath, argv, { stdio: 'pipe' })
+    expect(filter).toHaveBeenCalledWith(process.stderr, expect.any(Function), DEBUG_PREFIX)
     expect(result).toBe(mockChildProcess)
 
     expect(mockChildProcess.stdout.pipe).toHaveBeenCalledWith(process.stdout)
@@ -132,6 +148,7 @@ describe('open', () => {
     it('pipes child stderr direct to process stderr', async () => {
       await open(appPath, argv)
 
+      expect(filter).not.toHaveBeenCalled()
       expect(mockChildProcess.stderr.pipe).toHaveBeenCalledWith(process.stderr)
     })
   })
@@ -145,6 +162,7 @@ describe('open', () => {
     it('pipes child stderr direct to process stderr', async () => {
       await open(appPath, argv)
       expect(spawn).toHaveBeenCalledWith(execPath, expect.arrayContaining(['--enable-logging']), { stdio: 'pipe' })
+      expect(filter).not.toHaveBeenCalled()
       expect(mockChildProcess.stderr.pipe).toHaveBeenCalledWith(process.stderr)
     })
   })
@@ -157,7 +175,23 @@ describe('open', () => {
     it('pipes child stderr direct to process stderr', async () => {
       await open(appPath, argv)
       expect(spawn).toHaveBeenCalledWith(execPath, argv, { stdio: 'pipe' })
+      expect(filter).not.toHaveBeenCalled()
       expect(mockChildProcess.stderr.pipe).toHaveBeenCalledWith(process.stderr)
+    })
+  })
+
+  describe('when in non develop env, electron debug disabled, and enable logging is disabled', () => {
+    beforeEach(() => {
+      vi.stubEnv('CYPRESS_INTERNAL_ENV', 'production')
+      vi.stubEnv('ELECTRON_ENABLE_LOGGING', '0')
+      // @ts-expect-error
+      mockElectronDebugFn.enabled = false
+    })
+
+    it('filters child stderr', async () => {
+      await open(appPath, argv)
+      expect(filter).toHaveBeenCalledWith(process.stderr, expect.any(Function), DEBUG_PREFIX)
+      expect(mockChildProcess.stderr.pipe, 'child stderr pipe').not.toHaveBeenCalledWith(process.stderr)
     })
   })
 
@@ -181,6 +215,7 @@ describe('open', () => {
     describe('and geteuid returns 1000', () => {
       beforeEach(() => {
         // @ts-expect-error
+
         vi.spyOn(process, 'geteuid').mockReturnValue(1000)
       })
 

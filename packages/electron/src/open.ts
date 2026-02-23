@@ -6,6 +6,7 @@ import inspector from 'inspector'
 import { ChildProcess, spawn } from 'child_process'
 import Debug from 'debug'
 import os from 'os'
+import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
 
 function getInspectFromUrl (url: string): string {
   const flag = process.execArgv.some((f) => f === '--inspect' || f.startsWith('--inspect=')) ? '--inspect' : '--inspect-brk'
@@ -91,7 +92,18 @@ export async function open (appPath: string, argv: string[]): Promise<ChildProce
       process.exit(code)
     })
 
-    spawned.stderr.pipe(process.stderr)
+    // Same stderr filtering as cli/spawn: suppress Chromium noise (e.g. dbus) unless logging/debug/dev
+    const debugStderr = Debug('cypress:internal-stderr')
+
+    if (
+      (process.env.ELECTRON_ENABLE_LOGGING ?? '') === '1' ||
+      debugElectron.enabled ||
+      (process.env.CYPRESS_INTERNAL_ENV ?? '') === 'development'
+    ) {
+      spawned.stderr.pipe(process.stderr)
+    } else {
+      spawned.stderr.pipe(filter(process.stderr, debugStderr, DEBUG_PREFIX))
+    }
 
     spawned.stdout.pipe(process.stdout)
     process.stdin.pipe(spawned.stdin)
