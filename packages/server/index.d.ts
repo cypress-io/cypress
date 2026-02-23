@@ -29,10 +29,6 @@ export namespace CyServer {
      */
     responseTimeout: number
   }
-
-  export interface Socket {
-    toDriver: (eventName: string, ...args: any) => void
-  }
 }
 
 export default CyServer
