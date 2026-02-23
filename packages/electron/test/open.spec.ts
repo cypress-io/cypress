@@ -52,7 +52,6 @@ describe('open', () => {
   const appPath = 'path/to/app'
   let mockProcessStdoutWritePipe: Writable
   let mockProcessStdinWritePipe: Writable
-  let mockFilterWriter: Writable
   let mockElectronDebugFn: Mock<ReturnType<typeof Debug>>
   let mockStderrDebugFn: Mock<ReturnType<typeof Debug>>
 

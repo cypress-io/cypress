@@ -1,7 +1,6 @@
 import path from 'path'
 import { access, remove, ensureSymlink } from 'fs-extra'
 import { getPathToResources, getSymlinkType, getPathToExec } from './paths'
-import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
 import minimist from 'minimist'
 import inspector from 'inspector'
 import { ChildProcess, spawn } from 'child_process'
@@ -31,7 +30,6 @@ function getInspectFromOpts (argv: string[]): string | undefined {
 
 export async function open (appPath: string, argv: string[]): Promise<ChildProcess> {
   const debugElectron = Debug('cypress:electron')
-  const debugStderr = Debug('cypress:internal-stderr')
 
   debugElectron('opening %s', appPath)
 
@@ -93,15 +91,7 @@ export async function open (appPath: string, argv: string[]): Promise<ChildProce
       process.exit(code)
     })
 
-    if (
-      (process.env.ELECTRON_ENABLE_LOGGING ?? '') === '1' ||
-      debugElectron.enabled ||
-      (process.env.CYPRESS_INTERNAL_ENV ?? '') === 'development'
-    ) {
-      spawned.stderr.pipe(process.stderr)
-    } else {
-      spawned.stderr.pipe(filter(process.stderr, debugStderr, DEBUG_PREFIX))
-    }
+    spawned.stderr.pipe(process.stderr)
 
     spawned.stdout.pipe(process.stdout)
     process.stdin.pipe(spawned.stdin)
