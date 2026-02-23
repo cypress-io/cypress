@@ -11,7 +11,10 @@ import { throwFormErrorText, getError, errors } from '../errors'
 import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
+import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
+
 const debug = Debug('cypress:cli')
+const debugElectron = Debug('cypress:electron')
 
 const DBUS_ERROR_PATTERN = /ERROR:dbus\/(bus|object_proxy)\.cc/
 
@@ -184,22 +187,15 @@ function createSpawnFunction (
       // to filter out the garbage
       if (child.stderr) {
         debug('piping child STDERR to process STDERR')
-        child.stderr.on('data', (data: any) => {
-          const str = data.toString()
-
-          // if we have a callback and this explicitly returns
-          // false then bail
-          if (onStderrData && onStderrData(str)) {
-            return
-          }
-
-          if (str.match(DBUS_ERROR_PATTERN)) {
-            debug(str)
-          } else {
-          // else pass it along!
-            stderr.write(data)
-          }
-        })
+        if (
+          (process.env.ELECTRON_ENABLE_LOGGING ?? '') === '1' ||
+          debugElectron.enabled ||
+          (process.env.CYPRESS_INTERNAL_ENV ?? '') === 'development'
+        ) {
+          child.stderr.pipe(stderr)
+        } else {
+          child.stderr.pipe(filter(stderr, debug, DEBUG_PREFIX))
+        }
       }
 
       // https://github.com/cypress-io/cypress/issues/1841

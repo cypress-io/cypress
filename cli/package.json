@@ -25,6 +25,7 @@
   "dependencies": {
     "@cypress/request": "^3.0.10",
     "@cypress/xvfb": "^1.2.4",
+    "@packages/stderr-filtering": "0.0.0-development",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",
     "@types/tmp": "^0.2.3",
