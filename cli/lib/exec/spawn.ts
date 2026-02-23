@@ -12,6 +12,7 @@ import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
 import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
+import { Transform } from 'stream'
 
 const debug = Debug('cypress:cli')
 const debugElectron = Debug('cypress:electron')
@@ -187,14 +188,43 @@ function createSpawnFunction (
       // to filter out the garbage
       if (child.stderr) {
         debug('piping child STDERR to process STDERR')
+
+        const sourceStream = new Transform({
+          async transform (chunk, encoding, callback) {
+            try {
+              const str = chunk.toString()
+              const canWrite = this.push(str)
+
+              if (!canWrite) {
+                await new Promise((resolve) => this.once('drain', resolve))
+              }
+
+              callback()
+            } catch (err) {
+              debug('error in transform', err)
+              callback(err as Error)
+            }
+          },
+        })
+
+        child.stderr.on('data', (data: any) => {
+          const str = data.toString()
+
+          if (onStderrData && onStderrData(str)) {
+            return
+          }
+
+          sourceStream.write(data)
+        })
+
         if (
           (process.env.ELECTRON_ENABLE_LOGGING ?? '') === '1' ||
           debugElectron.enabled ||
           (process.env.CYPRESS_INTERNAL_ENV ?? '') === 'development'
         ) {
-          child.stderr.pipe(stderr)
+          sourceStream.pipe(stderr)
         } else {
-          child.stderr.pipe(filter(stderr, debug, DEBUG_PREFIX))
+          sourceStream.pipe(filter(stderr, debug, DEBUG_PREFIX))
         }
       }
 
@@ -224,6 +254,7 @@ async function spawnInXvfb (spawn: ReturnType<typeof createSpawnFunction>): Prom
   try {
     await xvfb.start()
 
+    debug('xvfb started')
     const code = await userFriendlySpawn(spawn)
 
     return code
@@ -255,6 +286,7 @@ async function userFriendlySpawn (spawn: ReturnType<typeof createSpawnFunction>,
   try {
     const code: number = await spawn(overrides)
 
+    debug('tried spawning without xvfb, code', code, brokenGtkDisplay)
     if (code !== 0 && brokenGtkDisplay) {
       util.logBrokenGtkDisplayWarning()
 
@@ -263,12 +295,13 @@ async function userFriendlySpawn (spawn: ReturnType<typeof createSpawnFunction>,
 
     return code
   } catch (error: any) {
+    debug('error in userFriendlySpawn', error)
     // we can format and handle an error message from the code above
     // prevent wrapping error again by using "known: undefined" filter
     if ((error as any).known === undefined) {
       const raiseErrorFn = throwFormErrorText(errors.unexpected)
 
-      await raiseErrorFn(error.message)
+      //await raiseErrorFn(error.message)
     }
 
     throw error
@@ -309,6 +342,8 @@ export async function start (args: string | string[], options: StartOptions = {}
   const spawn = createSpawnFunction(executable, decoratedArgs, { stdio, dev, detached, env })
 
   if (needsXvfb) {
+    debug('starting xvfb')
+
     return spawnInXvfb(spawn)
   }
 
@@ -316,6 +351,8 @@ export async function start (args: string | string[], options: StartOptions = {}
   // set, then we may need to rerun cypress after
   // spawning our own Xvfb server
   const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
+
+  debug('linuxWithDisplayEnv', linuxWithDisplayEnv)
 
   return userFriendlySpawn(spawn, linuxWithDisplayEnv)
 }

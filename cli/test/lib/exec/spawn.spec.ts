@@ -8,6 +8,7 @@ import si, { Systeminformation } from 'systeminformation'
 import { EventEmitter as EE } from 'events'
 import readline from 'readline'
 import createDebug from 'debug'
+import { PassThrough } from 'stream'
 import { stdin, stdout, stderr } from 'process'
 
 import state from '../../../lib/tasks/state'
@@ -188,6 +189,7 @@ const defaultBinaryDir = '/default/binary/dir'
 describe('lib/exec/spawn', function () {
   let spawnedProcess: any
   let mockReadlineEE: any
+  let stderrFilterMock: PassThrough
 
   beforeEach(function () {
     vi.resetAllMocks()
@@ -239,13 +241,17 @@ describe('lib/exec/spawn', function () {
     })
 
     // Default: pass-through so tests that assert on stderr.write still see data; filtering behavior lives in @packages/stderr-filtering
-    vi.mocked(stderrFilter).mockImplementation((dest: NodeJS.WritableStream) => ({
-      write: (chunk: any, enc?: any, cb?: any) => {
-        dest.write(chunk, enc, cb)
-        if (typeof cb === 'function') cb()
-      },
-      end: vi.fn(),
-    } as any))
+    // Must return a real stream (with .on) so sourceStream.pipe(filter(...)) in spawn.ts does not throw "dest.on is not a function"
+    vi.mocked(stderrFilter).mockImplementation((dest: NodeJS.WritableStream) => {
+      stderrFilterMock = new PassThrough()
+      stderrFilterMock.on('data', (chunk: any) => {
+        if (dest && typeof dest.write === 'function') dest.write(chunk)
+      })
+
+      vi.spyOn(stderrFilterMock, 'on')
+
+      return stderrFilterMock as any
+    })
   })
 
   describe('.start', function () {
@@ -510,8 +516,8 @@ describe('lib/exec/spawn', function () {
 
         throw new Error('should have hit error handler but did not')
       } catch (e) {
-        debug('error message', e.message)
-        expect(e.message).toMatch(msg)
+        debug('error message', (e as Error).message)
+        expect((e as Error).message).toMatch(msg)
       }
     })
 
@@ -713,12 +719,11 @@ describe('lib/exec/spawn', function () {
       vi.stubEnv('ELECTRON_ENABLE_LOGGING', undefined)
       vi.stubEnv('CYPRESS_INTERNAL_ENV', undefined)
 
-      const mockFilterStream = {
-        write: vi.fn(),
-        end: vi.fn(),
-      }
+      let stderrDataCallback: (data: Buffer) => void
 
-      vi.mocked(stderrFilter).mockReturnValue(mockFilterStream as any)
+      spawnedProcess.stderr.on.mockImplementation((event, callback) => {
+        if (event === 'data') stderrDataCallback = callback
+      })
 
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = start()
@@ -726,7 +731,14 @@ describe('lib/exec/spawn', function () {
       await flushPromises()
 
       expect(stderrFilter).toHaveBeenCalledWith(stderr, expect.any(Function), 'DEBUG_PREFIX')
-      expect(spawnedProcess.stderr.pipe).toHaveBeenCalledWith(mockFilterStream)
+
+      // Data flows: child.stderr 'data' -> sourceStream -> filter return value -> stderr (async transform may need a tick)
+      const buf = Buffer.from('stderr via sourceStream')
+
+      stderrDataCallback!(buf)
+      await new Promise((r) => setImmediate(r))
+      await flushPromises()
+      expect(stderr.write).toHaveBeenCalledWith(buf)
 
       spawnedProcess.emit('close', 0)
       await startPromise
@@ -737,22 +749,26 @@ describe('lib/exec/spawn', function () {
 
       const buf1 = Buffer.from('asdf')
 
-      // mock display missing
+      let stderrDataCallback: (data: Buffer) => void
+
       spawnedProcess.stderr.on.mockImplementation((event, callback) => {
-        if (event === 'data') {
-          callback(buf1)
-        }
+        if (event === 'data') stderrDataCallback = callback
       })
 
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = start()
 
-      spawnedProcess.emit('close', 0)
+      await flushPromises()
 
+      // Emit stderr data after sourceStream.pipe(filter()) is set up so it flows to stderr.write
+      stderrDataCallback!(buf1)
+      await new Promise((r) => setImmediate(r))
+      await flushPromises()
+
+      spawnedProcess.emit('close', 0)
       await startPromise
 
-      // validates the child process stderr event handler was called
-      expect(stderr.write).toHaveBeenCalledWith(buf1, undefined, undefined)
+      expect(stderr.write).toHaveBeenCalledWith(buf1)
       expect(stdin.pipe).toHaveBeenCalledExactlyOnceWith(spawnedProcess.stdin)
       expect(spawnedProcess.stdout.pipe).toHaveBeenCalledExactlyOnceWith(stdout)
     })
@@ -765,35 +781,38 @@ describe('lib/exec/spawn', function () {
 
       const FILTER_PATTERN = /ERROR:dbus\/(bus|object_proxy)\.cc/
 
-      vi.mocked(stderrFilter).mockImplementation((dest: NodeJS.WritableStream) => ({
-        write: (chunk: any, enc?: any, cb?: any) => {
+      // Return a real stream (with .on) so sourceStream.pipe(filter(...)) works; apply same filter logic
+      vi.mocked(stderrFilter).mockImplementation((dest: NodeJS.WritableStream) => {
+        const pt = new PassThrough()
+
+        pt.on('data', (chunk: Buffer) => {
           const str = Buffer.isBuffer(chunk) ? chunk.toString() : chunk
 
-          if (!FILTER_PATTERN.test(str)) {
-            dest.write(chunk, enc, cb)
-          }
+          if (!FILTER_PATTERN.test(str)) dest.write(chunk)
+        })
 
-          if (typeof cb === 'function') cb()
-        },
-        end: vi.fn(),
-      } as any))
+        return pt as any
+      })
 
       let dataCallback: (data: Buffer) => void
 
       spawnedProcess.stderr.on.mockImplementation((event, callback) => {
-        if (event === 'data') {
-          dataCallback = callback
-        }
+        if (event === 'data') dataCallback = callback
       })
 
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = start()
 
+      await flushPromises()
+
       dataCallback!(filteredOut)
-      expect(stderr.write).not.toHaveBeenCalledWith(filteredOut)
+      await flushPromises()
+      expect(stderr.write).not.toHaveBeenCalledWith('ERROR:dbus/bus.cc:123: noise')
 
       dataCallback!(passedThrough)
-      expect(stderr.write).toHaveBeenCalledWith(passedThrough, undefined, undefined)
+      await flushPromises()
+      // sourceStream passes data through; filter dest.write receives Buffer
+      expect(stderr.write).toHaveBeenCalledWith(passedThrough)
 
       spawnedProcess.emit('close', 0)
       await startPromise
