@@ -1,7 +1,7 @@
-import { expect } from 'chai'
+import { describe, expect, it, beforeEach } from 'vitest'
 import { resourceTypeAndCredentialManager } from '../../lib/resourceTypeAndCredentialManager'
 
-context('resourceTypeAndCredentialManager Singleton', () => {
+describe('resourceTypeAndCredentialManager Singleton', () => {
   beforeEach(() => {
     resourceTypeAndCredentialManager.clear()
     resourceTypeAndCredentialManager.set({

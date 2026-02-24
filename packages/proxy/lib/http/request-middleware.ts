@@ -7,7 +7,7 @@ import {
   addCookieJarCookiesToRequest, getSameSiteContext, shouldAttachAndSetCookies,
 } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
-
+import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
 import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
@@ -182,7 +182,7 @@ const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
   }
 
   this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  const { credentialStatus, resourceType } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
+  const { credentialStatus, resourceType } = resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
 
   this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
 
