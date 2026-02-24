@@ -12,12 +12,11 @@ import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
 import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
-import { Transform } from 'stream'
+import { PassThrough } from 'stream'
 
 const debug = Debug('cypress:cli')
 const debugElectron = Debug('cypress:electron')
-
-const DBUS_ERROR_PATTERN = /ERROR:dbus\/(bus|object_proxy)\.cc/
+const debugStderr = Debug('cypress:internal-stderr')
 
 function isPlatform (platform: string): boolean {
   return os.platform() === platform
@@ -189,23 +188,7 @@ function createSpawnFunction (
       if (child.stderr) {
         debug('piping child STDERR to process STDERR')
 
-        const sourceStream = new Transform({
-          async transform (chunk, encoding, callback) {
-            try {
-              const str = chunk.toString()
-              const canWrite = this.push(str)
-
-              if (!canWrite) {
-                await new Promise((resolve) => this.once('drain', resolve))
-              }
-
-              callback()
-            } catch (err) {
-              debug('error in transform', err)
-              callback(err as Error)
-            }
-          },
-        })
+        const sourceStream = new PassThrough()
 
         child.stderr.on('data', (data: any) => {
           const str = data.toString()
@@ -224,7 +207,7 @@ function createSpawnFunction (
         ) {
           sourceStream.pipe(stderr)
         } else {
-          sourceStream.pipe(filter(stderr, debug, DEBUG_PREFIX))
+          sourceStream.pipe(filter(stderr, debugStderr, DEBUG_PREFIX))
         }
       }
 

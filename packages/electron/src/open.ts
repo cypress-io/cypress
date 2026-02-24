@@ -1,12 +1,12 @@
 import path from 'path'
 import { access, remove, ensureSymlink } from 'fs-extra'
 import { getPathToResources, getSymlinkType, getPathToExec } from './paths'
+import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
 import minimist from 'minimist'
 import inspector from 'inspector'
 import { ChildProcess, spawn } from 'child_process'
 import Debug from 'debug'
 import os from 'os'
-import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
 
 function getInspectFromUrl (url: string): string {
   const flag = process.execArgv.some((f) => f === '--inspect' || f.startsWith('--inspect=')) ? '--inspect' : '--inspect-brk'
@@ -31,6 +31,7 @@ function getInspectFromOpts (argv: string[]): string | undefined {
 
 export async function open (appPath: string, argv: string[]): Promise<ChildProcess> {
   const debugElectron = Debug('cypress:electron')
+  const debugStderr = Debug('cypress:internal-stderr')
 
   debugElectron('opening %s', appPath)
 
@@ -91,9 +92,6 @@ export async function open (appPath: string, argv: string[]): Promise<ChildProce
 
       process.exit(code)
     })
-
-    // Same stderr filtering as cli/spawn: suppress Chromium noise (e.g. dbus) unless logging/debug/dev
-    const debugStderr = Debug('cypress:internal-stderr')
 
     if (
       (process.env.ELECTRON_ENABLE_LOGGING ?? '') === '1' ||
