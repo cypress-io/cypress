@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { resourceTypeAndCredentialManager } from '../../../lib/util/resourceTypeAndCredentialManager'
+import { resourceTypeAndCredentialManager } from '../../lib/resourceTypeAndCredentialManager'
 
 context('resourceTypeAndCredentialManager Singleton', () => {
   beforeEach(() => {
