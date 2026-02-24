@@ -1,12 +1,25 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { LineDecoder } from '../LineDecoder'
-import { END_TAG } from '../constants'
+import { getEndTag } from '../tags'
+
+vi.mock('../tags', () => {
+  return {
+    getEndTag: vi.fn(),
+  }
+})
 
 describe('LineDecoder', () => {
   let decoder: LineDecoder
 
+  const END_TAG = '_END_'
+
   beforeEach(() => {
     decoder = new LineDecoder()
+    vi.mocked(getEndTag).mockReturnValue(END_TAG)
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
   })
 
   describe('when a chunk with a trailing newline is provided', () => {

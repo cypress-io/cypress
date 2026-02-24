@@ -3,12 +3,20 @@ import { filter } from '../Filter'
 import { FilterPrefixedContent } from '../FilterPrefixedContent'
 import { FilterTaggedContent } from '../FilterTaggedContent'
 import { WriteToDebug } from '../WriteToDebug'
-import { START_TAG, END_TAG, DEBUG_PREFIX } from '../constants'
+import { getStartTag, getEndTag, DEBUG_PREFIX } from '../tags'
 
 // Mock all dependencies
 vi.mock('../FilterPrefixedContent')
 vi.mock('../FilterTaggedContent')
 vi.mock('../WriteToDebug')
+
+vi.mock('../tags', async (importActual) => {
+  return {
+    ...(await importActual()),
+    getStartTag: vi.fn(),
+    getEndTag: vi.fn(),
+  }
+})
 
 describe('Filter', () => {
   let mockStderr: any
@@ -16,6 +24,9 @@ describe('Filter', () => {
   let mockFilterPrefixedContent: any
   let mockFilterTaggedContent: any
   let mockWriteToDebug: any
+
+  const START_TAG = '_START_'
+  const END_TAG = '_END_'
 
   beforeEach(() => {
     // Create mock objects
@@ -44,6 +55,9 @@ describe('Filter', () => {
     vi.mocked(FilterPrefixedContent).mockImplementation(() => mockFilterPrefixedContent)
     vi.mocked(FilterTaggedContent).mockImplementation(() => mockFilterTaggedContent)
     vi.mocked(WriteToDebug).mockImplementation(() => mockWriteToDebug)
+
+    vi.mocked(getStartTag).mockReturnValue(START_TAG)
+    vi.mocked(getEndTag).mockReturnValue(END_TAG)
   })
 
   afterEach(() => {

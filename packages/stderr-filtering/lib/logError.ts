@@ -1,7 +1,7 @@
 /**
  * Standard error logging tags used for stderr filtering
  */
-import { START_TAG, END_TAG } from './constants'
+import { getStartTag, getEndTag } from './tags'
 import { tagsDisabled } from './tagsDisabled'
 
 /**
@@ -23,6 +23,6 @@ export const logError = (...args: any[]) => {
     console.error(...args)
   } else {
     // eslint-disable-next-line no-console
-    console.error(START_TAG, ...args, END_TAG)
+    console.error(getStartTag(), ...args, getEndTag())
   }
 }

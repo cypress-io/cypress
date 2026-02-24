@@ -3,12 +3,20 @@
  * be filtered from stderr output. The tags are designed to be unique and easily
  * identifiable in log output.
  */
-export const START_TAG = '<<<CYPRESS.STDERR.START>>>'
+const DEFAULT_START_TAG = '<<<CYPRESS.STDERR.START>>>'
 
 /**
  * Marks the end of error content that should be filtered from stderr output.
  */
-export const END_TAG = '<<<CYPRESS.STDERR.END>>>'
+const DEFAULT_END_TAG = '<<<CYPRESS.STDERR.END>>>'
+
+export function getStartTag (): string {
+  return process.env.CYPRESS_INTERNAL_STDERR_START_TAG ?? DEFAULT_START_TAG
+}
+
+export function getEndTag (): string {
+  return process.env.CYPRESS_INTERNAL_STDERR_END_TAG ?? DEFAULT_END_TAG
+}
 
 /**
  * A regex that will match output from the 'debug' package

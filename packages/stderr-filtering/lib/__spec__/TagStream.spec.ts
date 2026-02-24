@@ -1,15 +1,23 @@
 import { describe, it, expect, vi, MockedObject } from 'vitest'
 import { TagStream } from '../TagStream'
-import { START_TAG, END_TAG } from '../constants'
+import { getStartTag, getEndTag } from '../tags'
 import { StringDecoder } from 'string_decoder'
 
 vi.mock('stream')
 vi.mock('string_decoder')
+vi.mock('../tags', () => {
+  return {
+    getStartTag: vi.fn(),
+    getEndTag: vi.fn(),
+  }
+})
 
 describe('TagStream', () => {
   let mockStringDecoder: MockedObject<StringDecoder>
   let tagStream: TagStream
   const strInput = 'Hello, world!'
+  const START_TAG = '_START_'
+  const END_TAG = '_END_'
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -19,8 +27,14 @@ describe('TagStream', () => {
     }
 
     vi.mocked(StringDecoder).mockImplementation(() => mockStringDecoder)
+    vi.mocked(getStartTag).mockReturnValue(START_TAG)
+    vi.mocked(getEndTag).mockReturnValue(END_TAG)
     tagStream = new TagStream()
     vi.spyOn(tagStream, 'push').mockImplementation(() => true)
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
   })
 
   describe('when transforming a string', () => {
@@ -28,7 +42,9 @@ describe('TagStream', () => {
       const cb = vi.fn()
 
       await tagStream.transform(strInput, 'utf-8', cb)
-      expect(tagStream.push).toHaveBeenCalledWith(Buffer.from(`${START_TAG}${strInput}${END_TAG}`))
+      const expected = `${START_TAG}${strInput}${END_TAG}`
+
+      expect(tagStream.push).toHaveBeenCalledWith(Buffer.from(expected))
       expect(cb).toHaveBeenCalled()
     })
 
