@@ -36,7 +36,11 @@ const log = (...args) => console.log('📦', ...args)
 * Given a package name, returns the path to the module directory on disk.
 */
 function pathToPackage (pkg: string): string {
-  return path.dirname(require.resolve(`${pkg}/package.json`))
+  const resolved = require.resolve(`${pkg}/package.json`)
+
+  log(`Resolved ${pkg} to ${resolved}`)
+
+  return path.dirname(resolved)
 }
 
 async function ensureCacheDir (cacheDir: string) {
@@ -128,9 +132,9 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
       const version = deps[dep]
 
       if (version.startsWith('file:')) {
-        const absPath = pathToPackage(dep)
+        const absPath = pathToPackage(version.replace('file:', ''))
 
-        log(`Setting absolute path in package.json for ${dep}: ${absPath}.`)
+        log(`Setting absolute path in package.json for ${dep} @ ${version}: ${absPath}.`)
 
         deps[dep] = `file:${absPath}`
         updatedDeps.push(dep)
