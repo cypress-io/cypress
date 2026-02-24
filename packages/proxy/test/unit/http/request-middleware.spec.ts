@@ -8,6 +8,17 @@ import { RemoteStates } from '@packages/server/lib/remote_states'
 import { CookieJar } from '@packages/server/lib/util/cookies'
 import { HttpMiddlewareThis } from '../../../lib/http'
 import { DocumentDomainInjection } from '@packages/network-tools'
+import { resourceTypeAndCredentialManager } from '../../../lib/resourceTypeAndCredentialManager'
+
+vi.mock('../../../lib/resourceTypeAndCredentialManager', () => {
+  return {
+    resourceTypeAndCredentialManager: {
+      get: vi.fn(),
+      set: vi.fn(),
+      clear: vi.fn(),
+    },
+  }
+})
 
 describe('http/request-middleware', () => {
   const serverPort = 3030
@@ -23,6 +34,10 @@ describe('http/request-middleware', () => {
   beforeEach(() => {
     documentDomainInjection = DocumentDomainInjection.InjectionBehavior({ injectDocumentDomain: false, testingType: 'e2e' })
     remoteStates = new RemoteStates(remoteStateConfig, documentDomainInjection)
+  })
+
+  afterEach(() => {
+    vi.resetAllMocks()
   })
 
   it('exports the members in the correct order', () => {
@@ -174,13 +189,12 @@ describe('http/request-middleware', () => {
 
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
     it('provides resourceTypeAndCredentialManager with resourceType if able to determine from prerequest (xhr)', async () => {
+      vi.mocked(resourceTypeAndCredentialManager.get).mockReturnValue({ resourceType: 'xhr', credentialStatus: 'same-origin' })
+
       const ctx = {
         getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
-        },
-        resourceTypeAndCredentialManager: {
-          get: vi.fn().mockReturnValue({}),
         },
         req: {
           resourceType: 'xhr',
@@ -193,18 +207,17 @@ describe('http/request-middleware', () => {
       }
 
       await testMiddleware([CalculateCredentialLevelIfApplicable], ctx)
-      expect(ctx.resourceTypeAndCredentialManager.get).toHaveBeenCalledWith('http://localhost:8080', `xhr`)
+      expect(resourceTypeAndCredentialManager.get).toHaveBeenCalledWith('http://localhost:8080', `xhr`)
     })
 
     // CDP can determine whether or not the request is xhr | fetch, but the extension or electron cannot
     it('provides resourceTypeAndCredentialManager with resourceType if able to determine from prerequest (fetch)', async () => {
+      vi.mocked(resourceTypeAndCredentialManager.get).mockReturnValue({ resourceType: 'fetch', credentialStatus: 'same-origin' })
+
       const ctx = {
         getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
-        },
-        resourceTypeAndCredentialManager: {
-          get: vi.fn().mockReturnValue({}),
         },
         req: {
           resourceType: 'fetch',
@@ -217,20 +230,19 @@ describe('http/request-middleware', () => {
       }
 
       await testMiddleware([CalculateCredentialLevelIfApplicable], ctx)
-      expect(ctx.resourceTypeAndCredentialManager.get).toHaveBeenCalledWith('http://localhost:8080', `fetch`)
+      expect(resourceTypeAndCredentialManager.get).toHaveBeenCalledWith('http://localhost:8080', `fetch`)
     })
 
     it('sets the resourceType and credentialsLevel on the request from whatever is returned by resourceTypeAndCredentialManager if conditions apply, assuming resourceType does NOT exist on the request', async () => {
+      vi.mocked(resourceTypeAndCredentialManager.get).mockReturnValue({
+        resourceType: 'fetch',
+        credentialStatus: 'same-origin',
+      })
+
       const ctx = {
         getAUTUrl: vi.fn().mockReturnValue('http://localhost:8080'),
         remoteStates: {
           isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(false),
-        },
-        resourceTypeAndCredentialManager: {
-          get: vi.fn().mockReturnValue({
-            resourceType: 'fetch',
-            credentialStatus: 'same-origin',
-          }),
         },
         req: {
           resourceType: undefined,

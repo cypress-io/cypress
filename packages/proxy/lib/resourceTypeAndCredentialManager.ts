@@ -1,12 +1,7 @@
 import md5 from 'md5'
 import Debug from 'debug'
 
-type AppliedCredentialByUrlAndResourceMap = Map<string, Array<{
-  resourceType: ResourceType
-  credentialStatus: RequestCredentialLevel
-}>>
-
-const debug = Debug('cypress:server:util:resource-type-and-credential')
+const debug = Debug('cypress:proxy:resource-type-and-credential')
 
 const hashUrl = (url: string): string => {
   return md5(decodeURIComponent(url))
@@ -16,7 +11,12 @@ export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesh
 
 export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
 
-// leverage a singleton Map throughout the server to prevent clashes with this context bindings
+type AppliedCredentialByUrlAndResourceMap = Map<string, Array<{
+  resourceType: ResourceType
+  credentialStatus: RequestCredentialLevel
+}>>
+
+// leverage a singleton Map throughout the proxy to prevent clashes with this context bindings
 const _appliedCredentialByUrlAndResourceMap: AppliedCredentialByUrlAndResourceMap = new Map()
 
 class ResourceTypeAndCredentialManagerClass {
