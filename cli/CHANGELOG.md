@@ -1,13 +1,14 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.11.0
 
-_Released 02/17/2026 (PENDING)_
+_Released 02/24/2026 (PENDING)_
 
 **Features:**
 
 - Adds `--pass-with-no-tests` command line flag. Addresses [#23019](https://github.com/cypress-io/cypress/issues/23019). Addressed in [#33384](https://github.com/cypress-io/cypress/pull/33384).
 - Introduces manual bootstrap script injection via a `<script data-cy-bootstrap>` tag. This is a workaround to fix React SSR hydration mismatches, and enables React apps to use `suppressHydrationWarning` to ignore the mismatch. Addresses [#27204](https://github.com/cypress-io/cypress/issues/27204). Addressed in [#33295](https://github.com/cypress-io/cypress/pull/33295).
 - Added Brotli compression support to the proxy. Addresses [#6197](https://github.com/cypress-io/cypress/issues/6197).
+- Improved CI environment detection and CI/commit metadata capture for Cypress Cloud recorded runs. Added support for Harness CI, AWS Amplify Console, Buddy, Bitrise, and Cloudbees Unify and removed support for EOL providers. Addressed in [#33396](https://github.com/cypress-io/cypress/pull/33396).
 
 **Bugfixes:**
 
