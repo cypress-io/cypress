@@ -28,6 +28,8 @@ import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
+import { passWithNoTests } from './pass-with-no-tests'
+import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
@@ -1035,6 +1037,7 @@ export interface ReadyOptions {
   tag: string
   testingType: TestingType
   webSecurity: boolean
+  passWithNoTests: boolean
 }
 
 async function ready (options: ReadyOptions) {
@@ -1111,7 +1114,21 @@ async function ready (options: ReadyOptions) {
   const specs = project.ctx.project.specs
 
   if (!specs.length) {
-    errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+    if (options.passWithNoTests) {
+      const results = await passWithNoTests({
+        ...options,
+        specs,
+        specPattern,
+        config,
+        browser,
+      } as EmptyRunOptions)
+
+      await writeOutput(options.outputPath, createPublicRunResults(results))
+
+      return results
+    } else {
+      errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+    }
   }
 
   if (browser.unsupportedVersion && browser.warning) {

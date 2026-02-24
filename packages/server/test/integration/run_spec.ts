@@ -1,5 +1,6 @@
 import fs from 'fs'
 import fsExtra from 'fs-extra'
+import '../spec_helper'
 import { run } from '../../lib/modes/run'
 import { ProjectConfigIpc } from '@packages/data-context/src/data/ProjectConfigIpc'
 import { FileDataSource } from '@packages/data-context/src/sources/FileDataSource'
@@ -22,6 +23,7 @@ describe('lib/modes/run', () => {
     key: undefined,
     outputPath: '',
     parallel: undefined,
+    passWithNoTests: false,
     projectRoot: '/path/to/project/root',
     quiet: false,
     record: false,
@@ -48,6 +50,7 @@ describe('lib/modes/run', () => {
       onError: (err: Error) => undefined,
       outputPath: '',
       parallel: undefined,
+      passWithNoTests: false,
       projectRoot: '/path/to/project/root',
       quiet: false,
       record: false,
@@ -159,5 +162,15 @@ describe('lib/modes/run', () => {
     })
 
     await run(options, Promise.resolve())
+  })
+
+  it('completes successfully when no specs are found and passWithNoTests is true', async () => {
+    specs = []
+    ctx.project._specs = []
+    options = { ...options, spec: [], passWithNoTests: true }
+
+    const result = await run(options, Promise.resolve())
+
+    expect(result).to.be.an('object')
   })
 })

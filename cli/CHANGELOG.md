@@ -1,18 +1,21 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.11.0
 
-_Released 02/17/2026 (PENDING)_
+_Released 02/24/2026 (PENDING)_
 
 **Features:**
 
+- Adds `--pass-with-no-tests` command line flag. Addresses [#23019](https://github.com/cypress-io/cypress/issues/23019). Addressed in [#33384](https://github.com/cypress-io/cypress/pull/33384).
 - Introduces manual bootstrap script injection via a `<script data-cy-bootstrap>` tag. This is a workaround to fix React SSR hydration mismatches, and enables React apps to use `suppressHydrationWarning` to ignore the mismatch. Addresses [#27204](https://github.com/cypress-io/cypress/issues/27204). Addressed in [#33295](https://github.com/cypress-io/cypress/pull/33295).
 - Added Brotli compression support to the proxy. Addresses [#6197](https://github.com/cypress-io/cypress/issues/6197).
+- Improved CI environment detection and CI/commit metadata capture for Cypress Cloud recorded runs. Added support for Harness CI, AWS Amplify Console, Buddy, Bitrise, and Cloudbees Unify and removed support for EOL providers. Addressed in [#33396](https://github.com/cypress-io/cypress/pull/33396).
 
 **Bugfixes:**
 
 - Fixed an issue where a cancelled or incomplete login attempt would not properly open a browser window or tab, and required a restart of Cypress to enable a new login attempt. Fixed in [#33366](https://github.com/cypress-io/cypress/pull/33366). Fixes [#33350](https://github.com/cypress-io/cypress/issues/33350).
 - Fixed an issue where `cy.intercept` `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
 - Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
+- The capture protocol is now properly cleaned up when the protocol is re-initialized or when the run closes, ensuring CDP client listeners and resources are removed. Addressed in [#33391](https://github.com/cypress-io/cypress/pull/33391).
 
 **Misc:**
 
@@ -24,6 +27,7 @@ _Released 02/17/2026 (PENDING)_
 - Upgraded `qs` to `6.14.2` to address [CVE-2026-2391](https://github.com/advisories/GHSA-w7fw-mjwx-w883) vulnerability reported in security scans. Addresses [#33363](https://github.com/cypress-io/cypress/issues/33363).
 - Upgraded `rimraf` to `6.1.1` to address [CVE-2026-25547](https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2) vulnerability reported in security scans. Addressed in [#33336](https://github.com/cypress-io/cypress/pull/33336).
 - Upgraded `squirrelly` to `9.1.0` to address [CVE-2021-32819](https://nvd.nist.gov/vuln/detail/CVE-2021-32819) vulnerability reported in security scans. Addresses [#33354](https://github.com/cypress-io/cypress/issues/33354).
+- Upgraded `systeminformation` to `5.31.1` to address [CVE-2026-26280](https://github.com/advisories/GHSA-9c88-49p5-5ggf) and [CVE-2026-26318](https://github.com/advisories/GHSA-5vv4-hvf7-2h46) vulnerabilities reported in security scans. Addresses [#33389](https://github.com/cypress-io/cypress/issues/33389).
 
 ## 15.10.0
 

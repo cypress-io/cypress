@@ -72,6 +72,7 @@ vi.mock('../../../lib/util', async (importActual) => {
       // @ts-expect-error
       ...actual.default,
       pkgVersion: vi.fn(),
+      pkgBuildInfo: vi.fn(),
       isCi: vi.fn(),
       isPostInstall: vi.fn(),
       getPlatformInfo: vi.fn(),
@@ -136,12 +137,16 @@ const installDir = '/cache/Cypress/1.2.3'
  * @see https://listr2.kilic.dev/renderer/renderer.html#frontmatter-title
  */
 describe('/lib/tasks/install', function () {
+  const buildInfo = {
+    commitSha: 'abc123',
+    commitBranch: 'aBranchName',
+  }
   const createStdoutCapture = () => {
     const logs: string[] = []
-    // eslint-disable-next-line no-console
+
     const originalOut = process.stdout.write
 
-    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
+    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array) => {
       logs.push(strOrBugger as string)
 
       return originalOut(strOrBugger)
@@ -221,6 +226,10 @@ describe('/lib/tasks/install', function () {
         commitBranch: 'aBranchName',
         commitDate: new Date('1996-11-27').toISOString(),
       }
+
+      beforeEach(() => {
+        vi.mocked(util.pkgBuildInfo).mockReturnValue(buildInfo)
+      })
 
       it('install from a constructed CDN URL', async function () {
         await install.start({ buildInfo })
@@ -528,7 +537,9 @@ describe('/lib/tasks/install', function () {
             await install.start()
             throw new Error('should have caught error')
           } catch (err) {
-            expect(err.message).not.toEqual('should have caught error')
+            const message = err instanceof Error ? err.message : String(err)
+
+            expect(message).not.toEqual('should have caught error')
             logger.error(err)
 
             expect(output()).toMatchSnapshot('invalid cache directory 1')
@@ -618,7 +629,9 @@ describe('/lib/tasks/install', function () {
         await install.start()
         throw new Error('should have caught error')
       } catch (err) {
-        expect(err.message).not.toEqual('should have caught error')
+        const message = err instanceof Error ? err.message : String(err)
+
+        expect(message).not.toEqual('should have caught error')
         logger.error(err)
 
         expect(output()).toMatchSnapshot('error when installing on unsupported os')
@@ -631,17 +644,24 @@ describe('/lib/tasks/install', function () {
       commitSha: 'abc123',
       commitBranch: 'aBranchName',
     }
+    const pkgVersion = '0.0.0-development'
+
+    beforeEach(() => {
+      vi.mocked(util.pkgVersion).mockReset()
+      vi.mocked(util.pkgBuildInfo).mockReset()
+      vi.mocked(util.pkgBuildInfo).mockReturnValue(buildInfo)
+      vi.mocked(util.pkgVersion).mockReturnValue(pkgVersion)
+    })
 
     it('generates the expected URL', () => {
       vi.mocked(os.platform).mockReturnValue('linux')
-
-      expect(install._getBinaryUrlFromBuildInfo('x64', buildInfo)).toEqual(`https://cdn.cypress.io/beta/binary/0.0.0-development/linux-x64/aBranchName-abc123/cypress.zip`)
+      expect(install._getBinaryUrlFromBuildInfo(pkgVersion, 'x64', buildInfo)).toEqual(`https://cdn.cypress.io/beta/binary/0.0.0-development/linux-x64/aBranchName-abc123/cypress.zip`)
     })
 
     it('overrides win32-arm64 to win32-x64 for pre-release', () => {
       vi.mocked(os.platform).mockReturnValue('win32')
 
-      expect(install._getBinaryUrlFromBuildInfo('arm64', buildInfo))
+      expect(install._getBinaryUrlFromBuildInfo(pkgVersion, 'arm64', buildInfo))
       .toEqual(`https://cdn.cypress.io/beta/binary/0.0.0-development/win32-x64/aBranchName-abc123/cypress.zip`)
     })
   })

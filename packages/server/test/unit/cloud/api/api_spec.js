@@ -1605,19 +1605,19 @@ describe('lib/cloud/api', () => {
         expect(errors.warning).to.be.calledThrice
         expect(errors.warning.firstCall.args[0]).to.eql('CLOUD_API_RESPONSE_FAILED_RETRYING')
         expect(errors.warning.firstCall.args[1]).to.eql({
-          delayMs: 30000,
+          delay: '30 seconds',
           tries: 3,
           response: err,
         })
 
         expect(errors.warning.secondCall.args[1]).to.eql({
-          delayMs: 60000,
+          delay: '1 minute',
           tries: 2,
           response: err,
         })
 
         expect(errors.warning.thirdCall.args[1]).to.eql({
-          delayMs: 120000,
+          delay: '2 minutes',
           tries: 1,
           response: err,
         })

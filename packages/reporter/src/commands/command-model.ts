@@ -132,7 +132,7 @@ export default class Command extends Instrument {
   get isCyPrompt () {
     // @ts-expect-error - experimentalPromptCommand is not typed until we
     // release the feature
-    return Cypress.config('experimentalPromptCommand') && Cypress.config('isInteractive') && this.name === 'prompt'
+    return Cypress.config('experimentalPromptCommand') && this.name === 'prompt'
   }
 
   constructor (props: CommandProps) {
