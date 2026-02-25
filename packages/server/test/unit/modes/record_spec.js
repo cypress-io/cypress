@@ -86,17 +86,6 @@ describe('lib/modes/record', () => {
       expect(commit.branch).to.eq('bem/buildkite')
     })
 
-    it('gets branch from process.env.CI_BRANCH for codeship', () => {
-      process.env.CI_NAME = 'codeship'
-      process.env.CI_BRANCH = 'bem/ci'
-
-      const commit = recordMode.getCommitFromGitOrCi(gitCommit)
-
-      debug(commit)
-
-      expect(commit.branch).to.eq('bem/ci')
-    })
-
     it('gets branch from process.env.APPVEYOR_REPO_BRANCH for AppVeyor', () => {
       process.env.APPVEYOR = '1'
       process.env.APPVEYOR_REPO_BRANCH = 'bem/app'

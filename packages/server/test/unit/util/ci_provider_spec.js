@@ -80,6 +80,41 @@ describe('lib/util/ci_provider', () => {
     return expectsCommitParams(null)
   }) // we don't know CI-specific params
 
+  it('detectableCiBuildIdProviders lists supported providers alphabetically', () => {
+    // This list is used in user-facing error messaging.
+    const providers = ciProvider.detectableCiBuildIdProviders()
+
+    expect(providers).to.deep.eq([
+      'appveyor',
+      'awsAmplifyConsole',
+      'awsCodeBuild',
+      'azure',
+      'bamboo',
+      'bitbucket',
+      'bitrise',
+      'buddy',
+      'buildkite',
+      'circle',
+      'cloudbeesUnify',
+      'codeFresh',
+      'concourse',
+      'drone',
+      'githubActions',
+      'gitlab',
+      'goCD',
+      'googleCloud',
+      'harness',
+      'jenkins',
+      'netlify',
+      'semaphore',
+      'teamcity',
+      'travis',
+    ])
+
+    // Confirm the returned list is already sorted (not just matching this test's ordering).
+    expect(providers).to.deep.eq([...providers].sort())
+  })
+
   it('appveyor', () => {
     resetEnv = mockedEnv({
       APPVEYOR: 'true',
@@ -134,6 +169,7 @@ describe('lib/util/ci_provider', () => {
   it('awsCodeBuild', () => {
     resetEnv = mockedEnv({
       CODEBUILD_BUILD_ID: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
+      CODEBUILD_BUILD_ARN: 'arn:aws:codebuild:us-west-2:123456789012:build/codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
       CODEBUILD_BUILD_NUMBER: '123',
       CODEBUILD_RESOLVED_SOURCE_VERSION: 'commit',
       CODEBUILD_SOURCE_REPO_URL: 'repositoryUrl',
@@ -143,6 +179,7 @@ describe('lib/util/ci_provider', () => {
     expectsName('awsCodeBuild')
     expectsCiParams({
       codebuildBuildId: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
+      codebuildBuildArn: 'arn:aws:codebuild:us-west-2:123456789012:build/codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
       codebuildBuildNumber: '123',
       codebuildResolvedSourceVersion: 'commit',
       codebuildSourceRepoUrl: 'repositoryUrl',
@@ -152,6 +189,116 @@ describe('lib/util/ci_provider', () => {
     return expectsCommitParams({
       sha: 'commit',
       remoteOrigin: 'repositoryUrl',
+    })
+  })
+
+  it('aws amplify console', () => {
+    resetEnv = mockedEnv({
+      AWS_APP_ID: 'abcd1234',
+      AWS_BRANCH: 'main',
+      AWS_BRANCH_ARN: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
+      AWS_JOB_ID: '0000000001',
+      AWS_CLONE_URL: 'git@github.com:octocat/hello-world.git',
+      AWS_COMMIT_ID: 'commitSha',
+      AWS_PULL_REQUEST_ID: '12',
+      AWS_PULL_REQUEST_SOURCE_BRANCH: 'featureA',
+      AWS_PULL_REQUEST_DESTINATION_BRANCH: 'main',
+    }, { clear: true })
+
+    expectsName('awsAmplifyConsole')
+    expectsCiParams({
+      awsAppId: 'abcd1234',
+      awsBranch: 'main',
+      awsBranchArn: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
+      awsJobId: '0000000001',
+      awsCloneUrl: 'git@github.com:octocat/hello-world.git',
+      awsCommitId: 'commitSha',
+      awsPullRequestId: '12',
+      awsPullRequestSourceBranch: 'featureA',
+      awsPullRequestDestinationBranch: 'main',
+    })
+
+    return expectsCommitParams({
+      sha: 'commitSha',
+      branch: 'featureA',
+      remoteOrigin: 'git@github.com:octocat/hello-world.git',
+    })
+  })
+
+  it('aws amplify console (prefers amplify over codebuild)', () => {
+    resetEnv = mockedEnv({
+      // Real Amplify builds can also expose CODEBUILD_* env vars, since Amplify uses CodeBuild under the hood.
+      // Ensure we detect the more-specific Amplify provider instead of awsCodeBuild.
+      CODEBUILD_BUILD_ID: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
+      CODEBUILD_SOURCE_REPO_URL: 'repositoryUrl',
+      CODEBUILD_RESOLVED_SOURCE_VERSION: 'codebuildCommitSha',
+
+      AWS_APP_ID: 'abcd1234',
+      AWS_BRANCH: 'main',
+      AWS_BRANCH_ARN: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
+      AWS_JOB_ID: '0000000001',
+      AWS_CLONE_URL: 'git@github.com:octocat/hello-world.git',
+      AWS_COMMIT_ID: 'amplifyCommitSha',
+      AWS_PULL_REQUEST_ID: '12',
+      AWS_PULL_REQUEST_SOURCE_BRANCH: 'featureA',
+      AWS_PULL_REQUEST_DESTINATION_BRANCH: 'main',
+    }, { clear: true })
+
+    expectsName('awsAmplifyConsole')
+    expectsCiParams({
+      awsAppId: 'abcd1234',
+      awsBranch: 'main',
+      awsBranchArn: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
+      awsJobId: '0000000001',
+      awsCloneUrl: 'git@github.com:octocat/hello-world.git',
+      awsCommitId: 'amplifyCommitSha',
+      awsPullRequestId: '12',
+      awsPullRequestSourceBranch: 'featureA',
+      awsPullRequestDestinationBranch: 'main',
+    })
+
+    return expectsCommitParams({
+      sha: 'amplifyCommitSha',
+      branch: 'featureA',
+      remoteOrigin: 'git@github.com:octocat/hello-world.git',
+    })
+  })
+
+  it('aws amplify console (missing AWS_JOB_ID does not fall back to codebuild)', () => {
+    resetEnv = mockedEnv({
+      // Real Amplify builds can also expose CODEBUILD_* env vars, since Amplify uses CodeBuild under the hood.
+      // If AWS_JOB_ID is absent, Amplify should still be detected (and win) to avoid unexpected metadata shifts.
+      CODEBUILD_BUILD_ID: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
+      CODEBUILD_SOURCE_REPO_URL: 'repositoryUrl',
+      CODEBUILD_RESOLVED_SOURCE_VERSION: 'codebuildCommitSha',
+
+      AWS_APP_ID: 'abcd1234',
+      AWS_BRANCH: 'main',
+      AWS_BRANCH_ARN: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
+      // AWS_JOB_ID intentionally omitted
+      AWS_CLONE_URL: 'git@github.com:octocat/hello-world.git',
+      AWS_COMMIT_ID: 'amplifyCommitSha',
+      AWS_PULL_REQUEST_ID: '12',
+      AWS_PULL_REQUEST_SOURCE_BRANCH: 'featureA',
+      AWS_PULL_REQUEST_DESTINATION_BRANCH: 'main',
+    }, { clear: true })
+
+    expectsName('awsAmplifyConsole')
+    expectsCiParams({
+      awsAppId: 'abcd1234',
+      awsBranch: 'main',
+      awsBranchArn: 'aws:arn:amplify:us-west-2:123456789012:apps/abcd1234/branches/main',
+      awsCloneUrl: 'git@github.com:octocat/hello-world.git',
+      awsCommitId: 'amplifyCommitSha',
+      awsPullRequestId: '12',
+      awsPullRequestSourceBranch: 'featureA',
+      awsPullRequestDestinationBranch: 'main',
+    })
+
+    return expectsCommitParams({
+      sha: 'amplifyCommitSha',
+      branch: 'featureA',
+      remoteOrigin: 'git@github.com:octocat/hello-world.git',
     })
   })
 
@@ -285,6 +432,82 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('buddy', () => {
+    resetEnv = mockedEnv({
+      BUDDY: 'true',
+      BUDDY_RUN_ID: 'pull/1',
+      BUDDY_RUN_PR_NO: '1',
+      BUDDY_RUN_URL: 'https://app.buddy.works/my-workspace/my-project/pipelines/pipeline/1/execution/5d9dc42c422f5a268b389',
+      BUDDY_RUN_BRANCH: 'feature-branch',
+      BUDDY_RUN_COMMIT: '46c360492d6372e5335300776806af412755871',
+      BUDDY_RUN_COMMIT_MESSAGE: 'commit message',
+      BUDDY_RUN_COMMIT_COMMITTER_NAME: 'Committer Name',
+      BUDDY_RUN_COMMIT_COMMITTER_EMAIL: 'committer@example.com',
+      BUDDY_REPO_SSH_URL: 'git@github.com:githubaccount/repository',
+    }, { clear: true })
+
+    expectsName('buddy')
+    expectsCiParams({
+      buddyRunId: 'pull/1',
+      buddyRunPrNo: '1',
+      buddyRunUrl: 'https://app.buddy.works/my-workspace/my-project/pipelines/pipeline/1/execution/5d9dc42c422f5a268b389',
+      buddyRunBranch: 'feature-branch',
+      buddyRunCommit: '46c360492d6372e5335300776806af412755871',
+      buddyRunCommitMessage: 'commit message',
+      buddyRunCommitCommitterName: 'Committer Name',
+      buddyRunCommitCommitterEmail: 'committer@example.com',
+      buddyRepoSshUrl: 'git@github.com:githubaccount/repository',
+    })
+
+    return expectsCommitParams({
+      sha: '46c360492d6372e5335300776806af412755871',
+      branch: 'feature-branch',
+      message: 'commit message',
+      authorName: 'Committer Name',
+      authorEmail: 'committer@example.com',
+      remoteOrigin: 'git@github.com:githubaccount/repository',
+    })
+  })
+
+  it('bitrise', () => {
+    resetEnv = mockedEnv({
+      BITRISE_IO: 'true',
+      BITRISE_BUILD_NUMBER: '123',
+      BITRISE_BUILD_URL: 'https://app.bitrise.io/build/abcd',
+      BITRISE_BUILD_SLUG: 'abcd',
+      BITRISE_APP_SLUG: 'appslug',
+      GIT_REPOSITORY_URL: 'git@github.com:octocat/hello-world.git',
+      BITRISE_GIT_BRANCH: 'main',
+      BITRISEIO_GIT_BRANCH_DEST: 'main',
+      BITRISE_PULL_REQUEST: '42',
+      BITRISE_GIT_COMMIT: 'commitSha',
+      BITRISE_GIT_MESSAGE: 'commit message',
+      GIT_CLONE_COMMIT_AUTHOR_NAME: 'Author Name',
+      GIT_CLONE_COMMIT_AUTHOR_EMAIL: 'author@example.com',
+    }, { clear: true })
+
+    expectsName('bitrise')
+    expectsCiParams({
+      bitriseBuildNumber: '123',
+      bitriseBuildUrl: 'https://app.bitrise.io/build/abcd',
+      bitriseBuildSlug: 'abcd',
+      bitriseAppSlug: 'appslug',
+      gitRepositoryUrl: 'git@github.com:octocat/hello-world.git',
+      bitriseGitBranch: 'main',
+      bitriseioGitBranchDest: 'main',
+      bitrisePullRequest: '42',
+    })
+
+    return expectsCommitParams({
+      sha: 'commitSha',
+      branch: 'main',
+      message: 'commit message',
+      authorName: 'Author Name',
+      authorEmail: 'author@example.com',
+      remoteOrigin: 'git@github.com:octocat/hello-world.git',
+    })
+  })
+
   it('buildkite', () => {
     resetEnv = mockedEnv({
       BUILDKITE: 'true',
@@ -396,77 +619,17 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
-  it('codeshipBasic', () => {
+  it('cloudbeesUnify', () => {
     resetEnv = mockedEnv({
-      CODESHIP: 'TRUE',
-      CI_NAME: 'codeship',
-
-      CI_BUILD_ID: 'ciBuildId',
-      CI_REPO_NAME: 'ciRepoName',
-      CI_BUILD_URL: 'ciBuildUrl',
-      CI_PROJECT_ID: 'ciProjectId',
-      CI_BUILD_NUMBER: 'ciBuildNumber',
-      CI_PULL_REQUEST: 'ciPullRequest',
-
-      CI_COMMIT_ID: 'ciCommitId',
-      CI_BRANCH: 'ciBranch',
-      CI_COMMIT_MESSAGE: 'ciCommitMessage',
-      CI_COMMITTER_NAME: 'ciCommitterName',
-      CI_COMMITTER_EMAIL: 'ciCommitterEmail',
+      CLOUDBEES_WORKSPACE: '/cloudbees/workspace',
     }, { clear: true })
 
-    expectsName('codeshipBasic')
+    expectsName('cloudbeesUnify')
     expectsCiParams({
-      ciBuildId: 'ciBuildId',
-      ciRepoName: 'ciRepoName',
-      ciBuildUrl: 'ciBuildUrl',
-      ciProjectId: 'ciProjectId',
-      ciBuildNumber: 'ciBuildNumber',
-      ciPullRequest: 'ciPullRequest',
+      cloudbeesWorkspace: '/cloudbees/workspace',
     })
 
-    return expectsCommitParams({
-      sha: 'ciCommitId',
-      branch: 'ciBranch',
-      message: 'ciCommitMessage',
-      authorName: 'ciCommitterName',
-      authorEmail: 'ciCommitterEmail',
-    })
-  })
-
-  it('codeshipPro', () => {
-    resetEnv = mockedEnv({
-      CI_NAME: 'codeship',
-
-      CI_BUILD_ID: 'ciBuildId',
-      CI_REPO_NAME: 'ciRepoName',
-      CI_PROJECT_ID: 'ciProjectId',
-
-      CI_COMMIT_ID: 'ciCommitId',
-      CI_BRANCH: 'ciBranch',
-      CI_COMMIT_MESSAGE: 'ciCommitMessage',
-      CI_COMMITTER_NAME: 'ciCommitterName',
-      CI_COMMITTER_EMAIL: 'ciCommitterEmail',
-      CI_PR_NUMBER: 'prNumber',
-      CI_PULL_REQUEST: 'pullRequest',
-    }, { clear: true })
-
-    expectsName('codeshipPro')
-    expectsCiParams({
-      ciBuildId: 'ciBuildId',
-      ciRepoName: 'ciRepoName',
-      ciProjectId: 'ciProjectId',
-      ciPrNumber: 'prNumber',
-      ciPullRequest: 'pullRequest',
-    })
-
-    return expectsCommitParams({
-      sha: 'ciCommitId',
-      branch: 'ciBranch',
-      message: 'ciCommitMessage',
-      authorName: 'ciCommitterName',
-      authorEmail: 'ciCommitterEmail',
-    })
+    return expectsCommitParams({})
   })
 
   it('concourse', () => {
@@ -530,10 +693,64 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('harness', () => {
+    resetEnv = mockedEnv({
+      // Ensure we detect Harness even if DRONE_* variables are present
+      // (and without relying on DRONE=true marker)
+
+      // Harness identifiers
+      HARNESS_BUILD_ID: 'harnessBuildId',
+      HARNESS_EXECUTION_ID: 'harnessExecutionId',
+      HARNESS_PIPELINE_ID: 'harnessPipelineId',
+      HARNESS_PROJECT_ID: 'harnessProjectId',
+      HARNESS_ORG_ID: 'harnessOrgId',
+      HARNESS_ACCOUNT_ID: 'harnessAccountId',
+      HARNESS_STAGE_ID: 'harnessStageId',
+
+      // Build metadata
+      DRONE_BUILD_LINK: 'droneBuildLink',
+      DRONE_BUILD_NUMBER: '42',
+      DRONE_PULL_REQUEST: '13',
+      DRONE_REPO: 'octocat/hello-world',
+
+      // Commit metadata
+      DRONE_COMMIT_SHA: 'droneCommitSha',
+      DRONE_SOURCE_BRANCH: 'feature-branch',
+      DRONE_COMMIT_MESSAGE: 'commit message',
+      DRONE_COMMIT_AUTHOR: 'Drone Author',
+      DRONE_COMMIT_AUTHOR_EMAIL: 'drone@author.test',
+      DRONE_GIT_HTTP_URL: 'https://github.com/octocat/hello-world.git',
+      DRONE_REPO_BRANCH: 'main',
+    }, { clear: true })
+
+    expectsName('harness')
+    expectsCiParams({
+      harnessBuildId: 'harnessBuildId',
+      harnessExecutionId: 'harnessExecutionId',
+      harnessPipelineId: 'harnessPipelineId',
+      harnessProjectId: 'harnessProjectId',
+      harnessOrgId: 'harnessOrgId',
+      harnessAccountId: 'harnessAccountId',
+      harnessStageId: 'harnessStageId',
+      droneBuildLink: 'droneBuildLink',
+      droneBuildNumber: '42',
+      dronePullRequest: '13',
+      droneRepo: 'octocat/hello-world',
+    })
+
+    return expectsCommitParams({
+      sha: 'droneCommitSha',
+      branch: 'feature-branch',
+      message: 'commit message',
+      authorName: 'Drone Author',
+      authorEmail: 'drone@author.test',
+      remoteOrigin: 'https://github.com/octocat/hello-world.git',
+      defaultBranch: 'main',
+    })
+  })
+
   it('drone', () => {
     resetEnv = mockedEnv({
-      DRONE: 'true',
-
       DRONE_JOB_NUMBER: 'droneJobNumber',
       DRONE_BUILD_LINK: 'droneBuildLink',
       DRONE_BUILD_NUMBER: 'droneBuildNumber',
@@ -922,6 +1139,7 @@ describe('lib/util/ci_provider', () => {
       SEMAPHORE_EXECUTABLE_UUID: 'semaphoreExecutableUuid',
       SEMAPHORE_GIT_BRANCH: 'show-semaphore-v2-266',
       SEMAPHORE_GIT_WORKING_BRANCH: 'show-semaphore-v2-266',
+      SEMAPHORE_GIT_COMMIT_AUTHOR: 'semaphoreGitCommitAuthor',
       SEMAPHORE_GIT_DIR: 'cypress-example-kitchensink',
       SEMAPHORE_GIT_PR_NUMBER: '1',
       SEMAPHORE_GIT_REF: 'refs/heads/show-semaphore-v2-266',
@@ -932,7 +1150,9 @@ describe('lib/util/ci_provider', () => {
       SEMAPHORE_JOB_ID: '5fb8dd98-3242-4a4e-a8ab-c4eca9db486c',
       SEMAPHORE_JOB_NAME: 'Cypress E2E 2',
       SEMAPHORE_JOB_COUNT: 'semaphoreJobCount',
+      SEMAPHORE_JOB_INDEX: '2',
       SEMAPHORE_JOB_UUID: 'semaphoreJobUuid',
+      SEMAPHORE_ORGANIZATION_URL: 'https://my-org.semaphoreci.com',
       SEMAPHORE_PIPELINE_ID: 'a9219129-951e-4e2c-9354-45534b63fa8b',
       SEMAPHORE_PLATFORM: 'semaphorePlatform',
       SEMAPHORE_PROJECT_DIR: 'semaphoreProjectDir',
@@ -943,6 +1163,7 @@ describe('lib/util/ci_provider', () => {
       SEMAPHORE_REPO_SLUG: 'semaphoreRepoSlug',
       SEMAPHORE_TRIGGER_SOURCE: 'semaphoreTriggerSource',
       SEMAPHORE_WORKFLOW_ID: '67aecea7-e4e7-405e-a77c-165e1b37a128',
+      SEMAPHORE_WORKFLOW_NUMBER: '42',
       PULL_REQUEST_NUMBER: 'pullRequestNumber',
     }, { clear: true })
 
@@ -956,6 +1177,7 @@ describe('lib/util/ci_provider', () => {
       semaphoreExecutableUuid: 'semaphoreExecutableUuid',
       semaphoreGitBranch: 'show-semaphore-v2-266',
       semaphoreGitWorkingBranch: 'show-semaphore-v2-266',
+      semaphoreGitCommitAuthor: 'semaphoreGitCommitAuthor',
       semaphoreGitDir: 'cypress-example-kitchensink',
       semaphoreGitPrNumber: '1',
       semaphoreGitRef: 'refs/heads/show-semaphore-v2-266',
@@ -966,7 +1188,9 @@ describe('lib/util/ci_provider', () => {
       semaphoreJobId: '5fb8dd98-3242-4a4e-a8ab-c4eca9db486c',
       semaphoreJobName: 'Cypress E2E 2',
       semaphoreJobCount: 'semaphoreJobCount',
+      semaphoreJobIndex: '2',
       semaphoreJobUuid: 'semaphoreJobUuid',
+      semaphoreOrganizationUrl: 'https://my-org.semaphoreci.com',
       semaphorePipelineId: 'a9219129-951e-4e2c-9354-45534b63fa8b',
       semaphorePlatform: 'semaphorePlatform',
       semaphoreProjectDir: 'semaphoreProjectDir',
@@ -977,96 +1201,29 @@ describe('lib/util/ci_provider', () => {
       semaphoreRepoSlug: 'semaphoreRepoSlug',
       semaphoreTriggerSource: 'semaphoreTriggerSource',
       semaphoreWorkflowId: '67aecea7-e4e7-405e-a77c-165e1b37a128',
+      semaphoreWorkflowNumber: '42',
     })
 
     return expectsCommitParams({
       sha: '83ce1df0f8be2767655bb805d20126ee441b71bf',
       branch: 'show-semaphore-v2-266',
-      remoteOrigin: 'cypress-io/cypress-example-kitchensink',
-    })
-  })
-
-  it('shippable', () => {
-    resetEnv = mockedEnv({
-      SHIPPABLE: 'true',
-
-      // build environment variables
-      SHIPPABLE_BUILD_ID: 'buildId',
-      SHIPPABLE_BUILD_NUMBER: 'buildNumber',
-      SHIPPABLE_COMMIT_RANGE: 'commitRange',
-      SHIPPABLE_CONTAINER_NAME: 'containerName',
-      SHIPPABLE_JOB_ID: 'jobId',
-      SHIPPABLE_JOB_NUMBER: 'jobNumber',
-      SHIPPABLE_REPO_SLUG: 'repoSlug',
-
-      // additional information
-      IS_FORK: 'isFork',
-      IS_GIT_TAG: 'isGitTag',
-      IS_PRERELEASE: 'isPrerelease',
-      IS_RELEASE: 'isRelease',
-      REPOSITORY_URL: 'repositoryUrl',
-      REPO_FULL_NAME: 'repoFullName',
-      REPO_NAME: 'repoName',
-      BUILD_URL: 'buildUrl',
-
-      // pull request variables
-      BASE_BRANCH: 'baseBranch',
-      HEAD_BRANCH: 'headBranch',
-      IS_PULL_REQUEST: 'isPullRequest',
-      PULL_REQUEST: 'pullRequest',
-      PULL_REQUEST_BASE_BRANCH: 'pullRequestBaseBranch',
-      PULL_REQUEST_REPO_FULL_NAME: 'pullRequestRepoFullName',
-
-      // git information
-      COMMIT: 'commit',
-      BRANCH: 'branch',
-      COMMITTER: 'committer',
-      COMMIT_MESSAGE: 'commitMessage',
-    }, { clear: true })
-
-    expectsName('shippable')
-    expectsCiParams({
-      // build information
-      shippableBuildId: 'buildId',
-      shippableBuildNumber: 'buildNumber',
-      shippableCommitRange: 'commitRange',
-      shippableContainerName: 'containerName',
-      shippableJobId: 'jobId',
-      shippableJobNumber: 'jobNumber',
-      shippableRepoSlug: 'repoSlug',
-      // additional information
-      isFork: 'isFork',
-      isGitTag: 'isGitTag',
-      isPrerelease: 'isPrerelease',
-      isRelease: 'isRelease',
-      repositoryUrl: 'repositoryUrl',
-      repoFullName: 'repoFullName',
-      repoName: 'repoName',
-      buildUrl: 'buildUrl',
-      // pull request information
-      baseBranch: 'baseBranch',
-      headBranch: 'headBranch',
-      isPullRequest: 'isPullRequest',
-      pullRequest: 'pullRequest',
-      pullRequestBaseBranch: 'pullRequestBaseBranch',
-      pullRequestRepoFullName: 'pullRequestRepoFullName',
-    })
-
-    return expectsCommitParams({
-      sha: 'commit',
-      branch: 'branch',
-      message: 'commitMessage',
-      authorName: 'committer',
+      authorName: 'semaphoreGitCommitAuthor',
+      remoteOrigin: 'git@github.com:cypress-io/cypress-example-kitchensink.git',
     })
   })
 
   it('teamcity', () => {
     resetEnv = mockedEnv({
-      TEAMCITY_VERSION: 'true',
+      TEAMCITY_VERSION: '2025.12',
+      BUILD_NUMBER: '42',
+      BUILD_URL: 'https://teamcity.example.com/viewLog.html?buildId=42&buildTypeId=bt1',
     }, { clear: true })
 
     expectsName('teamcity')
-    expectsCiParams(null)
+    expectsCiParams({
+      buildNumber: '42',
+      buildUrl: 'https://teamcity.example.com/viewLog.html?buildId=42&buildTypeId=bt1',
+    })
 
     return expectsCommitParams(null)
   })
@@ -1106,43 +1263,6 @@ describe('lib/util/ci_provider', () => {
       sha: 'commit',
       branch: 'branch',
       remoteOrigin: 'repositoryUrl',
-    })
-  })
-
-  it('webappio', () => {
-    resetEnv = mockedEnv({
-      WEBAPPIO: 'true',
-
-      JOB_ID: 'jobId',
-      RUNNER_ID: 'runnerId',
-      RETRY_INDEX: 'retryIndex',
-
-      // git info
-      PULL_REQUEST_URL: 'pullRequest',
-      REPOSITORY_NAME: 'repoName',
-      REPOSITORY_OWNER: 'repoOwner',
-      GIT_BRANCH: 'branch',
-      GIT_TAG: 'tag',
-      GIT_COMMIT: 'commit',
-      GIT_COMMIT_TITLE: 'commitTitle',
-    }, { clear: true })
-
-    expectsName('webappio')
-    expectsCiParams({
-      jobId: 'jobId',
-      runnerId: 'runnerId',
-      retryIndex: 'retryIndex',
-      gitTag: 'tag',
-      gitBranch: 'branch',
-      pullRequestUrl: 'pullRequest',
-      repositoryName: 'repoName',
-      repositoryOwner: 'repoOwner',
-    })
-
-    return expectsCommitParams({
-      sha: 'commit',
-      branch: 'branch',
-      message: 'commitTitle',
     })
   })
 
@@ -1194,36 +1314,6 @@ describe('lib/util/ci_provider', () => {
       message: 'message',
       authorName: 'name',
       authorEmail: 'email',
-    })
-  })
-
-  it('teamfoundation', () => {
-    resetEnv = mockedEnv({
-      TF_BUILD: 'true',
-      TF_BUILD_BUILDNUMBER: 'CIBuild_20130613.6',
-
-      BUILD_BUILDID: 'buildId',
-      BUILD_BUILDNUMBER: 'buildNumber',
-      BUILD_CONTAINERID: 'containerId',
-
-      BUILD_SOURCEVERSION: 'commit',
-      BUILD_SOURCEBRANCHNAME: 'branch',
-      BUILD_SOURCEVERSIONMESSAGE: 'message',
-      BUILD_SOURCEVERSIONAUTHOR: 'name',
-    }, { clear: true })
-
-    expectsName('teamfoundation')
-    expectsCiParams({
-      buildBuildid: 'buildId',
-      buildBuildnumber: 'buildNumber',
-      buildContainerid: 'containerId',
-    })
-
-    return expectsCommitParams({
-      sha: 'commit',
-      branch: 'branch',
-      message: 'message',
-      authorName: 'name',
     })
   })
 
@@ -1296,21 +1386,5 @@ describe('lib/util/ci_provider', () => {
       branch: 'travisPullRequestBranch',
       message: 'travisCommitMessage',
     })
-  })
-
-  it('wercker', () => {
-    resetEnv = mockedEnv({
-      WERCKER: 'true',
-    }, { clear: true })
-
-    expectsName('wercker')
-    expectsCiParams(null)
-    expectsCommitParams(null)
-
-    resetEnv = mockedEnv({
-      WERCKER_MAIN_PIPELINE_STARTED: 'true',
-    }, { clear: true })
-
-    return expectsName('wercker')
   })
 })
