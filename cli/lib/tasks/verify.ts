@@ -55,8 +55,16 @@ const checkExecutable = async (binaryDir: string): Promise<void> => {
 
 const runSmokeTest = (binaryDir: string, options: any): any => {
   let executable = state.getPathToExecutable(binaryDir)
+  const childEnv = {
+    ...process.env,
+    ...options.env,
+  }
 
-  const needsXvfb = xvfb.isNeeded()
+  if (!childEnv.CYPRESS_INTERNAL_FORCE_ELECTRON_RUN_AS_NODE) {
+    delete childEnv.ELECTRON_RUN_AS_NODE
+  }
+
+  const needsXvfb = xvfb.isNeeded(childEnv)
 
   debug('needs Xvfb?', needsXvfb)
 
@@ -94,8 +102,7 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
 
     const stdioOptions = _.extend({}, {
       env: {
-        ...process.env,
-        ...options.env,
+        ...childEnv,
         FORCE_COLOR: '0',
       },
       // execa defaults to extending process.env. We pass a fully-shaped env object
@@ -107,10 +114,6 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
 
     // Sandboxed shells can leak ELECTRON_RUN_AS_NODE=1 into child processes.
     // Verify must run Electron in normal mode so --smoke-test/--ping are handled by Cypress.
-    if (!stdioOptions.env.CYPRESS_INTERNAL_FORCE_ELECTRON_RUN_AS_NODE) {
-      delete stdioOptions.env.ELECTRON_RUN_AS_NODE
-    }
-
     try {
       const result = await util.exec(
         executable,

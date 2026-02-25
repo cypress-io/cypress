@@ -435,6 +435,8 @@ describe('lib/tasks/verify', () => {
           env: expect.not.objectContaining({ ELECTRON_RUN_AS_NODE: expect.anything() }),
         }),
       )
+
+      expect(xvfb.isNeeded).toHaveBeenCalledWith(expect.not.objectContaining({ ELECTRON_RUN_AS_NODE: expect.anything() }))
     })
 
     it('keeps ELECTRON_RUN_AS_NODE when explicitly forced in child env options', async () => {

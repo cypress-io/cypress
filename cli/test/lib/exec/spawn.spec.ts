@@ -549,6 +549,26 @@ describe('lib/exec/spawn', function () {
       expect(thirdArg.env.ELECTRON_RUN_AS_NODE).toBeUndefined()
     })
 
+    it('starts xvfb on linux when parent ELECTRON_RUN_AS_NODE is leaked', async () => {
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+      vi.mocked(os.platform).mockReturnValue('linux')
+      vi.mocked(xvfb.isNeeded).mockImplementation((env?: NodeJS.ProcessEnv) => {
+        expect(env?.ELECTRON_RUN_AS_NODE).toBeUndefined()
+
+        return true
+      })
+
+      const startPromise = start('--foo')
+
+      await flushPromises()
+
+      spawnedProcess.emit('close', 0)
+
+      await startPromise
+
+      expect(xvfb.start).toHaveBeenCalledOnce()
+    })
+
     it('forces colors and streams when supported', async () => {
       vi.mocked(util.supportsColor).mockReturnValue(true)
       vi.mocked(tty.isatty).mockReturnValue(true)
