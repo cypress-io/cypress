@@ -201,7 +201,9 @@ function createSpawnFunction (
             return
           }
 
-          sourceStream.write(data)
+          if (sourceStream.writable) {
+            sourceStream.write(data)
+          }
         })
 
         if (
@@ -209,7 +211,7 @@ function createSpawnFunction (
           debugElectron.enabled ||
           (process.env.CYPRESS_INTERNAL_ENV ?? '') === 'development'
         ) {
-          sourceStream.pipe(stderr)
+          sourceStream.pipe(stderr, { end: false })
         } else {
           sourceStream.pipe(filter(stderr, debugStderr, DEBUG_PREFIX))
         }
