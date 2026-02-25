@@ -71,8 +71,6 @@ export class NetworkProxy {
 
   reset (options: { resetBetweenSpecs: boolean } = { resetBetweenSpecs: false }) {
     this.http.reset(options)
-
-    resourceTypeAndCredentialManager.clear()
   }
 
   setProtocolManager (protocolManager) {

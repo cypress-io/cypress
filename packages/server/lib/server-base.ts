@@ -644,6 +644,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
+    this._networkProxy?.clearCredentials()
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)
