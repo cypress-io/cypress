@@ -84,4 +84,47 @@ describe('event-manager', () => {
 
     cy.get('@resetDirtyState').should('have.been.calledOnce')
   })
+
+  it('should start loading Studio when re-running and Studio is active', () => {
+    loadSpec({
+      filePath: 'hooks/basic.cy.js',
+      passCount: 2,
+    })
+
+    cy.window().then((win) => {
+      const eventManager = win.getEventManager()
+
+      cy.spy(eventManager['studioStore'], 'startLoading').as('startLoading')
+      cy.spy(eventManager['studioStore'], 'setActive').as('setActive')
+    })
+
+    cy.get('[data-cy="launch-studio"]').eq(0).click()
+
+    cy.get('@startLoading').should('have.been.calledOnce')
+    cy.get('@setActive').should('have.been.calledOnce')
+
+    cy.get('.restart').click()
+
+    cy.get('@startLoading').should('have.been.calledTwice')
+    cy.get('@setActive').should('have.been.calledTwice')
+  })
+
+  it('should not start loading Studio when re-running and Studio is not active', () => {
+    loadSpec({
+      filePath: 'hooks/basic.cy.js',
+      passCount: 2,
+    })
+
+    cy.window().then((win) => {
+      const eventManager = win.getEventManager()
+
+      cy.spy(eventManager['studioStore'], 'startLoading').as('startLoading')
+      cy.spy(eventManager['studioStore'], 'setActive').as('setActive')
+    })
+
+    cy.get('.restart').click()
+
+    cy.get('@startLoading').should('not.have.been.called')
+    cy.get('@setActive').should('have.been.calledOnce')
+  })
 })

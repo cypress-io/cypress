@@ -937,6 +937,12 @@ export class EventManager {
     Cypress.primaryOriginCommunicator.removeAllListeners()
     // clean up the cross origin logs in memory to prevent dangling references as the log objects themselves at this point will no longer be needed.
     crossOriginLogs = {}
+
+    // if we are re-running and Studio is active, we need to start loading so the Studio panel doesn't flicker
+    if (this.studioStore.isActive && isRerun) {
+      this.studioStore.startLoading()
+    }
+
     this.studioStore.setActive(false)
     this.promptStore.resetState()
     this.specDirtyDataStore.resetDirtyState()
