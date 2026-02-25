@@ -14041,12 +14041,12 @@ csstype@^3.0.2:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.3.tgz#d80ff294d114fb0e6ac500fbf85b60137d7eff81"
   integrity sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==
 
-cypress-example-kitchensink@5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-5.2.0.tgz#0a7be481e1e25edbbf98d39de559c983c40f1a42"
-  integrity sha512-Q8dNSJXrR5j/HiuzXK4nPXOG+3s05QxnhV3gfsdV0Rl3uwsf3r38UFk4Fgi6uEd/URQM2Kl5NbZjLj9mj+OE8Q==
+cypress-example-kitchensink@5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-5.2.1.tgz#55cbf633d283b3e63b1c02862ee8e812a92e64b6"
+  integrity sha512-pM6CizO1uPyFkkuNO6QaewO7yEBfccBslYDlDO4H+rXK4nRC8EwTOHgGiiCqAqg31VfP8HVSBjsj1plvXfSk+Q==
   dependencies:
-    npm-run-all2 "7.0.2"
+    npm-run-all2 "8.0.4"
     serve "14.2.5"
 
 cypress-multi-reporters@1.4.0:
@@ -24268,15 +24268,15 @@ npm-registry-fetch@^18.0.0, npm-registry-fetch@^18.0.1:
     npm-package-arg "^12.0.0"
     proc-log "^5.0.0"
 
-npm-run-all2@7.0.2:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/npm-run-all2/-/npm-run-all2-7.0.2.tgz#26155c140b5e3f1155efd7f5d67212c8027b397c"
-  integrity sha512-7tXR+r9hzRNOPNTvXegM+QzCuMjzUIIq66VDunL6j60O4RrExx32XUhlrS7UK4VcdGw5/Wxzb3kfNcFix9JKDA==
+npm-run-all2@8.0.4:
+  version "8.0.4"
+  resolved "https://registry.yarnpkg.com/npm-run-all2/-/npm-run-all2-8.0.4.tgz#bcc070fd0cdb8d45496ec875d99a659a112e3f74"
+  integrity sha512-wdbB5My48XKp2ZfJUlhnLVihzeuA1hgBnqB2J9ahV77wLS+/YAJAlN8I+X3DIFIPZ3m5L7nplmlbhNiFDmXRDA==
   dependencies:
     ansi-styles "^6.2.1"
     cross-spawn "^7.0.6"
     memorystream "^0.3.1"
-    minimatch "^9.0.0"
+    picomatch "^4.0.2"
     pidtree "^0.6.0"
     read-package-json-fast "^4.0.0"
     shell-quote "^1.7.3"

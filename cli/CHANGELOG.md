@@ -1,5 +1,5 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.11.0
+## 15.11.1
 
 _Released 03/10/2026 (PENDING)_
 
@@ -9,7 +9,7 @@ _Released 03/10/2026 (PENDING)_
 
 ## 15.11.0
 
-_Released 02/24/2026 (PENDING)_
+_Released 02/24/2026_
 
 **Features:**
 
