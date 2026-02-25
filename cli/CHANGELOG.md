@@ -20,6 +20,7 @@ _Released 02/24/2026 (PENDING)_
 
 - The Node.js path is now displayed correctly in run log headers for typical GitHub Actions paths. ANSI escape sequences are no longer incorrectly displayed for longer Node.js paths. Addresses [#32736](https://github.com/cypress-io/cypress/issues/32736).
 - Fixed an issue that caused a Node.js [DEP0169](https://nodejs.org/docs/latest/api/deprecations.html#DEP0169) deprecation warning to be output when executing `cypress install` to download and install the Cypress binary. Addresses [#33347](https://github.com/cypress-io/cypress/issues/33347).
+- Adds option to 'word wrap' for Studio panel code. Addressed in [#33411]https://github.com/cypress-io/cypress/pull/33411
 
 **Dependency Updates:**
 
