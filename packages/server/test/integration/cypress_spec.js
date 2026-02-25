@@ -1365,6 +1365,7 @@ describe('lib/cypress', () => {
 
     it('errors and exits when using --group but ciBuildId could not be generated', function () {
       sinon.stub(ciProvider, 'provider').returns(null)
+      sinon.stub(ciProvider, 'detectableCiBuildIdProviders').returns(['circle', 'githubActions'])
 
       return cypress.start([
         `--run-project=${this.recordPath}`,
@@ -1381,6 +1382,7 @@ describe('lib/cypress', () => {
 
     it('errors and exits when using --parallel but ciBuildId could not be generated', function () {
       sinon.stub(ciProvider, 'provider').returns(null)
+      sinon.stub(ciProvider, 'detectableCiBuildIdProviders').returns(['circle', 'githubActions'])
 
       return cypress.start([
         `--run-project=${this.recordPath}`,
@@ -1397,6 +1399,7 @@ describe('lib/cypress', () => {
 
     it('errors and exits when using --parallel and --group but ciBuildId could not be generated', function () {
       sinon.stub(ciProvider, 'provider').returns(null)
+      sinon.stub(ciProvider, 'detectableCiBuildIdProviders').returns(['circle', 'githubActions'])
 
       return cypress.start([
         `--run-project=${this.recordPath}`,

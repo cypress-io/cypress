@@ -8,8 +8,10 @@ import path from 'path'
 const pkg = JSON.parse(readFileSync('./package.json', 'utf8').toString())
 
 function external (id, parent, resolved) {
-  // Bundle tslib so that we include ts helpers
-  if (id === 'tslib' || id.startsWith('tslib/') || id.includes('tslib/tslib.es6.js')) {
+  // Bundle tslib so that we include ts helpers (Windows resolves to absolute path with backslashes)
+  const idNorm = id.replace(/\\/g, '/')
+
+  if (id === 'tslib' || idNorm.startsWith('tslib') || idNorm.includes('tslib/tslib.es6.js')) {
     return false
   }
 
