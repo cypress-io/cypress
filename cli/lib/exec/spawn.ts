@@ -284,7 +284,7 @@ async function userFriendlySpawn (spawn: ReturnType<typeof createSpawnFunction>,
     if ((error as any).known === undefined) {
       const raiseErrorFn = throwFormErrorText(errors.unexpected)
 
-      //await raiseErrorFn(error.message)
+      await raiseErrorFn(error.message)
     }
 
     throw error

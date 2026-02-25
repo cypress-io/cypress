@@ -14,8 +14,8 @@ describe('LineDecoder', () => {
   const END_TAG = '_END_'
 
   beforeEach(() => {
-    decoder = new LineDecoder()
     vi.mocked(getEndTag).mockReturnValue(END_TAG)
+    decoder = new LineDecoder()
   })
 
   afterEach(() => {
