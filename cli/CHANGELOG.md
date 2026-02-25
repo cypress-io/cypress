@@ -5,7 +5,7 @@ _Released 03/10/2026 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where the Cypress verify and start scripts errored with `bad option: --no-sandbox` when `ELECTRON_RUN_AS_NODE=1` was set. Addressed in [#33410](https://github.com/cypress-io/cypress/pull/33410).
+- Fixed an issue where the Cypress verify and start scripts errored with `bad option: --no-sandbox` when `ELECTRON_RUN_AS_NODE=1` was set. Fixes [#23636](https://github.com/cypress-io/cypress/issues/23636).
 
 ## 15.11.0
 
