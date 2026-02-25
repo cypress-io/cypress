@@ -10,4 +10,4 @@ export { filter } from './Filter'
 
 export { logError } from './logError'
 
-export { getStartTag, getEndTag, DEBUG_PREFIX } from './tags'
+export { START_TAG, END_TAG, DEBUG_PREFIX } from './constants'

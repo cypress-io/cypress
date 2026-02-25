@@ -1,13 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { logError } from '../logError'
-import { getStartTag, getEndTag } from '../tags'
-
-vi.mock('../tags', () => {
-  return {
-    getStartTag: vi.fn(),
-    getEndTag: vi.fn(),
-  }
-})
+import { START_TAG, END_TAG } from '../constants'
 
 describe('logError', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
@@ -15,23 +8,12 @@ describe('logError', () => {
   beforeEach(() => {
     // Mock console.error at the module boundary
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    vi.mocked(getStartTag).mockReturnValue(START_TAG)
-    vi.mocked(getEndTag).mockReturnValue(END_TAG)
   })
 
   afterEach(() => {
     // Restore the original console.error
     consoleErrorSpy.mockRestore()
     vi.unstubAllEnvs()
-    vi.clearAllMocks()
-  })
-
-  const START_TAG = '_START_'
-  const END_TAG = '_END_'
-
-  beforeEach(() => {
-    vi.mocked(getStartTag).mockReturnValue(START_TAG)
-    vi.mocked(getEndTag).mockReturnValue(END_TAG)
   })
 
   describe('START_TAG and END_TAG constants', () => {

@@ -1,5 +1,5 @@
 import { Transform } from 'stream'
-import { getStartTag, getEndTag } from './tags'
+import { START_TAG, END_TAG } from './constants'
 import { StringDecoder } from 'string_decoder'
 import Debug from 'debug'
 import { tagsDisabled } from './tagsDisabled'
@@ -15,23 +15,16 @@ const debugVerbose = Debug('cypress-verbose:stderr-filtering:TagStream')
  * Buffer and string inputs, using a StringDecoder for proper encoding
  * when processing Buffer chunks.
  *
- * The default start and end tags are the values of the environment variables:
- *  - CYPRESS_INTERNAL_STDERR_START_TAG
- *  - CYPRESS_INTERNAL_STDERR_END_TAG
- *
- * Or, if the environment variables are not set, the following values are used:
- *  - <<<CYPRESS.STDERR.START>>>
- *  - <<<CYPRESS.STDERR.END>>>
+ * By default, the start and end tags are the constants exported by this package:
+ *  - START_TAG
+ *  - END_TAG
  *
  * @example
  * ```typescript
- * const tagStream = new TagStream(getStartTag(), getEndTag());
+ * const tagStream = new TagStream('[START]', '[END]');
  * tagStream.pipe(process.stdout);
- * tagStream.write('Hello World'); // Outputs: getStartTag()Hello WorldgetEndTag()()
+ * tagStream.write('Hello World'); // Outputs: [START]Hello World[END]
  * ```
- *
- * @param startTag - The tag to prepend to each chunk. Defaults to the value of getStartTag().
- * @param endTag - The tag to append to each chunk. Defaults to the value of getEndTag().
  */
 export class TagStream extends Transform {
   decoder?: StringDecoder
@@ -51,7 +44,7 @@ export class TagStream extends Transform {
    * @param startTag - The tag to prepend to each chunk. Defaults to START_TAG.
    * @param endTag - The tag to append to each chunk. Defaults to END_TAG.
    */
-  constructor (private startTag: string = getStartTag(), private endTag: string = getEndTag()) {
+  constructor (private startTag: string = START_TAG, private endTag: string = END_TAG) {
     super({
       transform: (...args) => this.transform(...args),
     })

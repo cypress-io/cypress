@@ -8,14 +8,14 @@
  */
 
 import Debug from 'debug'
-import { getEndTag } from './tags'
+import { END_TAG } from './constants'
 
 const debugVerbose = Debug(`cypress-verbose:stderr-filtering:LineDecoder:${process.pid}`)
 
 export class LineDecoder {
   private buffer: string = ''
 
-  constructor (private overrideToken: string = getEndTag()) {}
+  constructor (private overrideToken: string = END_TAG) {}
 
   /**
    * Adds a chunk of string data to the internal buffer.
