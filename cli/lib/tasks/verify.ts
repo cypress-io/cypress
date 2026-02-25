@@ -100,6 +100,12 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
       timeout: options.smokeTestTimeout,
     })
 
+    // Sandboxed shells can leak ELECTRON_RUN_AS_NODE=1 into child processes.
+    // Verify must run Electron in normal mode so --smoke-test/--ping are handled by Cypress.
+    if (!process.env.CYPRESS_INTERNAL_FORCE_ELECTRON_RUN_AS_NODE) {
+      delete stdioOptions.env.ELECTRON_RUN_AS_NODE
+    }
+
     try {
       const result = await util.exec(
         executable,

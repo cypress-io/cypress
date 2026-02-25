@@ -96,6 +96,13 @@ function createSpawnFunction (
       // it is a tty as opposed to a pipe.
       stdioOptions.env = _.extend({}, stdioOptions.env, envOverrides)
 
+      // Sandboxed shells can leak ELECTRON_RUN_AS_NODE=1 into child processes.
+      // For normal Cypress launches this breaks CLI arg parsing (e.g. --smoke-test, --ping).
+      // Keep node-mode only when explicitly forced by Cypress internals.
+      if (!stdioOptions.env.CYPRESS_INTERNAL_FORCE_ELECTRON_RUN_AS_NODE) {
+        delete stdioOptions.env.ELECTRON_RUN_AS_NODE
+      }
+
       if (node11WindowsFix) {
         stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
       }

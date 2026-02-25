@@ -531,6 +531,24 @@ describe('lib/exec/spawn', function () {
       expect(thirdArg.env.FOO).toEqual('bar')
     })
 
+    it('does not inherit ELECTRON_RUN_AS_NODE from parent environment', async () => {
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+
+      const startPromise = start('--foo')
+
+      spawnedProcess.emit('close', 0)
+
+      await startPromise
+
+      // @ts-expect-error - mock argument
+      const spawnArgs = cp.spawn.mock.calls[0][1]
+      // @ts-expect-error - mock argument
+      const thirdArg = cp.spawn.mock.calls[0][2]
+
+      expect(spawnArgs[0]).toEqual('--')
+      expect(thirdArg.env.ELECTRON_RUN_AS_NODE).toBeUndefined()
+    })
+
     it('forces colors and streams when supported', async () => {
       vi.mocked(util.supportsColor).mockReturnValue(true)
       vi.mocked(tty.isatty).mockReturnValue(true)

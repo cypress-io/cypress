@@ -410,6 +410,31 @@ describe('lib/tasks/verify', () => {
         expect.objectContaining({ env: expect.objectContaining({ FORCE_COLOR: '0' }) }),
       )
     })
+
+    it('does not inherit ELECTRON_RUN_AS_NODE from parent environment', async () => {
+      vi.stubEnv('ELECTRON_RUN_AS_NODE', '1')
+
+      createfs({
+        alreadyVerified: false,
+        executable: mockfs.file({ mode: 0o777 }),
+        packageVersion,
+      })
+
+      vi.mocked(util.exec).mockResolvedValue({
+        stdout: '222',
+        stderr: '',
+      } as any)
+
+      await start({ listrRenderer: 'silent' })
+
+      expect(util.exec).toHaveBeenCalledWith(
+        executablePath,
+        ['--no-sandbox', '--smoke-test', '--ping=222'],
+        expect.objectContaining({
+          env: expect.not.objectContaining({ ELECTRON_RUN_AS_NODE: expect.anything() }),
+        }),
+      )
+    })
   })
 
   describe('with force: true', () => {
