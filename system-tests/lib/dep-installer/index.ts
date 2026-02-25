@@ -36,11 +36,7 @@ const log = (...args) => console.log('📦', ...args)
 * Given a package name, returns the path to the module directory on disk.
 */
 function pathToPackage (pkg: string): string {
-  const resolved = require.resolve(pkg)
-
-  log(`Resolved ${pkg} to ${resolved}`)
-
-  return path.dirname(resolved)
+  return path.dirname(require.resolve(`${pkg}/package.json`))
 }
 
 async function ensureCacheDir (cacheDir: string) {
