@@ -190,6 +190,10 @@ function createSpawnFunction (
 
         const sourceStream = new PassThrough()
 
+        child.on('close', () => {
+          sourceStream.end()
+        })
+
         child.stderr.on('data', (data: any) => {
           const str = data.toString()
 

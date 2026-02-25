@@ -132,7 +132,10 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<st
       const version = deps[dep]
 
       if (version.startsWith('file:')) {
-        const absPath = pathToPackage(version.replace('file:', ''))
+        const pathRelativeToProject = version.replace('file:', '')
+        const projectPathFromInstaller = getRelativePathToProjectDir(path.dirname(pathToPkgJson))
+        const relativeDepPath = path.relative(projectPathFromInstaller, pathRelativeToProject)
+        const absPath = pathToPackage(relativeDepPath)
 
         log(`Setting absolute path in package.json for ${dep} @ ${version}: ${absPath}.`)
 
