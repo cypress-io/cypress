@@ -9,7 +9,7 @@ _Released 03/02/2026 (PENDING)_
 
 ## 15.11.0
 
-_Released 02/24/2026
+_Released 02/24/2026_
 
 **Features:**
 
