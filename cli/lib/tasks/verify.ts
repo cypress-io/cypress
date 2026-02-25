@@ -95,14 +95,19 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
     const stdioOptions = _.extend({}, {
       env: {
         ...process.env,
+        ...options.env,
         FORCE_COLOR: '0',
       },
+      // execa defaults to extending process.env. We pass a fully-shaped env object
+      // and need to prevent leaked parent vars (like ELECTRON_RUN_AS_NODE) from
+      // being reintroduced after sanitization.
+      extendEnv: false,
       timeout: options.smokeTestTimeout,
     })
 
     // Sandboxed shells can leak ELECTRON_RUN_AS_NODE=1 into child processes.
     // Verify must run Electron in normal mode so --smoke-test/--ping are handled by Cypress.
-    if (!process.env.CYPRESS_INTERNAL_FORCE_ELECTRON_RUN_AS_NODE) {
+    if (!stdioOptions.env.CYPRESS_INTERNAL_FORCE_ELECTRON_RUN_AS_NODE) {
       delete stdioOptions.env.ELECTRON_RUN_AS_NODE
     }
 
