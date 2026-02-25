@@ -17,14 +17,6 @@ const extract = (envKeys) => {
 }
 
 /**
- * Returns true if running on TeamFoundation server.
- * @see https://technet.microsoft.com/en-us/hh850448(v=vs.92)
- */
-const isTeamFoundation = () => {
-  return process.env.TF_BUILD && process.env.TF_BUILD_BUILDNUMBER
-}
-
-/**
  * Returns true if running on Azure CI pipeline.
  * See environment variables in the issue #3657
  * @see https://github.com/cypress-io/cypress/issues/3657
@@ -39,16 +31,36 @@ const isAWSCodeBuild = () => {
   })
 }
 
+// AWS Amplify Console / Amplify Hosting
+// Ref: https://docs.aws.amazon.com/amplify/latest/userguide/environment-variables.html
+const isAWSAmplifyConsole = () => {
+  // Some Amplify build types/environments may not expose AWS_JOB_ID.
+  // Prefer a more robust detection based on other Amplify-built-in variables
+  // so we don't fall back to generic CodeBuild detection and change metadata.
+  return process.env.AWS_APP_ID && Boolean(
+    process.env.AWS_JOB_ID ||
+    process.env.AWS_BRANCH ||
+    process.env.AWS_COMMIT_ID ||
+    process.env.AWS_BRANCH_ARN ||
+    process.env.AWS_CLONE_URL ||
+    process.env.AWS_PULL_REQUEST_ID,
+  )
+}
+
 const isBamboo = () => {
   return process.env.bamboo_buildNumber
 }
 
-const isCodeshipBasic = () => {
-  return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && process.env.CODESHIP
+// Harness CI exposes both HARNESS_* and DRONE_* environment variables.
+// Ref: https://developer.harness.io/docs/continuous-integration/troubleshoot-ci/ci-env-var/#codebase-and-trigger-variables
+const isHarnessCi = () => {
+  return _.some(process.env, (val, key) => /^HARNESS_/.test(key))
 }
 
-const isCodeshipPro = () => {
-  return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && !process.env.CODESHIP
+const isDroneCi = () => {
+  // Drone (and Harness CI) set DRONE_* env vars.
+  // But Drone standalone has no HARNESS_* env vars.
+  return process.env.DRONE || _.some(process.env, (val, key) => /^DRONE_/.test(key))
 }
 
 const isConcourse = () => {
@@ -76,10 +88,6 @@ const isJenkins = () => {
     process.env.HUDSON_HOME
 }
 
-const isWercker = () => {
-  return process.env.WERCKER || process.env.WERCKER_MAIN_PIPELINE_STARTED
-}
-
 /**
  * We detect CI providers by detecting an environment variable
  * unique to the provider, or by calling a function that returns true
@@ -91,29 +99,35 @@ const isWercker = () => {
 const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
   'azure': isAzureCi,
+  // Amplify Console runs on CodeBuild and can expose CODEBUILD_* env vars.
+  // Since provider detection picks the first match, the more specific provider
+  // must be listed before the generic CodeBuild detection.
+  awsAmplifyConsole: isAWSAmplifyConsole,
   'awsCodeBuild': isAWSCodeBuild,
   'bamboo': isBamboo,
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
+  buddy: 'BUDDY',
+  bitrise: 'BITRISE_IO',
   'buildkite': 'BUILDKITE',
   'circle': 'CIRCLECI',
-  'codeshipBasic': isCodeshipBasic,
-  'codeshipPro': isCodeshipPro,
+  // CloudBees Unify runs workflows in a CloudBees-managed workspace directory.
+  // The official CloudBees checkout action checks out repositories under $CLOUDBEES_WORKSPACE.
+  // Ref: https://raw.githubusercontent.com/cloudbees-io/checkout/v1/README.adoc
+  cloudbeesUnify: 'CLOUDBEES_WORKSPACE',
   'concourse': isConcourse,
   codeFresh: 'CF_BUILD_ID',
-  'drone': 'DRONE',
+  // Harness CI check must be before Drone CI check
+  harness: isHarnessCi,
+  'drone': isDroneCi,
   githubActions: 'GITHUB_ACTIONS',
   'gitlab': isGitlab,
   'goCD': 'GO_JOB_NAME',
   'googleCloud': isGoogleCloud,
   'jenkins': isJenkins,
   'semaphore': 'SEMAPHORE',
-  'shippable': 'SHIPPABLE',
   'teamcity': 'TEAMCITY_VERSION',
-  'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
-  'wercker': isWercker,
   netlify: 'NETLIFY',
-  webappio: 'WEBAPPIO',
 }
 
 const _detectProviderName = () => {
@@ -145,6 +159,7 @@ const _userProvidedProviderCiParams = () => {
 // look at the old commit that was removed to see how we did it
 const _providerCiParams = () => {
   return {
+    // https://www.appveyor.com/docs/environment-variables/
     appveyor: extract([
       'APPVEYOR_JOB_ID',
       'APPVEYOR_ACCOUNT_NAME',
@@ -171,17 +186,65 @@ const _providerCiParams = () => {
     ]),
     awsCodeBuild: extract([
       'CODEBUILD_BUILD_ID',
+      'CODEBUILD_BUILD_ARN',
       'CODEBUILD_BUILD_NUMBER',
       'CODEBUILD_RESOLVED_SOURCE_VERSION',
       'CODEBUILD_SOURCE_REPO_URL',
       'CODEBUILD_SOURCE_VERSION',
     ]),
+    // https://docs.aws.amazon.com/amplify/latest/userguide/environment-variables.html
+    awsAmplifyConsole: extract([
+      'AWS_APP_ID',
+      'AWS_BRANCH',
+      'AWS_BRANCH_ARN',
+      'AWS_JOB_ID',
+      'AWS_CLONE_URL',
+      'AWS_COMMIT_ID',
+      // PR preview builds
+      'AWS_PULL_REQUEST_ID',
+      'AWS_PULL_REQUEST_SOURCE_BRANCH',
+      'AWS_PULL_REQUEST_DESTINATION_BRANCH',
+    ]),
+    // https://buddy.works/docs/basics/environment-variables/default-variables
+    buddy: extract([
+      // The ID of the current pipeline run: '1'
+      'BUDDY_RUN_ID',
+      // The number of the currently run pull request: '27'
+      'BUDDY_RUN_PR_NO',
+      // The URL of the current pipeline run
+      'BUDDY_RUN_URL',
+      // The name of the Git branch of the current pipeline run
+      'BUDDY_RUN_BRANCH',
+      // The SHA1 hash of the commit of the current pipeline run
+      'BUDDY_RUN_COMMIT',
+      // The commit message of the currently run commit
+      'BUDDY_RUN_COMMIT_MESSAGE',
+      // The name of the committer of the currently run commit
+      'BUDDY_RUN_COMMIT_COMMITTER_NAME',
+      // The email address of the committer email of the currently run commit
+      'BUDDY_RUN_COMMIT_COMMITTER_EMAIL',
+      // The SSH URL of the repository
+      'BUDDY_REPO_SSH_URL',
+    ]),
+    // https://docs.bitrise.io/en/bitrise-ci/references/available-environment-variables.html
+    bitrise: extract([
+      'BITRISE_BUILD_NUMBER',
+      'BITRISE_BUILD_URL',
+      'BITRISE_BUILD_SLUG',
+      'BITRISE_APP_SLUG',
+      'GIT_REPOSITORY_URL',
+      'BITRISE_GIT_BRANCH',
+      'BITRISEIO_GIT_BRANCH_DEST',
+      'BITRISE_PULL_REQUEST',
+    ]),
+    // https://confluence.atlassian.com/bamboo/bamboo-variables-289277087.html
     bamboo: extract([
       'bamboo_buildNumber',
       'bamboo_buildResultsUrl',
       'bamboo_planRepository_repositoryUrl',
       'bamboo_buildKey',
     ]),
+    // https://support.atlassian.com/bitbucket-cloud/docs/variables-and-secrets/
     bitbucket: extract([
       'BITBUCKET_REPO_SLUG',
       'BITBUCKET_REPO_OWNER',
@@ -193,6 +256,7 @@ const _providerCiParams = () => {
       'BITBUCKET_PR_DESTINATION_BRANCH',
       'BITBUCKET_PR_DESTINATION_COMMIT',
     ]),
+    // https://buildkite.com/docs/pipelines/configure/environment-variables
     buildkite: extract([
       'BUILDKITE_REPO',
       'BUILDKITE_SOURCE',
@@ -205,6 +269,7 @@ const _providerCiParams = () => {
       'BUILDKITE_PULL_REQUEST_BASE_BRANCH',
       'BUILDKITE_RETRY_COUNT',
     ]),
+    // https://circleci.com/docs/reference/variables/
     circle: extract([
       'CIRCLE_JOB',
       'CIRCLE_BUILD_NUM',
@@ -220,22 +285,8 @@ const _providerCiParams = () => {
       'CIRCLE_REPOSITORY_URL',
       'CI_PULL_REQUEST',
     ]),
-    codeshipBasic: extract([
-      'CI_BUILD_ID',
-      'CI_REPO_NAME',
-      'CI_BUILD_URL',
-      'CI_PROJECT_ID',
-      'CI_BUILD_NUMBER',
-      'CI_PULL_REQUEST',
-    ]),
-    // CodeshipPro provides very few CI variables
-    // https://documentation.codeship.com/pro/builds-and-configuration/environment-variables/
-    codeshipPro: extract([
-      'CI_BUILD_ID',
-      'CI_REPO_NAME',
-      'CI_PROJECT_ID',
-      'CI_PR_NUMBER',
-      'CI_PULL_REQUEST',
+    cloudbeesUnify: extract([
+      'CLOUDBEES_WORKSPACE',
     ]),
     // https://concourse-ci.org/implementing-resource-types.html#resource-metadata
     concourse: extract([
@@ -260,13 +311,31 @@ const _providerCiParams = () => {
       'CF_PULL_REQUEST_NUMBER',
       'CF_PULL_REQUEST_TARGET',
     ]),
+    // https://developer.harness.io/docs/continuous-integration/troubleshoot-ci/ci-env-var/#codebase-and-trigger-variables
+    harness: extract([
+      'HARNESS_BUILD_ID',
+      'HARNESS_EXECUTION_ID',
+      'HARNESS_PIPELINE_ID',
+      'HARNESS_PROJECT_ID',
+      'HARNESS_ORG_ID',
+      'HARNESS_ACCOUNT_ID',
+      'HARNESS_STAGE_ID',
+      // build/run links and identifiers (often exposed as DRONE_* as well)
+      'CI_BUILD_LINK',
+      'CI_BUILD_NUMBER',
+      'DRONE_BUILD_LINK',
+      'DRONE_BUILD_NUMBER',
+      // PR + repo metadata
+      'DRONE_PULL_REQUEST',
+      'DRONE_REPO',
+    ]),
     drone: extract([
       'DRONE_JOB_NUMBER',
       'DRONE_BUILD_LINK',
       'DRONE_BUILD_NUMBER',
       'DRONE_PULL_REQUEST',
     ]),
-    // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
+    // https://docs.github.com/en/actions/reference/workflows-and-actions/variables
     githubActions: extract([
       'GITHUB_WORKFLOW',
       'GITHUB_ACTION',
@@ -280,7 +349,7 @@ const _providerCiParams = () => {
       'GITHUB_REF',
       'GITHUB_JOB',
     ]),
-    // see https://docs.gitlab.com/ee/ci/variables/
+    // see https://docs.gitlab.com/ci/variables/predefined_variables/
     gitlab: extract([
     // pipeline is common among all jobs
       'CI_PIPELINE_ID',
@@ -332,13 +401,10 @@ const _providerCiParams = () => {
       '_PR_NUMBER',
       // https://cloud.google.com/cloud-build/docs/api/reference/rest/Shared.Types/Build
     ]),
-    /**
-     * References:
-     * https://ci.eclipse.org/webtools/env-vars.html/
-     * https://www.jenkins.io/doc/book/pipeline/multibranch/#additional-environment-variables
-     */
+    // https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
     jenkins: extract([
       'BUILD_ID',
+      'BUILD_TAG',
       'BUILD_URL',
       'BUILD_NUMBER',
       'ghprbPullId',
@@ -348,8 +414,7 @@ const _providerCiParams = () => {
       'CHANGE_TARGET',
       'CHANGE_TITLE',
     ]),
-    // https://semaphoreci.com/docs/available-environment-variables.html
-    // some come from v1, some from v2 of semaphore
+    // https://docs.semaphore.io/reference/env-vars
     semaphore: extract([
       'SEMAPHORE_BRANCH_ID',
       'SEMAPHORE_BUILD_NUMBER',
@@ -357,18 +422,28 @@ const _providerCiParams = () => {
       'SEMAPHORE_CURRENT_THREAD',
       'SEMAPHORE_EXECUTABLE_UUID',
       'SEMAPHORE_GIT_BRANCH',
+      'SEMAPHORE_GIT_COMMIT_AUTHOR',
+      'SEMAPHORE_GIT_COMMITTER',
       'SEMAPHORE_GIT_DIR',
+      'SEMAPHORE_GIT_PR_BRANCH',
+      'SEMAPHORE_GIT_PR_NAME',
       'SEMAPHORE_GIT_PR_NUMBER',
+      'SEMAPHORE_GIT_PR_SHA',
+      'SEMAPHORE_GIT_PR_SLUG',
       'SEMAPHORE_GIT_REF',
       'SEMAPHORE_GIT_REF_TYPE',
+      'SEMAPHORE_GIT_REPO_NAME',
       'SEMAPHORE_GIT_REPO_SLUG',
       'SEMAPHORE_GIT_SHA',
+      'SEMAPHORE_GIT_TAG_NAME',
       'SEMAPHORE_GIT_URL',
       'SEMAPHORE_GIT_WORKING_BRANCH',
       'SEMAPHORE_JOB_COUNT',
+      'SEMAPHORE_JOB_INDEX',
       'SEMAPHORE_JOB_ID', // v2
       'SEMAPHORE_JOB_NAME',
       'SEMAPHORE_JOB_UUID', // v1
+      'SEMAPHORE_ORGANIZATION_URL',
       'SEMAPHORE_PIPELINE_ID',
       'SEMAPHORE_PLATFORM',
       'SEMAPHORE_PROJECT_DIR',
@@ -379,41 +454,15 @@ const _providerCiParams = () => {
       'SEMAPHORE_REPO_SLUG',
       'SEMAPHORE_TRIGGER_SOURCE',
       'SEMAPHORE_WORKFLOW_ID',
+      'SEMAPHORE_WORKFLOW_NUMBER',
       'PULL_REQUEST_NUMBER', // pull requests from forks ONLY
     ]),
-    // see http://docs.shippable.com/ci/env-vars/
-    shippable: extract([
-    // build variables
-      'SHIPPABLE_BUILD_ID', // "5b93354cabfabb07007f01fd"
-      'SHIPPABLE_BUILD_NUMBER', // "4"
-      'SHIPPABLE_COMMIT_RANGE', // "sha1...sha2"
-      'SHIPPABLE_CONTAINER_NAME', // "c.exec.cypress-example-kitchensink.4.1"
-      'SHIPPABLE_JOB_ID', // "1"
-      'SHIPPABLE_JOB_NUMBER', // "1"
-      'SHIPPABLE_REPO_SLUG', // "<username>/<repo>"
-      // additional information that Shippable provides
-      'IS_FORK', // "true"
-      'IS_GIT_TAG', // "false"
-      'IS_PRERELEASE', // "false"
-      'IS_RELEASE', // "false"
-      'REPOSITORY_URL', // "https://github.com/....git"
-      'REPO_FULL_NAME', // "<username>/<repo>"
-      'REPO_NAME', // "cypress-example-kitchensink"
-      'BUILD_URL', // "https://app.shippable.com/github/<username>/<repo>/runs/1"
-      // Pull request information
-      'BASE_BRANCH', // Name of the target branch into which the pull request changes will be merged.
-      'HEAD_BRANCH', // This is only set for pull requests and is the name of the branch the pull request was opened from.
-      'IS_PULL_REQUEST', // "false" or "true"
-      'PULL_REQUEST', // Pull request number if the job is a pull request. If not, this will be set to false.
-      'PULL_REQUEST_BASE_BRANCH', // Name of the branch that the pull request will be merged into. It should be the same as BASE_BRANCH.
-      'PULL_REQUEST_REPO_FULL_NAME', // Full name of the repository from where the pull request originated.
+    // https://www.jetbrains.com/help/teamcity/predefined-build-parameters.html#Predefined+Server+Build+Parameters
+    teamcity: extract([
+      'BUILD_NUMBER',
+      'BUILD_URL',
     ]),
-    teamcity: null,
-    teamfoundation: extract([
-      'BUILD_BUILDID',
-      'BUILD_BUILDNUMBER',
-      'BUILD_CONTAINERID',
-    ]),
+    // // https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
     travis: extract([
       'TRAVIS_JOB_ID',
       'TRAVIS_BUILD_ID',
@@ -427,8 +476,7 @@ const _providerCiParams = () => {
       'TRAVIS_PULL_REQUEST_BRANCH',
       'TRAVIS_PULL_REQUEST_SHA',
     ]),
-    wercker: null,
-    // https://docs.netlify.com/configure-builds/environment-variables/#deploy-urls-and-metadata
+    // https://docs.netlify.com/configure-builds/environment-variables
     netlify: extract([
       'BUILD_ID',
       'CONTEXT',
@@ -436,17 +484,6 @@ const _providerCiParams = () => {
       'DEPLOY_URL',
       'DEPLOY_PRIME_URL',
       'DEPLOY_ID',
-    ]),
-    // https://docs.webapp.io/layerfile-reference/build-env
-    webappio: extract([
-      'JOB_ID',
-      'RUNNER_ID',
-      'RETRY_INDEX',
-      'PULL_REQUEST_URL',
-      'REPOSITORY_NAME',
-      'REPOSITORY_OWNER',
-      'GIT_BRANCH',
-      'GIT_TAG', // short hex for commits
     ]),
   }
 }
@@ -478,6 +515,30 @@ const _providerCommitParams = () => {
       // authorName: ???
       // authorEmail: ???
       remoteOrigin: env.CODEBUILD_SOURCE_REPO_URL,
+      // defaultBranch: ???
+    },
+    awsAmplifyConsole: {
+      sha: env.AWS_COMMIT_ID,
+      branch: env.AWS_PULL_REQUEST_SOURCE_BRANCH || env.AWS_BRANCH,
+      remoteOrigin: env.AWS_CLONE_URL,
+      // defaultBranch: ???
+    },
+    buddy: {
+      sha: env.BUDDY_RUN_COMMIT,
+      branch: env.BUDDY_RUN_BRANCH,
+      message: env.BUDDY_RUN_COMMIT_MESSAGE,
+      authorName: env.BUDDY_RUN_COMMIT_COMMITTER_NAME,
+      authorEmail: env.BUDDY_RUN_COMMIT_COMMITTER_EMAIL,
+      remoteOrigin: env.BUDDY_REPO_SSH_URL,
+      // defaultBranch: ???
+    },
+    bitrise: {
+      sha: env.BITRISE_GIT_COMMIT || env.GIT_CLONE_COMMIT_HASH,
+      branch: env.BITRISE_GIT_BRANCH,
+      message: env.BITRISE_GIT_MESSAGE,
+      authorName: env.GIT_CLONE_COMMIT_AUTHOR_NAME,
+      authorEmail: env.GIT_CLONE_COMMIT_AUTHOR_EMAIL,
+      remoteOrigin: env.GIT_REPOSITORY_URL,
       // defaultBranch: ???
     },
     azure: {
@@ -523,29 +584,22 @@ const _providerCommitParams = () => {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
-    codeshipBasic: {
-      sha: env.CI_COMMIT_ID,
-      branch: env.CI_BRANCH,
-      message: env.CI_COMMIT_MESSAGE,
-      authorName: env.CI_COMMITTER_NAME,
-      authorEmail: env.CI_COMMITTER_EMAIL,
-      // remoteOrigin: ???
-      // defaultBranch: ???
-    },
-    codeshipPro: {
-      sha: env.CI_COMMIT_ID,
-      branch: env.CI_BRANCH,
-      message: env.CI_COMMIT_MESSAGE,
-      authorName: env.CI_COMMITTER_NAME,
-      authorEmail: env.CI_COMMITTER_EMAIL,
-      // remoteOrigin: ???
-      // defaultBranch: ???
-    },
+    cloudbeesUnify: {},
     codeFresh: {
       sha: env.CF_REVISION,
       branch: env.CF_BRANCH,
       message: env.CF_COMMIT_MESSAGE,
       authorName: env.CF_COMMIT_AUTHOR,
+    },
+    // https://developer.harness.io/docs/continuous-integration/troubleshoot-ci/ci-env-var/#codebase-and-trigger-variables
+    harness: {
+      sha: env.CI_COMMIT_SHA || env.DRONE_COMMIT_SHA || env.DRONE_COMMIT,
+      branch: env.DRONE_SOURCE_BRANCH || env.DRONE_BRANCH || env.CI_COMMIT_BRANCH,
+      message: env.CI_COMMIT_MESSAGE || env.DRONE_COMMIT_MESSAGE,
+      authorName: env.CI_COMMIT_AUTHOR || env.DRONE_COMMIT_AUTHOR || env.CI_COMMIT_AUTHOR_NAME || env.DRONE_COMMIT_AUTHOR_NAME,
+      authorEmail: env.CI_COMMIT_AUTHOR_EMAIL || env.DRONE_COMMIT_AUTHOR_EMAIL,
+      remoteOrigin: env.CI_REPO_REMOTE || env.DRONE_GIT_HTTP_URL || env.DRONE_GIT_SSH_URL,
+      defaultBranch: env.DRONE_REPO_BRANCH,
     },
     drone: {
       sha: env.DRONE_COMMIT_SHA,
@@ -597,33 +651,25 @@ const _providerCommitParams = () => {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
-    // Only from forks? https://semaphoreci.com/docs/available-environment-variables.html
+    // https://docs.semaphore.io/reference/env-vars
     semaphore: {
       sha: env.SEMAPHORE_GIT_SHA,
-      branch: env.SEMAPHORE_GIT_WORKING_BRANCH,
+      branch: env.SEMAPHORE_GIT_WORKING_BRANCH || env.SEMAPHORE_GIT_BRANCH,
       // message: ???
-      // authorName: ???
+      authorName: env.SEMAPHORE_GIT_COMMIT_AUTHOR || env.SEMAPHORE_GIT_COMMITTER,
       // authorEmail: ???
-      remoteOrigin: env.SEMAPHORE_GIT_REPO_SLUG,
-      // defaultBranch: ???
-    },
-    shippable: {
-      sha: env.COMMIT,
-      branch: env.BRANCH,
-      message: env.COMMIT_MESSAGE,
-      authorName: env.COMMITTER,
-      // authorEmail: ???
-      // remoteOrigin: ???
+      remoteOrigin: env.SEMAPHORE_GIT_URL || env.SEMAPHORE_GIT_REPO_SLUG,
       // defaultBranch: ???
     },
     snap: null,
+    // TeamCity does not expose standardized commit metadata via env vars by default.
+    // branch: not a predefined env var; may be configured via custom parameters
+    // message: ???
+    // authorName: ???
+    // authorEmail: ???
+    // remoteOrigin: ???
+    // defaultBranch: ???
     teamcity: null,
-    teamfoundation: {
-      sha: env.BUILD_SOURCEVERSION,
-      branch: env.BUILD_SOURCEBRANCHNAME,
-      message: env.BUILD_SOURCEVERSIONMESSAGE,
-      authorName: env.BUILD_SOURCEVERSIONAUTHOR,
-    },
     travis: {
       sha: env.TRAVIS_PULL_REQUEST_SHA || env.TRAVIS_COMMIT,
       // for PRs, TRAVIS_BRANCH is the base branch being merged into
@@ -634,16 +680,10 @@ const _providerCommitParams = () => {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
-    wercker: null,
     netlify: {
       sha: env.COMMIT_REF,
       branch: env.BRANCH,
       remoteOrigin: env.REPOSITORY_URL,
-    },
-    webappio: {
-      sha: env.GIT_COMMIT,
-      branch: env.GIT_BRANCH,
-      message: env.GIT_COMMIT_TITLE,
     },
   }
 }
@@ -721,8 +761,9 @@ const list = () => {
 const detectableCiBuildIdProviders = () => {
   return _
   .chain(_providerCiParams())
-  .omitBy(_.isNull)
+  .omitBy(_.isNil)
   .keys()
+  .sortBy()
   .value()
 }
 
