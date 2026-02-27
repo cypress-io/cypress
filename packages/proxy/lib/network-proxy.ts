@@ -81,11 +81,11 @@ export class NetworkProxy {
     this.http.setPreRequestTimeout(timeout)
   }
 
-  setCredentials = ({ url, resourceType, credentialStatus }: {
+  setCredentials ({ url, resourceType, credentialStatus }: {
     url: string
     resourceType: ResourceType
     credentialStatus: RequestCredentialLevel
-  }): void => {
+  }): void {
     resourceTypeAndCredentialManager.set({ url, resourceType, credentialStatus })
   }
 
