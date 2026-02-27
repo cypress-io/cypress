@@ -182,6 +182,7 @@ fragment SpecRunner_Preferences on Query {
       isSpecsListOpen
       autoScrollingEnabled
       showFetchRequests
+      codeEditorLineWrap
       reporterWidth
       specListWidth
       studioWidth
@@ -356,7 +357,7 @@ onMounted(() => {
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-
+preferences.update('codeEditorLineWrap', props.gql.localSettings.preferences.codeEditorLineWrap ?? false)
 preferences.update('showFetchRequests', props.gql.localSettings.preferences.showFetchRequests ?? true)
 
 // if the CYPRESS_NO_COMMAND_LOG environment variable is set,
@@ -442,6 +443,7 @@ onMounted(() => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
     preferences.update('showFetchRequests', state.showFetchRequests)
+    preferences.update('codeEditorLineWrap', state.codeEditorLineWrap)
   })
 })
 

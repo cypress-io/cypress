@@ -1,7 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.11.1
 
-_Released 03/10/2026 (PENDING)_
+## 15.12.0
+
+_Released 03/02/2026 (PENDING)_
+
+**Features:**
+
+- Adds an option to enable word wrap for Studio panel code. Addressed in [#33411](https://github.com/cypress-io/cypress/pull/33411).
 
 **Bugfixes:**
 

@@ -71,6 +71,11 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     events.emit('save:state')
   }
 
+  const toggleCodeEditorLineWrap = () => {
+    appState.toggleCodeEditorLineWrap()
+    events.emit('save:state')
+  }
+
   // Close popover when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -166,6 +171,25 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           </span>
         </div>
 
+      </div>
+
+      <div className="runnable-popover-section">
+        <div className="runnable-popover-section-title">Studio preferences</div>
+        <div className="runnable-popover-item-with-toggle">
+          <div className="runnable-popover-item-with-toggle-content">
+            <div className="runnable-popover-item-text">
+              <span className="runnable-popover-item-label">Code editor line wrap</span>
+            </div>
+            <Switch
+              data-cy="code-editor-line-wrap-switch"
+              value={appState.codeEditorLineWrap}
+              onUpdate={action('toggle:code:editor:line:wrap', toggleCodeEditorLineWrap)}
+            />
+          </div>
+          <span className="runnable-popover-item-description">
+            Wrap long lines instead of scrolling horizontally.
+          </span>
+        </div>
       </div>
     </div>
   )
