@@ -3,7 +3,7 @@
 
 _Released 03/02/2026 (PENDING)_
 
-**Misc:**
+**Features:**
 
 - Adds an option to enable word wrap for Studio panel code. Addressed in [#33411](https://github.com/cypress-io/cypress/pull/33411).
 
