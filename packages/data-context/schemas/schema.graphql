@@ -1409,6 +1409,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  codeEditorLineWrap: Boolean
   debugSlideshowComplete: Boolean
   desktopNotificationsEnabled: Boolean
   dismissNotificationBannerUntil: DateTime
