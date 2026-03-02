@@ -205,6 +205,7 @@ const events: Events = {
         autoScrollingEnabled: appState.autoScrollingUserPref,
         isSpecsListOpen: appState.isSpecsListOpen,
         showFetchRequests: appState.showFetchRequests,
+        codeEditorLineWrap: appState.codeEditorLineWrap,
       })
     })
 
