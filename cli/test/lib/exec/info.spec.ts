@@ -68,7 +68,6 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
 describe('exec info', () => {
   const createStdoutCapture = () => {
     const logs: string[] = []
-    // eslint-disable-next-line no-console
     const originalOut = process.stdout.write
 
     vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {

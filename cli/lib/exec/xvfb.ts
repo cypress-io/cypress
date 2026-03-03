@@ -104,7 +104,7 @@ export function isNeeded (): boolean {
   return true
 }
 
-  // async method, resolved with Boolean
+// async method, resolved with Boolean
 export async function verify (): Promise<boolean> {
   try {
     await xvfb.startAsync()

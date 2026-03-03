@@ -7,7 +7,6 @@ import dayjs from 'dayjs'
 const formattedLog = (options: any, output: string): void => {
   const timestamp = dayjs().format(options.dateFormat)
 
-  // eslint-disable-next-line no-console
   console.log(`${chalk.dim(`[${timestamp}]`)} ${output}`)
 }
 
@@ -40,7 +39,6 @@ const render = (tasks: any[], options: any): void => {
         renderHelper(task, event, options)
       },
       (err: any) => {
-        // eslint-disable-next-line no-console
         console.log(err)
       },
     )

@@ -97,7 +97,6 @@ describe('lib/tasks/download', function () {
 
   const createStdoutCapture = () => {
     const logs: string[] = []
-    // eslint-disable-next-line no-console
     const originalOut = process.stdout.write
 
     vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
@@ -294,10 +293,12 @@ describe('lib/tasks/download', function () {
     let expectedFileSize: number
     let onProgress: vi.Mock
 
-    beforeEach(function () {
-      expectedChecksum = hasha.fromFileSync(examplePath)
+    beforeEach(async function () {
+      expectedChecksum = await hasha.fromFile(examplePath)
 
-      expectedFileSize = fs.statSync(examplePath).size
+      const stat = await fs.stat(examplePath)
+
+      expectedFileSize = stat.size
 
       onProgress = vi.fn().mockReturnValue(undefined)
       debug('example file %s should have checksum %s and file size %d',

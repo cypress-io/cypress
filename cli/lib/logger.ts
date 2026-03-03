@@ -8,26 +8,26 @@ const logLevel = (): string => {
 
 const error = (...messages: any[]): void => {
   logs.push(messages.join(' '))
-  console.log(chalk.red(...messages)) // eslint-disable-line no-console
+  console.log(chalk.red(...messages))
 }
 
 const warn = (...messages: any[]): void => {
   if (logLevel() === 'silent') return
 
   logs.push(messages.join(' '))
-  console.log(chalk.yellow(...messages)) // eslint-disable-line no-console
+  console.log(chalk.yellow(...messages))
 }
 
 const log = (...messages: any[]): void => {
   if (logLevel() === 'silent' || logLevel() === 'warn') return
 
   logs.push(messages.join(' '))
-  console.log(...messages) // eslint-disable-line no-console
+  console.log(...messages)
 }
 
 const always = (...messages: any[]): void => {
   logs.push(messages.join(' '))
-  console.log(...messages) // eslint-disable-line no-console
+  console.log(...messages)
 }
 
 // splits long text into lines and calls log()

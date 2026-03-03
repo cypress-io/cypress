@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { start as spawnStart } from './spawn'
 import util from '../util'
 import state from '../tasks/state'

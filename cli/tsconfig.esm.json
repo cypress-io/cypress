@@ -4,7 +4,9 @@
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "node",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "lib/**/*.mts"

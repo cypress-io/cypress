@@ -4,16 +4,18 @@
 // and should not repeat them
 
 // extra code that is not in the kitchensink that type checks edge cases
-cy.wrap('foo').then(subject => {
+cy.wrap('foo').then((subject) => {
   subject // $ExpectType string
+
   return cy.wrap(subject)
-}).then(subject => {
+}).then((subject) => {
   subject // $ExpectType string
 })
 
 const result = Cypress.minimatch('/users/1/comments', '/users/*/comments', {
   matchBase: true,
 })
+
 result // $ExpectType boolean
 
 Cypress.minimatch('/users/1/comments', '/users/*/comments') // $ExpectType boolean
@@ -21,8 +23,8 @@ Cypress.minimatch('/users/1/comments', '/users/*/comments') // $ExpectType boole
 cy.visit('https://www.acme.com/', {
   auth: {
     username: 'wile',
-    password: 'coyote'
-  }
+    password: 'coyote',
+  },
 })
 
 Cypress.spec.name // $ExpectType string
@@ -43,6 +45,7 @@ cy.on('window:alert', cy.stub())
 
 // sinon-chai example
 const stub = cy.stub()
+
 expect(stub).to.not.have.been.called
 stub()
 expect(stub).to.have.been.calledOnce
@@ -66,9 +69,9 @@ namespace EventInterfaceTests {
 
 // specifying HTTP method directly in the options object
 cy.request({
-  url: "http://localhost:3000/myressource",
-  method: "POST",
-  body: {}
+  url: 'http://localhost:3000/myressource',
+  method: 'POST',
+  body: {},
 }).then((resp) => {
   resp // $ExpectType Response<any>
   resp.redirectedToUrl // $ExpectType string | undefined
@@ -79,10 +82,10 @@ cy.request({
 // specify query parameters
 // https://github.com/cypress-io/cypress/issues/2305
 cy.request({
-  url: "http://localhost:3000/myressource",
+  url: 'http://localhost:3000/myressource',
   qs: {
-    param: 'someValue'
-  }
+    param: 'someValue',
+  },
 })
 
 // Users can specify body type.
@@ -104,7 +107,7 @@ cy.request<ResBody>('post', 'http://goooooogle.com', {})
 
 cy.request<ResBody>({
   url: 'http://goooooogle.com',
-  body: {}
+  body: {},
 }).then((resp) => {
   resp // $ExpectType Response<ResBody>
 })
@@ -113,36 +116,39 @@ cy.request<ResBody>({
 // otherwise TSC does not cast string "POST" as HttpMethod
 // https://github.com/cypress-io/cypress/issues/2093
 const opts: Partial<Cypress.RequestOptions> = {
-  url: "http://localhost:3000/myressource",
-  method: "POST",
-  body: {}
+  url: 'http://localhost:3000/myressource',
+  method: 'POST',
+  body: {},
 }
+
 cy.request(opts)
 
 // you can cast just the "method" property
 const opts2 = {
-  url: "http://localhost:3000/myressource",
-  method: "POST" as Cypress.HttpMethod,
-  body: {}
+  url: 'http://localhost:3000/myressource',
+  method: 'POST' as Cypress.HttpMethod,
+  body: {},
 }
+
 cy.request(opts2)
 
 const obj = {
-  foo: () => { }
+  foo: () => { },
 }
+
 cy.spy(obj, 'foo').as('my-spy')
 
 // use path-based access for nested structures
 cy.wrap({
   foo: {
-    bar: 1
-  }
+    bar: 1,
+  },
 }).its('foo.bar')
 
 cy.wrap({
   foo: {
-    quux: () => 2
-  }
+    quux: () => 2,
+  },
 }).invoke('foo.quux')
 
 // different clearLocalStorage signatures
@@ -164,12 +170,13 @@ namespace BufferTests {
   buffer.length
 }
 
-cy.window().then(window => {
+cy.window().then((window) => {
   window // $ExpectType AUTWindow
 
   window.eval('1')
 })
 
 const a = 1
+
 // $ExpectError
-a.should("be.visible")
+a.should('be.visible')

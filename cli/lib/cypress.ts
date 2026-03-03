@@ -6,7 +6,7 @@ import runModule from './exec/run'
 import util from './util'
 import cliImport from './cli'
 
-  /**
+/**
    * Opens Cypress GUI
    * @see https://on.cypress.io/module-api#cypress-open
    */

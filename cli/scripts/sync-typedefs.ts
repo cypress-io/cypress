@@ -18,20 +18,6 @@ shell.set('-e') // any error is fatal
 // yet we do not install "@types/.." packages with "npm install cypress"
 // because they can conflict with user's own libraries
 
-fs.ensureDirSync(join(__dirname, '..', 'types'))
-
-includeTypes.forEach((folder: string) => {
-  const source: string = resolvePkg(`@types/${folder}`, { cwd: __dirname })
-
-  fs.copySync(source, join(__dirname, '..', 'types', folder))
-})
-
-// jQuery v3.3.x includes "dist" folder that just references back to itself
-// causing dtslint to think there are double definitions. Remove that folder.
-const typesJqueryDistFolder: string = join('types', 'jquery', 'dist')
-
-shell.rm('-rf', typesJqueryDistFolder)
-
 /**
  * Replaces "reference types=<n>" comment with "reference path=..." line.
  * @param {string} typeName - like "chai" or "jquery"
@@ -53,46 +39,67 @@ function makeReferenceTypesCommentRelative (typeName: string, relativeTypesFileP
   )
 }
 
-// fix paths to Chai, jQuery and other types to be relative
-makeReferenceTypesCommentRelative('chai', '../chai/index.d.ts',
-  join('types', 'chai-jquery', 'index.d.ts'))
+async function main (): Promise<void> {
+  await fs.ensureDir(join(__dirname, '..', 'types'))
 
-makeReferenceTypesCommentRelative('jquery', '../jquery/index.d.ts',
-  join('types', 'chai-jquery', 'index.d.ts'))
+  for (const folder of includeTypes) {
+    const source: string = resolvePkg(`@types/${folder}`, { cwd: __dirname })
 
-const sinonChaiFilename: string = join('types', 'sinon-chai', 'index.d.ts')
+    await fs.copy(source, join(__dirname, '..', 'types', folder))
+  }
 
-makeReferenceTypesCommentRelative('chai', '../chai/index.d.ts', sinonChaiFilename)
+  // jQuery v3.3.x includes "dist" folder that just references back to itself
+  // causing dtslint to think there are double definitions. Remove that folder.
+  const typesJqueryDistFolder: string = join('types', 'jquery', 'dist')
 
-// also use relative import via path for sinon-chai
-// there is reference comment line we need to fix to be relative
-makeReferenceTypesCommentRelative('sinon', '../sinon/index.d.ts', sinonChaiFilename)
+  shell.rm('-rf', typesJqueryDistFolder)
 
-// and an import sinon line to be changed to relative path
-shell.sed('-i', 'from "sinon";', 'from "../sinon";', sinonChaiFilename)
+  // fix paths to Chai, jQuery and other types to be relative
+  makeReferenceTypesCommentRelative('chai', '../chai/index.d.ts',
+    join('types', 'chai-jquery', 'index.d.ts'))
 
-// copy experimental network stubbing type definitions
-// so users can import: `import 'cypress/types/net-stubbing'`
-fs.copySync(resolvePkg('@packages/net-stubbing/lib/external-types.ts'), 'types/net-stubbing.d.ts')
+  makeReferenceTypesCommentRelative('jquery', '../jquery/index.d.ts',
+    join('types', 'chai-jquery', 'index.d.ts'))
 
-// https://github.com/cypress-io/cypress/issues/18069
-// To avoid type clashes, some files should be commented out entirely by patch-package
-// and uncommented here.
+  const sinonChaiFilename: string = join('types', 'sinon-chai', 'index.d.ts')
 
-const filesToUncomment: string[] = [
-  'mocha/index.d.ts',
-  'jquery/JQuery.d.ts',
-  'jquery/legacy.d.ts',
-  'jquery/misc.d.ts',
-]
+  makeReferenceTypesCommentRelative('chai', '../chai/index.d.ts', sinonChaiFilename)
 
-filesToUncomment.forEach((file: string) => {
-  const filePath: string = join(__dirname, '../types', file)
-  const str: string = fs.readFileSync(filePath).toString()
+  // also use relative import via path for sinon-chai
+  // there is reference comment line we need to fix to be relative
+  makeReferenceTypesCommentRelative('sinon', '../sinon/index.d.ts', sinonChaiFilename)
 
-  const result: string = str.split('\n').map((line: string) => {
-    return line.startsWith('//z ') ? line.substring(4) : line
-  }).join('\n')
+  // and an import sinon line to be changed to relative path
+  shell.sed('-i', 'from "sinon";', 'from "../sinon";', sinonChaiFilename)
 
-  fs.writeFileSync(filePath, result)
+  // copy experimental network stubbing type definitions
+  // so users can import: `import 'cypress/types/net-stubbing'`
+  await fs.copy(resolvePkg('@packages/net-stubbing/lib/external-types.ts'), 'types/net-stubbing.d.ts')
+
+  // https://github.com/cypress-io/cypress/issues/18069
+  // To avoid type clashes, some files should be commented out entirely by patch-package
+  // and uncommented here.
+
+  const filesToUncomment: string[] = [
+    'mocha/index.d.ts',
+    'jquery/JQuery.d.ts',
+    'jquery/legacy.d.ts',
+    'jquery/misc.d.ts',
+  ]
+
+  for (const file of filesToUncomment) {
+    const filePath: string = join(__dirname, '../types', file)
+    const str: string = (await fs.readFile(filePath)).toString()
+
+    const result: string = str.split('\n').map((line: string) => {
+      return line.startsWith('//z ') ? line.substring(4) : line
+    }).join('\n')
+
+    await fs.writeFile(filePath, result)
+  }
+}
+
+main().catch((err) => {
+  console.error(err)
+  process.exit(1)
 })

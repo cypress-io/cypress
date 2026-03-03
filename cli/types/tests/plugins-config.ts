@@ -22,6 +22,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
     options.env // $ExpectType { [key: string]: any; }
 
     console.log('launching browser', browser.displayName)
+
     return options
   })
 
@@ -60,15 +61,15 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   })
 
   on('task', {
-    foo() {
+    foo () {
       return true
-    }
+    },
   })
 
   return {
     e2e: {
-      baseUrl: 'http://localhost:3000'
-    }
+      baseUrl: 'http://localhost:3000',
+    },
   }
 }
 
@@ -101,21 +102,21 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
   })
 
   on('task', {
-    foo() {
+    foo () {
       return Promise.resolve([])
-    }
+    },
   })
 
   return Promise.resolve({
     e2e: {
-      baseUrl: 'http://localhost:3000'
-    }
+      baseUrl: 'http://localhost:3000',
+    },
   })
 }
 
 // does not allow returning unknown properties
 const pluginConfig5: Cypress.PluginConfig = (on, config) => { // $ExpectError
   return {
-    unknownKey: 42
+    unknownKey: 42,
   }
 }

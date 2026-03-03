@@ -64,7 +64,6 @@ vi.mock('../../../lib/util', async (importActual) => {
 describe('lib/tasks/unzip', function () {
   const createStdoutCapture = () => {
     const logs: string[] = []
-    // eslint-disable-next-line no-console
     const originalOut = process.stdout.write
 
     vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
