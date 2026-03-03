@@ -122,7 +122,7 @@ export async function startCypressWatch () {
     child = await spawnCypressWithMode('open', 'dev', ENV_VARS.DEV)
 
     child.on('exit', (code) => {
-      if (isClosing) {
+      if (isClosing || !isRestarting) {
         process.exit(code ?? 0)
       }
     })
