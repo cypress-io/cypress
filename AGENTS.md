@@ -15,7 +15,7 @@ Cypress is an open-source end-to-end and component testing framework for the mod
 
 ## Prerequisites
 
-- **Node**: `>=22.19.0` (check with `node -v`; use [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to manage versions)
+- **Node**: Use the node version specified in the `.node-version` file (check with `node -v`; run `nvm use` to manage versions)
 - **Package manager**: Yarn 1 (`yarn@1.22.22`) — do not use npm or pnpm
 - **Lerna**: Orchestrated via root `package.json` scripts; installed as a dev dependency
 - **Electron** (for binary builds): handled automatically by `@packages/electron` during build
