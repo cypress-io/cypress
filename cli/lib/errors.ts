@@ -266,12 +266,6 @@ const CYPRESS_RUN_BINARY = {
   },
 }
 
-async function addPlatformInformation (info: any): Promise<any> {
-  const platform = await util.getPlatformInfo()
-
-  return { ...info, platform }
-}
-
 /**
  * Given an error object (see the errors above), forms error message text with details,
  * then resolves with Error instance you can throw or reject with.
@@ -298,37 +292,51 @@ export async function getError (errorObject: any): Promise<Error> {
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
  */
-export async function formErrorText (info: any, msg?: string, prevMessage?: string): Promise<string> {
-  const infoWithPlatform = await addPlatformInformation(info)
+interface ErrorInfo {
+  description: string
+  solution: string | ((msg?: string, prevMessage?: string) => string)
+  platform: string
+  footer?: string
+}
 
+export async function formErrorText (info: Omit<ErrorInfo, 'platform'>, msg?: string, prevMessage?: string): Promise<string> {
+  const platform = await util.getPlatformInfo()
+
+  return syncFormErrorText({
+    ...info,
+    platform,
+  }, msg, prevMessage)
+}
+
+export function syncFormErrorText (info: ErrorInfo, msg?: string, prevMessage?: string): string {
   const formatted: string[] = []
 
   function add (msg: string): void {
     formatted.push(stripIndents(msg))
   }
 
-  assert.ok(_.isString(infoWithPlatform.description) && !_.isEmpty(infoWithPlatform.description), 'expected error description to be text.')
+  assert.ok(_.isString(info.description) && !_.isEmpty(info.description), 'expected error description to be text.')
 
   // assuming that if there the solution is a function it will handle
   // error message and (optional previous error message)
-  if (_.isFunction(infoWithPlatform.solution)) {
-    const text = infoWithPlatform.solution(msg, prevMessage)
+  if (_.isFunction(info.solution)) {
+    const text = info.solution(msg, prevMessage)
 
     assert.ok(_.isString(text) && !_.isEmpty(text), 'expected solution to be text.')
 
     add(`
-        ${infoWithPlatform.description}
+        ${info.description}
 
         ${text}
 
       `)
   } else {
-    assert.ok(_.isString(infoWithPlatform.solution) && !_.isEmpty(infoWithPlatform.solution), 'expected error solution to be text.')
+    assert.ok(_.isString(info.solution) && !_.isEmpty(info.solution), 'expected error solution to be text.')
 
     add(`
-        ${infoWithPlatform.description}
+        ${info.description}
 
-        ${infoWithPlatform.solution}
+        ${info.solution}
 
       `)
 
@@ -345,15 +353,15 @@ export async function formErrorText (info: any, msg?: string, prevMessage?: stri
   add(`
       ${hr}
 
-      ${infoWithPlatform.platform}
+      ${info.platform}
     `)
 
-  if (infoWithPlatform.footer) {
+  if (info.footer) {
     add(`
 
         ${hr}
 
-        ${infoWithPlatform.footer}
+        ${info.footer}
       `)
   }
 

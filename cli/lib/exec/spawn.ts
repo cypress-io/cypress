@@ -7,7 +7,7 @@ import util from '../util'
 import state from '../tasks/state'
 import xvfb from './xvfb'
 import { needsSandbox } from '../tasks/verify'
-import { throwFormErrorText, getError, errors } from '../errors'
+import { throwFormErrorText, getError, errors, syncFormErrorText } from '../errors'
 import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
@@ -60,7 +60,7 @@ function createSpawnFunction (
   options: any,
 ) {
   return (overrides: any = {}): any => {
-    return new Promise((resolve: any, reject: any) => {
+    return new Promise(async (resolve: any, reject: any) => {
       _.defaults(overrides, {
         onStderrData: false,
       })
@@ -131,18 +131,25 @@ function createSpawnFunction (
       debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
       debug('spawning Cypress with executable: %s', executable)
 
+      const platform = await util.getPlatformInfo()
       const child = cp.spawn(executable, args, stdioOptions)
 
       function resolveOn (event: any): any {
-        return async function (code: any, signal: any): Promise<any> {
+        return function (code: any, signal: NodeJS.Signals): void {
           debug('child event fired %o', { event, code, signal })
 
-          if (code === null) {
+          if (code === null && signal !== 'SIGINT') {
             const errorObject = errors.childProcessKilled(event, signal)
 
-            const err = await getError(errorObject)
+            const err = new Error(syncFormErrorText(errorObject, platform))
 
-            return reject(err)
+            reject(err)
+
+            return
+          }
+
+          if (signal === 'SIGINT') {
+            console.log('SIGINT received; exiting...')
           }
 
           resolve(code)
