@@ -7,7 +7,7 @@ import util from '../util'
 import state from '../tasks/state'
 import xvfb from './xvfb'
 import { needsSandbox } from '../tasks/verify'
-import { throwFormErrorText, getErrorSync, errors, syncFormErrorText } from '../errors'
+import { throwFormErrorText, getErrorSync, errors } from '../errors'
 import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
@@ -199,6 +199,10 @@ function createSpawnFunction (
         debug('piping child STDERR to process STDERR')
 
         const sourceStream = new PassThrough()
+
+        child.on('close', () => {
+          sourceStream.end()
+        })
 
         child.stderr.on('data', (data: any) => {
           const str = data.toString()
