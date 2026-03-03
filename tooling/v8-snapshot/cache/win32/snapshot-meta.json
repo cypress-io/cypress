@@ -3094,7 +3094,7 @@
     "./node_modules/source-map/lib/source-node.js",
     "./node_modules/source-map/lib/util.js",
     "./node_modules/source-map/source-map.js",
-    "./node_modules/squirrelly/dist/squirrelly.min.js",
+    "./node_modules/squirrelly/dist/squirrelly.cjs.js",
     "./node_modules/sshpk/lib/ssh-buffer.js",
     "./node_modules/statuses/codes.json",
     "./node_modules/statuses/index.js",
@@ -3528,6 +3528,7 @@
     "./packages/net-stubbing/node_modules/mime/index.js",
     "./packages/net-stubbing/node_modules/mime/types/other.js",
     "./packages/net-stubbing/node_modules/mime/types/standard.js",
+    "./packages/network-tools/cjs/accept-encoding.js",
     "./packages/network-tools/cjs/types.js",
     "./packages/network/cjs/allow-destroy.js",
     "./packages/network/node_modules/proxy-from-env/index.js",
@@ -3689,6 +3690,7 @@
     "./packages/server/lib/modes/index.ts",
     "./packages/server/lib/modes/info.ts",
     "./packages/server/lib/modes/interactive.ts",
+    "./packages/server/lib/modes/pass-with-no-tests.ts",
     "./packages/server/lib/modes/pkg.ts",
     "./packages/server/lib/modes/results.ts",
     "./packages/server/lib/modes/smoke_test.ts",
@@ -3996,5 +3998,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "65533251003d0c2633034da3adf9d3ae2444c585ee1f542d0d7f52160c0bdc5d"
+  "deferredHash": "e082f4387bc49c6e8ae31d17a3ce0d852d6b73357ec408b4342f710c9cb76668"
 }

@@ -17,4 +17,5 @@ export interface ReporterStartInfo extends StatsStoreStartInfo {
   studioActive: boolean
   studioSingleTestActive: boolean
   showFetchRequests: boolean
+  codeEditorLineWrap: boolean
 }

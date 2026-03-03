@@ -1,7 +1,7 @@
-import { expect } from 'chai'
-import { resourceTypeAndCredentialManager } from '../../../lib/util/resourceTypeAndCredentialManager'
+import { describe, expect, it, beforeEach } from 'vitest'
+import { resourceTypeAndCredentialManager } from '../../lib/resourceTypeAndCredentialManager'
 
-context('resourceTypeAndCredentialManager Singleton', () => {
+describe('resourceTypeAndCredentialManager Singleton', () => {
   beforeEach(() => {
     resourceTypeAndCredentialManager.clear()
     resourceTypeAndCredentialManager.set({
@@ -36,49 +36,49 @@ context('resourceTypeAndCredentialManager Singleton', () => {
   })
 
   it('gets the first record out of the queue matching the absolute url and removes it', () => {
-    expect(resourceTypeAndCredentialManager.get('www.foobar.com/test-request')).to.deep.equal({
+    expect(resourceTypeAndCredentialManager.get('www.foobar.com/test-request')).toEqual({
       resourceType: 'xhr',
       credentialStatus: true,
     })
 
-    expect(resourceTypeAndCredentialManager.get('www.foobar.com/test-request')).to.deep.equal({
+    expect(resourceTypeAndCredentialManager.get('www.foobar.com/test-request')).toEqual({
       resourceType: 'fetch',
       credentialStatus: 'omit',
     })
 
-    expect(resourceTypeAndCredentialManager.get('www.foobar.com/test-request')).to.deep.equal({
+    expect(resourceTypeAndCredentialManager.get('www.foobar.com/test-request')).toEqual({
       resourceType: 'fetch',
       credentialStatus: 'include',
     })
 
     // the default as no other records should exist in the map for this URL
-    expect(resourceTypeAndCredentialManager.get('www.foobar.com/test-request')).to.deep.equal({
+    expect(resourceTypeAndCredentialManager.get('www.foobar.com/test-request')).toEqual({
       resourceType: 'xhr',
       credentialStatus: false,
     })
   })
 
   it('can locate a record hash even when the URL is encoded', () => {
-    expect(resourceTypeAndCredentialManager.get('www.foobar.com%2Ftest-request')).to.deep.equal({
+    expect(resourceTypeAndCredentialManager.get('www.foobar.com%2Ftest-request')).toEqual({
       resourceType: 'xhr',
       credentialStatus: true,
     })
   })
 
   it('applies defaults if a record cannot be found without a resourceType', () => {
-    expect(resourceTypeAndCredentialManager.get('www.barbaz.com/test-request')).to.deep.equal({
+    expect(resourceTypeAndCredentialManager.get('www.barbaz.com/test-request')).toEqual({
       resourceType: 'xhr',
       credentialStatus: false,
     })
   })
 
   it('applies defaults if a record cannot be found with a resourceType', () => {
-    expect(resourceTypeAndCredentialManager.get('www.barbaz.com/test-request', 'xhr')).to.deep.equal({
+    expect(resourceTypeAndCredentialManager.get('www.barbaz.com/test-request', 'xhr')).toEqual({
       resourceType: 'xhr',
       credentialStatus: false,
     })
 
-    expect(resourceTypeAndCredentialManager.get('www.barbaz.com/test-request', 'fetch')).to.deep.equal({
+    expect(resourceTypeAndCredentialManager.get('www.barbaz.com/test-request', 'fetch')).toEqual({
       resourceType: 'fetch',
       credentialStatus: 'same-origin',
     })

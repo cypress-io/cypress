@@ -54,6 +54,7 @@ function renderReporter (
     studioEnabled: window.__CYPRESS_TESTING_TYPE__ === 'e2e',
     runnerStore: store,
     testFilter: specsStore.testFilter,
+    codeEditorLineWrap: runnerUiStore.codeEditorLineWrap,
   })
 
   reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(root)

@@ -355,11 +355,13 @@ describe('events', () => {
       appState.autoScrollingUserPref = false
       appState.isSpecsListOpen = true
       appState.showFetchRequests = false
+      appState.codeEditorLineWrap = false
       events.emit('save:state')
       expect(runner.emit).to.have.been.calledWith('save:state', {
         autoScrollingEnabled: false,
         isSpecsListOpen: true,
         showFetchRequests: false,
+        codeEditorLineWrap: false,
       })
     })
 

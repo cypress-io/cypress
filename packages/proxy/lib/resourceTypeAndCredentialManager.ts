@@ -1,20 +1,22 @@
-import md5 from 'md5'
+import { createHash } from 'crypto'
 import Debug from 'debug'
-import type { RequestCredentialLevel } from '@packages/proxy'
-import type { ResourceType } from '@packages/net-stubbing'
+
+const debug = Debug('cypress:proxy:resource-type-and-credential')
+
+const hashUrl = (url: string): string => {
+  return createHash('md5').update(decodeURIComponent(url)).digest('hex')
+}
+
+export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
+
+export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
 
 type AppliedCredentialByUrlAndResourceMap = Map<string, Array<{
   resourceType: ResourceType
   credentialStatus: RequestCredentialLevel
 }>>
 
-const debug = Debug('cypress:server:util:resource-type-and-credential')
-
-const hashUrl = (url: string): string => {
-  return md5(decodeURIComponent(url))
-}
-
-// leverage a singleton Map throughout the server to prevent clashes with this context bindings
+// leverage a singleton Map throughout the proxy to prevent clashes with this context bindings
 const _appliedCredentialByUrlAndResourceMap: AppliedCredentialByUrlAndResourceMap = new Map()
 
 class ResourceTypeAndCredentialManagerClass {
@@ -84,6 +86,3 @@ class ResourceTypeAndCredentialManagerClass {
 
 // export as a singleton
 export const resourceTypeAndCredentialManager = new ResourceTypeAndCredentialManagerClass()
-
-// export but only as a type. We do NOT want others to create instances of the class as it is intended to be a singleton
-export type ResourceTypeAndCredentialManager = ResourceTypeAndCredentialManagerClass

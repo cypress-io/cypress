@@ -906,6 +906,7 @@ export class EventManager {
       scrollTop: runState.scrollTop,
       studioActive: hasActiveStudio,
       studioSingleTestActive,
+      codeEditorLineWrap: runState.codeEditorLineWrap,
     } as ReporterStartInfo)
   }
 
