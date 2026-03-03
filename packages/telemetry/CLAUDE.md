@@ -1,0 +1,3 @@
+# Telemetry
+
+@AGENTS.md
