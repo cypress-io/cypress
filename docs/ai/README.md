@@ -3,9 +3,13 @@
 This repo is AI-ready. The goal of these docs is to make **effective AI workflows
 discoverable alongside the code**, with minimal process overhead.
 
+> Note: Some references below point to Cypress-internal resources (e.g. AI Hub).
+> These are optional background/context and are not required to contribute to this repository.
+> All repo-local AI guidance should remain usable without access to internal systems.
+
 ## Canonical Source of Truth
 
-Canonical workflows and patterns live in the AI Hub:
+Canonical workflows and patterns are curated in the AI Hub (internal reference):
 
 - Patterns: https://aihub.cypress.io/patterns
 - Playbooks: https://aihub.cypress.io/playbooks
@@ -144,3 +148,6 @@ not aspirational guides.
 
 If you add a new package to the monorepo, add a `CLAUDE.md` and `AGENTS.md` alongside
 it following the patterns in existing packages.
+
+When repo structure, commands, or conventions change, update the relevant `AGENTS.md` /
+`CLAUDE.md` files in the same PR (similar to keeping READMEs accurate).

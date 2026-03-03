@@ -464,6 +464,35 @@ Each package documents how to best work with it, so consult the `README.md` of e
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
+### AI assistant guidance files
+
+This repository includes lightweight AI guidance files used by common AI coding tools.
+
+These files are intended to make project structure and conventions more discoverable
+to AI assistants while remaining transparent and minimal for human contributors.
+
+#### Files used by AI tools
+
+- `CLAUDE.md` — Used by Claude Code (Claude loads these by walking upward from the working directory).
+- `AGENTS.md` — Used by Codex CLI and Cursor. Claude references this via `@import`.
+
+The root `AGENTS.md` provides project-wide context. Workspace and package-level
+`AGENTS.md` files add scoped details.
+
+#### Maintenance expectations
+
+These files should be treated like other repository documentation:
+
+- If you change repository structure, commands, conventions, or workflows,
+  update the relevant `AGENTS.md` / `CLAUDE.md` in the same PR.
+- Keep repo-local guidance factual and descriptive (what exists),
+  not aspirational process.
+
+#### External references
+
+Some AI-related documentation may reference Cypress-internal resources.
+Contributing to this repository does not require access to those systems.
+
 ## Committing Code
 
 ### Branches
