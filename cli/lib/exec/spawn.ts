@@ -69,6 +69,7 @@ function createSpawnFunction (
       const envOverrides = util.getEnvOverrides(options)
       const electronArgs: string[] = []
       const node11WindowsFix = isPlatform('win32')
+      const platformInfo = await util.getPlatformInfo()
 
       let startScriptPath: string | undefined
 
@@ -156,9 +157,28 @@ function createSpawnFunction (
         }
       }
 
-      child.on('close', resolveOn('close'))
-      child.on('exit', resolveOn('exit'))
-      child.on('error', reject)
+      child.on('close', () => {
+        debug('Child OnClose')
+        resolveOn('close')
+      })
+
+      child.on('SIGINT', () => {
+        debug('child event fired %o', { event: 'SIGINT' })
+      })
+
+      process.on('SIGINT', () => {
+        debug('process event fired %o', { event: 'SIGINT' })
+      })
+
+      child.on('exit', (code, signal) => {
+        debug('child event fired %o', { event: 'exit', code, signal })
+        resolveOn('exit')(code, signal)
+      })
+
+      child.on('error', (err: any) => {
+        debug('child event fired %o', { event: 'error', err })
+        reject(err)
+      })
 
       if (isPlatform('win32')) {
         const rl = readline.createInterface({

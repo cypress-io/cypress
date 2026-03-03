@@ -9,21 +9,20 @@ const exitedPids = new Set<number>()
 let hasExited = false
 
 export function addChildProcess (child: ChildProcess) {
-  if (hasExited) {
+  if (hasExited && child.pid) {
     treeKill(child.pid)
 
     return
   }
 
   childProcesses.add(child)
-  child.on('exit', () => {
-    if (!hasExited) {
-      exitAndRemoveProcess(child)
-    }
-  })
 }
 
 export async function exitAndRemoveProcess (child: ChildProcess) {
+  if (!child.pid) {
+    return
+  }
+
   if (exitedPids.has(child.pid)) {
     return
   }
@@ -73,16 +72,16 @@ export async function exitAfterAll () {
 
 async function exitHandler (exitCode: number) {
   hasExited = true
-  console.log(`Exiting with code ${exitCode}`)
-  await exitAllProcesses()
-  process.exit(exitCode)
+  //console.log(`Exiting with code ${exitCode}`)
+  //await exitAllProcesses()
+  //process.exit(exitCode)
 }
 
 async function signalHandler (signal: NodeJS.Signals, code: number) {
-  hasExited = true
-  console.log(`Exiting due to ${signal}`)
-  await exitAllProcesses()
-  process.exit(128 + code)
+  // hasExited = true
+  // console.log(`Exiting due to ${signal}`)
+  // await exitAllProcesses()
+  // process.exit(128 + code)
 }
 
 async function uncaughtExceptionHandler (error: Error) {

@@ -248,7 +248,7 @@ const invalidConfigFile = {
  * @param {'close'|'event'} eventName Child close event name
  * @param {string} signal Signal that closed the child process, like "SIGBUS"
 */
-const childProcessKilled = (eventName: string, signal: string): any => {
+const childProcessKilled = (eventName: string, signal: NodeJS.Signals | null): any => {
   return {
     description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(signal)}`,
     solution: solutionUnknown,
