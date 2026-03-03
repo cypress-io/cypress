@@ -7,7 +7,7 @@ import util from '../util'
 import state from '../tasks/state'
 import xvfb from './xvfb'
 import { needsSandbox } from '../tasks/verify'
-import { throwFormErrorText, getError, errors, syncFormErrorText } from '../errors'
+import { throwFormErrorText, getErrorSync, errors, syncFormErrorText } from '../errors'
 import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
@@ -69,7 +69,6 @@ function createSpawnFunction (
       const envOverrides = util.getEnvOverrides(options)
       const electronArgs: string[] = []
       const node11WindowsFix = isPlatform('win32')
-      const platformInfo = await util.getPlatformInfo()
 
       let startScriptPath: string | undefined
 
@@ -133,47 +132,31 @@ function createSpawnFunction (
       debug('spawning Cypress with executable: %s', executable)
 
       const platform = await util.getPlatformInfo()
+
       const child = cp.spawn(executable, args, stdioOptions)
 
       function resolveOn (event: any): any {
         return function (code: any, signal: NodeJS.Signals): void {
           debug('child event fired %o', { event, code, signal })
 
-          if (code === null && signal !== 'SIGINT') {
+          if (code === null) {
             const errorObject = errors.childProcessKilled(event, signal)
 
-            const err = new Error(syncFormErrorText(errorObject, platform))
+            errorObject.platform = platform
+            const err = getErrorSync(errorObject, platform)
 
             reject(err)
 
             return
           }
 
-          if (signal === 'SIGINT') {
-            console.log('SIGINT received; exiting...')
-          }
-
           resolve(code)
         }
       }
 
-      child.on('close', () => {
-        debug('Child OnClose')
-        resolveOn('close')
-      })
+      child.on('close', resolveOn('close'))
 
-      child.on('SIGINT', () => {
-        debug('child event fired %o', { event: 'SIGINT' })
-      })
-
-      process.on('SIGINT', () => {
-        debug('process event fired %o', { event: 'SIGINT' })
-      })
-
-      child.on('exit', (code, signal) => {
-        debug('child event fired %o', { event: 'exit', code, signal })
-        resolveOn('exit')(code, signal)
-      })
+      child.on('exit', resolveOn('exit'))
 
       child.on('error', (err: any) => {
         debug('child event fired %o', { event: 'error', err })
@@ -216,10 +199,6 @@ function createSpawnFunction (
         debug('piping child STDERR to process STDERR')
 
         const sourceStream = new PassThrough()
-
-        child.on('close', () => {
-          sourceStream.end()
-        })
 
         child.stderr.on('data', (data: any) => {
           const str = data.toString()

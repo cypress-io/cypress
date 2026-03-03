@@ -288,6 +288,19 @@ export async function getError (errorObject: any): Promise<Error> {
   return err
 }
 
+export function getErrorSync (errorObject: any, platform: string): Error {
+  const errorMessage = syncFormErrorText({
+    ...errorObject,
+    platform,
+  })
+
+  const err: any = new Error(errorMessage)
+
+  err.known = true
+
+  return err
+}
+
 /**
  * Forms nice error message with error and platform information,
  * and if possible a way to solve it. Resolves with a string.
