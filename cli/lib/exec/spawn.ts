@@ -158,10 +158,7 @@ function createSpawnFunction (
 
       child.on('exit', resolveOn('exit'))
 
-      child.on('error', (err: any) => {
-        debug('child event fired %o', { event: 'error', err })
-        reject(err)
-      })
+      child.on('error', reject)
 
       if (isPlatform('win32')) {
         const rl = readline.createInterface({
