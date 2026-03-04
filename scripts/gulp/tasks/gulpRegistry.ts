@@ -18,6 +18,11 @@ export function addChildProcess (child: ChildProcess) {
   }
 
   childProcesses.add(child)
+  child.on('exit', async (code) => {
+    if (!hasExited) {
+      await exitAndRemoveProcess(child)
+    }
+  })
 }
 
 export async function exitAndRemoveProcess (child: ChildProcess) {
@@ -74,21 +79,27 @@ export async function exitAfterAll () {
 
 async function exitHandler (exitCode: number) {
   hasExited = true
+  await exitAllProcesses()
+  process.exit(exitCode)
 }
 
-async function signalHandler (signal: NodeJS.Signals, code: number) {
+function signalHandler (signal: NodeJS.Signals, code: number) {
   hasExited = true
-  // Windows doesn't automatically send signals to the whole process tree
-  if (os.platform().startsWith('win')) {
-    // signal handlers must be synchronous, so we can't use tree-kill
-    const childPids = psTreeSync(process.pid)
+  try {
+    // Windows doesn't automatically send signals to the whole process tree
+    if (os.platform().startsWith('win')) {
+      // signal handlers must be synchronous, so we can't use tree-kill
+      const tree = psTreeSync(process.pid).filter((pid) => pid !== process.pid)
 
-    for (const pid of childPids) {
-      process.kill(pid, signal)
+      for (const pid of tree) {
+        process.kill(pid, signal)
+      }
     }
+  } catch (error) {
+    console.error(`An error occurred while handling signal ${signal}: ${error}`)
   }
 
-  process.exit(code)
+  process.exit(128 + code)
 }
 
 async function uncaughtExceptionHandler (error: Error) {

@@ -131,9 +131,11 @@ function createSpawnFunction (
       debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
       debug('spawning Cypress with executable: %s', executable)
 
-      const platform = await util.getPlatformInfo()
+      const platform = await util.getPlatformInfo().catch((e) => reject(e))
 
-      const child = cp.spawn(executable, args, stdioOptions)
+      if (!platform) {
+        return
+      }
 
       function resolveOn (event: any): any {
         return function (code: any, signal: NodeJS.Signals): void {
@@ -153,6 +155,8 @@ function createSpawnFunction (
           resolve(code)
         }
       }
+
+      const child = cp.spawn(executable, args, stdioOptions)
 
       child.on('close', resolveOn('close'))
 

@@ -859,21 +859,20 @@ describe('lib/exec/spawn', function () {
       })
 
       it(`catches process.stdin errors and returns when code=${errCode}`, async () => {
-        expect(async () => {
-          // kick off the mock process
-          // @ts-expect-error - invalid number of arguments for given type
-          const p = start()
+        // @ts-expect-error - invalid number of arguments for given type
+        const p = start()
 
-          const err: any = new Error()
+        const err: any = new Error()
 
-          err.code = errCode
+        err.code = errCode
 
-          await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('error', expect.any(Function)))
+        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('error', expect.any(Function)))
 
-          stdin.emit('error', err)
+        stdin.emit('error', err)
 
-          await p
-        }).not.toThrow()
+        // If the error is caught, p resolves; if not, p rejects and the assertion fails
+
+        await expect(p).resolves.toBeDefined()
       })
     })
 
