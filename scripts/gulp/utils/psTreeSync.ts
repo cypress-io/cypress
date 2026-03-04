@@ -5,10 +5,14 @@ function linuxOutput (pid: number): string {
 }
 
 function windowsOutput (pid: number): string {
-  return execSync(`wmic process where (ParentProcessId=${pid}) get ProcessId`)
-  .toString()
-  .replace('ProcessId', '') // Remove the header row
-  .trim()
+  try {
+    return execSync(`wmic process where (ParentProcessId=${pid}) get ProcessId`, { stdio: 'ignore' })
+    .toString()
+    .replace('ProcessId', '') // Remove the header row
+    .trim()
+  } catch (error) {
+    return ''
+  }
 }
 
 function isValidPid (pid: unknown): pid is number {

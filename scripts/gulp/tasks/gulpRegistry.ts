@@ -78,6 +78,11 @@ export async function exitAfterAll () {
 }
 
 async function exitHandler (exitCode: number) {
+  // do not execute if the signal handler has already been called
+  if (hasExited) {
+    return
+  }
+
   hasExited = true
   await exitAllProcesses()
   process.exit(exitCode)
