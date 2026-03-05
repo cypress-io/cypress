@@ -1,1 +1,1 @@
-// support file for experimental-studio project
+// support file for studio project

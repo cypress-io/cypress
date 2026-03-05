@@ -45,12 +45,12 @@ The code that supports cloud Studio and lives in the `cypress-services` monorepo
 
 Helpers for testing Studio with Cypress-in-Cypress live in [packages/app/cypress/e2e/studio/helper.ts](https://github.com/cypress-io/cypress/blob/develop/packages/app/cypress/e2e/studio/helper.ts). The `launchStudio` helper:
 
-1. Loads a project (by default the [`experimental-studio`](https://github.com/cypress-io/cypress/tree/develop/system-tests/projects/experimental-studio) fixture project).
+1. Loads a project (by default the [`studio`](https://github.com/cypress-io/cypress/tree/develop/system-tests/projects/studio) fixture project).
 2. Navigates to the target spec (by default `specName.cy.js`).
 3. Enters Studio (new test or existing test via the `createNewTest` parameter).
 4. Waits for the test run to finish in Studio mode.
 
-Those tests use the Studio bundle from the Cloud. The `experimental-studio` project uses a `canary` projectId so it receives the latest Cloud Studio build. For local Studio changes, set `process.env.CYPRESS_LOCAL_STUDIO_PATH` to your local studio build; Studio is enabled in that environment in [packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts](https://github.com/cypress-io/cypress/blob/develop/packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts).
+Those tests use the Studio bundle from the Cloud. The `studio` project uses a `canary` projectId so it receives the latest Cloud Studio build. For local Studio changes, set `process.env.CYPRESS_LOCAL_STUDIO_PATH` to your local studio build; Studio is enabled in that environment in [packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts](https://github.com/cypress-io/cypress/blob/develop/packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts).
 
 In order to properly engage with Studio AI, we choose to simulate the cloud interactions that enable it via something like:
 
