@@ -127,7 +127,6 @@ const Reporter: React.FC<SingleReporterProps> = observer(({ appState = appStateD
           spec={runnerStore.spec}
           statsStore={statsStore}
           studioEnabled={studioEnabled}
-          canSaveStudioLogs={runnerStore.canSaveStudioLogs}
         />
       }
     </div>

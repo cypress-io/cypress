@@ -193,7 +193,6 @@ fragment SpecRunner_Preferences on Query {
 
 gql`
 fragment SpecRunner_Studio on Query {
-  cloudStudioRequested
   currentProject {
     id
     projectId
@@ -327,24 +326,18 @@ useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
   return data
 })
 
-const cloudStudioRequested = computed(() => {
-  studioStore.setCloudStudioRequested(props.gql.cloudStudioRequested || false)
-
-  return props.gql.cloudStudioRequested
-})
-
 const shouldShowStudioButton = computed(() => {
   // Check if we're running all specs by looking at the route query
   const isRunningAllSpecs = route.query.file === '__all'
 
-  // Studio can only be enabled for e2e testing
+  // Studio is only available for e2e testing (always cloud-delivered)
   const isE2ETesting = props.gql.currentProject?.currentTestingType === 'e2e'
 
-  return !!cloudStudioRequested.value && !studioStore.isOpen && !isRunningAllSpecs && isE2ETesting
+  return !studioStore.isOpen && !isRunningAllSpecs && isE2ETesting
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return !!cloudStudioRequested.value && (studioStore.isLoading || studioStore.isActive) && !screenshotStore.isScreenshotting
+  return (studioStore.isLoading || studioStore.isActive) && !screenshotStore.isScreenshotting
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog

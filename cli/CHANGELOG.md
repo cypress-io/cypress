@@ -2,7 +2,7 @@
 
 ## 15.12.0
 
-_Released 03/02/2026 (PENDING)_
+_Released 03/10/2026 (PENDING)_
 
 **Features:**
 
@@ -11,6 +11,10 @@ _Released 03/02/2026 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).
+
+**Dependency Updates:**
+
+- Upgraded `basic-ftp` to `5.2.0` to address [CVE-2026-27699](https://github.com/advisories/GHSA-5rq4-664w-9x2c) vulnerability reported in security scans. Addresses [#33436](https://github.com/cypress-io/cypress/issues/33436).
 
 ## 15.11.0
 
