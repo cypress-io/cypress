@@ -84,12 +84,6 @@ export const Query = objectType({
       resolve: (source, args, ctx) => ctx.coreData.authState,
     })
 
-    t.field('cloudStudioRequested', {
-      type: 'Boolean',
-      description: 'Whether cloud studio is requested by the environment',
-      resolve: (source, args, ctx) => ctx.coreData.studioLifecycleManager?.cloudStudioRequested ?? false,
-    })
-
     t.nonNull.field('localSettings', {
       type: LocalSettings,
       description: 'local settings on a device-by-device basis',
