@@ -230,12 +230,6 @@ describe('tests', () => {
 
 describe('studio controls', () => {
   describe('launch studio button when studio is not active', () => {
-    beforeEach(() => {
-      const runnerStore = visitAndRenderReporter(true, false)
-
-      runnerStore.setCanSaveStudioLogs(false)
-    })
-
     it('displays studio icon with half transparency when hovering over test title', { scrollBehavior: false }, () => {
       cy.contains('test 1')
       .closest('.runnable-wrapper')

@@ -169,7 +169,7 @@ const updateInstanceStdout = async (options: any = {}) => {
 }
 
 const postInstanceResults = (options: any = {}) => {
-  const { runId, instanceId, results, group, parallel, ciBuildId, metadata } = options
+  const { runId, instanceId, results, group, parallel, ciBuildId } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
@@ -195,7 +195,6 @@ const postInstanceResults = (options: any = {}) => {
     video,
     reporterStats,
     screenshots,
-    metadata,
   })
   .catch((err: any) => {
     debug('failed updating instance %o', {
