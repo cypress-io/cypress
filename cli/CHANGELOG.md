@@ -10,6 +10,7 @@ _Released 03/10/2026 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed issues where Cypress could crash or misbehave on exit: sending SIGINT (e.g. Ctrl+C) no longer produces a crash report or leaves the terminal displaying raw characters, and closing the runner window (e.g. File > Close Window) no longer produces a spurious "failed spec" message. Cypress and Chrome now exit gracefully. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228), [#29232](https://github.com/cypress-io/cypress/issues/29232) and [#33367](https://github.com/cypress-io/cypress/issues/33367). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).
 
 **Dependency Updates:**
