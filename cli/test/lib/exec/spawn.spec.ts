@@ -65,12 +65,13 @@ vi.mock('process', async (importActual) => {
   const actual = await importActual()
 
   return {
+    // @ts-expect-error
+    ...actual,
     stdin: {
-      // @ts-expect-error
       ...actual.stdin,
-      pipe: vi.fn(),
       on: vi.fn(),
       emit: vi.fn(),
+      pipe: vi.fn(),
     },
     stdout: vi.fn(),
     stderr: {
@@ -84,8 +85,9 @@ vi.mock('process', async (importActual) => {
       stdin: {
         // @ts-expect-error
         ...actual.default.stdin,
-        pipe: vi.fn(),
         on: vi.fn(),
+        emit: vi.fn(),
+        pipe: vi.fn(),
       },
       stdout: vi.fn(),
       stderr: {
@@ -205,10 +207,9 @@ describe('lib/exec/spawn', function () {
 
     spawnedProcess = new EventEmitter()
     spawnedProcess.unref = vi.fn().mockReturnValue(undefined)
-    spawnedProcess.stdin = {
-      on: vi.fn().mockReturnValue(undefined),
-      pipe: vi.fn().mockReturnValue(undefined),
-    }
+    spawnedProcess.stdin = new PassThrough()
+    vi.spyOn(spawnedProcess.stdin, 'on')
+    vi.spyOn(spawnedProcess.stdin, 'pipe')
 
     spawnedProcess.stdout = {
       on: vi.fn().mockReturnValue(undefined),
@@ -843,51 +844,65 @@ describe('lib/exec/spawn', function () {
     // https://github.com/cypress-io/cypress/issues/5241
     const errCodes = ['EPIPE', 'ENOTCONN']
 
-    errCodes.forEach((errCode) => {
+    describe('process.stdin error handling', () => {
       beforeEach(() => {
-        // create an EventEmitter and bind it to process.stdin
-        const stdinEventEmitter = new EventEmitter()
+        console.log('mocking process')
+        const stdinEmitter = new EventEmitter()
+
+        vi.mocked(stdin.on).mockImplementation((event, callback) => {
+          console.log('spied on')
+
+          stdinEmitter.on(event, callback)
+
+          return stdin
+        })
 
         vi.mocked(stdin.emit).mockImplementation((event, ...args) => {
-          return stdinEventEmitter.emit(event, ...args)
-        })
+          console.log('spied emit')
 
-        // @ts-expect-error - mock arguments
-        vi.mocked(stdin.on).mockImplementation((event, callback) => {
-          return stdinEventEmitter.on(event, callback)
+          stdinEmitter.emit(event, ...args)
+
+          return stdin
         })
       })
 
-      it(`catches process.stdin errors and returns when code=${errCode}`, async () => {
-        // @ts-expect-error - invalid number of arguments for given type
+      errCodes.forEach((errCode) => {
+        it(`catches process.stdin errors and returns when code=${errCode}`, async () => {
+          // @ts-expect-error - invalid number of arguments for given type
+          const p = start()
+
+          const err: any = new Error()
+
+          err.code = errCode
+
+          await vi.waitFor(() => expect(stdin.on).toHaveBeenCalledWith('error', expect.any(Function)))
+
+          stdin.emit('error', err)
+
+          // If the error is caught, p resolves; if not, p rejects and the assertion fails
+
+          await expect(p).resolves
+        })
+      })
+
+      it('throws process.stdin errors code!=EPIPE', async function () {
+          // kick off the mock process
+          // @ts-expect-error - invalid number of arguments for given type
         const p = start()
 
-        const err: any = new Error()
+        await vi.waitFor(() => {
+          return expect(stdin.on).toHaveBeenCalledWith('error', expect.any(Function))
+        })
 
-        err.code = errCode
+        const err = {
+          message: 'wattttt',
+          code: 'FAILWHALE',
+        }
 
-        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('error', expect.any(Function)))
-
+        console.log('emitting error', stdin.emit)
         stdin.emit('error', err)
-
-        // If the error is caught, p resolves; if not, p rejects and the assertion fails
-
-        await expect(p).resolves.toBeDefined()
+        await expect(p).rejects.toThrow('wattttt')
       })
-    })
-
-    it('throws process.stdin errors code!=EPIPE', function () {
-      expect(() => {
-        // kick off the mock process
-        // @ts-expect-error - invalid number of arguments for given type
-        start()
-
-        const err: any = new Error('wattttt')
-
-        err.code = 'FAILWHALE'
-
-        return stdin.emit('error', err)
-      }).toThrow(/wattttt/)
     })
   })
 })

@@ -240,7 +240,7 @@ function createSpawnFunction (
           return
         }
 
-        throw err
+        reject(err)
       })
 
       if (stdioOptions.detached) {
