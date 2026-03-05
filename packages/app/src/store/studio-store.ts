@@ -25,14 +25,6 @@ export interface CommandLog {
   numElements: number
 }
 
-export interface StudioLog {
-  id?: number
-  name: string
-  selector?: string
-  message?: unknown // todo: what is the type
-  isAssertion?: boolean
-}
-
 export type EntrySource = 'welcome' | 'new-test-root' | 'new-test-suite' | 'edit'
 
 interface StudioRecorderState {

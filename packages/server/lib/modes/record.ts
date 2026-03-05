@@ -18,7 +18,6 @@ import * as capture from '../capture'
 import * as env from '../util/env'
 import ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
-import { countStudioUsage } from '../util/spec_writer'
 import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
 
 import type { Cfg } from '../project-base'
@@ -691,17 +690,13 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
         debug('after spec run %o', { spec })
 
-        return countStudioUsage(spec.absolute)
-        .then((metadata) => {
-          return postInstanceResults({
-            group,
-            config,
-            results,
-            parallel,
-            ciBuildId,
-            instanceId,
-            metadata,
-          })
+        return postInstanceResults({
+          group,
+          config,
+          results,
+          parallel,
+          ciBuildId,
+          instanceId,
         })
         .then((resp: any) => {
           if (!resp) {
