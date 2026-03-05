@@ -3707,7 +3707,6 @@
     "./packages/server/lib/session.ts",
     "./packages/server/lib/socket-base.ts",
     "./packages/server/lib/socket-e2e.ts",
-    "./packages/server/lib/studio.ts",
     "./packages/server/lib/task.js",
     "./packages/server/lib/template_engine.js",
     "./packages/server/lib/unhandled_exceptions.ts",

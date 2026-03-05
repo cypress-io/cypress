@@ -384,10 +384,5 @@ describe('events', () => {
       events.emit('studio:cancel')
       expect(runner.emit).to.have.been.calledWith('studio:cancel')
     })
-
-    it('emits studio:save on studio:save', () => {
-      events.emit('studio:save')
-      expect(runner.emit).to.have.been.calledWith('studio:save')
-    })
   })
 })
