@@ -23,7 +23,6 @@ export interface CommandLog {
   number?: number
   instrument: Instrument
   numElements: number
-  isStudio: boolean
 }
 
 export interface StudioLog {
