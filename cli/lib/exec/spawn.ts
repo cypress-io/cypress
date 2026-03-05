@@ -11,9 +11,12 @@ import { throwFormErrorText, getError, errors } from '../errors'
 import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
-const debug = Debug('cypress:cli')
+import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
+import { PassThrough } from 'stream'
 
-const DBUS_ERROR_PATTERN = /ERROR:dbus\/(bus|object_proxy)\.cc/
+const debug = Debug('cypress:cli')
+const debugElectron = Debug('cypress:electron')
+const debugStderr = Debug('cypress:internal-stderr')
 
 function isPlatform (platform: string): boolean {
   return os.platform() === platform
@@ -184,22 +187,34 @@ function createSpawnFunction (
       // to filter out the garbage
       if (child.stderr) {
         debug('piping child STDERR to process STDERR')
+
+        const sourceStream = new PassThrough()
+
+        child.on('close', () => {
+          sourceStream.end()
+        })
+
         child.stderr.on('data', (data: any) => {
           const str = data.toString()
 
-          // if we have a callback and this explicitly returns
-          // false then bail
           if (onStderrData && onStderrData(str)) {
             return
           }
 
-          if (str.match(DBUS_ERROR_PATTERN)) {
-            debug(str)
-          } else {
-          // else pass it along!
-            stderr.write(data)
+          if (sourceStream.writable) {
+            sourceStream.write(data)
           }
         })
+
+        if (
+          (process.env.ELECTRON_ENABLE_LOGGING ?? '') === '1' ||
+          debugElectron.enabled ||
+          (process.env.CYPRESS_INTERNAL_ENV ?? '') === 'development'
+        ) {
+          sourceStream.pipe(stderr, { end: false })
+        } else {
+          sourceStream.pipe(filter(stderr, debugStderr, DEBUG_PREFIX))
+        }
       }
 
       // https://github.com/cypress-io/cypress/issues/1841
@@ -228,6 +243,7 @@ async function spawnInXvfb (spawn: ReturnType<typeof createSpawnFunction>): Prom
   try {
     await xvfb.start()
 
+    debug('xvfb started')
     const code = await userFriendlySpawn(spawn)
 
     return code
@@ -259,6 +275,7 @@ async function userFriendlySpawn (spawn: ReturnType<typeof createSpawnFunction>,
   try {
     const code: number = await spawn(overrides)
 
+    debug('tried spawning without xvfb, code', code, brokenGtkDisplay)
     if (code !== 0 && brokenGtkDisplay) {
       util.logBrokenGtkDisplayWarning()
 
@@ -267,6 +284,7 @@ async function userFriendlySpawn (spawn: ReturnType<typeof createSpawnFunction>,
 
     return code
   } catch (error: any) {
+    debug('error in userFriendlySpawn', error)
     // we can format and handle an error message from the code above
     // prevent wrapping error again by using "known: undefined" filter
     if ((error as any).known === undefined) {
@@ -313,6 +331,8 @@ export async function start (args: string | string[], options: StartOptions = {}
   const spawn = createSpawnFunction(executable, decoratedArgs, { stdio, dev, detached, env })
 
   if (needsXvfb) {
+    debug('starting xvfb')
+
     return spawnInXvfb(spawn)
   }
 
@@ -320,6 +340,8 @@ export async function start (args: string | string[], options: StartOptions = {}
   // set, then we may need to rerun cypress after
   // spawning our own Xvfb server
   const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
+
+  debug('linuxWithDisplayEnv', linuxWithDisplayEnv)
 
   return userFriendlySpawn(spawn, linuxWithDisplayEnv)
 }

@@ -3,6 +3,7 @@ import { Http, ServerCtx } from './http'
 import type { BrowserPreRequest } from './types'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './http/util/service-worker-manager'
+import { resourceTypeAndCredentialManager, ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentialManager'
 
 export class NetworkProxy {
   http: Http
@@ -78,5 +79,17 @@ export class NetworkProxy {
 
   setPreRequestTimeout (timeout) {
     this.http.setPreRequestTimeout(timeout)
+  }
+
+  setCredentials ({ url, resourceType, credentialStatus }: {
+    url: string
+    resourceType: ResourceType
+    credentialStatus: RequestCredentialLevel
+  }): void {
+    resourceTypeAndCredentialManager.set({ url, resourceType, credentialStatus })
+  }
+
+  clearCredentials (): void {
+    resourceTypeAndCredentialManager.clear()
   }
 }

@@ -1,11 +1,21 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.11.1
+
+## 15.12.0
 
 _Released 03/10/2026 (PENDING)_
 
+**Features:**
+
+- Adds an option to enable word wrap for Studio panel code. Addressed in [#33411](https://github.com/cypress-io/cypress/pull/33411).
+
 **Bugfixes:**
 
+- Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).
 - Fixed an issue where `cy.intercept` `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
+
+**Dependency Updates:**
+
+- Upgraded `basic-ftp` to `5.2.0` to address [CVE-2026-27699](https://github.com/advisories/GHSA-5rq4-664w-9x2c) vulnerability reported in security scans. Addresses [#33436](https://github.com/cypress-io/cypress/issues/33436).
 
 ## 15.11.0
 

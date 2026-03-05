@@ -26,7 +26,6 @@ import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
-import type { ResourceTypeAndCredentialManager } from '@packages/server/lib/util/resourceTypeAndCredentialManager'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
@@ -95,7 +94,6 @@ export type ServerCtx = Readonly<{
   getFileServerToken: () => string | undefined
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
-  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -278,7 +276,6 @@ export class Http {
   request: any
   socket: SocketBroadcaster
   serverBus: EventEmitter
-  resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   renderedHTMLOrigins: {[key: string]: boolean} = {}
   autUrl?: string
   getCookieJar: () => CookieJar
@@ -297,7 +294,6 @@ export class Http {
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
-    this.resourceTypeAndCredentialManager = opts.resourceTypeAndCredentialManager
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
 
@@ -326,7 +322,6 @@ export class Http {
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,
-      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       getCookieJar: this.getCookieJar,
       simulatedCookies: [],
       debug: (formatter, ...args) => {

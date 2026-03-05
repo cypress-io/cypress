@@ -119,23 +119,29 @@ async function normalizeLockFileRelativePaths (opts: { project: string, projectD
  * the Internet to obtain these packages once it runs in the temp dir.
  * @returns a list of dependency names that were updated
  */
-async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<string[]> {
+async function makeWorkspacePackagesAbsolute (pathToPkgJson: string, projectDir: string): Promise<string[]> {
   const pkgJson = await fs.readJson(pathToPkgJson)
+
   const updatedDeps: string[] = []
 
-  for (const deps of [pkgJson.dependencies, pkgJson.devDependencies, pkgJson.optionalDependencies]) {
-    for (const dep in deps) {
-      const version = deps[dep]
+  try {
+    for (const deps of [pkgJson.dependencies, pkgJson.devDependencies, pkgJson.optionalDependencies]) {
+      for (const dep in deps) {
+        const version = deps[dep]
 
-      if (version.startsWith('file:')) {
-        const absPath = pathToPackage(dep)
+        if (version.startsWith('file:')) {
+          const absPath = path.resolve(__dirname, '../../projects', projectDir, version.replace('file:', ''))
 
-        log(`Setting absolute path in package.json for ${dep}: ${absPath}.`)
+          log(`Setting absolute path in package.json for ${dep} @ ${version}: ${absPath}.`)
 
-        deps[dep] = `file:${absPath}`
-        updatedDeps.push(dep)
+          deps[dep] = `file:${absPath}`
+          updatedDeps.push(dep)
+        }
       }
     }
+  } catch (err) {
+    log(`Error making workspace packages absolute: ${err}`)
+    throw err
   }
 
   await fs.writeJson(pathToPkgJson, pkgJson)
@@ -213,7 +219,7 @@ export async function scaffoldProjectNodeModules ({
 
     // 2. Before running the package installer, resolve workspace deps to absolute paths.
     // This is required to fix install for workspace-only packages.
-    const workspaceDeps = await makeWorkspacePackagesAbsolute(projectPkgJsonPath)
+    const workspaceDeps = await makeWorkspacePackagesAbsolute(projectPkgJsonPath, project)
 
     // 3. Delete cached workspace packages since the pkg manager will create a fresh symlink during install.
     await removeWorkspacePackages(workspaceDeps)

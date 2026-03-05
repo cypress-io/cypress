@@ -62,16 +62,7 @@ describe('network stubbing', () => {
       request: new Request(),
       getRenderedHTMLOrigins: () => ({}),
       serverBus: new EventEmitter(),
-      resourceTypeAndCredentialManager: {
-        get () {
-          return {
-            resourceType: 'xhr',
-            credentialStatus: 'same-origin',
-          }
-        },
-        set () {},
-        clear () {},
-      },
+      getCurrentBrowser: vi.fn(),
     })
 
     app.use((req, res, next) => {

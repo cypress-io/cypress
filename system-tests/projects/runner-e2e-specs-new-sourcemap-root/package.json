@@ -6,7 +6,7 @@
     "@babel/preset-typescript": "^7.26.0",
     "@cypress/webpack-preprocessor": "file:../../../npm/webpack-preprocessor",
     "babel-loader": "^10.0.0",
-    "cypress": "file:../../../cli"
+    "cypress": "file:../../../cli/build"
   },
   "projectFixtureDirectory": "runner-specs"
 }
