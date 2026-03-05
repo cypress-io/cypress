@@ -321,7 +321,7 @@ export async function formErrorText (info: Omit<ErrorInfo, 'platform'>, msg?: st
   }, msg, prevMessage)
 }
 
-export function syncFormErrorText (info: ErrorInfo, msg?: string, prevMessage?: string): string {
+function syncFormErrorText (info: ErrorInfo, msg?: string, prevMessage?: string): string {
   const formatted: string[] = []
 
   function add (msg: string): void {
