@@ -229,10 +229,6 @@ const events: Events = {
       runner.emit('studio:init:suite', { suiteId, entrySource })
     })
 
-    localBus.on('studio:remove:command', (commandId) => {
-      runner.emit('studio:remove:command', commandId)
-    })
-
     localBus.on('studio:cancel', () => {
       runner.emit('studio:cancel')
     })
