@@ -11,8 +11,10 @@ const exitedPids = new Set<number>()
 let hasExited = false
 
 export function addChildProcess (child: ChildProcess) {
-  if (hasExited && child.pid) {
-    treeKill(child.pid)
+  if (hasExited) {
+    if (child.pid) {
+      treeKill(child.pid)
+    }
 
     return
   }
