@@ -19,6 +19,7 @@ _Released 03/10/2026 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded `basic-ftp` to `5.2.0` to address [CVE-2026-27699](https://github.com/advisories/GHSA-5rq4-664w-9x2c) vulnerability reported in security scans. Addresses [#33436](https://github.com/cypress-io/cypress/issues/33436).
+- Upgraded `fast-xml-parser` to `4.5.4` to address [CVE-2026-25896](https://github.com/advisories/GHSA-m7jm-9gc2-mpf2) vulnerability reported in security scans. Addresses [#33434](https://github.com/cypress-io/cypress/issues/33434).
 
 ## 15.11.0
 
