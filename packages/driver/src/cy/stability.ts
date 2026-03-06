@@ -2,9 +2,6 @@ import Promise from 'bluebird'
 import type { ICypress } from '../cypress'
 import type { StateFunc } from '../cypress/state'
 
-// Error used when rejecting pending waiters after a test reset (avoids stale callbacks running in the next test).
-const STABILITY_RESET_ERROR = new Error('Stability waiters cleared due to test reset')
-
 export const create = (Cypress: ICypress, state: StateFunc) => {
   const whenStableQueue: Array<{
     fn: () => any
@@ -15,8 +12,9 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
   const reset = () => {
     const pending = whenStableQueue.splice(0)
 
+    // reject each waiter so they don't run in the next test
     for (const waiter of pending) {
-      waiter.reject(STABILITY_RESET_ERROR)
+      waiter.reject(new Error('Stability waiters cleared due to test reset'))
     }
   }
 
