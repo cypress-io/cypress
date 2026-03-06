@@ -2,6 +2,9 @@ import Promise from 'bluebird'
 import type { ICypress } from '../cypress'
 import type { StateFunc } from '../cypress/state'
 
+// Error used when rejecting pending waiters after a test reset (avoids stale callbacks running in the next test).
+const STABILITY_RESET_ERROR = new Error('Stability waiters cleared due to test reset')
+
 export const create = (Cypress: ICypress, state: StateFunc) => {
   const whenStableQueue: Array<{
     fn: () => any
@@ -9,7 +12,16 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
     resolve: (value?: any) => void
   }> = []
 
+  const reset = () => {
+    const pending = whenStableQueue.splice(0)
+
+    for (const waiter of pending) {
+      waiter.reject(STABILITY_RESET_ERROR)
+    }
+  }
+
   return {
+    reset,
     isStable: (stable: boolean = true, event: string) => {
       // if the state is already in the desired state, return
       if (state('isStable') === stable) {
@@ -63,4 +75,6 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
   }
 }
 
-export interface IStability extends ReturnType<typeof create> {}
+// Omit 'reset' so $Cy can implement IStability without conflicting with its own reset(test) method.
+// Stability reset is exposed on the cy instance as resetStability.
+export interface IStability extends Omit<ReturnType<typeof create>, 'reset'> {}

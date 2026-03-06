@@ -1,4 +1,4 @@
-import type { ICypress } from '../../../src/cypress'
+import { describe, it, expect } from 'vitest'
 import type { StateFunc } from '../../../src/cypress/state'
 import { create } from '../../../src/cy/stability'
 
@@ -40,8 +40,8 @@ describe('src/cy/stability', () => {
 
         return undefined
       },
-    } as ICypress
-    const stability = create(CypressMock, state)
+    }
+    const stability = create(CypressMock as any, state)
 
     const first = stability.whenStable(() => {
       order.push('first')
@@ -53,7 +53,7 @@ describe('src/cy/stability', () => {
     stability.isStable(true, 'test release waiters')
 
     return Promise.all([first, second]).then(() => {
-      expect(order).to.deep.equal(['before-release', 'first', 'second'])
+      expect(order).toEqual(['before-release', 'first', 'second'])
     })
   })
 
@@ -67,8 +67,8 @@ describe('src/cy/stability', () => {
 
         return undefined
       },
-    } as ICypress
-    const stability = create(CypressMock, state)
+    }
+    const stability = create(CypressMock as any, state)
     const order: string[] = []
     let secondWaiterResolved = false
     let secondWaiter: Promise<unknown> | undefined
@@ -86,14 +86,45 @@ describe('src/cy/stability', () => {
 
     return firstWaiter
     .then(() => {
-      expect(secondWaiterResolved).to.equal(false)
+      expect(secondWaiterResolved).toBe(false)
 
       stability.isStable(true, 'second release')
 
       return secondWaiter
     })
     .then(() => {
-      expect(order).to.deep.equal(['first', 'second'])
+      expect(order).toEqual(['first', 'second'])
+    })
+  })
+
+  it('reset() clears queue and rejects pending waiters to avoid test pollution', () => {
+    const order: string[] = []
+    const state = createState({ isStable: false })
+    const CypressMock = {
+      action: () => Promise.resolve(),
+    }
+    const stability = create(CypressMock as any, state)
+
+    const waiterPromise = stability.whenStable(() => {
+      order.push('ran')
+    })
+
+    stability.reset()
+
+    return waiterPromise
+    .then(
+      () => {
+        throw new Error('waiter should have been rejected')
+      },
+      (err: Error) => {
+        expect(err.message).toBe('Stability waiters cleared due to test reset')
+      },
+    )
+    .then(() => {
+      expect(order).toEqual([])
+      state('isStable', undefined)
+      stability.isStable(true, 'next test')
+      expect(order).toEqual([])
     })
   })
 })
