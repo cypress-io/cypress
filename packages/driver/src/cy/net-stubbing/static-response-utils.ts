@@ -61,7 +61,7 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
   // (about 24.8 days) are silently treated as 1ms and effectively ignored.
   const MAX_TIMEOUT = 2147483647 // 2**31 - 1
 
-  if (delay && delay >= MAX_TIMEOUT) {
+  if (delay && delay > MAX_TIMEOUT) {
     err(`\`delay\` must be less than ${MAX_TIMEOUT}ms (approximately 24.8 days). Larger values are silently ignored by the timer implementation.`)
   }
 }
