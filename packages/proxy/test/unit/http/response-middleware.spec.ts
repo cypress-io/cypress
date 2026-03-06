@@ -5,12 +5,11 @@ import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
 import EventEmitter from 'events'
 import { testMiddleware } from './helpers'
-import { RemoteStates } from '@packages/server/lib/remote_states'
+import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
 import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
 import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
-import { DocumentDomainInjection } from '@packages/network-tools'
 
 async function flushPromises () {
   return new Promise((resolve) => setTimeout(resolve, 0))

@@ -1,7 +1,9 @@
-import { origin, getDomainNameFromParsedHost, parseUrlIntoHostProtocolDomainTldPort } from '@packages/network-tools'
+import { getDomainNameFromParsedHost, parseUrlIntoHostProtocolDomainTldPort } from './cors'
 import Debug from 'debug'
 import _ from 'lodash'
-import type { DocumentDomainInjection, ParsedHostWithProtocolAndHost } from '@packages/network-tools'
+import type { DocumentDomainInjection } from './document-domain-injection'
+import type { ParsedHostWithProtocolAndHost } from './types'
+import { origin } from './uri'
 
 export const DEFAULT_DOMAIN_NAME = 'localhost'
 

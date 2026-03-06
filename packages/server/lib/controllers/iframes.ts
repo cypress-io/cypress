@@ -4,7 +4,7 @@ import Debug from 'debug'
 import files from './files'
 import type { Cfg } from '../project-base'
 import type { FoundSpec } from '@packages/types'
-import type { RemoteStates } from '../remote_states'
+import type { RemoteStates } from '@packages/network-tools'
 
 const debug = Debug('cypress:server:iframes')
 

@@ -7,7 +7,7 @@ import { getCtx } from '@packages/data-context'
 import { DocumentDomainInjection } from '@packages/network-tools'
 import { privilegedCommandsManager } from '../privileged-commands/privileged-commands-manager'
 import type { Cfg } from '../project-base'
-import type { RemoteStates } from '../remote_states'
+import type { RemoteStates } from '@packages/network-tools'
 
 const debug = Debug('cypress:server:controllers')
 

@@ -1,16 +1,8 @@
-require('../spec_helper')
-import chai, { expect } from 'chai'
-import chaiAsPromised from 'chai-as-promised'
-import chaiSubset from 'chai-subset'
-import sinonChai from '@cypress/sinon-chai'
-import Sinon from 'sinon'
-import { OriginBehavior } from '@packages/network-tools'
+import { describe, it, expect, beforeEach, MockedObject, vi } from 'vitest'
+import { OriginBehavior } from '../lib/document-domain-injection'
 
-import { RemoteStates, DEFAULT_DOMAIN_NAME } from '../../lib/remote_states'
-
-chai.use(chaiAsPromised)
-chai.use(chaiSubset)
-chai.use(sinonChai)
+import { RemoteStates, DEFAULT_DOMAIN_NAME } from '../lib/remote-states'
+import type { RemoteState } from '../lib/remote-states'
 
 describe('remote states', () => {
   const serverPorts = {
@@ -23,26 +15,36 @@ describe('remote states', () => {
   }
 
   let remoteStates: RemoteStates
-  let documentDomainInjection: Sinon.SinonStubbedInstance<OriginBehavior>
+  let documentDomainInjection: MockedObject<OriginBehavior>
 
   beforeEach(() => {
-    documentDomainInjection = Sinon.createStubInstance(OriginBehavior)
+    documentDomainInjection = {
 
-    // While the behavior of this class is partially determined by DocumentDomainInjection,
-    // it's not necessary to test multiple permutations of its getOriginKey - as long as it's
-    // returning an appropriate origin key, this class will behave as expected.
-    documentDomainInjection.getOrigin.callsFake((url) => {
-      return new URL(url).origin
-    })
+      // While the behavior of this class is partially determined by DocumentDomainInjection,
+      // it's not necessary to test multiple permutations of its getOriginKey - as long as it's
+      // returning an appropriate origin key, this class will behave as expected.
+      getOrigin: vi.fn().mockImplementation((url) => {
+        return new URL(url).origin
+      }),
+      getHostname: vi.fn().mockImplementation((url) => {
+        return new URL(url).hostname
+      }),
+      urlsMatch: vi.fn().mockImplementation((frameUrl, topUrl) => {
+        return new URL(frameUrl).origin === new URL(topUrl).origin
+      }),
+      shouldInjectDocumentDomain: vi.fn().mockImplementation((url) => {
+        return true
+      }),
+    }
 
     remoteStates = new RemoteStates(remoteStatesServerPorts, documentDomainInjection)
     // set the initial state
     remoteStates.set('http://localhost:3500')
   })
 
-  context('#get', () => {
+  describe('#get', () => {
     it('returns the remote state for an origin when a matching origin key is returned from DocumentDomainInjection', function () {
-      documentDomainInjection.getOrigin.returns('http://localhost:3500')
+      documentDomainInjection.getOrigin.mockReturnValue('http://localhost:3500')
       const state = remoteStates.get('http://localhost:3500/foobar')
 
       expect(state).to.deep.equal({
@@ -106,7 +108,7 @@ describe('remote states', () => {
     })
   })
 
-  context('#getPrimary', () => {
+  describe('#getPrimary', () => {
     it('returns the primary when there is only the primary in remote states', function () {
       const state = remoteStates.getPrimary()
 
@@ -148,7 +150,7 @@ describe('remote states', () => {
     })
   })
 
-  context('#isPrimarySuperDomainOrigin', () => {
+  describe('#isPrimarySuperDomainOrigin', () => {
     it('returns true when the requested url is the primary origin', function () {
       const isPrimarySuperDomainOrigin = remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')
 
@@ -163,7 +165,7 @@ describe('remote states', () => {
     })
   })
 
-  context('#reset', () => {
+  describe('#reset', () => {
     it('resets the origin stack and remote states to the primary', function () {
       remoteStates.set('https://google.com', {}, false)
 
@@ -175,7 +177,7 @@ describe('remote states', () => {
     })
   })
 
-  context('#current', () => {
+  describe('#current', () => {
     it('returns the remote state for the current origin in the stack', function () {
       remoteStates.set('https://google.com', {})
       remoteStates.set('https://staging.google.com/foo/bar', {}, false)
@@ -199,7 +201,7 @@ describe('remote states', () => {
     })
   })
 
-  context('#set', () => {
+  describe('#set', () => {
     it('sets primary state and origin when isPrimarySuperDomainOrigin is true', function () {
       expect(remoteStates.isPrimarySuperDomainOrigin('http://localhost:3500')).to.be.true
 
@@ -335,7 +337,7 @@ describe('remote states', () => {
     })
 
     it('sets the remote state when passed a state object', function () {
-      const state = {
+      const state: RemoteState = {
         auth: undefined,
         origin: 'http://www.foobar.com',
         strategy: 'http',

@@ -4,10 +4,9 @@ import RequestMiddleware from '../../../lib/http/request-middleware'
 import { testMiddleware } from './helpers'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
-import { RemoteStates } from '@packages/server/lib/remote_states'
+import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
 import { CookieJar } from '@packages/server/lib/util/cookies'
 import { HttpMiddlewareThis } from '../../../lib/http'
-import { DocumentDomainInjection } from '@packages/network-tools'
 
 describe('http/request-middleware', () => {
   const serverPort = 3030
