@@ -416,30 +416,6 @@ describe('e2e record', () => {
     })
   })
 
-  context('metadata', () => {
-    setupStubbedServer(createRoutes())
-
-    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23151
-    it.skip('sends Studio usage metadata', function () {
-      return systemTests.exec(this, {
-        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id.config.js',
-        spec: 'studio_written.cy.js',
-        record: true,
-        snapshot: true,
-      })
-      .then(() => {
-        const requests = getRequests()
-        const postResults = requests[3]
-
-        expect(postResults.url).to.eq(`POST /instances/${instanceId}/results`)
-
-        expect(postResults.body.metadata.studioCreated).to.eq(2)
-        expect(postResults.body.metadata.studioExtended).to.eq(4)
-      })
-    })
-  })
-
   context('misconfiguration', () => {
     setupStubbedServer([])
 

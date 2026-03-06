@@ -1830,9 +1830,6 @@ type Query {
     specPath: String!
   ): CloudProjectSpecResult
 
-  """Whether cloud studio is requested by the environment"""
-  cloudStudioRequested: Boolean
-
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
 

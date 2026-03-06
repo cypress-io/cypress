@@ -328,41 +328,6 @@ export class EventManager {
       })
     })
 
-    this.reporterBus.on('studio:remove:command', (commandId) => {
-      this.studioStore.removeLog(commandId)
-    })
-
-    this.reporterBus.on('studio:save', () => {
-      this.studioStore.startSave()
-    })
-
-    this.reporterBus.on('studio:copy:to:clipboard', (cb) => {
-      this._studioCopyToClipboard(cb)
-    })
-
-    this.localBus.on('studio:copy:to:clipboard', (cb) => {
-      this._studioCopyToClipboard(cb)
-    })
-
-    this.localBus.on('studio:save', (saveInfo) => {
-      this.ws.emit('studio:save', saveInfo, (err) => {
-        if (err) {
-          this.reporterBus.emit('test:set:state', this.studioStore.saveError(err), noop)
-        } else {
-          this.ws.emit('studio:destroy', ({ error }) => {
-            if (error) {
-              // eslint-disable-next-line no-console
-              console.error(error)
-            }
-
-            this.studioStore.saveSuccess()
-            // Reloading for now. This is the easiest way to clear out the protocol code from the front end
-            window.location.reload()
-          })
-        }
-      })
-    })
-
     this.localBus.on('studio:cancel', () => {
       this.ws.emit('studio:destroy', ({ error }) => {
         if (error) {
@@ -981,12 +946,6 @@ export class EventManager {
     }
 
     return displayProps
-  }
-  _studioCopyToClipboard (cb) {
-    this.ws.emit('studio:get:commands:text', this.studioStore.logs, async (commandsText) => {
-      await this.studioStore.copyToClipboard(commandsText)
-      cb()
-    })
   }
 
   emit<K extends Extract<keyof LocalBusEmitsMap, string>>(k: K, v: LocalBusEmitsMap[K]): void

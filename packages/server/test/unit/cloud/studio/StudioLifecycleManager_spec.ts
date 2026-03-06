@@ -181,12 +181,6 @@ describe('StudioLifecycleManager', () => {
     delete process.env.CYPRESS_LOCAL_STUDIO_PATH
   })
 
-  describe('cloudStudioRequested', () => {
-    it('is always true', () => {
-      expect(studioLifecycleManager.cloudStudioRequested).to.be.true
-    })
-  })
-
   describe('initializeStudioManager', () => {
     it('initializes the studio manager and registers it in the data context and sets up protocol when studio is enabled', async () => {
       studioManagerSetupStub.callsFake((args) => {

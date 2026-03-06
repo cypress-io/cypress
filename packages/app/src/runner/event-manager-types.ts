@@ -1,6 +1,6 @@
 import type { FileDetails } from '@packages/types'
 import type { ScriptError } from '../store'
-import type { CommandLog, EntrySource, StudioLog } from '../store/studio-store'
+import type { CommandLog, EntrySource } from '../store/studio-store'
 import type { CypressInCypressMochaEvent } from './event-manager'
 
 interface BeforeScreenshot {
@@ -22,16 +22,6 @@ export type LocalBusEventMap = {
   'testFilter:cloudDebug:dismiss': undefined
 }
 
-export interface StudioSavePayload {
-  fileDetails?: FileDetails
-  absoluteFile: string
-  runnableTitle?: string
-  commands: StudioLog[]
-  isSuite: boolean
-  isRoot: boolean
-  testName?: string
-}
-
 export type LocalBusEmitsMap = {
   // Local Bus
   'restart': undefined
@@ -39,9 +29,7 @@ export type LocalBusEmitsMap = {
   'cypress:in:cypress:run:complete': CypressInCypressMochaEvent[]
 
   // Studio Events
-  'studio:save': StudioSavePayload
   'studio:cancel': undefined
-  'studio:copy:to:clipboard': () => void
   'studio:init:suite': { suiteId: string, entrySource?: EntrySource, showUrlPrompt?: boolean }
 
   // Reporter Events

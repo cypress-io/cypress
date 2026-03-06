@@ -35,7 +35,6 @@ export interface CommandProps extends InstrumentProps {
   visible?: boolean
   wallClockStartedAt?: string
   hookId: string
-  isStudio?: boolean
   group?: number
   groupLevel?: number
   hasSnapshot?: boolean
@@ -55,7 +54,6 @@ export default class Command extends Instrument {
   wallClockStartedAt?: string
   children: Array<Command> = []
   hookId: string
-  isStudio: boolean
   group?: number
   groupLevel?: number
   hasSnapshot?: boolean
@@ -151,7 +149,6 @@ export default class Command extends Instrument {
       wallClockStartedAt: observable,
       children: observable,
       hookId: observable,
-      isStudio: observable,
       group: observable,
       groupLevel: observable,
       hasSnapshot: observable,
@@ -182,7 +179,6 @@ export default class Command extends Instrument {
     this.visible = props.visible === undefined || props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
-    this.isStudio = !!props.isStudio
     this.group = props.group
     this.hasSnapshot = !!props.hasSnapshot
     this.hasConsoleProps = !!props.hasConsoleProps
