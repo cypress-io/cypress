@@ -998,9 +998,9 @@ describe('network stubbing', { retries: 15 }, function () {
             'delay exceeds maximum setTimeout value',
             {
               body: 'test',
-              delay: 2147483647,
+              delay: 2147483648,
             },
-            'must be less than 2147483647ms',
+            'must be less than 2147483648ms',
           ],
         ].forEach(function ([name, handler, expectedErr]) {
           it(`${name} fails`, function (done) {
