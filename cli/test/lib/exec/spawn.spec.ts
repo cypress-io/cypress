@@ -5,7 +5,7 @@ import tty from 'tty'
 import path from 'path'
 import treeKill from 'tree-kill'
 import si, { Systeminformation } from 'systeminformation'
-import { EventEmitter as EE } from 'events'
+import { EventEmitter } from 'events'
 import readline from 'readline'
 import createDebug from 'debug'
 import { PassThrough } from 'stream'
@@ -65,12 +65,13 @@ vi.mock('process', async (importActual) => {
   const actual = await importActual()
 
   return {
+    // @ts-expect-error
+    ...actual,
     stdin: {
-      // @ts-expect-error
       ...actual.stdin,
-      pipe: vi.fn(),
       on: vi.fn(),
       emit: vi.fn(),
+      pipe: vi.fn(),
     },
     stdout: vi.fn(),
     stderr: {
@@ -84,8 +85,9 @@ vi.mock('process', async (importActual) => {
       stdin: {
         // @ts-expect-error
         ...actual.default.stdin,
-        pipe: vi.fn(),
         on: vi.fn(),
+        emit: vi.fn(),
+        pipe: vi.fn(),
       },
       stdout: vi.fn(),
       stderr: {
@@ -188,7 +190,7 @@ const defaultBinaryDir = '/default/binary/dir'
 
 describe('lib/exec/spawn', function () {
   let spawnedProcess: any
-  let mockReadlineEE: any
+  let mockReadlineEventEmitter: any
   let stderrFilterMock: PassThrough
 
   beforeEach(function () {
@@ -203,12 +205,11 @@ describe('lib/exec/spawn', function () {
       release: 'OsVersion',
     } as Systeminformation.OsData)
 
-    spawnedProcess = new EE()
+    spawnedProcess = new EventEmitter()
     spawnedProcess.unref = vi.fn().mockReturnValue(undefined)
-    spawnedProcess.stdin = {
-      on: vi.fn().mockReturnValue(undefined),
-      pipe: vi.fn().mockReturnValue(undefined),
-    }
+    spawnedProcess.stdin = new PassThrough()
+    vi.spyOn(spawnedProcess.stdin, 'on')
+    vi.spyOn(spawnedProcess.stdin, 'pipe')
 
     spawnedProcess.stdout = {
       on: vi.fn().mockReturnValue(undefined),
@@ -224,11 +225,13 @@ describe('lib/exec/spawn', function () {
       on: vi.fn().mockReturnValue(undefined),
     }
 
+    vi.spyOn(spawnedProcess, 'on')
+
     spawnedProcess.kill = vi.fn()
 
-    mockReadlineEE = new EE()
+    mockReadlineEventEmitter = new EventEmitter()
 
-    vi.mocked(readline.createInterface).mockReturnValue(mockReadlineEE)
+    vi.mocked(readline.createInterface).mockReturnValue(mockReadlineEventEmitter)
     vi.mocked(cp.spawn).mockReturnValue(spawnedProcess)
     vi.mocked(xvfb.start).mockResolvedValue(undefined)
     vi.mocked(xvfb.stop).mockResolvedValue(undefined)
@@ -269,6 +272,8 @@ describe('lib/exec/spawn', function () {
       // start the process
       const startPromise = start('--foo', { foo: 'bar' })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+
       // simulate the process closing successfully
       spawnedProcess.emit('close', 0)
 
@@ -295,6 +300,7 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start('--foo', { foo: 'bar' })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -326,6 +332,7 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start('--foo', { dev: true, foo: 'bar' })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -354,6 +361,7 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start('--foo', { dev: true, foo: 'bar' })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -382,8 +390,7 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start('--foo')
 
-      await flushPromises()
-
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -396,6 +403,7 @@ describe('lib/exec/spawn', function () {
         it(`if '${event}' event fired`, async () => {
           const startPromise = start('--foo')
 
+          await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
           spawnedProcess.emit(event, 0)
 
           const code = await startPromise
@@ -407,6 +415,8 @@ describe('lib/exec/spawn', function () {
       it('if exit event fired and close event fired', async () => {
         const startPromise = start('--foo')
 
+        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('exit', expect.any(Function)))
         spawnedProcess.emit('exit', 0)
         spawnedProcess.emit('close', 0)
 
@@ -421,6 +431,7 @@ describe('lib/exec/spawn', function () {
         try {
           const startPromise = start('--foo')
 
+          await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('exit', expect.any(Function)))
           spawnedProcess.emit('exit', null, 'SIGKILL')
 
           await startPromise
@@ -436,8 +447,7 @@ describe('lib/exec/spawn', function () {
     it('does not start xvfb when its not needed', async () => {
       const startPromise = start('--foo')
 
-      await flushPromises()
-
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -450,8 +460,7 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start('--foo')
 
-      await flushPromises()
-
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -462,6 +471,7 @@ describe('lib/exec/spawn', function () {
     it('resolves with spawned close code in the message', async () => {
       const startPromise = start('--foo')
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 10)
 
       const code = await startPromise
@@ -486,6 +496,7 @@ describe('lib/exec/spawn', function () {
 
         const startPromise = start('--foo')
 
+        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
         // mock display error due to missing display
         spawnedProcess.emit('close', 1)
 
@@ -509,6 +520,7 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start('--foo')
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('error', expect.any(Function)))
       spawnedProcess.emit('error', new Error(msg))
 
       try {
@@ -524,6 +536,7 @@ describe('lib/exec/spawn', function () {
     it('unrefs if options.detached is true', async () => {
       const startPromise = start(null, { detached: true })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -535,6 +548,7 @@ describe('lib/exec/spawn', function () {
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = start()
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -548,6 +562,7 @@ describe('lib/exec/spawn', function () {
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = start()
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -564,6 +579,7 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start([], { env: {} })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -579,6 +595,7 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start([], { env: {} })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -595,11 +612,12 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start([], { env: {} })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
 
-      mockReadlineEE.emit('SIGINT')
+      mockReadlineEventEmitter.emit('SIGINT')
       // since the import of tree-kill is async inside spawn, we need to wait for it to be imported and called
       await flushPromises()
 
@@ -609,6 +627,7 @@ describe('lib/exec/spawn', function () {
     it('does not set windowsHide property when in darwin', async () => {
       const startPromise = start([], { env: {} })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -625,6 +644,7 @@ describe('lib/exec/spawn', function () {
 
       const startPromise = start([], { env: {} })
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -643,6 +663,7 @@ describe('lib/exec/spawn', function () {
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = start()
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -663,6 +684,7 @@ describe('lib/exec/spawn', function () {
       // @ts-expect-error - invalid number of arguments for given type
       const startPromise = start()
 
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -700,7 +722,7 @@ describe('lib/exec/spawn', function () {
       const startPromise = start()
 
       await flushPromises()
-
+      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
       spawnedProcess.emit('close', 0)
 
       await startPromise
@@ -822,48 +844,63 @@ describe('lib/exec/spawn', function () {
     // https://github.com/cypress-io/cypress/issues/5241
     const errCodes = ['EPIPE', 'ENOTCONN']
 
-    errCodes.forEach((errCode) => {
+    describe('process.stdin error handling', () => {
       beforeEach(() => {
-        // create an EventEmitter and bind it to process.stdin
-        const stdinEE = new EE()
+        const stdinEmitter = new EventEmitter()
 
-        vi.mocked(stdin.emit).mockImplementation((event, ...args) => {
-          return stdinEE.emit(event, ...args)
+        vi.mocked(stdin.on).mockImplementation((event, callback) => {
+          console.log('spied on')
+
+          stdinEmitter.on(event, callback)
+
+          return stdin
         })
 
-        // @ts-expect-error - mock arguments
-        vi.mocked(stdin.on).mockImplementation((event, callback) => {
-          return stdinEE.on(event, callback)
+        vi.mocked(stdin.emit).mockImplementation((event, ...args) => {
+          console.log('spied emit')
+
+          stdinEmitter.emit(event, ...args)
+
+          return stdin
         })
       })
 
-      it(`catches process.stdin errors and returns when code=${errCode}`, async () => {
-        expect(() => {
-          // kick off the mock process
+      errCodes.forEach((errCode) => {
+        it(`catches process.stdin errors and returns when code=${errCode}`, async () => {
           // @ts-expect-error - invalid number of arguments for given type
-          start()
+          const p = start()
 
           const err: any = new Error()
 
           err.code = errCode
 
-          return stdin.emit('error', err)
-        }).not.toThrow()
+          await vi.waitFor(() => expect(stdin.on).toHaveBeenCalledWith('error', expect.any(Function)))
+
+          stdin.emit('error', err)
+
+          // If the error is caught, p resolves when the child process exits rather than immediately rejecting
+          spawnedProcess.emit('exit', 0)
+          await expect(p).resolves.not.toThrow()
+        })
       })
-    })
 
-    it('throws process.stdin errors code!=EPIPE', function () {
-      expect(() => {
-        // kick off the mock process
-        // @ts-expect-error - invalid number of arguments for given type
-        start()
+      it('throws process.stdin errors code!=EPIPE', async function () {
+          // kick off the mock process
+          // @ts-expect-error - invalid number of arguments for given type
+        const p = start()
 
-        const err: any = new Error('wattttt')
+        await vi.waitFor(() => {
+          return expect(stdin.on).toHaveBeenCalledWith('error', expect.any(Function))
+        })
 
-        err.code = 'FAILWHALE'
+        const err = {
+          message: 'wattttt',
+          code: 'FAILWHALE',
+        }
 
-        return stdin.emit('error', err)
-      }).toThrow(/wattttt/)
+        stdin.emit('error', err)
+        await expect(p).rejects.toThrow('wattttt')
+      })
     })
   })
 })

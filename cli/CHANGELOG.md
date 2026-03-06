@@ -1,5 +1,4 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-
 ## 15.12.0
 
 _Released 03/10/2026 (PENDING)_
@@ -10,11 +9,16 @@ _Released 03/10/2026 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where sending SIGINT (e.g. Ctrl+C) to exit Cypress produced a crash report (e.g. on macOS). Cypress and Chrome now exit gracefully on interrupt. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
+- Fixed an issue where sending SIGINT (e.g. Ctrl+C) to exit Cypress left the terminal displaying raw characters. Fixes [#33367](https://github.com/cypress-io/cypress/issues/33367). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
+- Fixed an issue where closing the runner window (e.g. File > Close Window) produced a spurious "We have failed the current spec and aborted the run" or "closed unexpectedly" message. Fixes [#29232](https://github.com/cypress-io/cypress/issues/29232). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
+- Fixed an issue in develop mode (when running Cypress via gulp with file watching) where closing the Electron window did not exit the gulp process, leaving it running. Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).
 
 **Dependency Updates:**
 
 - Upgraded `basic-ftp` to `5.2.0` to address [CVE-2026-27699](https://github.com/advisories/GHSA-5rq4-664w-9x2c) vulnerability reported in security scans. Addresses [#33436](https://github.com/cypress-io/cypress/issues/33436).
+- Upgraded `fast-xml-parser` to `4.5.4` to address [CVE-2026-25896](https://github.com/advisories/GHSA-m7jm-9gc2-mpf2) vulnerability reported in security scans. Addresses [#33434](https://github.com/cypress-io/cypress/issues/33434).
 
 ## 15.11.0
 

@@ -7,7 +7,7 @@ import util from '../util'
 import state from '../tasks/state'
 import xvfb from './xvfb'
 import { needsSandbox } from '../tasks/verify'
-import { throwFormErrorText, getError, errors } from '../errors'
+import { throwFormErrorText, getErrorSync, errors } from '../errors'
 import readline from 'readline'
 import { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
@@ -60,7 +60,7 @@ function createSpawnFunction (
   options: any,
 ) {
   return (overrides: any = {}): any => {
-    return new Promise((resolve: any, reject: any) => {
+    return new Promise(async (resolve: any, reject: any) => {
       _.defaults(overrides, {
         onStderrData: false,
       })
@@ -131,26 +131,37 @@ function createSpawnFunction (
       debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
       debug('spawning Cypress with executable: %s', executable)
 
-      const child = cp.spawn(executable, args, stdioOptions)
+      const platform = await util.getPlatformInfo().catch((e) => reject(e))
+
+      if (!platform) {
+        return
+      }
 
       function resolveOn (event: any): any {
-        return async function (code: any, signal: any): Promise<any> {
+        return function (code: any, signal: NodeJS.Signals): void {
           debug('child event fired %o', { event, code, signal })
 
           if (code === null) {
             const errorObject = errors.childProcessKilled(event, signal)
 
-            const err = await getError(errorObject)
+            errorObject.platform = platform
+            const err = getErrorSync(errorObject, platform)
 
-            return reject(err)
+            reject(err)
+
+            return
           }
 
           resolve(code)
         }
       }
 
+      const child = cp.spawn(executable, args, stdioOptions)
+
       child.on('close', resolveOn('close'))
+
       child.on('exit', resolveOn('exit'))
+
       child.on('error', reject)
 
       if (isPlatform('win32')) {
@@ -229,7 +240,7 @@ function createSpawnFunction (
           return
         }
 
-        throw err
+        reject(err)
       })
 
       if (stdioOptions.detached) {
