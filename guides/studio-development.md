@@ -1,27 +1,23 @@
 # Studio Development
 
-In production, the code used to facilitate Studio functionality will be retrieved from the Cloud. During development, the environment variable `CYPRESS_LOCAL_STUDIO_PATH` can be used to run against a local version.
+Studio is delivered from Cypress Cloud. In production, the Studio bundle is retrieved from the Cloud at runtime. For local development, the environment variable `CYPRESS_LOCAL_STUDIO_PATH` can be used to run against a local Studio build from the `cypress-services` repo.
 
 To run against locally developed Studio:
 
-- Clone the `cypress-services` repo (this requires that you be a member of the Cypress organization)
+- Clone the `cypress-services` repo (requires Cypress organization membership)
   - Run `yarn`
   - Run `yarn watch` in `app/packages/studio`
-  - If developing against locally running `cypress-services`: Run `yarn dev` in the `cypress-services` directory first
+  - If developing against locally running `cypress-services`: run `yarn dev` in the `cypress-services` directory first
 - Set environment variables:
-  - `CYPRESS_INTERNAL_ENV=<environment>` (typically `staging` or `production` to hit those deployments of `cypress-services`, or `development` if you want to hit a locally running version of `cypress-services`)
-  - Set `CYPRESS_LOCAL_STUDIO_PATH` to a relative path pointing to the `cypress-services/app/packages/studio/dist/development` directory (regardless of the `CYPRESS_INTERNAL_ENV` set).
-- Clone the `cypress` repo
-  - Run `yarn`
-  - Run `yarn cypress:open`
-  - Log In to the Cloud via the App
-  - Ensure the project has been setup in the `Cypress (staging)` if in staging environment or `Cypress Internal Org` if in production environment and has a `projectId` that represents that. If developing against locally running `cypress-services`, ensure that the project has the feature `studio-ai` enabled for it.
-  - Open a project with `e2e` tests.
-  - Click to 'Add Commands to Test' after hovering over a test command.
+  - `CYPRESS_INTERNAL_ENV=<environment>` (e.g. `staging`, `production`, or `development` for a local `cypress-services` instance)
+  - `CYPRESS_LOCAL_STUDIO_PATH`: path to `cypress-services/app/packages/studio/dist/development` (overrides Cloud bundle when set)
+- In the `cypress` repo:
+  - Run `yarn` and `yarn cypress:open`
+  - Log in to Cypress Cloud in the app
+  - Use a project that has Studio enabled (e.g. in Cypress (staging) or Cypress Internal Org with the `studio-ai` feature enabled for that project)
+  - Open a project with E2E tests and use "Add Commands to Test" from a test to enter Studio
 
-Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` environment variable or when running the Cypress app via the locally cloned repository, we bypass our error reporting and instead log errors to the browser or node console.
-
-Note: When using the `CYPRESS_LOCAL_STUDIO_PATH` the cloud studio code will be watched for changes so that you do not have to stop the app to incorporate any new changes.
+Note: With `CYPRESS_LOCAL_STUDIO_PATH` or when running the app from a local clone, error reporting is bypassed and errors are logged to the browser or Node console. With `CYPRESS_LOCAL_STUDIO_PATH`, the local Studio code is watched so you can change it without restarting the app.
 
 ## Types
 
@@ -47,14 +43,14 @@ The code that supports cloud Studio and lives in the `cypress-services` monorepo
 
 ### Cypress in Cypress Testing
 
-Several helpers are provided to facilitate testing cloud Studio using Cypress in Cypress tests. The [helper file](https://github.com/cypress-io/cypress/blob/ad353fcc0f7fdc51b8e624a2a1ef4e76ef9400a0/packages/app/cypress/e2e/studio/helper.ts) provides a method, `launchStudio` that:
+Helpers for testing Studio with Cypress-in-Cypress live in [packages/app/cypress/e2e/studio/helper.ts](https://github.com/cypress-io/cypress/blob/develop/packages/app/cypress/e2e/studio/helper.ts). The `launchStudio` helper:
 
-1. Loads a project (by default [`experimental-studio`](https://github.com/cypress-io/cypress/tree/develop/system-tests/projects/experimental-studio)).
-2. Navigates to the appropriate spec (by default `specName.cy.js`).
-3. Enters Studio either by creating a new test or entering from an existing test via the `createNewTest` parameter
-4. Waits for the test to finish executing again in Studio mode.
+1. Loads a project (by default the [`studio`](https://github.com/cypress-io/cypress/tree/develop/system-tests/projects/studio) fixture project).
+2. Navigates to the target spec (by default `specName.cy.js`).
+3. Enters Studio (new test or existing test via the `createNewTest` parameter).
+4. Waits for the test run to finish in Studio mode.
 
-The above steps actually download the studio code from the cloud and use it for the test. Note that `experimental-studio` is set up to be a `canary` project so it will always get the latest and greatest of the cloud Studio code, whether or not it has been fully promoted to production. Note that this means that if you are writing Cypress in Cypress tests that depend on new functionality delivered from the cloud, the Cypress in Cypress tests cannot be merged until the code lands and is built in the cloud. Local development is still possible however by setting `process.env.CYPRESS_LOCAL_STUDIO_PATH` to your local studio path where we enable studio [here](https://github.com/cypress-io/cypress/blob/develop/packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts#L424).
+Those tests use the Studio bundle from the Cloud. The `studio` project uses a `canary` projectId so it receives the latest Cloud Studio build. For local Studio changes, set `process.env.CYPRESS_LOCAL_STUDIO_PATH` to your local studio build; Studio is enabled in that environment in [packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts](https://github.com/cypress-io/cypress/blob/develop/packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts).
 
 In order to properly engage with Studio AI, we choose to simulate the cloud interactions that enable it via something like:
 

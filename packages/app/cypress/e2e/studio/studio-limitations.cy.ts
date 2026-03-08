@@ -1,8 +1,8 @@
 describe('Cypress Studio - Limitations', () => {
   it('does not show the studio button in component testing mode', () => {
     // Load project in component testing mode
-    cy.scaffoldProject('experimental-studio')
-    cy.openProject('experimental-studio', ['--component'])
+    cy.scaffoldProject('studio')
+    cy.openProject('studio', ['--component'])
     cy.startAppServer('component')
     cy.visitApp()
     cy.specsPageIsVisible()
@@ -47,9 +47,9 @@ describe('Cypress Studio - Limitations', () => {
   })
 
   it('shows studio button when running a single spec', () => {
-    // Use the existing experimental-studio project
-    cy.scaffoldProject('experimental-studio')
-    cy.openProject('experimental-studio')
+    // Use the existing studio project
+    cy.scaffoldProject('studio')
+    cy.openProject('studio')
     cy.startAppServer('e2e')
     cy.visitApp()
     cy.specsPageIsVisible()

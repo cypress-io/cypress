@@ -1,7 +1,7 @@
 {
-  "name": "cypress-example-experimental-studio",
+  "name": "cypress-example-studio",
   "version": "0.0.0-development",
-  "description": "Example running specs using Cypress via experimental studio",
+  "description": "Example running specs using Cypress via studio",
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@babel/preset-env": "^7.24.0",
