@@ -359,19 +359,13 @@ export class EventManager {
     // While we must move to pagehide for Chromium, it does not work for our
     // needs in Firefox. Until that is addressed, only Chromium uses the pagehide
     // event as a proxy for AUT unloads.
+    // We use unload/pagehide (not beforeunload) so that we only restart tests and
+    // clear state when the page really unloads. If a beforeunload dialog is shown
+    // (e.g. Studio unsaved changes) and the user clicks Cancel, the page stays
+    // and this event never fires, so we don't rerun tests.
     const unloadEvent = this.isBrowserFamily('chromium') ? 'pagehide' : 'unload'
 
-    $window.on(unloadEvent, (e) => {
-      this._clearAllCookies()
-    })
-
-    // when our window triggers beforeunload
-    // we know we've change the URL and we need
-    // to clear our cookies
-    // additionally we set unload to true so
-    // that Cypress knows not to set any more
-    // cookies
-    $window.on('beforeunload', () => {
+    $window.on(unloadEvent, () => {
       telemetry.getSpan('cypress:app')?.end()
       this.reporterBus.emit('reporter:restart:test:run')
 
