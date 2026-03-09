@@ -114,7 +114,6 @@ async function spawnCypressWithMode (
  *------------------------------------------------------------------------**/
 
 export async function startCypressWatch () {
-  let isClosing = false
   let isRestarting = false
   let child: ChildProcess | null = null
 
@@ -122,7 +121,7 @@ export async function startCypressWatch () {
     child = await spawnCypressWithMode('open', 'dev', ENV_VARS.DEV)
 
     child.on('exit', (code) => {
-      if (isClosing) {
+      if (!isRestarting) {
         process.exit(code ?? 0)
       }
     })
@@ -184,7 +183,6 @@ export async function startCypressWatch () {
   watcher.on('change', signalRestart)
 
   process.on('beforeExit', () => {
-    isClosing = true
     watcher.close()
   })
 

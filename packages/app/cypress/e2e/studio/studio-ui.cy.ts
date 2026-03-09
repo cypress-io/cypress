@@ -189,7 +189,7 @@ describe('studio functionality', () => {
     cy.get('.cm-is-recommendation-line').should('contain', aiOutput)
   })
 
-  it('studio AI is marked as coming soon', () => {
+  it('studio AI is marked as disabled', () => {
     cy.mockNodeCloudRequest({
       url: '/studio/config?projectSlug=n69px6',
       method: 'get',
@@ -205,7 +205,7 @@ describe('studio functionality', () => {
 
     launchStudio()
 
-    // Verify that AI is coming soon
-    cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Coming soon')
+    // Verify that AI is displaying as disabled
+    cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Disabled')
   })
 })
