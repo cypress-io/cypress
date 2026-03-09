@@ -16,6 +16,10 @@ _Released 03/10/2026 (PENDING)_
 
 - Upgraded `basic-ftp` to `5.2.0` to address [CVE-2026-27699](https://github.com/advisories/GHSA-5rq4-664w-9x2c) vulnerability reported in security scans. Addresses [#33436](https://github.com/cypress-io/cypress/issues/33436).
 
+**Misc:**
+
+- Rerun tests on `pagehide` or `unload` instead of on `beforeunload`. Addresses [#33456](https://github.com/cypress-io/cypress/pull/33456).
+
 ## 15.11.0
 
 _Released 02/24/2026_
