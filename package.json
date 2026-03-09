@@ -149,7 +149,7 @@
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-vue": "7.18.0",
     "execa": "4.1.0",
-    "fast-xml-parser": "^4.5.3",
+    "fast-xml-parser": "^4.5.4",
     "filesize": "10.1.6",
     "fs-extra": "9.1.0",
     "glob": "7.1.6",
