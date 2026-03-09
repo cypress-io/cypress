@@ -73,6 +73,7 @@ Thanks for taking the time to contribute! :smile:
     - [Code Review of Dependency Updates](#code-review-of-dependency-updates)
       - [Dependency Update Instructions](#dependency-update-instructions)
       - [Dependency Updates Checklist](#dependency-updates-checklist)
+  - [AI-Assisted Contributions](#ai-assisted-contributions)
   - [Releases](#releases)
   - [Known problems](#known-problems)
     - [ENFILE or EMFILE](#enfile-or-emfile)
@@ -634,6 +635,30 @@ Below are some guidelines Cypress uses when reviewing dependency updates.
 - [ ] Code using the dependency has been updated to accommodate any breaking changes
 - [ ] The dependency still supports the version of Node that the package requires.
 - [ ] Appropriate labels have been added to the PR (for example: label `type: breaking change` if it is a breaking change)
+
+## AI-Assisted Contributions
+
+AI coding assistants (such as Claude, Codex, Cursor, etc.) are increasingly common tools for developers. Contributions to Cypress may be created with or without AI assistance. AI tools are treated the same as any other development aid (such as linters, formatters, or code generators).
+
+We do not restrict or require disclosure of AI usage, but contributors are responsible for all code they submit regardless of how it was produced.
+
+When submitting a pull request, please ensure that:
+
+- **You understand the code you are submitting.**  
+  You should be able to explain how the change works and why it is correct.
+
+- **You have reviewed and validated the generated code.**  
+  AI-generated code may contain mistakes, unnecessary complexity, or patterns that do not match the repository.
+
+- **Your changes follow the existing codebase conventions and architecture.**
+
+- **Your pull request remains focused and reviewable.**  
+  Avoid submitting large AI-generated changes that you have not carefully reviewed.
+
+- **The repository’s pull request template is preserved.**  
+  AI tools may help draft content, but the template structure should remain intact.
+
+Reviewers may ask clarifying questions about changes. As with any contribution, authors remain responsible for the correctness, maintainability, and quality of the code they submit.
 
 ## Releases
 
