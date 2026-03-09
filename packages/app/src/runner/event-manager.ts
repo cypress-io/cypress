@@ -338,7 +338,11 @@ export class EventManager {
     })
 
     this.localBus.on('studio:cancel', () => {
-      executeStudioCancel()
+      const blocked = guardUnsavedStudioChanges(this.specDirtyDataStore, executeStudioCancel)
+
+      if (!blocked) {
+        executeStudioCancel()
+      }
     })
 
     this.ws.on('aut:destroy:init', () => {
