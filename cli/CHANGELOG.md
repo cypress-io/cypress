@@ -8,10 +8,7 @@ _Released 03/10/2026 (PENDING)_
 - Adds an option to enable word wrap for Studio panel code. Addressed in [#33411](https://github.com/cypress-io/cypress/pull/33411).
 
 **Bugfixes:**
-
-- Fixed an issue where sending SIGINT (e.g. Ctrl+C) to exit Cypress produced a crash report (e.g. on macOS). Cypress and Chrome now exit gracefully on interrupt. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue where sending SIGINT (e.g. Ctrl+C) to exit Cypress left the terminal displaying raw characters. Fixes [#33367](https://github.com/cypress-io/cypress/issues/33367). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
-- Fixed an issue where closing the runner window (e.g. File > Close Window) produced a spurious "We have failed the current spec and aborted the run" or "closed unexpectedly" message. Fixes [#29232](https://github.com/cypress-io/cypress/issues/29232). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue in develop mode (when running Cypress via gulp with file watching) where closing the Electron window did not exit the gulp process, leaving it running. Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).
 - Fixed an issue where Cypress may hang when waiting on multiple intercepts and the page navigates causing a stability change. Addressed in [#33446](https://github.com/cypress-io/cypress/pull/33446).
