@@ -31,3 +31,4 @@
 /// <reference path="./cypress-global-vars.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
 /// <reference path="./cypress-expect.d.ts" />
+/// <reference path="./cypress-global-augmentation.d.ts" />

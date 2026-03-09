@@ -1298,8 +1298,16 @@ namespace CypressGlobalsTests {
   window.expect
   window.assert
 
-  globalThis.Cypress
-  globalThis.cy
-  globalThis.expect
-  globalThis.assert
+  // globalThis is not augmented in Cypress types (would require redeclaring globals).
+  // Assert type so we still verify the globals are available on the global object.
+  const g = globalThis as typeof globalThis & {
+    Cypress: typeof Cypress
+    cy: typeof cy
+    expect: typeof expect
+    assert: typeof assert
+  }
+  g.Cypress
+  g.cy
+  g.expect
+  g.assert
 }
