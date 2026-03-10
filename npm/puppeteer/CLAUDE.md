@@ -1,0 +1,3 @@
+# @cypress/puppeteer
+
+@AGENTS.md

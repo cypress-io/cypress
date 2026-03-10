@@ -1,0 +1,3 @@
+# Scaffold Config
+
+@AGENTS.md
