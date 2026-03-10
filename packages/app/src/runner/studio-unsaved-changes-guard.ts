@@ -1,10 +1,9 @@
 import { ref } from 'vue'
-import type { Router, RouteLocationNormalized } from 'vue-router'
+import type { Router } from 'vue-router'
 import type { SpecDirtyDataStore } from '../store/spec-dirty-data-store'
 
 type UnsavedChangesCallback = ((resume: () => void) => void) | null
 
-const pendingNavigation = ref<RouteLocationNormalized | null>(null)
 const unsavedChangesCallback = ref<UnsavedChangesCallback>(null)
 
 export function setUnsavedChangesCallback (cb: UnsavedChangesCallback) {
@@ -36,13 +35,10 @@ export function installStudioExitNavigationGuard (router: Router, getSpecDirtyDa
 
     const blocked = guardUnsavedStudioChanges(store, () => {
       store.resetDirtyState()
-      pendingNavigation.value = null
       router.push(to)
     })
 
     if (blocked) {
-      pendingNavigation.value = to
-
       return false
     }
 
