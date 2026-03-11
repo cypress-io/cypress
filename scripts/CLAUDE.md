@@ -1,0 +1,3 @@
+# Scripts
+
+@AGENTS.md
