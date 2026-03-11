@@ -20,6 +20,8 @@ interface Props {
 const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState }: Props) => {
   const emit = (event: string) => () => events.emit(event)
 
+  const rerunLabel = appState.studioSingleTestActive ? 'Run test' : 'Rerun all tests'
+
   return (
     <div className='controls'>
       {appState.isPaused && (
@@ -41,9 +43,9 @@ const Controls: React.FC<Props> = observer(({ events = defaultEvents, appState }
         </Tooltip>
       )}
       {!appState.isRunning && (
-        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
+        <Tooltip placement='bottom' title={<p>{rerunLabel} <span className='kbd'>R</span></p>} className='cy-tooltip'>
           <div>
-            <Button size='20' variant='outline-dark' aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
+            <Button size='20' variant='outline-dark' aria-label={rerunLabel} className='restart' onClick={emit('restart')}>
               {appState.studioActive ? (
                 <IconActionRestart transform="scale(-1 1)" strokeColor={iconStrokeColor} />
               ) : (
