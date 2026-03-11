@@ -14,6 +14,9 @@ _Released 03/10/2026_
 - Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).
 - Fixed an issue where Cypress may hang when waiting on multiple intercepts and the page navigates causing a stability change. Addressed in [#33446](https://github.com/cypress-io/cypress/pull/33446).
 
+**Misc:**
+- Studio now warns users before navigating if they try to exit when they have unsaved changes in the editor. Addressed in [#33457](https://github.com/cypress-io/cypress/pull/33457)
+
 **Dependency Updates:**
 
 - Upgraded `basic-ftp` to `5.2.0` to address [CVE-2026-27699](https://github.com/advisories/GHSA-5rq4-664w-9x2c) vulnerability reported in security scans. Addresses [#33436](https://github.com/cypress-io/cypress/issues/33436).
