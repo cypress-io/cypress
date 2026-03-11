@@ -386,6 +386,9 @@ export class EventManager {
         return
       }
 
+      // Clear any stale flag from a previously cancelled beforeunload so the unload
+      // handler does not run full cleanup again
+      this._deferCleanupToUnload = false
       this._runFullUnloadCleanup()
     })
 
