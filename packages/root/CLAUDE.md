@@ -1,0 +1,3 @@
+# Root
+
+@AGENTS.md
