@@ -330,7 +330,10 @@ export class EventManager {
     }
 
     this.reporterBus.on('studio:cancel', () => {
-      const blocked = guardUnsavedStudioChanges(this.specDirtyDataStore, executeStudioCancel)
+      const blocked = guardUnsavedStudioChanges(this.specDirtyDataStore, () => {
+        this.specDirtyDataStore.resetDirtyState()
+        executeStudioCancel()
+      })
 
       if (!blocked) {
         executeStudioCancel()
