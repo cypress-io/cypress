@@ -58,6 +58,21 @@ describe('controllers/iframes', () => {
       expect(() => proxyCallback(err)).to.throw(err)
     })
 
+    it('throws when in run mode (isTextTerminal) and dev server connection is reset (ECONNRESET)', () => {
+      const config = { isTextTerminal: true, devServerPublicPathRoute: '/__cypress/' }
+      const req = { query: {}, params: { 0: 'foo.js' }, url: '', headers: {} }
+      const res = {}
+
+      iframesController.component({ config, nodeProxy }, req, res)
+
+      expect(nodeProxy.web).to.have.been.calledOnce
+      const err = new Error('connect ECONNRESET 127.0.0.1:8080')
+
+      err.code = 'ECONNRESET'
+
+      expect(() => proxyCallback(err)).to.throw(err)
+    })
+
     it('does not throw when in open mode and dev server connection is refused (ECONNREFUSED)', () => {
       const config = { isTextTerminal: false, devServerPublicPathRoute: '/__cypress/' }
       const req = { query: {}, params: { 0: 'foo.js' }, url: '', headers: {} }
@@ -69,21 +84,6 @@ describe('controllers/iframes', () => {
       const err = new Error('connect ECONNREFUSED 127.0.0.1:8080')
 
       err.code = 'ECONNREFUSED'
-
-      expect(() => proxyCallback(err)).not.to.throw()
-    })
-
-    it('does not throw when in run mode but error is not ECONNREFUSED (e.g. socket hangup)', () => {
-      const config = { isTextTerminal: true, devServerPublicPathRoute: '/__cypress/' }
-      const req = { query: {}, params: { 0: 'foo.js' }, url: '', headers: {} }
-      const res = {}
-
-      iframesController.component({ config, nodeProxy }, req, res)
-
-      expect(nodeProxy.web).to.have.been.calledOnce
-      const err = new Error('socket hang up')
-
-      err.code = 'ECONNRESET'
 
       expect(() => proxyCallback(err)).not.to.throw()
     })
