@@ -3,7 +3,7 @@
 
 _Released 03/24/2026 (PENDING)_
 
-**Bugfixes**
+**Bugfixes:**
 
 - Fixed an issue where Cypress may hang when running component tests and a connection to the dev server can no longer be made. Addressed in [#33469](https://github.com/cypress-io/cypress/pull/33469)
 
