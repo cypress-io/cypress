@@ -4,6 +4,7 @@
 _Released 03/24/2026 (PENDING)_
 
 **Misc:**
+
 - Studio now warns users before navigating if they try to exit when they have unsaved changes in the editor. Addressed in [#33457](https://github.com/cypress-io/cypress/pull/33457)
 
 ## 15.12.0
