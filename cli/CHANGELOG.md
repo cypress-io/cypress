@@ -1,5 +1,13 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 
+## 15.12.1
+
+_Released 03/24/2026 (PENDING)_
+
+**Dependency Updates:**
+
+- Upgraded `simple-git` from `3.27.0` to `3.32.3` to address [Improper Handling of Case Sensitivity](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15457646) (CVE-2026-28292) vulnerability reported in security scans.
+
 ## 15.12.0
 
 _Released 03/10/2026_
