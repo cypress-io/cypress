@@ -61,7 +61,14 @@ export const iframesController = {
 
     nodeProxy.web(req, res, {}, (e) => {
       if (e) {
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+        // if we are in run mode and we are not able to connect to the dev server (e.g. it has probably crashed),
+        // we need to throw an error so the app doesn't hang
+        if (config.isTextTerminal && (e as NodeJS.ErrnoException).code === 'ECONNREFUSED') {
+          debug('Connection refused from the dev server. This is likely the dev server has crashed', e)
+          throw e
+        } else {
+          debug('Error from the dev server. This is likely the socket hangup issue during file watching, we can basically ignore this since the App should make another request during rerun', e)
+        }
       }
     })
   },
