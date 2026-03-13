@@ -289,12 +289,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           fileServer.create(fileServerFolder as string),
         ])
         .spread((httpsProxy, fileServer) => {
+          this._httpsProxy = httpsProxy as HttpsProxyServer
+          this._fileServer = fileServer as FileServer
+
           // once we open the server, set the domain to root or baseUrl by default which
           // prevents a situation where navigating to http sites redirects to /__/ cypress
           this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
-
-          this._httpsProxy = httpsProxy as HttpsProxyServer
-          this._fileServer = fileServer as FileServer
 
           // if we have a baseUrl let's go ahead
           // and make sure the server is connectable!
