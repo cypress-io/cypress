@@ -194,7 +194,7 @@
     "ts-loader": "9.5.2",
     "tsconfig-paths": "3.10.1",
     "webpack": "^5.88.2",
-    "ws": "5.2.4",
+    "ws": "8.17.1",
     "xvfb-maybe": "0.2.1"
   },
   "files": [

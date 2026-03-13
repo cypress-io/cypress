@@ -86,7 +86,7 @@
     "supertest": "4.0.2",
     "systeminformation": "^5.27.7",
     "temp-dir": "^2.0.0",
-    "ws": "5.2.4"
+    "ws": "8.17.1"
   },
   "types": "lib/fixtures.ts",
   "license": "ISC",
