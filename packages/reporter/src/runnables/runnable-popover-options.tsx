@@ -22,8 +22,6 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
 }: Props) => {
   const relativeSpecPath = spec.relative
 
-  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
-
   const fileDetails = {
     absoluteFile: spec.absolute,
     column: 0,
@@ -56,8 +54,21 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     setIsOpen(false)
   }
 
+  const getSuiteIdForNewTest = (): string => {
+    const test = Cypress.state('test')
+    const parent = test && test?.parent
+
+    if (parent && parent.id && parent.type === 'suite') {
+      return parent.id
+    }
+
+    return 'r1'
+  }
+
   const handleNewTest = () => {
-    events.emit('studio:init:suite', { suiteId: 'r1', entrySource: 'new-test-root' })
+    const suiteId = getSuiteIdForNewTest()
+
+    events.emit('studio:init:suite', { suiteId, entrySource: suiteId === 'r1' ? 'new-test-root' : 'new-test-suite' })
     setIsOpen(false)
   }
 
@@ -129,7 +140,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           <span>Open in IDE</span>
         </button>
 
-        {!isStudioSingleTest && <button
+        {<button
           className="runnable-popover-item"
           onClick={handleNewTest}
           data-cy="runnable-popover-new-test"
