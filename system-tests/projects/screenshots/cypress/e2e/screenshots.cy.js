@@ -181,9 +181,6 @@ describe('taking screenshots', () => {
   })
 
   it('ensures unique paths when there\'s a non-named screenshot and a failure', () => {
-    // Visit a distinct page and viewport so the viewport screenshot and failure screenshot
-    // have unique content/size from other failure screens (reduces flake in system test uniqueness check).
-    cy.viewport(900, 700)
     cy.visit('http://localhost:3322/color/teal')
     cy.screenshot({ capture: 'viewport' }).then(() => {
       throw new Error('failing on purpose')
