@@ -6,9 +6,9 @@ mockery.registerMock('morgan', () => {
   return morganFn
 })
 
-// Stub https-proxy so createServer does not start a real HTTPS proxy (used by createServer remote state tests)
+// Stub https-proxy so createServer does not start a real HTTPS proxy (used by createServer remote state tests).
 mockery.registerMock('@packages/https-proxy', {
-  createProxy: () => Promise.resolve({}),
+  createProxy: () => Promise.resolve({ close: () => {} }),
 })
 
 const _ = require('lodash')
@@ -36,9 +36,6 @@ function getOpenOptions (overrides = {}) {
   }
 }
 
-// TODO: Figure out correct configuration to run these tests and/or which ones we need to keep.
-// The introduction of server-base/socket-base and the `ensureProp` function made unit testing
-// the server difficult.
 describe('lib/server-base', () => {
   beforeEach(function () {
     this.fileServer = {
