@@ -92,9 +92,7 @@ describe('e2e screenshots', () => {
           fs.statAsync(screenshot4).get('size'),
           fs.statAsync(screenshot5).get('size'),
           fs.statAsync(screenshot6).get('size'),
-          // Ignore comparing 6 and 7 since they can sometimes be the same since we take the screenshot as close to the failure as possible and
-          // the test run error may not have displayed yet. Leaving this commented in case we want to change this behavior in the future
-          // fs.statAsync(screenshot7).get('size'),
+          fs.statAsync(screenshot7).get('size'),
           fs.statAsync(screenshot8).get('size'),
           fs.statAsync(screenshot9).get('size'),
         ])
@@ -110,6 +108,8 @@ describe('e2e screenshots', () => {
             sizeOf(screenshot5),
             sizeOf(screenshot6),
             sizeOf(screenshot7),
+            sizeOf(screenshot8),
+            sizeOf(screenshot9),
           ])
         }).then((dimensions = []) => {
           if (browser === 'electron') {
