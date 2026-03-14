@@ -68,6 +68,10 @@ export type ItOptions = ExecOptions & {
    * Same as using `systemTests.it.skip`.
    */
   skip?: boolean
+  /**
+   * If set, the system test will be retried up to the given number of times.
+   */
+  retries?: number
 }
 
 type ExecOptions = {
@@ -501,6 +505,7 @@ const localItFn = function (title: string, opts: ItOptions) {
   const DEFAULT_OPTIONS = {
     only: false,
     skip: false,
+    retries: 0,
     browser: [],
     snapshot: false,
     onStdout: _.noop,
