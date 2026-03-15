@@ -101,7 +101,7 @@ describe('studio functionality', () => {
 
     cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
 
-    cy.get('button[aria-label="Rerun all tests"]').click()
+    cy.get('button.restart').click()
 
     // dismiss unsaved changes modal
     cy.findByTestId('unsaved-changes-discard-button').click()
