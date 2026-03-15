@@ -537,7 +537,10 @@ const localItFn = function (title: string, opts: ItOptions) {
     const testTitle = `${title} [${browser}]`
 
     return mochaItFn(testTitle, function () {
-      this.retries(options.retries)
+      // Only set retries when explicitly provided; otherwise allow Mocha to inherit from parent suite
+      if ('retries' in opts) {
+        this.retries(options.retries)
+      }
 
       if (options.useSeparateBrowserSnapshots) {
         title = testTitle
