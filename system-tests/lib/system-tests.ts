@@ -537,6 +537,8 @@ const localItFn = function (title: string, opts: ItOptions) {
     const testTitle = `${title} [${browser}]`
 
     return mochaItFn(testTitle, function () {
+      this.retries(options.retries)
+
       if (options.useSeparateBrowserSnapshots) {
         title = testTitle
       }
