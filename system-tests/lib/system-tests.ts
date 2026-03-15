@@ -505,7 +505,6 @@ const localItFn = function (title: string, opts: ItOptions) {
   const DEFAULT_OPTIONS = {
     only: false,
     skip: false,
-    retries: 0,
     browser: [],
     snapshot: false,
     onStdout: _.noop,
