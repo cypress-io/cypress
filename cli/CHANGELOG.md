@@ -1,4 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.12.1
+
+_Released 03/24/2026 (PENDING)_
+
+**Misc:**
+
+- When a test is isolated in Studio, 'rerun' button should not say 'Run all tests. It should say 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466)
 
 ## 15.12.0
 
@@ -9,6 +16,7 @@ _Released 03/10/2026_
 - Adds an option to enable word wrap for Studio panel code. Addressed in [#33411](https://github.com/cypress-io/cypress/pull/33411).
 
 **Bugfixes:**
+
 - Fixed an issue where sending SIGINT (e.g. Ctrl+C) to exit Cypress left the terminal displaying raw characters. Fixes [#33367](https://github.com/cypress-io/cypress/issues/33367). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue in develop mode (when running Cypress via gulp with file watching) where closing the Electron window did not exit the gulp process, leaving it running. Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).
