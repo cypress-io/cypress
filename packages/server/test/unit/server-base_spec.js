@@ -70,12 +70,11 @@ describe('lib/server-base', () => {
     })
 
     it('requires morgan if true', function () {
+      const useMorganStub = sinon.stub(this.server, 'useMorgan').returns(morganFn)
+
       this.server.createExpressApp({ morgan: true })
 
-      // Express may call use(path, fn) internally; morgan is passed as middleware in some call
-      const morganWasUsed = this.use.getCalls().some((call) => call.args.includes(morganFn))
-
-      expect(morganWasUsed).to.be.true
+      expect(useMorganStub).to.have.been.calledOnce
     })
   })
 
@@ -190,8 +189,8 @@ describe('lib/server-base', () => {
           nonLoopbackAttempt
           .then(() => {
             throw new Error(`Shouldn't be able to connect on ${nonLoopback.address}:${port}`)
-          }).catch({ errno: 'ECONNREFUSED' }, () => {}).catch((err) => {
-            if (err.message === 'connect timeout') return
+          }).catch((err) => {
+            if (err.code === 'ECONNREFUSED' || err.message === 'connect timeout') return
 
             throw err
           }),
