@@ -6,11 +6,6 @@ mockery.registerMock('morgan', () => {
   return morganFn
 })
 
-// Stub https-proxy so createServer does not start a real HTTPS proxy (used by createServer remote state tests).
-mockery.registerMock('@packages/https-proxy', {
-  createProxy: () => Promise.resolve({ close: () => {} }),
-})
-
 const _ = require('lodash')
 const os = require('os')
 const express = require('express')
