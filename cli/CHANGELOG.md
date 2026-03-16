@@ -14,6 +14,8 @@ _Released 03/24/2026 (PENDING)_
 **Dependency Updates:**
 
 - Upgraded `simple-git` from `3.27.0` to `3.32.3` to address [Improper Handling of Case Sensitivity](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15457646) (CVE-2026-28292) vulnerability reported in security scans. Addressed in [#33470](https://github.com/cypress-io/cypress/pull/33470)
+- Upgraded `minimatch` to `3.1.3` to address [CVE-2026-26996](https://nvd.nist.gov/vuln/detail/CVE-2026-26996), [CVE-2026-27903](https://nvd.nist.gov/vuln/detail/CVE-2026-27903), and [CVE-2026-27904](https://nvd.nist.gov/vuln/detail/CVE-2026-27904) ReDoS vulnerabilities reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
+- Upgraded `serialize-javascript` to `7.0.3` to address [GHSA-5c6j-r48x-rmvq](https://github.com/advisories/GHSA-5c6j-r48x-rmvq) vulnerability reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
 
 ## 15.12.0
 
@@ -34,8 +36,6 @@ _Released 03/13/2026_
 
 - Upgraded `basic-ftp` to `5.2.0` to address [CVE-2026-27699](https://github.com/advisories/GHSA-5rq4-664w-9x2c) vulnerability reported in security scans. Addresses [#33436](https://github.com/cypress-io/cypress/issues/33436).
 - Upgraded `fast-xml-parser` to `4.5.4` to address [CVE-2026-25896](https://github.com/advisories/GHSA-m7jm-9gc2-mpf2) vulnerability reported in security scans. Addresses [#33434](https://github.com/cypress-io/cypress/issues/33434).
-- Upgraded `minimatch` to `3.1.3` to address [CVE-2026-26996](https://nvd.nist.gov/vuln/detail/CVE-2026-26996), [CVE-2026-27903](https://nvd.nist.gov/vuln/detail/CVE-2026-27903), and [CVE-2026-27904](https://nvd.nist.gov/vuln/detail/CVE-2026-27904) ReDoS vulnerabilities reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
-- Upgraded `serialize-javascript` to `7.0.3` to address [GHSA-5c6j-r48x-rmvq](https://github.com/advisories/GHSA-5c6j-r48x-rmvq) vulnerability reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
 
 ## 15.11.0
 
