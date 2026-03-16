@@ -146,14 +146,14 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           <span>Open in IDE</span>
         </button>
 
-        {<button
+        <button
           className="runnable-popover-item"
           onClick={handleNewTest}
           data-cy="runnable-popover-new-test"
         >
           <IconActionAddMedium strokeColor="gray-500" />
           <span>New test</span>
-        </button>}
+        </button>
       </div>
 
       <div className="runnable-popover-section">
