@@ -22,6 +22,8 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
 }: Props) => {
   const relativeSpecPath = spec.relative
 
+  const isStudioSingleTest = appState?.studioActive && appState.studioSingleTestActive
+
   const fileDetails = {
     absoluteFile: spec.absolute,
     column: 0,
@@ -58,11 +60,15 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     const test = Cypress.state('test')
     const parent = test && test?.parent
 
-    if (parent && parent.id && parent.type === 'suite') {
-      return parent.id
+    let suiteId = 'r1'
+
+    if (isStudioSingleTest) {
+      if (parent && parent.id && parent.type === 'suite') {
+        suiteId = parent.id
+      }
     }
 
-    return 'r1'
+    return suiteId
   }
 
   const handleNewTest = () => {
