@@ -3,6 +3,10 @@
 
 _Released 03/24/2026 (PENDING)_
 
+**Features:**
+
+- Studio now allows adding a new test when focused on a single test. Addressed in [#33481](https://github.com/cypress-io/cypress/pull/33481)
+
 **Bugfixes:**
 
 - Fixed an issue where Cypress may hang when running component tests and a connection to the dev server can no longer be made. Addressed in [#33469](https://github.com/cypress-io/cypress/pull/33469)
