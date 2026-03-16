@@ -1,10 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.13.0
+## 15.12.1
 
-_Released 03/11/2026 (PENDING)_
+_Released 03/24/2026 (PENDING)_
 
 **Misc:**
 
+- When a test is isolated in Studio, 'rerun' button should not say 'Run all tests. It should say 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466).
 - Rerun tests on `pagehide` or `unload` instead of on `beforeunload`. Addressed in [#33456](https://github.com/cypress-io/cypress/pull/33456).
 
 ## 15.12.0
