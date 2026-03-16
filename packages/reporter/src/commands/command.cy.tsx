@@ -1,6 +1,7 @@
 import React from 'react'
 import Command from './command'
 import CommandModel from './command-model'
+import type { ErrProps } from '../errors/err-model'
 import type { SessionStatus } from '../sessions/utils'
 import type { TestState } from '@packages/types'
 import events from '../lib/events'
@@ -151,7 +152,7 @@ describe('commands', () => {
       cy.percySnapshot()
     })
 
-    it('should not render prompt get code button when state is failed', () => {
+    it('should not render prompt get code button when state is failed with no error', () => {
       config.withArgs('experimentalPromptCommand').returns(true)
       cy.mount(
         <div>
@@ -176,6 +177,110 @@ describe('commands', () => {
       cy.get('.command-prompt-get-code-indicator').should('not.exist')
 
       cy.percySnapshot()
+    })
+
+    it('should render prompt get code button when state is failed with non-excluded error', () => {
+      config.withArgs('experimentalPromptCommand').returns(true)
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'prompt',
+                state: 'failed',
+                err: { name: 'SomeOtherError' } as ErrProps,
+                numElements: 1,
+                hookId: '1',
+                id: 1,
+                testId: '1',
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      cy.get('.command-prompt-get-code').should('be.visible').should('have.text', 'Code')
+      cy.get('.command-prompt-get-code-indicator').should('be.visible')
+    })
+
+    it('should not render prompt get code button when state is failed with PromptDisabledError', () => {
+      config.withArgs('experimentalPromptCommand').returns(true)
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'prompt',
+                state: 'failed',
+                err: { name: 'PromptDisabledError' } as ErrProps,
+                numElements: 1,
+                hookId: '1',
+                id: 1,
+                testId: '1',
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      cy.get('.command-prompt-get-code').should('not.exist')
+      cy.get('.command-prompt-get-code-indicator').should('not.exist')
+    })
+
+    it('should not render prompt get code button when state is failed with PromptAuthenticationError', () => {
+      config.withArgs('experimentalPromptCommand').returns(true)
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'prompt',
+                state: 'failed',
+                err: { name: 'PromptAuthenticationError' } as ErrProps,
+                numElements: 1,
+                hookId: '1',
+                id: 1,
+                testId: '1',
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      cy.get('.command-prompt-get-code').should('not.exist')
+      cy.get('.command-prompt-get-code-indicator').should('not.exist')
+    })
+
+    it('should not render prompt get code button when state is failed with PromptUsageLimitError', () => {
+      config.withArgs('experimentalPromptCommand').returns(true)
+      cy.mount(
+        <div>
+          <Command
+            model={
+              new CommandModel({
+                name: 'prompt',
+                state: 'failed',
+                err: { name: 'PromptUsageLimitError' } as ErrProps,
+                numElements: 1,
+                hookId: '1',
+                id: 1,
+                testId: '1',
+              })
+            }
+            scrollIntoView={() => {}}
+            aliasesWithDuplicates={[]}
+          />
+        </div>,
+      )
+
+      cy.get('.command-prompt-get-code').should('not.exist')
+      cy.get('.command-prompt-get-code-indicator').should('not.exist')
     })
 
     it('should not render prompt get code button when state is not passed', () => {
