@@ -77,7 +77,10 @@ describe('lib/server-base', () => {
     it('requires morgan if true', function () {
       this.server.createExpressApp({ morgan: true })
 
-      expect(this.use).to.be.calledWith(morganFn)
+      // Express may call use(path, fn) internally; morgan is passed as middleware in some call
+      const morganWasUsed = this.use.getCalls().some((call) => call.args.includes(morganFn))
+
+      expect(morganWasUsed).to.be.true
     })
   })
 
@@ -175,15 +178,28 @@ describe('lib/server-base', () => {
       fileServer.create.restore()
       this.server._fileServer = this.oldFileServer
 
+      // byPortAndAddress has no timeout; connecting to non-loopback with nothing listening
+      // can hang until TCP timeout. Cap wait so the test doesn't hang.
+      const connectTimeoutMs = 1000
+
       // verify that we can connect to `port` over loopback
       // and not over another configured IPv4 address
       const tryOnlyLoopbackConnect = (port) => {
+        const nonLoopbackAttempt = Promise.race([
+          connect.byPortAndAddress(port, nonLoopback),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('connect timeout')), connectTimeoutMs)),
+        ])
+
         return Promise.all([
           connect.byPortAndAddress(port, '127.0.0.1'),
-          connect.byPortAndAddress(port, nonLoopback)
+          nonLoopbackAttempt
           .then(() => {
             throw new Error(`Shouldn't be able to connect on ${nonLoopback.address}:${port}`)
-          }).catch({ errno: 'ECONNREFUSED' }, () => {}),
+          }).catch({ errno: 'ECONNREFUSED' }, () => {}).catch((err) => {
+            if (err.message === 'connect timeout') return
+
+            throw err
+          }),
         ])
       }
 
