@@ -29,6 +29,7 @@ import appData from './util/app_data'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
 import { remoteSchemaWrapped } from '@packages/data-context/graphql'
+import { TeardownQueue } from './util/teardown-queue'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -221,6 +222,10 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         cohorts.set(cohort)
       },
     },
+  })
+
+  TeardownQueue.addStep(async () => {
+    await clearCtx()
   })
 
   return ctx

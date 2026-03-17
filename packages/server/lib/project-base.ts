@@ -41,6 +41,7 @@ import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
 import { INITIALIZATION_MARK_NAMES, INITIALIZATION_TELEMETRY_GROUP_NAMES } from './cloud/studio/telemetry/constants/initialization'
 import { TelemetryReporter } from './cloud/studio/telemetry/TelemetryReporter'
 import type { StudioInitOptions } from './types/studio'
+import { TeardownQueue } from './util/teardown-queue'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
@@ -183,7 +184,7 @@ export class ProjectBase extends EE {
     if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: this.ctx.cloud,
         cfg,
         debugData: this.configDebugData,

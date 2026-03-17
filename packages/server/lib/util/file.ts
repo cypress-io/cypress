@@ -7,7 +7,7 @@ import Promise from 'bluebird'
 import lockFileModule from 'lockfile'
 import { fs } from './fs'
 import * as env from './env'
-import exit from './exit'
+import onExit from 'signal-exit'
 import pQueue from 'p-queue'
 const lockFile = Promise.promisifyAll(lockFileModule)
 
@@ -18,8 +18,8 @@ const LOCK_TIMEOUT = 2000
 
 function getUid () {
   try {
-    // @ts-expect-error - process.geteuid is defined
-    return process.geteuid()
+    // eslint-disable-next-line no-restricted-properties
+    return process.geteuid?.()
   } catch (err) {
     // process.geteuid() can fail, return a constant
     // @see https://github.com/cypress-io/cypress/issues/17415
@@ -56,7 +56,7 @@ export class File {
     this.path = options.path
     this.initialize()
 
-    exit.ensure(() => {
+    onExit(() => {
       return lockFile.unlockSync(this._lockFilePath)
     })
   }

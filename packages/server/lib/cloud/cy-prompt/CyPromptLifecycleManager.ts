@@ -15,12 +15,17 @@ import { getCloudMetadata } from '../get_cloud_metadata'
 import type { CyPromptAuthenticatedUserShape, CyPromptServerOptions } from '@packages/types'
 import crypto from 'crypto'
 import { reportCyPromptError } from '../api/cy-prompt/report_cy_prompt_error'
+import { TeardownQueue } from '../../util/teardown-queue'
 
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
 export class CyPromptLifecycleManager {
   private static hashLoadingMap: Map<string, Promise<Record<string, string>>> = new Map()
   private static watcher: chokidar.FSWatcher | null = null
+  static async close () {
+    await CyPromptLifecycleManager.watcher?.close().catch(() => {})
+  }
+
   private cyPromptManagerPromise?: Promise<{
     cyPromptManager?: CyPromptManager
     error?: Error
@@ -273,6 +278,10 @@ export class CyPromptLifecycleManager {
           error: new Error('Error during reload of cy prompt manager'),
         }
       })
+    })
+
+    TeardownQueue.addStep(async () => {
+      await CyPromptLifecycleManager.watcher?.close()
     })
   }
 

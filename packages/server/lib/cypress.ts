@@ -16,35 +16,10 @@ import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
+import { TeardownQueue } from './util/teardown-queue'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
-
-const exit = async (code = 0) => {
-  // TODO: we shouldn't have to do this
-  // but cannot figure out how null is
-  // being passed into exit
-  debug('about to exit with code', code)
-
-  if (hasCtx()) {
-    await getCtx().lifecycleManager.mainProcessWillDisconnect().catch((err: any) => {
-      debug('mainProcessWillDisconnect errored with: ', err)
-    })
-  }
-
-  const span = telemetry.getSpan('cypress')
-
-  span?.setAttribute('exitCode', code)
-  span?.end()
-
-  await telemetry.shutdown().catch((err: any) => {
-    debug('telemetry shutdown errored with: ', err)
-  })
-
-  debug('process.exit', code)
-
-  return process.exit(code)
-}
 
 const showWarningForInvalidConfig = (options: any) => {
   const publicConfigKeys = getPublicConfigKeys()
@@ -61,10 +36,6 @@ const showWarningForInvalidConfig = (options: any) => {
   }
 
   return undefined
-}
-
-const exit0 = () => {
-  return exit(0)
 }
 
 function isCypressError (err: unknown): err is CypressError {
@@ -85,11 +56,11 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
       err.type === 'CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK' ||
       err.type === 'CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK'
     )) {
-      return exit(112)
+      return TeardownQueue.exitGracefully(112)
     }
   }
 
-  return exit(1)
+  return TeardownQueue.exitGracefully(1)
 }
 
 export = {
@@ -242,9 +213,9 @@ export = {
           const pong = await this.runElectron(mode, options)
 
           if (!this.isCurrentlyRunningElectron()) {
-            return exit(pong)
+            return TeardownQueue.exitGracefully(pong)
           } else if (pong !== options.ping) {
-            return exit(1)
+            return TeardownQueue.exitGracefully(1)
           }
 
           break
@@ -257,7 +228,7 @@ export = {
           break
         }
         case 'exitWithCode': {
-          return exit(toNumber(options.exitWithCode))
+          return TeardownQueue.exitGracefully(toNumber(options.exitWithCode))
           break
         }
         case 'run': {
@@ -270,17 +241,17 @@ export = {
               // eslint-disable-next-line no-console
               console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
-              return exit(1)
+              return TeardownQueue.exitGracefully(1)
             }
           }
 
           debug('results.totalFailed, posix?', results.totalFailed, options.posixExitCodes)
 
           if (options.posixExitCodes) {
-            return exit(results.totalFailed ? 1 : 0)
+            return TeardownQueue.exitGracefully(results.totalFailed ? 1 : 0)
           }
 
-          return exit(results.totalFailed ?? 0)
+          return TeardownQueue.exitGracefully(results.totalFailed ?? 0)
         }
         default: {
           throw new Error(`Cannot start. Invalid mode: '${mode}'`)
@@ -291,6 +262,6 @@ export = {
     }
     debug('end of startInMode, exit 0')
 
-    return exit(0)
+    return TeardownQueue.exitGracefully(0)
   },
 }

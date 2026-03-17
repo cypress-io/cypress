@@ -26,6 +26,7 @@ import crypto from 'crypto'
 import { logError } from '@packages/stderr-filtering'
 import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
 import type { DebugData } from '@packages/types'
+import { TeardownQueue } from '../../util/teardown-queue'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
@@ -56,7 +57,7 @@ export class StudioLifecycleManager {
    * @param debugData Debug data for the configuration
    * @param ctx Data context to register this instance with
    */
-  initializeStudioManager ({
+  async initializeStudioManager ({
     cloudDataSource,
     cfg,
     debugData,
@@ -66,7 +67,7 @@ export class StudioLifecycleManager {
     cfg: Cfg
     debugData: any
     ctx: DataContext
-  }): void {
+  }): Promise<void> {
     debug('Initializing studio manager')
 
     // Store initialization parameters for retry
@@ -134,7 +135,7 @@ export class StudioLifecycleManager {
 
     this.studioManagerPromise = studioManagerPromise
 
-    this.setupWatcher({
+    await this.setupWatcher({
       cloudDataSource,
       cfg,
       debugData,
@@ -337,7 +338,11 @@ export class StudioLifecycleManager {
     }
   }
 
-  private setupWatcher ({
+  static async close () {
+    await StudioLifecycleManager.watcher?.close().catch(() => {})
+  }
+
+  private async setupWatcher ({
     cloudDataSource,
     cfg,
     debugData,
@@ -356,7 +361,7 @@ export class StudioLifecycleManager {
     // Close the watcher if a previous watcher exists
     if (StudioLifecycleManager.watcher) {
       StudioLifecycleManager.watcher.removeAllListeners()
-      StudioLifecycleManager.watcher.close().catch(() => {})
+      await StudioLifecycleManager.watcher.close().catch(() => {})
     }
 
     // Watch for changes to the studio bundle
@@ -380,6 +385,10 @@ export class StudioLifecycleManager {
 
         return null
       })
+    })
+
+    TeardownQueue.addStep(async () => {
+      await StudioLifecycleManager.watcher?.close()
     })
   }
 
@@ -412,7 +421,7 @@ export class StudioLifecycleManager {
     return !!(this.lastStatus === 'IN_ERROR' && this.lastErrorCode && isNonRetriableCertErrorCode(this.lastErrorCode))
   }
 
-  public retry (): void {
+  public async retry (): Promise<void> {
     if (!this.ctx) {
       debug('No ctx available, cannot retry studio initialization')
 
@@ -439,7 +448,7 @@ export class StudioLifecycleManager {
 
     // Re-initialize with the same parameters we stored
     if (this.initializationParams) {
-      this.initializeStudioManager(this.initializationParams)
+      await this.initializeStudioManager(this.initializationParams)
     } else {
       debug('No initialization parameters available for retry')
       this.updateStatus('IN_ERROR')

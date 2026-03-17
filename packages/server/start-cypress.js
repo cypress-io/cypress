@@ -3,7 +3,7 @@ const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 const { override: overrideTty } = require('./lib/util/tty')
-
+const { TeardownQueue } = require('./lib/util/teardown-queue')
 const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
 
 process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
@@ -44,12 +44,23 @@ if (isRunningElectron) {
     exporter,
   })
 
+  TeardownQueue.addStep(async (code) => {
+    await telemetry.shutdown()
+  })
+
   const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 
   const v8SnapshotStartupTime = debugElapsedTime('v8-snapshot-startup-time')
   const endTime = v8SnapshotStartupTime + global.cypressServerStartTime
 
   telemetry.startSpan({ name: 'cypress', attachType: 'root', active: true, opts: { startTime: global.cypressBinaryStartTime } })
+
+  TeardownQueue.addStep(async (code) => {
+    const span = telemetry.getSpan('cypress')
+
+    span?.setAttribute('exitCode', code)
+    span?.end()
+  })
 
   const v8SnapshotSpan = telemetry.startSpan({ name: 'v8snapshot:startup', opts: { startTime: global.cypressServerStartTime } })
 
