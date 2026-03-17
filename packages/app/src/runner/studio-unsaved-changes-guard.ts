@@ -38,10 +38,6 @@ export function installStudioExitNavigationGuard (router: Router, getSpecDirtyDa
       router.push(to)
     })
 
-    if (blocked) {
-      return false
-    }
-
-    return true
+    return !blocked
   })
 }
