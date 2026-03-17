@@ -56,8 +56,25 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
     setIsOpen(false)
   }
 
+  const getSuiteIdForNewTest = (): string => {
+    const test = Cypress.state('test')
+    const parent = test && test?.parent
+
+    let suiteId = 'r1'
+
+    if (isStudioSingleTest) {
+      if (parent && parent.id && parent.type === 'suite') {
+        suiteId = parent.id
+      }
+    }
+
+    return suiteId
+  }
+
   const handleNewTest = () => {
-    events.emit('studio:init:suite', { suiteId: 'r1', entrySource: 'new-test-root' })
+    const suiteId = getSuiteIdForNewTest()
+
+    events.emit('studio:init:suite', { suiteId, entrySource: suiteId === 'r1' ? 'new-test-root' : 'new-test-suite' })
     setIsOpen(false)
   }
 
@@ -129,14 +146,14 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           <span>Open in IDE</span>
         </button>
 
-        {!isStudioSingleTest && <button
+        <button
           className="runnable-popover-item"
           onClick={handleNewTest}
           data-cy="runnable-popover-new-test"
         >
           <IconActionAddMedium strokeColor="gray-500" />
           <span>New test</span>
-        </button>}
+        </button>
       </div>
 
       <div className="runnable-popover-section">
