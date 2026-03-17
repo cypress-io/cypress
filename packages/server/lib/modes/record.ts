@@ -602,6 +602,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
       osVersion: sys.osVersion,
       browserName: browser.displayName,
       browserVersion: browser.version,
+      browserFamily: browser.family,
     }
 
     telemetry.startSpan({ name: 'record:createRun' })
