@@ -17,7 +17,7 @@ import $stackUtils, { StackAndCodeFrameIndex } from './stack_utils'
 import $utils from './utils'
 import type { HandlerType } from './runner'
 
-const ERROR_PROPS = ['message', 'type', 'name', 'stack', 'parsedStack', 'fileName', 'lineNumber', 'columnNumber', 'host', 'uncaught', 'actual', 'expected', 'showDiff', 'isPending', 'isRecovered', 'docsUrl', 'codeFrame', 'docsUrlTitle'] as const
+const ERROR_PROPS = ['message', 'type', 'name', 'stack', 'parsedStack', 'fileName', 'lineNumber', 'columnNumber', 'host', 'uncaught', 'actual', 'expected', 'showDiff', 'isPending', 'isRecovered', 'docsUrl', 'codeFrame', 'docsUrlTitle', 'triggerAction'] as const
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 const crossOriginScriptRe = /^script error/i
@@ -330,6 +330,7 @@ export class InternalCypressError extends Error {
 export class CypressError extends Error {
   docsUrl?: string
   docsUrlTitle?: string | null
+  triggerAction?: 'login' | 'connectProject' | null
   retry?: boolean
   userInvocationStack?: any
   onFail?: Function
@@ -425,6 +426,22 @@ const docsUrlTitleByParents = (msgPath) => {
   return docsUrlTitleByParents(msgPath)
 }
 
+const triggerActionByParents = (msgPath) => {
+  msgPath = msgPath.split('.').slice(0, -1).join('.')
+
+  if (!msgPath) {
+    return // reached root
+  }
+
+  const obj = _.get(allErrorMessages, msgPath)
+
+  if (obj.hasOwnProperty('triggerAction')) {
+    return obj.triggerAction
+  }
+
+  return triggerActionByParents(msgPath)
+}
+
 const errByPath = (msgPath, args?) => {
   let msgValue = _.get(allErrorMessages, msgPath)
 
@@ -446,11 +463,13 @@ const errByPath = (msgPath, args?) => {
 
   const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || docsUrlByParents(msgPath)
   const docsUrlTitle = (msgObj.hasOwnProperty('docsUrlTitle') && msgObj.docsUrlTitle) || docsUrlTitleByParents(msgPath)
+  const triggerAction = (msgObj.hasOwnProperty('triggerAction') && msgObj.triggerAction) || triggerActionByParents(msgPath)
 
   return cypressErr({
     message: replaceErrMsgTokens(msgObj.message, args),
     docsUrl: docsUrl ? replaceErrMsgTokens(docsUrl, args) : undefined,
     docsUrlTitle: docsUrlTitle ? replaceErrMsgTokens(docsUrlTitle, args) : undefined,
+    triggerAction: triggerAction ? replaceErrMsgTokens(triggerAction, args) : undefined,
   })
 }
 
@@ -565,6 +584,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
   let { message, filename, lineno, colno, error } = event
   let docsUrl = error?.docsUrl
   let docsUrlTitle = error?.docsUrlTitle
+  let triggerAction = error?.triggerAction
 
   // reset the message on a cross origin script error
   // since no details are accessible
@@ -574,6 +594,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
     message = crossOriginErr.message
     docsUrl = crossOriginErr.docsUrl
     docsUrlTitle = crossOriginErr.docsUrlTitle
+    triggerAction = crossOriginErr.triggerAction
   }
 
   // it's possible the error was thrown as a string (throw 'some error')
@@ -584,6 +605,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
 
   err.docsUrl = docsUrl
   err.docsUrlTitle = docsUrlTitle
+  err.triggerAction = triggerAction
 
   // makeErrFromObj clones the error, so the original doesn't get mutated
   return {
