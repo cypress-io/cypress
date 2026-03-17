@@ -7,7 +7,7 @@
 const DEFAULT_MAX_ATTEMPTS = 30
 const DEFAULT_DELAY_MS = 200
 
-export interface WaitUntilUrlReadyOptions {
+interface WaitUntilUrlReadyOptions {
   maxAttempts?: number
   delayMs?: number
 }
