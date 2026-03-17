@@ -3,13 +3,23 @@
 
 _Released 03/24/2026 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue where Cypress may hang when running component tests and a connection to the dev server can no longer be made. Addressed in [#33469](https://github.com/cypress-io/cypress/pull/33469)
+
 **Misc:**
 
 - When a test is isolated in Studio, 'rerun' button should not say 'Run all tests. It should say 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466)
 
+**Dependency Updates:**
+
+- Upgraded `simple-git` from `3.27.0` to `3.32.3` to address [Improper Handling of Case Sensitivity](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15457646) (CVE-2026-28292) vulnerability reported in security scans. Addressed in [#33470](https://github.com/cypress-io/cypress/pull/33470)
+- Upgraded `minimatch` to `3.1.3` to address [CVE-2026-26996](https://nvd.nist.gov/vuln/detail/CVE-2026-26996), [CVE-2026-27903](https://nvd.nist.gov/vuln/detail/CVE-2026-27903), and [CVE-2026-27904](https://nvd.nist.gov/vuln/detail/CVE-2026-27904) ReDoS vulnerabilities reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
+- Upgraded `serialize-javascript` to `7.0.3` to address [GHSA-5c6j-r48x-rmvq](https://github.com/advisories/GHSA-5c6j-r48x-rmvq) vulnerability reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
+
 ## 15.12.0
 
-_Released 03/10/2026_
+_Released 03/13/2026_
 
 **Features:**
 
