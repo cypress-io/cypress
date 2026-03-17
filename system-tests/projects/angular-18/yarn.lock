@@ -179,9 +179,9 @@
     yargs "17.7.2"
 
 "@angular/common@^18.0.0":
-  version "18.2.13"
-  resolved "https://registry.npmjs.org/@angular/common/-/common-18.2.13.tgz#cb277651585a6d5aa17c9c1f8e4bbcd85c770517"
-  integrity sha512-4ZqrNp1PoZo7VNvW+sbSc2CB2axP1sCH2wXl8B0wdjsj8JY1hF1OhuugwhpAHtGxqewed2kCXayE+ZJqSTV4jw==
+  version "18.2.14"
+  resolved "https://registry.yarnpkg.com/@angular/common/-/common-18.2.14.tgz#d4ff0b2b7aabb17339bd9d304bbc5aca90d226e3"
+  integrity sha512-ZPRswzaVRiqcfZoowuAM22Hr2/z10ajWOUoFDoQ9tWqz/fH/773kJv2F9VvePIekgNPCzaizqv9gF6tGNqaAwg==
   dependencies:
     tslib "^2.3.0"
 

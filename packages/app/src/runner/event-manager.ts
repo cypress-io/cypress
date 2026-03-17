@@ -66,6 +66,7 @@ export class EventManager {
   studioStore: ReturnType<typeof useStudioStore>
   promptStore: ReturnType<typeof usePromptStore>
   specDirtyDataStore: ReturnType<typeof useSpecDirtyDataStore>
+  _deferCleanupToUnload = false
 
   constructor (
     // import '@packages/driver'
@@ -366,8 +367,13 @@ export class EventManager {
     // event as a proxy for AUT unloads.
     const unloadEvent = this.isBrowserFamily('chromium') ? 'pagehide' : 'unload'
 
-    $window.on(unloadEvent, (e) => {
-      this._clearAllCookies()
+    $window.on(unloadEvent, () => {
+      if (this._deferCleanupToUnload) {
+        this._runFullUnloadCleanup()
+        this._deferCleanupToUnload = false
+      } else {
+        this._clearAllCookies()
+      }
     })
 
     // when our window triggers beforeunload
@@ -377,11 +383,18 @@ export class EventManager {
     // that Cypress knows not to set any more
     // cookies
     $window.on('beforeunload', () => {
-      telemetry.getSpan('cypress:app')?.end()
-      this.reporterBus.emit('reporter:restart:test:run')
+      if (this.specDirtyDataStore.isDirty()) {
+        // Used to handle Studio unsaved changes. It defers the cleanup to the unload event
+        // so that the test is not rerun if the user cancels the beforeunload dialog.
+        this._deferCleanupToUnload = true
 
-      this._clearAllCookies()
-      this._setUnload()
+        return
+      }
+
+      // Clear any stale flag from a previously cancelled beforeunload so the unload
+      // handler does not run full cleanup again
+      this._deferCleanupToUnload = false
+      this._runFullUnloadCleanup()
     })
 
     this.addPromptListeners()
@@ -1001,6 +1014,13 @@ export class EventManager {
 
   launchBrowser (browser) {
     this.ws.emit('reload:browser', window.location.toString(), browser && browser.name)
+  }
+
+  _runFullUnloadCleanup () {
+    telemetry.getSpan('cypress:app')?.end()
+    this.reporterBus.emit('reporter:restart:test:run')
+    this._clearAllCookies()
+    this._setUnload()
   }
 
   // clear all the cypress specific cookies
