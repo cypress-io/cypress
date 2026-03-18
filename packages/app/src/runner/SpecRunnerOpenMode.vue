@@ -113,6 +113,7 @@
             :request-project-access-mutation="requestProjectAccessMutation"
             :spec-dirty-data-store="specDirtyDataStore"
             :aut-snapshot-store="snapshotStore"
+            :pending-navigation-resume="pendingNavigationResume"
           />
         </HideDuringScreenshot>
       </template>
@@ -157,6 +158,7 @@ import { usePromptStore } from '../store/prompt-store'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { useSpecDirtyDataStore } from '../store/spec-dirty-data-store'
 import { useSnapshotStore } from './snapshot-store'
+import { setUnsavedChangesCallback } from './studio-unsaved-changes-guard'
 
 // this is used by the StudioPanel to access the AUT URL input
 const autUrlSelector = '.aut-url-input'
@@ -295,6 +297,16 @@ const requestProjectAccessMutation = useMutation(SpecRunner_Studio_RequestAccess
 const handleStudioPanelClose = () => {
   eventManager.emit('studio:cancel', undefined)
 }
+
+const pendingNavigationResume = ref<(() => void) | null>(null)
+
+setUnsavedChangesCallback((resume) => {
+  pendingNavigationResume.value = resume
+})
+
+onBeforeUnmount(() => {
+  setUnsavedChangesCallback(null)
+})
 
 const specsListWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth

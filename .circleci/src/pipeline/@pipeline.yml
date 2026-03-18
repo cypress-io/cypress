@@ -2017,6 +2017,7 @@ jobs:
         type: boolean
         default: false
     parallelism: 3
+    resource_class: large
     steps:
       - run-new-ui-tests:
           browser: chrome
