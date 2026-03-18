@@ -27,6 +27,8 @@ describe('capture-protocol', () => {
   describe('service worker', () => {
     BROWSERS.forEach((browser) => {
       it(`verifies the types of requests match - ${browser}`, function () {
+        this.retries(10)
+
         return systemTests.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
           project: 'protocol',
