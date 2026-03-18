@@ -2072,6 +2072,9 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
+      run-index:
+        type: integer
+        default: 1
       resource_class:
         type: string
         default: medium+
