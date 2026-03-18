@@ -1,5 +1,11 @@
 require('../spec_helper')
 
+const morganFn = function () {}
+
+mockery.registerMock('morgan', () => {
+  return morganFn
+})
+
 const _ = require('lodash')
 const os = require('os')
 const express = require('express')
@@ -12,34 +18,20 @@ const fileServer = require(`../../lib/file_server`)
 const ensureUrl = require(`../../lib/util/ensure-url`)
 const { getCtx } = require('@packages/data-context')
 
-const morganFn = function () {}
+function getOpenOptions (overrides = {}) {
+  return {
+    SocketCtor: SocketE2E,
+    testingType: 'e2e',
+    onError: sinon.stub(),
+    onWarning: sinon.stub(),
+    getCurrentBrowser: () => null,
+    getSpec: () => null,
+    shouldCorrelatePreRequests: () => false,
+    ...overrides,
+  }
+}
 
-mockery.registerMock('morgan', () => {
-  return morganFn
-})
-
-describe('lib/server', () => {
-  beforeEach(function () {
-    return setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } }, getCtx().file.getFilesByGlob)
-    .then((cfg) => {
-      this.config = cfg
-      this.server = new ServerBase(cfg)
-    })
-  })
-
-  context('#close', () => {
-    it('resolves true successfully bailing out early', function () {
-      return this.server.close().then((res) => {
-        expect(res[0]).to.be.true
-      })
-    })
-  })
-})
-
-// TODO: Figure out correct configuration to run these tests and/or which ones we need to keep.
-// The introduction of server-base/socket-base and the `ensureProp` function made unit testing
-// the server difficult.
-describe.skip('lib/server', () => {
+describe('lib/server-base', () => {
   beforeEach(function () {
     this.fileServer = {
       close () {},
@@ -50,7 +42,7 @@ describe.skip('lib/server', () => {
 
     sinon.stub(fileServer, 'create').returns(this.fileServer)
 
-    return setupFullConfigWithDefaults({ projectRoot: '/foo/bar/' }, getCtx().file.getFilesByGlob)
+    return setupFullConfigWithDefaults({ projectRoot: '/foo/bar/', config: { supportFile: false } }, getCtx().file.getFilesByGlob)
     .then((cfg) => {
       this.config = cfg
       this.server = new ServerBase(cfg)
@@ -78,70 +70,38 @@ describe.skip('lib/server', () => {
     })
 
     it('requires morgan if true', function () {
+      const useMorganStub = sinon.stub(this.server, 'useMorgan').returns(morganFn)
+
       this.server.createExpressApp({ morgan: true })
 
-      expect(this.use).to.be.calledWith(morganFn)
+      expect(useMorganStub).to.have.been.calledOnce
     })
   })
 
   context('#open', () => {
     beforeEach(function () {
-      return sinon.stub(this.server, 'createServer').resolves()
+      sinon.stub(this.server, 'createServer').resolves()
     })
 
     it('calls #createExpressApp with morgan', function () {
       sinon.spy(this.server, 'createExpressApp')
-
       _.extend(this.config, { port: 54321, morgan: false })
 
-      return this.server.open(this.config)
+      return this.server.open(this.config, getOpenOptions())
       .then(() => {
         expect(this.server.createExpressApp).to.be.calledWithMatch({ morgan: false })
       })
     })
 
-    it('calls #createServer with port', function () {
+    it('calls #createServer with app and config', function () {
       _.extend(this.config, { port: 54321 })
+      const app = { use: sinon.stub() }
 
-      const obj = {}
-
-      sinon.stub(this.server, 'createRoutes')
-      sinon.stub(this.server, 'createExpressApp').returns(obj)
-
-      return this.server.open(this.config)
-      .then(() => {
-        expect(this.server.createServer).to.be.calledWith(obj, this.config)
-      })
-    })
-
-    it('calls #createRoutes with app + config', function () {
-      const app = {}
-      const project = {}
-      const onError = sinon.spy()
-
-      sinon.stub(this.server, 'createRoutes')
       sinon.stub(this.server, 'createExpressApp').returns(app)
 
-      return this.server.open(this.config, project, onError)
+      return this.server.open(this.config, getOpenOptions())
       .then(() => {
-        expect(this.server.createRoutes).to.be.called
-        expect(this.server.createRoutes.lastCall.args[0].app).to.equal(app)
-        expect(this.server.createRoutes.lastCall.args[0].config).to.equal(this.config)
-        expect(this.server.createRoutes.lastCall.args[0].project).to.equal(project)
-
-        expect(this.server.createRoutes.lastCall.args[0].onError).to.equal(onError)
-      })
-    })
-
-    it('calls #createServer with port + fileServerFolder + socketIoRoute + app', function () {
-      const obj = {}
-
-      sinon.stub(this.server, 'createRoutes')
-      sinon.stub(this.server, 'createExpressApp').returns(obj)
-
-      return this.server.open(this.config)
-      .then(() => {
-        expect(this.server.createServer).to.be.calledWith(obj, this.config)
+        expect(this.server.createServer).to.have.been.calledWith(app, this.config, sinon.match.func)
       })
     })
   })
@@ -150,6 +110,32 @@ describe.skip('lib/server', () => {
     beforeEach(function () {
       this.port = 54321
       this.app = this.server.createExpressApp({ morgan: true })
+    })
+
+    context('remote state', () => {
+      beforeEach(function () {
+        sinon.stub(this.server, '_listen').callsFake((port) => Promise.resolve(port))
+        sinon.stub(this.server, '_port').returns(this.port)
+      })
+
+      it('sets remote state to baseUrl when baseUrl is provided', function () {
+        sinon.stub(ensureUrl, 'isListening').resolves()
+        const setSpy = sinon.spy(this.server._remoteStates, 'set')
+
+        return this.server.createServer(this.app, { port: this.port, baseUrl: 'http://localhost:9999' })
+        .spread(() => {
+          expect(setSpy).to.have.been.calledWith('http://localhost:9999')
+        })
+      })
+
+      it('sets remote state to <root> when baseUrl is not provided', function () {
+        const setSpy = sinon.spy(this.server._remoteStates, 'set')
+
+        return this.server.createServer(this.app, { port: this.port })
+        .spread(() => {
+          expect(setSpy).to.have.been.calledWith('<root>')
+        })
+      })
     })
 
     it('isListening=true', function () {
@@ -167,23 +153,47 @@ describe.skip('lib/server', () => {
     })
 
     it('all servers listen only on localhost and no other interface', function () {
-      fileServer.create.restore()
-      this.server._fileServer = this.oldFileServer
+      let interfaces
 
-      const interfaces = _.flatten(_.values(os.networkInterfaces()))
+      try {
+        interfaces = _.flatten(_.values(os.networkInterfaces()))
+      } catch (e) {
+        this.skip()
+      }
+
       const nonLoopback = interfaces.find((iface) => {
         return (iface.family === 'IPv4') && (iface.address !== '127.0.0.1')
       })
 
+      if (!nonLoopback) {
+        this.skip()
+      }
+
+      fileServer.create.restore()
+      this.server._fileServer = this.oldFileServer
+
+      // byPortAndAddress has no timeout; connecting to non-loopback with nothing listening
+      // can hang until TCP timeout. Cap wait so the test doesn't hang.
+      const connectTimeoutMs = 1000
+
       // verify that we can connect to `port` over loopback
       // and not over another configured IPv4 address
       const tryOnlyLoopbackConnect = (port) => {
+        const nonLoopbackAttempt = Promise.race([
+          connect.byPortAndAddress(port, nonLoopback),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('connect timeout')), connectTimeoutMs)),
+        ])
+
         return Promise.all([
           connect.byPortAndAddress(port, '127.0.0.1'),
-          connect.byPortAndAddress(port, nonLoopback)
+          nonLoopbackAttempt
           .then(() => {
             throw new Error(`Shouldn't be able to connect on ${nonLoopback.address}:${port}`)
-          }).catch({ errno: 'ECONNREFUSED' }, () => {}),
+          }).catch((err) => {
+            if (err.code === 'ECONNREFUSED' || err.message === 'connect timeout') return
+
+            throw err
+          }),
         ])
       }
 
@@ -252,7 +262,7 @@ describe.skip('lib/server', () => {
     })
 
     it('sets _socket and calls _socket#startListening', function () {
-      return this.server.open(this.config)
+      return this.server.open(this.config, getOpenOptions())
       .then(() => {
         const arg2 = {}
 
@@ -265,7 +275,7 @@ describe.skip('lib/server', () => {
 
   context('#reset', () => {
     beforeEach(function () {
-      return this.server.open(this.config)
+      return this.server.open(this.config, getOpenOptions())
       .then(() => {
         this.buffers = this.server._networkProxy.http
 
@@ -283,30 +293,36 @@ describe.skip('lib/server', () => {
       this.server._baseUrl = 'http://localhost:3000'
       this.server.reset()
 
-      expect(this.server._remoteStrategy).to.equal('http')
+      expect(this.server._remoteStates.current().strategy).to.equal('http')
     })
 
     it('sets the domain to <root> if not set', function () {
       this.server.reset()
 
-      expect(this.server._remoteStrategy).to.equal('file')
+      expect(this.server._remoteStates.current().strategy).to.equal('file')
     })
   })
 
   context('#close', () => {
+    it('resolves true successfully bailing out early', function () {
+      return this.server.close().then((res) => {
+        expect(res[0]).to.be.true
+      })
+    })
+
     it('returns a promise', function () {
       expect(this.server.close()).to.be.instanceof(Promise)
     })
 
     it('calls close on this.server', function () {
-      return this.server.open(this.config)
+      return this.server.open(this.config, getOpenOptions())
       .then(() => {
         return this.server.close()
       })
     })
 
     it('isListening=false', function () {
-      return this.server.open(this.config)
+      return this.server.open(this.config, getOpenOptions())
       .then(() => {
         return this.server.close()
       }).then(() => {
@@ -336,20 +352,18 @@ describe.skip('lib/server', () => {
     })
 
     it('is noop if req.url startsWith socketIoRoute', function () {
-      const socket = {
-        remotePort: 12345,
-        remoteAddress: '127.0.0.1',
+      const remotePort = 12345
+      const req = {
+        url: '/foobarbaz',
+        socket: { remotePort, remoteAddress: '127.0.0.1' },
       }
 
-      this.server._socketAllowed.add({
-        localPort: socket.remotePort,
+      this.server.socketAllowed.add({
+        localPort: remotePort,
         once: _.noop,
       })
 
-      const noop = this.server.proxyWebsockets(this.proxy, '/foo', {
-        url: '/foobarbaz',
-        socket,
-      })
+      const noop = this.server.proxyWebsockets(this.proxy, '/foo', req, this.socket, this.head)
 
       expect(noop).to.be.undefined
     })
