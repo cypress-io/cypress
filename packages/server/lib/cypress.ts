@@ -112,22 +112,7 @@ export = {
         // const mainEntryFile = require.main.filename
         const serverMain = getCwd()
 
-        return cypressElectron.open(serverMain, args, (spawned) => {
-          GracefulExit.detachProcessSignalHandlers()
-
-          const relay = (sig: NodeJS.Signals) => {
-            try {
-              if (spawned && !spawned.killed) {
-                spawned.kill(sig)
-              }
-            } catch {
-              // ignore e.g. ESRCH
-            }
-          }
-
-          process.on('SIGINT', () => relay('SIGINT'))
-          process.on('SIGTERM', () => relay('SIGTERM'))
-        })
+        return cypressElectron.open(serverMain, args, fn)
       })
     })
   },
