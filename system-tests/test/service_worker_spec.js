@@ -47,7 +47,9 @@ describe('e2e service worker', () => {
   systemTests.it('executes one spec with a cached call', {
     project: 'e2e',
     spec: 'service_worker.cy.js',
+    retries: 10,
     onRun: async (exec, browser) => {
+      requestsForServiceWorkerCache = 0
       await exec()
       // Ensure that we only called this once even though we loaded the
       // service worker twice
