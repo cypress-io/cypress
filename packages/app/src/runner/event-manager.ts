@@ -19,6 +19,7 @@ import { addCaptureProtocolListeners } from './events/capture-protocol'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 import { usePromptStore } from '../store/prompt-store'
 import { useSpecDirtyDataStore } from '../store/spec-dirty-data-store'
+import { guardUnsavedStudioChanges } from './studio-unsaved-changes-guard'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -318,7 +319,7 @@ export class EventManager {
       }
     }
 
-    this.reporterBus.on('studio:cancel', () => {
+    const executeStudioCancel = () => {
       this.ws.emit('studio:destroy', ({ error }) => {
         if (error) {
           // eslint-disable-next-line no-console
@@ -327,17 +328,21 @@ export class EventManager {
 
         maybeCleanUpProtocol()
       })
+    }
+
+    this.reporterBus.on('studio:cancel', () => {
+      const blocked = guardUnsavedStudioChanges(this.specDirtyDataStore, () => {
+        this.specDirtyDataStore.resetDirtyState()
+        executeStudioCancel()
+      })
+
+      if (!blocked) {
+        executeStudioCancel()
+      }
     })
 
     this.localBus.on('studio:cancel', () => {
-      this.ws.emit('studio:destroy', ({ error }) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }
-
-        maybeCleanUpProtocol()
-      })
+      executeStudioCancel()
     })
 
     this.ws.on('aut:destroy:init', () => {

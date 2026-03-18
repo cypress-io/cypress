@@ -70,6 +70,7 @@ const props = defineProps<{
   requestProjectAccessMutation: UseMutationResponse<any, any>
   specDirtyDataStore: SpecDirtyDataStore
   autSnapshotStore: SnapshotStore
+  pendingNavigationResume?: (() => void) | null
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -143,6 +144,7 @@ const maybeRenderReactComponent = () => {
     isSelectorPlaygroundOpen: isSelectorPlaygroundOpen.value,
     onCloseSelectorPlayground,
     autSnapshotStore: props.autSnapshotStore,
+    pendingNavigationResume: props.pendingNavigationResume,
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference
@@ -163,6 +165,7 @@ watch(() => props.canAccessStudioAI, maybeRenderReactComponent)
 watch(() => props.cloudStudioSessionId, maybeRenderReactComponent)
 watch(() => isSelectorPlaygroundOpen.value, maybeRenderReactComponent)
 watch(() => props.autSnapshotStore.isSnapshotPinned, maybeRenderReactComponent)
+watch(() => props.pendingNavigationResume, maybeRenderReactComponent)
 
 const unmountReactComponent = () => {
   if (!ReactStudioPanel.value || !container.value) {
