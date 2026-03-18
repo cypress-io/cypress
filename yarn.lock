@@ -15759,12 +15759,12 @@ eslint-plugin-cypress@3.5.0:
   dependencies:
     globals "^13.20.0"
 
-eslint-plugin-cypress@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-cypress/-/eslint-plugin-cypress-5.1.0.tgz#348c63f2afb2b336ab2063bf27347c1219be64b6"
-  integrity sha512-tdLXm4aq9vX2hTtKJTUFD3gdNseMKqsf8+P6hI4TtOPdz1LU4xvTpQBd1++qPAsPZP2lyYh71B5mvzu2lBr4Ow==
+eslint-plugin-cypress@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-cypress/-/eslint-plugin-cypress-6.1.0.tgz#5619ceb67d09d74cb5225408bb36c962afb94880"
+  integrity sha512-B8sxtNpINDxFkmsu1qKYjg70VsP8SGneEXgLcZMk1bUZcW08S+JyaiMdof1x6dmt02FgOD7YkT4wOaOD5HotJw==
   dependencies:
-    globals "^16.2.0"
+    globals "^17.3.0"
 
 eslint-plugin-graphql@4.0.0:
   version "4.0.0"
@@ -18052,10 +18052,10 @@ globals@^15.12.0, globals@^15.14.0:
   resolved "https://registry.yarnpkg.com/globals/-/globals-15.15.0.tgz#7c4761299d41c32b075715a4ce1ede7897ff72a8"
   integrity sha512-7ACyT3wmyp3I61S4fG682L0VA2RGD9otkqGJIwNUMF1SWUombIIk+af1unuDYgMm082aHYwD+mzJvv9Iu8dsgg==
 
-globals@^16.2.0:
-  version "16.3.0"
-  resolved "https://registry.yarnpkg.com/globals/-/globals-16.3.0.tgz#66118e765ddaf9e2d880f7e17658543f93f1f667"
-  integrity sha512-bqWEnJ1Nt3neqx2q5SFfGS8r/ahumIakg3HcwtNlrVlwXIeNumWn/c7Pn/wKzGhf6SaW6H6uWXLqC30STCMchQ==
+globals@^17.3.0:
+  version "17.4.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-17.4.0.tgz#33d7d297ed1536b388a0e2f4bcd0ff19c8ff91b5"
+  integrity sha512-hjrNztw/VajQwOLsMNT1cbJiH2muO3OROCHnbehc8eY5JyD2gqz4AcMHPqgaOR59DjgUjYAYLeH699g/eWi2jw==
 
 globalthis@^1.0.1, globalthis@^1.0.4:
   version "1.0.4"
