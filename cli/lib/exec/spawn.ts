@@ -236,6 +236,7 @@ function createSpawnFunction (
       // to have any effect. so we're just catching the
       // error here and not doing anything.
       stdin.on('error', (err: any) => {
+        debug('error on stdin', err)
         if (['EPIPE', 'ENOTCONN'].includes(err.code)) {
           return
         }

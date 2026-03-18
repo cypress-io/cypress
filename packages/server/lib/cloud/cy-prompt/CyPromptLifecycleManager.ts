@@ -15,7 +15,7 @@ import { getCloudMetadata } from '../get_cloud_metadata'
 import type { CyPromptAuthenticatedUserShape, CyPromptServerOptions } from '@packages/types'
 import crypto from 'crypto'
 import { reportCyPromptError } from '../api/cy-prompt/report_cy_prompt_error'
-import { TeardownQueue } from '../../util/teardown-queue'
+import { GracefulExit } from '../../util/graceful-exit'
 
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
@@ -280,9 +280,9 @@ export class CyPromptLifecycleManager {
       })
     })
 
-    TeardownQueue.addStep(async () => {
+    GracefulExit.addStep(async () => {
       await CyPromptLifecycleManager.watcher?.close()
-    })
+    }, 'close cy prompt watcher')
   }
 
   /**

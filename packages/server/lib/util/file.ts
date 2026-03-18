@@ -7,8 +7,9 @@ import Promise from 'bluebird'
 import lockFileModule from 'lockfile'
 import { fs } from './fs'
 import * as env from './env'
-import onExit from 'signal-exit'
 import pQueue from 'p-queue'
+import { GracefulExit } from './graceful-exit'
+
 const lockFile = Promise.promisifyAll(lockFileModule)
 
 const debugVerbose = debugModule('cypress-verbose:server:util:file')
@@ -56,9 +57,9 @@ export class File {
     this.path = options.path
     this.initialize()
 
-    onExit(() => {
-      return lockFile.unlockSync(this._lockFilePath)
-    })
+    GracefulExit.addStep(async () => {
+      await lockFile.unlockSync(this._lockFilePath)
+    }, 'unlock lockfile')
   }
 
   initialize () {

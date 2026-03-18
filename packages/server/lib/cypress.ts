@@ -16,7 +16,7 @@ import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
-import { TeardownQueue } from './util/teardown-queue'
+import { GracefulExit } from './util/graceful-exit'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
@@ -56,11 +56,11 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
       err.type === 'CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK' ||
       err.type === 'CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK'
     )) {
-      return TeardownQueue.exitGracefully(112)
+      return GracefulExit.exitGracefully(112)
     }
   }
 
-  return TeardownQueue.exitGracefully(1)
+  return GracefulExit.exitGracefully(1)
 }
 
 export = {
@@ -112,7 +112,22 @@ export = {
         // const mainEntryFile = require.main.filename
         const serverMain = getCwd()
 
-        return cypressElectron.open(serverMain, args, fn)
+        return cypressElectron.open(serverMain, args, (spawned) => {
+          GracefulExit.detachProcessSignalHandlers()
+
+          const relay = (sig: NodeJS.Signals) => {
+            try {
+              if (spawned && !spawned.killed) {
+                spawned.kill(sig)
+              }
+            } catch {
+              // ignore e.g. ESRCH
+            }
+          }
+
+          process.on('SIGINT', () => relay('SIGINT'))
+          process.on('SIGTERM', () => relay('SIGTERM'))
+        })
       })
     })
   },
@@ -213,9 +228,9 @@ export = {
           const pong = await this.runElectron(mode, options)
 
           if (!this.isCurrentlyRunningElectron()) {
-            return TeardownQueue.exitGracefully(pong)
+            return GracefulExit.exitGracefully(pong)
           } else if (pong !== options.ping) {
-            return TeardownQueue.exitGracefully(1)
+            return GracefulExit.exitGracefully(1)
           }
 
           break
@@ -228,7 +243,7 @@ export = {
           break
         }
         case 'exitWithCode': {
-          return TeardownQueue.exitGracefully(toNumber(options.exitWithCode))
+          return GracefulExit.exitGracefully(toNumber(options.exitWithCode))
           break
         }
         case 'run': {
@@ -241,17 +256,17 @@ export = {
               // eslint-disable-next-line no-console
               console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
-              return TeardownQueue.exitGracefully(1)
+              return GracefulExit.exitGracefully(1)
             }
           }
 
           debug('results.totalFailed, posix?', results.totalFailed, options.posixExitCodes)
 
           if (options.posixExitCodes) {
-            return TeardownQueue.exitGracefully(results.totalFailed ? 1 : 0)
+            return GracefulExit.exitGracefully(results.totalFailed ? 1 : 0)
           }
 
-          return TeardownQueue.exitGracefully(results.totalFailed ?? 0)
+          return GracefulExit.exitGracefully(results.totalFailed ?? 0)
         }
         default: {
           throw new Error(`Cannot start. Invalid mode: '${mode}'`)
@@ -262,6 +277,6 @@ export = {
     }
     debug('end of startInMode, exit 0')
 
-    return TeardownQueue.exitGracefully(0)
+    return GracefulExit.exitGracefully(0)
   },
 }

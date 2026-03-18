@@ -8,6 +8,7 @@ const savedState = require(`../../../lib/saved_state`)
 const menu = require(`../../../lib/gui/menu`)
 const Windows = require(`../../../lib/gui/windows`)
 const interactiveMode = require(`../../../lib/modes/interactive`)
+const { GracefulExit } = require(`../../../lib/util/graceful-exit`)
 
 describe('gui/interactive', () => {
   context('.isMac', () => {
@@ -186,8 +187,8 @@ describe('gui/interactive', () => {
     })
 
     describe('data context management', () => {
-      let willQuitHandler
-      let clearCtxImmediateCallback
+      let beforeQuitHandler
+      let quitTeardownImmediateCallback
 
       let mockEvent = {
         preventDefault: sinon.stub(),
@@ -199,40 +200,43 @@ describe('gui/interactive', () => {
         return interactiveMode.run(opts).then(() => {
           expect(interactiveMode.ready).to.be.calledWith(opts)
         }).then(async () => {
-          expect(willQuitHandler).to.be.defined
+          expect(beforeQuitHandler).to.be.defined
 
-          willQuitHandler(mockEvent)
+          beforeQuitHandler(mockEvent)
           expect(mockEvent.preventDefault).to.have.been.called
-          expect(clearCtxImmediateCallback).to.be.defined
+          expect(quitTeardownImmediateCallback).to.be.defined
 
-          await clearCtxImmediateCallback()
+          await quitTeardownImmediateCallback()
 
           expect(DataContext.clearCtx).to.have.been.called
+          expect(GracefulExit.exitGracefully).to.have.been.calledWith(0, false)
           expect(electron.app.quit).to.have.been.called
         })
       }
 
       beforeEach(() => {
-        willQuitHandler = undefined
-        clearCtxImmediateCallback = undefined
+        beforeQuitHandler = undefined
+        quitTeardownImmediateCallback = undefined
 
         sinon.stub(interactiveMode, 'ready')
-        sinon.stub(electron.app, 'once').callsFake((eventName, handler) => {
-          if (eventName === 'will-quit') {
-            willQuitHandler = handler
+        sinon.stub(electron.app, 'on').callsFake((eventName, handler) => {
+          if (eventName === 'before-quit') {
+            beforeQuitHandler = handler
           }
         })
+
+        sinon.stub(GracefulExit, 'exitGracefully').resolves()
 
         sinon.stub(global, 'setImmediate').callsFake((callback) => {
           // we intercept the setImmediate call so we can synchronously
           // execute the callback in the test and await its result
-          clearCtxImmediateCallback = callback
+          quitTeardownImmediateCallback = callback
         })
 
         electron.app.quit = sinon.stub()
       })
 
-      it('uses will-quit listener to destroy DataContext before exiting', () => {
+      it('uses before-quit listener to destroy DataContext and graceful exit before exiting', () => {
         sinon.stub(DataContext, 'clearCtx').resolves()
 
         return performAssertions()

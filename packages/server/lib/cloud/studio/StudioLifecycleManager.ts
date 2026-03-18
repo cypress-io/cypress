@@ -26,7 +26,7 @@ import crypto from 'crypto'
 import { logError } from '@packages/stderr-filtering'
 import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
 import type { DebugData } from '@packages/types'
-import { TeardownQueue } from '../../util/teardown-queue'
+import { GracefulExit } from '../../util/graceful-exit'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
@@ -387,9 +387,9 @@ export class StudioLifecycleManager {
       })
     })
 
-    TeardownQueue.addStep(async () => {
+    GracefulExit.addStep(async () => {
       await StudioLifecycleManager.watcher?.close()
-    })
+    }, 'close studio watcher')
   }
 
   /**

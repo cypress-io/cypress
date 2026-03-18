@@ -29,7 +29,11 @@ function getInspectFromOpts (argv: string[]): string | undefined {
   return undefined
 }
 
-export async function open (appPath: string, argv: string[]): Promise<ChildProcess> {
+export async function open (
+  appPath: string,
+  argv: string[],
+  onChildSpawned?: (child: ChildProcess) => void,
+): Promise<ChildProcess> {
   const debugElectron = Debug('cypress:electron')
   const debugStderr = Debug('cypress:internal-stderr')
 
@@ -75,6 +79,8 @@ export async function open (appPath: string, argv: string[]): Promise<ChildProce
       ].filter(Boolean),
       { stdio: 'pipe' },
     )
+
+    onChildSpawned?.(spawned)
 
     spawned.on('error', (err) => {
       console.error(err)

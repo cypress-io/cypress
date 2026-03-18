@@ -41,7 +41,6 @@ import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
 import { INITIALIZATION_MARK_NAMES, INITIALIZATION_TELEMETRY_GROUP_NAMES } from './cloud/studio/telemetry/constants/initialization'
 import { TelemetryReporter } from './cloud/studio/telemetry/TelemetryReporter'
 import type { StudioInitOptions } from './types/studio'
-import { TeardownQueue } from './util/teardown-queue'
 
 export interface Cfg extends ReceivedCypressOptions {
   projectId?: string
