@@ -510,6 +510,7 @@ interface InstanceOptions {
     osVersion: any
     browserName: any
     browserVersion: any
+    browserFamily: any
   }
   parallel?: any
   ciBuildId?: any
