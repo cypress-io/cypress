@@ -8,6 +8,9 @@ export const baseConfig: Cypress.ConfigOptions = {
   experimentalWebKitSupport: true,
   env: {
     CI: process.env.CI,
+    CY_ENV_FOO: 'foo',
+    CY_ENV_BAR: 'bar',
+    CY_ENV_BAZ: 'baz',
   },
   hosts: {
     'foobar.com': '127.0.0.1',

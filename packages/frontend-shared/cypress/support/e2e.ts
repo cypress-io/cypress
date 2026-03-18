@@ -219,16 +219,18 @@ declare global {
 cy.i18n = i18n
 
 before(() => {
-  Cypress.env('e2e_launchpadPort', undefined)
-  taskInternal('__internal__before', undefined).then(({ launchpadPort }) => {
-    Cypress.env('e2e_launchpadPort', launchpadPort)
+  cy.task('setCyInCyVariables', { 'e2e_launchpadPort': undefined }).then(() => {
+    taskInternal('__internal__before', undefined).then(({ launchpadPort }) => {
+      cy.task('setCyInCyVariables', { 'e2e_launchpadPort': launchpadPort })
+    })
   })
 })
 
 beforeEach(() => {
   // Reset the ports so we know we need to call "openProject" before each test
-  Cypress.env('e2e_serverPort', undefined)
-  taskInternal('__internal__beforeEach', undefined)
+  cy.task('setCyInCyVariables', { 'e2e_serverPort': undefined }).then(() => {
+    taskInternal('__internal__beforeEach', undefined)
+  })
 })
 
 afterEach(() => {
@@ -265,9 +267,9 @@ function openGlobalMode (options: OpenGlobalModeOptions = {}) {
   return logInternal({ name: 'openGlobalMode', message: '' }, () => {
     return taskInternal('__internal_openGlobal', options)
   }).then((obj) => {
-    Cypress.env('e2e_serverPort', obj.e2eServerPort)
-
-    return obj.modeOptions
+    return cy.task('setCyInCyVariables', { 'e2e_serverPort': obj.e2eServerPort }).then(() => {
+      return obj.modeOptions
+    })
   })
 }
 
@@ -281,9 +283,9 @@ function openProject (projectName: WithPrefix<ProjectFixtureDir>, argv: string[]
   return logInternal({ name: 'openProject', message: argv.join(' ') }, () => {
     return taskInternal('__internal_openProject', { projectName, argv })
   }).then((obj) => {
-    Cypress.env('e2e_serverPort', obj.e2eServerPort)
-
-    return obj.modeOptions
+    return cy.task('setCyInCyVariables', { 'e2e_serverPort': obj.e2eServerPort }).then(() => {
+      return obj.modeOptions
+    })
   })
 }
 
@@ -391,30 +393,30 @@ function startAppServer (mode: 'component' | 'e2e' = 'e2e', options: { skipMocki
         return ctx.coreData.servers.appServerPort
       }, { log: false, mode, url: win.top ? win.top.location.href : undefined, ...options }).then((serverPort) => {
         log?.set({ message: `port: ${serverPort}` })
-        Cypress.env('e2e_serverPort', serverPort)
+        cy.task('setCyInCyVariables', { 'e2e_serverPort': serverPort })
       })
     })
   })
 }
 
 function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
-  const { e2e_serverPort } = Cypress.env()
-
-  if (!e2e_serverPort) {
-    throw new Error(`
+  cy.task<{ e2e_serverPort: number }>('getCyInCyVariables', ['e2e_serverPort']).then(({ e2e_serverPort }) => {
+    if (!e2e_serverPort) {
+      throw new Error(`
       Missing serverPort, app was not initialized.
       Make sure you're adding args to openModeSystemTest which will launch the browser, such as:
       ['--e2e', '--browser', 'electron']
     `)
-  }
+    }
 
-  return logInternal('visitApp', () => {
-    return cy.withCtx(async (ctx) => {
-      const config = await ctx.lifecycleManager.getFullInitialConfig()
+    return logInternal('visitApp', () => {
+      return cy.withCtx(async (ctx) => {
+        const config = await ctx.lifecycleManager.getFullInitialConfig()
 
-      return config.clientRoute
-    }).then((clientRoute) => {
-      return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
+        return config.clientRoute
+      }).then((clientRoute) => {
+        return cy.visit(`http://localhost:${e2e_serverPort}${clientRoute || '/__/'}#${href || ''}`, opts)
+      })
     })
   })
 }
@@ -435,33 +437,35 @@ function specsPageIsVisible (specsSetup) {
 }
 
 function visitLaunchpad (options: { showWelcome?: boolean } = { showWelcome: false }) {
-  function launchpadVisit () {
-    return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
-      return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
-        return cy.get('.spinner', { timeout: 10000, log: false }).should('not.exist').then(() => {
-          return val
+  cy.task<{ e2e_launchpadPort: number }>('getCyInCyVariables', ['e2e_launchpadPort']).then(({ e2e_launchpadPort }) => {
+    function launchpadVisit () {
+      return cy.visit(`/__launchpad/index.html`, { log: false }).then((val) => {
+        return cy.get('[data-e2e]', { timeout: 10000, log: false }).then(() => {
+          return cy.get('.spinner', { timeout: 10000, log: false }).should('not.exist').then(() => {
+            return val
+          })
         })
-      })
-    })
-  }
-
-  return logInternal(`visitLaunchpad ${Cypress.env('e2e_launchpadPort')}`, () => {
-    if (!options.showWelcome) {
-      return cy.withCtx(async (ctx, o) => {
-        // avoid re-stubbing already stubbed prompts in case we call getPreferences multiple times
-        if ((ctx._apis.localSettingsApi.getPreferences as any).wrappedMethod === undefined) {
-          o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
-            [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
-          } })
-        }
-      }, {
-        MAJOR_VERSION_FOR_CONTENT: GET_MAJOR_VERSION_FOR_CONTENT(),
-      }).then(() => {
-        return launchpadVisit()
       })
     }
 
-    return launchpadVisit()
+    return logInternal(`visitLaunchpad ${e2e_launchpadPort}`, () => {
+      if (!options.showWelcome) {
+        return cy.withCtx(async (ctx, o) => {
+          // avoid re-stubbing already stubbed prompts in case we call getPreferences multiple times
+          if ((ctx._apis.localSettingsApi.getPreferences as any).wrappedMethod === undefined) {
+            o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
+              [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
+            } })
+          }
+        }, {
+          MAJOR_VERSION_FOR_CONTENT: GET_MAJOR_VERSION_FOR_CONTENT(),
+        }).then(() => {
+          return launchpadVisit()
+        })
+      }
+
+      return launchpadVisit()
+    })
   })
 }
 
@@ -498,22 +502,24 @@ function withCtx<T extends Partial<WithCtxOptions>, R> (fn: (ctx: DataContext, o
     },
   })
 
-  return cy.task<CyTaskResult<R>>('__internal_withCtx', {
-    fn: fn.toString(),
-    options: rest,
-  }, { timeout: timeout ?? Cypress.env('e2e_isDebugging') ? NO_TIMEOUT : SIXTY_SECONDS, log: Boolean(Cypress.env('e2e_isDebugging')) }).then((result) => {
-    _log?.set('result', result)
-    _log?.end()
+  return cy.task<{ e2e_isDebugging: boolean }>('getCyInCyVariables', ['e2e_isDebugging']).then(({ e2e_isDebugging }) => {
+    return cy.task<CyTaskResult<R>>('__internal_withCtx', {
+      fn: fn.toString(),
+      options: rest,
+    }, { timeout: timeout ?? e2e_isDebugging ? NO_TIMEOUT : SIXTY_SECONDS, log: Boolean(e2e_isDebugging) }).then((result) => {
+      _log?.set('result', result)
+      _log?.end()
 
-    if (result.error) {
-      const err = new Error(result.error.message)
+      if (result.error) {
+        const err = new Error(result.error.message)
 
-      err.name = result.error.name
-      err.stack = result.error.stack
-      throw err
-    }
+        err.name = result.error.name
+        err.stack = result.error.stack
+        throw err
+      }
 
-    return result.value as Cypress.Chainable<UnwrapPromise<R>>
+      return result.value as Cypress.Chainable<UnwrapPromise<R>>
+    })
   })
 }
 
@@ -588,9 +594,9 @@ type Resolved<V> = V extends Promise<infer U> ? U : V
  *
  */
 function taskInternal<T extends keyof E2ETaskMap> (name: T, arg: Parameters<E2ETaskMap[T]>[0], options: { timeout?: number } = {}): Cypress.Chainable<Resolved<ReturnType<E2ETaskMap[T]>>> {
-  const isDebugging = Boolean(Cypress.env('e2e_isDebugging'))
-
-  return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: isDebugging, timeout: options.timeout ?? (isDebugging ? NO_TIMEOUT : TEN_SECONDS) })
+  return cy.task<{ e2e_isDebugging: boolean }>('getCyInCyVariables', ['e2e_isDebugging']).then(({ e2e_isDebugging }) => {
+    return cy.task<Resolved<ReturnType<E2ETaskMap[T]>>>(name, arg, { log: e2e_isDebugging, timeout: options.timeout ?? (e2e_isDebugging ? NO_TIMEOUT : TEN_SECONDS) })
+  })
 }
 
 /**

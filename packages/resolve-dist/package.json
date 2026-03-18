@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "fs-extra": "9.1.0",
-    "rimraf": "^6.0.1",
+    "rimraf": "^6.1.1",
     "typescript": "~5.4.5"
   },
   "files": [

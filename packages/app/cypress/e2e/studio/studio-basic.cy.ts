@@ -66,7 +66,31 @@ describe('studio functionality', () => {
 
     cy.findByTestId('studio-header-studio-button').click()
 
+    // dismiss unsaved changes modal
+    cy.findByTestId('unsaved-changes-discard-button').click()
+
     assertClosingPanelWithoutChanges()
+  })
+
+  it('keeps studio open when cancel is clicked in the unsaved changes dialog', () => {
+    launchStudio()
+
+    incrementCounter(0)
+
+    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
+
+    cy.findByTestId('studio-header-studio-button').click()
+
+    cy.findByTestId('unsaved-changes-modal').should('be.visible')
+
+    // clicking cancel should keep studio open
+    cy.findByTestId('unsaved-changes-cancel-button').click()
+
+    cy.findByTestId('unsaved-changes-modal').should('not.exist')
+    cy.findByTestId('studio-panel').should('be.visible')
+
+    // the pending commands should still be there
+    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
   })
 
   it('removes pending commands if the page is reloaded', () => {
@@ -98,7 +122,10 @@ describe('studio functionality', () => {
 
     cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
 
-    cy.get('button[aria-label="Rerun all tests"]').click()
+    cy.get('button.restart').click()
+
+    // dismiss unsaved changes modal
+    cy.findByTestId('unsaved-changes-discard-button').click()
 
     cy.waitForSpecToFinish()
     // after reloading we should still be in studio mode but the commands should be removed

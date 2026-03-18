@@ -11,7 +11,7 @@ import type {
 } from '../types'
 import type { BackendRoute, NetStubbingState } from './types'
 import { emit, sendStaticResponse } from './util'
-import type CyServer from '@packages/server'
+import type { SocketBroadcaster } from '@packages/socket'
 import type { BackendStaticResponse } from '../internal-types'
 import * as errors from '@packages/errors'
 
@@ -41,7 +41,7 @@ export class InterceptedRequest {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
   state: NetStubbingState
-  socket: CyServer.Socket
+  socket: SocketBroadcaster
 
   constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket'>) {
     this.id = _.uniqueId('interceptedRequest')

@@ -46,6 +46,10 @@ const processOpenOptions = (options: any = {}): string[] => {
     args.push('--env', options.env)
   }
 
+  if (options.expose) {
+    args.push('--expose', options.expose)
+  }
+
   if (options.port) {
     args.push('--port', options.port)
   }

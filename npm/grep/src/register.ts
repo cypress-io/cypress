@@ -21,27 +21,27 @@ export function register (): void {
   // define Cypress.grep function
   if (!Cypress.grep) {
     Cypress.grep = function grep (grep?: string, tags?: string, burn?: string): void {
-      Cypress.env('grep', grep)
-      Cypress.env('grepTags', tags)
-      Cypress.env('grepBurn', burn)
-      Cypress.env('grep-tags', null)
-      Cypress.env('grep-burn', null)
-      Cypress.env('burn', null)
+      Cypress.expose('grep', grep)
+      Cypress.expose('grepTags', tags)
+      Cypress.expose('grepBurn', burn)
+      Cypress.expose('grep-tags', null)
+      Cypress.expose('grep-burn', null)
+      Cypress.expose('burn', null)
 
       debugInstance('set new grep to "%o" restarting tests', { grep, tags, burn })
       restartTests()
     }
   }
 
-  let grep: string | undefined = Cypress.env('grep')
+  let grep: string | undefined = Cypress.expose('grep')
 
   if (grep) {
     grep = String(grep).trim()
   }
 
-  const grepTags: string | undefined = Cypress.env('grepTags') || Cypress.env('grep-tags')
-  const burnSpecified: string | undefined = Cypress.env('grepBurn') || Cypress.env('grep-burn') || Cypress.env('burn')
-  const grepUntagged: string | undefined = Cypress.env('grepUntagged') || Cypress.env('grep-untagged')
+  const grepTags: string | undefined = Cypress.expose('grepTags') || Cypress.expose('grep-tags')
+  const burnSpecified: string | undefined = Cypress.expose('grepBurn') || Cypress.expose('grep-burn') || Cypress.expose('burn')
+  const grepUntagged: string | undefined = Cypress.expose('grepUntagged') || Cypress.expose('grep-untagged')
 
   if (!grep && !grepTags && !burnSpecified && !grepUntagged) {
     debugInstance('Nothing to grep, version %s', version)
@@ -50,13 +50,13 @@ export function register (): void {
   }
 
   const grepBurn: number =
-    Cypress.env('grepBurn') ||
-    Cypress.env('grep-burn') ||
-    Cypress.env('burn') ||
+    Cypress.expose('grepBurn') ||
+    Cypress.expose('grep-burn') ||
+    Cypress.expose('burn') ||
     1
 
   const omitFiltered: boolean =
-    Cypress.env('grepOmitFiltered') || Cypress.env('grep-omit-filtered')
+    Cypress.expose('grepOmitFiltered') || Cypress.expose('grep-omit-filtered')
 
   debugInstance('grep %o', { grep, grepTags, grepBurn, omitFiltered, version })
   if (!Cypress._.isInteger(grepBurn) || grepBurn < 1) {

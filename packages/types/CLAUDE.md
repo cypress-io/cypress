@@ -1,0 +1,3 @@
+# Types
+
+@AGENTS.md

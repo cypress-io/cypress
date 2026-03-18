@@ -1,4 +1,5 @@
 module.exports = {
+  'allowCypressEnv': false,
   'e2e': {
     'supportFile': 'cypress/support.ts',
     setupNodeEvents (on, config) {

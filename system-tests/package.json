@@ -21,7 +21,6 @@
   "devDependencies": {
     "@babel/core": "7.28.0",
     "@babel/preset-env": "7.28.0",
-    "@cypress/commit-info": "2.2.0",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/request": "^3.0.10",
     "@cypress/request-promise": "^5.0.0",
@@ -93,6 +92,10 @@
   "license": "ISC",
   "author": "",
   "keywords": [],
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
   "nx": {
     "targets": {
       "build": {

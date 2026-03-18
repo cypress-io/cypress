@@ -70,8 +70,8 @@ export function resetIssuedWarnings () {
 }
 
 const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]>, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
-  breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
-    if (_.has(cfg, name)) {
+  breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value, shouldDisplayOrThrow }) => {
+    if (_.has(cfg, name) && (!shouldDisplayOrThrow || shouldDisplayOrThrow(cfg[name]))) {
       if (value && cfg[name] !== value) {
         // Bail if a value is specified but the config does not have that value.
         return

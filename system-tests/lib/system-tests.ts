@@ -68,9 +68,17 @@ export type ItOptions = ExecOptions & {
    * Same as using `systemTests.it.skip`.
    */
   skip?: boolean
+  /**
+   * If set, the system test will be retried up to the given number of times.
+   */
+  retries?: number
 }
 
 type ExecOptions = {
+  /**
+   * If set, Cypress will pass the `--pass-with-no-tests` flag.
+   */
+  passWithNoTests?: boolean
   /**
    * If set, `docker exec` will be used to run this test. Requires Docker.
    */
@@ -528,6 +536,11 @@ const localItFn = function (title: string, opts: ItOptions) {
     const testTitle = `${title} [${browser}]`
 
     return mochaItFn(testTitle, function () {
+      // Only set retries when explicitly provided; otherwise allow Mocha to inherit from parent suite
+      if ('retries' in opts) {
+        this.retries(options.retries)
+      }
+
       if (options.useSeparateBrowserSnapshots) {
         title = testTitle
       }
@@ -768,7 +781,9 @@ const systemTests = {
       args.push(`--userNodeVersion=${options.userNodeVersion}`)
     }
 
-    debug('posixExitCodes', options.posixExitCodes)
+    if (options.passWithNoTests) {
+      args.push('--pass-with-no-tests')
+    }
 
     if (options.posixExitCodes) {
       args.push('--posix-exit-codes')

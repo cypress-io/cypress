@@ -110,6 +110,7 @@
   // privileged commands are commands that should only be called from the spec
   // because they escape the browser sandbox and (generally) have access to node
   const privilegedCommands = [
+    'env',
     'exec',
     // cy.origin() doesn't directly access node, but is a pathway for other
     // commands to do so

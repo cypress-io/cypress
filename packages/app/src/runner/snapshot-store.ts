@@ -105,3 +105,5 @@ export const useSnapshotStore = defineStore({
     },
   },
 })
+
+export type SnapshotStore = ReturnType<typeof useSnapshotStore>

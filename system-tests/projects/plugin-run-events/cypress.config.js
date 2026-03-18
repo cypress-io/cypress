@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 
 module.exports = {
+  allowCypressEnv: false,
   fixturesFolder: false,
   experimentalInteractiveRunEvents: true,
   e2e: {

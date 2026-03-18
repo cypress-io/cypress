@@ -1,7 +1,7 @@
 import { vi, describe, it, beforeEach, expect } from 'vitest'
 import fs from 'fs-extra'
 import semver from 'semver'
-import makeUserPackageFile from '../../scripts/build'
+import makeUserPackageFile from '../../scripts/prepare-package-json'
 
 vi.mock('fs-extra', async (importActual) => {
   const actual = await importActual()

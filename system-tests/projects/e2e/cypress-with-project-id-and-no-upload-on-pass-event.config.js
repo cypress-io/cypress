@@ -1,6 +1,7 @@
 const fs = require('fs')
 
 module.exports = {
+  'allowCypressEnv': false,
   'projectId': 'pid123',
   'e2e': {
     setupNodeEvents (on, config) {

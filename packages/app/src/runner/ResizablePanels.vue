@@ -44,6 +44,7 @@
     </div>
 
     <div
+      id="aut-panel"
       data-cy="aut-panel"
       class="grow h-full bg-gray-100 relative"
       :class="{ 'pointer-events-none': panel2IsDragging || panel4IsDragging }"

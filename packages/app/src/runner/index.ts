@@ -128,17 +128,10 @@ function setupRunner () {
   getEventManager().start(config)
 
   const autStore = useAutStore()
-  const studioStore = useStudioStore()
 
   watchEffect(() => {
     autStore.viewportUpdateCallback?.()
   }, { flush: 'post' })
-
-  watchEffect(() => {
-    window.UnifiedRunner.MobX.runInAction(() => {
-      mobxRunnerStore.setCanSaveStudioLogs(studioStore.logs.length > 0)
-    })
-  })
 
   _autIframeModel = new AutIframe(
     'Test Project',
@@ -298,6 +291,7 @@ async function runSpecE2E (config, spec: SpecFile) {
   // create root for new AUT
   const $container = document.createElement('div')
 
+  $container.id = 'aut-iframes-container'
   $container.classList.add('screenshot-height-container')
 
   $runnerRoot.append($container)
@@ -305,10 +299,13 @@ async function runSpecE2E (config, spec: SpecFile) {
   // create new AUT
   const autIframe = getAutIframeModel()
 
-  const { autIframe: $autIframe, autSnapshotIframe: $autSnapshotIframe } = autIframe.create()
+  const { autIframe: $autIframe, autSnapshotIframes: $autSnapshotIframes } = autIframe.create()
 
   $autIframe.appendTo($container)
-  $autSnapshotIframe.appendTo($container)
+
+  $autSnapshotIframes.forEach((iframe) => {
+    iframe.appendTo($container)
+  })
 
   // Remove the spec bridge iframe
   document.querySelectorAll('iframe.spec-bridge-iframe').forEach((el) => {
@@ -333,7 +330,7 @@ async function runSpecE2E (config, spec: SpecFile) {
   })
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize({ $autIframe, $autSnapshotIframe, config })
+  getEventManager().initialize({ $autIframe, $autSnapshotIframes, config })
 }
 
 /**

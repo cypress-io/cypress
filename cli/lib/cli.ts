@@ -117,6 +117,7 @@ const descriptions: any = {
   dev: 'runs cypress in development and bypasses binary check',
   e2e: 'runs end to end tests',
   env: 'sets environment variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs} or cypress.env.json',
+  expose: 'sets exposed public configuration variables. separate multiple values with a comma. overrides any value in cypress.config.{js,ts,mjs,cjs}',
   exit: 'keep the browser open after tests finish',
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if it were globally installed',
@@ -125,6 +126,7 @@ const descriptions: any = {
   headless: 'hide the browser instead of running headed (default for cypress run)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
+  passWithNoTests: 'pass when no tests are found',
   port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
   project: 'path to the project',
   posixExitCodes: 'use POSIX exit codes for error handling',
@@ -252,12 +254,14 @@ const addCypressRunCommand = (program: any): any => {
   .option('-C, --config-file <config-file>', text('configFile'))
   .option('--e2e', text('e2e'))
   .option('-e, --env <env>', text('env'))
+  .option('-x, --expose <expose>', text('expose'))
   .option('--group <name>', text('group'))
   .option('-k, --key <record-key>', text('key'))
   .option('--headed', text('headed'))
   .option('--headless', text('headless'))
   .option('--no-exit', text('exit'))
   .option('--parallel', text('parallel'))
+  .option('--pass-with-no-tests', text('passWithNoTests'))
   .option('-p, --port <port>', text('port'))
   .option('-P, --project <project-path>', text('project'))
   .option('--posix-exit-codes', text('posixExitCodes'))
@@ -284,6 +288,7 @@ const addCypressOpenCommand = (program: any): any => {
   .option('-d, --detached [bool]', text('detached'), coerceFalse)
   .option('--e2e', text('e2e'))
   .option('-e, --env <env>', text('env'))
+  .option('-x, --expose <expose>', text('expose'))
   .option('--global', text('global'))
   .option('-p, --port <port>', text('port'))
   .option('-P, --project <project-path>', text('project'))

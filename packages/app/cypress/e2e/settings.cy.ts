@@ -256,6 +256,8 @@ describe('App: Settings', () => {
         cy.get('[data-cy-config="env"]').contains('INTERNAL_GRAPHQL_PORT')
         cy.get('[data-cy-config="cli"]').contains('fromCli')
         cy.get('[data-cy-config="cli"]').contains('4455')
+        cy.get('[data-cy-config="expose"]').contains('INTERNAL_E2E_TESTING_SELF')
+        cy.get('[data-cy-config="expose"]').contains('value').should('not.exist')
       })
     })
 

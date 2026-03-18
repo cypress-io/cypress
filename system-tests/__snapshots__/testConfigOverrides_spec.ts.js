@@ -1630,3 +1630,68 @@ exports['testConfigOverrides / experimental retries specific behavior / succeeds
 
 
 `
+
+exports['testConfigOverrides / fails when trying to perform testConfigOverrides for Cypress.env() with allowCypressEnv=false'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (allow_cypress_env.cy.js)                                                  │
+  │ Searched:   cypress/e2e/testConfigOverrides/allow_cypress_env.cy.js                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  allow_cypress_env.cy.js                                                         (1 of 1)
+
+
+  testConfigOverrides with allowCypressEnv=false
+    1) fails when trying to perform testConfigOverrides for Cypress.env()
+
+
+  0 passing
+  1 failing
+
+  1) testConfigOverrides with allowCypressEnv=false
+       fails when trying to perform testConfigOverrides for Cypress.env():
+     CypressError: overriding environment variables via suite or test configuration is not allowed when \`allowCypressEnv\` is set to \`false\`.
+
+https://on.cypress.io/cypress-env-migration
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     allow_cypress_env.cy.js                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  allow_cypress_env.cy.js                  XX:XX        1        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+
+
+`

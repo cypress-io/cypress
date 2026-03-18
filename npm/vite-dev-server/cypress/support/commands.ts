@@ -8,7 +8,7 @@ declare global {
        *
        * 1. Waits for the stats to reset which signifies that the test page has loaded
        * 2. Waits for 'Your tests are loading...' to not be present so that we know the tests themselves have loaded
-       * 3. Waits (with a timeout of 30s) for the Rerun all tests button to be present. This ensures all tests have completed
+       * 3. Waits (with a timeout of 30s) for the restart button to be present (Rerun all tests / Run test in Studio single-test mode). This ensures all tests have completed.
        *
        */
       waitForSpecToFinish()
@@ -27,8 +27,8 @@ export const waitForSpecToFinish = () => {
   // Then ensure the tests are running
   cy.contains('Your tests are loading...').should('not.exist')
 
-  // Then ensure the tests have finished
-  cy.get('[aria-label="Rerun all tests"]', { timeout: 30000 })
+  // Wait for the restart button (shows "Rerun all tests" or "Run test" in Studio single-test mode)
+  cy.get('button.restart', { timeout: 30000 })
 }
 
 Cypress.Commands.add('waitForSpecToFinish', waitForSpecToFinish)

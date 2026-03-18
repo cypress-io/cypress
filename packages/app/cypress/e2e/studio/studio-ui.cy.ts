@@ -2,6 +2,34 @@ import { launchStudio, loadProjectAndRunSpec } from './helper'
 import pDefer from 'p-defer'
 
 describe('Cypress Studio - UI and Panel Management', () => {
+  it('shows Run test button label in single-test mode', () => {
+    launchStudio()
+
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.get('button.restart').trigger('mouseover')
+    cy.get('.cy-tooltip').should('have.text', 'Run test R')
+  })
+
+  it('shows Run All Tests button label on welcome screen', () => {
+    cy.viewport(1500, 1000)
+    loadProjectAndRunSpec()
+    cy.findByTestId('studio-button').should('be.visible').click()
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
+
+    cy.get('button.restart').trigger('mouseover')
+    cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
+  })
+
+  it('shows Run All Tests button label on new test screen', () => {
+    launchStudio({ createNewTestFromSpecHeader: true })
+
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('test-name-input').should('be.visible')
+    cy.get('button.restart').trigger('mouseover')
+    cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
+  })
+
   it('closes studio panel when clicking studio button (from the cloud)', () => {
     launchStudio()
 
@@ -35,15 +63,13 @@ describe('studio functionality', () => {
     })
   })
 
-  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
-  it.skip('opens studio panel to new test when clicking on studio button (from the app) next to url', () => {
+  it('opens studio panel to welcome screen when clicking on studio button (from the app) next to url', () => {
     cy.viewport(1500, 1000)
     loadProjectAndRunSpec()
     // studio button should be visible when using cloud studio
     cy.findByTestId('studio-button').should('be.visible').click()
     cy.findByTestId('studio-panel').should('be.visible')
-
-    cy.contains('New test')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     cy.percySnapshot()
   })
@@ -85,22 +111,21 @@ describe('studio functionality', () => {
     cy.percySnapshot()
   })
 
-  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
-  it.skip('shows test body sections correctly when studio panel is open and page is refreshed', () => {
+  it('shows test body sections correctly when studio panel is open and page is refreshed', () => {
     loadProjectAndRunSpec()
 
     cy.waitForSpecToFinish()
 
     cy.findByTestId('studio-button').click()
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.findByTestId('new-test-button').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     cy.reload()
 
     cy.waitForSpecToFinish()
 
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.findByTestId('new-test-button').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     // verify test body section is visible after refresh
     cy.get('.runnable-instruments').should('be.visible')
@@ -116,15 +141,14 @@ describe('studio functionality', () => {
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
   })
 
-  // TODO: unskip with https://github.com/cypress-io/cypress/pull/33236
-  it.skip('stays in new test mode when studio panel is opened when the spec is running', () => {
+  it('stays in the welcome screen when studio panel is opened while the spec is running', () => {
     loadProjectAndRunSpec()
 
     cy.waitForSpecToFinish()
 
     cy.findByTestId('studio-button').click()
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.findByTestId('new-test-button').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     // Verify we're initially in new test mode
     cy.location().its('hash').should('contain', 'suiteId=r1').and('not.contain', 'testId=')
@@ -139,7 +163,7 @@ describe('studio functionality', () => {
 
     // verify we're still in new test mode
     cy.findByTestId('studio-panel').should('be.visible')
-    cy.findByTestId('new-test-button').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
 
     // these should not exist if we stayed in new test mode
     cy.findByTestId('studio-single-test-title').should('not.exist')
@@ -186,11 +210,14 @@ describe('studio functionality', () => {
 
     launchStudio()
 
+    // expand the recommendation
+    cy.get('[aria-label="Expand recommendation"]').first().click()
+
     // Verify that the AI output is correct
     cy.get('.cm-is-recommendation-line').should('contain', aiOutput)
   })
 
-  it('studio AI is marked as coming soon', () => {
+  it('studio AI is marked as disabled', () => {
     cy.mockNodeCloudRequest({
       url: '/studio/config?projectSlug=n69px6',
       method: 'get',
@@ -206,7 +233,7 @@ describe('studio functionality', () => {
 
     launchStudio()
 
-    // Verify that AI is coming soon
-    cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Coming soon')
+    // Verify that AI is displaying as disabled
+    cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Disabled')
   })
 })

@@ -25,6 +25,7 @@ import { INITIALIZATION_TELEMETRY_GROUP_NAMES } from './telemetry/constants/init
 import crypto from 'crypto'
 import { logError } from '@packages/stderr-filtering'
 import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
+import type { DebugData } from '@packages/types'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
@@ -45,12 +46,6 @@ export class StudioLifecycleManager {
     cfg: Cfg
     debugData: any
     ctx: DataContext
-  }
-
-  public get cloudStudioRequested () {
-    // TODO: Remove cloudStudioRequested when we remove the legacy studio code
-    // https://github.com/cypress-io/cypress-services/issues/10390
-    return true
   }
 
   /**
@@ -179,7 +174,7 @@ export class StudioLifecycleManager {
   }: {
     cloudDataSource: CloudDataSource
     cfg: Cfg
-    debugData: any
+    debugData?: DebugData
     getProjectOptions: Required<StudioServerOptions>['getProjectOptions']
   }): Promise<StudioManager> {
     let studioPath: string
@@ -277,6 +272,7 @@ export class StudioLifecycleManager {
       },
       manifest,
       getProjectOptions,
+      debugData,
     })
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.STUDIO_MANAGER_SETUP_END)
@@ -349,7 +345,7 @@ export class StudioLifecycleManager {
   }: {
     cloudDataSource: CloudDataSource
     cfg: Cfg
-    debugData: any
+    debugData?: DebugData
     getProjectOptions: Required<StudioServerOptions>['getProjectOptions']
   }) {
     // Don't setup a watcher if the studio bundle is NOT local
