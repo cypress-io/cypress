@@ -175,6 +175,7 @@ export class ProjectBase extends EE {
       ctx: this.ctx,
       record: this.options.record,
       key: this.options.key,
+      projectId: cfg.projectId,
     })
 
     if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {

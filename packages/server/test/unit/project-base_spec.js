@@ -536,6 +536,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
             ctx,
             record: true,
             key: '123e4567-e89b-12d3-a456-426614174000',
+            projectId: 'abc123',
           })
         })
       })
