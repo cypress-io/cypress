@@ -18,8 +18,9 @@ beforeEach(() => {
 })
 
 beforeEach(() => {
-  // Mock out all studio telemetry requests so that our tests don't pollute Honeycomb data
-  cy.mockNodeCloudRequest({ url: '/studio/telemetry', method: 'post', body: {}, allowUnmocked: false })
+  // Stub Studio Honeycomb-style posts only (default allowUnmocked: true leaves other cloud traffic alone).
+  cy.mockNodeCloudRequest({ url: '/studio/telemetry', method: 'post', body: {}, persist: true })
+  cy.mockNodeCloudRequest({ url: '/studio/metrics', method: 'post', body: {}, persist: true })
 })
 
 function e2eTestingTypeIsSelected () {
