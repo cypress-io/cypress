@@ -392,8 +392,9 @@ const replaceErrMsgTokens = (errMessage, args) => {
   return $utils.normalizeNewLines(getMsg(args), 2)
 }
 
-// recursively try for a default docsUrl
-const docsUrlByParents = (msgPath) => {
+// Walk up the error message path (e.g. foo.bar.baz -> foo.bar -> foo) and return
+// the first ancestor object in allErrorMessages that defines `propName`.
+const findPropByParents = (msgPath, propName) => {
   msgPath = msgPath.split('.').slice(0, -1).join('.')
 
   if (!msgPath) {
@@ -402,44 +403,11 @@ const docsUrlByParents = (msgPath) => {
 
   const obj = _.get(allErrorMessages, msgPath)
 
-  if (obj.hasOwnProperty('docsUrl')) {
-    return obj.docsUrl
+  if (obj.hasOwnProperty(propName)) {
+    return obj[propName]
   }
 
-  return docsUrlByParents(msgPath)
-}
-
-// recursively try for a default docsUrlTitle
-const docsUrlTitleByParents = (msgPath) => {
-  msgPath = msgPath.split('.').slice(0, -1).join('.')
-
-  if (!msgPath) {
-    return // reached root
-  }
-
-  const obj = _.get(allErrorMessages, msgPath)
-
-  if (obj.hasOwnProperty('docsUrlTitle')) {
-    return obj.docsUrlTitle
-  }
-
-  return docsUrlTitleByParents(msgPath)
-}
-
-const triggerActionByParents = (msgPath) => {
-  msgPath = msgPath.split('.').slice(0, -1).join('.')
-
-  if (!msgPath) {
-    return // reached root
-  }
-
-  const obj = _.get(allErrorMessages, msgPath)
-
-  if (obj.hasOwnProperty('triggerAction')) {
-    return obj.triggerAction
-  }
-
-  return triggerActionByParents(msgPath)
+  return findPropByParents(msgPath, propName)
 }
 
 const errByPath = (msgPath, args?) => {
@@ -461,9 +429,9 @@ const errByPath = (msgPath, args?) => {
     }
   }
 
-  const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || docsUrlByParents(msgPath)
-  const docsUrlTitle = (msgObj.hasOwnProperty('docsUrlTitle') && msgObj.docsUrlTitle) || docsUrlTitleByParents(msgPath)
-  const triggerAction = (msgObj.hasOwnProperty('triggerAction') && msgObj.triggerAction) || triggerActionByParents(msgPath)
+  const docsUrl = (msgObj.hasOwnProperty('docsUrl') && msgObj.docsUrl) || findPropByParents(msgPath, 'docsUrl')
+  const docsUrlTitle = (msgObj.hasOwnProperty('docsUrlTitle') && msgObj.docsUrlTitle) || findPropByParents(msgPath, 'docsUrlTitle')
+  const triggerAction = (msgObj.hasOwnProperty('triggerAction') && msgObj.triggerAction) || findPropByParents(msgPath, 'triggerAction')
 
   const resolvedTriggerAction =
     triggerAction === 'loginModal' || triggerAction === 'projectConnectModal'
