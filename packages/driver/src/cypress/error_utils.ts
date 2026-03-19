@@ -330,7 +330,7 @@ export class InternalCypressError extends Error {
 export class CypressError extends Error {
   docsUrl?: string
   docsUrlTitle?: string | null
-  triggerAction?: 'login' | 'connectProject' | null
+  triggerAction?: 'loginModal' | 'projectConnectModal' | null
   retry?: boolean
   userInvocationStack?: any
   onFail?: Function

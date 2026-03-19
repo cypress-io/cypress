@@ -127,10 +127,10 @@ describe('driver/src/cypress/error_utils', () => {
         obj_with_trigger_action: {
           message: 'Error with trigger action',
           docsUrl: 'https://on.link.io',
-          triggerAction: 'login',
+          triggerAction: 'loginModal',
         },
         parent_has_trigger: {
-          triggerAction: 'connectProject',
+          triggerAction: 'projectConnectModal',
           child: {
             message: 'Child error inherits trigger from parent',
           },
@@ -210,14 +210,14 @@ describe('driver/src/cypress/error_utils', () => {
         const err = $errUtils.errByPath('__test_errors.obj_with_trigger_action') as CypressError
 
         expect(err.message).to.include('Error with trigger action')
-        expect(err.triggerAction).to.eq('login')
+        expect(err.triggerAction).to.eq('loginModal')
       })
 
       it('inherits triggerAction from parent when not set on the message object', () => {
         const err = $errUtils.errByPath('__test_errors.parent_has_trigger.child') as CypressError
 
         expect(err.message).to.include('Child error inherits trigger from parent')
-        expect(err.triggerAction).to.eq('connectProject')
+        expect(err.triggerAction).to.eq('projectConnectModal')
       })
 
       it('uses args provided for the error', () => {
