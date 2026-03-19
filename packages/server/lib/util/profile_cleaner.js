@@ -78,7 +78,7 @@ const removeRootProfile = async (pathToProfiles, ignore) => {
 
     debug('found %d root level profile matches: %o', matches.length, matches)
 
-    return Promise.all(matches.map(removeMatch))
+    await Promise.all(matches.map(removeMatch))
   } catch {
     return null // swallow errors
   }
