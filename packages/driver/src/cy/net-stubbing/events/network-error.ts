@@ -18,10 +18,11 @@ export const onNetworkError: HandlerFn<CyHttpMessages.NetworkError> = async (Cyp
     return subscription.eventName === 'response:callback'
   })
   const isAwaitingResponse = hasResponseHandler && ['Received', 'Intercepted'].includes(request.state)
+  const isBrowserCancelledError = data.error.code === 'ERR_BROWSER_REQUEST_CANCELLED'
   const isTimeoutError = data.error.code && ['ESOCKETTIMEDOUT', 'ETIMEDOUT'].includes(data.error.code)
 
   if (isAwaitingResponse || isTimeoutError) {
-    const errorName = isTimeoutError ? 'timeout' : 'network_error'
+    const errorName = isTimeoutError ? 'timeout' : isBrowserCancelledError ? 'cancelled' : 'network_error'
 
     err = $errUtils.errByPath(`net_stubbing.request_error.${errorName}`, {
       innerErr: err,

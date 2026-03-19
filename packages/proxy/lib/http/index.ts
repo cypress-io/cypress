@@ -46,6 +46,13 @@ const isVerbose = isVerboseTelemetry
 
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
+const createBrowserRequestCancelledError = () => {
+  return Object.assign(new Error('Request was cancelled by the browser.'), {
+    code: 'ERR_BROWSER_REQUEST_CANCELLED',
+    isBrowserRequestCancelled: true,
+  })
+}
+
 export enum HttpStages {
   IncomingRequest,
   IncomingResponse,
@@ -174,7 +181,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
       function onClose () {
         if (!ctx.res.writableFinished) {
-          _onError(new Error('Socket closed before finished writing response.'))
+          _onError(createBrowserRequestCancelledError())
         }
       }
 
@@ -406,7 +413,7 @@ export class Http {
       // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
       // In this case we don't want to run the response middleware and should just exit.
       if (res.destroyed) {
-        return onError(new Error('Socket closed before finished writing response'))
+        return onError(createBrowserRequestCancelledError())
       }
 
       if (ctx.incomingRes) {

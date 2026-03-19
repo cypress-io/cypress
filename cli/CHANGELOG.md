@@ -10,6 +10,7 @@ _Released 03/24/2026 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where Cypress may hang when running component tests and a connection to the dev server can no longer be made. Addressed in [#33469](https://github.com/cypress-io/cypress/pull/33469)
+- Fixed an issue where `cy.wait('@alias')` could time out when an aliased intercepted request was cancelled by the browser before the response completed, including during navigation such as `cy.visit()`. Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 
 **Misc:**
 
@@ -89,10 +90,6 @@ _Released 02/03/2026_
 **Bugfixes:**
 
 - Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
-
-**Bugfixes:**
-
-- Fixed an issue where `cy.wait('@alias')` could time out when the underlying network request was canceled by navigation (e.g., `cy.visit`, `cy.reload`). Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 
 **Misc:**
 

@@ -1165,6 +1165,16 @@ export default {
 
           Intercepted request: ${format(req)}`, 10)
       },
+      cancelled: ({ innerErr, req, route }) => {
+        return cyStripIndent(`\
+          A callback was provided to intercept the upstream response, but the request was cancelled by the browser before a response was received:
+
+          ${$stackUtils.normalizedStack(innerErr)}
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`, 10)
+      },
       timeout: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
           A callback was provided to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.

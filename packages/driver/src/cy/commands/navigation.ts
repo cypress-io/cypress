@@ -175,18 +175,6 @@ const pageLoading = (bool, Cypress, state) => {
   Cypress.action('app:page:loading', bool)
 }
 
-const markRequestAsCancelled = (request: any) => {
-  if (
-    request &&
-    request.state === 'Received' &&
-    !request.response &&
-    !request.error
-  ) {
-    request.state = 'Errored'
-    request.error = new Error('Request was cancelled due to navigation.')
-  }
-}
-
 const stabilityChanged = async (Cypress, state, config, stable) => {
   debug('stabilityChanged:', stable)
 
@@ -197,23 +185,6 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
   // then just return now
   if (stable !== false) {
     return
-  }
-
-  // Mark inflight requests as canceled at navigation start.
-  try {
-    const routes = state('routes') ?? {}
-
-    _.forEach(routes, ({ requests }) => {
-      _.forEach(requests, markRequestAsCancelled)
-    })
-
-    const aliasedRequests = state('aliasedRequests') ?? []
-
-    aliasedRequests.forEach(({ request }) => {
-      markRequestAsCancelled(request)
-    })
-  } catch {
-    // Ignore errors. Failure to mark requests as canceled is non-critical.
   }
 
   // if we purposefully just caused the page to load
