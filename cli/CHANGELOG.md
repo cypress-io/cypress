@@ -3,6 +3,10 @@
 
 _Released 03/24/2026 (PENDING)_
 
+**Features:**
+
+- Studio now allows adding a new test when focused on a single test. Addressed in [#33481](https://github.com/cypress-io/cypress/pull/33481)
+
 **Bugfixes:**
 
 - Fixed an issue where Cypress may hang when running component tests and a connection to the dev server can no longer be made. Addressed in [#33469](https://github.com/cypress-io/cypress/pull/33469)
@@ -10,6 +14,7 @@ _Released 03/24/2026 (PENDING)_
 **Misc:**
 
 - When a test is isolated in Studio, 'rerun' button should not say 'Run all tests. It should say 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466)
+- Studio now warns users before navigating if they try to exit when they have unsaved changes in the editor. Addressed in [#33457](https://github.com/cypress-io/cypress/pull/33457)
 
 **Dependency Updates:**
 
