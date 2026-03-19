@@ -465,11 +465,16 @@ const errByPath = (msgPath, args?) => {
   const docsUrlTitle = (msgObj.hasOwnProperty('docsUrlTitle') && msgObj.docsUrlTitle) || docsUrlTitleByParents(msgPath)
   const triggerAction = (msgObj.hasOwnProperty('triggerAction') && msgObj.triggerAction) || triggerActionByParents(msgPath)
 
+  const resolvedTriggerAction =
+    triggerAction === 'loginModal' || triggerAction === 'projectConnectModal'
+      ? triggerAction
+      : undefined
+
   return cypressErr({
     message: replaceErrMsgTokens(msgObj.message, args),
     docsUrl: docsUrl ? replaceErrMsgTokens(docsUrl, args) : undefined,
     docsUrlTitle: docsUrlTitle ? replaceErrMsgTokens(docsUrlTitle, args) : undefined,
-    triggerAction: triggerAction ? replaceErrMsgTokens(triggerAction, args) : undefined,
+    triggerAction: resolvedTriggerAction,
   })
 }
 
