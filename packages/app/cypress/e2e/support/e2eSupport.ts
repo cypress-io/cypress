@@ -17,6 +17,11 @@ beforeEach(() => {
   expect(window.top?.getEventManager().autDestroyedCount).to.be.undefined
 })
 
+beforeEach(() => {
+  // Mock out all studio telemetry requests so that our tests don't pollute Honeycomb data
+  cy.mockNodeCloudRequest({ url: '/studio/telemetry', method: 'post', body: {}, allowUnmocked: false })
+})
+
 function e2eTestingTypeIsSelected () {
   cy.findByTestId('specs-testing-type-header').within(() => {
     cy.findByTestId('testing-type-switch').contains('button', 'E2E').should('have.attr', 'aria-selected', 'true')
