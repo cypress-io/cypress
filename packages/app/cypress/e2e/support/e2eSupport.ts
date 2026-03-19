@@ -18,7 +18,7 @@ beforeEach(() => {
 })
 
 beforeEach(() => {
-  // Mock out all studio telemetry/metrics // Mock out all studio telemetry requests so that our tests don't pollute Honeycomb data requests so that our tests don't pollute our telemetry data
+  // Mock out all studio telemetry requests so that our tests don't pollute Honeycomb data
   cy.mockNodeCloudRequest({ url: '/studio/telemetry', method: 'post', body: {}, persist: true })
   cy.mockNodeCloudRequest({ url: '/studio/metrics', method: 'post', body: {}, persist: true })
 })
