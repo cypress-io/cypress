@@ -1068,6 +1068,12 @@ describe('visual error templates', () => {
       }
     },
 
+    EXPERIMENTAL_PROMPT_COMMAND_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],

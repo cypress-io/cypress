@@ -1399,11 +1399,6 @@ export default {
     promptTestingTypeError: stripIndent`\
       \`cy.prompt\` is currently only supported in end-to-end tests.
     `,
-    experimentalPromptCommandError: stripIndent`\
-      \`cy.prompt\` cannot be called without the \`experimentalPromptCommand\` being set. 
-
-      Please set this in your Cypress config file to continue using \`cy.prompt\`.
-    `,
   },
 
   proxy: {
