@@ -12,8 +12,7 @@ export default function (options: any): Rule {
       (tree: Tree, _context: SchematicContext) => {
         const componentName = path.parse(options.name).name
         const componentPath = tree.actions.filter((a) => a.path.includes(`${componentName}.component.ts`))
-        .map((a) => path.dirname(a.path))
-        .at(0)
+        .map((a) => path.dirname(a.path))[0]
 
         return componentPath ? cypressTest({
           ...options,

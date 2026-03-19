@@ -21,7 +21,7 @@
     "@angular-devkit/schematics-cli": "^21.0.5",
     "@schematics/angular": "^21.0.5",
     "@types/mocha": "8.0.3",
-    "@types/node": "^22.18.7",
+    "@types/node": "^24.10.1",
     "eslint": "^9.31.0",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"

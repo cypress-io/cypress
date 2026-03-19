@@ -20,9 +20,9 @@
   },
   "devDependencies": {
     "@packages/root": "0.0.0-development",
-    "@types/node": "22.18.7",
+    "@types/node": "24.10.1",
     "axios": "^1.8.3",
-    "better-sqlite3": "12.4.1",
+    "better-sqlite3": "12.8.0",
     "devtools-protocol": "0.0.1575685",
     "express": "4.21.0",
     "rimraf": "^6.1.1",
