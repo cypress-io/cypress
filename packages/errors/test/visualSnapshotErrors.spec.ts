@@ -1086,12 +1086,6 @@ describe('visual error templates', () => {
       }
     },
 
-    EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY: () => {
-      return {
-        default: [],
-      }
-    },
-
     PROXY_ENCOUNTERED_INVALID_HEADER_NAME: () => {
       const err = makeErr()
 

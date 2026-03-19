@@ -655,6 +655,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     isWarning: true,
   },
   {
+    name: 'experimentalPromptCommand',
+    errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
+    isWarning: true,
+  },
+  {
     name: 'allowCypressEnv',
     errorKey: 'CYPRESS_ENV_DEPRECATION',
     // Display this warning if the value is not present or is explicitly false
