@@ -154,6 +154,12 @@ export class CyPromptLifecycleManager {
     return cyPromptManager
   }
 
+  resetCyPrompt (): void {
+    if (this.cyPromptManager) {
+      this.cyPromptManager.reset()
+    }
+  }
+
   private async createCyPromptManager ({
     cloudDataSource,
     getProjectOptions,

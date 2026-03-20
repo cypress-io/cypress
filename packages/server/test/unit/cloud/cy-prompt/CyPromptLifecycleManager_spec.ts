@@ -699,6 +699,23 @@ describe('CyPromptLifecycleManager', () => {
     })
   })
 
+  describe('resetCyPrompt', () => {
+    it('does nothing when cy prompt manager is not assigned', () => {
+      cyPromptLifecycleManager.resetCyPrompt()
+    })
+
+    it('calls reset on the manager when assigned', () => {
+      const resetStub = sinon.stub()
+
+      // @ts-expect-error - partial mock
+      cyPromptLifecycleManager.cyPromptManager = { reset: resetStub }
+
+      cyPromptLifecycleManager.resetCyPrompt()
+
+      expect(resetStub).to.be.calledOnce
+    })
+  })
+
   describe('registerCyPromptReadyListener', () => {
     beforeEach(() => {
       const mockManifest = {
