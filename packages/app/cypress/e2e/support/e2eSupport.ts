@@ -1,6 +1,7 @@
 import '@packages/frontend-shared/cypress/support/e2e'
 import 'cypress-real-events/support'
 import './execute-spec'
+import nock from 'nock'
 
 Cypress.on('window:before:load', (win) => {
   // Can set this in a spec-by-spec basis to 'true' to use
@@ -21,6 +22,10 @@ beforeEach(() => {
   // Mock out all studio telemetry requests so that our tests don't pollute Honeycomb data
   cy.mockNodeCloudRequest({ url: '/studio/telemetry', method: 'post', body: {}, persist: true })
   cy.mockNodeCloudRequest({ url: '/studio/metrics', method: 'post', body: {}, persist: true })
+})
+
+afterEach(() => {
+  nock.cleanAll()
 })
 
 function e2eTestingTypeIsSelected () {
