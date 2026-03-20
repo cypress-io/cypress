@@ -3,6 +3,8 @@ import Debug from 'debug'
 import { randomUUID } from 'crypto'
 import os from 'os'
 
+const TEARDOWN_TIMEOUT = process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT ? Number(process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT) : 5000
+
 export interface ExitStep {
   name: string
   fn: (code: number, expectedCode: number) => Promise<number | void> | void
@@ -89,13 +91,13 @@ export class GracefulExit {
       }),
       new Promise<void>((resolve, reject) => {
         forceExitTimeout = setTimeout(() => {
-          console.error('Failed to gracefully exit after 5 seconds. Exiting with code 1.')
+          console.error(`Failed to gracefully exit after ${TEARDOWN_TIMEOUT}ms. Exiting with code 1. This timeout can be configured with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT.`)
           if (exit) {
             queue.forceExit()
           } else {
-            reject(new Error('Failed to gracefully exit after 5 seconds'))
+            reject(new Error(`Failed to gracefully exit after ${TEARDOWN_TIMEOUT}ms`))
           }
-        }, 5000)
+        }, TEARDOWN_TIMEOUT)
       }),
     ])
 

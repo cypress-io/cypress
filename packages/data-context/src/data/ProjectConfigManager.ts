@@ -649,6 +649,7 @@ export class ProjectConfigManager {
       }, 5000)
 
       this._eventsIpc.on('main:process:will:disconnect:ack', () => {
+        debug('Received main:process:will:disconnect:ack')
         clearTimeout(timeoutId)
         resolve()
       })

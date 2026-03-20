@@ -27,12 +27,15 @@ const run = require('./run_require_async_child')
 
 exporter.attachIPC(ipc)
 
+let disconnection = null
+
 ipc.on('main:process:will:disconnect', async () => {
   if (span) {
     span.end()
   }
 
-  await telemetry.shutdown()
+  await disconnection ?? (disconnection = telemetry.shutdown())
+  disconnection = null
   ipc.send('main:process:will:disconnect:ack')
 })
 

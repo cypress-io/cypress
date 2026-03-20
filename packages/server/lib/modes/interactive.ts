@@ -181,32 +181,16 @@ export = {
     // or quit lifecycle never completes (see cypress runElectron + GracefulExit.detachProcessSignalHandlers).
     // https://github.com/cypress-io/cypress/issues/22026
 
-    let interactiveQuitTeardownStarted = false
-
-    app.on('before-quit', (event: Electron.Event) => {
-      if (interactiveQuitTeardownStarted) {
-        return
-      }
-
+    app.on('before-quit', async (event: Electron.Event) => {
       event.preventDefault()
-      interactiveQuitTeardownStarted = true
-
-      debug('interactive quit: clearing DataContext and running graceful exit steps')
-
       setImmediate(async () => {
-        try {
-          await clearCtx()
-        } catch (e) {
-          debug(`clearCtx during quit: ${(e as Error)?.message}`)
-        }
-
         try {
           await GracefulExit.exitGracefully(0, false)
         } catch (e) {
           debug(`graceful exit steps during quit: ${(e as Error)?.message}`)
+        } finally {
+          app.quit()
         }
-
-        app.quit()
       })
     })
 
