@@ -7,6 +7,7 @@ import inspector from 'inspector'
 import { ChildProcess, spawn } from 'child_process'
 import Debug from 'debug'
 import os from 'os'
+import pDefer from 'p-defer'
 
 function getInspectFromUrl (url: string): string {
   const flag = process.execArgv.some((f) => f === '--inspect' || f.startsWith('--inspect=')) ? '--inspect' : '--inspect-brk'
@@ -82,22 +83,33 @@ export async function open (
 
     onChildSpawned?.(spawned)
 
+    const childClosed = pDefer<number>()
+
     spawned.on('error', (err) => {
       console.error(err)
 
-      process.exit(1)
+      childClosed.resolve(1)
     })
 
     spawned.on('close', (code, signal) => {
       debugElectron('electron closing %o', { code, signal })
 
       if (signal) {
-        debugElectron('electron exited with a signal, forcing code = 1 %o', { signal })
-        code = 1
+        debugElectron('electron exited with a signal %s', signal)
+        childClosed.resolve(128 + os.constants.signals[signal])
+      } else {
+        childClosed.resolve(code ?? 0)
       }
-
-      process.exit(code)
     })
+
+    for (const signal of ['SIGINT', 'SIGTERM']) {
+      process.on(signal, async () => {
+        debugElectron('electron received signal %s', signal)
+        const code = await childClosed.promise
+
+        process.exit(code)
+      })
+    }
 
     if (
       (process.env.ELECTRON_ENABLE_LOGGING ?? '') === '1' ||

@@ -177,6 +177,18 @@ function createSpawnFunction (
 
           kill(child.pid as number, 'SIGINT')
         })
+      } else {
+        // Adding listeners here prevents immediate process.exit() for these signals.
+        // Exiting when the child process exits instead will allow the child process
+        // to log during the exit process.
+
+        // Unlike in windows, we do not need to propagate these signals to the child process
+        // tree.
+        for (const signal of ['SIGINT', 'SIGTERM']) {
+          process.on(signal, async function () {
+            console.log(`${signal} received; Attempting to exit gracefully...`)
+          })
+        }
       }
 
       // if stdio options is set to 'pipe', then

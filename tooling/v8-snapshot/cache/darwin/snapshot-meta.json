@@ -905,9 +905,9 @@
     "./packages/server/node_modules/serve-static/node_modules/debug/src/index.js",
     "./packages/server/node_modules/serve-static/node_modules/mime/mime.js",
     "./packages/server/node_modules/serve-static/node_modules/send/index.js",
+    "./packages/server/node_modules/signal-exit/dist/cjs/signals.js",
     "./packages/server/node_modules/supports-color/index.js",
     "./packages/server/node_modules/tough-cookie/lib/cookie.js",
-    "./packages/server/node_modules/write-file-atomic/node_modules/signal-exit/dist/cjs/signals.js",
     "./packages/server/start-cypress.js",
     "./packages/server/v8-snapshot-entry.js",
     "./packages/socket/cjs/node/cdp-socket.js",
@@ -939,7 +939,7 @@
     "./packages/stderr-filtering/dist/TagStream.js",
     "./packages/stderr-filtering/dist/WriteToDebug.js",
     "./packages/ts/register.js",
-    "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry-cy-in-cy.js"
+    "./tooling/v8-snapshot/dist/setup/v8-snapshot-entry.js"
   ],
   "healthy": [
     "./node_modules/@babel/code-frame/lib/index.js",
@@ -3496,9 +3496,6 @@
     "./packages/errors/node_modules/chalk/source/util.js",
     "./packages/example/index.js",
     "./packages/example/lib/example.js",
-    "./packages/frontend-shared/cypress/e2e/prod-dependencies.ts",
-    "./packages/frontend-shared/cypress/e2e/v8-snapshot-entry.ts",
-    "./packages/frontend-shared/node_modules/cross-fetch/dist/node-ponyfill.js",
     "./packages/https-proxy/cjs/index.js",
     "./packages/https-proxy/cjs/proxy.js",
     "./packages/https-proxy/cjs/util/parse.js",
@@ -3726,11 +3723,11 @@
     "./packages/server/lib/util/env-editors.ts",
     "./packages/server/lib/util/env.ts",
     "./packages/server/lib/util/escape_filename.ts",
-    "./packages/server/lib/util/exit.js",
     "./packages/server/lib/util/file-opener.ts",
     "./packages/server/lib/util/file.ts",
     "./packages/server/lib/util/find_process.js",
     "./packages/server/lib/util/get-windows-proxy.js",
+    "./packages/server/lib/util/graceful-exit.ts",
     "./packages/server/lib/util/graceful_crash_handling.ts",
     "./packages/server/lib/util/headers.js",
     "./packages/server/lib/util/human_time.js",
@@ -3885,6 +3882,7 @@
     "./packages/server/node_modules/serve-static/node_modules/debug/src/debug.js",
     "./packages/server/node_modules/serve-static/node_modules/mime/types.json",
     "./packages/server/node_modules/serve-static/node_modules/ms/index.js",
+    "./packages/server/node_modules/signal-exit/dist/cjs/index.js",
     "./packages/server/node_modules/statuses/codes.json",
     "./packages/server/node_modules/statuses/index.js",
     "./packages/server/node_modules/tough-cookie/lib/memstore.js",
@@ -3905,7 +3903,6 @@
     "./packages/server/node_modules/whatwg-url/lib/url-state-machine.js",
     "./packages/server/node_modules/whatwg-url/lib/utils.js",
     "./packages/server/node_modules/write-file-atomic/lib/index.js",
-    "./packages/server/node_modules/write-file-atomic/node_modules/signal-exit/dist/cjs/index.js",
     "./packages/socket/cjs/node/index.js",
     "./packages/socket/cjs/utils.js",
     "./packages/socket/node_modules/engine.io-parser/lib/commons.js",
@@ -3974,5 +3971,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "efafbf7516ef521f70362e7d126c17919e414b195a34205296b66ba2a982fccd"
+  "deferredHash": "b11c0e455101e18af085154770510832de3a74d92f92e4478d620971f258bd1a"
 }

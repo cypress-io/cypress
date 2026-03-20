@@ -19,8 +19,8 @@ import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, Prot
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
 
-const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH && !process.env.CYPRESS_LOCAL_STUDIO_PATH
-const DELETE_DB = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+const CAPTURE_ERRORS = !undefined && !undefined
+const DELETE_DB = !undefined
 
 export const DB_SIZE_LIMIT = 5000000000
 
@@ -364,7 +364,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
-    const captureErrors = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+    const captureErrors = !undefined
 
     debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
 

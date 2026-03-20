@@ -40,7 +40,7 @@ export class StudioManager implements StudioManagerShape {
       verifyHash: (contents: BinaryLike, expectedHash: string) => {
         // If we are running locally, we don't need to verify the signature. This
         // environment variable will get stripped in the binary.
-        if (process.env.CYPRESS_LOCAL_STUDIO_PATH) {
+        if (undefined) {
           return true
         }
 
