@@ -472,10 +472,14 @@ async function makeE2ETasks () {
 
       return null
     },
-    __internal_mockNodeCloudRequest ({ url, method, body }: MockNodeCloudRequestOptions) {
+    __internal_mockNodeCloudRequest ({ url, method, body, persist = false }: MockNodeCloudRequestOptions) {
       const nocked = nock('https://cloud.cypress.io', {
         allowUnmocked: true,
       })
+
+      if (persist) {
+        nocked.persist()
+      }
 
       nocked[method](url).reply(200, body)
 
