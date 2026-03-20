@@ -2,7 +2,6 @@ import { HelloX } from './hello-x.jsx'
 import React from 'react'
 import { mount } from '@cypress/react'
 
-/* eslint-env mocha */
 describe('HelloX component', () => {
   it('works', () => {
     mount(<HelloX name="SuperMan" />)
