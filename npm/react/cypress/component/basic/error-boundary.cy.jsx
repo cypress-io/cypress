@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import { ErrorBoundary } from './error-boundary.jsx'
 import React from 'react'
 import { mount } from '@cypress/react'
@@ -7,7 +6,6 @@ Cypress.on('uncaught:exception', (err, runnable) => {
   return false
 })
 
-/* eslint-env mocha */
 describe('Error Boundary', () => {
   const errorMessage = 'I crashed!'
   const ChildWithoutError = () => <h1>Normal Child</h1>

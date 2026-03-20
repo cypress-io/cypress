@@ -10,20 +10,6 @@ describe('Clicker with delay', () => {
     )
   }
 
-  // NOTE: Skipped because .then does not retry
-  // and will fail as soon as "expect" throws an error
-  it.skip('calls the click prop: then', () => {
-    const onClick = cy.stub()
-
-    mount(<Clicker click={onClick} />)
-    cy.get('button')
-    .click()
-    .click()
-    .then(() => {
-      expect(onClick).to.be.calledTwice
-    })
-  })
-
   it('calls the click prop: should', () => {
     const onClick = cy.stub()
 

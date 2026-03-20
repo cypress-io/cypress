@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import { HelloX } from './hello-x.jsx'
 import React from 'react'
 import { mount } from '@cypress/react'

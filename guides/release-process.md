@@ -52,8 +52,6 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 
 If you don't have access to 1Password, ask a team member who has done a deploy.
 
-Tip: Use [as-a](https://github.com/bahmutov/as-a) to manage environment variables for different situations.
-
 ### Before Publishing a New Version
 
 In order to publish a new version of the `cypress` package to the npm registry, CI must build and test it across multiple platforms and test projects. CI is set up to do the following on every commit to `develop`:

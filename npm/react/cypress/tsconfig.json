@@ -4,7 +4,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "jsx": "react",
-    "types": ["cypress"],
+    "noEmit": true,
+    "rootDir": ".",
+    "types": ["cypress", "vite/client"],
     "paths": {
       "@cypress/react": ["../lib"]
     }

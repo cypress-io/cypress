@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import React, { useState } from 'react'
 import { mount } from '@cypress/react'
 import './tic-tac-toe.css'

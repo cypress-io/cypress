@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-// import wrapped Axios method
 import axiosApi from './axios-api.jsx'
 
 export function Users () {

@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
 import { HelloWorld } from './hello-world.jsx'
@@ -8,8 +7,7 @@ it('works by itself', () => {
   cy.contains('Hello World!')
 })
 
-// NOTE: TypeError: Invalid value used as weak map key
-it.skip('works inside a div', () => {
+it('works inside a div', () => {
   mount(
     <div>
       <HelloWorld />

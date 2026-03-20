@@ -1,5 +1,4 @@
 import * as React from 'react'
-// @ts-ignore
 import SamoyedImage from './samoyed.jpg'
 
 interface DogProps {}

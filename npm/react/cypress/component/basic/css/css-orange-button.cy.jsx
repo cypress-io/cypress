@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
 import { Button } from './Button.jsx'
@@ -11,9 +10,5 @@ describe('Button', () => {
     .should('have.class', 'orange')
     .find('button')
     .should('have.css', 'background-color', 'rgb(245, 146, 62)')
-
-    // for now disabled Percy in support commands
-    // to make the bundles smaller and faster
-    // cy.percySnapshot()
   })
 })

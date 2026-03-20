@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import Game, { Board, calculateWinner } from './game.jsx'
 import React from 'react'
 import { mount } from '@cypress/react'

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react'
-// import the entire axios module
-// later we can use axios.get to make requests
 import axios from 'axios'
 
 export function Users () {

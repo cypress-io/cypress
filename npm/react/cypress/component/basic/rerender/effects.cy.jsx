@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import React, { useLayoutEffect, useEffect } from 'react'
 import { mount } from '@cypress/react'
 

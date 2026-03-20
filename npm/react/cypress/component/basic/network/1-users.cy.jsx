@@ -1,9 +1,7 @@
-/// <reference types="cypress" />
 import { Users } from './1-users.jsx'
 import React from 'react'
 import { mount } from '@cypress/react'
 
-/* eslint-env mocha */
 context('Users', () => {
   describe('Component', () => {
     it('fetches 3 users from remote API', () => {
