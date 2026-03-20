@@ -57,6 +57,21 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
   if (delay && (!_.isFinite(delay) || delay < 0)) {
     err('`delay` must be a finite, positive number.')
   }
+
+  // setTimeout uses a 32-bit signed integer internally, so values >= 2^31
+  // overflow and cause the delay to fire immediately. Warn the user if their
+  // delay exceeds this limit — it will be clamped at the server layer.
+  const maxDelay = 2 ** 31 - 1
+
+  if (delay && delay > maxDelay) {
+    // eslint-disable-next-line no-console
+    console.warn(`\`delay\` of ${delay}ms exceeds the maximum supported value of ${maxDelay}ms (~24.8 days) and will be clamped.`)
+  }
+
+  if (delayMs && delayMs > maxDelay) {
+    // eslint-disable-next-line no-console
+    console.warn(`\`delayMs\` of ${delayMs}ms exceeds the maximum supported value of ${maxDelay}ms (~24.8 days) and will be clamped.`)
+  }
 }
 
 export function parseStaticResponseShorthand (statusCodeOrBody: number | string | any, bodyOrHeaders: string | { [key: string]: string }, maybeHeaders?: { [key: string]: string }) {

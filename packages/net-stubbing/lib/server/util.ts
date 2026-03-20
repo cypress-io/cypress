@@ -178,8 +178,17 @@ export async function sendStaticResponse (backendRequest: Pick<InterceptedReques
   onResponse!(incomingRes, bodyStream)
 }
 
+// setTimeout uses a 32-bit signed integer for its delay parameter.
+// Values >= 2^31 (2,147,483,648) overflow and fire immediately.
+const MAX_TIMEOUT_DELAY = 2 ** 31 - 1
+
+export function clampDelay (delay: number): number {
+  return Math.min(delay, MAX_TIMEOUT_DELAY)
+}
+
 export async function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Promise<Readable> {
-  const { delay, throttleKbps } = options
+  const { throttleKbps } = options
+  const delay = options.delay ? clampDelay(options.delay) : options.delay
   const pt = new PassThrough()
 
   const sendBody = () => {
