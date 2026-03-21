@@ -1396,9 +1396,6 @@ export default {
       `,
       docsUrl: 'https://on.cypress.io/proxy-configuration',
     },
-    promptTestingTypeError: stripIndent`\
-      \`cy.prompt\` is currently only supported in end-to-end tests.
-    `,
   },
 
   proxy: {
