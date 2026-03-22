@@ -31,6 +31,7 @@
     "./node_modules/compression/node_modules/debug/src/node.js",
     "./node_modules/debug/src/node.js",
     "./node_modules/evil-dns/evil-dns.js",
+    "./node_modules/flatted/cjs/index.js",
     "./node_modules/front-matter/node_modules/js-yaml/lib/js-yaml/type/js/function.js",
     "./node_modules/get-stream/buffer-stream.js",
     "./node_modules/graceful-fs/polyfills.js",
@@ -81,7 +82,6 @@
     "./packages/server/node_modules/graceful-fs/polyfills.js",
     "./packages/server/node_modules/mocha/node_modules/debug/src/node.js",
     "./packages/server/node_modules/serve-static/node_modules/debug/src/node.js",
-    "./packages/socket/node_modules/flatted/cjs/index.js",
     "./packages/socket/node_modules/socket.io-parser/node_modules/debug/src/node.js",
     "./packages/socket/node_modules/socket.io/node_modules/debug/src/node.js",
     "./packages/socket/node_modules/ws/lib/websocket.js"
@@ -3971,5 +3971,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "c8a97a029968c6380354af1549c4454c67f56cd0572ed67df3246d61a574c8b5"
+  "deferredHash": "167855a3a47bb6b78d1809230b134a06937e08056d60d6a2bad5bebd148984f6"
 }
