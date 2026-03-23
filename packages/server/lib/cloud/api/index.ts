@@ -65,7 +65,7 @@ const runnerCapabilities = {
 
 let responseCache = {}
 
-const CAPTURE_ERRORS = !undefined
+const CAPTURE_ERRORS = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
 export interface CypressRequestOptions extends OptionsWithUrl {
   encrypt?: boolean | 'always' | 'signed'
@@ -459,7 +459,7 @@ export default {
       let script
 
       try {
-        const protocolUrl = captureProtocolUrl || undefined
+        const protocolUrl = captureProtocolUrl || process.env.CYPRESS_LOCAL_PROTOCOL_PATH
 
         if (protocolUrl) {
           script = await this.getCaptureProtocolScript(protocolUrl)
@@ -708,11 +708,10 @@ export default {
 
   async getCaptureProtocolScript (url: string, options: { displayRetryErrors?: boolean } = { displayRetryErrors: true }) {
     // TODO(protocol): Ensure this is removed in production
-    if (undefined) {
-      debugProtocol(`Loading protocol via script at local path %s`, undefined)
+    if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
+      debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
 
-      // @ts-expect-error - ??
-      return fs.promises.readFile(undefined, 'utf8')
+      return fs.promises.readFile(process.env.CYPRESS_LOCAL_PROTOCOL_PATH, 'utf8')
     }
 
     const res = await retryWithBackoff(async (attemptIndex) => {

@@ -48,7 +48,7 @@ export function reportStudioError ({
 
   // When developing locally, do not send to Sentry, but instead log to console.
   if (
-    undefined ||
+    process.env.CYPRESS_LOCAL_STUDIO_PATH ||
     process.env.NODE_ENV === 'development' ||
     process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
   ) {
