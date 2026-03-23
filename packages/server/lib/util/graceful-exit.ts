@@ -3,7 +3,7 @@ import Debug from 'debug'
 import { randomUUID } from 'crypto'
 import os from 'os'
 
-const TEARDOWN_TIMEOUT = process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT ? Number(process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT) : 5000
+const TEARDOWN_TIMEOUT = 5000
 
 export interface ExitStep {
   name: string
@@ -28,10 +28,10 @@ export class GracefulExit {
     for (const signal of this.handledSignals) {
       process.on(signal, async (signal) => {
         if (this.processTeardown) {
-          console.log(`${signal} received during graceful exit. Forcing exit.`)
+          console.log(`\n\n${signal} received during graceful exit. Forcing exit.`)
           this.forceExit()
         } else {
-          console.log(`${signal} received. Gracefully exiting.`)
+          console.log(`\n\n${signal} received. Gracefully exiting.`)
           await GracefulExit.exitGracefully(128 + os.constants.signals[signal])
         }
       })
@@ -56,11 +56,15 @@ export class GracefulExit {
   private async flushSteps (code: number): Promise<number> {
     let hadErrors = false
 
-    await Promise.all(Array.from(this.steps.values()).map(async ({ name, fn }) => {
+    await Promise.all(Array.from(this.steps.entries()).map(async ([key, { name, fn }]) => {
       try {
-        return await fn(hadErrors ? 1 : code, code)
+        this.debug(`<${key}> executing teardown step: %s`, name)
+
+        await fn(hadErrors ? 1 : code, code)
+
+        this.debug(`<${key}> teardown step completed: %s`, name)
       } catch (error) {
-        GracefulExit.singleton.debug(`Error executing teardown step: ${name}`, error)
+        GracefulExit.singleton.debug(`<${key}> Error executing teardown step: ${name}`, error)
         hadErrors = true
       }
     }))
@@ -68,7 +72,7 @@ export class GracefulExit {
     return hadErrors ? 1 : code
   }
 
-  static async exitGracefully (code: number, exit: boolean = true): Promise<number | void> {
+  static async exitGracefully (code: number): Promise<number | void> {
     const queue = GracefulExit.singleton
 
     if (queue.processTeardown) {
@@ -81,22 +85,17 @@ export class GracefulExit {
       new Promise<number | void>(async (resolve, reject) => {
         const finalExitCode = await queue.flushSteps(code)
 
+        queue.debug('flushSteps complete')
+        queue.debug('clearing forceExitTimeout')
         clearTimeout(forceExitTimeout)
 
-        if (exit) {
-          process.exit(finalExitCode)
-        } else {
-          resolve(finalExitCode)
-        }
+        queue.debug('exiting with code: %s', finalExitCode)
+        process.exit(finalExitCode)
       }),
       new Promise<void>((resolve, reject) => {
         forceExitTimeout = setTimeout(() => {
           console.error(`Failed to gracefully exit after ${TEARDOWN_TIMEOUT}ms. Exiting with code 1. This timeout can be configured with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT.`)
-          if (exit) {
-            queue.forceExit()
-          } else {
-            reject(new Error(`Failed to gracefully exit after ${TEARDOWN_TIMEOUT}ms`))
-          }
+          queue.forceExit()
         }, TEARDOWN_TIMEOUT)
       }),
     ])

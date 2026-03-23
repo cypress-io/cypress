@@ -185,11 +185,9 @@ export = {
       event.preventDefault()
       setImmediate(async () => {
         try {
-          await GracefulExit.exitGracefully(0, false)
+          await GracefulExit.exitGracefully(0)
         } catch (e) {
           debug(`graceful exit steps during quit: ${(e as Error)?.message}`)
-        } finally {
-          app.quit()
         }
       })
     })

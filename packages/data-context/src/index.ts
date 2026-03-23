@@ -1,4 +1,8 @@
+import Debug from 'debug'
+
 import type { DataContext } from './DataContext'
+
+const debug = Debug('cypress:data-context')
 
 export { DocumentNodeBuilder } from './util/DocumentNodeBuilder'
 
@@ -22,9 +26,19 @@ export { globalPubSub } from './globalPubSub'
 let ctx: DataContext | null = null
 
 export async function clearCtx () {
+  // eslint-disable-next-line no-console
+  try {
+    debug('clearCtx() called; trace: %o', new Error().stack)
+  } catch (e) {
+    // noop
+  }
   if (ctx) {
+    debug('clearing data-context')
+    debug('signalling mainProcessWillDisconnect')
     await ctx.lifecycleManager.mainProcessWillDisconnect()
+    debug('destroying data-context')
     await ctx.destroy()
+    debug('data-context destroyed')
     ctx = null
   }
 }
