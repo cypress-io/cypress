@@ -3,7 +3,11 @@ import Debug from 'debug'
 import { randomUUID } from 'crypto'
 import os from 'os'
 
-const TEARDOWN_TIMEOUT = 5000
+function getTeardownTimeoutMs (): number {
+  const n = Number(process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT)
+
+  return Number.isFinite(n) && n > 0 ? n : 5000
+}
 
 export interface ExitStep {
   name: string
@@ -17,6 +21,7 @@ export class GracefulExit {
   }
 
   private readonly handledSignals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']
+  private readonly signalHandlers: Array<{ signal: NodeJS.Signals, listener: (sig: NodeJS.Signals) => void }> = []
   private processTeardown: Promise<number | void> | null = null
   private steps: Map<string, ExitStep> = new Map()
   private debug: Debug.Debugger
@@ -25,17 +30,44 @@ export class GracefulExit {
     this.debug = Debug(`cypress:server:graceful-exit:${process.pid}`)
     this.debug('initializing graceful exit in process %s', process.pid)
 
-    for (const signal of this.handledSignals) {
-      process.on(signal, async (signal) => {
+    for (const sig of this.handledSignals) {
+      const listener = async (received: NodeJS.Signals) => {
         if (this.processTeardown) {
-          console.log(`\n\n${signal} received during graceful exit. Forcing exit.`)
+          console.log(`\n\n${received} received during graceful exit. Forcing exit.`)
           this.forceExit()
         } else {
-          console.log(`\n\n${signal} received. Gracefully exiting.`)
-          await GracefulExit.exitGracefully(128 + os.constants.signals[signal])
+          console.log(`\n\n${received} received. Gracefully exiting.`)
+          await GracefulExit.exitGracefully(128 + os.constants.signals[received])
         }
-      })
+      }
+
+      process.on(sig, listener)
+      this.signalHandlers.push({ signal: sig, listener })
     }
+  }
+
+  /**
+   * Clears singleton state and signal listeners. Only for use from server unit tests
+   * (when `global.IS_TEST` is set by spec_helper).
+   */
+  static resetForTesting (): void {
+    if (!(globalThis as { IS_TEST?: boolean }).IS_TEST) {
+      return
+    }
+
+    const inst = GracefulExit.instance
+
+    if (!inst) {
+      return
+    }
+
+    for (const { signal, listener } of inst.signalHandlers) {
+      process.removeListener(signal, listener)
+    }
+
+    inst.steps.clear()
+    inst.processTeardown = null
+    GracefulExit.instance = null
   }
 
   static addStep (teardownFn: () => Promise<void> | void, stepName?: string): string {
@@ -90,13 +122,16 @@ export class GracefulExit {
         clearTimeout(forceExitTimeout)
 
         queue.debug('exiting with code: %s', finalExitCode)
+        resolve(finalExitCode)
         process.exit(finalExitCode)
       }),
       new Promise<void>((resolve, reject) => {
         forceExitTimeout = setTimeout(() => {
-          console.error(`Failed to gracefully exit after ${TEARDOWN_TIMEOUT}ms. Exiting with code 1. This timeout can be configured with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT.`)
+          const ms = getTeardownTimeoutMs()
+
+          console.error(`Failed to gracefully exit after ${ms}ms. Exiting with code 1. Configure with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT (milliseconds).`)
           queue.forceExit()
-        }, TEARDOWN_TIMEOUT)
+        }, getTeardownTimeoutMs())
       }),
     ])
 

@@ -1,10 +1,12 @@
+import '../../spec_helper'
+
 import os from 'os'
 import path from 'path'
 import Promise from 'bluebird'
 import lockFileModule from 'lockfile'
 import { fs } from '../../../lib/util/fs'
 import * as env from '../../../lib/util/env'
-import exit from '../../../lib/util/exit'
+import { GracefulExit } from '../../../lib/util/graceful-exit'
 import { File as FileUtil } from '../../../lib/util/file'
 
 const lockFile = Promise.promisifyAll(lockFileModule)
@@ -25,12 +27,22 @@ describe('lib/util/file', () => {
   })
 
   it('unlocks file on exit', function () {
-    sinon.spy(lockFile, 'unlockSync')
-    sinon.stub(exit, 'ensure')
-    new FileUtil({ path: this.path })
-    exit.ensure.yield()
+    const unlockSpy = sinon.spy(lockFile, 'unlockSync')
+    let teardownStep: () => Promise<void>
+    const addStepStub = sinon.stub(GracefulExit, 'addStep').callsFake((fn: () => Promise<void> | void) => {
+      teardownStep = fn as () => Promise<void>
 
-    expect(lockFile.unlockSync).to.be.called
+      return 'test-step'
+    })
+
+    new FileUtil({ path: this.path })
+
+    return teardownStep!().then(() => {
+      expect(lockFile.unlockSync).to.be.called
+    }).finally(() => {
+      addStepStub.restore()
+      unlockSpy.restore()
+    })
   })
 
   context('#transaction', () => {

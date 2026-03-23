@@ -21,7 +21,7 @@ if (version && context) {
 const span = telemetry.startSpan({ name: 'child:process', active: true })
 
 debug('child:process span initialized')
-//require('../../util/suppress_warnings').suppress()
+require('../../util/suppress_warnings').suppress()
 
 process.on('disconnect', () => {
   debug('received disconnect event')

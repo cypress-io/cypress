@@ -280,31 +280,42 @@ describe('open', () => {
     })
 
     describe('emits error', () => {
-      it('writes the error to stderr and exit with code 1', () => {
+      it('writes the error to stderr and exit with code 1 after SIGINT', async () => {
         const err = new Error('test error')
 
         errCb(err)
 
-        expect(process.exit).toHaveBeenCalledWith(1)
-
         expect(console.error).toHaveBeenCalledWith(err)
+
+        process.emit('SIGINT')
+        await new Promise((resolve) => setImmediate(resolve))
+
+        expect(process.exit).toHaveBeenCalledWith(1)
       })
     })
 
     describe('emits close', () => {
       describe('with null signal', () => {
-        it('exits with code 0', () => {
+        it('exits with code 0 after SIGINT', async () => {
           closeCb(0, null)
+
+          process.emit('SIGINT')
+          await new Promise((resolve) => setImmediate(resolve))
 
           expect(process.exit).toHaveBeenCalledWith(0)
         })
       })
 
       describe('with a signal', () => {
-        it('exits with code 1', () => {
-          closeCb(1, 'SIGKILL')
+        it('exits with code 128 + signal after SIGINT', async () => {
+          const signal = 'SIGKILL' as NodeJS.Signals
 
-          expect(process.exit).toHaveBeenCalledWith(1)
+          closeCb(1, signal)
+
+          process.emit('SIGINT')
+          await new Promise((resolve) => setImmediate(resolve))
+
+          expect(process.exit).toHaveBeenCalledWith(128 + os.constants.signals[signal])
         })
       })
     })

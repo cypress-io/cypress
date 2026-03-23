@@ -3,7 +3,6 @@ require('../../spec_helper')
 const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
-const DataContext = require('@packages/data-context')
 const savedState = require(`../../../lib/saved_state`)
 const menu = require(`../../../lib/gui/menu`)
 const Windows = require(`../../../lib/gui/windows`)
@@ -208,9 +207,7 @@ describe('gui/interactive', () => {
 
           await quitTeardownImmediateCallback()
 
-          expect(DataContext.clearCtx).to.have.been.called
-          expect(GracefulExit.exitGracefully).to.have.been.calledWith(0, false)
-          expect(electron.app.quit).to.have.been.called
+          expect(GracefulExit.exitGracefully).to.have.been.calledWith(0)
         })
       }
 
@@ -236,16 +233,22 @@ describe('gui/interactive', () => {
         electron.app.quit = sinon.stub()
       })
 
-      it('uses before-quit listener to destroy DataContext and graceful exit before exiting', () => {
-        sinon.stub(DataContext, 'clearCtx').resolves()
-
+      it('uses before-quit listener and invokes graceful exit', () => {
         return performAssertions()
       })
 
-      it('still quits if destroying DataContext throws error', () => {
-        sinon.stub(DataContext, 'clearCtx').rejects()
+      it('swallows errors from graceful exit during quit teardown', () => {
+        GracefulExit.exitGracefully.restore()
+        sinon.stub(GracefulExit, 'exitGracefully').rejects(new Error('teardown failed'))
 
-        return performAssertions()
+        const opts = {}
+
+        return interactiveMode.run(opts).then(() => {
+          expect(interactiveMode.ready).to.be.calledWith(opts)
+        }).then(async () => {
+          beforeQuitHandler(mockEvent)
+          await quitTeardownImmediateCallback()
+        })
       })
     })
   })

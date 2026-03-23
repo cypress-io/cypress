@@ -189,13 +189,6 @@ describe('StudioLifecycleManager', () => {
         return Promise.resolve()
       })
 
-      studioLifecycleManager.initializeStudioManager({
-        cloudDataSource: mockCloudDataSource,
-        ctx: mockCtx,
-        cfg: mockCfg,
-        debugData,
-      })
-
       const studioReadyPromise = new Promise((resolve) => {
         studioLifecycleManager?.registerStudioReadyListener((studioManager) => {
           resolve(studioManager)
@@ -207,6 +200,13 @@ describe('StudioLifecycleManager', () => {
       }
 
       ensureStudioBundleStub.resolves(mockManifest)
+
+      await studioLifecycleManager.initializeStudioManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData,
+      })
 
       await studioReadyPromise
 
@@ -292,13 +292,6 @@ describe('StudioLifecycleManager', () => {
         return Promise.resolve()
       })
 
-      studioLifecycleManager.initializeStudioManager({
-        cloudDataSource: mockCloudDataSource,
-        ctx: mockCtx,
-        cfg: mockCfg,
-        debugData: {},
-      })
-
       const studioReadyPromise = new Promise((resolve) => {
         studioLifecycleManager?.registerStudioReadyListener((studioManager) => {
           resolve(studioManager)
@@ -310,6 +303,13 @@ describe('StudioLifecycleManager', () => {
       }
 
       ensureStudioBundleStub.resolves(mockManifest)
+
+      await studioLifecycleManager.initializeStudioManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
 
       await studioReadyPromise
 
@@ -409,7 +409,7 @@ describe('StudioLifecycleManager', () => {
 
       ensureStudioBundleStub.resolves(mockManifest)
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -455,7 +455,7 @@ describe('StudioLifecycleManager', () => {
 
       ensureStudioBundleStub.resolves(mockManifest)
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -697,7 +697,7 @@ describe('StudioLifecycleManager', () => {
         }),
       ])
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -768,7 +768,7 @@ describe('StudioLifecycleManager', () => {
     it('handles status updates properly during initialization', async () => {
       const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         cfg: mockCfg,
         debugData: {},
@@ -794,7 +794,7 @@ describe('StudioLifecycleManager', () => {
 
       const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         cfg: mockCfg,
         debugData: {},
@@ -955,7 +955,7 @@ describe('StudioLifecycleManager', () => {
       ensureStudioBundleStub.resolves(mockManifest)
 
       // First initialize with some state
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -975,7 +975,7 @@ describe('StudioLifecycleManager', () => {
 
       const initialCallCount = postStudioSessionStub.callCount
 
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       // Verify state was cleared
       expect(studioLifecycleManager.getCurrentStatus()).to.equal('INITIALIZING')
@@ -997,22 +997,22 @@ describe('StudioLifecycleManager', () => {
       expect(ensureStudioBundleStub.callCount).to.equal(initialCallCount + 1)
     })
 
-    it('sets status to IN_ERROR when no initialization parameters are available', () => {
+    it('sets status to IN_ERROR when no initialization parameters are available', async () => {
       // Set up ctx so retry doesn't return early
       // @ts-expect-error - accessing private property
       studioLifecycleManager.ctx = mockCtx
 
       // Don't initialize first, so no params are stored
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       expect(studioLifecycleManager.getCurrentStatus()).to.equal('IN_ERROR')
     })
 
-    it('does nothing when no ctx is available', () => {
+    it('does nothing when no ctx is available', async () => {
       const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
 
       // Call retry without ctx
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       // Should not have updated status
       expect(statusChangesSpy).not.to.be.called
@@ -1036,7 +1036,7 @@ describe('StudioLifecycleManager', () => {
       StudioLifecycleManager.hashLoadingMap.set('abc', dummyPromise) // This should be the current hash (from studioUrl)
 
       // Initialize with ctx so retry will work
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -1053,7 +1053,7 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       // Verify only the current studio hash was cleared (abc from the studioUrl)
       // @ts-expect-error - accessing private static property
@@ -1086,7 +1086,7 @@ describe('StudioLifecycleManager', () => {
       expect(StudioLifecycleManager.hashLoadingMap.size).to.equal(2)
 
       // Initialize with ctx so retry will work
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -1100,7 +1100,7 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       // Wait for retry to complete
       await new Promise((resolve) => {

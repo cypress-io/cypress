@@ -1,0 +1,78 @@
+import '../../spec_helper'
+
+import { GracefulExit } from '../../../lib/util/graceful-exit'
+
+describe('lib/util/graceful-exit', () => {
+  beforeEach(() => {
+    GracefulExit.resetForTesting()
+  })
+
+  afterEach(() => {
+    GracefulExit.resetForTesting()
+    delete process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT
+  })
+
+  it('runs registered teardown steps then exits with the requested code', async () => {
+    const exitStub = sinon.stub(process, 'exit')
+    const step = sinon.stub().resolves()
+
+    GracefulExit.addStep(step as any, 'test-step')
+    await GracefulExit.exitGracefully(0)
+
+    expect(step).to.have.been.calledOnce
+    expect(exitStub).to.have.been.calledWith(0)
+  })
+
+  it('exits with code 1 when a step throws', async () => {
+    const exitStub = sinon.stub(process, 'exit')
+
+    GracefulExit.addStep(async () => {
+      throw new Error('step failed')
+    }, 'failing-step')
+
+    await GracefulExit.exitGracefully(0)
+
+    expect(exitStub).to.have.been.calledWith(1)
+  })
+
+  it('returns the same in-flight promise when exitGracefully is called twice', async () => {
+    const exitStub = sinon.stub(process, 'exit')
+    let resolveStep: () => void
+    const stepPromise = new Promise<void>((resolve) => {
+      resolveStep = resolve
+    })
+
+    GracefulExit.addStep(async () => {
+      await stepPromise
+    }, 'slow-step')
+
+    const p1 = GracefulExit.exitGracefully(3)
+    const p2 = GracefulExit.exitGracefully(7)
+
+    resolveStep!()
+
+    const [r1, r2] = await Promise.all([p1, p2])
+
+    expect(r1).to.equal(r2)
+    expect(r1).to.equal(3)
+
+    expect(exitStub).to.have.been.calledOnce
+    expect(exitStub).to.have.been.calledWith(3)
+  })
+
+  it('force exits after teardown timeout when a step never completes', async function () {
+    this.timeout(5000)
+
+    process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT = '50'
+
+    const exitStub = sinon.stub(process, 'exit')
+
+    GracefulExit.addStep(() => new Promise(() => {}), 'hang')
+
+    void GracefulExit.exitGracefully(0)
+
+    await new Promise((r) => setTimeout(r, 200))
+
+    expect(exitStub).to.have.been.calledWith(1)
+  })
+})
