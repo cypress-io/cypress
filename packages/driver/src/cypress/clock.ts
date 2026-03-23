@@ -15,6 +15,8 @@ export const create = (win, now, methods) => {
     return clock.tick(ms)
   }
 
+  const tickAsync = (ms: number) => clock.tickAsync(ms)
+
   const restore = () => {
     _.each(clock.methods, (method) => {
       try {
@@ -52,6 +54,8 @@ export const create = (win, now, methods) => {
 
   return {
     tick,
+
+    tickAsync,
 
     restore,
 
