@@ -1,4 +1,4 @@
 const glob = require('glob')
-const Promise = require('bluebird')
+const { promisify } = require('util')
 
-module.exports = Promise.promisify(glob)
+module.exports = promisify(glob)

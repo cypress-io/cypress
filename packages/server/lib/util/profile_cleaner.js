@@ -53,27 +53,35 @@ const removeMatch = (match) => {
   return fs.removeAsync(match)
 }
 
-const removeInactiveByPid = (pathToProfiles, pidPrefix) => {
+const removeInactiveByPid = async (pathToProfiles, pidPrefix) => {
   const pattern = path.join(pathToProfiles, `${pidPrefix}*`)
+  const folders = await glob(pattern, { absolute: true })
 
-  return glob(pattern, { absolute: true })
-  .tap((folders) => {
-    debug('found %d profile folders: %o', folders.length, folders)
-  })
-  .map(folderWithPid(pidPrefix))
-  .filter(inactivePids)
-  .map(removeProfile)
+  debug('found %d profile folders: %o', folders.length, folders)
+
+  const withPid = folders.map(folderWithPid(pidPrefix))
+  const toRemove = await Promise.all(
+    withPid.map((item) =>
+      inactivePids(item).then((inactive) => (inactive ? item : null)),
+    ),
+  )
+  const items = toRemove.filter(Boolean)
+
+  return Promise.all(items.map(removeProfile))
 }
 
-const removeRootProfile = (pathToProfiles, ignore) => {
+const removeRootProfile = async (pathToProfiles, ignore) => {
   const pattern = path.join(pathToProfiles, '*')
 
-  return glob(pattern, { absolute: true, dot: true, ignore })
-  .tap((matches) => {
+  try {
+    const matches = await glob(pattern, { absolute: true, dot: true, ignore })
+
     debug('found %d root level profile matches: %o', matches.length, matches)
-  })
-  .map(removeMatch)
-  .catchReturn(null) // swallow errors
+
+    await Promise.all(matches.map(removeMatch))
+  } catch {
+    return null // swallow errors
+  }
 }
 
 module.exports = {

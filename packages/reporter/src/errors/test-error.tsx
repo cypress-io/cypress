@@ -41,6 +41,18 @@ const DocsUrl = ({ url, title }: DocsUrlProps) => {
   ))
 }
 
+const TriggerAction = ({ triggerAction }: { triggerAction: 'loginModal' | 'projectConnectModal' }) => {
+  const openTriggerActionModal = () => {
+    events.emit('open:login:connect:modal', {
+      utmMedium: 'Reporter Error Learn More',
+    })
+  }
+
+  return <div className='runnable-err-trigger-action'><a onClick={openTriggerActionModal}>
+    {triggerAction === 'loginModal' ? 'Log in to Cypress Cloud.' : 'Connect project to Cypress Cloud.'}
+  </a></div>
+}
+
 interface TestErrorProps {
   err: Err
   testId?: string
@@ -95,6 +107,7 @@ const TestError: React.FC<TestErrorProps> = ({ err, groupLevel = 0, testId, comm
           <div className='runnable-err-message'>
             <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
             <DocsUrl url={err.docsUrl} title={err.docsUrlTitle} />
+            {err.triggerAction && <TriggerAction triggerAction={err.triggerAction} />}
           </div>
           {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
           {err.stack &&

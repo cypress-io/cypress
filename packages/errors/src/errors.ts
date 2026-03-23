@@ -1245,18 +1245,13 @@ export const AllCypressErrors = {
 
         ${fmt.code(code)}`
   },
-  EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY: () => {
-    const code = errPartial`
-    {
-      e2e: {
-        experimentalPromptCommand: true
-      },
-    }`
-
+  EXPERIMENTAL_PROMPT_COMMAND_REMOVED: () => {
     return errTemplate`\
-        The ${fmt.highlight(`experimentalPromptCommand`)} experiment is currently only supported for End to End Testing and must be configured as an e2e testing type property: ${fmt.highlightSecondary(`e2e.experimentalPromptCommand`)}.
-
-        ${fmt.code(code)}`
+        The ${fmt.highlight(`experimentalPromptCommand`)} option was removed in ${fmt.cypressVersion(`15.13.0`)}.
+        
+        \`cy.prompt\` is now available for all users.
+        
+        You can safely remove this option from your config.`
   },
   JIT_COMPONENT_TESTING: () => {
     return errTemplate`\

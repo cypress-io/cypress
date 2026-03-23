@@ -32,6 +32,7 @@ export interface ErrProps {
   templateType: string
   codeFrame: CodeFrame
   docsUrlTitle: string | null
+  triggerAction: 'loginModal' | 'projectConnectModal' | null
 }
 
 export default class Err {
@@ -45,7 +46,7 @@ export default class Err {
   codeFrame: CodeFrame
   isRecovered: boolean = false
   docsUrlTitle: string | null = null
-
+  triggerAction: 'loginModal' | 'projectConnectModal' | null = null
   constructor (props?: Partial<ErrProps>) {
     makeObservable(this, {
       name: observable,
@@ -59,6 +60,7 @@ export default class Err {
       displayMessage: computed,
       isCommandErr: computed,
       docsUrlTitle: observable,
+      triggerAction: observable,
     })
 
     this.update(props)
@@ -83,6 +85,7 @@ export default class Err {
     if (props.templateType) this.templateType = props.templateType
     if (props.codeFrame) this.codeFrame = props.codeFrame
     if (props.docsUrlTitle) this.docsUrlTitle = props.docsUrlTitle
+    if (props.triggerAction) this.triggerAction = props.triggerAction
     this.isRecovered = !!props.isRecovered
   }
 }

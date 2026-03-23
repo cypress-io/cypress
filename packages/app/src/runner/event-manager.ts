@@ -19,6 +19,7 @@ import { addCaptureProtocolListeners } from './events/capture-protocol'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
 import { usePromptStore } from '../store/prompt-store'
 import { useSpecDirtyDataStore } from '../store/spec-dirty-data-store'
+import { guardUnsavedStudioChanges } from './studio-unsaved-changes-guard'
 
 export type CypressInCypressMochaEvent = Array<Array<string | Record<string, any>>>
 
@@ -65,6 +66,7 @@ export class EventManager {
   studioStore: ReturnType<typeof useStudioStore>
   promptStore: ReturnType<typeof usePromptStore>
   specDirtyDataStore: ReturnType<typeof useSpecDirtyDataStore>
+  _deferCleanupToUnload = false
 
   constructor (
     // import '@packages/driver'
@@ -262,6 +264,10 @@ export class EventManager {
       this.ws.emit('external:open', url)
     })
 
+    this.reporterBus.on('open:login:connect:modal', (args) => {
+      this.localBus.emit('open:login:connect:modal', args)
+    })
+
     this.reporterBus.on('get:user:editor', (cb) => {
       this.ws.emit('get:user:editor', cb)
     })
@@ -317,7 +323,7 @@ export class EventManager {
       }
     }
 
-    this.reporterBus.on('studio:cancel', () => {
+    const executeStudioCancel = () => {
       this.ws.emit('studio:destroy', ({ error }) => {
         if (error) {
           // eslint-disable-next-line no-console
@@ -326,17 +332,21 @@ export class EventManager {
 
         maybeCleanUpProtocol()
       })
+    }
+
+    this.reporterBus.on('studio:cancel', () => {
+      const blocked = guardUnsavedStudioChanges(this.specDirtyDataStore, () => {
+        this.specDirtyDataStore.resetDirtyState()
+        executeStudioCancel()
+      })
+
+      if (!blocked) {
+        executeStudioCancel()
+      }
     })
 
     this.localBus.on('studio:cancel', () => {
-      this.ws.emit('studio:destroy', ({ error }) => {
-        if (error) {
-          // eslint-disable-next-line no-console
-          console.error(error)
-        }
-
-        maybeCleanUpProtocol()
-      })
+      executeStudioCancel()
     })
 
     this.ws.on('aut:destroy:init', () => {
@@ -361,8 +371,13 @@ export class EventManager {
     // event as a proxy for AUT unloads.
     const unloadEvent = this.isBrowserFamily('chromium') ? 'pagehide' : 'unload'
 
-    $window.on(unloadEvent, (e) => {
-      this._clearAllCookies()
+    $window.on(unloadEvent, () => {
+      if (this._deferCleanupToUnload) {
+        this._runFullUnloadCleanup()
+        this._deferCleanupToUnload = false
+      } else {
+        this._clearAllCookies()
+      }
     })
 
     // when our window triggers beforeunload
@@ -372,11 +387,18 @@ export class EventManager {
     // that Cypress knows not to set any more
     // cookies
     $window.on('beforeunload', () => {
-      telemetry.getSpan('cypress:app')?.end()
-      this.reporterBus.emit('reporter:restart:test:run')
+      if (this.specDirtyDataStore.isDirty()) {
+        // Used to handle Studio unsaved changes. It defers the cleanup to the unload event
+        // so that the test is not rerun if the user cancels the beforeunload dialog.
+        this._deferCleanupToUnload = true
 
-      this._clearAllCookies()
-      this._setUnload()
+        return
+      }
+
+      // Clear any stale flag from a previously cancelled beforeunload so the unload
+      // handler does not run full cleanup again
+      this._deferCleanupToUnload = false
+      this._runFullUnloadCleanup()
     })
 
     this.addPromptListeners()
@@ -431,11 +453,9 @@ export class EventManager {
 
     this._addListeners()
 
-    if (Cypress.config('experimentalPromptCommand')) {
-      await new Promise((resolve) => {
-        this.ws.emit('prompt:reset', resolve)
-      })
-    }
+    await new Promise((resolve) => {
+      this.ws.emit('prompt:reset', resolve)
+    })
   }
 
   isBrowserFamily (family: string) {
@@ -996,6 +1016,13 @@ export class EventManager {
 
   launchBrowser (browser) {
     this.ws.emit('reload:browser', window.location.toString(), browser && browser.name)
+  }
+
+  _runFullUnloadCleanup () {
+    telemetry.getSpan('cypress:app')?.end()
+    this.reporterBus.emit('reporter:restart:test:run')
+    this._clearAllCookies()
+    this._setUnload()
   }
 
   // clear all the cypress specific cookies

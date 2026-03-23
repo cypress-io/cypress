@@ -85,6 +85,7 @@ export interface MockNodeCloudRequestOptions {
   url: string
   method: string
   body: nock.Body
+  persist?: boolean
 }
 
 export interface MockNodeCloudStreamingRequestOptions {
@@ -206,7 +207,7 @@ declare global {
       /**
        * Mocks a node cloud request
        */
-      mockNodeCloudRequest(options: { url: string, method: string, body: nock.Body }): void
+      mockNodeCloudRequest(options: { url: string, method: string, body: nock.Body, persist?: boolean }): void
       /**
        * Mocks a node cloud streaming request
        */
