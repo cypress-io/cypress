@@ -105,23 +105,22 @@ export class GracefulExit {
   }
 
   static async exitGracefully (code: number): Promise<number | void> {
-    const queue = GracefulExit.singleton
+    const exit = GracefulExit.singleton
 
-    if (queue.processTeardown) {
-      return queue.processTeardown
+    if (exit.processTeardown) {
+      return exit.processTeardown
     }
 
     let forceExitTimeout: NodeJS.Timeout | undefined = undefined
 
-    queue.processTeardown = Promise.race([
+    exit.processTeardown = Promise.race([
       new Promise<number | void>(async (resolve, reject) => {
-        const finalExitCode = await queue.flushSteps(code)
+        const finalExitCode = await exit.flushSteps(code)
 
-        queue.debug('flushSteps complete')
-        queue.debug('clearing forceExitTimeout')
+        exit.debug('flushSteps complete')
         clearTimeout(forceExitTimeout)
 
-        queue.debug('exiting with code: %s', finalExitCode)
+        exit.debug('exiting with code: %s', finalExitCode)
         resolve(finalExitCode)
         process.exit(finalExitCode)
       }),
@@ -130,11 +129,11 @@ export class GracefulExit {
           const ms = getTeardownTimeoutMs()
 
           console.error(`Failed to gracefully exit after ${ms}ms. Exiting with code 1. Configure with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT (milliseconds).`)
-          queue.forceExit()
+          exit.forceExit()
         }, getTeardownTimeoutMs())
       }),
     ])
 
-    return queue.processTeardown
+    return exit.processTeardown
   }
 }

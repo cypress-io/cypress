@@ -6,7 +6,7 @@
 // synchronous requires the first go around just to
 // essentially do it all again when we boot the correct
 // mode.
-
+import type { ChildProcess } from 'child_process'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import argsUtils from './util/args'
@@ -68,7 +68,7 @@ export = {
     return require('./util/electron-app').isRunning()
   },
 
-  runElectron (mode: Mode, options: any) {
+  runElectron (mode: Mode, options: any): Promise<number | { totalFailed: number }> {
     // wrap all of this in a promise to force the
     // promise interface - even if it doesn't matter
     // in dev mode due to cp.spawn
@@ -89,21 +89,9 @@ export = {
         return require('./modes')(mode, options)
       }
 
-      return new Promise((resolve) => {
+      return new Promise(async (resolve) => {
         debug('starting Electron')
         const cypressElectron = require('@packages/electron')
-
-        const fn = (code: number) => {
-          // juggle up the totalFailed since our outer
-          // promise is expecting this object structure
-          debug('electron finished with', code)
-
-          if (mode === 'smokeTest') {
-            return resolve(code)
-          }
-
-          return resolve({ totalFailed: code })
-        }
 
         const args = require('./util/args').toArray(options)
 
@@ -112,7 +100,16 @@ export = {
         // const mainEntryFile = require.main.filename
         const serverMain = getCwd()
 
-        return cypressElectron.open(serverMain, args, fn)
+        const child = await cypressElectron.open(serverMain, args)
+
+        child.on('close', (code, signal) => {
+          debug('electron closed with', { code, signal })
+          if (mode === 'smokeTest') {
+            resolve(code)
+          }
+
+          resolve({ totalFailed: code })
+        })
       })
     })
   },
