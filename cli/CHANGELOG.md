@@ -1,11 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.12.1
+## 15.13.0
 
 _Released 03/24/2026 (PENDING)_
 
 **Features:**
 
-- Studio now allows adding a new test when focused on a single test. Addressed in [#33481](https://github.com/cypress-io/cypress/pull/33481)
+- [`cy.prompt`](https://docs.cypress.io/api/commands/prompt) is now in beta and available without any configuration. `cy.prompt` is an AI-powered command that lets you write test steps in plain English instead of code. The `experimentalPromptCommand` flag was removed and can be deleted from your config. Addressed in [#33497](https://github.com/cypress-io/cypress/pull/33497).
+- Studio now allows adding a new test when focused on a single test, supporting a workflow to add new tests as you record. Addressed in [#33481](https://github.com/cypress-io/cypress/pull/33481)
 
 **Bugfixes:**
 
@@ -13,7 +14,7 @@ _Released 03/24/2026 (PENDING)_
 
 **Misc:**
 
-- When a test is isolated in Studio, 'rerun' button should not say 'Run all tests. It should say 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466)
+- When a test is isolated in Studio, the 'rerun' button now properly says 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466)
 - Studio now warns users before navigating if they try to exit when they have unsaved changes in the editor. Addressed in [#33457](https://github.com/cypress-io/cypress/pull/33457)
 
 **Dependency Updates:**
