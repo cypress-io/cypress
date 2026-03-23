@@ -162,6 +162,26 @@ describe('config/src/index', () => {
       expect(errorFn).toHaveBeenCalledTimes(0)
     })
 
+    it('calls warning callback if config contains experimentalPromptCommand', () => {
+      const warningFn = vi.fn()
+      const errorFn = vi.fn()
+
+      configUtil.validateNoBreakingConfig({
+        experimentalPromptCommand: true,
+        configFile: 'config.js',
+      }, warningFn, errorFn, 'e2e')
+
+      expect(warningFn).toHaveBeenCalledExactlyOnceWith('EXPERIMENTAL_PROMPT_COMMAND_REMOVED', {
+        name: 'experimentalPromptCommand',
+        newName: undefined,
+        value: undefined,
+        testingType: 'e2e',
+        configFile: 'config.js',
+      })
+
+      expect(errorFn).toHaveBeenCalledTimes(0)
+    })
+
     it('calls error callback if config contains breaking option that should throw an error', () => {
       const warningFn = vi.fn()
       const errorFn = vi.fn()

@@ -453,11 +453,9 @@ export class EventManager {
 
     this._addListeners()
 
-    if (Cypress.config('experimentalPromptCommand')) {
-      await new Promise((resolve) => {
-        this.ws.emit('prompt:reset', resolve)
-      })
-    }
+    await new Promise((resolve) => {
+      this.ws.emit('prompt:reset', resolve)
+    })
   }
 
   isBrowserFamily (family: string) {
