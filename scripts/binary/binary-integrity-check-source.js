@@ -190,10 +190,6 @@ function integrityCheck (options) {
         line: 1,
         column: 2764,
       },
-      {
-        functionName: 'traceSync',
-        fileName: 'node:diagnostics_channel',
-      },
     ],
   })
 
