@@ -7,6 +7,9 @@ linux-x64:
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
+      - matches:
+          pattern: /^electron\/\d+\.\d+\.\d+$/
+          value: << pipeline.git.branch >>
       - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
   jobs:
     - node_modules_install:
