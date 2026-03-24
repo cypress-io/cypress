@@ -88,6 +88,25 @@ describe('config/src/index', () => {
     })
   })
 
+  describe('.getCloudRecordingConfigKeys', () => {
+    it('includes every public config key plus component recording extras', () => {
+      const cloudKeys = configUtil.getCloudRecordingConfigKeys()
+      const publicKeys = configUtil.getPublicConfigKeys()
+
+      for (const key of publicKeys) {
+        expect(cloudKeys).toContain(key)
+      }
+
+      expect(cloudKeys).toContain('devServer')
+      expect(cloudKeys).toContain('devServerConfig')
+      expect(cloudKeys).toContain('indexHtmlFile')
+    })
+
+    it('returns the same array instance on each call', () => {
+      expect(configUtil.getCloudRecordingConfigKeys()).toBe(configUtil.getCloudRecordingConfigKeys())
+    })
+  })
+
   describe('.matchesConfigKey', () => {
     it('returns normalized key when config key has a default value', () => {
       let normalizedKey = configUtil.matchesConfigKey('EXEC_TIMEOUT')
