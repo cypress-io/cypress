@@ -210,8 +210,10 @@ export = {
         case 'smokeTest': {
           const pong = await this.runElectron(mode, options)
 
+          const code = typeof pong === 'number' ? pong : pong.totalFailed
+
           if (!this.isCurrentlyRunningElectron()) {
-            return GracefulExit.exitGracefully(pong)
+            return GracefulExit.exitGracefully(code)
           } else if (pong !== options.ping) {
             return GracefulExit.exitGracefully(1)
           }
