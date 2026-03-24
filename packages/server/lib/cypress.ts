@@ -17,8 +17,21 @@ import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
 const debug = Debug('cypress:server:cypress')
+import type { CypressRunResult } from './modes/results'
 
-type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
+type Modes = {
+  exit: never
+  info: void
+  interactive: Awaited<ReturnType<typeof import('./modes/interactive')['run']>>
+  pkg: Awaited<ReturnType<typeof import('./modes/pkg')>>
+  record: typeof import('./modes/record')
+  results: typeof import('./modes/results')
+  run: CypressRunResult | { totalFailed: number }
+  smokeTest: number
+  version: void
+  returnPkg: void
+  exitWithCode: never
+}
 
 const exit = async (code = 0) => {
   // TODO: we shouldn't have to do this
@@ -63,10 +76,6 @@ const showWarningForInvalidConfig = (options: any) => {
   return undefined
 }
 
-const exit0 = () => {
-  return exit(0)
-}
-
 function isCypressError (err: unknown): err is CypressError {
   return (err as CypressError).isCypressErr
 }
@@ -93,56 +102,44 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
 }
 
 export = {
-  isCurrentlyRunningElectron () {
-    return require('./util/electron-app').isRunning()
-  },
-
-  runElectron (mode: Mode, options: any) {
-    // wrap all of this in a promise to force the
-    // promise interface - even if it doesn't matter
-    // in dev mode due to cp.spawn
-    return Promise.resolve().then(() => {
-      // if we have the electron property on versions
-      // that means we're already running in electron
-      // like in production and we shouldn't spawn a new
-      // process
-      if (this.isCurrentlyRunningElectron()) {
-        // if we weren't invoked from the CLI
-        // then display a warning to the user
-        if (!options.invokedFromCli) {
-          errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
-        }
-
-        debug('running Electron currently')
-
-        return require('./modes')(mode, options)
+  async runElectron<T extends keyof Modes> (mode: T, options: any): Promise<Modes[T] | void> {
+    // if we have the electron property on versions
+    // that means we're already running in electron
+    // like in production and we shouldn't spawn a new
+    // process
+    if (require('./util/electron-app').isRunning()) {
+      // if we weren't invoked from the CLI
+      // then display a warning to the user
+      if (!options.invokedFromCli) {
+        errorsWarning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
       }
 
-      return new Promise((resolve) => {
-        debug('starting Electron')
-        const cypressElectron = require('@packages/electron')
+      debug('running Electron currently')
+      if (mode === 'run') {
+        return require('./modes/run').run(options)
+      } else if (mode === 'interactive') {
+        return require('./modes/interactive').run(options)
+      } else if (mode === 'smokeTest') {
+        return require('./modes/smoke_test').run(options)
+      } else if (mode === 'version') {
+        return require('./modes/pkg').version(options)
+      } else if (mode === 'info') {
+        return require('./modes/info').info(options)
+      }
+    }
 
-        const fn = (code: number) => {
-          // juggle up the totalFailed since our outer
-          // promise is expecting this object structure
-          debug('electron finished with', code)
+    return new Promise((resolve) => {
+      debug('starting Electron')
+      const cypressElectron = require('@packages/electron')
 
-          if (mode === 'smokeTest') {
-            return resolve(code)
-          }
+      const args = require('./util/args').toArray(options)
 
-          return resolve({ totalFailed: code })
-        }
+      debug('electron open arguments %o', args)
 
-        const args = require('./util/args').toArray(options)
+      // const mainEntryFile = require.main.filename
+      const serverMain = getCwd()
 
-        debug('electron open arguments %o', args)
-
-        // const mainEntryFile = require.main.filename
-        const serverMain = getCwd()
-
-        return cypressElectron.open(serverMain, args, fn)
-      })
+      return cypressElectron.open(serverMain, args)
     })
   },
 
@@ -218,7 +215,7 @@ export = {
     })
   },
 
-  async startInMode (mode: Mode, options: any) {
+  async startInMode<T extends keyof Modes>(mode: T, options: any): Promise<Modes[T] | void> {
     debug('starting in mode %s with options %o', mode, options)
 
     if (mode === 'interactive') {
@@ -240,9 +237,9 @@ export = {
           break
         }
         case 'smokeTest': {
-          const pong = await this.runElectron(mode, options)
+          const pong = await this.runElectron<T>(mode, options) as Modes['smokeTest']
 
-          if (!this.isCurrentlyRunningElectron()) {
+          if (!require('./util/electron-app').isRunning()) {
             return exit(pong)
           } else if (pong !== options.ping) {
             return exit(1)
@@ -251,7 +248,7 @@ export = {
           break
         }
         case 'returnPkg': {
-          const pkg = await require('./modes/pkg')(options)
+          const pkg = await (require('./modes/pkg')(options) as Modes['pkg'])
 
           // eslint-disable-next-line no-console
           console.log(JSON.stringify(pkg))
@@ -262,9 +259,9 @@ export = {
           break
         }
         case 'run': {
-          const results = await this.runElectron(mode, options)
+          const results = await this.runElectron<'run'>(mode, options)
 
-          if (results.runs) {
+          if (results && 'runs' in results && results.runs) {
             const isCanceled = results.runs.filter((run) => run.skippedSpec).length
 
             if (isCanceled) {
@@ -275,13 +272,15 @@ export = {
             }
           }
 
-          debug('results.totalFailed, posix?', results.totalFailed, options.posixExitCodes)
+          const totalFailed = results && 'totalFailed' in results ? results.totalFailed : undefined
+
+          debug('results.totalFailed, posix?', totalFailed, options.posixExitCodes)
 
           if (options.posixExitCodes) {
-            return exit(results.totalFailed ? 1 : 0)
+            return exit(totalFailed ? 1 : 0)
           }
 
-          return exit(results.totalFailed ?? 0)
+          return exit(totalFailed ?? 0)
         }
         default: {
           throw new Error(`Cannot start. Invalid mode: '${mode}'`)

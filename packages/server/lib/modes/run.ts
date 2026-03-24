@@ -31,6 +31,8 @@ import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
+import { setupTelemetry } from './setup-telemetry'
+import { setupCtx } from './setup-context'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 export type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -1040,7 +1042,7 @@ export interface ReadyOptions {
   passWithNoTests: boolean
 }
 
-async function ready (options: ReadyOptions) {
+async function ready (options: ReadyOptions): Promise<CypressRunResult> {
   debug('run mode ready with options %o', options)
 
   if (process.env.ELECTRON_RUN_AS_NODE && !process.env.DISPLAY) {
@@ -1211,8 +1213,20 @@ async function ready (options: ReadyOptions) {
   })
 }
 
-export async function run (options, loading: Promise<void>) {
+export async function run (options: ReadyOptions): Promise<CypressRunResult | void> {
   debug('run start')
+
+  _.defaults(options, {
+    socketId: randomId(10),
+    isTextTerminal: true,
+    browser: 'electron',
+    quiet: false,
+    morgan: false,
+    report: true,
+  })
+
+  const loading = setupCtx('run', options, setupTelemetry('run'))
+
   // Check if running as electron process
   if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
     // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined

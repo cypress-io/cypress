@@ -10,7 +10,8 @@ import * as Windows from '../gui/windows'
 import { makeGraphQLServer } from '@packages/data-context/graphql/makeGraphQLServer'
 import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import { telemetry } from '@packages/telemetry'
-
+import { setupTelemetry } from './setup-telemetry'
+import { setupCtx } from './setup-context'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { WebContents } from 'electron'
 import type { LaunchArgs, Preferences } from '@packages/types'
@@ -158,7 +159,10 @@ export = {
     return win
   },
 
-  async run (options: LaunchArgs, _loading: Promise<void>) {
+  async run (options: LaunchArgs) {
+    // @ts-ignore
+    const _loading = setupCtx('interactive', options, setupTelemetry('interactive'))
+
     // Need to set this for system notifications to appear as "Cypress" on Windows
     if (app.setAppUserModelId) {
       app.setAppUserModelId('Cypress')
