@@ -25,7 +25,7 @@ export default function (Commands, Cypress, cy, state, config) {
       log: true,
       verify: true,
       force: false,
-      delay: config('keystrokeDelay') ?? $Keyboard.getConfig().keystrokeDelay,
+      delay: $Keyboard.getConfig().keystrokeDelay ?? config('keystrokeDelay'),
       release: true,
       parseSpecialCharSequences: true,
       waitForAnimations: config('waitForAnimations'),

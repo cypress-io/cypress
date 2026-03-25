@@ -1,7 +1,7 @@
 const { Keyboard } = Cypress
 
 const DEFAULTS = {
-  keystrokeDelay: 10,
+  keystrokeDelay: undefined,
 }
 
 describe('src/cypress/keyboard', () => {
