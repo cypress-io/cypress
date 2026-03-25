@@ -3056,6 +3056,11 @@ declare namespace Cypress {
      */
     execTimeout: number
     /**
+     * Time, in milliseconds, to wait for a keystroke to be typed during a [cy.type()](https://on.cypress.io/type) command
+     * @default 10
+     */
+    keystrokeDelay: number
+    /**
      * Time, in milliseconds, to wait for page transition events or [cy.visit()](https://on.cypress.io/visit), [cy.go()](https://on.cypress.io/go), [cy.reload()](https://on.cypress.io/reload) commands to fire their page load events
      * @default 60000
      */

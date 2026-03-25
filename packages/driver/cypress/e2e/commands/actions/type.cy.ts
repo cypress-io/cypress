@@ -759,6 +759,20 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    it('test config keystrokeDelay 0 is honored (not treated as falsy)', { keystrokeDelay: 0 }, () => {
+      // Ensure Keyboard fallback would be 10ms if test config 0 were wrongly skipped (e.g. config || keyboard).
+      // @ts-expect-error - TODO: Get this to use the internal Keyboard types
+      Cypress.Keyboard.reset()
+
+      cy.spy(cy, 'timeout')
+
+      cy.get(':text:first')
+      .type('foo{enter}bar{leftarrow}')
+      .then(() => {
+        expect(cy.timeout).not.to.be.calledWith(10 * 8, true, 'type')
+      })
+    })
+
     it('delay will override default keystrokeDelay', () => {
       Cypress.Keyboard.defaults({
         keystrokeDelay: 20,

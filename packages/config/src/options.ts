@@ -310,7 +310,7 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     requireRestartOnChange: 'server',
   }, {
     name: 'keystrokeDelay',
-    defaultValue: 0,
+    defaultValue: 10,
     validation: validate.isNumberOrFalse,
     overrideLevel: 'any',
   }, {
