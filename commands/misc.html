@@ -28,7 +28,7 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li class="active" class="dropdown">
+          <li class="active dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="/commands/querying">Querying</a></li>
@@ -162,18 +162,18 @@ cy.focused().should('have.id', 'description')</code></pre>
 
         <div class="col-xs-12"><hr></div>
 
-              <div class="col-xs-7">
-                <h4 id="screenshot"><a href="https://on.cypress.io/screenshot">cy.screenshot()</a></h4>
-                <p>To take a screenshot, use the <a href="https://on.cypress.io/screenshot"><code>cy.screenshot()</code></a> command.</p>
+        <div class="col-xs-7">
+          <h4 id="screenshot"><a href="https://on.cypress.io/screenshot">cy.screenshot()</a></h4>
+          <p>To take a screenshot, use the <a href="https://on.cypress.io/screenshot"><code>cy.screenshot()</code></a> command.</p>
                 <pre><code class="javascript">cy.screenshot('my-image')</code></pre>
-            </div>
-              <div class="col-xs-5">
-                <div class="well">
-                  <code>cypress/screenshots/my-image.png</code>
-                </div>
-              </div>
+        </div>
+        <div class="col-xs-5">
+          <div class="well">
+            <code>cypress/screenshots/my-image.png</code>
+          </div>
+        </div>
 
-              <div class="col-xs-12"><hr></div>
+        <div class="col-xs-12"><hr></div>
 
         <div class="col-xs-7">
           <h4 id="wrap"><a href="https://on.cypress.io/wrap">cy.wrap()</a></h4>
@@ -181,7 +181,7 @@ cy.focused().should('have.id', 'description')</code></pre>
           <pre><code class="javascript">cy.wrap({foo: 'bar'})
   .should('have.property', 'foo')
   .and('include', 'bar')</code></pre>
-      </div>
+        </div>
         <div class="col-xs-5">
           <div class="well">
             <code>{foo: bar}</code>

@@ -28,7 +28,7 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li class="active" class="dropdown">
+          <li class="active dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="/commands/querying">Querying</a></li>
@@ -72,7 +72,7 @@
       <div class="row">
 
         <div class="col-xs-7">
-          <h4 id="getCookie"><a href="https://on.cypress.io/getcookie">cy.getCookie()</a></h4>
+          <h4><a href="https://on.cypress.io/getcookie">cy.getCookie()</a></h4>
           <p>To get a browser cookie, use the <a href="https://on.cypress.io/getcookie"><code>cy.getCookie()</code></a> command.</p>
           <pre><code class="javascript">cy.get('#getCookie .set-a-cookie').click()
 
@@ -93,7 +93,7 @@ cy.getCookie('token').should('have.property', 'value', '123ABC')</code></pre>
       <div class="row">
 
         <div class="col-xs-7">
-          <h4 id="getCookies"><a href="https://on.cypress.io/getcookies">cy.getCookies()</a></h4>
+          <h4><a href="https://on.cypress.io/getcookies">cy.getCookies()</a></h4>
           <p>To get browser cookies for the current domain, use the <a href="https://on.cypress.io/getcookies"><code>cy.getCookies()</code></a> command.</p>
           <pre><code class="javascript">cy.getCookies().should('be.empty')
 
@@ -125,7 +125,7 @@ cy.getCookies().should('have.length', 1).should((cookies) => {
       <div class="row">
 
         <div class="col-xs-7">
-          <h4 id="getAllCookies"><a href="https://on.cypress.io/getallcookies">cy.getAllCookies()</a></h4>
+          <h4><a href="https://on.cypress.io/getallcookies">cy.getAllCookies()</a></h4>
           <p>To get all browser cookies, use the <a href="https://on.cypress.io/getallcookies"><code>cy.getAllCookies()</code></a> command.</p>
           <pre><code class="javascript">cy.getAllCookies().should('be.empty')
 
@@ -161,7 +161,7 @@ cy.getAllCookies().should('have.length', 2).should((cookies) => {
       <div class="row">
 
         <div class="col-xs-12">
-          <h4 id="setCookie"><a href="https://on.cypress.io/setcookie">cy.setCookie()</a></h4>
+          <h4><a href="https://on.cypress.io/setcookie">cy.setCookie()</a></h4>
           <p>To set a browser cookie, use the <a href="https://on.cypress.io/setcookie"><code>cy.setCookie()</code></a> command.</p>
           <pre><code class="javascript">cy.getCookies().should('be.empty')
 
@@ -179,7 +179,7 @@ cy.getCookie('foo').should('have.property', 'value', 'bar')</code></pre>
       <div class="row">
 
         <div class="col-xs-7">
-          <h4 id="clearCookie"><a href="https://on.cypress.io/clearcookie">cy.clearCookie()</a></h4>
+          <h4><a href="https://on.cypress.io/clearcookie">cy.clearCookie()</a></h4>
           <p>To clear a browser cookie, use the <a href="https://on.cypress.io/clearcookie"><code>cy.clearCookie()</code></a> command.</p>
           <pre><code class="javascript">cy.getCookie('token').should('be.null')
 
@@ -206,7 +206,7 @@ cy.getCookie('token').should('be.null')</code></pre>
       <div class="row">
 
         <div class="col-xs-7">
-          <h4 id="clearCookies"><a href="https://on.cypress.io/clearcookies">cy.clearCookies()</a></h4>
+          <h4><a href="https://on.cypress.io/clearcookies">cy.clearCookies()</a></h4>
           <p>To clear browser cookies for the current domain, use the <a href="https://on.cypress.io/clearcookies"><code>cy.clearCookies()</code></a> command.</p>
           <pre><code class="javascript">cy.getCookies().should('be.empty')
 
@@ -233,7 +233,7 @@ cy.getCookies().should('be.empty')</code></pre>
       <div class="row">
 
         <div class="col-xs-7">
-          <h4 id="clearAllCookies"><a href="https://on.cypress.io/clearallcookies">cy.clearAllCookies()</a></h4>
+          <h4><a href="https://on.cypress.io/clearallcookies">cy.clearAllCookies()</a></h4>
           <p>To clear all browser cookies, use the <a href="https://on.cypress.io/clearallcookies"><code>cy.clearAllCookies()</code></a> command.</p>
           <pre><code class="javascript">cy.getAllCookies().should('be.empty')
 
