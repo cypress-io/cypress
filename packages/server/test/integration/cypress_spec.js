@@ -136,7 +136,7 @@ function mockEE () {
       on: sinon.stub(),
       removeListener: sinon.stub(),
       webRequest: {
-        onBeforeSendHeaders () {},
+        onErrorOccurred: sinon.stub(),
       },
     },
   }
