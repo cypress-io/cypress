@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.13.1
+
+_Released 03/31/2026 (PENDING)_
+
+**Bugfixes:**
+
+- `keystrokeDelay` set to 0 in config or test configuration is now respected by `cy.type()` instead of falling back to the 10ms keyboard default. The default `keystrokeDelay` in resolved config is now correctly shown as 10, matching previous typing behavior and the documented keyboard default. Addressed in [#33522](https://github.com/cypress-io/cypress/pull/33522).
+
 ## 15.13.0
 
 _Released 03/24/2026_
