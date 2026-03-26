@@ -33,6 +33,7 @@ afterEach(() => {
   // reset studio after each test to avoid triggering the browser's unsaved changes dialog in between tests
   cy.get('body').then(($body) => {
     const $btn = $body.find('[data-cy="studio-reset-button"]')
+
     if ($btn.length) {
       cy.wrap($btn).click({ force: true })
     }
