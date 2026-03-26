@@ -1,0 +1,12 @@
+version: 2.1
+
+jobs:
+  no_op:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run: echo "no op as GH pages does not need a circle job to deploy. Disregard this job and related workflows..."
+workflows:
+  main:
+    jobs:
+      - no_op
