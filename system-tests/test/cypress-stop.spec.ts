@@ -39,9 +39,6 @@ describe('Cypress.stop()', () => {
     snapshot: true,
     expectedExitCode: 0,
     browser: 'chrome',
-    processEnv: {
-      ELECTRON_ENABLE_LOGGING: 1,
-    },
     onStderr: (stderr) => {
       expect(stderr).to.include('before 1')
       expect(stderr).to.include('before 2')
@@ -72,9 +69,6 @@ describe('Cypress.stop()', () => {
     snapshot: true,
     expectedExitCode: 0,
     browser: 'chrome',
-    processEnv: {
-      ELECTRON_ENABLE_LOGGING: 1,
-    },
     onStderr: (stderr) => {
       expect(stderr).to.include('beforeEach 1')
       expect(stderr).to.include('beforeEach 2')
@@ -105,9 +99,6 @@ describe('Cypress.stop()', () => {
     snapshot: true,
     expectedExitCode: 0,
     browser: 'chrome',
-    processEnv: {
-      ELECTRON_ENABLE_LOGGING: 1,
-    },
     onStderr: (stderr) => {
       expect(stderr).to.include('test 1')
       expect(stderr).to.not.include('test 2')
@@ -138,9 +129,6 @@ describe('Cypress.stop()', () => {
     snapshot: true,
     expectedExitCode: 0,
     browser: 'chrome',
-    processEnv: {
-      ELECTRON_ENABLE_LOGGING: 1,
-    },
     onStderr: (stderr) => {
       expect(stderr).to.include('afterEach 1')
       expect(stderr).to.include('afterEach 2')
@@ -171,9 +159,6 @@ describe('Cypress.stop()', () => {
     snapshot: true,
     expectedExitCode: 0,
     browser: 'chrome',
-    processEnv: {
-      ELECTRON_ENABLE_LOGGING: 1,
-    },
     onStderr: (stderr) => {
       expect(stderr).to.include('after 1')
       expect(stderr).to.include('after 2')

@@ -19,9 +19,6 @@ describe('before all and after all throw', () => {
     snapshot: true,
     expectedExitCode: 1,
     browser: 'chrome',
-    processEnv: {
-      ELECTRON_ENABLE_LOGGING: 1,
-    },
     onStderr: (stderr) => {
       expect(stderr).to.include('before all')
       expect(stderr).to.not.include('test body 1')

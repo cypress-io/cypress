@@ -96,10 +96,10 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         sinon.stub(ctx.actions.project, 'launchProject').resolves()
       })
 
-      cy.contains('li', 'Electron').click()
+      cy.contains('li', 'Chrome for Testing').click()
 
       cy.withCtx((ctx) => {
-        expect(ctx.coreData.activeBrowser?.displayName).eq('Electron')
+        expect(ctx.coreData.activeBrowser?.displayName).eq('Chrome for Testing')
         expect(ctx.actions.project.launchProject).to.have.been.called
       })
     })

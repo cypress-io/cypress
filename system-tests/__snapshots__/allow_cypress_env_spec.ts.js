@@ -51,7 +51,7 @@ https://on.cypress.io/cypress-env-migration
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/allow-cypress-env.cy.ts/allowCypressEnv -- invo     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/allow-cypress-env.cy.ts/allowCypressEnv -- invo     (1280x633)
      kes Cypress.env() (failed).png                                                                 
 
 

@@ -1,3 +1,11 @@
+beforeEach(() => {
+  cy.findBrowsers({
+    filter: (browser) => {
+      return Cypress._.includes(['chrome', 'firefox', 'edge'], browser.name) && browser.channel === 'stable'
+    },
+  })
+})
+
 describe('baseUrl', () => {
   it('should show baseUrl warning if Cypress cannot connect to provided baseUrl', () => {
     cy.scaffoldProject('config-with-base-url-warning')

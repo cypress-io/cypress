@@ -12,15 +12,13 @@ import { getCtx } from '@packages/data-context'
 const { stubMachineBrowsers } = require('./helpers/stub-machine-browsers')
 const sinon = require('sinon')
 
-let ctx
-
 describe('lib/fixture', () => {
   before(async function () {
     // Clear and set up DataContext
     await clearCtx()
     // @ts-expect-error
     setCtx(makeDataContext({}))
-    ctx = getCtx()
+    const ctx = getCtx()
 
     stubMachineBrowsers(ctx, sinon)
 
@@ -37,7 +35,6 @@ describe('lib/fixture', () => {
 
   beforeEach(function () {
     stubMachineBrowsers(getCtx(), sinon)
-
     this.read = (folder, image, encoding) => {
       return fs.readFileAsync(path.join(folder, image), encoding)
     }
@@ -171,12 +168,13 @@ describe('lib/fixture', () => {
     // https://github.com/cypress-io/cypress/issues/3739
     it('can load a fixture with no extension when a same-named folder also exists', async () => {
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
+      const ctx = getCtx()
 
       await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)
 
       return ctx.lifecycleManager.getFullInitialConfig()
       .then((cfg) => {
-        return fixture.get(cfg.fixturesFolder, 'foo')
+        return fixture.get(cfg.fixturesFolder as string, 'foo')
         .then((result) => {
           expect(result).to.deep.eq({ 'bar': 'baz' })
         })

@@ -128,9 +128,9 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/does not run (fail     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/does not run (fail     (1280x633)
      ed).png                                                                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/nested -- does not     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_event.js/nested -- does not     (1280x633)
       run 2 (failed).png                                                                            
 
 
@@ -204,9 +204,9 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/does not run     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/does not run     (1280x633)
       (failed).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/nested -- do     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/invalid_before_test_async_event.js/nested -- do     (1280x633)
      es not run 2 (failed).png                                                                      
 
 

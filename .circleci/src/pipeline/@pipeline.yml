@@ -574,7 +574,11 @@ commands:
                             # which we do not expect and errors out when running Cypress
                             name: remove linked google-chrome binary
                             command: |
-                              rm /usr/bin/google-chrome
+                              if [[ $(id -u) -eq 0 ]]; then
+                                rm /usr/bin/google-chrome
+                              else
+                                sudo rm /usr/bin/google-chrome
+                              fi
             - when:
                 condition:
                   equal: [ true, << parameters.install-chrome-for-testing >> ]
@@ -582,7 +586,11 @@ commands:
                   - run:
                       name: Install unzip
                       command: |
-                        apt-get update && apt-get install -y unzip
+                        if [[ $(id -u) -eq 0 ]]; then
+                          apt-get update && apt-get install -y unzip
+                        else
+                          sudo apt-get update && sudo apt-get install -y unzip
+                        fi
                   - browser-tools/install_chrome_for_testing:
                       version: << parameters.google-chrome-for-testing-version >>
                       install_chromedriver: false
@@ -1973,6 +1981,14 @@ jobs:
       - run-system-tests:
           browser: chrome
 
+  system-tests-chrome-for-testing:
+    <<: *defaults
+    resource_class: medium+
+    parallelism: 8
+    steps:
+      - run-system-tests:
+          browser: chrome-for-testing
+
   system-tests-firefox:
     <<: *defaults
     resource_class: medium+
@@ -1993,6 +2009,9 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
       - run:
           environment:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
