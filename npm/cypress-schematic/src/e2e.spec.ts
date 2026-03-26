@@ -40,7 +40,7 @@ describe('ng add @cypress/schematic / only e2e', { timeout: 1000 * 60 * 5 }, fun
         await runCommandInProject('yarn ng add @cypress/schematic --e2e --component false --add-ct-specs false', projectPath)
       }
 
-      await runCommandInProject('yarn ng e2e --watch false', projectPath)
+      await runCommandInProject('yarn ng e2e --watch false --browser chrome', projectPath)
     })
   }
 })

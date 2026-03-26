@@ -34,7 +34,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
     })
 
     cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
-    cy.findByTestId('select-browser').should('be.visible').contains('title', 'Electron 73')
+    cy.findByTestId('select-browser').should('be.visible').contains('title', 'Chrome 78')
     cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
   })
 
@@ -314,7 +314,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
       cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
       cy.findByRole('list').within(() =>
-        ['Chrome', 'Electron', 'Firefox'].forEach((browser) => cy.findAllByText(browser)))
+        ['Chrome', 'Firefox', 'Chromium'].forEach((browser) => cy.findAllByText(browser)))
 
       cy.get('[data-cy="select-browser"] button[aria-controls]').focus().type('{enter}')
       cy.contains('Firefox').should('be.hidden')
@@ -344,7 +344,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       })
 
       cy.get('[data-cy="select-browser"] > button').should('be.enabled').click()
-      cy.get('[data-browser-id="1"]').should('contain', 'Electron').and('contain', 'Version 73')
+      cy.get('[data-browser-id="1"]').should('contain', 'Chrome').and('contain', 'Version 78')
       cy.get('[data-browser-id="1"]').find('[data-cy="top-nav-browser-list-selected-item"]')
     })
 

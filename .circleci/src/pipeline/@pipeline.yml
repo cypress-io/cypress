@@ -2236,6 +2236,11 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Build
           command: yarn lerna run build --scope=@cypress/webpack-preprocessor
@@ -2279,6 +2284,11 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Build
           command: yarn lerna run build --scope=@cypress/vue
@@ -2336,6 +2346,11 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Build
           command: yarn lerna run build --scope=@cypress/react

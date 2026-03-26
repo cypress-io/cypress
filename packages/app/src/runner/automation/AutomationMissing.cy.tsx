@@ -64,7 +64,7 @@ describe('AutomationMissing', () => {
     cy.get('[data-cy="select-browser"]').click()
     cy.contains('li', 'Chrome').should('be.visible')
     cy.contains('li', 'Version 80').should('be.visible')
-    cy.get('[data-browser-id=1]').contains('Electron').should('be.visible')
+    cy.get('[data-browser-id=1]').contains('Chrome').should('be.visible')
     cy.percySnapshot()
   })
 })

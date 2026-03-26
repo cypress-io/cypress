@@ -61,7 +61,7 @@ describe('<OpenBrowserList />', () => {
 
     cy.get('[data-cy-browser]').each((browser) => cy.wrap(browser).should('have.attr', 'aria-disabled', 'true'))
     cy.get('[data-cy="launch-button"]').should('not.exist')
-    cy.contains('button', defaultMessages.openBrowser.openingE2E.replace('{browser}', 'Electron')).should('be.disabled')
+    cy.contains('button', defaultMessages.openBrowser.openingE2E.replace('{browser}', 'Chrome')).should('be.disabled')
   })
 
   it('shows browser is open', () => {
@@ -78,7 +78,7 @@ describe('<OpenBrowserList />', () => {
     })
 
     cy.get('[data-cy-browser]').each((browser) => cy.wrap(browser).should('have.attr', 'aria-disabled', 'true'))
-    cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Electron')).should('be.disabled')
+    cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Chrome')).should('be.disabled')
     cy.contains('button', defaultMessages.openBrowser.focus)
     cy.contains('button', defaultMessages.openBrowser.close).click()
     cy.get('@closeBrowser').should('have.been.called')
@@ -102,9 +102,9 @@ describe('<OpenBrowserList />', () => {
       },
     })
 
-    cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Electron')).should('be.disabled')
+    cy.contains('button', defaultMessages.openBrowser.running.replace('{browser}', 'Chrome')).should('be.disabled')
     cy.contains('button', defaultMessages.openBrowser.focus).should('not.exist')
-    cy.get('[aria-checked="true"]').contains('Electron')
+    cy.get('[aria-checked="true"]').contains('Chrome')
   })
 
   it('throws when activeBrowser is null', () => {

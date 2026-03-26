@@ -56,7 +56,7 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
       it('should install ct files with option and no component specs', async () => {
         await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
         await copyAngularMount(projectPath, { copyZonelessMount: project === 'angular-21' })
-        await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts', projectPath)
+        await runCommandInProject('yarn ng run angular:ct --watch false --browser chrome --spec src/app/app.component.cy.ts', projectPath)
       }, timeout)
 
       it('should generate component alongside component spec', async () => {
@@ -71,7 +71,7 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
           await runCommandInProject('yarn ng generate c foo', projectPath)
         }
 
-        await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/foo/foo.component.cy.ts', projectPath)
+        await runCommandInProject('yarn ng run angular:ct --watch false --browser chrome --spec src/app/foo/foo.component.cy.ts', projectPath)
       }, timeout)
     })
   }
