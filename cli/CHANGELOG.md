@@ -5,7 +5,7 @@ _Released 04/07/2026 (PENDING)_
 
 **Performance:**
 
-- When recording to Cypress Cloud, the App now sends a smaller, sanitized snapshot of your project config (supported options only with bulky fields redacted), which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
+- When recording to Cypress Cloud, the App now sends a smaller snapshot of your project config, which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
 
 ## 15.13.0
 
