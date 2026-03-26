@@ -23,6 +23,23 @@ beforeEach(() => {
   cy.mockNodeCloudRequest({ url: '/studio/metrics', method: 'post', body: {}, persist: true })
 })
 
+afterEach(() => {
+  const specPath = Cypress.spec.relative.replace(/\\/g, '/')
+
+  if (!specPath.includes('e2e/studio/')) {
+    return
+  }
+
+  // reset studio after each test to avoid triggering the browser's unsaved changes dialog in between tests
+  cy.get('body').then(($body) => {
+    const $btn = $body.find('[data-cy="studio-reset-button"]')
+
+    if ($btn.length) {
+      cy.wrap($btn).click({ force: true })
+    }
+  })
+})
+
 function e2eTestingTypeIsSelected () {
   cy.findByTestId('specs-testing-type-header').within(() => {
     cy.findByTestId('testing-type-switch').contains('button', 'E2E').should('have.attr', 'aria-selected', 'true')
