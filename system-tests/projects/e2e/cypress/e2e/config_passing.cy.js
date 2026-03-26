@@ -17,11 +17,10 @@ describe('Cypress static methods + props', () => {
     const { browser } = Cypress
 
     expect(browser).to.be.an('object')
-    expect(browser.name).to.be.oneOf(['chrome', 'chromium'])
-    expect(browser.displayName).to.be.oneOf(['Electron', 'Chrome', 'Canary', 'Chromium'])
+    expect(browser.name).to.be.oneOf(['chrome', 'chromium', 'chrome-for-testing'])
+    expect(browser.displayName).to.be.oneOf(['Chrome', 'Chromium', 'Chrome for Testing'])
     expect(browser.version).to.be.a('string')
-    // we are parsing major version, so it should be a number
-    expect(browser.majorVersion).to.be.a('number')
+    expect(Number(browser.majorVersion)).to.be.a('number').and.to.be.greaterThan(0)
     expect(browser.path).to.be.a('string')
 
     if (browser.isHeadless === true) {

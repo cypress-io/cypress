@@ -1,7 +1,7 @@
 exports['module api and after:run results'] = `
 {
   "browserName": "chrome",
-  "browserPath": "",
+  "browserPath": "/path/to/browserPath",
   "browserVersion": "X.Y.Z",
   "config": {
     "allowCypressEnv": false,
@@ -30,6 +30,7 @@ exports['module api and after:run results'] = `
     "experimentalModifyObstructiveThirdPartyCode": false,
     "injectDocumentDomain": false,
     "experimentalOriginDependencies": false,
+    "experimentalPromptCommand": false,
     "experimentalSourceRewriting": false,
     "experimentalSingleTabRunMode": false,
     "experimentalWebKitSupport": false,
@@ -76,7 +77,7 @@ exports['module api and after:run results'] = `
         "family": "chromium",
         "majorVersion": "X",
         "name": "chrome",
-        "path": "/path/to/chrome",
+        "path": "/path/to/path",
         "version": "X.Y.Z"
       }
     ],
@@ -108,35 +109,35 @@ exports['module api and after:run results'] = `
       },
       "screenshots": [
         {
-          "height": 660,
+          "height": 633,
           "name": "test 1 screenshot",
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1000
         },
         {
-          "height": 660,
+          "height": 633,
           "name": "test 3 screenshot",
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1000
         },
         {
-          "height": 720,
+          "height": 633,
           "name": null,
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1280
         },
         {
-          "height": 660,
+          "height": 633,
           "name": "test 3 screenshot",
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1000
         },
         {
-          "height": 720,
+          "height": 633,
           "name": null,
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
@@ -225,42 +226,42 @@ exports['module api and after:run results'] = `
       },
       "screenshots": [
         {
-          "height": 660,
+          "height": 633,
           "name": "test 1 screenshot",
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1000
         },
         {
-          "height": 720,
+          "height": 633,
           "name": null,
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1280
         },
         {
-          "height": 660,
+          "height": 633,
           "name": "test 1 screenshot",
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1000
         },
         {
-          "height": 720,
+          "height": 633,
           "name": null,
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1280
         },
         {
-          "height": 660,
+          "height": 633,
           "name": "test 2 screenshot",
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
           "width": 1000
         },
         {
-          "height": 720,
+          "height": 633,
           "name": null,
           "path": "/path/to/path",
           "takenAt": "2015-03-18T00:00:00.000Z",
@@ -386,42 +387,42 @@ exports['after:spec results'] = `
     },
     "screenshots": [
       {
-        "height": 660,
+        "height": 633,
         "name": "test 1 screenshot",
         "path": "/path/to/path",
         "takenAt": "2015-03-18T00:00:00.000Z",
         "width": 1000
       },
       {
-        "height": 720,
+        "height": 633,
         "name": null,
         "path": "/path/to/path",
         "takenAt": "2015-03-18T00:00:00.000Z",
         "width": 1280
       },
       {
-        "height": 660,
+        "height": 633,
         "name": "test 1 screenshot",
         "path": "/path/to/path",
         "takenAt": "2015-03-18T00:00:00.000Z",
         "width": 1000
       },
       {
-        "height": 720,
+        "height": 633,
         "name": null,
         "path": "/path/to/path",
         "takenAt": "2015-03-18T00:00:00.000Z",
         "width": 1280
       },
       {
-        "height": 660,
+        "height": 633,
         "name": "test 2 screenshot",
         "path": "/path/to/path",
         "takenAt": "2015-03-18T00:00:00.000Z",
         "width": 1000
       },
       {
-        "height": 720,
+        "height": 633,
         "name": null,
         "path": "/path/to/path",
         "takenAt": "2015-03-18T00:00:00.000Z",

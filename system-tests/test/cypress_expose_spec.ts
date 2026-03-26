@@ -17,6 +17,7 @@ describe('cypress_expose', () => {
     command: 'cypress',
     args: [
       'run',
+      '--browser', 'chrome',
       '--dev',
       '--project', path.resolve(process.cwd(), './projects/cypress-expose'),
       '--config-file', path.resolve(process.cwd(), './projects/cypress-expose/cypress-expose-in-cli.config.ts'),
@@ -30,6 +31,7 @@ describe('cypress_expose', () => {
     command: 'cypress',
     args: [
       'run',
+      '--browser', 'chrome',
       '--dev',
       '--project', path.resolve(process.cwd(), './projects/cypress-expose'),
       '--config-file', path.resolve(process.cwd(), './projects/cypress-expose/cypress-expose-in-cli.config.ts'),
