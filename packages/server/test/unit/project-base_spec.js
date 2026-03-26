@@ -20,6 +20,7 @@ const { StudioLifecycleManager } = require('../../lib/cloud/studio/StudioLifecyc
 const { StudioManager } = require('../../lib/cloud/studio/studio')
 const { telemetryManager, MARK_NAMES, TELEMETRY_GROUP_NAMES } = require('../../lib/cloud/studio/telemetry/TelemetryManager')
 const { TelemetryReporter } = require('../../lib/cloud/studio/telemetry/TelemetryReporter')
+const { stubMachineBrowsers } = require('./helpers/stub-machine-browsers')
 
 let ctx
 
@@ -30,6 +31,9 @@ describe('lib/project-base', () => {
     delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
 
     ctx = getCtx()
+
+    stubMachineBrowsers(ctx, sinon)
+
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')

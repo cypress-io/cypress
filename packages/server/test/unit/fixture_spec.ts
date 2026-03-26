@@ -1,3 +1,5 @@
+import '../spec_helper'
+
 import path from 'path'
 import Promise from 'bluebird'
 import * as fixture from '../../lib/fixture'
@@ -6,6 +8,9 @@ import FixturesHelper from '@tooling/system-tests'
 import snapshot from 'snap-shot-it'
 import { setCtx, makeDataContext, clearCtx } from '../../lib/makeDataContext'
 import { getCtx } from '@packages/data-context'
+
+const { stubMachineBrowsers } = require('./helpers/stub-machine-browsers')
+const sinon = require('sinon')
 
 let ctx
 
@@ -17,24 +22,13 @@ describe('lib/fixture', () => {
     setCtx(makeDataContext({}))
     ctx = getCtx()
 
+    stubMachineBrowsers(ctx, sinon)
+
     FixturesHelper.scaffold()
 
     this.todosPath = FixturesHelper.projectPath('todos')
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
-
-    // needed to run these tests locally
-    // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
-    //   {
-    //     channel: 'stable',
-    //     displayName: 'Electron',
-    //     family: 'chromium',
-    //     majorVersion: '123',
-    //     name: 'electron',
-    //     path: 'path-to-browser-one',
-    //     version: '123.45.67',
-    //   },
-    // ])
 
     const cfg = await ctx.lifecycleManager.getFullInitialConfig()
 
@@ -42,6 +36,8 @@ describe('lib/fixture', () => {
   })
 
   beforeEach(function () {
+    stubMachineBrowsers(getCtx(), sinon)
+
     this.read = (folder, image, encoding) => {
       return fs.readFileAsync(path.join(folder, image), encoding)
     }
@@ -174,18 +170,6 @@ describe('lib/fixture', () => {
 
     // https://github.com/cypress-io/cypress/issues/3739
     it('can load a fixture with no extension when a same-named folder also exists', async () => {
-      // needed to run these tests locally
-      // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
-      //   {
-      //     channel: 'stable',
-      //     displayName: 'Electron',
-      //     family: 'chromium',
-      //     majorVersion: '123',
-      //     name: 'electron',
-      //     path: 'path-to-browser-one',
-      //     version: '123.45.67',
-      //   },
-      // ])
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
       await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)

@@ -21,28 +21,19 @@ const { createRoutes } = require('../../lib/routes')
 const { getCtx } = require('../../lib/makeDataContext')
 const { sinon } = require('../spec_helper')
 const { SocketCt } = require('../../lib/socket-ct')
+const { stubMachineBrowsers } = require('./helpers/stub-machine-browsers')
 
 let ctx
 
 describe('lib/socket', () => {
   beforeEach(async function () {
     ctx = getCtx()
+
+    stubMachineBrowsers(ctx, sinon)
+
     ctx.coreData.activeBrowser = {
       path: 'path-to-browser-one',
     }
-
-    // needed to run these tests locally
-    // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
-    //   {
-    //     channel: 'stable',
-    //     displayName: 'Electron',
-    //     family: 'chromium',
-    //     majorVersion: '123',
-    //     name: 'electron',
-    //     path: 'path-to-browser-one',
-    //     version: '123.45.67',
-    //   },
-    // ])
 
     // Don't bother initializing the child process, etc for this
     sinon.stub(ctx.actions.project, 'initializeActiveProject')

@@ -267,30 +267,6 @@ const getBrowsers = async () => {
 
   debug('found browsers %o', { browsers })
 
-  // TODO: remove with full electron-as-test-browser deprecation — delete this block and
-  // packages/server/lib/browsers/electron.ts once the Electron renderer is no longer a launch target.
-  // Previously (when process.versions.electron) we pushed a synthetic FoundBrowser { name: 'electron', ... }.
-  // It is intentionally not exposed in the list anymore.
-  // if (!process.versions.electron) {
-  //   debug('not in electron, skipping adding electron browser')
-  //   return browsers
-  // }
-  // const version = process.versions.chrome || ''
-  // let majorVersion
-  // if (version) {
-  //   majorVersion = getMajorVersion(version)
-  // }
-  // const electronBrowser: FoundBrowser = {
-  //   name: 'electron',
-  //   channel: 'stable',
-  //   family: 'chromium',
-  //   displayName: 'Electron',
-  //   version,
-  //   path: '',
-  //   majorVersion,
-  // }
-  // browsers.push(electronBrowser)
-
   return browsers
 }
 

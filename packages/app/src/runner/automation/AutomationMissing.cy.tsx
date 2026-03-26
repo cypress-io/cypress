@@ -36,7 +36,8 @@ describe('AutomationMissing', () => {
     })
 
     cy.get('[data-cy="select-browser"]').click()
-    cy.contains('li', 'Chrome').click()
+    // Chrome is already the selected browser in stub data; pick another to exercise SetBrowser.
+    cy.get('[data-browser-id="9"]').click()
 
     cy.wrap(selectBrowserStub).should('have.been.called')
   })

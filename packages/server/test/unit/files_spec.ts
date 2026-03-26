@@ -1,7 +1,13 @@
+import '../spec_helper'
+
 import { readFile, writeFile } from '../../lib/files'
 import FixturesHelper from '@tooling/system-tests'
 import { setCtx, makeDataContext, clearCtx } from '../../lib/makeDataContext'
 import { getCtx } from '@packages/data-context'
+
+const { stubMachineBrowsers } = require('./helpers/stub-machine-browsers')
+const sinon = require('sinon')
+
 let ctx
 
 describe('lib/files', () => {
@@ -12,18 +18,7 @@ describe('lib/files', () => {
     setCtx(makeDataContext({}))
     ctx = getCtx()
 
-    // needed to run these tests locally
-    // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
-    //   {
-    //     channel: 'stable',
-    //     displayName: 'Electron',
-    //     family: 'chromium',
-    //     majorVersion: '123',
-    //     name: 'electron',
-    //     path: 'path-to-browser-one',
-    //     version: '123.45.67',
-    //   },
-    // ])
+    stubMachineBrowsers(ctx, sinon)
 
     FixturesHelper.scaffold()
     this.todosPath = FixturesHelper.projectPath('todos')
@@ -36,6 +31,10 @@ describe('lib/files', () => {
     this.projectRoot = cfg.projectRoot
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.projectRoot)
+  })
+
+  beforeEach(function () {
+    stubMachineBrowsers(getCtx(), sinon)
   })
 
   after(() => {

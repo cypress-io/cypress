@@ -146,7 +146,7 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
       cy.get('[data-cy="aut-url"]').should('exist')
       cy.findByTestId('aut-url-input').should('be.visible').should('have.value', autUrl)
-      cy.findByTestId('select-browser').should('be.visible').contains('Electron 73')
+      cy.findByTestId('select-browser').should('be.visible').contains('Chrome 78')
       cy.findByTestId('viewport-size').should('be.visible').contains('500x500')
       cy.percySnapshot()
     })

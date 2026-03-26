@@ -2393,6 +2393,11 @@ jobs:
     resource_class: small
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run: yarn workspace @cypress/grep and
       - run: yarn workspace @cypress/grep and:not
       - run: yarn workspace @cypress/grep burn
@@ -2435,6 +2440,11 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Build + Install
           command: |

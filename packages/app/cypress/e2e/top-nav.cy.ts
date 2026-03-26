@@ -74,7 +74,7 @@ describe('App Top Nav Workflows', () => {
       it('shows list of browser options in dropdown when selected', () => {
         cy.findByTestId('top-nav-active-browser').click()
 
-        cy.findAllByTestId('top-nav-browser-list-item').as('browserItems').should('have.length', 4)
+        cy.findAllByTestId('top-nav-browser-list-item').as('browserItems').should('have.length', 3)
 
         cy.get('@browserItems').eq(0)
         .should('contain', 'Chrome')
@@ -89,12 +89,6 @@ describe('App Top Nav Workflows', () => {
         .should('not.exist')
 
         cy.get('@browserItems').eq(2)
-        .should('contain', 'Electron')
-        .and('contain', 'Version 13')
-        .findByTestId('top-nav-browser-list-selected-item')
-        .should('not.exist')
-
-        cy.get('@browserItems').eq(3)
         .should('contain', 'Firefox')
         .and('contain', 'Version 6')
         .findByTestId('top-nav-browser-list-selected-item')

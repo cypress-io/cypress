@@ -131,8 +131,6 @@ describe('Choose a browser page', () => {
 
       cy.findByRole('radio', { name: 'Firefox v6' })
 
-      cy.findByRole('radio', { name: 'Electron v13' })
-
       cy.findByRole('radio', { name: 'Edge v9' })
     })
 

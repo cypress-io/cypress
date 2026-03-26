@@ -602,9 +602,11 @@ describe('lib/cypress', () => {
           RUN_BROWSER_CHROME,
         ])
       .then(() => {
+        // Chromium opens the browser once, then attaches further specs via connectToNewSpec.
+        expect(browsers.open).to.be.calledOnce
         expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
-      }).then(() => {
-        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
+        expect(browsers.connectToNewSpec).to.be.calledOnce
+        expect(browsers.connectToNewSpec).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
         this.expectExitWith(0)
       })
     })

@@ -6,6 +6,7 @@ const { stripIndent } = require('common-tags')
 const Fixtures = require('@tooling/system-tests')
 const { getCtx } = require('@packages/data-context')
 const { sinon } = require('../spec_helper')
+const { stubMachineBrowsers } = require('./helpers/stub-machine-browsers')
 
 describe('lib/config', () => {
   before(function () {
@@ -28,6 +29,8 @@ describe('lib/config', () => {
       delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
 
       this.ctx = getCtx()
+
+      stubMachineBrowsers(this.ctx, sinon)
 
       this.projectRoot = '/_test-output/path/to/project'
 
