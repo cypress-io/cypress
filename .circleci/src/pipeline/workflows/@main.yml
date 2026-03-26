@@ -56,7 +56,6 @@ linux-x64:
           - driver-integration-tests-chrome
           - driver-integration-tests-chrome-inject-document-domain
           - driver-integration-tests-chrome-beta-inject-document-domain
-          - driver-integration-tests-electron
           - driver-integration-tests-webkit
           - driver-integration-memory-tests
     - lint-types:
@@ -91,10 +90,6 @@ linux-x64:
         context: test-runner:performance-tracking
         requires:
           - system-tests-node-modules-install
-    - system-tests-electron:
-        context: test-runner:performance-tracking
-        requires:
-          - system-tests-node-modules-install
     - system-tests-firefox:
         context: test-runner:performance-tracking
         requires:
@@ -125,10 +120,6 @@ linux-x64:
         requires:
           - build
     - driver-integration-tests-firefox:
-        context: test-runner:cypress-record-key
-        requires:
-          - build
-    - driver-integration-tests-electron:
         context: test-runner:cypress-record-key
         requires:
           - build
@@ -283,12 +274,10 @@ linux-x64:
           - driver-integration-tests-chrome-beta
           - driver-integration-tests-chrome-inject-document-domain
           - driver-integration-tests-chrome-beta-inject-document-domain
-          - driver-integration-tests-electron
           - driver-integration-tests-webkit
           - driver-integration-memory-tests
           - system-tests-non-root
           - system-tests-firefox
-          - system-tests-electron
           - system-tests-chrome
           - system-tests-webkit
           - server-performance-tests

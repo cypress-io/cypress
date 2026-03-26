@@ -155,6 +155,7 @@ We recommend setting your [Cypress Cloud](https://on.cypress.io/features-dashboa
   "builder": "@cypress/schematic:cypress",
   "options": {
     "devServerTarget": "{project-name}:serve",
+    "browser": "chrome",
     "record": true,
     "key": "your-cypress-cloud-recording-key"
   },
@@ -177,6 +178,7 @@ It may be useful to have different Cypress configuration files per environment (
   "builder": "@cypress/schematic:cypress",
   "options": {
     "devServerTarget": "{project-name}:serve",
+    "browser": "chrome",
     "configFile": "cypress.production.js"
   },
   "configurations": {
@@ -196,6 +198,7 @@ Read our docs to learn more about all the [configuration options](https://on.cyp
   "builder": "@cypress/schematic:cypress",
   "options": {
     "devServerTarget": "{project-name}:serve",
+    "browser": "chrome",
     "parallel": true,
     "record": true,
     "key": "your-cypress-cloud-recording-key"
@@ -219,6 +222,7 @@ You may want to specify a custom reporter. Cypress works with any reporters buil
   "builder": "@cypress/schematic:cypress",
   "options": {
     "devServerTarget": "{project-name}:serve",
+    "browser": "chrome",
     "reporter": "junit",
     "reporterOptions": {
       "mochaFile": "results/my-test-output.xml",
@@ -246,6 +250,7 @@ You can specify a `baseUrl` that is different than the one in `cypress.config.js
   "builder": "@cypress/schematic:cypress",
   "options": {
     "devServerTarget": "{project-name}:serve",
+    "browser": "chrome",
     "watch": true,
     "headless": false
   },

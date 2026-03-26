@@ -4,20 +4,20 @@ describe('e2e plugin run events', () => {
   systemTests.setup()
 
   systemTests.it('sends events', {
-    browser: 'electron',
+    browser: 'chrome',
     project: 'plugin-run-events',
     snapshot: true,
   })
 
   systemTests.it('handles async before:spec', {
-    browser: 'electron',
+    browser: 'chrome',
     project: 'plugin-run-events',
     snapshot: true,
     configFile: 'cypress.config.beforeSpec.async.js',
   })
 
   systemTests.it('handles video being deleted in after:spec', {
-    browser: 'electron',
+    browser: 'chrome',
     project: 'plugin-run-events',
     spec: '*1.cy.js',
     configFile: 'cypress.config.afterSpec.deleteVideo.js',
@@ -25,7 +25,7 @@ describe('e2e plugin run events', () => {
   })
 
   systemTests.it('fails run if event handler throws', {
-    browser: 'electron',
+    browser: 'chrome',
     project: 'plugin-run-events',
     snapshot: true,
     expectedExitCode: 1,

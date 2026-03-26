@@ -1049,13 +1049,16 @@ async function ready (options: ReadyOptions) {
 
   _.defaults(options, {
     isTextTerminal: true,
-    browser: 'electron',
     quiet: false,
   })
 
   const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
   assert(socketId)
+
+  if (browserName == null || (typeof browserName === 'string' && browserName.trim() === '')) {
+    errors.throwErr('BROWSER_NOT_SPECIFIED_FOR_RUN')
+  }
 
   // this needs to be a closure over `exitEarly` and not a reference
   // because `exitEarly` gets overwritten in `listenForProjectEnd`

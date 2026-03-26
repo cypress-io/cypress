@@ -54,7 +54,7 @@ const normalizeSnapshot = (str: string) => {
 const BROWSER_LIST_REGEX = /(found on your system are:)(?:\n - .*)*/
 
 const normalizeBrowsers = (message: string) => {
-  return message.replace(BROWSER_LIST_REGEX, '$1\n - chrome\n - firefox\n - electron')
+  return message.replace(BROWSER_LIST_REGEX, '$1\n - chrome\n - firefox')
 }
 
 // When we added component testing mode, we added the option for electron to be omitted
@@ -131,7 +131,6 @@ describe('lib/browsers/index', () => {
       const foundBrowsers: TestBrowser[] = [
         { name: 'chrome', channel: 'stable' },
         { name: 'firefox', channel: 'stable' },
-        { name: 'electron', channel: 'stable' },
       ]
 
       return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound', false, foundBrowsers as FoundBrowser[]))
@@ -153,6 +152,15 @@ describe('lib/browsers/index', () => {
       .then((err: CypressErrorType) => {
         return normalizeSnapshot(err.message)
       })
+    })
+
+    it('throws when electron is requested by name', () => {
+      const foundBrowsers: TestBrowser[] = [
+        { name: 'chrome', channel: 'stable' },
+      ]
+
+      return expect(browsers.ensureAndGetByNameOrPath('electron', false, foundBrowsers as FoundBrowser[]))
+      .to.be.rejectedWith({ type: 'BROWSER_ELECTRON_REMOVED' } as any)
     })
   })
 

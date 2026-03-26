@@ -541,7 +541,6 @@ Can't run because you've entered an invalid browser name.
 Browser: browserDoesNotExist was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
- - electron
  - chrome
  - chromium
  - chrome-for-testing

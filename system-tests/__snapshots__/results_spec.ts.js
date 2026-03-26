@@ -1,6 +1,6 @@
 exports['module api and after:run results'] = `
 {
-  "browserName": "electron",
+  "browserName": "chrome",
   "browserPath": "",
   "browserVersion": "X.Y.Z",
   "config": {
@@ -72,11 +72,11 @@ exports['module api and after:run results'] = `
     "browsers": [
       {
         "channel": "stable",
-        "displayName": "Electron",
+        "displayName": "Chrome",
         "family": "chromium",
         "majorVersion": "X",
-        "name": "electron",
-        "path": "",
+        "name": "chrome",
+        "path": "/path/to/chrome",
         "version": "X.Y.Z"
       }
     ],

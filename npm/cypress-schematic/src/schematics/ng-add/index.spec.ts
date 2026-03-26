@@ -37,6 +37,14 @@ describe('@cypress/schematic: ng-add', () => {
 
   it('should create cypress files for e2e testing by default', async () => {
     await schematicRunner.runSchematic('ng-add', {}, appTree).then((tree: UnitTestTree) => {
+      const angularJson = readAngularJson(tree)
+      const architect = (angularJson.projects as JsonObject).sandbox as JsonObject
+      const arch = architect.architect as JsonObject
+
+      expect((arch['cypress-run'] as JsonObject).options).to.have.property('browser', 'chrome')
+      expect((arch['cypress-open'] as JsonObject).options).to.have.property('browser', 'chrome')
+      expect((arch.e2e as JsonObject).options).to.have.property('browser', 'chrome')
+
       const files = tree.files
 
       expect(files).to.contain('/projects/sandbox/cypress/e2e/spec.cy.ts')
@@ -50,6 +58,12 @@ describe('@cypress/schematic: ng-add', () => {
 
   it('should create cypress files for component testing', async () => {
     await schematicRunner.runSchematic('ng-add', { 'component': true }, appTree).then((tree: UnitTestTree) => {
+      const angularJson = readAngularJson(tree)
+      const architect = (angularJson.projects as JsonObject).sandbox as JsonObject
+      const arch = architect.architect as JsonObject
+
+      expect((arch.ct as JsonObject).options).to.have.property('browser', 'chrome')
+
       const files = tree.files
 
       expect(files).to.contain('/projects/sandbox/cypress/support/component.ts')

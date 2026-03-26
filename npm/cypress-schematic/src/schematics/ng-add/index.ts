@@ -235,6 +235,7 @@ function modifyAngularJson (options: any): Rule {
           builder,
           options: {
             devServerTarget: `${project}:serve`,
+            browser: 'chrome',
           },
           configurations: {
             production: {
@@ -248,6 +249,7 @@ function modifyAngularJson (options: any): Rule {
           options: {
             watch: true,
             headless: false,
+            browser: 'chrome',
           },
         }
 
@@ -257,6 +259,7 @@ function modifyAngularJson (options: any): Rule {
             devServerTarget: `${project}:serve`,
             watch: true,
             headless: false,
+            browser: 'chrome',
           },
           configurations: {
             production: {
@@ -271,6 +274,7 @@ function modifyAngularJson (options: any): Rule {
             devServerTarget: `${project}:serve`,
             watch: true,
             headless: false,
+            browser: 'chrome',
             testingType: 'component',
           },
           configurations: {

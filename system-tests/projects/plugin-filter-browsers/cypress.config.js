@@ -16,19 +16,19 @@ module.exports = {
         throw new Error('Expected at least 1 browser in the config')
       }
 
-      const electronBrowser = config.browsers.find((browser) => {
-        return browser.name === 'electron'
+      const firefoxBrowser = config.browsers.find((browser) => {
+        return browser.name === 'firefox'
       })
 
-      if (!electronBrowser) {
-        throw new Error('List of browsers passed into plugins does not include Electron browser')
+      if (!firefoxBrowser) {
+        throw new Error('List of browsers passed into plugins does not include Firefox browser')
       }
 
       const changedConfig = {
-        browsers: [electronBrowser],
+        browsers: [firefoxBrowser],
       }
 
-      debug('returning only Electron browser from plugins %o', changedConfig)
+      debug('returning only Firefox browser from plugins %o', changedConfig)
 
       return changedConfig
     },

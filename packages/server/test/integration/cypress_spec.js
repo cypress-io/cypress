@@ -77,14 +77,10 @@ const TYPICAL_BROWSERS = [
   },
 ]
 
-const ELECTRON_BROWSER = {
-  name: 'electron',
-  family: 'chromium',
-  displayName: 'Electron',
-  path: '',
-  version: '99.101.1234',
-  majorVersion: 99,
-}
+const MOCK_EMBEDDED_CHROME_VERSION = '99.101.1234'
+
+const DEFAULT_RUN_BROWSER = TYPICAL_BROWSERS[0]
+const RUN_BROWSER_CHROME = '--browser=chrome'
 
 const previousCwd = process.cwd()
 
@@ -186,10 +182,10 @@ describe('lib/cypress', () => {
     sinon.spy(errors, 'logException')
     sinon.spy(console, 'log')
 
-    // to make sure our Electron browser mock object passes validation during tests
+    // stub embedded Chromium version while running in the Electron shell
     sinon.stub(process, 'versions').value({
       ...processVersions,
-      chrome: ELECTRON_BROWSER.version,
+      chrome: MOCK_EMBEDDED_CHROME_VERSION,
       electron: '123.45.6789',
     })
 
@@ -234,10 +230,6 @@ describe('lib/cypress', () => {
     // all pass the internal validation function
     it('has valid browsers', () => {
       expect(v.isValidBrowserList('browsers', TYPICAL_BROWSERS)).to.be.true
-    })
-
-    it('has valid electron browser', () => {
-      expect(v.isValidBrowserList('browsers', [ELECTRON_BROWSER])).to.be.true
     })
 
     it('allows browser major to be a number', () => {
@@ -365,7 +357,9 @@ describe('lib/cypress', () => {
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
-        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`,
+          RUN_BROWSER_CHROME,
+        ]).then(() => {
           expect(console.log).to.be.calledWith(cloudRecommendationMessage)
 
           snapshotConsoleLogs('CLOUD_RECOMMENDATION_MESSAGE')
@@ -379,7 +373,9 @@ describe('lib/cypress', () => {
         process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS = '0'
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
-        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`,
+          RUN_BROWSER_CHROME,
+        ]).then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
         })
       })
@@ -391,7 +387,9 @@ describe('lib/cypress', () => {
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }
 
-        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`,
+          RUN_BROWSER_CHROME,
+        ]).then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
         })
       })
@@ -403,26 +401,39 @@ describe('lib/cypress', () => {
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 1 } }
 
-        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`]).then(() => {
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${relativePath}/tests/test1.js`,
+          RUN_BROWSER_CHROME,
+        ]).then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)
         })
       })
     })
 
     it('runs project headlessly and exits with exit code 0', function () {
+      return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
+      .then(() => {
+        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER)
+        this.expectExitWith(0)
+      })
+    })
+
+    it('logs error when browser is not specified for cypress run', function () {
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
-        this.expectExitWith(0)
+        this.expectExitWithErr('BROWSER_NOT_SPECIFIED_FOR_RUN')
       })
     })
 
     it('sets --headed false if --headless', function () {
       sinon.spy(cypress, 'startInMode')
 
-      return cypress.start([`--run-project=${this.todosPath}`, '--headless'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--headless',
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER)
         this.expectExitWith(0)
 
         // check how --headless option sets --headed
@@ -439,7 +450,9 @@ describe('lib/cypress', () => {
 
     it('throws an error if both --headed and --headless are true', function () {
       // error is thrown synchronously
-      expect(() => cypress.start([`--run-project=${this.todosPath}`, '--headless', '--headed']))
+      expect(() => cypress.start([`--run-project=${this.todosPath}`, '--headless', '--headed',
+          RUN_BROWSER_CHROME,
+        ]))
       .to.throw('Impossible options: both headless and headed are true')
     })
 
@@ -449,10 +462,12 @@ describe('lib/cypress', () => {
       })
 
       it('strips leading', function () {
-        return cypress.start(['--', `--run-project=${this.todosPath}`])
+        return cypress.start(['--', `--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
         .then(() => {
-          expect(argsUtil.toObject).to.have.been.calledWith([`--run-project=${this.todosPath}`])
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+          expect(argsUtil.toObject).to.have.been.calledWith([`--run-project=${this.todosPath}`, RUN_BROWSER_CHROME])
+          expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER)
           this.expectExitWith(0)
         })
       })
@@ -461,8 +476,7 @@ describe('lib/cypress', () => {
         return cypress.start([`--run-project=${this.todosPath}`, '--', '--browser=electron'])
         .then(() => {
           expect(argsUtil.toObject).to.have.been.calledWith([`--run-project=${this.todosPath}`, '--browser=electron'])
-          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
-          this.expectExitWith(0)
+          this.expectExitWithErr('BROWSER_ELECTRON_REMOVED')
         })
       })
     })
@@ -470,7 +484,9 @@ describe('lib/cypress', () => {
     it('runs project headlessly and exits with exit code 10', function () {
       globalThis.CY_TEST_MOCK.runSpecs = { totalFailed: 10 }
 
-      return cypress.start([`--run-project=${this.todosPath}`])
+      return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWith(10)
       })
@@ -488,7 +504,8 @@ describe('lib/cypress', () => {
         '--record',
         '--key=test-key',
         '--posix-exit-codes',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWith(112)
       })
@@ -508,7 +525,8 @@ describe('lib/cypress', () => {
         '--parallel',
         '--ci-build-id=test-build-id',
         '--posix-exit-codes',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWith(1)
       })
@@ -520,7 +538,9 @@ describe('lib/cypress', () => {
         // no projects in the cache
         expect(projects.length).to.eq(0)
 
-        return cypress.start([`--run-project=${this.todosPath}`])
+        return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       }).then(() => {
         return cache.getProjectRoots()
       }).then((projects) => {
@@ -535,9 +555,10 @@ describe('lib/cypress', () => {
       return cypress.start([
         `--run-project=${this.todosPath}`,
         `--spec=${relativePath}/tests/test2.coffee`,
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
+        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, {
           url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee',
         })
 
@@ -546,36 +567,44 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by specific spec with default configuration', function () {
-      return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/**/*qux*`, '--config', 'port=2020'])
+      return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/**/*qux*`, '--config', 'port=2020',
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/specs/runner?file=cypress/e2e/qux.cy.js' })
+        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, { url: 'http://localhost:2020/__/#/specs/runner?file=cypress/e2e/qux.cy.js' })
         expect(browsers.open).to.be.calledOnce
         this.expectExitWith(0)
       })
     })
 
     it('runs project by specific absolute spec and exits with status 0', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
+      return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`,
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
         this.expectExitWith(0)
       })
     })
 
     it('runs project by limiting spec files via config.e2e.specPattern string glob pattern', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.coffee"}}`])
+      return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.coffee"}}`,
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
         this.expectExitWith(0)
       })
     })
 
     it('runs project by limiting spec files via config.e2e.specPattern as a JSON array of string glob patterns', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.coffee","**/test1.js"]}}'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.coffee","**/test1.js"]}}',
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
       }).then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
+        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
         this.expectExitWith(0)
       })
     })
@@ -594,7 +623,9 @@ describe('lib/cypress', () => {
         fs.statAsync(path.join(this.pristinePath, 'cypress.config.js')).reflect(),
       ])
       .each(ensureDoesNotExist).then(() => {
-        return cypress.start([`--run-project=${this.pristinePath}`])
+        return cypress.start([`--run-project=${this.pristinePath}`,
+          RUN_BROWSER_CHROME,
+        ])
       }).then(() => {
         return Promise.all([
           fs.statAsync(path.join(this.pristinePath, 'cypress')).reflect(),
@@ -604,9 +635,11 @@ describe('lib/cypress', () => {
     })
 
     it('runs project headed and displays gui', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--headed'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--headed',
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
+        expect(browsers.open).to.be.calledWithMatch(DEFAULT_RUN_BROWSER, {
           proxyServer: 'http://localhost:8888',
           browser: {
             isHeadless: false,
@@ -620,7 +653,9 @@ describe('lib/cypress', () => {
     it('turns on reporting', function () {
       sinon.spy(Reporter, 'create')
 
-      return cypress.start([`--run-project=${this.todosPath}`])
+      return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         expect(Reporter.create).to.be.calledWith('spec')
         this.expectExitWith(0)
@@ -630,7 +665,9 @@ describe('lib/cypress', () => {
     it('can change the reporter to nyan', function () {
       sinon.spy(Reporter, 'create')
 
-      return cypress.start([`--run-project=${this.todosPath}`, '--reporter=nyan'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--reporter=nyan',
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         expect(Reporter.create).to.be.calledWith('nyan')
         this.expectExitWith(0)
@@ -640,7 +677,9 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.config.js', async function () {
       sinon.spy(Reporter, 'create')
 
-      return cypress.start([`--run-project=${this.idsPath}`, `--config-file=${this.idsPath}/cypress.dot-reporter.config.js`])
+      return cypress.start([`--run-project=${this.idsPath}`, `--config-file=${this.idsPath}/cypress.dot-reporter.config.js`,
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         expect(Reporter.create).to.be.calledWith('dot')
         this.expectExitWith(0)
@@ -650,14 +689,18 @@ describe('lib/cypress', () => {
     it('runs tests even when user isn\'t logged in', function () {
       return user.set({})
       .then(() => {
-        return cypress.start([`--run-project=${this.todosPath}`])
+        return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       }).then(() => {
         this.expectExitWith(0)
       })
     })
 
     it('logs warning when projectId and key but no record option', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--key=asdf'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--key=asdf',
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         expect(errors.warning).to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', 'abc123')
         expect(console.log).to.be.calledWithMatch('You also provided your Record Key, but you did not pass the')
@@ -671,7 +714,9 @@ describe('lib/cypress', () => {
 
       sinon.stub(browsers, 'removeOldProfiles').rejects(err)
 
-      return cypress.start([`--run-project=${this.todosPath}`])
+      return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         expect(errors.warning).to.be.calledWith('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err)
         expect(console.log).to.be.calledWithMatch('Warning: We failed to remove old browser profiles from previous runs.')
@@ -680,7 +725,9 @@ describe('lib/cypress', () => {
     })
 
     it('does not log warning when no projectId', function () {
-      return cypress.start([`--run-project=${this.pristinePath}`, '--key=asdf'])
+      return cypress.start([`--run-project=${this.pristinePath}`, '--key=asdf',
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         expect(errors.warning).not.to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', 'abc123')
         expect(console.log).not.to.be.calledWithMatch('cypress run --key <record_key>')
@@ -688,7 +735,9 @@ describe('lib/cypress', () => {
     })
 
     it('does not log warning when projectId but --record false', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--key=asdf', '--record=false'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--key=asdf', '--record=false',
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         expect(errors.warning).not.to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', 'abc123')
         expect(console.log).not.to.be.calledWithMatch('cypress run --key <record_key>')
@@ -698,7 +747,9 @@ describe('lib/cypress', () => {
     it(`logs error when supportFile doesn't exist`, function () {
       return settings.writeForTesting(this.idsPath, { e2e: { supportFile: '/does/not/exist' } })
       .then(() => {
-        return cypress.start([`--run-project=${this.idsPath}`])
+        return cypress.start([`--run-project=${this.idsPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       })
       .then(() => {
         this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', `Your supportFile is missing or invalid: /does/not/exist`)
@@ -738,7 +789,7 @@ describe('lib/cypress', () => {
         const found3 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && stripAnsi(arg.message).includes(
-              'Available browsers found on your system are:\n - chrome\n - chromium\n - chrome:canary\n - electron',
+              'Available browsers found on your system are:\n - chrome\n - chromium\n - chrome:canary',
             )
           })
         })
@@ -755,6 +806,7 @@ describe('lib/cypress', () => {
           `--cwd=${cwd}`,
           `--run-project=${this.todosPath}`,
           '--spec=path/to/spec',
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           // includes the search spec
@@ -771,6 +823,7 @@ describe('lib/cypress', () => {
           `--cwd=${cwd}`,
           `--run-project=${this.todosPath}`,
           '--spec=../path/to/spec',
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           // includes the search spec
@@ -787,6 +840,7 @@ describe('lib/cypress', () => {
           `--cwd=${cwd}`,
           `--run-project=${this.todosPath}`,
           '--spec=../path/to/**/*',
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           // includes the search spec
@@ -800,6 +854,7 @@ describe('lib/cypress', () => {
         return cypress.start([
           `--run-project=${this.todosPath}`,
           `--spec=/path/to/spec`,
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           // includes folder name + path to the spec
@@ -812,6 +867,7 @@ describe('lib/cypress', () => {
         return cypress.start([
           `--run-project=${this.todosPath}`,
           '--spec=/this/does/not/exist/**/*',
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           this.expectExitWithErr('NO_SPECS_FOUND', 'We searched for specs matching this glob pattern')
@@ -823,7 +879,9 @@ describe('lib/cypress', () => {
     it('logs error and exits when project has cypress.config.js syntax error', function () {
       return fs.writeFileAsync(`${this.todosPath}/cypress.config.js`, `module.exports = {`)
       .then(() => {
-        return cypress.start([`--run-project=${this.todosPath}`])
+        return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       }).then(() => {
         this.expectExitWithErr('CONFIG_FILE_REQUIRE_ERROR', this.todosPath)
       })
@@ -832,7 +890,9 @@ describe('lib/cypress', () => {
     it('logs error and exits when project has cypress.env.json syntax error', function () {
       return fs.writeFileAsync(`${this.todosPath}/cypress.env.json`, '{\'foo\': \'bar}')
       .then(() => {
-        return cypress.start([`--run-project=${this.todosPath}`])
+        return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       }).then(() => {
         this.expectExitWithErr('ERROR_READING_FILE', this.todosPath)
       })
@@ -841,7 +901,9 @@ describe('lib/cypress', () => {
     it('logs error and exits when project has invalid cypress.config.js values', function () {
       return settings.writeForTesting(this.todosPath, { baseUrl: 'localhost:9999' })
       .then(() => {
-        return cypress.start([`--run-project=${this.todosPath}`])
+        return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       }).then(() => {
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'cypress.config.js')
       })
@@ -851,7 +913,8 @@ describe('lib/cypress', () => {
       return cypress.start([
         `--run-project=${this.todosPath}`,
         '--config=baseUrl=localhost:9999',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'An invalid configuration value was set.')
@@ -861,7 +924,9 @@ describe('lib/cypress', () => {
     it('logs error and exits when project has invalid config values from env vars', function () {
       process.env.CYPRESS_BASE_URL = 'localhost:9999'
 
-      return cypress.start([`--run-project=${this.todosPath}`])
+      return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'An invalid configuration value was set.')
@@ -881,6 +946,7 @@ describe('lib/cypress', () => {
         return cypress.start([
           `--run-project=${this.todosPath}`,
           `--config=${config.old}=''`,
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.old)
@@ -912,7 +978,9 @@ describe('lib/cypress', () => {
         // read only
         return fs.chmodAsync(permissionsPath, '555')
       }).then(() => {
-        return cypress.start([`--run-project=${permissionsPath}`])
+        return cypress.start([`--run-project=${permissionsPath}`,
+          RUN_BROWSER_CHROME,
+        ])
       }).then(() => {
         return fs.chmodAsync(permissionsPath, '777')
       }).then(() => {
@@ -923,7 +991,9 @@ describe('lib/cypress', () => {
     })
 
     it('logs error and exits when reporter does not exist', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--reporter', 'foobarbaz'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--reporter', 'foobarbaz',
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('INVALID_REPORTER_NAME', 'foobarbaz')
       })
@@ -940,7 +1010,9 @@ describe('lib/cypress', () => {
       })
 
       it('does not save project state', function () {
-        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`,
+          RUN_BROWSER_CHROME,
+        ])
         .then(() => {
           this.expectExitWith(0)
 
@@ -958,7 +1030,9 @@ describe('lib/cypress', () => {
 
     describe('morgan', () => {
       it('sets morgan to false', function () {
-        return cypress.start([`--run-project=${this.todosPath}`])
+        return cypress.start([`--run-project=${this.todosPath}`,
+          RUN_BROWSER_CHROME,
+        ])
         .then(() => {
           expect(openProject.getProject().cfg.morgan).to.be.false
           this.expectExitWith(0)
@@ -972,7 +1046,9 @@ describe('lib/cypress', () => {
       })
 
       it('can override default values', function () {
-        return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=true'])
+        return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=true',
+          RUN_BROWSER_CHROME,
+        ])
         .then(() => {
           const { cfg } = openProject.getProject()
 
@@ -997,6 +1073,7 @@ describe('lib/cypress', () => {
         return cypress.start([
           `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=true',
           '--env=foo=foo,bar=bar',
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           const { cfg } = openProject.getProject()
@@ -1113,41 +1190,13 @@ describe('lib/cypress', () => {
           })
         })
 
-        it('electron', function () {
-          // during testing, do not try to connect to the remote interface or
-          // use the Chrome remote interface client
-          const criClient = {
-            on: sinon.stub(),
-            off: sinon.stub(),
-            send: sinon.stub(),
-          }
-          const browserCriClient = {
-            attachToTargetUrl: sinon.stub().resolves(criClient),
-            currentlyAttachedTarget: criClient,
-            currentlyAttachedProtocolTarget: criClient,
-            close: sinon.stub().resolves(),
-            getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
-          }
-
-          sinon.stub(BrowserCriClient, 'create').resolves(browserCriClient)
-
-          videoCapture.start.returns()
-
+        it('electron is not a supported browser name', function () {
           return cypress.start([
             `--run-project=${this.pluginBrowser}`,
             '--browser=electron',
           ])
           .then(() => {
-            expect(Windows.create).to.be.calledWithMatch(this.pluginBrowser, {
-              browser: 'electron',
-              foo: 'bar',
-              onNewWindow: sinon.match.func,
-            })
-
-            expect(BrowserCriClient.create).to.have.been.calledOnce
-            expect(browserCriClient.attachToTargetUrl).to.have.been.calledOnce
-
-            this.expectExitWith(0)
+            this.expectExitWithErr('BROWSER_ELECTRON_REMOVED')
           })
         })
       })
@@ -1162,7 +1211,9 @@ describe('lib/cypress', () => {
         const listen = sinon.spy(http.Server.prototype, 'listen')
         const open = sinon.spy(ServerBase.prototype, 'open')
 
-        return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
+        return cypress.start([`--run-project=${this.todosPath}`, '--port=5544',
+          RUN_BROWSER_CHROME,
+        ])
         .then(() => {
           expect(openProject.getProject().cfg.port).to.eq(5544)
           expect(listen).to.be.calledWith(5544)
@@ -1179,7 +1230,9 @@ describe('lib/cypress', () => {
 
         return server.listenAsync(5544, '127.0.0.1')
         .then(() => {
-          return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
+          return cypress.start([`--run-project=${this.todosPath}`, '--port=5544',
+          RUN_BROWSER_CHROME,
+        ])
         }).then(() => {
           this.expectExitWithErr('PORT_IN_USE_SHORT', '5544')
         })
@@ -1200,6 +1253,7 @@ describe('lib/cypress', () => {
           '--video=false',
           '--env',
           'version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor',
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           expect(openProject.getProject().cfg.env).to.deep.eq({
@@ -1218,6 +1272,7 @@ describe('lib/cypress', () => {
           `--run-project=${this.todosPath}`,
           '--video=false',
           '--env=FOO=,BAR=,BAZ=ipsum',
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           expect(openProject.getProject().cfg.env).to.deep.eq({
@@ -1334,7 +1389,8 @@ describe('lib/cypress', () => {
         `--run-project=${this.noScaffolding}`,
         '--record',
         '--key=token-123',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         expect(api.createRun).to.be.calledWithMatch({ projectId: this.projectId })
         expect(errors.warning).not.to.be.called
@@ -1351,7 +1407,8 @@ describe('lib/cypress', () => {
         '--cwd=/foo/bar',
         `--run-project=${this.noScaffolding}`,
         '--record',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         expect(api.createRun).to.be.calledWithMatch({
           projectId: 'foo-project-123',
@@ -1372,7 +1429,8 @@ describe('lib/cypress', () => {
         '--record',
         '--key=token-123',
         '--group=e2e-tests',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('INDETERMINATE_CI_BUILD_ID')
 
@@ -1389,7 +1447,8 @@ describe('lib/cypress', () => {
         '--record',
         '--key=token-123',
         '--parallel',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('INDETERMINATE_CI_BUILD_ID')
 
@@ -1407,7 +1466,8 @@ describe('lib/cypress', () => {
         '--key=token-123',
         '--group=e2e-tests-chrome',
         '--parallel',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('INDETERMINATE_CI_BUILD_ID')
 
@@ -1421,7 +1481,8 @@ describe('lib/cypress', () => {
         '--record',
         '--key=token-123',
         '--ci-build-id=ciBuildId123',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('INCORRECT_CI_BUILD_ID_USAGE')
 
@@ -1433,7 +1494,8 @@ describe('lib/cypress', () => {
       return cypress.start([
         `--run-project=${this.recordPath}`,
         '--ci-build-id=ciBuildId123',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
 
@@ -1445,7 +1507,8 @@ describe('lib/cypress', () => {
       return cypress.start([
         `--run-project=${this.recordPath}`,
         '--group=e2e-tests',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
 
@@ -1457,7 +1520,8 @@ describe('lib/cypress', () => {
       return cypress.start([
         `--run-project=${this.recordPath}`,
         '--parallel',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
 
@@ -1469,7 +1533,8 @@ describe('lib/cypress', () => {
       return cypress.start([
         `--run-project=${this.recordPath}`,
         '--tag=nightly',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
 
@@ -1483,7 +1548,8 @@ describe('lib/cypress', () => {
         '--tag=nightly',
         '--group=electron-smoke-tests',
         '--parallel',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
 
@@ -1495,7 +1561,8 @@ describe('lib/cypress', () => {
       return cypress.start([
         `--run-project=${this.recordPath}`,
         '--auto-cancel-after-failures=4',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('RECORD_PARAMS_WITHOUT_RECORDING')
 
@@ -1524,7 +1591,8 @@ describe('lib/cypress', () => {
         '--key=token-123',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         return snapshotConsoleLogs('Long Cypress Cloud URL')
       })
@@ -1549,7 +1617,8 @@ describe('lib/cypress', () => {
         '--key=token-123',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('CLOUD_RUN_GROUP_NAME_NOT_UNIQUE')
 
@@ -1600,7 +1669,8 @@ describe('lib/cypress', () => {
         '--parallel',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('CLOUD_PARALLEL_GROUP_PARAMS_MISMATCH')
 
@@ -1628,7 +1698,8 @@ describe('lib/cypress', () => {
         '--parallel',
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('CLOUD_PARALLEL_DISALLOWED')
 
@@ -1658,7 +1729,8 @@ describe('lib/cypress', () => {
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
         '--auto-cancel-after-failures=4',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('CLOUD_PARALLEL_REQUIRED')
 
@@ -1687,7 +1759,8 @@ describe('lib/cypress', () => {
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
         '--auto-cancel-after-failures=4',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('CLOUD_ALREADY_COMPLETE')
 
@@ -1717,7 +1790,8 @@ describe('lib/cypress', () => {
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
         '--auto-cancel-after-failures=4',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('CLOUD_STALE_RUN')
 
@@ -1746,7 +1820,8 @@ describe('lib/cypress', () => {
         '--group=electron-smoke-tests',
         '--ciBuildId=ciBuildId123',
         '--auto-cancel-after-failures=4',
-      ])
+          RUN_BROWSER_CHROME,
+        ])
       .then(() => {
         this.expectExitWithErr('CLOUD_AUTO_CANCEL_MISMATCH')
 
@@ -1767,6 +1842,7 @@ describe('lib/cypress', () => {
           '--group=electron-smoke-tests',
           '--ciBuildId=ciBuildId123',
           '--auto-cancel-after-failures=4',
+          RUN_BROWSER_CHROME,
         ])
         .then(() => {
           expect(console.log).not.to.be.calledWith(cloudRecommendationMessage)

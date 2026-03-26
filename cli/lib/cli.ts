@@ -104,6 +104,7 @@ const parseVariableOpts = (fnArgs: any[], args: string[]): any => {
 const descriptions: any = {
   autoCancelAfterFailures: 'overrides the project-level Cloud configuration to set the failed test threshold for auto cancellation or to disable auto cancellation when recording to the Cloud',
   browser: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
+  browserRun: 'required for cypress run: name or path of the browser to run tests in (for example chrome or firefox). electron is not supported.',
   cacheClear: 'delete all cached binaries',
   cachePrune: 'deletes all cached binaries except for the version currently in use',
   cacheList: 'list cached binary versions',
@@ -247,7 +248,7 @@ const addCypressRunCommand = (program: any): any => {
   .usage('[options]')
   .description('Runs Cypress tests from the CLI without the GUI')
   .option('--auto-cancel-after-failures <test-failure-count || false>', text('autoCancelAfterFailures'))
-  .option('-b, --browser <browser-name-or-path>', text('browser'))
+  .option('-b, --browser <browser-name-or-path>', text('browserRun'))
   .option('--ci-build-id <id>', text('ciBuildId'))
   .option('--component', text('component'))
   .option('-c, --config <config>', text('config'))

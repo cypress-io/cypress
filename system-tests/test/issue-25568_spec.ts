@@ -14,7 +14,7 @@ describe('component testing issue 25568', function () {
     return systemTests.exec(this, {
       project: 'vite-simple',
       testingType: 'component',
-      browser: 'electron',
+      browser: 'chrome',
     })
   })
 })

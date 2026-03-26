@@ -112,7 +112,7 @@ describe('e2e screenshots', () => {
             sizeOf(screenshot7),
           ])
         }).then((dimensions = []) => {
-          if (browser === 'electron') {
+          if (browser === 'chrome') {
             // all of the images should be 1280x720
             // since thats what we run headlessly
             return _.each(dimensions, (dimension) => {

@@ -5,7 +5,6 @@ describe('per-test config', () => {
     ranFirefox: false,
     ranChrome: false,
     ranChromium: false,
-    ranElectron: false,
     ranWebKit: false,
   }
 
@@ -18,7 +17,6 @@ describe('per-test config', () => {
       ranChrome: name === 'chrome',
       ranChromium: name === 'chromium',
       ranFirefox: name === 'firefox',
-      ranElectron: name === 'electron',
       ranWebKit: name === 'webkit',
     })
   })
@@ -69,13 +67,6 @@ describe('per-test config', () => {
   }, () => {
     testState.ranFirefox = true
     expect(Cypress.browser.name).eq('firefox')
-  })
-
-  it('can specify only run in electron', {
-    browser: 'electron',
-  }, () => {
-    testState.ranElectron = true
-    expect(Cypress.browser.name).eq('electron')
   })
 
   it('can specify only run in webkit', {

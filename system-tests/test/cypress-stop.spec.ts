@@ -38,7 +38,7 @@ describe('Cypress.stop()', () => {
     spec: 'before.cy.js',
     snapshot: true,
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
     processEnv: {
       ELECTRON_ENABLE_LOGGING: 1,
     },
@@ -71,7 +71,7 @@ describe('Cypress.stop()', () => {
     spec: 'beforeEach.cy.js',
     snapshot: true,
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
     processEnv: {
       ELECTRON_ENABLE_LOGGING: 1,
     },
@@ -104,7 +104,7 @@ describe('Cypress.stop()', () => {
     spec: 'test.cy.js',
     snapshot: true,
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
     processEnv: {
       ELECTRON_ENABLE_LOGGING: 1,
     },
@@ -137,7 +137,7 @@ describe('Cypress.stop()', () => {
     spec: 'afterEach.cy.js',
     snapshot: true,
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
     processEnv: {
       ELECTRON_ENABLE_LOGGING: 1,
     },
@@ -170,7 +170,7 @@ describe('Cypress.stop()', () => {
     spec: 'after.cy.js',
     snapshot: true,
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
     processEnv: {
       ELECTRON_ENABLE_LOGGING: 1,
     },

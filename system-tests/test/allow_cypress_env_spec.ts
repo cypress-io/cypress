@@ -8,7 +8,7 @@ describe('allowCypressEnv', () => {
     configFile: 'cypress-without-allow-cypress-env.config.ts',
     snapshot: true,
     expectedExitCode: 1,
-    browser: 'electron',
+    browser: 'chrome',
   })
 
   systemTests.it('correctly prints a warning when trying to use Cypress.env() with allowCypressEnv=true', {
@@ -16,7 +16,7 @@ describe('allowCypressEnv', () => {
     configFile: 'cypress-with-allow-cypress-env.config.ts',
     snapshot: true,
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
     async onRun (exec) {
       const res = await exec()
 

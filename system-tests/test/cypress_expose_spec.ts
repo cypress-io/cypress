@@ -8,12 +8,12 @@ describe('cypress_expose', () => {
     project: 'cypress-expose',
     configFile: 'cypress-expose-in-config.config.ts',
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
   })
 
   systemTests.it('Hydrates Cypress.expose() from the CLI via "--expose" argument', {
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
     command: 'cypress',
     args: [
       'run',
@@ -26,7 +26,7 @@ describe('cypress_expose', () => {
 
   systemTests.it('Hydrates Cypress.expose() from the CLI via "-x" argument', {
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
     command: 'cypress',
     args: [
       'run',

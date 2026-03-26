@@ -18,6 +18,6 @@ describe('e2e issue 5016 - screenshot times out after clicking target _blank', f
     sanitizeScreenshotDimensions: true,
     snapshot: true,
     expectedExitCode: 1,
-    browser: 'electron',
+    browser: 'chrome',
   })
 })

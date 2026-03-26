@@ -3,7 +3,7 @@ import systemTests, { ItOptions } from '../lib/system-tests'
 function smokeTestDockerImage (title: string, dockerImage: string, expectedExitCode: number, onRun?: ItOptions['onRun']) {
   systemTests.it(title, {
     withBinary: true,
-    browser: 'electron',
+    browser: 'chrome',
     dockerImage,
     spec: 'test1.js',
     specDir: 'tests',

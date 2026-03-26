@@ -1,4 +1,4 @@
-import systemTests, { BrowserName } from '../lib/system-tests'
+import systemTests from '../lib/system-tests'
 
 describe('e2e headless', function () {
   systemTests.setup()
@@ -33,12 +33,6 @@ describe('e2e headless', function () {
         })
       },
     })
-
-    systemTests.it('fails for browsers that do need xvfb', {
-      ...baseSpec,
-      expectedExitCode: 1,
-      browser: ['electron'],
-    })
   })
 
   // cypress run --headless
@@ -54,27 +48,17 @@ describe('e2e headless', function () {
     snapshot: true,
   })
 
-  // NOTE: cypress run --headed
-  // currently, Electron differs because it displays a
-  // "can not record video in headed mode" error
-  // this trick allows us to have 1 snapshot for electron
-  // and 1 for every other browser
-  ;([
-    'electron',
-    '!electron',
-  ] as BrowserName[]).map((b) => {
-    systemTests.it(`tests in headed mode pass in ${b}`, {
-      spec: 'headless.cy.js',
-      config: {
-        env: {
-          'CI': process.env.CI,
-        },
+  systemTests.it('tests in headed mode pass in chrome', {
+    spec: 'headless.cy.js',
+    config: {
+      env: {
+        'CI': process.env.CI,
       },
-      expectedExitCode: 0,
-      headed: true,
-      snapshot: true,
-      browser: b,
-    })
+    },
+    expectedExitCode: 0,
+    headed: true,
+    snapshot: true,
+    browser: 'chrome',
   })
 
   systemTests.it('launches maximized by default in headless mode', {

@@ -958,9 +958,9 @@ commands:
         type: string
         default: "cypress-realworld-app"
       browser:
-        description: Name of the browser to use, like "electron", "chrome", "firefox"
+        description: Name of the browser to use, like "chrome", "firefox", "webkit"
         type: enum
-        enum: [ "", "electron", "chrome", "firefox" ]
+        enum: [ "", "chrome", "firefox", "webkit" ]
         default: ""
       command:
         description: Test command to run to start Cypress tests
@@ -1067,9 +1067,9 @@ commands:
         description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
       browser:
-        description: Name of the browser to use, like "electron", "chrome", "firefox"
+        description: Name of the browser to use, like "chrome", "firefox", "webkit"
         type: enum
-        enum: [ "", "electron", "chrome", "firefox" ]
+        enum: [ "", "chrome", "firefox", "webkit" ]
         default: ""
       command:
         description: Test command to run to start Cypress tests
@@ -1703,7 +1703,7 @@ jobs:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
       - run:
-          name: Driver memory tests in Electron
+          name: Driver memory tests in Chrome
           environment:
             CYPRESS_CONFIG_ENV: production
           command: |
@@ -1717,7 +1717,7 @@ jobs:
 
             CYPRESS_INTERNAL_MEMORY_SAVE_STATS=true \
             DEBUG=cypress*memory \
-            yarn cypress:run --browser electron --spec "cypress/e2e/memory/*.cy.*"
+            yarn cypress:run --browser chrome --spec "cypress/e2e/memory/*.cy.*"
           working_directory: packages/driver
       - sanitize-verify-and-store-mocha-results
 
@@ -1964,14 +1964,6 @@ jobs:
       - run-system-tests:
           browser: chrome
 
-  system-tests-electron:
-    <<: *defaults
-    resource_class: medium+
-    parallelism: 8
-    steps:
-      - run-system-tests:
-          browser: electron
-
   system-tests-firefox:
     <<: *defaults
     resource_class: medium+
@@ -1996,7 +1988,7 @@ jobs:
           environment:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
           command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*"
-            --browser electron
+            --browser chrome
       - sanitize-verify-and-store-mocha-results
 
   run-frontend-shared-component-tests-chrome:
@@ -2137,14 +2129,6 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: firefox
-
-  driver-integration-tests-electron:
-    <<: *defaults
-    resource_class: medium+
-    parallelism: 5
-    steps:
-      - run-driver-integration-tests:
-          browser: electron
 
   driver-integration-tests-webkit:
     <<: *defaults
@@ -2772,7 +2756,7 @@ jobs:
           # Split the specs up across 4 different machines to run in parallel
           command: npm run test:ci -- --chunk $CIRCLE_NODE_INDEX --total-chunks
             $CIRCLE_NODE_TOTAL
-          browser: electron
+          browser: chrome
 
   # This is a special job. It allows you to test the current
   # built test runner against a pull request in the repo
@@ -2801,7 +2785,7 @@ jobs:
       - maybe_skip_binary_jobs
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
-          browser: electron
+          browser: chrome
 
   test-binary-against-kitchensink-firefox:
     <<: *defaults

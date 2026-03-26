@@ -12,7 +12,7 @@ describe('e2e headless spec', function () {
     cy.env(['EXPECT_HEADLESS']).then(({ EXPECT_HEADLESS }) => {
       const expectedHeadless = !!EXPECT_HEADLESS
 
-      if (Cypress.browser.family !== 'chromium' || Cypress.browser.name === 'electron') {
+      if (Cypress.browser.family !== 'chromium') {
         return
       }
 

@@ -4,7 +4,7 @@ import os from 'os'
 
 export const e2ePath = Fixtures.projectPath('e2e')
 
-export const DEFAULT_BROWSERS = ['electron', 'chrome', 'chrome-for-testing', 'firefox', 'webkit']
+export const DEFAULT_BROWSERS = ['chrome', 'chrome-for-testing', 'firefox', 'webkit']
 
 export const pathUpToProjectName = Fixtures.projectPath('')
 
@@ -75,7 +75,7 @@ const replaceUploadActivityIndicator = function (str: string, preamble: string, 
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
-export const replaceStackTraceLines = (str: string, browserName: 'electron' | 'firefox' | 'chrome' | 'webkit') => {
+export const replaceStackTraceLines = (str: string, browserName: 'firefox' | 'chrome' | 'chrome-for-testing' | 'webkit') => {
   // matches the newline preceding the stack and any leading whitespace
   const leadingNewLinesAndWhitespace = `(?:\\n?[^\\S\\n\\r]*)`
   // matches against the potential file location patterns, including:

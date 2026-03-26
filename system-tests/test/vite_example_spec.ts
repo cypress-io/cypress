@@ -13,7 +13,7 @@ describe('example vite test', function () {
     testingType: 'component',
     spec: 'src/support.cy.ts',
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
   })
 
   systemTests.it(`should load the support file`, {
@@ -21,6 +21,6 @@ describe('example vite test', function () {
     testingType: 'component',
     spec: 'src/support.cy.ts',
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
   })
 })

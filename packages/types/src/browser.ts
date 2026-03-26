@@ -1,6 +1,6 @@
 export const BROWSER_FAMILY = ['chromium', 'firefox', 'webkit']
 
-type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'webkit' | string
+type BrowserName = 'chrome' | 'chromium' | 'firefox' | 'webkit' | string
 
 export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 

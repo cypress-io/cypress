@@ -1,20 +1,6 @@
 export const longBrowsersList = [
   {
     id: '1',
-    name: 'electron',
-    displayName: 'Electron',
-    family: 'chromium',
-    channel: 'stable',
-    version: '73.0.3683.121',
-    path: '',
-    majorVersion: '73',
-    info: 'Info about electron browser',
-    isFocusSupported: true,
-    isVersionSupported: true,
-    disabled: false,
-  },
-  {
-    id: '2',
     name: 'chrome',
     displayName: 'Chrome',
     family: 'chromium',
@@ -27,7 +13,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '3',
+    id: '2',
     name: 'chrome',
     displayName: 'Chrome',
     family: 'chromium',
@@ -40,7 +26,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '4',
+    id: '3',
     name: 'chrome',
     displayName: 'Canary',
     family: 'chromium',
@@ -53,7 +39,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '5',
+    id: '4',
     name: 'chromium',
     displayName: 'Chromium',
     family: 'chromium',
@@ -66,7 +52,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '6',
+    id: '5',
     name: 'chromium',
     displayName: 'Chromium',
     family: 'chromium',
@@ -79,7 +65,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '7',
+    id: '6',
     name: 'edge',
     displayName: 'Edge Beta',
     family: 'chromium',
@@ -92,7 +78,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '8',
+    id: '7',
     name: 'edge',
     displayName: 'Edge Canary',
     family: 'chromium',
@@ -105,7 +91,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '9',
+    id: '8',
     name: 'edge',
     displayName: 'Edge Dev',
     family: 'chromium',
@@ -118,7 +104,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '10',
+    id: '9',
     name: 'firefox',
     displayName: 'Firefox',
     family: 'firefox',
@@ -131,7 +117,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '11',
+    id: '10',
     name: 'firefox',
     displayName: 'Firefox',
     family: 'firefox',
@@ -144,7 +130,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '12',
+    id: '11',
     name: 'firefox',
     displayName: 'Firefox Developer Edition',
     channel: 'dev',
@@ -157,7 +143,7 @@ export const longBrowsersList = [
     disabled: false,
   },
   {
-    id: '13',
+    id: '12',
     name: 'firefox',
     displayName: 'Firefox Nightly',
     channel: 'beta',
@@ -171,7 +157,7 @@ export const longBrowsersList = [
     warning: 'Cypress does not support running Firefox Nightly version 69. To use Firefox Nightly with Cypress, install a version of Firefox Nightly newer than or equal to 78.',
   },
   {
-    id: '14',
+    id: '13',
     name: 'fake',
     displayName: 'Fake Browser',
     channel: 'stable',

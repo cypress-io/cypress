@@ -82,14 +82,14 @@ describe('e2e plugins', function () {
     return systemTests.exec(this, {
       project: 'plugin-filter-browsers',
       // the test project filters available browsers
-      // and returns a list with JUST Electron browser
+      // and returns a list with JUST Firefox
       // and we ask to run in Chrome
       // thus the test should fail
       browser: 'chrome',
       expectedExitCode: 1,
       snapshot: true,
       // we are interested in the actual filtered available browser name
-      // which should be "electron"
+      // which should be "firefox"
       normalizeStdoutAvailableBrowsers: false,
     })
   })

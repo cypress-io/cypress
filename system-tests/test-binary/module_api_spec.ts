@@ -6,7 +6,7 @@ describe('module API', () => {
     dockerImage: 'cypress/base-internal:22.19.0-trixie',
     withBinary: true,
     project: 'module-api',
-    browser: 'electron',
+    browser: 'chrome',
     command: 'yarn',
     args: ['test'],
   })

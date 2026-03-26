@@ -267,30 +267,29 @@ const getBrowsers = async () => {
 
   debug('found browsers %o', { browsers })
 
-  if (!process.versions.electron) {
-    debug('not in electron, skipping adding electron browser')
-
-    return browsers
-  }
-
-  const version = process.versions.chrome || ''
-  let majorVersion
-
-  if (version) {
-    majorVersion = getMajorVersion(version)
-  }
-
-  const electronBrowser: FoundBrowser = {
-    name: 'electron',
-    channel: 'stable',
-    family: 'chromium',
-    displayName: 'Electron',
-    version,
-    path: '',
-    majorVersion,
-  }
-
-  browsers.push(electronBrowser)
+  // TODO: remove with full electron-as-test-browser deprecation — delete this block and
+  // packages/server/lib/browsers/electron.ts once the Electron renderer is no longer a launch target.
+  // Previously (when process.versions.electron) we pushed a synthetic FoundBrowser { name: 'electron', ... }.
+  // It is intentionally not exposed in the list anymore.
+  // if (!process.versions.electron) {
+  //   debug('not in electron, skipping adding electron browser')
+  //   return browsers
+  // }
+  // const version = process.versions.chrome || ''
+  // let majorVersion
+  // if (version) {
+  //   majorVersion = getMajorVersion(version)
+  // }
+  // const electronBrowser: FoundBrowser = {
+  //   name: 'electron',
+  //   channel: 'stable',
+  //   family: 'chromium',
+  //   displayName: 'Electron',
+  //   version,
+  //   path: '',
+  //   majorVersion,
+  // }
+  // browsers.push(electronBrowser)
 
   return browsers
 }
@@ -325,14 +324,22 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
 
   const filter = parseBrowserOption(nameOrPath)
 
+  if (filter.name === 'electron') {
+    errors.throwErr('BROWSER_ELECTRON_REMOVED')
+  }
+
   debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
 
   // try to find the browser by name with the highest version property
   const sortedBrowsers = _.sortBy(browsers, ['version'])
 
-  const browser = _.findLast(sortedBrowsers, filter)
+  const browser = _.findLast(sortedBrowsers, filter) as FoundBrowser | undefined
 
   if (browser) {
+    if (browser.name === 'electron') {
+      errors.throwErr('BROWSER_ELECTRON_REMOVED')
+    }
+
     // short circuit if found
     if (returnAll) {
       return browsers
@@ -346,6 +353,10 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
     // looks like a path - try to resolve it to a FoundBrowser
     return launcher.detectByPath(nameOrPath)
     .then((browser) => {
+      if (browser.name === 'electron') {
+        errors.throwErr('BROWSER_ELECTRON_REMOVED')
+      }
+
       if (returnAll) {
         return [browser].concat(browsers)
       }

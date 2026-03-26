@@ -18,7 +18,7 @@ const getFilePath = (filename) => {
   )
 }
 
-const BROWSERS = ['chrome', 'electron']
+const BROWSERS = ['chrome']
 
 describe('capture-protocol', () => {
   setupStubbedServer(createRoutes())

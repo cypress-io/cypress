@@ -5,7 +5,7 @@ describe('e2e issue 5475 history pushState hangs', function () {
 
   systemTests.it('fails when remote debugging port cannot be connected to', {
     spec: 'issue_5475*',
-    browser: 'electron',
+    browser: 'chrome',
     expectedExitCode: 1,
     snapshot: true,
   })

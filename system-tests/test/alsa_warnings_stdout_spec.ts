@@ -5,7 +5,7 @@ describe('Electron sysctrlbyname warning', function () {
     return systemTests.exec(this, {
       project: 'e2e',
       spec: 'embedded_video_with_audio.cy.js',
-      browser: 'electron',
+      browser: 'chrome',
     }).then(({ stderr }) => {
       expect(stderr).not.to.include('sysctlbyname for kern.hv_vmm_present failed with status -1')
     })

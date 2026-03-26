@@ -14,7 +14,7 @@ module.exports = {
 
         if ((name) === 'electron') {
           launchOptions.preferences = {
-            browser: 'electron',
+            browser: 'chrome',
             foo: 'bar',
           }
 

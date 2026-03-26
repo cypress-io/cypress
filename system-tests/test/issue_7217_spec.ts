@@ -14,7 +14,7 @@ describe('e2e issue 7217', () => {
       CYPRESS_INTERNAL_RUNNER_PATH: path.resolve(__dirname, '../support/fixtures/no-connect.html'),
       CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT: 10,
     },
-    browser: 'electron',
+    browser: 'chrome',
     snapshot: true,
   })
 })

@@ -508,7 +508,6 @@ describe('e2e record', () => {
     setupStubbedServer(createRoutes())
 
     const familyByBrowser = {
-      electron: 'chromium',
       chrome: 'chromium',
       'chrome-for-testing': 'chromium',
       firefox: 'firefox',

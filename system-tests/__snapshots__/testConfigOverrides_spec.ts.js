@@ -224,7 +224,7 @@ exports['testConfigOverrides / fails when setting invalid config opt with Cypres
 
 `
 
-exports['testConfigOverrides / fails when passing invalid config values - [chrome,electron]'] = `
+exports['testConfigOverrides / fails when passing invalid config values - [chrome]'] = `
 
 ====================================================================================================
 
@@ -459,7 +459,7 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
 
 `
 
-exports['testConfigOverrides / fails when passing invalid config values with beforeEach - [chrome,electron]'] = `
+exports['testConfigOverrides / fails when passing invalid config values with beforeEach - [chrome]'] = `
 
 ====================================================================================================
 
@@ -634,7 +634,7 @@ https://on.cypress.io/config
 
 `
 
-exports['testConfigOverrides / correctly fails when invalid config values for it.only [chrome,electron]'] = `
+exports['testConfigOverrides / correctly fails when invalid config values for it.only [chrome]'] = `
 
 ====================================================================================================
 
@@ -1355,7 +1355,7 @@ https://on.cypress.io/config
 
 `
 
-exports['testConfigOverrides / experimental retries specific behavior / fails when attempting to set experimental retries as override [chrome,electron]'] = `
+exports['testConfigOverrides / experimental retries specific behavior / fails when attempting to set experimental retries as override [chrome]'] = `
 
 ====================================================================================================
 
@@ -1439,7 +1439,7 @@ https://on.cypress.io/config
 
 `
 
-exports['testConfigOverrides / experimental retries specific behavior / succeeds when setting legacy retries as an override to experimental retries [chrome,electron]'] = `
+exports['testConfigOverrides / experimental retries specific behavior / succeeds when setting legacy retries as an override to experimental retries [chrome]'] = `
 
 ====================================================================================================
 

@@ -406,7 +406,7 @@ function visitApp (href?: string, opts?: Partial<Cypress.VisitOptions>) {
       throw new Error(`
       Missing serverPort, app was not initialized.
       Make sure you're adding args to openModeSystemTest which will launch the browser, such as:
-      ['--e2e', '--browser', 'electron']
+      ['--e2e', '--browser', 'chrome']
     `)
     }
 
@@ -558,12 +558,7 @@ function findBrowsers (options: FindBrowsersOptions = {}) {
       return result
     }
 
-    filteredBrowsers = [...knownBrowsers, {
-      name: 'electron',
-      channel: 'stable',
-      family: 'chromium',
-      displayName: 'Electron',
-    } as Browser].reduce(reducer, [])
+    filteredBrowsers = knownBrowsers.reduce(reducer, [])
   }
 
   logInternal('findBrowsers', () => {

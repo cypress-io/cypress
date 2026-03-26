@@ -91,99 +91,6 @@ https://on.cypress.io/renderer-process-crashed
 
 `
 
-exports['Browser Crash Handling / when the tab crashes in electron / fails'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (chrome_tab_crash.cy.js, simple.cy.js)                                     │
-  │ Searched:   cypress/e2e/chrome_tab_crash.cy.js, cypress/e2e/simple.cy.js                       │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  chrome_tab_crash.cy.js                                                          (1 of 2)
-
-
-  a test suite with a browser crash
-    ✓ navigates to about:blank
-
-We detected that the Electron Renderer process just crashed.
-
-We have failed the current spec but will continue running the next spec.
-
-This can happen for a number of different reasons.
-
-If you're running lots of tests on a memory intense application.
-  - Try increasing the CPU/memory on the machine you're running on.
-  - Try enabling experimentalMemoryManagement in your config file.
-  - Try lowering numTestsKeptInMemory in your config file during 'cypress open'.
-
-You can learn more here:
-
-https://on.cypress.io/renderer-process-crashed
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     chrome_tab_crash.cy.js                                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  simple.cy.js                                                                    (2 of 2)
-
-
-  ✓ is true
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     simple.cy.js                                                                     │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  chrome_tab_crash.cy.js                   XX:XX        2        1        1        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  simple.cy.js                             XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 2 failed (50%)                      XX:XX        3        2        1        -        -  
-
-
-`
-
 exports['Browser Crash Handling / when the browser process crashes in chrome / fails w/ video off'] = `
 
 ====================================================================================================
@@ -497,31 +404,6 @@ exports['Browser Crash Handling / when the tab closes in chrome / fails'] = `
 
 
 We detected that the Chrome tab running Cypress tests closed unexpectedly.
-
-We have failed the current spec and aborted the run.
-
-`
-
-exports['Browser Crash Handling / when the tab closes in electron / fails'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (chrome_tab_close.cy.js, simple.cy.js)                                     │
-  │ Searched:   cypress/e2e/chrome_tab_close.cy.js, cypress/e2e/simple.cy.js                       │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  chrome_tab_close.cy.js                                                          (1 of 2)
-
-
-We detected that the electron tab running Cypress tests closed unexpectedly.
 
 We have failed the current spec and aborted the run.
 

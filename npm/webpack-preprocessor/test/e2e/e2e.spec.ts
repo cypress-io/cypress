@@ -43,7 +43,7 @@ const runTest = async (options: { spec?: string } = {}) => {
       totalFailed: 0,
     },
     stdoutInclude: null,
-    browser: 'electron',
+    browser: 'chrome',
     exit: true,
   })
 

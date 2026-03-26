@@ -181,6 +181,11 @@ describe('visual error templates', () => {
         default: ['firefox'],
       }
     },
+    BROWSER_ELECTRON_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
     BROWSER_NOT_FOUND_BY_NAME: () => {
       return {
         default: ['invalid-browser', MOCK_FOUND_BROWSERS],
@@ -192,6 +197,11 @@ describe('visual error templates', () => {
 
       return {
         default: ['/path/does/not/exist', err.message],
+      }
+    },
+    BROWSER_NOT_SPECIFIED_FOR_RUN: () => {
+      return {
+        default: [],
       }
     },
     TESTS_DID_NOT_START_RETRYING: () => {

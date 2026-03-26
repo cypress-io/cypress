@@ -4,7 +4,7 @@ function smokeTestDockerImage (dockerImage: string) {
   context('e2e', () => {
     systemTests.it(`can run in ${dockerImage}`, {
       withBinary: true,
-      browser: 'electron',
+      browser: 'chrome',
       dockerImage,
       spec: 'test1.js',
       specDir: 'tests',
@@ -15,7 +15,7 @@ function smokeTestDockerImage (dockerImage: string) {
   context('component', () => {
     systemTests.it(`can run in ${dockerImage}`, {
       withBinary: true,
-      browser: 'electron',
+      browser: 'chrome',
       dockerImage,
       testingType: 'component',
       project: 'simple-ct',
@@ -54,7 +54,7 @@ describe('type: module', () => {
       dockerImage,
       testingType: 'e2e',
       spec: 'app.cy.js',
-      browser: 'electron',
+      browser: 'chrome',
       expectedExitCode: 0,
     })
   })

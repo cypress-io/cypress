@@ -12,7 +12,7 @@ describe('Choose a browser page', () => {
     beforeEach(() => {
       cy.findBrowsers({
         filter: (browser) => {
-          return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
+          return Cypress._.includes(['chrome', 'firefox', 'edge'], browser.name) && browser.channel === 'stable'
         },
       })
     })
@@ -356,12 +356,11 @@ describe('Choose a browser page', () => {
     })
   })
 
-  describe('No System Browsers Detected', () => {
-    it('shows single electron browser option when no system browsers are detected and process is running in electron', () => {
-      cy.log('This test simulates the Electron browser injection performed by server.getBrowsers')
+  describe('Single mocked browser', () => {
+    it('shows one option when the machine list resolves to a single stable chromium browser', () => {
       cy.findBrowsers({
         filter: (browser) => {
-          return browser.name === 'electron'
+          return browser.name === 'chrome' && browser.channel === 'stable'
         },
       })
 
@@ -373,7 +372,7 @@ describe('Choose a browser page', () => {
 
       cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
 
-      cy.findByRole('radio', { name: 'Electron v13', checked: true })
+      cy.findByRole('radio', { name: /Chrome v\d+/, checked: true })
       cy.percySnapshot()
     })
   })

@@ -40,8 +40,8 @@ require(`@packages/server/lib/project-base`)
 
 type CypressConfig = { [key: string]: any }
 
-export type BrowserName = 'electron' | 'firefox' | 'chrome' | 'chrome-for-testing' | 'webkit'
-| '!electron' | '!chrome' | '!chrome-for-testing' | '!firefox' | '!webkit'
+export type BrowserName = 'firefox' | 'chrome' | 'chrome-for-testing' | 'webkit'
+| '!chrome' | '!chrome-for-testing' | '!firefox' | '!webkit'
 
 type ExecResult = {
   code: number
@@ -642,7 +642,7 @@ const systemTests = {
 
   options (ctx, options: ExecOptions) {
     _.defaults(options, {
-      browser: process.env.SNAPSHOT_BROWSER || 'electron',
+      browser: process.env.SNAPSHOT_BROWSER || 'chrome',
       headed: process.env.HEADED || false,
       project: 'e2e',
       timeout: Number(process.env.SYSTEM_TEST_TIMEOUT || 120000),
@@ -904,9 +904,8 @@ const systemTests = {
 
           expect(parseFloat(version)).to.be.a.number
 
-          // if we are in headed mode or headed is undefined in a browser other
-          // than electron
-          if (options.headed || (_.isUndefined(options.headed) && browser && browser !== 'electron')) {
+          // if we are in headed mode or headed is undefined with an explicit browser
+          if (options.headed || (_.isUndefined(options.headed) && browser)) {
             expect(headless).not.to.exist
           } else {
             expect(headless).to.include('(headless)')

@@ -52,9 +52,9 @@ describe('taking screenshots', () => {
     ])
   })
 
-  it('handles devicePixelRatio correctly on headless electron', () => {
+  it('handles devicePixelRatio correctly on headless chrome', () => {
     // this checks to see if the topLeftRight pixel (1, 0) is
-    // currently white. when electron runs offscreen it upscales
+    // currently white. headless Chromium can upscale
     // images incorrectly on retina screens and the algorithm
     // blurs this pixel into gray.
     cy.screenshot('color-check', { capture: 'runner' })

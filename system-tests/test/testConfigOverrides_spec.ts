@@ -14,7 +14,7 @@ describe('testConfigOverrides', () => {
     spec: 'testConfigOverrides/valid-suite-only.js',
     snapshot: true,
     expectedExitCode: 0,
-    browser: 'electron',
+    browser: 'chrome',
   })
 
   systemTests.it('fails when passing invalid config value browser', {
@@ -27,7 +27,7 @@ describe('testConfigOverrides', () => {
     spec: 'testConfigOverrides/skip-browser.js',
     snapshot: true,
     outputPath,
-    browser: 'electron',
+    browser: 'chrome',
     async onRun (exec) {
       await exec()
       const results = await fs.readJson(outputPath)
@@ -42,7 +42,7 @@ describe('testConfigOverrides', () => {
     spec: 'testConfigOverrides/invalid_before_test_event.js',
     snapshot: true,
     outputPath,
-    browser: 'electron',
+    browser: 'chrome',
     expectedExitCode: 2,
   })
 
@@ -50,7 +50,7 @@ describe('testConfigOverrides', () => {
     spec: 'testConfigOverrides/invalid_before_test_async_event.js',
     snapshot: true,
     outputPath,
-    browser: 'electron',
+    browser: 'chrome',
     expectedExitCode: 2,
   })
 
@@ -58,14 +58,14 @@ describe('testConfigOverrides', () => {
     spec: 'testConfigOverrides/allow_cypress_env.cy.js',
     configFile: 'cypress-allow-cypress-env.config.mjs',
     expectedExitCode: 1,
-    browser: 'electron',
+    browser: 'chrome',
     snapshot: true,
   })
 
   // window.Error throws differently for firefox. break into
   // browser permutations for snapshot comparisons
   const permutations: BrowserName[][] = [
-    ['chrome', 'electron'],
+    ['chrome'],
     ['firefox'],
   ]
 

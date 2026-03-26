@@ -24,7 +24,7 @@ describe('component testing: justInTimeCompile', function () {
   systemTests.it('vite@5', {
     project: 'justInTimeCompile/vite',
     testingType: 'component',
-    browser: 'electron',
+    browser: 'chrome',
     expectedExitCode: 0,
     onRun: async (exec) => {
       const { stderr } = await exec({
@@ -50,7 +50,7 @@ describe('component testing: justInTimeCompile', function () {
   systemTests.it('webpack@5', {
     project: 'justInTimeCompile/webpack',
     testingType: 'component',
-    browser: 'electron',
+    browser: 'chrome',
     expectedExitCode: 0,
     onRun: async (exec) => {
       const { stderr } = await exec({

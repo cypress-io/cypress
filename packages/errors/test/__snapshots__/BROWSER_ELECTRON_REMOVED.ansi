@@ -1,0 +1,5 @@
+[31mCypress no longer supports selecting [33melectron[39m[31m as the test browser.[39m
+[31m[39m
+[31mChoose an installed browser with [95m--browser[39m[31m (for example [95m--browser chrome[39m[31m) or pass a `browser` option to [33mcypress.run()[39m[31m.[39m
+[31m[39m
+[31mLearn more: https://on.cypress.io/launching-browsers[39m

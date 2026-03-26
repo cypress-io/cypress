@@ -18,7 +18,7 @@ describe('before all and after all throw', () => {
     spec: 'test.cy.js',
     snapshot: true,
     expectedExitCode: 1,
-    browser: 'electron',
+    browser: 'chrome',
     processEnv: {
       ELECTRON_ENABLE_LOGGING: 1,
     },

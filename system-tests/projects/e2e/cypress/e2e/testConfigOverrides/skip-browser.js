@@ -1,11 +1,11 @@
 describe('suite', () => {
   it('is skipped due to test-level browser override', {
-    browser: ['!electron'],
+    browser: ['!chrome'],
   }, () => {})
 })
 
 describe('suite 2', {
-  browser: ['!electron'],
+  browser: ['!chrome'],
 }, () => {
   it('is skipped due to suite-level browser override', () => {
     // do something

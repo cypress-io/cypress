@@ -17,7 +17,7 @@ describe('Cypress static methods + props', () => {
     const { browser } = Cypress
 
     expect(browser).to.be.an('object')
-    expect(browser.name).to.be.oneOf(['electron', 'chrome', 'chromium'])
+    expect(browser.name).to.be.oneOf(['chrome', 'chromium'])
     expect(browser.displayName).to.be.oneOf(['Electron', 'Chrome', 'Canary', 'Chromium'])
     expect(browser.version).to.be.a('string')
     // we are parsing major version, so it should be a number

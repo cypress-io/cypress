@@ -8,7 +8,7 @@ describe('config-spec', () => {
     })
 
     cy.visitLaunchpad()
-    // Filtered down to the electron browser in the plugin
+    // Filtered down to the firefox browser in the plugin
     cy.get('[data-cy="open-browser-list"]').children().should('have.length', 1)
   })
 })

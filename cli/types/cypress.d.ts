@@ -79,7 +79,7 @@ declare namespace Cypress {
     (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
-  type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
+  type BrowserName = 'chrome' | 'chromium' | 'firefox' | 'edge' | string
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 

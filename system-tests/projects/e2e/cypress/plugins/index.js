@@ -52,7 +52,7 @@ module.exports = (on, config) => {
       options.preferences['network.cookie.sameSite.noneRequiresSecure'] = true
     }
 
-    if (browser.family === 'chromium' && browser.name !== 'electron') {
+    if (browser.family === 'chromium') {
       if (process.env.CHROMIUM_EXTRA_LAUNCH_ARGS) {
         options.args = options.args.concat(process.env.CHROMIUM_EXTRA_LAUNCH_ARGS.split(' '))
       }

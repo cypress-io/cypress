@@ -12,7 +12,7 @@ describe('max listeners warning spec', () => {
 
   // @see https://github.com/cypress-io/cypress/issues/1305
   systemTests.it('does not log MaxEventListeners error', {
-    browser: 'electron',
+    browser: 'chrome',
     project: 'max-listeners',
     spec: '*',
     processEnv: {

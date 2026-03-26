@@ -1,0 +1,5 @@
+[31mYou must specify a browser for [33mcypress run[39m[31m.[39m
+[31m[39m
+[31mPass [95m--browser <name-or-path>[39m[31m (for example [95m--browser chrome[39m[31m) or set the `browser` option when calling [33mcypress.run()[39m[31m from Node.js.[39m
+[31m[39m
+[31mLearn more: https://on.cypress.io/launching-browsers[39m

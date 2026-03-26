@@ -99,10 +99,6 @@ jobs:
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
-  - system-tests-electron:
-      context: test-runner:performance-tracking
-      requires:
-        - system-tests-node-modules-install
   - system-tests-firefox:
       context: test-runner:performance-tracking
       requires:
@@ -141,12 +137,6 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-firefox:
-      context: test-runner:cypress-record-key
-      requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
-  - driver-integration-tests-electron:
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
@@ -422,6 +412,5 @@ jobs:
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta-inject-document-domain
-        - driver-integration-tests-electron
         - driver-integration-tests-webkit
         - driver-integration-memory-tests

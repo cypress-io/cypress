@@ -53,7 +53,7 @@ describe('App Top Nav Workflows', () => {
       beforeEach(() => {
         cy.findBrowsers({
           filter: (browser) => {
-            return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
+            return Cypress._.includes(['chrome', 'firefox', 'edge'], browser.name) && browser.channel === 'stable'
           },
         })
 

@@ -10,7 +10,7 @@ describe('posix exit codes', () => {
       spec: 'simple_failing.cy.js',
       posixExitCodes,
       expectedExitCode: 1,
-      browser: ['electron'],
+      browser: ['chrome'],
       project: 'e2e',
     })
 
@@ -18,7 +18,7 @@ describe('posix exit codes', () => {
       spec: 'simple_passing.cy.js',
       posixExitCodes: true,
       expectedExitCode: 0,
-      browser: ['electron'],
+      browser: ['chrome'],
       project: 'e2e',
     })
   })
@@ -30,7 +30,7 @@ describe('posix exit codes', () => {
       spec: 'simple_failing.cy.js',
       posixExitCodes,
       expectedExitCode: 2,
-      browser: ['electron'],
+      browser: ['chrome'],
       project: 'e2e',
     })
   })

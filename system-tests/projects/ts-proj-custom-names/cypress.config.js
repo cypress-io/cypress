@@ -4,7 +4,7 @@ module.exports = {
     'supportFile': 'cypress/support.ts',
     setupNodeEvents (on, config) {
       on('before:browser:launch', (browser, launchOptions) => {
-        if (browser.family === 'chromium' && browser.name !== 'electron') {
+        if (browser.family === 'chromium') {
           // Mac/Linux
           //launchOptions.args.push('--use-file-for-fake-video-capture=cypress/fixtures/my-video.y4m')
 

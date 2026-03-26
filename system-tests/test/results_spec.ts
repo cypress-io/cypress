@@ -31,7 +31,7 @@ const normalizeResults = (resultsJson) => {
 }
 
 const normalizeBrowsers = (browsers) => {
-  return browsers.filter((browser) => browser.name === 'electron')
+  return browsers.filter((browser) => browser.name === 'chrome')
 }
 
 const stringify = (obj) => JSON.stringify(obj, null, 2)
@@ -44,7 +44,7 @@ describe('module api, after:spec, and after:run results', () => {
 
   systemTests.it('has expected properties and values', {
     project: 'results',
-    browser: 'electron',
+    browser: 'chrome',
     outputPath,
     expectedExitCode: 3,
     config: {

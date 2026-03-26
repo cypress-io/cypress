@@ -10,14 +10,12 @@ describe('Browser Crash Handling', () => {
   })
 
   // It should fail the chrome_tab_crash spec, but the simple spec should run and succeed
-  ;['chrome', 'electron'].forEach((browser) => {
-    context(`when the tab crashes in ${browser}`, () => {
-      systemTests.it('fails', {
-        browser,
-        spec: 'chrome_tab_crash.cy.js,simple.cy.js',
-        snapshot: true,
-        expectedExitCode: 1,
-      })
+  context('when the tab crashes in chrome', () => {
+    systemTests.it('fails', {
+      browser: 'chrome',
+      spec: 'chrome_tab_crash.cy.js,simple.cy.js',
+      snapshot: true,
+      expectedExitCode: 1,
     })
   })
 
@@ -53,18 +51,8 @@ describe('Browser Crash Handling', () => {
     })
   })
 
-  // It should fail the chrome_tab_close spec, and exit early, do not move onto the next spec
-  context('when the tab closes in electron', () => {
-    systemTests.it('fails', {
-      browser: 'electron',
-      spec: 'chrome_tab_close.cy.js,simple.cy.js',
-      snapshot: true,
-      expectedExitCode: 1,
-    })
-  })
-
   // It should fail the chrome_process_kill spec, but the simple spec should run and succeed
-  // NOTE: we do NOT test the "browser process" being killed OR crashed in electron because
+  // NOTE: we do NOT test the "browser process" being killed OR crashed in the Cypress Electron shell because
   // there is no valid situation to simulate this. the main browser process is actually
   // not the renderer process but the actual electron process, and killing it would be
   // killing the entire cypress process, which is unrecoverable. this is also the same
@@ -112,7 +100,7 @@ describe('Browser Crash Handling', () => {
 
   context('when the window closes mid launch of the browser process', () => {
     systemTests.it('passes', {
-      browser: 'electron',
+      browser: 'chrome',
       spec: 'abort_beforeunload_event_child.cy.ts,abort_beforeunload_event.cy.ts',
       snapshot: true,
       expectedExitCode: 0,

@@ -91,7 +91,7 @@ describe('e2e web security', () => {
         chromeWebSecurity: false,
       },
       snapshot: true,
-      browser: ['chrome', 'electron'],
+      browser: ['chrome'],
     })
   })
 

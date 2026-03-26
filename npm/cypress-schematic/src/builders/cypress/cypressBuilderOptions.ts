@@ -3,7 +3,7 @@ import { JsonObject } from '@angular-devkit/core'
 export interface CypressBuilderOptions extends JsonObject {
   baseUrl: string
   configFile: string
-  browser: 'electron' | 'chrome' | 'chromium' | 'canary' | 'firefox' | 'edge' | string
+  browser: 'chrome' | 'chromium' | 'canary' | 'firefox' | 'edge' | string
   devServerTarget: string
   e2e: boolean
   component: boolean

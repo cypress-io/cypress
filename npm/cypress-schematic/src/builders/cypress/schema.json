@@ -20,9 +20,8 @@
     },
     "browser": {
       "type": "string",
-      "description": "The browser to run tests in",
+      "description": "The browser to run tests in (required)",
       "enum": [
-        "electron",
         "chrome",
         "chromium",
         "canary",
@@ -101,5 +100,8 @@
       "description": "Specify the type of tests to execute; either e2e or component. Defaults to e2e."
     }
   },
+  "required": [
+    "browser"
+  ],
   "additionalProperties": true
 }

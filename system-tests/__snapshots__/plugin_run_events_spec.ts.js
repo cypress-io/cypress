@@ -12,7 +12,7 @@ exports['e2e plugin run events / sends events'] = `
   │ Experiments:  experimentalInteractiveRunEvents=true                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-before:run: cypress/e2e/run_events_spec_1.cy.js electron
+before:run: cypress/e2e/run_events_spec_1.cy.js chrome
 before:run is awaited
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────

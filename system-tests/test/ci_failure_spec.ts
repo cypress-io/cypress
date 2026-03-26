@@ -5,7 +5,7 @@ describe('CI failure', () => {
 
   it('fails and displays the message that points users to the cloud', function () {
     return systemTests.exec(this, {
-      browser: 'electron',
+      browser: 'chrome',
       spec: 'simple_failing.cy.js',
       processEnv: {
         CI: '1',
