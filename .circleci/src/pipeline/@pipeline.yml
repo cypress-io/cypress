@@ -1702,6 +1702,11 @@ jobs:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Driver memory tests in Chrome
           environment:
@@ -1924,11 +1929,13 @@ jobs:
           command: |
             yarn set version 4.3.1
             cd ./system-tests/projects/yarn-v4.3.1-pnp-dep-resolution && yarn
+      - install-browsers:
+          install-chrome: true
       - run:
           name: Bootstrap the Cypress binary and run binary system test
           command: |
             # we need to bootstrap the binary into our project directory and run the tests
-            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run'
+            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --browser chrome'
   # We can remove this job a once https://github.com/sveltejs/svelte-loader/issues/243 is resolved.
   svelte-webpack-system-test:
     parallelism: 1
@@ -1950,11 +1957,13 @@ jobs:
       - run:
           name: install dependencies
           command: cd ./system-tests/projects/svelte-webpack-configured && yarn
+      - install-browsers:
+          install-chrome: true
       - run:
           name: Bootstrap the Cypress binary and run binary system test
           command: |
             # we need to bootstrap the binary into our project directory and run the tests
-            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --component --spec src/mount.cy.ts src/App.cy.ts'
+            source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --browser chrome --component --spec src/mount.cy.ts src/App.cy.ts'
 
   system-tests-chrome:
     <<: *defaults
@@ -2162,6 +2171,11 @@ jobs:
     parallelism: 3
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           command: yarn build-for-tests
           working_directory: packages/reporter
@@ -2173,7 +2187,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group reporter --runner-ui
+            yarn cypress:run --browser chrome --record --parallel --group reporter --runner-ui
           working_directory: packages/reporter
       - sanitize-verify-and-store-mocha-results
 
@@ -2194,7 +2208,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group webpack-dev-server
+            yarn cypress:run --browser chrome --record --parallel --group webpack-dev-server
           working_directory: npm/webpack-dev-server
       - sanitize-verify-and-store-mocha-results
 
@@ -2214,7 +2228,7 @@ jobs:
             PERCY_ENABLE=${PERCY_TOKEN:-0} \
             PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec --parallel -- -- \
-            yarn cypress:run --record --parallel --group vite-dev-server
+            yarn cypress:run --browser chrome --record --parallel --group vite-dev-server
           working_directory: npm/vite-dev-server
       - sanitize-verify-and-store-mocha-results
 
@@ -2336,6 +2350,11 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Build
           command: yarn lerna run build --scope=@cypress/vite-plugin-cypress-esm
@@ -2513,6 +2532,11 @@ jobs:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - install-required-node
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Install prod dependencies
           command: yarn --production --ignore-engines
@@ -2525,7 +2549,7 @@ jobs:
       - run:
           name: Run Kitchensink example project
           command: |
-            yarn cypress:run --project /tmp/cypress-example-kitchensink
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --browser chrome
 
   test-kitchensink-against-staging:
     <<: *defaults
@@ -2534,6 +2558,11 @@ jobs:
       - clone-repo-and-checkout-branch:
           repo: cypress-example-kitchensink
       - install-required-node
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -2550,7 +2579,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_KITCHENSINK_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --browser chrome --record
 
   test-against-staging:
     <<: *defaults
@@ -2558,13 +2587,18 @@ jobs:
       - restore_cached_workspace
       - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Run test project
           command: |
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            yarn cypress:run --project /tmp/cypress-test-tiny --record
+            yarn cypress:run --project /tmp/cypress-test-tiny --browser chrome --record
 
   test-npm-module-and-verify-binary:
     <<: *defaults
@@ -2704,10 +2738,15 @@ jobs:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           command: |
             npm install /root/cypress/cypress.tgz typescript
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Run project tests 🗳
           working_directory: /tmp/cypress-test-tiny
-          command: npm run cypress:run
+          command: npm run cypress:run -- --browser chrome
 
   # install NPM + binary zip and run against staging API
   test-binary-against-staging:
@@ -2722,6 +2761,11 @@ jobs:
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i --legacy-peer-deps
             ~/cypress/cypress.tgz
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - windows-install-chrome:
+          browser: chrome
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -2729,7 +2773,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            $(yarn bin cypress) run --record
+            $(yarn bin cypress) run --browser chrome --record
 
   test-binary-against-recipes-firefox:
     <<: *defaults

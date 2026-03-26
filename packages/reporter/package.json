@@ -8,8 +8,8 @@
     "check-ts": "yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
-    "cypress:run": "node ../../scripts/cypress run --project .",
-    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project .",
+    "cypress:run": "node ../../scripts/cypress run --project . --browser chrome",
+    "cypress:run:ct": "cross-env TZ=America/New_York node ../../scripts/cypress run --component --project . --browser chrome",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "tslint": "tslint --config ../ts/tslint.json --project .",
     "watch": "yarn build-for-tests --watch --progress"
