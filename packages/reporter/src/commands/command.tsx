@@ -33,6 +33,8 @@ const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 
 const md = new Markdown()
 const mdOnlyHTML = new Markdown('zero').enable(['html_inline', 'html_block'])
+// Instance for escaping HTML - no HTML parsing enabled so tags are escaped
+const mdEscapeHTML = new Markdown('zero')
 
 const asterisksRegex = /^\*\*(.+?)\*\*$/gs
 // regex to match everything outside of expected/actual values like:
@@ -66,7 +68,7 @@ export const formattedMessage = (message: string, name?: string) => {
       return splitTrim.map((s) => {
         // we want to escape HTML chars so that they display
         // correctly in the command log: <p> -> &lt;p&gt;
-        const HTMLEscapedString = mdOnlyHTML.renderInline(s)
+        const HTMLEscapedString = mdEscapeHTML.renderInline(s)
 
         return HTMLEscapedString.replace(asterisksRegex, `<strong>$1</strong>`)
       })

@@ -93,6 +93,14 @@ describe('formattedMessage', () => {
       expect(result).to.equal('expected <strong>&lt;button#increment&gt;</strong> to be enabled')
     })
 
+    it('escapes HTML in spy assertion arguments', () => {
+      // Spy assertions like calledOnceWith can contain HTML strings
+      const specialMessage = 'expected **method** to have been called once with **<svg viewBox="0 0 10 10"></svg>**'
+      const result = formattedMessage(specialMessage, 'assert')
+
+      expect(result).to.equal('expected <strong>method</strong> to have been called once with <strong>&lt;svg viewBox=&quot;0 0 10 10&quot;&gt;&lt;/svg&gt;</strong>')
+    })
+
     it('renders the custom message properly with the assertion message', () => {
       const specialMessage = 'My Custom Message: expected **abcdef** to equal **abcdef**'
       const result = formattedMessage(specialMessage, 'assert')
