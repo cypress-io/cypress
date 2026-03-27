@@ -160,17 +160,17 @@ export = {
   },
 
   async run (options: LaunchArgs) {
-    // @ts-ignore
-    const _loading = setupCtx('interactive', options, setupTelemetry('interactive'))
+    // Note: This promise is intentionally dangling.
+    // We do not await the `_loading` promise here since initializing
+    // the data context can significantly delay initial render of the UI
+    // https://github.com/cypress-io/cypress/issues/26388#issuecomment-1492616609
+
+    setupCtx('interactive', options, setupTelemetry('interactive'))
 
     // Need to set this for system notifications to appear as "Cypress" on Windows
     if (app.setAppUserModelId) {
       app.setAppUserModelId('Cypress')
     }
-
-    // Note: We do not await the `_loading` promise here since initializing
-    // the data context can significantly delay initial render of the UI
-    // https://github.com/cypress-io/cypress/issues/26388#issuecomment-1492616609
 
     const [, port] = await Promise.all([
       app.whenReady(),
