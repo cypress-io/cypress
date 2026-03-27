@@ -100,7 +100,6 @@ linux-x64:
           - system-tests-node-modules-install
     - system-tests-non-root:
         context: test-runner:performance-tracking
-        executor: non-root-docker-user
         requires:
           - system-tests-node-modules-install
     - driver-integration-tests-chrome:
