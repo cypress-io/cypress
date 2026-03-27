@@ -37,7 +37,7 @@ const long = (ms, alwaysIncludeSeconds = true) => {
   return msg.join(', ')
 }
 
-const short = (ms, fixed = undefined) => {
+const short = (ms, fixed) => {
   let { mins, duration } = parse(ms)
   const msg = []
 

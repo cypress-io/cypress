@@ -24,8 +24,8 @@ type Modes = {
   info: void
   interactive: Awaited<ReturnType<typeof import('./modes/interactive')['run']>>
   pkg: Awaited<ReturnType<typeof import('./modes/pkg')>>
-  record: typeof import('./modes/record')
-  results: typeof import('./modes/results')
+  record: any
+  results: any
   run: CypressRunResult | { totalFailed: number }
   smokeTest: number
   version: void
@@ -143,7 +143,7 @@ export = {
     })
   },
 
-  start (argv: any = []) {
+  async start (argv: any = []) {
     debug('starting cypress with argv %o', argv)
 
     // if the CLI passed "--" somewhere, we need to remove it
@@ -187,32 +187,31 @@ export = {
     }
 
     // make sure we have the appData folder
-    return Promise.all([
+    await Promise.all([
       require('./util/app_data').ensure(),
       require('./util/electron-app').setRemoteDebuggingPort(),
     ])
-    .then(() => {
-      // else determine the mode by
-      // the passed in arguments / options
-      // and normalize this mode
-      let mode = options.mode || 'interactive'
 
-      if (options.version) {
-        mode = 'version'
-      } else if (options.smokeTest) {
-        mode = 'smokeTest'
-      } else if (options.returnPkg) {
-        mode = 'returnPkg'
-      } else if (!(options.exitWithCode == null)) {
-        mode = 'exitWithCode'
-      } else if (options.runProject) {
-        // go into headless mode when running
-        // until completion + exit
-        mode = 'run'
-      }
+    // else determine the mode by
+    // the passed in arguments / options
+    // and normalize this mode
+    let mode = options.mode || 'interactive'
 
-      return this.startInMode(mode, options)
-    })
+    if (options.version) {
+      mode = 'version'
+    } else if (options.smokeTest) {
+      mode = 'smokeTest'
+    } else if (options.returnPkg) {
+      mode = 'returnPkg'
+    } else if (!(options.exitWithCode == null)) {
+      mode = 'exitWithCode'
+    } else if (options.runProject) {
+      // go into headless mode when running
+      // until completion + exit
+      mode = 'run'
+    }
+
+    return this.startInMode(mode, options)
   },
 
   async startInMode<T extends keyof Modes>(mode: T, options: any): Promise<Modes[T] | void> {
