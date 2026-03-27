@@ -2016,6 +2016,9 @@ jobs:
           name: Grant node user access to workspace for non-root Cypress run
           command: chown -R node:node "${HOME}/cypress"
       - run:
+          name: Allow node user to traverse /root to the workspace
+          command: chmod o+x /root
+      - run:
           name: Run non-root system tests
           user: node
           working_directory: /root/cypress
