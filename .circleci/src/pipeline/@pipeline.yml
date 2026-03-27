@@ -17,7 +17,7 @@ base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20
 parameters:
   publish-binary-branch:
     type: string
-    default: main
+    default: mschile/remove_electron
   force-persist-artifacts:
     type: boolean
     default: false
