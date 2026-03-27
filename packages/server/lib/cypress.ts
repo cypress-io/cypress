@@ -122,9 +122,9 @@ export = {
       } else if (mode === 'smokeTest') {
         return require('./modes/smoke_test').run(options)
       } else if (mode === 'version') {
-        return require('./modes/pkg').version(options)
+        return require('./modes/pkg')(options)
       } else if (mode === 'info') {
-        return require('./modes/info').info(options)
+        return require('./modes/info')(options)
       }
     }
 

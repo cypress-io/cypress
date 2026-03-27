@@ -1040,6 +1040,7 @@ export interface ReadyOptions {
   testingType: TestingType
   webSecurity: boolean
   passWithNoTests: boolean
+  isBrowserGivenByCli?: boolean
 }
 
 async function ready (options: ReadyOptions): Promise<CypressRunResult> {
@@ -1216,6 +1217,8 @@ async function ready (options: ReadyOptions): Promise<CypressRunResult> {
 export async function run (options: ReadyOptions): Promise<CypressRunResult | void> {
   debug('run start')
 
+  options.isBrowserGivenByCli = options.browser !== undefined
+
   _.defaults(options, {
     socketId: randomId(10),
     isTextTerminal: true,
@@ -1223,6 +1226,7 @@ export async function run (options: ReadyOptions): Promise<CypressRunResult | vo
     quiet: false,
     morgan: false,
     report: true,
+    testingType: 'e2e',
   })
 
   const loading = setupCtx('run', options, setupTelemetry('run'))
