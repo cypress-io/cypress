@@ -84,6 +84,7 @@ const runProjectTest = function (buildAppExecutable, e2e) {
     const args = [
       `--run-project=${e2e}`,
       `--spec=${e2e}/cypress/e2e/simple_passing.cy.js`,
+      '--browser=chrome',
     ]
 
     if (needsSandbox()) {
@@ -134,6 +135,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
       const args = [
         `--run-project=${e2e}`,
         `--spec=${e2e}/cypress/e2e/simple_failing.cy.js`,
+        '--browser=chrome',
       ]
 
       if (needsSandbox()) {
@@ -176,6 +178,7 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
       const args = [
         `--run-project=${e2e}`,
         `--spec=${e2e}/cypress/e2e/simple_v8_snapshot.cy.js`,
+        '--browser=chrome',
       ]
 
       if (needsSandbox()) {
@@ -213,6 +216,7 @@ const runErroringProjectTest = function (buildAppExecutable, e2e, testName, erro
     const args = [
       `--run-project=${e2e}`,
       `--spec=${e2e}/cypress/e2e/simple_passing.cy.js`,
+      '--browser=chrome',
     ]
 
     if (needsSandbox()) {
