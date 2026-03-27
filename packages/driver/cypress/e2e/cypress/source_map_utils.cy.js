@@ -1,3 +1,7 @@
+/**
+ * Browser-level regression tests for source map parsing. Complements unit tests: here we use the real
+ * source-map library and Cypress utils (e.g. base64) to match how user specs are processed in the runner.
+ */
 const { SourceMapConsumer } = require('source-map')
 import $sourceMapUtils from '@packages/driver/src/cypress/source_map_utils'
 
@@ -51,10 +55,19 @@ describe('driver/src/cypress/source_map_utils', () => {
       expect(sourceMap).to.be.null
     })
 
-    it('returns null if it is not an inline map', () => {
+    // extractSourceMap stays sync: external refs are loaded later via loadAndInitializeSourceMap, not here.
+    it('returns null if the last pragma points at an external map (loaded separately at runtime)', () => {
       const sourceMap = $sourceMapUtils.extractSourceMap(`${testContent}\n\/\/# sourceMappingURL=foo.map`)
 
       expect(sourceMap).to.be.null
+    })
+
+    // Real pipelines sometimes append a final inline map after an intermediate external reference.
+    it('returns inline map when it is the last pragma after an external one (matches bundler ordering)', () => {
+      const dataComment = `\/\/# sourceMappingURL=data:application/json;charset=utf-8;base64,${encodeBase64Unicode(JSON.stringify(sourceMap))}`
+      const extracted = $sourceMapUtils.extractSourceMap(`${testContent}\n\/\/# sourceMappingURL=foo.map\n${dataComment}`)
+
+      expect(extracted).to.be.eql(sourceMap)
     })
 
     it('returns null if it is not valid base64', () => {
@@ -100,6 +113,27 @@ describe('driver/src/cypress/source_map_utils', () => {
       const sourceMap = $sourceMapUtils.extractSourceMap(fileContents)
 
       expect(sourceMap.sourcesContent[1]).to.include('サイプリスは一番')
+    })
+  })
+
+  // Covers multi-pragma vendor bundles: only the effective URL should drive fetch vs inline parse.
+  context('.getLastSourceMappingUrl', () => {
+    it('returns the last mapping URL among many line comments', () => {
+      const url = $sourceMapUtils.getLastSourceMappingUrl(`a
+\/\/# sourceMappingURL=first.map
+b
+\/\/# sourceMappingURL=second.map
+`)
+
+      expect(url).to.eq('second.map')
+    })
+
+    // Rollup and others sometimes emit the mapping in a block comment instead of //.
+    it('supports /*# sourceMappingURL=... */', () => {
+      const url = $sourceMapUtils.getLastSourceMappingUrl(`x
+/*# sourceMappingURL=chunk.js.map */`)
+
+      expect(url).to.eq('chunk.js.map')
     })
   })
 

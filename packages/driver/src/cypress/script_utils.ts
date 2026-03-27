@@ -10,7 +10,13 @@ const fetchScript = (scriptWindow, script) => {
   })
 }
 
-const extractSourceMap = ([script, contents]) => {
+/**
+ * After downloading the spec JS, register source maps before `eval`. External `.map` files require a
+ * second network round-trip and async parsing — that path did not exist before, so any preprocessor
+ * emitting `//# sourceMappingURL=relative.map` left Cypress without a consumer. Inline maps still work
+ * and `extractSourceMap`-only callers are unchanged.
+ */
+const loadSourceMapForFetchedScript = async ([script, contents], specWindow: Window) => {
   try {
     script.fullyQualifiedUrl = `${window.top!.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
   } catch (error) {
@@ -21,14 +27,9 @@ const extractSourceMap = ([script, contents]) => {
     }
   }
 
-  const sourceMap = $sourceMapUtils.extractSourceMap(contents)
+  await $sourceMapUtils.loadAndInitializeSourceMap(specWindow, script, contents)
 
-  return $sourceMapUtils.initializeSourceMapConsumer(script, sourceMap)
-  .catch((_err) => {
-    // if WebAssembly is missing, we can't consume source maps, but it shouldn't block Cy
-    // like in WebKit on Windows: https://github.com/microsoft/playwright/issues/2876
-  })
-  .then(() => [script, contents])
+  return [script, contents]
 }
 
 const evalScripts = (specWindow, scripts: any = []) => {
@@ -46,7 +47,8 @@ const evalScripts = (specWindow, scripts: any = []) => {
 const runScriptsFromUrls = (specWindow, scripts, projectRoot, specRelativePath, specAbsolutePath) => {
   return Bluebird
   .map<any, any>(scripts, (script) => fetchScript(specWindow, script))
-  .map(extractSourceMap)
+  // Second map step may await map fetch; order per script is preserved by Bluebird.map.
+  .map(([script, contents]: [any, string]) => loadSourceMapForFetchedScript([script, contents], specWindow))
   .then((scripts) => {
     $sourceMapUtils.setSourceMapProjectRoot(specRelativePath, specAbsolutePath, projectRoot)
 

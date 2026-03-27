@@ -18,8 +18,8 @@ describe('src/cypress/script_utils', () => {
       }
 
       cy.stub($networkUtils, 'fetch').resolves('the script contents')
-      cy.stub($sourceMapUtils, 'extractSourceMap').returns()
-      cy.stub($sourceMapUtils, 'initializeSourceMapConsumer').resolves()
+      // Stub the async map path (inline + external); avoids wasm/network in this unit-style e2e.
+      cy.stub($sourceMapUtils, 'loadAndInitializeSourceMap').resolves()
     })
 
     it('fetches each script in non-webkit browsers', () => {
@@ -85,7 +85,8 @@ describe('src/cypress/script_utils', () => {
       expect(foundScript.after).to.be.calledWith(createdScript2)
     })
 
-    it('extracts the source map from each script', () => {
+    // Ensures every fetched script goes through map registration (where external .map would be requested).
+    it('loads source maps for each fetched script', () => {
       return $scriptUtils.runScripts({
         browser: { family: 'chromium' },
         scripts,
@@ -93,9 +94,12 @@ describe('src/cypress/script_utils', () => {
         testingType: 'e2e',
       })
       .then(() => {
-        expect($sourceMapUtils.extractSourceMap).to.be.calledTwice
-        expect($sourceMapUtils.extractSourceMap).to.be.calledWith('the script contents')
-        expect($sourceMapUtils.extractSourceMap).to.be.calledWith('the script contents')
+        expect($sourceMapUtils.loadAndInitializeSourceMap).to.be.calledTwice
+        expect($sourceMapUtils.loadAndInitializeSourceMap.firstCall.args[0]).to.equal(scriptWindow)
+        expect($sourceMapUtils.loadAndInitializeSourceMap.firstCall.args[1].relativeUrl).to.equal(scripts[0].relativeUrl)
+        expect($sourceMapUtils.loadAndInitializeSourceMap.firstCall.args[2]).to.equal('the script contents')
+        expect($sourceMapUtils.loadAndInitializeSourceMap.secondCall.args[1].relativeUrl).to.equal(scripts[1].relativeUrl)
+        expect($sourceMapUtils.loadAndInitializeSourceMap.secondCall.args[2]).to.equal('the script contents')
       })
     })
 
