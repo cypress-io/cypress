@@ -499,6 +499,14 @@ const normalizeToArray = (value) => {
   return value
 }
 
+function restoreProcessBrowserEnv (previous: string | undefined) {
+  if (previous === undefined) {
+    delete process.env.BROWSER
+  } else {
+    process.env.BROWSER = previous
+  }
+}
+
 const localItFn = function (title: string, opts: ItOptions) {
   opts.browser = normalizeToArray(opts.browser)
 
@@ -553,8 +561,22 @@ const localItFn = function (title: string, opts: ItOptions) {
         return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
       }
 
-      // pass Mocha's this context to onRun
-      return options.onRun.call(this, execFn, browser, ctx)
+      // Match CI: while this test runs, BROWSER is the active browser so exec(), spawn env, and
+      // snapshot/debug paths see the same process.env as a single-browser job (run.js --browser).
+      const previousBrowser = process.env.BROWSER
+
+      process.env.BROWSER = browser
+
+      try {
+        const runResult = options.onRun.call(this, execFn, browser, ctx)
+
+        return Promise.resolve(runResult).finally(() => {
+          restoreProcessBrowserEnv(previousBrowser)
+        })
+      } catch (err) {
+        restoreProcessBrowserEnv(previousBrowser)
+        throw err
+      }
     })
   }
 

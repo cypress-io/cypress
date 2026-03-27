@@ -6,7 +6,10 @@ const cp = require('child_process')
 const path = require('path')
 const os = require('os')
 
-const options = minimist(process.argv.slice(2))
+const options = minimist(process.argv.slice(2), {
+  alias: { b: 'browser' },
+  string: ['browser'],
+})
 
 let run = options._
 
