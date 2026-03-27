@@ -502,6 +502,18 @@ commands:
             source ./scripts/ensure-node.sh
             yarn check-node-version
 
+  ensure-sudo-for-non-root-docker-user:
+    steps:
+      - run:
+          name: Install sudo for browser-tools (non-root Docker user)
+          user: root
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update
+            apt-get install -y sudo
+            echo 'node ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/circleci-node
+            chmod 440 /etc/sudoers.d/circleci-node
+
   install-browsers:
     description: Install Google Chrome or Firefox
     parameters:
@@ -2009,6 +2021,7 @@ jobs:
     <<: *defaults
     steps:
       - restore_cached_workspace
+      - ensure-sudo-for-non-root-docker-user
       - install-browsers:
           install-chrome: true
           executor: << parameters.executor >>
