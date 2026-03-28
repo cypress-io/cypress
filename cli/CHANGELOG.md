@@ -1,13 +1,47 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.13.1 
+
+_Released 03/31/2026 (PENDING)_
+
+**Performance:**
+
+- When recording to Cypress Cloud, the App now sends a smaller snapshot of your project config, which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
+
+## 15.13.0
+
+_Released 03/24/2026_
+
+**Features:**
+
+- [`cy.prompt`](https://docs.cypress.io/api/commands/prompt) is now in beta and available without any configuration. `cy.prompt` is an AI-powered command that lets you write test steps in plain English instead of code. The `experimentalPromptCommand` flag was removed and can be deleted from your config. Addressed in [#33497](https://github.com/cypress-io/cypress/pull/33497).
+- Studio now allows adding a new test when focused on a single test, supporting a workflow to add new tests as you record. Addressed in [#33481](https://github.com/cypress-io/cypress/pull/33481)
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress may hang when running component tests and a connection to the dev server can no longer be made. Addressed in [#33469](https://github.com/cypress-io/cypress/pull/33469)
+
+**Misc:**
+
+- When a test is isolated in Studio, the 'rerun' button now properly says 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466)
+- Studio now warns users before navigating if they try to exit when they have unsaved changes in the editor. Addressed in [#33457](https://github.com/cypress-io/cypress/pull/33457)
+
+**Dependency Updates:**
+
+- Upgraded `simple-git` from `3.27.0` to `3.32.3` to address [Improper Handling of Case Sensitivity](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15457646) (CVE-2026-28292) vulnerability reported in security scans. Addressed in [#33470](https://github.com/cypress-io/cypress/pull/33470)
+- Upgraded `minimatch` to `3.1.3` to address [CVE-2026-26996](https://nvd.nist.gov/vuln/detail/CVE-2026-26996), [CVE-2026-27903](https://nvd.nist.gov/vuln/detail/CVE-2026-27903), and [CVE-2026-27904](https://nvd.nist.gov/vuln/detail/CVE-2026-27904) ReDoS vulnerabilities reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
+- Upgraded `serialize-javascript` to `7.0.3` to address [GHSA-5c6j-r48x-rmvq](https://github.com/advisories/GHSA-5c6j-r48x-rmvq) vulnerability reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
+- Upgraded `flatted` from `3.2.9` to `3.4.2` to address [Prototype Pollution](https://security.snyk.io/vuln/SNYK-JS-FLATTED-15700433) (CVE-2026-33228) vulnerability reported in security scans. Addressed in [#33501](https://github.com/cypress-io/cypress/pull/33501)
+
 ## 15.12.0
 
-_Released 03/10/2026 (PENDING)_
+_Released 03/13/2026_
 
 **Features:**
 
 - Adds an option to enable word wrap for Studio panel code. Addressed in [#33411](https://github.com/cypress-io/cypress/pull/33411).
 
 **Bugfixes:**
+
 - Fixed an issue where sending SIGINT (e.g. Ctrl+C) to exit Cypress left the terminal displaying raw characters. Fixes [#33367](https://github.com/cypress-io/cypress/issues/33367). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue in develop mode (when running Cypress via gulp with file watching) where closing the Electron window did not exit the gulp process, leaving it running. Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).

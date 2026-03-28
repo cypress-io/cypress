@@ -122,6 +122,9 @@ describe('lib/socket', () => {
           getCyPrompt: sinon.stub().resolves({
             cyPromptManager: mockCyPrompt,
           }),
+          resetCyPrompt: sinon.stub().callsFake(() => {
+            mockCyPrompt.reset()
+          }),
           registerCyPromptReadyListener: sinon.stub().callsFake((callback) => {
             callback(mockCyPrompt)
 
@@ -472,6 +475,7 @@ describe('lib/socket', () => {
       it('calls reset', async function () {
         await new Promise((resolve) => {
           this.client.emit('prompt:reset', () => {
+            expect(ctx.coreData.cyPromptLifecycleManager.resetCyPrompt).to.be.called
             expect(mockCyPrompt.reset).to.be.called
 
             resolve()
@@ -488,6 +492,7 @@ describe('lib/socket', () => {
 
         await new Promise((resolve) => {
           this.client.emit('prompt:reset', () => {
+            expect(ctx.coreData.cyPromptLifecycleManager.resetCyPrompt).not.to.be.called
             expect(mockCyPrompt.reset).not.to.be.called
 
             resolve()
