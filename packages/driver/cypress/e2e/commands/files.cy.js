@@ -6,10 +6,85 @@ const okResponse = {
   filePath: '/path/to/foo.json',
 }
 
+const privilegedFileReadUrl = '/__cypress/privileged-commands/read-file'
+
+let restoreFetch = () => {}
+
+const getPrivilegedFileReadRequest = (input, init) => {
+  if (input !== privilegedFileReadUrl || init?.method !== 'POST') {
+    return
+  }
+
+  return JSON.parse(String(init.body))
+}
+
+const createPrivilegedFileReadResponse = (body, filePath) => {
+  return new Response(body, {
+    headers: {
+      'x-cypress-file-path': encodeURIComponent(filePath),
+    },
+    status: 200,
+  })
+}
+
+const createPrivilegedFileReadErrorResponse = (error) => {
+  return new Response(JSON.stringify({ error }), {
+    headers: {
+      'content-type': 'application/json',
+    },
+    status: 500,
+  })
+}
+
+/**
+ * Returns the Cypress windows that may send the privileged `readFile` request.
+ * @returns {Window[]}
+ */
+const getPrivilegedFileReadWindows = () => {
+  const candidateWindows = [
+    window,
+    window.parent,
+    window.top,
+    Cypress.state('specWindow'),
+    cy.state('window'),
+  ]
+
+  return [...new Set(
+    candidateWindows.filter((candidateWindow) => candidateWindow?.fetch),
+  )]
+}
+
+const stubPrivilegedFileRead = (handler) => {
+  const fetchStubs = getPrivilegedFileReadWindows().map((candidateWindow) => {
+    const originalFetch = candidateWindow.fetch.bind(candidateWindow)
+
+    return Cypress.sinon.stub(candidateWindow, 'fetch').callsFake((input, init) => {
+      const request = getPrivilegedFileReadRequest(input, init)
+
+      if (!request) return originalFetch(input, init)
+
+      const response = handler(request)
+
+      if (typeof response === 'undefined') return originalFetch(input, init)
+
+      return Promise.resolve(response)
+    })
+  })
+
+  restoreFetch = () => {
+    fetchStubs.forEach((fetchStub) => fetchStub.restore())
+    restoreFetch = () => {}
+  }
+}
+
 describe('src/cy/commands/files', () => {
   beforeEach(() => {
     // call through normally on everything
     cy.stub(Cypress, 'backend').log(false).callThrough()
+  })
+
+  afterEach(() => {
+    restoreFetch()
   })
 
   describe('#readFile', () => {
@@ -22,113 +97,133 @@ describe('src/cy/commands/files', () => {
     })
 
     it('sends privileged readFile to backend with the right options', () => {
-      Cypress.backend.resolves(okResponse)
+      stubPrivilegedFileRead((request) => {
+        if (request.options.file !== 'foo.json') return
 
-      cy.readFile('foo.json').then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'run:privileged',
-          {
-            args: ['6998637248317671'],
-            commandName: 'readFile',
-            options: {
-              file: 'foo.json',
-              encoding: 'utf8',
-            },
+        expect(request).to.deep.eq({
+          args: [request.args[0]],
+          commandName: 'readFile',
+          options: {
+            file: 'foo.json',
+            encoding: 'utf8',
           },
-        )
+        })
+
+        return createPrivilegedFileReadResponse('"contents"', '/path/to/foo.json')
       })
+
+      cy.readFile('foo.json').should('eq', 'contents')
     })
 
     it('can take encoding as second argument', () => {
-      Cypress.backend.resolves(okResponse)
+      stubPrivilegedFileRead((request) => {
+        if (request.options.file !== 'foo.json') return
 
-      cy.readFile('foo.json', 'ascii').then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'run:privileged',
-          {
-            args: ['6998637248317671', '2573904513237804'],
-            commandName: 'readFile',
-            options: {
-              file: 'foo.json',
-              encoding: 'ascii',
-            },
+        expect(request).to.deep.eq({
+          args: [request.args[0], request.args[1]],
+          commandName: 'readFile',
+          options: {
+            file: 'foo.json',
+            encoding: 'ascii',
           },
-        )
+        })
+
+        return createPrivilegedFileReadResponse('"contents"', '/path/to/foo.json')
       })
+
+      cy.readFile('foo.json', 'ascii').should('eq', 'contents')
     })
 
     // https://github.com/cypress-io/cypress/issues/1558
     it('passes explicit null encoding through to server and decodes response', () => {
-      Cypress.backend.resolves({
-        contents: Buffer.from('\n'),
-        filePath: '/path/to/foo.json',
+      stubPrivilegedFileRead((request) => {
+        if (request.options.file !== 'foo.json') return
+
+        expect(request).to.deep.eq({
+          args: [request.args[0], request.args[1]],
+          commandName: 'readFile',
+          options: {
+            file: 'foo.json',
+            encoding: null,
+          },
+        })
+
+        return createPrivilegedFileReadResponse(Buffer.from('\n'), '/path/to/foo.json')
       })
 
-      cy.readFile('foo.json', null).then(() => {
-        expect(Cypress.backend).to.be.calledWith(
-          'run:privileged',
-          {
-            args: ['6998637248317671', '6158203196586298'],
-            commandName: 'readFile',
-            options: {
-              file: 'foo.json',
-              encoding: null,
-            },
-          },
-        )
-      }).should('eql', Buffer.from('\n'))
+      cy.readFile('foo.json', null).should('eql', Buffer.from('\n'))
     })
 
     it('sets the contents as the subject', () => {
-      Cypress.backend.resolves(okResponse)
+      stubPrivilegedFileRead((request) => {
+        if (request.options.file !== 'foo.json') return
+
+        return createPrivilegedFileReadResponse('"contents"', '/path/to/foo.json')
+      })
 
       cy.readFile('foo.json').then((subject) => {
         expect(subject).to.equal('contents')
       })
     })
 
-    it('retries to read when ENOENT', () => {
-      const err = new Error('foo')
+    it('should read file contents without relying on the privileged socket response', () => {
+      Cypress.backend.withArgs('run:privileged').rejects(new Error('unexpected privileged socket request'))
 
-      err.code = 'ENOENT'
-
-      Cypress.backend.withArgs('run:privileged')
-      .onFirstCall()
-      .rejects(err)
-      .onSecondCall()
-      .resolves(okResponse)
-
-      cy.readFile('foo.json').then(() => {
-        // Verify two calls were indeed made: the first one to fail, and the second one to succeed.
+      cy.readFile('cypress/fixtures/app.js', null)
+      .should('eql', Cypress.Buffer.from('{ \'bar\' }\n'))
+      .then(() => {
         const readFilePrivilegedCalls = Cypress.backend.getCalls().filter(
           (c) => c.args[0] === 'run:privileged' && c.args[1]?.commandName === 'readFile',
         )
 
-        expect(readFilePrivilegedCalls.length).to.eq(2)
+        expect(readFilePrivilegedCalls.length).to.eq(0)
+      })
+    })
+
+    it('retries to read when ENOENT', () => {
+      let count = 0
+
+      stubPrivilegedFileRead((request) => {
+        if (request.options.file !== 'foo.json') return
+
+        count += 1
+
+        if (count === 1) {
+          return createPrivilegedFileReadErrorResponse({
+            code: 'ENOENT',
+            filePath: '/path/to/foo.json',
+            message: 'foo',
+            name: 'ENOENT',
+          })
+        }
+
+        return createPrivilegedFileReadResponse('"contents"', '/path/to/foo.json')
+      })
+
+      cy.readFile('foo.json').then(() => {
+        expect(count).to.eq(2)
       })
     })
 
     it('retries assertions until they pass', () => {
       let retries = 0
+      let count = 0
 
       cy.on('command:retry', () => {
         retries += 1
       })
 
-      Cypress.backend.withArgs('run:privileged')
-      .onFirstCall()
-      .resolves({
-        contents: 'foobarbaz',
-      })
-      .onSecondCall()
-      .resolves({
-        contents: 'quux',
+      stubPrivilegedFileRead((request) => {
+        if (request.options.file !== 'foo.json') return
+
+        count += 1
+
+        return createPrivilegedFileReadResponse(count === 1 ? '"foobarbaz"' : '"quux"', '/path/to/foo.json')
       })
 
       cy.readFile('foo.json').should('eq', 'quux').then(() => {
-        // Two retries: The first one triggers a backend request and throws a 'not ready' error.
-        // The second gets foobarbaz, triggering another request to the backend.
         expect(retries).to.eq(2)
+        expect(count).to.eq(2)
       })
     })
 
@@ -148,7 +243,11 @@ describe('src/cy/commands/files', () => {
           this.hiddenLog = log
         })
 
-        Cypress.backend.resolves(okResponse)
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo.json') return
+
+          return createPrivilegedFileReadResponse('"contents"', '/path/to/foo.json')
+        })
 
         cy.readFile('foo.json', { log: false }).then(function () {
           const { lastLog, hiddenLog } = this
@@ -164,7 +263,11 @@ describe('src/cy/commands/files', () => {
           this.hiddenLog = log
         })
 
-        Cypress.backend.resolves(okResponse)
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo.json') return
+
+          return createPrivilegedFileReadResponse('"contents"', '/path/to/foo.json')
+        })
 
         cy.readFile('foo.json', { log: false }).then(function () {
           const { lastLog, hiddenLog } = this
@@ -177,7 +280,11 @@ describe('src/cy/commands/files', () => {
       })
 
       it('logs immediately before resolving', function () {
-        Cypress.backend.resolves(okResponse)
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo.json') return
+
+          return createPrivilegedFileReadResponse('"contents"', '/path/to/foo.json')
+        })
 
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'readFile') {
@@ -266,18 +373,21 @@ describe('src/cy/commands/files', () => {
       })
 
       it('throws when there is an error reading the file', function (done) {
-        const err = new Error('EISDIR: illegal operation on a directory, read')
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo') return
 
-        err.name = 'EISDIR'
-        err.code = 'EISDIR'
-        err.filePath = '/path/to/foo'
-
-        Cypress.backend.withArgs('run:privileged').rejects(err)
+          return createPrivilegedFileReadErrorResponse({
+            code: 'EISDIR',
+            filePath: '/path/to/foo',
+            message: 'EISDIR: illegal operation on a directory, read',
+            name: 'EISDIR',
+          })
+        })
 
         cy.on('fail', (err) => {
           const { fileLog } = this
 
-          assertLogLength(this.logs, 2)
+          assertLogLength(this.logs, 1)
           expect(fileLog.get('error')).to.eq(err)
           expect(fileLog.get('state')).to.eq('failed')
           expect(err.message).to.eq(stripIndent`\
@@ -298,13 +408,16 @@ describe('src/cy/commands/files', () => {
       })
 
       it('has implicit existence assertion and throws a specific error when file does not exist', function (done) {
-        const err = new Error('ENOENT: no such file or directory, open \'foo.json\'')
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo.json') return
 
-        err.name = 'ENOENT'
-        err.code = 'ENOENT'
-        err.filePath = '/path/to/foo.json'
-
-        Cypress.backend.withArgs('run:privileged').rejects(err)
+          return createPrivilegedFileReadErrorResponse({
+            code: 'ENOENT',
+            filePath: '/path/to/foo.json',
+            message: 'ENOENT: no such file or directory, open \'foo.json\'',
+            name: 'ENOENT',
+          })
+        })
 
         cy.on('fail', (err) => {
           const { fileLog } = this
@@ -327,13 +440,17 @@ describe('src/cy/commands/files', () => {
 
       // https://github.com/cypress-io/cypress/issues/20683
       it('has implicit existence assertion, retries and throws a specific error when file does not exist for null encoding', function (done) {
-        const err = new Error('ENOENT: no such file or directory, open \'foo.json\'')
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo.json') return
 
-        err.name = 'ENOENT'
-        err.code = 'ENOENT'
-        err.filePath = '/path/to/foo.json'
+          return createPrivilegedFileReadErrorResponse({
+            code: 'ENOENT',
+            filePath: '/path/to/foo.json',
+            message: 'ENOENT: no such file or directory, open \'foo.json\'',
+            name: 'ENOENT',
+          })
+        })
 
-        Cypress.backend.withArgs('run:privileged').rejects(err)
         let hasRetried = false
 
         cy.on('command:retry', () => {
@@ -362,7 +479,11 @@ describe('src/cy/commands/files', () => {
       })
 
       it('throws a specific error when file exists when it shouldn\'t', function (done) {
-        Cypress.backend.resolves(okResponse)
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo.json') return
+
+          return createPrivilegedFileReadResponse('"contents"', '/path/to/foo.json')
+        })
 
         cy.on('fail', (err) => {
           const { fileLog, logs } = this
@@ -389,8 +510,10 @@ describe('src/cy/commands/files', () => {
       })
 
       it('passes through assertion error when not about existence', function (done) {
-        Cypress.backend.resolves({
-          contents: 'foo',
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo.json') return
+
+          return createPrivilegedFileReadResponse('"foo"', '/path/to/foo.json')
         })
 
         cy.on('fail', (err) => {
@@ -412,8 +535,10 @@ describe('src/cy/commands/files', () => {
       })
 
       it('throws when the read timeout expires', function (done) {
-        Cypress.backend.withArgs('run:privileged').callsFake(() => {
-          return new Cypress.Promise(() => { /* Broken promise for timeout */ })
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo') return
+
+          return new Promise(() => {})
         })
 
         cy.on('fail', (err) => {
@@ -436,8 +561,10 @@ describe('src/cy/commands/files', () => {
       it('uses defaultCommandTimeout config value if option not provided', {
         defaultCommandTimeout: 42,
       }, function (done) {
-        Cypress.backend.withArgs('run:privileged').callsFake(() => {
-          return new Cypress.Promise(() => { /* Broken promise for timeout */ })
+        stubPrivilegedFileRead((request) => {
+          if (request.options.file !== 'foo') return
+
+          return new Promise(() => {})
         })
 
         cy.on('fail', (err) => {

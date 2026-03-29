@@ -81,7 +81,7 @@ class PrivilegedCommandsManager {
     return !!matchingCommand
   }
 
-  runPrivilegedCommand (config, { commandName, options, args }) {
+  verifyCommand (config, { commandName, args }) {
     // the presence of the command within the verifiedCommands array indicates
     // the command being run is verified
     const hasCommand = this.hasVerifiedCommand({ name: commandName, args })
@@ -95,6 +95,10 @@ class PrivilegedCommandsManager {
 
       throw err
     }
+  }
+
+  runPrivilegedCommand (config, { commandName, options, args }) {
+    this.verifyCommand(config, { commandName, args })
 
     switch (commandName) {
       case 'env':

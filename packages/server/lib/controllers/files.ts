@@ -5,11 +5,22 @@ import Debug from 'debug'
 import { escapeFilenameInUrl } from '../util/escape_filename'
 import { getCtx } from '@packages/data-context'
 import { DocumentDomainInjection } from '@packages/network-tools'
+import type { Request, Response } from 'express'
 import { privilegedCommandsManager } from '../privileged-commands/privileged-commands-manager'
+import { createReadFileStream } from '../files'
+import * as errors from '../errors'
 import type { Cfg } from '../project-base'
 import type { RemoteStates } from '../remote_states'
 
 const debug = Debug('cypress:server:controllers')
+
+type PrivilegedFileReadRequest = Request<{}, {}, {
+  args: string[]
+  commandName: 'readFile' | 'selectFile'
+  options: {
+    file: string
+  }
+}>
 
 export = {
 
@@ -86,6 +97,51 @@ export = {
     debug('cross origin iframe with options %o', iframeOptions)
 
     res.render(iframePath, iframeOptions)
+  },
+
+  async handlePrivilegedFileRead (
+    req: PrivilegedFileReadRequest,
+    res: Response,
+    config: Cfg,
+  ) {
+    const { args, commandName, options } = req.body
+
+    try {
+      if (commandName !== 'readFile' && commandName !== 'selectFile') {
+        throw new Error(
+          `You requested a privileged file read for a command we cannot handle: ${commandName}`,
+        )
+      }
+
+      privilegedCommandsManager.verifyCommand(config, { commandName, args })
+
+      const { filePath, stream } = await createReadFileStream(config.projectRoot, {
+        file: options.file,
+      })
+
+      res.type('application/octet-stream')
+      res.setHeader('Cache-Control', 'no-store')
+      res.setHeader('x-cypress-file-path', encodeURIComponent(filePath))
+
+      stream.on('error', (error) => {
+        debug(
+          'privileged file stream errored %o',
+          { filePath, error: error.message },
+        )
+
+        if (!res.headersSent) {
+          res.status(500).json({ error: errors.cloneErr(error) })
+
+          return
+        }
+
+        res.destroy(error)
+      })
+
+      stream.pipe(res)
+    } catch (error) {
+      res.status(500).json({ error: errors.cloneErr(error) })
+    }
   },
 
   getSpecs (spec: any, config: Cfg, extraOptions = {}) {

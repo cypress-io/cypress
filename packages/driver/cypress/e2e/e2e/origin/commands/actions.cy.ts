@@ -188,6 +188,38 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
     })
   })
 
+  it('should select a path based file in cy.origin()', () => {
+    cy.get('a[data-cy="files-form-link"]').click()
+
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.get<HTMLInputElement>('#basic')
+      .selectFile('cypress/fixtures/valid.json')
+      .should(($input) => {
+        const { files } = $input[0]
+
+        if (!files || files.length === 0) {
+          throw new Error('expected `selectFile()` to attach a file')
+        }
+
+        const file = files[0]
+
+        expect(file.name).to.equal('valid.json')
+
+        return file.arrayBuffer()
+        .then((arrayBuffer) => {
+          const contents = new TextDecoder('utf8').decode(arrayBuffer)
+
+          expect(JSON.parse(contents)).to.deep.equal({
+            bar: {
+              baz: 'cypress',
+            },
+            foo: 1,
+          })
+        })
+      })
+    })
+  })
+
   // With Cypress 15, window() will work always without cy.origin().
   // However, users may not have access to the AUT window object, so cy.window() yielded window objects
   // may return cross-origin errors.

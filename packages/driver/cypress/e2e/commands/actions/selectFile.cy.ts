@@ -296,6 +296,26 @@ describe('src/cy/commands/actions/selectFile', () => {
         })
       })
 
+      it('should read path based files without relying on the privileged socket response', () => {
+        const backend = cy.stub(Cypress, 'backend').callThrough()
+
+        cy.get('#basic').selectFile('cypress/fixtures/app.js')
+        .then(getFileContents)
+        .then((contents) => {
+          expect(contents[0]).to.eql('{ \'bar\' }\n')
+
+          const calls = backend.getCalls()
+          const selectFilePrivilegedCalls = calls.filter(
+            (call) => {
+              return call.args[0] === 'run:privileged'
+              && call.args[1]?.commandName === 'selectFile'
+            },
+          )
+
+          expect(selectFilePrivilegedCalls.length).to.eq(0)
+        })
+      })
+
       it('allows users to override the inferred filenames and mimetypes', () => {
         cy.fixture('valid.json').as('myFixture')
 

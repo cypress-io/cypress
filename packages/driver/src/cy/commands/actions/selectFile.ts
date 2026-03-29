@@ -6,7 +6,7 @@ import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
-import { runPrivilegedCommand } from '../../../util/privileged_channel'
+import { runPrivilegedFileCommand } from '../../../util/privileged_channel'
 
 /* dropzone.js relies on an experimental, nonstandard API, webkitGetAsEntry().
  * https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
@@ -167,28 +167,30 @@ export default (Commands, Cypress, cy, state, config) => {
     if (!filePaths.length) return []
 
     // This reads the file with privileged access in the same manner as
-    // cy.readFile(). We call directly into the backend rather than calling
-    // cy.readFile() directly because we don't want to retry loading a specific
-    // file until timeout, but rather retry the selectFile command as a whole
-    return runPrivilegedCommand({
-      commandName: 'selectFile',
-      cy,
-      Cypress: (Cypress as unknown) as InternalCypress.Cypress,
-      options: {
-        files: filePaths,
-      },
-    })
-    .then((results) => {
-      return results.map((result) => {
+    // cy.readFile(). We read each file individually so large files are
+    // transferred as streamed HTTP responses rather than a single socket
+    // payload.
+    try {
+      return await Promise.all(filePaths.map(async (filePath) => {
+        const result = await runPrivilegedFileCommand({
+          commandName: 'selectFile',
+          cy,
+          Cypress,
+          options: {
+            encoding: filePath.encoding,
+            file: filePath.path,
+          },
+        })
+
         return {
-          // We default to the filename on the path, but allow them to override
-          fileName: basename(result.path),
-          ...result,
-          contents: Cypress.Buffer.from(result.contents),
+          ...filePath,
+          // We default to the filename on the path, but allow them to override.
+          fileName: filePath.fileName ?? basename(filePath.path),
+          filePath: result.filePath,
+          contents: result.contents,
         }
-      })
-    })
-    .catch((err) => {
+      }))
+    } catch (err) {
       if (err.isNonSpec) {
         $errUtils.throwErrByPath('miscellaneous.non_spec_invocation', {
           args: { cmd: 'selectFile' },
@@ -205,7 +207,9 @@ export default (Commands, Cypress, cy, state, config) => {
         onFail: options._log,
         args: { cmd: 'selectFile', action: 'read', file: err.originalFilePath, filePath: err.filePath, error: err.message },
       })
-    })
+
+      return []
+    }
   }
 
   const getFilePathObject = (file, index) => {

@@ -1,4 +1,5 @@
 import path from 'path'
+import type { ReadStream } from 'fs'
 import { fs } from './util/fs'
 
 export async function readFile (projectRoot: string, options: { file: string, encoding?: BufferEncoding } = { file: '', encoding: 'utf8' }) {
@@ -28,6 +29,42 @@ export async function readFile (projectRoot: string, options: { file: string, en
     err.originalFilePath = options.file
     err.filePath = filePath
     throw err
+  }
+}
+
+export async function createReadFileStream (
+  projectRoot: string,
+  options: { file: string } = { file: '' },
+): Promise<{ filePath: string, stream: ReadStream }> {
+  const filePath = path.resolve(projectRoot, options.file)
+  const stream = fs.createReadStream(filePath)
+
+  try {
+    // Wait for the stream to emit `open` so missing file errors are normalized
+    // before the response starts streaming.
+    await new Promise<void>((resolve, reject) => {
+      const handleError = (error: Error & { originalFilePath?: string, filePath?: string }) => {
+        error.originalFilePath = options.file
+        error.filePath = filePath
+
+        reject(error)
+      }
+
+      stream.once('error', handleError)
+      stream.once('open', () => {
+        stream.off('error', handleError)
+        resolve()
+      })
+    })
+
+    return {
+      filePath,
+      stream,
+    }
+  } catch (error) {
+    stream.destroy()
+
+    throw error
   }
 }
 
