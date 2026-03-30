@@ -392,7 +392,7 @@
 
 ### Bug Fixes
 
-* removing test for previous undesireable behavior ([#15458](https://github.com/cypress-io/cypress/issues/15458)) ([35dde75](https://github.com/cypress-io/cypress/commit/35dde753560e9d53d1c49131187ff30d8e31fc75))
+* removing test for previous undesirable behavior ([#15458](https://github.com/cypress-io/cypress/issues/15458)) ([35dde75](https://github.com/cypress-io/cypress/commit/35dde753560e9d53d1c49131187ff30d8e31fc75))
 * **@cypress/react:** Correctly unmount react components ([#15250](https://github.com/cypress-io/cypress/issues/15250)) ([6b515c7](https://github.com/cypress-io/cypress/commit/6b515c777ca2fa599f21dc47d181fd28a7eb6db0))
 * **component-testing:** ensure to call unmount after each test ([#15385](https://github.com/cypress-io/cypress/issues/15385)) ([153fc51](https://github.com/cypress-io/cypress/commit/153fc515a53343758393db795879a64494374551))
 * make webpack-dev-server a peer dependency ([#15163](https://github.com/cypress-io/cypress/issues/15163)) ([fa969fb](https://github.com/cypress-io/cypress/commit/fa969fba78d86494b5d920f573768677301fad13))

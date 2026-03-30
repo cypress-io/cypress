@@ -65,7 +65,7 @@
 
 * update changelog references to make it clearer on where angular 17 packages live historically
 
-* fix cy framework errors app test to use angualr 18 and 19
+* fix cy framework errors app test to use angular 18 and 19
 
 * fix issue where di was not discoverable in resolved system tests config
 

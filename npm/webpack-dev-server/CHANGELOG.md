@@ -65,7 +65,7 @@
 
 ### Bug Fixes
 
-* extranous angular warnings ([#32251](https://github.com/cypress-io/cypress/issues/32251)) ([c8606c2](https://github.com/cypress-io/cypress/commit/c8606c21ae148459fe54d74e040fd2ec5bdc3d08))
+* extraneous angular warnings ([#32251](https://github.com/cypress-io/cypress/issues/32251)) ([c8606c2](https://github.com/cypress-io/cypress/commit/c8606c21ae148459fe54d74e040fd2ec5bdc3d08))
 
 # [@cypress/webpack-dev-server-v5.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.0.0...@cypress/webpack-dev-server-v5.1.0) (2025-08-14)
 
@@ -95,7 +95,7 @@
 
 * update changelog references to make it clearer on where angular 17 packages live historically
 
-* fix cy framework errors app test to use angualr 18 and 19
+* fix cy framework errors app test to use angular 18 and 19
 
 * fix issue where di was not discoverable in resolved system tests config
 

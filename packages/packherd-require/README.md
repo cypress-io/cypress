@@ -65,7 +65,7 @@ To enable this feature the [packherdRequire][require fn] has to be invoked in or
 have it hook into Node.js `require` calls via a `Module._extension`. Particularly the
 [`transpileOpts`][transpile opts] field of the [opts][require opts] needs to be configured as follows.
 
-- `supportTS`: `true`
+- `supports`: `true`
 - `initTranspileCache`: needs to be a function matching [InitTranspileCache][init transpile cache fn]
 
 ### Transpile Cache

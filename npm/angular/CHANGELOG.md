@@ -28,7 +28,7 @@
 
 * update changelog references to make it clearer on where angular 17 packages live historically
 
-* fix cy framework errors app test to use angualr 18 and 19
+* fix cy framework errors app test to use angular 18 and 19
 
 * fix issue where di was not discoverable in resolved system tests config
 
@@ -203,7 +203,7 @@
 * support webpack-dev-server v4 ([#17918](https://github.com/cypress-io/cypress/issues/17918)) ([16e4759](https://github.com/cypress-io/cypress/commit/16e4759e0196f68c5f0525efb020211337748f94))
 * swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
 * Use .config files ([#18578](https://github.com/cypress-io/cypress/issues/18578)) ([081dd19](https://github.com/cypress-io/cypress/commit/081dd19cc6da3da229a7af9c84f62730c85a5cd6))
-* use devServer instad of startDevServer ([#20092](https://github.com/cypress-io/cypress/issues/20092)) ([8a6768f](https://github.com/cypress-io/cypress/commit/8a6768fee6f46b908c5a9daf23da8b804a6c627f))
+* use devServer instead of startDevServer ([#20092](https://github.com/cypress-io/cypress/issues/20092)) ([8a6768f](https://github.com/cypress-io/cypress/commit/8a6768fee6f46b908c5a9daf23da8b804a6c627f))
 * use hoisted yarn install in binary build ([#17285](https://github.com/cypress-io/cypress/issues/17285)) ([e4f5b10](https://github.com/cypress-io/cypress/commit/e4f5b106d49d6ac0857c5fdac886f83b99558c88))
 * Use plugins on config files ([#18798](https://github.com/cypress-io/cypress/issues/18798)) ([bb8251b](https://github.com/cypress-io/cypress/commit/bb8251b752ac44f1184f9160194cf12d41fc867f))
 * use supportFile by testingType ([#19364](https://github.com/cypress-io/cypress/issues/19364)) ([0366d4f](https://github.com/cypress-io/cypress/commit/0366d4fa8971e5e5189c6fd6450cc3c8d72dcfe1))
@@ -231,7 +231,7 @@
 * support webpack-dev-server v4 ([#17918](https://github.com/cypress-io/cypress/issues/17918)) ([16e4759](https://github.com/cypress-io/cypress/commit/16e4759e0196f68c5f0525efb020211337748f94))
 * swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
 * Use .config files ([#18578](https://github.com/cypress-io/cypress/issues/18578)) ([081dd19](https://github.com/cypress-io/cypress/commit/081dd19cc6da3da229a7af9c84f62730c85a5cd6))
-* use devServer instad of startDevServer ([#20092](https://github.com/cypress-io/cypress/issues/20092)) ([8a6768f](https://github.com/cypress-io/cypress/commit/8a6768fee6f46b908c5a9daf23da8b804a6c627f))
+* use devServer instead of startDevServer ([#20092](https://github.com/cypress-io/cypress/issues/20092)) ([8a6768f](https://github.com/cypress-io/cypress/commit/8a6768fee6f46b908c5a9daf23da8b804a6c627f))
 * use hoisted yarn install in binary build ([#17285](https://github.com/cypress-io/cypress/issues/17285)) ([e4f5b10](https://github.com/cypress-io/cypress/commit/e4f5b106d49d6ac0857c5fdac886f83b99558c88))
 * Use plugins on config files ([#18798](https://github.com/cypress-io/cypress/issues/18798)) ([bb8251b](https://github.com/cypress-io/cypress/commit/bb8251b752ac44f1184f9160194cf12d41fc867f))
 * use supportFile by testingType ([#19364](https://github.com/cypress-io/cypress/issues/19364)) ([0366d4f](https://github.com/cypress-io/cypress/commit/0366d4fa8971e5e5189c6fd6450cc3c8d72dcfe1))
@@ -259,7 +259,7 @@
 * support webpack-dev-server v4 ([#17918](https://github.com/cypress-io/cypress/issues/17918)) ([16e4759](https://github.com/cypress-io/cypress/commit/16e4759e0196f68c5f0525efb020211337748f94))
 * swap the #__cy_root id selector to become data-cy-root for component mounting ([#20951](https://github.com/cypress-io/cypress/issues/20951)) ([0e7b555](https://github.com/cypress-io/cypress/commit/0e7b555f93fb403f431c5de4a07ae7ad6ac89ba2))
 * Use .config files ([#18578](https://github.com/cypress-io/cypress/issues/18578)) ([081dd19](https://github.com/cypress-io/cypress/commit/081dd19cc6da3da229a7af9c84f62730c85a5cd6))
-* use devServer instad of startDevServer ([#20092](https://github.com/cypress-io/cypress/issues/20092)) ([8a6768f](https://github.com/cypress-io/cypress/commit/8a6768fee6f46b908c5a9daf23da8b804a6c627f))
+* use devServer instead of startDevServer ([#20092](https://github.com/cypress-io/cypress/issues/20092)) ([8a6768f](https://github.com/cypress-io/cypress/commit/8a6768fee6f46b908c5a9daf23da8b804a6c627f))
 * use hoisted yarn install in binary build ([#17285](https://github.com/cypress-io/cypress/issues/17285)) ([e4f5b10](https://github.com/cypress-io/cypress/commit/e4f5b106d49d6ac0857c5fdac886f83b99558c88))
 * Use plugins on config files ([#18798](https://github.com/cypress-io/cypress/issues/18798)) ([bb8251b](https://github.com/cypress-io/cypress/commit/bb8251b752ac44f1184f9160194cf12d41fc867f))
 * use supportFile by testingType ([#19364](https://github.com/cypress-io/cypress/issues/19364)) ([0366d4f](https://github.com/cypress-io/cypress/commit/0366d4fa8971e5e5189c6fd6450cc3c8d72dcfe1))

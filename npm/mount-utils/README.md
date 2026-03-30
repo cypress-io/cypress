@@ -80,7 +80,7 @@ export function mount(
   // Render HTML containing component.
   $root.innerHTML = `<${name} id="root"></${name}>`;
 
-  // Log a messsage in the Command Log.
+  // Log a message in the Command Log.
   Cypress.log({
     name: "mount",
     message: [`<${name} ... />`],
