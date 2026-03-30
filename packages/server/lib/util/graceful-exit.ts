@@ -36,7 +36,7 @@ export class GracefulExit {
       const listener = async (received: NodeJS.Signals) => {
         if (this.processTeardown) {
           console.log(`\n\n${received} received during graceful exit. Forcing exit.`)
-          this.forceExit()
+          process.exit(1)
         } else {
           console.log(`\n\n${received} received. Gracefully exiting.`)
           await GracefulExit.exitGracefully(128 + os.constants.signals[received])
