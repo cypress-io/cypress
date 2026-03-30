@@ -306,11 +306,12 @@ export default (Commands, Cypress, cy, state) => {
       switch (err.type) {
         case 'length':
           if (err.expected > 1) {
-            const { message, docsUrl, docsUrlTitle } = $errUtils.cypressErrByPath('contains.length_option')
+            const { message, docsUrl, docsUrlTitle, triggerAction } = $errUtils.cypressErrByPath('contains.length_option')
 
             err.message = message
             err.docsUrl = docsUrl
             err.docsUrlTitle = docsUrlTitle
+            err.triggerAction = triggerAction
             err.retry = false
           }
 
@@ -382,11 +383,12 @@ export default (Commands, Cypress, cy, state) => {
     this.set('onFail', (err) => {
       switch (err.type) {
         case 'existence': {
-          const { message, docsUrl, docsUrlTitle } = $errUtils.cypressErrByPath('shadow.no_shadow_root')
+          const { message, docsUrl, docsUrlTitle, triggerAction } = $errUtils.cypressErrByPath('shadow.no_shadow_root')
 
           err.message = message
           err.docsUrl = docsUrl
           err.docsUrlTitle = docsUrlTitle
+          err.triggerAction = triggerAction
           break
         }
         default:

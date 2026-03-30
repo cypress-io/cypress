@@ -2,6 +2,34 @@ import { launchStudio, loadProjectAndRunSpec } from './helper'
 import pDefer from 'p-defer'
 
 describe('Cypress Studio - UI and Panel Management', () => {
+  it('shows Run test button label in single-test mode', () => {
+    launchStudio()
+
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.get('button.restart').trigger('mouseover')
+    cy.get('.cy-tooltip').should('have.text', 'Run test R')
+  })
+
+  it('shows Run All Tests button label on welcome screen', () => {
+    cy.viewport(1500, 1000)
+    loadProjectAndRunSpec()
+    cy.findByTestId('studio-button').should('be.visible').click()
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
+
+    cy.get('button.restart').trigger('mouseover')
+    cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
+  })
+
+  it('shows Run All Tests button label on new test screen', () => {
+    launchStudio({ createNewTestFromSpecHeader: true })
+
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('test-name-input').should('be.visible')
+    cy.get('button.restart').trigger('mouseover')
+    cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
+  })
+
   it('closes studio panel when clicking studio button (from the cloud)', () => {
     launchStudio()
 

@@ -8,6 +8,7 @@ const profileCleaner = require(`../../../lib/util/profile_cleaner`)
 
 const tmpDir = os.tmpdir()
 const pidProfilesFolder = path.join(tmpDir, 'pid-profiles')
+const rootProfileFolder = path.join(tmpDir, 'root-profile-cleaner')
 
 describe('lib/util/profile_cleaner', () => {
   context('.isCypressProcess', () => {
@@ -98,6 +99,56 @@ describe('lib/util/profile_cleaner', () => {
         ])
       }).finally(() => {
         return findProcess.byPid.restore()
+      })
+    })
+
+    it('resolves when no profile folders match the prefix', () => {
+      const emptyFolder = path.join(tmpDir, 'empty-pid-profiles')
+
+      return fs.ensureDirAsync(emptyFolder)
+      .then(() => profileCleaner.removeInactiveByPid(emptyFolder, 'run-'))
+      .then((result) => {
+        expect(result).to.eql([])
+      })
+      .finally(() => fs.removeAsync(emptyFolder))
+    })
+  })
+
+  context('.removeRootProfile', () => {
+    beforeEach(() => {
+      return fs.ensureDirAsync(rootProfileFolder)
+    })
+
+    afterEach(() => {
+      return fs.removeAsync(rootProfileFolder).catch(() => {})
+    })
+
+    it('removes all matches in the profile directory', () => {
+      const fileA = path.join(rootProfileFolder, 'a')
+      const fileB = path.join(rootProfileFolder, 'b')
+
+      return fs.writeFileAsync(fileA, '')
+      .then(() => fs.writeFileAsync(fileB, ''))
+      .then(() => profileCleaner.removeRootProfile(rootProfileFolder))
+      .then(() => Promise.all([
+        fs.pathExists(fileA),
+        fs.pathExists(fileB),
+      ]))
+      .then(([existsA, existsB]) => {
+        expect(existsA).to.eq(false)
+        expect(existsB).to.eq(false)
+      })
+    })
+
+    it('returns null when glob throws', () => {
+      const stubbedGlob = sinon.stub().rejects(new Error('glob error'))
+      const cleaner = proxyquire(path.join(__dirname, '../../../lib/util/profile_cleaner'), {
+        './glob': stubbedGlob,
+      })
+
+      return cleaner.removeRootProfile(rootProfileFolder)
+      .then((result) => {
+        expect(result).to.eq(null)
       })
     })
   })
