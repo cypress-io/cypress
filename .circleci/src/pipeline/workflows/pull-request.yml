@@ -8,11 +8,14 @@ when:
             pattern: /^release\//
             value: << pipeline.git.branch >>
     - not:
-        matches:
-            pattern: /^develop/
-            value: << pipeline.git.branch >>
+        equal: [ 'develop', << pipeline.git.branch >> ]
+    - not:
+        equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
+    # TODO: temporary branches that can be removed after merging
+    - not:
+        equal: [ 'mschile/remove_electron', << pipeline.git.branch >> ]
 
 jobs:
   - node_modules_install:
@@ -96,6 +99,10 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - system-tests-chrome:
+      context: test-runner:performance-tracking
+      requires:
+        - system-tests-node-modules-install
+  - system-tests-chrome-for-testing:
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
