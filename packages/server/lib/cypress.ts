@@ -6,7 +6,6 @@
 // synchronous requires the first go around just to
 // essentially do it all again when we boot the correct
 // mode.
-import type { ChildProcess } from 'child_process'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import argsUtils from './util/args'
@@ -115,9 +114,9 @@ export = {
           debug('electron closed with', { code, signal })
           if (mode === 'smokeTest') {
             resolve(code)
+          } else {
+            resolve({ totalFailed: code })
           }
-
-          resolve({ totalFailed: code })
         })
       })
     })

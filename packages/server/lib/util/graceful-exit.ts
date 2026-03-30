@@ -70,7 +70,7 @@ export class GracefulExit {
     GracefulExit.instance = null
   }
 
-  static addStep (teardownFn: () => Promise<void> | void, stepName?: string): string {
+  static addStep (teardownFn: ExitStep['fn'], stepName?: string): string {
     GracefulExit.singleton.debug('adding step to graceful exit: %s', stepName)
 
     const key = randomUUID()

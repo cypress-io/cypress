@@ -129,14 +129,6 @@ describe('open', () => {
     vi.clearAllMocks()
   })
 
-  it('invokes onChildSpawned with the spawned process when provided', async () => {
-    const onChildSpawned = vi.fn()
-
-    await open(appPath, argv, onChildSpawned)
-
-    expect(onChildSpawned).toHaveBeenCalledWith(mockChildProcess)
-  })
-
   it('opens the electron app and returns the child process', async () => {
     const result = await open(appPath, argv)
 
