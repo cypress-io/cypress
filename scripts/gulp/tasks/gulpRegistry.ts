@@ -92,15 +92,7 @@ async function exitHandler (exitCode: number) {
 async function signalHandler (signal: NodeJS.Signals) {
   hasExited = true
   try {
-    await new Promise<void>((resolve, reject) => {
-      treeKill(process.pid, signal, (err) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
+    await exitAllProcesses()
   } catch (error) {
     console.error(`An error occurred while handling signal ${signal}: ${error}`)
     process.exit(1)

@@ -6,11 +6,11 @@
 // synchronous requires the first go around just to
 // essentially do it all again when we boot the correct
 // mode.
+import type { ChildProcess } from 'child_process'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
 import argsUtils from './util/args'
 import { telemetry } from '@packages/telemetry'
-import { getCtx, hasCtx } from '@packages/data-context'
 import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
@@ -108,10 +108,12 @@ export = {
         // const mainEntryFile = require.main.filename
         const serverMain = getCwd()
 
-        const child = await cypressElectron.open(serverMain, args)
+        const child: ChildProcess = await cypressElectron.open(serverMain, args)
 
-        child.on('close', (code, signal) => {
-          debug('electron closed with', { code, signal })
+        child.on('close', (exitCode, signal) => {
+          debug('electron closed with', { code: exitCode, signal })
+          const code = exitCode === null ? 0 : exitCode
+
           if (mode === 'smokeTest') {
             resolve(code)
           } else {
