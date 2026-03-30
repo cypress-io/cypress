@@ -17,9 +17,18 @@ import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
 import { toNumber } from 'lodash'
 import { GracefulExit } from './util/graceful-exit'
+import type { BrowserWindow } from 'electron'
+import type { CypressRunResult } from './modes/results'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
+
+/** Resolved value from {@link runElectron} (in-process Electron vs spawned child). */
+type RunElectronResult =
+  | number
+  | CypressRunResult
+  | { totalFailed: number }
+  | BrowserWindow
 
 const showWarningForInvalidConfig = (options: any) => {
   const publicConfigKeys = getPublicConfigKeys()
@@ -68,7 +77,7 @@ export = {
     return require('./util/electron-app').isRunning()
   },
 
-  runElectron (mode: Mode, options: any): Promise<number | { totalFailed: number }> {
+  runElectron (mode: Mode, options: any): Promise<RunElectronResult> {
     // wrap all of this in a promise to force the
     // promise interface - even if it doesn't matter
     // in dev mode due to cp.spawn
@@ -210,7 +219,11 @@ export = {
         case 'smokeTest': {
           const pong = await this.runElectron(mode, options)
 
-          const code = typeof pong === 'number' ? pong : pong.totalFailed
+          const code = typeof pong === 'number'
+            ? pong
+            : 'totalFailed' in pong
+              ? pong.totalFailed
+              : 1
 
           if (!this.isCurrentlyRunningElectron()) {
             return GracefulExit.exitGracefully(code)
@@ -234,7 +247,15 @@ export = {
         case 'run': {
           const results = await this.runElectron(mode, options)
 
-          if (results.runs) {
+          if (typeof results === 'number') {
+            return GracefulExit.exitGracefully(results)
+          }
+
+          if (!('totalFailed' in results)) {
+            throw new Error('unexpected runElectron result for run mode')
+          }
+
+          if ('runs' in results && results.runs) {
             const isCanceled = results.runs.filter((run) => run.skippedSpec).length
 
             if (isCanceled) {

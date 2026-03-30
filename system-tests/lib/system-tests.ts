@@ -43,8 +43,9 @@ type CypressConfig = { [key: string]: any }
 export type BrowserName = 'electron' | 'firefox' | 'chrome' | 'chrome-for-testing' | 'webkit'
 | '!electron' | '!chrome' | '!chrome-for-testing' | '!firefox' | '!webkit'
 
-type ExecResult = {
-  code: number
+export type ExecResult = {
+  code: number | null
+  signal: NodeJS.Signals | null
   stdout: string
   stderr: string
 }
@@ -250,6 +251,11 @@ type ExecOptions = {
    * Run Cypress with POSIX exit codes.
    */
   posixExitCodes?: boolean
+  /**
+   * If true, skip asserting the Cypress child exited without a termination signal (e.g. SIGABRT).
+   * @default false
+   */
+  skipExitSignalAssertion?: boolean
 }
 
 type Server = {
@@ -289,7 +295,7 @@ export type SpawnerResult = {
   stdout: stream.Readable
   stderr: stream.Readable
   on(event: 'error', cb: (err: Error) => void): void
-  on(event: 'exit', cb: (exitCode: number) => void): void
+  on(event: 'exit', cb: (exitCode: number | null, signal?: NodeJS.Signals | null) => void): void
   kill: ChildProcess['kill']
   pid: number
 }
@@ -848,10 +854,14 @@ const systemTests = {
     let stdout = ''
     let stderr = ''
 
-    const exit = function (code) {
-      const { expectedExitCode } = options
+    const exit = function (code: number | null, signal: NodeJS.Signals | null | undefined) {
+      const { expectedExitCode, skipExitSignalAssertion } = options
 
       maybeVerifyExitCode(expectedExitCode, () => {
+        if (!skipExitSignalAssertion) {
+          expect(signal == null, `Cypress process exited by signal: ${signal} (exit code ${code})`).to.be.true
+        }
+
         if (expectedExitCode === 0) {
           expect(code).to.eq(expectedExitCode, `Process errored: Exit code ${code}`)
         } else {
@@ -934,6 +944,7 @@ const systemTests = {
 
       return {
         code,
+        signal: signal == null ? null : signal,
         stdout,
         stderr,
       }
@@ -1009,14 +1020,16 @@ const systemTests = {
     sp.stdout.on('data', (buf) => stdout += buf.toString())
     sp.stderr.on('data', (buf) => stderr += buf.toString())
 
-    const exitCode = await new Promise((resolve, reject) => {
+    const [exitCode, exitSignal] = await new Promise<[number | null, NodeJS.Signals | null | undefined]>((resolve, reject) => {
       sp.on('error', reject)
-      sp.on('exit', resolve)
+      sp.on('exit', (code, sig) => {
+        resolve([code, sig])
+      })
     })
 
     await copy(projectPath)
 
-    return exit(exitCode)
+    return exit(exitCode, exitSignal)
   },
 
   sendHtml (contents) {

@@ -100,7 +100,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
         }
 
         log('Docker run exited:', { err, data })
-        this.emit('exit', data.StatusCode)
+        this.emit('exit', data.StatusCode, null)
       },
     )
   }
