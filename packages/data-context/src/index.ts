@@ -33,7 +33,6 @@ export async function clearCtx () {
     // noop
   }
   if (ctx) {
-    debug('clearing data-context')
     debug('signalling mainProcessWillDisconnect')
     await ctx.lifecycleManager.mainProcessWillDisconnect()
     debug('destroying data-context')
