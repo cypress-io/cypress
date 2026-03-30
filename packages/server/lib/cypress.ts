@@ -6,6 +6,7 @@
 // synchronous requires the first go around just to
 // essentially do it all again when we boot the correct
 // mode.
+import os from 'os'
 import type { ChildProcess } from 'child_process'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
@@ -112,7 +113,9 @@ export = {
 
         child.on('close', (exitCode, signal) => {
           debug('electron closed with', { code: exitCode, signal })
-          const code = exitCode === null ? 0 : exitCode
+          const code = signal && signal in os.constants.signals ?
+            128 + os.constants.signals[signal] :
+            exitCode !== null ? exitCode : 0
 
           if (mode === 'smokeTest') {
             resolve(code)
