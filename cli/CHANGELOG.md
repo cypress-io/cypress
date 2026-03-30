@@ -7,6 +7,10 @@ _Released 03/31/2026 (PENDING)_
 
 - When recording to Cypress Cloud, the App now sends a smaller snapshot of your project config, which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
 
+**Bugfixes:**
+
+- Fixed an issue where `cy.intercept` `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
+
 ## 15.13.0
 
 _Released 03/24/2026_
@@ -46,7 +50,6 @@ _Released 03/13/2026_
 - Fixed an issue in develop mode (when running Cypress via gulp with file watching) where closing the Electron window did not exit the gulp process, leaving it running. Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
 - Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).
 - Fixed an issue where Cypress may hang when waiting on multiple intercepts and the page navigates causing a stability change. Addressed in [#33446](https://github.com/cypress-io/cypress/pull/33446).
-- Fixed an issue where `cy.intercept` `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
 
 **Dependency Updates:**
 
