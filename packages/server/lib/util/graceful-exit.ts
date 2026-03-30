@@ -89,10 +89,6 @@ export class GracefulExit {
     GracefulExit.singleton.steps.delete(key)
   }
 
-  private forceExit () {
-    process.exit(1)
-  }
-
   private async flushSteps (code: number): Promise<number> {
     let hadErrors = false
 
@@ -118,6 +114,19 @@ export class GracefulExit {
     return code
   }
 
+  private async flushAndExit (code: number): Promise<number | void> {
+    let finalExitCode = code ?? 0
+
+    try {
+      finalExitCode = await this.flushSteps(code)
+    } catch (error) {
+      GracefulExit.singleton.debug('Error flushing steps: ', error)
+      finalExitCode = 1
+    } finally {
+      process.exit(finalExitCode)
+    }
+  }
+
   static async exitGracefully (code: number): Promise<number | void> {
     const exit = GracefulExit.singleton
 
@@ -128,27 +137,22 @@ export class GracefulExit {
     let forceExitTimeout: NodeJS.Timeout | undefined = undefined
 
     exit.processTeardown = Promise.race([
-      new Promise<number | void>(async (resolve, reject) => {
-        let finalExitCode = 0
-
-        try {
-          finalExitCode = await exit.flushSteps(code)
-
-          resolve(finalExitCode)
-        } catch (error) {
-          GracefulExit.singleton.debug('Error flushing steps', error)
-          reject(error)
-        } finally {
-          clearTimeout(forceExitTimeout)
-          process.exit(finalExitCode)
-        }
+      GracefulExit.singleton.flushAndExit(code).then(() => {
+        clearTimeout(forceExitTimeout)
       }),
-      new Promise<void>((resolve, reject) => {
+      new Promise<void>((resolve) => {
         forceExitTimeout = setTimeout(() => {
-          const ms = getTeardownTimeoutMs()
+          try {
+            const ms = getTeardownTimeoutMs()
 
-          console.error(`Failed to gracefully exit after ${ms}ms. Exiting with code 1. Configure with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT (milliseconds).`)
-          exit.forceExit()
+            console.error(`Failed to gracefully exit after ${ms}ms. Exiting with code 1. Configure with CYPRESS_INTERNAL_TEARDOWN_TIMEOUT (milliseconds).`)
+          } catch (e) {
+            console.error('Error forcing exit: ', e)
+          } finally {
+            clearTimeout(forceExitTimeout)
+            resolve()
+            process.exit(1)
+          }
         }, getTeardownTimeoutMs())
       }),
     ])

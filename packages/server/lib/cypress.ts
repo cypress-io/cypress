@@ -222,9 +222,9 @@ export = {
 
           const code = typeof pong === 'number'
             ? pong
-            : 'totalFailed' in pong
+            : typeof pong === 'object' && 'totalFailed' in pong
               ? pong.totalFailed
-              : 1
+              : Number(pong ?? 0)
 
           if (!this.isCurrentlyRunningElectron()) {
             return GracefulExit.exitGracefully(code)
