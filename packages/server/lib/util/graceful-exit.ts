@@ -139,6 +139,7 @@ export class GracefulExit {
           GracefulExit.singleton.debug('Error flushing steps', error)
           reject(error)
         } finally {
+          clearTimeout(forceExitTimeout)
           process.exit(finalExitCode)
         }
       }),
