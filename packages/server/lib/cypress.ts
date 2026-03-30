@@ -222,7 +222,7 @@ export = {
 
           const code = typeof pong === 'number'
             ? pong
-            : 'totalFailed' in pong
+            : typeof pong === 'object' && pong !== null && 'totalFailed' in pong
               ? pong.totalFailed
               : 1
 

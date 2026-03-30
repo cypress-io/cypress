@@ -129,7 +129,7 @@ export class GracefulExit {
 
     exit.processTeardown = Promise.race([
       new Promise<number | void>(async (resolve, reject) => {
-        let finalExitCode = 0
+        let finalExitCode = code
 
         try {
           finalExitCode = await exit.flushSteps(code)
@@ -139,6 +139,10 @@ export class GracefulExit {
           GracefulExit.singleton.debug('Error flushing steps', error)
           reject(error)
         } finally {
+          if (forceExitTimeout !== undefined) {
+            clearTimeout(forceExitTimeout)
+          }
+
           process.exit(finalExitCode)
         }
       }),
