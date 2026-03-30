@@ -187,7 +187,8 @@ export = {
         try {
           await GracefulExit.exitGracefully(0)
         } catch (e) {
-          debug(`graceful exit steps during quit: ${(e as Error)?.message}`)
+          debug(`graceful exit errored during quit: ${(e as Error)?.message}`)
+          process.exit(1)
         }
       })
     })
