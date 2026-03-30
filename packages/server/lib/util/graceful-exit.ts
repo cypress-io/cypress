@@ -11,8 +11,10 @@ function getTeardownTimeoutMs (): number {
 
 export interface ExitStep {
   name: string
-  fn: (code: number, expectedCode: number) => Promise<number | void> | void
+  fn: (code: number) => Promise<number | void> | void
 }
+
+export type ExitStepKey = string
 
 export class GracefulExit {
   private static instance: GracefulExit | null = null
@@ -52,6 +54,8 @@ export class GracefulExit {
    */
   static resetForTesting (): void {
     if (!(globalThis as { IS_TEST?: boolean }).IS_TEST) {
+      console.warn('GracefulExit.resetForTesting is a static harness only for unit tests')
+
       return
     }
 
@@ -70,7 +74,7 @@ export class GracefulExit {
     GracefulExit.instance = null
   }
 
-  static addStep (teardownFn: ExitStep['fn'], stepName?: string): string {
+  static addStep (teardownFn: ExitStep['fn'], stepName?: string): ExitStepKey {
     GracefulExit.singleton.debug('adding step to graceful exit: %s', stepName)
 
     const key = randomUUID()
@@ -79,6 +83,10 @@ export class GracefulExit {
     GracefulExit.singleton.steps.set(key, { name, fn: teardownFn })
 
     return key
+  }
+
+  static removeStep (key: ExitStepKey): void {
+    GracefulExit.singleton.steps.delete(key)
   }
 
   private forceExit () {
@@ -92,7 +100,7 @@ export class GracefulExit {
       try {
         this.debug(`<${key}> executing teardown step: %s`, name)
 
-        await fn(hadErrors ? 1 : code, code)
+        await fn(code)
 
         this.debug(`<${key}> teardown step completed: %s`, name)
       } catch (error) {
@@ -101,7 +109,13 @@ export class GracefulExit {
       }
     }))
 
-    return hadErrors ? 1 : code
+    if (hadErrors) {
+      console.error('Additional errors occurred during teardown. Exiting with code 1.')
+
+      return 1
+    }
+
+    return code
   }
 
   static async exitGracefully (code: number): Promise<number | void> {
@@ -115,14 +129,18 @@ export class GracefulExit {
 
     exit.processTeardown = Promise.race([
       new Promise<number | void>(async (resolve, reject) => {
-        const finalExitCode = await exit.flushSteps(code)
+        let finalExitCode = 0
 
-        exit.debug('flushSteps complete')
-        clearTimeout(forceExitTimeout)
+        try {
+          finalExitCode = await exit.flushSteps(code)
 
-        exit.debug('exiting with code: %s', finalExitCode)
-        resolve(finalExitCode)
-        process.exit(finalExitCode)
+          resolve(finalExitCode)
+        } catch (error) {
+          GracefulExit.singleton.debug('Error flushing steps', error)
+          reject(error)
+        } finally {
+          process.exit(finalExitCode)
+        }
       }),
       new Promise<void>((resolve, reject) => {
         forceExitTimeout = setTimeout(() => {

@@ -16,13 +16,16 @@ import type { CyPromptAuthenticatedUserShape, CyPromptServerOptions } from '@pac
 import crypto from 'crypto'
 import { reportCyPromptError } from '../api/cy-prompt/report_cy_prompt_error'
 import { GracefulExit } from '../../util/graceful-exit'
-
+import type { ExitStepKey } from '../../util/graceful-exit'
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
 export class CyPromptLifecycleManager {
   private static hashLoadingMap: Map<string, Promise<Record<string, string>>> = new Map()
   private static watcher: chokidar.FSWatcher | null = null
+  private static teardown: ExitStepKey | null = null
+
   static async close () {
+    CyPromptLifecycleManager.watcher?.removeAllListeners()
     await CyPromptLifecycleManager.watcher?.close().catch(() => {})
   }
 
@@ -287,9 +290,17 @@ export class CyPromptLifecycleManager {
 
     // Close the watcher if a previous watcher exists
     if (CyPromptLifecycleManager.watcher) {
-      CyPromptLifecycleManager.watcher.removeAllListeners()
-      CyPromptLifecycleManager.watcher.close().catch(() => {})
+      CyPromptLifecycleManager.close().catch(() => {})
     }
+
+    if (CyPromptLifecycleManager.teardown) {
+      GracefulExit.removeStep(CyPromptLifecycleManager.teardown)
+      CyPromptLifecycleManager.teardown = null
+    }
+
+    CyPromptLifecycleManager.teardown = GracefulExit.addStep(async () => {
+      await CyPromptLifecycleManager.close()
+    }, 'close cy prompt watcher')
 
     // Watch for changes to the cy prompt bundle
     CyPromptLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_CY_PROMPT_PATH, 'server', 'index.js'), {
@@ -309,10 +320,6 @@ export class CyPromptLifecycleManager {
         }
       })
     })
-
-    GracefulExit.addStep(async () => {
-      await CyPromptLifecycleManager.watcher?.close()
-    }, 'close cy prompt watcher')
   }
 
   /**

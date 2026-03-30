@@ -27,11 +27,13 @@ import { logError } from '@packages/stderr-filtering'
 import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
 import type { DebugData } from '@packages/types'
 import { GracefulExit } from '../../util/graceful-exit'
+import type { ExitStepKey } from '../../util/graceful-exit'
 
 const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
 
 export class StudioLifecycleManager {
+  private static teardown: ExitStepKey | null = null
   private static hashLoadingMap: Map<string, Promise<Record<string, string>>> = new Map()
   private static watcher: chokidar.FSWatcher | null = null
   private studioManagerPromise?: Promise<StudioManager | null>
@@ -361,8 +363,17 @@ export class StudioLifecycleManager {
     // Close the watcher if a previous watcher exists
     if (StudioLifecycleManager.watcher) {
       StudioLifecycleManager.watcher.removeAllListeners()
-      await StudioLifecycleManager.watcher.close().catch(() => {})
+      await StudioLifecycleManager.close().catch(() => {})
     }
+
+    if (StudioLifecycleManager.teardown) {
+      GracefulExit.removeStep(StudioLifecycleManager.teardown)
+      StudioLifecycleManager.teardown = null
+    }
+
+    StudioLifecycleManager.teardown = GracefulExit.addStep(async () => {
+      await StudioLifecycleManager.close()
+    }, 'close studio watcher')
 
     // Watch for changes to the studio bundle
     StudioLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server', 'index.js'), {
@@ -386,10 +397,6 @@ export class StudioLifecycleManager {
         return null
       })
     })
-
-    GracefulExit.addStep(async () => {
-      await StudioLifecycleManager.watcher?.close()
-    }, 'close studio watcher')
   }
 
   /**
