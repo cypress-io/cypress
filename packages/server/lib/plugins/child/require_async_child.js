@@ -48,7 +48,9 @@ ipc.on('main:process:will:disconnect', async () => {
 
   debug('existing disconnection?', disconnection)
   debug('waiting telemetry shutdown')
-  await disconnection ?? (disconnection = telemetry.shutdown())
+  const p = disconnection ?? (disconnection = telemetry.shutdown())
+
+  await p
   debug('telemetry shutdown complete')
 
   debug('sending main:process:will:disconnect:ack')
