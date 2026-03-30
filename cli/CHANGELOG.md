@@ -3,6 +3,10 @@
 
 _Released 03/31/2026 (PENDING)_
 
+**Bugfixes:**
+
+- Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228).
+
 **Performance:**
 
 - When recording to Cypress Cloud, the App now sends a smaller snapshot of your project config, which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
