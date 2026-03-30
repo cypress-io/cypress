@@ -17,7 +17,7 @@ exports['module api and after:run results'] = `
     "blockHosts": null,
     "chromeWebSecurity": true,
     "clientCertificates": [],
-    "defaultBrowser": null,
+    "defaultBrowser": "chrome",
     "defaultCommandTimeout": 4000,
     "downloadsFolder": "/path/to/downloadsFolder",
     "env": {},

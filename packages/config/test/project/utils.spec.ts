@@ -1041,6 +1041,21 @@ describe('config/src/project/utils', () => {
       expect(cfg.watchForFileChanges).toBe(false)
     })
 
+    it('sets defaultBrowser to chrome in run mode when unset', async function () {
+      await defaults('defaultBrowser', 'chrome', { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+    })
+
+    it('does not replace defaultBrowser in run mode when set in config', async function () {
+      const cfg = await mergeDefaults(
+        { projectRoot: '/foo/bar/', supportFile: false, defaultBrowser: 'firefox' },
+        { isTextTerminal: true },
+        {},
+        getFilesByGlob,
+      )
+
+      expect(cfg.defaultBrowser).toBe('firefox')
+    })
+
     it('can override morgan in options', async function () {
       const cfg = await defaults('morgan', false, { projectRoot: '/foo/bar/', supportFile: false }, { morgan: false })
 

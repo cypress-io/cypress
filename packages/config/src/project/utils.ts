@@ -461,13 +461,19 @@ export function mergeDefaults (
   delete config.envFile
 
   // when headless
-  if (config.isTextTerminal && !process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH) {
-    // dont ever watch for file changes
-    config.watchForFileChanges = false
+  if (config.isTextTerminal) {
+    // don't ever watch for file changes unless the user has explicitly asked for it
+    if (!process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH) {
+      config.watchForFileChanges = false
+    }
 
-    // and forcibly reset numTestsKeptInMemory
-    // to zero
+    // and forcibly reset numTestsKeptInMemory to zero
     config.numTestsKeptInMemory = 0
+
+    // and set defaultBrowser to chrome if it is not set
+    if (!config.defaultBrowser) {
+      config.defaultBrowser = 'chrome'
+    }
   }
 
   config = setResolvedConfigValues(config, defaultsForRuntime, resolved)
