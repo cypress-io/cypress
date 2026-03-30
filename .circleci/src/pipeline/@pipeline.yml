@@ -863,6 +863,8 @@ commands:
     steps:
       - restore_cached_workspace
       - restore_cached_system_tests_deps
+      - install-browsers:
+          install-chrome-for-testing: true
       - run:
           name: Run system tests
           environment:
@@ -871,7 +873,7 @@ commands:
             ALL_SPECS=`circleci tests glob "$HOME/cypress/system-tests/test-binary/*spec*"`
             SPECS=`echo $ALL_SPECS | xargs -n 1 | circleci tests split --split-by=timings`
             echo SPECS=$SPECS
-            yarn workspace @tooling/system-tests test:ci $SPECS
+            yarn workspace @tooling/system-tests test:ci $SPECS --browser chrome-for-testing
       - sanitize-verify-and-store-mocha-results
 
   post-install-comment:
@@ -2917,6 +2919,9 @@ jobs:
     steps:
       - maybe_skip_binary_jobs
       - restore_workspace_binaries
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
       - clone-repo-and-checkout-branch:
           repo: cypress-test-tiny
       # the user should be "node"
@@ -2951,4 +2956,4 @@ jobs:
       - run:
           name: Run Cypress binary
           working_directory: /tmp/cypress-test-tiny
-          command: DEBUG=cypress:cli $(yarn bin cypress) run
+          command: DEBUG=cypress:cli $(yarn bin cypress) run --browser chrome
