@@ -58,7 +58,7 @@ export class File {
     this.initialize()
 
     GracefulExit.addStep(async () => {
-      await lockFile.unlockSync(this._lockFilePath)
+      return lockFile.unlockSync(this._lockFilePath)
     }, 'unlock lockfile')
   }
 
