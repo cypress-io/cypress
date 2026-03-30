@@ -49,7 +49,6 @@ defaults: &defaults
     LINES: 24
 
 executors:
-  # the Docker image with Cypress dependencies and Chrome browser
   cy-docker:
     docker:
       - image: *base-internal-trixie
@@ -63,14 +62,6 @@ executors:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
-    environment:
-      PLATFORM: linux
-
-  # Docker image with non-root "node" user
-  non-root-docker-user:
-    docker:
-      - image: *base-internal-trixie
-        user: node
     environment:
       PLATFORM: linux
 
@@ -2022,12 +2013,8 @@ jobs:
           command: chmod o+x /root
       - run:
           name: Run non-root system tests
-          user: node
-          working_directory: /root/cypress
-          environment:
-            CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
-          command: yarn workspace @tooling/system-tests test:ci "test/non_root*spec*"
-            --browser chrome
+          command: |
+            runuser -u node -w /root/cypress -- env CYPRESS_COMMERCIAL_RECOMMENDATIONS=0 bash -eo pipefail -lc 'yarn workspace @tooling/system-tests test:ci "test/non_root*spec*" --browser chrome'
       - sanitize-verify-and-store-mocha-results
 
   run-frontend-shared-component-tests-chrome:
@@ -2957,3 +2944,35 @@ jobs:
           name: Run Cypress binary
           working_directory: /tmp/cypress-test-tiny
           command: DEBUG=cypress:cli $(yarn bin cypress) run --browser chrome
+
+  test-binary-as-non-root-user:
+    <<: *defaults
+    steps:
+      - maybe_skip_binary_jobs
+      - restore_workspace_binaries
+      - install-browsers:
+          install-chrome: true
+          executor: << parameters.executor >>
+      - clone-repo-and-checkout-branch:
+          repo: cypress-test-tiny
+      - run:
+          name: Grant node user access to workspace and test project
+          command: |
+            chown -R node:node "${HOME}/cypress" /tmp/cypress-test-tiny
+            chmod o+x /root
+      - run:
+          name: Verify binary as node user
+          command: |
+            runuser -u node -w /root/cypress -- bash -eo pipefail -lc "
+              whoami
+              pwd
+              node -e 'console.log(process.geteuid())'
+              ls -l
+              ls -l cypress.zip cypress.tgz
+              cd /tmp/cypress-test-tiny
+              CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+              \$(yarn bin cypress) help
+              \$(yarn bin cypress) info
+              DEBUG=cypress:cli \$(yarn bin cypress) verify
+              DEBUG=cypress:cli \$(yarn bin cypress) run --browser chrome
+            "

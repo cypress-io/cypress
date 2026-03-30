@@ -392,9 +392,8 @@ linux-x64:
         filters: *mainBuildFilters
         requires:
           - get-published-artifacts
-    - test-binary-as-specific-user:
+    - test-binary-as-non-root-user:
         name: "test binary as a non-root user"
-        executor: non-root-docker-user
         context: publish-binary
         requires:
           - get-published-artifacts
