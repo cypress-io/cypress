@@ -72,6 +72,9 @@
     "verify:mocha:results": "node ./scripts/verify-mocha-results.js",
     "watch": "yarn gulp watch"
   },
+  "dependencies": {
+    "node-forge": "1.4.0"
+  },
   "devDependencies": {
     "@aws-sdk/client-s3": "3.485.0",
     "@aws-sdk/credential-providers": "3.53.0",
