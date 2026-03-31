@@ -23843,7 +23843,7 @@ node-fetch@^3.3.2:
     fetch-blob "^3.1.4"
     formdata-polyfill "^4.0.10"
 
-node-forge@1.4.0, node-forge@^1, node-forge@^1.4.0:
+node-forge@^1, node-forge@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.4.0.tgz#1c7b7d8bdc2d078739f58287d589d903a11b2fc2"
   integrity sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==
