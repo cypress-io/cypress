@@ -46,7 +46,6 @@ const savedState = require(`../../lib/saved_state`)
 const { getCtx, clearCtx, setCtx, makeDataContext } = require(`../../lib/makeDataContext`)
 const { BrowserCriClient } = require(`../../lib/browsers/browser-cri-client`)
 const { cloudRecommendationMessage } = require('../../lib/util/print-run')
-const { GracefulExit } = require('../../lib/util/graceful-exit')
 
 const processVersions = process.versions
 
@@ -176,7 +175,6 @@ describe('lib/cypress', () => {
   require('mocha-banner').register()
 
   beforeEach(async function () {
-    GracefulExit.resetForTesting()
     ctx = getCtx()
     process.chdir(previousCwd)
     this.timeout(8000)
