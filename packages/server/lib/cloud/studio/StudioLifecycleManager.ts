@@ -341,6 +341,7 @@ export class StudioLifecycleManager {
   }
 
   static async close () {
+    StudioLifecycleManager.watcher?.removeAllListeners()
     await StudioLifecycleManager.watcher?.close().catch(() => {})
   }
 
