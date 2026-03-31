@@ -16,7 +16,7 @@ export = (mode, options) => {
     _.defaults(options, {
       socketId: randomId(10),
       isTextTerminal: true,
-      browser: 'brave',
+      browser: 'chrome',
       quiet: false,
       morgan: false,
       report: true,
