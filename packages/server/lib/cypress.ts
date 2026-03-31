@@ -113,9 +113,7 @@ export = {
 
         child.on('close', (exitCode, signal) => {
           debug('electron closed with', { code: exitCode, signal })
-          const code = signal && signal in os.constants.signals ?
-            128 + os.constants.signals[signal] :
-            exitCode !== null ? exitCode : 0
+          const code = signal ? 1 : (exitCode ?? 0)
 
           if (mode === 'smokeTest') {
             resolve(code)
