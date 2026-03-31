@@ -25,6 +25,9 @@ exports['cy.pause() in run mode / pauses with --headed and --no-exit'] = `
 
 not exiting due to options.exit being false
 
+
+SIGTERM received. Gracefully exiting.
+
 `
 
 exports['cy.pause() in run mode / does not pause if headless'] = `
@@ -53,6 +56,9 @@ exports['cy.pause() in run mode / does not pause if headless'] = `
   1 passing
 
 not exiting due to options.exit being false
+
+
+SIGTERM received. Gracefully exiting.
 
 `
 
