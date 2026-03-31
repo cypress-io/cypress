@@ -7,7 +7,7 @@ _Released 03/31/2026 (PENDING)_
 
 - When recording to Cypress Cloud, the App now sends a smaller snapshot of your project config, which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
 
-**Dependency Updats:**
+**Dependency Updates:**
 
 - Upgraded `node-forge` from `1.3.x` to `^1.4.0`. Addressed in [#33546](https://github.com/cypress-io/cypress/pull/33546).
 
