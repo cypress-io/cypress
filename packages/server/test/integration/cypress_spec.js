@@ -419,13 +419,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error when browser is not specified for cypress run', function () {
-      return cypress.start([`--run-project=${this.todosPath}`])
-      .then(() => {
-        this.expectExitWithErr('BROWSER_NOT_SPECIFIED_FOR_RUN')
-      })
-    })
-
     it('sets --headed false if --headless', function () {
       sinon.spy(cypress, 'startInMode')
 

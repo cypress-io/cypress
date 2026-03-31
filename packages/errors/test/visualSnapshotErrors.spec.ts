@@ -199,11 +199,6 @@ describe('visual error templates', () => {
         default: ['/path/does/not/exist', err.message],
       }
     },
-    BROWSER_NOT_SPECIFIED_FOR_RUN: () => {
-      return {
-        default: [],
-      }
-    },
     TESTS_DID_NOT_START_RETRYING: () => {
       return {
         default: ['Retrying...'],

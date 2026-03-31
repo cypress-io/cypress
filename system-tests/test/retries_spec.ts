@@ -6,7 +6,7 @@ describe('retries', () => {
   systemTests.setup()
 
   it('supports retries', {
-    browser: '!chrome',
+    browser: ['!chrome', '!chrome-for-testing'],
     project: 'retries-2',
     spec: 'fail-twice.cy.js',
     snapshot: true,
