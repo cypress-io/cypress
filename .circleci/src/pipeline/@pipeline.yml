@@ -1350,7 +1350,7 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             node --version
-            CHROME_PATH=$(npx @puppeteer/browsers install chrome@${CHROME_STABLE_VERSION} | awk '{print $NF}')
+            CHROME_PATH=$(npx @puppeteer/browsers install chrome@${CHROME_STABLE_VERSION} --format '{{path}}')
             yarn binary-smoke-test --version $(node ./scripts/get-next-version.js) --browser "$CHROME_PATH"
       - run:
           name: Zip the binary
@@ -1706,15 +1706,11 @@ jobs:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
-      - install-browsers:
-          install-chrome: true
-          executor: << parameters.executor >>
-      - windows-install-chrome:
-          browser: chrome
       - run:
           name: Driver memory tests in Chrome
           environment:
             CYPRESS_CONFIG_ENV: production
+            CHROME_STABLE_VERSION: *chrome-stable-version
           command: |
             echo Current working directory is $PWD
             node --version
@@ -1722,11 +1718,14 @@ jobs:
               # these are missing on Circle and there is no way to pre-install them on Arm
               sudo apt-get update
               sudo apt-get install -y libgbm-dev
+              sudo apt-get install chromium
+              BROWSER=chromium
+            else
+              BROWSER=$(npx @puppeteer/browsers install chrome@${CHROME_STABLE_VERSION} --format '{{path}}')  
             fi
-
             CYPRESS_INTERNAL_MEMORY_SAVE_STATS=true \
             DEBUG=cypress*memory \
-            yarn cypress:run --browser chrome --spec "cypress/e2e/memory/*.cy.*"
+            yarn cypress:run --spec "cypress/e2e/memory/*.cy.*" --browser "$BROWSER"
           working_directory: packages/driver
       - sanitize-verify-and-store-mocha-results
 
