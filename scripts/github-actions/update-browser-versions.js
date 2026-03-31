@@ -102,7 +102,7 @@ const getVersions = async ({ core }) => {
     core.setOutput('current_beta_version', currentChromeBeta)
     core.setOutput('latest_beta_version', hasBetaUpdate ? betaData.versions[0].version : currentChromeBeta)
     core.setOutput('current_chrome_for_testing_stable_version', currentChromeForTestingStable)
-    core.setOutput('latest_chrome_for_testing_stable_version', latestChromeForTestingStable)
+    core.setOutput('latest_chrome_for_testing_stable_version', hasChromeForTestingUpdate ? latestChromeForTestingStable : currentChromeForTestingStable)
     core.setOutput('description', description)
   } catch (err) {
     console.log('Errored checking for new Chrome versions:', err.stack)

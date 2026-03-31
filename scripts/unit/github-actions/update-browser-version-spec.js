@@ -242,6 +242,26 @@ describe('update browser version github action', () => {
 
       expect(core.setOutput).to.be.calledWith('description', 'Update Chrome for Testing (stable) to 2.0')
     })
+
+    it('does not set latest_chrome_for_testing_stable_version below the pinned value when only stable/beta update', async () => {
+      stubRepoVersions({
+        betaVersion: '1.1',
+        stableVersion: '1.0',
+        chromeForTestingStableVersion: '147.0.0',
+      })
+
+      stubChromeVersions({
+        stableVersion: '2.0',
+        chromeForTestingStableVersion: '100.0.0',
+      })
+
+      const core = coreStub()
+
+      await getVersions({ core })
+
+      expect(core.setOutput).to.be.calledWith('latest_chrome_for_testing_stable_version', '147.0.0')
+      expect(core.setOutput).to.be.calledWith('has_update', 'true')
+    })
   })
 
   context('.checkNeedForBranchUpdate', () => {
