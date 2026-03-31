@@ -4,6 +4,7 @@ import os from 'os'
 
 import type { FoundBrowser } from '@packages/types'
 import type { DataContext } from '..'
+import errors from '@packages/errors'
 
 let isPowerShellAvailable: undefined | boolean
 let powerShellPromise: Promise<void> | undefined
@@ -86,7 +87,9 @@ export class BrowserDataSource {
     const p = this.ctx._apis.browserApi.getBrowsers()
 
     return this.ctx.coreData.machineBrowsers = p.then(async (browsers) => {
-      if (!browsers[0]) throw new Error('no browsers found in machineBrowsers')
+      if (!browsers[0]) {
+        errors.throwErr('BROWSER_MACHINE_BROWSERS_EMPTY')
+      }
 
       return browsers
     }).catch((e) => {

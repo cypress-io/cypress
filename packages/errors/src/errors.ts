@@ -147,6 +147,16 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(arg2)}`
   },
+  BROWSER_MACHINE_BROWSERS_EMPTY: () => {
+    return errTemplate`\
+        Unable to continue as no browsers were found on your system.
+
+        Cypress supports the following browsers:
+        ${fmt.listItems(['chrome', 'chromium', 'chrome-for-testing', 'edge', 'firefox'])}
+
+        Read more about how to troubleshoot launching browsers: https://on.cypress.io/troubleshooting-launching-browsers
+      `
+  },
   TESTS_DID_NOT_START_RETRYING: (arg1: string) => {
     return errTemplate`Timed out waiting for the browser to connect. ${fmt.off(arg1)}`
   },
