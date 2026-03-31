@@ -301,7 +301,7 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
   const filter = parseBrowserOption(nameOrPath)
 
   if (filter.name === 'electron') {
-    errors.throwErr('BROWSER_ELECTRON_REMOVED')
+    throwBrowserElectronRemoved(browsers)
   }
 
   debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
@@ -313,7 +313,7 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
 
   if (browser) {
     if (browser.name === 'electron') {
-      errors.throwErr('BROWSER_ELECTRON_REMOVED')
+      throwBrowserElectronRemoved(browsers)
     }
 
     // short circuit if found
@@ -330,7 +330,7 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
     return launcher.detectByPath(nameOrPath)
     .then((browser) => {
       if (browser.name === 'electron') {
-        errors.throwErr('BROWSER_ELECTRON_REMOVED')
+        throwBrowserElectronRemoved(browsers)
       }
 
       if (returnAll) {
@@ -355,6 +355,10 @@ const formatBrowsersToOptions = (browsers) => {
 
     return browser.name
   })
+}
+
+const throwBrowserElectronRemoved = function (browsers: FoundBrowser[]) {
+  return errors.throwErr('BROWSER_ELECTRON_REMOVED', formatBrowsersToOptions(browsers))
 }
 
 const throwBrowserNotFound = function (browserName, browsers: FoundBrowser[] = []) {

@@ -115,8 +115,6 @@ export const AllCypressErrors = {
   },
   BROWSER_NOT_FOUND_BY_NAME: (browser: string, foundBrowsersStr: string[]) => {
     return errTemplate`\
-        Can't run because you've entered an invalid browser name.
-
         Browser: ${fmt.highlight(browser)} was not found on your system or is not supported by Cypress.
 
         Cypress supports the following browsers:
@@ -127,21 +125,17 @@ export const AllCypressErrors = {
         Available browsers found on your system are:
         ${fmt.listItems(foundBrowsersStr)}`
   },
-  BROWSER_ELECTRON_REMOVED: () => {
+  BROWSER_ELECTRON_REMOVED: (foundBrowsersStr: string[]) => {
     return errTemplate`\
-        Cypress no longer supports selecting ${fmt.highlight('electron')} as the test browser.
+        Cypress no longer supports ${fmt.highlight('electron')} as a browser.
 
-        Choose an installed browser with ${fmt.flag(`--browser`)} (for example ${fmt.flag(`--browser chrome`)}) or pass a \`browser\` option to ${fmt.highlight('cypress.run()')}.
+        Cypress supports the following browsers:
+        ${fmt.listItems(['chrome', 'chromium', 'chrome-for-testing', 'edge', 'firefox'])}
 
-        Learn more: https://on.cypress.io/launching-browsers`
-  },
-  BROWSER_NOT_SPECIFIED_FOR_RUN: () => {
-    return errTemplate`\
-        You must specify a browser for ${fmt.highlight('cypress run')}.
+        You can also use a custom browser: https://on.cypress.io/customize-browsers
 
-        Pass ${fmt.flag(`--browser <name-or-path>`)} (for example ${fmt.flag(`--browser chrome`)}) or set the \`browser\` option when calling ${fmt.highlight('cypress.run()')} from Node.js.
-
-        Learn more: https://on.cypress.io/launching-browsers`
+        Available browsers found on your system are:
+        ${fmt.listItems(foundBrowsersStr)}`
   },
   BROWSER_NOT_FOUND_BY_PATH: (arg1: string, arg2: string) => {
     return errTemplate`\
