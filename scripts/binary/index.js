@@ -304,7 +304,7 @@ const deploy = {
 
       const executablePath = meta.buildAppExecutable()
 
-      await smoke.test(executablePath, meta.buildAppDir())
+      await smoke.test(executablePath, meta.buildAppDir(), options.browser)
     } finally {
       if (usingXvfb) {
         await xvfb.stop()

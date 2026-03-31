@@ -66,7 +66,7 @@ const runSmokeTest = function (buildAppExecutable, timeoutSeconds = 30) {
   })
 }
 
-const runProjectTest = function (buildAppExecutable, e2e) {
+const runProjectTest = function (buildAppExecutable, e2e, browser = 'chrome') {
   if (shouldSkipProjectTest()) {
     console.log('skipping project test')
 
@@ -84,7 +84,7 @@ const runProjectTest = function (buildAppExecutable, e2e) {
     const args = [
       `--run-project=${e2e}`,
       `--spec=${e2e}/cypress/e2e/simple_passing.cy.js`,
-      '--browser=chrome-for-testing',
+      `--browser=${browser}`,
     ]
 
     if (needsSandbox()) {
@@ -109,7 +109,7 @@ const runProjectTest = function (buildAppExecutable, e2e) {
   })
 }
 
-const runFailingProjectTest = function (buildAppExecutable, e2e) {
+const runFailingProjectTest = function (buildAppExecutable, e2e, browser = 'chrome') {
   if (shouldSkipProjectTest()) {
     console.log('skipping failing project test')
 
@@ -135,7 +135,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
       const args = [
         `--run-project=${e2e}`,
         `--spec=${e2e}/cypress/e2e/simple_failing.cy.js`,
-        '--browser=chrome-for-testing',
+        `--browser=${browser}`,
       ]
 
       if (needsSandbox()) {
@@ -162,7 +162,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
   .then(verifyScreenshots)
 }
 
-const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
+const runV8SnapshotProjectTest = function (buildAppExecutable, e2e, browser = 'chrome') {
   if (shouldSkipProjectTest()) {
     console.log('skipping failing project test')
 
@@ -178,7 +178,7 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
       const args = [
         `--run-project=${e2e}`,
         `--spec=${e2e}/cypress/e2e/simple_v8_snapshot.cy.js`,
-        '--browser=chrome-for-testing',
+        `--browser=${browser}`,
       ]
 
       if (needsSandbox()) {
@@ -204,7 +204,7 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
   return spawn()
 }
 
-const runErroringProjectTest = function (buildAppExecutable, e2e, testName, errorMessage) {
+const runErroringProjectTest = function (buildAppExecutable, e2e, testName, errorMessage, browser = 'chrome') {
   return new Promise((resolve, reject) => {
     const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
 
@@ -216,7 +216,7 @@ const runErroringProjectTest = function (buildAppExecutable, e2e, testName, erro
     const args = [
       `--run-project=${e2e}`,
       `--spec=${e2e}/cypress/e2e/simple_passing.cy.js`,
-      '--browser=chrome-for-testing',
+      `--browser=${browser}`,
     ]
 
     if (needsSandbox()) {
@@ -251,7 +251,7 @@ const runErroringProjectTest = function (buildAppExecutable, e2e, testName, erro
   })
 }
 
-const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
+const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e, browser = 'chrome') {
   const testCorruptingFile = async (file, errorMessage) => {
     const contents = await fs.readFile(file)
 
@@ -260,7 +260,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
     // Modify app
     await fs.writeFile(file, Buffer.concat([contents, Buffer.from(`\nconsole.log('modified code')`)]))
-    await runErroringProjectTest(buildAppExecutable, e2e, `corrupting ${file}`, errorMessage)
+    await runErroringProjectTest(buildAppExecutable, e2e, `corrupting ${file}`, errorMessage, browser)
 
     // Restore original state
     await fs.move(`${file}.bak`, file, { overwrite: true })
@@ -282,7 +282,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
     })
 
     await fs.writeFile(path.join(buildAppDir, 'index2.js'), `${additionalCode}\nrequire("./index.js")`)
-    await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point', errorMessage)
+    await runErroringProjectTest(buildAppExecutable, e2e, 'altering entry point', errorMessage, browser)
 
     // Restore original state
     await fs.move(path.join(buildAppDir, 'package.json.bak'), path.join(buildAppDir, 'package.json'), { overwrite: true })
@@ -317,7 +317,7 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
 
     // Modify app
     await fs.writeFile(file, `console.log("rewritten code");const fs=require('fs');const { join } = require('path');fs.writeFileSync(join(__dirname,'index.js'),fs.readFileSync(join(__dirname,'index.js.bak')));${contents}`)
-    await runErroringProjectTest(buildAppExecutable, e2e, 'temporarily rewriting index.js', 'Integrity check failed with expected column number 2573 but got')
+    await runErroringProjectTest(buildAppExecutable, e2e, 'temporarily rewriting index.js', 'Integrity check failed with expected column number 2573 but got', browser)
 
     // Restore original state
     await fs.move(backupFile, file, { overwrite: true })
@@ -326,17 +326,17 @@ const runIntegrityTest = async function (buildAppExecutable, buildAppDir, e2e) {
   await testTemporarilyRewritingEntryPoint()
 }
 
-const test = async function (buildAppExecutable, buildAppDir) {
+const test = async function (buildAppExecutable, buildAppDir, browser = 'chrome') {
   await scaffoldCommonNodeModules()
   await Fixtures.scaffoldProject('e2e')
   const e2e = Fixtures.projectPath('e2e')
 
   await runSmokeTest(buildAppExecutable)
-  await runProjectTest(buildAppExecutable, e2e)
-  await runFailingProjectTest(buildAppExecutable, e2e)
+  await runProjectTest(buildAppExecutable, e2e, browser)
+  await runFailingProjectTest(buildAppExecutable, e2e, browser)
   if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE)) {
-    await runIntegrityTest(buildAppExecutable, buildAppDir, e2e)
-    await runV8SnapshotProjectTest(buildAppExecutable, e2e)
+    await runIntegrityTest(buildAppExecutable, buildAppDir, e2e, browser)
+    await runV8SnapshotProjectTest(buildAppExecutable, e2e, browser)
   }
 
   Fixtures.remove()

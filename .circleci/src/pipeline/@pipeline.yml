@@ -1345,10 +1345,13 @@ commands:
             fi
       - run:
           name: Smoke Test the Cypress binary
+          environment:
+            CHROME_STABLE_VERSION: *chrome-stable-version
           command: |
             source ./scripts/ensure-node.sh
             node --version
-            yarn binary-smoke-test --version $(node ./scripts/get-next-version.js)
+            CHROME_PATH=$(npx @puppeteer/browsers install chrome@${CHROME_STABLE_VERSION} | awk '{print $NF}')
+            yarn binary-smoke-test --version $(node ./scripts/get-next-version.js) --browser "$CHROME_PATH"
       - run:
           name: Zip the binary
           command: |
@@ -2502,11 +2505,6 @@ jobs:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
       - check-if-binary-exists
-      - install-browsers:
-          install-chrome: true
-          executor: << parameters.executor >>
-      - windows-install-chrome:
-          browser: chrome
       - build-and-package-binary
       - build-cypress-npm-package:
           executor: << parameters.executor >>
