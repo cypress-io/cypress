@@ -123,6 +123,8 @@ export class GracefulExit {
       GracefulExit.singleton.debug('Error flushing steps: ', error)
       finalExitCode = 1
     } finally {
+      GracefulExit.singleton.processTeardown = null
+      GracefulExit.singleton.steps.clear()
       process.exit(finalExitCode)
     }
   }
