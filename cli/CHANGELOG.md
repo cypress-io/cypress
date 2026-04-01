@@ -10,6 +10,7 @@ _Released 03/31/2026 (PENDING)_
 **Bugfixes:**
 
 - Fixed an issue where `cy.intercept` `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
+- Fixed a regression in [14.3.3](#14-3-3) where deleting `results.video` in `after:spec` to keep videos only for failing specs could leave an empty `*-compressed.mp4` file in `cypress/videos`. Fixes [#32883](https://github.com/cypress-io/cypress/issues/32883).
 
 ## 15.13.0
 
