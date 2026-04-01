@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`snapshots > saves snapshot with backticks 1`] = `
+"line 1
+line 2 with \`42\`
+line 3 with \`foo\`"
+`;

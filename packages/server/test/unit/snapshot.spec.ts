@@ -1,7 +1,7 @@
-const snapshot = require('snap-shot-it')
+import { describe, expect, it } from 'vitest'
 
 describe('snapshots', () => {
-// sanity check to make sure backtick escape works with our snapshots
+  // sanity check to make sure backtick escape works with our snapshots
   it('saves snapshot with backticks', () => {
     const text = `\
 line 1
@@ -9,6 +9,6 @@ line 2 with \`42\`
 line 3 with \`foo\`\
 `
 
-    return snapshot('has backticks', text)
+    expect(text).toMatchSnapshot()
   })
 })
