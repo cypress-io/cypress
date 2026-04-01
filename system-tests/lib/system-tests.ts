@@ -29,6 +29,9 @@ const human = require('human-interval')
 const morgan = require('morgan')
 const Bluebird = require('bluebird')
 const debug = require('debug')('cypress:system-tests')
+const treeKill = require('tree-kill')
+const { once } = require('events')
+const os = require('os')
 const { create: createHttpsServer } = require('@packages/https-proxy/test/helpers/https_server')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
@@ -299,6 +302,70 @@ export type SpawnerResult = {
   kill: ChildProcess['kill']
   pid: number
 }
+
+/** Active Cypress child from {@link systemTests.exec} (tree-kill; Docker has no host pid). */
+let activeCypressSpawn: SpawnerResult | null = null
+let activeSpawnIsDocker = false
+let interruptRequested = false
+let interruptInProgress = false
+
+const INTERRUPT_CHILD_WAIT_MS = 30000
+
+async function handleHarnessInterrupt (signal: NodeJS.Signals) {
+  if (interruptInProgress) {
+    process.exit(1)
+
+    return
+  }
+
+  interruptInProgress = true
+  interruptRequested = true
+
+  // So Mocha (or others) cannot exit this process before we tear down Cypress.
+  process.removeAllListeners(signal)
+
+  try {
+    if (activeCypressSpawn && !activeSpawnIsDocker) {
+      await new Promise<void>((resolve) => {
+        treeKill(activeCypressSpawn!.pid, signal, (err?: Error) => {
+          if (err) {
+            debug('tree-kill error: %o', err)
+          }
+
+          resolve()
+        })
+      })
+
+      try {
+        await Promise.race([
+          once(activeCypressSpawn, 'exit'),
+          new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('timeout waiting for Cypress exit')), INTERRUPT_CHILD_WAIT_MS)
+          }),
+        ])
+      } catch (e) {
+        debug('waiting for Cypress exit after interrupt: %o', e)
+      }
+    }
+  } finally {
+    activeCypressSpawn = null
+    activeSpawnIsDocker = false
+
+    const code = 128 + os.constants.signals[signal]
+
+    process.exit(code)
+  }
+}
+
+function installHarnessInterruptHandlers () {
+  for (const sig of (['SIGINT', 'SIGTERM'] as const)) {
+    process.prependListener(sig, () => {
+      void handleHarnessInterrupt(sig)
+    })
+  }
+}
+
+installHarnessInterruptHandlers()
 
 const cpSpawner: Spawner = (cmd, args, env, options) => {
   if (options.withBinary) {
@@ -818,6 +885,10 @@ const systemTests = {
     debug('systemTests.exec options %o', options)
     options = this.options(ctx, options)
 
+    if (interruptRequested) {
+      ctx.skip()
+    }
+
     debug('processed options %o', options)
     const args = options.args || this.args(options)
 
@@ -855,6 +926,15 @@ const systemTests = {
     let stderr = ''
 
     const exit = function (code: number | null, signal: NodeJS.Signals | null | undefined) {
+      if (interruptRequested) {
+        return {
+          code,
+          signal: signal == null ? null : signal,
+          stdout,
+          stderr,
+        }
+      }
+
       const { expectedExitCode, skipExitSignalAssertion } = options
 
       maybeVerifyExitCode(expectedExitCode, () => {
@@ -993,43 +1073,66 @@ const systemTests = {
     .extend(options.processEnv)
     .value()
 
+    if (interruptRequested) {
+      ctx.skip()
+    }
+
     const spawnerFn: Spawner = options.dockerImage ? dockerSpawner : cpSpawner
     const sp: SpawnerResult = await spawnerFn(cmd, args, env, options)
 
-    options.onSpawn && options.onSpawn(sp)
+    activeSpawnIsDocker = !!options.dockerImage
+    activeCypressSpawn = sp
 
-    const ColorOutput = function () {
-      const colorOutput = new stream.Transform()
+    try {
+      options.onSpawn && options.onSpawn(sp)
 
-      colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
+      const ColorOutput = function () {
+        const colorOutput = new stream.Transform()
 
-      return colorOutput
-    }
+        colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
 
-    // pipe these to our current process
-    // so we can see them in the terminal
-    // color it so we can tell which is test output
-    sp.stdout
-    .pipe(ColorOutput())
-    .pipe(process.stdout)
+        return colorOutput
+      }
 
-    sp.stderr
-    .pipe(ColorOutput())
-    .pipe(process.stderr)
+      // pipe these to our current process
+      // so we can see them in the terminal
+      // color it so we can tell which is test output
+      sp.stdout
+      .pipe(ColorOutput())
+      .pipe(process.stdout)
 
-    sp.stdout.on('data', (buf) => stdout += buf.toString())
-    sp.stderr.on('data', (buf) => stderr += buf.toString())
+      sp.stderr
+      .pipe(ColorOutput())
+      .pipe(process.stderr)
 
-    const [exitCode, exitSignal] = await new Promise<[number | null, NodeJS.Signals | null | undefined]>((resolve, reject) => {
-      sp.on('error', reject)
-      sp.on('exit', (code, sig) => {
-        resolve([code, sig])
+      sp.stdout.on('data', (buf) => stdout += buf.toString())
+      sp.stderr.on('data', (buf) => stderr += buf.toString())
+
+      const [exitCode, exitSignal] = await new Promise<[number | null, NodeJS.Signals | null | undefined]>((resolve, reject) => {
+        sp.on('error', reject)
+        sp.on('exit', (code, sig) => {
+          resolve([code, sig])
+        })
       })
-    })
 
-    await copy(projectPath)
+      await copy(projectPath)
 
-    return exit(exitCode, exitSignal)
+      if (interruptRequested) {
+        return {
+          code: exitCode,
+          signal: exitSignal == null ? null : exitSignal,
+          stdout,
+          stderr,
+        }
+      }
+
+      return exit(exitCode, exitSignal)
+    } finally {
+      if (activeCypressSpawn === sp) {
+        activeCypressSpawn = null
+        activeSpawnIsDocker = false
+      }
+    }
   },
 
   sendHtml (contents) {
