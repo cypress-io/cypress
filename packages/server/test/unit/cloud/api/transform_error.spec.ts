@@ -1,7 +1,6 @@
-import { expect } from 'chai'
 import { installErrorTransform } from '../../../../lib/cloud/api/axios_middleware/transform_error'
 import { AxiosError, AxiosResponse, AxiosInstance } from 'axios'
-import sinon, { SinonSpy } from 'sinon'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('transformError', () => {
   const status = 400
@@ -13,25 +12,28 @@ describe('transformError', () => {
   let transformError: (err: AxiosError | Error & { error?: any, statusCode: number, isApiError?: boolean }) => never
 
   beforeEach(() => {
+    const responseUse = vi.fn()
+    const requestUse = vi.fn()
+
     const mockAxiosInstance: Partial<AxiosInstance> = {
       interceptors: {
         response: {
-          use: sinon.spy(),
-          eject: sinon.spy(),
-          clear: sinon.spy(),
+          use: responseUse,
+          eject: vi.fn(),
+          clear: vi.fn(),
         },
         request: {
-          use: sinon.spy(),
-          eject: sinon.spy(),
-          clear: sinon.spy(),
+          use: requestUse,
+          eject: vi.fn(),
+          clear: vi.fn(),
         },
       },
     }
 
-    // @ts-expect-error
-    installErrorTransform(mockAxiosInstance)
+    // @ts-expect-error partial mock
+    installErrorTransform(mockAxiosInstance as AxiosInstance)
 
-    const [, secondArg] = (mockAxiosInstance.interceptors?.response.use as SinonSpy).firstCall.args
+    const [, secondArg] = responseUse.mock.calls[0] as [unknown, typeof transformError]
 
     transformError = secondArg
   })
@@ -50,30 +52,32 @@ describe('transformError', () => {
       })
 
       it('throws an error with the expected message', () => {
-        let thrown
+        let thrown: Error | undefined
 
         try {
           transformError(err)
         } catch (e) {
-          thrown = e
+          thrown = e as Error
         }
-        expect(thrown).not.to.be.undefined
-        expect(thrown.message).to.eq(expectedDataMessage)
-        expect(thrown.isApiError).to.be.true
+
+        expect(thrown).toBeDefined()
+        expect(thrown!.message).toBe(expectedDataMessage)
+        expect((thrown as Error & { isApiError?: boolean }).isApiError).toBe(true)
       })
     })
 
     describe('and the response does not have object data', () => {
       it('re-throws the original error', () => {
-        let thrown
+        let thrown: Error | undefined
 
         try {
           transformError(err)
         } catch (e) {
-          thrown = e
+          thrown = e as Error
         }
-        expect(thrown.message).to.eq(err.message)
-        expect(thrown.isApiError).to.be.true
+
+        expect(thrown!.message).toBe(err.message)
+        expect((thrown as Error & { isApiError?: boolean }).isApiError).toBe(true)
       })
     })
   })
@@ -93,30 +97,32 @@ describe('transformError', () => {
       })
 
       it('throws an error with a formatted message', () => {
-        let thrown
+        let thrown: Error | undefined
 
         try {
           transformError(err)
         } catch (e) {
-          thrown = e
+          thrown = e as Error
         }
-        expect(thrown).to.not.be.undefined
-        expect(thrown.message).to.eq(expectedDataMessage)
-        expect(thrown.isApiError).to.be.true
+
+        expect(thrown).toBeDefined()
+        expect(thrown!.message).toBe(expectedDataMessage)
+        expect((thrown as Error & { isApiError?: boolean }).isApiError).toBe(true)
       })
     })
 
     describe('and the response does not have object data', () => {
       it('re-throws the original error', () => {
-        let thrown
+        let thrown: Error | undefined
 
         try {
           transformError(err)
         } catch (e) {
-          thrown = e
+          thrown = e as Error
         }
-        expect(thrown.message).to.eq(err.message)
-        expect(thrown.isApiError).to.be.true
+
+        expect(thrown!.message).toBe(err.message)
+        expect((thrown as Error & { isApiError?: boolean }).isApiError).toBe(true)
       })
     })
   })
