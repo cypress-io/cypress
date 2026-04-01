@@ -157,7 +157,7 @@ export class GitDataSource {
   }
 
   setSpecs (specs: string[]) {
-    if (this.#destroyed) {
+    if (this.#destroyed || this.config.isRunMode) {
       return
     }
 
