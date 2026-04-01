@@ -16,4 +16,5 @@ export interface CyPromptLifecycleManagerShape {
     error?: Error
   }>
   registerCyPromptReadyListener: (listener: (cyPromptManager: CyPromptManagerShape) => void) => void
+  resetCyPrompt: () => void
 }

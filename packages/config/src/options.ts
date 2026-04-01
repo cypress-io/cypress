@@ -28,6 +28,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'VIDEO_UPLOAD_ON_PASSES_REMOVED',
   'RENAMED_CONFIG_OPTION',
   'EXPERIMENTAL_STUDIO_REMOVED',
+  'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
   'CYPRESS_ENV_DEPRECATION',
 ] as const
 
@@ -256,12 +257,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     overrideLevel: 'any',
     requireRestartOnChange: 'browser',
-  }, {
-    name: 'experimentalPromptCommand',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
-    requireRestartOnChange: 'server',
   }, {
     name: 'experimentalSourceRewriting',
     defaultValue: false,
@@ -660,6 +655,11 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     isWarning: true,
   },
   {
+    name: 'experimentalPromptCommand',
+    errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
+    isWarning: true,
+  },
+  {
     name: 'allowCypressEnv',
     errorKey: 'CYPRESS_ENV_DEPRECATION',
     // Display this warning if the value is not present or is explicitly false
@@ -712,12 +712,6 @@ export const breakingRootOptions: Array<BreakingOption> = [
     testingTypes: ['e2e'],
   },
   {
-    name: 'experimentalPromptCommand',
-    errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
-    isWarning: false,
-    testingTypes: ['e2e'],
-  },
-  {
     name: 'justInTimeCompile',
     errorKey: 'JIT_COMPONENT_TESTING',
     isWarning: false,
@@ -762,11 +756,6 @@ export const testingTypeBreakingOptions: { e2e: Array<BreakingOption>, component
     {
       name: 'experimentalOriginDependencies',
       errorKey: 'EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY',
-      isWarning: false,
-    },
-    {
-      name: 'experimentalPromptCommand',
-      errorKey: 'EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY',
       isWarning: false,
     },
     {

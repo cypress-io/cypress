@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-exclusive-tests -- dtslint-style samples for Mocha/Cypress API typings */
 namespace CypressLodashTests {
   Cypress._ // $ExpectType LoDashStatic
   Cypress._.each([1], (item) => {

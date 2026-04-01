@@ -450,6 +450,13 @@ onMounted(() => {
     preferences.update('showFetchRequests', state.showFetchRequests)
     preferences.update('codeEditorLineWrap', state.codeEditorLineWrap)
   })
+
+  eventManager.on('open:login:connect:modal', ({ utmMedium, utmContent }) => {
+    userProjectStatusStore.openLoginConnectModal({
+      utmMedium,
+      utmContent,
+    })
+  })
 })
 
 onBeforeUnmount(() => {
