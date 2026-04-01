@@ -237,9 +237,10 @@ describe('gui/interactive', () => {
         return performAssertions()
       })
 
-      it('swallows errors from graceful exit during quit teardown', () => {
+      it('exits with code 1 when graceful exit fails during quit teardown', () => {
         GracefulExit.exitGracefully.restore()
         sinon.stub(GracefulExit, 'exitGracefully').rejects(new Error('teardown failed'))
+        sinon.stub(process, 'exit')
 
         const opts = {}
 
@@ -248,6 +249,8 @@ describe('gui/interactive', () => {
         }).then(async () => {
           beforeQuitHandler(mockEvent)
           await quitTeardownImmediateCallback()
+
+          expect(process.exit).to.have.been.calledWith(1)
         })
       })
     })
