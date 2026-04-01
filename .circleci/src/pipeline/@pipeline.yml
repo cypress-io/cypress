@@ -1718,10 +1718,10 @@ jobs:
               # these are missing on Circle and there is no way to pre-install them on Arm
               sudo apt-get update
               sudo apt-get install -y libgbm-dev
-              sudo apt-get install chromium
+              sudo apt-get install chromium-browser
               BROWSER=chromium
             else
-              BROWSER=$(npx @puppeteer/browsers install chrome@${CHROME_STABLE_VERSION} --format '{{path}}')  
+              BROWSER=$(npx @puppeteer/browsers@latest install chrome@${CHROME_STABLE_VERSION} --format {{path}} --path /tmp)
             fi
             CYPRESS_INTERNAL_MEMORY_SAVE_STATS=true \
             DEBUG=cypress*memory \
