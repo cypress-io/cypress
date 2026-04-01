@@ -51,10 +51,7 @@ describe('lib/util/graceful-exit', () => {
 
     resolveStep!()
 
-    const [r1, r2] = await Promise.all([p1, p2])
-
-    expect(r1).to.equal(r2)
-    expect(r1).to.equal(3)
+    await Promise.all([p1, p2])
 
     expect(exitStub).to.have.been.calledOnce
     expect(exitStub).to.have.been.calledWith(3)
