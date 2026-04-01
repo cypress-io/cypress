@@ -38,10 +38,10 @@ async function parseChangelog ({ pendingRelease = true, changelogContent = null 
       sections['version'] = line
     } else if (index === 3) {
       nextKnownLineBreak = index + 1
-      if (pendingRelease && !/_Released \d{2}\/\d{2}\/\d{4} \(PENDING\)_/.test(line)) {
-        throw new Error(`Expected line number ${index + 1} to include "_Released MM/DD/YYYY (PENDING)_"`)
-      } else if (!pendingRelease && !/_Released \d{2}\/\d{2}\/\d{4}_/.test(line)) {
-        throw new Error(`Expected line number ${index + 1} to include "_Released MM/DD/YYYY_"`)
+      if (pendingRelease && !/_Released [A-Z][a-z]{2} ([1-9]|[12]\d|3[01]), \d{4} \(PENDING\)_/.test(line)) {
+        throw new Error(`Expected line number ${index + 1} to include "_Released Mon D, YYYY (PENDING)_"`)
+      } else if (!pendingRelease && !/_Released [A-Z][a-z]{2} ([1-9]|[12]\d|3[01]), \d{4}_/.test(line)) {
+        throw new Error(`Expected line number ${index + 1} to include "_Released Mon D, YYYY_"`)
       }
 
       sections['releaseDate'] = line

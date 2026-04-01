@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.13.1 
 
-_Released 03/31/2026 (PENDING)_
+_Released Mar 31, 2026 (PENDING)_
 
 **Performance:**
 
@@ -17,7 +17,7 @@ _Released 03/31/2026 (PENDING)_
 
 ## 15.13.0
 
-_Released 03/24/2026_
+_Released Mar 24, 2026_
 
 **Features:**
 
@@ -42,7 +42,7 @@ _Released 03/24/2026_
 
 ## 15.12.0
 
-_Released 03/13/2026_
+_Released Mar 13, 2026_
 
 **Features:**
 
@@ -62,7 +62,7 @@ _Released 03/13/2026_
 
 ## 15.11.0
 
-_Released 02/24/2026_
+_Released Feb 24, 2026_
 
 **Features:**
 
@@ -91,7 +91,7 @@ _Released 02/24/2026_
 
 ## 15.10.0
 
-_Released 02/03/2026_
+_Released Feb 3, 2026_
 
 **Deprecations:**
 
@@ -120,7 +120,7 @@ _Released 02/03/2026_
 
 ## 15.9.0
 
-_Released 01/13/2026_
+_Released Jan 13, 2026_
 
 **Features:**
 
@@ -128,7 +128,7 @@ _Released 01/13/2026_
 
 ## 15.8.2
 
-_Released 01/06/2026_
+_Released Jan 6, 2026_
 
 **Bugfixes:**
 
@@ -141,7 +141,7 @@ _Released 01/06/2026_
 
 ## 15.8.1
 
-_Released 12/18/2025_
+_Released Dec 18, 2025_
 
 **Dependency Updates:**
 
@@ -149,7 +149,7 @@ _Released 12/18/2025_
 
 ## 15.8.0
 
-_Released 12/16/2025_
+_Released Dec 16, 2025_
 
 **Performance:**
 
@@ -177,7 +177,7 @@ _Released 12/16/2025_
 
 ## 15.7.1
 
-_Released 12/02/2025_
+_Released Dec 2, 2025_
 
 **Performance:**
 
@@ -193,7 +193,7 @@ _Released 12/02/2025_
 
 ## 15.7.0
 
-_Released 11/19/2025_
+_Released Nov 19, 2025_
 
 **Performance:**
 
@@ -217,7 +217,7 @@ _Released 11/19/2025_
 
 ## 15.6.0
 
-_Released 11/04/2025_
+_Released Nov 4, 2025_
 
 **Features:**
 
@@ -249,7 +249,7 @@ _Released 11/04/2025_
 
 ## 15.5.0
 
-_Released 10/17/2025_
+_Released Oct 17, 2025_
 
 **Features:**
 
@@ -272,7 +272,7 @@ _Released 10/17/2025_
 
 ## 15.4.0
 
-_Released 10/07/2025_
+_Released Oct 7, 2025_
 
 **Features:**
 
@@ -302,7 +302,7 @@ _Released 10/07/2025_
 
 ## 15.3.0
 
-_Released 09/23/2025_
+_Released Sep 23, 2025_
 
 **Features:**
 
@@ -321,7 +321,7 @@ _Released 09/23/2025_
 
 ## 15.2.0
 
-_Released 09/09/2025_
+_Released Sep 9, 2025_
 
 **Features:**
 
@@ -337,7 +337,7 @@ _Released 09/09/2025_
 
 ## 15.1.0
 
-_Released 09/02/2025_
+_Released Sep 2, 2025_
 
 **Features:**
 
@@ -364,7 +364,7 @@ _Released 09/02/2025_
 
 ## 15.0.0
 
-_Released 08/20/2025_
+_Released Aug 20, 2025_
 
 **Breaking Changes:**
 
@@ -424,7 +424,7 @@ _Released 08/20/2025_
 
 ## 14.5.4
 
-_Released 08/07/2025_
+_Released Aug 7, 2025_
 
 **Dependency Updates:**
 
@@ -432,7 +432,7 @@ _Released 08/07/2025_
 
 ## 14.5.3
 
-_Released 07/25/2025_
+_Released Jul 25, 2025_
 
 **Bugfixes:**
 
@@ -446,7 +446,7 @@ _Released 07/25/2025_
 
 ## 14.5.2
 
-_Released 07/15/2025_
+_Released Jul 15, 2025_
 
 **Bugfixes:**
 
@@ -455,7 +455,7 @@ _Released 07/15/2025_
 
 ## 14.5.1
 
-_Released 07/01/2025_
+_Released Jul 1, 2025_
 
 **Bugfixes:**
 
@@ -467,7 +467,7 @@ _Released 07/01/2025_
 
 ## 14.5.0
 
-_Released 06/17/2025_
+_Released Jun 17, 2025_
 
 **Features:**
 
@@ -479,7 +479,7 @@ _Released 06/17/2025_
 
 ## 14.4.1
 
-_Released 06/03/2025_
+_Released Jun 3, 2025_
 
 **Bugfixes:**
 
@@ -495,7 +495,7 @@ _Released 06/03/2025_
 
 ## 14.4.0
 
-_Released 05/20/2025_
+_Released May 20, 2025_
 
 **Features:**
 
@@ -521,7 +521,7 @@ _Released 05/20/2025_
 
 ## 14.3.3
 
-_Released 05/06/2025_
+_Released May 6, 2025_
 
 **Performance:**
 
@@ -544,7 +544,7 @@ _Released 05/06/2025_
 
 ## 14.3.2
 
-_Released 04/22/2025_
+_Released Apr 22, 2025_
 
 **Bugfixes:**
 
@@ -553,7 +553,7 @@ _Released 04/22/2025_
 
 ## 14.3.1
 
-_Released 04/17/2025_
+_Released Apr 17, 2025_
 
 **Performance:**
 
@@ -572,7 +572,7 @@ _Released 04/17/2025_
 
 ## 14.3.0
 
-_Released 04/08/2025_
+_Released Apr 8, 2025_
 
 **Features:**
 
@@ -597,7 +597,7 @@ _Released 04/08/2025_
 
 ## 14.2.1
 
-_Released 03/26/2025_
+_Released Mar 26, 2025_
 
 **Bugfixes:**
 
@@ -620,7 +620,7 @@ _Released 03/26/2025_
 
 ## 14.2.0
 
-_Released 03/12/2025_
+_Released Mar 12, 2025_
 
 **Features:**
 
@@ -639,7 +639,7 @@ _Released 03/12/2025_
 
 ## 14.1.0
 
-_Released 02/25/2025_
+_Released Feb 25, 2025_
 
 **Features:**
 
@@ -663,7 +663,7 @@ _Released 02/25/2025_
 
 ## 14.0.3
 
-_Released 02/11/2025_
+_Released Feb 11, 2025_
 
 **Bugfixes:**
 
@@ -676,7 +676,7 @@ _Released 02/11/2025_
 
 ## 14.0.2
 
-_Released 02/05/2025_
+_Released Feb 5, 2025_
 
 **Bugfixes:**
 
@@ -695,7 +695,7 @@ _Released 02/05/2025_
 
 ## 14.0.1
 
-_Released 01/28/2025_
+_Released Jan 28, 2025_
 
 **Bugfixes:**
 
@@ -712,7 +712,7 @@ _Released 01/28/2025_
 
 ## 14.0.0
 
-_Released 01/16/2025_
+_Released Jan 16, 2025_
 
 **Breaking Changes:**
 
@@ -785,7 +785,7 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 
 ## 13.17.0
 
-_Released 12/17/2024_
+_Released Dec 17, 2024_
 
 **Features:**
 
@@ -807,7 +807,7 @@ _Released 12/17/2024_
 
 ## 13.16.1
 
-_Released 12/03/2024_
+_Released Dec 3, 2024_
 
 **Bugfixes:**
 
@@ -815,7 +815,7 @@ _Released 12/03/2024_
 
 ## 13.16.0
 
-_Released 11/19/2024_
+_Released Nov 19, 2024_
 
 **Features:**
 
@@ -828,7 +828,7 @@ _Released 11/19/2024_
 
 ## 13.15.2
 
-_Released 11/05/2024_
+_Released Nov 5, 2024_
 
 **Bugfixes:**
 
@@ -846,7 +846,7 @@ _Released 11/05/2024_
 
 ## 13.15.1
 
-_Released 10/24/2024_
+_Released Oct 24, 2024_
 
 **Bugfixes:**
 
@@ -865,7 +865,7 @@ _Released 10/24/2024_
 
 ## 13.15.0
 
-_Released 09/25/2024_
+_Released Sep 25, 2024_
 
 **Features:**
 
@@ -890,7 +890,7 @@ _Released 09/25/2024_
 
 ## 13.14.2
 
-_Released 09/04/2024_
+_Released Sep 4, 2024_
 
 **Bugfixes:**
 
@@ -899,7 +899,7 @@ _Released 09/04/2024_
 
 ## 13.14.1
 
-_Released 08/29/2024_
+_Released Aug 29, 2024_
 
 **Bugfixes:**
 
@@ -907,7 +907,7 @@ _Released 08/29/2024_
 
 ## 13.14.0
 
-_Released 08/27/2024_
+_Released Aug 27, 2024_
 
 **Performance:**
 
@@ -939,7 +939,7 @@ _Released 08/27/2024_
 
 ## 13.13.3
 
-_Released 08/14/2024_
+_Released Aug 14, 2024_
 
 **Bugfixes:**
 
@@ -956,7 +956,7 @@ _Released 08/14/2024_
 
 ## 13.13.2
 
-_Released 07/31/2024_
+_Released Jul 31, 2024_
 
 **Performance:**
 
@@ -976,7 +976,7 @@ _Released 07/31/2024_
 
 ## 13.13.1
 
-_Released 07/16/2024_
+_Released Jul 16, 2024_
 
 **Bugfixes:**
 
@@ -993,7 +993,7 @@ _Released 07/16/2024_
 
 ## 13.13.0
 
-_Released 07/01/2024_
+_Released Jul 1, 2024_
 
 **Performance:**
 
@@ -1017,7 +1017,7 @@ _Released 07/01/2024_
 
 ## 13.12.0
 
-_Released 06/18/2024_
+_Released Jun 18, 2024_
 
 **Features:**
 
@@ -1043,7 +1043,7 @@ _Released 06/18/2024_
 
 ## 13.11.0
 
-_Released 06/04/2024_
+_Released Jun 4, 2024_
 
 **Performance:**
 
@@ -1065,7 +1065,7 @@ _Released 06/04/2024_
 
 ## 13.10.0
 
-_Released 05/21/2024_
+_Released May 21, 2024_
 
 **Features:**
 
@@ -1086,7 +1086,7 @@ _Released 05/21/2024_
 
 ## 13.9.0
 
-_Released 05/07/2024_
+_Released May 7, 2024_
 
 **Features:**
 
@@ -1109,7 +1109,7 @@ _Released 05/07/2024_
 
 ## 13.8.1
 
-_Released 04/23/2024_
+_Released Apr 23, 2024_
 
 **Performance:**
 
@@ -1130,7 +1130,7 @@ _Released 04/23/2024_
 
 ## 13.8.0
 
-_Released 04/18/2024_
+_Released Apr 18, 2024_
 
 **Features:**
 
@@ -1146,7 +1146,7 @@ _Released 04/18/2024_
 
 ## 13.7.3
 
-_Released 04/11/2024_
+_Released Apr 11, 2024_
 
 **Bugfixes:**
 
@@ -1160,7 +1160,7 @@ _Released 04/11/2024_
 
 ## 13.7.2
 
-_Released 04/02/2024_
+_Released Apr 2, 2024_
 
 **Performance:**
 
@@ -1179,7 +1179,7 @@ _Released 04/02/2024_
 
 ## 13.7.1
 
-_Released 03/21/2024_
+_Released Mar 21, 2024_
 
 **Bugfixes:**
 
@@ -1192,7 +1192,7 @@ _Released 03/21/2024_
 
 ## 13.7.0
 
-_Released 03/13/2024_
+_Released Mar 13, 2024_
 
 **Features:**
 
@@ -1225,7 +1225,7 @@ _Released 03/13/2024_
 
 ## 13.6.6
 
-_Released 02/22/2024_
+_Released Feb 22, 2024_
 
 **Bugfixes:**
 
@@ -1233,7 +1233,7 @@ _Released 02/22/2024_
 
 ## 13.6.5
 
-_Released 02/20/2024_
+_Released Feb 20, 2024_
 
 **Bugfixes:**
 
@@ -1259,7 +1259,7 @@ _Released 02/20/2024_
 
 ## 13.6.4
 
-_Released 01/30/2024_
+_Released Jan 30, 2024_
 
 **Performance:**
 
@@ -1275,7 +1275,7 @@ _Released 01/30/2024_
 
 ## 13.6.3
 
-_Released 01/16/2024_
+_Released Jan 16, 2024_
 
 **Bugfixes:**
 
@@ -1310,7 +1310,7 @@ _Released 01/16/2024_
 
 ## 13.6.2
 
-_Released 12/26/2023_
+_Released Dec 26, 2023_
 
 **Bugfixes:**
 
@@ -1327,7 +1327,7 @@ _Released 12/26/2023_
 
 ## 13.6.1
 
-_Released 12/05/2023_
+_Released Dec 5, 2023_
 
 **Bugfixes:**
 
@@ -1343,7 +1343,7 @@ _Released 12/05/2023_
 
 ## 13.6.0
 
-_Released 11/21/2023_
+_Released Nov 21, 2023_
 
 **Features:**
 
@@ -1369,7 +1369,7 @@ _Released 11/21/2023_
 
 ## 13.5.1
 
-_Released 11/14/2023_
+_Released Nov 14, 2023_
 
 **Bugfixes:**
 
@@ -1379,7 +1379,7 @@ _Released 11/14/2023_
 
 ## 13.5.0
 
-_Released 11/08/2023_
+_Released Nov 8, 2023_
 
 **Features:**
 
@@ -1399,7 +1399,7 @@ _Released 11/08/2023_
 
 ## 13.4.0
 
-_Released 10/30/2023_
+_Released Oct 30, 2023_
 
 **Features:**
 
@@ -1411,7 +1411,7 @@ _Released 10/30/2023_
 
 ## 13.3.3
 
-_Released 10/24/2023_
+_Released Oct 24, 2023_
 
 **Bugfixes:**
 
@@ -1421,7 +1421,7 @@ _Released 10/24/2023_
 
 ## 13.3.2
 
-_Released 10/18/2023_
+_Released Oct 18, 2023_
 
 **Bugfixes:**
 
@@ -1438,7 +1438,7 @@ _Released 10/18/2023_
 
 ## 13.3.1
 
-_Released 10/11/2023_
+_Released Oct 11, 2023_
 
 **Bugfixes:**
 
@@ -1451,7 +1451,7 @@ _Released 10/11/2023_
 
 ## 13.3.0
 
-_Released 09/27/2023_
+_Released Sep 27, 2023_
 
 **Features:**
 
@@ -1464,7 +1464,7 @@ _Released 09/27/2023_
 
 ## 13.2.0
 
-_Released 09/12/2023_
+_Released Sep 12, 2023_
 
 **Features:**
 
@@ -1483,7 +1483,7 @@ _Released 09/12/2023_
 
 ## 13.1.0
 
-_Released 08/31/2023_
+_Released Aug 31, 2023_
 
 **Features:**
 
@@ -1499,7 +1499,7 @@ _Released 08/31/2023_
 
 ## 13.0.0
 
-_Released 08/29/2023_
+_Released Aug 29, 2023_
 
 **Breaking Changes:**
 
@@ -1537,7 +1537,7 @@ _Released 08/29/2023_
 
 ## 12.17.4
 
-_Released 08/15/2023_
+_Released Aug 15, 2023_
 
 **Bugfixes:**
 
@@ -1550,7 +1550,7 @@ _Released 08/15/2023_
 
 ## 12.17.3
 
-_Released 08/01/2023_
+_Released Aug 1, 2023_
 
 **Bugfixes:**
 
@@ -1562,7 +1562,7 @@ _Released 08/01/2023_
 
 ## 12.17.2
 
-_Released 07/20/2023_
+_Released Jul 20, 2023_
 
 **Bugfixes:**
 
@@ -1572,7 +1572,7 @@ _Released 07/20/2023_
 
 ## 12.17.1
 
-_Released 07/10/2023_
+_Released Jul 10, 2023_
 
 **Bugfixes:**
 
@@ -1585,7 +1585,7 @@ _Released 07/10/2023_
 
 ## 12.17.0
 
-_Released 07/05/2023_
+_Released Jul 5, 2023_
 
 **Features:**
 
@@ -1607,7 +1607,7 @@ _Released 07/05/2023_
 
 ## 12.16.0
 
-_Released 06/26/2023_
+_Released Jun 26, 2023_
 
 **Features:**
 
@@ -1619,7 +1619,7 @@ _Released 06/26/2023_
 
 ## 12.15.0
 
-_Released 06/20/2023_
+_Released Jun 20, 2023_
 
 **Features:**
 
@@ -1638,7 +1638,7 @@ _Released 06/20/2023_
 
 ## 12.14.0
 
-_Released 06/07/2023_
+_Released Jun 7, 2023_
 
 **Features:**
 
@@ -1661,7 +1661,7 @@ during Component Testing onboarding. Addresses [#26852](https://github.com/cypre
 
 ## 12.13.0
 
-_Released 05/23/2023_
+_Released May 23, 2023_
 
 **Features:**
 
@@ -1683,7 +1683,7 @@ _Released 05/23/2023_
 
 ## 12.12.0
 
-_Released 05/09/2023_
+_Released May 9, 2023_
 
 **Features:**
 
@@ -1704,7 +1704,7 @@ _Released 05/09/2023_
 
 ## 12.11.0
 
-_Released 04/26/2023_
+_Released Apr 26, 2023_
 
 **Features:**
 
@@ -1726,7 +1726,7 @@ _Released 04/26/2023_
 
 ## 12.10.0
 
-_Released 04/17/2023_
+_Released Apr 17, 2023_
 
 **Features:**
 
@@ -1752,7 +1752,7 @@ _Released 04/17/2023_
 
 ## 12.9.0
 
-_Released 03/28/2023_
+_Released Mar 28, 2023_
 
 **Features:**
 
@@ -1773,7 +1773,7 @@ _Released 03/28/2023_
 
 ## 12.8.1
 
-_Released 03/15/2023_
+_Released Mar 15, 2023_
 
 **Bugfixes:**
 
@@ -1785,7 +1785,7 @@ _Released 03/15/2023_
 
 ## 12.8.0
 
-_Released 03/14/2023_
+_Released Mar 14, 2023_
 
 **Features:**
 
@@ -1816,7 +1816,7 @@ _Released 03/14/2023_
 
 ## 12.7.0
 
-_Released 02/24/2023_
+_Released Feb 24, 2023_
 
 **Features:**
 
@@ -1843,7 +1843,7 @@ _Released 02/24/2023_
 
 ## 12.6.0
 
-_Released 02/15/2023_
+_Released Feb 15, 2023_
 
 **Features:**
 
@@ -1871,7 +1871,7 @@ _Released 02/15/2023_
 
 ## 12.5.1
 
-_Released 02/02/2023_
+_Released Feb 2, 2023_
 
 **Bugfixes:**
 
@@ -1883,7 +1883,7 @@ _Released 02/02/2023_
 
 ## 12.5.0
 
-_Released 01/31/2023_
+_Released Jan 31, 2023_
 
 **Features:**
 
@@ -1903,7 +1903,7 @@ _Released 01/31/2023_
 
 ## 12.4.1
 
-_Released 01/27/2023_
+_Released Jan 27, 2023_
 
 **Bugfixes:**
 
@@ -1915,7 +1915,7 @@ _Released 01/27/2023_
 
 ## 12.4.0
 
-_Released 01/24/2023_
+_Released Jan 24, 2023_
 
 **Features:**
 

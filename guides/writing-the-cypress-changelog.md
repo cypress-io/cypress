@@ -27,7 +27,7 @@ The changelog should include anything that was merged into the `develop` branch 
     - <CHANGELOG_ENTRY>
     ```
 
-    The `RELEASE_DATE` follows the `MM/DD/YYYY` format (two-digit month, two-digit day, four-digit year), including leading zeros for any single-digit month or day.
+    The `RELEASE_DATE` follows the `Mon D, YYYY` format (three-letter month abbreviation, non-zero-padded day, four-digit year).
 
 2. Each changelog entry is written and merged with the associated user-facing code change in [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
 3. The changelog entry should be added to the associated change section. The supported change sections for the changelog (that should be listed in the order below) are:
