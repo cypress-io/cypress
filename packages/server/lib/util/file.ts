@@ -20,7 +20,7 @@ const LOCK_TIMEOUT = 2000
 function getUid () {
   try {
     // eslint-disable-next-line no-restricted-properties
-    return process.geteuid?.()
+    return process.geteuid?.() ?? 1
   } catch (err) {
     // process.geteuid() can fail, return a constant
     // @see https://github.com/cypress-io/cypress/issues/17415
