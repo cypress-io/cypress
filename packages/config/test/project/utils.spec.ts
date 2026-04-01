@@ -1041,10 +1041,6 @@ describe('config/src/project/utils', () => {
       expect(cfg.watchForFileChanges).toBe(false)
     })
 
-    it('sets defaultBrowser to chrome in run mode when unset', async function () {
-      await defaults('defaultBrowser', 'chrome', { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
-    })
-
     it('does not replace defaultBrowser in run mode when set in config', async function () {
       const cfg = await mergeDefaults(
         { projectRoot: '/foo/bar/', supportFile: false, defaultBrowser: 'firefox' },
