@@ -1350,8 +1350,8 @@ commands:
           command: |
             source ./scripts/ensure-node.sh
             node --version
-            CHROME_PATH=$(npx @puppeteer/browsers install chrome@${CHROME_STABLE_VERSION} --format '{{path}}')
-            yarn binary-smoke-test --version $(node ./scripts/get-next-version.js) --browser "$CHROME_PATH"
+            BROWSER=$(npx @puppeteer/browsers@latest install chrome@${CHROME_STABLE_VERSION} --format {{path}} --path /tmp)
+            yarn binary-smoke-test --version $(node ./scripts/get-next-version.js) --browser "$BROWSER"
       - run:
           name: Zip the binary
           command: |
