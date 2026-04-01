@@ -6,6 +6,7 @@
 // synchronous requires the first go around just to
 // essentially do it all again when we boot the correct
 // mode.
+import os from 'os'
 import type { ChildProcess } from 'child_process'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
@@ -22,12 +23,26 @@ const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
 
+interface MinimalRunResult {
+  totalFailed: number
+}
+
 /** Resolved value from {@link runElectron} (in-process Electron vs spawned child). */
 type RunElectronResult =
   | number
   | CypressRunResult
-  | { totalFailed: number }
+  | MinimalRunResult
   | BrowserWindow
+
+function isCypressRunResult (result: any): result is CypressRunResult {
+  return result && typeof result === 'object' && 'runs' in result && Array.isArray(result.runs)
+}
+function isBrowserWindow (result: any): result is BrowserWindow {
+  return result && typeof result === 'object' && 'webContents' in result
+}
+function isMinimalRunResult (result: any): result is MinimalRunResult {
+  return result && typeof result === 'object' && 'totalFailed' in result
+}
 
 const showWarningForInvalidConfig = (options: any) => {
   const publicConfigKeys = getPublicConfigKeys()
@@ -248,52 +263,29 @@ export = {
         case 'run': {
           const results = await this.runElectron(mode, options)
 
-          if (typeof results === 'number') {
-            return GracefulExit.exitGracefully(results)
-          }
-
-          if (!('totalFailed' in results)) {
-            throw new Error('unexpected runElectron result for run mode')
-          }
-
-          if ('runs' in results && results.runs) {
-            const isCanceled = results.runs.filter((run) => run.skippedSpec).length
-
-            if (isCanceled) {
+          if (
+            isCypressRunResult(results) &&
+            (results.runs.filter((run) => run.skippedSpec).length)
+          ) {
               // eslint-disable-next-line no-console
               console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
               return GracefulExit.exitGracefully(1)
+          }
+
+          if (isCypressRunResult(results) || isMinimalRunResult(results)) {
+            if (options.posixExitCodes) {
+              return GracefulExit.exitGracefully(results.totalFailed ? 1 : 0)
+            } else {
+              return GracefulExit.exitGracefully(results.totalFailed ?? 0)
             }
           }
 
-          debug('results.totalFailed, posix?', results.totalFailed, options.posixExitCodes)
-
-          if (options.posixExitCodes) {
-            const tf = results.totalFailed ?? 0
-
-            if (tf === 0) {
-              return GracefulExit.exitGracefully(0)
-            }
-
-            // In-process run results include `runs` and `totalFailed` is a failed-test count;
-            // POSIX mode maps that to 0/1. When the CLI spawns Electron, `runElectron` only
-            // resolves `{ totalFailed: childExitCode }` — that number is the process exit code
-            // (e.g. 112 for cloud network errors), not a test count, and must not be collapsed to 1.
-            const hasRuns = 'runs' in results && Array.isArray(results.runs) && results.runs.length > 0
-
-            if (hasRuns) {
-              return GracefulExit.exitGracefully(1)
-            }
-
-            if (tf === 112) {
-              return GracefulExit.exitGracefully(112)
-            }
-
-            return GracefulExit.exitGracefully(1)
+          if (typeof results === 'number') {
+            return GracefulExit.exitGracefully(results)
           }
 
-          return GracefulExit.exitGracefully(results.totalFailed ?? 0)
+          throw new Error('unexpected runElectron result for run mode')
         }
         default: {
           throw new Error(`Cannot start. Invalid mode: '${mode}'`)
