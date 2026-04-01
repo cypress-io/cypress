@@ -23,7 +23,19 @@ if (options['glob-in-dir']) {
   if (run[0]) {
     run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
   } else {
-    run = [path.join(options['glob-in-dir'], '**')]
+    const globInDir = options['glob-in-dir']
+    const unitDirNorm = String(globInDir).replace(/\\/g, '/')
+    const isUnitDir = unitDirNorm === 'test/unit' || unitDirNorm.endsWith('/test/unit')
+
+    // Unit tests: Mocha only runs legacy *_spec files; Vitest runs *.spec.* (see vitest.config.ts)
+    if (isUnitDir) {
+      run = [
+        path.join(globInDir, '**', '*_spec.js'),
+        path.join(globInDir, '**', '*_spec.ts'),
+      ]
+    } else {
+      run = [path.join(globInDir, '**')]
+    }
   }
 }
 

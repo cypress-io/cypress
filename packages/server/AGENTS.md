@@ -8,11 +8,18 @@ yarn workspace @packages/server start
 
 # NOTE: Full suite is slow (hundreds of tests); always target a specific file or grep pattern
 
-# Run a specific unit test file
-yarn workspace @packages/server test-unit -- <path-to-spec>
+# Unit tests: `test-unit` runs Mocha on `test/unit/**/*_spec.{js,ts}` then Vitest on `test/unit/**/*.spec.{js,ts}`.
+# Migrated `*.spec.*` files should use Vitest only (`expect`, `vi.fn`, `vi.spyOn`, …), not sinon/chai.
 
-# Filter unit tests by name pattern
+# Run a specific legacy Mocha unit file
+yarn workspace @packages/server test-unit -- <path-to-_spec>
+
+# Filter Mocha unit tests by name
 yarn workspace @packages/server test-unit -- --grep "handles request"
+
+# Run Vitest unit tests only (e.g. migrated `*.spec.ts`)
+yarn workspace @packages/server test-unit-vitest
+yarn workspace @packages/server test-unit-vitest -- test/unit/append_electron_switches.spec.ts
 
 # Run a specific integration test file
 yarn workspace @packages/server test-integration -- <path-to-spec>

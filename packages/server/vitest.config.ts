@@ -3,7 +3,8 @@ import { defineConfig } from 'vitest/config'
 /**
  * Unit tests migrated from Mocha use `*.spec.{js,ts}` under `test/unit/`.
  * Legacy Mocha unit tests remain `*_spec.{js,ts}` until migrated.
- * setupFiles (spec_helper port) is added in a follow-up change.
+ * In migrated files, use Vitest (`expect`, `vi`) — not sinon/chai.
+ * Shared setup for specs that use spec_helper is added in test/vitest-setup.ts when migrated.
  */
 export default defineConfig({
   test: {
