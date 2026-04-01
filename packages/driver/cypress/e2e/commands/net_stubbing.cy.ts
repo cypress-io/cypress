@@ -993,6 +993,15 @@ describe('network stubbing', { retries: 15 }, function () {
             },
             'must be a number',
           ],
+          // @see https://github.com/cypress-io/cypress/issues/33183
+          [
+            'delay exceeds maximum setTimeout value',
+            {
+              body: 'test',
+              delay: 2147483648,
+            },
+            'must be less than 2147483648ms',
+          ],
         ].forEach(function ([name, handler, expectedErr]) {
           it(`${name} fails`, function (done) {
             testFail((err) => {
