@@ -17,7 +17,7 @@ base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20
 parameters:
   publish-binary-branch:
     type: string
-    default: main
+    default: mschile/electron_41
   force-persist-artifacts:
     type: boolean
     default: false
@@ -31,7 +31,7 @@ defaults: &defaults
   parameters: &defaultsParameters
     executor:
       type: executor
-      default: cy-doc
+      default: cy-docker
     only-cache-for-root-user:
       type: boolean
       default: false
@@ -49,8 +49,7 @@ defaults: &defaults
     LINES: 24
 
 executors:
-  # the Docker image with Cypress dependencies and Chrome browser
-  cy-doc:
+  cy-docker:
     docker:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
@@ -465,7 +464,7 @@ commands:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run: pwd
       ##- run:
@@ -508,7 +507,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
       install-chrome:
         description: whether or not to install google chrome
         type: boolean
@@ -1103,7 +1102,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Install yarn if not already installed
@@ -1370,7 +1369,7 @@ commands:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Bump NPM version
@@ -2660,7 +2659,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
       wd:
         description: Working directory, should be OUTSIDE cypress monorepo folder
         type: string
@@ -2700,7 +2699,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
     <<: *defaults
     resource_class: small
     steps:
