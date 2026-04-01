@@ -1,5 +1,15 @@
-[31mCypress no longer supports selecting [33melectron[39m[31m as the test browser.[39m
+[31mCypress no longer supports [33melectron[39m[31m as a browser.[39m
 [31m[39m
-[31mChoose an installed browser with [95m--browser[39m[31m (for example [95m--browser chrome[39m[31m) or pass a `browser` option to [33mcypress.run()[39m[31m.[39m
+[31mCypress supports the following browsers:[39m
+[31m[90m - [39m[31m[94mchrome[39m[31m[39m
+[31m[90m - [39m[31m[94mchromium[39m[31m[39m
+[31m[90m - [39m[31m[94mchrome-for-testing[39m[31m[39m
+[31m[90m - [39m[31m[94medge[39m[31m[39m
+[31m[90m - [39m[31m[94mfirefox[39m[31m[39m
 [31m[39m
-[31mLearn more: https://on.cypress.io/launching-browsers[39m
+[31mYou can also use a custom browser: https://on.cypress.io/customize-browsers[39m
+[31m[39m
+[31mAvailable browsers found on your system are:[39m
+[31m[90m - [39m[31m[94mChrome 120[39m[31m[39m
+[31m[90m - [39m[31m[94mFirefox 121[39m[31m[39m
+[31m[90m - [39m[31m[94mEdge 119[39m[31m[39m

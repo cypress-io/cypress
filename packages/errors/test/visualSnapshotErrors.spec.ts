@@ -183,7 +183,7 @@ describe('visual error templates', () => {
     },
     BROWSER_ELECTRON_REMOVED: () => {
       return {
-        default: [],
+        default: [MOCK_FOUND_BROWSERS],
       }
     },
     BROWSER_NOT_FOUND_BY_NAME: () => {
@@ -197,6 +197,11 @@ describe('visual error templates', () => {
 
       return {
         default: ['/path/does/not/exist', err.message],
+      }
+    },
+    BROWSER_MACHINE_BROWSERS_EMPTY: () => {
+      return {
+        default: [],
       }
     },
     TESTS_DID_NOT_START_RETRYING: () => {

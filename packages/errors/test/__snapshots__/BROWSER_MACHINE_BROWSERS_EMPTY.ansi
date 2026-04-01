@@ -1,0 +1,11 @@
+[31mUnable to continue as no browsers were found on your system.[39m
+[31m[39m
+[31mCypress supports the following browsers:[39m
+[31m[90m - [39m[31m[94mchrome[39m[31m[39m
+[31m[90m - [39m[31m[94mchromium[39m[31m[39m
+[31m[90m - [39m[31m[94mchrome-for-testing[39m[31m[39m
+[31m[90m - [39m[31m[94medge[39m[31m[39m
+[31m[90m - [39m[31m[94mfirefox[39m[31m[39m
+[31m[39m
+[31mRead more about how to troubleshoot launching browsers: https://on.cypress.io/troubleshooting-launching-browsers[39m
+[31m[39m
