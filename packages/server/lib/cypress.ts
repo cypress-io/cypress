@@ -37,9 +37,6 @@ type RunElectronResult =
 function isCypressRunResult (result: any): result is CypressRunResult {
   return result && typeof result === 'object' && 'runs' in result && Array.isArray(result.runs)
 }
-function isBrowserWindow (result: any): result is BrowserWindow {
-  return result && typeof result === 'object' && 'webContents' in result
-}
 function isMinimalRunResult (result: any): result is MinimalRunResult {
   return result && typeof result === 'object' && 'totalFailed' in result
 }
