@@ -100,7 +100,7 @@ export class GracefulExit {
 
         this.debug(`<${key}> teardown step completed: %s`, name)
       } catch (error) {
-        GracefulExit.singleton.debug(`<${key}> Error executing teardown step: ${name}`, error)
+        this.debug(`<${key}> Error executing teardown step: ${name}`, error)
         hadErrors = true
       }
     }))
@@ -119,12 +119,13 @@ export class GracefulExit {
 
     try {
       finalExitCode = await this.flushSteps(code)
+      this.debug('steps flushed successfully', code, finalExitCode)
     } catch (error) {
-      GracefulExit.singleton.debug('Error flushing steps: ', error)
+     this.debug('Error flushing steps: ', error)
       finalExitCode = 1
     } finally {
-      GracefulExit.singleton.processTeardown = null
-      GracefulExit.singleton.steps.clear()
+      this.processTeardown = null
+      this.steps.clear()
       process.exit(finalExitCode)
     }
   }

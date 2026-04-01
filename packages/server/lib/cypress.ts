@@ -6,7 +6,6 @@
 // synchronous requires the first go around just to
 // essentially do it all again when we boot the correct
 // mode.
-import os from 'os'
 import type { ChildProcess } from 'child_process'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
@@ -271,7 +270,27 @@ export = {
           debug('results.totalFailed, posix?', results.totalFailed, options.posixExitCodes)
 
           if (options.posixExitCodes) {
-            return GracefulExit.exitGracefully(results.totalFailed ? 1 : 0)
+            const tf = results.totalFailed ?? 0
+
+            if (tf === 0) {
+              return GracefulExit.exitGracefully(0)
+            }
+
+            // In-process run results include `runs` and `totalFailed` is a failed-test count;
+            // POSIX mode maps that to 0/1. When the CLI spawns Electron, `runElectron` only
+            // resolves `{ totalFailed: childExitCode }` — that number is the process exit code
+            // (e.g. 112 for cloud network errors), not a test count, and must not be collapsed to 1.
+            const hasRuns = 'runs' in results && Array.isArray(results.runs) && results.runs.length > 0
+
+            if (hasRuns) {
+              return GracefulExit.exitGracefully(1)
+            }
+
+            if (tf === 112) {
+              return GracefulExit.exitGracefully(112)
+            }
+
+            return GracefulExit.exitGracefully(1)
           }
 
           return GracefulExit.exitGracefully(results.totalFailed ?? 0)

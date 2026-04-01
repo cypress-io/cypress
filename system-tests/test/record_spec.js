@@ -2293,6 +2293,8 @@ describe('e2e record', () => {
           posixExitCodes: true,
           ciBuildId: 'ciBuildId123',
           expectedExitCode: 112,
+        }).then((res) => {
+          console.log(res)
         })
       })
 
