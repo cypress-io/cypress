@@ -17,6 +17,7 @@
     "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",
     "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
     "test-unit": "node ./test/scripts/run.js --glob-in-dir=test/unit",
+    "test-unit-vitest": "vitest run",
     "test-watch": "./test/scripts/watch test"
   },
   "dependencies": {
@@ -193,6 +194,7 @@
     "supertest": "4.0.2",
     "ts-loader": "9.5.2",
     "tsconfig-paths": "3.10.1",
+    "vitest": "^3.2.4",
     "webpack": "^5.88.2",
     "ws": "5.2.4",
     "xvfb-maybe": "0.2.1"
