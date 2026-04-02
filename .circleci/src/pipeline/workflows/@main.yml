@@ -261,7 +261,6 @@ linux-x64:
           - system-tests-node-modules-install
 
     - ready-to-release:
-        # filters: *mainBuildFilters
         requires:
           - check-ts
           - health-check
@@ -348,6 +347,7 @@ linux-x64:
               only:
                 - develop
                 - /^release\/\d+\.\d+\.\d+$/
+                - /^electron\/\d+\.\d+\.\d+$/
                 - 'update-v8-snapshot-cache-on-develop'
                 # temporary branches that can be removed after merging
                 - 'mschile/electron_41'
