@@ -5,7 +5,7 @@ _Released 03/29/2026 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where [`cy.readFile()`](https://docs.cypress.io/api/commands/readfile) and path based [`cy.selectFile()`](https://docs.cypress.io/api/commands/selectfile) could crash the browser when working with very large files because the full contents were sent in one privileged socket payload. File contents are now streamed to the browser in smaller chunks instead. Fixes [#20244](https://github.com/cypress-io/cypress/issues/20244).
+- Fixed an issue where [`cy.readFile()`](https://docs.cypress.io/api/commands/readfile) and path based [`cy.selectFile()`](https://docs.cypress.io/api/commands/selectfile) could hang or crash the browser when working with very large files because the full contents were sent in one privileged socket payload. File contents are now streamed to the browser in smaller chunks instead. Fixes [#20244](https://github.com/cypress-io/cypress/issues/20244) and [#29668](https://github.com/cypress-io/cypress/issues/29668).
 
 ## 15.13.1 
 
