@@ -358,7 +358,7 @@ export = {
       cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
     }
 
-    // Electron 41 workaround (possibly also needed for Electron 38/39/40 but they weren't tested):
+    // HACK: Electron 41 workaround (possibly also needed for Electron 38/39/40 but they weren't tested):
     // registering any `session.webRequest` listener before first navigation appears to
     // initialize the network stack and avoids blank initial load.
     // Keep this ahead of `loadURL`.
