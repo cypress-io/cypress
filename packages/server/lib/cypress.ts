@@ -271,7 +271,10 @@ export = {
           }
 
           if (isCypressRunResult(results) || isMinimalRunResult(results)) {
-            if (options.posixExitCodes) {
+            // Exit code 112 is reserved for network errors in parallel mode
+            // All other exit codes are "number of tests that failed," so collapse
+            // them to 0/1.
+            if (options.posixExitCodes && results.totalFailed !== 112) {
               return GracefulExit.exitGracefully(results.totalFailed ? 1 : 0)
             } else {
               return GracefulExit.exitGracefully(results.totalFailed ?? 0)
