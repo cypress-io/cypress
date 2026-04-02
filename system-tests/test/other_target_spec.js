@@ -26,6 +26,9 @@ describe('e2e other target', () => {
   // The goal of this test is to load a page containing a target type of 'other' (e.g. embedded pdfs)
   // This is to ensure that we don't hang on the cy.visit (https://github.com/cypress-io/cypress/issues/28228)
   systemTests.it(`executes a page containing a target type of 'other'`, {
+    // HACK: Electron 41 broke the ability to load PDFs when using the --disable-site-isolation-trials flag
+    // https://github.com/electron/electron/issues/50657
+    browser: '!electron',
     project: 'e2e',
     spec: 'other_target.cy.js',
   })
