@@ -22,7 +22,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
-          node-version-file: .node-version
+          node-version: 'lts/*'
       - name: Run comment_workflow.js Script
         uses: actions/github-script@v7
         with:
