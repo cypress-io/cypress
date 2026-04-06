@@ -1829,7 +1829,7 @@ jobs:
       - restore_cached_workspace
       - run: yarn test-unit --scope=@packages/server
       - sanitize-verify-and-store-mocha-results:
-          expectedResultCount: 1
+          expectedResultCount: 2
 
   server-unit-tests-cloud-environment:
     <<: *defaults
@@ -1860,7 +1860,7 @@ jobs:
                 command: rm -rf node_modules && yarn
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
-          expectedResultCount: 1
+          expectedResultCount: 2
 
   server-integration-tests:
     <<: *defaults
