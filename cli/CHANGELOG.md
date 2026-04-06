@@ -6,6 +6,7 @@ _Released 03/31/2026 (PENDING)_
 **Performance:**
 
 - When recording to Cypress Cloud, the App now sends a smaller snapshot of your project config, which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
+- Eliminated unnecessary `git status` and `git log` subprocess calls during `cypress run`, which were collecting spec file git metadata only used in the interactive GUI. Fixed in [#33552](https://github.com/cypress-io/cypress/pull/33552).
 
 **Bugfixes:**
 
