@@ -60,6 +60,7 @@ Thanks for taking the time to contribute! :smile:
   - [Committing Code](#committing-code)
     - [Branches](#branches)
     - [Pull Requests](#pull-requests)
+    - [AI-Assisted Contributions](#ai-assisted-contributions)
     - [Write Some Tests](#write-some-tests)
     - [Dependencies](#dependencies)
   - [Reviewing Code](#reviewing-code)
@@ -546,6 +547,30 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 
 1. When converting files to another language and there is a clear commit history needed to maintain from the file conversion.
 2. When merging a `release/*` branch to `develop`. Individual PRs were already squashed when they were merged to the release branch, and we want that history intact on develop.
+
+### AI-Assisted Contributions
+
+AI coding assistants (such as Claude, Codex, Cursor, etc.) are increasingly common tools for developers. Contributions to Cypress may be created with or without AI assistance. AI tools are a normal part of modern development workflows, but contributors remain responsible for the changes they submit.
+
+We do not restrict or require disclosure of AI usage, but contributors are responsible for all code they submit regardless of how it was produced.
+
+When submitting a pull request, please ensure that:
+
+- **You understand the code you are submitting.**  
+  You should be able to explain how the change works and why it is correct.
+
+- **You have reviewed and validated AI-assisted changes.**  
+  AI-generated output may contain mistakes, unnecessary complexity, or patterns that do not match the repository.
+
+- **Your changes follow the existing codebase conventions and architecture.**
+
+- **Your pull request remains focused and reviewable.**  
+  Avoid submitting large AI-generated changes that you have not carefully reviewed.
+
+- **The repository's pull request template is preserved.**  
+  AI tools may help draft content, but contributors should keep the template structure intact and ensure the final content is accurate.
+
+Reviewers may ask clarifying questions about changes. As with any contribution, authors remain responsible for the correctness, maintainability, and quality of the code they submit.
 
 ### Write Some Tests
 
