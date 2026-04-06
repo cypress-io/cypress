@@ -290,6 +290,11 @@ export = {
 
     let cdpAutomation
 
+    // HACK: Electron 41 workaround:
+    // register any `session.webRequest` listener before loading the page
+    // @see https://github.com/electron/electron/issues/50678
+    win.webContents.session.webRequest.onErrorOccurred(() => {})
+
     // If the cdp socket server is not present, this is a child window and we don't want to bind or listen to anything
     if (cdpSocketServer) {
       await win.loadURL('about:blank')
@@ -357,12 +362,6 @@ export = {
       await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
       cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
     }
-
-    // HACK: Electron 41 workaround (possibly also needed for Electron 38/39/40 but they weren't tested):
-    // registering any `session.webRequest` listener before first navigation appears to
-    // initialize the network stack and avoids blank initial load.
-    // Keep this ahead of `loadURL`.
-    win.webContents.session.webRequest.onErrorOccurred(() => {})
 
     await win.loadURL(url)
 
