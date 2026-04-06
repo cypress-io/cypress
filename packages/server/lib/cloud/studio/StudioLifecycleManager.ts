@@ -363,7 +363,6 @@ export class StudioLifecycleManager {
 
     // Close the watcher if a previous watcher exists
     if (StudioLifecycleManager.watcher) {
-      StudioLifecycleManager.watcher.removeAllListeners()
       await StudioLifecycleManager.close().catch(() => {})
     }
 
