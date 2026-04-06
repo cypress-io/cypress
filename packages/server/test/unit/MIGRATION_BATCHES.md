@@ -192,14 +192,6 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 
 ---
 
-## Notes
-
-- **Skills:** `packages/server/CLAUDE.md`, `.cursor/skills/server-unit-*.md` (sinon → `vi`, Chai → Vitest, deep mocks, fake timers, spec_helper migration).
-- **Duplicate paths:** `environment_spec.ts` (root) and `cloud/environment_spec.ts` are different files — both listed (batch 8 vs 10).
-- **Already migrated (examples):** `fetch_spec` → `fetch.spec.ts`, `is_retryable_error_spec` → `is_retryable_error.spec.ts`, `status_code_spec` → `status_code.spec.ts`, `server-base_spec` → `server-base.spec.ts`, etc. — not repeated in checklists above.
-
----
-
 ## Reconcile file count
 
 After all boxes are checked, `find test/unit -name '*_spec.ts' -o -name '*_spec.js' | wc -l` should be **0** under `test/unit/`.
