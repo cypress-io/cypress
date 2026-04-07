@@ -1,10 +1,12 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
+import semverLt from 'semver/functions/lt'
 import * as events from 'events'
 import * as path from 'path'
 import webpack from 'webpack'
 import utils from './lib/utils'
+import { getResolvedTypescriptVersion } from './lib/get-typescript'
 import { overrideSourceMaps } from './lib/typescript-overrides'
 
 const getTsLoaderIfExists = (rules) => {
@@ -284,21 +286,31 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
           return
         }
 
-        // FIXME: To prevent disruption, we are only passing in these 4 options to the ts-loader.
+        // FIXME: To prevent disruption, we are only passing in a subset of options to ts-loader.
         // We will be passing in the entire compilerOptions object from the tsconfig.json in Cypress 15.
         // @see https://github.com/cypress-io/cypress/issues/29614#issuecomment-2722071332
         // @see https://github.com/cypress-io/cypress/issues/31282
         // Cypress ALWAYS wants sourceMap set to true, regardless of the user configuration.
         // This is because we want to display a correct code frame in the test runner.
-        debug(`ts-loader detected: overriding tsconfig to use sourceMap:true, inlineSourceMap:false, inlineSources:false, downlevelIteration:true`)
-
         tsLoaderRule.options = tsLoaderRule?.options || {}
         tsLoaderRule.options.compilerOptions = tsLoaderRule.options?.compilerOptions || {}
+
+        const tsVersion = getResolvedTypescriptVersion(options.typescript)
+
+        debug(
+          `ts-loader detected: overriding tsconfig to use sourceMap:true, inlineSourceMap:false, inlineSources:false${
+            tsVersion && semverLt(tsVersion, '6.0.0')
+              ? ', downlevelIteration:true'
+              : ''
+          } (TypeScript ${tsVersion ?? 'version unknown'})`,
+        )
 
         tsLoaderRule.options.compilerOptions.sourceMap = true
         tsLoaderRule.options.compilerOptions.inlineSourceMap = false
         tsLoaderRule.options.compilerOptions.inlineSources = false
-        tsLoaderRule.options.compilerOptions.downlevelIteration = true
+        if (tsVersion && semverLt(tsVersion, '6.0.0')) {
+          tsLoaderRule.options.compilerOptions.downlevelIteration = true
+        }
       } catch (e) {
         debug('ts-loader not detected', e)
 

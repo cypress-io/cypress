@@ -10,6 +10,8 @@ _Released 03/31/2026 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where running Cypress with **TypeScript 6** and the default webpack preprocessor failed with TS5101/TS5107 deprecation errors because Cypress injected deprecated `compilerOptions` (`downlevelIteration`, legacy `moduleResolution`). `@cypress/webpack-preprocessor` now normalizes options for the bundled TypeScript version, and the Component Testing setup wizard accepts TypeScript 6 (and 7) in its version range. Fixes [#33385](https://github.com/cypress-io/cypress/issues/33385). Addresses [#33511](https://github.com/cypress-io/cypress/issues/33511).
+
 - Fixed an issue where `cy.intercept` `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
 
 **Dependency Updates:**

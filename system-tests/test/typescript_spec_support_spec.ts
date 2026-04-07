@@ -31,6 +31,12 @@ describe('e2e typescript in spec and support file', function () {
     })
   })
 
+  it('project passes with typescript 6', function () {
+    return systemTests.exec(this, {
+      project: 'ts-proj-6',
+    })
+  })
+
   it('project with custom supportFile passes', function () {
     return systemTests.exec(this, {
       project: 'ts-proj-custom-names',
