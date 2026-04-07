@@ -1,6 +1,7 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import path from 'node:path'
 import getTsConfig from 'get-tsconfig'
+import { getResolvedTypescriptVersion } from '@cypress/webpack-preprocessor/lib/get-typescript'
 const Debug = require('debug')
 
 vi.mock('tsconfig-paths-webpack-plugin')
@@ -8,6 +9,15 @@ vi.mock('tsconfig-paths-webpack-plugin')
 vi.mock('@cypress/webpack-preprocessor', () => ({
   default: vi.fn().mockReturnValue((file) => undefined),
 }))
+
+vi.mock('@cypress/webpack-preprocessor/lib/get-typescript', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@cypress/webpack-preprocessor/lib/get-typescript')>()
+
+  return {
+    ...actual,
+    getResolvedTypescriptVersion: vi.fn(actual.getResolvedTypescriptVersion),
+  }
+})
 
 vi.mock('get-tsconfig', () => ({
   default: {
@@ -57,7 +67,10 @@ describe('webpack-batteries-included-preprocessor', () => {
   describe('#getTSCompilerOptionsForUser', () => {
     let webpackOptions
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      const actual = await vi.importActual<typeof import('@cypress/webpack-preprocessor/lib/get-typescript')>('@cypress/webpack-preprocessor/lib/get-typescript')
+
+      vi.mocked(getResolvedTypescriptVersion).mockImplementation(actual.getResolvedTypescriptVersion)
       webpackOptions = {
         module: {
           rules: [],
@@ -174,6 +187,45 @@ describe('webpack-batteries-included-preprocessor', () => {
           outputPath: '.js',
         } as any)
       }).toThrow('No typescript installable was found. ts-loader needs a version of typescript to work properly. Please install typescript in your project\'s package.json.')
+    })
+
+    describe('with TypeScript 6 or newer', () => {
+      beforeEach(() => {
+        vi.mocked(getResolvedTypescriptVersion).mockReturnValue('6.0.2')
+      })
+
+      it('passes only Cypress source map options to ts-loader so deprecated tsconfig options are not forwarded', () => {
+        vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
+          config: {
+            compilerOptions: {
+              module: 'ESNext',
+              moduleResolution: 'Bundler',
+              downlevelIteration: true,
+            },
+          },
+          path: path.resolve(__dirname, '../../test/fixtures/tsconfig.json'),
+        })
+
+        const preprocessorCB = preprocessor({
+          typescript: true,
+          webpackOptions,
+        })
+
+        preprocessorCB({
+          filePath: 'foo.ts',
+          outputPath: '.js',
+        } as any)
+
+        const tsLoader = webpackOptions.module.rules[0].use[0]
+
+        expect(tsLoader.loader).toContain('ts-loader')
+        expect(tsLoader.options.configFile).toBeUndefined()
+        expect(tsLoader.options.compilerOptions).toEqual({
+          sourceMap: true,
+          inlineSourceMap: false,
+          inlineSources: false,
+        })
+      })
     })
   })
 })
