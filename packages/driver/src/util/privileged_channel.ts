@@ -18,7 +18,7 @@ export function setSpecContentSecurityPolicy (specWindow) {
 
 type PrivilegedCy = Pick<Cypress.cy, 'state'>
 type PrivilegedCommandCypress = Pick<InternalCypress.Cypress, 'backend'>
-type PrivilegedFileCommandCypress = Pick<InternalCypress.Cypress, 'config'> & {
+type PrivilegedFileCommandCypress = Pick<InternalCypress.Cypress, 'backend' | 'config'> & {
   Buffer: {
     from: (value: ArrayBuffer) => Buffer
   }
@@ -36,6 +36,10 @@ type DecodedPrivilegedFileContents = Buffer | JsonValue
 type PrivilegedFileCommandResult = {
   contents: DecodedPrivilegedFileContents
   filePath: string
+}
+type PrivilegedFileRead = {
+  filePath: string
+  token: string
 }
 
 interface RunPrivilegedCommandOptions {
@@ -64,7 +68,7 @@ const getVerifiedCommand = (cy: PrivilegedCy): PrivilegedVerification => {
 const getPrivilegedFileReadUrl = (
   Cypress: RunPrivilegedFileCommandOptions['Cypress'],
 ) => {
-  return `/${String(Cypress.config('namespace'))}/privileged-commands/read-file`
+  return `${window.location.origin}/${String(Cypress.config('namespace'))}/privileged-commands/read-file`
 }
 
 const readResponseAsArrayBuffer = async (response: Response) => {
@@ -167,10 +171,21 @@ export function runPrivilegedFileCommand ({
   return Bluebird
   .try(() => promise)
   .then(async () => {
+    const fileRead: PrivilegedFileRead = await Cypress.backend(
+      'create:privileged:file:read',
+      {
+        args,
+        commandName,
+        options: {
+          file: options.file,
+        },
+      },
+    )
+
     const response = await fetch(
       getPrivilegedFileReadUrl(Cypress),
       {
-        body: JSON.stringify({ args, commandName, options }),
+        body: JSON.stringify({ token: fileRead.token }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
       },
@@ -181,7 +196,7 @@ export function runPrivilegedFileCommand ({
     const encodedFilePath = response.headers.get('x-cypress-file-path')
     const filePath = encodedFilePath
       ? decodeURIComponent(encodedFilePath)
-      : options.file
+      : fileRead.filePath
     const contents = decodePrivilegedFileContents(
       Cypress,
       await readResponseAsArrayBuffer(response),

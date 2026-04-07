@@ -2,6 +2,49 @@ import path from 'path'
 import type { ReadStream } from 'fs'
 import { fs } from './util/fs'
 
+type FileStreamError = Error & {
+  filePath?: string
+  originalFilePath?: string
+}
+
+export async function createReadFileStreamFromPath ({
+  filePath,
+  originalFilePath,
+}: {
+  filePath: string
+  originalFilePath?: string
+}) {
+  const stream = fs.createReadStream(filePath)
+
+  try {
+    // Wait for the stream to emit `open` so missing file errors are normalized
+    // before the response starts streaming.
+    await new Promise<void>((resolve, reject) => {
+      const handleError = (error: FileStreamError) => {
+        error.originalFilePath = originalFilePath
+        error.filePath = filePath
+
+        reject(error)
+      }
+
+      stream.once('error', handleError)
+      stream.once('open', () => {
+        stream.off('error', handleError)
+        resolve()
+      })
+    })
+
+    return {
+      filePath,
+      stream,
+    }
+  } catch (error) {
+    stream.destroy()
+
+    throw error
+  }
+}
+
 export async function readFile (projectRoot: string, options: { file: string, encoding?: BufferEncoding } = { file: '', encoding: 'utf8' }) {
   const filePath = path.resolve(projectRoot, options.file)
 
@@ -37,35 +80,11 @@ export async function createReadFileStream (
   options: { file: string } = { file: '' },
 ): Promise<{ filePath: string, stream: ReadStream }> {
   const filePath = path.resolve(projectRoot, options.file)
-  const stream = fs.createReadStream(filePath)
 
-  try {
-    // Wait for the stream to emit `open` so missing file errors are normalized
-    // before the response starts streaming.
-    await new Promise<void>((resolve, reject) => {
-      const handleError = (error: Error & { originalFilePath?: string, filePath?: string }) => {
-        error.originalFilePath = options.file
-        error.filePath = filePath
-
-        reject(error)
-      }
-
-      stream.once('error', handleError)
-      stream.once('open', () => {
-        stream.off('error', handleError)
-        resolve()
-      })
-    })
-
-    return {
-      filePath,
-      stream,
-    }
-  } catch (error) {
-    stream.destroy()
-
-    throw error
-  }
+  return createReadFileStreamFromPath({
+    filePath,
+    originalFilePath: options.file,
+  })
 }
 
 export async function readFiles (projectRoot: string, options: { files: { path: string, encoding?: BufferEncoding }[] } = { files: [] }) {

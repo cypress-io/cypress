@@ -7,7 +7,7 @@ import { getCtx } from '@packages/data-context'
 import { DocumentDomainInjection } from '@packages/network-tools'
 import type { Request, Response } from 'express'
 import { privilegedCommandsManager } from '../privileged-commands/privileged-commands-manager'
-import { createReadFileStream } from '../files'
+import { createReadFileStreamFromPath } from '../files'
 import * as errors from '../errors'
 import type { Cfg } from '../project-base'
 import type { RemoteStates } from '../remote_states'
@@ -15,11 +15,7 @@ import type { RemoteStates } from '../remote_states'
 const debug = Debug('cypress:server:controllers')
 
 type PrivilegedFileReadRequest = Request<{}, {}, {
-  args: string[]
-  commandName: 'readFile' | 'selectFile'
-  options: {
-    file: string
-  }
+  token: string
 }>
 
 export = {
@@ -102,21 +98,24 @@ export = {
   async handlePrivilegedFileRead (
     req: PrivilegedFileReadRequest,
     res: Response,
-    config: Cfg,
   ) {
-    const { args, commandName, options } = req.body
+    const { token } = req.body
 
     try {
-      if (commandName !== 'readFile' && commandName !== 'selectFile') {
+      if (!token || !_.isString(token)) {
         throw new Error(
-          `You requested a privileged file read for a command we cannot handle: ${commandName}`,
+          'You requested a privileged file read without a valid token',
         )
       }
 
-      privilegedCommandsManager.verifyCommand(config, { commandName, args })
+      const {
+        filePath,
+        originalFilePath,
+      } = privilegedCommandsManager.consumePrivilegedFileRead(token)
 
-      const { filePath, stream } = await createReadFileStream(config.projectRoot, {
-        file: options.file,
+      const { stream } = await createReadFileStreamFromPath({
+        filePath,
+        originalFilePath,
       })
 
       res.type('application/octet-stream')

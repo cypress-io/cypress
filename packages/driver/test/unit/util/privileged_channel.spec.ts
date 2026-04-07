@@ -19,8 +19,14 @@ const createCy = (args: string[]) => {
 }
 
 const createCypress = () => {
+  const backend = vi.fn().mockResolvedValue({
+    filePath: '/authorized/path/to/foo.txt',
+    token: 'file-read-token',
+  })
+
   return {
     Buffer,
+    backend,
     config: vi.fn().mockImplementation((key) => {
       if (key === 'namespace') return '__cypress'
 
@@ -54,17 +60,23 @@ describe('runPrivilegedFileCommand', () => {
   })
 
   it('should combine streamed binary chunks into a Buffer', async () => {
+    const Cypress = createCypress()
     const fetchStub = vi.fn().mockResolvedValue(createStreamedResponse([
       Uint8Array.from([102, 111]),
       Uint8Array.from([111, 98, 97, 114]),
     ], '/path/to/foo.txt'))
 
     vi.stubGlobal('fetch', fetchStub)
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:1234',
+      },
+    })
 
     const result = await runPrivilegedFileCommand({
       commandName: 'readFile',
       cy: createCy(['123']),
-      Cypress: createCypress(),
+      Cypress,
       options: {
         encoding: null,
         file: 'foo.txt',
@@ -77,23 +89,36 @@ describe('runPrivilegedFileCommand', () => {
     })
 
     expect(fetchStub).toHaveBeenCalledWith(
-      '/__cypress/privileged-commands/read-file',
+      'http://localhost:1234/__cypress/privileged-commands/read-file',
       expect.objectContaining({
         body: JSON.stringify({
-          args: ['123'],
-          commandName: 'readFile',
-          options: {
-            encoding: null,
-            file: 'foo.txt',
-          },
+          token: 'file-read-token',
         }),
         method: 'POST',
       }),
     )
+
+    expect(Cypress.backend).toHaveBeenCalledWith(
+      'create:privileged:file:read',
+      {
+        args: ['123'],
+        commandName: 'readFile',
+        options: {
+          file: 'foo.txt',
+        },
+      },
+    )
   })
 
   it('should parse streamed JSON files using the requested encoding', async () => {
+    const Cypress = createCypress()
     const encoder = new TextEncoder()
+
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:1234',
+      },
+    })
 
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createStreamedResponse([
       encoder.encode('{"foo":'),
@@ -103,7 +128,7 @@ describe('runPrivilegedFileCommand', () => {
     const result = await runPrivilegedFileCommand({
       commandName: 'readFile',
       cy: createCy(['456']),
-      Cypress: createCypress(),
+      Cypress,
       options: {
         encoding: 'utf8',
         file: 'data.json',
@@ -119,7 +144,15 @@ describe('runPrivilegedFileCommand', () => {
     })
   })
 
-  it('should use the original file path when the response header is absent', async () => {
+  it('should use the authorized file path when the response header is absent', async () => {
+    const Cypress = createCypress()
+
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:1234',
+      },
+    })
+
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue(
@@ -130,7 +163,7 @@ describe('runPrivilegedFileCommand', () => {
     const result = await runPrivilegedFileCommand({
       commandName: 'readFile',
       cy: createCy(['789']),
-      Cypress: createCypress(),
+      Cypress,
       options: {
         encoding: null,
         file: 'percent%file.txt',
@@ -139,7 +172,7 @@ describe('runPrivilegedFileCommand', () => {
 
     expect(result).toEqual({
       contents: Buffer.from('hello world'),
-      filePath: 'percent%file.txt',
+      filePath: '/authorized/path/to/foo.txt',
     })
   })
 })

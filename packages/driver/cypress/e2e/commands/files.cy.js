@@ -11,9 +11,16 @@ const privilegedFileReadUrl = '/__cypress/privileged-commands/read-file'
 let restoreFetch = () => {}
 
 const getPrivilegedFileReadRequest = (input, init) => {
-  if (input !== privilegedFileReadUrl || init?.method !== 'POST') {
-    return
-  }
+  const requestUrl = typeof input === 'string' ? input : input?.url
+
+  if (typeof requestUrl !== 'string' || init?.method !== 'POST') return
+
+  const normalizedPathname = new URL(
+    requestUrl,
+    window.location.origin,
+  ).pathname
+
+  if (normalizedPathname !== privilegedFileReadUrl) return
 
   return JSON.parse(String(init.body))
 }
@@ -55,6 +62,8 @@ const getPrivilegedFileReadWindows = () => {
 }
 
 const stubPrivilegedFileRead = (handler) => {
+  const responsesByToken = new Map()
+  let tokenCount = 0
   const fetchStubs = getPrivilegedFileReadWindows().map((candidateWindow) => {
     const originalFetch = candidateWindow.fetch.bind(candidateWindow)
 
@@ -63,12 +72,36 @@ const stubPrivilegedFileRead = (handler) => {
 
       if (!request) return originalFetch(input, init)
 
-      const response = handler(request)
+      const response = responsesByToken.get(request.token)
 
       if (typeof response === 'undefined') return originalFetch(input, init)
 
       return Promise.resolve(response)
     })
+  })
+
+  Cypress.backend.withArgs('create:privileged:file:read').callsFake((eventName, request) => {
+    const response = handler(request)
+
+    if (typeof response === 'undefined') {
+      throw new Error(
+        `No stubbed privileged file read response was returned for ${
+          request.options.file
+        }`,
+      )
+    }
+
+    const token = `stubbed-file-read-token-${tokenCount++}`
+    const encodedFilePath = response?.headers?.get?.('x-cypress-file-path')
+
+    responsesByToken.set(token, response)
+
+    return {
+      filePath: encodedFilePath
+        ? decodeURIComponent(encodedFilePath)
+        : request.options.file,
+      token,
+    }
   })
 
   restoreFetch = () => {
@@ -105,7 +138,6 @@ describe('src/cy/commands/files', () => {
           commandName: 'readFile',
           options: {
             file: 'foo.json',
-            encoding: 'utf8',
           },
         })
 
@@ -124,7 +156,6 @@ describe('src/cy/commands/files', () => {
           commandName: 'readFile',
           options: {
             file: 'foo.json',
-            encoding: 'ascii',
           },
         })
 
@@ -144,7 +175,6 @@ describe('src/cy/commands/files', () => {
           commandName: 'readFile',
           options: {
             file: 'foo.json',
-            encoding: null,
           },
         })
 
@@ -232,6 +262,8 @@ describe('src/cy/commands/files', () => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
+          if (attrs.name !== 'readFile') return
+
           this.lastLog = log
           this.logs.push(log)
         })
@@ -240,6 +272,8 @@ describe('src/cy/commands/files', () => {
       it('can turn off logging when protocol is disabled', function () {
         cy.state('isProtocolEnabled', false)
         cy.on('_log:added', (attrs, log) => {
+          if (attrs.name !== 'readFile') return
+
           this.hiddenLog = log
         })
 
@@ -260,6 +294,8 @@ describe('src/cy/commands/files', () => {
       it('can send hidden log when protocol is enabled', function () {
         cy.state('isProtocolEnabled', true)
         cy.on('_log:added', (attrs, log) => {
+          if (attrs.name !== 'readFile') return
+
           this.hiddenLog = log
         })
 
@@ -307,6 +343,8 @@ describe('src/cy/commands/files', () => {
     }, () => {
       beforeEach(function () {
         const collectLogs = (attrs, log) => {
+          if (attrs.name !== 'readFile' && attrs.name !== 'assert') return
+
           if (attrs.name === 'readFile') {
             this.fileLog = log
           }

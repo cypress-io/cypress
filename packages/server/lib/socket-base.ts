@@ -582,6 +582,8 @@ export class SocketBase implements SocketBroadcaster {
                 return this._protocolManager?.pageLoading(args[0])
               case 'run:privileged':
                 return privilegedCommandsManager.runPrivilegedCommand(config, args[0])
+              case 'create:privileged:file:read':
+                return privilegedCommandsManager.createPrivilegedFileRead(config, args[0])
               case 'telemetry':
                 return (telemetry.exporter() as OTLPTraceExporterCloud)?.send(args[0], () => {}, (err) => {
                   debug('error exporting telemetry data from browser %s', err)

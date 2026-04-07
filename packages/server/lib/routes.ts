@@ -212,7 +212,7 @@ export const createCommonRoutes = ({
   })
 
   router.post(`/${config.namespace}/privileged-commands/read-file`, bodyParser.json(), async (req, res) => {
-    await files.handlePrivilegedFileRead(req, res, config)
+    await files.handlePrivilegedFileRead(req, res)
   })
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
