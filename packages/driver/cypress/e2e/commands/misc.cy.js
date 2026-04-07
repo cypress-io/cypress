@@ -322,7 +322,6 @@ describe('src/cy/commands/misc', () => {
         cy.wrap(rejectedPromise)
       })
 
-      // https://github.com/cypress-io/cypress/issues/FIXME
       // When a rejected promise error already has a custom `onFail` handler
       // (e.g. set by throwErrByPath in cy.prompt's throwPromptError),
       // cy.wrap's catch must not overwrite it — the log handler is a fallback only.
