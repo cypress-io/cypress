@@ -1,0 +1,8 @@
+{
+  "name": "ts-proj-6",
+  "version": "0.0.0-test",
+  "dependencies": {
+    "typescript": "6.0.2",
+    "vite": "^5.4.18"
+  }
+}
