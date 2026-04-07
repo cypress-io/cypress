@@ -1,7 +1,7 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.13.1 
 
-_Released 03/31/2026 (PENDING)_
+_Released 04/07/2026_
 
 **Performance:**
 
@@ -10,11 +10,11 @@ _Released 03/31/2026 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where `cy.intercept` `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
+- Fixed an issue where [`cy.intercept`](https://docs.cypress.io/api/commands/intercept) `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
 
 **Dependency Updates:**
 
-- Upgraded `node-forge` from `1.3.x` to `^1.4.0` to address [CVE-2026-33896](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-15789771) vulnerability reported in security scans.. Addressed in [#33546](https://github.com/cypress-io/cypress/pull/33546).
+- Upgraded `node-forge` from `1.3.x` to `^1.4.0` to address [CVE-2026-33896](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-15789771) vulnerability reported in security scans. Addressed in [#33546](https://github.com/cypress-io/cypress/pull/33546).
 
 ## 15.13.0
 
