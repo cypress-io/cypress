@@ -53,7 +53,9 @@ export default (Commands, Cypress, cy, state) => {
       })
       .catch((err) => {
         $errUtils.throwErr(err, {
-          onFail: options._log,
+          // Don't overwrite a custom onFail already set on the error (e.g. by throwErrByPath
+          // in cy.prompt's throwPromptError). cy.wrap's log handler is a fallback only.
+          onFail: err.onFail ? undefined : options._log,
         })
       })
       .then((subject) => {
