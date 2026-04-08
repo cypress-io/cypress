@@ -66,11 +66,9 @@ describe('webpack-batteries-included-preprocessor', () => {
   describe('#getTSCompilerOptionsForUser', () => {
     let webpackOptions
 
-    beforeEach(async () => {
-      const actualMod = await vi.importActual<typeof import('@cypress/webpack-preprocessor')>('@cypress/webpack-preprocessor')
-      const actualPreprocessor = (actualMod as { default?: typeof webpackPreprocessor }).default ?? (actualMod as unknown as typeof webpackPreprocessor)
-
-      vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockImplementation(actualPreprocessor.getResolvedTypescriptVersion)
+    beforeEach(() => {
+      // Pin TS < 6 so assertions on forwarded tsconfig compilerOptions stay stable when the monorepo uses TypeScript 6+.
+      vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue('5.4.5')
       webpackOptions = {
         module: {
           rules: [],
