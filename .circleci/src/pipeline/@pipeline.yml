@@ -1848,7 +1848,7 @@ jobs:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: rm -rf node_modules && yarn
-      - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
+      - run: yarn workspace @packages/server test-unit-mocha cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 2
 

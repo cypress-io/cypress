@@ -16,7 +16,8 @@
     "test": "node ./test/scripts/run.js",
     "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",
     "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
-    "test-unit": "node ./test/scripts/run.js --glob-in-dir=test/unit && vitest run",
+    "test-unit": "yarn test-unit-mocha && yarn test-unit-vitest",
+    "test-unit-mocha": "node ./test/scripts/run.js --glob-in-dir=test/unit",
     "test-unit-vitest": "vitest run",
     "test-watch": "./test/scripts/watch test"
   },
