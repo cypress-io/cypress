@@ -38,7 +38,6 @@ export class GracefulExit {
           console.log(`\n\n${received} received during graceful exit. Forcing exit.`)
           process.exit(1)
         } else {
-          console.log(`\n\n${received} received. Gracefully exiting.`)
           await GracefulExit.exitGracefully(128 + os.constants.signals[received])
         }
       }
@@ -100,6 +99,7 @@ export class GracefulExit {
 
         this.debug(`<${key}> teardown step completed: %s`, name)
       } catch (error) {
+        console.error(error)
         this.debug(`<${key}> Error executing teardown step: ${name}`, error)
         hadErrors = true
       }
