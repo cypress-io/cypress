@@ -7,6 +7,10 @@ _Released 04/21/2026 (PENDING)_
 
 - Added support for `TypeScript 6` to the default webpack preprocessor `@cypress/webpack-preprocessor`. Updated the Component Testing setup wizard to also accept TypeScript 6. Addresses [#33385](https://github.com/cypress-io/cypress/issues/33385). Addresses [#33511](https://github.com/cypress-io/cypress/issues/33511).
 
+**Bugfixes:**
+
+- Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
+
 ## 15.13.1 
 
 _Released 04/07/2026_
