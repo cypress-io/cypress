@@ -1850,7 +1850,7 @@ jobs:
                 command: rm -rf node_modules && yarn
       - run: yarn workspace @packages/server test-unit-mocha cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
-          expectedResultCount: 2
+          expectedResultCount: 1
 
   server-integration-tests:
     <<: *defaults
