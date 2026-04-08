@@ -1,7 +1,15 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.14.0
+
+_Release 04/21/2026 (PENDING)_
+
+**Features:**
+
+- Added support for `TypeScript 6` to the default webpack preprocessor `@cypress/webpack-preprocessor`. Updated the Component Testing setup wizard to also accepts TypeScript 6. Addresses [#33385](https://github.com/cypress-io/cypress/issues/33385). Addresses [#33511](https://github.com/cypress-io/cypress/issues/33511).
+
 ## 15.13.1 
 
-_Released 03/31/2026 (PENDING)_
+_Released 04/07/2026_
 
 **Performance:**
 
@@ -10,13 +18,11 @@ _Released 03/31/2026 (PENDING)_
 
 **Bugfixes:**
 
-- Fixed an issue where running Cypress with **TypeScript 6** and the default webpack preprocessor failed with TS5101/TS5107 deprecation errors because Cypress injected deprecated `compilerOptions` (`downlevelIteration`, legacy `moduleResolution`). `@cypress/webpack-preprocessor` now normalizes options for the bundled TypeScript version, and the Component Testing setup wizard accepts TypeScript 6 (and 7) in its version range. Fixes [#33385](https://github.com/cypress-io/cypress/issues/33385). Addresses [#33511](https://github.com/cypress-io/cypress/issues/33511).
-
-- Fixed an issue where `cy.intercept` `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
+- Fixed an issue where [`cy.intercept`](https://docs.cypress.io/api/commands/intercept) `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
 
 **Dependency Updates:**
 
-- Upgraded `node-forge` from `1.3.x` to `^1.4.0` to address [CVE-2026-33896](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-15789771) vulnerability reported in security scans.. Addressed in [#33546](https://github.com/cypress-io/cypress/pull/33546).
+- Upgraded `node-forge` from `1.3.x` to `^1.4.0` to address [CVE-2026-33896](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-15789771) vulnerability reported in security scans. Addressed in [#33546](https://github.com/cypress-io/cypress/pull/33546).
 
 ## 15.13.0
 
