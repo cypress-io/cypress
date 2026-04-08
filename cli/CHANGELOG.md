@@ -10,6 +10,7 @@ _Released 04/21/2026 (PENDING)_
 **Features:**
 
 - Cypress now officially supports TypeScript 6. Addresses [#33385](https://github.com/cypress-io/cypress/issues/33385) and [#33511](https://github.com/cypress-io/cypress/issues/33511).
+- Adds Vite 8 support for component testing. Addresses [#32550](https://github.com/cypress-io/cypress/issues/32550) and [#33078](https://github.com/cypress-io/cypress/issues/33078).
 
 **Bugfixes:**
 
