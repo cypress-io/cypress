@@ -1,10 +1,11 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.13.2
 
-_Released 04/21/2026_
+_Released 04/21/2026 (PENDING)_
 
 **Bugfixes:**
 
+- Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
 - Fixed an issue where a single `cy.tick()` could miss nested timers scheduled from resolved promises, requiring multiple `cy.tick()` calls to advance the clock. Fixes [#1273](https://github.com/cypress-io/cypress/issues/1273).
 
 ## 15.13.1 
