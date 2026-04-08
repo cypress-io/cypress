@@ -4,7 +4,6 @@ import type { EventEmitter } from 'events'
 import getTsConfig from 'get-tsconfig'
 import webpack from 'webpack'
 import webpackPreprocessor from '@cypress/webpack-preprocessor'
-import { getResolvedTypescriptVersion } from '@cypress/webpack-preprocessor/lib/get-typescript'
 import semver from 'semver'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
@@ -105,7 +104,7 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
     configFile.config.compilerOptions.moduleResolution = 'node'
   }
 
-  const tsVersion = getResolvedTypescriptVersion(typeof typeScriptPath === 'string' ? typeScriptPath : undefined)
+  const tsVersion = webpackPreprocessor.getResolvedTypescriptVersion(typeof typeScriptPath === 'string' ? typeScriptPath : undefined)
   const isLessThanTs6 = tsVersion && semver.lt(tsVersion, '6.0.0')
 
   const compilerOptions = isLessThanTs6 ? configFile?.config?.compilerOptions : {

@@ -207,6 +207,12 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
    * @memberof WebpackPreprocessor
    */
   defaultOptions: Omit<PreprocessorOptions, 'additionalEntries'>
+
+  /**
+   * Resolves the TypeScript package version used for ts-loader (project or explicit path).
+   * @param typescriptPath - Optional path to the `typescript` module (same as the preprocessor `typescript` option).
+   */
+  getResolvedTypescriptVersion: (typescriptPath?: string) => string | null
 }
 
 /**
@@ -502,6 +508,8 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
     return bundles[filePath].promise
   }
 }
+
+preprocessor.getResolvedTypescriptVersion = getResolvedTypescriptVersion
 
 // provide a clone of the default options
 Object.defineProperty(preprocessor, 'defaultOptions', {

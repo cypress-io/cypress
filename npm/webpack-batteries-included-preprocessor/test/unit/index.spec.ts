@@ -1,21 +1,20 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import path from 'node:path'
 import getTsConfig from 'get-tsconfig'
-import { getResolvedTypescriptVersion } from '@cypress/webpack-preprocessor/lib/get-typescript'
+import webpackPreprocessor from '@cypress/webpack-preprocessor'
 const Debug = require('debug')
 
 vi.mock('tsconfig-paths-webpack-plugin')
 
-vi.mock('@cypress/webpack-preprocessor', () => ({
-  default: vi.fn().mockReturnValue((file) => undefined),
-}))
+vi.mock('@cypress/webpack-preprocessor', async (importOriginal) => {
+  const actualMod = await importOriginal<typeof import('@cypress/webpack-preprocessor')>()
+  const actualPreprocessor = (actualMod as { default?: { getResolvedTypescriptVersion: (p?: string) => string | null } }).default ?? actualMod
+  const mockedDefault = vi.fn().mockReturnValue((file) => undefined) as unknown as typeof webpackPreprocessor
 
-vi.mock('@cypress/webpack-preprocessor/lib/get-typescript', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@cypress/webpack-preprocessor/lib/get-typescript')>()
+  mockedDefault.getResolvedTypescriptVersion = vi.fn(actualPreprocessor.getResolvedTypescriptVersion)
 
   return {
-    ...actual,
-    getResolvedTypescriptVersion: vi.fn(actual.getResolvedTypescriptVersion),
+    default: mockedDefault,
   }
 })
 
@@ -68,9 +67,10 @@ describe('webpack-batteries-included-preprocessor', () => {
     let webpackOptions
 
     beforeEach(async () => {
-      const actual = await vi.importActual<typeof import('@cypress/webpack-preprocessor/lib/get-typescript')>('@cypress/webpack-preprocessor/lib/get-typescript')
+      const actualMod = await vi.importActual<typeof import('@cypress/webpack-preprocessor')>('@cypress/webpack-preprocessor')
+      const actualPreprocessor = (actualMod as { default?: typeof webpackPreprocessor }).default ?? (actualMod as unknown as typeof webpackPreprocessor)
 
-      vi.mocked(getResolvedTypescriptVersion).mockImplementation(actual.getResolvedTypescriptVersion)
+      vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockImplementation(actualPreprocessor.getResolvedTypescriptVersion)
       webpackOptions = {
         module: {
           rules: [],
@@ -191,7 +191,7 @@ describe('webpack-batteries-included-preprocessor', () => {
 
     describe('with TypeScript 6 or newer', () => {
       beforeEach(() => {
-        vi.mocked(getResolvedTypescriptVersion).mockReturnValue('6.0.2')
+        vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue('6.0.2')
       })
 
       it('passes only Cypress source map options to ts-loader so deprecated tsconfig options are not forwarded', () => {
