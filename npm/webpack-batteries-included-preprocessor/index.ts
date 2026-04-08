@@ -123,7 +123,6 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
         options: {
           configFile: isLessThanTs6 ? configFile?.path : undefined,
           compiler: typeScriptPath,
-          // pass in the resolved compiler options from the tsconfig file into ts-loader to most accurately transpile the code
           ...(compilerOptions ? {
             compilerOptions,
           } : {}),
