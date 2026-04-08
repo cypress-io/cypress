@@ -155,7 +155,7 @@ async function pkgElectronApp (
 
   const e = 'electron'
   const p = 'packager'
-  const pkgr = require(`@${e}/${p}`)
+  const pkgr = require(`@${e}/${p}`).default
   const icons = require('@packages/icons')
 
   const iconPath = icons.getPathToIcon('cypress')
