@@ -144,6 +144,39 @@ describe('runPrivilegedFileCommand', () => {
     })
   })
 
+  it('should parse streamed JSON files with a utf8 byte order mark', async () => {
+    const Cypress = createCypress()
+    const encoder = new TextEncoder()
+
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:1234',
+      },
+    })
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createStreamedResponse([
+      encoder.encode('\uFEFF{"foo":'),
+      encoder.encode('1}'),
+    ], '/path/to/data.json')))
+
+    const result = await runPrivilegedFileCommand({
+      commandName: 'readFile',
+      cy: createCy(['654']),
+      Cypress,
+      options: {
+        encoding: 'utf8',
+        file: 'data.json',
+      },
+    })
+
+    expect(result).toEqual({
+      contents: {
+        foo: 1,
+      },
+      filePath: '/path/to/data.json',
+    })
+  })
+
   it('should use the authorized file path when the response header is absent', async () => {
     const Cypress = createCypress()
 

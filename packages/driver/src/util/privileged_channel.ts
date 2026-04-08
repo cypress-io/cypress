@@ -113,6 +113,10 @@ const throwResponseError = async (response: Response) => {
   throw defaultError
 }
 
+const stripJsonByteOrderMark = (contents: string) => {
+  return contents.replace(/^\uFEFF/, '')
+}
+
 const decodePrivilegedFileContents = (
   Cypress: RunPrivilegedFileCommandOptions['Cypress'],
   arrayBuffer: ArrayBuffer,
@@ -134,7 +138,7 @@ const decodePrivilegedFileContents = (
 
   if (extname(filePath || file) === '.json') {
     try {
-      return JSON.parse(stringContents)
+      return JSON.parse(stripJsonByteOrderMark(stringContents))
     } catch (error) {
       error.filePath = filePath
       error.originalFilePath = file

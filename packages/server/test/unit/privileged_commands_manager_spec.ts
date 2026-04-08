@@ -13,19 +13,24 @@ describe('lib/privileged-commands/privileged-commands-manager', () => {
     projectRoot,
     testingType: 'e2e',
   } satisfies Pick<Cfg, 'projectRoot' | 'testingType'>
+  const unsupportedRunPrivilegedCommands = ['readFile', 'selectFile'] as const
 
   beforeEach(() => {
     privilegedCommandsManager.reset()
   })
 
-  it('should create one-time file read tokens for verified commands', () => {
+  const addVerifiedCommand = (name: string) => {
     privilegedCommandsManager.channelKeys[verifiedCommandUrl] = verifiedCommandKey
     privilegedCommandsManager.addVerifiedCommand({
       args: ['arg-hash'],
       key: verifiedCommandKey,
-      name: 'readFile',
+      name,
       url: verifiedCommandUrl,
     })
+  }
+
+  it('should create one-time file read tokens for verified commands', () => {
+    addVerifiedCommand('readFile')
 
     const fileRead = privilegedCommandsManager.createPrivilegedFileRead(config, {
       args: ['arg-hash'],
@@ -54,5 +59,25 @@ describe('lib/privileged-commands/privileged-commands-manager', () => {
         file: 'foo.txt',
       },
     })).to.throw('cy.readFile() must be invoked from the spec file or support file')
+  })
+
+  unsupportedRunPrivilegedCommands.forEach((commandName) => {
+    it(`should reject ${commandName} through runPrivilegedCommand`, () => {
+      addVerifiedCommand(commandName)
+
+      expect(() =>
+        privilegedCommandsManager.runPrivilegedCommand(config, {
+          args: ['arg-hash'],
+          commandName,
+          options: {
+            file: 'foo.txt',
+          },
+        }),
+      ).to.throw(
+        `You requested a secure backend event for a command we cannot handle: ${
+          commandName
+        }`,
+      )
+    })
   })
 })

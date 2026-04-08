@@ -152,10 +152,6 @@ class PrivilegedCommandsManager {
       case 'origin':
         // only need to verify that it's spec-originated above
         return
-      case 'readFile':
-        return files.readFile(config.projectRoot, options)
-      case 'selectFile':
-        return files.readFiles(config.projectRoot, options)
       case 'writeFile':
         return files.writeFile(config.projectRoot, options)
       case 'task': {
