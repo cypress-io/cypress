@@ -5,12 +5,12 @@ _Released 03/24/2026 (PENDING)_
 
 **Breaking Changes:**
 
-- Upgraded bundled Node.js version from `22.19.0` to `24.14.0`
+- Upgraded bundled Node.js version from `22.19.0` to `24.14.0`. Addressed in [#33494](https://github.com/cypress-io/cypress/pull/33494).
 
 **Dependency Updates:**
 
-- Upgraded `electron` from `37.6.0` to `41.0.3`
-- Upgraded bundled Chromium version to `146.0.7680.80`
+- Upgraded `electron` from `37.6.0` to `41.0.3`.
+- Upgraded bundled Chromium version to `146.0.7680.80`.
 
 ## 15.13.1
 
