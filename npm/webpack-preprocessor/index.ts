@@ -302,10 +302,11 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
         tsLoaderRule.options.compilerOptions = tsLoaderRule.options?.compilerOptions || {}
 
         const tsVersion = getResolvedTypescriptVersion(options.typescript)
+        const isTypescriptBelow6 = tsVersion && semverLt(tsVersion, '6.0.0-0')
 
         debug(
           `ts-loader detected: overriding tsconfig to use sourceMap:true, inlineSourceMap:false, inlineSources:false${
-            tsVersion && semverLt(tsVersion, '6.0.0')
+            isTypescriptBelow6
               ? ', downlevelIteration:true'
               : ''
           } (TypeScript ${tsVersion ?? 'version unknown'})`,
@@ -314,7 +315,7 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
         tsLoaderRule.options.compilerOptions.sourceMap = true
         tsLoaderRule.options.compilerOptions.inlineSourceMap = false
         tsLoaderRule.options.compilerOptions.inlineSources = false
-        if (tsVersion && semverLt(tsVersion, '6.0.0')) {
+        if (isTypescriptBelow6) {
           tsLoaderRule.options.compilerOptions.downlevelIteration = true
         }
       } catch (e) {

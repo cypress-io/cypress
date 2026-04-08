@@ -105,7 +105,7 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
   }
 
   const tsVersion = webpackPreprocessor.getResolvedTypescriptVersion(typeof typeScriptPath === 'string' ? typeScriptPath : undefined)
-  const isLessThanTs6 = tsVersion && semver.lt(tsVersion, '6.0.0')
+  const isLessThanTs6 = tsVersion && semver.lt(tsVersion, '6.0.0-0')
 
   const compilerOptions = isLessThanTs6 ? configFile?.config?.compilerOptions : {
     sourceMap: true,

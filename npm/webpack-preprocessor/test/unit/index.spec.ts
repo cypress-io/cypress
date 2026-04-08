@@ -650,6 +650,14 @@ describe('webpack preprocessor', function () {
         runTsLoaderOverrideSuite('TypeScript is 6 or newer', 'modern')
       })
 
+      describe('TypeScript 6 pre-release', function () {
+        beforeEach(function () {
+          vi.mocked(getResolvedTypescriptVersion).mockReturnValue('6.0.0-beta')
+        })
+
+        runTsLoaderOverrideSuite('TypeScript 6 pre-release', 'modern')
+      })
+
       describe('TypeScript version cannot be resolved', function () {
         beforeEach(function () {
           vi.mocked(getResolvedTypescriptVersion).mockReturnValue(null)

@@ -188,42 +188,43 @@ describe('webpack-batteries-included-preprocessor', () => {
     })
 
     describe('with TypeScript 6 or newer', () => {
-      beforeEach(() => {
-        vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue('6.0.2')
-      })
+      it.each(['6.0.2', '6.0.0-beta', '6.0.0-rc.1'] as const)(
+        'when resolved version is %s, passes only Cypress source map options to ts-loader so deprecated tsconfig options are not forwarded',
+        (resolvedVersion) => {
+          vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue(resolvedVersion)
 
-      it('passes only Cypress source map options to ts-loader so deprecated tsconfig options are not forwarded', () => {
-        vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
-          config: {
-            compilerOptions: {
-              module: 'ESNext',
-              moduleResolution: 'Bundler',
-              downlevelIteration: true,
+          vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
+            config: {
+              compilerOptions: {
+                module: 'ESNext',
+                moduleResolution: 'Bundler',
+                downlevelIteration: true,
+              },
             },
-          },
-          path: path.resolve(__dirname, '../../test/fixtures/tsconfig.json'),
-        })
+            path: path.resolve(__dirname, '../../test/fixtures/tsconfig.json'),
+          })
 
-        const preprocessorCB = preprocessor({
-          typescript: true,
-          webpackOptions,
-        })
+          const preprocessorCB = preprocessor({
+            typescript: true,
+            webpackOptions,
+          })
 
-        preprocessorCB({
-          filePath: 'foo.ts',
-          outputPath: '.js',
-        } as any)
+          preprocessorCB({
+            filePath: 'foo.ts',
+            outputPath: '.js',
+          } as any)
 
-        const tsLoader = webpackOptions.module.rules[0].use[0]
+          const tsLoader = webpackOptions.module.rules[0].use[0]
 
-        expect(tsLoader.loader).toContain('ts-loader')
-        expect(tsLoader.options.configFile).toBeUndefined()
-        expect(tsLoader.options.compilerOptions).toEqual({
-          sourceMap: true,
-          inlineSourceMap: false,
-          inlineSources: false,
-        })
-      })
+          expect(tsLoader.loader).toContain('ts-loader')
+          expect(tsLoader.options.configFile).toBeUndefined()
+          expect(tsLoader.options.compilerOptions).toEqual({
+            sourceMap: true,
+            inlineSourceMap: false,
+            inlineSources: false,
+          })
+        },
+      )
     })
   })
 })
