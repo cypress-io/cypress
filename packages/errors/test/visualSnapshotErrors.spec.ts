@@ -1068,6 +1068,12 @@ describe('visual error templates', () => {
       }
     },
 
+    EXPERIMENTAL_PROMPT_COMMAND_REMOVED: () => {
+      return {
+        default: [],
+      }
+    },
+
     BROWSER_UNSUPPORTED_LAUNCH_OPTION: () => {
       return {
         default: ['electron', ['env']],
@@ -1075,12 +1081,6 @@ describe('visual error templates', () => {
     },
 
     EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY: () => {
-      return {
-        default: [],
-      }
-    },
-
-    EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY: () => {
       return {
         default: [],
       }

@@ -228,7 +228,8 @@ export = {
     try {
       switch (mode) {
         case 'version': {
-          const version = await require('./modes/pkg')(options).get('version')
+          const pkg = await require('./modes/pkg')(options)
+          const version = pkg.version
 
           // eslint-disable-next-line no-console
           console.log(version)

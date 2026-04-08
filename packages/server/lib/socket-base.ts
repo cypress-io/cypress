@@ -489,15 +489,13 @@ export class SocketBase implements SocketBroadcaster {
           }
         })
 
-        socket.on('prompt:reset', async (cb) => {
+        socket.on('prompt:reset', (cb) => {
           try {
-            const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
-
             // If we have runState, then we shouldn't reset the full prompt manager because
             // we are just changing top. We will clear the prompt manager for a specific test
             // later.
             if (!runState) {
-              cyPrompt?.cyPromptManager?.reset()
+              getCtx().coreData.cyPromptLifecycleManager?.resetCyPrompt()
             }
           } finally {
             cb()

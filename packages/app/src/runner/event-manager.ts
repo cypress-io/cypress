@@ -264,6 +264,10 @@ export class EventManager {
       this.ws.emit('external:open', url)
     })
 
+    this.reporterBus.on('open:login:connect:modal', (args) => {
+      this.localBus.emit('open:login:connect:modal', args)
+    })
+
     this.reporterBus.on('get:user:editor', (cb) => {
       this.ws.emit('get:user:editor', cb)
     })
@@ -449,11 +453,9 @@ export class EventManager {
 
     this._addListeners()
 
-    if (Cypress.config('experimentalPromptCommand')) {
-      await new Promise((resolve) => {
-        this.ws.emit('prompt:reset', resolve)
-      })
-    }
+    await new Promise((resolve) => {
+      this.ws.emit('prompt:reset', resolve)
+    })
   }
 
   isBrowserFamily (family: string) {
