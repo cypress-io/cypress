@@ -1,5 +1,4 @@
 import path from 'path'
-import type { ReadStream } from 'fs'
 import { fs } from './util/fs'
 
 type FileStreamError = Error & {
@@ -73,35 +72,6 @@ export async function readFile (projectRoot: string, options: { file: string, en
     err.filePath = filePath
     throw err
   }
-}
-
-export async function createReadFileStream (
-  projectRoot: string,
-  options: { file: string } = { file: '' },
-): Promise<{ filePath: string, stream: ReadStream }> {
-  const filePath = path.resolve(projectRoot, options.file)
-
-  return createReadFileStreamFromPath({
-    filePath,
-    originalFilePath: options.file,
-  })
-}
-
-export async function readFiles (projectRoot: string, options: { files: { path: string, encoding?: BufferEncoding }[] } = { files: [] }) {
-  const files = await Promise.all(options.files.map(async (file) => {
-    const { contents, filePath } = await readFile(projectRoot, {
-      file: file.path,
-      encoding: file.encoding,
-    })
-
-    return {
-      ...file,
-      filePath,
-      contents,
-    }
-  }))
-
-  return files
 }
 
 export async function writeFile (projectRoot: string, options: { fileName: string, contents: string, encoding?: BufferEncoding, flag?: string } = { fileName: '', contents: '', encoding: 'utf8', flag: 'w' }) {
