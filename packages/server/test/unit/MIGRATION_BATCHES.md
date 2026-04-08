@@ -4,36 +4,49 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 
 **Convention:** When a file is migrated, add `foo.spec.ts`, delete `foo_spec.ts`, run `yarn workspace @packages/server test-unit-vitest -- <path>`, and check the box below.
 
-**Totals (baseline):** ~105 files, ~34.4k LOC — batches target **~2.8k–3.5k LOC** each for reviewable PRs, grouped by theme.
+**Batch sizing:** Each batch is **≤3000 LOC** (line counts from current `*_spec` files). If a single file ever exceeds 3000 LOC, it should be **its own batch**; none of the current files cross that bar (largest is `browsers/bidi_automation_spec.ts` ~2.4k).
+
+**Totals (baseline):** ~106 files, ~34.7k LOC — batches are sliced for reviewable PRs (theme where it fits, hard cap on LOC).
 
 ---
 
 ## Progress summary
 
-| Batch | Theme                         | ~LOC  | Files | Done |
-| ----- | ----------------------------- | ----- | ----- | ---- |
-| 1     | `util/`                       | ~4320 | 21    | [ ]  |
-| 2     | `browsers/` — BiDi + CDP base | ~2860 | 5     | [ ]  |
-| 3     | `browsers/` — CRI + matrix  | ~3190 | 7     | [ ]  |
-| 4     | `browsers/` — Chrome, Electron, memory | ~3440 | 3 | [ ]  |
-| 5     | `cloud/api/`                  | ~6410 | 10    | [ ]  |
-| 6     | `cloud/studio/` + telemetry   | ~3270 | 6     | [ ]  |
-| 7     | `cloud/cy-prompt/` managers     | ~1060 | 3     | [ ]  |
-| 8     | `cloud/` — core (auth, routes, env, …) | ~3200 | 12 | [ ]  |
-| 9     | `plugins/` + `modes/` + `gui/` | ~3870 | 13   | [ ]  |
-| 10    | `automation/` + fixtures + misc small | ~2500 | 15 | [ ]  |
-| 11    | Top-level — core server & I/O | ~7250 | 10    | [ ]  |
+| Batch | Theme                                      | ~LOC | Files | Done |
+| ----- | ------------------------------------------ | ---- | ----- | ---- |
+| 1     | `util/` — args, CI, file, commit-info      | 2970 | 4     | [ ]  |
+| 2     | `util/` — remainder                        | 1400 | 17    | [ ]  |
+| 3     | `browsers/` — BiDi + CDP base               | 2860 | 5     | [ ]  |
+| 4     | `browsers/` — CRI, launchers, WebKit line  | 2630 | 6     | [ ]  |
+| 5     | `browsers/` — Firefox + memory profiler    | 1290 | 2     | [ ]  |
+| 6     | `browsers/` — Chrome + Electron            | 2710 | 2     | [ ]  |
+| 7     | `cloud/api/` — core HTTP + cy-prompt start | 2870 | 5     | [ ]  |
+| 8     | `cloud/api/` — cy-prompt report + studio + artifact | 1170 | 5 | [ ]  |
+| 9     | `cloud/studio/` + telemetry                | 2380 | 6     | [ ]  |
+| 10    | `cloud/cy-prompt/` managers                | 1110 | 3     | [ ]  |
+| 11    | `cloud/` core (auth, routes, env, …)      | 2620 | 12    | [ ]  |
+| 12    | `plugins/` + `modes/` + `gui/`             | 2080 | 13    | [ ]  |
+| 13    | `automation/` + fixtures + misc small      | 2310 | 16    | [ ]  |
+| 14    | Top-level — `config` + `project-base`      | 2420 | 2     | [ ]  |
+| 15    | Top-level — `socket`                       | 1210 | 1     | [ ]  |
+| 16    | Top-level — `request`                      | 1090 | 1     | [ ]  |
+| 17    | Top-level — open, reporter, screenshots, … | 1600 | 6     | [ ]  |
 
-*Batches 5 and 11 are larger than the target; split into sub-PRs if reviews are too heavy (e.g. `api_spec.js` alone is ~1.7k LOC).*
+*LOC rounded to ~10s for the table; exact sums are in each batch heading.*
 
 ---
 
-## Batch 1 — `util/` (~4320 LOC, 21 files)
+## Batch 1 — `util/` args, CI, file, commit-info (~2966 LOC, 4 files)
 
 - [ ] `util/args_spec.js`
 - [ ] `util/ci_provider_spec.js`
 - [ ] `util/file_spec.ts`
 - [ ] `util/commit-info_spec.ts`
+
+---
+
+## Batch 2 — `util/` remainder (~1403 LOC, 17 files)
+
 - [ ] `util/process_profiler_spec.ts`
 - [ ] `util/editors_spec.ts`
 - [ ] `util/terminal_spec.ts`
@@ -54,7 +67,7 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 
 ---
 
-## Batch 2 — `browsers/` BiDi + CDP plumbing (~2860 LOC, 5 files)
+## Batch 3 — `browsers/` BiDi + CDP plumbing (~2861 LOC, 5 files)
 
 - [ ] `browsers/bidi_automation_spec.ts`
 - [ ] `browsers/cdp-connection_spec.ts`
@@ -64,7 +77,7 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 
 ---
 
-## Batch 3 — `browsers/` CRI, launchers, Firefox line (~3190 LOC, 7 files)
+## Batch 4 — `browsers/` CRI, launchers, WebKit line (~2630 LOC, 6 files)
 
 - [ ] `browsers/cdp_automation_spec.ts`
 - [ ] `browsers/browser-cri-client_spec.ts`
@@ -72,27 +85,35 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 - [ ] `browsers/webkit_spec.ts`
 - [ ] `browsers/firefox-util_spec.ts`
 - [ ] `browsers/browsers_spec.ts`
-- [ ] `browsers/firefox_spec.ts`
 
 ---
 
-## Batch 4 — `browsers/` Chrome, Electron, memory profiler (~3440 LOC, 3 files)
+## Batch 5 — `browsers/` Firefox + memory profiler (~1288 LOC, 2 files)
 
-- [ ] `browsers/chrome_spec.js`
-- [ ] `browsers/electron_spec.js`
+- [ ] `browsers/firefox_spec.ts`
 - [ ] `browsers/memory/memory_spec.ts`
 
 ---
 
-## Batch 5 — `cloud/api/` (~6410 LOC, 10 files)
+## Batch 6 — `browsers/` Chrome + Electron (~2708 LOC, 2 files)
 
-*Consider splitting: e.g. first PR `api_spec` + encryption + cloud_request; second PR cy-prompt + studio API.*
+- [ ] `browsers/chrome_spec.js`
+- [ ] `browsers/electron_spec.js`
+
+---
+
+## Batch 7 — `cloud/api/` core HTTP + cy-prompt session (~2874 LOC, 5 files)
 
 - [ ] `cloud/api/api_spec.js`
 - [ ] `cloud/api/cloud_request_spec.ts`
 - [ ] `cloud/api/cloud_request_encryption_spec.ts`
 - [ ] `cloud/api/cy-prompt/get_cy_prompt_bundle_spec.ts`
 - [ ] `cloud/api/cy-prompt/post_cy_prompt_session_spec.ts`
+
+---
+
+## Batch 8 — `cloud/api/` cy-prompt report + studio API + artifact (~1165 LOC, 5 files)
+
 - [ ] `cloud/api/cy-prompt/report_cy_prompt_error_spec.ts`
 - [ ] `cloud/api/studio/get_studio_bundle_spec.ts`
 - [ ] `cloud/api/studio/post_studio_session_spec.ts`
@@ -101,7 +122,7 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 
 ---
 
-## Batch 6 — `cloud/studio/` + telemetry (~3270 LOC, 6 files)
+## Batch 9 — `cloud/studio/` + telemetry (~2377 LOC, 6 files)
 
 - [ ] `cloud/studio/StudioLifecycleManager_spec.ts`
 - [ ] `cloud/studio/studio_spec.ts`
@@ -112,7 +133,7 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 
 ---
 
-## Batch 7 — `cloud/cy-prompt/` managers (~1060 LOC, 3 files)
+## Batch 10 — `cloud/cy-prompt/` managers (~1112 LOC, 3 files)
 
 - [ ] `cloud/cy-prompt/CyPromptLifecycleManager_spec.ts`
 - [ ] `cloud/cy-prompt/CyPromptManager_spec.ts`
@@ -120,7 +141,7 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 
 ---
 
-## Batch 8 — `cloud/` core services (~3200 LOC, 12 files)
+## Batch 11 — `cloud/` core services (~2617 LOC, 12 files)
 
 - [ ] `cloud/auth_spec.js`
 - [ ] `cloud/environment_spec.ts`
@@ -137,7 +158,7 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 
 ---
 
-## Batch 9 — `plugins/` + `modes/` + `gui/` (~3870 LOC, 13 files)
+## Batch 12 — `plugins/` + `modes/` + `gui/` (~2079 LOC, 13 files)
 
 - [ ] `plugins/preprocessor_spec.js`
 - [ ] `plugins/util_spec.js`
@@ -155,7 +176,7 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 
 ---
 
-## Batch 10 — `automation/` + project/fixture plumbing (~2500 LOC, 15 files)
+## Batch 13 — `automation/` + project/fixture plumbing (~2310 LOC, 16 files)
 
 - [ ] `automation_spec.js`
 - [ ] `automation/util_spec.ts`
@@ -172,17 +193,31 @@ Scope: legacy unit tests under `packages/server/test/unit/` matching `**/*_spec.
 - [ ] `spec_spec.js`
 - [ ] `iframes_spec.js`
 - [ ] `xhrs_spec.js`
+- [ ] `filter_runtime_config_for_recording_spec.js`
 
 ---
 
-## Batch 11 — Top-level server & I/O (~7250 LOC, 10 files)
-
-*Largest batch by LOC — strong candidates to split into two PRs (e.g. config + socket + request vs screenshots + project-base + open_project).*
+## Batch 14 — Top-level `config` + `project-base` (~2421 LOC, 2 files)
 
 - [ ] `config_spec.js`
 - [ ] `project-base_spec.js`
+
+---
+
+## Batch 15 — Top-level `socket` (~1206 LOC, 1 file)
+
 - [ ] `socket_spec.js`
+
+---
+
+## Batch 16 — Top-level `request` (~1088 LOC, 1 file)
+
 - [ ] `request_spec.js`
+
+---
+
+## Batch 17 — Top-level open, reporter, screenshots, template, exceptions, saved state (~1597 LOC, 6 files)
+
 - [ ] `open_project_spec.js`
 - [ ] `reporter_spec.js`
 - [ ] `screenshots_spec.js`
