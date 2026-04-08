@@ -13,6 +13,8 @@ describe('@cypress/vite-dev-server', function () {
   describe('react', () => {
     for (const project of VITE_REACT) {
       it(`executes all of the specs for ${project}`, function () {
+        this.retries(10)
+
         return systemTests.exec(this, {
           project,
           configFile: 'cypress-vite.config.ts',

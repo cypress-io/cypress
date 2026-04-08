@@ -31,7 +31,6 @@ export interface StateFunc {
   (k: 'specWindow', v?: Window): Window
   (k: 'runnable', v?: CypressRunnable): CypressRunnable
   (k: 'isStable', v?: boolean): boolean
-  (k: 'whenStable', v?: null | (() => Promise<any>)): () => Promise<any>
   (k: 'current', v?: $Command): $Command
   (k: 'canceled', v?: boolean): boolean
   (k: 'error', v?: Error): Error

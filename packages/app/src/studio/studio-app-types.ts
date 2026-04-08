@@ -101,6 +101,9 @@ export interface StudioPanelProps {
   // Callback to close the Selector Playground
   onCloseSelectorPlayground?: () => void
   autSnapshotStore?: AutSnapshotStore
+  // When non-null, navigation was blocked due to unsaved changes.
+  // Call this function to discard changes and resume the navigation.
+  pendingNavigationResume?: (() => void) | null
 }
 
 export type StudioPanelShape = (props: StudioPanelProps) => JSX.Element

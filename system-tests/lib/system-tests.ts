@@ -68,6 +68,10 @@ export type ItOptions = ExecOptions & {
    * Same as using `systemTests.it.skip`.
    */
   skip?: boolean
+  /**
+   * If set, the system test will be retried up to the given number of times.
+   */
+  retries?: number
 }
 
 type ExecOptions = {
@@ -532,6 +536,11 @@ const localItFn = function (title: string, opts: ItOptions) {
     const testTitle = `${title} [${browser}]`
 
     return mochaItFn(testTitle, function () {
+      // Only set retries when explicitly provided; otherwise allow Mocha to inherit from parent suite
+      if ('retries' in opts) {
+        this.retries(options.retries)
+      }
+
       if (options.useSeparateBrowserSnapshots) {
         title = testTitle
       }

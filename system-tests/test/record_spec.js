@@ -416,30 +416,6 @@ describe('e2e record', () => {
     })
   })
 
-  context('metadata', () => {
-    setupStubbedServer(createRoutes())
-
-    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23151
-    it.skip('sends Studio usage metadata', function () {
-      return systemTests.exec(this, {
-        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id.config.js',
-        spec: 'studio_written.cy.js',
-        record: true,
-        snapshot: true,
-      })
-      .then(() => {
-        const requests = getRequests()
-        const postResults = requests[3]
-
-        expect(postResults.url).to.eq(`POST /instances/${instanceId}/results`)
-
-        expect(postResults.body.metadata.studioCreated).to.eq(2)
-        expect(postResults.body.metadata.studioExtended).to.eq(4)
-      })
-    })
-  })
-
   context('misconfiguration', () => {
     setupStubbedServer([])
 
@@ -525,6 +501,50 @@ describe('e2e record', () => {
         expectedExitCode: 0,
         quiet: true,
       })
+    })
+  })
+
+  context('platform.browserFamily', () => {
+    setupStubbedServer(createRoutes())
+
+    const familyByBrowser = {
+      electron: 'chromium',
+      chrome: 'chromium',
+      'chrome-for-testing': 'chromium',
+      firefox: 'firefox',
+      webkit: 'webkit',
+    }
+
+    systemTests.it('is sent on POST /runs and instance create matching the launched browser', {
+      key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+      configFile: 'cypress-with-project-id.config.js',
+      config: {
+        experimentalWebKitSupport: true,
+      },
+      spec: 'record_pass.cy.js',
+      record: true,
+      snapshot: false,
+      expectedExitCode: 0,
+      onRun (execFn, browser) {
+        return execFn().then(() => {
+          const expectedFamily = familyByBrowser[browser]
+
+          expect(expectedFamily, `no browserFamily mapping for browser: ${browser}`).to.exist
+
+          const requests = getRequests()
+          const postRun = requests.find((r) => r.url === 'POST /runs')
+
+          expect(postRun, 'POST /runs').to.exist
+          expect(postRun.body.platform.browserFamily).to.eq(expectedFamily)
+
+          const instanceCreate = requests.find((r) => {
+            return r.url.startsWith('POST /runs/') && r.url.endsWith('/instances')
+          })
+
+          expect(instanceCreate, 'POST /runs/:id/instances').to.exist
+          expect(instanceCreate.body.platform.browserFamily).to.eq(expectedFamily)
+        })
+      },
     })
   })
 

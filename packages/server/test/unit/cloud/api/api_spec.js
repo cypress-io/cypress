@@ -1007,6 +1007,8 @@ describe('lib/cloud/api', () => {
     it('POSTs /instances/:id/tests strips arbitrarily large config values', function () {
       this.props.config = {
         projectId: 'abcd1234',
+        customBloat: { nested: 'x'.repeat(5000) },
+        _myPluginState: { foo: 'bar' },
         devServer: {
           bundler: 'webpack',
           framework: 'react',
@@ -1053,6 +1055,46 @@ describe('lib/cloud/api', () => {
       expect(expectedConfig.resolved).to.be.undefined
       expect(expectedConfig.devServer.webpackConfig).to.equal('omitted')
       expect(expectedConfig.devServer.viteConfig).to.equal('omitted')
+      expect(expectedConfig.customBloat).to.be.undefined
+      expect(expectedConfig._myPluginState).to.be.undefined
+
+      return api.postInstanceTests(this.props)
+    })
+
+    it('POSTs /instances/:id/tests keeps allowlisted component config keys', function () {
+      this.props.config = {
+        projectId: 'abcd1234',
+        indexHtmlFile: 'cypress/support/component-index.html',
+        devServerConfig: {
+          framework: 'react',
+          bundler: 'webpack',
+          mode: 'development',
+          webpackConfig: { entry: 'app' },
+        },
+      }
+
+      const expectedConfig = filterRuntimeConfigForRecording(this.props.config)
+
+      expect(expectedConfig.projectId).to.eq('abcd1234')
+      expect(expectedConfig.indexHtmlFile).to.eq('cypress/support/component-index.html')
+      expect(expectedConfig.devServerConfig).to.eql({
+        framework: 'react',
+        bundler: 'webpack',
+        mode: 'omitted: string',
+        webpackConfig: 'omitted: object',
+      })
+
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '1')
+      .matchHeader('x-cypress-run-id', this.props.runId)
+      .matchHeader('x-cypress-request-attempt', '0')
+      .matchHeader('x-os-name', OS_PLATFORM)
+      .matchHeader('x-cypress-version', pkg.version)
+      .post('/instances/instance-id-123/tests', {
+        ...this.bodyProps,
+        config: expectedConfig,
+      })
+      .reply(200)
 
       return api.postInstanceTests(this.props)
     })

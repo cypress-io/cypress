@@ -163,90 +163,61 @@ const initializeCloudCyPrompt = async (Cypress: Cypress.Cypress, cy: Cypress.Cyp
 }
 
 export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress, cy: Cypress.Cypress['cy']) => {
-  // @ts-expect-error - these types are not yet implemented until the prompt command is rolled out
-  if (Cypress.config('experimentalPromptCommand')) {
-    let initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
+  let initializeCloudCyPromptPromise = initializeCloudCyPrompt(Cypress, cy)
 
-    const commands = {
-      prompt (steps: string[], commandOptions: object = {}) {
-        const promptCmd = cy.state('current')
+  const commands = {
+    prompt (steps: string[], commandOptions: object = {}) {
+      const promptCmd = cy.state('current')
 
-        const downloadTimeout = '_downloadTimeout' in commandOptions ? commandOptions._downloadTimeout as number : 45000
+      const downloadTimeout = '_downloadTimeout' in commandOptions ? commandOptions._downloadTimeout as number : 45000
 
-        let timeoutId: NodeJS.Timeout
-        const timeoutPromise = new Promise((resolve) => {
-          timeoutId = setTimeout(() => {
-            resolve({
-              error: undefined,
-              timedOut: true,
-            })
-          }, downloadTimeout)
-        })
-        const raceBundleResult = Promise.race([
-          initializeCloudCyPromptPromise,
-          timeoutPromise,
-        ]).finally(() => {
-          clearTimeout(timeoutId)
-        }) as Promise<BundleResult>
-
-        return cy.wrap(raceBundleResult, { log: false, timeout: 1e9 }).then((bundleResult: BundleResult) => {
-          if (bundleResult.timedOut) {
-            cy.state('current', promptCmd)
-
-            return $errUtils.throwErrByPath('prompt.promptDownloadTimedOut', {
-              args: {
-                error: new Error('cy.prompt bundle download timed out'),
-              },
-            })
-          }
-
-          if (bundleResult.error) {
-            cy.state('current', promptCmd)
-            throw bundleResult.error
-          }
-
-          const cyPrompt = bundleResult.bundle
-
-          return cyPrompt({
-            steps,
-            commandOptions,
-            promptCmd,
+      let timeoutId: NodeJS.Timeout
+      const timeoutPromise = new Promise((resolve) => {
+        timeoutId = setTimeout(() => {
+          resolve({
+            error: undefined,
+            timedOut: true,
           })
-        })
-      },
-    }
+        }, downloadTimeout)
+      })
+      const raceBundleResult = Promise.race([
+        initializeCloudCyPromptPromise,
+        timeoutPromise,
+      ]).finally(() => {
+        clearTimeout(timeoutId)
+      }) as Promise<BundleResult>
 
-    commands.prompt['__resetPrompt'] = async (delay: number = 0) => {
-      initializedModule = null
-      initializeCloudCyPromptPromise = new Promise((resolve) => setTimeout(resolve, delay)).then(() => initializeCloudCyPrompt(Cypress, cy))
-    }
+      return cy.wrap(raceBundleResult, { log: false, timeout: 1e9 }).then((bundleResult: BundleResult) => {
+        if (bundleResult.timedOut) {
+          cy.state('current', promptCmd)
 
-    Commands.addAll(commands)
-  } else {
-    Commands.addAll({
-      prompt () {
-        const stack = cy.state('current').get('userInvocationStack')
-
-        if (Cypress.testingType === 'component') {
-          $errUtils.throwErrByPath('prompt.promptTestingTypeError', {
-            errProps: {
-              name: 'PromptTestingTypeError',
-            },
-            onFail: (err) => {
-              err.stack = stack
+          return $errUtils.throwErrByPath('prompt.promptDownloadTimedOut', {
+            args: {
+              error: new Error('cy.prompt bundle download timed out'),
             },
           })
         }
 
-        $errUtils.throwErrByPath('prompt.experimentalPromptCommandError', {
-          errProps: {
-            name: 'PromptNotEnabledError',
-          },
-          onFail: (err) => {
-            err.stack = stack
-          },
+        if (bundleResult.error) {
+          cy.state('current', promptCmd)
+          throw bundleResult.error
+        }
+
+        const cyPrompt = bundleResult.bundle
+
+        return cyPrompt({
+          steps,
+          commandOptions,
+          promptCmd,
         })
-      },
-    })
+      })
+    },
   }
+
+  commands.prompt['__resetPrompt'] = async (delay: number = 0) => {
+    initializedModule = null
+    initializeCloudCyPromptPromise = new Promise((resolve) => setTimeout(resolve, delay)).then(() => initializeCloudCyPrompt(Cypress, cy))
+  }
+
+  Commands.addAll(commands)
 }

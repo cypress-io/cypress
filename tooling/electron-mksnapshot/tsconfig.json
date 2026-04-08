@@ -4,5 +4,9 @@
   "compilerOptions": {
     "lib": ["esnext"],
     "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@electron/get": ["../../node_modules/@electron/get/dist/index.d.ts"]
+    }
   },
 }

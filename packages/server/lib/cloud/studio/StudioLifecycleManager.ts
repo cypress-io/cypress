@@ -48,12 +48,6 @@ export class StudioLifecycleManager {
     ctx: DataContext
   }
 
-  public get cloudStudioRequested () {
-    // TODO: Remove cloudStudioRequested when we remove the legacy studio code
-    // https://github.com/cypress-io/cypress-services/issues/10390
-    return true
-  }
-
   /**
    * Initialize the studio manager and possibly set up protocol.
    * Also registers this instance in the data context.

@@ -24,7 +24,6 @@ interface SuiteProps {
   eventManager?: Events
   model: SuiteModel
   studioEnabled: boolean
-  canSaveStudioLogs: boolean
   spec?: Cypress.Cypress['spec']
 }
 
@@ -34,7 +33,7 @@ const headerIconDefaultProps = {
   className: 'header-icon',
 }
 
-const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, canSaveStudioLogs, spec }: SuiteProps) => {
+const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, studioEnabled, spec }: SuiteProps) => {
   const headerIconStyle = {
     marginTop: '1px',
   }
@@ -93,13 +92,12 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
           key={runnable.id}
           model={runnable}
           studioEnabled={studioEnabled}
-          canSaveStudioLogs={canSaveStudioLogs}
           shouldShowConnectingDots={shouldShowConnectionDots(model.children, runnable, index)}
           spec={spec}
         />)
       })}
     </ul>
-  ), [model.children, studioEnabled, canSaveStudioLogs])
+  ), [model.children, studioEnabled])
 
   return (
     // we don't want to show the collapsible if there are no tests in the suite
@@ -123,7 +121,6 @@ Suite.displayName = 'Suite'
 interface RunnableComponentProps {
   model: TestModel | SuiteModel
   studioEnabled: boolean
-  canSaveStudioLogs: boolean
   shouldShowConnectingDots: boolean
   spec?: Cypress.Cypress['spec']
 }
@@ -132,7 +129,7 @@ interface RunnableComponentProps {
 // in order to mess with its internal state. converting it to a functional
 // component breaks that, so it needs to stay a Class-based component or
 // else the driver tests need to be refactored to support it being functional
-const Runnable: React.FC<RunnableComponentProps> = observer(({ model, studioEnabled, canSaveStudioLogs, shouldShowConnectingDots, spec }) => {
+const Runnable: React.FC<RunnableComponentProps> = observer(({ model, studioEnabled, shouldShowConnectingDots, spec }) => {
   return (<>
     <li
       className={cs(`${model.type} runnable runnable-${model.state}`, {
@@ -145,7 +142,6 @@ const Runnable: React.FC<RunnableComponentProps> = observer(({ model, studioEnab
         ? <Test model={model as TestModel} studioEnabled={studioEnabled} spec={spec}/>
         : <Suite model={model as SuiteModel}
           studioEnabled={studioEnabled}
-          canSaveStudioLogs={canSaveStudioLogs}
           spec={spec}
         />}
     </li>

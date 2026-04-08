@@ -195,6 +195,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   getStyles: ISnapshots['getStyles']
 
   resetTimer: ReturnType<typeof createTimer>['reset']
+  resetStability: ReturnType<typeof createStability>['reset']
   overrides: IOverrides
 
   // Private methods
@@ -254,6 +255,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.isStable = stability.isStable
     this.whenStable = stability.whenStable
+    this.resetStability = stability.reset
 
     const assertions = createAssertions(Cypress, this)
 
@@ -655,6 +657,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.queue.reset()
       this.queue.clear()
       this.resetTimer()
+      this.resetStability()
       this.removeAllListeners()
       this.testConfigOverride.restoreAndSetTestConfigOverrides(test, this.Cypress.config, this.Cypress.env)
     } catch (err) {
