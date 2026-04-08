@@ -3,12 +3,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import registerClockCommands from '../../../../src/cy/commands/clock'
 
 describe('cy/commands/clock', () => {
+  type MockLog = {
+    snapshot: ReturnType<typeof vi.fn>
+    end: ReturnType<typeof vi.fn>
+  }
+
   let commands: Record<string, Function>
+  let logs: MockLog[]
   let state: ReturnType<typeof vi.fn>
   let stateValues: Record<string, any>
 
   beforeEach(() => {
     commands = {}
+    logs = []
     stateValues = { ctx: {}, window }
 
     state = vi.fn((key, ...args) => {
@@ -35,10 +42,14 @@ describe('cy/commands/clock', () => {
       prependListener: vi.fn(),
       on: vi.fn(),
       log: vi.fn(() => {
-        return {
+        const log = {
           snapshot: vi.fn().mockReturnThis(),
           end: vi.fn().mockReturnThis(),
         }
+
+        logs.push(log)
+
+        return log
       }),
     }
 
@@ -64,6 +75,40 @@ describe('cy/commands/clock', () => {
       }, 100)
 
       await commands.tick(undefined, 2000)
+
+      expect(onLoaded).toHaveBeenCalledOnce()
+    } finally {
+      clock.restore({ log: false })
+    }
+  })
+
+  it('should close the tick log when ticking rejects', async () => {
+    const clock = commands.clock(undefined)
+
+    try {
+      window.setTimeout(() => {
+        throw new Error('boom')
+      }, 0)
+
+      await expect(commands.tick(undefined, 0)).rejects.toThrow('boom')
+
+      expect(logs).toHaveLength(2)
+      expect(logs[1].snapshot).toHaveBeenCalledTimes(2)
+      expect(logs[1].snapshot).toHaveBeenNthCalledWith(1, 'before', { next: 'after' })
+      expect(logs[1].end).toHaveBeenCalledOnce()
+    } finally {
+      clock.restore({ log: false })
+    }
+  })
+
+  it('should treat null as 0 milliseconds for the yielded clock', () => {
+    const onLoaded = vi.fn()
+    const clock = commands.clock(undefined)
+
+    try {
+      window.setTimeout(onLoaded, 0)
+
+      clock.tick(null)
 
       expect(onLoaded).toHaveBeenCalledOnce()
     } finally {

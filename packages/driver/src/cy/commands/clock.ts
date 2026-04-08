@@ -103,7 +103,7 @@ export default function (Commands, Cypress, cy, state) {
       const { tick, tickAsync } = clock
 
       const createTickLog = (ms: number | undefined, userOptions: Partial<Cypress.Loggable>) => {
-        if (typeof ms !== 'undefined' && !_.isNumber(ms)) {
+        if (ms !== null && typeof ms !== 'undefined' && !_.isNumber(ms)) {
           $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg: JSON.stringify(ms) } })
         }
 
@@ -141,10 +141,8 @@ export default function (Commands, Cypress, cy, state) {
         const tickOptions = userOptions ?? {}
         const { tickMs, tickLog } = createTickLog(ms, tickOptions)
 
-        return tickAsync.apply(this, [tickMs]).then((result) => {
+        return tickAsync.apply(this, [tickMs]).finally(() => {
           endTickLog(tickLog)
-
-          return result
         })
       }
 
