@@ -23,20 +23,19 @@ const span = telemetry.startSpan({ name: 'child:process', active: true })
 debug('child:process span initialized')
 require('../../util/suppress_warnings').suppress()
 
-process.on('disconnect', () => {
-  debug('received disconnect event')
-  process.exit()
-})
-
 require('graceful-fs').gracefulify(require('fs'))
 const util = require('../util')
 const ipc = util.wrapIpc(process)
-const run = require('./run_require_async_child')
 
 exporter.attachIPC(ipc)
 
 let disconnection = null
 let willDisconnect = pDefer()
+
+process.on('disconnect', () => {
+  debug('received disconnect event')
+  willDisconnect.resolve()
+})
 
 debug('registering main:process:will:disconnect listener')
 ipc.on('main:process:will:disconnect', async () => {
@@ -65,6 +64,7 @@ ipc.on('main:process:will:disconnect', async () => {
       willDisconnect.promise,
       new Promise((resolve) => {
         setTimeout(() => {
+          debug('timeout waiting for main:process:will:disconnect signal')
           resolve()
         }, 5000)
       }),
@@ -73,6 +73,8 @@ ipc.on('main:process:will:disconnect', async () => {
     process.exit(128 + os.constants.signals[signal])
   })
 })
+
+const run = require('./run_require_async_child')
 
 debug('run')
 run(ipc, file, projectRoot)

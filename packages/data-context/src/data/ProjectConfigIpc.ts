@@ -70,15 +70,18 @@ export class ProjectConfigIpc extends EventEmitter {
   ) {
     super()
     this._childProcess = this.forkConfigProcess()
-    this._childProcess.on('error', (err) => {
-      // this.emit('error', err)
+    this._childProcess.on('error', (err: any) => {
+      debug('child process error: %s', err)
+      this.emit('error', err)
     })
 
     this._childProcess.on('message', (msg: { event: string, args: any[] }) => {
+      debug('received %s message from child process %s with args %o', msg.event, this._childProcess.pid, msg.args)
       this.emit(msg.event, ...msg.args)
     })
 
     this._childProcess.once('disconnect', () => {
+      debug('received disconnect event from child process %s', this._childProcess.pid)
       this.emit('disconnect')
     })
 
@@ -104,8 +107,12 @@ export class ProjectConfigIpc extends EventEmitter {
   send(event: 'main:process:will:disconnect'): void
   send (event: string, ...args: any[]) {
     if (this._childProcess.killed || !this._childProcess.connected) {
+      debug('not sending %s message to child process. Killed? %s, Connected? %s', event, this._childProcess.killed, this._childProcess.connected)
+
       return false
     }
+
+    debug('sending %s message to child process %s with args %o', event, this._childProcess.pid, args)
 
     return this._childProcess.send({ event, args })
   }
@@ -114,6 +121,7 @@ export class ProjectConfigIpc extends EventEmitter {
   on(evt: 'export:telemetry', listener: (data: string) => void): void
   on(evt: 'main:process:will:disconnect:ack', listener: () => void): void
   on(evt: 'warning', listener: (warningErr: CypressError) => void): this
+  on(evt: 'disconnect', listener: () => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
   }
@@ -399,11 +407,19 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   cleanupIpc () {
+    debug('cleaning up IPC')
     this.killChildProcess()
     this.removeAllListeners()
   }
 
-  private killChildProcess () {
+  private killChildProcess (): void {
+    if (this._childProcess.killed || !this._childProcess.connected) {
+      debug('child process %s already killed', this._childProcess.pid)
+
+      return
+    }
+
+    debug('killing child process %s', this._childProcess.pid)
     this._childProcess.kill()
     this._childProcess.stdout?.removeAllListeners()
     this._childProcess.stderr?.removeAllListeners()

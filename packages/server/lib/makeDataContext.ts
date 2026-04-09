@@ -225,7 +225,12 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
   })
 
   GracefulExit.addStep(async () => {
-    await clearCtx()
+    try {
+      await clearCtx()
+    } catch (error) {
+      console.error('Error clearing data context: ', error)
+      throw error
+    }
   }, 'clear data context')
 
   return ctx

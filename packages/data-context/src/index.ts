@@ -26,7 +26,6 @@ export { globalPubSub } from './globalPubSub'
 let ctx: DataContext | null = null
 
 export async function clearCtx () {
-  // eslint-disable-next-line no-console
   try {
     debug('clearCtx() called; trace: %o', new Error().stack)
   } catch (e) {
@@ -39,6 +38,8 @@ export async function clearCtx () {
     await ctx.destroy()
     debug('data-context destroyed')
     ctx = null
+  } else {
+    debug('no data-context to clear')
   }
 }
 
