@@ -5,7 +5,7 @@ _Released 04/21/2026 (PENDING)_
 
 **Features:**
 
-- Added support for `TypeScript 6` to the default webpack preprocessor `@cypress/webpack-preprocessor`. Updated the Component Testing setup wizard to also accept TypeScript 6. Addresses [#33385](https://github.com/cypress-io/cypress/issues/33385). Addresses [#33511](https://github.com/cypress-io/cypress/issues/33511).
+- Added support for `TypeScript 6` to the default webpack preprocessor `@cypress/webpack-preprocessor`. Updated the Component Testing setup wizard to also accept TypeScript 6. Addresses [#33385](https://github.com/cypress-io/cypress/issues/33385). Addresses [#33385](https://github.com/cypress-io/cypress/issues/33385) and [#33511](https://github.com/cypress-io/cypress/issues/33511).
 
 **Bugfixes:**
 
