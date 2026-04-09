@@ -288,6 +288,11 @@ describe('config/src/index', () => {
         server: true,
         browser: false,
       })
+
+      expect(configUtil.validateNeedToRestartOnChange({ env: { TEST_VAR: 'test' } }, {})).toEqual({
+        server: true,
+        browser: false,
+      })
     })
   })
 })

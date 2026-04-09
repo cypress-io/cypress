@@ -1,16 +1,30 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.13.2
+
+_Released 04/21/2026 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
+- Fixed an issue where `cy.readFile(..., 'base64')` assertions against large mismatched strings could appear to hang because assertion messages were not being truncated. Fixes [#25443](https://github.com/cypress-io/cypress/issues/25443).
+- Fixed a regression in [14.3.3](#14-3-3) where deleting `results.video` in `after:spec` to keep videos only for failing specs could leave an empty `*-compressed.mp4` file in `cypress/videos`. Fixes [#32883](https://github.com/cypress-io/cypress/issues/32883).
+
 ## 15.13.1 
 
-_Released 03/31/2026 (PENDING)_
+_Released 04/07/2026_
 
 **Performance:**
 
 - When recording to Cypress Cloud, the App now sends a smaller snapshot of your project config, which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
+- Eliminated unnecessary `git status` and `git log` subprocess calls during `cypress run`, which were collecting spec file git metadata only used in the interactive GUI. Fixed in [#33552](https://github.com/cypress-io/cypress/pull/33552).
 
 **Bugfixes:**
 
-- Fixed an issue where `cy.intercept` `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
-- Fixed a regression in [14.3.3](#14-3-3) where deleting `results.video` in `after:spec` to keep videos only for failing specs could leave an empty `*-compressed.mp4` file in `cypress/videos`. Fixes [#32883](https://github.com/cypress-io/cypress/issues/32883).
+- Fixed an issue where [`cy.intercept`](https://docs.cypress.io/api/commands/intercept) `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
+
+**Dependency Updates:**
+
+- Upgraded `node-forge` from `1.3.x` to `^1.4.0` to address [CVE-2026-33896](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-15789771) vulnerability reported in security scans. Addressed in [#33546](https://github.com/cypress-io/cypress/pull/33546).
 
 ## 15.13.0
 
