@@ -188,8 +188,10 @@ describe('webpack-batteries-included-preprocessor', () => {
     })
 
     describe('with TypeScript 6 or newer', () => {
+      const fixtureTsconfigPath = path.resolve(__dirname, '../../test/fixtures/tsconfig.json')
+
       it.each(['6.0.2', '6.0.0-beta', '6.0.0-rc.1'] as const)(
-        'when resolved version is %s, passes only Cypress source map options to ts-loader so deprecated tsconfig options are not forwarded',
+        'when resolved version is %s, passes configFile to ts-loader and does not forward compilerOptions from tsconfig (ts-loader reads options from the file)',
         (resolvedVersion) => {
           vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue(resolvedVersion)
 
@@ -201,7 +203,7 @@ describe('webpack-batteries-included-preprocessor', () => {
                 downlevelIteration: true,
               },
             },
-            path: path.resolve(__dirname, '../../test/fixtures/tsconfig.json'),
+            path: fixtureTsconfigPath,
           })
 
           const preprocessorCB = preprocessor({
@@ -217,16 +219,12 @@ describe('webpack-batteries-included-preprocessor', () => {
           const tsLoader = webpackOptions.module.rules[0].use[0]
 
           expect(tsLoader.loader).toContain('ts-loader')
-          expect(tsLoader.options.configFile).toBeUndefined()
-          expect(tsLoader.options.compilerOptions).toEqual({
-            sourceMap: true,
-            inlineSourceMap: false,
-            inlineSources: false,
-          })
+          expect(tsLoader.options.configFile).toBe(fixtureTsconfigPath)
+          expect(tsLoader.options.compilerOptions).toBeUndefined()
         },
       )
 
-      it('when resolved version fails semver.valid, uses TS6+ ts-loader options', () => {
+      it('when resolved version fails semver.valid, does not pass configFile or user compilerOptions to ts-loader', () => {
         vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue('not-a-semver-version')
 
         vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
@@ -236,7 +234,7 @@ describe('webpack-batteries-included-preprocessor', () => {
               moduleResolution: 'Bundler',
             },
           },
-          path: path.resolve(__dirname, '../../test/fixtures/tsconfig.json'),
+          path: fixtureTsconfigPath,
         })
 
         const preprocessorCB = preprocessor({
@@ -252,11 +250,7 @@ describe('webpack-batteries-included-preprocessor', () => {
         const tsLoader = webpackOptions.module.rules[0].use[0]
 
         expect(tsLoader.options.configFile).toBeUndefined()
-        expect(tsLoader.options.compilerOptions).toEqual({
-          sourceMap: true,
-          inlineSourceMap: false,
-          inlineSources: false,
-        })
+        expect(tsLoader.options.compilerOptions).toBeUndefined()
       })
     })
   })
