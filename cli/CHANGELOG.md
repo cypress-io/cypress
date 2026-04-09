@@ -7,6 +7,7 @@ _Released 04/21/2026 (PENDING)_
 
 - Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
 - Fixed an issue where `cy.readFile(..., 'base64')` assertions against large mismatched strings could appear to hang because assertion messages were not being truncated. Fixes [#25443](https://github.com/cypress-io/cypress/issues/25443).
+- Fixed an issue where `cy.screenshot()` could still capture changing pixels from some running web animations. `onAfterScreenshot` now runs after Cypress restores timers and animations. Fixes [#29144](https://github.com/cypress-io/cypress/issues/29144).
 
 ## 15.13.1 
 
