@@ -61,6 +61,20 @@ describe('lib/privileged-commands/privileged-commands-manager', () => {
     })).to.throw('cy.readFile() must be invoked from the spec file or support file')
   })
 
+  it('should reject unsupported privileged file read commands', () => {
+    addVerifiedCommand('writeFile')
+
+    expect(() => privilegedCommandsManager.createPrivilegedFileRead(config, {
+      args: ['arg-hash'],
+      commandName: 'writeFile',
+      options: {
+        file: 'foo.txt',
+      },
+    })).to.throw(
+      'You requested a privileged file read for a command we cannot handle: writeFile',
+    )
+  })
+
   unsupportedRunPrivilegedCommands.forEach((commandName) => {
     it(`should reject ${commandName} through runPrivilegedCommand`, () => {
       addVerifiedCommand(commandName)

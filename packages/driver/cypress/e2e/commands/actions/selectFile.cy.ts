@@ -1,6 +1,10 @@
 // @ts-expect-error - this is being redeclared
 const { _, $ } = Cypress
 
+type PrivilegedBackendCall = {
+  args: import('sinon').SinonSpyCall['args']
+}
+
 // Reading and decoding files from an input element would, in the real world,
 // be handled by the application under test, and they would assert on their
 // application state. We want to assert on how selectFile behaves directly
@@ -296,22 +300,31 @@ describe('src/cy/commands/actions/selectFile', () => {
         })
       })
 
-      it('should read path based files without relying on the privileged socket response', () => {
+      it('should select a large file from disk without using the privileged socket response', () => {
+        const sizeInMb = 256
+        const fileName = `issue-29668-${sizeInMb}mb.bin`
+        const expectedSize = sizeInMb * 1024 * 1024
         const backend = cy.stub(Cypress, 'backend').callThrough()
 
-        cy.get('#basic').selectFile('cypress/fixtures/app.js')
-        .then(getFileContents)
-        .then((contents) => {
-          expect(contents[0]).to.eql('{ \'bar\' }\n')
+        cy.task<string>('create:large:file', { fileName, sizeInMb })
+        .then((filePath) => {
+          cy.get('#basic').selectFile(filePath)
+        })
 
-          const calls = backend.getCalls()
-          const selectFilePrivilegedCalls = calls.filter(
-            (call) => {
-              return call.args[0] === 'run:privileged'
-              && call.args[1]?.commandName === 'selectFile'
-            },
-          )
+        cy.get('#basic').should('include.value', fileName)
 
+        cy.get<HTMLInputElement>('#basic').then(($input) => {
+          const input = $input[0]
+          const file = input.files?.[0]
+          const selectFilePrivilegedCalls = backend.getCalls().filter((
+            call: PrivilegedBackendCall,
+          ) => {
+            return call.args[0] === 'run:privileged' && call.args[1]?.commandName === 'selectFile'
+          })
+
+          expect(input.files?.length).to.eq(1)
+          expect(file?.name).to.eq(fileName)
+          expect(file?.size).to.eq(expectedSize)
           expect(selectFilePrivilegedCalls.length).to.eq(0)
         })
       })

@@ -53,6 +53,15 @@ const createResponseWithoutFilePath = (body: BodyInit) => {
   return new Response(body, { status: 200 })
 }
 
+const createErrorResponse = (status: number, body: BodyInit) => {
+  return new Response(body, {
+    headers: {
+      'content-type': 'application/json',
+    },
+    status,
+  })
+}
+
 describe('runPrivilegedFileCommand', () => {
   afterEach(() => {
     vi.restoreAllMocks()
@@ -207,5 +216,95 @@ describe('runPrivilegedFileCommand', () => {
       contents: Buffer.from('hello world'),
       filePath: '/authorized/path/to/foo.txt',
     })
+  })
+
+  it('should attach file path metadata to JSON parse errors', async () => {
+    const Cypress = createCypress()
+    const encoder = new TextEncoder()
+
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:1234',
+      },
+    })
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createStreamedResponse([
+      encoder.encode('{"foo":'),
+      encoder.encode('}'),
+    ], '/path/to/data.json')))
+
+    await expect(runPrivilegedFileCommand({
+      commandName: 'readFile',
+      cy: createCy(['987']),
+      Cypress,
+      options: {
+        encoding: 'utf8',
+        file: 'data.json',
+      },
+    })).rejects.toMatchObject({
+      filePath: '/path/to/data.json',
+      originalFilePath: 'data.json',
+    })
+  })
+
+  it('should throw backend errors from failed HTTP responses', async () => {
+    const Cypress = createCypress()
+
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:1234',
+      },
+    })
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(createErrorResponse(
+      500,
+      JSON.stringify({
+        error: {
+          code: 'EISDIR',
+          filePath: '/path/to/foo.txt',
+          message: 'EISDIR: illegal operation on a directory, read',
+          name: 'EISDIR',
+        },
+      }),
+    )))
+
+    await expect(runPrivilegedFileCommand({
+      commandName: 'readFile',
+      cy: createCy(['741']),
+      Cypress,
+      options: {
+        encoding: null,
+        file: 'foo.txt',
+      },
+    })).rejects.toMatchObject({
+      code: 'EISDIR',
+      filePath: '/path/to/foo.txt',
+      message: 'EISDIR: illegal operation on a directory, read',
+      name: 'EISDIR',
+    })
+  })
+
+  it('should throw a default status error when the HTTP error body is invalid', async () => {
+    const Cypress = createCypress()
+
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:1234',
+      },
+    })
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('not json', {
+      status: 502,
+    })))
+
+    await expect(runPrivilegedFileCommand({
+      commandName: 'readFile',
+      cy: createCy(['852']),
+      Cypress,
+      options: {
+        encoding: null,
+        file: 'foo.txt',
+      },
+    })).rejects.toThrow('Privileged file read failed with status code 502')
   })
 })

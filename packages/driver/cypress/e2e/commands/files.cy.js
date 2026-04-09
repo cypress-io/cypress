@@ -110,6 +110,12 @@ const stubPrivilegedFileRead = (handler) => {
   }
 }
 
+const getReadFilePrivilegedCalls = () => {
+  return Cypress.backend.getCalls().filter(
+    (call) => call.args[0] === 'run:privileged' && call.args[1]?.commandName === 'readFile',
+  )
+}
+
 describe('src/cy/commands/files', () => {
   beforeEach(() => {
     // call through normally on everything
@@ -202,11 +208,21 @@ describe('src/cy/commands/files', () => {
       cy.readFile('cypress/fixtures/app.js', null)
       .should('eql', Cypress.Buffer.from('{ \'bar\' }\n'))
       .then(() => {
-        const readFilePrivilegedCalls = Cypress.backend.getCalls().filter(
-          (c) => c.args[0] === 'run:privileged' && c.args[1]?.commandName === 'readFile',
-        )
+        expect(getReadFilePrivilegedCalls().length).to.eq(0)
+      })
+    })
 
-        expect(readFilePrivilegedCalls.length).to.eq(0)
+    it('should read a large file without relying on the privileged socket response', () => {
+      const sizeInMb = 256
+      const fileName = `issue-20244-${sizeInMb}mb.bin`
+      const expectedSize = sizeInMb * 1024 * 1024
+
+      cy.task('create:large:file', { fileName, sizeInMb })
+      .then((filePath) => {
+        return cy.readFile(filePath, null).then((contents) => {
+          expect(contents.length).to.eq(expectedSize)
+          expect(getReadFilePrivilegedCalls().length).to.eq(0)
+        })
       })
     })
 
