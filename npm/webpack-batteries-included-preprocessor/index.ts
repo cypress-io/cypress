@@ -105,12 +105,13 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
   }
 
   const tsVersion = webpackPreprocessor.getResolvedTypescriptVersion(typeof typeScriptPath === 'string' ? typeScriptPath : undefined)
-  const isLessThanTs6 = tsVersion && semver.lt(tsVersion, '6.0.0-0')
 
-  const compilerOptions = isLessThanTs6 ? configFile?.config?.compilerOptions : {
-    sourceMap: true,
-    inlineSourceMap: false,
-    inlineSources: false,
+  let isLessThanTs6
+  let isGreaterThanOrEqualToTs6
+
+  if (tsVersion && semver.valid(tsVersion)) {
+    isLessThanTs6 = semver.lt(tsVersion, '6.0.0-0')
+    isGreaterThanOrEqualToTs6 = semver.gte(tsVersion, '6.0.0-0')
   }
 
   webpackOptions.module.rules.push({
@@ -120,10 +121,12 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
       {
         loader: require.resolve('ts-loader'),
         options: {
-          configFile: isLessThanTs6 ? configFile?.path : undefined,
+          ...(isGreaterThanOrEqualToTs6 ? {
+            configFile: configFile?.path,
+          } : {}),
           compiler: typeScriptPath,
-          ...(compilerOptions ? {
-            compilerOptions,
+          ...(isLessThanTs6 ? {
+            compilerOptions: configFile?.config?.compilerOptions,
           } : {}),
           logLevel: 'error',
           silent: true,

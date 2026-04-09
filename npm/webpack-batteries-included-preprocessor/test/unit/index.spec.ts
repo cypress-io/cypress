@@ -225,6 +225,39 @@ describe('webpack-batteries-included-preprocessor', () => {
           })
         },
       )
+
+      it('when resolved version fails semver.valid, uses TS6+ ts-loader options', () => {
+        vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue('not-a-semver-version')
+
+        vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
+          config: {
+            compilerOptions: {
+              module: 'ESNext',
+              moduleResolution: 'Bundler',
+            },
+          },
+          path: path.resolve(__dirname, '../../test/fixtures/tsconfig.json'),
+        })
+
+        const preprocessorCB = preprocessor({
+          typescript: true,
+          webpackOptions,
+        })
+
+        preprocessorCB({
+          filePath: 'foo.ts',
+          outputPath: '.js',
+        } as any)
+
+        const tsLoader = webpackOptions.module.rules[0].use[0]
+
+        expect(tsLoader.options.configFile).toBeUndefined()
+        expect(tsLoader.options.compilerOptions).toEqual({
+          sourceMap: true,
+          inlineSourceMap: false,
+          inlineSources: false,
+        })
+      })
     })
   })
 })
