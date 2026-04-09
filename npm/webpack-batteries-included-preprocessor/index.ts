@@ -111,7 +111,7 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
 
   if (tsVersion && semver.valid(tsVersion)) {
     isLessThanTs6 = semver.lt(tsVersion, '6.0.0-0')
-    isGreaterThanOrEqualToTs6 = semver.gte(tsVersion, '6.0.0-0')
+    isGreaterThanOrEqualToTs6 = !isLessThanTs6
   }
 
   webpackOptions.module.rules.push({
