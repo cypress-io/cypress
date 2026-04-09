@@ -31,7 +31,6 @@ export interface FullConfig extends Partial<Cypress.RuntimeConfigOptions & Cypre
 export type ReceivedCypressOptions =
   Pick<Cypress.RuntimeConfigOptions, 'hosts' | 'projectName' | 'clientRoute' | 'devServerPublicPathRoute' | 'namespace' | 'report' | 'socketIoCookie' | 'configFile' | 'isTextTerminal' | 'isNewProject' | 'proxyUrl' | 'browsers' | 'browserUrl' | 'socketIoRoute' | 'arch' | 'platform' | 'spec' | 'specs' | 'browser' | 'version' | 'remote'>
   & Pick<Cypress.ResolvedConfigOptions, 'chromeWebSecurity' | 'supportFolder' | 'experimentalSourceRewriting' | 'fixturesFolder' | 'reporter' | 'reporterOptions' | 'screenshotsFolder' | 'supportFile' | 'baseUrl' | 'viewportHeight' | 'viewportWidth' | 'port' | 'experimentalInteractiveRunEvents' | 'userAgent' | 'downloadsFolder' | 'env' | 'excludeSpecPattern' | 'specPattern' | 'experimentalModifyObstructiveThirdPartyCode' | 'injectDocumentDomain' | 'video' | 'videoCompression' | 'videosFolder' | 'resolvedNodeVersion' | 'resolvedNodePath' | 'trashAssetsBeforeRuns' | 'experimentalWebKitSupport' | 'justInTimeCompile'>
-  & Pick<Cypress.ResolvedConfigOptions['e2e'], 'experimentalPromptCommand'> // TODO: Figure out how to type this better.
 
 export interface SettingsOptions {
   testingType?: 'component' |'e2e'

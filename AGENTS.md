@@ -82,12 +82,6 @@ yarn lint
 
 # Lint and auto-fix specific scopes
 yarn lint:fix
-
-# Remove accidental .only from test files (specific file types)
-yarn stop-only
-
-# Remove .only from all test files in packages/
-yarn stop-only-all
 ```
 
 > **Note**: This project does **not** use Prettier. All formatting is enforced via ESLint.
@@ -207,7 +201,7 @@ yarn clean-deps && yarn
 - **TypeScript**: `strict: true` base, but `noImplicitAny: false` (implicit `any` allowed for pragmatic reasons).
 - **Type-only imports**: `importsNotUsedAsValues: "error"` — use `import type` for type-only imports.
 - **Unused vars**: Prefix with `_` to suppress (`argsIgnorePattern: '^_'`).
-- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'`; `yarn stop-only` removes them.
+- **No `.only` in tests** — `mocha/no-exclusive-tests: 'error'` (ESLint). Caught by `yarn lint` and by pre-commit ESLint (`lint-staged`). For intentional `.only` in fixtures or type samples, use `eslint-disable-next-line mocha/no-exclusive-tests` (with a short comment).
 - **`.skip` requires a comment** — Must include `NOTE:`, `TODO:`, or `FIXME:` comment explaining why.
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.

@@ -326,4 +326,34 @@ describe('test errors', () => {
       cy.get('.runnable-err-docs-url').should('have.text', 'Custom title')
     })
   })
+
+  describe('trigger action', () => {
+    it('shows "Log in to Cypress Cloud." when triggerAction is loginModal', () => {
+      setError({ ...commandErr, triggerAction: 'loginModal' })
+
+      cy.get('.runnable-err-trigger-action').should('be.visible')
+      cy.get('.runnable-err-trigger-action').contains('Log in to Cypress Cloud.')
+    })
+
+    it('shows "Connect project to Cypress Cloud." when triggerAction is projectConnectModal', () => {
+      setError({ ...commandErr, triggerAction: 'projectConnectModal' })
+
+      cy.get('.runnable-err-trigger-action').should('be.visible')
+      cy.get('.runnable-err-trigger-action').contains('Connect project to Cypress Cloud.')
+    })
+
+    it('does not show trigger action when triggerAction is not set', () => {
+      setError(commandErr)
+
+      cy.get('.runnable-err-trigger-action').should('not.exist')
+    })
+
+    it('emits open:login:connect:modal when trigger action link is clicked', () => {
+      setError({ ...commandErr, triggerAction: 'loginModal' })
+
+      cy.spy(runner, 'emit')
+      cy.get('.runnable-err-trigger-action a').click()
+      cy.wrap(runner.emit).should('be.calledWith', 'open:login:connect:modal', { utmMedium: 'Reporter Error Learn More' })
+    })
+  })
 })

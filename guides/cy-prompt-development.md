@@ -22,7 +22,6 @@ Regardless of running against local or deployed `cy.prompt`:
   - Run `yarn`
   - Run `yarn cypress:open`
   - Log In to the Cloud via the App
-  - Open a project that has `experimentalPromptCommand: true` set in the config of the `cypress.config.js|ts` file within `e2e`. Ensure the project has the feature flag `cy-prompt` enabled.
  
 To run against a deployed version of `cy.prompt`:
 

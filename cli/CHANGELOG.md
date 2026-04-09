@@ -1,11 +1,38 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.12.1
+## 15.13.2
 
-_Released 03/24/2026 (PENDING)_
+_Released 04/21/2026 (PENDING)_
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
+- Fixed an issue where `cy.readFile(..., 'base64')` assertions against large mismatched strings could appear to hang because assertion messages were not being truncated. Fixes [#25443](https://github.com/cypress-io/cypress/issues/25443).
+
+## 15.13.1 
+
+_Released 04/07/2026_
+
+**Performance:**
+
+- When recording to Cypress Cloud, the App now sends a smaller snapshot of your project config, which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
+- Eliminated unnecessary `git status` and `git log` subprocess calls during `cypress run`, which were collecting spec file git metadata only used in the interactive GUI. Fixed in [#33552](https://github.com/cypress-io/cypress/pull/33552).
+
+**Bugfixes:**
+
+- Fixed an issue where [`cy.intercept`](https://docs.cypress.io/api/commands/intercept) `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
+
+**Dependency Updates:**
+
+- Upgraded `node-forge` from `1.3.x` to `^1.4.0` to address [CVE-2026-33896](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-15789771) vulnerability reported in security scans. Addressed in [#33546](https://github.com/cypress-io/cypress/pull/33546).
+
+## 15.13.0
+
+_Released 03/24/2026_
 
 **Features:**
 
-- Studio now allows adding a new test when focused on a single test. Addressed in [#33481](https://github.com/cypress-io/cypress/pull/33481)
+- [`cy.prompt`](https://docs.cypress.io/api/commands/prompt) is now in beta and available without any configuration. `cy.prompt` is an AI-powered command that lets you write test steps in plain English instead of code. The `experimentalPromptCommand` flag was removed and can be deleted from your config. Addressed in [#33497](https://github.com/cypress-io/cypress/pull/33497).
+- Studio now allows adding a new test when focused on a single test, supporting a workflow to add new tests as you record. Addressed in [#33481](https://github.com/cypress-io/cypress/pull/33481)
 
 **Bugfixes:**
 
@@ -14,7 +41,7 @@ _Released 03/24/2026 (PENDING)_
 
 **Misc:**
 
-- When a test is isolated in Studio, 'rerun' button should not say 'Run all tests. It should say 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466)
+- When a test is isolated in Studio, the 'rerun' button now properly says 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466)
 - Studio now warns users before navigating if they try to exit when they have unsaved changes in the editor. Addressed in [#33457](https://github.com/cypress-io/cypress/pull/33457)
 
 **Dependency Updates:**
@@ -22,6 +49,7 @@ _Released 03/24/2026 (PENDING)_
 - Upgraded `simple-git` from `3.27.0` to `3.32.3` to address [Improper Handling of Case Sensitivity](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15457646) (CVE-2026-28292) vulnerability reported in security scans. Addressed in [#33470](https://github.com/cypress-io/cypress/pull/33470)
 - Upgraded `minimatch` to `3.1.3` to address [CVE-2026-26996](https://nvd.nist.gov/vuln/detail/CVE-2026-26996), [CVE-2026-27903](https://nvd.nist.gov/vuln/detail/CVE-2026-27903), and [CVE-2026-27904](https://nvd.nist.gov/vuln/detail/CVE-2026-27904) ReDoS vulnerabilities reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
 - Upgraded `serialize-javascript` to `7.0.3` to address [GHSA-5c6j-r48x-rmvq](https://github.com/advisories/GHSA-5c6j-r48x-rmvq) vulnerability reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
+- Upgraded `flatted` from `3.2.9` to `3.4.2` to address [Prototype Pollution](https://security.snyk.io/vuln/SNYK-JS-FLATTED-15700433) (CVE-2026-33228) vulnerability reported in security scans. Addressed in [#33501](https://github.com/cypress-io/cypress/pull/33501)
 
 ## 15.12.0
 

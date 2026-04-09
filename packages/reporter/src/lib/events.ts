@@ -213,6 +213,10 @@ const events: Events = {
       runner.emit('external:open', url)
     })
 
+    localBus.on('open:login:connect:modal', (args) => {
+      runner.emit('open:login:connect:modal', args)
+    })
+
     localBus.on('open:file', (fileDetails) => {
       runner.emit('open:file', fileDetails)
     })
