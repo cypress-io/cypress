@@ -479,6 +479,13 @@ const takeScreenshot = (
     return automateScreenshot(state, automationOptions)
   })
   .then((props) => {
+    return Promise.try(() => after($body)).return(props)
+  }, (err) => {
+    return Promise.try(() => after($body)).then(() => {
+      throw err
+    })
+  })
+  .then((props) => {
     if (onAfterScreenshot) {
       onAfterScreenshot.call(state('ctx'), $el, props)
     }
@@ -487,7 +494,6 @@ const takeScreenshot = (
 
     return props
   })
-  .finally(() => after($body))
 }
 
 export default function (Commands, Cypress, cy, state, config) {

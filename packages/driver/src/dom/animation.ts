@@ -1,8 +1,17 @@
 import $ from 'jquery'
 
-function addCssAnimationDisabler ($body: JQuery<HTMLBodyElement>) {
+type DocumentAnimationState = {
+  disablerCount: number
+  pausedAnimations: Animation[]
+}
+
+const animationDisablerId = '__cypress-animation-disabler'
+const animationDisablerSelector = `#${animationDisablerId}`
+const animationStateByDocument = new WeakMap<Document, DocumentAnimationState>()
+
+const addDisablerStyle = ($body: JQuery<HTMLBodyElement>) => {
   $(`
-    <style id="__cypress-animation-disabler">
+    <style id="${animationDisablerId}">
       *, *:before, *:after {
         transition-property: none !important;
         animation: none !important;
@@ -11,8 +20,75 @@ function addCssAnimationDisabler ($body: JQuery<HTMLBodyElement>) {
   `).appendTo($body)
 }
 
-function removeCssAnimationDisabler ($body: JQuery<HTMLBodyElement>) {
-  $body.find('#__cypress-animation-disabler').remove()
+const pauseDocumentAnimations = (doc: Document) => {
+  const existingState = animationStateByDocument.get(doc)
+
+  if (existingState) {
+    existingState.disablerCount += 1
+
+    return
+  }
+
+  const pausedAnimations = doc.getAnimations?.().filter(({ playState }) => {
+    return playState === 'running'
+  }) ?? []
+
+  pausedAnimations.forEach((animation) => {
+    animation.pause()
+  })
+
+  animationStateByDocument.set(doc, {
+    disablerCount: 1,
+    pausedAnimations,
+  })
+}
+
+const resumeDocumentAnimations = (doc: Document) => {
+  const animationState = animationStateByDocument.get(doc)
+
+  if (!animationState) return
+
+  animationState.disablerCount -= 1
+
+  if (animationState.disablerCount > 0) return
+
+  animationState.pausedAnimations.forEach((animation) => {
+    if (animation.playState === 'paused') animation.play()
+  })
+
+  animationStateByDocument.delete(doc)
+}
+
+const addCssAnimationDisabler = ($body: JQuery<HTMLBodyElement>) => {
+  const doc = $body[0]?.ownerDocument
+
+  if (!doc) {
+    addDisablerStyle($body)
+
+    return
+  }
+
+  if (!animationStateByDocument.has(doc)) {
+    addDisablerStyle($body)
+  }
+
+  pauseDocumentAnimations(doc)
+}
+
+const removeCssAnimationDisabler = ($body: JQuery<HTMLBodyElement>) => {
+  const doc = $body[0]?.ownerDocument
+
+  if (!doc) {
+    $body.find(animationDisablerSelector).remove()
+
+    return
+  }
+
+  resumeDocumentAnimations(doc)
+
+  if (!animationStateByDocument.has(doc)) {
+    $body.find(animationDisablerSelector).remove()
+  }
 }
 
 export default {
