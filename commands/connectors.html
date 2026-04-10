@@ -28,7 +28,7 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li class="active" class="dropdown">
+          <li class="active dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="/commands/querying">Querying</a></li>
@@ -78,7 +78,7 @@
   .each(function($el, index, $list){
     console.log($el, index, $list)
   })</code></pre>
-      </div>
+        </div>
         <div class="col-xs-5">
           <div class="well">
             <ul class="connectors-each-ul">
@@ -98,7 +98,7 @@
   // calls the 'length' property returning that value
   .its('length')
   .should('be.gt', 2)</code></pre>
-      </div>
+        </div>
         <div class="col-xs-5">
           <div class="well">
             <ul class="connectors-its-ul">
@@ -118,7 +118,7 @@
   // call the jquery method 'show' on the 'div.container'
   .invoke('show')
   .should('be.visible')</code></pre>
-      </div>
+        </div>
         <div class="col-xs-5">
           <div class="well">
             <div class="connectors-div">
@@ -139,7 +139,7 @@ cy.wrap(arr).spread(function(foo, bar, baz){
   expect(bar).to.eq('bar')
   expect(baz).to.eq('baz')
 })</code></pre>
-      </div>
+        </div>
 
         <div class="col-xs-12"><hr></div>
 

@@ -28,7 +28,7 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
-          <li class="active" class="dropdown">
+          <li class="active dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">Commands <span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li><a href="/commands/querying">Querying</a></li>
@@ -589,7 +589,7 @@ cy.get('#scroll-both button')
               </div>
             </div>
 
-            <div id="scroll-both"  style="height: 300px; width: 300px; overflow: auto;">
+            <div id="scroll-both" style="height: 300px; width: 300px; overflow: auto;">
               <div style="width: 1000px; height: 1000px; position: relative;">
                 Both Scroll
                 <button class="btn btn-danger" style="position: absolute; top: 500px; left: 500px">I'm Here</button>
@@ -692,7 +692,7 @@ cy.get('#scrollable-both').scrollTo('center', { duration: 2000 })</code></pre>
             </div>
 
             <div id="scrollable-vertical" style="height: 150px; width: 300px; overflow: auto;">
-              <div style='height: 1000px'>
+              <div style="height: 1000px">
                 Vertical Scroll
                 <ul>
                   <li>
@@ -754,12 +754,12 @@ cy.get('.trigger-input-range')
         <div class="col-xs-5">
           <div class="well">
             <form>
-            <fieldset>
-              <label for="range-input">Range Input</label>
-              <input class="trigger-input-range" name="range-input" type="range" value="0" />
-              <p>0</p>
-            </fieldset>
-          </form>
+              <fieldset>
+                <label for="range-input">Range Input</label>
+                <input class="trigger-input-range" name="range-input" type="range" value="0">
+                <p>0</p>
+              </fieldset>
+            </form>
           </div>
         </div>
 
