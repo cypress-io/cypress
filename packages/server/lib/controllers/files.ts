@@ -39,10 +39,13 @@ export = {
 
     const injection = DocumentDomainInjection.InjectionBehavior(config)
 
-    debug('primary remote state', remoteStates.getPrimary())
-    const { origin } = remoteStates.getPrimary()
+    const primaryRemoteState = remoteStates.hasPrimary() ? remoteStates.getPrimary() : undefined
+    const primaryOrigin = primaryRemoteState?.origin
+    const documentDomainContext = primaryOrigin ? injection.shouldInjectDocumentDomain(primaryOrigin) : false
 
-    const superDomain = injection.shouldInjectDocumentDomain(origin) ? injection.getHostname(origin) : ''
+    debug('primary remote state', primaryRemoteState)
+
+    const superDomain = primaryOrigin && documentDomainContext ? injection.getHostname(primaryOrigin) : ''
 
     const privilegedChannel = await privilegedCommandsManager.getPrivilegedChannel({
       browserFamily: req.query.browserFamily,
@@ -50,7 +53,7 @@ export = {
       namespace: config.namespace,
       scripts: allFilesToSend,
       url: req.proxiedUrl,
-      documentDomainContext: injection.shouldInjectDocumentDomain(origin),
+      documentDomainContext,
     })
 
     const iframeOptions = {
