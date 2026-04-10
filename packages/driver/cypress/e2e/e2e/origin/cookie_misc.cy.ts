@@ -78,20 +78,6 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
     cy.getAllCookies().then((cookies) => {
       const isFirefox = Cypress.isBrowser({ family: 'firefox' })
-      /**
-       * Normalizes Firefox cookies whose default `sameSite` value may be
-       * reported as `unspecified` or `lax`.
-       */
-      const normalizeFirefoxDefaultSameSite = (cookie: Cypress.Cookie) => {
-        if (!isFirefox) return cookie
-
-        if (cookie.sameSite === 'unspecified' || cookie.sameSite === 'lax') {
-          return { ...cookie, sameSite: 'unspecified' }
-        }
-
-        return cookie
-      }
-
       const asyncCookie = {
         name: 'ASYNC_COOKIE',
         value: 'async',
@@ -118,8 +104,8 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         // in Firefox both the foo=bar and ASYNC_COOKIE=async cookies will be set
         // SYNC_COOKIE=sync is not set because the intercept is not hit
         expect(cookies).to.have.length(2)
-        expect(normalizeFirefoxDefaultSameSite(cookies[0])).to.deep.equal(fooBarCookie)
-        expect(normalizeFirefoxDefaultSameSite(cookies[1])).to.deep.equal(asyncCookie)
+        expect(cookies[0]).to.deep.equal(fooBarCookie)
+        expect(cookies[1]).to.deep.equal(asyncCookie)
       } else {
         // in other browsers only the ASYNC_COOKIE=async cookie will be set
         // SYNC_COOKIE=sync is not set because the intercept is not hit
