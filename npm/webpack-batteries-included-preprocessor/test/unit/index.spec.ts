@@ -63,7 +63,7 @@ describe('webpack-batteries-included-preprocessor', () => {
     })
   })
 
-  describe('#getTSCompilerOptionsForUser', () => {
+  describe('preprocessor', () => {
     let webpackOptions
 
     beforeEach(() => {
@@ -187,7 +187,57 @@ describe('webpack-batteries-included-preprocessor', () => {
       }).toThrow('No typescript installable was found. ts-loader needs a version of typescript to work properly. Please install typescript in your project\'s package.json.')
     })
 
-    describe('with TypeScript 6 or newer', () => {
+    describe('with typescript below 6', () => {
+      const fixtureTsconfigPath = path.resolve(__dirname, '../../test/fixtures/tsconfig.json')
+
+      beforeEach(() => {
+        vi.mocked(webpackPreprocessor.getResolvedTypescriptVersion).mockReturnValue('5.4.5')
+        webpackOptions = {
+          module: {
+            rules: [],
+          },
+          resolve: {
+            extensions: [],
+            plugins: [],
+          },
+        }
+      })
+
+      it('forwards compilerOptions from tsconfig and does not pass configFile to ts-loader', () => {
+        vi.mocked(getTsConfig).getTsconfig.mockReturnValue({
+          config: {
+            compilerOptions: {
+              module: 'ESNext',
+              moduleResolution: 'Bundler',
+              downlevelIteration: true,
+            },
+          },
+          path: fixtureTsconfigPath,
+        })
+
+        const preprocessorCB = preprocessor({
+          typescript: true,
+          webpackOptions,
+        })
+
+        preprocessorCB({
+          filePath: 'foo.ts',
+          outputPath: '.js',
+        } as any)
+
+        const tsLoader = webpackOptions.module.rules[0].use[0]
+
+        expect(tsLoader.loader).toContain('ts-loader')
+        expect(tsLoader.options.configFile).toBeUndefined()
+        expect(tsLoader.options.compilerOptions).toEqual({
+          module: 'ESNext',
+          moduleResolution: 'Bundler',
+          downlevelIteration: true,
+        })
+      })
+    })
+
+    describe('with typescript 6 or newer', () => {
       const fixtureTsconfigPath = path.resolve(__dirname, '../../test/fixtures/tsconfig.json')
 
       it.each(['6.0.2', '6.0.0-beta', '6.0.0-rc.1'] as const)(

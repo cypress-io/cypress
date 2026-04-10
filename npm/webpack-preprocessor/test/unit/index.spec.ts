@@ -457,7 +457,7 @@ describe('webpack preprocessor', function () {
         },
       ]
 
-      type TsLoaderVersionBehavior = 'legacy' | 'modern'
+      type TsLoaderVersionBehavior = 5 | 6
 
       const expectedTsLoaderCompilerOptions = (
         tsBehavior: TsLoaderVersionBehavior,
@@ -468,7 +468,7 @@ describe('webpack preprocessor', function () {
           sourceMap: true,
           inlineSourceMap: false,
           inlineSources: false,
-          ...(tsBehavior === 'legacy' ? { downlevelIteration: true } : {}),
+          ...(tsBehavior === 5 ? { downlevelIteration: true } : {}),
         }
       }
 
@@ -639,7 +639,7 @@ describe('webpack preprocessor', function () {
           vi.mocked(getResolvedTypescriptVersion).mockReturnValue('5.4.5')
         })
 
-        runTsLoaderOverrideSuite('TypeScript is below 6', 'legacy')
+        runTsLoaderOverrideSuite('TypeScript is below 6', 5)
       })
 
       describe('TypeScript is 6 or newer', function () {
@@ -647,7 +647,7 @@ describe('webpack preprocessor', function () {
           vi.mocked(getResolvedTypescriptVersion).mockReturnValue('6.0.2')
         })
 
-        runTsLoaderOverrideSuite('TypeScript is 6 or newer', 'modern')
+        runTsLoaderOverrideSuite('TypeScript is 6 or newer', 6)
       })
 
       describe('TypeScript 6 pre-release', function () {
@@ -655,7 +655,7 @@ describe('webpack preprocessor', function () {
           vi.mocked(getResolvedTypescriptVersion).mockReturnValue('6.0.0-beta')
         })
 
-        runTsLoaderOverrideSuite('TypeScript 6 pre-release', 'modern')
+        runTsLoaderOverrideSuite('TypeScript 6 pre-release', 6)
       })
 
       describe('TypeScript version cannot be resolved', function () {
@@ -663,7 +663,15 @@ describe('webpack preprocessor', function () {
           vi.mocked(getResolvedTypescriptVersion).mockReturnValue(null)
         })
 
-        runTsLoaderOverrideSuite('TypeScript version cannot be resolved', 'modern')
+        runTsLoaderOverrideSuite('TypeScript version cannot be resolved', 6)
+      })
+
+      describe('TypeScript version string is not valid semver', function () {
+        beforeEach(function () {
+          vi.mocked(getResolvedTypescriptVersion).mockReturnValue('not-a-semver-version')
+        })
+
+        runTsLoaderOverrideSuite('TypeScript version string is not valid semver', 6)
       })
     })
   })

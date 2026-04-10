@@ -2,6 +2,7 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
 import semverLt from 'semver/functions/lt'
+import semverValid from 'semver/functions/valid'
 import * as events from 'events'
 import * as path from 'path'
 import webpack from 'webpack'
@@ -302,7 +303,9 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
         tsLoaderRule.options.compilerOptions = tsLoaderRule.options?.compilerOptions || {}
 
         const tsVersion = getResolvedTypescriptVersion(options.typescript)
-        const isTypescriptBelow6 = tsVersion && semverLt(tsVersion, '6.0.0-0')
+        const isTypescriptBelow6 = Boolean(
+          tsVersion && semverValid(tsVersion) && semverLt(tsVersion, '6.0.0-0'),
+        )
 
         debug(
           `ts-loader detected: overriding tsconfig to use sourceMap:true, inlineSourceMap:false, inlineSources:false${
