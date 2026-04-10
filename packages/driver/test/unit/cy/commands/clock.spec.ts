@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { InstalledClock } from '@sinonjs/fake-timers'
 
+import * as clockModule from '../../../../src/cypress/clock'
 import registerClockCommands from '../../../../src/cy/commands/clock'
 
 describe('cy/commands/clock', () => {
@@ -12,8 +14,16 @@ describe('cy/commands/clock', () => {
   let logs: MockLog[]
   let state: ReturnType<typeof vi.fn>
   let stateValues: Record<string, any>
+  let Cypress: {
+    prependListener: ReturnType<typeof vi.fn>
+    on: ReturnType<typeof vi.fn>
+    log: ReturnType<typeof vi.fn>
+  }
+  let Commands: {
+    addAll: ReturnType<typeof vi.fn>
+  }
 
-  beforeEach(() => {
+  const registerCommands = () => {
     commands = {}
     logs = []
     stateValues = { ctx: {}, window }
@@ -30,7 +40,7 @@ describe('cy/commands/clock', () => {
       return stateValues[key]
     })
 
-    const Commands = {
+    Commands = {
       addAll: vi.fn((_, registeredCommands) => {
         Object.assign(commands, registeredCommands)
 
@@ -38,7 +48,7 @@ describe('cy/commands/clock', () => {
       }),
     }
 
-    const Cypress = {
+    Cypress = {
       prependListener: vi.fn(),
       on: vi.fn(),
       log: vi.fn(() => {
@@ -54,6 +64,11 @@ describe('cy/commands/clock', () => {
     }
 
     registerClockCommands(Commands, Cypress, {}, state)
+  }
+
+  beforeEach(() => {
+    vi.restoreAllMocks()
+    registerCommands()
   })
 
   it('should resolve promises queued during a tick before continuing', async () => {
@@ -114,5 +129,39 @@ describe('cy/commands/clock', () => {
     } finally {
       clock.restore({ log: false })
     }
+  })
+
+  it('should fall back to a synchronous tick when async ticking is unavailable', async () => {
+    const tick = vi.fn().mockReturnValue(250)
+    const tickAsync = vi.fn().mockRejectedValue(
+      new TypeError(
+        'originalSetTimeout is not a function',
+      ),
+    )
+
+    vi.spyOn(clockModule, 'create').mockReturnValue({
+      tick,
+      tickAsync,
+      restore: vi.fn(),
+      setSystemTime: vi.fn(),
+      bind: vi.fn(),
+      details: vi.fn((): Pick<InstalledClock, 'now' | 'methods'> => {
+        return { now: 0, methods: ['setTimeout'] }
+      }),
+    })
+
+    registerCommands()
+    commands.clock(undefined)
+
+    await expect(commands.tick(undefined, 250)).resolves.toMatchObject({
+      tick: expect.any(Function),
+    })
+
+    expect(tickAsync).toHaveBeenCalledOnce()
+    expect(tick).toHaveBeenCalledOnce()
+    expect(tick).toHaveBeenCalledWith(250)
+    expect(logs).toHaveLength(2)
+    expect(logs[1].snapshot).toHaveBeenCalledTimes(2)
+    expect(logs[1].end).toHaveBeenCalledOnce()
   })
 })

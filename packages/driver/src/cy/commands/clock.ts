@@ -141,7 +141,16 @@ export default function (Commands, Cypress, cy, state) {
         const tickOptions = userOptions ?? {}
         const { tickMs, tickLog } = createTickLog(ms, tickOptions)
 
-        return tickAsync.apply(this, [tickMs]).finally(() => {
+        return tickAsync.apply(this, [tickMs]).catch((error) => {
+          if (
+            !(error instanceof TypeError) ||
+              error.message !== 'originalSetTimeout is not a function'
+          ) {
+            throw error
+          }
+
+          return tick.apply(this, [tickMs])
+        }).finally(() => {
           endTickLog(tickLog)
         })
       }
