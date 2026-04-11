@@ -1,0 +1,35 @@
+{
+  "name": "@packages/utils",
+  "version": "0.0.0-development",
+  "description": "Shared utility functions for the Cypress monorepo",
+  "main": "cjs/index.js",
+  "module": "esm/index.js",
+  "browser": "esm/index.js",
+  "files": [
+    "cjs/*",
+    "esm/*"
+  ],
+  "types": "cjs/index.d.ts",
+  "scripts": {
+    "build": "yarn build:esm && yarn build:cjs",
+    "build-prod": "yarn build",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit",
+    "clean": "rimraf cjs esm",
+    "lint": "eslint",
+    "test": "yarn test-unit",
+    "test-unit": "vitest run",
+    "watch": "yarn build:cjs --watch & yarn build:esm --watch"
+  },
+  "devDependencies": {
+    "@packages/eslint-config": "0.0.0-development",
+    "@packages/ts": "0.0.0-development",
+    "@types/node": "22.18.7",
+    "eslint": "^9.31.0",
+    "rimraf": "6.1.1",
+    "vitest": "^3.2.4"
+  },
+  "license": "MIT",
+  "nx": {}
+}
