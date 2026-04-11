@@ -1,8 +1,8 @@
 import { vi, describe, it, beforeEach, afterEach, expect, MockInstance } from 'vitest'
 import path from 'path'
 import chalk from 'chalk'
-import _ from 'lodash'
 import os from 'os'
+import { isDeepStrictEqual } from 'node:util'
 import { stripIndent } from 'common-tags'
 import mockfs from 'mock-fs'
 import { geteuid } from 'process'
@@ -41,18 +41,6 @@ vi.mock('@cypress/xvfb', async () => {
 
   return {
     default: XVFB_MOCK,
-  }
-})
-
-vi.mock('lodash', async (importActual) => {
-  const actual = await importActual()
-
-  return {
-    default: {
-      // @ts-expect-error
-      ...actual.default,
-      random: vi.fn(),
-    },
   }
 })
 
@@ -177,10 +165,10 @@ describe('lib/tasks/verify', () => {
     vi.mocked(xvfb.isNeeded).mockReturnValue(false)
     /// @ts-expect-error - geteuid is potentially undefined
     vi.mocked(geteuid).mockReturnValue(1000)
-    vi.mocked(_.random).mockReturnValue(222)
+    vi.spyOn(Math, 'random').mockReturnValue(222 / 1001)
     // @ts-expect-error - mock args
     vi.mocked(util.exec).mockImplementation((...args: any) => {
-      if (args[0] === executablePath && _.isEqual(args[1], ['--no-sandbox', '--smoke-test', '--ping=222'])) {
+      if (args[0] === executablePath && isDeepStrictEqual(args[1], ['--no-sandbox', '--smoke-test', '--ping=222'])) {
         return Promise.resolve(spawnedProcess)
       }
 
@@ -847,7 +835,7 @@ describe('lib/tasks/verify', () => {
 
       // @ts-expect-error - mock args
       vi.mocked(util.exec).mockImplementation((...args: any) => {
-        if (args[0] === realEnvBinaryPath && _.isEqual(args[1], ['--no-sandbox', '--smoke-test', '--ping=222'])) {
+        if (args[0] === realEnvBinaryPath && isDeepStrictEqual(args[1], ['--no-sandbox', '--smoke-test', '--ping=222'])) {
           return Promise.resolve(spawnedProcess)
         }
 

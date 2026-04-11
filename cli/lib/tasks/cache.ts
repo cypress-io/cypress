@@ -8,7 +8,6 @@ import Table from 'cli-table3'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import chalk from 'chalk'
-import _ from 'lodash'
 import getFolderSize from './get-folder-size'
 
 dayjs.extend(relativeTime)
@@ -135,7 +134,7 @@ const getCachedVersions = async (showSize: boolean): Promise<{
     try {
       const stat = await fs.stat(executable)
 
-      const lastAccessedTime = _.get(stat, 'atime')
+      const lastAccessedTime = stat?.atime
 
       if (lastAccessedTime) {
         const accessed = dayjs(lastAccessedTime).fromNow()

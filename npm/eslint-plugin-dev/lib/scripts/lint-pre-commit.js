@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-const _ = require('lodash')
 const utils = require('./utils')
 const sh = require('shelljs')
 const chalk = require('chalk')
@@ -8,8 +7,8 @@ const chalk = require('chalk')
 const start = () => {
   const filesStaged = sh.exec(`git diff --name-only --diff-filter=MA --staged`).split('\n').filter(Boolean)
   const filesUnstaged = sh.exec(`git diff --name-only --diff-filter=M`).split('\n').filter(Boolean)
-  const filesPartiallyStaged = _.intersection(filesStaged, filesUnstaged)
-  const filesFullyStaged = _.difference(filesStaged, filesPartiallyStaged)
+  const filesPartiallyStaged = filesStaged.filter((x) => filesUnstaged.includes(x))
+  const filesFullyStaged = filesStaged.filter((x) => !filesPartiallyStaged.includes(x))
 
   let fail = false
   let lintedFilesCount = 0

@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import cp from 'child_process'
 import os from 'os'
 import yauzl from 'yauzl'
@@ -90,7 +89,16 @@ const unzip = async ({ zipFilePath, installDir, progress }: any): Promise<void> 
         }
       }
 
-      const unzipFallback = _.once(unzipWithNode)
+      let unzipFallbackCalled = false
+      let unzipFallbackResult: any
+      const unzipFallback = (...args: any[]) => {
+        if (!unzipFallbackCalled) {
+          unzipFallbackCalled = true
+          unzipFallbackResult = unzipWithNode(...args)
+        }
+
+        return unzipFallbackResult
+      }
 
       const unzipWithUnzipTool = (): any => {
         debug('unzipping via `unzip`')
@@ -196,7 +204,7 @@ function isMaybeWindowsMaxPathLengthError (err: any): boolean {
 }
 
 const start = async ({ zipFilePath, installDir, progress }: any): Promise<void> => {
-  assert.ok(_.isString(installDir) && !_.isEmpty(installDir), 'missing installDir')
+  assert.ok(typeof installDir === 'string' && installDir.length > 0, 'missing installDir')
   if (!progress) {
     progress = { onProgress: () => {
       return {}

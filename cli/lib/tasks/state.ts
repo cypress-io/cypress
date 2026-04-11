@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import untildify from 'untildify'
@@ -163,7 +162,7 @@ const writeBinaryVerifiedAsync = async (verified: boolean, binaryDir: string): P
 
   await fs.outputJson(
     getBinaryStatePath(binaryDir),
-    _.extend(contents, { verified }),
+    Object.assign(contents ?? {}, { verified }),
     { spaces: 2 },
   )
 }
@@ -190,9 +189,9 @@ const getBinaryPkgAsync = async (binaryDir: string): Promise<any> => {
   return fs.readJson(pathToPackageJson)
 }
 
-const getBinaryPkgVersion = (o: any): any => _.get(o, 'version', null)
-const getBinaryElectronVersion = (o: any): any => _.get(o, 'electronVersion', null)
-const getBinaryElectronNodeVersion = (o: any): any => _.get(o, 'electronNodeVersion', null)
+const getBinaryPkgVersion = (o: any): any => o?.version ?? null
+const getBinaryElectronVersion = (o: any): any => o?.electronVersion ?? null
+const getBinaryElectronNodeVersion = (o: any): any => o?.electronNodeVersion ?? null
 
 const stateModule = {
   getPathToExecutable,

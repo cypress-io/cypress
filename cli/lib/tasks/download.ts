@@ -1,6 +1,5 @@
 import os from 'os'
 import assert from 'assert'
-import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
 import request from '@cypress/request'
@@ -81,7 +80,7 @@ const prepend = (arch: string, urlPath: string, version: string): string => {
 }
 
 const getUrl = (arch: string, version?: string): string => {
-  if (_.isString(version) && version.match(/^https?:\/\/.*$/)) {
+  if (typeof version === 'string' && version.match(/^https?:\/\/.*$/)) {
     debug('version is already an url', version)
 
     return version as string
@@ -335,7 +334,7 @@ const start = async (opts: any): Promise<any> => {
   let { version, downloadDestination, progress, redirectTTL } = opts
 
   if (!downloadDestination) {
-    assert.ok(_.isString(downloadDestination) && !_.isEmpty(downloadDestination), 'missing download dir')
+    assert.ok(typeof downloadDestination === 'string' && downloadDestination.length > 0, 'missing download dir')
   }
 
   if (!progress) {

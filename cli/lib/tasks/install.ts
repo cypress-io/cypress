@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import chalk from 'chalk'
@@ -215,10 +214,11 @@ const start = async (options: any = {}): Promise<any> => {
 
   const { buildInfo, version } = JSON.parse(await readFile(pkgPath, 'utf8'))
 
-  _.defaults(options, {
+  options = {
     force: false,
     buildInfo,
-  })
+    ...options,
+  }
 
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
     const envCache = util.getEnv('CYPRESS_CACHE_FOLDER')

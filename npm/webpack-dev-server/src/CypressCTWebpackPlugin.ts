@@ -1,7 +1,7 @@
 import type { Compiler, Compilation } from 'webpack'
 import type webpack from 'webpack'
 import type { EventEmitter } from 'events'
-import _ from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 import fs from 'fs-extra'
 import path from 'path'
 
@@ -91,7 +91,7 @@ export class CypressCTWebpackPlugin {
    * See https://github.com/cypress-io/cypress/issues/24398
    */
   private onSpecsChange = async ({ specs, options }: { specs: Cypress.Cypress['spec'][], options?: { neededForJustInTimeCompile: boolean}}) => {
-    if (!this.compilation || _.isEqual(specs, this.files)) {
+    if (!this.compilation || isDeepStrictEqual(specs, this.files)) {
       return
     }
 

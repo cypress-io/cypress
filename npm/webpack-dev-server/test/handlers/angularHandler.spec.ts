@@ -1,6 +1,5 @@
 import { expect, it, describe } from 'vitest'
 import * as fs from 'fs-extra'
-import cloneDeep from 'lodash/cloneDeep'
 import * as path from 'path'
 import {
   angularHandler,
@@ -197,12 +196,12 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
     ],
   })
 
-  const modifiedBuildOptions = cloneDeep(buildOptions)
+  const modifiedBuildOptions = structuredClone(buildOptions)
 
   delete modifiedBuildOptions.polyfills
   modifiedBuildOptions.tsConfig = 'tsconfig.cy.json'
 
-  const modifiedDevServerConfig = cloneDeep(devServerConfig)
+  const modifiedDevServerConfig = structuredClone(devServerConfig)
   const supportFile = path.join(projectRoot, 'cypress', 'support', 'component.ts')
 
   modifiedDevServerConfig.cypressConfig.supportFile = supportFile

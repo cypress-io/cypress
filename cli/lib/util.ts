@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import assert from 'assert'
 import arch from 'arch'
 import os from 'os'
@@ -32,13 +31,13 @@ const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
  * Returns SHA512 of a file
  */
 const getFileChecksum = (filename: string): any => {
-  assert.ok(_.isString(filename) && !_.isEmpty(filename), 'expected filename')
+  assert.ok(typeof filename === 'string' && filename.length > 0, 'expected filename')
 
   return hasha.fromFile(filename, { algorithm: 'sha512' })
 }
 
 const getFileSize = async (filename: string): Promise<any> => {
-  assert.ok(_.isString(filename) && !_.isEmpty(filename), 'expected filename')
+  assert.ok(typeof filename === 'string' && filename.length > 0, 'expected filename')
 
   const { size } = await fs.stat(filename)
 
@@ -48,11 +47,11 @@ const getFileSize = async (filename: string): Promise<any> => {
 const isBrokenGtkDisplayRe = /Gtk: cannot open display/
 
 const stringify = (val: any): string => {
-  return _.isObject(val) ? JSON.stringify(val) : val
+  return (typeof val === 'object' && val !== null) ? JSON.stringify(val) : val
 }
 
 function normalizeModuleOptions (options: any = {}): any {
-  return _.mapValues(options, stringify)
+  return Object.fromEntries(Object.entries(options).map(([k, v]) => [k, stringify(v)]))
 }
 
 /**
@@ -110,7 +109,7 @@ function stdoutLineMatches (expectedLine: string, stdout: string): boolean {
  * @example util.isValidCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
  */
 function isValidCypressInternalEnvValue (value: string | undefined): boolean {
-  if (_.isUndefined(value)) {
+  if (value === undefined) {
     // will get default value
     return true
   }
@@ -118,7 +117,7 @@ function isValidCypressInternalEnvValue (value: string | undefined): boolean {
   // names of config environments, see "packages/server/config/app.json"
   const names = ['development', 'test', 'staging', 'production']
 
-  return _.includes(names, value)
+  return names.includes(value)
 }
 
 /**
@@ -129,7 +128,7 @@ function isValidCypressInternalEnvValue (value: string | undefined): boolean {
  * @example util.isNonProductionCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
  */
 function isNonProductionCypressInternalEnvValue (value: string | undefined): boolean {
-  return !_.isUndefined(value) && value !== 'production'
+  return value !== undefined && value !== 'production'
 }
 
 /**
@@ -163,7 +162,7 @@ function printNodeOptions (log: any = debug): void {
   ```
  */
 const dequote = (str: string): string => {
-  assert.ok(_.isString(str), 'expected a string to remove double quotes')
+  assert.ok(typeof str === 'string', 'expected a string to remove double quotes')
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.substr(1, str.length - 2)
   }
@@ -172,7 +171,7 @@ const dequote = (str: string): string => {
 }
 
 const parseOpts = (opts: any): any => {
-  opts = _.pick(opts,
+  const pickKeys = [
     'autoCancelAfterFailures',
     'browser',
     'cachePath',
@@ -213,10 +212,17 @@ const parseOpts = (opts: any): any => {
     'runnerUi',
     'runProject',
     'spec',
-    'tag')
+    'tag',
+  ]
+
+  opts = Object.fromEntries(
+    Object.entries(opts).filter(([k]) => pickKeys.includes(k)),
+  )
 
   if (opts.exit) {
-    opts = _.omit(opts, 'exit')
+    const { exit: _exit, ...rest } = opts
+
+    opts = rest
   }
 
   // some options might be quoted - which leads to unexpected results
@@ -225,7 +231,7 @@ const parseOpts = (opts: any): any => {
   const toDequote = ['group', 'ciBuildId']
 
   for (const prop of toDequote) {
-    if (_.has(opts, prop)) {
+    if (Object.prototype.hasOwnProperty.call(opts, prop)) {
       cleanOpts[prop] = dequote(opts[prop])
     }
   }
@@ -272,16 +278,15 @@ const util = {
   },
 
   getEnvOverrides (options: any = {}): any {
-    return _
-    .chain({})
-    .extend(this.getEnvColors())
-    .extend(this.getForceTty())
-    .omitBy(_.isUndefined) // remove undefined values
-    .mapValues((value: any) => { // stringify to 1 or 0
-      return value ? '1' : '0'
-    })
-    .extend(this.getOriginalNodeOptions())
-    .value()
+    const merged = Object.assign({}, this.getEnvColors(), this.getForceTty())
+    const filtered = Object.fromEntries(
+      Object.entries(merged).filter(([, v]) => v !== undefined),
+    )
+    const stringified = Object.fromEntries(
+      Object.entries(filtered).map(([k, v]) => [k, v ? '1' : '0']),
+    )
+
+    return Object.assign(stringified, this.getOriginalNodeOptions())
   },
 
   getOriginalNodeOptions (): any {
@@ -369,10 +374,10 @@ const util = {
   titleize (...args: any[]): string {
     // prepend first arg with space
     // and pad so that all messages line up
-    args[0] = _.padEnd(` ${args[0]}`, 24)
+    args[0] = ` ${args[0]}`.padEnd(24)
 
     // get rid of any falsy values
-    args = _.compact(args)
+    args = args.filter(Boolean)
 
     return chalk.blue(...args)
   },
@@ -395,12 +400,12 @@ const util = {
     // convert a percent with values between 0 and 1
     // with decimals, so that it is between 0 and 100
     // and has no decimal places
-    return Math.round(_.isFinite(num) ? (num * 100) : 0)
+    return Math.round(Number.isFinite(num) ? (num * 100) : 0)
   },
 
   secsRemaining (eta: number): string {
     // calculate the seconds reminaing with no decimal places
-    return (_.isFinite(eta) ? (eta / 1000) : 0).toFixed(0)
+    return (Number.isFinite(eta) ? (eta / 1000) : 0).toFixed(0)
   },
 
   setTaskTitle (task: any, title: string, renderer: string): void {
@@ -508,7 +513,7 @@ const util = {
   },
 
   getEnv (varName: string, trim?: boolean): string | undefined {
-    assert.ok(_.isString(varName) && !_.isEmpty(varName), 'expected environment variable name, not')
+    assert.ok(typeof varName === 'string' && varName.length > 0, 'expected environment variable name, not')
 
     const configVarName = `npm_config_${varName}`
     const configVarNameLower = configVarName.toLowerCase()
@@ -543,7 +548,7 @@ const util = {
     // so for sanity sake we should first trim whitespace characters and remove
     // double quotes around environment strings if the caller is expected to
     // use this environment string as a file path
-    return trim && (result !== null && result !== undefined) ? dequote(_.trim(result)) : result
+    return trim && (result !== null && result !== undefined) ? dequote(result.trim()) : result
   },
 
   getCacheDir (): string {
@@ -567,7 +572,7 @@ const util = {
   isPossibleLinuxWithIncorrectDisplay,
 
   getGitHubIssueUrl (number: number): string {
-    assert.ok(_.isInteger(number), 'github issue should be an integer')
+    assert.ok(Number.isInteger(number), 'github issue should be an integer')
     assert.ok(number > 0, 'github issue should be a positive number')
 
     return `${issuesUrl}/${number}`

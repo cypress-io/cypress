@@ -1,5 +1,4 @@
 const path = require('path')
-const _ = require('lodash')
 const EE = require('events')
 const sh = require('shelljs')
 // const chalk = require('chalk')
@@ -18,10 +17,7 @@ module.exports = {
     sh.config.silent = true
     EE.defaultMaxListeners = 100
 
-    const opts = _.defaults(options, {
-      getFilenames: null,
-      getFileText: null,
-    })
+    const opts = { getFilenames: null, getFileText: null, ...options }
 
     const filenames = opts.getFilenames().filter((v) => filesRegex.test(v))
 
@@ -52,7 +48,7 @@ module.exports = {
       })
     }, { concurrency: 0 })
     .then((results) => {
-      const failCount = _.filter(results).length
+      const failCount = results.filter(Boolean).length
 
       debug({ failCount })
 
@@ -62,10 +58,7 @@ module.exports = {
   lintFilesByName: (options) => {
     sh.config.silent = true
 
-    const opts = _.defaults(options, {
-      getFilenames: null,
-      fix: false,
-    })
+    const opts = { getFilenames: null, fix: false, ...options }
 
     const filenames = opts.getFilenames().filter((v) => filesRegex.test(v))
 

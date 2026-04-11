@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import os from 'os'
 import cp from 'child_process'
 import path from 'path'
@@ -23,13 +22,13 @@ function isPlatform (platform: string): boolean {
 }
 
 function needsStderrPiped (needsXvfb: boolean): boolean {
-  return _.some([
+  return [
     isPlatform('darwin'),
 
     (needsXvfb && isPlatform('linux')),
 
     util.isPossibleLinuxWithIncorrectDisplay(),
-  ])
+  ].some(Boolean)
 }
 
 function needsEverythingPipedDirectly (): boolean {
@@ -61,9 +60,10 @@ function createSpawnFunction (
 ) {
   return (overrides: any = {}): any => {
     return new Promise(async (resolve: any, reject: any) => {
-      _.defaults(overrides, {
+      overrides = {
         onStderrData: false,
-      })
+        ...overrides,
+      }
 
       const { onStderrData } = overrides
       const envOverrides = util.getEnvOverrides(options)
@@ -92,15 +92,18 @@ function createSpawnFunction (
       /**
          * @type {import('child_process').ForkOptions}
          */
-      let stdioOptions: any = _.pick(options, 'env', 'detached', 'stdio')
+      const stdioPickKeys = ['env', 'detached', 'stdio']
+      let stdioOptions: any = Object.fromEntries(
+        Object.entries(options).filter(([k]) => stdioPickKeys.includes(k)),
+      )
 
       // figure out if we're going to be force enabling or disabling colors.
       // also figure out whether we should force stdout and stderr into thinking
       // it is a tty as opposed to a pipe.
-      stdioOptions.env = _.extend({}, stdioOptions.env, envOverrides)
+      stdioOptions.env = Object.assign({}, stdioOptions.env, envOverrides)
 
       if (node11WindowsFix) {
-        stdioOptions = _.extend({}, stdioOptions, { windowsHide: false })
+        stdioOptions = Object.assign({}, stdioOptions, { windowsHide: false })
       }
 
       if (util.isPossibleLinuxWithIncorrectDisplay()) {
@@ -128,7 +131,10 @@ function createSpawnFunction (
         args.unshift(process.env.CYPRESS_INTERNAL_DEV_DEBUG)
       }
 
-      debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
+      debug('spawn args %o %o', args, Object.fromEntries(
+        Object.entries(stdioOptions).filter(([k]) => k !== 'env'),
+      ))
+
       debug('spawning Cypress with executable: %s', executable)
 
       const platform = await util.getPlatformInfo().catch((e) => reject(e))
@@ -271,7 +277,7 @@ async function userFriendlySpawn (spawn: ReturnType<typeof createSpawnFunction>,
   const overrides: any = {}
 
   if (linuxWithDisplayEnv) {
-    _.extend(overrides, {
+    Object.assign(overrides, {
       electronLogging: true,
       onStderrData (str: string): any {
         // if we receive a broken pipe anywhere

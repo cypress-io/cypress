@@ -2,7 +2,6 @@
 
 const sh = require('shelljs')
 const utils = require('./utils')
-const _ = require('lodash')
 const chalk = require('chalk')
 
 const start = () => {
@@ -11,10 +10,10 @@ const start = () => {
   return utils.lintFilesByName({
     // list only modified files
     getFilenames: () => {
-      return _.union(
-        sh.exec(`git diff --name-only --diff-filter=M`).split('\n'),
-        sh.exec(`git diff --name-only --diff-filter=MA --staged`).split('\n'),
-      )
+      return [...new Set([
+        ...sh.exec(`git diff --name-only --diff-filter=M`).split('\n'),
+        ...sh.exec(`git diff --name-only --diff-filter=MA --staged`).split('\n'),
+      ])]
     },
     fix,
   })

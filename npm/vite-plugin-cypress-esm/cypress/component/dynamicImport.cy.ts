@@ -1,35 +1,32 @@
 /// <reference types="cypress" />
 
-import _ from 'lodash'
+import dayjs from 'dayjs'
 
 describe('dynamic imports', () => {
   it('uses real implementation', () => {
-    expect(_.add(1, 2)).to.eq(3)
+    expect(dayjs.isDayjs(dayjs())).to.eq(true)
   })
 
   it('mocks', () => {
-    cy.stub(_, 'add').callsFake(function multiply (a: number, b: number) {
-      return a * b
-    })
+    cy.stub(dayjs, 'isDayjs').callsFake(() => false)
 
-    // Plot twist - add actually does multiplication!
-    expect(_.add(1, 2)).to.eq(2)
+    expect(dayjs.isDayjs(dayjs())).to.eq(false)
   })
 
   it('uses real implementation again', () => {
-    expect(_.add(1, 2)).to.eq(3)
+    expect(dayjs.isDayjs(dayjs())).to.eq(true)
   })
 
-  it('stubs lodash method from node_modules using dynamic import', () => {
+  it('stubs named export from node_modules using dynamic import', () => {
     let done = false
 
     async function run () {
-      const _ = await import('lodash')
+      const mod = await import('react-router-dom')
 
-      cy.stub(_, 'camelCase').callsFake((str: string) => str.toUpperCase())
-      const result = _.camelCase('foo_bar')
+      cy.stub(mod, 'createSearchParams').callsFake(() => 'STUB')
+      const result = mod.createSearchParams({ q: 'test' })
 
-      expect(result).to.eq('FOO_BAR')
+      expect(result).to.eq('STUB')
 
       done = true
     }
@@ -55,21 +52,21 @@ describe('dynamic imports', () => {
     })
   })
 
-  it('stubs lodash method from node_modules using `then`', () => {
-    import('lodash').then((mod) => {
-      cy.stub(mod, 'camelCase').callsFake((str: string) => str.toUpperCase())
+  it('stubs named export from node_modules using `then`', () => {
+    import('react-router-dom').then((mod) => {
+      cy.stub(mod, 'createSearchParams').callsFake(() => 'THEN_STUB')
 
-      const result = mod.camelCase('foo_bar')
+      const result = mod.createSearchParams({ q: 'test' })
 
-      expect(result).to.eq('FOO_BAR')
+      expect(result).to.eq('THEN_STUB')
     })
   })
 
-  it('destructures', () => {
+  it('destructures named export from dynamic import', () => {
     async function run () {
-      const { add } = await import('lodash')
+      const { createSearchParams } = await import('react-router-dom')
 
-      expect(add(1, 2)).to.eq(3)
+      expect(createSearchParams({ q: 'hello' }).toString()).to.eq('q=hello')
     }
 
     cy.wrap(run())

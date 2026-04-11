@@ -2,7 +2,23 @@ import { describe, it, expect } from 'vitest'
 import path from 'path'
 import eslint from 'eslint'
 import plugin from '../lib'
-import _ from 'lodash'
+
+function defaultsDeep (target, ...sources) {
+  for (const source of sources) {
+    for (const key of Object.keys(source)) {
+      if (target[key] === undefined) {
+        target[key] = source[key]
+      } else if (
+        typeof target[key] === 'object' && target[key] !== null && !Array.isArray(target[key]) &&
+        typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])
+      ) {
+        defaultsDeep(target[key], source[key])
+      }
+    }
+  }
+
+  return target
+}
 
 const pluginName = '__plugin__'
 const ESLint = eslint.ESLint
@@ -26,7 +42,7 @@ async function execute (file, options = {}) {
       [pluginName]: plugin,
     },
   }
-  const opts = _.defaultsDeep(options, defaultConfig)
+  const opts = defaultsDeep(options, defaultConfig)
 
   const cli = new ESLint(opts)
 

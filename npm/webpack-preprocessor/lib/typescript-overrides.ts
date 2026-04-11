@@ -1,5 +1,4 @@
 import debugModule from 'debug'
-import _ from 'lodash'
 import semverLt from 'semver/functions/lt'
 
 import { CompilerOptions, CreateProgramOptions } from 'typescript'
@@ -10,7 +9,7 @@ const debug = debugModule('cypress:webpack')
 let patched = false
 
 const getProgramOptions = (rootNamesOrOptions: CreateProgramOptions, options: CompilerOptions): CompilerOptions => {
-  return _.isArray(rootNamesOrOptions) ? options : rootNamesOrOptions.options
+  return Array.isArray(rootNamesOrOptions) ? options : rootNamesOrOptions.options
 }
 
 export const overrideSourceMaps = (sourceMap: boolean, typescriptPath?: string) => {

@@ -85,6 +85,20 @@ describe('webpack preprocessor', function () {
       // @ts-expect-error
       expect(preprocessor.defaultOptions.webpackOptions.module.rules[0]?.test).toBeInstanceOf(RegExp)
     })
+
+    it('falls back to defaults when webpackOptions is NaN', () => {
+      compilerApi.run.mockImplementation((callback) => {
+        return callback(null, statsApi as unknown as webpack.Stats)
+      })
+
+      return run({ webpackOptions: Number.NaN as any }).then(() => {
+        expect(webpack).toHaveBeenCalledWith(expect.objectContaining({
+          mode: 'development',
+        }))
+
+        file.emit('close')
+      })
+    })
   })
 
   describe('preprocessor function', function () {

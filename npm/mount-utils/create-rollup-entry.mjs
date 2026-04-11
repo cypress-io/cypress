@@ -2,9 +2,34 @@
 import ts from 'rollup-plugin-typescript2'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-import _ from 'lodash'
 import { readFileSync } from 'fs'
 import dts from 'rollup-plugin-dts'
+
+/**
+ * Deep merge two objects. When both values for a key are arrays,
+ * concatenate them instead of replacing.
+ */
+function mergeWith (target, source) {
+  const result = { ...target }
+
+  for (const key of Object.keys(source)) {
+    const targetVal = result[key]
+    const sourceVal = source[key]
+
+    if (Array.isArray(targetVal) && Array.isArray(sourceVal)) {
+      result[key] = targetVal.concat(sourceVal)
+    } else if (
+      targetVal != null && typeof targetVal === 'object' && !Array.isArray(targetVal) &&
+      sourceVal != null && typeof sourceVal === 'object' && !Array.isArray(sourceVal)
+    ) {
+      result[key] = mergeWith(targetVal, sourceVal)
+    } else {
+      result[key] = sourceVal
+    }
+  }
+
+  return result
+}
 
 const pkg = JSON.parse(readFileSync('./package.json'))
 
@@ -51,11 +76,7 @@ export function createEntries (options) {
       },
     }
 
-    const finalConfig = _.mergeWith({}, baseConfig, config, (objValue, srcValue) => {
-      if (Array.isArray(objValue)) {
-        return objValue.concat(srcValue)
-      }
-    })
+    const finalConfig = mergeWith(baseConfig, config)
 
     if (format === 'es') {
       finalConfig.output.file = pkg.module

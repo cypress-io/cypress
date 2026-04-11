@@ -468,5 +468,13 @@ describe('#setup', () => {
       // @ts-expect-error
       expect(() => setup({ on: vi.fn(), onMessage: () => {} })).toThrow('The `onMessage` option provided to `setup` must be an object.')
     })
+
+    it('accepts null-prototype objects for options', () => {
+      const opts = Object.create(null)
+
+      opts.on = vi.fn()
+      opts.onMessage = Object.create(null)
+      expect(() => setup(opts)).not.toThrow('must be an object')
+    })
   })
 })

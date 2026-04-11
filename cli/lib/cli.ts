@@ -1,5 +1,4 @@
 // @ts-check
-import _ from 'lodash'
 import commander from 'commander'
 import { stripIndent } from 'common-tags'
 import logSymbols from 'log-symbols'
@@ -73,20 +72,20 @@ const parseVariableOpts = (fnArgs: any[], args: string[]): any => {
     // but before the next option
     // --spec spec1 spec2 or --tag foo bar
 
-    const multiArgFlags = _.compact([
+    const multiArgFlags = [
       opts.spec ? 'spec' : opts.spec,
       opts.tag ? 'tag' : opts.tag,
-    ])
+    ].filter(Boolean)
 
-    _.forEach(multiArgFlags, (flag: string) => {
-      const argIndex = _.indexOf(args, `--${flag}`) + 2
-      const nextOptOffset = _.findIndex(_.slice(args, argIndex), (arg: string) => {
-        return _.startsWith(arg, '--')
+    multiArgFlags.forEach((flag: string) => {
+      const argIndex = args.indexOf(`--${flag}`) + 2
+      const nextOptOffset = args.slice(argIndex).findIndex((arg: string) => {
+        return arg.startsWith('--')
       })
       const endIndex = nextOptOffset !== -1 ? argIndex + nextOptOffset : args.length
 
-      const maybeArgs = _.slice(args, argIndex, endIndex)
-      const extraArgs = _.intersection(maybeArgs, unknownArgs)
+      const maybeArgs = args.slice(argIndex, endIndex)
+      const extraArgs = maybeArgs.filter((x: string) => unknownArgs.includes(x))
 
       if (extraArgs.length) {
         opts[flag] = [opts[flag]].concat(extraArgs)
@@ -166,8 +165,8 @@ const text = (description: string): string => {
 
 function includesVersion (args: string[]): boolean {
   return (
-    _.includes(args, '--version') ||
-    _.includes(args, '-v')
+    args.includes('--version') ||
+    args.includes('-v')
   )
 }
 
@@ -318,7 +317,7 @@ const castCypressOptions = (opts: any): any => {
   // boolean arguments
   const castOpts = { ...opts }
 
-  if (_.has(opts, 'port')) {
+  if (Object.prototype.hasOwnProperty.call(opts, 'port')) {
     castOpts.port = coerceAnyStringToInt(opts.port)
   }
 
@@ -529,7 +528,7 @@ const cliModule = {
     .action(async (opts: any) => {
       const defaultOpts = { force: true, welcomeMessage: false }
       const parsedOpts = util.parseOpts(opts)
-      const options = _.extend(parsedOpts, defaultOpts)
+      const options = Object.assign(parsedOpts, defaultOpts)
 
       try {
         await start(options)
@@ -555,7 +554,7 @@ const cliModule = {
 
       const [command] = args
 
-      if (!_.includes(['list', 'path', 'clear', 'prune'], command)) {
+      if (!['list', 'path', 'clear', 'prune'].includes(command)) {
         unknownOption.call(this, `cache ${command}`, 'command')
       }
 
@@ -609,7 +608,7 @@ const cliModule = {
 
     const firstCommand = args[2]
 
-    if (!_.includes(knownCommands, firstCommand)) {
+    if (!knownCommands.includes(firstCommand)) {
       debug('unknown command %s', firstCommand)
       logger.error('Unknown command', `"${firstCommand}"`)
       program.outputHelp()

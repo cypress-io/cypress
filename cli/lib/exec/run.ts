@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Debug from 'debug'
 import util from '../util'
 import { start as spawnStart } from './spawn'
@@ -177,13 +176,11 @@ const runModule = {
   isValidProject,
   // resolves with the number of failed tests
   async start (options: any = {}): Promise<any> {
-    _.defaults(options, {
-      key: null,
-      spec: null,
-      reporter: null,
-      reporterOptions: null,
-      project: process.cwd(),
-    })
+    options.key ??= null
+    options.spec ??= null
+    options.reporter ??= null
+    options.reporterOptions ??= null
+    options.project ??= process.cwd()
 
     function run (): any {
       try {

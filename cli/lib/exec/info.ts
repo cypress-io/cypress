@@ -1,11 +1,9 @@
-/* eslint-disable no-console */
 import { start as spawnStart } from './spawn'
 import util from '../util'
 import state from '../tasks/state'
 import os from 'os'
 import chalk from 'chalk'
 import prettyBytes from 'pretty-bytes'
-import _ from 'lodash'
 
 // color for numbers and show values
 const g = chalk.green
@@ -19,7 +17,11 @@ const link = chalk.blue.underline
 const methods: any = {}
 
 methods.findProxyEnvironmentVariables = (): any => {
-  return _.pick(process.env, ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'])
+  const keys = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY']
+
+  return Object.fromEntries(
+    Object.entries(process.env).filter(([k]) => keys.includes(k)),
+  )
 }
 
 const maskSensitiveVariables = (obj: any): any => {
@@ -33,9 +35,9 @@ const maskSensitiveVariables = (obj: any): any => {
 }
 
 methods.findCypressEnvironmentVariables = (): any => {
-  const isCyVariable = (val: any, key: string): boolean => key.startsWith('CYPRESS_')
-
-  return _.pickBy(process.env, isCyVariable)
+  return Object.fromEntries(
+    Object.entries(process.env).filter(([key]) => key.startsWith('CYPRESS_')),
+  )
 }
 
 const formatCypressVariables = (): any => {
@@ -54,11 +56,11 @@ methods.start = async (options: any = {}): Promise<void> => {
   console.log()
   const proxyVars = methods.findProxyEnvironmentVariables()
 
-  if (_.isEmpty(proxyVars)) {
+  if (!proxyVars || Object.keys(proxyVars).length === 0) {
     console.log('Proxy Settings: none detected')
   } else {
     console.log('Proxy Settings:')
-    _.forEach(proxyVars, (value: any, key: string) => {
+    Object.entries(proxyVars).forEach(([key, value]: [string, any]) => {
       console.log('%s: %s', key, g(value))
     })
 
@@ -69,11 +71,11 @@ methods.start = async (options: any = {}): Promise<void> => {
 
   const cyVars = formatCypressVariables()
 
-  if (_.isEmpty(cyVars)) {
+  if (!cyVars || Object.keys(cyVars).length === 0) {
     console.log('Environment Variables: none detected')
   } else {
     console.log('Environment Variables:')
-    _.forEach(cyVars, (value: any, key: string) => {
+    Object.entries(cyVars).forEach(([key, value]: [string, any]) => {
       console.log('%s: %s', key, g(value))
     })
   }

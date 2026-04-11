@@ -3,7 +3,7 @@ import React from 'react'
 import * as M from './fixtures/add'
 import { mount } from 'cypress/react'
 import * as Foo from './fixtures/Foo'
-import _ from 'lodash'
+import dayjs from 'dayjs'
 
 describe('stubbing ES modules', () => {
   it('uses real implementation', () => {
@@ -49,8 +49,8 @@ describe('stubbing ES modules', () => {
     cy.contains('Hello world').should('not.exist')
   })
 
-  it('stubs lodash method from node_modules using static import', () => {
-    cy.stub(_, 'camelCase').callsFake(() => 'STUB')
-    expect(_.camelCase('aaaa')).to.eq('STUB')
+  it('stubs method from node_modules using static import', () => {
+    cy.stub(dayjs, 'isDayjs').callsFake(() => 'STUB')
+    expect(dayjs.isDayjs(null)).to.eq('STUB')
   })
 })

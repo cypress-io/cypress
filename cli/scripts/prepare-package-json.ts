@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import path from 'path'
 import shell from 'shelljs'
 import fs from 'fs-extra'
@@ -34,7 +33,7 @@ function preparePackageForNpmRelease (json: any, branchName?: string): any {
   delete json.nyc
   delete json.workspaces
 
-  _.extend(json, {
+  Object.assign(json, {
     version,
     buildInfo: {
       commitBranch: branchName || process.env.CIRCLE_BRANCH || getStdout('git branch --show-current'),

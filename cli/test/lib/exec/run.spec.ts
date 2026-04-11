@@ -238,5 +238,10 @@ describe('exec run', () => {
       await run.start({ runnerUi: true })
       expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--runner-ui', true], expect.anything())
     })
+
+    it('defaults project to cwd when explicitly undefined', async () => {
+      await run.start({ project: undefined })
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd()], expect.anything())
+    })
   })
 })

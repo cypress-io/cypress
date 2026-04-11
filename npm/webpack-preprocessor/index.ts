@@ -1,6 +1,5 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import _ from 'lodash'
 import * as events from 'events'
 import * as path from 'path'
 import webpack from 'webpack'
@@ -35,7 +34,7 @@ const getTsLoaderIfExists = (rules) => {
       return tsLoaderRule
     }
 
-    if (_.isObject(rule.use) && rule.use.loader && rule.use.loader.match(/(^|[^a-zA-Z])ts-loader([^a-zA-Z]|$)/)) {
+    if (typeof rule.use === 'object' && rule.use !== null && rule.use.loader && rule.use.loader.match(/(^|[^a-zA-Z])ts-loader([^a-zA-Z]|$)/)) {
       /**
        * If the rule is found, it will look like this:
        * rules: [
@@ -113,10 +112,10 @@ const getDefaultWebpackOptions = (): webpack.Configuration => {
 }
 
 const replaceErrMessage = (err: Error, partToReplace: string, replaceWith = '') => {
-  err.message = _.trim(err.message.replace(partToReplace, replaceWith))
+  err.message = err.message.replace(partToReplace, replaceWith).trim()
 
   if (err.stack) {
-    err.stack = _.trim(err.stack.replace(partToReplace, replaceWith))
+    err.stack = err.stack.replace(partToReplace, replaceWith).trim()
   }
 
   return err
@@ -258,13 +257,18 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
     const watchOptions = options.watchOptions || {}
 
     // user can override the default options
-    const webpackOptions: webpack.Configuration = _
-    .chain(options.webpackOptions)
-    .defaultTo(defaultWebpackOptions)
-    .defaults({
-      mode: defaultWebpackOptions.mode,
-    })
-    .assign({
+    // _.defaultTo semantics: fallback for null, undefined, or NaN
+    let webpackOptions: webpack.Configuration = (options.webpackOptions == null || Number.isNaN(options.webpackOptions))
+      ? defaultWebpackOptions
+      : options.webpackOptions
+
+    // apply defaults: fill in undefined keys only
+    if (webpackOptions.mode === undefined) {
+      webpackOptions.mode = defaultWebpackOptions.mode
+    }
+
+    // apply assign: override with entry and output
+    Object.assign(webpackOptions, {
       // we need to set entry and output
       entry,
       output: {
@@ -274,16 +278,14 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
         filename: path.basename(outputPath),
       },
     })
-    .tap((opts) => {
-      try {
-        const tsLoaderRule = getTsLoaderIfExists(opts?.module?.rules)
 
-        if (!tsLoaderRule) {
-          debug('ts-loader not detected')
+    // tap: configure ts-loader
+    try {
+      const tsLoaderRule = getTsLoaderIfExists(webpackOptions?.module?.rules)
 
-          return
-        }
-
+      if (!tsLoaderRule) {
+        debug('ts-loader not detected')
+      } else {
         // FIXME: To prevent disruption, we are only passing in these 4 options to the ts-loader.
         // We will be passing in the entire compilerOptions object from the tsconfig.json in Cypress 15.
         // @see https://github.com/cypress-io/cypress/issues/29614#issuecomment-2722071332
@@ -299,32 +301,27 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
         tsLoaderRule.options.compilerOptions.inlineSourceMap = false
         tsLoaderRule.options.compilerOptions.inlineSources = false
         tsLoaderRule.options.compilerOptions.downlevelIteration = true
-      } catch (e) {
-        debug('ts-loader not detected', e)
-
-        return
       }
-    })
-    .tap((opts) => {
-      if (opts.devtool === false) {
-        // disable any overrides if we've explicitly turned off sourcemaps
-        overrideSourceMaps(false, options.typescript)
+    } catch (e) {
+      debug('ts-loader not detected', e)
+    }
 
-        return
-      }
-
+    // tap: configure source maps and chunk splitting
+    if (webpackOptions.devtool === false) {
+      // disable any overrides if we've explicitly turned off sourcemaps
+      overrideSourceMaps(false, options.typescript)
+    } else {
       debug('setting devtool to inline-source-map')
 
-      opts.devtool = 'inline-source-map'
+      webpackOptions.devtool = 'inline-source-map'
 
       // override typescript to always generate proper source maps
       overrideSourceMaps(true, options.typescript)
 
       // To support dynamic imports, we have to disable any code splitting.
       debug('Limiting number of chunks to 1')
-      opts.plugins = (opts.plugins || []).concat(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }))
-    })
-    .value() as any
+      webpackOptions.plugins = (webpackOptions.plugins || []).concat(new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }))
+    }
 
     debug('webpackOptions: %o', webpackOptions)
     debug('watchOptions: %o', watchOptions)

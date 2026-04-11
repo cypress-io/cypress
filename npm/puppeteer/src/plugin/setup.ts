@@ -1,7 +1,14 @@
-import isPlainObject from 'lodash/isPlainObject'
 import defaultPuppeteer, { Browser, PuppeteerNode } from 'puppeteer-core'
 import { pluginError } from './util'
 import { activateMainTab } from './activateMainTab'
+
+const isPlainObject = (val: unknown): val is Record<string, unknown> => {
+  if (val == null || typeof val !== 'object') return false
+
+  const proto = Object.getPrototypeOf(val)
+
+  return proto === Object.prototype || proto === null
+}
 
 type MessageHandler = (browser: Browser, ...args: any[]) => any | Promise<any>
 

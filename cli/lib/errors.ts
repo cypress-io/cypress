@@ -1,6 +1,5 @@
 import chalk from 'chalk'
 import { stripIndent, stripIndents } from 'common-tags'
-import _ from 'lodash'
 import assert from 'assert'
 import util from './util'
 import state from './tasks/state'
@@ -328,14 +327,14 @@ function syncFormErrorText (info: ErrorInfo, msg?: string, prevMessage?: string)
     formatted.push(stripIndents(msg))
   }
 
-  assert.ok(_.isString(info.description) && !_.isEmpty(info.description), 'expected error description to be text.')
+  assert.ok(typeof info.description === 'string' && info.description.length > 0, 'expected error description to be text.')
 
   // assuming that if there the solution is a function it will handle
   // error message and (optional previous error message)
-  if (_.isFunction(info.solution)) {
+  if (typeof info.solution === 'function') {
     const text = info.solution(msg, prevMessage)
 
-    assert.ok(_.isString(text) && !_.isEmpty(text), 'expected solution to be text.')
+    assert.ok(typeof text === 'string' && text.length > 0, 'expected solution to be text.')
 
     add(`
         ${info.description}
@@ -344,7 +343,7 @@ function syncFormErrorText (info: ErrorInfo, msg?: string, prevMessage?: string)
 
       `)
   } else {
-    assert.ok(_.isString(info.solution) && !_.isEmpty(info.solution), 'expected error solution to be text.')
+    assert.ok(typeof info.solution === 'string' && info.solution.length > 0, 'expected error solution to be text.')
 
     add(`
         ${info.description}

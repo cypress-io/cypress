@@ -3,7 +3,6 @@
 import { describe, it, expect } from 'vitest'
 import globby from 'globby'
 import fs from 'fs-extra'
-import _ from 'lodash'
 import path from 'path'
 import chalk from 'chalk'
 import stripAnsi from 'strip-ansi'
@@ -27,7 +26,7 @@ const runTest = async (options: { spec?: string } = {}) => {
 
   let parsedSpecOptions = {}
 
-  if (!_.isArray(options.spec)) {
+  if (!Array.isArray(options.spec)) {
     const fileStr = (await fs.readFile(options.spec)).toString()
     const match = /\/\*\s*EXPECT:\s*({.*})\s*\*\//s.exec(fileStr)
 
@@ -37,7 +36,7 @@ const runTest = async (options: { spec?: string } = {}) => {
     }
   }
 
-  const opts = _.defaults(options, {
+  const defaults = {
     spec: '',
     expectedResults: {
       totalFailed: 0,
@@ -45,11 +44,19 @@ const runTest = async (options: { spec?: string } = {}) => {
     stdoutInclude: null,
     browser: 'electron',
     exit: true,
-  })
+  }
 
-  _.merge(opts, parsedSpecOptions)
+  const opts = { ...defaults, ...options }
 
-  if (_.isString(opts.stdoutInclude)) {
+  for (const [key, value] of Object.entries(parsedSpecOptions)) {
+    if (typeof value === 'object' && value !== null && !Array.isArray(value) && typeof opts[key] === 'object' && opts[key] !== null && !Array.isArray(opts[key])) {
+      Object.assign(opts[key], value)
+    } else {
+      opts[key] = value
+    }
+  }
+
+  if (typeof opts.stdoutInclude === 'string') {
     opts.stdoutInclude = [opts.stdoutInclude]
   }
 
@@ -59,7 +66,7 @@ const runTest = async (options: { spec?: string } = {}) => {
 
   let stdout
 
-  _.extend(process.env, {
+  Object.assign(process.env, {
     FAKE_CWD_PATH: '/[cwd]',
     DEBUG_COLORS: '1',
     // prevent any Compression progress
@@ -85,7 +92,7 @@ const runTest = async (options: { spec?: string } = {}) => {
     expect(res).toMatchObject(opts.expectedResults)
 
     if (opts.stdoutInclude) {
-      _.forEach(opts.stdoutInclude, (v) => {
+      opts.stdoutInclude.forEach((v) => {
         expect(stdout).toContain(v)
         console.log(`${chalk.bold('run matched stdout:')}\n${v}`)
       })

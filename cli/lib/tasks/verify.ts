@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import chalk from 'chalk'
 import { Listr } from 'listr2'
 import Debug from 'debug'
@@ -19,7 +18,7 @@ const debug = Debug('cypress:cli')
 export const verifyTestRunnerTimeoutMs = () => {
   const verifyTimeout = +(util?.getEnv('CYPRESS_VERIFY_TIMEOUT') || 'NaN')
 
-  if (_.isNumber(verifyTimeout) && !_.isNaN(verifyTimeout)) {
+  if (typeof verifyTimeout === 'number' && !Number.isNaN(verifyTimeout)) {
     return verifyTimeout
   }
 
@@ -64,8 +63,10 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
    * Spawn Cypress running smoke test to check if all operating system
    * dependencies are good.
    */
+  const randomInt = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1)) + min
+
   const spawn = async (linuxWithDisplayEnv: boolean): Promise<any> => {
-    const random = _.random(0, 1000)
+    const random = randomInt(0, 1000)
     const args = ['--smoke-test', `--ping=${random}`]
 
     if (needsSandbox()) {
@@ -92,13 +93,13 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
     debug('smoke test command:', smokeTestCommand)
     debug('smoke test timeout %d ms', options.smokeTestTimeout)
 
-    const stdioOptions = _.extend({}, {
+    const stdioOptions = {
       env: {
         ...process.env,
         FORCE_COLOR: '0',
       },
       timeout: options.smokeTestTimeout,
-    })
+    }
 
     try {
       const result = await util.exec(
@@ -109,15 +110,15 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
 
       // TODO: when execa > 1.1 is released
       // change this to `result.all` for both stderr and stdout
-      // use lodash to be robust during tests against null result or missing stdout
-      const smokeTestStdout = _.get(result, 'stdout', '')
+      // use optional chaining to be robust during tests against null result or missing stdout
+      const smokeTestStdout = result?.stdout ?? ''
 
       debug('smoke test stdout "%s"', smokeTestStdout)
 
       if (!util.stdoutLineMatches(String(random), smokeTestStdout)) {
         debug('Smoke test failed because could not find %d in:', random, result)
 
-        const smokeTestStderr = _.get(result, 'stderr', '')
+        const smokeTestStderr = result?.stderr ?? ''
         const errorText = smokeTestStderr || smokeTestStdout
 
         return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(errorText)
@@ -263,13 +264,14 @@ const maybeVerify = async (installedVersion: string, binaryDir: string, options:
 export const start = async (options: any = {}): Promise<void> => {
   debug('verifying Cypress app')
 
-  _.defaults(options, {
+  options = {
     dev: false,
     force: false,
     welcomeMessage: true,
     smokeTestTimeout: verifyTestRunnerTimeoutMs(),
     skipVerify: util.getEnv('CYPRESS_SKIP_VERIFY') === 'true',
-  })
+    ...options,
+  }
 
   if (options.skipVerify) {
     debug('skipping verification of the Cypress app')
