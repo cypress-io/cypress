@@ -15,7 +15,7 @@ workflows:
 parameters:
   publish-binary-branch:
     type: string
-    default: mschile/electron_41
+    default: release/16.0.0
   force-persist-artifacts:
     type: boolean
     default: false

@@ -152,8 +152,4 @@ const disabledFeaturesElectron = [
 
 export const DEFAULT_ELECTRON_FLAGS = [
   ...formatElectronFlags(formatChromeFlags(makeDefaultFlags(disabledFeaturesElectron))),
-  // NOTE: Can likely be removed with Electron upgrade to 37+.
-  // @see https://github.com/electron/electron/issues/46538
-  // @see https://github.com/cypress-io/cypress/issues/32361
-  ...formatElectronFlags(['--gtk-version=3']),
 ]

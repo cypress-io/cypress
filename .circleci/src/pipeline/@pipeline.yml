@@ -17,7 +17,7 @@ base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20
 parameters:
   publish-binary-branch:
     type: string
-    default: mschile/electron_41
+    default: release/16.0.0
   force-persist-artifacts:
     type: boolean
     default: false
@@ -126,7 +126,7 @@ commands:
             if [[ "<< pipeline.parameters.force-persist-artifacts >>" == "true" ]]; then
               echo 'export SHOULD_PERSIST_ARTIFACTS=true' >> "$BASH_ENV"
             else
-              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "electron/"* ]]; then
+              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "mschile/electron_41" ]]; then
                   export SHOULD_PERSIST_ARTIFACTS=true
               fi' >> "$BASH_ENV"
             fi
