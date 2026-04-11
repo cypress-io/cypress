@@ -1,6 +1,6 @@
 import { gql } from '@urql/core'
 import debugLib from 'debug'
-import { isEqual, take, takeWhile } from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 
 import type { DataContext } from '../DataContext'
 import type { Query, RelevantRun, RelevantRunInfo, RelevantRunLocationEnum } from '../gen/graphcache-config.gen'
@@ -202,15 +202,21 @@ export class RelevantRunsDataSource {
   }
 
   #takeRelevantRuns (runs: RelevantRunInfo[]) {
-    let firstShaWithCompletedRun: string
+    let firstShaWithCompletedRun: string | undefined
 
-    const relevantRuns: RelevantRunInfo[] = takeWhile(runs, (run) => {
+    const relevantRuns: RelevantRunInfo[] = []
+
+    for (const run of runs) {
       if (firstShaWithCompletedRun === undefined && run.status !== 'RUNNING') {
         firstShaWithCompletedRun = run.sha
       }
 
-      return run.status === 'RUNNING' || run.sha === firstShaWithCompletedRun
-    })
+      if (run.status === 'RUNNING' || run.sha === firstShaWithCompletedRun) {
+        relevantRuns.push(run)
+      } else {
+        break
+      }
+    }
 
     debug('relevant runs after take', relevantRuns)
 
@@ -218,7 +224,7 @@ export class RelevantRunsDataSource {
   }
 
   #takeLatestRuns (runs: RelevantRunInfo[]) {
-    const latestRuns = take(runs, 100)
+    const latestRuns = runs.slice(0, 100)
 
     debug('latest runs after take', latestRuns)
 
@@ -252,7 +258,7 @@ export class RelevantRunsDataSource {
     debug(`New values %o`, toCache)
 
     //only emit a new value if something changes
-    if (!isEqual(toCache, this.#cached)) {
+    if (!isDeepStrictEqual(toCache, this.#cached)) {
       debug('Values changed')
 
       debug('current cache: %o, new values: %o', this.#cached, toCache)
@@ -263,7 +269,7 @@ export class RelevantRunsDataSource {
       await this.ctx.cloud.invalidate('Query', 'cloudProjectBySlug', { slug: projectSlug })
 
       // If the cache is empty, then we're just starting up. Don't send notifications
-      if (this.#cached.all[0] && toCache.all[0] && !isEqual(toCache.all[0], this.#cached.all[0])) {
+      if (this.#cached.all[0] && toCache.all[0] && !isDeepStrictEqual(toCache.all[0], this.#cached.all[0])) {
         this.ctx.actions.notification.maybeSendRunNotification(this.#cached.all[0], toCache.all[0])
       }
 

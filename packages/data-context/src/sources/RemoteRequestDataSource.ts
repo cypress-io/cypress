@@ -2,7 +2,7 @@ import { CombinedError, stringifyVariables } from '@urql/core'
 import type { NexusGenAbstractTypeMembers, NexusGenInterfaces, RemoteFetchableStatus } from '../gen/nxs.gen'
 import { DocumentNode, FieldNode, GraphQLResolveInfo, SelectionNode, visit, print, ArgumentNode, VariableDefinitionNode, TypeNode, ValueNode, parseType, VariableNode, GraphQLObjectType } from 'graphql'
 import crypto from 'crypto'
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import type { DataContext } from '../DataContext'
 import { pathToArray } from 'graphql/jsutils/Path'
 import type { RemoteFieldDefinitionConfig, RemoteQueryArgsResolver } from '../../graphql/plugins'
@@ -186,7 +186,7 @@ export class RemoteRequestDataSource {
         ctx.emitter.pushFragment([{
           target: params.__typename,
           fragment: toSend,
-          variables: _.pick(operationVariables, variableNames),
+          variables: pick(operationVariables, variableNames),
           data: {
             id: params.id,
             fetchingStatus,

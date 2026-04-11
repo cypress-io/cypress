@@ -5,7 +5,7 @@ import debugLib from 'debug'
 import type { DataContext } from '../DataContext'
 import type { Query, CloudRun } from '../gen/graphcache-config.gen'
 import { Poller } from '../polling'
-import { compact, isEqual, uniq } from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 
 const debug = debugLib('cypress:data-context:sources:RelevantRunSpecsDataSource')
 
@@ -89,11 +89,11 @@ export class RelevantRunSpecsDataSource {
       this.#poller = new Poller(this.ctx, 'relevantRunSpecChange', this.#pollingInterval, async (subscriptions) => {
         debug('subscriptions', subscriptions.length)
 
-        const runIds = uniq(compact(subscriptions?.map((sub) => sub.meta?.runId)))
+        const runIds = [...new Set(subscriptions?.map((sub) => sub.meta?.runId).filter((id): id is string => Boolean(id)))]
 
         debug('Polling for specs for runs: %o', runIds)
 
-        const query = this.createQuery(compact(subscriptions.map((sub) => sub.meta?.info)))
+        const query = this.createQuery(subscriptions.map((sub) => sub.meta?.info).filter(Boolean) as GraphQLResolveInfo[])
 
         //debug('query', query)
 
@@ -110,7 +110,7 @@ export class RelevantRunSpecsDataSource {
 
           const cachedRun = this.#cached.get(run.id)
 
-          if (!cachedRun || !isEqual(run, cachedRun)) {
+          if (!cachedRun || !isDeepStrictEqual(run, cachedRun)) {
             debug(`Caching for id %s: %o`, run.id, run)
             this.#cached.set(run.id, { ...run })
 

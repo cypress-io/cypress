@@ -2,7 +2,6 @@
 import type { App, BrowserWindow, OpenDialogOptions, OpenDialogReturnValue, SaveDialogOptions, SaveDialogReturnValue, Notification } from 'electron'
 import os from 'os'
 import type { DataContext } from '..'
-import _ from 'lodash'
 import path from 'path'
 import assert from 'assert'
 import debugLib from 'debug'
@@ -83,7 +82,7 @@ export class ElectronActions {
     .then((obj) => {
       // return the first path since there can only ever
       // be a single directory selection
-      return _.get(obj, ['filePaths', 0])
+      return obj?.filePaths?.[0]
     })
   }
 

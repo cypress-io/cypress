@@ -5,7 +5,7 @@
  */
 import type { DataContext } from '../DataContext'
 import { getPathToDist, resolveFromPackages } from '@packages/resolve-dist'
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import { telemetry } from '@packages/telemetry'
 
 const PATH_TO_NON_PROXIED_ERROR = resolveFromPackages('server', 'lib', 'html', 'non_proxied_error.html')
@@ -61,7 +61,7 @@ export class HtmlDataSource {
       'hideRunnerUi',
     ]
 
-    return _.pick(cfg, keys)
+    return pick(cfg, keys)
   }
 
   async makeServeConfig () {

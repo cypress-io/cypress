@@ -1,5 +1,5 @@
 import execa from 'execa'
-import _ from 'lodash'
+import { uniqBy } from '@packages/utils'
 import os from 'os'
 
 import type { FoundBrowser } from '@packages/types'
@@ -28,7 +28,7 @@ function getBrowserKey<T extends {name: string, version: string | number}> (brow
 }
 
 export function removeDuplicateBrowsers (browsers: FoundBrowser[]) {
-  return _.uniqBy(browsers, getBrowserKey)
+  return uniqBy(browsers, getBrowserKey)
 }
 
 export interface BrowserApiShape {
@@ -60,7 +60,7 @@ export class BrowserDataSource {
     }
 
     const userBrowsers = p.browsers.reduce<FoundBrowser[]>((acc, b) => {
-      if (_.includes(_.map(machineBrowsers, getBrowserKey), getBrowserKey(b))) return acc
+      if (machineBrowsers.map(getBrowserKey).includes(getBrowserKey(b))) return acc
 
       return [...acc, {
         ...b,
@@ -69,7 +69,7 @@ export class BrowserDataSource {
       }]
     }, [])
 
-    this.ctx.coreData.allBrowsers = Promise.resolve(_.concat(machineBrowsers, userBrowsers))
+    this.ctx.coreData.allBrowsers = Promise.resolve([...machineBrowsers, ...userBrowsers])
 
     return this.ctx.coreData.allBrowsers
   }

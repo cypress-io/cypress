@@ -2,7 +2,8 @@ import os from 'os'
 import chokidar from 'chokidar'
 import type { ResolvedFromConfig, TestingType, SpecWithRelativeRoot } from '@packages/types'
 import minimatch from 'minimatch'
-import _ from 'lodash'
+import { debounce, intersection } from '@packages/utils'
+import { isDeepStrictEqual } from 'node:util'
 import path from 'path'
 import Debug from 'debug'
 import commonPathPrefix from 'common-path-prefix'
@@ -325,7 +326,7 @@ export class ProjectDataSource {
     // we do **not** want to capture `timers.ts` (source code) or a video in
     // cypress/videos/timers.cy.ts.mp4, so we take the intersection between specPattern
     // and --spec.
-    if (!_.isEqual(specPattern, configSpecPattern)) {
+    if (!isDeepStrictEqual(specPattern, configSpecPattern)) {
       const defaultSpecAbsolutePaths = await this.ctx.file.getFilesByGlob(
         projectRoot,
         configSpecPattern, {
@@ -334,7 +335,7 @@ export class ProjectDataSource {
         },
       )
 
-      specAbsolutePaths = _.intersection(specAbsolutePaths, defaultSpecAbsolutePaths)
+      specAbsolutePaths = intersection(specAbsolutePaths, defaultSpecAbsolutePaths)
     }
 
     const matched = matchedSpecs({
@@ -372,7 +373,7 @@ export class ProjectDataSource {
     // When file system changes are detected, we retrieve any spec files matching
     // the determined specPattern. This function is debounced to limit execution
     // during sequential file operations.
-    const onProjectFileSystemChange = _.debounce(async (_type, _filePath) => {
+    const onProjectFileSystemChange = debounce(async (_type: string, _filePath: string) => {
       const specs = await this.findSpecs({
         projectRoot,
         testingType,
@@ -385,7 +386,7 @@ export class ProjectDataSource {
       // with JIT, since we are unable to deterministically determine the dev-server in use, the test will recompile
       // any time the spec directory has contents added/removed. This means a recompile when it is not needed, but this should
       // only be applicable in open mode and seldomly experienced.
-      if (_.isEqual(this.specs, specs)) {
+      if (isDeepStrictEqual(this.specs, specs)) {
         this.ctx.actions.project.refreshSpecs(specs)
 
         // If no differences are found, we do not need to emit events
@@ -600,10 +601,10 @@ export class ProjectDataSource {
     const { specPattern } = await this.ctx.project.specPatterns()
 
     if (this.ctx.coreData.currentTestingType === 'e2e') {
-      return _.isEqual(specPattern, [e2e])
+      return isDeepStrictEqual(specPattern, [e2e])
     }
 
-    return _.isEqual(specPattern, [component])
+    return isDeepStrictEqual(specPattern, [component])
   }
 
   async maybeGetProjectId (source: ProjectShape) {

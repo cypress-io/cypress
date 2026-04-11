@@ -1,8 +1,8 @@
 import path from 'path'
-import * as _ from 'lodash'
 import { commaListsOr } from 'common-tags'
 import Debug from 'debug'
 import { BROWSER_FAMILY } from '@packages/types'
+import { difference, pick, omit } from '@packages/utils'
 
 const debug = Debug('cypress:server:validation')
 
@@ -28,11 +28,11 @@ const errMsg = (key: string, value: any, type: string): ErrResult => {
 }
 
 const _isFullyQualifiedUrl = (value: any): ErrResult | boolean => {
-  return _.isString(value) && /^https?\:\/\//.test(value)
+  return typeof value === 'string' && /^https?\:\/\//.test(value)
 }
 
 const isStringArray = (value: any): ErrResult | boolean => {
-  return _.isArray(value) && _.every(value, _.isString)
+  return Array.isArray(value) && value.every((x) => typeof x === 'string')
 }
 
 const isFalse = (value: any): boolean => {
@@ -59,19 +59,19 @@ export const validateAny = (...validations: ValidationFn[]): ValidationFn => {
  * @returns {string|true} Returns `true` if the object is matching browser object schema. Returns an error message if it does not.
  */
 export const isValidBrowser = (browser: any): ErrResult | true => {
-  if (!_.isString(browser.name) || _.isEmpty(browser.name)) {
+  if (typeof browser.name !== 'string' || browser.name.length === 0) {
     return errMsg('name', browser, 'a non-empty string')
   }
 
-  if (!_.includes(BROWSER_FAMILY, browser.family)) {
+  if (!BROWSER_FAMILY.includes(browser.family)) {
     return errMsg('family', browser, commaListsOr`either ${BROWSER_FAMILY}`)
   }
 
-  if (!_.isString(browser.displayName) || _.isEmpty(browser.displayName)) {
+  if (typeof browser.displayName !== 'string' || browser.displayName.length === 0) {
     return errMsg('displayName', browser, 'a non-empty string')
   }
 
-  if (!_.isString(browser.version) || _.isEmpty(browser.version)) {
+  if (typeof browser.version !== 'string' || browser.version.length === 0) {
     return errMsg('version', browser, 'a non-empty string')
   }
 
@@ -79,7 +79,7 @@ export const isValidBrowser = (browser: any): ErrResult | true => {
     return errMsg('path', browser, 'a string')
   }
 
-  if (typeof browser.majorVersion !== 'string' && !(_.isNumber(browser.majorVersion) && browser.majorVersion > 0)) {
+  if (typeof browser.majorVersion !== 'string' && !(typeof browser.majorVersion === 'number' && browser.majorVersion > 0)) {
     return errMsg('majorVersion', browser, 'a string or a positive number')
   }
 
@@ -132,11 +132,11 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
   // if the strategy is 'detect-flake-but-always-fail' and the stopIfAnyPassed is required and must be a boolean
   if (strategy === 'detect-flake-but-always-fail') {
     validKeys.push('stopIfAnyPassed')
-    if (_.isNull(value.stopIfAnyPassed) || value.stopIfAnyPassed === undefined) {
+    if (value.stopIfAnyPassed === null || value.stopIfAnyPassed === undefined) {
       return errMsg(`${key}.stopIfAnyPassed`, value.stopIfAnyPassed, 'is required when using the "detect-flake-but-always-fail" strategy')
     }
 
-    const isValidStopIfAnyPasses = _.isBoolean(value.stopIfAnyPassed)
+    const isValidStopIfAnyPasses = typeof value.stopIfAnyPassed === 'boolean'
 
     if (!isValidStopIfAnyPasses) {
       return errMsg(`${key}.stopIfAnyPassed`, value.stopIfAnyPassed, 'a boolean')
@@ -147,7 +147,7 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
   if (strategy === 'detect-flake-and-pass-on-threshold') {
     validKeys.push('passesRequired')
 
-    if (_.isNull(value.passesRequired) || value.passesRequired === undefined) {
+    if (value.passesRequired === null || value.passesRequired === undefined) {
       return errMsg(`${key}.passesRequired`, value.stopIfAnyPassed, 'is required when using the "detect-flake-and-pass-on-threshold" strategy')
     }
 
@@ -158,7 +158,7 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
     }
   }
 
-  const extraneousKeys = _.difference(Object.keys(value), validKeys)
+  const extraneousKeys = difference(Object.keys(value), validKeys)
 
   if (extraneousKeys.length > 0) {
     return errMsg(key, value, `an object with keys ${validKeys.join(', ')}`)
@@ -168,7 +168,7 @@ const isValidExperimentalRetryOptionsConfig = (key: string, value: any, strategy
 }
 
 const isValidRetryValue = (key: string, value: any, minimumValue: 0|1): ErrResult | true => {
-  if (_.isNull(value)) return true
+  if (value === null) return true
 
   if (Number.isInteger(value) && value >= minimumValue) return true
 
@@ -186,24 +186,24 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
         return errMsg(key, parentVal, 'an object with keys "openMode" and "runMode" with values of numbers, booleans, or nulls')
       }
 
-      const optionValue = _.get(parentVal, optionName)
+      const optionValue = (parentVal as Record<string, any>)[optionName]
 
-      if (_.isBoolean(optionValue)) return true
+      if (typeof optionValue === 'boolean') return true
 
-      return isValidRetryValue(`${key}.${optionName}`, _.get(parentVal, optionName), 0)
+      return isValidRetryValue(`${key}.${optionName}`, optionValue, 0)
     }
   }
 
-  if (_.isObject(value)) {
-    const traditionalConfigOptions = _.omit(value, experimentalOptions)
-    const experimentalConfigOptions = _.pick<any>(value, experimentalOptions)
-    const openAndRunModeConfigOptions = _.pick(value, optionalKeys)
+  if (typeof value === 'object' && value !== null) {
+    const traditionalConfigOptions = omit(value, experimentalOptions)
+    const experimentalConfigOptions = pick(value, experimentalOptions)
+    const openAndRunModeConfigOptions = pick(value, optionalKeys)
 
     for (const optionKey in traditionalConfigOptions) {
       if (Object.prototype.hasOwnProperty.call(traditionalConfigOptions, optionKey)) {
         const optionValidation = optionalKeysAreValid(key)(value, optionKey)
 
-        if (optionValidation !== true || _.isObject(optionValidation)) {
+        if (optionValidation !== true || (typeof optionValidation === 'object' && optionValidation !== null)) {
           return optionValidation
         }
       }
@@ -222,9 +222,9 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
 
       for (const optionalKey in openAndRunModeConfigOptions) {
         if (Object.prototype.hasOwnProperty.call(openAndRunModeConfigOptions, optionalKey)) {
-          const optionalConfigVal = _.get(openAndRunModeConfigOptions, optionalKey)
+          const optionalConfigVal = openAndRunModeConfigOptions[optionalKey]
 
-          if (!_.isBoolean(optionalConfigVal)) {
+          if (typeof optionalConfigVal !== 'boolean') {
             return errMsg(`${key}.${optionalKey}`, optionalConfigVal, 'a boolean since an experimental strategy is provided')
           }
         }
@@ -244,9 +244,9 @@ export const isValidRetriesConfig = (key: string, value: any): ErrResult | true 
     } else {
       for (const optionalKey in openAndRunModeConfigOptions) {
         if (Object.prototype.hasOwnProperty.call(openAndRunModeConfigOptions, optionalKey)) {
-          const optionalConfigVal = _.get(openAndRunModeConfigOptions, optionalKey)
+          const optionalConfigVal = openAndRunModeConfigOptions[optionalKey]
 
-          if (!_.isNumber(optionalConfigVal)) {
+          if (typeof optionalConfigVal !== 'number') {
             return errMsg(`${key}.${optionalKey}`, optionalConfigVal, 'a number since no experimental strategy is provided')
           }
         }
@@ -421,8 +421,16 @@ export const isValidClientCertificatesSet = (_key: string, certsForUrls: Array<{
   return true
 }
 
+const _isPlainObject = (value: any): boolean => {
+  if (value == null || typeof value !== 'object') return false
+
+  const proto = Object.getPrototypeOf(value)
+
+  return proto === Object.prototype || proto === null
+}
+
 export const isPlainObject = (key: string, value: any) => {
-  if (value == null || _.isPlainObject(value)) {
+  if (value == null || _isPlainObject(value)) {
     return true
   }
 
@@ -430,7 +438,7 @@ export const isPlainObject = (key: string, value: any) => {
 }
 
 export function isBoolean (key: string, value: any): ErrResult | true {
-  if (value == null || _.isBoolean(value)) {
+  if (value == null || typeof value === 'boolean') {
     return true
   }
 
@@ -438,7 +446,7 @@ export function isBoolean (key: string, value: any): ErrResult | true {
 }
 
 export function isNumber (key: string, value: any): ErrResult | true {
-  if (value == null || _.isNumber(value)) {
+  if (value == null || typeof value === 'number') {
     return true
   }
 
@@ -446,7 +454,7 @@ export function isNumber (key: string, value: any): ErrResult | true {
 }
 
 export function isString (key: string, value: any): ErrResult | true {
-  if (value == null || _.isString(value)) {
+  if (value == null || typeof value === 'string') {
     return true
   }
 
@@ -454,7 +462,7 @@ export function isString (key: string, value: any): ErrResult | true {
 }
 
 export function isArray (key: string, value: any) {
-  if (value == null || _.isArray(value)) {
+  if (value == null || Array.isArray(value)) {
     return true
   }
 
@@ -462,7 +470,7 @@ export function isArray (key: string, value: any) {
 }
 
 export function isNumberOrFalse (key: string, value: any): ErrResult | true {
-  if (_.isNumber(value) || isFalse(value)) {
+  if (typeof value === 'number' || isFalse(value)) {
     return true
   }
 
@@ -472,7 +480,7 @@ export function isNumberOrFalse (key: string, value: any): ErrResult | true {
 export function isValidCrfOrBoolean (key: string, value: any): ErrResult | true {
   // a valid number that is between 1-51 including 1 or 51
   // or a boolean. false or 0 disables compression and true sets compression to 32 CRF by default.
-  if (_.isBoolean(value) || (_.isNumber(value) && _.inRange(value, 0, 52))) {
+  if (typeof value === 'boolean' || (typeof value === 'number' && value >= 0 && value < 52)) {
     return true
   }
 
@@ -480,7 +488,7 @@ export function isValidCrfOrBoolean (key: string, value: any): ErrResult | true 
 }
 
 export function isStringOrFalse (key: string, value: any): ErrResult | true {
-  if (_.isString(value) || isFalse(value)) {
+  if (typeof value === 'string' || isFalse(value)) {
     return true
   }
 
@@ -500,7 +508,7 @@ export function isFullyQualifiedUrl (key: string, value: any): ErrResult | true 
 }
 
 export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | true {
-  if (_.isString(value) || isStringArray(value)) {
+  if (typeof value === 'string' || isStringArray(value)) {
     return true
   }
 
@@ -508,7 +516,7 @@ export function isStringOrArrayOfStrings (key: string, value: any): ErrResult | 
 }
 
 export function isNullOrArrayOfStrings (key: string, value: any): ErrResult | true {
-  if (_.isNull(value) || isStringArray(value)) {
+  if (value === null || isStringArray(value)) {
     return true
   }
 

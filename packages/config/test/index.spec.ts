@@ -294,5 +294,88 @@ describe('config/src/index', () => {
         browser: false,
       })
     })
+
+    it('detects changed Date values', () => {
+      const d1 = new Date('2024-01-01')
+      const d2 = new Date('2024-06-01')
+
+      expect(configUtil.validateNeedToRestartOnChange({ env: { d: d1 } }, { env: { d: d2 } })).toEqual({
+        server: true,
+        browser: false,
+      })
+    })
+
+    it('treats equal Date values as unchanged', () => {
+      const d1 = new Date('2024-01-01')
+      const d2 = new Date('2024-01-01')
+
+      expect(configUtil.validateNeedToRestartOnChange({ env: { d: d1 } }, { env: { d: d2 } })).toEqual({
+        server: false,
+        browser: false,
+      })
+    })
+
+    it('detects changed RegExp values', () => {
+      expect(configUtil.validateNeedToRestartOnChange({ env: { r: /foo/i } }, { env: { r: /bar/i } })).toEqual({
+        server: true,
+        browser: false,
+      })
+    })
+
+    it('treats reordered-but-equal objects as unchanged', () => {
+      expect(configUtil.validateNeedToRestartOnChange({ env: { a: 1, b: 2 } }, { env: { b: 2, a: 1 } })).toEqual({
+        server: false,
+        browser: false,
+      })
+    })
+
+    it('detects devServer changes with function-valued fields', () => {
+      const fn1 = () => {}
+      const fn2 = () => {}
+
+      expect(configUtil.validateNeedToRestartOnChange(
+        { devServer: { framework: 'react', bundler: 'vite', setup: fn1 } },
+        { devServer: { framework: 'react', bundler: 'vite', setup: fn2 } },
+      )).toEqual({
+        server: true,
+        browser: false,
+      })
+    })
+
+    it('handles asymmetric cyclic objects correctly', () => {
+      const a: any = { x: 1 }
+
+      a.self = a
+
+      const b: any = { x: 2 }
+
+      b.self = b
+
+      // a and b are both cyclic but have different x values
+      expect(configUtil.validateNeedToRestartOnChange({ env: a }, { env: b })).toEqual({
+        server: true,
+        browser: false,
+      })
+    })
+
+    it('handles Map values with deep-equal keys', () => {
+      const m1 = new Map([[{ id: 1 }, 'a']])
+      const m2 = new Map([[{ id: 1 }, 'a']])
+
+      expect(configUtil.validateNeedToRestartOnChange({ env: { m: m1 } }, { env: { m: m2 } })).toEqual({
+        server: false,
+        browser: false,
+      })
+    })
+
+    it('handles Set values with deep-equal elements', () => {
+      const s1 = new Set([{ id: 1 }, { id: 2 }])
+      const s2 = new Set([{ id: 1 }, { id: 2 }])
+
+      expect(configUtil.validateNeedToRestartOnChange({ env: { s: s1 } }, { env: { s: s2 } })).toEqual({
+        server: false,
+        browser: false,
+      })
+    })
   })
 })

@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Debug from 'debug'
 // @ts-ignore
 import deepDiff from 'return-deep-diff'
@@ -18,6 +17,36 @@ import {
 } from './utils'
 
 const debug = Debug('cypress:config:project')
+
+// Arrays are treated as atomic: if the target already has an array, it wins
+// entirely (no index-by-index merging). This matches plugin override semantics
+// where e.g. specPattern: ['foo.cy.ts'] should replace, not merge with, the default.
+function defaultsDeep (target: any, ...sources: any[]) {
+  if (target == null) target = {}
+
+  if (typeof target !== 'object') return target
+
+  for (const source of sources) {
+    if (!source || typeof source !== 'object') continue
+
+    for (const key of Object.keys(source)) {
+      const targetVal = target[key]
+      const sourceVal = source[key]
+
+      if (targetVal === undefined) {
+        target[key] = sourceVal
+      } else if (
+        typeof targetVal === 'object' && targetVal !== null && !Array.isArray(targetVal) &&
+        typeof sourceVal === 'object' && sourceVal !== null && !Array.isArray(sourceVal)
+      ) {
+        defaultsDeep(targetVal, sourceVal)
+      }
+      // arrays: target wins (no index merge)
+    }
+  }
+
+  return target
+}
 
 // TODO: any -> SetupFullConfigOptions in data-context/src/data/ProjectConfigManager.ts
 export function setupFullConfigWithDefaults (obj: any = {}, getFilesByGlob: any): Promise<FullConfig> {
@@ -56,7 +85,7 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
   validate(modifiedConfig, (validationResult: ConfigValidationFailureInfo | string) => {
     let configFile = cfg.configFile!
 
-    if (_.isString(validationResult)) {
+    if (typeof validationResult === 'string') {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', 'configFile', configFile, validationResult)
     }
 
@@ -82,7 +111,7 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
     }))
   }, testingType)
 
-  const originalResolvedBrowsers = _.cloneDeep(cfg?.resolved?.browsers) ?? {
+  const originalResolvedBrowsers = structuredClone(cfg?.resolved?.browsers) ?? {
     value: cfg.browsers,
     from: 'default',
   } as ResolvedFromConfig
@@ -91,7 +120,7 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
 
   debug('config diffs %o', diffs)
 
-  const userBrowserList = diffs && diffs.browsers && _.cloneDeep(diffs.browsers)
+  const userBrowserList = diffs && diffs.browsers && structuredClone(diffs.browsers)
 
   if (userBrowserList) {
     debug('user browser list %o', userBrowserList)
@@ -106,22 +135,10 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
     debug('resolved config object %o', cfg.resolved)
   }
 
-  const diffsClone = _.cloneDeep(diffs) ?? {}
-
   // merge cfg into overrides
-  const merged = _.defaultsDeep(diffs, cfg) ?? {}
-
-  for (const [key, value] of Object.entries(diffsClone)) {
-    if (Array.isArray(value)) {
-      merged[key] = _.cloneDeep(value)
-    }
-  }
+  const merged = defaultsDeep(diffs, cfg) ?? {}
 
   debug('merged config object %o', merged)
-
-  // the above _.defaultsDeep combines arrays,
-  // if diffs.browsers = [1] and cfg.browsers = [1, 2]
-  // then the merged result merged.browsers = [1, 2]
   // which is NOT what we want
   if (Array.isArray(userBrowserList) && userBrowserList.length) {
     merged.browsers = userBrowserList

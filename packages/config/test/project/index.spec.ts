@@ -201,5 +201,44 @@ describe('config/src/project/index', () => {
         },
       })
     })
+
+    it('does not throw on function-valued nested overrides and preserves array overrides', () => {
+      const mySetupFn = () => {}
+      const cfg = {
+        foo: 'bar',
+        browsers: [{ name: 'chrome' }],
+        e2e: {
+          specPattern: ['cypress/e2e/**/*.cy.ts', 'other.cy.ts'],
+          excludeSpecPattern: ['ignore/**'],
+        },
+        resolved: {
+          foo: { value: 'bar', from: 'default' as const },
+          browsers: { value: [{ name: 'chrome' }], from: 'default' as const },
+          e2e: {
+            specPattern: { value: ['cypress/e2e/**/*.cy.ts', 'other.cy.ts'], from: 'default' as const },
+            excludeSpecPattern: { value: ['ignore/**'], from: 'default' as const },
+          },
+        },
+      }
+
+      const overrides = {
+        component: {
+          devServer: { framework: 'react', bundler: 'vite', setup: mySetupFn },
+        },
+        browsers: [{ name: 'firefox' }, { name: 'edge' }],
+        e2e: {
+          specPattern: ['foo.cy.ts'],
+        },
+      }
+
+      const updated = updateWithPluginValues(cfg as any, overrides, 'e2e')
+
+      // top-level array preserved
+      expect(updated.browsers).toEqual([{ name: 'firefox' }, { name: 'edge' }])
+      // nested array preserved (not index-merged with default)
+      expect(updated.e2e.specPattern).toEqual(['foo.cy.ts'])
+      // nested function preserved
+      expect(updated.component.devServer.setup).toBe(mySetupFn)
+    })
   })
 })

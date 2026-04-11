@@ -1,6 +1,5 @@
 import { ErrorWrapperSource, stackUtils } from '@packages/errors'
 import path from 'path'
-import _ from 'lodash'
 import { codeFrameColumns } from '@babel/code-frame'
 import os from 'os'
 import type { DataContext } from '..'
@@ -54,7 +53,7 @@ export class ErrorDataSource {
       }
     }
 
-    if (!absolute || !_.isNumber(line) || !_.isNumber(column)) {
+    if (!absolute || typeof line !== 'number' || typeof column !== 'number') {
       return null
     }
 

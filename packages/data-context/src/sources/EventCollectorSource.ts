@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import type { DataContext } from '..'
 import type { CloudTestingTypeEnum, LocalTestCountsInput } from '../gen/nxs.gen'
 import { getTestCounts } from '../util/testCounts'
-import { debounce } from 'lodash'
+import { debounce } from '@packages/utils'
 
 const debug = Debug('cypress:data-context:sources:EventCollectorSource')
 

@@ -4,7 +4,7 @@ import assert from 'assert'
 import type { AllModeOptions, FullConfig, TestingType, DebugData } from '@packages/types'
 import debugLib from 'debug'
 import path from 'path'
-import _ from 'lodash'
+import { uniqueId } from '@packages/utils'
 import chokidar from 'chokidar'
 import {
   validate as validateConfig,
@@ -23,6 +23,45 @@ import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
 
 const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
+
+const isPlainObject = (val: any): boolean => {
+  if (val == null || typeof val !== 'object') return false
+
+  const proto = Object.getPrototypeOf(val)
+
+  return proto === Object.prototype || proto === null
+}
+
+const cloneDeepSafe = (obj: any, seen = new Map<any, any>()): any => {
+  if (obj === null || typeof obj !== 'object') return obj
+
+  if (typeof obj === 'function') return obj
+
+  if (seen.has(obj)) return seen.get(obj)
+
+  // Non-plain objects (Date, RegExp, class instances): preserve by reference
+  if (!isPlainObject(obj) && !Array.isArray(obj)) return obj
+
+  if (Array.isArray(obj)) {
+    const arr: any[] = []
+
+    seen.set(obj, arr)
+    for (const item of obj) {
+      arr.push(cloneDeepSafe(item, seen))
+    }
+
+    return arr
+  }
+
+  const clone: Record<string, any> = {}
+
+  seen.set(obj, clone)
+  for (const key of Object.keys(obj)) {
+    clone[key] = cloneDeepSafe(obj[key], seen)
+  }
+
+  return clone
+}
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
@@ -298,14 +337,14 @@ export class ProjectConfigManager {
 
       this.options.eventRegistrar.registerEvent(event, function (...args: any[]) {
         return new Promise((resolve, reject) => {
-          const invocationId = _.uniqueId('inv')
+          const invocationId = uniqueId('inv')
 
           debug('call event', event, 'for invocation id', invocationId)
 
           ipc.once(`promise:fulfilled:${invocationId}`, (err: any, value: any) => {
             if (err) {
               debug('promise rejected for id %s %o', invocationId, ':', err.stack)
-              reject(_.extend(new Error(err.message), err))
+              reject(Object.assign(new Error(err.message), err))
 
               return
             }
@@ -395,7 +434,7 @@ export class ProjectConfigManager {
 
   private validateConfigFile (file: string | false, config: Cypress.ConfigOptions) {
     validateConfig(config, (errMsg) => {
-      if (_.isString(errMsg)) {
+      if (typeof errMsg === 'string') {
         throw getError('CONFIG_VALIDATION_MSG_ERROR', 'configFile', file || null, errMsg)
       }
 
@@ -523,8 +562,8 @@ export class ProjectConfigManager {
       projectName: path.basename(this.options.projectRoot),
       projectRoot: this.options.projectRoot,
       repoRoot: this.repoRoot,
-      config: _.cloneDeep(configFileContents),
-      envFile: _.cloneDeep(envFile),
+      config: cloneDeepSafe(configFileContents),
+      envFile: structuredClone(envFile),
       options: {
         ...options,
         testingType: this._testingType,
@@ -567,7 +606,7 @@ export class ProjectConfigManager {
       this.validateConfigFile(this.options.configFile, fullConfig)
     }
 
-    return _.cloneDeep(fullConfig)
+    return cloneDeepSafe(fullConfig) as FullConfig
   }
 
   async getFullInitialConfig (options: Partial<AllModeOptions> = this.options.ctx.modeOptions, withBrowsers = true): Promise<FullConfig> {
@@ -581,9 +620,11 @@ export class ProjectConfigManager {
       this.reloadCypressEnvFile(),
     ])
 
-    this._cachedFullConfig = await this.buildBaseFullConfig(configFileContents, envFile, options, withBrowsers)
+    const fullConfig = await this.buildBaseFullConfig(configFileContents, envFile, options, withBrowsers)
 
-    return this._cachedFullConfig
+    this._cachedFullConfig = fullConfig
+
+    return fullConfig
   }
 
   async getConfigFileContents () {
@@ -616,7 +657,7 @@ export class ProjectConfigManager {
       return false
     }
 
-    if (!_.has(config, testingType)) {
+    if (!Object.prototype.hasOwnProperty.call(config, testingType)) {
       return false
     }
 

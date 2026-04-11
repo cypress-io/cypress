@@ -1,5 +1,5 @@
-import _ from 'lodash'
 import Debug from 'debug'
+import { pick, mapValues, camelCase } from '@packages/utils'
 import {
   defaultSpecPattern,
   defaultExcludeSpecPattern,
@@ -12,6 +12,7 @@ import {
 import type { BreakingErrResult, TestingType } from '@packages/types'
 import type { BreakingOption, BreakingOptionErrorKey, OverrideLevel } from './options'
 import type { ErrResult } from './validation'
+import { deepEqual } from './internal/deepEqual'
 
 // this export has to be done in 2 lines because of a bug in babel typescript
 import * as validation from './validation'
@@ -33,7 +34,7 @@ const dashesOrUnderscoresRe = /^(_-)+/
 
 // takes an array and creates an index object of [keyKey]: [valueKey]
 function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyof T, valueKey: keyof T, defaultValueFallback?: any) {
-  return _.reduce(arr, (memo: Record<string, any>, item) => {
+  return arr.reduce((memo: Record<string, any>, item) => {
     if (item[valueKey] !== undefined) {
       memo[item[keyKey]] = item[valueKey]
     } else {
@@ -44,14 +45,14 @@ function createIndex<T extends Record<string, any>> (arr: Array<T>, keyKey: keyo
   }, {})
 }
 
-const breakingKeys = _.map(breakingOptions, 'name')
+const breakingKeys = breakingOptions.map((x) => x.name)
 const defaultValues = createIndex(options, 'name', 'defaultValue')
-const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
+const publicConfigKeys = options.filter((x) => !('isInternal' in x && x.isInternal)).map((x) => x.name)
 const validationRules = createIndex(options, 'name', 'validation')
 
 export const testOverrideLevels = createIndex(options, 'name', 'overrideLevel', 'never')
 
-const restartOnChangeOptionsKeys = _.filter(options, 'requireRestartOnChange')
+const restartOnChangeOptionsKeys = options.filter((x) => x.requireRestartOnChange)
 
 const issuedWarnings = new Set()
 
@@ -70,8 +71,10 @@ export function resetIssuedWarnings () {
 }
 
 const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]>, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
+  if (cfg == null) return
+
   breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value, shouldDisplayOrThrow }) => {
-    if (_.has(cfg, name) && (!shouldDisplayOrThrow || shouldDisplayOrThrow(cfg[name]))) {
+    if (Object.prototype.hasOwnProperty.call(cfg, name) && (!shouldDisplayOrThrow || shouldDisplayOrThrow(cfg[name]))) {
       if (value && cfg[name] !== value) {
         // Bail if a value is specified but the config does not have that value.
         return
@@ -108,7 +111,7 @@ const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]
 export const allowed = (obj = {}) => {
   const propertyNames = publicConfigKeys.concat(breakingKeys)
 
-  return _.pick(obj, propertyNames)
+  return pick(obj, propertyNames)
 }
 
 export const getBreakingKeys = () => {
@@ -123,7 +126,7 @@ export const getDefaultValues = (runtimeOptions: { [k: string]: any } = {}) => {
   // Default values can be functions, in which case they are evaluated
   // at runtime - for example, slowTestThreshold where the default value
   // varies between e2e and component testing.
-  const defaultsForRuntime = _.mapValues(defaultValues, (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
+  const defaultsForRuntime = mapValues(defaultValues, (value) => (typeof value === 'function' ? value(runtimeOptions) : value))
 
   // As we normalize the config based on the selected testing type, we need
   // to do the same with the default values to resolve those correctly
@@ -152,14 +155,14 @@ export const getCloudRecordingConfigKeys = (): string[] => {
 }
 
 export const matchesConfigKey = (key: string) => {
-  if (_.has(defaultValues, key)) {
+  if (Object.prototype.hasOwnProperty.call(defaultValues, key)) {
     return key
   }
 
   key = key.toLowerCase().replace(dashesOrUnderscoresRe, '')
-  key = _.camelCase(key)
+  key = camelCase(key)
 
-  if (_.has(defaultValues, key)) {
+  if (Object.prototype.hasOwnProperty.call(defaultValues, key)) {
     return key
   }
 
@@ -169,7 +172,7 @@ export const matchesConfigKey = (key: string) => {
 export const validate = (cfg: any, onErr: (property: ErrResult | string) => void, testingType: TestingType | null) => {
   debug('validating configuration', cfg)
 
-  return _.each(cfg, (value, key) => {
+  Object.entries(cfg).forEach(([key, value]) => {
     const validationFn = validationRules[key]
 
     // key has a validation rule & value different from the default
@@ -181,7 +184,7 @@ export const validate = (cfg: any, onErr: (property: ErrResult | string) => void
       })
 
       if (result !== true) {
-        return onErr(result)
+        onErr(result)
       }
     }
   })
@@ -256,7 +259,7 @@ export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: 
     return restartOnChange
   }
 
-  const configDiff = _.reduce<any, string[]>(cachedConfig, (result, value, key) => _.isEqual(value, updatedConfig[key]) ? result : result.concat(key), [])
+  const configDiff = Object.entries(cachedConfig).reduce<string[]>((result, [key, value]) => deepEqual(value, updatedConfig[key]) ? result : result.concat(key), [])
 
   restartOnChangeOptionsKeys.forEach((o) => {
     if (o.requireRestartOnChange && configDiff.includes(o.name)) {
@@ -266,7 +269,7 @@ export const validateNeedToRestartOnChange = (cachedConfig: any, updatedConfig: 
 
   // devServer property is not part of the options, but we should trigger a server
   // restart if we identify any change
-  if (!_.isEqual(cachedConfig.devServer, updatedConfig.devServer)) {
+  if (!deepEqual(cachedConfig.devServer, updatedConfig.devServer)) {
     restartOnChange.server = true
   }
 

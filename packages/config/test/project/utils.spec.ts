@@ -1,5 +1,4 @@
 import { vi, describe, it, beforeAll, beforeEach, expect } from 'vitest'
-import _ from 'lodash'
 import stripAnsi from 'strip-ansi'
 import Debug from 'debug'
 import os from 'node:os'
@@ -414,20 +413,56 @@ describe('config/src/project/utils', () => {
     })
   })
 
-  describe('_.defaultsDeep', () => {
-    it('merges arrays', () => {
-      // sanity checks to confirm how Lodash merges arrays in defaultsDeep
+  describe('defaultsDeep', () => {
+    // Arrays are treated as atomic: target array wins entirely (no index merge).
+    // This matches config override semantics where plugin/user arrays replace defaults.
+    function defaultsDeep (target: any, ...sources: any[]) {
+      for (const source of sources) {
+        if (!source || typeof source !== 'object') continue
+
+        for (const key of Object.keys(source)) {
+          const targetVal = target[key]
+          const sourceVal = source[key]
+
+          if (targetVal === undefined) {
+            target[key] = sourceVal
+          } else if (
+            typeof targetVal === 'object' && targetVal !== null && !Array.isArray(targetVal) &&
+            typeof sourceVal === 'object' && sourceVal !== null && !Array.isArray(sourceVal)
+          ) {
+            defaultsDeep(targetVal, sourceVal)
+          }
+        }
+      }
+
+      return target
+    }
+
+    it('preserves target arrays without index merging', () => {
       const diffs = {
         list: [1],
       }
       const cfg = {
         list: [1, 2],
       }
-      const merged = _.defaultsDeep({}, diffs, cfg)
+      const merged = defaultsDeep({}, diffs, cfg)
 
-      expect(merged, 'arrays are combined').toEqual({
-        list: [1, 2],
+      // target array [1] wins entirely -- cfg's longer array does not fill in
+      expect(merged).toEqual({
+        list: [1],
       })
+    })
+
+    it('preserves nested arrays without index merging', () => {
+      const diffs = {
+        e2e: { specPattern: ['foo.cy.ts'] },
+      }
+      const cfg = {
+        e2e: { specPattern: ['cypress/e2e/**/*.cy.ts', 'other.cy.ts'] },
+      }
+      const merged = defaultsDeep({}, diffs, cfg)
+
+      expect(merged.e2e.specPattern).toEqual(['foo.cy.ts'])
     })
   })
 
@@ -1393,6 +1428,34 @@ describe('config/src/project/utils', () => {
         expect(cfg.resolved).toHaveProperty('testIsolation')
         expect(cfg.resolved.testIsolation).toEqual({ value: false, from: 'config' })
       })
+    })
+
+    it('does not throw when config contains function-valued fields', async function () {
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+        e2e: {
+          setupNodeEvents () { /* noop */ },
+        },
+        component: {
+          devServer: { framework: 'react', bundler: 'vite' },
+        },
+      } as any
+
+      await expect(mergeDefaults(cfg, { testingType: 'e2e' }, {}, getFilesByGlob)).resolves.toBeDefined()
+    })
+
+    it('does not throw when env contains RegExp and Date values', async () => {
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+        env: {
+          pattern: /test/i,
+          date: new Date('2024-01-01'),
+        },
+      } as any
+
+      await expect(mergeDefaults(cfg, { testingType: 'e2e' }, {}, getFilesByGlob)).resolves.toBeDefined()
     })
   })
 })

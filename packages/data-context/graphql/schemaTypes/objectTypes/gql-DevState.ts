@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { objectType } from 'nexus'
 import path from 'path'
 const toExpand = new Set(['ProjectLifecycleManager'])
@@ -11,12 +10,18 @@ export const DevState = objectType({
       description: 'For debugging, the current application state',
       resolve: (source, args, ctx) => {
         function replacer (key: string, val: unknown) {
-          if (val && !Array.isArray(val) && _.isObject(val) && !_.isPlainObject(val)) {
-            if (toExpand.has(val.constructor.name)) {
+          if (typeof val === 'function') return '[Function]'
+
+          const proto = val && typeof val === 'object' && !Array.isArray(val) ? Object.getPrototypeOf(val) : null
+
+          if (proto !== null && proto !== Object.prototype) {
+            const name = (val as any).constructor?.name ?? 'Object'
+
+            if (toExpand.has(name)) {
               return val
             }
 
-            return `[${val.constructor.name}]`
+            return `[${name}]`
           }
 
           return val

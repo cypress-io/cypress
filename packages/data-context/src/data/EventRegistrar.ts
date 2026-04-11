@@ -1,5 +1,4 @@
 import debugLib from 'debug'
-import _ from 'lodash'
 
 const debug = debugLib(`cypress:lifecycle:EventRegistrar`)
 
@@ -29,11 +28,11 @@ export class EventRegistrar {
   registerEvent (event: string, callback: Function) {
     debug(`register event '${event}'`)
 
-    if (!_.isString(event)) {
+    if (typeof event !== 'string') {
       throw new Error(`The plugin register function must be called with an event as its 1st argument. You passed '${event}'.`)
     }
 
-    if (!_.isFunction(callback)) {
+    if (typeof callback !== 'function') {
       throw new Error(`The plugin register function must be called with a callback function as its 2nd argument. You passed '${callback}'.`)
     }
 

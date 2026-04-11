@@ -8,7 +8,7 @@ import inspector from 'inspector'
 import debugLib from 'debug'
 import { getTsconfig } from 'get-tsconfig'
 import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
-import _ from 'lodash'
+import { omit } from '@packages/utils'
 import os from 'os'
 import semver from 'semver'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
@@ -279,7 +279,7 @@ export class ProjectConfigIpc extends EventEmitter {
   private forkConfigProcess (): ChildProcess {
     const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath]
     // we do NOT want telemetry enabled within our cy-in-cy tests as it isn't configured to handled it
-    const env = _.omit(process.env, 'CYPRESS_INTERNAL_E2E_TESTING_SELF', 'CYPRESS_INTERNAL_ENABLE_TELEMETRY')
+    const env = omit(process.env, ['CYPRESS_INTERNAL_E2E_TESTING_SELF', 'CYPRESS_INTERNAL_ENABLE_TELEMETRY'])
 
     env.NODE_OPTIONS = process.env.ORIGINAL_NODE_OPTIONS || ''
 
@@ -291,13 +291,13 @@ export class ProjectConfigIpc extends EventEmitter {
     }
 
     if (inspector.url()) {
-      childOptions.execArgv = _.chain(process.execArgv.slice(0))
-      .remove('--inspect-brk')
-      // NOTE: The IDE in which you are working likely will not let attach to this process until it is running if using the --inspect option
-      // If needing to debug the child process (webpack-dev-server/vite-dev-server/webpack-preprocessor(s)/config loading), you may want to use --inspect-brk instead
-      // as it will NOT execute that process until you attach the debugger to it.
-      .push(`--inspect=${process.debugPort + 1}`)
-      .value()
+      childOptions.execArgv = [
+        ...process.execArgv.slice(0).filter((arg) => arg !== '--inspect-brk'),
+        // NOTE: The IDE in which you are working likely will not let attach to this process until it is running if using the --inspect option
+        // If needing to debug the child process (webpack-dev-server/vite-dev-server/webpack-preprocessor(s)/config loading), you may want to use --inspect-brk instead
+        // as it will NOT execute that process until you attach the debugger to it.
+        `--inspect=${process.debugPort + 1}`,
+      ]
     }
 
     /**
@@ -318,7 +318,7 @@ export class ProjectConfigIpc extends EventEmitter {
      * We can use tsx to load just about anything, including JavaScript files (@see https://github.com/privatenumber/ts-runtime-comparison)!
      */
 
-    debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions: _.omit(childOptions, 'env') })
+    debug('fork child process %o', { CHILD_PROCESS_FILE_PATH, configProcessArgs, childOptions: omit(childOptions, ['env']) })
 
     if (!childOptions.env) {
       childOptions.env = {}

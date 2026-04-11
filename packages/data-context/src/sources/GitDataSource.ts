@@ -8,7 +8,7 @@ import os from 'os'
 import Debug from 'debug'
 import type { gitStatusType } from '@packages/types'
 import chokidar from 'chokidar'
-import { isEqual } from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 
 const debug = Debug('cypress:data-context:sources:GitDataSource')
 const debugVerbose = Debug('cypress-verbose:data-context:sources:GitDataSource')
@@ -362,7 +362,7 @@ export class GitDataSource {
         }
 
         this.#gitMeta.set(file, toSet)
-        if (!isEqual(toSet, current)) {
+        if (!isDeepStrictEqual(toSet, current)) {
           changed.push(file)
         }
       }
@@ -454,7 +454,7 @@ export class GitDataSource {
       debug('hashes loaded')
       const currentHashes = logResponse?.all.map((log) => log.hash)
 
-      if (!isEqual(this.#gitHashes, currentHashes)) {
+      if (!isDeepStrictEqual(this.#gitHashes, currentHashes)) {
         this.#gitHashes = currentHashes || []
         this.#currentCommitInfo = logResponse?.all[0]
 

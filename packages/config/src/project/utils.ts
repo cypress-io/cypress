@@ -1,8 +1,8 @@
 import Debug from 'debug'
 import fs from 'fs-extra'
-import _ from 'lodash'
 import path from 'path'
 
+import { pick, mapValues, omit } from '@packages/utils'
 import type {
   ResolvedFromConfig,
   ResolvedConfigurationOptionSource,
@@ -20,12 +20,38 @@ import {
   validateNoBreakingConfig,
 } from '../browser'
 import { hideKeys, setUrls, coerce } from '../utils'
+import { deepEqual, cloneDeepSafe } from '../internal/deepEqual'
 import { options } from '../options'
 
 const debug = Debug('cypress:config:project:utils')
 
+// Arrays are treated as atomic: if the target already has an array, it wins
+// entirely (no index-by-index merging). This matches config override semantics
+// where array-valued config should replace, not merge with, the default.
+function defaultsDeep (target: any, ...sources: any[]) {
+  for (const source of sources) {
+    if (!source || typeof source !== 'object') continue
+
+    for (const key of Object.keys(source)) {
+      const targetVal = target[key]
+      const sourceVal = source[key]
+
+      if (targetVal === undefined) {
+        target[key] = sourceVal
+      } else if (
+        typeof targetVal === 'object' && targetVal !== null && !Array.isArray(targetVal) &&
+        typeof sourceVal === 'object' && sourceVal !== null && !Array.isArray(sourceVal)
+      ) {
+        defaultsDeep(targetVal, sourceVal)
+      }
+    }
+  }
+
+  return target
+}
+
 const hideSpecialVals = function (val: string, key: string) {
-  if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
+  if (CYPRESS_SPECIAL_ENV_VARS.includes(key)) {
     return hideKeys(val)
   }
 
@@ -33,7 +59,7 @@ const hideSpecialVals = function (val: string, key: string) {
 }
 
 export function getProcessEnvVars (obj: NodeJS.ProcessEnv) {
-  return _.reduce(obj, (memo: Record<string, string>, value: string | undefined, key: string) => {
+  return Object.entries(obj).reduce((memo: Record<string, string>, [key, value]) => {
     if (!value) {
       return memo
     }
@@ -89,11 +115,8 @@ const CYPRESS_SPECIAL_ENV_VARS = [
 ]
 
 const isCypressEnvLike = (key: string) => {
-  return _.chain(key)
-  .invoke('toUpperCase')
-  .startsWith(CYPRESS_ENV_PREFIX)
-  .value() &&
-  !_.includes(CYPRESS_RESERVED_ENV_VARS, key)
+  return key.toUpperCase().startsWith(CYPRESS_ENV_PREFIX) &&
+  !CYPRESS_RESERVED_ENV_VARS.includes(key)
 }
 
 const removeEnvPrefix = (key: string) => {
@@ -103,9 +126,9 @@ const removeEnvPrefix = (key: string) => {
 export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>, resolved: Record<string, any> = {}) {
   const envVars: any = (resolved.env = {})
 
-  const resolveFrom = (from: string, obj = {}) => {
-    return _.each(obj, (val, key) => {
-      return envVars[key] = {
+  const resolveFrom = (from: string, obj: Record<string, any> = {}) => {
+    Object.entries(obj).forEach(([key, val]) => {
+      envVars[key] = {
         value: val,
         from,
       }
@@ -119,7 +142,7 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
 
   cliEnvs = cliEnvs != null ? cliEnvs : {}
 
-  const configFromEnv = _.reduce(processEnvs, (memo: string[], val, key) => {
+  const configFromEnv = Object.entries(processEnvs).reduce((memo: string[], [key, val]) => {
     const cfgKey = matchesConfigKey(key)
 
     if (cfgKey) {
@@ -139,10 +162,7 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
     return memo
   }, [])
 
-  processEnvs = _.chain(processEnvs)
-  .omit(configFromEnv)
-  .mapValues(hideSpecialVals)
-  .value()
+  processEnvs = mapValues(omit(processEnvs, configFromEnv), hideSpecialVals) as Record<string, string>
 
   resolveFrom('config', configEnv)
   resolveFrom('envFile', envFile)
@@ -153,15 +173,15 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
   // envFile is from cypress.env.json
   // processEnvs is from process env vars
   // cliEnvs is from CLI arguments
-  return _.extend(configEnv, envFile, processEnvs, cliEnvs)
+  return Object.assign(configEnv, envFile, processEnvs, cliEnvs)
 }
 
 function parseExposed (cfg: Record<string, any>, cliExposeVars: Record<string, any>, resolved: Record<string, any> = {}) {
   const exposeVars: any = (resolved.expose = {})
 
-  const resolveFrom = (from: string, obj = {}) => {
-    return _.each(obj, (val, key) => {
-      return exposeVars[key] = {
+  const resolveFrom = (from: string, obj: Record<string, any> = {}) => {
+    Object.entries(obj).forEach(([key, val]) => {
+      exposeVars[key] = {
         value: val,
         from,
       }
@@ -177,7 +197,7 @@ function parseExposed (cfg: Record<string, any>, cliExposeVars: Record<string, a
 
   // configExpose is from cypress.config.{js,ts,mjs,cjs}
   // cliExposedVars is from CLI arguments
-  return _.extend(configExpose, cliExposeVars)
+  return Object.assign(configExpose, cliExposeVars)
 }
 
 // combines the default configuration object with values specified in the
@@ -185,10 +205,9 @@ function parseExposed (cfg: Record<string, any>, cliExposeVars: Record<string, a
 // overwrite the defaults.
 export function resolveConfigValues (config: Config, defaults: Record<string, any>, resolved: any = {}) {
   // pick out only known configuration keys
-  return _
-  .chain(config)
-  .pick(getPublicConfigKeys())
-  .mapValues((val, key) => {
+  const picked = pick(config, getPublicConfigKeys())
+
+  return mapValues(picked, (val, key) => {
     const source = (s: ResolvedConfigurationOptionSource): ResolvedFromConfig => {
       return {
         value: val,
@@ -199,14 +218,14 @@ export function resolveConfigValues (config: Config, defaults: Record<string, an
     const r = resolved[key]
 
     if (r) {
-      if (_.isObject(r)) {
+      if (typeof r === 'object' && r !== null) {
         return r
       }
 
       return source(r)
     }
 
-    if (_.isEqual(config[key], defaults[key]) || key === 'browsers') {
+    if (deepEqual(config[key], defaults[key]) || key === 'browsers') {
       // "browsers" list is special, since it is dynamic by default
       // and can only be overwritten via plugins file
       return source('default')
@@ -214,15 +233,14 @@ export function resolveConfigValues (config: Config, defaults: Record<string, an
 
     return source('config')
   })
-  .value()
 }
 
 // Given an object "resolvedObj" and a list of overrides in "obj"
 // marks all properties from "obj" inside "resolvedObj" using
 // {value: obj.val, from: "plugin"}
 export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Record<string, any>): any {
-  return _.each(obj, (val, key) => {
-    if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
+  Object.entries(obj).forEach(([key, val]) => {
+    if (typeof val === 'object' && val !== null && !Array.isArray(val) && resolvedObj[key]) {
       // recurse setting overrides
       // inside of objected
       return setPluginResolvedOn(resolvedObj[key], val)
@@ -238,7 +256,7 @@ export function setPluginResolvedOn (resolvedObj: Record<string, any>, obj: Reco
 }
 
 export function setAbsolutePaths (obj: Config) {
-  obj = _.clone(obj)
+  obj = { ...obj }
 
   // if we have a projectRoot
   const pr = obj.projectRoot
@@ -248,16 +266,16 @@ export function setAbsolutePaths (obj: Config) {
     // obj.fileServerFolder = path.resolve(pr, obj.fileServerFolder)
 
     // and do the same for all the rest
-    _.extend(obj, convertRelativeToAbsolutePaths(pr, obj))
+    Object.assign(obj, convertRelativeToAbsolutePaths(pr, obj))
   }
 
   return obj
 }
 
-const folders = _(options).filter({ isFolder: true }).map('name').value()
+const folders = options.filter((x) => 'isFolder' in x && x.isFolder).map((x) => x.name)
 
 const convertRelativeToAbsolutePaths = (projectRoot: string, obj: Config) => {
-  return _.reduce(folders, (memo: Record<string, string>, folder) => {
+  return folders.reduce((memo: Record<string, string>, folder) => {
     const val = obj[folder]
 
     if ((val != null) && (val !== false)) {
@@ -300,7 +318,7 @@ export async function setSupportFileAndFolder (obj: Config, getFilesByGlob: any)
     return Promise.resolve(obj)
   }
 
-  obj = _.clone(obj)
+  obj = { ...obj }
 
   const supportFilesByGlob = await getFilesByGlob(obj.projectRoot, obj.supportFile)
 
@@ -386,17 +404,14 @@ export function mergeDefaults (
   const resolved: any = {}
   const { testingType } = options
 
-  config.rawJson = _.cloneDeep(config)
+  config.rawJson = cloneDeepSafe(config)
 
-  _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers'))
+  Object.assign(config, pick(options, ['configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers']))
   debug('merged config with options, got %o', config)
 
-  _
-  .chain(allowed({ ...cliConfig, ...options }))
-  .omit('env')
-  .omit('expose')
-  .omit('browsers')
-  .each((val: any, key) => {
+  const allowedCliConfig = omit(allowed({ ...cliConfig, ...options }), ['env', 'expose', 'browsers'])
+
+  Object.entries(allowedCliConfig).forEach(([key, val]) => {
     // If users pass in testing-type specific keys (eg, specPattern),
     // we want to merge this with what we've read from the config file,
     // rather than override it entirely.
@@ -409,7 +424,7 @@ export function mergeDefaults (
       resolved[key] = 'cli'
       config[key] = val
     }
-  }).value()
+  })
 
   let url = config.baseUrl
 
@@ -424,7 +439,7 @@ export function mergeDefaults (
     ...options,
   })
 
-  _.defaultsDeep(config, defaultsForRuntime)
+  defaultsDeep(config, defaultsForRuntime)
 
   let additionalIgnorePattern = config.additionalIgnorePattern
 
@@ -442,7 +457,7 @@ export function mergeDefaults (
   // breaking options in order to correctly hide the error that Cypress.env() is deprecated when allowCypressEnv is false
   // unless the value is explicitly set
   config.allowCypressEnv = config.allowCypressEnv ?? true
-  if (!_.has(config[testingType], 'allowCypressEnv') && _.isObject(config[testingType])) {
+  if (config[testingType] && typeof config[testingType] === 'object' && !Object.prototype.hasOwnProperty.call(config[testingType], 'allowCypressEnv')) {
     config[testingType].allowCypressEnv = config.allowCypressEnv
   }
 
@@ -478,9 +493,9 @@ export function mergeDefaults (
 
   // validate config again here so that we catch configuration errors coming
   // from the CLI overrides or env var overrides
-  validate(_.omit(config, 'browsers'), (validationResult: ConfigValidationFailureInfo | string) => {
+  validate(omit(config, ['browsers']), (validationResult: ConfigValidationFailureInfo | string) => {
     // return errors.throwErr('CONFIG_VALIDATION_ERROR', errMsg)
-    if (_.isString(validationResult)) {
+    if (typeof validationResult === 'string') {
       return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
     }
 
@@ -523,11 +538,11 @@ function isValidCypressInternalEnvValue (value: string) {
   // names of config environments, see "config/app.json"
   const names = ['development', 'test', 'staging', 'production']
 
-  return _.includes(names, value)
+  return names.includes(value)
 }
 
 function setResolvedConfigValues (config: Config, defaults: any, resolved: any) {
-  const obj = _.clone(config)
+  const obj = { ...config }
 
   obj.resolved = resolveConfigValues(config, defaults, resolved)
   debug('resolved config is %o', obj.resolved.browsers)

@@ -3,8 +3,7 @@ import fsExtra from 'fs-extra'
 import path from 'path'
 import chalk from 'chalk'
 import assert from 'assert'
-import str from 'underscore.string'
-import _ from 'lodash'
+import { uniqueId } from '@packages/utils'
 
 import 'server-destroy'
 
@@ -297,7 +296,7 @@ export class DataContext {
       }
     } else {
       const err = {
-        id: _.uniqueId('Error'),
+        id: uniqueId('Error'),
         title,
         cypressError,
       }
@@ -317,9 +316,18 @@ export class DataContext {
       // eslint-disable-next-line
       console.log(chalk.yellow(err.message))
     } else {
+      const WARNING_TITLE_BY_TYPE: Record<string, string> = {
+        BROWSER_NOT_FOUND_BY_NAME: 'Browser Not Found',
+        BROWSER_NOT_FOUND_BY_PATH: 'Browser Not Found',
+      }
+
+      const humanizeErrorType = (value: string) => value.replace(/[_-]+/g, ' ').trim().toLowerCase()
+      const titleizeWords = (value: string) => humanizeErrorType(value).replace(/\b\w/g, (char) => char.toUpperCase())
+      const title = WARNING_TITLE_BY_TYPE[err.type ?? ''] ?? titleizeWords(err.type ?? '')
+
       const warning = {
-        id: _.uniqueId('Warning'),
-        title: `Warning: ${str.titleize(str.humanize(err.type ?? ''))}`,
+        id: uniqueId('Warning'),
+        title: `Warning: ${title}`,
         cypressError: err,
       }
 

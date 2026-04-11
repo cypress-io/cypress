@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 type WeightedAlgorithm = {
   pick: (values: string[]) => string
 }
@@ -33,15 +31,19 @@ const weightedChoice = (weights: number[], values: any[]) => {
 
   const randomNumber = Math.random() * (cumulativeWeights[cumulativeWeights.length - 1] ?? 1)
 
-  const choice = _.transform(cumulativeWeights, (result, value, index) => {
-    if (value >= randomNumber) {
-      result.chosenIndex = index
+  let chosenIndex = -1
+
+  for (let index = 0; index < cumulativeWeights.length; index++) {
+    if (cumulativeWeights[index]! >= randomNumber) {
+      chosenIndex = index
     }
 
-    return result.chosenIndex === -1
-  }, { chosenIndex: -1 })
+    if (chosenIndex !== -1) {
+      break
+    }
+  }
 
-  return values[choice.chosenIndex]
+  return values[chosenIndex]
 }
 
 export const WEIGHTED = (weights: number[]): WeightedAlgorithm => {
@@ -53,5 +55,5 @@ export const WEIGHTED = (weights: number[]): WeightedAlgorithm => {
 }
 
 export const WEIGHTED_EVEN = (values: any[]): WeightedAlgorithm => {
-  return WEIGHTED(_.fill(Array(values.length), 1))
+  return WEIGHTED(Array(values.length).fill(1))
 }

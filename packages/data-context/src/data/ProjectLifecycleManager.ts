@@ -7,7 +7,6 @@
  * states that exist, and how they are managed.
  */
 import path from 'path'
-import _ from 'lodash'
 import fs from 'fs'
 
 import { getError, CypressError } from '@packages/errors'
@@ -707,7 +706,7 @@ export class ProjectLifecycleManager {
       return false
     }
 
-    if (!_.has(config, testingType)) {
+    if (!Object.prototype.hasOwnProperty.call(config, testingType)) {
       return false
     }
 

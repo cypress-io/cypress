@@ -5,7 +5,7 @@ import fs from 'fs-extra'
 import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern } from '../../../src/sources'
 import path from 'path'
 import chokidar from 'chokidar'
-import _ from 'lodash'
+import * as utils from '@packages/utils'
 import { FoundSpec } from '@packages/types'
 import { DataContext } from '../../../src'
 import type { FindSpecs } from '../../../src/actions'
@@ -602,10 +602,10 @@ describe('startSpecWatcher', () => {
 
       let handleFsChange
 
-      jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
+      jest.spyOn(utils, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
 
-        return handleFsChange as _.DebouncedFunc<any>
+        return handleFsChange as utils.DebouncedFunction<any>
       })
 
       ctx.project.startSpecWatcher({
@@ -617,7 +617,7 @@ describe('startSpecWatcher', () => {
         additionalIgnorePattern: ['additional.ignore.cy.js'],
       })
 
-      expect(_.debounce).not.toHaveBeenCalled()
+      expect(utils.debounce).not.toHaveBeenCalled()
 
       expect(chokidar.watch).not.toHaveBeenCalled()
 
@@ -665,10 +665,10 @@ describe('startSpecWatcher', () => {
 
       let handleFsChange
 
-      jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
+      jest.spyOn(utils, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
 
-        return handleFsChange as _.DebouncedFunc<any>
+        return handleFsChange as utils.DebouncedFunction<any>
       })
 
       await ctx.project.startSpecWatcher({
@@ -680,7 +680,7 @@ describe('startSpecWatcher', () => {
         additionalIgnorePattern: ['additional.ignore.cy.js'],
       })
 
-      expect(_.debounce).toHaveBeenCalledWith(expect.any(Function), 250)
+      expect(utils.debounce).toHaveBeenCalledWith(expect.any(Function), 250)
 
       expect(chokidar.watch).toHaveBeenCalledWith('.', {
         ignoreInitial: true,
@@ -714,10 +714,10 @@ describe('startSpecWatcher', () => {
 
       let handleFsChange
 
-      jest.spyOn(_, 'debounce').mockImplementation((funcToDebounce) => {
+      jest.spyOn(utils, 'debounce').mockImplementation((funcToDebounce) => {
         handleFsChange = (() => funcToDebounce())
 
-        return handleFsChange as _.DebouncedFunc<any>
+        return handleFsChange as utils.DebouncedFunction<any>
       })
 
       const watchOptions: FindSpecs<string[]> = {

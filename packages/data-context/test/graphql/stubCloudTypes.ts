@@ -3,7 +3,6 @@
  * Takes all of the "Cloud" types and creates realistic mocks,
  * indexing the types in a way that we can access them
  */
-import _ from 'lodash'
 import fakeUuid from 'fake-uuid'
 import { connectionFromArray } from 'graphql-relay'
 
@@ -126,7 +125,7 @@ export function createCloudProject (config: Partial<ConfigFor<CloudProject>>) {
         }
       }
 
-      const twentyRuns = _.times(20, (i) => {
+      const twentyRuns = Array.from({ length: 20 }, (_, i) => {
         const statusIndex = i % STATUS_ARRAY.length
         const status = STATUS_ARRAY[statusIndex]
 

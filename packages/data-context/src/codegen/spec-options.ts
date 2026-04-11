@@ -1,11 +1,12 @@
 import type { ParsedPath } from 'path'
 import type { CodeGenType } from '../gen/nxs.gen'
 import fs from 'fs-extra'
-import { uniq, upperFirst } from 'lodash'
 import path from 'path'
 import { FileExtension, getDefaultSpecFileName } from '../util/files'
 import { toPosix } from '../util'
 import type { FoundSpec } from '@packages/types'
+
+const upperFirst = (s: string) => s && s.length > 0 ? s[0]!.toUpperCase() + s.slice(1) : ''
 
 interface CodeGenOptions {
   codeGenPath: string
@@ -135,7 +136,7 @@ export class SpecOptions {
       componentName,
       componentPath: `${componentPath.dir}/${componentPath.name}`,
       // If the component name and file name are different, the spec file should be combined (ex: SpecNameComponentName.cy.xx)
-      fileName: await this.buildComponentSpecFilename(extension, parsedSpecPath, uniq([this.parsedPath.name, componentName]).join('')),
+      fileName: await this.buildComponentSpecFilename(extension, parsedSpecPath, [...new Set([this.parsedPath.name, componentName])].join('')),
       templateKey: 'reactComponent' as TemplateKey,
       overrideCodeGenDir: parsedSpecPath?.dir,
       isDefault: this.options.isDefault,

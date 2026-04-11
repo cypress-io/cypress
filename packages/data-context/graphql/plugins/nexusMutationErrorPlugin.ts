@@ -2,7 +2,7 @@ import { plugin } from 'nexus'
 import { getError } from '@packages/errors'
 import type { DataContext } from '../../src'
 import { getNamedType, isObjectType } from 'graphql'
-import _ from 'lodash'
+import { uniqueId } from '@packages/utils'
 
 export const mutationErrorPlugin = plugin({
   name: 'MutationErrorPlugin',
@@ -16,7 +16,7 @@ export const mutationErrorPlugin = plugin({
       return plugin.completeValue(next(source, args, ctx, info), (v) => v, (err) => {
         ctx.update((d) => {
           d.diagnostics.error = {
-            id: _.uniqueId('Error'),
+            id: uniqueId('Error'),
             cypressError: err.isCypressErr
               ? err
               : getError('UNEXPECTED_MUTATION_ERROR', def.fieldConfig.name, args, err),

@@ -19,7 +19,7 @@ import {
   stringifyVariables,
   RequestPolicy,
 } from '@urql/core'
-import _ from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
@@ -150,7 +150,7 @@ export class CloudDataSource {
       ],
       // Set this way so we can intercept the fetch on the context for testing
       fetch: async (uri, init) => {
-        const internalResponse = _.get(init, 'headers.INTERNAL_REQUEST')
+        const internalResponse = (init?.headers as Record<string, string> | undefined)?.INTERNAL_REQUEST
 
         if (internalResponse) {
           return Promise.resolve(new Response(internalResponse, { status: 200 }))
@@ -245,7 +245,7 @@ export class CloudDataSource {
         }
       }
 
-      if (initialResult && !_.isEqual(op.data, initialResult.data)) {
+      if (initialResult && !isDeepStrictEqual(op.data, initialResult.data)) {
         debug('Different Query Value %j, %j', op.data, initialResult.data)
 
         if (typeof config.onUpdatedResult === 'function') {

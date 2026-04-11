@@ -1,5 +1,3 @@
-import _ from 'lodash'
-import { toBoolean } from 'underscore.string'
 import { origin } from '@packages/network-tools'
 
 export const hideKeys = (token?: string | number | boolean) => {
@@ -20,7 +18,7 @@ export const hideKeys = (token?: string | number | boolean) => {
 }
 
 export function setUrls (obj: any) {
-  obj = _.clone(obj)
+  obj = { ...obj }
 
   // TODO: rename this to be proxyServer
   const proxyUrl = `http://localhost:${obj.port}`
@@ -72,16 +70,24 @@ const fromJson = (value: string) => {
   }
 }
 
-export const coerce = (value: any) => {
-  const num = _.toNumber(value)
+const toBooleanStrict = (value: string): boolean | undefined => {
+  if (value === 'true') return true
 
-  if (_.invoke(num, 'toString') === value) {
+  if (value === 'false') return false
+
+  return undefined
+}
+
+export const coerce = (value: any) => {
+  const num = Number(value)
+
+  if (num?.toString?.() === value) {
     return num
   }
 
-  const bool = toBoolean(value)
+  const bool = toBooleanStrict(value)
 
-  if (_.invoke(bool, 'toString') === value) {
+  if (bool?.toString?.() === value) {
     return bool
   }
 
@@ -93,7 +99,7 @@ export const coerce = (value: any) => {
 
   const arr = toArray(value)
 
-  if (_.invoke(arr, 'toString') === value) {
+  if (arr?.toString?.() === value) {
     return arr
   }
 
