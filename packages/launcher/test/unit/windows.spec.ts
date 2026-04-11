@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import winVersionInfo from 'win-version-info'
-import _ from 'lodash'
 import * as windowsHelper from '../../lib/windows'
 import { knownBrowsers } from '../../lib/known-browsers'
 import fs from 'fs-extra'
@@ -8,6 +7,20 @@ import os from 'os'
 import type { Browser } from '@packages/types'
 import { detectByPath } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
+
+/** Mutates `arr` by removing all elements matching `pred`, returns removed elements. */
+function remove<T> (arr: T[], pred: (item: T) => boolean): T[] {
+  const removed: T[] = []
+
+  for (let i = arr.length - 1; i >= 0; i--) {
+    if (pred(arr[i])) {
+      removed.unshift(arr[i])
+      arr.splice(i, 1)
+    }
+  }
+
+  return removed
+}
 
 vi.mock('os', async (importActual) => {
   const actual = await importActual()
@@ -166,7 +179,7 @@ describe('windows browser detection', () => {
       version: '9.0.1',
     })
 
-    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'beta' })! as Browser
+    const chrome = knownBrowsers.find((b) => b.name === 'chrome' && b.channel === 'beta')! as Browser
 
     const foundBrowser = await windowsHelper.detect(chrome)
 
@@ -188,7 +201,7 @@ describe('windows browser detection', () => {
       version: '4.4.4',
     })
 
-    const chrome = _.find(knownBrowsers, { name: 'chrome', channel: 'stable' })! as Browser
+    const chrome = knownBrowsers.find((b) => b.name === 'chrome' && b.channel === 'stable')! as Browser
 
     const foundBrowser = await windowsHelper.detect(chrome)
 
@@ -203,7 +216,7 @@ describe('windows browser detection', () => {
 
   it('detects Chrome for Testing 32-bit install', async () => {
     // mock uninstalling the 32-bit and 64-bit
-    const foundCFTInstalls = _.remove(mockBrowsers, (browser) => browser.path.includes('Chrome for Testing'))
+    const foundCFTInstalls = remove(mockBrowsers, (browser) => browser.path.includes('Chrome for Testing'))
 
     expect(foundCFTInstalls).toHaveLength(2)
 
@@ -213,7 +226,7 @@ describe('windows browser detection', () => {
       version: '5.5.5',
     })
 
-    const chromeForTesting = _.find(knownBrowsers, { name: 'chrome-for-testing' })!
+    const chromeForTesting = knownBrowsers.find((b) => b.name === 'chrome-for-testing')!
 
     const foundBrowser = await windowsHelper.detect(chromeForTesting)
 
@@ -229,7 +242,7 @@ describe('windows browser detection', () => {
   // @see https://github.com/cypress-io/cypress/issues/8432
   it('detects Firefox local installs', async () => {
     // mock uninstalling Firefox in the Program Files directory
-    const foundFirefoxInstalls = _.remove(mockBrowsers, (browser) => browser.path.includes('Firefox'))
+    const foundFirefoxInstalls = remove(mockBrowsers, (browser) => browser.path.includes('Firefox'))
 
     expect(foundFirefoxInstalls).toHaveLength(4)
 
@@ -249,7 +262,7 @@ describe('windows browser detection', () => {
       version: '300',
     })
 
-    const firefoxBrowsers = _.filter(knownBrowsers, { family: 'firefox' })
+    const firefoxBrowsers = knownBrowsers.filter((b) => b.family === 'firefox')
 
     const mappedBrowsers = []
 
@@ -268,7 +281,7 @@ describe('windows browser detection', () => {
 
   it('detects Chromium 64-bit install', async () => {
     // mock updating the 64-bit install of chrome
-    const foundChromiumInstalls = _.remove(mockBrowsers, (browser) => browser.path === 'C:/Program Files/Google/chrome-win/chrome.exe')
+    const foundChromiumInstalls = remove(mockBrowsers, (browser) => browser.path === 'C:/Program Files/Google/chrome-win/chrome.exe')
 
     expect(foundChromiumInstalls).toHaveLength(1)
 
@@ -277,7 +290,7 @@ describe('windows browser detection', () => {
       version: '6.6.6',
     })
 
-    const chromium = _.find(knownBrowsers, { name: 'chromium' })!
+    const chromium = knownBrowsers.find((b) => b.name === 'chromium')!
 
     const foundBrowser = await windowsHelper.detect(chromium)
 
@@ -292,7 +305,7 @@ describe('windows browser detection', () => {
 
   it('detects Chromium 32-bit install in Chromium folder', async () => {
     // mock uninstalling the 64-bit and 32-bit in the Google path
-    const foundChromiumInstalls = _.remove(mockBrowsers, (browser) => browser.path.includes('chrome-win'))
+    const foundChromiumInstalls = remove(mockBrowsers, (browser) => browser.path.includes('chrome-win'))
 
     expect(foundChromiumInstalls).toHaveLength(2)
 
@@ -302,7 +315,7 @@ describe('windows browser detection', () => {
       version: '7.7.7',
     })
 
-    const chromium = _.find(knownBrowsers, { name: 'chromium' })!
+    const chromium = knownBrowsers.find((b) => b.name === 'chromium')!
 
     const foundBrowser = await windowsHelper.detect(chromium)
 
@@ -317,7 +330,7 @@ describe('windows browser detection', () => {
 
   it('detects Chromium 64-bit install in Chromium folder', async () => {
     // mock uninstalling the 64-bit and 32-bit in the Google path
-    const foundChromiumInstalls = _.remove(mockBrowsers, (browser) => browser.path.includes('chrome-win'))
+    const foundChromiumInstalls = remove(mockBrowsers, (browser) => browser.path.includes('chrome-win'))
 
     expect(foundChromiumInstalls).toHaveLength(2)
 
@@ -327,7 +340,7 @@ describe('windows browser detection', () => {
       version: '8.8.8',
     })
 
-    const chromium = _.find(knownBrowsers, { name: 'chromium' })!
+    const chromium = knownBrowsers.find((b) => b.name === 'chromium')!
 
     const foundBrowser = await windowsHelper.detect(chromium)
 

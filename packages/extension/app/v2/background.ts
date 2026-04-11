@@ -1,18 +1,30 @@
-import get from 'lodash/get'
-import once from 'lodash/once'
 import Bluebird from 'bluebird'
 import browser from 'webextension-polyfill'
 
 import { connect as clientConnect } from './client'
 
 const checkIfFirefox = async () => {
-  if (!browser || !get(browser, 'runtime.getBrowserInfo')) {
+  if (!browser || !browser?.runtime?.getBrowserInfo) {
     return false
   }
 
   const { name } = await browser.runtime.getBrowserInfo()
 
   return name === 'Firefox'
+}
+
+function once<T extends (...args: any[]) => any> (fn: T): T {
+  let called = false
+  let result: any
+
+  return ((...args: any[]) => {
+    if (!called) {
+      called = true
+      result = fn(...args)
+    }
+
+    return result
+  }) as unknown as T
 }
 
 const connect = function (host: string, path: string, extraOpts?: any) {

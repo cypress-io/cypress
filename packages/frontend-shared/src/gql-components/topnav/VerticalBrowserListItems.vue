@@ -80,7 +80,7 @@ import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import Tooltip from '../../components/Tooltip.vue'
-import _ from 'lodash'
+import { sortBy } from '@packages/utils'
 
 const { t } = useI18n()
 
@@ -122,12 +122,15 @@ const props = withDefaults(defineProps <{
 })
 
 const browsers = computed(() => {
-  const alphaSortedBrowser = _.sortBy(props.gql.browsers ?? [], 'displayName')
+  const alphaSortedBrowser = sortBy(props.gql.browsers ?? [], (b) => b.displayName)
 
-  const [selectedBrowser] = _.remove(alphaSortedBrowser, (browser) => browser.isSelected)
+  const selectedIndex = alphaSortedBrowser.findIndex((browser) => browser.isSelected)
+  const selectedBrowser = selectedIndex !== -1 ? alphaSortedBrowser.splice(selectedIndex, 1)[0] : undefined
 
   // move the selected browser to the top to easily see selected browser version at the top when opening the dropdown
-  alphaSortedBrowser.unshift(selectedBrowser)
+  if (selectedBrowser) {
+    alphaSortedBrowser.unshift(selectedBrowser)
+  }
 
   return alphaSortedBrowser
 })

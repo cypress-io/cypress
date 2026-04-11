@@ -1,5 +1,4 @@
 import type { TestFilter } from '@packages/types'
-import _ from 'lodash'
 import { action, observable, makeObservable } from 'mobx'
 import type { AgentProps } from '../agents/agent-model'
 import type { CommandProps } from '../commands/command-model'
@@ -89,7 +88,7 @@ export class RunnablesStore {
     this.runnables = this._createRunnableChildren(rootRunnable, 0)
     this.isReady = true
 
-    const numTests = _.keys(this._tests).length
+    const numTests = Object.keys(this._tests).length
 
     this.hasTests = numTests > 0
     this.hasSingleTest = numTests === 1
@@ -108,13 +107,13 @@ export class RunnablesStore {
   }
 
   _createRunnables<T> (type: RunnableType, runnables: Array<TestOrSuite<T>>, hooks: Array<HookProps>, level: number) {
-    return _.map(runnables, (runnableProps) => {
+    return runnables.map((runnableProps) => {
       return this._createRunnable(type, runnableProps, hooks, level)
     })
   }
 
   _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, hooks: Array<HookProps>, level: number) {
-    props.hooks = _.unionBy(props.hooks, hooks, 'hookId')
+    props.hooks = [...(props.hooks || []), ...hooks.filter((h) => !(props.hooks || []).some((ph) => ph.hookId === h.hookId))]
 
     return type === 'suite' ? this._createSuite(props as SuiteProps, level) : this._createTest(props as TestProps, level)
   }
@@ -253,7 +252,7 @@ export class RunnablesStore {
   }
 
   reset () {
-    _.each(defaults, (value, key) => {
+    Object.entries(defaults).forEach(([key, value]) => {
       this[key] = value
     })
 

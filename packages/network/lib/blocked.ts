@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import minimatch from 'minimatch'
 import { stripProtocolAndDefaultPorts } from '@packages/network-tools'
 
@@ -14,5 +13,5 @@ export function matches (urlToCheck: string, blockHosts: string[] | string) {
     return minimatch(urlToCheckStripped, hostMatcher)
   }
 
-  return _.find(blockHostsNormalized, matchUrl)
+  return blockHostsNormalized.find(matchUrl)
 }

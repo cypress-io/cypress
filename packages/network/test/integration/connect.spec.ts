@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest'
-import _ from 'lodash'
 import net, { AddressInfo } from 'net'
 import * as connect from '../../lib/connect'
 
@@ -10,7 +9,7 @@ describe('lib/connect', function () {
       retry: 15,
       timeout: 50,
     }, async () => {
-      const server = net.createServer(_.partialRight(_.invoke, 'close'))
+      const server = net.createServer((socket) => socket.destroy())
 
       // start the server
       await new Promise<void>((resolve) => {
@@ -38,7 +37,7 @@ describe('lib/connect', function () {
     it('resolves localhost on ::1 immediately', {
       timeout: 50,
     }, async () => {
-      const server = net.createServer(_.partialRight(_.invoke, 'close'))
+      const server = net.createServer((socket) => socket.destroy())
 
       // start the server
       await new Promise<void>((resolve) => {

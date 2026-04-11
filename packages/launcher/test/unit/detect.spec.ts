@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import _ from 'lodash'
 import cp from 'child_process'
 import { EventEmitter } from 'stream'
 import { detect, detectByPath, getMajorVersion } from '../../lib/detect'
@@ -87,7 +86,7 @@ describe('detect', () => {
     log('detected browsers %j', browsers)
     expect(browsers).toBeInstanceOf(Array)
 
-    const mainProps = browsers.map((val) => _.pick(val, ['name', 'version']))
+    const mainProps = browsers.map((val) => ({ name: val.name, version: val.version }))
 
     log('%d browsers\n%j', browsers.length, mainProps)
 

@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Debug from 'debug'
 import { rewriteJsSourceMapAsync } from './async-rewriters'
 import * as sourceMaps from './util/source-maps'
@@ -58,11 +57,15 @@ export class DeferredSourceMapCache {
   }
 
   _removeRequestsByUrl (url: string) {
-    _.remove(this.requests, { url })
+    for (let i = this.requests.length - 1; i >= 0; i--) {
+      if (this.requests[i].url === url) {
+        this.requests.splice(i, 1)
+      }
+    }
   }
 
   _getRequestById (uniqueId: string) {
-    return _.find(this.requests, { uniqueId })
+    return this.requests.find((r) => r.uniqueId === uniqueId)
   }
 
   async _getInputSourceMap (request: DeferredSourceMapRequest, headers: any) {

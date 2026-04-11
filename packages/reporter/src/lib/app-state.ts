@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { observable, makeObservable } from 'mobx'
 
 interface DefaultAppState {
@@ -153,7 +152,7 @@ class AppState {
   }
 
   reset () {
-    _.each(defaults, (value: any, key: string) => {
+    Object.entries(defaults).forEach(([key, value]: [string, any]) => {
       this[key] = value
     })
 

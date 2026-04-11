@@ -88,7 +88,7 @@
 </template>
 
 <script lang="ts" setup>
-import { compact, groupBy } from 'lodash'
+import { groupBy } from '@packages/utils'
 import { computed, h, FunctionalComponent } from 'vue'
 import { useI18n } from '@cy/i18n'
 import RunCard from './RunCard.vue'
@@ -129,7 +129,7 @@ const enableDebugging = (runId: string) => {
 }
 
 const groupByCommit = computed(() => {
-  const grouped = groupBy(compact(props.runs), (run) => {
+  const grouped = groupBy((props.runs || []).filter(Boolean), (run) => {
     return run?.commitInfo?.sha
   })
 

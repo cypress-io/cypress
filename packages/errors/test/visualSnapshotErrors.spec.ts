@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 import chalk from 'chalk'
-import _ from 'lodash'
 import path from 'path'
 import * as errors from '../src'
 import os from 'os'
@@ -65,11 +64,9 @@ describe('visual error templates', () => {
     })
 
     getConsoleLogOutput = () => {
-      const sanitizedLogs = _
-      .chain(logs)
+      const sanitizedLogs = logs
       .map(sanitize)
       .join('\n')
-      .value()
 
       return sanitizedLogs
     }
@@ -111,24 +108,16 @@ describe('visual error templates', () => {
     }
 
     // test each error visually
-    _.forEach(errorsToTest, testVisualError)
+    Object.entries(errorsToTest).forEach(([key, fn]) => testVisualError(fn, key as CypressErrorType))
 
     // if we are testing all the errors then make sure we
     // have a test to validate that we've written a test
     // for each error type
     it('ensures there are matching tests for each cypress error', () => {
-      const { missingErrorTypes, excessErrorTypes } = _
-      .chain(errors.AllCypressErrors)
-      .keys()
-      .thru((errorTypes) => {
-        const errorsToTestTypes = _.keys(errorsToTest)
-
-        return {
-          missingErrorTypes: _.difference(errorTypes, errorsToTestTypes),
-          excessErrorTypes: _.difference(errorsToTestTypes, errorTypes),
-        }
-      })
-      .value()
+      const errorTypes = Object.keys(errors.AllCypressErrors)
+      const errorsToTestTypes = Object.keys(errorsToTest)
+      const missingErrorTypes = errorTypes.filter((x) => !errorsToTestTypes.includes(x))
+      const excessErrorTypes = errorsToTestTypes.filter((x) => !errorTypes.includes(x))
 
       expect(missingErrorTypes, 'you are missing tests around the following error types').toHaveLength(0)
       expect(excessErrorTypes, 'you have added excessive tests for errors which do not exist').toHaveLength(0)

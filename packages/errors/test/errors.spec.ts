@@ -166,6 +166,13 @@ describe('lib/errors', () => {
 
       expect(obj.message).toEqual('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m')
     })
+
+    it('preserves inherited Error.name', () => {
+      const err = new Error('test message')
+      const obj = errors.cloneErr(err)
+
+      expect(obj.name).toEqual('Error')
+    })
   })
 
   describe('.parseResolvedPattern', () => {

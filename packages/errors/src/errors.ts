@@ -2,7 +2,7 @@ import AU from 'ansi_up'
 import os from 'os'
 
 import chalk from 'chalk'
-import _ from 'lodash'
+import { defaults } from '@packages/utils'
 import path from 'path'
 import stripAnsi from 'strip-ansi'
 import type { BreakingErrResult, TestingType } from '@packages/types'
@@ -27,7 +27,7 @@ const displayRetriesRemaining = function (tries: number) {
 }
 
 const getUsedTestsMessage = (limit: number, usedTestsMessage: string) => {
-  return _.isFinite(limit)
+  return Number.isFinite(limit)
     ? fmt.off(`The limit is ${chalk.yellow(`${limit}`)} ${usedTestsMessage} results.`)
     : fmt.off('')
 }
@@ -101,7 +101,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
 
-        This option will not have an effect in ${fmt.off(_.capitalize(browser))}. Tests that rely on web security being disabled will not run as expected.`
+        This option will not have an effect in ${fmt.off(browser.charAt(0).toUpperCase() + browser.slice(1).toLowerCase())}. Tests that rely on web security being disabled will not run as expected.`
   },
   CHROME_137_LOAD_EXTENSION_NOT_SUPPORTED: () => {
     return errTemplate`\
@@ -326,12 +326,12 @@ export const AllCypressErrors = {
     if (arg1.payload?.differentParams) {
       params = {}
 
-      _.map(arg1.parameters, (value, key) => {
+      Object.entries(arg1.parameters).forEach(([key, value]: [string, any]) => {
         if (key === 'specs' && arg1.payload.differentSpecs?.length) {
           const addedSpecs: string[] = []
           const missingSpecs: string[] = []
 
-          _.forEach(arg1.payload.differentSpecs, (s) => {
+          arg1.payload.differentSpecs.forEach((s: string) => {
             if (value.includes(s)) {
               addedSpecs.push(s)
             } else {
@@ -743,7 +743,7 @@ export const AllCypressErrors = {
           ${fmt.listItem(folderPath)}`
     }
 
-    const globPaths = _.castArray(globPattern).map((pattern) => {
+    const globPaths = (Array.isArray(globPattern) ? globPattern : [globPattern]).map((pattern) => {
       const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
 
       return path.join(resolvedBasePath!, theme.yellow(resolvedPattern!))
@@ -1134,7 +1134,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
-        This usually indicates there was a problem opening the ${fmt.off(_.capitalize(browserName))} browser.
+        This usually indicates there was a problem opening the ${fmt.off(browserName.charAt(0).toUpperCase() + browserName.slice(1).toLowerCase())} browser.
 
         The CDP port requested was ${fmt.highlight(port)}.
 
@@ -1158,7 +1158,7 @@ export const AllCypressErrors = {
         ${fmt.stackTrace(arg1)}`
   },
   CDP_RETRYING_CONNECTION: (attempt: string | number, browserName: string, connectRetryThreshold: number) => {
-    return errTemplate`Still waiting to connect to ${fmt.off(_.capitalize(browserName))}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
+    return errTemplate`Still waiting to connect to ${fmt.off(browserName.charAt(0).toUpperCase() + browserName.slice(1).toLowerCase())}, retrying in 1 second ${fmt.meta(`(attempt ${attempt}/${connectRetryThreshold})`)}`
   },
   BROWSER_PROCESS_CLOSED_UNEXPECTEDLY: (browserName: string) => {
     return errTemplate`\
@@ -1651,12 +1651,19 @@ interface GenericError extends Error {
 }
 
 export const cloneErr = function (err: CypressError | GenericError, options: { html?: boolean } = {}) {
-  _.defaults(options, {
+  defaults(options, {
     html: false,
   })
 
-  // pull off these properties
-  const obj = _.pick(err, 'message', 'messageMarkdown', 'type', 'name', 'stack', 'fileName', 'lineNumber', 'columnNumber') as ClonedError
+  // pull off these properties (use `in` to preserve inherited keys like Error.name)
+  const allowedKeys = ['message', 'messageMarkdown', 'type', 'name', 'stack', 'fileName', 'lineNumber', 'columnNumber']
+  const obj = {} as ClonedError
+
+  for (const key of allowedKeys) {
+    if (key in err) {
+      obj[key] = err[key]
+    }
+  }
 
   if (options.html) {
     obj.message = ansi_up.ansi_to_html(err.message)

@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
 import appState, { AppState } from '../lib/app-state'
@@ -44,7 +43,7 @@ const Hook: React.FC<HookComponentProps> = observer(({ model, showNumber, scroll
       isOpen
     >
       <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} scrollIntoView={scrollIntoView} />)}
+        {model.commands.map((command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} scrollIntoView={scrollIntoView} />)}
       </ul>
     </Collapsible>
   </li>
@@ -66,7 +65,7 @@ interface HooksProps {
 
 const Hooks: React.FC<HooksProps> = observer(({ state = appState, model, scrollIntoView }: HooksProps) => (
   <ul className='hooks-container'>
-    {_.map(model.hooks, (hook) => {
+    {model.hooks.map((hook) => {
       if (hook.commands.length && hook.hookName !== 'studio commands') {
         return <Hook key={hook.hookId} model={hook} scrollIntoView={scrollIntoView} showNumber={model.hookCount[hook.hookName] > 1} />
       }

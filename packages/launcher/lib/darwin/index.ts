@@ -2,7 +2,6 @@ import { findApp, FindAppParams } from './util'
 import type { Browser, DetectedBrowser } from '@packages/types'
 import * as linuxHelper from '../linux'
 import Debug from 'debug'
-import { get } from 'lodash'
 
 const debugVerbose = Debug('cypress-verbose:launcher:darwin')
 
@@ -104,7 +103,7 @@ export const getVersionNumber = linuxHelper.getVersionNumber
 export const getPathData = linuxHelper.getPathData
 
 export function detect (browser: Browser): Promise<DetectedBrowser> {
-  let findAppParams = get(browsers, [browser.name, browser.channel])
+  let findAppParams = browsers?.[browser.name]?.[browser.channel]
 
   if (!findAppParams) {
     // ok, maybe it is custom alias?

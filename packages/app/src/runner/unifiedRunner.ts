@@ -6,7 +6,6 @@ import { closePlayground } from './selector-playground/utils'
 import { RUN_ALL_SPECS, RUN_ALL_SPECS_KEY, SpecFile } from '@packages/types/src'
 import { LocationQuery, useRoute } from 'vue-router'
 import { getPathForPlatform, posixify } from '../paths'
-import { isEqual } from 'lodash'
 import { gql, useMutation } from '@urql/vue'
 import { TestsForRunDocument } from '../generated/graphql'
 
@@ -52,7 +51,7 @@ export function useUnifiedRunner () {
           ? RUN_ALL_SPECS
           : specs.value.find((x) => x.relative === queryFile)
 
-        if (isEqual(route.query, prevQuery) && isEqual(activeSpecInSpecsList, specStore.activeSpec)) {
+        if (JSON.stringify(route.query) === JSON.stringify(prevQuery) && JSON.stringify(activeSpecInSpecsList) === JSON.stringify(specStore.activeSpec)) {
           return
         }
 

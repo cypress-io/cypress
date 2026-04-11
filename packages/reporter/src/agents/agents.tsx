@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
 import Collapsible from '../collapsible/collapsible'
@@ -30,7 +29,7 @@ interface AgentsProps {
 
 const AgentsList: React.FC<AgentsProps> = observer(({ model }: AgentsProps) => (
   <tbody>
-    {_.map(model.agents, (agent) => <Agent key={agent.id} model={agent} />)}
+    {model.agents.map((agent) => <Agent key={agent.id} model={agent} />)}
   </tbody>
 ))
 

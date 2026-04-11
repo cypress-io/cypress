@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import React, { MouseEvent, useCallback } from 'react'
 import cs from 'classnames'
 import { observer } from 'mobx-react'
@@ -32,9 +31,9 @@ const DocsUrl = ({ url, title }: DocsUrlProps) => {
     events.emit('external:open', url)
   }
 
-  const urlArray = _.castArray(url)
+  const urlArray = Array.isArray(url) ? url : [url]
 
-  return _.map(urlArray, (url) => (
+  return urlArray.map((url) => (
     <a className='runnable-err-docs-url' href={url} key={url} onClick={openUrl(url)}>
       {title || 'Learn more'}
     </a>

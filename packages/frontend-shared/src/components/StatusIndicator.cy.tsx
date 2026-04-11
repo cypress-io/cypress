@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import type { StatusIndicatorType } from './StatusIndicator.vue'
 import StatusIndicator from './StatusIndicator.vue'
 
@@ -34,7 +33,7 @@ describe('<StatusIndicator />', () => {
       </div>
     ))
 
-    _.forEach(types, (text) => {
+    Object.values(types).forEach((text) => {
       cy.findByText(text).should('be.visible')
     })
   })

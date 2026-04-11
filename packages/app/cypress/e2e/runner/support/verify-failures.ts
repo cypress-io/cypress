@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 // Assert that either the the dialog is presented or the mutation is emitted, depending on
@@ -79,7 +78,7 @@ const verifyFailure = (options) => {
     if (messageLines.length) {
       cy.log('message contains expected lines and stack does not include message')
 
-      _.each(messageLines, (msg) => {
+      messageLines.forEach((msg) => {
         cy.get('.runnable-err-message')
         .should('include.text', msg)
 
@@ -98,7 +97,7 @@ const verifyFailure = (options) => {
     if (notInMessageLines.length) {
       cy.log('message does not contain the specified lines')
 
-      _.each(notInMessageLines, (msg) => {
+      notInMessageLines.forEach((msg) => {
         cy.get('.runnable-err-message')
         .should('not.include.text', msg)
       })
@@ -116,7 +115,7 @@ const verifyFailure = (options) => {
         cy.log('stack contains the expected lines')
       }
 
-      _.each(stackLines, (stackLine) => {
+      stackLines.forEach((stackLine) => {
         cy.get('.runnable-err-stack-trace')
         .should('include.text', stackLine)
       })

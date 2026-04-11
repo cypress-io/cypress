@@ -1,8 +1,40 @@
-import _ from 'lodash'
 import { addDefaultPort, parse as parseUrl } from './uri'
 import debugModule from 'debug'
 import _parseDomain from '@cypress/parse-domain'
 import type { ParsedHost, ParsedHostWithProtocolAndHost } from './types'
+
+/**
+ * Shallow equality check for plain objects with primitive values.
+ * Used instead of lodash isEqual for isomorphic (browser + Node) compatibility.
+ */
+export function shallowEqual (a: Record<string, any>, b: Record<string, any>): boolean {
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+
+  if (keysA.length !== keysB.length) {
+    return false
+  }
+
+  for (const key of keysA) {
+    if (a[key] !== b[key]) {
+      return false
+    }
+  }
+
+  return true
+}
+
+function defaults<T extends Record<string, any>> (target: T, ...sources: Record<string, any>[]): T {
+  for (const source of sources) {
+    for (const key of Object.keys(source)) {
+      if (target[key] === undefined) {
+        (target as any)[key] = source[key]
+      }
+    }
+  }
+
+  return target
+}
 
 export type Policy = 'same-origin' | 'same-super-domain-origin' | 'schemeful-same-site'
 
@@ -14,11 +46,11 @@ const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
 export function getSuperDomain (url: string) {
   const parsed = parseUrlIntoHostProtocolDomainTldPort(url)
 
-  return _.compact([parsed.domain, parsed.tld]).join('.')
+  return [parsed.domain, parsed.tld].filter(Boolean).join('.')
 }
 
 export function parseDomain (domain: string, options = {}) {
-  return _parseDomain(domain, _.defaults(options, {
+  return _parseDomain(domain, defaults(options, {
     privateTlds: true,
     customTlds: customTldsRe,
   }))
@@ -73,11 +105,11 @@ export function getDomainNameFromUrl (url: string) {
 }
 
 export function getDomainNameFromParsedHost (parsedHost: ParsedHost) {
-  return _.compact([parsedHost.domain, parsedHost.tld]).join('.')
+  return [parsedHost.domain, parsedHost.tld].filter(Boolean).join('.')
 }
 
 export function domainPropsToHostname ({ domain, subdomain, tld }: Record<string, any>) {
-  return _.compact([subdomain, domain, tld]).join('.')
+  return [subdomain, domain, tld].filter(Boolean).join('.')
 }
 
 /**
@@ -103,7 +135,7 @@ export function urlMatchesPolicyProps ({ policy, frameUrl, topProps }: {
   switch (policy) {
     case 'same-origin': {
       // if same origin, all parts of the props needs to match, including subdomain and scheme
-      return _.isEqual(urlProps, topProps)
+      return shallowEqual(urlProps, topProps)
     }
     case 'same-super-domain-origin':
     case 'schemeful-same-site': {
@@ -121,7 +153,7 @@ export function urlMatchesPolicyProps ({ policy, frameUrl, topProps }: {
         doPortsPassSameSchemeCheck = port1 !== port2 ? (port1 !== '443' && port2 !== '443') : true
       }
 
-      return doPortsPassSameSchemeCheck && _.isEqual(parsedUrl, relevantProps)
+      return doPortsPassSameSchemeCheck && shallowEqual(parsedUrl, relevantProps)
     }
     default:
       return false
@@ -183,7 +215,7 @@ export function urlMatchesOriginProtectionSpace (urlStr: string, origin: string)
   const normalizedUrl = addDefaultPort(urlStr).format()
   const normalizedOrigin = addDefaultPort(origin).format()
 
-  return _.startsWith(normalizedUrl, normalizedOrigin)
+  return normalizedUrl.startsWith(normalizedOrigin)
 }
 
 /**
@@ -202,5 +234,5 @@ export function getSuperDomainOrigin (url: string) {
 
   // super domain origin is comprised of:
   // protocol + superdomain + port (subdomain is not factored in)
-  return _.compact([`${protocol}//${getSuperDomain(url)}`, port]).join(':')
+  return [`${protocol}//${getSuperDomain(url)}`, port].filter(Boolean).join(':')
 }

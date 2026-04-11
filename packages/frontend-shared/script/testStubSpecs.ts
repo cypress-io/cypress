@@ -1,14 +1,22 @@
 import JustMyLuck from 'just-my-luck'
 import { faker } from '@faker-js/faker'
-import { template, keys, reduce, templateSettings } from 'lodash'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import type { TemplateExecutor } from 'lodash'
 import combineProperties from 'combine-properties'
 
 dayjs.extend(relativeTime)
 
-templateSettings.interpolate = /{{([\s\S]+?)}}/g
+type TemplateFunction = (data: Record<string, any>) => string
+
+function makeTemplate (templateStr: string): TemplateFunction {
+  return (data: Record<string, any>) => {
+    return templateStr.replace(/\{\{([\s\S]+?)\}\}/g, (_, key) => {
+      const val = data[key.trim()]
+
+      return val == null ? '' : String(val)
+    })
+  }
+}
 
 let jml
 const setupSeeds = () => {
@@ -61,50 +69,50 @@ export const specPattern = ['.spec', '_spec']
 export const fileExtension = ['.tsx', '.jsx', '.ts', '.js']
 
 export const directories = {
-  rootDedicated: template('tests'),
-  rootSrc: template('src'),
-  monorepo: template('packages/{{component}}/test'),
-  jestRoot: template('__test__'),
-  jestNestedLib: template('lib/{{component}}{{component2}}/__test__'),
-  dedicatedNested: template('lib/{{component}}/test'),
-  jestNested: template('src/{{component}}/__test__'),
-  componentsNested: template('src/components/{{component}}'),
-  componentsFlat: template('src/{{component}}'),
-  viewsFlat: template('src/views'),
-  frontendFlat: template('frontend'),
-  frontendComponentsFlat: template('frontend/components'),
+  rootDedicated: makeTemplate('tests'),
+  rootSrc: makeTemplate('src'),
+  monorepo: makeTemplate('packages/{{component}}/test'),
+  jestRoot: makeTemplate('__test__'),
+  jestNestedLib: makeTemplate('lib/{{component}}{{component2}}/__test__'),
+  dedicatedNested: makeTemplate('lib/{{component}}/test'),
+  jestNested: makeTemplate('src/{{component}}/__test__'),
+  componentsNested: makeTemplate('src/components/{{component}}'),
+  componentsFlat: makeTemplate('src/{{component}}'),
+  viewsFlat: makeTemplate('src/views'),
+  frontendFlat: makeTemplate('frontend'),
+  frontendComponentsFlat: makeTemplate('frontend/components'),
 }
 
 type NameTemplate = {
-  readonly [key: string]: TemplateExecutor
+  readonly [key: string]: TemplateFunction
 }
 
 const nameTemplates = {
   // Business Logic Components
-  longDomain: template(`{{prefix}}{{modifier}}{{domain}}{{component}}`),
-  longDomain2: template(`{{prefix}}{{domain}}{{component}}{{component2}}`),
+  longDomain: makeTemplate(`{{prefix}}{{modifier}}{{domain}}{{component}}`),
+  longDomain2: makeTemplate(`{{prefix}}{{domain}}{{component}}{{component2}}`),
 
   // App Components
-  page1: template(`{{domain}}Page`),
-  layout: template(`{{domain}}Layout`),
+  page1: makeTemplate(`{{domain}}Page`),
+  layout: makeTemplate(`{{domain}}Layout`),
 
-  presentationalShort: template(`Base{{component}}`),
-  presentationalLong: template(`Base{{component}}{{component2}}`),
-  medium1: template(`{{prefix}}{{modifier}}{{component}}`),
-  medium2: template(`{{prefix}}{{component}}{{component2}}`),
-  short: template(`{{prefix}}{{component}}`),
+  presentationalShort: makeTemplate(`Base{{component}}`),
+  presentationalLong: makeTemplate(`Base{{component}}{{component2}}`),
+  medium1: makeTemplate(`{{prefix}}{{modifier}}{{component}}`),
+  medium2: makeTemplate(`{{prefix}}{{component}}{{component2}}`),
+  short: makeTemplate(`{{prefix}}{{component}}`),
 } as const
 
 const prefixes = ['I', 'V', 'Cy', null]
 
 interface ComponentNameGeneratorOptions {
-  template: TemplateExecutor
+  template: TemplateFunction
   omit?: string[]
   overrides?: object
 }
 
 export const componentNameGenerator = (options: ComponentNameGeneratorOptions = { template: nameTemplates.medium1, omit: [], overrides: {} }) => {
-  const withoutValues = reduce(options.omit, (acc, v) => {
+  const withoutValues = (options.omit || []).reduce((acc, v) => {
     acc[v] = null
 
     return acc
@@ -134,7 +142,7 @@ const allRandomComponents = combineProperties({
   component2: componentNames,
   fileExtension,
   specPattern,
-  directory: keys(directories),
+  directory: Object.keys(directories),
 })
 
 export const randomComponents = <T extends 'Spec' | 'FileParts'>(n = 200, baseTypename: T) => {

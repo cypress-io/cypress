@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { MouseEvent, useCallback, useEffect, useRef } from 'react'
@@ -95,7 +94,7 @@ const RunnablesList: React.FC<RunnablesListProps> = observer(({ runnables, studi
   return (
     <div className='wrap'>
       <ul className='runnables'>
-        {_.map(runnables, (runnable, index) =>
+        {runnables.map((runnable, index) =>
           (<Runnable
             key={runnable.id}
             model={runnable}

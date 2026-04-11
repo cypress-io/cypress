@@ -207,7 +207,7 @@ import OrganizationIcon from '~icons/cy/office-building_x16.svg'
 import { SelectCloudProjectModal_CreateCloudProjectDocument, SelectCloudProjectModal_SetProjectIdDocument } from '../../generated/graphql'
 import type { SelectCloudProjectModalFragment } from '../../generated/graphql'
 import { useI18n } from '@cy/i18n'
-import { isEqual, sortBy } from 'lodash'
+import { sortBy } from '@packages/utils'
 import { useOnline } from '@vueuse/core'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { clearPendingError } from '@packages/frontend-shared/src/graphql/urqlClient'
@@ -325,7 +325,7 @@ const organizationOptions = computed(() => {
     }
   })
 
-  return sortBy(options || [], 'name')
+  return sortBy(options || [], (o) => o.name)
 })
 const pickedOrganization = ref(organizationOptions.value.length >= 1 ? organizationOptions.value[0] : undefined)
 
@@ -339,7 +339,7 @@ const projectOptions = computed(() => {
     }
   })
 
-  return sortBy(options || [], 'name')
+  return sortBy(options || [], (o) => o.name)
 })
 const newProject = ref(projectOptions.value.length === 0)
 const pickedProject = ref<typeof projectOptions.value[number]>()
@@ -347,7 +347,7 @@ const pickedProject = ref<typeof projectOptions.value[number]>()
 watch(projectOptions, (newVal, oldVal) => {
   // avoid unselecting currently chosen project
   // can happen when gql updates due to polling
-  if (isEqual(newVal, oldVal)) {
+  if (JSON.stringify(newVal) === JSON.stringify(oldVal)) {
     return
   }
 

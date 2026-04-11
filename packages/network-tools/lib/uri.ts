@@ -5,7 +5,6 @@
 // node's url formatting algorithm (which acts pretty unexpectedly)
 // - https://nodejs.org/api/url.html#url_url_format_urlobject
 
-import _ from 'lodash'
 import url from 'url'
 
 // yup, protocol contains a: ':' colon
@@ -17,14 +16,14 @@ const DEFAULT_PROTOCOL_PORTS = {
 
 type Protocols = keyof typeof DEFAULT_PROTOCOL_PORTS
 
-const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS) as string[]
+const DEFAULT_PORTS = Object.values(DEFAULT_PROTOCOL_PORTS) as string[]
 
 const portIsDefault = (port: string | null) => {
   return port && DEFAULT_PORTS.includes(port)
 }
 
 const parseClone = (urlObject: any) => {
-  return url.parse(_.clone(urlObject))
+  return url.parse(typeof urlObject === 'string' ? urlObject : url.format(urlObject))
 }
 
 export const parse = url.parse

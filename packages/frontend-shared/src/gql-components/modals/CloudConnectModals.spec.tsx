@@ -5,7 +5,6 @@ import { CloudUserStubs,
 } from '@packages/data-context/test/graphql/stubCloudTypes'
 import { CloudConnectModalsFragmentDoc } from '../../generated/graphql-test'
 import CloudConnectModals from './CloudConnectModals.vue'
-import cloneDeep from 'lodash/cloneDeep'
 
 type MountOptions = {
   hasOrg: boolean
@@ -25,7 +24,7 @@ describe('<CloudConnectModals />', () => {
 
         result.cloudViewer = {
           ...CloudUserStubs.me,
-          organizations: hasOrg ? cloneDeep(CloudOrganizationConnectionStubs) : null,
+          organizations: hasOrg ? structuredClone(CloudOrganizationConnectionStubs) : null,
           firstOrganization: {
             __typename: 'CloudOrganizationConnection',
             nodes: [],

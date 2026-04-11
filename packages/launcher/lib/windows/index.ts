@@ -2,7 +2,6 @@ import fs from 'fs-extra'
 import winVersionInfo from 'win-version-info'
 import os from 'os'
 import { join, normalize, win32 } from 'path'
-import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
 import Debug from 'debug'
 import type { PathData } from '../types'
@@ -127,7 +126,7 @@ const formPaths: WindowsBrowserPaths = {
 }
 
 function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
-  const formFullAppPathFn: NameToPath = get(formPaths, [browser.name, browser.channel], formFullAppPath)
+  const formFullAppPathFn: NameToPath = formPaths?.[browser.name]?.[browser.channel] ?? formFullAppPath
 
   const exePaths = formFullAppPathFn(browser.name)
 

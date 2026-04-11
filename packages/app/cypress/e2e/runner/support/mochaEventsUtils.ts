@@ -1,5 +1,4 @@
 import type { CypressInCypressMochaEvent } from '../../../../src/runner/event-manager'
-import _ from 'lodash'
 import type { MochaLifecycleData, SanitizedMochaLifecycleData } from './mochaTypes'
 import EventEmitter from 'events'
 import disparity from 'disparity'
@@ -10,17 +9,17 @@ const hooks = {
 } as const
 
 const stringifyShort = (obj: Record<string, any>) => {
-  const constructorName = _.get(obj, 'constructor.name')
+  const constructorName = obj?.constructor?.name
 
-  if (constructorName && !_.includes(['Object', 'Array'], constructorName)) {
+  if (constructorName && !['Object', 'Array'].includes(constructorName)) {
     return `{${constructorName}}`
   }
 
-  if (_.isArray(obj)) {
+  if (Array.isArray(obj)) {
     return `[Array ${obj.length}]`
   }
 
-  if (_.isObject(obj)) {
+  if (typeof obj === 'object' && obj !== null) {
     return `{Object ${Object.keys(obj).length}}`
   }
 

@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { allowDestroy, connect, httpUtils } from '@packages/network'
 import debugModule from 'debug'
 import https from 'https'
@@ -65,7 +64,7 @@ export class Server {
     // https://github.com/cypress-io/cypress/issues/3192
     browserSocket.setNoDelay(true)
 
-    debug('Writing browserSocket connection headers %o', { url: req.url, headLength: _.get(head, 'length'), headers: req.headers })
+    debug('Writing browserSocket connection headers %o', { url: req.url, headLength: head?.length, headers: req.headers })
 
     browserSocket.on('error', (err: Error) => {
       // TODO: shouldn't we destroy the upstream socket here?
@@ -89,7 +88,7 @@ export class Server {
     browserSocket.write('\r\n')
 
     // if we somehow already have the head here
-    if (_.get(head, 'length')) {
+    if (head?.length) {
       // then immediately make up the connection
       return this._onFirstHeadBytes(req, browserSocket, head)
     }
@@ -101,8 +100,7 @@ export class Server {
   }
 
   _onFirstHeadBytes (req: IncomingMessage, browserSocket: net.Socket, head: Buffer) {
-    // @ts-expect-error
-    debug('Got first head bytes %o', { url: req.url, head: _.chain(head).invoke('toString').slice(0, 64).join('').value() })
+    debug('Got first head bytes %o', { url: req.url, head: head.toString().slice(0, 64) })
 
     browserSocket.pause()
 
@@ -344,7 +342,7 @@ export class Server {
 
   close = async (): Promise<void> => {
     const close = async () => {
-      const servers = _.values(sslIpServers).concat(this._sniServer)
+      const servers = Object.values(sslIpServers).concat(this._sniServer)
 
       await Promise.all(servers.map((server) => {
         return new Promise<void>((resolve) => {

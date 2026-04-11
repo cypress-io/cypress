@@ -11,8 +11,7 @@ of this logic, which should help inform a subsequent refactor strategy.
   - how to verify stack traces of privileged commands in chrome
 */
 import Debug from 'debug'
-import { isString, isEqual } from 'lodash'
-import { getSuperDomainOrigin, getSuperDomain, parseUrlIntoHostProtocolDomainTldPort } from './cors'
+import { getSuperDomainOrigin, getSuperDomain, parseUrlIntoHostProtocolDomainTldPort, shallowEqual } from './cors'
 import type { ParsedHostWithProtocolAndHost } from './types'
 
 const debug = Debug('cypress:network:document-domain-injection')
@@ -49,13 +48,13 @@ export class DocumentDomainBehavior implements DocumentDomainInjection {
     return getSuperDomain(url)
   }
   public urlsMatch (frameUrl: string | ParsedHostWithProtocolAndHost, topUrl: string | ParsedHostWithProtocolAndHost): boolean {
-    const frameProps = isString(frameUrl) ? parseUrlIntoHostProtocolDomainTldPort(frameUrl) : frameUrl
-    const topProps = isString(topUrl) ? parseUrlIntoHostProtocolDomainTldPort(topUrl) : topUrl
+    const frameProps = typeof frameUrl === 'string' ? parseUrlIntoHostProtocolDomainTldPort(frameUrl) : frameUrl
+    const topProps = typeof topUrl === 'string' ? parseUrlIntoHostProtocolDomainTldPort(topUrl) : topUrl
 
     const { subdomain: frameSubdomain, ...parsedFrameUrl } = frameProps
     const { subdomain: topSubdomain, ...parsedTopUrl } = topProps
 
-    return isEqual(parsedFrameUrl, parsedTopUrl)
+    return shallowEqual(parsedFrameUrl, parsedTopUrl)
   }
   public shouldInjectDocumentDomain (url: string | undefined) {
     debug('document-domain behavior: should inject document domain -> true')
@@ -72,10 +71,10 @@ export class OriginBehavior implements DocumentDomainInjection {
     return new URL(url).hostname
   }
   public urlsMatch (frameUrl: string | ParsedHostWithProtocolAndHost, topUrl: string | ParsedHostWithProtocolAndHost): boolean {
-    const frameProps = isString(frameUrl) ? parseUrlIntoHostProtocolDomainTldPort(frameUrl) : frameUrl
-    const topProps = isString(topUrl) ? parseUrlIntoHostProtocolDomainTldPort(topUrl) : topUrl
+    const frameProps = typeof frameUrl === 'string' ? parseUrlIntoHostProtocolDomainTldPort(frameUrl) : frameUrl
+    const topProps = typeof topUrl === 'string' ? parseUrlIntoHostProtocolDomainTldPort(topUrl) : topUrl
 
-    return isEqual(frameProps, topProps)
+    return shallowEqual(frameProps, topProps)
   }
   public shouldInjectDocumentDomain (url: string | undefined) {
     debug('origin-behavior: should inject document domain -> false')

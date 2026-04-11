@@ -22,7 +22,6 @@ import {
 
 import path from 'path'
 import execa from 'execa'
-import _ from 'lodash'
 
 import type { CyTaskResult, OpenGlobalModeOptions, RemoteGraphQLBatchInterceptor, RemoteGraphQLInterceptor, ResetOptionsResult, WithCtxInjected, WithCtxOptions, MockNodeCloudRequestOptions, MockNodeCloudStreamingRequestOptions } from '../support/e2e'
 import { fixtureDirs } from '@tooling/system-tests'
@@ -296,8 +295,12 @@ async function makeE2ETasks () {
               }
 
               const [, capture1, capture2] = re
-              const subqueryVariables = _.transform(_.pickBy(variables, (val, key) => key.startsWith(`_${capture1}_`)), (acc, val, k) => {
+              const subqueryVariables = Object.entries(variables)
+              .filter(([key]) => key.startsWith(`_${capture1}_`))
+              .reduce((acc, [k, val]) => {
                 acc[k.replace(`_${capture1}_`, '')] = val
+
+                return acc
               }, {})
 
               keys.push(key)
@@ -315,8 +318,10 @@ async function makeE2ETasks () {
                 return null
               }))
             }
+            const settled = await Promise.allSettled(values)
+
             result = {
-              data: _.zipObject(keys, (await Promise.allSettled(values)).map((v) => v.status === 'fulfilled' ? v.value : v.reason)),
+              data: { ...finalVal, ...Object.fromEntries(keys.map((k, i) => [k, settled[i].status === 'fulfilled' ? settled[i].value : settled[i].reason])) },
               errors: errors.length ? [...(result.errors ?? []), ...errors] : result.errors,
               extensions: result.extensions,
             }

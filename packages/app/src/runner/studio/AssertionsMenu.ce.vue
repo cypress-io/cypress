@@ -63,7 +63,6 @@
 <script lang="ts" setup>
 import { createPopper } from '@popperjs/core'
 import AssertionType from './AssertionType.ce.vue'
-import _ from 'lodash'
 import { nextTick, onMounted, Ref, ref, StyleValue } from 'vue'
 import { IconActionDeleteSmall, IconActionTap } from '@cypress-design/vue-icon'
 import type { PossibleAssertions, AddAssertion, AssertionArgs } from './types'
@@ -83,7 +82,7 @@ const onAddAssertion = ({ type, name, value }: {
 }) => {
   let args = [type, name, value]
 
-  args = _.compact(args)
+  args = args.filter(Boolean)
   props.addAssertion(props.jqueryElement, ...args as AssertionArgs)
 }
 

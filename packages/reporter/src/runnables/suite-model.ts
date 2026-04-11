@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { computed, observable, makeObservable } from 'mobx'
 import Runnable, { RunnableProps } from './runnable-model'
 import type TestModel from '../test/test-model'
@@ -59,34 +58,34 @@ export default class Suite extends Runnable {
      * since we're displaying a collapsible for each suite whether it's a nested suite or not,
      * we only want to consider the test children of the current suite and not the state of any suite children
      */
-    return _.map(this._testChildren, 'state')
+    return this._testChildren.map((t) => t.state)
   }
 
   get hasRetried (): boolean {
-    return _.some(this._testChildren, (v) => v.hasRetried)
+    return this._testChildren.some((v) => v.hasRetried)
   }
 
   get _anyTestChildrenRunning () {
-    return _.some(this._testChildStates, (state) => {
+    return this._testChildStates.some((state) => {
       return state === 'active'
     })
   }
 
   get _anyTestChildrenFailed () {
-    return _.some(this._testChildStates, (state) => {
+    return this._testChildStates.some((state) => {
       return state === 'failed'
     })
   }
 
   get _allTestChildrenPassedOrPending () {
-    return !this._testChildStates.length || _.every(this._testChildStates, (state) => {
+    return !this._testChildStates.length || this._testChildStates.every((state) => {
       return state === 'passed' || state === 'pending'
     })
   }
 
   get _allTestChildrenPending () {
     return !!this._testChildStates.length
-            && _.every(this._testChildStates, (state) => {
+            && this._testChildStates.every((state) => {
               return state === 'pending'
             })
   }

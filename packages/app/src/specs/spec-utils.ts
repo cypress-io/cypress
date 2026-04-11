@@ -1,7 +1,6 @@
 import fuzzySort from 'fuzzysort'
 import type { FoundSpec } from '@packages/types'
 import { ComputedRef, Ref, ref, watch } from 'vue'
-import _ from 'lodash'
 import { FuzzyFoundSpec, getPlatform } from './tree/useCollapsibleTree'
 
 export function fuzzySortSpecs <T extends FuzzyFoundSpec> (specs: T[], searchValue: string) {
@@ -51,7 +50,7 @@ export function useCachedSpecs<S extends { absolute: string }> (
   const cachedSpecs: Ref<Readonly<S[]>> = ref([])
 
   watch(specs, (currentSpecs, prevSpecs = []) => {
-    if (!_.isEqual(currentSpecs, prevSpecs)) {
+    if (JSON.stringify(currentSpecs) !== JSON.stringify(prevSpecs)) {
       cachedSpecs.value = currentSpecs
     }
   }, { immediate: true })

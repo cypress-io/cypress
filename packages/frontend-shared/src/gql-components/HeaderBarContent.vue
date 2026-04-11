@@ -175,7 +175,7 @@ import Auth from './Auth.vue'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from './ExternalLink.vue'
 import interval from 'human-interval'
-import { sortBy } from 'lodash'
+import { sortBy } from '@packages/utils'
 import Tooltip from '../components/Tooltip.vue'
 import type { AllowedState } from '@packages/types'
 import { useUserProjectStatusStore } from '../store/user-project-status-store'
@@ -278,7 +278,7 @@ const prompts = sortBy([
     slug: 'orchestration1',
     noProjectId: true,
   },
-], 'interval')
+], (p) => p.interval ?? 0)
 const isForceOpenAllowed = ref(true)
 const isOpenDelayElapsed = ref(false)
 

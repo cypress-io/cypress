@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import chalk from 'chalk'
-import _ from 'lodash'
 import path from 'path'
 
 const pluralize = require('pluralize')
@@ -11,17 +10,21 @@ export {
   pluralize,
 }
 
-const whileMatching = (othArr: string[]) => {
-  return (val: string, index: number) => {
-    return val === othArr[index]
-  }
-}
-
 export const parseResolvedPattern = (baseFolder: string, globPattern: string) => {
   const resolvedPath = path.resolve(baseFolder, globPattern)
   const resolvedPathParts = resolvedPath.split(path.sep)
   const folderPathPaths = baseFolder.split(path.sep)
-  const commonPath = _.takeWhile(folderPathPaths, whileMatching(resolvedPathParts)).join(path.sep)
+  const commonParts: string[] = []
+
+  for (const part of folderPathPaths) {
+    if (part === resolvedPathParts[commonParts.length]) {
+      commonParts.push(part)
+    } else {
+      break
+    }
+  }
+
+  const commonPath = commonParts.join(path.sep)
   const remainingPattern = !commonPath ? resolvedPath : resolvedPath.replace(commonPath.concat(path.sep), '')
 
   return [commonPath, remainingPattern]
@@ -34,12 +37,10 @@ export const isCypressErr = (err: ErrorLike): err is CypressError => {
 const twoOrMoreNewLinesRe = /\n{2,}/
 
 export const trimMultipleNewLines = (str: string) => {
-  return _
-  .chain(str)
+  return str
   .split(twoOrMoreNewLinesRe)
-  .compact()
+  .filter(Boolean)
   .join('\n\n')
-  .value()
 }
 
 type AllowedChalkColors = 'red' | 'blue' | 'green' | 'magenta' | 'yellow'

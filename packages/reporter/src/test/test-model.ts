@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
 
 import { FileDetails, TestState } from '@packages/types'
@@ -94,13 +93,13 @@ export default class Test extends Runnable {
       isStudio: true,
     }]
 
-    _.each(props.prevAttempts || [], (attempt) => this._addAttempt(attempt))
+    ;(props.prevAttempts || []).forEach((attempt) => this._addAttempt(attempt))
 
     this._addAttempt(props)
   }
 
   get isLongRunning () {
-    return _.some(this.attempts, (attempt: Attempt) => {
+    return this.attempts.some((attempt: Attempt) => {
       return attempt.isLongRunning
     })
   }
@@ -127,7 +126,7 @@ export default class Test extends Runnable {
   }
 
   get lastAttempt () {
-    return _.last(this.attempts) as Attempt
+    return this.attempts.at(-1) as Attempt
   }
 
   get hasMultipleAttempts () {
@@ -140,7 +139,7 @@ export default class Test extends Runnable {
 
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
   get isActive (): boolean {
-    return _.some(this.attempts, { isActive: true })
+    return this.attempts.some((a) => a.isActive === true)
   }
 
   get currentRetry () {
@@ -261,8 +260,8 @@ export default class Test extends Runnable {
   get isSelfHealed () {
     // Compute self-healed status from the commands in all attempts
     // This ensures the badge is shown correctly even across retries
-    return _.some(this.attempts, (attempt: Attempt) => {
-      return _.some(attempt.commands, (command) => command.isSelfHealed)
+    return this.attempts.some((attempt: Attempt) => {
+      return attempt.commands.some((command) => command.isSelfHealed)
     })
   }
 }

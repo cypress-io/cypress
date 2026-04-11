@@ -1,7 +1,6 @@
 import { CloudRunStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 import { RunCardFragmentDoc } from '../generated/graphql-test'
 import RunCard from './RunCard.vue'
-import _ from 'lodash'
 
 const SECOND = 1000
 const MINUTE = 60 * SECOND
@@ -19,7 +18,7 @@ describe('<RunCard />', { viewportHeight: 400 }, () => {
             result.totalFlakyTests = 1
           },
           render: (gqlVal) => {
-            const withLongBranchName = _.cloneDeep(gqlVal)
+            const withLongBranchName = structuredClone(gqlVal)
 
             if (withLongBranchName.commitInfo) {
               withLongBranchName.commitInfo.branch = 'user/this-is-a-really-long-branch-name-that-should-truncate'

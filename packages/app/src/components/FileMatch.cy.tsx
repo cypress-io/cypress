@@ -2,7 +2,6 @@ import FileMatch from './FileMatch.vue'
 import { ref } from 'vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
-import { each } from 'lodash'
 
 /*----------  Selectors  ----------*/
 // Inputs
@@ -183,7 +182,7 @@ describe('<FileMatch />', { viewportWidth: 600, viewportHeight: 300 }, () => {
       ],
     }
 
-    each(matchesData, ([theProps, expected], key) => {
+    Object.entries(matchesData).forEach(([key, [theProps, expected]]) => {
       it(`displays ${key} matches`, () => {
         cy.mount(() => <FileMatch matches={theProps.matches} pattern={theProps.pattern || ''} extensionPattern={theProps.extensionPattern || ''} />)
         .get(fileMatchIndicatorSelector)

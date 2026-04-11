@@ -1,5 +1,4 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import _ from 'lodash'
 import { _rewriteJsUnsafe } from '../../lib/js'
 import fse from 'fs-extra'
 import Bluebird from 'bluebird'
@@ -274,10 +273,7 @@ describe('js rewriter', function () {
           bluebird: `${cdnUrl}/bluebird/3.5.1/bluebird.js`,
         }
 
-        libs = _
-        .chain(libs)
-        .clone()
-        .reduce((memo, url, lib) => {
+        const reduced = Object.entries(libs).reduce<Record<string, string>>((memo, [lib, url]) => {
           memo[lib] = url
           memo[`${lib}Min`] = url
           .replace(/js$/, 'min.js')
@@ -288,9 +284,9 @@ describe('js rewriter', function () {
           }
 
           return memo
-        }
-        , {})
-        .extend({
+        }, {})
+
+        libs = Object.assign(reduced, {
           knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
           knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,
           emberMin: `${cdnUrl}/ember.js/2.18.2/ember.min.js`,
@@ -299,10 +295,9 @@ describe('js rewriter', function () {
           reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
           vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
           hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
-        })
-        .value() as unknown as typeof libs
+        }) as unknown as typeof libs
 
-        _.each(libs, (url, lib) => {
+        Object.entries(libs).forEach(([lib, url]) => {
           it(`does not corrupt code from '${lib}'`, function () {
             const pathToLib = `/tmp/${lib}`
 

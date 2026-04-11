@@ -1,9 +1,8 @@
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { blankContents } from '../components/Blank'
 import { logger } from './logger'
-import _ from 'lodash'
-/* eslint-disable no-duplicate-imports */
-import type { DebouncedFunc } from 'lodash'
+import { debounce } from '@packages/utils'
+import type { DebouncedFunction } from '@packages/utils'
 import { useStudioStore } from '../store/studio-store'
 import { getElementDimensions, setOffset } from './dimensions'
 import { getOrCreateHelperDom, getSelectorHighlightStyles, INT32_MAX } from './dom'
@@ -17,7 +16,7 @@ const sizzleRe = /sizzle/i
 const jQueryRe = /jquery/i
 
 export class AutIframe {
-  debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
+  debouncedToggleSelectorPlayground: DebouncedFunction<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
   // the iframes used to display snapshots of the AUT (currently used to display the studio snapshots)
   $snapshotIframes?: JQuery<HTMLIFrameElement>[]
@@ -30,7 +29,7 @@ export class AutIframe {
     private eventManager: any,
     private $: $CypressJQuery,
   ) {
-    this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
+    this.debouncedToggleSelectorPlayground = debounce(this.toggleSelectorPlayground, 300)
   }
 
   create (): { autIframe: JQuery<HTMLIFrameElement>, autSnapshotIframes: JQuery<HTMLIFrameElement>[] } {
@@ -44,7 +43,7 @@ export class AutIframe {
 
     // Create two iframes to facilitate before/after snapshot
     // rendering with a double buffer.
-    this.$snapshotIframes = _.times(2, (index) => {
+    this.$snapshotIframes = Array.from({ length: 2 }, (_, index) => {
       const $snapshotIframe = this.$('<iframe>', {
         id: `AUT Snapshot - ${index}: '${this.projectName}'`,
         title: `AUT Snapshot - ${index}: '${this.projectName}'`,
@@ -225,17 +224,17 @@ export class AutIframe {
 
     // remove all attributes
     if ($html[0]) {
-      oldAttrs = _.map($html[0].attributes, (attr) => {
+      oldAttrs = Array.from($html[0].attributes, (attr) => {
         return attr.name
       })
     }
 
-    _.each(oldAttrs, (attr) => {
+    (oldAttrs as string[]).forEach((attr) => {
       $html.removeAttr(attr)
     })
 
     // set the ones specified
-    _.each(htmlAttrs, (value, key) => {
+    Object.entries(htmlAttrs).forEach(([key, value]) => {
       $html.attr(key, value)
     })
   }
@@ -248,7 +247,7 @@ export class AutIframe {
 
     const existingStyles = $head?.find('link[rel="stylesheet"],style')
 
-    _.each(styles, (style, index) => {
+    Object.values(styles).forEach((style, index) => {
       if (style.href) {
         // make a best effort at not disturbing <link> stylesheets
         // if possible by checking to see if the existing head has a
@@ -297,7 +296,7 @@ export class AutIframe {
   }
 
   _insertBodyStyles ($body, styles: Record<string, any> = {}) {
-    _.each(styles, (style) => {
+    Object.values(styles).forEach((style) => {
       $body.append(style.href ? this._linkTag(style) : this._styleTag(style))
     })
   }
@@ -790,7 +789,7 @@ export class AutIframe {
     }
 
     // create the margin / bottom / padding layers
-    _.each(layers, (color, attr) => {
+    Object.entries(layers).forEach(([attr, color]) => {
       let obj
 
       switch (attr) {

@@ -15,7 +15,7 @@ import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import { onMounted, ref, watchEffect, watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { TrackedBanner_ProjectStateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_SetProjectStateDocument } from '../../generated/graphql'
-import { set } from 'lodash'
+import { setPath } from '@packages/utils'
 import { nanoid } from 'nanoid'
 
 type EventData = {
@@ -87,7 +87,7 @@ onMounted(async () => {
 async function updateBannerState (field: 'lastShown' | 'dismissed') {
   const savedBannerState = stateQuery.data.value?.currentProject?.savedState?.banners ?? {}
 
-  set(savedBannerState, [props.bannerId, field], Date.now())
+  setPath(savedBannerState, [props.bannerId, field], Date.now())
 
   await setStateMutation.executeMutation({ value: JSON.stringify({ banners: savedBannerState }) })
 }

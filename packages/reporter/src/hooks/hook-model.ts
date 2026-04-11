@@ -1,7 +1,31 @@
-import _ from 'lodash'
 import { observable, computed, makeObservable } from 'mobx'
 
 import type { FileDetails } from '@packages/types'
+
+const deepEqual = (a: any, b: any): boolean => {
+  if (a === b) return true
+
+  if (a == null || b == null) return false
+
+  if (typeof a !== typeof b) return false
+
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b) || a.length !== b.length) return false
+
+    return a.every((val, i) => deepEqual(val, b[i]))
+  }
+
+  if (typeof a === 'object') {
+    const keysA = Object.keys(a)
+    const keysB = Object.keys(b)
+
+    if (keysA.length !== keysB.length) return false
+
+    return keysA.every((key) => deepEqual(a[key], b[key]))
+  }
+
+  return false
+}
 import type { Alias } from '../instruments/instrument-model'
 import type Err from '../errors/err-model'
 import type CommandModel from '../commands/command-model'
@@ -75,7 +99,7 @@ export default class Hook implements HookProps {
     // do a deep compare here to see if we can use the cached aliases, which will allow mobx's
     // @computed identity comparison to pass, preventing unnecessary re-renders
     // https://github.com/cypress-io/cypress/issues/4411
-    if (!_.isEqual(aliasesWithDuplicates, this._aliasesWithDuplicatesCache)) {
+    if (!deepEqual(aliasesWithDuplicates, this._aliasesWithDuplicatesCache)) {
       this._aliasesWithDuplicatesCache = aliasesWithDuplicates
     }
 
@@ -83,7 +107,7 @@ export default class Hook implements HookProps {
   }
 
   get hasFailedCommand () {
-    return !!_.find(this.commands, { state: 'failed' })
+    return !!this.commands.find((c) => c.state === 'failed')
   }
 
   get showStudioPrompt () {
@@ -101,7 +125,7 @@ export default class Hook implements HookProps {
     }
 
     if (command.group) {
-      const groupCommand = _.find(this.commands, { id: command.group }) as CommandModel
+      const groupCommand = this.commands.find((c) => c.id === command.group) as CommandModel
 
       if (groupCommand && groupCommand.addChild) {
         groupCommand.addChild(command)
@@ -111,7 +135,7 @@ export default class Hook implements HookProps {
       }
     }
 
-    const lastCommand = _.last(this.commands)
+    const lastCommand = this.commands.at(-1)
 
     if (lastCommand &&
       lastCommand.isMatchingEvent &&
@@ -125,16 +149,16 @@ export default class Hook implements HookProps {
   }
 
   removeCommand (commandId: number) {
-    const commandIndex = _.findIndex(this.commands, { id: commandId })
+    const commandIndex = this.commands.findIndex((c) => c.id === commandId)
 
     this.commands.splice(commandIndex, 1)
   }
 
   commandMatchingErr (errToMatch: Err): CommandModel | undefined {
-    return _(this.commands) // @ts-ignore
+    return this.commands
     .filter(({ err }) => {
       return err && err.message === errToMatch.message && err.message !== undefined
     })
-    .last()
+    .at(-1)
   }
 }

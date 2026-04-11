@@ -2,7 +2,6 @@ import type { Ref, CSSProperties } from 'vue'
 import { watch, ref, computed, shallowRef } from 'vue'
 import type { MaybeRef } from '@vueuse/core'
 import { useElementSize } from '@vueuse/core'
-import { isEqual } from 'lodash'
 
 export type UseVirtualListApi = ReturnType<typeof useVirtualList>['api']
 
@@ -109,7 +108,7 @@ export function useVirtualList<T = any> (list: MaybeRef<T[]>, options: UseVirtua
   }
 
   watch([size.height, list], (newVal, oldVal) => {
-    if (!isEqual(newVal, oldVal)) {
+    if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
       calculateRange()
     }
   })

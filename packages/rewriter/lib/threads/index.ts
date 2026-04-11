@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import * as path from 'path'
@@ -9,12 +8,12 @@ import type { DeferSourceMapRewriteFn } from '../js'
 
 const debug = Debug('cypress:rewriter:threads')
 
-const _debugWorker = !debug.enabled ? _.noop : (worker: WorkerInfo) => {
-  return { ..._.pick(worker, 'isBusy', 'id'), freeWorkers: _.filter(workers, { isBusy: false }).length }
+const _debugWorker = !debug.enabled ? () => {} : (worker: WorkerInfo) => {
+  return { isBusy: worker.isBusy, id: worker.id, freeWorkers: workers.filter((w) => !w.isBusy).length }
 }
 
-const _debugOpts = !debug.enabled ? _.noop : (opts: RewriteOpts) => {
-  return { ..._.pick(opts, 'isHtml'), sourceLength: opts.source.length }
+const _debugOpts = !debug.enabled ? () => {} : (opts: RewriteOpts) => {
+  return { isHtml: opts.isHtml, sourceLength: opts.source.length }
 }
 
 // in production, it is preferable to use the transpiled version of `worker.ts`
@@ -26,7 +25,7 @@ const WORKER_FILENAME = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'wor
 const WORKER_PATH = path.join(__dirname, WORKER_FILENAME)
 
 // spawn up to `os.cpus().length` threads (default to 4 if this call fails)
-const MAX_WORKER_THREADS = _.get(os.cpus(), 'length') || 4
+const MAX_WORKER_THREADS = os.cpus()?.length || 4
 
 // spawn up to 4 threads at startup
 const INITIAL_WORKER_THREADS = Math.min(MAX_WORKER_THREADS, 4)
@@ -65,7 +64,13 @@ function wrapProcessExit () {
 
   // note - process.exit is normally synchronous, so this could potentially cause strange behavior
   // @ts-ignore
-  process.exit = _.once(async (...args) => {
+  let exitCalled = false
+
+  // @ts-ignore
+  process.exit = async (...args) => {
+    if (exitCalled) return
+
+    exitCalled = true
     debug('intercepted process.exit called, closing worker threads')
     terminateAllWorkers()
     .delay(100)
@@ -73,7 +78,7 @@ function wrapProcessExit () {
       debug('all workers terminated, exiting for real')
       originalProcessExit.call(process, ...args)
     })
-  })
+  }
 }
 
 function createWorker () {
@@ -83,7 +88,9 @@ function createWorker () {
   const thread = new Worker(WORKER_PATH)
   .on('exit', (exitCode) => {
     debug('worker exited %o', { exitCode, worker: _debugWorker(worker) })
-    _.remove(workers, worker)
+    const idx = workers.indexOf(worker)
+
+    if (idx !== -1) workers.splice(idx, 1)
   })
   .on('online', () => {
     onlineMs = Date.now() - startedAt
@@ -116,7 +123,7 @@ export function createInitialWorkers () {
     return
   }
 
-  _.times(INITIAL_WORKER_THREADS, createWorker)
+  Array.from({ length: INITIAL_WORKER_THREADS }, () => createWorker())
 }
 
 // try to cleanly shut down worker threads to avoid SIGABRT in Electron
@@ -159,9 +166,11 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
 
   const { port1, port2 } = new MessageChannel()
 
+  const { deferSourceMapRewrite: _dsm, ...rewriteOpts } = opts
+
   const req: RewriteRequest = {
     port: port1,
-    ..._.omit(opts, 'deferSourceMapRewrite'),
+    ...rewriteOpts,
   }
 
   worker.thread.postMessage(req, [req.port])
@@ -223,7 +232,7 @@ function maybeRunNextInQueue () {
 }
 
 function getFreeWorker (): WorkerInfo | undefined {
-  return _.find(workers, { isBusy: false })
+  return workers.find((w) => !w.isBusy)
 }
 
 export function queueRewriting (opts: RewriteOpts): Promise<string> {

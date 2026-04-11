@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import _ from 'lodash'
 import cp from 'child_process'
 import { EventEmitter } from 'events'
 import * as linuxHelper from '../../lib/linux'
@@ -194,7 +193,7 @@ describe('linux browser detection', () => {
       }
     }
 
-    const goal = _.defaults({ binary: 'multiline-foo' }, _.find(goalBrowsers, { name: 'foo-browser' }))
+    const goal = { ...goalBrowsers.find((b) => b.name === 'foo-browser'), binary: 'multiline-foo' }
 
     // @ts-expect-error
     const [browser] = await detect([goal])

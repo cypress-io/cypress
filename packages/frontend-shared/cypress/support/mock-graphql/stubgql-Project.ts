@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import config from '../../fixtures/config.json'
 import data from '../../fixtures/TestCurrentProject.json'
 
@@ -12,7 +11,7 @@ import { CloudProjectStubs } from '@packages/data-context/test/graphql/stubCloud
 import { stubBrowsers } from './stubgql-Browser'
 
 export const createTestGlobalProject = (title: string, additionalConfig: Partial<GlobalProject> = {}): GlobalProject => {
-  const snakeTitle = _.kebabCase(title)
+  const snakeTitle = title.replace(/([a-z])([A-Z])/g, '$1-$2').replace(/[\s_]+/g, '-').toLowerCase()
 
   return {
     ...testNodeId('GlobalProject', snakeTitle),

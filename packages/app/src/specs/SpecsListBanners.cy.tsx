@@ -1,4 +1,4 @@
-import { camelCase, assignIn, set } from 'lodash'
+import { camelCase, setPath } from '@packages/utils'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import SpecsListBanners from './SpecsListBanners.vue'
@@ -63,8 +63,8 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
   const mountWithState = (query: Partial<SpecsListBannersFragment>, state?: Partial<AllowedState>, props?: object) => {
     cy.mountFragment(SpecsListBannersFragmentDoc, {
       onResult: (result) => {
-        assignIn(result, query)
-        set(result, 'currentProject.savedState', state)
+        Object.assign(result, query)
+        setPath(result, 'currentProject.savedState', state)
       },
       render: (gql) => <SpecsListBanners gql={gql} {...props} />,
     })

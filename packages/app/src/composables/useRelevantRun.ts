@@ -3,7 +3,6 @@ import { Debug_RelevantRuns_SubscriptionDocument, Sidebar_RelevantRuns_Subscript
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 import { computed } from 'vue'
-import { uniq } from 'lodash'
 
 /**
  * Using two different subscriptions with different names in order for urql to treat them separately.
@@ -70,7 +69,7 @@ export function useRelevantRun (location: 'SIDEBAR' | 'DEBUG' | 'RUNS' | 'SPECS'
 
     const selectedRun = allRuns?.find((run) => run.runNumber === selectedRunNumber)
 
-    const commitShas = uniq(allRuns?.map((run) => run.sha))
+    const commitShas = [...new Set(allRuns?.map((run) => run.sha))]
 
     return {
       all: subscriptionResponse.data.value?.relevantRuns?.all,

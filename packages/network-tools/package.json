@@ -21,8 +21,7 @@
   },
   "dependencies": {
     "@cypress/parse-domain": "2.4.0",
-    "debug": "^4.3.4",
-    "lodash": "^4.17.21"
+    "debug": "^4.3.4"
   },
   "devDependencies": {
     "rimraf": "6.1.1",

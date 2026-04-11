@@ -23,10 +23,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
-import { uniqBy } from 'lodash'
+import { uniqBy } from '@packages/utils'
 
 const routes = computed(() => {
-  return uniqBy(useRouter().getRoutes(), 'path').filter((r) => r.meta?.layout !== 'error' && !r.meta?.error)
+  return uniqBy(useRouter().getRoutes(), (r) => r.path).filter((r) => r.meta?.layout !== 'error' && !r.meta?.error)
 })
 </script>
 

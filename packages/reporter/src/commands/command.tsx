@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { observer } from 'mobx-react'
@@ -105,7 +104,7 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
     return false
   }
 
-  return _.includes(aliasesWithDuplicates, aliasName)
+  return aliasesWithDuplicates?.includes(aliasName) ?? false
 }
 
 interface NavColumnsProps {
@@ -245,7 +244,7 @@ const Aliases: React.FC<AliasesProps> = observer(({ model }: AliasesProps) => {
         const aliases = [alias]
 
         if (model.hasChildren && !model.isOpen) {
-          aliases.push(..._.compact(model.children.map((dupe) => dupe.alias)))
+          aliases.push(...model.children.map((dupe) => dupe.alias).filter(Boolean))
         }
 
         return (

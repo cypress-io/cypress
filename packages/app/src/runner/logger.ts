@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 
 interface Table {
   name: string
@@ -10,9 +10,18 @@ interface Table {
 interface Group {
   name: string
   items?: any
+  groups?: Group[]
   label?: boolean
   expand?: boolean
   table?: boolean
+}
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
+
+const resolveResult = <T>(obj: any, key: string): T | undefined => {
+  const v = obj[key]
+
+  return typeof v === 'function' ? v.call(obj) : v
 }
 
 export const logger = {
@@ -29,10 +38,15 @@ export const logger = {
   },
 
   logFormatted (consoleProps: any) {
-    if (_.isEmpty(consoleProps)) return
+    if (!consoleProps || Object.keys(consoleProps).length === 0) return
 
-    // clone the consoleProps to avoid mutating the original object
-    const clonedConsoleProps = _.cloneDeep(consoleProps)
+    // shallow clone the consoleProps to avoid mutating the original object
+    const clonedConsoleProps = {
+      ...consoleProps,
+      props: consoleProps.props ? { ...consoleProps.props } : undefined,
+      groups: consoleProps.groups ? consoleProps.groups.map((g) => ({ ...g })) : undefined,
+      table: consoleProps.table ? { ...consoleProps.table } : undefined,
+    }
 
     this._logValues(clonedConsoleProps)
     this._logArgs(clonedConsoleProps)
@@ -45,17 +59,17 @@ export const logger = {
 
     const formattedLog = this._formatted({
       [consoleProps.type]: consoleProps.name,
-      ..._.pick(consoleProps, 'error', 'snapshot'),
+      ...pick(consoleProps, 'error', 'snapshot'),
       ...consoleProps.props,
     })
 
-    _.each(formattedLog, (value, key) => {
+    Object.entries(formattedLog).forEach(([key, value]) => {
       // don't log empty strings
       // trim([]) returns '' but we want to log empty arrays, so account for that
-      if (_.isString(value) && _.trim(value) === '') return
+      if (typeof value === 'string' && value.trim() === '') return
 
       // Skip trim if we know value is an object
-      if (typeof value !== 'object' && _.trim(value) === '' && !_.isArray(value)) return
+      if (typeof value !== 'object' && String(value).trim() === '' && !Array.isArray(value)) return
 
       this.log(`%c${key}`, 'font-weight: bold', value)
     })
@@ -64,13 +78,14 @@ export const logger = {
   _formatted (consoleProps: any) {
     const maxKeyLength = this._getMaxKeyLength(consoleProps)
 
-    return _.reduce(consoleProps, (memo, value, key) => {
+    return Object.entries(consoleProps).reduce((memo, [key, value]) => {
       if (!key || key === 'undefined') return memo
 
       const append = ': '
 
-      key = _.capitalize(key + append).padEnd(maxKeyLength + append.length, ' ')
-      memo[key] = value
+      const formattedKey = capitalize(key + append).padEnd(maxKeyLength + append.length, ' ')
+
+      memo[formattedKey] = value
 
       return memo
     }, {})
@@ -95,7 +110,7 @@ export const logger = {
   },
 
   _getArgs (consoleProps: any) {
-    const args = _.result<unknown[]>(consoleProps, 'args')
+    const args = resolveResult<unknown[]>(consoleProps, 'args')
 
     if (!args) return
 
@@ -105,14 +120,14 @@ export const logger = {
   _logGroups (consoleProps: any) {
     const groups = this._getGroups(consoleProps)
 
-    _.each(groups, (group) => {
+    groups?.forEach((group) => {
       if (group.expand) {
         console.group(group.name)
       } else {
         console.groupCollapsed(group.name)
       }
 
-      _.each(group.items, (value, key) => {
+      Object.entries(group.items || {}).forEach(([key, value]) => {
         if (group.label === false) {
           this.log(value)
         } else {
@@ -126,15 +141,19 @@ export const logger = {
   },
 
   _getGroups (consoleProps: any): Group[] | undefined {
-    const groups = _.result<Group[]>(consoleProps, 'groups')
+    const groups = resolveResult<Group[]>(consoleProps, 'groups')
 
     if (!groups) return
 
-    return _.map(groups, (group) => {
-      group.items = this._formatted(group.items || {})
+    const cloneGroup = (group: Group): Group => {
+      return {
+        ...group,
+        items: this._formatted(group.items || {}),
+        groups: group.groups ? group.groups.map(cloneGroup) : undefined,
+      }
+    }
 
-      return group
-    })
+    return groups.map(cloneGroup)
   },
 
   _logTables (consoleProps: any) {
@@ -163,7 +182,9 @@ export const logger = {
 
         tableData = data.map((rowObj) => {
           return Object.entries(rowObj).reduce((acc: any, value) => {
-            acc[value[0]] = _.isElement(value[1]) ? getSimplifiedElementDisplay(value[1] as Element) : value[1]
+            const isEl = value[1] != null && (value[1] as any).nodeType === 1 && typeof (value[1] as any).tagName === 'string'
+
+            acc[value[0]] = isEl ? getSimplifiedElementDisplay(value[1] as Element) : value[1]
 
             return acc
           }, {})
@@ -175,8 +196,10 @@ export const logger = {
       console.groupEnd()
     }
 
-    _.each(_.sortBy(consoleProps.table, (val, key) => key), (getTableData: () => Table) => {
-      return logTable(getTableData())
+    if (!consoleProps.table) return
+
+    Object.entries(consoleProps.table).sort(([a], [b]) => a.localeCompare(b)).forEach(([, getTableData]) => {
+      return logTable((getTableData as () => Table)())
     })
   },
 }

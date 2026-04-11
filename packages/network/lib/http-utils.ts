@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import type { IncomingMessage } from 'http'
 
 // https://github.com/cypress-io/cypress/issues/4298
@@ -7,7 +6,7 @@ import type { IncomingMessage } from 'http'
 const NO_BODY_STATUS_CODES = [204, 304]
 
 export function responseMustHaveEmptyBody (req: IncomingMessage, res: IncomingMessage) {
-  return _.includes(NO_BODY_STATUS_CODES, res.statusCode) || (req.method && req.method.toLowerCase() === 'head')
+  return NO_BODY_STATUS_CODES.includes(res.statusCode!) || (req.method && req.method.toLowerCase() === 'head')
 }
 
 /**

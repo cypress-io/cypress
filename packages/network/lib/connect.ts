@@ -1,7 +1,6 @@
 import { promisify } from 'util'
 import debugModule from 'debug'
 import dns from 'dns'
-import _ from 'lodash'
 import net from 'net'
 import tls from 'tls'
 import os from 'os'
@@ -73,9 +72,8 @@ export interface RetryingOptions {
 }
 
 function createSocket (opts: RetryingOptions, onConnect: () => void): net.Socket {
-  const netOpts = _.defaults(_.pick(opts, 'family', 'host', 'port'), {
-    family: 4,
-  })
+  const picked = { family: opts.family, host: opts.host, port: opts.port }
+  const netOpts = { family: picked.family ?? 4, host: picked.host, port: picked.port }
 
   if (opts.useTls) {
     return tls.connect(netOpts, onConnect)

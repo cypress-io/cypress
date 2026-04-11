@@ -26,9 +26,9 @@
 
   },
   "dependencies": {
+    "@packages/utils": "0.0.0-development",
     "ansi_up": "5.0.0",
     "chalk": "^4.1.2",
-    "lodash": "^4.17.21",
     "pluralize": "8.0.0",
     "strip-ansi": "6.0.1"
   },

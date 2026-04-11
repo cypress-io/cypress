@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest'
-import _ from 'lodash'
 import { knownBrowsers } from '../../lib/known-browsers'
 
 describe('browsers', () => {
@@ -9,9 +8,9 @@ describe('browsers', () => {
 
   // https://github.com/cypress-io/cypress/issues/6669
   it('exports multiline versionRegexes', () => {
-    expect(_.every(knownBrowsers.map(({ versionRegex }) => {
+    expect(knownBrowsers.map(({ versionRegex }) => {
       return versionRegex.multiline
-    }))).toBe(true)
+    }).every(Boolean)).toBe(true)
   })
 
   describe('browser.validator', () => {

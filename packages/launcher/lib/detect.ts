@@ -1,5 +1,4 @@
 import Bluebird from 'bluebird'
-import _, { compact, extend, find } from 'lodash'
 import os from 'os'
 import { removeDuplicateBrowsers } from '@packages/data-context/src/sources/BrowserDataSource'
 import { knownBrowsers } from './known-browsers'
@@ -97,7 +96,7 @@ function lookup (
 function checkBrowser (browser: Browser): Bluebird<(boolean | HasVersion)[]> {
   if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
     return Bluebird.map(browser.binary, (binary: string) => {
-      return checkOneBrowser(extend({}, browser, { binary }))
+      return checkOneBrowser(Object.assign({}, browser, { binary }))
     })
   }
 
@@ -133,7 +132,17 @@ function checkOneBrowser (browser: Browser): Promise<boolean | HasVersion> {
 
   return lookup(platform, browser)
   .then((val) => ({ ...browser, ...val }))
-  .then((val) => _.pick(val, pickBrowserProps) as FoundBrowser)
+  .then((val) => {
+    const picked: Record<string, any> = {}
+
+    for (const key of pickBrowserProps) {
+      if (key in val) {
+        picked[key] = val[key]
+      }
+    }
+
+    return picked as FoundBrowser
+  })
   .then((foundBrowser) => {
     foundBrowser.majorVersion = getMajorVersion(foundBrowser.version)
 
@@ -153,13 +162,13 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   }
 
   const compactFalse = (browsers: any[]) => {
-    return compact(browsers) as FoundBrowser[]
+    return browsers.filter(Boolean) as FoundBrowser[]
   }
 
   debug('detecting if the following browsers are present %o', goalBrowsers)
 
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
-  .then((val) => _.flatten(val))
+  .then((val) => val.flat())
   .then(compactFalse)
   .then(removeDuplicateBrowsers)
 }
@@ -175,13 +184,13 @@ export const detectByPath = (
   const helper = getHelper()
 
   const detectBrowserByVersionString = (stdout: string): Browser | undefined => {
-    return find(goalBrowsers, (goalBrowser: Browser) => {
+    return goalBrowsers.find((goalBrowser: Browser) => {
       return goalBrowser.versionRegex.test(stdout)
     })
   }
 
   const detectBrowserFromKey = (browserKey): Browser | undefined => {
-    return find(goalBrowsers, (goalBrowser) => {
+    return goalBrowsers.find((goalBrowser) => {
       return (
         goalBrowser.name === browserKey ||
         goalBrowser.displayName === browserKey ||
@@ -193,7 +202,7 @@ export const detectByPath = (
   const setCustomBrowserData = (browser: Browser, path: string, versionStr: string): FoundBrowser => {
     const version = helper.getVersionNumber(versionStr, browser)
 
-    const parsedBrowser = extend({}, browser, {
+    const parsedBrowser = Object.assign({}, browser, {
       name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,

@@ -1,5 +1,4 @@
 /* eslint-disable padding-line-between-statements */
-import _ from 'lodash'
 import { computed, observable, makeObservable } from 'mobx'
 
 import type { FileDetails } from '@packages/types'
@@ -67,7 +66,7 @@ export default class Err {
   }
 
   get displayMessage () {
-    return _.compact([this.name, this.message]).join(': ')
+    return [this.name, this.message].filter(Boolean).join(': ')
   }
 
   get isCommandErr () {

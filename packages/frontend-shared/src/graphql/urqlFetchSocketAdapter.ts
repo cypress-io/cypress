@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { uniqueId } from '@packages/utils'
 import type { SocketShape } from '@packages/socket/browser/client'
 import type { ClientOptions } from '@urql/core'
 
@@ -16,7 +16,7 @@ export const urqlFetchSocketAdapter = (io: SocketShape): ClientOptions['fetch'] 
         }
       }
 
-      const uid = _.uniqueId('gql')
+      const uid = uniqueId('gql')
 
       // An ad-hoc version of the "Request"
       io.emit(`graphql:request`, uid, fetchOptions.body, (payload) => {

@@ -1,6 +1,5 @@
 import sinon from 'sinon'
 import { logger } from '../../../src/runner/logger'
-import _ from 'lodash'
 
 describe('logger', () => {
   let spyLog = sinon.spy(logger, 'log')
@@ -44,20 +43,19 @@ describe('logger', () => {
   })
 
   describe('_logValues', () => {
-    let spyTrim = sinon.spy(_, 'trim')
-
-    afterEach(() => {
-      // reset after each unit test
-      spyTrim.resetHistory()
-    })
-
-    it('should not call trim', () => {
+    it('should not call log for empty/nullish values', () => {
       logger._logValues({})
       logger._logValues({ test: {} })
       logger._logValues(null)
       logger._logValues(undefined)
 
-      expect(spyTrim.getCalls()).to.have.length(0)
+      // When consoleProps is empty or only has object values,
+      // log should not be called with string trim checks
+      expect(spyLog.getCalls().filter((call) => {
+        const value = call.args[2]
+
+        return typeof value === 'string' && value.trim() === ''
+      })).to.have.length(0)
     })
 
     // The positive unit tests to capture if log has been called are already written in

@@ -1,6 +1,6 @@
 import { SpecHeaderCloudDataTooltipFragmentDoc } from '../generated/graphql-test'
 import SpecHeaderCloudDataTooltip from './SpecHeaderCloudDataTooltip.vue'
-import { get, set } from 'lodash'
+import { getPath, setPath } from '@packages/utils'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
@@ -23,7 +23,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
     cy.mountFragment(SpecHeaderCloudDataTooltipFragmentDoc, {
       onResult: (result) => {
-        set(result, 'cloudViewer', { __typename: 'CloudUser', id: 'abc123' })
+        setPath(result, 'cloudViewer', { __typename: 'CloudUser', id: 'abc123' })
 
         switch (status) {
           case 'LOGGED_OUT':
@@ -44,7 +44,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
             userProjectStatusStore.setUserFlag('isLoggedIn', true)
             userProjectStatusStore.setProjectFlag('isNotAuthorized', true)
 
-            set(result, 'currentProject.cloudProject', {
+            setPath(result, 'currentProject.cloudProject', {
               __typename: 'CloudProjectUnauthorized',
               message: '',
               hasRequestedAccess: true,
@@ -110,7 +110,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.connected).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', getPath(defaultMessages, msgKeys.connected).replace('{0}', getPath(defaultMessages, msgKeys.docs)))
 
           cy.findByTestId('cloud-data-tooltip-content').find('button').should('not.exist')
         })
@@ -126,7 +126,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.notConnected).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', getPath(defaultMessages, msgKeys.notConnected).replace('{0}', getPath(defaultMessages, msgKeys.docs)))
 
           cy.findByTestId('connect-button')
           .should('be.visible')
@@ -146,7 +146,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', getPath(defaultMessages, msgKeys.noAccess).replace('{0}', getPath(defaultMessages, msgKeys.docs)))
 
           cy.contains('button', defaultMessages.specPage.requestAccessButton).should('be.visible')
         })
@@ -162,7 +162,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.noAccess).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', getPath(defaultMessages, msgKeys.noAccess).replace('{0}', getPath(defaultMessages, msgKeys.docs)))
 
           cy.contains('button', defaultMessages.specPage.requestSentButton).should('be.visible').should('be.disabled')
         })
@@ -178,7 +178,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.notConnected).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', getPath(defaultMessages, msgKeys.notConnected).replace('{0}', getPath(defaultMessages, msgKeys.docs)))
 
           cy.findByTestId('login-button')
           .should('be.visible')
@@ -198,7 +198,7 @@ describe('<SpecHeaderCloudDataTooltip />', () => {
 
           cy.findByTestId('cloud-data-tooltip-content')
           .should('be.visible')
-          .and('contain', get(defaultMessages, msgKeys.notConnected).replace('{0}', get(defaultMessages, msgKeys.docs)))
+          .and('contain', getPath(defaultMessages, msgKeys.notConnected).replace('{0}', getPath(defaultMessages, msgKeys.docs)))
 
           cy.findByTestId('reconnect-button')
           .should('be.visible')

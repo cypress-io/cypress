@@ -14,7 +14,6 @@ import { SubscriptionHook, testUrqlClient } from './clientTestUrqlClient'
 import type { MutationResolverCallback as MutationResolver } from './clientTestUrqlClient'
 import type { Component } from 'vue'
 import { computed, watch, defineComponent, h, toRaw } from 'vue'
-import { each } from 'lodash'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these tsconfig compiler paths
 import { createI18n } from '@cy/i18n'
 import type { ResultOf, VariablesOf } from '@graphql-typed-document-node/core'
@@ -37,7 +36,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       }
 
       options.global.plugins = options.global.plugins || []
-      each(plugins, (pluginFn: () => any) => {
+      plugins?.forEach((pluginFn: () => any) => {
         options?.global?.plugins?.push(pluginFn())
       })
 
@@ -78,7 +77,7 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
       },
     }
 
-    each(plugins, (pluginFn: () => any) => {
+    plugins?.forEach((pluginFn: () => any) => {
       mountingOptions?.global?.plugins?.push(pluginFn())
     })
 

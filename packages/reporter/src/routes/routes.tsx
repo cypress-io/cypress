@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
 // @ts-ignore
@@ -40,7 +39,7 @@ interface RouteListProps {
 
 const RoutesList: React.FC<RouteListProps> = observer(({ model }: RouteListProps) => (
   <tbody>
-    {_.map(model.routes, (route) => <Route key={route.id} model={route} />)}
+    {model.routes.map((route) => <Route key={route.id} model={route} />)}
   </tbody>
 ))
 

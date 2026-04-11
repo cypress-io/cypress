@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
 import { TestState } from '../test/test-model'
 import type { IntervalID } from '../lib/types'
@@ -73,7 +72,7 @@ class StatsStore {
   }
 
   incrementCount (type: TestState) {
-    const countKey = `num${_.capitalize(type)}`
+    const countKey = `num${type.charAt(0).toUpperCase() + type.slice(1).toLowerCase()}`
 
     this[countKey] = this[countKey] + 1
   }
@@ -93,7 +92,7 @@ class StatsStore {
 
   reset () {
     this._stopTimer()
-    _.each(defaults, (value, key) => {
+    Object.entries(defaults).forEach(([key, value]) => {
       this[key] = value
     })
   }

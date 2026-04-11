@@ -1,6 +1,6 @@
 import assert from 'assert'
 import chalk from 'chalk'
-import _ from 'lodash'
+import { defaults } from '@packages/utils'
 import stripAnsi from 'strip-ansi'
 import { trimMultipleNewLines } from './errorUtils'
 import { stripIndent } from './stripIndent'
@@ -174,7 +174,7 @@ function cypressVersion (version: string) {
 }
 
 function _item (item: string, options: ListOptions = {}) {
-  const { prefix, color } = _.defaults(options, {
+  const { prefix, color } = defaults(options, {
     prefix: '',
     color: 'blue',
   })
@@ -183,7 +183,7 @@ function _item (item: string, options: ListOptions = {}) {
 }
 
 function listItem (item: string, options: ListOptions = {}) {
-  _.defaults(options, {
+  defaults(options, {
     prefix: '  > ',
   })
 
@@ -191,7 +191,7 @@ function listItem (item: string, options: ListOptions = {}) {
 }
 
 function listItems (items: string[], options: ListOptions = {}) {
-  _.defaults(options, {
+  defaults(options, {
     prefix: ' - ',
   })
 
@@ -204,9 +204,8 @@ function listFlags (
   obj: Record<string, string | undefined | null>,
   mapper: Record<string, string>,
 ) {
-  return guard(_
-  .chain(mapper)
-  .map((flag, key) => {
+  return guard(Object.entries(mapper)
+  .map(([key, flag]) => {
     const v = obj[key]
 
     if (v) {
@@ -215,9 +214,8 @@ function listFlags (
 
     return undefined
   })
-  .compact()
-  .join('\n')
-  .value())
+  .filter(Boolean)
+  .join('\n'))
 }
 
 class Guard {

@@ -50,7 +50,7 @@
               v-else
               name="selected"
             >
-              {{ get(modelValue, itemValue || '') }}
+              {{ getPath(modelValue, itemValue || '') }}
             </slot>
           </span>
           <span class="flex pr-3 inset-y-0 right-0 absolute items-center">
@@ -82,7 +82,7 @@
           >
             <ListboxOption
               v-for="option in props.options"
-              :key="get(option, itemKey)"
+              :key="getPath(option, itemKey)"
               v-slot="{ active, selected }"
               as="li"
               :value="option"
@@ -96,7 +96,7 @@
                   'text-gray-800': !isSelectedOption(option) && !active,
                   'text-opacity-40': option.disabled || false
                 }]"
-                :data-cy="get(option, itemKey)"
+                :data-cy="getPath(option, itemKey)"
               >
                 <span class="flex inset-y-0 absolute items-center">
                   <slot
@@ -119,7 +119,7 @@
                     :active="active"
                     :value="option"
                   >
-                    {{ get(option, itemValue || '') }}
+                    {{ getPath(option, itemValue || '') }}
                   </slot>
                 </span>
                 <span class="flex text-sm pr-3 inset-y-0 right-0 absolute items-center">
@@ -164,7 +164,7 @@ export default {
 
 <script lang="ts" setup>
 import { Listbox, ListboxButton, ListboxLabel, ListboxOption, ListboxOptions } from '@headlessui/vue'
-import { get } from 'lodash'
+import { getPath } from '@packages/utils'
 import { useI18n } from '@cy/i18n'
 
 const { t } = useI18n()
@@ -199,9 +199,9 @@ const props = withDefaults(defineProps<{
 })
 
 const isSelectedOption = (option: Option) => {
-  const optionKey = get(option, props.itemKey)
+  const optionKey = getPath(option, props.itemKey)
 
-  return optionKey && optionKey === get(props.modelValue, props.itemKey)
+  return optionKey && optionKey === getPath(props.modelValue, props.itemKey)
 }
 
 const emit = defineEmits<{

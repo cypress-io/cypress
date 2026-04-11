@@ -44,7 +44,6 @@ import SpecsListRunWatcher from '../../specs/SpecsListRunWatcher.vue'
 import { SpecsPageContainerDocument, SpecsPageContainer_SpecsChangeDocument } from '../../generated/graphql'
 import { useSubscription } from '../../graphql'
 import { useRelevantRun } from '../../composables/useRelevantRun'
-import { isEmpty } from 'lodash'
 
 const { t } = useI18n()
 
@@ -86,7 +85,7 @@ const relevantRuns = useRelevantRun('SPECS')
 
 const variables = computed(() => {
   const runIds = relevantRuns.value.latest?.map((run) => run.runId) || []
-  const hasRunIds = !isEmpty(runIds)
+  const hasRunIds = runIds.length > 0
 
   return { runIds, hasRunIds }
 })

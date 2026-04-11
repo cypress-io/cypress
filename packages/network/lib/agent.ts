@@ -1,7 +1,6 @@
 import debugModule from 'debug'
 import http from 'http'
 import https from 'https'
-import _ from 'lodash'
 import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
@@ -51,7 +50,7 @@ const mergeCAOptions = (options: https.RequestOptions, caOptions: CaOptions): ht
   }
 
   // First, normalize the options.ca option. It can be a string, a Buffer, an array of strings, or an array of Buffers
-  const caArray = _.castArray(options.ca).map((caOption) => caOption.toString())
+  const caArray = (Array.isArray(options.ca) ? options.ca : [options.ca]).map((caOption) => caOption.toString())
 
   return {
     ...options,
@@ -85,7 +84,7 @@ export function buildConnectReqHead (hostname: string, port: string, proxy: url.
     connectReq.push(`Proxy-Authorization: Basic ${Buffer.from(proxy.auth).toString('base64')}`)
   }
 
-  return connectReq.join(CRLF) + _.repeat(CRLF, 2)
+  return connectReq.join(CRLF) + CRLF.repeat(2)
 }
 
 interface CreateProxySockOpts {
@@ -128,14 +127,14 @@ export const createProxySock = (opts: CreateProxySockOpts, cb: CreateProxySockCb
 
 export const isRequestHttps = (options: http.RequestOptions) => {
   // WSS connections will not have an href, but you can tell protocol from the defaultAgent
-  return _.get(options, '_defaultAgent.protocol') === 'https:' || options.protocol === 'https:' || (options.href || '').slice(0, 6) === 'https:'
+  return (options as any)?._defaultAgent?.protocol === 'https:' || options.protocol === 'https:' || (options.href || '').slice(0, 6) === 'https:'
 }
 
 export const isResponseStatusCode200 = (head: string) => {
   // read status code from proxy's response
   const matches = head.match(statusCodeRe)
 
-  return _.get(matches, 1) === '200'
+  return matches?.[1] === '200'
 }
 
 export const regenerateRequestHead = (req: http.ClientRequest) => {
@@ -144,7 +143,7 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
   if (req.output && req.output.length > 0) {
     // the _header has already been queued to be written to the socket
     const first = req.output[0]
-    const endOfHeaders = first.indexOf(_.repeat(CRLF, 2)) + 4
+    const endOfHeaders = first.indexOf(CRLF.repeat(2)) + 4
 
     req.output[0] = req._header + first.substring(endOfHeaders)
   }
@@ -203,7 +202,7 @@ export class CombinedAgent {
   // called by Node.js whenever a new request is made internally
   // NOTE: this function has to be sync via callback because it is called by the Agent.addRequest method, which expect a sync function
   addRequest (req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
-    _.merge(req, lenientOptions)
+    Object.assign(req, lenientOptions)
 
     // Legacy API: addRequest(req, host, port, localAddress)
     // https://github.com/nodejs/node/blob/cb68c04ce1bc4534b2d92bc7319c6ff6dda0180d/lib/_http_agent.js#L148-L155
@@ -250,15 +249,15 @@ export class CombinedAgent {
 
     const uri = options.uri = options.uri ?? url.parse(options.href)
 
-    debug('addRequest called %o', { isHttps, ..._.pick(options, 'href') })
+    debug('addRequest called %o', { isHttps, href: options.href })
 
     return getFirstWorkingFamily(options, this.familyCache, (family?: net.family) => {
       options.family = family
 
-      debug('got family %o', _.pick(options, 'family', 'href'))
+      debug('got family %o', { family: options.family, href: options.href })
 
       if (isHttps) {
-        _.assign(options, clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(uri))
+        Object.assign(options, clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(uri))
 
         return this.httpsAgent.addRequest(req, options as https.RequestOptions)
       }
@@ -427,7 +426,7 @@ class HttpsAgent extends https.Agent {
 
         buffer += data.toString()
 
-        if (!_.includes(buffer, _.repeat(CRLF, 2))) {
+        if (!buffer.includes(CRLF.repeat(2))) {
           // haven't received end of headers yet, keep buffering
           proxySocket?.once('data', onData)
 

@@ -1,4 +1,3 @@
-import find from 'lodash/find'
 import type RewritingStream from 'parse5-html-rewriting-stream'
 import { STRIPPED_INTEGRITY_TAG } from './constants.json'
 import * as js from './js'
@@ -14,7 +13,7 @@ export function install (url: string, rewriter: RewritingStream, deferSourceMapR
       return rewriter.emitRaw(raw)
     }
 
-    const typeAttr = find(startTag.attrs, { name: 'type' })
+    const typeAttr = startTag.attrs.find((a) => a.name === 'type')
 
     if (typeAttr && typeAttr.value !== 'text/javascript' && typeAttr.value !== 'module') {
       // we don't care about intercepting non-JS <script> tags
@@ -27,7 +26,7 @@ export function install (url: string, rewriter: RewritingStream, deferSourceMapR
 
     // rename subresource integrity attr since cypress's rewriting will invalidate SRI hashes
     // @see https://github.com/cypress-io/cypress/issues/2393
-    const sriAttr = find(startTag.attrs, { name: 'integrity' })
+    const sriAttr = startTag.attrs.find((a) => a.name === 'integrity')
 
     if (sriAttr) {
       sriAttr.name = STRIPPED_INTEGRITY_TAG

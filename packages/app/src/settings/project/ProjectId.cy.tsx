@@ -1,4 +1,4 @@
-import { set } from 'lodash'
+import { setPath } from '@packages/utils'
 import { ProjectIdFragmentDoc } from '../../generated/graphql-test'
 import ProjectId from './ProjectId.vue'
 
@@ -12,7 +12,7 @@ describe('<ProjectId />', () => {
 
     cy.mountFragment(ProjectIdFragmentDoc, {
       onResult: (result) => {
-        set(result, 'currentProject.projectId', givenProjectId)
+        setPath(result, 'currentProject.projectId', givenProjectId)
       },
       render: (gqlVal) => (
         <div class="py-4 px-8">

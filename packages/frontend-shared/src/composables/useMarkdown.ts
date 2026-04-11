@@ -10,7 +10,7 @@ import MarkdownItClass from '@toycode/markdown-it-class'
 import { useEventListener, whenever } from '@vueuse/core'
 import type { MaybeRef } from '@vueuse/core'
 import { useExternalLink } from '../gql-components/useExternalLink'
-import { mapValues, isArray, flatten } from 'lodash'
+import { mapValues } from '@packages/utils'
 
 export interface UseMarkdownOptions {
   openExternal?: boolean
@@ -60,8 +60,8 @@ const buildClasses = (options) => {
   const _classes = defaultClasses // Constant above
 
   const buildFlat = (value) => {
-    if (isArray(value)) {
-      return flatten<string>(value).map((arrValue) => arrValue.split(' '))
+    if (Array.isArray(value)) {
+      return value.flat().map((arrValue) => arrValue.split(' '))
     }
 
     return value?.split(' ') ?? []
@@ -73,9 +73,9 @@ const buildClasses = (options) => {
     return mapValues(_classes, (defaultValue, key) => {
       const inputClasses = buildFlat(options.classes[key])
 
-      if (options.classes.overwrite) return flatten([...inputClasses])
+      if (options.classes.overwrite) return [...inputClasses].flat()
 
-      return flatten([...buildFlat(defaultValue), ...inputClasses])
+      return [...buildFlat(defaultValue), ...inputClasses].flat()
     })
   }
 

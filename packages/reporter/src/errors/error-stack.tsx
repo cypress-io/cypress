@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { ReactElement } from 'react'
 
@@ -24,7 +23,7 @@ const ErrorStack = observer(({ err }: Props) => {
   // only display stack lines beyond the original message, since it's already
   // displayed above this in the UI
   let foundFirstStackLine = false
-  const stackLines = _.filter(err.parsedStack, (line) => {
+  const stackLines = err.parsedStack.filter((line) => {
     if (foundFirstStackLine) return true
 
     if (isMessageLine(line)) return false
@@ -37,7 +36,7 @@ const ErrorStack = observer(({ err }: Props) => {
   // instead of having every line indented, get rid of the smallest amount of
   // whitespace common to each line so the stack is aligned left but lines
   // with extra whitespace still have it
-  const whitespaceLengths = _.map(stackLines, ({ whitespace }) => whitespace ? whitespace.length : 0)
+  const whitespaceLengths = stackLines.map(({ whitespace }) => whitespace ? whitespace.length : 0)
   const commonWhitespaceLength = Math.min(...whitespaceLengths)
 
   const makeLine = (key: string, content: StringOrElement[]) => {
@@ -47,7 +46,7 @@ const ErrorStack = observer(({ err }: Props) => {
   }
 
   let stopLinking = false
-  const lines = _.map(stackLines, (stackLine, index) => {
+  const lines = stackLines.map((stackLine, index) => {
     const whitespace = stackLine.whitespace.slice(commonWhitespaceLength)
 
     if (isMessageLine(stackLine)) {

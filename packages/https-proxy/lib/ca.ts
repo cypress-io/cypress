@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { promisify } from 'util'
 import debugModule from 'debug'
 import os from 'os'
@@ -219,7 +218,7 @@ export class CA {
     certServer.validity.notAfter = new Date
     certServer.validity.notAfter.setFullYear(certServer.validity.notBefore.getFullYear() + 2)
 
-    const attrsServer = _.clone(ServerAttrs)
+    const attrsServer = [...ServerAttrs]
 
     attrsServer.unshift({
       name: 'commonName',

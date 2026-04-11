@@ -3,7 +3,6 @@ import SidebarNavigation from './SidebarNavigation.vue'
 import { defaultMessages } from '@cy/i18n'
 import { CloudRunStatus, SidebarNavigationFragment, SidebarNavigationFragmentDoc, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql-test'
 import { CloudRunStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
-import { cloneDeep } from 'lodash'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?: { status: CloudRunStatus, numFailedTests: number }, latestCloudProject?: { status: CloudRunStatus, numFailedTests: number }, isLoading?: boolean, online?: boolean} = {}) {
@@ -48,13 +47,13 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
 
       if (gql.currentProject?.cloudProject?.__typename === 'CloudProject') {
         if (withDefaults.cloudProject) {
-          gql.currentProject.cloudProject.selectedRun = cloneDeep(CloudRunStubs.failingWithTests)
+          gql.currentProject.cloudProject.selectedRun = structuredClone(CloudRunStubs.failingWithTests)
           gql.currentProject.cloudProject.selectedRun.status = withDefaults.cloudProject.status as CloudRunStatus
           gql.currentProject.cloudProject.selectedRun.totalFailed = withDefaults.cloudProject.numFailedTests
         }
 
         if (withDefaults.latestCloudProject) {
-          gql.currentProject.cloudProject.latestRun = cloneDeep(CloudRunStubs.failingWithTests)
+          gql.currentProject.cloudProject.latestRun = structuredClone(CloudRunStubs.failingWithTests)
           gql.currentProject.cloudProject.latestRun.status = withDefaults.latestCloudProject.status as CloudRunStatus
           gql.currentProject.cloudProject.latestRun.totalFailed = withDefaults.latestCloudProject.numFailedTests
         }

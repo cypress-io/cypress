@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
 
 import Agent, { AgentProps } from '../agents/agent-model'
@@ -87,11 +86,11 @@ export default class Attempt {
 
     this.invocationDetails = props.invocationDetails
 
-    this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
+    this.hooks = props.hooks.map((hook) => new Hook(hook))
 
-    _.each(props.agents, this.addLog)
-    _.each(props.commands, this.addLog)
-    _.each(props.routes, this.addLog)
+    props.agents?.forEach(this.addLog)
+    props.commands?.forEach(this.addLog)
+    props.routes?.forEach(this.addLog)
   }
 
   get hasCommands () {
@@ -103,7 +102,7 @@ export default class Attempt {
   }
 
   get _hasLongRunningCommand () {
-    return _.some(this.commands, (command) => {
+    return this.commands.some((command) => {
       return command.isLongRunning
     })
   }
@@ -185,13 +184,13 @@ export default class Attempt {
       return undefined
     }
 
-    return _(this.hooks)
+    return this.hooks
     .map((hook) => {
       // @ts-ignore
       return hook.commandMatchingErr(this.err)
     })
-    .compact()
-    .last()
+    .filter(Boolean)
+    .at(-1) as Command | undefined
   }
 
   start () {
@@ -216,7 +215,7 @@ export default class Attempt {
     }
 
     if (props.failedFromHookId) {
-      const hook = _.find(this.hooks, { hookId: props.failedFromHookId })
+      const hook = this.hooks.find((h) => h.hookId === props.failedFromHookId)
 
       if (hook && props.err) {
         hook.failed = true
@@ -294,7 +293,7 @@ export default class Attempt {
 
     this.commands.push(command)
 
-    const hookIndex = _.findIndex(this.hooks, { hookId: command.hookId })
+    const hookIndex = this.hooks.findIndex((h) => h.hookId === command.hookId)
 
     const hook = this.hooks[hookIndex]
 
@@ -323,11 +322,11 @@ export default class Attempt {
   _removeCommand (props: CommandProps) {
     delete this._logs[props.id]
 
-    const commandIndex = _.findIndex(this.commands, { id: props.id })
+    const commandIndex = this.commands.findIndex((c) => c.id === props.id)
 
     this.commands.splice(commandIndex, 1)
 
-    const hookIndex = _.findIndex(this.hooks, { hookId: props.hookId })
+    const hookIndex = this.hooks.findIndex((h) => h.hookId === props.hookId)
 
     const hook = this.hooks[hookIndex]
 

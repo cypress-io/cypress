@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import _concatStream from 'concat-stream'
 
 type Callback = (buf: Buffer) => void
@@ -18,7 +17,7 @@ export const concatStream: typeof _concatStream = function (opts: Callback | Con
   }
 
   return _concatStream(opts as ConcatOpts, function (buf: Buffer) {
-    if (!_.get(buf, 'length')) {
+    if (!buf?.length) {
       // concat-stream can give an empty array if the stream has
       // no data - just call the callback with an empty buffer
       return _cb(Buffer.from(''))

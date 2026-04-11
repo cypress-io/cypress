@@ -1,5 +1,4 @@
 import cs from 'classnames'
-import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { useCallback, useMemo } from 'react'
 
@@ -87,7 +86,7 @@ const Suite: React.FC<SuiteProps> = observer(({ eventManager = events, model, st
 
   const runnablesList = useMemo(() => (
     <ul className='runnables'>
-      {_.map(model.children, (runnable, index) => {
+      {model.children.map((runnable, index) => {
         return (<Runnable
           key={runnable.id}
           model={runnable}

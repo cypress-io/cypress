@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
 
 import Err, { ErrProps } from '../errors/err-model'
@@ -94,13 +93,13 @@ export default class Command extends Instrument {
         // command has nested commands
         (this.defaultCollapsedState !== 'closed' && this.hasChildren && !this.event && this.type !== 'system') ||
         // command has nested commands with children
-        (this.defaultCollapsedState !== 'closed' && _.some(this.children, (v) => v.hasChildren)) ||
+        (this.defaultCollapsedState !== 'closed' && this.children.some((v) => v.hasChildren)) ||
         // last nested command is open
-        (this.defaultCollapsedState !== 'closed' && _.last(this.children)?.isOpen) ||
+        (this.defaultCollapsedState !== 'closed' && this.children.at(-1)?.isOpen) ||
         // show slow command when test is running
-        (_.some(this.children, (v) => v.isLongRunning) && _.last(this.children)?.state === 'pending') ||
+        (this.children.some((v) => v.isLongRunning) && this.children.at(-1)?.state === 'pending') ||
         // at last nested command failed
-        _.last(this.children)?.state === 'failed'
+        this.children.at(-1)?.state === 'failed'
       )
     )
   }

@@ -1,7 +1,6 @@
 import type { RunStatusDotsFragment } from '../generated/graphql'
 import RunStatusDots from './RunStatusDots.vue'
 import { fakeRuns } from '@packages/frontend-shared/cypress/support/mock-graphql/fakeCloudSpecRun'
-import { fill } from 'lodash'
 import type { CloudSpecRun } from '@packages/data-context/src/gen/cloud-source-types.gen'
 
 function mountWithRuns (runs: Required<CloudSpecRun>[]) {
@@ -133,7 +132,7 @@ describe('<RunStatusDots />', () => {
 
   context('unknown/unhandled statuses', () => {
     beforeEach(() => {
-      const runs = fakeRuns(fill(['', '', '', ''], 'FAKE_UNKNOWN_STATUS' as any))
+      const runs = fakeRuns(new Array(4).fill('FAKE_UNKNOWN_STATUS' as any))
 
       mountWithRuns(runs)
     })

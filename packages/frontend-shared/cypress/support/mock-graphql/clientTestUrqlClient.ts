@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { hasPath, getPath } from '@packages/utils'
 import { pipe, map } from 'wonka'
 import { Client, subscriptionExchange, TypedDocumentNode, createClient, dedupExchange, errorExchange, ExecutionResult, gql } from '@urql/core'
 import { executeExchange } from '@urql/exchange-execute'
@@ -143,10 +143,10 @@ const testFieldResolver: GraphQLFieldResolver<any, ClientTestContext> = function
     directPath = directPath.slice(1)
   }
 
-  if (_.has(source, info.fieldName)) {
-    let result = _.get(source, info.fieldName)
+  if (hasPath(source, info.fieldName)) {
+    let result = getPath(source, info.fieldName)
 
-    if (_.isFunction(result)) {
+    if (typeof result === 'function') {
       result = result(source, args, ctx, info)
     }
 
@@ -200,7 +200,7 @@ function resolveFragmentMember (info: GraphQLResolveInfo) {
 }
 
 function resolveFragmentMemberList (args: { count?: number }, info: GraphQLResolveInfo) {
-  return _.times(args.count ?? 2, () => resolveFragmentMember(info))
+  return Array.from({ length: args.count ?? 2 }, () => resolveFragmentMember(info))
 }
 
 function getMountedFragmentName (info: GraphQLResolveInfo) {

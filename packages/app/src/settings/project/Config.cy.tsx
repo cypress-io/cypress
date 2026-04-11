@@ -1,7 +1,6 @@
 import Config from './Config.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
-import { each } from 'lodash'
 import { ConfigFragmentDoc } from '../../generated/graphql-test'
 
 describe('<Config/>', { viewportWidth: 1200, viewportHeight: 1600 }, () => {
@@ -18,7 +17,7 @@ describe('<Config/>', { viewportWidth: 1200, viewportHeight: 1600 }, () => {
     cy.get('[data-cy="config-legend"]').contains('default')
     cy.contains(defaultMessages.settingsPage.config.title)
     // TODO: write a support file helper for ignoring the {0} values etc
-    each(defaultMessages.settingsPage.config.description.split('{0}'), (description) => {
+    defaultMessages.settingsPage.config.description.split('{0}').forEach((description) => {
       cy.contains(description)
     })
   })

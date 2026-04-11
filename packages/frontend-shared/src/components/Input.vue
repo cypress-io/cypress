@@ -63,7 +63,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import _ from 'lodash'
+import { omit } from '@packages/utils'
 
 import type { InputHTMLAttributes, FunctionalComponent, SVGAttributes, Ref } from 'vue'
 // eslint-disable-next-line no-duplicate-imports
@@ -73,7 +73,7 @@ import { useModelWrapper } from '../composables'
 const slots = useSlots()
 const attrs = useAttrs()
 
-const inputAttrs = _.omit(attrs, 'class')
+const inputAttrs = omit(attrs, 'class')
 
 const props = withDefaults(defineProps<{
   type?: InputHTMLAttributes['type']

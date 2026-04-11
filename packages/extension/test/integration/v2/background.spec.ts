@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import _ from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 import http from 'http'
 import { SocketIOServer } from '@packages/socket'
 import { connect } from '../../../app/v2/client'
@@ -248,7 +248,7 @@ describe('app/background', () => {
     describe('reset:browser:state', () => {
       beforeEach(() => {
         vi.mocked(browser.browsingData.remove).mockImplementation((args: any, options: any) => {
-          if (_.isEqual(args, {}) && _.isEqual(options, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true })) {
+          if (isDeepStrictEqual(args, {}) && isDeepStrictEqual(options, { cache: true, cookies: true, downloads: true, formData: true, history: true, indexedDB: true, localStorage: true, passwords: true, pluginData: true, serviceWorkers: true })) {
             return Promise.resolve()
           }
 

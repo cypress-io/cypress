@@ -132,7 +132,7 @@
 import { gql, useMutation } from '@urql/vue'
 import DebugRunNavigationRow from './DebugRunNavigationRow.vue'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
-import { compact, groupBy } from 'lodash'
+import { groupBy } from '@packages/utils'
 import { computed, FunctionalComponent, h } from 'vue'
 import { DebugRunNavigationFragment, DebugRunNavigationRunInfoFragment, DebugRunNavigation_MoveToRunDocument } from '../generated/graphql'
 import RunResults from '../runs/RunResults.vue'
@@ -225,7 +225,7 @@ const latestIsCurrentlySelected = computed(() => {
 })
 
 const groupByCommit = computed(() => {
-  const grouped = groupBy(compact(props.runs), (run) => {
+  const grouped = groupBy(props.runs.filter(Boolean), (run) => {
     return run?.commitInfo?.sha
   })
 
