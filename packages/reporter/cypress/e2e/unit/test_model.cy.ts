@@ -5,8 +5,6 @@ import { RouteProps } from '../../../src/routes/route-model'
 import { RunnablesStore } from '../../../src/runnables/runnables-store'
 import { AgentProps } from '../../../src/agents/agent-model'
 
-const { _ } = Cypress
-
 const createTest = (props: Partial<TestProps> = {}, store = {}) => {
   const defaults = {
     currentRetry: 0,
@@ -16,7 +14,7 @@ const createTest = (props: Partial<TestProps> = {}, store = {}) => {
     hooks: [],
   } as TestProps
 
-  return new TestModel(_.defaults(props, defaults), 0, store as RunnablesStore)
+  return new TestModel({ ...defaults, ...props }, 0, store as RunnablesStore)
 }
 const createCommand = (props: Partial<CommandProps> = {}) => {
   const defaults = {
@@ -32,7 +30,7 @@ const createCommand = (props: Partial<CommandProps> = {}) => {
     wallClockStartedAt: new Date().toString(),
   } as CommandProps
 
-  return _.defaults(props, defaults)
+  return { ...defaults, ...props }
 }
 
 describe('Test model', () => {

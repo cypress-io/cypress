@@ -3,6 +3,6 @@ describe('s1', () => {
   // eslint-disable-next-line
   it('t1', (done) => {
     cy.timeout(10)
-    Cypress._.times(25, () => expect(true).ok)
+    Array.from({ length: 25 }, () => expect(true).ok)
   })
 })

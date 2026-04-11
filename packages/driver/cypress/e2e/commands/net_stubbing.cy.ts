@@ -22,7 +22,7 @@ const uniqueRoute = (route) => {
 
 // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23434
 describe('network stubbing', { retries: 15 }, function () {
-  const { $, _, sinon, state, Promise } = Cypress
+  const { $, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
     cy.spy(Cypress.utils, 'warning')
@@ -40,7 +40,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         this.testRoute = function (options, handler, expectedEvent, expectedRoute) {
           cy.intercept(options, handler).then(function () {
-            const routeId = _.findKey(state('routes'), { handler })
+            const routeId = Object.keys(state('routes')).find((k) => state('routes')[k].handler === handler)
             const route = state('routes')[routeId!]
 
             expectedEvent.routeId = routeId
@@ -202,7 +202,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         const handler = (req) => {
           // @ts-ignore
-          const routeId = _.findKey(state('routes'), { handler })
+          const routeId = Object.keys(state('routes')).find((k) => state('routes')[k].handler === handler)
           const route = state('routes')[routeId!]
 
           // @ts-ignore
@@ -245,7 +245,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         const handler = (req) => {
           // @ts-ignore
-          const routeId = _.findKey(state('routes'), { handler })
+          const routeId = Object.keys(state('routes')).find((k) => state('routes')[k].handler === handler)
           const route = state('routes')[routeId!]
 
           // @ts-ignore
@@ -1027,7 +1027,7 @@ describe('network stubbing', { retries: 15 }, function () {
         req.reply({ bad: 'should not be received' })
       })
       .then(() => {
-        const routeIds = _.keys(state('routes'))
+        const routeIds = Object.keys(state('routes'))
 
         // delete the driver-side route - the server-side route will still exist and cause an event
         // to be emitted to the driver
@@ -1428,11 +1428,11 @@ describe('network stubbing', { retries: 15 }, function () {
         },
       }).as('getFoo').visit('http://localhost:3500/fixtures/jquery.html').window().then(function (win) {
         return new Promise(function (resolve) {
-          $.get(url).done(_.ary(resolve, 0))
+          $.get(url).done((...args) => resolve())
         })
       }).wait('@getFoo').its('request.url').should('include', url).visit('http://localhost:3500/fixtures/generic.html').window().then(function (win) {
         return new Promise(function (resolve) {
-          $.get(url).done(_.ary(resolve, 0))
+          $.get(url).done((...args) => resolve())
         })
       }).wait('@getFoo').its('request.url').should('include', url)
     })
@@ -2179,7 +2179,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
           cy.intercept(url, function (req) {
             // @ts-ignore
-            req.on('totally-bad', _.noop)
+            req.on('totally-bad', () => {})
           }).visit(url)
         })
 
@@ -2531,7 +2531,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
         .then(() => {
           return new Promise((resolve) => {
-            $.get(url).fail((xhr) => resolve(_.pick(xhr, 'status', 'responseText')))
+            $.get(url).fail((xhr) => resolve({ status: xhr.status, responseText: xhr.responseText }))
           })
         }).should('include', {
           status: 777,
@@ -2547,7 +2547,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
         .then(() => {
           return new Promise((resolve) => {
-            $.get(url).fail((xhr) => resolve(_.pick(xhr, 'status', 'responseJSON')))
+            $.get(url).fail((xhr) => resolve({ status: xhr.status, responseJSON: xhr.responseJSON }))
           })
         }).should('deep.include', {
           status: 777,
@@ -2563,7 +2563,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
         .then(() => {
           return new Promise((resolve) => {
-            $.get(url).fail((xhr) => resolve(_.pick(xhr, 'status', 'responseJSON', 'getAllResponseHeaders')))
+            $.get(url).fail((xhr) => resolve({ status: xhr.status, responseJSON: xhr.responseJSON, getAllResponseHeaders: xhr.getAllResponseHeaders }))
           })
         }).should('deep.include', {
           status: 777,
@@ -2870,7 +2870,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
       })
       .as('foo')
-      .then(() => _.times(2, () => fetch(url)))
+      .then(() => Array.from({ length: 2 }, () => fetch(url)))
       .wait('@foo')
       .wait('@foo')
       .then(() => {
@@ -3136,7 +3136,7 @@ describe('network stubbing', { retries: 15 }, function () {
 
         cy.intercept('/binary*', (req) => {
           req.on('response', (res) => {
-            expect(_.isArrayBuffer(res.body)).to.eq(true)
+            expect(res.body instanceof ArrayBuffer).to.eq(true)
             assertBody(res.body)
           })
         }).as('get')
@@ -3510,7 +3510,7 @@ describe('network stubbing', { retries: 15 }, function () {
         // (it seems like we are getting multiple requests and that is triggering the issue)
         // https://github.com/orgs/cypress-io/projects/10/views/22?pane=issue&itemId=32520743
         cy.intercept('/timeout*', { times: 1 }, (req) => {
-          req.reply(_.noop)
+          req.reply(() => {})
         }).then(() => {
           $.get('/timeout?ms=50')
         })
@@ -3540,7 +3540,7 @@ describe('network stubbing', { retries: 15 }, function () {
         done()
       })
 
-      cy.intercept(`${url}*`, () => new Promise(_.noop))
+      cy.intercept(`${url}*`, () => new Promise(() => {}))
       .as('foo.bar')
       .then(() => {
         $.get(url)
@@ -3567,7 +3567,7 @@ describe('network stubbing', { retries: 15 }, function () {
         done()
       })
 
-      cy.intercept(`${url}*`, () => new Promise(_.noop))
+      cy.intercept(`${url}*`, () => new Promise(() => {}))
       .as('foo.bar')
       .then(() => {
         $.get(url)
@@ -3622,7 +3622,7 @@ describe('network stubbing', { retries: 15 }, function () {
         done()
       })
 
-      cy.intercept(`${url}*`, () => new Promise(_.noop))
+      cy.intercept(`${url}*`, () => new Promise(() => {}))
       .as('foo.bar')
       .then(() => {
         $.get(url)
@@ -3636,7 +3636,7 @@ describe('network stubbing', { retries: 15 }, function () {
       const url = uniqueRoute('/foo')
 
       cy.intercept(`${url}*`, (req) => {
-        req.reply(_.noop) // only request will be received, no response
+        req.reply(() => {}) // only request will be received, no response
       })
       .as('foo.bar')
       .then(() => {
@@ -3658,7 +3658,7 @@ describe('network stubbing', { retries: 15 }, function () {
       })
 
       cy.intercept(`${url}*`, (req) => {
-        req.reply(_.noop) // only request will be received, no response
+        req.reply(() => {}) // only request will be received, no response
       })
       .as('foo.bar')
       .then(() => {

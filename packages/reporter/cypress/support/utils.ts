@@ -1,7 +1,8 @@
 import { EventEmitter } from 'events'
 import CommandModel from './../../src/commands/command-model'
 
-const { _ } = Cypress
+let commandIdCounter = 0
+const uniqueId = (prefix = '') => `${prefix}${++commandIdCounter}`
 
 interface File {
   file: string
@@ -41,7 +42,7 @@ export const addCommand = (runner: EventEmitter, log: Partial<CommandModel>) => 
   const defaultLog = {
     event: false,
     hookId: 'r3',
-    id: _.uniqueId('c'),
+    id: uniqueId('c'),
     instrument: 'command',
     renderProps: {},
     state: 'passed',

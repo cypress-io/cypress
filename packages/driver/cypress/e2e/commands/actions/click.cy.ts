@@ -13,7 +13,7 @@ import {
   shouldNotBeCalled,
 } from '../../../support/utils'
 
-const { _, $, Promise } = Cypress
+const { $, Promise } = Cypress
 
 const fail = function (str) {
   throw new Error(str)
@@ -43,9 +43,9 @@ describe('src/cy/commands/actions/click', () => {
       $btn.on('click', (e) => {
         const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'view', 'button', 'buttons', 'which', 'relatedTarget', 'altKey', 'ctrlKey', 'shiftKey', 'metaKey', 'detail', 'type')
+        const { bubbles, cancelable, view, button, buttons, which, relatedTarget, altKey, ctrlKey, shiftKey, metaKey, detail, type } = e.originalEvent
 
-        expect(obj).to.deep.eq({
+        expect({ bubbles, cancelable, view, button, buttons, which, relatedTarget, altKey, ctrlKey, shiftKey, metaKey, detail, type }).to.deep.eq({
           bubbles: true,
           cancelable: true,
           view: cy.state('window'),
@@ -91,9 +91,9 @@ describe('src/cy/commands/actions/click', () => {
         // calculate after scrolling
         const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        const obj = _.pick(e, 'bubbles', 'cancelable', 'view', 'button', 'buttons', 'which', 'relatedTarget', 'altKey', 'ctrlKey', 'shiftKey', 'metaKey', 'detail', 'type')
+        const { bubbles, cancelable, view, button, buttons, which, relatedTarget, altKey, ctrlKey, shiftKey, metaKey, detail, type } = e
 
-        expect(obj).to.deep.eq({
+        expect({ bubbles, cancelable, view, button, buttons, which, relatedTarget, altKey, ctrlKey, shiftKey, metaKey, detail, type }).to.deep.eq({
           bubbles: true,
           cancelable: true,
           view: win,
@@ -126,9 +126,9 @@ describe('src/cy/commands/actions/click', () => {
       $btn.get(0).addEventListener('mouseup', (e) => {
         const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        const obj = _.pick(e, 'bubbles', 'cancelable', 'view', 'button', 'buttons', 'which', 'relatedTarget', 'altKey', 'ctrlKey', 'shiftKey', 'metaKey', 'detail', 'type')
+        const { bubbles, cancelable, view, button, buttons, which, relatedTarget, altKey, ctrlKey, shiftKey, metaKey, detail, type } = e
 
-        expect(obj).to.deep.eq({
+        expect({ bubbles, cancelable, view, button, buttons, which, relatedTarget, altKey, ctrlKey, shiftKey, metaKey, detail, type }).to.deep.eq({
           bubbles: true,
           cancelable: true,
           view: win,
@@ -158,7 +158,7 @@ describe('src/cy/commands/actions/click', () => {
 
       const $btn = cy.$$('#button')
 
-      _.each('mousedown mouseup click'.split(' '), (event) => {
+      'mousedown mouseup click'.split(' ').forEach((event) => {
         $btn.get(0).addEventListener(event, () => {
           events.push(event)
         })
@@ -173,7 +173,7 @@ describe('src/cy/commands/actions/click', () => {
       const events: any[] = []
       const $btn = cy.$$('#button')
 
-      _.each('pointerdown mousedown pointerup mouseup click'.split(' '), (event) => {
+      'pointerdown mousedown pointerup mouseup click'.split(' ').forEach((event) => {
         $btn.get(0).addEventListener(event, () => {
           events.push(event)
         })
@@ -698,9 +698,12 @@ describe('src/cy/commands/actions/click', () => {
       cy.stub(Cypress.runner, 'stop')
 
       // abort after the 3rd click
-      const stop = _.after(3, () => {
-        Cypress.stop()
-      })
+      let stopCount = 0
+      const stop = () => {
+        if (++stopCount >= 3) {
+          Cypress.stop()
+        }
+      }
 
       const clicked = cy.spy(() => {
         stop()
@@ -719,15 +722,14 @@ describe('src/cy/commands/actions/click', () => {
         // is called
         const timeout = cy.spy(cy.timeout)
 
-        _.delay(() => {
+        setTimeout(() => {
           // and we should have stopped clicking after 3
           expect(clicked.callCount).to.eq(3)
 
           expect(timeout.callCount).to.eq(0)
 
           done()
-        }
-        , 100)
+        }, 100)
       })
 
       cy.get('#sequential-clicks a').click({ multiple: true })
@@ -739,7 +741,13 @@ describe('src/cy/commands/actions/click', () => {
       // create a throttled click function
       // which proves we are clicking serially
       const handleClick = cy.stub()
-      .callsFake(_.throttle(throttled, 0, { leading: false }))
+      .callsFake((() => {
+        let timer
+        return (...args) => {
+          clearTimeout(timer)
+          timer = setTimeout(() => throttled(...args), 0)
+        }
+      })())
       .as('handleClick')
 
       const $anchors = cy.$$('#sequential-clicks a')
@@ -757,14 +765,17 @@ describe('src/cy/commands/actions/click', () => {
     it('requeries if the DOM rerenders during actionability', () => {
       cy.$$('[name=colors]').first().prop('disabled', true)
 
-      const listener = _.after(3, () => {
-        cy.$$('[name=colors]').first().prop('disabled', false)
+      let listenerCount = 0
+      const listener = () => {
+        if (++listenerCount >= 3) {
+          cy.$$('[name=colors]').first().prop('disabled', false)
 
-        const parent = cy.$$('[name=colors]').parent()
+          const parent = cy.$$('[name=colors]').parent()
 
-        parent.replaceWith(parent[0].outerHTML)
-        cy.off('command:retry', listener)
-      })
+          parent.replaceWith(parent[0].outerHTML)
+          cy.off('command:retry', listener)
+        }
+      }
 
       cy.on('command:retry', listener)
 
@@ -783,7 +794,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('#three-buttons button').click({ multiple: true }).then(() => {
         const calls = cy.timeout.getCalls()
 
-        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true]))
+        const num = calls.filter((call) => call.args.length === 2 && call.args[0] === 50 && call.args[1] === true)
 
         expect(num.length).to.eq(count)
       })
@@ -1026,14 +1037,14 @@ describe('src/cy/commands/actions/click', () => {
           expect(err.message).to.not.contain('inherited from')
           const consoleProps = lastLog.invoke('consoleProps')
 
-          expect(_.keys(consoleProps)).deep.eq([
+          expect(Object.keys(consoleProps)).deep.eq([
             'name',
             'type',
             'error',
             'props',
           ])
 
-          expect(_.keys(consoleProps.props)).deep.eq([
+          expect(Object.keys(consoleProps.props)).deep.eq([
             'Tried to Click',
             'But it has CSS',
           ])
@@ -1053,14 +1064,14 @@ describe('src/cy/commands/actions/click', () => {
           expect(err.message).to.contain('<div id="ptrNone"')
           const consoleProps = lastLog.invoke('consoleProps')
 
-          expect(_.keys(consoleProps)).deep.eq([
+          expect(Object.keys(consoleProps)).deep.eq([
             'name',
             'type',
             'error',
             'props',
           ])
 
-          expect(_.keys(consoleProps.props)).deep.eq([
+          expect(Object.keys(consoleProps.props)).deep.eq([
             'Tried to Click',
             'But it has CSS',
             'Inherited From',
@@ -1447,9 +1458,13 @@ describe('src/cy/commands/actions/click', () => {
           scrolled.push(type)
         })
 
-        cy.on('command:retry', _.after(3, () => {
-          $span.hide()
-        }))
+        let retryCount1 = 0
+
+        cy.on('command:retry', () => {
+          if (++retryCount1 >= 3) {
+            $span.hide()
+          }
+        })
 
         cy.get('#button-covered-in-span').click().then(() => {
           expect(retries).to.be.gt(0)
@@ -1613,9 +1628,13 @@ describe('src/cy/commands/actions/click', () => {
       it('waits until element becomes visible', () => {
         const $btn = cy.$$('#button').hide()
 
-        cy.on('command:retry', _.after(3, () => {
-          $btn.show()
-        }))
+        let retryCount2 = 0
+
+        cy.on('command:retry', () => {
+          if (++retryCount2 >= 3) {
+            $btn.show()
+          }
+        })
 
         cy.get('#button').click().then(() => {
           expect(retries).to.be.gt(0)
@@ -1631,9 +1650,13 @@ describe('src/cy/commands/actions/click', () => {
           clicks += 1
         })
 
-        cy.on('command:retry', _.after(3, () => {
-          $btn.prop('disabled', false)
-        }))
+        let retryCount3 = 0
+
+        cy.on('command:retry', () => {
+          if (++retryCount3 >= 3) {
+            $btn.prop('disabled', false)
+          }
+        })
 
         cy.get('#button').click().then(() => {
           expect(clicks).to.eq(1)
@@ -1645,9 +1668,13 @@ describe('src/cy/commands/actions/click', () => {
       it('succeeds when DOM rerenders and returns new subject', () => {
         const $btn = cy.$$('#button').prop('disabled', true)
 
-        cy.on('command:retry', _.after(3, () => {
-          $btn.replaceWith('<button id="button">New Button</button>')
-        }))
+        let retryCount4 = 0
+
+        cy.on('command:retry', () => {
+          if (++retryCount4 >= 3) {
+            $btn.replaceWith('<button id="button">New Button</button>')
+          }
+        })
 
         cy.get('#button').click().should('contain', 'New Button')
       })
@@ -1785,10 +1812,9 @@ describe('src/cy/commands/actions/click', () => {
 
       it('eventually passes the assertion', () => {
         cy.$$('button:first').click(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('clicked')
-          }
-          , 50)
+          }, 50)
 
           return false
         })
@@ -1805,10 +1831,9 @@ describe('src/cy/commands/actions/click', () => {
 
       it('eventually passes the assertion on multiple buttons', () => {
         cy.$$('button').click(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('clicked')
-          }
-          , 50)
+          }, 50)
 
           return false
         })
@@ -1836,9 +1861,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let clickCount1 = 0
+        const clicked = () => {
+          if (++clickCount1 >= 2) done()
+        }
 
         span.on('click', clicked)
         $btn.on('click', clicked)
@@ -1858,9 +1884,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let clickCount2 = 0
+        const clicked = () => {
+          if (++clickCount2 >= 2) done()
+        }
 
         $span.on('click', clicked)
         $btn.on('click', clicked)
@@ -1881,9 +1908,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let posClickCount = 0
+        const clicked = () => {
+          if (++posClickCount >= 2) done()
+        }
 
         span.on('click', clicked)
         $btn.on('click', clicked)
@@ -1904,9 +1932,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let posClickCount = 0
+        const clicked = () => {
+          if (++posClickCount >= 2) done()
+        }
 
         span.on('click', clicked)
         $btn.on('click', clicked)
@@ -1927,9 +1956,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let posClickCount = 0
+        const clicked = () => {
+          if (++posClickCount >= 2) done()
+        }
 
         span.on('click', clicked)
         $btn.on('click', clicked)
@@ -1950,9 +1980,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let posClickCount = 0
+        const clicked = () => {
+          if (++posClickCount >= 2) done()
+        }
 
         span.on('click', clicked)
         $btn.on('click', clicked)
@@ -1973,9 +2004,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let posClickCount = 0
+        const clicked = () => {
+          if (++posClickCount >= 2) done()
+        }
 
         span.on('click', clicked)
         $btn.on('click', clicked)
@@ -2000,9 +2032,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let posClickCount = 0
+        const clicked = () => {
+          if (++posClickCount >= 2) done()
+        }
 
         span.on('click', clicked)
         $btn.on('click', clicked)
@@ -2023,9 +2056,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let posClickCount = 0
+        const clicked = () => {
+          if (++posClickCount >= 2) done()
+        }
 
         span.on('click', clicked)
         $btn.on('click', clicked)
@@ -2046,9 +2080,10 @@ describe('src/cy/commands/actions/click', () => {
         .css('backgroundColor', 'yellow')
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
-        })
+        let posClickCount = 0
+        const clicked = () => {
+          if (++posClickCount >= 2) done()
+        }
 
         span.on('click', clicked)
         $btn.on('click', clicked)
@@ -2158,9 +2193,9 @@ describe('src/cy/commands/actions/click', () => {
         const input = cy.$$('input:first')
 
         input.get(0).addEventListener('focus', (e) => {
-          const obj = _.pick(e, 'bubbles', 'cancelable', 'view', 'which', 'relatedTarget', 'detail', 'type')
+          const { bubbles, cancelable, view, which, relatedTarget, detail, type } = e
 
-          expect(obj).to.deep.eq({
+          expect({ bubbles, cancelable, view, which, relatedTarget, detail, type }).to.deep.eq({
             bubbles: false,
             cancelable: false,
             view: cy.state('window'),
@@ -2183,9 +2218,9 @@ describe('src/cy/commands/actions/click', () => {
         const input = cy.$$('input:first')
 
         input.get(0).addEventListener('focusin', (e) => {
-          const obj = _.pick(e, 'bubbles', 'cancelable', 'view', 'which', 'relatedTarget', 'detail', 'type')
+          const { bubbles, cancelable, view, which, relatedTarget, detail, type } = e
 
-          expect(obj).to.deep.eq({
+          expect({ bubbles, cancelable, view, which, relatedTarget, detail, type }).to.deep.eq({
             bubbles: true,
             cancelable: false,
             view: cy.state('window'),
@@ -2208,7 +2243,7 @@ describe('src/cy/commands/actions/click', () => {
 
         const input = cy.$$('input:first')
 
-        _.each('focus focusin mousedown mouseup click'.split(' '), (event) => {
+        'focus focusin mousedown mouseup click'.split(' ').forEach((event) => {
           input.get(0).addEventListener(event, () => {
             events.push(event)
           })
@@ -2764,7 +2799,7 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.get('#three-buttons button').click({ multiple: true }).then(() => {
-          _.each(logs, (log) => {
+          logs.forEach((log) => {
             expect(log.get('state')).to.eq('passed')
 
             expect(log.get('ended')).to.be.true
@@ -2819,7 +2854,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups MouseDown', () => {
-        cy.$$('input:first').mousedown(_.stubFalse)
+        cy.$$('input:first').mousedown(() => false)
 
         cy.get('input:first').click().then(function () {
           const consoleProps = this.lastLog.invoke('consoleProps')
@@ -2887,7 +2922,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups MouseUp', () => {
-        cy.$$('input:first').mouseup(_.stubFalse)
+        cy.$$('input:first').mouseup(() => false)
 
         cy.get('input:first').click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
@@ -2926,7 +2961,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups Click', () => {
-        cy.$$('input:first').click(_.stubFalse)
+        cy.$$('input:first').click(() => false)
 
         cy.get('input:first').click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
@@ -3006,10 +3041,10 @@ describe('src/cy/commands/actions/click', () => {
           const { logs } = this
           const consolePropsArr = logs.map((x) => x.invoke('consoleProps'))
 
-          const lastClickProps = _.filter(consolePropsArr, { name: 'click' })[1]
+          const lastClickProps = consolePropsArr.filter((p) => p.name === 'click')[1]
           const consoleProps = lastClickProps
 
-          expect(_.map(consoleProps.table, (x) => x())).to.containSubset([
+          expect(consoleProps.table.map((x) => x())).to.containSubset([
             {
               'name': 'Mouse Events',
               'data': [
@@ -3055,7 +3090,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('#consoleProps groups have activated modifiers', () => {
-        cy.$$('input:first').click(_.stubFalse)
+        cy.$$('input:first').click(() => false)
 
         cy.get('input:first').type('{ctrl}{shift}', { release: false }).click().then(function () {
           expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
@@ -3312,7 +3347,8 @@ describe('mouse state', () => {
           cy.get('body').then(($el) => {
             $el[0].addEventListener('mouseenter', mouseenter)
           }).then(() => {
-            const rect = _.pick($el[0].getBoundingClientRect(), 'left', 'top')
+            const { left, top } = $el[0].getBoundingClientRect()
+            const rect = { left, top }
             const coords = {
               x: rect.left,
               y: rect.top,
@@ -3422,8 +3458,10 @@ describe('mouse state', () => {
             // which: 0,
           }
 
-          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
-          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
+          const picked = {}
+          for (const key of Object.keys(exp)) picked[key] = e[key]
+          expect(picked).to.containSubset(exp)
+          Object.entries(coords).forEach(([key, v]) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('mouseout', mouseout)
         }).as('mouseout')
@@ -3460,8 +3498,10 @@ describe('mouse state', () => {
             // which: 0,
           }
 
-          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
-          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
+          const picked = {}
+          for (const key of Object.keys(exp)) picked[key] = e[key]
+          expect(picked).to.containSubset(exp)
+          Object.entries(coords).forEach(([key, v]) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('mouseleave', mouseleave)
         }).as('mouseleave')
@@ -3498,8 +3538,10 @@ describe('mouse state', () => {
             // which: 0,
           }
 
-          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
-          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
+          const picked = {}
+          for (const key of Object.keys(exp)) picked[key] = e[key]
+          expect(picked).to.containSubset(exp)
+          Object.entries(coords).forEach(([key, v]) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('pointerout', pointerout)
         }).as('pointerout')
@@ -3536,8 +3578,10 @@ describe('mouse state', () => {
             // which: 0,
           }
 
-          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
-          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
+          const picked = {}
+          for (const key of Object.keys(exp)) picked[key] = e[key]
+          expect(picked).to.containSubset(exp)
+          Object.entries(coords).forEach(([key, v]) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('pointerleave', pointerleave)
         }).as('pointerleave')
@@ -3574,8 +3618,10 @@ describe('mouse state', () => {
             // which: 0,
           }
 
-          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
-          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
+          const picked = {}
+          for (const key of Object.keys(exp)) picked[key] = e[key]
+          expect(picked).to.containSubset(exp)
+          Object.entries(coords).forEach(([key, v]) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('mouseover', mouseover)
         }).as('mouseover')
@@ -3612,8 +3658,10 @@ describe('mouse state', () => {
             // which: 0,
           }
 
-          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
-          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
+          const picked = {}
+          for (const key of Object.keys(exp)) picked[key] = e[key]
+          expect(picked).to.containSubset(exp)
+          Object.entries(coords).forEach(([key, v]) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('mouseenter', mouseenter)
         }).as('mouseenter')
@@ -3650,8 +3698,10 @@ describe('mouse state', () => {
             // which: 0,
           }
 
-          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
-          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
+          const picked = {}
+          for (const key of Object.keys(exp)) picked[key] = e[key]
+          expect(picked).to.containSubset(exp)
+          Object.entries(coords).forEach(([key, v]) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('pointerover', pointerover)
         }).as('pointerover')
@@ -3688,8 +3738,10 @@ describe('mouse state', () => {
             // which: 0,
           }
 
-          expect(_.pick(e, _.keys(exp))).to.containSubset(exp)
-          _.each(coords, (v, key) => expect(e[key], key).closeTo(v, 1))
+          const picked = {}
+          for (const key of Object.keys(exp)) picked[key] = e[key]
+          expect(picked).to.containSubset(exp)
+          Object.entries(coords).forEach(([key, v]) => expect(e[key], key).closeTo(v, 1))
 
           e.target.removeEventListener('pointerenter', pointerenter)
         }).as('pointerenter')

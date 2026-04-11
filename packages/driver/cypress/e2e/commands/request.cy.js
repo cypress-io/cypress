@@ -1,6 +1,6 @@
 const { stripIndent } = require('common-tags')
 const { assertLogLength } = require('../../support/utils')
-const { _, Promise } = Cypress
+const { Promise } = Cypress
 
 const RESPONSE_TIMEOUT = 22222
 
@@ -19,7 +19,7 @@ describe('src/cy/commands/request', () => {
         .resolves({ isOkStatusCode: true, status: 200 })
 
         this.expectOptionsToBe = function (opts) {
-          _.defaults(opts, {
+          const defaults = {
             failOnStatusCode: true,
             retryOnNetworkFailure: true,
             retryOnStatusCodeFailure: false,
@@ -29,15 +29,19 @@ describe('src/cy/commands/request', () => {
             timeout: RESPONSE_TIMEOUT,
             method: 'GET',
             retryIntervals: [0, 100, 200, 200],
+          }
+
+          Object.keys(defaults).forEach((k) => {
+            if (opts[k] === undefined) opts[k] = defaults[k]
           })
 
           const options = backend.firstCall.args[1]
 
-          _.each(options, (value, key) => {
+          Object.entries(options).forEach(([key, value]) => {
             expect(options[key]).to.deep.eq(opts[key], `failed on property: (${key})`)
           })
 
-          _.each(opts, (value, key) => {
+          Object.entries(opts).forEach(([key, value]) => {
             expect(opts[key]).to.deep.eq(options[key], `failed on property: (${key})`)
           })
         }

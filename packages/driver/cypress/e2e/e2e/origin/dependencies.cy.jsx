@@ -6,9 +6,9 @@ describe('cy.origin dependencies - jsx', { browser: '!webkit' }, () => {
 
   it('works with a jsx file', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const lodash = Cypress.require('lodash')
+      const dayjs = Cypress.require('dayjs')
 
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+      expect(dayjs('2022-07-29 12:00:00').format('MMMM D, YYYY')).to.equal('July 29, 2022')
     })
   })
 })

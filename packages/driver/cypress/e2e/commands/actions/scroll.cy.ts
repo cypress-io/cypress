@@ -1,5 +1,5 @@
 // @ts-expect-error - this is declared multiple times
-const { _, $ } = Cypress
+const { $ } = Cypress
 
 describe('src/cy/commands/actions/scroll', () => {
   beforeEach(() => {
@@ -342,15 +342,19 @@ describe('src/cy/commands/actions/scroll', () => {
 
         let retried = false
 
-        cy.on('command:retry', _.after(2, () => {
-          // Replacing the element with itself to ensure that .scrollTo() is requerying the DOM
-          // as necessary
-          $container.replaceWith($container[0].outerHTML)
-          $container = cy.$$('#nonscroll-becomes-scrollable')
+        let retryCount1 = 0
 
-          $container.css('overflow', 'scroll')
-          retried = true
-        }))
+        cy.on('command:retry', () => {
+          if (++retryCount1 >= 2) {
+            // Replacing the element with itself to ensure that .scrollTo() is requerying the DOM
+            // as necessary
+            $container.replaceWith($container[0].outerHTML)
+            $container = cy.$$('#nonscroll-becomes-scrollable')
+
+            $container.css('overflow', 'scroll')
+            retried = true
+          }
+        })
 
         cy.get('#nonscroll-becomes-scrollable').scrollTo(500, 300).then(() => {
           expect(retried).to.be.true
@@ -380,9 +384,13 @@ describe('src/cy/commands/actions/scroll', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('#scroll-into-view-horizontal').addClass('scrolled')
-        }))
+        let retryCount2 = 0
+
+        cy.on('command:retry', () => {
+          if (++retryCount2 >= 2) {
+            cy.$$('#scroll-into-view-horizontal').addClass('scrolled')
+          }
+        })
 
         cy
         .get('#scroll-into-view-horizontal')
@@ -867,9 +875,13 @@ describe('src/cy/commands/actions/scroll', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('#scroll-into-view-win-vertical div').addClass('scrolled')
-        }))
+        let retryCount3 = 0
+
+        cy.on('command:retry', () => {
+          if (++retryCount3 >= 2) {
+            cy.$$('#scroll-into-view-win-vertical div').addClass('scrolled')
+          }
+        })
 
         cy
         .contains('scroll into view vertical')

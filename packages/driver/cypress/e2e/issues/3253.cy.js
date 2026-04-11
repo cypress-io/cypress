@@ -1,4 +1,9 @@
-const _ = Cypress._
+const copyEnumerableKeysIn = (obj) => {
+  const out = {}
+  for (const key in obj) { out[key] = obj[key] }
+
+  return out
+}
 
 // https://github.com/cypress-io/cypress/issues/3253
 describe('issue #3253: scrollbar appearing full height including scrolling AUT', () => {
@@ -7,12 +12,12 @@ describe('issue #3253: scrollbar appearing full height including scrolling AUT',
 
     const beforeScrollY = window.top.scrollY
     const beforeClientRect = html.getBoundingClientRect()
-    const beforeRect = _.pick(beforeClientRect, _.keysIn(beforeClientRect))
+    const beforeRect = copyEnumerableKeysIn(beforeClientRect)
 
     cy.viewport(300, 300)
     // this bug only happens when the command log
     // extends below the height of the html and aut
-    _.times(100, (i) => {
+    Array.from({ length: 100 }, (_, i) => i).forEach((i) => {
       cy.wrap(i)
     })
 
@@ -22,7 +27,7 @@ describe('issue #3253: scrollbar appearing full height including scrolling AUT',
 
       const afterScrollY = window.top.scrollY
       const afterClientRect = html.getBoundingClientRect()
-      const afterRect = _.pick(afterClientRect, _.keysIn(afterClientRect))
+      const afterRect = copyEnumerableKeysIn(afterClientRect)
 
       // the html should not be scrollable
       // we only want the Command Log to scroll

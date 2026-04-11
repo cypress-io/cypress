@@ -1,5 +1,3 @@
-const { _ } = Cypress
-
 let count = 1
 let openInIdePath = Cypress.spec
 
@@ -40,7 +38,7 @@ export const verify = (title, ctx, options) => {
     .within(() => {
       cy.contains('Stack trace').click()
 
-      _.each([].concat(message), (msg) => {
+      ;[].concat(message).forEach((msg) => {
         cy.get('.runnable-err-message')
         .should('include.text', msg)
 
@@ -52,7 +50,7 @@ export const verify = (title, ctx, options) => {
       .invoke('text')
       .should('match', stackFileRegex)
 
-      _.each([].concat(stack), (stackLine) => {
+      ;[].concat(stack).forEach((stackLine) => {
         cy.get('.runnable-err-stack-trace')
         .should('include.text', stackLine)
       })

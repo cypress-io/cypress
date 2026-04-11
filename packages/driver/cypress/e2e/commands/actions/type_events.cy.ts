@@ -1,5 +1,15 @@
 // @ts-expect-error - redeclared variable needs to be handled
-const { _, $ } = Cypress
+const { $ } = Cypress
+
+const toPlainObject = (obj) => {
+  const result = {}
+
+  for (const key in obj) {
+    result[key] = obj[key]
+  }
+
+  return result
+}
 
 describe('src/cy/commands/actions/type - #type events', () => {
   beforeEach(() => {
@@ -11,7 +21,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
       const $txt = cy.$$(':text:first')
 
       $txt.on('keydown', (e) => {
-        expect(_.toPlainObject(e.originalEvent)).to.include({
+        expect(toPlainObject(e.originalEvent)).to.include({
           altKey: false,
           bubbles: true,
           cancelable: true,
@@ -40,7 +50,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
       const $txt = cy.$$(':text:first')
 
       $txt.on('keypress', (e) => {
-        expect(_.toPlainObject(e.originalEvent)).to.include({
+        expect(toPlainObject(e.originalEvent)).to.include({
           altKey: false,
           bubbles: true,
           cancelable: true,
@@ -68,7 +78,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
       const $txt = cy.$$(':text:first')
 
       $txt.on('keyup', (e) => {
-        expect(_.toPlainObject(e.originalEvent)).to.include({
+        expect(toPlainObject(e.originalEvent)).to.include({
           altKey: false,
           bubbles: true,
           cancelable: true,
@@ -105,7 +115,7 @@ describe('src/cy/commands/actions/type - #type events', () => {
         expect(Object.prototype.toString.call(textInputEvent.view)).eq('[object Window]')
         // @ts-expect-error - TODO: view is readonly and should not be assigned
         textInputEvent.view = null
-        expect(_.toPlainObject(textInputEvent)).to.include({
+        expect(toPlainObject(textInputEvent)).to.include({
           bubbles: true,
           cancelable: true,
           data: 'a',
@@ -125,7 +135,8 @@ describe('src/cy/commands/actions/type - #type events', () => {
       const $txt = cy.$$(':text:first')
 
       $txt.on('input', (e) => {
-        const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'type')
+        const { bubbles, cancelable, type } = e.originalEvent
+        const obj = { bubbles, cancelable, type }
 
         expect(obj).to.deep.eq({
           bubbles: true,

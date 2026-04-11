@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-const { _ } = Cypress
 
 // chrome defaults to "unspecified"
 let defaultSameSite = undefined
@@ -267,7 +266,7 @@ describe('cookies', () => {
 
               let expectedGetCookiesArray = []
 
-              _.times(n + 1, (i) => {
+              Array.from({ length: n + 1 }, (_, i) => {
                 ['foo', 'bar'].forEach((tag) => {
                   const domain = (i % 2) === (8 - n) ? expectedDomain : altDomain
 
@@ -292,7 +291,7 @@ describe('cookies', () => {
                 })
               })
 
-              expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
+              expectedGetCookiesArray = [...expectedGetCookiesArray].sort((a, b) => { const va = a.name; const vb = b.name; return va < vb ? -1 : va > vb ? 1 : 0 }).reverse()
 
               // sanity check
               cy.clearAllCookies()
@@ -302,7 +301,7 @@ describe('cookies', () => {
 
               cy.getAllCookies().then((cookies) => {
                 // reverse them so they'll be in the order they were set
-                cookies = _.reverse(_.sortBy(cookies, _.property('name')))
+                cookies = [...cookies].sort((a, b) => { const va = a.name; const vb = b.name; return va < vb ? -1 : va > vb ? 1 : 0 }).reverse()
 
                 expect(cookies).to.deep.eq(expectedGetCookiesArray)
               })

@@ -1,31 +1,13 @@
-import type { LoDashStatic } from 'lodash'
-
 describe('cy.origin dependencies', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
     cy.get('a[data-cy="cross-origin-secondary-link"]').click()
   })
 
-  it('works', () => {
-    cy.origin('http://www.foobar.com:3500', () => {
-      // default type: any
-      const lodash1 = Cypress.require('lodash')
-      // 2 ways of getting the proper type
-      const lodash2 = Cypress.require('lodash') as typeof import('lodash')
-      const lodash3 = Cypress.require<LoDashStatic>('lodash')
-
-      expect(lodash1.get({ foo: 'foo' }, 'foo')).to.equal('foo')
-      expect(lodash2.get({ foo: 'foo' }, 'foo')).to.equal('foo')
-      expect(lodash3.get({ foo: 'foo' }, 'foo')).to.equal('foo')
-    })
-  })
-
   it('works with an arrow function', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const lodash = Cypress.require('lodash')
       const dayjs = Cypress.require('dayjs')
 
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
       expect(dayjs('2022-07-29 12:00:00').format('MMMM D, YYYY')).to.equal('July 29, 2022')
 
       cy.log('command log')
@@ -34,26 +16,26 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works with a function expression', () => {
     cy.origin('http://www.foobar.com:3500', function () {
-      const lodash = Cypress.require('lodash')
+      const dayjs = Cypress.require('dayjs')
 
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+      expect(dayjs('2022-07-29 12:00:00').format('MMMM D, YYYY')).to.equal('July 29, 2022')
     })
   })
 
   it('works with options object + args', () => {
     cy.origin('http://www.foobar.com:3500', { args: ['arg1'] }, ([arg1]) => {
-      const lodash = Cypress.require('lodash')
+      const dayjs = Cypress.require('dayjs')
 
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+      expect(dayjs('2022-07-29 12:00:00').format('MMMM D, YYYY')).to.equal('July 29, 2022')
       expect(arg1).to.equal('arg1')
     })
   })
 
   it('works with a yielded value', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const lodash = Cypress.require('lodash')
+      const dayjs = Cypress.require('dayjs')
 
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+      expect(dayjs('2022-07-29 12:00:00').format('MMMM D, YYYY')).to.equal('July 29, 2022')
 
       cy.wrap('yielded value')
     })
@@ -71,9 +53,9 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
 
   it('works with multiple cy.origin calls', () => {
     cy.origin('http://www.foobar.com:3500', () => {
-      const lodash = Cypress.require('lodash')
+      const dayjs = Cypress.require('dayjs')
 
-      expect(lodash.get({ foo: 'foo' }, 'foo')).to.equal('foo')
+      expect(dayjs('2022-07-29 12:00:00').format('MMMM D, YYYY')).to.equal('July 29, 2022')
 
       cy.get('[data-cy="cross-origin-tertiary-link"]').click()
     })
@@ -143,7 +125,7 @@ describe('cy.origin dependencies', { browser: '!webkit' }, () => {
       })
 
       cy.origin('http://www.foobar.com:3500', () => {
-        Cypress.require('lodash')
+        Cypress.require('dayjs')
       })
     })
   })

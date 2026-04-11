@@ -17,7 +17,7 @@ function loadErrorSpec (options: specLoader.LoadSpecOptions): VerifyFunc {
   specLoader.loadSpec(options)
 
   // Return scoped verify function with spec options baked in
-  return createVerify({ filePath, fileName: Cypress._.last(filePath.split('/')), hasPreferredIde, mode })
+  return createVerify({ filePath, fileName: filePath.split('/').at(-1), hasPreferredIde, mode })
 }
 
 describe('errors ui', {

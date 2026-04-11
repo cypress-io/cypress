@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../../support/utils'
 
-const { _, $, Promise } = Cypress
+const { $, Promise } = Cypress
 
 describe('src/cy/commands/querying', () => {
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe('src/cy/commands/querying', () => {
       const options = { timeout: {} }
       const getErrMsgForTimeout = (timeout) => `\`cy.get()\` only accepts a \`number\` for its \`timeout\` option. You passed: \`${timeout}\``
 
-      _.each([{}, 'abc', null, NaN, false, []], (value) => {
+      ;([{}, 'abc', null, NaN, false, []] as const).forEach((value) => {
         it(`timeout throws if passed anything other invalid arg, such as: ${value}`, (done) => {
           // @ts-expect-error - testing invalid timeout value
           options.timeout = value
@@ -47,13 +47,17 @@ describe('src/cy/commands/querying', () => {
     it('can increase the timeout', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 
-      cy.on('command:retry', _.after(2, (options) => {
-        // make sure runnableTimeout is 10secs
-        expect(options._runnableTimeout).to.eq(10000)
+      let afterCount1 = 0
 
-        // we shouldnt have a timer either
-        cy.$$('body').append(missingEl)
-      }))
+      cy.on('command:retry', (options) => {
+        if (++afterCount1 >= 2) {
+          // make sure runnableTimeout is 10secs
+          expect(options._runnableTimeout).to.eq(10000)
+
+          // we shouldnt have a timer either
+          cy.$$('body').append(missingEl)
+        }
+      })
 
       cy.get('#missing-el', { timeout: 10000 })
     })
@@ -61,9 +65,13 @@ describe('src/cy/commands/querying', () => {
     it('does not factor in the total time the test has been running', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 
-      cy.on('command:retry', _.after(2, () => {
-        cy.$$('body').append(missingEl)
-      }))
+      let afterCount2 = 0
+
+      cy.on('command:retry', () => {
+        if (++afterCount2 >= 2) {
+          cy.$$('body').append(missingEl)
+        }
+      })
 
       const defaultCommandTimeout = Cypress.config('defaultCommandTimeout')
 
@@ -86,17 +94,19 @@ describe('src/cy/commands/querying', () => {
 
       let retrys = 0
 
-      const stop = _.after(2, () => {
-        Cypress.stop()
-      })
+      let stopCount = 0
+      const stop = () => {
+        if (++stopCount >= 2) {
+          Cypress.stop()
+        }
+      }
 
       cy.on('stop', () => {
-        _.delay(() => {
+        setTimeout(() => {
           expect(retrys).to.eq(2)
 
           done()
-        }
-        , 100)
+        }, 100)
       })
 
       cy.on('command:retry', () => {
@@ -145,9 +155,13 @@ describe('src/cy/commands/querying', () => {
       defaultCommandTimeout: 1000,
     }, () => {
       it('waits until button exists', () => {
-        cy.on('command:retry', _.after(3, () => {
-          cy.$$('body').append($('<div id=\'missing-el\'>missing el</div>'))
-        }))
+        let afterCount3 = 0
+
+        cy.on('command:retry', () => {
+          if (++afterCount3 >= 3) {
+            cy.$$('body').append($('<div id=\'missing-el\'>missing el</div>'))
+          }
+        })
 
         cy.get('#missing-el').should('exist')
       })
@@ -157,9 +171,13 @@ describe('src/cy/commands/querying', () => {
       it('waits until button does not exist', () => {
         cy.timeout(500, true)
 
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('#button').remove()
-        }))
+        let afterCount4 = 0
+
+        cy.on('command:retry', () => {
+          if (++afterCount4 >= 2) {
+            cy.$$('#button').remove()
+          }
+        })
 
         cy.get('#button').should('not.exist')
       })
@@ -174,9 +192,12 @@ describe('src/cy/commands/querying', () => {
         // add 500ms to the delta
         cy.timeout(500, true)
 
-        const retry = _.after(3, () => {
-          cy.$$('#list li:last').remove()
-        })
+        let afterCount5 = 0
+        const retry = () => {
+          if (++afterCount5 >= 3) {
+            cy.$$('#list li:last').remove()
+          }
+        }
 
         cy.on('command:retry', retry)
 
@@ -214,10 +235,13 @@ describe('src/cy/commands/querying', () => {
 
         let button = null
 
-        const retry = _.after(3, () => {
-          // @ts-expect-error TODO: Figure out types for this
-          button = cy.$$('#button').hide()
-        })
+        let afterCount6 = 0
+        const retry = () => {
+          if (++afterCount6 >= 3) {
+            // @ts-expect-error TODO: Figure out types for this
+            button = cy.$$('#button').hide()
+          }
+        }
 
         cy.on('command:retry', retry)
 
@@ -243,9 +267,12 @@ describe('src/cy/commands/querying', () => {
 
         const button = cy.$$('#button').hide()
 
-        const retry = _.after(3, () => {
-          button.show()
-        })
+        let afterCount7 = 0
+        const retry = () => {
+          if (++afterCount7 >= 3) {
+            button.show()
+          }
+        }
 
         cy.on('command:retry', retry)
 
@@ -272,10 +299,14 @@ describe('src/cy/commands/querying', () => {
 
         const length = buttons.length - 2
 
-        cy.on('command:retry', _.after(2, () => {
-          buttons.last().remove()
-          buttons = cy.$$('button')
-        }))
+        let afterCount8 = 0
+
+        cy.on('command:retry', () => {
+          if (++afterCount8 >= 2) {
+            buttons.last().remove()
+            buttons = cy.$$('button')
+          }
+        })
 
         // should resolving after removing 2 buttons
         cy.get('button').should('have.length', length).then(($buttons) => {
@@ -292,9 +323,15 @@ describe('src/cy/commands/querying', () => {
         const length = buttons.length + 1
 
         // add another button after 2 retries, once
-        cy.on('command:retry', _.after(2, _.once(() => {
-          $('<button />').appendTo(cy.$$('body'))
-        })))
+        let afterCount9 = 0
+        let onceCalled9 = false
+
+        cy.on('command:retry', () => {
+          if (++afterCount9 >= 2 && !onceCalled9) {
+            onceCalled9 = true
+            $('<button />').appendTo(cy.$$('body'))
+          }
+        })
 
         // should eventually resolve after adding 1 button
         cy
@@ -328,17 +365,25 @@ describe('src/cy/commands/querying', () => {
 
     describe('assertion verification', () => {
       it('automatically retries', () => {
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('button:first').attr('data-foo', 'bar')
-        }))
+        let afterCount10 = 0
+
+        cy.on('command:retry', () => {
+          if (++afterCount10 >= 2) {
+            cy.$$('button:first').attr('data-foo', 'bar')
+          }
+        })
 
         cy.get('button:first').should('have.attr', 'data-foo').and('match', /bar/)
       })
 
       it('eventually resolves an alias', () => {
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('button:first').addClass('foo-bar-baz')
-        }))
+        let afterCount11 = 0
+
+        cy.on('command:retry', () => {
+          if (++afterCount11 >= 2) {
+            cy.$$('button:first').addClass('foo-bar-baz')
+          }
+        })
 
         cy
         .get('button:first').as('btn')
@@ -486,7 +531,7 @@ describe('src/cy/commands/querying', () => {
 
           expect(this.lastLog.get('$el')).to.eql($body)
 
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(this.lastLog.get(key)).to.eq(value, `expected key: ${key} to eq value: ${value}`)
           })
         })
@@ -866,9 +911,14 @@ describe('src/cy/commands/querying', () => {
           cy.$$('#get-json').click(() => {
             cy.timeout(1000)
 
-            const retry = _.after(3, _.once(() => {
-              cy.state('window').$.getJSON('/json')
-            }))
+            let retryCount12 = 0
+            let retryCalled12 = false
+            const retry = () => {
+              if (++retryCount12 >= 3 && !retryCalled12) {
+                retryCalled12 = true
+                cy.state('window').$.getJSON('/json')
+              }
+            }
 
             cy.on('command:retry', retry)
           })
@@ -1022,7 +1072,7 @@ describe('src/cy/commands/querying', () => {
         .get('@getUsers.all ')
       })
 
-      _.each(['', 'foo', [], 1, null], (value) => {
+      ;(['', 'foo', [], 1, null] as const).forEach((value) => {
         it(`throws when options property is not an object. Such as: ${value}`, (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.include(`only accepts an options object for its second argument. You passed ${value}`)
@@ -1241,9 +1291,12 @@ describe('src/cy/commands/querying', () => {
 
       // only append the span after we retry
       // three times
-      const retry = _.after(3, () => {
-        cy.$$('body').append(span)
-      })
+      let afterCount13 = 0
+      const retry = () => {
+        if (++afterCount13 >= 3) {
+          cy.$$('body').append(span)
+        }
+      }
 
       cy.on('command:retry', retry)
 
@@ -1296,20 +1349,22 @@ describe('src/cy/commands/querying', () => {
 
       cy.stub(Cypress.runner, 'stop')
 
-      const abort = _.after(2, () => {
-        cy.spy(cy, 'now')
+      let abortCount = 0
+      const abort = () => {
+        if (++abortCount >= 2) {
+          cy.spy(cy, 'now')
 
-        Cypress.stop()
-      })
+          Cypress.stop()
+        }
+      }
 
       cy.on('stop', () => {
-        _.delay(() => {
+        setTimeout(() => {
           expect(cy.now).not.to.be.called
           expect(retrys).to.eq(2)
 
           done()
-        }
-        , 50)
+        }, 50)
       })
 
       cy.on('command:retry', () => {
@@ -1605,11 +1660,14 @@ space
         let retried3Times = false
 
         // make sure it retries 3 times.
-        const retry = _.after(3, () => {
-          retried3Times = true
+        let afterCount14 = 0
+        const retry = () => {
+          if (++afterCount14 >= 3) {
+            retried3Times = true
 
-          cy.$$('#edge-case-contains').append(count)
-        })
+            cy.$$('#edge-case-contains').append(count)
+          }
+        }
 
         cy.on('command:retry', retry)
 
@@ -1625,11 +1683,14 @@ space
         const count = $('<span class=\'count\'>100</span>')
         let retried3Times = false
 
-        const retry = _.after(3, () => {
-          retried3Times = true
+        let afterCount15 = 0
+        const retry = () => {
+          if (++afterCount15 >= 3) {
+            retried3Times = true
 
-          cy.$$('#edge-case-contains').append(count)
-        })
+            cy.$$('#edge-case-contains').append(count)
+          }
+        }
 
         cy.on('command:retry', retry)
 
@@ -1657,7 +1718,7 @@ space
 
       it(`finds selector with characters`, () => {
         Cypress.config({ numTestsKeptInMemory: 0 })
-        _.each(specialCharacters, (char) => {
+        specialCharacters.forEach((char) => {
           const button = $(`<button id="form-field${char}:r1:">special char ${char} content</button>`).appendTo(cy.$$('body'))
 
           cy.contains('button', char).then(($button) => {
@@ -1667,10 +1728,10 @@ space
       })
 
       it(`finds content by regex with characters`, () => {
-        _.each(specialCharacters, (char) => {
+        specialCharacters.forEach((char) => {
           const span = $(`<span>special char ${char} content</span>`).appendTo(cy.$$('body'))
 
-          cy.contains('span', new RegExp(_.escapeRegExp(char))).then(($span) => {
+          cy.contains('span', new RegExp(char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))).then(($span) => {
             const el = $span?.[0] as unknown as HTMLElement
 
             expect(el).to.eq(span.get(0))
@@ -1723,7 +1784,7 @@ space
       // BAD:  [ {name: get} , {name: get} , {name: contains} ]
       it('silences internal cy.get() log', () => {
         cy.get('#complex-contains').contains('nested contains').then(function ($label) {
-          const names = _.map(this.logs, (log) => log.get('name'))
+          const names = this.logs.map((log) => log.get('name'))
 
           assertLogLength(this.logs, 2)
 
@@ -1807,7 +1868,7 @@ space
         return null
       })
 
-      _.each([undefined, null], (val) => {
+      ;([undefined, null] as const).forEach((val) => {
         it(`throws when text is ${val}`, (done) => {
           cy.on('fail', (err) => {
             expect(err.name).to.eq('CypressError')

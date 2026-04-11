@@ -23,7 +23,7 @@ it('takes consistent viewport captures', () => {
       })
     }
 
-    Cypress._.times(25, fn)
+    Array.from({ length: 25 }, () => fn())
   })
 })
 

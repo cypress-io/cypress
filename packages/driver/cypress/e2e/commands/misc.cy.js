@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { _, $, dom } = Cypress
+const { $, dom } = Cypress
 
 describe('src/cy/commands/misc', () => {
   beforeEach(function () {
@@ -143,7 +143,15 @@ describe('src/cy/commands/misc', () => {
         }, 50)
       }
 
-      cy.on('command:retry', _.after(2, _.once(append)))
+      let appendCount = 0
+      let appendCalled = false
+
+      cy.on('command:retry', (...args) => {
+        if (++appendCount >= 2 && !appendCalled) {
+          appendCalled = true
+          append()
+        }
+      })
 
       cy.get('#list').then(($ul) => {
         cy

@@ -3,7 +3,6 @@ types/bluebird
 types/chai
 types/chai-jquery
 types/jquery
-types/lodash
 types/mocha
 types/minimatch
 types/sinon

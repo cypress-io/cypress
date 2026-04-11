@@ -116,7 +116,6 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
   })
 
   context('#consoleProps', () => {
-    const { _ } = Cypress
     let logs: Map<string, any>
 
     beforeEach(() => {
@@ -239,7 +238,7 @@ context('cy.origin traversal', { browser: '!webkit' }, () => {
 
         expect(consoleProps.props.Yielded.length).to.equal(4)
 
-        _.forEach(consoleProps.props.Yielded, (yielded) => {
+        consoleProps.props.Yielded.forEach((yielded) => {
           expect(yielded).to.have.property('tagName').that.equals('INPUT')
           expect(yielded).to.have.property('name').that.equals('dogs')
         })

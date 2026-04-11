@@ -1,8 +1,6 @@
 import { expect } from 'chai'
 
 describe('Proxy Logging', () => {
-  const { _ } = Cypress
-
   const url = '/testFlag'
   const alias = 'aliasName'
 
@@ -70,7 +68,7 @@ describe('Proxy Logging', () => {
         })
 
         // case depends on browser
-        const refererKey = _.keys(log.consoleProps.props['Request Headers']).find((k) => k.toLowerCase() === 'referer') || 'referer'
+        const refererKey = Object.keys(log.consoleProps.props['Request Headers']).find((k) => k.toLowerCase() === 'referer') || 'referer'
 
         expect(log.consoleProps.props['Request Headers']).to.include({
           [refererKey]: window.location.href,

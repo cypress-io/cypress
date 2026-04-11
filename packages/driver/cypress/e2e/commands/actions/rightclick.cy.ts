@@ -12,7 +12,7 @@ import {
   shouldNotBeCalled,
 } from '../../../support/utils'
 
-const { _, $ } = Cypress
+const { $ } = Cypress
 
 const attachContextmenuListeners = attachListeners(['contextmenu'])
 
@@ -355,7 +355,7 @@ describe('src/cy/commands/actions/rightclick', () => {
             'Coords': midpoint,
           })
 
-          const tables = _.map(consoleProps.table, ((x) => x()))
+          const tables = consoleProps.table.map((x) => x())
 
           expect(tables).to.containSubset([
             {

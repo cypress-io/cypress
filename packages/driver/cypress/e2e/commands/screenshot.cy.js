@@ -1,7 +1,7 @@
 const $ = require('jquery')
 const { assertLogLength } = require('../../support/utils')
 
-const { _, Promise, Screenshot } = Cypress
+const { Promise, Screenshot } = Cypress
 
 const getViewportHeight = () => {
   return Math.min(cy.state('viewportHeight'), $(cy.state('window')).height())
@@ -156,9 +156,9 @@ describe('src/cy/commands/screenshot', () => {
         expect(Cypress.automation).to.be.calledWith('take:screenshot')
         let args = Cypress.automation.withArgs('take:screenshot').args[0][1]
 
-        args = _.omit(args, 'padding', 'clip', 'userClip', 'viewport', 'takenPaths', 'startTime')
+        const { padding: _p1, clip: _c1, userClip: _uc1, viewport: _vp1, takenPaths: _tp1, startTime: _st1, ...filteredArgs1 } = args
 
-        expect(args).to.eql({
+        expect(filteredArgs1).to.eql({
           testId: runnable.id,
           titles: [
             'src/cy/commands/screenshot',
@@ -204,7 +204,8 @@ describe('src/cy/commands/screenshot', () => {
           expect(Cypress.automation.withArgs('take:screenshot')).to.be.calledOnce
           let args = Cypress.automation.withArgs('take:screenshot').args[0][1]
 
-          args = _.omit(args, 'padding', 'clip', 'userClip', 'viewport', 'takenPaths', 'startTime')
+          const { padding: _p2, clip: _c2, userClip: _uc2, viewport: _vp2, takenPaths: _tp2, startTime: _st2, ...filteredArgs2 } = args
+          args = filteredArgs2
 
           expect(args).to.eql({
             testId: runnable.id,
@@ -268,9 +269,9 @@ describe('src/cy/commands/screenshot', () => {
         expect(Cypress.automation).to.be.calledWith('take:screenshot')
         let args = Cypress.automation.withArgs('take:screenshot').args[0][1]
 
-        args = _.omit(args, 'padding', 'clip', 'userClip', 'viewport', 'takenPaths', 'startTime')
+        const { padding: _p3, clip: _c3, userClip: _uc3, viewport: _vp3, takenPaths: _tp3, startTime: _st3, ...filteredArgs3 } = args
 
-        expect(args).to.eql({
+        expect(filteredArgs3).to.eql({
           testId: runnable.id,
           titles: [
             'src/cy/commands/screenshot',
@@ -1153,16 +1154,16 @@ describe('src/cy/commands/screenshot', () => {
       it('#consoleProps', function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
 
-        let expected = _.extend({}, this.serverResult, this.screenshotConfig, {
+        const merged = Object.assign({}, this.serverResult, this.screenshotConfig, {
           scaled: true,
           duration: '100ms',
         })
 
-        expected = _.omit(expected, 'blackout', 'dimensions', 'screenshotOnRunFailure', 'scale', 'size')
+        const { blackout: _b1, dimensions: _d1, screenshotOnRunFailure: _sr1, scale: _sc1, size: _sz1, ...expected } = merged
 
         cy.screenshot().then(() => {
           const consoleProps = this.lastLog.invoke('consoleProps')
-          const actual = _.omit(consoleProps.props, 'blackout', 'dimensions', 'size')
+          const { blackout: _b2, dimensions: _d2, size: _sz2, ...actual } = consoleProps.props
           const { width, height } = this.serverResult.dimensions
 
           expect(actual).to.eql(expected)

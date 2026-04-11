@@ -48,7 +48,7 @@ function loadErrorSpec (options: Options): VerifyFunc {
   })
 
   // Return scoped verify function with spec options baked in
-  return createVerify({ fileName: Cypress._.last(filePath.split('/')), filePath, hasPreferredIde: false, mode: 'component' })
+  return createVerify({ fileName: filePath.split('/').at(-1), filePath, hasPreferredIde: false, mode: 'component' })
 }
 
 const reactVersions = [18, 19] as const

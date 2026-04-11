@@ -25,7 +25,6 @@
     "types/chai",
     "types/chai-jquery",
     "types/jquery",
-    "types/lodash",
     "types/minimatch",
     "types/mocha",
     "types/sinon",

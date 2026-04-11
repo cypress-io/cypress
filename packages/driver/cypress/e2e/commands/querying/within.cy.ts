@@ -1,7 +1,5 @@
 import { assertLogLength } from '../../../support/utils'
 
-const { _ } = Cypress
-
 describe('src/cy/commands/querying/within', () => {
   context('#within', () => {
     beforeEach(() => {
@@ -175,9 +173,13 @@ describe('src/cy/commands/querying/within', () => {
     })
 
     it('re-queries if withinSubject is detached from dom', () => {
-      cy.on('command:retry', _.after(2, (options) => {
-        cy.$$('#wrapper').replaceWith('<div id="wrapper"><div id="upper">Newer York</div></div>')
-      }))
+      let afterCount = 0
+
+      cy.on('command:retry', (options) => {
+        if (++afterCount >= 2) {
+          cy.$$('#wrapper').replaceWith('<div id="wrapper"><div id="upper">Newer York</div></div>')
+        }
+      })
 
       cy.get('#wrapper').within(() => {
         cy.get(`#upper`).should(`contain.text`, `Newer York`)
@@ -307,7 +309,7 @@ describe('src/cy/commands/querying/within', () => {
         cy.noop().within(() => {})
       })
 
-      _.each(['', [], {}, 1, null, undefined], (value) => {
+      ;(['', [], {}, 1, null, undefined] as const).forEach((value) => {
         it(`throws if passed anything other than a function, such as: ${value}`, (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.within()` must be called with a function.')

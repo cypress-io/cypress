@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../../support/utils'
 
-const { _, $ } = Cypress
+const { $ } = Cypress
 
 describe('src/cy/commands/actions/select', () => {
   beforeEach(() => {
@@ -236,9 +236,14 @@ describe('src/cy/commands/actions/select', () => {
     it('retries until <option> can be selected', () => {
       const option = cy.$$('<option>foo</option>')
 
-      cy.on('command:retry', _.once(() => {
-        cy.$$('#select-maps').append(option)
-      }))
+      let onceCalled1 = false
+
+      cy.on('command:retry', () => {
+        if (!onceCalled1) {
+          onceCalled1 = true
+          cy.$$('#select-maps').append(option)
+        }
+      })
 
       cy.get('#select-maps').select('foo')
     })
@@ -246,11 +251,16 @@ describe('src/cy/commands/actions/select', () => {
     it('retries until <select> is no longer disabled', () => {
       const select = cy.$$('select[name=disabled]')
 
-      cy.on('command:retry', _.once(() => {
-        // Replace the element with a copy of itself, to ensure .select() is requerying the DOM
-        select.replaceWith(select[0].outerHTML)
-        cy.$$('select[name=disabled]').prop('disabled', false)
-      }))
+      let onceCalled2 = false
+
+      cy.on('command:retry', () => {
+        if (!onceCalled2) {
+          onceCalled2 = true
+          // Replace the element with a copy of itself, to ensure .select() is requerying the DOM
+          select.replaceWith(select[0].outerHTML)
+          cy.$$('select[name=disabled]').prop('disabled', false)
+        }
+      })
 
       cy.get('select[name=disabled]').select('foo')
       cy.get('select[name=disabled]').invoke('val').should('eq', 'foo')
@@ -259,9 +269,14 @@ describe('src/cy/commands/actions/select', () => {
     it('retries until <optgroup> is no longer disabled', () => {
       const select = cy.$$('select[name=optgroup-disabled]')
 
-      cy.on('command:retry', _.once(() => {
-        select.find('optgroup').prop('disabled', false)
-      }))
+      let onceCalled3 = false
+
+      cy.on('command:retry', () => {
+        if (!onceCalled3) {
+          onceCalled3 = true
+          select.find('optgroup').prop('disabled', false)
+        }
+      })
 
       cy.get('select[name=optgroup-disabled]').select('bar')
       .invoke('val').should('eq', 'bar')
@@ -270,9 +285,14 @@ describe('src/cy/commands/actions/select', () => {
     it('retries until <options> are no longer disabled', () => {
       const select = cy.$$('select[name=opt-disabled]')
 
-      cy.on('command:retry', _.once(() => {
-        select.find('option').prop('disabled', false)
-      }))
+      let onceCalled4 = false
+
+      cy.on('command:retry', () => {
+        if (!onceCalled4) {
+          onceCalled4 = true
+          select.find('option').prop('disabled', false)
+        }
+      })
 
       cy.get('select[name=opt-disabled]').select('bar')
       .invoke('val').should('eq', 'bar')
@@ -297,7 +317,7 @@ describe('src/cy/commands/actions/select', () => {
 
       it('eventually passes the assertion', () => {
         cy.$$('#select-maps').change(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('selected')
           }, 100)
         })
@@ -349,7 +369,7 @@ describe('src/cy/commands/actions/select', () => {
         const fired: any[] = []
         const events = ['mousedown', 'focus', 'mouseup', 'click', 'input', 'change']
 
-        _.each(events, (event) => {
+        events.forEach((event) => {
           cy.$$('select[name=maps]').one(event, () => {
             fired.push(event)
           })

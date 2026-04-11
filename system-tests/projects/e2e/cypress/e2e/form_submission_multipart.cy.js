@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const { Blob, _ } = Cypress
+const { Blob } = Cypress
 
 Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath, commandTimeoutOpts) => {
   const mimeTypes = {
@@ -13,7 +13,7 @@ Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath, 
   const mimeType = mimeTypes[filePathSplitted] !== undefined ? mimeTypes[filePathSplitted] : null
 
   const fixtureOrReadFile = function (filePath) {
-    if (_.startsWith(filePath, '/')) {
+    if (filePath.startsWith('/')) {
       return cy.readFile(filePath, 'base64', commandTimeoutOpts)
     }
 

@@ -59,7 +59,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookies().then((cookies) => {
         expect(cookies).to.have.length(2)
 
-        const sortedCookies = Cypress._.sortBy(cookies, 'name')
+        const sortedCookies = [...cookies].sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 
         expect(sortedCookies[0].name).to.equal('key5')
         expect(sortedCookies[0].domain).to.match(/\.?barbaz\.com/)
@@ -87,7 +87,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookies().then((cookies) => {
         expect(cookies).to.have.length(4)
 
-        const sortedCookies = Cypress._.sortBy(cookies, 'name')
+        const sortedCookies = [...cookies].sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 
         expect(sortedCookies[0].name).to.equal('key3')
         expect(sortedCookies[0].domain).to.match(/\.?www\.barbaz\.com/)
@@ -106,7 +106,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.visit('http://www.foobar.com:3500/fixtures/generic.html')
 
         cy.getCookies().then((cookies) => {
-          const sortedCookies = Cypress._.sortBy(cookies, 'name')
+          const sortedCookies = [...cookies].sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 
           expect(sortedCookies).to.have.length(2)
           expect(sortedCookies[0].name).to.equal('key1')
@@ -124,7 +124,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
         expect(cookies).to.have.length(2)
 
-        const sortedCookies = Cypress._.sortBy(cookies, 'name')
+        const sortedCookies = [...cookies].sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 
         expect(sortedCookies[0].name).to.equal('key1')
         expect(sortedCookies[0].domain).to.match(/\.?www\.foobar\.com/)
@@ -135,7 +135,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getCookies({ domain: 'barbaz.com' }).then((cookies) => {
         expect(cookies).to.have.length(2)
 
-        const sortedCookies = Cypress._.sortBy(cookies, 'name')
+        const sortedCookies = [...cookies].sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 
         expect(sortedCookies[0].name).to.equal('key5')
         expect(sortedCookies[0].domain).to.match(/\.?barbaz\.com/)
@@ -152,7 +152,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.getCookies({ domain: 'www.barbaz.com' }).then((cookies) => {
           expect(cookies).to.have.length(4)
 
-          const sortedCookies = Cypress._.sortBy(cookies, 'name')
+          const sortedCookies = [...cookies].sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)
 
           expect(sortedCookies[0].name).to.equal('key3')
           expect(sortedCookies[0].domain).to.match(/\.?www\.barbaz\.com/)
@@ -175,7 +175,7 @@ describe('src/cy/commands/cookies - no stub', () => {
       cy.getAllCookies().then((cookies) => {
         expect(cookies).to.have.length(8)
 
-        const sortedCookies = Cypress._.sortBy(cookies, 'name').map((cookie) => `${cookie.name}=${cookie.value}`)
+        const sortedCookies = [...cookies].sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0).map((cookie) => `${cookie.name}=${cookie.value}`)
 
         expect(sortedCookies).to.deep.equal([
           'key1=value1',
@@ -198,7 +198,7 @@ describe('src/cy/commands/cookies - no stub', () => {
         cy.getAllCookies().then((cookies) => {
           expect(cookies).to.have.length(8)
 
-          const sortedCookies = Cypress._.sortBy(cookies, 'name').map((cookie) => `${cookie.name}=${cookie.value}`)
+          const sortedCookies = [...cookies].sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0).map((cookie) => `${cookie.name}=${cookie.value}`)
 
           expect(sortedCookies).to.deep.equal([
             'key1=value1',

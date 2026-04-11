@@ -1,5 +1,3 @@
-const { _ } = Cypress
-
 describe('set:cookies', () => {
   it('t1', async () => {
     cy.env(['HTTPS']).then(async ({ HTTPS }) => {
@@ -149,11 +147,13 @@ describe('set:cookies', () => {
       }
 
       const cleanse = (cookies) => {
-        return _.cloneDeepWith(cookies, (value, key) => {
+        return JSON.parse(JSON.stringify(cookies, (key, value) => {
           if (key === 'expiry') {
             return 100
           }
-        })
+
+          return value
+        }))
       }
 
       await Cypress.session.clearCookies()

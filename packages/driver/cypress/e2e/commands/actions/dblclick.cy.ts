@@ -5,7 +5,7 @@ import {
   clickCommandLog,
 } from '../../../support/utils'
 
-const { _, $, Promise } = Cypress
+const { $, Promise } = Cypress
 
 const attachMouseDblclickListeners = attachListeners(['dblclick'])
 
@@ -91,7 +91,8 @@ describe('src/cy/commands/actions/dblclick', () => {
       })
 
       // abort after the 3rd dblclick
-      const dblclicked = _.after(3, spy)
+      let afterCount = 0
+      const dblclicked = (...args) => { if (++afterCount >= 3) return spy(...args) }
 
       const anchors = cy.$$('#sequential-clicks a')
 
@@ -110,7 +111,7 @@ describe('src/cy/commands/actions/dblclick', () => {
         // is called
         const timeout = this.sandbox.spy(cy, '_timeout')
 
-        _.delay(() => {
+        setTimeout(() => {
           // abort should only have been called once
           expect(spy.callCount).to.eq(1)
 
@@ -120,8 +121,7 @@ describe('src/cy/commands/actions/dblclick', () => {
           expect(timeout.callCount).to.eq(0)
 
           done()
-        }
-        , 200)
+        }, 200)
       })
 
       cy.get('#sequential-clicks a').dblclick()
@@ -132,8 +132,16 @@ describe('src/cy/commands/actions/dblclick', () => {
 
       // create a throttled click function
       // which proves we are clicking serially
+      let lastCall = 0
       const handleClick = cy.stub()
-      .callsFake(_.throttle(throttled, 5, { leading: false }))
+      .callsFake((...args) => {
+        const now = Date.now()
+
+        if (now - lastCall >= 5) {
+          lastCall = now
+          throttled(...args)
+        }
+      })
       .as('handleClick')
 
       const $anchors = cy.$$('#sequential-clicks a')
@@ -156,8 +164,16 @@ describe('src/cy/commands/actions/dblclick', () => {
 
       // create a throttled click function
       // which proves we are clicking serially
+      let lastCall2 = 0
       const handleClick = cy.stub()
-      .callsFake(_.throttle(throttled, 5, { leading: false }))
+      .callsFake((...args) => {
+        const now = Date.now()
+
+        if (now - lastCall2 >= 5) {
+          lastCall2 = now
+          throttled(...args)
+        }
+      })
       .as('handleClick')
 
       const $anchors = cy.$$('#three-buttons button')
@@ -224,7 +240,7 @@ describe('src/cy/commands/actions/dblclick', () => {
       cy.get('#three-buttons button').dblclick().then(() => {
         const calls = cy.timeout.getCalls()
 
-        const num = _.filter(calls, (call) => _.isEqual(call.args, [50, true]))
+        const num = calls.filter((call) => call.args.length === 2 && call.args[0] === 50 && call.args[1] === true)
 
         expect(num.length).to.eq(count)
       })
@@ -273,7 +289,7 @@ describe('src/cy/commands/actions/dblclick', () => {
         cy.on('fail', (err) => {
           const { lastLog } = this
 
-          const logs = _.cloneDeep(this.logs)
+          const logs = [...this.logs]
 
           expect(logs).to.have.length(4)
           expect(lastLog.get('error')).to.eq(err)
@@ -415,7 +431,7 @@ describe('src/cy/commands/actions/dblclick', () => {
             'Elements': 1,
           })
 
-          const tables = _.map(consoleProps.table, ((x) => x()))
+          const tables = consoleProps.table.map((x) => x())
 
           expect(tables[0]).to.containSubset({
             name: 'Mouse Events',

@@ -45,7 +45,7 @@ describe('subdomains', () => {
     }).then((cookie) => {
     // there should have been only a single secret-session
     // request cookie sent on this XHR request
-      const occurrences = Cypress._.compact(cookie.split('secret-session'))
+      const occurrences = cookie.split('secret-session').filter(Boolean)
 
       expect(occurrences).to.have.length(1)
     })

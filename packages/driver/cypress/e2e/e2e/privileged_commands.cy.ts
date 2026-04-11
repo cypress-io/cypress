@@ -57,17 +57,10 @@ describe('privileged commands', () => {
 
     // https://github.com/cypress-io/cypress/issues/27099
     it('passes with large payloads', () => {
-      const hugeJson = Cypress._.times(3000).map(() => {
-        return {
-          key1: 'value 1',
-          key2: {
-            key3: 'value 3',
-            key4: {
-              key5: 'value 5',
-            },
-          },
-        }
-      })
+      const hugeJson = Array.from({ length: 3000 }, () => ({
+        key1: 'value 1',
+        key2: { key3: 'value 3', key4: { key5: 'value 5' } },
+      }))
 
       cy.task('return:arg', hugeJson)
       cy.writeFile('cypress/_test-output/huge-out.json', hugeJson)

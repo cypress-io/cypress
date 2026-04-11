@@ -2,8 +2,6 @@ import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
 
 import scroller from '../../../src/lib/scroller'
 
-const { _ } = Cypress
-
 interface ContainerProps {
   clientHeight?: number
   scrollHeight?: number
@@ -16,12 +14,12 @@ type TestContainer = Element & {
 }
 
 const getContainer = (props?: ContainerProps): TestContainer => {
-  return _.extend<TestContainer>({
+  return Object.assign({
     clientHeight: 400,
     scrollHeight: 900,
     scrollTop: 0,
     addEventListener: sinon.spy(),
-  }, props)
+  }, props) as TestContainer
 }
 
 interface ElementProps {
@@ -30,10 +28,10 @@ interface ElementProps {
 }
 
 const getElement = (props?: ElementProps): HTMLElement => {
-  return _.extend<HTMLElement>({
+  return Object.assign({
     clientHeight: 20,
     offsetTop: 150,
-  }, props)
+  }, props) as HTMLElement
 }
 
 describe('scroller', () => {

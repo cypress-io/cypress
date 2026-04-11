@@ -196,7 +196,7 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
 
         expect(tickLog.name).to.equal('tick')
 
-        const consoleProps = Cypress._.isFunction(tickLog.consoleProps) ? tickLog.consoleProps() : tickLog.consoleProps
+        const consoleProps = typeof tickLog.consoleProps === 'function' ? tickLog.consoleProps() : tickLog.consoleProps
 
         expect(consoleProps.name).to.equal('tick')
         expect(consoleProps.type).to.equal('command')

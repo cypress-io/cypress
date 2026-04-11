@@ -80,7 +80,9 @@ function scaffoldAndOpenCTProject (opts: {
   cy.contains(opts.framework).click()
   if (opts.bundler) {
     cy.contains('Pick a bundler').click()
-    cy.contains(Cypress._.startCase(opts.bundler)).click()
+    const startCase = (str) => str.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+
+    cy.contains(startCase(opts.bundler)).click()
   }
 
   cy.contains('Next step').click()

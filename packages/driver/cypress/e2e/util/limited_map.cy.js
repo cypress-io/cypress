@@ -1,7 +1,5 @@
 const LimitedMap = require('@packages/driver/src/util/limited_map').default
 
-const _ = Cypress._
-
 describe('driver/src/util/limited_map', () => {
   it('has all the methods of a Map', () => {
     const limitedMap = new LimitedMap()
@@ -16,7 +14,7 @@ describe('driver/src/util/limited_map', () => {
   it('remove old entries when over limit, default 100', () => {
     const limitedMap = new LimitedMap()
 
-    _.each(_.times(100), (i) => {
+    Array.from({ length: 100 }, (_, i) => i).forEach((i) => {
       limitedMap.set(`foo-${i}`, i)
     })
 
@@ -43,7 +41,7 @@ describe('driver/src/util/limited_map', () => {
   it('accepts limit as first parameter', () => {
     const limitedMap = new LimitedMap(5)
 
-    _.each(_.times(5), (i) => {
+    Array.from({ length: 5 }, (_, i) => i).forEach((i) => {
       limitedMap.set(`foo-${i}`, i)
     })
 

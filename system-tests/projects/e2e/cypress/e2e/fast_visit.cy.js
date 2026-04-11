@@ -14,7 +14,7 @@ const fastVisitSpec = function (url) {
 
   const times = []
 
-  Cypress._.times(100, () => {
+  Array.from({ length: 100 }, () => {
     cy.visit(url)
     .then(function () {
       const time = this.lastLog.get('totalTime')

@@ -1,4 +1,3 @@
-const { _ } = Cypress
 import { assertLogLength } from '../../support/utils'
 
 describe('src/cy/commands/commands', () => {
@@ -188,7 +187,7 @@ describe('src/cy/commands/commands', () => {
   context('errors', () => {
     it('throws when cannot find command by name', (done) => {
       cy.on('fail', (err) => {
-        const cmds = _.keys(Cypress.Chainer.prototype)
+        const cmds = Object.keys(Cypress.Chainer.prototype)
 
         expect(cmds.length).to.be.gt(1)
         expect(err.message).to.eq(`Could not find a command for: \`fooDoesNotExist\`.\n\nAvailable commands are: \`${cmds.join('`, `')}\`.\n`)

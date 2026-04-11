@@ -1,5 +1,5 @@
 import { assertLogLength } from '../../../support/utils'
-const { _, $, Promise } = Cypress
+const { $, Promise } = Cypress
 
 describe('src/cy/commands/actions/submit', () => {
   beforeEach(function () {
@@ -181,7 +181,7 @@ describe('src/cy/commands/actions/submit', () => {
 
       it('eventually passes the assertion', () => {
         cy.$$('form:first').submit(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('submitted')
           }, 100)
 

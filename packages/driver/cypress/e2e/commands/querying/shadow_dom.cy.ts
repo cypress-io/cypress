@@ -1,6 +1,3 @@
-// @ts-expect-error TODO: fix this reference
-const { _ } = Cypress
-
 describe('src/cy/commands/querying - shadow dom', () => {
   beforeEach(() => {
     cy.visit('/fixtures/shadow-dom.html')
@@ -150,9 +147,13 @@ describe('src/cy/commands/querying - shadow dom', () => {
     })
 
     it('retries until it can find a root', () => {
-      cy.on('command:retry', _.after(2, () => {
-        cy.$$('#non-shadow-element')[0].attachShadow({ mode: 'open' })
-      }))
+      let afterCount = 0
+
+      cy.on('command:retry', (...args) => {
+        if (++afterCount >= 2) {
+          cy.$$('#non-shadow-element')[0].attachShadow({ mode: 'open' })
+        }
+      })
 
       cy.get('#non-shadow-element').shadow()
       .then(($roots) => {

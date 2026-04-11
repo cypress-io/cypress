@@ -1,7 +1,5 @@
 import { assertLogLength } from '../../../support/utils'
 
-const { _ } = Cypress
-
 describe('src/cy/commands/querying', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -43,9 +41,13 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$(':text:first').addClass('focused').focus()
-        }))
+        let afterCount1 = 0
+
+        cy.on('command:retry', (...args) => {
+          if (++afterCount1 >= 2) {
+            cy.$$(':text:first').addClass('focused').focus()
+          }
+        })
 
         cy.focused().should('have.class', 'focused').then(function () {
           const { lastLog } = this
@@ -61,11 +63,15 @@ describe('src/cy/commands/querying', () => {
       it('retries on an elements value', () => {
         const $input = cy.$$('input:first')
 
-        cy.on('command:retry', _.after(2, () => {
-          $input.val('1234')
+        let afterCount2 = 0
 
-          $input.get(0).focus()
-        }))
+        cy.on('command:retry', (...args) => {
+          if (++afterCount2 >= 2) {
+            $input.val('1234')
+
+            $input.get(0).focus()
+          }
+        })
 
         cy.focused().should('have.value', '1234').then(function () {
           const { lastLog } = this

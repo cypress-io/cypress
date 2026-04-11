@@ -299,7 +299,6 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
   })
 
   context('#consoleProps', () => {
-    const { _ } = Cypress
     let logs: Map<string, any>
 
     beforeEach(() => {
@@ -556,7 +555,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
         expect(mouseEventsTable.data).to.be.a('object')
         expect(KeyboardEventsTable.data).to.be.a('object')
 
-        _.forEach(mouseEventsTable.data, (datum) => {
+        mouseEventsTable.data.forEach((datum) => {
           expect(datum).to.have.property('Active Modifiers').that.equals(null)
           expect(datum).to.have.property('Event Type').that.is.oneOf(['pointerover', 'mouseover', 'pointermove', 'mousemove', 'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
           expect(datum).to.have.property('Prevented Default').that.equals(null)
@@ -564,7 +563,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
           expect(datum).to.have.property('Target Element').that.deep.equals(consoleProps.props['Applied To'])
         })
 
-        _.forEach(KeyboardEventsTable.data, (datum) => {
+        KeyboardEventsTable.data.forEach((datum) => {
           expect(datum).to.have.property('Active Modifiers').that.equals(null)
           expect(datum).to.have.property('Events Fired').that.equals('keydown, keypress, beforeinput, textInput, input, keyup')
           expect(datum).to.have.property('Prevented Default').that.equals(null)

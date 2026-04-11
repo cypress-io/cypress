@@ -66,7 +66,7 @@ describe('<ConfigCode />', () => {
         }} />
       </div>))
 
-      Cypress._.each(arrayTest, (val) => {
+      arrayTest.forEach((val) => {
         const valElement = cy.findByText(`'${val}',`)
 
         valElement.realHover()
@@ -110,7 +110,7 @@ describe('<ConfigCode />', () => {
         }} />
       </div>))
 
-      Cypress._.each(Object.values(objectTest), (value) => {
+      Object.values(objectTest).forEach((value) => {
         const valElement = cy.findByText(`'${value}',`)
 
         valElement.realHover()

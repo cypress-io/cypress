@@ -1,6 +1,4 @@
 const { assertLogLength } = require('../../support/utils')
-const { _ } = Cypress
-
 describe('src/cy/commands/location', () => {
   beforeEach(() => {
     cy.visit('/fixtures/generic.html')
@@ -14,7 +12,7 @@ describe('src/cy/commands/location', () => {
     })
 
     it('eventually resolves', () => {
-      _.delay(() => {
+      setTimeout(() => {
         const win = cy.state('window')
 
         win.location.href = '/foo/bar/baz.html'
@@ -55,11 +53,17 @@ describe('src/cy/commands/location', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.on('command:retry', _.after(2, _.once(() => {
-          const win = cy.state('window')
+        let __afterCount1 = 0
+        let __onceCalled1 = false
 
-          win.location.href = '/foo/bar/baz.html'
-        })))
+        cy.on('command:retry', () => {
+          if (++__afterCount1 >= 2 && !__onceCalled1) {
+            __onceCalled1 = true
+            const win = cy.state('window')
+
+            win.location.href = '/foo/bar/baz.html'
+          }
+        })
 
         cy.url().should('match', /baz/).then(function () {
           const { lastLog } = this
@@ -151,7 +155,7 @@ describe('src/cy/commands/location', () => {
 
           const { lastLog } = this
 
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(lastLog.get(key)).to.deep.eq(value)
           })
         })
@@ -211,7 +215,7 @@ describe('src/cy/commands/location', () => {
     })
 
     it('eventually resolves', () => {
-      _.delay(() => {
+      setTimeout(() => {
         const win = cy.state('window')
 
         win.location.hash = 'users/1'
@@ -232,11 +236,15 @@ describe('src/cy/commands/location', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.on('command:retry', _.after(2, () => {
-          const win = cy.state('window')
+        let __afterCount2 = 0
 
-          win.location.hash = 'users/1'
-        }))
+        cy.on('command:retry', () => {
+          if (++__afterCount2 >= 2) {
+            const win = cy.state('window')
+
+            win.location.hash = 'users/1'
+          }
+        })
 
         cy.hash().should('match', /users/).then(function () {
           const { lastLog } = this
@@ -328,7 +336,7 @@ describe('src/cy/commands/location', () => {
 
           const { lastLog } = this
 
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(lastLog.get(key)).to.deep.eq(value)
           })
         })
@@ -403,7 +411,7 @@ describe('src/cy/commands/location', () => {
     })
 
     it('eventually resolves', () => {
-      _.delay(() => {
+      setTimeout(() => {
         const win = cy.state('window')
 
         win.location.pathname = 'users/1'
@@ -440,11 +448,17 @@ describe('src/cy/commands/location', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.on('command:retry', _.after(2, _.once(() => {
-          const win = cy.state('window')
+        let __afterCount3 = 0
+        let __onceCalled2 = false
 
-          win.location.pathname = 'users/1'
-        })))
+        cy.on('command:retry', () => {
+          if (++__afterCount3 >= 2 && !__onceCalled2) {
+            __onceCalled2 = true
+            const win = cy.state('window')
+
+            win.location.pathname = 'users/1'
+          }
+        })
 
         cy.location('pathname').should('match', /users/).then(function () {
           const { lastLog } = this
@@ -602,7 +616,7 @@ describe('src/cy/commands/location', () => {
 
           const { lastLog } = this
 
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(lastLog.get(key)).to.deep.eq(value)
           })
         })
@@ -617,7 +631,7 @@ describe('src/cy/commands/location', () => {
 
           const { lastLog } = this
 
-          expect(_.pick(lastLog.attributes, ['name', 'message'])).to.eql(obj)
+          expect({ name: lastLog.attributes.name, message: lastLog.attributes.message }).to.eql(obj)
         })
       })
 
@@ -625,11 +639,11 @@ describe('src/cy/commands/location', () => {
         cy.location().then(function () {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
-          expect(_.keys(consoleProps)).to.deep.eq(['name', 'type', 'props'])
+          expect(Object.keys(consoleProps)).to.deep.eq(['name', 'type', 'props'])
           expect(consoleProps.name).to.eq('location')
           expect(consoleProps.type).to.eq('command')
 
-          expect(_.keys(consoleProps.props.Yielded)).to.deep.eq(['hash', 'host', 'hostname', 'href', 'origin', 'pathname', 'port', 'protocol', 'search', 'searchParams'])
+          expect(Object.keys(consoleProps.props.Yielded)).to.deep.eq(['hash', 'host', 'hostname', 'href', 'origin', 'pathname', 'port', 'protocol', 'search', 'searchParams'])
         })
       })
     })

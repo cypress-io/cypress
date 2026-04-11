@@ -608,7 +608,7 @@ function validateExternalLink (subject, options: ValidateExternalLinkOptions | s
   let name: string | undefined
   let href: string
 
-  if (Cypress._.isString(options)) {
+  if (typeof options === 'string') {
     name = href = options
   } else {
     ({ name, href } = options)

@@ -1,7 +1,5 @@
 import { assertLogLength } from '../../support/utils'
 
-const { _ } = Cypress
-
 describe('src/cy/commands/agents', () => {
   context('.stub', () => {
     it('synchronously returns stub', () => {
@@ -295,15 +293,19 @@ describe('src/cy/commands/agents', () => {
         })
 
         it('retries until assertions pass', function () {
-          cy.on('command:retry', _.after(2, () => {
-            this.myStub('foo')
-          }))
+          let __afterCount1 = 0
+
+          cy.on('command:retry', (...args) => {
+            if (++__afterCount1 >= 2) {
+              this.myStub('foo')
+            }
+          })
 
           cy.get('@myStub').should('be.calledWith', 'foo')
         })
 
         describe('errors', () => {
-          _.each([null, undefined, {}, [], 123], (value) => {
+          ;[null, undefined, {}, [], 123].forEach((value) => {
             it(`throws when passed: ${value}`, () => {
               expect(() => {
               // @ts-expect-error Testing invalid inputs
@@ -318,7 +320,7 @@ describe('src/cy/commands/agents', () => {
             }).to.throw('`cy.as()` cannot be passed an empty string.')
           })
 
-          _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (reserved) => {
+          ;['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'].forEach((reserved) => {
             it(`throws on a reserved word: ${reserved}`, () => {
               expect(() => {
                 cy.stub().as(reserved)
@@ -373,15 +375,19 @@ describe('src/cy/commands/agents', () => {
         })
 
         it('retries until assertions pass', function () {
-          cy.on('command:retry', _.after(2, () => {
-            this['my.stub']('foo')
-          }))
+          let __afterCount2 = 0
+
+          cy.on('command:retry', (...args) => {
+            if (++__afterCount2 >= 2) {
+              this['my.stub']('foo')
+            }
+          })
 
           cy.get('@my.stub').should('be.calledWith', 'foo')
         })
 
         describe('errors', () => {
-          _.each([null, undefined, {}, [], 123], (value) => {
+          ;[null, undefined, {}, [], 123].forEach((value) => {
             it(`throws when passed: ${value}`, () => {
               expect(() => {
                 // @ts-expect-error Testing invalid inputs
@@ -396,7 +402,7 @@ describe('src/cy/commands/agents', () => {
             }).to.throw('`cy.as()` cannot be passed an empty string.')
           })
 
-          _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (reserved) => {
+          ;['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'].forEach((reserved) => {
             it(`throws on a reserved word: ${reserved}`, () => {
               expect(() => {
                 cy.stub().as(reserved)

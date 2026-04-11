@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { _, $ } = Cypress
+const { $ } = Cypress
 
 describe('src/cy/commands/window', () => {
   context('#window', () => {
@@ -28,9 +28,13 @@ describe('src/cy/commands/window', () => {
       })
 
       it('eventually passes the assertion', function () {
-        cy.on('command:retry', _.after(2, () => {
-          this.remoteWindow.foo = 'bar'
-        }))
+        let afterCount1 = 0
+
+        cy.on('command:retry', () => {
+          if (++afterCount1 >= 2) {
+            this.remoteWindow.foo = 'bar'
+          }
+        })
 
         cy.window().should('have.property', 'foo', 'bar').then(function () {
           const { lastLog } = this
@@ -42,9 +46,13 @@ describe('src/cy/commands/window', () => {
       })
 
       it('eventually fails the assertion', function (done) {
-        cy.on('command:retry', _.after(2, () => {
-          this.remoteWindow.foo = 'foo'
-        }))
+        let afterCount2 = 0
+
+        cy.on('command:retry', () => {
+          if (++afterCount2 >= 2) {
+            this.remoteWindow.foo = 'foo'
+          }
+        })
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -186,7 +194,7 @@ describe('src/cy/commands/window', () => {
 
           const { lastLog } = this
 
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(lastLog.get(key)).to.deep.eq(value)
           })
         })
@@ -232,9 +240,13 @@ describe('src/cy/commands/window', () => {
       })
 
       it('eventually passes the assertion', function () {
-        cy.on('command:retry', _.after(2, () => {
-          this.remoteDocument.foo = 'bar'
-        }))
+        let afterCount3 = 0
+
+        cy.on('command:retry', () => {
+          if (++afterCount3 >= 2) {
+            this.remoteDocument.foo = 'bar'
+          }
+        })
 
         cy.document().should('have.property', 'foo', 'bar').then(function () {
           const { lastLog } = this
@@ -246,9 +258,13 @@ describe('src/cy/commands/window', () => {
       })
 
       it('eventually fails the assertion', function (done) {
-        cy.on('command:retry', _.after(2, () => {
-          this.remoteDocument.foo = 'foo'
-        }))
+        let afterCount4 = 0
+
+        cy.on('command:retry', () => {
+          if (++afterCount4 >= 2) {
+            this.remoteDocument.foo = 'foo'
+          }
+        })
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -390,7 +406,7 @@ describe('src/cy/commands/window', () => {
 
           const { lastLog } = this
 
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(lastLog.get(key)).to.deep.eq(value)
           })
         })
@@ -432,9 +448,12 @@ describe('src/cy/commands/window', () => {
     it('retries finding the title', () => {
       cy.$$('title').remove()
 
-      const retry = _.after(2, () => {
-        cy.$$('head').append($('<title>waiting on title</title>'))
-      })
+      let retryTitleCount = 0
+      const retry = () => {
+        if (++retryTitleCount >= 2) {
+          cy.$$('head').append($('<title>waiting on title</title>'))
+        }
+      }
 
       cy.on('command:retry', retry)
 
@@ -442,7 +461,7 @@ describe('src/cy/commands/window', () => {
     })
 
     it('eventually resolves', () => {
-      _.delay(() => {
+      setTimeout(() => {
         cy.$$('title').text('about page')
       }, 100)
 
@@ -596,7 +615,7 @@ describe('src/cy/commands/window', () => {
 
           const { lastLog } = this
 
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(lastLog.get(key)).to.deep.eq(value)
           })
         })
@@ -982,7 +1001,7 @@ describe('src/cy/commands/window', () => {
         cy.viewport('iphone-4', 'foobar')
       })
 
-      _.each([{}, [], NaN, Infinity, null, undefined], (val) => {
+      ;[{}, [], NaN, Infinity, null, undefined].forEach((val) => {
         it(`throws when passed the invalid: '${val}' as width`, function (done) {
           const logs = []
 

@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { _, Promise } = Cypress
+const { Promise } = Cypress
 
 describe('src/cy/commands/exec', () => {
   const okResponse = { exitCode: 0 }
@@ -356,8 +356,8 @@ describe('src/cy/commands/exec', () => {
         it('truncates the stdout and stderr in the error message', (done) => {
           Cypress.backend.resolves({
             exitCode: 1,
-            stderr: `${_.range(200).join()}stderr should be truncated`,
-            stdout: `${_.range(200).join()}stdout should be truncated`,
+            stderr: `${Array.from({ length: 200 }, (_, i) => i).join()}stderr should be truncated`,
+            stdout: `${Array.from({ length: 200 }, (_, i) => i).join()}stdout should be truncated`,
           })
 
           cy.on('fail', (err) => {

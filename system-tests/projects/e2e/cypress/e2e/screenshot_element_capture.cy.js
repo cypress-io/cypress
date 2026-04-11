@@ -21,6 +21,6 @@ it('takes consistent element captures', () => {
       })
     }
 
-    Cypress._.times(10, fn)
+    Array.from({ length: 10 }, () => fn())
   })
 })

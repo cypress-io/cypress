@@ -1,7 +1,5 @@
-const { _ } = Cypress
-
 const getQueueNames = () => {
-  return _.map(cy.queue, 'name')
+  return cy.queue.get().map((item) => item.get('name'))
 }
 
 function allowTsModuleStubbing () {

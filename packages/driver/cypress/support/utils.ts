@@ -1,4 +1,4 @@
-const { $, _, Promise } = Cypress
+const { $, Promise } = Cypress
 
 export const getCommandLogWithText = (command, type?) => {
   if (!type) {
@@ -16,7 +16,7 @@ export const getCommandLogWithText = (command, type?) => {
 // This work around is super hacky to get the appState from the Test Mobx Observable Model
 // this is needed to pause the runner to assert on the test
 export const findAppStateFromTest = function (dom) {
-  let key = _.keys(dom).find((key) => key.startsWith('__reactFiber')) as string
+  let key = Object.keys(dom).find((key) => key.startsWith('__reactFiber')) as string
   let internalInstance = dom[key]
 
   if (internalInstance == null) return null
@@ -89,7 +89,7 @@ export const findCrossOriginLogs = (consolePropCommand, logMap, matchingOrigin) 
 
 export const attachListeners = (listenerArr) => {
   return (els) => {
-    _.each(els, (el, elName) => {
+    Object.entries(els).forEach(([elName, el]: [string, any]) => {
       return listenerArr.forEach((evtName) => {
         el.on(evtName, cy.stub().as(`${elName}:${evtName}`))
       })
@@ -101,7 +101,7 @@ const getAllFn = (...aliases) => {
   let getFns
 
   if (aliases.length > 1) {
-    const aliasArray = _.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')
+    const aliasArray = Array.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')
 
     getFns = aliasArray.map((alias) => cy.now('get', `@${aliases[0]}:${alias}`))
   } else {
@@ -157,7 +157,7 @@ export const isWebKit = Cypress.isBrowser('webkit')
 // due to changing browser versions implementing
 // this differently
 export const trimInnerText = ($el) => {
-  return _.trimEnd($el.get(0).innerText, '\n')
+  return $el.get(0).innerText.replace(/\n+$/, '')
 }
 
 export const makeRequestForCookieBehaviorTests = (
@@ -168,7 +168,7 @@ export const makeRequestForCookieBehaviorTests = (
 ) => {
   if (client === 'fetch') {
     // if a boolean is specified, make sure the default is applied
-    credentials = Cypress._.isBoolean(credentials) ? 'same-origin' : credentials
+    credentials = typeof credentials === 'boolean' ? 'same-origin' : credentials
 
     return win.fetch(url, { credentials })
   }
@@ -177,7 +177,7 @@ export const makeRequestForCookieBehaviorTests = (
     let xhr = new XMLHttpRequest()
 
     xhr.open('GET', url)
-    xhr.withCredentials = Cypress._.isBoolean(credentials) ? credentials : false
+    xhr.withCredentials = typeof credentials === 'boolean' ? credentials : false
     xhr.onload = function () {
       resolve(xhr.response)
     }

@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../../support/utils'
 
-const { _, $ } = Cypress
+const { $ } = Cypress
 
 describe('src/cy/commands/actions/trigger', () => {
   beforeEach(function () {
@@ -14,9 +14,9 @@ describe('src/cy/commands/actions/trigger', () => {
       $btn.on('mouseover', (e) => {
         const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-        const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'target', 'type')
+        const { bubbles, cancelable, target, type } = e.originalEvent
 
-        expect(obj).to.deep.eq({
+        expect({ bubbles, cancelable, target, type }).to.deep.eq({
           bubbles: true,
           cancelable: true,
           target: $btn.get(0),
@@ -81,7 +81,8 @@ describe('src/cy/commands/actions/trigger', () => {
       }
 
       cy.$$('button:first').on('mouseover', (e) => {
-        const eventOptions = _.pick(e.originalEvent, 'clientX', 'clientY', 'pageX', 'pageY', 'foo')
+        const { clientX, clientY, pageX, pageY, foo } = e.originalEvent
+        const eventOptions = { clientX, clientY, pageX, pageY, foo }
 
         expect(eventOptions).to.eql(options)
 
@@ -334,9 +335,13 @@ describe('src/cy/commands/actions/trigger', () => {
           return scrolled.push(type)
         })
 
-        cy.on('command:retry', _.after(3, () => {
-          $span.hide()
-        }))
+        let retryCount1 = 0
+
+        cy.on('command:retry', () => {
+          if (++retryCount1 >= 3) {
+            $span.hide()
+          }
+        })
 
         cy.get('#button-covered-in-span').trigger('mousedown').then(() => {
           expect(retries).to.be.gt(1)
@@ -528,9 +533,13 @@ describe('src/cy/commands/actions/trigger', () => {
       it('waits until element becomes visible', () => {
         const $btn = cy.$$('#button').hide()
 
-        cy.on('command:retry', _.after(3, () => {
-          $btn.show()
-        }))
+        let retryCount2 = 0
+
+        cy.on('command:retry', () => {
+          if (++retryCount2 >= 3) {
+            $btn.show()
+          }
+        })
 
         cy.get('#button').trigger('mouseover').then(() => {
           expect(retries).to.be.gt(1)
@@ -547,10 +556,14 @@ describe('src/cy/commands/actions/trigger', () => {
           mouseovers += 1
         })
 
-        cy.on('command:retry', _.after(3, () => {
-          $btn.prop('disabled', false)
-          retried = true
-        }))
+        let retryCount3 = 0
+
+        cy.on('command:retry', () => {
+          if (++retryCount3 >= 3) {
+            $btn.prop('disabled', false)
+            retried = true
+          }
+        })
 
         cy.get('#button').trigger('mouseover').then(() => {
           expect(mouseovers).to.eq(1)
@@ -736,9 +749,14 @@ describe('src/cy/commands/actions/trigger', () => {
       it('eventually passes the assertion', () => {
         const $btn = cy.$$('button:first')
 
-        cy.on('command:retry', _.once(() => {
-          $btn.addClass('moused-over')
-        }))
+        let onceCalled1 = false
+
+        cy.on('command:retry', () => {
+          if (!onceCalled1) {
+            onceCalled1 = true
+            $btn.addClass('moused-over')
+          }
+        })
 
         cy.get('button:first').trigger('mouseover').should('have.class', 'moused-over').then(function () {
           const { lastLog } = this

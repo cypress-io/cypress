@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../../support/utils'
 
-const { _, Promise, $ } = Cypress
+const { Promise, $ } = Cypress
 
 describe('src/cy/commands/actions/check', () => {
   beforeEach(function () {
@@ -102,14 +102,17 @@ describe('src/cy/commands/actions/check', () => {
     it('requeries if the DOM rerenders during actionability', () => {
       cy.$$('[name=colors]').first().prop('disabled', true)
 
-      const listener = _.after(3, () => {
-        cy.$$('[name=colors]').first().prop('disabled', false)
+      let retryCount1 = 0
+      const listener = () => {
+        if (++retryCount1 >= 3) {
+          cy.$$('[name=colors]').first().prop('disabled', false)
 
-        const parent = cy.$$('[name=colors]').parent()
+          const parent = cy.$$('[name=colors]').parent()
 
-        parent.replaceWith(parent[0].outerHTML)
-        cy.off('command:retry', listener)
-      })
+          parent.replaceWith(parent[0].outerHTML)
+          cy.off('command:retry', listener)
+        }
+      }
 
       cy.on('command:retry', listener)
 
@@ -202,12 +205,17 @@ describe('src/cy/commands/actions/check', () => {
       .css('background-color', 'yellow')
       .prependTo($('body'))
 
-      cy.on('command:retry', _.once((options) => {
-        expect(options.timeout).to.eq(1000)
-        expect(options.interval).to.eq(60)
+      let onceCalled1 = false
 
-        done()
-      }))
+      cy.on('command:retry', (options) => {
+        if (!onceCalled1) {
+          onceCalled1 = true
+          expect(options.timeout).to.eq(1000)
+          expect(options.interval).to.eq(60)
+
+          done()
+        }
+      })
 
       // @ts-expect-error: TODO: Internal types for check should accept interval
       cy.get('#checkbox-covered-in-span').check({ timeout: 1000, interval: 60 })
@@ -318,10 +326,14 @@ describe('src/cy/commands/actions/check', () => {
         clicks += 1
       })
 
-      cy.on('command:retry', _.after(3, () => {
-        chk.prop('disabled', false)
-        retried = true
-      }))
+      let retryCount2 = 0
+
+      cy.on('command:retry', () => {
+        if (++retryCount2 >= 3) {
+          chk.prop('disabled', false)
+          retried = true
+        }
+      })
 
       cy.get(':checkbox:first').check().then(() => {
         expect(clicks).to.eq(1)
@@ -377,7 +389,7 @@ describe('src/cy/commands/actions/check', () => {
 
       it('eventually passes the assertion', () => {
         $(':checkbox:first').click(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('checked')
           }, 100)
         })
@@ -393,7 +405,7 @@ describe('src/cy/commands/actions/check', () => {
 
       it('eventually passes the assertion on multiple :checkboxes', () => {
         $(':checkbox').click(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('checked')
           }, 100)
         })
@@ -811,7 +823,7 @@ describe('src/cy/commands/actions/check', () => {
           expect(consoleProps.props['Applied To']).to.eq(lastLog.get('$el').get(0))
           expect(consoleProps.props.Elements).to.eq(1)
           expect(consoleProps.props.Coords).to.deep.eq(
-            _.pick(fromElWindow, 'x', 'y'),
+            { x: fromElWindow.x, y: fromElWindow.y },
           )
 
           expect(consoleProps).to.have.property('table')
@@ -1055,10 +1067,14 @@ describe('src/cy/commands/actions/check', () => {
         clicks += 1
       })
 
-      cy.on('command:retry', _.after(3, () => {
-        chk.prop('disabled', false)
-        retried = true
-      }))
+      let retryCount3 = 0
+
+      cy.on('command:retry', () => {
+        if (++retryCount3 >= 3) {
+          chk.prop('disabled', false)
+          retried = true
+        }
+      })
 
       cy.get(':checkbox:first').uncheck().then(() => {
         expect(clicks).to.eq(1)
@@ -1079,7 +1095,7 @@ describe('src/cy/commands/actions/check', () => {
 
       it('eventually passes the assertion', () => {
         $(':checkbox:first').prop('checked', true).click(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('unchecked')
           }, 100)
         })
@@ -1238,7 +1254,7 @@ describe('src/cy/commands/actions/check', () => {
 
       it('eventually passes the assertion on multiple :checkboxs', () => {
         $(':checkbox').prop('checked', true).click(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('unchecked')
           }, 100)
         })
@@ -1430,7 +1446,7 @@ describe('src/cy/commands/actions/check', () => {
           expect(consoleProps.props['Applied To']).to.eq(lastLog.get('$el').get(0))
           expect(consoleProps.props.Elements).to.eq(1)
           expect(consoleProps.props.Coords).to.deep.eq(
-            _.pick(fromElWindow, 'x', 'y'),
+            { x: fromElWindow.x, y: fromElWindow.y },
           )
 
           expect(consoleProps).to.have.property('table')

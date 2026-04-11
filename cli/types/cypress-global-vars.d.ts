@@ -16,7 +16,6 @@ declare var cy: Cypress.cy & CyEventEmitter
 ```
 Cypress.config("pageLoadTimeout") // => 60000
 Cypress.version // => "1.4.0"
-Cypress._ // => Lodash _
 ```
  */
 declare var Cypress: Cypress.Cypress & CyEventEmitter

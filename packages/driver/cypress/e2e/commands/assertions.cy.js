@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { $, _ } = Cypress
+const { $ } = Cypress
 
 const captureCommands = () => {
   const commands = []
@@ -31,7 +31,7 @@ const captureCommands = () => {
     commands[commands.length - 1].snapshots++
   })
 
-  return () => _.cloneDeep(commands)
+  return () => structuredClone(commands)
 }
 
 describe('src/cy/commands/assertions', () => {
@@ -93,25 +93,41 @@ describe('src/cy/commands/assertions', () => {
     })
 
     it('skips over utility commands', () => {
-      cy.on('command:retry', _.after(2, () => {
-        cy.$$('div:first').addClass('foo')
-      }))
+      let __afterCount1 = 0
 
-      cy.on('command:retry', _.after(4, () => {
-        cy.$$('div:first').attr('id', 'bar')
-      }))
+      cy.on('command:retry', () => {
+        if (++__afterCount1 >= 2) {
+          cy.$$('div:first').addClass('foo')
+        }
+      })
+
+      let __afterCount2 = 0
+
+      cy.on('command:retry', () => {
+        if (++__afterCount2 >= 4) {
+          cy.$$('div:first').attr('id', 'bar')
+        }
+      })
 
       cy.get('div:first').should('have.class', 'foo').debug().and('have.id', 'bar')
     })
 
     it('skips over aliasing', () => {
-      cy.on('command:retry', _.after(2, () => {
-        cy.$$('div:first').addClass('foo')
-      }))
+      let __afterCount3 = 0
 
-      cy.on('command:retry', _.after(4, () => {
-        cy.$$('div:first').attr('id', 'bar')
-      }))
+      cy.on('command:retry', () => {
+        if (++__afterCount3 >= 2) {
+          cy.$$('div:first').addClass('foo')
+        }
+      })
+
+      let __afterCount4 = 0
+
+      cy.on('command:retry', () => {
+        if (++__afterCount4 >= 4) {
+          cy.$$('div:first').attr('id', 'bar')
+        }
+      })
 
       cy.get('div:first').as('div').should('have.class', 'foo').debug().and('have.id', 'bar')
     })
@@ -193,10 +209,13 @@ describe('src/cy/commands/assertions', () => {
     describe('function argument', () => {
       it('waits until function is true', () => {
         const button = cy.$$('button:first')
+        let __afterCount5 = 0
 
-        cy.on('command:retry', _.after(2, () => {
-          button.addClass('ready')
-        }))
+        cy.on('command:retry', () => {
+          if (++__afterCount5 >= 2) {
+            button.addClass('ready')
+          }
+        })
 
         cy.get('button:first').should(($button) => {
           expect($button).to.have.class('ready')
@@ -218,10 +237,13 @@ describe('src/cy/commands/assertions', () => {
 
       it('works with regular objects', () => {
         const obj = {}
+        let __afterCount6 = 0
 
-        cy.on('command:retry', _.after(2, () => {
-          obj.foo = 'bar'
-        }))
+        cy.on('command:retry', () => {
+          if (++__afterCount6 >= 2) {
+            obj.foo = 'bar'
+          }
+        })
 
         cy.wrap(obj).should((o) => {
           expect(o).to.have.property('foo').and.eq('bar')
@@ -232,12 +254,12 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('logs two assertions', () => {
-        _.delay(() => {
+        setTimeout(() => {
           cy.$$('body').addClass('foo')
         }
         , Math.random() * 300)
 
-        _.delay(() => {
+        setTimeout(() => {
           cy.$$('body').prop('id', 'bar')
         }
         , Math.random() * 300)
@@ -261,12 +283,12 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('logs assertions as children even if subject is different', () => {
-        _.delay(() => {
+        setTimeout(() => {
           cy.$$('body').addClass('foo')
         }
         , Math.random() * 300)
 
-        _.delay(() => {
+        setTimeout(() => {
           cy.$$('body').prop('id', 'bar')
         }
         , Math.random() * 300)
@@ -279,7 +301,7 @@ describe('src/cy/commands/assertions', () => {
         }).then(function () {
           cy.$$('body').removeClass('foo').removeAttr('id')
 
-          const types = _.map(this.logs, (l) => l.get('type'))
+          const types = this.logs.map((l) => l.get('type'))
 
           expect(types).to.deep.eq(['parent', 'child', 'child'])
 
@@ -349,10 +371,15 @@ describe('src/cy/commands/assertions', () => {
     describe('not.exist', () => {
       it('resolves eventually not exist', () => {
         const button = cy.$$('button:first')
+        let __afterCount7 = 0
+        let __onceCalled1 = false
 
-        cy.on('command:retry', _.after(3, _.once(() => {
-          button.remove()
-        })))
+        cy.on('command:retry', () => {
+          if (++__afterCount7 >= 3 && !__onceCalled1) {
+            __onceCalled1 = true
+            button.remove()
+          }
+        })
 
         cy.get('button:first').click().should('not.exist')
 
@@ -478,9 +505,13 @@ describe('src/cy/commands/assertions', () => {
 
     describe('have.class', () => {
       it('snapshots and ends the assertion after retrying', () => {
-        cy.on('command:retry', _.after(3, () => {
-          cy.$$('#foo').addClass('active')
-        }))
+        let __afterCount8 = 0
+
+        cy.on('command:retry', () => {
+          if (++__afterCount8 >= 3) {
+            cy.$$('#foo').addClass('active')
+          }
+        })
 
         cy.contains('foo').should('have.class', 'active').then(function () {
           const { lastLog } = this
@@ -496,10 +527,13 @@ describe('src/cy/commands/assertions', () => {
 
       it('retries assertion until true', () => {
         const button = cy.$$('button:first')
+        let __afterCount9 = 0
 
-        const retry = _.after(3, () => {
-          button.addClass('new-class')
-        })
+        const retry = () => {
+          if (++__afterCount9 >= 3) {
+            button.addClass('new-class')
+          }
+        }
 
         cy.on('command:retry', retry)
 
@@ -675,12 +709,18 @@ describe('src/cy/commands/assertions', () => {
 
         const button = cy.$$('button:first')
 
-        cy.on('command:retry', _.after(2, _.once(() => {
-          button.addClass('foo').remove()
-        })))
+        let __afterCount10 = 0
+        let __onceCalled2 = false
+
+        cy.on('command:retry', () => {
+          if (++__afterCount10 >= 2 && !__onceCalled2) {
+            __onceCalled2 = true
+            button.addClass('foo').remove()
+          }
+        })
 
         cy.on('fail', (err) => {
-          const names = _.invokeMap(this.logs, 'get', 'name')
+          const names = this.logs.map((x) => x.get('name'))
 
           // should is present here due to the retry
           expect(names).to.deep.eq(['get', 'click', 'assert'])
@@ -1611,9 +1651,13 @@ describe('src/cy/commands/assertions', () => {
 
         const { length } = buttons
 
-        cy.on('command:retry', _.after(2, () => {
-          cy.$$('button:last').remove()
-        }))
+        let __afterCount11 = 0
+
+        cy.on('command:retry', () => {
+          if (++__afterCount11 >= 2) {
+            cy.$$('button:last').remove()
+          }
+        })
 
         cy.wrap(buttons).should('have.length', length - 1)
       })

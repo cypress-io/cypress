@@ -1,5 +1,4 @@
 import CryptoJS from 'crypto-js'
-import type { TemplateExecutor } from 'lodash'
 
 // NOTE: in order to run these tests, the following config flags need to be set
 //    experimentalModifyObstructiveThirdPartyCode=true
@@ -16,7 +15,77 @@ describe('Integrity Preservation', { browser: '!webkit' }, () => {
   const availableDigests = ['SHA256', 'SHA384', 'SHA512']
   const integrityJSDigests: {[key: string]: string} = {}
   const integrityCSSDigests: {[key: string]: string} = {}
-  let templateExecutor: TemplateExecutor
+
+  const renderTemplate = (data: {
+    staticScriptInjection?: boolean
+    dynamicScriptInjection?: boolean
+    staticLinkInjection?: boolean
+    dynamicLinkInjection?: boolean
+    integrityValue: string
+  }) => {
+    let html = `<!DOCTYPE html>
+<!-- NOTE: This is an EJS template used by the origin/integrity.cy.ts to test regex rewriting integrity -->
+<!-- using this fixture without compiling and rendering the template will cause errors -->
+<html>
+  <head>
+    <title>DOM Fixture</title>
+  </head>
+  <body>
+    <h1 data-cy="integrity-header">Integrity Scripts</h1>
+  </body>`
+
+    if (data && data.staticLinkInjection) {
+      html += `
+    <!-- static link injection -->
+    <!-- the actual integrity of the file is: ${data.integrityValue} -->
+    <link id="static-set-integrity-link" rel="stylesheet" href="integrity.css" integrity="${data.integrityValue}">`
+    }
+
+    if (data && data.staticScriptInjection) {
+      html += `
+    <!-- static script injection -->
+    <!-- the actual integrity of the file is: ${data.integrityValue} -->
+    <script id="static-set-integrity-script" type="text/javascript" src="integrity.js" data-script-type="static" crossorigin="anonymous" integrity="${data.integrityValue}"></script>`
+    }
+
+    if (data && data.dynamicScriptInjection) {
+      html += `
+    <!-- dynamic script injection-->
+    <script type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('script')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-script'
+      dynamicIntegrityScript.type = 'text/javascript'
+      dynamicIntegrityScript.src = 'integrity.js'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      dynamicIntegrityScript.setAttribute('data-script-type', 'dynamic')
+      // the actual integrity of the file is: ${data.integrityValue}
+      dynamicIntegrityScript.setAttribute('integrity', "${data.integrityValue}")
+      ${''}
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>`
+    }
+
+    if (data && data.dynamicLinkInjection) {
+      html += `
+    <!-- dynamic link injection -->
+    <script id="dynamic-link-injection" type="text/javascript">
+      const dynamicIntegrityScript = document.createElement('link')
+      dynamicIntegrityScript.id = 'dynamic-set-integrity-link'
+      dynamicIntegrityScript.rel = "stylesheet"
+      dynamicIntegrityScript.href = 'integrity.css'
+      dynamicIntegrityScript.setAttribute('crossorigin', "anonymous")
+      // the actual integrity of the file is: ${data.integrityValue}
+      dynamicIntegrityScript.setAttribute('integrity', "${data.integrityValue}")
+      ${''}
+      document.querySelector('head').appendChild(dynamicIntegrityScript)
+    </script>`
+    }
+
+    html += `
+</html>`
+
+    return html
+  }
 
   before(() => {
     // Before running our tests, we need to build out digests to inject into our HTML ejs template
@@ -41,17 +110,13 @@ describe('Integrity Preservation', { browser: '!webkit' }, () => {
         integrityCSSDigests[algo] = stringifiedBase64
       })
     })
-
-    cy.fixture('scripts-with-integrity').then((integrityTemplate) => {
-      templateExecutor = Cypress._.template(integrityTemplate, { variable: 'data' })
-    })
   })
 
   describe('<script> tags', () => {
     availableDigests.forEach((algo) => {
       it(`preserves integrity with static <script> in HTML with ${algo} integrity.`, () => {
         cy.then(() => {
-          const compiledTemplate = templateExecutor({
+          const compiledTemplate = renderTemplate({
             staticScriptInjection: true,
             integrityValue: `${algo.toLowerCase()}-${integrityJSDigests[algo]}`,
           })
@@ -74,7 +139,7 @@ describe('Integrity Preservation', { browser: '!webkit' }, () => {
 
       it(`preserves integrity with dynamically added <script> in HTML with ${algo} integrity.`, () => {
         cy.then(() => {
-          const compiledTemplate = templateExecutor({
+          const compiledTemplate = renderTemplate({
             dynamicScriptInjection: true,
             integrityValue: `${algo.toLowerCase()}-${integrityJSDigests[algo]}`,
           })
@@ -101,7 +166,7 @@ describe('Integrity Preservation', { browser: '!webkit' }, () => {
     availableDigests.forEach((algo) => {
       it(`preserves integrity with static <link> in HTML with ${algo} integrity.`, () => {
         cy.then(() => {
-          const compiledTemplate = templateExecutor({
+          const compiledTemplate = renderTemplate({
             staticLinkInjection: true,
             integrityValue: `${algo.toLowerCase()}-${integrityCSSDigests[algo]}`,
           })
@@ -126,7 +191,7 @@ describe('Integrity Preservation', { browser: '!webkit' }, () => {
 
       it(`preserves integrity with dynamically added <link> in HTML with ${algo} integrity.`, () => {
         cy.then(() => {
-          const compiledTemplate = templateExecutor({
+          const compiledTemplate = renderTemplate({
             dynamicLinkInjection: true,
             integrityValue: `${algo.toLowerCase()}-${integrityCSSDigests[algo]}`,
           })

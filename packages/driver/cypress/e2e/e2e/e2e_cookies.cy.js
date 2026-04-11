@@ -1,11 +1,23 @@
-const { _ } = Cypress
+const cloneDeepReplacingExpiry = (obj) => {
+  if (Array.isArray(obj)) {
+    return obj.map((item) => cloneDeepReplacingExpiry(item))
+  }
+
+  if (obj !== null && typeof obj === 'object') {
+    const out = {}
+
+    for (const key of Object.keys(obj)) {
+      out[key] = key === 'expiry' ? 100 : cloneDeepReplacingExpiry(obj[key])
+    }
+
+    return out
+  }
+
+  return obj
+}
 
 const cleanse = (cookies) => {
-  return _.cloneDeepWith(cookies, (v, key) => {
-    if (key === 'expiry') {
-      return 100
-    }
-  })
+  return cloneDeepReplacingExpiry(cookies)
 }
 
 const firefoxDefaultSameSite = Cypress.isBrowser({ family: 'firefox' }) ? { sameSite: 'unspecified' } : {}

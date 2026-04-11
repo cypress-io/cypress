@@ -1,5 +1,5 @@
 import { assertLogLength } from '../../../support/utils'
-const { _, $ } = Cypress
+const { $ } = Cypress
 
 describe('src/cy/commands/actions/type - #type errors', () => {
   beforeEach(() => {
@@ -48,12 +48,12 @@ describe('src/cy/commands/actions/type - #type errors', () => {
       cy.get('input:first').type('a').type('b')
     })
 
-    _.each([
+    ;[
       { id: 'readonly-attr', val: '' },
       { id: 'readonly-empty-str', val: '' },
       { id: 'readonly-readonly', val: 'readonly' },
       { id: 'readonly-str', val: 'abc' },
-    ], (attrs) => {
+    ].forEach((attrs) => {
       it(`throws when readonly ${attrs.val} attr (${attrs.id})`, (done) => {
         cy.get(`#${attrs.id}`).type('foo')
 
@@ -170,7 +170,7 @@ describe('src/cy/commands/actions/type - #type errors', () => {
         assertLogLength(this.logs, 2)
 
         // @ts-expect-error - TODO: Get this to use the internal Keyboard types
-        const allChars = _.keys(Cypress.Keyboard.getKeymap()).join(', ')
+        const allChars = Object.keys(Cypress.Keyboard.getKeymap()).join(', ')
 
         expect(err.message).to.eq(`Special character sequence: \`{bar}\` is not recognized. Available sequences are: \`${allChars}\`
 
@@ -218,8 +218,8 @@ If you want to skip parsing special character sequences and type the text exactl
       .should('have.value', '')
     })
 
-    _.each(['toString', 'toLocaleString', 'hasOwnProperty', 'valueOf',
-      'undefined', 'null', 'true', 'false', 'True', 'False'], (val) => {
+    ;['toString', 'toLocaleString', 'hasOwnProperty', 'valueOf',
+      'undefined', 'null', 'true', 'false', 'True', 'False'].forEach((val) => {
       it(`allows typing reserved Javscript word (${val})`, () => {
         const value = val as string
 
@@ -231,9 +231,9 @@ If you want to skip parsing special character sequences and type the text exactl
     })
 
     describe('naughty strings', () => {
-      _.each(['Ω≈ç√∫˜µ≤≥÷', '2.2250738585072011e-308', '田中さんにあげて下さい',
+      ;['Ω≈ç√∫˜µ≤≥÷', '2.2250738585072011e-308', '田中さんにあげて下さい',
         '<foo val=`bar\' />', '⁰⁴⁵₀₁₂', '🐵 🙈 🙉 🙊',
-        '<script>alert(123)</script>', '$USER'], (val) => {
+        '<script>alert(123)</script>', '$USER'].forEach((val) => {
         it(`allows typing some naughty strings (${val})`, () => {
           cy
           .get(':text:first')
@@ -260,7 +260,7 @@ If you want to skip parsing special character sequences and type the text exactl
     })
 
     describe('throws when trying to type', () => {
-      _.each([NaN, Infinity, [], {}, null, undefined], (val) => {
+      ;[NaN, Infinity, [], {}, null, undefined].forEach((val) => {
         it(`throws when trying to type: ${val}`, function (done) {
           const logs: any[] = []
 

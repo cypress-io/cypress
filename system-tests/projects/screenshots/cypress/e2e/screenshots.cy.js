@@ -41,13 +41,11 @@ describe('taking screenshots', () => {
       throw new Error('this test can only pass if the previous test ran')
     }
 
-    const testFailure = Cypress._.find(onAfterScreenshotResults, {
-      testFailure: true,
-    })
+    const testFailure = onAfterScreenshotResults.find((x) => x.testFailure === true)
 
     expect(testFailure).to.exist
 
-    expect(Cypress._.map(onAfterScreenshotResults, 'name')).to.deep.eq([
+    expect(onAfterScreenshotResults.map((x) => x.name)).to.deep.eq([
       'black', 'red', 'foo/bar/baz', undefined,
     ])
   })
@@ -394,7 +392,7 @@ describe('taking screenshots', () => {
     it('empty test 2', () => { })
   })
 
-  context(`really long test title ${Cypress._.repeat('a', 255)}`, () => {
+  context(`really long test title ${'a'.repeat(255)}`, () => {
     it('takes a screenshot', () => {
       cy.screenshot()
     })

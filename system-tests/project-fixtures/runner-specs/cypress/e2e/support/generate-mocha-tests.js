@@ -1,5 +1,4 @@
 const debug = require('debug')('spec')
-const _ = Cypress._
 
 const evalFn = (win, fn) => {
   return function () {
@@ -8,8 +7,8 @@ const evalFn = (win, fn) => {
 }
 
 const createHooks = (win, hooks = []) => {
-  _.each(hooks, (hook) => {
-    if (_.isString(hook)) {
+  hooks.forEach((hook) => {
+    if (typeof hook === 'string') {
       hook = { type: hook }
     }
 
@@ -40,7 +39,7 @@ const createHooks = (win, hooks = []) => {
           registerAgents(win)
         }
 
-        if (_.isNumber(fail) && fail-- <= 0) {
+        if (typeof fail === 'number' && fail-- <= 0) {
           debug(`hook pass after (${numFailures}) failures: ${type}`)
           win.assert(true, message)
 
@@ -67,8 +66,8 @@ const createHooks = (win, hooks = []) => {
 }
 
 const createTests = (win, tests = []) => {
-  _.each(tests, (test) => {
-    if (_.isString(test)) {
+  tests.forEach((test) => {
+    if (typeof test === 'string') {
       test = { name: test }
     }
 
@@ -105,7 +104,7 @@ const createTests = (win, tests = []) => {
           registerAgents(win)
         }
 
-        if (_.isNumber(fail) && fail-- === 0) {
+        if (typeof fail === 'number' && fail-- === 0) {
           debug(`test pass after retry: ${name}`)
           win.assert(true, name)
 
@@ -140,14 +139,14 @@ const registerAgents = (win) => {
 }
 
 export const createSuites = (win, suites = {}) => {
-  _.each(suites, (obj, suiteName) => {
+  Object.entries(suites).forEach(([suiteName, obj]) => {
     let fn = () => {
       createHooks(win, obj.hooks)
       createTests(win, obj.tests)
       createSuites(win, obj.suites)
     }
 
-    if (_.isFunction(obj)) {
+    if (typeof obj === 'function') {
       fn = evalFn(win, obj)
     }
 

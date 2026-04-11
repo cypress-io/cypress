@@ -1,4 +1,4 @@
-const { _, Location } = Cypress
+const { Location } = Cypress
 
 const urls = {
   blank: 'about:blank',
@@ -402,7 +402,7 @@ describe('src/cypress/location', () => {
     })
 
     describe('localhost, 0.0.0.0, 127.0.0.1', () => {
-      _.each(['localhost', '0.0.0.0', '127.0.0.1'], (host) => {
+      ;['localhost', '0.0.0.0', '127.0.0.1'].forEach((host) => {
         it(`inserts http:// automatically for ${host}`, function () {
           this.url(`${host}:4200`, `http://${host}:4200/`)
         })

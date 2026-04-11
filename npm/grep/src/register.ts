@@ -59,7 +59,7 @@ export function register (): void {
     Cypress.expose('grepOmitFiltered') || Cypress.expose('grep-omit-filtered')
 
   debugInstance('grep %o', { grep, grepTags, grepBurn, omitFiltered, version })
-  if (!Cypress._.isInteger(grepBurn) || grepBurn < 1) {
+  if (!Number.isInteger(grepBurn) || grepBurn < 1) {
     throw new Error(`Invalid grep burn value: ${grepBurn}`)
   }
 
@@ -119,7 +119,7 @@ export function register (): void {
 
     if (shouldRun) {
       if (grepBurn > 1) {
-        return Cypress._.times(grepBurn, (k) => {
+        return Array.from({ length: grepBurn }, (_, k) => {
           const fullName = `${name}: burning ${k + 1} of ${grepBurn}`
 
           _it(fullName, options, callback)

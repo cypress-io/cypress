@@ -1,6 +1,4 @@
 describe('cy.origin logging', { browser: '!webkit' }, () => {
-  const { _ } = Cypress
-
   it('groups callback commands on a passing test', () => {
     const logs: any[] = []
 
@@ -16,11 +14,11 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     })
 
     cy.log('after').should(() => {
-      const originLog = _.find(logs, { name: 'origin' })
-      const getLog = _.find(logs, { name: 'get', message: '[data-cy="dom-check"]' })
-      const invokeLog = _.find(logs, { name: 'invoke', message: '.text()' })
-      const newUrlLog = _.find(logs, { name: 'new url' })
-      const logLog = _.find(logs, { name: 'log' })
+      const originLog = logs.find((l) => l.name === 'origin')
+      const getLog = logs.find((l) => l.name === 'get' && l.message === '[data-cy="dom-check"]')
+      const invokeLog = logs.find((l) => l.name === 'invoke' && l.message === '.text()')
+      const newUrlLog = logs.find((l) => l.name === 'new url')
+      const logLog = logs.find((l) => l.name === 'log')
 
       expect(originLog.groupStart).to.be.true
       expect(getLog.group).to.equal(originLog.id)
@@ -38,7 +36,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     })
 
     cy.on('fail', () => {
-      const originLog = _.find(logs, { name: 'origin' })
+      const originLog = logs.find((l) => l.name === 'origin')
 
       expect(originLog.groupStart).to.be.true
     })
@@ -58,7 +56,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     })
 
     cy.on('fail', () => {
-      const originLog = _.find(logs, { name: 'origin' })
+      const originLog = logs.find((l) => l.name === 'origin')
 
       expect(originLog.groupStart).to.be.true
     })
@@ -79,11 +77,11 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     })
 
     cy.on('fail', () => {
-      const originLog = _.find(logs, { name: 'origin' })
-      const getLog = _.find(logs, { name: 'get', message: '[data-cy="dom-check"]' })
-      const invokeLog = _.find(logs, { name: 'invoke', message: '.text()' })
-      const newUrlLog = _.find(logs, { name: 'new url' })
-      const failingGetLog = _.find(logs, { name: 'get', message: '#does-not-exist' })
+      const originLog = logs.find((l) => l.name === 'origin')
+      const getLog = logs.find((l) => l.name === 'get' && l.message === '[data-cy="dom-check"]')
+      const invokeLog = logs.find((l) => l.name === 'invoke' && l.message === '.text()')
+      const newUrlLog = logs.find((l) => l.name === 'new url')
+      const failingGetLog = logs.find((l) => l.name === 'get' && l.message === '#does-not-exist')
 
       expect(originLog.groupStart).to.be.true
       expect(getLog.group).to.equal(originLog.id)
@@ -113,10 +111,10 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     })
 
     cy.on('fail', () => {
-      const originLog = _.find(logs, { name: 'origin' })
-      const getLog = _.find(logs, { name: 'get', message: '[data-cy="dom-check"]' })
-      const invokeLog = _.find(logs, { name: 'invoke', message: '.text()' })
-      const newUrlLog = _.find(logs, { name: 'new url' })
+      const originLog = logs.find((l) => l.name === 'origin')
+      const getLog = logs.find((l) => l.name === 'get' && l.message === '[data-cy="dom-check"]')
+      const invokeLog = logs.find((l) => l.name === 'invoke' && l.message === '.text()')
+      const newUrlLog = logs.find((l) => l.name === 'new url')
 
       expect(originLog.groupStart).to.be.true
       expect(getLog.group).to.equal(originLog.id)

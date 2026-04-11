@@ -406,7 +406,7 @@ describe.skip('consoleProps', () => {
   })
 
   it('t1', () => {
-    const renderedConsoleProps = Cypress._.omit(log.get('consoleProps')(), 'Snapshot')
+    const { Snapshot: _snapshot, ...renderedConsoleProps } = log.get('consoleProps')()
 
     renderedConsoleProps.table = renderedConsoleProps.table.map((v) => v())
 
@@ -482,7 +482,7 @@ describe('ignores setting insecure context data when on secure context', () => {
 
     it('nothing to clear - 2/2', () => {
       top.logSpy = logSpy
-      expect(Cypress._.find(logSpy.args, (v) => v[0].name === 'warning')).to.not.exist
+      expect(logSpy.args.find((v) => v[0].name === 'warning')).to.not.exist
     })
   })
 
@@ -502,7 +502,7 @@ describe('ignores setting insecure context data when on secure context', () => {
 
     it('clears only secure context data - 2/2', () => {
       top.logSpy = logSpy
-      expect(Cypress._.find(logSpy.args, (v) => v[0].name === 'warning')).to.not.exist
+      expect(logSpy.args.find((v) => v[0].name === 'warning')).to.not.exist
     })
   })
 })

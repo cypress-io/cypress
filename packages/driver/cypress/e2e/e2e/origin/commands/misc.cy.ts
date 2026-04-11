@@ -216,7 +216,7 @@ it('verifies number of cy commands', () => {
   // remove custom commands we added for our own testing
   const customCommands = ['getAll', 'shouldWithTimeout', 'originLoadUtils', 'runSupportFileCustomPrivilegedCommands']
   // @ts-ignore
-  const actualCommands = Cypress._.pullAll([...Object.keys(cy.commandFns), ...Object.keys(cy.queryFns)], customCommands)
+  const actualCommands = [...Object.keys(cy.commandFns), ...Object.keys(cy.queryFns)].filter((x) => !customCommands.includes(x))
   const expectedCommands = [
     'check', 'uncheck', 'click', 'env', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
     'selectFile', 'submit', 'type', 'clear', 'trigger', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
@@ -228,8 +228,8 @@ it('verifies number of cy commands', () => {
     'mount', 'as', 'root', 'getAllLocalStorage', 'clearAllLocalStorage', 'getAllSessionStorage', 'clearAllSessionStorage',
     'getAllCookies', 'clearAllCookies',
   ]
-  const addedCommands = Cypress._.difference(actualCommands, expectedCommands)
-  const removedCommands = Cypress._.difference(expectedCommands, actualCommands)
+  const addedCommands = actualCommands.filter((x) => !expectedCommands.includes(x))
+  const removedCommands = expectedCommands.filter((x) => !actualCommands.includes(x))
 
   if (addedCommands.length && removedCommands.length) {
     throw new Error(`Commands have been added to and removed from Cypress.

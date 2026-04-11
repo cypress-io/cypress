@@ -1,7 +1,6 @@
 /// <reference path="../../cli/types/cy-blob-util.d.ts" />
 /// <reference path="../../cli/types/cy-bluebird.d.ts" />
 /// <reference path="../../cli/types/cy-minimatch.d.ts" />
-/// <reference path="../../cli/types/lodash/index.d.ts" />
 /// <reference path="../../cli/types/sinon/index.d.ts" />
 /// <reference path="../../cli/types/jquery/index.d.ts" />
 /// <reference path="../../cli/types/mocha/index.d.ts" />

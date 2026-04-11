@@ -4,8 +4,6 @@ import { MobxRunnerStore } from '@packages/app/src/store/mobx-runner-store'
 
 let runner: EventEmitter
 let runnables: RootRunnable
-const { _ } = Cypress
-
 function visitAndRenderReporter (studioEnabled: boolean = false, studioActive: boolean = false) {
   cy.fixture('runnables_memory').then((_runnables) => {
     runnables = _runnables
@@ -44,8 +42,8 @@ describe('tests', () => {
 
   context('run mode', () => {
     beforeEach(() => {
-      _.each(runnables.suites, (suite) => {
-        _.each(suite.tests, (test) => {
+      runnables.suites.forEach((suite) => {
+        suite.tests.forEach((test) => {
           runner.emit('test:after:run', test, false)
         })
       })
@@ -178,8 +176,8 @@ describe('tests', () => {
 
   context('open mode', () => {
     beforeEach(() => {
-      _.each(runnables.suites, (suite) => {
-        _.each(suite.tests, (test) => {
+      runnables.suites.forEach((suite) => {
+        suite.tests.forEach((test) => {
           runner.emit('test:after:run', test, true)
         })
       })

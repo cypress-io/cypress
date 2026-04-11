@@ -7,7 +7,7 @@ import {
   shouldBeCalledOnce,
 } from '../../../support/utils'
 
-const { _, $ } = Cypress
+const { $ } = Cypress
 const { Promise } = Cypress
 
 const expectTextEndsWith = (expected) => {
@@ -279,12 +279,16 @@ describe('src/cy/commands/actions/type - #type', () => {
     it('waits until element becomes visible', () => {
       const $txt = cy.$$(':text:first').hide()
 
-      cy.on('command:retry', _.after(3, () => {
-        // Replace the element with a copy of itself, to ensure that .type() requeries the DOM
-        // while retrying actionability
-        $txt.replaceWith($txt[0].innerHTML)
-        cy.$$(':text:first').show()
-      }))
+      let retryCount1 = 0
+
+      cy.on('command:retry', () => {
+        if (++retryCount1 >= 3) {
+          // Replace the element with a copy of itself, to ensure that .type() requeries the DOM
+          // while retrying actionability
+          $txt.replaceWith($txt[0].innerHTML)
+          cy.$$(':text:first').show()
+        }
+      })
 
       cy.get(':text:first').type('foo').then(() => {
         expect(retries).to.be.gt(1)
@@ -298,9 +302,13 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       $txt.on('click', clicked)
 
-      cy.on('command:retry', _.after(3, () => {
-        $txt.prop('disabled', false)
-      }))
+      let retryCount2 = 0
+
+      cy.on('command:retry', () => {
+        if (++retryCount2 >= 3) {
+          $txt.prop('disabled', false)
+        }
+      })
 
       cy.get(':text:first').type('foo').then(() => {
         expect(clicked).to.be.calledOnce
@@ -316,10 +324,14 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       $txt.on('click', clicked)
 
-      cy.on('command:retry', _.after(3, () => {
-        $txt.prop('readonly', false)
-        retried()
-      }))
+      let retryCount3 = 0
+
+      cy.on('command:retry', () => {
+        if (++retryCount3 >= 3) {
+          $txt.prop('readonly', false)
+          retried()
+        }
+      })
 
       cy.get(':text:first').type('foo').then(() => {
         expect(clicked).to.be.calledOnce
@@ -530,14 +542,14 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('input types where no extra formatting required', () => {
-    _.each([
+    ;[
       'password',
       'email',
       'number',
       'search',
       'url',
       'tel',
-    ], (type) => {
+    ].forEach((type) => {
       it(`accepts input [type=${type}]`, () => {
         const input = cy.$$(`<input type='${type}' id='input-type-${type}' />`)
 
@@ -561,14 +573,14 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('button-like input types', () => {
-    _.each([
+    ;[
       'button',
       'image',
       'reset',
       'submit',
       'checkbox',
       'radio',
-    ], (type) => {
+    ].forEach((type) => {
       describe(`[type=${type}]`, () => {
         let input
 
@@ -733,17 +745,19 @@ describe('src/cy/commands/actions/type - #type', () => {
     it('can cancel additional keystrokes', (done) => {
       cy.stub(Cypress.runner, 'stop')
 
-      const text = cy.$$(':text:first').keydown(_.after(3, () => {
-        Cypress.stop()
-      }))
+      let keydownCount1 = 0
+      const text = cy.$$(':text:first').keydown(() => {
+        if (++keydownCount1 >= 3) {
+          Cypress.stop()
+        }
+      })
 
       cy.on('stop', () => {
-        return _.delay(() => {
+        return setTimeout(() => {
           expect(text).to.have.value('foo')
 
           done()
-        }
-        , 50)
+        }, 50)
       })
 
       cy.get(':text:first').type('foo{enter}bar{leftarrow}')
@@ -1156,7 +1170,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.$$('#input-without-value').keypress((e) => {
         const $input = $(e.target)
 
-        _.defer(() => {
+        setTimeout(() => {
           const val = $input.val()
 
           $input.val(`${val}-`)
@@ -2154,9 +2168,13 @@ describe('src/cy/commands/actions/type - #type', () => {
     // https://github.com/cypress-io/cypress/issues/2240
     describe('element reference loss', () => {
       it('follows the focus of the cursor', () => {
-        cy.$$('input:first').keydown(_.after(4, () => {
-          cy.$$('input').eq(1).focus()
-        }))
+        let keydownCount2 = 0
+
+        cy.$$('input:first').keydown(() => {
+          if (++keydownCount2 >= 4) {
+            cy.$$('input').eq(1).focus()
+          }
+        })
 
         cy.get('input:first').type('foobar').then(() => {
           cy.get('input:first').should('have.value', 'foo')
@@ -2167,18 +2185,28 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       // https://github.com/cypress-io/cypress/issues/5480
       it('does NOT follow focus if target is blurred without another receiving focus', () => {
-        cy.$$('input:first').keydown(_.after(4, function () {
-          this.blur()
-        }))
+        let keydownCount3 = 0
+
+        cy.$$('input:first').keydown(function () {
+          if (++keydownCount3 >= 4) {
+            this.blur()
+          }
+        })
 
         cy.get('input:first').type('foobar')
         .should('have.value', 'foobar')
       })
 
       it('follows focus into date input', () => {
-        cy.$$('input:first').on('input', _.after(3, _.once((e) => {
-          cy.$$('input[type=date]:first').focus()
-        })))
+        let inputCount1 = 0
+        let inputOnceCalled1 = false
+
+        cy.$$('input:first').on('input', () => {
+          if (++inputCount1 >= 3 && !inputOnceCalled1) {
+            inputOnceCalled1 = true
+            cy.$$('input[type=date]:first').focus()
+          }
+        })
 
         cy.get('input:first')
         .type('foo2010-10-10')
@@ -2194,9 +2222,13 @@ describe('src/cy/commands/actions/type - #type', () => {
           done()
         })
 
-        cy.$$('input:first').on('input', _.after(3, (e) => {
-          cy.$$('input[type=date]:first').focus()
-        }))
+        let inputCount2 = 0
+
+        cy.$$('input:first').on('input', () => {
+          if (++inputCount2 >= 3) {
+            cy.$$('input[type=date]:first').focus()
+          }
+        })
 
         cy.get('input:first')
         .type('fooBAR')
@@ -2915,10 +2947,9 @@ describe('src/cy/commands/actions/type - #type', () => {
 
     it('eventually passes the assertion', () => {
       cy.$$('input:first').keyup(function () {
-        _.delay(() => {
+        setTimeout(() => {
           $(this).addClass('typed')
-        }
-        , 100)
+        }, 100)
       })
 
       cy.get('input:first').type('f').should('have.class', 'typed').then(function () {

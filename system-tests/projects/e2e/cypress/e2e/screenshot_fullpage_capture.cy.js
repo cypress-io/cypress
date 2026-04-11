@@ -24,6 +24,6 @@ it('takes consistent fullPage captures', () => {
       })
     }
 
-    Cypress._.times(10, fn)
+    Array.from({ length: 10 }, (_, i) => fn(i))
   })
 })

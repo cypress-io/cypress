@@ -1,6 +1,6 @@
 import { assertLogLength } from '../../../support/utils'
 
-const { _, $ } = Cypress
+const { $ } = Cypress
 
 const getActiveElement = () => {
   return cy.state('document').activeElement
@@ -229,7 +229,7 @@ describe('src/cy/commands/actions/focus', () => {
 
       it('eventually passes the assertion', () => {
         cy.$$(':text:first').focus(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('focused')
           }, 100)
         })
@@ -725,7 +725,7 @@ describe('src/cy/commands/actions/focus', () => {
 
       it('eventually passes the assertion', () => {
         cy.$$(':text:first').blur(function () {
-          _.delay(() => {
+          setTimeout(() => {
             $(this).addClass('blured')
           }, 100)
         })

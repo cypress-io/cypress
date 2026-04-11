@@ -1,10 +1,10 @@
 import dayjs from 'dayjs'
 
 describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
-  const { _ } = Cypress
   // ensures unique username so there's no risk of false positives from
   // test pollution
-  const getUsername = () => _.uniqueId('user')
+  let userCounter = 0
+  const getUsername = () => `user${++userCounter}`
 
   const verifyLoggedIn = (username, { cookieKey } = { cookieKey: 'user' }) => {
     cy.get('h1').invoke('text').should('equal', `Welcome, ${username}!`)
@@ -12,12 +12,13 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
   }
 
   const verifyIdpNotLoggedIn = (config = {}) => {
-    const { isHttps, cookieKey, expectNullCookie, subdomain } = _.defaults(config, {
+    const { isHttps, cookieKey, expectNullCookie, subdomain } = {
       isHttps: false,
       cookieKey: 'user',
       expectNullCookie: true,
       subdomain: 'www',
-    })
+      ...config,
+    }
     const [protocol, port] = isHttps ? ['https', '3502'] : ['http', '3501']
 
     cy.origin(`${protocol}://${subdomain}.idp.com:${port}`, { args: { cookieKey, expectNullCookie } }, ({ cookieKey, expectNullCookie }) => {
@@ -721,7 +722,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         })
 
         cy.getCookie('key').then((cookie) => {
-          expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
+          const { expiry: _omitted, ...rest } = cookie
+
+          expect(rest).to.deep.equal({
             domain: 'www.foobar.com',
             httpOnly: false,
             hostOnly: true,
@@ -850,7 +853,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
         cy.document().its('cookie').should('include', 'name=value')
         cy.get('[data-cy="doc-cookie"]').invoke('text').should('equal', 'name=value')
         cy.getCookie('name').then((cookie) => {
-          expect(Cypress._.omit(cookie, 'expiry')).to.deep.equal({
+          const { expiry: _omitted, ...rest } = cookie
+
+          expect(rest).to.deep.equal({
             domain: 'www.foobar.com',
             httpOnly: false,
             hostOnly: true,

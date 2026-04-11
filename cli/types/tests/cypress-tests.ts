@@ -1,11 +1,4 @@
 /* eslint-disable mocha/no-exclusive-tests -- dtslint-style samples for Mocha/Cypress API typings */
-namespace CypressLodashTests {
-  Cypress._ // $ExpectType LoDashStatic
-  Cypress._.each([1], (item) => {
-    item // $ExpectType number
-  })
-}
-
 namespace CypressSinonTests {
   Cypress.sinon // $ExpectType SinonStatic
 
@@ -1272,16 +1265,11 @@ namespace CypressTraversalTests {
 }
 
 namespace CypressRequireTests {
-  Cypress.require('lodash')
-
   const anydep = Cypress.require('anydep')
   anydep // $ExpectType any
 
   const sinon = Cypress.require<sinon.SinonStatic>('sinon') as typeof import('sinon')
   sinon // $ExpectType SinonStatic
-
-  const lodash = Cypress.require<_.LoDashStatic>('lodash')
-  lodash // $ExpectType LoDashStatic
 
   Cypress.require() // $ExpectError
   Cypress.require({}) // $ExpectError

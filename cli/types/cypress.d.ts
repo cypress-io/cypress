@@ -313,14 +313,6 @@ declare namespace Cypress {
    */
   interface Cypress {
     /**
-     * Lodash library
-     *
-     * @see https://on.cypress.io/_
-     * @example
-     *    Cypress._.keys(obj)
-     */
-    _: _.LoDashStatic
-    /**
      * jQuery library
      *
      * @see https://on.cypress.io/$

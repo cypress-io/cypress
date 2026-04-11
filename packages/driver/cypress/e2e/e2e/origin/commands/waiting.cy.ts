@@ -126,8 +126,15 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const actualLog = Cypress._.pick(findCrossOriginLogs('wait', logs, 'localhost'),
-          ['name', 'referencesAlias', 'aliasType', 'type', 'instrument', 'message'])
+        const waitLog = findCrossOriginLogs('wait', logs, 'localhost')
+        const actualLog = {
+          name: waitLog.name,
+          referencesAlias: waitLog.referencesAlias,
+          aliasType: waitLog.aliasType,
+          type: waitLog.type,
+          instrument: waitLog.instrument,
+          message: waitLog.message,
+        }
 
         const expectedLog = {
           name: 'wait',

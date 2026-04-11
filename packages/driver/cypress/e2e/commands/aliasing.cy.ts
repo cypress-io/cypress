@@ -1,5 +1,4 @@
 import { assertLogLength } from '../../support/utils'
-const { _ } = Cypress
 
 describe('src/cy/commands/aliasing', () => {
   beforeEach(() => {
@@ -58,9 +57,13 @@ describe('src/cy/commands/aliasing', () => {
     it('retries primitives and assertions', () => {
       const obj: any = {}
 
-      cy.on('command:retry', _.after(2, () => {
-        obj.foo = 'bar'
-      }))
+      let __afterCount1 = 0
+
+      cy.on('command:retry', (...args) => {
+        if (++__afterCount1 >= 2) {
+          obj.foo = 'bar'
+        }
+      })
 
       cy.wrap(obj).as('obj')
 
@@ -194,7 +197,7 @@ describe('src/cy/commands/aliasing', () => {
         cy.as('foo')
       })
 
-      _.each([null, undefined, {}, [], 123], (value) => {
+      ;[null, undefined, {}, [], 123].forEach((value) => {
         it(`throws if when passed: ${value}`, (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('`cy.as()` can only accept a string.')
@@ -247,7 +250,7 @@ describe('src/cy/commands/aliasing', () => {
         cy.get('@my@Alias')
       })
 
-      _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (reserved) => {
+      ;['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'].forEach((reserved) => {
         it(`throws on a reserved word: ${reserved}`, (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq(`\`cy.as()\` cannot be aliased as: \`${reserved}\`. This word is reserved.`)

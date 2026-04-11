@@ -12,7 +12,7 @@ describe('Choose a browser page', () => {
     beforeEach(() => {
       cy.findBrowsers({
         filter: (browser) => {
-          return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
+          return ['chrome', 'firefox', 'electron', 'edge'].includes(browser.name) && browser.channel === 'stable'
         },
       })
     })

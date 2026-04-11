@@ -1,5 +1,5 @@
 // @ts-expect-error - this is being redeclared
-const { _, $ } = Cypress
+const { $ } = Cypress
 
 // Reading and decoding files from an input element would, in the real world,
 // be handled by the application under test, and they would assert on their
@@ -9,7 +9,7 @@ const { _, $ } = Cypress
 function getFileContents (subject) {
   const decoder = new TextDecoder('utf8')
 
-  const fileContents = _.map(subject[0].files, (f) => {
+  const fileContents = Array.from(subject[0].files).map((f) => {
     return f
     .arrayBuffer()
     .then((c) => decoder.decode(c))
@@ -120,9 +120,9 @@ describe('src/cy/commands/actions/selectFile', () => {
       const $input = cy.$$('#basic')
 
       $input.on('input', (e) => {
-        const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'composed', 'target', 'type')
+        const { bubbles, cancelable, composed, target, type } = e.originalEvent
 
-        expect(obj).to.deep.eq({
+        expect({ bubbles, cancelable, composed, target, type }).to.deep.eq({
           bubbles: true,
           cancelable: false,
           composed: true,
@@ -131,9 +131,9 @@ describe('src/cy/commands/actions/selectFile', () => {
         })
 
         $input.on('change', (e) => {
-          const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'composed', 'target', 'type')
+          const { bubbles, cancelable, composed, target, type } = e.originalEvent
 
-          expect(obj).to.deep.eq({
+          expect({ bubbles, cancelable, composed, target, type }).to.deep.eq({
             bubbles: true,
             cancelable: false,
             composed: false,
@@ -763,9 +763,9 @@ is being covered by another element:
         const $input = cy.$$('#basic')
 
         $input.on('input', (e) => {
-          const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'composed', 'target', 'type')
+          const { bubbles, cancelable, composed, target, type } = e.originalEvent
 
-          expect(obj).to.deep.eq({
+          expect({ bubbles, cancelable, composed, target, type }).to.deep.eq({
             bubbles: true,
             cancelable: false,
             composed: true,
@@ -774,9 +774,9 @@ is being covered by another element:
           })
 
           $input.on('change', (e) => {
-            const obj = _.pick(e.originalEvent, 'bubbles', 'cancelable', 'composed', 'target', 'type')
+            const { bubbles, cancelable, composed, target, type } = e.originalEvent
 
-            expect(obj).to.deep.eq({
+            expect({ bubbles, cancelable, composed, target, type }).to.deep.eq({
               bubbles: true,
               cancelable: false,
               composed: false,
@@ -823,11 +823,11 @@ is being covered by another element:
         $body.on('dragover', (e) => events.push(e))
         $body.on('drop', (e) => {
           events.push(e)
-          expect(_.map(events, 'originalEvent.type')).to.deep.eq(['drag', 'dragenter', 'dragover', 'drop'])
-          expect(_.every(events, ['originalEvent.bubbles', true])).to.be.true
-          expect(_.every(events, ['originalEvent.cancelable', true])).to.be.true
-          expect(_.every(events, ['originalEvent.composed', true])).to.be.true
-          expect(_.every(events, ['originalEvent.target', $body[0]])).to.be.true
+          expect(events.map((ev) => ev.originalEvent.type)).to.deep.eq(['drag', 'dragenter', 'dragover', 'drop'])
+          expect(events.every((ev) => ev.originalEvent.bubbles === true)).to.be.true
+          expect(events.every((ev) => ev.originalEvent.cancelable === true)).to.be.true
+          expect(events.every((ev) => ev.originalEvent.composed === true)).to.be.true
+          expect(events.every((ev) => ev.originalEvent.target === $body[0])).to.be.true
 
           done()
         })

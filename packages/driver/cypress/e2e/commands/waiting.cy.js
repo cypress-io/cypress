@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { _, Promise } = Cypress
+const { Promise } = Cypress
 let reqQueue = []
 
 const xhrGet = function (win, url) {
@@ -15,7 +15,7 @@ const xhrGet = function (win, url) {
 // keep track of outstanding requests and abort them so
 // they do not clog up the browser request queue
 beforeEach(() => {
-  _.each(reqQueue, (xhr) => xhr.abort())
+  reqQueue.forEach((xhr) => xhr.abort())
   reqQueue = []
 })
 
@@ -73,13 +73,18 @@ describe('src/cy/commands/waiting', () => {
       })
 
       it('waits for the route alias to have a request', () => {
-        cy.on('command:retry', _.once(() => {
-          const win = cy.state('window')
+        let onceCalled1 = false
 
-          xhrGet(win, '/users')
+        cy.on('command:retry', () => {
+          if (!onceCalled1) {
+            onceCalled1 = true
+            const win = cy.state('window')
 
-          return null
-        }))
+            xhrGet(win, '/users')
+
+            return null
+          }
+        })
 
         cy
         .intercept(/users/, {
@@ -107,9 +112,14 @@ describe('src/cy/commands/waiting', () => {
       it('resets the timeout after waiting', () => {
         const prevTimeout = cy.timeout()
 
-        const retry = _.after(3, _.once(() => {
-          cy.state('window').$.get('/foo')
-        }))
+        let retryCount1 = 0
+        let retryCalled1 = false
+        const retry = () => {
+          if (++retryCount1 >= 3 && !retryCalled1) {
+            retryCalled1 = true
+            cy.state('window').$.get('/foo')
+          }
+        }
 
         cy.on('command:retry', retry)
 
@@ -390,13 +400,18 @@ describe('src/cy/commands/waiting', () => {
             done()
           })
 
-          cy.on('command:retry', _.once(() => {
-            const win = cy.state('window')
+          let onceCalled2 = false
 
-            xhrGet(win, '/foo')
+          cy.on('command:retry', () => {
+            if (!onceCalled2) {
+              onceCalled2 = true
+              const win = cy.state('window')
 
-            return null
-          }))
+              xhrGet(win, '/foo')
+
+              return null
+            }
+          })
 
           cy
           .intercept(/foo/, { foo: 'foo' }).as('foo')
@@ -413,13 +428,18 @@ describe('src/cy/commands/waiting', () => {
             done()
           })
 
-          cy.on('command:retry', _.once(() => {
-            const win = cy.state('window')
+          let onceCalled3 = false
 
-            xhrGet(win, '/bar')
+          cy.on('command:retry', () => {
+            if (!onceCalled3) {
+              onceCalled3 = true
+              const win = cy.state('window')
 
-            return null
-          }))
+              xhrGet(win, '/bar')
+
+              return null
+            }
+          })
 
           cy
           .intercept(/foo/, { foo: 'foo' }).as('foo')
@@ -526,12 +546,17 @@ describe('src/cy/commands/waiting', () => {
           })
 
           // dont send the 2nd response
-          cy.on('command:retry', _.once(() => {
-            response += 1
-            const win = cy.state('window')
+          let onceCalled4 = false
 
-            return xhrGet(win, `/users?num=${response}`)
-          }))
+          cy.on('command:retry', () => {
+            if (!onceCalled4) {
+              onceCalled4 = true
+              response += 1
+              const win = cy.state('window')
+
+              return xhrGet(win, `/users?num=${response}`)
+            }
+          })
 
           cy
           .intercept(/users/, resp).as('getUsers')
@@ -552,12 +577,17 @@ describe('src/cy/commands/waiting', () => {
           })
 
           // dont send the 2nd request
-          cy.on('command:retry', _.once(() => {
-            request += 1
-            const win = cy.state('window')
+          let onceCalled5 = false
 
-            return xhrGet(win, `/users?num=${request}`)
-          }))
+          cy.on('command:retry', () => {
+            if (!onceCalled5) {
+              onceCalled5 = true
+              request += 1
+              const win = cy.state('window')
+
+              return xhrGet(win, `/users?num=${request}`)
+            }
+          })
 
           cy
           .intercept(/users/, resp).as('getUsers')
@@ -628,13 +658,18 @@ describe('src/cy/commands/waiting', () => {
         it('throws when waiting on the 2nd request', {
           requestTimeout: 200,
         }, (done) => {
-          cy.on('command:retry', _.once(() => {
-            const win = cy.state('window')
+          let onceCalled6 = false
 
-            xhrGet(win, '/users')
+          cy.on('command:retry', () => {
+            if (!onceCalled6) {
+              onceCalled6 = true
+              const win = cy.state('window')
 
-            return null
-          }))
+              xhrGet(win, '/users')
+
+              return null
+            }
+          })
 
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `200ms` for the 2nd request to the route: `getUsers`. No request ever occurred.')
@@ -658,17 +693,22 @@ describe('src/cy/commands/waiting', () => {
           requestTimeout: 500,
           responseTimeout: 10000,
         }, (done) => {
-          cy.on('command:retry', _.once(() => {
-            const win = cy.state('window')
+          let onceCalled7 = false
 
-            _.defer(() => {
-              xhrGet(win, '/timeout?ms=2001')
-            })
+          cy.on('command:retry', () => {
+            if (!onceCalled7) {
+              onceCalled7 = true
+              const win = cy.state('window')
 
-            _.defer(() => {
-              xhrGet(win, '/timeout?ms=2002')
-            })
-          }))
+              setTimeout(() => {
+                xhrGet(win, '/timeout?ms=2001')
+              }, 0)
+
+              setTimeout(() => {
+                xhrGet(win, '/timeout?ms=2002')
+              }, 0)
+            }
+          })
 
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `500ms` for the 1st request to the route: `get.three`. No request ever occurred.')
@@ -906,7 +946,7 @@ describe('src/cy/commands/waiting', () => {
       describe('invalid 1st argument', {
         defaultCommandTimeout: 50,
       }, () => {
-        _.each([
+        ;[
           { type: 'NaN', val: 0 / 0, errVal: 'NaN' },
           { type: 'Infinity', val: Infinity, errVal: 'Infinity' },
           { type: 'Array', val: [] },
@@ -916,7 +956,7 @@ describe('src/cy/commands/waiting', () => {
           { type: 'Object', val: {} },
           { type: 'Symbol', val: Symbol.iterator, errVal: 'Symbol(Symbol.iterator)' },
           { type: 'Function', val: () => {}, errVal: 'undefined' },
-        ], (attrs) => {
+        ].forEach((attrs) => {
           it(`throws when 1st arg is ${attrs.type}`, (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq(`\`cy.wait()\` only accepts a number, an alias of a route, or an array of aliases of routes. You passed: \`${attrs.errVal || JSON.stringify(attrs.val)}\``)
@@ -1187,7 +1227,7 @@ describe('src/cy/commands/waiting', () => {
 
             const { lastLog } = this
 
-            _.each(obj, (value, key) => {
+            Object.entries(obj).forEach(([key, value]) => {
               expect(lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
             })
 

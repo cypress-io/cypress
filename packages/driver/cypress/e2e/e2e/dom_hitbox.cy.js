@@ -1,5 +1,4 @@
 const { clickCommandLog } = require('../../support/utils')
-const { _ } = Cypress
 
 // https://github.com/cypress-io/cypress/pull/5299/files
 // TODO(webkit): fix+unskip for experimental webkit
@@ -115,9 +114,9 @@ const ensureCorrectHighlightPositions = (sel, skipElementComparison) => {
       border: cy.$$('div[data-layer=Border]'),
     }
 
-    const dims = _.mapValues(els, ($el) => {
-      return $el[0].getBoundingClientRect()
-    })
+    const dims = Object.fromEntries(Object.entries(els).map(([k, $el]) => {
+      return [k, $el[0].getBoundingClientRect()]
+    }))
 
     if (!skipElementComparison) {
       const doc = els.content[0].ownerDocument

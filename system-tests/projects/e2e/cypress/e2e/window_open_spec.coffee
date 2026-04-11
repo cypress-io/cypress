@@ -4,7 +4,11 @@ describe "window.open", ->
       .visit("/index.html")
       .window().then (win) ->
         new Cypress.Promise (resolve, reject) ->
-          win.foo = Cypress._.after(2, resolve)
+          afterCount = 0
+          win.foo = (args...) ->
+            afterCount += 1
+            if afterCount >= 2
+              resolve(args...)
 
           debugger
 

@@ -1,5 +1,5 @@
 function snakeCase (string) {
-  return _.snakeCase(string)
+  return string.replace(/\s+/g, '_')
 }
 
 snakeCase.add = (a, b) => a + b

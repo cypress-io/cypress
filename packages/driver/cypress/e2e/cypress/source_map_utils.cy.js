@@ -1,7 +1,6 @@
 const { SourceMapConsumer } = require('source-map')
 import $sourceMapUtils from '@packages/driver/src/cypress/source_map_utils'
 
-const _ = Cypress._
 const { encodeBase64Unicode } = Cypress.utils
 
 const testContent = `it(\'simple test\', () => {
@@ -131,7 +130,7 @@ describe('driver/src/cypress/source_map_utils', () => {
     it('returns source position for generated position', () => {
       const position = $sourceMapUtils.getSourcePosition(file1.fullyQualifiedUrl, { line: 1, column: 2 })
 
-      expect(_.pick(position, 'line', 'column')).to.eql({ line: 1, column: 0 })
+      expect({ line: position.line, column: position.column }).to.eql({ line: 1, column: 0 })
     })
   })
 

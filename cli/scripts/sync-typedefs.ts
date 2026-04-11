@@ -14,16 +14,30 @@ shell.set('-e') // any error is fatal
 // We include the TypeScript definitions for the bundled 3rd party tools
 // thus we need to copy them from "dev" dependencies into our types folder
 // and we need to sometimes tweak these types files to use relative paths
-// This ensures that globals like Cypress.$, Cypress._ etc are property typed
+// This ensures that globals like Cypress.$ etc are properly typed
 // yet we do not install "@types/.." packages with "npm install cypress"
 // because they can conflict with user's own libraries
 
-fs.ensureDirSync(join(__dirname, '..', 'types'))
+const typesDir = join(__dirname, '..', 'types')
+
+fs.ensureDirSync(typesDir)
+
+// Prune type folders that are no longer in includeTypes
+// so stale vendored typings do not survive postinstall runs.
+const existingFolders = fs.readdirSync(typesDir).filter((entry: string) => {
+  return fs.statSync(join(typesDir, entry)).isDirectory()
+})
+
+for (const folder of existingFolders) {
+  if (!includeTypes.includes(folder)) {
+    fs.removeSync(join(typesDir, folder))
+  }
+}
 
 includeTypes.forEach((folder: string) => {
   const source: string = resolvePkg(`@types/${folder}`, { cwd: __dirname })
 
-  fs.copySync(source, join(__dirname, '..', 'types', folder))
+  fs.copySync(source, join(typesDir, folder))
 })
 
 // jQuery v3.3.x includes "dist" folder that just references back to itself

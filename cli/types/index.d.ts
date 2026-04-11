@@ -11,7 +11,6 @@
 /// <reference path="./cy-bluebird.d.ts" />
 /// <reference path="./cy-minimatch.d.ts" />
 /// <reference path="./cy-chai.d.ts" />
-/// <reference path="./lodash/index.d.ts" />
 /// <reference path="./sinon/index.d.ts" />
 /// <reference path="./sinon-chai/index.d.ts" />
 /// <reference path="./mocha/index.d.ts" />

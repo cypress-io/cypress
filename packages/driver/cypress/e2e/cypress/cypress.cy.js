@@ -1,5 +1,4 @@
 const { $, Promise } = Cypress
-const lodash = require('lodash')
 
 describe('driver/src/cypress/index', () => {
   let CypressInstance
@@ -39,13 +38,8 @@ describe('driver/src/cypress/index', () => {
   })
 
   context('_', () => {
-    it('exposes lodash methods', () => {
-      expect(Object.getOwnPropertyNames(Cypress._)).to.include.members(Object.getOwnPropertyNames(lodash))
-    })
-
-    it('has same lodash capitalize method', () => {
-      // https://github.com/cypress-io/cypress/issues/7222
-      expect(Cypress._.capitalize('FOO BAR')).to.eq(lodash.capitalize('FOO BAR'))
+    it('does not expose lodash on Cypress', () => {
+      expect(Cypress).not.to.have.property('_')
     })
   })
 

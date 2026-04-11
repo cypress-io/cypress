@@ -38,7 +38,12 @@
   *   - no focus events are queued when programmatically calling element.focus() AND the window is out of focus. the events evaporate into the ether.
   *   - however, if calling window.focus() programmatically prior to programmatic element.focus() calls will fire all events as if the window is natively in focus
 */
-const { _ } = Cypress
+const toPlainObject = (obj) => {
+  const out = {}
+  for (const key in obj) { out[key] = obj[key] }
+
+  return out
+}
 
 const chaiSubset = require('chai-subset')
 
@@ -165,19 +170,19 @@ it('blur the activeElement when clicking the body', () => {
       // native event immediately
       expect(events).to.have.length(3)
 
-      expect(_.toPlainObject(events[0])).to.include({
+      expect(toPlainObject(events[0])).to.include({
         type: 'focus',
         isTrusted: true,
         target: $one.get(0),
       })
 
-      expect(_.toPlainObject(events[1])).to.include({
+      expect(toPlainObject(events[1])).to.include({
         type: 'blur',
         isTrusted: true,
         target: $one.get(0),
       })
 
-      expect(_.toPlainObject(events[2])).to.include({
+      expect(toPlainObject(events[2])).to.include({
         type: 'focus',
         isTrusted: true,
         target: $two.get(0),
@@ -195,7 +200,7 @@ it('blur the activeElement when clicking the body', () => {
       // focus event is necessary
       expect(events).to.have.length(4)
 
-      expect(_.toPlainObject(events[3])).to.include({
+      expect(toPlainObject(events[3])).to.include({
         type: 'blur',
         isTrusted: true,
         target: $two.get(0),
@@ -334,13 +339,13 @@ describe('polyfill programmatic blur events', () => {
       cy.then(() => {
         expect(stub).calledTwice
 
-        expect(_.toPlainObject(stub.getCall(0).args[0].originalEvent)).to.containSubset({
+        expect(toPlainObject(stub.getCall(0).args[0].originalEvent)).to.containSubset({
           type: 'focus',
           target: $one.get(0),
           isTrusted: false,
         })
 
-        expect(_.toPlainObject(stub.getCall(1).args[0].originalEvent)).to.containSubset({
+        expect(toPlainObject(stub.getCall(1).args[0].originalEvent)).to.containSubset({
           type: 'blur',
           target: $one.get(0),
           isTrusted: false,
@@ -458,13 +463,13 @@ describe('polyfill programmatic blur events', () => {
       cy.then(() => {
         expect(stub).calledTwice
 
-        expect(_.toPlainObject(stub.getCall(0).args[0].originalEvent)).to.containSubset({
+        expect(toPlainObject(stub.getCall(0).args[0].originalEvent)).to.containSubset({
           type: 'focus',
           target: $one.get(0),
           isTrusted: false,
         })
 
-        expect(_.toPlainObject(stub.getCall(1).args[0].originalEvent)).to.containSubset({
+        expect(toPlainObject(stub.getCall(1).args[0].originalEvent)).to.containSubset({
           type: 'blur',
           target: $one.get(0),
           isTrusted: false,

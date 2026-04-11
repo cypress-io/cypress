@@ -2,8 +2,6 @@ import { TestFilter } from '@packages/types'
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 
-const { _ } = Cypress
-
 describe('header', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
@@ -68,7 +66,7 @@ describe('header', () => {
 
     it('displays numbers for passed, failed, and pending tests', () => {
       const addStat = (state: string, times: number) => {
-        _.times(times, () => {
+        Array.from({ length: times }, () => {
           runner.emit('test:after:run', { state, final: true })
         })
       }

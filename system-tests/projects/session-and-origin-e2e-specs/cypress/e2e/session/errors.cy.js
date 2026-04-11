@@ -12,10 +12,11 @@ let sessionId
 let testData
 // the number of times validate has executed for a test
 let count = 0
+let sessionCounter = 0
 
 beforeEach(() => {
   count = 0
-  sessionId = `session_${Cypress._.uniqueId()}`
+  sessionId = `session_${++sessionCounter}`
   testData = Cypress.state('specWindow').parent.CYPRESS_TEST_DATA
 
   // uncomment to debug tests:

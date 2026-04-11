@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { _, Promise, $ } = Cypress
+const { Promise, $ } = Cypress
 
 describe('src/cy/commands/connectors', () => {
   describe('with jquery', () => {
@@ -352,11 +352,15 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('eventually passes the assertion', function () {
-          cy.on('command:retry', _.after(2, () => {
-            this.remoteWindow.$.fn.foo = () => {
-              return 'foo'
+          let __afterCount1 = 0
+
+          cy.on('command:retry', () => {
+            if (++__afterCount1 >= 2) {
+              this.remoteWindow.$.fn.foo = () => {
+                return 'foo'
+              }
             }
-          }))
+          })
 
           cy.get('div:first').invoke('foo').should('eq', 'foo').then(function () {
             const { lastLog } = this
@@ -368,11 +372,15 @@ describe('src/cy/commands/connectors', () => {
         })
 
         it('eventually fails the assertion', function (done) {
-          cy.on('command:retry', _.after(2, () => {
-            this.remoteWindow.$.fn.foo = () => {
-              return 'foo'
+          let __afterCount2 = 0
+
+          cy.on('command:retry', () => {
+            if (++__afterCount2 >= 2) {
+              this.remoteWindow.$.fn.foo = () => {
+                return 'foo'
+              }
             }
-          }))
+          })
 
           cy.on('fail', (err) => {
             const { lastLog } = this
@@ -471,7 +479,7 @@ describe('src/cy/commands/connectors', () => {
             return i === 5
           }
 
-          cy.noop([_.noop, fn]).invoke(1).should('be.true')
+          cy.noop([() => {}, fn]).invoke(1).should('be.true')
         })
 
         it('works with 0 as a value if object has property 0', () => {
@@ -528,12 +536,15 @@ describe('src/cy/commands/connectors', () => {
 
         it('retries until function exists on the subject', () => {
           const obj = {}
+          let __afterCount3 = 0
 
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = () => {
-              return 'bar'
+          cy.on('command:retry', () => {
+            if (++__afterCount3 >= 3) {
+              obj.foo = () => {
+                return 'bar'
+              }
             }
-          }))
+          })
 
           cy.wrap(obj).invoke('foo').then((val) => {
             expect(val).to.eq('bar')
@@ -545,11 +556,15 @@ describe('src/cy/commands/connectors', () => {
             foo: '',
           }
 
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = () => {
-              return 'bar'
+          let __afterCount4 = 0
+
+          cy.on('command:retry', () => {
+            if (++__afterCount4 >= 3) {
+              obj.foo = () => {
+                return 'bar'
+              }
             }
-          }))
+          })
 
           cy.wrap(obj).invoke('foo').then((val) => {
             expect(val).to.eq('bar')
@@ -561,11 +576,15 @@ describe('src/cy/commands/connectors', () => {
             foo: undefined,
           }
 
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = () => {
-              return 'bar'
+          let __afterCount5 = 0
+
+          cy.on('command:retry', () => {
+            if (++__afterCount5 >= 3) {
+              obj.foo = () => {
+                return 'bar'
+              }
             }
-          }))
+          })
 
           cy.wrap(obj).invoke('foo').then((val) => {
             expect(val).to.eq('bar')
@@ -579,11 +598,15 @@ describe('src/cy/commands/connectors', () => {
             },
           }
 
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = () => {
-              return 'bar'
+          let __afterCount6 = 0
+
+          cy.on('command:retry', () => {
+            if (++__afterCount6 >= 3) {
+              obj.foo = () => {
+                return 'bar'
+              }
             }
-          }))
+          })
 
           cy.wrap(obj).invoke('foo').should('eq', 'bar')
         });
@@ -686,7 +709,7 @@ describe('src/cy/commands/connectors', () => {
             return i === 5
           }
 
-          cy.noop([_.noop, fn]).invoke({}, 1).should('be.true')
+          cy.noop([() => {}, fn]).invoke({}, 1).should('be.true')
         })
 
         describe('errors', {
@@ -796,7 +819,7 @@ describe('src/cy/commands/connectors', () => {
 
               const { lastLog } = this
 
-              _.each(obj, (value, key) => {
+              Object.entries(obj).forEach(([key, value]) => {
                 expect(lastLog.get(key)).to.deep.eq(value)
               })
             })
@@ -866,7 +889,7 @@ describe('src/cy/commands/connectors', () => {
               return obj
             },
             sum (...args) {
-              return _.reduce(args, (memo, num) => {
+              return args.reduce((memo, num) => {
                 return memo + num
               }, 0)
             },
@@ -907,7 +930,7 @@ describe('src/cy/commands/connectors', () => {
 
             const { lastLog } = this
 
-            _.each(obj, (value, key) => {
+            Object.entries(obj).forEach(([key, value]) => {
               expect(lastLog.get(key)).to.deep.eq(value)
             })
           })
@@ -1227,10 +1250,13 @@ describe('src/cy/commands/connectors', () => {
 
       it('retries by default until property exists without an assertion', () => {
         const obj = {}
+        let __afterCount7 = 0
 
-        cy.on('command:retry', _.after(3, () => {
-          return obj.foo = 'bar'
-        }))
+        cy.on('command:retry', () => {
+          if (++__afterCount7 >= 3) {
+            return obj.foo = 'bar'
+          }
+        })
 
         cy.wrap(obj).its('foo').then((val) => {
           expect(val).to.eq('bar')
@@ -1242,9 +1268,13 @@ describe('src/cy/commands/connectors', () => {
           foo: undefined,
         }
 
-        cy.on('command:retry', _.after(3, () => {
-          return obj.foo = 'bar'
-        }))
+        let __afterCount8 = 0
+
+        cy.on('command:retry', () => {
+          if (++__afterCount8 >= 3) {
+            return obj.foo = 'bar'
+          }
+        })
 
         cy.wrap(obj).its('foo').then((val) => {
           expect(val).to.eq('bar')
@@ -1256,9 +1286,13 @@ describe('src/cy/commands/connectors', () => {
           foo: null,
         }
 
-        cy.on('command:retry', _.after(3, () => {
-          return obj.foo = 'bar'
-        }))
+        let __afterCount9 = 0
+
+        cy.on('command:retry', () => {
+          if (++__afterCount9 >= 3) {
+            return obj.foo = 'bar'
+          }
+        })
 
         cy.wrap(obj).its('foo').then((val) => {
           expect(val).to.eq('bar')
@@ -1284,9 +1318,13 @@ describe('src/cy/commands/connectors', () => {
           foo: '',
         }
 
-        cy.on('command:retry', _.after(3, () => {
-          return delete obj.foo
-        }))
+        let __afterCount10 = 0
+
+        cy.on('command:retry', () => {
+          if (++__afterCount10 >= 3) {
+            return delete obj.foo
+          }
+        })
 
         cy.wrap(obj).its('foo').should('not.exist').then((val) => {
           expect(val).to.be.undefined
@@ -1345,7 +1383,7 @@ describe('src/cy/commands/connectors', () => {
               return obj
             },
             sum (...args) {
-              return _.reduce(args, (memo, num) => {
+              return args.reduce((memo, num) => {
                 return memo + num
               }, 0)
             },
@@ -1403,7 +1441,7 @@ describe('src/cy/commands/connectors', () => {
 
             const { lastLog } = this
 
-            _.each(obj, (value, key) => {
+            Object.entries(obj).forEach(([key, value]) => {
               expect(lastLog.get(key)).to.deep.eq(value)
             })
           })
@@ -1760,11 +1798,15 @@ describe('src/cy/commands/connectors', () => {
             done()
           })
 
-          cy.on('command:retry', _.after(3, () => {
-            obj.foo = {
-              bar: 'bar',
+          let __afterCount11 = 0
+
+          cy.on('command:retry', () => {
+            if (++__afterCount11 >= 3) {
+              obj.foo = {
+                bar: 'bar',
+              }
             }
-          }))
+          })
 
           cy.noop(obj).its('foo.bar').should('eq', 'baz')
         })
@@ -1841,7 +1883,7 @@ describe('src/cy/commands/connectors', () => {
 
         cy.get('#list li').each(($li, i, arr) => {
           return new Promise((resolve, reject) => {
-            _.delay(() => {
+            setTimeout(() => {
               count += 1
 
               resolve()
@@ -1873,9 +1915,12 @@ describe('src/cy/commands/connectors', () => {
 
         // after 2 calls return false
         // to end the loop early
-        let fn = _.after(2, () => {
-          return false
-        })
+        let __afterCount12 = 0
+        let fn = (...args) => {
+          if (++__afterCount12 >= 2) {
+            return false
+          }
+        }
 
         fn = cy.spy(fn)
 

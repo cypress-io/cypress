@@ -41,7 +41,7 @@ export default [
       '**/vue/**/*',
       '**/svelte/**/*',
       '**/mount-utils/**/*',
-      '**/types/{bluebird,chai,chai-jquery,jquery,lodash,minimatch,mocha,sinon,sinon-chai}/**/*',
+      '**/types/{bluebird,chai,chai-jquery,jquery,minimatch,mocha,sinon,sinon-chai}/**/*',
       '.mocharc.js',
       '**/*.js',
     ],

@@ -1,5 +1,5 @@
 const { assertLogLength } = require('../../support/utils')
-const { _, $, dom } = Cypress
+const { $, dom } = Cypress
 
 describe('src/cy/commands/traversals', () => {
   beforeEach(() => {
@@ -17,13 +17,13 @@ describe('src/cy/commands/traversals', () => {
     'children', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev', 'prevAll', 'prevUntil', 'siblings',
   ]
 
-  _.each(fns, (fn) => {
+  fns.forEach((fn) => {
     // normalize string vs object
     let arg
     let name
 
-    if (_.isObject(fn)) {
-      name = _.keys(fn)[0]
+    if (typeof fn === 'object' && fn !== null) {
+      name = Object.keys(fn)[0]
       arg = fn[name]
     } else {
       name = fn
@@ -179,7 +179,7 @@ describe('src/cy/commands/traversals', () => {
           cy.get('#list')[name](arg).then(function () {
             let message
 
-            if (_.isUndefined(arg) || _.isFunction(arg)) {
+            if (arg === undefined || typeof arg === 'function') {
               message = ''
             } else {
               message = arg.toString()
@@ -199,7 +199,7 @@ describe('src/cy/commands/traversals', () => {
               name,
               type: 'command',
               props: {
-                Selector: _.isFunction(arg) ? '' : [].concat(arg).join(', '),
+                Selector: typeof arg === 'function' ? '' : [].concat(arg).join(', '),
                 'Applied To': cy.$$('#list')[0],
                 Yielded: yielded,
                 Elements: $el.length,
@@ -242,9 +242,13 @@ describe('src/cy/commands/traversals', () => {
   })
 
   it('eventually resolves', () => {
-    cy.on('command:retry', _.after(2, () => {
-      cy.$$('button:first').text('foo').addClass('bar')
-    }))
+    let __afterCount1 = 0
+
+    cy.on('command:retry', () => {
+      if (++__afterCount1 >= 2) {
+        cy.$$('button:first').text('foo').addClass('bar')
+      }
+    })
 
     cy.root().find('button:first').should('have.text', 'foo').and('have.class', 'bar')
   })
@@ -252,10 +256,13 @@ describe('src/cy/commands/traversals', () => {
   it('retries until it finds', () => {
     const li = cy.$$('#list li:last')
     const span = $('<span>foo</span>')
+    let __afterCount2 = 0
 
-    const retry = _.after(3, () => {
-      li.append(span)
-    })
+    const retry = () => {
+      if (++__afterCount2 >= 3) {
+        li.append(span)
+      }
+    }
 
     cy.on('command:retry', retry)
 
@@ -268,11 +275,14 @@ describe('src/cy/commands/traversals', () => {
     let buttons = cy.$$('button')
 
     const length = buttons.length - 2
+    let __afterCount3 = 0
 
-    cy.on('command:retry', _.after(2, () => {
-      buttons.last().remove()
-      buttons = cy.$$('button')
-    }))
+    cy.on('command:retry', () => {
+      if (++__afterCount3 >= 2) {
+        buttons.last().remove()
+        buttons = cy.$$('button')
+      }
+    })
 
     // should resolving after removing 2 buttons
     cy.root().find('button').should('have.length', length).then(($buttons) => {
@@ -281,28 +291,40 @@ describe('src/cy/commands/traversals', () => {
   })
 
   it('should(\'not.exist\')', () => {
-    cy.on('command:retry', _.after(3, () => {
-      cy.$$('#nested-div').find('span').remove()
-    }))
+    let __afterCount4 = 0
+
+    cy.on('command:retry', () => {
+      if (++__afterCount4 >= 3) {
+        cy.$$('#nested-div').find('span').remove()
+      }
+    })
 
     cy.get('#nested-div').find('span').should('not.exist')
   })
 
   it('should(\'exist\')', () => {
-    cy.on('command:retry', _.after(3, () => {
-      cy.$$('#nested-div').append($('<strong />'))
-    }))
+    let __afterCount5 = 0
+
+    cy.on('command:retry', () => {
+      if (++__afterCount5 >= 3) {
+        cy.$$('#nested-div').append($('<strong />'))
+      }
+    })
 
     cy.get('#nested-div').find('strong')
   })
 
   // https://github.com/cypress-io/cypress/issues/38
   it('works with checkboxes', () => {
-    cy.on('command:retry', _.after(2, () => {
-      const c = cy.$$('[name=colors]').slice(0, 2)
+    let __afterCount6 = 0
 
-      c.prop('checked', true)
-    }))
+    cy.on('command:retry', () => {
+      if (++__afterCount6 >= 2) {
+        const c = cy.$$('[name=colors]').slice(0, 2)
+
+        c.prop('checked', true)
+      }
+    })
 
     cy.get('#by-name').find(':checked').should('have.length', 2)
   })

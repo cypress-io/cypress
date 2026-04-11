@@ -2,7 +2,7 @@ const Cookie = require('js-cookie')
 const { stripIndent } = require('common-tags')
 
 const { assertLogLength } = require('../../support/utils')
-const { _, Promise, $ } = Cypress
+const { Promise, $ } = Cypress
 
 describe('src/cy/commands/navigation', () => {
   context('#reload', () => {
@@ -423,7 +423,7 @@ describe('src/cy/commands/navigation', () => {
         return null
       })
 
-      _.each([null, undefined, NaN, Infinity, {}, [], () => {}], (val) => {
+      ;[null, undefined, NaN, Infinity, {}, [], () => {}].forEach((val) => {
         it(`throws on: '${val}'`, (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('`cy.go()` accepts only a string or number argument')
@@ -963,7 +963,7 @@ describe('src/cy/commands/navigation', () => {
         }
 
         const fn = function (eventName, state) {
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(state[key]).to.deep.eq(value)
           })
 
@@ -1130,7 +1130,7 @@ describe('src/cy/commands/navigation', () => {
 
           const { lastLog } = this
 
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
           })
         })
@@ -1149,7 +1149,7 @@ describe('src/cy/commands/navigation', () => {
 
           const { lastLog } = this
 
-          _.each(obj, (value, key) => {
+          Object.entries(obj).forEach(([key, value]) => {
             expect(lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
           })
         })
@@ -2064,7 +2064,7 @@ describe('src/cy/commands/navigation', () => {
 
       it('does time out once stability is reached', function (done) {
         const logByName = (name) => {
-          return _.find(this.logs, (log) => {
+          return this.logs.find((log) => {
             return log.get('name') === name
           })
         }

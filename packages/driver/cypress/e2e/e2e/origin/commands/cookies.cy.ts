@@ -128,7 +128,6 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
     })
 
     context('#consoleProps', () => {
-      const { _ } = Cypress
       let logs: Map<string, any>
 
       beforeEach(() => {
@@ -261,7 +260,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
           expect(consoleProps.props['Cleared Cookies'][1]).to.have.property('name').that.equals('faz')
           expect(consoleProps.props['Cleared Cookies'][1]).to.have.property('value').that.equals('baz')
 
-          _.forEach(consoleProps.props['Cleared Cookies'], (clearedCookie) => {
+          consoleProps.props['Cleared Cookies'].forEach((clearedCookie) => {
             expect(clearedCookie).to.have.property('httpOnly').that.equals(false)
             expect(clearedCookie).to.have.property('secure').that.equals(false)
             expect(clearedCookie).to.have.property('path').that.is.a('string')

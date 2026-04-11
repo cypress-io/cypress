@@ -5,7 +5,7 @@ import {
   shouldNotBeCalled,
 } from '../../../support/utils'
 
-const { _, $ } = Cypress
+const { $ } = Cypress
 
 describe('src/cy/commands/actions/type - #clear', () => {
   beforeEach(() => {
@@ -41,10 +41,14 @@ describe('src/cy/commands/actions/type - #clear', () => {
 
     textarea.on('click', clicked)
 
-    cy.on('command:retry', _.after(3, () => {
-      textarea.prop('disabled', false)
-      retried()
-    }))
+    let retryCount1 = 0
+
+    cy.on('command:retry', () => {
+      if (++retryCount1 >= 3) {
+        textarea.prop('disabled', false)
+        retried()
+      }
+    })
 
     cy.get('#comments').clear().then(() => {
       expect(clicked).to.be.calledOnce
@@ -59,13 +63,17 @@ describe('src/cy/commands/actions/type - #clear', () => {
 
     const textarea = cy.$$('#comments').val('foo bar').prop('disabled', true)
 
-    cy.on('command:retry', _.after(3, () => {
-      if (!retried.callCount) {
-        textarea.replaceWith(textarea[0].outerHTML)
-        cy.$$('#comments').prop('disabled', false).on('click', clicked)
-        retried()
+    let retryCount2 = 0
+
+    cy.on('command:retry', () => {
+      if (++retryCount2 >= 3) {
+        if (!retried.callCount) {
+          textarea.replaceWith(textarea[0].outerHTML)
+          cy.$$('#comments').prop('disabled', false).on('click', clicked)
+          retried()
+        }
       }
-    }))
+    })
 
     cy.get('#comments').clear().then(() => {
       expect(clicked).to.be.calledOnce
@@ -248,10 +256,9 @@ describe('src/cy/commands/actions/type - #clear', () => {
 
     it('eventually passes the assertion', () => {
       cy.$$('input:first').keyup(function () {
-        _.delay(() => {
+        setTimeout(() => {
           $(this).addClass('cleared')
-        }
-        , 100)
+        }, 100)
       })
 
       cy.get('input:first').clear().should('have.class', 'cleared').then(function () {
@@ -266,10 +273,9 @@ describe('src/cy/commands/actions/type - #clear', () => {
 
     it('eventually passes the assertion on multiple inputs', () => {
       cy.$$('input').keyup(function () {
-        _.delay(() => {
+        setTimeout(() => {
           $(this).addClass('cleared')
-        }
-        , 100)
+        }, 100)
       })
 
       cy.get('input').invoke('slice', 0, 2).clear().should('have.class', 'cleared')
@@ -556,7 +562,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
       })
 
       cy.get('input').invoke('slice', 0, 2).clear().then(() => {
-        _.each(logs, (log) => {
+        logs.forEach((log) => {
           expect(log.get('state')).to.eq('passed')
 
           expect(log.get('ended')).to.be.true

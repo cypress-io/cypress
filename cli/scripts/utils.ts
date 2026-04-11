@@ -5,7 +5,6 @@
  */
 export const includeTypes: string[] = [
   'bluebird',
-  'lodash',
   'mocha',
   'minimatch',
   'sinon',

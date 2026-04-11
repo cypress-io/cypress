@@ -1,10 +1,35 @@
 const { create, Log, LogUtils } = require('@packages/driver/src/cypress/log')
 const { MAX_VISIBILITY_CHECK_ELEMENTS } = require('@packages/types')
 
+const isEqualWith = (a, b, customizer) => {
+  const result = customizer(a, b, undefined)
+
+  if (result !== undefined) return result
+
+  if (a === b) return true
+  if (a == null || b == null) return a === b
+  if (typeof a !== 'object' || typeof b !== 'object') return a === b
+
+  const keysA = Object.keys(a)
+  const keysB = Object.keys(b)
+
+  if (keysA.length !== keysB.length) return false
+
+  for (const key of keysA) {
+    const custResult = customizer(a[key], b[key], key)
+
+    if (custResult === false) return false
+    if (custResult === true) continue
+    if (!isEqualWith(a[key], b[key], customizer)) return false
+  }
+
+  return true
+}
+
 const objectDiff = (newAttrs, oldAttrs) => {
   return Object.entries(newAttrs).reduce(
     (diff, [key, value]) => {
-      const isEq = Cypress._.isEqualWith(oldAttrs[key], value, (objValue, othValue, key) => {
+      const isEq = isEqualWith(oldAttrs[key], value, (objValue, othValue, key) => {
         if (objValue === undefined && othValue === undefined) return true
 
         if (key === 'updatedAtTimestamp') {

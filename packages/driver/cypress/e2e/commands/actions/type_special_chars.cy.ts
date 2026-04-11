@@ -5,8 +5,6 @@ import {
   trimInnerText,
 } from '../../../support/utils'
 
-const { _ } = Cypress
-
 describe('src/cy/commands/actions/type - #type special chars', () => {
   before(function () {
     cy
@@ -250,13 +248,17 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         done('should not have received keypress')
       })
 
-      cy.$$(':text:first').on('keydown', _.after(2, (e) => {
-        expect(e.which).to.eq(8)
-        expect(e.keyCode).to.eq(8)
-        expect(e.key).to.eq('Backspace')
+      let keydownCount1 = 0
 
-        done()
-      }))
+      cy.$$(':text:first').on('keydown', (e) => {
+        if (++keydownCount1 >= 2) {
+          expect(e.which).to.eq(8)
+          expect(e.keyCode).to.eq(8)
+          expect(e.key).to.eq('Backspace')
+
+          done()
+        }
+      })
 
       cy.get(':text:first').invoke('val', 'ab').type('{leftarrow}{backspace}')
     })
@@ -446,13 +448,17 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         done('should not have received keypress')
       })
 
-      cy.$$(':text:first').on('keydown', _.after(2, (e) => {
-        expect(e.which).to.eq(46)
-        expect(e.keyCode).to.eq(46)
-        expect(e.key).to.eq('Delete')
+      let keydownCount2 = 0
 
-        done()
-      }))
+      cy.$$(':text:first').on('keydown', (e) => {
+        if (++keydownCount2 >= 2) {
+          expect(e.which).to.eq(46)
+          expect(e.keyCode).to.eq(46)
+          expect(e.key).to.eq('Delete')
+
+          done()
+        }
+      })
 
       cy.get(':text:first').invoke('val', 'ab').type('{leftarrow}{del}')
     })
@@ -1163,17 +1169,25 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     it('sets which and keyCode to 13 and prevents EOL insertion', (done) => {
-      cy.$$('#input-types textarea').on('keypress', _.after(2, (e) => {
-        done('should not have received keypress event')
-      }))
+      let keypressCount1 = 0
 
-      cy.$$('#input-types textarea').on('keydown', _.after(2, (e) => {
-        expect(e.which).to.eq(13)
-        expect(e.keyCode).to.eq(13)
-        expect(e.key).to.eq('Enter')
+      cy.$$('#input-types textarea').on('keypress', () => {
+        if (++keypressCount1 >= 2) {
+          done('should not have received keypress event')
+        }
+      })
 
-        e.preventDefault()
-      }))
+      let keydownCount3 = 0
+
+      cy.$$('#input-types textarea').on('keydown', (e) => {
+        if (++keydownCount3 >= 2) {
+          expect(e.which).to.eq(13)
+          expect(e.keyCode).to.eq(13)
+          expect(e.key).to.eq('Enter')
+
+          e.preventDefault()
+        }
+      })
 
       cy.get('#input-types textarea').invoke('val', 'foo').type('d{enter}').then(($textarea) => {
         expect($textarea).to.have.value('food')
@@ -1183,14 +1197,18 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     it('sets which and keyCode and charCode to 13 and prevents EOL insertion', (done) => {
-      cy.$$('#input-types textarea').on('keypress', _.after(2, (e) => {
-        expect(e.which).to.eq(13)
-        expect(e.keyCode).to.eq(13)
-        expect(e.charCode).to.eq(13)
-        expect(e.key).to.eq('Enter')
+      let keypressCount2 = 0
 
-        e.preventDefault()
-      }))
+      cy.$$('#input-types textarea').on('keypress', (e) => {
+        if (++keypressCount2 >= 2) {
+          expect(e.which).to.eq(13)
+          expect(e.keyCode).to.eq(13)
+          expect(e.charCode).to.eq(13)
+          expect(e.key).to.eq('Enter')
+
+          e.preventDefault()
+        }
+      })
 
       cy.get('#input-types textarea').invoke('val', 'foo').type('d{enter}').then(($textarea) => {
         expect($textarea).to.have.value('food')

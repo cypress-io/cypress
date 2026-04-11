@@ -165,7 +165,7 @@ describe('driver/src/cypress/stack_utils', () => {
       })
       .its('parsed')
       .then((parsed) => {
-        return Cypress._.find(parsed, { fileUrl: 'http://localhost:8888/js/utils.js' })
+        return parsed.find((item) => item.fileUrl === 'http://localhost:8888/js/utils.js')
       })
       .then((errorLocation) => {
         expect(errorLocation, 'does not have disk information').to.deep.equal({

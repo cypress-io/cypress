@@ -96,7 +96,7 @@ export class PrimaryOriginCommunicator extends EventEmitter {
       }
 
       // reify the final or requested snapshot coming back from the secondary domain if requested by the runner.
-      if (data?.event.includes(SNAPSHOT_EVENT_PREFIX) && !Cypress._.isEmpty(data?.data)) {
+      if (data?.event.includes(SNAPSHOT_EVENT_PREFIX) && data?.data != null && Object.keys(data.data).length > 0) {
         data.data = reifySnapshotFromSerialization(data.data as any)
       }
 
@@ -305,7 +305,7 @@ export class SpecBridgeCommunicator extends EventEmitter {
 
     // If requested by the runner, preprocess the snapshot before sending through postMessage() to attempt to serialize the DOM body of the snapshot.
     // NOTE: SNAPSHOT_EVENT_PREFIX events, if requested by the log manager, are namespaced per primary log
-    if (eventName.includes(SNAPSHOT_EVENT_PREFIX) && !Cypress._.isEmpty(data)) {
+    if (eventName.includes(SNAPSHOT_EVENT_PREFIX) && data != null && Object.keys(data).length > 0) {
       data = preprocessSnapshotForSerialization(data as any)
     }
 

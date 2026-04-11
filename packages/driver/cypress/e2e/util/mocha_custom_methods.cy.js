@@ -15,7 +15,12 @@ describe('mocha custom methods', () => {
         prevAttempts,
       }
 
-      return Cypress._.cloneDeep(mockTestContext)
+      return {
+        ...mockTestContext,
+        currentRetry: mockTestContext.currentRetry,
+        retries: mockTestContext.retries,
+        prevAttempts: [...prevAttempts],
+      }
     }
 
     it('should never attempt to retry a test that passes on the first try, regardless of strategy', function () {
