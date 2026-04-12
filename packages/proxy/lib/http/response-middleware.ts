@@ -219,8 +219,8 @@ const getOriginalRequestId = (requestId: string) => {
 const LogResponse: ResponseMiddleware = function () {
   this.debug('received response %o', {
     browserPreRequest: pick(this.req.browserPreRequest, 'requestId'),
-    req: pick(this.req, 'method', 'proxiedUrl', 'headers'),
-    incomingRes: pick(this.incomingRes, 'headers', 'statusCode'),
+    req: { method: this.req.method, proxiedUrl: this.req.proxiedUrl, headers: this.req.headers },
+    incomingRes: { headers: this.incomingRes.headers, statusCode: this.incomingRes.statusCode },
   })
 
   this.next()

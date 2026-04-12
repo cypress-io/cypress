@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getBodyEncoding, mergeDeletedHeaders, mergeWithPreservedBuffers, parseContentType } from '../../lib/server/util'
+import { getBodyEncoding, mergeDeletedHeaders, mergeWithPreservedBuffers, parseContentType, pickFromIncomingMessage } from '../../lib/server/util'
 import { join } from 'path'
 import { readFileSync } from 'fs'
 
@@ -204,6 +204,50 @@ describe('net-stubbing util', () => {
         preserved: true,
         added: 'new',
       })
+    })
+  })
+
+  describe('pickFromIncomingMessage', () => {
+    it('picks inherited properties from a prototype-backed object', () => {
+      const proto = {
+        headers: { 'content-type': 'application/json' },
+        method: 'GET',
+        url: '/api/test',
+      }
+
+      const obj = Object.create(proto)
+
+      const result = pickFromIncomingMessage(obj, ['headers', 'method', 'url', 'missing'])
+
+      expect(result).toEqual({
+        headers: { 'content-type': 'application/json' },
+        method: 'GET',
+        url: '/api/test',
+      })
+    })
+
+    it('picks own properties', () => {
+      const obj = {
+        headers: { host: 'localhost' },
+        method: 'POST',
+        statusCode: 200,
+      }
+
+      const result = pickFromIncomingMessage(obj, ['headers', 'method', 'statusCode'])
+
+      expect(result).toEqual({
+        headers: { host: 'localhost' },
+        method: 'POST',
+        statusCode: 200,
+      })
+    })
+
+    it('omits keys not present on the object or its prototype', () => {
+      const obj = Object.create({ headers: {} })
+
+      const result = pickFromIncomingMessage(obj, ['headers', 'nonexistent'])
+
+      expect(result).toEqual({ headers: {} })
     })
   })
 

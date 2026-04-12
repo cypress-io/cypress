@@ -853,7 +853,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         .on('response', (incomingRes) => {
           debug(
             'resolve:url headers received, buffering response %o',
-            pick(incomingRes, ['headers', 'statusCode']),
+            { headers: incomingRes.headers, statusCode: incomingRes.statusCode },
           )
 
           if (newUrl == null) {

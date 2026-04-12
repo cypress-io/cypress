@@ -491,7 +491,15 @@ module.exports = function (options = {}) {
 
       push(response)
 
-      response = pickKeys(response, ['statusCode', 'body', 'headers'])
+      const picked = {}
+
+      for (const key of ['statusCode', 'body', 'headers']) {
+        if (key in response) {
+          picked[key] = response[key]
+        }
+      }
+
+      response = picked
 
       // normalize status
       response.status = response.statusCode

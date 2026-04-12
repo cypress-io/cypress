@@ -1,7 +1,6 @@
 const EE = require('events')
 const Promise = require('bluebird')
 const path = require('path')
-const { pick } = require('@packages/utils')
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
 const buildErrorLocationFromTransformError = (err, projectRoot) => {
@@ -21,13 +20,26 @@ const buildErrorLocationFromTransformError = (err, projectRoot) => {
 }
 
 const serializeError = (err) => {
-  const obj = pick(err, [
+  if (err == null || (typeof err !== 'object' && typeof err !== 'function')) {
+    return { message: String(err) }
+  }
+
+  const keys = [
     'name', 'message', 'stack', 'code', 'annotated', 'type',
     'details', 'isCypressErr', 'messageMarkdown',
     'originalError',
     // Location of the error when a TransformError or a esbuild error occurs (parse error from ts-node or esbuild)
     'compilerErrorLocation',
-  ])
+  ]
+
+  // Use `in` instead of hasOwnProperty because Error.name is inherited
+  const obj = {}
+
+  for (const key of keys) {
+    if (key in err) {
+      obj[key] = err[key]
+    }
+  }
 
   if (obj.originalError) {
     obj.originalError = serializeError(obj.originalError)

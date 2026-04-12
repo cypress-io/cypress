@@ -344,10 +344,12 @@ const createRun = Promise.method((options: any = {}) => {
       }
     })
   }).catch((err: any) => {
-    debug('failed creating run with status %o',
-      pick(err, ['name', 'message', 'statusCode', 'stack']))
+    const statusCode = err?.statusCode
 
-    switch (err.statusCode) {
+    debug('failed creating run with status %o',
+      { name: err?.name, message: err?.message, statusCode, stack: err?.stack })
+
+    switch (statusCode) {
       case 401:
         recordKey = hideKeys(recordKey)
         if (!recordKey) {

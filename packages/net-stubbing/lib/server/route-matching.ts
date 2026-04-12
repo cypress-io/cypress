@@ -4,7 +4,7 @@ import url from 'url'
 import type { CypressIncomingRequest } from '@packages/proxy'
 import type { BackendRoute } from './types'
 import type { RouteMatcherOptions } from '../types'
-import { getAllStringMatcherFields } from './util'
+import { getAllStringMatcherFields, pickFromIncomingMessage } from './util'
 import { pick, omit, getPath, partition } from '@packages/utils'
 
 /**
@@ -93,7 +93,7 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 }
 
 export function _getMatchableForRequest (req: CypressIncomingRequest) {
-  let matchable: any = pick(req, 'headers', 'method', 'resourceType')
+  let matchable: any = pickFromIncomingMessage(req, ['headers', 'method', 'resourceType'])
 
   const authorization = req.headers['authorization']
 

@@ -15,6 +15,7 @@ import {
   mergeDeletedHeaders,
   mergeWithPreservedBuffers,
   getBodyEncoding,
+  pickFromIncomingMessage,
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
 import { telemetry } from '@packages/telemetry'
@@ -91,7 +92,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   this.netStubbingState.requests[request.id] = request
 
-  const req = Object.assign(pick(request.req, SERIALIZABLE_REQ_PROPS), {
+  const req = Object.assign(pickFromIncomingMessage(request.req, SERIALIZABLE_REQ_PROPS), {
     url: request.req.proxiedUrl,
   }) as CyHttpMessages.IncomingRequest
 

@@ -150,6 +150,29 @@ describe('lib/plugins/util', () => {
         annotated: 'the annotated version',
       })
     })
+
+    it('handles a primitive string rejection', () => {
+      expect(util.serializeError('boom')).to.eql({ message: 'boom' })
+    })
+
+    it('handles null', () => {
+      expect(util.serializeError(null)).to.eql({ message: 'null' })
+    })
+
+    it('handles a number', () => {
+      expect(util.serializeError(42)).to.eql({ message: '42' })
+    })
+
+    it('recursively serializes a primitive originalError', () => {
+      const err = new Error('wrapper')
+
+      err.originalError = 'inner boom'
+
+      const result = util.serializeError(err)
+
+      expect(result.originalError).to.eql({ message: 'inner boom' })
+      expect(result.message).to.equal('wrapper')
+    })
   })
 
   context('#buildErrorLocationFromTransformError', () => {

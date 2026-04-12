@@ -13,6 +13,7 @@ import {
   getBodyStream,
   mergeDeletedHeaders,
   mergeWithPreservedBuffers,
+  pickFromIncomingMessage,
 } from '../util'
 import { pick } from '@packages/utils'
 
@@ -55,7 +56,7 @@ export const InterceptResponse: ResponseMiddleware = async function () {
     return getEncoding(buf) !== 'binary' ? buf.toString('utf8') : buf
   })
 
-  const res = Object.assign(pick(this.incomingRes, SERIALIZABLE_RES_PROPS), {
+  const res = Object.assign(pickFromIncomingMessage(this.incomingRes, SERIALIZABLE_RES_PROPS), {
     url: this.req.proxiedUrl,
     body,
   }) as CyHttpMessages.IncomingResponse

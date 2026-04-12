@@ -22,6 +22,23 @@ import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
+
+/**
+ * Pick properties from an object using the `in` operator so inherited
+ * properties (e.g. `headers`, `method` on IncomingMessage) are included.
+ */
+export function pickFromIncomingMessage (obj: any, keys: string[]): Record<string, any> {
+  const result: Record<string, any> = {}
+
+  for (const key of keys) {
+    if (key in obj) {
+      result[key] = obj[key]
+    }
+  }
+
+  return result
+}
+
 const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
 
 const isValidJSON = function (text: unknown) {

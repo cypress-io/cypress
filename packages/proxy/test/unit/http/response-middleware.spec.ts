@@ -128,6 +128,51 @@ describe('http/response-middleware', function () {
     })
   })
 
+  describe('LogResponse', () => {
+    const { LogResponse } = ResponseMiddleware
+
+    it('captures inherited properties from prototype-backed req and incomingRes', async () => {
+      const debugArgs: any[] = []
+
+      const reqProto = {
+        method: 'POST',
+        headers: { 'x-custom': 'value' },
+        proxiedUrl: '/foo',
+        browserPreRequest: { requestId: '123', extra: 'ignored' },
+      }
+
+      const incomingResProto = {
+        headers: { 'content-type': 'text/html' },
+        statusCode: 200,
+      }
+
+      const ctx = {
+        req: Object.create(reqProto),
+        incomingRes: Object.create(incomingResProto),
+        res: {
+          on: (_event, _listener) => {},
+          off: (_event, _listener) => {},
+        },
+        debug (...args) {
+          debugArgs.push(args)
+        },
+      }
+
+      await testMiddleware([LogResponse], ctx)
+
+      expect(debugArgs).toHaveLength(1)
+
+      const logged = debugArgs[0][1]
+
+      expect(logged.browserPreRequest).toEqual({ requestId: '123' })
+      expect(logged.req.method).toEqual('POST')
+      expect(logged.req.headers).toEqual({ 'x-custom': 'value' })
+      expect(logged.req.proxiedUrl).toEqual('/foo')
+      expect(logged.incomingRes.headers).toEqual({ 'content-type': 'text/html' })
+      expect(logged.incomingRes.statusCode).toEqual(200)
+    })
+  })
+
   describe('FilterNonProxiedResponse', () => {
     const { FilterNonProxiedResponse } = ResponseMiddleware
     let ctx

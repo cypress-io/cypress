@@ -471,6 +471,18 @@ describe('lib/modes/record', () => {
 
       expect(errors.throwErr).to.have.been.calledWith('CLOUD_RECORD_KEY_NOT_VALID', 'undefined')
     })
+
+    it('does not throw when createRun rejects with undefined', async () => {
+      api.createRun.rejects(undefined)
+
+      // the catch block should not blow up when err is undefined;
+      // it falls through to the default branch which re-throws a
+      // wrapped CypressError, so the promise is still rejected
+      await expect(recordMode.createRun({
+        git: {},
+        recordKey: '1',
+      })).to.be.rejected
+    })
   })
 
   context('.postInstanceTests', () => {
