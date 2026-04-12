@@ -1,6 +1,5 @@
 require('../../spec_helper')
 
-const _ = require('lodash')
 const fs = require('fs')
 const stream = require('stream')
 const Promise = require('bluebird')
@@ -17,7 +16,13 @@ function drain (stream) {
 
 describe('lib/util/stream_buffer', () => {
   it('reads out no matter when we write', function (done) {
-    done = _.after(2, done)
+    let afterCount = 0
+    const origDone = done
+
+    done = (...args) => {
+      if (++afterCount >= 2) return origDone(...args)
+    }
+
     const pt = stream.PassThrough()
     const sb = streamBuffer()
 

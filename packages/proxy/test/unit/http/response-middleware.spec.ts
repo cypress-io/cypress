@@ -1,5 +1,5 @@
 import { describe, expect, beforeEach, afterEach, it, vi, Mock, MockInstance } from 'vitest'
-import _ from 'lodash'
+import { omit, pick } from '@packages/utils'
 import zlib from 'zlib'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
@@ -33,7 +33,7 @@ describe('http/response-middleware', function () {
   })
 
   it('exports the members in the correct order', function () {
-    expect(_.keys(ResponseMiddleware)).toEqual([
+    expect(Object.keys(ResponseMiddleware)).toEqual([
       'LogResponse',
       'FilterNonProxiedResponse',
       'AttachPlainTextStreamFn',
@@ -217,7 +217,7 @@ describe('http/response-middleware', function () {
         it('removes the document-domain directive from the header and keeps the rest', async () => {
           await testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
           const [, featurePolicy] = ctx.res.set.mock.calls[0]
-          const directives = _.fromPairs(featurePolicy.split('; ').map((directive) => directive.split(' ')))
+          const directives = Object.fromEntries(featurePolicy.split('; ').map((directive) => directive.split(' ')))
 
           expect(directives['document-domain']).toBeUndefined()
           expect(directives['autoplay']).toBeDefined()
@@ -227,7 +227,7 @@ describe('http/response-middleware', function () {
 
       describe('when it is the only directive', function () {
         beforeEach(function () {
-          featurePolicyDirectives = _.pick(featurePolicyDirectives, 'document-domain')
+          featurePolicyDirectives = pick(featurePolicyDirectives, 'document-domain')
           prepareContext()
         })
 
@@ -244,8 +244,8 @@ describe('http/response-middleware', function () {
         'referrer-policy': 'same-origin',
       }
 
-      if (!_.isEmpty(featurePolicyDirectives)) {
-        headers['feature-policy'] = _.toPairs(featurePolicyDirectives).map(
+      if (Object.keys(featurePolicyDirectives).length > 0) {
+        headers['feature-policy'] = Object.entries(featurePolicyDirectives).map(
           (directive) => directive.join(' '),
         ).join('; ')
       }
@@ -1090,7 +1090,7 @@ describe('http/response-middleware', function () {
         onError (error) {
           throw error
         },
-        ..._.omit(props, 'incomingRes', 'res', 'req'),
+        ...omit(props, 'incomingRes', 'res', 'req'),
       }
     }
   })
@@ -1862,7 +1862,7 @@ describe('http/response-middleware', function () {
             return serverBusMock.once(event, listener)
           }),
         },
-        ..._.omit(props, 'incomingRes', 'res', 'req'),
+        ...omit(props, 'incomingRes', 'res', 'req'),
       }
     }
 
@@ -2174,7 +2174,7 @@ describe('http/response-middleware', function () {
         onError (error) {
           throw error
         },
-        ..._.omit(props, 'incomingRes', 'res', 'req'),
+        ...omit(props, 'incomingRes', 'res', 'req'),
       }
     }
   })
@@ -2284,7 +2284,7 @@ describe('http/response-middleware', function () {
         onError (error) {
           throw error
         },
-        ..._.omit(props, 'incomingRes', 'res', 'req'),
+        ...omit(props, 'incomingRes', 'res', 'req'),
       }
     }
   })
@@ -2381,7 +2381,7 @@ describe('http/response-middleware', function () {
             family: 'chromium',
           }
         },
-        ..._.omit(props, 'incomingRes', 'res', 'req'),
+        ...omit(props, 'incomingRes', 'res', 'req'),
       }
     }
   })

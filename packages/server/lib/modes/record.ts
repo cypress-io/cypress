@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { defaults, getPath, omit, pick, uniqBy } from '@packages/utils'
 import path from 'path'
 import la from 'lazy-ass'
 import check from 'check-more-types'
@@ -36,7 +36,7 @@ const haveProjectIdAndKeyButNoRecordOption = (projectId: Cfg['projectId'], optio
   // if we have a project id and we have a key
   // and record hasn't been set to true or false
   return (projectId && options.key) && (
-    _.isUndefined(options.record)
+    options.record === undefined
   )
 }
 
@@ -87,7 +87,7 @@ const throwIfIndeterminateCiBuildId = (ciBuildId: ReadyOptions['ciBuildId'], par
 }
 
 const throwIfRecordParamsWithoutRecording = (record: ReadyOptions['record'], ciBuildId: ReadyOptions['ciBuildId'], parallel: ReadyOptions['parallel'], group: ReadyOptions['group'], tag: ReadyOptions['tag'], autoCancelAfterFailures: ReadyOptions['autoCancelAfterFailures']) => {
-  if (!record && _.some([ciBuildId, parallel, group, tag, autoCancelAfterFailures !== undefined])) {
+  if (!record && [ciBuildId, parallel, group, tag, autoCancelAfterFailures !== undefined].some(Boolean)) {
     throwErr('RECORD_PARAMS_WITHOUT_RECORDING', {
       ciBuildId,
       tag,
@@ -113,7 +113,7 @@ const throwIfNoProjectId = (projectId: Cfg['projectId'], configFile: any) => {
 }
 
 const getSpecRelativePath = (spec: ReadyOptions['spec']) => {
-  return _.get(spec, 'relative', null)
+  return getPath(spec, 'relative') ?? null
 }
 
 /*
@@ -175,15 +175,15 @@ const postInstanceResults = (options: any = {}) => {
   video = Boolean(video)
 
   // get rid of the path property
-  screenshots = _.map(screenshots, (screenshot) => {
-    return _.omit(screenshot, 'path')
+  screenshots = screenshots.map((screenshot) => {
+    return omit(screenshot, ['path'])
   })
 
-  tests = tests && _.map(tests, (test) => {
-    return _.omit({
+  tests = tests && tests.map((test) => {
+    return omit({
       clientId: test.testId,
       ...test,
-    }, 'title', 'body', 'testId')
+    }, ['title', 'body', 'testId'])
   })
 
   return api.postInstanceResults({
@@ -232,7 +232,7 @@ const gracePeriodMessage = (gracePeriodEnds: any) => {
 }
 
 const createRun = Promise.method((options: any = {}) => {
-  _.defaults(options, {
+  defaults(options, {
     group: null,
     tags: null,
     parallel: null,
@@ -268,7 +268,7 @@ const createRun = Promise.method((options: any = {}) => {
     ciBuildId = String(ciBuildId)
   }
 
-  specs = _.map(specs, getSpecRelativePath)
+  specs = (specs || []).map(getSpecRelativePath)
 
   const commit = getCommitFromGitOrCi(git)
   const ci = {
@@ -303,7 +303,7 @@ const createRun = Promise.method((options: any = {}) => {
       return
     }
 
-    return _.each(response.warnings, (warning: any) => {
+    return response.warnings.forEach((warning: any) => {
       switch (warning.code) {
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
           return errorsWarning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
@@ -339,13 +339,13 @@ const createRun = Promise.method((options: any = {}) => {
         default:
           return errorsWarning('CLOUD_UNKNOWN_CREATE_RUN_WARNING', {
             message: warning.message,
-            props: _.omit(warning, 'message'),
+            props: omit(warning, ['message']),
           })
       }
     })
   }).catch((err: any) => {
     debug('failed creating run with status %o',
-      _.pick(err, ['name', 'message', 'statusCode', 'stack']))
+      pick(err, ['name', 'message', 'statusCode', 'stack']))
 
     switch (err.statusCode) {
       case 401:
@@ -361,8 +361,8 @@ const createRun = Promise.method((options: any = {}) => {
       case 402: {
         const { code, payload } = err.error
 
-        const limit = _.get(payload, 'limit')
-        const orgId = _.get(payload, 'orgId')
+        const limit = payload?.limit
+        const orgId = payload?.orgId
 
         switch (code) {
           case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
@@ -402,7 +402,7 @@ const createRun = Promise.method((options: any = {}) => {
       case 422: {
         const { code, payload } = err.error
 
-        const runUrl: string = _.get(payload, 'runUrl')
+        const runUrl: string = payload?.runUrl
 
         switch (code) {
           case 'RUN_GROUP_NAME_NOT_UNIQUE':
@@ -589,7 +589,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
   const recordKey = options.key
 
   // we want to normalize this to an array to send to API
-  const tags = _.split(options.tag, ',')
+  const tags = (options.tag || '').split(',')
 
   return commitInfo.commitInfo(projectRoot)
   .then((git: any) => {
@@ -665,14 +665,11 @@ const createRunAndRecordSpecs = (options: any = {}) => {
           ctx.actions.currentRecording.startInstance(instanceId)
 
           // pull off only what we need
-          const result = _
-          .chain(resp)
-          .pick('spec', 'claimedInstances', 'totalInstances')
-          .extend({
+          const result = {
+            ...pick(resp, ['spec', 'claimedInstances', 'totalInstances']),
             estimated: resp.estimatedWallClockDuration,
             instanceId,
-          })
-          .value()
+          }
 
           telemetry.getSpan('record:beforeSpecRun')?.end()
 
@@ -751,10 +748,9 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         const runtimeConfig = runnables.runtimeConfig
         const resolvedRuntimeConfig = { ...config, ...runtimeConfig }
 
-        const tests = _.chain(r[0])
-        .uniqBy('id')
+        const tests = uniqBy(r[0], 'id')
         .map((v) => {
-          return _.pick({
+          return pick({
             ...v,
             clientId: v.id,
             config: v._testConfig?.unverifiedTestConfig || null,
@@ -768,25 +764,22 @@ const createRunAndRecordSpecs = (options: any = {}) => {
             }),
             hookIds: v.hooks.map((hook) => hook.hookId),
           },
-          'clientId', 'body', 'title', 'config', 'hookIds')
+          ['clientId', 'body', 'title', 'config', 'hookIds'])
         })
-        .value()
 
-        const hooks = _.chain(r[1])
-        .uniqBy('hookId')
+        const hooks = uniqBy(r[1], 'hookId')
         .map((v) => {
-          return _.pick({
+          return pick({
             ...v,
             clientId: v.hookId,
             title: [v.title],
             type: v.hookName,
           },
-          'clientId',
+          ['clientId',
           'type',
           'title',
-          'body')
+          'body'])
         })
-        .value()
 
         const responseDidFail = {}
         const response = await _postInstanceTests({
@@ -812,7 +805,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
           return
         }
 
-        if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
+        if (response.actions?.some((a) => a.type === 'SPEC' && a.action === 'SKIP')) {
           errorsWarning('CLOUD_CANCEL_SKIPPED_SPEC')
 
           // set a property on the response so the browser runner

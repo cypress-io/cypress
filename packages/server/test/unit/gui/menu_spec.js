@@ -1,21 +1,20 @@
 require('../../spec_helper')
 
-const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
 const appData = require(`../../../lib/util/app_data`)
 const menu = require(`../../../lib/gui/menu`)
 
 const getMenuItem = function (label) {
-  return _.find(electron.Menu.buildFromTemplate.lastCall.args[0], { label })
+  return electron.Menu.buildFromTemplate.lastCall.args[0].find((item) => item.label === label)
 }
 
 const getSubMenuItem = (menu, label) => {
-  return _.find(menu.submenu, { label })
+  return menu.submenu.find((item) => item.label === label)
 }
 
 const getLabels = (menu) => {
-  return _(menu).map('label').compact().value()
+  return menu.map((item) => item.label).filter(Boolean)
 }
 
 describe('gui/menu', function () {

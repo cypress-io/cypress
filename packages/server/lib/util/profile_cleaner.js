@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const path = require('path')
 const debug = require('debug')('cypress:server:profilecleaner')
 const { fs } = require('./fs')
@@ -6,17 +5,17 @@ const glob = require('./glob')
 const findProcess = require('./find_process')
 
 const includesCypress = (str) => {
-  return _.chain(str).lowerCase().includes('cypress').value()
+  return typeof str === 'string' && str.toLowerCase().includes('cypress')
 }
 
 const isCypressProcess = (process) => {
   debug('got process %o', process)
 
-  return _.some([process.cmd, process.name], includesCypress)
+  return [process.cmd, process.name].some(includesCypress)
 }
 
 const getPidFromFolder = (folder, pidPrefix) => {
-  return _.toNumber(
+  return Number(
     path.basename(folder).replace(pidPrefix, ''),
   )
 }
@@ -37,7 +36,7 @@ const inactivePids = ({ pid }) => {
   return findProcess.byPid(pid)
   .then((processes) => {
     // return true if no processes are a cypress process
-    return !_.some(processes, isCypressProcess)
+    return !processes.some(isCypressProcess)
   })
 }
 

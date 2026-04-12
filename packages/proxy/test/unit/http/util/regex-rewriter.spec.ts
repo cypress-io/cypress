@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import _ from 'lodash'
 import { concatStream } from '@packages/network'
 import fs from 'fs/promises'
 import rp from '@cypress/request-promise'
@@ -528,10 +527,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         bluebird: `${cdnUrl}/bluebird/3.5.1/bluebird.js`,
       }
 
-      libs = _
-      .chain(libs)
-      .clone()
-      .reduce((memo, url, lib) => {
+      const reduced = Object.entries(libs).reduce<Record<string, string>>((memo, [lib, url]) => {
         memo[lib] = url
         memo[`${lib}Min`] = url
         .replace(/js$/, 'min.js')
@@ -542,9 +538,9 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         }
 
         return memo
-      }
-      , {})
-      .extend({
+      }, {})
+
+      libs = Object.assign(reduced, {
         knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
         knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,
         emberMin: `${cdnUrl}/ember.js/2.18.2/ember.min.js`,
@@ -553,10 +549,9 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
         vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
         hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
-      })
-      .value() as unknown as typeof libs
+      }) as unknown as typeof libs
 
-      _.each(libs, (url, lib) => {
+      Object.entries(libs).forEach(([lib, url]) => {
         [false, true].forEach((modifyObstructiveThirdPartyCode) => {
           it(`does not alter code from: '${lib}', with modifyObstructiveThirdPartyCode set to ${modifyObstructiveThirdPartyCode}`, { timeout: 10000 }, async function () {
             const pathToLib = `/tmp/${lib}`

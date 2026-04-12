@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import chalk from 'chalk'
 import Debug from 'debug'
-import _ from 'lodash'
+import { omit, pick } from '@packages/utils'
 import { errorUtils } from '@packages/errors'
 import { DeferredSourceMapCache } from '@packages/rewriter'
 import { telemetry, Span } from '@packages/telemetry'
@@ -137,7 +137,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
     const middlewares = ctx.middleware[type]
 
     // pop the first pair off the middleware
-    const middlewareName = _.keys(middlewares)[0]
+    const middlewareName = Object.keys(middlewares)[0]
 
     if (!middlewareName) {
       return Promise.resolve()
@@ -145,20 +145,17 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
     const middleware = middlewares[middlewareName]
 
-    ctx.middleware[type] = _.omit(middlewares, middlewareName)
+    ctx.middleware[type] = omit(middlewares, middlewareName)
 
     return new Bluebird((resolve) => {
       let ended = false
 
       function copyChangedCtx () {
-        _.chain(fullCtx)
-        .omit(READONLY_MIDDLEWARE_KEYS)
-        .forEach((value, key) => {
-          if (ctx[key] !== value) {
+        Object.entries(fullCtx).forEach(([key, value]) => {
+          if (!(READONLY_MIDDLEWARE_KEYS as string[]).includes(key) && ctx[key] !== value) {
             ctx[key] = value
           }
         })
-        .value()
       }
 
       function _onError (error: Error) {
@@ -230,10 +227,10 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         },
         onError: _onError,
         skipMiddleware: (name: string) => {
-          ctx.middleware[type] = _.omit(ctx.middleware[type], name)
+          ctx.middleware[type] = omit(ctx.middleware[type], name)
         },
         onlyRunMiddleware: (names: string[]) => {
-          ctx.middleware[type] = _.pick(ctx.middleware[type], names)
+          ctx.middleware[type] = pick(ctx.middleware[type], names)
         },
         ...ctx,
       }
@@ -318,7 +315,9 @@ export class Http {
       getFileServerToken: this.getFileServerToken,
       remoteStates: this.remoteStates,
       request: this.request,
-      middleware: _.cloneDeep(this.middleware),
+      middleware: Object.fromEntries(
+        Object.entries(this.middleware).map(([stage, middlewareMap]) => [stage, { ...middlewareMap }]),
+      ) as HttpMiddlewareStacks,
       netStubbingState: this.netStubbingState,
       socket: this.socket,
       serverBus: this.serverBus,

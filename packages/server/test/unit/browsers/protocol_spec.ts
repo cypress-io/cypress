@@ -2,7 +2,6 @@ import '../../spec_helper'
 import 'chai-as-promised' // for the types!
 import { expect } from 'chai'
 import humanInterval from 'human-interval'
-import _ from 'lodash'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import stripAnsi from 'strip-ansi'
@@ -23,7 +22,7 @@ describe('lib/browsers/protocol', () => {
         i++
       }
 
-      expect(_.sum(delays)).to.eq(humanInterval('50 seconds'))
+      expect(delays.reduce((a, b) => a + b, 0)).to.eq(humanInterval('50 seconds'))
 
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])

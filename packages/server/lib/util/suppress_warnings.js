@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const Debug = require('debug')
 
 const debug = Debug('cypress:server:lib:util:suppress_warnings')
@@ -20,7 +19,7 @@ const suppress = () => {
      * we work on proper SSL verification.
      * https://github.com/cypress-io/cypress/issues/5248
      */
-    if (_.isString(warning) && _.includes(warning, 'NODE_TLS_REJECT_UNAUTHORIZED')) {
+    if (typeof warning === 'string' && warning.includes('NODE_TLS_REJECT_UNAUTHORIZED')) {
       // https://github.com/nodejs/node/blob/85e6089c4db4da23dd88358fe0a12edefcd411f2/lib/internal/options.js#L17
 
       return

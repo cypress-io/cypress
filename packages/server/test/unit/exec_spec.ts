@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import os from 'os'
 import * as exec from '../../lib/exec'
 
@@ -6,13 +5,14 @@ const isWindows = () => {
   return os.platform() === 'win32'
 }
 
-const runCommand = function (cmd, options = {}) {
-  _.defaults(options, {
+const runCommand = function (cmd, options: any = {}) {
+  options = {
     cmd,
     timeout: 10000,
     env: {},
     failOnNonZeroExit: true,
-  })
+    ...options,
+  }
 
   return exec.run(process.cwd(), options)
 }

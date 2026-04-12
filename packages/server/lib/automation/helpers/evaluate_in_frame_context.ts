@@ -1,7 +1,6 @@
 import type { Protocol } from 'devtools-protocol'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import Debug from 'debug'
-import { isError } from 'lodash'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 
 const debug = Debug('cypress:server:automation:helpers:evaluate_in_frame_context')
@@ -18,7 +17,7 @@ export async function evaluateInFrameContext (expression: string,
           contextId,
         })
       } catch (e) {
-        if (isError(e) && (e as Error).message.includes('Cannot find context with specified id')) {
+        if (e instanceof Error && e.message.includes('Cannot find context with specified id')) {
           debug('found invalid context %d, removing', contextId)
           contexts.delete(contextId)
         }

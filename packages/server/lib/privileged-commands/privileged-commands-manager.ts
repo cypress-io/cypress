@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
@@ -74,8 +74,8 @@ class PrivilegedCommandsManager {
   // finds and returns matching command from the verified commands array. it
   // also removes that command from the verified commands array
   hasVerifiedCommand (command) {
-    const matchingCommand = _.find(this.verifiedCommands, ({ name, args }) => {
-      return command.name === name && _.isEqual(args, command.args)
+    const matchingCommand = this.verifiedCommands.find(({ name, args }) => {
+      return command.name === name && isDeepStrictEqual(args, command.args)
     })
 
     return !!matchingCommand

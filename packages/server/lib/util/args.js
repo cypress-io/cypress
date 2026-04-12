@@ -1,10 +1,10 @@
-const _ = require('lodash')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
 const { getBreakingRootKeys, getPublicConfigKeys, coerce } = require('@packages/config')
+const { pick, omit, defaults, mapValues } = require('@packages/utils')
 
 const proxyUtil = require('./proxy')
 const errors = require('../errors')
@@ -106,7 +106,7 @@ const normalizeBackslashes = (options) => {
 }
 
 const stringify = (val) => {
-  if (_.isObject(val)) {
+  if (val !== null && typeof val === 'object') {
     return JSON.stringify(val)
   }
 
@@ -187,17 +187,17 @@ const sanitizeAndConvertNestedArgs = (str, argName) => {
     // foo: a:b|b:c
     // bar: 1|2|3
 
-    return _
-    .chain(str)
+    const pairs = str
     .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
     .replace(nestedArraysInSquareBracketsRe, commasToPipes)
     .split(',')
     .map((pair) => {
       return pair.split(everythingAfterFirstEqualRe)
     })
-    .fromPairs()
-    .mapValues(JSONOrCoerce)
-    .value()
+
+    const obj = Object.fromEntries(pairs.map(([k, v]) => [k, v]))
+
+    return mapValues(obj, JSONOrCoerce)
   } catch (err) {
     debug('could not pass config %s value %s', argName, str)
     debug('error %o', err)
@@ -383,23 +383,21 @@ module.exports = {
 
     debug('parsed argv options %o', { options })
 
-    const allowed = _.pick(argv, allowList)
+    const allowed = pick(argv, allowList)
 
     // were we invoked from the CLI or directly?
     const invokedFromCli = Boolean(options.cwd)
 
-    options = _
-    .chain(options)
-    .defaults(allowed)
-    .omit(_.keys(alias)) // remove aliases
-    .extend({ invokedFromCli })
-    .defaults({
+    options = defaults(options, allowed)
+    options = omit(options, Object.keys(alias))
+    Object.assign(options, { invokedFromCli })
+    options = defaults(options, {
       // set in case we
       // bypassed the cli
       cwd: process.cwd(),
     })
-    .mapValues(coerce)
-    .value()
+
+    options = mapValues(options, coerce)
 
     debug('argv parsed: %o', options)
 
@@ -509,16 +507,16 @@ module.exports = {
     const configKeys = getPublicConfigKeys()
 
     // and if any of our options match this
-    const configValues = _.pick(options, configKeys)
+    const configValues = pick(options, configKeys)
 
     // then set them on config
     // this solves situations where we accept
     // root level arguments which also can
     // be set in configuration
-    _.extend(options.config, configValues)
+    Object.assign(options.config, configValues)
 
     // remove them from the root options object
-    options = _.omit(options, configKeys)
+    options = omit(options, configKeys)
 
     options = normalizeBackslashes(options)
     debug('options %o', options)
@@ -547,12 +545,10 @@ module.exports = {
     // and converts to an array by picking
     // only the allowed properties and
     // mapping them to include the argument
-    return _
-    .chain(obj)
-    .pick(...allowList)
-    .mapValues((val, key) => {
+    const picked = pick(obj, allowList)
+
+    return Object.entries(picked).map(([key, val]) => {
       return `--${key}=${stringify(val)}`
-    }).values()
-    .value()
+    })
   },
 }

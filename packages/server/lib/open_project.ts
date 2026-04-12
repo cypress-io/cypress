@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { defaults } from '@packages/utils'
 import la from 'lazy-ass'
 import Debug from 'debug'
 import Bluebird from 'bluebird'
@@ -63,7 +63,7 @@ export class OpenProject {
     debug('resetting project state, preparing to launch browser %s for spec %o options %o',
       browser.name, spec, prevOptions)
 
-    la(_.isPlainObject(browser), 'expected browser object:', browser)
+    la(browser !== null && typeof browser === 'object' && !Array.isArray(browser), 'expected browser object:', browser)
 
     // reset to reset server and socket state because
     // of potential domain changes, request buffers, etc
@@ -102,7 +102,7 @@ export class OpenProject {
     // then we're in interactive mode and we
     // can assume its a headed browser
     // TODO: we should clean this up
-    if (!_.has(browser, 'isHeaded')) {
+    if (!('isHeaded' in browser)) {
       browser.isHeaded = true
       browser.isHeadless = false
     }
@@ -296,7 +296,7 @@ export class OpenProject {
     this._ctx = getCtx()
     debug('open_project create %s', path)
 
-    _.defaults(options, {
+    defaults(options, {
       onReloadBrowser: () => {
         if (this.relaunchBrowser) {
           return this.relaunchBrowser()
@@ -306,11 +306,11 @@ export class OpenProject {
       },
     })
 
-    if (!_.isUndefined(args.configFile) && !_.isNull(args.configFile)) {
+    if (args.configFile !== undefined && args.configFile !== null) {
       options.configFile = args.configFile
     }
 
-    options = _.extend({}, args.config, options, { args })
+    options = { ...args.config, ...options, args }
 
     // open the project and return
     // the config for the project instance

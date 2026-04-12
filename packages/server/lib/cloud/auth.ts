@@ -1,4 +1,4 @@
-const _ = require('lodash')
+const { pick } = require('@packages/utils')
 const debug = require('debug')('cypress:server:cloud:auth')
 const express = require('express')
 const os = require('os')
@@ -61,7 +61,7 @@ const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmConten
 const getOriginFromUrl = (originalUrl) => {
   const parsedUrl = url.parse(originalUrl)
 
-  return url.format(_.pick(parsedUrl, ['protocol', 'slashes', 'hostname', 'port']))
+  return url.format(pick(parsedUrl, ['protocol', 'slashes', 'hostname', 'port']))
 }
 
 /**
@@ -100,7 +100,7 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
        * is bugging out, `authCallback` can be undefined and reaching this point makes no sense.
        * @see https://github.com/cypress-io/cypress/pull/5243
        */
-      if (_.get(req.query, 'status') === 'error' || !authCallback) {
+      if (req.query?.status === 'error' || !authCallback) {
         if (authCallback) {
           authCallback(new Error('There was an error authenticating to Cypress Cloud.'))
         }

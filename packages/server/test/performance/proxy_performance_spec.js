@@ -8,7 +8,6 @@ const cp = require('child_process')
 const fse = require('fs-extra')
 const os = require('os')
 const path = require('path')
-const _ = require('lodash')
 const { expect } = require('chai')
 const debug = require('debug')('test:proxy-performance')
 const DebuggingProxy = require('@cypress/debugging-proxy')
@@ -100,17 +99,18 @@ const TEST_CASES = [
   },
 ].map((v) => {
   // fill in all the fields so the keys are in the correct order for readability
-  return _.defaults(v, {
+  return {
     disableHttp2: false,
     upstreamProxy: false,
     httpsUpstreamProxy: false,
     cyProxy: false,
     cyIntercept: false,
-  })
+    ...v,
+  }
 })
 
 const average = (arr) => {
-  return _.sum(arr) / arr.length
+  return arr.reduce((a, b) => a + b, 0) / arr.length
 }
 
 const percentile = (sortedArr, p) => {
@@ -141,7 +141,7 @@ const getResultsFromHar = (har) => {
   }
 
   entries.forEach((entry) => {
-    const blockedTime = _.get(entry.timings, 'blocked', -1) === -1 ? 0 : entry.timings.blocked
+    const blockedTime = (entry.timings?.blocked ?? -1) === -1 ? 0 : entry.timings.blocked
     const totalTime = entry.time - blockedTime
 
     timings.total.push(totalTime)
@@ -165,9 +165,7 @@ const getResultsFromHar = (har) => {
     mins[key] = Math.round(arr[0])
     maxes[key] = Math.round(arr[arr.length - 1])
 
-    _.merge(results, {
-      [`Avg ${_.upperFirst(key)}`]: Math.round(average(arr)),
-    })
+    results[`Avg ${key.charAt(0).toUpperCase() + key.slice(1)}`] = Math.round(average(arr))
   }
 
   results['Min'] = mins.total
@@ -305,7 +303,7 @@ const runBrowserTest = (urlUnderTest, testCase) => {
         debug('Received HAR from Chrome')
         const results = getResultsFromHar(har)
 
-        _.merge(testCase, results)
+        Object.assign(testCase, results)
 
         return storeHar(testCase.name, har)
         .return(results)
@@ -378,7 +376,7 @@ describe('Proxy Performance', function () {
     // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23214
     describe(urlUnderTest, { retries: 15 }, function () {
       let baseline
-      const testCases = _.cloneDeep(TEST_CASES)
+      const testCases = structuredClone(TEST_CASES)
 
       before(function () {
         // run baseline test

@@ -1,13 +1,13 @@
 import { CDPCommandQueue, Command } from '../../../lib/browsers/cdp-command-queue'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import pDeferred from 'p-defer'
-import _ from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 
 const { expect } = require('../../spec_helper')
 
 function matchCommand (search: Partial<Command<any>>) {
   return (predicate: Partial<Command<any>>) => {
-    return _.isEqual(search.command, predicate.command) && _.isEqual(search.params, predicate.params)
+    return isDeepStrictEqual(search.command, predicate.command) && isDeepStrictEqual(search.params, predicate.params)
   }
 }
 
@@ -69,7 +69,7 @@ describe('CDPCommandQueue', () => {
       const enqueued = queue.entries[0]
 
       expect(enqueued.command).to.eq(enableAnimation.command)
-      expect(_.isEqual(enqueued.params, enableAnimation.params), 'params are preserved').to.be.true
+      expect(isDeepStrictEqual(enqueued.params, enableAnimation.params), 'params are preserved').to.be.true
       expect(enqueued.sessionId).to.eq(sessionId)
       expect(enqueued.deferred).not.to.be.undefined
 

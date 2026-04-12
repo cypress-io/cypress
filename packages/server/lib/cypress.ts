@@ -15,7 +15,6 @@ import { getCtx, hasCtx } from '@packages/data-context'
 import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
 import type { CypressError } from '@packages/errors'
-import { toNumber } from 'lodash'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
@@ -48,7 +47,7 @@ const exit = async (code = 0) => {
 
 const showWarningForInvalidConfig = (options: any) => {
   const publicConfigKeys = getPublicConfigKeys()
-  const invalidConfigOptions = require('lodash').keys(options.config).reduce((invalid, option) => {
+  const invalidConfigOptions = Object.keys(options.config).reduce((invalid, option) => {
     if (!publicConfigKeys.find((configKey) => configKey === option)) {
       invalid.push(option)
     }
@@ -258,7 +257,7 @@ export = {
           break
         }
         case 'exitWithCode': {
-          return exit(toNumber(options.exitWithCode))
+          return exit(Number(options.exitWithCode))
           break
         }
         case 'run': {

@@ -1,5 +1,4 @@
 import debugModule from 'debug'
-import _ from 'lodash'
 import si from 'systeminformation'
 import os from 'os'
 import fs from 'fs-extra'
@@ -297,7 +296,7 @@ const addCumulativeStats = (stats: { [key: string]: any }) => {
   debugVerbose('memory stats: %o', stats)
 
   if (SAVE_MEMORY_STATS) {
-    cumulativeStats.push(_.clone(stats))
+    cumulativeStats.push({ ...stats })
   }
 }
 
@@ -418,7 +417,7 @@ const endProfiling = async () => {
  * @returns Array of memory stats.
  */
 const getMemoryStats = () => {
-  return _.clone(cumulativeStats)
+  return [...cumulativeStats]
 }
 
 export default {

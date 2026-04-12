@@ -1,9 +1,11 @@
-import _ from 'lodash'
 import chalk from 'chalk'
+import { defaults, mapValues } from '@packages/utils'
 import Table from 'cli-table3'
 import utils from 'cli-table3/src/utils'
 import widestLine from 'widest-line'
-import { get as getTerminalSize } from './terminal-size'
+// Use require so that sinon stubs in tests can intercept calls
+
+const terminalSize = require('./terminal-size') as typeof import('./terminal-size')
 import type { HorizontalAlignment } from 'cli-table3'
 
 const MAXIMUM_SIZE = 100
@@ -12,25 +14,32 @@ const EXPECTED_SUM = 100
 export const getMaximumColumns = () => {
   // get the maximum amount of columns
   // that can fit in the terminal
-  return Math.min(MAXIMUM_SIZE, getTerminalSize().columns)
+  return Math.min(MAXIMUM_SIZE, terminalSize.get().columns)
 }
 
 const getBordersLength = (left, right) => {
-  return _
-  .chain([left, right])
-  .compact()
+  return [left, right]
+  .filter(Boolean)
   .map(widestLine)
-  .sum()
-  .value()
+  .reduce((sum, n) => sum + n, 0)
 }
 
 export const renderTables = (...tables) => {
-  return _
-  .chain<string[]>([])
-  .concat(tables)
-  .invokeMap('toString')
+  // Note: do not use .flat() or concat here because cli-table3's Table extends Array,
+  // and Array methods would unwrap Table instances into their row arrays.
+  const allTables: any[] = []
+
+  for (const t of tables) {
+    if (Array.isArray(t) && !(t instanceof Table)) {
+      allTables.push(...t)
+    } else {
+      allTables.push(t)
+    }
+  }
+
+  return allTables
+  .map((t) => t.toString())
   .join('\n')
-  .value()
 }
 
 const getChars = (type) => {
@@ -122,7 +131,7 @@ const getChars = (type) => {
 }
 
 const wrapBordersInGray = (chars) => {
-  return _.mapValues(chars, (char) => {
+  return mapValues(chars, (char) => {
     if (char) {
       return chalk.gray(char)
     }
@@ -133,25 +142,32 @@ const wrapBordersInGray = (chars) => {
 
 export const table = (options: { type: string, colWidths?: number[], colAligns?: HorizontalAlignment[], head?: string[], chars?: Record<string, string>, style?: { [key: string]: any } }) => {
   const { type } = options
-  const defaults = utils.mergeOptions({})
+  const tableDefaults = utils.mergeOptions({})
 
   let { colWidths } = options
-  let chars = _.defaults(getChars(type), defaults.chars)
+  let chars = defaults(getChars(type), tableDefaults.chars)
 
-  _.defaultsDeep(options, {
-    chars,
-    style: {
-      head: [],
-      border: [],
-      'padding-left': 1,
-      'padding-right': 1,
-    },
+  if (!options.chars) {
+    options.chars = chars
+  } else {
+    options.chars = defaults(options.chars, chars)
+  }
+
+  if (!options.style) {
+    options.style = {}
+  }
+
+  options.style = defaults(options.style, {
+    head: [],
+    border: [],
+    'padding-left': 1,
+    'padding-right': 1,
   })
 
   chars = options.chars
 
   if (colWidths) {
-    const sum = _.sum(colWidths)
+    const sum = colWidths.reduce((a, b) => a + b, 0)
 
     if (sum !== EXPECTED_SUM) {
       throw new Error(`Expected colWidths array to sum to: ${EXPECTED_SUM}, instead got: ${sum}`)
@@ -162,11 +178,11 @@ export const table = (options: { type: string, colWidths?: number[], colAligns?:
     if (bordersLength > 0) {
       // redistribute the columns to account for borders on each side...
       // and subtract  borders size from the largest width cell
-      const largestCellWidth = _.max(colWidths) ?? 0
+      const largestCellWidth = Math.max(...colWidths)
 
-      const index = _.indexOf(colWidths, largestCellWidth)
+      const index = colWidths.indexOf(largestCellWidth)
 
-      colWidths = _.clone(colWidths)
+      colWidths = [...colWidths]
 
       colWidths[index] = largestCellWidth - bordersLength
       options.colWidths = colWidths
@@ -179,9 +195,9 @@ export const table = (options: { type: string, colWidths?: number[], colAligns?:
 }
 
 export const header = (message: string, options: { color?: string[] | null } = {}) => {
-  _.defaults(options, {
-    color: null,
-  })
+  if (options.color === undefined) {
+    options.color = null
+  }
 
   message = `  (${chalk.underline.bold(message)})`
 
@@ -189,7 +205,7 @@ export const header = (message: string, options: { color?: string[] | null } = {
     // @ts-expect-error type is cast incorrectly to never
     const colors = <string[]>[].concat(options.color)
 
-    message = _.reduce(colors, (memo, color) => {
+    message = colors.reduce((memo, color) => {
       return chalk[color](memo)
     }, message)
   }

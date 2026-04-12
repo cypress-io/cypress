@@ -7,7 +7,7 @@ const { openProject } = require('../../lib/open_project')
 const preprocessor = require(`../../lib/plugins/preprocessor`).default
 const runEvents = require(`../../lib/plugins/run_events`).default
 const Fixtures = require('@tooling/system-tests')
-const delay = require('lodash/delay')
+const delay = setTimeout
 
 const todosPath = Fixtures.projectPath('todos')
 

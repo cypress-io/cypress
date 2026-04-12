@@ -88,6 +88,10 @@ describe('lib/browsers/chrome', () => {
       this.readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' })
       this.readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' })
 
+      // Stub outputJson so _writeChromePreferences doesn't try to write to disk
+      // when defaults are merged with empty prefs; some nested tests re-stub this
+      this.outputJson = sinon.stub(fs, 'outputJson').resolves()
+
       // port for Chrome remote interface communication
       sinon.stub(utils, 'getPort').resolves(50505)
     })
@@ -219,6 +223,7 @@ describe('lib/browsers/chrome', () => {
         oldPref = process.env.IGNORE_CHROME_PREFERENCES
         process.env.IGNORE_CHROME_PREFERENCES = true
         this.readJson.rejects({ code: 'ENOENT' })
+        this.outputJson.restore()
         writeJson = sinon.stub(fs, 'outputJson').resolves()
       })
 
@@ -323,6 +328,7 @@ describe('lib/browsers/chrome', () => {
         },
       })
 
+      this.outputJson.restore()
       sinon.stub(fs, 'outputJson').resolves()
 
       return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
@@ -1005,6 +1011,111 @@ describe('lib/browsers/chrome', () => {
       }
 
       expect(chrome._mergeChromePreferences(originalPrefs, newPrefs)).to.deep.eq(expected)
+    })
+
+    it('handles nested null deletion under a missing parent', () => {
+      const originalPrefs = {
+        default: {},
+        defaultSecure: {},
+        localState: {},
+      }
+
+      const newPrefs = {
+        default: {
+          nested: {
+            keepThis: 'value',
+            deleteThis: null,
+          },
+        },
+      }
+
+      const result = chrome._mergeChromePreferences(originalPrefs, newPrefs)
+
+      expect(result.default).to.deep.eq({
+        nested: {
+          keepThis: 'value',
+        },
+      })
+    })
+
+    it('deep-merges array elements that are objects', () => {
+      const originalPrefs = {
+        default: {
+          items: [{ a: 1, b: 2 }, { c: 3 }],
+        },
+        defaultSecure: {},
+        localState: {},
+      }
+
+      const newPrefs = {
+        default: {
+          items: [{ a: 10 }],
+        },
+      }
+
+      const result = chrome._mergeChromePreferences(originalPrefs, newPrefs)
+
+      expect(result.default.items).to.deep.eq([{ a: 10, b: 2 }, { c: 3 }])
+    })
+
+    it('handles null deletion inside array elements', () => {
+      const originalPrefs = {
+        default: {
+          items: [{ keep: 'yes', remove: 'no' }],
+        },
+        defaultSecure: {},
+        localState: {},
+      }
+
+      const newPrefs = {
+        default: {
+          items: [{ remove: null }],
+        },
+      }
+
+      const result = chrome._mergeChromePreferences(originalPrefs, newPrefs)
+
+      expect(result.default.items).to.deep.eq([{ keep: 'yes' }])
+    })
+
+    it('merges arrays by index preserving trailing values', () => {
+      const originalPrefs = {
+        default: {
+          list: [1, 2, 3],
+        },
+        defaultSecure: {},
+        localState: {},
+      }
+
+      const newPrefs = {
+        default: {
+          list: [10],
+        },
+      }
+
+      const result = chrome._mergeChromePreferences(originalPrefs, newPrefs)
+
+      expect(result.default.list).to.deep.eq([10, 2, 3])
+    })
+
+    it('applies null-deletes inside a new array element object', () => {
+      const originalPrefs = {
+        default: {
+          items: [],
+        },
+        defaultSecure: {},
+        localState: {},
+      }
+
+      const newPrefs = {
+        default: {
+          items: [{ remove: null, keep: 'x' }],
+        },
+      }
+
+      const result = chrome._mergeChromePreferences(originalPrefs, newPrefs)
+
+      expect(result.default.items).to.deep.eq([{ keep: 'x' }])
     })
   })
 

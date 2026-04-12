@@ -1,6 +1,4 @@
 import debugModule from 'debug'
-import toInteger from 'lodash/toInteger'
-import isNumber from 'lodash/isNumber'
 import { isHostOnlyCookie } from './cdp_automation'
 import { cookieMatches } from '../automation/util'
 import { bidiKeyPress } from '../automation/commands/key_press'
@@ -168,7 +166,7 @@ const convertCyCookieToBiDiCookie = (cookie: CyCookie, majorFirefoxVersion?: num
     sameSite: convertSameSiteExtensionToBiDi(cookie.sameSite, majorFirefoxVersion),
     // BiDi cookie expiry is in seconds from EPOCH, but sometimes the automation client feeds in a float and BiDi does not know how to handle it.
     // If trying to set a float on the expiry time in BiDi, the setting silently fails.
-    expiry: (cookie.expirationDate === -Infinity ? 0 : (isNumber(cookie.expirationDate) ? toInteger(cookie.expirationDate) : null)) ?? undefined,
+    expiry: (cookie.expirationDate === -Infinity ? 0 : (typeof cookie.expirationDate === 'number' ? Math.trunc(cookie.expirationDate) : null)) ?? undefined,
   }
 
   if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {

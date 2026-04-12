@@ -4,7 +4,7 @@ import { detect as launcherDetect } from '@packages/launcher'
 import pluralize from 'pluralize'
 import { stripIndent } from 'common-tags'
 import browserUtils from '../browsers/utils'
-import _ from 'lodash'
+import { without } from '@packages/utils'
 import chalk from 'chalk'
 import { fs } from '../util/fs'
 import type { FoundBrowser } from '@packages/types/src/browser'
@@ -31,8 +31,8 @@ const pickRandomItem = (list: any) => {
     }
   }
 
-  const item = _.sample(list)
-  const remaining = _.without(list, item)
+  const item = list[Math.floor(Math.random() * list.length)]
+  const remaining = without(list, item)
 
   return {
     item, remaining,
@@ -84,7 +84,20 @@ const print = (browsers: FoundBrowser[] = []) => {
 
   console.log('')
 
-  const sortedByNameAndMajorVersion = _.sortBy(browsers, ['name', 'majorVersion'])
+  const sortedByNameAndMajorVersion = [...browsers].sort((a, b) => {
+    if (a.name < b.name) return -1
+
+    if (a.name > b.name) return 1
+
+    const aMajor = Number(a.majorVersion)
+    const bMajor = Number(b.majorVersion)
+
+    if (aMajor < bMajor) return -1
+
+    if (aMajor > bMajor) return 1
+
+    return 0
+  })
 
   sortedByNameAndMajorVersion.forEach((browser, k) => {
     const text = stripIndent`

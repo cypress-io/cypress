@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
 const http = require('http')
 const rp = require('@cypress/request-promise')
 const Promise = require('bluebird')
@@ -17,9 +16,9 @@ const { getCtx } = require('../../lib/makeDataContext')
 const s3StaticHtmlUrl = 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html'
 
 const expectToEqDetails = function (actual, expected) {
-  actual = _.omit(actual, 'totalTime')
+  const { totalTime: _totalTime, ...rest } = actual
 
-  expect(actual).to.deep.eq(expected)
+  expect(rest).to.deep.eq(expected)
 }
 
 describe('Server', () => {
@@ -40,7 +39,7 @@ describe('Server', () => {
       this.automationRequest.withArgs('set:cookie').resolves({})
 
       this.setup = (initialUrl, obj = {}) => {
-        if (_.isObject(initialUrl)) {
+        if (initialUrl !== null && typeof initialUrl === 'object') {
           obj = initialUrl
           initialUrl = null
         }
@@ -61,19 +60,20 @@ describe('Server', () => {
           this.rp = (options = {}) => {
             let url
 
-            if (_.isString(options)) {
+            if (typeof options === 'string') {
               url = options
               options = {}
             }
 
-            _.defaults(options, {
+            options = {
               url,
               proxy: this.proxy,
               jar,
               simple: false,
               followRedirect: false,
               resolveWithFullResponse: true,
-            })
+              ...options,
+            }
 
             return rp(options)
           }

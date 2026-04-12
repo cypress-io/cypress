@@ -4,7 +4,7 @@
 // and executing any tasks that the plugin registers
 const debugLib = require('debug')
 const Promise = require('bluebird')
-const _ = require('lodash')
+const { intersection, pick } = require('@packages/utils')
 
 const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
 
@@ -200,31 +200,31 @@ class RunPlugins {
 
   taskGetBody (ids, args) {
     const [event] = args
-    const taskEvent = _.find(this.registeredEventsById, { event: 'task' })
+    const taskEvent = Object.values(this.registeredEventsById).find((e) => e.event === 'task')
     const invoke = () => {
       const fn = taskEvent && taskEvent.handler[event]
 
-      return _.isFunction(fn) ? fn.toString() : ''
+      return typeof fn === 'function' ? fn.toString() : ''
     }
 
     util.wrapChildPromise(this.ipc, invoke, ids)
   }
 
   taskGetKeys (ids) {
-    const taskEvent = _.find(this.registeredEventsById, { event: 'task' })
-    const invoke = () => _.keys(taskEvent ? taskEvent.handler : {})
+    const taskEvent = Object.values(this.registeredEventsById).find((e) => e.event === 'task')
+    const invoke = () => Object.keys(taskEvent ? taskEvent.handler : {})
 
     util.wrapChildPromise(this.ipc, invoke, ids)
   }
 
   taskMerge (target, events) {
-    const duplicates = _.intersection(_.keys(target), _.keys(events))
+    const duplicates = intersection(Object.keys(target), Object.keys(events))
 
     if (duplicates.length) {
       require('@packages/errors').warning('DUPLICATE_TASK_KEY', duplicates)
     }
 
-    return _.extend(target, events)
+    return Object.assign(target, events)
   }
 
   taskExecute (ids, args) {
@@ -238,9 +238,9 @@ class RunPlugins {
     }
 
     const invoke = (eventId, args = []) => {
-      const handler = _.get(this.registeredEventsById, `${eventId}.handler.${task}`)
+      const handler = this.registeredEventsById[eventId]?.handler?.[task]
 
-      if (_.isFunction(handler)) {
+      if (typeof handler === 'function') {
         return handler(...args)
       }
 

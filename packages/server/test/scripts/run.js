@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-const _ = require('lodash')
 const chalk = require('chalk')
 const minimist = require('minimist')
 const execa = require('execa')
@@ -120,17 +119,17 @@ commandAndArguments.args.push(
   '--exit',
 )
 
-const env = _.clone(process.env)
+const env = { ...process.env }
 
 env.NODE_ENV = 'test'
 env.CYPRESS_INTERNAL_ENV = 'test'
 
 if (env.VERBOSE === '1') {
-  _.extend(env, {
+  Object.assign(env, {
     CYPRESS_DEBUG: true,
     NODE_DEBUG: 'request',
     BLUEBIRD_DEBUG: 1,
-    DEBUG: _.chain([
+    DEBUG: [
       env.DEBUG,
       'nock.*',
       '-nock.common',
@@ -138,8 +137,8 @@ if (env.VERBOSE === '1') {
       '-nock.interceptor',
       'socket.io:*',
       'xvfb-maybe',
-    ])
-    .compact()
+    ]
+    .filter(Boolean)
     .join(','),
   })
 }

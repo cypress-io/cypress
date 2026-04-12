@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import path from 'path'
 import { getCwd } from '../cwd'
 import Debug from 'debug'
@@ -16,7 +15,7 @@ export = {
   async handleIframe (req: any, res: any, config: Cfg, remoteStates: RemoteStates, extraOptions: any) {
     const test = req.params[0]
     const iframePath: string = getCwd('lib', 'html', 'iframe.html')
-    const specFilter = _.get(extraOptions, 'specFilter')
+    const specFilter = extraOptions?.specFilter
 
     debug('handle iframe %o', { test, specFilter, config })
 
@@ -28,7 +27,7 @@ export = {
       allFilesToSend.unshift(supportFileJs)
     }
 
-    debug('all files to send %o', _.map(allFilesToSend, 'relative'))
+    debug('all files to send %o', allFilesToSend.map((f) => f.relative))
 
     const injection = DocumentDomainInjection.InjectionBehavior(config)
 

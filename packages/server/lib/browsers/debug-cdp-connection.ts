@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import _ from 'lodash'
+import { getPath, setPath } from '@packages/utils'
 import type CDP from 'chrome-remote-interface'
 import type EventEmitter from 'events'
 import type WebSocket from 'ws'
@@ -21,28 +21,26 @@ export const debugCdpConnection = (namespace: string, cri: DebuggableCDPClient) 
 
   if (debugVerboseReceive.enabled) {
     cri._ws?.prependListener('message', (data) => {
-      data = _
-      .chain(JSON.parse(data))
-      .tap((data) => {
-        ([
-          'params.data', // screencast frame data
-          'result.data', // screenshot data
-        ]).forEach((truncatablePath) => {
-          const str = _.get(data, truncatablePath)
+      const truncate = (str: string, length: number, omission: string) => {
+        return str.length > length ? str.slice(0, length - omission.length) + omission : str
+      }
 
-          if (!_.isString(str)) {
-            return
-          }
+      const parsed = JSON.parse(data)
 
-          _.set(data, truncatablePath, _.truncate(str, {
-            length: 100,
-            omission: `... [truncated string of total bytes: ${str.length}]`,
-          }))
-        })
+      ;([
+        'params.data', // screencast frame data
+        'result.data', // screenshot data
+      ]).forEach((truncatablePath) => {
+        const str = getPath(parsed, truncatablePath)
 
-        return data
+        if (typeof str !== 'string') {
+          return
+        }
+
+        setPath(parsed, truncatablePath, truncate(str, 100, `... [truncated string of total bytes: ${str.length}]`))
       })
-      .value()
+
+      data = parsed
 
       debugVerboseReceive('received CDP message %o', data)
     })

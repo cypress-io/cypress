@@ -1,9 +1,31 @@
-import _ from 'lodash'
+import { defaults as utilsDefaults, pick, debounce as _debounce } from '@packages/utils'
 import Bluebird from 'bluebird'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
 import * as savedState from '../saved_state'
+
+function defaultsDeep (target: Record<string, any>, ...sources: Record<string, any>[]) {
+  for (const source of sources) {
+    for (const key of Object.keys(source)) {
+      const targetVal = target[key]
+      const sourceVal = source[key]
+
+      if (
+        targetVal !== null &&
+        sourceVal !== null &&
+        typeof targetVal === 'object' && !Array.isArray(targetVal) &&
+        typeof sourceVal === 'object' && !Array.isArray(sourceVal)
+      ) {
+        defaultsDeep(targetVal, sourceVal)
+      } else if (targetVal === undefined || targetVal === null) {
+        target[key] = sourceVal
+      }
+    }
+  }
+
+  return target
+}
 
 const debug = Debug('cypress:server:windows')
 
@@ -74,7 +96,7 @@ export function reset () {
 }
 
 export function showAll () {
-  return _.invoke(windows, 'showInactive')
+  Object.values(windows).forEach((win: any) => win.showInactive())
 }
 
 export function hideAllUnlessAnotherWindowIsFocused () {
@@ -85,7 +107,7 @@ export function hideAllUnlessAnotherWindowIsFocused () {
   }
 
   // else hide all windows
-  return _.invoke(windows, 'hide')
+  Object.values(windows).forEach((win: any) => win.hide())
 }
 
 export function isMainWindowFocused () {
@@ -105,7 +127,7 @@ function _newBrowserWindow (options) {
 }
 
 export function defaults (options = {}) {
-  return _.defaultsDeep(options, {
+  return defaultsDeep(options, {
     x: null,
     y: null,
     show: true,
@@ -223,7 +245,7 @@ export async function open (projectRoot: string, options: WindowOpenOptions, new
 
   recentlyCreatedWindow = true
 
-  _.defaults(options, {
+  utilsDefaults(options, {
     width: 600,
     height: 500,
     show: true,
@@ -257,7 +279,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMa
     return win.isDestroyed()
   }
 
-  win.on('resize', _.debounce(() => {
+  win.on('resize', _debounce(() => {
     if (isDestroyed()) {
       return
     }
@@ -278,7 +300,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMa
   },
    500))
 
-  win.on('moved', _.debounce(() => {
+  win.on('moved', _debounce(() => {
     if (isDestroyed()) {
       return
     }

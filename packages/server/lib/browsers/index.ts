@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { defaults } from '@packages/utils'
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import utils from './utils'
@@ -27,7 +27,7 @@ interface KillOptions {
 }
 
 const kill = (options: KillOptions = {}) => {
-  options = _.defaults({}, options, {
+  options = defaults({}, options, {
     instance,
     isProcessExit: false,
     isOrphanedBrowserProcess: false,
@@ -184,7 +184,7 @@ export = {
     // kill any currently open browser instance before launching a new one
     await kill()
 
-    _.defaults(options, {
+    defaults(options, {
       onBrowserOpen () {},
       onBrowserClose () {},
     })

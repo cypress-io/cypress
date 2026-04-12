@@ -1,6 +1,5 @@
 import '../../spec_helper'
 
-import _ from 'lodash'
 import si from 'systeminformation'
 import { expect } from 'chai'
 import {
@@ -125,7 +124,7 @@ describe('lib/util/process_profiler', function () {
       const groupedProcesses = groupCyProcesses({ list: PROCESSES })
 
       const checkGroup = (pid, group) => {
-        expect(_.find(groupedProcesses, { pid }))
+        expect(groupedProcesses.find((p) => p.pid === pid))
         .to.have.property('group')
         .eq(group)
       }
@@ -174,7 +173,7 @@ describe('lib/util/process_profiler', function () {
       sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
       sinon.stub(plugins, 'getPluginPid').returns(PLUGIN_PID)
 
-      const processes = _.cloneDeep(PROCESSES)
+      const processes = structuredClone(PROCESSES)
       .map((proc) => {
         // add some dummy measurements so there is data to aggregate
         proc.memRss = 10 * 1024 // 10mb
@@ -188,7 +187,7 @@ describe('lib/util/process_profiler', function () {
 
       // main process will have variable pid, replace it w constant for snapshotting
       // @ts-ignore
-      _.find(result, { pids: String(MAIN_PID) }).pids = '111111111'
+      result.find((r) => r.pids === String(MAIN_PID)).pids = '111111111'
 
       // @ts-ignore
       snapshot(result)

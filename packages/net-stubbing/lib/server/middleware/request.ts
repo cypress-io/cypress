@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { concatStream } from '@packages/network'
 import url from 'url'
 
@@ -19,6 +18,7 @@ import {
 } from '../util'
 import { InterceptedRequest } from '../intercepted-request'
 import { telemetry } from '@packages/telemetry'
+import { pick } from '@packages/utils'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -91,7 +91,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
 
   this.netStubbingState.requests[request.id] = request
 
-  const req = _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
+  const req = Object.assign(pick(request.req, SERIALIZABLE_REQ_PROPS), {
     url: request.req.proxiedUrl,
   }) as CyHttpMessages.IncomingRequest
 
@@ -101,7 +101,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
       data: request.includeBodyInAfterResponse ? {
         finalResBody: request.res.body!,
       } : {},
-      mergeChanges: _.noop,
+      mergeChanges: () => {},
     })
 
     this.debug('cy.intercept: request/response finished, cleaning up')
@@ -143,7 +143,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   // https://github.com/cypress-io/cypress/blob/aafac6a6104b689a118f4c4f29f948d7d8a35aef/packages/net-stubbing/lib/server/intercepted-request.ts#L167-L169
   request.addDefaultSubscriptions()
 
-  if (!_.isString(req.body) && !_.isBuffer(req.body)) {
+  if (typeof req.body !== 'string' && !Buffer.isBuffer(req.body)) {
     throw new Error('req.body must be a string or a Buffer')
   }
 
@@ -163,7 +163,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
   request.req.body = req.body
 
   const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
-    if ('content-length' in before.headers && before.headers['content-length'] === after.headers['content-length']) {
+    if (before.headers && after.headers && 'content-length' in before.headers && before.headers['content-length'] === after.headers['content-length']) {
       // user did not purposely override content-length, let's set it
       after.headers['content-length'] = String(Buffer.from(after.body).byteLength)
     }
@@ -171,7 +171,7 @@ export const InterceptRequest: RequestMiddleware = async function () {
     // resolve and propagate any changes to the URL
     request.req.proxiedUrl = after.url = url.resolve(request.req.proxiedUrl, after.url)
 
-    mergeWithPreservedBuffers(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
+    mergeWithPreservedBuffers(before, pick(after, SERIALIZABLE_REQ_PROPS))
 
     mergeDeletedHeaders(before, after)
   }

@@ -10,9 +10,9 @@ exports['lib/util/process_profiler ._aggregateGroups aggregates groups as expect
     "maxMemRssMb": 40
   },
   {
-    "group": "other",
+    "group": "browser",
     "processCount": 2,
-    "pids": "66666, 88888",
+    "pids": "11111, 11112",
     "cpuPercent": 40,
     "memRssMb": 20,
     "meanCpuPercent": 40,
@@ -30,9 +30,9 @@ exports['lib/util/process_profiler ._aggregateGroups aggregates groups as expect
     "maxMemRssMb": 20
   },
   {
-    "group": "browser",
+    "group": "other",
     "processCount": 2,
-    "pids": "11111, 11112",
+    "pids": "66666, 88888",
     "cpuPercent": 40,
     "memRssMb": 20,
     "meanCpuPercent": 40,
@@ -40,9 +40,9 @@ exports['lib/util/process_profiler ._aggregateGroups aggregates groups as expect
     "maxMemRssMb": 20
   },
   {
-    "group": "ffmpeg",
+    "group": "cypress",
     "processCount": 1,
-    "pids": "33333",
+    "pids": "111111111",
     "cpuPercent": 20,
     "memRssMb": 10,
     "meanCpuPercent": 20,
@@ -60,9 +60,9 @@ exports['lib/util/process_profiler ._aggregateGroups aggregates groups as expect
     "maxMemRssMb": 10
   },
   {
-    "group": "cypress",
+    "group": "ffmpeg",
     "processCount": 1,
-    "pids": "111111111",
+    "pids": "33333",
     "cpuPercent": 20,
     "memRssMb": 10,
     "meanCpuPercent": 20,

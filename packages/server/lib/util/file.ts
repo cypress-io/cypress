@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import os from 'os'
 import md5 from 'md5'
 import path from 'path'
@@ -7,6 +6,7 @@ import Promise from 'bluebird'
 import lockFileModule from 'lockfile'
 import { fs } from './fs'
 import * as env from './env'
+import { getPath, setPath } from '@packages/utils'
 import exit from './exit'
 import pQueue from 'p-queue'
 const lockFile = Promise.promisifyAll(lockFileModule)
@@ -131,9 +131,13 @@ export class File {
         return contents
       }
 
-      const value = _.get(contents, key)
+      const value = getPath(contents, key)
 
-      return value === undefined ? _.clone(defaultValue) : value
+      if (value !== undefined) return value
+
+      if (defaultValue == null || typeof defaultValue !== 'object') return defaultValue
+
+      return Array.isArray(defaultValue) ? [...defaultValue] : { ...defaultValue }
     })
   }
 
@@ -181,15 +185,15 @@ export class File {
   }
 
   _set (inTransaction, key, value) {
-    if (!_.isString(key) && !_.isPlainObject(key)) {
-      const type = _.isArray(key) ? 'array' : (typeof key)
+    if (typeof key !== 'string' && (typeof key !== 'object' || key === null || Array.isArray(key))) {
+      const type = Array.isArray(key) ? 'array' : (typeof key)
 
       throw new TypeError(`Expected \`key\` to be of type \`string\` or \`object\`, got \`${type}\``)
     }
 
     let valueObject = key
 
-    if (_.isString(key)) {
+    if (typeof key === 'string') {
       const tmp = {}
 
       tmp[key] = value
@@ -209,8 +213,8 @@ export class File {
   _setContents (valueObject) {
     return this._getContents()
     .then((contents) => {
-      _.each(valueObject, (value, key) => {
-        _.set(contents, key, value)
+      Object.entries(valueObject).forEach(([key, value]) => {
+        setPath(contents, key, value)
       })
 
       this._cache = contents

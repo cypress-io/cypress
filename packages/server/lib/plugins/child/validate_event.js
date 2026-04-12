@@ -1,5 +1,3 @@
-const _ = require('lodash')
-
 const createErrorResult = (errorMessage) => {
   return {
     isValid: false,
@@ -16,11 +14,11 @@ const validate = (func, arg, errorMessage) => {
 }
 
 const isFunction = (event, handler) => {
-  return validate(_.isFunction, handler, `The handler for the event \`${event}\` must be a function`)
+  return validate((h) => typeof h === 'function', handler, `The handler for the event \`${event}\` must be a function`)
 }
 
 const isObject = (event, handler) => {
-  return validate(_.isPlainObject, handler, `The handler for the event \`${event}\` must be an object`)
+  return validate((h) => h !== null && typeof h === 'object' && !Array.isArray(h) && Object.getPrototypeOf(h) === Object.prototype, handler, `The handler for the event \`${event}\` must be an object`)
 }
 
 const eventValidators = {
@@ -43,10 +41,10 @@ const validateEvent = (event, handler, config, errConstructorFn) => {
   const validator = eventValidators[event]
 
   if (!validator) {
-    const userEvents = _.reject(_.keys(eventValidators), (event) => {
+    const userEvents = Object.keys(eventValidators).filter((event) => {
       // we're currently not documenting after:browser:launch, so it shouldn't
       // appear in the list of valid events
-      return event.startsWith('_') || event === 'after:browser:launch'
+      return !event.startsWith('_') && event !== 'after:browser:launch'
     })
 
     const error = new Error(`invalid event name registered: ${event}`)

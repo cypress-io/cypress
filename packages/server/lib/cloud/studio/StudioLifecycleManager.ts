@@ -1,9 +1,9 @@
 import { StudioManager } from './studio'
 import { ProtocolManager } from '../protocol'
+import { pick } from '@packages/utils'
 import Debug from 'debug'
 import type { CloudDataSource } from '@packages/data-context/src/sources'
 import type { Cfg } from '../../project-base'
-import _ from 'lodash'
 import type { DataContext } from '@packages/data-context'
 import api from '../api'
 import { reportStudioError } from '../api/studio/report_studio_error'
@@ -295,7 +295,7 @@ export class StudioLifecycleManager {
         retryWithBackoff: api.retryWithBackoff,
         requestPromise: api.rp,
       },
-      projectConfig: _.pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
+      projectConfig: pick(cfg, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
       mountVersion: api.runnerCapabilities.protocolMountVersion,
       debugData,
       mode: 'studio',

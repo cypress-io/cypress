@@ -1,6 +1,5 @@
 import { origin, getDomainNameFromParsedHost, parseUrlIntoHostProtocolDomainTldPort } from '@packages/network-tools'
 import Debug from 'debug'
-import _ from 'lodash'
 import type { DocumentDomainInjection, ParsedHostWithProtocolAndHost } from '@packages/network-tools'
 
 export const DEFAULT_DOMAIN_NAME = 'localhost'
@@ -75,7 +74,7 @@ export class RemoteStates {
   get (url: string) {
     const state = this.remoteStates.get(this.documentDomainInjection.getOrigin(url))
 
-    return _.cloneDeep(state)
+    return structuredClone(state)
   }
 
   hasPrimary () {
@@ -116,7 +115,7 @@ export class RemoteStates {
       return {
         origin: `http://${DEFAULT_DOMAIN_NAME}:${this.ports.server}`,
         strategy: 'file',
-        fileServer: _.compact([`http://${DEFAULT_DOMAIN_NAME}`, this.ports.fileServer]).join(':'),
+        fileServer: [`http://${DEFAULT_DOMAIN_NAME}`, this.ports.fileServer].filter(Boolean).join(':'),
         domainName: DEFAULT_DOMAIN_NAME,
         props: null,
       }
@@ -132,7 +131,7 @@ export class RemoteStates {
   }
 
   set (urlOrState: string | RemoteState, options: Pick<RemoteState, 'auth'> = { }, isPrimaryOrigin: boolean = true): RemoteState | undefined {
-    const state: RemoteState = _.isString(urlOrState) ?
+    const state: RemoteState = typeof urlOrState === 'string' ?
       {
         ...this._stateFromUrl(urlOrState),
         auth: options.auth,

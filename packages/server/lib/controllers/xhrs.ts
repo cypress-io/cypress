@@ -1,5 +1,4 @@
 import { parseContentType } from '@packages/net-stubbing/lib/server/util'
-import _ from 'lodash'
 import Promise from 'bluebird'
 import { get as fixtureGet } from '../fixture'
 
@@ -34,7 +33,7 @@ export = {
 
         // TODO: if data is binary then set
         // content-type to binary/octet-stream
-        if (_.isObject(data)) {
+        if (typeof data === 'object' && data !== null) {
           data = JSON.stringify(data)
         }
 
@@ -44,7 +43,7 @@ export = {
           data = ''
         }
 
-        if (_.isNumber(data) || _.isBoolean(data)) {
+        if (typeof data === 'number' || typeof data === 'boolean') {
           data = String(data)
         }
 

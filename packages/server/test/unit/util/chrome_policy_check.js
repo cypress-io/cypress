@@ -2,7 +2,6 @@ const stripAnsi = require('strip-ansi')
 
 require('../../spec_helper')
 
-const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const chromePolicyCheck = require(`../../../lib/util/chrome_policy_check`)
 
@@ -12,7 +11,7 @@ describe('lib/util/chrome_policy_check', () => {
       const run = chromePolicyCheck.getRunner({
         enumerateValues (hkey, key) {
         // mock a registry with a couple of policies
-          return _.get({
+          const registry = {
             'HKEY_LOCAL_MACHINE': {
               'Software\\Policies\\Google\\Chrome': [
                 { name: 'ProxyServer' },
@@ -23,7 +22,9 @@ describe('lib/util/chrome_policy_check', () => {
                 { name: 'ExtensionSettings' },
               ],
             },
-          }, `${hkey}.${key}`, [])
+          }
+
+          return registry[hkey]?.[key] ?? []
         },
       })
 
@@ -47,7 +48,7 @@ For more information, see https://on.cypress.io/bad-browser-policy\
 
     it('does not call callback if no policies are found', () => {
       const run = chromePolicyCheck.getRunner({
-        enumerateValues: _.constant([]),
+        enumerateValues: () => [],
       })
 
       const cb = sinon.stub()

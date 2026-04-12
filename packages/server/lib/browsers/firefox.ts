@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import EventEmitter from 'events'
 import fs from 'fs-extra'
 import Debug from 'debug'
@@ -421,7 +420,7 @@ async function recordVideo (videoApi: RunModeVideoApi) {
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
-    preferences: _.extend({}, defaultPreferences),
+    preferences: { ...defaultPreferences },
     args: [
       '-new-instance',
       // if testing against older versions of Firefox to determine when a regression may have been introduced, uncomment the '-allow-downgrade' flag.
@@ -457,7 +456,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
       port = protocol === 'https:' ? '443' : '80'
     }
 
-    _.extend(defaultLaunchOptions.preferences, {
+    Object.assign(defaultLaunchOptions.preferences, {
       'network.proxy.allow_hijacking_localhost': true,
       'network.proxy.testing_localhost_is_secure_when_hijacked': true,
       'network.proxy.http': hostname,
@@ -706,7 +705,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     }
 
     // install the browser extensions
-    await Promise.all(_.map(launchOptions.extensions, async (path) => {
+    await Promise.all(launchOptions.extensions.map(async (path) => {
       debug(`installing extension at path: ${path}`)
       const id = await webdriverClient.installAddOn(path, true)
 

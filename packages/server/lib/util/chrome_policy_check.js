@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const debug = require('debug')('cypress:server:chrome_policy_check')
 const errors = require('../errors')
 const os = require('os')
@@ -37,15 +36,13 @@ const POLICY_HKEYS = [
 ]
 
 function warnIfPolicyMatches (policyNames, allPolicies, warningName, cb) {
-  const matchedPolicyPaths = _.chain(policyNames)
+  const matchedPolicyPaths = policyNames
   .map((policyName) => {
-    return _.chain(allPolicies)
-    .find({ name: policyName })
-    .get('fullPath')
-    .value()
+    const found = allPolicies.find((p) => p.name === policyName)
+
+    return found ? found.fullPath : undefined
   })
-  .filter()
-  .value()
+  .filter(Boolean)
 
   if (!matchedPolicyPaths.length) {
     return
@@ -56,18 +53,16 @@ function warnIfPolicyMatches (policyNames, allPolicies, warningName, cb) {
 
 function getRunner ({ enumerateValues }) {
   function getAllPolicies () {
-    return _.flattenDeep(
-      POLICY_KEYS.map((key) => {
-        return POLICY_HKEYS.map((hkey) => {
-          return enumerateValues(hkey, key)
-          .map((value) => {
-            value.fullPath = `${hkey}\\${key}\\${value.name}`
+    return POLICY_KEYS.flatMap((key) => {
+      return POLICY_HKEYS.flatMap((hkey) => {
+        return enumerateValues(hkey, key)
+        .map((value) => {
+          value.fullPath = `${hkey}\\${key}\\${value.name}`
 
-            return value
-          })
+          return value
         })
-      }),
-    )
+      })
+    })
   }
 
   return function run (cb) {
@@ -75,7 +70,7 @@ function getRunner ({ enumerateValues }) {
       debug('running chrome policy check')
 
       const policies = getAllPolicies()
-      const badPolicyNames = _.concat(BAD_PROXY_POLICY_NAMES, BAD_EXTENSION_POLICY_NAMES)
+      const badPolicyNames = [...BAD_PROXY_POLICY_NAMES, ...BAD_EXTENSION_POLICY_NAMES]
 
       debug('received policies %o', { policies, badPolicyNames })
 
@@ -87,7 +82,7 @@ function getRunner ({ enumerateValues }) {
 }
 
 module.exports = {
-  run: _.noop,
+  run: () => {},
   getRunner,
 }
 

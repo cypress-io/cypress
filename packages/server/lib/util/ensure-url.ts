@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import rp from '@cypress/request-promise'
@@ -15,7 +14,7 @@ type RetryOptions = {
 export const retryIsListening = (urlStr: string, options: RetryOptions) => {
   const { retryIntervals, onRetry } = options
 
-  const delaysRemaining = _.clone(retryIntervals)
+  const delaysRemaining = [...retryIntervals]
 
   const run = () => {
     debug('checking that baseUrl is available', {

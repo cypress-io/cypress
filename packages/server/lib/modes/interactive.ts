@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import os from 'os'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { app, nativeImage as image } from 'electron'
@@ -111,7 +110,7 @@ export = {
       },
     }
 
-    return _.extend(common, this.platformArgs())
+    return { ...common, ...this.platformArgs() }
   },
 
   platformArgs () {

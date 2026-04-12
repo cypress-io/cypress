@@ -7,7 +7,9 @@ export function trimStartChars (str: string, chars: string): string {
   return str.slice(i)
 }
 
-export function trimEndChars (str: string, chars: string): string {
+export function trimEndChars (str: string | null | undefined, chars: string): string {
+  if (str == null) return ''
+
   const charSet = new Set(chars)
   let i = str.length
 

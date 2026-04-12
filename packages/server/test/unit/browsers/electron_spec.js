@@ -1,6 +1,5 @@
 require('../../spec_helper')
 
-const _ = require('lodash')
 const EE = require('events')
 const la = require('lazy-ass')
 const check = require('check-more-types')
@@ -51,7 +50,7 @@ describe('lib/browsers/electron', () => {
       screenshotsFolder: 'baz',
     })
 
-    this.win = _.extend(new EE(), {
+    this.win = Object.assign(new EE(), {
       isDestroyed () {
         return false
       },
@@ -141,9 +140,9 @@ describe('lib/browsers/electron', () => {
 
         options = Windows.defaults(options)
 
-        const preferencesKeys = _.keys(electron._render.firstCall.args[2])
+        const preferencesKeys = Object.keys(electron._render.firstCall.args[2])
 
-        expect(_.keys(options)).to.deep.eq(preferencesKeys)
+        expect(Object.keys(options)).to.deep.eq(preferencesKeys)
 
         const electronOptionsArg = electron._render.firstCall.args[3]
 
@@ -999,7 +998,8 @@ describe('lib/browsers/electron', () => {
     it('tracks browser state', function () {
       const opts = electron._defaultOptions('/foo', { browserY: 300 }, this.options)
 
-      const args = _.pick(opts.trackState, 'width', 'height', 'x', 'y', 'devTools')
+      const pickKeys = ['width', 'height', 'x', 'y', 'devTools']
+      const args = Object.fromEntries(Object.entries(opts.trackState).filter(([k]) => pickKeys.includes(k)))
 
       expect(args).to.deep.eq({
         width: 'browserWidth',
@@ -1050,7 +1050,9 @@ describe('lib/browsers/electron', () => {
 
         const NEW_WINDOW_PID = ELECTRON_PID * 2
 
-        const child = _.cloneDeep(this.win)
+        const child = Object.assign(new EE(), this.win, {
+          webContents: { ...this.win.webContents },
+        })
 
         child.webContents.getOSProcessId = sinon.stub().returns(NEW_WINDOW_PID)
 
@@ -1072,7 +1074,7 @@ describe('lib/browsers/electron', () => {
   // TODO: these all need to be updated
   context.skip('._launchChild', () => {
     beforeEach(function () {
-      this.childWin = _.extend(new EE(), {
+      this.childWin = Object.assign(new EE(), {
         close: sinon.stub(),
         isDestroyed: sinon.stub().returns(false),
         webContents: new EE(),
@@ -1195,7 +1197,7 @@ describe('lib/browsers/electron', () => {
     })
 
     it('does the same things for children of the child window', function () {
-      this.grandchildWin = _.extend(new EE(), {
+      this.grandchildWin = Object.assign(new EE(), {
         close: sinon.stub(),
         isDestroyed: sinon.stub().returns(false),
         webContents: new EE(),

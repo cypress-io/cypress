@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import minimatch from 'minimatch'
 import url from 'url'
 
@@ -6,6 +5,7 @@ import type { CypressIncomingRequest } from '@packages/proxy'
 import type { BackendRoute } from './types'
 import type { RouteMatcherOptions } from '../types'
 import { getAllStringMatcherFields } from './util'
+import { pick, omit, getPath, partition } from '@packages/utils'
 
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
@@ -15,13 +15,13 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 
   // get a list of all the fields which exist where a rule needs to be succeed
   const stringMatcherFields = getAllStringMatcherFields(routeMatcher)
-  const booleanFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['https']))
-  const numberFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['port']))
+  const booleanFields = Object.keys(routeMatcher).filter((k) => ['https'].includes(k))
+  const numberFields = Object.keys(routeMatcher).filter((k) => ['port'].includes(k))
 
   for (let i = 0; i < stringMatcherFields.length; i++) {
     const field = stringMatcherFields[i]
-    let matcher = _.get(routeMatcher, field)
-    let value = _.get(matchable, field, '')
+    let matcher = getPath(routeMatcher, field)
+    let value = getPath(matchable, field) ?? ''
 
     // for convenience, attempt to match `url` against `path`?
     const shouldTryMatchingPath = field === 'url'
@@ -63,8 +63,8 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 
   for (let i = 0; i < booleanFields.length; i++) {
     const field = booleanFields[i]
-    const matcher = _.get(routeMatcher, field)
-    const value = _.get(matchable, field)
+    const matcher = getPath(routeMatcher, field)
+    const value = getPath(matchable, field)
 
     if (matcher !== value) {
       return false
@@ -73,8 +73,8 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 
   for (let i = 0; i < numberFields.length; i++) {
     const field = numberFields[i]
-    const matcher = _.get(routeMatcher, field)
-    const value = _.get(matchable, field)
+    const matcher = getPath(routeMatcher, field)
+    const value = getPath(matchable, field)
 
     if (matcher.length) {
       if (!matcher.includes(value)) {
@@ -93,7 +93,7 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 }
 
 export function _getMatchableForRequest (req: CypressIncomingRequest) {
-  let matchable: any = _.pick(req, ['headers', 'method', 'resourceType'])
+  let matchable: any = pick(req, 'headers', 'method', 'resourceType')
 
   const authorization = req.headers['authorization']
 
@@ -109,7 +109,7 @@ export function _getMatchableForRequest (req: CypressIncomingRequest) {
 
   const proxiedUrl = url.parse(req.proxiedUrl, true)
 
-  _.assign(matchable, _.pick(proxiedUrl, ['hostname', 'path', 'pathname', 'port', 'query']))
+  Object.assign(matchable, pick(proxiedUrl, 'hostname', 'path', 'pathname', 'port', 'query'))
 
   matchable.url = req.proxiedUrl
 
@@ -126,7 +126,7 @@ export function _getMatchableForRequest (req: CypressIncomingRequest) {
  * Find all `BackendRoute`s that match the supplied request.
  */
 export function* getRoutesForRequest (routes: BackendRoute[], req: CypressIncomingRequest) {
-  const [middleware, handlers] = _.partition(routes, (route) => route.routeMatcher.middleware === true)
+  const [middleware, handlers] = partition(routes, (route) => route.routeMatcher.middleware === true)
   // First, match the oldest matching route handler with `middleware: true`.
   // Then, match the newest matching route handler.
   const orderedRoutes = middleware.concat(handlers.reverse())
@@ -153,9 +153,9 @@ export function matchesRoutePreflight (routes: BackendRoute[], req: CypressIncom
 
   let hasCorsOverride = false
 
-  const matchingRoutes = _.filter(routes, ({ routeMatcher }) => {
+  const matchingRoutes = routes.filter(({ routeMatcher }) => {
     // omit headers from matching since preflight req will not send headers
-    const preflightMatcher = _.omit(routeMatcher, 'method', 'headers', 'auth')
+    const preflightMatcher = omit(routeMatcher, 'method', 'headers', 'auth')
 
     if (!_doesRouteMatch(preflightMatcher, req)) {
       return false

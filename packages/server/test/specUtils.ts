@@ -1,20 +1,30 @@
-import _ from 'lodash'
 import mockfs from 'mock-fs'
 import path from 'path'
 
 export const getFsPath = (pathStr: string) => {
-  return _.get(getFs(), _.compact(pathStr.split(path.sep)))
+  const keys = pathStr.split(path.sep).filter(Boolean)
+  let current: any = getFs()
+
+  for (const key of keys) {
+    if (current == null || typeof current !== 'object') {
+      return undefined
+    }
+
+    current = current[key]
+  }
+
+  return current
 }
 
 export const getFs = () => {
   const cwd = process.cwd().split(path.sep).slice(1)
 
   const recurse = (dir, d) => {
-    if (_.isString(dir)) {
+    if (typeof dir === 'string') {
       return dir
     }
 
-    return _.extend({}, ..._.map(dir, (val, key) => {
+    return Object.assign({}, ...Object.entries(dir).map(([key, val]: [string, any]) => {
       let nextDepth = null
 
       if (d !== null) {

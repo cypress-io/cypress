@@ -1,6 +1,5 @@
 import Debug from 'debug'
 import la from 'lazy-ass'
-import _ from 'lodash'
 import si from 'systeminformation'
 import { concatStream } from '@packages/network'
 
@@ -25,7 +24,7 @@ export const _reset = () => {
 }
 
 const formatPidDisplay = (groupedProcesses) => {
-  const pids = _.map(groupedProcesses, 'pid')
+  const pids = groupedProcesses.map((p) => p.pid)
   const maxArrayLength = 6
 
   let display = pids.slice(0, maxArrayLength).join(', ')
@@ -39,12 +38,15 @@ const formatPidDisplay = (groupedProcesses) => {
 
 export const groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) => {
   const cyProcesses: Process[] = []
-  const thisProcess: Process = _.find(list, { pid: process.pid })!
+  const thisProcess: Process = list.find((p) => p.pid === process.pid)!
 
   la(thisProcess, 'expected to find current pid in process list', process.pid)
 
   const isParentProcessInGroup = (proc: Process, group: Group) => {
-    return _.chain(cyProcesses).filter({ group }).map('pid').includes(proc.parentPid).value()
+    return cyProcesses
+    .filter((p) => p.group === group)
+    .map((p) => p.pid)
+    .includes(proc.parentPid)
   }
 
   // is this a browser process launched to run Cypress tests?
@@ -121,10 +123,9 @@ export const groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) =
       cyProcesses.push(proc)
 
       // queue all children
-      _.chain(list)
-      .filter({ parentPid: proc.pid })
-      .map(classifyProcess)
-      .value()
+      list
+      .filter((p) => p.parentPid === proc.pid)
+      .forEach(classifyProcess)
     }
 
     classify(getProcessGroup(proc))
@@ -137,7 +138,7 @@ export const groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) =
 
 export const _renameBrowserGroup = (processes: Process[]) => {
   const instance = browsers.getBrowserInstance()
-  const displayName = _.get(instance, 'browser.displayName')
+  const displayName = instance?.browser?.displayName
 
   processes.forEach((proc) => {
     if (!displayName) {
@@ -155,23 +156,39 @@ export const _renameBrowserGroup = (processes: Process[]) => {
 export const _aggregateGroups = (processes: Process[]) => {
   debugVerbose('all Cypress-launched processes: %s', require('util').inspect(processes))
 
-  const groupTotals = _.chain(processes)
-  .groupBy('group')
-  .mapValues((groupedProcesses, group) => {
+  const grouped: Record<string, Process[]> = {}
+
+  processes.forEach((proc) => {
+    const key = proc.group || 'other'
+
+    if (!grouped[key]) {
+      grouped[key] = []
+    }
+
+    grouped[key].push(proc)
+  })
+
+  const sumBy = (arr, prop: string) => arr.reduce((sum, item) => sum + (item[prop] || 0), 0)
+  const meanBy = (arr, prop: string) => arr.length ? sumBy(arr, prop) / arr.length : 0
+  const round = (num: number, precision: number) => {
+    const factor = Math.pow(10, precision)
+
+    return Math.round(num * factor) / factor
+  }
+
+  const groupTotals = Object.entries(grouped)
+  .map(([group, groupedProcesses]) => {
     return {
       group,
       processCount: groupedProcesses.length,
       pids: formatPidDisplay(groupedProcesses),
-      cpuPercent: _.sumBy(groupedProcesses, 'cpu'),
-      memRssMb: _.sumBy(groupedProcesses, 'memRss') / 1024,
+      cpuPercent: sumBy(groupedProcesses, 'cpu'),
+      memRssMb: sumBy(groupedProcesses, 'memRss') / 1024,
     }
   })
-  .values()
-  .sortBy('memRssMb')
-  .reverse()
-  .value()
+  .sort((a, b) => b.memRssMb - a.memRssMb)
 
-  groupTotals.push(_.reduce(groupTotals, (acc, val) => {
+  groupTotals.push(groupTotals.reduce((acc, val) => {
     acc.processCount += val.processCount
     acc.cpuPercent += val.cpuPercent
     acc.memRssMb += val.memRssMb
@@ -188,16 +205,16 @@ export const _aggregateGroups = (processes: Process[]) => {
 
     measurements.push(total)
 
-    _.merge(total, {
-      meanCpuPercent: _.meanBy(measurements, 'cpuPercent'),
-      meanMemRssMb: _.meanBy(measurements, 'memRssMb'),
-      maxMemRssMb: _.max(_.map(measurements, _.property('memRssMb'))),
+    Object.assign(total, {
+      meanCpuPercent: meanBy(measurements, 'cpuPercent'),
+      meanMemRssMb: meanBy(measurements, 'memRssMb'),
+      maxMemRssMb: Math.max(...measurements.map((m) => m.memRssMb)),
     })
 
-    _.forEach(total, (v, k) => {
+    Object.keys(total).forEach((k) => {
       // round all numbers to 100ths precision
-      if (_.isNumber(v)) {
-        total[k] = _.round(v, 2)
+      if (typeof total[k] === 'number') {
+        total[k] = round(total[k], 2)
       }
     })
   })

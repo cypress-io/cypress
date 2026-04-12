@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { omit, pick } from '@packages/utils'
 import type { FoundBrowser, SpecWithRelativeRoot } from '@packages/types'
 import path from 'path'
 
@@ -93,12 +93,12 @@ export interface CypressRunResult {
 }
 
 const createPublicTest = (test: TestResult): CypressCommandLine.TestResult => {
-  const duration = _.reduce(test.attempts, (memo, attempt) => {
+  const duration = test.attempts.reduce((memo, attempt) => {
     return memo + (attempt.wallClockDuration || 0)
   }, 0)
 
   return {
-    attempts: _.map(test.attempts, ({ state }) => ({ state })),
+    attempts: test.attempts.map(({ state }) => ({ state })),
     displayError: test.displayError,
     duration,
     state: test.state,
@@ -110,7 +110,7 @@ const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
   error: run.error,
   reporter: run.reporter,
   reporterStats: run.reporterStats,
-  screenshots: _.map(run.screenshots, (screenshot) => ({
+  screenshots: run.screenshots.map((screenshot) => ({
     height: screenshot.height,
     name: screenshot.name,
     path: screenshot.path,
@@ -129,7 +129,7 @@ const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
     suites: run.stats.suites,
     tests: run.stats.tests,
   },
-  tests: _.map(run.tests, createPublicTest),
+  tests: run.tests.map(createPublicTest),
   video: run.video,
 })
 
@@ -185,8 +185,8 @@ export const createPublicConfig = (config: Cfg): CypressCommandLine.PublicConfig
   // this removes/changes values while leaving all others as-is, so that new
   // config properties don't need to be manually accounted for
   return {
-    ..._.omit(config, omitConfigKeys) as Omit<CypressCommandLine.PublicConfig, 'browsers' | 'cypressInternalEnv'>,
-    browsers: _.map(config.browsers, createPublicBrowser),
+    ...omit(config, omitConfigKeys) as Omit<CypressCommandLine.PublicConfig, 'browsers' | 'cypressInternalEnv'>,
+    browsers: config.browsers.map(createPublicBrowser),
     // @ts-expect-error
     cypressInternalEnv: config.cypressEnv,
   }
@@ -205,7 +205,7 @@ export const createPublicRunResults = (results: CypressRunResult): CypressComman
   endedTestsAt: results.endedTestsAt,
   osName: results.osName,
   osVersion: results.osVersion,
-  runs: _.map(results.runs, createPublicRun),
+  runs: results.runs.map(createPublicRun),
   runUrl: results.runUrl,
   startedTestsAt: results.startedTestsAt,
   totalDuration: results.totalDuration,

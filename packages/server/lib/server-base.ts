@@ -7,7 +7,8 @@ import * as ensureUrl from './util/ensure-url'
 import express, { Express } from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
-import _ from 'lodash'
+import { defaults, once, pick } from '@packages/utils'
+import { trimEndChars } from '@packages/utils'
 import type { AddressInfo } from 'net'
 import url from 'url'
 import la from 'lazy-ass'
@@ -60,7 +61,7 @@ const isResponseHtml = function (contentType, responseBuffer) {
     return htmlContentTypesRe.test(contentType)
   }
 
-  const body = _.invoke(responseBuffer, 'toString')
+  const body = responseBuffer?.toString?.()
 
   if (body) {
     return isHtml(body)
@@ -84,10 +85,10 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   ]
 
   // normalize clientRoute to help with comparison
-  const trimmedClientRoute = _.trimEnd(clientRoute, '/')
+  const trimmedClientRoute = trimEndChars(clientRoute, '/')
 
   return function (req, res, next) {
-    const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+    const trimmedUrl = trimEndChars(req.proxiedUrl, '/')
 
     // if this request is a non-proxied cy-in-cy request,
     // we need to update the proxiedUrl and allow it to pass through
@@ -338,7 +339,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     debug('server open')
     this.testingType = testingType
 
-    la(_.isPlainObject(config), 'expected plain config object', config)
+    la(config !== null && typeof config === 'object' && !Array.isArray(config), 'expected plain config object', config)
 
     if (!config.baseUrl && testingType === 'component') {
       throw new Error('Server#open called without config.baseUrl.')
@@ -491,9 +492,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   createHosts (hosts: { [key: string]: string } | null = {}) {
-    return _.each(hosts, (ip, host) => {
-      return evilDns.add(host, ip)
-    })
+    if (hosts) {
+      Object.entries(hosts).forEach(([host, ip]) => {
+        evilDns.add(host, ip)
+      })
+    }
   }
 
   async addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
@@ -791,7 +794,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       const proxiedReq = {
         proxiedUrl: requestOptions.url,
         resourceType: 'document',
-        ..._.pick(requestOptions, ['headers', 'method']),
+        ...pick(requestOptions, ['headers', 'method']),
         // TODO: add `body` here once bodies can be statically matched
       }
 
@@ -812,9 +815,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         p.currentPromisePhase = currentPromisePhase
         p.reqStream = reqStream
 
-        _.invoke(reqStream, 'abort')
+        reqStream?.abort?.()
 
-        return _.invoke(currentPromisePhase, 'cancel')
+        return currentPromisePhase?.cancel?.()
       })
 
       const redirects: any[] = []
@@ -850,7 +853,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         .on('response', (incomingRes) => {
           debug(
             'resolve:url headers received, buffering response %o',
-            _.pick(incomingRes, 'headers', 'statusCode'),
+            pick(incomingRes, ['headers', 'statusCode']),
           )
 
           if (newUrl == null) {
@@ -967,20 +970,22 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       }
 
       // if they're POSTing an object, querystringify their POST body
-      if ((options.method === 'POST') && _.isObject(options.body)) {
+      if ((options.method === 'POST') && typeof options.body === 'object' && options.body !== null) {
         options.form = options.body
         delete options.body
       }
 
       // HTTP header names are case-insensitive; convert all keys to lowercase
-      options.headers = _.mapKeys(options.headers, (value, key) => key.toLowerCase())
+      options.headers = Object.fromEntries(
+        Object.entries(options.headers).map(([key, value]) => [key.toLowerCase(), value]),
+      )
 
-      _.assign(options, {
+      Object.assign(options, {
         // turn off gzip since we need to eventually
         // rewrite these contents
         gzip: false,
         url: urlFile != null ? urlFile : urlStr,
-        headers: _.assign({
+        headers: Object.assign({
           accept: 'text/html,*/*',
         }, options.headers, {
           'accept-encoding': getSupportedAcceptEncoding(options.headers['accept-encoding']),
@@ -1003,13 +1008,15 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       if (matchesNetStubbingRoute(options)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
         // however, network errors will be obfuscated by the proxying so this is not an ideal solution
-        _.merge(options, {
+        Object.assign(options, {
           proxy: `http://127.0.0.1:${this._port()}`,
           agent: null,
-          headers: {
-            'x-cypress-resolving-url': '1',
-          },
         })
+
+        options.headers = {
+          ...options.headers,
+          'x-cypress-resolving-url': '1',
+        }
       }
 
       debug('sending request with options %o', options)

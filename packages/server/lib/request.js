@@ -1,4 +1,4 @@
-const _ = require('lodash')
+const { defaults, pick: pickKeys, uniqueId, getPath } = require('@packages/utils')
 let r = require('@cypress/request')
 let rp = require('@cypress/request-promise')
 const url = require('url')
@@ -44,7 +44,7 @@ const getOriginalHeaders = (req = {}) => {
   // as the 'req' property which holds the
   // original headers else fall back to
   // the normal req.headers
-  return _.get(req, 'req.headers', req.headers)
+  return getPath(req, 'req.headers') ?? req.headers
 }
 
 const getDelayForRetry = function (options = {}) {
@@ -52,7 +52,7 @@ const getDelayForRetry = function (options = {}) {
 
   let delay = delaysRemaining.shift()
 
-  if (!_.isNumber(delay)) {
+  if (typeof delay !== 'number') {
     // no more delays, bailing
     debug('exhausted all attempts retrying request %o', merge(opts, { err }))
 
@@ -67,7 +67,7 @@ const getDelayForRetry = function (options = {}) {
   // then divide the delay interval
   // by 10 so it doesn't wait as long to retry
   // TODO: do we really want to do this?
-  if ((delay >= 1000) && (_.get(err, 'code') === 'ECONNREFUSED')) {
+  if ((delay >= 1000) && (err?.code === 'ECONNREFUSED')) {
     delay = delay / 10
   }
 
@@ -82,21 +82,15 @@ const getDelayForRetry = function (options = {}) {
 const hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) => {
   // everything must be true in order to
   // retry a status code failure
-  return _.every([
-    retryOnStatusCodeFailure,
-    !statusCode.isOk(res.statusCode),
-  ])
+  return retryOnStatusCodeFailure && !statusCode.isOk(res.statusCode)
 }
 
 const isErrEmptyResponseError = (err) => {
-  return _.startsWith(err.message, 'ERR_EMPTY_RESPONSE')
+  return err.message.startsWith('ERR_EMPTY_RESPONSE')
 }
 
 const isRetriableError = (err = {}, retryOnNetworkFailure) => {
-  return _.every([
-    retryOnNetworkFailure,
-    _.includes(NETWORK_ERRORS, err.code),
-  ])
+  return retryOnNetworkFailure && NETWORK_ERRORS.includes(err.code)
 }
 
 const maybeRetryOnNetworkFailure = function (err, options = {}) {
@@ -155,7 +149,7 @@ const maybeRetryOnStatusCodeFailure = function (res, options = {}) {
   debug('received status code & headers on request %o', {
     requestId,
     statusCode: res.statusCode,
-    headers: _.pick(res.headers, 'content-type', 'set-cookie', 'location'),
+    headers: pickKeys(res.headers, ['content-type', 'set-cookie', 'location']),
   })
 
   // is this a retryable status code failure?
@@ -176,10 +170,13 @@ const maybeRetryOnStatusCodeFailure = function (res, options = {}) {
 }
 
 const merge = (...args) => {
-  return _.chain({})
-  .extend(...args)
-  .omit(VERBOSE_REQUEST_OPTS)
-  .value()
+  const merged = Object.assign({}, ...args)
+
+  for (const key of VERBOSE_REQUEST_OPTS) {
+    delete merged[key]
+  }
+
+  return merged
 }
 
 const pick = function (resp = {}) {
@@ -235,7 +232,7 @@ const createRetryingRequestPromise = function (opts) {
       delaysRemaining,
       retryOnStatusCodeFailure,
       retryFn: retry,
-      onEnd: _.constant(res),
+      onEnd: () => res,
     })
   })
 }
@@ -379,7 +376,7 @@ const createRetryingRequestStream = function (opts = {}) {
           reqStream.pipe(delayStream)
 
           // `http.ClientRequest` events
-          return _.map(HTTP_CLIENT_REQUEST_EVENTS, _.partial(pipeEvent, reqStream, retryStream))
+          return HTTP_CLIENT_REQUEST_EVENTS.map((event) => pipeEvent(reqStream, retryStream, event))
         },
       })
     })
@@ -415,23 +412,22 @@ const caseInsensitiveSet = function (obj, property, val) {
 }
 
 const setDefaults = (opts) => {
-  return _
-  .chain(opts)
-  .defaults({
-    requestId: _.uniqueId('request'),
+  defaults(opts, {
+    requestId: uniqueId('request'),
     retryIntervals: [],
     retryOnNetworkFailure: true,
     retryOnStatusCodeFailure: false,
   })
-  .thru((opts) => {
-    return _.defaults(opts, {
-      delaysRemaining: _.clone(opts.retryIntervals),
-    })
-  }).value()
+
+  defaults(opts, {
+    delaysRemaining: [...opts.retryIntervals],
+  })
+
+  return opts
 }
 
 module.exports = function (options = {}) {
-  const defaults = {
+  const requestDefaults = {
     timeout: options.timeout,
     agent,
     // send keep-alive with requests since Chrome won't send it in proxy mode
@@ -442,8 +438,8 @@ module.exports = function (options = {}) {
     proxy: null, // upstream proxying is handled by CombinedAgent
   }
 
-  r = r.defaults(defaults)
-  rp = rp.defaults(defaults)
+  r = r.defaults(requestDefaults)
+  rp = rp.defaults(requestDefaults)
 
   return {
     r: require('@cypress/request'),
@@ -457,7 +453,7 @@ module.exports = function (options = {}) {
     create (strOrOpts, promise) {
       let opts
 
-      if (_.isString(strOrOpts)) {
+      if (typeof strOrOpts === 'string') {
         opts = {
           url: strOrOpts,
         }
@@ -495,13 +491,13 @@ module.exports = function (options = {}) {
 
       push(response)
 
-      response = _.pick(response, 'statusCode', 'body', 'headers')
+      response = pickKeys(response, ['statusCode', 'body', 'headers'])
 
       // normalize status
       response.status = response.statusCode
       delete response.statusCode
 
-      _.extend(response, {
+      Object.assign(response, {
         // normalize what is an ok status code
         statusText: statusCode.getText(response.status),
         isOkStatusCode: statusCode.isOk(response.status),
@@ -511,7 +507,7 @@ module.exports = function (options = {}) {
 
       // if body is a string and content type is json
       // try to convert the body to JSON
-      if (_.isString(response.body) && this.contentTypeIsJson(response)) {
+      if (typeof response.body === 'string' && this.contentTypeIsJson(response)) {
         response.body = this.parseJsonBody(response.body)
       }
 
@@ -591,7 +587,7 @@ module.exports = function (options = {}) {
 
         cookie.sameSite = convertSameSiteToughToExtension(cookie.sameSite, cyCookie)
 
-        cookie = _.pick(cookie, SERIALIZABLE_COOKIE_PROPS)
+        cookie = pickKeys(cookie, SERIALIZABLE_COOKIE_PROPS)
 
         let automationCmd = 'set:cookie'
 
@@ -607,7 +603,7 @@ module.exports = function (options = {}) {
     },
 
     sendStream (userAgent, automationFn, options = {}) {
-      _.defaults(options, {
+      defaults(options, {
         headers: {},
         followAllRedirects: true,
         onBeforeReqInit (fn) {
@@ -619,7 +615,7 @@ module.exports = function (options = {}) {
         options.headers['user-agent'] = userAgent
       }
 
-      _.extend(options, {
+      Object.assign(options, {
         strictSSL: false,
       })
 
@@ -663,7 +659,7 @@ module.exports = function (options = {}) {
     },
 
     sendPromise (userAgent, automationFn, options = {}) {
-      _.defaults(options, {
+      defaults(options, {
         headers: {},
         gzip: true,
         cookies: true,
@@ -684,11 +680,11 @@ module.exports = function (options = {}) {
       }
 
       // https://github.com/cypress-io/cypress/issues/338
-      _.defaults(options.headers, {
+      defaults(options.headers, {
         accept: '*/*',
       })
 
-      _.extend(options, {
+      Object.assign(options, {
         strictSSL: false,
         simple: false,
         resolveWithFullResponse: true,
@@ -700,7 +696,7 @@ module.exports = function (options = {}) {
 
       // https://github.com/cypress-io/cypress/issues/28789
       if (options.json === true) {
-        if (_.isBoolean(options.body) || _.isNull(options.body)) options.body = String(options.body)
+        if (typeof options.body === 'boolean' || options.body === null) options.body = String(options.body)
       }
 
       if (options.form === true) {

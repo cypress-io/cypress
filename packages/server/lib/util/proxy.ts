@@ -1,6 +1,6 @@
-import _ from 'lodash'
 import debugModule from 'debug'
 import os from 'os'
+import { pick } from '@packages/utils'
 import { getWindowsProxy } from './get-windows-proxy'
 
 const debug = debugModule('cypress:server:util:proxy')
@@ -39,7 +39,7 @@ const normalizeEnvironmentProxy = () => {
     process.env.NO_PROXY = ''
   }
 
-  const noProxyParts = _.compact((process.env.NO_PROXY || '').split(','))
+  const noProxyParts = (process.env.NO_PROXY || '').split(',').filter(Boolean)
 
   if (!noProxyParts.includes('<-loopback>')) {
     debug('<-loopback> not found, adding localhost to NO_PROXY')
@@ -48,7 +48,7 @@ const normalizeEnvironmentProxy = () => {
     ]).join(',')
   }
 
-  debug('normalized proxy environment variables %o', _.pick(process.env, [
+  debug('normalized proxy environment variables %o', pick(process.env, [
     'NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY',
   ]))
 }
@@ -60,7 +60,7 @@ const mergeNpmProxyVars = () => {
     ['npm_config_proxy', 'HTTP_PROXY'],
     ['npm_config_https_proxy', 'HTTPS_PROXY'],
   ].forEach(([from, to]) => {
-    if (!falsyEnv(process.env[from]) && _.isUndefined(process.env[to])) {
+    if (!falsyEnv(process.env[from]) && process.env[to] === undefined) {
       debug('using npm\'s %s as %s', from, to)
       process.env[to] = process.env[from]
     }
@@ -68,7 +68,7 @@ const mergeNpmProxyVars = () => {
 }
 
 export const loadSystemProxySettings = () => {
-  debug('found proxy environment variables %o', _.pick(process.env, [
+  debug('found proxy environment variables %o', pick(process.env, [
     'NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY',
     'no_proxy', 'http_proxy', 'https_proxy',
     'npm_config_proxy', 'npm_config_https_proxy', 'npm_config_noproxy',
@@ -78,7 +78,7 @@ export const loadSystemProxySettings = () => {
 
   mergeNpmProxyVars()
 
-  if (!_.isUndefined(process.env.HTTP_PROXY)) {
+  if (process.env.HTTP_PROXY !== undefined) {
     normalizeEnvironmentProxy()
 
     return

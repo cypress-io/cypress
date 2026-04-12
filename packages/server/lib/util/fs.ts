@@ -2,7 +2,6 @@ import Bluebird from 'bluebird'
 import fsExtra from 'fs-extra'
 import sanitize from 'sanitize-filename'
 import path from 'path'
-import _ from 'lodash'
 
 const RUNNABLE_SEPARATOR = ' -- '
 const pathSeparatorRe = /[\\\/]/g
@@ -99,7 +98,7 @@ const ensureSafePath = async function (withoutExt: string, extension: string | n
 const sanitizeToString = (title: any, idx: number, arr: Array<string>) => {
   // test titles may be values which aren't strings like
   // null or undefined - so convert before trying to sanitize
-  return sanitize(_.toString(title))
+  return sanitize(String(title))
 }
 
 export const getPath = async function (data: Data, ext: string | null, screenshotsFolder: ScreenshotsFolder, overwrite: boolean | undefined): Promise<string> {
@@ -111,11 +110,10 @@ export const getPath = async function (data: Data, ext: string | null, screensho
     names = data.name.split(pathSeparatorRe).map(sanitizeToString)
   } else {
     // we put this in array so to match with type of the if branch above
-    names = [_
-    .chain(data.titles)
+    names = [(data.titles || [])
+    .map((t) => t == null ? '' : t)
     .map(sanitizeToString)
-    .join(RUNNABLE_SEPARATOR)
-    .value()]
+    .join(RUNNABLE_SEPARATOR)]
   }
 
   const index = names.length - 1

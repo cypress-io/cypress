@@ -1,7 +1,5 @@
 require('../../../spec_helper')
 
-const _ = require('lodash')
-
 const preprocessor = require('../../../../lib/plugins/child/preprocessor')
 const util = require('../../../../lib/plugins/util')
 const resolve = require('../../../../lib/util/resolve')
@@ -64,7 +62,7 @@ describe('lib/plugins/child/run_plugins', () => {
           typescript: '/path/to/typescript.js',
         })
 
-        expect(_.last(registrations)).to.eql({
+        expect(registrations.at(-1)).to.eql({
           event: 'file:preprocessor',
           eventId: 5,
         })
@@ -113,7 +111,7 @@ describe('lib/plugins/child/run_plugins', () => {
         expect(setupConfig).to.eql({ includeShadowDom: true })
 
         expect(registrations).to.have.length(6)
-        expect(_.map(registrations, 'event')).to.eql([
+        expect(registrations.map((r) => r.event)).to.eql([
           '_get:task:body',
           '_get:task:keys',
           '_process:cross:origin:callback',

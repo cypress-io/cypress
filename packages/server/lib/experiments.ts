@@ -1,4 +1,4 @@
-import { get } from 'lodash'
+import { getPath } from '@packages/utils'
 
 /**
  * Returns a single string with human-readable experiments.
@@ -104,14 +104,14 @@ export const getExperimentsFromResolved = (resolvedConfig, names = experimental.
   const experimentalKeys = Object.keys(resolvedConfig).filter(isExperimentKey)
 
   experimentalKeys.forEach((key) => {
-    const name = get(names, key)
+    const name = getPath(names, key)
 
     if (!name) {
       // ignore unknown experiments
       return
     }
 
-    const summary = get(summaries, key, 'top secret')
+    const summary = getPath(summaries, key) ?? 'top secret'
 
     // it would be nice to have default value in the resolved config
     experiments[key] = {
@@ -132,7 +132,7 @@ export const getExperimentsFromResolved = (resolvedConfig, names = experimental.
  * where "on" is set to true if the value is different from default..
  */
 export const getExperiments = (project: CypressProject, names = experimental.names, summaries = experimental.summaries): CypressExperiments => {
-  const resolvedEnv = get(project, 'resolvedConfig', {})
+  const resolvedEnv = getPath(project, 'resolvedConfig') ?? {}
 
   return getExperimentsFromResolved(resolvedEnv, names, summaries)
 }

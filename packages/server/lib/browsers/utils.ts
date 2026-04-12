@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird'
-import _ from 'lodash'
+import { omit } from '@packages/utils'
 import type { FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
@@ -65,10 +65,37 @@ const defaultLaunchOptions: {
   env: {},
 }
 
-const KNOWN_LAUNCH_OPTION_PROPERTIES = _.keys(defaultLaunchOptions)
+const KNOWN_LAUNCH_OPTION_PROPERTIES = Object.keys(defaultLaunchOptions)
+
+const defaultsDeep = (target: any, ...sources: any[]): any => {
+  for (const source of sources) {
+    if (!source) continue
+
+    for (const key of Object.keys(source)) {
+      if (target[key] === undefined) {
+        const val = source[key]
+
+        if (Array.isArray(val)) {
+          target[key] = [...val]
+        } else if (typeof val === 'object' && val !== null) {
+          target[key] = { ...val }
+        } else {
+          target[key] = val
+        }
+      } else if (
+        typeof target[key] === 'object' && target[key] !== null && !Array.isArray(target[key]) &&
+        typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])
+      ) {
+        defaultsDeep(target[key], source[key])
+      }
+    }
+  }
+
+  return target
+}
 
 const getDefaultLaunchOptions = (options) => {
-  return _.defaultsDeep(options, defaultLaunchOptions)
+  return defaultsDeep(options, defaultLaunchOptions)
 }
 
 const copyExtension = (src, dest) => {
@@ -179,32 +206,30 @@ async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowse
 
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
   // strip out all the known launch option properties from the resulting object
-  const unexpectedProperties: string[] = _
-  .chain(pluginConfigResult)
-  .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
-  .keys()
-  .value()
+  const unexpectedProperties: string[] = Object.keys(omit(pluginConfigResult, KNOWN_LAUNCH_OPTION_PROPERTIES))
 
   if (unexpectedProperties.length) {
     // error on invalid props
     errors.throwErr('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
   }
 
-  _.forEach(launchOptions, (val, key) => {
+  for (const key of Object.keys(launchOptions)) {
     const pluginResultValue = pluginConfigResult[key]
 
     if (pluginResultValue) {
-      if (_.isPlainObject(val)) {
-        launchOptions[key] = _.extend({}, launchOptions[key], pluginResultValue)
+      const val = launchOptions[key]
 
-        return
+      if (typeof val === 'object' && val !== null && !Array.isArray(val) && Object.getPrototypeOf(val) === Object.prototype) {
+        launchOptions[key] = Object.assign({}, launchOptions[key], pluginResultValue)
+
+        continue
       }
 
       launchOptions[key] = pluginResultValue
 
-      return
+      continue
     }
-  })
+  }
 
   return launchOptions
 }
@@ -301,7 +326,7 @@ const isValidPathToBrowser = (str) => {
 
 const parseBrowserOption = (opt) => {
   // it's a name or a path
-  if (!_.isString(opt) || !opt.includes(':')) {
+  if (typeof opt !== 'string' || !opt.includes(':')) {
     return {
       name: opt,
       channel: 'stable',
@@ -328,9 +353,21 @@ async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, 
   debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
 
   // try to find the browser by name with the highest version property
-  const sortedBrowsers = _.sortBy(browsers, ['version'])
+  const browser = [...browsers].sort((a, b) => {
+    const aParts = (a.version || '0').split('.').map(Number)
+    const bParts = (b.version || '0').split('.').map(Number)
 
-  const browser = _.findLast(sortedBrowsers, filter)
+    for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+      const av = aParts[i] || 0
+      const bv = bParts[i] || 0
+
+      if (av !== bv) return bv - av
+    }
+
+    return 0
+  }).find((b) => {
+    return Object.keys(filter).every((key) => b[key] === filter[key])
+  })
 
   if (browser) {
     // short circuit if found

@@ -7,7 +7,6 @@ const { fs } = require(`../../../lib/util/fs`)
 const detect = require('@packages/launcher/lib/detect')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
-const _ = require('lodash')
 
 describe('lib/modes/info', () => {
   beforeEach(() => {
@@ -66,14 +65,45 @@ describe('lib/modes/info', () => {
     sinon.stub(detect, 'detect').resolves([chromeStable, firefoxDev])
     // have to make sure random sampling from the browser list
     // to create examples returns same order
-    // so Chrome will be picked first, Firefox will be second
-    const sample = sinon.stub(_, 'sample')
+    // so Chrome will be picked first (index 0), Firefox will be second (index 1)
+    const randomStub = sinon.stub(Math, 'random')
 
-    sample.onFirstCall().returns(chromeStable)
-    sample.onSecondCall().returns(firefoxDev)
+    randomStub.onFirstCall().returns(0)
+    randomStub.onSecondCall().returns(0.99)
 
     await infoAndSnapshot('two browsers')
-    expect(sample, 'two browsers were picked to create examples').to.be.calledTwice
+    expect(randomStub.callCount, 'two browsers were picked to create examples').to.be.gte(2)
+  })
+
+  it('sorts browsers by name then major version', async () => {
+    const browsers = [
+      { displayName: 'Firefox', name: 'firefox', channel: 'stable', version: '100.0', majorVersion: '100', path: '/path/firefox' },
+      { displayName: 'Chrome', name: 'chrome', channel: 'stable', version: '120.0', majorVersion: '120', path: '/path/chrome120' },
+      { displayName: 'Chrome', name: 'chrome', channel: 'stable', version: '110.0', majorVersion: '110', path: '/path/chrome110' },
+    ]
+
+    sinon.stub(detect, 'detect').resolves(browsers)
+
+    browserUtils.getBrowserPath
+    .withArgs(browsers[0]).returns('/path/to/user/firefox/profile')
+    .withArgs(browsers[1]).returns('/path/to/user/chrome120/profile')
+    .withArgs(browsers[2]).returns('/path/to/user/chrome110/profile')
+
+    const captured = capture.stdout()
+
+    await info()
+
+    capture.restore()
+    const output = stripAnsi(captured.toString())
+
+    // Chrome 110 should come before Chrome 120 (same name, sorted by majorVersion)
+    // Both Chromes should come before Firefox (sorted by name)
+    const chrome110Idx = output.indexOf('110.0')
+    const chrome120Idx = output.indexOf('120.0')
+    const firefoxIdx = output.indexOf('Firefox')
+
+    expect(chrome110Idx).to.be.lessThan(chrome120Idx)
+    expect(chrome120Idx).to.be.lessThan(firefoxIdx)
   })
 
   it('adds profile for browser if folder exists', async () => {
@@ -82,16 +112,16 @@ describe('lib/modes/info', () => {
     sinon.stub(fs, 'statAsync')
     .withArgs('/path/to/user/chrome/profile').throws('No Chrome profile folder')
     .withArgs('/path/to/user/firefox/profile').resolves({
-      isDirectory: _.stubTrue,
+      isDirectory: () => true,
     })
 
     // have to make sure random sampling from the browser list
     // to create examples returns same order
-    // so Chrome will be picked first, Firefox will be second
-    const sample = sinon.stub(_, 'sample')
+    // so Chrome will be picked first (index 0), Firefox will be second (index 1)
+    const randomStub = sinon.stub(Math, 'random')
 
-    sample.onFirstCall().returns(chromeStable)
-    sample.onSecondCall().returns(firefoxDev)
+    randomStub.onFirstCall().returns(0)
+    randomStub.onSecondCall().returns(0.99)
 
     await infoAndSnapshot('two browsers with firefox having profile folder')
   })

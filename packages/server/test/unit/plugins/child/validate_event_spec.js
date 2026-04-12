@@ -1,6 +1,5 @@
 require('../../../spec_helper')
 
-const _ = require('lodash')
 const validateEvent = require('../../../../lib/plugins/child/validate_event')
 
 const events = [
@@ -41,7 +40,7 @@ describe('lib/plugins/child/validate_event', () => {
     expect(error.message).to.equal(`invalid event name registered: invalid:event:name`)
   })
 
-  _.each(events, ([event, type]) => {
+  events.forEach(([event, type]) => {
     it(`returns error when event handler of ${event} is not ${type}`, () => {
       const { isValid, error } = validateEvent(event, 'invalid type')
 
@@ -51,7 +50,7 @@ describe('lib/plugins/child/validate_event', () => {
     })
   })
 
-  _.each(events, ([event, type, validValue]) => {
+  events.forEach(([event, type, validValue]) => {
     it(`returns success when event handler of ${event} is ${type}`, () => {
       const { isValid } = validateEvent(event, validValue)
 

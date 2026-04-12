@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 import CRI from 'chrome-remote-interface'
 import Debug from 'debug'
@@ -408,7 +407,7 @@ export class BrowserCriClient {
     // where they came from and run only the minimal middleware necessary
     extraTargetCriClient.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
       // headers are received as an object but need to be an array to modify them
-      const headers = _.map(params.request.headers, (value, name) => ({ name, value }))
+      const headers = Object.entries(params.request.headers || {}).map(([name, value]) => ({ name, value }))
 
       const details: Protocol.Fetch.ContinueRequestRequest = {
         requestId: params.requestId,

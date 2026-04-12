@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Debug from 'debug'
 import type {
   NetStubbingState,
@@ -19,6 +18,7 @@ import {
 import { InterceptedRequest } from './intercepted-request'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { BackendStaticResponse } from '../internal-types'
+import { pick, getPath, setPath } from '@packages/utils'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
@@ -82,7 +82,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
   const ret: RouteMatcherOptions = {}
 
   stringMatcherFields.forEach((field) => {
-    const obj = _.get(options, field)
+    const obj = getPath(options, field)
 
     if (!obj) {
       return
@@ -98,10 +98,10 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
       value = new RegExp(pattern, flags)
     }
 
-    _.set(ret, field, value)
+    setPath(ret, field, value)
   })
 
-  _.extend(ret, _.pick(options, PLAIN_FIELDS))
+  Object.assign(ret, pick(options, PLAIN_FIELDS))
 
   return ret
 }

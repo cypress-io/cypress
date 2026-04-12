@@ -1,7 +1,7 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import EventEmitter from 'events'
-import _ from 'lodash'
+import { defaults, omit } from '@packages/utils'
 import { getCtx } from '@packages/data-context'
 import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
 import { onNetStubbingEvent } from '@packages/net-stubbing'
@@ -147,7 +147,7 @@ export class SocketBase implements SocketBroadcaster {
   ) {
     let runState: RunState | undefined = undefined
 
-    _.defaults(options, {
+    defaults(options, {
       socketId: null,
       onResetServerState () {},
       onTestsReceivedAndMaybeRecord () {},
@@ -657,7 +657,7 @@ export class SocketBase implements SocketBroadcaster {
 
         socket.on('save:app:state', (state, cb) => {
           const opts = state.__options
-          const stateWithoutOptions = _.omit(state, '__options')
+          const stateWithoutOptions = omit(state, ['__options'])
 
           options.onSavedStateChanged(stateWithoutOptions, opts)
 

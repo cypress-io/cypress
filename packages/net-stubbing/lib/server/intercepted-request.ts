@@ -1,6 +1,6 @@
-import _ from 'lodash'
 import type { IncomingMessage } from 'http'
 import type { Readable } from 'stream'
+import { isDeepStrictEqual } from 'node:util'
 import type {
   CypressIncomingRequest,
   CypressOutgoingResponse,
@@ -14,6 +14,7 @@ import { emit, sendStaticResponse } from './util'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { BackendStaticResponse } from '../internal-types'
 import * as errors from '@packages/errors'
+import { uniqueId } from '@packages/utils'
 
 export class InterceptedRequest {
   id: string
@@ -44,7 +45,7 @@ export class InterceptedRequest {
   socket: SocketBroadcaster
 
   constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket'>) {
-    this.id = _.uniqueId('interceptedRequest')
+    this.id = uniqueId('interceptedRequest')
     this.req = opts.req
     this.res = opts.res
     this.continueRequest = opts.continueRequest
@@ -117,14 +118,14 @@ export class InterceptedRequest {
   }
 
   addSubscription (subscription: Subscription) {
-    const subscriptionsByRoute = _.find(this.subscriptionsByRoute, { routeId: subscription.routeId })
+    const subscriptionsByRoute = this.subscriptionsByRoute.find((s) => s.routeId === subscription.routeId)
 
     if (!subscriptionsByRoute) {
       throw new Error('expected to find existing subscriptions for route, but request did not originally match route')
     }
 
     // filter out any defaultSub subscriptions that are no longer needed
-    const defaultSub = _.find(subscriptionsByRoute.subscriptions, ({ eventName, routeId, id, skip }) => {
+    const defaultSub = subscriptionsByRoute.subscriptions.find(({ eventName, routeId, id, skip }) => {
       return eventName === subscription.eventName && routeId === subscription.routeId && !id && !skip
     })
 
@@ -157,7 +158,7 @@ export class InterceptedRequest {
           return
         }
 
-        const eventId = _.uniqueId('event')
+        const eventId = uniqueId('event')
         const eventFrame: NetEvent.ToDriver.Event<any> = {
           eventId,
           subscription,
@@ -214,7 +215,7 @@ export class InterceptedRequest {
 
         if (eventName === 'before:request' && immediateStaticResponse) {
           // Since StaticResponse is conflated with InterceptOptions, only send an immediate response if there are keys other than `log`.
-          const hasOnlyLog = _.isEqual(Object.keys(immediateStaticResponse), ['log'])
+          const hasOnlyLog = isDeepStrictEqual(Object.keys(immediateStaticResponse), ['log'])
 
           if (!hasOnlyLog) {
             await sendStaticResponse(this, immediateStaticResponse)

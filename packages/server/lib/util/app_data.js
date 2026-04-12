@@ -10,7 +10,6 @@ const { fs } = require('../util/fs')
 const cwd = require('../cwd').getCwd
 const md5 = require('md5')
 const sanitize = require('sanitize-filename')
-const replace = require('lodash/replace')
 
 const PRODUCT_NAME = pkg.productName || pkg.name
 
@@ -101,7 +100,7 @@ const modifyFileIfOutsideProjectDirectory = (projectRoot, filePath) => {
   if (!isSubDirectory) {
     const commonDirectoryPath = findCommonAncestor(projectRoot, filePath)
 
-    filePath = replace(filePath, commonDirectoryPath, '')
+    filePath = filePath.replace(commonDirectoryPath, '')
   }
 
   return filePath

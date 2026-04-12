@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import Debug from 'debug'
 import { isHostOnlyCookie } from '../browsers/cdp_automation'
 import type { SerializableAutomationCookie } from '../util/cookies'
@@ -28,7 +28,7 @@ const COOKIE_PROPERTIES = 'domain expiry httpOnly hostOnly name path sameSite se
 const debug = Debug('cypress:server:automation:cookies')
 
 const normalizeCookies = (cookies: (SerializableAutomationCookie | AutomationCookie)[]): AutomationCookie[] => {
-  return _.map(cookies, normalizeCookieProps) as AutomationCookie[]
+  return cookies.map(normalizeCookieProps) as AutomationCookie[]
 }
 
 const getCookieUrl = (cookie: {
@@ -49,7 +49,7 @@ const normalizeCookieProps = function (automationCookie: SerializableAutomationC
     return automationCookie
   }
 
-  const cookie = _.pick(automationCookie, COOKIE_PROPERTIES)
+  const cookie = pick(automationCookie, COOKIE_PROPERTIES)
 
   if (automationCookie.expiry === '-Infinity') {
     cookie.expiry = -Infinity
@@ -74,11 +74,15 @@ const normalizeCookieProps = function (automationCookie: SerializableAutomationC
 }
 
 const normalizeGetCookies = (cookies: (AutomationCookie | null)[]): (AutomationCookie | null)[] => {
-  return _.chain(cookies)
+  return cookies
   .map(normalizeGetCookieProps)
   // sort in order of expiration date, ascending
-  .sortBy(_.partialRight(_.get, 'expiry', Number.MAX_SAFE_INTEGER))
-  .value()
+  .sort((a, b) => {
+    const aExpiry = a?.expiry ?? Number.MAX_SAFE_INTEGER
+    const bExpiry = b?.expiry ?? Number.MAX_SAFE_INTEGER
+
+    return (aExpiry as number) - (bExpiry as number)
+  })
 }
 
 const normalizeGetCookieProps = (props: AutomationCookie | null) => {
@@ -128,7 +132,7 @@ export class Cookies {
     let cookies = await automate('get:cookies', data)
 
     cookies = normalizeGetCookies(cookies)
-    cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie)) as AutomationCookie[]
+    cookies = cookies.filter((cookie) => !this.isNamespaced(cookie)) as AutomationCookie[]
 
     debug('received get:cookies %o', cookies)
 
@@ -231,12 +235,12 @@ export class Cookies {
   async clearCookies (data: AutomationCookie[], automate: AutomationMessageFn<AutomationCookie[], AutomationCookie[]>) {
     const cookiesToClear = data
 
-    const cookies = _.reject(normalizeCookies(cookiesToClear), this.isNamespaced)
+    const cookies = normalizeCookies(cookiesToClear).filter((cookie) => !this.isNamespaced(cookie))
 
     debug('clear:cookies %o', cookies.length)
 
     const automationCookies = await automate('clear:cookies', cookies)
-    const normalizedCookies = _.map(automationCookies, normalizeCookieProps)
+    const normalizedCookies = automationCookies.map(normalizeCookieProps)
 
     return normalizedCookies
   }

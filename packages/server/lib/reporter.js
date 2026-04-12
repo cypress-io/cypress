@@ -1,4 +1,4 @@
-const _ = require('lodash')
+const { pick, omit, uniqBy } = require('@packages/utils')
 const path = require('path')
 const { stackUtils } = require('@packages/errors')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
@@ -150,17 +150,18 @@ const mochaProps = {
 }
 
 const toMochaProps = (testProps) => {
-  return _.each(mochaProps, (val, key) => {
+  Object.entries(mochaProps).forEach(([key, val]) => {
     if (testProps.hasOwnProperty(key)) {
       testProps[val] = testProps[key]
-
-      return delete testProps[key]
+      delete testProps[key]
     }
   })
+
+  return testProps
 }
 
 const toAttemptProps = (runnable) => {
-  return _.pick(runnable, [
+  return pick(runnable, [
     'err',
     'state',
     'timings',
@@ -191,7 +192,7 @@ const mergeRunnable = (eventName) => {
       }
     }
 
-    return [_.extend(runnable, testProps)]
+    return [Object.assign(runnable, testProps)]
   })
 }
 
@@ -208,7 +209,7 @@ const safelyMergeRunnable = function (hookProps, runnables) {
     }
   }
 
-  return [_.extend({}, runnables[hookProps.id], hookProps)]
+  return [{ ...runnables[hookProps.id], ...hookProps }]
 }
 
 const mergeErr = function (runnable, runnables, stats) {
@@ -229,7 +230,18 @@ const mergeErr = function (runnable, runnables, stats) {
 
   // However, we need to propagate the cypressTestStatusInfo to the reporter in order to print the test information correctly
   // in the terminal, as well as updating the test state as it may have changed in the client-side runner.
-  test = _.extend({}, test, { title: runnable.title, _cypressTestStatusInfo: runnable._cypressTestStatusInfo, state: runnable.state })
+  // Note: we use a for..in loop to copy all enumerable properties including inherited ones
+  // (e.g. fullTitle() from Mocha.Test.prototype) -- Object spread only copies own properties.
+  const merged = {}
+
+  for (const key in test) {
+    merged[key] = test[key]
+  }
+
+  merged.title = runnable.title
+  merged._cypressTestStatusInfo = runnable._cypressTestStatusInfo
+  merged.state = runnable.state
+  test = merged
 
   return [test, test.err]
 }
@@ -425,11 +437,11 @@ class Reporter {
           // eslint-disable-next-line no-case-declarations
           const suite = createSuite(runnableProps, parent)
 
-          suite.tests = _.map(runnableProps.tests, (testProps) => {
+          suite.tests = (runnableProps.tests || []).map((testProps) => {
             return this._createRunnable(testProps, 'test', suite)
           })
 
-          suite.suites = _.map(runnableProps.suites, (suiteProps) => {
+          suite.suites = (runnableProps.suites || []).map((suiteProps) => {
             return this._createRunnable(suiteProps, 'suite', suite)
           })
 
@@ -472,13 +484,15 @@ class Reporter {
   parseArgs (event, arg) {
     const normalizeArgs = events[event]
 
-    const args = _.isFunction(normalizeArgs)
+    const args = typeof normalizeArgs === 'function'
       ? normalizeArgs.call(this, arg, this.runnables, this.stats)
       : [arg]
 
     // the normalizeArgs function needs the id property, but we want to remove
     // and other private props before logging/emitting to mocha
-    args[0] = _.isPlainObject(args[0]) ? _.omit(args[0], ['id', 'hookId']) : args[0]
+    args[0] = (args[0] !== null && typeof args[0] === 'object' && !Array.isArray(args[0]) && Object.getPrototypeOf(args[0]) === Object.prototype)
+      ? omit(args[0], ['id', 'hookId'])
+      : args[0]
 
     debug('got mocha event \'%s\' with args: %o', event, args)
 
@@ -489,7 +503,7 @@ class Reporter {
     const runnable = this.runnables[test.id]
 
     // Merge the runnable with the updated test props to gain most recent status from the app runnable (in the case a passed test is retried).
-    _.extend(runnable, test)
+    Object.assign(runnable, test)
     const padding = '  '.repeat(runnable.titlePath().length)
 
     // Don't display a pass/fail symbol if we don't know the status.
@@ -532,7 +546,7 @@ class Reporter {
   }
 
   normalizeTest (test = {}) {
-    let outerTest = _.clone(test)
+    let outerTest = { ...test }
 
     // In the case tests were skipped or another case where they haven't run,
     // test._cypressTestStatusInfo.outerStatus will be undefined. In this case,
@@ -556,7 +570,7 @@ class Reporter {
       state: orNull(outerTest.state),
       body: orNull(outerTest.body),
       displayError: orNull(outerTest.err && outerTest.err.stack),
-      attempts: _.map((outerTest.prevAttempts || []).concat([test]), (attempt) => {
+      attempts: (outerTest.prevAttempts || []).concat([test]).map((attempt) => {
         const err = attempt.err && {
           name: attempt.err.name,
           message: attempt.err.message,
@@ -596,22 +610,18 @@ class Reporter {
   }
 
   results () {
-    const tests = _
-    .chain(this.runnables)
-    .filter({ type: 'test' })
+    const runnableValues = Object.values(this.runnables)
+
+    const tests = runnableValues
+    .filter((r) => r.type === 'test')
     .map(this.normalizeTest)
-    .value()
 
-    const hooks = _
-    .chain(this.runnables)
-    .filter({ type: 'hook' })
+    const hooks = runnableValues
+    .filter((r) => r.type === 'hook')
     .map(this.normalizeHook)
-    .value()
 
-    const suites = _
-    .chain(this.runnables)
-    .filter({ root: false }) // don't include root suite
-    .value()
+    const suites = runnableValues
+    .filter((r) => r.root === false)
 
     // default to 0
     this.stats.wallClockDuration = 0
@@ -624,10 +634,10 @@ class Reporter {
 
     this.stats.suites = suites.length
     this.stats.tests = tests.length
-    this.stats.passes = _.filter(tests, { state: 'passed' }).length
-    this.stats.pending = _.filter(tests, { state: 'pending' }).length
-    this.stats.skipped = _.filter(tests, { state: 'skipped' }).length
-    this.stats.failures = _.filter(tests, { state: 'failed' }).length
+    this.stats.passes = tests.filter((t) => t.state === 'passed').length
+    this.stats.pending = tests.filter((t) => t.state === 'pending').length
+    this.stats.skipped = tests.filter((t) => t.state === 'skipped').length
+    this.stats.failures = tests.filter((t) => t.state === 'failed').length
 
     // return an object of results
     return {
@@ -646,7 +656,7 @@ class Reporter {
   }
 
   static setVideoTimestamp (videoStart, tests = []) {
-    return _.map(tests, (test) => {
+    return tests.map((test) => {
       // if we have a wallClockStartedAt
       let wcs
 
@@ -720,10 +730,10 @@ class Reporter {
   }
 
   static getSearchPathsForReporter (reporterName, projectRoot) {
-    return _.uniq([
+    return [...new Set([
       path.resolve(projectRoot, reporterName),
       path.resolve(projectRoot, 'node_modules', reporterName),
-    ])
+    ])]
   }
 }
 

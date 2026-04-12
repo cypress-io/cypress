@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
 const http = require('http')
 const Bluebird = require('bluebird')
 const Request = require(`../../lib/request`)
@@ -39,7 +38,7 @@ const testAttachingCookiesWith = function (fn) {
       }),
       getCalls: get.getCalls().map((call) => {
         return {
-          newUrl: _.get(call, 'args.1'),
+          newUrl: call?.args?.[1],
         }
       }),
     })
@@ -1071,7 +1070,7 @@ describe('lib/request', () => {
       return testAttachingCookiesWith(() => {
         return request.sendStream({}, this.fn, {
           url: 'http://localhost:1234/',
-          followRedirect: _.stubTrue,
+          followRedirect: () => true,
         })
         .then((fn) => {
           const req = fn()

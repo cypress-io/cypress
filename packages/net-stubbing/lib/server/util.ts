@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Debug from 'debug'
 import mime from 'mime'
 import isHtml from 'is-html'
@@ -17,6 +16,7 @@ import type { CypressIncomingRequest } from '@packages/proxy'
 import type { InterceptedRequest } from './intercepted-request'
 import type { SocketBroadcaster } from '@packages/socket'
 import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
+import { pick, setPath, hasPath } from '@packages/utils'
 
 import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
@@ -25,14 +25,14 @@ const debug = Debug('cypress:net-stubbing:server:util')
 const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
 
 const isValidJSON = function (text: unknown) {
-  if (_.isObject(text)) {
+  if (typeof text === 'object' && text !== null) {
     return true
   }
 
   try {
     const o = JSON.parse(text as string)
 
-    return _.isObject(o)
+    return typeof o === 'object' && o !== null
   } catch (error) {
     false
   }
@@ -54,32 +54,35 @@ export function parseContentType (response?: string) {
 
 export function emit (socket: SocketBroadcaster, eventName: string, data: object) {
   if (debug.enabled) {
-    debug('sending event to driver %o', { eventName, data: _.chain(data).cloneDeep().omit('res.body').value() })
+    try {
+      const clone = structuredClone(data) as any
+
+      delete clone.res?.body
+      debug('sending event to driver %o', { eventName, data: clone })
+    } catch {
+      debug('sending event to driver %o', { eventName, data: '[uncloneable]' })
+    }
   }
 
   socket.toDriver('net:stubbing:event', eventName, data)
 }
 
 export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<any>) {
-  return _.concat(
-    _.filter(STRING_MATCHER_FIELDS, _.partial(_.has, options)),
+  return [
+    ...STRING_MATCHER_FIELDS.filter((field) => hasPath(options, field)),
     // add the nested DictStringMatcher values to the list of fields
-    _.flatten(
-      _.filter(
-        DICT_STRING_MATCHER_FIELDS.map((field) => {
-          const value = options[field]
+    ...DICT_STRING_MATCHER_FIELDS.map((field) => {
+      const value = options[field]
 
-          if (value) {
-            return _.keys(value).map((key) => {
-              return `${field}.${key}`
-            })
-          }
+      if (value) {
+        return Object.keys(value).map((key) => {
+          return `${field}.${key}`
+        })
+      }
 
-          return ''
-        }),
-      ),
-    ),
-  )
+      return ''
+    }).filter(Boolean).flat(),
+  ]
 }
 
 /**
@@ -102,7 +105,7 @@ function _getFakeClientResponse (opts: {
     opts.headers['content-type'] = 'text/html'
   }
 
-  _.merge(clientResponse, opts)
+  Object.assign(clientResponse, opts)
 
   return clientResponse
 }
@@ -133,11 +136,11 @@ export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMes
 
   // We should not override the user's access-control-expose-headers setting.
   if (hasCustomHeader && !res.headers['access-control-expose-headers']) {
-    setDefaultHeader('access-control-expose-headers', _.constant('*'))
+    setDefaultHeader('access-control-expose-headers', () => '*')
   }
 
   setDefaultHeader('access-control-allow-origin', () => caseInsensitiveGet(req.headers, 'origin') || '*')
-  setDefaultHeader('access-control-allow-credentials', _.constant('true'))
+  setDefaultHeader('access-control-allow-credentials', () => 'true')
 }
 
 export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {
@@ -155,7 +158,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
     // attempt to detect mimeType based on extension, fall back to regular cy.fixture inspection otherwise
     const mimeType = mime.getType(fixture.filePath) || parseContentType(data)
 
-    _.set(staticResponse, 'headers.content-type', mimeType)
+    setPath(staticResponse, 'headers.content-type', mimeType)
   }
 
   function getBody (): string {
@@ -164,7 +167,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
       return JSON.stringify('')
     }
 
-    if (!_.isBuffer(data) && !_.isString(data)) {
+    if (!Buffer.isBuffer(data) && typeof data !== 'string') {
       // TODO: probably we can use another function in fixtures.js that doesn't require us to remassage the fixture
       return JSON.stringify(data)
     }
@@ -192,7 +195,7 @@ export async function sendStaticResponse (backendRequest: Pick<InterceptedReques
 
   const statusCode = staticResponse.statusCode || 200
   const headers = staticResponse.headers || {}
-  const body = backendRequest.res.body = _.isUndefined(staticResponse.body) ? '' : staticResponse.body
+  const body = backendRequest.res.body = staticResponse.body === undefined ? '' : staticResponse.body
 
   const incomingRes = _getFakeClientResponse({
     statusCode,
@@ -200,7 +203,7 @@ export async function sendStaticResponse (backendRequest: Pick<InterceptedReques
     body,
   })
 
-  const bodyStream = await getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delay'))
+  const bodyStream = await getBodyStream(body, pick(staticResponse, 'throttleKbps', 'delay'))
 
   onResponse!(incomingRes, bodyStream)
 }
@@ -219,7 +222,7 @@ export async function getBodyStream (body: Buffer | string | Readable | undefine
       writable.pipe(pt)
     }
 
-    if (!_.isUndefined(body)) {
+    if (body !== undefined) {
       if ((body as Readable).pipe) {
         return (body as Readable).pipe(writable)
       }
@@ -244,23 +247,39 @@ function wait (fn, ms) {
 }
 
 export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: CyHttpMessages.BaseMessage) {
+  if (!before.headers || !after.headers) return
+
   for (const k in before.headers) {
     // a header was deleted from `after` but was present in `before`, delete it in `before` too
-    !after.headers[k] && delete before.headers[k]
+    if (!Object.prototype.hasOwnProperty.call(after.headers, k)) {
+      delete before.headers[k]
+    }
   }
 }
 
 export function mergeWithPreservedBuffers (before: CyHttpMessages.BaseMessage, after: Partial<CyHttpMessages.BaseMessage>) {
-  // lodash merge converts Buffer into Array (by design)
-  // https://github.com/lodash/lodash/issues/2964
+  // Deep merge that recurses through plain objects while preserving Buffer
+  // instances intact and replacing arrays/primitives directly.
   // @see https://github.com/cypress-io/cypress/issues/15898
-  _.mergeWith(before, after, (_a, b) => {
-    if (b instanceof Buffer) {
-      return b
-    }
+  const merge = (target: any, source: any) => {
+    for (const key of Object.keys(source)) {
+      const sVal = source[key]
+      const tVal = target[key]
 
-    return undefined
-  })
+      if (Buffer.isBuffer(sVal)) {
+        target[key] = sVal
+      } else if (
+        typeof sVal === 'object' && sVal !== null && !Array.isArray(sVal) &&
+        typeof tVal === 'object' && tVal !== null && !Array.isArray(tVal)
+      ) {
+        merge(tVal, sVal)
+      } else {
+        target[key] = sVal
+      }
+    }
+  }
+
+  merge(before, after)
 }
 
 type BodyEncoding = 'utf8' | 'binary' | null

@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import UrlParse from 'url-parse'
 
 const app_config = require('../../config/app.json')
@@ -25,26 +24,28 @@ const CLOUD_ENDPOINTS = {
 } as const
 
 const parseArgs = function (url, args: any[] = []) {
-  _.each(args, (value) => {
-    if (_.isObject(value)) {
-      url.set('query', _.extend(url.query, value))
+  for (const value of args) {
+    if (typeof value === 'object' && value !== null) {
+      url.set('query', Object.assign(url.query, value))
 
-      return
+      continue
     }
 
-    if (_.isString(value) || _.isNumber(value)) {
+    if (typeof value === 'string' || typeof value === 'number') {
       url.set('pathname', url.pathname.replace(':id', value))
 
-      return
+      continue
     }
-  })
+  }
 
   return url
 }
 
 const _makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
-  return _.reduce(routes, (memo, value, key) => {
-    memo[key] = function (...args: any[]) {
+  const memo = {} as Record<keyof typeof CLOUD_ENDPOINTS, (...args: any[]) => string>
+
+  for (const [key, value] of Object.entries(routes)) {
+    memo[key as keyof typeof CLOUD_ENDPOINTS] = function (...args: any[]) {
       let url = new UrlParse(baseUrl, true)
 
       if (value) {
@@ -57,9 +58,9 @@ const _makeRoutes = (baseUrl: string, routes: typeof CLOUD_ENDPOINTS) => {
 
       return url.toString()
     }
+  }
 
-    return memo
-  }, {} as Record<keyof typeof CLOUD_ENDPOINTS, (...args: any[]) => string>)
+  return memo
 }
 
 export const apiRoutes = _makeRoutes(apiUrl, CLOUD_ENDPOINTS)

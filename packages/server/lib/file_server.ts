@@ -1,5 +1,4 @@
 // TODO: move this to packages/core-file-server
-import _ from 'lodash'
 import debugModule from 'debug'
 import url from 'url'
 import http from 'http'
@@ -31,10 +30,10 @@ const onRequest = function (req: http.IncomingMessage, res: http.ServerResponse,
     return
   }
 
-  const args = _.compact([
+  const args = [
     fileServerFolder,
     req.url,
-  ])
+  ].filter(Boolean)
 
   // strip off any query params from our req's url
   // since we're pulling this from the file system

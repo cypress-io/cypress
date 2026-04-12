@@ -1,4 +1,3 @@
-import { isObject } from 'lodash'
 import axios, { AxiosError, AxiosInstance } from 'axios'
 
 declare module 'axios' {
@@ -12,7 +11,7 @@ export const transformError = (err: AxiosError | Error & { error?: any, statusCo
     { data: err.response?.data, status: err.status } :
     { data: err.error, status: err.statusCode }
 
-  if (isObject(data)) {
+  if (typeof data === 'object' && data !== null) {
     let body: string | null = null
 
     try {

@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:task')
 const plugins = require('./plugins')
@@ -6,7 +5,7 @@ const plugins = require('./plugins')
 const throwKnownError = function (message, props = {}) {
   const err = new Error(message)
 
-  _.extend(err, props, { isKnownError: true })
+  Object.assign(err, props, { isKnownError: true })
   throw err
 }
 

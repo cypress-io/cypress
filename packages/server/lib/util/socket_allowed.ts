@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Debug from 'debug'
 import type net from 'net'
 import type { Request } from 'express'
@@ -28,7 +27,11 @@ export class SocketAllowed {
   }
 
   _remove (socket: net.Socket) {
-    _.pull(this.allowedLocalPorts, socket.localPort)
+    const idx = this.allowedLocalPorts.indexOf(socket.localPort as number)
+
+    if (idx !== -1) {
+      this.allowedLocalPorts.splice(idx, 1)
+    }
   }
 
   /**

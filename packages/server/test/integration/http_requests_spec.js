@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
 let r = require('@cypress/request')
 const rp = require('@cypress/request-promise')
 const compression = require('compression')
@@ -93,7 +92,7 @@ describe('Routes', () => {
     Fixtures.scaffold()
 
     this.setup = async (initialUrl, obj = {}, spec, shouldCorrelatePreRequests = false) => {
-      if (_.isObject(initialUrl)) {
+      if (initialUrl !== null && typeof initialUrl === 'object') {
         obj = initialUrl
         initialUrl = null
       }
@@ -115,13 +114,14 @@ describe('Routes', () => {
         const jar = rp.jar()
 
         this.r = function (options = {}, cb) {
-          _.defaults(options, {
+          options = {
             proxy: this.proxy,
             jar,
             simple: false,
             followRedirect: false,
             resolveWithFullResponse: true,
-          })
+            ...options,
+          }
 
           return r(options, cb)
         }
@@ -132,19 +132,20 @@ describe('Routes', () => {
         this.rp = (options = {}) => {
           let targetUrl
 
-          if (_.isString(options)) {
+          if (typeof options === 'string') {
             targetUrl = options
             options = {}
           }
 
-          _.defaults(options, {
+          options = {
             url: targetUrl,
             proxy: this.proxy,
             jar,
             simple: false,
             followRedirect: false,
             resolveWithFullResponse: true,
-          })
+            ...options,
+          }
 
           return rp(options)
         }
@@ -1366,7 +1367,7 @@ describe('Routes', () => {
 
           // note - this is unintentionally invalid JS, just try executing it anywhere
           write('function ')
-          _.times(100, () => {
+          Array.from({ length: 100 }, () => {
             return write('😡😈'.repeat(10))
           })
 
@@ -2900,7 +2901,7 @@ describe('Routes', () => {
             .matchHeader('authorization', `Basic ${base64}`)
             .reply(200, '')
             .get('/index')
-            .matchHeader('authorization', _.isUndefined)
+            .matchHeader('authorization', (val) => val === undefined)
             .reply(200, '')
 
             return this.rp('http://beta.something.com/index')
@@ -4449,7 +4450,7 @@ describe('Routes', () => {
 
           // if we dont have multiple addresses aka ipv6 then
           // just skip this test
-          if (!_.find(addresses, { family: 6 })) {
+          if (!addresses.find((addr) => addr.family === 6)) {
             return done()
           }
 
@@ -4523,7 +4524,7 @@ describe('Routes', () => {
           this.rp('https://some.adwords.com'),
         ])
         .spread((...responses) => {
-          _.every(responses, (res) => {
+          responses.forEach((res) => {
             expect(res.statusCode).to.eq(503)
 
             expect(res.body).to.be.empty
@@ -4671,7 +4672,7 @@ describe('Routes', () => {
           this.httpSrv = http.createServer((req, res) => {
             const { query } = url.parse(req.url, true)
 
-            if (_.has(query, 'chunked')) {
+            if ('chunked' in query) {
               res.setHeader('tranfer-encoding', 'chunked')
             } else {
               res.setHeader('content-length', '0')
@@ -4688,7 +4689,7 @@ describe('Routes', () => {
             this.port = this.httpSrv.address().port
 
             return this.setup(`http://localhost:${this.port}`)
-            .then(_.ary(done, 0))
+            .then(() => done())
           })
         })
       })

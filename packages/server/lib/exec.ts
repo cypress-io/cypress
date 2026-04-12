@@ -1,20 +1,20 @@
 import Promise from 'bluebird'
 import execa from 'execa'
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import debugModule from 'debug'
 const log = debugModule('cypress:server:exec')
 import * as utils from './util/shell'
 
-const pickMainProps = (val) => _.pick(val, ['stdout', 'stderr', 'exitCode'])
+const pickMainProps = (val) => pick(val, ['stdout', 'stderr', 'exitCode'])
 
 const trimStdio = (val) => {
   const result = { ...val }
 
-  if (_.isString(val.stdout)) {
+  if (typeof val.stdout === 'string') {
     result.stdout = val.stdout.trim()
   }
 
-  if (_.isString(val.stderr)) {
+  if (typeof val.stderr === 'string') {
     result.stderr = val.stderr.trim()
   }
 
@@ -61,7 +61,7 @@ export const run = (projectRoot: string, options: any) => {
     const { shellEnv } = await tsImport('shell-env', __filename) as typeof import('shell-env')
 
     const shellVariables = await shellEnv()
-    const env = _.merge({}, shellVariables, process.env, options.env)
+    const env = { ...shellVariables, ...process.env, ...options.env }
 
     const shell = await utils.getShell(env.SHELL)
 

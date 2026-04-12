@@ -1,6 +1,5 @@
 require('../../spec_helper')
 
-const _ = require('lodash')
 const os = require('os')
 const electron = require('electron')
 const DataContext = require('@packages/data-context')
@@ -35,7 +34,8 @@ describe('gui/interactive', () => {
     it('tracks state properties', () => {
       const { trackState } = interactiveMode.getWindowArgs('http://app', {})
 
-      const args = _.pick(trackState, 'width', 'height', 'x', 'y', 'devTools')
+      const pickKeys = ['width', 'height', 'x', 'y', 'devTools']
+      const args = Object.fromEntries(Object.entries(trackState).filter(([k]) => pickKeys.includes(k)))
 
       expect(args).to.deep.eq({
         width: 'appWidth',

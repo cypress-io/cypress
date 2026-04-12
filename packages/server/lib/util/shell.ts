@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 import execa from 'execa'
 import os from 'os'
@@ -103,7 +102,7 @@ export const commandExists = (command) => {
   .return(true)
   // commandExists rejects with no error if command does not exist
   // otherwise, it's a legitimate error
-  .catchReturn(_.isNil, false)
+  .catchReturn((err: unknown) => err == null, false)
 }
 
 // for testing

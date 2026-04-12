@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import path from 'path'
 import Debug from 'debug'
 import appData from './util/app_data'
@@ -51,7 +51,7 @@ export const formStatePath = async (projectRoot?: string) => {
 
 const normalizeAndAllowSet = (set, key, value) => {
   const valueObject = (() => {
-    if (_.isString(key)) {
+    if (typeof key === 'string') {
       const tmp = {}
 
       tmp[key] = value
@@ -62,15 +62,15 @@ const normalizeAndAllowSet = (set, key, value) => {
     return key
   })()
 
-  const invalidKeys = _.filter(_.keys(valueObject), (key) => {
-    return !_.includes(allowedKeys, key)
+  const invalidKeys = Object.keys(valueObject).filter((key) => {
+    return !allowedKeys.includes(key)
   })
 
   if (invalidKeys.length) {
     logError(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.ts`)
   }
 
-  return set(_.pick(valueObject, allowedKeys))
+  return set(pick(valueObject, allowedKeys as unknown as string[]))
 }
 
 interface SavedStateAPI {
@@ -105,7 +105,9 @@ export const create = (projectRoot?: string, isTextTerminal: boolean = false): P
       stateFile.__resetForTest()
     })
 
-    stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)
+    const originalSet = stateFile.set.bind(stateFile)
+
+    stateFile.set = (...args) => normalizeAndAllowSet(originalSet, ...args)
 
     // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
     // After some package refactoring, we should be able to remove this.

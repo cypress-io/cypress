@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { omitBy } from '@packages/utils'
 import EE from 'events'
 import path from 'path'
 import Debug from 'debug'
@@ -18,6 +18,27 @@ import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
 import type { CriClient } from './cri-client'
+
+const defaultsDeep = (...objects: any[]): any => {
+  const result = {}
+
+  for (const obj of objects) {
+    if (!obj) continue
+
+    for (const key of Object.keys(obj)) {
+      if (result[key] === undefined) {
+        result[key] = obj[key]
+      } else if (
+        typeof result[key] === 'object' && result[key] !== null && !Array.isArray(result[key]) &&
+        typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])
+      ) {
+        result[key] = defaultsDeep(result[key], obj[key])
+      }
+    }
+  }
+
+  return result
+}
 
 // TODO: unmix these two types
 type ElectronOpts = Windows.WindowOptions & BrowserLaunchOpts
@@ -39,7 +60,7 @@ let browserCriClient: BrowserCriClient | null = null
 const tryToCall = function (win, method) {
   try {
     if (!win.isDestroyed()) {
-      if (_.isString(method)) {
+      if (typeof method === 'string') {
         return win[method]()
       }
 
@@ -83,19 +104,22 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
 
   const automation = await CdpAutomation.create(pageCriClient.send, pageCriClient.on, pageCriClient.off, sendClose, parent)
 
-  automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
+  const originalOnRequest = automation.onRequest
+
+  automation.onRequest = function (message, data) {
+    const fn = originalOnRequest
+
     switch (message) {
       case 'take:screenshot': {
         // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
         // workaround: start and stop screencasts between screenshots
         // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
         if (!options.videoApi) {
-          await pageCriClient.send('Page.startScreencast', screencastOpts())
-          const ret = await fn(message, data)
-
-          await pageCriClient.send('Page.stopScreencast')
-
-          return ret
+          return pageCriClient.send('Page.startScreencast', screencastOpts())
+          .then(() => fn(message, data))
+          .then((ret) => {
+            return pageCriClient.send('Page.stopScreencast').then(() => ret)
+          })
         }
 
         return fn(message, data)
@@ -109,7 +133,7 @@ const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) 
         return fn(message, data)
       }
     }
-  })
+  } as typeof automation.onRequest
 
   return automation
 }
@@ -235,7 +259,7 @@ export = {
       },
     }
 
-    return _.defaultsDeep({}, options, defaults)
+    return defaultsDeep({}, options, defaults)
   },
 
   _getAutomation,
@@ -261,7 +285,7 @@ export = {
 
     const electronOptions = this._defaultOptions(projectRoot, state, options, automation)
 
-    _.extend(electronOptions, {
+    Object.assign(electronOptions, {
       x: parentX + 100,
       y: parentY + 100,
       trackState: false,
@@ -562,7 +586,7 @@ export = {
       this._defaultOptions(options.projectRoot, state, options, automation),
     )
 
-    debug('browser window options %o', _.omitBy(electronOptions, _.isFunction))
+    debug('browser window options %o', omitBy(electronOptions, (v) => typeof v === 'function'))
 
     const defaultLaunchOptions = utils.getDefaultLaunchOptions({
       preferences: electronOptions,
@@ -601,7 +625,7 @@ export = {
 
     const clearInstanceState = this.clearInstanceState
 
-    instance = _.extend(events, {
+    instance = Object.assign(events, {
       pid: mainPid,
       allPids: [mainPid],
       browserWindow: win,

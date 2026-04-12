@@ -30,6 +30,24 @@ describe('http/util/buffers', () => {
     })
   })
 
+  describe('#set', () => {
+    it('isolates details from caller mutations', () => {
+      const details = { isPrimarySuperDomainOrigin: false, someProp: 'original' }
+      const obj = { url: 'http://example.com/', details } as unknown as HttpBuffer
+
+      buffers.set(obj)
+
+      // Mutate the original details after storing
+      details.isPrimarySuperDomainOrigin = true
+      details.someProp = 'mutated'
+
+      const buffer = buffers.get('http://example.com/') as HttpBuffer
+
+      expect((buffer as any).details.isPrimarySuperDomainOrigin).toEqual(false)
+      expect((buffer as any).details.someProp).toEqual('original')
+    })
+  })
+
   describe('#take', () => {
     it('removes the found buffer', () => {
       const obj = { url: 'https://www.google.com/' } as HttpBuffer

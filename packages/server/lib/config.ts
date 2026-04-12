@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick, omit, mapValues } from '@packages/utils'
 import { getCloudRecordingConfigKeys, setUrls } from '@packages/config'
 
 export { setUrls }
@@ -6,17 +6,17 @@ export { setUrls }
 const devServerConfigRecordingPreservedKeys = ['bundler', 'framework'] as const
 
 function sanitizeDevServerConfigForRecording (devServerConfig: Record<string, unknown>) {
-  const preserved = _.pick(devServerConfig, devServerConfigRecordingPreservedKeys)
-  const rest = _.omit(devServerConfig, devServerConfigRecordingPreservedKeys)
+  const preserved = pick(devServerConfig, devServerConfigRecordingPreservedKeys as unknown as string[])
+  const rest = omit(devServerConfig, devServerConfigRecordingPreservedKeys as unknown as string[])
 
   return {
     ...preserved,
-    ..._.mapValues(rest, (val) => `omitted: ${typeof val}`),
+    ...mapValues(rest, (val) => `omitted: ${typeof val}`),
   }
 }
 
 function sanitizeEnvLikeForRecording (obj: Record<string, unknown>) {
-  return _.mapValues(obj ?? {}, (val) => `omitted: ${typeof val}`)
+  return mapValues(obj ?? {}, (val) => `omitted: ${typeof val}`)
 }
 
 // Strips out values that can be aribitrarily sized / are duplicated from config
@@ -35,7 +35,7 @@ export function filterRuntimeConfigForRecording (config) {
   }
 
   if (devServerConfig !== undefined) {
-    if (_.isPlainObject(devServerConfig)) {
+    if (devServerConfig !== null && typeof devServerConfig === 'object' && !Array.isArray(devServerConfig) && Object.getPrototypeOf(devServerConfig) === Object.prototype) {
       resultConfig.devServerConfig = sanitizeDevServerConfigForRecording(devServerConfig)
     } else {
       resultConfig.devServerConfig = `omitted: ${typeof devServerConfig}`
@@ -53,5 +53,5 @@ export function filterRuntimeConfigForRecording (config) {
     }
   }
 
-  return _.pick(resultConfig, getCloudRecordingConfigKeys())
+  return pick(resultConfig, getCloudRecordingConfigKeys())
 }

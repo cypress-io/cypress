@@ -1,7 +1,7 @@
 import charset from 'charset'
 import crypto from 'crypto'
 import iconv from 'iconv-lite'
-import _ from 'lodash'
+import { omit, pick } from '@packages/utils'
 import { PassThrough, Readable } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
@@ -137,10 +137,8 @@ function resContentTypeIs (res: IncomingMessage, contentType: string) {
 }
 
 function resContentTypeIsJavaScript (res: IncomingMessage) {
-  return _.some(
-    ['application/javascript', 'application/x-javascript', 'text/javascript']
-    .map(_.partial(resContentTypeIs, res)),
-  )
+  return ['application/javascript', 'application/x-javascript', 'text/javascript']
+  .some((contentType) => resContentTypeIs(res, contentType))
 }
 
 const SUPPORTED_CONTENT_ENCODINGS = ['gzip', 'br'] as const
@@ -196,12 +194,12 @@ function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value
 const parseFeaturePolicy = (policy: string): any => {
   const pairs = policy.split('; ').map((directive) => directive.split(' '))
 
-  return _.fromPairs(pairs)
+  return Object.fromEntries(pairs)
 }
 
 // { autoplay: "*", "document-domain": "'none'" } => "autoplay *; document-domain 'none'"
 const stringifyFeaturePolicy = (policy: any): string => {
-  const pairs = _.toPairs(policy)
+  const pairs = Object.entries(policy)
 
   return pairs.map((directive) => directive.join(' ')).join('; ')
 }
@@ -220,9 +218,9 @@ const getOriginalRequestId = (requestId: string) => {
 
 const LogResponse: ResponseMiddleware = function () {
   this.debug('received response %o', {
-    browserPreRequest: _.pick(this.req.browserPreRequest, 'requestId'),
-    req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
-    incomingRes: _.pick(this.incomingRes, 'headers', 'statusCode'),
+    browserPreRequest: pick(this.req.browserPreRequest, 'requestId'),
+    req: pick(this.req, 'method', 'proxiedUrl', 'headers'),
+    incomingRes: pick(this.incomingRes, 'headers', 'statusCode'),
   })
 
   this.next()
@@ -307,7 +305,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
   // symbol - Symbol.for('kOutHeaders') will not work
   const getKOutHeadersSymbol = () => {
     const findKOutHeadersSymbol = (): symbol => {
-      return _.find(Object.getOwnPropertySymbols(this.res), (sym) => {
+      return Object.getOwnPropertySymbols(this.res).find((sym) => {
         return sym.toString() === 'Symbol(kOutHeaders)'
       })!
     }
@@ -375,7 +373,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 const OmitProblematicHeaders: ResponseMiddleware = function () {
   const span = telemetry.startSpan({ name: 'omit:problematic:header', parentSpan: this.resMiddlewareSpan, isVerbose })
 
-  const headers = _.omit(this.incomingRes.headers, [
+  const headers = omit(this.incomingRes.headers, [
     'set-cookie',
     'x-frame-options',
     'content-length',
@@ -632,7 +630,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     wantsSecurityRemoved: this.res.wantsSecurityRemoved,
   })
 
-  this.debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
+  this.debug('injection levels: %o', pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
 
   span?.end()
   this.next()

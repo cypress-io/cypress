@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { defaults, without } from '@packages/utils'
 import Promise from 'bluebird'
 import { globalPubSub } from '@packages/data-context'
 import { fs } from './util/fs'
@@ -38,7 +38,7 @@ export const cache = {
 
   _read (): Promise<Cache> {
     return fileUtil.get().then((contents) => {
-      return _.defaults(contents, this.defaults())
+      return defaults(contents, this.defaults())
     })
   },
 
@@ -49,7 +49,7 @@ export const cache = {
   _removeProjects (tx: Transaction, projects: string[], paths: string | string[]): Promise<void> {
     const pathsArray = Array.isArray(paths) ? paths : [paths]
 
-    projects = _.without(projects, ...pathsArray)
+    projects = without(projects, ...pathsArray)
 
     return tx.set({ PROJECTS: projects })
   },
@@ -91,7 +91,7 @@ export const cache = {
       return this._getProjects(tx).then((projects) => {
         // projects are sorted by most recently used, so add a project to
         // the start or move it to the start if it already exists
-        const existingIndex = _.findIndex(projects, (project) => {
+        const existingIndex = projects.findIndex((project) => {
           return project === path
         })
 

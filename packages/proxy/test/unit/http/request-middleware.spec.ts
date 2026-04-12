@@ -1,5 +1,4 @@
 import { describe, expect, beforeEach, it, vi } from 'vitest'
-import _ from 'lodash'
 import RequestMiddleware from '../../../lib/http/request-middleware'
 import { testMiddleware } from './helpers'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
@@ -41,7 +40,7 @@ describe('http/request-middleware', () => {
   })
 
   it('exports the members in the correct order', () => {
-    expect(_.keys(RequestMiddleware)).toEqual([
+    expect(Object.keys(RequestMiddleware)).toEqual([
       'LogRequest',
       'ExtractCypressMetadataHeaders',
       'MaybeSimulateSecHeaders',

@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
 const path = require('path')
 const httpsAgent = require('https-proxy-agent')
 // NOTE: we need to import the client from the lib directory because the browser/client directory is compiled to ESM.
@@ -137,7 +136,16 @@ describe('lib/socket', () => {
         this.server.startWebsockets(this.automation, this.cfg, this.options)
         this.socket = this.server._socket
 
-        done = _.once(done)
+        let doneCalled = false
+        const origDone = done
+
+        done = (...args) => {
+          if (doneCalled) return
+
+          doneCalled = true
+
+          return origDone(...args)
+        }
 
         // when our real client connects then we're done
         this.socket.socketIo.on('connection', (socket) => {

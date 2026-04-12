@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
 const path = require('path')
 const Jimp = require('jimp')
 const sinon = require('sinon')
@@ -253,7 +252,17 @@ describe('lib/screenshots', () => {
         this.getPixelColor.withArgs(0, 0).onSecondCall().returns('white')
 
         const clone = (img, props) => {
-          return _.defaultsDeep(props, img)
+          const result = { ...img }
+
+          for (const [k, v] of Object.entries(props)) {
+            if (v && typeof v === 'object' && !Buffer.isBuffer(v) && result[k] && typeof result[k] === 'object') {
+              result[k] = { ...result[k], ...v }
+            } else {
+              result[k] = v
+            }
+          }
+
+          return result
         }
 
         this.jimpImage2 = clone(this.jimpImage, {
@@ -481,7 +490,7 @@ describe('lib/screenshots', () => {
   context('.crop', () => {
     beforeEach(function () {
       this.dimensions = (overrides) => {
-        return _.extend({ x: 0, y: 0, width: 10, height: 10 }, overrides)
+        return Object.assign({ x: 0, y: 0, width: 10, height: 10 }, overrides)
       }
     })
 
@@ -558,7 +567,7 @@ describe('lib/screenshots', () => {
             specName: 'foo.spec.js',
             testFailure: false,
             takenAt: '1234-date',
-            dimensions: _.pick(dimensions, 'width', 'height'),
+            dimensions: { width: dimensions.width, height: dimensions.height },
           })
 
           expect(expectedPath).to.eq(actualPath)
@@ -599,7 +608,7 @@ describe('lib/screenshots', () => {
           specName: 'foo.spec.js',
           testFailure: false,
           takenAt: '1234-date',
-          dimensions: _.pick(dimensions, 'width', 'height'),
+          dimensions: { width: dimensions.width, height: dimensions.height },
         })
 
         expect(expectedPath).to.eq(actualPath)
@@ -678,7 +687,7 @@ describe('lib/screenshots', () => {
 
       err.code = 'ENAMETOOLONG'
 
-      _.times(50, (i) => fs.outputFileAsync.onCall(i).rejects(err))
+      Array.from({ length: 50 }, (_, i) => fs.outputFileAsync.onCall(i).rejects(err))
 
       const fullPath = await screenshots.getPath({
         specName: 'foo.js',
@@ -693,7 +702,7 @@ describe('lib/screenshots', () => {
 
       err.code = 'ENAMETOOLONG'
 
-      _.times(150, (i) => fs.outputFileAsync.onCall(i).rejects(err))
+      Array.from({ length: 150 }, (_, i) => fs.outputFileAsync.onCall(i).rejects(err))
 
       await expect(screenshots.getPath({
         specName: 'foo.js',
@@ -701,7 +710,7 @@ describe('lib/screenshots', () => {
       }, 'png', '/tmp')).to.be.rejectedWith(err)
     })
 
-    _.each([Infinity, 0 / 0, [], {}, 1, false], (value) => {
+    ;[Infinity, 0 / 0, [], {}, 1, false].forEach((value) => {
       it(`doesn't err and stringifies non-string test title: ${value}`, () => {
         return screenshots.getPath({
           specName: 'examples$/user/list.js',
@@ -715,7 +724,7 @@ describe('lib/screenshots', () => {
       })
     })
 
-    _.each([null, undefined], (value) => {
+    ;[null, undefined].forEach((value) => {
       it(`doesn't err and removes null/undefined test title: ${value}`, () => {
         return screenshots.getPath({
           specName: 'examples$/user/list.js',
@@ -768,7 +777,9 @@ describe('lib/screenshots', () => {
       plugins.has.returns(false)
 
       return screenshots.afterScreenshot(this.data, this.details).then((result) => {
-        expect(_.omit(result, 'duration')).to.eql({
+        const { duration: _duration, ...resultWithoutDuration } = result
+
+        expect(resultWithoutDuration).to.eql({
           size: 100,
           takenAt: this.details.takenAt,
           dimensions: this.details.dimensions,
@@ -797,7 +808,9 @@ describe('lib/screenshots', () => {
       })
 
       return screenshots.afterScreenshot(this.data, this.details).then((result) => {
-        expect(_.omit(result, 'duration')).to.eql({
+        const { duration: _duration, ...resultWithoutDuration } = result
+
+        expect(resultWithoutDuration).to.eql({
           size: 200,
           takenAt: this.details.takenAt,
           dimensions: { width: 2000, height: 1320 },
@@ -819,7 +832,9 @@ describe('lib/screenshots', () => {
       plugins.execute.resolves('foo')
 
       return screenshots.afterScreenshot(this.data, this.details).then((result) => {
-        expect(_.omit(result, 'duration')).to.eql({
+        const { duration: _duration, ...resultWithoutDuration } = result
+
+        expect(resultWithoutDuration).to.eql({
           size: 100,
           takenAt: this.details.takenAt,
           dimensions: this.details.dimensions,

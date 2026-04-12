@@ -11,6 +11,7 @@ const FORBIDDEN = new Set(['__proto__', 'prototype', 'constructor'])
  */
 export function toPathArray (path: string | number | (string | number)[]): (string | number)[] {
   if (Array.isArray(path)) return [...path]
+
   if (typeof path === 'number') return [path]
 
   const result: (string | number)[] = []
@@ -107,6 +108,7 @@ export function hasPath (obj: any, path: string | number | (string | number)[]):
     const key = String(parts[i])
 
     if (FORBIDDEN.has(key)) return false
+
     if (!Object.prototype.hasOwnProperty.call(current, parts[i])) return false
 
     current = current[parts[i]]
@@ -129,7 +131,9 @@ export function defaults<T extends Record<string, any>> (target: T, ...sources: 
   return target
 }
 
-export function pick (obj: Record<string, any>, ...keys: (string | string[])[]): Record<string, any> {
+export function pick (obj: Record<string, any> | null | undefined, ...keys: (string | string[])[]): Record<string, any> {
+  if (obj == null || typeof obj !== 'object') return {}
+
   const allKeys = keys.flat()
   const result: Record<string, any> = {}
 
@@ -142,7 +146,9 @@ export function pick (obj: Record<string, any>, ...keys: (string | string[])[]):
   return result
 }
 
-export function omit (obj: Record<string, any>, ...keys: (string | string[])[]): Record<string, any> {
+export function omit (obj: Record<string, any> | null | undefined, ...keys: (string | string[])[]): Record<string, any> {
+  if (obj == null) return {}
+
   const keySet = new Set(keys.flat())
   const result: Record<string, any> = {}
 

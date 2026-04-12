@@ -3,7 +3,7 @@ import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey, isSupported
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
 import Debug from 'debug'
-import { isEqual } from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 import { evaluateInFrameContext } from '../helpers/evaluate_in_frame_context'
 import { AUT_FRAME_NAME_IDENTIFIER } from '../helpers/aut_identifier'
 
@@ -149,7 +149,7 @@ export async function bidiKeyPress (inKey: any, client: Client, autContext: stri
     const autFrameElement = await client.findElement('css selector', 'iframe.aut-iframe')
     const activeElement = await client.getActiveElement()
 
-    if (!isEqual(autFrameElement, activeElement)) {
+    if (!isDeepStrictEqual(autFrameElement, activeElement)) {
       debug('aut iframe is not currently focused; focusing aut iframe: ', autContext)
       await client.scriptEvaluate(
         {

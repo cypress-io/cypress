@@ -1,5 +1,5 @@
-const _ = require('lodash')
 const EE = require('events')
+const { pick } = require('@packages/utils')
 const util = require('../util')
 
 let fileObjects = {}
@@ -7,7 +7,7 @@ let fileObjects = {}
 let wrappedClose = false
 
 const wrap = (ipc, invoke, ids, args) => {
-  const file = _.pick(args[0], 'filePath', 'outputPath', 'shouldWatch')
+  const file = pick(args[0], ['filePath', 'outputPath', 'shouldWatch'])
   let childFile = fileObjects[file.filePath]
 
   // https://github.com/cypress-io/cypress/issues/1305
@@ -38,7 +38,7 @@ const wrap = (ipc, invoke, ids, args) => {
   // the emitter methods don't come through from the parent process
   // so we have to re-apply them here
   if (!childFile) {
-    childFile = fileObjects[file.filePath] = _.extend(new EE(), file)
+    childFile = fileObjects[file.filePath] = Object.assign(new EE(), file)
     childFile.on('rerun', () => {
       ipc.send('preprocessor:rerun', file.filePath)
     })

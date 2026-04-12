@@ -1,19 +1,19 @@
-const _ = require('lodash')
 const isCi = require('ci-info').isCI
 const debug = require('debug')('cypress:server')
+const { camelCase } = require('@packages/utils')
 
 const getIsCi = () => isCi
 
 const join = (char, ...pieces) => {
-  return _.chain(pieces).compact().join(char).value()
-}
-
-const toCamelObject = (obj, key) => {
-  return _.set(obj, _.camelCase(key), process.env[key])
+  return pieces.filter(Boolean).join(char)
 }
 
 const extract = (envKeys) => {
-  return _.transform(envKeys, toCamelObject, {})
+  return envKeys.reduce((obj, key) => {
+    obj[camelCase(key)] = process.env[key]
+
+    return obj
+  }, {})
 }
 
 /**
@@ -26,7 +26,7 @@ const isAzureCi = () => {
 }
 
 const isAWSCodeBuild = () => {
-  return _.some(process.env, (val, key) => {
+  return Object.keys(process.env).some((key) => {
     return /^CODEBUILD_/.test(key)
   })
 }
@@ -54,17 +54,17 @@ const isBamboo = () => {
 // Harness CI exposes both HARNESS_* and DRONE_* environment variables.
 // Ref: https://developer.harness.io/docs/continuous-integration/troubleshoot-ci/ci-env-var/#codebase-and-trigger-variables
 const isHarnessCi = () => {
-  return _.some(process.env, (val, key) => /^HARNESS_/.test(key))
+  return Object.keys(process.env).some((key) => /^HARNESS_/.test(key))
 }
 
 const isDroneCi = () => {
   // Drone (and Harness CI) set DRONE_* env vars.
   // But Drone standalone has no HARNESS_* env vars.
-  return process.env.DRONE || _.some(process.env, (val, key) => /^DRONE_/.test(key))
+  return process.env.DRONE || Object.keys(process.env).some((key) => /^DRONE_/.test(key))
 }
 
 const isConcourse = () => {
-  return _.some(process.env, (val, key) => {
+  return Object.keys(process.env).some((key) => {
     return /^CONCOURSE_/.test(key)
   })
 }
@@ -135,12 +135,14 @@ const _detectProviderName = () => {
   // return the key of the first provider
   // which is truthy
 
-  return _.findKey(CI_PROVIDERS, (value) => {
-    if (_.isString(value)) {
+  return Object.keys(CI_PROVIDERS).find((key) => {
+    const value = CI_PROVIDERS[key]
+
+    if (typeof value === 'string') {
       return env[value]
     }
 
-    if (_.isFunction(value)) {
+    if (typeof value === 'function') {
       return value()
     }
   })
@@ -693,23 +695,32 @@ const provider = () => {
 }
 
 const omitUndefined = (ret) => {
-  if (_.isObject(ret)) {
-    return _.omitBy(ret, _.isUndefined)
+  if (ret !== null && typeof ret === 'object') {
+    const result = {}
+
+    for (const [k, v] of Object.entries(ret)) {
+      if (v !== undefined) {
+        result[k] = v
+      }
+    }
+
+    return result
   }
 }
 
 const _get = (fn) => {
-  return _
-  .chain(fn())
-  .get(provider())
-  .thru(omitUndefined)
-  .defaultTo(null)
-  .value()
+  const providerName = provider()
+  const data = fn()
+  const val = providerName ? data[providerName] : undefined
+  const cleaned = omitUndefined(val)
+
+  return cleaned == null ? null : cleaned
 }
 
 const ciParams = () => {
+  const userParams = omitUndefined(_userProvidedProviderCiParams()) || null
   const ciParams = {
-    ..._.chain(_userProvidedProviderCiParams()).thru(omitUndefined).defaultTo(null).value(),
+    ...userParams,
     ..._get(_providerCiParams),
   }
 
@@ -742,9 +753,13 @@ const commitDefaults = (existingInfo) => {
   // merge in the commitParams if null or undefined
   // defaulting back to null if all fails
   // NOTE: only properties defined in "existingInfo" will be returned
-  const combined = _.transform(existingInfo, (memo, value, key) => {
-    return memo[key] = _.defaultTo(value || commitParamsObj[key], null)
-  })
+  const combined = Object.entries(existingInfo).reduce((memo, [key, value]) => {
+    const selected = value || commitParamsObj[key]
+
+    memo[key] = selected == null || Number.isNaN(selected) ? null : selected
+
+    return memo
+  }, {})
 
   debug('combined git and environment variables from provider')
   debug(combined)
@@ -753,18 +768,17 @@ const commitDefaults = (existingInfo) => {
 }
 
 const list = () => {
-  return _.keys(CI_PROVIDERS)
+  return Object.keys(CI_PROVIDERS)
 }
 
 // grab all detectable providers
 // that we can extract ciBuildId from
 const detectableCiBuildIdProviders = () => {
-  return _
-  .chain(_providerCiParams())
-  .omitBy(_.isNil)
-  .keys()
-  .sortBy()
-  .value()
+  const params = _providerCiParams()
+
+  return Object.keys(params)
+  .filter((key) => params[key] != null)
+  .sort()
 }
 
 module.exports = {

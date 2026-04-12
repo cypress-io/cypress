@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import send from 'send'
 import { getPathToIndex, getPathToDist } from '@packages/resolve-dist'
 import type { Cfg } from './project-base'
@@ -30,7 +30,7 @@ export const makeServeConfig = (options) => {
   // them straight to the HTML on load
 
   debug('serving runner index.html with config %o',
-    _.pick(config, 'version', 'platform', 'arch', 'projectName'))
+    pick(config, ['version', 'platform', 'arch', 'projectName']))
 
   // base64 before embedding so user-supplied contents can't break out of <script>
   // https://github.com/cypress-io/cypress/issues/4952

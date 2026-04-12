@@ -16,7 +16,6 @@ global.mockery = require('mockery')
 global.proxyquire = require('proxyquire')
 global.sinon = require('sinon')
 
-const _ = require('lodash')
 const Promise = require('bluebird')
 const cache = require('../lib/cache').cache
 
@@ -52,7 +51,7 @@ let hasOnly = false;
 })
 
 const originalEnv = process.env
-const env = _.clone(process.env)
+const env = { ...process.env }
 
 sinon.usingPromise(Promise)
 
@@ -131,7 +130,7 @@ afterEach(async () => {
   nock.cleanAll()
   nock.enableNetConnect()
 
-  process.env = _.clone(env)
+  process.env = { ...env }
 })
 
 module.exports = {

@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { uniqueId } from '@packages/utils'
 import debugModule from 'debug'
 import stream from 'stream'
 
@@ -55,7 +55,7 @@ function streamBuffer (initialSize = 2048) {
 
     public createReadStream () {
       let bytesRead = 0
-      const readerId = _.uniqueId('reader')
+      const readerId = uniqueId('reader')
 
       const onRead = (size) => {
         if (!buffer) {
@@ -120,7 +120,7 @@ function streamBuffer (initialSize = 2048) {
 
     unpipeAll () {
       buffer = null // aggressive GC
-      _.invokeMap(this.readers, 'unpipe')
+      this.readers.forEach((reader) => reader.unpipe())
     }
 
     _buffer () {

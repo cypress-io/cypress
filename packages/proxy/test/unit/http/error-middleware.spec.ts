@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest'
-import _ from 'lodash'
 import ErrorMiddleware, {
   AbortRequest,
   UnpipeResponse,
@@ -11,7 +10,7 @@ import {
 
 describe('http/error-middleware', function () {
   it('exports the members in the correct order', function () {
-    expect(_.keys(ErrorMiddleware)).toEqual([
+    expect(Object.keys(ErrorMiddleware)).toEqual([
       'LogError',
       'SendToDriver',
       'InterceptError',

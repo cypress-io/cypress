@@ -1,6 +1,5 @@
 require('../../spec_helper')
 
-const _ = require('lodash')
 const debug = require('debug')('test')
 
 const errors = require(`../../../lib/errors`)
@@ -10,7 +9,7 @@ const commitInfo = require('../../../lib/util/commit-info')
 const recordMode = require(`../../../lib/modes/record`)
 const ciProvider = require(`../../../lib/util/ci_provider`)
 
-const initialEnv = _.clone(process.env)
+const initialEnv = { ...process.env }
 
 // NOTE: the majority of the logic of record_spec is
 // tested as an e2e/record_spec

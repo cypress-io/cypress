@@ -1,7 +1,8 @@
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import la from 'lazy-ass'
-import _ from 'lodash'
+import { mapValues, without } from '@packages/utils'
+import { isDeepStrictEqual } from 'node:util'
 import os from 'os'
 import path from 'path'
 import * as extension from '@packages/extension'
@@ -83,12 +84,12 @@ const _getChromePreferences = (userDir: string): Promise<ChromePreferences> => {
   if (process.env.IGNORE_CHROME_PREFERENCES) {
     debug('ignoring chrome preferences: not reading from chrome preference files')
 
-    return Promise.resolve(_.mapValues(CHROME_PREFERENCE_PATHS, () => ({})))
+    return Promise.resolve(mapValues(CHROME_PREFERENCE_PATHS, () => ({})))
   }
 
   debug('reading chrome preferences... %o', { userDir, CHROME_PREFERENCE_PATHS })
 
-  return Bluebird.props(_.mapValues(CHROME_PREFERENCE_PATHS, (prefPath) => {
+  return Bluebird.props(mapValues(CHROME_PREFERENCE_PATHS, (prefPath) => {
     return fs.readJson(path.join(userDir, prefPath))
     .catch((err) => {
       // return empty obj if it doesn't exist
@@ -111,26 +112,64 @@ const _getChromePreferencesWithDefaults = async (userDir: string): Promise<Chrom
   return _mergeChromePreferences(defaultPrefs, existingPrefs)
 }
 
+const _deepMergeWithNullDelete = (target: any, source: any): any => {
+  const deletions: [any, string][] = []
+
+  const merge = (tgt: any, src: any) => {
+    for (const key of Object.keys(src)) {
+      if (src[key] == null) {
+        // setting a key to null should remove it
+        deletions.push([tgt, key])
+      } else if (Array.isArray(src[key])) {
+        if (!Array.isArray(tgt[key])) {
+          tgt[key] = []
+        }
+
+        for (let i = 0; i < src[key].length; i++) {
+          const sEl = src[key][i]
+
+          if (sEl == null) {
+            deletions.push([tgt[key], String(i)])
+          } else if (typeof sEl === 'object' && !Array.isArray(sEl)) {
+            if (typeof tgt[key][i] !== 'object' || tgt[key][i] === null || Array.isArray(tgt[key][i])) {
+              tgt[key][i] = {}
+            }
+
+            merge(tgt[key][i], sEl)
+          } else {
+            tgt[key][i] = sEl
+          }
+        }
+      } else if (typeof src[key] === 'object') {
+        if (typeof tgt[key] !== 'object' || tgt[key] === null || Array.isArray(tgt[key])) {
+          tgt[key] = {}
+        }
+
+        merge(tgt[key], src[key])
+      } else {
+        tgt[key] = src[key]
+      }
+    }
+  }
+
+  merge(target, source)
+
+  deletions.forEach(([obj, key]) => {
+    delete obj[key]
+  })
+
+  return target
+}
+
 const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: ChromePreferences): ChromePreferences => {
-  return _.mapValues(CHROME_PREFERENCE_PATHS, (_v, prefPath) => {
-    const original = _.cloneDeep(originalPrefs[prefPath])
+  return mapValues(CHROME_PREFERENCE_PATHS, (_v, prefPath) => {
+    const original = structuredClone(originalPrefs[prefPath])
 
     if (!newPrefs[prefPath]) {
       return original
     }
 
-    let deletions: any[] = []
-
-    _.mergeWith(original, newPrefs[prefPath], (_objValue, newValue, key, obj) => {
-      if (newValue == null) {
-        // setting a key to null should remove it
-        deletions.push([obj, key])
-      }
-    })
-
-    deletions.forEach(([obj, key]) => {
-      delete obj[key]
-    })
+    _deepMergeWithNullDelete(original, newPrefs[prefPath])
 
     return original
   })
@@ -146,11 +185,11 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
     return Promise.resolve()
   }
 
-  return Bluebird.map(_.keys(originalPrefs), (key) => {
+  return Bluebird.map(Object.keys(originalPrefs), (key) => {
     const originalJson = originalPrefs[key]
     const newJson = newPrefs[key]
 
-    if (!newJson || _.isEqual(originalJson, newJson)) {
+    if (!newJson || isDeepStrictEqual(originalJson, newJson)) {
       debug('skipping writing preferences for %s: no changes detected', key)
 
       return
@@ -179,7 +218,7 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
   }
 
   let userExtensions = []
-  const loadExtension = _.find(args, (arg) => {
+  const loadExtension = args.find((arg) => {
     return arg.includes(LOAD_EXTENSION)
   })
 
@@ -191,7 +230,7 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
   }
 
   if (loadExtension) {
-    args = _.without(args, loadExtension)
+    args = without(args, loadExtension)
 
     // form into array, enabling users to pass multiple extensions
     userExtensions = userExtensions.concat(loadExtension.replace(LOAD_EXTENSION, '').split(','))
@@ -203,7 +242,7 @@ const _normalizeArgExtensions = function (extPath, args, pluginExtensions, brows
 
   const extensions = ([] as any).concat(userExtensions, extPath, pathToTheme)
 
-  args.push(LOAD_EXTENSION + _.compact(extensions).join(','))
+  args.push(LOAD_EXTENSION + extensions.filter(Boolean).join(','))
 
   return args
 }
@@ -254,7 +293,7 @@ async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunMode
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
 const _navigateUsingCRI = async function (client, url) {
-  la(_.isString(url) && url.match(/^https?:\/\/.*$/), 'missing url to navigate to', url)
+  la(typeof url === 'string' && url.match(/^https?:\/\/.*$/), 'missing url to navigate to', url)
   la(client, 'could not get CRI client')
   debug('received CRI client')
   debug('navigating to page %s', url)

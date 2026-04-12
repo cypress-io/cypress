@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 
 require('../spec_helper')
-const _ = require('lodash')
 const path = require('path')
 const EE = require('events')
 const http = require('http')
@@ -89,12 +88,10 @@ const ELECTRON_BROWSER = {
 const previousCwd = process.cwd()
 
 const snapshotConsoleLogs = function (name) {
-  const args = _
-  .chain(console.log.args)
+  const args = console.log.args
   .map((innerArgs) => {
     return innerArgs.join(' ')
   }).join('\n')
-  .value()
 
   // our cwd() is currently the project
   // so must switch back to original
@@ -715,8 +712,8 @@ describe('lib/cypress', () => {
         // get all the error args
         const argsSet = errors.log.args
 
-        const found1 = _.find(argsSet, (args) => {
-          return _.find(args, (arg) => {
+        const found1 = argsSet.find((args) => {
+          return args.find((arg) => {
             return arg.message && stripAnsi(arg.message).includes(
               `Browser: foo was not found on your system or is not supported by Cypress.`,
             )
@@ -725,8 +722,8 @@ describe('lib/cypress', () => {
 
         expect(found1, `foo should not be found`).to.be.ok
 
-        const found2 = _.find(argsSet, (args) => {
-          return _.find(args, (arg) => {
+        const found2 = argsSet.find((args) => {
+          return args.find((arg) => {
             return arg.message && stripAnsi(arg.message).includes(
               'Cypress supports the following browsers:',
             )
@@ -735,8 +732,8 @@ describe('lib/cypress', () => {
 
         expect(found2, 'supported browsers should be listed').to.be.ok
 
-        const found3 = _.find(argsSet, (args) => {
-          return _.find(args, (arg) => {
+        const found3 = argsSet.find((args) => {
+          return args.find((arg) => {
             return arg.message && stripAnsi(arg.message).includes(
               'Available browsers found on your system are:\n - chrome\n - chromium\n - chrome:canary\n - electron',
             )
@@ -1085,11 +1082,12 @@ describe('lib/cypress', () => {
             const { args } = launch.launch.firstCall
 
             // when we work with the browsers we set a few extra flags
-            const chrome = _.find(TYPICAL_BROWSERS, { name: 'chrome' })
-            const launchedChrome = _.defaults({}, chrome, {
+            const chrome = TYPICAL_BROWSERS.find((b) => b.name === 'chrome')
+            const launchedChrome = {
               isHeadless: true,
               isHeaded: false,
-            })
+              ...chrome,
+            }
 
             expect(args[0], 'found and used Chrome').to.deep.eq(launchedChrome)
 
@@ -1188,7 +1186,7 @@ describe('lib/cypress', () => {
 
     describe('--env', () => {
       beforeEach(() => {
-        process.env = _.omit(process.env, 'CYPRESS_DEBUG')
+        process.env = Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== 'CYPRESS_DEBUG'))
         delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
 
         globalThis.CY_TEST_MOCK.listenForProjectEnd = { stats: { failures: 0 } }

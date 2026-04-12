@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 
@@ -55,7 +54,7 @@ const getUserEditors = async (): Promise<Editor[]> => {
     .then((preferredOpener: Editor | undefined) => {
       debug('saved preferred editor: %o', preferredOpener)
 
-      const cyEditors = _.map(editors, createEditor)
+      const cyEditors = editors.map(createEditor)
       const preferred = getOtherEditor(preferredOpener)
 
       if (!preferred) {

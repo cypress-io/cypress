@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
 const { filterRuntimeConfigForRecording } = require('../../lib/config')
 const { getCloudRecordingConfigKeys } = require('@packages/config')
 
@@ -140,7 +139,7 @@ describe('lib/config filterRuntimeConfigForRecording', () => {
       extra: 'should-not-appear',
     })
 
-    _.each(_.keys(filtered), (key) => {
+    Object.keys(filtered).forEach((key) => {
       expect(allow.has(key), `unexpected key on filtered config: ${key}`).to.equal(true)
     })
   })

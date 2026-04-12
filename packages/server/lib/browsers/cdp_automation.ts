@@ -1,6 +1,6 @@
 /// <reference types='chrome'/>
 
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
@@ -46,7 +46,7 @@ function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): Protocol.Net
 }
 
 function convertSameSiteCdpToExtension (str: Protocol.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
-  if (_.isUndefined(str)) {
+  if (str === undefined) {
     return str
   }
 
@@ -92,7 +92,7 @@ const normalizeGetCookieProps = (cookie: Protocol.Network.Cookie): CyCookie => {
 }
 
 const normalizeGetCookies = (cookies: Protocol.Network.Cookie[]) => {
-  return _.map(cookies, normalizeGetCookieProps)
+  return cookies.map(normalizeGetCookieProps)
 }
 
 const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRequest => {
@@ -100,23 +100,29 @@ const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRe
   // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
   // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
 
-  const setCookieRequest: Protocol.Network.SetCookieRequest = _({
+  const rawProps: Record<string, any> = {
     domain: cookie.domain,
     path: cookie.path,
     secure: cookie.secure,
     httpOnly: cookie.httpOnly,
     sameSite: convertSameSiteExtensionToCdp(cookie.sameSite),
     expires: cookie.expirationDate,
-  })
+  }
+
   // Network.setCookie will error on any undefined/null parameters
-  .omitBy(_.isNull)
-  .omitBy(_.isUndefined)
+  const filtered: Record<string, any> = {}
+
+  for (const [key, val] of Object.entries(rawProps)) {
+    if (val !== null && val !== undefined) {
+      filtered[key] = val
+    }
+  }
+
   // set name and value at the end to get the correct typing
-  .extend({
+  const setCookieRequest: Protocol.Network.SetCookieRequest = Object.assign(filtered, {
     name: cookie.name || '',
     value: cookie.value || '',
-  })
-  .value()
+  }) as Protocol.Network.SetCookieRequest
 
   // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
   if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
@@ -399,7 +405,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
   private getCookie = (filter: CyCookieFilter): Promise<CyCookie | null> => {
     return this.getAllCookies(filter)
     .then((cookies) => {
-      return _.get(cookies, 0, null)
+      return cookies[0] ?? null
     })
   }
 
@@ -428,7 +434,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     if (header) {
     // headers are received as an object but need to be an array
     // to modify them
-      const currentHeaders = _.map(params.request.headers, (value, name) => ({ name, value }))
+      const currentHeaders = Object.entries(params.request.headers).map(([name, value]) => ({ name, value }))
 
       details.headers = [
         ...currentHeaders,
@@ -460,7 +466,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       await this.gettingFrameTree
     }
 
-    const frame = _.find(this.frameTree?.childFrames || [], ({ frame }) => {
+    const frame = (this.frameTree?.childFrames || []).find(({ frame }) => {
       return frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
     }) as HasFrame | undefined
 
@@ -481,14 +487,14 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
       const frameTree = (await this.send('Page.getFrameTree')).frameTree
 
-      let frame = _.find(frameTree?.childFrames || [], (item: HasFrame) => {
+      let frame = (frameTree?.childFrames || []).find((item: HasFrame) => {
         return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
       }) as HasFrame | undefined
 
       // If we are in E2E Cypress in Cypress testing, we need to get the frame from the child frames of the AUT frame. Else we are reloading what would be the "top" frame under test (with the AUT and reporter_)
       if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && frame) {
         // @ts-expect-error
-        frame = _.find(frame?.childFrames || [], (item: HasFrame) => {
+        frame = (frame?.childFrames || []).find((item: HasFrame) => {
           return item.frame?.name?.startsWith(AUT_FRAME_NAME_IDENTIFIER)
         }) as HasFrame | undefined
       }
@@ -595,7 +601,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
             return cookieToBeCleared
           }
 
-          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          return this.sendDebuggerCommandFn('Network.deleteCookies', pick(cookieToBeCleared, ['name', 'domain']))
           .then(() => {
             return cookieToBeCleared
           })
@@ -610,7 +616,7 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
           if (!cookieToBeCleared) return
 
-          await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          await this.sendDebuggerCommandFn('Network.deleteCookies', pick(cookieToBeCleared, ['name', 'domain']))
 
           return cookieToBeCleared
         })

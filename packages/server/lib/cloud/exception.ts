@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 import pkg from '@packages/root'
 import api from './api'
@@ -51,7 +50,7 @@ export = {
   getBody (err: Error) {
     return system.info()
     .then((systemInfo) => {
-      return _.extend({
+      return Object.assign({
         err: this.getErr(err),
         version: this.getVersion(),
       }, systemInfo)

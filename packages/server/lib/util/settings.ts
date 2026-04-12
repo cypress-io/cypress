@@ -1,6 +1,6 @@
 import Debug from 'debug'
-import _ from 'lodash'
 import path from 'path'
+import { omit } from '@packages/utils'
 import { fs } from '../util/fs'
 import type { SettingsOptions } from '@packages/types'
 import { getCtx } from '@packages/data-context'
@@ -9,8 +9,8 @@ import * as errors from '../errors'
 const debug = Debug('cypress:server:settings')
 
 function configCode (obj, isTS?: boolean) {
-  const objJSON = obj && !_.isEmpty(obj)
-    ? JSON.stringify(_.omit(obj, 'configFile'), null, 2)
+  const objJSON = obj && Object.keys(obj).length > 0
+    ? JSON.stringify(omit(obj, ['configFile']), null, 2)
     : `{
 
 }`

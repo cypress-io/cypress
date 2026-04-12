@@ -364,11 +364,22 @@ describe('CloudRequest', () => {
       const logSpy = sinon.stub(process.stderr, 'write')
 
       await CloudRequest.get('/ping')
-      const debugCalls = logSpy.getCalls().flatMap((c) => stripAnsi(String(c.args[0])).trim().replace(/\+(\d+)ms$/, '+?ms'))
+      const debugCalls = logSpy.getCalls()
+      .flatMap((c) => stripAnsi(String(c.args[0])).trim())
+      .filter((line) => line.includes('cypress:server:cloud:api'))
+      .map((line) => {
+        return line
+        // strip ISO timestamp prefix used in non-TTY environments
+        .replace(/^\d{4}-\d{2}-\d{2}T[\d:.]+Z\s+/, '')
+        // strip relative time suffix used in TTY environments
+        .replace(/\s*\+(\d+)ms$/, '')
+        // strip the namespace prefix repeated on continuation lines (TTY)
+        .replace(/\n\s+cypress:server:cloud:api\s+/g, '\n  ')
+      })
 
       expect(debugCalls).to.eql([
-        'cypress:server:cloud:api get /ping +?ms',
-        'cypress:server:cloud:api get /ping Success: 200 OK -> \n  cypress:server:cloud:api   Response: \'OK\' +?ms',
+        'cypress:server:cloud:api get /ping',
+        'cypress:server:cloud:api get /ping Success: 200 OK -> \n  Response: \'OK\'',
       ])
 
       logSpy.reset()

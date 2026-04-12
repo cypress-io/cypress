@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import EE from 'events'
-import _ from 'lodash'
+import { omit, pick } from '@packages/utils'
 import path from 'path'
 import pkg from '@packages/root'
 
@@ -107,7 +107,7 @@ export class ProjectBase extends EE {
       throw new Error('Instantiating lib/project requires a projectRoot!')
     }
 
-    if (!_.isString(projectRoot) || _.isEmpty(projectRoot)) {
+    if (typeof projectRoot !== 'string' || projectRoot === '') {
       throw new Error(`Expected project root path, not ${projectRoot}`)
     }
 
@@ -209,7 +209,7 @@ export class ProjectBase extends EE {
       cfg.port = port
 
       // and set all the urls again
-      _.extend(cfg, config.setUrls(cfg))
+      Object.assign(cfg, config.setUrls(cfg))
     }
 
     cfg.proxyServer = cfg.proxyUrl
@@ -218,7 +218,7 @@ export class ProjectBase extends EE {
     // opening the server
     this._cfg = cfg
 
-    debug('project config: %o', _.omit(cfg, 'resolved'))
+    debug('project config: %o', omit(cfg, ['resolved']))
 
     if (warning) {
       this.options.onWarning(warning)
@@ -265,7 +265,7 @@ export class ProjectBase extends EE {
     const beforeRunDetails = {
       config: cfg,
       cypressVersion: pkg.version,
-      system: _.pick(sys, 'osName', 'osVersion'),
+      system: pick(sys, ['osName', 'osVersion']),
     }
 
     this.isOpen = true

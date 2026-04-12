@@ -1,4 +1,3 @@
-import * as _ from 'lodash'
 import type {
   RouteMatcherOptionsGeneric,
   GenericStaticResponse,
@@ -28,13 +27,13 @@ export const SERIALIZABLE_REQ_PROPS = [
   'query',
 ]
 
-export const SERIALIZABLE_RES_PROPS = _.concat(
-  SERIALIZABLE_REQ_PROPS,
+export const SERIALIZABLE_RES_PROPS = [
+  ...SERIALIZABLE_REQ_PROPS,
   'statusCode',
   'statusMessage',
   'delay',
   'throttleKbps',
-)
+]
 
 /**
  * RouteMatcher fields which are sent as-is (booleans, numbers...)

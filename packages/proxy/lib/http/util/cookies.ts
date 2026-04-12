@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import type Debug from 'debug'
 import { URL } from 'url'
 import { SerializableAutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
@@ -132,10 +132,8 @@ export const getSameSiteContext = (autUrl: string | undefined, requestUrl: strin
 }
 
 const comparableCookieString = (toughCookie: Cookie): string => {
-  return _(toughCookie)
-  .pick('key', 'value', 'domain', 'path')
-  .toPairs()
-  .sortBy(([key]) => key)
+  return Object.entries(pick(toughCookie, 'key', 'value', 'domain', 'path'))
+  .sort(([a], [b]) => a.localeCompare(b))
   .map(([key, value]) => `${key}=${value}`)
   .join('; ')
 }

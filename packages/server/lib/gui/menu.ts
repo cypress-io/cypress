@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import os from 'os'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { Menu, shell } from 'electron'
@@ -11,7 +10,7 @@ let options = {}
 
 export = {
   set (opts) {
-    _.extend(options, opts)
+    Object.assign(options, opts)
 
     const template = [
       {

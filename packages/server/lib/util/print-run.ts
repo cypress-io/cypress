@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import _ from 'lodash'
 import logSymbols from 'log-symbols'
 import chalk from 'chalk'
 import human from 'human-interval'
@@ -65,17 +64,17 @@ function getWidth (table: Table, index: number) {
 }
 
 function formatBrowser (browser: Browser) {
-  return _.compact([
+  return [
     browser.displayName,
     browser.majorVersion,
     browser.isHeadless && gray('(headless)'),
-  ]).join(' ')
+  ].filter(Boolean).join(' ')
 }
 
 function formatFooterSummary (results: any) {
   const { totalFailed, runs } = results
 
-  const isCanceled = _.some(results.runs, { skippedSpec: true })
+  const isCanceled = results.runs.some((run) => run.skippedSpec === true)
 
   // pass or fail color
   const c = isCanceled ? 'magenta' : totalFailed ? 'red' : 'green'
@@ -92,7 +91,7 @@ function formatFooterSummary (results: any) {
 
     // number of specs
     const total = runs.length
-    const failingRuns = _.filter(runs, 'stats.failures').length
+    const failingRuns = runs.filter((run) => run.stats.failures).length
     const percent = Math.round((failingRuns / total) * 100)
 
     return `${failingRuns} of ${total} failed (${percent}%)`
@@ -125,14 +124,14 @@ function macOSRemovePrivate (str: string) {
 
 function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[], spec?: any, stats?: any }, estimated: number) {
   return {
-    name: _.get(obj, 'spec.name'),
-    relativeToCommonRoot: _.get(obj, 'spec.relativeToCommonRoot'),
-    tests: _.get(obj, 'stats.tests'),
-    passes: _.get(obj, 'stats.passes'),
-    pending: _.get(obj, 'stats.pending'),
-    failures: _.get(obj, 'stats.failures'),
-    skipped: _.get(obj, 'stats.skipped'),
-    duration: humanTime.long(_.get(obj, 'stats.wallClockDuration')),
+    name: obj.spec?.name,
+    relativeToCommonRoot: obj.spec?.relativeToCommonRoot,
+    tests: obj.stats?.tests,
+    passes: obj.stats?.passes,
+    pending: obj.stats?.pending,
+    failures: obj.stats?.failures,
+    skipped: obj.stats?.skipped,
+    duration: humanTime.long(obj.stats?.wallClockDuration),
     estimated: estimated && humanTime.long(estimated),
     screenshots: obj.screenshots && obj.screenshots.length,
     video: Boolean(obj.video),
@@ -197,8 +196,10 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
   console.log('')
 
   const experimental = experiments.getExperimentsFromResolved(config.resolved)
-  const enabledExperiments = _.pickBy(experimental, _.property('enabled'))
-  const hasExperiments = !process.env.CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS && !_.isEmpty(enabledExperiments)
+  const enabledExperiments = Object.fromEntries(
+    Object.entries(experimental).filter(([, v]) => v.enabled),
+  )
+  const hasExperiments = !process.env.CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS && Object.keys(enabledExperiments).length > 0
 
   // if we show Node Version, then increase 1st column width
   // to include wider 'Node Version:'.
@@ -216,8 +217,9 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
 
   const formatSpecs = (specs) => {
     // 25 found: (foo.spec.js, bar.spec.js, baz.spec.js)
-    const names = _.map(specs, 'relativeToCommonRoot')
-    const specsTruncated = _.truncate(names.join(', '), { length: 250 })
+    const names = specs.map((s) => s.relativeToCommonRoot)
+    const joined = names.join(', ')
+    const specsTruncated = joined.length > 250 ? `${joined.slice(0, 247)}...` : joined
 
     const stringifiedSpecs = [
       `${names.length} found `,
@@ -230,8 +232,7 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
     return formatPath(stringifiedSpecs, getWidth(table, 1))
   }
 
-  const data = _
-  .chain([
+  const data = [
     [gray('Cypress:'), pkg.version],
     [gray('Browser:'), formatBrowser(browser)],
     [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
@@ -240,9 +241,8 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
     [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag, autoCancelAfterFailures)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
     [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
-  ])
-  .filter(_.property(1))
-  .value()
+  ]
+  .filter((row) => row[1])
 
   table.push(...data)
 
@@ -346,7 +346,7 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
       head: formatFooterSummary(results),
     })
 
-    _.each(runs, (run) => {
+    runs.forEach((run) => {
       const { spec, stats } = run
 
       const ms = duration.format(stats.wallClockDuration || 0)
@@ -414,7 +414,7 @@ export function displayResults (obj: { screenshots?: Screenshot[] }, estimated: 
     type: 'outsideBorder',
   })
 
-  const data = _.chain([
+  const data = ([
     ['Tests:', results.tests],
     ['Passing:', results.passes],
     ['Failing:', results.failures],
@@ -425,14 +425,13 @@ export function displayResults (obj: { screenshots?: Screenshot[] }, estimated: 
     ['Duration:', results.duration],
     estimated ? ['Estimated:', results.estimated] : undefined,
     ['Spec Ran:', formatPath(results.relativeToCommonRoot, getWidth(table, 1), c)],
-  ])
-  .compact()
+  ] as (string[] | undefined)[])
+  .filter(Boolean)
   .map((arr) => {
-    const [key, val] = arr
+    const [key, val] = arr!
 
     return [color(key, 'gray'), color(val, c)]
   })
-  .value()
 
   table.push(...data)
 

@@ -1,7 +1,7 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
 import Debug from 'debug'
-import _ from 'lodash'
+import { isDeepStrictEqual } from 'node:util'
 import WebSocket from 'ws'
 import { CdpCommand, CdpEvent } from '../../lib/browsers/cdp_automation'
 import { CriClient } from '../../lib/browsers/cri-client'
@@ -421,14 +421,14 @@ describe('CDP Clients', () => {
          * onmessage was called with a specific command and params, regardless of message id
          */
         const sentArgs = onMessage.args.filter(([arg]) => {
-          return arg.method === command && _.isEqual(arg.params, params)
+          return arg.method === command && isDeepStrictEqual(arg.params, params)
         })
 
         expect(sentArgs, `onMessage args for enqueued command ${command}`).to.have.lengthOf(1)
       }
       for (const { command, params } of commandsToEnqueue) {
         const sentArgs = onMessage.args.filter(([{ method, params: p }]) => {
-          return method === command && _.isEqual(p, params)
+          return method === command && isDeepStrictEqual(p, params)
         })
 
         expect(sentArgs, `onMessage args for enqueued command ${command}`).to.have.lengthOf(1)

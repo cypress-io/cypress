@@ -5,7 +5,6 @@ const stealthyRequire = require('stealthy-require')
 
 require('../../../spec_helper')
 
-const _ = require('lodash')
 const os = require('os')
 const encryption = require('../../../../lib/cloud/encryption')
 const { filterRuntimeConfigForRecording } = require('../../../../lib/config')
@@ -34,7 +33,7 @@ const {
 } = require('@tooling/system-tests/lib/protocol-stubs/protocolStubResponse')
 
 const makeError = (details = {}) => {
-  return _.extend(new Error(details.message || 'Some error'), details)
+  return Object.assign(new Error(details.message || 'Some error'), details)
 }
 
 const OS_PLATFORM = 'linux'
@@ -988,7 +987,9 @@ describe('lib/cloud/api', () => {
         hooks: [],
       }
 
-      this.bodyProps = _.omit(this.props, 'instanceId', 'runId')
+      const { instanceId: _instanceId, runId: _runId, ...bodyProps } = this.props
+
+      this.bodyProps = bodyProps
     })
 
     it('POSTs /instances/:id/tests', function () {
@@ -1029,7 +1030,7 @@ describe('lib/cloud/api', () => {
         },
       }
 
-      this.props.config.rawJson = _.cloneDeep(this.props.config)
+      this.props.config.rawJson = structuredClone(this.props.config)
 
       const expectedConfig = filterRuntimeConfigForRecording(this.props.config)
 
@@ -1188,7 +1189,9 @@ describe('lib/cloud/api', () => {
         reporterStats: {},
       }
 
-      this.postProps = _.pick(this.updateProps, 'stats', 'video', 'screenshots', 'reporterStats')
+      const pickKeys = ['stats', 'video', 'screenshots', 'reporterStats']
+
+      this.postProps = Object.fromEntries(Object.entries(this.updateProps).filter(([k]) => pickKeys.includes(k)))
     })
 
     it('POSTs /instances/:id/results', function () {

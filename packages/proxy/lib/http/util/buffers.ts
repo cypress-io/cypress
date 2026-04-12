@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import debugModule from 'debug'
 import { removeDefaultPort } from '@packages/network-tools'
 import type { Readable } from 'stream'
@@ -33,17 +33,20 @@ export class HttpBuffers {
   }
 
   set (obj) {
-    obj = _.cloneDeep(obj)
-    obj.url = stripPort(obj.url)
-    obj.originalUrl = stripPort(obj.originalUrl)
-
-    if (this.buffer) {
-      debug('warning: overwriting existing buffer...', { buffer: _.pick(this.buffer, 'url') })
+    const cloned = {
+      ...obj,
+      url: stripPort(obj.url),
+      originalUrl: stripPort(obj.originalUrl),
+      details: obj.details ? { ...obj.details } : obj.details,
     }
 
-    debug('setting buffer %o', _.pick(obj, 'url'))
+    if (this.buffer) {
+      debug('warning: overwriting existing buffer...', { buffer: pick(this.buffer, 'url') })
+    }
 
-    this.buffer = obj
+    debug('setting buffer %o', pick(cloned, 'url'))
+
+    this.buffer = cloned
   }
 
   get (str): Optional<HttpBuffer> {
@@ -58,7 +61,7 @@ export class HttpBuffers {
     if (foundBuffer) {
       delete this.buffer
 
-      debug('found request buffer %o', { buffer: _.pick(foundBuffer, 'url') })
+      debug('found request buffer %o', { buffer: pick(foundBuffer, 'url') })
 
       return foundBuffer
     }

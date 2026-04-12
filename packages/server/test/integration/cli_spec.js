@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
 const cp = require('child_process')
 const pkg = require('../../package.json')
 const execa = require('execa')
@@ -14,16 +13,14 @@ const clean = (str) => {
   // remove blank lines and slice off any line
   // starting with a caret because thats junk
   // from npm logs
-  return _
-  .chain(str)
+  return str
   .split('\n')
-  .compact()
-  .reject(anyLineWithCaret)
+  .filter(Boolean)
+  .filter((line) => !anyLineWithCaret(line))
   .join('\n')
-  .value()
 }
 
-const env = _.omit(process.env, 'CYPRESS_DEBUG')
+const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== 'CYPRESS_DEBUG'))
 
 describe('CLI Interface', () => {
   beforeEach(function () {

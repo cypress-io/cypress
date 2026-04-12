@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { defaults, pick } from '@packages/utils'
 import os from 'os'
 import debugModule from 'debug'
 import request from '@cypress/request-promise'
@@ -53,7 +53,7 @@ function defaultTimeout () {
 
 function retryDelays (): number[] {
   return process.env.API_RETRY_INTERVALS
-    ? process.env.API_RETRY_INTERVALS.split(',').map(_.toNumber)
+    ? process.env.API_RETRY_INTERVALS.split(',').map(Number)
     : [THIRTY_SECONDS, SIXTY_SECONDS, TWO_MINUTES]
 }
 
@@ -94,7 +94,7 @@ const rp = request.defaults((params, callback) => {
     return Bluebird.resolve(resp)
   }
 
-  _.defaults(params, {
+  defaults(params, {
     agent,
     proxy: null,
     gzip: true,
@@ -105,7 +105,7 @@ const rp = request.defaults((params, callback) => {
 
   const headers = params.headers ??= {}
 
-  _.defaults(headers, {
+  defaults(headers, {
     'x-os-name': os.platform(),
     'x-cypress-version': pkg.version,
   })
@@ -116,7 +116,7 @@ const rp = request.defaults((params, callback) => {
   debug(
     'request to url: %s with params: %j and token: %s',
     `${params.method} ${params.url}`,
-    _.pick(params, 'body', 'headers'),
+    pick(params, ['body', 'headers']),
     params.auth && params.auth.bearer,
   )
 
@@ -402,7 +402,7 @@ export default {
   },
 
   createRun (options: CreateRunOptions): Bluebird<CreateRunResponse> {
-    const preflightOptions = _.pick(options, ['projectId', 'projectRoot', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
+    const preflightOptions = pick(options, ['projectId', 'projectRoot', 'ciBuildId', 'browser', 'testingType', 'parallel', 'timeout'])
 
     return this.sendPreflight(preflightOptions)
     .then((result) => {
@@ -410,7 +410,7 @@ export default {
 
       return retryWithBackoff((attemptIndex) => {
         const body = {
-          ..._.pick(options, [
+          ...pick(options, [
             'autoCancelAfterFailures',
             'ci',
             'specs',
@@ -487,7 +487,7 @@ export default {
             retryWithBackoff: this.retryWithBackoff,
             requestPromise: this.rp,
           },
-          projectConfig: _.pick(config, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
+          projectConfig: pick(config, ['devServerPublicPathRoute', 'port', 'proxyUrl', 'namespace']),
           mountVersion: runnerCapabilities.protocolMountVersion,
           debugData: options.project.configDebugData,
           mode: 'record',
@@ -595,7 +595,7 @@ export default {
           'x-cypress-run-id': options.runId,
           'x-cypress-request-attempt': attemptIndex,
         },
-        body: _.pick(options, [
+        body: pick(options, [
           'stats',
           'tests',
           'exception',

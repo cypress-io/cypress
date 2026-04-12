@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { omit } from '@packages/utils'
 import Debug from 'debug'
 import type ProtocolManager from '../protocol'
 import { isProtocolInitializationError } from '@packages/types'
@@ -29,7 +29,7 @@ const toUploadReportPayload = (acc: {
   video?: ArtifactMetadata
   protocol?: ProtocolMetadata
 }, { key, ...report }: ArtifactUploadResult): UpdateInstanceArtifactsPayload => {
-  const reportWithoutOriginalError = _.omit(report, 'originalError')
+  const reportWithoutOriginalError = omit(report, ['originalError'])
 
   if (key === ArtifactKinds.PROTOCOL) {
     let { error, errorStack, allErrors } = reportWithoutOriginalError

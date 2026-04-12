@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { EventEmitter } from 'events'
 import path from 'path'
 import debug from 'debug'
@@ -93,7 +92,7 @@ const API: PreprocessorAPI = {
 
       const baseFilePath = filePath.replace(config.projectRoot, '')
 
-      fileObject = (fileObjects[filePath] = _.extend(new EventEmitter(), {
+      fileObject = (fileObjects[filePath] = Object.assign(new EventEmitter(), {
         filePath,
         shouldWatch,
         outputPath: appData.getBundledFilePath(config.projectRoot, baseFilePath),

@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const dayjs = require('dayjs')
 const duration = require('dayjs/plugin/duration')
 const relativeTime = require('dayjs/plugin/relativeTime')
@@ -33,11 +32,11 @@ const format = (durationInMs, padMinutes = true) => {
   const durationMins = duration.minutes() ? `${duration.minutes()}` : ''
   const durationHrs = duration.hours() ? `${duration.hours()}` : ''
 
-  const total = _.compact([
+  const total = [
     durationHrs,
-    !!durationHrs || padMinutes ? _.padStart(durationMins, 2, '0') : durationMins,
-    _.padStart(durationSecs, 2, '0'),
-  ])
+    !!durationHrs || padMinutes ? durationMins.padStart(2, '0') : durationMins,
+    durationSecs.padStart(2, '0'),
+  ].filter(Boolean)
 
   const totalMinSec = total.join(':')
 

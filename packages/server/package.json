@@ -32,6 +32,7 @@
     "@packages/icons": "0.0.0-development",
     "@packages/stderr-filtering": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
+    "@packages/utils": "0.0.0-development",
     "@types/mime": "^3.0.1",
     "axios": "^1.11.0",
     "base64url": "^3.0.1",

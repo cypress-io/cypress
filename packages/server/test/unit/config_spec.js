@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
 const stripAnsi = require('strip-ansi')
 const { stripIndent } = require('common-tags')
 const Fixtures = require('@tooling/system-tests')
@@ -12,7 +11,7 @@ describe('lib/config', () => {
     this.env = process.env
     this.versions = process.versions
 
-    process.env = _.omit(process.env, 'CYPRESS_DEBUG')
+    process.env = Object.fromEntries(Object.entries(process.env).filter(([k]) => k !== 'CYPRESS_DEBUG'))
     process.versions.chrome = '0'
 
     Fixtures.scaffold()

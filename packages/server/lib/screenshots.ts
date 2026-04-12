@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick, uniqueId } from '@packages/utils'
 import Debug from 'debug'
 import mime from 'mime'
 import Promise from 'bluebird'
@@ -46,9 +46,13 @@ interface SavedDetails {
 
 // when debugging logs automatically prefix the
 // screenshot id to the debug logs for easier association
-debug = _.wrap(debug, (fn, str, ...args) => {
-  return fn(`(${__ID__}) ${str}`, ...args)
+const _origDebug = debug
+const _wrappedDebug = ((str, ...args) => {
+  return _origDebug(`(${__ID__}) ${str}`, ...args)
 }) as Debug.Debugger
+
+Object.assign(_wrappedDebug, _origDebug)
+debug = _wrappedDebug
 
 interface RGBA {
   r: number
@@ -169,15 +173,17 @@ const captureAndCheck = function (data: Data, automate, conditionFn) {
 }
 
 const isMultipart = (data: Data) => {
-  return _.isNumber(data.current) && _.isNumber(data.total)
+  return typeof data.current === 'number' && typeof data.total === 'number'
 }
 
 const crop = function (image, dimensions, pixelRatio = 1) {
   debug('dimensions before are %o', dimensions)
 
-  dimensions = _.transform(dimensions, (result, value, dimension) => {
-    return result[dimension] = value * pixelRatio
-  })
+  dimensions = Object.keys(dimensions).reduce((result, dimension) => {
+    result[dimension] = dimensions[dimension] * pixelRatio
+
+    return result
+  }, {})
 
   debug('dimensions for cropping are %o', dimensions)
 
@@ -230,7 +236,7 @@ const imagesMatch = (img1, img2) => {
 const lastImagesAreDifferent = function (data: Data, image) {
   // ensure the previous image isn't the same,
   // which might indicate the page has not scrolled yet
-  const previous = _.last(multipartImages)
+  const previous = multipartImages.at(-1)
 
   if (!previous) {
     debug('no previous image to compare')
@@ -259,18 +265,10 @@ const multipartConditionFn = function (data: Data, image) {
 }
 
 const stitchScreenshots = function (pixelRatio) {
-  const fullWidth = _
-  .chain(multipartImages)
-  .map('data.clip.width')
-  .min()
-  .multiply(pixelRatio)
-  .value()
+  const widths = multipartImages.map((img) => img.data.clip.width)
+  const fullWidth = Math.min(...widths) * pixelRatio
 
-  const fullHeight = _
-  .chain(multipartImages)
-  .sumBy('data.clip.height')
-  .multiply(pixelRatio)
-  .value()
+  const fullHeight = multipartImages.reduce((sum, img) => sum + img.data.clip.height, 0) * pixelRatio
 
   debug(`stitch ${multipartImages.length} images together`)
 
@@ -278,7 +276,7 @@ const stitchScreenshots = function (pixelRatio) {
   let heightMarker = 0
   const fullImage = new Jimp(fullWidth, fullHeight)
 
-  _.each(multipartImages, ({ data, image, takenAt }) => {
+  multipartImages.forEach(({ data, image, takenAt }) => {
     const croppedImage = crop(image, data.clip, pixelRatio)
 
     debug(`stitch: add image at (0, ${heightMarker})`)
@@ -311,15 +309,15 @@ const getBuffer = function (details) {
 }
 
 const getDimensions = function (details) {
-  const pick = (obj) => {
-    return _.pick(obj, 'width', 'height')
+  const pickDims = (obj) => {
+    return pick(obj, ['width', 'height'])
   }
 
   if (details.buffer) {
-    return pick(sizeOf(details.buffer))
+    return pickDims(sizeOf(details.buffer))
   }
 
-  return pick(details.image.bitmap)
+  return pickDims(details.image.bitmap)
 }
 
 const getPathToScreenshot = function (data: Data, details: Details, screenshotsFolder: ScreenshotsFolder) {
@@ -338,7 +336,7 @@ export = {
   imagesMatch,
 
   capture (data: Data, automate) {
-    __ID__ = _.uniqueId('s')
+    __ID__ = uniqueId('s')
 
     debug('capturing screenshot %o', data)
 
@@ -447,8 +445,8 @@ export = {
   afterScreenshot (data: Data, details: SavedDetails) {
     const duration = new Date().getTime() - new Date(data.startTime).getTime()
 
-    details = _.extend({}, data, details, { duration })
-    details = _.pick(details, 'testAttemptIndex', 'size', 'takenAt', 'dimensions', 'multipart', 'pixelRatio', 'name', 'specName', 'testFailure', 'path', 'scaled', 'blackout', 'duration')
+    details = { ...data, ...details, duration }
+    details = pick(details, ['testAttemptIndex', 'size', 'takenAt', 'dimensions', 'multipart', 'pixelRatio', 'name', 'specName', 'testFailure', 'path', 'scaled', 'blackout', 'duration'])
 
     if (!plugins.has('after:screenshot')) {
       return Promise.resolve(details)
@@ -456,11 +454,11 @@ export = {
 
     return plugins.execute('after:screenshot', details)
     .then((updates) => {
-      if (!_.isPlainObject(updates)) {
+      if (!(updates !== null && typeof updates === 'object' && !Array.isArray(updates) && Object.getPrototypeOf(updates) === Object.prototype)) {
         return details
       }
 
-      return _.extend(details, _.pick(updates, 'size', 'dimensions', 'path'))
+      return { ...details, ...pick(updates, ['size', 'dimensions', 'path']) }
     })
   },
 

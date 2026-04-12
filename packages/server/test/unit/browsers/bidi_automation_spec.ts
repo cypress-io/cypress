@@ -2,7 +2,7 @@ import EventEmitter from 'node:events'
 import type { Client as WebDriverClient } from 'webdriver'
 import { expect } from 'chai'
 import sinon from 'sinon'
-import { toInteger } from 'lodash'
+const toInteger = (x: number) => Math.trunc(Number(x))
 import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
 import type { NetworkBeforeRequestSentParametersModified } from '../../../lib/browsers/bidi_automation'
 import type { Automation } from '../../../lib/automation'

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getBodyEncoding, parseContentType } from '../../lib/server/util'
+import { getBodyEncoding, mergeDeletedHeaders, mergeWithPreservedBuffers, parseContentType } from '../../lib/server/util'
 import { join } from 'path'
 import { readFileSync } from 'fs'
 
@@ -96,6 +96,136 @@ describe('net-stubbing util', () => {
       }
 
       expect(getBodyEncoding(req), 'image').toEqual('binary')
+    })
+  })
+
+  describe('mergeWithPreservedBuffers', () => {
+    it('deep-merges nested plain objects', () => {
+      const before: any = {
+        headers: {
+          'content-type': 'text/html',
+          nested: { deep: 'value', keep: 'this' },
+        },
+        body: 'original',
+      }
+
+      mergeWithPreservedBuffers(before, {
+        headers: {
+          nested: { deep: 'changed', extra: 'new' },
+        },
+      } as any)
+
+      expect(before.headers.nested).toEqual({ deep: 'changed', keep: 'this', extra: 'new' })
+      expect(before.headers['content-type']).toEqual('text/html')
+      expect(before.body).toEqual('original')
+    })
+
+    it('replaces arrays wholesale', () => {
+      const before: any = {
+        headers: {
+          'set-cookie': ['a=1', 'b=2'],
+        },
+        body: 'original',
+      }
+
+      mergeWithPreservedBuffers(before, {
+        headers: {
+          'set-cookie': ['c=3'],
+        },
+      } as any)
+
+      expect(before.headers['set-cookie']).toEqual(['c=3'])
+    })
+
+    it('preserves Buffer values without merging', () => {
+      const buf = Buffer.from('hello')
+      const before: any = {
+        headers: {},
+        body: 'original',
+      }
+
+      mergeWithPreservedBuffers(before, {
+        body: buf,
+      } as any)
+
+      expect(Buffer.isBuffer(before.body)).toBe(true)
+      expect(before.body).toBe(buf)
+    })
+
+    it('does not merge into a Buffer when target is a Buffer', () => {
+      const originalBuf = Buffer.from('original')
+      const newBuf = Buffer.from('new')
+      const before: any = {
+        headers: {},
+        body: originalBuf,
+      }
+
+      mergeWithPreservedBuffers(before, {
+        body: newBuf,
+      } as any)
+
+      expect(before.body).toBe(newBuf)
+    })
+
+    it('adds new nested properties', () => {
+      const before: any = {
+        headers: {
+          existing: 'value',
+        },
+        body: 'original',
+      }
+
+      mergeWithPreservedBuffers(before, {
+        headers: {
+          'x-new-header': 'added',
+        },
+      } as any)
+
+      expect(before.headers['x-new-header']).toEqual('added')
+      expect(before.headers.existing).toEqual('value')
+    })
+
+    it('handles deeply nested objects beyond two levels', () => {
+      const before: any = {
+        headers: {
+          meta: { level1: { level2: 'original', preserved: true } },
+        },
+        body: 'original',
+      }
+
+      mergeWithPreservedBuffers(before, {
+        headers: {
+          meta: { level1: { level2: 'changed', added: 'new' } },
+        },
+      } as any)
+
+      expect(before.headers.meta.level1).toEqual({
+        level2: 'changed',
+        preserved: true,
+        added: 'new',
+      })
+    })
+  })
+
+  describe('mergeDeletedHeaders', () => {
+    it('deletes headers omitted from after', () => {
+      const before = { headers: { 'x-keep': 'yes', 'x-remove': 'bye' } } as any
+      const after = { headers: { 'x-keep': 'yes' } } as any
+
+      mergeWithPreservedBuffers(before, after)
+      mergeDeletedHeaders(before, after)
+
+      expect(before.headers).toEqual({ 'x-keep': 'yes' })
+    })
+
+    it('preserves headers set to empty string in after', () => {
+      const before = { headers: { 'x-keep': 'original', 'x-empty': 'was-full' } } as any
+      const after = { headers: { 'x-keep': 'original', 'x-empty': '' } } as any
+
+      mergeWithPreservedBuffers(before, after)
+      mergeDeletedHeaders(before, after)
+
+      expect(before.headers).toEqual({ 'x-keep': 'original', 'x-empty': '' })
     })
   })
 })

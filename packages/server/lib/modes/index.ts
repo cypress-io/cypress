@@ -1,5 +1,5 @@
 import { setCtx } from '@packages/data-context'
-import _ from 'lodash'
+import { defaults } from '@packages/utils'
 
 import { makeDataContext } from '../makeDataContext'
 import { id as randomId } from '../util/random'
@@ -13,7 +13,7 @@ export = (mode, options) => {
   options.isBrowserGivenByCli = options.browser !== undefined
 
   if (mode === 'run') {
-    _.defaults(options, {
+    defaults(options, {
       socketId: randomId(10),
       isTextTerminal: true,
       browser: 'electron',

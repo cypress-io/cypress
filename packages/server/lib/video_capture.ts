@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { defaults, once, pick } from '@packages/utils'
 import utils from 'fluent-ffmpeg/lib/utils'
 import Debug from 'debug'
 import ffmpeg from 'fluent-ffmpeg'
@@ -111,7 +111,7 @@ export function start (options: StartOptions) {
   let skippedFramesCount = 0
   let writtenFramesCount = 0
 
-  _.defaults(options, {
+  defaults(options, {
     onError () {},
   })
 
@@ -154,7 +154,7 @@ export function start (options: StartOptions) {
     // errors in the video capture process, which are handled later
     // on, so just skip empty frames here.
     // @see https://github.com/cypress-io/cypress/pull/6818
-    if (_.isEmpty(data)) {
+    if (!data || (Buffer.isBuffer(data) && data.length === 0)) {
       debugFrames('empty chunk received %o', data)
 
       return

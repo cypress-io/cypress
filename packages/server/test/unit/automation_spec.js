@@ -1,6 +1,5 @@
 require('../spec_helper')
 
-const _ = require('lodash')
 const { Automation } = require(`../../lib/automation`)
 
 describe('lib/automation', () => {
@@ -13,7 +12,7 @@ describe('lib/automation', () => {
       const m = this.automation.getMiddleware()
 
       // all props are null by default
-      expect(_.omitBy(m, _.isNull)).to.deep.eq({})
+      expect(Object.fromEntries(Object.entries(m).filter(([, v]) => v !== null))).to.deep.eq({})
 
       const onRequest = function () {}
       const onPush = function () {}

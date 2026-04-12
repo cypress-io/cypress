@@ -6,7 +6,6 @@ mockery.registerMock('morgan', () => {
   return morganFn
 })
 
-const _ = require('lodash')
 const os = require('os')
 const express = require('express')
 const Promise = require('bluebird')
@@ -85,7 +84,7 @@ describe('lib/server-base', () => {
 
     it('calls #createExpressApp with morgan', function () {
       sinon.spy(this.server, 'createExpressApp')
-      _.extend(this.config, { port: 54321, morgan: false })
+      Object.assign(this.config, { port: 54321, morgan: false })
 
       return this.server.open(this.config, getOpenOptions())
       .then(() => {
@@ -94,7 +93,7 @@ describe('lib/server-base', () => {
     })
 
     it('calls #createServer with app and config', function () {
-      _.extend(this.config, { port: 54321 })
+      Object.assign(this.config, { port: 54321 })
       const app = { use: sinon.stub() }
 
       sinon.stub(this.server, 'createExpressApp').returns(app)
@@ -156,7 +155,7 @@ describe('lib/server-base', () => {
       let interfaces
 
       try {
-        interfaces = _.flatten(_.values(os.networkInterfaces()))
+        interfaces = Object.values(os.networkInterfaces()).flat()
       } catch (e) {
         this.skip()
       }
@@ -360,7 +359,7 @@ describe('lib/server-base', () => {
 
       this.server.socketAllowed.add({
         localPort: remotePort,
-        once: _.noop,
+        once: () => {},
       })
 
       const noop = this.server.proxyWebsockets(this.proxy, '/foo', req, this.socket, this.head)

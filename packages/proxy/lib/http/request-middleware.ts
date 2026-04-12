@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import { blocked } from '@packages/network'
 import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import { telemetry } from '@packages/telemetry'
@@ -24,7 +24,7 @@ export type RequestMiddleware = HttpMiddleware<{
 
 const LogRequest: RequestMiddleware = function () {
   this.debug('proxying request %o', {
-    req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
+    req: pick(this.req, 'method', 'proxiedUrl', 'headers'),
   })
 
   this.next()
@@ -496,7 +496,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   }
 
   if (requestBodyBuffered) {
-    _.assign(requestOptions, _.pick(this.req, 'method', 'body', 'headers'))
+    Object.assign(requestOptions, pick(this.req, 'method', 'body', 'headers'))
   }
 
   const req = this.request.create(requestOptions)

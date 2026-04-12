@@ -599,4 +599,34 @@ describe('lib/browsers/index', () => {
       })
     })
   })
+
+  context('.getDefaultLaunchOptions', () => {
+    it('does not share default arrays between calls', () => {
+      const first = utils.getDefaultLaunchOptions({})
+
+      first.args.push('--contaminated')
+      first.extensions.push('/bad/extension')
+      first.env.CONTAMINATED = true
+
+      const second = utils.getDefaultLaunchOptions({})
+
+      expect(second.args).to.deep.eq([])
+      expect(second.extensions).to.deep.eq([])
+      expect(second.env).to.deep.eq({})
+    })
+  })
+
+  context('.ensureAndGetByNameOrPath version selection', () => {
+    it('selects the highest version numerically, not lexicographically', () => {
+      const fakeBrowsers = [
+        { name: 'chrome', family: 'chromium', channel: 'stable', displayName: 'Chrome', version: '99.0.0', majorVersion: '99', path: '/chrome99' },
+        { name: 'chrome', family: 'chromium', channel: 'stable', displayName: 'Chrome', version: '120.0.0', majorVersion: '120', path: '/chrome120' },
+      ]
+
+      return utils.ensureAndGetByNameOrPath('chrome', false, fakeBrowsers as any)
+      .then((result) => {
+        expect(result).to.have.property('version', '120.0.0')
+      })
+    })
+  })
 })

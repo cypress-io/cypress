@@ -1,21 +1,19 @@
-import _ from 'lodash'
-
 const traverse = (obj, mapObj, parent?, key?) => {
-  if (_.isFunction(mapObj)) {
+  if (typeof mapObj === 'function') {
     mapObj(parent, key, obj)
 
     return
   }
 
-  if (_.isObject(mapObj)) {
-    _.each(mapObj, (mapVal, mapKey) => {
+  if (mapObj !== null && typeof mapObj === 'object') {
+    Object.entries(mapObj).forEach(([mapKey, mapVal]) => {
       traverse(obj[mapKey], mapVal, obj, mapKey)
     })
   }
 }
 
 export const remapKeys = (fromObj, toObj) => {
-  fromObj = _.cloneDeep(fromObj)
+  fromObj = structuredClone(fromObj)
 
   traverse(fromObj, toObj)
 
@@ -39,8 +37,8 @@ export const setValue = (defaultVal) => {
 
 export const each = (fn) => {
   return (__, ___, arr) => {
-    return _.each(arr, (val, i) => {
-      const mapObj = _.isFunction(fn) ? fn(val, i) : fn
+    return arr.forEach((val, i) => {
+      const mapObj = typeof fn === 'function' ? fn(val, i) : fn
 
       traverse(val, mapObj)
     })

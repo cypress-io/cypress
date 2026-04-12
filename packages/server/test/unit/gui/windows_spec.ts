@@ -3,7 +3,6 @@ import '../../spec_helper'
 import { expect } from 'chai'
 import 'sinon-chai'
 
-import _ from 'lodash'
 import Promise from 'bluebird'
 import { EventEmitter } from 'events'
 import { BrowserWindow } from 'electron'
@@ -96,12 +95,15 @@ describe('lib/gui/windows', () => {
     it('saves size and position when window resizes, debounced', function () {
       // tried using useFakeTimers here, but it didn't work for some
       // reason, so this is the next best thing
-      sinon.stub(_, 'debounce').returnsArg(0)
+      // Note: @packages/utils CJS re-exports use getter descriptors which are not stubbable,
+      // so we stub the sub-module directly
+      const functionUtils = require('@packages/utils/cjs/function-utils')
+      const _debounce = sinon.stub(functionUtils, 'debounce').callsFake((fn: any) => fn)
 
       Windows.trackState(this.projectRoot, false, this.win, this.keys)
       this.win.emit('resize')
 
-      expect(_.debounce).to.be.called
+      expect(_debounce).to.be.called
 
       return Promise
       .delay(100)
@@ -131,7 +133,9 @@ describe('lib/gui/windows', () => {
     it('saves position when window moves, debounced', function () {
       // tried using useFakeTimers here, but it didn't work for some
       // reason, so this is the next best thing
-      sinon.stub(_, 'debounce').returnsArg(0)
+      const functionUtils = require('@packages/utils/cjs/function-utils')
+
+      sinon.stub(functionUtils, 'debounce').callsFake((fn: any) => fn)
       Windows.trackState(this.projectRoot, false, this.win, this.keys)
       this.win.emit('moved')
 

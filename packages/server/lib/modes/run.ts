@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import _ from 'lodash'
+import { defaults, getPath, once, pick } from '@packages/utils'
 import pkg from '@packages/root'
 import path from 'path'
 import chalk from 'chalk'
@@ -75,7 +75,7 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
     // find the actual spec object amongst
     // our specs array since the API sends us
     // the relative name
-    const specObject = _.find(specs, { relative: spec })
+    const specObject = specs.find((s) => s.relative === spec)
 
     if (!specObject) throw new Error(`Unable to find specObject for spec '${spec}'`)
 
@@ -124,11 +124,11 @@ async function getProjectId (project, id) {
 }
 
 const sumByProp = (runs, prop) => {
-  return _.sumBy(runs, prop) || 0
+  return runs.reduce((sum, run) => sum + (getPath(run, prop) || 0), 0)
 }
 
 const getRun = (run, prop) => {
-  return _.get(run, prop)
+  return getPath(run, prop)
 }
 
 async function writeOutput (outputPath, results) {
@@ -255,7 +255,7 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
 
   const outputDir = path.dirname(videoName)
 
-  const onError = _.once((err) => {
+  const onError = once((err) => {
     // catch video recording failures and log them out
     // but don't let this affect the run at all
     errors.warning('VIDEO_RECORDING_FAILED', err)
@@ -408,7 +408,7 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
       },
       onAfterResponse: (message, data, resp) => {
         if (message === 'take:screenshot' && resp) {
-          const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
+          const existingScreenshot = screenshots.findIndex((s) => s.path === resp.path)
 
           if (existingScreenshot !== -1) {
             // NOTE: saving screenshots to the same path will overwrite the previous one
@@ -605,7 +605,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   debug('received project end')
 
-  _.defaults(results, {
+  defaults(results, {
     error: null,
     hooks: null,
     tests: null,
@@ -640,7 +640,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   results.spec = spec
 
   const { tests } = results
-  const attempts = _.flatMap(tests, (test) => test.attempts)
+  const attempts = tests.flatMap((test) => test.attempts)
 
   let videoCaptureFailed = false
 
@@ -867,7 +867,7 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
     runUrl,
     specs,
     specPattern,
-    system: _.pick(sys, 'osName', 'osVersion'),
+    system: pick(sys, ['osName', 'osVersion']),
     tag,
     autoCancelAfterFailures,
   }
@@ -902,8 +902,8 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
 
   const results: CypressRunResult = {
     status: 'finished',
-    startedTestsAt: getRun(_.first(runs), 'stats.wallClockStartedAt'),
-    endedTestsAt: getRun(_.last(runs), 'stats.wallClockEndedAt'),
+    startedTestsAt: getRun(runs[0], 'stats.wallClockStartedAt'),
+    endedTestsAt: getRun(runs.at(-1), 'stats.wallClockEndedAt'),
     totalDuration: sumByProp(runs, 'stats.wallClockDuration'),
     totalSuites: sumByProp(runs, 'stats.suites'),
     totalTests: sumByProp(runs, 'stats.tests'),
@@ -1047,7 +1047,7 @@ async function ready (options: ReadyOptions) {
     debug('running electron as a node process without xvfb')
   }
 
-  _.defaults(options, {
+  defaults(options, {
     isTextTerminal: true,
     browser: 'electron',
     quiet: false,
@@ -1093,7 +1093,7 @@ async function ready (options: ReadyOptions) {
 
   // user code might have modified list of allowed browsers
   // but be defensive about it
-  const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
+  const userBrowsers = getPath(config, 'resolved.browsers.value') ?? browsers
 
   let specPattern = specPatternFromCli || config.specPattern
 
