@@ -1,19 +1,8 @@
-import {
-  PackageVulnerabilityProject,
-  type PackageVulnerabilityWithPaths,
-} from './vuln-utils'
+function extractPackageVulnerabilities(data) {
+  const vulnerabilities = {}
 
-export function extractPackageVulnerabilities(
-  data: PackageVulnerabilityProject[]
-): Record<string, PackageVulnerabilityWithPaths> {
-  // Use a Set to automatically track unique values
-  const vulnerabilities: Record<string, PackageVulnerabilityWithPaths> = {}
-
-  // Iterate through each project
   data.forEach((project) => {
-    // Check if vulnerabilities array exists and has items
     if (project.vulnerabilities && Array.isArray(project.vulnerabilities)) {
-      // Add each vulnerability ID to the Set
       project.vulnerabilities.forEach((vuln) => {
         if (vuln.id) {
           if (vuln.id in vulnerabilities) {
@@ -28,7 +17,7 @@ export function extractPackageVulnerabilities(
               severity: vuln.severity,
               paths: [
                 {
-                  path: vuln.from?.slice(1) || [], // Ensure 'from' is an array or empty array
+                  path: vuln.from?.slice(1) || [],
                   projectName: project.projectName,
                 },
               ],
@@ -39,6 +28,7 @@ export function extractPackageVulnerabilities(
     }
   })
 
-  // Convert Set to Array and return
   return vulnerabilities
 }
+
+module.exports = { extractPackageVulnerabilities }

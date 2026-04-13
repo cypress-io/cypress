@@ -2,7 +2,8 @@
 name: snyk-vulnerabilities
 description: Triage, fix, and validate high-severity Snyk package vulnerabilities in a monorepo. Use when a user asks to fix Snyk issues, or asks to remediate package vulnerabilities. Covers the full workflow including looking up fixed versions, deciding on fix strategy (relock vs resolution vs direct dep bump), applying changes across all yarn workspaces, relock, and re-running Snyk to validate.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
+  model: claude-opus-4-6
 ---
 
 # Fix Snyk Vulnerabilities
@@ -17,7 +18,7 @@ Before starting, ensure you have access to:
 
 - The repo root directory with `package.json` and `yarn.lock` files
 - Snyk CLI (`npx snyk`) authenticated to the `cypress-pilot` org
-- Node.js and `npx ts-node` for running skill scripts
+- Node.js for running skill scripts
 - Write access to `package.json` and `yarn.lock` files in all workspaces
 
 ## Output Format
@@ -44,15 +45,16 @@ mkdir -p $SKILL_TMP
 
 ## Available scripts
 
-All scripts live in `$SCRIPTS/` and are run with `npx ts-node`:
+All scripts live in `$SCRIPTS/` and are run with `node`:
 
-- **`vuln-actions.ts`:** Parse Snyk JSON → human-readable vulnerability list (filters by vuln-actions rules)
-- **`triage-vulns.ts`:** Extract triage data from Snyk JSON: package names, fix versions, ranges, SNYK IDs
-- **`check-npm-versions.ts`:** Query npm registry for available versions (replaces ad-hoc python version lookups)
-- **`parse-snyk-summary.ts`:** Quick summary of Snyk results: project count, vuln count, ALL CLEAR confirmation
-- **`find-lockfile-stanzas.ts`:** Find all lockfile stanzas for a package across workspace lockfiles
-- **`remove-lockfile-stanzas.ts`:** Remove lockfile stanzas by package name + version (batch, from JSON stdin)
-- **`verify-lockfile-versions.ts`:** Verify packages resolve to expected versions in all lockfiles
+- **`vuln-actions.js`:** Parse Snyk JSON → human-readable vulnerability list (filters by vuln-actions rules)
+- **`triage-vulns.js`:** Extract triage data from Snyk JSON: package names, fix versions, ranges, SNYK IDs
+- **`check-npm-versions.js`:** Query npm registry for available versions (replaces ad-hoc python version lookups)
+- **`parse-snyk-summary.js`:** Quick summary of Snyk results: project count, vuln count, ALL CLEAR confirmation
+- **`find-lockfile-stanzas.js`:** Find all lockfile stanzas for a package across workspace lockfiles
+- **`remove-lockfile-stanzas.js`:** Remove lockfile stanzas by package name + version (batch, from JSON stdin)
+- **`verify-lockfile-versions.js`:** Verify packages resolve to expected versions in all lockfiles
+- **`check-npm-deprecation.js`:** Check whether specific package versions are deprecated on npm
 
 ---
 
@@ -83,6 +85,18 @@ Example output: `root`, `app`, `discovery`, `frontend`. Use this list everywhere
 
 ---
 
+## Pre-flight: Verify model
+
+This skill orchestrates parallel subagents, reasons over complex dependency graphs, and makes judgment calls about fix strategies. It requires a high-capability model.
+
+**Check which model you are running as.** If you are not on `claude-opus-4-6` (or an equivalent high-capability model), stop and tell the user:
+
+> This skill works best on Claude Opus. You are currently on [model name]. Switch with `/model claude-opus-4-6` and re-run, or confirm you'd like to continue on the current model.
+
+Do not proceed until the user either switches models or explicitly confirms they want to continue.
+
+---
+
 ## Step 0: Generate the vulnerability report
 
 **STOP and ask the user** which severity threshold to use: **critical**, **high** (default), or **medium**. **Do not run the Snyk scan until the user responds.** Use `high` only if they explicitly say to use the default or tell you to pick.
@@ -100,7 +114,7 @@ npx snyk test \
   --json 2>/dev/null > $SKILL_TMP/snyk.json
 
 # Human-readable vulnerability list (filters by vuln-actions rules)
-npx ts-node $SCRIPTS/vuln-actions.ts -f $SKILL_TMP/snyk.json > $SKILL_TMP/snyk_vulnerabilities.txt
+node $SCRIPTS/vuln-actions.js -f $SKILL_TMP/snyk.json > $SKILL_TMP/snyk_vulnerabilities.txt
 ```
 
 **Important:** Use `2>/dev/null` to prevent npm warnings from polluting the JSON output.
@@ -114,7 +128,7 @@ Review the vulnerability list before proceeding. Only entries in that file shoul
 Run the triage script to automatically extract package names, fix versions, vulnerability ranges, and SNYK IDs from the Snyk JSON:
 
 ```bash
-npx ts-node $SCRIPTS/triage-vulns.ts $SKILL_TMP/snyk.json
+node $SCRIPTS/triage-vulns.js $SKILL_TMP/snyk.json
 ```
 
 This outputs a de-duplicated table grouped by package name with the highest fix version for each. For JSON output (useful for programmatic processing): add `--json`.
@@ -123,10 +137,10 @@ This outputs a de-duplicated table grouped by package name with the highest fix 
 
 ```bash
 # Example: find recent versions of tar in the 7.x line
-npx ts-node $SCRIPTS/check-npm-versions.ts tar --major 7
+node $SCRIPTS/check-npm-versions.js tar --major 7
 
 # Example: find versions >= a specific version
-npx ts-node $SCRIPTS/check-npm-versions.ts qs --gte 6.14.0 --last 5
+node $SCRIPTS/check-npm-versions.js qs --gte 6.14.0 --last 5
 ```
 
 After triage, you will have a complete list:
@@ -192,7 +206,7 @@ B. Apply the correct strategy (only for packages that appear in the Snyk report 
 
 Use the find-lockfile-stanzas script to locate stanzas:
 
-  npx ts-node [SCRIPTS_DIR]/find-lockfile-stanzas.ts --package [PACKAGE_NAME] --version [VULNERABLE_VERSION]
+  node [SCRIPTS_DIR]/find-lockfile-stanzas.js --package [PACKAGE_NAME] --version [VULNERABLE_VERSION]
 
 This will search all workspace lockfiles and output each matching stanza with its key line, resolved version, and lockfile path.
 
@@ -255,7 +269,7 @@ echo '[
   {"lockfile":"yarn.lock","package":"qs","version":"6.13.0"},
   {"lockfile":"app/yarn.lock","package":"qs","version":"6.13.0"},
   {"lockfile":"yarn.lock","package":"tar","version":"6.2.1"}
-]' | npx ts-node $SCRIPTS/remove-lockfile-stanzas.ts
+]' | node $SCRIPTS/remove-lockfile-stanzas.js
 ```
 
 The script:
@@ -278,15 +292,25 @@ Once all lockfile edits are applied, run `yarn install` **only in the affected w
 
 `--ignore-scripts` avoids native build failures during the relock step.
 
-### Step 3b-post: Verify resolved versions
+### Step 3b-post: Verify resolved versions and check for deprecations
 
 After yarn install completes, verify that all packages now resolve to their expected fix versions:
 
 ```bash
-npx ts-node $SCRIPTS/verify-lockfile-versions.ts tar@7.5.11 qs@6.14.2 multer@2.1.1
+node $SCRIPTS/verify-lockfile-versions.js tar@7.5.11 qs@6.14.2 multer@2.1.1
 ```
 
 The script checks all workspace lockfiles and reports pass/fail for each package. If any fail, investigate before proceeding to validation.
+
+Next, check that none of the installed fix versions are deprecated on npm:
+
+```bash
+node $SCRIPTS/check-npm-deprecation.js tar@7.5.11 qs@6.14.2 multer@2.1.1
+```
+
+**If any package is reported as deprecated (exit code 1), stop immediately.** Do not proceed to Snyk validation. Return to Step 1 and select a newer, non-deprecated version. Snyk's suggested fix version can lag behind npm deprecations, so this check is essential.
+
+**If the script reports registry lookup failures (exit code 2), do not proceed either.** This means npm couldn't reach the registry or errored out for one or more packages. Retry after resolving network/npm issues — never treat a lookup failure as "not deprecated."
 
 ### Step 3c: Patch re-application subagents (if needed)
 
@@ -366,10 +390,10 @@ npx snyk test \
   --json 2>/dev/null > $SKILL_TMP/snyk_updated.json
 
 # Quick summary — confirms zero vulns or shows remaining issues
-npx ts-node $SCRIPTS/parse-snyk-summary.ts $SKILL_TMP/snyk_updated.json
+node $SCRIPTS/parse-snyk-summary.js $SKILL_TMP/snyk_updated.json
 
 # Detailed vulnerability list (if any remain)
-npx ts-node $SCRIPTS/vuln-actions.ts -f $SKILL_TMP/snyk_updated.json > $SKILL_TMP/snyk_vulnerabilities_updated.txt
+node $SCRIPTS/vuln-actions.js -f $SKILL_TMP/snyk_updated.json > $SKILL_TMP/snyk_vulnerabilities_updated.txt
 ```
 
 If the summary shows "ALL CLEAR", done. Otherwise review the detailed list and repeat from Step 1 for remaining issues.
@@ -405,12 +429,13 @@ For each vulnerable package (from Snyk output only):
 - **Snyk stderr pollution**: Always use `2>/dev/null` when redirecting Snyk JSON output to a file. npm warnings on stderr will corrupt the JSON and cause parse failures.
 - **Resolutions only for reported packages**: Add resolutions only for packages in the vulnerability report. Do not add preemptively; ignore vulns that exist only in devDependency trees (they are not in the report).
 - **Prefer dev dep repin over resolution**: When the vulnerable package is only pulled in via a devDependency, bump/repin that devDependency to the fix version instead of adding a resolution when possible.
-- **Multiple lockfiles**: A package can appear in any of the discovered workspaces' lockfiles. Remove the stanza from every one that has it. The `find-lockfile-stanzas.ts` and `remove-lockfile-stanzas.ts` scripts handle this automatically.
+- **Multiple lockfiles**: A package can appear in any of the discovered workspaces' lockfiles. Remove the stanza from every one that has it. The `find-lockfile-stanzas.js` and `remove-lockfile-stanzas.js` scripts handle this automatically.
 - **Consolidated lock stanza keys**: Yarn 1 merges ranges: `qs@6.13.0, qs@6.14.1, qs@^6.14.1, ...` all resolve to one entry. The lockfile scripts handle this correctly.
 - **Residual resolutions pinning old versions**: If a root/workspace `package.json` has a resolution like `"**/pkg": "oldVulnVersion"`, update or remove it or the relock will keep the old version.
 - **Per-workspace resolutions**: Check each non-root workspace's `package.json` for its own `resolutions` block — they may pin transitive deps (e.g. qs, minimatch) independently.
 - **@bull-board/express pins express@4.21.x**: Packages like `@bull-board/express` may carry their own pinned `express` with an older `qs`. If `qs@6.13.0` persists, a targeted `"**/qs": "6.14.2"` resolution is required.
-- **Subagent lockfile conflicts**: Subagents never edit `yarn.lock` files. They use `find-lockfile-stanzas.ts` to identify stanza keys and return that information to the orchestrator, which applies all deletions using `remove-lockfile-stanzas.ts`.
+- **Subagent lockfile conflicts**: Subagents never edit `yarn.lock` files. They use `find-lockfile-stanzas.js` to identify stanza keys and return that information to the orchestrator, which applies all deletions using `remove-lockfile-stanzas.js`.
 - **Patched packages: always carry forward**: When a package has a patch and we upgrade it (e.g. for a vuln fix), we always re-apply the patch to the new version. Patches here rarely fix a bug; they usually change behavior in a way the new version won't fix.
 - **Old patch files**: Fix subagents leave old patch files in place. Patch subagents are responsible for deleting them after generating the new patch. Never delete a patch file without first successfully generating its replacement.
 - **Patch subagent escalation threshold**: Only escalate to the user if the patched code is entirely gone or replaced with a fundamentally different implementation. Shifted lines, minor refactors, and renamed variables are all auto-resolvable — do not escalate for those.
+- **Snyk fix versions can be deprecated**: Snyk's suggested fix version may itself be deprecated on npm. Always run `check-npm-deprecation.js` after relocking (Step 3b-post) before proceeding to Snyk validation. If a fix version is deprecated (exit 1), do not release — find a newer non-deprecated version. If the script reports registry lookup failures (exit 2), do not proceed — resolve the issue and retry.

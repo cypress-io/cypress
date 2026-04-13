@@ -4,34 +4,24 @@
  *
  * Usage (stdin JSON):
  *   echo '[{"lockfile":"yarn.lock","package":"qs","version":"6.13.0"}]' | \
- *     ts-node remove-lockfile-stanzas.ts
+ *     node remove-lockfile-stanzas.js
  *
  * Usage (CLI args, repeatable):
- *   ts-node remove-lockfile-stanzas.ts \
+ *   node remove-lockfile-stanzas.js \
  *     --lockfile yarn.lock --package qs --version 6.13.0 \
  *     --lockfile app/yarn.lock --package qs --version 6.13.0
  *
  * Usage (file):
- *   ts-node remove-lockfile-stanzas.ts --input removals.json
+ *   node remove-lockfile-stanzas.js --input removals.json
  */
-import { readFileSync, existsSync } from 'fs'
-import { join } from 'path'
-import { removeLockfileStanzas } from './lockfile-utils'
+const { readFileSync, existsSync } = require('fs')
+const { join } = require('path')
+const { removeLockfileStanzas } = require('./lockfile-utils')
 
-type Removal = {
-  lockfile: string
-  package: string
-  version: string
-}
-
-function parseArgs(): {
-  removals: Removal[]
-  inputFile?: string
-  help: boolean
-} {
+function parseArgs() {
   const argv = process.argv.slice(2)
-  const removals: Removal[] = []
-  let inputFile: string | undefined
+  const removals = []
+  let inputFile
   let help = false
 
   let currentLockfile = ''
@@ -40,11 +30,7 @@ function parseArgs(): {
 
   function flush() {
     if (currentLockfile && currentPackage && currentVersion) {
-      removals.push({
-        lockfile: currentLockfile,
-        package: currentPackage,
-        version: currentVersion,
-      })
+      removals.push({ lockfile: currentLockfile, package: currentPackage, version: currentVersion })
     }
     currentPackage = ''
     currentVersion = ''
@@ -70,9 +56,9 @@ function parseArgs(): {
   return { removals, inputFile, help }
 }
 
-function readStdin(): Promise<string> {
+function readStdin() {
   return new Promise((resolve) => {
-    const chunks: Buffer[] = []
+    const chunks = []
     if (process.stdin.isTTY) {
       resolve('')
       return
@@ -82,11 +68,11 @@ function readStdin(): Promise<string> {
   })
 }
 
-async function main(): Promise<void> {
+async function main() {
   const args = parseArgs()
 
   if (args.help) {
-    console.log(`Usage: ts-node remove-lockfile-stanzas.ts [options]
+    console.log(`Usage: node remove-lockfile-stanzas.js [options]
 
 Reads removal instructions from stdin JSON, --input file, or CLI args.
 
@@ -101,15 +87,13 @@ CLI options (repeatable per lockfile):
     process.exit(0)
   }
 
-  let removals: Removal[] = args.removals
+  let removals = args.removals
 
-  // Read from file if specified
   if (args.inputFile) {
     const raw = readFileSync(args.inputFile, 'utf8')
     removals = removals.concat(JSON.parse(raw))
   }
 
-  // Read from stdin if no CLI removals and no input file
   if (removals.length === 0) {
     const stdin = await readStdin()
     if (stdin.trim()) {
@@ -122,19 +106,13 @@ CLI options (repeatable per lockfile):
     process.exit(1)
   }
 
-  // Group by lockfile
-  const byLockfile = new Map<string, { packageName: string; version: string }[]>()
+  const byLockfile = new Map()
   const repoRoot = process.cwd()
 
   for (const r of removals) {
-    const fullPath = r.lockfile.startsWith('/')
-      ? r.lockfile
-      : join(repoRoot, r.lockfile)
+    const fullPath = r.lockfile.startsWith('/') ? r.lockfile : join(repoRoot, r.lockfile)
     if (!byLockfile.has(fullPath)) byLockfile.set(fullPath, [])
-    byLockfile.get(fullPath)!.push({
-      packageName: r.package,
-      version: r.version,
-    })
+    byLockfile.get(fullPath).push({ packageName: r.package, version: r.version })
   }
 
   let totalRemoved = 0
@@ -158,12 +136,8 @@ CLI options (repeatable per lockfile):
         console.log(`  - ${key.substring(0, 80)}${key.length > 80 ? '...' : ''}`)
       }
     } else {
-      const targetDesc = targets
-        .map((t) => `${t.packageName}@${t.version}`)
-        .join(', ')
-      console.log(
-        `${relativePath}: no matching stanzas found for ${targetDesc}`
-      )
+      const targetDesc = targets.map((t) => `${t.packageName}@${t.version}`).join(', ')
+      console.log(`${relativePath}: no matching stanzas found for ${targetDesc}`)
     }
   }
 
