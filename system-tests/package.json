@@ -69,7 +69,6 @@
     "image-size": "1.2.1",
     "jose": "^4.15.5",
     "lazy-ass": "1.6.0",
-    "lodash": "^4.17.21",
     "mocha": "7.1.0",
     "mocha-banner": "1.1.2",
     "mochawesome-7.1.4": "npm:mochawesome@7.1.4",

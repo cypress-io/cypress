@@ -18,8 +18,8 @@ function createWindow () {
   // @ts-ignore
   win.toggleDevTools()
 
-  const isObjectLike = require('lodash/isObjectLike')
-  const res = isObjectLike({ a: 1, b: 2 })
+  const semver = require('semver')
+  const res = semver.valid('1.2.3') !== null
 
   console.log(res)
 }

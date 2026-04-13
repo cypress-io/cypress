@@ -8,7 +8,6 @@ Usage - All arguments are required
 
 // http://stackoverflow.com/questions/1683531/how-to-import-existing-git-repository-into-another#answer-8396318
 
-const { snakeCase } = require('lodash')
 const { execSync } = require('child_process')
 const path = require('path')
 const argv = require('minimist')(process.argv.slice(2))
@@ -17,7 +16,7 @@ const from = argv.from
 const repo = argv.repo
 const to = path.join(argv.to, '/') // ensure trailing slash
 const branch = argv.branch || 'develop'
-const remoteName = snakeCase(to)
+const remoteName = to.replace(/([a-z])([A-Z])/g, '$1_$2').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '').toLowerCase()
 const temp = path.join(process.cwd(), `.temp-import`)
 
 function exec (command, args = {}) {

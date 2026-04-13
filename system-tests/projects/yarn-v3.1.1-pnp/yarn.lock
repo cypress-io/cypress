@@ -5,17 +5,19 @@ __metadata:
   version: 5
   cacheKey: 8
 
-"@types/lodash@npm:^4.14.225":
-  version: 4.17.16
-  resolution: "@types/lodash@npm:4.17.16"
-  checksum: 915618c5735b10007e0ed7d06fdce6b344f88fc721d492b189a69064bfd046d2382e1ba61d683eeb61cad60ca0286cd110e6fe0fa4ab2e99066a40478376831d
+"@types/semver@npm:^7.5.8":
+  version: 7.5.8
+  resolution: "@types/semver@npm:7.5.8"
+  checksum: ea6f5276f5b84c55c5a55e5ae3d7b49c7541fc66cbb43ebab3596f96fb267a41cc1b23fa42e3f3bfefffd63cb1f22196f8e93b6092f0803e36070c409e588a554
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.21":
-  version: 4.17.21
-  resolution: "lodash@npm:4.17.21"
-  checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
+"semver@npm:^7.5.4":
+  version: 7.6.3
+  resolution: "semver@npm:7.6.3"
+  bin:
+    semver: bin/semver.js
+  checksum: 4110ec5d015c9438f322b374e95b46f77e5765b4995591e6e39e7a069b4060bae9cf45ae46094631a4210ca23d6819097f0e8fded3826a7e962f539290c1e8b8
   languageName: node
   linkType: hard
 
@@ -43,8 +45,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "yarn-v3.1.1-pnp@workspace:."
   dependencies:
-    "@types/lodash": ^4.14.225
-    lodash: ^4.17.21
+    "@types/semver": ^7.5.8
+    semver: ^7.5.4
     typescript: ^5.6.3
   languageName: unknown
   linkType: soft

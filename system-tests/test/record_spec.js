@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const dedent = require('dedent')
@@ -262,26 +261,25 @@ describe('e2e record', () => {
     ]
 
     const postInstanceResponses = (specs) => {
-      return _
-      .chain(specs)
-      .map((spec, i) => {
-        return {
-          spec,
-          instanceId,
-          estimatedWallClockDuration: (i + 1) * 1000,
-        }
-      })
-      .concat({
-        spec: null,
-        instanceId: null,
-        estimatedWallClockDuration: null,
-      })
-      .value()
+      return [
+        ...specs.map((spec, i) => {
+          return {
+            spec,
+            instanceId,
+            estimatedWallClockDuration: (i + 1) * 1000,
+          }
+        }),
+        {
+          spec: null,
+          instanceId: null,
+          estimatedWallClockDuration: null,
+        },
+      ]
     }
 
     // a1 does 3 specs, b2 does 1 spec
-    const a1Specs = _.without(allSpecs, 'cypress/e2e/record_pass.cy.js')
-    const b2Specs = _.difference(allSpecs, a1Specs)
+    const a1Specs = allSpecs.filter((s) => s !== 'cypress/e2e/record_pass.cy.js')
+    const b2Specs = allSpecs.filter((s) => !a1Specs.includes(s))
 
     let firstRunResponse = false
     let waitUntilSecondInstanceClaims = null
@@ -315,7 +313,7 @@ describe('e2e record', () => {
           }
 
           return res.json(
-            _.extend({}, postRunResponse, { machineId }),
+            { ...postRunResponse, machineId },
           )
         },
       },
@@ -976,7 +974,7 @@ describe('e2e record', () => {
         },
       })
 
-      setupStubbedServer(_.values(routes))
+      setupStubbedServer(Object.values(routes))
 
       it('does not proceed and exits with error when parallelizing and creating instance', function () {
         process.env.DISABLE_API_RETRIES = 'true'
@@ -1187,7 +1185,7 @@ describe('e2e record', () => {
           reqSchema: ['createRun', 4],
           // force this to throw a schema error
           onReqBody (body) {
-            _.extend(body, {
+            Object.assign(body, {
               ci: null,
               commit: null,
               ciBuildId: null,

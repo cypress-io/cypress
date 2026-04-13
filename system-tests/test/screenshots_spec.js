@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const Fixtures = require('../lib/fixtures')
@@ -100,7 +99,7 @@ describe('e2e screenshots', () => {
         ])
         .then((sizes) => {
           // make sure all of the values are unique
-          expect(sizes).to.deep.eq(_.uniq(sizes))
+          expect(sizes).to.deep.eq([...new Set(sizes)])
         }).then(() => {
           return Promise.all([
             sizeOf(screenshot1),
@@ -115,7 +114,7 @@ describe('e2e screenshots', () => {
           if (browser === 'electron') {
             // all of the images should be 1280x720
             // since thats what we run headlessly
-            return _.each(dimensions, (dimension) => {
+            dimensions.forEach((dimension) => {
               expect(dimension).to.deep.eq({ width: 1280, height: 720, type: 'png' })
             })
           }

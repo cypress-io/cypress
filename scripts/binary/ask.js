@@ -1,4 +1,3 @@
-const _ = require('lodash')
 let fs = require('fs-extra')
 let glob = require('glob')
 const Promise = require('bluebird')
@@ -75,7 +74,7 @@ const getReleases = (releases) => {
     name: 'release',
     type: 'list',
     message: 'Release which version?',
-    choices: _.map(releases, (r) => {
+    choices: releases.map((r) => {
       return {
         name: r,
         value: r,
@@ -97,7 +96,7 @@ const getVersions = (releases) => {
     name: 'version',
     type: 'list',
     message: 'Bump to which version?',
-    choices: _.map(releases, (r) => {
+    choices: releases.map((r) => {
       return {
         name: r,
         value: r,
@@ -164,7 +163,7 @@ const whichVersion = (distDir) => {
     return fs.readJsonAsync(pkg)
     .get('version')
   }).then((versions) => {
-    versions = _.uniq(versions)
+    versions = [...new Set(versions)]
 
     return prompt(getVersions(versions))
     .get('version')
@@ -177,7 +176,7 @@ const whichRelease = (distDir) => {
     return fs.readJsonAsync(pkg)
     .get('version')
   }).then((versions) => {
-    versions = _.uniq(versions)
+    versions = [...new Set(versions)]
 
     return prompt(getReleases(versions))
     .get('release')

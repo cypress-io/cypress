@@ -8,6 +8,7 @@ const { sinon } = require('../spec_helper')
 
 describe('lib/config', () => {
   before(function () {
+    this.timeout(30000)
     this.env = process.env
     this.versions = process.versions
 

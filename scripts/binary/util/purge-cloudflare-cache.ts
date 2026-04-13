@@ -1,13 +1,9 @@
-import _ from 'lodash'
 import check from 'check-more-types'
 import la from 'lazy-ass'
 import rp from '@cypress/request-promise'
 
 function hasCloudflareEnvironmentVars () {
-  return _.chain([process.env.CF_TOKEN, process.env.CF_ZONEID])
-  .map(check.unemptyString)
-  .every()
-  .value()
+  return [process.env.CF_TOKEN, process.env.CF_ZONEID].every(check.unemptyString)
 }
 
 export function purgeCloudflareCache (url) {

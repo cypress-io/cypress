@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 import { s3helpers } from './s3-api'
 const debug = require('debug')('cypress:binary')
 import la from 'lazy-ass'
@@ -87,9 +85,9 @@ export const findBuildByCommit = (commit: commit, s3paths: string[]) => {
 
   // each path includes commit SHA and build number, let's pick the last build
   const parsedBuilds = matching.map(parseBuildPath)
-  const sortedBuilds = _.sortBy(parsedBuilds, 'build')
+  const sortedBuilds = [...parsedBuilds].sort((a, b) => (a?.build ?? 0) - (b?.build ?? 0))
 
-  return _.last(sortedBuilds).s3path
+  return sortedBuilds[sortedBuilds.length - 1].s3path
 }
 
 /**

@@ -1,14 +1,30 @@
 import systemTests from './system-tests'
 import dayjs from 'dayjs'
-import _ from 'lodash'
 
 const STATIC_DATE = '2018-02-01T20:14:19.323Z'
 
+function getPath (obj: any, path: string): any {
+  return path.split('.').reduce((acc, key) => acc?.[key], obj)
+}
+
+function setPath (obj: any, path: string, value: any): any {
+  const keys = path.split('.')
+  let current = obj
+
+  for (let i = 0; i < keys.length - 1; i++) {
+    current = current[keys[i]]
+  }
+
+  current[keys[keys.length - 1]] = value
+
+  return obj
+}
+
 const expectDurationWithin = function (obj: object, duration: string, low: number, high: number, reset: number) {
-  const d: number | undefined = _.get(obj, duration)
+  const d: number | undefined = getPath(obj, duration)
 
   // bail if we don't have a duration
-  if (!_.isNumber(d)) {
+  if (typeof d !== 'number') {
     return
   }
 
@@ -16,12 +32,12 @@ const expectDurationWithin = function (obj: object, duration: string, low: numbe
   expect(d, duration).to.be.within(low, high)
 
   // once valid, mutate and set static range
-  return _.set(obj, duration, reset)
+  return setPath(obj, duration, reset)
 }
 
 const expectStartToBeBeforeEnd = function (obj, start, end) {
-  const s = _.get(obj, start)
-  const e = _.get(obj, end)
+  const s = getPath(obj, start)
+  const e = getPath(obj, end)
 
   expect(
     dayjs(s).isBefore(e),
@@ -29,45 +45,47 @@ const expectStartToBeBeforeEnd = function (obj, start, end) {
   ).to.be.true
 
   // once valid, mutate and set static dates
-  _.set(obj, start, STATIC_DATE)
+  setPath(obj, start, STATIC_DATE)
 
-  return _.set(obj, end, STATIC_DATE)
+  return setPath(obj, end, STATIC_DATE)
 }
 
 const normalizeTestTimings = function (obj, timings) {
-  const t = _.get(obj, timings)
+  const t = getPath(obj, timings)
 
   // bail if we don't have any timings
   if (!t) {
     return
   }
 
-  _.set(obj, 'timings', _.mapValues(t, (val, key) => {
+  const mapped = Object.fromEntries(Object.entries(t).map(([key, val]: [string, any]) => {
     switch (key) {
       case 'lifecycle':
         // ensure that lifecycle is under 500ms
         expect(val, 'lifecycle').to.be.within(0, 500)
 
         // reset to 100
-        return 100
+        return [key, 100]
       case 'test':
         // ensure test fn duration is within 2000ms
         expectDurationWithin(val, 'fnDuration', 0, 2000, 400)
         // ensure test after fn duration is within 500ms
         expectDurationWithin(val, 'afterFnDuration', 0, 500, 200)
 
-        return val
+        return [key, val]
       default:
-        return _.map(val, (hook) => {
+        return [key, (val as any[]).map((hook) => {
           // ensure test fn duration is within 1500ms
           expectDurationWithin(hook, 'fnDuration', 0, 1500, 400)
           // ensure test after fn duration is within 500ms
           expectDurationWithin(hook, 'afterFnDuration', 0, 500, 200)
 
           return hook
-        })
+        })]
     }
   }))
+
+  setPath(obj, 'timings', mapped)
 }
 
 export const expectRunsToHaveCorrectTimings = (runs = []) => {
@@ -79,9 +97,9 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
     // grab all the wallclock durations for all test (and retried attempts)
     // because our duration should be at least this
 
-    const attempts = _.flatMap(run.tests, (test) => test.attempts)
+    const attempts = run.tests.flatMap((test) => test.attempts)
 
-    const wallClocks = _.sumBy(attempts, 'wallClockDuration')
+    const wallClocks = attempts.reduce((sum, a) => sum + (a.wallClockDuration || 0), 0)
 
     // ensure each run's duration is around the sum
     // of all tests wallclock duration
@@ -108,7 +126,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
       return obj.fnDuration + obj.afterFnDuration
     }
 
-    _.each(run.tests, (test) => {
+    run.tests.forEach((test) => {
       try {
         if (test.displayError) {
           test.displayError = systemTests.normalizeStdout(test.displayError)
@@ -124,19 +142,19 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
           }
 
           // cannot sum an object, must use array of values
-          const timings = _.sumBy(_.values(attempt.timings), (val) => {
-            if (_.isArray(val)) {
+          const timings = Object.values(attempt.timings).reduce((sum: number, val: any) => {
+            if (Array.isArray(val)) {
               // array for hooks
-              return _.sumBy(val, addFnAndAfterFn)
+              return sum + val.reduce((s, v) => s + addFnAndAfterFn(v), 0)
             }
 
-            if (_.isObject(val)) {
+            if (val !== null && typeof val === 'object') {
               // obj for test itself
-              return addFnAndAfterFn(val)
+              return sum + addFnAndAfterFn(val)
             }
 
-            return val
-          })
+            return sum + val
+          }, 0)
 
           expectDurationWithin(
             attempt,
@@ -165,7 +183,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
       }
     })
 
-    run.screenshots = _.map(run.screenshots, (screenshot) => {
+    run.screenshots = run.screenshots.map((screenshot) => {
       expect(screenshot.screenshotId).to.have.length(5)
       screenshot.screenshotId = 'some-random-id'
 
@@ -206,7 +224,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
   expect(json.osVersion).to.be.a('string')
   expect(json.cypressVersion).to.be.a('string')
 
-  _.extend(json, {
+  Object.assign(json, {
     browserPath: 'path/to/browser',
     browserName: 'FooBrowser',
     browserVersion: '88',
@@ -217,20 +235,15 @@ export const expectCorrectModuleApiResult = (json, opts: {
 
   // ensure the totals are accurate
   expect(json.totalTests).to.eq(
-    _.sum([
-      json.totalFailed,
-      json.totalPassed,
-      json.totalPending,
-      json.totalSkipped,
-    ]),
+    json.totalFailed + json.totalPassed + json.totalPending + json.totalSkipped,
   )
 
   // ensure totalDuration matches all of the stats durations
   expectDurationWithin(
     json,
     'totalDuration',
-    _.sumBy(json.runs, 'stats.duration'),
-    _.sumBy(json.runs, 'stats.duration'),
+    json.runs.reduce((sum, r) => sum + (r.stats.duration || 0), 0),
+    json.runs.reduce((sum, r) => sum + (r.stats.duration || 0), 0),
     5555,
   )
 
@@ -240,7 +253,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
     expectStartToBeBeforeEnd(run, 'stats.startedAt', 'stats.endedAt')
     expectStartToBeBeforeEnd(run, 'reporterStats.start', 'reporterStats.end')
 
-    const wallClocks = _.sumBy(run.tests, 'duration')
+    const wallClocks = run.tests.reduce((sum, t) => sum + (t.duration || 0), 0)
 
     // ensure each run's duration is around the sum
     // of all tests wallclock duration
@@ -262,7 +275,7 @@ export const expectCorrectModuleApiResult = (json, opts: {
 
     run.spec.absolute = systemTests.normalizeStdout(run.spec.absolute)
 
-    _.each(run.tests, (test) => {
+    run.tests.forEach((test) => {
       if (test.displayError) {
         test.displayError = systemTests.normalizeStdout(test.displayError)
       }

@@ -2,7 +2,6 @@ import { spawn, execSync } from 'child_process'
 import chalk from 'chalk'
 import pDefer from 'p-defer'
 import chokidar from 'chokidar'
-import _ from 'lodash'
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -86,13 +85,23 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
   })
 }
 
-let debounced: Record<string, Function> = {}
+function debounce<T extends (...args: any[]) => any> (fn: T, ms: number): (...args: Parameters<T>) => void {
+  let timer: ReturnType<typeof setTimeout> | null = null
+
+  return (...args: Parameters<T>) => {
+    if (timer) clearTimeout(timer)
+
+    timer = setTimeout(() => fn(...args), ms)
+  }
+}
+
+let debouncedFns: Record<string, Function> = {}
 
 const nexusTypegenDebounced = (cfg: NexusTypegenCfg) => {
-  debounced[cfg.filePath] =
-    debounced[cfg.filePath] ?? _.debounce(nexusTypegen, 500)
+  debouncedFns[cfg.filePath] =
+    debouncedFns[cfg.filePath] ?? debounce(nexusTypegen, 500)
 
-  debounced[cfg.filePath](cfg)
+  debouncedFns[cfg.filePath](cfg)
 }
 
 interface NexusTypegenWatchCfg extends NexusTypegenCfg {

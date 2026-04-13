@@ -1,8 +1,6 @@
 import chokidar from 'chokidar'
 import path from 'path'
 import fs from 'fs-extra'
-import _ from 'lodash'
-
 import { monorepoPaths } from '../monorepoPaths'
 
 const PROJECT_FIXTURE_DIRECTORY = 'system-tests/projects'
@@ -61,9 +59,15 @@ export async function e2eTestScaffoldWatch () {
     e2eTestScaffold()
   })
 
-  fixtureWatcher.on('addDir', _.debounce(() => {
-    _e2eTestScaffold(false)
-  }))
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+  fixtureWatcher.on('addDir', () => {
+    if (debounceTimer) clearTimeout(debounceTimer)
+
+    debounceTimer = setTimeout(() => {
+      _e2eTestScaffold(false)
+    }, 0)
+  })
 
   await e2eTestScaffold()
 }

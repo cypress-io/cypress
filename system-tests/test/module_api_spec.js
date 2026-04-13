@@ -1,5 +1,4 @@
 const path = require('path')
-const _ = require('lodash')
 const { fs } = require('@packages/server/lib/util/fs')
 const { default: systemTests } = require('../lib/system-tests')
 const { STDOUT_DURATION_IN_TABLES_RE, e2ePath } = require('../lib/normalizeStdout')
@@ -28,9 +27,13 @@ describe('module api', () => {
     async onRun (execFn) {
       const { stdout } = await execFn()
 
-      _.each(STDOUT_DURATION_IN_TABLES_RE.exec(stdout), (str) => {
-        expect(str.trim(), 'spec durations in tables should not be 0ms').not.eq('0ms')
-      })
+      const matches = STDOUT_DURATION_IN_TABLES_RE.exec(stdout)
+
+      if (matches) {
+        matches.forEach((str) => {
+          expect(str.trim(), 'spec durations in tables should not be 0ms').not.eq('0ms')
+        })
+      }
 
       // now what we want to do is read in the outputPath
       // and snapshot it so its what we expect after normalizing it

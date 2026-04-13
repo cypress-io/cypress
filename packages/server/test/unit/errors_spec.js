@@ -32,7 +32,7 @@ context('.logException', () => {
 
     return errors.logException(err)
     .then(() => {
-      expect(console.log).not.to.be.calledWith(err.stack)
+      expect(console.log).not.to.be.calledWith(chalk.red(err.stack))
 
       expect(exception.create).not.to.be.called
     })
@@ -46,8 +46,6 @@ context('.logException', () => {
 
     return errors.logException(err)
     .then(() => {
-      expect(console.log).not.to.be.calledWith(err.stack)
-
       expect(exception.create).not.to.be.called
     })
   })

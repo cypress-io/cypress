@@ -1,7 +1,6 @@
 import { signal } from '@angular/core'
 import { SignalsComplexComponent } from './signals-complex.component'
 import { createOutputSpy } from 'cypress/angular'
-import cloneDeep from 'lodash/cloneDeep'
 
 const user = {
   firstName: 'Hank',
@@ -30,15 +29,15 @@ const acquaintances = [
 it('can pass in complex props', () => {
   cy.mount(SignalsComplexComponent, {
     componentProperties: {
-      user: cloneDeep(user),
-      acquaintances: cloneDeep(acquaintances),
+      user: structuredClone(user),
+      acquaintances: structuredClone(acquaintances),
     },
   })
 })
 
 it('can pass in complex props as signals and mutate them', () => {
-  const userRef = cloneDeep(user)
-  const acquaintancesRef = cloneDeep(acquaintances)
+  const userRef = structuredClone(user)
+  const acquaintancesRef = structuredClone(acquaintances)
   const userSignal = signal(userRef)
   const acquaintancesSignal = signal(acquaintancesRef)
 
@@ -61,7 +60,7 @@ it('can pass in complex props as signals and mutate them', () => {
       firstName: 'Foo',
     })
 
-    const acquaintancesRefNew = cloneDeep(acquaintances)
+    const acquaintancesRefNew = structuredClone(acquaintances)
 
     acquaintancesRefNew.push({
       firstName: 'Bobby',

@@ -278,7 +278,7 @@ export async function scaffoldProjectNodeModules ({
 /**
  * Create symlinks to very commonly used (in example projects) `node_modules`.
  *
- * This is done because many `projects` use the same modules, like `lodash`, and it's not worth it
+ * This is done because many `projects` use the same modules, like `debug`, and it's not worth it
  * to increase CI install times just to have it explicitly specified by `package.json`. A symlink
  * is faster than a real `npm install`.
  *
@@ -307,10 +307,8 @@ export async function scaffoldCommonNodeModules () {
     'https-proxy-agent',
     'jimp',
     'lazy-ass',
-    'lodash',
     'playwright-webkit',
     'proxyquire',
-    'semver',
     'systeminformation',
     'tslib',
     'typescript',

@@ -1,9 +1,8 @@
-const _ = require('lodash')
 const cp = require('bluebird').promisifyAll(require('child_process'))
 const { expect } = require('chai')
 
 const assertPsOutput = (strs) => {
-  if (!_.isArray(strs)) {
+  if (!Array.isArray(strs)) {
     strs = [strs]
   }
 
@@ -11,7 +10,7 @@ const assertPsOutput = (strs) => {
     return cp.execAsync('ps -fww')
     .call('toString')
     .then((psOutput) => {
-      _.forEach(strs, (str) => {
+      strs.forEach((str) => {
         expect(psOutput, 'ps output').contain(str)
       })
 

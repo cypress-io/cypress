@@ -1,4 +1,4 @@
-import head from 'lodash/head'
+import semver from 'semver'
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
@@ -7,7 +7,7 @@ export default defineConfig({
     supportFile: false,
     setupNodeEvents (on, config) {
       // make sure plugin can access dependencies
-      head([1, 2, 3])
+      semver.valid('1.2.3')
 
       return config
     },

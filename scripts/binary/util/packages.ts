@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import fs from 'fs-extra'
 import util from 'util'
 import path from 'path'
@@ -42,7 +41,7 @@ const createCLIExecutable = (command) => {
 
 const yarn = createCLIExecutable('yarn')
 
-export const runAllCleanJs = _.partial(yarn, ['lerna', 'run', 'clean-js', '--ignore', 'cli'])
+export const runAllCleanJs = () => yarn(['lerna', 'run', 'clean-js', '--ignore', 'cli'])
 
 export async function copyAllToDist (distDir: string) {
   await fs.ensureDir(distDir)
@@ -103,11 +102,9 @@ export async function copyAllToDist (distDir: string) {
 
     try {
       // Strip out dev-dependencies & scripts for everything in /packages so we can yarn install in there
-      await fs.writeJson(path.join(distDir, pkg, 'package.json'), _.omit(json, [
-        'devDependencies',
-        'lint-staged',
-        'engines',
-      ]), { spaces: 2 })
+      const { devDependencies: _dev, 'lint-staged': _ls, engines: _eng, ...cleanedJson } = json
+
+      await fs.writeJson(path.join(distDir, pkg, 'package.json'), cleanedJson, { spaces: 2 })
     } catch (e) {
       if (!e.message.includes('ENOENT')) {
         throw e

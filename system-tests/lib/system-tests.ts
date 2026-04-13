@@ -20,7 +20,6 @@ const isCi = require('ci-info').isCI
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
-const _ = require('lodash')
 let cp = require('child_process')
 const fs = require('fs-extra')
 const path = require('path')
@@ -309,7 +308,7 @@ const serverPath = path.dirname(require.resolve('@packages/server'))
 
 cp = Bluebird.promisifyAll(cp)
 
-const processEnvCache = _.clone(process.env)
+const processEnvCache = { ...process.env }
 
 Bluebird.config({
   longStackTraces: true,
@@ -351,18 +350,36 @@ const isVideoSnapshotError = (err: Error) => {
     if (line.charAt(0) === '-') deleted.push(line.slice(1).trim())
   }
 
-  _.pull(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
-  _.pull(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
+  const pullItems = (arr: string[], ...items: string[]) => {
+    for (const item of items) {
+      let idx: number
 
-  // If a video line exists after removing other static matches, remove it
-  const deletedVideoLine = _.remove(deleted, (remainingDeleted) => !!videoRe.exec(remainingDeleted))
-
-  // If we did indeed remove a video line, also remove the (Video) text that preceded it
-  if (deletedVideoLine) {
-    _.pull(deleted, '(Video)')
+      while ((idx = arr.indexOf(item)) !== -1) {
+        arr.splice(idx, 1)
+      }
+    }
   }
 
-  return _.isEqual(added, expectedAddedVideoSnapshotLines) && (deleted.length === 0 || _.isEqual(deleted, expectedDeletedVideoSnapshotLines))
+  pullItems(added, sometimesAddedVideoSnapshotLine, sometimesAddedSpacingLine)
+  pullItems(deleted, sometimesDeletedVideoSnapshotLine, sometimesAddedSpacingLine)
+
+  // If a video line exists after removing other static matches, remove it
+  const deletedVideoLine: string[] = []
+
+  for (let i = deleted.length - 1; i >= 0; i--) {
+    if (videoRe.exec(deleted[i])) {
+      deletedVideoLine.push(...deleted.splice(i, 1))
+    }
+  }
+
+  // If we did indeed remove a video line, also remove the (Video) text that preceded it
+  if (deletedVideoLine.length) {
+    pullItems(deleted, '(Video)')
+  }
+
+  const arraysEqual = (a: string[], b: string[]) => a.length === b.length && a.every((v, i) => v === b[i])
+
+  return arraysEqual(added, expectedAddedVideoSnapshotLines) && (deleted.length === 0 || arraysEqual(deleted, expectedDeletedVideoSnapshotLines))
 }
 
 /**
@@ -475,13 +492,13 @@ function getBrowsers (browserPattern) {
 
   let selected = []
 
-  const addBrowsers = _.clone(browserPattern)
-  const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
+  const addBrowsers = browserPattern.filter((b) => !b.startsWith('!'))
+  const removeBrowsers = browserPattern.filter((b) => b.startsWith('!')).map((b) => b.slice(1))
 
   if (removeBrowsers.length) {
-    selected = _.without(DEFAULT_BROWSERS, ...removeBrowsers)
+    selected = DEFAULT_BROWSERS.filter((b) => !removeBrowsers.includes(b))
   } else {
-    selected = _.intersection(DEFAULT_BROWSERS, addBrowsers)
+    selected = DEFAULT_BROWSERS.filter((b) => addBrowsers.includes(b))
   }
 
   if (!selected.length) {
@@ -492,7 +509,7 @@ function getBrowsers (browserPattern) {
 }
 
 const normalizeToArray = (value) => {
-  if (value && !_.isArray(value)) {
+  if (value && !Array.isArray(value)) {
     return [value]
   }
 
@@ -500,20 +517,20 @@ const normalizeToArray = (value) => {
 }
 
 const localItFn = function (title: string, opts: ItOptions) {
-  opts.browser = normalizeToArray(opts.browser)
-
   const DEFAULT_OPTIONS = {
     only: false,
     skip: false,
     browser: [],
     snapshot: false,
-    onStdout: _.noop,
+    onStdout () {},
     onRun (execFn, browser, ctx) {
       return execFn()
     },
   }
 
-  const options = _.defaults({}, opts, DEFAULT_OPTIONS)
+  const options = { ...DEFAULT_OPTIONS, ...opts }
+
+  options.browser = normalizeToArray(options.browser) ?? []
 
   if (!title) {
     throw new Error('systemTests.it(...) must be passed a title as the first argument')
@@ -550,7 +567,7 @@ const localItFn = function (title: string, opts: ItOptions) {
       const ctx = this
 
       const execFn = (overrides = {}) => {
-        return systemTests.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+        return systemTests.exec(ctx, { ...options, originalTitle, ...overrides, browser })
       }
 
       // pass Mocha's this context to onRun
@@ -558,7 +575,7 @@ const localItFn = function (title: string, opts: ItOptions) {
     })
   }
 
-  return _.each(browsersToTest, browserToTest)
+  browsersToTest.forEach(browserToTest)
 }
 
 localItFn.only = function (title: string, options: ItOptions) {
@@ -594,7 +611,7 @@ const systemTests = {
   it: localItFn,
 
   snapshot (...args) {
-    args = _.compact(args)
+    args = args.filter((a) => a != null)
 
     // avoid snapshot cwd issue - see /patches/snap-shot* for more information
     // @ts-ignore
@@ -623,7 +640,7 @@ const systemTests = {
     })
 
     afterEach(async function () {
-      process.env = _.clone(processEnvCache)
+      process.env = { ...processEnvCache }
 
       this.timeout(human('2 minutes'))
 
@@ -641,7 +658,7 @@ const systemTests = {
   },
 
   options (ctx, options: ExecOptions) {
-    _.defaults(options, {
+    const defaults = {
       browser: process.env.SNAPSHOT_BROWSER || 'electron',
       headed: process.env.HEADED || false,
       project: 'e2e',
@@ -652,7 +669,13 @@ const systemTests = {
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
-    })
+    }
+
+    for (const [key, value] of Object.entries(defaults)) {
+      if (options[key] === undefined) {
+        options[key] = value
+      }
+    }
 
     const projectPath = Fixtures.projectPath(options.project)
 
@@ -709,7 +732,7 @@ const systemTests = {
       args.push(`--port=${options.port}`)
     }
 
-    if (!_.isUndefined(options.headed)) {
+    if (options.headed !== undefined) {
       args.push('--headed', String(options.headed))
     }
 
@@ -869,7 +892,7 @@ const systemTests = {
       if (options.onStdout) {
         const newStdout = options.onStdout(stdout)
 
-        if (newStdout && _.isString(newStdout)) {
+        if (newStdout && typeof newStdout === 'string') {
           stdout = newStdout
         }
       }
@@ -877,7 +900,7 @@ const systemTests = {
       if (options.onStderr) {
         const newStderr = options.onStderr(stderr)
 
-        if (newStderr && _.isString(newStderr)) {
+        if (newStderr && typeof newStderr === 'string') {
           stderr = newStderr
         }
       }
@@ -906,7 +929,7 @@ const systemTests = {
 
           // if we are in headed mode or headed is undefined in a browser other
           // than electron
-          if (options.headed || (_.isUndefined(options.headed) && browser && browser !== 'electron')) {
+          if (options.headed || (options.headed === undefined && browser && browser !== 'electron')) {
             expect(headless).not.to.exist
           } else {
             expect(headless).to.include('(headless)')
@@ -943,15 +966,8 @@ const systemTests = {
 
     const cmd = options.command || (options.withBinary ? 'cypress' : 'node')
 
-    const env = _.chain(process.env)
-    .omit('CYPRESS_DEBUG')
-    .extend({
-      // FYI: color will be disabled
-      // because we are piping the child process
-      COLUMNS: 100,
-      LINES: 24,
-    })
-    .defaults({
+    const { CYPRESS_DEBUG: _omitDebug, ...envWithoutDebug } = process.env
+    const envDefaults = {
       // match CircleCI's filesystem limits, so screenshot names in snapshots match
       CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
       FAKE_CWD_PATH: '/XXX/XXX/XXX',
@@ -978,9 +994,18 @@ const systemTests = {
         // prevent snapshots from failing due to "Experiments:  experimentalWebKitSupport=true" difference
         CYPRESS_INTERNAL_SKIP_EXPERIMENT_LOGS: '1',
       } : {}),
-    })
-    .extend(options.processEnv)
-    .value()
+    }
+
+    // Apply defaults (don't overwrite existing keys), then overrides, then processEnv
+    const env = {
+      ...envDefaults,
+      ...envWithoutDebug,
+      // FYI: color will be disabled
+      // because we are piping the child process
+      COLUMNS: 100,
+      LINES: 24,
+      ...options.processEnv,
+    }
 
     const spawnerFn: Spawner = options.dockerImage ? dockerSpawner : cpSpawner
     const sp: SpawnerResult = await spawnerFn(cmd, args, env, options)

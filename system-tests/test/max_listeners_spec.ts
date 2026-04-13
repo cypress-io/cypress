@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -24,7 +23,7 @@ describe('max listeners warning spec', () => {
       // create a bunch of dummy test files to reproduce #1305
       await fs.mkdirp(integrationPath)
       await Promise.all(
-        _.times(15, (i) => fs.writeFile(path.join(integrationPath, `${i}.cy.js`), `it('test', () => {})`)),
+        Array.from({ length: 15 }, (_, i) => fs.writeFile(path.join(integrationPath, `${i}.cy.js`), `it('test', () => {})`)),
       )
 
       const { stderr } = await exec()

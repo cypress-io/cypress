@@ -1,8 +1,13 @@
 import fs from 'fs-extra'
 import path from 'path'
-import _ from 'lodash'
 
 const ROOT_DIR = path.join(__dirname, '../../..')
+
+function camelCase (str: string): string {
+  return str
+  .replace(/[-_\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '')
+  .replace(/^[A-Z]/, (c) => c.toLowerCase())
+}
 
 /**
  * Builds
@@ -33,7 +38,7 @@ export const monorepoPaths = {
 ${dirs
 .filter((f) => f)
 .map((dir) => {
-  return `  ${_.camelCase(
+  return `  ${camelCase(
         `pkg-${dir}`,
   )}: path.join(__dirname, '../../packages/${dir}')`
 }).join(',\n')}

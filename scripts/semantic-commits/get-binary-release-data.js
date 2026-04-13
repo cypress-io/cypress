@@ -1,6 +1,5 @@
 const Bluebird = require('bluebird')
 const childProcess = require('child_process')
-const _ = require('lodash')
 const { Octokit } = require('@octokit/core')
 const debugLib = require('debug')
 
@@ -114,7 +113,15 @@ const getReleaseData = async (latestReleaseInfo) => {
     commits: semanticCommits,
   } = await getNextVersionForBinary()
 
-  semanticCommits = _.uniqBy(semanticCommits, (commit) => commit.header)
+  const seenHeaders = new Set()
+
+  semanticCommits = semanticCommits.filter((commit) => {
+    if (seenHeaders.has(commit.header)) return false
+
+    seenHeaders.add(commit.header)
+
+    return true
+  })
 
   const changedFiles = await getChangedFilesSinceLastRelease(latestReleaseInfo)
 

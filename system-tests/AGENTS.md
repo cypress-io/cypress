@@ -21,7 +21,7 @@ This workspace (`@tooling/system-tests`) contains Cypress's suite of system (int
 **Gotchas / Notes**
 
 - Test projects are copied to a temp directory *outside* the monorepo before each run, so they do not inherit monorepo `node_modules`. Dependencies needed inside a project must be declared in that project's own `package.json`.
-- A small set of common packages (`lodash`, `debug`, etc.) is scaffolded automatically for all projects via `scaffoldCommonNodeModules` in `lib/fixtures.ts` — these do not need to be listed in project `package.json` files.
+- A small set of common packages (`debug`, `bluebird`, etc.) is scaffolded automatically for all projects via `scaffoldCommonNodeModules` in `lib/dep-installer/index.ts` — these do not need to be listed in project `package.json` files.
 - To keep the browser open after a run for debugging: pass `--no-exit` to the test command (e.g. `node ./scripts/run.js --glob-in-dir="go_spec" -- --browser chrome --no-exit`).
 - `test-binary/` specs require a built Cypress `.zip` and a running Docker daemon; they should not be run locally without the full build artifact.
 - Snapshot mismatches on Retina displays can occur when updating screenshots; set `SNAPSHOT_BROWSER=chrome` when running `SNAPSHOT_UPDATE=1` on a Retina machine.

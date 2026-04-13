@@ -2,7 +2,6 @@
 
 const la = require('lazy-ass')
 const fs = require('fs-extra')
-const _ = require('lodash')
 const glob = require('glob')
 const chalk = require('chalk').default
 const Promise = require('bluebird')
@@ -108,13 +107,14 @@ const testStaticAssets = async (buildResourcePath) => {
 
 const testPackageStaticAssets = async (options = {}) => {
   la(options.assetGlob, 'missing resourcePath')
-  const opts = _.defaults(options, {
+  const opts = {
     assetGlob: '',
     goodStrings: [],
     badStrings: [],
     testAssetStrings: [],
     minLineCount: 0,
-  })
+    ...options,
+  }
 
   const foundAssets = await globAsync(opts.assetGlob)
   .map(async (path) => {
@@ -188,7 +188,7 @@ function includesCount (string, subString) {
 }
 
 const includesString = (fileStr, options) => {
-  const opts = _.isArray(options) ? options : [options, 1]
+  const opts = Array.isArray(options) ? options : [options, 1]
 
   const [substr, atLeast] = opts
 

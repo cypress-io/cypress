@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const Bluebird = require('bluebird')
 const { options } = require('@packages/https-proxy/test/helpers/certs')
 const https = require('https')
@@ -9,9 +8,7 @@ const systemTests = require('../lib/system-tests').default
 // create an HTTPS server that forces TLSv1
 const startTlsV1Server = (port) => {
   return Bluebird.fromCallback((cb) => {
-    const opts = _.merge({
-      secureProtocol: 'TLSv1_server_method',
-    }, options)
+    const opts = { ...options, secureProtocol: 'TLSv1_server_method' }
 
     const serv = https.createServer(opts, (req, res) => {
       res.setHeader('content-type', 'text/html')

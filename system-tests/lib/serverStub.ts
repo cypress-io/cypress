@@ -1,5 +1,4 @@
 import crypto from 'crypto'
-import _ from 'lodash'
 import Bluebird from 'bluebird'
 import bodyParser from 'body-parser'
 import Debug from 'debug'
@@ -31,7 +30,7 @@ export const postRunInstanceResponse = getExample('createInstance', 5, 'res')
 export const postInstanceTestsResponse = getExample('postInstanceTests', 1, 'res')
 
 postInstanceTestsResponse.actions = []
-export const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
+export const postRunResponse = { ...postRunResponseWithWarnings, warnings: [] }
 
 // mocked here rather than attempting to intercept and mock an s3 req
 export const CAPTURE_PROTOCOL_UPLOAD_URL = '/capture-protocol/upload/?x-amz-credential=1234abcd&x-amz-signature=1a2b3c-4d5e6f'
@@ -84,7 +83,7 @@ const sendUploadUrls = function (req, res) {
     json.videoUploadUrl = 'http://localhost:1234/videos/video.mp4'
   }
 
-  const screenshotUploadUrls = _.map(body.screenshots, (s) => {
+  const screenshotUploadUrls = (body.screenshots || []).map((s) => {
     num += 1
 
     return {
@@ -269,8 +268,45 @@ export const routeHandlers: Record<string, RouteHandler> = {
   },
 }
 
+function deepClone (obj: any): any {
+  if (obj === null || typeof obj !== 'object') return obj
+
+  if (Array.isArray(obj)) return obj.map(deepClone)
+
+  const result = {}
+
+  for (const key of Object.keys(obj)) {
+    result[key] = deepClone(obj[key])
+  }
+
+  return result
+}
+
+function deepMerge (target: any, source: any): any {
+  const result = { ...target }
+
+  for (const key of Object.keys(source)) {
+    if (
+      source[key] !== null &&
+      typeof source[key] === 'object' &&
+      !Array.isArray(source[key]) &&
+      typeof source[key] !== 'function' &&
+      target[key] !== null &&
+      typeof target[key] === 'object' &&
+      !Array.isArray(target[key]) &&
+      typeof target[key] !== 'function'
+    ) {
+      result[key] = deepMerge(target[key], source[key])
+    } else {
+      result[key] = source[key]
+    }
+  }
+
+  return result
+}
+
 export const createRoutes = (props: DeepPartial<typeof routeHandlers> = {}) => {
-  return _.values(_.merge(_.cloneDeep(routeHandlers), props))
+  return Object.values(deepMerge(deepClone(routeHandlers), props))
 }
 
 beforeEach(() => {
@@ -280,7 +316,7 @@ beforeEach(() => {
 })
 
 export const getRequestUrls = () => {
-  return _.map(mockServerState.requests, 'url').filter((u) => u !== 'POST /preflight')
+  return mockServerState.requests.map((r) => r.url).filter((u) => u !== 'POST /preflight')
 }
 
 export const getRequests = () => {
@@ -292,7 +328,7 @@ const getResponse = function (responseSchema) {
     throw new Error('No response schema supplied')
   }
 
-  if (_.isObject(responseSchema)) {
+  if (typeof responseSchema === 'object' && responseSchema !== null) {
     return responseSchema
   }
 
@@ -312,7 +348,7 @@ const sendResponse = function (req, res, responseBody) {
       return _writeRaw.apply(this, arguments)
     }
 
-    if (_.isFunction(responseBody)) {
+    if (typeof responseBody === 'function') {
       return responseBody(req, res)
     }
 
@@ -331,7 +367,7 @@ const ensureSchema = function (onRequestBody, expectedRequestSchema, responseBod
   return async function (req, res) {
     const { body } = req
 
-    if (_.isFunction(onRequestBody)) {
+    if (typeof onRequestBody === 'function') {
       onRequestBody(body)
     }
 
@@ -380,7 +416,7 @@ const assertResponseBodySchema = function (req, res, next) {
     res.write = oldWrite
     res.end = oldEnd
 
-    if (res.expectedResponseSchema && _.inRange(res.statusCode, 200, 299)) {
+    if (res.expectedResponseSchema && res.statusCode >= 200 && res.statusCode < 299) {
       const body = JSON.parse(Buffer.concat(chunks).toString('utf8'))
 
       const [resName, resVersion] = res.expectedResponseSchema
@@ -432,7 +468,7 @@ const onServer = (routes) => {
 
     app.use(assertResponseBodySchema)
 
-    return _.each(routes, (route) => {
+    return routes.forEach((route) => {
       return app[route.method](route.url, ensureSchema(
         route.onReqBody,
         route.reqSchema,

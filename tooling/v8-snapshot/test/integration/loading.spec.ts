@@ -57,7 +57,7 @@ describe('loading', () => {
     }
   })
 
-  it('loads an entry esm module importing a lodash function', async () => {
+  it('loads an entry esm module importing a semver function', async () => {
     const projectName = 'v8-snapshot/esm'
 
     const projectBaseDir = await scaffoldProject(projectName)
@@ -85,7 +85,7 @@ describe('loading', () => {
       const { stdout } = await exec(cmd, { env })
       const res = JSON.parse(stdout.trim())
 
-      expect(res.isObjectLike).to.be.true
+      expect(res.isValid).to.be.true
     } catch (err: any) {
       assert.fail(err.toString())
     }

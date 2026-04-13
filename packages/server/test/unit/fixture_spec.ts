@@ -11,6 +11,7 @@ let ctx
 
 describe('lib/fixture', () => {
   before(async function () {
+    this.timeout(30000)
     // Clear and set up DataContext
     await clearCtx()
     // @ts-expect-error

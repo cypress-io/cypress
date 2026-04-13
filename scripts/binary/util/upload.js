@@ -6,8 +6,6 @@ const fse = require('fs-extra')
 const os = require('os')
 const Promise = require('bluebird')
 const { fromSSO, fromEnv } = require('@aws-sdk/credential-providers')
-const _ = require('lodash')
-
 const { purgeCloudflareCache } = require('./purge-cloudflare-cache')
 
 const CDN_URL = 'https://cdn.cypress.io'
@@ -124,7 +122,7 @@ const purgeDesktopAppAllPlatforms = function (version, zipName) {
 const purgeUrlsFromCloudflareCache = async function (urlsFilePath) {
   const urls = (await fse.readFile(urlsFilePath)).toString().split('\n')
 
-  return Promise.map(_.compact(urls), purgeCloudflareCache, { concurrency: 5 })
+  return Promise.map(urls.filter(Boolean), purgeCloudflareCache, { concurrency: 5 })
 }
 
 // simple check for platform-arch string

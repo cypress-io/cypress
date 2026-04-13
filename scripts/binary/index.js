@@ -2,7 +2,6 @@
 const cwd = process.cwd()
 
 const path = require('path')
-const _ = require('lodash')
 const os = require('os')
 const simpleGit = require('simple-git')
 const chalk = require('chalk')
@@ -56,7 +55,9 @@ const askMissingOptions = function (properties = []) {
     zip: ask.whichZipFile,
     commit: ask.toCommit,
   }
-  const pickedQuestions = _.pick(questions, properties)
+  const pickedQuestions = Object.fromEntries(
+    properties.filter((p) => p in questions).map((p) => [p, questions[p]]),
+  )
 
   return questionsRemain(pickedQuestions)
 }
@@ -460,4 +461,11 @@ const deploy = {
   },
 }
 
-module.exports = _.bindAll(deploy, _.functions(deploy))
+// Bind all own function properties so they can be called as standalone references
+for (const key of Object.keys(deploy)) {
+  if (typeof deploy[key] === 'function') {
+    deploy[key] = deploy[key].bind(deploy)
+  }
+}
+
+module.exports = deploy

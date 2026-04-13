@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const fse = require('fs-extra')
 const cp = require('child_process')
 const execa = require('execa')
@@ -20,7 +19,7 @@ const shouldSkipProjectTest = () => {
 }
 
 const runSmokeTest = function (buildAppExecutable, timeoutSeconds = 30) {
-  const rand = String(_.random(0, 1000))
+  const rand = String(Math.floor(Math.random() * 1001))
 
   console.log(`executable path ${buildAppExecutable}`)
   console.log(`timeout ${timeoutSeconds} seconds`)
@@ -74,7 +73,7 @@ const runProjectTest = function (buildAppExecutable, e2e) {
   }
 
   return new Promise((resolve, reject) => {
-    const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
+    const { CYPRESS_INTERNAL_ENV: _omitted, ...env } = process.env
 
     if (!canRecordVideo()) {
       console.log('cannot record video on this platform yet, disabling')
@@ -129,7 +128,7 @@ const runFailingProjectTest = function (buildAppExecutable, e2e) {
 
   const spawn = () => {
     return new Promise((resolve, reject) => {
-      const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
+      const { CYPRESS_INTERNAL_ENV: _omitted, ...env } = process.env
 
       const args = [
         `--run-project=${e2e}`,
@@ -171,7 +170,7 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
 
   const spawn = () => {
     return new Promise((resolve, reject) => {
-      const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
+      const { CYPRESS_INTERNAL_ENV: _omitted, ...env } = process.env
 
       const args = [
         `--run-project=${e2e}`,
@@ -203,7 +202,7 @@ const runV8SnapshotProjectTest = function (buildAppExecutable, e2e) {
 
 const runErroringProjectTest = function (buildAppExecutable, e2e, testName, errorMessage) {
   return new Promise((resolve, reject) => {
-    const env = _.omit(process.env, 'CYPRESS_INTERNAL_ENV')
+    const { CYPRESS_INTERNAL_ENV: _omitted, ...env } = process.env
 
     if (!canRecordVideo()) {
       console.log('cannot record video on this platform yet, disabling')

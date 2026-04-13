@@ -1,7 +1,6 @@
 import os from 'os'
 import fs from 'fs-extra'
 import path from 'path'
-import _ from 'lodash'
 import del from 'del'
 import chalk from 'chalk'
 import electron from '../../packages/electron'
@@ -131,12 +130,7 @@ export async function buildCypressApp (options: BuildCypressAppOpts) {
     filter: (src, _) => !src.includes('.dev.patch'),
   })
 
-  const packageJsonContents = _.omit(jsonRoot, [
-    'devDependencies',
-    'lint-staged',
-    'engines',
-    'scripts',
-  ])
+  const { devDependencies: _dev, 'lint-staged': _ls, engines: _eng, scripts: _scr, ...packageJsonContents } = jsonRoot
 
   fs.writeJsonSync(meta.distDir('package.json'), {
     ...packageJsonContents,
@@ -353,7 +347,7 @@ export async function packageElectronApp (options: BuildCypressAppOpts) {
     data[packageName] = packageSize
   })
 
-  const sizes = _.fromPairs(_.sortBy(_.toPairs(data), 1))
+  const sizes = Object.fromEntries(Object.entries(data).sort(([, a], [, b]) => (a as number) - (b as number)))
 
   console.log(sizes)
 

@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const express = require('express')
 const path = require('path')
 const debug = require('debug')('cypress:server:network-error-handling-spec')
@@ -28,7 +27,7 @@ let counts = {}
 
 const launchBrowser = (url, opts = {}) => {
   return launcher.detect().then((browsers) => {
-    const browser = _.find(browsers, { name: 'chrome' })
+    const browser = browsers.find((b) => b.name === 'chrome')
 
     const args = [
       `--user-data-dir=/tmp/cy-e2e-${random.id()}`,
@@ -156,7 +155,7 @@ describe('e2e network error handling', function () {
       {
         onServer (app) {
           app.use((req, res, next) => {
-            counts[req.url] = _.get(counts, req.url, 0) + 1
+            counts[req.url] = (counts[req.url] || 0) + 1
 
             debug('received request %o', {
               counts,
@@ -212,7 +211,7 @@ describe('e2e network error handling', function () {
       }, {
         onServer (app) {
           app.use((req, res, next) => {
-            counts[req.url] = _.get(counts, req.url, 0) + 1
+            counts[req.url] = (counts[req.url] || 0) + 1
 
             debug('received request %o', {
               counts,

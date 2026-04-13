@@ -1,6 +1,5 @@
 /* global sinon */
 const os = require('os')
-const _ = require('lodash')
 const path = require('path')
 const proxyquire = require('proxyquire')
 const mockfs = require('mock-fs')
@@ -271,11 +270,12 @@ const getFs = () => {
   const cwd = process.cwd().split(path.sep).slice(1)
 
   const recurse = (dir, d) => {
-    if (_.isString(dir)) {
+    if (typeof dir === 'string') {
       return dir
     }
 
-    return _.extend({}, ..._.map(dir, (val, key) => {
+    return Object.assign({}, ...Object.entries(dir).map(([origKey, val]) => {
+      let key = origKey
       let nextDepth = null
 
       if (d !== null) {

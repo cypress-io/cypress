@@ -1,5 +1,4 @@
 import Fixtures from './fixtures'
-import _ from 'lodash'
 import os from 'os'
 
 export const e2ePath = Fixtures.projectPath('e2e')
@@ -20,22 +19,22 @@ export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
 
 const replaceBrowserName = function (str: string, key: string, customBrowserPath: string, browserName: string, version: string, headless: boolean, whitespace: string) {
   // get the padding for the existing browser string
-  const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, 'length', 0), whitespace.length])
+  const lengthOfExistingBrowserString = browserName.length + version.length + (headless ? (headless as unknown as string).length : 0) + whitespace.length
 
   // this ensures we add whitespace so the border is not shifted
-  return key + customBrowserPath + _.padEnd('FooBrowser 88', lengthOfExistingBrowserString)
+  return key + customBrowserPath + 'FooBrowser 88'.padEnd(lengthOfExistingBrowserString)
 }
 
 const replaceDurationSeconds = function (str: string, p1: string, p2: string, p3: string, p4: string) {
   // get the padding for the existing duration
-  const lengthOfExistingDuration = _.sum([(p2 != null ? p2.length : undefined) || 0, p3.length, p4.length])
+  const lengthOfExistingDuration = ((p2 != null ? p2.length : undefined) || 0) + p3.length + p4.length
 
-  return p1 + _.padEnd('X seconds', lengthOfExistingDuration)
+  return p1 + 'X seconds'.padEnd(lengthOfExistingDuration)
 }
 
 // duration='1589'
 const replaceDurationFromReporter = (str: string, p1: string, p2: string, p3: string) => {
-  return p1 + _.padEnd('X', p2.length, 'X') + p3
+  return p1 + 'X'.repeat(p2.length) + p3
 }
 
 const replaceShortDuration = (str: string, prefix: string, p2: string, p3: string, p4: string, count: string): string => {
@@ -46,28 +45,28 @@ const replaceNodeVersion = (str: string, p1: string, p2: string, p3: string) => 
   // Accounts for paths that break across lines
   const p3Length = p3.includes('\n') ? p3.split('\n')[0].length - 1 : p3.length
 
-  return _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3Length))
+  return `${p1}X (/foo/bar/node)`.padEnd(p1.length + p2.length + p3Length)
 }
 
 const replaceCypressVersion = (str: string, p1: string, p2: string) => {
   // Cypress: 12.10.10 -> Cypress: 1.2.3 (handling padding)
-  return _.padEnd(`${p1}1.2.3`, (p1.length + p2.length))
+  return `${p1}1.2.3`.padEnd(p1.length + p2.length)
 }
 
 // when swapping out the duration, ensure we pad the
 // full length of the duration so it doesn't shift content
 const replaceDurationInTables = (str: string, p1: string, p2: string) => {
-  return _.padStart('XX:XX', p1.length + p2.length)
+  return 'XX:XX'.padStart(p1.length + p2.length)
 }
 
 // since time lives on it's own line
 // we can replace the time with 'X second(s)' and pad the length of the expected string.
 // This accounts for the test taking 1 second, X seconds, or XX seconds, and so on.
 const replaceTime = (str: string, p1: string) => {
-  return _.padEnd('X second(s)', p1.length)
+  return 'X second(s)'.padEnd(p1.length)
 }
 
-const replaceScreenshotDims = (str: string, p1: string) => _.padStart('(YxX)', p1.length)
+const replaceScreenshotDims = (str: string, p1: string) => '(YxX)'.padStart(p1.length)
 
 const replaceUploadActivityIndicator = function (str: string, preamble: string, activity: string, ..._) {
   return `${preamble}. . . . .`

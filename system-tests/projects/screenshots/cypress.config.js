@@ -1,6 +1,5 @@
 const path = require('path')
 const Jimp = require('jimp')
-const _ = require('lodash')
 const { useFixedBrowserLaunchSize } = require('@tooling/system-tests/lib/pluginUtils')
 
 module.exports = {
@@ -19,7 +18,7 @@ module.exports = {
 
           return Jimp.read(imagePath)
           .then((image) => {
-            _.each(colors, ({ coords, color }) => {
+            colors.forEach(({ coords, color }) => {
               let [x, y] = coords
 
               x = x * devicePixelRatio
@@ -29,7 +28,7 @@ module.exports = {
 
               const { r, g, b } = pixels
 
-              if (!_.isEqual(color, [r, g, b])) {
+              if (color[0] !== r || color[1] !== g || color[2] !== b) {
                 throw new Error(`The pixel color at coords: [${x}, ${y}] does not match the expected pixel color. The color was [${r}, ${g}, ${b}] and was expected to be [${color.join(', ')}].`)
               }
             })

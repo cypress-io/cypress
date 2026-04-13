@@ -3,8 +3,6 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const fs = require('fs')
 const hasha = require('hasha')
-const _ = require('lodash')
-
 const upload = require('./upload')
 const uploadUtils = require('./util/upload')
 const { s3helpers } = require('./s3-api')
@@ -93,7 +91,9 @@ const uploadArtifactToS3 = function (args = []) {
   })
 
   console.log('Upload options')
-  console.log(_.pick(options, supportedOptions))
+  console.log(Object.fromEntries(
+    supportedOptions.filter((k) => k in options).map((k) => [k, options[k]]),
+  ))
 
   validateOptions(options)
 

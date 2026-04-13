@@ -2,7 +2,8 @@ import systemTests from '../lib/system-tests'
 import Fixtures from '../lib/fixtures'
 import path from 'path'
 import globby from 'globby'
-import { escapeRegExp } from 'lodash'
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 describe('@cypress/webpack-dev-server', function () {
   systemTests.setup()

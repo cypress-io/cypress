@@ -1,7 +1,6 @@
 const chokidar = require('chokidar')
 const path = require('path')
 const fs = require('fs-extra')
-const _ = require('lodash')
 const minimist = require('minimist')
 
 const toolingRoot = path.join(__dirname, '..')
@@ -62,9 +61,14 @@ async function e2eTestScaffoldWatch () {
     e2eTestScaffold()
   })
 
-  fixtureWatcher.on('addDir', _.debounce(() => {
-    _e2eTestScaffold(false)
-  }))
+  let debounceTimer
+
+  fixtureWatcher.on('addDir', () => {
+    clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => {
+      _e2eTestScaffold(false)
+    }, 0)
+  })
 
   await e2eTestScaffold()
 }
