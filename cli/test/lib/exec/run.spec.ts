@@ -243,5 +243,10 @@ describe('exec run', () => {
       await run.start({ project: undefined })
       expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd()], expect.anything())
     })
+
+    it('does not substitute process.cwd() when project is null', async () => {
+      await run.start({ project: null })
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', null], expect.anything())
+    })
   })
 })

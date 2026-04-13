@@ -209,6 +209,30 @@ describe('lib/tasks/verify', () => {
     expect(result).toEqual(undefined)
   })
 
+  it('returns early when CYPRESS_SKIP_VERIFY is true even if skipVerify is explicitly undefined', async () => {
+    vi.stubEnv('CYPRESS_SKIP_VERIFY', 'true')
+
+    await start({ skipVerify: undefined, listrRenderer: 'silent' })
+
+    expect(util.exec).not.toHaveBeenCalled()
+  })
+
+  it('uses default smoke test timeout when smokeTestTimeout is explicitly undefined', async () => {
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0o777 }),
+      packageVersion,
+    })
+
+    await start({ smokeTestTimeout: undefined, listrRenderer: 'silent' })
+
+    expect(util.exec).toHaveBeenCalledWith(
+      executablePath,
+      expect.anything(),
+      expect.objectContaining({ timeout: DEFAULT_VERIFY_TIMEOUT }),
+    )
+  })
+
   it('logs error and exits when no version of Cypress is installed', async () => {
     const output = createStdoutCapture()
 

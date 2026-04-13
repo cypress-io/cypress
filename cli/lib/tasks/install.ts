@@ -214,10 +214,12 @@ const start = async (options: any = {}): Promise<any> => {
 
   const { buildInfo, version } = JSON.parse(await readFile(pkgPath, 'utf8'))
 
-  options = {
-    force: false,
-    buildInfo,
-    ...options,
+  if (options.force === undefined) {
+    options.force = false
+  }
+
+  if (options.buildInfo === undefined) {
+    options.buildInfo = buildInfo
   }
 
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {

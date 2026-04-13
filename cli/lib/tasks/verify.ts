@@ -264,13 +264,24 @@ const maybeVerify = async (installedVersion: string, binaryDir: string, options:
 export const start = async (options: any = {}): Promise<void> => {
   debug('verifying Cypress app')
 
-  options = {
-    dev: false,
-    force: false,
-    welcomeMessage: true,
-    smokeTestTimeout: verifyTestRunnerTimeoutMs(),
-    skipVerify: util.getEnv('CYPRESS_SKIP_VERIFY') === 'true',
-    ...options,
+  if (options.dev === undefined) {
+    options.dev = false
+  }
+
+  if (options.force === undefined) {
+    options.force = false
+  }
+
+  if (options.welcomeMessage === undefined) {
+    options.welcomeMessage = true
+  }
+
+  if (options.smokeTestTimeout === undefined) {
+    options.smokeTestTimeout = verifyTestRunnerTimeoutMs()
+  }
+
+  if (options.skipVerify === undefined) {
+    options.skipVerify = util.getEnv('CYPRESS_SKIP_VERIFY') === 'true'
   }
 
   if (options.skipVerify) {

@@ -17,9 +17,16 @@ module.exports = {
     sh.config.silent = true
     EE.defaultMaxListeners = 100
 
-    const opts = { getFilenames: null, getFileText: null, ...options }
+    options = options || {}
+    if (options.getFilenames === undefined) {
+      options.getFilenames = null
+    }
 
-    const filenames = opts.getFilenames().filter((v) => filesRegex.test(v))
+    if (options.getFileText === undefined) {
+      options.getFileText = null
+    }
+
+    const filenames = options.getFilenames().filter((v) => filesRegex.test(v))
 
     debug(`linting:
     ${filenames.join('\n\t')}
@@ -28,7 +35,7 @@ module.exports = {
     return Promise.map(filenames, (f) => {
       debug('started linting', f)
 
-      const fileText = opts.getFileText(f)
+      const fileText = options.getFileText(f)
 
       debugTerse('file text:', fileText)
 
@@ -58,9 +65,16 @@ module.exports = {
   lintFilesByName: (options) => {
     sh.config.silent = true
 
-    const opts = { getFilenames: null, fix: false, ...options }
+    options = options || {}
+    if (options.getFilenames === undefined) {
+      options.getFilenames = null
+    }
 
-    const filenames = opts.getFilenames().filter((v) => filesRegex.test(v))
+    if (options.fix === undefined) {
+      options.fix = false
+    }
+
+    const filenames = options.getFilenames().filter((v) => filesRegex.test(v))
 
     debug(`linting:
     ${filenames.join('\n\t')}
@@ -68,7 +82,7 @@ module.exports = {
 
     const filenamesString = sh.ShellString(filenames.join(' '))
 
-    const lintCommand = opts.fix ?
+    const lintCommand = options.fix ?
       `npx eslint --color=true --fix ${filenamesString}`
       : `npx eslint --color=true ${filenamesString}`
 

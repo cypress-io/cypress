@@ -176,11 +176,25 @@ const runModule = {
   isValidProject,
   // resolves with the number of failed tests
   async start (options: any = {}): Promise<any> {
-    options.key ??= null
-    options.spec ??= null
-    options.reporter ??= null
-    options.reporterOptions ??= null
-    options.project ??= process.cwd()
+    if (options.key === undefined) {
+      options.key = null
+    }
+
+    if (options.spec === undefined) {
+      options.spec = null
+    }
+
+    if (options.reporter === undefined) {
+      options.reporter = null
+    }
+
+    if (options.reporterOptions === undefined) {
+      options.reporterOptions = null
+    }
+
+    if (options.project === undefined) {
+      options.project = process.cwd()
+    }
 
     function run (): any {
       try {
