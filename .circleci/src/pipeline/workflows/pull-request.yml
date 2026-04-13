@@ -56,144 +56,116 @@ jobs:
         branches:
           only: /^pull\/[0-9]+/
 
-  # The following jobs are only run for contributor PRs once they are approved
-  # unit, integration and e2e tests
+  # The following jobs are only run for contributor PRs once they are approved.
+  # Each job checks its pipeline parameter at startup and halts early if the
+  # changed files don't require it to run.
   - cli-visual-tests:
-      when: << pipeline.parameters.run-cli-tests >>
       context: test-runner:percy
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - unit-tests:
-      when: << pipeline.parameters.run-unit-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - verify-release-readiness:
-      when: << pipeline.parameters.run-unit-tests >>
       context: [test-runner:npm-release, org-npm-credentials]
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - server-unit-tests:
-      when: << pipeline.parameters.run-server-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - server-integration-tests:
-      when: << pipeline.parameters.run-server-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - server-performance-tests:
-      when: << pipeline.parameters.run-server-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
-
-  # system-tests-node-modules-install is a prerequisite for system-tests-* AND
-  # for some npm dev-server tests. Run it when any of those are needed.
   - system-tests-node-modules-install:
-      when:
-        or:
-          - << pipeline.parameters.run-system-tests >>
-          - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
-          - << pipeline.parameters.run-npm-vite-dev-server-tests >>
-          - << pipeline.parameters.run-v8-tests >>
       context: test-runner:performance-tracking
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - system-tests-chrome:
-      when: << pipeline.parameters.run-system-tests >>
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - system-tests-electron:
-      when: << pipeline.parameters.run-system-tests >>
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - system-tests-firefox:
-      when: << pipeline.parameters.run-system-tests >>
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - system-tests-webkit:
-      when: << pipeline.parameters.run-system-tests >>
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - system-tests-non-root:
-      when: << pipeline.parameters.run-system-tests >>
       context: test-runner:performance-tracking
       executor: non-root-docker-user
       requires:
         - system-tests-node-modules-install
   - driver-integration-tests-chrome:
-      when: << pipeline.parameters.run-driver-tests >>
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-chrome-inject-document-domain:
-      when: << pipeline.parameters.run-driver-tests >>
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-chrome-beta:
-      when: << pipeline.parameters.run-driver-tests >>
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-chrome-beta-inject-document-domain:
-      when: << pipeline.parameters.run-driver-tests >>
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-firefox:
-      when: << pipeline.parameters.run-driver-tests >>
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-electron:
-      when: << pipeline.parameters.run-driver-tests >>
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-webkit:
-      when: << pipeline.parameters.run-driver-tests >>
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-memory-tests:
-      when: << pipeline.parameters.run-driver-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - run-frontend-shared-component-tests-chrome:
-      when: << pipeline.parameters.run-frontend-shared-tests >>
       context:
         [
           test-runner:cypress-record-key,
@@ -206,7 +178,6 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-launchpad-integration-tests-chrome:
-      when: << pipeline.parameters.run-launchpad-tests >>
       context:
         [
           test-runner:cypress-record-key,
@@ -219,7 +190,6 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-launchpad-component-tests-chrome:
-      when: << pipeline.parameters.run-launchpad-tests >>
       context:
         [
           test-runner:cypress-record-key,
@@ -232,7 +202,6 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-app-integration-tests-chrome:
-      when: << pipeline.parameters.run-app-ui-tests >>
       context:
         [
           test-runner:cypress-record-key,
@@ -245,23 +214,14 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-webpack-dev-server-integration-tests:
-      when:
-        and:
-          - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
-          - << pipeline.parameters.run-system-tests >>
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       requires:
         - system-tests-node-modules-install
   - run-vite-dev-server-integration-tests:
-      when:
-        and:
-          - << pipeline.parameters.run-npm-vite-dev-server-tests >>
-          - << pipeline.parameters.run-system-tests >>
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       requires:
         - system-tests-node-modules-install
   - run-app-component-tests-chrome:
-      when: << pipeline.parameters.run-app-ui-tests >>
       context:
         [
           test-runner:cypress-record-key,
@@ -274,7 +234,6 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-reporter-component-tests-chrome:
-      when: << pipeline.parameters.run-reporter-tests >>
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       percy: true
       requires:
@@ -282,102 +241,85 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - reporter-integration-tests:
-      when: << pipeline.parameters.run-reporter-tests >>
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-webpack-dev-server:
-      when: << pipeline.parameters.run-npm-webpack-dev-server-tests >>
       requires:
         - system-tests-node-modules-install
   - npm-vite-dev-server:
-      when: << pipeline.parameters.run-npm-vite-dev-server-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-vite-plugin-cypress-esm:
-      when: << pipeline.parameters.run-npm-vite-plugin-esm-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-webpack-preprocessor:
-      when: << pipeline.parameters.run-npm-webpack-preprocessor-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-webpack-batteries-included-preprocessor:
-      when: << pipeline.parameters.run-npm-webpack-batteries-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-vue:
-      when: << pipeline.parameters.run-npm-vue-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-puppeteer-unit-tests:
-      when: << pipeline.parameters.run-npm-puppeteer-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-puppeteer-cypress-tests:
-      when: << pipeline.parameters.run-npm-puppeteer-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-react:
-      when: << pipeline.parameters.run-npm-react-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-angular:
-      when: << pipeline.parameters.run-npm-angular-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-angular-zoneless:
-      when: << pipeline.parameters.run-npm-angular-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-mount-utils:
-      when: << pipeline.parameters.run-npm-mount-utils-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-grep:
-      when: << pipeline.parameters.run-npm-grep-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-eslint-plugin-dev:
-      when: << pipeline.parameters.run-npm-eslint-plugin-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-cypress-schematic:
-      when: << pipeline.parameters.run-npm-schematic-tests >>
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - v8-integration-tests:
-      when: << pipeline.parameters.run-v8-tests >>
       requires:
         - system-tests-node-modules-install
 
@@ -450,19 +392,8 @@ jobs:
         - get-published-artifacts
         - system-tests-node-modules-install
 
-  # Finalization jobs — only run when at least one upstream Percy job ran.
-  # The when: or: mirrors the upstream job conditions so CircleCI doesn't
-  # block waiting for a job that was never scheduled.
+  # Finalization jobs
   - percy-finalize:
-      when:
-        or:
-          - << pipeline.parameters.run-cli-tests >>
-          - << pipeline.parameters.run-reporter-tests >>
-          - << pipeline.parameters.run-app-ui-tests >>
-          - << pipeline.parameters.run-frontend-shared-tests >>
-          - << pipeline.parameters.run-launchpad-tests >>
-          - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
-          - << pipeline.parameters.run-npm-vite-dev-server-tests >>
       context: test-runner:percy
       required_env_var: PERCY_TOKEN
       requires:
@@ -476,9 +407,31 @@ jobs:
         - run-reporter-component-tests-chrome
         - run-webpack-dev-server-integration-tests
         - run-vite-dev-server-integration-tests
-  # Fan-in aggregator — only required GitHub status check for PRs.
-  # Requires every job in this workflow. When a job is excluded by its when:
-  # condition, CircleCI treats it as absent and does not block this job.
+  # Cypress run must be completed to fetch Accessibility report
+  - verify-accessibility-results:
+      context: test-runner:cypress-record-key
+      requires:
+        - reporter-integration-tests
+        - run-app-component-tests-chrome
+        - run-app-integration-tests-chrome
+        - run-frontend-shared-component-tests-chrome
+        - run-launchpad-component-tests-chrome
+        - run-launchpad-integration-tests-chrome
+        - run-reporter-component-tests-chrome
+        - run-webpack-dev-server-integration-tests
+        - run-vite-dev-server-integration-tests
+        - driver-integration-tests-firefox
+        - driver-integration-tests-chrome
+        - driver-integration-tests-chrome-inject-document-domain
+        - driver-integration-tests-chrome-beta-inject-document-domain
+        - driver-integration-tests-electron
+        - driver-integration-tests-webkit
+        - driver-integration-memory-tests
+
+  # Fan-in aggregator — the only required GitHub status check for PRs.
+  # All jobs in this workflow fan into this one. Jobs that halt early
+  # (because their pipeline parameter is false) still complete successfully,
+  # so this job runs once all included jobs finish.
   - all-jobs-passed:
       requires:
         # Always-run jobs
@@ -487,7 +440,7 @@ jobs:
         - health-check
         - lint-types
         - test-kitchensink
-        # Conditional jobs — excluded ones are transparently skipped by CircleCI
+        # Conditional jobs (halt early when not needed)
         - cli-visual-tests
         - unit-tests
         - verify-release-readiness
@@ -532,33 +485,3 @@ jobs:
         - npm-eslint-plugin-dev
         - npm-cypress-schematic
         - v8-integration-tests
-
-  # Cypress run must be completed to fetch Accessibility report
-  - verify-accessibility-results:
-      when:
-        or:
-          - << pipeline.parameters.run-reporter-tests >>
-          - << pipeline.parameters.run-app-ui-tests >>
-          - << pipeline.parameters.run-frontend-shared-tests >>
-          - << pipeline.parameters.run-launchpad-tests >>
-          - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
-          - << pipeline.parameters.run-npm-vite-dev-server-tests >>
-          - << pipeline.parameters.run-driver-tests >>
-      context: test-runner:cypress-record-key
-      requires:
-        - reporter-integration-tests
-        - run-app-component-tests-chrome
-        - run-app-integration-tests-chrome
-        - run-frontend-shared-component-tests-chrome
-        - run-launchpad-component-tests-chrome
-        - run-launchpad-integration-tests-chrome
-        - run-reporter-component-tests-chrome
-        - run-webpack-dev-server-integration-tests
-        - run-vite-dev-server-integration-tests
-        - driver-integration-tests-firefox
-        - driver-integration-tests-chrome
-        - driver-integration-tests-chrome-inject-document-domain
-        - driver-integration-tests-chrome-beta-inject-document-domain
-        - driver-integration-tests-electron
-        - driver-integration-tests-webkit
-        - driver-integration-memory-tests
