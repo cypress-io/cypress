@@ -8,6 +8,7 @@
     "./node_modules/@babel/traverse/lib/path/lib/virtual-types-validator.js",
     "./node_modules/@babel/types/lib/definitions/index.js",
     "./node_modules/@cspotcode/source-map-support/source-map-support.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/node.js",
     "./node_modules/@cypress/get-windows-proxy/src/registry.js",
     "./node_modules/ast-types/lib/def/core.js",
     "./node_modules/ast-types/lib/def/es2016.js",
@@ -193,6 +194,8 @@
     "./node_modules/@babel/types/lib/modifications/prependToMemberExpression.js",
     "./node_modules/@babel/types/lib/utils/react/cleanJSXElementLiteralChild.js",
     "./node_modules/@cspotcode/source-map-support/node_modules/@jridgewell/trace-mapping/dist/trace-mapping.umd.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/browser.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/index.js",
     "./node_modules/@cypress/request-promise/lib/rp.js",
     "./node_modules/@cypress/request-promise/node_modules/tough-cookie/lib/cookie.js",
     "./node_modules/@cypress/request/index.js",
@@ -812,7 +815,6 @@
     "./packages/server/lib/cloud/routes.ts",
     "./packages/server/lib/cloud/studio/StudioLifecycleManager.ts",
     "./packages/server/lib/cloud/user.ts",
-    "./packages/server/lib/config.ts",
     "./packages/server/lib/controllers/client.ts",
     "./packages/server/lib/modes/record.ts",
     "./packages/server/lib/plugins/dev-server.ts",
@@ -1190,6 +1192,7 @@
     "./node_modules/@babel/types/lib/validators/react/isCompatTag.js",
     "./node_modules/@babel/types/lib/validators/react/isReactComponent.js",
     "./node_modules/@babel/types/lib/validators/validate.js",
+    "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/common.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/index.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/registry-js/dist/lib/registry.js",
     "./node_modules/@cypress/get-windows-proxy/src/index.js",
@@ -2010,6 +2013,7 @@
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/move/move.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/output-file/index.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/remove/index.js",
+    "./node_modules/firefox-profile/node_modules/fs-extra/lib/util/async.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/util/stat.js",
     "./node_modules/firefox-profile/node_modules/fs-extra/lib/util/utimes.js",
     "./node_modules/firefox-profile/node_modules/ini/lib/ini.js",
@@ -3669,6 +3673,7 @@
     "./packages/server/lib/cloud/upload/stream_activity_monitor.ts",
     "./packages/server/lib/cloud/upload/stream_stalled_error.ts",
     "./packages/server/lib/cohorts.ts",
+    "./packages/server/lib/config.ts",
     "./packages/server/lib/controllers/files.ts",
     "./packages/server/lib/controllers/iframes.ts",
     "./packages/server/lib/controllers/runner.ts",
@@ -3971,5 +3976,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "b7f83437955752f0fb659b48d056320865210cc3da63c8ea88571be6b2d14a10"
+  "deferredHash": "137c2c786fc595081ff335bb8a23a357ae41747677bc291bb9c8196d5cd9e78a"
 }
