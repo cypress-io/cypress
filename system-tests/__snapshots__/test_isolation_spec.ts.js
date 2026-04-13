@@ -144,9 +144,6 @@ exports['Test Isolation / fires events in the right order with the right argumen
 
 not exiting due to options.exit being false
 
-
-SIGTERM received. Gracefully exiting.
-
 `
 
 exports['Test Isolation / fires events in the right order with the right arguments - headed: false - noExit: true'] = `
@@ -178,8 +175,5 @@ exports['Test Isolation / fires events in the right order with the right argumen
   3 passing
 
 not exiting due to options.exit being false
-
-
-SIGTERM received. Gracefully exiting.
 
 `

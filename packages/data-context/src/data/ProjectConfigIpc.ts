@@ -72,7 +72,6 @@ export class ProjectConfigIpc extends EventEmitter {
     this._childProcess = this.forkConfigProcess()
     this._childProcess.on('error', (err: any) => {
       debug('child process error: %s', err)
-      this.emit('error', err)
     })
 
     this._childProcess.on('message', (msg: { event: string, args: any[] }) => {
