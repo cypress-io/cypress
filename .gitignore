@@ -401,9 +401,4 @@ system-tests/lib/validations
 .nx/cache
 .nx/workspace-data
 
-# IDE files
-.cursor/*
-!.cursor/BUGBOT.md
-!.cursor/skills/*
-
 settings.local.json
