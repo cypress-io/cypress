@@ -3,7 +3,6 @@ require('../../spec_helper')
 const _ = require('lodash')
 const EE = require('events')
 const la = require('lazy-ass')
-const check = require('check-more-types')
 
 const menu = require(`../../../lib/gui/menu`)
 const plugins = require(`../../../lib/plugins`)
@@ -107,7 +106,7 @@ describe('lib/browsers/electron', () => {
 
       return savedState.create()
       .then((state) => {
-        la(check.fn(state.get), 'state is missing .get to stub', state)
+        la(_.isFunction(state.get), 'state is missing .get to stub', state)
 
         return sinon.stub(state, 'get').resolves(this.state)
       })

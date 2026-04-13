@@ -1,6 +1,5 @@
 const _ = require('lodash')
 const la = require('lazy-ass')
-const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
@@ -166,7 +165,7 @@ const JSONOrCoerce = (str) => {
 }
 
 const sanitizeAndConvertNestedArgs = (str, argName) => {
-  la(is.unemptyString(argName), 'missing config argName to be parsed')
+  la(_.isString(argName) && Boolean(argName), 'missing config argName to be parsed')
 
   try {
     if (typeof str === 'object') {
