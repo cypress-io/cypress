@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../../dom'
@@ -6,6 +5,7 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import type { Log } from '../../../cypress/log'
+import { defaults } from '@packages/utils'
 
 interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable>{
   _log?: Log
@@ -15,7 +15,7 @@ interface InternalSubmitOptions extends Partial<Cypress.Loggable & Cypress.Timeo
 export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     submit (subject: JQuery<HTMLFormElement>, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const options: InternalSubmitOptions = _.defaults({}, userOptions, {
+      const options: InternalSubmitOptions = defaults({}, userOptions, {
         log: true,
         $el: subject,
       })

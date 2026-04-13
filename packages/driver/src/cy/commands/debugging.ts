@@ -1,11 +1,10 @@
-import _ from 'lodash'
 import $utils from '../../cypress/utils'
 
 const resume = (state, resumeAll = true) => {
   const onResume = state('onResume')
 
   // dont do anything if this isnt a fn
-  if (!_.isFunction(onResume)) {
+  if (typeof onResume !== 'function') {
     return
   }
 
@@ -44,7 +43,7 @@ export default (Commands, Cypress, cy, state, config) => {
   // presses a key or clicks in the UI to continue
   Commands.addQuery('pause', function pause (options: Partial<Cypress.Loggable> = {}) {
     if (!config('isInteractive') && (!config('browser').isHeaded || config('exit'))) {
-      return _.identity
+      return (subject) => subject
     }
 
     const log = Cypress.log({

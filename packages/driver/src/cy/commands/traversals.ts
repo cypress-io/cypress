@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 import $dom from '../../dom'
 import $elements from '../../dom/elements'
 import { resolveShadowDomInclusion } from '../../cypress/shadow_dom_utils'
@@ -15,7 +13,14 @@ export default (Commands, Cypress, cy) => {
     // so we reverse, uniq, then reverse again
     // so [div1, body, html, div2, body, html]
     // becomes [div1, div2, body, html] and not [div1, body, html, div2]
-    return cy.$$(_($el).reverse().uniq().reverse().value())
+    const arr = Array.from($el)
+
+    arr.reverse()
+    const unique = [...new Set(arr)]
+
+    unique.reverse()
+
+    return cy.$$(unique)
   }
 
   const getEl = (traversal, includeShadowDom, subject, arg1, arg2) => {
@@ -23,14 +28,14 @@ export default (Commands, Cypress, cy) => {
       const roots = subject.map((i, el) => $dom.findAllShadowRoots(el))
 
       // add the roots to the existing selection
-      const elementsWithShadow = subject.add(_.flatten(roots))
+      const elementsWithShadow = subject.add((Array.from(roots) as any[]).flat())
 
       // query the entire set of [selection + shadow roots]
       return elementsWithShadow.find(arg1, arg2)
     }
 
     if (traversal === 'closest' && $dom.isWithinShadowRoot(subject[0])) {
-      const nodes = _.reduce(subject, (nodes, el) => {
+      const nodes = Array.from(subject).reduce((nodes: any[], el: any) => {
         const getClosest = (node) => {
           const closestNode = node.closest(arg1)
 
@@ -78,18 +83,18 @@ export default (Commands, Cypress, cy) => {
     return subject[traversal].call(subject, arg1, arg2)
   }
 
-  _.each(traversals, (traversal) => {
+  traversals.forEach((traversal) => {
     Commands.addQuery(traversal, function traversalFn (arg1, arg2, userOptions: TraversalOptions = {}) {
-      if (_.isObject(arg1) && !_.isFunction(arg1)) {
+      if (typeof arg1 === 'object' && arg1 !== null && typeof arg1 !== 'function') {
         userOptions = arg1
       }
 
-      if (_.isObject(arg2) && !_.isFunction(arg2)) {
+      if (typeof arg2 === 'object' && arg2 !== null && typeof arg2 !== 'function') {
         userOptions = arg2
       }
 
       // Omit any null or undefined arguments
-      const selector = _.filter([arg1, arg2], (a) => (a != null && !_.isFunction(a) && !_.isObject(a))).join(', ')
+      const selector = [arg1, arg2].filter((a) => (a != null && typeof a !== 'function' && typeof a !== 'object')).join(', ')
 
       const log = Cypress.log({
         hidden: userOptions.log === false,

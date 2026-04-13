@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
@@ -6,6 +5,7 @@ import type { Log } from '../../cypress/log'
 import { getTitleFromAutomation } from './helpers/window'
 import type { StateFunc } from '../../cypress/state'
 import type { $Cy } from '../../cypress/cy'
+import { defaults, pick, isBlank } from '@packages/utils'
 
 const viewports = {
   'macbook-16': '1536x960',
@@ -62,7 +62,7 @@ export function getTitleQueryCommand (Cypress: Cypress.Cypress, cy: $Cy, state: 
 }
 
 export default (Commands, Cypress, cy, state) => {
-  const defaultViewport: CurrentViewport = _.pick(Cypress.config() as Cypress.Config, 'viewportWidth', 'viewportHeight')
+  const defaultViewport: CurrentViewport = pick(Cypress.config() as Cypress.Config, ['viewportWidth', 'viewportHeight']) as CurrentViewport
 
   // currentViewport could already be set due to previous runs
   currentViewport = currentViewport || defaultViewport
@@ -79,7 +79,7 @@ export default (Commands, Cypress, cy, state) => {
     // need to restore prior to running the next test
     // after which we simply null and wait for the
     // next viewport change
-    const configDefaultViewport = _.pick(Cypress.config(), 'viewportWidth', 'viewportHeight')
+    const configDefaultViewport = pick(Cypress.config(), ['viewportWidth', 'viewportHeight'])
 
     setViewportAndSynchronize(configDefaultViewport.viewportWidth, configDefaultViewport.viewportHeight)
   })
@@ -154,11 +154,11 @@ export default (Commands, Cypress, cy, state) => {
 
   Commands.addAll({
     viewport (presetOrWidth, heightOrOrientation, userOptions: Partial<Cypress.Loggable> = {}) {
-      if (_.isObject(heightOrOrientation)) {
+      if (typeof heightOrOrientation === 'object' && heightOrOrientation !== null) {
         userOptions = heightOrOrientation
       }
 
-      const options: InternalViewportOptions = _.defaults({}, userOptions, { log: true })
+      const options: InternalViewportOptions = defaults({}, userOptions, { log: true })
 
       let height
       let width
@@ -189,25 +189,25 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       const widthAndHeightAreValidNumbers = (width, height) => {
-        return _.every([width, height], (val) => {
-          return _.isNumber(val) && _.isFinite(val)
+        return [width, height].every((val) => {
+          return typeof val === 'number' && Number.isFinite(val)
         })
       }
 
       const widthAndHeightAreWithinBounds = (width, height) => {
-        return _.every([width, height], (val) => {
+        return [width, height].every((val) => {
           return val >= 0
         })
       }
 
-      if (_.isString(presetOrWidth) && _.isBlank(presetOrWidth)) {
+      if (typeof presetOrWidth === 'string' && isBlank(presetOrWidth)) {
         $errUtils.throwErrByPath('viewport.empty_string', { onFail: options._log })
-      } else if (_.isString(presetOrWidth)) {
+      } else if (typeof presetOrWidth === 'string') {
         const getPresetDimensions = (preset): number[] => {
           try {
-            return _.map(viewports[presetOrWidth].split('x'), Number)
+            return viewports[presetOrWidth].split('x').map(Number)
           } catch (e) {
-            const presets = _.keys(viewports).join(', ')
+            const presets = Object.keys(viewports).join(', ')
 
             $errUtils.throwErrByPath('viewport.missing_preset', {
               onFail: options._log,
@@ -237,7 +237,7 @@ export default (Commands, Cypress, cy, state) => {
         // get preset, split by x, convert to a number
         const dimensions = getPresetDimensions(preset)
 
-        if (_.isString(orientation)) {
+        if (typeof orientation === 'string') {
           if (orientationIsValidAndLandscape(orientation)) {
             dimensions.reverse()
           }

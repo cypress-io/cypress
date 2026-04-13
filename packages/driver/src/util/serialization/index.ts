@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import structuredClonePonyfill from 'core-js-pure/actual/structured-clone'
 import $stackUtils from '../../cypress/stack_utils'
 import $errUtils from '../../cypress/error_utils'
@@ -15,7 +14,7 @@ export const isSerializableInCurrentBrowser = (value: any) => {
     structuredCloneRef(value)
 
     // @ts-ignore
-    if (Cypress.isBrowser('firefox') && _.isError(value) && structuredCloneRef !== window?.structuredClone) {
+    if (Cypress.isBrowser('firefox') && value instanceof Error && structuredCloneRef !== window?.structuredClone) {
       /**
        * NOTE: structuredClone() was introduced in Firefox 94. Supported versions below 94 need to use the ponyfill
        * to determine whether or not a value can be serialized through postMessage. Since the ponyfill deems Errors
@@ -101,16 +100,16 @@ export const preprocessForSerialization = <T>(valueToSanitize: { [key: string]: 
 // because of this, we preprocess native errors to objects and postprocess them once they come back to the primary origin
 
   // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays. This is important for commands like .selectFile() using buffer streams
-  if (_.isArray(valueToSanitize) || _.isTypedArray(valueToSanitize)) {
-    return _.map(valueToSanitize, preprocessForSerialization) as unknown as T
+  if (Array.isArray(valueToSanitize) || ArrayBuffer.isView(valueToSanitize)) {
+    return Array.from(valueToSanitize as any).map(preprocessForSerialization) as unknown as T
   }
 
-  if (_.isObject(valueToSanitize)) {
+  if (valueToSanitize !== null && typeof valueToSanitize === 'object') {
     try {
       const sanitizedValueAsLiteral = convertObjectToSerializableLiteral(valueToSanitize) as T
 
       // convert any nested structures as well, if objects or arrays, to literals. This is needed in the case of Proxy objects
-      _.forEach(sanitizedValueAsLiteral as any, (value, key) => {
+      Object.entries(sanitizedValueAsLiteral as any).forEach(([key, value]) => {
         sanitizedValueAsLiteral[key] = preprocessForSerialization(value)
       })
 
@@ -133,14 +132,14 @@ export const reifySerializedError = (serializedError: any, userInvocationStack: 
 
   let reifiedError = $errUtils.errByPath('origin.failed_to_serialize_or_map_thrown_value')
 
-  if (_.isArray(serializedError)) {
+  if (Array.isArray(serializedError)) {
     // if the error is an array of anything, create a normal error with the stringified values of the passed in array
     reifiedError = new Error(serializedError.toString())
-  } else if (_.isObject(serializedError as any)) {
+  } else if (serializedError !== null && typeof serializedError === 'object') {
     // otherwise, try to determine if there are any error details in the object and merge the error objects together
     let errorToMerge = serializedError?.message ? new Error(serializedError?.message || '') : reifiedError
 
-    reifiedError = _.assignWith(errorToMerge, serializedError)
+    reifiedError = Object.assign(errorToMerge, serializedError)
   } else if (serializedError !== UNSERIALIZABLE) {
     reifiedError = new Error(`${serializedError}`)
   }

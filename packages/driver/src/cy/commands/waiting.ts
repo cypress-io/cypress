@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 import { waitForRoute } from '../net-stubbing/wait-for-route'
 import { isDynamicAliasingPossible } from '../net-stubbing/aliasing'
@@ -8,6 +7,7 @@ import $errUtils, { type CypressError, type InternalCypressError } from '../../c
 import type { $Cy } from '../../cypress/cy'
 import type { StateFunc } from '../../cypress/state'
 import type { Log } from '../../cypress/log'
+import { defaults, omit } from '@packages/utils'
 
 type waitOptions = {
   _log?: Cypress.Log
@@ -68,7 +68,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       type: 'parent',
       aliasType: 'route',
       // avoid circular reference
-      options: _.omit(options, '_log'),
+      options: omit(options, ['_log']),
     })
 
     if (options.isCrossOriginSpecBridge) {
@@ -126,17 +126,17 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
 
       // we always want to strip everything after the last '.'
       // since we support alias property 'request'
-      if ((_.indexOf(str, '.') === -1) ||
-      _.keys(cy.state('aliases')).includes(str.slice(1))) {
+      if ((str.indexOf('.') === -1) ||
+      Object.keys(cy.state('aliases') || {}).includes(str.slice(1))) {
         specifier = null
       } else {
         // potentially request, response
-        const allParts = _.split(str, '.')
-        const last = _.last(allParts)
+        const allParts = str.split('.')
+        const last = allParts.at(-1)
 
         if (last === 'request' || last === 'response') {
-          str = _.join(_.dropRight(allParts, 1), '.')
-          specifier = _.last(allParts)
+          str = allParts.slice(0, -1).join('.')
+          specifier = allParts.at(-1)
         } else {
           specifier = null
         }
@@ -167,7 +167,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       // by its alias
       const { alias, command } = aliasObj
 
-      str = _.compact([alias, specifier]).join('.')
+      str = [alias, specifier].filter(Boolean).join('.')
 
       const type = cy.getXhrTypeByAlias(str)
 
@@ -201,7 +201,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       const findInterceptAlias = (alias: string) => {
         const routes = cy.state('routes') ?? {}
 
-        return _.find(_.values(routes), { alias })
+        return Object.values(routes).find((r: any) => r.alias === alias)
       }
 
       const isInterceptAlias = (alias: string) => Boolean(findInterceptAlias(alias))
@@ -225,7 +225,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       const responseTimeout = options.responseTimeout || timeout
 
       const waitForRequest = () => {
-        options = _.omit(options, '_runnableTimeout')
+        options = omit(options, ['_runnableTimeout']) as waitOptions
         // TODO: If `requestTimeout` is `0`, is this code going to work the way
         // it was intended to?
         options.timeout = requestTimeout || Cypress.config('requestTimeout')
@@ -238,7 +238,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       }
 
       const waitForResponse = () => {
-        options = _.omit(options, '_runnableTimeout')
+        options = omit(options, ['_runnableTimeout']) as waitOptions
         // TODO: If `responseTimeout` is `0`, is this code going to work the way
         // it was intended to?
         options.timeout = responseTimeout || Cypress.config('responseTimeout')
@@ -263,7 +263,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       // we may get back an xhr value instead
       // of a promise, so we have to wrap this
       // in another promise :-(
-      return waitForXhr(str, _.omit(options, 'error'))
+      return waitForXhr(str, omit(options, ['error']) as Omit<waitOptions, 'error'>)
     })
     .then((responses) => {
       // if we only asked to wait for one alias
@@ -294,7 +294,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       if (log) {
         log.set('consoleProps', () => {
           return {
-            'Waited For': (_.map(log.get('referencesAlias'), 'name') || []).join(', '),
+            'Waited For': ((log.get('referencesAlias') || []).map((a) => a.name) || []).join(', '),
             'Yielded': ret,
           }
         })
@@ -360,22 +360,22 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       // if its a string the user most likely is trying
       // to wait on multiple aliases and forget to make this
       // an array
-      if (_.isString(options)) {
+      if (typeof options === 'string') {
         $errUtils.throwErrByPath('wait.invalid_arguments')
       }
 
-      if (_.isFunction(options)) {
+      if (typeof options === 'function') {
         $errUtils.throwErrByPath('wait.invalid_arguments_function')
       }
 
-      options = _.defaults({}, options, { log: true })
+      options = defaults({}, options, { log: true })
 
       try {
-        if (typeof msOrAlias === 'number' && _.isFinite(msOrAlias)) {
+        if (typeof msOrAlias === 'number' && Number.isFinite(msOrAlias)) {
           return waitNumber.apply(window, [subject, msOrAlias, options])
         }
 
-        if (_.isString(msOrAlias) || (_.isArray(msOrAlias) && !_.isEmpty(msOrAlias))) {
+        if (typeof msOrAlias === 'string' || (Array.isArray(msOrAlias) && msOrAlias.length > 0)) {
           if (Cypress.isCrossOriginSpecBridge) {
             return delegateToPrimaryOrigin(msOrAlias, options)
           }
@@ -384,7 +384,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
         }
 
         // figure out why this error failed
-        if (_.isNaN(msOrAlias)) {
+        if (Number.isNaN(msOrAlias)) {
           throwErr('NaN')
         }
 
@@ -392,7 +392,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
           throwErr('Infinity')
         }
 
-        if (_.isSymbol(msOrAlias)) {
+        if (typeof msOrAlias === 'symbol') {
           throwErr(msOrAlias.toString())
         }
 

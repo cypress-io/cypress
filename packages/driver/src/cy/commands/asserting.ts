@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../dom'
@@ -10,7 +9,7 @@ const reHaveLength = /length/
 const onBeforeLog = (log, command, commandLogId) => {
   log.set('commandLogId', commandLogId)
 
-  const previousLogInstance = command.get('logs').find(_.matchesProperty('attributes.commandLogId', commandLogId))
+  const previousLogInstance = command.get('logs').find((l) => l.attributes.commandLogId === commandLogId)
 
   if (previousLogInstance) {
     // log.merge unsets any keys that aren't set on the new log instance. We
@@ -87,7 +86,7 @@ export default function (Commands, Cypress, cy, state) {
     const assertionIndex = cy.state('upcomingAssertions') ? cy.state('upcomingAssertions').indexOf(command.get('currentAssertionCommand')) : 0
     let logIndex = 0
 
-    if (_.isFunction(chainers)) {
+    if (typeof chainers === 'function') {
       cy.state('onBeforeLog', (log) => {
         logIndex++
 
@@ -122,7 +121,7 @@ export default function (Commands, Cypress, cy, state) {
     }
 
     chainers = chainers.split('.')
-    const lastChainer = _.last(chainers)
+    const lastChainer = chainers.at(-1)
 
     // backup the original assertion subject
     const originalObj = exp._obj
@@ -144,7 +143,7 @@ export default function (Commands, Cypress, cy, state) {
           // It creates duplicated messages and confuses users.
           const cmd = memo[value]
 
-          if (_.isFunction(cmd)) {
+          if (typeof cmd === 'function') {
             try {
               return cmd.apply(memo, args)
             } catch (err: any) {
@@ -180,7 +179,7 @@ export default function (Commands, Cypress, cy, state) {
         Cypress.ensure.isAttached(subject, 'should', cy)
       }
 
-      const newExp = _.reduce(chainers, (memo, value) => {
+      const newExp = chainers.reduce((memo, value) => {
         if (!(value in memo)) {
           err = $errUtils.cypressErrByPath('should.chainer_not_found', { args: { chainer: value } })
           err.retry = false
@@ -189,7 +188,7 @@ export default function (Commands, Cypress, cy, state) {
 
         // https://github.com/cypress-io/cypress/issues/883
         // A single chainer used that is not an actual assertion, like '.should('be', 'true')'
-        if (chainers.length < 2 && !isCheckingExistence && !_.isFunction(memo[value])) {
+        if (chainers.length < 2 && !isCheckingExistence && typeof memo[value] !== 'function') {
           err = $errUtils.cypressErrByPath('should.language_chainer', { args: { originalChainers } })
           err.retry = false
           throwAndLogErr(err)

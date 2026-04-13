@@ -15,7 +15,9 @@
     "test:watch": "vitest watch",
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
-  "dependencies": {},
+  "dependencies": {
+    "@packages/utils": "0.0.0-development"
+  },
   "devDependencies": {
     "@babel/code-frame": "7.27.1",
     "@cypress/sinon-chai": "2.9.1",
@@ -73,7 +75,6 @@
     "js-cookie": "3.0.5",
     "jsdom": "^26.0.0",
     "json-stable-stringify": "1.0.1",
-    "lodash": "^4.17.21",
     "md5": "2.3.0",
     "method-override": "3.0.0",
     "methods": "1.1.2",
@@ -91,7 +92,6 @@
     "sinon": "8.1.1",
     "source-map": "0.8.0-beta.0",
     "text-mask-addons": "3.8.0",
-    "underscore.string": "3.3.6",
     "url-parse": "1.5.10",
     "vanilla-text-mask": "5.1.1",
     "vite": "^6.3.5",

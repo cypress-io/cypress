@@ -1,5 +1,3 @@
-import { extend, isObject, isString } from 'lodash'
-
 const reset = (state = {}) => {
   // perf loop
   for (let key in state) {
@@ -24,7 +22,7 @@ export default {
       let obj
       let ret
 
-      if (isObject(key)) {
+      if (key !== null && typeof key === 'object') {
         obj = key
         ret = obj
       } else {
@@ -35,7 +33,7 @@ export default {
 
       validate && validate(obj)
 
-      extend(state, obj)
+      Object.assign(state, obj)
 
       return ret
     }
@@ -46,7 +44,7 @@ export default {
         case 0:
           return get()
         case 1:
-          if (isString(key)) {
+          if (typeof key === 'string') {
             return get(key)
           }
 

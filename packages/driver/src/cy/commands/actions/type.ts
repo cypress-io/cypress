@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../../dom'
@@ -8,6 +7,7 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import $Keyboard from '../../../cy/keyboard'
+import { defaults } from '@packages/utils'
 
 import debugFn from 'debug'
 const debug = debugFn('cypress:driver:command:type')
@@ -20,7 +20,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
     // allow the el we're typing into to be
     // changed by options -- used by cy.clear()
-    const options: InternalTypeOptions = _.defaults({}, userOptions, {
+    const options: InternalTypeOptions = defaults({}, userOptions, {
       $el: subject,
       log: true,
       verify: true,
@@ -76,7 +76,7 @@ export default function (Commands, Cypress, cy, state, config) {
       }
 
       const getTableData = () => {
-        return _.values(table)
+        return Object.values(table)
       }
 
       options._log = Cypress.log({
@@ -113,14 +113,14 @@ export default function (Commands, Cypress, cy, state, config) {
       })
     }
 
-    if (!(_.isString(chars) || _.isFinite(chars))) {
+    if (!(typeof chars === 'string' || Number.isFinite(chars))) {
       $errUtils.throwErrByPath('type.wrong_type', {
         onFail: options._log,
         args: { chars },
       })
     }
 
-    if (_.isString(chars) && _.isEmpty(chars)) {
+    if (typeof chars === 'string' && chars.length === 0) {
       $errUtils.throwErrByPath('type.empty_string', {
         onFail: options._log,
         args: { chars },
@@ -128,7 +128,7 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     const isInvalidDelay = (delay) => {
-      return delay !== undefined && (!_.isNumber(delay) || delay < 0)
+      return delay !== undefined && (typeof delay !== 'number' || delay < 0)
     }
 
     if (isInvalidDelay(userOptions.delay)) {
@@ -159,10 +159,10 @@ export default function (Commands, Cypress, cy, state, config) {
       const formId = CSS.escape(form.attr('id'))
       const nestedButtons = form.find('input, button')
 
-      const possibleDefaultButtons: JQuery<any> = formId ? $dom.wrap(_.uniq([
+      const possibleDefaultButtons: JQuery<any> = formId ? $dom.wrap([...new Set([
         ...nestedButtons,
         ...$dom.query('body', form.prop('ownerDocument')).find(`input[form="${formId}"], button[form="${formId}"]`),
-      ])) : nestedButtons
+      ])]) : nestedButtons
 
       return possibleDefaultButtons.filter((__, el) => {
         const $el = $dom.wrap(el)
@@ -592,7 +592,7 @@ export default function (Commands, Cypress, cy, state, config) {
   }
 
   function clear (subject, userOptions: Partial<InternalClearOptions> = {}) {
-    const options: InternalClearOptions = _.defaults({}, userOptions, {
+    const options: InternalClearOptions = defaults({}, userOptions, {
       log: true,
       force: false,
       waitForAnimations: config('waitForAnimations'),

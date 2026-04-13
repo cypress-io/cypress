@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 /**
  * Fix property reads and writes that could potentially help the AUT to break out of its iframe.
  *
@@ -33,7 +31,7 @@ export function resolveWindowReference (this: Cypress.Cypress, currentWindow: Wi
       return targetLocation
     }
 
-    if (_.isFunction(targetValue)) {
+    if (typeof targetValue === 'function') {
       return targetValue.bind(accessedObject)
     }
 
@@ -136,7 +134,7 @@ export function resolveLocationReference (currentWindow: Window) {
 
   const fakeLocation = {}
 
-  _.reduce(locationKeys, (acc, cur) => {
+  locationKeys.reduce((acc, cur) => {
     // set a dummy value, the proxy will handle sets/gets
     acc[cur] = Symbol.for('Proxied')
 

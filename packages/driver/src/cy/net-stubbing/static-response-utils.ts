@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { omit, omitBy, setPath, intersection } from '@packages/utils'
 
 import type {
   StaticResponse,
@@ -35,25 +35,25 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
     err('`body` and `fixture` cannot both be set, pick one.')
   }
 
-  if (fixture && !_.isString(fixture)) {
+  if (fixture && typeof fixture !== 'string') {
     err('`fixture` must be a string containing a path and, optionally, an encoding separated by a comma (for example, "foo.txt,ascii").')
   }
 
   // statusCode must be a three-digit integer
   // @see https://tools.ietf.org/html/rfc2616#section-6.1.1
-  if (statusCode && !(_.isNumber(statusCode) && _.inRange(statusCode, 100, 1000))) {
+  if (statusCode && !(typeof statusCode === 'number' && statusCode >= 100 && statusCode < 1000)) {
     err('`statusCode` must be a number between 100 and 999 (inclusive).')
   }
 
-  if (headers && _.keys(_.omitBy(headers, _.isString)).length) {
+  if (headers && Object.keys(omitBy(headers, (v) => typeof v === 'string')).length) {
     err('`headers` must be a map of strings to strings.')
   }
 
-  if (!_.isUndefined(throttleKbps) && (!_.isNumber(throttleKbps) || (throttleKbps < 0 || !_.isFinite(throttleKbps)))) {
+  if (throttleKbps !== undefined && (typeof throttleKbps !== 'number' || (throttleKbps < 0 || !Number.isFinite(throttleKbps)))) {
     err('`throttleKbps` must be a finite, positive number.')
   }
 
-  if (delay && (!_.isFinite(delay) || delay < 0)) {
+  if (delay && (!Number.isFinite(delay) || delay < 0)) {
     err('`delay` must be a finite, positive number.')
   }
 
@@ -67,29 +67,29 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 }
 
 export function parseStaticResponseShorthand (statusCodeOrBody: number | string | any, bodyOrHeaders: string | { [key: string]: string }, maybeHeaders?: { [key: string]: string }) {
-  if (_.isNumber(statusCodeOrBody)) {
+  if (typeof statusCodeOrBody === 'number') {
     // statusCodeOrBody is a status code
     const staticResponse: StaticResponse = {
       statusCode: statusCodeOrBody,
     }
 
-    if (!_.isUndefined(bodyOrHeaders)) {
+    if (bodyOrHeaders !== undefined) {
       staticResponse.body = bodyOrHeaders as string
     }
 
-    if (_.isObject(maybeHeaders)) {
+    if (maybeHeaders != null && typeof maybeHeaders === 'object') {
       staticResponse.headers = maybeHeaders as { [key: string]: string }
     }
 
     return staticResponse
   }
 
-  if ((_.isString(statusCodeOrBody) || !hasStaticResponseKeys(statusCodeOrBody)) && !maybeHeaders) {
+  if ((typeof statusCodeOrBody === 'string' || !hasStaticResponseKeys(statusCodeOrBody)) && !maybeHeaders) {
     const staticResponse: StaticResponse = {
       body: statusCodeOrBody,
     }
 
-    if (_.isObject(bodyOrHeaders)) {
+    if (bodyOrHeaders != null && typeof bodyOrHeaders === 'object') {
       staticResponse.headers = bodyOrHeaders as { [key: string]: string }
     }
 
@@ -106,14 +106,14 @@ function getFixtureOpts (fixture: string): FixtureOpts {
 }
 
 export function getBackendStaticResponse (staticResponse: Readonly<StaticResponseWithOptions>): BackendStaticResponseWithArrayBuffer {
-  const backendStaticResponse: BackendStaticResponseWithArrayBuffer = _.omit(staticResponse, 'body', 'fixture', 'log')
+  const backendStaticResponse: BackendStaticResponseWithArrayBuffer = omit(staticResponse, 'body', 'fixture', 'log') as BackendStaticResponseWithArrayBuffer
 
   if (staticResponse.fixture) {
     backendStaticResponse.fixture = getFixtureOpts(staticResponse.fixture)
   }
 
-  if (!_.isUndefined(staticResponse.body)) {
-    if (_.isString(staticResponse.body) || _.isArrayBuffer(staticResponse.body)) {
+  if (staticResponse.body !== undefined) {
+    if (typeof staticResponse.body === 'string' || staticResponse.body instanceof ArrayBuffer) {
       backendStaticResponse.body = staticResponse.body
     } else {
       backendStaticResponse.body = JSON.stringify(staticResponse.body)
@@ -125,12 +125,12 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
         (backendStaticResponse.headers &&
           !caseInsensitiveHas(backendStaticResponse.headers, 'content-type'))
       ) {
-        _.set(backendStaticResponse, 'headers.content-type', 'application/json')
+        setPath(backendStaticResponse, 'headers.content-type', 'application/json')
       }
     }
   }
 
-  if (!_.isUndefined(staticResponse.log)) {
+  if (staticResponse.log !== undefined) {
     backendStaticResponse.log = !!staticResponse.log
   }
 
@@ -138,9 +138,9 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
 }
 
 function hasStaticResponseKeys (obj: any) {
-  return !_.isArray(obj) && (_.intersection(_.keys(obj), STATIC_RESPONSE_KEYS).length || _.isEmpty(obj))
+  return !Array.isArray(obj) && (intersection(Object.keys(obj), STATIC_RESPONSE_KEYS).length || Object.keys(obj).length === 0)
 }
 
 export function hasStaticResponseWithOptionsKeys (obj: any) {
-  return !_.isArray(obj) && (_.intersection(_.keys(obj), STATIC_RESPONSE_WITH_OPTIONS_KEYS).length || _.isEmpty(obj))
+  return !Array.isArray(obj) && (intersection(Object.keys(obj), STATIC_RESPONSE_WITH_OPTIONS_KEYS).length || Object.keys(obj).length === 0)
 }

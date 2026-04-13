@@ -1,7 +1,6 @@
 import { isButton, isInput } from './elementHelpers'
 import { getNativeProp } from './nativeProps'
 import $jquery from '../jquery'
-import _ from 'lodash'
 import type { JQueryOrEl } from './types'
 
 export const isInputType = function (el: JQueryOrEl<HTMLElement>, type) {
@@ -15,8 +14,8 @@ export const isInputType = function (el: JQueryOrEl<HTMLElement>, type) {
   //       <input type="asdf"> will have type="text", and behaves like text type
   const elType = (getNativeProp(el, 'type') || '').toLowerCase()
 
-  if (_.isArray(type)) {
-    return _.includes(type, elType)
+  if (Array.isArray(type)) {
+    return type.includes(elType)
   }
 
   return elType === type
@@ -38,7 +37,7 @@ export const isInputAllowingImplicitFormSubmission = function ($el) {
   }
 
   // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
-  return _.some([
+  return [
     type('text'),
     type('search'),
     type('url'),
@@ -51,5 +50,5 @@ export const isInputAllowingImplicitFormSubmission = function ($el) {
     type('time'),
     type('datetime-local'),
     type('number'),
-  ])
+  ].some(Boolean)
 }

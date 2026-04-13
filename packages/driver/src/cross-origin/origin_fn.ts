@@ -44,13 +44,29 @@ const rehydrateRunnable = (data: serializedRunnable): Runnable|Test => {
     runnable.type = data.type
   }
 
-  runnable.ctx = data.ctx
   runnable.id = data.id
   runnable._currentRetry = data._currentRetry
   runnable._timeout = data._timeout
   // Short circuit title path to avoid implementing it up the parent chain.
   runnable.titlePath = () => {
     return data.titlePath
+  }
+
+  // Rehydrate ctx with proper runnables so Cypress.currentTest and
+  // Cypress.currentRetry work inside cy.origin() callbacks
+  runnable.ctx = {}
+
+  if (data.ctx?.currentTest) {
+    runnable.ctx.currentTest = rehydrateRunnable(data.ctx.currentTest)
+  }
+
+  if (data.ctx?.test) {
+    runnable.ctx.test = rehydrateRunnable(data.ctx.test)
+  }
+
+  // For test-body runnables, ctx.test should reference the runnable itself
+  if (data.type === 'test' && !runnable.ctx.test) {
+    runnable.ctx.test = runnable
   }
 
   if (data.parent) {
@@ -168,6 +184,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       setRunnableStateToPassed()
       Cypress.specBridgeCommunicator.toPrimary('queue:finished', {
         subject: cy.subject(),
+        logCounter: LogUtils.getCounter(),
       }, {
         syncGlobals: true,
       })
@@ -187,7 +204,7 @@ export const handleOriginFn = (Cypress: Cypress.Cypress, cy: $Cy) => {
       const userInvocationStack = cy.state('current').get('userInvocationStack')
 
       cy.stop()
-      Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err, crossOriginUserInvocationStack: currentAssertionUserInvocationStack || userInvocationStack }, { syncGlobals: true })
+      Cypress.specBridgeCommunicator.toPrimary('queue:finished', { err, crossOriginUserInvocationStack: currentAssertionUserInvocationStack || userInvocationStack, logCounter: LogUtils.getCounter() }, { syncGlobals: true })
     })
 
     // the name of this function is used to verify if privileged commands are

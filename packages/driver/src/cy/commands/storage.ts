@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 import $errUtils from '../../cypress/error_utils'
 import $LocalStorage from '../../cypress/local_storage'
 import { clearStorage, getStorage, StorageType } from './sessions/storage'
@@ -77,15 +75,17 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy, state, config) =
     clearAllSessionStorage: clearAllStorage.bind(null, 'sessionStorage', Cypress),
 
     clearLocalStorage (keys, options: Options = {}) {
-      if (_.isPlainObject(keys)) {
+      if (typeof keys === 'object' && keys !== null && !Array.isArray(keys) && !(keys instanceof RegExp) && Object.getPrototypeOf(keys) === Object.prototype) {
         options = keys
         keys = null
       }
 
-      _.defaults(options, { log: true })
+      if (options.log === undefined) {
+        options.log = true
+      }
 
       // bail if we have keys and we're not a string and we're not a regexp
-      if (keys && !_.isString(keys) && !_.isRegExp(keys)) {
+      if (keys && typeof keys !== 'string' && !(keys instanceof RegExp)) {
         $errUtils.throwErrByPath('clearLocalStorage.invalid_argument')
       }
 

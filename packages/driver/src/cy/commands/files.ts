@@ -1,9 +1,9 @@
-import _ from 'lodash'
 import { basename, isAbsolute, relative, resolve } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 import { runPrivilegedCommand } from '../../util/privileged_channel'
+import { defaults } from '@packages/utils'
 
 interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> {
   _log?: Log
@@ -17,7 +17,7 @@ type WriteFileOptions = Partial<Cypress.WriteFileOptions & Cypress.Timeoutable>
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('readFile', function readFile (file: string, encoding: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions, ...extras: never[]) {
-    if (_.isObject(encoding)) {
+    if (typeof encoding === 'object' && encoding !== null) {
       userOptions = encoding
       encoding = userOptions.encoding
     }
@@ -33,7 +33,7 @@ export default (Commands, Cypress, cy, state) => {
 
     const log = Cypress.log({ message: file, hidden: userOptions.log === false, timeout })
 
-    if (!file || !_.isString(file)) {
+    if (!file || typeof file !== 'string') {
       $errUtils.throwErrByPath('files.invalid_argument', {
         args: { cmd: 'readFile', file },
       })
@@ -160,14 +160,14 @@ export default (Commands, Cypress, cy, state) => {
     writeFile (fileName: string, contents: string, encoding: Cypress.Encodings | WriteFileOptions | undefined, userOptions: WriteFileOptions, ...extras: never[]) {
       const { defaultCommandTimeout, fixturesFolder } = Cypress.config()
 
-      if (_.isObject(encoding)) {
+      if (typeof encoding === 'object' && encoding !== null) {
         userOptions = encoding
         encoding = undefined
       }
 
       userOptions = userOptions || {}
 
-      const options: InternalWriteFileOptions = _.defaults({}, userOptions, {
+      const options: InternalWriteFileOptions = defaults({}, userOptions, {
         // https://github.com/cypress-io/cypress/issues/1558
         // If no encoding is specified, then Cypress has historically defaulted
         // to `utf8`, because of it's focus on text files. This is in contrast to
@@ -190,21 +190,21 @@ export default (Commands, Cypress, cy, state) => {
         },
       })
 
-      if (!fileName || !_.isString(fileName)) {
+      if (!fileName || typeof fileName !== 'string') {
         $errUtils.throwErrByPath('files.invalid_argument', {
           onFail: options._log,
           args: { cmd: 'writeFile', file: fileName },
         })
       }
 
-      if (!(_.isString(contents) || _.isObject(contents))) {
+      if (!(typeof contents === 'string' || (typeof contents === 'object' && contents !== null))) {
         $errUtils.throwErrByPath('files.invalid_contents', {
           onFail: options._log,
           args: { contents },
         })
       }
 
-      if (_.isObject(contents) && !Buffer.isBuffer(contents)) {
+      if (typeof contents === 'object' && contents !== null && !Buffer.isBuffer(contents)) {
         contents = JSON.stringify(contents, null, 2)
       }
 

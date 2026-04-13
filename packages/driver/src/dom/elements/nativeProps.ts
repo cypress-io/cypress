@@ -2,7 +2,6 @@
 // if a setter or getter or function then add a native method
 // if a traversal, don't
 
-import _ from 'lodash'
 import $window from '../window'
 import { isInput, isTextarea, isSelect, isButton, isSvg } from './elementHelpers'
 
@@ -182,14 +181,14 @@ export const callNativeMethod = function (obj, fn, ...args) {
   const nativeFn = nativeMethods[fn]
 
   if (!nativeFn) {
-    const fns = _.keys(nativeMethods).join(', ')
+    const fns = Object.keys(nativeMethods).join(', ')
 
     throw new Error(`attempted to use a native fn called: ${fn}. Available fns are: ${fns}`)
   }
 
   let retFn = nativeFn.apply(obj, args)
 
-  if (_.isFunction(retFn)) {
+  if (typeof retFn === 'function') {
     retFn = retFn.apply(obj, args)
   }
 
@@ -241,14 +240,14 @@ export const getNativeProp = function<T, K extends keyof T> (obj: T, prop: K): T
   const nativeProp = nativeGetters[prop as string]
 
   if (!nativeProp) {
-    const props = _.keys(nativeGetters).join(', ')
+    const props = Object.keys(nativeGetters).join(', ')
 
     throw new Error(`attempted to use a native getter prop called: ${String(prop)}. Available props are: ${props}`)
   }
 
   let retProp = nativeProp.call(obj, prop)
 
-  if (_.isFunction(retProp)) {
+  if (typeof retProp === 'function') {
     // if we got back another function
     // then invoke it again
     retProp = retProp.call(obj, prop)
@@ -261,14 +260,14 @@ export const setNativeProp = function<T, K extends keyof T> (obj: T, prop: K, va
   const nativeProp = nativeSetters[prop as string]
 
   if (!nativeProp) {
-    const fns = _.keys(nativeSetters).join(', ')
+    const fns = Object.keys(nativeSetters).join(', ')
 
     throw new Error(`attempted to use a native setter prop called: ${String(prop)}. Available props are: ${fns}`)
   }
 
   let retProp = nativeProp.call(obj, val)
 
-  if (_.isFunction(retProp)) {
+  if (typeof retProp === 'function') {
     retProp = retProp.call(obj, val)
   }
 

@@ -1,5 +1,5 @@
 /* eslint-disable prefer-rest-params */
-import _ from 'lodash'
+import { getPath } from '@packages/utils'
 import $errUtils, { CypressError } from './error_utils'
 import $utils from './utils'
 import $stackUtils from './stack_utils'
@@ -60,8 +60,8 @@ export function calculateTestStatus (test: CypressTest, config?: NormalizedRetri
   let shouldAttemptsContinue: boolean = true
   let outerTestStatus: 'passed' | 'failed' | undefined = undefined
 
-  const passedTests = _.filter(test.prevAttempts, (o) => o.state === 'passed')
-  const failedTests = _.filter(test.prevAttempts, (o) => o.state === 'failed')
+  const passedTests = test.prevAttempts.filter((o) => o.state === 'passed')
+  const failedTests = test.prevAttempts.filter((o) => o.state === 'failed')
 
   // Additionally, if the current test attempt passed/failed, add it to the attempt list
   if (test.state === 'passed') {
@@ -181,8 +181,8 @@ function overloadMochaFnForConfig (fnName, specWindow) {
       // - it('does something')
       let testCallback = args[1]
 
-      if (args.length > 2 && _.isObject(args[1])) {
-        const _testConfig = _.extend({}, args[1]) as any
+      if (args.length > 2 && args[1] !== null && typeof args[1] === 'object') {
+        const _testConfig = { ...args[1] } as any
 
         const mochaArgs: MochaArgs = [args[0], args[2]]
         const originalTitle = mochaArgs[0]
@@ -388,7 +388,7 @@ const patchHookRetries = () => {
 // changing the logic for determining whether this is a valid err
 const patchRunnerFail = () => {
   Runner.prototype.fail = function (runnable, err) {
-    const errMessage = _.get(err, 'message')
+    const errMessage = getPath(err, 'message')
 
     if (errMessage && errMessage.indexOf('Resolution method is overspecified') > -1) {
       err.message = $errUtils.errByPath('mocha.overspecified', { error: err.stack }).message
@@ -611,7 +611,7 @@ const patchRunnableResetTimeout = () => {
 }
 
 const patchSuiteHooks = (specWindow) => {
-  _.each(['beforeAll', 'beforeEach', 'afterAll', 'afterEach'], (fnName) => {
+  (['beforeAll', 'beforeEach', 'afterAll', 'afterEach'] as const).forEach((fnName) => {
     const _fn = Suite.prototype[fnName]
 
     Suite.prototype[fnName] = function (title, fn) {

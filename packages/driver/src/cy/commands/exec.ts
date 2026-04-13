@@ -1,9 +1,15 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
 import { runPrivilegedCommand } from '../../util/privileged_channel'
+import { defaults, pick, omit } from '@packages/utils'
+
+const truncate = (str: string, maxLength: number): string => {
+  if (str.length <= maxLength) return str
+
+  return `${str.slice(0, maxLength - 3)}...`
+}
 
 interface InternalExecOptions extends Partial<Cypress.ExecOptions> {
   _log?: Log
@@ -16,7 +22,7 @@ export default (Commands, Cypress, cy) => {
     exec (cmd: string, userOptions: Partial<Cypress.ExecOptions>, ...extras: never[]) {
       userOptions = userOptions || {}
 
-      const options: InternalExecOptions = _.defaults({}, userOptions, {
+      const options: InternalExecOptions = defaults({}, userOptions, {
         log: true,
         timeout: Cypress.config('execTimeout') as number,
         failOnNonZeroExit: true,
@@ -28,7 +34,7 @@ export default (Commands, Cypress, cy) => {
       consoleOutput = {}
 
       options._log = Cypress.log({
-        message: _.truncate(cmd, { length: 25 }),
+        message: truncate(cmd, 25),
         hidden: options.log === false,
         timeout: options.timeout,
         consoleProps () {
@@ -36,7 +42,7 @@ export default (Commands, Cypress, cy) => {
         },
       })
 
-      if (!cmd || !_.isString(cmd)) {
+      if (!cmd || typeof cmd !== 'string') {
         $errUtils.throwErrByPath('exec.invalid_argument', {
           onFail: options._log,
           args: { cmd: cmd ?? '' },
@@ -53,12 +59,12 @@ export default (Commands, Cypress, cy) => {
         commandName: 'exec',
         cy,
         Cypress: (Cypress as unknown) as InternalCypress.Cypress,
-        options: _.pick(options, 'cmd', 'timeout', 'env'),
+        options: pick(options, ['cmd', 'timeout', 'env']),
       })
       .timeout(options.timeout)
       .then((result) => {
         if (options._log) {
-          _.extend(consoleOutput, { Yielded: _.omit(result, 'shell') })
+          Object.assign(consoleOutput, { Yielded: omit(result, ['shell']) })
 
           consoleOutput['Shell Used'] = result.shell
         }
@@ -70,11 +76,11 @@ export default (Commands, Cypress, cy) => {
         let output = ''
 
         if (result.stdout) {
-          output += `\nStdout:\n${_.truncate(result.stdout, { length: 200 })}`
+          output += `\nStdout:\n${truncate(result.stdout, 200)}`
         }
 
         if (result.stderr) {
-          output += `\nStderr:\n${_.truncate(result.stderr, { length: 200 })}`
+          output += `\nStderr:\n${truncate(result.stderr, 200)}`
         }
 
         return $errUtils.throwErrByPath('exec.non_zero_exit', {

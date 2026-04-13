@@ -1,19 +1,19 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import { defaults, pick } from '@packages/utils'
 
 const COOKIE_PROPS = 'name value path secure hostOnly httpOnly expiry domain sameSite'.split(' ')
 
 function pickCookieProps (cookie) {
   if (!cookie) return cookie
 
-  if (_.isArray(cookie)) {
+  if (Array.isArray(cookie)) {
     return cookie.map(pickCookieProps)
   }
 
-  return _.pick(cookie, COOKIE_PROPS)
+  return pick(cookie, COOKIE_PROPS)
 }
 
 // from https://developer.chrome.com/extensions/cookies#type-SameSiteStatus
@@ -24,11 +24,11 @@ function pickCookieProps (cookie) {
 const VALID_SAMESITE_VALUES = ['no_restriction', 'lax', 'strict', 'unspecified']
 
 function normalizeSameSite (sameSite?: string) {
-  if (_.isUndefined(sameSite)) {
+  if (sameSite === undefined) {
     return sameSite
   }
 
-  if (_.isString(sameSite)) {
+  if (typeof sameSite === 'string') {
     sameSite = sameSite.toLowerCase()
   }
 
@@ -173,7 +173,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
   const handleBackendError = (command: CommandName, action: string, onFail?: Cypress.Log) => {
     return (err) => {
-      if (!_.includes(err.stack, err.message)) {
+      if (!err.stack.includes(err.message)) {
         err.stack = `${err.message}\n${err.stack}`
       }
 
@@ -201,7 +201,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
   return Commands.addAll({
     getCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
-      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+      const options: Cypress.CookieOptions = defaults({}, userOptions, {
         log: true,
       })
 
@@ -228,7 +228,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         },
       })
 
-      if (!_.isString(name)) {
+      if (typeof name !== 'string') {
         $errUtils.throwErrByPath('getCookie.invalid_argument', { onFail: log })
       }
 
@@ -257,7 +257,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     },
 
     getCookies (userOptions: Cypress.CookieOptions = {}) {
-      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+      const options: Cypress.CookieOptions = defaults({}, userOptions, {
         log: true,
       })
 
@@ -306,7 +306,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     },
 
     getAllCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+      const options: Cypress.CookieOptions = defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
@@ -343,7 +343,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     },
 
     setCookie (name: string, value: string, userOptions: Partial<Cypress.SetCookieOptions> = {}) {
-      const options: Partial<Cypress.SetCookieOptions> = _.defaults({}, userOptions, {
+      const options: Partial<Cypress.SetCookieOptions> = defaults({}, userOptions, {
         path: '/',
         secure: false,
         httpOnly: false,
@@ -356,7 +356,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
       options.timeout = options.timeout || config('defaultCommandTimeout')
 
-      const cookie = _.extend(pickCookieProps(options), { name, value })
+      const cookie = Object.assign(pickCookieProps(options), { name, value })
       let resultingCookie: Cypress.Cookie
       const log: Cypress.Log | undefined = Cypress.log({
         message: userOptions.domain ? [name, value, { domain: userOptions.domain }] : [name, value],
@@ -375,7 +375,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
       cookie.sameSite = normalizeSameSite(cookie.sameSite)
 
-      if (!_.isUndefined(cookie.sameSite) && !VALID_SAMESITE_VALUES.includes(cookie.sameSite)) {
+      if (cookie.sameSite !== undefined && !VALID_SAMESITE_VALUES.includes(cookie.sameSite)) {
         $errUtils.throwErrByPath('setCookie.invalid_samesite', {
           onFail: log,
           args: {
@@ -396,7 +396,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         })
       }
 
-      if (!_.isString(name) || !_.isString(value)) {
+      if (typeof name !== 'string' || typeof value !== 'string') {
         $errUtils.throwErrByPath('setCookie.invalid_arguments', { onFail: log })
       }
 
@@ -433,7 +433,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     },
 
     clearCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
-      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+      const options: Cypress.CookieOptions = defaults({}, userOptions, {
         log: true,
       })
 
@@ -461,7 +461,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         },
       })
 
-      if (!_.isString(name)) {
+      if (typeof name !== 'string') {
         $errUtils.throwErrByPath('clearCookie.invalid_argument', { onFail: log })
       }
 
@@ -496,7 +496,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     },
 
     clearCookies (userOptions: Cypress.CookieOptions = {}) {
-      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+      const options: Cypress.CookieOptions = defaults({}, userOptions, {
         log: true,
       })
 
@@ -552,7 +552,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     },
 
     clearAllCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable>) {
-      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+      const options: Cypress.CookieOptions = defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })

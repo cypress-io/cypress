@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import type { Interception, Route } from '@packages/net-stubbing/lib/types'
 import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
 import $errUtils from './error_utils'
@@ -9,13 +8,19 @@ const debug = Debug('cypress:driver:proxy-logging')
 function formatInterception ({ route, interception }: ProxyRequest['interceptions'][number]) {
   const ret = {
     'RouteMatcher': route.options,
-    'RouteHandler Type': !_.isNil(route.handler) ? (_.isFunction(route.handler) ? 'Function' : 'StaticResponse stub') : 'Spy',
+    'RouteHandler Type': route.handler != null ? (typeof route.handler === 'function' ? 'Function' : 'StaticResponse stub') : 'Spy',
     'RouteHandler': route.handler,
     'Request': interception.request,
   }
 
   if (interception.response) {
-    ret['Response'] = _.omitBy(interception.response, _.isNil)
+    const response: Record<string, any> = {}
+
+    for (const [k, v] of Object.entries(interception.response)) {
+      if (v != null) response[k] = v
+    }
+
+    ret['Response'] = response
   }
 
   const alias = interception.request.alias || route.alias
@@ -34,7 +39,7 @@ function getDisplayUrl (url: string) {
 }
 
 function getDynamicRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.InternalLogConfig> {
-  const last = _.last(req.interceptions)
+  const last = req.interceptions.at(-1)
   let alias = last ? last.interception.request.alias || last.route.alias : undefined
 
   return {
@@ -82,11 +87,11 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
         return 'bad'
       }
 
-      const message = _.compact([
+      const message = [
         req.preRequest.method,
         req.responseReceived && req.responseReceived.status,
         getDisplayUrl(req.preRequest.url),
-      ]).join(' ')
+      ].filter(Boolean).join(' ')
 
       return {
         indicator: getIndicator(),
@@ -98,13 +103,13 @@ function getRequestLogConfig (req: Omit<ProxyRequest, 'log'>): Partial<Cypress.I
             return {
               command: 'intercept',
               alias: interception.request.alias || route.alias,
-              type: !_.isNil(route.handler) ? (_.isFunction(route.handler) ? 'function' : 'stub') : 'spy',
+              type: route.handler != null ? (typeof route.handler === 'function' ? 'function' : 'stub') : 'spy',
             }
           })),
           ...(req.route ? [{
             command: 'route',
             alias: req.route?.alias,
-            type: _.isNil(req.route?.response) ? 'spy' : 'stub',
+            type: req.route?.response == null ? 'spy' : 'stub',
           }] : []),
         ],
       }
@@ -134,7 +139,7 @@ class ProxyRequest {
 
   constructor (preRequest: BrowserPreRequest, opts?: Partial<ProxyRequest>) {
     this.preRequest = preRequest
-    opts && _.assign(this, opts)
+    opts && Object.assign(this, opts)
 
     // high-level request information
     this.consoleProps = {
@@ -181,21 +186,22 @@ class ProxyRequest {
     // details on request
     consoleProps['Request Headers'] = this.preRequest.headers
 
-    const reqBody = _.chain(this.interceptions).last().get('interception.request.body').value()
+    const lastInterception = this.interceptions.at(-1)
+    const reqBody = lastInterception?.interception?.request?.body
 
     if (reqBody) consoleProps['Request Body'] = reqBody
 
     if (this.responseReceived) {
-      _.assign(consoleProps, {
+      Object.assign(consoleProps, {
         'Response Status Code': this.responseReceived.status,
         'Response Headers': this.responseReceived.headers,
       })
     }
 
     // details on response
-    let resBody
+    const resBody = this.interceptions.at(-1)?.interception?.response?.body
 
-    if ((resBody = _.chain(this.interceptions).last().get('interception.response.body').value())) {
+    if (resBody) {
       consoleProps['Response Body'] = resBody
     }
 
@@ -241,7 +247,7 @@ export default class ProxyLogging {
    * Update an existing proxy log with an interception, or create a new log if one was not created (like if shouldLog returned false)
    */
   logInterception (interception: Interception, route: Route): ProxyRequest | undefined {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
+    const proxyRequest = this.proxyRequests.find(({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
       // request was never logged
@@ -253,13 +259,13 @@ export default class ProxyLogging {
     proxyRequest.log?.set(getDynamicRequestLogConfig(proxyRequest))
 
     // consider a function to be 'spying' until it actually stubs/modifies the response
-    proxyRequest.setFlag(!_.isNil(route.handler) && !_.isFunction(route.handler) ? 'stubbed' : 'spied')
+    proxyRequest.setFlag(route.handler != null && typeof route.handler !== 'function' ? 'stubbed' : 'spied')
 
     return proxyRequest
   }
 
   private updateRequestWithResponse (responseReceived: BrowserResponseReceived): void {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
+    const proxyRequest = this.proxyRequests.find(({ preRequest }) => preRequest.requestId === responseReceived.requestId)
 
     if (!proxyRequest) {
       return debug('unmatched responseReceived event %o', responseReceived)
@@ -278,7 +284,7 @@ export default class ProxyLogging {
   }
 
   private updateRequestWithError (error: RequestError): void {
-    const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === error.requestId)
+    const proxyRequest = this.proxyRequests.find(({ preRequest }) => preRequest.requestId === error.requestId)
 
     if (!proxyRequest) {
       return debug('unmatched error event %o', error)

@@ -1,6 +1,6 @@
-import _ from 'lodash'
 import { getAllHtmlOrigins } from './origins'
 import { clearStorage, getStorage, setStorage } from './storage'
+import { mapValues } from '@packages/utils'
 
 const LOGS = {
   clearCurrentSessionData: {
@@ -50,7 +50,7 @@ export default class SessionsManager {
 
   clearActiveSessions = () => {
     const curSessions = this.cy.state('activeSessions') || {}
-    const clearedSessions: Cypress.ActiveSessions = _.mapValues(curSessions, (v) => ({ ...v, hydrated: false }))
+    const clearedSessions: Cypress.ActiveSessions = mapValues(curSessions, (v) => ({ ...v, hydrated: false }))
 
     this.cy.state('activeSessions', clearedSessions)
   }
@@ -82,12 +82,12 @@ export default class SessionsManager {
     let _localStorage = data.localStorage || []
     let _sessionStorage = data.sessionStorage || []
 
-    _.each(allHtmlOrigins, (v) => {
-      if (!_.find(_localStorage, v)) {
+    allHtmlOrigins.forEach((v) => {
+      if (!_localStorage.find((item) => item.origin === v)) {
         _localStorage = _localStorage.concat({ origin: v, clear: true })
       }
 
-      if (!_.find(_sessionStorage, v)) {
+      if (!_sessionStorage.find((item) => item.origin === v)) {
         _sessionStorage = _sessionStorage.concat({ origin: v, clear: true })
       }
     })

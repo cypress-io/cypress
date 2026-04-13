@@ -1,10 +1,10 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
+import { defaults } from '@packages/utils'
 
 const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOptions = {}) => {
   // we're not handling conversion of values to strings
@@ -12,7 +12,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
 
   // if we're not an array but we are an object
   // reassign userOptions to values
-  if (!_.isArray(values) && _.isObject(values)) {
+  if (!Array.isArray(values) && (typeof values === 'object' ? values !== null : typeof values === 'function')) {
     userOptions = values
     values = []
   } else {
@@ -25,7 +25,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
   // to new filtered subjects
   const matchingElements: HTMLElement[] = []
 
-  const options: Record<string, any> = _.defaults({}, userOptions, {
+  const options: Record<string, any> = defaults({}, userOptions, {
     $el: subject,
     log: true,
     force: false,
@@ -88,7 +88,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values: any[] = [], userOpti
       $el,
       timeout: options.timeout,
       consoleProps () {
-        return _.extend(consoleProps, {
+        return Object.assign(consoleProps, {
           Options: deltaOptions,
         })
       },

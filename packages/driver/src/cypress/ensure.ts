@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { without } from '@packages/utils'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -43,14 +43,14 @@ const isType = (subject, type, name: string, cy: $Cy) => {
 
   // if we have an optional subject and nothing's
   // here then just return cuz we good to go
-  if (types.includes('optional') && _.isUndefined(subject)) {
+  if (types.includes('optional') && subject === undefined) {
     return
   }
 
   // okay we either have a subject and either way
   // slice out optional so we can verify against
   // the various types
-  types = _.without(types, 'optional')
+  types = without(types, 'optional')
 
   // if we have no types then bail
   if (types.length === 0) {
@@ -99,7 +99,7 @@ const isChildCommand = (command, args, cy: $Cy) => {
     $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
       args: {
         cmd: command.get('name'),
-        args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+        args: typeof args[0] === 'string' ? `\"${stringifiedArg}\"` : stringifiedArg,
       },
     })
   }

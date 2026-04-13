@@ -1,5 +1,4 @@
 import { basename } from 'path'
-import _ from 'lodash'
 import mime from 'mime'
 
 import $dom from '../../../dom'
@@ -7,6 +6,7 @@ import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import { addEventCoords, dispatch } from './trigger'
 import { runPrivilegedCommand } from '../../../util/privileged_channel'
+import { defaults, pick } from '@packages/utils'
 
 /* dropzone.js relies on an experimental, nonstandard API, webkitGetAsEntry().
  * https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
@@ -59,7 +59,7 @@ const createDataTransfer = (files: Cypress.FileReferenceObject[], eventTarget: J
   // also cannot be constructed, so we have to use an array instead.
   Object.defineProperty(dataTransfer, 'items', {
     get () {
-      return _.map(oldItems, tryMockWebKit)
+      return Array.from(oldItems, tryMockWebKit)
     },
   })
 
@@ -259,7 +259,7 @@ export default (Commands, Cypress, cy, state, config) => {
         file = handleAlias(file, options) ?? getFilePathObject(file, index)
       }
 
-      if (!file.isFilePath && !_.isString(file.contents) && !ArrayBuffer.isView(file.contents)) {
+      if (!file.isFilePath && typeof file.contents !== 'string' && !ArrayBuffer.isView(file.contents)) {
         file.contents = JSON.stringify(file.contents)
       }
 
@@ -275,7 +275,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
     // stitch them back into the collection
     filePathResults.forEach((filePathResult) => {
-      filesCollection[filePathResult.index] = _.pick(filePathResult, 'contents', 'fileName', 'mimeType', 'lastModified')
+      filesCollection[filePathResult.index] = pick(filePathResult, 'contents', 'fileName', 'mimeType', 'lastModified')
     })
 
     return filesCollection as Cypress.FileReferenceObject[]
@@ -283,7 +283,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
   Commands.addAll({ prevSubject: 'element' }, {
     async selectFile (subject: JQuery<any>, files: Cypress.FileReference | Cypress.FileReference[], options: Partial<InternalSelectFileOptions>, ...extras: never[]): Promise<JQuery> {
-      options = _.defaults({}, options, {
+      options = defaults({}, options, {
         action: 'select',
         log: true,
         $el: subject,

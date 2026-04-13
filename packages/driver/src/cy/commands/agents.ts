@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import sinon from 'sinon'
 
 import Promise from 'bluebird'
@@ -33,7 +32,7 @@ const display = (name) => {
 }
 
 const formatArgs = (args) => {
-  return _.map(args, (arg) => {
+  return args.map((arg) => {
     return $utils.stringifyArg(arg)
   })
 }
@@ -106,7 +105,7 @@ const onInvoke = function (Cypress, obj, args) {
     },
   }
 
-  const aliases = _.compact([agent._cyAlias].concat(_.map(fakes, '_cyAlias')))
+  const aliases = [agent._cyAlias, ...fakes.map((f) => f._cyAlias)].filter(Boolean)
 
   if (aliases.length) {
     logProps.alias = aliases

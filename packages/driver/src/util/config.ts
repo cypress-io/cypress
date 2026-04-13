@@ -1,5 +1,5 @@
-import _ from 'lodash'
 import { testOverrideLevels, validate as validateConfigValues, validateOverridableAtRunTime } from '@packages/config'
+import { omitBy } from '@packages/utils'
 import { preprocessForSerialization } from './serialization'
 import $errUtils from '../cypress/error_utils'
 
@@ -41,12 +41,12 @@ const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => 
  */
 const syncToCurrentOrigin = (valuesFromOtherOrigin: Cypress.ObjectLike, valuesFromCurrentOrigin: Cypress.ObjectLike): Cypress.ObjectLike => {
   // @ts-ignore
-  const shallowDifferencesInConfig = _.omitBy(valuesFromOtherOrigin, (value: any, key: string) => {
+  const shallowDifferencesInConfig = omitBy(valuesFromOtherOrigin, (value: any, key: string) => {
     const valueToSync = value
     const currentOriginValue = valuesFromCurrentOrigin[key]
 
     // if the values being compared are objects, do a value comparison to see if the contents of each object are identical
-    return _.isEqual(valueToSync, currentOriginValue)
+    return JSON.stringify(valueToSync) === JSON.stringify(currentOriginValue)
   })
 
   return shallowDifferencesInConfig
@@ -133,7 +133,7 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
     // TODO: this does not use the @packages/error rewriting rules
     // for stdout vs markdown - it always inserts back ticks for markdown
     // and those leak out into the stdout formatting.
-    const errMsg = _.isString(errResult)
+    const errMsg = typeof errResult === 'string'
       ? errResult
       : `Expected ${format(errResult.key)} to be ${errResult.type}.\n\nInstead the value was: ${stringify(errResult.value)}`
 

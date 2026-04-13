@@ -1,20 +1,3 @@
-import _ from 'lodash'
-
-// IE doesn't support Array.from or Map.prototype.keys
-const getMapKeys = (map) => {
-  if (_.isFunction(Array.from) && _.isFunction(map.keys)) {
-    return Array.from(map.keys())
-  }
-
-  const keys: any[] = []
-
-  map.forEach((key) => {
-    keys.push(key)
-  })
-
-  return keys
-}
-
 class LimitedMap extends Map {
   private _limit: number
 
@@ -26,7 +9,7 @@ class LimitedMap extends Map {
 
   set (key, value) {
     if (this.size === this._limit) {
-      const firstKey = _.first(getMapKeys(this))
+      const firstKey = this.keys().next().value
 
       this.delete(firstKey)
     }

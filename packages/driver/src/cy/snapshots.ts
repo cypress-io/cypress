@@ -1,5 +1,4 @@
 import $ from 'jquery'
-import _ from 'lodash'
 import type { $Cy } from '../cypress/cy'
 import type { StateFunc } from '../cypress/state'
 import $dom from '../dom'
@@ -18,18 +17,24 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
   const getHtmlAttrs = function (htmlEl) {
     const tmpHtmlEl = document.createElement('html')
 
-    return _.transform(htmlEl?.attributes, (memo, attr) => {
-      if (!attr.specified) {
-        return
-      }
+    const result: Record<string, string> = {}
 
-      try {
-        // if we can successfully set the attributethen set it on memo
-        // because it's possible the attribute is completely invalid
-        tmpHtmlEl.setAttribute(attr.name, attr.value)
-        memo[attr.name] = attr.value
-      } catch (error) { } // eslint-disable-line no-empty
-    }, {})
+    if (htmlEl?.attributes) {
+      for (const attr of Array.from(htmlEl.attributes)) {
+        if (!attr.specified) {
+          continue
+        }
+
+        try {
+          // if we can successfully set the attribute then set it on memo
+          // because it's possible the attribute is completely invalid
+          tmpHtmlEl.setAttribute(attr.name, attr.value)
+          result[attr.name] = attr.value
+        } catch (error) { } // eslint-disable-line no-empty
+      }
+    }
+
+    return result
   }
 
   const replaceIframes = (body) => {

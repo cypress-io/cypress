@@ -1,14 +1,31 @@
-import _ from 'lodash'
 import $ from 'jquery'
 import Bluebird from 'bluebird'
 import { $Location } from '../../../cypress/location'
+import { groupBy } from '@packages/utils'
 
 const getSessionDetailsByDomain = (sessState: Cypress.SessionData) => {
-  return _.merge(
-    _.mapValues(_.groupBy(sessState.cookies, 'domain'), (v) => ({ cookies: v })),
-    ..._.map(sessState.localStorage, (v) => ({ [$Location.create(v.origin).hostname]: { localStorage: v } })),
-    ..._.map(sessState.sessionStorage, (v) => ({ [$Location.create(v.origin).hostname]: { sessionStorage: v } })),
-  )
+  const cookiesByDomain = groupBy(sessState.cookies || [], (c) => c.domain)
+  const cookiesResult: Record<string, any> = {}
+
+  for (const [domain, cookies] of Object.entries(cookiesByDomain)) {
+    cookiesResult[domain] = { cookies }
+  }
+
+  const result = { ...cookiesResult }
+
+  for (const v of (sessState.localStorage || [])) {
+    const hostname = $Location.create(v.origin).hostname
+
+    result[hostname] = { ...result[hostname], localStorage: v }
+  }
+
+  for (const v of (sessState.sessionStorage || [])) {
+    const hostname = $Location.create(v.origin).hostname
+
+    result[hostname] = { ...result[hostname], sessionStorage: v }
+  }
+
+  return result
 }
 
 const isSecureContext = (url: string) => url.startsWith('https:')
@@ -44,12 +61,16 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   // if we're on an https domain, there is no way for the secure context to access insecure origins from iframes
   // since there is no way for the app to access localStorage on insecure contexts, we don't have to clear any localStorage on http domains.
   if (isSecureContext(specWindow.location.href)) {
-    _.remove(origins, (v) => !isSecureContext(v))
+    for (let i = origins.length - 1; i >= 0; i--) {
+      if (!isSecureContext(origins[i])) {
+        origins.splice(i, 1)
+      }
+    }
   }
 
   if (!origins.length) return []
 
-  _.each(origins, (u) => {
+  origins.forEach((u) => {
     const $iframe = $(`<iframe src="${`${u}/__cypress/automation/setLocalStorage?${u}`}"></iframe>`)
 
     $iframe.appendTo($iframeContainer)
@@ -69,7 +90,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
           throw new Error('failed to get localStorage')
         }
 
-        const opts = _.find(originOptions, { origin: event.origin })!
+        const opts = originOptions.find((o) => o.origin === event.origin)!
 
         event.source.postMessage({ type: 'set:storage:data', data: opts }, '*')
       } else if (data.type === 'set:storage:complete') {
@@ -91,7 +112,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
   .catch(() => {
     Cypress.log({
       name: 'warning',
-      message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
+      message: `failed to access session localStorage data on origin(s): ${origins.filter((o) => !successOrigins.includes(o)).concat(successOrigins.filter((o) => !origins.includes(o))).join(', ')}`,
     })
   })
 }
@@ -99,30 +120,30 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
 const getConsoleProps = (session: Cypress.SessionData) => {
   const sessionDetails = getSessionDetailsByDomain(session)
 
-  const groupsByDomain = _.flatMap(sessionDetails, (val, domain) => {
+  const groupsByDomain = Object.entries(sessionDetails).map(([domain, val]) => {
     return {
       name: `${domain} data:`,
       expand: true,
       label: false,
-      groups: _.compact([
+      groups: [
         val.cookies && {
           name: `🍪 Cookies - (${val.cookies.length})`,
           expand: true,
           items: val.cookies,
         },
         val.localStorage && {
-          name: `📁 Local Storage - (${_.keys(val.localStorage.value).length})`,
+          name: `📁 Local Storage - (${Object.keys(val.localStorage.value).length})`,
           label: true,
           expand: true,
           items: val.localStorage.value,
         },
         val.sessionStorage && {
-          name: `📁 Session Storage - (${_.keys(val.sessionStorage.value).length})`,
+          name: `📁 Session Storage - (${Object.keys(val.sessionStorage.value).length})`,
           expand: true,
           label: true,
           items: val.sessionStorage.value,
         },
-      ]),
+      ].filter(Boolean),
     }
   })
 
@@ -134,7 +155,7 @@ const getConsoleProps = (session: Cypress.SessionData) => {
     ...(groupsByDomain.length && {
       Domains: `This session captured data from ${Object.keys(sessionDetails).join(' and ')}.`,
     }),
-    groups: _.compact(groupsByDomain),
+    groups: groupsByDomain.filter(Boolean),
   }
 
   return props
@@ -148,7 +169,7 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
 
   const $iframeContainer = $(`<div style="display:none"></div>`).appendTo($('body', specWindow.document))
 
-  _.each(origins, (u) => {
+  origins.forEach((u) => {
     const $iframe = $(`<iframe src="${`${u}/__cypress/automation/getLocalStorage`}"></iframe>`)
 
     $iframe.appendTo($iframeContainer)
@@ -184,7 +205,7 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
   .catch((err) => {
     Cypress.log({
       name: 'warning',
-      message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
+      message: `failed to access session localStorage data on origin(s): ${origins.filter((o) => !successOrigins.includes(o)).concat(successOrigins.filter((o) => !origins.includes(o))).join(', ')}`,
     })
 
     return []

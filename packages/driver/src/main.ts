@@ -2,7 +2,6 @@ import 'setimmediate'
 
 import './config/bluebird'
 import './config/jquery'
-import './config/lodash'
 import $Cypress from './cypress'
 import { telemetry } from '@packages/telemetry/browser/client'
 

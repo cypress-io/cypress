@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick, uniqueId } from '@packages/utils'
 
 import {
   SERIALIZABLE_REQ_PROPS,
@@ -32,11 +32,11 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
   const bodyParsed = parseJsonBody(req)
 
   req.responseTimeout = Cypress.config('responseTimeout')
-  const reqClone = _.cloneDeep(req)
+  const reqClone = structuredClone(req)
 
   const subscribe = (eventName, handler) => {
     const subscription: Subscription = {
-      id: _.uniqueId('Subscription'),
+      id: uniqueId('Subscription'),
       routeId,
       eventName,
       await: true,
@@ -177,7 +177,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         })
       }
 
-      if (!_.isFunction(handler)) {
+      if (typeof handler !== 'function') {
         $errUtils.throwErrByPath('net_stubbing.request_handling.event_needs_handler')
       }
 
@@ -201,7 +201,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         return finish(true)
       }
 
-      if (!_.isFunction(responseHandler)) {
+      if (typeof responseHandler !== 'function') {
         return $errUtils.throwErrByPath('net_stubbing.request_handling.req_continue_fn_only')
       }
 
@@ -220,7 +220,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         return $errUtils.throwErrByPath('net_stubbing.request_handling.multiple_completion_calls')
       }
 
-      if (_.isFunction(responseHandler)) {
+      if (typeof responseHandler === 'function') {
         // backwards-compatibility: before req.continue, req.reply was used to intercept a response
         // or to end request handler propagation
         return userReq.continue(responseHandler)
@@ -234,7 +234,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
         responseHandler = staticResponse
       }
 
-      if (!_.isUndefined(responseHandler)) {
+      if (responseHandler !== undefined) {
         // `responseHandler` is a StaticResponse
         validateStaticResponse('req.reply', responseHandler)
 
@@ -264,7 +264,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
 
   function updateRequest (req) {
     if (request) {
-      request.request = _.cloneDeep(req)
+      request.request = structuredClone(req)
 
       request.state = 'Intercepted'
     }
@@ -282,7 +282,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     continueSent = true
 
     // copy changeable attributes of userReq to req
-    _.merge(req, _.pick(userReq, SERIALIZABLE_REQ_PROPS))
+    Object.assign(req, pick(userReq, SERIALIZABLE_REQ_PROPS))
 
     updateRequest(req)
 
@@ -290,7 +290,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
       stringifyJsonBody(req)
     }
 
-    if (!_.isEqual(req, reqClone)) {
+    if (JSON.stringify(req) !== JSON.stringify(reqClone)) {
       request.setLogFlag('reqModified')
     }
 
@@ -316,7 +316,7 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     route.requests[requestId] = request as Interception
   }
 
-  if (!_.isFunction(userHandler)) {
+  if (typeof userHandler !== 'function') {
     // notification-only
     return null
   }

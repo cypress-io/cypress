@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $elements from './elements'
 import $document from './document'
 
@@ -74,7 +73,7 @@ const extractTransformInfo = ($el): TransformInfo | null => {
 }
 
 const existsInvisibleBackface = (list: TransformInfo[]) => {
-  return !!_.find(list, { backfaceVisibility: 'hidden' })
+  return !!list.find((item) => item.backfaceVisibility === 'hidden')
 }
 
 const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
@@ -233,7 +232,7 @@ const elIsTransformedToZero = (list: TransformInfo[]) => {
     return isElementOrthogonalWithView(normal)
   }
 
-  return !!_.find(list, (info) => isTransformedToZero(info))
+  return !!list.find((info) => isTransformedToZero(info))
 }
 
 const isTransformedToZero = ({ transform }: TransformInfo) => {

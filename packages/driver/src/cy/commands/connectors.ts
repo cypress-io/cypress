@@ -1,12 +1,12 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../dom'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
+import { defaults, getPath, hasPath, toPathArray } from '@packages/utils'
 
 const returnFalseIfThenable = (key, ...args): boolean => {
-  if ((key === 'then') && _.isFunction(args[0]) && _.isFunction(args[1])) {
+  if ((key === 'then') && typeof args[0] === 'function' && typeof args[1] === 'function') {
     // https://github.com/cypress-io/cypress/issues/111
     // if we're inside of a promise then the promise lib will naturally
     // pass (at least) two functions to another cy.then
@@ -49,12 +49,12 @@ export default function (Commands, Cypress, cy, state) {
   const thenFn = function (subject, userOptions, fn) {
     const ctx = state('ctx')
 
-    if (_.isFunction(userOptions)) {
+    if (typeof userOptions === 'function') {
       fn = userOptions
       userOptions = {}
     }
 
-    const options = _.defaults({}, userOptions, {
+    const options = defaults({}, userOptions, {
       timeout: Cypress.config('defaultCommandTimeout'),
     })
 
@@ -117,7 +117,7 @@ export default function (Commands, Cypress, cy, state) {
     .then((ret) => {
       // if ret is undefined then
       // resolve with the existing subject
-      if (_.isUndefined(ret)) {
+      if (ret === undefined) {
         return subject
       }
 
@@ -154,7 +154,7 @@ export default function (Commands, Cypress, cy, state) {
       $errUtils.throwErrByPath('invoke_its.invalid_num_of_args', { args: { cmd } })
     }
 
-    if (!_.isObject(options)) {
+    if (typeof options !== 'object' || options === null) {
       $errUtils.throwErrByPath('invoke_its.invalid_options_arg', { args: { cmd } })
     }
 
@@ -164,7 +164,7 @@ export default function (Commands, Cypress, cy, state) {
       })
     }
 
-    if (!_.isString(path) && !_.isNumber(path)) {
+    if (typeof path !== 'string' && typeof path !== 'number') {
       $errUtils.throwErrByPath('invoke_its.invalid_prop_name_arg', {
         args: { cmd, identifier: 'property' },
       })
@@ -188,7 +188,7 @@ export default function (Commands, Cypress, cy, state) {
 
       subject = cy.getRemotejQueryInstance(subject) || subject
 
-      const value = _.get(subject, path)
+      const value = getPath(subject, path)
 
       cy.state('current') === this && log?.set({
         $el: $dom.isElement(subject) ? subject : null,
@@ -204,7 +204,7 @@ export default function (Commands, Cypress, cy, state) {
       })
 
       if (value == null && !upcomingAssertion(this.get('next'))) {
-        if (!_.has(subject, path)) {
+        if (!hasPath(subject, path)) {
           $errUtils.throwErrByPath('invoke_its.nonexistent_prop', { args: { cmd, prop: path, value } })
         }
 
@@ -219,7 +219,7 @@ export default function (Commands, Cypress, cy, state) {
     let options
     let path
 
-    if (_.isString(optionsOrPath) || _.isNumber(optionsOrPath)) {
+    if (typeof optionsOrPath === 'string' || typeof optionsOrPath === 'number') {
       options = {}
       path = optionsOrPath
       if (arguments.length > 1) {
@@ -230,8 +230,8 @@ export default function (Commands, Cypress, cy, state) {
       path = argOrOptions
     }
 
-    if (!_.isString(path) && !_.isNumber(path)) {
-      if (path == null && _.isObject(options) && !_.isFunction(options)) {
+    if (typeof path !== 'string' && typeof path !== 'number') {
+      if (path == null && typeof options === 'object' && options !== null && typeof options !== 'function') {
         $errUtils.throwErrByPath('invoke_its.null_or_undefined_property_name', { args: {
           cmd: 'invoke',
           identifier: 'function',
@@ -265,11 +265,11 @@ export default function (Commands, Cypress, cy, state) {
       // We use its for its validation, even though we ignore the returned value.
       itsFn(subject)
 
-      const pathParts = path.toString().split('.')
-      const last = pathParts.pop()
-      const parent = pathParts.length === 0 ? subject : _.get(subject, pathParts)
+      const parts = toPathArray(path)
+      const last = parts.pop()!
+      const parent = parts.length === 0 ? subject : getPath(subject, parts)
 
-      if (!_.isFunction(parent[last])) {
+      if (typeof parent[last] !== 'function') {
         $errUtils.throwErrByPath('invoke.prop_not_a_function', { args: {
           prop: path,
           type: $utils.stringifyFriendlyTypeof(parent[last]),
@@ -298,7 +298,7 @@ export default function (Commands, Cypress, cy, state) {
   Commands.addAll({ prevSubject: true }, {
     spread (subject, options, fn) {
       // if this isnt an array-like blow up right here
-      if (!_.isArrayLike(subject)) {
+      if (subject == null || typeof subject === 'function' || typeof subject.length !== 'number' || subject.length < 0 || !Number.isInteger(subject.length)) {
         $errUtils.throwErrByPath('spread.invalid_type')
       }
 
@@ -311,12 +311,12 @@ export default function (Commands, Cypress, cy, state) {
       let userOptions = options
       const ctx = this
 
-      if (_.isUndefined(fn)) {
+      if (fn === undefined) {
         fn = userOptions
         userOptions = {}
       }
 
-      if (!_.isFunction(fn)) {
+      if (typeof fn !== 'function') {
         $errUtils.throwErrByPath('each.invalid_argument')
       }
 
@@ -358,7 +358,7 @@ export default function (Commands, Cypress, cy, state) {
       // generate a real array since bluebird is finicky and
       // doesnt want an 'array-like' structure like jquery instances
       return Promise
-      .each(_.toArray(subject), yieldItem)
+      .each(Array.from(subject), yieldItem)
       .then(() => {
         // cy.each does *not* want to use any subjects that the user's callback generated - therefore we break
         // cypress' subject chaining logic, which by default would override this with any subjects generated by

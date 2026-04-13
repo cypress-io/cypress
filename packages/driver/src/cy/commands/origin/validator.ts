@@ -1,6 +1,6 @@
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
-import { difference, isPlainObject, isString, isFunction } from 'lodash'
+import { difference } from '@packages/utils'
 import type { LocationObject } from '../../../cypress/location'
 import { policyFromConfig, DocumentDomainInjection } from '@packages/network-tools'
 
@@ -14,7 +14,7 @@ export class Validator {
   }
 
   validate ({ callbackFn, options, urlOrDomain }) {
-    if (!isString(urlOrDomain)) {
+    if (typeof urlOrDomain !== 'string') {
       $errUtils.throwErrByPath('origin.invalid_url_argument', {
         onFail: this.log,
         args: { arg: $utils.stringify(urlOrDomain) },
@@ -22,7 +22,7 @@ export class Validator {
     }
 
     if (options) {
-      if (!isPlainObject(options)) {
+      if (!(typeof options === 'object' && options !== null && !Array.isArray(options) && Object.getPrototypeOf(options) === Object.prototype)) {
         $errUtils.throwErrByPath('origin.invalid_options_argument', {
           onFail: this.log,
           args: { arg: $utils.stringify(options) },
@@ -51,18 +51,18 @@ export class Validator {
   }
 
   _isValidCallbackFn (callbackFn) {
-    if (isFunction(callbackFn)) return true
+    if (typeof callbackFn === 'function') return true
 
     // the user must pass a function, but at runtime the function may be
     // replaced with an object in the form
     // { callbackName: string, outputFilePath: string }
     // by the webpack-preprocessor. if it doesn't have that form, it's
     // an invalid input by the user
-    if (isPlainObject(callbackFn)) {
+    if (typeof callbackFn === 'object' && callbackFn !== null && !Array.isArray(callbackFn) && Object.getPrototypeOf(callbackFn) === Object.prototype) {
       return (
         Object.keys(callbackFn).length === 2
-        && isString(callbackFn.callbackName)
-        && isString(callbackFn.outputFilePath)
+        && typeof callbackFn.callbackName === 'string'
+        && typeof callbackFn.outputFilePath === 'string'
       )
     }
 

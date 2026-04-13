@@ -1,7 +1,6 @@
 /* eslint-disable prefer-rest-params */
 // tests in driver/cypress/integration/commands/assertions_spec.js
 
-import _ from 'lodash'
 import $ from 'jquery'
 import chai from 'chai'
 import sinonChai from '@cypress/sinon-chai'
@@ -145,8 +144,8 @@ chai.use((chai, u) => {
   }
 
   const replaceArgMessages = (args, str) => {
-    return _.reduce(args, (memo: string[], value, index) => {
-      if (_.isString(value)) {
+    return args.reduce((memo: string[], value, index) => {
+      if (typeof value === 'string') {
         value = value
         .replace(allWordsBetweenCurlyBraces, '**$1**')
         .replace(allEscapedSingleQuotes, '__quote__')
@@ -266,7 +265,7 @@ chai.use((chai, u) => {
 
     chai.Assertion.overwriteMethod('match', (_super) => {
       return (function (regExp) {
-        if (_.isRegExp(regExp) || $dom.isDom(this._obj)) {
+        if (regExp instanceof RegExp || $dom.isDom(this._obj)) {
           return _super.apply(this, arguments)
         }
 
@@ -356,7 +355,7 @@ chai.use((chai, u) => {
             e1.negated = chaiUtils.flag(this, 'negate')
             e1.type = 'length'
 
-            if (_.isFinite(length)) {
+            if (Number.isFinite(length)) {
               const getLongLengthMessage = function (len1, len2) {
                 if (len1 > len2) {
                   return `Too many elements found. Found '${len1}', expected '${len2}'.`
@@ -518,9 +517,9 @@ chai.use((chai, u) => {
       return chai.assert(express, errmsg)
     }
 
-    const fns = _.functions(chai.assert)
+    const fns = Object.keys(chai.assert).filter((key) => typeof chai.assert[key] === 'function')
 
-    _.each(fns, (name) => {
+    fns.forEach((name) => {
       fn[name] = function () {
         state('assertUsed', true)
         captureUserInvocationStack(specWindow, state, overrideAssert)

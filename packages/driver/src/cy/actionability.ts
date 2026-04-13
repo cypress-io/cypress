@@ -1,8 +1,8 @@
-import _ from 'lodash'
 import $ from 'jquery'
 import Promise from 'bluebird'
 
 import debugFn from 'debug'
+import { defaults } from '@packages/utils'
 import $dom from '../dom'
 import $utils from './../cypress/utils'
 import type { ElWindowPosition, ElViewportPosition, ElementPositioning } from '../dom/coordinates'
@@ -37,18 +37,18 @@ const scrollBehaviorOptionsMap = {
 const getPositionFromArguments = function (positionOrX, y, options) {
   let position; let x
 
-  if (_.isObject(positionOrX)) {
+  if (positionOrX !== null && typeof positionOrX === 'object') {
     options = positionOrX
     position = null
-  } else if (_.isObject(y)) {
+  } else if (y !== null && typeof y === 'object') {
     options = y
     position = positionOrX
     y = null
     x = null
-  } else if (_.every([positionOrX, y], _.isFinite)) {
+  } else if ([positionOrX, y].every((v) => Number.isFinite(v))) {
     position = null
     x = positionOrX
-  } else if (_.isString(positionOrX)) {
+  } else if (typeof positionOrX === 'string') {
     position = positionOrX
   }
 
@@ -75,7 +75,7 @@ const ensureElDoesNotHaveCSS = ($el, cssProperty, cssValue, name: string, onFail
     }
 
     if (elementInherited) {
-      _.extend(consoleProps, {
+      Object.assign(consoleProps, {
         'Inherited From': elInherited,
       })
     }
@@ -360,7 +360,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
           const obj = {}
 
           obj['Tried to Click'] = $dom.getElements($el)
-          _.extend(obj, err.consoleProps)
+          Object.assign(obj, err.consoleProps)
 
           return obj
         },
@@ -376,7 +376,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
 const getCoordinatesForEl = function (cy, $el, options) {
   // determine if this element is animating
-  if (_.isFinite(options.x) && _.isFinite(options.y)) {
+  if (Number.isFinite(options.x) && Number.isFinite(options.y)) {
     return $dom.getElementCoordinatesByPositionRelativeToXY($el, options.x, options.y)
   }
 
@@ -419,7 +419,7 @@ interface VerifyCallbacks {
 }
 
 const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
-  _.defaults(options, {
+  defaults(options, {
     scrollBehavior: config('scrollBehavior'),
     ensure: {
       position: true,
@@ -548,7 +548,7 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
           Cypress.ensure.isNotReadonly($el, name, _log)
         }
 
-        if (_.isFunction(options.custom)) {
+        if (typeof options.custom === 'function') {
           options.custom($el, _log)
         }
       }

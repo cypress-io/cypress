@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
@@ -6,6 +5,7 @@ import $errUtils from '../../cypress/error_utils'
 import $stackUtils from '../../cypress/stack_utils'
 import type { Log } from '../../cypress/log'
 import { runPrivilegedCommand } from '../../util/privileged_channel'
+import { defaults } from '@packages/utils'
 
 interface InternalTaskOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
@@ -17,7 +17,7 @@ export default (Commands, Cypress, cy) => {
     task (task, arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable>, ...extras: never[]) {
       userOptions = userOptions || {}
 
-      const options: InternalTaskOptions = _.defaults({}, userOptions, {
+      const options: InternalTaskOptions = defaults({}, userOptions, {
         log: true,
         timeout: Cypress.config('taskTimeout') as number,
       })
@@ -44,7 +44,7 @@ export default (Commands, Cypress, cy) => {
         },
       })
 
-      if (!task || !_.isString(task)) {
+      if (!task || typeof task !== 'string') {
         $errUtils.throwErrByPath('task.invalid_argument', {
           onFail: options._log,
           args: { task: task || '' },
@@ -68,7 +68,7 @@ export default (Commands, Cypress, cy) => {
       .timeout(options.timeout)
       .then((result) => {
         if (options._log) {
-          _.extend(consoleOutput, { Yielded: result })
+          Object.assign(consoleOutput, { Yielded: result })
         }
 
         return result

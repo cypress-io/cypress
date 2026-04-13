@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { defaults, pick, getPath } from '@packages/utils'
 
 import {
   CyHttpMessages,
@@ -20,7 +20,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
   const { data: res, requestId, subscription } = frame
   const { routeId } = subscription
   const request = getRequest(routeId, frame.requestId)
-  const resClone = _.cloneDeep(res)
+  const resClone = structuredClone(res)
 
   const bodyParsed = parseJsonBody(res)
 
@@ -40,11 +40,11 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
 
   const finishResponseStage = (res) => {
     if (request) {
-      if (!_.isEqual(resClone, res)) {
+      if (JSON.stringify(resClone) !== JSON.stringify(res)) {
         request.setLogFlag('resModified')
       }
 
-      request.response = _.cloneDeep(res)
+      request.response = structuredClone(res)
       request.state = 'ResponseIntercepted'
     }
   }
@@ -75,9 +75,9 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
         validateStaticResponse('res.send', staticResponse)
 
         // arguments to res.send() are merged with the existing response
-        const _staticResponse = _.defaults({}, staticResponse, _.pick(res, STATIC_RESPONSE_KEYS))
+        const _staticResponse = defaults({}, staticResponse, pick(res, STATIC_RESPONSE_KEYS))
 
-        _staticResponse.headers = _.defaults({}, _staticResponse.headers, res.headers)
+        _staticResponse.headers = defaults({}, _staticResponse.headers, res.headers)
 
         // https://github.com/cypress-io/cypress/issues/17084
         // When a user didn't provide content-type,
@@ -112,7 +112,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
     responseSent = true
 
     // copy changeable attributes of userRes to res
-    _.merge(res, _.pick(userRes, SERIALIZABLE_RES_PROPS))
+    Object.assign(res, pick(userRes, SERIALIZABLE_RES_PROPS))
 
     finishResponseStage(res)
 
@@ -121,7 +121,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
     }
 
     resolve({
-      changedData: _.cloneDeep(res),
+      changedData: structuredClone(res),
       stopPropagation,
     })
   }
@@ -149,7 +149,7 @@ export const onResponse: HandlerFn<CyHttpMessages.IncomingResponse> = async (Cyp
       args: {
         timeout,
         req: request.request,
-        route: _.get(getRoute(routeId), 'options'),
+        route: getPath(getRoute(routeId), 'options'),
         res,
       },
     })

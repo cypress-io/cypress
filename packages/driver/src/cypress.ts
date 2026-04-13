@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { omit } from '@packages/utils'
 import $ from 'jquery'
 import * as blobUtil from 'blob-util'
 import minimatch from 'minimatch'
@@ -234,7 +234,7 @@ class $Cypress {
 
     setupAutEventHandlers(this)
 
-    _.extend(this.$, $)
+    Object.assign(this.$, $)
   }
 
   configure (config: Record<string, any> = {}) {
@@ -279,9 +279,9 @@ class $Cypress {
     // change this in the NEXT_BREAKING
     const { env, expose } = config
 
-    config = _.omit(config, 'env', 'expose', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
+    config = omit(config, 'env', 'expose', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
-    _.extend(this, browserInfo(config))
+    Object.assign(this, browserInfo(config))
 
     this.state = $SetterGetter.create({}) as unknown as StateFunc
 
@@ -310,7 +310,7 @@ class $Cypress {
       },
     })
 
-    this.originalConfig = _.cloneDeep(config)
+    this.originalConfig = structuredClone(config)
     this.config = $SetterGetter.create(config, (config) => {
       const skipConfigOverrideValidation = this.isCrossOriginSpecBridge ? window.__cySkipValidateConfig : window.top!.__cySkipValidateConfig
 
@@ -332,16 +332,16 @@ class $Cypress {
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
 
-      if (_.isNumber(testRetries)) {
+      if (typeof testRetries === 'number') {
         return testRetries
       }
 
-      if (_.isObject(testRetries)) {
+      if (testRetries !== null && typeof testRetries === 'object') {
         const retriesAsNumberOrBoolean = testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
 
         // If experimentalRetries are configured, an experimentalStrategy is present, and the retries configured is a boolean
         // then we need to set the mocha '_retries' to 'maxRetries' present in the 'experimentalOptions' configuration.
-        if (testRetries['experimentalStrategy'] && _.isBoolean(retriesAsNumberOrBoolean) && retriesAsNumberOrBoolean) {
+        if (testRetries['experimentalStrategy'] && typeof retriesAsNumberOrBoolean === 'boolean' && retriesAsNumberOrBoolean) {
           return testRetries['experimentalOptions'].maxRetries
         }
 
@@ -913,8 +913,8 @@ class $Cypress {
 
     return this.action('cy:collect:run:state').then((otherRunStates: ReporterRunState) => {
       // merge all the states together
-      runState = _.reduce(otherRunStates, (memo, obj) => {
-        return _.extend(memo, obj)
+      runState = (otherRunStates as any[]).reduce((memo, obj) => {
+        return Object.assign(memo, obj)
       }, runState)
 
       return this.backend('preserve:run:state', runState)
@@ -990,7 +990,7 @@ class $Cypress {
   get currentRetry (): number {
     const ctx = this.cy.state('runnable').ctx
 
-    return ctx?.currentTest?._currentRetry || ctx?.test?._currentRetry
+    return ctx?.currentTest?._currentRetry ?? ctx?.test?._currentRetry ?? 0
   }
 
   static create (config: Record<string, any>) {

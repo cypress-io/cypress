@@ -1,8 +1,7 @@
-import _ from 'lodash'
-
 import { $Location } from '../../../cypress/location'
 import { getAllHtmlOrigins, mapOrigins } from './origins'
 import { getCurrentOriginStorage, getPostMessageLocalStorage, setPostMessageLocalStorage } from './utils'
+import { defaults, pick, groupBy } from '@packages/utils'
 
 export type StorageType = 'localStorage' | 'sessionStorage'
 
@@ -31,11 +30,11 @@ interface SetStoragesOptions {
 export async function getStorage (Cypress: Cypress.Cypress, options: GetStorageOptions = {}): Promise<Cypress.Storages> {
   const specWindow = Cypress.state('specWindow')
 
-  if (!_.isObject(options)) {
+  if (typeof options !== 'object' || options === null) {
     throw new Error('getStorage() takes an object')
   }
 
-  const opts = _.defaults({}, options, {
+  const opts = defaults({}, options, {
     origin: 'currentOrigin',
   })
 
@@ -47,11 +46,11 @@ export async function getStorage (Cypress: Cypress.Cypress, options: GetStorageO
   }
 
   function pushValue (origin, value) {
-    if (!_.isEmpty(value.localStorage)) {
+    if (value.localStorage && Object.keys(value.localStorage).length) {
       results.localStorage.push({ origin, value: value.localStorage })
     }
 
-    if (!_.isEmpty(value.sessionStorage)) {
+    if (value.sessionStorage && Object.keys(value.sessionStorage).length) {
       results.sessionStorage.push({ origin, value: value.sessionStorage })
     }
   }
@@ -65,12 +64,16 @@ export async function getStorage (Cypress: Cypress.Cypress, options: GetStorageO
     pushValue(currentOrigin, currentOriginStorage)
   }
 
-  if (_.isEmpty(origins)) {
+  if (origins.length === 0) {
     return results
   }
 
   if (currentOrigin.startsWith('https:')) {
-    _.remove(origins, (v) => v.startsWith('http:'))
+    for (let i = origins.length - 1; i >= 0; i--) {
+      if (origins[i].startsWith('http:')) {
+        origins.splice(i, 1)
+      }
+    }
   }
 
   const postMessageResults = await getPostMessageLocalStorage(specWindow, origins)
@@ -103,17 +106,17 @@ async function setStorageOnOrigins (Cypress: Cypress.Cypress, originOptions) {
 
   const currentOrigin = window.location.origin
 
-  const currentOriginIndex = _.findIndex(originOptions, { origin: currentOrigin })
+  const currentOriginIndex = originOptions.findIndex((o) => o.origin === currentOrigin)
 
   if (currentOriginIndex !== -1) {
     const opts = originOptions.splice(currentOriginIndex, 1)[0]
 
-    if (!_.isEmpty(opts.localStorage)) {
+    if (opts.localStorage && ((opts.localStorage.clear) || (opts.localStorage.value && Object.keys(opts.localStorage.value).length))) {
       if (opts.localStorage.clear) {
         window.localStorage.clear()
       }
 
-      _.each(opts.localStorage.value, (val, key) => localStorage.setItem(key, val))
+      Object.entries(opts.localStorage.value || {}).forEach(([key, val]) => localStorage.setItem(key, val as string))
     }
 
     if (opts.sessionStorage) {
@@ -121,11 +124,11 @@ async function setStorageOnOrigins (Cypress: Cypress.Cypress, originOptions) {
         window.sessionStorage.clear()
       }
 
-      _.each(opts.sessionStorage.value, (val, key) => sessionStorage.setItem(key, val))
+      Object.entries(opts.sessionStorage.value || {}).forEach(([key, val]) => sessionStorage.setItem(key, val as string))
     }
   }
 
-  if (_.isEmpty(originOptions)) {
+  if (originOptions.length === 0) {
     return
   }
 
@@ -144,15 +147,16 @@ export async function setStorage (Cypress: Cypress.Cypress, options: SetStorages
     }
   }
 
-  const mappedLocalStorage = _.map(options.localStorage, (v) => {
-    return mapToCurrentOrigin({ origin: v.origin, localStorage: _.pick(v, 'value', 'clear') })
+  const mappedLocalStorage = (options.localStorage || []).map((v) => {
+    return mapToCurrentOrigin({ origin: v.origin, localStorage: pick(v, ['value', 'clear']) })
   })
 
-  const mappedSessionStorage = _.map(options.sessionStorage, (v) => {
-    return mapToCurrentOrigin({ origin: v.origin, sessionStorage: _.pick(v, 'value', 'clear') })
+  const mappedSessionStorage = (options.sessionStorage || []).map((v) => {
+    return mapToCurrentOrigin({ origin: v.origin, sessionStorage: pick(v, ['value', 'clear']) })
   })
 
-  const storageOptions = _.map(_.groupBy(mappedLocalStorage.concat(mappedSessionStorage), 'origin'), (v) => _.merge({}, ...v))
+  const grouped = groupBy(mappedLocalStorage.concat(mappedSessionStorage), (item) => item.origin)
+  const storageOptions = Object.values(grouped).map((v) => Object.assign({}, ...v))
 
   await setStorageOnOrigins(Cypress, storageOptions)
 }

@@ -1,5 +1,4 @@
-import _ from 'lodash'
-import capitalize from 'underscore.string/capitalize'
+import { defaults } from '@packages/utils'
 import methods from 'methods'
 import dayjs from 'dayjs'
 import $ from 'jquery'
@@ -8,6 +7,8 @@ import $dom from '../dom'
 import $jquery from '../dom/jquery'
 import { $Location } from './location'
 import $errUtils from './error_utils'
+
+const capitalizePreserveRest = (str: string) => str ? str[0].toUpperCase() + str.slice(1) : ''
 
 const customProtocolRegex = /^[^:\/]+:\/{1,3}/
 // Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
@@ -27,29 +28,27 @@ const defaultOptions = {
   scrollBehavior: 'top',
 }
 
-const USER_FRIENDLY_TYPE_DETECTORS = _.map([
-  [_.isUndefined, 'undefined'],
-  [_.isNull, 'null'],
-  [_.isBoolean, 'boolean'],
-  [_.isNumber, 'number'],
-  [_.isString, 'string'],
-  [_.isRegExp, 'regexp'],
-  [_.isSymbol, 'symbol'],
-  [_.isElement, 'element'],
-  [_.isError, 'error'],
-  [_.isSet, 'set'],
-  [_.isWeakSet, 'set'],
-  [_.isMap, 'map'],
-  [_.isWeakMap, 'map'],
-  [_.isFunction, 'function'],
-  [_.isArrayLikeObject, 'array'],
-  [_.isBuffer, 'buffer'],
-  [_.isDate, 'date'],
-  [_.isObject, 'object'],
-  [_.stubTrue, 'unknown'],
-], ([fn, type]) => {
-  return [fn, _.constant(type)]
-}) as unknown as [(val: any) => boolean, (val: Function) => Function][]
+const USER_FRIENDLY_TYPE_DETECTORS: [(val: any) => boolean, () => string][] = [
+  [(v) => v === undefined, () => 'undefined'],
+  [(v) => v === null, () => 'null'],
+  [(v) => typeof v === 'boolean', () => 'boolean'],
+  [(v) => typeof v === 'number', () => 'number'],
+  [(v) => typeof v === 'string', () => 'string'],
+  [(v) => v instanceof RegExp, () => 'regexp'],
+  [(v) => typeof v === 'symbol', () => 'symbol'],
+  [(v) => v instanceof Element, () => 'element'],
+  [(v) => v instanceof Error, () => 'error'],
+  [(v) => v instanceof Set, () => 'set'],
+  [(v) => v instanceof WeakSet, () => 'set'],
+  [(v) => v instanceof Map, () => 'map'],
+  [(v) => v instanceof WeakMap, () => 'map'],
+  [(v) => typeof v === 'function', () => 'function'],
+  [(v) => Array.isArray(v) || (v !== null && typeof v === 'object' && typeof v.length === 'number'), () => 'array'],
+  [(v) => Buffer.isBuffer(v), () => 'buffer'],
+  [(v) => v instanceof Date, () => 'date'],
+  [(v) => v !== null && typeof v === 'object', () => 'object'],
+  [() => true, () => 'unknown'],
+]
 
 export default {
   warning (msg) {
@@ -106,15 +105,19 @@ export default {
   },
 
   switchCase (value, casesObj, defaultKey = 'default') {
-    if (_.has(casesObj, value)) {
-      return _.result(casesObj, value)
+    if (value in casesObj) {
+      const v = casesObj[value]
+
+      return typeof v === 'function' ? v() : v
     }
 
-    if (_.has(casesObj, defaultKey)) {
-      return _.result(casesObj, defaultKey)
+    if (defaultKey in casesObj) {
+      const v = casesObj[defaultKey]
+
+      return typeof v === 'function' ? v() : v
     }
 
-    const keys = _.keys(casesObj)
+    const keys = Object.keys(casesObj)
 
     throw new Error(`The switch/case value: '${value}' did not match any cases: ${keys.join(', ')}.`)
   },
@@ -124,9 +127,11 @@ export default {
       return null
     }
 
-    return _.reduce(props, (memo, prop) => {
-      if (_.has(obj, prop) || obj[prop] !== undefined) {
-        memo[prop] = _.result(obj, prop)
+    return props.reduce((memo, prop) => {
+      if (prop in obj || obj[prop] !== undefined) {
+        const v = obj[prop]
+
+        memo[prop] = typeof v === 'function' ? v.call(obj) : v
       }
 
       return memo
@@ -134,9 +139,9 @@ export default {
   },
 
   normalizeObjWithLength (obj) {
-    // lodash shits the bed if our object has a 'length'
+    // some utilities have issues if our object has a 'length'
     // property so we have to normalize that
-    if (_.has(obj, 'length')) {
+    if ('length' in obj) {
       obj.Length = obj.length
       delete obj.length
     }
@@ -148,24 +153,27 @@ export default {
   // contains the properties of filter
   // and the values are different
   filterOutOptions (obj, filter = {}) {
-    _.defaults(filter, defaultOptions)
+    defaults(filter, defaultOptions)
 
     this.normalizeObjWithLength(filter)
 
-    const whereFilterHasSameKeyButDifferentValue = (value, key) => {
-      const upperKey = capitalize(key)
+    const result: Record<string, any> = {}
+    let hasKeys = false
 
-      return (_.has(filter, key) || _.has(filter, upperKey)) &&
-        filter[key] !== value
+    for (const [key, value] of Object.entries(obj)) {
+      const upperKey = capitalizePreserveRest(key)
+
+      if ((key in filter || upperKey in filter) && filter[key] !== value) {
+        result[key] = value
+        hasKeys = true
+      }
     }
 
-    obj = _.pickBy(obj, whereFilterHasSameKeyButDifferentValue)
-
-    if (_.isEmpty(obj)) {
+    if (!hasKeys) {
       return undefined
     }
 
-    return obj
+    return result
   },
 
   stringifyActualObj (obj, visited?: WeakSet<any>) {
@@ -174,7 +182,7 @@ export default {
 
     obj = this.normalizeObjWithLength(obj)
 
-    const str = _.reduce(obj, (memo, value, key) => {
+    const str = Object.entries(obj).reduce((memo, [key, value]) => {
       memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value, visitedSet)}`)
 
       return memo
@@ -191,11 +199,11 @@ export default {
       return $dom.stringify(value, 'short')
     }
 
-    if (_.isFunction(value)) {
+    if (typeof value === 'function') {
       return 'function(){}'
     }
 
-    if (_.isArray(value)) {
+    if (Array.isArray(value)) {
       // Check for circular reference first to prevent infinite recursion
       if (visitedSet.has(value)) {
         return '[Circular]'
@@ -214,7 +222,7 @@ export default {
       // Add to visited set before recursing
       visitedSet.add(value)
 
-      const result = `[${_.map(value, (item) => this.stringifyActual(item, visitedSet)).join(', ')}]`
+      const result = `[${value.map((item) => this.stringifyActual(item, visitedSet)).join(', ')}]`
 
       // Note: We don't remove from visited set because WeakSet automatically handles cleanup
       // and we want to detect circular references even after the first level
@@ -222,11 +230,11 @@ export default {
       return result
     }
 
-    if (_.isRegExp(value)) {
+    if (value instanceof RegExp) {
       return value.toString()
     }
 
-    if (_.isObject(value)) {
+    if (value !== null && typeof value === 'object') {
       // Cannot use $dom.isJquery here because it causes infinite recursion.
       if (value instanceof $) {
         return `jQuery{${(value as JQueryStatic).length}}`
@@ -237,7 +245,7 @@ export default {
         return '[Circular]'
       }
 
-      const len = _.keys(value).length
+      const len = Object.keys(value).length
 
       if (len > 2) {
         // Add to visited set to prevent infinite recursion in nested structures
@@ -261,11 +269,11 @@ export default {
       }
     }
 
-    if (_.isSymbol(value)) {
+    if (typeof value === 'symbol') {
       return 'Symbol'
     }
 
-    if (_.isUndefined(value)) {
+    if (value === undefined) {
       return undefined
     }
 
@@ -273,7 +281,15 @@ export default {
   },
 
   // give us some user-friendly "types"
-  stringifyFriendlyTypeof: _.cond(USER_FRIENDLY_TYPE_DETECTORS),
+  stringifyFriendlyTypeof (val) {
+    for (const [predicate, typeFn] of USER_FRIENDLY_TYPE_DETECTORS) {
+      if (predicate(val)) {
+        return typeFn()
+      }
+    }
+
+    return 'unknown'
+  },
 
   stringify (values) {
     // if we already have an array
@@ -281,25 +297,22 @@ export default {
     // its formatted properly
     values = [].concat(values)
 
-    return _
-    .chain(values)
-    .map(_.bind(this.stringifyActual, this))
-    // @ts-expect-error
-    .without(undefined)
+    return values
+    .map((v) => this.stringifyActual(v))
+    .filter((v) => v !== undefined)
     .join(', ')
-    .value()
   },
 
   stringifyArg (arg) {
-    if (_.isString(arg) || _.isNumber(arg) || _.isBoolean(arg)) {
+    if (typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean') {
       return JSON.stringify(arg)
     }
 
-    if (_.isNull(arg)) {
+    if (arg === null) {
       return 'null'
     }
 
-    if (_.isUndefined(arg)) {
+    if (arg === undefined) {
       return 'undefined'
     }
 
@@ -307,7 +320,7 @@ export default {
   },
 
   plural (obj, plural, singular) {
-    obj = _.isNumber(obj) ? obj : obj.length
+    obj = typeof obj === 'number' ? obj : obj.length
     if (obj > 1) {
       return plural
     }
@@ -333,7 +346,7 @@ export default {
     const parsed = Number(num)
 
     // return num if this isNaN else return parsed
-    if (_.isNaN(parsed)) {
+    if (Number.isNaN(parsed)) {
       return num
     }
 
@@ -341,7 +354,7 @@ export default {
   },
 
   isValidHttpMethod (str) {
-    return _.isString(str) && _.includes(methods, str.toLowerCase())
+    return typeof str === 'string' && methods.includes(str.toLowerCase())
   },
 
   addTwentyYears () {
@@ -401,7 +414,7 @@ export default {
   },
 
   indent (str, indentAmount) {
-    const indentStr = _.repeat(' ', indentAmount)
+    const indentStr = ' '.repeat(indentAmount)
 
     str = str.replace(/\n/g, `\n${indentStr}`)
 
@@ -414,11 +427,10 @@ export default {
     const moreThanMaxNewLinesRe = new RegExp(`\\n{${maxNewLines},}`)
     const replacementWithNumLines = replacementNumLines ?? maxNewLines
 
-    return _.chain(str)
+    return str
     .split(moreThanMaxNewLinesRe)
-    .compact()
-    .join(_.repeat('\n', replacementWithNumLines))
-    .value()
+    .filter(Boolean)
+    .join('\n'.repeat(replacementWithNumLines))
   },
 
   /**
@@ -456,12 +468,12 @@ export default {
   },
 
   noArgsAreAFunction (args) {
-    return !_.some(args, _.isFunction)
+    return !args.some((arg) => typeof arg === 'function')
   },
 
   isPromiseLike (ret) {
     // @ts-ignore
-    return ret && _.isObject(ret) && 'then' in ret && _.isFunction(ret.then) && 'catch' in ret && _.isFunction(ret.catch)
+    return ret && (ret !== null && typeof ret === 'object') && 'then' in ret && typeof ret.then === 'function' && 'catch' in ret && typeof ret.catch === 'function'
   },
 
   stripCustomProtocol (filePath: string) {

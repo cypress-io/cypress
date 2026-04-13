@@ -1,9 +1,9 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
+import { defaults } from '@packages/utils'
 
 interface InternalWrapOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
@@ -27,7 +27,7 @@ export default (Commands, Cypress, cy, state) => {
 
   Commands.addAll({
     wrap (arg, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
-      const options: InternalWrapOptions = _.defaults({}, userOptions, {
+      const options: InternalWrapOptions = defaults({}, userOptions, {
         log: true,
         timeout: Cypress.config('defaultCommandTimeout'),
       })

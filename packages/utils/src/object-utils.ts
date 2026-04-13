@@ -4,10 +4,8 @@ const FORBIDDEN = new Set(['__proto__', 'prototype', 'constructor'])
  * Parse a path into an array of string/number segments.
  *
  * Supports dotted paths (`a.b.c`), numeric indices (`0`),
- * and simple bracket numeric segments (`a[0].b`).
- *
- * This is a Cypress-scoped path parser. It does NOT support
- * quoted bracket keys like `a["b"]` or escaped-dot keys.
+ * bracket numeric segments (`a[0].b`), and quoted bracket
+ * keys (`a["b"]`, `a['b']`).
  */
 export function toPathArray (path: string | number | (string | number)[]): (string | number)[] {
   if (Array.isArray(path)) return [...path]
@@ -37,9 +35,19 @@ export function toPathArray (path: string | number | (string | number)[]): (stri
       }
 
       i++ // skip ]
-      const num = Number(bracket)
 
-      result.push(Number.isFinite(num) && bracket !== '' ? num : bracket)
+      // Strip surrounding quotes (single or double)
+      if (
+        bracket.length >= 2 &&
+        ((bracket[0] === '"' && bracket[bracket.length - 1] === '"') ||
+        (bracket[0] === '\'' && bracket[bracket.length - 1] === '\''))
+      ) {
+        result.push(bracket.slice(1, -1))
+      } else {
+        const num = Number(bracket)
+
+        result.push(Number.isFinite(num) && bracket !== '' ? num : bracket)
+      }
     } else {
       current += path[i]
       i++

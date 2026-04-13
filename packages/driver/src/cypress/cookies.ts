@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { defaults } from '@packages/utils'
 import Cookies from 'js-cookie'
 import { CookieJar } from '@packages/server/lib/util/cookies'
 
@@ -9,12 +9,12 @@ let isDebuggingVerbose = false
 
 export const $Cookies = (namespace, domain) => {
   const isNamespaced = (name) => {
-    return _.startsWith(name, namespace)
+    return name.startsWith(namespace)
   }
 
   const API = {
     debug (bool = true, options: any = {}) {
-      _.defaults(options, {
+      defaults(options, {
         verbose: true,
       })
 
@@ -29,7 +29,7 @@ export const $Cookies = (namespace, domain) => {
 
       const m = removed ? 'warn' : 'info'
 
-      const args = [_.truncate(message, { length: 50 })]
+      const args = [message.length > 50 ? `${message.slice(0, 47)}...` : message]
 
       if (isDebuggingVerbose) {
         args.push(cookie)
@@ -45,7 +45,7 @@ export const $Cookies = (namespace, domain) => {
         return
       }
 
-      _.defaults(options, {
+      defaults(options, {
         path: '/',
       })
 
@@ -57,7 +57,7 @@ export const $Cookies = (namespace, domain) => {
     },
 
     setCy (name, value, options = {}) {
-      _.defaults(options, {
+      defaults(options, {
         domain,
       })
 
@@ -73,14 +73,16 @@ export const $Cookies = (namespace, domain) => {
     },
 
     clearCypressCookies () {
-      return _.each(Cookies.get(), (value, key) => {
+      const allCookies = Cookies.get()
+
+      for (const key of Object.keys(allCookies)) {
         if (isNamespaced(key)) {
-          return Cookies.remove(key, {
+          Cookies.remove(key, {
             path: '/',
             domain,
           })
         }
-      })
+      }
     },
 
     setInitial () {

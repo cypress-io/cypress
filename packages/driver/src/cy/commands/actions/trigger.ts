@@ -1,9 +1,9 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../../dom'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
+import { defaults, omit } from '@packages/utils'
 
 export const dispatch = (target, appWindow, eventName, options) => {
   const eventConstructor = options.eventConstructor ?? 'Event'
@@ -31,7 +31,7 @@ export const dispatch = (target, appWindow, eventName, options) => {
 
   // some options, like clientX & clientY, must be set on the
   // instance instead of passing them into the constructor
-  _.extend(event, options)
+  Object.assign(event, options)
 
   return target.dispatchEvent(event)
 }
@@ -39,7 +39,7 @@ export const dispatch = (target, appWindow, eventName, options) => {
 export const addEventCoords = (eventOptions, coords) => {
   const { fromElWindow, fromElViewport } = coords
 
-  return _.extend({
+  return Object.assign({
     clientX: fromElViewport.x,
     clientY: fromElViewport.y,
     screenX: fromElViewport.x,
@@ -57,7 +57,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
 
-      const options: Record<string, any> = _.defaults({}, userOptions, {
+      const options: Record<string, any> = defaults({}, userOptions, {
         log: true,
         $el: subject,
         bubbles: true,
@@ -76,7 +76,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       // omit entries we know aren't part of an event, but pass anything
       // else through so user can specify what the event object needs
-      let eventOptions = _.omit(options, 'log', '$el', 'position', 'x', 'y', 'waitForAnimations', 'animationDistanceThreshold')
+      let eventOptions = omit(options, 'log', '$el', 'position', 'x', 'y', 'waitForAnimations', 'animationDistanceThreshold')
 
       options._log = Cypress.log({
         $el: subject,
@@ -92,7 +92,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       options._log?.snapshot('before', { next: 'after' })
 
-      if (!_.isString(eventName)) {
+      if (typeof eventName !== 'string') {
         $errUtils.throwErrByPath('trigger.invalid_argument', {
           onFail: options._log,
           args: { eventName },

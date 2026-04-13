@@ -1,9 +1,9 @@
-import _ from 'lodash'
 import stringifyStable from 'json-stable-stringify'
 
 import $errUtils from '../../../cypress/error_utils'
 import $utils from '../../../cypress/utils'
 import logGroup from '../../logGroup'
+import { omit } from '@packages/utils'
 import SessionsManager from './manager'
 import {
   getConsoleProps,
@@ -56,14 +56,14 @@ export default function (Commands, Cypress, cy) {
 
   Commands.addAll({
     session (id: string | object, setup: () => void, options: Cypress.SessionOptions = { cacheAcrossSpecs: false }) {
-      if (!id || !_.isString(id) && !_.isObject(id)) {
+      if (!id || typeof id !== 'string' && (typeof id !== 'object' || id === null)) {
         $errUtils.throwErrByPath('sessions.session.wrongArgId')
       }
 
       // stringify deterministically if we were given an object
-      id = _.isString(id) ? id : stringifyStable(id) as string
+      id = typeof id === 'string' ? id : stringifyStable(id) as string
 
-      if (!setup || !_.isFunction(setup)) {
+      if (!setup || typeof setup !== 'function') {
         $errUtils.throwErrByPath('sessions.session.wrongArgSetup')
       }
 
@@ -72,7 +72,7 @@ export default function (Commands, Cypress, cy) {
       const withinSubjectChain = cy.state('withinSubjectChain')
 
       if (options) {
-        if (!_.isObject(options)) {
+        if (typeof options !== 'object' || options === null) {
           $errUtils.throwErrByPath('sessions.session.wrongArgOptions')
         }
 
@@ -115,11 +115,11 @@ export default function (Commands, Cypress, cy) {
           })
         }
 
-        if (session.cacheAcrossSpecs && _.isString(session.setup)) {
+        if (session.cacheAcrossSpecs && typeof session.setup === 'string') {
           session.setup = setup
         }
 
-        if (session.cacheAcrossSpecs && session.validate && _.isString(session.validate)) {
+        if (session.cacheAcrossSpecs && session.validate && typeof session.validate === 'string') {
           session.validate = options.validate
         }
       } else {
@@ -158,7 +158,7 @@ export default function (Commands, Cypress, cy) {
             // Catch when a cypress command fails in the setup function to correctly update log status
             // before failing command and ending command queue.
             cy.state('onQueueFailed', (err, _queue) => {
-              if (!_.isObject(err)) {
+              if (typeof err !== 'object' || err === null) {
                 err = new Error(err)
               }
 
@@ -174,7 +174,7 @@ export default function (Commands, Cypress, cy) {
 
               setSessionLogStatus('failed')
 
-              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while ${statusMap.inProgress(step)} the session. Because the session setup failed, we failed the test.`, _.add)
+              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while ${statusMap.inProgress(step)} the session. Because the session setup failed, we failed the test.`, (a, b) => a + b)
 
               return err
             })
@@ -189,7 +189,7 @@ export default function (Commands, Cypress, cy) {
             cy.state('onQueueFailed', null)
             const data = await sessions.getCurrentSessionData()
 
-            _.extend(existingSession, data)
+            Object.assign(existingSession, data)
             existingSession.hydrated = true
 
             _log.set({ consoleProps: () => getConsoleProps(existingSession) })
@@ -269,7 +269,7 @@ export default function (Commands, Cypress, cy) {
 
               // show validation error and allow sessions workflow to recreate the session
               if (step === 'restore') {
-                $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the restored session. Because validation failed, we will try to recreate the session.`, _.add)
+                $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the restored session. Because validation failed, we will try to recreate the session.`, (a, b) => a + b)
 
                 // @ts-ignore
                 err.isRecovered = true
@@ -299,7 +299,7 @@ export default function (Commands, Cypress, cy) {
                 snapshot: true,
               })
 
-              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the ${statusMap.complete(step)} session. Because validation failed immediately after ${statusMap.inProgress(step)} the session, we failed the test.`, _.add)
+              $errUtils.modifyErrMsg(err, `\n\nThis error occurred while validating the ${statusMap.complete(step)} session. Because validation failed immediately after ${statusMap.inProgress(step)} the session, we failed the test.`, (a, b) => a + b)
 
               return err
             }
@@ -312,7 +312,7 @@ export default function (Commands, Cypress, cy) {
               if (step === 'restore') {
                 const commands = queue.get()
                 // determine command queue index of _commandToRunAfterValidation's index
-                let index = _.findIndex(commands, (command: any) => {
+                let index = commands.findIndex((command: any) => {
                   return (
                     _commandToRunAfterValidation
                     && command.attributes.chainerId === _commandToRunAfterValidation.chainerId
@@ -417,7 +417,7 @@ export default function (Commands, Cypress, cy) {
               // collect all session data again that may have been updated during the validation check
               const data = await sessions.getCurrentSessionData()
 
-              _.extend(existingSession, data)
+              Object.assign(existingSession, data)
               validateLog.set({
                 consoleProps: () => {
                   return {
@@ -507,11 +507,11 @@ export default function (Commands, Cypress, cy) {
           _log = log
 
           if (!session.hydrated) {
-            const serverStoredSession = await sessions.getSession(session.id).catch(_.noop)
+            const serverStoredSession = await sessions.getSession(session.id).catch(() => {})
 
             // we have a saved session on the server and setup matches
             if (serverStoredSession && serverStoredSession.setup === session.setup.toString()) {
-              _.extend(session, _.omit(serverStoredSession, 'setup', 'validate'))
+              Object.assign(session, omit(serverStoredSession, ['setup', 'validate']))
               session.hydrated = true
             } else {
               return createSessionWorkflow(session, SESSION_STEPS.create)

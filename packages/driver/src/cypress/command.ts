@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick, omitBy } from '@packages/utils'
 import utils from './utils'
 
 let idCounter = 1
@@ -45,14 +45,14 @@ export class $Command {
   set (key, val?) {
     let obj
 
-    if (_.isString(key)) {
+    if (typeof key === 'string') {
       obj = {}
       obj[key] = val
     } else {
       obj = key
     }
 
-    _.extend(this.attributes, obj)
+    Object.assign(this.attributes, obj)
 
     return this
   }
@@ -124,10 +124,10 @@ export class $Command {
     for (let i = args.length - 1; i >= 0; i--) {
       const arg = args[i]
 
-      if (_.isObject(arg)) {
+      if (arg !== null && typeof arg === 'object') {
         // filter out any properties which aren't primitives
         // to prevent accidental mutations
-        const opts = _.omitBy(arg, _.isObject)
+        const opts = omitBy(arg, (v) => v !== null && typeof v === 'object')
 
         // force command to log
         opts.log = true
@@ -142,8 +142,8 @@ export class $Command {
   stringify () {
     let { name, args } = this.attributes
 
-    args = _.reduce(args, (memo: string[], arg) => {
-      arg = _.isString(arg) ? _.truncate(arg, { length: 20 }) : '...'
+    args = args.reduce((memo: string[], arg) => {
+      arg = typeof arg === 'string' ? (arg.length > 20 ? `${arg.slice(0, 17)}...` : arg) : '...'
       memo.push(arg)
 
       return memo
@@ -157,7 +157,7 @@ export class $Command {
   clone () {
     this._removeNonPrimitives(this.get('args'))
 
-    return $Command.create(_.clone(this.attributes))
+    return $Command.create({ ...this.attributes })
   }
 
   reset () {
@@ -168,9 +168,7 @@ export class $Command {
   }
 
   pick (...args) {
-    args.unshift(this.attributes)
-
-    return _.pick.apply(_, args as [Record<string, any>, any[]])
+    return pick(this.attributes, ...args)
   }
 
   static create (obj) {

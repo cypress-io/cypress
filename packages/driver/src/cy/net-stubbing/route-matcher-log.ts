@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { omit, hasPath } from '@packages/utils'
 
 import type {
   RouteMatcherOptions,
@@ -10,11 +10,11 @@ import $utils from '../../cypress/utils'
 const standaloneDisplayUrlProps: Array<keyof RouteMatcherOptions> = ['url', 'path', 'pathname']
 
 export function getDisplayUrlMatcher (matcher: RouteMatcherOptions): string {
-  const displayMatcher = _.omit(matcher, 'method')
-  const displayMatcherKeys = _.keys(displayMatcher)
+  const displayMatcher = omit(matcher, 'method')
+  const displayMatcherKeys = Object.keys(displayMatcher)
 
   for (const prop of standaloneDisplayUrlProps) {
-    if (_.has(matcher, prop) && displayMatcherKeys.length === 1) {
+    if (hasPath(matcher, prop) && displayMatcherKeys.length === 1) {
       return String(matcher[prop])
     }
   }

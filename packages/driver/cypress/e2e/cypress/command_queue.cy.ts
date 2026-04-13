@@ -1,23 +1,25 @@
-import _ from 'lodash'
 import type { IStability } from '../../../src/cy/stability'
 import $Command from '../../../src/cypress/command'
 import { CommandQueue } from '../../../src/cypress/command_queue'
 import type { StateFunc } from '../../../src/cypress/state'
 
+let _uniqueIdCounter = 0
+const _uniqueId = (prefix = '') => `${prefix}${++_uniqueIdCounter}`
+
 const createCommand = (props = {}) => {
-  return $Command.create(_.extend({
+  return $Command.create(Object.assign({
     name: 'get',
     args: ['#foo'],
     type: 'parent',
-    chainerId: _.uniqueId('ch'),
+    chainerId: _uniqueId('ch'),
     userInvocationStack: '',
     fn () {},
   }, props))
 }
 
 const log = (props = {}) => {
-  return Cypress.log(_.extend({
-    name: _.uniqueId('l'),
+  return Cypress.log(Object.assign({
+    name: _uniqueId('l'),
   }, props))
 }
 
@@ -56,13 +58,13 @@ describe('src/cypress/command_queue', () => {
     it('returns a flat list of logs from the commands', () => {
       const logs = queue.logs()
 
-      expect(_.invokeMap(logs, 'get', 'name')).to.eql(['l1', 'l2', 'l3', 'l4', 'l5'])
+      expect(logs.map((l) => l.get('name'))).to.eql(['l1', 'l2', 'l3', 'l4', 'l5'])
     })
 
     it('returns a filtered list of logs if filter is provided', () => {
       const logs = queue.logs({ alias: 'alias-1' })
 
-      expect(_.invokeMap(logs, 'get', 'name')).to.eql(['l1', 'l2', 'l4'])
+      expect(logs.map((l) => l.get('name'))).to.eql(['l1', 'l2', 'l4'])
     })
   })
 
@@ -70,7 +72,7 @@ describe('src/cypress/command_queue', () => {
     it('returns list of commands', () => {
       const commands = queue.get()
 
-      expect(_.invokeMap(commands, 'get', 'name')).to.eql(['get', 'find', 'click'])
+      expect(commands.map((c) => c.get('name'))).to.eql(['get', 'find', 'click'])
     })
   })
 
@@ -132,7 +134,7 @@ describe('src/cypress/command_queue', () => {
     it('returns commands from the index', () => {
       const commands = queue.slice(1)
 
-      expect(_.invokeMap(commands, 'get', 'name')).to.eql(['find', 'click'])
+      expect(commands.map((c) => c.get('name'))).to.eql(['find', 'click'])
     })
   })
 

@@ -6,7 +6,7 @@
 // 2. there is a bug when handling about:blank which borks it and
 // turns it into about://blank
 
-import _ from 'lodash'
+import { trimStartChars, trimEndChars, trimChars } from '@packages/utils'
 import UrlParse from 'url-parse'
 import { getSuperDomain, getSuperDomainOrigin } from '@packages/network-tools'
 
@@ -132,7 +132,7 @@ export class $Location {
       search: this.getSearch(),
       superDomainOrigin: this.getSuperDomainOrigin(),
       superDomain: this.getSuperDomain(),
-      toString: _.bind(this.getToString, this),
+      toString: this.getToString.bind(this),
     }
   }
 
@@ -170,7 +170,7 @@ export class $Location {
 
   static mergeUrlWithParams (url, params) {
     url = new UrlParse(url, null, true)
-    url.set('query', _.merge(url.query || {}, params))
+    url.set('query', { ...(url.query || {}), ...params })
 
     return url.toString()
   }
@@ -241,17 +241,17 @@ export class $Location {
   }
 
   static join (from, ...rest) {
-    const last = _.last(rest)
+    const last = rest.at(-1)
 
-    const paths = _.reduce(rest, (memo, segment) => {
+    const paths = rest.reduce((memo, segment) => {
       if (segment === last) {
-        memo.push(_.trimStart(segment, '/'))
+        memo.push(trimStartChars(segment, '/'))
       } else {
-        memo.push(_.trim(segment, '/'))
+        memo.push(trimChars(segment, '/'))
       }
 
       return memo
-    }, [_.trimEnd(from, '/')])
+    }, [trimEndChars(from, '/')])
 
     return paths.join('/')
   }

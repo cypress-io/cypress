@@ -1,5 +1,3 @@
-import _, { isEmpty } from 'lodash'
-
 import $dom from '../../../dom'
 import $elements from '../../../dom/elements'
 import $errUtils from '../../../cypress/error_utils'
@@ -8,6 +6,7 @@ import type { Log } from '../../../cypress/log'
 import { resolveShadowDomInclusion } from '../../../cypress/shadow_dom_utils'
 import { getAliasedRequests, isDynamicAliasingPossible } from '../../net-stubbing/aliasing'
 import { aliasRe, aliasIndexRe, aliasDisplayName } from '../../aliases'
+import { isBlank } from '@packages/utils'
 
 type GetOptions = Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow & {
   _log?: Log
@@ -143,7 +142,7 @@ function getAlias (selector, log, cy) {
 }
 
 function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | Cypress.LogTimeoutOptions = {}, queryCommand: QueryCommandOptions = '') {
-  if (!isEmpty(queryCommand) && _.isPlainObject(options) && options.hasOwnProperty('timeout') && !_.isFinite(options.timeout)) {
+  if (queryCommand !== '' && typeof options === 'object' && options !== null && !Array.isArray(options) && Object.getPrototypeOf(options) === Object.prototype && options.hasOwnProperty('timeout') && !Number.isFinite(options.timeout)) {
     $errUtils.throwErrByPath(`${queryCommand}.invalid_option_timeout`, {
       args: { timeout: options.timeout },
     })
@@ -152,7 +151,7 @@ function validateTimeoutFromOpts (options: GetOptions | ContainsOptions | Cypres
 
 export default (Commands, Cypress, cy, state) => {
   Commands.addQuery('get', function get (selector, userOptions: GetOptions = {}) {
-    if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
+    if ((userOptions === null) || Array.isArray(userOptions) || !(typeof userOptions === 'object' && userOptions !== null && Object.getPrototypeOf(userOptions) === Object.prototype)) {
       $errUtils.throwErrByPath('get.invalid_options', {
         args: { options: userOptions },
       })
@@ -232,15 +231,15 @@ export default (Commands, Cypress, cy, state) => {
   })
 
   Commands.addQuery('contains', function contains (filter, text, userOptions: ContainsOptions = {}) {
-    if (_.isRegExp(text)) {
+    if (text instanceof RegExp) {
       // .contains(filter, text)
       // Do nothing
-    } else if (_.isObject(text)) {
+    } else if (typeof text === 'object' && text !== null) {
       // .contains(text, userOptions)
       userOptions = text
       text = filter
       filter = ''
-    } else if (_.isUndefined(text)) {
+    } else if (text === undefined) {
       // .contains(text)
       text = filter
       filter = ''
@@ -252,15 +251,15 @@ export default (Commands, Cypress, cy, state) => {
       text = '0'
     }
 
-    if (userOptions.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
+    if (userOptions.matchCase === true && text instanceof RegExp && text.flags.includes('i')) {
       $errUtils.throwErrByPath('contains.regex_conflict')
     }
 
-    if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
+    if (!(typeof text === 'string' || (typeof text === 'number' && Number.isFinite(text)) || text instanceof RegExp)) {
       $errUtils.throwErrByPath('contains.invalid_argument')
     }
 
-    if (_.isBlank(text)) {
+    if (isBlank(text)) {
       $errUtils.throwErrByPath('contains.empty_string')
     }
 
@@ -271,14 +270,14 @@ export default (Commands, Cypress, cy, state) => {
     const selector = $dom.getContainsSelector(text, filter, { matchCase: true, ...userOptions })
 
     const log = Cypress.log({
-      message: $utils.stringify(_.compact([filter, text])),
+      message: $utils.stringify([filter, text].filter(Boolean)),
       type: this.hasPreviouslyLinkedCommand ? 'child' : 'parent',
       hidden: userOptions.log === false,
       timeout: userOptions.timeout,
       consoleProps: () => ({}),
     })
 
-    const getOptions = _.extend({ _log: log }, userOptions) as GetOptions
+    const getOptions = Object.assign({ _log: log }, userOptions) as GetOptions
     const getFn = cy.now('get', selector, getOptions)
 
     const getPhrase = () => {

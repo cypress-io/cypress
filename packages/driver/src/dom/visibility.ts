@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $jquery from './jquery'
 import $document from './document'
 import $elements from './elements'
@@ -321,13 +320,13 @@ const elDescendentsHavePositionFixedOrAbsolute = function ($parent, $child) {
   const parents = getAllParents($child[0], $parent)
   const $els = $jquery.wrap(parents).add($child)
 
-  return _.some($els.get(), (el) => {
+  return $els.get().some((el) => {
     return fixedOrAbsoluteRe.test($jquery.wrap(el).css('position'))
   })
 }
 
 const elHasVisibleChild = function ($el) {
-  return _.some($el.children(), (el) => {
+  return Array.from($el.children()).some((el) => {
     return isVisible(el)
   })
 }

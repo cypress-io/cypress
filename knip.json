@@ -838,9 +838,6 @@
     "packages/driver/src/dom/visibility.ts": [
       "exports"
     ],
-    "packages/driver/src/config/lodash.ts": [
-      "exports"
-    ],
     "packages/driver/src/cypress/server.ts": [
       "exports"
     ],

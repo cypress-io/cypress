@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $jquery from '../jquery'
 import $ from 'jquery'
 import $document from '../document'
@@ -54,14 +53,14 @@ export const isButtonLike = (el: HTMLElement) => {
     return isInputType(el, type)
   }
 
-  return _.some([
+  return [
     type('button'),
     type('image'),
     type('reset'),
     type('submit'),
     type('checkbox'),
     type('radio'),
-  ])
+  ].some(Boolean)
 }
 
 export const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement {
@@ -81,7 +80,7 @@ export const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement 
 
   if (isContentEditableElement) return true
 
-  return _.some([
+  return [
     isContentEditableElement,
     sel('textarea'),
     sel(':text'),
@@ -98,7 +97,7 @@ export const isTextLike = function (el: HTMLElement): el is HTMLTextLikeElement 
     type('search'),
     type('url'),
     type('tel'),
-  ])
+  ].some(Boolean)
 }
 
 /**
@@ -132,7 +131,7 @@ export const isFocused = (el) => {
  */
 export const isFocusable = ($el: JQuery<HTMLElement>) => {
   return (
-    _.some(focusableSelectors, (sel) => $el.is(sel)) ||
+    focusableSelectors.some((sel) => $el.is(sel)) ||
      isDesignModeDocumentElement($el.get(0))
   )
 }
@@ -200,7 +199,7 @@ export const isFocusedOrInFocused = (el: HTMLElement) => {
  */
 export const isFocusableWhenNotDisabled = ($el: JQuery<HTMLElement>) => {
   return (
-    _.some(focusableWhenNotDisabledSelectors, (sel) => $el.is(sel)) ||
+    focusableWhenNotDisabledSelectors.some((sel) => $el.is(sel)) ||
     isDesignModeDocumentElement($el.get(0))
   )
 }

@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-import _ from 'lodash'
 import uniqueSelector from '@cypress/unique-selector'
 
 import $utils from './utils'
@@ -62,7 +61,7 @@ const ElementSelector: ElementSelectorAPI & ElementSelectorPrivate = {
   },
 
   defaults (props: ElementSelectorDefaultsOptions) {
-    if (!_.isPlainObject(props)) {
+    if (props === null || typeof props !== 'object' || Array.isArray(props)) {
       $errUtils.throwErrByPath('element_selector.defaults_invalid_arg', {
         args: { arg: $utils.stringify(props) },
       })
@@ -71,7 +70,7 @@ const ElementSelector: ElementSelectorAPI & ElementSelectorPrivate = {
     const { selectorPriority } = props
 
     if (selectorPriority) {
-      if (!_.isArray(selectorPriority)) {
+      if (!Array.isArray(selectorPriority)) {
         $errUtils.throwErrByPath('element_selector.defaults_invalid_priority_type', {
           args: { arg: $utils.stringify(selectorPriority) },
         })

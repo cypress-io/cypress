@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $dom from '../../../dom'
@@ -6,6 +5,7 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
 import type { Log } from '../../../cypress/log'
+import { defaults } from '@packages/utils'
 
 const newLineRe = /\n/g
 
@@ -19,22 +19,22 @@ export default (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'element' }, {
     select (subject, valueOrTextOrIndex, userOptions: Partial<Cypress.SelectOptions> = {}) {
       if (
-        !_.isNumber(valueOrTextOrIndex)
-        && !_.isString(valueOrTextOrIndex)
-        && !_.isArray(valueOrTextOrIndex)
+        typeof valueOrTextOrIndex !== 'number'
+        && typeof valueOrTextOrIndex !== 'string'
+        && !Array.isArray(valueOrTextOrIndex)
       ) {
         $errUtils.throwErrByPath('select.invalid_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
 
       if (
-        _.isArray(valueOrTextOrIndex)
+        Array.isArray(valueOrTextOrIndex)
         && valueOrTextOrIndex.length > 0
-        && !_.some(valueOrTextOrIndex, (val) => _.isNumber(val) || _.isString(val))
+        && !valueOrTextOrIndex.some((val) => typeof val === 'number' || typeof val === 'string')
       ) {
         $errUtils.throwErrByPath('select.invalid_array_argument', { args: { value: JSON.stringify(valueOrTextOrIndex) } })
       }
 
-      const options: InternalSelectOptions = _.defaults({}, userOptions, {
+      const options: InternalSelectOptions = defaults({}, userOptions, {
         $el: subject,
         log: true,
         force: false,
@@ -52,7 +52,7 @@ export default (Commands, Cypress, cy) => {
         timeout: options.timeout,
         consoleProps () {
           // merge into consoleProps without mutating it
-          return _.extend({}, consoleProps, {
+          return Object.assign({}, consoleProps, {
             'Applied To': $dom.getElements(options.$el),
             'Options': deltaOptions,
           })
@@ -85,14 +85,14 @@ export default (Commands, Cypress, cy) => {
 
       // normalize valueOrTextOrIndex if its not an array
       valueOrTextOrIndex = [].concat(valueOrTextOrIndex).map((v: any) => {
-        if (_.isNumber(v) && (!_.isInteger(v) || v < 0)) {
+        if (typeof v === 'number' && (!Number.isInteger(v) || v < 0)) {
           $errUtils.throwErrByPath('select.invalid_number', { args: { index: v } })
         }
 
         // https://github.com/cypress-io/cypress/issues/16045
         // replace `&nbsp;` in the text to `\us00a0` to find match.
         // @see https://stackoverflow.com/a/53306311/1038927
-        return _.isNumber(v) ? v : v.replace(/&nbsp;/g, '\u00a0')
+        return typeof v === 'number' ? v : v.replace(/&nbsp;/g, '\u00a0')
       })
 
       const multiple = options.$el.prop('multiple')
@@ -151,11 +151,11 @@ export default (Commands, Cypress, cy) => {
           // if any of the values are the same and the user is trying to
           // select based on the text, setting the value won't work
           // `notAllUniqueValues` is used later to do the right thing
-          const uniqueValues = _.chain(optionsObjects).map('value').uniq().value()
+          const uniqueValues = [...new Set(optionsObjects.map((obj) => obj.value))]
 
           notAllUniqueValues = uniqueValues.length !== optionsObjects.length
 
-          _.each(optionsObjects, (obj) => {
+          optionsObjects.forEach((obj) => {
             if (valueOrTextOrIndex.includes(obj.text)) {
               optionEls.push(obj.$el)
               const objValue = obj.value
@@ -173,13 +173,13 @@ export default (Commands, Cypress, cy) => {
           })
         }
 
-        if (!values.length && !(_.isArray(valueOrTextOrIndex) && valueOrTextOrIndex.length === 0)) {
+        if (!values.length && !(Array.isArray(valueOrTextOrIndex) && valueOrTextOrIndex.length === 0)) {
           $errUtils.throwErrByPath('select.no_matches', {
             args: { value: valueOrTextOrIndex.join(', ') },
           })
         }
 
-        _.each(optionEls, ($el) => {
+        optionEls.forEach(($el) => {
           if ($el.prop('disabled')) {
             node = $dom.stringify($el)
 
@@ -277,8 +277,8 @@ export default (Commands, Cypress, cy) => {
               // select the first one
               let selectedIndex = 0
 
-              _.each(optionEls, ($el) => {
-                const index = _.findIndex(optionsObjects, (optionObject: any) => {
+              optionEls.forEach(($el) => {
+                const index = optionsObjects.findIndex((optionObject: any) => {
                   return $el.text() === optionObject.originalText
                 })
 

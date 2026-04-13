@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { allCommands } from '../cy/commands'
 import { addCommand as addNetstubbingCommand } from '../cy/net-stubbing'
 import $errUtils from './error_utils'
@@ -11,7 +10,7 @@ const PLACEHOLDER_COMMANDS = ['mount', 'hover']
 const builtInCommands = [
   // `default` is necessary if a file uses `export default` syntax.
   // @ts-ignore
-  ..._.toArray(allCommands).map((c) => c.default || c),
+  ...Object.values(allCommands).map((c: any) => c.default || c),
   addNetstubbingCommand,
 ]
 
@@ -99,7 +98,7 @@ export default {
           builtInCommandNames[name] = true
         }
 
-        if (_.isFunction(options)) {
+        if (typeof options === 'function') {
           fn = options
           options = {}
         }
@@ -144,7 +143,7 @@ export default {
           return original.fn.apply(this, args)
         }
 
-        const overridden = _.clone(original)
+        const overridden = { ...original }
 
         overridden.fn = function (...args) {
           args = ([] as any).concat(originalFn, args)

@@ -1,5 +1,4 @@
 import $ from 'jquery'
-import _ from 'lodash'
 import $dom from '../dom'
 import $elements from '../dom/elements'
 import $Keyboard, { Keyboard, ModifiersEventOptions } from './keyboard'
@@ -161,13 +160,9 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       return true
     }
 
-    const xy = (obj) => {
-      return _.pick(obj, 'x', 'y')
-    }
-
     // if we have the same element, but the xy coords are different
     // then fire mouse move events...
-    return !_.isEqual(xy(fromElViewport), xy(coords))
+    return fromElViewport.x !== coords.x || fromElViewport.y !== coords.y
   }
 
   const shouldMoveCursorToEndAfterMousedown = (el: HTMLElement) => {
@@ -203,7 +198,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 
-      return _.extend({
+      return Object.assign({
         view: win,
         // allow propagation out of root of shadow-dom
         // https://developer.mozilla.org/en-US/docs/Web/API/Event/composed
@@ -251,13 +246,13 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       const { x, y } = coords
 
       const defaultOptions = mouse._getDefaultMouseOptions(x, y, win)
-      const defaultMouseOptions = _.extend({}, defaultOptions, {
+      const defaultMouseOptions = Object.assign({}, defaultOptions, {
         button: 0,
         which: 0,
         buttons: 0,
       })
 
-      const defaultPointerOptions = _.extend({}, defaultOptions, {
+      const defaultPointerOptions = Object.assign({}, defaultOptions, {
         button: -1,
         which: 0,
         buttons: 0,
@@ -276,14 +271,14 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         | (() => { skipped: string })
         | (() => SentEvent)
 
-      let pointerout = _.noop
-      let pointerleave = _.noop
+      let pointerout = () => {}
+      let pointerleave = () => {}
       let pointerover: EventFunc = notFired
-      let pointerenter = _.noop
-      let mouseout = _.noop
-      let mouseleave = _.noop
+      let pointerenter = () => {}
+      let mouseout = () => {}
+      let mouseleave = () => {}
       let mouseover: EventFunc = notFired
-      let mouseenter = _.noop
+      let mouseenter = () => {}
       let pointermove: EventFunc = notFired
       let mousemove: EventFunc = notFired
 
@@ -295,11 +290,11 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       if (hoveredElChanged && lastHoveredEl) {
         commonAncestor = $elements.getFirstCommonAncestor(el, lastHoveredEl)
         pointerout = () => {
-          sendPointerout(lastHoveredEl, _.extend({}, defaultPointerOptions, { relatedTarget: el }))
+          sendPointerout(lastHoveredEl, Object.assign({}, defaultPointerOptions, { relatedTarget: el }))
         }
 
         mouseout = () => {
-          sendMouseout(lastHoveredEl, _.extend({}, defaultMouseOptions, { relatedTarget: el }))
+          sendMouseout(lastHoveredEl, Object.assign({}, defaultMouseOptions, { relatedTarget: el }))
         }
 
         let curParent: Node | null = lastHoveredEl
@@ -313,13 +308,13 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
         pointerleave = () => {
           elsToSendMouseleave.forEach((elToSend) => {
-            sendPointerleave(elToSend, _.extend({}, defaultPointerOptions, { relatedTarget: el }))
+            sendPointerleave(elToSend, Object.assign({}, defaultPointerOptions, { relatedTarget: el }))
           })
         }
 
         mouseleave = () => {
           elsToSendMouseleave.forEach((elToSend) => {
-            sendMouseleave(elToSend, _.extend({}, defaultMouseOptions, { relatedTarget: el }))
+            sendMouseleave(elToSend, Object.assign({}, defaultMouseOptions, { relatedTarget: el }))
           })
         }
       }
@@ -327,11 +322,11 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       if (hoveredElChanged) {
         if (el && $elements.isAttachedEl(el)) {
           mouseover = () => {
-            return sendMouseover(el, _.extend({}, defaultMouseOptions, { relatedTarget: lastHoveredEl }))
+            return sendMouseover(el, Object.assign({}, defaultMouseOptions, { relatedTarget: lastHoveredEl }))
           }
 
           pointerover = () => {
-            return sendPointerover(el, _.extend({}, defaultPointerOptions, { relatedTarget: lastHoveredEl }))
+            return sendPointerover(el, Object.assign({}, defaultPointerOptions, { relatedTarget: lastHoveredEl }))
           }
 
           let curParent: Node | null = el
@@ -346,13 +341,13 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
           pointerenter = () => {
             return elsToSendMouseenter.forEach((elToSend) => {
-              sendPointerenter(elToSend, _.extend({}, defaultPointerOptions, { relatedTarget: lastHoveredEl }))
+              sendPointerenter(elToSend, Object.assign({}, defaultPointerOptions, { relatedTarget: lastHoveredEl }))
             })
           }
 
           mouseenter = () => {
             return elsToSendMouseenter.forEach((elToSend) => {
-              sendMouseenter(elToSend, _.extend({}, defaultMouseOptions, { relatedTarget: lastHoveredEl }))
+              sendMouseenter(elToSend, Object.assign({}, defaultMouseOptions, { relatedTarget: lastHoveredEl }))
             })
           }
         }
@@ -418,7 +413,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
       const defaultOptions = mouse._getDefaultMouseOptions(x, y, win)
 
-      const pointerEvtOptions = _.extend({}, defaultOptions, {
+      const pointerEvtOptions = Object.assign({}, defaultOptions, {
         ...defaultPointerDownUpOptions,
         button: 0,
         which: 1,
@@ -426,7 +421,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
         relatedTarget: null,
       }, pointerEvtOptionsExtend)
 
-      const mouseEvtOptions = _.extend({}, defaultOptions, {
+      const mouseEvtOptions = Object.assign({}, defaultOptions, {
         button: 0,
         which: 1,
         buttons: 1,
@@ -593,7 +588,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
       const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, elToClick, forceEl, skipClickEventReason, mouseEvtOptionsExtend)
 
-      return _.extend({}, mouseDownPhase.events, mouseUpPhase.events, mouseClickEvents)
+      return Object.assign({}, mouseDownPhase.events, mouseUpPhase.events, mouseClickEvents)
     },
 
     /**
@@ -607,12 +602,12 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
       let defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
 
-      const pointerEvtOptions = _.extend({}, defaultOptions, {
+      const pointerEvtOptions = Object.assign({}, defaultOptions, {
         ...defaultPointerDownUpOptions,
         buttons: 0,
       }, pointerEvtOptionsExtend)
 
-      let mouseEvtOptions = _.extend({}, defaultOptions, {
+      let mouseEvtOptions = Object.assign({}, defaultOptions, {
         buttons: 0,
         detail: 1,
       }, mouseEvtOptionsExtend)
@@ -663,7 +658,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
 
       const defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
 
-      const clickEventOptions = _.extend({}, defaultOptions, {
+      const clickEventOptions = Object.assign({}, defaultOptions, {
         buttons: 0,
         detail: 1,
       }, mouseEvtOptionsExtend)
@@ -679,7 +674,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       const win = $dom.getWindowByElement(el)
       const defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
 
-      const mouseEvtOptions = _.extend({}, defaultOptions, {
+      const mouseEvtOptions = Object.assign({}, defaultOptions, {
         button: 2,
         buttons: 2,
         detail: 0,
@@ -704,7 +699,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       const el = forceEl || mouse.moveToCoords(fromElViewport)
       const win = $dom.getWindowByElement(el)
 
-      const dblclickEvtProps = _.extend(mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win), {
+      const dblclickEvtProps = Object.assign(mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win), {
         buttons: 0,
         detail: 2,
       }, mouseEvtOptionsExtend)
@@ -733,9 +728,9 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       const skipMouseupEvent = mouseDownPhase.events.pointerdown.preventedDefault
       const mouseUpPhase = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      const clickEvents = _.extend({}, mouseDownPhase.events, mouseUpPhase.events)
+      const clickEvents = Object.assign({}, mouseDownPhase.events, mouseUpPhase.events)
 
-      return _.extend({}, { clickEvents, contextmenuEvent })
+      return Object.assign({}, { clickEvents, contextmenuEvent })
     },
   }
 
@@ -752,11 +747,11 @@ type SentEvent = {
 }
 
 const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, Constructor, composed = false): SentEvent => {
-  evtOptions = _.extend({}, evtOptions, { bubbles, cancelable })
+  evtOptions = Object.assign({}, evtOptions, { bubbles, cancelable })
   const _eventModifiers = $Keyboard.fromModifierEventOptions(evtOptions)
   const modifiers = $Keyboard.modifiersToString(_eventModifiers)
 
-  const evt = new Constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable, composed }))
+  const evt = new Constructor(evtName, Object.assign({}, evtOptions, { bubbles, cancelable, composed }))
 
   if (bubbles) {
     evt.stopPropagation = function (...args) {

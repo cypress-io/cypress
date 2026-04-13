@@ -1,13 +1,13 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import { $Location } from '../../cypress/location'
 import { whatIsCircular } from '../../util/what-is-circular'
+import { defaults, pick, omitBy } from '@packages/utils'
 
 const isOptional = (memo, val, key) => {
-  if (_.isNull(val)) {
+  if (val === null) {
     memo.push(key)
   }
 
@@ -33,19 +33,19 @@ const REQUEST_DEFAULTS = {
   retryOnStatusCodeFailure: false,
 }
 
-const REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
+const REQUEST_PROPS = Object.keys(REQUEST_DEFAULTS)
 
-const OPTIONAL_OPTS = _.reduce(REQUEST_DEFAULTS, isOptional, [])
+const OPTIONAL_OPTS = Object.entries(REQUEST_DEFAULTS).reduce((memo, [key, val]) => isOptional(memo, val, key), [] as string[])
 
 const hasFormUrlEncodedContentTypeHeader = (headers) => {
-  const header = _.findKey(headers, _.matches('application/x-www-form-urlencoded'))
+  const header = Object.keys(headers).find((key) => headers[key] === 'application/x-www-form-urlencoded')
 
-  return header && (_.toLower(header) === 'content-type')
+  return header && (header.toLowerCase() === 'content-type')
 }
 
 const isValidBody = (body, isExplicitlyDefined: boolean = false) => {
-  return (_.isObject(body) || _.isBoolean(body) || (isExplicitlyDefined && _.isNull(body)))
-    && !_.isFunction(body)
+  return ((typeof body === 'object' && body !== null) || typeof body === 'boolean' || (isExplicitlyDefined && body === null))
+    && typeof body !== 'function'
 }
 
 const whichAreOptional = (val, key) => {
@@ -65,7 +65,7 @@ const needsFormSpecified = (options: any = {}) => {
 
   // json isn't true, and we have an object body and the user
   // specified that the content-type header is x-www-form-urlencoded
-  return (json !== true) && _.isObject(body) && hasFormUrlEncodedContentTypeHeader(headers)
+  return (json !== true) && typeof body === 'object' && body !== null && hasFormUrlEncodedContentTypeHeader(headers)
 }
 
 interface BackendError {
@@ -84,9 +84,9 @@ export default (Commands, Cypress, cy, state, config) => {
       const userOptions = o
       let bodyIsExplicitlyDefined = false
 
-      if (_.isObject(args[0])) {
-        _.extend(userOptions, args[0])
-        bodyIsExplicitlyDefined = _.has(args[0], 'body')
+      if (typeof args[0] === 'object' && args[0] !== null) {
+        Object.assign(userOptions, args[0])
+        bodyIsExplicitlyDefined = Object.prototype.hasOwnProperty.call(args[0], 'body')
       } else if (args.length === 1) {
         o.url = args[0]
       } else if (args.length === 2) {
@@ -108,7 +108,7 @@ export default (Commands, Cypress, cy, state, config) => {
         bodyIsExplicitlyDefined = true
       }
 
-      let options = _.defaults({}, userOptions, REQUEST_DEFAULTS, {
+      let options = defaults({}, userOptions, REQUEST_DEFAULTS, {
         log: true,
       })
 
@@ -125,7 +125,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       // normalize followRedirects -> followRedirect
       // because we are nice
-      if (_.has(options, 'followRedirects')) {
+      if (Object.prototype.hasOwnProperty.call(options, 'followRedirects')) {
         options.followRedirect = options.followRedirects
       }
 
@@ -139,7 +139,7 @@ export default (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('request.url_missing')
       }
 
-      if (!_.isString(options.url)) {
+      if (typeof options.url !== 'string') {
         $errUtils.throwErrByPath('request.url_wrong_type')
       }
 
@@ -200,7 +200,7 @@ export default (Commands, Cypress, cy, state, config) => {
       }
 
       if (options.encoding) {
-        if (!_.isString(options.encoding) || !Buffer.isEncoding(options.encoding)) {
+        if (typeof options.encoding !== 'string' || !Buffer.isEncoding(options.encoding)) {
           $errUtils.throwErrByPath('request.encoding_invalid', {
             args: {
               encoding: options.encoding,
@@ -221,7 +221,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       const path = whatIsCircular(options.body)
 
-      if (_.isObject(options.body) && path) {
+      if (typeof options.body === 'object' && options.body !== null && path) {
         $errUtils.throwErrByPath('request.body_circular', { args: { path } })
       }
 
@@ -231,35 +231,35 @@ export default (Commands, Cypress, cy, state, config) => {
         options.json = true
       }
 
-      options = _.omitBy(options, whichAreOptional)
+      options = omitBy(options, whichAreOptional)
 
       const { auth, headers, form } = options
 
       if (auth) {
-        if (!_.isObject(auth)) {
+        if (typeof auth !== 'object' || auth === null) {
           $errUtils.throwErrByPath('request.auth_invalid')
         }
       }
 
       if (headers) {
-        if (!_.isObject(headers)) {
+        if (typeof headers !== 'object' || headers === null) {
           $errUtils.throwErrByPath('request.headers_invalid')
         }
       }
 
-      if (!_.isBoolean(options.gzip)) {
+      if (typeof options.gzip !== 'boolean') {
         $errUtils.throwErrByPath('request.gzip_invalid')
       }
 
       if (form) {
-        if (!_.isBoolean(form)) {
+        if (typeof form !== 'boolean') {
           $errUtils.throwErrByPath('request.form_invalid')
         }
       }
 
       // clone the requestOpts and reduce them down
       // to the bare minimum to send to lib/request
-      const requestOpts = _.pick(options, REQUEST_PROPS)
+      const requestOpts = pick(options, REQUEST_PROPS)
 
       options._log = Cypress.log({
         message: '',
@@ -278,7 +278,7 @@ export default (Commands, Cypress, cy, state, config) => {
           rr = rr.length === 1 ? rr[0] : rr
 
           obj[word] = rr
-          obj['Yielded'] = _.pick(resp, 'status', 'duration', 'body', 'headers')
+          obj['Yielded'] = pick(resp, ['status', 'duration', 'body', 'headers'])
 
           return obj
         },

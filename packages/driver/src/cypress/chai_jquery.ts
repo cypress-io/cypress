@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $dom from '../dom'
 import $elements from '../dom/elements'
 import type { Methods, PartialAssertionArgs } from './assertions/assert'
@@ -7,7 +6,7 @@ import { assert, assertDom, accessors, selectors, wrap } from './assertions/asse
 const maybeCastNumberToString = (num: number | string) => {
   // if this is a finite number (no Infinity or NaN)
   // cast to a string
-  return _.isFinite(num) ? `${num}` : num
+  return Number.isFinite(num) ? `${num}` : num
 }
 
 interface Callbacks {
@@ -33,7 +32,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
         chaiUtils,
         callbacks,
         method,
-        _.includes(actual, expected),
+        actual != null && actual.includes(expected),
         `expected #{this} to contain ${message}`,
         `expected #{this} not to contain ${notMessage}`,
         ...args,
@@ -238,7 +237,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
     })
   })
 
-  _.each(selectors, (selectorName, selector) => {
+  Object.entries(selectors).forEach(([selector, selectorName]) => {
     const sel = selector as keyof typeof selectors
 
     return chai.Assertion.addProperty(sel, function () {
@@ -255,7 +254,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
     })
   })
 
-  _.each(accessors, (description, accessor) => {
+  Object.entries(accessors).forEach(([accessor, description]) => {
     const acc = accessor as keyof typeof accessors
 
     return chai.Assertion.addMethod(acc, function (name, val) {
@@ -292,7 +291,7 @@ const $chaiJquery = (chai: Chai.ChaiStatic, chaiUtils: Chai.ChaiUtils, callbacks
         let message: string
         let negatedMessage: string
 
-        if (_.isUndefined(actual)) {
+        if (actual === undefined) {
           message = `expected \#{this} to have ${description} ${inspect(name)}`
 
           negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)}`

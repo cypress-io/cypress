@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import $ from 'jquery'
 import Bluebird from 'bluebird'
 import Debug from 'debug'
@@ -20,7 +20,7 @@ const __stackReplacementMarker = (fn, args) => {
 
 const commandRunningFailed = (Cypress, err, current?: $Command) => {
   // allow for our own custom onFail function
-  if (err.onFail && _.isFunction(err.onFail)) {
+  if (err.onFail && typeof err.onFail === 'function') {
     err.onFail(err)
     // clean up this onFail callback after it's been called
     delete err.onFail
@@ -78,7 +78,7 @@ function retryQuery (command: $Command, ret: any, cy: $Cy) {
     )
   }
 
-  if (!_.isFunction(ret)) {
+  if (typeof ret !== 'function') {
     $errUtils.throwErrByPath(
       'query_command.returned_non_function', {
         args: { name: command.get('name'), returned: ret },
@@ -130,13 +130,15 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   logs (filter) {
-    let logs = _.flatten(_.invokeMap(this.get(), 'get', 'logs'))
+    let logs = this.get().map((cmd) => cmd.get('logs')).flat()
 
     if (filter) {
-      const matchesFilter = _.matches(filter)
+      const filterKeys = Object.keys(filter)
 
-      logs = _.filter(logs, (log) => {
-        return matchesFilter(log.get())
+      logs = logs.filter((log) => {
+        const logAttrs = log.get()
+
+        return filterKeys.every((key) => logAttrs[key] === filter[key])
       })
     }
 
@@ -144,7 +146,7 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   names () {
-    return _.invokeMap(this.get(), 'get', 'name')
+    return this.get().map((cmd) => cmd.get('name'))
   }
 
   enqueue (command: $Command) {
@@ -165,14 +167,14 @@ export class CommandQueue extends Queue<$Command> {
 
     // if this is a number, then we know we're about to insert this
     // into our commands and need to reset next + increment the index
-    if (_.isNumber(nestedIndex) && nestedIndex < this.length) {
+    if (typeof nestedIndex === 'number' && nestedIndex < this.length) {
       this.state('nestedIndex', (nestedIndex += 1))
     }
 
     // we look at whether or not nestedIndex is a number, because if it
     // is then we need to insert inside of our commands, else just push
     // it onto the end of the queue
-    const index = _.isNumber(nestedIndex) ? nestedIndex : this.length
+    const index = typeof nestedIndex === 'number' ? nestedIndex : this.length
 
     this.insert(index, command)
   }
@@ -197,10 +199,10 @@ export class CommandQueue extends Queue<$Command> {
   }
 
   find (attrs) {
-    const matchesAttrs = _.matches(attrs)
+    const attrKeys = Object.keys(attrs)
 
-    return _.find(this.get(), (command: $Command) => {
-      return matchesAttrs(command.attributes)
+    return this.get().find((command: $Command) => {
+      return attrKeys.every((key) => command.attributes[key] === attrs[key])
     })
   }
 
@@ -322,8 +324,8 @@ export class CommandQueue extends Queue<$Command> {
         )
       }
 
-      if (!(!enqueuedCmd || !!_.isUndefined(ret))) {
-        ret = _.isFunction(ret) ?
+      if (!(!enqueuedCmd || ret === undefined)) {
+        ret = typeof ret === 'function' ?
           ret.toString() :
           $utils.stringify(ret)
 
@@ -524,7 +526,7 @@ export class CommandQueue extends Queue<$Command> {
       // since this failed this means that a specific command failed
       // and we should highlight it in red or insert a new command
       // @ts-ignore
-      if (_.isObject(err) && !err.name) {
+      if (err !== null && typeof err === 'object' && !err.name) {
         // @ts-ignore
         err.name = 'CypressError'
       }
@@ -588,6 +590,6 @@ export class CommandQueue extends Queue<$Command> {
       }
     })
 
-    this.cy.state('subjects', _.pick(this.cy.state('subjects'), stillNeeded))
+    this.cy.state('subjects', pick(this.cy.state('subjects'), ...stillNeeded))
   }
 }

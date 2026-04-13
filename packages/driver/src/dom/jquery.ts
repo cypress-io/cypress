@@ -1,5 +1,4 @@
 import $ from 'jquery'
-import _ from 'lodash'
 
 // wrap the object in jquery
 export function wrap (obj) {
@@ -36,7 +35,7 @@ export const isJquery = (obj: any): obj is JQuery<any> => {
   // as the jquery property of the window constructor
   // for actual jquery, it should be the version number
   // so we ensure that it is a string (rather than HTML element)
-  return !!hasJqueryProperty && typeof _.get(obj, 'constructor.prototype.jquery') === 'string'
+  return !!hasJqueryProperty && typeof obj?.constructor?.prototype?.jquery === 'string'
 }
 
 export default {

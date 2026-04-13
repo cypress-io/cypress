@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import dayjs from 'dayjs'
 import Promise from 'bluebird'
 
@@ -135,7 +135,7 @@ const testAfterRun = (test, Cypress) => {
     for (let key of Object.keys(test.ctx || {})) {
       const value = test.ctx[key]
 
-      if (_.isObject(value) && !mochaCtxKeysRe.test(key)) {
+      if ((value !== null && typeof value === 'object') && !mochaCtxKeysRe.test(key)) {
         // nuke any object properties that come from
         // cy.as() aliases or anything set from 'this'
         // so we aggressively perform GC and prevent obj
@@ -192,7 +192,7 @@ const wrap = (runnable): Record<string, any> | null => {
 // Sent to the Reporter to populate command log
 // and send to Cypress Cloud when in record mode.
 const wrapAll = (runnable): Record<string, any> => {
-  return _.extend(
+  return Object.assign(
     {},
     $utils.reduceProps(runnable, RUNNABLE_PROPS),
     $utils.reduceProps(runnable, RUNNABLE_LOGS),
@@ -201,14 +201,14 @@ const wrapAll = (runnable): Record<string, any> => {
 
 const condenseHooks = (runnable, getHookId) => {
   runnable._condensedHooks = true
-  const hooks = _.compact(_.concat(
-    runnable._beforeAll,
-    runnable._beforeEach,
-    runnable._afterAll,
-    runnable._afterEach,
-  ))
+  const hooks = [
+    ...(runnable._beforeAll || []),
+    ...(runnable._beforeEach || []),
+    ...(runnable._afterAll || []),
+    ...(runnable._afterEach || []),
+  ].filter(Boolean)
 
-  return _.map(hooks, (hook) => {
+  return hooks.map((hook) => {
     if (!hook.hookId) {
       hook.hookId = getHookId()
     }
@@ -255,7 +255,7 @@ const eachHookInSuite = (suite, fn) => {
 
 // iterates over a suite's tests (including nested suites)
 // and will return as soon as the callback is true
-const findTestInSuite = (suite, fn: any = _.identity) => {
+const findTestInSuite = (suite, fn: any = (v) => v) => {
   for (const test of suite.tests) {
     if (fn(test)) {
       return test
@@ -276,7 +276,7 @@ const suiteHasTest = (suite, testId) => {
 }
 
 // same as findTestInSuite but iterates backwards
-const findLastTestInSuite = (suite, fn: any = _.identity) => {
+const findLastTestInSuite = (suite, fn: any = (v) => v) => {
   for (let i = suite.suites.length - 1; i >= 0; i--) {
     const test = findLastTestInSuite(suite.suites[i], fn)
 
@@ -338,7 +338,7 @@ const isLastSuite = (suite, tests) => {
 
   // grab all of the suites from our filtered tests
   // including all of their ancestor suites!
-  const suites = _.reduce<any, any[]>(tests, (memo, test) => {
+  const suites = tests.reduce<any[]>((memo, test) => {
     let parent
 
     while ((parent = test.parent)) {
@@ -350,12 +350,11 @@ const isLastSuite = (suite, tests) => {
   }, [])
 
   // intersect them with our parent suites and see if the last one is us
-  return _
-  .chain(suites)
-  .uniq()
-  .intersection(suite.parent.suites)
-  .last()
-  .value() === suite
+  const uniqueSuites = [...new Set(suites)]
+  const parentSuites = new Set(suite.parent.suites)
+  const intersected = uniqueSuites.filter((s) => parentSuites.has(s))
+
+  return intersected.at(-1) === suite
 }
 
 // we are the last test that will run in the suite
@@ -377,13 +376,13 @@ const nextTestThatWillRunInSuite = (test, tests) => {
     return test
   }
 
-  const index = _.findIndex(tests, { id: test.id })
+  const index = tests.findIndex((t) => t.id === test.id)
 
   return index < tests.length - 1 ? tests[index + 1] : null
 }
 
 const isLastTest = (test, tests) => {
-  return test.id === _.get(_.last(tests), 'id')
+  return test.id === tests.at(-1)?.id
 }
 
 const isRootSuite = (suite) => {
@@ -424,7 +423,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
             // make sure this test isnt the last test overall but also
             // isnt the last test in our filtered parent suite's tests array
-            if (test.final === false || (test !== _.last(allTests)) && (test !== _.last(tests))) {
+            if (test.final === false || (test !== allTests.at(-1)) && (test !== tests.at(-1))) {
               return true
             }
           }
@@ -567,8 +566,8 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 }
 
 const getTestResults = (tests) => {
-  return _.map(tests, (test) => {
-    const obj: Record<string, any> = _.pick(test, 'title', 'id', 'duration', 'state')
+  return tests.map((test) => {
+    const obj: Record<string, any> = pick(test, 'title', 'id', 'duration', 'state')
 
     // TODO FIX THIS!
     if (!obj.state) {
@@ -583,7 +582,7 @@ const hasOnly = (suite) => {
   return (
     suite._onlyTests.length ||
     suite._onlySuites.length ||
-    _.some(suite.suites, hasOnly)
+    suite.suites.some(hasOnly)
   )
 }
 
@@ -688,7 +687,7 @@ const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTes
   if (setTests) {
     let i = 0
 
-    const testsArr = _.map(tests, (test) => {
+    const testsArr = Object.values(tests).map((test: any) => {
       test.order = i += 1
 
       return test
@@ -701,8 +700,8 @@ const normalizeAll = (suite, initialTests = {}, testFilter, setTestsById, setTes
   // generate the diff of the config after spec has been executed
   // e.g. config changes via Cypress.config('...')
   normalizedSuite.runtimeConfig = {}
-  _.map(Cypress.config(), (v, key) => {
-    if (_.isEqual(v, Cypress.originalConfig[key])) {
+  Object.entries(Cypress.config()).forEach(([key, v]) => {
+    if (JSON.stringify(v) === JSON.stringify(Cypress.originalConfig[key])) {
       return null
     }
 
@@ -738,10 +737,10 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
       prevAttempts = []
 
       if (i.prevAttempts) {
-        prevAttempts = _.map(i.prevAttempts, wrapAll)
+        prevAttempts = i.prevAttempts.map(wrapAll)
       }
 
-      _.extend(runnable, i)
+      Object.assign(runnable, i)
     }
 
     // merge all hooks into single array
@@ -752,7 +751,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
     if (runnable.type === 'test') {
       const cfg = getResolvedTestConfigOverride(runnable)
 
-      if (_.size(cfg)) {
+      if (Object.keys(cfg).length > 0) {
         runnable._testConfig = cfg
         wrappedRunnable._testConfig = cfg
       }
@@ -806,9 +805,9 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
     }
 
     // recursively iterate and normalize all other _runnables
-    _.each({ tests: runnableTests, suites: runnableSuites }, (_runnables, type) => {
+    Object.entries({ tests: runnableTests, suites: runnableSuites }).forEach(([type, _runnables]) => {
       if (runnable[type]) {
-        return normalizedRunnable[type] = _.compact(_.map(_runnables, (childRunnable) => {
+        return normalizedRunnable[type] = (_runnables as any[]).map((childRunnable) => {
           const normalizedChild = normalize(childRunnable, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber, getIsStudioCreatedTest)
 
           if (type === 'tests' && onlyIdMode()) {
@@ -834,7 +833,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
           }
 
           return normalizedChild
-        }))
+        }).filter(Boolean)
       }
 
       return null
@@ -858,7 +857,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
         suite.tests = suite._onlyTests
       }
 
-      normalizedSuite.tests = _.compact(_.map(suiteOnlyTests, (test) => {
+      normalizedSuite.tests = suiteOnlyTests.map((test) => {
         const normalizedTest = normalizeRunnable(test)
 
         if (getOnlyTestId()) {
@@ -877,7 +876,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
         push(test)
 
         return normalizedTest
-      }))
+      }).filter(Boolean)
 
       suite.suites = []
       normalizedSuite.suites = []
@@ -885,7 +884,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
       suite.tests = []
       normalizedSuite.tests = []
 
-      _.each(suite._onlySuites, (onlySuite) => {
+      suite._onlySuites.forEach((onlySuite) => {
         const normalizedOnlySuite = normalizeRunnable(onlySuite)
 
         if (hasOnly(onlySuite)) {
@@ -897,7 +896,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
 
       suite.suites = []
 
-      normalizedSuite.suites = _.compact(_.map(suiteSuites, (childSuite) => {
+      normalizedSuite.suites = suiteSuites.map((childSuite) => {
         const normalizedChildSuite = normalize(childSuite, tests, initialTests, getRunnableId, getHookId, setOnlyTestId, getOnlyTestId, getNewTestLineNumber, getIsStudioCreatedTest)
 
         if ((suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)) {
@@ -917,7 +916,7 @@ const normalize = (runnable, tests, initialTests, getRunnableId, getHookId, setO
         }
 
         return null
-      }))
+      }).filter(Boolean)
     }
 
     return suite.tests.length || suite.suites.length
@@ -1142,7 +1141,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     // else this will not get called
     const tests = getAllSiblingTests(test.parent, getTestById)
 
-    if (_.last(tests) !== test) {
+    if (tests.at(-1) !== test) {
       test.final = true
 
       return fire(TEST_AFTER_RUN_EVENT, test, Cypress)
@@ -1374,13 +1373,13 @@ export default {
     }
 
     const replaceTest = (runnable, id) => {
-      const testsQueueIndex = _.findIndex(_testsQueue, { id })
+      const testsQueueIndex = _testsQueue.findIndex((t) => t.id === id)
 
       _testsQueue.splice(testsQueueIndex, 1, runnable)
 
       _testsQueueById[id] = runnable
 
-      const testsIndex = _.findIndex(_tests, { id })
+      const testsIndex = _tests.findIndex((t) => t.id === id)
 
       _tests.splice(testsIndex, 1, runnable)
 
@@ -1773,7 +1772,7 @@ export default {
           if (err) {
             const PendingErrorMessages = ['sync skip', 'sync skip; aborting execution', 'async skip call', 'async skip; aborting execution']
 
-            if (_.find(PendingErrorMessages, err.message) !== undefined) {
+            if (PendingErrorMessages.includes(err.message)) {
               err.isPending = true
             }
 
@@ -1888,7 +1887,7 @@ export default {
       },
 
       countByTestState (tests, state) {
-        const count = _.filter(tests, (test, key) => {
+        const count = Object.values(tests).filter((test: any) => {
           return test.state === state
         })
 
@@ -1921,7 +1920,7 @@ export default {
           } else {
             const test = serializeTest(testRunnable)
 
-            test.prevAttempts = _.map(testRunnable.prevAttempts, serializeTest)
+            test.prevAttempts = (testRunnable.prevAttempts || []).map(serializeTest)
 
             tests[test.id] = test
           }
@@ -1954,7 +1953,7 @@ export default {
 
         if (!test) return
 
-        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+        const logAttrs = (test.commands || []).find((log) => log.id === logId)
 
         if (logAttrs) {
           if (logAttrs._hasBeenCleanedUp) {
@@ -1974,7 +1973,7 @@ export default {
 
         if (!test) return
 
-        const logAttrs = _.find(test.commands || [], (log) => log.id === logId)
+        const logAttrs = (test.commands || []).find((log) => log.id === logId)
 
         if (logAttrs) {
           return LogUtils.getSnapshotProps(logAttrs)
@@ -2016,8 +2015,8 @@ export default {
 
             delete _testsQueueById[test.id]
 
-            _.each(RUNNABLE_LOGS, (logs) => {
-              return _.each(test[logs], (attrs) => {
+            RUNNABLE_LOGS.forEach((logs) => {
+              return (test[logs] || []).forEach((attrs) => {
                 // we know our attrs have been cleaned
                 // now, so lets store that
                 attrs._hasBeenCleanedUp = true
@@ -2061,7 +2060,7 @@ export default {
         const name = `${instrument}s`
         const logs = test[name] != null ? test[name] : (test[name] = [])
 
-        const existing = _.find(logs, (log) => log.id === attrs.id)
+        const existing = logs.find((log) => log.id === attrs.id)
 
         if (existing) {
           // because log:state:changed may
@@ -2074,7 +2073,7 @@ export default {
           }
 
           // mutate the existing object
-          return _.extend(existing, attrs)
+          return Object.assign(existing, attrs)
         }
 
         return logs.push(attrs)
@@ -2084,11 +2083,11 @@ export default {
 }
 
 const mixinLogs = (test) => {
-  _.each(RUNNABLE_LOGS, (type) => {
+  RUNNABLE_LOGS.forEach((type) => {
     const logs = test[type]
 
     if (logs) {
-      test[type] = _.map(logs, LogUtils.toSerializedJSON)
+      test[type] = logs.map(LogUtils.toSerializedJSON)
     }
   })
 }

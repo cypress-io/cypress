@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 import $errUtils from '../cypress/error_utils'
 import type { StateFunc } from '../cypress/state'
 
@@ -8,7 +6,7 @@ const xhrNotWaitedOnByIndex = (state: StateFunc, alias: string, index: number, p
   // which hasnt already been used.
   let xhrs = state(prop) || []
 
-  xhrs = _.filter(xhrs, { alias })
+  xhrs = xhrs.filter((xhr) => xhr.alias === alias)
 
   // allow us to handle waiting on both
   // the request or the response part of the xhr
@@ -29,14 +27,14 @@ export const create = (state: StateFunc) => ({
     let prop
     let str
 
-    if (_.indexOf(alias, '.') === -1) {
+    if (alias.indexOf('.') === -1) {
       str = alias
       prop = null
     } else {
-      const allParts = _.split(alias, '.')
+      const allParts = alias.split('.')
 
-      str = _.join(_.dropRight(allParts, 1), '.')
-      prop = _.last(allParts)
+      str = allParts.slice(0, -1).join('.')
+      prop = allParts.at(-1)
     }
 
     if (prop) {

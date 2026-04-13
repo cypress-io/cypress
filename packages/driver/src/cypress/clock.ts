@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import fakeTimers from '@sinonjs/fake-timers'
 
 const install = (win, now, methods) => {
@@ -16,7 +16,7 @@ export const create = (win, now, methods) => {
   }
 
   const restore = () => {
-    _.each(clock.methods, (method) => {
+    clock.methods.forEach((method) => {
       try {
         // before restoring the clock, we need to
         // reset the hadOwnProperty in case a
@@ -43,7 +43,7 @@ export const create = (win, now, methods) => {
   }
 
   const details = () => {
-    return _.pick(clock, 'now', 'methods')
+    return pick(clock, 'now', 'methods')
   }
 
   const setSystemTime = (now) => {

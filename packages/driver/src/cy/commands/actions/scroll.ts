@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $ from 'jquery'
 import Promise from 'bluebird'
 
@@ -7,6 +6,7 @@ import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $actionability from '../../actionability'
 import type { Log } from '../../../cypress/log'
+import { defaults } from '@packages/utils'
 
 const findScrollableParent = ($el, win) => {
   const $parent = $dom.getParent($el)
@@ -27,7 +27,7 @@ const findScrollableParent = ($el, win) => {
 const isNaNOrInfinity = (item) => {
   const num = Number.parseFloat(item)
 
-  return _.isNaN(num) || !_.isFinite(num)
+  return Number.isNaN(num) || !Number.isFinite(num)
 }
 
 interface InternalScrollIntoViewOptions extends Partial<Cypress.ScrollToOptions> {
@@ -50,7 +50,7 @@ interface InternalScrollToOptions extends Partial<Cypress.ScrollToOptions> {
 export default (Commands, Cypress, cy, state) => {
   Commands.addAll({ prevSubject: 'element' }, {
     scrollIntoView (subject, userOptions: Partial<Cypress.ScrollToOptions> = {}) {
-      if (!_.isObject(userOptions)) {
+      if (!(typeof userOptions === 'object' && userOptions !== null)) {
         $errUtils.throwErrByPath('scrollIntoView.invalid_argument', { args: { arg: userOptions } })
       }
 
@@ -65,7 +65,7 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollIntoView.multiple_elements', { args: { num: subject.length } })
       }
 
-      const options: InternalScrollIntoViewOptions = _.defaults({}, userOptions, {
+      const options: InternalScrollIntoViewOptions = defaults({}, userOptions, {
         $el: subject,
         $parent: state('window'),
         log: true,
@@ -176,7 +176,7 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollTo.invalid_target', { args: { x } })
       }
 
-      if (_.isObject(yOrOptions)) {
+      if (typeof yOrOptions === 'object' && yOrOptions !== null) {
         userOptions = yOrOptions
       } else {
         y = yOrOptions
@@ -185,7 +185,7 @@ export default (Commands, Cypress, cy, state) => {
       let position: string | null = null
 
       // we may be '50%' or 'bottomCenter'
-      if (_.isString(xOrPosition)) {
+      if (typeof xOrPosition === 'string') {
         // if there's a number in our string, then
         // don't check for positions and just set x
         // this will check for NaN, etc - we need to explicitly
@@ -249,7 +249,7 @@ export default (Commands, Cypress, cy, state) => {
 
       let isWin
 
-      const options: InternalScrollToOptions = _.defaults({}, userOptions, {
+      const options: InternalScrollToOptions = defaults({}, userOptions, {
         $el: subject,
         log: true,
         duration: 0,
@@ -270,7 +270,7 @@ export default (Commands, Cypress, cy, state) => {
         $errUtils.throwErrByPath('scrollTo.invalid_easing', { args: { easing: options.easing } })
       }
 
-      if (!_.isBoolean(options.ensureScrollable)) {
+      if (typeof options.ensureScrollable !== 'boolean') {
         $errUtils.throwErrByPath('scrollTo.invalid_ensureScrollable', { args: { ensureScrollable: options.ensureScrollable } })
       }
 

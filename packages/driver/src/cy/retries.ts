@@ -1,6 +1,6 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
+import { defaults } from '@packages/utils'
 import $errUtils, { CypressError } from '../cypress/error_utils'
 import type { ICypress } from '../cypress'
 import type { $Cy } from '../cypress/cy'
@@ -45,7 +45,7 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       log = options._log ?? current?.getLastLog()
     }
 
-    _.defaults(options, {
+    defaults(options, {
       _runnable: state('runnable'),
       _runnableTimeout: runnableTimeout,
       _interval: 16,

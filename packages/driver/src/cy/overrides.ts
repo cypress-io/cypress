@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $selection from '../dom/selection'
 
 import type { ICypress } from '../cypress'
@@ -52,8 +51,13 @@ export const create = (state: StateFunc, config: ICypress['config'], focused: IF
       const { insertRule } = contentWindow.CSSStyleSheet.prototype
       const { deleteRule } = contentWindow.CSSStyleSheet.prototype
 
-      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
-      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
+      contentWindow.CSSStyleSheet.prototype.insertRule = function (...args) {
+        return cssModificationSpy.call(this, insertRule, ...args)
+      }
+
+      contentWindow.CSSStyleSheet.prototype.deleteRule = function (...args) {
+        return cssModificationSpy.call(this, deleteRule, ...args)
+      }
     } catch (error) {} // eslint-disable-line no-empty
   }
 

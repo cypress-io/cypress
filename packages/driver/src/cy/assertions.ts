@@ -1,6 +1,6 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
+import { defaults, difference } from '@packages/utils'
 import $dom from '../dom'
 import $errUtils from '../cypress/error_utils'
 import type { ICypress } from '../cypress'
@@ -25,7 +25,7 @@ const invokeWith = (value) => {
 const functionHadArguments = (current) => {
   const fn = current && current.get('args') && current.get('args')[0]
 
-  return fn && _.isFunction(fn) && (fn.length > 0)
+  return fn && typeof fn === 'function' && (fn.length > 0)
 }
 
 const isAssertionType = (cmd) => {
@@ -38,12 +38,12 @@ const isDomSubjectAndMatchesValue = (value, subject) => {
     const els2 = $dom.getElements(subject)
 
     // no difference
-    return _.difference(els1, els2).length === 0
+    return difference(els1, els2).length === 0
   }
 
   // iterate through each dom type until we
   // find the function for this particular value
-  const isDomTypeFn = _.find(IS_DOM_TYPES, invokeWith(value))
+  const isDomTypeFn = IS_DOM_TYPES.find(invokeWith(value))
 
   if (isDomTypeFn) {
     // then check that subject also matches this
@@ -95,7 +95,7 @@ const parseValueActualAndExpected = (value, actual, expected) => {
   if ($dom.isJquery(value)) {
     obj.subject = value
 
-    if (_.isUndefined(actual) || (actual !== expected)) {
+    if (actual === undefined || (actual !== expected)) {
       delete obj.actual
       delete obj.expected
     }
@@ -206,7 +206,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         functionHadArguments(current)
     }
 
-    _.extend(obj, {
+    Object.assign(obj, {
       name: 'assert',
       message,
       passed,
@@ -222,9 +222,9 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       consoleProps: () => {
         obj = { name: 'assert' }
 
-        _.extend(obj, parseValueActualAndExpected(value, actual, expected))
+        Object.assign(obj, parseValueActualAndExpected(value, actual, expected))
 
-        return _.extend(obj,
+        return Object.assign(obj,
           { Message: message.replace(bTagOpen, '').replace(bTagClosed, '') })
       },
     })
@@ -286,7 +286,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
       // case where there are no upcoming assertion commands
       const isDefaultAssertionErr = cmds.length === 0
 
-      _.defaults(callbacks, {
+      defaults(callbacks, {
         ensureExistenceFor: 'dom',
       })
 
@@ -313,7 +313,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
 
       const determineEl = ($el, subject) => {
         // prefer $el unless it is strictly undefined
-        if (!_.isUndefined($el)) {
+        if ($el !== undefined) {
           return $el
         }
 
@@ -358,7 +358,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         // and finish the assertions and then throw
         // it again
         try {
-          if (_.isFunction(onFail)) {
+          if (typeof onFail === 'function') {
             // pass in the err and the upcoming assertion commands
             onFail.call(this, err, isDefaultAssertionErr, cmds)
           }
@@ -367,7 +367,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
           throw e3
         }
 
-        if (_.isFunction(onRetry)) {
+        if (typeof onRetry === 'function') {
           //@ts-expect-error
           return cy.retry(onRetry, options)
         }
@@ -415,7 +415,7 @@ export const create = (Cypress: ICypress, cy: $Cy) => {
         return assertFn.apply(this, args.concat(true) as any)
       }
 
-      const fns = _.map(cmds, injectAssertion)
+      const fns = cmds.map(injectAssertion)
 
       // TODO: remove any when the type of subject, the first argument of this function is specified.
       const subjects: any[] = []

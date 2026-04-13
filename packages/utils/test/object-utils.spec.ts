@@ -47,6 +47,22 @@ describe('toPathArray', () => {
   it('handles non-numeric bracket content as string', () => {
     expect(toPathArray('a[foo]')).toEqual(['a', 'foo'])
   })
+
+  it('handles double-quoted bracket keys', () => {
+    expect(toPathArray('a["foo"]')).toEqual(['a', 'foo'])
+  })
+
+  it('handles single-quoted bracket keys', () => {
+    expect(toPathArray('a[\'bar\']')).toEqual(['a', 'bar'])
+  })
+
+  it('handles quoted bracket keys with dots', () => {
+    expect(toPathArray('a["foo.bar"].c')).toEqual(['a', 'foo.bar', 'c'])
+  })
+
+  it('handles quoted bracket keys with spaces', () => {
+    expect(toPathArray('a["spaced key"]')).toEqual(['a', 'spaced key'])
+  })
 })
 
 describe('getPath', () => {

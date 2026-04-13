@@ -1,7 +1,7 @@
 import Promise from 'bluebird'
 import Debug from 'debug'
-import _ from 'lodash'
 import dayjs from 'dayjs'
+import { defaults, pick, omitBy, uniqueId, uniqBy } from '@packages/utils'
 import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import $dom from '../dom'
@@ -82,13 +82,9 @@ const INITIAL_MODIFIERS = {
  * @example {meta: true, ctrl: false, shift: false, alt: true} => 5
  */
 const getModifiersValue = (modifiers: KeyboardModifiers) => {
-  return _
-  .chain(modifiers)
-  .map((value, key) => {
-    return value && modifierValueMap[key]
-  })
-  .sum()
-  .value()
+  return Object.entries(modifiers).reduce((sum, [key, value]) => {
+    return sum + (value ? (modifierValueMap[key] || 0) : 0)
+  }, 0)
 }
 
 const modifierValueMap = {
@@ -125,31 +121,20 @@ const toModifiersEventOptions = (modifiers: KeyboardModifiers) => {
 const fromModifierEventOptions = (eventOptions: {
   [key: string]: string
 }): KeyboardModifiers => {
-  return _
-  .chain({
-    alt: eventOptions.altKey,
-    ctrl: eventOptions.ctrlKey,
-    meta: eventOptions.metaKey,
-    shift: eventOptions.shiftKey,
-  })
-  .pickBy() // remove falsy values
-  .defaults({
-    alt: false,
-    ctrl: false,
-    meta: false,
-    shift: false,
-  })
-  .value()
+  return {
+    alt: !!eventOptions.altKey,
+    ctrl: !!eventOptions.ctrlKey,
+    meta: !!eventOptions.metaKey,
+    shift: !!eventOptions.shiftKey,
+  }
 }
 
 const modifiersToString = (modifiers: KeyboardModifiers) => {
-  return _.keys(_.pickBy(modifiers, (val) => {
-    return val
-  })).join(', ')
+  return Object.keys(modifiers).filter((key) => modifiers[key]).join(', ')
 }
 
 const joinKeyArrayToString = (keyArr: KeyInfo[]) => {
-  return _.map(keyArr, (key) => {
+  return keyArr.map((key) => {
     if (key.type === 'key') {
       if (key.text) return key.key
 
@@ -169,7 +154,7 @@ const isModifier = (details: KeyInfo): details is KeyDetails & KeyModifiers => {
 }
 
 const getFormattedKeyString = (details: KeyDetails) => {
-  let foundKeyString = _.findKey(keyboardMappings, { key: details.key })
+  let foundKeyString = Object.keys(keyboardMappings).find((k) => keyboardMappings[k].key === details.key)
 
   if (foundKeyString) {
     return `{${details.originalSequence}}`
@@ -185,7 +170,7 @@ const getFormattedKeyString = (details: KeyDetails) => {
 }
 
 const countNumIndividualKeyStrokes = (keys: KeyInfo[]) => {
-  return _.countBy(keys, isModifier)['false']
+  return keys.filter((key) => !isModifier(key)).length
 }
 
 const findKeyDetailsOrLowercase = (key: string): KeyDetailsPartial => {
@@ -194,12 +179,16 @@ const findKeyDetailsOrLowercase = (key: string): KeyDetailsPartial => {
 
   if (foundKey) return foundKey
 
-  return _.mapKeys(keymap, (val, key) => {
-    return _.toLower(key)
-  })[_.toLower(key)]
+  const lowered: Record<string, KeyDetailsPartial> = {}
+
+  for (const k of Object.keys(keymap)) {
+    lowered[k.toLowerCase()] = keymap[k]
+  }
+
+  return lowered[key.toLowerCase()]
 }
 
-const getTextLength = (str) => _.toArray(str).length
+const getTextLength = (str) => [...str].length
 
 const getKeyDetails = (onKeyNotFound) => {
   return (key: string): KeyDetails | ShortcutDetails => {
@@ -212,7 +201,7 @@ const getKeyDetails = (onKeyNotFound) => {
     }
 
     if (foundKey) {
-      const details = _.defaults({}, foundKey, {
+      const details = defaults({}, foundKey, {
         type: 'key',
         key: '',
         keyCode: 0,
@@ -238,7 +227,7 @@ const getKeyDetails = (onKeyNotFound) => {
       }
 
       const keys = key.split('+')
-      let lastKey = _.last(keys)
+      let lastKey = keys.at(-1)
 
       if (lastKey === 'plus') {
         keys[keys.length - 1] = '+'
@@ -246,7 +235,7 @@ const getKeyDetails = (onKeyNotFound) => {
       }
 
       if (!lastKey) {
-        return onKeyNotFound(key, _.keys(getKeymap()).join(', '))
+        return onKeyNotFound(key, Object.keys(getKeymap()).join(', '))
       }
 
       const keyWithModifiers = getKeyDetails(onKeyNotFound)(lastKey) as KeyDetails
@@ -287,7 +276,7 @@ const getKeyDetails = (onKeyNotFound) => {
       return details
     }
 
-    onKeyNotFound(key, _.keys(getKeymap()).join(', '))
+    onKeyNotFound(key, Object.keys(getKeymap()).join(', '))
 
     throw new Error('this can never happen')
   }
@@ -433,7 +422,7 @@ const validateTyping = (
 
   const isFocusable = $elements.isFocusable($el)
   const clearChars = '{selectall}{delete}'
-  const isClearChars = _.startsWith(chars.toLowerCase(), clearChars)
+  const isClearChars = chars.toLowerCase().startsWith(clearChars)
 
   // TODO: tabindex can't be -1
   // TODO: can't be readonly
@@ -484,12 +473,12 @@ const validateTyping = (
       return dayjs(date, 'YYYY-MM-DD').format('YYYY-MM-DD') === date
     }
 
-    if (_.isString(chars) && arrowKeyChars) {
+    if (typeof chars === 'string' && arrowKeyChars) {
       return {}
     }
 
     if (
-      _.isString(chars) &&
+      typeof chars === 'string' &&
       dateChars &&
       dateExists(dateChars[0])
     ) {
@@ -508,11 +497,11 @@ const validateTyping = (
   if (isMonth) {
     monthChars = monthRe.exec(chars)
 
-    if (_.isString(chars) && arrowKeyChars) {
+    if (typeof chars === 'string' && arrowKeyChars) {
       return {}
     }
 
-    if (_.isString(chars) && monthChars) {
+    if (typeof chars === 'string' && monthChars) {
       skipCheckUntilIndex = _getEndIndex(chars, monthChars[0])
 
       return { skipCheckUntilIndex }
@@ -527,11 +516,11 @@ const validateTyping = (
   if (isWeek) {
     weekChars = weekRe.exec(chars)
 
-    if (_.isString(chars) && arrowKeyChars) {
+    if (typeof chars === 'string' && arrowKeyChars) {
       return {}
     }
 
-    if (_.isString(chars) && weekChars) {
+    if (typeof chars === 'string' && weekChars) {
       skipCheckUntilIndex = _getEndIndex(chars, weekChars[0])
 
       return { skipCheckUntilIndex }
@@ -546,11 +535,11 @@ const validateTyping = (
   if (isTime) {
     timeChars = timeRe.exec(chars)
 
-    if (_.isString(chars) && arrowKeyChars) {
+    if (typeof chars === 'string' && arrowKeyChars) {
       return {}
     }
 
-    if (_.isString(chars) && timeChars) {
+    if (typeof chars === 'string' && timeChars) {
       skipCheckUntilIndex = _getEndIndex(chars, timeChars[0])
 
       return { skipCheckUntilIndex }
@@ -565,11 +554,11 @@ const validateTyping = (
   if (isDateTime) {
     dateTimeChars = dateTimeRe.exec(chars)
 
-    if (_.isString(chars) && arrowKeyChars) {
+    if (typeof chars === 'string' && arrowKeyChars) {
       return {}
     }
 
-    if (_.isString(chars) && dateTimeChars) {
+    if (typeof chars === 'string' && dateTimeChars) {
       skipCheckUntilIndex = _getEndIndex(chars, dateTimeChars[0])
 
       return { skipCheckUntilIndex }
@@ -713,22 +702,23 @@ export class Keyboard {
   constructor (private state: StateFunc) {}
 
   type (opts: typeOptions) {
-    const options = _.defaults({}, opts, {
+    const noop = () => {}
+    const options = defaults({}, opts, {
       delay: 0,
       force: false,
       simulated: false,
-      onError: _.noop,
-      onEvent: _.noop,
-      onBeforeEvent: _.noop,
-      onFocusChange: _.noop,
-      onBeforeType: _.noop,
-      onAfterType: _.noop,
-      onValueChange: _.noop,
-      onEnterPressed: _.noop,
-      onNoMatchingSpecialChars: _.noop,
-      onBeforeSpecialCharAction: _.noop,
+      onError: noop,
+      onEvent: noop,
+      onBeforeEvent: noop,
+      onFocusChange: noop,
+      onBeforeType: noop,
+      onAfterType: noop,
+      onValueChange: noop,
+      onEnterPressed: noop,
+      onNoMatchingSpecialChars: noop,
+      onBeforeSpecialCharAction: noop,
       parseSpecialCharSequences: true,
-      onFail: _.noop,
+      onFail: noop,
     })
 
     if (options.force) {
@@ -742,8 +732,7 @@ export class Keyboard {
     if (!options.parseSpecialCharSequences) {
       keys = options.chars.split('')
     } else {
-      keys = _.flatMap(
-        options.chars.split(charsBetweenCurlyBracesRe),
+      keys = options.chars.split(charsBetweenCurlyBracesRe).flatMap(
         (chars) => {
           if (charsBetweenCurlyBracesRe.test(chars)) {
             // allow special chars and modifiers to be case-insensitive
@@ -751,13 +740,12 @@ export class Keyboard {
           }
 
           // ignore empty strings
-          return _.filter(_.split(chars, ''))
+          return chars.split('').filter(Boolean)
         },
       )
     }
 
-    const keyDetailsArr = _.map(
-      keys,
+    const keyDetailsArr = keys.map(
       getKeyDetails(options.onNoMatchingSpecialChars),
     )
 
@@ -767,8 +755,7 @@ export class Keyboard {
 
     let _skipCheckUntilIndex: number | undefined = 0
 
-    const typeKeyFns = _.map(
-      keyDetailsArr,
+    const typeKeyFns = keyDetailsArr.map(
       (key: KeyInfo, currentKeyIndex: number) => {
         return () => {
           const activeEl = this.getActiveEl(options)
@@ -804,16 +791,16 @@ export class Keyboard {
               debug('skip validate until:', _skipCheckUntilIndex)
               const keysToType = keyDetailsArr.slice(currentKeyIndex, currentKeyIndex + _skipCheckUntilIndex)
 
-              _.each(keysToType, (key) => {
+              keysToType.forEach((key) => {
                 // singleValueChange inputs must have their value set once at the end
                 // performing the simulatedDefault for a key would try to insert text on each character
                 // we still send all the events as normal, however
                 if (key.type === 'key') {
-                  key.simulatedDefault = _.noop
+                  key.simulatedDefault = () => {}
                 }
               })
 
-              const lastKeyToType = _.last(keysToType)!
+              const lastKeyToType = keysToType.at(-1)!
 
               if (lastKeyToType.type === 'key') {
                 lastKeyToType.simulatedDefault = () => {
@@ -850,11 +837,10 @@ export class Keyboard {
     )
 
     // we will only press each modifier once, so only find unique modifiers
-    const modifierKeys = _
-    .chain(keyDetailsArr)
-    .filter(isModifier)
-    .uniqBy('key')
-    .value()
+    const modifierKeys = uniqBy(
+      keyDetailsArr.filter(isModifier),
+      'key',
+    )
 
     return Promise
     .each(typeKeyFns, (fn) => {
@@ -870,7 +856,7 @@ export class Keyboard {
     .then(() => {
       if (options.release !== false) {
         return Promise.map(modifierKeys, (key) => {
-          options.id = _.uniqueId('char')
+          options.id = uniqueId('char')
 
           return this.simulatedKeyup(this.getActiveEl(options), key, options)
         })
@@ -889,9 +875,9 @@ export class Keyboard {
   ) {
     debug('fireSimulatedEvent', eventType, keyDetails)
 
-    const options = _.defaults(opts, {
-      onBeforeEvent: _.noop,
-      onEvent: _.noop,
+    const options = defaults(opts, {
+      onBeforeEvent: () => {},
+      onEvent: () => {},
     })
     const win = $window.getWindowByElement(el)
     const text = keyDetails.text
@@ -989,7 +975,7 @@ export class Keyboard {
 
     eventOptions = {
       ...eventOptions,
-      ..._.omitBy(
+      ...omitBy(
         {
           bubbles: true,
           // allow propagation out of root of shadow-dom
@@ -1007,7 +993,7 @@ export class Keyboard {
           view: win,
           inputType,
         },
-        _.isUndefined,
+        (v) => v === undefined,
       ),
     }
 
@@ -1040,7 +1026,7 @@ export class Keyboard {
       }
 
       event = new constructor(eventType, eventOptions)
-      _.extend(event, eventOptions)
+      Object.assign(event, eventOptions)
     }
 
     const dispatched = el.dispatchEvent(event)
@@ -1104,7 +1090,7 @@ export class Keyboard {
   }
 
   getActiveModifiers () {
-    return _.clone(this.state('keyboardModifiers')) || _.clone(INITIAL_MODIFIERS)
+    return { ...(this.state('keyboardModifiers') || INITIAL_MODIFIERS) }
   }
 
   getModifierKeyDetails (key: KeyDetails) {
@@ -1176,11 +1162,11 @@ export class Keyboard {
 
     let elToType
 
-    options.id = _.uniqueId('char')
+    options.id = uniqueId('char')
 
     debug(
       'typeSimulatedKey options:',
-      _.pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id']),
+      pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id']),
     )
 
     if (
@@ -1228,7 +1214,7 @@ export class Keyboard {
 
   typeSimulatedKey (el: HTMLElement, key: KeyDetails, options) {
     debug('typeSimulatedKey', key.key, el)
-    _.defaults(options, {
+    defaults(options, {
       prevText: null,
     })
 
@@ -1256,13 +1242,13 @@ export class Keyboard {
     this.simulatedKeydown(el, key.key, options)
     this.simulatedKeyup(el, key.key, options)
 
-    options.id = _.uniqueId('char')
+    options.id = uniqueId('char')
 
     const elToKeyup = this.getActiveEl(options)
 
     key.modifiers.reverse().forEach((key) => {
       delete key.events.keyup
-      options.id = _.uniqueId('char')
+      options.id = uniqueId('char')
       this.simulatedKeyup(elToKeyup, key, options)
     })
   }
@@ -1365,11 +1351,11 @@ const reset = () => {
 reset()
 
 const getConfig = () => {
-  return _.clone(_defaults)
+  return { ..._defaults }
 }
 
-const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
-  if (!_.isPlainObject(props)) {
+const keyboardDefaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
+  if (typeof props !== 'object' || props === null || Array.isArray(props) || Object.getPrototypeOf(props) !== Object.prototype) {
     $errUtils.throwErrByPath('keyboard.invalid_arg', {
       args: { arg: $utils.stringify(props) },
     })
@@ -1379,7 +1365,7 @@ const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
     return getConfig()
   }
 
-  if (!_.isNumber(props.keystrokeDelay) || props.keystrokeDelay! < 0) {
+  if (typeof props.keystrokeDelay !== 'number' || props.keystrokeDelay! < 0) {
     $errUtils.throwErrByPath('keyboard.invalid_delay', {
       args: {
         cmd: 'Cypress.Keyboard.defaults',
@@ -1390,7 +1376,7 @@ const defaults = (props: Partial<Cypress.KeyboardDefaultsOptions>) => {
     })
   }
 
-  _.extend(_defaults, {
+  Object.assign(_defaults, {
     keystrokeDelay: props.keystrokeDelay,
   })
 
@@ -1416,7 +1402,7 @@ const Keys: Record<string, Cypress.SupportedNamedKey> = {
 }
 
 export default {
-  defaults,
+  defaults: keyboardDefaults,
   getConfig,
   getKeymap,
   modifiersToString,

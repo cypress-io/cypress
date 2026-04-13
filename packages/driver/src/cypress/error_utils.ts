@@ -9,7 +9,7 @@
 // to prevent regressions.
 
 import chai from 'chai'
-import _ from 'lodash'
+import { getPath } from '@packages/utils'
 import $dom from '../dom'
 import { stripAnsi } from '@packages/errors'
 import $errorMessages from './error_messages'
@@ -83,7 +83,7 @@ const isAssertionErr = (err: Error) => {
 }
 
 const isChaiValidationErr = (err: Error) => {
-  return _.startsWith(err.message, 'Invalid Chai property')
+  return err.message.startsWith('Invalid Chai property')
 }
 
 const isCypressErr = (err: Error): boolean => {
@@ -91,11 +91,11 @@ const isCypressErr = (err: Error): boolean => {
 }
 
 const isSpecError = (spec, err) => {
-  return _.includes(err.stack, spec.relative)
+  return err.stack?.includes(spec.relative) ?? false
 }
 
 const mergeErrProps = (origErr: Error, ...newProps): Error => {
-  return _.extend(origErr, ...newProps)
+  return Object.assign(origErr, ...newProps)
 }
 
 const stackWithReplacedProps = (err, props) => {
@@ -177,12 +177,16 @@ const getUserInvocationStack = (err, state) => {
   // removes lines in the invocation stack above the first userland line. If one
   // of the cypress codepoint identifiers is not present in the stack trace,
   // the first line will be a userland codepoint, so no dropping is necessary.
-  userInvocationStack = internalCodepointIdentifier ? _.dropWhile(
-    userInvocationStack.split('\n'),
-    (stackLine) => {
-      return stackLine.includes(internalCodepointIdentifier)
-    },
-  ).join('\n') : userInvocationStack
+  if (internalCodepointIdentifier) {
+    const lines = userInvocationStack.split('\n')
+    let i = 0
+
+    while (i < lines.length && lines[i].includes(internalCodepointIdentifier)) {
+      i++
+    }
+
+    userInvocationStack = lines.slice(i).join('\n')
+  }
 
   // remove lines that are included _after and including_ the replacement marker -
   // these are also internal to cypress, and unimportant for the user invocation stack
@@ -224,11 +228,11 @@ const appendErrMsg = (err, errMsg) => {
 }
 
 const makeErrFromObj = (obj: any) => {
-  if (_.isString(obj)) {
+  if (typeof obj === 'string') {
     return new Error(obj)
   }
 
-  if (_.isObject(obj) && _.isString((obj as any).message)) {
+  if (obj !== null && typeof obj === 'object' && typeof (obj as any).message === 'string') {
     obj = obj as {
       message: string
       name: string
@@ -240,7 +244,7 @@ const makeErrFromObj = (obj: any) => {
     err2.name = (obj as any).name
     err2.stack = (obj as any).stack
 
-    _.each(obj, (val, prop) => {
+    Object.entries(obj).forEach(([prop, val]) => {
       if (!err2[prop]) {
         err2[prop] = val
       }
@@ -254,7 +258,7 @@ const makeErrFromObj = (obj: any) => {
 }
 
 const makeErrFromErr = (err, options: any = {}) => {
-  if (_.isString(err)) {
+  if (typeof err === 'string') {
     err = cypressErr({ message: err })
   }
 
@@ -262,7 +266,7 @@ const makeErrFromErr = (err, options: any = {}) => {
 
   // assume onFail is a command if
   // onFail is present and isn't a function
-  if (onFail && !_.isFunction(onFail)) {
+  if (onFail && typeof onFail !== 'function') {
     const log = onFail
 
     // redefine onFail and automatically
@@ -277,7 +281,7 @@ const makeErrFromErr = (err, options: any = {}) => {
   }
 
   if (errProps) {
-    _.extend(err, errProps)
+    Object.assign(err, errProps)
   }
 
   return err
@@ -379,9 +383,9 @@ const replaceErrMsgTokens = (errMessage, args) => {
   }
 
   const getMsg = function (args = {}) {
-    return _.reduce(args, (message, argValue, argKey) => {
-      if (_.isArray(message)) {
-        return _.map(message, (str) => replace(str, argValue, argKey))
+    return Object.entries(args).reduce((message: any, [argKey, argValue]) => {
+      if (Array.isArray(message)) {
+        return message.map((str) => replace(str, argValue, argKey))
       }
 
       return replace(message, argValue, argKey)
@@ -401,7 +405,7 @@ const findPropByParents = (msgPath, propName) => {
     return // reached root
   }
 
-  const obj = _.get(allErrorMessages, msgPath)
+  const obj = getPath(allErrorMessages, msgPath)
 
   if (obj.hasOwnProperty(propName)) {
     return obj[propName]
@@ -411,7 +415,7 @@ const findPropByParents = (msgPath, propName) => {
 }
 
 const errByPath = (msgPath, args?) => {
-  let msgValue = _.get(allErrorMessages, msgPath)
+  let msgValue = getPath(allErrorMessages, msgPath)
 
   if (!msgValue) {
     return internalErr({ message: `Error message path '${msgPath}' does not exist` })
@@ -419,11 +423,11 @@ const errByPath = (msgPath, args?) => {
 
   let msgObj = msgValue
 
-  if (_.isFunction(msgValue)) {
+  if (typeof msgValue === 'function') {
     msgObj = msgValue(args)
   }
 
-  if (_.isString(msgObj)) {
+  if (typeof msgObj === 'string') {
     msgObj = {
       message: msgObj,
     }
@@ -455,7 +459,7 @@ const createUncaughtException = ({ frameType, handlerType, state, err }) => {
 
   err = modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
-  err.docsUrl = _.compact([uncaughtErr.docsUrl, err.docsUrl])
+  err.docsUrl = [uncaughtErr.docsUrl, err.docsUrl].filter(Boolean)
 
   const current = state('current')
 
@@ -517,7 +521,7 @@ const processErr = (errObj: CypressError, config) => {
   // for screenshots or videos
   delete errObj.docsUrl
 
-  docsUrl = _(docsUrl).castArray().compact().join('\n\n')
+  docsUrl = ([] as string[]).concat(docsUrl).filter(Boolean).join('\n\n')
 
   // append the docs url when not interactive so it appears in the stdout
   return appendErrMsg(errObj, docsUrl)
@@ -538,7 +542,7 @@ const convertErrorEventPropertiesToObject = (args) => {
   // if the error was thrown as a string (throw 'some error'), `err` is
   // the message ('some error') and message is some browser-created
   // variant (e.g. 'Uncaught some error')
-  message = _.isString(err) ? err : message
+  message = typeof err === 'string' ? err : message
   const stack = getStackFromErrArgs({ filename, lineno, colno })
 
   return makeErrFromObj({
@@ -572,7 +576,7 @@ const errorFromErrorEvent = (event): ErrorFromErrorEvent => {
 
   // it's possible the error was thrown as a string (throw 'some error')
   // so create it in the case it's not already an object
-  const err = (_.isObject(error) ? error : convertErrorEventPropertiesToObject({
+  const err = ((error !== null && typeof error === 'object') ? error : convertErrorEventPropertiesToObject({
     message, filename, lineno, colno,
   })) as CypressError
 

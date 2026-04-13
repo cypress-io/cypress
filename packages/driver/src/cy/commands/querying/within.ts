@@ -1,8 +1,7 @@
-import _ from 'lodash'
-
 import { $Command } from '../../../cypress/command'
 import $errUtils from '../../../cypress/error_utils'
 import group from '../../logGroup'
+import { defaults } from '@packages/utils'
 
 export default (Commands, Cypress, cy, state) => {
   const withinFn = (subject, fn) => {
@@ -88,12 +87,12 @@ export default (Commands, Cypress, cy, state) => {
     within (subject, options, fn) {
       let userOptions = options
 
-      if (_.isUndefined(fn)) {
+      if (fn === undefined) {
         fn = userOptions
         userOptions = {}
       }
 
-      options = _.defaults({}, userOptions, { log: true })
+      options = defaults({}, userOptions, { log: true })
 
       const groupOptions: Cypress.LogGroup.Config = {
         log: options.log,
@@ -103,7 +102,7 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       return group(Cypress, groupOptions, (log) => {
-        if (!_.isFunction(fn)) {
+        if (typeof fn !== 'function') {
           $errUtils.throwErrByPath('within.invalid_argument', { onFail: log })
         }
 

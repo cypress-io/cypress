@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $document from './document'
 import $elements from './elements'
 
@@ -421,8 +420,8 @@ const _moveCursorUpOrDown = function (up: boolean, el: HTMLElement) {
   }
 }
 
-const moveCursorUp = _.curry(_moveCursorUpOrDown)(true)
-const moveCursorDown = _.curry(_moveCursorUpOrDown)(false)
+const moveCursorUp = (el: HTMLElement) => _moveCursorUpOrDown(true, el)
+const moveCursorDown = (el: HTMLElement) => _moveCursorUpOrDown(false, el)
 
 const _moveCursorToLineStartOrEnd = function (toStart: boolean, el: HTMLElement) {
   const isInput = $elements.isInput(el)
@@ -472,8 +471,8 @@ const _moveCursorToLineStartOrEnd = function (toStart: boolean, el: HTMLElement)
   }
 }
 
-const moveCursorToLineStart = _.curry(_moveCursorToLineStartOrEnd)(true)
-const moveCursorToLineEnd = _.curry(_moveCursorToLineStartOrEnd)(false)
+const moveCursorToLineStart = (el: HTMLElement) => _moveCursorToLineStartOrEnd(true, el)
+const moveCursorToLineEnd = (el: HTMLElement) => _moveCursorToLineStartOrEnd(false, el)
 
 const isCollapsed = function (el) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
@@ -534,9 +533,7 @@ const getSelectionBounds = function (el) {
 }
 
 const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = {}) {
-  const opts = _.defaults({}, options, {
-    onlyIfEmptySelection: false,
-  })
+  const opts = { onlyIfEmptySelection: false, ...options }
 
   const doc = $document.getDocumentFromElement(el)
 
@@ -608,9 +605,9 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
   return
 }
 
-const moveSelectionToEnd = _.curry(_moveSelectionTo)(false)
+const moveSelectionToEnd = (el: HTMLElement, options = {}) => _moveSelectionTo(false, el, options)
 
-const moveSelectionToStart = _.curry(_moveSelectionTo)(true)
+const moveSelectionToStart = (el: HTMLElement, options = {}) => _moveSelectionTo(true, el, options)
 
 const replaceSelectionContents = function (el, key) {
   if ($elements.isContentEditable(el)) {

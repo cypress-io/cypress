@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import UrlParse from 'url-parse'
 import Promise from 'bluebird'
 
@@ -11,6 +10,7 @@ import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunica
 import { whatIsCircular } from '../../util/what-is-circular'
 import debugFn from 'debug'
 import type { StateFunc } from '../../cypress/state'
+import { defaults, pick } from '@packages/utils'
 const debug = debugFn('cypress:driver:navigation')
 
 let id = null
@@ -35,7 +35,7 @@ const reset = (test: any = {}) => {
 const VALID_VISIT_METHODS = ['GET', 'POST']
 
 const isValidVisitMethod = (method) => {
-  return _.includes(VALID_VISIT_METHODS, method)
+  return VALID_VISIT_METHODS.includes(method)
 }
 
 const timedOutWaitingForPageLoad = (ms, log) => {
@@ -67,7 +67,7 @@ const navigationChanged = async (Cypress, cy, state, source, arg) => {
   debug('navigation changed:', url)
 
   // don't trigger for empty url's or about:blank
-  if (_.isEmpty(url) || (url === 'about:blank')) {
+  if (!url || (url === 'about:blank')) {
     return
   }
 
@@ -222,7 +222,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 
   const options: Record<string, any> = {}
 
-  _.defaults(options, {
+  defaults(options, {
     timeout: config('pageLoadTimeout'),
   })
 
@@ -418,15 +418,14 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
 // object and send 'responseTimeout' as options.timeout
 // for the backend.
 const normalizeOptions = (options) => {
-  return _
-  .chain(options)
-  .pick(REQUEST_URL_OPTS)
-  .extend({
-    timeout: options.responseTimeout,
-    isFromSpecBridge: Cypress.isCrossOriginSpecBridge,
-    hasAlreadyVisitedUrl: options.hasAlreadyVisitedUrl,
-  })
-  .value()
+  return Object.assign(
+    pick(options, REQUEST_URL_OPTS),
+    {
+      timeout: options.responseTimeout,
+      isFromSpecBridge: Cypress.isCrossOriginSpecBridge,
+      hasAlreadyVisitedUrl: options.hasAlreadyVisitedUrl,
+    },
+  )
 }
 
 type NotOkResponseError = Error & {
@@ -456,7 +455,7 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
       break
 
     case 1:
-      if (_.isObject(args[0])) {
+      if (typeof args[0] === 'object' && args[0] !== null) {
         userOptions = args[0]
       } else {
         forceReload = args[0]
@@ -478,7 +477,7 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
   cy.clearTimeout('reload')
 
   let cleanup: (() => any) | null = null
-  const options = _.defaults({}, userOptions, {
+  const options = defaults({}, userOptions, {
     log: true,
     // @ts-expect-error
     timeout: config('pageLoadTimeout'),
@@ -489,11 +488,11 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
       forceReload = forceReload || false
       userOptions = userOptions || {}
 
-      if (!_.isObject(userOptions)) {
+      if (typeof userOptions !== 'object' || userOptions === null) {
         throwArgsErr()
       }
 
-      if (!_.isBoolean(forceReload)) {
+      if (typeof forceReload !== 'boolean') {
         throwArgsErr()
       }
 
@@ -540,7 +539,7 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
 }
 
 export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFunc, config: Cypress.Config, numberOrString: number | string, userOptions = {}) => {
-  const options: Record<string, any> = _.defaults({}, userOptions, {
+  const options: Record<string, any> = defaults({}, userOptions, {
     log: true,
     // @ts-expect-error
     timeout: config('pageLoadTimeout'),
@@ -643,11 +642,11 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
     }
   }
 
-  if (_.isFinite(numberOrString)) {
+  if (typeof numberOrString === 'number' && Number.isFinite(numberOrString)) {
     return goNumber(numberOrString)
   }
 
-  if (_.isString(numberOrString)) {
+  if (typeof numberOrString === 'string') {
     return goString(numberOrString)
   }
 
@@ -702,7 +701,7 @@ export default (Commands, Cypress, cy, state, config) => {
         const err: NotOkResponseError = new Error as any
 
         err.gotResponse = true
-        _.extend(err, resp)
+        Object.assign(err, resp)
 
         throw err
       }
@@ -712,7 +711,7 @@ export default (Commands, Cypress, cy, state, config) => {
         const err: InvalidContentTypeError = new Error as any
 
         err.invalidContentType = true
-        _.extend(err, resp)
+        Object.assign(err, resp)
 
         throw err
       }
@@ -758,26 +757,26 @@ export default (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('visit.no_duplicate_url', { args: { optionsUrl: userOptions.url, url } })
       }
 
-      if (_.isObject(url) && _.isEqual(userOptions, {})) {
+      if (typeof url === 'object' && url !== null && Object.keys(userOptions).length === 0) {
         // options specified as only argument
         userOptions = url
         url = userOptions.url
       }
 
-      if (!_.isString(url)) {
+      if (typeof url !== 'string') {
         $errUtils.throwErrByPath('visit.invalid_1st_arg')
       }
 
       const consoleProps = {}
 
-      if (!_.isEmpty(userOptions)) {
-        consoleProps['Options'] = _.pick(userOptions, VISIT_OPTS)
+      if (Object.keys(userOptions).length) {
+        consoleProps['Options'] = pick(userOptions, VISIT_OPTS)
       }
 
       const onLoadIsUserDefined = !!userOptions.onLoad
       const onBeforeLoadIsUserDefined = !!userOptions.onBeforeLoad
 
-      const options: InternalVisitOptions = _.defaults({}, userOptions, {
+      const options: InternalVisitOptions = defaults({}, userOptions, {
         auth: null,
         failOnStatusCode: true,
         retryOnNetworkFailure: true,
@@ -795,7 +794,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
       options.hasAlreadyVisitedUrl = !!previouslyVisitedLocation
 
-      if (!_.isUndefined(options.qs) && !_.isObject(options.qs)) {
+      if (options.qs !== undefined && (typeof options.qs !== 'object' || options.qs === null)) {
         $errUtils.throwErrByPath('visit.invalid_qs', { args: { qs: String(options.qs) } })
       }
 
@@ -807,13 +806,13 @@ export default (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('visit.invalid_method', { args: { method: options.method } })
       }
 
-      if (!_.isObject(options.headers)) {
+      if (typeof options.headers !== 'object' || options.headers === null) {
         $errUtils.throwErrByPath('visit.invalid_headers')
       }
 
       const path = whatIsCircular(options.body)
 
-      if (_.isObject(options.body) && path) {
+      if (typeof options.body === 'object' && options.body !== null && path) {
         $errUtils.throwErrByPath('visit.body_circular', { args: { path } })
       }
 

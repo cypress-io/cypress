@@ -1,9 +1,9 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 
 import $errUtils from '../../cypress/error_utils'
 import $stackUtils from '../../cypress/stack_utils'
 import { runPrivilegedCommand } from '../../util/privileged_channel'
+import { defaults } from '@packages/utils'
 
 interface EnvOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   log?: boolean
@@ -13,7 +13,7 @@ interface EnvOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
 export default (Commands: Cypress.Cypress['Commands'], Cypress: Cypress.Cypress, cy: Cypress.Cypress['cy']) => {
   Commands.addAll({
     env (envVars: string[], userOptions: EnvOptions = {}) {
-      const options: { timeout: number, log: boolean, _log?: Cypress.Log } = _.defaults({}, userOptions, {
+      const options: { timeout: number, log: boolean, _log?: Cypress.Log } = defaults({}, userOptions, {
         timeout: 4000,
         log: true,
       })

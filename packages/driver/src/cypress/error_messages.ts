@@ -1,19 +1,19 @@
-import _ from 'lodash'
 import { stripIndent } from 'common-tags'
-import capitalize from 'underscore.string/capitalize'
 import $stackUtils from './stack_utils'
 import $utils from './utils'
+
+const capitalizePreserveRest = (str: string) => str ? str[0].toUpperCase() + str.slice(1) : ''
 
 const divider = (num, char) => {
   return Array(num).join(char)
 }
 
 const format = (data) => {
-  if (_.isString(data)) {
-    return _.truncate(data, { length: 2000 })
+  if (typeof data === 'string') {
+    return data.length > 2000 ? `${data.slice(0, 1997)}...` : data
   }
 
-  if (_.isObject(data)) {
+  if (data !== null && typeof data === 'object') {
     return JSON.stringify(data, null, 2)
   }
 
@@ -33,7 +33,7 @@ const formatConfigFile = (projectRoot: Cypress.Config['projectRoot'], configFile
 }
 
 const formatRedirects = (redirects = [], listIndentSize) => {
-  return _.map(redirects, (redirect) => {
+  return redirects.map((redirect) => {
     return `${' '.repeat(listIndentSize)}  - ${redirect}`
   })
 }
@@ -42,7 +42,7 @@ const formatProp = (memo, field): string[] => {
   const { key, value } = field
 
   if (value != null) {
-    memo.push(`${capitalize(key)}: ${format(value)}`)
+    memo.push(`${capitalizePreserveRest(key)}: ${format(value)}`)
   }
 
   return memo
@@ -91,11 +91,7 @@ const getRedirects = (obj, phrase, listIndentSize) => {
 }
 
 const getHttpProps = (fields: { value: string, key: string }[] = []) => {
-  return _
-  .chain(fields)
-  .reduce<string[]>(formatProp, [])
-  .join('\n')
-  .value()
+  return fields.reduce<string[]>(formatProp, []).join('\n')
 }
 
 // When a function that returns a multi-line string like getHttpProps()
@@ -323,7 +319,7 @@ export default {
           `> {{error}}`,
           ``,
         ].join('\n'),
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+        docsUrl: `https://on.cypress.io/${obj.cmd.toLowerCase()}`,
       }
     },
     removed (obj) {
@@ -335,19 +331,19 @@ export default {
     invalid_domain (obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed a valid domain name. You passed: \`{{domain}}\``,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+        docsUrl: `https://on.cypress.io/${obj.cmd.toLowerCase()}`,
       }
     },
     invalid_name (obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n\`{{name}}\``,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+        docsUrl: `https://on.cypress.io/${obj.cmd.toLowerCase()}`,
       }
     },
     timed_out (obj) {
       return {
         message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+        docsUrl: `https://on.cypress.io/${obj.cmd.toLowerCase()}`,
       }
     },
   },
@@ -528,7 +524,7 @@ export default {
           The following error occurred:
 
             > "{{error}}"`,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+        docsUrl: `https://on.cypress.io/${obj.cmd.toLowerCase()}`,
       }
     },
     existent (obj) {
@@ -537,13 +533,13 @@ export default {
           ${cmd('{{cmd}}', '"{{file}}"')} failed because the file exists when expected not to exist at the following path:
 
           \`{{filePath}}\``,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+        docsUrl: `https://on.cypress.io/${obj.cmd.toLowerCase()}`,
       }
     },
     invalid_argument (obj) {
       return {
         message: `${cmd('{{cmd}}')} must be passed a non-empty string as its 1st argument. You passed: \`{{file}}\`.`,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+        docsUrl: `https://on.cypress.io/${obj.cmd.toLowerCase()}`,
       }
     },
     invalid_contents: {
@@ -556,7 +552,7 @@ export default {
           ${cmd('{{cmd}}', '"{{file}}"')} failed because the file does not exist at the following path:
 
           \`{{filePath}}\``,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+        docsUrl: `https://on.cypress.io/${obj.cmd.toLowerCase()}`,
       }
     },
     read_timed_out (obj) {
@@ -568,7 +564,7 @@ export default {
     timed_out (obj) {
       return {
         message: `${cmd('{{cmd}}', '"{{file}}"')} timed out after waiting \`{{timeout}}ms\`.`,
-        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+        docsUrl: `https://on.cypress.io/${obj.cmd.toLowerCase()}`,
       }
     },
   },
@@ -2271,9 +2267,7 @@ export default {
       const t = obj.parentTitle
 
       if (t) {
-        msg += `the remaining tests in the current suite: \`${_.truncate(t, {
-          length: 30,
-        })}\``
+        msg += `the remaining tests in the current suite: \`${t.length > 30 ? `${t.slice(0, 27)}...` : t}\``
       } else {
         msg += 'all of the remaining tests.'
       }

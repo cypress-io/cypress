@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $window from './window'
 import $elements from './elements'
 import $jquery from './jquery'
@@ -35,7 +34,7 @@ const isAUTFrame = (win) => {
 }
 
 const getFirstValidSizedRect = (el) => {
-  return _.find(el.getClientRects(), (rect) => {
+  return Array.from(el.getClientRects()).find((rect) => {
     // use the first rect that has a nonzero width and height
     return rect.width && rect.height
   }) || el.getBoundingClientRect() // otherwise fall back to the parent client rect

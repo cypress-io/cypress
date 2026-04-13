@@ -1,9 +1,32 @@
-const _ = require('lodash')
+const isPlainObject = (val) => {
+  if (val == null || typeof val !== 'object') return false
+
+  const proto = Object.getPrototypeOf(val)
+
+  return proto === Object.prototype || proto === null
+}
+
+const cloneDeep = (obj) => {
+  if (obj === null || typeof obj !== 'object') return obj
+
+  if (Array.isArray(obj)) return obj.map(cloneDeep)
+
+  // Preserve DOM nodes, jQuery objects, and other non-plain objects by reference
+  if (!isPlainObject(obj)) return obj
+
+  const out = {}
+
+  for (const key of Object.keys(obj)) {
+    out[key] = cloneDeep(obj[key])
+  }
+
+  return out
+}
 
 const testOptions = (commandName, options, order, f) => {
   it(commandName, () => {
-    let usedOptions = _.clone(options)
-    let expectedOptions = _.clone(options)
+    let usedOptions = cloneDeep(options)
+    let expectedOptions = cloneDeep(options)
     let count = 0
 
     cy.on('log:added', () => {

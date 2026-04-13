@@ -1,5 +1,5 @@
 /* eslint-disable prefer-rest-params */
-import _ from 'lodash'
+import { defaults, omitBy, uniqueId } from '@packages/utils'
 import Promise from 'bluebird'
 import debugFn from 'debug'
 
@@ -215,7 +215,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     state('specWindow', specWindow)
 
     this.specWindow = specWindow
-    this.id = _.uniqueId('cy')
+    this.id = uniqueId('cy')
     this.state = state
     this.config = config
     this.Cypress = Cypress
@@ -379,7 +379,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       throw err
     }
 
-    options = _.defaults(options, {
+    options = defaults(options, {
       async: false,
     })
 
@@ -711,7 +711,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // onInjectCommand returns false
       const onInjectCommand = cy.state('onInjectCommand')
 
-      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
+      if (typeof onInjectCommand === 'function' && onInjectCommand.call(cy, name, ...args) === false) {
         return
       }
 
@@ -803,7 +803,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       // onInjectCommand returns false
       const onInjectCommand = cy.state('onInjectCommand')
 
-      if (_.isFunction(onInjectCommand) && onInjectCommand.call(cy, name, ...args) === false) {
+      if (typeof onInjectCommand === 'function' && onInjectCommand.call(cy, name, ...args) === false) {
         return
       }
 
@@ -920,7 +920,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         // dont do anything if any of our uncaught:exception
         // listeners returned false
-        if (_.some(results, returnedFalse)) {
+        if (results.some(returnedFalse)) {
           // return true to signal that the user handled this error
           return true
         }
@@ -972,7 +972,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       const timeout = cy.config('defaultCommandTimeout')
 
       // control timeouts on runnables ourselves
-      if (_.isFinite(timeout)) {
+      if (Number.isFinite(timeout)) {
         cy.timeout(timeout)
       }
 
@@ -1020,7 +1020,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
           !$utils.isPromiseLike(ret)) {
           // TODO: clean this up in the utility function
           // to conditionally stringify functions
-          ret = _.isFunction(ret)
+          ret = typeof ret === 'function'
             ? ret.toString()
             : $utils.stringify(ret)
 
@@ -1160,7 +1160,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
         // return false if ANY results are false
         // else true
-        const ret = !_.some(results, returnedFalse)
+        const ret = !results.some(returnedFalse)
 
         cy.Cypress.action('app:window:confirmed', str, ret)
 
@@ -1184,7 +1184,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
         args: {
           cmd: name,
-          args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+          args: typeof args[0] === 'string' ? `\"${stringifiedArg}\"` : stringifiedArg,
         },
       })
     }
@@ -1321,7 +1321,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     const chainerId = this.state('chainerId')
     const links = this.state('subjectLinks') || {} as Record<string, string>
 
-    this.state('subjectLinks', _.omitBy(links, (l) => l === chainerId))
+    this.state('subjectLinks', omitBy(links, (l) => l === chainerId))
   }
 
   /*

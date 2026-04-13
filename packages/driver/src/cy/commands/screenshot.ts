@@ -1,5 +1,4 @@
 /* global Cypress, cy */
-import _ from 'lodash'
 import $ from 'jquery'
 import bytes from 'bytes'
 import Promise from 'bluebird'
@@ -10,6 +9,7 @@ import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
 import type { Log } from '../../cypress/log'
 import type { StateFunc } from '../../cypress/state'
+import { defaults, pick, omit } from '@packages/utils'
 
 interface InternalScreenshotOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> {
   _log?: Log
@@ -77,13 +77,13 @@ const automateScreenshot = (state: StateFunc, options: TakeScreenshotOptions) =>
 
   getParentTitle(runnable)
 
-  const props = _.extend({
+  const props = Object.assign({
     titles,
     testId: runnable.id,
     takenPaths: state('screenshotPaths'),
     // @ts-ignore
     testAttemptIndex: $utils.getTestFromRunnable(runnable)._currentRetry,
-  }, _.omit(options, 'runnable', 'timeout', 'log', 'subject'))
+  }, omit(options, ['runnable', 'timeout', 'log', 'subject']))
 
   const automate = () => {
     return Cypress.automation('take:screenshot', props)
@@ -164,7 +164,7 @@ const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFu
       clip = afterScroll()
     }
 
-    const options = _.extend({}, automationOptions, {
+    const options = Object.assign({}, automationOptions, {
       current: index + 1,
       total: scrolls.length,
       clip,
@@ -175,7 +175,7 @@ const takeScrollingScreenshots = (scrolls: Scroll[], win: Window, state: StateFu
 
   return Promise
   .mapSeries(scrolls, scrollAndTake)
-  .then(_.last)
+  .then((results) => results.at(-1))
 }
 
 const takeFullPageScreenshot = (state: StateFunc, automationOptions: ScreenshotAutomationOptions) => {
@@ -194,7 +194,7 @@ const takeFullPageScreenshot = (state: StateFunc, automationOptions: ScreenshotA
 
   validateNumScreenshots(numScreenshots, automationOptions)
 
-  const scrolls = _.map(_.times(numScreenshots), (index) => {
+  const scrolls = Array.from({ length: numScreenshots }, (_, index) => {
     const y = viewportHeight * index
     let clip
 
@@ -260,7 +260,7 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
 
   validateNumScreenshots(numScreenshots, automationOptions)
 
-  const scrolls: Scroll[] = _.map(_.times(numScreenshots), (index) => {
+  const scrolls: Scroll[] = Array.from({ length: numScreenshots }, (_, index) => {
     const y = elPosition.fromElWindow.top + (viewportHeight * index)
 
     const afterScroll = () => {
@@ -302,7 +302,7 @@ const takeElementScreenshot = ($el: JQuery<HTMLElement>, state: StateFunc, autom
       }
     }
 
-    return { y, afterScroll }
+    return { y, afterScroll } as Scroll
   })
 
   return takeScrollingScreenshots(scrolls, win, state, automationOptions)
@@ -389,7 +389,7 @@ const takeScreenshot = (
           $dom.addCssAnimationDisabler($body)
         }
 
-        _.each(getBlackout(screenshotConfig), (selector) => {
+        getBlackout(screenshotConfig).forEach((selector) => {
           $dom.addBlackouts($body, $container, selector)
         })
       } catch (err) {
@@ -429,7 +429,7 @@ const takeScreenshot = (
     })
   }
 
-  const automationOptions: ScreenshotAutomationOptions = _.extend({}, options, {
+  const automationOptions: ScreenshotAutomationOptions = Object.assign({}, options, {
     capture,
     clip: {
       x: 0,
@@ -524,7 +524,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
   Commands.addAll({ prevSubject: ['optional', 'element', 'window', 'document'] }, {
     screenshot (subject, name, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> = {}) {
-      if (_.isObject(name)) {
+      if (typeof name === 'object' && name !== null) {
         userOptions = name
         name = null
       }
@@ -543,23 +543,23 @@ export default function (Commands, Cypress, cy, state, config) {
       // TODO: handle hook titles
       const runnable = state('runnable')
 
-      const options: InternalScreenshotOptions = _.defaults({}, userOptions, {
+      const options: InternalScreenshotOptions = defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
 
       const isWin = $dom.isWindow(subject)
 
-      let screenshotConfig: any = _.pick(options, 'capture', 'scale', 'disableTimersAndAnimations', 'overwrite', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot')
+      let screenshotConfig: any = pick(options, ['capture', 'scale', 'disableTimersAndAnimations', 'overwrite', 'blackout', 'waitForCommandSynchronization', 'padding', 'clip', 'onBeforeScreenshot', 'onAfterScreenshot'])
 
       screenshotConfig = $Screenshot.validate(screenshotConfig, 'screenshot', options._log)
-      screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
+      screenshotConfig = Object.assign($Screenshot.getConfig(), screenshotConfig)
 
       // set this regardless of options.log b/c its used by the
       // yielded value below
-      let consoleProps = _.omit(screenshotConfig, 'scale', 'screenshotOnRunFailure')
+      let consoleProps = omit(screenshotConfig, ['scale', 'screenshotOnRunFailure'])
 
-      consoleProps = _.extend(consoleProps, {
+      consoleProps = Object.assign(consoleProps, {
         scaled: getShouldScale(screenshotConfig),
         blackout: getBlackout(screenshotConfig),
       })
@@ -605,7 +605,7 @@ export default function (Commands, Cypress, cy, state, config) {
 
         state('screenshotPaths', takenPaths.concat([path]))
 
-        _.extend(consoleProps, props, {
+        Object.assign(consoleProps, props, {
           size: bytes(size, { unitSeparator: ' ' }),
           duration: `${duration}ms`,
           dimensions: `${width}px x ${height}px`,

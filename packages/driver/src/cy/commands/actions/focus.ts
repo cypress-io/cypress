@@ -1,11 +1,10 @@
-import _ from 'lodash'
-
 import $dom from '../../../dom'
 import $utils from '../../../cypress/utils'
 import $errUtils from '../../../cypress/error_utils'
 import $elements from '../../../dom/elements'
 import $selection from '../../../dom/selection'
 import type { Log } from '../../../cypress/log'
+import { defaults } from '@packages/utils'
 
 interface InternalFocusOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable> {
   _log?: Log
@@ -27,7 +26,7 @@ export default (Commands, Cypress, cy) => {
     focus (subject, userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       // we should throw errors by default!
       // but allow them to be silenced
-      const options: InternalFocusOptions = _.defaults({}, userOptions, {
+      const options: InternalFocusOptions = defaults({}, userOptions, {
         $el: subject,
         error: true,
         log: true,
@@ -113,7 +112,7 @@ export default (Commands, Cypress, cy) => {
     blur (subject, userOptions: Partial<Cypress.BlurOptions> = {}) {
       // we should throw errors by default!
       // but allow them to be silenced
-      const options: InternalBlurOptions = _.defaults({}, userOptions, {
+      const options: InternalBlurOptions = defaults({}, userOptions, {
         $el: subject,
         $focused: cy.getFocused(),
         error: true,

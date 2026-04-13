@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { $Command } from '../cypress/command'
 import $errUtils from '../cypress/error_utils'
 
@@ -15,7 +14,7 @@ export default (Cypress, userOptions: Cypress.LogGroup.Config, fn: Cypress.LogGr
 
   const log = Cypress.log(options)
 
-  if (!_.isFunction(fn)) {
+  if (typeof fn !== 'function') {
     $errUtils.throwErrByPath('group.missing_fn', { onFail: log })
   }
 

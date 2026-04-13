@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $errUtils from '../cypress/error_utils'
 import type { StateFunc } from '../cypress/state'
 
@@ -11,7 +10,7 @@ export const create = (state: StateFunc) => ({
       $errUtils.throwErrByPath('miscellaneous.outside_test')
     }
 
-    if (_.isFinite(ms)) {
+    if (Number.isFinite(ms)) {
       // if delta is true then we add (or subtract) from the
       // runnables current timeout instead of blanketingly setting it
       ms = delta ? runnable.timeout() + ms! : ms

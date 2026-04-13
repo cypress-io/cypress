@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick } from '@packages/utils'
 import $errUtils from '../cypress/error_utils'
 
 // See Test Config Overrides in ../../../../cli/types/cypress.d.ts
@@ -45,7 +45,7 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
   testConfigList.forEach((resolvedConfig) => {
     const { overrides: testConfigOverride, overrideLevel, invocationDetails } = resolvedConfig as TestConfig
 
-    if (_.isArray(testConfigOverride)) {
+    if (Array.isArray(testConfigOverride)) {
       setConfig(resolvedConfig as ResolvedTestConfigOverride, config, localConfigOverrides)
     } else if (Object.keys(testConfigOverride).length) {
       delete testConfigOverride.browser
@@ -71,14 +71,14 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
 }
 
 function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, env) {
-  let globalConfig = _.clone(config())
+  let globalConfig = { ...config() }
 
   const localConfigOverrides = setConfig(testConfig, config)
 
   // only store the global config values that updated
-  globalConfig = _.pick(globalConfig, Object.keys(localConfigOverrides))
+  globalConfig = pick(globalConfig, Object.keys(localConfigOverrides))
 
-  const localConfigOverridesBackup = _.clone(localConfigOverrides)
+  const localConfigOverridesBackup = { ...localConfigOverrides }
 
   // Do not allow overriding test/suite environment variables via testConfigOverrides with allowCypressEnv=false
   // as the server needs to be restarted. The environment variables needing to be overridden need to be injected via the Cypress server
@@ -95,13 +95,13 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
   let localTestEnvBackup
 
   if (config('allowCypressEnv')) {
-    globalEnv = _.clone(env())
+    globalEnv = { ...env() }
     if (localConfigOverrides.env) {
       env(localConfigOverrides.env)
     }
 
     localTestEnv = env()
-    localTestEnvBackup = _.clone(localTestEnv)
+    localTestEnvBackup = { ...localTestEnv }
   }
 
   // we restore config back to what it was before the test ran
@@ -110,7 +110,7 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
   // TODO: (NEXT_BREAKING) always restore configuration
   //   do not allow global mutations inside test
   const restoreConfigFn = function () {
-    _.each(localConfigOverrides, (val, key) => {
+    Object.entries(localConfigOverrides).forEach(([key, val]) => {
       if (localConfigOverridesBackup[key] !== val) {
         globalConfig[key] = val
       }
@@ -122,7 +122,7 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
     })
 
     if (config('allowCypressEnv')) {
-      _.each(localTestEnv, (val, key) => {
+      Object.entries(localTestEnv).forEach(([key, val]) => {
         if (localTestEnvBackup[key] !== val) {
           globalEnv[key] = val
         }
@@ -167,7 +167,7 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
   const testConfig = {
     testConfigList: testConfigList.filter(({ overrides }) => overrides !== undefined),
     // collect test overrides to send to the Cypress Cloud api when @packages/server is ran in record mode
-    unverifiedTestConfig: _.reduce(testConfigList, (acc, { overrides }) => _.extend(acc, overrides), {}),
+    unverifiedTestConfig: testConfigList.reduce((acc, { overrides }) => Object.assign(acc, overrides), {}),
   }
 
   return testConfig

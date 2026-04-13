@@ -1,4 +1,5 @@
-import _, { DebouncedFunc } from 'lodash'
+import { pick, defaults, debounce } from '@packages/utils'
+import type { DebouncedFunction } from '@packages/utils'
 import $ from 'jquery'
 import clone from 'clone'
 
@@ -27,42 +28,51 @@ export const LogUtils = {
   // mutate attrs by nulling out
   // object properties
   reduceMemory: (attrs) => {
-    return _.each(attrs, (value, key) => {
-      if (_.isObject(value)) {
+    for (const key of Object.keys(attrs)) {
+      if (attrs[key] !== null && typeof attrs[key] === 'object') {
         attrs[key] = null
       }
-    })
+    }
+
+    return attrs
   },
 
   toSerializedJSON (attrs) {
     const { isDom } = $dom
 
-    const stringify = function (value, key) {
-      if (BLACKLIST_PROPS.includes(key)) {
+    const stringify = function (value, key?) {
+      if (key && BLACKLIST_PROPS.includes(key)) {
         return null
       }
 
-      if (_.isArray(value)) {
-        return _.map(value, stringify)
+      if (Array.isArray(value)) {
+        return value.map((v) => stringify(v))
       }
 
       if (isDom(value)) {
         return $dom.stringify(value, 'short')
       }
 
-      if (_.isFunction(value) && groupsOrTableRe.test(key)) {
+      if (typeof value === 'function' && groupsOrTableRe.test(key)) {
         return value()
       }
 
-      if (_.isFunction(value) || _.isSymbol(value)) {
+      if (typeof value === 'function' || typeof value === 'symbol') {
         return value.toString()
       }
 
-      if (_.isObject(value)) {
+      if (value !== null && typeof value === 'object') {
         // clone to nuke circular references
         // and blow away anything that throws
         try {
-          return _.mapValues(clone(value), stringify)
+          const cloned = clone(value)
+          const result: Record<string, any> = {}
+
+          for (const k of Object.keys(cloned)) {
+            result[k] = stringify(cloned[k], k)
+          }
+
+          return result
         } catch (err) {
           return null
         }
@@ -71,19 +81,25 @@ export const LogUtils = {
       return value
     }
 
-    return _.mapValues(attrs, stringify)
+    const result: Record<string, any> = {}
+
+    for (const key of Object.keys(attrs)) {
+      result[key] = stringify(attrs[key], key)
+    }
+
+    return result
   },
 
   getDisplayProps: (attrs) => {
     return {
-      ..._.pick(attrs, DISPLAY_PROPS),
+      ...pick(attrs, ...DISPLAY_PROPS),
       hasSnapshot: !!attrs.snapshots,
       hasConsoleProps: !!attrs.consoleProps,
     }
   },
 
   getProtocolProps: (attrs) => {
-    return _.pick(attrs, PROTOCOL_PROPS)
+    return pick(attrs, ...PROTOCOL_PROPS)
   },
 
   getConsoleProps: (attrs) => {
@@ -91,24 +107,23 @@ export const LogUtils = {
   },
 
   getSnapshotProps: (attrs) => {
-    return _.pick(attrs, SNAPSHOT_PROPS)
+    return pick(attrs, ...SNAPSHOT_PROPS)
   },
 
   countLogsByTests (tests: Record<string, any> = {}) {
-    if (_.isEmpty(tests)) {
+    const testValues = Object.values(tests)
+
+    if (testValues.length === 0) {
       return 0
     }
 
-    return _
-    .chain(tests)
-    .flatMap((test) => test.prevAttempts ? [test, ...test.prevAttempts] : [test])
-    .flatMap<{id: string}>((tests) => [].concat(tests.agents, tests.routes, tests.commands))
-    .compact()
-    .union([{ id: '0' }])
-    // id is a string in the form of 'log-origin-#', grab the number off the end.
-    .map(({ id }) => parseInt((id.match(/\d*$/) || ['0'])[0]))
-    .max()
-    .value()
+    const allTests = testValues.flatMap((test) => test.prevAttempts ? [test, ...test.prevAttempts] : [test])
+    const allLogs = allTests.flatMap((t: any) => ([] as any[]).concat(t.agents, t.routes, t.commands)).filter(Boolean)
+    const allIds = [...allLogs, { id: '0' }]
+    const ids = [...new Set(allIds.map((item) => item.id))]
+    const nums = ids.map((id) => parseInt((id.match(/\d*$/) || ['0'])[0]))
+
+    return Math.max(...nums)
   },
 
   // TODO: fix this
@@ -121,7 +136,7 @@ export const LogUtils = {
   },
 }
 
-const defaults = function (state: StateFunc, config, obj) {
+const resolveLogDefaults = function (state: StateFunc, config, obj) {
   const instrument = obj.instrument != null ? obj.instrument : 'command'
   const current = state('current')
 
@@ -134,7 +149,7 @@ const defaults = function (state: StateFunc, config, obj) {
   // may not even be inside of a command
   if (instrument === 'command') {
     // we are logging a command instrument by default
-    _.defaults(obj, current != null ? current.pick('name', 'type') : undefined)
+    defaults(obj, current != null ? current.pick('name', 'type') : undefined)
 
     // force duals to become either parents or childs
     // normally this would be handled by the command itself
@@ -147,7 +162,7 @@ const defaults = function (state: StateFunc, config, obj) {
       obj.type = (current != null ? current.hasPreviouslyLinkedCommand() : undefined) ? 'child' : 'parent'
     }
 
-    _.defaults(obj, {
+    defaults(obj, {
       timeout: config('defaultCommandTimeout'),
       event: false,
       renderProps () {
@@ -173,7 +188,7 @@ const defaults = function (state: StateFunc, config, obj) {
     // allow type to by a dynamic function
     // so it can conditionally return either
     // parent or child (useful in assertions)
-    if (_.isFunction(obj.type)) {
+    if (typeof obj.type === 'function') {
       obj.type = obj.type(current, cy.subjectChain(chainerId))
     }
   }
@@ -192,7 +207,7 @@ const defaults = function (state: StateFunc, config, obj) {
   }
 
   counter++
-  _.defaults(obj, {
+  defaults(obj, {
     isCrossOriginLog: Cypress.isCrossOriginSpecBridge,
     id: `log-${window.location.origin}-${counter}`,
     chainerId,
@@ -225,12 +240,12 @@ const defaults = function (state: StateFunc, config, obj) {
   const logGroupIds = state('logGroupIds') || []
 
   if (logGroupIds.length) {
-    obj.group = _.last(logGroupIds)
+    obj.group = logGroupIds.at(-1)
     obj.groupLevel = logGroupIds.length
   }
 
   if (obj.groupEnd) {
-    state('logGroupIds', _.slice(logGroupIds, 0, -1))
+    state('logGroupIds', logGroupIds.slice(0, -1))
   }
 
   if (obj.groupStart) {
@@ -244,7 +259,7 @@ export class Log {
   createSnapshot: ISnapshots['createSnapshot']
   state: StateFunc
   config: any
-  fireChangeEvent: DebouncedFunc<((log) => (void | undefined))>
+  fireChangeEvent: DebouncedFunction<((log) => (void | undefined))>
 
   _hasInitiallyLogged: boolean = false
   private attributes: Record<string, any> = { }
@@ -255,7 +270,7 @@ export class Log {
     this.state = state
     this.config = config
     // only fire the log:state:changed event as fast as every 4ms
-    this.fireChangeEvent = _.debounce(fireChangeEvent, 4)
+    this.fireChangeEvent = debounce(fireChangeEvent, 4)
 
     if (state('isProtocolEnabled')) {
       Cypress.once('test:after:run', () => {
@@ -282,7 +297,7 @@ export class Log {
       // and set its default to empty object literal
       const fn = this.get(key)
 
-      if (_.isFunction(fn)) {
+      if (typeof fn === 'function') {
         return fn()
       }
 
@@ -293,22 +308,26 @@ export class Log {
   }
 
   toJSON () {
-    return _
-    .chain(this.attributes)
-    .omit('error')
-    .omitBy(_.isFunction)
-    .extend({
+    const result: Record<string, any> = {}
+
+    for (const [key, value] of Object.entries(this.attributes)) {
+      if (key === 'error' || typeof value === 'function') continue
+
+      result[key] = value
+    }
+
+    return {
+      ...result,
       err: $errUtils.wrapErr(this.get('error')),
       consoleProps: this.invoke('consoleProps'),
       renderProps: this.invoke('renderProps'),
-    })
-    .value()
+    }
   }
 
   set (key, val?) {
     let obj = key
 
-    if (_.isString(key)) {
+    if (typeof key === 'string') {
       obj = {}
       obj[key] = val
     }
@@ -348,18 +367,18 @@ export class Log {
     // if we have an alias automatically
     // figure out what type of alias it is
     if (obj.alias) {
-      _.defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
+      defaults(obj, { aliasType: obj.$el ? 'dom' : 'primitive' })
     }
 
-    _.extend(this.attributes, obj)
+    Object.assign(this.attributes, obj)
 
     // if we have an consoleProps then re-wrap it
     // cy.clock sets obj / cross origin logs come as objs
-    if (obj && _.isFunction(obj.consoleProps)) {
+    if (obj && typeof obj.consoleProps === 'function') {
       this.wrapConsoleProps()
     }
 
-    if (obj.renderProps && _.isFunction(obj.renderProps) && isHiddenLog && this.state('isProtocolEnabled')) {
+    if (obj.renderProps && typeof obj.renderProps === 'function' && isHiddenLog && this.state('isProtocolEnabled')) {
       this.wrapRenderProps()
     }
 
@@ -373,7 +392,7 @@ export class Log {
   }
 
   pick (...args) {
-    return _.pick(this.attributes, args)
+    return pick(this.attributes, ...args)
   }
 
   private addSnapshot (snapshot, options) {
@@ -424,7 +443,7 @@ export class Log {
     const logGroupIds = this.state('logGroupIds') || []
 
     // current log was responsible for creating the current log group so end the current group
-    if (_.last(logGroupIds) === this.attributes.id) {
+    if (logGroupIds.at(-1) === this.attributes.id) {
       this.endGroup()
     }
 
@@ -458,7 +477,7 @@ export class Log {
   }
 
   endGroup () {
-    this.state('logGroupIds', _.slice(this.state('logGroupIds'), 0, -1))
+    this.state('logGroupIds', this.state('logGroupIds').slice(0, -1))
   }
 
   getError (err) {
@@ -472,7 +491,7 @@ export class Log {
       return
     }
 
-    if (_.isElement($el)) {
+    if ($dom.isElement($el)) {
       // wrap the element in jquery
       // if its just a plain element
       return this.set('$el', $($el))
@@ -516,9 +535,10 @@ export class Log {
     // on the original
 
     // 1. calculate which properties to unset
-    const unsets = _.chain(this.attributes).keys().without(..._.keys(log.get())).value()
+    const logKeys = new Set(Object.keys(log.get()))
+    const unsets = Object.keys(this.attributes).filter((k) => !logKeys.has(k))
 
-    _.each(unsets, (unset) => {
+    unsets.forEach((unset) => {
       return this.unset(unset)
     })
 
@@ -569,7 +589,7 @@ export class Log {
 
       // and finally add error if one exists
       if (_this.get('error')) {
-        _.defaults(consoleObj, {
+        defaults(consoleObj, {
           error: _this.getError(_this.get('error')),
         })
       }
@@ -582,11 +602,11 @@ export class Log {
       }
 
       // in the case a log is being recreated from the cross-origin spec bridge to the primary, consoleProps may be an Object
-      const consoleObjResult = _.isFunction(consoleProps) ? consoleProps.apply(this, invokedArgs) : consoleProps
+      const consoleObjResult = typeof consoleProps === 'function' ? consoleProps.apply(this, invokedArgs) : consoleProps
 
       // these are the expected properties on the consoleProps object
       const expectedProperties = ['name', 'type', 'error', 'snapshot', 'args', 'groups', 'table', 'props']
-      const expectedPropertiesObj = _.reduce(_.pick(consoleObjResult, expectedProperties), (memo, value, key) => {
+      const expectedPropertiesObj = Object.entries(pick(consoleObjResult, ...expectedProperties)).reduce((memo, [key, value]) => {
         // don't include properties with undefined values
         if (value !== undefined) {
           memo[key] = value
@@ -595,10 +615,16 @@ export class Log {
         return memo
       }, consoleObj)
       // any other key/value pairs need to be added to the `props` property
-      const rest = _.omit(consoleObjResult, expectedProperties)
+      const rest: Record<string, any> = {}
 
-      return _.extend(expectedPropertiesObj, {
-        props: _.extend(rest, expectedPropertiesObj.props || {}),
+      for (const key of Object.keys(consoleObjResult || {})) {
+        if (!expectedProperties.includes(key)) {
+          rest[key] = consoleObjResult[key]
+        }
+      }
+
+      return Object.assign(expectedPropertiesObj, {
+        props: Object.assign(rest, expectedPropertiesObj.props || {}),
       })
     }
   }
@@ -642,7 +668,49 @@ class LogManager {
 
     const attrs = log.toJSON()
 
-    const logAttrsEqual = _.isEqualWith(log._emittedAttrs, attrs, (_objValue, _othValue, key) => {
+    const deepEqual = (a, b) => {
+      if (a === b) return true
+
+      if (a == null || b == null) return a === b
+
+      if (typeof a !== typeof b) return false
+
+      if (typeof a !== 'object') return false
+
+      if (Array.isArray(a)) {
+        if (!Array.isArray(b) || a.length !== b.length) return false
+
+        return a.every((v, i) => deepEqual(v, b[i]))
+      }
+
+      const keysA = Object.keys(a)
+      const keysB = Object.keys(b)
+
+      if (keysA.length !== keysB.length) return false
+
+      return keysA.every((k) => Object.prototype.hasOwnProperty.call(b, k) && deepEqual(a[k], b[k]))
+    }
+
+    const isEqualWith = (obj1, obj2, customizer) => {
+      const keys1 = Object.keys(obj1 || {})
+      const keys2 = Object.keys(obj2 || {})
+
+      if (keys1.length !== keys2.length) return false
+
+      for (const key of keys1) {
+        const custom = customizer(obj1[key], obj2[key], key)
+
+        if (custom === true) continue
+
+        if (custom === false) return false
+
+        if (!deepEqual(obj1[key], obj2[key])) return false
+      }
+
+      return true
+    }
+
+    const logAttrsEqual = isEqualWith(log._emittedAttrs, attrs, (_objValue, _othValue, key) => {
       // if the key is 'updatedAtTimestamp' then we want to ignore it since it will always be different
       if (key === 'updatedAtTimestamp') {
         return true
@@ -678,7 +746,7 @@ class LogManager {
 
   createLogFn (cy, state, config) {
     return (options: Cypress.InternalLogConfig = {}) => {
-      if (!_.isObject(options)) {
+      if (options === null || typeof options !== 'object') {
         $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
       }
 
@@ -688,13 +756,13 @@ class LogManager {
 
       const log = new Log(cy.createSnapshot, state, config, this.fireChangeEvent)
 
-      log.set(defaults(state, config, _.clone(options)))
+      log.set(resolveLogDefaults(state, config, { ...options }))
 
       const onBeforeLog = state('onBeforeLog')
 
       // dont trigger log if this function
       // explicitly returns false
-      if (_.isFunction(onBeforeLog)) {
+      if (typeof onBeforeLog === 'function') {
         if (onBeforeLog.call(cy, log) === false) {
           return
         }

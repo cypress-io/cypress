@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $ from 'jquery'
 import $document from '../document'
 import $jquery from '../jquery'
@@ -215,7 +214,7 @@ export const isUndefinedOrHTMLBodyDoc = ($el: JQuery<HTMLElement>) => {
  */
 export const getElements = ($el) => {
   // bail if no $el or length
-  if (!_.get($el, 'length')) {
+  if (!$el?.length) {
     return
   }
 
@@ -302,20 +301,20 @@ $.expr[':']['cy-contains-regex'] = $.expr.createPseudo((text) => {
 export const getContainsSelector = (text, filter = '', options: {
   matchCase?: boolean
 } = {}) => {
-  if (_.isRegExp(text) && options.matchCase === false && !text.flags.includes('i')) {
+  if (text instanceof RegExp && options.matchCase === false && !text.flags.includes('i')) {
     text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
   }
 
-  const escapedText = _.isString(text) ? JSON.stringify(text).slice(1, -1) : text.toString()
+  const escapedText = typeof text === 'string' ? JSON.stringify(text).slice(1, -1) : text.toString()
 
   // they may have written the filter as
   // comma separated dom els, so we want to search all
   // https://github.com/cypress-io/cypress/issues/2407
   const filters = filter.trim().split(',')
 
-  let expr = _.isRegExp(text) ? 'cy-contains-regex' : (options.matchCase ? 'cy-contains' : 'cy-contains-insensitive')
+  let expr = text instanceof RegExp ? 'cy-contains-regex' : (options.matchCase ? 'cy-contains' : 'cy-contains-insensitive')
 
-  const selectors = _.map(filters, (filter) => {
+  const selectors = filters.map((filter) => {
     // https://github.com/cypress-io/cypress/issues/8626
     // Sizzle cannot parse when \' is used inside [attribute~='value'] selector.
     // We need to use other type of quote characters.

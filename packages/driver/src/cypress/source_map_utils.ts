@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { SourceMapConsumer } from 'source-map'
 
 import type { BasicSourceMapConsumer } from 'source-map'
@@ -38,7 +37,7 @@ const extractSourceMap = (fileContents) => {
 
     if (!sourceMapMatch) return null
 
-    const url = _.last(sourceMapMatch) as any
+    const url = sourceMapMatch.at(-1) as any
 
     dataUrlMatch = url.match(regexDataUrl)
   } catch (err) {

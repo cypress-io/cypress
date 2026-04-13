@@ -1,7 +1,5 @@
-const lodash = require('lodash')
-
 export function whatIsCircular (obj) {
-  if (!lodash.isObject(obj)) {
+  if (obj === null || typeof obj !== 'object') {
     return
   }
 
@@ -13,8 +11,8 @@ function _dfs (obj, parents: any[] = [], parentKeys: any[] = []) {
   for (const key in obj) {
     const val = obj[key]
 
-    if (lodash.isObject(val)) {
-      if (lodash.includes(parents, val)) {
+    if (val !== null && typeof val === 'object') {
+      if (parents.includes(val)) {
         return parentKeys
       }
 

@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import type { $Cy } from '../cypress/cy'
 
 import $errUtils from '../cypress/error_utils'
@@ -60,7 +59,7 @@ export const create = (cy: $Cy) => ({
   },
 
   validateAlias (alias: string) {
-    if (!_.isString(alias)) {
+    if (typeof alias !== 'string') {
       $errUtils.throwErrByPath('as.invalid_type')
     }
 
@@ -73,7 +72,7 @@ export const create = (cy: $Cy) => ({
       })
     }
 
-    if (_.isEmpty(alias)) {
+    if (alias.length === 0) {
       $errUtils.throwErrByPath('as.empty_string')
     }
 
@@ -86,7 +85,7 @@ export const create = (cy: $Cy) => ({
 
   aliasNotFoundFor (name, cmd, log) {
     const availableAliases = cy.state('aliases')
-      ? _.keys(cy.state('aliases'))
+      ? Object.keys(cy.state('aliases'))
       : []
 
     let displayName

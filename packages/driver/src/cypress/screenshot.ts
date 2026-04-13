@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { omit } from '@packages/utils'
 
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -30,7 +30,7 @@ const normalizePadding = (padding) => {
     padding = 0
   }
 
-  if (_.isArray(padding)) {
+  if (Array.isArray(padding)) {
     // CSS shorthand
     // See: https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties#Tricky_edge_cases
     switch (padding.length) {
@@ -74,7 +74,7 @@ const validateAndSetBoolean = (props, values, cmd, log, option) => {
     return
   }
 
-  if (!_.isBoolean(value)) {
+  if (typeof value !== 'boolean') {
     $errUtils.throwErrByPath('screenshot.invalid_boolean', {
       log,
       args: {
@@ -95,7 +95,7 @@ const validateAndSetCallback = (props, values, cmd, log, option) => {
     return
   }
 
-  if (!_.isFunction(value)) {
+  if (typeof value !== 'function') {
     $errUtils.throwErrByPath('screenshot.invalid_callback', {
       log,
       args: {
@@ -112,7 +112,7 @@ const validateAndSetCallback = (props, values, cmd, log, option) => {
 const validate = (props, cmd, log?) => {
   const values: Record<string, any> = {}
 
-  if (!_.isPlainObject(props)) {
+  if (props === null || typeof props !== 'object' || Array.isArray(props)) {
     $errUtils.throwErrByPath('screenshot.invalid_arg', {
       log,
       args: { cmd, arg: $utils.stringify(props) },
@@ -137,11 +137,11 @@ const validate = (props, cmd, log?) => {
   })
 
   if (blackout) {
-    const existsNonString = _.some(blackout, (selector) => {
-      return !_.isString(selector)
+    const existsNonString = blackout.some((selector) => {
+      return typeof selector !== 'string'
     })
 
-    if (!_.isArray(blackout) || existsNonString) {
+    if (!Array.isArray(blackout) || existsNonString) {
       $errUtils.throwErrByPath('screenshot.invalid_blackout', {
         log,
         args: { cmd, arg: $utils.stringify(blackout) },
@@ -152,13 +152,13 @@ const validate = (props, cmd, log?) => {
   }
 
   if (clip) {
-    const existsNonNumber = _.some(clip, (value) => {
-      return !_.isNumber(value)
+    const existsNonNumber = Object.values(clip).some((value) => {
+      return typeof value !== 'number'
     })
 
     if (
-      !_.isPlainObject(clip) || existsNonNumber ||
-      (_.sortBy(_.keys(clip)).join(',') !== 'height,width,x,y')
+      (clip === null || typeof clip !== 'object' || Array.isArray(clip)) || existsNonNumber ||
+      (Object.keys(clip).sort().join(',') !== 'height,width,x,y')
     ) {
       $errUtils.throwErrByPath('screenshot.invalid_clip', {
         log,
@@ -171,13 +171,13 @@ const validate = (props, cmd, log?) => {
 
   if (padding) {
     const isShorthandPadding = (value) => {
-      return _.isArray(value) &&
+      return Array.isArray(value) &&
         (value.length >= 1) &&
         (value.length <= 4) &&
-        _.every(value, _.isFinite)
+        value.every((v) => Number.isFinite(v))
     }
 
-    if (!(_.isFinite(padding) || isShorthandPadding(padding))) {
+    if (!(Number.isFinite(padding) || isShorthandPadding(padding))) {
       $errUtils.throwErrByPath('screenshot.invalid_padding', {
         log,
         args: { cmd, arg: $utils.stringify(padding) },
@@ -198,7 +198,7 @@ function reset () {
 }
 
 function getConfig () {
-  return _.cloneDeep(_.omit(_defaults, 'onBeforeScreenshot', 'onAfterScreenshot'))
+  return structuredClone(omit(_defaults, 'onBeforeScreenshot', 'onAfterScreenshot'))
 }
 
 function onBeforeScreenshot ($el) {
@@ -212,7 +212,7 @@ function onAfterScreenshot ($el, results) {
 function defaults (props) {
   const values = validate(props, 'Cypress.Screenshot.defaults')
 
-  return _.extend(_defaults, values)
+  return Object.assign(_defaults, values)
 }
 
 export default {

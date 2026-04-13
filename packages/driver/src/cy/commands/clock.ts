@@ -1,7 +1,6 @@
-import _ from 'lodash'
-
 import { create as createClock, Clock } from '../../cypress/clock'
 import $errUtils from '../../cypress/error_utils'
+import { defaults } from '@packages/utils'
 
 type CyClock = Clock & {
   tick(ms, options?: any): number
@@ -50,29 +49,29 @@ export default function (Commands, Cypress, cy, state) {
         return clock
       }
 
-      if (_.isDate(now)) {
+      if (now instanceof Date) {
         now = now.getTime()
       }
 
-      if (_.isObject(now)) {
+      if (typeof now === 'object' && now !== null) {
         userOptions = now
         now = undefined
       }
 
-      if (_.isObject(methods) && !_.isArray(methods)) {
+      if (typeof methods === 'object' && methods !== null && !Array.isArray(methods)) {
         userOptions = methods
         methods = undefined
       }
 
-      if (now != null && !_.isNumber(now)) {
+      if (now != null && typeof now !== 'number') {
         $errUtils.throwErrByPath('clock.invalid_1st_arg', { args: { arg: JSON.stringify(now) } })
       }
 
-      if (methods != null && !(_.isArray(methods) && _.every(methods, _.isString))) {
+      if (methods != null && !(Array.isArray(methods) && methods.every((m) => typeof m === 'string'))) {
         $errUtils.throwErrByPath('clock.invalid_2nd_arg', { args: { arg: JSON.stringify(methods) } })
       }
 
-      options = _.defaults({}, userOptions, {
+      options = defaults({}, userOptions, {
         log: true,
       })
 
@@ -89,7 +88,7 @@ export default function (Commands, Cypress, cy, state) {
           end: true,
           snapshot,
           consoleProps () {
-            return _.extend({
+            return Object.assign({
               'Now': logNow,
               'Methods replaced': logMethods,
             }, consoleProps)
@@ -102,7 +101,7 @@ export default function (Commands, Cypress, cy, state) {
       const { tick } = clock
 
       clock.tick = function (ms, userOptions: Partial<Cypress.Loggable> = {}) {
-        if ((ms != null) && !_.isNumber(ms)) {
+        if ((ms != null) && typeof ms !== 'number') {
           $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg: JSON.stringify(ms) } })
         }
 
@@ -110,7 +109,7 @@ export default function (Commands, Cypress, cy, state) {
           ms = 0
         }
 
-        userOptions = _.defaults({}, userOptions, {
+        userOptions = defaults({}, userOptions, {
           log: options.log,
         })
 
@@ -137,7 +136,7 @@ export default function (Commands, Cypress, cy, state) {
       clock.restore = function (userOptions: Partial<Cypress.Loggable> = {}) {
         const ret = restore.apply(this)
 
-        userOptions = _.defaults({}, userOptions, {
+        userOptions = defaults({}, userOptions, {
           log: options.log,
         })
 

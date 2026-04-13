@@ -1,8 +1,8 @@
-import _ from 'lodash'
 import Promise from 'bluebird'
 import { basename, extname, sep } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
+import { pick } from '@packages/utils'
 
 const NULL_SEP = '\u0000'
 
@@ -90,13 +90,13 @@ export default (Commands, Cypress, cy, state, config) => {
 
       let options: Record<string, any> = {}
 
-      if (_.isObject(args[0])) {
+      if (typeof args[0] === 'object' && args[0] !== null) {
         options = args[0]
-      } else if (_.isObject(args[1])) {
+      } else if (typeof args[1] === 'object' && args[1] !== null) {
         options = args[1]
       }
 
-      if (_.isString(args[0]) || args[0] === null) {
+      if (typeof args[0] === 'string' || args[0] === null) {
         options.encoding = args[0]
       }
 
@@ -114,7 +114,7 @@ export default (Commands, Cypress, cy, state, config) => {
       // because we're handling timeouts ourselves
       cy.clearTimeout('get:fixture')
 
-      return Cypress.backend('get:fixture', fixture, _.pick(options, 'encoding'))
+      return Cypress.backend('get:fixture', fixture, pick(options, ['encoding']))
       .timeout(timeout)
       .then((response) => {
         if (response && response.__error) {

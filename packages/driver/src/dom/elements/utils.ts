@@ -1,8 +1,8 @@
 import $ from 'jquery'
-import _ from 'lodash'
 import $jquery from '../jquery'
 import $window from '../window'
 import $document from '../document'
+import { clean } from '@packages/utils'
 
 const whitespaces = /\s+/g
 
@@ -21,29 +21,35 @@ export const isSame = function ($el1, $el2) {
   const el1 = $jquery.unwrap($el1)
   const el2 = $jquery.unwrap($el2)
 
-  return el1 && el2 && _.isEqual(el1, el2)
+  return el1 && el2 && el1 === el2
 }
 
 export const isSelector = ($el: JQuery<HTMLElement>, selector) => {
   return $el.is(selector)
 }
 
+const resolveValue = (obj, key) => {
+  const v = obj[key]
+
+  return typeof v === 'function' ? v.call(obj) : v
+}
+
 export function switchCase (value, casesObj, defaultKey = 'default') {
-  if (_.has(casesObj, value)) {
-    return _.result(casesObj, value)
+  if (Object.prototype.hasOwnProperty.call(casesObj, value)) {
+    return resolveValue(casesObj, value)
   }
 
-  if (_.has(casesObj, defaultKey)) {
-    return _.result(casesObj, defaultKey)
+  if (Object.prototype.hasOwnProperty.call(casesObj, defaultKey)) {
+    return resolveValue(casesObj, defaultKey)
   }
 
-  const keys = _.keys(casesObj)
+  const keys = Object.keys(casesObj)
 
   throw new Error(`The switch/case value: '${value}' did not match any cases: ${keys.join(', ')}.`)
 }
 
 export const stringify = (el, form = 'long') => {
-  if (_.isString(el)) {
+  if (typeof el === 'string') {
     return el
   }
 
@@ -66,10 +72,8 @@ export const stringify = (el, form = 'long') => {
     .empty()
     .prop('outerHTML')
 
-    const text = (_.chain($el.text()) as any)
-    .clean()
-    .truncate({ length: 10 })
-    .value()
+    const cleanedText = clean($el.text())
+    const text = cleanedText.length > 10 ? `${cleanedText.slice(0, 7)}...` : cleanedText
     const children = $el.children().length
 
     if (children) {

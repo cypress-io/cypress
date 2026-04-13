@@ -1,11 +1,9 @@
-import _ from 'lodash'
-
 import { $Chainer } from '../../cypress/chainer'
 import $errUtils from '../../cypress/error_utils'
 
 const command = function (ctx, name, ...args) {
   if (!ctx[name]) {
-    const cmds = `\`${_.keys($Chainer.prototype).join('`, `')}\``
+    const cmds = `\`${Object.keys($Chainer.prototype).join('`, `')}\``
 
     $errUtils.throwErrByPath('miscellaneous.invalid_command', {
       args: { name, cmds },

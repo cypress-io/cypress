@@ -2,8 +2,6 @@
 // This duplication of code has been created when migrating legacy runner to app.
 // When migrating `driver`, we might need to remove this function and use the `app` version instead.
 
-import _ from 'lodash'
-
 interface Box {
   offset: { top: number, left: number } | undefined
   paddingTop: number
@@ -92,9 +90,9 @@ type dir = 'top' | 'right' | 'bottom' | 'left'
 const getStylePropertyNumber = (computedStyle: CSSStyleDeclaration, property: string): number => {
   const value = computedStyle.getPropertyValue(property)
   // nuke anything thats not a number or a negative symbol
-  const num = _.toNumber(value.replace(/[^0-9\.-]+/, ''))
+  const num = Number(value.replace(/[^0-9\.-]+/, ''))
 
-  if (!_.isFinite(num)) {
+  if (!Number.isFinite(num)) {
     throw new Error('Element attr did not return a valid number')
   }
 

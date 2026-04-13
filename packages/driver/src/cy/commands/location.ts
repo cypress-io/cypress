@@ -1,5 +1,3 @@
-import _ from 'lodash'
-
 import $errUtils from '../../cypress/error_utils'
 import { getUrlFromAutomation } from './helpers/location'
 
@@ -66,12 +64,12 @@ export function locationQueryCommand (Cypress: Cypress.Cypress, cy: Cypress.Cypr
 
   // Make sure the location command can communicate with the AUT.
   // otherwise the command just yields 'null' and the reason may be unclear to the user.
-  if (_.isObject(key)) {
+  if (typeof key === 'object' && key !== null) {
     options = key
   }
 
   Cypress.log({
-    message: _.isString(key) ? key : '',
+    message: typeof key === 'string' ? key : '',
     hidden: options.log === false,
     timeout: options.timeout,
   })
@@ -103,7 +101,7 @@ export function locationQueryCommand (Cypress: Cypress.Cypress, cy: Cypress.Cypr
       return null
     }
 
-    return _.isString(key)
+    return typeof key === 'string'
       // use existential here because we only want to throw
       // on null or undefined values (and not empty strings)
       ? location[key] ?? $errUtils.throwErrByPath('location.invalid_key', { args: { key } })

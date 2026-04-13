@@ -8,7 +8,6 @@
 // Various stack patterns are saved as scenario fixtures in ./driver/test
 // to prevent regressions.
 
-import _ from 'lodash'
 import path from 'path'
 import errorStackParser from 'error-stack-parser'
 import { codeFrameColumns } from '@babel/code-frame'
@@ -73,12 +72,16 @@ const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
     if (specWindow.Cypress.isBrowser({ family: 'chromium' })) {
       // The actual test invocation line starts with either 'at eval' or 'at Suite.eval',
       // so remove all lines until we reach the test invocation line
-      processedLines = _.dropWhile(lines, (line) => {
-        return !(
-          line.trim().startsWith('at eval ') ||
-          line.trim().startsWith('at Suite.eval ')
-        )
-      })
+      let dropIdx = 0
+
+      while (dropIdx < lines.length && !(
+        lines[dropIdx].trim().startsWith('at eval ') ||
+        lines[dropIdx].trim().startsWith('at Suite.eval ')
+      )) {
+        dropIdx++
+      }
+
+      processedLines = lines.slice(dropIdx)
     } else if (specWindow.Cypress.isBrowser({ family: 'firefox' })) {
       const isTestInvocationLine = (line: string) => {
         const splitAtAt = line.split('@')
@@ -93,9 +96,13 @@ const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
         return splitAtAt.length > 1 && splitAtAt[0].trim().length === 0
       }
 
-      processedLines = _.dropWhile(lines, (line) => {
-        return !isTestInvocationLine(line)
-      })
+      let dropIdx2 = 0
+
+      while (dropIdx2 < lines.length && !isTestInvocationLine(lines[dropIdx2])) {
+        dropIdx2++
+      }
+
+      processedLines = lines.slice(dropIdx2)
     } else {
       processedLines = lines
     }
@@ -114,9 +121,13 @@ const stackTrimmedToTestInvocation = (stack: string, specWindow) => {
 const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
-    const withAboveMarkerRemoved = _.dropWhile(lines, (line: any) => {
-      return !_.includes(line, marker)
-    })
+    let dropIdx = 0
+
+    while (dropIdx < lines.length && !lines[dropIdx].includes(marker)) {
+      dropIdx++
+    }
+
+    const withAboveMarkerRemoved = lines.slice(dropIdx)
 
     return includeLast ? withAboveMarkerRemoved : withAboveMarkerRemoved.slice(1)
   })
@@ -124,15 +135,15 @@ const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => 
 
 const stackWithReplacementMarkerLineRemoved = (stack) => {
   return stackWithLinesRemoved(stack, (lines) => {
-    return _.reject(lines, (line) => _.includes(line, STACK_REPLACEMENT_MARKER))
+    return lines.filter((line) => !line.includes(STACK_REPLACEMENT_MARKER))
   })
 }
 
 const stackPriorToReplacementMarker = (stack) => {
-  return _.chain(stack).split('\n')
-  .takeWhile((line) => !line.includes(STACK_REPLACEMENT_MARKER))
-  .join('\n')
-  .value()
+  const lines = stack.split('\n')
+  const idx = lines.findIndex((line) => line.includes(STACK_REPLACEMENT_MARKER))
+
+  return (idx === -1 ? lines : lines.slice(0, idx)).join('\n')
 }
 
 export type StackAndCodeFrameIndex = {
@@ -141,11 +152,11 @@ export type StackAndCodeFrameIndex = {
 }
 
 const stackWithUserInvocationStackSpliced = (err, userInvocationStack): StackAndCodeFrameIndex => {
-  const stack = _.trim(err.stack, '\n') // trim newlines from end
+  const stack = err.stack.replace(/^\n+|\n+$/g, '') // trim newlines from both ends
   const [messageLines, stackLines] = splitStack(stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
 
-  let commandCallIndex = _.findIndex(stackLines, (line) => {
+  let commandCallIndex = stackLines.findIndex((line) => {
     return line.includes(STACK_REPLACEMENT_MARKER)
   })
 
@@ -280,7 +291,7 @@ const captureUserInvocationStack = (ErrorConstructor: SpecWindow['Error'], userI
 
 const getCodeFrameStackLine = (err, stackIndex) => {
   // if a specific index is not specified, use the first line with a file in it
-  if (stackIndex == null) return _.find(err.parsedStack, (line) => !!line.fileUrl)
+  if (stackIndex == null) return err.parsedStack?.find((line) => !!line.fileUrl)
 
   return err.parsedStack[stackIndex]
 }
@@ -342,9 +353,9 @@ const getSourceDetails = (generatedDetails) => {
 const functionExtrasRegex = /(\/<|<\/<)$/
 
 const cleanFunctionName = (functionName) => {
-  if (!_.isString(functionName)) return '<unknown>'
+  if (typeof functionName !== 'string') return '<unknown>'
 
-  return _.trim(functionName.replace(functionExtrasRegex, ''))
+  return functionName.replace(functionExtrasRegex, '').trim()
 }
 
 const parseLine = (line) => {
@@ -442,7 +453,7 @@ const getSourceDetailsForFirstLine = (stack, projectRoot) => {
 }
 
 const reconstructStack = (parsedStack) => {
-  return _.map(parsedStack, (parsedLine) => {
+  return parsedStack.map((parsedLine) => {
     if (parsedLine.message != null) {
       return `${parsedLine.whitespace}${parsedLine.message}`
     }
@@ -456,10 +467,9 @@ const reconstructStack = (parsedStack) => {
 }
 
 const getSourceStack = (stack, projectRoot?) => {
-  if (!_.isString(stack)) return {}
+  if (typeof stack !== 'string') return {}
 
-  const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)
-  const parsed = _.map(stack.split('\n'), getSourceDetailsWithStackUtil)
+  const parsed = stack.split('\n').map((line) => getSourceDetailsForLine(projectRoot, line))
 
   return {
     parsed,
@@ -469,7 +479,7 @@ const getSourceStack = (stack, projectRoot?) => {
 
 const normalizeStackIndentation = (stack) => {
   const [messageLines, stackLines] = splitStack(stack)
-  const normalizedStackLines = _.map(stackLines, (line) => {
+  const normalizedStackLines = stackLines.map((line) => {
     if (stackLineRegex.test(line)) {
       // stack lines get indented 4 spaces
       return line.replace(whitespaceRegex, '    ')
@@ -538,24 +548,26 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   // add/$Chainer.prototype[key] (cypress:///../driver/src/cypress/chainer.js:30:128)
   // whereas Chromium browsers have the user's line first
   const stackLines = getStackLines(userInvocationStack)
-  const nonCypressStackLines = _.reject(stackLines, (line) => {
+  const nonCypressStackLines = stackLines.filter((line) => {
     // WARNING: STACK TRACE WILL BE DIFFERENT IN DEVELOPMENT vs PRODUCTION
     // stacks in development builds look like:
     //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
     // stacks in prod builds look like:
     //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
-    return line.includes('cy[name]')
-    || line.includes('Chainer.prototype[key]')
-    || line.includes('cy.<computed>')
-    || line.includes('$Chainer.<computed>')
-    // Note that these are hard coded for now, because they are happening in the prompt command
-    // for some reason. Long term, we should make this more dynamic if necessary.
-    || line.includes('$Cy.prompt')
-    || line.includes('$Chainer.prompt')
-    || line.includes('CyPrompt.prototype.prompt')
-    // Remove cross origin stack lines
-    || line.includes('SpecBridgeCommunicator')
-    || (line.includes('at invokeOriginFn') && !line.includes('at eval'))
+    return !(
+      line.includes('cy[name]')
+      || line.includes('Chainer.prototype[key]')
+      || line.includes('cy.<computed>')
+      || line.includes('$Chainer.<computed>')
+      // Note that these are hard coded for now, because they are happening in the prompt command
+      // for some reason. Long term, we should make this more dynamic if necessary.
+      || line.includes('$Cy.prompt')
+      || line.includes('$Chainer.prompt')
+      || line.includes('CyPrompt.prototype.prompt')
+      // Remove cross origin stack lines
+      || line.includes('SpecBridgeCommunicator')
+      || (line.includes('at invokeOriginFn') && !line.includes('at eval'))
+    )
   }).join('\n')
 
   return normalizeStackIndentation(nonCypressStackLines)

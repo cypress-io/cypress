@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $dom from '../../dom'
 import $errUtils from '../../cypress/error_utils'
 
@@ -7,7 +6,7 @@ export default function (Commands, Cypress, cy) {
     Cypress.ensure.isChildCommand(this, [alias], cy)
     cy.validateAlias(alias)
 
-    if (!_.isPlainObject(options)) {
+    if (!(typeof options === 'object' && options !== null && !Array.isArray(options) && Object.getPrototypeOf(options) === Object.prototype)) {
       $errUtils.throwErrByPath('as.invalid_options', { args: { arg: options } })
     }
 
@@ -48,13 +47,15 @@ export default function (Commands, Cypress, cy) {
       // TODO: change the log type from `any` to `Log`.
       // we also need to set the alias on the last command log
       // that matches our chainerId
-      const log: any = _.last(cy.queue.logs({
+      const logs = cy.queue.logs({
         instrument: 'command',
         event: false,
         chainerId: this.get('chainerId'),
-      }))
+      })
 
-      const alreadyAliasedLog = _.map(prevCommand.get('logs'), 'attributes.alias').find((a) => a === alias)
+      const log: any = logs.at(-1)
+
+      const alreadyAliasedLog = prevCommand.get('logs').map((l) => l.attributes.alias).find((a) => a === alias)
 
       if (!alreadyAliasedLog && log) {
         log.set({

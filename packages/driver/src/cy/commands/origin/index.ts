@@ -2,7 +2,6 @@ import Bluebird from 'bluebird'
 import $errUtils from '../../../cypress/error_utils'
 import $stackUtils from '../../../cypress/stack_utils'
 import { Validator } from './validator'
-import { isFunction } from 'lodash'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
 import { preprocessConfig, preprocessEnv, preprocessExpose, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin, syncExposeToCurrentOrigin } from '../../../util/config'
@@ -119,7 +118,13 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
           reject(err)
         }
 
-        const onQueueFinished = ({ err, crossOriginUserInvocationStack, subject, unserializableSubjectType }) => {
+        const onQueueFinished = ({ err, crossOriginUserInvocationStack, subject, unserializableSubjectType, logCounter }) => {
+          // Advance the primary log counter so subsequent cy.origin() calls
+          // to the same origin don't regenerate already-used log ids
+          if (typeof logCounter === 'number') {
+            LogUtils.setCounter(logCounter)
+          }
+
           if (err) {
             err.crossOriginUserInvocationStack = crossOriginUserInvocationStack
 
@@ -194,7 +199,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
             // Attach the spec bridge to the window to be tested.
             communicator.toSpecBridge(origin, 'attach:to:window')
-            const fn = isFunction(callbackFn) ? callbackFn.toString() : callbackFn
+            const fn = typeof callbackFn === 'function' ? callbackFn.toString() : callbackFn
             const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, $sourceMapUtils.getSourceMapProjectRoot())?.absoluteFile
 
             try {

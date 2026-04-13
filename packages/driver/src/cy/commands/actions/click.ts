@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import $ from 'jquery'
 import Promise from 'bluebird'
 import $dom from '../../../dom'
@@ -8,9 +7,10 @@ import $actionability from '../../actionability'
 import type { ElViewportPosition } from '../../../dom/coordinates'
 import type { $Cy } from '../../../cypress/cy'
 import type { ForceEl } from '../../mouse'
+import { defaults, pick } from '@packages/utils'
 
 const formatMouseEvents = (events) => {
-  return _.map(events, (val, key) => {
+  return Object.entries(events).map(([key, val]: [string, any]) => {
     // get event type either from the keyname, or from the sole object key name
     const eventName = (typeof key === 'string') ? key : val.type
 
@@ -57,7 +57,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
 
     ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
 
-    const options = _.defaults({}, userOptions, {
+    const options = defaults({}, userOptions, {
       $el: subject,
       log: true,
       verify: true,
@@ -146,10 +146,10 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
         let consoleObj = options._log?.invoke('consoleProps')
 
         const consoleProps = function () {
-          consoleObj = _.defaults(consoleObj != null ? consoleObj : {}, {
+          consoleObj = defaults(consoleObj != null ? consoleObj : {}, {
             'Applied To': $dom.getElements(options.$el),
             'Elements': options.$el.length,
-            'Coords': _.pick(fromElWindow, 'x', 'y'), // always absolute
+            'Coords': pick(fromElWindow, 'x', 'y'), // always absolute
             'Options': deltaOptions,
           })
 
@@ -158,7 +158,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
             consoleObj['Actual Element Clicked'] = $dom.getElements($(elClicked))
           }
 
-          consoleObj.table = _.extend((consoleObj.table || {}), onTable(domEvents))
+          consoleObj.table = Object.assign((consoleObj.table || {}), onTable(domEvents))
 
           return consoleObj
         }
@@ -274,7 +274,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
             1: () => {
               return {
                 name: 'Mouse Events',
-                data: _.concat(
+                data: ([] as any[]).concat(
                   formatMouseEvents(domEvents.moveEvents.events),
                   formatMouseEvents(domEvents.clickEvents),
                 ),
@@ -306,7 +306,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
             1: () => {
               return {
                 name: 'Mouse Events',
-                data: _.concat(
+                data: ([] as any[]).concat(
                   formatMouseEvents(domEvents.moveEvents.events),
                   formatMouseEvents(domEvents.clickEvents[0]),
                   formatMouseEvents(domEvents.clickEvents[1]),
@@ -340,7 +340,7 @@ export default (Commands, Cypress, cy: $Cy, state, config) => {
             1: () => {
               return {
                 name: 'Mouse Events',
-                data: _.concat(
+                data: ([] as any[]).concat(
                   formatMouseEvents(domEvents.moveEvents.events),
                   formatMouseEvents(domEvents.clickEvents),
                   formatMouseEvents(domEvents.contextmenuEvent),

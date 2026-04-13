@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { EventEmitter2 } from 'eventemitter2'
 import { debug as Debug } from 'debug'
 import Bluebird from 'bluebird'
@@ -8,7 +7,7 @@ const log = Debug('cypress:driver')
 const proxyFunctions = ['emit', 'emitThen', 'emitThenSeries', 'emitMap']
 
 const withoutFunctions = (arr) => {
-  return _.reject(arr, _.isFunction)
+  return arr.filter((item) => typeof item !== 'function')
 }
 
 let logEmit = true
@@ -86,7 +85,7 @@ export function extend (obj): Events {
     }
   }
 
-  events.emitMap = map(_.map)
+  events.emitMap = map((arr, fn) => arr.map(fn))
   events.emitThen = map(Bluebird.map)
   events.emitThenSeries = map(Bluebird.mapSeries)
 
@@ -114,7 +113,7 @@ export function extend (obj): Events {
     }
   }
 
-  _.extend(obj, events)
+  Object.assign(obj, events)
 
   // return the events object
   return events as Events

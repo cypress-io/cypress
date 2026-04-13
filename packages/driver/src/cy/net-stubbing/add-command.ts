@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import { pick, omit, getPath, setPath, hasPath, uniqueId } from '@packages/utils'
 
 import {
   PLAIN_FIELDS,
@@ -32,10 +32,23 @@ import type { StateFunc } from '../../cypress/state'
 import isValidDomain from 'is-valid-domain'
 import isValidHostname from 'is-valid-hostname'
 
-const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
+const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => {
+  const result: Record<string, any> = {}
+
+  for (const k of Object.keys(headers)) {
+    result[k.toLowerCase()] = headers[k]
+  }
+
+  return result
+}
 
 function hasOnlyRouteMatcherKeys (obj: any) {
-  return !_.isEmpty(obj) && !_.isArray(obj) && _.isEmpty(_.omit(obj, _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS)))
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false
+
+  const allFields = [...PLAIN_FIELDS, ...STRING_MATCHER_FIELDS, ...DICT_STRING_MATCHER_FIELDS]
+  const remaining = omit(obj, allFields)
+
+  return Object.keys(obj).length > 0 && Object.keys(remaining).length === 0
 }
 
 /**
@@ -44,23 +57,23 @@ function hasOnlyRouteMatcherKeys (obj: any) {
  */
 function getAllStringMatcherFields (options: RouteMatcherOptions): string[] {
   // add the nested DictStringMatcher values to the list of fields to annotate
-  return _.chain(DICT_STRING_MATCHER_FIELDS)
+  const nested = DICT_STRING_MATCHER_FIELDS
   .map((field): string[] | string => {
     const value = options[field]
 
     if (value) {
       // if this DICT_STRING_MATCHER is set, return a list of the prop paths
-      return _.keys(value).map((key) => {
+      return Object.keys(value).map((key) => {
         return `${field}.${key}`
       })
     }
 
     return ''
   })
-  .compact()
-  .flatten()
-  .concat(STRING_MATCHER_FIELDS)
-  .value()
+  .filter(Boolean)
+  .flat()
+
+  return [...nested, ...STRING_MATCHER_FIELDS]
 }
 
 /**
@@ -70,23 +83,23 @@ function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
   const ret: AnnotatedRouteMatcherOptions = {}
 
   getAllStringMatcherFields(options).forEach((field) => {
-    const value = _.get(options, field)
+    const value = getPath(options, field)
 
     if (value) {
-      _.set(ret, field, {
+      setPath(ret, field, {
         type: (isRegExp(value)) ? 'regex' : 'glob',
         value: value.toString(),
       } as AnnotatedStringMatcher)
     }
   })
 
-  _.extend(ret, _.pick(options, PLAIN_FIELDS))
+  Object.assign(ret, pick(options, PLAIN_FIELDS))
 
   return ret
 }
 
 function getUniqueId () {
-  return `${Number(new Date()).toString()}-${_.uniqueId()}`
+  return `${Number(new Date()).toString()}-${uniqueId()}`
 }
 
 function isHttpRequestInterceptor (obj): obj is HttpRequestInterceptor {
@@ -98,30 +111,30 @@ function isRegExp (obj): obj is RegExp {
 }
 
 function isStringMatcher (obj): obj is StringMatcher {
-  return isRegExp(obj) || _.isString(obj)
+  return isRegExp(obj) || typeof obj === 'string'
 }
 
 function isNumberMatcher (obj): obj is NumberMatcher {
-  return Array.isArray(obj) ? _.every(obj, _.isNumber) : _.isNumber(obj)
+  return Array.isArray(obj) ? obj.every((v) => typeof v === 'number') : typeof obj === 'number'
 }
 
-const allRouteMatcherFields = _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS, 'auth')
+const allRouteMatcherFields = [...PLAIN_FIELDS, ...STRING_MATCHER_FIELDS, ...DICT_STRING_MATCHER_FIELDS, 'auth']
 
 function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isValid: boolean, message?: string } {
   const err = (message) => {
     return { isValid: false, message }
   }
 
-  if (_.isEmpty(routeMatcher)) {
+  if (!routeMatcher || Object.keys(routeMatcher).length === 0) {
     return err('The RouteMatcher does not contain any keys. You must pass something to match on.')
   }
 
   const stringMatcherFields = getAllStringMatcherFields(routeMatcher)
 
   for (const path of stringMatcherFields) {
-    const v = _.get(routeMatcher, path)
+    const v = getPath(routeMatcher, path)
 
-    if (_.has(routeMatcher, path) && !isStringMatcher(v)) {
+    if (hasPath(routeMatcher, path) && !isStringMatcher(v)) {
       return err(`\`${path}\` must be a string or a regular expression.`)
     }
   }
@@ -129,24 +142,24 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
   const booleanProps = ['https', 'middleware']
 
   for (const prop of booleanProps) {
-    if (_.has(routeMatcher, prop) && !_.isBoolean(routeMatcher[prop])) {
+    if (hasPath(routeMatcher, prop) && typeof routeMatcher[prop] !== 'boolean') {
       return err(`\`${prop}\` must be a boolean.`)
     }
   }
 
-  if (_.isString(routeMatcher.hostname) && !(isValidHostname(routeMatcher.hostname) || isValidDomain(routeMatcher.hostname, { allowUnicode: true }))) {
+  if (typeof routeMatcher.hostname === 'string' && !(isValidHostname(routeMatcher.hostname) || isValidDomain(routeMatcher.hostname, { allowUnicode: true }))) {
     return err('`hostname` must be a valid host name or domain name.')
   }
 
-  if (_.has(routeMatcher, 'port') && !isNumberMatcher(routeMatcher.port)) {
+  if (hasPath(routeMatcher, 'port') && !isNumberMatcher(routeMatcher.port)) {
     return err('`port` must be a number or a list of numbers.')
   }
 
-  if (_.has(routeMatcher, 'times') && (!_.isInteger(routeMatcher.times) || Number(routeMatcher.times) <= 0)) {
+  if (hasPath(routeMatcher, 'times') && (!Number.isInteger(routeMatcher.times) || Number(routeMatcher.times) <= 0)) {
     return err('`times` must be a positive integer.')
   }
 
-  if (_.has(routeMatcher, 'headers')) {
+  if (hasPath(routeMatcher, 'headers')) {
     const knownFieldNames: string[] = []
 
     for (const k in routeMatcher.headers) {
@@ -180,9 +193,9 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
     if (isHttpRequestInterceptor(handler)) {
       hasInterceptor = true
-    } else if (_.isString(handler)) {
+    } else if (typeof handler === 'string') {
       staticResponse = { body: handler }
-    } else if (_.isObjectLike(handler)) {
+    } else if (handler != null && typeof handler === 'object') {
       if (!hasStaticResponseWithOptionsKeys(handler)) {
         // the user has not supplied any of the StaticResponse keys, assume it's a JSON object
         // that should become the body property
@@ -194,7 +207,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       validateStaticResponse('cy.intercept', <StaticResponseWithOptions>handler)
 
       staticResponse = handler as StaticResponseWithOptions
-    } else if (!_.isUndefined(handler)) {
+    } else if (handler !== undefined) {
       // a handler was passed but we dunno what it's supposed to be
       $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
     }
@@ -273,7 +286,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         return opts
       }
 
-      if (_.isString(matcher) && $utils.isValidHttpMethod(matcher) && isStringMatcher(handler)) {
+      if (typeof matcher === 'string' && $utils.isValidHttpMethod(matcher) && isStringMatcher(handler)) {
         // method, url, handler?
         const url = handler as StringMatcher
 

@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { isSerializableInCurrentBrowser, preprocessForSerialization } from './index'
 import $dom from '../../dom'
 
@@ -111,29 +110,35 @@ export const reifyDomElement = (props: any) => {
  * @returns
  */
 const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions = false) => {
-  if (_.isArray(props)) {
+  if (Array.isArray(props)) {
     return props.map((prop) => preprocessLogLikeForSerialization(prop, attemptToSerializeFunctions))
   }
 
-  if (_.isPlainObject(props)) {
+  if (props !== null && typeof props === 'object' && Object.getPrototypeOf(props) === Object.prototype) {
     // only attempt to try and serialize dom elements and functions (if attemptToSerializeFunctions is set to true)
-    let objWithPossiblySerializableProps = _.pickBy(props, (value) => {
+    let objWithPossiblySerializableProps: Record<string, any> = {}
+
+    for (const [key, value] of Object.entries(props)) {
       const isSerializable = isSerializableInCurrentBrowser(value)
 
-      if (!isSerializable && $dom.isDom(value) || _.isFunction(value) || _.isObject(value)) {
-        return true
+      if (!isSerializable && $dom.isDom(value) || typeof value === 'function' || (value !== null && typeof value === 'object')) {
+        objWithPossiblySerializableProps[key] = value
       }
+    }
 
-      return false
-    })
+    let objWithOnlySerializableProps: Record<string, any> = {}
 
-    let objWithOnlySerializableProps = _.pickBy(props, (value) => isSerializableInCurrentBrowser(value))
+    for (const [key, value] of Object.entries(props)) {
+      if (isSerializableInCurrentBrowser(value)) {
+        objWithOnlySerializableProps[key] = value
+      }
+    }
 
     // assign the properties we know we can serialize here
     let preprocessed: any = preprocessForSerialization(objWithOnlySerializableProps)
 
     // and attempt to serialize possibly unserializable props here and fail gracefully if unsuccessful
-    _.forIn(objWithPossiblySerializableProps, (value, key) => {
+    Object.entries(objWithPossiblySerializableProps).forEach(([key, value]) => {
       preprocessed[key] = preprocessLogLikeForSerialization(value, attemptToSerializeFunctions)
     })
 
@@ -157,7 +162,7 @@ const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions
 const reifyObjectLikeForSerialization = (props, matchElementsAgainstSnapshotDOM) => {
   let reifiedObjectOrArray = {}
 
-  _.forIn(props, (value, key) => {
+  Object.entries(props).forEach(([key, value]) => {
     const val = reifyLogLikeFromSerialization(value, matchElementsAgainstSnapshotDOM)
 
     if (val?.serializationKey === 'dom') {
@@ -180,7 +185,7 @@ const reifyObjectLikeForSerialization = (props, matchElementsAgainstSnapshotDOM)
   })
 
   // NOTE: transforms arrays into objects to have defined getters for DOM elements, and proxy back to that object via an ES6 Proxy.
-  if (_.isArray(props)) {
+  if (Array.isArray(props)) {
     // if an array, map the array to our special getter object.
     return new Proxy(reifiedObjectOrArray, {
       get (target, name) {
@@ -238,7 +243,7 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
      * If there are other functions that have serializable contents, the invoker/developer will need to be EXPLICIT
      * in what needs serialization. Otherwise, functions should NOT be serialized.
      */
-    if (_.isFunction(props)) {
+    if (typeof props === 'function') {
       if (attemptToSerializeFunctions) {
         return {
           value: preprocessLogLikeForSerialization(props(), attemptToSerializeFunctions),
@@ -249,7 +254,7 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
       return null
     }
 
-    if (_.isObject(props)) {
+    if (props !== null && typeof props === 'object') {
       return preprocessObjectLikeForSerialization(props, attemptToSerializeFunctions)
     }
 
@@ -311,7 +316,7 @@ const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapshotDOM = 
       return () => reifiedFunctionData
     }
 
-    if (_.isObject(props)) {
+    if (props !== null && typeof props === 'object') {
       return reifyObjectLikeForSerialization(props, matchElementsAgainstSnapshotDOM)
     }
 

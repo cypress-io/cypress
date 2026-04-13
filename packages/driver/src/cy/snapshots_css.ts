@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import md5 from 'md5'
 import path from 'path'
 import url from 'url'
@@ -9,7 +8,7 @@ const anyUrlInCssRe = /url\((['"])([^'"]*)\1\)/gm
 const screenStylesheetRe = /(screen|all)/
 
 const reduceText = (arr, fn) => {
-  return _.reduce(arr, ((memo, item) => {
+  return Array.from(arr).reduce(((memo: string, item) => {
     return memo += fn(item)
   }), '')
 }
@@ -17,20 +16,26 @@ const reduceText = (arr, fn) => {
 const isScreenStylesheet = (stylesheet) => {
   const media = stylesheet.getAttribute('media')
 
-  return !_.isString(media) || screenStylesheetRe.test(media)
+  return typeof media !== 'string' || screenStylesheetRe.test(media)
 }
 
 const getDocumentStylesheets = (doc) => {
   if (!doc) return {}
 
-  return _.transform(doc.styleSheets, (memo, stylesheet) => {
-    memo[stylesheet.href] = stylesheet
-  }, {})
+  const result: Record<string, CSSStyleSheet> = {}
+
+  for (const stylesheet of Array.from<CSSStyleSheet>(doc.styleSheets)) {
+    if (stylesheet.href) {
+      result[stylesheet.href] = stylesheet
+    }
+  }
+
+  return result
 }
 
 const makePathsAbsoluteToDocCache = new LimitedMap(50)
 const makePathsAbsoluteToDoc = $utils.memoize((styles, doc) => {
-  if (!_.isString(styles)) return styles
+  if (typeof styles !== 'string') return styles
 
   return styles.replace(anyUrlInCssRe, (_1, _2, filePath) => {
     // the href getter will always resolve an absolute path taking into
@@ -45,7 +50,7 @@ const makePathsAbsoluteToDoc = $utils.memoize((styles, doc) => {
 
 const makePathsAbsoluteToStylesheetCache = new LimitedMap(50)
 const makePathsAbsoluteToStylesheet = $utils.memoize((styles, href) => {
-  if (!_.isString(styles)) {
+  if (typeof styles !== 'string') {
     return styles
   }
 
@@ -155,9 +160,9 @@ export const create = ($$, state) => {
   const getStyleIdsFor = (doc, $$, stylesheets, location) => {
     let styles = $$(location).find('link[rel=\'stylesheet\'],style')
 
-    styles = _.filter(styles, isScreenStylesheet)
+    styles = Array.from(styles).filter(isScreenStylesheet)
 
-    return _.map(styles, (stylesheet) => {
+    return styles.map((stylesheet) => {
       // in cases where we can get the CSS as a string, make the paths
       // absolute so that when they're restored by appending them to the page
       // in <style> tags, background images and fonts still properly load
@@ -193,8 +198,8 @@ export const create = ($$, state) => {
   }
 
   const getStylesByIds = (ids) => {
-    return _.map(ids, (idOrCss) => {
-      if (_.isString(idOrCss)) {
+    return ids.map((idOrCss) => {
+      if (typeof idOrCss === 'string') {
         return idOrCss
       }
 

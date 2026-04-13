@@ -1,5 +1,4 @@
 import $jquery from '../jquery'
-import _ from 'lodash'
 import type { HTMLSingleValueChangeInputElement, HTMLValueIsNumberTypeElement } from './types'
 
 const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
@@ -18,7 +17,7 @@ export const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement
       obj = obj[0]
     }
 
-    return Boolean(obj && _.isElement(obj))
+    return Boolean(obj && obj.nodeType === 1)
   } catch (error) {
     return false
   }
