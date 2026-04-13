@@ -407,3 +407,5 @@ system-tests/lib/validations
 !.cursor/skills
 
 settings.local.json
+
+.claude/*
