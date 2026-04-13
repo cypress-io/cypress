@@ -21,6 +21,80 @@ parameters:
   force-persist-artifacts:
     type: boolean
     default: false
+  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
+  # Default true so develop/release branches run everything without explicit params.
+  run-driver-tests:
+    type: boolean
+    default: true
+  run-server-tests:
+    type: boolean
+    default: true
+  run-app-ui-tests:
+    type: boolean
+    default: true
+  run-launchpad-tests:
+    type: boolean
+    default: true
+  run-reporter-tests:
+    type: boolean
+    default: true
+  run-frontend-shared-tests:
+    type: boolean
+    default: true
+  run-system-tests:
+    type: boolean
+    default: true
+  run-v8-tests:
+    type: boolean
+    default: true
+  run-cli-tests:
+    type: boolean
+    default: true
+  run-unit-tests:
+    type: boolean
+    default: true
+  run-npm-webpack-dev-server-tests:
+    type: boolean
+    default: true
+  run-npm-vite-dev-server-tests:
+    type: boolean
+    default: true
+  run-npm-webpack-preprocessor-tests:
+    type: boolean
+    default: true
+  run-npm-webpack-batteries-tests:
+    type: boolean
+    default: true
+  run-npm-vue-tests:
+    type: boolean
+    default: true
+  run-npm-react-tests:
+    type: boolean
+    default: true
+  run-npm-angular-tests:
+    type: boolean
+    default: true
+  run-npm-svelte-tests:
+    type: boolean
+    default: true
+  run-npm-puppeteer-tests:
+    type: boolean
+    default: true
+  run-npm-vite-plugin-esm-tests:
+    type: boolean
+    default: true
+  run-npm-mount-utils-tests:
+    type: boolean
+    default: true
+  run-npm-grep-tests:
+    type: boolean
+    default: true
+  run-npm-eslint-plugin-tests:
+    type: boolean
+    default: true
+  run-npm-schematic-tests:
+    type: boolean
+    default: true
 
 orbs:
   browser-tools: circleci/browser-tools@2.3.2
@@ -2866,3 +2940,16 @@ jobs:
           name: Run Cypress binary
           working_directory: /tmp/cypress-test-tiny
           command: DEBUG=cypress:cli $(yarn bin cypress) run
+
+  # Fan-in aggregator job — the only required GitHub status check for PRs.
+  # All conditional test jobs fan into this one. When upstream jobs are excluded
+  # by their when: condition, CircleCI does not wait for them, so this job
+  # completes once all *included* jobs finish successfully.
+  all-jobs-passed:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: All jobs passed
+          command: echo "✅ All required jobs passed"

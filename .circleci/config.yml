@@ -19,6 +19,80 @@ parameters:
   force-persist-artifacts:
     type: boolean
     default: false
+  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
+  # Default true so develop/release branches run everything without explicit params.
+  run-driver-tests:
+    type: boolean
+    default: true
+  run-server-tests:
+    type: boolean
+    default: true
+  run-app-ui-tests:
+    type: boolean
+    default: true
+  run-launchpad-tests:
+    type: boolean
+    default: true
+  run-reporter-tests:
+    type: boolean
+    default: true
+  run-frontend-shared-tests:
+    type: boolean
+    default: true
+  run-system-tests:
+    type: boolean
+    default: true
+  run-v8-tests:
+    type: boolean
+    default: true
+  run-cli-tests:
+    type: boolean
+    default: true
+  run-unit-tests:
+    type: boolean
+    default: true
+  run-npm-webpack-dev-server-tests:
+    type: boolean
+    default: true
+  run-npm-vite-dev-server-tests:
+    type: boolean
+    default: true
+  run-npm-webpack-preprocessor-tests:
+    type: boolean
+    default: true
+  run-npm-webpack-batteries-tests:
+    type: boolean
+    default: true
+  run-npm-vue-tests:
+    type: boolean
+    default: true
+  run-npm-react-tests:
+    type: boolean
+    default: true
+  run-npm-angular-tests:
+    type: boolean
+    default: true
+  run-npm-svelte-tests:
+    type: boolean
+    default: true
+  run-npm-puppeteer-tests:
+    type: boolean
+    default: true
+  run-npm-vite-plugin-esm-tests:
+    type: boolean
+    default: true
+  run-npm-mount-utils-tests:
+    type: boolean
+    default: true
+  run-npm-grep-tests:
+    type: boolean
+    default: true
+  run-npm-eslint-plugin-tests:
+    type: boolean
+    default: true
+  run-npm-schematic-tests:
+    type: boolean
+    default: true
 
 commands:
   persist:
@@ -151,6 +225,8 @@ jobs:
       resource_class: small
       steps:
           - cancel-draft-prs
+          - checkout:
+              method: blobless
           - attach_workspace:
               at: .
           - run:
@@ -160,5 +236,13 @@ jobs:
                     echo "❌ Primary workflow definition not found in .circleci/packed/pipeline.yml!"
                     exit 1
                 fi
+          - run:
+              name: Generate path-filtered pipeline parameters
+              command: |
+                bash .circleci/scripts/generate-pipeline-parameters.sh \
+                  > /tmp/pipeline-parameters.json
+                echo "Generated parameters:"
+                cat /tmp/pipeline-parameters.json
           - continuation/continue:
               configuration_path: .circleci/packed/pipeline.yml
+              parameters: /tmp/pipeline-parameters.json
