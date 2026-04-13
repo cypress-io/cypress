@@ -28,11 +28,4 @@ config.plugins = [
   new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
 ]
 
-config.resolve = {
-  ...config.resolve,
-  alias: {
-    'lodash': require.resolve('lodash'),
-  },
-}
-
 export default config

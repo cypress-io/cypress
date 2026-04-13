@@ -31,13 +31,12 @@
   },
   "linterOptions": {
     "exclude": [
-      // Lodash types and other external types are 3rd party and don't follow our rules
+      // External types are 3rd party and don't follow our rules
       "./blob-util/*",
       "./bluebird/*",
       "./chai/*",
       "./chai-jquery/*",
       "./jquery/*",
-      "./lodash/**/*",
       "./mocha/*",
       "./minimatch/*",
       "./sinon/**/*",

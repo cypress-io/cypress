@@ -18,7 +18,6 @@
     "watch": "rimraf dist && tsc --watch"
   },
   "dependencies": {
-    "lodash": "^4.17.21",
     "puppeteer-core": "^21.2.1"
   },
   "devDependencies": {

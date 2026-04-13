@@ -195,12 +195,12 @@ export const CypressEsm = (options?: CypressEsmOptions): Plugin => {
    *
    * Given:
    *   const m = import("./mod_1")
-   *   const m = await import("lodash")
+   *   const m = await import("some-package")
    *   import("./mod_2").then(mod => mod)
    *
    * Returns:
    *   const m = __cypressDynamicModule(import("./mod_1"))
-   *   const m = await __cypressDynamicModule(import("lodash"))
+   *   const m = await __cypressDynamicModule(import("some-package"))
    *   __cypressDynamicModule(import("./mod_2")).then(mod => mod)
    */
   const mapDynamicImportsToCache = (id: string, code: string) => {

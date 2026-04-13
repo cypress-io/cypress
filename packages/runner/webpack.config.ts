@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import { waitUntilIconsBuilt } from '../../scripts/ensure-icons'
 import { getCommonConfig, getSimpleConfig, getCopyWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
@@ -8,9 +7,9 @@ const commonConfig = getCommonConfig()
 const CopyWebpackPlugin = getCopyWebpackPlugin()
 
 // @ts-ignore
-const babelLoader = _.find(commonConfig.module.rules, (rule) => {
+const babelLoader = commonConfig.module.rules.find((rule) => {
   // @ts-ignore
-  return _.includes(rule.use.loader, 'babel-loader')
+  return rule.use.loader.includes('babel-loader')
 })
 
 // @ts-ignore
@@ -37,7 +36,6 @@ mainConfig.resolve = {
   ...mainConfig.resolve,
   alias: {
     'bluebird': require.resolve('bluebird'),
-    'lodash': require.resolve('lodash'),
   },
 }
 

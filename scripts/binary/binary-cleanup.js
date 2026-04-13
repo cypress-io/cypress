@@ -184,7 +184,7 @@ const buildEntryPointAndCleanup = async (buildAppDir) => {
     }
   }))
 
-  // 5. Consolidate dependencies that are safe to consolidate (`lodash` and `bluebird`)
+  // 5. Consolidate dependencies that are safe to consolidate (`bluebird`)
   await consolidateDeps({ projectBaseDir: buildAppDir })
 }
 
