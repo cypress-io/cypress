@@ -61,6 +61,17 @@ When Electron is upgraded, the bundled Node.js version often changes. Sync this 
 # Replace with: "@types/node": "NEW_VERSION"
 ```
 
+### Binary CI environment spec (major Node bump only)
+
+When the **major** Node.js version changes (for example `22.x` → `24.x`), update **`/system-tests/test-binary/ci_environments_spec.ts`** so Docker image tags match the new major:
+
+- The bare Node smoke test uses `node:<major>` (must align with Cypress’s supported Node major).
+- Each **passing** Ubuntu case uses tags of the form `cypress/base-internal:ubuntu<UBUNTU_VERSION>-node<major>` (today that may be `ubuntu22` and `ubuntu24`; **more Ubuntu LTS variants may be added later**). When the Node major bumps, update **every** such `base-internal` tag in this file — do not assume only two rows.
+
+Those images must exist in `cypress-docker-images` for that Node major (coordinate with the Docker image work in Step 3 / external repos).
+
+If only the **minor/patch** Node version changes within the same major, this file usually does **not** need edits unless image tags are version-suffixed differently in practice.
+
 ## Step 3: Update Docker Configuration
 
 ### Docker Compose
@@ -127,6 +138,8 @@ yarn
 # Update any Ubuntu/Node image references to match new versions
 # Check if system binary tests need new Docker images
 ```
+
+**Required when the Node major changes:** `/system-tests/test-binary/ci_environments_spec.ts` — see **Binary CI environment spec (major Node bump only)** under Step 2. Re-read the file for **all** `node:` and `cypress/base-internal:ubuntu*-node*` references (the list of Ubuntu images can grow). Re-run or scope binary system tests that exercise these Docker images after publishing matching `base-internal` images.
 
 ## Step 9: Changelog and Breaking Changes
 
@@ -248,6 +261,7 @@ grep -r "OLD_ELECTRON_VERSION" . --exclude-dir=node_modules --exclude-dir=dist
 - [ ] `/packages/server/package.json` - better-sqlite3 version
 - [ ] `/packages/types/package.json` - better-sqlite3 version
 - [ ] `/system-tests/test-binary/*` - Docker image references
+- [ ] `/system-tests/test-binary/ci_environments_spec.ts` - **if Node major changed:** `node:<major>` and every `cypress/base-internal:ubuntu*-node<major>` tag (additional Ubuntu rows may exist over time)
 - [ ] All `@types/node` references across monorepo
 
 ## External Dependencies (Manual Steps)
