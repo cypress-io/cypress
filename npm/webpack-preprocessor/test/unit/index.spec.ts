@@ -457,10 +457,10 @@ describe('webpack preprocessor', function () {
         },
       ]
 
-      type TsLoaderVersionBehavior = 5 | 6
+      type TypeScriptVersionBehavior = 5 | 6
 
       const expectedTsLoaderCompilerOptions = (
-        tsBehavior: TsLoaderVersionBehavior,
+        tsBehavior: TypeScriptVersionBehavior,
         inputCompilerOptions: typeof COMPILER_PERMUTATIONS[number],
       ) => {
         return {
@@ -511,7 +511,7 @@ describe('webpack preprocessor', function () {
       // eslint-disable-next-line quotes
       const TS_LOADER_NAMES = ['ts-loader', "ts-loader", 'foo/ts-loader/dist/index.js']
 
-      const runTsLoaderOverrideSuite = (versionLabel: string, tsBehavior: TsLoaderVersionBehavior) => {
+      const runTsLoaderOverrideSuite = (versionLabel: string, tsBehavior: TypeScriptVersionBehavior) => {
         describe(`when ${versionLabel}`, function () {
           COMPILER_PERMUTATIONS.forEach((compilerOptions) => {
             TS_LOADER_NAMES.forEach((tsLoaderName) => {
