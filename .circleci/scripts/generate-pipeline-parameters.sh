@@ -209,6 +209,9 @@ while IFS= read -r file; do
     npm/angular-zoneless/*)
       p_run_npm_angular_tests=true
       ;;
+    npm/svelte/*)
+      p_run_system_tests=true
+      ;;
     npm/puppeteer/*)
       p_run_npm_puppeteer_tests=true
       ;;
