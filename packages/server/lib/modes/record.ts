@@ -205,7 +205,7 @@ const postInstanceResults = (options: any = {}) => {
 }
 
 const getCommitFromGitOrCi = (git: any) => {
-  la(_.isObjectLike(git) && !_.isArray(git) && !_.isDate(git), 'expected git information object', git)
+  la(_.isPlainObject(git), 'expected git information object', git)
 
   return ciProvider.commitDefaults({
     sha: git.sha,
