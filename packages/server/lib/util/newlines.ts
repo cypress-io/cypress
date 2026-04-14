@@ -1,11 +1,11 @@
-const util = require('util')
+import util from 'util'
 
-const addNewlineAtEveryNChar = (str, n) => {
+export const addNewlineAtEveryNChar = (str: string, n: number) => {
   if (!str) {
     return str
   }
 
-  let result = []
+  let result: string[] = []
   let idx = 0
 
   let printableString = util.stripVTControlCharacters(str)
@@ -23,8 +23,4 @@ const addNewlineAtEveryNChar = (str, n) => {
   }
 
   return result.join('\n')
-}
-
-module.exports = {
-  addNewlineAtEveryNChar,
 }
