@@ -143,8 +143,6 @@ describe('semantic-pull-request/validate-changelog', () => {
       fs.readFileSync.returns(`
 ## 120.2.0
 
-_Released 01/17/2033 (PENDING)_
-
 **Performance:**
 
 - Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).`)
@@ -168,8 +166,6 @@ _Released 01/17/2033 (PENDING)_
 
       const changelogContent = `
 ## 120.2.0
-
-_Released 01/17/2033 (PENDING)_
 
 **Performance:**
 
@@ -195,8 +191,6 @@ _Released 01/17/2033 (PENDING)_
 
       fs.readFileSync.returns(`
 ## 120.2.0
-
-_Released 01/17/2033 (PENDING)_
 
 **Misc:**
 
@@ -283,8 +277,6 @@ _Released 01/17/2033 (PENDING)_
         fs.readFileSync.returns(`
 ## 120.2.0
 
-_Released 01/17/2033 (PENDING)_
-
 `)
 
         return validateChangelog({
@@ -309,8 +301,6 @@ _Released 01/17/2033 (PENDING)_
 
         fs.readFileSync.returns(`
 ## 120.2.0
-
-_Released 01/17/2033 (PENDING)_
 
 **Features:**
 
@@ -338,8 +328,6 @@ _Released 01/17/2033 (PENDING)_
 
         fs.readFileSync.returns(`
 ## 120.2.0
-
-_Released 01/17/2033 (PENDING)_
 
 **Performance:**
 
@@ -372,8 +360,6 @@ _Released 01/17/2033 (PENDING)_
         fs.readFileSync.returns(`
 ## 120.2.0
 
-_Released 01/17/2033 (PENDING)_
-
 **Performance:**
 
 - comment without link.`)
@@ -400,8 +386,6 @@ _Released 01/17/2033 (PENDING)_
 
         fs.readFileSync.returns(`
 ## 120.2.0
-
-_Released 01/17/2033 (PENDING)_
 
 **Performance:**
 
