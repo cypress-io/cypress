@@ -1418,14 +1418,14 @@ commands:
             node scripts/binary.js upload-build-artifact \
               --type binary \
               --file cypress.zip \
-              --version $(node -p "require('./package.json').version")
+              --version $(node ./scripts/get-next-version.js)
       - run:
           name: Upload NPM package to S3
           command: |
             node scripts/binary.js upload-build-artifact \
               --type npm-package \
               --file cypress.tgz \
-              --version $(node -p "require('./package.json').version")
+              --version $(node ./scripts/get-next-version.js)
       - run: ls -l
       - run: cat binary-url.json
       - run: cat npm-package-url.json
