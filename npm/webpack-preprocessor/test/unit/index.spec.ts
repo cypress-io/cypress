@@ -3,6 +3,7 @@ import webpack from 'webpack'
 import Bluebird from 'bluebird'
 import preprocessor from '../../index'
 import { overrideSourceMaps } from '../../lib/typescript-overrides'
+import { getResolvedTypescriptVersion } from '../../lib/get-typescript'
 import EventEmitter from 'node:events'
 
 vi.mock('webpack')
@@ -10,6 +11,15 @@ vi.mock('webpack')
 vi.mock('../../lib/typescript-overrides', () => {
   return {
     overrideSourceMaps: vi.fn(),
+  }
+})
+
+vi.mock('../../lib/get-typescript', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../lib/get-typescript')>()
+
+  return {
+    ...actual,
+    getResolvedTypescriptVersion: vi.fn(actual.getResolvedTypescriptVersion),
   }
 })
 
@@ -428,7 +438,10 @@ describe('webpack preprocessor', function () {
     })
 
     describe('ts-loader', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
+        const actual = await vi.importActual<typeof import('../../lib/get-typescript')>('../../lib/get-typescript')
+
+        vi.mocked(getResolvedTypescriptVersion).mockImplementation(actual.getResolvedTypescriptVersion)
         compilerApi.run.mockImplementation((callback) => {
           return callback(null, statsApi as unknown as webpack.Stats)
         })
@@ -443,6 +456,21 @@ describe('webpack preprocessor', function () {
           downlevelIteration: false,
         },
       ]
+
+      type TypeScriptVersionBehavior = 5 | 6
+
+      const expectedTsLoaderCompilerOptions = (
+        tsBehavior: TypeScriptVersionBehavior,
+        inputCompilerOptions: typeof COMPILER_PERMUTATIONS[number],
+      ) => {
+        return {
+          ...(inputCompilerOptions || {}),
+          sourceMap: true,
+          inlineSourceMap: false,
+          inlineSources: false,
+          ...(tsBehavior === 5 ? { downlevelIteration: true } : {}),
+        }
+      }
 
       // @see https://github.com/cypress-io/cypress/issues/32266
       it('matches ts-loader explicitly and does not add configuration if not ts-loader', async function () {
@@ -483,138 +511,167 @@ describe('webpack preprocessor', function () {
       // eslint-disable-next-line quotes
       const TS_LOADER_NAMES = ['ts-loader', "ts-loader", 'foo/ts-loader/dist/index.js']
 
-      COMPILER_PERMUTATIONS.forEach((compilerOptions) => {
-        TS_LOADER_NAMES.forEach((tsLoaderName) => {
-          describe(`sets Cypress overrides to compiler options when compiler options are ${compilerOptions ? 'defined' : 'undefined'} when`, function () {
-            it(`rules is an array of "use" objects with ${tsLoaderName}`, async function () {
-              const options = {
-                webpackOptions: {
-                  module: {
-                    rules: [
-                      {
-                        test: /\.tsx?$/,
-                        exclude: [/node_modules/],
-                        use: {
+      const runTsLoaderOverrideSuite = (versionLabel: string, tsBehavior: TypeScriptVersionBehavior) => {
+        describe(`when ${versionLabel}`, function () {
+          COMPILER_PERMUTATIONS.forEach((compilerOptions) => {
+            TS_LOADER_NAMES.forEach((tsLoaderName) => {
+              describe(`sets Cypress overrides to compiler options when compiler options are ${compilerOptions ? 'defined' : 'undefined'} when`, function () {
+                it(`rules is an array of "use" objects with ${tsLoaderName}`, async function () {
+                  const options = {
+                    webpackOptions: {
+                      module: {
+                        rules: [
+                          {
+                            test: /\.tsx?$/,
+                            exclude: [/node_modules/],
+                            use: {
+                              loader: tsLoaderName,
+                              options: {
+                                compilerOptions,
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  }
+
+                  await run(options)
+                  expect(webpack).toHaveBeenCalledWith(expect.objectContaining({
+                    module: {
+                      rules: [
+                        {
+                          test: /\.tsx?$/,
+                          exclude: [/node_modules/],
+                          use: {
+                            loader: tsLoaderName,
+                            options: {
+                              compilerOptions: expectedTsLoaderCompilerOptions(tsBehavior, compilerOptions),
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  }))
+                })
+
+                it(`rules is an array of "use" array objects ${tsLoaderName}`, async function () {
+                  const options = {
+                    webpackOptions: {
+                      module: {
+                        rules: [
+                          {
+                            test: /\.tsx?$/,
+                            exclude: [/node_modules/],
+                            use: [{
+                              loader: tsLoaderName,
+                              options: {
+                                compilerOptions,
+                              },
+                            }],
+                          },
+                        ],
+                      },
+                    },
+                  }
+
+                  await run(options)
+                  expect(webpack).toHaveBeenCalledWith(expect.objectContaining({
+                    module: {
+                      rules: [
+                        {
+                          test: /\.tsx?$/,
+                          exclude: [/node_modules/],
+                          use: [{
+                            loader: tsLoaderName,
+                            options: {
+                              compilerOptions: expectedTsLoaderCompilerOptions(tsBehavior, compilerOptions),
+                            },
+                          }],
+                        },
+                      ],
+                    },
+                  }))
+                })
+
+                it(`rules is an array of "loader" objects ${tsLoaderName}`, async function () {
+                  const options = {
+                    webpackOptions: {
+                      module: {
+                        rules: [
+                          {
+                            test: /\.tsx?$/,
+                            exclude: [/node_modules/],
+                            loader: tsLoaderName,
+                            options: {
+                              compilerOptions,
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  }
+
+                  await run(options)
+                  expect(webpack).toHaveBeenCalledWith(expect.objectContaining({
+                    module: {
+                      rules: [
+                        {
+                          test: /\.tsx?$/,
+                          exclude: [/node_modules/],
                           loader: tsLoaderName,
                           options: {
-                            compilerOptions,
+                            compilerOptions: expectedTsLoaderCompilerOptions(tsBehavior, compilerOptions),
                           },
                         },
-                      },
-                    ],
-                  },
-                },
-              }
-
-              await run(options)
-              expect(webpack).toHaveBeenCalledWith(expect.objectContaining({
-                module: {
-                  rules: [
-                    {
-                      test: /\.tsx?$/,
-                      exclude: [/node_modules/],
-                      use: {
-                        loader: tsLoaderName,
-                        options: {
-                          compilerOptions: {
-                            downlevelIteration: true,
-                            inlineSourceMap: false,
-                            inlineSources: false,
-                            sourceMap: true,
-                          },
-                        },
-                      },
+                      ],
                     },
-                  ],
-                },
-              }))
-            })
-
-            it(`rules is an array of "use" array objects ${tsLoaderName}`, async function () {
-              const options = {
-                webpackOptions: {
-                  module: {
-                    rules: [
-                      {
-                        test: /\.tsx?$/,
-                        exclude: [/node_modules/],
-                        use: [{
-                          loader: tsLoaderName,
-                          options: {
-                            compilerOptions,
-                          },
-                        }],
-                      },
-                    ],
-                  },
-                },
-              }
-
-              await run(options)
-              expect(webpack).toHaveBeenCalledWith(expect.objectContaining({
-                module: {
-                  rules: [
-                    {
-                      test: /\.tsx?$/,
-                      exclude: [/node_modules/],
-                      use: [{
-                        loader: tsLoaderName,
-                        options: {
-                          compilerOptions: {
-                            downlevelIteration: true,
-                            inlineSourceMap: false,
-                            inlineSources: false,
-                            sourceMap: true,
-                          },
-                        },
-                      }],
-                    },
-                  ],
-                },
-              }))
-            })
-
-            it(`rules is an array of "loader" objects ${tsLoaderName}`, async function () {
-              const options = {
-                webpackOptions: {
-                  module: {
-                    rules: [
-                      {
-                        test: /\.tsx?$/,
-                        exclude: [/node_modules/],
-                        loader: tsLoaderName,
-                        options: {
-                          compilerOptions,
-                        },
-                      },
-                    ],
-                  },
-                },
-              }
-
-              await run(options)
-              expect(webpack).toHaveBeenCalledWith(expect.objectContaining({
-                module: {
-                  rules: [
-                    {
-                      test: /\.tsx?$/,
-                      exclude: [/node_modules/],
-                      loader: tsLoaderName,
-                      options: {
-                        compilerOptions: {
-                          downlevelIteration: true,
-                          inlineSourceMap: false,
-                          inlineSources: false,
-                          sourceMap: true,
-                        },
-                      },
-                    },
-                  ],
-                },
-              }))
+                  }))
+                })
+              })
             })
           })
         })
+      }
+
+      describe('TypeScript is below 6', function () {
+        beforeEach(function () {
+          vi.mocked(getResolvedTypescriptVersion).mockReturnValue('5.4.5')
+        })
+
+        runTsLoaderOverrideSuite('TypeScript is below 6', 5)
+      })
+
+      describe('TypeScript is 6 or newer', function () {
+        beforeEach(function () {
+          vi.mocked(getResolvedTypescriptVersion).mockReturnValue('6.0.2')
+        })
+
+        runTsLoaderOverrideSuite('TypeScript is 6 or newer', 6)
+      })
+
+      describe('TypeScript 6 pre-release', function () {
+        beforeEach(function () {
+          vi.mocked(getResolvedTypescriptVersion).mockReturnValue('6.0.0-beta')
+        })
+
+        runTsLoaderOverrideSuite('TypeScript 6 pre-release', 6)
+      })
+
+      describe('TypeScript version cannot be resolved', function () {
+        beforeEach(function () {
+          vi.mocked(getResolvedTypescriptVersion).mockReturnValue(null)
+        })
+
+        runTsLoaderOverrideSuite('TypeScript version cannot be resolved', 6)
+      })
+
+      describe('TypeScript version string is not valid semver', function () {
+        beforeEach(function () {
+          vi.mocked(getResolvedTypescriptVersion).mockReturnValue('not-a-semver-version')
+        })
+
+        runTsLoaderOverrideSuite('TypeScript version string is not valid semver', 6)
       })
     })
   })

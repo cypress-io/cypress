@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.4...@cypress/webpack-batteries-included-preprocessor-v4.1.0) (2026-04-13)
+
+
+### Features
+
+* TypeScript 6 compatibility for webpack preprocessor and CT wizard ([#33575](https://github.com/cypress-io/cypress/issues/33575)) ([8eaedab](https://github.com/cypress-io/cypress/commit/8eaedab0d8679a0ae595dc7711b1be2cc784f707))
+
 # [@cypress/webpack-batteries-included-preprocessor-v4.0.4](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.3...@cypress/webpack-batteries-included-preprocessor-v4.0.4) (2025-11-13)
 
 # [@cypress/webpack-batteries-included-preprocessor-v4.0.3](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.2...@cypress/webpack-batteries-included-preprocessor-v4.0.3) (2025-11-07)
