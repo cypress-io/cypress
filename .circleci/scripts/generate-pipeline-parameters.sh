@@ -175,6 +175,40 @@ while IFS= read -r file; do
       p_run_app_ui_tests=true
       p_run_launchpad_tests=true
       ;;
+    packages/telemetry/*)
+      # Used by driver, server, app, data-context, net-stubbing, proxy
+      p_run_driver_tests=true
+      p_run_server_tests=true
+      p_run_app_ui_tests=true
+      p_run_system_tests=true
+      ;;
+    packages/network-tools/*)
+      # Used by driver, proxy, server (and transitively by packages/network which is a global trigger)
+      p_run_driver_tests=true
+      p_run_server_tests=true
+      p_run_system_tests=true
+      ;;
+    packages/packherd-require/*)
+      # Consumed by v8-snapshot-require; tested via v8 integration tests
+      p_run_v8_tests=true
+      ;;
+    packages/v8-snapshot-require/*)
+      p_run_v8_tests=true
+      ;;
+    packages/stderr-filtering/*)
+      # Used by data-context, electron, server
+      p_run_server_tests=true
+      p_run_app_ui_tests=true
+      p_run_launchpad_tests=true
+      p_run_system_tests=true
+      ;;
+    packages/icons/*)
+      # Used by electron, extension, runner, server
+      p_run_driver_tests=true
+      p_run_server_tests=true
+      p_run_app_ui_tests=true
+      p_run_system_tests=true
+      ;;
     cli/*)
       p_run_cli_tests=true
       p_run_unit_tests=true
