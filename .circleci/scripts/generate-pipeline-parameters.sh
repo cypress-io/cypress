@@ -262,6 +262,9 @@ while IFS= read -r file; do
     packages/eslint-config/*|packages/example/*|npm/xpath/*)
       # No CI jobs are associated with these packages — no tests to run
       ;;
+    *.md|*.mdx|*.txt|LICENSE|.github/*|.gitignore|.gitattributes|.editorconfig)
+      # Documentation and repo-metadata files — no tests to run
+      ;;
     *)
       # Unrecognized path — run everything rather than risk missing coverage
       echo "Unrecognized path '$file' — running all tests" >&2
