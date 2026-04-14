@@ -74,9 +74,6 @@ parameters:
   run-npm-angular-tests:
     type: boolean
     default: true
-  run-npm-svelte-tests:
-    type: boolean
-    default: true
   run-npm-puppeteer-tests:
     type: boolean
     default: true

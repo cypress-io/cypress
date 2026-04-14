@@ -27,7 +27,6 @@ p_run_npm_webpack_batteries_tests=false
 p_run_npm_vue_tests=false
 p_run_npm_react_tests=false
 p_run_npm_angular_tests=false
-p_run_npm_svelte_tests=false
 p_run_npm_puppeteer_tests=false
 p_run_npm_vite_plugin_esm_tests=false
 p_run_npm_mount_utils_tests=false
@@ -39,7 +38,7 @@ emit_json() {
   local pb="${PUBLISH_BINARY_BRANCH:-main}"
   local fpa="${FORCE_PERSIST_ARTIFACTS:-false}"
   cat <<EOF
-{"publish-binary-branch": "$pb", "force-persist-artifacts": $fpa, "run-driver-tests": $p_run_driver_tests, "run-server-tests": $p_run_server_tests, "run-app-ui-tests": $p_run_app_ui_tests, "run-launchpad-tests": $p_run_launchpad_tests, "run-reporter-tests": $p_run_reporter_tests, "run-frontend-shared-tests": $p_run_frontend_shared_tests, "run-system-tests": $p_run_system_tests, "run-v8-tests": $p_run_v8_tests, "run-cli-tests": $p_run_cli_tests, "run-unit-tests": $p_run_unit_tests, "run-npm-webpack-dev-server-tests": $p_run_npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $p_run_npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $p_run_npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $p_run_npm_webpack_batteries_tests, "run-npm-vue-tests": $p_run_npm_vue_tests, "run-npm-react-tests": $p_run_npm_react_tests, "run-npm-angular-tests": $p_run_npm_angular_tests, "run-npm-svelte-tests": $p_run_npm_svelte_tests, "run-npm-puppeteer-tests": $p_run_npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $p_run_npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $p_run_npm_mount_utils_tests, "run-npm-grep-tests": $p_run_npm_grep_tests, "run-npm-eslint-plugin-tests": $p_run_npm_eslint_plugin_tests, "run-npm-schematic-tests": $p_run_npm_schematic_tests}
+{"publish-binary-branch": "$pb", "force-persist-artifacts": $fpa, "run-driver-tests": $p_run_driver_tests, "run-server-tests": $p_run_server_tests, "run-app-ui-tests": $p_run_app_ui_tests, "run-launchpad-tests": $p_run_launchpad_tests, "run-reporter-tests": $p_run_reporter_tests, "run-frontend-shared-tests": $p_run_frontend_shared_tests, "run-system-tests": $p_run_system_tests, "run-v8-tests": $p_run_v8_tests, "run-cli-tests": $p_run_cli_tests, "run-unit-tests": $p_run_unit_tests, "run-npm-webpack-dev-server-tests": $p_run_npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $p_run_npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $p_run_npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $p_run_npm_webpack_batteries_tests, "run-npm-vue-tests": $p_run_npm_vue_tests, "run-npm-react-tests": $p_run_npm_react_tests, "run-npm-angular-tests": $p_run_npm_angular_tests, "run-npm-puppeteer-tests": $p_run_npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $p_run_npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $p_run_npm_mount_utils_tests, "run-npm-grep-tests": $p_run_npm_grep_tests, "run-npm-eslint-plugin-tests": $p_run_npm_eslint_plugin_tests, "run-npm-schematic-tests": $p_run_npm_schematic_tests}
 EOF
 }
 
@@ -47,7 +46,7 @@ emit_all_true() {
   local pb="${PUBLISH_BINARY_BRANCH:-main}"
   local fpa="${FORCE_PERSIST_ARTIFACTS:-false}"
   cat <<EOF
-{"publish-binary-branch": "$pb", "force-persist-artifacts": $fpa, "run-driver-tests": true, "run-server-tests": true, "run-app-ui-tests": true, "run-launchpad-tests": true, "run-reporter-tests": true, "run-frontend-shared-tests": true, "run-system-tests": true, "run-v8-tests": true, "run-cli-tests": true, "run-unit-tests": true, "run-npm-webpack-dev-server-tests": true, "run-npm-vite-dev-server-tests": true, "run-npm-webpack-preprocessor-tests": true, "run-npm-webpack-batteries-tests": true, "run-npm-vue-tests": true, "run-npm-react-tests": true, "run-npm-angular-tests": true, "run-npm-svelte-tests": true, "run-npm-puppeteer-tests": true, "run-npm-vite-plugin-esm-tests": true, "run-npm-mount-utils-tests": true, "run-npm-grep-tests": true, "run-npm-eslint-plugin-tests": true, "run-npm-schematic-tests": true}
+{"publish-binary-branch": "$pb", "force-persist-artifacts": $fpa, "run-driver-tests": true, "run-server-tests": true, "run-app-ui-tests": true, "run-launchpad-tests": true, "run-reporter-tests": true, "run-frontend-shared-tests": true, "run-system-tests": true, "run-v8-tests": true, "run-cli-tests": true, "run-unit-tests": true, "run-npm-webpack-dev-server-tests": true, "run-npm-vite-dev-server-tests": true, "run-npm-webpack-preprocessor-tests": true, "run-npm-webpack-batteries-tests": true, "run-npm-vue-tests": true, "run-npm-react-tests": true, "run-npm-angular-tests": true, "run-npm-puppeteer-tests": true, "run-npm-vite-plugin-esm-tests": true, "run-npm-mount-utils-tests": true, "run-npm-grep-tests": true, "run-npm-eslint-plugin-tests": true, "run-npm-schematic-tests": true}
 EOF
 }
 
@@ -209,9 +208,6 @@ while IFS= read -r file; do
       ;;
     npm/angular-zoneless/*)
       p_run_npm_angular_tests=true
-      ;;
-    npm/svelte/*)
-      p_run_npm_svelte_tests=true
       ;;
     npm/puppeteer/*)
       p_run_npm_puppeteer_tests=true
