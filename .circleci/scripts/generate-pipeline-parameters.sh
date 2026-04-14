@@ -264,10 +264,14 @@ while IFS= read -r file; do
     npm/cypress-schematic/*)
       p_run_npm_schematic_tests=true
       ;;
+    packages/eslint-config/*|packages/example/*|npm/xpath/*)
+      # No CI jobs are associated with these packages — no tests to run
+      ;;
     *)
-      # Unknown path — enable unit tests as a safe fallback
-      echo "Unrecognized path '$file' — enabling run-unit-tests as fallback" >&2
-      p_run_unit_tests=true
+      # Unrecognized path — run everything rather than risk missing coverage
+      echo "Unrecognized path '$file' — running all tests" >&2
+      emit_all_true
+      exit 0
       ;;
   esac
 done <<< "$CHANGED"
