@@ -274,13 +274,13 @@ function noProxyPreflightTimeout (): number {
 type CreateRunOptions = {
   projectRoot: string
   ci: {
-    params: string
-    provider: string
+    params: Record<string, any> | null
+    provider: string | null
   }
   ciBuildId: string
   projectId: string
   recordKey: string
-  commit: string
+  commit: Record<string, string | null | undefined>
   specs: string[]
   group: string
   platform: string

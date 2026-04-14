@@ -1,8 +1,8 @@
-const _ = require('lodash')
-const dayjs = require('dayjs')
-const duration = require('dayjs/plugin/duration')
-const relativeTime = require('dayjs/plugin/relativeTime')
-const updateLocale = require('dayjs/plugin/updateLocale')
+import _ from 'lodash'
+import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import updateLocale from 'dayjs/plugin/updateLocale'
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
@@ -26,7 +26,7 @@ dayjs.updateLocale('en', {
   },
 })
 
-const format = (durationInMs, padMinutes = true) => {
+export const format = (durationInMs, padMinutes = true) => {
   const duration = dayjs.duration(durationInMs)
 
   const durationSecs = duration.seconds() ? `${duration.seconds()}` : ''
@@ -46,8 +46,4 @@ const format = (durationInMs, padMinutes = true) => {
   }
 
   return totalMinSec
-}
-
-module.exports = {
-  format,
 }

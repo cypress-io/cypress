@@ -1,5 +1,5 @@
-const dayjs = require('dayjs')
-const duration = require('dayjs/plugin/duration')
+import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
 
 dayjs.extend(duration)
 
@@ -15,10 +15,10 @@ const parse = (ms) => {
   }
 }
 
-const long = (ms, alwaysIncludeSeconds = true) => {
+export const long = (ms, alwaysIncludeSeconds = true) => {
   let { mins, duration } = parse(ms)
   let word
-  const msg = []
+  const msg: string[] = []
 
   mins += duration.minutes()
 
@@ -37,9 +37,9 @@ const long = (ms, alwaysIncludeSeconds = true) => {
   return msg.join(', ')
 }
 
-const short = (ms, fixed = undefined) => {
+export const short = (ms, fixed: number | undefined = undefined) => {
   let { mins, duration } = parse(ms)
-  const msg = []
+  const msg: string[] = []
 
   mins += duration.minutes()
 
@@ -64,10 +64,4 @@ const short = (ms, fixed = undefined) => {
   }
 
   return msg.join(', ')
-}
-
-module.exports = {
-  long,
-
-  short,
 }
