@@ -1,10 +1,12 @@
-const _ = require('lodash')
-const isCi = require('ci-info').isCI
-const debug = require('debug')('cypress:server')
+import _ from 'lodash'
+import { isCI } from 'ci-info'
+import debugModule from 'debug'
 
-const getIsCi = () => isCi
+const debug = debugModule('cypress:server')
 
-const join = (char, ...pieces) => {
+export const getIsCi = () => isCI
+
+const join = (char: string, ...pieces: string[]) => {
   return _.chain(pieces).compact().join(char).value()
 }
 
@@ -688,7 +690,7 @@ const _providerCommitParams = () => {
   }
 }
 
-const provider = () => {
+export const provider = () => {
   return _detectProviderName() || null
 }
 
@@ -707,7 +709,7 @@ const _get = (fn) => {
   .value()
 }
 
-const ciParams = () => {
+export const ciParams = () => {
   const ciParams = {
     ..._.chain(_userProvidedProviderCiParams()).thru(omitUndefined).defaultTo(null).value(),
     ..._get(_providerCiParams),
@@ -716,11 +718,11 @@ const ciParams = () => {
   return Object.keys(ciParams).length > 0 ? ciParams : null
 }
 
-const commitParams = () => {
+export const commitParams = () => {
   return _get(_providerCommitParams)
 }
 
-const commitDefaults = (existingInfo) => {
+export const commitDefaults = (existingInfo) => {
   debug('git commit existing info')
   debug(existingInfo)
 
@@ -752,33 +754,17 @@ const commitDefaults = (existingInfo) => {
   return combined
 }
 
-const list = () => {
+export const list = () => {
   return _.keys(CI_PROVIDERS)
 }
 
 // grab all detectable providers
 // that we can extract ciBuildId from
-const detectableCiBuildIdProviders = () => {
+export const detectableCiBuildIdProviders = () => {
   return _
   .chain(_providerCiParams())
   .omitBy(_.isNil)
   .keys()
   .sortBy()
   .value()
-}
-
-module.exports = {
-  getIsCi,
-
-  list,
-
-  provider,
-
-  ciParams,
-
-  commitParams,
-
-  commitDefaults,
-
-  detectableCiBuildIdProviders,
 }
