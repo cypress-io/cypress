@@ -9,10 +9,12 @@ interface ContainerProps {
   scrollHeight?: number
   scrollTop?: number
   addEventListener?: SinonSpy
+  removeEventListener?: SinonSpy
 }
 
-type TestContainer = Element & {
-  addEventListener?: SinonSpy
+type TestContainer = Omit<Element, 'addEventListener' | 'removeEventListener'> & {
+  addEventListener: SinonSpy
+  removeEventListener: SinonSpy
 }
 
 const getContainer = (props?: ContainerProps): TestContainer => {
@@ -21,6 +23,7 @@ const getContainer = (props?: ContainerProps): TestContainer => {
     scrollHeight: 900,
     scrollTop: 0,
     addEventListener: sinon.spy(),
+    removeEventListener: sinon.spy(),
   }, props)
 }
 
@@ -123,6 +126,24 @@ describe('scroller', () => {
 
       scroller.setContainer(container)
       expect(container.addEventListener).to.have.been.calledWith('scroll')
+    })
+
+    it('does not stack scroll listeners when setContainer is called repeatedly', () => {
+      const container = getContainer()
+      const onUserScroll = sinon.spy()
+
+      scroller.setContainer(container, onUserScroll)
+      scroller.setContainer(container, onUserScroll)
+
+      expect(container.removeEventListener).to.have.been.called
+      expect(container.removeEventListener.firstCall.args[0]).to.equal('scroll')
+
+      container.addEventListener.callArg(1)
+      clock.tick(15)
+      container.addEventListener.callArg(1)
+      clock.tick(15)
+      container.addEventListener.callArg(1)
+      expect(onUserScroll).to.have.been.calledOnce
     })
 
     it('calls onUserScroll callback if 3 or more user scroll events are detected within 50ms', () => {
