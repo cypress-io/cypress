@@ -1655,6 +1655,9 @@ jobs:
       required_env_var:
         type: env_var_name
     steps:
+      # Uses an inline when: not: or: instead of halt-if-skipped because this
+      # job depends on multiple parameters. CircleCI boolean parameters cannot
+      # express or: logic, so a multi-condition inline step is required here.
       - when:
           condition:
             not:
@@ -1696,6 +1699,9 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      # Uses an inline when: not: or: instead of halt-if-skipped because this
+      # job depends on multiple parameters. CircleCI boolean parameters cannot
+      # express or: logic, so a multi-condition inline step is required here.
       - when:
           condition:
             not:
@@ -2033,6 +2039,9 @@ jobs:
   system-tests-node-modules-install:
     <<: *defaults
     steps:
+      # Uses an inline when: not: or: instead of halt-if-skipped because this
+      # job depends on multiple parameters. CircleCI boolean parameters cannot
+      # express or: logic, so a multi-condition inline step is required here.
       - when:
           condition:
             not:
@@ -3089,10 +3098,7 @@ jobs:
           working_directory: /tmp/cypress-test-tiny
           command: DEBUG=cypress:cli $(yarn bin cypress) run
 
-  # Fan-in aggregator job — the only required GitHub status check for PRs.
-  # All conditional test jobs fan into this one. When upstream jobs are excluded
-  # by their when: condition, CircleCI does not wait for them, so this job
-  # completes once all *included* jobs finish successfully.
+  # Aggregator job — the only required GitHub status check for PRs.
   all-jobs-passed:
     docker:
       - image: cimg/base:stable
