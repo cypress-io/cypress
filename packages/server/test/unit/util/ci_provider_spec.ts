@@ -1,8 +1,7 @@
-const mockedEnv = require('mocked-env')
+import '../../spec_helper'
+import mockedEnv from 'mocked-env'
 
-require('../../spec_helper')
-
-const ciProvider = require(`../../../lib/util/ci_provider`)
+import * as ciProvider from '../../../lib/util/ci_provider'
 
 const expectsName = (name) => {
   expect(ciProvider.provider(), 'CI providers detected name').to.eq(name)
