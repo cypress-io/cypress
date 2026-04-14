@@ -5,13 +5,17 @@ import { describe, it, expect } from 'vitest'
 import { LogUtils } from '../../../src/cypress/log'
 
 describe('LogUtils.reduceMemory', () => {
-  it('nulls payloads and unknown keys while preserving small core metadata', () => {
+  it('nulls payloads and unknown keys while preserving identifiers and core metadata', () => {
     const attrs: Record<string, unknown> = {
       id: 'log-https://example.com-1',
       testId: 'r1',
       state: 'passed',
       message: 'a'.repeat(5000),
       name: 'get',
+      displayName: 'GET',
+      alias: '@foo',
+      referencesAlias: '@bar',
+      functionName: 'stub',
       method: 'GET',
       url: `https://example.com/${'p'.repeat(2000)}`,
       response: 'body'.repeat(1000),
@@ -32,8 +36,12 @@ describe('LogUtils.reduceMemory', () => {
     expect(attrs.state).toBe('passed')
     expect(attrs.numResponses).toBe(2)
     expect(attrs.wallClockStartedAt).toBe('2020-01-01T00:00:00.000Z')
-    expect(attrs.name).toBeNull()
-    expect(attrs.method).toBeNull()
+    expect(attrs.name).toBe('get')
+    expect(attrs.displayName).toBe('GET')
+    expect(attrs.alias).toBe('@foo')
+    expect(attrs.referencesAlias).toBe('@bar')
+    expect(attrs.functionName).toBe('stub')
+    expect(attrs.method).toBe('GET')
     expect(attrs.message).toBeNull()
     expect(attrs.url).toBeNull()
     expect(attrs.response).toBeNull()

@@ -25,8 +25,12 @@ const PROTOCOL_MESSAGE_TRUNCATION_LENGTH = 3000
 // (stringified args, URLs, `consoleProps`, custom `Cypress.log` fields, etc.) after a
 // test falls out of `numTestsKeptInMemory`. Everything not in this allowlist is set to
 // `null` so GC can reclaim memory and clean up custom log properties.
+//
+// Keep short display identifiers (`name`, `displayName`, `alias`, …) so `getTestsState` /
+// serialized run state still renders command logs, routes, and agents after restore.
 const REDUCE_MEMORY_PRESERVED_KEYS = new Set([
   '_hasBeenCleanedUp',
+  'alias',
   'aliasType',
   'autoEnd',
   'callCount',
@@ -34,9 +38,11 @@ const REDUCE_MEMORY_PRESERVED_KEYS = new Set([
   'count',
   'createdAtTimestamp',
   'defaultCollapsedState',
+  'displayName',
   'end',
   'ended',
   'event',
+  'functionName',
   'group',
   'groupEnd',
   'groupLevel',
@@ -47,8 +53,11 @@ const REDUCE_MEMORY_PRESERVED_KEYS = new Set([
   'instrument',
   'isCrossOriginLog',
   'isStubbed',
+  'method',
+  'name',
   'numElements',
   'numResponses',
+  'referencesAlias',
   'snapshot',
   'state',
   'status',
