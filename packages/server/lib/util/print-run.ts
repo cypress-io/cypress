@@ -7,7 +7,7 @@ import prettyBytes from 'pretty-bytes'
 import pkg from '@packages/root'
 import humanTime from './human_time'
 import { format as durationFormat } from './duration'
-import newlines from './newlines'
+import { addNewlineAtEveryNChar } from './newlines'
 import * as env from './env'
 import * as terminal from './terminal'
 import { getIsCi } from './ci_provider'
@@ -159,7 +159,7 @@ function formatPath (name: string, n: number | undefined, pathColor = 'reset') {
 
   // add newLines at each n char and colorize the path
   if (n) {
-    let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
+    let nameWithNewLines = addNewlineAtEveryNChar(name, n)
 
     return `${color(nameWithNewLines, pathColor)}`
   }
