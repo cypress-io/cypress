@@ -3,6 +3,10 @@
 
 _Released 04/21/2026 (PENDING)_
 
+**Performance:**
+
+- Reduced browser memory growth during long interactive runs by clearing stored command log data (messages, URLs, snapshots, console props, and other fields—including custom `Cypress.log` properties) once tests age out of `numTestsKeptInMemory`, so the runner can reclaim memory and stay more responsive. Addressed in [#33601](https://github.com/cypress-io/cypress/pull/33601).
+
 **Features:**
 
 - Cypress now officially supports TypeScript 6. Addresses [#33385](https://github.com/cypress-io/cypress/issues/33385) and [#33511](https://github.com/cypress-io/cypress/issues/33511).
