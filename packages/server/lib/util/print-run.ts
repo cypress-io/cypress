@@ -6,7 +6,7 @@ import human from 'human-interval'
 import prettyBytes from 'pretty-bytes'
 import pkg from '@packages/root'
 import humanTime from './human_time'
-import duration from './duration'
+import { format as durationFormat } from './duration'
 import newlines from './newlines'
 import * as env from './env'
 import * as terminal from './terminal'
@@ -101,7 +101,7 @@ function formatFooterSummary (results: any) {
   return [
     isCanceled ? '-' : formatSymbolSummary(totalFailed),
     color(phrase, c),
-    gray(duration.format(results.totalDuration)),
+    gray(durationFormat(results.totalDuration)),
     colorIf(results.totalTests, 'reset'),
     colorIf(results.totalPassed, 'green'),
     colorIf(totalFailed, 'red'),
@@ -349,7 +349,7 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
     _.each(runs, (run) => {
       const { spec, stats } = run
 
-      const ms = duration.format(stats.wallClockDuration || 0)
+      const ms = durationFormat(stats.wallClockDuration || 0)
 
       const formattedSpec = formatPath(spec.relativeToCommonRoot, getWidth(table2, 1))
 
