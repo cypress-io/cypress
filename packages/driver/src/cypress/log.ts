@@ -59,8 +59,6 @@ const REDUCE_MEMORY_PRESERVED_KEYS = new Set([
   'type',
   'updatedAtTimestamp',
   'visible',
-  'viewportHeight',
-  'viewportWidth',
   'wallClockStartedAt',
 ])
 
