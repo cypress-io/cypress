@@ -260,7 +260,7 @@ export class CombinedAgent {
       if (isHttps) {
         _.assign(options, clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(uri))
 
-        return this.httpsAgent.addRequest(req, options as https.RequestOptions)
+        return this.httpsAgent.addRequest(req, options)
       }
 
       return this.httpAgent.addRequest(req, options)
@@ -348,25 +348,27 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  async addRequest (req: http.ClientRequest, options: https.RequestOptions) {
+  async addRequest (req: http.ClientRequest, options: http.RequestOptions): Promise<void> {
+    const opts = options as https.RequestOptions
+
     // Ensure we have a proper port defined otherwise node has assumed we are port 80
     // (https://github.com/nodejs/node/blob/master/lib/_http_client.js#L164) since we are a combined agent
     // rather than an http or https agent. This will cause issues with fetch requests (@cypress/request already handles it:
     // https://github.com/cypress-io/request/blob/master/request.js#L301-L303)
-    if (!options?.uri?.port && options?.uri?.protocol === 'https:') {
-      options.uri = {
-        ...options.uri,
+    if (!opts?.uri?.port && opts?.uri?.protocol === 'https:') {
+      opts.uri = {
+        ...opts.uri,
         port: String(443),
       }
 
-      options.port = 443
+      opts.port = 443
     }
 
     if (baseCaOptions) {
-      super.addRequest(req, mergeCAOptions(options, baseCaOptions))
+      super.addRequest(req, mergeCAOptions(opts, baseCaOptions) as http.RequestOptions)
     } else {
       await baseCaOptionsPromise.then((caOptions) => {
-        super.addRequest(req, mergeCAOptions(options, caOptions))
+        super.addRequest(req, mergeCAOptions(opts, caOptions) as http.RequestOptions)
       })
     }
   }

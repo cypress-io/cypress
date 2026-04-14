@@ -4,6 +4,7 @@ import type { EventEmitter } from 'events'
 import getTsConfig from 'get-tsconfig'
 import webpack from 'webpack'
 import webpackPreprocessor from '@cypress/webpack-preprocessor'
+import semver from 'semver'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 
 const debug = Debug('cypress:webpack-batteries-included-preprocessor')
@@ -103,6 +104,16 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
     configFile.config.compilerOptions.moduleResolution = 'node'
   }
 
+  const tsVersion = webpackPreprocessor.getResolvedTypescriptVersion(typeof typeScriptPath === 'string' ? typeScriptPath : undefined)
+
+  let isLessThanTs6
+  let isGreaterThanOrEqualToTs6
+
+  if (tsVersion && semver.valid(tsVersion)) {
+    isLessThanTs6 = semver.lt(tsVersion, '6.0.0-0')
+    isGreaterThanOrEqualToTs6 = !isLessThanTs6
+  }
+
   webpackOptions.module.rules.push({
     test: typescriptExtensionRegex,
     exclude: [/node_modules/],
@@ -110,10 +121,12 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
       {
         loader: require.resolve('ts-loader'),
         options: {
+          ...(isGreaterThanOrEqualToTs6 ? {
+            configFile: configFile?.path,
+          } : {}),
           compiler: typeScriptPath,
-          // pass in the resolved compiler options from the tsconfig file into ts-loader to most accurately transpile the code
-          ...(configFile ? {
-            compilerOptions: configFile.config.compilerOptions,
+          ...(isLessThanTs6 ? {
+            compilerOptions: configFile?.config?.compilerOptions,
           } : {}),
           logLevel: 'error',
           silent: true,

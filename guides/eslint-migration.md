@@ -9,7 +9,7 @@
 - [x] npm/cypress-schematic ✅ **COMPLETED** 
 
 ### Batch 2: Framework adapters
-- [ ] npm/react
+- [x] npm/react ✅ **COMPLETED**
 - [ ] npm/vue
 - [ ] npm/svelte
 

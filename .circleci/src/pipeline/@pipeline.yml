@@ -8,8 +8,8 @@ version: 2.1
 chrome-stable-version: &chrome-stable-version "146.0.7680.75"
 chrome-beta-version: &chrome-beta-version "147.0.7727.3"
 firefox-stable-version: &firefox-stable-version "145.0.2"
-base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
-base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
+base-internal-trixie: &base-internal-trixie cypress/base-internal:24.14.0-trixie
+base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.14.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
 base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20.15.0
@@ -17,7 +17,7 @@ base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20
 parameters:
   publish-binary-branch:
     type: string
-    default: main
+    default: release/16.0.0
   force-persist-artifacts:
     type: boolean
     default: false
@@ -31,7 +31,7 @@ defaults: &defaults
   parameters: &defaultsParameters
     executor:
       type: executor
-      default: cy-doc
+      default: cy-docker
     only-cache-for-root-user:
       type: boolean
       default: false
@@ -49,8 +49,7 @@ defaults: &defaults
     LINES: 24
 
 executors:
-  # the Docker image with Cypress dependencies and Chrome browser
-  cy-doc:
+  cy-docker:
     docker:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
@@ -127,7 +126,7 @@ commands:
             if [[ "<< pipeline.parameters.force-persist-artifacts >>" == "true" ]]; then
               echo 'export SHOULD_PERSIST_ARTIFACTS=true' >> "$BASH_ENV"
             else
-              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* ]]; then
+              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "electron/"* && "$CIRCLE_BRANCH" != "mschile/electron_41" ]]; then
                   export SHOULD_PERSIST_ARTIFACTS=true
               fi' >> "$BASH_ENV"
             fi
@@ -465,7 +464,7 @@ commands:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run: pwd
       ##- run:
@@ -508,7 +507,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
       install-chrome:
         description: whether or not to install google chrome
         type: boolean
@@ -587,7 +586,7 @@ commands:
                       version: << parameters.google-chrome-for-testing-version >>
                       install_chromedriver: false
 
-  # This code builds better-sqlite3 on Debian 11 (Bullseye). This is necessary because Debian 11 has the oldest glibc version (2.31) that we support.
+  # This code builds better-sqlite3 on Ubuntu 20 (Focal). This is necessary because Ubuntu 20 has the oldest glibc version (2.31) that we support.
   #
   # Since this is running Docker remote (because the job running the command may not be using an executor with the appropriate glibc version), we need to 
   # copy the project into the container, and copy the built plugin out of the container because the host running docker does not have access to the 
@@ -602,9 +601,9 @@ commands:
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:22.19.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder cypress/base-internal:24.14.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 37.6.0 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 41.0.3 --include-regex 'better_sqlite3.node$'"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
@@ -1103,7 +1102,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Install yarn if not already installed
@@ -1370,7 +1369,7 @@ commands:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Bump NPM version
@@ -2660,7 +2659,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
       wd:
         description: Working directory, should be OUTSIDE cypress monorepo folder
         type: string
@@ -2700,7 +2699,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
     <<: *defaults
     resource_class: small
     steps:

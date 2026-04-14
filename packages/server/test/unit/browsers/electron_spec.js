@@ -69,7 +69,7 @@ describe('lib/browsers/electron', () => {
           },
           on: sinon.stub(),
           webRequest: {
-            onBeforeSendHeaders () {},
+            onErrorOccurred: sinon.stub(),
           },
           setUserAgent: sinon.stub(),
           getUserAgent: sinon.stub(),
