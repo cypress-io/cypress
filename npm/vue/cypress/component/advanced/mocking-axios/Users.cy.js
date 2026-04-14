@@ -1,15 +1,12 @@
 /// <reference types="cypress" />
 import { mount } from '@cypress/vue'
-import Users from './1-Users.vue'
+import Users from './Users.vue'
 // we can load list of mock users straight from JSON file
 import mockUsers from './user.list.json'
 
-// import everything from "axios" module
-// so we can mock its methods from the test
 import Axios from 'axios'
 
-// TODO: fix with https://github.com/cypress-io/cypress/issues/30706
-describe.skip('Mocking get import from Axios', () => {
+describe('Mocking axios.get with default import', () => {
   it('renders mocked data', () => {
     cy.stub(Axios, 'get')
     .resolves({
