@@ -6,6 +6,7 @@ _Released 04/21/2026 (PENDING)_
 **Performance:**
 
 - Reduced browser memory growth during long interactive runs by clearing stored command log data (messages, URLs, snapshots, console props, and other fields—including custom `Cypress.log` properties) once tests age out of `numTestsKeptInMemory`, so the runner can reclaim memory and stay more responsive. Addressed in [#33601](https://github.com/cypress-io/cypress/pull/33601).
+- Reduced main-thread overhead when scrolling the command log in `cypress open` by fixing an issue where the reporter could register more than one `scroll` listener on the log if its scroll container was set more than once. Addressed in [#33607](https://github.com/cypress-io/cypress/pull/33607).
 
 **Features:**
 
