@@ -290,6 +290,11 @@ export = {
 
     let cdpAutomation
 
+    // HACK: Electron 41 workaround:
+    // register any `session.webRequest` listener before loading the page
+    // @see https://github.com/electron/electron/issues/50678
+    win.webContents.session.webRequest.onErrorOccurred(() => {})
+
     // If the cdp socket server is not present, this is a child window and we don't want to bind or listen to anything
     if (cdpSocketServer) {
       await win.loadURL('about:blank')

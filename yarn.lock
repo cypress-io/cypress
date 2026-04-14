@@ -8708,12 +8708,12 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@16.9.1", "@types/node@22.18.7", "@types/node@>=10.0.0", "@types/node@>=13.7.0", "@types/node@^12.12.29", "@types/node@^12.12.7", "@types/node@^20.1.0", "@types/node@^22.18.7", "@types/node@^22.7.7", "@types/node@^8.0.7":
-  version "22.18.7"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.18.7.tgz#e1d013d5759fa50ff4d334aee3fd6254f1dbae74"
-  integrity sha512-3E97nlWEVp2V6J7aMkR8eOnw/w0pArPwf/5/W0865f+xzBoGL/ZuHkTAKAGN7cOWNwd+sG+hZOqj+fjzeHS75g==
+"@types/node@*", "@types/node@16.9.1", "@types/node@24.10.1", "@types/node@>=10.0.0", "@types/node@>=13.7.0", "@types/node@^12.12.29", "@types/node@^12.12.7", "@types/node@^20.1.0", "@types/node@^24.10.1", "@types/node@^24.9.0", "@types/node@^8.0.7":
+  version "24.10.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-24.10.1.tgz#91e92182c93db8bd6224fca031e2370cef9a8f01"
+  integrity sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==
   dependencies:
-    undici-types "~6.21.0"
+    undici-types "~7.16.0"
 
 "@types/normalize-package-data@^2.4.0", "@types/normalize-package-data@^2.4.3":
   version "2.4.4"
@@ -11570,10 +11570,10 @@ before-after-hook@^2.2.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.2.2.tgz#a6e8ca41028d90ee2c24222f201c90956091613e"
   integrity sha512-3pZEU3NT5BFUo/AD5ERPWOgQOCZITni6iavr5AUw5AUwQjMlI0kzu5btnyD39AF0gUEsDPwJT+oY1ORBJijPjQ==
 
-better-sqlite3@12.4.1:
-  version "12.4.1"
-  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-12.4.1.tgz#f78df6c80530d1a0b750b538033e6199b7d30d26"
-  integrity sha512-3yVdyZhklTiNrtg+4WqHpJpFDd+WHTg2oM7UcR80GqL05AOV0xEJzc6qNvFYoEtE+hRp1n9MpN6/+4yhlGkDXQ==
+better-sqlite3@12.8.0:
+  version "12.8.0"
+  resolved "https://registry.yarnpkg.com/better-sqlite3/-/better-sqlite3-12.8.0.tgz#ec9ccd4a426a35f3b9355c147af6c92a6ddd6862"
+  integrity sha512-RxD2Vd96sQDjQr20kdP+F+dK/1OUNiVOl200vKBZY8u0vTwysfolF6Hq+3ZK2+h8My9YvZhHsF+RSGZW2VYrPQ==
   dependencies:
     bindings "^1.5.0"
     prebuild-install "^7.1.1"
@@ -15119,13 +15119,13 @@ electron-to-chromium@^1.5.263:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.267.tgz#5d84f2df8cdb6bfe7e873706bb21bd4bfb574dc7"
   integrity sha512-0Drusm6MVRXSOJpGbaSVgcQsuB4hEkMpHXaVstcPmhu5LIedxs1xNK/nIxmQIU/RPC0+1/o0AVZfBTkTNJOdUw==
 
-electron@37.6.0:
-  version "37.6.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-37.6.0.tgz#4f13cd6fe57c9577d11385ffecea5edb4fbf24bd"
-  integrity sha512-8AANcn6irYQ7cTAJRY7r0CovWckcGCHUniQecyGhw/jJ25vWwitVhF97skF+EyDztiEI6YBoF0G6tx1s37bO3g==
+electron@41.0.3:
+  version "41.0.3"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-41.0.3.tgz#fa8864adacf903b986cd1d532db130f070e320f1"
+  integrity sha512-IDjx8liW1q+r7+MOip5W1Eo1eMwJzVObmYrd9yz2dPCkS7XlgLq3qPVMR80TpiROFp73iY30kTzMdpA6fEVs3A==
   dependencies:
     "@electron/get" "^2.0.0"
-    "@types/node" "^22.7.7"
+    "@types/node" "^24.9.0"
     extract-zip "^2.0.1"
 
 elegant-spinner@^1.0.1:
@@ -23760,10 +23760,10 @@ nock@13.2.9:
     lodash "^4.17.21"
     propagate "^2.0.0"
 
-node-abi@4.9.0, node-abi@^2.7.0, node-abi@^3.3.0, node-abi@^3.45.0, node-abi@^4.2.0:
-  version "4.9.0"
-  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-4.9.0.tgz#ca6dabf7991e54bf3ba6d8d32641e1b84f305263"
-  integrity sha512-0isb3h+AXUblx5Iv0mnYy2WsErH+dk2e9iXJXdKAtS076Q5hP+scQhp6P4tvDeVlOBlG3ROKvkpQHtbORllq2A==
+node-abi@4.28.0, node-abi@^2.7.0, node-abi@^3.3.0, node-abi@^3.45.0, node-abi@^4.2.0:
+  version "4.28.0"
+  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-4.28.0.tgz#2c93b89b6bc2208155b3c3ed5620211da8eb62a5"
+  integrity sha512-Qfp5XZL1cJDOabOT8H5gnqMTmM4NjvYzHp4I/Kt/Sl76OVkOBBHRFlPspGV0hYvMoqQsypFjT/Yp7Km0beXW9g==
   dependencies:
     semver "^7.6.3"
 
@@ -31081,10 +31081,10 @@ undertaker@^1.2.1:
     object.reduce "^1.0.0"
     undertaker-registry "^1.0.0"
 
-undici-types@~6.21.0:
-  version "6.21.0"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
-  integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
+undici-types@~7.16.0:
+  version "7.16.0"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.16.0.tgz#ffccdff36aea4884cbfce9a750a0580224f58a46"
+  integrity sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==
 
 undici@^6.20.1:
   version "6.21.3"

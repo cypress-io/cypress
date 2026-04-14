@@ -1,5 +1,5 @@
 {
-  "name": "yarn-v3.1.1-pnp",
+  "name": "yarn-v3.2.0-pnp",
   "version": "0.0.0-test",
   "dependencies": {
     "lodash": "^4.17.21"

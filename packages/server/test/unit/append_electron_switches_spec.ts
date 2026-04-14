@@ -12,21 +12,6 @@ describe('lib/append_electron_switches', () => {
     sinon.restore()
   })
 
-  // @see https://github.com/electron/electron/issues/46538
-  // @see https://github.com/cypress-io/cypress/issues/32361
-  context('sets gtk-version=3 in Electron >= 36', () => {
-    it('sets launch args', async () => {
-      const mockApp = {
-        commandLine: {
-          appendSwitch: sinon.stub(),
-        },
-      } as unknown as Electron.App
-
-      appendElectronSwitches(mockApp)
-      expect(mockApp.commandLine.appendSwitch).to.have.been.calledWith('--gtk-version', '3')
-    })
-  })
-
   context('disables hardware acceleration on Linux', () => {
     it('disables hardware acceleration', async () => {
       const mockApp = {

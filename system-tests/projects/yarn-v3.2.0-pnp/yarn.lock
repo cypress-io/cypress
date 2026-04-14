@@ -2,7 +2,7 @@
 # Manual changes might be lost - proceed with caution!
 
 __metadata:
-  version: 5
+  version: 6
   cacheKey: 8
 
 "@types/lodash@npm:^4.14.225":
@@ -31,7 +31,7 @@ __metadata:
 
 "typescript@patch:typescript@^5.6.3#~builtin<compat/typescript>":
   version: 5.6.3
-  resolution: "typescript@patch:typescript@npm%3A5.6.3#~builtin<compat/typescript>::version=5.6.3&hash=493e53"
+  resolution: "typescript@patch:typescript@npm%3A5.6.3#~builtin<compat/typescript>::version=5.6.3&hash=bda367"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
@@ -39,9 +39,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yarn-v3.1.1-pnp@workspace:.":
+"yarn-v3.2.0-pnp@workspace:.":
   version: 0.0.0-use.local
-  resolution: "yarn-v3.1.1-pnp@workspace:."
+  resolution: "yarn-v3.2.0-pnp@workspace:."
   dependencies:
     "@types/lodash": ^4.14.225
     lodash: ^4.17.21
