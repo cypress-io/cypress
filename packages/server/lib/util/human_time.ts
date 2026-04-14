@@ -37,7 +37,7 @@ export const long = (ms, alwaysIncludeSeconds = true) => {
   return msg.join(', ')
 }
 
-export const short = (ms, fixed = undefined) => {
+export const short = (ms, fixed: number | undefined = undefined) => {
   let { mins, duration } = parse(ms)
   const msg: string[] = []
 

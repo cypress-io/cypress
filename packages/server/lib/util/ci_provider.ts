@@ -6,7 +6,7 @@ const debug = debugModule('cypress:server')
 
 export const getIsCi = () => isCI
 
-const join = (char: string, ...pieces: string[]) => {
+const join = (char: string, ...pieces: (string | undefined)[]) => {
   return _.chain(pieces).compact().join(char).value()
 }
 
@@ -145,6 +145,8 @@ const _detectProviderName = () => {
     if (_.isFunction(value)) {
       return value()
     }
+
+    return undefined
   })
 }
 
@@ -698,12 +700,18 @@ const omitUndefined = (ret) => {
   if (_.isObject(ret)) {
     return _.omitBy(ret, _.isUndefined)
   }
+
+  return undefined
 }
 
 const _get = (fn) => {
+  const providerName = provider()
+
+  if (!providerName) return null
+
   return _
   .chain(fn())
-  .get(provider())
+  .get(providerName)
   .thru(omitUndefined)
   .defaultTo(null)
   .value()
@@ -722,7 +730,7 @@ export const commitParams = () => {
   return _get(_providerCommitParams)
 }
 
-export const commitDefaults = (existingInfo) => {
+export const commitDefaults = (existingInfo: Record<string, string | null | undefined>) => {
   debug('git commit existing info')
   debug(existingInfo)
 
@@ -737,16 +745,18 @@ export const commitDefaults = (existingInfo) => {
     commitParamsObj = {}
   }
 
+  const resolvedCommitParamsObj: Record<string, any> = commitParamsObj
+
   debug('commit info from provider environment variables')
-  debug('%o', commitParamsObj)
+  debug('%o', resolvedCommitParamsObj)
 
   // based on the existingInfo properties
   // merge in the commitParams if null or undefined
   // defaulting back to null if all fails
   // NOTE: only properties defined in "existingInfo" will be returned
-  const combined = _.transform(existingInfo, (memo, value, key) => {
-    return memo[key] = _.defaultTo(value || commitParamsObj[key], null)
-  })
+  const combined = _.transform(existingInfo, (memo: Record<string, string | null | undefined>, value, key) => {
+    memo[key] = _.defaultTo(value || resolvedCommitParamsObj[key], null)
+  }, {} as Record<string, string | null | undefined>)
 
   debug('combined git and environment variables from provider')
   debug(combined)
