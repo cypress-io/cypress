@@ -1,12 +1,20 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.13.2
+## 15.14.0
 
 _Released Apr 21, 2026 (PENDING)_
+
+**Features:**
+
+- Cypress now officially supports TypeScript 6. Addresses [#33385](https://github.com/cypress-io/cypress/issues/33385) and [#33511](https://github.com/cypress-io/cypress/issues/33511).
 
 **Bugfixes:**
 
 - Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
 - Fixed an issue where `cy.readFile(..., 'base64')` assertions against large mismatched strings could appear to hang because assertion messages were not being truncated. Fixes [#25443](https://github.com/cypress-io/cypress/issues/25443).
+
+**Dependency Updates:**
+
+- Upgraded `axios` to `1.15.0` to address [CVE-2025-62718](https://www.cve.org/CVERecord?id=CVE-2025-62718) and [CVE-2026-40175](https://www.cve.org/CVERecord?id=CVE-2026-40175) vulnerabilities reported in security scans. Fixes [#33590](https://github.com/cypress-io/cypress/issues/33590).
 
 ## 15.13.1 
 
