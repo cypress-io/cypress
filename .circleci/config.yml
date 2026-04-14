@@ -19,80 +19,11 @@ parameters:
   force-persist-artifacts:
     type: boolean
     default: false
-  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
-  # Default true so develop/release branches run everything without explicit params.
-  run-driver-tests:
-    type: boolean
-    default: true
-  run-server-tests:
-    type: boolean
-    default: true
-  run-app-ui-tests:
-    type: boolean
-    default: true
-  run-launchpad-tests:
-    type: boolean
-    default: true
-  run-reporter-tests:
-    type: boolean
-    default: true
-  run-frontend-shared-tests:
-    type: boolean
-    default: true
-  run-system-tests:
-    type: boolean
-    default: true
-  run-v8-tests:
-    type: boolean
-    default: true
-  run-cli-tests:
-    type: boolean
-    default: true
-  run-unit-tests:
-    type: boolean
-    default: true
-  run-npm-webpack-dev-server-tests:
-    type: boolean
-    default: true
-  run-npm-vite-dev-server-tests:
-    type: boolean
-    default: true
-  run-npm-webpack-preprocessor-tests:
-    type: boolean
-    default: true
-  run-npm-webpack-batteries-tests:
-    type: boolean
-    default: true
-  run-npm-vue-tests:
-    type: boolean
-    default: true
-  run-npm-react-tests:
-    type: boolean
-    default: true
-  run-npm-angular-tests:
-    type: boolean
-    default: true
-  run-npm-svelte-tests:
-    type: boolean
-    default: true
-  run-npm-puppeteer-tests:
-    type: boolean
-    default: true
-  run-npm-vite-plugin-esm-tests:
-    type: boolean
-    default: true
-  run-npm-mount-utils-tests:
-    type: boolean
-    default: true
-  run-npm-grep-tests:
-    type: boolean
-    default: true
-  run-npm-eslint-plugin-tests:
-    type: boolean
-    default: true
-  run-npm-schematic-tests:
-    type: boolean
-    default: true
+  # Note: path-filtering parameters (run-driver-tests, run-server-tests, etc.)
+  # are NOT declared here. They live only in the continuation pipeline
+  # (packed/pipeline.yml) and are set exclusively by generate-pipeline-parameters.sh.
+  # Keeping them out of config.yml prevents them from appearing in the CircleCI
+  # "Trigger Pipeline" UI, ensuring users cannot manually bypass job execution.
 
 commands:
   persist:
