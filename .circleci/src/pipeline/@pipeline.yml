@@ -1980,6 +1980,8 @@ jobs:
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-server-tests >>
       - restore_cached_workspace
       # TODO: Remove this once we switch off self-hosted M1 runners
       - when:

@@ -144,11 +144,6 @@ while IFS= read -r file; do
       p_run_server_tests=true
       p_run_system_tests=true
       ;;
-    packages/graphql/*)
-      p_run_app_ui_tests=true
-      p_run_launchpad_tests=true
-      p_run_server_tests=true
-      ;;
     packages/runner/*)
       p_run_driver_tests=true
       p_run_app_ui_tests=true
