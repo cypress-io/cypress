@@ -12,8 +12,7 @@ const DocumentTest = ({ reportHeight }) => {
             document.documentElement.clientHeight,
             document.body.clientHeight,
           )
-        }
-        }
+        }}
       >
       Report height
       </button>

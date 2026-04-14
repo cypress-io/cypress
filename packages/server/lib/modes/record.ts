@@ -16,7 +16,7 @@ import type { AllCypressErrorNames } from '@packages/errors'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
 import * as capture from '../capture'
 import * as env from '../util/env'
-import ciProvider from '../util/ci_provider'
+import * as ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
 import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
 
