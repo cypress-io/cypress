@@ -1,13 +1,9 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-# Pack CircleCI config if any files in .circleci/src were changed.
-# Validate only the setup config (config.yml) — the packed pipeline.yml
-# is validated server-side by CircleCI and may use features the local
-# CLI does not yet support (e.g. when: at the workflow job level).
+# Pack CircleCI config if any files in .circleci/src were changed
 if git diff --cached --name-only | grep -q "^\.circleci/src/"; then
-  yarn pack-ci
-  circleci config validate ./.circleci/config.yml
+  yarn pack-ci --validate
 fi
 
 npx lint-staged
