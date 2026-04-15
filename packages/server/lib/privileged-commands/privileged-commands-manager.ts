@@ -14,12 +14,18 @@ interface SpecOriginatedCommand {
   args: string[]
 }
 
+interface PendingFileRead {
+  filePath: string
+  originalFilePath: string
+}
+
 type NonSpecError = Error & { isNonSpec: boolean | undefined }
 type ChannelUrl = string
 type ChannelKey = string
 
 class PrivilegedCommandsManager {
   channelKeys: Record<ChannelUrl, ChannelKey> = {}
+  pendingFileReads: Record<string, PendingFileRead> = {}
   verifiedCommands: SpecOriginatedCommand[] = []
 
   async getPrivilegedChannel (options: {
@@ -81,7 +87,7 @@ class PrivilegedCommandsManager {
     return !!matchingCommand
   }
 
-  runPrivilegedCommand (config, { commandName, options, args }) {
+  verifyCommand (config, { commandName, args }) {
     // the presence of the command within the verifiedCommands array indicates
     // the command being run is verified
     const hasCommand = this.hasVerifiedCommand({ name: commandName, args })
@@ -95,6 +101,48 @@ class PrivilegedCommandsManager {
 
       throw err
     }
+  }
+
+  createPrivilegedFileRead (config, { commandName, args, options }) {
+    if (commandName !== 'readFile' && commandName !== 'selectFile') {
+      throw new Error(
+        `You requested a privileged file read for a command we cannot handle: ${
+          commandName
+        }`,
+      )
+    }
+
+    this.verifyCommand(config, { commandName, args })
+
+    const file = options?.file
+
+    const token = uuidv4()
+
+    this.pendingFileReads[token] = {
+      filePath: path.resolve(config.projectRoot, file),
+      originalFilePath: file,
+    }
+
+    return {
+      filePath: this.pendingFileReads[token].filePath,
+      token,
+    }
+  }
+
+  consumePrivilegedFileRead (token: string) {
+    const pendingFileRead = this.pendingFileReads[token]
+
+    if (!pendingFileRead) {
+      throw new Error('You requested a privileged file read with an invalid token')
+    }
+
+    delete this.pendingFileReads[token]
+
+    return pendingFileRead
+  }
+
+  runPrivilegedCommand (config, { commandName, options, args }) {
+    this.verifyCommand(config, { commandName, args })
 
     switch (commandName) {
       case 'env':
@@ -104,10 +152,6 @@ class PrivilegedCommandsManager {
       case 'origin':
         // only need to verify that it's spec-originated above
         return
-      case 'readFile':
-        return files.readFile(config.projectRoot, options)
-      case 'selectFile':
-        return files.readFiles(config.projectRoot, options)
       case 'writeFile':
         return files.writeFile(config.projectRoot, options)
       case 'task': {
@@ -124,6 +168,7 @@ class PrivilegedCommandsManager {
 
   reset () {
     this.channelKeys = {}
+    this.pendingFileReads = {}
     this.verifiedCommands = []
   }
 }
