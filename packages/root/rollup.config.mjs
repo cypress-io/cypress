@@ -1,19 +1,22 @@
 import json from '@rollup/plugin-json'
 import { execSync } from 'child_process'
+import { dirname, resolve } from 'path'
+import { fileURLToPath } from 'url'
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
 const SENTINEL_VERSION = '0.0.0-development'
 
 /**
- * Finds the latest stable release version from git tags (e.g. "15.13.1").
- * Used to replace the sentinel during development builds so that consumers
- * always receive a real semver rather than the sentinel.
+ * Computes the next Cypress release version using the same script that drives
+ * the binary and CLI release pipeline. Used to replace the 0.0.0-development
+ * sentinel during development builds so that consumers (e.g. Cloud API headers)
+ * always identify with the version currently being developed.
  */
-function getLatestReleasedVersion () {
+function getNextVersion () {
   try {
-    const output = execSync('git tag --list --sort=-version:refname', { encoding: 'utf8' })
-    const tag = output.trim().split('\n').find((t) => /^v\d+\.\d+\.\d+$/.test(t))
+    const scriptPath = resolve(__dirname, '../../scripts/get-next-version.js')
 
-    return tag ? tag.slice(1) : null
+    return execSync(`node "${scriptPath}"`, { encoding: 'utf8' }).trim()
   } catch {
     return null
   }
@@ -33,7 +36,7 @@ export default {
           return null
         }
 
-        const version = getLatestReleasedVersion()
+        const version = getNextVersion()
 
         if (!version) {
           return null

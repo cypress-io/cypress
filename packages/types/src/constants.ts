@@ -26,8 +26,8 @@ export type PackageManager = typeof PACKAGE_MANAGERS[number]
 
 export const GET_MAJOR_VERSION_FOR_CONTENT = () => {
   // @packages/root's Rollup build replaces the 0.0.0-development sentinel with
-  // the latest released version at build time, so semverMajor always returns the
-  // correct major (e.g. 15) rather than 0.
+  // the next computed release version (via scripts/get-next-version.js), so
+  // semverMajor always returns the correct major (e.g. 15) rather than 0.
   return semverMajor(packageInfo.version).toString()
 }
 
