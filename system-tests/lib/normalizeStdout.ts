@@ -144,7 +144,7 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(escapedRetryDuration, 'Timed out retrying after $1ms')
   .replace(/(coffee|js)-\d{3}/g, '$1-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3
-  .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
+  .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+(?:-\S+)?)/g, replaceCypressVersion)
   // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
   .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \((?:.|\n)*?\)\s+)/g, replaceNodeVersion)
   // 15 seconds -> X second
