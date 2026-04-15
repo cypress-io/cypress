@@ -78,6 +78,22 @@ module.exports = async (on, config) => {
 
       return null
     },
+    /**
+     * @param {{ fileName: string, sizeInMb: number }} options.
+     * @returns {Promise<string>} Relative path to the generated file.
+     */
+    async 'create:large:file' ({ fileName, sizeInMb }) {
+      const filePath = path.join(__dirname, '..', '_test-output', fileName)
+      const sizeInBytes = sizeInMb * 1024 * 1024
+      const existingFile = await fs.stat(filePath).catch(() => undefined)
+
+      if (!existingFile || existingFile.size !== sizeInBytes) {
+        await fs.ensureFile(filePath)
+        await fs.truncate(filePath, sizeInBytes)
+      }
+
+      return path.join('cypress', '_test-output', fileName)
+    },
     'check:screenshot:size' ({ filePath, width, height, devicePixelRatio }) {
       return Jimp.read(filePath)
       .then((image) => {
