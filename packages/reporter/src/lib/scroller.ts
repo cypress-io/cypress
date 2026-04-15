@@ -24,24 +24,30 @@ export class Scroller {
   private _countUserScrollsTimeout?: number
   private _userScrollThresholdMs = SCROLL_THRESHOLD_MS
   private _onUserScroll?: UserScrollCallback
+  private _scrollListenerAbort?: AbortController
 
   setContainer (container: Element, onUserScroll?: UserScrollCallback) {
-    this._stopListeningToScrolls()
+    this._detachScrollListener()
 
     this._container = container
     this._onUserScroll = onUserScroll
     this._userScrollCount = 0
 
-    this._listenToScrolls()
+    this._attachScrollListener()
   }
 
-  _listenToScrolls () {
+  _attachScrollListener () {
     if (!this._container) return
 
-    this._container.addEventListener('scroll', this._onContainerScroll)
+    this._scrollListenerAbort = new AbortController()
+    this._container.addEventListener('scroll', this._onContainerScroll, { signal: this._scrollListenerAbort.signal })
   }
 
-  _stopListeningToScrolls () {
+  /** Drops the active `scroll` subscription (AbortController + `removeEventListener`). */
+  _detachScrollListener () {
+    this._scrollListenerAbort?.abort()
+    this._scrollListenerAbort = undefined
+
     if (!this._container) return
 
     const { removeEventListener } = this._container
@@ -139,7 +145,7 @@ export class Scroller {
 
   // for testing purposes
   __reset () {
-    this._stopListeningToScrolls()
+    this._detachScrollListener()
     this._container = null
     this._onUserScroll = undefined
     this._userScrollCount = 0

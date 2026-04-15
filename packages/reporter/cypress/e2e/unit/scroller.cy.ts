@@ -57,6 +57,14 @@ const getElement = (props?: ElementProps): HTMLElement => {
   }, props)
 }
 
+/** Fire the scroll handler that is currently registered (last `addEventListener('scroll', …)`). */
+const fireContainerScroll = (container: TestContainer) => {
+  expect(container.addEventListener).to.have.been.calledWith('scroll')
+  const listener = container.addEventListener.lastCall.args[1] as () => void
+
+  listener()
+}
+
 describe('scroller', () => {
   let clock: SinonFakeTimers
 
@@ -156,11 +164,11 @@ describe('scroller', () => {
       expect(container.removeEventListener).to.have.been.called
       expect(container.removeEventListener.firstCall.args[0]).to.equal('scroll')
 
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(15)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(15)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       expect(onUserScroll).to.have.been.calledOnce
     })
 
@@ -169,11 +177,11 @@ describe('scroller', () => {
       const onUserScroll = sinon.spy()
 
       scroller.setContainer(container, onUserScroll)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(15)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(15)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       expect(onUserScroll).to.have.been.called
     })
 
@@ -182,10 +190,10 @@ describe('scroller', () => {
       const onUserScroll = sinon.spy()
 
       scroller.setContainer(container, onUserScroll)
-      container.addEventListener.callArg(1)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
+      fireContainerScroll(container)
       clock.tick(50)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       expect(onUserScroll).not.to.have.been.called
     })
 
@@ -197,13 +205,13 @@ describe('scroller', () => {
       scroller.scrollIntoView(getElement({ offsetTop: 600 }))
       scroller.scrollIntoView(getElement({ offsetTop: 600 }))
       clock.tick(16)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(16)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(16)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(16)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       expect(onUserScroll).not.to.have.been.called
     })
   })
