@@ -211,6 +211,10 @@ export const createCommonRoutes = ({
     res.sendStatus(204)
   })
 
+  router.post(`/${config.namespace}/privileged-commands/read-file`, bodyParser.json(), async (req, res) => {
+    await files.handlePrivilegedFileRead(req, res)
+  })
+
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const proxy = httpProxy.createProxyServer({
       target: `http://localhost:${process.env.CYPRESS_INTERNAL_VITE_APP_PORT}/`,

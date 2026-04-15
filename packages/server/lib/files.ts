@@ -1,6 +1,49 @@
 import path from 'path'
 import { fs } from './util/fs'
 
+type FileStreamError = Error & {
+  filePath?: string
+  originalFilePath?: string
+}
+
+export async function createReadFileStreamFromPath ({
+  filePath,
+  originalFilePath,
+}: {
+  filePath: string
+  originalFilePath?: string
+}) {
+  const stream = fs.createReadStream(filePath)
+
+  try {
+    // Wait for the stream to emit `open` so missing file errors are normalized
+    // before the response starts streaming.
+    await new Promise<void>((resolve, reject) => {
+      const handleError = (error: FileStreamError) => {
+        error.originalFilePath = originalFilePath
+        error.filePath = filePath
+
+        reject(error)
+      }
+
+      stream.once('error', handleError)
+      stream.once('open', () => {
+        stream.off('error', handleError)
+        resolve()
+      })
+    })
+
+    return {
+      filePath,
+      stream,
+    }
+  } catch (error) {
+    stream.destroy()
+
+    throw error
+  }
+}
+
 export async function readFile (projectRoot: string, options: { file: string, encoding?: BufferEncoding } = { file: '', encoding: 'utf8' }) {
   const filePath = path.resolve(projectRoot, options.file)
 
@@ -29,23 +72,6 @@ export async function readFile (projectRoot: string, options: { file: string, en
     err.filePath = filePath
     throw err
   }
-}
-
-export async function readFiles (projectRoot: string, options: { files: { path: string, encoding?: BufferEncoding }[] } = { files: [] }) {
-  const files = await Promise.all(options.files.map(async (file) => {
-    const { contents, filePath } = await readFile(projectRoot, {
-      file: file.path,
-      encoding: file.encoding,
-    })
-
-    return {
-      ...file,
-      filePath,
-      contents,
-    }
-  }))
-
-  return files
 }
 
 export async function writeFile (projectRoot: string, options: { fileName: string, contents: string, encoding?: BufferEncoding, flag?: string } = { fileName: '', contents: '', encoding: 'utf8', flag: 'w' }) {
