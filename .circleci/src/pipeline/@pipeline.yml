@@ -1957,6 +1957,11 @@ jobs:
             source ./system-tests/scripts/bootstrap-docker-container.sh 'yarn cypress run --component --spec src/mount.cy.ts src/App.cy.ts'
 
   system-tests-chrome:
+    parameters:
+      <<: *defaultsParameters
+      run-index:
+        type: integer
+        default: 1
     <<: *defaults
     resource_class: medium+
     parallelism: 8
@@ -2057,6 +2062,9 @@ jobs:
     <<: *defaults
     parameters:
       <<: *defaultsParameters
+      run-index:
+        type: integer
+        default: 1
       resource_class:
         type: string
         default: medium+
