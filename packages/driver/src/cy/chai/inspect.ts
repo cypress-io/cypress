@@ -13,9 +13,6 @@ import getEnumerableProperties from 'chai/lib/chai/utils/getEnumerableProperties
 export function create (chai) {
   const { getName, getProperties } = chai.util
   const { config } = chai
-  // Match `loupe`'s ellipsis truncation marker (kept ASCII only in source).
-  // https://github.com/chaijs/loupe/blob/4386081e3302476af38f6fe64786a3f9c5a30ad4/src/helpers.ts#L48
-  const truncator = '\u2026'
 
   /**
    * ### .inspect(obj, [showHidden], [depth], [colors])
@@ -23,15 +20,16 @@ export function create (chai) {
    * Echoes the value of a value. Tries to print the value out
    * in the best way possible given the different types.
    *
-   * @param obj The object to print out.
-   * @param showHidden Flag that shows hidden (not enumerable)
+   * @param {Object} obj The object to print out.
+   * @param {Boolean} showHidden Flag that shows hidden (not enumerable)
    *    properties of objects. Default is false.
-   * @param depth Depth in which to descend in object. Default is 2.
-   * @param colors Flag to turn on ANSI escape codes to color the
+   * @param {Number} depth Depth in which to descend in object. Default is 2.
+   * @param {Boolean} colors Flag to turn on ANSI escape codes to color the
    *    output. Default is false (no coloring).
    * @namespace Utils
+   * @name inspect
    */
-  function inspect (obj: any, showHidden?: boolean, depth?: number, _colors?: boolean) {
+  function inspect (obj, showHidden, depth, colors) {
     let ctx = {
       showHidden,
       seen: [],
@@ -71,35 +69,6 @@ export function create (chai) {
   let formatValueHook
 
   const setFormatValueHook = (fn) => formatValueHook = fn
-
-  const isHighSurrogate = (char: string) => char >= '\ud800' && char <= '\udbff'
-
-  const truncate = (string: string, length: number, tail?: string) => {
-    string = String(string)
-    tail = tail ?? truncator
-
-    const tailLength = tail.length
-    const stringLength = string.length
-
-    // If the truncation marker is longer than the requested output, return only
-    // the marker.
-    if (tailLength > length && stringLength > tailLength) {
-      return tail
-    }
-
-    if (stringLength > length && stringLength > tailLength) {
-      let end = length - tailLength
-
-      // Avoid splitting a UTF-16 surrogate pair at the truncation boundary.
-      if (end > 0 && isHighSurrogate(string[end - 1])) {
-        end -= 1
-      }
-
-      return `${string.slice(0, end)}${tail}`
-    }
-
-    return string
-  }
 
   function formatValue (ctx, value, recurseTimes) {
     // Provide a hook for user-specified inspect functions.
@@ -284,14 +253,11 @@ export function create (chai) {
         return ctx.stylize('undefined', 'undefined')
 
       case 'string': {
-        const simple = JSON.stringify(value).replace(/^"|"$/g, '')
+        const simple = `'${JSON.stringify(value).replace(/^"|"$/g, '')
         .replace(/'/g, '\\\'')
-        .replace(/\\"/g, '"')
-        const truncated = config.truncateThreshold
-          ? truncate(simple, config.truncateThreshold - 2)
-          : simple
+        .replace(/\\"/g, '"')}'`
 
-        return ctx.stylize(`'${truncated}'`, 'string')
+        return ctx.stylize(simple, 'string')
       }
 
       case 'number':
