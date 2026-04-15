@@ -5,33 +5,6 @@ const CypressInstance = window.Cypress = parent.Cypress
 
 const importsToLoad = []
 
-// Retry dynamic import to tolerate Vite dev server not ready yet (e.g. in CI).
-// "Failed to fetch dynamically imported module" can happen when the iframe loads
-// before the server has finished serving the support or spec module.
-function isRetryableImportError (err) {
-  const msg = err && err.message
-
-  return typeof msg === 'string' && (
-    msg.includes('Failed to fetch') ||
-    msg.includes('dynamically imported module') ||
-    msg.includes('Importing a module script failed')
-  )
-}
-
-function retryDynamicImport (url, maxAttempts = 4, delayMs = 400) {
-  const attempt = (n) => {
-    return import(url).catch((err) => {
-      if (n < maxAttempts && isRetryableImportError(err)) {
-        return new Promise((resolve) => setTimeout(resolve, delayMs)).then(() => attempt(n + 1))
-      }
-
-      throw err
-    })
-  }
-
-  return attempt(1)
-}
-
 /* Support file import logic, this should be removed once we
  * are able to return relative paths from the supportFile
  * Jira #UNIFY-1260
@@ -67,7 +40,7 @@ if (supportFile) {
   const relativeUrl = `${devServerPublicPathBase}${supportRelativeToProjectRoot}`
 
   importsToLoad.push({
-    load: () => retryDynamicImport(relativeUrl),
+    load: () => import(relativeUrl),
     absolute: supportFile,
     relative: supportRelativeToProjectRoot,
     relativeUrl,
@@ -89,7 +62,7 @@ if (specPath === '__all' || CypressInstance.spec.relative === '__all') {
       const specRoute = `${devServerPublicPathBase}/@fs/${normalizedPath}`
 
       importsToLoad.push({
-        load: () => retryDynamicImport(specRoute),
+        load: () => import(specRoute),
         absolute: specObj.absolute,
         relative: specObj.relative,
         relativeUrl: specRoute,
@@ -105,7 +78,7 @@ if (specPath === '__all' || CypressInstance.spec.relative === '__all') {
 
   // We need a slash before /src/my-spec.js, this does not happen by default.
   importsToLoad.push({
-    load: () => retryDynamicImport(testFileAbsolutePathRoute),
+    load: () => import(testFileAbsolutePathRoute),
     absolute: CypressInstance.spec.absolute,
     relative: CypressInstance.spec.relative,
     relativeUrl: testFileAbsolutePathRoute,

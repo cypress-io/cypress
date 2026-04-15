@@ -50,7 +50,7 @@ jobs:
       context: test-runner:performance-tracking
       matrix:
         parameters:
-          run-index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          run-index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
       requires:
         - system-tests-node-modules-install
   - run-app-component-tests-chrome:
@@ -63,7 +63,7 @@ jobs:
       percy: true
       matrix:
         parameters:
-          run-index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          run-index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
       requires:
         - internal-pr-build
         - external-pr-build
