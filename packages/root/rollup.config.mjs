@@ -11,15 +11,14 @@ const SENTINEL_VERSION = '0.0.0-development'
  * the binary and CLI release pipeline. Used to replace the 0.0.0-development
  * sentinel during development builds so that consumers (e.g. Cloud API headers)
  * always identify with the version currently being developed.
+ *
+ * Throws if the version cannot be resolved so that a broken sentinel is never
+ * silently shipped in the bundle.
  */
 function getNextVersion () {
-  try {
-    const scriptPath = resolve(__dirname, '../../scripts/get-next-version.js')
+  const scriptPath = resolve(__dirname, '../../scripts/get-next-version.js')
 
-    return execSync(`node "${scriptPath}"`, { encoding: 'utf8' }).trim()
-  } catch {
-    return null
-  }
+  return execSync(`node "${scriptPath}"`, { encoding: 'utf8' }).trim()
 }
 
 export default {
@@ -36,11 +35,9 @@ export default {
           return null
         }
 
+        // Throws if get-next-version.js fails — a broken sentinel must never
+        // be silently shipped in the bundle.
         const version = getNextVersion()
-
-        if (!version) {
-          return null
-        }
 
         // Replace every occurrence (version appears once in the inlined JSON,
         // but guard against any extras by splitting instead of a single replace)
