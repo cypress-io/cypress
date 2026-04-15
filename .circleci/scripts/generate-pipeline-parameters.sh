@@ -45,13 +45,30 @@ EOF
 }
 
 emit_all_true() {
-  local pb="${PUBLISH_BINARY_BRANCH:-main}"
-  # CircleCI converts boolean pipeline params to "0"/"1" in env vars; normalize to JSON boolean
-  local fpa_raw="${FORCE_PERSIST_ARTIFACTS:-false}"
-  local fpa; [[ "$fpa_raw" == "true" || "$fpa_raw" == "1" ]] && fpa=true || fpa=false
-  cat <<EOF
-{"publish-binary-branch": "$pb", "force-persist-artifacts": $fpa, "run-driver-tests": true, "run-server-tests": true, "run-app-ui-tests": true, "run-launchpad-tests": true, "run-reporter-tests": true, "run-frontend-shared-tests": true, "run-system-tests": true, "run-v8-tests": true, "run-cli-tests": true, "run-unit-tests": true, "run-npm-webpack-dev-server-tests": true, "run-npm-vite-dev-server-tests": true, "run-npm-webpack-preprocessor-tests": true, "run-npm-webpack-batteries-tests": true, "run-npm-vue-tests": true, "run-npm-react-tests": true, "run-npm-angular-tests": true, "run-npm-puppeteer-tests": true, "run-npm-vite-plugin-esm-tests": true, "run-npm-mount-utils-tests": true, "run-npm-grep-tests": true, "run-npm-eslint-plugin-tests": true, "run-npm-schematic-tests": true}
-EOF
+  p_run_driver_tests=true
+  p_run_server_tests=true
+  p_run_app_ui_tests=true
+  p_run_launchpad_tests=true
+  p_run_reporter_tests=true
+  p_run_frontend_shared_tests=true
+  p_run_system_tests=true
+  p_run_v8_tests=true
+  p_run_cli_tests=true
+  p_run_unit_tests=true
+  p_run_npm_webpack_dev_server_tests=true
+  p_run_npm_vite_dev_server_tests=true
+  p_run_npm_webpack_preprocessor_tests=true
+  p_run_npm_webpack_batteries_tests=true
+  p_run_npm_vue_tests=true
+  p_run_npm_react_tests=true
+  p_run_npm_angular_tests=true
+  p_run_npm_puppeteer_tests=true
+  p_run_npm_vite_plugin_esm_tests=true
+  p_run_npm_mount_utils_tests=true
+  p_run_npm_grep_tests=true
+  p_run_npm_eslint_plugin_tests=true
+  p_run_npm_schematic_tests=true
+  emit_json
 }
 
 # ----- branch override --------------------------------------------------------
@@ -107,6 +124,7 @@ while IFS= read -r file; do
       ;;
     packages/driver/*)
       p_run_driver_tests=true
+      p_run_system_tests=true
       ;;
     packages/server/*)
       p_run_server_tests=true
