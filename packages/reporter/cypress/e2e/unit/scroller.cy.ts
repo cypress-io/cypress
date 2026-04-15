@@ -18,12 +18,30 @@ type TestContainer = Omit<Element, 'addEventListener' | 'removeEventListener'> &
 }
 
 const getContainer = (props?: ContainerProps): TestContainer => {
+  const scrollListeners: Array<(ev: Event) => void> = []
+
+  const addEventListener = sinon.spy((type: string, listener: (ev: Event) => void) => {
+    if (type === 'scroll') {
+      scrollListeners.push(listener)
+    }
+  })
+
+  const removeEventListener = sinon.spy((type: string, listener: (ev: Event) => void) => {
+    if (type === 'scroll') {
+      const idx = scrollListeners.lastIndexOf(listener)
+
+      if (idx !== -1) {
+        scrollListeners.splice(idx, 1)
+      }
+    }
+  })
+
   return _.extend<TestContainer>({
     clientHeight: 400,
     scrollHeight: 900,
     scrollTop: 0,
-    addEventListener: sinon.spy(),
-    removeEventListener: sinon.spy(),
+    addEventListener,
+    removeEventListener,
   }, props)
 }
 

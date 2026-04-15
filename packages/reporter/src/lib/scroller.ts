@@ -44,7 +44,11 @@ export class Scroller {
   _stopListeningToScrolls () {
     if (!this._container) return
 
-    this._container.removeEventListener('scroll', this._onContainerScroll)
+    const { removeEventListener } = this._container
+
+    if (typeof removeEventListener !== 'function') return
+
+    removeEventListener.call(this._container, 'scroll', this._onContainerScroll)
   }
 
   /** Stable `scroll` handler so `removeEventListener` can match `addEventListener`. */
