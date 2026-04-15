@@ -15,7 +15,6 @@ _Released 04/21/2026 (PENDING)_
 
 - Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
 - Fixed an issue where `cy.readFile(..., 'base64')` assertions against large mismatched strings could appear to hang because assertion messages were not being truncated. Fixes [#25443](https://github.com/cypress-io/cypress/issues/25443).
-- Fixed an issue where [`cy.readFile()`](https://docs.cypress.io/api/commands/readfile) and path based [`cy.selectFile()`](https://docs.cypress.io/api/commands/selectfile) could hang or crash the browser when working with very large files because the full contents were sent in one privileged socket payload. File contents are now streamed to the browser in smaller chunks instead. Fixes [#20244](https://github.com/cypress-io/cypress/issues/20244) and [#29668](https://github.com/cypress-io/cypress/issues/29668).
 
 **Dependency Updates:**
 
