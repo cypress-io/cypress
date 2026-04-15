@@ -108,7 +108,7 @@ if (require.main !== module) {
 
   const nextVersion = args.nextVersion || (await getNextVersionForBinary()).nextVersion
 
-  if (args.npm && !isSentinelVersion && checkedInBinaryVersion !== nextVersion) {
+  if (args.npm && checkedInBinaryVersion !== nextVersion) {
     const cmd = `npm --no-git-tag-version version ${nextVersion}`
 
     console.log(`Running '${cmd}'...`)
