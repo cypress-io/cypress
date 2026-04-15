@@ -84,4 +84,22 @@ describe('event-manager', () => {
 
     cy.get('@resetDirtyState').should('have.been.calledOnce')
   })
+
+  it('forwards open:login:connect:modal from reporter to local bus', () => {
+    loadSpec({
+      filePath: 'hooks/basic.cy.js',
+      passCount: 2,
+    })
+
+    cy.window().then((win) => {
+      const eventManager = win.getEventManager()
+      const args = { utmMedium: 'test-medium', utmContent: 'test-content' }
+
+      cy.spy(eventManager.localBus, 'emit').as('localBusEmit')
+
+      eventManager.reporterBus.emit('open:login:connect:modal', args)
+
+      expect(eventManager.localBus.emit).to.have.been.calledWith('open:login:connect:modal', args)
+    })
+  })
 })

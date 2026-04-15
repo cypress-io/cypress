@@ -124,6 +124,17 @@ describe('driver/src/cypress/error_utils', () => {
           message: 'This is a simple error message',
           docsUrl: 'https://on.link.io',
         },
+        obj_with_trigger_action: {
+          message: 'Error with trigger action',
+          docsUrl: 'https://on.link.io',
+          triggerAction: 'loginModal',
+        },
+        parent_has_trigger: {
+          triggerAction: 'projectConnectModal',
+          child: {
+            message: 'Child error inherits trigger from parent',
+          },
+        },
         obj_with_args: {
           message: `This has args like '{{foo}}' and {{bar}}`,
           docsUrl: 'https://on.link.io',
@@ -193,6 +204,20 @@ describe('driver/src/cypress/error_utils', () => {
         expect(err.name).to.eq('CypressError')
         expect(err.message).to.include('This is a simple error message')
         expect(err.docsUrl).to.include('https://on.link.io')
+      })
+
+      it('includes triggerAction when present on the error message object', () => {
+        const err = $errUtils.errByPath('__test_errors.obj_with_trigger_action') as CypressError
+
+        expect(err.message).to.include('Error with trigger action')
+        expect(err.triggerAction).to.eq('loginModal')
+      })
+
+      it('inherits triggerAction from parent when not set on the message object', () => {
+        const err = $errUtils.errByPath('__test_errors.parent_has_trigger.child') as CypressError
+
+        expect(err.message).to.include('Child error inherits trigger from parent')
+        expect(err.triggerAction).to.eq('projectConnectModal')
       })
 
       it('uses args provided for the error', () => {

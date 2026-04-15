@@ -42,11 +42,17 @@ export class CyPromptLifecycleManager {
     ctx,
     record,
     key,
+    projectId: fallbackProjectSlug,
   }: {
     cloudDataSource: CloudDataSource
     ctx: DataContext
     record?: boolean
     key?: string
+    /**
+     * Resolved from ProjectBase config when cy-prompt initializes. Used when
+     * `ctx.project.getConfig()` is not available yet (no ProjectConfigManager).
+     */
+    projectId?: string | null
   }): void {
     // Register this instance in the data context
     ctx.update((data) => {
@@ -62,15 +68,25 @@ export class CyPromptLifecycleManager {
       },
     }
 
+    const resolveProjectSlug = async (): Promise<string | undefined> => {
+      try {
+        const config = await ctx.project.getConfig()
+
+        return config.projectId || undefined
+      } catch {
+        return fallbackProjectSlug || undefined
+      }
+    }
+
     const getProjectOptions = async () => {
-      const [user, config] = await Promise.all([
+      const [user, projectSlug] = await Promise.all([
         ctx.actions.auth.authApi.getUser(),
-        ctx.project.getConfig(),
+        resolveProjectSlug(),
       ])
 
       return {
         user,
-        projectSlug: config.projectId || undefined,
+        projectSlug,
         record,
         key,
         isOpenMode: ctx.isOpenMode,
@@ -88,6 +104,14 @@ export class CyPromptLifecycleManager {
       const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
       const cloudHeaders = await ctx.cloud.additionalHeaders()
 
+      let projectSlug: string | undefined
+
+      try {
+        projectSlug = (await ctx.project.getConfig()).projectId || undefined
+      } catch {
+        projectSlug = fallbackProjectSlug || undefined
+      }
+
       reportCyPromptError({
         cloudApi: {
           cloudUrl,
@@ -98,7 +122,7 @@ export class CyPromptLifecycleManager {
         },
         additionalHeaders: cloudHeaders,
         cyPromptHash: this.cyPromptHash,
-        projectSlug: (await ctx.project.getConfig()).projectId || undefined,
+        projectSlug,
         error,
         cyPromptMethod: 'initializeCyPromptManager',
         cyPromptMethodArgs: [],
@@ -128,6 +152,12 @@ export class CyPromptLifecycleManager {
     const cyPromptManager = await this.cyPromptManagerPromise
 
     return cyPromptManager
+  }
+
+  resetCyPrompt (): void {
+    if (this.cyPromptManager) {
+      this.cyPromptManager.reset()
+    }
   }
 
   private async createCyPromptManager ({

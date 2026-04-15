@@ -134,6 +134,23 @@ export const getPublicConfigKeys = () => {
   return publicConfigKeys
 }
 
+/**
+ * Keys allowed on Cypress Cloud recording payloads: public config options (same basis as
+ * config.resolved) plus flattened component-testing-only fields not listed as top-level
+ * `options[].name` entries (see mergeDefaults in project/utils).
+ */
+const cloudRecordingConfigExtraKeys = ['devServer', 'devServerConfig', 'indexHtmlFile'] as const
+
+let cloudRecordingConfigKeysCache: string[] | undefined
+
+export const getCloudRecordingConfigKeys = (): string[] => {
+  if (!cloudRecordingConfigKeysCache) {
+    cloudRecordingConfigKeysCache = [...publicConfigKeys, ...cloudRecordingConfigExtraKeys]
+  }
+
+  return cloudRecordingConfigKeysCache
+}
+
 export const matchesConfigKey = (key: string) => {
   if (_.has(defaultValues, key)) {
     return key

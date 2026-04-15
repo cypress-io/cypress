@@ -185,6 +185,7 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '@typescript-eslint/no-wrapper-object-types': 'off',
       '@typescript-eslint/no-non-null-asserted-optional-chain': 'off',
 
+      'mocha/no-exclusive-tests': 'error',
       'mocha/no-mocha-arrows': 'off',
       'mocha/no-setup-in-describe': 'off',
       'mocha/max-top-level-suites': 'off',

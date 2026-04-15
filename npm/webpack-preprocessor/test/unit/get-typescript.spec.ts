@@ -1,6 +1,6 @@
 import { describe, it, vi, expect } from 'vitest'
 import path from 'node:path'
-import { getTypescript } from '../../lib/get-typescript'
+import { getTypescript, getResolvedTypescriptVersion } from '../../lib/get-typescript'
 // NOTE: mock-require is a deprecated package that is no longer maintained, but it plays nicely with Vitest unlike proxyquire.
 // We are leveraging mock-require here until we are able to fully convert the package to ESM, where we can construct a proper mock from the module API.
 // @see https://github.com/vitest-dev/vitest/discussions/3134
@@ -40,6 +40,18 @@ describe('./lib/get-typescript', () => {
       expect(mockTypeScript.createProgram).toEqual(resolvedTypeScript.createProgram)
 
       mockRequire.stop(fullPathToMockUserTsconfig)
+    })
+  })
+
+  describe('.getResolvedTypescriptVersion', () => {
+    it('returns the resolved TypeScript semver when the default package loads', () => {
+      const version = getResolvedTypescriptVersion()
+
+      expect(version).toMatch(/^\d+\.\d+/)
+    })
+
+    it('returns null when typescript cannot be resolved', () => {
+      expect(getResolvedTypescriptVersion('nonexistent-typescript-module-xyz')).toBeNull()
     })
   })
 })

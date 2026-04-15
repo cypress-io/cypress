@@ -88,6 +88,25 @@ describe('config/src/index', () => {
     })
   })
 
+  describe('.getCloudRecordingConfigKeys', () => {
+    it('includes every public config key plus component recording extras', () => {
+      const cloudKeys = configUtil.getCloudRecordingConfigKeys()
+      const publicKeys = configUtil.getPublicConfigKeys()
+
+      for (const key of publicKeys) {
+        expect(cloudKeys).toContain(key)
+      }
+
+      expect(cloudKeys).toContain('devServer')
+      expect(cloudKeys).toContain('devServerConfig')
+      expect(cloudKeys).toContain('indexHtmlFile')
+    })
+
+    it('returns the same array instance on each call', () => {
+      expect(configUtil.getCloudRecordingConfigKeys()).toBe(configUtil.getCloudRecordingConfigKeys())
+    })
+  })
+
   describe('.matchesConfigKey', () => {
     it('returns normalized key when config key has a default value', () => {
       let normalizedKey = configUtil.matchesConfigKey('EXEC_TIMEOUT')
@@ -153,6 +172,26 @@ describe('config/src/index', () => {
 
       expect(warningFn).toHaveBeenCalledExactlyOnceWith('EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED', {
         name: 'experimentalSessionAndOrigin',
+        newName: undefined,
+        value: undefined,
+        testingType: 'e2e',
+        configFile: 'config.js',
+      })
+
+      expect(errorFn).toHaveBeenCalledTimes(0)
+    })
+
+    it('calls warning callback if config contains experimentalPromptCommand', () => {
+      const warningFn = vi.fn()
+      const errorFn = vi.fn()
+
+      configUtil.validateNoBreakingConfig({
+        experimentalPromptCommand: true,
+        configFile: 'config.js',
+      }, warningFn, errorFn, 'e2e')
+
+      expect(warningFn).toHaveBeenCalledExactlyOnceWith('EXPERIMENTAL_PROMPT_COMMAND_REMOVED', {
+        name: 'experimentalPromptCommand',
         newName: undefined,
         value: undefined,
         testingType: 'e2e',
@@ -246,6 +285,11 @@ describe('config/src/index', () => {
       })
 
       expect(configUtil.validateNeedToRestartOnChange({ injectDocumentDomain: true }, {})).toEqual({
+        server: true,
+        browser: false,
+      })
+
+      expect(configUtil.validateNeedToRestartOnChange({ env: { TEST_VAR: 'test' } }, {})).toEqual({
         server: true,
         browser: false,
       })
