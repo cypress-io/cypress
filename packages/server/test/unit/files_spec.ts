@@ -1,7 +1,9 @@
-import { readFile, writeFile } from '../../lib/files'
+import path from 'path'
+import { createReadFileStreamFromPath, readFile, writeFile } from '../../lib/files'
 import FixturesHelper from '@tooling/system-tests'
 import { setCtx, makeDataContext, clearCtx } from '../../lib/makeDataContext'
 import { getCtx } from '@packages/data-context'
+import { expect } from 'chai'
 let ctx
 
 describe('lib/files', () => {
@@ -82,6 +84,33 @@ describe('lib/files', () => {
           },
         ])
       })
+    })
+  })
+
+  context('#createReadFileStreamFromPath', () => {
+    it('should stream large files in multiple chunks', async function () {
+      const relativeFilePath = '.projects/stream_file.txt'
+      const largeContents = 'stream'.repeat(16 * 1024)
+
+      await writeFile(this.projectRoot, {
+        fileName: relativeFilePath,
+        contents: largeContents,
+      })
+
+      const filePath = path.resolve(this.projectRoot, relativeFilePath)
+      const { stream } = await createReadFileStreamFromPath({
+        filePath,
+        originalFilePath: relativeFilePath,
+      })
+      const chunks: Buffer[] = []
+
+      for await (const chunk of stream) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+      }
+
+      expect(chunks.length).to.be.greaterThan(1)
+      expect(Buffer.concat(chunks).toString('utf8')).to.equal(largeContents)
+      expect(filePath).to.equal(`${this.projectRoot}/${relativeFilePath}`)
     })
   })
 
