@@ -62,7 +62,7 @@ if [[ "$BRANCH" == "develop" ]] || \
 fi
 
 # ----- compute changed files --------------------------------------------------
-git fetch origin develop --depth=1 2>/dev/null || true
+git fetch origin develop 2>/dev/null || true
 MERGE_BASE=$(git merge-base HEAD origin/develop 2>/dev/null || echo "")
 
 if [[ -n "$MERGE_BASE" ]]; then

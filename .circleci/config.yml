@@ -169,6 +169,9 @@ jobs:
                 fi
           - run:
               name: Generate path-filtered pipeline parameters
+              environment:
+                PUBLISH_BINARY_BRANCH: << pipeline.parameters.publish-binary-branch >>
+                FORCE_PERSIST_ARTIFACTS: << pipeline.parameters.force-persist-artifacts >>
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json
