@@ -83,13 +83,17 @@ if [[ "$BRANCH" == "develop" ]] || \
 fi
 
 # ----- compute changed files --------------------------------------------------
-git fetch origin develop 2>/dev/null || true
-MERGE_BASE=$(git merge-base HEAD origin/develop 2>/dev/null || echo "")
+# Fetch develop from the upstream project repo using CIRCLE_PROJECT_USERNAME/REPONAME,
+# which CircleCI always sets to the canonical upstream (cypress-io/cypress), not the
+# contributor's fork. This ensures fork PRs compare against the real develop branch.
+UPSTREAM_URL="https://github.com/${CIRCLE_PROJECT_USERNAME:-cypress-io}/${CIRCLE_PROJECT_REPONAME:-cypress}.git"
+git fetch "$UPSTREAM_URL" develop 2>/dev/null || true
+MERGE_BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo "")
 
 if [[ -n "$MERGE_BASE" ]]; then
   CHANGED=$(git diff --name-only "$MERGE_BASE" HEAD)
 else
-  echo "Could not find merge base with origin/develop, falling back to HEAD~1" >&2
+  echo "Could not find merge base with upstream develop, falling back to HEAD~1" >&2
   CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
 fi
 
