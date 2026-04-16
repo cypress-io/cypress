@@ -9,11 +9,12 @@ const debug = Debug('cypress:util:crash_handling')
 /** Matches attempt `error` shape from `reporter.js` `normalizeTest` for Cypress Cloud. */
 export const fatalErrorToAttemptError = (error: Error) => {
   const codeFrame = (error as { codeFrame?: unknown }).codeFrame
+  const stackLines = error.stack ? stackUtils.stackWithoutMessage(error.stack) : undefined
 
   return {
     name: error.name,
-    message: error.message,
-    stack: error.stack ? stackUtils.stackWithoutMessage(error.stack) : undefined,
+    message: stripAnsi(error.message),
+    stack: stackLines !== undefined ? stripAnsi(stackLines) : undefined,
     ...(codeFrame !== undefined ? { codeFrame } : {}),
   }
 }
@@ -26,7 +27,7 @@ const patchTestForCrash = (
   attemptError: ReturnType<typeof fatalErrorToAttemptError>,
   fatal: Error,
 ): ReporterTest => {
-  const displayError = fatal.stack || stripAnsi(fatal.message)
+  const displayError = stripAnsi(fatal.stack || fatal.message)
   const attempts: ReporterTestAttempt[] = test.attempts?.length
     ? (() => {
         const prev = test.attempts.slice(0, -1)

@@ -65,6 +65,19 @@ describe('lib/util/graceful_crash_handling', () => {
       expect(serialized.message).to.eq('config blew up')
       expect(serialized.stack).to.eq(`    at foo (bar.js:1:1)`)
     })
+
+    it('strips ANSI from message and stack for Cloud / UI', () => {
+      const err = new Error('\u001b[33mconfigFile\u001b[39m threw')
+
+      err.stack = `Error: \u001b[33mconfigFile\u001b[39m threw\n    at \u001b[94mcypress.config.js\u001b[39m:1:1`
+
+      const serialized = fatalErrorToAttemptError(err)
+
+      expect(serialized.message).to.eq('configFile threw')
+      expect(serialized.stack).to.include('cypress.config.js')
+      expect(serialized.message).to.not.include('\u001b[')
+      expect(serialized.stack).to.not.include('\u001b[')
+    })
   })
 
   describe('patchRunResultsAfterCrash', () => {
@@ -89,6 +102,21 @@ describe('lib/util/graceful_crash_handling', () => {
       })
 
       expect(test.attempts[0].error.stack).to.include('cypress.config.js')
+    })
+
+    it('strips ANSI from displayError and attempt fields for Cypress errors', () => {
+      const fatal = new Error(
+        'Your \u001b[33mconfigFile\u001b[39m threw an error from: \u001b[94mcypress.config.js\u001b[39m\n\nWe stopped running your tests because your config file crashed.',
+      )
+
+      fatal.stack = `${fatal.message}\n    at x (y:1:1)`
+
+      const out = patchRunResultsAfterCrash(fatal, baseReporterResults(), { id: 'r1' })
+
+      expect(out.tests[0].displayError).to.not.include('\u001b[')
+      expect(out.tests[0].attempts[0].error?.message).to.not.include('\u001b[')
+      expect(out.tests[0].attempts[0].error?.message).to.include('configFile')
+      expect(out.tests[0].attempts[0].error?.message).to.include('cypress.config.js')
     })
 
     it('falls back to the last test when runnable id does not match any test', () => {
