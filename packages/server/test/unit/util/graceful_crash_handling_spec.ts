@@ -103,6 +103,15 @@ describe('lib/util/graceful_crash_handling', () => {
       expect(out.tests[0].attempts[0].error?.stack).to.not.include('\u001b[')
     })
 
+    it('does not throw and does not patch tests when mostRecentRunnable is undefined', () => {
+      const fatal = new Error('boom')
+      const results = baseReporterResults()
+      const out = patchRunResultsAfterCrash(fatal, results, undefined)
+
+      expect(out.tests[0].state).to.eq('skipped')
+      expect(out.tests[0].attempts[0].error).to.eq(null)
+    })
+
     it('does not patch any test when runnable id matches no test (stats still reflect fatal)', () => {
       const fatal = new Error('config process died')
       const results = baseReporterResults()
