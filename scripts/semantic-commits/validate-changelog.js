@@ -147,7 +147,7 @@ async function validateChangelog ({ changedFiles, nextVersion, commits, changelo
 
   commits.forEach(({ commitMessage }) => {
     // Revert messages look like: revert: "fix: something (#33512)" (#33611)
-    const match = commitMessage && commitMessage.match(/revert.*\(#(\d+)\)"/)
+    const match = commitMessage && commitMessage.match(/revert.*\(#(\d+)\)"/i)
 
     if (match) {
       revertedPRNumbers.add(String(match[1]))
