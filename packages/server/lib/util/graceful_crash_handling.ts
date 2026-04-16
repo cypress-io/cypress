@@ -28,7 +28,6 @@ export const patchRunResultsAfterCrash = (
   const wallClockDuration = reporterResults?.stats?.wallClockStartedAt ?
     endTime - Date.parse(reporterResults.stats.wallClockStartedAt) : 0
   const endTimeStamp = new Date(endTime).toJSON()
-  const targetTestId = mostRecentRunnable?.id
 
   // in crash situations, the most recent report will not have the triggering test
   // so the results are manually patched, which produces the expected exit=1 and
