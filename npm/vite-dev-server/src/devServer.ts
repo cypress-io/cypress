@@ -50,7 +50,7 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   const supportPath = getSupportFileRelativePath(config.cypressConfig)
 
   if (supportPath) {
-    const baseUrl = `http://${host ?? '127.0.0.1'}:${port}`
+    const baseUrl = `http://${typeof host === 'string' ? host : '127.0.0.1'}:${port}`
     const supportFileUrl = new URL(supportPath, `${baseUrl}/`).href
 
     debug('Waiting until support file is servable', supportFileUrl)
