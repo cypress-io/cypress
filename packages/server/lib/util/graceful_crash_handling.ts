@@ -19,31 +19,6 @@ export const fatalErrorToAttemptError = (error: Error) => {
   }
 }
 
-type ReporterTest = ReporterResults['tests'][number]
-type ReporterTestAttempt = ReporterTest['attempts'][number]
-
-const patchTestForCrash = (
-  test: ReporterTest,
-  attemptError: ReturnType<typeof fatalErrorToAttemptError>,
-  fatal: Error,
-): ReporterTest => {
-  const displayError = stripAnsi(fatal.stack || fatal.message)
-  const prev = test.attempts.slice(0, -1)
-  const last = test.attempts[test.attempts.length - 1]
-  const failedAttempt: ReporterTestAttempt = {
-    ...last,
-    state: 'failed',
-    error: attemptError,
-  }
-
-  return {
-    ...test,
-    state: 'failed',
-    displayError,
-    attempts: [...prev, failedAttempt],
-  }
-}
-
 export const patchRunResultsAfterCrash = (
   error: Error,
   reporterResults: ReporterResults,
@@ -53,7 +28,6 @@ export const patchRunResultsAfterCrash = (
   const wallClockDuration = reporterResults?.stats?.wallClockStartedAt ?
     endTime - Date.parse(reporterResults.stats.wallClockStartedAt) : 0
   const endTimeStamp = new Date(endTime).toJSON()
-  const attemptError = fatalErrorToAttemptError(error)
   const targetTestId = mostRecentRunnable?.id
 
   // in crash situations, the most recent report will not have the triggering test
@@ -78,7 +52,20 @@ export const patchRunResultsAfterCrash = (
     },
     tests: (reporterResults?.tests || []).map((test) => {
       if (targetTestId && test.testId === targetTestId) {
-        return patchTestForCrash(test, attemptError, error)
+        const prevAttempts = test.attempts.slice(0, -1)
+        const lastAttempt = test.attempts[test.attempts.length - 1]
+        const attemptError = fatalErrorToAttemptError(error)
+
+        return {
+          ...test,
+          state: 'failed',
+          displayError: stripAnsi(error.stack || error.message),
+          attempts: [...prevAttempts, {
+            ...lastAttempt,
+            state: 'failed',
+            error: attemptError,
+          }],
+        }
       }
 
       return test
