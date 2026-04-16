@@ -321,6 +321,27 @@ describe('src/cy/commands/misc', () => {
 
         cy.wrap(rejectedPromise)
       })
+
+      // When a rejected promise error already has a custom `onFail` handler
+      // (e.g. set by throwErrByPath in cy.prompt's throwPromptError),
+      // cy.wrap's catch must not overwrite it — the log handler is a fallback only.
+      it('preserves a custom onFail already attached to the rejected error', function (done) {
+        const customOnFail = cy.stub()
+
+        const err = new Error('error with custom onFail')
+
+        err.onFail = customOnFail
+
+        const rejectedPromise = Promise.reject(err)
+
+        cy.on('fail', () => {
+          expect(customOnFail).to.have.been.calledOnce
+          expect(customOnFail).to.have.been.calledWith(err)
+          done()
+        })
+
+        cy.wrap(rejectedPromise)
+      })
     })
 
     describe('circular references', () => {

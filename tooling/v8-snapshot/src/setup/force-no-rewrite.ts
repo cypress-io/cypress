@@ -51,5 +51,4 @@ export default [
   '*/node_modules/ci-info/index.js',
   '*/node_modules/@babel/traverse/lib/index.js',
   '*/node_modules/@babel/types/lib/definitions/index.js',
-  '*/node_modules/axios/lib/adapters/http.js',
 ]
