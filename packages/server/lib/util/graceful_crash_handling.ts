@@ -28,52 +28,20 @@ const patchTestForCrash = (
   fatal: Error,
 ): ReporterTest => {
   const displayError = stripAnsi(fatal.stack || fatal.message)
-  const attempts: ReporterTestAttempt[] = test.attempts?.length
-    ? (() => {
-        const prev = test.attempts.slice(0, -1)
-        const last = test.attempts[test.attempts.length - 1]
-        const failedAttempt: ReporterTestAttempt = {
-          ...last,
-          state: 'failed',
-          error: attemptError,
-        }
-
-        return [...prev, failedAttempt]
-      })()
-    : [{
-        state: 'failed',
-        error: attemptError,
-        timings: null,
-        failedFromHookId: null,
-        wallClockStartedAt: new Date(),
-        wallClockDuration: 0,
-        videoTimestamp: null,
-      }]
+  const prev = test.attempts.slice(0, -1)
+  const last = test.attempts[test.attempts.length - 1]
+  const failedAttempt: ReporterTestAttempt = {
+    ...last,
+    state: 'failed',
+    error: attemptError,
+  }
 
   return {
     ...test,
     state: 'failed',
     displayError,
-    attempts,
+    attempts: [...prev, failedAttempt],
   }
-}
-
-const resolveCrashTargetTestId = (
-  tests: ReporterResults['tests'],
-  mostRecentRunnable: { id?: string } | undefined,
-): string | undefined => {
-  if (!tests.length) {
-    return undefined
-  }
-
-  const fromRunnable = mostRecentRunnable?.id
-  const matched = fromRunnable && tests.some((t) => t.testId === fromRunnable)
-
-  if (matched && fromRunnable) {
-    return fromRunnable
-  }
-
-  return tests[tests.length - 1].testId
 }
 
 export const patchRunResultsAfterCrash = (
@@ -86,7 +54,7 @@ export const patchRunResultsAfterCrash = (
     endTime - Date.parse(reporterResults.stats.wallClockStartedAt) : 0
   const endTimeStamp = new Date(endTime).toJSON()
   const attemptError = fatalErrorToAttemptError(error)
-  const targetTestId = resolveCrashTargetTestId(reporterResults?.tests || [], mostRecentRunnable)
+  const targetTestId = mostRecentRunnable?.id
 
   // in crash situations, the most recent report will not have the triggering test
   // so the results are manually patched, which produces the expected exit=1 and
@@ -103,13 +71,13 @@ export const patchRunResultsAfterCrash = (
     },
     reporterStats: {
       ...reporterResults?.reporterStats,
-      tests: (reporterResults?.reporterStats?.tests ?? 0) + 1, // crashed test does not increment this value
+      tests: (reporterResults?.reporterStats?.tests ?? 0) + 1,
       end: reporterResults?.reporterStats?.end || endTimeStamp,
       duration: wallClockDuration,
       failures: (reporterResults?.reporterStats?.failures ?? 0) + 1,
     },
     tests: (reporterResults?.tests || []).map((test) => {
-      if (targetTestId !== undefined && test.testId === targetTestId) {
+      if (targetTestId && test.testId === targetTestId) {
         return patchTestForCrash(test, attemptError, error)
       }
 
