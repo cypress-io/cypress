@@ -51,7 +51,7 @@ export const patchRunResultsAfterCrash = (
       failures: (reporterResults?.reporterStats?.failures ?? 0) + 1,
     },
     tests: (reporterResults?.tests || []).map((test) => {
-      if (targetTestId && test.testId === targetTestId) {
+      if (test.testId === mostRecentRunnable.id) {
         const prevAttempts = test.attempts.slice(0, -1)
         const lastAttempt = test.attempts[test.attempts.length - 1]
         const attemptError = fatalErrorToAttemptError(error)
