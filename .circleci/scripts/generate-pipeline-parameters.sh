@@ -158,6 +158,7 @@ while IFS= read -r file; do
       ;;
     packages/https-proxy/*)
       p_run_server_tests=true
+      p_run_system_tests=true
       ;;
     packages/app/*)
       p_run_app_ui_tests=true
