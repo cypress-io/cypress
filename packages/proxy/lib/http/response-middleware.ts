@@ -1020,7 +1020,9 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 }
 
 const CompressBody: ResponseMiddleware = async function () {
-  if (this.protocolManager && this.req.browserPreRequest?.requestId) {
+  const isPrivilegedFileRead = (this.req.proxiedUrl ?? '').includes('/privileged-commands/read-file')
+
+  if (this.protocolManager && this.req.browserPreRequest?.requestId && !isPrivilegedFileRead) {
     const preRequest = this.req.browserPreRequest
     const requestId = getOriginalRequestId(preRequest.requestId)
 

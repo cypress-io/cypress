@@ -2531,6 +2531,35 @@ describe('http/response-middleware', function () {
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
+    it('does not call responseStreamReceived on protocolManager for privileged file read requests', async function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'gzip' }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+          proxiedUrl: 'http://localhost:3000/__cypress/privileged-commands/read-file',
+          browserPreRequest: {
+            requestId: '123',
+          },
+        },
+        res: {
+          on: () => {},
+          off: () => {},
+        },
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: true,
+        incomingResStream: stream,
+      })
+
+      await testMiddleware([CompressBody], ctx)
+      expect(responseStreamReceivedStub).not.toHaveBeenCalled()
+    })
+
     it('calls responseStreamReceived with isAlreadyBrotliDecompressed when isBrotliDecompressed is true', async function () {
       const stream = Readable.from(['foo'])
       const headers = { 'content-encoding': 'br' }
