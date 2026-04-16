@@ -23,8 +23,17 @@ const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 const crossOriginScriptRe = /^script error/i
 const truncator = '\u2026'
 const NO_DIFFERENCE = -1
+const STRING_INSPECT_OVERHEAD = 2
 
 let allErrorMessages = $errorMessages
+
+const getStringDiffWindowSize = () => {
+  const { truncateThreshold: threshold } = chai.config
+
+  if (threshold <= 0) return threshold
+
+  return Math.max(1, threshold - STRING_INSPECT_OVERHEAD)
+}
 
 /**
  * Returns the index of the first character where two strings differ, or
@@ -43,16 +52,16 @@ const getFirstDifferenceIndex = (a: string, b: string) => {
  * Returns a truncated view of `value` centered around `differenceIndex`.
  */
 const getDiffWindow = (value: string, differenceIndex: number) => {
-  const { truncateThreshold: threshold } = chai.config
+  const windowSize = getStringDiffWindowSize()
 
-  if (threshold <= 0 || value.length <= threshold) return value
+  if (windowSize <= 0 || value.length <= windowSize) return value
 
-  const halfWindow = Math.floor(threshold / 2)
+  const halfWindow = Math.floor(windowSize / 2)
   const start = Math.max(
     0,
-    Math.min(differenceIndex - halfWindow, value.length - threshold),
+    Math.min(differenceIndex - halfWindow, value.length - windowSize),
   )
-  const end = start + threshold
+  const end = start + windowSize
 
   const prefix = start > 0 ? truncator : ''
   const suffix = end < value.length ? truncator : ''

@@ -117,8 +117,8 @@ describe('err_utils', () => {
 
       expect(wrapped).to.deep.eq(
         makeExpected(
-          '\'…aaaaaaaaaaaaaaaaaaaXbbbbbbbbbbbbbbbbbb…\'',
-          '\'…aaaaaaaaaaaaaaaaaaaYbbbbbbbbbbbbbbbbbb…\'',
+          '\'…aaaaaaaaaaaaaaaaaaXbbbbbbbbbbbbbbbbb…\'',
+          '\'…aaaaaaaaaaaaaaaaaaYbbbbbbbbbbbbbbbbb…\'',
         ),
       )
     })
@@ -130,8 +130,8 @@ describe('err_utils', () => {
 
       expect(wrapped).to.deep.eq(
         makeExpected(
-          '\'Xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…\'',
-          '\'Yaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…\'',
+          '\'Xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…\'',
+          '\'Yaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…\'',
         ),
       )
     })
@@ -143,10 +143,58 @@ describe('err_utils', () => {
 
       expect(wrapped).to.deep.eq(
         makeExpected(
-          '\'…aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaX\'',
-          '\'…aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaY\'',
+          '\'…aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaX\'',
+          '\'…aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaY\'',
         ),
       )
+    })
+
+    it('should keep the differing character when it is near the right edge after inspect truncation', () => {
+      const { truncateThreshold: threshold } = chai.config
+      const { inspect: originalInspect } = chai.util
+
+      const truncator = '\u2026'
+
+      const truncate = (string: string, length: number, tail: string) => {
+        if (string.length > length && string.length > tail.length) {
+          return `${string.slice(0, length - tail.length)}${tail}`
+        }
+
+        return string
+      }
+
+      chai.util.inspect = (value: unknown) => {
+        if (typeof value !== 'string') {
+          return originalInspect(value)
+        }
+
+        const simple = JSON.stringify(value)
+        .replace(/^"|"$/g, '')
+        .replace(/'/g, '\\\'')
+        .replace(/\\"/g, '"')
+
+        const truncated = threshold
+          ? truncate(simple, threshold - 2, truncator)
+          : simple
+
+        return `'${truncated}'`
+      }
+
+      try {
+        const samePrefix = 'a'.repeat(threshold + 10)
+        const actual = `${samePrefix}X`
+        const expected = `${samePrefix}Y`
+        const wrapped = makeWrapped(actual, expected)
+
+        expect(wrapped).to.deep.eq(
+          makeExpected(
+            '\'…aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaX\'',
+            '\'…aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaY\'',
+          ),
+        )
+      } finally {
+        chai.util.inspect = originalInspect
+      }
     })
   })
 })
