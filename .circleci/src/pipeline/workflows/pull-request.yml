@@ -1,9 +1,6 @@
 # The workflow runs for:
 # External PR after approval (approved contributor PR that's not a main branch)
 # Internal PR for any branch that does is not develop or release/ related
-#
-# TEMPORARY: Reduced to system-tests-chrome (x10) + run-app-component-tests-chrome (x10) + deps for CI testing.
-# Restore full job list from git history when done.
 when:
   and:
     - not:
@@ -35,11 +32,63 @@ jobs:
       filters:
         branches:
           only: /^pull\/[0-9]+/
+  - check-ts:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+  - health-check:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+  - lint:
+      name: linux-lint
+      requires:
+        - internal-pr-build
+        - external-pr-build
+  - lint-types:
+      requires:
+        - internal-pr-build
+        - external-pr-build
   - approve-contributor-pr:
       type: approval
       filters:
         branches:
           only: /^pull\/[0-9]+/
+
+  # The following jobs are only run for contributor PRs once they are approved
+  # unit, integration and e2e tests
+  - cli-visual-tests:
+      context: test-runner:percy
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - unit-tests:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - verify-release-readiness:
+      context: [test-runner:npm-release, org-npm-credentials]
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - server-unit-tests:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - server-integration-tests:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - server-performance-tests:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
   - system-tests-node-modules-install:
       context: test-runner:performance-tracking
       requires:
@@ -48,9 +97,126 @@ jobs:
         - approve-contributor-pr
   - system-tests-chrome:
       context: test-runner:performance-tracking
-      matrix:
-        parameters:
-          run-index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+      requires:
+        - system-tests-node-modules-install
+  - system-tests-electron:
+      context: test-runner:performance-tracking
+      requires:
+        - system-tests-node-modules-install
+  - system-tests-firefox:
+      context: test-runner:performance-tracking
+      requires:
+        - system-tests-node-modules-install
+  - system-tests-webkit:
+      context: test-runner:performance-tracking
+      requires:
+        - system-tests-node-modules-install
+  - system-tests-non-root:
+      context: test-runner:performance-tracking
+      executor: non-root-docker-user
+      requires:
+        - system-tests-node-modules-install
+  - driver-integration-tests-chrome:
+      context: test-runner:cypress-record-key
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - driver-integration-tests-chrome-inject-document-domain:
+      context: test-runner:cypress-record-key
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - driver-integration-tests-chrome-beta:
+      context: test-runner:cypress-record-key
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - driver-integration-tests-chrome-beta-inject-document-domain:
+      context: test-runner:cypress-record-key
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - driver-integration-tests-firefox:
+      context: test-runner:cypress-record-key
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - driver-integration-tests-electron:
+      context: test-runner:cypress-record-key
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - driver-integration-tests-webkit:
+      context: test-runner:cypress-record-key
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - driver-integration-memory-tests:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - run-frontend-shared-component-tests-chrome:
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      percy: true
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - run-launchpad-integration-tests-chrome:
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      percy: true
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - run-launchpad-component-tests-chrome:
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      percy: true
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - run-app-integration-tests-chrome:
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      percy: true
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - run-webpack-dev-server-integration-tests:
+      context: [ test-runner:cypress-record-key, test-runner:percy ]
+      requires:
+        - system-tests-node-modules-install
+  - run-vite-dev-server-integration-tests:
+      context: [ test-runner:cypress-record-key, test-runner:percy ]
       requires:
         - system-tests-node-modules-install
   - run-app-component-tests-chrome:
@@ -61,10 +227,201 @@ jobs:
           test-runner:percy
         ]
       percy: true
-      matrix:
-        parameters:
-          run-index: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
+  - run-reporter-component-tests-chrome:
+      context: [ test-runner:cypress-record-key, test-runner:percy ]
+      percy: true
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - reporter-integration-tests:
+      context: [ test-runner:cypress-record-key, test-runner:percy ]
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-webpack-dev-server:
+      requires:
+        - system-tests-node-modules-install
+  - npm-vite-dev-server:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-vite-plugin-cypress-esm:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-webpack-preprocessor:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-webpack-batteries-included-preprocessor:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-vue:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-puppeteer-unit-tests:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-puppeteer-cypress-tests:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-react:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-angular:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-angular-zoneless:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-mount-utils:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-grep:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-eslint-plugin-dev:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - npm-cypress-schematic:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - v8-integration-tests:
+      requires:
+        - system-tests-node-modules-install
+
+  - create-and-trigger-packaging-artifacts:
+      context:
+        - test-runner:upload
+        - test-runner:build-binary
+        - publish-binary
+      requires:
+        - node_modules_install
+        - internal-pr-build
+      filters:
+        branches:
+          ignore: /^pull\/[0-9]+/
+  - wait-for-binary-publish:
+      type: approval
+      requires:
+        - create-and-trigger-packaging-artifacts
+  - get-published-artifacts:
+      context:
+        - publish-binary
+        - test-runner:commit-status-checks
+      requires:
+        - wait-for-binary-publish
+  - test-kitchensink:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
+  - test-npm-module-on-minimum-node-version:
+      context: publish-binary
+      requires:
+        - get-published-artifacts
+  - test-types-cypress-and-jest:
+      context: publish-binary
+      requires:
+        - get-published-artifacts
+  - test-full-typescript-project:
+      context: publish-binary
+      requires:
+        - get-published-artifacts
+  - test-binary-against-kitchensink:
+      context: publish-binary
+      requires:
+        - get-published-artifacts
+  - test-binary-as-specific-user:
+      name: "test binary as a non-root user"
+      executor: non-root-docker-user
+      context: publish-binary
+      requires:
+        - get-published-artifacts
+  - test-binary-as-specific-user:
+      name: "test binary as a root user"
+      context: publish-binary
+      requires:
+        - get-published-artifacts
+  - binary-system-tests:
+      context: publish-binary
+      requires:
+        - get-published-artifacts
+        - system-tests-node-modules-install
+  - yarn-pnp-preprocessor-system-test:
+      context: publish-binary
+      requires:
+        - get-published-artifacts
+        - system-tests-node-modules-install
+  - svelte-webpack-system-test:
+      context: publish-binary
+      requires:
+        - get-published-artifacts
+        - system-tests-node-modules-install
+
+  # Finalization jobs
+  - percy-finalize:
+      context: test-runner:percy
+      required_env_var: PERCY_TOKEN
+      requires:
+        - cli-visual-tests
+        - reporter-integration-tests
+        - run-app-component-tests-chrome
+        - run-app-integration-tests-chrome
+        - run-frontend-shared-component-tests-chrome
+        - run-launchpad-component-tests-chrome
+        - run-launchpad-integration-tests-chrome
+        - run-reporter-component-tests-chrome
+        - run-webpack-dev-server-integration-tests
+        - run-vite-dev-server-integration-tests
+  # Cypress run must be completed to fetch Accessibility report
+  - verify-accessibility-results:
+      context: test-runner:cypress-record-key
+      requires:
+        - reporter-integration-tests
+        - run-app-component-tests-chrome
+        - run-app-integration-tests-chrome
+        - run-frontend-shared-component-tests-chrome
+        - run-launchpad-component-tests-chrome
+        - run-launchpad-integration-tests-chrome
+        - run-reporter-component-tests-chrome
+        - run-webpack-dev-server-integration-tests
+        - run-vite-dev-server-integration-tests
+        - driver-integration-tests-firefox
+        - driver-integration-tests-chrome
+        - driver-integration-tests-chrome-inject-document-domain
+        - driver-integration-tests-chrome-beta-inject-document-domain
+        - driver-integration-tests-electron
+        - driver-integration-tests-webkit
+        - driver-integration-memory-tests
