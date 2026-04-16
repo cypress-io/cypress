@@ -2,6 +2,7 @@
  * @vitest-environment jsdom
  */
 import { vi, describe, it, expect, beforeEach } from 'vitest'
+import chai from 'chai'
 
 // source_map_utils must be included in order for vite to mock it, even
 // if it isn't referenced.
@@ -63,5 +64,89 @@ describe('err_utils', () => {
         })
       })
     }
+  })
+
+  describe('wrapErr', () => {
+    const { truncateThreshold: threshold } = chai.config
+    const baseErr = {
+      message: 'expected values to be equal',
+      name: 'AssertionError',
+      showDiff: true,
+    }
+
+    const makeWrapped = (actual: unknown, expected: unknown) => {
+      return errUtils.wrapErr({ ...baseErr, actual, expected })
+    }
+
+    const makeExpected = (actual: unknown, expected: unknown) => {
+      return { ...baseErr, actual, expected }
+    }
+
+    it('should return non-string values unchanged', () => {
+      const wrapped = makeWrapped({ a: 1 }, { a: 2 })
+
+      expect(wrapped).to.deep.eq(
+        makeExpected('{ a: 1 }', '{ a: 2 }'),
+      )
+    })
+
+    it('should return identical strings unchanged', () => {
+      const value = 'identical'
+      const wrapped = makeWrapped(value, value)
+
+      expect(wrapped).to.deep.eq(
+        makeExpected('\'identical\'', '\'identical\''),
+      )
+    })
+
+    it('should return short strings unchanged', () => {
+      const actual = 'short-X'
+      const expected = 'short-Y'
+      const wrapped = makeWrapped(actual, expected)
+
+      expect(wrapped).to.deep.eq(
+        makeExpected('\'short-X\'', '\'short-Y\''),
+      )
+    })
+
+    it('should truncate long strings around the diff with both markers', () => {
+      const samePrefix = 'a'.repeat(threshold + 10)
+      const actual = `${samePrefix}X${'b'.repeat(50)}`
+      const expected = `${samePrefix}Y${'b'.repeat(50)}`
+      const wrapped = makeWrapped(actual, expected)
+
+      expect(wrapped).to.deep.eq(
+        makeExpected(
+          '\'…aaaaaaaaaaaaaaaaaaaXbbbbbbbbbbbbbbbbbb…\'',
+          '\'…aaaaaaaaaaaaaaaaaaaYbbbbbbbbbbbbbbbbbb…\'',
+        ),
+      )
+    })
+
+    it('should omit leading marker when difference is near the start', () => {
+      const actual = `X${'a'.repeat(threshold + 10)}`
+      const expected = `Y${'a'.repeat(threshold + 10)}`
+      const wrapped = makeWrapped(actual, expected)
+
+      expect(wrapped).to.deep.eq(
+        makeExpected(
+          '\'Xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…\'',
+          '\'Yaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…\'',
+        ),
+      )
+    })
+
+    it('should omit trailing marker when difference is near the end', () => {
+      const actual = `${'a'.repeat(threshold + 10)}X`
+      const expected = `${'a'.repeat(threshold + 10)}Y`
+      const wrapped = makeWrapped(actual, expected)
+
+      expect(wrapped).to.deep.eq(
+        makeExpected(
+          '\'…aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaX\'',
+          '\'…aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaY\'',
+        ),
+      )
+    })
   })
 })

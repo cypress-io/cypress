@@ -21,8 +21,71 @@ const ERROR_PROPS = ['message', 'type', 'name', 'stack', 'parsedStack', 'fileNam
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 const crossOriginScriptRe = /^script error/i
+const truncator = '\u2026'
+const NO_DIFFERENCE = -1
 
 let allErrorMessages = $errorMessages
+
+/**
+ * Returns the index of the first character where two strings differ, or
+ * `NO_DIFFERENCE` if identical.
+ */
+const getFirstDifferenceIndex = (a: string, b: string) => {
+  const len = Math.min(a.length, b.length)
+  let i = 0
+
+  while (i < len && a[i] === b[i]) i++
+
+  return i === a.length && i === b.length ? NO_DIFFERENCE : i
+}
+
+/**
+ * Returns a truncated view of `value` centered around `differenceIndex`.
+ */
+const getDiffWindow = (value: string, differenceIndex: number) => {
+  const { truncateThreshold: threshold } = chai.config
+
+  if (threshold <= 0 || value.length <= threshold) return value
+
+  const halfWindow = Math.floor(threshold / 2)
+  const start = Math.max(
+    0,
+    Math.min(differenceIndex - halfWindow, value.length - threshold),
+  )
+  const end = start + threshold
+
+  const prefix = start > 0 ? truncator : ''
+  const suffix = end < value.length ? truncator : ''
+
+  const visibleStart = start + (prefix ? 1 : 0)
+  const visibleEnd = end - (suffix ? 1 : 0)
+
+  return `${prefix}${value.slice(visibleStart, visibleEnd)}${suffix}`
+}
+
+/**
+ * Returns `actual` and `expected` truncated around their first difference, or
+ * unchanged if either is not a string.
+ */
+const getDiffFriendlyStringValues = (
+  actual: unknown,
+  expected: unknown,
+) => {
+  if (typeof actual !== 'string' || typeof expected !== 'string') {
+    return { actual, expected }
+  }
+
+  const differenceIndex = getFirstDifferenceIndex(actual, expected)
+
+  if (differenceIndex === NO_DIFFERENCE) {
+    return { actual, expected }
+  }
+
+  return {
+    actual: getDiffWindow(actual, differenceIndex),
+    expected: getDiffWindow(expected, differenceIndex),
+  }
+}
 
 if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
@@ -46,12 +109,14 @@ const prepareErrorForSerialization = (err) => {
   }
 
   if (err.showDiff === true) {
+    const diffFriendlyValues = getDiffFriendlyStringValues(err.actual, err.expected)
+
     if (err.actual) {
-      err.actual = chai.util.inspect(err.actual)
+      err.actual = chai.util.inspect(diffFriendlyValues.actual)
     }
 
     if (err.expected) {
-      err.expected = chai.util.inspect(err.expected)
+      err.expected = chai.util.inspect(diffFriendlyValues.expected)
     }
   } else {
     delete err.actual
