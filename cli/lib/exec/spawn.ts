@@ -141,18 +141,15 @@ function createSpawnFunction (
         return function (code: any, signal: NodeJS.Signals): void {
           debug('child event fired %o', { event, code, signal })
 
-          if (code === null) {
-            const errorObject = errors.childProcessKilled(event, signal)
-
-            errorObject.platform = platform
-            const err = getErrorSync(errorObject, platform)
-
-            reject(err)
-
-            return
+          if (signal) {
+            if (signal === 'SIGINT') {
+              resolve(0)
+            } else {
+              resolve(128 + os.constants.signals[signal])
+            }
           }
 
-          resolve(code)
+          resolve(code ?? 1)
         }
       }
 
