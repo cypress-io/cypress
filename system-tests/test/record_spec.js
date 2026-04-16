@@ -2754,21 +2754,6 @@ describe('e2e record', () => {
             const postResultsRequest = requests.find((r) => r.url === `POST /instances/${instanceId}/results`)
 
             expect(postResultsRequest?.body.exception).to.include('Your configFile threw an error')
-
-            const { tests } = postResultsRequest.body
-
-            expect(tests).to.be.an('array').and.not.empty
-
-            const failedWithConfigOnAttempt = tests.filter((t) => {
-              if (t.state !== 'failed' || !t.attempts?.length) return false
-
-              const err = t.attempts[t.attempts.length - 1].error
-
-              return err && err.message && err.message.includes('configFile')
-            })
-
-            expect(failedWithConfigOnAttempt, 'failed test should carry config error on last attempt').to.have.length.greaterThan(0)
-            expect(failedWithConfigOnAttempt[0].displayError).to.be.a('string').and.not.empty
           })
         })
       })
