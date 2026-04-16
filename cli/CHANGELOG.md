@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.14.1
+
+_Released 12/31/2026_ (PENDING)
+
+**Bugfixes:**
+
+- Fixed an issue where `cy.readFile(..., 'base64')` assertions against large mismatched strings could appear to hang because assertion messages were not being truncated. Fixes [#25443](https://github.com/cypress-io/cypress/issues/25443).
+
 ## 15.14.0
 
 _Released 04/16/2026_
