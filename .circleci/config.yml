@@ -19,7 +19,7 @@ parameters:
   force-persist-artifacts:
     type: boolean
     default: false
-  run-all-tests:
+  run-all-jobs:
     type: boolean
     default: false
     # Set to true when triggering the pipeline manually to bypass path filtering
@@ -177,7 +177,7 @@ jobs:
               environment:
                 PUBLISH_BINARY_BRANCH: << pipeline.parameters.publish-binary-branch >>
                 FORCE_PERSIST_ARTIFACTS: << pipeline.parameters.force-persist-artifacts >>
-                RUN_ALL_TESTS: << pipeline.parameters.run-all-tests >>
+                RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json

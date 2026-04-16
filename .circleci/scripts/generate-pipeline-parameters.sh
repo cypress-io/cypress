@@ -83,10 +83,10 @@ if [[ "$BRANCH" == "develop" ]] || \
 fi
 
 # ----- manual trigger override -----------------------------------------------
-# When run-all-tests=true is set in the "Trigger Pipeline" UI, skip path filtering.
-RUN_ALL_RAW="${RUN_ALL_TESTS:-false}"
+# When run-all-jobs=true is set in the "Trigger Pipeline" UI, skip path filtering.
+RUN_ALL_RAW="${RUN_ALL_JOBS:-false}"
 if [[ "$RUN_ALL_RAW" == "true" || "$RUN_ALL_RAW" == "1" ]]; then
-  echo "run-all-tests=true — running all tests" >&2
+  echo "run-all-jobs=true — running all jobs" >&2
   emit_all_true
   exit 0
 fi
