@@ -4,10 +4,14 @@ module.exports = {
   'e2e': {
     'supportFile': false,
     setupNodeEvents (on, config) {
-      on('before:spec', () => {
-        setTimeout(() => {
-          throw new Error('Async error from plugins file')
-        }, 0)
+      on('task', {
+        log (message) {
+          setTimeout(() => {
+            throw new Error('Async error from plugins file')
+          }, 0)
+
+          return null
+        },
       })
 
       return config
