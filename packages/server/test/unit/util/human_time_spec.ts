@@ -1,10 +1,10 @@
-require('../../spec_helper')
+import '../../spec_helper'
 
-const humanInterval = require('human-interval')
-const humanTime = require(`../../../lib/util/human_time`)
+import humanInterval from 'human-interval'
+import * as humanTime from '../../../lib/util/human_time'
 
 describe('lib/util/human_time', () => {
-  context('.long', () => {
+  describe('.long', () => {
     it('outputs minutes + seconds', () => {
       expect(humanTime.long(humanInterval('2 minutes and 3 seconds'))).to.eq('2 minutes, 3 seconds')
       expect(humanTime.long(humanInterval('65 minutes'))).to.eq('65 minutes, 0 seconds')
