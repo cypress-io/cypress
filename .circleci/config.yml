@@ -157,8 +157,8 @@ jobs:
               name: Check for primary workflow definition
               command: |
                 if [ ! -f .circleci/packed/pipeline.yml ]; then
-                    echo "ℹ️ Primary workflow definition not found — pack-workflows was likely halted (draft PR or no relevant changes). Halting gracefully."
-                    circleci-agent step halt
+                    echo "❌ Primary workflow definition not found in .circleci/packed/pipeline.yml!"
+                    exit 1
                 fi
           - continuation/continue:
               configuration_path: .circleci/packed/pipeline.yml
