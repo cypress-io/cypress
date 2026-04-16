@@ -45,7 +45,7 @@ export const patchRunResultsAfterCrash = (
     },
     reporterStats: {
       ...reporterResults?.reporterStats,
-      tests: (reporterResults?.reporterStats?.tests ?? 0) + 1,
+      tests: (reporterResults?.reporterStats?.tests ?? 0) + 1,  // crashed test does not increment this value
       end: reporterResults?.reporterStats?.end || endTimeStamp,
       duration: wallClockDuration,
       failures: (reporterResults?.reporterStats?.failures ?? 0) + 1,
