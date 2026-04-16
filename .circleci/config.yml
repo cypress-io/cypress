@@ -19,16 +19,11 @@ parameters:
   force-persist-artifacts:
     type: boolean
     default: false
+  # Set to true when triggering the pipeline manually to bypass path filtering
+  # and run all CI jobs regardless of which files changed.
   run-all-jobs:
     type: boolean
     default: false
-    # Set to true when triggering the pipeline manually to bypass path filtering
-    # and run all CI jobs regardless of which files changed.
-  # Note: path-filtering parameters (run-driver-tests, run-server-tests, etc.)
-  # are NOT declared here. They live only in the continuation pipeline
-  # (packed/pipeline.yml) and are set exclusively by generate-pipeline-parameters.sh.
-  # Keeping them out of config.yml prevents them from appearing in the CircleCI
-  # "Trigger Pipeline" UI, ensuring users cannot manually bypass job execution.
 
 commands:
   persist:
