@@ -82,6 +82,15 @@ if [[ "$BRANCH" == "develop" ]] || \
   exit 0
 fi
 
+# ----- manual trigger override -----------------------------------------------
+# When run-all-tests=true is set in the "Trigger Pipeline" UI, skip path filtering.
+RUN_ALL_RAW="${RUN_ALL_TESTS:-false}"
+if [[ "$RUN_ALL_RAW" == "true" || "$RUN_ALL_RAW" == "1" ]]; then
+  echo "run-all-tests=true — running all tests" >&2
+  emit_all_true
+  exit 0
+fi
+
 # ----- compute changed files --------------------------------------------------
 # Fetch develop from the upstream project repo using CIRCLE_PROJECT_USERNAME/REPONAME,
 # which CircleCI always sets to the canonical upstream (cypress-io/cypress), not the
