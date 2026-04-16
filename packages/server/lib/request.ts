@@ -161,7 +161,7 @@ interface RetryCallbackOptions {
 }
 
 export class Request {
-  r: typeof cypressRequest
+  private r: typeof cypressRequest
   rp: typeof cypressRequestPromise
 
   constructor (options: { timeout?: number } = {}) {

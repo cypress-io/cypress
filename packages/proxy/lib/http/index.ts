@@ -285,7 +285,7 @@ export class Http {
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
-    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
+    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request.rp)
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
