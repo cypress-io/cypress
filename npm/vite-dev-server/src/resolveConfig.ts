@@ -4,7 +4,9 @@
  * You can find it here https://github.com/vitest-dev/vitest/blob/main/packages/vitest/src/node/create.ts
  */
 import debugFn from 'debug'
-import type { InlineConfig } from 'vite-7'
+import type { InlineConfig as InlineConfig_7, DepOptimizationOptions as DepOptimizationOptions_7 } from 'vite-7'
+import type { InlineConfig as InlineConfig_8, DepOptimizationOptions as DepOptimizationOptions_8 } from 'vite-8'
+import type { Plugin, PluginBuild, BuildResult } from 'esbuild'
 import path from 'path'
 import { createRequire } from 'module'
 import semverGte from 'semver/functions/gte.js'
@@ -12,13 +14,21 @@ import semverGte from 'semver/functions/gte.js'
 import { configFiles } from './constants.js'
 import type { ViteDevServerConfig } from './devServer.js'
 import { Cypress, CypressSourcemap } from './plugins/index.js'
-import type { Vite } from './getVite.js'
+import type { Vite_7, Vite_8 } from './getVite.js'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
-export const createViteDevServerConfig = async (config: ViteDevServerConfig, vite: Vite): Promise<InlineConfig> => {
+export const isVite8 = (vite: Vite_7 | Vite_8): boolean => {
+  const isVite8 = vite.version && semverGte(vite.version, '8.0.0') || false
+
+  debug('is vite 8 being used:', isVite8)
+
+  return isVite8
+}
+
+export const createViteDevServerConfig = async <T extends Vite_7 | Vite_8>(config: ViteDevServerConfig, vite: T): Promise<T extends Vite_7 ? InlineConfig_7 : InlineConfig_8> => {
   const { viteConfig: inlineViteConfig, cypressConfig: { projectRoot } } = config
-  let resolvedOverrides: InlineConfig = {}
+  let resolvedOverrides: InlineConfig_7 | InlineConfig_8 = {}
 
   if (inlineViteConfig) {
     debug(`Received a custom viteConfig`, inlineViteConfig)
@@ -62,7 +72,7 @@ export const createViteDevServerConfig = async (config: ViteDevServerConfig, vit
   return finalConfig
 }
 
-function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): InlineConfig | InlineConfig {
+function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite_7 | Vite_8): InlineConfig_7 | InlineConfig_8 {
   const {
     cypressConfig: {
       port,
@@ -85,32 +95,51 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
     paths: [projectRoot],
   })))
 
-  // Our Vite typings do not have the 'incremental' field since it was removed in 4.2, but users' version
-  // of Vite may be older and we want to use it if it's there
-  type Vite_4_1_Config = { optimizeDeps: { esbuildOptions: { incremental?: boolean } } }
+  const cypress_esbuild_plugin: Plugin = {
+    name: 'cypress-esbuild-plugin',
+    setup (build: PluginBuild) {
+      build.onEnd(function (result: BuildResult) {
+        // We don't want to completely fail the build here on errors so we treat the errors as warnings
+        // which will handle things more gracefully. Vite will 500 on files that have errors when they
+        // are requested later and Cypress will display an error message.
+        // See: https://github.com/cypress-io/cypress/pull/21599
+        result.warnings = [...(result.warnings || []), ...(result.errors || [])]
+        result.errors = []
+      })
+    },
+  }
 
-  const viteConfig: InlineConfig & Vite_4_1_Config = {
+  let options: DepOptimizationOptions_7 | DepOptimizationOptions_8
+
+  if (isVite8(vite)) {
+    // @see https://main.vite.dev/guide/migration
+    options = {
+      rolldownOptions: {
+        plugins: [
+          // @see https://vite.dev/guide/rolldown#withfilter-wrapper
+          (vite as Vite_8).withFilter(
+            cypress_esbuild_plugin,
+            {},
+          ),
+        ],
+      },
+    }
+  } else {
+    options = {
+      esbuildOptions: {
+        // Type assertion needed due to esbuild version mismatch between vite-dev-server and vite
+        plugins: [
+          cypress_esbuild_plugin as any,
+        ],
+      },
+    }
+  }
+
+  const viteConfig: InlineConfig_7 | InlineConfig_8 = {
     root: projectRoot,
     base: `${devServerPublicPathRoute}/`,
     optimizeDeps: {
-      esbuildOptions: {
-        incremental: true,
-        plugins: [
-          {
-            name: 'cypress-esbuild-plugin',
-            setup (build) {
-              build.onEnd(function (result) {
-                // We don't want to completely fail the build here on errors so we treat the errors as warnings
-                // which will handle things more gracefully. Vite will 500 on files that have errors when they
-                // are requested later and Cypress will display an error message.
-                // See: https://github.com/cypress-io/cypress/pull/21599
-                result.warnings = [...result.warnings, ...result.errors]
-                result.errors = []
-              })
-            },
-          },
-        ],
-      },
+      ...options,
       entries: [
         ...specs.map((s) => path.relative(projectRoot, s.relative)),
         ...(supportFile ? [path.resolve(projectRoot, supportFile)] : []),
@@ -138,10 +167,6 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite): Inline
       Cypress(config, vite),
       CypressSourcemap(config, vite),
     ],
-  }
-
-  if (vite.version && semverGte(vite.version, '4.2.0')) {
-    delete viteConfig.optimizeDeps?.esbuildOptions?.incremental
   }
 
   return viteConfig
