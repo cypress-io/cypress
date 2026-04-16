@@ -1,10 +1,12 @@
-const _ = require('lodash')
-const isCi = require('ci-info').isCI
-const debug = require('debug')('cypress:server')
+import _ from 'lodash'
+import { isCI } from 'ci-info'
+import debugModule from 'debug'
 
-const getIsCi = () => isCi
+const debug = debugModule('cypress:server')
 
-const join = (char, ...pieces) => {
+export const getIsCi = () => isCI
+
+const join = (char: string, ...pieces: (string | undefined)[]) => {
   return _.chain(pieces).compact().join(char).value()
 }
 
@@ -143,6 +145,8 @@ const _detectProviderName = () => {
     if (_.isFunction(value)) {
       return value()
     }
+
+    return undefined
   })
 }
 
@@ -688,7 +692,7 @@ const _providerCommitParams = () => {
   }
 }
 
-const provider = () => {
+export const provider = () => {
   return _detectProviderName() || null
 }
 
@@ -696,18 +700,24 @@ const omitUndefined = (ret) => {
   if (_.isObject(ret)) {
     return _.omitBy(ret, _.isUndefined)
   }
+
+  return undefined
 }
 
 const _get = (fn) => {
+  const providerName = provider()
+
+  if (!providerName) return null
+
   return _
   .chain(fn())
-  .get(provider())
+  .get(providerName)
   .thru(omitUndefined)
   .defaultTo(null)
   .value()
 }
 
-const ciParams = () => {
+export const ciParams = () => {
   const ciParams = {
     ..._.chain(_userProvidedProviderCiParams()).thru(omitUndefined).defaultTo(null).value(),
     ..._get(_providerCiParams),
@@ -716,11 +726,11 @@ const ciParams = () => {
   return Object.keys(ciParams).length > 0 ? ciParams : null
 }
 
-const commitParams = () => {
+export const commitParams = () => {
   return _get(_providerCommitParams)
 }
 
-const commitDefaults = (existingInfo) => {
+export const commitDefaults = (existingInfo: Record<string, string | null | undefined>) => {
   debug('git commit existing info')
   debug(existingInfo)
 
@@ -735,16 +745,18 @@ const commitDefaults = (existingInfo) => {
     commitParamsObj = {}
   }
 
+  const resolvedCommitParamsObj: Record<string, any> = commitParamsObj
+
   debug('commit info from provider environment variables')
-  debug('%o', commitParamsObj)
+  debug('%o', resolvedCommitParamsObj)
 
   // based on the existingInfo properties
   // merge in the commitParams if null or undefined
   // defaulting back to null if all fails
   // NOTE: only properties defined in "existingInfo" will be returned
-  const combined = _.transform(existingInfo, (memo, value, key) => {
-    return memo[key] = _.defaultTo(value || commitParamsObj[key], null)
-  })
+  const combined = _.transform(existingInfo, (memo: Record<string, string | null | undefined>, value, key) => {
+    memo[key] = _.defaultTo(value || resolvedCommitParamsObj[key], null)
+  }, {} as Record<string, string | null | undefined>)
 
   debug('combined git and environment variables from provider')
   debug(combined)
@@ -752,33 +764,17 @@ const commitDefaults = (existingInfo) => {
   return combined
 }
 
-const list = () => {
+export const list = () => {
   return _.keys(CI_PROVIDERS)
 }
 
 // grab all detectable providers
 // that we can extract ciBuildId from
-const detectableCiBuildIdProviders = () => {
+export const detectableCiBuildIdProviders = () => {
   return _
   .chain(_providerCiParams())
   .omitBy(_.isNil)
   .keys()
   .sortBy()
   .value()
-}
-
-module.exports = {
-  getIsCi,
-
-  list,
-
-  provider,
-
-  ciParams,
-
-  commitParams,
-
-  commitDefaults,
-
-  detectableCiBuildIdProviders,
 }

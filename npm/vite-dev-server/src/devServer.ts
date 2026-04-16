@@ -1,8 +1,8 @@
 import debugFn from 'debug'
 import semverMajor from 'semver/functions/major.js'
 import type { UserConfig } from 'vite-7'
-import { getVite, Vite } from './getVite.js'
-import { createViteDevServerConfig } from './resolveConfig.js'
+import { getVite, Vite_7, Vite_8 } from './getVite.js'
+import { createViteDevServerConfig, isVite8 } from './resolveConfig.js'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -60,11 +60,19 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   }
 }
 
-devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite) {
+devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite_7 | Vite_8) {
   try {
-    const config = await createViteDevServerConfig(devServerConfig, vite)
+    // Handling here is mainly for conditional generics to make sure we get the types correct between vite 7 and vite 8.
+    // Eventually, vite 8 will be the default and we can remove this logic
+    if (isVite8(vite)) {
+      const config = await createViteDevServerConfig<Vite_8>(devServerConfig, vite as Vite_8)
 
-    return await vite.createServer(config)
+      return await (vite as Vite_8).createServer(config)
+    }
+
+    const config = await createViteDevServerConfig<Vite_7>(devServerConfig, vite as Vite_7)
+
+    return await (vite as Vite_7).createServer(config)
   } catch (err) {
     if (err instanceof Error) {
       throw err
