@@ -150,11 +150,11 @@ async function validateChangelog ({ changedFiles, nextVersion, commits, changelo
     const match = commitMessage && commitMessage.match(/revert.*\(#(\d+)\)"/)
 
     if (match) {
-      revertedPRNumbers.add(Number(match[1]))
+      revertedPRNumbers.add(String(match[1]))
     }
   })
 
-  const nonRevertedCommits = commits.filter(({ prNumber }) => !revertedPRNumbers.has(prNumber))
+  const nonRevertedCommits = commits.filter(({ prNumber }) => !revertedPRNumbers.has(String(prNumber)))
 
   const hasUserFacingCommits = nonRevertedCommits.some(({ semanticType }) => hasUserFacingChange(semanticType))
 
