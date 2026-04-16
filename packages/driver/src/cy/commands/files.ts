@@ -3,7 +3,7 @@ import { basename, isAbsolute, relative, resolve } from 'path'
 
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { runPrivilegedCommand, runPrivilegedFileCommand } from '../../util/privileged_channel'
+import { runPrivilegedCommand } from '../../util/privileged_channel'
 
 interface InternalWriteFileOptions extends Partial<Cypress.WriteFileOptions & Cypress.Timeoutable> {
   _log?: Log
@@ -16,18 +16,22 @@ interface ReadFileOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable
 type WriteFileOptions = Partial<Cypress.WriteFileOptions & Cypress.Timeoutable>
 
 export default (Commands, Cypress, cy, state) => {
-  Commands.addQuery('readFile', function readFile (file: string, encodingOrOptions: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions, ...extras: never[]) {
-    const hasEncodingOptions = _.isObject(encodingOrOptions)
-    const options = (hasEncodingOptions ? encodingOrOptions : userOptions) ?? {}
-    const requestedEncoding = hasEncodingOptions ? options.encoding : encodingOrOptions
-    const encoding = requestedEncoding === undefined ? 'utf8' : requestedEncoding
+  Commands.addQuery('readFile', function readFile (file: string, encoding: Cypress.Encodings | ReadFileOptions | undefined, userOptions?: ReadFileOptions, ...extras: never[]) {
+    if (_.isObject(encoding)) {
+      userOptions = encoding
+      encoding = userOptions.encoding
+    }
 
-    const timeout = options.timeout ?? Cypress.config('defaultCommandTimeout') as number
+    userOptions = userOptions || {}
+
+    encoding = encoding === undefined ? 'utf8' : encoding
+
+    const timeout = userOptions.timeout ?? Cypress.config('defaultCommandTimeout') as number
 
     this.set('timeout', timeout)
     this.set('ensureExistenceFor', 'subject')
 
-    const log = Cypress.log({ message: file, hidden: options.log === false, timeout })
+    const log = Cypress.log({ message: file, hidden: userOptions.log === false, timeout })
 
     if (!file || !_.isString(file)) {
       $errUtils.throwErrByPath('files.invalid_argument', {
@@ -49,10 +53,10 @@ export default (Commands, Cypress, cy, state) => {
       }
 
       fileResult = null
-      filePromise = runPrivilegedFileCommand({
+      filePromise = runPrivilegedCommand({
         commandName: 'readFile',
         cy,
-        Cypress,
+        Cypress: (Cypress as unknown) as InternalCypress.Cypress,
         options: {
           file,
           encoding,
@@ -60,6 +64,14 @@ export default (Commands, Cypress, cy, state) => {
       })
       .timeout(timeout)
       .then((result) => {
+        // https://github.com/cypress-io/cypress/issues/1558
+        // https://github.com/cypress-io/cypress/issues/20683
+        // We invoke Buffer.from() in order to transform this from an ArrayBuffer -
+        // which socket.io uses to transfer the file over the websocket - into a `Buffer`.
+        if (encoding === null && result.contents !== null) {
+          result.contents = Buffer.from(result.contents)
+        }
+
         // Add the filename as a symbol, in case we need it later (such as when storing an alias)
         try {
           state('current').set('fileName', basename(result.filePath))
