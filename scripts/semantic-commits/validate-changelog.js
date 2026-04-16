@@ -140,7 +140,23 @@ async function validateChangelog ({ changedFiles, nextVersion, commits, changelo
     }
   }
 
-  const hasUserFacingCommits = commits.some(({ semanticType }) => hasUserFacingChange(semanticType))
+  // Build a set of PR numbers that were reverted within this release window so
+  // they can be excluded from changelog validation — a reverted commit should
+  // not appear in the changelog since the change never shipped to users.
+  const revertedPRNumbers = new Set()
+
+  commits.forEach(({ commitMessage }) => {
+    // Revert messages look like: revert: "fix: something (#33512)" (#33611)
+    const match = commitMessage && commitMessage.match(/revert.*\(#(\d+)\)"/)
+
+    if (match) {
+      revertedPRNumbers.add(Number(match[1]))
+    }
+  })
+
+  const nonRevertedCommits = commits.filter(({ prNumber }) => !revertedPRNumbers.has(prNumber))
+
+  const hasUserFacingCommits = nonRevertedCommits.some(({ semanticType }) => hasUserFacingChange(semanticType))
 
   if (!hasUserFacingCommits) {
     console.log('Does not contain any user-facing changes that impact the next Cypress release.')
@@ -164,8 +180,8 @@ async function validateChangelog ({ changedFiles, nextVersion, commits, changelo
   if (!hasChangeLogUpdate) {
     errors.push(`A changelog entry was not found in cli/CHANGELOG.md.`)
 
-    if (commits.length === 1) {
-      errors.push(`Please add a changelog entry that describes the changes. Include this entry under the section:\n\n${_printChangeLogExample(commits[0].semanticType, commits[0].prNumber, commits[0].associatedIssues)}`)
+    if (nonRevertedCommits.length === 1) {
+      errors.push(`Please add a changelog entry that describes the changes. Include this entry under the section:\n\n${_printChangeLogExample(nonRevertedCommits[0].semanticType, nonRevertedCommits[0].prNumber, nonRevertedCommits[0].associatedIssues)}`)
 
       return _handleErrors(errors)
     }
@@ -177,7 +193,7 @@ async function validateChangelog ({ changedFiles, nextVersion, commits, changelo
     errors.push(`The changelog version does not contain the next Cypress version of ${nextVersion}. If the changelog version is correct, please correct the pull request title to correctly reflect the change being made.`)
   }
 
-  commits.forEach(({ commitMessage, semanticType, prNumber, associatedIssues }) => {
+  nonRevertedCommits.forEach(({ commitMessage, semanticType, prNumber, associatedIssues }) => {
     if (!Object.keys(userFacingChanges).includes(semanticType)) {
       return
     }

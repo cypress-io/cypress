@@ -13,6 +13,7 @@
 **Bugfixes:**
 
 - Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
+- Fixed an issue where `cy.wrap` would not preserve a custom `onFail` handler when wrapping a rejected promise. Fixed in [#33570](https://github.com/cypress-io/cypress/pull/33570).
 
 **Dependency Updates:**
 
