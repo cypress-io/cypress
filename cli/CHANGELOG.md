@@ -1,4 +1,3 @@
-<<<<<<< fix/cy-prompt-decrypt-inflate-limit
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 
 ## 15.14.1
@@ -9,9 +8,6 @@ _Released 04/30/2026 (PENDING)_
 
  - Increased the limit for decrypted payloads to support large `cy.prompt` requests and responses. Fixed in [#33619](https://github.com/cypress-io/cypress/pull/33619).
 
-=======
-<!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
->>>>>>> develop
 ## 15.14.0
 
 _Released Apr 16, 2026_
