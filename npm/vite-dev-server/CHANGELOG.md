@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v7.3.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.2.1...@cypress/vite-dev-server-v7.3.0) (2026-04-16)
+
+
+### Features
+
+* support vite 8 for component testing ([#33580](https://github.com/cypress-io/cypress/issues/33580)) ([acf1eef](https://github.com/cypress-io/cypress/commit/acf1eef15c654af212152720d748c80d85ce8b0d))
+
 # [@cypress/vite-dev-server-v7.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.2.0...@cypress/vite-dev-server-v7.2.1) (2026-03-16)
 
 # [@cypress/vite-dev-server-v7.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.1.0...@cypress/vite-dev-server-v7.2.0) (2026-01-22)

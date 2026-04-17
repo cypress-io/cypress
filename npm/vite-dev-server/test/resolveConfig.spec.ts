@@ -3,6 +3,7 @@ import { EventEmitter } from 'events'
 import * as vite5 from 'vite-5'
 import * as vite6 from 'vite-6'
 import * as vite7 from 'vite-7'
+import * as vite8 from 'vite-8'
 import { scaffoldSystemTestProject } from './test-helpers/scaffoldProject'
 import { createViteDevServerConfig } from '../src/resolveConfig'
 import type { ViteDevServerConfig } from '../src/devServer'
@@ -32,6 +33,10 @@ const MAJOR_VERSIONS: ({version: 5, vite: any } | {version: 6, vite: any } | {ve
   {
     version: 7,
     vite: vite7,
+  },
+  {
+    version: 8,
+    vite: vite8,
   },
 ]
 
