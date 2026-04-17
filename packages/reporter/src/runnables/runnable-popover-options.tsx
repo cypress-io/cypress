@@ -6,7 +6,7 @@ import cs from 'classnames'
 
 import Tooltip from '@cypress/react-tooltip'
 import Button from '@cypress-design/react-button'
-import { IconActionAddMedium, IconWindowCodeEditor, IconMenuDotsVertical } from '@cypress-design/react-icon'
+import { IconActionAddMedium, IconWindowCodeEditorSmall, IconMenuDotsVertical } from '@cypress-design/react-icon'
 import defaultEvents, { Events } from '../lib/events'
 import Switch from '../lib/switch'
 import appState from '../lib/app-state'
@@ -142,7 +142,7 @@ export const RunnablePopoverOptions: React.FC<Props> = observer(({
           onClick={handleOpenInIDE}
           data-cy="runnable-popover-open-ide"
         >
-          <IconWindowCodeEditor strokeColor="gray-500" fillColor="gray-500" />
+          <IconWindowCodeEditorSmall strokeColor="gray-500" fillColor="gray-500" />
           <span>Open in IDE</span>
         </button>
 
