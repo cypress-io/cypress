@@ -21,16 +21,66 @@ const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 const PROTOCOL_MESSAGE_TRUNCATION_LENGTH = 3000
 
+// Log attrs on `test.routes` / `agents` / `commands` / `hooks` retain payloads
+// (stringified args, URLs, `consoleProps`, custom `Cypress.log` fields, etc.) after a
+// test falls out of `numTestsKeptInMemory`. Everything not in this allowlist is set to
+// `null` so GC can reclaim memory and clean up custom log properties.
+//
+// Keep short display identifiers (`name`, `displayName`, `alias`, …) so `getTestsState` /
+// serialized run state still renders command logs, routes, and agents after restore.
+const REDUCE_MEMORY_PRESERVED_KEYS = new Set([
+  '_hasBeenCleanedUp',
+  'alias',
+  'aliasType',
+  'autoEnd',
+  'callCount',
+  'chainerId',
+  'count',
+  'createdAtTimestamp',
+  'defaultCollapsedState',
+  'displayName',
+  'end',
+  'ended',
+  'event',
+  'functionName',
+  'group',
+  'groupEnd',
+  'groupLevel',
+  'groupStart',
+  'hidden',
+  'hookId',
+  'id',
+  'instrument',
+  'isCrossOriginLog',
+  'isStubbed',
+  'method',
+  'name',
+  'numElements',
+  'numResponses',
+  'referencesAlias',
+  'snapshot',
+  'state',
+  'status',
+  'testCurrentRetry',
+  'testId',
+  'timestamp',
+  'timeout',
+  'type',
+  'updatedAtTimestamp',
+  'visible',
+  'wallClockStartedAt',
+])
+
 let counter = 0
 
 export const LogUtils = {
-  // mutate attrs by nulling out
-  // object properties
   reduceMemory: (attrs) => {
-    return _.each(attrs, (value, key) => {
-      if (_.isObject(value)) {
-        attrs[key] = null
+    return _.each(attrs, (_value, key) => {
+      if (REDUCE_MEMORY_PRESERVED_KEYS.has(key)) {
+        return
       }
+
+      attrs[key] = null
     })
   },
 

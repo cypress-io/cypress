@@ -121,7 +121,7 @@ describe('cloud debug test filtering', () => {
   it('works with browser filter', () => {
     cy.withCtx((ctx) => {
       ctx.coreData.cloudProject.testsForRunResults = {
-        'cypress/e2e/lots-of-tests.cy.j': ['t1', 's1 t2'],
+        'cypress/e2e/browsers.cy.js': ['t1', 's1 t2'],
       }
     })
 
@@ -141,7 +141,7 @@ describe('cloud debug test filtering', () => {
 
     cy.withCtx((ctx) => {
       ctx.coreData.cloudProject.testsForRunResults = {
-        'cypress/e2e/lots-of-tests.cy.j': ['t2', 't3'],
+        'cypress/e2e/domain-change.cy.js': ['t2', 't3'],
       }
     })
 
