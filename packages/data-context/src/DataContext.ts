@@ -332,10 +332,10 @@ export class DataContext {
   }
 
   async destroy () {
-    return Promise.all([
-      this.actions.servers.destroyGqlServer(),
-      this._reset(),
-    ])
+    // Close graphql-ws clients and the GQL HTTP server before lifecycle teardown so
+    // in-flight GraphQL/subscription work does not write to sockets mid-destroy (ERR_STREAM_DESTROYED).
+    await this.actions.servers.destroyGqlServer()
+    await this._reset()
   }
 
   /**

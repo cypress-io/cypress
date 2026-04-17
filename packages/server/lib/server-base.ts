@@ -30,13 +30,13 @@ import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
-import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates, RemoteState } from './remote_states'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
 import appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
+import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
 import * as statusCode from './util/status_code'
 import headersUtil from './util/headers'
 import stream from 'stream'
@@ -161,7 +161,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
-  protected _graphqlWS?: WebSocketServer
+  protected _graphqlWS?: GraphqlWsHandle
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
@@ -667,13 +667,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
-    return Bluebird.all([
-      this._close(),
-      this._socket?.close(),
-      this._fileServer?.close(),
-      this._httpsProxy?.close(),
-      this._graphqlWS?.close(),
-    ])
+    // graphql-ws clients must be closed before the HTTP server is destroyed.
+    const graphqlDispose = this._graphqlWS?.dispose
+      ? Bluebird.resolve(this._graphqlWS.dispose())
+      : Bluebird.resolve()
+
+    return graphqlDispose.then(() => {
+      return Bluebird.all([
+        this._close(),
+        this._socket?.close(),
+        this._fileServer?.close(),
+        this._httpsProxy?.close(),
+      ])
+    })
     .then((res) => {
       this._middleware = null
 
