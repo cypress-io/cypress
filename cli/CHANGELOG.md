@@ -1,4 +1,4 @@
-<!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+<!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.14.0
 
 _Released Apr 16, 2026_
