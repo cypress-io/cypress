@@ -1,7 +1,7 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.14.1
 
-_Released 04/30/2026 (PENDING)_
+_Released Apr 30, 2026 (PENDING)_
 
 **Performance:**
 
