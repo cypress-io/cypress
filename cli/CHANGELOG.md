@@ -1,4 +1,12 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.14.1
+
+_Released 04/28/2026_
+
+**Performance:**
+
+- Fixed a memory leak in `cypress open` where each spec rerun accumulated an additional `uncaughtException` listener on `process`, preventing the previous Mocha runner — and all the objects it retained (commands, snapshots, logs) — from being garbage collected. Fixed in [#33631](https://github.com/cypress-io/cypress/pull/33631).
+
 ## 15.14.0
 
 _Released 04/16/2026_
@@ -6,7 +14,6 @@ _Released 04/16/2026_
 **Performance:**
 
 - Reduced browser memory growth during long interactive runs by clearing stored command log data (messages, URLs, snapshots, console props, and other fields—including custom `Cypress.log` properties) once tests age out of `numTestsKeptInMemory`, so the runner can reclaim memory and stay more responsive. Addressed in [#33601](https://github.com/cypress-io/cypress/pull/33601).
-- Fixed a memory leak in `cypress open` where each spec rerun accumulated an additional `uncaughtException` listener on `process`, preventing the previous Mocha runner — and all the objects it retained (commands, snapshots, logs) — from being garbage collected. Fixed in [#33631](https://github.com/cypress-io/cypress/pull/33631).
 
 **Features:**
 
