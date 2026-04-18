@@ -625,32 +625,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   stop () {
-    // only run doneEarly() if we haven't already stopped — this preserves
-    // the original early-return semantics for the async cancellation path
-    if (!this.queue.stopped) {
-      this.doneEarly()
+    // don't do anything if we've already stopped
+    if (this.queue.stopped) {
+      return
     }
 
-    // [LEAK-FIX cypress-services#13184]
-    // Aggressively release per-command references, then clear the queueables
-    // array. $Commands are doubly-linked via prev/next, and each $Command
-    // holds an array of $Logs whose attributes.consoleProps / renderProps
-    // closures capture $autIframe (e.g. visit at navigation.ts:824). Simply
-    // clearing the queueables array leaves these cross-references intact:
-    // if ANY external holder (mocha runnable ctx, pending promise, reporter
-    // store) retains any single $Command or $Log, the detached AUT iframe
-    // and its contentWindow stay pinned across reruns via:
-    //   top.onerror (getter) → Cypress → cy → queue → queueables[i]
-    //     → next → next → ... → attributes.logs[j] → consoleProps → $autIframe
-    // Nulling prev/next breaks the linked list, nulling fn/queryFn/subject
-    // breaks command-level closure captures, and emptying logs breaks the
-    // command→log→consoleProps path.
-    for (const cmd of this.queue.get()) {
-      try {
-        cmd.set({ prev: null, next: null, fn: null, queryFn: null, subject: null, logs: [] })
-      } catch { /* noop */ }
-    }
-    this.queue.clear()
+    return this.doneEarly()
   }
 
   // reset is called before each test

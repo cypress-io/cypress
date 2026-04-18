@@ -1638,7 +1638,6 @@ export default {
           // remove all the listeners
           // so no more events fire
           // since a test failure may 'leak' after a run completes
-          // _runner.removeAllListeners()
           _runner.dispose()
 
           // TODO this functions is not correctly
