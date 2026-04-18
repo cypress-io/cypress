@@ -67,6 +67,51 @@ export function getEventManager () {
 
 window.getEventManager = getEventManager
 
+// [LEAK-FIX cypress-services#13184] Navigate any existing aut-iframe,
+// aut-snapshot-iframe, and spec-iframe children of the runner root to
+// about:blank and await their load events (with a safety timeout).
+// This helps Blink tear down the old frames' Window realms before the
+// iframes are detached from the DOM on rerun.
+function blankOutIframes (root: HTMLElement): Promise<void> {
+  const iframes = Array.from(
+    root.querySelectorAll<HTMLIFrameElement>(
+      'iframe.aut-iframe, iframe.aut-snapshot-iframe, iframe.spec-iframe',
+    ),
+  )
+
+  if (iframes.length === 0) {
+    return Promise.resolve()
+  }
+
+  const waits = iframes.map((iframe) => {
+    return new Promise<void>((resolve) => {
+      let settled = false
+      const settle = () => {
+        if (settled) return
+
+        settled = true
+        iframe.removeEventListener('load', settle)
+        clearTimeout(timer)
+        resolve()
+      }
+
+      iframe.addEventListener('load', settle)
+      const timer = setTimeout(settle, 500) // safety net
+
+      try {
+        // removing the src (or setting to about:blank) triggers a same-origin
+        // navigation to about:blank, which resets the frame's Document and
+        // clears pending JS state (timers, observers, promises) in the realm
+        iframe.src = 'about:blank'
+      } catch {
+        settle()
+      }
+    })
+  })
+
+  return Promise.all(waits).then(() => undefined)
+}
+
 let _autIframeModel: AutIframe | null
 
 /**
@@ -284,6 +329,15 @@ function setSpecForDriver (spec: SpecFile) {
  */
 async function runSpecE2E (config, spec: SpecFile) {
   const $runnerRoot = getRunnerElement()
+
+  // [LEAK-FIX cypress-services#13184] Before detaching the old iframes,
+  // navigate each to about:blank and wait for the load event. Without this,
+  // Chromium/Blink tends to keep the old frames' Window objects alive after
+  // iframe removal due to internal frame lifecycle tasks, even when the JS
+  // side is fully dereferenced. Forcing a same-origin navigation to
+  // about:blank resets the frame's Document and globals, allowing Blink to
+  // fully tear down the realm before the iframe is detached.
+  await blankOutIframes($runnerRoot)
 
   // clear AUT, if there is one.
   empty($runnerRoot)
