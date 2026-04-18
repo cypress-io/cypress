@@ -63,14 +63,6 @@ declare let top: WindowProxy & { __alreadySetErrorHandlers__: boolean }
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
 let curCy: $Cy | null = null
-
-// Defined at module scope so they do NOT share a V8 closure context with
-// onTopError (which captures the first Cypress instance). If these were
-// inline inside setTopOnError, the shared context would pin Cypress₀ in
-// memory permanently via top.onerror's [[Get]] slot.
-const _noopOnerrorGet = function () {}
-const _noopOnerrorSet = function () {}
-
 const setTopOnError = function (Cypress, cy: $Cy) {
   if (curCy) {
     curCy = cy
@@ -119,8 +111,8 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
   // prevent Mocha from setting top.onerror
   Object.defineProperty(top, 'onerror', {
-    set: _noopOnerrorSet,
-    get: _noopOnerrorGet,
+    set () { },
+    get () { },
     configurable: false,
     enumerable: true,
   })
