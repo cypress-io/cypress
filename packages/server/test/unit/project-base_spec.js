@@ -61,11 +61,11 @@ describe('lib/project-base', () => {
     this.project._cfg = this.config
   })
 
-  afterEach(function () {
+  afterEach(async function () {
     Fixtures.remove()
 
     if (this.project) {
-      this.project.close()
+      await this.project.close()
     }
   })
 
