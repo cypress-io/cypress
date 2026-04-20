@@ -15,7 +15,7 @@
   "devDependencies": {
     "@angular/common": "^21.0.0",
     "@angular/core": "^21.0.0",
-    "@angular/platform-browser-dynamic": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
     "@cypress/mount-utils": "0.0.0-development",
     "rollup": "4.60.2",
     "typescript": "~5.9.2"
@@ -23,7 +23,7 @@
   "peerDependencies": {
     "@angular/common": ">=21.0.0",
     "@angular/core": ">=21.0.0",
-    "@angular/platform-browser-dynamic": ">=21.0.0",
+    "@angular/platform-browser": ">=21.0.0",
     "rxjs": ">=7.8.0"
   },
   "files": [
