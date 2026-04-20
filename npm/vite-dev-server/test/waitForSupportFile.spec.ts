@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { getSupportFileRelativePath, waitUntilUrlReady } from '../src/waitForSupportFile.js'
+import { getSupportFileRelativePath, waitUntilUrlReady } from '../src/waitForSupportFile'
 
 describe('waitForSupportFile', () => {
   describe('getSupportFileRelativePath', () => {
