@@ -1,5 +1,4 @@
-/// <reference types="cypress" />
-import { mount } from 'cypress/angular'
+import { mount } from 'cypress/angular-zoneless'
 
 declare global {
   namespace Cypress {
@@ -10,6 +9,3 @@ declare global {
 }
 
 Cypress.Commands.add('mount', mount)
-
-// Example use:
-// cy.mount(MyComponent)
