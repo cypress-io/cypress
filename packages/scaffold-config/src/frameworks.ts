@@ -183,7 +183,7 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
         dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR,
         dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE,
         dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON,
-        dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC,
+        dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER,
       ]
     },
     codeGenFramework: 'angular',
