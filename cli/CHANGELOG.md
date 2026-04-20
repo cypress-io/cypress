@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- Fixed a memory leak in `cypress open` where each spec rerun accumulated an additional `uncaughtException` listener on `process`, preventing the previous Mocha runner — and all the objects it retained (commands, snapshots, logs) — from being garbage collected. Fixed in [#33631](https://github.com/cypress-io/cypress/pull/33631).
+- Fixed a memory leak in `cypress open` where each spec rerun accumulated an additional `uncaughtException` listener, preventing the previous Mocha runner — and all the objects it retained (commands, snapshots, logs) — from being garbage collected. Fixed in [#33631](https://github.com/cypress-io/cypress/pull/33631).
 
 **Bugfixes:**
 
