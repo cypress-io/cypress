@@ -340,7 +340,7 @@ describe.skip('Svelte', {
   })
 })
 
-const angularVersions = [18, 19] as const
+const angularVersions = [21] as const
 
 angularVersions.forEach((angularVersion) => {
   describe(`Angular ${angularVersion}`, {
@@ -359,13 +359,12 @@ angularVersions.forEach((angularVersion) => {
         projectName: `angular-${angularVersion}`,
         configFile: 'cypress.config.ts',
         filePath: 'src/app/errors.cy.ts',
-        failCount: 3,
-        passCount: 1,
+        failCount: 4,
       })
 
       verify('sync error', {
         fileName: 'errors.ts',
-        line: 14,
+        line: 22,
         column: 11,
         uncaught: true,
         uncaughtMessage: 'sync error',
@@ -379,7 +378,7 @@ angularVersions.forEach((angularVersion) => {
 
       verify('async error', {
         fileName: 'errors.ts',
-        line: 19,
+        line: 27,
         column: 13,
         uncaught: true,
         uncaughtMessage: 'async error',
@@ -392,7 +391,7 @@ angularVersions.forEach((angularVersion) => {
       })
 
       verify('command failure', {
-        line: 20,
+        line: 21,
         column: 8,
         command: 'get',
         message: [
