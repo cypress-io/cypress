@@ -112,7 +112,7 @@ describe('lib/util/graceful_crash_handling', () => {
       expect(out.tests[0].attempts[0].error).to.eq(null)
     })
 
-    it('does not patch any test when runnable id matches no test (stats still reflect fatal)', () => {
+    it('does not patch test when runnable id doesn't match a test (stats still reflect fatal)', () => {
       const fatal = new Error('config process died')
       const results = baseReporterResults()
 
