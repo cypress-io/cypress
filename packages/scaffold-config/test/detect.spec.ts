@@ -45,7 +45,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('react-vite-ts-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [
-      { devDependency: 'vite', version: '5.0.0' },
+      { devDependency: 'vite', version: '8.0.0' },
       { dependency: 'react', version: '18.0.0' },
     ])
 

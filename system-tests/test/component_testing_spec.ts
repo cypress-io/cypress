@@ -46,7 +46,8 @@ describe(`React major versions with Vite`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-vite-default.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
+        // @see https://github.com/cypress-io/cypress/issues/30881 and src/Rerendering.cy.jsx for details on skipping.
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/mount.cy.jsx,!src/Rerendering.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
