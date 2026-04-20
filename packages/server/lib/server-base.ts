@@ -669,7 +669,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   close () {
     // graphql-ws clients must be closed before the HTTP server is destroyed.
     const graphqlDispose = this._graphqlWS?.dispose
-      ? Bluebird.resolve(this._graphqlWS.dispose())
+      ? Bluebird.resolve(this._graphqlWS.dispose()).finally(() => {
+        // graphql-ws dispose() closes the ws server; repeating close() rejects with
+        // "The server is not running". Clear handle so subsequent close() is a no-op for gql.
+        this._graphqlWS = undefined
+      })
       : Bluebird.resolve()
 
     return graphqlDispose.then(() => {
