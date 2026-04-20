@@ -36,12 +36,13 @@
 
     --pill-accent: var(--bright-blue);
 
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol";
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+      sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     box-sizing: border-box;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    display: block;
+    height: 100dvh;
   }
 
   h1 {
@@ -51,9 +52,8 @@
     line-height: 100%;
     letter-spacing: -0.125rem;
     margin: 0;
-    font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-      "Segoe UI Symbol";
+    font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+      Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   }
 
   p {
@@ -124,6 +124,7 @@
     line-height: 1.4rem;
     letter-spacing: -0.00875rem;
     text-decoration: none;
+    white-space: nowrap;
   }
 
   .pill:hover {
@@ -134,11 +135,15 @@
     --pill-accent: var(--bright-blue);
   }
   .pill-group .pill:nth-child(6n + 2) {
+    --pill-accent: var(--electric-violet);
+  }
+  .pill-group .pill:nth-child(6n + 3) {
     --pill-accent: var(--french-violet);
   }
-  .pill-group .pill:nth-child(6n + 3),
+
   .pill-group .pill:nth-child(6n + 4),
-  .pill-group .pill:nth-child(6n + 5) {
+  .pill-group .pill:nth-child(6n + 5),
+  .pill-group .pill:nth-child(6n + 6) {
     --pill-accent: var(--hot-red);
   }
 
@@ -209,14 +214,7 @@
             <stop offset=".707" stop-color="#FF41F8" stop-opacity=".5" />
             <stop offset="1" stop-color="#FF41F8" stop-opacity="0" />
           </radialGradient>
-          <linearGradient
-            id="b"
-            x1="0"
-            x2="982"
-            y1="192"
-            y2="192"
-            gradientUnits="userSpaceOnUse"
-          >
+          <linearGradient id="b" x1="0" x2="982" y1="192" y2="192" gradientUnits="userSpaceOnUse">
             <stop stop-color="#F0060B" />
             <stop offset="0" stop-color="#F0070C" />
             <stop offset=".526" stop-color="#CC26D5" />
@@ -225,38 +223,32 @@
           <clipPath id="a"><path fill="#fff" d="M0 0h982v239H0z" /></clipPath>
         </defs>
       </svg>
-      <h1>Hello, {{ title }}</h1>
+      <h1>Hello, {{ title() }}</h1>
       <p>Congratulations! Your app is running. 🎉</p>
     </div>
     <div class="divider" role="separator" aria-label="Divider"></div>
     <div class="right-side">
       <div class="pill-group">
-        @for (item of [
-          { title: 'Explore the Docs', link: 'https://angular.dev' },
-          { title: 'Learn with Tutorials', link: 'https://angular.dev/tutorials' },
-          { title: 'CLI Docs', link: 'https://angular.dev/tools/cli' },
-          { title: 'Angular Language Service', link: 'https://angular.dev/tools/language-service' },
-          { title: 'Angular DevTools', link: 'https://angular.dev/tools/devtools' },
-        ]; track item.title) {
-          <a
-            class="pill"
-            [href]="item.link"
-            target="_blank"
-            rel="noopener"
+        @for (item of [ { title: 'Explore the Docs', link: 'https://angular.dev' }, { title: 'Learn
+        with Tutorials', link: 'https://angular.dev/tutorials' }, { title: 'Prompt and best
+        practices for AI', link: 'https://angular.dev/ai/develop-with-ai'}, { title: 'CLI Docs',
+        link: 'https://angular.dev/tools/cli' }, { title: 'Angular Language Service', link:
+        'https://angular.dev/tools/language-service' }, { title: 'Angular DevTools', link:
+        'https://angular.dev/tools/devtools' }, ]; track item.title) {
+        <a class="pill" [href]="item.link" target="_blank" rel="noopener">
+          <span>{{ item.title }}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            height="14"
+            viewBox="0 -960 960 960"
+            width="14"
+            fill="currentColor"
           >
-            <span>{{ item.title }}</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              height="14"
-              viewBox="0 -960 960 960"
-              width="14"
-              fill="currentColor"
-            >
-              <path
-                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
-              />
-            </svg>
-          </a>
+            <path
+              d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"
+            />
+          </svg>
+        </a>
         }
       </div>
       <div class="social-links">
@@ -279,19 +271,14 @@
             />
           </svg>
         </a>
-        <a
-          href="https://twitter.com/angular"
-          aria-label="Twitter"
-          target="_blank"
-          rel="noopener"
-        >
+        <a href="https://x.com/angular" aria-label="X" target="_blank" rel="noopener">
           <svg
             width="24"
             height="24"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            alt="Twitter"
+            alt="X"
           >
             <path
               d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
@@ -331,6 +318,5 @@
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
 <!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
 
 <router-outlet />
