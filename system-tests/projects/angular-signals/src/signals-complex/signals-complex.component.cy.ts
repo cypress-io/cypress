@@ -1,7 +1,9 @@
 import { signal } from '@angular/core'
 import { SignalsComplexComponent } from './signals-complex.component'
-import { createOutputSpy } from 'cypress/angular'
+import { createOutputSpy } from 'cypress/angular-zoneless'
 import cloneDeep from 'lodash/cloneDeep'
+import type { InputSignal, ModelSignal } from '@angular/core'
+import type { User } from './signals-complex.component'
 
 const user = {
   firstName: 'Hank',
@@ -30,8 +32,8 @@ const acquaintances = [
 it('can pass in complex props', () => {
   cy.mount(SignalsComplexComponent, {
     componentProperties: {
-      user: cloneDeep(user),
-      acquaintances: cloneDeep(acquaintances),
+      user: cloneDeep(user) as unknown as InputSignal<User>,
+      acquaintances: cloneDeep(acquaintances) as unknown as ModelSignal<User[]>,
     },
   })
 })
@@ -44,8 +46,8 @@ it('can pass in complex props as signals and mutate them', () => {
 
   cy.mount(SignalsComplexComponent, {
     componentProperties: {
-      user: userSignal,
-      acquaintances: acquaintancesSignal,
+      user: userSignal as unknown as InputSignal<User>,
+      acquaintances: acquaintancesSignal as unknown as ModelSignal<User[]>,
       // @ts-ignore
       acquaintancesChange: createOutputSpy('acquaintancesChange'),
     },
@@ -80,8 +82,8 @@ it('can pass in complex props as signals and mutate them', () => {
 it('can derive an observable from signals (test for https://github.com/cypress-io/cypress/issues/31238) - ensure mount is reference safe', () => {
   cy.mount(SignalsComplexComponent, {
     componentProperties: {
-      user: { age: 10, firstName: 'Foo', lastName: 'Bar' },
-      acquaintances: [],
+      user: { age: 10, firstName: 'Foo', lastName: 'Bar' } as unknown as InputSignal<User>,
+      acquaintances: [] as unknown as ModelSignal<User[]>, // empty array is valid for ModelSignal<User[]>
     },
   })
 
