@@ -1,6 +1,6 @@
 import { signal } from '@angular/core'
 import { SignalsComplexComponent } from './signals-complex.component'
-import { createOutputSpy } from 'cypress/angular-zoneless'
+import { createOutputSpy } from 'cypress/angular'
 import cloneDeep from 'lodash/cloneDeep'
 import type { InputSignal, ModelSignal } from '@angular/core'
 import type { User } from './signals-complex.component'

@@ -1,10 +1,10 @@
 import { signal, computed } from '@angular/core'
 import { SignalsRequiredComponent } from './signals-required.component'
-import { createOutputSpy } from 'cypress/angular-zoneless'
+import { createOutputSpy } from 'cypress/angular'
 import type { InputSignal, ModelSignal } from '@angular/core'
 
 // NOTE: if this is the only test in your test suite, this error will continually throw until the fixture is closed.
-// TODO: move to a cy-in-cy test in @cypress/angular-zoneless. We aren't grabbing the error serially anymore since it is now a promise.
+// TODO: move to a cy-in-cy test in @cypress/angular. We aren't grabbing the error serially anymore since it is now a promise.
 // but the functionality works as expected
 it.skip('errors on required props missing', (done) => {
   cy.once('uncaught:exception', (e) => {

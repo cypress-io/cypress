@@ -16,7 +16,7 @@
 // Import commands.js using ES2015 syntax:
 import './commands'
 
-import { mount } from 'cypress/angular-zoneless'
+import { mount } from 'cypress/angular'
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.

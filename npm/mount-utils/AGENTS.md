@@ -22,4 +22,4 @@ yarn lint         # ESLint
 
 ## Integration Points
 
-- Consumed by `@cypress/react`, `@cypress/vue`, `@cypress/angular`, `@cypress/angular-zoneless`, and `@cypress/svelte` as a build-time (`devDependencies`) dependency.
+- Consumed by `@cypress/react`, `@cypress/vue`, `@cypress/angular`, and `@cypress/svelte` as a build-time (`devDependencies`) dependency.

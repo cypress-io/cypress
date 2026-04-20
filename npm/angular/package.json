@@ -13,20 +13,18 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@angular/common": "^18.0.0",
-    "@angular/core": "^18.0.0",
-    "@angular/platform-browser-dynamic": "^18.0.0",
+    "@angular/common": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/platform-browser-dynamic": "^21.0.0",
     "@cypress/mount-utils": "0.0.0-development",
     "rollup": "^4.60.2",
-    "typescript": "~5.4.5",
-    "zone.js": "~0.14.6"
+    "typescript": "~5.9.2"
   },
   "peerDependencies": {
-    "@angular/common": ">=18.0.0",
-    "@angular/core": ">=18.0.0",
-    "@angular/platform-browser-dynamic": ">=18.0.0",
-    "rxjs": ">=7.5.0",
-    "zone.js": ">=0.14.0"
+    "@angular/common": ">=21.0.0",
+    "@angular/core": ">=21.0.0",
+    "@angular/platform-browser-dynamic": ">=21.0.0",
+    "rxjs": ">=7.8.0"
   },
   "files": [
     "dist"
@@ -44,7 +42,8 @@
     "cypress",
     "cypress-io",
     "test",
-    "testing"
+    "testing",
+    "zoneless"
   ],
   "contributors": [
     {

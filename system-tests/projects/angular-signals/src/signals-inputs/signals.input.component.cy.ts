@@ -1,5 +1,5 @@
 import { SignalsInputComponent } from './signals.input.component'
-import { createOutputSpy, mount } from 'cypress/angular-zoneless'
+import { createOutputSpy, mount } from 'cypress/angular'
 
 describe('with output spies', () => {
   // regression test for https://github.com/cypress-io/cypress/issues/32137
