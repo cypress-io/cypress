@@ -687,7 +687,11 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     debug(`No video found after spec ran - skipping compression. Video path: ${videoName}`)
 
     if (compressedVideoName) {
-      await fs.remove(compressedVideoName)
+      try {
+        await fs.remove(compressedVideoName)
+      } catch (err) {
+        debug('Error removing compressed video file: %o', err)
+      }
     }
 
     results.video = null

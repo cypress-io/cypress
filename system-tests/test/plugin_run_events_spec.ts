@@ -27,7 +27,7 @@ describe('e2e plugin run events', () => {
   })
 
   systemTests.it('should not leave reserved compressed videos when deleting the video in after:spec', {
-    browser: 'chrome',
+    browser: 'electron',
     project: 'plugin-run-events',
     spec: '*1.cy.js',
     configFile: 'cypress.config.afterSpec.deleteVideo.js',
