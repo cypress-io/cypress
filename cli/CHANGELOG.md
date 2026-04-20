@@ -1,8 +1,6 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.14.1
 
-_Released Apr 30, 2026 (PENDING)_
-
 **Performance:**
 
 - Fixed a memory leak in `cypress open` where each spec rerun accumulated an additional `uncaughtException` listener on `process`, preventing the previous Mocha runner — and all the objects it retained (commands, snapshots, logs) — from being garbage collected. Fixed in [#33631](https://github.com/cypress-io/cypress/pull/33631).
