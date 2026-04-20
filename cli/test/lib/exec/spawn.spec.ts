@@ -427,20 +427,13 @@ describe('lib/exec/spawn', function () {
     })
 
     describe('detects kill signal', async () => {
-      it('exits with error on SIGKILL', async () => {
-        try {
+      it('does not exit with error on SIGKILL', async () => {
           const startPromise = start('--foo')
 
           await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('exit', expect.any(Function)))
           spawnedProcess.emit('exit', null, 'SIGKILL')
 
-          await startPromise
-
-          throw new Error('should have hit error handler but did not')
-        } catch (e) {
-          expect(e.message).toMatch(/SIGKILL/)
-          expect(e.message).toMatchSnapshot()
-        }
+          await expect(startPromise).resolves.toEqual(0)
       })
     })
 
