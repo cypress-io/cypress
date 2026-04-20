@@ -19,7 +19,7 @@ import * as env from '../util/env'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
 import * as system from '../util/system'
-import chromePolicyCheck from '../util/chrome_policy_check'
+import { run as runChromePolicyCheck } from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import type { Cfg, ProjectBase } from '../project-base'
 import type { Browser } from '../browsers/types'
@@ -1136,7 +1136,7 @@ async function ready (options: ReadyOptions) {
   }
 
   if (browser.family === 'chromium') {
-    chromePolicyCheck.run(onWarning)
+    runChromePolicyCheck(onWarning)
   }
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {

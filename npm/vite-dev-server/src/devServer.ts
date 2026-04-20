@@ -1,8 +1,9 @@
 import debugFn from 'debug'
 import semverMajor from 'semver/functions/major.js'
 import type { UserConfig } from 'vite-7'
-import { getVite, Vite } from './getVite.js'
-import { createViteDevServerConfig } from './resolveConfig.js'
+import { getVite, Vite_7, Vite_8 } from './getVite.js'
+import { createViteDevServerConfig, isVite8 } from './resolveConfig.js'
+import { getSupportFileRelativePath, waitUntilUrlReady } from './waitForSupportFile.js'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -38,13 +39,24 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   debug('Vite server created')
 
   await server.listen()
-  const { port } = server.config.server
+  const { port, host } = server.config.server
 
   if (!port) {
     throw new Error('Missing vite dev server port.')
   }
 
   debug('Successfully launched the vite server on port', port)
+
+  const supportPath = getSupportFileRelativePath(config.cypressConfig)
+
+  if (supportPath) {
+    const baseUrl = `http://${typeof host === 'string' ? host : '127.0.0.1'}:${port}`
+    const supportFileUrl = new URL(supportPath, `${baseUrl}/`).href
+
+    debug('Waiting until support file is servable', supportFileUrl)
+    await waitUntilUrlReady(supportFileUrl)
+    debug('Support file is ready')
+  }
 
   return {
     port,
@@ -60,11 +72,19 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   }
 }
 
-devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite) {
+devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite_7 | Vite_8) {
   try {
-    const config = await createViteDevServerConfig(devServerConfig, vite)
+    // Handling here is mainly for conditional generics to make sure we get the types correct between vite 7 and vite 8.
+    // Eventually, vite 8 will be the default and we can remove this logic
+    if (isVite8(vite)) {
+      const config = await createViteDevServerConfig<Vite_8>(devServerConfig, vite as Vite_8)
 
-    return await vite.createServer(config)
+      return await (vite as Vite_8).createServer(config)
+    }
+
+    const config = await createViteDevServerConfig<Vite_7>(devServerConfig, vite as Vite_7)
+
+    return await (vite as Vite_7).createServer(config)
   } catch (err) {
     if (err instanceof Error) {
       throw err
