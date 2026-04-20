@@ -1,15 +1,15 @@
-require('../../spec_helper')
+import '../../spec_helper'
 
-const _ = require('lodash')
-const fs = require('fs')
-const stream = require('stream')
-const Promise = require('bluebird')
-const { concatStream } = require('@packages/network')
-const { streamBuffer } = require('../../../lib/util/stream_buffer')
+import _ from 'lodash'
+import fs from 'fs'
+import stream from 'stream'
+import Promise from 'bluebird'
+import { concatStream } from '@packages/network'
+import { streamBuffer } from '../../../lib/util/stream_buffer'
 
-function drain (stream) {
-  return new Promise((resolve) => {
-    return stream.pipe(concatStream((buf) => {
+function drain (readable: NodeJS.ReadableStream): Promise<string> {
+  return new Promise<string>((resolve) => {
+    return readable.pipe(concatStream((buf) => {
       resolve(buf.toString())
     }))
   })
@@ -18,7 +18,7 @@ function drain (stream) {
 describe('lib/util/stream_buffer', () => {
   it('reads out no matter when we write', function (done) {
     done = _.after(2, done)
-    const pt = stream.PassThrough()
+    const pt = new stream.PassThrough()
     const sb = streamBuffer()
 
     pt.pipe(sb)
@@ -140,11 +140,11 @@ describe('lib/util/stream_buffer', () => {
   it('readable recursively pushes until it returns false', (done) => {
     const sb = streamBuffer()
     const readable = sb.createReadStream()
-    const writeable = stream.Writable({
+    const writeable = new stream.Writable({
       final () {
         expect(readable.push).to.be.calledTwice
-        expect(readable.push.firstCall).to.be.calledWith(buf)
-        expect(readable.push.secondCall).to.be.calledWith(null)
+        expect((readable.push as any).firstCall).to.be.calledWith(buf)
+        expect((readable.push as any).secondCall).to.be.calledWith(null)
         done()
       },
       write (chunk, enc, cb) {
@@ -165,10 +165,10 @@ describe('lib/util/stream_buffer', () => {
   it('readable pipes do not end until the writeable ends', function (done) {
     const sb = streamBuffer()
     const readable = sb.createReadStream()
-    const writeable = stream.Writable({
+    const writeable = new stream.Writable({
       final () {
         expect(sb.writable).to.be.false
-        expect(sb._writableState).to.have.property('ended', true)
+        expect((sb as any)._writableState).to.have.property('ended', true)
         done()
       },
       write (chunk, enc, cb) {
@@ -232,7 +232,7 @@ describe('lib/util/stream_buffer', () => {
 
   it('silently discards writes after it has been destroyed, with a consumer', function (done) {
     const sb = streamBuffer()
-    const pt = stream.PassThrough()
+    const pt = new stream.PassThrough()
 
     sb.createReadStream().pipe(pt)
 

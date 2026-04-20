@@ -7,6 +7,7 @@ import * as launcher from '@packages/launcher'
 import type { Automation } from '../automation'
 import type { Browser } from './types'
 import type { CriClient } from './cri-client'
+import * as profileCleaner from '../util/profile_cleaner'
 
 declare global {
   interface Window {
@@ -23,7 +24,6 @@ const getPort = require('get-port')
 const { fs } = require('../util/fs')
 const extension = require('@packages/extension')
 const appData = require('../util/app_data')
-const profileCleaner = require('../util/profile_cleaner')
 const { telemetry } = require('@packages/telemetry')
 
 const pathToBrowsers = appData.path('browsers')
@@ -317,9 +317,11 @@ const parseBrowserOption = (opt) => {
   }
 }
 
+// eslint-disable-next-line no-redeclare
 function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
+// eslint-disable-next-line no-redeclare
 function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
-
+// eslint-disable-next-line no-redeclare
 async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
   const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
 
