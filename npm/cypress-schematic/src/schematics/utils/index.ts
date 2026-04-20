@@ -4,32 +4,12 @@ import { getSystemPath, normalize, strings } from '@angular-devkit/core'
 import { Tree, apply, url, applyTemplates, move, Rule } from '@angular-devkit/schematics'
 import { get } from 'https'
 import { Schema } from '../ng-generate/cypress-test/schema'
-import { minVersion as semverMinVersion } from 'semver'
-import type { SemVer } from 'semver'
 
-import { getPackageJsonDependency } from './dependencies'
 import { JSONFile } from './jsonFile'
 
 export interface NodePackage {
   name: string
   version: string
-}
-
-export function getAngularSemverVersion (tree: Tree): SemVer | null {
-  const packageNode = getPackageJsonDependency(tree, '@angular/core')
-
-  try {
-    if (packageNode !== null) {
-      const version: SemVer | null = packageNode && packageNode.version ?
-        semverMinVersion(packageNode.version) : null
-
-      return version
-    }
-
-    return null
-  } catch (e) {
-    return null
-  }
 }
 
 /**

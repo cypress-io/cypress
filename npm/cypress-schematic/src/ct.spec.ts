@@ -15,18 +15,11 @@ const runCommandInProject = (command: string, projectPath: string) => {
 // @cypress/angular won't exist in the tmp project. To fix this, we replace the
 // contents of the <project-path>/node_modules/cypress/angular with the latest
 // contents of cli/angular
-const copyAngularMount = async (projectPath: string, options: { copyZonelessMount?: boolean } = { copyZonelessMount: false }) => {
-  if (options.copyZonelessMount) {
-    await fs.copy(
-      path.join(__dirname, '..', '..', '..', 'cli', 'angular-zoneless'),
-      path.join(projectPath, 'node_modules', 'cypress', 'angular-zoneless'),
-    )
-  } else {
+const copyAngularMount = async (projectPath: string) => {
     await fs.copy(
       path.join(__dirname, '..', '..', '..', 'cli', 'angular'),
       path.join(projectPath, 'node_modules', 'cypress', 'angular'),
     )
-  }
 }
 
 const cypressSchematicPackagePath = path.join(__dirname, '..')
@@ -55,14 +48,14 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
 
       it('should install ct files with option and no component specs', async () => {
         await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
-        await copyAngularMount(projectPath, { copyZonelessMount: project === 'angular-21' })
+        await copyAngularMount(projectPath)
         await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts', projectPath)
       }, timeout)
 
       it('should generate component alongside component spec', async () => {
         await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
         // make sure to copy the zoneless mount function for angular 21+
-        await copyAngularMount(projectPath, { copyZonelessMount: project === 'angular-21' })
+        await copyAngularMount(projectPath)
         if (project === 'angular-21') {
           // our angular 21 project is a pure standalone project, so we need to pass in the --standalone flag to ignore module generation.
           // this may be no longer true if we update the schematic dependencies

@@ -168,7 +168,6 @@ yarn clean-deps && yarn
 - **`@cypress/react`** — Component testing adapter for React.
 - **`@cypress/vue`** — Component testing adapter for Vue.js.
 - **`@cypress/angular`** — Component testing adapter for Angular.
-- **`@cypress/angular-zoneless`** — Angular adapter without zone.js.
 - **`@cypress/svelte`** — Component testing adapter for Svelte.
 - **`@cypress/mount-utils`** — Shared utilities used by all component testing adapters.
 

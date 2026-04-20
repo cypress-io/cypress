@@ -1,4 +1,4 @@
-import { createOutputSpy } from 'cypress/angular-zoneless'
+import { createOutputSpy } from 'cypress/angular'
 import { EventEmitter, Component, NgModule } from '@angular/core'
 import type { InputSignal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'

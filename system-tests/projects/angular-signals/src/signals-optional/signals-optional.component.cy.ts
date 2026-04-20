@@ -1,6 +1,6 @@
 import { signal } from '@angular/core'
 import { SignalsOptionalComponent } from './signals-optional.component'
-import { createOutputSpy } from 'cypress/angular-zoneless'
+import { createOutputSpy } from 'cypress/angular'
 import type { InputSignal, ModelSignal } from '@angular/core'
 
 it('can handle default props', () => {

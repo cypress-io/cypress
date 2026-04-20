@@ -31,8 +31,9 @@
 
 ## Requirements
 
-- Cypress `^15.8.0`
-- Angular `>=20.0.0` 
+- Cypress `^16.0.0`
+- Angular `>=21.0.0` 
+    - `@cypress/schematic@5` supports Angular 20 - 21 on Cypress <= `15.0.0`
     - `@cypress/schematic@4` supports Angular 18 - 19
     - `@cypress/schematic@3` supports Angular 17
     - `@cypress/schematic@2` supports Angular 13 - 16
