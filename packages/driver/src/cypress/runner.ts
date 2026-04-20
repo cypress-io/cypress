@@ -1636,6 +1636,7 @@ export default {
           // the Runner itself is properly released; otherwise each rerun retains the
           // previous Runner (and everything it holds — Cypress, window, commands,
           // snapshots, logs, etc.).
+          // @see https://github.com/cypress-io/cypress/pull/33631
           _runner.dispose()
 
           // TODO this functions is not correctly
