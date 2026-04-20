@@ -20,14 +20,10 @@ The changelog should include anything that was merged into the `develop` branch 
     ```md
     ## <RELEASE_VERSION>
 
-    _Released <RELEASE_DATE> (PENDING)_
-
     **<CHANGE_SECTION:**
 
     - <CHANGELOG_ENTRY>
     ```
-
-    The `RELEASE_DATE` follows the `Mon D, YYYY` format (three-letter month abbreviation, non-zero-padded day, four-digit year).
 
 2. Each changelog entry is written and merged with the associated user-facing code change in [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
 3. The changelog entry should be added to the associated change section. The supported change sections for the changelog (that should be listed in the order below) are:
@@ -75,7 +71,6 @@ No backticks for:
 ## Release
 
 At the time of the release, the releaser will:
-- remove the `(PENDING)` text next to the planned release date and adjust the date if needed
 - ensure the Changelog is coherent
 - ensure the change sections are in the correct order
 - ensure that the entries are ordered by impact
