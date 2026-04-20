@@ -1,12 +1,22 @@
 import crypto, { BinaryLike } from 'crypto'
 import { TextEncoder, promisify } from 'util'
-import { generalDecrypt, GeneralJWE } from 'jose'
+import { DecryptOptions, generalDecrypt, GeneralJWE } from 'jose'
 import base64Url from 'base64url'
 import type { CypressRequestOptions } from './api'
-import { deflateRaw as deflateRawCb } from 'zlib'
+import { deflateRaw as deflateRawCb, inflateRaw as inflateRawCb } from 'zlib'
 import fs from 'fs'
 
 const deflateRaw = promisify(deflateRawCb)
+const inflateRaw = promisify(inflateRawCb)
+
+// The `jose` library caps decompressed JWE payloads at ~250KB by default, which
+// is too small for larger cy.prompt `/plan` responses (these carry cached
+// selectors/chains that can inflate past that threshold). Override with a 5MB
+// ceiling so decryption matches the server-side inflate limit configured in
+// `@packages/encryption` in cypress-services.
+const DECRYPT_OPTIONS: DecryptOptions = {
+  inflateRaw: (data) => inflateRaw(data, { maxOutputLength: 1024 * 1024 * 5 }),
+}
 
 const CY_TEST = `LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFyZ0pGb2FuMFROTUxWSUNvZWF2WQpJVWtqNWJaM2QxTlVJdVU4WjM1b2hzcUFGWHY1eGhRRzd5MWdkeTR1SVZOSFU0a1RmUERBZEk1MnRWcGE5UG1yCm5OSDhsZE5kMjRwemVFNm1CeE91MlVDQ1d3VEY5eS9BUGZqNjVkczJSSTMwR09oZm95Q1pyQndxRU1zdWJ1MTUKVVNqbFBUcEFoWlFZN2Y2bHA4TTZMYU55SUhLMzYyMDgvZFp6aWs4Q1NLWmwya0E0TUN4eWxhUElWNVVWZG0rRQpkdjJhdm1Hcy9vQzVUV1VRNzlVSmJyMDllem1oZWExcS81VnpvajRvODlKSkNnelFhcllvL1QrNVlreWJ0Z2hkCjN3NnNPSjBCQ2NrUUV5MGpXVWJWUnhSa084VGJsckxXbC9Rd0Ryd1EvRERQaEZaSGhIbCtCL3JRTldsYTFXdEoKclFJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t`
 const CY_STAGING = `LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFxZE1OazZYVkFhV3VlT0lXZ3V2aQpDTlhPRGVtMHRINmo0NnFTWUhJZFcyU1N5NHU0ZFpGd1VHQldlZjBEbDVmeGhZa1BFczBxUDJHUnlUZnY5YjNXCk9xWEJFQmFyNXMyYzJSMGd1RzdqNGtidTlZZklRQWpWejZndUtQMTIzd3VKSjFmcEU5T3pXWlZmUi9pQWl4b1gKTi82aEFhSHNMT1RlNXROdTVESzNOQnUxa3VJTTExcDZScEo5bGgvbWVFK3JObzRZVWUvZ2Jzam1mZmJiODRGeQpqWk1sQW9YSnYxU3lKK2phdTNMa3JkdzMybWYrczMyd2NLUnNpbmp1STgrZndDT2lEb2xnZW9NdEhta2tXVS8xCnJvUnVEcGd6d2FZemxLbUhRODNWQTlOTUhvNmMwVU40MzlBMnVtRFQ4ek94SjJjQUY0U0RiWTV3RnBnd3cvUVgKd1FJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t`
@@ -111,7 +121,7 @@ export async function encryptRequest (params: Pick<CypressRequestOptions, 'body'
  * decrypts the response payload, which is assumed to be JSON
  */
 export async function decryptResponse (jwe: GeneralJWE, encryptionKey: crypto.KeyObject): Promise<any> {
-  const result = await generalDecrypt(jwe, encryptionKey)
+  const result = await generalDecrypt(jwe, encryptionKey, DECRYPT_OPTIONS)
   const plaintext = Buffer.from(result.plaintext).toString('utf8')
 
   return JSON.parse(plaintext)

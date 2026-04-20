@@ -66,6 +66,44 @@ describe('encryption', () => {
     expect(roundtripResponse).to.eql(RESPONSE_BODY)
   })
 
+  // Regression: jose's default inflateRaw caps decompressed payloads at ~250KB,
+  // which caused large cy.prompt /plan responses to fail with
+  // "DecryptionError: decryption operation failed". decryptResponse must pass
+  // DecryptOptions with a higher maxOutputLength to match the server-side limit.
+  it('decrypts response payloads larger than the jose default inflate limit', async () => {
+    const { jwe, secretKey } = await encryption.encryptRequest({
+      encrypt: true,
+      body: TEST_BODY,
+    }, { publicKey })
+
+    const unwrappedKey = crypto.privateDecrypt(privateKey, Buffer.from(jwe.recipients[0].encrypted_key, 'base64'))
+    const unwrappedSecretKey = crypto.createSecretKey(unwrappedKey)
+
+    // Build a payload whose uncompressed JSON is larger than jose's ~250KB
+    // default but still well within our 5MB ceiling. Use random bytes per entry
+    // so the DEFLATE layer can't trivially compress it away.
+    const LARGE_RESPONSE = {
+      items: Array.from({ length: 800 }, (_, i) => ({
+        id: i,
+        xpath: `//body/div[${i}]`,
+        innerText: crypto.randomBytes(256).toString('hex'),
+      })),
+    }
+
+    expect(JSON.stringify(LARGE_RESPONSE).length).to.be.greaterThan(400 * 1024)
+
+    const enc = new jose.GeneralEncrypt(
+      Buffer.from(JSON.stringify(LARGE_RESPONSE)),
+    )
+
+    enc.setProtectedHeader({ alg: 'A256GCMKW', enc: 'A256GCM', zip: 'DEF' }).addRecipient(unwrappedSecretKey)
+
+    const jweResponse = await enc.encrypt()
+    const roundtripResponse = await encryption.decryptResponse(jweResponse, secretKey)
+
+    expect(roundtripResponse).to.eql(LARGE_RESPONSE)
+  })
+
   describe('verifySignatureFromFile', () => {
     it('verifies a valid signature from a file', async () => {
       const filePath = path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'encryption', 'index.js')
