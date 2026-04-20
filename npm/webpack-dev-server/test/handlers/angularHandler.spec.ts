@@ -105,11 +105,10 @@ describe('angularHandler', { timeout: 60000 }, function () {
         outputPath: 'dist/angular',
         index: 'src/index.html',
         main: 'src/main.ts',
-        polyfills: 'src/polyfills.ts',
         tsConfig: 'tsconfig.app.json',
-        inlineStyleLanguage: 'scss',
+        inlineStyleLanguage: 'css',
         assets: ['src/favicon.ico', 'src/assets'],
-        styles: ['src/styles.scss'],
+        styles: ['src/styles.css'],
         scripts: [],
         buildOptimizer: false,
         optimization: false,
@@ -139,7 +138,7 @@ describe('angularHandler', { timeout: 60000 }, function () {
     expect(sourceWebpackModulesResult.framework?.importPath).toContain(path.join('@angular-devkit', 'build-angular'))
     await expectLoadsAngularJson(projectRoot)
     await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig, customProjectConfig.buildOptions, true)
+    await expectGeneratesTsConfig(devServerConfig, customProjectConfig.buildOptions)
     expectLoadsAngularBuildOptions(customProjectConfig.buildOptions)
   })
 })

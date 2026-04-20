@@ -100,7 +100,7 @@ describe(`Angular CLI versions`, () => {
     expectedExitCode: 0,
   })
 
-  systemTests.it('angular 19 custom config', {
+  systemTests.it('angular 21 custom config', {
     project: 'angular-custom-config',
     spec: 'src/app/my-component.cy.ts',
     testingType: 'component',
