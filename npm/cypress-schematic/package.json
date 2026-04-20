@@ -15,11 +15,11 @@
     "semver": "^7.7.3"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "^0.2100.5",
-    "@angular-devkit/core": "^21.0.5",
-    "@angular-devkit/schematics": "^21.0.5",
-    "@angular-devkit/schematics-cli": "^21.0.5",
-    "@schematics/angular": "^21.0.5",
+    "@angular-devkit/architect": "^0.2102.7",
+    "@angular-devkit/core": "^21.2.7",
+    "@angular-devkit/schematics": "^21.2.7",
+    "@angular-devkit/schematics-cli": "^21.2.7",
+    "@schematics/angular": "^21.2.7",
     "@types/mocha": "8.0.3",
     "@types/node": "^24.10.1",
     "eslint": "^9.31.0",
@@ -27,9 +27,9 @@
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "@angular/cli": ">=20.0.0",
-    "@angular/core": ">=20.0.0",
-    "cypress": "^15.8.0"
+    "@angular/cli": ">=21.0.0",
+    "@angular/core": ">=21.0.0",
+    "cypress": "^16.0.0"
   },
   "license": "MIT",
   "repository": {

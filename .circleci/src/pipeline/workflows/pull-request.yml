@@ -299,11 +299,6 @@ jobs:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
-  - npm-angular-zoneless:
-      requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
   - npm-mount-utils:
       requires:
         - internal-pr-build

@@ -2298,14 +2298,6 @@ jobs:
           name: Build
           command: yarn lerna run build --scope=@cypress/angular
 
-  npm-angular-zoneless:
-    <<: *defaults
-    steps:
-      - restore_cached_workspace
-      - run:
-          name: Build
-          command: yarn lerna run build --scope @cypress/angular-zoneless
-
   npm-puppeteer-unit-tests:
     <<: *defaults
     steps:

@@ -21,7 +21,7 @@
     "@vue/test-utils": "2.4.6",
     "axios": "^1.15.0",
     "cypress": "0.0.0-development",
-    "rollup": "3.29.5",
+    "rollup": "^4.60.2",
     "typescript": "~5.4.5",
     "vite": "6.3.5",
     "vue": "3.2.47",
