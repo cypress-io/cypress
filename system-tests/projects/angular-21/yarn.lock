@@ -344,13 +344,6 @@
     "@standard-schema/spec" "^1.0.0"
     tslib "^2.3.0"
 
-"@angular/platform-browser-dynamic@^21.2.0":
-  version "21.2.2"
-  resolved "https://registry.yarnpkg.com/@angular/platform-browser-dynamic/-/platform-browser-dynamic-21.2.2.tgz#7c82b40f6fc642887066aca3e91db0365ad99f99"
-  integrity sha512-xhagOxT/2Z66DNR/2mXp94yRXod3AZCpeyeIgluiuUWyDyBzqn1dd7Kdkpae5FYkoDDbYqWvjbGgtoFrRhm0+A==
-  dependencies:
-    tslib "^2.3.0"
-
 "@angular/platform-browser@^21.2.0":
   version "21.2.2"
   resolved "https://registry.yarnpkg.com/@angular/platform-browser/-/platform-browser-21.2.2.tgz#1625da40a26dae4c9b91797d4385d0b563dc7772"

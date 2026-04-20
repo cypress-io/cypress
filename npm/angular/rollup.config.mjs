@@ -5,7 +5,7 @@ const config = {
     '@angular/core',
     '@angular/core/testing',
     '@angular/common',
-    '@angular/platform-browser-dynamic/testing',
+    '@angular/platform-browser/testing',
     '@angular/core/rxjs-interop',
   ],
 }

@@ -24,7 +24,6 @@
     "@angular/build": "^21.2.7",
     "@angular/cli": "^21.2.7",
     "@angular/compiler-cli": "^21.2.0",
-    "@angular/platform-browser-dynamic": "^21.2.9",
     "@types/lodash": "~4.17.24",
     "lodash": "~4.18.1",
     "typescript": "~5.9.2"

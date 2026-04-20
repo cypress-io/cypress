@@ -8,12 +8,10 @@ import {
   TestBed,
   TestComponentRenderer,
 } from '@angular/core/testing'
-// NOTE: @angular/platform-browser-dynamic is deprecated and needs to be updated to @angular/platform-browser in a breaking change of Cypress.
-// @see https://github.com/cypress-io/cypress/issues/33006
 import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting,
-} from '@angular/platform-browser-dynamic/testing'
+  BrowserTestingModule,
+  platformBrowserTesting,
+} from '@angular/platform-browser/testing'
 import {
   setupHooks,
   getContainerEl,
@@ -551,8 +549,8 @@ export const createOutputSpy = <T>(alias: string) => {
 
 // Only needs to run once, we reset before each test
 getTestBed().initTestEnvironment(
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting(),
+  BrowserTestingModule,
+  platformBrowserTesting(),
   {
     teardown: { destroyAfterEach: false },
   },

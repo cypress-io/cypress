@@ -100,12 +100,12 @@ export const WIZARD_DEPENDENCY_ANGULAR_COMMON = {
   minVersion: '^21.0.0',
 } as const
 
-export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC = {
+export const WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER = {
   type: 'angular',
-  name: 'Angular Platform Browser Dynamic',
-  package: '@angular/platform-browser-dynamic',
-  installer: '@angular/platform-browser-dynamic',
-  description: 'Library for using Angular in a web browser with JIT compilation',
+  name: 'Angular Platform Browser',
+  package: '@angular/platform-browser',
+  installer: '@angular/platform-browser',
+  description: 'Library for using Angular in a web browser',
   minVersion: '^21.0.0',
 } as const
 
@@ -130,7 +130,7 @@ export const WIZARD_DEPENDENCIES = [
   WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR,
   WIZARD_DEPENDENCY_ANGULAR_CORE,
   WIZARD_DEPENDENCY_ANGULAR_COMMON,
-  WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC,
+  WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER,
   WIZARD_DEPENDENCY_SVELTE,
 ] as const
 
@@ -144,7 +144,7 @@ const componentDependenciesOfInterest = [
   '@angular-devkit/build-angular',
   '@angular/core',
   '@angular/common',
-  '@angular/platform-browser-dynamic',
+  '@angular/platform-browser',
   'react',
   'react-dom',
   'vue',
