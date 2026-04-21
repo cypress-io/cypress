@@ -688,8 +688,39 @@ windows-branch-test:
         requires:
           - windows-node-modules-install
 
+    # run 5 times to build confidence in the 'No tests found' Windows fix
+    # (PR #33642) — failure was 6/6 pre-fix, so 5 consecutive greens here is
+    # strong signal. Remove before merge.
     - run-app-integration-tests-chrome:
         name: windows-run-app-integration-tests-chrome
+        executor: windows
+        resource_class: windows.large
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
+        requires:
+          - windows-build
+    - run-app-integration-tests-chrome:
+        name: windows-run-app-integration-tests-chrome-2
+        executor: windows
+        resource_class: windows.large
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
+        requires:
+          - windows-build
+    - run-app-integration-tests-chrome:
+        name: windows-run-app-integration-tests-chrome-3
+        executor: windows
+        resource_class: windows.large
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
+        requires:
+          - windows-build
+    - run-app-integration-tests-chrome:
+        name: windows-run-app-integration-tests-chrome-4
+        executor: windows
+        resource_class: windows.large
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
+        requires:
+          - windows-build
+    - run-app-integration-tests-chrome:
+        name: windows-run-app-integration-tests-chrome-5
         executor: windows
         resource_class: windows.large
         context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
