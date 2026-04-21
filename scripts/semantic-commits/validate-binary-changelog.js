@@ -40,7 +40,6 @@ const changelog = async () => {
   return validateChangelog({
     nextVersion,
     changedFiles,
-    pendingRelease: !hasVersionBump,
     commits,
   })
 }

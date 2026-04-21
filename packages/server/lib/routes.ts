@@ -16,7 +16,7 @@ import type { RemoteStates } from './remote_states'
 import bodyParser from 'body-parser'
 import path from 'path'
 import AppData from './util/app_data'
-import CacheBuster from './util/cache_buster'
+import { strip as cacheBusterStrip } from './util/cache_buster'
 import specController from './controllers/spec'
 import client from './controllers/client'
 import files from './controllers/files'
@@ -138,7 +138,7 @@ export const createCommonRoutes = ({
 
   router.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster
-    const test = CacheBuster.strip(req.query.p)
+    const test = cacheBusterStrip(req.query.p as string)
 
     specController.handle(test, req, res, config, next, onError)
   })
