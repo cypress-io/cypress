@@ -1,8 +1,6 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.0.0
 
-_Released 06/23/2026 (PENDING)_
-
 **Breaking Changes:**
 
 - Upgraded bundled Node.js version from `22.19.0` to `24.14.0`. Addressed in [#33494](https://github.com/cypress-io/cypress/pull/33494).
