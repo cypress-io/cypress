@@ -591,7 +591,17 @@ darwin-arm64:
           - darwin-arm64-build
 
 windows:
-  when: *full-workflow-filters
+  when:
+    or:
+      - equal: [ develop, << pipeline.git.branch >> ]
+      - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+      # temporary: run the windows workflow on this branch to validate fixes
+      # for the runner empty-state tests (see PR #33642). Remove before merge.
+      - equal: [ 'mschile/cool-yonath-30a3c1', << pipeline.git.branch >> ]
+      - matches:
+          pattern: /^release\/\d+\.\d+\.\d+$/
+          value: << pipeline.git.branch >>
+      - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
   jobs:
     - node_modules_install:
         name: windows-node-modules-install
