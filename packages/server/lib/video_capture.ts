@@ -9,6 +9,7 @@ import { path as ffprobePath } from '@ffprobe-installer/ffprobe'
 import BlackHoleStream from 'black-hole-stream'
 import { fs } from './util/fs'
 import type { ProcessOptions, WriteVideoFrame } from '@packages/types'
+import type { FfprobeData } from 'fluent-ffmpeg'
 
 const debug = Debug('cypress:server:video')
 const debugVerbose = Debug('cypress-verbose:server:video')
@@ -62,8 +63,17 @@ export function getMsFromDuration (duration) {
   return utils.timemarkToSeconds(duration) * 1000
 }
 
-export function getCodecData (src) {
-  return new Bluebird((resolve, reject) => {
+type CodecData = {
+  format: string
+  audio: string
+  audio_details: string
+  video: string
+  video_details: string
+  duration: string
+}
+
+export function getCodecData (src): Bluebird<CodecData> {
+  return new Bluebird<CodecData>((resolve, reject) => {
     return ffmpeg()
     .on('stderr', (stderr) => {
       return debug('get codecData stderr log %o', { message: stderr })
@@ -82,8 +92,8 @@ export function getCodecData (src) {
   })
 }
 
-export function getChapters (fileName) {
-  return new Bluebird((resolve, reject) => {
+export function getChapters (fileName): Bluebird<FfprobeData> {
+  return new Bluebird<FfprobeData>((resolve, reject) => {
     ffmpeg.ffprobe(fileName, ['-show_chapters'], (err, metadata) => {
       if (err) {
         return reject(err)
