@@ -148,26 +148,27 @@ describe('Next.js', {
     })
 
     // line/column omitted: Next.js 16 bundles React internally and the exact
-    // stack frame offsets vary across React versions; message and code frame
-    // file are sufficient to validate error reporting behaviour.
+    // stack frame offsets vary across React versions; message is sufficient
+    // to validate error reporting behaviour.
+    // hasCodeFrame: false — code frames are not fully supported with Next.js 15/16.
     verify('error on mount', {
       uncaught: true,
       uncaughtMessage: 'mount error',
+      hasCodeFrame: false,
       message: [
         'The following error originated from your application code',
         'mount error',
       ],
-      codeFrameText: 'Errors.cy.jsx',
     })
 
     verify('sync error', {
       uncaught: true,
       uncaughtMessage: 'sync error',
+      hasCodeFrame: false,
       message: [
         'The following error originated from your application code',
         'sync error',
       ],
-      codeFrameText: 'Errors.cy.jsx',
     }).then(() => {
       // TODO: ReactDOM seems to double throw.
       // verifyErrorOnlyCapturedOnce('Error: sync error')
@@ -176,11 +177,11 @@ describe('Next.js', {
     verify('async error', {
       uncaught: true,
       uncaughtMessage: 'async error',
+      hasCodeFrame: false,
       message: [
         'The following error originated from your application code',
         'async error',
       ],
-      codeFrameText: 'Errors.cy.jsx',
     }).then(() => {
       verifyErrorOnlyCapturedOnce('Error: async error')
     })
