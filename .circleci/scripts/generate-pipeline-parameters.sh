@@ -100,10 +100,10 @@ git fetch "$UPSTREAM_URL" develop 2>/dev/null || true
 MERGE_BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo "")
 
 if [[ -n "$MERGE_BASE" ]]; then
-  CHANGED=$(git diff --name-only "$MERGE_BASE" HEAD)
+  CHANGED=$(git -c core.quotepath=false diff --name-only "$MERGE_BASE" HEAD)
 else
   echo "Could not find merge base with upstream develop, falling back to HEAD~1" >&2
-  CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+  CHANGED=$(git -c core.quotepath=false diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
 fi
 
 if [[ -z "$CHANGED" ]]; then
@@ -120,7 +120,8 @@ echo "$CHANGED" >&2
 while IFS= read -r file; do
   case "$file" in
     .circleci/*|yarn.lock|package.json|packages/types/*|packages/config/*|\
-    packages/errors/*|packages/socket/*|packages/network/*|packages/ts/*|scripts/*)
+    packages/errors/*|packages/socket/*|packages/network/*|packages/ts/*|scripts/*|\
+    patches/*|packages/root/*|vitest.config.ts|gulpfile.js)
       echo "Global trigger matched: '$file' — running all tests" >&2
       emit_all_true
       exit 0
@@ -131,9 +132,16 @@ done <<< "$CHANGED"
 # ----- targeted path mapping --------------------------------------------------
 while IFS= read -r file; do
   case "$file" in
-    # Documentation and repo-metadata — must be first so that e.g.
+    # Documentation, assets, and repo-metadata — must be first so that e.g.
     # packages/driver/README.md doesn't match packages/driver/* below
-    *.md|*.mdx|*.txt|LICENSE|.github/*|.gitignore|.gitattributes|.editorconfig)
+    *.md|*.mdx|*.txt|*.png|*.jpg|*.gif|*.svg|*.ico|\
+    LICENSE|.github/*|.gitignore|.gitattributes|.editorconfig|\
+    guides/*|assets/*|\
+    .eslintrc.js|.prettierignore|.nvmrc|.node-version|.npmrc|.yarnclean|\
+    .percy.yml|.releaserc.js|renovate.json|docker-compose.yml|lerna.json|\
+    electron-builder.json|knip.json|nx.json|jsconfig.json|autobarrel.json|\
+    mocha-reporter-config.json|apollo.config.js|\
+    .husky/*|.vscode/*|__snapshots__/*)
       ;;
     packages/driver/*)
       driver_tests=true
