@@ -1,17 +1,17 @@
-require('../../spec_helper')
-
-const os = require('os')
-const path = require('path')
-const { fs } = require(`../../../lib/util/fs`)
-const findProcess = require(`../../../lib/util/find_process`)
-const profileCleaner = require(`../../../lib/util/profile_cleaner`)
+import '../../spec_helper'
+import os from 'os'
+import path from 'path'
+import { fs } from '../../../lib/util/fs'
+import * as findProcess from '../../../lib/util/find_process'
+import * as globModule from '../../../lib/util/glob'
+import * as profileCleaner from '../../../lib/util/profile_cleaner'
 
 const tmpDir = os.tmpdir()
 const pidProfilesFolder = path.join(tmpDir, 'pid-profiles')
 const rootProfileFolder = path.join(tmpDir, 'root-profile-cleaner')
 
 describe('lib/util/profile_cleaner', () => {
-  context('.isCypressProcess', () => {
+  describe('.isCypressProcess', () => {
     it('finds cypress processes by name or cmd', () => {
       const isProc = (obj, bool) => {
         expect(profileCleaner.isCypressProcess(obj), JSON.stringify(obj)).to.eq(bool)
@@ -37,16 +37,16 @@ describe('lib/util/profile_cleaner', () => {
     })
   })
 
-  context('.removeInactiveByPid', () => {
+  describe('.removeInactiveByPid', () => {
     beforeEach(() => {
       sinon.stub(findProcess, 'byPid')
       .withArgs(53301)
       .resolves([
         {
-          pid: '53301',
-          ppid: '53300',
-          uid: '501',
-          gid: '20',
+          pid: 53301,
+          ppid: 53300,
+          uid: 501,
+          gid: 20,
           name: 'Cypress',
           cmd: '/Users/bmann/Library/Caches/Cypress/3.0.3/Cypress.app/Contents/MacOS/Cypress --project /Users/bmann/Dev/cypress-dashboard --cwd /Users/bmann/Dev/cypress-dashboard',
         },
@@ -54,7 +54,7 @@ describe('lib/util/profile_cleaner', () => {
       .withArgs(12345)
       .resolves([
         {
-          pid: '12345',
+          pid: 12345,
           name: 'Foo',
           cmd: 'node foo bar',
         },
@@ -63,7 +63,7 @@ describe('lib/util/profile_cleaner', () => {
       .resolves([])
 
       const createFolder = (folder) => {
-        return fs.ensureDirAsync(path.join(pidProfilesFolder, folder))
+        return fs.ensureDir(path.join(pidProfilesFolder, folder))
       }
 
       return Promise.all([
@@ -75,6 +75,8 @@ describe('lib/util/profile_cleaner', () => {
     })
 
     afterEach(() => {
+      sinon.restore()
+
       return fs.removeAsync(pidProfilesFolder)
     })
 
@@ -97,15 +99,13 @@ describe('lib/util/profile_cleaner', () => {
           expected('run-53301', true),
           expected('foo-53301', true),
         ])
-      }).finally(() => {
-        return findProcess.byPid.restore()
       })
     })
 
     it('resolves when no profile folders match the prefix', () => {
       const emptyFolder = path.join(tmpDir, 'empty-pid-profiles')
 
-      return fs.ensureDirAsync(emptyFolder)
+      return fs.ensureDir(emptyFolder)
       .then(() => profileCleaner.removeInactiveByPid(emptyFolder, 'run-'))
       .then((result) => {
         expect(result).to.eql([])
@@ -114,9 +114,9 @@ describe('lib/util/profile_cleaner', () => {
     })
   })
 
-  context('.removeRootProfile', () => {
+  describe('.removeRootProfile', () => {
     beforeEach(() => {
-      return fs.ensureDirAsync(rootProfileFolder)
+      return fs.ensureDir(rootProfileFolder)
     })
 
     afterEach(() => {
@@ -140,16 +140,14 @@ describe('lib/util/profile_cleaner', () => {
       })
     })
 
-    it('returns null when glob throws', () => {
-      const stubbedGlob = sinon.stub().rejects(new Error('glob error'))
-      const cleaner = proxyquire(path.join(__dirname, '../../../lib/util/profile_cleaner'), {
-        './glob': stubbedGlob,
-      })
+    it('swallows errors when glob throws', () => {
+      sinon.stub(globModule, 'globAsync').rejects(new Error('glob error'))
 
-      return cleaner.removeRootProfile(rootProfileFolder)
+      return profileCleaner.removeRootProfile(rootProfileFolder)
       .then((result) => {
-        expect(result).to.eq(null)
+        expect(result).to.be.undefined
       })
+      .finally(() => sinon.restore())
     })
   })
 })

@@ -1,3 +1,10 @@
+# [@cypress/vite-dev-server-v7.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.0...@cypress/vite-dev-server-v7.3.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* (vite-dev-server) wait for support file ([#33487](https://github.com/cypress-io/cypress/issues/33487)) ([f652605](https://github.com/cypress-io/cypress/commit/f652605d31877666ac5f9bbc7258c4f88f987795))
+
 # [@cypress/vite-dev-server-v7.3.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.2.1...@cypress/vite-dev-server-v7.3.0) (2026-04-16)
 
 
