@@ -6,6 +6,7 @@ _Released 06/23/2026 (PENDING)_
 **Breaking Changes:**
 
 - Upgraded bundled Node.js version from `22.19.0` to `24.14.0`. Addressed in [#33494](https://github.com/cypress-io/cypress/pull/33494).
+- Removed Next.js 14 support for component testing. Next.js 15.0.4+ or 16+ is now required. Addressed in [#33641](https://github.com/cypress-io/cypress/pull/33641).
 
 **Dependency Updates:**
 
