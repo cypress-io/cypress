@@ -1,6 +1,6 @@
 const path = require('path')
 const { fs } = require('@packages/server/lib/util/fs')
-const glob = require('@packages/server/lib/util/glob')
+const { globAsync: glob } = require('@packages/server/lib/util/glob')
 const systemTests = require('../lib/system-tests').default
 const Fixtures = require('../lib/fixtures')
 

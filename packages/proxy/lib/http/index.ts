@@ -26,6 +26,7 @@ import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/server/lib/remote_states'
 import type { CookieJar, SerializableAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { Request as ServerRequest } from '@packages/server/lib/request'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from './util/service-worker-manager'
@@ -98,7 +99,7 @@ export type ServerCtx = Readonly<{
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
   socket: SocketBroadcaster
-  request: any
+  request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
 }>
@@ -273,7 +274,7 @@ export class Http {
   netStubbingState: NetStubbingState
   preRequests: PreRequests = new PreRequests()
   getCurrentBrowser: () => FoundBrowser
-  request: any
+  request: ServerRequest
   socket: SocketBroadcaster
   serverBus: EventEmitter
   renderedHTMLOrigins: {[key: string]: boolean} = {}
@@ -284,7 +285,7 @@ export class Http {
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
-    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
+    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request.rp)
     this.config = opts.config
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken

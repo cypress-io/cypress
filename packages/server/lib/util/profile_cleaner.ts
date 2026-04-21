@@ -1,28 +1,41 @@
-const _ = require('lodash')
-const path = require('path')
-const debug = require('debug')('cypress:server:profilecleaner')
-const { fs } = require('./fs')
-const glob = require('./glob')
-const findProcess = require('./find_process')
+import _ from 'lodash'
+import path from 'path'
+import Debug from 'debug'
+import { fs } from './fs'
+import { globAsync as glob } from './glob'
+import { byPid as findProcessByPid } from './find_process'
 
-const includesCypress = (str) => {
+const debug = Debug('cypress:server:profilecleaner')
+
+interface ProcessInfo {
+  pid: number
+  cmd: string
+  name: string
+}
+
+interface FolderWithPid {
+  folder: string
+  pid: number
+}
+
+const includesCypress = (str: string) => {
   return _.chain(str).lowerCase().includes('cypress').value()
 }
 
-const isCypressProcess = (process) => {
+export const isCypressProcess = (process: ProcessInfo) => {
   debug('got process %o', process)
 
   return _.some([process.cmd, process.name], includesCypress)
 }
 
-const getPidFromFolder = (folder, pidPrefix) => {
+export const getPidFromFolder = (folder: string, pidPrefix: string) => {
   return _.toNumber(
     path.basename(folder).replace(pidPrefix, ''),
   )
 }
 
-const folderWithPid = (pidPrefix) => {
-  return (folder) => {
+const folderWithPid = (pidPrefix: string) => {
+  return (folder: string): FolderWithPid => {
     return {
       folder,
       pid: getPidFromFolder(folder, pidPrefix),
@@ -31,29 +44,29 @@ const folderWithPid = (pidPrefix) => {
 }
 
 // find all the pids not associated to a cypress process
-const inactivePids = ({ pid }) => {
+export const inactivePids = ({ pid }: { pid: number }) => {
   debug('finding process by pid:', pid)
 
-  return findProcess.byPid(pid)
+  return findProcessByPid(pid)
   .then((processes) => {
     // return true if no processes are a cypress process
     return !_.some(processes, isCypressProcess)
   })
 }
 
-const removeProfile = ({ pid, folder }) => {
+const removeProfile = ({ pid, folder }: FolderWithPid) => {
   debug('removing old profile %o', { pid, folder })
 
   return fs.removeAsync(folder)
 }
 
-const removeMatch = (match) => {
+const removeMatch = (match: string) => {
   debug('removed root profile object %o', { path: match })
 
   return fs.removeAsync(match)
 }
 
-const removeInactiveByPid = async (pathToProfiles, pidPrefix) => {
+export const removeInactiveByPid = async (pathToProfiles: string, pidPrefix: string) => {
   const pattern = path.join(pathToProfiles, `${pidPrefix}*`)
   const folders = await glob(pattern, { absolute: true })
 
@@ -65,12 +78,12 @@ const removeInactiveByPid = async (pathToProfiles, pidPrefix) => {
       inactivePids(item).then((inactive) => (inactive ? item : null)),
     ),
   )
-  const items = toRemove.filter(Boolean)
+  const items = toRemove.filter((item): item is FolderWithPid => item !== null)
 
   return Promise.all(items.map(removeProfile))
 }
 
-const removeRootProfile = async (pathToProfiles, ignore) => {
+export const removeRootProfile = async (pathToProfiles: string, ignore?: string[]): Promise<void> => {
   const pattern = path.join(pathToProfiles, '*')
 
   try {
@@ -80,18 +93,7 @@ const removeRootProfile = async (pathToProfiles, ignore) => {
 
     await Promise.all(matches.map(removeMatch))
   } catch {
-    return null // swallow errors
+    // swallow errors
+    return undefined
   }
-}
-
-module.exports = {
-  inactivePids,
-
-  isCypressProcess,
-
-  getPidFromFolder,
-
-  removeRootProfile,
-
-  removeInactiveByPid,
 }

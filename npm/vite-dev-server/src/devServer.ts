@@ -3,6 +3,7 @@ import semverMajor from 'semver/functions/major.js'
 import type { UserConfig } from 'vite-7'
 import { getVite, Vite_7, Vite_8 } from './getVite.js'
 import { createViteDevServerConfig, isVite8 } from './resolveConfig.js'
+import { getSupportFileRelativePath, waitUntilUrlReady } from './waitForSupportFile.js'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -38,13 +39,24 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   debug('Vite server created')
 
   await server.listen()
-  const { port } = server.config.server
+  const { port, host } = server.config.server
 
   if (!port) {
     throw new Error('Missing vite dev server port.')
   }
 
   debug('Successfully launched the vite server on port', port)
+
+  const supportPath = getSupportFileRelativePath(config.cypressConfig)
+
+  if (supportPath) {
+    const baseUrl = `http://${typeof host === 'string' ? host : '127.0.0.1'}:${port}`
+    const supportFileUrl = new URL(supportPath, `${baseUrl}/`).href
+
+    debug('Waiting until support file is servable', supportFileUrl)
+    await waitUntilUrlReady(supportFileUrl)
+    debug('Support file is ready')
+  }
 
   return {
     port,

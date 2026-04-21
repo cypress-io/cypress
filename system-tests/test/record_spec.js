@@ -2721,6 +2721,18 @@ describe('e2e record', () => {
             expect(postResultsRequest.body.stats.passes).to.equal(1)
             expect(postResultsRequest.body.stats.failures).to.equal(1)
             expect(postResultsRequest.body.stats.skipped).to.equal(0)
+
+            // Early-exit crash patching should attach structured error to the impacted test for Cloud
+            const failedWithCrashOnAttempt = postResultsRequest.body.tests.filter((t) => {
+              if (t.state !== 'failed' || !t.attempts?.length) return false
+
+              const err = t.attempts[t.attempts.length - 1].error
+
+              return err && err.message && err.message.includes('Chrome')
+            })
+
+            expect(failedWithCrashOnAttempt, 'failed test should carry crash error on last attempt').to.have.length.greaterThan(0)
+            expect(failedWithCrashOnAttempt[0].displayError).to.be.a('string').and.not.empty
           })
         })
       })
