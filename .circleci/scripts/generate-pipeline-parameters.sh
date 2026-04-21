@@ -10,29 +10,29 @@
 set -euo pipefail
 
 # Use individual variables instead of associative arrays (bash 3.x compatible)
-p_run_driver_tests=false
-p_run_server_tests=false
-p_run_app_ui_tests=false
-p_run_launchpad_tests=false
-p_run_reporter_tests=false
-p_run_frontend_shared_tests=false
-p_run_system_tests=false
-p_run_v8_tests=false
-p_run_cli_tests=false
-p_run_unit_tests=false
-p_run_npm_webpack_dev_server_tests=false
-p_run_npm_vite_dev_server_tests=false
-p_run_npm_webpack_preprocessor_tests=false
-p_run_npm_webpack_batteries_tests=false
-p_run_npm_vue_tests=false
-p_run_npm_react_tests=false
-p_run_npm_angular_tests=false
-p_run_npm_puppeteer_tests=false
-p_run_npm_vite_plugin_esm_tests=false
-p_run_npm_mount_utils_tests=false
-p_run_npm_grep_tests=false
-p_run_npm_eslint_plugin_tests=false
-p_run_npm_schematic_tests=false
+driver_tests=false
+server_tests=false
+app_ui_tests=false
+launchpad_tests=false
+reporter_tests=false
+frontend_shared_tests=false
+system_tests=false
+v8_tests=false
+cli_tests=false
+unit_tests=false
+npm_webpack_dev_server_tests=false
+npm_vite_dev_server_tests=false
+npm_webpack_preprocessor_tests=false
+npm_webpack_batteries_tests=false
+npm_vue_tests=false
+npm_react_tests=false
+npm_angular_tests=false
+npm_puppeteer_tests=false
+npm_vite_plugin_esm_tests=false
+npm_mount_utils_tests=false
+npm_grep_tests=false
+npm_eslint_plugin_tests=false
+npm_schematic_tests=false
 
 emit_json() {
   local pb="${PUBLISH_BINARY_BRANCH:-main}"
@@ -40,34 +40,34 @@ emit_json() {
   local fpa_raw="${FORCE_PERSIST_ARTIFACTS:-false}"
   local fpa; [[ "$fpa_raw" == "true" || "$fpa_raw" == "1" ]] && fpa=true || fpa=false
   cat <<EOF
-{"publish-binary-branch": "$pb", "force-persist-artifacts": $fpa, "run-driver-tests": $p_run_driver_tests, "run-server-tests": $p_run_server_tests, "run-app-ui-tests": $p_run_app_ui_tests, "run-launchpad-tests": $p_run_launchpad_tests, "run-reporter-tests": $p_run_reporter_tests, "run-frontend-shared-tests": $p_run_frontend_shared_tests, "run-system-tests": $p_run_system_tests, "run-v8-tests": $p_run_v8_tests, "run-cli-tests": $p_run_cli_tests, "run-unit-tests": $p_run_unit_tests, "run-npm-webpack-dev-server-tests": $p_run_npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $p_run_npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $p_run_npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $p_run_npm_webpack_batteries_tests, "run-npm-vue-tests": $p_run_npm_vue_tests, "run-npm-react-tests": $p_run_npm_react_tests, "run-npm-angular-tests": $p_run_npm_angular_tests, "run-npm-puppeteer-tests": $p_run_npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $p_run_npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $p_run_npm_mount_utils_tests, "run-npm-grep-tests": $p_run_npm_grep_tests, "run-npm-eslint-plugin-tests": $p_run_npm_eslint_plugin_tests, "run-npm-schematic-tests": $p_run_npm_schematic_tests}
+{"publish-binary-branch": "$pb", "force-persist-artifacts": $fpa, "run-driver-tests": $driver_tests, "run-server-tests": $server_tests, "run-app-ui-tests": $app_ui_tests, "run-launchpad-tests": $launchpad_tests, "run-reporter-tests": $reporter_tests, "run-frontend-shared-tests": $frontend_shared_tests, "run-system-tests": $system_tests, "run-v8-tests": $v8_tests, "run-cli-tests": $cli_tests, "run-unit-tests": $unit_tests, "run-npm-webpack-dev-server-tests": $npm_webpack_dev_server_tests, "run-npm-vite-dev-server-tests": $npm_vite_dev_server_tests, "run-npm-webpack-preprocessor-tests": $npm_webpack_preprocessor_tests, "run-npm-webpack-batteries-tests": $npm_webpack_batteries_tests, "run-npm-vue-tests": $npm_vue_tests, "run-npm-react-tests": $npm_react_tests, "run-npm-angular-tests": $npm_angular_tests, "run-npm-puppeteer-tests": $npm_puppeteer_tests, "run-npm-vite-plugin-esm-tests": $npm_vite_plugin_esm_tests, "run-npm-mount-utils-tests": $npm_mount_utils_tests, "run-npm-grep-tests": $npm_grep_tests, "run-npm-eslint-plugin-tests": $npm_eslint_plugin_tests, "run-npm-schematic-tests": $npm_schematic_tests}
 EOF
 }
 
 emit_all_true() {
-  p_run_driver_tests=true
-  p_run_server_tests=true
-  p_run_app_ui_tests=true
-  p_run_launchpad_tests=true
-  p_run_reporter_tests=true
-  p_run_frontend_shared_tests=true
-  p_run_system_tests=true
-  p_run_v8_tests=true
-  p_run_cli_tests=true
-  p_run_unit_tests=true
-  p_run_npm_webpack_dev_server_tests=true
-  p_run_npm_vite_dev_server_tests=true
-  p_run_npm_webpack_preprocessor_tests=true
-  p_run_npm_webpack_batteries_tests=true
-  p_run_npm_vue_tests=true
-  p_run_npm_react_tests=true
-  p_run_npm_angular_tests=true
-  p_run_npm_puppeteer_tests=true
-  p_run_npm_vite_plugin_esm_tests=true
-  p_run_npm_mount_utils_tests=true
-  p_run_npm_grep_tests=true
-  p_run_npm_eslint_plugin_tests=true
-  p_run_npm_schematic_tests=true
+  driver_tests=true
+  server_tests=true
+  app_ui_tests=true
+  launchpad_tests=true
+  reporter_tests=true
+  frontend_shared_tests=true
+  system_tests=true
+  v8_tests=true
+  cli_tests=true
+  unit_tests=true
+  npm_webpack_dev_server_tests=true
+  npm_vite_dev_server_tests=true
+  npm_webpack_preprocessor_tests=true
+  npm_webpack_batteries_tests=true
+  npm_vue_tests=true
+  npm_react_tests=true
+  npm_angular_tests=true
+  npm_puppeteer_tests=true
+  npm_vite_plugin_esm_tests=true
+  npm_mount_utils_tests=true
+  npm_grep_tests=true
+  npm_eslint_plugin_tests=true
+  npm_schematic_tests=true
   emit_json
 }
 
@@ -136,177 +136,187 @@ while IFS= read -r file; do
     *.md|*.mdx|*.txt|LICENSE|.github/*|.gitignore|.gitattributes|.editorconfig)
       ;;
     packages/driver/*)
-      p_run_driver_tests=true
-      p_run_system_tests=true
+      driver_tests=true
+      system_tests=true
       ;;
     packages/server/*)
-      p_run_server_tests=true
-      p_run_system_tests=true
+      server_tests=true
+      system_tests=true
       ;;
     packages/proxy/*)
-      p_run_server_tests=true
-      p_run_system_tests=true
+      server_tests=true
+      system_tests=true
       ;;
     packages/net-stubbing/*)
-      p_run_server_tests=true
-      p_run_driver_tests=true
-      p_run_system_tests=true
+      server_tests=true
+      driver_tests=true
+      system_tests=true
       ;;
     packages/rewriter/*)
-      p_run_server_tests=true
-      p_run_system_tests=true
+      server_tests=true
+      system_tests=true
       ;;
     packages/https-proxy/*)
-      p_run_server_tests=true
-      p_run_system_tests=true
+      server_tests=true
+      system_tests=true
       ;;
     packages/app/*)
-      p_run_app_ui_tests=true
-      p_run_system_tests=true
+      app_ui_tests=true
+      system_tests=true
       ;;
     packages/launchpad/*)
-      p_run_launchpad_tests=true
-      p_run_system_tests=true
+      launchpad_tests=true
+      system_tests=true
       ;;
     packages/reporter/*)
-      p_run_reporter_tests=true
-      p_run_app_ui_tests=true
+      reporter_tests=true
+      app_ui_tests=true
       ;;
     packages/frontend-shared/*)
-      p_run_frontend_shared_tests=true
-      p_run_app_ui_tests=true
-      p_run_launchpad_tests=true
-      p_run_reporter_tests=true
+      frontend_shared_tests=true
+      app_ui_tests=true
+      launchpad_tests=true
+      reporter_tests=true
       ;;
     packages/data-context/*)
-      p_run_app_ui_tests=true
-      p_run_launchpad_tests=true
-      p_run_server_tests=true
-      p_run_system_tests=true
+      app_ui_tests=true
+      launchpad_tests=true
+      server_tests=true
+      system_tests=true
       ;;
     packages/runner/*)
-      p_run_driver_tests=true
-      p_run_app_ui_tests=true
+      driver_tests=true
+      app_ui_tests=true
       ;;
     packages/web-config/*)
-      p_run_driver_tests=true
-      p_run_app_ui_tests=true
+      driver_tests=true
+      app_ui_tests=true
       ;;
     packages/electron/*)
-      p_run_driver_tests=true
-      p_run_system_tests=true
+      driver_tests=true
+      system_tests=true
       ;;
     packages/extension/*)
-      p_run_driver_tests=true
+      # Extension is a browser WebExtension; driver tests only need to run in Firefox.
+      # TODO: introduce a run-firefox-driver-tests parameter to avoid running all browser variants.
+      driver_tests=true
+      system_tests=true
       ;;
     packages/launcher/*)
-      p_run_system_tests=true
+      system_tests=true
       ;;
     packages/scaffold-config/*)
-      p_run_launchpad_tests=true
-      p_run_system_tests=true
+      launchpad_tests=true
+      system_tests=true
       ;;
     packages/resolve-dist/*)
-      p_run_app_ui_tests=true
-      p_run_launchpad_tests=true
+      app_ui_tests=true
+      launchpad_tests=true
       ;;
     packages/telemetry/*)
       # Used by driver, server, app, data-context, net-stubbing, proxy
-      p_run_driver_tests=true
-      p_run_server_tests=true
-      p_run_app_ui_tests=true
-      p_run_system_tests=true
+      driver_tests=true
+      server_tests=true
+      app_ui_tests=true
+      system_tests=true
       ;;
     packages/network-tools/*)
       # Used by driver, proxy, server (and transitively by packages/network which is a global trigger)
-      p_run_driver_tests=true
-      p_run_server_tests=true
-      p_run_system_tests=true
+      driver_tests=true
+      server_tests=true
+      system_tests=true
       ;;
     packages/packherd-require/*)
       # Consumed by v8-snapshot-require; tested via v8 integration tests
-      p_run_v8_tests=true
+      v8_tests=true
       ;;
     packages/v8-snapshot-require/*)
-      p_run_v8_tests=true
+      v8_tests=true
       ;;
     packages/stderr-filtering/*)
       # Used by data-context, electron, server
-      p_run_server_tests=true
-      p_run_app_ui_tests=true
-      p_run_launchpad_tests=true
-      p_run_system_tests=true
+      server_tests=true
+      app_ui_tests=true
+      launchpad_tests=true
+      system_tests=true
       ;;
     packages/icons/*)
       # Used by electron, extension, runner, server
-      p_run_driver_tests=true
-      p_run_server_tests=true
-      p_run_app_ui_tests=true
-      p_run_system_tests=true
+      driver_tests=true
+      server_tests=true
+      app_ui_tests=true
+      system_tests=true
       ;;
     cli/*)
-      p_run_cli_tests=true
-      p_run_unit_tests=true
+      cli_tests=true
+      unit_tests=true
       ;;
     system-tests/*)
-      p_run_system_tests=true
+      system_tests=true
       ;;
     tooling/*)
-      p_run_v8_tests=true
+      v8_tests=true
       ;;
     npm/webpack-dev-server/*)
-      p_run_npm_webpack_dev_server_tests=true
+      # TODO: also run relevant system tests (component_testing_spec, scaffold_config_spec, etc.)
+      npm_webpack_dev_server_tests=true
       ;;
     npm/vite-dev-server/*)
-      p_run_npm_vite_dev_server_tests=true
+      # TODO: also run relevant system tests
+      npm_vite_dev_server_tests=true
       ;;
     npm/webpack-preprocessor/*)
-      p_run_npm_webpack_preprocessor_tests=true
+      npm_webpack_preprocessor_tests=true
       ;;
     npm/webpack-batteries-included-preprocessor/*)
-      p_run_npm_webpack_batteries_tests=true
+      npm_webpack_batteries_tests=true
       ;;
     npm/vue/*)
-      p_run_npm_vue_tests=true
+      # TODO: also run relevant system tests
+      npm_vue_tests=true
       ;;
     npm/react/*)
-      p_run_npm_react_tests=true
+      # TODO: also run relevant system tests
+      npm_react_tests=true
       ;;
     npm/angular/*)
-      p_run_npm_angular_tests=true
+      # TODO: also run relevant system tests (component_testing_spec, scaffold_config_spec, webpack-dev-server tests)
+      npm_angular_tests=true
       ;;
     npm/angular-zoneless/*)
-      p_run_npm_angular_tests=true
+      # TODO: also run relevant system tests
+      npm_angular_tests=true
       ;;
     npm/svelte/*)
-      p_run_system_tests=true
+      system_tests=true
       ;;
     npm/puppeteer/*)
-      p_run_npm_puppeteer_tests=true
+      npm_puppeteer_tests=true
       ;;
     npm/vite-plugin-cypress-esm/*)
-      p_run_npm_vite_plugin_esm_tests=true
+      npm_vite_plugin_esm_tests=true
       ;;
     npm/mount-utils/*)
-      p_run_npm_mount_utils_tests=true
+      npm_mount_utils_tests=true
       ;;
     npm/grep/*)
-      p_run_npm_grep_tests=true
+      npm_grep_tests=true
       ;;
     npm/eslint-plugin-dev/*)
-      p_run_npm_eslint_plugin_tests=true
+      npm_eslint_plugin_tests=true
       ;;
     npm/cypress-schematic/*)
-      p_run_npm_schematic_tests=true
+      npm_schematic_tests=true
       ;;
     packages/eslint-config/*|packages/example/*|npm/xpath/*)
       # No CI jobs are associated with these packages — no tests to run
       ;;
     *)
-      # Unrecognized path — run everything rather than risk missing coverage
-      echo "Unrecognized path '$file' — running all tests" >&2
-      emit_all_true
-      exit 0
+      # Unrecognized path — fail loudly so the mapping is kept up to date.
+      # Add the new path to one of the cases above rather than silently skipping tests.
+      echo "Error: unrecognized path '$file' has no mapping in generate-pipeline-parameters.sh" >&2
+      echo "Add it to the targeted path mapping section before merging." >&2
+      exit 1
       ;;
   esac
 done <<< "$CHANGED"
