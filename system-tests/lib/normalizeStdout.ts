@@ -167,6 +167,9 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   // Replaces "new dependencies optimized" message from vite as it does not respect the logLevel='silent' option
   .replace(/^.*Re-optimizing dependencies.*?\n$/gm, '')
   .replace(/\).*new dependencies optimized.*?\n/gm, ')\n')
+  // Strip non-deterministic Vite timestamped log lines (e.g. "2:59:36 PM [vite] (client) ...")
+  // that occasionally leak into stdout despite logLevel='silent'
+  .replace(/^\d{1,2}:\d{2}:\d{2}\s(?:AM|PM)\s\[vite\].*\n/gm, '')
 
   if (options.browser === 'webkit') {
     // WebKit throws for lookups on undefined refs with "Can't find variable: <var>"
