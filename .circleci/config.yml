@@ -59,6 +59,11 @@ workflows:
             - pack-workflows
             # Draft-PR cancellation is handled by pack-workflows above; if that
             # job halts (draft PR, non-PR build), this job never starts.
+            # The orb's built-in steps run checkout first, then attach the
+            # workspace at workspace_path (bringing in .circleci/packed/ from
+            # pack-workflows). Do NOT add a pre-step attach_workspace here —
+            # it would populate /home/circleci/project before checkout and
+            # cause "directory is not empty and not a git repository".
             - path-filtering/filter:
                 name: launch-path-filtered-workflow
                 requires:
@@ -67,9 +72,6 @@ workflows:
                 mapping: .circleci/path-filter-mapping.conf
                 config-path: .circleci/packed/pipeline.yml
                 workspace_path: .
-                pre-steps:
-                    - attach_workspace:
-                        at: .
 
 commands:
   persist:
