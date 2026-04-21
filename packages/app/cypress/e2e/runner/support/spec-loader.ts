@@ -7,6 +7,11 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }: Ex
 
   cy.get('button.restart', { timeout: 30000 }).should('be.visible') // ensure tests are finished running
 
+  // ensure the reporter has exited its Loading state (i.e. runnablesStore.isReady === true).
+  // Necessary because when passCount/failCount are 0 they coerce to '--', which also matches
+  // the pre-run stats, so without this gate downstream assertions can race the reporter render.
+  cy.get('.reporter').find('.runnable-loading').should('not.exist')
+
   cy.get('.stats', { timeout: 10000 }).within(() => {
     cy.get('.passed .num', { timeout: 40000 }).should('have.text', `${passCount}`)
     cy.get('.failed .num', { timeout: 40000 }).should('have.text', `${failCount}`)

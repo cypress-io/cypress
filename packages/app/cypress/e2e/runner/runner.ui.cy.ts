@@ -61,8 +61,7 @@ describe('src/cypress/runner', () => {
         failCount: 0,
       })
 
-      cy.get('.reporter').find('.runnable-loading').should('not.exist')
-      cy.contains('No tests found.', { timeout: 10000 }).should('be.visible')
+      cy.contains('No tests found.').should('be.visible')
       cy.contains('p', 'Cypress could not detect tests in this file.').should('be.visible')
     })
 
@@ -282,8 +281,7 @@ describe('src/cypress/runner', () => {
         failCount: 0,
       })
 
-      cy.get('.reporter').find('.runnable-loading').should('not.exist')
-      cy.get('.reporter').contains('No tests found', { timeout: 10000 })
+      cy.get('.reporter').contains('No tests found')
     })
   })
 
