@@ -281,7 +281,6 @@ function registerSignalEventsIfNeeded<T> (
   if (isPropValueASignal) {
     // propValue -> componentValue
     const convertedToObservable = toObservable(propValue, {
-      // @ts-expect-error - monorepo clashing types between Angular 18 and Angular 21
       injector,
     })
 
@@ -300,7 +299,6 @@ function registerSignalEventsIfNeeded<T> (
   if (isPropValueASignal && isComponentValueAModelSignal) {
     // propValue <- componentValue
     const modelChanged$ = toObservable(componentValue, {
-      // @ts-expect-error - monorepo clashing types between Angular 18 and Angular 21
       injector,
     })
 
@@ -337,7 +335,6 @@ function detectAndRegisterOutputSpyToSignal<T> (config: MountConfig<T>, componen
       if (isWritableSignal(componentValue) && !isInputSignal(componentValue)) {
         activeInternalSubscriptions.push(
           toObservable(componentValue, {
-            // @ts-expect-error - monorepo clashing types between Angular 18 and Angular 21
             injector,
           }).subscribe((value) => {
             component[expectedChangeKey]?.emit(value)
