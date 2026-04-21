@@ -89,7 +89,8 @@
 
 <script lang="ts" setup>
 import { compact, groupBy } from 'lodash'
-import { computed, h, FunctionalComponent } from 'vue'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import { useI18n } from '@cy/i18n'
 import RunCard from './RunCard.vue'
 import DebugCommitIcon from '../debug/DebugCommitIcon.vue'

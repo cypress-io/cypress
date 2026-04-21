@@ -79,7 +79,9 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, FunctionalComponent, SVGAttributes, watch, ref } from 'vue'
+import { computed, watch, ref } from 'vue'
+import type { FunctionalComponent } from 'vue'
+import type { SVGAttributes } from 'vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import { promiseTimeout } from '@vueuse/core'
 

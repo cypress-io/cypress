@@ -91,9 +91,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, FunctionalComponent, ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import SidebarNavigationRow, { Badge, IconStatus } from './SidebarNavigationRow.vue'
+import SidebarNavigationRow from './SidebarNavigationRow.vue'
+import type { Badge, IconStatus } from './SidebarNavigationRow.vue'
 import KeyboardBindingsModal from './KeyboardBindingsModal.vue'
 import {
   IconTechnologyCodeEditor,
@@ -104,7 +106,8 @@ import {
 import { OutlineStatusIcon } from '@cypress-design/vue-statusicon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
-import { SidebarNavigationFragment, SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
+import { SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
+import type { SidebarNavigationFragment } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
 import { useRoute, RouterLink } from 'vue-router'

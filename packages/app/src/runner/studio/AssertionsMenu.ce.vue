@@ -64,9 +64,10 @@
 import { createPopper } from '@popperjs/core'
 import AssertionType from './AssertionType.ce.vue'
 import _ from 'lodash'
-import { nextTick, onMounted, Ref, ref, StyleValue } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { IconActionDeleteSmall, IconActionTap } from '@cypress-design/vue-icon'
 import type { PossibleAssertions, AddAssertion, AssertionArgs } from './types'
+import type { Ref, StyleValue} from 'vue'
 
 const props = defineProps <{
   jqueryElement: JQuery<HTMLElement>
@@ -116,7 +117,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@import "./assertions-style.scss";
+@use "./assertions-style.scss";
 
 // NOTE: This is needed because the icon component css is not imported in this component
 .icon-dark-gray-500 {
@@ -135,7 +136,7 @@ onMounted(() => {
 }
 
 .assertions-menu {
-  @include menu-style;
+  @include assertions-style.menu-style;
 
   font-weight: normal;
   font-family: $font-system;

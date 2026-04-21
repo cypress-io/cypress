@@ -45,7 +45,8 @@
 
 <script lang="ts" setup>
 import type { FunctionalComponent, SVGAttributes } from 'vue'
-import { ref, ComponentPublicInstance, computed, watchEffect, nextTick } from 'vue'
+import { ref, computed, watchEffect, nextTick } from 'vue'
+import type { ComponentPublicInstance } from 'vue'
 import Collapsible from '@cy/components/Collapsible.vue'
 import ListRowHeader from '@cy/components/ListRowHeader.vue'
 import { useRoute } from 'vue-router'

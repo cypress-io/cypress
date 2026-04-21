@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { pipe, map } from 'wonka'
-import { Client, subscriptionExchange, TypedDocumentNode, createClient, dedupExchange, errorExchange, ExecutionResult, gql } from '@urql/core'
+import { Client, subscriptionExchange, createClient, dedupExchange, errorExchange, gql } from '@urql/core'
+import type { TypedDocumentNode, ExecutionResult } from '@urql/core'
 import { executeExchange } from '@urql/exchange-execute'
 import { makeCacheExchange } from '../../../src/graphql/urqlClient'
 import { clientTestSchema } from './clientTestSchema'

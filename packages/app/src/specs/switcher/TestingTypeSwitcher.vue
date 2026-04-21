@@ -10,7 +10,8 @@
 
 <script setup lang="ts">
 
-import { computed, h, FunctionalComponent } from 'vue'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import Tabs from '@cypress-design/vue-tabs'
 import type { Tab } from '@cypress-design/constants-tabs'
 import { IconTestingTypeComponent, IconTestingTypeE2E, IconActionQuestionMarkOutline } from '@cypress-design/vue-icon'
