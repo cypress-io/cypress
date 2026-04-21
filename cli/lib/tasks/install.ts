@@ -82,7 +82,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
     onProgress: null,
   }
   const downloadDestination = path.join(downloadDir, `cypress-${process.pid}.zip`)
-  const rendererOptions = getRendererOptions()
+  const listrRenderer = getRendererOptions().renderer
 
   // let the user know what version of cypress we're downloading!
   logger.log(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`)
@@ -90,7 +90,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
 
   const tasks = new Listr([
     {
-      options: { title: util.titleize('Downloading Cypress') },
+      title: util.titleize('Downloading Cypress'),
       task: async (ctx: any, task: any) => {
         // as our download progresses indicate the status
         progress.onProgress = progessify(task, 'Downloading Cypress')
@@ -105,7 +105,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
         util.setTaskTitle(
           task,
           util.titleize(chalk.green('Downloaded Cypress')),
-          rendererOptions.renderer,
+          listrRenderer,
         )
       },
     },
@@ -113,10 +113,10 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
       progress,
       zipFilePath: downloadDestination,
       installDir,
-      rendererOptions,
+      renderer: listrRenderer,
     }),
     {
-      options: { title: util.titleize('Finishing Installation') },
+      title: util.titleize('Finishing Installation'),
       task: async (ctx: any, task: any) => {
         const cleanup = async () => {
           debug('removing zip file %s', downloadDestination)
@@ -131,11 +131,11 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
         util.setTaskTitle(
           task,
           util.titleize(chalk.green('Finished Installation'), chalk.gray(installDir)),
-          rendererOptions.renderer,
+          listrRenderer,
         )
       },
     },
-  ], { rendererOptions })
+  ], { renderer: listrRenderer })
 
   // start the tasks!
   return tasks.run()
@@ -344,7 +344,7 @@ const start = async (options: any = {}): Promise<any> => {
     debug('found local file at', absolutePath)
     debug('skipping download')
 
-    const rendererOptions = getRendererOptions()
+    const listrRenderer = getRendererOptions().renderer
 
     return new Listr([unzipTask({
       progress: {
@@ -353,8 +353,8 @@ const start = async (options: any = {}): Promise<any> => {
       },
       zipFilePath: absolutePath,
       installDir,
-      rendererOptions,
-    })], { rendererOptions }).run()
+      renderer: listrRenderer,
+    })], { renderer: listrRenderer }).run()
   }
 
   if (options.force) {
@@ -374,9 +374,9 @@ const start = async (options: any = {}): Promise<any> => {
   displayCompletionMsg()
 }
 
-const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }: any): any => {
+const unzipTask = ({ zipFilePath, installDir, progress, renderer }: any): any => {
   return {
-    options: { title: util.titleize('Unzipping Cypress') },
+    title: util.titleize('Unzipping Cypress'),
     task: async (ctx: any, task: any) => {
     // as our unzip progresses indicate the status
       progress.onProgress = progessify(task, 'Unzipping Cypress')
@@ -385,7 +385,7 @@ const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }: any):
       util.setTaskTitle(
         task,
         util.titleize(chalk.green('Unzipped Cypress')),
-        rendererOptions.renderer,
+        renderer,
       )
     },
   }

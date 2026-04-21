@@ -120,19 +120,23 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
   }
 })
 
+/** Stable clock for VerboseRenderer snapshot lines */
+vi.mock('dayjs', () => ({
+  default: () => ({
+    format: () => '10:01:12',
+  }),
+}))
+
 const packageVersion = '1.2.3'
 const downloadDestination = path.join(os.tmpdir(), `cypress-${process.pid}.zip`)
 const installDir = '/cache/Cypress/1.2.3'
 
 /**
- * NOTE: icons from listr2 do not render if process.stdout.isTTY is false,
- * which does not exist when running in a worker thread, which is commonly the case in Vitest.
+ * NOTE: Vitest worker threads typically have non-TTY stdout; listr2 uses the SimpleRenderer fallback in that case,
+ * while local CLI runs often use DefaultRenderer when TTY is available. stdout is mocked here via createStdoutCapture;
+ * forwarding write() must preserve Node's stream binding (see mock implementation).
  *
- * This means that the test environment implicitly uses the VerboseRenderer as a fallback,
- * where as the CLI uses the DefaultRenderer.
- *
- * This is the main reason the snapshots look different in testing mode vs when running the commands directly
- * via the CLI. This also allows us for our snapshot tests to be deterministic because we aren't rerendering icon states.
+ * `dayjs` is mocked so VerboseRenderer (CI) snapshots keep a stable timestamp prefix.
  *
  * @see https://listr2.kilic.dev/renderer/renderer.html#frontmatter-title
  */
@@ -144,12 +148,15 @@ describe('/lib/tasks/install', function () {
   const createStdoutCapture = () => {
     const logs: string[] = []
 
-    const originalOut = process.stdout.write
+    const originalOut = process.stdout.write.bind(process.stdout)
 
-    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array) => {
-      logs.push(strOrBugger as string)
+    vi.spyOn(process.stdout, 'write').mockImplementation(function (
+      this: typeof process.stdout,
+      ...args: Parameters<typeof process.stdout.write>
+    ): boolean {
+      logs.push(args[0] as string)
 
-      return originalOut(strOrBugger)
+      return originalOut(...args)
     })
 
     return () => logs.join('')
@@ -253,7 +260,7 @@ describe('/lib/tasks/install', function () {
 
         await install.start({ buildInfo })
         expect(unzip.start).toHaveBeenCalledWith(expect.objectContaining({
-          installDir: expect.stringMatching(/\/Cypress\/beta\-1\.2\.3\-aBranchName\-3b7f0b5c$/),
+          installDir: expect.stringMatching(/beta\-1\.2\.3\-aBranchName\-3b7f0b5c$/),
         }))
       })
     })

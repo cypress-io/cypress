@@ -11,15 +11,7 @@ exports[`/lib/tasks/install > .start > exits with error when installing on unsup
 "
 `;
 
-exports[`/lib/tasks/install > .start > is silent when log level is silent > silent install 1 1`] = `
-"[STARTED] Task without title.
-[SUCCESS] Task without title.
-[STARTED] Task without title.
-[SUCCESS] Task without title.
-[STARTED] Task without title.
-[SUCCESS] Task without title.
-"
-`;
+exports[`/lib/tasks/install > .start > is silent when log level is silent > silent install 1 1`] = `""`;
 
 exports[`/lib/tasks/install > .start > non-stable builds > logs a warning about installing a pre-release > pre-release warning 1`] = `
 "[33m⚠ Warning: You are installing a pre-release build of Cypress.[39m
@@ -33,15 +25,12 @@ exports[`/lib/tasks/install > .start > non-stable builds > logs a warning about 
 
 Installing Cypress [90m(version: https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/aBranchName-3b7f0b5c59def1e9b5f385bd585c9b2836706c29/cypress.zip)[39m
 
-[STARTED] Task without title.
-[TITLE] [34m [32mDownloaded Cypress[39m[34m[39m
-[SUCCESS] [34m [32mDownloaded Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mUnzipped Cypress[39m[34m[39m
-[SUCCESS] [34m [32mUnzipped Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
-[SUCCESS] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
+❯ [34m Downloading Cypress    [39m
+✔ [34m [32mDownloaded Cypress[39m[34m[39m
+❯ [34m Unzipping Cypress      [39m
+✔ [34m [32mUnzipped Cypress[39m[34m[39m
+❯ [34m Finishing Installation [39m
+✔ [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
@@ -60,15 +49,12 @@ Cypress [32mx.x.x[39m is installed in [36m/cache/Cypress/1.2.3[39m
 
 Installing Cypress [90m(version: 1.2.3)[39m
 
-[STARTED] Task without title.
-[TITLE] [34m [32mDownloaded Cypress[39m[34m[39m
-[SUCCESS] [34m [32mDownloaded Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mUnzipped Cypress[39m[34m[39m
-[SUCCESS] [34m [32mUnzipped Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
-[SUCCESS] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
+❯ [34m Downloading Cypress    [39m
+✔ [34m [32mDownloaded Cypress[39m[34m[39m
+❯ [34m Unzipping Cypress      [39m
+✔ [34m [32mUnzipped Cypress[39m[34m[39m
+❯ [34m Finishing Installation [39m
+✔ [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
 
 [33m⚠ Warning: It looks like you've installed Cypress globally.[39m
 [33m[39m
@@ -111,15 +97,12 @@ exports[`/lib/tasks/install > .start > override version > warns when specifying 
 
 Installing Cypress [90m(version: 0.12.1)[39m
 
-[STARTED] Task without title.
-[TITLE] [34m [32mDownloaded Cypress[39m[34m[39m
-[SUCCESS] [34m [32mDownloaded Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mUnzipped Cypress[39m[34m[39m
-[SUCCESS] [34m [32mUnzipped Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
-[SUCCESS] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
+❯ [34m Downloading Cypress    [39m
+✔ [34m [32mDownloaded Cypress[39m[34m[39m
+❯ [34m Unzipping Cypress      [39m
+✔ [34m [32mUnzipped Cypress[39m[34m[39m
+❯ [34m Finishing Installation [39m
+✔ [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
@@ -138,15 +121,12 @@ Cypress [32mx.x.x[39m is installed in [36m/cache/Cypress/1.2.3[39m
 
 Installing Cypress [90m(version: 1.2.3)[39m
 
-[STARTED] Task without title.
-[TITLE] [34m [32mDownloaded Cypress[39m[34m[39m
-[SUCCESS] [34m [32mDownloaded Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mUnzipped Cypress[39m[34m[39m
-[SUCCESS] [34m [32mUnzipped Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
-[SUCCESS] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
+❯ [34m Downloading Cypress    [39m
+✔ [34m [32mDownloaded Cypress[39m[34m[39m
+❯ [34m Unzipping Cypress      [39m
+✔ [34m [32mUnzipped Cypress[39m[34m[39m
+❯ [34m Finishing Installation [39m
+✔ [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
@@ -162,15 +142,12 @@ You can now open Cypress by running one of the following, depending on your pack
 exports[`/lib/tasks/install > .start > override version > when getting installed version fails > logs message and starts download > continues installing on failure 1 1`] = `
 "Installing Cypress [90m(version: 1.2.3)[39m
 
-[STARTED] Task without title.
-[TITLE] [34m [32mDownloaded Cypress[39m[34m[39m
-[SUCCESS] [34m [32mDownloaded Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mUnzipped Cypress[39m[34m[39m
-[SUCCESS] [34m [32mUnzipped Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
-[SUCCESS] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
+❯ [34m Downloading Cypress    [39m
+✔ [34m [32mDownloaded Cypress[39m[34m[39m
+❯ [34m Unzipping Cypress      [39m
+✔ [34m [32mUnzipped Cypress[39m[34m[39m
+❯ [34m Finishing Installation [39m
+✔ [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
@@ -189,12 +166,15 @@ Cypress [32mx.x.x[39m is installed in [36m/cache/Cypress/1.2.3[39m
 
 Installing Cypress [90m(version: 1.2.3)[39m
 
-[STARTED] Task without title.
-[SUCCESS] Task without title.
-[STARTED] Task without title.
-[SUCCESS] Task without title.
-[STARTED] Task without title.
-[SUCCESS] Task without title.
+[2m[10:01:12][22m [34m Downloading Cypress    [39m [started]
+[2m[10:01:12][22m [34m [32mDownloaded Cypress[39m[34m[39m [title changed]
+[2m[10:01:12][22m [34m [32mDownloaded Cypress[39m[34m[39m [COMPLETED]
+[2m[10:01:12][22m [34m Unzipping Cypress      [39m [started]
+[2m[10:01:12][22m [34m [32mUnzipped Cypress[39m[34m[39m [title changed]
+[2m[10:01:12][22m [34m [32mUnzipped Cypress[39m[34m[39m [COMPLETED]
+[2m[10:01:12][22m [34m Finishing Installation [39m [started]
+[2m[10:01:12][22m [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m [title changed]
+[2m[10:01:12][22m [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m [COMPLETED]
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
@@ -210,15 +190,12 @@ You can now open Cypress by running one of the following, depending on your pack
 exports[`/lib/tasks/install > .start > override version > when there is no install version > logs message and starts download > installs without existing installation 1 1`] = `
 "Installing Cypress [90m(version: 1.2.3)[39m
 
-[STARTED] Task without title.
-[TITLE] [34m [32mDownloaded Cypress[39m[34m[39m
-[SUCCESS] [34m [32mDownloaded Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mUnzipped Cypress[39m[34m[39m
-[SUCCESS] [34m [32mUnzipped Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
-[SUCCESS] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
+❯ [34m Downloading Cypress    [39m
+✔ [34m [32mDownloaded Cypress[39m[34m[39m
+❯ [34m Unzipping Cypress      [39m
+✔ [34m [32mUnzipped Cypress[39m[34m[39m
+❯ [34m Finishing Installation [39m
+✔ [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
 
 You can now open Cypress by running one of the following, depending on your package manager:
 
@@ -254,15 +231,12 @@ Cypress [32m1.2.3[39m is installed in [36m/cache/Cypress/1.2.3[39m
 
 Installing Cypress [90m(version: 1.2.3)[39m
 
-[STARTED] Task without title.
-[TITLE] [34m [32mDownloaded Cypress[39m[34m[39m
-[SUCCESS] [34m [32mDownloaded Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mUnzipped Cypress[39m[34m[39m
-[SUCCESS] [34m [32mUnzipped Cypress[39m[34m[39m
-[STARTED] Task without title.
-[TITLE] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
-[SUCCESS] [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
+❯ [34m Downloading Cypress    [39m
+✔ [34m [32mDownloaded Cypress[39m[34m[39m
+❯ [34m Unzipping Cypress      [39m
+✔ [34m [32mUnzipped Cypress[39m[34m[39m
+❯ [34m Finishing Installation [39m
+✔ [34m [32mFinished Installation[39m[34m [90m/cache/Cypress/1.2.3[39m[34m[39m
 
 You can now open Cypress by running one of the following, depending on your package manager:
 

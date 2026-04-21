@@ -201,10 +201,6 @@ function testBinary (version: string, binaryDir: string, options: any): Promise<
   // NOTE: under test we set the listr renderer to 'silent' in order to get deterministic snapshots
   if (logger.logLevel() === 'silent' || options.listrRenderer) renderer = 'silent'
 
-  const rendererOptions = {
-    renderer,
-  }
-
   const tasks = new Listr([
     {
       title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
@@ -228,11 +224,11 @@ function testBinary (version: string, binaryDir: string, options: any): Promise<
             chalk.green('Verified Cypress!'),
             chalk.gray(binaryDir),
           ),
-          rendererOptions.renderer as string,
+          renderer,
         )
       },
     },
-  ] as any, rendererOptions as any)
+  ], { renderer })
 
   return tasks.run()
 }

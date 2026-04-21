@@ -51,7 +51,7 @@
     "fs-extra": "^9.1.0",
     "hasha": "5.2.2",
     "is-installed-globally": "~0.4.0",
-    "listr2": "^3.8.3",
+    "listr2": "^9.0.5",
     "lodash": "^4.17.23",
     "log-symbols": "^4.0.0",
     "minimist": "^1.2.8",

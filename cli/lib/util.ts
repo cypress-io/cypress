@@ -23,6 +23,7 @@ import Debug from 'debug'
 import fs from 'fs-extra'
 import { readFile } from 'fs/promises'
 import { relativeToRepoRoot } from './relative-to-repo-root'
+import VerboseRenderer from './VerboseRenderer'
 
 const debug = Debug('cypress:cli')
 
@@ -403,9 +404,10 @@ const util = {
     return (_.isFinite(eta) ? (eta / 1000) : 0).toFixed(0)
   },
 
-  setTaskTitle (task: any, title: string, renderer: string): void {
-    // only update the renderer title when not running in CI
-    if (renderer === 'default' && task.title !== title) {
+  setTaskTitle (task: any, title: string, renderer: unknown): void {
+    const usesDynamicTitles = renderer === 'default' || renderer === VerboseRenderer
+
+    if (usesDynamicTitles && task.title !== title) {
       task.title = title
     }
   },
