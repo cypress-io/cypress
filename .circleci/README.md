@@ -50,6 +50,9 @@ This command:
 
 - `src/` - Source configuration directories (modify these)
 - `packed/` - Generated configuration files (ignored by git)
+- `path-filter-mapping.conf` - Path → pipeline-parameter rules consumed by
+  the [`circleci/path-filtering`](https://circleci.com/developer/orbs/orb/circleci/path-filtering)
+  orb on PR pipelines (see [Path filtering](#path-filtering) below).
 
 ## Development Workflow
 
@@ -60,3 +63,63 @@ This command:
 ## `config.yml`
 
 This is the main entrypoint to Cypress CI. It loads packed workflow files from cache, or builds them if necessary. Then it continues to the primary workflow. The main entrypoint to our CI must be available in source control and not packed on-the-fly.
+
+`config.yml` declares two setup workflows; exactly one runs per pipeline based
+on the branch and pipeline parameters:
+
+| Setup workflow | Continuation | When it runs |
+| --- | --- | --- |
+| `setup-workflow-full` | `launch-primary-workflow` → continues with `run-all-jobs: true` | `develop`, `update-v8-snapshot-cache-on-develop`, `release/*`, `force-persist-artifacts=true`, or `run-all-jobs=true` |
+| `setup-workflow-filtered` | `launch-path-filtered-workflow` (the `path-filtering/filter` orb job) | All other branches (regular PR pipelines) |
+
+## Path filtering
+
+On regular PR pipelines, the `path-filtering` orb diffs the branch against
+`develop` and sets a set of `run-*` pipeline parameters (e.g. `run-driver-tests`,
+`run-server-tests`, `run-npm-webpack-dev-server-tests`) based on the declarative
+rules in [`path-filter-mapping.conf`](./path-filter-mapping.conf). Each
+conditional job in `src/pipeline/workflows/pull-request.yml` has an
+expression-based `filters:` clause that references its parameter plus
+`run-all-jobs`, so jobs the diff doesn't touch are removed from the DAG
+entirely (no container spawned, no "skipped" step).
+
+A single `all-jobs-passed` aggregator fans in from every conditional job; it is
+the only required GitHub status check for PRs. Because skipped jobs are
+removed from the DAG, their entries in `all-jobs-passed.requires:` become
+no-ops, and the aggregator completes as soon as all non-skipped dependencies
+finish.
+
+### Mapping file format
+
+Each non-comment, non-blank line in `path-filter-mapping.conf` is:
+
+```
+<python-regex>  <pipeline-parameter>  <value>
+```
+
+- Regexes are anchored with `^` and `$` automatically.
+- For every changed file, each rule whose regex matches sets
+  `<pipeline-parameter>` to `<value>`. Later matches win over earlier ones.
+- Parameters not set by any rule keep the default declared in
+  `src/pipeline/@pipeline.yml` (all `run-*` default to `false`).
+- A docs-only PR matches nothing, so all `run-*` parameters stay `false` and
+  the only jobs that run are the always-run ones (lint, check-ts, health-check,
+  lint-types, `all-jobs-passed`).
+
+Changes to any of the "global trigger" paths in the mapping
+(`.circleci/`, `yarn.lock`, `scripts/`, `tooling/`, shared packages, etc.) set
+`run-all-jobs: true`, which forces every conditional job to run.
+
+### Adding a new package or directory
+
+When adding a new top-level directory or `packages/*` entry, add a rule to
+`path-filter-mapping.conf` so changes to it trigger the right test jobs. A
+directory with no mapping rule is silently treated as "no tests needed" —
+catch this in review.
+
+### Forcing a full CI run on a branch
+
+Trigger the pipeline from the CircleCI "Trigger Pipeline" UI with
+`run-all-jobs: true`. This routes the pipeline through
+`setup-workflow-full`, which passes `run-all-jobs: true` to the continuation
+and causes every conditional job's expression filter to evaluate true.

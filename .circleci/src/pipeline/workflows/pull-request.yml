@@ -14,7 +14,17 @@ when:
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
+# Each conditional job uses an expression-based job filter that evaluates to
+# true if either the relevant path-filter parameter OR the run-all-jobs
+# bypass is set. The bypass is set by the setup pipeline on develop/release/
+# force-persist/manual "run all" paths (see .circleci/config.yml) so those
+# pipelines always run the full matrix.
+#
+# Each distinct filter expression is defined as a YAML anchor (&...) on its
+# first use and reused via aliases (*...) on every subsequent job.
+
 jobs:
+  # --- Always-run jobs -----------------------------------------------------
   - node_modules_install:
       build-better-sqlite3: true
   - build:
@@ -55,115 +65,140 @@ jobs:
         branches:
           only: /^pull\/[0-9]+/
 
-  # The following jobs are only run for contributor PRs once they are approved
-  # unit, integration and e2e tests
+  # --- Conditional jobs (path-filtered) -----------------------------------
   - cli-visual-tests:
+      filters: &cli-filter >-
+        pipeline.parameters.run-cli-tests or pipeline.parameters.run-all-jobs
       context: test-runner:percy
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - unit-tests:
+      filters: *cli-filter
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - verify-release-readiness:
+      filters: *cli-filter
       context: [test-runner:npm-release, org-npm-credentials]
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - server-unit-tests:
+      filters: &server-filter >-
+        pipeline.parameters.run-server-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - server-integration-tests:
+      filters: *server-filter
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - server-performance-tests:
+      filters: *server-filter
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - system-tests-node-modules-install:
+      filters: &system-filter >-
+        pipeline.parameters.run-system-tests or pipeline.parameters.run-all-jobs
       context: test-runner:performance-tracking
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - system-tests-chrome:
+      filters: *system-filter
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - system-tests-electron:
+      filters: *system-filter
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - system-tests-firefox:
+      filters: *system-filter
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - system-tests-webkit:
+      filters: *system-filter
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
   - system-tests-non-root:
+      filters: *system-filter
       context: test-runner:performance-tracking
       executor: non-root-docker-user
       requires:
         - system-tests-node-modules-install
   - driver-integration-tests-chrome:
+      filters: &driver-filter >-
+        pipeline.parameters.run-driver-tests or pipeline.parameters.run-all-jobs
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-chrome-inject-document-domain:
+      filters: *driver-filter
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-chrome-beta:
+      filters: *driver-filter
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-chrome-beta-inject-document-domain:
+      filters: *driver-filter
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-firefox:
+      filters: *driver-filter
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-electron:
+      filters: *driver-filter
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-tests-webkit:
+      filters: *driver-filter
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - driver-integration-memory-tests:
+      filters: *driver-filter
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - run-frontend-shared-component-tests-chrome:
+      filters: &frontend-shared-filter >-
+        pipeline.parameters.run-frontend-shared-tests or pipeline.parameters.run-all-jobs
       context:
         [
           test-runner:cypress-record-key,
@@ -176,6 +211,8 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-launchpad-integration-tests-chrome:
+      filters: &launchpad-filter >-
+        pipeline.parameters.run-launchpad-tests or pipeline.parameters.run-all-jobs
       context:
         [
           test-runner:cypress-record-key,
@@ -188,6 +225,7 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-launchpad-component-tests-chrome:
+      filters: *launchpad-filter
       context:
         [
           test-runner:cypress-record-key,
@@ -200,6 +238,8 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-app-integration-tests-chrome:
+      filters: &app-ui-filter >-
+        pipeline.parameters.run-app-ui-tests or pipeline.parameters.run-all-jobs
       context:
         [
           test-runner:cypress-record-key,
@@ -212,14 +252,19 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-webpack-dev-server-integration-tests:
+      filters: &npm-webpack-dev-server-filter >-
+        pipeline.parameters.run-npm-webpack-dev-server-tests or pipeline.parameters.run-all-jobs
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       requires:
         - system-tests-node-modules-install
   - run-vite-dev-server-integration-tests:
+      filters: &npm-vite-dev-server-filter >-
+        pipeline.parameters.run-npm-vite-dev-server-tests or pipeline.parameters.run-all-jobs
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       requires:
         - system-tests-node-modules-install
   - run-app-component-tests-chrome:
+      filters: *app-ui-filter
       context:
         [
           test-runner:cypress-record-key,
@@ -232,6 +277,8 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - run-reporter-component-tests-chrome:
+      filters: &reporter-filter >-
+        pipeline.parameters.run-reporter-tests or pipeline.parameters.run-all-jobs
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       percy: true
       requires:
@@ -239,88 +286,118 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - reporter-integration-tests:
+      filters: *reporter-filter
       context: [ test-runner:cypress-record-key, test-runner:percy ]
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-webpack-dev-server:
+      filters: *npm-webpack-dev-server-filter
       requires:
         - system-tests-node-modules-install
   - npm-vite-dev-server:
+      filters: *npm-vite-dev-server-filter
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-vite-plugin-cypress-esm:
+      filters: &npm-vite-plugin-esm-filter >-
+        pipeline.parameters.run-npm-vite-plugin-esm-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-webpack-preprocessor:
+      filters: &npm-webpack-preprocessor-filter >-
+        pipeline.parameters.run-npm-webpack-preprocessor-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-webpack-batteries-included-preprocessor:
+      filters: &npm-webpack-batteries-filter >-
+        pipeline.parameters.run-npm-webpack-batteries-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-vue:
+      filters: &npm-vue-filter >-
+        pipeline.parameters.run-npm-vue-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-puppeteer-unit-tests:
+      filters: &npm-puppeteer-filter >-
+        pipeline.parameters.run-npm-puppeteer-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-puppeteer-cypress-tests:
+      filters: *npm-puppeteer-filter
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-react:
+      filters: &npm-react-filter >-
+        pipeline.parameters.run-npm-react-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-angular:
+      filters: &npm-angular-filter >-
+        pipeline.parameters.run-npm-angular-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-angular-zoneless:
+      filters: *npm-angular-filter
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-mount-utils:
+      filters: &npm-mount-utils-filter >-
+        pipeline.parameters.run-npm-mount-utils-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-grep:
+      filters: &npm-grep-filter >-
+        pipeline.parameters.run-npm-grep-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-eslint-plugin-dev:
+      filters: &npm-eslint-plugin-filter >-
+        pipeline.parameters.run-npm-eslint-plugin-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - npm-cypress-schematic:
+      filters: &npm-schematic-filter >-
+        pipeline.parameters.run-npm-schematic-tests or pipeline.parameters.run-all-jobs
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - v8-integration-tests:
+      filters: &v8-filter >-
+        pipeline.parameters.run-v8-tests or pipeline.parameters.run-all-jobs
       requires:
         - system-tests-node-modules-install
 
+  # --- Binary-publish chain (unchanged) -----------------------------------
   - create-and-trigger-packaging-artifacts:
       context:
         - test-runner:upload
@@ -390,7 +467,7 @@ jobs:
         - get-published-artifacts
         - system-tests-node-modules-install
 
-  # Finalization jobs
+  # --- Finalization jobs --------------------------------------------------
   - percy-finalize:
       context: test-runner:percy
       required_env_var: PERCY_TOKEN
@@ -405,7 +482,6 @@ jobs:
         - run-reporter-component-tests-chrome
         - run-webpack-dev-server-integration-tests
         - run-vite-dev-server-integration-tests
-  # Cypress run must be completed to fetch Accessibility report
   - verify-accessibility-results:
       context: test-runner:cypress-record-key
       requires:
@@ -425,3 +501,60 @@ jobs:
         - driver-integration-tests-electron
         - driver-integration-tests-webkit
         - driver-integration-memory-tests
+
+  # --- Single required GitHub status check --------------------------------
+  # Fan-in aggregator. Skipped jobs (expression filter = false) are removed
+  # from the DAG entirely so their requires become no-ops; this job therefore
+  # runs as soon as every non-skipped dependency has completed successfully.
+  # Configure GitHub branch protection to require only this check.
+  - all-jobs-passed:
+      requires:
+        - linux-lint
+        - check-ts
+        - health-check
+        - lint-types
+        - test-kitchensink
+        - cli-visual-tests
+        - unit-tests
+        - verify-release-readiness
+        - server-unit-tests
+        - server-integration-tests
+        - server-performance-tests
+        - system-tests-chrome
+        - system-tests-electron
+        - system-tests-firefox
+        - system-tests-webkit
+        - system-tests-non-root
+        - driver-integration-tests-chrome
+        - driver-integration-tests-chrome-inject-document-domain
+        - driver-integration-tests-chrome-beta
+        - driver-integration-tests-chrome-beta-inject-document-domain
+        - driver-integration-tests-firefox
+        - driver-integration-tests-electron
+        - driver-integration-tests-webkit
+        - driver-integration-memory-tests
+        - run-frontend-shared-component-tests-chrome
+        - run-launchpad-integration-tests-chrome
+        - run-launchpad-component-tests-chrome
+        - run-app-integration-tests-chrome
+        - run-app-component-tests-chrome
+        - run-reporter-component-tests-chrome
+        - reporter-integration-tests
+        - run-webpack-dev-server-integration-tests
+        - run-vite-dev-server-integration-tests
+        - npm-webpack-dev-server
+        - npm-vite-dev-server
+        - npm-vite-plugin-cypress-esm
+        - npm-webpack-preprocessor
+        - npm-webpack-batteries-included-preprocessor
+        - npm-vue
+        - npm-puppeteer-unit-tests
+        - npm-puppeteer-cypress-tests
+        - npm-react
+        - npm-angular
+        - npm-angular-zoneless
+        - npm-mount-utils
+        - npm-grep
+        - npm-eslint-plugin-dev
+        - npm-cypress-schematic
+        - v8-integration-tests

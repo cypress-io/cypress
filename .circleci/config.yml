@@ -1,16 +1,9 @@
 orbs:
     continuation: circleci/continuation@1.1.0
     circleci-cli: circleci/circleci-cli@0.1.9
+    path-filtering: circleci/path-filtering@3.0.0
 setup: true
 version: 2.1
-
-workflows:
-    setup-workflow:
-        jobs:
-            - pack-workflows
-            - launch-primary-workflow:
-                requires:
-                  - pack-workflows
 
 parameters:
   publish-binary-branch:
@@ -19,6 +12,64 @@ parameters:
   force-persist-artifacts:
     type: boolean
     default: false
+  # Set to true from the CircleCI "Trigger Pipeline" UI to bypass path
+  # filtering and run every conditional job regardless of the diff.
+  run-all-jobs:
+    type: boolean
+    default: false
+
+# Two setup workflows select which continuation strategy runs:
+#   - setup-workflow-full       — develop/release/force-persist/manual "run all"
+#                                 paths continue directly with run-all-jobs=true.
+#   - setup-workflow-filtered   — PR path uses the path-filtering orb to diff
+#                                 against develop and set run-* parameters.
+workflows:
+    setup-workflow-full:
+        when:
+            or:
+                - equal: [develop, << pipeline.git.branch >>]
+                - equal: ['update-v8-snapshot-cache-on-develop', << pipeline.git.branch >>]
+                - matches:
+                    pattern: /^release\//
+                    value: << pipeline.git.branch >>
+                - equal: [true, << pipeline.parameters.force-persist-artifacts >>]
+                - equal: [true, << pipeline.parameters.run-all-jobs >>]
+        jobs:
+            - pack-workflows
+            - launch-primary-workflow:
+                requires:
+                    - pack-workflows
+
+    setup-workflow-filtered:
+        when:
+            and:
+                - not:
+                    equal: [develop, << pipeline.git.branch >>]
+                - not:
+                    equal: ['update-v8-snapshot-cache-on-develop', << pipeline.git.branch >>]
+                - not:
+                    matches:
+                        pattern: /^release\//
+                        value: << pipeline.git.branch >>
+                - not:
+                    equal: [true, << pipeline.parameters.force-persist-artifacts >>]
+                - not:
+                    equal: [true, << pipeline.parameters.run-all-jobs >>]
+        jobs:
+            - pack-workflows
+            # Draft-PR cancellation is handled by pack-workflows above; if that
+            # job halts (draft PR, non-PR build), this job never starts.
+            - path-filtering/filter:
+                name: launch-path-filtered-workflow
+                requires:
+                    - pack-workflows
+                base-revision: develop
+                mapping: .circleci/path-filter-mapping.conf
+                config-path: .circleci/packed/pipeline.yml
+                workspace_path: .
+                pre-steps:
+                    - attach_workspace:
+                        at: .
 
 commands:
   persist:
@@ -160,5 +211,23 @@ jobs:
                     echo "❌ Primary workflow definition not found in .circleci/packed/pipeline.yml!"
                     exit 1
                 fi
+          - run:
+              name: Build continuation parameters (run-all path)
+              environment:
+                  PUBLISH_BINARY_BRANCH: << pipeline.parameters.publish-binary-branch >>
+                  FORCE_PERSIST_ARTIFACTS: << pipeline.parameters.force-persist-artifacts >>
+              command: |
+                # In the full path, every conditional job must run, so force
+                # run-all-jobs=true in the continued pipeline. publish-binary-branch
+                # and force-persist-artifacts are passed through verbatim.
+                cat > /tmp/pipeline-parameters.json <<EOF
+                {
+                  "publish-binary-branch": "${PUBLISH_BINARY_BRANCH}",
+                  "force-persist-artifacts": ${FORCE_PERSIST_ARTIFACTS},
+                  "run-all-jobs": true
+                }
+                EOF
+                cat /tmp/pipeline-parameters.json
           - continuation/continue:
               configuration_path: .circleci/packed/pipeline.yml
+              parameters: /tmp/pipeline-parameters.json

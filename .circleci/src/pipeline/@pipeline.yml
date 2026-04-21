@@ -22,6 +22,86 @@ parameters:
     type: boolean
     default: false
 
+  # --- Path-filter parameters ---------------------------------------------
+  # These are set by the `circleci/path-filtering` orb running in the setup
+  # pipeline (.circleci/config.yml). Every conditional PR job uses an
+  # expression-based `filters:` referencing one of these plus `run-all-jobs`
+  # so that non-PR pipelines (develop/release/etc.) run everything by virtue
+  # of the setup pipeline passing `run-all-jobs: true` to continuation.
+  #
+  # Defaults are `false`: an unfiltered PR that somehow skipped the filter
+  # job runs zero conditional jobs, which is caught by the `all-jobs-passed`
+  # aggregator hanging indefinitely rather than silently green-lighting.
+  run-all-jobs:
+    type: boolean
+    default: false
+  run-driver-tests:
+    type: boolean
+    default: false
+  run-server-tests:
+    type: boolean
+    default: false
+  run-app-ui-tests:
+    type: boolean
+    default: false
+  run-launchpad-tests:
+    type: boolean
+    default: false
+  run-reporter-tests:
+    type: boolean
+    default: false
+  run-frontend-shared-tests:
+    type: boolean
+    default: false
+  run-system-tests:
+    type: boolean
+    default: false
+  run-v8-tests:
+    type: boolean
+    default: false
+  run-cli-tests:
+    type: boolean
+    default: false
+  run-npm-webpack-dev-server-tests:
+    type: boolean
+    default: false
+  run-npm-vite-dev-server-tests:
+    type: boolean
+    default: false
+  run-npm-webpack-preprocessor-tests:
+    type: boolean
+    default: false
+  run-npm-webpack-batteries-tests:
+    type: boolean
+    default: false
+  run-npm-vue-tests:
+    type: boolean
+    default: false
+  run-npm-react-tests:
+    type: boolean
+    default: false
+  run-npm-angular-tests:
+    type: boolean
+    default: false
+  run-npm-puppeteer-tests:
+    type: boolean
+    default: false
+  run-npm-vite-plugin-esm-tests:
+    type: boolean
+    default: false
+  run-npm-mount-utils-tests:
+    type: boolean
+    default: false
+  run-npm-grep-tests:
+    type: boolean
+    default: false
+  run-npm-eslint-plugin-tests:
+    type: boolean
+    default: false
+  run-npm-schematic-tests:
+    type: boolean
+    default: false
+
 orbs:
   browser-tools: circleci/browser-tools@2.3.2
 
@@ -2866,3 +2946,17 @@ jobs:
           name: Run Cypress binary
           working_directory: /tmp/cypress-test-tiny
           command: DEBUG=cypress:cli $(yarn bin cypress) run
+
+  # Fan-in aggregator — the only required GitHub status check for PRs.
+  # Conditional jobs that are filtered out by path-filter expressions are
+  # removed from the DAG entirely, so their entries in `requires:` below
+  # become no-ops and this job runs once every non-skipped dependency has
+  # completed successfully.
+  all-jobs-passed:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: All required jobs passed
+          command: echo "All required jobs completed successfully"
