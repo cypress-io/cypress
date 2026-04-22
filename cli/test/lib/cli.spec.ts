@@ -114,6 +114,8 @@ vi.mock('../../lib/tasks/inspect', () => {
       list: vi.fn(),
       status: vi.fn(),
       specs: vi.fn(),
+      run: vi.fn(),
+      switch: vi.fn(),
     },
   }
 })
@@ -825,6 +827,8 @@ describe('cli', () => {
       vi.mocked(inspect.list).mockResolvedValue(undefined)
       vi.mocked(inspect.status).mockResolvedValue(undefined)
       vi.mocked(inspect.specs).mockResolvedValue(undefined)
+      vi.mocked(inspect.run).mockResolvedValue(undefined)
+      vi.mocked(inspect.switch).mockResolvedValue(undefined)
     })
 
     it('inspect is a known command and defaults to list', async () => {
@@ -873,6 +877,46 @@ describe('cli', () => {
       await flushPromises()
 
       expect(util.logErrorExit1).toHaveBeenCalledWith(err)
+    })
+
+    it('calls inspect.run with the positional <spec>', async () => {
+      await exec('inspect run cypress/e2e/foo.cy.ts')
+      await flushPromises()
+      expect(inspect.run).toHaveBeenCalledWith(expect.objectContaining({ spec: 'cypress/e2e/foo.cy.ts' }))
+    })
+
+    it('inspect run without <spec> exits with error', async () => {
+      await exec('inspect run')
+      await flushPromises()
+
+      // Handler receives spec: undefined and is responsible for exiting 1.
+      expect(inspect.run).toHaveBeenCalledWith(expect.objectContaining({ spec: undefined }))
+    })
+
+    it('calls inspect.switch with the positional <mode>', async () => {
+      await exec('inspect switch e2e')
+      await flushPromises()
+      expect(inspect.switch).toHaveBeenCalledWith(expect.objectContaining({ mode: 'e2e' }))
+    })
+
+    it('calls inspect.switch with --no-relaunch', async () => {
+      await exec('inspect switch e2e --no-relaunch')
+      await flushPromises()
+      expect(inspect.switch).toHaveBeenCalledWith(expect.objectContaining({ mode: 'e2e', noRelaunch: true }))
+    })
+
+    it('calls inspect.switch with --timeout parsed as integer', async () => {
+      await exec('inspect switch e2e --timeout 5000')
+      await flushPromises()
+      expect(inspect.switch).toHaveBeenCalledWith(expect.objectContaining({ mode: 'e2e', timeout: 5000 }))
+    })
+
+    it('inspect switch without <mode> exits with error', async () => {
+      await exec('inspect switch')
+      await flushPromises()
+
+      // Handler receives mode: undefined and is responsible for exiting 1.
+      expect(inspect.switch).toHaveBeenCalledWith(expect.objectContaining({ mode: undefined }))
     })
   })
 })

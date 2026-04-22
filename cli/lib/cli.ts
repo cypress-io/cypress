@@ -590,15 +590,37 @@ const cliModule = {
     .description('Inspect and control a running cypress open instance')
     .option('--json', 'Output JSON instead of human-readable text')
     .option('--instance <selector>', 'Select an instance by pid or projectRoot substring (when multiple are running)')
+    .option('--no-relaunch', 'For `switch`: update testing type without relaunching the browser')
+    .option('--timeout <ms>', 'For `switch`: milliseconds to wait for the relaunch to settle (default 30000)', coerceAnyStringToInt)
     .action(async function (this: any, opts: any, args: string[]) {
-      const [command = 'list'] = args || []
+      const [command = 'list', positional] = args || []
 
-      if (!_.includes(['list', 'status', 'specs'], command)) {
+      if (!_.includes(['list', 'status', 'specs', 'run', 'switch'], command)) {
         unknownOption.call(this, `inspect ${command}`, 'command')
       }
 
+      if (command === 'run' || command === 'switch') {
+        if (opts.timeout !== undefined && (Number.isNaN(opts.timeout) || opts.timeout <= 0)) {
+          logger.error()
+          logger.error('  error: --timeout must be a positive integer (milliseconds)')
+          logger.error()
+          this.outputHelp()
+          process.exit(1)
+        }
+      }
+
       try {
-        await inspect[command as 'list' | 'status' | 'specs'](opts)
+        if (command === 'run') {
+          await inspect.run({ ...opts, spec: positional })
+        } else if (command === 'switch') {
+          // Commander maps `--no-relaunch` to `opts.relaunch === false`;
+          // normalize to `noRelaunch: true` for the handler's API.
+          const noRelaunch = opts.relaunch === false
+
+          await inspect.switch({ ...opts, mode: positional, noRelaunch })
+        } else {
+          await inspect[command as 'list' | 'status' | 'specs'](opts)
+        }
       } catch (e: any) {
         util.logErrorExit1(e)
       }

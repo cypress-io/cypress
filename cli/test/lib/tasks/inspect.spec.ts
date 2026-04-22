@@ -500,4 +500,441 @@ describe('lib/tasks/inspect', () => {
       await expect(inspect.status({})).rejects.toThrow('boom')
     })
   })
+
+  describe('.run', () => {
+    const PROJECT_ROOT = '/Users/me/code/my-app'
+    const SPECS = [
+      { relative: 'cypress/e2e/foo.cy.ts', absolute: `${PROJECT_ROOT}/cypress/e2e/foo.cy.ts` },
+      { relative: 'cypress/e2e/bar.cy.ts', absolute: `${PROJECT_ROOT}/cypress/e2e/bar.cy.ts` },
+      { relative: 'cypress/e2e/nested/foo.cy.ts', absolute: `${PROJECT_ROOT}/cypress/e2e/nested/foo.cy.ts` },
+    ]
+
+    const RUN_SPEC_RESPONSE = {
+      __typename: 'RunSpecResponse',
+      testingType: 'e2e',
+      browser: { name: 'chrome', displayName: 'Chrome', channel: 'stable', family: 'chromium', version: '120' },
+      spec: { relative: 'cypress/e2e/bar.cy.ts', absolute: `${PROJECT_ROOT}/cypress/e2e/bar.cy.ts`, name: 'bar.cy.ts' },
+    }
+
+    const mockProjectSpecs = (projectRoot: string | null, specs = SPECS): void => {
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: { currentProject: projectRoot === null ? null : { projectRoot, specs } },
+        }),
+      })
+    }
+
+    const mockRunSpecSuccess = (): void => {
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: { runSpec: RUN_SPEC_RESPONSE } }),
+      })
+    }
+
+    it('no instance → exit 2', async () => {
+      vi.mocked(resolveInstance).mockRejectedValue(
+        new InstanceDiscoveryError('NO_INSTANCE', 'No running Cypress instances found.'),
+      )
+
+      const err = createStderrCapture()
+
+      await inspect.run({ spec: 'foo.cy.ts' })
+
+      expect(err()).toContain('No running Cypress instances found.')
+      expect(processExitSpy).toHaveBeenCalledWith(2)
+    })
+
+    it('missing spec argument → stderr + exit 1', async () => {
+      const err = createStderrCapture()
+
+      await inspect.run({})
+
+      expect(err()).toContain('Missing required argument: <spec>')
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('no project loaded → stderr + exit 1', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(null)
+
+      const err = createStderrCapture()
+
+      await inspect.run({ spec: 'foo.cy.ts' })
+
+      expect(err()).toContain('No project loaded')
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('absolute path found in specs → mutation called with that absolute path', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+      mockRunSpecSuccess()
+
+      const out = createStdoutCapture()
+
+      await inspect.run({ spec: `${PROJECT_ROOT}/cypress/e2e/bar.cy.ts` })
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2)
+      const mutationCall = fetchSpy.mock.calls[1]
+      const body = JSON.parse(mutationCall[1].body)
+
+      expect(body.variables).toEqual({ specPath: `${PROJECT_ROOT}/cypress/e2e/bar.cy.ts` })
+      expect(out()).toContain('Launched cypress/e2e/bar.cy.ts')
+    })
+
+    it('absolute path NOT in specs → exit 1', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+
+      const err = createStderrCapture()
+
+      await inspect.run({ spec: '/some/other/path/x.cy.ts' })
+
+      expect(err()).toContain('No such spec: /some/other/path/x.cy.ts')
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('relative path resolved against projectRoot → mutation with correct absolute', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+      mockRunSpecSuccess()
+
+      await inspect.run({ spec: 'cypress/e2e/bar.cy.ts' })
+
+      const mutationCall = fetchSpy.mock.calls[1]
+      const body = JSON.parse(mutationCall[1].body)
+
+      expect(body.variables).toEqual({ specPath: `${PROJECT_ROOT}/cypress/e2e/bar.cy.ts` })
+    })
+
+    it('relative path not in specs → exit 1', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+
+      const err = createStderrCapture()
+
+      await inspect.run({ spec: 'some/path/missing.cy.ts' })
+
+      expect(err()).toContain('No such spec: some/path/missing.cy.ts')
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('unique basename match → mutation with correct absolute', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT, [
+        { relative: 'cypress/e2e/uniq.cy.ts', absolute: `${PROJECT_ROOT}/cypress/e2e/uniq.cy.ts` },
+        { relative: 'cypress/e2e/other.cy.ts', absolute: `${PROJECT_ROOT}/cypress/e2e/other.cy.ts` },
+      ])
+
+      mockRunSpecSuccess()
+
+      await inspect.run({ spec: 'uniq.cy.ts' })
+
+      const mutationCall = fetchSpy.mock.calls[1]
+      const body = JSON.parse(mutationCall[1].body)
+
+      expect(body.variables).toEqual({ specPath: `${PROJECT_ROOT}/cypress/e2e/uniq.cy.ts` })
+    })
+
+    it('ambiguous basename (2 matches) → stderr lists both, exit 1', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+
+      const err = createStderrCapture()
+
+      await inspect.run({ spec: 'foo.cy.ts' })
+
+      const stderr = err()
+
+      expect(stderr).toContain('Ambiguous spec \'foo.cy.ts\'')
+      expect(stderr).toContain('cypress/e2e/foo.cy.ts')
+      expect(stderr).toContain('cypress/e2e/nested/foo.cy.ts')
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('basename with no match → exit 1', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+
+      const err = createStderrCapture()
+
+      await inspect.run({ spec: 'missing.cy.ts' })
+
+      expect(err()).toContain('No spec matching: missing.cy.ts')
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('mutation error response → propagates as thrown error', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ errors: [{ message: 'runSpec failed' }] }),
+      })
+
+      await expect(inspect.run({ spec: 'bar.cy.ts' })).rejects.toThrow('runSpec failed')
+    })
+
+    it('success text → "Launched <relative>"', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+      mockRunSpecSuccess()
+
+      const out = createStdoutCapture()
+
+      await inspect.run({ spec: 'bar.cy.ts' })
+
+      expect(out()).toContain('Launched cypress/e2e/bar.cy.ts')
+    })
+
+    it('success json → printed mutation result', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+      mockRunSpecSuccess()
+
+      const out = createStdoutCapture()
+
+      await inspect.run({ spec: 'bar.cy.ts', json: true })
+
+      const parsed = JSON.parse(out())
+
+      expect(parsed).toEqual(RUN_SPEC_RESPONSE)
+    })
+
+    it('--instance <pid> forwarded to resolveInstance', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockProjectSpecs(PROJECT_ROOT)
+      mockRunSpecSuccess()
+
+      await inspect.run({ spec: 'bar.cy.ts', instance: '12345' })
+
+      expect(resolveInstance).toHaveBeenCalledWith('12345')
+    })
+  })
+
+  describe('.switch', () => {
+    const queueSnapshotResponses = (snapshots: any[]): void => {
+      for (const snapshot of snapshots) {
+        fetchSpy.mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: async () => ({ data: { inspectSnapshot: snapshot } }),
+        })
+      }
+    }
+
+    const mockMutationOk = (payload: any = { switchTestingTypeAndRelaunch: true }): void => {
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: payload }),
+      })
+    }
+
+    it('no instance → exit 2', async () => {
+      vi.mocked(resolveInstance).mockRejectedValue(
+        new InstanceDiscoveryError('NO_INSTANCE', 'No running Cypress instances found.'),
+      )
+
+      const err = createStderrCapture()
+
+      await inspect.switch({ mode: 'e2e' })
+
+      expect(err()).toContain('No running Cypress instances found.')
+      expect(processExitSpy).toHaveBeenCalledWith(2)
+    })
+
+    it('missing mode → stderr + exit 1', async () => {
+      const err = createStderrCapture()
+
+      await inspect.switch({})
+
+      expect(err()).toContain('Missing required argument: <mode>')
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('invalid mode → stderr + exit 1', async () => {
+      const err = createStderrCapture()
+
+      await inspect.switch({ mode: 'bogus' })
+
+      expect(err()).toContain('Invalid testing type \'bogus\'')
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('e2e default → switchTestingTypeAndRelaunch called; poll sees open → exit 0', async () => {
+      vi.useFakeTimers()
+
+      try {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+
+        mockMutationOk()
+        queueSnapshotResponses([
+          { ...SNAPSHOT, browserStatus: 'opening', testingType: 'e2e' },
+          { ...SNAPSHOT, browserStatus: 'open', testingType: 'e2e' },
+        ])
+
+        const out = createStdoutCapture()
+
+        const p = inspect.switch({ mode: 'e2e' })
+
+        await vi.advanceTimersByTimeAsync(500)
+        await vi.advanceTimersByTimeAsync(500)
+        await p
+
+        const mutationCall = fetchSpy.mock.calls[0]
+        const mutationBody = JSON.parse(mutationCall[1].body)
+
+        expect(mutationBody.query).toContain('switchTestingTypeAndRelaunch')
+        expect(mutationBody.variables).toEqual({ testingType: 'e2e' })
+
+        const stdout = out()
+
+        expect(stdout).toContain('switched testing type to e2e')
+        expect(stdout).toContain('browser: chrome (open)')
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('component default → switchTestingTypeAndRelaunch called', async () => {
+      vi.useFakeTimers()
+
+      try {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+
+        mockMutationOk()
+        queueSnapshotResponses([
+          { ...SNAPSHOT, browserStatus: 'open', testingType: 'component' },
+        ])
+
+        const p = inspect.switch({ mode: 'component' })
+
+        await vi.advanceTimersByTimeAsync(500)
+        await p
+
+        const mutationCall = fetchSpy.mock.calls[0]
+        const mutationBody = JSON.parse(mutationCall[1].body)
+
+        expect(mutationBody.query).toContain('switchTestingTypeAndRelaunch')
+        expect(mutationBody.variables).toEqual({ testingType: 'component' })
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('--no-relaunch → setAndLoadCurrentTestingType called, no polling', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockMutationOk({ setAndLoadCurrentTestingType: { __typename: 'Query' } })
+
+      const out = createStdoutCapture()
+
+      await inspect.switch({ mode: 'e2e', noRelaunch: true })
+
+      // Only the mutation call — no polling snapshots.
+      expect(fetchSpy).toHaveBeenCalledTimes(1)
+      const body = JSON.parse(fetchSpy.mock.calls[0][1].body)
+
+      expect(body.query).toContain('setAndLoadCurrentTestingType')
+      expect(body.variables).toEqual({ testingType: 'e2e' })
+      expect(out()).toContain('switched testing type to e2e')
+    })
+
+    it('poll timeout after --timeout 100 ms while status stays opening → exit 124', async () => {
+      vi.useFakeTimers()
+
+      try {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockMutationOk()
+
+        // Every poll returns 'opening' — will never settle.
+        fetchSpy.mockResolvedValue({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            data: {
+              inspectSnapshot: { ...SNAPSHOT, browserStatus: 'opening', testingType: 'e2e' },
+            },
+          }),
+        })
+
+        const err = createStderrCapture()
+
+        const p = inspect.switch({ mode: 'e2e', timeout: 100 })
+
+        // Advance past one poll interval; still opening, deadline exceeded.
+        await vi.advanceTimersByTimeAsync(500)
+        await p
+
+        expect(err()).toContain('Timed out after 100ms')
+        expect(processExitSpy).toHaveBeenCalledWith(124)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('text output final line matches design doc example', async () => {
+      vi.useFakeTimers()
+
+      try {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockMutationOk()
+        queueSnapshotResponses([
+          { ...SNAPSHOT, browserStatus: 'open', testingType: 'e2e' },
+        ])
+
+        const out = createStdoutCapture()
+
+        const p = inspect.switch({ mode: 'e2e' })
+
+        await vi.advanceTimersByTimeAsync(500)
+        await p
+
+        const lines = out().split('\n').filter(Boolean)
+
+        expect(lines[lines.length - 2]).toEqual('switched testing type to e2e')
+        expect(lines[lines.length - 1]).toEqual('browser: chrome (open)')
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('json output is final snapshot', async () => {
+      vi.useFakeTimers()
+
+      try {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockMutationOk()
+        const finalSnapshot = { ...SNAPSHOT, browserStatus: 'open', testingType: 'e2e' }
+
+        queueSnapshotResponses([finalSnapshot])
+
+        const out = createStdoutCapture()
+
+        const p = inspect.switch({ mode: 'e2e', json: true })
+
+        await vi.advanceTimersByTimeAsync(500)
+        await p
+
+        const parsed = JSON.parse(out())
+
+        expect(parsed).toEqual(finalSnapshot)
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it('--instance <pid> forwarded to resolveInstance', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      mockMutationOk({ setAndLoadCurrentTestingType: { __typename: 'Query' } })
+
+      await inspect.switch({ mode: 'e2e', noRelaunch: true, instance: '12345' })
+
+      expect(resolveInstance).toHaveBeenCalledWith('12345')
+    })
+  })
 })

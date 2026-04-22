@@ -1,3 +1,4 @@
+import path from 'path'
 import Table from 'cli-table3'
 import chalk from 'chalk'
 
@@ -14,6 +15,28 @@ import {
 interface InspectOpts {
   json?: boolean
   instance?: string
+}
+
+/**
+ * Options for `cypress inspect run <spec>`.
+ */
+interface RunOpts extends InspectOpts {
+  spec?: string
+}
+
+/**
+ * Options for `cypress inspect switch <mode>`.
+ *
+ * - `mode` is the positional arg (`'e2e'` | `'component'`).
+ * - `noRelaunch` (from `--no-relaunch`) skips the browser relaunch and calls
+ *   `setAndLoadCurrentTestingType` instead.
+ * - `timeout` (from `--timeout <ms>`) overrides the 30 s default when polling
+ *   for the relaunch to complete.
+ */
+interface SwitchOpts extends InspectOpts {
+  mode?: string
+  noRelaunch?: boolean
+  timeout?: number
 }
 
 /**
@@ -197,6 +220,58 @@ const specsQuery = `
         absolute
         specType
       }
+    }
+  }
+`
+
+const projectSpecsQuery = `
+  query CypressInspectProjectSpecs {
+    currentProject {
+      projectRoot
+      specs {
+        relative
+        absolute
+      }
+    }
+  }
+`
+
+const runSpecMutation = `
+  mutation CypressInspectRunSpec($specPath: String!) {
+    runSpec(specPath: $specPath) {
+      ... on RunSpecResponse {
+        testingType
+        browser {
+          name
+          displayName
+          channel
+          family
+          version
+        }
+        spec {
+          relative
+          absolute
+          name
+        }
+      }
+      ... on RunSpecError {
+        code
+        detailMessage
+      }
+    }
+  }
+`
+
+const switchRelaunchMutation = `
+  mutation CypressInspectSwitchRelaunch($testingType: TestingTypeEnum!) {
+    switchTestingTypeAndRelaunch(testingType: $testingType)
+  }
+`
+
+const switchNoRelaunchMutation = `
+  mutation CypressInspectSetTestingType($testingType: TestingTypeEnum!) {
+    setAndLoadCurrentTestingType(testingType: $testingType) {
+      __typename
     }
   }
 `
@@ -418,10 +493,266 @@ const specs = async (opts: InspectOpts): Promise<void> => {
   }
 }
 
+interface ResolvedSpec {
+  relative: string
+  absolute: string
+}
+
+/**
+ * Resolve a user-supplied spec string against the project's spec list.
+ *
+ * Resolution precedence (per design doc §9 Q4):
+ *   1. Absolute path → exact match against `specs[].absolute`.
+ *   2. Contains `/`  → resolved relative to `projectRoot`, then matched against
+ *      `specs[].absolute`.
+ *   3. Bare basename → match any spec whose `relative` equals the input or
+ *      ends with `/<input>`. 0 matches → error; >1 → ambiguous error.
+ *
+ * Returns the matched spec on success; returns `null` after writing a message
+ * to stderr and calling `process.exit(1)` on any failure so that callers can
+ * short-circuit without relying on `process.exit` throwing.
+ */
+const resolveSpec = (
+  specArg: string,
+  projectRoot: string,
+  specs: ResolvedSpec[],
+): ResolvedSpec | null => {
+  if (path.isAbsolute(specArg)) {
+    const match = specs.find((s) => s.absolute === specArg)
+
+    if (!match) {
+      writeStderr(`No such spec: ${specArg}\n`)
+      process.exit(1)
+
+      return null
+    }
+
+    return match
+  }
+
+  if (specArg.includes('/')) {
+    const absolute = path.resolve(projectRoot, specArg)
+    const match = specs.find((s) => s.absolute === absolute)
+
+    if (!match) {
+      writeStderr(`No such spec: ${specArg}\n`)
+      process.exit(1)
+
+      return null
+    }
+
+    return match
+  }
+
+  // Bare basename: match `relative === specArg` or `relative` ends with `/specArg`.
+  const basenameMatches = specs.filter((s) => {
+    return s.relative === specArg || s.relative.endsWith(`/${specArg}`)
+  })
+
+  if (basenameMatches.length === 0) {
+    writeStderr(`No spec matching: ${specArg}\n`)
+    process.exit(1)
+
+    return null
+  }
+
+  if (basenameMatches.length > 1) {
+    writeStderr(`Ambiguous spec '${specArg}'. Matches:\n`)
+    for (const match of basenameMatches) {
+      writeStderr(`  ${match.relative}\n`)
+    }
+
+    process.exit(1)
+
+    return null
+  }
+
+  return basenameMatches[0]
+}
+
+/**
+ * `cypress inspect run <spec>` — launch a spec in the running instance.
+ *
+ * Fire-and-forget; the server-side `runSpec` mutation initiates the run but
+ * does not wait for it to finish. `--wait` is explicitly deferred to Phase 2
+ * (design doc §6) because it needs a new lifecycle signal.
+ */
+const run = async (opts: RunOpts): Promise<void> => {
+  if (!opts.spec) {
+    writeStderr('Missing required argument: <spec>. See `cypress inspect --help`.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const data = await postGraphQL(instance, projectSpecsQuery)
+
+  if (!data.currentProject) {
+    writeStderr('No project loaded\n')
+    process.exit(1)
+
+    return
+  }
+
+  const projectRoot: string = data.currentProject.projectRoot
+  const specs: ResolvedSpec[] = data.currentProject.specs || []
+
+  const resolved = resolveSpec(opts.spec, projectRoot, specs)
+
+  if (!resolved) {
+    return
+  }
+
+  const result = await postGraphQL(instance, runSpecMutation, { specPath: resolved.absolute })
+
+  if (opts.json) {
+    printJson(result.runSpec)
+
+    return
+  }
+
+  logger.always(`Launched ${resolved.relative}`)
+}
+
+/**
+ * `cypress inspect switch <e2e|component>` — swap the active testing type.
+ *
+ * Default path calls `switchTestingTypeAndRelaunch` and polls
+ * `inspectSnapshot.browserStatus` until it settles at `open` or `closed`.
+ * `--no-relaunch` short-circuits to `setAndLoadCurrentTestingType`, which
+ * just updates state without touching the browser.
+ */
+const switchMode = async (opts: SwitchOpts): Promise<void> => {
+  if (!opts.mode) {
+    writeStderr('Missing required argument: <mode>. See `cypress inspect --help`.\n')
+    process.exit(1)
+
+    return
+  }
+
+  if (opts.mode !== 'e2e' && opts.mode !== 'component') {
+    writeStderr(`Invalid testing type '${opts.mode}'. Expected 'e2e' or 'component'.\n`)
+    process.exit(1)
+
+    return
+  }
+
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const testingType = opts.mode
+
+  if (opts.noRelaunch) {
+    await postGraphQL(instance, switchNoRelaunchMutation, { testingType })
+
+    if (opts.json) {
+      const snapshot = await fetchSnapshot(instance)
+
+      printJson(snapshot)
+
+      return
+    }
+
+    logger.always(`switched testing type to ${testingType}`)
+
+    return
+  }
+
+  // Kick off the relaunch. The mutation returns synchronously but the browser
+  // transitions (`opening` → `open` / `closing` → `closed`) land shortly after.
+  await postGraphQL(instance, switchRelaunchMutation, { testingType })
+
+  const timeoutMs = typeof opts.timeout === 'number' ? opts.timeout : 30000
+  const pollIntervalMs = 500
+
+  /**
+   * Consider the switch complete when `browserStatus` has settled at `open`
+   * or `closed` AND `testingType` matches the requested mode. If the server
+   * has no browser queued at all (e.g. user hasn't picked one yet), a
+   * settled `closed` + matching testingType is also a valid terminal state.
+   *
+   * Design note: we unconditionally wait at least one poll cycle so callers
+   * don't race past the transition when the starting state already matches
+   * the target. The polling loop below handles this naturally because the
+   * first snapshot fetch happens after `pollIntervalMs`.
+   */
+  const isSettled = (snapshot: InspectSnapshot): boolean => {
+    const statusSettled = snapshot.browserStatus === 'open' || snapshot.browserStatus === 'closed' || snapshot.browserStatus === null
+    const typeMatches = snapshot.testingType === testingType
+
+    return statusSettled && typeMatches
+  }
+
+  const deadline = Date.now() + timeoutMs
+  let finalSnapshot: InspectSnapshot | null = null
+  let timer: ReturnType<typeof setTimeout> | null = null
+
+  try {
+    while (true) {
+      await new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, pollIntervalMs)
+      })
+
+      timer = null
+
+      const snapshot = await fetchSnapshot(instance)
+
+      if (isSettled(snapshot)) {
+        finalSnapshot = snapshot
+        break
+      }
+
+      if (Date.now() >= deadline) {
+        writeStderr(`Timed out after ${timeoutMs}ms waiting for testing type switch.\n`)
+        process.exit(124)
+
+        return
+      }
+    }
+  } finally {
+    // Clear any pending poll timer on error/exit paths.
+    if (timer) {
+      clearTimeout(timer)
+    }
+  }
+
+  if (!finalSnapshot) {
+    return
+  }
+
+  if (opts.json) {
+    printJson(finalSnapshot)
+
+    return
+  }
+
+  let browserLine = '—'
+
+  if (finalSnapshot.activeBrowser?.name) {
+    const statusText = finalSnapshot.browserStatus ? ` (${finalSnapshot.browserStatus})` : ''
+
+    browserLine = `${finalSnapshot.activeBrowser.name}${statusText}`
+  }
+
+  logger.always(`switched testing type to ${testingType}`)
+  logger.always(`browser: ${browserLine}`)
+}
+
 const inspectModule = {
   list,
   status,
   specs,
+  run,
+  switch: switchMode,
 }
 
 export default inspectModule
