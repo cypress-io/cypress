@@ -13,11 +13,6 @@ when:
             value: << pipeline.git.branch >>
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
-    # temporary: skip the full PR workflow on this branch so only the minimal
-    # windows-branch-test workflow runs while we validate the CI fix (PR #33642).
-    # Remove before merge.
-    - not:
-        equal: [ 'mschile/cool-yonath-30a3c1', << pipeline.git.branch >> ]
 
 jobs:
   - node_modules_install:
