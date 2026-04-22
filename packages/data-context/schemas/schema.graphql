@@ -2,6 +2,30 @@
 ### Do not make changes to this file directly
 
 
+"""A spec run that is currently in progress. Populated in Phase 2."""
+type ActiveRun {
+  """Absolute path to the spec that is running."""
+  specPath: String!
+
+  """When the run started."""
+  startedAt: DateTime!
+
+  """One of 'starting' | 'running' | 'finished' | 'errored'."""
+  status: String!
+}
+
+"""
+Derived high-level route of the open-mode app, exposed for CLI inspection.
+"""
+enum AppRoute {
+  BROWSER_SELECTION
+  ERROR
+  INTRO
+  SPEC_LIST
+  SPEC_RUNNING
+  TESTING_TYPE_SELECTION
+}
+
 """Represents state of auth based on most recent message from login flow"""
 type AuthState {
   """Whether the browser was successfully opened for login"""
@@ -1396,6 +1420,42 @@ type GlobalProject implements Node & ProjectLike {
 }
 
 """
+Aggregated, read-only view of the open-mode instance state — consumed by the `cypress inspect` CLI.
+"""
+type InspectSnapshot {
+  """The currently-selected browser, or null if none is selected."""
+  activeBrowser: Browser
+
+  """
+  An in-progress spec run, if any. Always null until Phase 2 lifecycle wiring lands.
+  """
+  activeRun: ActiveRun
+
+  """Derived high-level route of the app UI."""
+  appRoute: AppRoute!
+
+  """The status of the browser currently controlled by the instance."""
+  browserStatus: BrowserStatus
+
+  """Version of Cypress running in this instance."""
+  cypressVersion: String!
+
+  """Process id of the open-mode instance."""
+  pid: Int!
+
+  """
+  Absolute path to the currently-opened project, or null if no project is loaded.
+  """
+  projectRoot: String
+
+  """Number of specs discovered for the current project."""
+  specCount: Int!
+
+  """The currently selected testing type, or null if not yet chosen."""
+  testingType: TestingTypeEnum
+}
+
+"""
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
@@ -1844,6 +1904,11 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
+
+  """
+  A snapshot of the current open-mode instance state, for CLI inspection.
+  """
+  inspectSnapshot: InspectSnapshot!
 
   """
   Whether the app was invoked from the CLI, false if user is using the binary directly (not invoked from package manager e.g. npm)

@@ -11,6 +11,7 @@ import { Wizard } from './gql-Wizard'
 import { ErrorWrapper } from './gql-ErrorWrapper'
 import { CachedUser } from './gql-CachedUser'
 import { Cohort } from './gql-Cohorts'
+import { InspectSnapshot } from './gql-InspectSnapshot'
 
 export const Query = objectType({
   name: 'Query',
@@ -128,6 +129,15 @@ export const Query = objectType({
     t.string('machineId', {
       description: 'Unique node machine identifier for this instance - may be nil if unable to resolve',
       resolve: async (source, args, ctx) => await ctx.coreData.machineId,
+    })
+
+    t.nonNull.field('inspectSnapshot', {
+      type: InspectSnapshot,
+      description: 'A snapshot of the current open-mode instance state, for CLI inspection.',
+      // Return a truthy object so field-level resolvers (which all read from `ctx`) run.
+      // The concrete root object is irrelevant; every field resolver derives its value
+      // from `ctx.coreData` / `ctx.project`.
+      resolve: () => ({}),
     })
   },
   sourceType: {

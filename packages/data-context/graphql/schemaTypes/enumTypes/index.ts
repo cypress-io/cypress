@@ -1,6 +1,7 @@
 /* eslint-disable padding-line-between-statements */
 // created by autobarrel, do not modify directly
 
+export * from './gql-AppRoute'
 export * from './gql-BrowserFamilyEnum'
 export * from './gql-BrowserStatus'
 export * from './gql-CodeGenTypeEnum'
