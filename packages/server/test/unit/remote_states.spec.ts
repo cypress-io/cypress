@@ -146,6 +146,58 @@ describe('remote states', () => {
         },
       })
     })
+
+    it('returns undefined when no primary has been set', function () {
+      const freshRemoteStates = new RemoteStates(remoteStatesServerPorts, documentDomainInjection)
+
+      expect(freshRemoteStates.hasPrimary()).to.be.false
+      expect(freshRemoteStates.getPrimary()).to.be.undefined
+    })
+  })
+
+  context('#waitForPrimary', () => {
+    it('resolves immediately when a primary is already set', async function () {
+      // beforeEach already set a primary
+      await remoteStates.waitForPrimary(100)
+    })
+
+    it('resolves once a primary is subsequently set', async function () {
+      const freshRemoteStates = new RemoteStates(remoteStatesServerPorts, documentDomainInjection)
+
+      // start the wait first, then set the primary
+      const pending = freshRemoteStates.waitForPrimary(1000)
+
+      setTimeout(() => freshRemoteStates.set('http://localhost:3500'), 10)
+
+      await pending
+      expect(freshRemoteStates.hasPrimary()).to.be.true
+    })
+
+    it('only resolves when the primary (not a secondary) is set', async function () {
+      const freshRemoteStates = new RemoteStates(remoteStatesServerPorts, documentDomainInjection)
+
+      let resolved = false
+      const pending = freshRemoteStates.waitForPrimary(1000).then(() => {
+        resolved = true
+      })
+
+      // set a non-primary origin — should not wake the waiter
+      freshRemoteStates.set('https://staging.google.com/foo/bar', {}, false)
+      await new Promise((r) => setTimeout(r, 20))
+      expect(resolved).to.be.false
+
+      // now set the primary — should wake it
+      freshRemoteStates.set('http://localhost:3500')
+      await pending
+      expect(resolved).to.be.true
+    })
+
+    it('rejects after the timeout elapses', async function () {
+      const freshRemoteStates = new RemoteStates(remoteStatesServerPorts, documentDomainInjection)
+
+      await expect(freshRemoteStates.waitForPrimary(50))
+      .to.be.rejectedWith(/Timed out .* waiting for primary remote state/)
+    })
   })
 
   context('#isPrimarySuperDomainOrigin', () => {

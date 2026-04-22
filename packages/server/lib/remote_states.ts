@@ -65,11 +65,44 @@ export class RemoteStates {
   private primaryOriginKey: string = ''
   private currentOriginKey: string = ''
   private serverPorts?: RemoteStatesServerPorts
+  private primarySetWaiters: Array<() => void> = []
 
   constructor (
     private configure: () => RemoteStatesServerPorts,
     private documentDomainInjection: DocumentDomainInjection,
   ) {
+  }
+
+  /**
+   * Resolves once a primary remote state has been established, or rejects
+   * after `timeoutMs`. Used by HTTP handlers (e.g. the iframe route) that can
+   * race ahead of server-base setting the initial primary during a project
+   * (re)initialization — e.g. when the user edits cypress.config.js in open
+   * mode. Resolves immediately if the primary is already set.
+   */
+  waitForPrimary (timeoutMs: number = 2000): Promise<void> {
+    if (this.hasPrimary()) {
+      return Promise.resolve()
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        const idx = this.primarySetWaiters.indexOf(onSet)
+
+        if (idx !== -1) {
+          this.primarySetWaiters.splice(idx, 1)
+        }
+
+        reject(new Error(`Timed out after ${timeoutMs}ms waiting for primary remote state to be set`))
+      }, timeoutMs)
+
+      const onSet = () => {
+        clearTimeout(timeout)
+        resolve()
+      }
+
+      this.primarySetWaiters.push(onSet)
+    })
   }
 
   get (url: string) {
@@ -84,10 +117,10 @@ export class RemoteStates {
     return !!(remoteStates.length && remoteStates[0] && remoteStates[0][1])
   }
 
-  getPrimary () {
-    const state = Array.from(this.remoteStates.entries())[0][1]
+  getPrimary (): RemoteState | undefined {
+    const entry = Array.from(this.remoteStates.entries())[0]
 
-    return state
+    return entry?.[1]
   }
 
   isPrimarySuperDomainOrigin (url: string): boolean {
@@ -150,6 +183,14 @@ export class RemoteStates {
       this.remoteStates = new Map(stateArray)
 
       this.primaryOriginKey = this.currentOriginKey
+
+      // notify anything awaiting the primary (e.g. a racing iframe request)
+      if (this.primarySetWaiters.length) {
+        const waiters = this.primarySetWaiters
+
+        this.primarySetWaiters = []
+        waiters.forEach((resolve) => resolve())
+      }
     } else {
       this.remoteStates.set(this.currentOriginKey, state)
     }

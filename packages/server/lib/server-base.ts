@@ -768,7 +768,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     let handlingLocalFile = false
     const previousRemoteState = this._remoteStates.current()
     const previousRemoteStateIsPrimary = this._remoteStates.isPrimarySuperDomainOrigin(previousRemoteState.origin)
-    const primaryRemoteState = this._remoteStates.getPrimary()
+    // _onResolveUrl runs during cy.visit, after the primary has been set by
+    // server startup — assert non-null to satisfy the RemoteState | undefined
+    // return type of getPrimary().
+    const primaryRemoteState = this._remoteStates.getPrimary()!
 
     // nuke any hashes from our url since
     // those those are client only and do

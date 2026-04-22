@@ -32,8 +32,24 @@ export = {
 
     const injection = DocumentDomainInjection.InjectionBehavior(config)
 
+    // The primary remote state may not be established yet if the project is
+    // being (re)initialized — e.g. when the user edits cypress.config.js in
+    // open mode and the server becomes routable before `remoteStates.set()`
+    // has been called for the new project. Wait briefly for it to arrive
+    // rather than crashing on an empty map.
+    if (!remoteStates.hasPrimary()) {
+      try {
+        await remoteStates.waitForPrimary()
+      } catch (err) {
+        debug('iframe request timed out waiting for primary remote state: %s', (err as Error).message)
+        res.status(503).type('text').send('Cypress project not ready')
+
+        return
+      }
+    }
+
     debug('primary remote state', remoteStates.getPrimary())
-    const { origin } = remoteStates.getPrimary()
+    const { origin } = remoteStates.getPrimary()!
 
     const superDomain = injection.shouldInjectDocumentDomain(origin) ? injection.getHostname(origin) : ''
 

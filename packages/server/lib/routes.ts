@@ -79,7 +79,8 @@ export const createCommonRoutes = ({
       return next()
     }
 
-    const primary = remoteStates.getPrimary()
+    // `hasPrimary()` was checked above, so getPrimary() returns a value here.
+    const primary = remoteStates.getPrimary()!
 
     // props can be null in certain circumstances even if the primary is established
     if (!primary.props) {

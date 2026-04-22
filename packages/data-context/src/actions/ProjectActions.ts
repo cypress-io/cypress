@@ -40,7 +40,7 @@ export interface ProjectApiShape {
   clearAllProjectPreferences(): Promise<unknown>
   closeActiveProject(shouldCloseBrowser?: boolean): Promise<unknown>
   getConfig(): ReceivedCypressOptions | undefined
-  getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState } | undefined
+  getRemoteStates(): { reset(): void, getPrimary(): Cypress.RemoteState | undefined } | undefined
   getCurrentBrowser: () => Cypress.Browser | undefined
   getCurrentProjectSavedState(): AllowedState | undefined
   setPromptShown(slug: string): void
