@@ -4,6 +4,8 @@ linux-x64:
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+      # TEMP: run full workflow on this branch to flake-test the origin-communicator cleanup fix
+      - equal: [ 'mschile/deflake-origin-communicator-cleanup', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
@@ -607,8 +609,41 @@ windows:
         requires:
           - windows-node-modules-install
 
+    # TEMP: run 5x to verify the origin-communicator cleanup flake fix on Windows
     - run-app-integration-tests-chrome:
-        name: windows-run-app-integration-tests-chrome
+        name: windows-run-app-integration-tests-chrome-1
+        executor: windows
+        resource_class: windows.large
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
+        requires:
+          - windows-build
+
+    - run-app-integration-tests-chrome:
+        name: windows-run-app-integration-tests-chrome-2
+        executor: windows
+        resource_class: windows.large
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
+        requires:
+          - windows-build
+
+    - run-app-integration-tests-chrome:
+        name: windows-run-app-integration-tests-chrome-3
+        executor: windows
+        resource_class: windows.large
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
+        requires:
+          - windows-build
+
+    - run-app-integration-tests-chrome:
+        name: windows-run-app-integration-tests-chrome-4
+        executor: windows
+        resource_class: windows.large
+        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
+        requires:
+          - windows-build
+
+    - run-app-integration-tests-chrome:
+        name: windows-run-app-integration-tests-chrome-5
         executor: windows
         resource_class: windows.large
         context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
