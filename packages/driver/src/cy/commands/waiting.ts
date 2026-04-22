@@ -266,6 +266,14 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
       return waitForXhr(str, _.omit(options, 'error'))
     })
     .then((responses) => {
+      // cy.retry may resolve with undefined when the runnable has already
+      // ended (canceled or transitioned). Bail out rather than dereferencing
+      // undefined entries below and surfacing a spurious TypeError as an
+      // unhandled rejection.
+      if (responses.some((r) => r == null)) {
+        return
+      }
+
       // if we only asked to wait for one alias
       // then return that, else return the array of xhr responses
       const ret = responses.length === 1 ? responses[0] : ((resp) => {
