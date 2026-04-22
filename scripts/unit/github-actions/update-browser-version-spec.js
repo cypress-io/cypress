@@ -21,13 +21,21 @@ const coreStub = () => {
   }
 }
 
-const stubRepoVersions = ({ betaVersion, stableVersion }) => {
+const pipelineStubContent = ({ betaVersion, stableVersion, chromeForTestingStableVersion }) => {
+  return `chrome-stable-version: &chrome-stable-version "${stableVersion}"\nchrome-beta-version: &chrome-beta-version "${betaVersion}"\nchrome-for-testing-stable-version: &chrome-for-testing-stable-version "${chromeForTestingStableVersion}"\n`
+}
+
+const stubRepoVersions = ({ betaVersion, stableVersion, chromeForTestingStableVersion = '1.0' }) => {
   mockfs({
-    [CIRCLECI_WORKFLOWS_FILEPATH]: `chrome-stable-version: &chrome-stable-version "${stableVersion}"\nchrome-beta-version: &chrome-beta-version "${betaVersion}"\n`,
+    [CIRCLECI_WORKFLOWS_FILEPATH]: pipelineStubContent({
+      betaVersion,
+      stableVersion,
+      chromeForTestingStableVersion,
+    }),
   })
 }
 
-const stubChromeVersions = ({ betaVersion, stableVersion }) => {
+const stubChromeVersions = ({ betaVersion, stableVersion, chromeForTestingStableVersion }) => {
   if (!global.originalFetch) {
     global.originalFetch = global.fetch
   }
@@ -42,7 +50,18 @@ const stubChromeVersions = ({ betaVersion, stableVersion }) => {
     nextPageToken: '',
   }
 
+  const cftVersion = chromeForTestingStableVersion !== undefined ? chromeForTestingStableVersion : '1.0'
+  const cftBody = JSON.stringify({
+    channels: {
+      Stable: { channel: 'Stable', version: cftVersion },
+    },
+  })
+
   global.fetch = sinon.stub().callsFake((url) => {
+    if (String(url).includes('chrome-for-testing/last-known-good-versions.json')) {
+      return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(cftBody) })
+    }
+
     if (url.includes('/channels/stable/')) {
       return Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(stableResponse)) })
     }
@@ -73,12 +92,14 @@ describe('update browser version github action', () => {
       stubRepoVersions({
         betaVersion: '1.1',
         stableVersion: '1.0',
+        chromeForTestingStableVersion: '1.0',
       })
     })
 
     it('sets has_update: true when there is a stable update', async () => {
       stubChromeVersions({
         stableVersion: '2.0',
+        chromeForTestingStableVersion: '1.0',
       })
 
       const core = coreStub()
@@ -91,6 +112,7 @@ describe('update browser version github action', () => {
     it('sets has_update: true when there is a beta update', async () => {
       stubChromeVersions({
         betaVersion: '1.2',
+        chromeForTestingStableVersion: '1.0',
       })
 
       const core = coreStub()
@@ -104,6 +126,19 @@ describe('update browser version github action', () => {
       stubChromeVersions({
         betaVersion: '2.1',
         stableVersion: '2.0',
+        chromeForTestingStableVersion: '1.0',
+      })
+
+      const core = coreStub()
+
+      await getVersions({ core })
+
+      expect(core.setOutput).to.be.calledWith('has_update', 'true')
+    })
+
+    it('sets has_update: true when there is a Chrome for Testing stable update', async () => {
+      stubChromeVersions({
+        chromeForTestingStableVersion: '2.0',
       })
 
       const core = coreStub()
@@ -114,7 +149,9 @@ describe('update browser version github action', () => {
     })
 
     it('sets has_update: false when there is not a stable update or a beta update', async () => {
-      stubChromeVersions({})
+      stubChromeVersions({
+        chromeForTestingStableVersion: '1.0',
+      })
 
       const core = coreStub()
 
@@ -124,7 +161,9 @@ describe('update browser version github action', () => {
     })
 
     it('sets has_update: false if there is a failure', async () => {
-      stubChromeVersions({})
+      stubChromeVersions({
+        chromeForTestingStableVersion: '1.0',
+      })
 
       const core = coreStub()
 
@@ -137,6 +176,7 @@ describe('update browser version github action', () => {
       stubChromeVersions({
         betaVersion: '2.1',
         stableVersion: '2.0',
+        chromeForTestingStableVersion: '3.0',
       })
 
       const core = coreStub()
@@ -147,11 +187,14 @@ describe('update browser version github action', () => {
       expect(core.setOutput).to.be.calledWith('latest_stable_version', '2.0')
       expect(core.setOutput).to.be.calledWith('current_beta_version', '1.1')
       expect(core.setOutput).to.be.calledWith('latest_beta_version', '2.1')
+      expect(core.setOutput).to.be.calledWith('current_chrome_for_testing_stable_version', '1.0')
+      expect(core.setOutput).to.be.calledWith('latest_chrome_for_testing_stable_version', '3.0')
     })
 
     it('sets description correctly when there is a stable update', async () => {
       stubChromeVersions({
         stableVersion: '2.0',
+        chromeForTestingStableVersion: '1.0',
       })
 
       const core = coreStub()
@@ -164,6 +207,7 @@ describe('update browser version github action', () => {
     it('sets description correctly when there is a beta update', async () => {
       stubChromeVersions({
         betaVersion: '1.2',
+        chromeForTestingStableVersion: '1.0',
       })
 
       const core = coreStub()
@@ -177,6 +221,7 @@ describe('update browser version github action', () => {
       stubChromeVersions({
         betaVersion: '2.1',
         stableVersion: '2.0',
+        chromeForTestingStableVersion: '1.0',
       })
 
       const core = coreStub()
@@ -185,6 +230,38 @@ describe('update browser version github action', () => {
 
       expect(core.setOutput).to.be.calledWith('description', 'Update Chrome (stable) to 2.0 and Chrome (beta) to 2.1')
     })
+
+    it('sets description correctly when there is a Chrome for Testing stable update', async () => {
+      stubChromeVersions({
+        chromeForTestingStableVersion: '2.0',
+      })
+
+      const core = coreStub()
+
+      await getVersions({ core })
+
+      expect(core.setOutput).to.be.calledWith('description', 'Update Chrome for Testing (stable) to 2.0')
+    })
+
+    it('does not set latest_chrome_for_testing_stable_version below the pinned value when only stable/beta update', async () => {
+      stubRepoVersions({
+        betaVersion: '1.1',
+        stableVersion: '1.0',
+        chromeForTestingStableVersion: '147.0.0',
+      })
+
+      stubChromeVersions({
+        stableVersion: '2.0',
+        chromeForTestingStableVersion: '100.0.0',
+      })
+
+      const core = coreStub()
+
+      await getVersions({ core })
+
+      expect(core.setOutput).to.be.calledWith('latest_chrome_for_testing_stable_version', '147.0.0')
+      expect(core.setOutput).to.be.calledWith('has_update', 'true')
+    })
   })
 
   context('.checkNeedForBranchUpdate', () => {
@@ -192,6 +269,7 @@ describe('update browser version github action', () => {
       stubRepoVersions({
         betaVersion: '1.1',
         stableVersion: '1.0',
+        chromeForTestingStableVersion: '1.0',
       })
     })
 
@@ -202,6 +280,7 @@ describe('update browser version github action', () => {
         core,
         latestBetaVersion: '1.1',
         latestStableVersion: '2.0',
+        latestChromeForTestingStableVersion: '1.0',
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
@@ -214,6 +293,7 @@ describe('update browser version github action', () => {
         core,
         latestBetaVersion: '1.2',
         latestStableVersion: '1.0',
+        latestChromeForTestingStableVersion: '1.0',
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
@@ -226,6 +306,20 @@ describe('update browser version github action', () => {
         core,
         latestBetaVersion: '2.1',
         latestStableVersion: '2.0',
+        latestChromeForTestingStableVersion: '1.0',
+      })
+
+      expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
+    })
+
+    it('sets has_newer_update: true when there is a Chrome for Testing stable update', () => {
+      const core = coreStub()
+
+      checkNeedForBranchUpdate({
+        core,
+        latestBetaVersion: '1.1',
+        latestStableVersion: '1.0',
+        latestChromeForTestingStableVersion: '2.0',
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
@@ -238,6 +332,7 @@ describe('update browser version github action', () => {
         core,
         latestBetaVersion: '1.1',
         latestStableVersion: '1.0',
+        latestChromeForTestingStableVersion: '1.0',
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'false')
@@ -249,6 +344,7 @@ describe('update browser version github action', () => {
       stubRepoVersions({
         betaVersion: '1.1',
         stableVersion: '1.0',
+        chromeForTestingStableVersion: '1.0',
       })
 
       sinon.stub(fs, 'writeFileSync')
@@ -256,9 +352,18 @@ describe('update browser version github action', () => {
       updateBrowserVersionsFile({
         latestBetaVersion: '2.1',
         latestStableVersion: '2.0',
+        latestChromeForTestingStableVersion: '2.2',
       })
 
-      expect(fs.writeFileSync).to.be.calledWith(CIRCLECI_WORKFLOWS_FILEPATH, `chrome-stable-version: &chrome-stable-version "2.0"\nchrome-beta-version: &chrome-beta-version "2.1"\n`, 'utf8')
+      expect(fs.writeFileSync).to.be.calledWith(
+        CIRCLECI_WORKFLOWS_FILEPATH,
+        pipelineStubContent({
+          stableVersion: '2.0',
+          betaVersion: '2.1',
+          chromeForTestingStableVersion: '2.2',
+        }),
+        'utf8',
+      )
     })
   })
 

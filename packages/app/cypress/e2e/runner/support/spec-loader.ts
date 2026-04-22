@@ -15,6 +15,15 @@ export const shouldHaveTestResults = ({ passCount, failCount, pendingCount }: Ex
       cy.get('.pending .num', { timeout: 20000 }).should('have.text', `${pendingCount}`)
     }
   })
+
+  // For the no-tests case (both counts are 0 → '--'), the stats assertions
+  // above match BOTH the pre-run state and the no-tests final state, so they
+  // can pass before the reporter has rendered. Explicitly wait for the
+  // reporter to exit its Loading state (runnablesStore.isReady === true) so
+  // downstream assertions (e.g. on the empty-state copy) don't race.
+  if (passCount === '--' && failCount === '--') {
+    cy.get('.reporter').find('.runnable-loading', { timeout: 30000 }).should('not.exist')
+  }
 }
 
 type ExperimentalRetriesProjects = 'detect-flake-and-pass-on-threshold' | 'detect-flake-but-always-fail' | 'detect-flake-but-always-fail-stop-any-passed'

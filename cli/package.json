@@ -33,7 +33,7 @@
     "blob-util": "^2.0.2",
     "bluebird": "^3.7.2",
     "buffer": "^5.7.1",
-    "cachedir": "^2.3.0",
+    "cachedir": "^2.4.0",
     "chalk": "^4.1.0",
     "ci-info": "^4.1.0",
     "cli-cursor": "^3.1.0",

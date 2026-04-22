@@ -66,9 +66,12 @@ describe('Cypress In Cypress Origin Communicator', () => {
 
       cy.get('[aria-controls="reporter-inline-specs-list"]').type('{enter}')
       cy.get('[data-cy="spec-row-item"]').contains('123').click()
+      cy.waitForSpecToFinish()
 
       cy.then(() => {
-        expect(removeAllListenersSpy).to.be.calledOnce
+        const noArgCalls = removeAllListenersSpy.getCalls().filter((c) => c.args.length === 0)
+
+        expect(noArgCalls).to.have.length(1)
       })
     })
   })
