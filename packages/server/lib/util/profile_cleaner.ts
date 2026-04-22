@@ -74,9 +74,9 @@ export const removeInactiveByPid = async (pathToProfiles: string, pidPrefix: str
 
   const withPid = folders.map(folderWithPid(pidPrefix))
   const toRemove = await Promise.all(
-    withPid.map((item) =>
-      inactivePids(item).then((inactive) => (inactive ? item : null)),
-    ),
+    withPid.map((item) => {
+      return inactivePids(item).then((inactive) => (inactive ? item : null))
+    }),
   )
   const items = toRemove.filter((item): item is FolderWithPid => item !== null)
 
