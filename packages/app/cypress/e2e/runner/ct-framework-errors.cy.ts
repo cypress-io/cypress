@@ -188,6 +188,7 @@ describe('Next.js', {
 
     verify('command failure', {
       command: 'get',
+      hasCodeFrame: false,
       message: [
         'Timed out retrying',
         'element-that-does-not-exist',
