@@ -752,7 +752,7 @@ commands:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: yarn install --check-files
       - install-browsers:
           install-chrome: true
           install-firefox: true
@@ -1498,7 +1498,7 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: yarn install --check-files
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -1651,7 +1651,7 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: yarn install --check-files
       # TODO: Remove this once we switch off self-hosted M1 runners
       - when:
           condition:
@@ -1703,7 +1703,7 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: yarn install --check-files
       - run:
           name: Driver memory tests in Electron
           environment:
@@ -1849,7 +1849,7 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: yarn install --check-files
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
@@ -2457,7 +2457,7 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: yarn install --check-files
       - check-if-binary-exists
       - build-and-package-binary
       - build-cypress-npm-package:
