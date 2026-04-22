@@ -83,11 +83,13 @@ describe('encryption', () => {
     // default but still well within our 5MB ceiling. Use random bytes per entry
     // so the DEFLATE layer can't trivially compress it away.
     const LARGE_RESPONSE = {
-      items: Array.from({ length: 800 }, (_, i) => ({
-        id: i,
-        xpath: `//body/div[${i}]`,
-        innerText: crypto.randomBytes(256).toString('hex'),
-      })),
+      items: Array.from({ length: 800 }, (_, i) => {
+        return {
+          id: i,
+          xpath: `//body/div[${i}]`,
+          innerText: crypto.randomBytes(256).toString('hex'),
+        }
+      }),
     }
 
     expect(JSON.stringify(LARGE_RESPONSE).length).to.be.greaterThan(400 * 1024)

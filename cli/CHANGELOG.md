@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 5.14.2
+
+**Dependency Updates:**
+
+- Upgraded `cachedir` from `^2.3.0` to `^2.4.0`. Addressed in [#33608](https://github.com/cypress-io/cypress/pull/33608).
+
 ## 15.14.1
 
 **Performance:**
