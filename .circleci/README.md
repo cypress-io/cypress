@@ -89,6 +89,40 @@ removed from the DAG, their entries in `all-jobs-passed.requires:` become
 no-ops, and the aggregator completes as soon as all non-skipped dependencies
 finish.
 
+### Workflow DAG invariants (`pull-request.yml`)
+
+These rules prevent subtle CI failures when jobs are skipped by expression
+filters but downstream work still runs (broken cache, missing artifacts, or
+gates finishing before the work they summarize).
+
+**`system-tests-node-modules-install`**
+
+- In `@pipeline.yml`, any job whose steps call `restore_cached_system_tests_deps`
+  must list `system-tests-node-modules-install` under `requires:` in
+  `workflows/pull-request.yml` (the install job runs
+  `update_cached_system_tests_deps`, which seeds the Circle cache those steps
+  restore).
+- The install job's `filters:` expression must OR in every
+  `pipeline.parameters.run-*` that can schedule any job that depends on it
+  (otherwise CircleCI drops the install job from the DAG while dependents
+  still run, and `requires:` becomes a no-op).
+- For path-filter-only PRs, add matching rows in `path-filter-mapping.conf` so
+  fixture edits under `system-tests/projects/**` set the same `run-*`
+  parameters as changes to the corresponding `npm/**` package when applicable.
+
+**`verify-accessibility-results`**
+
+- This job should `require` the same **driver integration** jobs as
+  `all-jobs-passed` (every `driver-integration-tests-*` in the PR workflow).
+  Keep the lists in sync when adding or removing a driver matrix job; ordering
+  may differ for readability, but no driver should be omitted from the
+  accessibility fan-in unless the team explicitly excludes it.
+
+**`percy-finalize`**
+
+- Intentionally narrower: only Percy-participating jobs. Do not mirror the full
+  `all-jobs-passed` list here.
+
 ### Mapping file format
 
 Each non-comment, non-blank line in `path-filter-mapping.conf` is:

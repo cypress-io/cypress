@@ -101,6 +101,9 @@ parameters:
   run-npm-schematic-tests:
     type: boolean
     default: false
+  run-npm-svelte-tests:
+    type: boolean
+    default: false
 
 orbs:
   browser-tools: circleci/browser-tools@2.3.2

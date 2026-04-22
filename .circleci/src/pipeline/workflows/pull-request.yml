@@ -108,15 +108,22 @@ jobs:
         - external-pr-build
         - approve-contributor-pr
   - system-tests-node-modules-install:
-      filters: &system-filter >-
-        pipeline.parameters.run-system-tests or pipeline.parameters.run-all-jobs
+      filters: >-
+        pipeline.parameters.run-system-tests or
+        pipeline.parameters.run-all-jobs or
+        pipeline.parameters.run-npm-webpack-dev-server-tests or
+        pipeline.parameters.run-npm-vite-dev-server-tests or
+        pipeline.parameters.run-v8-tests or
+        pipeline.parameters.run-npm-svelte-tests or
+        pipeline.parameters.run-npm-puppeteer-tests
       context: test-runner:performance-tracking
       requires:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
   - system-tests-chrome:
-      filters: *system-filter
+      filters: &system-filter >-
+        pipeline.parameters.run-system-tests or pipeline.parameters.run-all-jobs
       context: test-runner:performance-tracking
       requires:
         - system-tests-node-modules-install
@@ -341,9 +348,7 @@ jobs:
   - npm-puppeteer-cypress-tests:
       filters: *npm-puppeteer-filter
       requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
+        - system-tests-node-modules-install
   - npm-react:
       filters: &npm-react-filter >-
         pipeline.parameters.run-npm-react-tests or pipeline.parameters.run-all-jobs
@@ -454,16 +459,19 @@ jobs:
         - get-published-artifacts
   - binary-system-tests:
       context: publish-binary
+      filters: *system-filter
       requires:
         - get-published-artifacts
         - system-tests-node-modules-install
   - yarn-pnp-preprocessor-system-test:
       context: publish-binary
+      filters: *system-filter
       requires:
         - get-published-artifacts
         - system-tests-node-modules-install
   - svelte-webpack-system-test:
       context: publish-binary
+      filters: pipeline.parameters.run-npm-svelte-tests or pipeline.parameters.run-all-jobs
       requires:
         - get-published-artifacts
         - system-tests-node-modules-install
@@ -498,6 +506,7 @@ jobs:
         - driver-integration-tests-firefox
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
+        - driver-integration-tests-chrome-beta
         - driver-integration-tests-chrome-beta-inject-document-domain
         - driver-integration-tests-electron
         - driver-integration-tests-webkit
