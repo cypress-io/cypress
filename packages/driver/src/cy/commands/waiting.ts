@@ -335,7 +335,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
     return new Promise((resolve, reject) => {
       Cypress.specBridgeCommunicator.once('wait:for:xhr:end', (responsesOrErr) => {
         // determine if this is an error by checking if there is a spec bridge error
-        if (responsesOrErr.hasSpecBridgeError) {
+        if (responsesOrErr?.hasSpecBridgeError) {
           delete responsesOrErr.hasSpecBridgeError
           if (options.log) {
             // skip this 'wait' log since it was already added through the primary
