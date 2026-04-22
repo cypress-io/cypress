@@ -67,7 +67,7 @@ export class RemoteStates {
   private primaryOriginKey: string = ''
   private currentOriginKey: string = ''
   private serverPorts?: RemoteStatesServerPorts
-  private primarySetWaiters: Array<() => void> = []
+  private primarySetWaiters: Array<(state: RemoteState) => void> = []
 
   constructor (
     private configure: () => RemoteStatesServerPorts,
@@ -76,18 +76,20 @@ export class RemoteStates {
   }
 
   /**
-   * Resolves once a primary remote state has been established, or rejects
-   * after `timeoutMs`. Used by HTTP handlers (e.g. the iframe route) that can
-   * race ahead of server-base setting the initial primary during a project
-   * (re)initialization — e.g. when the user edits cypress.config.js in open
-   * mode. Resolves immediately if the primary is already set.
+   * Resolves with the primary remote state once one has been established, or
+   * rejects after `timeoutMs`. Used by HTTP handlers (e.g. the iframe route)
+   * that can race ahead of server-base setting the initial primary during a
+   * project (re)initialization — e.g. when the user edits cypress.config.js
+   * in open mode. Resolves immediately if the primary is already set.
    */
-  waitForPrimary (timeoutMs: number = 2000): Promise<void> {
-    if (this.hasPrimary()) {
-      return Promise.resolve()
+  waitForPrimary (timeoutMs: number = 2000): Promise<RemoteState> {
+    const existing = this.getPrimary()
+
+    if (existing) {
+      return Promise.resolve(existing)
     }
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<RemoteState>((resolve, reject) => {
       const timeout = setTimeout(() => {
         const idx = this.primarySetWaiters.indexOf(onSet)
 
@@ -98,9 +100,9 @@ export class RemoteStates {
         reject(new Error(`Timed out after ${timeoutMs}ms waiting for primary remote state to be set`))
       }, timeoutMs)
 
-      const onSet = () => {
+      const onSet = (state: RemoteState) => {
         clearTimeout(timeout)
-        resolve()
+        resolve(state)
       }
 
       this.primarySetWaiters.push(onSet)
@@ -191,7 +193,7 @@ export class RemoteStates {
         const waiters = this.primarySetWaiters
 
         this.primarySetWaiters = []
-        waiters.forEach((resolve) => resolve())
+        waiters.forEach((resolve) => resolve(state))
       }
     } else {
       this.remoteStates.set(this.currentOriginKey, state)

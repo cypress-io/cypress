@@ -37,9 +37,11 @@ export = {
     // open mode and the server becomes routable before `remoteStates.set()`
     // has been called for the new project. Wait briefly for it to arrive
     // rather than crashing on an empty map.
-    if (!remoteStates.hasPrimary()) {
+    let primary = remoteStates.getPrimary()
+
+    if (!primary) {
       try {
-        await remoteStates.waitForPrimary()
+        primary = await remoteStates.waitForPrimary()
       } catch (err) {
         debug('iframe request timed out waiting for primary remote state: %s', (err as Error).message)
         res.status(503).type('text').send('Cypress project not ready')
@@ -48,8 +50,8 @@ export = {
       }
     }
 
-    debug('primary remote state', remoteStates.getPrimary())
-    const { origin } = remoteStates.getPrimary()!
+    debug('primary remote state', primary)
+    const { origin } = primary
 
     const superDomain = injection.shouldInjectDocumentDomain(origin) ? injection.getHostname(origin) : ''
 

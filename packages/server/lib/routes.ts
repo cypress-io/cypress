@@ -73,17 +73,15 @@ export const createCommonRoutes = ({
       (req.path !== '/' && req.path !== clientRoute)
       // not an https upgrade request if not https protocol
       || req.protocol !== 'https'
-      // primary has not been established by a cy.visit() yet
-      || !remoteStates.hasPrimary()
     ) {
       return next()
     }
 
-    // `hasPrimary()` was checked above, so getPrimary() returns a value here.
-    const primary = remoteStates.getPrimary()!
+    const primary = remoteStates.getPrimary()
 
-    // props can be null in certain circumstances even if the primary is established
-    if (!primary.props) {
+    // primary may not have been established by a cy.visit() yet, and `props`
+    // can be null in certain circumstances even when it has been
+    if (!primary?.props) {
       return next()
     }
 

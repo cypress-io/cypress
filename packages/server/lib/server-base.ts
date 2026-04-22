@@ -769,9 +769,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const previousRemoteState = this._remoteStates.current()
     const previousRemoteStateIsPrimary = this._remoteStates.isPrimarySuperDomainOrigin(previousRemoteState.origin)
     // _onResolveUrl runs during cy.visit, after the primary has been set by
-    // server startup — assert non-null to satisfy the RemoteState | undefined
-    // return type of getPrimary().
-    const primaryRemoteState = this._remoteStates.getPrimary()!
+    // server startup. Throw an explicit error rather than letting a missing
+    // primary surface as a cryptic `undefined` dereference downstream.
+    const primaryRemoteState = this._remoteStates.getPrimary()
+
+    if (!primaryRemoteState) {
+      throw new Error('RemoteStates primary is not set while resolving a URL')
+    }
 
     // nuke any hashes from our url since
     // those those are client only and do

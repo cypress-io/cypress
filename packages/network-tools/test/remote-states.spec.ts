@@ -158,12 +158,14 @@ describe('remote states', () => {
   })
 
   context('#waitForPrimary', () => {
-    it('resolves immediately when a primary is already set', async function () {
+    it('resolves with the existing primary when one is already set', async function () {
       // beforeEach already set a primary
-      await remoteStates.waitForPrimary(100)
+      const state = await remoteStates.waitForPrimary(100)
+
+      expect(state.origin).to.equal('http://localhost:3500')
     })
 
-    it('resolves once a primary is subsequently set', async function () {
+    it('resolves with the primary once one is subsequently set', async function () {
       const freshRemoteStates = new RemoteStates(remoteStatesServerPorts, documentDomainInjection)
 
       // start the wait first, then set the primary
@@ -171,8 +173,9 @@ describe('remote states', () => {
 
       setTimeout(() => freshRemoteStates.set('http://localhost:3500'), 10)
 
-      await pending
-      expect(freshRemoteStates.hasPrimary()).to.be.true
+      const state = await pending
+
+      expect(state.origin).to.equal('http://localhost:3500')
     })
 
     it('only resolves when the primary (not a secondary) is set', async function () {
