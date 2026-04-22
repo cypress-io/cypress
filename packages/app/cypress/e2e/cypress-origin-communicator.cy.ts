@@ -29,10 +29,6 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.get('a[href="#/runs"]').click()
       cy.location('hash').should('include', '/runs')
 
-      // Teardown runs asynchronously, so retry until the no-arg cleanup call
-      // has fired. Other code paths may invoke `removeAllListeners` with
-      // specific event names (e.g. cy-prompt re-init), so filter to zero-arg
-      // calls and assert only that the global cleanup fired at least once.
       cy.wrap(null).should(() => {
         const noArgCalls = removeAllListenersSpy.getCalls().filter((c) => c.args.length === 0)
 
