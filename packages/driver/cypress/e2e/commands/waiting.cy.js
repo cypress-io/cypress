@@ -494,6 +494,16 @@ describe('src/cy/commands/waiting', () => {
           Promise.onPossiblyUnhandledRejection(done)
 
           const originalRetry = cy.retry.bind(cy)
+          const restoreRetry = () => {
+            cy.retry = originalRetry
+          }
+
+          // Restore cy.retry on failure as well, so a failure in any command
+          // below does not leak the stub into subsequent tests.
+          cy.on('fail', (err) => {
+            restoreRetry()
+            done(err)
+          })
 
           cy
           .intercept(/foo/, { foo: 'foo' }).as('foo')
@@ -511,7 +521,7 @@ describe('src/cy/commands/waiting', () => {
           })
           .wait(['@foo', '@bar'])
           .then((result) => {
-            cy.retry = originalRetry
+            restoreRetry()
             expect(result).to.be.undefined
             done()
           })
