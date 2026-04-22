@@ -5,6 +5,6 @@ export default defineConfig({
     include: ['test/**/*.spec.ts'],
     globals: true,
     environment: 'node',
-    reporters: ['default', ['junit', { suiteName: 'Cypress CLI Tests', outputFile: '/tmp/cypress/junit/cli-test-results.xml' }]],
+    reporters: ['default', 'junit'],
   },
 })
