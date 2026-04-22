@@ -8,6 +8,7 @@ import util from './util'
 import logger from './logger'
 import { exitWithError, errors } from './errors'
 import cache from './tasks/cache'
+import inspect from './tasks/inspect'
 
 import openModule from './exec/open'
 import runModule from './exec/run'
@@ -146,6 +147,7 @@ const knownCommands = [
   'help',
   '-h',
   '--help',
+  'inspect',
   'install',
   'open',
   'run',
@@ -580,6 +582,26 @@ const cliModule = {
       }
 
       cache[command]()
+    })
+
+    program
+    .command('inspect')
+    .usage('[command]')
+    .description('Inspect and control a running cypress open instance')
+    .option('--json', 'Output JSON instead of human-readable text')
+    .option('--instance <selector>', 'Select an instance by pid or projectRoot substring (when multiple are running)')
+    .action(async function (this: any, opts: any, args: string[]) {
+      const [command = 'list'] = args || []
+
+      if (!_.includes(['list', 'status', 'specs'], command)) {
+        unknownOption.call(this, `inspect ${command}`, 'command')
+      }
+
+      try {
+        await inspect[command as 'list' | 'status' | 'specs'](opts)
+      } catch (e: any) {
+        util.logErrorExit1(e)
+      }
     })
 
     program

@@ -9,6 +9,7 @@ import info from '../../lib/exec/info'
 import run from '../../lib/exec/run'
 import open from '../../lib/exec/open'
 import cache from '../../lib/tasks/cache'
+import inspect from '../../lib/tasks/inspect'
 import state from '../../lib/tasks/state'
 import { start as verifyStart } from '../../lib/tasks/verify'
 import install from '../../lib/tasks/install'
@@ -103,6 +104,16 @@ vi.mock('../../lib/tasks/cache', async (importActual) => {
       // @ts-expect-error
       ...actual.default,
       list: vi.fn(),
+    },
+  }
+})
+
+vi.mock('../../lib/tasks/inspect', () => {
+  return {
+    default: {
+      list: vi.fn(),
+      status: vi.fn(),
+      specs: vi.fn(),
     },
   }
 })
@@ -803,6 +814,62 @@ describe('cli', () => {
 
       await exec('cache list')
 
+      await flushPromises()
+
+      expect(util.logErrorExit1).toHaveBeenCalledWith(err)
+    })
+  })
+
+  describe('cypress inspect', () => {
+    beforeEach(() => {
+      vi.mocked(inspect.list).mockResolvedValue(undefined)
+      vi.mocked(inspect.status).mockResolvedValue(undefined)
+      vi.mocked(inspect.specs).mockResolvedValue(undefined)
+    })
+
+    it('inspect is a known command and defaults to list', async () => {
+      // Indirect verification that `inspect` is in `knownCommands` — commander
+      // only reaches the action handler for whitelisted commands.
+      await exec('inspect')
+      await flushPromises()
+      expect(inspect.list).toHaveBeenCalledWith(expect.objectContaining({}))
+    })
+
+    it('calls inspect.list with --json', async () => {
+      await exec('inspect list --json')
+      await flushPromises()
+      expect(inspect.list).toHaveBeenCalledWith(expect.objectContaining({ json: true }))
+    })
+
+    it('calls inspect.status with --instance', async () => {
+      await exec('inspect status --instance 1234')
+      await flushPromises()
+      expect(inspect.status).toHaveBeenCalledWith(expect.objectContaining({ instance: '1234' }))
+    })
+
+    it('calls inspect.specs', async () => {
+      await exec('inspect specs')
+      await flushPromises()
+      expect(inspect.specs).toHaveBeenCalled()
+    })
+
+    it('unknown subcommand exits with error', async () => {
+      await exec('inspect bogus')
+      await flushPromises()
+
+      // unknownOption invokes process.exit(1) and prints help — no inspect.* call
+      expect(inspect.list).not.toHaveBeenCalled()
+      expect(inspect.status).not.toHaveBeenCalled()
+      expect(inspect.specs).not.toHaveBeenCalled()
+      expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+
+    it('catches rejection and exits via logErrorExit1', async () => {
+      const err = new Error('inspect failed')
+
+      vi.mocked(inspect.list).mockRejectedValue(err)
+
+      await exec('inspect list')
       await flushPromises()
 
       expect(util.logErrorExit1).toHaveBeenCalledWith(err)
