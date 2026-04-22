@@ -1,8 +1,6 @@
 <!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.0.0
 
-_Released 06/23/2026 (PENDING)_
-
 **Breaking Changes:**
 
 - Removed built-in CoffeeScript support: `cy.fixture()` no longer parses `.coffee` fixtures as executable CoffeeScript; the default `@cypress/webpack-batteries-included-preprocessor` no longer bundles `coffee-loader` or `coffeescript`. Use JavaScript/TypeScript for specs, fixtures, and support files, or add CoffeeScript to your own webpack config via `@cypress/webpack-preprocessor`.
