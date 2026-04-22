@@ -49,7 +49,7 @@ jobs:
       - name: Determine name of new branch and if it already exists
         id: check-branch
         env:
-          BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.latest_stable_version }}-beta-from-${{ steps.get-versions.outputs.latest_beta_version }}
+          BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.latest_stable_version }}-beta-from-${{ steps.get-versions.outputs.latest_beta_version }}-cft-from-${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}
         run: |
           echo "branch_name=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
           echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')" >> $GITHUB_OUTPUT
@@ -74,6 +74,7 @@ jobs:
               core,
               latestStableVersion: '${{ steps.get-versions.outputs.latest_stable_version }}',
               latestBetaVersion: '${{ steps.get-versions.outputs.latest_beta_version }}',
+              latestChromeForTestingStableVersion: '${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}',
             })
       ## Update available and a PR doesn't already exist
       - name: Checkout new branch
@@ -90,6 +91,7 @@ jobs:
             updateBrowserVersionsFile({
               latestStableVersion: '${{ steps.get-versions.outputs.latest_stable_version }}',
               latestBetaVersion: '${{ steps.get-versions.outputs.latest_beta_version }}',
+              latestChromeForTestingStableVersion: '${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}',
             })
       - name: Commit the changes
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
@@ -128,6 +130,6 @@ jobs:
               baseBranch: '${{ env.BASE_BRANCH }}',
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
               description: '${{ steps.get-versions.outputs.description }}',
-              body: 'This PR was auto-generated to update the version(s) of Chrome for driver tests',
+              body: 'This PR was auto-generated to update pinned Chrome (Version History), Chrome for Testing ([last-known-good-versions.json](https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json)), or both for CI.',
               team_reviewers: ['app']
             })
