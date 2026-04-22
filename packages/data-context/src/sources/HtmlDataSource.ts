@@ -86,10 +86,15 @@ export class HtmlDataSource {
     // for project-base config, the remote state we wish to convey should be whatever top is set to, also known as the primary domain
     // whenever the app is served/re-served
     if (this.ctx.coreData.currentTestingType === 'e2e') {
-      const remoteStates = this.ctx._apis.projectApi.getRemoteStates()
+      const primary = this.ctx._apis.projectApi.getRemoteStates()?.getPrimary()
 
-      if (remoteStates) {
-        cfg.remote = remoteStates.getPrimary()
+      // Only overwrite `cfg.remote` when a primary is actually established —
+      // otherwise we would erase a value already picked from the project
+      // config above. `getPrimary()` can return undefined during the narrow
+      // window where the server is routable before `remoteStates.set()` has
+      // been called for a (re)initialized project.
+      if (primary) {
+        cfg.remote = primary
       }
     }
 
