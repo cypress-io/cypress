@@ -2,7 +2,7 @@ import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import chalk from 'chalk'
 import { Console } from 'console'
 
-import inspect from '../../../lib/tasks/inspect'
+import inspect, { buildSpecTree, renderSpecTree } from '../../../lib/tasks/inspect'
 import {
   Instance,
   InstanceDiscoveryError,
@@ -321,7 +321,7 @@ describe('lib/tasks/inspect', () => {
   })
 
   describe('.specs', () => {
-    it('3 specs, text → 3 lines of relative paths', async () => {
+    it('specs, text → renders as an ASCII tree', async () => {
       vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
       fetchSpy.mockResolvedValue({
         ok: true,
@@ -331,8 +331,8 @@ describe('lib/tasks/inspect', () => {
             currentProject: {
               specs: [
                 { relative: 'cypress/e2e/a.cy.ts', absolute: '/p/cypress/e2e/a.cy.ts', specType: 'integration' },
+                { relative: 'cypress/e2e/auth/login.cy.ts', absolute: '/p/cypress/e2e/auth/login.cy.ts', specType: 'integration' },
                 { relative: 'cypress/e2e/b.cy.ts', absolute: '/p/cypress/e2e/b.cy.ts', specType: 'integration' },
-                { relative: 'cypress/e2e/c.cy.ts', absolute: '/p/cypress/e2e/c.cy.ts', specType: 'integration' },
               ],
             },
           },
@@ -346,10 +346,28 @@ describe('lib/tasks/inspect', () => {
       const lines = out().split('\n').filter(Boolean)
 
       expect(lines).toEqual([
-        'cypress/e2e/a.cy.ts',
-        'cypress/e2e/b.cy.ts',
-        'cypress/e2e/c.cy.ts',
+        '└── cypress/',
+        '    └── e2e/',
+        '        ├── auth/',
+        '        │   └── login.cy.ts',
+        '        ├── a.cy.ts',
+        '        └── b.cy.ts',
       ])
+    })
+
+    it('empty spec list, text → prints nothing', async () => {
+      vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: { currentProject: { specs: [] } } }),
+      })
+
+      const out = createStdoutCapture()
+
+      await inspect.specs({})
+
+      expect(out()).toEqual('')
     })
 
     it('3 specs, json → array with relative, absolute, specType', async () => {
@@ -390,6 +408,72 @@ describe('lib/tasks/inspect', () => {
 
       expect(err()).toContain('No project loaded')
       expect(processExitSpy).toHaveBeenCalledWith(1)
+    })
+  })
+
+  describe('buildSpecTree / renderSpecTree', () => {
+    it('builds a tree from nested paths', () => {
+      const tree = buildSpecTree([
+        'cypress/e2e/a.cy.ts',
+        'cypress/e2e/auth/login.cy.ts',
+      ])
+
+      const cypress = tree.children.get('cypress')
+      const e2e = cypress?.children.get('e2e')
+      const auth = e2e?.children.get('auth')
+
+      expect(cypress).toBeDefined()
+      expect(e2e?.children.has('a.cy.ts')).toBe(true)
+      expect(auth?.children.has('login.cy.ts')).toBe(true)
+    })
+
+    it('drops empty segments (leading slashes, doubled slashes)', () => {
+      const tree = buildSpecTree(['/cypress//e2e/a.cy.ts', ''])
+
+      expect(Array.from(tree.children.keys())).toEqual(['cypress'])
+      expect(tree.children.get('cypress')?.children.get('e2e')?.children.has('a.cy.ts')).toBe(true)
+    })
+
+    it('renders an empty tree as no lines', () => {
+      expect(renderSpecTree(buildSpecTree([]))).toEqual([])
+    })
+
+    it('renders a single spec at the root', () => {
+      expect(renderSpecTree(buildSpecTree(['spec.cy.ts']))).toEqual(['└── spec.cy.ts'])
+    })
+
+    it('sorts directories before files, alpha within each group', () => {
+      const lines = renderSpecTree(buildSpecTree([
+        'z-root.cy.ts',
+        'a-root.cy.ts',
+        'beta/one.cy.ts',
+        'alpha/one.cy.ts',
+      ]))
+
+      expect(lines).toEqual([
+        '├── alpha/',
+        '│   └── one.cy.ts',
+        '├── beta/',
+        '│   └── one.cy.ts',
+        '├── a-root.cy.ts',
+        '└── z-root.cy.ts',
+      ])
+    })
+
+    it('uses correct connectors for nested last-child branches', () => {
+      const lines = renderSpecTree(buildSpecTree([
+        'a/b/c.cy.ts',
+        'a/b/d.cy.ts',
+        'a/e.cy.ts',
+      ]))
+
+      expect(lines).toEqual([
+        '└── a/',
+        '    ├── b/',
+        '    │   ├── c.cy.ts',
+        '    │   └── d.cy.ts',
+        '    └── e.cy.ts',
+      ])
     })
   })
 

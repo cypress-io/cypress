@@ -48,6 +48,80 @@ const writeStderr = (msg: string): void => {
   process.stderr.write(msg)
 }
 
+/**
+ * Tree node used to render spec paths as an ASCII tree. A node with an
+ * empty `children` map is a leaf (a spec file). Non-empty nodes are directories.
+ */
+export interface SpecTreeNode {
+  children: Map<string, SpecTreeNode>
+}
+
+/**
+ * Build a nested tree from a list of POSIX-style relative paths. Paths are
+ * split on `/`; empty segments (leading slashes, doubled slashes) are dropped.
+ */
+export const buildSpecTree = (relativePaths: string[]): SpecTreeNode => {
+  const root: SpecTreeNode = { children: new Map() }
+
+  for (const relative of relativePaths) {
+    const parts = relative.split('/').filter(Boolean)
+
+    if (!parts.length) {
+      continue
+    }
+
+    let cursor = root
+
+    for (const part of parts) {
+      let next = cursor.children.get(part)
+
+      if (!next) {
+        next = { children: new Map() }
+        cursor.children.set(part, next)
+      }
+
+      cursor = next
+    }
+  }
+
+  return root
+}
+
+/**
+ * Render a tree built by `buildSpecTree` into box-drawing lines. Entries at
+ * each level are sorted alphabetically; directories get a trailing `/`.
+ */
+export const renderSpecTree = (node: SpecTreeNode, prefix = ''): string[] => {
+  const lines: string[] = []
+  const entries = Array.from(node.children.entries()).sort(([aName, aNode], [bName, bNode]) => {
+    const aIsDir = aNode.children.size > 0
+    const bIsDir = bNode.children.size > 0
+
+    if (aIsDir !== bIsDir) {
+      return aIsDir ? -1 : 1
+    }
+
+    return aName.localeCompare(bName)
+  })
+
+  entries.forEach(([name, child], index) => {
+    const isLast = index === entries.length - 1
+    const connector = isLast ? '└── ' : '├── '
+    const isDir = child.children.size > 0
+    const label = isDir ? `${name}/` : name
+
+    lines.push(`${prefix}${connector}${label}`)
+
+    if (isDir) {
+      const childPrefix = prefix + (isLast ? '    ' : '│   ')
+
+      lines.push(...renderSpecTree(child, childPrefix))
+    }
+  })
+
+  return lines
+}
+
 const printJson = (obj: any): void => {
   logger.always(JSON.stringify(obj, null, 2))
 }
@@ -333,8 +407,14 @@ const specs = async (opts: InspectOpts): Promise<void> => {
     return
   }
 
-  for (const spec of specList) {
-    logger.always(spec.relative)
+  if (!specList.length) {
+    return
+  }
+
+  const tree = buildSpecTree(specList.map((spec) => spec.relative))
+
+  for (const line of renderSpecTree(tree)) {
+    logger.always(line)
   }
 }
 
