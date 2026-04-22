@@ -1,4 +1,4 @@
-import express, { Request } from 'express'
+import express, { Request, RequestHandler } from 'express'
 import type { AddressInfo, Socket } from 'net'
 import { DataContext, getCtx, globalPubSub, GraphQLRequestInfo } from '../src'
 import pDefer from 'p-defer'
@@ -33,6 +33,10 @@ export async function makeGraphQLServer () {
   const dfd = pDefer<number>()
   const app = express()
 
+  // Populated in listenCallback once the server binds to a port; used by the
+  // origin allow-list middleware to validate same-origin requests.
+  let serverPort: number | null = null
+
   app.use(cors())
 
   app.get('/cloud-notification', (req, res) => {
@@ -63,7 +67,56 @@ export async function makeGraphQLServer () {
     res.sendStatus(200)
   })
 
-  app.use('/__launchpad/graphql/:operationName?', graphQLHTTP)
+  /**
+   * Origin allow-list middleware. Applied to both GraphQL mounts.
+   *
+   * - No Origin header (curl, Node fetch, the inspect CLI) → allow.
+   * - `Origin: null` → allow (some CORS pre-flight / sandboxed contexts).
+   * - `http://127.0.0.1:{port}` or `http://localhost:{port}` → allow.
+   * - Anything else → 403.
+   */
+  const originMiddleware: RequestHandler = (req, res, next) => {
+    const origin = req.headers.origin
+
+    if (!origin || origin === 'null') {
+      return next()
+    }
+
+    if (serverPort != null) {
+      const allowed = new Set([
+        `http://127.0.0.1:${serverPort}`,
+        `http://localhost:${serverPort}`,
+      ])
+
+      if (allowed.has(origin)) {
+        return next()
+      }
+    }
+
+    res.status(403).json({ error: 'Origin not allowed' })
+  }
+
+  /**
+   * Token middleware for the `/__inspect/graphql` mount. Requires a header
+   * `X-Cypress-Inspect-Token` that matches the value written into the
+   * instance descriptor by `ServersActions.writeInstanceDescriptor()`.
+   */
+  const tokenMiddleware: RequestHandler = (req, res, next) => {
+    const ctx = getCtx()
+    const expected = ctx.coreData.servers.inspect?.token
+    const provided = req.headers['x-cypress-inspect-token']
+
+    if (!expected || !provided || provided !== expected) {
+      res.status(401).json({ error: 'Invalid inspect token' })
+
+      return
+    }
+
+    next()
+  }
+
+  app.use('/__launchpad/graphql/:operationName?', originMiddleware, graphQLHTTP)
+  app.use('/__inspect/graphql/:operationName?', originMiddleware, tokenMiddleware, graphQLHTTP)
 
   function makeProxy (): express.Handler {
     if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
@@ -93,6 +146,8 @@ export async function makeGraphQLServer () {
   function listenCallback () {
     const port = (srv.address() as AddressInfo).port
 
+    serverPort = port
+
     const endpoint = `http://localhost:${port}/__launchpad/graphql`
 
     if (process.env.NODE_ENV === 'development') {
@@ -105,6 +160,14 @@ export async function makeGraphQLServer () {
     gqlServer = srv
 
     ctx.actions.servers.setGqlServer(srv)
+
+    // Write the inspect instance descriptor so the `cypress inspect` CLI can
+    // discover this running open-mode process. Failures must not crash boot.
+    try {
+      ctx.actions.servers.writeInstanceDescriptor()
+    } catch (err) {
+      debug('writeInstanceDescriptor failed: %o', err)
+    }
 
     dfd.resolve(port)
   }

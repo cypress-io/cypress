@@ -31,6 +31,10 @@ interface ServersDataShape {
   gqlServer?: Maybe<Server>
   gqlServerPort?: Maybe<number>
   gqlSocketServer?: Maybe<SocketIONamespace>
+  inspect?: {
+    token: string
+    descriptorPath: string
+  }
 }
 
 export interface DevStateShape {
