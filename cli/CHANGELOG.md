@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.14.2
+
+**Bugfixes:**
+
+- Fixed an issue where `cy.wait` on multiple aliases could surface an unhandled `Cannot read properties of undefined (reading 'routeId')` rejection when a retry short-circuited during runnable teardown. Fixed in [#33651](https://github.com/cypress-io/cypress/pull/33651).
+
 ## 15.14.1
 
 **Performance:**
