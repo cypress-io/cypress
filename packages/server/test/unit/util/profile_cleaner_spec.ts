@@ -130,10 +130,12 @@ describe('lib/util/profile_cleaner', () => {
       return fs.writeFileAsync(fileA, '')
       .then(() => fs.writeFileAsync(fileB, ''))
       .then(() => profileCleaner.removeRootProfile(rootProfileFolder))
-      .then(() => Promise.all([
-        fs.pathExists(fileA),
-        fs.pathExists(fileB),
-      ]))
+      .then(() => {
+        return Promise.all([
+          fs.pathExists(fileA),
+          fs.pathExists(fileB),
+        ])
+      })
       .then(([existsA, existsB]) => {
         expect(existsA).to.eq(false)
         expect(existsB).to.eq(false)

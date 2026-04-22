@@ -317,9 +317,11 @@ const parseBrowserOption = (opt) => {
   }
 }
 
+// eslint-disable-next-line no-redeclare
 function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
+// eslint-disable-next-line no-redeclare
 function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
-
+// eslint-disable-next-line no-redeclare
 async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
   const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
 
