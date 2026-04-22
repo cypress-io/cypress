@@ -715,7 +715,21 @@ commands:
           command: |
             # install with `--ignore-checksums` to avoid checksum error
             # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
-            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome -y --ignore-checksums || [[ $PLATFORM != 'windows' ]]
+            # Retry to tolerate 504s from the Chocolatey community feed, and verify the
+            # binary exists because `choco install` exits 0 on "installed 0/0 packages".
+            if [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]]; then
+              n=0
+              until [ $n -ge 3 ]; do
+                choco install googlechrome -y --ignore-checksums --no-progress && break
+                n=$((n+1))
+                echo "choco install googlechrome failed (attempt $n); retrying in 15s..."
+                sleep 15
+              done
+              if [[ ! -f "/c/Program Files/Google/Chrome/Application/chrome.exe" && ! -f "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" ]]; then
+                echo "ERROR: Chrome not installed after choco install"
+                exit 1
+              fi
+            fi
 
   run-new-ui-tests:
     parameters:
