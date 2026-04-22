@@ -1,15 +1,14 @@
-const stripAnsi = require('strip-ansi')
+import _ from 'lodash'
+import { stripIndent } from 'common-tags'
+import stripAnsi from 'strip-ansi'
+import { getRunner } from '../../../lib/util/chrome_policy_check'
 
-require('../../spec_helper')
-
-const _ = require('lodash')
-const { stripIndent } = require('common-tags')
-const chromePolicyCheck = require(`../../../lib/util/chrome_policy_check`)
+import '../../spec_helper'
 
 describe('lib/util/chrome_policy_check', () => {
-  context('.getRunner returns a function', () => {
+  describe('.getRunner returns a function', () => {
     it('calls callback with an error if policies are found', () => {
-      const run = chromePolicyCheck.getRunner({
+      const run = getRunner({
         enumerateValues (hkey, key) {
         // mock a registry with a couple of policies
           return _.get({
@@ -46,7 +45,7 @@ For more information, see https://on.cypress.io/bad-browser-policy\
     })
 
     it('does not call callback if no policies are found', () => {
-      const run = chromePolicyCheck.getRunner({
+      const run = getRunner({
         enumerateValues: _.constant([]),
       })
 
@@ -58,7 +57,7 @@ For more information, see https://on.cypress.io/bad-browser-policy\
     })
 
     it('fails silently if enumerateValues throws', () => {
-      const run = chromePolicyCheck.getRunner({
+      const run = getRunner({
         enumerateValues () {
           throw new Error('blah')
         },

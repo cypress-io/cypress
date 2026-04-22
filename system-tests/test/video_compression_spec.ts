@@ -1,18 +1,18 @@
-const ffmpeg = require('fluent-ffmpeg')
+import ffmpeg from 'fluent-ffmpeg'
+import path from 'path'
+import fs from 'fs-extra'
+import humanInterval from 'human-interval'
+import systemTests from '../lib/system-tests'
+import { globAsync as glob } from '@packages/server/lib/util/glob'
+import * as videoCapture from '@packages/server/lib/video_capture'
+import Fixtures from '../lib/fixtures'
 
-const path = require('path')
-const fs = require('fs-extra')
-const humanInterval = require('human-interval')
-const systemTests = require('../lib/system-tests').default
-const glob = require('@packages/server/lib/util/glob')
-const videoCapture = require('@packages/server/lib/video_capture')
-const Fixtures = require('../lib/fixtures')
-const {
+import {
   createRoutes,
   setupStubbedServer,
   getRequests,
   postRunInstanceResponse,
-} = require('../lib/serverStub')
+} from '../lib/serverStub'
 
 const NUM_TESTS = 40
 const MS_PER_TEST = 500
@@ -35,7 +35,7 @@ describe('e2e video compression', () => {
 
   beforeEach(() => {
     // uploads happen too fast to be captured by these tests without tuning these values
-    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = 1000
+    process.env.CYPRESS_UPLOAD_ACTIVITY_INTERVAL = '1000'
   })
 
   return [
@@ -63,7 +63,7 @@ describe('e2e video compression', () => {
           this.retries(15)
         }
 
-        process.env.VIDEO_COMPRESSION_THROTTLE = 10
+        process.env.VIDEO_COMPRESSION_THROTTLE = '10'
 
         const { stdout } = await exec()
         const videosPath = Fixtures.projectPath('e2e/cypress/videos/*')
