@@ -1,10 +1,6 @@
 # The workflow runs for:
 # External PR after approval (approved contributor PR that's not a main branch)
 # Internal PR for any branch that does is not develop or release/ related
-#
-# TEMP: pull-request workflow is disabled while verifying the origin-communicator
-# cleanup flake fix on the `mschile/deflake-origin-communicator-cleanup` branch.
-# Revert this block before merging.
 when:
   and:
     - not:
@@ -17,8 +13,6 @@ when:
             value: << pipeline.git.branch >>
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
-    - not:
-        equal: [ 'mschile/deflake-origin-communicator-cleanup', << pipeline.git.branch >> ]
 
 jobs:
   - node_modules_install:
