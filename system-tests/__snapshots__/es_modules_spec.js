@@ -7,8 +7,8 @@ exports['e2e es modules passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (es_modules_passing.cy.js)                                                │
-  │ Searched:   cypress/e2e/es_modules_passing.cy.js                                              │
+  │ Specs:      1 found (es_modules_passing.cy.js)                                                 │
+  │ Searched:   cypress/e2e/es_modules_passing.cy.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
