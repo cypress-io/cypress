@@ -715,17 +715,24 @@ commands:
           command: |
             # install with `--ignore-checksums` to avoid checksum error
             # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
-            # Retry to tolerate 504s from the Chocolatey community feed, and verify the
-            # binary exists because `choco install` exits 0 on "installed 0/0 packages".
+            # Retry to tolerate 504s from the Chocolatey community feed. `choco install`
+            # exits 0 on "installed 0/0 packages", so gate the retry on whether chrome.exe
+            # actually exists, not on choco's exit code.
             if [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]]; then
+              chrome_installed() {
+                [[ -f "/c/Program Files/Google/Chrome/Application/chrome.exe" || -f "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" ]]
+              }
               n=0
               until [ $n -ge 3 ]; do
-                choco install googlechrome -y --ignore-checksums --no-progress && break
+                choco install googlechrome -y --ignore-checksums --no-progress || true
+                if chrome_installed; then
+                  break
+                fi
                 n=$((n+1))
-                echo "choco install googlechrome failed (attempt $n); retrying in 15s..."
+                echo "Chrome not installed (attempt $n); retrying in 15s..."
                 sleep 15
               done
-              if [[ ! -f "/c/Program Files/Google/Chrome/Application/chrome.exe" && ! -f "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" ]]; then
+              if ! chrome_installed; then
                 echo "ERROR: Chrome not installed after choco install"
                 exit 1
               fi
