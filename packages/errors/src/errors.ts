@@ -796,7 +796,7 @@ export const AllCypressErrors = {
     return errTemplate`\
         Your ${fmt.highlight(`supportFile`)} is missing or invalid: ${fmt.path(supportFilePath)}
 
-        The supportFile must be a .js, .ts, .coffee file or be supported by your preprocessor plugin (if configured).
+        The supportFile must be a .js or .ts file or be supported by your preprocessor plugin (if configured).
 
         Fix your support file, or set supportFile to ${fmt.highlightSecondary(`false`)} if a support file is not necessary for your project.
 

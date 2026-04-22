@@ -1,3 +1,9 @@
+# [@cypress/webpack-batteries-included-preprocessor-v4.2.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.1.0...@cypress/webpack-batteries-included-preprocessor-v4.2.0) (PENDING)
+
+### BREAKING CHANGES
+
+- Removed CoffeeScript support (`coffee-loader` and `coffeescript` dependencies). To run `.coffee` specs, configure `@cypress/webpack-preprocessor` with a custom webpack setup that includes `coffee-loader`.
+
 # [@cypress/webpack-batteries-included-preprocessor-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.4...@cypress/webpack-batteries-included-preprocessor-v4.1.0) (2026-04-13)
 
 

@@ -7,18 +7,18 @@ exports['e2e es modules passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (es_modules_in_coffee_spec.coffee)                                         │
-  │ Searched:   cypress/e2e/es_modules_in_coffee_spec.coffee                                       │
+  │ Specs:      1 found (es_modules_passing.cy.js)                                                │
+  │ Searched:   cypress/e2e/es_modules_passing.cy.js                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  es_modules_in_coffee_spec.coffee                                                (1 of 1)
+  Running:  es_modules_passing.cy.js                                                        (1 of 1)
 
 
   imports work
-    ✓ foo coffee
+    ✓ foo js
     ✓ bar babel
     ✓ dom jsx
 
@@ -37,7 +37,7 @@ exports['e2e es modules passes 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     es_modules_in_coffee_spec.coffee                                                 │
+  │ Spec Ran:     es_modules_passing.cy.js                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -48,7 +48,7 @@ exports['e2e es modules passes 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  es_modules_in_coffee_spec.coffee         XX:XX        3        3        -        -        - │
+  │ ✔  es_modules_passing.cy.js                 XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 

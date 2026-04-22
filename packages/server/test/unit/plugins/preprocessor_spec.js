@@ -12,11 +12,11 @@ describe('lib/plugins/preprocessor', () => {
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
 
-    this.filePath = 'path/to/test.coffee'
+    this.filePath = 'path/to/test.tsx'
     this.fullFilePath = path.join(this.todosPath, this.filePath)
 
-    this.testPath = path.join(this.todosPath, 'test.coffee')
-    this.localPreprocessorPath = path.join(this.todosPath, 'prep.coffee')
+    this.testPath = path.join(this.todosPath, 'test.tsx')
+    this.localPreprocessorPath = path.join(this.todosPath, 'prep.ts')
 
     this.plugin = sinon.stub().returns(new Promise((resolve) => resolve('/path/to/output.js')))
     plugins.registerEvent('file:preprocessor', this.plugin)

@@ -958,17 +958,17 @@ describe('lib/socket', () => {
 
         it('watches file by path', function () {
           this.socket.watchTestFileByPath(this.cfg, {
-            relative: `integration${path.sep}test2.coffee`,
+            relative: `integration${path.sep}test2.js`,
           })
 
-          expect(preprocessor.getFile).to.be.calledWith(`integration${path.sep}test2.coffee`, this.cfg)
+          expect(preprocessor.getFile).to.be.calledWith(`integration${path.sep}test2.js`, this.cfg)
         })
 
         it('watches file by relative path in spec object', function () {
           // this is what happens now with component / integration specs
           const spec = {
             absolute: `${path.sep}foo${path.sep}bar`,
-            relative: `relative${path.sep}to${path.sep}root${path.sep}test2.coffee`,
+            relative: `relative${path.sep}to${path.sep}root${path.sep}test2.js`,
           }
 
           this.socket.watchTestFileByPath(this.cfg, spec)
@@ -980,10 +980,10 @@ describe('lib/socket', () => {
           sinon.stub(fs, 'statAsync').resolves()
           this.cfg.watchForFileChanges = true
           this.socket.watchTestFileByPath(this.cfg, {
-            relative: 'integration/test2.coffee',
+            relative: 'integration/test2.js',
           })
 
-          preprocessor.emitter.on.withArgs('file:updated').yield('integration/test2.coffee')
+          preprocessor.emitter.on.withArgs('file:updated').yield('integration/test2.js')
 
           return setTimeout(() => {
             expect(this.io.emit).to.be.calledWith('watched:file:changed')
@@ -1023,9 +1023,9 @@ describe('lib/socket', () => {
             })
           })
 
-          it('calls statAsync on .coffee file', function () {
-            return this.socket.onTestFileChange('foo/bar_coffee.coffee').then(() => {
-              expect(fs.statAsync).to.be.calledWith('foo/bar_coffee.coffee')
+          it('calls statAsync on .js file', function () {
+            return this.socket.onTestFileChange('foo/bar_style.js').then(() => {
+              expect(fs.statAsync).to.be.calledWith('foo/bar_style.js')
             })
           })
 

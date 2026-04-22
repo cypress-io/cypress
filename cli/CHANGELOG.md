@@ -5,6 +5,7 @@ _Released 06/23/2026 (PENDING)_
 
 **Breaking Changes:**
 
+- Removed built-in CoffeeScript support: `cy.fixture()` no longer parses `.coffee` fixtures as executable CoffeeScript; the default `@cypress/webpack-batteries-included-preprocessor` no longer bundles `coffee-loader` or `coffeescript`. Use JavaScript/TypeScript for specs, fixtures, and support files, or add CoffeeScript to your own webpack config via `@cypress/webpack-preprocessor`.
 - Upgraded bundled Node.js version from `22.19.0` to `24.14.0`. Addressed in [#33494](https://github.com/cypress-io/cypress/pull/33494).
 
 **Dependency Updates:**

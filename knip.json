@@ -480,7 +480,7 @@
     "npm/webpack-batteries-included-preprocessor": {
       "entry": [
         "index.ts",
-        "test/**/*.{ts,tsx,js,jsx,coffee,mjs,mts}"
+        "test/**/*.{ts,tsx,js,jsx,mjs,mts}"
       ],
       "project": [
         "**/*.{ts,tsx,js,jsx}",

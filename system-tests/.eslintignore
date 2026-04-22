@@ -1,3 +1,6 @@
+# tsconfig.json uses JSONC; skip to avoid @cypress/eslint-plugin-json warnings
+system-tests/projects/react-webpack-interop/tsconfig.json
+
 # purposeful syntax errors
 system-tests/projects/config-with-ts-module-error/cypress.config.ts
 system-tests/projects/config-with-ts-syntax-error/cypress.config.ts

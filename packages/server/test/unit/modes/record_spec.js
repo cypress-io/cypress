@@ -404,7 +404,7 @@ describe('lib/modes/record', () => {
         groupId: 'group-123',
         machineId: 'machine-123',
         platform: {},
-        spec: { relative: 'cypress/integration/app_spec.coffee' },
+        spec: { relative: 'cypress/e2e/app_spec.cy.js' },
       }
     })
 
@@ -417,7 +417,7 @@ describe('lib/modes/record', () => {
           groupId: 'group-123',
           machineId: 'machine-123',
           platform: {},
-          spec: 'cypress/integration/app_spec.coffee',
+          spec: 'cypress/e2e/app_spec.cy.js',
         })
       })
     })
@@ -436,7 +436,7 @@ describe('lib/modes/record', () => {
         groupId: 'group-123',
         machineId: 'machine-123',
         platform: {},
-        spec: { relative: 'cypress/integration/app_spec.coffee' },
+        spec: { relative: 'cypress/e2e/app_spec.cy.js' },
       })).to.be.rejected
 
       expect(errors.get).to.have.been.calledWith('CLOUD_CANNOT_PROCEED_IN_SERIAL')

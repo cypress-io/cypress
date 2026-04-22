@@ -18,7 +18,7 @@ exports['e2e typescript in spec and support file spec passes 1'] = `
 
 
   imports work
-    ✓ foo coffee
+    ✓ foo imports
     ✓ bar babel
     ✓ dom jsx
     ✓ issue 7098

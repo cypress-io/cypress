@@ -2,11 +2,11 @@
 // for .mjs files. don't upgrade graphql from 14.0.0 or it won't reproduce
 // the issue properly
 // https://github.com/cypress-io/cypress/issues/8361
-import graphql from 'graphql' // eslint-disable-line no-unused-vars
+import graphql from 'graphql'
 
 import { fromJs } from './file-types/js-file'
 import { fromJsx } from './file-types/jsx-file'
-import { fromCoffee } from './file-types/coffee-file'
+import { fromCoffee } from './file-types/former-coffee-export'
 import { fromMjs } from './file-types/mjs-file'
 
 import json from './json_file'

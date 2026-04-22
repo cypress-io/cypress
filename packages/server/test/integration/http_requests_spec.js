@@ -482,13 +482,13 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', async function () {
+      it('processes foo.js spec', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(sourceMapRegex)
-        expect(res.body).to.include('expect("foo.coffee")')
+        expect(res.body).to.include('foo.js')
       })
 
       it('processes dom.jsx spec', async function () {
@@ -514,7 +514,7 @@ describe('Routes', () => {
 
       it('serves error javascript file when the file is missing', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.include('Module not found')
@@ -535,13 +535,13 @@ describe('Routes', () => {
         })
       })
 
-      it('processes foo.coffee spec', async function () {
+      it('processes foo.js spec', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=cypress/e2e/foo.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(sourceMapRegex)
-        expect(res.body).to.include('expect("foo.coffee")')
+        expect(res.body).to.include('foo.js')
       })
 
       it('processes dom.jsx spec', async function () {
@@ -555,7 +555,7 @@ describe('Routes', () => {
 
       it('serves error javascript file when the file is missing', async function () {
         await pollUntilEventsIpcLoaded()
-        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.coffee')
+        const res = await this.rp('http://localhost:2020/__cypress/tests?p=does/not/exist.js')
 
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.include('Cypress.action("spec:script:error", {')

@@ -39,15 +39,15 @@ describe('webpack-batteries-included-preprocessor', () => {
       const result = getFullWebpackOptions('foo')
 
       expect(result.node.global).toBe(true)
-      expect(result.module.rules).toHaveLength(3)
-      expect(result.resolve.extensions).toEqual(['.js', '.json', '.jsx', '.mjs', '.coffee'])
+      expect(result.module.rules).toHaveLength(2)
+      expect(result.resolve.extensions).toEqual(['.js', '.json', '.jsx', '.mjs'])
     })
 
     it('adds typescript config if path is specified', () => {
       const result = getFullWebpackOptions('file/path', 'typescript/path')
 
-      expect(result.module.rules).toHaveLength(4)
-      expect(result.module.rules[3].use[0].loader).toContain('ts-loader')
+      expect(result.module.rules).toHaveLength(3)
+      expect(result.module.rules[2].use[0].loader).toContain('ts-loader')
     })
 
     it('adds the BundleAnalyzerPlugin if the user is trying to debug their bundle', async () => {

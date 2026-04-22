@@ -13260,16 +13260,6 @@ code-point-at@^1.0.0:
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
   integrity sha1-DQcLTQQ6W+ozovGkDi7bPZpMz3c=
 
-coffee-loader@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/coffee-loader/-/coffee-loader-4.0.0.tgz#85284b489b0a63963da2b52e372111edf0565617"
-  integrity sha512-RvgC8c0JwRew5lq3x2J+P4z9Cvan/v91muEvV90VJXcTuJbJQN20taZxfj6/XC4yysA8PInPGpxdB1J9LphLuQ==
-
-coffeescript@2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/coffeescript/-/coffeescript-2.6.0.tgz#927d52aa03df17d445c93c1afb66b081d26e1fa0"
-  integrity sha512-gCGXhR72sTAdEr+oZh3FcOj04DrcMc9lZYSJUBNudkQ4tQXuPKE3cvcYVbK/HiVW+zFzLmnZdHexuJ33ufLZOg==
-
 collect-v8-coverage@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/collect-v8-coverage/-/collect-v8-coverage-1.0.2.tgz#c0b29bcd33bcd0779a1344c2136051e6afd3d9e9"
