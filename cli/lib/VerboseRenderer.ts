@@ -1,5 +1,5 @@
 // Vendored from @cypress/listr-verbose-renderer; listr2 v6+ uses event APIs (not rxjs subscribe)
-import { ListrTaskEventType } from 'listr2'
+import { ListrTaskEventType, type ListrRenderer } from 'listr2'
 import figures from 'figures'
 import cliCursor from 'cli-cursor'
 import chalk from 'chalk'
@@ -44,11 +44,14 @@ const render = (tasks: any[], options: any): void => {
   }
 }
 
-class VerboseRenderer {
+class VerboseRenderer implements ListrRenderer {
+  static rendererOptions: Record<PropertyKey, any> = {}
+  static rendererTaskOptions: Record<PropertyKey, any> = {}
+
   private readonly _tasks: any[]
   private readonly _options: any
 
-  constructor (tasks: any[], options: any) {
+  constructor (tasks: any[], options: any, _events?: unknown) {
     this._tasks = tasks
     this._options = Object.assign({
       dateFormat: 'HH:mm:ss',
@@ -64,7 +67,7 @@ class VerboseRenderer {
     render(this._tasks, this._options)
   }
 
-  end (): void {
+  end (_err?: Error): void {
     cliCursor.show()
   }
 }
