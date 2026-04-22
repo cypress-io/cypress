@@ -484,6 +484,39 @@ describe('src/cy/commands/waiting', () => {
           .wait(['@foo', '@bar'])
         })
 
+        // Regression test: if cy.retry short-circuits via ended() during
+        // runnable teardown, waitString's Promise.map resolves with an
+        // array containing undefined entries. Previously `resp.map((r) =>
+        // r.routeId)` would throw a TypeError that surfaced as an
+        // unhandled bluebird rejection. The guard in waitString should
+        // bail out cleanly instead.
+        it('does not throw when Promise.map resolves with undefined responses', (done) => {
+          Promise.onPossiblyUnhandledRejection(done)
+
+          const originalRetry = cy.retry.bind(cy)
+
+          cy
+          .intercept(/foo/, { foo: 'foo' }).as('foo')
+          .intercept(/bar/, { bar: 'bar' }).as('bar')
+          .then(() => {
+            // Force cy.retry calls triggered by `cy.wait` to resolve with
+            // `undefined`, mimicking the `ended()` short-circuit path.
+            cy.retry = (fn, options, log) => {
+              if (options && options.error && /cy\.wait/.test(options.error.message)) {
+                return Promise.resolve()
+              }
+
+              return originalRetry(fn, options, log)
+            }
+          })
+          .wait(['@foo', '@bar'])
+          .then((result) => {
+            cy.retry = originalRetry
+            expect(result).to.be.undefined
+            done()
+          })
+        })
+
         it('throws waiting for the 3rd response', {
           requestTimeout: 200,
         }, (done) => {
