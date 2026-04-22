@@ -143,6 +143,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
 11. Review the release-specific documentation and changelog PR in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one.
     - Copy the changelog content for this version from the release PR above into `/docs/app/references/changelog.mdx`. Adjust any `docs.cypress.io` links to use host-relative paths.
+    - Add the release date in `_Released MM/DD/YYYY_` format below the version header in the `changelog.mdx` entry.
     - Merge any release-specific documentation changes into the main release PR.
     - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
 

@@ -1,12 +1,13 @@
-require('../spec_helper')
+import '../spec_helper'
 
-const _ = require('lodash')
-const http = require('http')
-const Bluebird = require('bluebird')
-const Request = require(`../../lib/request`)
-const snapshot = require('snap-shot-it')
+import _ from 'lodash'
+import http from 'http'
+import Bluebird from 'bluebird'
+import { Request } from '../../lib/request'
+import snapshot from 'snap-shot-it'
+import rp from '@cypress/request-promise'
 
-const request = Request({ timeout: 100 })
+const request = new Request({ timeout: 100 })
 
 const testAttachingCookiesWith = function (fn) {
   const set = sinon.spy(request, 'setCookiesOnBrowser')
@@ -69,6 +70,7 @@ describe('lib/request', () => {
       const retryFn = sinon.stub()
 
       retryIntervals.forEach(() => {
+        // @ts-expect-error - getDelayForRetry is private
         return request.getDelayForRetry({
           err,
           retryFn,
@@ -97,6 +99,7 @@ describe('lib/request', () => {
 
       const retryFn = sinon.stub()
 
+      // @ts-expect-error - getDelayForRetry is private
       request.getDelayForRetry({
         err,
         retryFn,
@@ -116,6 +119,7 @@ describe('lib/request', () => {
       const retryFn = sinon.stub()
       const onEnd = sinon.stub()
 
+      // @ts-expect-error - getDelayForRetry is private
       request.getDelayForRetry({
         onEnd,
         retryFn,
@@ -133,7 +137,8 @@ describe('lib/request', () => {
     it('delaysRemaining to retryIntervals clone', () => {
       const retryIntervals = [1, 2, 3, 4]
 
-      const opts = request.setDefaults({ retryIntervals })
+      // @ts-expect-error - setDefaults is private
+      const opts = Request.setDefaults({ retryIntervals })
 
       expect(opts.retryIntervals).to.eq(retryIntervals)
       expect(opts.delaysRemaining).not.to.eq(retryIntervals)
@@ -142,14 +147,16 @@ describe('lib/request', () => {
     })
 
     it('retryIntervals to [] by default', () => {
-      const opts = request.setDefaults({})
+      // @ts-expect-error - setDefaults is private
+      const opts = Request.setDefaults({})
 
       expect(opts.retryIntervals).to.deep.eq([])
     })
 
     it('delaysRemaining can be overridden', () => {
       const delaysRemaining = [1]
-      const opts = request.setDefaults({ delaysRemaining })
+      // @ts-expect-error - setDefaults is private
+      const opts = Request.setDefaults({ delaysRemaining })
 
       expect(opts.delaysRemaining).to.eq(delaysRemaining)
     })
@@ -161,6 +168,7 @@ describe('lib/request', () => {
     })
 
     it('sets status to statusCode and deletes statusCode', function () {
+      // @ts-expect-error - normalizeResponse is private
       expect(request.normalizeResponse(this.push, {
         statusCode: 404,
         request: {
@@ -179,6 +187,7 @@ describe('lib/request', () => {
     })
 
     it('picks out status body and headers', function () {
+      // @ts-expect-error - normalizeResponse is private
       expect(request.normalizeResponse(this.push, {
         foo: 'bar',
         req: {},
@@ -232,12 +241,13 @@ describe('lib/request', () => {
 
     context('retries for streams', () => {
       it('does not retry on a timeout', () => {
-        const opts = request.setDefaults({
+        // @ts-expect-error - setDefaults is private
+        const opts = Request.setDefaults({
           url: 'http://localhost:9988/never-ends',
           timeout: 1000,
         })
 
-        const stream = request.create(opts)
+        const stream = request.create(opts) as Duplexify<Stream.Readable, Stream.Writable>
 
         let retries = 0
 
@@ -352,7 +362,7 @@ describe('lib/request', () => {
 
   context('#sendPromise', () => {
     it('sets strictSSL=false', function () {
-      const init = sinon.spy(request.rp.Request.prototype, 'init')
+      const init = sinon.spy(rp.Request.prototype, 'init')
 
       nock('http://www.github.com')
       .get('/foo')
@@ -497,7 +507,7 @@ describe('lib/request', () => {
     it('catches errors', function () {
       nock.enableNetConnect()
 
-      const req = Request({ timeout: 2000 })
+      const req = new Request({ timeout: 2000 })
 
       return req.sendPromise({}, this.fn, {
         url: 'http://localhost:1111/foo',
@@ -506,7 +516,11 @@ describe('lib/request', () => {
       .then(() => {
         throw new Error('should have failed but didnt')
       }).catch((err) => {
-        expect(err.message).to.eq('Error: connect ECONNREFUSED 127.0.0.1:1111')
+        if (err.message === 'AggregateError') {
+          expect(err.error.errors[0].message).to.eq('connect ECONNREFUSED 127.0.0.1:1111')
+        } else {
+          expect(err.message).to.eq('Error: connect ECONNREFUSED 127.0.0.1:1111')
+        }
       })
     })
 
@@ -891,7 +905,7 @@ describe('lib/request', () => {
       })
 
       it('does not send body', function () {
-        const init = sinon.spy(request.rp.Request.prototype, 'init')
+        const init = sinon.spy(rp.Request.prototype, 'init')
 
         const body = {
           foo: 'bar',
@@ -915,7 +929,7 @@ describe('lib/request', () => {
       })
 
       it('does not set json=true', function () {
-        const init = sinon.spy(request.rp.Request.prototype, 'init')
+        const init = sinon.spy(rp.Request.prototype, 'init')
 
         return request.sendPromise({}, this.fn, {
           url: 'http://localhost:8080/login',
@@ -947,7 +961,7 @@ describe('lib/request', () => {
       })
 
       it('does not modify regular JSON objects', function () {
-        const init = sinon.spy(request.rp.Request.prototype, 'init')
+        const init = sinon.spy(rp.Request.prototype, 'init')
         const body = {
           foo: 'bar',
         }
@@ -965,7 +979,7 @@ describe('lib/request', () => {
       })
 
       it('converts boolean JSON literals to strings', function () {
-        const init = sinon.spy(request.rp.Request.prototype, 'init')
+        const init = sinon.spy(rp.Request.prototype, 'init')
 
         return request.sendPromise({}, this.fn, {
           url: 'http://localhost:8080/login',
@@ -980,7 +994,7 @@ describe('lib/request', () => {
       })
 
       it('converts null JSON literals to \'null\'', function () {
-        const init = sinon.spy(request.rp.Request.prototype, 'init')
+        const init = sinon.spy(rp.Request.prototype, 'init')
 
         return request.sendPromise({}, this.fn, {
           url: 'http://localhost:8080/login',

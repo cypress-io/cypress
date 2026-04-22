@@ -5,6 +5,7 @@
 const execa = require('execa')
 const fs = require('fs')
 const semverSortNewestFirst = require('semver/functions/rcompare')
+const SENTINEL_VERSION = '0.0.0-development'
 const checkedInBinaryVersion = require('../package.json').version
 
 const { getCurrentBranch, getPackagePath, readPackageJson, independentTagRegex } = require('./utils')
@@ -62,11 +63,23 @@ const getCurrentVersion = async (name) => {
 const getPackageVersions = async (packages) => {
   console.log(`Finding package versions...\n`)
 
-  console.log(`Cypress binary: ${checkedInBinaryVersion}`)
+  // If package.json still carries the sentinel (i.e. get-next-version --npm hasn't
+  // stamped the real version yet), compute it now so injectVersions can substitute
+  // the correct version into any dependency that lists cypress as "0.0.0-development".
+  let binaryVersion = checkedInBinaryVersion
+
+  if (binaryVersion === SENTINEL_VERSION) {
+    binaryVersion = require('child_process')
+    .execSync('node ./scripts/get-next-version.js')
+    .toString()
+    .trim()
+  }
+
+  console.log(`Cypress binary: ${binaryVersion}`)
 
   const versions = {
     cypress: {
-      currentVersion: checkedInBinaryVersion,
+      currentVersion: binaryVersion,
       nextVersion: undefined,
     },
   }
