@@ -1528,6 +1528,38 @@ commands:
 jobs:
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
+  debug_workflow_params:
+    <<: *defaults
+    resource_class: small
+    steps:
+      - run:
+          name: Debug workflow parameters
+          command: |
+            echo "Path-filter pipeline parameters (set by circleci/path-filtering orb from .circleci/path-filter-mapping.conf):"
+            echo "  run-all-jobs=<< pipeline.parameters.run-all-jobs >>"
+            echo "  run-driver-tests=<< pipeline.parameters.run-driver-tests >>"
+            echo "  run-server-tests=<< pipeline.parameters.run-server-tests >>"
+            echo "  run-app-ui-tests=<< pipeline.parameters.run-app-ui-tests >>"
+            echo "  run-launchpad-tests=<< pipeline.parameters.run-launchpad-tests >>"
+            echo "  run-reporter-tests=<< pipeline.parameters.run-reporter-tests >>"
+            echo "  run-frontend-shared-tests=<< pipeline.parameters.run-frontend-shared-tests >>"
+            echo "  run-system-tests=<< pipeline.parameters.run-system-tests >>"
+            echo "  run-v8-tests=<< pipeline.parameters.run-v8-tests >>"
+            echo "  run-cli-tests=<< pipeline.parameters.run-cli-tests >>"
+            echo "  run-npm-webpack-dev-server-tests=<< pipeline.parameters.run-npm-webpack-dev-server-tests >>"
+            echo "  run-npm-vite-dev-server-tests=<< pipeline.parameters.run-npm-vite-dev-server-tests >>"
+            echo "  run-npm-webpack-preprocessor-tests=<< pipeline.parameters.run-npm-webpack-preprocessor-tests >>"
+            echo "  run-npm-webpack-batteries-tests=<< pipeline.parameters.run-npm-webpack-batteries-tests >>"
+            echo "  run-npm-vue-tests=<< pipeline.parameters.run-npm-vue-tests >>"
+            echo "  run-npm-react-tests=<< pipeline.parameters.run-npm-react-tests >>"
+            echo "  run-npm-angular-tests=<< pipeline.parameters.run-npm-angular-tests >>"
+            echo "  run-npm-puppeteer-tests=<< pipeline.parameters.run-npm-puppeteer-tests >>"
+            echo "  run-npm-vite-plugin-esm-tests=<< pipeline.parameters.run-npm-vite-plugin-esm-tests >>"
+            echo "  run-npm-mount-utils-tests=<< pipeline.parameters.run-npm-mount-utils-tests >>"
+            echo "  run-npm-grep-tests=<< pipeline.parameters.run-npm-grep-tests >>"
+            echo "  run-npm-eslint-plugin-tests=<< pipeline.parameters.run-npm-eslint-plugin-tests >>"
+            echo "  run-npm-schematic-tests=<< pipeline.parameters.run-npm-schematic-tests >>"
+
   node_modules_install:
     <<: *defaults
     parameters:

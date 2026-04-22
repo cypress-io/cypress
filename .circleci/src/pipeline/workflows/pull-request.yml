@@ -24,6 +24,7 @@ when:
 # first use and reused via aliases (*...) on every subsequent job.
 
 jobs:
+  - debug_workflow_params
   # --- Always-run jobs -----------------------------------------------------
   - node_modules_install:
       build-better-sqlite3: true
