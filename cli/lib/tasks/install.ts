@@ -4,6 +4,7 @@ import path from 'path'
 import chalk from 'chalk'
 import Debug from 'debug'
 import { Listr } from 'listr2'
+import type { ListrTaskObject, ListrRendererValue } from 'listr2'
 import logSymbols from 'log-symbols'
 import { stripIndent } from 'common-tags'
 import timers from 'timers/promises'
@@ -16,9 +17,12 @@ import state from './state'
 import unzip from './unzip'
 import logger from '../logger'
 import { throwFormErrorText, errors } from '../errors'
-import verbose from '../VerboseRenderer'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
 const debug = Debug('cypress:cli')
+
+function getRenderer (): ListrRendererValue {
+  return logger.logLevel() === 'silent' ? 'silent' : 'default'
+}
 
 function _getBinaryUrlFromBuildInfo (version: string, arch: string, { commitSha, commitBranch }: any): string {
   const platform = os.platform()
@@ -82,7 +86,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
     onProgress: null,
   }
   const downloadDestination = path.join(downloadDir, `cypress-${process.pid}.zip`)
-  const listrRenderer = getRendererOptions().renderer
+  const renderer = getRenderer()
 
   // let the user know what version of cypress we're downloading!
   logger.log(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`)
@@ -101,23 +105,18 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
 
         debug(`finished downloading file: ${downloadDestination}`)
 
-        // save the download destination for unzipping
-        util.setTaskTitle(
-          task,
-          util.titleize(chalk.green('Downloaded Cypress')),
-          listrRenderer,
-        )
+        task.title = util.titleize(chalk.green('Downloaded Cypress'))
       },
     },
     unzipTask({
       progress,
       zipFilePath: downloadDestination,
       installDir,
-      renderer: listrRenderer,
+      renderer,
     }),
     {
       title: util.titleize('Finishing Installation'),
-      task: async (ctx: any, task: any) => {
+      task: async (ctx: any, task: ListrTaskObject<any>) => {
         const cleanup = async () => {
           debug('removing zip file %s', downloadDestination)
 
@@ -128,14 +127,10 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
 
         debug('finished installation in', installDir)
 
-        util.setTaskTitle(
-          task,
-          util.titleize(chalk.green('Finished Installation'), chalk.gray(installDir)),
-          listrRenderer,
-        )
+        task.title = util.titleize(chalk.green('Finished Installation'), chalk.gray(installDir))
       },
     },
-  ], { renderer: listrRenderer })
+  ], { renderer })
 
   // start the tasks!
   return tasks.run()
@@ -344,7 +339,7 @@ const start = async (options: any = {}): Promise<any> => {
     debug('found local file at', absolutePath)
     debug('skipping download')
 
-    const listrRenderer = getRendererOptions().renderer
+    const renderer = getRenderer()
 
     return new Listr([unzipTask({
       progress: {
@@ -353,8 +348,8 @@ const start = async (options: any = {}): Promise<any> => {
       },
       zipFilePath: absolutePath,
       installDir,
-      renderer: listrRenderer,
-    })], { renderer: listrRenderer }).run()
+      renderer,
+    })], { renderer }).run()
   }
 
   if (options.force) {
@@ -382,11 +377,7 @@ const unzipTask = ({ zipFilePath, installDir, progress, renderer }: any): any =>
       progress.onProgress = progessify(task, 'Unzipping Cypress')
 
       await unzip.start({ zipFilePath, installDir, progress })
-      util.setTaskTitle(
-        task,
-        util.titleize(chalk.green('Unzipped Cypress')),
-        renderer,
-      )
+      task.title = util.titleize(chalk.green('Unzipped Cypress'))
     },
   }
 }
@@ -399,26 +390,7 @@ const progessify = (task: any, title: string): any => {
     // pluralize seconds remaining
     const remainingStr = chalk.gray(`${remaining}s`)
 
-    util.setTaskTitle(
-      task,
-      util.titleize(title, percentCompleteStr, remainingStr),
-      getRendererOptions().renderer,
-    )
-  }
-}
-
-// if we are running in CI then use
-// the verbose renderer else use
-// the default
-const getRendererOptions = (): any => {
-  let renderer = util.isCi() ? verbose : 'default'
-
-  if (logger.logLevel() === 'silent') {
-    renderer = 'silent'
-  }
-
-  return {
-    renderer,
+    task.title = util.titleize(title, percentCompleteStr, remainingStr)
   }
 }
 

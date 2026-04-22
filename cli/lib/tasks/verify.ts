@@ -6,7 +6,7 @@ import { stripIndent } from 'common-tags'
 import Bluebird from 'bluebird'
 import logSymbols from 'log-symbols'
 import os from 'os'
-import verbose from '../VerboseRenderer'
+import type { ListrTaskObject } from 'listr2'
 import { throwFormErrorText, errors } from '../errors'
 import util from '../util'
 import logger from '../logger'
@@ -196,15 +196,14 @@ function testBinary (version: string, binaryDir: string, options: any): Promise<
   // if we are running in CI then use
   // the verbose renderer else use
   // the default
-  let renderer = util.isCi() ? verbose : 'default'
 
   // NOTE: under test we set the listr renderer to 'silent' in order to get deterministic snapshots
-  if (logger.logLevel() === 'silent' || options.listrRenderer) renderer = 'silent'
+  const renderer = logger.logLevel() === 'silent' ? 'silent' : 'default'
 
   const tasks = new Listr([
     {
       title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
-      task: async (ctx: any, task: any) => {
+      task: async (ctx, task) => {
         debug('clearing out the verified version')
 
         await state.clearBinaryStateAsync(binaryDir)
@@ -217,18 +216,15 @@ function testBinary (version: string, binaryDir: string, options: any): Promise<
         debug('write verified: true')
 
         await state.writeBinaryVerifiedAsync(true, binaryDir)
-
-        util.setTaskTitle(
-          task,
-          util.titleize(
-            chalk.green('Verified Cypress!'),
-            chalk.gray(binaryDir),
-          ),
-          renderer,
+        task.title = util.titleize(
+          chalk.green('Verified Cypress!'),
+          chalk.gray(binaryDir),
         )
       },
     },
-  ], { renderer })
+  ], {
+    renderer,
+  })
 
   return tasks.run()
 }
