@@ -126,6 +126,7 @@ const descriptions: any = {
   headless: 'hide the browser instead of running headed (default for cypress run)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
+  passWithNoTests: 'pass when no tests are found',
   port: 'runs Cypress on a specific port. overrides any value in cypress.config.{js,ts,mjs,cjs}.',
   project: 'path to the project',
   posixExitCodes: 'use POSIX exit codes for error handling',
@@ -260,6 +261,7 @@ const addCypressRunCommand = (program: any): any => {
   .option('--headless', text('headless'))
   .option('--no-exit', text('exit'))
   .option('--parallel', text('parallel'))
+  .option('--pass-with-no-tests', text('passWithNoTests'))
   .option('-p, --port <port>', text('port'))
   .option('-P, --project <project-path>', text('project'))
   .option('--posix-exit-codes', text('posixExitCodes'))

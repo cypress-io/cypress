@@ -1,5 +1,5 @@
 // https://medium.com/@pierrehedkvist/renderless-components-in-react-8d663746314c
-// eslint-disable-next-line no-unused-vars
+
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 

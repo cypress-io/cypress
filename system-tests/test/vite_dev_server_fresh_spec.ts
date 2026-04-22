@@ -5,7 +5,7 @@ import type { fixtureDirs } from '@tooling/system-tests'
 type ProjectDirs = typeof fixtureDirs
 
 // These versions should reflect the latest versions of each major version of Vite - update as needed
-const VITE_REACT: ProjectDirs[number][] = ['vite5.4.18-react', 'vite6.2.5-react', 'vite7.0.0-react']
+const VITE_REACT: ProjectDirs[number][] = ['vite5.4.18-react', 'vite6.2.5-react', 'vite7.0.0-react', 'vite8.0.0-react']
 
 describe('@cypress/vite-dev-server', function () {
   systemTests.setup()
@@ -19,7 +19,10 @@ describe('@cypress/vite-dev-server', function () {
           testingType: 'component',
           browser: 'chrome',
           snapshot: true,
-          expectedExitCode: 7,
+          // @see https://github.com/cypress-io/cypress/issues/30881 and src/Rerendering.cy.jsx for details on skipping.
+          spec: 'src/**/*.cy.jsx,!src/Rerendering.cy.jsx',
+          // AFAICT, vite 8 with rolldown support bundles react differently, so it is available in the "missing react" components and passes
+          expectedExitCode: project === 'vite8.0.0-react' ? 5 : 7,
         })
       })
 

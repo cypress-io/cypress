@@ -36,7 +36,8 @@ class AppState {
   showFetchRequests = true
   isStopped = false
   hasBeenPaused = defaults.hasBeenPaused
-  _resetAutoScrollingEnabledTo = true;
+  _resetAutoScrollingEnabledTo = true
+  codeEditorLineWrap = false;
   [key: string]: any
 
   constructor () {
@@ -52,6 +53,7 @@ class AppState {
       studioSingleTestActive: observable,
       showFetchRequests: observable,
       hasBeenPaused: observable,
+      codeEditorLineWrap: observable,
     })
   }
 
@@ -136,6 +138,14 @@ class AppState {
 
   toggleShowFetchRequests () {
     this.showFetchRequests = !this.showFetchRequests
+  }
+
+  toggleCodeEditorLineWrap () {
+    this.codeEditorLineWrap = !this.codeEditorLineWrap
+  }
+
+  setCodeEditorLineWrap (codeEditorLineWrap: boolean) {
+    this.codeEditorLineWrap = codeEditorLineWrap
   }
 
   setShowFetchRequests (showFetchRequests: boolean) {

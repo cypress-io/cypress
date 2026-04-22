@@ -1,0 +1,3 @@
+# Frontend Shared
+
+@AGENTS.md

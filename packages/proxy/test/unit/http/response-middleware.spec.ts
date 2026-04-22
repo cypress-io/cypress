@@ -1,5 +1,6 @@
 import { describe, expect, beforeEach, afterEach, it, vi, Mock, MockInstance } from 'vitest'
 import _ from 'lodash'
+import zlib from 'zlib'
 import ResponseMiddleware from '../../../lib/http/response-middleware'
 import { debugVerbose } from '../../../lib/http'
 import EventEmitter from 'events'
@@ -51,7 +52,7 @@ describe('http/response-middleware', function () {
       'MaybeInjectHtml',
       'MaybeRemoveSecurity',
       'MaybeInjectServiceWorker',
-      'GzipBody',
+      'CompressBody',
       'SendResponseBodyToClient',
     ])
   })
@@ -157,7 +158,7 @@ describe('http/response-middleware', function () {
         'MaybeSendRedirectToClient',
         'CopyResponseStatusCode',
         'MaybeEndWithEmptyBody',
-        'GzipBody',
+        'CompressBody',
         'SendResponseBodyToClient',
       ])
     })
@@ -1865,7 +1866,7 @@ describe('http/response-middleware', function () {
       }
     }
 
-    function prepareSameOriginContext (props = {}) {
+    function prepareSameOriginContext (props: { req?: object, incomingRes?: object, res?: object } = {}) {
       const appendStub = vi.fn()
 
       const ctx = prepareContext({
@@ -2385,8 +2386,8 @@ describe('http/response-middleware', function () {
     }
   })
 
-  describe('GzipBody', function () {
-    const { GzipBody } = ResponseMiddleware
+  describe('CompressBody', function () {
+    const { CompressBody } = ResponseMiddleware
     let ctx
     let responseStreamReceivedStub: Mock
 
@@ -2424,7 +2425,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([GzipBody], ctx)
+      await testMiddleware([CompressBody], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2468,7 +2469,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([GzipBody], ctx)
+      await testMiddleware([CompressBody], ctx)
       expect(responseStreamReceivedStub).toHaveBeenCalledWith(
         expect.objectContaining({
           requestId: '123',
@@ -2501,7 +2502,7 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([GzipBody], ctx)
+      await testMiddleware([CompressBody], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
@@ -2526,20 +2527,208 @@ describe('http/response-middleware', function () {
         incomingResStream: stream,
       })
 
-      await testMiddleware([GzipBody], ctx)
+      await testMiddleware([CompressBody], ctx)
       expect(responseStreamReceivedStub).not.toHaveBeenCalled()
     })
 
+    it('calls responseStreamReceived with isAlreadyBrotliDecompressed when isBrotliDecompressed is true', async function () {
+      const stream = Readable.from(['foo'])
+      const headers = { 'content-encoding': 'br' }
+      const res = {
+        on: (event, listener) => {},
+        off: (event, listener) => {},
+      }
+
+      prepareContext({
+        protocolManager: {
+          responseStreamReceived: responseStreamReceivedStub,
+        },
+        req: {
+          browserPreRequest: {
+            requestId: '123',
+            cdpRequestWillBeSentTimestamp: 1,
+            cdpRequestWillBeSentReceivedTimestamp: 2,
+            proxyRequestReceivedTimestamp: 3,
+            cdpLagDuration: 4,
+            proxyRequestCorrelationDuration: 5,
+          },
+        },
+        res,
+        incomingRes: {
+          headers,
+        },
+        isGunzipped: false,
+        isBrotliDecompressed: true,
+        incomingResStream: stream,
+      })
+
+      await testMiddleware([CompressBody], ctx)
+      expect(responseStreamReceivedStub).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requestId: '123',
+          responseHeaders: headers,
+          isAlreadyGunzipped: false,
+          isAlreadyBrotliDecompressed: true,
+          responseStream: stream,
+          res,
+        }),
+      )
+    })
+
+    it('does not re-compress gzip when contentEncodingOrder includes gzip but isGunzipped is false', async function () {
+      const plaintext = 'foo'
+      const stream = Readable.from([plaintext])
+      const res = {
+        on: (_e: string, _l: () => void) => {},
+        off: (_e: string, _l: () => void) => {},
+      }
+
+      prepareContext({
+        req: {},
+        res,
+        incomingRes: { headers: { 'content-encoding': 'gzip' } },
+        isGunzipped: false,
+        isBrotliDecompressed: false,
+        contentEncodingOrder: ['gzip'],
+        incomingResStream: stream,
+      })
+
+      await testMiddleware([CompressBody], ctx)
+
+      const chunks: Buffer[] = []
+
+      for await (const chunk of ctx.incomingResStream) {
+        chunks.push(Buffer.from(chunk))
+      }
+
+      const output = Buffer.concat(chunks).toString()
+
+      expect(output).toBe(plaintext)
+      expect(zlib.gzipSync(Buffer.from(plaintext)).toString()).not.toBe(plaintext)
+    })
+
+    it('does not re-compress br when contentEncodingOrder includes br but isBrotliDecompressed is false', async function () {
+      const plaintext = 'bar'
+      const stream = Readable.from([plaintext])
+      const res = {
+        on: (_e: string, _l: () => void) => {},
+        off: (_e: string, _l: () => void) => {},
+      }
+
+      prepareContext({
+        req: {},
+        res,
+        incomingRes: { headers: { 'content-encoding': 'br' } },
+        isGunzipped: false,
+        isBrotliDecompressed: false,
+        contentEncodingOrder: ['br'],
+        incomingResStream: stream,
+      })
+
+      await testMiddleware([CompressBody], ctx)
+
+      const chunks: Buffer[] = []
+
+      for await (const chunk of ctx.incomingResStream) {
+        chunks.push(Buffer.from(chunk))
+      }
+
+      const output = Buffer.concat(chunks).toString()
+
+      expect(output).toBe(plaintext)
+    })
+
     function prepareContext (props) {
+      const order =
+        props.contentEncodingOrder !== undefined
+          ? [...props.contentEncodingOrder]
+          : []
+
+      if (props.contentEncodingOrder === undefined) {
+        if (props.isGunzipped) order.push('gzip')
+
+        if (props.isBrotliDecompressed) order.push('br')
+      }
+
       ctx = {
         incomingRes: props.incomingRes,
         protocolManager: props.protocolManager,
         req: props.req,
         res: props.res,
         isGunzipped: props.isGunzipped,
+        isBrotliDecompressed: props.isBrotliDecompressed,
+        contentEncodingOrder: order,
         incomingResStream: props.incomingResStream,
         makeResStreamPlainText: props.makeResStreamPlainText,
       }
     }
+  })
+
+  describe('AttachPlainTextStreamFn', function () {
+    const { AttachPlainTextStreamFn } = ResponseMiddleware
+
+    it('decompresses Brotli and sets isBrotliDecompressed when content-encoding is br', async function () {
+      const compressed = zlib.brotliCompressSync(Buffer.from('hello'))
+      const stream = Readable.from([compressed])
+      const ctx = {
+        debug: () => {},
+        res: {
+          on: (_event, _listener) => {},
+          off: (_event, _listener) => {},
+        },
+        incomingRes: { headers: { 'content-encoding': 'br' } },
+        incomingResStream: stream,
+        isGunzipped: false,
+        isBrotliDecompressed: false,
+        contentEncodingOrder: [],
+        makeResStreamPlainText: () => {},
+        onError: (err) => {
+          throw err
+        },
+      }
+
+      await testMiddleware([AttachPlainTextStreamFn], ctx)
+      ctx.makeResStreamPlainText()
+      expect(ctx.isBrotliDecompressed).toBe(true)
+      expect(ctx.contentEncodingOrder).toEqual(['br'])
+      const chunks: Buffer[] = []
+
+      for await (const chunk of ctx.incomingResStream) {
+        chunks.push(Buffer.from(chunk))
+      }
+      expect(Buffer.concat(chunks).toString()).toBe('hello')
+    })
+
+    it('decompresses layered content-encoding in reverse order (br then gzip for "gzip, br")', async function () {
+      // content-encoding: gzip, br means gzip applied first, then br. Wire format: br(gzip(data)).
+      const inner = zlib.gzipSync(Buffer.from('layered'))
+      const outer = zlib.brotliCompressSync(inner)
+      const stream = Readable.from([outer])
+      const ctx = {
+        debug: () => {},
+        res: { on: () => {}, off: () => {} },
+        incomingRes: { headers: { 'content-encoding': 'gzip, br' } },
+        incomingResStream: stream,
+        isGunzipped: false,
+        isBrotliDecompressed: false,
+        contentEncodingOrder: [],
+        makeResStreamPlainText: () => {},
+        onError: (err) => {
+          throw err
+        },
+      }
+
+      await testMiddleware([AttachPlainTextStreamFn], ctx)
+      ctx.makeResStreamPlainText()
+      expect(ctx.contentEncodingOrder).toEqual(['gzip', 'br'])
+      expect(ctx.isGunzipped).toBe(true)
+      expect(ctx.isBrotliDecompressed).toBe(true)
+      const chunks: Buffer[] = []
+
+      for await (const chunk of ctx.incomingResStream) {
+        chunks.push(Buffer.from(chunk))
+      }
+      expect(Buffer.concat(chunks).toString()).toBe('layered')
+    })
   })
 })

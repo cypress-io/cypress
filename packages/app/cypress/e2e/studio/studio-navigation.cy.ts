@@ -1,5 +1,74 @@
 import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName, openNewTestFromSpecHeader } from './helper'
 
+describe('Cypress Studio - Unsaved Changes Navigation Guard', () => {
+  it('blocks navigation away from the runner when studio has unsaved changes', () => {
+    launchStudio()
+
+    incrementCounter(0)
+
+    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
+
+    // try to navigate away - the router guard should block this
+    cy.findByTestId('sidebar-link-runs-page').click()
+
+    // navigation should be blocked and the unsaved changes modal should appear
+    cy.findByTestId('unsaved-changes-modal').should('be.visible')
+
+    // we should still be on the runner page
+    cy.location().its('hash').should('contain', '/specs/runner')
+  })
+
+  it('allows navigation after discarding unsaved changes', () => {
+    launchStudio()
+
+    incrementCounter(0)
+
+    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
+
+    cy.findByTestId('sidebar-link-runs-page').click()
+
+    cy.findByTestId('unsaved-changes-modal').should('be.visible')
+
+    cy.findByTestId('unsaved-changes-discard-button').click()
+
+    // navigation should now proceed
+    cy.location().its('hash').should('contain', '/runs')
+  })
+
+  it('prevents navigation when cancel is clicked in the unsaved changes dialog', () => {
+    launchStudio()
+
+    incrementCounter(0)
+
+    cy.get('.cm-line').should('contain.text', `cy.get('#increment').click();`)
+
+    cy.findByTestId('sidebar-link-runs-page').click()
+
+    cy.findByTestId('unsaved-changes-modal').should('be.visible')
+
+    cy.findByTestId('unsaved-changes-cancel-button').click()
+
+    // modal should close and we should remain in the runner
+    cy.findByTestId('unsaved-changes-modal').should('not.exist')
+    cy.location().its('hash').should('contain', '/specs/runner')
+
+    // studio should still be open
+    cy.findByTestId('studio-panel').should('be.visible')
+  })
+
+  it('does not block navigation when there are no unsaved changes', () => {
+    launchStudio()
+
+    // navigate away without making any changes
+    cy.findByTestId('sidebar-link-runs-page').click()
+
+    // no unsaved changes modal should appear
+    cy.findByTestId('unsaved-changes-modal').should('not.exist')
+
+    cy.location().its('hash').should('contain', '/runs')
+  })
+})
+
 describe('Cypress Studio - Navigation and URL Management', () => {
   it('does not re-enter studio mode when changing pages and then coming back', () => {
     launchStudio()

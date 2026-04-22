@@ -522,9 +522,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         initializeCyPromptManagerStub.restore()
       })
 
-      it('initializes cy prompt lifecycle manager if experimentalPromptCommand is enabled', function () {
+      it('initializes cy prompt lifecycle manager', function () {
         this.config.projectId = 'abc123'
-        this.config.experimentalPromptCommand = true
         this.project.options.record = true
         this.project.options.key = '123e4567-e89b-12d3-a456-426614174000'
 
@@ -537,19 +536,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
             ctx,
             record: true,
             key: '123e4567-e89b-12d3-a456-426614174000',
+            projectId: 'abc123',
           })
-        })
-      })
-
-      it('does not initialize cy prompt lifecycle manager if experimentalPromptCommand is not enabled', function () {
-        this.config.projectId = 'abc123'
-        this.config.experimentalPromptCommand = false
-
-        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
-
-        return this.project.open()
-        .then(() => {
-          expect(initializeCyPromptManagerStub).not.to.be.called
         })
       })
     })

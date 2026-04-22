@@ -53,9 +53,14 @@ Thanks for taking the time to contribute! :smile:
       - [Docker](#docker)
       - [Docker as a performance constrained environment](#docker-as-a-performance-constrained-environment)
     - [Packages](#packages)
+    - [AI assistant guidance files](#ai-assistant-guidance-files)
+      - [Files used by AI tools](#files-used-by-ai-tools)
+      - [Maintenance expectations](#maintenance-expectations)
+      - [External references](#external-references)
   - [Committing Code](#committing-code)
     - [Branches](#branches)
     - [Pull Requests](#pull-requests)
+    - [AI-Assisted Contributions](#ai-assisted-contributions)
     - [Write Some Tests](#write-some-tests)
     - [Dependencies](#dependencies)
   - [Reviewing Code](#reviewing-code)
@@ -464,6 +469,35 @@ Each package documents how to best work with it, so consult the `README.md` of e
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
+### AI assistant guidance files
+
+This repository includes lightweight AI guidance files used by common AI coding tools.
+
+These files are intended to make project structure and conventions more discoverable
+to AI assistants while remaining transparent and minimal for human contributors.
+
+#### Files used by AI tools
+
+- `CLAUDE.md` — Used by Claude Code (Claude loads these by walking upward from the working directory).
+- `AGENTS.md` — Used by Codex CLI and Cursor. Claude references this via `@import`.
+
+The root `AGENTS.md` provides project-wide context. Workspace and package-level
+`AGENTS.md` files add scoped details.
+
+#### Maintenance expectations
+
+These files should be treated like other repository documentation:
+
+- If you change repository structure, commands, conventions, or workflows,
+  update the relevant `AGENTS.md` / `CLAUDE.md` in the same PR.
+- Keep repo-local guidance factual and descriptive (what exists),
+  not aspirational process.
+
+#### External references
+
+Some AI-related documentation may reference Cypress-internal resources.
+Contributing to this repository does not require access to those systems.
+
 ## Committing Code
 
 ### Branches
@@ -513,6 +547,30 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 
 1. When converting files to another language and there is a clear commit history needed to maintain from the file conversion.
 2. When merging a `release/*` branch to `develop`. Individual PRs were already squashed when they were merged to the release branch, and we want that history intact on develop.
+
+### AI-Assisted Contributions
+
+AI coding assistants (such as Claude, Codex, Cursor, etc.) are increasingly common tools for developers. Contributions to Cypress may be created with or without AI assistance. AI tools are a normal part of modern development workflows, but contributors remain responsible for the changes they submit.
+
+We do not restrict or require disclosure of AI usage, but contributors are responsible for all code they submit regardless of how it was produced.
+
+When submitting a pull request, please ensure that:
+
+- **You understand the code you are submitting.**  
+  You should be able to explain how the change works and why it is correct.
+
+- **You have reviewed and validated AI-assisted changes.**  
+  AI-generated output may contain mistakes, unnecessary complexity, or patterns that do not match the repository.
+
+- **Your changes follow the existing codebase conventions and architecture.**
+
+- **Your pull request remains focused and reviewable.**  
+  Avoid submitting large AI-generated changes that you have not carefully reviewed.
+
+- **The repository's pull request template is preserved.**  
+  AI tools may help draft content, but contributors should keep the template structure intact and ensure the final content is accurate.
+
+Reviewers may ask clarifying questions about changes. As with any contribution, authors remain responsible for the correctness, maintainability, and quality of the code they submit.
 
 ### Write Some Tests
 

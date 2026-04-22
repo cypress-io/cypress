@@ -7,10 +7,10 @@ import {
   addCookieJarCookiesToRequest, getSameSiteContext, shouldAttachAndSetCookies,
 } from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
-
+import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
 import type { CypressIncomingRequest } from '../types'
-import { urlMatchesOriginProtectionSpace } from '@packages/network-tools'
+import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
 import * as errors from '@packages/errors'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
@@ -182,7 +182,7 @@ const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
   }
 
   this.debug(`looking up credentials for ${this.req.proxiedUrl}`)
-  const { credentialStatus, resourceType } = this.resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
+  const { credentialStatus, resourceType } = resourceTypeAndCredentialManager.get(this.req.proxiedUrl, this.req.resourceType)
 
   this.debug(`credentials calculated for ${resourceType}:${credentialStatus}`)
 
@@ -410,30 +410,20 @@ const EndRequestsToBlockedHosts: RequestMiddleware = function () {
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
-  // Cypress can only support plaintext or gzip, so make sure we don't request anything else, by either filtering down to `gzip` or explicitly specifying `identity`
   const acceptEncoding = this.req.headers['accept-encoding']
+  const supported = getSupportedAcceptEncoding(acceptEncoding)
 
   span?.setAttributes({
     acceptEncodingHeaderPresent: !!acceptEncoding,
+    doesAcceptHeadingIncludeGzip: !!acceptEncoding?.includes('gzip'),
+    doesAcceptHeadingIncludeBr: !!acceptEncoding?.includes('br'),
   })
 
-  if (acceptEncoding) {
-    const doesAcceptHeadingIncludeGzip = acceptEncoding.includes('gzip')
-
-    span?.setAttributes({
-      doesAcceptHeadingIncludeGzip,
-    })
-
-    if (doesAcceptHeadingIncludeGzip) {
-      this.req.headers['accept-encoding'] = 'gzip'
-    } else {
-      this.req.headers['accept-encoding'] = 'identity'
-    }
-  } else {
-    // If there is no accept-encoding header, it means to accept everything (https://www.rfc-editor.org/rfc/rfc9110#name-accept-encoding).
-    // In that case, we want to explicitly filter that down to `gzip` and identity
-    this.req.headers['accept-encoding'] = 'gzip,identity'
-  }
+  this.req.headers['accept-encoding'] = supported
+  this.debug(
+    acceptEncoding ? 'accept-encoding header present, setting to %s' : 'no accept-encoding header, setting to %s',
+    supported,
+  )
 
   span?.end()
   this.next()

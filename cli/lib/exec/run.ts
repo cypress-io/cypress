@@ -114,6 +114,10 @@ const processRunOptions = (options: any = {}): string[] => {
     args.push('--parallel')
   }
 
+  if (options.passWithNoTests) {
+    args.push('--pass-with-no-tests')
+  }
+
   if (options.posixExitCodes) {
     args.push('--posix-exit-codes')
   }

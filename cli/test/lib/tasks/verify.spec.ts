@@ -111,6 +111,7 @@ vi.mock('../../../lib/util', async (importActual) => {
       exec: vi.fn(),
       getOsVersionAsync: vi.fn(),
       isPossibleLinuxWithIncorrectDisplay: vi.fn(),
+      pkgBuildInfo: vi.fn(),
     },
   }
 })
@@ -118,10 +119,9 @@ vi.mock('../../../lib/util', async (importActual) => {
 describe('lib/tasks/verify', () => {
   const createStdoutCapture = () => {
     const logs: string[] = []
-    // eslint-disable-next-line no-console
     const originalOut = process.stdout.write
 
-    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
+    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array) => {
       logs.push(strOrBugger as string)
 
       return originalOut(strOrBugger)
@@ -165,9 +165,17 @@ describe('lib/tasks/verify', () => {
     vi.mocked(util.getCacheDir).mockReturnValue(cacheDir)
     vi.mocked(util.isCi).mockReturnValue(false)
     vi.mocked(util.pkgVersion).mockReturnValue(packageVersion)
+    vi.mocked(util.pkgBuildInfo).mockReturnValue({
+      stable: true,
+      commitBranch: 'main',
+      commitSha: 'abcdef123456',
+      commitDate: '1970-01-01T05:00:00.000Z',
+    })
+
     vi.mocked(xvfb.start).mockResolvedValue(undefined)
-    vi.mocked(xvfb.stop).mockResolvedValue(undefined)
+    vi.mocked(xvfb.stop).mockResolvedValue(null)
     vi.mocked(xvfb.isNeeded).mockReturnValue(false)
+    /// @ts-expect-error - geteuid is potentially undefined
     vi.mocked(geteuid).mockReturnValue(1000)
     vi.mocked(_.random).mockReturnValue(222)
     // @ts-expect-error - mock args
@@ -220,7 +228,9 @@ describe('lib/tasks/verify', () => {
       await start({ listrRenderer: 'silent' })
       throw new Error('should have caught error')
     } catch (err) {
-      expect(err.message).not.toContain('should have caught error')
+      const message = err instanceof Error ? err.message : String(err)
+
+      expect(message).not.toContain('should have caught error')
       logger.error(err)
 
       expect(output()).toMatchSnapshot()
@@ -235,6 +245,7 @@ describe('lib/tasks/verify', () => {
       packageVersion,
     })
 
+    // @ts-expect-error - geteuid is potentially undefined
     vi.mocked(geteuid).mockReturnValue(0) // user is root
 
     await start({ listrRenderer: 'silent' })
@@ -250,6 +261,7 @@ describe('lib/tasks/verify', () => {
       packageVersion,
     })
 
+    // @ts-expect-error - geteuid is potentially undefined
     vi.mocked(geteuid).mockReturnValue(1000) // user is non-root
 
     await start({ listrRenderer: 'silent' })
@@ -295,7 +307,9 @@ describe('lib/tasks/verify', () => {
       await start({ listrRenderer: 'silent' })
       throw new Error('should have caught error')
     } catch (err) {
-      expect(err.message).not.toContain('should have caught error')
+      const message = err instanceof Error ? err.message : String(err)
+
+      expect(message).not.toContain('should have caught error')
       logger.error(err)
 
       expect(output()).toMatchSnapshot()
@@ -493,6 +507,7 @@ describe('lib/tasks/verify', () => {
       // initially we think the user has everything set
       vi.mocked(xvfb.isNeeded).mockReturnValue(false)
       vi.mocked(util.isPossibleLinuxWithIncorrectDisplay).mockReturnValue(true)
+      // @ts-expect-error - mock args
       vi.mocked(util.exec).mockImplementationOnce((...args: any) => {
         const firstSpawnError: any = new Error('')
 
@@ -568,6 +583,8 @@ describe('lib/tasks/verify', () => {
       try {
         await start({ listrRenderer: 'silent' })
       } catch (e) {
+        const message = e instanceof Error ? e.message : String(e)
+
         expect(util.exec).toHaveBeenCalledTimes(2)
         // second time around we should have called Xvfb
         expect(xvfb.start).toHaveBeenCalledOnce
@@ -576,7 +593,7 @@ describe('lib/tasks/verify', () => {
         // user should have been warned
         expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('DISPLAY was set to: "test-display"'))
 
-        expect(e.message).toMatchSnapshot('tried to verify twice, on the first try got the DISPLAY error')
+        expect(message).toMatchSnapshot('tried to verify twice, on the first try got the DISPLAY error')
 
         return
       }
@@ -869,18 +886,22 @@ describe('lib/tasks/verify', () => {
   describe('.needsSandbox', () => {
     it('needs --no-sandbox on Linux as a root', () => {
       vi.mocked(os.platform).mockReturnValue('linux')
+
+      // @ts-expect-error - geteuid is potentially undefined
       vi.mocked(geteuid).mockReturnValue(0)
       expect(needsSandbox()).toEqual(true)
     })
 
     it('needs --no-sandbox on Linux as a non-root', () => {
       vi.mocked(os.platform).mockReturnValue('linux')
+      // @ts-expect-error - geteuid is potentially undefined
       vi.mocked(geteuid).mockReturnValue(1000)
       expect(needsSandbox()).toEqual(true)
     })
 
     it('needs --no-sandbox on Mac as a non-root', () => {
       vi.mocked(os.platform).mockReturnValue('darwin')
+      // @ts-expect-error - geteuid is potentially undefined
       vi.mocked(geteuid).mockReturnValue(1000)
       expect(needsSandbox()).toEqual(true)
     })

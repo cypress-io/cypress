@@ -14,6 +14,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
+    "@packages/socket": "0.0.0-development",
     "debug": "^4.4.0",
     "is-html": "^2.0.0",
     "istextorbinary": "6.0.0",
@@ -26,7 +27,6 @@
     "@packages/errors": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
-    "@packages/server": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
     "@types/mime": "^3.0.1",
     "vitest": "^3.2.4"

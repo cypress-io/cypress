@@ -6,6 +6,7 @@ export const LocalSettingsPreferences = objectType({
   description: 'local setting preferences',
   definition (t) {
     t.boolean('autoScrollingEnabled')
+    t.boolean('codeEditorLineWrap')
     t.string('preferredEditorBinary')
     t.boolean('isSpecsListOpen')
     t.boolean('showFetchRequests')

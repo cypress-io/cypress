@@ -5,8 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "144.0.7559.132"
-chrome-beta-version: &chrome-beta-version "145.0.7632.26"
+chrome-stable-version: &chrome-stable-version "147.0.7727.101"
+chrome-beta-version: &chrome-beta-version "148.0.7778.5"
+# Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "147.0.7727.24"
 firefox-stable-version: &firefox-stable-version "145.0.2"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
@@ -23,7 +25,7 @@ parameters:
     default: false
 
 orbs:
-  browser-tools: circleci/browser-tools@2.3.2
+  browser-tools: circleci/browser-tools@2.4.1
 
 defaults: &defaults
   parallelism: 1
@@ -474,16 +476,6 @@ commands:
       - run:
           name: print yarn version
           command: yarn versions
-      - unless:
-          condition:
-            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: Stop .only # this will catch ".only"s in js/coffee as well
-                command: |
-                  source ./scripts/ensure-node.sh
-                  yarn stop-only-all
       - run:
           name: Check terminal variables
           ## make sure the TERM is set to 'xterm' in node (Linux only)
@@ -541,7 +533,7 @@ commands:
         description: Google Chrome for Testing version to install
         type: string
         # latest can also be used here
-        default: *chrome-stable-version
+        default: *chrome-for-testing-stable-version
       install-firefox:
         description: whether or not to install firefox
         type: boolean
@@ -1428,14 +1420,14 @@ commands:
             node scripts/binary.js upload-build-artifact \
               --type binary \
               --file cypress.zip \
-              --version $(node -p "require('./package.json').version")
+              --version $(node ./scripts/get-next-version.js)
       - run:
           name: Upload NPM package to S3
           command: |
             node scripts/binary.js upload-build-artifact \
               --type npm-package \
               --file cypress.tgz \
-              --version $(node -p "require('./package.json').version")
+              --version $(node ./scripts/get-next-version.js)
       - run: ls -l
       - run: cat binary-url.json
       - run: cat npm-package-url.json
@@ -2017,6 +2009,7 @@ jobs:
         type: boolean
         default: false
     parallelism: 3
+    resource_class: large
     steps:
       - run-new-ui-tests:
           browser: chrome

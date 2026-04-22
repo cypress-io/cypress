@@ -7,7 +7,7 @@ import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeG
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
-
+import type { SocketBroadcaster } from '@packages/socket'
 import * as errors from './errors'
 import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
@@ -46,7 +46,7 @@ type ExtendedSocketIoNamespace = socketIo.SocketIONamespace & GenericHandler
 
 type ExtendedCDPSocketServer = CDPSocketServer & GenericHandler
 
-export class SocketBase {
+export class SocketBase implements SocketBroadcaster {
   private _sendResetBrowserTabsForNextSpecMessage
   private _sendResetBrowserStateMessage
   private _isRunnerSocketConnected
@@ -489,15 +489,13 @@ export class SocketBase {
           }
         })
 
-        socket.on('prompt:reset', async (cb) => {
+        socket.on('prompt:reset', (cb) => {
           try {
-            const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
-
             // If we have runState, then we shouldn't reset the full prompt manager because
             // we are just changing top. We will clear the prompt manager for a specific test
             // later.
             if (!runState) {
-              cyPrompt?.cyPromptManager?.reset()
+              getCtx().coreData.cyPromptLifecycleManager?.resetCyPrompt()
             }
           } finally {
             cb()

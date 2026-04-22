@@ -86,17 +86,6 @@ describe('lib/modes/record', () => {
       expect(commit.branch).to.eq('bem/buildkite')
     })
 
-    it('gets branch from process.env.CI_BRANCH for codeship', () => {
-      process.env.CI_NAME = 'codeship'
-      process.env.CI_BRANCH = 'bem/ci'
-
-      const commit = recordMode.getCommitFromGitOrCi(gitCommit)
-
-      debug(commit)
-
-      expect(commit.branch).to.eq('bem/ci')
-    })
-
     it('gets branch from process.env.APPVEYOR_REPO_BRANCH for AppVeyor', () => {
       process.env.APPVEYOR = '1'
       process.env.APPVEYOR_REPO_BRANCH = 'bem/app'
@@ -223,6 +212,7 @@ describe('lib/modes/record', () => {
         const browser = {
           displayName: 'chrome',
           version: '59',
+          family: 'chromium',
         }
         const tag = 'nightly,develop'
         const testingType = 'e2e'
@@ -278,6 +268,7 @@ describe('lib/modes/record', () => {
             osVersion: 4,
             browserName: 'chrome',
             browserVersion: '59',
+            browserFamily: 'chromium',
           },
           ci: {
             params: {
@@ -304,8 +295,52 @@ describe('lib/modes/record', () => {
 
         await beforeSpecRun()
 
-        expect(api.createInstance).to.have.been.called
+        expect(api.createInstance).to.have.been.calledWith('run-id', sinon.match({
+          platform: sinon.match({
+            browserFamily: 'chromium',
+            browserName: 'chrome',
+            browserVersion: '59',
+          }),
+        }))
+
         expect(ctx.actions.currentRecording.startInstance).to.have.been.calledWith('instance-id')
+      })
+
+      it('passes browser.family as platform.browserFamily for non-chromium browsers', async () => {
+        const runAllSpecs = sinon.stub()
+        const sys = { osCpus: 1, osName: 'linux', osMemory: 8, osVersion: '1' }
+        const browser = {
+          displayName: 'firefox',
+          version: '120',
+          family: 'firefox',
+        }
+        const project = { setOnTestsReceived: sinon.stub() }
+        const ctx = {
+          actions: {
+            currentRecording: { startRun: sinon.stub(), startInstance: sinon.stub() },
+          },
+        }
+
+        await recordMode.createRunAndRecordSpecs({
+          key: 'k',
+          sys,
+          specs,
+          browser,
+          projectRoot: 'root',
+          specPattern: ['a'],
+          runAllSpecs,
+          testingType: 'e2e',
+          project,
+          ctx,
+        })
+
+        expect(api.createRun).to.have.been.calledWith(sinon.match({
+          platform: sinon.match({
+            browserFamily: 'firefox',
+            browserName: 'firefox',
+            browserVersion: '120',
+          }),
+        }))
       })
     })
   })

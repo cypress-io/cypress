@@ -1,9 +1,9 @@
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { ProxyTimings } from '@packages/types'
-import type { ResourceType } from '@packages/net-stubbing'
 import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
 import type { Protocol } from 'devtools-protocol'
+import type { RequestCredentialLevel, ResourceType } from './resourceTypeAndCredentialManager'
 
 /**
  * An incoming request to the Cypress web server.
@@ -30,8 +30,6 @@ export type CypressIncomingRequest = Request & {
   matchingRoutes?: BackendRoute[]
   isSyncRequest: boolean
 }
-
-export type RequestCredentialLevel = 'same-origin' | 'include' | 'omit' | boolean
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false
 

@@ -55,13 +55,19 @@ export const iframesController = {
       req.url = `${config.devServerPublicPathRoute}/${req.params[0]}`
     }
 
-    // use the node proxy here instead of the network proxy
-    // to avoid the user accidentally intercepting and modifying
-    // our internal index.html handler
-
+    // use the node proxy here instead of the network proxy to avoid
+    // the user accidentally intercepting and modifying our internal index.html handler
     nodeProxy.web(req, res, {}, (e) => {
       if (e) {
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+        if (config.isTextTerminal) {
+          // if we are in run mode and we receive an error, we need to throw an error so the app doesn't hang
+          debug('Error interacting with the dev server.', e)
+          throw e
+        } else {
+          // if we are in open mode, there can be multiple reasons we can't interact with the dev server (e.g. the config changed and the dev server has restarted, reruns, etc.),
+          // we can ignore this error since the App should make another request (note: it is possible the dev server has crashed or doesn't respond in a timely manner, in which case the App will hang)
+          debug('Error interacting with the dev server. Ignoring since the App should make another request.', e)
+        }
       }
     })
   },

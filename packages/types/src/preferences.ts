@@ -13,6 +13,7 @@ export const defaultPreferences: AllowedState = {
   notifyWhenRunStarts: false,
   notifyWhenRunStartsFailing: true,
   notifyWhenRunCompletes: ['failed'],
+  codeEditorLineWrap: false,
 }
 
 export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
@@ -54,6 +55,7 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'notifyWhenRunStartsFailing',
   'notifyWhenRunCompletes',
   'studioFirstUseInstructionsDismissed',
+  'codeEditorLineWrap',
 ] as const
 
 export type AllowedState = Partial<{
@@ -96,4 +98,5 @@ export type AllowedState = Partial<{
   notifyWhenRunStartsFailing: Maybe<boolean>
   notifyWhenRunCompletes: Maybe<NotifyWhenRunCompletes[]>
   studioFirstUseInstructionsDismissed: Maybe<boolean>
+  codeEditorLineWrap: Maybe<boolean>
 }>

@@ -1,0 +1,13 @@
+{
+  "name": "cypress-example-studio",
+  "version": "0.0.0-development",
+  "description": "Example running specs using Cypress via studio",
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-react": "^7.23.3",
+    "babel-loader": "^9.1.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}

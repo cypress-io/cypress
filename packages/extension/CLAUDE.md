@@ -1,0 +1,3 @@
+# Extension
+
+@AGENTS.md

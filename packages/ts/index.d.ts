@@ -1,13 +1,7 @@
 // missing type definitions for libraries
 
-declare module '@cypress/get-windows-proxy' {
-  type ProxyConfig = {
-    httpProxy: string
-    noProxy: string
-  }
-  function getWindowsProxy(): Optional<ProxyConfig>
-  export = getWindowsProxy
-}
+/// <reference path="typedefs/cypress-get-windows-proxy.d.ts" />
+/// <reference path="typedefs/cypress-request-promise.d.ts" />
 
 declare module 'http' {
   import { Socket } from 'net'

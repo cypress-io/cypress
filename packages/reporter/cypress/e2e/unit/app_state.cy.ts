@@ -161,6 +161,28 @@ describe('app state', () => {
     })
   })
 
+  context('#toggleCodeEditorLineWrap', () => {
+    it('toggles codeEditorLineWrap', () => {
+      const instance = new AppState()
+
+      instance.toggleCodeEditorLineWrap()
+      expect(instance.codeEditorLineWrap).to.be.true
+      instance.toggleCodeEditorLineWrap()
+      expect(instance.codeEditorLineWrap).to.be.false
+    })
+  })
+
+  context('#setCodeEditorLineWrap', () => {
+    it('sets codeEditorLineWrap', () => {
+      const instance = new AppState()
+
+      instance.setCodeEditorLineWrap(true)
+      expect(instance.codeEditorLineWrap).to.be.true
+      instance.setCodeEditorLineWrap(false)
+      expect(instance.codeEditorLineWrap).to.be.false
+    })
+  })
+
   context('#reset', () => {
     it('resets autoScrollingEnabled when it has not been toggled', () => {
       const instance = new AppState()

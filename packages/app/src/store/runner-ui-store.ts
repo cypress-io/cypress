@@ -21,6 +21,7 @@ export type AutomationStatus = keyof typeof automation
 export interface RunnerUiState {
   showChooseExternalEditorModal: boolean
   autoScrollingEnabled: boolean
+  codeEditorLineWrap: boolean
   isSpecsListOpen: boolean
   showFetchRequests: boolean
   specListWidth: number
@@ -48,6 +49,7 @@ export const useRunnerUiStore = defineStore({
       randomString: `${Math.random()}`,
       hideCommandLog: window.__CYPRESS_CONFIG__.hideCommandLog,
       hideRunnerUi: window.__CYPRESS_CONFIG__.hideRunnerUi,
+      codeEditorLineWrap: false,
     }
   },
 

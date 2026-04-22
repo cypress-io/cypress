@@ -22,7 +22,6 @@ export class MobxRunnerStore {
   width: number
   height: number
   automation?: AutomationStatus
-  canSaveStudioLogs = false
 
   constructor (testingType: Cypress.TestingType) {
     makeObservable(this, {
@@ -33,8 +32,6 @@ export class MobxRunnerStore {
       width: observable,
       height: observable,
       automation: observable,
-      canSaveStudioLogs: observable,
-      setCanSaveStudioLogs: action,
       setSpec: action,
       checkCurrentSpecStillExists: action,
       setSpecs: action,
@@ -44,10 +41,6 @@ export class MobxRunnerStore {
 
     this.width = defaults[testingType].width
     this.height = defaults[testingType].height
-  }
-
-  setCanSaveStudioLogs (canSave: boolean) {
-    this.canSaveStudioLogs = canSave
   }
 
   setSpec (spec: Cypress.Spec | undefined) {

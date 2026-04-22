@@ -92,12 +92,6 @@ describe('src/cy/commands/files', () => {
 
       err.code = 'ENOENT'
 
-      let retries = 0
-
-      cy.on('command:retry', () => {
-        retries += 1
-      })
-
       Cypress.backend.withArgs('run:privileged')
       .onFirstCall()
       .rejects(err)
@@ -105,7 +99,12 @@ describe('src/cy/commands/files', () => {
       .resolves(okResponse)
 
       cy.readFile('foo.json').then(() => {
-        expect(retries).to.eq(2)
+        // Verify two calls were indeed made: the first one to fail, and the second one to succeed.
+        const readFilePrivilegedCalls = Cypress.backend.getCalls().filter(
+          (c) => c.args[0] === 'run:privileged' && c.args[1]?.commandName === 'readFile',
+        )
+
+        expect(readFilePrivilegedCalls.length).to.eq(2)
       })
     })
 

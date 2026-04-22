@@ -374,10 +374,6 @@ exports['e2e record passing passes 2'] = [
       'end': '2018-02-01T20:14:19.323Z',
       'duration': 1234,
     },
-    'metadata': {
-      'studioCreated': 0,
-      'studioExtended': 0,
-    },
   },
   {
     'stats': {
@@ -454,10 +450,6 @@ exports['e2e record passing passes 2'] = [
       'end': '2018-02-01T20:14:19.323Z',
       'duration': 1234,
     },
-    'metadata': {
-      'studioCreated': 0,
-      'studioExtended': 0,
-    },
   },
   {
     'stats': {
@@ -530,10 +522,6 @@ exports['e2e record passing passes 2'] = [
       'start': '2018-02-01T20:14:19.323Z',
       'end': '2018-02-01T20:14:19.323Z',
       'duration': 1234,
-    },
-    'metadata': {
-      'studioCreated': 0,
-      'studioExtended': 0,
     },
   },
 ]

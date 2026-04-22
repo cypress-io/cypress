@@ -15,6 +15,7 @@ interface MochaRunnerState {
 export type RunState = MochaRunnerState & ReporterRunState & {
   isSpecsListOpen?: boolean
   showFetchRequests?: boolean
+  codeEditorLineWrap?: boolean
 }
 
 export interface Emissions {

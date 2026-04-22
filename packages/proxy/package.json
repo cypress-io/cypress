@@ -15,6 +15,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
+    "@packages/socket": "0.0.0-development",
     "bluebird": "3.5.3",
     "chalk": "2.4.2",
     "charset": "1.0.1",

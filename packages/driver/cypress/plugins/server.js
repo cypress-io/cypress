@@ -1,4 +1,5 @@
 const fs = require('fs-extra')
+const zlib = require('zlib')
 const auth = require('basic-auth')
 const bodyParser = require('body-parser')
 const express = require('express')
@@ -387,6 +388,74 @@ const createApp = (port) => {
         </body>
       </html>
     `)
+  })
+
+  const CONTENT_TYPES = {
+    html: 'text/html',
+    js: 'application/javascript',
+    css: 'text/css',
+  }
+
+  app.get('/encoding/:encodingType/:assetType', (req, res) => {
+    const { encodingType, assetType } = req.params
+
+    const body = (() => {
+      const text = `encoding-${encodingType}-${assetType}`
+
+      if (assetType === 'html') {
+        return `<html><head><link rel="stylesheet" href="/encoding/${encodingType}/css"></head><body><p id="encoding-test">${text}</p><p id="encoding-js"></p></body><script src="/encoding/${encodingType}/js"><\/script></html>`
+      }
+
+      if (assetType === 'js') {
+        return `document.getElementById('encoding-js').textContent = "${text}";`
+      }
+
+      return `#encoding-test { content: "${text}"; font-size: 42px; }`
+    })()
+
+    const contentType = CONTENT_TYPES[assetType]
+
+    res.setHeader('Content-Type', contentType)
+
+    // Prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+    res.setHeader('Pragma', 'no-cache')
+    res.setHeader('Expires', '0')
+
+    let buffer
+    let contentEncoding
+
+    if (encodingType === 'br') {
+      contentEncoding = 'br'
+      buffer = zlib.brotliCompressSync(Buffer.from(body, 'utf8'))
+    } else if (encodingType === 'gzip') {
+      contentEncoding = 'gzip'
+      buffer = zlib.gzipSync(Buffer.from(body, 'utf8'))
+    } else if (encodingType === 'layered-gzip-br') {
+      contentEncoding = 'gzip, br'
+      const gzipped = zlib.gzipSync(Buffer.from(body, 'utf8'))
+
+      buffer = zlib.brotliCompressSync(gzipped)
+    } else if (encodingType === 'layered-br-gzip') {
+      contentEncoding = 'br, gzip'
+      const brCompressed = zlib.brotliCompressSync(Buffer.from(body, 'utf8'))
+
+      buffer = zlib.gzipSync(brCompressed)
+    } else if (encodingType === 'invalid-br') {
+      contentEncoding = 'br'
+      // Valid HTML so the page loads; js and css subresources remain invalid.
+      buffer = assetType === 'html'
+        ? zlib.brotliCompressSync(Buffer.from(body, 'utf8'))
+        : Buffer.from('invalid brotli', 'utf8')
+    } else if (encodingType === 'invalid-gzip') {
+      contentEncoding = 'gzip'
+      buffer = assetType === 'html'
+        ? zlib.gzipSync(Buffer.from(body, 'utf8'))
+        : Buffer.from('invalid gzip', 'utf8')
+    }
+
+    res.setHeader('Content-Encoding', contentEncoding)
+    res.send(buffer)
   })
 
   app.use(express.static(path.join(__dirname, '..')))

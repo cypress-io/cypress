@@ -2,6 +2,34 @@ import { launchStudio, loadProjectAndRunSpec } from './helper'
 import pDefer from 'p-defer'
 
 describe('Cypress Studio - UI and Panel Management', () => {
+  it('shows Run test button label in single-test mode', () => {
+    launchStudio()
+
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.get('button.restart').trigger('mouseover')
+    cy.get('.cy-tooltip').should('have.text', 'Run test R')
+  })
+
+  it('shows Run All Tests button label on welcome screen', () => {
+    cy.viewport(1500, 1000)
+    loadProjectAndRunSpec()
+    cy.findByTestId('studio-button').should('be.visible').click()
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('new-test-features').should('be.visible')
+
+    cy.get('button.restart').trigger('mouseover')
+    cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
+  })
+
+  it('shows Run All Tests button label on new test screen', () => {
+    launchStudio({ createNewTestFromSpecHeader: true })
+
+    cy.findByTestId('studio-panel').should('be.visible')
+    cy.findByTestId('test-name-input').should('be.visible')
+    cy.get('button.restart').trigger('mouseover')
+    cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
+  })
+
   it('closes studio panel when clicking studio button (from the cloud)', () => {
     launchStudio()
 
@@ -182,11 +210,14 @@ describe('studio functionality', () => {
 
     launchStudio()
 
+    // expand the recommendation
+    cy.get('[aria-label="Expand recommendation"]').first().click()
+
     // Verify that the AI output is correct
     cy.get('.cm-is-recommendation-line').should('contain', aiOutput)
   })
 
-  it('studio AI is marked as coming soon', () => {
+  it('studio AI is marked as disabled', () => {
     cy.mockNodeCloudRequest({
       url: '/studio/config?projectSlug=n69px6',
       method: 'get',
@@ -202,7 +233,7 @@ describe('studio functionality', () => {
 
     launchStudio()
 
-    // Verify that AI is coming soon
-    cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Coming soon')
+    // Verify that AI is displaying as disabled
+    cy.get('[data-cy="ai-status-text"]').should('contain.text', 'Disabled')
   })
 })

@@ -1118,6 +1118,7 @@ enum ErrorTypeEnum {
   CANNOT_CONNECT_BASE_URL
   CANNOT_CONNECT_BASE_URL_RETRYING
   CANNOT_CONNECT_BASE_URL_WARNING
+  CANNOT_ENABLE_FEATURE_WITH_NO_TESTS
   CANNOT_RECORD_NO_PROJECT_ID
   CANNOT_REMOVE_OLD_BROWSER_PROFILES
   CANNOT_TRASH_ASSETS
@@ -1181,7 +1182,7 @@ enum ErrorTypeEnum {
   ERROR_WRITING_FILE
   EXPERIMENTAL_JIT_COMPILE_REMOVED
   EXPERIMENTAL_ORIGIN_DEPENDENCIES_E2E_ONLY
-  EXPERIMENTAL_PROMPT_COMMAND_E2E_ONLY
+  EXPERIMENTAL_PROMPT_COMMAND_REMOVED
   EXPERIMENTAL_SESSION_AND_ORIGIN_REMOVED
   EXPERIMENTAL_SINGLE_TAB_RUN_MODE
   EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED
@@ -1408,6 +1409,7 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+  codeEditorLineWrap: Boolean
   debugSlideshowComplete: Boolean
   desktopNotificationsEnabled: Boolean
   dismissNotificationBannerUntil: DateTime
@@ -1827,9 +1829,6 @@ type Query {
     """The spec path to find"""
     specPath: String!
   ): CloudProjectSpecResult
-
-  """Whether cloud studio is requested by the environment"""
-  cloudStudioRequested: Boolean
 
   """A user within the Cypress Cloud"""
   cloudViewer: CloudUser
