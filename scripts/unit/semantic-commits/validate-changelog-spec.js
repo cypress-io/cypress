@@ -143,8 +143,6 @@ describe('semantic-pull-request/validate-changelog', () => {
       fs.readFileSync.returns(`
 ## 120.2.0
 
-_Released Jan 7, 2033 (PENDING)_
-
 **Performance:**
 
 - Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).`)
@@ -168,8 +166,6 @@ _Released Jan 7, 2033 (PENDING)_
 
       const changelogContent = `
 ## 120.2.0
-
-_Released Jan 7, 2033 (PENDING)_
 
 **Performance:**
 
@@ -195,8 +191,6 @@ _Released Jan 7, 2033 (PENDING)_
 
       fs.readFileSync.returns(`
 ## 120.2.0
-
-_Released Jan 7, 2033 (PENDING)_
 
 **Misc:**
 
@@ -253,6 +247,82 @@ _Released Jan 7, 2033 (PENDING)_
         expect(console.log).to.be.calledWith('Does not contain changes that impact the next Cypress release.')
       })
 
+      it('when a user-facing commit was reverted within the same release (conventional revert: style)', async () => {
+        const changedFiles = [
+          'packages/driver/lib/index.js',
+          'cli/CHANGELOG.md',
+        ]
+
+        fs.readFileSync.returns(`
+## 120.2.0
+
+**Performance:**
+
+- Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).`)
+
+        await validateChangelog({
+          changedFiles,
+          commits: [
+            {
+              commitMessage: 'perf: do something faster (#77)',
+              prNumber: 77,
+              semanticType: 'perf',
+            },
+            {
+              commitMessage: 'fix: a bug (#88)',
+              prNumber: 88,
+              semanticType: 'fix',
+            },
+            {
+              // conventional-commits lowercase revert style
+              commitMessage: 'revert: "fix: a bug (#88)" (#99)',
+              prNumber: 99,
+              semanticType: 'revert',
+            },
+          ],
+        })
+
+        expect(console.log).to.be.calledWith('It appears at a high-level your changelog entry is correct! The remaining validation is left to the pull request reviewers.')
+      })
+
+      it('when a user-facing commit was reverted within the same release (GitHub Revert style)', async () => {
+        const changedFiles = [
+          'packages/driver/lib/index.js',
+          'cli/CHANGELOG.md',
+        ]
+
+        fs.readFileSync.returns(`
+## 120.2.0
+
+**Performance:**
+
+- Fixed in [#77](https://github.com/cypress-io/cypress/pull/77).`)
+
+        await validateChangelog({
+          changedFiles,
+          commits: [
+            {
+              commitMessage: 'perf: do something faster (#77)',
+              prNumber: 77,
+              semanticType: 'perf',
+            },
+            {
+              commitMessage: 'fix: a bug (#88)',
+              prNumber: '88',
+              semanticType: 'fix',
+            },
+            {
+              // GitHub UI uppercase Revert style; prNumber as string (from parser)
+              commitMessage: 'Revert "fix: a bug (#88)" (#99)',
+              prNumber: 99,
+              semanticType: 'revert',
+            },
+          ],
+        })
+
+        expect(console.log).to.be.calledWith('It appears at a high-level your changelog entry is correct! The remaining validation is left to the pull request reviewers.')
+      })
+
       it('when current branch is in SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES env var', async () => {
         process.env.CIRCLE_BRANCH = 'this-branch'
         process.env.SKIP_RELEASE_CHANGELOG_VALIDATION_FOR_BRANCHES = 'this-branch,that-branch'
@@ -283,8 +353,6 @@ _Released Jan 7, 2033 (PENDING)_
         fs.readFileSync.returns(`
 ## 120.2.0
 
-_Released Jan 7, 2033 (PENDING)_
-
 `)
 
         return validateChangelog({
@@ -309,8 +377,6 @@ _Released Jan 7, 2033 (PENDING)_
 
         fs.readFileSync.returns(`
 ## 120.2.0
-
-_Released Jan 7, 2033 (PENDING)_
 
 **Features:**
 
@@ -338,8 +404,6 @@ _Released Jan 7, 2033 (PENDING)_
 
         fs.readFileSync.returns(`
 ## 120.2.0
-
-_Released Jan 7, 2033 (PENDING)_
 
 **Performance:**
 
@@ -372,8 +436,6 @@ _Released Jan 7, 2033 (PENDING)_
         fs.readFileSync.returns(`
 ## 120.2.0
 
-_Released Jan 7, 2033 (PENDING)_
-
 **Performance:**
 
 - comment without link.`)
@@ -400,8 +462,6 @@ _Released Jan 7, 2033 (PENDING)_
 
         fs.readFileSync.returns(`
 ## 120.2.0
-
-_Released Jan 7, 2033 (PENDING)_
 
 **Performance:**
 
