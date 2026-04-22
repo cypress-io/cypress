@@ -2,6 +2,7 @@
 // created by autobarrel, do not modify directly
 
 export * from './DocumentNodeBuilder'
+export * from './app-data-paths'
 export * from './autoBindDebug'
 export * from './config-file-updater'
 export * from './file'
