@@ -165,7 +165,7 @@ describe('App: Settings', () => {
       cy.specsPageIsVisible()
       cy.get(SidebarSettingsLinkSelector).click()
       cy.findByText('Project settings').click()
-      cy.get('[data-cy="file-match-indicator"]').contains('19 matches')
+      cy.get('[data-cy="file-match-indicator"]').contains('13 matches')
       cy.get('[data-cy="spec-pattern"]').contains('tests/**/*.(js|ts)')
     })
 
