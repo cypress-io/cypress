@@ -7,7 +7,7 @@ import { getCtx } from '@packages/data-context'
 import { DocumentDomainInjection } from '@packages/network-tools'
 import { privilegedCommandsManager } from '../privileged-commands/privileged-commands-manager'
 import type { Cfg } from '../project-base'
-import type { RemoteStates } from '@packages/network-tools'
+import type { RemoteState, RemoteStates } from '@packages/network-tools'
 
 const debug = Debug('cypress:server:controllers')
 
@@ -35,19 +35,18 @@ export = {
     // The primary remote state may not be established yet if the project is
     // being (re)initialized — e.g. when the user edits cypress.config.js in
     // open mode and the server becomes routable before `remoteStates.set()`
-    // has been called for the new project. Wait briefly for it to arrive
+    // has been called for the new project. waitForPrimary resolves
+    // immediately when a primary is already set, otherwise waits briefly
     // rather than crashing on an empty map.
-    let primary = remoteStates.getPrimary()
+    let primary: RemoteState
 
-    if (!primary) {
-      try {
-        primary = await remoteStates.waitForPrimary()
-      } catch (err) {
-        debug('iframe request timed out waiting for primary remote state: %s', (err as Error).message)
-        res.status(503).type('text').send('Cypress project not ready')
+    try {
+      primary = await remoteStates.waitForPrimary()
+    } catch (err) {
+      debug('iframe request timed out waiting for primary remote state: %s', (err as Error).message)
+      res.status(503).type('text').send('Cypress project not ready')
 
-        return
-      }
+      return
     }
 
     debug('primary remote state', primary)
