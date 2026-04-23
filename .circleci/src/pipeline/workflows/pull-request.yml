@@ -13,10 +13,6 @@ when:
             value: << pipeline.git.branch >>
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
-    # TEMP: skip the pull-request workflow on this branch so only the windows
-    # workflow runs, to verify the Chrome install retry. Revert before merge.
-    - not:
-        equal: [ 'mschile/deflake-windows-chrome-install', << pipeline.git.branch >> ]
 
 jobs:
   - node_modules_install:
