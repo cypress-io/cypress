@@ -534,11 +534,11 @@ describe('lib/cypress', () => {
 
       return cypress.start([
         `--run-project=${this.todosPath}`,
-        `--spec=${relativePath}/tests/test2.coffee`,
+        `--spec=${relativePath}/tests/test2.js`,
       ])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {
-          url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee',
+          url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.js',
         })
 
         this.expectExitWith(0)
@@ -555,25 +555,25 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by specific absolute spec and exits with status 0', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
+      return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.js`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.js' })
         this.expectExitWith(0)
       })
     })
 
     it('runs project by limiting spec files via config.e2e.specPattern string glob pattern', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.coffee"}}`])
+      return cypress.start([`--run-project=${this.todosPath}`, `--config={"e2e":{"specPattern":"${this.todosPath}/tests/test2.js"}}`])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.js' })
         this.expectExitWith(0)
       })
     })
 
     it('runs project by limiting spec files via config.e2e.specPattern as a JSON array of string glob patterns', function () {
-      return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.coffee","**/test1.js"]}}'])
+      return cypress.start([`--run-project=${this.todosPath}`, '--config={"e2e":{"specPattern":["**/test2.js","**/test1.js"]}}'])
       .then(() => {
-        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.coffee' })
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test2.js' })
       }).then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:8888/__/#/specs/runner?file=tests/test1.js' })
         this.expectExitWith(0)
@@ -940,7 +940,7 @@ describe('lib/cypress', () => {
       })
 
       it('does not save project state', function () {
-        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
+        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.js`])
         .then(() => {
           this.expectExitWith(0)
 

@@ -545,13 +545,13 @@ describe('lib/config', () => {
 
       context('specPattern', () => {
         it('passes if a string', function () {
-          this.setup({ e2e: { supportFile: false, specPattern: '**/*.coffee' } })
+          this.setup({ e2e: { supportFile: false, specPattern: '**/*.spec.js' } })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ e2e: { supportFile: false, specPattern: ['**/*.coffee'] } })
+          this.setup({ e2e: { supportFile: false, specPattern: ['**/*.spec.js'] } })
 
           return this.expectValidationPasses()
         })

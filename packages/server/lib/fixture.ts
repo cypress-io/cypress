@@ -1,7 +1,6 @@
 import path from 'path'
 import check from 'syntax-error'
 import debugModule from 'debug'
-import coffee from 'coffeescript'
 import jsonParseBetterErrors from 'json-parse-even-better-errors'
 import stripAnsi from 'strip-ansi'
 import * as errors from './errors'
@@ -14,7 +13,6 @@ const debug = debugModule('cypress:server:fixture')
 const extensions = [
   '.json',
   '.js',
-  '.coffee',
   '.html',
   '.txt',
   '.csv',
@@ -133,7 +131,6 @@ async function parseFileByExtension (p: string, fixture: string, ext: string, op
   switch (ext) {
     case '.json': return parseJson(p, fixture)
     case '.js': return parseJs(p, fixture)
-    case '.coffee': return parseCoffee(p, fixture)
     case '.html': return parseHtml(p, fixture)
     case '.png': case '.jpg': case '.jpeg': case '.gif': case '.tif': case '.tiff': case '.zip':
       return parse(p, fixture, options.encoding)
@@ -173,24 +170,6 @@ async function parseJs (p: string, fixture: string) {
     return obj
   } catch (err) {
     throw new Error(`'${fixture}' is not a valid JavaScript object.\n${err.toString()}`)
-  }
-}
-
-async function parseCoffee (p: string, fixture: string) {
-  const dc = process.env.NODE_DISABLE_COLORS
-
-  process.env.NODE_DISABLE_COLORS = '0'
-
-  try {
-    const content = await fs.readFileAsync(p, 'utf8')
-
-    const str = coffee.compile(content, { bare: true })
-
-    return eval(str as string)
-  } catch (err) {
-    throw new Error(`'${fixture} is not a valid CoffeeScript object.\n${err.toString()}`)
-  } finally {
-    process.env.NODE_DISABLE_COLORS = dc
   }
 }
 

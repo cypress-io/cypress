@@ -5,6 +5,7 @@
 
 - Upgraded bundled Node.js version from `22.19.0` to `24.14.0`. Addressed in [#33494](https://github.com/cypress-io/cypress/pull/33494).
 - Removed Next.js 14 support for component testing. Next.js 15.0.4+ or 16+ is now required. Addressed in [#33641](https://github.com/cypress-io/cypress/pull/33641).
+- Removed built-in CoffeeScript support. The default `@cypress/webpack-batteries-included-preprocessor` no longer bundles `coffee-loader` or `coffeescript`. Use JavaScript/TypeScript for specs, fixtures, and support files, or add CoffeeScript to your own webpack config via `@cypress/webpack-preprocessor`. Addressed in [#33654](https://github.com/cypress-io/cypress/pull/33654).
 
 **Dependency Updates:**
 
