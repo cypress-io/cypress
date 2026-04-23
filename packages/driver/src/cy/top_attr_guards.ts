@@ -5,10 +5,28 @@ const invalidTargets = new Set(['_parent', '_top'])
 export type GuardedEvent = Event & {target: HTMLFormElement | HTMLAnchorElement}
 
 /**
+ * A `<base target>` is inherited by every untargeted <a> / <form>, so a value of
+ * `_top` or `_parent` will navigate the AUT out of the Cypress iframe even if
+ * the individual element's `target` attribute is empty. The proxy's HTML rewriter
+ * handles this at load time; this guard backstops dynamically inserted or
+ * post-load-modified <base> tags that bypass the rewriter.
+ */
+function neutralizeUnsafeBaseTarget (doc: Document | null | undefined) {
+  if (!doc) return
+
+  const base = doc.querySelector('base[target]') as HTMLBaseElement | null
+
+  if (base && invalidTargets.has(base.target)) {
+    base.removeAttribute('target')
+  }
+}
+
+/**
  * Guard against target being set to something other than blank or self, while trying
  * to preserve the appearance of having the correct target value.
  */
 export function handleInvalidEventTarget (e: GuardedEvent) {
+  neutralizeUnsafeBaseTarget(e.target?.ownerDocument)
   handleInvalidTarget(e.target)
 }
 
@@ -23,6 +41,7 @@ export type GuardedAnchorEvent = Event & {target: HTMLAnchorElement}
  */
 export function handleInvalidAnchorTarget (e: GuardedAnchorEvent) {
   if (e.target.tagName === 'A') {
+    neutralizeUnsafeBaseTarget(e.target.ownerDocument)
     handleInvalidTarget(e.target)
   }
 }

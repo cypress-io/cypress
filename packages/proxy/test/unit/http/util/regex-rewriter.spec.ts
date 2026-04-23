@@ -499,6 +499,56 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 `)
     })
 
+    describe('<base> target stripping', () => {
+      it('strips target="_top"', () => {
+        expect(regexRewriter.strip('<base href="/" target="_top">')).toEqual('<base href="/">')
+      })
+
+      it('strips target="_parent"', () => {
+        expect(regexRewriter.strip('<base target="_parent">')).toEqual('<base>')
+      })
+
+      it('strips target when attribute comes before other attrs', () => {
+        expect(regexRewriter.strip('<base target="_top" href="/">')).toEqual('<base href="/">')
+      })
+
+      it('strips target with single quotes', () => {
+        expect(regexRewriter.strip(`<base target='_top'>`)).toEqual('<base>')
+      })
+
+      it('strips unquoted target', () => {
+        expect(regexRewriter.strip('<base target=_top>')).toEqual('<base>')
+      })
+
+      it('strips target case-insensitively', () => {
+        expect(regexRewriter.strip('<base target="_TOP">')).toEqual('<base>')
+      })
+
+      it('preserves target="_blank"', () => {
+        const html = '<base target="_blank">'
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
+
+      it('preserves target="_self"', () => {
+        const html = '<base target="_self">'
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
+
+      it('preserves <base> with no target', () => {
+        const html = '<base href="/">'
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
+
+      it('does not match target=_topfoo', () => {
+        const html = '<base target=_topfoo>'
+
+        expect(regexRewriter.strip(html)).toEqual(html)
+      })
+    })
+
     describe('libs', () => {
       // go out and download all of these libs and ensure
       // that we can run them through the security strip
