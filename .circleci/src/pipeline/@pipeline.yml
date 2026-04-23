@@ -176,6 +176,30 @@ commands:
       - attach_workspace:
           at: ~/
 
+  # Work around the CircleCI Windows save_cache bug that corrupts @-named
+  # packages (https://github.com/cypress-io/cypress/issues/30343):
+  # reverse patch-package patches in every workspace that has a patches/
+  # directory so yarn's integrity check doesn't flag patched files as
+  # modified, then run `yarn install --check-files` so yarn re-extracts
+  # only genuinely missing/corrupt packages and the postinstall re-applies
+  # patches cleanly. Wrap the reverse in `|| true` — if a cache-corrupted
+  # package can't be reversed, --check-files will re-extract it anyway.
+  #
+  # Use shell globs (not `find`) because on Windows bash, `find` can
+  # resolve to Windows FIND.EXE. The glob `packages/*/patches` naturally
+  # excludes the 3-deep packages/runner/injection/patches which is not
+  # in patch-package format.
+  windows_reinstall_deps:
+    steps:
+      - run:
+          name: reinstall dependencies to work around cache issue (Windows only)
+          command: |
+            for p in patches cli/patches packages/*/patches; do
+              [ -d "$p" ] || continue
+              (cd "$(dirname "$p")" && npx patch-package --reverse) || true
+            done
+            yarn install --check-files
+
   prepare-modules-cache:
     parameters:
       dont-move:
@@ -750,22 +774,7 @@ commands:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: |
-                  # Un-apply patches in every workspace that has a patches/
-                  # directory so yarn's integrity check doesn't flag
-                  # patch-package-modified files as modified and pull them
-                  # into an inconsistent state when --check-files re-extracts.
-                  # Tolerate partial failure — --check-files + postinstall
-                  # will reinstall and re-patch anything left inconsistent.
-                  # Use shell globs (not `find`) because on Windows bash,
-                  # `find` can resolve to Windows FIND.EXE.
-                  for p in patches cli/patches packages/*/patches; do
-                    [ -d "$p" ] || continue
-                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
-                  done
-                  yarn install --check-files
+            - windows_reinstall_deps
       - install-browsers:
           install-chrome: true
           install-firefox: true
@@ -1509,22 +1518,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: |
-                  # Un-apply patches in every workspace that has a patches/
-                  # directory so yarn's integrity check doesn't flag
-                  # patch-package-modified files as modified and pull them
-                  # into an inconsistent state when --check-files re-extracts.
-                  # Tolerate partial failure — --check-files + postinstall
-                  # will reinstall and re-patch anything left inconsistent.
-                  # Use shell globs (not `find`) because on Windows bash,
-                  # `find` can resolve to Windows FIND.EXE.
-                  for p in patches cli/patches packages/*/patches; do
-                    [ -d "$p" ] || continue
-                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
-                  done
-                  yarn install --check-files
+            - windows_reinstall_deps
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -1675,22 +1669,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: |
-                  # Un-apply patches in every workspace that has a patches/
-                  # directory so yarn's integrity check doesn't flag
-                  # patch-package-modified files as modified and pull them
-                  # into an inconsistent state when --check-files re-extracts.
-                  # Tolerate partial failure — --check-files + postinstall
-                  # will reinstall and re-patch anything left inconsistent.
-                  # Use shell globs (not `find`) because on Windows bash,
-                  # `find` can resolve to Windows FIND.EXE.
-                  for p in patches cli/patches packages/*/patches; do
-                    [ -d "$p" ] || continue
-                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
-                  done
-                  yarn install --check-files
+            - windows_reinstall_deps
             # @tooling/v8-snapshot specs require('electron') at load time,
             # which reads node_modules/electron/path.txt. That file is
             # occasionally missing after the Windows yarn install above,
@@ -1753,22 +1732,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: |
-                  # Un-apply patches in every workspace that has a patches/
-                  # directory so yarn's integrity check doesn't flag
-                  # patch-package-modified files as modified and pull them
-                  # into an inconsistent state when --check-files re-extracts.
-                  # Tolerate partial failure — --check-files + postinstall
-                  # will reinstall and re-patch anything left inconsistent.
-                  # Use shell globs (not `find`) because on Windows bash,
-                  # `find` can resolve to Windows FIND.EXE.
-                  for p in patches cli/patches packages/*/patches; do
-                    [ -d "$p" ] || continue
-                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
-                  done
-                  yarn install --check-files
+            - windows_reinstall_deps
       - run:
           name: Driver memory tests in Electron
           environment:
@@ -1912,22 +1876,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: |
-                  # Un-apply patches in every workspace that has a patches/
-                  # directory so yarn's integrity check doesn't flag
-                  # patch-package-modified files as modified and pull them
-                  # into an inconsistent state when --check-files re-extracts.
-                  # Tolerate partial failure — --check-files + postinstall
-                  # will reinstall and re-patch anything left inconsistent.
-                  # Use shell globs (not `find`) because on Windows bash,
-                  # `find` can resolve to Windows FIND.EXE.
-                  for p in patches cli/patches packages/*/patches; do
-                    [ -d "$p" ] || continue
-                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
-                  done
-                  yarn install --check-files
+            - windows_reinstall_deps
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
@@ -2533,22 +2482,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: |
-                  # Un-apply patches in every workspace that has a patches/
-                  # directory so yarn's integrity check doesn't flag
-                  # patch-package-modified files as modified and pull them
-                  # into an inconsistent state when --check-files re-extracts.
-                  # Tolerate partial failure — --check-files + postinstall
-                  # will reinstall and re-patch anything left inconsistent.
-                  # Use shell globs (not `find`) because on Windows bash,
-                  # `find` can resolve to Windows FIND.EXE.
-                  for p in patches cli/patches packages/*/patches; do
-                    [ -d "$p" ] || continue
-                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
-                  done
-                  yarn install --check-files
+            - windows_reinstall_deps
       - check-if-binary-exists
       - build-and-package-binary
       - build-cypress-npm-package:
