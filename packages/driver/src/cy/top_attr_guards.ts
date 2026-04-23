@@ -30,7 +30,6 @@ function neutralizeUnsafeBaseTarget (doc: Document | null | undefined) {
  * to preserve the appearance of having the correct target value.
  */
 export function handleInvalidEventTarget (e: GuardedEvent) {
-  neutralizeUnsafeBaseTarget(e.target?.ownerDocument)
   handleInvalidTarget(e.target)
 }
 
@@ -44,15 +43,17 @@ export type GuardedAnchorEvent = Event & {target: HTMLAnchorElement}
  * @param e
  */
 export function handleInvalidAnchorTarget (e: GuardedAnchorEvent) {
-  // `<base target>` neutralization is document-scoped, so it must run regardless
-  // of which descendant the click landed on (e.g. `<a><img></a>` gives an <img>
-  // target — the anchor-attribute patch below is skipped, but the base fallback
-  // would still navigate out of the AUT frame without this call).
-  neutralizeUnsafeBaseTarget(e.target?.ownerDocument)
-
   if (e.target.tagName === 'A') {
     handleInvalidTarget(e.target)
+
+    return
   }
+
+  // A click on a descendant of an anchor (e.g. `<a><span>`) sets `e.target` to the
+  // descendant rather than the anchor. The navigation still bubbles up to the <a>
+  // and inherits the document's base target, so base-level neutralization must run
+  // independently of the per-element anchor patch.
+  neutralizeUnsafeBaseTarget(e.target?.ownerDocument)
 }
 
 /**
@@ -60,6 +61,12 @@ export function handleInvalidAnchorTarget (e: GuardedAnchorEvent) {
  * to preserve the appearance of having the correct target value.
  */
 export function handleInvalidTarget (el: HTMLFormElement | HTMLAnchorElement) {
+  // Neutralize unsafe `<base target>` before any per-element patching. Every
+  // navigation path — same-origin submit events, cross-origin programmatic
+  // `form.submit()`, anchor clicks — routes through here, so the document-scoped
+  // neutralization lives here to keep all call sites covered.
+  neutralizeUnsafeBaseTarget(el.ownerDocument)
+
   let targetValue = el.target
   let targetSet = el.hasAttribute('target')
 
