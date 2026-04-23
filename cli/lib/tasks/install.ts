@@ -4,7 +4,7 @@ import path from 'path'
 import chalk from 'chalk'
 import Debug from 'debug'
 import { Listr } from 'listr2'
-import type { ListrTaskObject, ListrRendererValue } from 'listr2'
+import type { ListrRendererValue, ListrContext, ListrTaskWrapper } from 'listr2'
 import logSymbols from 'log-symbols'
 import { stripIndent } from 'common-tags'
 import timers from 'timers/promises'
@@ -20,11 +20,23 @@ import { throwFormErrorText, errors } from '../errors'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
 const debug = Debug('cypress:cli')
 
+interface CypressBuildInfo {
+  commitSha: string
+  commitBranch: string
+  commitDate: string
+  stable: boolean
+}
+interface BuildPlatform {
+  arch: string
+  envVarVersion?: string
+  buildInfo?: CypressBuildInfo
+}
+
 function getRenderer (): ListrRendererValue {
   return logger.logLevel() === 'silent' ? 'silent' : 'default'
 }
 
-function _getBinaryUrlFromBuildInfo (version: string, arch: string, { commitSha, commitBranch }: any): string {
+function _getBinaryUrlFromBuildInfo (version: string, arch: string, { commitSha, commitBranch }: { commitSha: string, commitBranch: string }): string {
   const platform = os.platform()
 
   if ((platform === 'win32') && (arch === 'arm64')) {
@@ -80,7 +92,7 @@ const displayCompletionMsg = (): void => {
   logger.log()
 }
 
-const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
+const downloadAndUnzip = ({ version, installDir, downloadDir }: { version: string, installDir: string, downloadDir: string }): Promise<ListrContext> => {
   const progress = {
     throttle: 100,
     onProgress: null,
@@ -116,7 +128,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }: any): any => {
     }),
     {
       title: util.titleize('Finishing Installation'),
-      task: async (ctx: any, task: ListrTaskObject<any>) => {
+      task: async (ctx: any, task: ListrTaskWrapper<any, any>) => {
         const cleanup = async () => {
           debug('removing zip file %s', downloadDestination)
 
@@ -146,7 +158,7 @@ const validateOS = async (): Promise<RegExpMatchArray | null> => {
  * Returns the version to install - either a string like `1.2.3` to be fetched
  * from the download server or a file path or HTTP URL.
  */
-function getVersionOverride (version: string, { arch, envVarVersion, buildInfo }: any): string | undefined {
+function getVersionOverride (version: string, { arch, envVarVersion, buildInfo }: BuildPlatform): string | undefined {
   // let this environment variable reset the binary version we need
   if (envVarVersion) {
     return envVarVersion
@@ -185,7 +197,12 @@ function getEnvVarVersion (): string | undefined {
   return envVarVersion
 }
 
-const start = async (options: any = {}): Promise<any> => {
+interface StartOptions {
+  force?: boolean
+  buildInfo?: CypressBuildInfo
+}
+
+const start = async (options: StartOptions = {}): Promise<ListrContext | void> => {
   debug('installing with options %j', options)
 
   const envVarVersion = getEnvVarVersion()
@@ -246,16 +263,20 @@ const start = async (options: any = {}): Promise<any> => {
 
   try {
     await fs.ensureDir(cacheDir)
-  } catch (err: any) {
-    if (err.code === 'EACCES') {
-      return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
-        Failed to access ${chalk.cyan(cacheDir)}:
+  } catch (err: unknown) {
+    if (err instanceof Error && 'code' in err) {
+      if (err.code === 'EACCES') {
+        return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
+          Failed to access ${chalk.cyan(cacheDir)}:
 
-        ${err.message}
-      `)
+          ${err.message}
+        `)
+      } else {
+        throw err
+      }
     }
 
-    throw err
+    throw new Error('Unknown error', { cause: err })
   }
 
   const binaryPkg = await state.getBinaryPkgAsync(binaryDir)
@@ -369,10 +390,18 @@ const start = async (options: any = {}): Promise<any> => {
   displayCompletionMsg()
 }
 
-const unzipTask = ({ zipFilePath, installDir, progress, renderer }: any): any => {
+const unzipTask = ({ zipFilePath, installDir, progress }: {
+  zipFilePath: string
+  installDir: string
+  progress: {
+    throttle: number
+    onProgress: null | ((percentComplete: number, remaining: number) => void)
+  }
+  renderer: ListrRendererValue
+}) => {
   return {
     title: util.titleize('Unzipping Cypress'),
-    task: async (ctx: any, task: any) => {
+    task: async (ctx: ListrContext, task: ListrTaskWrapper<ListrContext, any>) => {
     // as our unzip progresses indicate the status
       progress.onProgress = progessify(task, 'Unzipping Cypress')
 
