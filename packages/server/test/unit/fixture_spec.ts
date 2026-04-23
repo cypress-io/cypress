@@ -254,44 +254,6 @@ ParseError: Unterminated string constant\
     })
   })
 
-  context('coffee files', () => {
-    it('returns valid coffee object', function () {
-      return fixture.get(this.fixturesFolder, 'valid_coffee_obj.coffee').then((coffeeObj) => {
-        expect(coffeeObj).to.deep.eq({
-          name: 'cypress',
-          users: [],
-        })
-      })
-    })
-
-    it('does not rewrite coffee files', function () {
-      return fixture.get(this.fixturesFolder, 'no_format_coffee.coffee').then(() => {
-        return fs.readFileAsync(`${this.fixturesFolder}/no_format_coffee.coffee`, 'utf8').then((str) => {
-          expect(str).to.eq(`\
-[
-  {id: 1}
-  {id: 2}
-]\
-`)
-        })
-      })
-    })
-
-    it('throws on bad coffee object', function () {
-      return fixture.get(this.fixturesFolder, 'bad_coffee.coffee')
-      .then(() => {
-        throw new Error('should have failed but did not')
-      }).catch((err) => {
-        expect(err.message).to.eq(`\
-'bad_coffee.coffee is not a valid CoffeeScript object.
-[stdin]:1:1: error: missing }
-{
-^\
-`)
-      })
-    })
-  })
-
   context('html files', () => {
     it('returns html as a string', function () {
       return fixture.get(this.fixturesFolder, 'index.html').then((index) => {
@@ -489,14 +451,6 @@ John,Chef,1982
       return fixture.get(this.fixturesFolder, 'trailing_new_line.js').then((str) => {
         return fs.readFileAsync(`${this.fixturesFolder}/trailing_new_line.js`, 'utf8').then((str2) => {
           expect(str2).to.eq('{foo: "bar"}\n')
-        })
-      })
-    })
-
-    it('does not remove trailing new lines on .coffee', function () {
-      return fixture.get(this.fixturesFolder, 'trailing_new_line_coffee.coffee').then((str) => {
-        return fs.readFileAsync(`${this.fixturesFolder}/trailing_new_line_coffee.coffee`, 'utf8').then((str2) => {
-          expect(str2).to.eq('{ foo: "bar" }\n')
         })
       })
     })

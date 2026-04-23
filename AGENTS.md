@@ -177,7 +177,7 @@ yarn clean-deps && yarn
 - **`@cypress/webpack-dev-server`** — Webpack Dev Server launcher for component testing.
 - **`@cypress/vite-dev-server`** — Vite Dev Server launcher for component testing.
 - **`@cypress/webpack-preprocessor`** — Webpack preprocessor for bundling test spec files.
-- **`@cypress/webpack-batteries-included-preprocessor`** — Webpack preprocessor with batteries included (TypeScript, CoffeeScript, etc.).
+- **`@cypress/webpack-batteries-included-preprocessor`** — Webpack preprocessor with batteries included (TypeScript, etc.).
 - **`@cypress/vite-plugin-cypress-esm`** — Vite plugin for mutable ESM modules in browser tests.
 
 ### Plugins & Dev Tooling (published via `npm/`)

@@ -12,7 +12,7 @@ import pluralize from 'pluralize'
 // @ts-ignore
 import confirm from 'inquirer-confirm'
 
-// ignore TS errors - we are importing from CoffeeScript files
+// ignore TS errors - legacy JS util without types
 // @ts-ignore
 import uploadUtils from './util/upload'
 

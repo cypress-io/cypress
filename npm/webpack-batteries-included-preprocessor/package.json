@@ -1,17 +1,15 @@
 {
   "name": "@cypress/webpack-batteries-included-preprocessor",
   "version": "0.0.0-development",
-  "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript",
+  "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features and TypeScript",
   "private": false,
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc || echo 'built, with errors'",
     "check-ts": "tsc --noEmit",
-    "lint": "eslint",
+    "lint": "eslint . --no-warn-ignored",
     "test": "vitest run",
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0"
-
   },
   "dependencies": {
     "@babel/core": "^7.28.0",
@@ -24,14 +22,12 @@
     "babel-loader": "^10.0.0",
     "babel-plugin-add-module-exports": "^1.0.2",
     "buffer": "^6.0.3",
-    "coffee-loader": "^4.0.0",
-    "coffeescript": "2.6.0",
     "debug": "^4.3.4",
     "get-tsconfig": "^4.10.0",
-    "semver": "^7.7.3",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
+    "semver": "^7.7.3",
     "stream-browserify": "^3.0.0",
     "ts-loader": "9.5.2",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
@@ -56,6 +52,7 @@
   "files": [
     "dist/*"
   ],
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -70,7 +67,7 @@
     "webpack"
   ],
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix"
+    "**/*.{js,jsx,ts,tsx,json}": "eslint --fix --no-warn-ignored"
   },
   "publishConfig": {
     "access": "public"

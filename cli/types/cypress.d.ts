@@ -413,9 +413,9 @@ declare namespace Cypress {
      * ```
      * Cypress.spec
      * // {
-     * //  name: "config_passing_spec.coffee",
-     * //  relative: "cypress/integration/config_passing_spec.coffee",
-     * //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
+     * //  name: "config_passing.cy.ts",
+     * //  relative: "cypress/e2e/config_passing.cy.ts",
+     * //  absolute: "/users/smith/projects/web/cypress/e2e/config_passing.cy.ts"
      * //  specType: "integration"
      * // }
      * ```
@@ -6457,7 +6457,7 @@ declare namespace Cypress {
     (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.Test) => void): Cypress
   }
 
-  // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS
+  // $CommandQueue - a lot to type; implementation is not fully reflected here
   interface CommandQueue extends ObjectLike {
     logs(filters: any): any
     add(obj: any): any

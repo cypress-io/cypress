@@ -31,18 +31,18 @@ describe('lib/project_utils', () => {
     })
 
     it('returns fully qualified url on absolute path to spec', function () {
-      const todosSpec = path.join(todosPath, 'tests/sub/sub_test.coffee')
+      const todosSpec = path.join(todosPath, 'tests/sub/sub_test.js')
       const str = getSpecUrl({
         ...defaultProps,
         spec: {
           ...defaultProps.spec,
-          relative: 'tests/sub/sub_test.coffee',
-          name: 'tests/sub/sub_test.coffee',
+          relative: 'tests/sub/sub_test.js',
+          name: 'tests/sub/sub_test.js',
           absolute: todosSpec,
         },
       })
 
-      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=tests/sub/sub_test.coffee')
+      expect(str).to.eq('http://localhost:8888/__/#/specs/runner?file=tests/sub/sub_test.js')
     })
 
     it('escapses %, &', function () {

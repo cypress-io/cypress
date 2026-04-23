@@ -45,7 +45,6 @@
     "chrome-remote-interface": "0.33.3",
     "ci-info": "^4.1.0",
     "cli-table3": "0.6.1",
-    "coffeescript": "2.6.0",
     "color-string": "1.5.5",
     "command-exists": "1.2.9",
     "common-tags": "1.8.0",
