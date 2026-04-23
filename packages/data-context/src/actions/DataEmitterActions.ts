@@ -121,6 +121,15 @@ abstract class DataEmitterEvents {
   }
 
   /**
+   * Emitted when the in-progress spec run transitions state
+   * (starting → running → finished / errored). Drives the `cypress inspect`
+   * CLI's `--wait` polling loop and the `SPEC_RUNNING` appRoute.
+   */
+  runStateChange () {
+    this._emit('runStateChange')
+  }
+
+  /**
    * When we want to update the cache with known values from the server, without
    * triggering a full refresh, we can send down a specific fragment / data to update
    */

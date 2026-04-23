@@ -451,6 +451,8 @@ export class ProjectLifecycleManager {
       s.packageManager = packageManagerUsed
     })
 
+    this.ctx.actions.servers.refreshInstanceDescriptor()
+
     this.verifyProjectRoot(projectRoot)
 
     if (this.readyToInitialize(this._projectRoot)) {

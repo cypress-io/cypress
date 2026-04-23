@@ -34,6 +34,7 @@ interface ServersDataShape {
   inspect?: {
     token: string
     descriptorPath: string
+    startedAt: string
   }
 }
 
@@ -102,6 +103,15 @@ interface RecordingInfo {
   instanceId?: string
 }
 
+export type ActiveRunStatus = 'starting' | 'running' | 'finished'
+
+export interface ActiveRunShape {
+  specPath: string
+  startedAt: string
+  endedAt: string | null
+  status: ActiveRunStatus
+}
+
 export interface CoreDataShape {
   cliBrowser: string | null
   cliTestingType: string | null
@@ -136,6 +146,7 @@ export interface CoreDataShape {
   studioLifecycleManager?: StudioLifecycleManagerShape
   cyPromptLifecycleManager?: CyPromptLifecycleManagerShape
   currentRecordingInfo: RecordingInfo
+  activeRun: ActiveRunShape | null
 }
 
 /**
@@ -203,6 +214,7 @@ export function makeCoreData (modeOptions: Partial<AllModeOptions> = {}): CoreDa
     didBrowserPreviouslyHaveUnexpectedExit: false,
     studioLifecycleManager: undefined,
     currentRecordingInfo: {},
+    activeRun: null,
   }
 
   async function machineId (): Promise<string | null> {

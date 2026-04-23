@@ -121,6 +121,8 @@ export class ProjectActions {
       d.currentRecordingInfo = {}
     })
 
+    this.ctx.actions.servers.refreshInstanceDescriptor()
+
     // Also clear any data associated with the linked cloud project
     this.ctx.actions.cloudProject.clearCloudProject()
 
@@ -632,6 +634,11 @@ export class ProjectActions {
       }
 
       const browser = this.ctx.coreData.activeBrowser!
+
+      // Seed `activeRun` so CLI `--wait` callers have a non-null state to
+      // poll against immediately — the driver's `run:start` bridge flips
+      // status to 'running' once the browser actually begins executing.
+      this.ctx.actions.runState.recordLaunching(spec.absolute)
 
       // Hooray, everything looks good and we're all set up
       // Try to launch the requested spec by navigating to it in the browser

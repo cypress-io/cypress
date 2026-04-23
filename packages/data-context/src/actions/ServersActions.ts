@@ -58,13 +58,44 @@ export class ServersActions {
    * running `cypress open` instances on the local machine.
    *
    * File lives at `{runningDir()}/{pid}.json` with mode 0o600, parent dir 0o700.
-   * Stores `{ token, descriptorPath }` on `coreData.servers.inspect` so the
-   * GraphQL middleware can authenticate inspect requests.
+   * Stores `{ token, descriptorPath, startedAt }` on `coreData.servers.inspect`
+   * so the GraphQL middleware can authenticate inspect requests and subsequent
+   * refreshes can preserve identity.
    *
    * Failures here are intentionally non-fatal — the caller should log and move on.
    */
   writeInstanceDescriptor () {
     const token = crypto.randomBytes(32).toString('hex')
+    const startedAt = new Date().toISOString()
+
+    this._writeDescriptor(token, startedAt)
+    this._registerExitHandlers()
+  }
+
+  /**
+   * Re-emit the descriptor file with updated state from `coreData`, preserving
+   * the `token` and `startedAt` minted by the initial `writeInstanceDescriptor`.
+   *
+   * Used when fields baked into the descriptor (currently `projectRoot`/
+   * `projectHash`) change after boot — notably when the user selects a project
+   * from Launchpad in `--global` mode, or returns to Launchpad.
+   *
+   * No-op if the initial descriptor hasn't been written yet. Callers that fire
+   * during early DataContext construction (before the GraphQL server is
+   * listening) will therefore be safely ignored; the eventual boot-time write
+   * is authoritative.
+   */
+  refreshInstanceDescriptor () {
+    const inspect = this.ctx.coreData.servers.inspect
+
+    if (!inspect) {
+      return
+    }
+
+    this._writeDescriptor(inspect.token, inspect.startedAt)
+  }
+
+  private _writeDescriptor (token: string, startedAt: string) {
     const dir = runningDir()
     const pid = process.pid
     const filePath = descriptorFilePath(pid)
@@ -91,7 +122,7 @@ export class ServersActions {
         ? crypto.createHash('md5').update(projectRoot).digest('hex')
         : null,
       cypressVersion: pkg.version,
-      startedAt: new Date().toISOString(),
+      startedAt,
     }
 
     // eslint-disable-next-line no-restricted-syntax
@@ -106,10 +137,8 @@ export class ServersActions {
     }
 
     this.ctx.update((d) => {
-      d.servers.inspect = { token, descriptorPath: filePath }
+      d.servers.inspect = { token, descriptorPath: filePath, startedAt }
     })
-
-    this._registerExitHandlers()
 
     debug('wrote instance descriptor at %s', filePath)
   }

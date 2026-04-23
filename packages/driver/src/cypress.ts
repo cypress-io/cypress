@@ -540,7 +540,7 @@ class $Cypress {
 
         // mocha runner has finished running the tests
         // TODO: it would be nice to await this emit before preceding.
-        this.emit('run:end')
+        this.emit('run:end', args[0])
 
         this.maybeEmitCypressInCypress('mocha', 'end', args[0])
 

@@ -150,7 +150,7 @@ describe('ServersActions — instance descriptor', () => {
     expect(stat.mode & 0o777).toBe(0o700)
   })
 
-  it('populates coreData.servers.inspect with { token, descriptorPath }', () => {
+  it('populates coreData.servers.inspect with { token, descriptorPath, startedAt }', () => {
     stubPid(66666)
     const ctx = buildCtx('/home/me/inspect-state')
 
@@ -161,6 +161,68 @@ describe('ServersActions — instance descriptor', () => {
     expect(inspect).toBeDefined()
     expect(inspect?.token).toMatch(/^[0-9a-f]{64}$/)
     expect(inspect?.descriptorPath).toBe(path.join(runningPath, '66666.json'))
+    expect(inspect?.startedAt).toBeDefined()
+    expect(new Date(inspect!.startedAt).toISOString()).toBe(inspect!.startedAt)
+  })
+
+  it('refreshInstanceDescriptor preserves token and startedAt while updating projectRoot', () => {
+    stubPid(202020)
+    const ctx = buildCtx(null)
+    const actions = new ServersActions(ctx)
+
+    actions.writeInstanceDescriptor()
+
+    const filePath = path.join(runningPath, '202020.json')
+    const initial = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+
+    expect(initial.projectRoot).toBeNull()
+    expect(initial.projectHash).toBeNull()
+
+    // Simulate the user picking a project from Launchpad.
+    ctx.update((d) => {
+      d.currentProject = '/home/me/picked'
+    })
+
+    actions.refreshInstanceDescriptor()
+
+    const refreshed = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+
+    expect(refreshed.token).toBe(initial.token)
+    expect(refreshed.startedAt).toBe(initial.startedAt)
+    expect(refreshed.projectRoot).toBe('/home/me/picked')
+    expect(refreshed.projectHash).toBe(crypto.createHash('md5').update('/home/me/picked').digest('hex'))
+    expect(ctx.coreData.servers.inspect?.token).toBe(initial.token)
+    expect(ctx.coreData.servers.inspect?.startedAt).toBe(initial.startedAt)
+  })
+
+  it('refreshInstanceDescriptor clears projectRoot when currentProject returns to null', () => {
+    stubPid(212121)
+    const ctx = buildCtx('/home/me/will-clear')
+    const actions = new ServersActions(ctx)
+
+    actions.writeInstanceDescriptor()
+
+    ctx.update((d) => {
+      d.currentProject = null
+    })
+
+    actions.refreshInstanceDescriptor()
+
+    const refreshed = JSON.parse(fs.readFileSync(path.join(runningPath, '212121.json'), 'utf8'))
+
+    expect(refreshed.projectRoot).toBeNull()
+    expect(refreshed.projectHash).toBeNull()
+  })
+
+  it('refreshInstanceDescriptor is a no-op when the initial descriptor has not been written', () => {
+    stubPid(222222)
+    const ctx = buildCtx('/home/me/no-initial')
+    const actions = new ServersActions(ctx)
+
+    actions.refreshInstanceDescriptor()
+
+    expect(fs.existsSync(path.join(runningPath, '222222.json'))).toBe(false)
+    expect(ctx.coreData.servers.inspect).toBeUndefined()
   })
 
   it('removeInstanceDescriptor deletes the file', () => {

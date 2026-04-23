@@ -61,6 +61,39 @@ describe('deriveAppRoute', () => {
 
     expect(deriveAppRoute(coreData)).toEqual('SPEC_LIST')
   })
+
+  it('returns SPEC_RUNNING when an activeRun is in flight', () => {
+    const coreData = baseCoreData()
+
+    coreData.currentProject = '/some/project'
+    coreData.currentTestingType = 'e2e'
+    coreData.activeBrowser = { name: 'chrome' } as any
+    coreData.activeRun = {
+      specPath: '/some/project/cypress/e2e/foo.cy.ts',
+      startedAt: '2026-04-22T00:00:00.000Z',
+      endedAt: null,
+      status: 'running',
+      stats: null,
+    }
+
+    expect(deriveAppRoute(coreData)).toEqual('SPEC_RUNNING')
+  })
+
+  it('falls through to SPEC_LIST once activeRun reaches a terminal status', () => {
+    const coreData = baseCoreData()
+
+    coreData.currentProject = '/some/project'
+    coreData.currentTestingType = 'e2e'
+    coreData.activeBrowser = { name: 'chrome' } as any
+    coreData.activeRun = {
+      specPath: '/some/project/cypress/e2e/foo.cy.ts',
+      startedAt: '2026-04-22T00:00:00.000Z',
+      endedAt: '2026-04-22T00:00:10.000Z',
+      status: 'finished',
+    }
+
+    expect(deriveAppRoute(coreData)).toEqual('SPEC_LIST')
+  })
 })
 
 describe('Query.inspectSnapshot', () => {
@@ -207,17 +240,63 @@ describe('Query.inspectSnapshot', () => {
     })
   })
 
-  it('activeRun is always null in Phase 0', async () => {
-    ctx.update((d) => {
-      d.currentProject = '/path/to/project'
-      d.currentTestingType = 'e2e'
-      d.activeBrowser = foundBrowserChrome
+  describe('activeRun', () => {
+    it('returns null when no run has been launched', async () => {
+      ctx.update((d) => {
+        d.currentProject = '/path/to/project'
+        d.currentTestingType = 'e2e'
+        d.activeBrowser = foundBrowserChrome
+      })
+
+      const result = await executeQuery(`{ inspectSnapshot { activeRun { specPath status } } }`)
+
+      expect(result.errors).toBeUndefined()
+      expect((result.data?.inspectSnapshot as any).activeRun).toBeNull()
     })
 
-    const result = await executeQuery(`{ inspectSnapshot { activeRun { specPath status } } }`)
+    it('returns the running spec while a run is in flight', async () => {
+      ctx.update((d) => {
+        d.currentProject = '/path/to/project'
+        d.currentTestingType = 'e2e'
+        d.activeBrowser = foundBrowserChrome
+        d.activeRun = {
+          specPath: '/path/to/project/foo.cy.ts',
+          startedAt: '2026-04-22T00:00:00.000Z',
+          endedAt: null,
+          status: 'running',
+        }
+      })
 
-    expect(result.errors).toBeUndefined()
-    expect((result.data?.inspectSnapshot as any).activeRun).toBeNull()
+      const result = await executeQuery(`{ inspectSnapshot { activeRun { specPath status } } }`)
+
+      expect(result.errors).toBeUndefined()
+      expect((result.data?.inspectSnapshot as any).activeRun).toEqual({
+        specPath: '/path/to/project/foo.cy.ts',
+        status: 'running',
+      })
+    })
+
+    it('surfaces the finished status once a run completes', async () => {
+      ctx.update((d) => {
+        d.currentProject = '/path/to/project'
+        d.currentTestingType = 'e2e'
+        d.activeBrowser = foundBrowserChrome
+        d.activeRun = {
+          specPath: '/path/to/project/foo.cy.ts',
+          startedAt: '2026-04-22T00:00:00.000Z',
+          endedAt: '2026-04-22T00:00:10.000Z',
+          status: 'finished',
+        }
+      })
+
+      const result = await executeQuery(`{ inspectSnapshot { activeRun { specPath status } } }`)
+
+      expect(result.errors).toBeUndefined()
+      expect((result.data?.inspectSnapshot as any).activeRun).toEqual({
+        specPath: '/path/to/project/foo.cy.ts',
+        status: 'finished',
+      })
+    })
   })
 
   describe('appRoute', () => {

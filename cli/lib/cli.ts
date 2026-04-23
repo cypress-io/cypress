@@ -591,15 +591,43 @@ const cliModule = {
     .option('--json', 'Output JSON instead of human-readable text')
     .option('--instance <selector>', 'Select an instance by pid or projectRoot substring (when multiple are running)')
     .option('--no-relaunch', 'For `switch`: update testing type without relaunching the browser')
-    .option('--timeout <ms>', 'For `switch`: milliseconds to wait for the relaunch to settle (default 30000)', coerceAnyStringToInt)
+    .option('--wait', 'For `run`: block until the spec finishes (exits 0 on pass, 1 on fail, 124 on timeout)')
+    .option('--timeout <ms>', 'For `switch` / `run --wait` / `browser open|close` / `project open|clear`: milliseconds to wait before giving up (default 30000, 120000 for run)', coerceAnyStringToInt)
     .action(async function (this: any, opts: any, args: string[]) {
-      const [command = 'list', positional] = args || []
+      const [command = 'list', positional, subPositional] = args || []
 
-      if (!_.includes(['list', 'status', 'specs', 'run', 'switch'], command)) {
+      const topLevel = ['list', 'status', 'specs', 'run', 'switch', 'browser', 'project']
+
+      if (!_.includes(topLevel, command)) {
         unknownOption.call(this, `inspect ${command}`, 'command')
       }
 
-      if (command === 'run' || command === 'switch') {
+      // `browser` and `project` are grouping commands with their own nested
+      // actions. Validate the sub-action up-front so unknown values fail
+      // fast with a consistent error shape.
+      if (command === 'browser') {
+        const browserActions = ['list', 'open', 'close']
+        const action = positional || 'list'
+
+        if (!_.includes(browserActions, action)) {
+          unknownOption.call(this, `inspect browser ${action}`, 'command')
+        }
+      }
+
+      if (command === 'project') {
+        const projectActions = ['list', 'open', 'add', 'clear']
+        const action = positional || 'list'
+
+        if (!_.includes(projectActions, action)) {
+          unknownOption.call(this, `inspect project ${action}`, 'command')
+        }
+      }
+
+      const isBrowserOpenOrClose = command === 'browser' && (positional === 'open' || positional === 'close')
+      const isProjectTimed = command === 'project' && (positional === 'open' || positional === 'clear')
+      const needsTimeout = command === 'run' || command === 'switch' || isBrowserOpenOrClose || isProjectTimed
+
+      if (needsTimeout) {
         if (opts.timeout !== undefined && (Number.isNaN(opts.timeout) || opts.timeout <= 0)) {
           logger.error()
           logger.error('  error: --timeout must be a positive integer (milliseconds)')
@@ -618,6 +646,28 @@ const cliModule = {
           const noRelaunch = opts.relaunch === false
 
           await inspect.switch({ ...opts, mode: positional, noRelaunch })
+        } else if (command === 'browser') {
+          const action = positional || 'list'
+
+          if (action === 'open') {
+            await inspect.browserOpen({ ...opts, name: subPositional })
+          } else if (action === 'close') {
+            await inspect.browserClose(opts)
+          } else {
+            await inspect.browserList(opts)
+          }
+        } else if (command === 'project') {
+          const action = positional || 'list'
+
+          if (action === 'open') {
+            await inspect.projectOpen({ ...opts, path: subPositional })
+          } else if (action === 'add') {
+            await inspect.projectAdd({ ...opts, path: subPositional })
+          } else if (action === 'clear') {
+            await inspect.projectClear(opts)
+          } else {
+            await inspect.projectList(opts)
+          }
         } else {
           await inspect[command as 'list' | 'status' | 'specs'](opts)
         }

@@ -14,6 +14,7 @@ import {
   CodegenActions,
   CloudProjectActions,
   CurrentRecordingActions,
+  RunStateActions,
 } from './actions'
 import { ErrorActions } from './actions/ErrorActions'
 import { EventCollectorActions } from './actions/EventCollectorActions'
@@ -39,6 +40,7 @@ export class DataActions {
   private _notification: NotificationActions
   private _cloudProject: CloudProjectActions
   private _currentRecording: CurrentRecordingActions
+  private _runState: RunStateActions
 
   constructor (private ctx: DataContext) {
     this._error = new ErrorActions(this.ctx)
@@ -59,6 +61,7 @@ export class DataActions {
     this._notification = new NotificationActions(this.ctx)
     this._cloudProject = new CloudProjectActions(this.ctx)
     this._currentRecording = new CurrentRecordingActions(this.ctx)
+    this._runState = new RunStateActions(this.ctx)
   }
 
   get error () {
@@ -131,5 +134,9 @@ export class DataActions {
 
   get currentRecording () {
     return this._currentRecording
+  }
+
+  get runState () {
+    return this._runState
   }
 }

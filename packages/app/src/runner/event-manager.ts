@@ -660,6 +660,22 @@ export class EventManager {
 
     Cypress.on('run:start', async () => {
       hasMochaRunEnded = false
+
+      // Forward run-start to the server in open mode only. The `mocha` socket
+      // channel above (line 47) is driver-gated on `isTextTerminal`, so in
+      // `cypress open` the server has no other way to know a spec is running —
+      // this is the bridge the `cypress inspect` CLI reads via
+      // `inspectSnapshot.activeRun`.
+      if (!Cypress.config('isTextTerminal')) {
+        const spec = Cypress.spec
+
+        this.ws.emit('run:lifecycle', {
+          phase: 'start',
+          specPath: spec?.absolute,
+          startedAt: new Date().toISOString(),
+        })
+      }
+
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
       }
@@ -667,6 +683,17 @@ export class EventManager {
 
     Cypress.on('run:end', async () => {
       hasMochaRunEnded = true
+
+      if (!Cypress.config('isTextTerminal')) {
+        const spec = Cypress.spec
+
+        this.ws.emit('run:lifecycle', {
+          phase: 'end',
+          specPath: spec?.absolute,
+          endedAt: new Date().toISOString(),
+        })
+      }
+
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('end:memory:profiling')
       }

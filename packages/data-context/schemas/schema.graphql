@@ -2,15 +2,20 @@
 ### Do not make changes to this file directly
 
 
-"""A spec run that is currently in progress. Populated in Phase 2."""
+"""
+The most recent spec run for this open-mode instance. While in flight, `status` is `running`; after `run:end` fires it transitions to `finished` and lingers so CLI consumers can poll for completion.
+"""
 type ActiveRun {
-  """Absolute path to the spec that is running."""
+  """When the run ended. Null while `status === running`."""
+  endedAt: DateTime
+
+  """Absolute path to the spec that is running (or just finished)."""
   specPath: String!
 
   """When the run started."""
   startedAt: DateTime!
 
-  """One of 'starting' | 'running' | 'finished' | 'errored'."""
+  """One of 'starting' | 'running' | 'finished'."""
   status: String!
 }
 
@@ -1427,7 +1432,7 @@ type InspectSnapshot {
   activeBrowser: Browser
 
   """
-  An in-progress spec run, if any. Always null until Phase 2 lifecycle wiring lands.
+  An in-progress (or most recently finished) spec run, if any. Null when no spec has been launched in this instance yet.
   """
   activeRun: ActiveRun
 

@@ -20,9 +20,7 @@ export type AppRoute =
  * Derives the high-level AppRoute from the current open-mode core data.
  *
  * Pure function — takes only the data it needs so it is trivially unit-testable
- * without spinning up a DataContext. `SPEC_RUNNING` is reserved for Phase 2 once
- * the run-lifecycle signal lands; today the deepest route we surface is
- * `SPEC_LIST`.
+ * without spinning up a DataContext.
  */
 export function deriveAppRoute (coreData: CoreDataShape): AppRoute {
   if (coreData.diagnostics?.error) {
@@ -41,23 +39,35 @@ export function deriveAppRoute (coreData: CoreDataShape): AppRoute {
     return 'BROWSER_SELECTION'
   }
 
+  // An active run is only `SPEC_RUNNING` while it is still in flight. A
+  // terminal `finished` entry lingers in `activeRun` so the CLI's `--wait`
+  // poll can observe the outcome; the UI has already returned to the spec
+  // list by then, so we fall through to `SPEC_LIST`.
+  if (coreData.activeRun && coreData.activeRun.status === 'running') {
+    return 'SPEC_RUNNING'
+  }
+
   return 'SPEC_LIST'
 }
 
 export const ActiveRun = objectType({
   name: 'ActiveRun',
-  description: 'A spec run that is currently in progress. Populated in Phase 2.',
+  description: 'The most recent spec run for this open-mode instance. While in flight, `status` is `running`; after `run:end` fires it transitions to `finished` and lingers so CLI consumers can poll for completion.',
   definition (t) {
     t.nonNull.string('specPath', {
-      description: 'Absolute path to the spec that is running.',
+      description: 'Absolute path to the spec that is running (or just finished).',
     })
 
     t.nonNull.dateTime('startedAt', {
       description: 'When the run started.',
     })
 
+    t.dateTime('endedAt', {
+      description: 'When the run ended. Null while `status === running`.',
+    })
+
     t.nonNull.string('status', {
-      description: `One of 'starting' | 'running' | 'finished' | 'errored'.`,
+      description: `One of 'starting' | 'running' | 'finished'.`,
     })
   },
 })
@@ -107,9 +117,8 @@ export const InspectSnapshot = objectType({
 
     t.field('activeRun', {
       type: ActiveRun,
-      description: 'An in-progress spec run, if any. Always null until Phase 2 lifecycle wiring lands.',
-      // populated in Phase 2
-      resolve: () => null,
+      description: 'An in-progress (or most recently finished) spec run, if any. Null when no spec has been launched in this instance yet.',
+      resolve: (source, args, ctx) => ctx.coreData.activeRun,
     })
 
     t.nonNull.int('specCount', {

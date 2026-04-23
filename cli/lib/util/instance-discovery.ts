@@ -4,7 +4,7 @@ import path from 'path'
 
 /**
  * Instance descriptor shape written by a running `cypress open` instance.
- * See `guides/cli-inspect-design.md` §4.1.
+ * See `inspect-cli-docs/design.md` §4.1.
  */
 export interface Instance {
   pid: number

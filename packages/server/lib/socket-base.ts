@@ -361,6 +361,44 @@ export class SocketBase implements SocketBroadcaster {
           return options.onMocha.apply(options, args)
         })
 
+        // Open-mode counterpart to `mocha start/end`. The driver emits
+        // `run:start` / `run:end` unconditionally, but the `mocha` socket
+        // forward is gated on `isTextTerminal` and never fires during
+        // `cypress open`. The app (`event-manager.ts`) bridges those two
+        // driver events to this channel when not in run mode, giving
+        // data-context a run-lifecycle signal without the Mocha reporter.
+        socket.on('run:lifecycle', async (payload: {
+          phase: 'start' | 'end'
+          specPath?: string
+          startedAt?: string
+          endedAt?: string
+        }) => {
+          // Defense-in-depth: the app-side gate should already keep us out of
+          // run mode, but skip here too so a stray forward can't double-write
+          // state that the Mocha reporter path owns.
+          if (this.inRunMode) {
+            return
+          }
+
+          try {
+            const ctx = await getCtx()
+
+            if (payload?.phase === 'start') {
+              ctx.actions.runState.recordStart({
+                specPath: payload.specPath,
+                startedAt: payload.startedAt,
+              })
+            } else if (payload?.phase === 'end') {
+              ctx.actions.runState.recordEnd({
+                specPath: payload.specPath,
+                endedAt: payload.endedAt,
+              })
+            }
+          } catch (err: any) {
+            debug('run:lifecycle handler failed: %s', err?.message)
+          }
+        })
+
         socket.on('recorder:frame', (data) => {
           return options.onCaptureVideoFrames(data)
         })

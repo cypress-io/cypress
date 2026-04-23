@@ -40,4 +40,18 @@ export const stubQuery: MaybeResolver<Query> = {
   scaffoldedFiles () {
     return null
   },
+  inspectSnapshot () {
+    return {
+      __typename: 'InspectSnapshot',
+      pid: process.pid,
+      cypressVersion: '0.0.0-test',
+      projectRoot: null,
+      testingType: null,
+      browserStatus: 'closed',
+      activeBrowser: null,
+      appRoute: 'INTRO',
+      activeRun: null,
+      specCount: 0,
+    }
+  },
 }
