@@ -160,7 +160,7 @@
     "@types/node": "24.10.1",
     "@types/request-promise": "^4.1.51",
     "@types/tar": "^6.1.13",
-    "@urql/core": "2.4.4",
+    "@urql/core": "6.0.1",
     "babel-loader": "10.0.0",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.2",

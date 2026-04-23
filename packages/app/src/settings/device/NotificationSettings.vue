@@ -46,6 +46,7 @@
               :disabled="!desktopNotificationsEnabled"
               @update="(value) => updatePref(id, value)"
             />
+            <!-- @vue-expect-error `gql` is shadowed by urql's gql tag in template type-check; display is props.gql -->
             {{ gql.localSettings }}
           </h4>
         </div>
@@ -107,7 +108,8 @@ import { gql, useMutation } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import Switch from '@packages/frontend-shared/src/components/Switch.vue'
 import SettingsSection from '../SettingsSection.vue'
-import { NotificationSettingsFragment, SetNotificationSettingsDocument, NotificationSettings_ShowNotificationDocument } from '../../generated/graphql'
+import { SetNotificationSettingsDocument, NotificationSettings_ShowNotificationDocument } from '../../generated/graphql'
+import type { NotificationSettingsFragment } from '../../generated/graphql'
 import Checkbox from '@packages/frontend-shared/src/components/Checkbox.vue'
 import ButtonDS from '@cypress-design/vue-button'
 import Button from '@packages/frontend-shared/src/components/Button.vue'
