@@ -5,6 +5,10 @@
 
 - Reduced main-thread overhead when scrolling the command log in `cypress open` by fixing an issue where the reporter could register more than one `scroll` listener on the log if its scroll container was set more than once. Addressed in [#33607](https://github.com/cypress-io/cypress/pull/33607).
 
+**Bugfixes:**
+
+- Fixed an issue where an application under test containing `<base target="_top">` or `<base target="_parent">` would navigate out of the Cypress iframe when untargeted links were clicked or forms were submitted, breaking the test run. The unsafe `target` is now stripped from `<base>` tags as part of the existing `modifyObstructiveCode` rewriting (enabled by default for the primary super-domain, and extendable to third-party origins with `experimentalModifyObstructiveThirdPartyCode`). A runtime guard also neutralizes any `<base>` inserted or modified after load, matching the always-on behavior of the existing `<a>` / `<form>` target guards. Fixed in [#33667](https://github.com/cypress-io/cypress/pull/33667).
+
 **Dependency Updates:**
 
 - Upgraded `cachedir` from `^2.3.0` to `^2.4.0`. Addressed in [#33608](https://github.com/cypress-io/cypress/pull/33608).
