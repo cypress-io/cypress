@@ -183,7 +183,7 @@ function createSpawnFunction (
         // tree.
         for (const signal of ['SIGINT', 'SIGTERM']) {
           debug('adding message for signal listener for %s', signal)
-          process.on(signal, async function () {
+          process.once(signal, async function () {
             console.log(`${signal} received; Attempting to exit gracefully. Force exit with ^C again if needed.`)
           })
         }
