@@ -705,9 +705,10 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
       })
     })
 
-    // `replace_stream.ts` re-applies the regex to the already-matched substring, so
-    // each `<base>` variant needs independent coverage in the stream path — the
-    // in-memory `strip()` tests above do not exercise this re-application.
+    // `replaceStream` re-applies each pattern to the already-matched substring,
+    // which can diverge from the one-shot `strip()` path when the regex depends
+    // on context at the match boundary (e.g., lookaheads past the last captured
+    // character). Exercise each quoting variant through the stream path directly.
     describe('<base> target stripping', () => {
       const runStream = (input: string) => {
         return new Promise<string>((resolve, reject) => {

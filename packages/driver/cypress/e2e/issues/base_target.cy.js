@@ -40,9 +40,8 @@ describe('<base target="_top|_parent">', { browser: '!webkit' }, () => {
     cy.url().should('include', 'dom.html')
   })
 
-  // Regression: target keyword matching must be ASCII case-insensitive to match
-  // the browser's navigation algorithm — else `<base target="_TOP">` escapes the
-  // driver runtime guard.
+  // The HTML navigation algorithm matches `_top` / `_parent` ASCII case-insensitively,
+  // so a mixed-case value is just as obstructive as the lowercase form.
   it('keeps anchor click inside AUT when <base target="_TOP"> (uppercase) is injected after load', () => {
     cy.visit('/fixtures/base-target-dynamic.html')
     cy.window().then((win) => win.injectBase('_TOP'))
@@ -51,9 +50,10 @@ describe('<base target="_top|_parent">', { browser: '!webkit' }, () => {
     cy.url().should('include', 'dom.html')
   })
 
-  // Regression: clicking a descendant of an <a> (e.g. <a><span>) makes e.target
-  // the child — the driver runtime guard must still neutralize <base> because
-  // the navigation will bubble up to the anchor and inherit the base target.
+  // A click on a descendant of an anchor (e.g. `<a><span>`) sets `e.target` to
+  // the descendant rather than the anchor. The navigation still bubbles up to
+  // the <a> and inherits the document's base target, so the base-level
+  // neutralization must run independently of the per-element tag check.
   it('keeps click-on-anchor-child inside AUT when <base target="_top"> is injected after load', () => {
     cy.visit('/fixtures/base-target-dynamic.html')
     cy.window().then((win) => win.injectBase('_top'))
