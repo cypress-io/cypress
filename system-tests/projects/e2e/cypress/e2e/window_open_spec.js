@@ -6,9 +6,6 @@ describe('window.open', () => {
       return new Cypress.Promise((resolve, reject) => {
         win.foo = Cypress._.after(2, resolve)
 
-        // eslint-disable-next-line no-debugger
-        debugger
-
         const child = win.open('/window_open.html', 'foo', 'width=371.58px,height=660px,left=1068.42px,menubar=no,scrollbars=no,status=no')
 
         const bar = () => {
