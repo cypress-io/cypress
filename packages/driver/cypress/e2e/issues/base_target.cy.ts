@@ -26,7 +26,7 @@ describe('<base target="_top|_parent">', { browser: '!webkit' }, () => {
 
   it('keeps anchor click inside AUT when <base target="_top"> is injected after load', () => {
     cy.visit('/fixtures/base-target-dynamic.html')
-    cy.window().then((win) => win.injectBase('_top'))
+    cy.window().then((win: any) => win.injectBase('_top'))
     cy.get('#link').click()
     cy.get('#dom').should('contain', 'DOM')
     cy.url().should('include', 'dom.html')
@@ -34,7 +34,7 @@ describe('<base target="_top|_parent">', { browser: '!webkit' }, () => {
 
   it('keeps form submit inside AUT when <base target="_parent"> is injected after load', () => {
     cy.visit('/fixtures/base-target-dynamic.html')
-    cy.window().then((win) => win.injectBase('_parent'))
+    cy.window().then((win: any) => win.injectBase('_parent'))
     cy.get('#submit').click()
     cy.get('#dom').should('contain', 'DOM')
     cy.url().should('include', 'dom.html')
@@ -44,7 +44,7 @@ describe('<base target="_top|_parent">', { browser: '!webkit' }, () => {
   // so a mixed-case value is just as obstructive as the lowercase form.
   it('keeps anchor click inside AUT when <base target="_TOP"> (uppercase) is injected after load', () => {
     cy.visit('/fixtures/base-target-dynamic.html')
-    cy.window().then((win) => win.injectBase('_TOP'))
+    cy.window().then((win: any) => win.injectBase('_TOP'))
     cy.get('#link').click()
     cy.get('#dom').should('contain', 'DOM')
     cy.url().should('include', 'dom.html')
@@ -56,7 +56,7 @@ describe('<base target="_top|_parent">', { browser: '!webkit' }, () => {
   // neutralization must run independently of the per-element tag check.
   it('keeps click-on-anchor-child inside AUT when <base target="_top"> is injected after load', () => {
     cy.visit('/fixtures/base-target-dynamic.html')
-    cy.window().then((win) => win.injectBase('_top'))
+    cy.window().then((win: any) => win.injectBase('_top'))
     cy.get('#nested-link-child').click()
     cy.get('#dom').should('contain', 'DOM')
     cy.url().should('include', 'dom.html')
