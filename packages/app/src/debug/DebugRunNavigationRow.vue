@@ -5,7 +5,7 @@
   >
     <component
       :is="isCurrentRun ? 'div': 'button'"
-      :aria-label="t('debugPage.switchToRun', {runNumber: gql.runNumber})"
+      :aria-label="t('debugPage.switchToRun', {runNumber: props.gql.runNumber})"
       class="rounded flex w-full p-[10px] pl-[35px] relative hocus:bg-indigo-50 focus:outline focus:outline-indigo-500"
       :class="{ 'bg-indigo-50': isCurrentRun }"
       @click="$emit('changeRun')"
@@ -50,7 +50,8 @@ import RunNumber from '../runs/RunNumber.vue'
 import RunResults from '../runs/RunResults.vue'
 import DebugCurrentRunIcon from './DebugCurrentRunIcon.vue'
 import type { DebugProgress_DebugTestsFragment } from '../generated/graphql'
-import { computed, FunctionalComponent, h } from 'vue'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import { useDebugRunSummary } from './useDebugRunSummary'
 import { useRunDateTimeInterval } from './useRunDateTimeInterval'
 import { useI18n } from '@cy/i18n'

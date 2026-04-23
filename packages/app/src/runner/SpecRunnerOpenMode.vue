@@ -472,5 +472,5 @@ onBeforeUnmount(() => {
 </route>
 
 <style scoped lang="scss">
-@import "./spec-runner-scoped.scss";
+@use "./spec-runner-scoped.scss";
 </style>

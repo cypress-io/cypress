@@ -1,4 +1,5 @@
-import { AllowedState, defaultPreferences, Editor, NotifyCompletionStatuses } from '@packages/types'
+import { defaultPreferences, NotifyCompletionStatuses } from '@packages/types'
+import type { AllowedState, Editor } from '@packages/types'
 import pDefer from 'p-defer'
 import _ from 'lodash'
 import Debug from 'debug'

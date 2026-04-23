@@ -1,13 +1,5 @@
-import {
-  Exchange,
-  Client,
-  createClient,
-  dedupExchange,
-  errorExchange,
-  fetchExchange,
-  subscriptionExchange,
-  CombinedError,
-} from '@urql/core'
+import { Client, createClient, errorExchange, fetchExchange, subscriptionExchange, CombinedError } from '@urql/core'
+import type { Exchange } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
 import type { SocketShape } from '@packages/socket/browser/client'
@@ -136,7 +128,7 @@ export function clearPendingError () {
 }
 
 export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client> {
-  const exchanges: Exchange[] = [dedupExchange]
+  const exchanges: Exchange[] = []
 
   const io = getPubSubSource(config)
 
@@ -187,6 +179,8 @@ export async function makeUrqlClient (config: UrqlClientConfig): Promise<Client>
   const client = createClient({
     url,
     requestPolicy: cypressInRunMode ? 'cache-only' : 'cache-first',
+    // urql v6 defaults to GET for small queries; Cypress app GraphQL expects POST.
+    preferGetMethod: false,
     exchanges,
 
     // Rather than authoring a custom exchange, let's just polyfill the "fetch"

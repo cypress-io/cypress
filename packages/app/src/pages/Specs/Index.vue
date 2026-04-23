@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="query.data.value"
+    v-if="query?.data?.value"
     class="h-full"
   >
     <CreateSpecModal
@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { gql, useQuery } from '@urql/vue'
 import { useI18n } from '@cy/i18n'
 import SpecsList from '../../specs/SpecsList.vue'
@@ -99,7 +99,11 @@ useSubscription({
 /**
  * Used to trigger Spec updates via the useCloudSpec composable.
  */
-const mostRecentUpdate = ref<string | undefined>()
+const mostRecentUpdate = ref<string | null>(null)
+
+const runUpdate = () => {
+  mostRecentUpdate.value = new Date().toISOString()
+}
 
 /**
  * At this time, the CloudRun is not passing the `updatedAt` field.  To mimic
@@ -115,16 +119,15 @@ const latestRuns = computed(() => {
   return relevantRuns.value.latest
 })
 
-const runUpdate = () => {
-  mostRecentUpdate.value = new Date().toISOString()
-}
+/**
+ * urql's useQuery registers a watchEffect with flush: 'sync' that can populate
+ * `data` and trigger a child render before `const query = useQuery(...)` would
+ * finish, leaving later `const` bindings (e.g. `title`) in the TDZ. Hold the
+ * client in a ref and assign only after dependent computeds exist.
+ */
+const query = shallowRef<any>(null)
 
-const query = useQuery({
-  query: SpecsPageContainerDocument,
-  variables,
-})
-
-const isDefaultSpecPattern = computed(() => !!query.data.value?.currentProject?.isDefaultSpecPattern)
+const isDefaultSpecPattern = computed(() => !!query.value?.data?.value?.currentProject?.isDefaultSpecPattern)
 
 const title = computed(() => {
   return isDefaultSpecPattern.value ?
@@ -145,6 +148,11 @@ const closeCreateSpecModal = () => {
   modalIsShown.value = false
   generator.value = null
 }
+
+query.value = useQuery({
+  query: SpecsPageContainerDocument,
+  variables,
+})
 </script>
 
 <route>

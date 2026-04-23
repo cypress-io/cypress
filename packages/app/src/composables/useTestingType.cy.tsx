@@ -1,17 +1,33 @@
 import { UseTestingType_ActivateTestingTypeDocument } from '../generated/graphql'
 import { useTestingType } from './useTestingType'
-import type { FunctionalComponent } from 'vue'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
 
 describe('useTestingType', () => {
-  type ComposableWrapperProps<R> = { useComposable: () => R, callback: (result: R) => void }
+  /**
+   * Stateful wrapper so composables run in `setup()` — @urql/vue `use*` helpers
+   * require an active Vue effect scope (functional render has none).
+   */
+  const ComposableWrapper = defineComponent({
+    name: 'ComposableWrapper',
+    props: {
+      useComposable: {
+        type: Function as PropType<() => unknown>,
+        required: true,
+      },
+      callback: {
+        type: Function as PropType<(result: unknown) => void>,
+        required: true,
+      },
+    },
+    setup (props) {
+      const result = props.useComposable()
 
-  const ComposableWrapper: FunctionalComponent<ComposableWrapperProps<unknown>> = <R, >({ useComposable, callback }: ComposableWrapperProps<R>) => {
-    const result = useComposable()
+      props.callback(result)
 
-    callback(result)
-
-    return <div>Composable</div>
-  }
+      return () => <div>Composable</div>
+    },
+  })
 
   const mountComposable = (composable: () => any) => {
     const callback = cy.stub().as('callback')

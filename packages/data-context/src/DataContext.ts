@@ -8,30 +8,17 @@ import _ from 'lodash'
 
 import 'server-destroy'
 
-import { AppApiShape, CohortsApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
+import { DataEmitterActions } from './actions'
+import type { AppApiShape, CohortsApiShape, LocalSettingsApiShape, ProjectApiShape } from './actions'
 import type { NexusGenAbstractTypeMembers } from './gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
 import debugLib from 'debug'
-import { CoreDataShape, makeCoreData } from './data/coreDataShape'
+import { makeCoreData } from './data/coreDataShape'
+import type { CoreDataShape } from './data/coreDataShape'
 import { DataActions } from './DataActions'
-import {
-  FileDataSource,
-  ProjectDataSource,
-  WizardDataSource,
-  BrowserDataSource,
-  CloudDataSource,
-  EnvDataSource,
-  HtmlDataSource,
-  UtilDataSource,
-  BrowserApiShape,
-  RelevantRunsDataSource,
-  RelevantRunSpecsDataSource,
-  VersionsDataSource,
-  ErrorDataSource,
-  GraphQLDataSource,
-  RemoteRequestDataSource,
-} from './sources'
+import { FileDataSource, ProjectDataSource, WizardDataSource, BrowserDataSource, CloudDataSource, EnvDataSource, HtmlDataSource, UtilDataSource, RelevantRunsDataSource, RelevantRunSpecsDataSource, VersionsDataSource, ErrorDataSource, GraphQLDataSource, RemoteRequestDataSource } from './sources'
+import type { BrowserApiShape } from './sources'
 import type { GraphQLSchema, OperationTypeNode, DocumentNode } from 'graphql'
 import type { IncomingHttpHeaders } from 'http'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
