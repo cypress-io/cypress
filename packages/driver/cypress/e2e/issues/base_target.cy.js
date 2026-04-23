@@ -39,4 +39,26 @@ describe('<base target="_top|_parent">', { browser: '!webkit' }, () => {
     cy.get('#dom').should('contain', 'DOM')
     cy.url().should('include', 'dom.html')
   })
+
+  // Regression: target keyword matching must be ASCII case-insensitive to match
+  // the browser's navigation algorithm — else `<base target="_TOP">` escapes the
+  // driver runtime guard.
+  it('keeps anchor click inside AUT when <base target="_TOP"> (uppercase) is injected after load', () => {
+    cy.visit('/fixtures/base-target-dynamic.html')
+    cy.window().then((win) => win.injectBase('_TOP'))
+    cy.get('#link').click()
+    cy.get('#dom').should('contain', 'DOM')
+    cy.url().should('include', 'dom.html')
+  })
+
+  // Regression: clicking a descendant of an <a> (e.g. <a><span>) makes e.target
+  // the child — the driver runtime guard must still neutralize <base> because
+  // the navigation will bubble up to the anchor and inherit the base target.
+  it('keeps click-on-anchor-child inside AUT when <base target="_top"> is injected after load', () => {
+    cy.visit('/fixtures/base-target-dynamic.html')
+    cy.window().then((win) => win.injectBase('_top'))
+    cy.get('#nested-link-child').click()
+    cy.get('#dom').should('contain', 'DOM')
+    cy.url().should('include', 'dom.html')
+  })
 })

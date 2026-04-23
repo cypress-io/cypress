@@ -16,7 +16,11 @@ function neutralizeUnsafeBaseTarget (doc: Document | null | undefined) {
 
   const base = doc.querySelector('base[target]') as HTMLBaseElement | null
 
-  if (base && invalidTargets.has(base.target)) {
+  // `HTMLBaseElement.target` reflects the raw content attribute without case
+  // normalization, but the browser matches `_top` / `_parent` case-insensitively
+  // at navigation time — so `<base target="_TOP">` would escape the AUT iframe
+  // unless we lowercase the comparison.
+  if (base && invalidTargets.has(base.target.toLowerCase())) {
     base.removeAttribute('target')
   }
 }
@@ -40,8 +44,13 @@ export type GuardedAnchorEvent = Event & {target: HTMLAnchorElement}
  * @param e
  */
 export function handleInvalidAnchorTarget (e: GuardedAnchorEvent) {
+  // `<base target>` neutralization is document-scoped, so it must run regardless
+  // of which descendant the click landed on (e.g. `<a><img></a>` gives an <img>
+  // target — the anchor-attribute patch below is skipped, but the base fallback
+  // would still navigate out of the AUT frame without this call).
+  neutralizeUnsafeBaseTarget(e.target?.ownerDocument)
+
   if (e.target.tagName === 'A') {
-    neutralizeUnsafeBaseTarget(e.target.ownerDocument)
     handleInvalidTarget(e.target)
   }
 }
