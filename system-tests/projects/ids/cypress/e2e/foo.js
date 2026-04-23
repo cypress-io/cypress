@@ -3,5 +3,5 @@ describe('foo [000]', () => {
     expect('foo.js').to.equal('foo.js')
   })
 
-  it('quux [002]', () => {})
+  it('quux [002]')
 })
