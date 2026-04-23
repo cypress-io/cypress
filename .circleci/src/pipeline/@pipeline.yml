@@ -753,12 +753,15 @@ commands:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: |
-                  # Un-apply patches so yarn's integrity check doesn't flag
-                  # patched files as modified and pull them into an
-                  # inconsistent state when --check-files re-extracts.
+                  # Un-apply patches in every workspace that has a patches/
+                  # directory so yarn's integrity check doesn't flag
+                  # patch-package-modified files as modified and pull them
+                  # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  npx patch-package --reverse || true
+                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
+                  done
                   yarn install --check-files
       - install-browsers:
           install-chrome: true
@@ -1506,12 +1509,15 @@ jobs:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: |
-                  # Un-apply patches so yarn's integrity check doesn't flag
-                  # patched files as modified and pull them into an
-                  # inconsistent state when --check-files re-extracts.
+                  # Un-apply patches in every workspace that has a patches/
+                  # directory so yarn's integrity check doesn't flag
+                  # patch-package-modified files as modified and pull them
+                  # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  npx patch-package --reverse || true
+                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
+                  done
                   yarn install --check-files
       - run:
           name: Top level packages
@@ -1666,12 +1672,15 @@ jobs:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: |
-                  # Un-apply patches so yarn's integrity check doesn't flag
-                  # patched files as modified and pull them into an
-                  # inconsistent state when --check-files re-extracts.
+                  # Un-apply patches in every workspace that has a patches/
+                  # directory so yarn's integrity check doesn't flag
+                  # patch-package-modified files as modified and pull them
+                  # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  npx patch-package --reverse || true
+                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
+                  done
                   yarn install --check-files
             # @tooling/v8-snapshot specs require('electron') at load time,
             # which reads node_modules/electron/path.txt. That file is
@@ -1738,12 +1747,15 @@ jobs:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: |
-                  # Un-apply patches so yarn's integrity check doesn't flag
-                  # patched files as modified and pull them into an
-                  # inconsistent state when --check-files re-extracts.
+                  # Un-apply patches in every workspace that has a patches/
+                  # directory so yarn's integrity check doesn't flag
+                  # patch-package-modified files as modified and pull them
+                  # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  npx patch-package --reverse || true
+                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
+                  done
                   yarn install --check-files
       - run:
           name: Driver memory tests in Electron
@@ -1891,12 +1903,15 @@ jobs:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: |
-                  # Un-apply patches so yarn's integrity check doesn't flag
-                  # patched files as modified and pull them into an
-                  # inconsistent state when --check-files re-extracts.
+                  # Un-apply patches in every workspace that has a patches/
+                  # directory so yarn's integrity check doesn't flag
+                  # patch-package-modified files as modified and pull them
+                  # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  npx patch-package --reverse || true
+                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
+                  done
                   yarn install --check-files
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
@@ -2506,12 +2521,15 @@ jobs:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
                 command: |
-                  # Un-apply patches so yarn's integrity check doesn't flag
-                  # patched files as modified and pull them into an
-                  # inconsistent state when --check-files re-extracts.
+                  # Un-apply patches in every workspace that has a patches/
+                  # directory so yarn's integrity check doesn't flag
+                  # patch-package-modified files as modified and pull them
+                  # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  npx patch-package --reverse || true
+                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                    (cd "$(dirname "$p")" && npx patch-package --reverse) || true
+                  done
                   yarn install --check-files
       - check-if-binary-exists
       - build-and-package-binary
