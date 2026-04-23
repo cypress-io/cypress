@@ -95,8 +95,12 @@ fi
 # which CircleCI always sets to the canonical upstream (cypress-io/cypress), not the
 # contributor's fork. This ensures fork PRs compare against the real develop branch.
 UPSTREAM_URL="https://github.com/${CIRCLE_PROJECT_USERNAME:-cypress-io}/${CIRCLE_PROJECT_REPONAME:-cypress}.git"
-git fetch "$UPSTREAM_URL" develop 2>/dev/null || true
-MERGE_BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo "")
+MERGE_BASE=""
+if git fetch "$UPSTREAM_URL" develop 2>/dev/null; then
+  MERGE_BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo "")
+else
+  echo "Could not fetch upstream develop" >&2
+fi
 
 if [[ -n "$MERGE_BASE" ]]; then
   CHANGED=$(git -c core.quotepath=false diff --name-only "$MERGE_BASE" HEAD)
