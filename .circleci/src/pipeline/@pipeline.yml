@@ -759,7 +759,10 @@ commands:
                   # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                  # Use shell globs (not `find`) because on Windows bash,
+                  # `find` can resolve to Windows FIND.EXE.
+                  for p in patches cli/patches packages/*/patches; do
+                    [ -d "$p" ] || continue
                     (cd "$(dirname "$p")" && npx patch-package --reverse) || true
                   done
                   yarn install --check-files
@@ -1515,7 +1518,10 @@ jobs:
                   # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                  # Use shell globs (not `find`) because on Windows bash,
+                  # `find` can resolve to Windows FIND.EXE.
+                  for p in patches cli/patches packages/*/patches; do
+                    [ -d "$p" ] || continue
                     (cd "$(dirname "$p")" && npx patch-package --reverse) || true
                   done
                   yarn install --check-files
@@ -1678,7 +1684,10 @@ jobs:
                   # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                  # Use shell globs (not `find`) because on Windows bash,
+                  # `find` can resolve to Windows FIND.EXE.
+                  for p in patches cli/patches packages/*/patches; do
+                    [ -d "$p" ] || continue
                     (cd "$(dirname "$p")" && npx patch-package --reverse) || true
                   done
                   yarn install --check-files
@@ -1753,7 +1762,10 @@ jobs:
                   # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                  # Use shell globs (not `find`) because on Windows bash,
+                  # `find` can resolve to Windows FIND.EXE.
+                  for p in patches cli/patches packages/*/patches; do
+                    [ -d "$p" ] || continue
                     (cd "$(dirname "$p")" && npx patch-package --reverse) || true
                   done
                   yarn install --check-files
@@ -1909,7 +1921,10 @@ jobs:
                   # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                  # Use shell globs (not `find`) because on Windows bash,
+                  # `find` can resolve to Windows FIND.EXE.
+                  for p in patches cli/patches packages/*/patches; do
+                    [ -d "$p" ] || continue
                     (cd "$(dirname "$p")" && npx patch-package --reverse) || true
                   done
                   yarn install --check-files
@@ -2527,7 +2542,10 @@ jobs:
                   # into an inconsistent state when --check-files re-extracts.
                   # Tolerate partial failure — --check-files + postinstall
                   # will reinstall and re-patch anything left inconsistent.
-                  for p in $(find . -maxdepth 4 -type d -name patches -not -path '*/node_modules/*' -not -path '*/runner/injection/*'); do
+                  # Use shell globs (not `find`) because on Windows bash,
+                  # `find` can resolve to Windows FIND.EXE.
+                  for p in patches cli/patches packages/*/patches; do
+                    [ -d "$p" ] || continue
                     (cd "$(dirname "$p")" && npx patch-package --reverse) || true
                   done
                   yarn install --check-files
