@@ -752,7 +752,14 @@ commands:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: |
+                  # Un-apply patches so yarn's integrity check doesn't flag
+                  # patched files as modified and pull them into an
+                  # inconsistent state when --check-files re-extracts.
+                  # Tolerate partial failure — --check-files + postinstall
+                  # will reinstall and re-patch anything left inconsistent.
+                  npx patch-package --reverse || true
+                  yarn install --check-files
       - install-browsers:
           install-chrome: true
           install-firefox: true
@@ -1498,7 +1505,14 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: |
+                  # Un-apply patches so yarn's integrity check doesn't flag
+                  # patched files as modified and pull them into an
+                  # inconsistent state when --check-files re-extracts.
+                  # Tolerate partial failure — --check-files + postinstall
+                  # will reinstall and re-patch anything left inconsistent.
+                  npx patch-package --reverse || true
+                  yarn install --check-files
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -1651,7 +1665,14 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: |
+                  # Un-apply patches so yarn's integrity check doesn't flag
+                  # patched files as modified and pull them into an
+                  # inconsistent state when --check-files re-extracts.
+                  # Tolerate partial failure — --check-files + postinstall
+                  # will reinstall and re-patch anything left inconsistent.
+                  npx patch-package --reverse || true
+                  yarn install --check-files
             # @tooling/v8-snapshot specs require('electron') at load time,
             # which reads node_modules/electron/path.txt. That file is
             # occasionally missing after the Windows yarn install above,
@@ -1716,7 +1737,14 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: |
+                  # Un-apply patches so yarn's integrity check doesn't flag
+                  # patched files as modified and pull them into an
+                  # inconsistent state when --check-files re-extracts.
+                  # Tolerate partial failure — --check-files + postinstall
+                  # will reinstall and re-patch anything left inconsistent.
+                  npx patch-package --reverse || true
+                  yarn install --check-files
       - run:
           name: Driver memory tests in Electron
           environment:
@@ -1862,7 +1890,14 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: |
+                  # Un-apply patches so yarn's integrity check doesn't flag
+                  # patched files as modified and pull them into an
+                  # inconsistent state when --check-files re-extracts.
+                  # Tolerate partial failure — --check-files + postinstall
+                  # will reinstall and re-patch anything left inconsistent.
+                  npx patch-package --reverse || true
+                  yarn install --check-files
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
@@ -2470,7 +2505,14 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+                command: |
+                  # Un-apply patches so yarn's integrity check doesn't flag
+                  # patched files as modified and pull them into an
+                  # inconsistent state when --check-files re-extracts.
+                  # Tolerate partial failure — --check-files + postinstall
+                  # will reinstall and re-patch anything left inconsistent.
+                  npx patch-package --reverse || true
+                  yarn install --check-files
       - check-if-binary-exists
       - build-and-package-binary
       - build-cypress-npm-package:
