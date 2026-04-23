@@ -10,11 +10,12 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.startAppServer()
     })
 
-    // Spy on `removeAllListeners` for every Cypress instance the event-manager
-    // creates (including the current one, if already set). Each inner Cypress
-    // owns its own PrimaryOriginCommunicator, so binding to a single instance
-    // is fragile — spec reloads and teardown timing can swap the reference
-    // before the assertion runs.
+    // Spy on `removeAllListeners` for the current Cypress instance and every
+    // future one the event-manager creates. Each inner Cypress owns its own
+    // PrimaryOriginCommunicator, so when the "different spec" test triggers a
+    // teardown-then-create sequence, we need to catch the cleanup on the OLD
+    // instance and also spy the NEW one. Must be invoked after a spec has
+    // loaded — before that, getEventManager() throws.
     const trackRemoveAllListenersOnAllCypressInstances = () => {
       cy.window().then((win) => {
         const em = win.getEventManager()
@@ -46,9 +47,9 @@ describe('Cypress In Cypress Origin Communicator', () => {
     it('cleans up the primaryOriginCommunicator events when navigating away from the /specs to /runs', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
-      trackRemoveAllListenersOnAllCypressInstances()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
+      trackRemoveAllListenersOnAllCypressInstances()
 
       cy.get('a[href="#/runs"]').click()
       cy.location('hash').should('include', '/runs')
@@ -59,9 +60,9 @@ describe('Cypress In Cypress Origin Communicator', () => {
     it('cleans up the primaryOriginCommunicator events when navigating away from the /specs to /settings', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
-      trackRemoveAllListenersOnAllCypressInstances()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
+      trackRemoveAllListenersOnAllCypressInstances()
 
       cy.get('a[href="#/settings"]').click()
       cy.location('hash').should('include', '/settings')
@@ -72,9 +73,9 @@ describe('Cypress In Cypress Origin Communicator', () => {
     it('cleans up the primaryOriginCommunicator events when navigating to run a different spec', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
-      trackRemoveAllListenersOnAllCypressInstances()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
+      trackRemoveAllListenersOnAllCypressInstances()
 
       cy.get('[aria-controls="reporter-inline-specs-list"]').type('{enter}')
       cy.get('[data-cy="spec-row-item"]').contains('123').click()
