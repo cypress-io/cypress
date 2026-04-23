@@ -26,6 +26,7 @@ interface CypressBuildInfo {
   commitDate: string
   stable: boolean
 }
+
 interface BuildPlatform {
   arch: string
   envVarVersion?: string
