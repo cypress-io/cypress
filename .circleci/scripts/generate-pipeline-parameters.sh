@@ -9,7 +9,6 @@
 
 set -euo pipefail
 
-# Use individual variables instead of associative arrays (bash 3.x compatible)
 driver_tests=false
 server_tests=false
 app_ui_tests=false
@@ -107,9 +106,8 @@ else
 fi
 
 if [[ -z "$CHANGED" ]]; then
-  echo "No changed files detected — running all tests as a safety fallback" >&2
-  emit_all_true
-  exit 0
+  echo "Error: no changed files detected" >&2
+  exit 1
 fi
 
 echo "Changed files:" >&2
@@ -179,12 +177,14 @@ while IFS= read -r file; do
     packages/reporter/*)
       reporter_tests=true
       app_ui_tests=true
+      system_tests=true
       ;;
     packages/frontend-shared/*)
       frontend_shared_tests=true
       app_ui_tests=true
       launchpad_tests=true
       reporter_tests=true
+      system_tests=true
       ;;
     packages/data-context/*)
       app_ui_tests=true
@@ -195,10 +195,12 @@ while IFS= read -r file; do
     packages/runner/*)
       driver_tests=true
       app_ui_tests=true
+      system_tests=true
       ;;
     packages/web-config/*)
       driver_tests=true
       app_ui_tests=true
+      system_tests=true
       ;;
     packages/electron/*)
       driver_tests=true
@@ -222,34 +224,29 @@ while IFS= read -r file; do
       launchpad_tests=true
       ;;
     packages/telemetry/*)
-      # Used by driver, server, app, data-context, net-stubbing, proxy
       driver_tests=true
       server_tests=true
       app_ui_tests=true
       system_tests=true
       ;;
     packages/network-tools/*)
-      # Used by driver, proxy, server (and transitively by packages/network which is a global trigger)
       driver_tests=true
       server_tests=true
       system_tests=true
       ;;
     packages/packherd-require/*)
-      # Consumed by v8-snapshot-require; tested via v8 integration tests
       v8_tests=true
       ;;
     packages/v8-snapshot-require/*)
       v8_tests=true
       ;;
     packages/stderr-filtering/*)
-      # Used by data-context, electron, server
       server_tests=true
       app_ui_tests=true
       launchpad_tests=true
       system_tests=true
       ;;
     packages/icons/*)
-      # Used by electron, extension, runner, server
       driver_tests=true
       server_tests=true
       app_ui_tests=true
@@ -266,55 +263,63 @@ while IFS= read -r file; do
       v8_tests=true
       ;;
     npm/webpack-dev-server/*)
-      # TODO: also run relevant system tests (component_testing_spec, scaffold_config_spec, etc.)
       npm_webpack_dev_server_tests=true
+      system_tests=true
       ;;
     npm/vite-dev-server/*)
-      # TODO: also run relevant system tests
       npm_vite_dev_server_tests=true
+      system_tests=true
       ;;
     npm/webpack-preprocessor/*)
       npm_webpack_preprocessor_tests=true
+      system_tests=true
       ;;
     npm/webpack-batteries-included-preprocessor/*)
       npm_webpack_batteries_tests=true
+      system_tests=true
       ;;
     npm/vue/*)
-      # TODO: also run relevant system tests
       npm_vue_tests=true
+      system_tests=true
       ;;
     npm/react/*)
-      # TODO: also run relevant system tests
       npm_react_tests=true
+      system_tests=true
       ;;
     npm/angular/*)
-      # TODO: also run relevant system tests (component_testing_spec, scaffold_config_spec, webpack-dev-server tests)
       npm_angular_tests=true
+      system_tests=true
       ;;
     npm/angular-zoneless/*)
-      # TODO: also run relevant system tests
       npm_angular_tests=true
+      system_tests=true
       ;;
     npm/svelte/*)
       system_tests=true
       ;;
     npm/puppeteer/*)
       npm_puppeteer_tests=true
+      system_tests=true
       ;;
     npm/vite-plugin-cypress-esm/*)
       npm_vite_plugin_esm_tests=true
+      system_tests=true
       ;;
     npm/mount-utils/*)
       npm_mount_utils_tests=true
+      system_tests=true
       ;;
     npm/grep/*)
       npm_grep_tests=true
+      system_tests=true
       ;;
     npm/eslint-plugin-dev/*)
       npm_eslint_plugin_tests=true
+      system_tests=true
       ;;
     npm/cypress-schematic/*)
       npm_schematic_tests=true
+      system_tests=true
       ;;
     packages/eslint-config/*|packages/example/*|npm/xpath/*)
       # No CI jobs are associated with these packages — no tests to run
