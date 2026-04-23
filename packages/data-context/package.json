@@ -7,7 +7,7 @@
   "scripts": {
     "build": "yarn build:schema && yarn build:graphql && yarn nexus-build",
     "build-prod": "tsc || echo 'built, with errors'",
-    "build:graphql": "graphql-codegen --config ./graphql/graphql-codegen.yml && node ./scripts/fix-graphcache-introspection-import.js",
+    "build:graphql": "graphql-codegen --config ./graphql/graphql-codegen.yml",
     "build:schema": "node ./scripts/build.js",
     "check-ts": "tsc --noEmit && yarn -s tslint",
     "clean": "rimraf --glob \"./{src,test,graphql}/**/*.js\"",

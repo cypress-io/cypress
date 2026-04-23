@@ -35,7 +35,7 @@
     "@babel/code-frame": "7.27.1",
     "@cypress-design/css": "^1.2.0",
     "@faker-js/faker": "9.6.0",
-    "@graphql-codegen/plugin-helpers": "2.3.2",
+    "@graphql-codegen/plugin-helpers": "5.1.0",
     "@graphql-typed-document-node/core": "^3.1.0",
     "@headlessui/vue": "1.4.0",
     "@iconify-json/logos": "^1.2.10",
