@@ -8,7 +8,7 @@
 **Dependency Updates:**
 
 - Upgraded `cachedir` from `^2.3.0` to `^2.4.0`. Addressed in [#33608](https://github.com/cypress-io/cypress/pull/33608).
-- Upgraded `listr2` from `3.8.3` to `^9.0.5`. Addressed in [#33640](https://github.com/cypress-io/cypress/pull/33640/).
+- Upgraded `listr2` from `3.8.3` to `^9.0.5`. Addressed in [#33640](https://github.com/cypress-io/cypress/pull/33640).
 
 ## 15.14.1
 
