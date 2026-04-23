@@ -591,7 +591,17 @@ darwin-arm64:
           - darwin-arm64-build
 
 windows:
-  when: *full-workflow-filters
+  # TEMP: run only the windows workflow on mschile/deflake-windows-chrome-install
+  # to verify the Chrome install retry. Revert before merge.
+  when:
+    or:
+      - equal: [ develop, << pipeline.git.branch >> ]
+      - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
+      - matches:
+          pattern: /^release\/\d+\.\d+\.\d+$/
+          value: << pipeline.git.branch >>
+      - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
+      - equal: [ 'mschile/deflake-windows-chrome-install', << pipeline.git.branch >> ]
   jobs:
     - node_modules_install:
         name: windows-node-modules-install
