@@ -752,7 +752,7 @@ commands:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: yarn install --check-files
+                command: rm -rf node_modules && yarn
       - install-browsers:
           install-chrome: true
           install-firefox: true
@@ -1498,7 +1498,7 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: yarn install --check-files
+                command: rm -rf node_modules && yarn
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -1651,7 +1651,20 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: yarn install --check-files
+                command: rm -rf node_modules && yarn
+            # @tooling/v8-snapshot specs require('electron') at load time,
+            # which reads node_modules/electron/path.txt. That file is
+            # occasionally missing after the Windows yarn install above,
+            # producing an "Electron failed to install correctly" flake.
+            # Re-run electron's install script if path.txt is absent.
+            - run:
+                name: verify electron install artifacts (Windows only)
+                command: |
+                  if [ ! -f node_modules/electron/path.txt ]; then
+                    echo "node_modules/electron/path.txt missing after yarn install — re-running electron postinstall"
+                    node node_modules/electron/install.js
+                    test -f node_modules/electron/path.txt
+                  fi
       # TODO: Remove this once we switch off self-hosted M1 runners
       - when:
           condition:
@@ -1703,7 +1716,7 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: yarn install --check-files
+                command: rm -rf node_modules && yarn
       - run:
           name: Driver memory tests in Electron
           environment:
@@ -1849,7 +1862,7 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: yarn install --check-files
+                command: rm -rf node_modules && yarn
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
@@ -2457,7 +2470,7 @@ jobs:
           steps:
             - run:
                 name: reinstall dependencies to work around cache issue (Windows only)
-                command: yarn install --check-files
+                command: rm -rf node_modules && yarn
       - check-if-binary-exists
       - build-and-package-binary
       - build-cypress-npm-package:
