@@ -3,6 +3,9 @@ import Debug from 'debug'
 import { randomUUID } from 'crypto'
 import os from 'os'
 
+/** Window after teardown starts in which extra signals are treated as duplicate delivery, not a second user interrupt. */
+const SIGNAL_DEDUP_MS = 200
+
 function getTeardownTimeoutMs (): number {
   const n = Number(process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT)
 
@@ -25,21 +28,53 @@ export class GracefulExit {
   private readonly handledSignals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']
   private readonly signalHandlers: Array<{ signal: NodeJS.Signals, listener: (sig: NodeJS.Signals) => void }> = []
   private processTeardown: Promise<number | void> | null = null
+  private teardownStartedAt: number | null = null
   private steps: Map<string, ExitStep> = new Map()
   private debug: Debug.Debugger
+
+  /**
+   * Handles SIGINT/SIGTERM for this registration (see constructor loop).
+   *
+   * **Why debounce:** The same OS interrupt can surface multiple times on `process` in quick succession —
+   * e.g. `signal-exit` (used by subprocess tooling) may call `process.kill(process.pid, sig)` after its
+   * own handler runs; multiple copies of `signal-exit` or other global handlers stack; or the CLI and
+   * Electron child share process-group semantics. Without a short dedup window, that second delivery
+   * arrived while `processTeardown` was already set and was misread as “user pressed interrupt again to
+   * force quit”, skipping in-flight teardown or exiting with code 1. We treat signals within
+   * `SIGNAL_DEDUP_MS` of teardown start as the same burst and only join the in-flight teardown promise;
+   * a later interrupt still forces exit so a hung teardown can be escaped by the user.
+   */
+  private readonly handleProcessSignal = async (
+    registeredSignal: NodeJS.Signals,
+    received?: NodeJS.Signals,
+  ): Promise<void> => {
+    const resolvedSig = received ?? registeredSignal
+
+    if (this.processTeardown) {
+      const elapsedMs = this.teardownStartedAt == null
+        ? Infinity
+        : Date.now() - this.teardownStartedAt
+
+      if (elapsedMs < SIGNAL_DEDUP_MS) {
+        await this.processTeardown
+
+        return
+      }
+
+      console.log(`\n\n${resolvedSig} received during graceful exit. Forcing exit.`)
+      process.exit(1)
+    } else {
+      await GracefulExit.exitGracefully(128 + os.constants.signals[resolvedSig])
+    }
+  }
 
   constructor () {
     this.debug = Debug(`cypress:server:graceful-exit:${process.pid}`)
     this.debug('initializing graceful exit in process %s', process.pid)
 
     for (const sig of this.handledSignals) {
-      const listener = async (received: NodeJS.Signals) => {
-        if (this.processTeardown) {
-          console.log(`\n\n${received} received during graceful exit. Forcing exit.`)
-          process.exit(1)
-        } else {
-          await GracefulExit.exitGracefully(128 + os.constants.signals[received])
-        }
+      const listener = async (received?: NodeJS.Signals): Promise<void> => {
+        await this.handleProcessSignal(sig, received)
       }
 
       process.on(sig, listener)
@@ -70,6 +105,7 @@ export class GracefulExit {
 
     inst.steps.clear()
     inst.processTeardown = null
+    inst.teardownStartedAt = null
     GracefulExit.instance = null
   }
 
@@ -125,6 +161,7 @@ export class GracefulExit {
       finalExitCode = 1
     } finally {
       this.processTeardown = null
+      this.teardownStartedAt = null
       this.steps.clear()
       process.exit(finalExitCode)
     }
@@ -139,6 +176,7 @@ export class GracefulExit {
 
     let forceExitTimeout: NodeJS.Timeout | undefined = undefined
 
+    exit.teardownStartedAt = Date.now()
     exit.processTeardown = Promise.race([
       GracefulExit.singleton.flushAndExit(code).then(() => {
         clearTimeout(forceExitTimeout)

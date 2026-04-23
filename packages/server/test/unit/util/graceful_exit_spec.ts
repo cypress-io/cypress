@@ -57,6 +57,46 @@ describe('lib/util/graceful-exit', () => {
     expect(exitStub).to.have.been.calledWith(3)
   })
 
+  it('debounces duplicate SIGINT soon after teardown starts (single graceful exit)', async () => {
+    const exitStub = sinon.stub(process, 'exit')
+    let resolveStep: () => void
+    const stepPromise = new Promise<void>((resolve) => {
+      resolveStep = resolve
+    })
+
+    GracefulExit.addStep(async () => {
+      await stepPromise
+    }, 'slow-step')
+
+    process.emit('SIGINT' as NodeJS.Signals)
+    process.emit('SIGINT' as NodeJS.Signals)
+
+    resolveStep!()
+
+    await new Promise((r) => setImmediate(r))
+
+    expect(exitStub).to.have.been.calledOnce
+    expect(exitStub).to.have.been.calledWith(130)
+  })
+
+  it('SIGINT after dedup window during hung teardown forces exit 1', async function () {
+    this.timeout(5000)
+
+    const exitStub = sinon.stub(process, 'exit')
+
+    GracefulExit.addStep(() => new Promise(() => {}), 'hang')
+
+    process.emit('SIGINT' as NodeJS.Signals)
+
+    await new Promise((r) => setTimeout(r, 250))
+
+    process.emit('SIGINT' as NodeJS.Signals)
+
+    await new Promise((r) => setTimeout(r, 50))
+
+    expect(exitStub).to.have.been.calledWith(1)
+  })
+
   it('force exits after teardown timeout when a step never completes', async function () {
     this.timeout(5000)
 
