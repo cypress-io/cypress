@@ -23,7 +23,14 @@ const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*
 // A `<base target="_top">` (or `_parent`) is inherited by every untargeted <a> and <form>,
 // so navigations would break out of the AUT iframe even if individual elements look safe.
 // Strip the attribute so the browser falls back to the default (`_self`).
-const baseTagTargetRe = /(<base\b[^>]*?)\s+target\s*=\s*(?:"_(?:top|parent)"|'_(?:top|parent)'|_(?:top|parent)(?=[\s/>]))/gi
+//
+// NOTE: the unquoted branch captures the boundary character into group 2 rather than using a
+// zero-width lookahead. `replaceStream` (replace_stream.ts) re-applies the regex to the
+// already-matched substring, and a positive lookahead for a boundary char fails at
+// end-of-match — so the stream path would silently skip the replacement. Consuming the
+// boundary char in the match and re-emitting it via `$2` keeps both the stream and
+// in-memory paths in lockstep.
+const baseTagTargetRe = /(<base\b[^>]*?)\s+target\s*=\s*(?:"_(?:top|parent)"|'_(?:top|parent)'|_(?:top|parent)([\s/>]))/gi
 /**
  * Matches the word integrity if being set on an object, such as foo.integrity. This MUST be followed by a valid hash to match. This is replaced with
  * foo['cypress-stripped-integrity']
@@ -47,7 +54,7 @@ export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partia
   .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
   .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
   .replace(topWindowLocationRe, 'self$2')
-  .replace(baseTagTargetRe, '$1')
+  .replace(baseTagTargetRe, '$1$2')
 
   if (modifyObstructiveThirdPartyCode) {
     rewrittenHTML = rewrittenHTML.replace(javaScriptIntegrityReplacementRe, `['${STRIPPED_INTEGRITY_TAG}']$2`)
@@ -83,7 +90,7 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         '$1 || $2.parent.__Cypress__$3',
         '$1 || $2.parent.__Cypress__$3',
         'self$2',
-        '$1',
+        '$1$2',
         ...(modifyObstructiveThirdPartyCode ? [
           `['${STRIPPED_INTEGRITY_TAG}']$2`,
           `${STRIPPED_INTEGRITY_TAG}$3`,

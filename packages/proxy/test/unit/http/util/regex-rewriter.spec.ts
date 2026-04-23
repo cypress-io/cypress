@@ -704,5 +704,47 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         replacer.end()
       })
     })
+
+    // `replace_stream.ts` re-applies the regex to the already-matched substring, so
+    // each `<base>` variant needs independent coverage in the stream path — the
+    // in-memory `strip()` tests above do not exercise this re-application.
+    describe('<base> target stripping', () => {
+      const runStream = (input: string) => {
+        return new Promise<string>((resolve, reject) => {
+          const replacer = regexRewriter.stripStream()
+
+          replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
+            try {
+              resolve(str.toString())
+            } catch (err) {
+              reject(err)
+            }
+          }))
+
+          replacer.write(input)
+          replacer.end()
+        })
+      }
+
+      it('strips unquoted target', async () => {
+        expect(await runStream('<base target=_top>')).toEqual('<base>')
+      })
+
+      it('strips double-quoted target', async () => {
+        expect(await runStream('<base href="/" target="_top">')).toEqual('<base href="/">')
+      })
+
+      it('strips single-quoted target', async () => {
+        expect(await runStream(`<base target='_parent'>`)).toEqual('<base>')
+      })
+
+      it('preserves other attrs after unquoted target', async () => {
+        expect(await runStream('<base target=_top href="/">')).toEqual('<base href="/">')
+      })
+
+      it('preserves self-closing after unquoted target', async () => {
+        expect(await runStream('<base target=_top/>')).toEqual('<base/>')
+      })
+    })
   })
 })
