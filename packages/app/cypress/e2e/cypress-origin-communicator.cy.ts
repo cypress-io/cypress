@@ -1,14 +1,42 @@
 describe('Cypress In Cypress Origin Communicator', () => {
   describe('primary origin memory leak prevention', () => {
-    let removeAllListenersSpy
+    let spies: Array<ReturnType<typeof cy.spy>>
 
     beforeEach(() => {
-      removeAllListenersSpy = undefined
+      spies = []
       cy.scaffoldProject('cypress-in-cypress')
       cy.findBrowsers()
       cy.openProject('cypress-in-cypress')
       cy.startAppServer()
     })
+
+    // Spy on `removeAllListeners` for every Cypress instance the event-manager
+    // creates (including the current one, if already set). Each inner Cypress
+    // owns its own PrimaryOriginCommunicator, so binding to a single instance
+    // is fragile — spec reloads and teardown timing can swap the reference
+    // before the assertion runs.
+    const trackRemoveAllListenersOnAllCypressInstances = () => {
+      cy.window().then((win) => {
+        const em = win.getEventManager()
+        const trackSpy = (cypress) => {
+          spies.push(cy.spy(cypress.primaryOriginCommunicator, 'removeAllListeners'))
+        }
+
+        const current = em.getCypress()
+
+        if (current) trackSpy(current)
+
+        em.on('cypress:created', trackSpy)
+      })
+    }
+
+    const assertZeroArgCleanupFired = () => {
+      cy.wrap(null).should(() => {
+        const noArgCalls = spies.flatMap((spy) => spy.getCalls()).filter((c) => c.args.length === 0)
+
+        expect(noArgCalls.length).to.be.at.least(1)
+      })
+    }
 
     /**
      * NOTE: This is more of a integration style test suite. We are not verifying that cy.origin works in these cases,
@@ -18,65 +46,41 @@ describe('Cypress In Cypress Origin Communicator', () => {
     it('cleans up the primaryOriginCommunicator events when navigating away from the /specs to /runs', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
+      trackRemoveAllListenersOnAllCypressInstances()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-
-      cy.then(() => {
-        // @ts-ignore
-        removeAllListenersSpy = cy.spy(window.top[0].Cypress.primaryOriginCommunicator, 'removeAllListeners')
-      })
 
       cy.get('a[href="#/runs"]').click()
       cy.location('hash').should('include', '/runs')
 
-      cy.wrap(null).should(() => {
-        const noArgCalls = removeAllListenersSpy.getCalls().filter((c) => c.args.length === 0)
-
-        expect(noArgCalls.length).to.be.at.least(1)
-      })
+      assertZeroArgCleanupFired()
     })
 
     it('cleans up the primaryOriginCommunicator events when navigating away from the /specs to /settings', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
+      trackRemoveAllListenersOnAllCypressInstances()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-
-      cy.then(() => {
-        // @ts-ignore
-        removeAllListenersSpy = cy.spy(window.top[0].Cypress.primaryOriginCommunicator, 'removeAllListeners')
-      })
 
       cy.get('a[href="#/settings"]').click()
       cy.location('hash').should('include', '/settings')
 
-      cy.wrap(null).should(() => {
-        const noArgCalls = removeAllListenersSpy.getCalls().filter((c) => c.args.length === 0)
-
-        expect(noArgCalls.length).to.be.at.least(1)
-      })
+      assertZeroArgCleanupFired()
     })
 
     it('cleans up the primaryOriginCommunicator events when navigating to run a different spec', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
+      trackRemoveAllListenersOnAllCypressInstances()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
-
-      cy.then(() => {
-        // @ts-ignore
-        removeAllListenersSpy = cy.spy(window.top[0].Cypress.primaryOriginCommunicator, 'removeAllListeners')
-      })
 
       cy.get('[aria-controls="reporter-inline-specs-list"]').type('{enter}')
       cy.get('[data-cy="spec-row-item"]').contains('123').click()
       cy.waitForSpecToFinish()
 
-      cy.wrap(null).should(() => {
-        const noArgCalls = removeAllListenersSpy.getCalls().filter((c) => c.args.length === 0)
-
-        expect(noArgCalls.length).to.be.at.least(1)
-      })
+      assertZeroArgCleanupFired()
     })
   })
 
