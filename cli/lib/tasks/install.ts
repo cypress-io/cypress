@@ -4,7 +4,7 @@ import path from 'path'
 import chalk from 'chalk'
 import Debug from 'debug'
 import { Listr } from 'listr2'
-import type { ListrRendererValue, ListrTask, ListrContext, ListrTaskWrapper, ListrRendererFactory } from 'listr2'
+import type { ListrBaseClassOptions, ListrRendererValue, ListrTask, ListrContext, ListrTaskWrapper, ListrRendererFactory } from 'listr2'
 import logSymbols from 'log-symbols'
 import { stripIndent } from 'common-tags'
 import timers from 'timers/promises'
@@ -18,7 +18,7 @@ import unzip from './unzip'
 import logger from '../logger'
 import { throwFormErrorText, errors } from '../errors'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
-const debug = Debug('cypress:cli')
+const debug = Debug('cypress:cli:install')
 
 interface CypressBuildInfo {
   commitSha: string
@@ -31,10 +31,6 @@ interface BuildPlatform {
   arch: string
   envVarVersion?: string
   buildInfo?: CypressBuildInfo
-}
-
-function getRenderer (): ListrRendererValue {
-  return logger.logLevel() === 'silent' ? 'silent' : 'default'
 }
 
 function _getBinaryUrlFromBuildInfo (version: string, arch: string, { commitSha, commitBranch }: { commitSha: string, commitBranch: string }): string {
@@ -299,30 +295,9 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
 
   const pathToLocalFile = await getLocalFilePath()
 
-  const zipFilePath = pathToLocalFile ?
-    path.resolve(versionToInstall) :
-    path.join(os.tmpdir(), `cypress-${process.pid}.zip`)
-
-  const tasks = new Listr(pathToLocalFile ? [
-    unzipArchive({
-      zipFilePath,
-      installDir,
-    }),
-  ] : [
-    downloadArchive({ version: versionToInstall, downloadDestination: zipFilePath }),
-    unzipArchive({
-      zipFilePath,
-      installDir,
-    }),
-    cleanup({ downloadDestination: zipFilePath, installDir }),
-  ])
-
-  if (pathToLocalFile) {
-    debug('found local file at', zipFilePath)
-    debug('skipping download')
-  } else {
-    debug('preparing to download and unzip version ', versionToInstall, 'to path', installDir)
-  }
+  const tasks = pathToLocalFile ?
+    installFromLocal({ pathToLocalFile, installDir }) :
+    installFromRemote({ version: versionToInstall, installDir })
 
   if (options.force) {
     debug('Cypress already installed at', installDir)
@@ -330,10 +305,18 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
   }
 
   // let the user know what version of cypress we're downloading!
-  logger.log(`Installing Cypress ${chalk.gray(`(version: ${version})`)}`)
+  logger.log(`Installing Cypress ${chalk.gray(`(version: ${versionToInstall})`)}`)
   logger.log()
 
-  await tasks.run()
+  const taskRunner = new Listr(
+    tasks,
+    {
+      silentRendererCondition: () => logger.logLevel() === 'silent',
+    },
+  )
+
+  await taskRunner.run()
+
   // delay 1 sec for UX, unless we are testing
   await timers.setTimeout(1000)
 
@@ -365,6 +348,35 @@ function downloadArchive ({ version, downloadDestination }: { version: string, d
       task.title = util.titleize(completedTitle)
     },
   }
+}
+
+function installFromLocal ({ pathToLocalFile, installDir }): ListrTask[] {
+  const zipFilePath = path.resolve(pathToLocalFile)
+
+  debug('found local file at', zipFilePath)
+  debug('skipping download')
+
+  return [
+    unzipArchive({
+      zipFilePath,
+      installDir,
+    }),
+  ]
+}
+
+function installFromRemote ({ version, installDir }: { version: string, installDir: string }): ListrTask[] {
+  const downloadDestination = path.join(os.tmpdir(), `cypress-${process.pid}.zip`)
+
+  debug('preparing to download and unzip version ', version, 'to path', installDir)
+
+  return [
+    downloadArchive({ version, downloadDestination }),
+    unzipArchive({
+      zipFilePath: downloadDestination,
+      installDir,
+    }),
+    cleanup({ downloadDestination, installDir }),
+  ]
 }
 
 function unzipArchive ({ zipFilePath, installDir }: {

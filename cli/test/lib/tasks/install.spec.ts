@@ -209,6 +209,7 @@ describe('/lib/tasks/install', function () {
   afterEach(() => {
     globalThis.console = originalConsole // Restore original console
     chalk.level = previousChalkLevel
+    vi.unstubAllEnvs()
   })
 
   describe('.start', function () {
@@ -239,10 +240,12 @@ describe('/lib/tasks/install', function () {
     })
 
     describe('skips install', function () {
+      beforeEach(() => {
+        vi.stubEnv('CYPRESS_INSTALL_BINARY', '0')
+      })
+
       it('when environment variable is set', async () => {
         const output = createStdoutCapture()
-
-        vi.stubEnv('CYPRESS_INSTALL_BINARY', '0')
 
         await install.start()
 
