@@ -3353,6 +3353,7 @@
     "./node_modules/zod/v3/locales/en.cjs",
     "./node_modules/zod/v3/types.cjs",
     "./packages/data-context/graphql/index.ts",
+    "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
     "./packages/data-context/node_modules/@babel/parser/lib/index.js",
     "./packages/data-context/node_modules/ast-types/def/babel-core.js",
     "./packages/data-context/node_modules/ast-types/def/babel.js",
@@ -3910,5 +3911,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "bb7b88f8890b77ab4d650190f2dbe2c7b54aadd45dd7f40ce4f341c74527228c"
+  "deferredHash": "8b6cd08ca4e25f95c46140e7f8d2ff1bf30c402c91e9b1cb9ac1eb0b009de8b8"
 }
