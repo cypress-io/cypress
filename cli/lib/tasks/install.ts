@@ -205,19 +205,15 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
   try {
     await fs.ensureDir(cacheDir)
   } catch (err: unknown) {
-    if (err instanceof Error && 'code' in err) {
-      if (err.code === 'EACCES') {
+    if (err instanceof Error && 'code' in err && err.code === 'EACCES') {
         return throwFormErrorText(errors.invalidCacheDirectory)(stripIndent`
           Failed to access ${chalk.cyan(cacheDir)}:
 
           ${err.message}
         `)
-      } else {
-        throw err
-      }
+    } else {
+      throw err
     }
-
-    throw new Error('Unknown error', { cause: err })
   }
 
   const binaryPkg = await state.getBinaryPkgAsync(binaryDir)
