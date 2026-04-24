@@ -1,4 +1,4 @@
-import { mount } from 'cypress/angular'
+import { mount } from 'cypress/angular-zoneless'
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
