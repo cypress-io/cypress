@@ -256,10 +256,14 @@ export class ProjectActions {
         ...options,
         ctx: this.ctx,
       }).finally(async () => {
-        // When switching testing type, the project should be relaunched in the previously selected browser
+        // When switching testing type, the project should be relaunched in the previously selected browser.
+        // Skip the relaunch when no browser has been selected yet (e.g. switching testing type from the
+        // CLI before a browser has been picked) — launchProject requires an activeBrowser.
         if (this.ctx.coreData.app.relaunchBrowser) {
           this.ctx.project.setRelaunchBrowser(false)
-          await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
+          if (this.ctx.coreData.activeBrowser) {
+            await this.ctx.actions.project.launchProject(this.ctx.coreData.currentTestingType)
+          }
         }
       })
     } catch (e) {
