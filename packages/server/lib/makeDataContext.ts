@@ -1,4 +1,5 @@
 import { DataContext, getCtx, clearCtx, setCtx } from '@packages/data-context'
+import type { AutInspectDomRunnerPayload, AutInspectRootRunnerPayload, AutInspectSnapshotRunnerPayload } from '@packages/data-context/src/data/coreDataShape'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import electron, { OpenDialogOptions, SaveDialogOptions, BrowserWindow } from 'electron'
 
@@ -165,6 +166,146 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       routeToDebug (runNumber: number) {
         openProject.changeUrlToDebug(runNumber)
+      },
+      emitStudioInitTest (testId: string) {
+        // Mirrors the reporter "Edit in Studio" button: the browser-side
+        // EventManager listens for `studio:remote-init:test` and calls the
+        // same local handler used for the reporter-emitted `studio:init:test`.
+        openProject.getProject()?.server.socket.toRunner('studio:remote-init:test', { testId })
+      },
+      emitStudioCancel () {
+        // Mirrors the reporter Studio cancel button: browser-side EventManager
+        // runs the same `executeStudioCancel` that tears down the Studio panel
+        // and asks the server to destroy `StudioLifecycleManager`.
+        openProject.getProject()?.server.socket.toRunner('studio:remote-cancel')
+      },
+      async requestCommandsSnapshot (testId: string) {
+        // Asks the runner for a snapshot of the reporter's command log for
+        // `testId`. The runner reads from its MobX store and replies via the
+        // socket ack — see `packages/reporter/src/lib/events.ts`.
+        const socket = openProject.getProject()?.server.socket
+
+        if (!socket?.requestRunner) {
+          return null
+        }
+
+        const response = await socket.requestRunner('inspect:request-commands', { testId }, 1500)
+
+        return Array.isArray(response) ? response : null
+      },
+      emitPinCommand (testId: string, logId: string) {
+        // Mirrors clicking the pin icon on a command in the reporter. The
+        // browser-side EventManager listens for this event and runs the same
+        // handler path as `_toggleColumnPin` in `reporter/src/commands/command.tsx`.
+        openProject.getProject()?.server.socket.toRunner('inspect:remote-pin-command', { testId, logId })
+      },
+      emitUnpinCommand () {
+        openProject.getProject()?.server.socket.toRunner('inspect:remote-unpin-command')
+      },
+      async requestPinnedCommand (testId: string) {
+        // Asks the runner which command (if any) is currently pinned, and for
+        // a safe-stringified dump of its `consoleProps`. The runner-side
+        // handler bridges the reporter's `appState.pinnedSnapshotId` to the
+        // driver's `getConsolePropsForLog`.
+        const socket = openProject.getProject()?.server.socket
+
+        if (!socket?.requestRunner) {
+          return null
+        }
+
+        const response = await socket.requestRunner('inspect:request-pinned-command', { testId }, 1500)
+
+        if (!response || typeof response !== 'object') {
+          return null
+        }
+
+        const pinned = response as { logId?: unknown, consolePropsJson?: unknown }
+
+        if (typeof pinned.logId !== 'string') {
+          return null
+        }
+
+        return {
+          testId,
+          logId: pinned.logId,
+          consolePropsJson: typeof pinned.consolePropsJson === 'string' ? pinned.consolePropsJson : null,
+        }
+      },
+      async requestCommandConsoleProps (testId: string, logIds: string[]) {
+        // Read-only sibling of `requestPinnedCommand`: asks the runner to dump
+        // `consoleProps` for each of `logIds` without touching the reporter's
+        // pin state. One round-trip per call, fan-out happens runner-side.
+        const socket = openProject.getProject()?.server.socket
+
+        if (!socket?.requestRunner) {
+          return null
+        }
+
+        const response = await socket.requestRunner('inspect:request-command-console-props', { testId, logIds }, 1500)
+
+        if (!Array.isArray(response)) {
+          return null
+        }
+
+        return response.map((entry: any) => ({
+          logId: typeof entry?.logId === 'string' ? entry.logId : '',
+          consolePropsJson: typeof entry?.consolePropsJson === 'string' ? entry.consolePropsJson : null,
+        })).filter((entry) => entry.logId !== '')
+      },
+      async requestAutInspectRoot () {
+        // Round-trip to the runner for url/title/viewport of the AUT iframe.
+        // The runner applies any needed truncation (N/A here) — we pass the
+        // payload through unchanged. See `packages/app/src/runner/event-manager.ts`
+        // for the handler.
+        const socket = openProject.getProject()?.server.socket
+
+        if (!socket?.requestRunner) {
+          return null
+        }
+
+        const response = await socket.requestRunner('inspect:request-aut', { kind: 'root', args: {} }, 1500)
+
+        if (!response || typeof response !== 'object') {
+          return null
+        }
+
+        return response as AutInspectRootRunnerPayload
+      },
+      async requestAutInspectDom (selector: string) {
+        // Round-trip to the runner for a CSS-selector query against the AUT
+        // DOM. Truncation caps (20 matches, 500-char text, 2048-char outerHTML)
+        // are applied runner-side.
+        const socket = openProject.getProject()?.server.socket
+
+        if (!socket?.requestRunner) {
+          return null
+        }
+
+        const response = await socket.requestRunner('inspect:request-aut', { kind: 'dom', args: { selector } }, 1500)
+
+        if (!response || typeof response !== 'object') {
+          return null
+        }
+
+        return response as AutInspectDomRunnerPayload
+      },
+      async requestAutInspectSnapshot () {
+        // Round-trip to the runner for an accessibility-tree snapshot of the
+        // AUT. Walker caps (500 nodes) are applied runner-side. Timeout is
+        // raised vs. the other verbs because the tree walk is O(DOM).
+        const socket = openProject.getProject()?.server.socket
+
+        if (!socket?.requestRunner) {
+          return null
+        }
+
+        const response = await socket.requestRunner('inspect:request-aut', { kind: 'snapshot', args: {} }, 3000)
+
+        if (!response || typeof response !== 'object') {
+          return null
+        }
+
+        return response as AutInspectSnapshotRunnerPayload
       },
     },
     electronApi: {

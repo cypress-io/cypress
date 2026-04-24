@@ -54,4 +54,25 @@ export const stubQuery: MaybeResolver<Query> = {
       specCount: 0,
     }
   },
+  autInspect () {
+    return {
+      __typename: 'AutInspectError',
+      code: 'NOT_IN_STUDIO',
+      detailMessage: null,
+    }
+  },
+  autInspectDom () {
+    return {
+      __typename: 'AutInspectError',
+      code: 'NOT_IN_STUDIO',
+      detailMessage: null,
+    }
+  },
+  autInspectSnapshot () {
+    return {
+      __typename: 'AutInspectError',
+      code: 'NOT_IN_STUDIO',
+      detailMessage: null,
+    }
+  },
 }

@@ -1,4 +1,5 @@
 import Bluebird from 'bluebird'
+import { randomUUID } from 'crypto'
 import Debug from 'debug'
 import EventEmitter from 'events'
 import _ from 'lodash'
@@ -50,6 +51,7 @@ export class SocketBase implements SocketBroadcaster {
   private _sendResetBrowserTabsForNextSpecMessage
   private _sendResetBrowserStateMessage
   private _isRunnerSocketConnected
+  private _requestRunner?: (event: string, data: any, timeoutMs: number) => Promise<unknown>
   private _sendFocusBrowserMessage
   private _protocolManager?: ProtocolManagerShape
 
@@ -171,6 +173,9 @@ export class SocketBase implements SocketBroadcaster {
 
     let automationClient
     let runnerSocket
+    // requestId → resolver for in-flight `_requestRunner` calls. See
+    // `inspect:response` handler below.
+    const inspectPending = new Map<string, (value: unknown) => void>()
 
     const { socketIoRoute, socketIoCookie } = config
 
@@ -320,6 +325,50 @@ export class SocketBase implements SocketBroadcaster {
           return !!(runnerSocket && runnerSocket.connected)
         }
 
+        // Server → runner request/response. Uses a two-event pattern instead
+        // of socket.io acks because the Chromium CDP-backed browser socket
+        // does not deliver server-initiated ack callbacks to the client
+        // listener — see `packages/socket/lib/client/cdp-browser.ts#send`,
+        // which immediately fires the ack with no data. Plain events work
+        // uniformly across CDP and real socket.io.
+        this._requestRunner = (event: string, data: any, timeoutMs: number): Promise<unknown> => {
+          return new Promise((resolve) => {
+            if (!runnerSocket || !runnerSocket.connected) {
+              return resolve(null)
+            }
+
+            const requestId = randomUUID()
+            const pending = inspectPending
+
+            let settled = false
+            const settle = (value: unknown) => {
+              if (settled) return
+
+              settled = true
+              pending.delete(requestId)
+              clearTimeout(timer)
+              resolve(value)
+            }
+
+            pending.set(requestId, settle)
+
+            const timer = setTimeout(() => settle(null), timeoutMs)
+
+            runnerSocket.emit(event, { requestId, ...data })
+          })
+        }
+
+        // Runner → server response for `_requestRunner`. Separate event so
+        // the same pattern works under CDP (no ack support) and real
+        // socket.io (which does support ack, but we don't rely on it).
+        socket.on('inspect:response', ({ requestId, snapshot }: { requestId: string, snapshot: unknown }) => {
+          const settle = inspectPending.get(requestId)
+
+          if (settle) {
+            settle(snapshot)
+          }
+        })
+
         socket.on('reporter:connected', () => {
           if (socket.inReporterRoom) {
             return
@@ -361,21 +410,58 @@ export class SocketBase implements SocketBroadcaster {
           return options.onMocha.apply(options, args)
         })
 
-        // Open-mode counterpart to `mocha start/end`. The driver emits
-        // `run:start` / `run:end` unconditionally, but the `mocha` socket
-        // forward is gated on `isTextTerminal` and never fires during
-        // `cypress open`. The app (`event-manager.ts`) bridges those two
-        // driver events to this channel when not in run mode, giving
-        // data-context a run-lifecycle signal without the Mocha reporter.
-        socket.on('run:lifecycle', async (payload: {
-          phase: 'start' | 'end'
+        // Single envelope channel for every open-mode inspect signal.
+        // `event-manager.ts` in the browser wraps every signal (lifecycle,
+        // per-test results, and future kinds — commands, network, console)
+        // in a discriminated envelope; `dispatchInspectEvent` routes by kind.
+        //
+        // Skipped in run mode: the Mocha reporter path already owns the
+        // equivalent state and a stray forward here would double-write.
+        socket.on('inspect:event', async (envelope: {
+          kind?: string
           specPath?: string
-          startedAt?: string
-          endedAt?: string
+          timestamp?: string
+          payload?: Record<string, any>
         }) => {
-          // Defense-in-depth: the app-side gate should already keep us out of
-          // run mode, but skip here too so a stray forward can't double-write
-          // state that the Mocha reporter path owns.
+          if (this.inRunMode) {
+            return
+          }
+
+          if (!envelope?.kind) {
+            return
+          }
+
+          try {
+            const ctx = await getCtx()
+
+            ctx.actions.runState.dispatchInspectEvent(envelope as any)
+          } catch (err: any) {
+            debug('inspect:event handler failed: %s', err?.message)
+          }
+        })
+
+        // Browser → server sync for Studio test targeting. Fires when the
+        // reporter UI ("Edit in Studio" button / cancel) activates or exits
+        // Studio so that `coreData.studioActiveTestId` mirrors the runner.
+        // The CLI `studioInitTest` / `studioCancel` mutation paths update
+        // coreData directly, so these listeners are no-ops on those paths.
+        socket.on('studio:testId:set', async ({ testId }: { testId: string }) => {
+          if (this.inRunMode || !testId) {
+            return
+          }
+
+          try {
+            const ctx = await getCtx()
+
+            ctx.update((d) => {
+              d.studioActiveTestId = testId
+            })
+          } catch (err: any) {
+            debug('studio:testId:set handler failed: %s', err?.message)
+          }
+        })
+
+        socket.on('studio:testId:clear', async () => {
           if (this.inRunMode) {
             return
           }
@@ -383,19 +469,11 @@ export class SocketBase implements SocketBroadcaster {
           try {
             const ctx = await getCtx()
 
-            if (payload?.phase === 'start') {
-              ctx.actions.runState.recordStart({
-                specPath: payload.specPath,
-                startedAt: payload.startedAt,
-              })
-            } else if (payload?.phase === 'end') {
-              ctx.actions.runState.recordEnd({
-                specPath: payload.specPath,
-                endedAt: payload.endedAt,
-              })
-            }
+            ctx.update((d) => {
+              d.studioActiveTestId = null
+            })
           } catch (err: any) {
-            debug('run:lifecycle handler failed: %s', err?.message)
+            debug('studio:testId:clear handler failed: %s', err?.message)
           }
         })
 
@@ -806,6 +884,18 @@ export class SocketBase implements SocketBroadcaster {
     if (this._isRunnerSocketConnected) {
       return this._isRunnerSocketConnected()
     }
+  }
+
+  /**
+   * Fire-and-wait request to the runner socket. Resolves to `null` when the
+   * runner isn't connected or doesn't ack within `timeoutMs`.
+   */
+  async requestRunner (event: string, data: any, timeoutMs: number): Promise<unknown> {
+    if (!this._requestRunner) {
+      return null
+    }
+
+    return this._requestRunner(event, data, timeoutMs)
   }
 
   async sendFocusBrowserMessage () {

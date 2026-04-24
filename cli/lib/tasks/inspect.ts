@@ -18,16 +18,20 @@ interface InspectOpts {
 }
 
 /**
- * Options for `cypress inspect run <spec>`.
+ * Options for `cypress inspect spec open <name>`.
  *
+ * Opening a spec launches it (there is no separate `run` step). By default
+ * the command returns once the launch is initiated; `--wait` blocks until
+ * the run finishes so CI scripts can use the exit code.
+ *
+ * - `name` is the spec selector (basename, relative path, or absolute path).
  * - `wait` (`--wait`) polls `inspectSnapshot.activeRun` until the run leaves
- *   the `starting` / `running` states. Exits 0 on `finished`, 1 on `errored`,
- *   124 on timeout.
+ *   the `starting` / `running` states. Exits 0 on pass, 1 on fail, 124 on timeout.
  * - `timeout` (`--timeout <ms>`) overrides the default wait deadline. Only
  *   meaningful together with `--wait`.
  */
-interface RunOpts extends InspectOpts {
-  spec?: string
+interface SpecOpenOpts extends InspectOpts {
+  name?: string
   wait?: boolean
   timeout?: number
 }
@@ -91,6 +95,18 @@ interface ProjectClearOpts extends InspectOpts {
 }
 
 /**
+ * Options for `cypress inspect test open <selector>`.
+ *
+ * - `selector` is the positional arg. Resolution precedence:
+ *   1. Exact `testId` match (e.g. `r3`)
+ *   2. Exact joined title-path match (e.g. `"Suite > test one"`)
+ *   3. Unique substring match against the joined title path
+ */
+interface TestOpenOpts extends InspectOpts {
+  selector?: string
+}
+
+/**
  * Shape of the `inspectSnapshot` Query result. Mirrors
  * `packages/data-context/graphql/schemaTypes/objectTypes/gql-InspectSnapshot.ts`.
  */
@@ -110,6 +126,7 @@ interface InspectSnapshot {
   appRoute: 'INTRO' | 'TESTING_TYPE_SELECTION' | 'BROWSER_SELECTION' | 'SPEC_LIST' | 'SPEC_RUNNING' | 'ERROR'
   activeRun: ActiveRun | null
   specCount: number
+  studioActiveTestId: string | null
 }
 
 interface ActiveRun {
@@ -117,6 +134,82 @@ interface ActiveRun {
   startedAt: string
   endedAt: string | null
   status: 'starting' | 'running' | 'finished'
+  tests: TestResult[]
+  stats: TestStats
+  commands: CommandLog[]
+}
+
+interface CommandLog {
+  id: string
+  name: string
+  message: string
+  state: 'pending' | 'passed' | 'failed' | 'warn'
+  type: string
+  testId: string | null
+  displayName: string | null
+  number: number | null
+  snapshotCount: number
+  hasSnapshot: boolean
+  hasConsoleProps: boolean
+  timeout: number | null
+  numElements: number | null
+  visible: boolean | null
+  groupLevel: number | null
+  group: number | null
+  alias: string | null
+  aliasType: string | null
+  referencesAlias: string[] | null
+  hookId: string | null
+  error: string | null
+  wallClockStartedAt: string | null
+}
+
+interface PinnedCommand {
+  testId: string
+  logId: string
+  command: CommandLog
+  consolePropsJson: string | null
+}
+
+/**
+ * Options for `cypress inspect command pin <selector>`.
+ *
+ * - `selector` resolves in this precedence:
+ *   1. Exact log id match (e.g. `'log-primary-7'`)
+ *   2. Exact `number` match (1-based ordinal, e.g. `'3'`)
+ *   3. Unique substring match against command `name` (e.g. `'visit'`)
+ */
+interface CommandPinOpts extends InspectOpts {
+  selector?: string
+}
+
+/**
+ * Options for `cypress inspect command info <selector...>`.
+ *
+ * - `selectors` is 1..N positional selectors. Each resolves independently using
+ *   the same precedence as `command pin` (id → number → unique name substring).
+ * - Read-only: does NOT pin any command in the reporter UI.
+ */
+interface CommandInfoOpts extends InspectOpts {
+  selectors?: string[]
+}
+
+interface TestResult {
+  testId: string
+  title: string
+  titlePath: string[]
+  state: 'passed' | 'failed' | 'pending' | 'skipped'
+  duration: number | null
+  currentRetry: number
+  error: string | null
+}
+
+interface TestStats {
+  passed: number
+  failed: number
+  pending: number
+  skipped: number
+  total: number
 }
 
 interface SpecFields {
@@ -265,8 +358,126 @@ const snapshotQuery = `
         startedAt
         endedAt
         status
+        tests {
+          testId
+          title
+          titlePath
+          state
+          duration
+          currentRetry
+          error
+        }
+        stats {
+          passed
+          failed
+          pending
+          skipped
+          total
+        }
+        commands {
+          id
+          name
+          message
+          state
+          type
+          testId
+          displayName
+          number
+          snapshotCount
+          hasSnapshot
+          hasConsoleProps
+          timeout
+          numElements
+          visible
+          groupLevel
+          group
+          alias
+          aliasType
+          referencesAlias
+          hookId
+          error
+          wallClockStartedAt
+        }
       }
       specCount
+      studioActiveTestId
+    }
+  }
+`
+
+const pinnedCommandQuery = `
+  query CypressInspectPinnedCommand {
+    inspectSnapshot {
+      studioActiveTestId
+      pinnedCommand {
+        testId
+        logId
+        consolePropsJson
+        command {
+          id
+          name
+          message
+          state
+          type
+          testId
+          displayName
+          number
+          snapshotCount
+          hasSnapshot
+          hasConsoleProps
+          timeout
+          numElements
+          visible
+          groupLevel
+          group
+          alias
+          aliasType
+          referencesAlias
+          hookId
+          error
+          wallClockStartedAt
+        }
+      }
+    }
+  }
+`
+
+const inspectCommandInfoQuery = `
+  query CypressInspectCommandInfo($logIds: [String!]!) {
+    inspectCommandInfo(logIds: $logIds) {
+      ... on InspectCommandInfoResponse {
+        items {
+          consolePropsJson
+          command {
+            id
+            name
+            message
+            state
+            type
+            testId
+            displayName
+            number
+            snapshotCount
+            hasSnapshot
+            hasConsoleProps
+            timeout
+            numElements
+            visible
+            groupLevel
+            group
+            alias
+            aliasType
+            referencesAlias
+            hookId
+            error
+            wallClockStartedAt
+          }
+        }
+      }
+      ... on InspectCommandInfoError {
+        code
+        detailMessage
+      }
     }
   }
 `
@@ -405,6 +616,127 @@ const clearCurrentProjectMutation = `
     clearCurrentProject {
       __typename
     }
+  }
+`
+
+const studioInitTestMutation = `
+  mutation CypressInspectStudioInitTest($testId: ID!) {
+    studioInitTest(testId: $testId) {
+      ... on StudioInitResponse {
+        testId
+      }
+      ... on StudioInitError {
+        code
+        detailMessage
+      }
+    }
+  }
+`
+
+const studioCancelMutation = `
+  mutation CypressInspectStudioCancel {
+    studioCancel
+  }
+`
+
+const autInspectQuery = `
+  query CypressInspectAut {
+    autInspect {
+      ... on AutInspectResponse {
+        url
+        title
+        viewportWidth
+        viewportHeight
+      }
+      ... on AutInspectError {
+        code
+        detailMessage
+      }
+    }
+  }
+`
+
+const autInspectDomQuery = `
+  query CypressInspectAutDom($selector: String!) {
+    autInspectDom(selector: $selector) {
+      ... on AutInspectDomResponse {
+        selector
+        count
+        matches {
+          tag
+          text
+          attrs {
+            name
+            value
+          }
+          outerHTML
+        }
+      }
+      ... on AutInspectError {
+        code
+        detailMessage
+      }
+    }
+  }
+`
+
+// GraphQL has no native recursive queries, so we spell out children up to
+// depth 10 via a repeated fragment. Real a11y trees are rarely deeper than
+// 6; anything beyond 10 will have its children silently dropped from the CLI
+// response (the runner still returns them, we just don't select past 10).
+const AUT_A11Y_NODE_FIELDS = `
+  fragment NodeFields on AutInspectA11yNode {
+    role name level value checked disabled selector
+  }
+`
+
+const buildNestedChildren = (depth: number): string => {
+  if (depth <= 0) return ''
+
+  return `children { ...NodeFields ${buildNestedChildren(depth - 1)} }`
+}
+
+const autInspectSnapshotQuery = `
+  ${AUT_A11Y_NODE_FIELDS}
+  query CypressInspectAutSnapshot {
+    autInspectSnapshot {
+      ... on AutInspectSnapshotResponse {
+        url
+        title
+        viewportWidth
+        viewportHeight
+        nodeCount
+        truncated
+        tree {
+          ...NodeFields
+          ${buildNestedChildren(10)}
+        }
+      }
+      ... on AutInspectError {
+        code
+        detailMessage
+      }
+    }
+  }
+`
+
+const inspectPinCommandMutation = `
+  mutation CypressInspectPinCommand($logId: String!) {
+    inspectPinCommand(logId: $logId) {
+      ... on InspectPinCommandResponse {
+        logId
+      }
+      ... on InspectPinCommandError {
+        code
+        detailMessage
+      }
+    }
+  }
+`
+
+const inspectUnpinCommandMutation = `
+  mutation CypressInspectUnpinCommand {
+    inspectUnpinCommand
   }
 `
 
@@ -593,10 +925,10 @@ const status = async (opts: InspectOpts): Promise<void> => {
 }
 
 /**
- * `cypress inspect specs` — list specs for the active project. Exits 1 if no
- * project is loaded (there's nothing to list yet).
+ * `cypress inspect spec list` — list specs for the active project. Exits 1
+ * if no project is loaded (there's nothing to list yet).
  */
-const specs = async (opts: InspectOpts): Promise<void> => {
+const specList = async (opts: InspectOpts): Promise<void> => {
   const instance = await resolveOrExit(opts.instance)
 
   if (!instance) {
@@ -612,24 +944,772 @@ const specs = async (opts: InspectOpts): Promise<void> => {
     return
   }
 
-  const specList: SpecFields[] = data.currentProject.specs || []
+  const list: SpecFields[] = data.currentProject.specs || []
 
   if (opts.json) {
-    printJson(specList)
+    printJson(list)
     process.exit(0)
 
     return
   }
 
-  if (!specList.length) {
+  if (!list.length) {
     return
   }
 
-  const tree = buildSpecTree(specList.map((spec) => spec.relative))
+  const tree = buildSpecTree(list.map((spec) => spec.relative))
 
   for (const line of renderSpecTree(tree)) {
     logger.always(line)
   }
+}
+
+/**
+ * `cypress inspect spec` — report metadata about the currently-loaded spec.
+ *
+ * "Current" is defined as `inspectSnapshot.activeRun.specPath` — in the new
+ * model, setting a spec launches it, so the active run's spec is the one
+ * the user is currently working with. If no spec has been launched since
+ * the instance started, prints a message and exits 0 (not an error state —
+ * "no spec loaded" is a valid answer).
+ */
+const specCurrent = async (opts: InspectOpts): Promise<void> => {
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const snapshot = await fetchSnapshot(instance)
+  const activeRun = snapshot.activeRun
+
+  if (!activeRun) {
+    if (opts.json) {
+      printJson(null)
+
+      return
+    }
+
+    logger.always('No spec is currently loaded.')
+
+    return
+  }
+
+  if (opts.json) {
+    printJson(activeRun)
+
+    return
+  }
+
+  const basename = path.basename(activeRun.specPath)
+  const { stats } = activeRun
+
+  logger.always(`Spec:     ${basename}`)
+  logger.always(`Path:     ${activeRun.specPath}`)
+  logger.always(`Status:   ${activeRun.status}`)
+  logger.always(
+    `Tests:    ${stats.passed} passed, ${stats.failed} failed, ${stats.pending} pending, ${stats.skipped} skipped (${stats.total} total)`,
+  )
+
+  if (activeRun.tests.length) {
+    logger.always('')
+    for (const test of activeRun.tests) {
+      const title = test.titlePath.length ? test.titlePath.join(' > ') : test.title
+
+      logger.always(`  [${test.state}] ${title}`)
+    }
+  }
+}
+
+/**
+ * `cypress inspect test` (bare) — only meaningful when Studio is active.
+ *
+ * Returns the high-level status of the targeted test plus the command log
+ * entries for it (what the reporter shows in the left bar). Errors when no
+ * Studio session is active so the CLI clearly signals the precondition.
+ */
+const testCurrent = async (opts: InspectOpts): Promise<void> => {
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const snapshot = await fetchSnapshot(instance)
+
+  if (!snapshot.studioActiveTestId) {
+    writeStderr('Not in Studio mode. Run `cypress inspect test open <selector>` first.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const activeRun = snapshot.activeRun
+
+  if (!activeRun) {
+    writeStderr('Studio is active but no spec is loaded — inconsistent state.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const testId = snapshot.studioActiveTestId
+  const test = activeRun.tests.find((t) => t.testId === testId)
+  const commands = activeRun.commands
+
+  if (opts.json) {
+    printJson({ test: test ?? null, commands })
+
+    return
+  }
+
+  if (test) {
+    const title = test.titlePath.length ? test.titlePath.join(' > ') : test.title
+    const duration = typeof test.duration === 'number' ? `${test.duration}ms` : '—'
+
+    logger.always(`Test:     ${title}`)
+    logger.always(`Id:       ${test.testId}`)
+    logger.always(`State:    ${test.state}`)
+    logger.always(`Duration: ${duration}`)
+
+    if (test.error) {
+      logger.always('')
+      logger.always(chalk.red(`Error: ${test.error}`))
+    }
+  } else {
+    // Studio can activate before a test finishes its first attempt — in that
+    // case `activeRun.tests` won't have the entry yet, but we still have the
+    // testId and (likely) in-flight commands.
+    logger.always(`Test:     (awaiting first attempt)`)
+    logger.always(`Id:       ${testId}`)
+  }
+
+  logger.always('')
+  logger.always(`Commands (${commands.length}):`)
+
+  if (!commands.length) {
+    logger.always('  (none yet — commands stream in as the test runs)')
+
+    return
+  }
+
+  for (const cmd of commands) {
+    const state = (() => {
+      if (cmd.state === 'passed') return chalk.green(cmd.state)
+
+      if (cmd.state === 'failed') return chalk.red(cmd.state)
+
+      if (cmd.state === 'warn') return chalk.yellow(cmd.state)
+
+      return chalk.dim(cmd.state)
+    })()
+
+    const num = cmd.number ? chalk.dim(`${cmd.number}.`.padStart(4, ' ')) : '    '
+    const name = cmd.displayName || cmd.name
+    const suffix = cmd.message ? ` ${chalk.dim(cmd.message)}` : ''
+
+    logger.always(`  ${num} [${state}] ${name}${suffix}`)
+  }
+}
+
+/**
+ * `cypress inspect test list` — list tests for the currently-loaded spec
+ * along with their status and any per-test info that's been surfaced so far.
+ *
+ * Data source is `inspectSnapshot.activeRun.tests`, which the driver populates
+ * via the `test:result` socket event as the run progresses. Early in a run
+ * this list may be empty or partial — that's expected, not an error. If no
+ * spec has been loaded at all, exits 1 with an error message (you need a
+ * spec open to list its tests).
+ */
+const testList = async (opts: InspectOpts): Promise<void> => {
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const snapshot = await fetchSnapshot(instance)
+  const activeRun = snapshot.activeRun
+
+  if (!activeRun) {
+    writeStderr('No spec is currently loaded. Run `cypress inspect spec open <name>` first.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const tests = activeRun.tests
+
+  if (opts.json) {
+    printJson(tests)
+
+    return
+  }
+
+  if (!tests.length) {
+    // `activeRun` exists but no test results yet — the run is still spinning
+    // up or hasn't emitted any `test:result` events. Tell the user rather
+    // than printing silence that looks like an empty spec.
+    logger.always(`${path.basename(activeRun.specPath)} (${activeRun.status}): no test results yet`)
+
+    return
+  }
+
+  const table = new Table({
+    head: [
+      chalk.white('STATE'),
+      chalk.white('TITLE'),
+      chalk.white('DURATION'),
+      chalk.white('RETRY'),
+    ],
+  })
+
+  const colorState = (state: TestResult['state']): string => {
+    if (state === 'passed') return chalk.green(state)
+
+    if (state === 'failed') return chalk.red(state)
+
+    if (state === 'pending' || state === 'skipped') return chalk.yellow(state)
+
+    return state
+  }
+
+  for (const test of tests) {
+    const title = test.titlePath.length ? test.titlePath.join(' > ') : test.title
+    const duration = typeof test.duration === 'number' ? `${test.duration}ms` : '—'
+    const retry = test.currentRetry > 0 ? String(test.currentRetry) : ''
+
+    table.push([colorState(test.state), title, duration, retry])
+  }
+
+  logger.always(table.toString())
+
+  // Surface error messages below the table — they won't fit in a column
+  // without wrapping ugly, and they're the information that matters most
+  // when something failed.
+  const failures = tests.filter((t) => t.state === 'failed' && t.error)
+
+  if (failures.length) {
+    logger.always('')
+    for (const failure of failures) {
+      const title = failure.titlePath.length ? failure.titlePath.join(' > ') : failure.title
+
+      logger.always(chalk.red(`FAIL ${title}`))
+      logger.always(`  ${failure.error}`)
+    }
+  }
+}
+
+/**
+ * Resolve a user-supplied test selector against `activeRun.tests`.
+ *
+ * Precedence:
+ *   1. Exact `testId` match (`r3`)
+ *   2. Exact joined title-path match (`"Suite > test one"`)
+ *   3. Unique substring match against the joined title path
+ *
+ * Writes to stderr + exits 1 on failure (no match / ambiguous).
+ */
+const resolveTest = (selector: string, tests: TestResult[]): TestResult | null => {
+  const byId = tests.find((t) => t.testId === selector)
+
+  if (byId) return byId
+
+  const joined = (t: TestResult) => (t.titlePath.length ? t.titlePath.join(' > ') : t.title)
+
+  const byExactTitle = tests.find((t) => joined(t) === selector)
+
+  if (byExactTitle) return byExactTitle
+
+  const substringMatches = tests.filter((t) => joined(t).includes(selector))
+
+  if (substringMatches.length === 0) {
+    writeStderr(`No test matching: ${selector}\n`)
+    process.exit(1)
+
+    return null
+  }
+
+  if (substringMatches.length > 1) {
+    writeStderr(`Ambiguous test '${selector}'. Matches:\n`)
+    for (const match of substringMatches) {
+      writeStderr(`  [${match.testId}] ${joined(match)}\n`)
+    }
+
+    process.exit(1)
+
+    return null
+  }
+
+  return substringMatches[0]
+}
+
+/**
+ * `cypress inspect test open <selector>` — remotely trigger the equivalent of
+ * clicking "Edit in Studio" on a test row in the reporter.
+ *
+ * Resolves the selector against `activeRun.tests` locally so we can emit a
+ * precise "no match / ambiguous" error instead of relying on the server to
+ * enumerate candidates. Then fires the `studioInitTest` mutation, which pushes
+ * a `studio:remote-init:test` socket event to the runner — the browser's
+ * EventManager runs the same handler the button click uses.
+ *
+ * Exits silently with code 0 on success ("fire and see what we get").
+ */
+const testOpen = async (opts: TestOpenOpts): Promise<void> => {
+  if (!opts.selector) {
+    writeStderr('Missing required argument: <selector>. See `cypress inspect --help`.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const snapshot = await fetchSnapshot(instance)
+  const activeRun = snapshot.activeRun
+
+  if (!activeRun) {
+    writeStderr('No spec is currently loaded. Run `cypress inspect spec open <name>` first.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const resolved = resolveTest(opts.selector, activeRun.tests)
+
+  if (!resolved) {
+    return
+  }
+
+  const data = await postGraphQL(instance, studioInitTestMutation, { testId: resolved.testId })
+  const result = data.studioInitTest
+
+  if (result.code) {
+    // Server-side validation rejected it — surface the detail message.
+    writeStderr(`${result.code}: ${result.detailMessage}\n`)
+    process.exit(1)
+
+    return
+  }
+
+  if (opts.json) {
+    printJson(result)
+  }
+}
+
+/**
+ * `cypress inspect test close` — deactivate Studio. Equivalent to clicking
+ * the cancel button in the Studio panel: tears down the server-side
+ * `StudioLifecycleManager` and clears the browser's studio store state.
+ *
+ * Idempotent from the caller's perspective — the mutation always resolves
+ * to `true`. Firing it when Studio isn't active is a no-op on the browser
+ * side (the handler guards on store state internally).
+ */
+const testClose = async (opts: InspectOpts): Promise<void> => {
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  await postGraphQL(instance, studioCancelMutation)
+}
+
+/**
+ * Resolve a user-supplied command selector against the Studio test's command
+ * log. Precedence mirrors `resolveTest`:
+ *   1. Exact log id match (e.g. `'log-primary-7'`)
+ *   2. Exact `number` match (1-based ordinal, stringified)
+ *   3. Unique substring match against `name`
+ *
+ * Writes to stderr + exits 1 on miss / ambiguous.
+ */
+const resolveCommand = (selector: string, commands: CommandLog[]): CommandLog | null => {
+  const byId = commands.find((c) => c.id === selector)
+
+  if (byId) return byId
+
+  const numeric = Number(selector)
+
+  if (Number.isFinite(numeric)) {
+    const byNumber = commands.find((c) => c.number === numeric)
+
+    if (byNumber) return byNumber
+  }
+
+  const substringMatches = commands.filter((c) => c.name.includes(selector))
+
+  if (substringMatches.length === 0) {
+    writeStderr(`No command matching: ${selector}\n`)
+    process.exit(1)
+
+    return null
+  }
+
+  if (substringMatches.length > 1) {
+    writeStderr(`Ambiguous command '${selector}'. Matches:\n`)
+    for (const match of substringMatches) {
+      const numLabel = match.number != null ? `#${match.number}` : '   '
+      const msg = match.message ? ` ${match.message}` : ''
+
+      writeStderr(`  [${match.id}] ${numLabel} ${match.name}${msg}\n`)
+    }
+
+    process.exit(1)
+
+    return null
+  }
+
+  return substringMatches[0]
+}
+
+/**
+ * Require Studio to be active for the `command` family. Writes a hint to
+ * stderr and exits 1 when no test is open in Studio; otherwise returns the
+ * snapshot so callers can proceed.
+ */
+const requireStudioSnapshot = async (instance: Instance): Promise<InspectSnapshot | null> => {
+  const snapshot = await fetchSnapshot(instance)
+
+  if (!snapshot.studioActiveTestId) {
+    writeStderr('Not in Studio mode. Run `cypress inspect test open <selector>` first.\n')
+    process.exit(1)
+
+    return null
+  }
+
+  return snapshot
+}
+
+/**
+ * `cypress inspect command list` — enumerate commands for the Studio-active
+ * test, with richer metadata than `inspect test` shows (snapshot count,
+ * duration, element count, alias, hook context, etc.).
+ *
+ * `--json` returns the raw `activeRun.commands` array for downstream scripts.
+ */
+const commandList = async (opts: InspectOpts): Promise<void> => {
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const snapshot = await requireStudioSnapshot(instance)
+
+  if (!snapshot) {
+    return
+  }
+
+  const commands = snapshot.activeRun?.commands ?? []
+
+  if (opts.json) {
+    printJson(commands)
+
+    return
+  }
+
+  if (!commands.length) {
+    logger.always('(no commands — run the test or wait for commands to stream in)')
+
+    return
+  }
+
+  const table = new Table({
+    head: [
+      chalk.white('#'),
+      chalk.white('STATE'),
+      chalk.white('NAME'),
+      chalk.white('MESSAGE'),
+      chalk.white('SNAPS'),
+      chalk.white('ELEMS'),
+      chalk.white('ALIAS'),
+    ],
+  })
+
+  const colorState = (state: CommandLog['state']): string => {
+    if (state === 'passed') return chalk.green(state)
+
+    if (state === 'failed') return chalk.red(state)
+
+    if (state === 'warn') return chalk.yellow(state)
+
+    return chalk.dim(state)
+  }
+
+  for (const cmd of commands) {
+    const number = cmd.number != null ? String(cmd.number) : ''
+    const name = cmd.displayName || cmd.name
+    const elems = cmd.numElements != null ? String(cmd.numElements) : ''
+    const alias = cmd.alias ?? ''
+
+    table.push([number, colorState(cmd.state), name, cmd.message, String(cmd.snapshotCount), elems, alias])
+  }
+
+  logger.always(table.toString())
+}
+
+/**
+ * `cypress inspect command` (bare) — show rich detail for the currently
+ * pinned command: all `CommandLog` metadata plus `consoleProps`. Errors if
+ * no command is pinned (run `inspect command pin <selector>` first).
+ */
+const commandCurrent = async (opts: InspectOpts): Promise<void> => {
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const data = await postGraphQL(instance, pinnedCommandQuery)
+  const pinned: PinnedCommand | null = data.inspectSnapshot?.pinnedCommand ?? null
+  const studioActiveTestId: string | null = data.inspectSnapshot?.studioActiveTestId ?? null
+
+  if (!studioActiveTestId) {
+    writeStderr('Not in Studio mode. Run `cypress inspect test open <selector>` first.\n')
+    process.exit(1)
+
+    return
+  }
+
+  if (!pinned) {
+    if (opts.json) {
+      printJson(null)
+
+      return
+    }
+
+    writeStderr('No command is pinned. Run `cypress inspect command pin <selector>` first.\n')
+    process.exit(1)
+
+    return
+  }
+
+  if (opts.json) {
+    printJson(pinned)
+
+    return
+  }
+
+  printCommandDetail(pinned.command, pinned.consolePropsJson)
+}
+
+/**
+ * Pretty-print a single `CommandLog` entry plus its `consoleProps` dump to
+ * stdout. Shared by `command` (bare) and `command info <selector...>`.
+ */
+const printCommandDetail = (cmd: CommandLog, consolePropsJson: string | null): void => {
+  const numLabel = cmd.number != null ? `#${cmd.number}` : ''
+  const name = cmd.displayName || cmd.name
+
+  logger.always(`Command:   ${name} ${chalk.dim(numLabel)}`)
+  logger.always(`Id:        ${cmd.id}`)
+  logger.always(`State:     ${cmd.state}`)
+  logger.always(`Type:      ${cmd.type}`)
+
+  if (cmd.message) logger.always(`Message:   ${cmd.message}`)
+
+  if (cmd.alias) logger.always(`Alias:     ${cmd.alias}${cmd.aliasType ? chalk.dim(` (${cmd.aliasType})`) : ''}`)
+
+  if (cmd.referencesAlias?.length) logger.always(`References: ${cmd.referencesAlias.join(', ')}`)
+
+  if (cmd.numElements != null) logger.always(`Elements:  ${cmd.numElements}`)
+
+  if (cmd.visible != null) logger.always(`Visible:   ${cmd.visible}`)
+
+  if (cmd.timeout != null) logger.always(`Timeout:   ${cmd.timeout}ms`)
+
+  logger.always(`Snapshots: ${cmd.snapshotCount}`)
+  if (cmd.hookId) logger.always(`Hook:      ${cmd.hookId}`)
+
+  if (cmd.groupLevel != null && cmd.groupLevel > 0) logger.always(`Group:     level ${cmd.groupLevel}${cmd.group != null ? ` (parent ${cmd.group})` : ''}`)
+
+  if (cmd.wallClockStartedAt) logger.always(`Started:   ${cmd.wallClockStartedAt}`)
+
+  if (cmd.error) {
+    logger.always('')
+    logger.always(chalk.red(`Error: ${cmd.error}`))
+  }
+
+  if (consolePropsJson) {
+    logger.always('')
+    logger.always('Console props:')
+
+    try {
+      const parsed = JSON.parse(consolePropsJson)
+
+      logger.always(JSON.stringify(parsed, null, 2))
+    } catch {
+      logger.always(consolePropsJson)
+    }
+  }
+}
+
+/**
+ * `cypress inspect command pin <selector>` — remotely pin a command in the
+ * reporter. Selector resolves locally (exact id → number → unique name
+ * substring) before calling `inspectPinCommand`.
+ *
+ * Exits silently with code 0 on success.
+ */
+const commandPin = async (opts: CommandPinOpts): Promise<void> => {
+  if (!opts.selector) {
+    writeStderr('Missing required argument: <selector>. See `cypress inspect --help`.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const snapshot = await requireStudioSnapshot(instance)
+
+  if (!snapshot) {
+    return
+  }
+
+  const commands = snapshot.activeRun?.commands ?? []
+
+  if (!commands.length) {
+    writeStderr('No commands on the current Studio test.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const resolved = resolveCommand(opts.selector, commands)
+
+  if (!resolved) {
+    return
+  }
+
+  const data = await postGraphQL(instance, inspectPinCommandMutation, { logId: resolved.id })
+  const result = data.inspectPinCommand
+
+  if (result.code) {
+    writeStderr(`${result.code}: ${result.detailMessage}\n`)
+    process.exit(1)
+
+    return
+  }
+
+  if (opts.json) {
+    printJson(result)
+  }
+}
+
+/**
+ * `cypress inspect command unpin` — unpin whatever command is currently pinned
+ * in the reporter. Idempotent.
+ */
+const commandUnpin = async (opts: InspectOpts): Promise<void> => {
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  await postGraphQL(instance, inspectUnpinCommandMutation)
+}
+
+/**
+ * `cypress inspect command info <selector...>` — read-only detail for one or
+ * more commands. Selectors resolve locally (same precedence as `command pin`:
+ * id → number → unique name substring). Duplicate resolutions are de-duped in
+ * response order. Does NOT pin anything in the reporter UI.
+ *
+ * Output:
+ * - text: `printCommandDetail` per item, separated by a rule line
+ * - JSON: always an array of `{ command, consolePropsJson }`, even for N=1
+ */
+const commandInfo = async (opts: CommandInfoOpts): Promise<void> => {
+  const selectors = opts.selectors ?? []
+
+  if (selectors.length === 0) {
+    writeStderr('Missing required argument: <selector>. See `cypress inspect --help`.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const snapshot = await requireStudioSnapshot(instance)
+
+  if (!snapshot) {
+    return
+  }
+
+  const commands = snapshot.activeRun?.commands ?? []
+
+  if (!commands.length) {
+    writeStderr('No commands on the current Studio test.\n')
+    process.exit(1)
+
+    return
+  }
+
+  // Resolve each selector; bail on the first miss/ambiguous. `resolveCommand`
+  // calls process.exit(1) itself, so null returns don't reach this loop —
+  // the explicit break is defensive.
+  const resolvedIds: string[] = []
+  const seen = new Set<string>()
+
+  for (const selector of selectors) {
+    const resolved = resolveCommand(selector, commands)
+
+    if (!resolved) {
+      return
+    }
+
+    if (!seen.has(resolved.id)) {
+      seen.add(resolved.id)
+      resolvedIds.push(resolved.id)
+    }
+  }
+
+  const data = await postGraphQL(instance, inspectCommandInfoQuery, { logIds: resolvedIds })
+  const result = data.inspectCommandInfo
+
+  if (result.code) {
+    writeStderr(`${result.code}: ${result.detailMessage}\n`)
+    process.exit(1)
+
+    return
+  }
+
+  const items: Array<{ command: CommandLog, consolePropsJson: string | null }> = result.items ?? []
+
+  if (opts.json) {
+    printJson(items)
+
+    return
+  }
+
+  items.forEach((item, i) => {
+    if (i > 0) {
+      logger.always('')
+      logger.always(chalk.dim('──'))
+      logger.always('')
+    }
+
+    printCommandDetail(item.command, item.consolePropsJson)
+  })
 }
 
 interface ResolvedSpec {
@@ -710,24 +1790,25 @@ const resolveSpec = (
 }
 
 /**
- * `cypress inspect run <spec>` — launch a spec in the running instance.
+ * `cypress inspect spec open <name>` — load a spec into the running instance,
+ * which launches it (opening the spec is running it).
  *
  * By default this is fire-and-forget: the `runSpec` mutation initiates the
  * run and the CLI returns once the mutation resolves. Pass `--wait` to poll
  * `inspectSnapshot.activeRun` until the run finishes.
  *
  * Exit codes under `--wait`:
- *   - 0   finished
- *   - 1   unexpected error (no activeRun record, etc.)
+ *   - 0   finished with no failures
+ *   - 1   unexpected error (no activeRun record, etc.) or one or more failing tests
  *   - 124 timed out before the run finished
  *
- * Note: pass/fail counts are not reported — Cypress's driver runs Mocha
- * without the Base reporter, so `runner.stats` is never populated. Inspect
- * the Cypress UI (or `cypress run`) for test results.
+ * Per-test outcomes are bridged from the driver over the `test:result` socket
+ * event and surfaced as `activeRun.tests` / `activeRun.stats`. Retries
+ * overwrite the prior attempt server-side so the final state wins.
  */
-const run = async (opts: RunOpts): Promise<void> => {
-  if (!opts.spec) {
-    writeStderr('Missing required argument: <spec>. See `cypress inspect --help`.\n')
+const specOpen = async (opts: SpecOpenOpts): Promise<void> => {
+  if (!opts.name) {
+    writeStderr('Missing required argument: <name>. See `cypress inspect --help`.\n')
     process.exit(1)
 
     return
@@ -751,7 +1832,7 @@ const run = async (opts: RunOpts): Promise<void> => {
   const projectRoot: string = data.currentProject.projectRoot
   const specs: ResolvedSpec[] = data.currentProject.specs || []
 
-  const resolved = resolveSpec(opts.spec, projectRoot, specs)
+  const resolved = resolveSpec(opts.name, projectRoot, specs)
 
   if (!resolved) {
     return
@@ -789,7 +1870,24 @@ const run = async (opts: RunOpts): Promise<void> => {
     return
   }
 
+  const { stats } = activeRun
+
   logger.always(`${resolved.relative}: finished`)
+  logger.always(
+    `  ${stats.passed} passed, ${stats.failed} failed, ${stats.pending} pending, ${stats.skipped} skipped (${stats.total} total)`,
+  )
+
+  if (stats.failed > 0) {
+    for (const test of activeRun.tests) {
+      if (test.state !== 'failed') continue
+
+      const path = test.titlePath.length ? test.titlePath.join(' > ') : test.title
+
+      writeStderr(`  FAIL ${path}${test.error ? `\n      ${test.error}` : ''}\n`)
+    }
+
+    process.exit(1)
+  }
 }
 
 /**
@@ -1408,10 +2506,12 @@ const projectList = async (opts: InspectOpts): Promise<void> => {
   ])
 
   if (opts.json) {
-    printJson(projects.map((p) => ({
-      ...p,
-      current: p.projectRoot === snapshot.projectRoot,
-    })))
+    printJson(projects.map((p) => {
+      return {
+        ...p,
+        current: p.projectRoot === snapshot.projectRoot,
+      }
+    }))
 
     process.exit(0)
 
@@ -1652,11 +2752,221 @@ const projectClear = async (opts: ProjectClearOpts): Promise<void> => {
   logger.always('project cleared')
 }
 
+interface AutDomOpts extends InspectOpts {
+  selector?: string
+}
+
+const AUT_ERROR_HINT: Record<string, string> = {
+  NOT_IN_STUDIO: 'Not in Studio mode. Run `cypress inspect test open <selector>` first.',
+  TIMEOUT: 'AUT did not respond in time. Make sure the runner is open and the test is paused in Studio.',
+  AUT_UNAVAILABLE: 'The AUT iframe is not ready (no document loaded, or cross-origin and inaccessible).',
+  INVALID_SELECTOR: 'The CSS selector was rejected by the browser parser.',
+}
+
+const writeAutError = (code: string, detailMessage?: string): void => {
+  const hint = AUT_ERROR_HINT[code] || code
+  const detail = detailMessage ? ` (${detailMessage})` : ''
+
+  writeStderr(`${code}: ${hint}${detail}\n`)
+}
+
+/**
+ * `cypress inspect aut` — snapshot of the AUT iframe: URL, title, and
+ * viewport dimensions. Studio-gated: requires `inspect test open <selector>`
+ * to have been run first (otherwise exits 1 with `NOT_IN_STUDIO`).
+ */
+const aut = async (opts: InspectOpts): Promise<void> => {
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const data = await postGraphQL(instance, autInspectQuery)
+  const result = data.autInspect
+
+  if (result.code) {
+    writeAutError(result.code, result.detailMessage)
+    process.exit(1)
+
+    return
+  }
+
+  if (opts.json) {
+    printJson(result)
+
+    return
+  }
+
+  logger.always(`URL:      ${result.url}`)
+  logger.always(`Title:    ${result.title ?? chalk.dim('(unavailable — cross-origin)')}`)
+  logger.always(`Viewport: ${result.viewportWidth}x${result.viewportHeight}`)
+}
+
+/**
+ * `cypress inspect aut dom <selector>` — CSS selector query against the AUT
+ * DOM. Returns up to 20 matches with tag/attrs/truncated text/outerHTML.
+ * Truncation is applied by the runner, not the CLI. Studio-gated.
+ */
+const autDom = async (opts: AutDomOpts): Promise<void> => {
+  if (!opts.selector) {
+    writeStderr('Missing required argument: <selector>. See `cypress inspect --help`.\n')
+    process.exit(1)
+
+    return
+  }
+
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const data = await postGraphQL(instance, autInspectDomQuery, { selector: opts.selector })
+  const result = data.autInspectDom
+
+  if (result.code) {
+    writeAutError(result.code, result.detailMessage)
+    process.exit(1)
+
+    return
+  }
+
+  if (opts.json) {
+    printJson(result)
+
+    return
+  }
+
+  logger.always(`Selector: ${result.selector}`)
+  logger.always(`Count:    ${result.count}`)
+
+  if (result.count === 0) {
+    return
+  }
+
+  logger.always('')
+
+  const capped = result.matches.length < result.count
+    ? chalk.dim(` (showing first ${result.matches.length})`)
+    : ''
+
+  logger.always(`Matches${capped}:`)
+
+  result.matches.forEach((m: any, i: number) => {
+    const num = chalk.dim(`${i + 1}.`.padStart(4, ' '))
+    const attrsPreview = m.attrs.length
+      ? ` ${chalk.dim(m.attrs.map((a: any) => `${a.name}="${a.value}"`).join(' '))}`
+      : ''
+    const textPreview = m.text ? ` ${chalk.dim(JSON.stringify(m.text))}` : ''
+
+    logger.always(`  ${num} [${m.tag}]${attrsPreview}${textPreview}`)
+  })
+}
+
+interface A11yNode {
+  role: string
+  name: string | null
+  level: number | null
+  value: string | null
+  checked: boolean | null
+  disabled: boolean | null
+  selector: string
+  children?: A11yNode[]
+}
+
+const formatA11yNode = (n: A11yNode): string => {
+  const bits: string[] = [`[${n.role}`]
+
+  if (n.level != null) bits.push(`level=${n.level}`)
+
+  bits[bits.length - 1] += ']'
+
+  if (n.name) bits.push(chalk.white(JSON.stringify(n.name)))
+
+  if (n.value != null) bits.push(chalk.dim(`value=${JSON.stringify(n.value)}`))
+
+  if (n.checked != null) bits.push(chalk.dim(`checked=${n.checked}`))
+
+  if (n.disabled) bits.push(chalk.dim('disabled'))
+
+  bits.push(chalk.dim(`→ ${n.selector}`))
+
+  return bits.join(' ')
+}
+
+const printA11yTree = (node: A11yNode, prefix: string, isLast: boolean, isRoot: boolean): void => {
+  if (isRoot) {
+    logger.always(formatA11yNode(node))
+  } else {
+    const connector = isLast ? '└─ ' : '├─ '
+
+    logger.always(`${prefix}${connector}${formatA11yNode(node)}`)
+  }
+
+  const children = node.children || []
+  const childPrefix = isRoot ? '' : prefix + (isLast ? '   ' : '│  ')
+
+  children.forEach((child, i) => {
+    printA11yTree(child, childPrefix, i === children.length - 1, false)
+  })
+}
+
+/**
+ * `cypress inspect aut snapshot` — compact accessibility tree of the AUT.
+ * Each node carries a unique CSS selector that can be fed to
+ * `cypress inspect aut dom <selector>` for deeper inspection. Studio-gated.
+ */
+const autSnapshot = async (opts: InspectOpts): Promise<void> => {
+  const instance = await resolveOrExit(opts.instance)
+
+  if (!instance) {
+    return
+  }
+
+  const data = await postGraphQL(instance, autInspectSnapshotQuery)
+  const result = data.autInspectSnapshot
+
+  if (result.code) {
+    writeAutError(result.code, result.detailMessage)
+    process.exit(1)
+
+    return
+  }
+
+  if (opts.json) {
+    printJson(result)
+
+    return
+  }
+
+  logger.always(`URL:      ${result.url}`)
+  logger.always(`Title:    ${result.title ?? chalk.dim('(unavailable)')}`)
+  logger.always(`Viewport: ${result.viewportWidth}x${result.viewportHeight}`)
+  logger.always(`Nodes:    ${result.nodeCount}${result.truncated ? chalk.yellow(' (truncated at 500)') : ''}`)
+  logger.always('')
+
+  printA11yTree(result.tree, '', true, true)
+}
+
 const inspectModule = {
   list,
   status,
-  specs,
-  run,
+  specCurrent,
+  specList,
+  specOpen,
+  testCurrent,
+  testList,
+  testOpen,
+  testClose,
+  commandList,
+  commandCurrent,
+  commandInfo,
+  commandPin,
+  commandUnpin,
+  aut,
+  autDom,
+  autSnapshot,
   switch: switchMode,
   browserList,
   browserOpen,

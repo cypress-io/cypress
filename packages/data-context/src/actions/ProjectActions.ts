@@ -5,7 +5,7 @@ import execa from 'execa'
 import path from 'path'
 import assert from 'assert'
 
-import type { ProjectShape } from '../data/coreDataShape'
+import type { AutInspectDomRunnerPayload, AutInspectRootRunnerPayload, AutInspectSnapshotRunnerPayload, CommandConsolePropsShape, CommandSnapshotShape, PinnedCommandShape, ProjectShape } from '../data/coreDataShape'
 import type { DataContext } from '..'
 import { hasNonExampleSpec } from '../codegen'
 import templates from '../codegen/templates'
@@ -57,6 +57,56 @@ export interface ProjectApiShape {
   resetServer(): void
   runSpec(spec: Cypress.Spec): Promise<void>
   routeToDebug(runNumber: number): void
+  emitStudioInitTest(testId: string): void
+  emitStudioCancel(): void
+  /**
+   * Ask the runner for a snapshot of the command log for `testId`, sourced
+   * from the reporter's MobX store. Resolves to the list or `null` when the
+   * runner doesn't respond (disconnected, timed out, or unknown test).
+   */
+  requestCommandsSnapshot(testId: string): Promise<CommandSnapshotShape[] | null>
+  /**
+   * Fire-and-forget — instructs the reporter to pin the command log entry
+   * `logId` on test `testId` (runs the same code path as clicking the pin
+   * icon in the reporter). Mirrors `emitStudioInitTest` for the remote-trigger side.
+   */
+  emitPinCommand(testId: string, logId: string): void
+  /**
+   * Fire-and-forget — instructs the reporter to clear any pinned command.
+   */
+  emitUnpinCommand(): void
+  /**
+   * Ask the runner for the currently pinned command plus its `consoleProps`
+   * dump. Resolves to `null` when nothing is pinned or the runner can't
+   * respond.
+   */
+  requestPinnedCommand(testId: string): Promise<PinnedCommandShape | null>
+  /**
+   * Ask the runner for `consoleProps` for each of the given log ids on `testId`.
+   * Read-only: does NOT pin any command in the reporter UI. Returns an array
+   * of `{ logId, consolePropsJson }` in the same order as `logIds`; unknown
+   * ids come back with `consolePropsJson: null`. Resolves to `null` when the
+   * runner isn't connected or times out.
+   */
+  requestCommandConsoleProps(testId: string, logIds: string[]): Promise<CommandConsolePropsShape[] | null>
+  /**
+   * Ask the runner for a URL/title/viewport snapshot of the AUT iframe.
+   * Resolves to `null` when the runner isn't connected / didn't ack within
+   * the socket timeout — the resolver maps `null` to `TIMEOUT`.
+   */
+  requestAutInspectRoot(): Promise<AutInspectRootRunnerPayload | null>
+  /**
+   * Ask the runner to query the AUT DOM by CSS selector. Truncation caps
+   * (20 matches, 500-char text, 2048-char outerHTML) are applied runner-side.
+   */
+  requestAutInspectDom(selector: string): Promise<AutInspectDomRunnerPayload | null>
+  /**
+   * Ask the runner to walk the AUT and return a compact accessibility tree.
+   * Each node carries a CSS selector that should feed back into
+   * `requestAutInspectDom` for deeper inspection. The walker caps total nodes
+   * (500) and sets `truncated: true` when the cap is hit.
+   */
+  requestAutInspectSnapshot(): Promise<AutInspectSnapshotRunnerPayload | null>
 }
 
 export interface FindSpecs<T> {
@@ -639,6 +689,18 @@ export class ProjectActions {
       // poll against immediately — the driver's `run:start` bridge flips
       // status to 'running' once the browser actually begins executing.
       this.ctx.actions.runState.recordLaunching(spec.absolute)
+
+      // Clear any active Studio session before navigating. Otherwise the
+      // Studio store's `testId` / `isActive` state persists across the spec
+      // switch and the new spec inherits Studio mode targeting a test that
+      // doesn't exist. The UI's InlineSpecListTree does this symmetrically
+      // for user-initiated spec clicks — mirror that here so CLI-triggered
+      // switches via `inspect spec open` get the same cleanup.
+      this.ctx.update((d) => {
+        d.studioActiveTestId = null
+      })
+
+      this.api.emitStudioCancel()
 
       // Hooray, everything looks good and we're all set up
       // Try to launch the requested spec by navigating to it in the browser

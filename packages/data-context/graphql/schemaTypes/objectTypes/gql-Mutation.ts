@@ -10,7 +10,7 @@ import { Query } from './gql-Query'
 import { ScaffoldedFile } from './gql-ScaffoldedFile'
 import { ReactComponentResponse } from './gql-ReactComponentResponse'
 import { TestsBySpecInput } from '../inputTypes'
-import { RunSpecResult } from '../unions'
+import { InspectPinCommandResult, RunSpecResult, StudioInitResult } from '../unions'
 
 export const mutation = mutationType({
   definition (t) {
@@ -556,6 +556,92 @@ export const mutation = mutationType({
         return await ctx.actions.project.runSpec({
           specPath: args.specPath,
         })
+      },
+    })
+
+    t.field('studioInitTest', {
+      description: 'Activate Studio for a specific test in the currently-running spec. Equivalent to clicking "Edit in Studio" on a test row in the reporter.',
+      type: StudioInitResult,
+      args: {
+        testId: nonNull(idArg({
+          description: 'Runtime id of the target test (matches `activeRun.tests[].testId`)',
+        })),
+      },
+      resolve: async (source, args, ctx) => {
+        const activeRun = ctx.coreData.activeRun
+
+        if (!activeRun) {
+          return { code: 'NO_SPEC' as const, detailMessage: 'No spec is currently loaded. Open a spec before activating Studio.' }
+        }
+
+        const test = activeRun.tests[args.testId]
+
+        if (!test) {
+          return { code: 'UNKNOWN_TEST' as const, detailMessage: `No test with id '${args.testId}' in the active run.` }
+        }
+
+        // Mirror the browser Pinia store server-side so `inspectSnapshot`
+        // can signal "in Studio on <testId>" to the CLI. Cleared on cancel /
+        // runSpec — see `emitStudioCancel` and `ProjectActions.runSpec`.
+        ctx.update((d) => {
+          d.studioActiveTestId = args.testId
+        })
+
+        ctx._apis.projectApi.emitStudioInitTest(args.testId)
+
+        return { testId: args.testId }
+      },
+    })
+
+    t.field('studioCancel', {
+      description: 'Deactivate Studio. Equivalent to clicking the cancel button in the Studio panel — tears down `StudioLifecycleManager` and clears the browser store state.',
+      type: 'Boolean',
+      resolve: (source, args, ctx) => {
+        ctx.update((d) => {
+          d.studioActiveTestId = null
+        })
+
+        ctx._apis.projectApi.emitStudioCancel()
+
+        return true
+      },
+    })
+
+    t.field('inspectPinCommand', {
+      description: 'Pin a specific command log entry in the reporter. Requires Studio to be active on a test (`inspect test open` first). Mirrors clicking the pin icon on a command row.',
+      type: InspectPinCommandResult,
+      args: {
+        logId: nonNull(stringArg({
+          description: 'Driver-assigned id of the command log entry to pin.',
+        })),
+      },
+      resolve: async (source, args, ctx) => {
+        const testId = ctx.coreData.studioActiveTestId
+
+        if (!testId) {
+          return { code: 'NO_STUDIO_TEST' as const, detailMessage: 'No test is currently open in Studio. Run `cypress inspect test open <selector>` first.' }
+        }
+
+        const commands = await ctx._apis.projectApi.requestCommandsSnapshot(testId)
+        const known = commands?.some((c) => c.id === args.logId)
+
+        if (!known) {
+          return { code: 'UNKNOWN_LOG' as const, detailMessage: `No command with id '${args.logId}' on the current Studio test.` }
+        }
+
+        ctx._apis.projectApi.emitPinCommand(testId, args.logId)
+
+        return { logId: args.logId }
+      },
+    })
+
+    t.field('inspectUnpinCommand', {
+      description: 'Clear any pinned command in the reporter. No-op when nothing is pinned.',
+      type: 'Boolean',
+      resolve: (source, args, ctx) => {
+        ctx._apis.projectApi.emitUnpinCommand()
+
+        return true
       },
     })
 

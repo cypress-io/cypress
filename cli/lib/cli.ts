@@ -591,20 +591,20 @@ const cliModule = {
     .option('--json', 'Output JSON instead of human-readable text')
     .option('--instance <selector>', 'Select an instance by pid or projectRoot substring (when multiple are running)')
     .option('--no-relaunch', 'For `switch`: update testing type without relaunching the browser')
-    .option('--wait', 'For `run`: block until the spec finishes (exits 0 on pass, 1 on fail, 124 on timeout)')
-    .option('--timeout <ms>', 'For `switch` / `run --wait` / `browser open|close` / `project open|clear`: milliseconds to wait before giving up (default 30000, 120000 for run)', coerceAnyStringToInt)
+    .option('--wait', 'For `spec open`: block until the spec finishes (exits 0 on pass, 1 on fail, 124 on timeout)')
+    .option('--timeout <ms>', 'For `switch` / `spec open --wait` / `browser open|close` / `project open|clear`: milliseconds to wait before giving up (default 30000, 120000 for spec open)', coerceAnyStringToInt)
     .action(async function (this: any, opts: any, args: string[]) {
       const [command = 'list', positional, subPositional] = args || []
 
-      const topLevel = ['list', 'status', 'specs', 'run', 'switch', 'browser', 'project']
+      const topLevel = ['list', 'status', 'spec', 'test', 'command', 'aut', 'switch', 'browser', 'project']
 
       if (!_.includes(topLevel, command)) {
         unknownOption.call(this, `inspect ${command}`, 'command')
       }
 
-      // `browser` and `project` are grouping commands with their own nested
-      // actions. Validate the sub-action up-front so unknown values fail
-      // fast with a consistent error shape.
+      // `browser`, `project`, and `spec` are grouping commands with their own
+      // nested actions. Validate the sub-action up-front so unknown values
+      // fail fast with a consistent error shape.
       if (command === 'browser') {
         const browserActions = ['list', 'open', 'close']
         const action = positional || 'list'
@@ -623,9 +623,57 @@ const cliModule = {
         }
       }
 
+      if (command === 'spec') {
+        // `inspect spec` with no positional reports the current spec.
+        // `inspect spec list` and `inspect spec open <name>` are the subactions.
+        const specActions = ['list', 'open']
+
+        if (positional && !_.includes(specActions, positional)) {
+          unknownOption.call(this, `inspect spec ${positional}`, 'command')
+        }
+      }
+
+      if (command === 'test') {
+        // `inspect test list` — enumerate tests in the current spec.
+        // `inspect test open <selector>` — Studio-activate a specific test.
+        // `inspect test close` — deactivate Studio.
+        // Bare `inspect test` defaults to `list` (same pattern as browser/project).
+        const testActions = ['list', 'open', 'close']
+
+        if (positional && !_.includes(testActions, positional)) {
+          unknownOption.call(this, `inspect test ${positional}`, 'command')
+        }
+      }
+
+      if (command === 'command') {
+        // `inspect command list` — commands for the Studio-active test.
+        // `inspect command info <selector...>` — read-only detail (one or many), no pin side effect.
+        // `inspect command pin <selector>` — pin a specific command in the reporter.
+        // `inspect command unpin` — clear any pin.
+        // Bare `inspect command` prints details for the currently pinned command.
+        const commandActions = ['list', 'info', 'pin', 'unpin']
+
+        if (positional && !_.includes(commandActions, positional)) {
+          unknownOption.call(this, `inspect command ${positional}`, 'command')
+        }
+      }
+
+      if (command === 'aut') {
+        // `inspect aut` — url/title/viewport of the AUT iframe.
+        // `inspect aut dom <selector>` — CSS-selector query against the AUT DOM.
+        // `inspect aut snapshot` — compact accessibility tree with unique selectors.
+        // All require Studio to be active (`inspect test open <selector>` first).
+        const autActions = ['dom', 'snapshot']
+
+        if (positional && !_.includes(autActions, positional)) {
+          unknownOption.call(this, `inspect aut ${positional}`, 'command')
+        }
+      }
+
       const isBrowserOpenOrClose = command === 'browser' && (positional === 'open' || positional === 'close')
       const isProjectTimed = command === 'project' && (positional === 'open' || positional === 'clear')
-      const needsTimeout = command === 'run' || command === 'switch' || isBrowserOpenOrClose || isProjectTimed
+      const isSpecOpen = command === 'spec' && positional === 'open'
+      const needsTimeout = command === 'switch' || isSpecOpen || isBrowserOpenOrClose || isProjectTimed
 
       if (needsTimeout) {
         if (opts.timeout !== undefined && (Number.isNaN(opts.timeout) || opts.timeout <= 0)) {
@@ -638,8 +686,58 @@ const cliModule = {
       }
 
       try {
-        if (command === 'run') {
-          await inspect.run({ ...opts, spec: positional })
+        if (command === 'spec') {
+          const action = positional
+
+          if (action === 'list') {
+            await inspect.specList(opts)
+          } else if (action === 'open') {
+            await inspect.specOpen({ ...opts, name: subPositional })
+          } else {
+            await inspect.specCurrent(opts)
+          }
+        } else if (command === 'test') {
+          const action = positional
+
+          if (action === 'open') {
+            await inspect.testOpen({ ...opts, selector: subPositional })
+          } else if (action === 'close') {
+            await inspect.testClose(opts)
+          } else if (action === 'list') {
+            await inspect.testList(opts)
+          } else {
+            // Bare `inspect test` — Studio-scoped view of the current test
+            // and its command log. Errors if Studio isn't active.
+            await inspect.testCurrent(opts)
+          }
+        } else if (command === 'command') {
+          const action = positional
+
+          if (action === 'pin') {
+            await inspect.commandPin({ ...opts, selector: subPositional })
+          } else if (action === 'unpin') {
+            await inspect.commandUnpin(opts)
+          } else if (action === 'list') {
+            await inspect.commandList(opts)
+          } else if (action === 'info') {
+            // `info` accepts 1..N selectors as trailing positionals.
+            // Shape of `args` is [command, action, ...selectors].
+            await inspect.commandInfo({ ...opts, selectors: (args || []).slice(2) })
+          } else {
+            // Bare `inspect command` — detail view of the currently pinned
+            // command, with consoleProps. Errors if nothing is pinned.
+            await inspect.commandCurrent(opts)
+          }
+        } else if (command === 'aut') {
+          const action = positional
+
+          if (action === 'dom') {
+            await inspect.autDom({ ...opts, selector: subPositional })
+          } else if (action === 'snapshot') {
+            await inspect.autSnapshot(opts)
+          } else {
+            await inspect.aut(opts)
+          }
         } else if (command === 'switch') {
           // Commander maps `--no-relaunch` to `opts.relaunch === false`;
           // normalize to `noRelaunch: true` for the handler's API.
@@ -669,7 +767,7 @@ const cliModule = {
             await inspect.projectList(opts)
           }
         } else {
-          await inspect[command as 'list' | 'status' | 'specs'](opts)
+          await inspect[command as 'list' | 'status'](opts)
         }
       } catch (e: any) {
         util.logErrorExit1(e)

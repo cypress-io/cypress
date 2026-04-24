@@ -6,6 +6,11 @@
 The most recent spec run for this open-mode instance. While in flight, `status` is `running`; after `run:end` fires it transitions to `finished` and lingers so CLI consumers can poll for completion.
 """
 type ActiveRun {
+  """
+  Command log entries for the test currently targeted by Studio. Empty outside Studio mode — sourced on demand from the reporter store, not buffered server-side.
+  """
+  commands: [CommandLog!]!
+
   """When the run ended. Null while `status === running`."""
   endedAt: DateTime
 
@@ -15,8 +20,16 @@ type ActiveRun {
   """When the run started."""
   startedAt: DateTime!
 
+  """Aggregate counts derived from `tests`."""
+  stats: TestStats!
+
   """One of 'starting' | 'running' | 'finished'."""
   status: String!
+
+  """
+  Per-test outcomes reported so far. Empty until the driver emits the first `test:after:run`.
+  """
+  tests: [TestResult!]!
 }
 
 """
@@ -30,6 +43,148 @@ enum AppRoute {
   SPEC_RUNNING
   TESTING_TYPE_SELECTION
 }
+
+"""
+One node in the AUT accessibility tree. `selector` targets the underlying element and can be passed to `autInspectDom` for deeper inspection.
+"""
+type AutInspectA11yNode {
+  """Checked state for `checkbox` / `radio` roles. Null for other roles."""
+  checked: Boolean
+
+  """
+  Nested accessibility nodes, in document order. Purely-layout elements are collapsed.
+  """
+  children: [AutInspectA11yNode!]!
+
+  """
+  Disabled state (`disabled` attribute or `aria-disabled="true"`). Null when not a form-control-like role.
+  """
+  disabled: Boolean
+
+  """Heading level (1–6). Null for non-heading roles."""
+  level: Int
+
+  """
+  Computed accessible name (aria-label, aria-labelledby, img alt, label text, or textContent for roles that take their name from content). Truncated to 200 chars.
+  """
+  name: String
+
+  """
+  ARIA role — explicit `role` attribute, or the implicit role for the tag (e.g. `h1` → `heading`, `nav` → `navigation`).
+  """
+  role: String!
+
+  """
+  Unique CSS selector for the element — `#id` / `[data-testid]` / `[data-cy]` when unique, otherwise a positional `nth-of-type` path from `<html>`.
+  """
+  selector: String!
+
+  """
+  Current value for form controls (text inputs, textareas). Null otherwise. Truncated to 200 chars.
+  """
+  value: String
+}
+
+"""A single HTML attribute on an AUT DOM match."""
+type AutInspectAttr {
+  name: String!
+  value: String!
+}
+
+"""
+One element in the AUT matching a CSS selector. Text and outerHTML are truncated by the runner.
+"""
+type AutInspectDomMatch {
+  """HTML attributes on the element, in document order."""
+  attrs: [AutInspectAttr!]!
+
+  """Truncated `outerHTML` (up to 2048 chars)."""
+  outerHTML: String!
+
+  """Lower-cased tag name, e.g. `div`."""
+  tag: String!
+
+  """
+  Truncated `textContent` (up to 500 chars). Null when the element has no text.
+  """
+  text: String
+}
+
+"""
+Result of an `autInspectDom` query: the CSS selector echoed back, the total match count, and a capped list of match details.
+"""
+type AutInspectDomResponse {
+  """
+  Total number of matches in the AUT before the `matches` cap was applied.
+  """
+  count: Int!
+
+  """Up to 20 matches, in document order."""
+  matches: [AutInspectDomMatch!]!
+
+  """The selector that was queried (echoed for convenience)."""
+  selector: String!
+}
+
+union AutInspectDomResult = AutInspectDomResponse | AutInspectError
+
+"""
+Error encountered when reading the AUT via `autInspect` or `autInspectDom`.
+"""
+type AutInspectError {
+  code: AutInspectErrorCode!
+
+  """Contextual information for the error."""
+  detailMessage: String
+}
+
+enum AutInspectErrorCode {
+  AUT_UNAVAILABLE
+  INVALID_SELECTOR
+  NOT_IN_STUDIO
+  TIMEOUT
+}
+
+"""
+Snapshot of the application-under-test iframe: URL, title, and viewport dimensions.
+"""
+type AutInspectResponse {
+  """
+  Document title of the AUT. Null when the AUT is cross-origin and `document.title` is inaccessible.
+  """
+  title: String
+
+  """Current URL of the AUT iframe."""
+  url: String!
+
+  """Configured viewport height of the AUT iframe in CSS pixels."""
+  viewportHeight: Int!
+
+  """Configured viewport width of the AUT iframe in CSS pixels."""
+  viewportWidth: Int!
+}
+
+union AutInspectResult = AutInspectError | AutInspectResponse
+
+"""
+Result of an `autInspectSnapshot` query: the AUT's URL/title/viewport plus a compact accessibility tree.
+"""
+type AutInspectSnapshotResponse {
+  """Total number of accessibility nodes discovered, before the walker cap."""
+  nodeCount: Int!
+  title: String
+
+  """Root of the accessibility tree (role `document`)."""
+  tree: AutInspectA11yNode!
+
+  """True when the walker stopped early because the node cap (500) was hit."""
+  truncated: Boolean!
+  url: String!
+  viewportHeight: Int!
+  viewportWidth: Int!
+}
+
+union AutInspectSnapshotResult = AutInspectError | AutInspectSnapshotResponse
 
 """Represents state of auth based on most recent message from login flow"""
 type AuthState {
@@ -977,6 +1132,100 @@ input CohortInput {
   weights: [Int!]
 }
 
+"""
+Detail view of a single command: the `CommandLog` entry plus its safe-stringified `consoleProps`. Fetched without side effects — unlike `pinnedCommand`, reading this does not pin the command in the reporter UI.
+"""
+type CommandInfo {
+  """
+  Full metadata for the command — the matching entry from `activeRun.commands`.
+  """
+  command: CommandLog!
+
+  """
+  Safely-serialized `consoleProps` dump for this command. Null if the driver could not produce console props (e.g. after memory cleanup).
+  """
+  consolePropsJson: String
+}
+
+"""
+A single entry from the driver command log — roughly what renders as a line in the reporter's left-side command bar.
+"""
+type CommandLog {
+  """Alias assigned via `cy.as()`, if any."""
+  alias: String
+
+  """One of 'dom' | 'primitive' | 'agent' | 'route' when an alias is set."""
+  aliasType: String
+
+  """Optional display override for the command name."""
+  displayName: String
+
+  """Error message for this command, if the command failed."""
+  error: String
+
+  """Id of the parent group log, if any."""
+  group: Int
+
+  """
+  Nesting depth of the command within collapsible groups. 0 for root-level.
+  """
+  groupLevel: Int
+
+  """
+  Whether the command has a non-trivial consoleProps payload (fetchable via `inspectCommandInfo` or `pinnedCommand.consolePropsJson`).
+  """
+  hasConsoleProps: Boolean!
+
+  """
+  Whether the command captured at least one DOM snapshot (mirrors the reporter indicator).
+  """
+  hasSnapshot: Boolean!
+
+  """Id of the hook containing this command, if any."""
+  hookId: String
+
+  """Driver-assigned log id. Stable across the add/change lifecycle."""
+  id: String!
+
+  """Display message for the command, typically the argument(s)."""
+  message: String!
+
+  """Command name (e.g. 'visit', 'get', 'click')."""
+  name: String!
+
+  """Matched DOM element count for DOM-targeting commands."""
+  numElements: Int
+
+  """1-based ordinal of the command within its test, if assigned."""
+  number: Int
+
+  """Aliases this command references (e.g. `@foo`)."""
+  referencesAlias: [String!]
+
+  """Number of DOM snapshots captured for this command (0 if none)."""
+  snapshotCount: Int!
+
+  """One of 'pending' | 'passed' | 'failed' | 'warn'."""
+  state: String!
+
+  """Mocha test id this command belongs to, if any."""
+  testId: String
+
+  """Command timeout in ms."""
+  timeout: Int
+
+  """Log type (e.g. 'parent', 'child', 'system')."""
+  type: String!
+
+  """
+  Whether the yielded subject was visible. Null for commands not tied to DOM (e.g. `cy.visit`, `cy.readFile`).
+  """
+  visible: Boolean
+
+  """ISO 8601 timestamp of when the command was logged."""
+  wallClockStartedAt: String
+}
+
 """"""
 type CommitInfo {
   """Commit message"""
@@ -1424,6 +1673,51 @@ type GlobalProject implements Node & ProjectLike {
   title: String!
 }
 
+"""Error encountered during an `inspectCommandInfo` query."""
+type InspectCommandInfoError {
+  code: InspectCommandInfoErrorCode!
+
+  """Contextual information for the error."""
+  detailMessage: String
+}
+
+enum InspectCommandInfoErrorCode {
+  LOG_NOT_FOUND
+  NOT_IN_STUDIO
+  TIMEOUT
+}
+
+"""
+Successful result of an `inspectCommandInfo` query — one `CommandInfo` entry per requested log id, in request order.
+"""
+type InspectCommandInfoResponse {
+  items: [CommandInfo!]!
+}
+
+union InspectCommandInfoResult = InspectCommandInfoError | InspectCommandInfoResponse
+
+"""Error encountered during an inspectPinCommand mutation."""
+type InspectPinCommandError {
+  code: InspectPinCommandErrorCode!
+
+  """Contextual information for the error."""
+  detailMessage: String
+}
+
+enum InspectPinCommandErrorCode {
+  NO_STUDIO_TEST
+  SPEC_RUNNING
+  UNKNOWN_LOG
+}
+
+"""Successful result of an inspectPinCommand mutation."""
+type InspectPinCommandResponse {
+  """Driver-assigned log id that was pinned."""
+  logId: String!
+}
+
+union InspectPinCommandResult = InspectPinCommandError | InspectPinCommandResponse
+
 """
 Aggregated, read-only view of the open-mode instance state — consumed by the `cypress inspect` CLI.
 """
@@ -1449,12 +1743,22 @@ type InspectSnapshot {
   pid: Int!
 
   """
+  The command currently pinned in the reporter. Only populated when Studio is active on a test; otherwise null.
+  """
+  pinnedCommand: PinnedCommand
+
+  """
   Absolute path to the currently-opened project, or null if no project is loaded.
   """
   projectRoot: String
 
   """Number of specs discovered for the current project."""
   specCount: Int!
+
+  """
+  Runtime id of the test currently targeted by Studio, or null if Studio is not active.
+  """
+  studioActiveTestId: String
 
   """The currently selected testing type, or null if not yet chosen."""
   testingType: TestingTypeEnum
@@ -1591,6 +1895,19 @@ type Mutation {
   Scan dependencies to determine what, if any, CT frameworks are installed
   """
   initializeCtFrameworks: Boolean
+
+  """
+  Pin a specific command log entry in the reporter. Requires Studio to be active on a test (`inspect test open` first). Mirrors clicking the pin icon on a command row.
+  """
+  inspectPinCommand(
+    """Driver-assigned id of the command log entry to pin."""
+    logId: String!
+  ): InspectPinCommandResult
+
+  """
+  Clear any pinned command in the reporter. No-op when nothing is pinned.
+  """
+  inspectUnpinCommand: Boolean
   internal_clearAllProjectPreferencesCache: Boolean
   internal_clearLatestProjectCache: Boolean
   internal_clearProjectPreferencesCache(projectTitle: String!): Boolean
@@ -1725,6 +2042,19 @@ type Mutation {
   """Show system notification via Electron"""
   showSystemNotification(body: String!, title: String!): Boolean
 
+  """
+  Deactivate Studio. Equivalent to clicking the cancel button in the Studio panel — tears down `StudioLifecycleManager` and clears the browser store state.
+  """
+  studioCancel: Boolean
+
+  """
+  Activate Studio for a specific test in the currently-running spec. Equivalent to clicking "Edit in Studio" on a test row in the reporter.
+  """
+  studioInitTest(
+    """Runtime id of the target test (matches `activeRun.tests[].testId`)"""
+    testId: ID!
+  ): StudioInitResult
+
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
 
@@ -1789,6 +2119,27 @@ type PageInfo {
   startCursor: String
 }
 
+"""
+The command log entry currently pinned in the reporter (selected via `cypress inspect command pin`). Null when nothing is pinned.
+"""
+type PinnedCommand {
+  """
+  Full metadata for the pinned command — the matching entry from `activeRun.commands`.
+  """
+  command: CommandLog!
+
+  """
+  Safely-serialized `consoleProps` dump for the pinned command. Null if the driver could not produce console props (e.g. after memory cleanup).
+  """
+  consolePropsJson: String
+
+  """Driver-assigned log id of the pinned command."""
+  logId: String!
+
+  """Runtime id of the test the pinned command belongs to."""
+  testId: String!
+}
+
 enum PluginsState {
   error
   initialized
@@ -1844,6 +2195,24 @@ type PushFragmentPayload {
 
 """The root "Query" type containing all entry fields for our querying"""
 type Query {
+  """
+  Snapshot of the AUT iframe (URL, title, viewport). Studio-gated: requires `studioActiveTestId` to be set (see `inspect test open`).
+  """
+  autInspect: AutInspectResult!
+
+  """
+  Query the AUT DOM by CSS selector. Returns up to 20 matches with tag/attrs/truncated text/outerHTML. Studio-gated.
+  """
+  autInspectDom(
+    """CSS selector to query in the AUT document."""
+    selector: String!
+  ): AutInspectDomResult!
+
+  """
+  Compact accessibility-tree snapshot of the AUT with unique CSS selectors per node. Studio-gated.
+  """
+  autInspectSnapshot: AutInspectSnapshotResult!
+
   """The latest state of the auth process"""
   authState: AuthState!
   baseError: ErrorWrapper
@@ -1909,6 +2278,16 @@ type Query {
 
   """The state of any info related to local development of the runner"""
   dev: DevState!
+
+  """
+  Read-only detail for one or more commands by log id: the matching `CommandLog` entry plus its safe-stringified `consoleProps`. Studio-gated. Unlike `pinnedCommand`, this has no side effects on the reporter UI and supports batch fetch.
+  """
+  inspectCommandInfo(
+    """
+    Driver-assigned log ids to fetch. Order is preserved in the response `items`.
+    """
+    logIds: [String!]!
+  ): InspectCommandInfoResult!
 
   """
   A snapshot of the current open-mode instance state, for CLI inspection.
@@ -2242,6 +2621,27 @@ enum SpecType {
   integration
 }
 
+"""Error encountered during a studioInitTest mutation"""
+type StudioInitError {
+  code: StudioInitErrorCode!
+
+  """Contextual information for the error"""
+  detailMessage: String
+}
+
+enum StudioInitErrorCode {
+  NO_SPEC
+  UNKNOWN_TEST
+}
+
+"""Result of a studioInitTest mutation"""
+type StudioInitResponse {
+  """Runtime id of the test that was targeted"""
+  testId: String!
+}
+
+union StudioInitResult = StudioInitError | StudioInitResponse
+
 type StudioStatusPayload {
   canAccessStudioAI: Boolean!
 
@@ -2324,6 +2724,43 @@ enum SupportStatusEnum {
 enum SupportedBundlers {
   vite
   webpack
+}
+
+"""
+Outcome of a single test. Retries produce updates to the same record, so this always reflects the latest attempt.
+"""
+type TestResult {
+  """Zero-based attempt index of the latest attempt."""
+  currentRetry: Int!
+
+  """Duration in ms for the latest attempt. Null if not reported."""
+  duration: Int
+
+  """Error message for the latest attempt, if any."""
+  error: String
+
+  """One of 'passed' | 'failed' | 'pending' | 'skipped'."""
+  state: String!
+
+  """Mocha-assigned id for the test. Stable across retries."""
+  testId: String!
+
+  """Leaf title of the test."""
+  title: String!
+
+  """Full describe/it path, outermost first."""
+  titlePath: [String!]!
+}
+
+"""
+Aggregate pass/fail/pending/skipped counts, derived from the per-test results on the containing run.
+"""
+type TestStats {
+  failed: Int!
+  passed: Int!
+  pending: Int!
+  skipped: Int!
+  total: Int!
 }
 
 enum TestingTypeEnum {

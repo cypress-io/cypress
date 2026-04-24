@@ -11,6 +11,39 @@ import type { ReporterStartInfo, ReporterRunState } from '@packages/types'
 
 const localBus = new EventEmitter()
 
+/**
+ * Reduce the driver's rich `alias` type (string | array | AliasObject) down
+ * to a single display string for the CLI wire shape. Returns null for
+ * unaliased commands.
+ */
+function normalizeAlias (alias: unknown): string | null {
+  if (alias == null) return null
+
+  if (typeof alias === 'string') return alias
+
+  if (Array.isArray(alias)) {
+    return alias.map((a) => (typeof a === 'string' ? a : (a && typeof a === 'object' && 'name' in a ? String((a as { name: unknown }).name) : ''))).filter(Boolean).join(', ') || null
+  }
+
+  if (typeof alias === 'object' && 'name' in (alias as object)) {
+    return String((alias as { name: unknown }).name)
+  }
+
+  return null
+}
+
+/**
+ * Normalize `referencesAlias` into a flat `string[]` for stable CLI output.
+ */
+function normalizeReferencesAlias (refs: unknown): string[] | null {
+  if (refs == null) return null
+
+  const list = Array.isArray(refs) ? refs : [refs]
+  const out = list.map((r) => (typeof r === 'string' ? r : (r && typeof r === 'object' && 'name' in r ? String((r as { name: unknown }).name) : null))).filter((s): s is string => typeof s === 'string' && !!s)
+
+  return out.length ? out : null
+}
+
 type StudioEntrySource = 'welcome' | 'new-test-root' | 'new-test-suite' | 'edit'
 
 interface InitEvent {
@@ -38,6 +71,39 @@ export interface Events {
 }
 
 type CollectRunStateCallback = (arg: ReporterRunState) => void
+
+/**
+ * Stable wire shape for a single command log entry — matches the CLI's
+ * `inspect test` / `inspect command` output. Keep in sync with
+ * `CommandSnapshotShape` in `@packages/data-context`. `snapshotCount` is
+ * populated downstream by the event-manager from the driver log attrs (the
+ * reporter only tracks `hasSnapshot` as a boolean), so it's optional on the
+ * reporter-side wire shape.
+ */
+interface CommandSnapshot {
+  id: string
+  name: string
+  message: string
+  state: string
+  type: string
+  testId: string | null
+  displayName: string | null
+  number: number | null
+  snapshotCount?: number
+  hasSnapshot: boolean
+  hasConsoleProps: boolean
+  timeout: number | null
+  numElements: number | null
+  visible: boolean | null
+  groupLevel: number | null
+  group: number | null
+  alias: string | null
+  aliasType: string | null
+  referencesAlias: string[] | null
+  hookId: string | null
+  error: string | null
+  wallClockStartedAt: string | null
+}
 
 const events: Events = {
   appState,
@@ -132,6 +198,118 @@ const events: Events = {
 
     runner.on('reporter:snapshot:unpinned', action('snapshot:unpinned', () => {
       appState.pinnedSnapshotId = null
+    }))
+
+    // On-demand snapshot of the current command log for a given test. Used by
+    // the `cypress inspect test` CLI bridge — no per-command streaming, the
+    // server asks for a snapshot at query time. Returns `null` when the test
+    // isn't present in the store so the caller can distinguish "empty log"
+    // from "unknown test".
+    runner.on('request:commands:snapshot', (testId: string, cb: (snapshot: CommandSnapshot[] | null) => void) => {
+      const test = runnablesStore.testById(testId)
+      const commands = test?.lastAttempt?.commands
+      const knownIds = Object.keys(runnablesStore._tests)
+
+      // eslint-disable-next-line no-console
+      console.log('[inspect] request:commands:snapshot', {
+        testId,
+        testFound: !!test,
+        commandCount: commands?.length ?? null,
+        knownTestIds: knownIds,
+      })
+
+      if (!commands) {
+        cb(null)
+
+        return
+      }
+
+      cb(commands.map((c) => {
+        return {
+          id: String(c.id ?? ''),
+          name: c.name ?? '',
+          message: c.displayMessage ?? '',
+          state: c.state ?? '',
+          type: c.type ?? '',
+          testId: c.testId ?? null,
+          displayName: c.displayName ?? null,
+          number: typeof c.number === 'number' ? c.number : null,
+          // Default to 0 so the GraphQL non-null contract always holds — the
+          // event-manager overrides this with the real count from
+          // `Cypress.runner.getSnapshotPropsForLog` when the driver is
+          // available. If the driver isn't loaded (no spec launched yet),
+          // leaving this as 0 is accurate: no commands = no snapshots.
+          snapshotCount: 0,
+          hasSnapshot: !!c.hasSnapshot,
+          hasConsoleProps: !!c.hasConsoleProps,
+          timeout: typeof c.timeout === 'number' ? c.timeout : null,
+          numElements: typeof c.numElements === 'number' ? c.numElements : null,
+          visible: typeof c.visible === 'boolean' ? c.visible : null,
+          groupLevel: typeof c.groupLevel === 'number' ? c.groupLevel : null,
+          group: typeof c.group === 'number' ? c.group : null,
+          alias: normalizeAlias(c.alias),
+          aliasType: c.aliasType ?? null,
+          referencesAlias: normalizeReferencesAlias(c.referencesAlias),
+          hookId: c.hookId ?? null,
+          error: c.err?.message ?? null,
+          wallClockStartedAt: c.wallClockStartedAt ?? null,
+        }
+      }))
+    })
+
+    // Companion to `inspect:request-pinned-command` — reports the currently
+    // pinned command's log id. The event-manager combines this with the
+    // driver's `consoleProps` to produce the full CLI payload. Returns `null`
+    // when nothing is pinned.
+    runner.on('request:pinned-command-state', (cb: (logId: string | null) => void) => {
+      const pinnedId = appState.pinnedSnapshotId
+
+      cb(pinnedId != null ? String(pinnedId) : null)
+    })
+
+    // Server → reporter: pin a specific command (same behavior as clicking
+    // the column pin icon). Guards on `isRunning` — pinning while the spec
+    // is still running is a no-op, matching `command.tsx#_toggleColumnPin`.
+    // `testId` and `logId` come from the server's `emitPinCommand`, which
+    // only fires when Studio is active on a specific test.
+    runner.on('inspect:remote-pin-command', action('inspect:remote-pin-command', (testId: string, logId: string) => {
+      // eslint-disable-next-line no-console
+      console.log('[inspect] inspect:remote-pin-command received', { testId, logId, isRunning: appState.isRunning })
+
+      if (appState.isRunning) return
+
+      // Driver log ids are strings (`log-{origin}-{counter}` — see
+      // `packages/driver/src/cypress/log.ts`). Preserve them as-is so the
+      // `appState.pinnedSnapshotId === model.id` comparison in the command
+      // model holds.
+      appState.pinnedSnapshotId = logId
+      runner.emit('runner:pin:snapshot', testId, logId)
+      runner.emit('runner:console:log', testId, logId)
+    }))
+
+    runner.on('inspect:remote-unpin-command', action('inspect:remote-unpin-command', () => {
+      // eslint-disable-next-line no-console
+      console.log('[inspect] inspect:remote-unpin-command received', { current: appState.pinnedSnapshotId })
+
+      if (appState.pinnedSnapshotId == null) return
+
+      const testIdGuess = (() => {
+        for (const t of Object.values(runnablesStore._tests)) {
+          for (const cmd of t.lastAttempt?.commands ?? []) {
+            if (cmd.id === appState.pinnedSnapshotId) return cmd.testId
+          }
+        }
+
+        return null
+      })()
+
+      const logId = appState.pinnedSnapshotId
+
+      appState.pinnedSnapshotId = null
+      // `runner:unpin:snapshot` triggers `_unpinSnapshot` in event-manager
+      // (signature-agnostic); include testId/logId for symmetry with the UI
+      // path in `command.tsx#_toggleColumnPin`.
+      runner.emit('runner:unpin:snapshot', testIdGuess, logId)
     }))
 
     localBus.on('resume', action('resume', () => {

@@ -937,4 +937,430 @@ describe('lib/tasks/inspect', () => {
       expect(resolveInstance).toHaveBeenCalledWith('12345')
     })
   })
+
+  describe('.command', () => {
+    const STUDIO_TEST_ID = 'r1'
+
+    const makeCommand = (overrides: any = {}) => ({
+      id: 'l3',
+      name: 'get',
+      message: '.foo',
+      state: 'passed',
+      type: 'parent',
+      testId: STUDIO_TEST_ID,
+      displayName: null,
+      number: 3,
+      snapshotCount: 2,
+      hasSnapshot: true,
+      hasConsoleProps: true,
+      timeout: 4000,
+      numElements: 1,
+      visible: true,
+      groupLevel: 0,
+      group: null,
+      alias: null,
+      aliasType: null,
+      referencesAlias: null,
+      hookId: null,
+      error: null,
+      wallClockStartedAt: '2026-04-22T00:00:00.000Z',
+      ...overrides,
+    })
+
+    const withCommands = (commands: any[], overrides: any = {}) => ({
+      ...SNAPSHOT,
+      studioActiveTestId: STUDIO_TEST_ID,
+      activeRun: {
+        specPath: '/path/to/project/foo.cy.ts',
+        startedAt: '2026-04-22T00:00:00.000Z',
+        endedAt: null,
+        status: 'finished',
+        tests: [{ testId: STUDIO_TEST_ID, title: 't', titlePath: ['t'], state: 'passed', duration: 10, currentRetry: 0, error: null }],
+        stats: { passed: 1, failed: 0, pending: 0, skipped: 0, total: 1 },
+        commands,
+      },
+      ...overrides,
+    })
+
+    const mockSnapshotOnce = (snapshot: any): void => {
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: { inspectSnapshot: snapshot } }),
+      })
+    }
+
+    const mockMutation = (payload: any): void => {
+      fetchSpy.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: payload }),
+      })
+    }
+
+    describe('.commandList', () => {
+      it('not in Studio → stderr + exit 1', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse({ ...SNAPSHOT, studioActiveTestId: null })
+
+        const err = createStderrCapture()
+
+        await inspect.commandList({})
+
+        expect(err()).toContain('Not in Studio mode')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('no commands → text notice', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse(withCommands([]))
+
+        const out = createStdoutCapture()
+
+        await inspect.commandList({})
+
+        expect(out()).toContain('no commands')
+      })
+
+      it('--json returns the raw commands array', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const cmd = makeCommand()
+
+        mockSnapshotResponse(withCommands([cmd]))
+
+        const out = createStdoutCapture()
+
+        await inspect.commandList({ json: true })
+
+        expect(JSON.parse(out())).toEqual([cmd])
+      })
+
+      it('text output includes enriched columns (snapshots, elements)', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse(withCommands([makeCommand({ snapshotCount: 2, numElements: 1 })]))
+
+        const out = createStdoutCapture()
+
+        await inspect.commandList({})
+
+        const text = out()
+
+        expect(text).toContain('SNAPS')
+        expect(text).toContain('ELEMS')
+        expect(text).toContain('get')
+      })
+    })
+
+    describe('.commandCurrent', () => {
+      const mockPinnedResponse = (payload: any): void => {
+        fetchSpy.mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: async () => ({ data: { inspectSnapshot: payload } }),
+        })
+      }
+
+      it('not in Studio → stderr + exit 1', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockPinnedResponse({ studioActiveTestId: null, pinnedCommand: null })
+
+        const err = createStderrCapture()
+
+        await inspect.commandCurrent({})
+
+        expect(err()).toContain('Not in Studio mode')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('nothing pinned → stderr + exit 1', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockPinnedResponse({ studioActiveTestId: STUDIO_TEST_ID, pinnedCommand: null })
+
+        const err = createStderrCapture()
+
+        await inspect.commandCurrent({})
+
+        expect(err()).toContain('No command is pinned')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('--json returns the full pinned payload', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const cmd = makeCommand()
+        const pinned = { testId: STUDIO_TEST_ID, logId: cmd.id, consolePropsJson: '{"Command":"get"}', command: cmd }
+
+        mockPinnedResponse({ studioActiveTestId: STUDIO_TEST_ID, pinnedCommand: pinned })
+
+        const out = createStdoutCapture()
+
+        await inspect.commandCurrent({ json: true })
+
+        expect(JSON.parse(out())).toEqual(pinned)
+      })
+
+      it('text output includes command metadata and parsed consoleProps', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const cmd = makeCommand({ alias: 'foo', aliasType: 'dom', numElements: 2 })
+
+        mockPinnedResponse({
+          studioActiveTestId: STUDIO_TEST_ID,
+          pinnedCommand: { testId: STUDIO_TEST_ID, logId: cmd.id, consolePropsJson: '{"Command":"get","Elements":2}', command: cmd },
+        })
+
+        const out = createStdoutCapture()
+
+        await inspect.commandCurrent({})
+
+        const text = out()
+
+        expect(text).toContain('Command:')
+        expect(text).toContain('get')
+        expect(text).toContain('Elements:  2')
+        expect(text).toContain('Alias:     foo')
+        expect(text).toContain('Console props:')
+        expect(text).toContain('"Command": "get"')
+      })
+    })
+
+    describe('.commandPin', () => {
+      it('missing selector → stderr + exit 1', async () => {
+        const err = createStderrCapture()
+
+        await inspect.commandPin({})
+
+        expect(err()).toContain('Missing required argument: <selector>')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('not in Studio → stderr + exit 1', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse({ ...SNAPSHOT, studioActiveTestId: null })
+
+        const err = createStderrCapture()
+
+        await inspect.commandPin({ selector: '3' })
+
+        expect(err()).toContain('Not in Studio mode')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('selector by number → fires mutation with resolved logId', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const cmd = makeCommand({ id: 'lx', number: 3 })
+
+        mockSnapshotOnce(withCommands([cmd]))
+        mockMutation({ inspectPinCommand: { logId: 'lx' } })
+
+        await inspect.commandPin({ selector: '3' })
+
+        const mutationCall = fetchSpy.mock.calls[1]
+        const body = JSON.parse(mutationCall[1].body)
+
+        expect(body.variables).toEqual({ logId: 'lx' })
+      })
+
+      it('unknown selector → stderr + exit 1', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse(withCommands([makeCommand()]))
+
+        const err = createStderrCapture()
+
+        await inspect.commandPin({ selector: 'nonexistent' })
+
+        expect(err()).toContain('No command matching')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('server error code → stderr + exit 1', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const cmd = makeCommand()
+
+        mockSnapshotOnce(withCommands([cmd]))
+        mockMutation({ inspectPinCommand: { code: 'SPEC_RUNNING', detailMessage: 'spec is still running' } })
+
+        const err = createStderrCapture()
+
+        await inspect.commandPin({ selector: cmd.id })
+
+        expect(err()).toContain('SPEC_RUNNING')
+        expect(err()).toContain('spec is still running')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+    })
+
+    describe('.commandUnpin', () => {
+      it('fires the unpin mutation', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockMutation({ inspectUnpinCommand: true })
+
+        await inspect.commandUnpin({})
+
+        expect(fetchSpy).toHaveBeenCalledTimes(1)
+        const body = JSON.parse(fetchSpy.mock.calls[0][1].body)
+
+        expect(body.query).toContain('inspectUnpinCommand')
+      })
+    })
+
+    describe('.commandInfo', () => {
+      it('missing selectors → stderr + exit 1', async () => {
+        const err = createStderrCapture()
+
+        await inspect.commandInfo({})
+
+        expect(err()).toContain('Missing required argument: <selector>')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('empty selectors array → stderr + exit 1', async () => {
+        const err = createStderrCapture()
+
+        await inspect.commandInfo({ selectors: [] })
+
+        expect(err()).toContain('Missing required argument: <selector>')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('not in Studio → stderr + exit 1', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse({ ...SNAPSHOT, studioActiveTestId: null })
+
+        const err = createStderrCapture()
+
+        await inspect.commandInfo({ selectors: ['3'] })
+
+        expect(err()).toContain('Not in Studio mode')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('no commands on the Studio test → stderr + exit 1', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse(withCommands([]))
+
+        const err = createStderrCapture()
+
+        await inspect.commandInfo({ selectors: ['3'] })
+
+        expect(err()).toContain('No commands on the current Studio test')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('unknown selector → exits via resolveCommand stderr', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse(withCommands([makeCommand()]))
+
+        const err = createStderrCapture()
+
+        await inspect.commandInfo({ selectors: ['nonexistent'] })
+
+        expect(err()).toContain('No command matching')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('single selector → queries with single logId and prints detail', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const cmd = makeCommand({ id: 'log-7', number: 3, name: 'visit', message: '/' })
+
+        mockSnapshotOnce(withCommands([cmd]))
+        mockMutation({
+          inspectCommandInfo: {
+            items: [{ command: cmd, consolePropsJson: '{"Command":"visit"}' }],
+          },
+        })
+
+        const out = createStdoutCapture()
+
+        await inspect.commandInfo({ selectors: ['3'] })
+
+        const queryCall = fetchSpy.mock.calls[1]
+        const body = JSON.parse(queryCall[1].body)
+
+        expect(body.variables).toEqual({ logIds: ['log-7'] })
+        expect(out()).toContain('Command:')
+        expect(out()).toContain('visit')
+        expect(out()).toContain('"Command": "visit"')
+      })
+
+      it('multiple selectors → dedupes and preserves request order', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const a = makeCommand({ id: 'log-a', number: 1, name: 'visit' })
+        const b = makeCommand({ id: 'log-b', number: 2, name: 'get' })
+
+        mockSnapshotOnce(withCommands([a, b]))
+        mockMutation({
+          inspectCommandInfo: {
+            items: [
+              { command: b, consolePropsJson: null },
+              { command: a, consolePropsJson: null },
+            ],
+          },
+        })
+
+        await inspect.commandInfo({ selectors: ['get', 'visit', 'log-a'] })
+
+        const queryCall = fetchSpy.mock.calls[1]
+        const body = JSON.parse(queryCall[1].body)
+
+        expect(body.variables).toEqual({ logIds: ['log-b', 'log-a'] })
+      })
+
+      it('JSON output → always an array of { command, consolePropsJson }', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const cmd = makeCommand({ id: 'log-x' })
+
+        mockSnapshotOnce(withCommands([cmd]))
+        mockMutation({
+          inspectCommandInfo: {
+            items: [{ command: cmd, consolePropsJson: null }],
+          },
+        })
+
+        const out = createStdoutCapture()
+
+        await inspect.commandInfo({ selectors: [cmd.id], json: true })
+
+        const parsed = JSON.parse(out())
+
+        expect(Array.isArray(parsed)).toBe(true)
+        expect(parsed).toHaveLength(1)
+        expect(parsed[0]).toHaveProperty('command')
+        expect(parsed[0]).toHaveProperty('consolePropsJson')
+      })
+
+      it('server error code → stderr + exit 1', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const cmd = makeCommand()
+
+        mockSnapshotOnce(withCommands([cmd]))
+        mockMutation({ inspectCommandInfo: { code: 'LOG_NOT_FOUND', detailMessage: 'Unknown log id(s): log-z' } })
+
+        const err = createStderrCapture()
+
+        await inspect.commandInfo({ selectors: [cmd.id] })
+
+        expect(err()).toContain('LOG_NOT_FOUND')
+        expect(err()).toContain('Unknown log id(s)')
+        expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('does not fire the pin mutation', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        const cmd = makeCommand({ id: 'log-7' })
+
+        mockSnapshotOnce(withCommands([cmd]))
+        mockMutation({
+          inspectCommandInfo: {
+            items: [{ command: cmd, consolePropsJson: null }],
+          },
+        })
+
+        await inspect.commandInfo({ selectors: [cmd.id] })
+
+        const allCalls = fetchSpy.mock.calls.map((c) => JSON.parse(c[1].body).query).join('\n')
+
+        expect(allCalls).not.toContain('inspectPinCommand')
+        expect(allCalls).not.toContain('inspectUnpinCommand')
+      })
+    })
+  })
 })

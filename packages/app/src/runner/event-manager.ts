@@ -29,6 +29,430 @@ type $Cypress = any
 
 const noop = () => {}
 
+/**
+ * Safely JSON-stringify a `consoleProps` object from the driver. The payload
+ * contains DOM elements, jQuery collections, functions, and occasional
+ * circular references — all of which break a naive `JSON.stringify`. This
+ * replaces them with short placeholder strings so the output is always valid
+ * JSON and readable in a CLI.
+ */
+function safeStringifyConsoleProps (value: unknown): string | null {
+  try {
+    const seen = new WeakSet<object>()
+
+    return JSON.stringify(value, function (_key, v) {
+      if (v == null) return v
+
+      if (typeof v === 'function') return '<Function>'
+
+      // jQuery collections carry a `.jquery` version string.
+      if (typeof v === 'object' && (v as any).jquery) {
+        return `<jQuery length=${(v as any).length ?? 0}>`
+      }
+
+      // DOM elements — fall back to `<DOMNode>` in non-browser cases.
+      if (typeof v === 'object' && typeof (v as any).nodeType === 'number') {
+        const tag = typeof (v as any).tagName === 'string' ? String((v as any).tagName).toLowerCase() : 'node'
+
+        return `<DOMElement tag=${tag}>`
+      }
+
+      if (typeof v === 'object') {
+        if (seen.has(v as object)) return '<Circular>'
+
+        seen.add(v as object)
+      }
+
+      return v
+    }) || null
+  } catch {
+    return null
+  }
+}
+
+interface A11yNode {
+  role: string
+  name: string | null
+  level: number | null
+  value: string | null
+  checked: boolean | null
+  disabled: boolean | null
+  selector: string
+  children: A11yNode[]
+}
+
+const A11Y_MAX_NODES = 500
+const A11Y_MAX_NAME = 200
+const NAME_FROM_CONTENT_ROLES = new Set([
+  'button', 'link', 'heading', 'listitem', 'option', 'cell',
+  'columnheader', 'rowheader', 'tab', 'menuitem', 'treeitem',
+])
+const CONTROLISH_ROLES = new Set([
+  'button', 'textbox', 'checkbox', 'radio', 'combobox',
+  'slider', 'spinbutton', 'option', 'link',
+])
+
+function implicitRole (el: Element): string | null {
+  const tag = el.tagName.toLowerCase()
+
+  switch (tag) {
+    case 'a': return el.hasAttribute('href') ? 'link' : null
+    case 'button': return 'button'
+    case 'input': {
+      const type = (el.getAttribute('type') || 'text').toLowerCase()
+
+      if (type === 'checkbox') return 'checkbox'
+
+      if (type === 'radio') return 'radio'
+
+      if (type === 'submit' || type === 'button' || type === 'reset' || type === 'image') return 'button'
+
+      if (type === 'range') return 'slider'
+
+      if (type === 'number') return 'spinbutton'
+
+      return 'textbox'
+    }
+    case 'textarea': return 'textbox'
+    case 'select': return 'combobox'
+    case 'option': return 'option'
+    case 'img': return el.hasAttribute('alt') ? 'img' : null
+    case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6': return 'heading'
+    case 'ul': case 'ol': return 'list'
+    case 'li': return 'listitem'
+    case 'nav': return 'navigation'
+    case 'main': return 'main'
+    case 'header': return 'banner'
+    case 'footer': return 'contentinfo'
+    case 'aside': return 'complementary'
+    case 'section': return (el.hasAttribute('aria-label') || el.hasAttribute('aria-labelledby')) ? 'region' : null
+    case 'form': return 'form'
+    case 'table': return 'table'
+    case 'tr': return 'row'
+    case 'td': return 'cell'
+    case 'th': return 'columnheader'
+    case 'dialog': return 'dialog'
+    case 'article': return 'article'
+    default: return null
+  }
+}
+
+function truncateName (s: string): string {
+  return s.length > A11Y_MAX_NAME ? s.slice(0, A11Y_MAX_NAME) : s
+}
+
+function computeName (el: Element, role: string, doc: Document): string | null {
+  const ariaLabel = el.getAttribute('aria-label')
+
+  if (ariaLabel && ariaLabel.trim()) return truncateName(ariaLabel.trim())
+
+  const labelledby = el.getAttribute('aria-labelledby')
+
+  if (labelledby) {
+    const parts = labelledby.split(/\s+/)
+    .map((id) => doc.getElementById(id))
+    .filter(Boolean)
+    .map((n) => (n!.textContent || '').trim())
+    .filter(Boolean)
+
+    if (parts.length) return truncateName(parts.join(' '))
+  }
+
+  const tag = el.tagName.toLowerCase()
+
+  if (tag === 'img') {
+    const alt = el.getAttribute('alt')
+
+    return alt != null ? truncateName(alt) : null
+  }
+
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+    const labels = (el as HTMLInputElement).labels
+
+    if (labels && labels[0]) {
+      const text = (labels[0].textContent || '').trim()
+
+      if (text) return truncateName(text)
+    }
+
+    const placeholder = el.getAttribute('placeholder')
+
+    if (placeholder) return truncateName(placeholder)
+
+    return null
+  }
+
+  if (NAME_FROM_CONTENT_ROLES.has(role)) {
+    const text = (el.textContent || '').trim()
+
+    return text ? truncateName(text) : null
+  }
+
+  return null
+}
+
+function computeValue (el: Element, role: string): string | null {
+  if (role !== 'textbox' && role !== 'combobox' && role !== 'spinbutton' && role !== 'slider') return null
+
+  const v = (el as HTMLInputElement).value
+
+  if (typeof v === 'string' && v) return truncateName(v)
+
+  return null
+}
+
+function computeChecked (el: Element, role: string): boolean | null {
+  if (role !== 'checkbox' && role !== 'radio') return null
+
+  const input = el as HTMLInputElement
+
+  if (typeof input.checked === 'boolean') return input.checked
+
+  const aria = el.getAttribute('aria-checked')
+
+  if (aria === 'true') return true
+
+  if (aria === 'false') return false
+
+  return null
+}
+
+function computeDisabled (el: Element, role: string): boolean | null {
+  if (!CONTROLISH_ROLES.has(role)) return null
+
+  if ((el as HTMLInputElement).disabled) return true
+
+  if (el.getAttribute('aria-disabled') === 'true') return true
+
+  return false
+}
+
+const TESTID_ATTRS = ['data-testid', 'data-cy', 'data-test', 'data-test-id']
+const USEFUL_ATTRS = ['name', 'aria-label', 'placeholder', 'title', 'type', 'role', 'for', 'href']
+const MAX_ATTR_VALUE_LEN = 80
+const MAX_CLASSES_TO_TRY = 5
+const MAX_ANCESTORS_TO_TRY = 6
+
+// Rejects classes that look framework-generated (CSS modules, styled-components,
+// emotion, CSS-in-JS hashes). Hashed classes aren't stable across rebuilds, so
+// selectors using them would rot.
+const GENERATED_CLASS_RE = /^(css|sc|jsx|emotion|makeStyles|mui|_)-[a-z0-9]/i
+const TRAILING_HASH_RE = /[_-][a-z0-9]{5,}$/i
+const isStableClass = (c: string): boolean => {
+  if (!c || c.length > 40) return false
+
+  if (GENERATED_CLASS_RE.test(c)) return false
+
+  if (TRAILING_HASH_RE.test(c)) return false
+
+  return true
+}
+
+const cssEscape = (doc: Document, v: string): string => {
+  const css = (doc.defaultView as any)?.CSS || (typeof window !== 'undefined' ? (window as any).CSS : null)
+
+  return css?.escape ? css.escape(v) : v.replace(/(["\\])/g, '\\$1')
+}
+
+const escAttr = (v: string): string => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+
+const isUniqueAndTargets = (doc: Document, sel: string, el: Element): boolean => {
+  try {
+    const matches = doc.querySelectorAll(sel)
+
+    return matches.length === 1 && matches[0] === el
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Collect candidate "self" selectors for `el` — selectors that refer to `el`
+ * alone (id, test-id, tag+attr, tag+class). Returned ordered shortest-first.
+ */
+const collectSelfSelectors = (el: Element, doc: Document): string[] => {
+  const out: string[] = []
+  const tag = el.tagName.toLowerCase()
+  const id = el.getAttribute('id')
+
+  if (id) out.push(`#${cssEscape(doc, id)}`)
+
+  for (const attr of TESTID_ATTRS) {
+    const v = el.getAttribute(attr)
+
+    if (v && v.length <= MAX_ATTR_VALUE_LEN) out.push(`[${attr}="${escAttr(v)}"]`)
+  }
+
+  for (const attr of USEFUL_ATTRS) {
+    const v = el.getAttribute(attr)
+
+    if (v && v.trim() && v.length <= MAX_ATTR_VALUE_LEN) out.push(`${tag}[${attr}="${escAttr(v)}"]`)
+  }
+
+  const classes = Array.from(el.classList).filter(isStableClass).slice(0, MAX_CLASSES_TO_TRY)
+
+  for (const c of classes) out.push(`${tag}.${cssEscape(doc, c)}`)
+
+  // A handful of class pairs in case no single class is unique.
+  for (let i = 0; i < Math.min(classes.length, 3); i++) {
+    for (let j = i + 1; j < Math.min(classes.length, 4); j++) {
+      out.push(`${tag}.${cssEscape(doc, classes[i])}.${cssEscape(doc, classes[j])}`)
+    }
+  }
+
+  return out.sort((a, b) => a.length - b.length)
+}
+
+/**
+ * Returns a short unique anchor selector for `el` (id or test-id only), or
+ * null if `el` has no unique anchoring attribute.
+ */
+const getAnchorSelector = (el: Element, doc: Document): string | null => {
+  const id = el.getAttribute('id')
+
+  if (id) {
+    const sel = `#${cssEscape(doc, id)}`
+
+    if (isUniqueAndTargets(doc, sel, el)) return sel
+  }
+
+  for (const attr of TESTID_ATTRS) {
+    const v = el.getAttribute(attr)
+
+    if (v && v.length <= MAX_ATTR_VALUE_LEN) {
+      const sel = `[${attr}="${escAttr(v)}"]`
+
+      if (isUniqueAndTargets(doc, sel, el)) return sel
+    }
+  }
+
+  return null
+}
+
+/**
+ * Build the shortest tag+nth-of-type path from `from` (exclusive) down to
+ * `el` (inclusive). Skips `nth-of-type` at levels where only one child has
+ * that tag.
+ */
+const relativePath = (el: Element, from: Element): string => {
+  const path: string[] = []
+  let cur: Element | null = el
+
+  while (cur && cur !== from) {
+    const parent = cur.parentElement
+
+    if (!parent) break
+
+    const tag = cur.tagName.toLowerCase()
+    const sameTag = (Array.from(parent.children) as Element[]).filter((c) => c.tagName === cur!.tagName)
+    const idx = sameTag.indexOf(cur)
+
+    path.unshift(sameTag.length > 1 ? `${tag}:nth-of-type(${idx + 1})` : tag)
+    cur = parent
+  }
+
+  return path.join(' > ')
+}
+
+function uniqueSelector (el: Element, doc: Document): string {
+  // 1. Self-selectors, shortest-first.
+  for (const sel of collectSelfSelectors(el, doc)) {
+    if (isUniqueAndTargets(doc, sel, el)) return sel
+  }
+
+  // 2. Anchor-relative: find the nearest ancestor with a unique id/test-id
+  // and compose `<anchor> <short-relative-path>`. Keeps selectors short.
+  let cur = el.parentElement
+  let hops = 0
+
+  while (cur && cur !== doc.documentElement && hops < MAX_ANCESTORS_TO_TRY) {
+    const anchor = getAnchorSelector(cur, doc)
+
+    if (anchor) {
+      const rel = relativePath(el, cur)
+      const composed = rel ? `${anchor} > ${rel}` : anchor
+
+      if (isUniqueAndTargets(doc, composed, el)) return composed
+    }
+
+    cur = cur.parentElement
+    hops++
+  }
+
+  // 3. Positional fallback from <html>.
+  const full = relativePath(el, doc.documentElement)
+
+  return full ? `html > ${full}` : el.tagName.toLowerCase()
+}
+
+/**
+ * Walk `doc` and produce a compact accessibility tree. Non-role-bearing
+ * elements (plain `<div>`, layout wrappers) are flattened — their interesting
+ * descendants bubble up into the nearest role-bearing ancestor's `children`.
+ * Walker is bounded at `A11Y_MAX_NODES` nodes; `truncated` is true if hit.
+ */
+function buildA11ySnapshot (doc: Document): { tree: A11yNode, nodeCount: number, truncated: boolean } {
+  let count = 0
+  let truncated = false
+
+  const walk = (el: Element): A11yNode[] => {
+    if (count >= A11Y_MAX_NODES) {
+      truncated = true
+
+      return []
+    }
+
+    if (el.getAttribute('aria-hidden') === 'true') return []
+
+    const explicit = el.getAttribute('role')?.trim().split(/\s+/)[0] || null
+    const role = explicit === 'presentation' || explicit === 'none'
+      ? null
+      : explicit || implicitRole(el)
+
+    const children: A11yNode[] = []
+
+    for (const child of Array.from(el.children) as Element[]) {
+      for (const c of walk(child)) children.push(c)
+    }
+
+    if (!role) return children
+
+    if (count >= A11Y_MAX_NODES) {
+      truncated = true
+
+      return children
+    }
+
+    count++
+
+    return [{
+      role,
+      name: computeName(el, role, doc),
+      level: role === 'heading' ? (parseInt(el.tagName.slice(1), 10) || null) : null,
+      value: computeValue(el, role),
+      checked: computeChecked(el, role),
+      disabled: computeDisabled(el, role),
+      selector: uniqueSelector(el, doc),
+      children,
+    }]
+  }
+
+  const topChildren = walk(doc.documentElement)
+
+  const tree: A11yNode = {
+    role: 'document',
+    name: (doc.title || '').trim() || null,
+    level: null,
+    value: null,
+    checked: null,
+    disabled: null,
+    selector: 'html',
+    children: topChildren,
+  }
+
+  return { tree, nodeCount: count, truncated }
+}
+
 let crossOriginOnMessageRef = ({ data, source }: MessageEvent<{
   data: any
   source: Window
@@ -285,8 +709,21 @@ export class EventManager {
       rerun()
     }
 
-    this.reporterBus.on('studio:init:test', studioInitTest)
-    this.localBus.on('studio:init:test', studioInitTest)
+    // When Studio is activated via the reporter UI (not the CLI mutation),
+    // let the server mirror `studioActiveTestId` so `cypress inspect test`
+    // can distinguish Studio mode. The CLI path already sets coreData via
+    // the `studioInitTest` mutation before emitting `studio:remote-init:test`,
+    // so it's fine for the server to no-op on a repeat notification.
+    const studioInitTestFromUi = (payload: { testId: string }) => {
+      this.ws.emit('studio:testId:set', { testId: payload.testId })
+      studioInitTest(payload)
+    }
+
+    this.reporterBus.on('studio:init:test', studioInitTestFromUi)
+    this.localBus.on('studio:init:test', studioInitTestFromUi)
+    // Server-initiated Studio activation (e.g. from `cypress inspect test open`).
+    // Runs the same handler the reporter button uses — behavior matches a click.
+    this.ws.on('studio:remote-init:test', studioInitTest)
 
     const studioInitSuite = ({ suiteId, showUrlPrompt = true, entrySource }: { suiteId: string, showUrlPrompt?: boolean, entrySource?: EntrySource }) => {
       this.studioStore.setSuiteId(suiteId)
@@ -324,6 +761,11 @@ export class EventManager {
     }
 
     const executeStudioCancel = () => {
+      // Mirror `studioActiveTestId` clearing to the server regardless of whether
+      // this cancel was UI- or server-initiated. The `studioCancel` mutation
+      // already clears it on the server side, so a duplicate is harmless.
+      this.ws.emit('studio:testId:clear')
+
       this.ws.emit('studio:destroy', ({ error }) => {
         if (error) {
           // eslint-disable-next-line no-console
@@ -347,6 +789,321 @@ export class EventManager {
 
     this.localBus.on('studio:cancel', () => {
       executeStudioCancel()
+    })
+
+    // Server-initiated Studio teardown (e.g. from `cypress inspect test close`).
+    this.ws.on('studio:remote-cancel', executeStudioCancel)
+
+    // On-demand command log snapshot for `cypress inspect test`. Bridges a
+    // request from the server to the reporter's MobX store via `reporterBus`,
+    // then replies over a separate `inspect:response` event (rather than a
+    // socket ack) because the CDP-backed runner socket doesn't deliver
+    // server-initiated ack callbacks — see `packages/socket/lib/client/cdp-browser.ts`.
+    this.ws.on('inspect:request-commands', ({ requestId, testId }: { requestId: string, testId: string }) => {
+      let settled = false
+      const reply = (snapshot: unknown) => {
+        if (settled) return
+
+        settled = true
+        this.ws.emit('inspect:response', { requestId, snapshot })
+      }
+
+      // Defensive timeout — if the reporter bus has no listener (reporter
+      // unmounted, never attached), reply with null so the server resolves.
+      const timer = setTimeout(() => reply(null), 1500)
+
+      this.reporterBus.emit('request:commands:snapshot', testId, (snapshot: unknown) => {
+        clearTimeout(timer)
+
+        // Enrich each command with `snapshotCount` from the driver. The
+        // reporter only tracks `hasSnapshot` as a boolean, but the raw
+        // snapshots array lives on the driver-side log attrs and we need
+        // the length for `cypress inspect command list`.
+        if (Array.isArray(snapshot) && Cypress?.runner?.getSnapshotPropsForLog) {
+          for (const cmd of snapshot) {
+            if (cmd && typeof cmd === 'object' && typeof (cmd as any).id === 'string') {
+              try {
+                const props = Cypress.runner.getSnapshotPropsForLog(testId, (cmd as any).id)
+                const snapshots = props && (props as any).snapshots
+
+                ;(cmd as any).snapshotCount = Array.isArray(snapshots) ? snapshots.length : 0
+              } catch {
+                (cmd as any).snapshotCount = 0
+              }
+            }
+          }
+        }
+
+        reply(snapshot)
+      })
+    })
+
+    // On-demand read of the currently pinned command for `cypress inspect
+    // command`. Combines the reporter's `appState.pinnedSnapshotId` with the
+    // driver's `getConsolePropsForLog` so the CLI gets both pin state and
+    // rich debug payload in one round-trip.
+    this.ws.on('inspect:request-pinned-command', ({ requestId, testId }: { requestId: string, testId: string }) => {
+      let settled = false
+      const reply = (snapshot: unknown) => {
+        if (settled) return
+
+        settled = true
+        this.ws.emit('inspect:response', { requestId, snapshot })
+      }
+
+      const timer = setTimeout(() => reply(null), 1500)
+
+      this.reporterBus.emit('request:pinned-command-state', (logId: string | null) => {
+        clearTimeout(timer)
+
+        if (!logId) {
+          return reply(null)
+        }
+
+        let consolePropsJson: string | null = null
+
+        try {
+          const consoleProps = Cypress?.runner?.getConsolePropsForLog?.(testId, logId)
+
+          if (consoleProps != null) {
+            consolePropsJson = safeStringifyConsoleProps(consoleProps)
+          }
+        } catch {
+          consolePropsJson = null
+        }
+
+        reply({ logId, consolePropsJson })
+      })
+    })
+
+    // Read-only sibling of `inspect:request-pinned-command`. Dumps
+    // `consoleProps` for each requested logId without touching the reporter's
+    // pinned state. Used by `cypress inspect command info <sel...>`.
+    this.ws.on('inspect:request-command-console-props', ({ requestId, testId, logIds }: {
+      requestId: string
+      testId: string
+      logIds: string[]
+    }) => {
+      const results: Array<{ logId: string, consolePropsJson: string | null }> = []
+
+      const safeLogIds = Array.isArray(logIds) ? logIds : []
+
+      for (const logId of safeLogIds) {
+        if (typeof logId !== 'string') {
+          continue
+        }
+
+        let consolePropsJson: string | null = null
+
+        try {
+          const consoleProps = Cypress?.runner?.getConsolePropsForLog?.(testId, logId)
+
+          if (consoleProps != null) {
+            consolePropsJson = safeStringifyConsoleProps(consoleProps)
+          }
+        } catch {
+          consolePropsJson = null
+        }
+
+        results.push({ logId, consolePropsJson })
+      }
+
+      this.ws.emit('inspect:response', { requestId, snapshot: results })
+    })
+
+    // On-demand read of the AUT iframe for `cypress inspect aut` /
+    // `cypress inspect aut dom`. Studio gating happens server-side in the
+    // resolver; this handler assumes it's OK to read and returns a tagged
+    // payload the resolver maps to the GraphQL union.
+    this.ws.on('inspect:request-aut', ({ requestId, kind, args }: {
+      requestId: string
+      kind: 'root' | 'dom' | 'snapshot'
+      args: { selector?: string }
+    }) => {
+      // eslint-disable-next-line no-console
+      console.log('[inspect] ws inspect:request-aut', { requestId, kind, args })
+      let settled = false
+      const reply = (snapshot: unknown) => {
+        if (settled) return
+
+        settled = true
+        // eslint-disable-next-line no-console
+        console.log('[inspect] inspect:response ←', { requestId, snapshot })
+        this.ws.emit('inspect:response', { requestId, snapshot })
+      }
+
+      // Safety timeout — matches other inspect handlers. The handler itself
+      // is synchronous, so this is belt-and-suspenders in case a cross-origin
+      // access hangs inside JQuery/DOM internals.
+      const timer = setTimeout(() => reply({ error: 'AUT_UNAVAILABLE' }), 1000)
+
+      try {
+        const autIframe = getAutIframeModel()
+        const autWindow: any = autIframe?.$iframe?.prop?.('contentWindow') ?? null
+
+        if (!autWindow) {
+          clearTimeout(timer)
+
+          return reply({ error: 'AUT_UNAVAILABLE' })
+        }
+
+        if (kind === 'root') {
+          let url: string | null = null
+
+          try {
+            url = autWindow.location?.href ?? null
+          } catch {
+            // Cross-origin AUT — fall back to the driver's cached last URL.
+            url = (Cypress as any)?.state?.('url') ?? null
+          }
+
+          if (!url) {
+            clearTimeout(timer)
+
+            return reply({ error: 'AUT_UNAVAILABLE' })
+          }
+
+          let title: string | null = null
+
+          try {
+            title = autWindow.document?.title ?? null
+          } catch {
+            title = null
+          }
+
+          const viewportWidth = Number((Cypress as any)?.config?.('viewportWidth')) || 0
+          const viewportHeight = Number((Cypress as any)?.config?.('viewportHeight')) || 0
+
+          clearTimeout(timer)
+
+          return reply({ data: { url, title, viewportWidth, viewportHeight } })
+        }
+
+        if (kind === 'dom') {
+          const selector = typeof args?.selector === 'string' ? args.selector : ''
+
+          if (!selector) {
+            clearTimeout(timer)
+
+            return reply({ error: 'INVALID_SELECTOR', detailMessage: 'selector is required' })
+          }
+
+          let doc: Document
+
+          try {
+            doc = autWindow.document
+            if (!doc) throw new Error('no document')
+          } catch (e: any) {
+            clearTimeout(timer)
+
+            return reply({ error: 'AUT_UNAVAILABLE', detailMessage: e?.message })
+          }
+
+          let nodes: NodeListOf<Element>
+
+          try {
+            nodes = doc.querySelectorAll(selector)
+          } catch (e: any) {
+            clearTimeout(timer)
+
+            return reply({ error: 'INVALID_SELECTOR', detailMessage: e?.message })
+          }
+
+          const MAX_MATCHES = 20
+          const MAX_OUTER_HTML = 2048
+          const MAX_TEXT = 500
+          const truncate = (s: string, n: number) => s.length > n ? s.slice(0, n) : s
+
+          const matches = [] as Array<{ tag: string, text: string | null, attrs: Array<{ name: string, value: string }>, outerHTML: string }>
+
+          for (let i = 0; i < Math.min(nodes.length, MAX_MATCHES); i++) {
+            const el = nodes[i] as Element
+            const rawText = (el.textContent ?? '').trim()
+            const attrs: Array<{ name: string, value: string }> = []
+
+            for (const attr of Array.from(el.attributes)) {
+              attrs.push({ name: attr.name, value: attr.value })
+            }
+
+            matches.push({
+              tag: el.tagName.toLowerCase(),
+              text: rawText ? truncate(rawText, MAX_TEXT) : null,
+              attrs,
+              outerHTML: truncate(el.outerHTML, MAX_OUTER_HTML),
+            })
+          }
+
+          clearTimeout(timer)
+
+          return reply({ data: { selector, count: nodes.length, matches } })
+        }
+
+        if (kind === 'snapshot') {
+          let doc: Document
+
+          try {
+            doc = autWindow.document
+            if (!doc) throw new Error('no document')
+          } catch (e: any) {
+            clearTimeout(timer)
+
+            return reply({ error: 'AUT_UNAVAILABLE', detailMessage: e?.message })
+          }
+
+          let url: string | null = null
+
+          try {
+            url = autWindow.location?.href ?? null
+          } catch {
+            url = (Cypress as any)?.state?.('url') ?? null
+          }
+
+          if (!url) {
+            clearTimeout(timer)
+
+            return reply({ error: 'AUT_UNAVAILABLE' })
+          }
+
+          let title: string | null = null
+
+          try {
+            title = doc.title ?? null
+          } catch {
+            title = null
+          }
+
+          const viewportWidth = Number((Cypress as any)?.config?.('viewportWidth')) || 0
+          const viewportHeight = Number((Cypress as any)?.config?.('viewportHeight')) || 0
+
+          const { tree, nodeCount, truncated } = buildA11ySnapshot(doc)
+
+          clearTimeout(timer)
+
+          return reply({ data: { url, title, viewportWidth, viewportHeight, nodeCount, truncated, tree } })
+        }
+
+        clearTimeout(timer)
+        reply({ error: 'AUT_UNAVAILABLE', detailMessage: `unknown kind: ${kind}` })
+      } catch (e: any) {
+        clearTimeout(timer)
+        reply({ error: 'AUT_UNAVAILABLE', detailMessage: e?.message })
+      }
+    })
+
+    // Server-initiated pin / unpin for `cypress inspect command pin|unpin`.
+    // Mirrors the browser-side `_toggleColumnPin` path; the reporter handler
+    // guards on `appState.isRunning` and emits the same `pin:snapshot` bus
+    // event the UI click uses.
+    this.ws.on('inspect:remote-pin-command', ({ testId, logId }: { testId: string, logId: string }) => {
+      // eslint-disable-next-line no-console
+      console.log('[inspect] ws inspect:remote-pin-command → reporterBus', { testId, logId })
+      this.reporterBus.emit('inspect:remote-pin-command', testId, logId)
+    })
+
+    this.ws.on('inspect:remote-unpin-command', () => {
+      // eslint-disable-next-line no-console
+      console.log('[inspect] ws inspect:remote-unpin-command → reporterBus')
+      this.reporterBus.emit('inspect:remote-unpin-command')
     })
 
     this.ws.on('aut:destroy:init', () => {
@@ -658,23 +1415,32 @@ export class EventManager {
       })
     })
 
+    /**
+     * Emit a single discriminated envelope over the `inspect:event` socket
+     * channel. Every open-mode inspect signal flows through this one helper:
+     * spec lifecycle, per-test results, and (soon) commands, network,
+     * console. The server-side dispatcher lives in
+     * `packages/data-context/src/actions/RunStateActions.ts#dispatchInspectEvent`.
+     */
+    const emitInspect = (kind: string, payload: Record<string, unknown>): void => {
+      if (Cypress.config('isTextTerminal')) {
+        return
+      }
+
+      const spec = Cypress.spec
+
+      this.ws.emit('inspect:event', {
+        kind,
+        specPath: spec?.absolute,
+        timestamp: new Date().toISOString(),
+        payload,
+      })
+    }
+
     Cypress.on('run:start', async () => {
       hasMochaRunEnded = false
 
-      // Forward run-start to the server in open mode only. The `mocha` socket
-      // channel above (line 47) is driver-gated on `isTextTerminal`, so in
-      // `cypress open` the server has no other way to know a spec is running —
-      // this is the bridge the `cypress inspect` CLI reads via
-      // `inspectSnapshot.activeRun`.
-      if (!Cypress.config('isTextTerminal')) {
-        const spec = Cypress.spec
-
-        this.ws.emit('run:lifecycle', {
-          phase: 'start',
-          specPath: spec?.absolute,
-          startedAt: new Date().toISOString(),
-        })
-      }
+      emitInspect('run:start', {})
 
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
@@ -684,19 +1450,33 @@ export class EventManager {
     Cypress.on('run:end', async () => {
       hasMochaRunEnded = true
 
-      if (!Cypress.config('isTextTerminal')) {
-        const spec = Cypress.spec
-
-        this.ws.emit('run:lifecycle', {
-          phase: 'end',
-          specPath: spec?.absolute,
-          endedAt: new Date().toISOString(),
-        })
-      }
+      emitInspect('run:end', {})
 
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('end:memory:profiling')
       }
+    })
+
+    // Per-test outcomes. Retries fire this event multiple times for the same
+    // test id; the server overwrites by id so the final attempt wins.
+    Cypress.on('test:after:run', (attributes: any) => {
+      const state: string | undefined = attributes?.state
+
+      // Mocha sometimes fires this for hooks or partial results; ignore
+      // anything without a terminal test state.
+      if (state !== 'passed' && state !== 'failed' && state !== 'pending' && state !== 'skipped') {
+        return
+      }
+
+      emitInspect('test:result', {
+        testId: String(attributes.id ?? ''),
+        title: String(attributes.title ?? ''),
+        titlePath: Array.isArray(attributes._titlePath) ? attributes._titlePath.map(String) : [],
+        state,
+        duration: typeof attributes.duration === 'number' ? attributes.duration : null,
+        currentRetry: typeof attributes.currentRetry === 'number' ? attributes.currentRetry : 0,
+        error: attributes.err?.message ? String(attributes.err.message) : null,
+      })
     })
 
     driverToLocalEvents.forEach((event) => {
