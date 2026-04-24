@@ -8,6 +8,7 @@
 **Bugfixes:**
 
 - Fixed an issue where an application under test containing `<base target="_top">` or `<base target="_parent">` would navigate out of the Cypress iframe when untargeted links were clicked or forms were submitted, breaking the test run. The unsafe `target` is now stripped from `<base>` tags as part of the existing `modifyObstructiveCode` rewriting (enabled by default for the primary super-domain, and extendable to third-party origins with `experimentalModifyObstructiveThirdPartyCode`). A runtime guard also neutralizes any `<base>` inserted or modified after load, matching the always-on behavior of the existing `<a>` / `<form>` target guards. Fixed in [#33667](https://github.com/cypress-io/cypress/pull/33667).
+- Fixed a race in `cypress open` where an in-flight browser request (iframe, app HTML, or proxied response) arriving during project (re)initialization — for example, immediately after a `cypress.config.js` edit — could crash the request handler on an unset primary remote state, surfacing as a misleading "Your configFile threw an error" with `ERR_STREAM_DESTROYED`. HTTP handlers now briefly await the primary remote state before responding and fail cleanly on timeout (503 for the iframe route, 500 for the HTML route) instead of throwing an unhandled exception. Fixed in [#33662](https://github.com/cypress-io/cypress/pull/33662).
 
 **Dependency Updates:**
 
