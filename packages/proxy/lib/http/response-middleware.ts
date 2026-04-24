@@ -101,11 +101,13 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
 function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState: RemoteState | undefined, documentDomainInjection: DocumentDomainInjection) {
   // `remoteState` may be undefined while a project is (re)initializing — e.g.
   // an in-flight proxy response from the previous AUT hits the new server
-  // before `remoteStates.set()` has been called for the new project. Treat
-  // that as "no match" so the caller falls back to a safe injection level
-  // instead of crashing on `undefined.strategy`.
+  // before `remoteStates.set()` has been called for the new project. Pre-PR
+  // the caller crashed on `undefined.strategy` and the middleware runner's
+  // try/catch routed that to error-middleware. Throw an explicit error here
+  // to preserve that contract with a clearer message rather than silently
+  // applying a potentially wrong injection level to the response.
   if (!remoteState) {
-    return false
+    throw new Error('reqMatchesPolicyBasedOnDomain: remote state is not set')
   }
 
   if (remoteState.strategy === 'http') {
