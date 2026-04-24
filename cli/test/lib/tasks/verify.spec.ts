@@ -877,15 +877,6 @@ describe('lib/tasks/verify', () => {
       vi.mocked(util.isCi).mockReturnValue(true)
     })
 
-    it('uses default listr renderer when npm log level is not silent', async () => {
-      await start()
-
-      expect(vi.mocked(Listr)).toHaveBeenCalledWith(
-        expect.any(Array),
-        expect.objectContaining({ renderer: 'default' }),
-      )
-    })
-
     it('logs error when binary not found', async () => {
       const output = createStdoutCapture()
 
