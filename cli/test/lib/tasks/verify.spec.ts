@@ -120,12 +120,12 @@ vi.mock('../../../lib/util', async (importActual) => {
 
 vi.mock('listr2', async (importActual) => {
   const actual = await importActual<typeof import('listr2')>()
-  const RealListr = actual.Listr
+  const { Listr } = actual
 
   return {
     ...actual,
-    Listr: vi.fn(function (this: unknown, ...args: ConstructorParameters<typeof RealListr>) {
-      return new RealListr(...args)
+    Listr: vi.fn(function (this: unknown, ...args: ConstructorParameters<typeof Listr>) {
+      return new Listr(...args)
     }),
   }
 })

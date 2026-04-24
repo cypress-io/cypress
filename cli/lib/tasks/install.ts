@@ -319,14 +319,14 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
   displayCompletionMsg()
 }
 
-function downloadArchive ({ version, downloadDestination }: { version: string, downloadDestination: string }): ListrTask {
+function downloadArchive (version: string, downloadDestination: string): ListrTask {
   const inProgressTitle = 'Downloading Cypress'
   const completedTitle = chalk.green('Downloaded Cypress')
 
   return {
     title: util.titleize(inProgressTitle),
-    task: async (ctx: any, task: any) => {
-      const redirectVersion = await download.start({
+    task: async (ctx, task) => {
+      await download.start({
         version,
         downloadDestination,
         progress: {
@@ -336,8 +336,6 @@ function downloadArchive ({ version, downloadDestination }: { version: string, d
           },
         },
       })
-
-      if (redirectVersion) version = redirectVersion
 
       debug(`finished downloading file: ${downloadDestination}`)
 
@@ -353,10 +351,7 @@ function installFromLocal (pathToLocalFile: string, installDir: string): ListrTa
   debug('skipping download')
 
   return [
-    unzipArchive({
-      zipFilePath,
-      installDir,
-    }),
+    unzipArchive(zipFilePath, installDir),
   ]
 }
 
@@ -366,19 +361,13 @@ function installFromRemote (version: string, installDir: string): ListrTask[] {
   debug('preparing to download and unzip version ', version, 'to path', installDir)
 
   return [
-    downloadArchive({ version, downloadDestination }),
-    unzipArchive({
-      zipFilePath: downloadDestination,
-      installDir,
-    }),
-    cleanup({ downloadDestination, installDir }),
+    downloadArchive(version, downloadDestination),
+    unzipArchive(downloadDestination, installDir),
+    cleanup(downloadDestination, installDir),
   ]
 }
 
-function unzipArchive ({ zipFilePath, installDir }: {
-  zipFilePath: string
-  installDir: string
-}): ListrTask {
+function unzipArchive (zipFilePath: string, installDir: string): ListrTask {
   const inProgressTitle = 'Unzipping Cypress'
   const completedTitle = chalk.green('Unzipped Cypress')
 
@@ -400,13 +389,13 @@ function unzipArchive ({ zipFilePath, installDir }: {
   }
 }
 
-function cleanup ({ downloadDestination, installDir }: { downloadDestination: string, installDir: string }): ListrTask {
+function cleanup (archiveLocation: string, installDir: string): ListrTask {
   return {
     title: util.titleize('Finishing Installation'),
     task: async (ctx, task) => {
-      debug('removing zip file %s', downloadDestination)
+      debug('removing zip file %s', archiveLocation)
 
-      await fs.remove(downloadDestination)
+      await fs.remove(archiveLocation)
 
       debug('finished installation in', installDir)
 
