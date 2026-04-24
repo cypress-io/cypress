@@ -184,11 +184,6 @@ commands:
   # only genuinely missing/corrupt packages and the postinstall re-applies
   # patches cleanly. Wrap the reverse in `|| true` — if a cache-corrupted
   # package can't be reversed, --check-files will re-extract it anyway.
-  #
-  # Use shell globs (not `find`) because on Windows bash, `find` can
-  # resolve to Windows FIND.EXE. The glob `packages/*/patches` naturally
-  # excludes the 3-deep packages/runner/injection/patches which is not
-  # in patch-package format.
   windows_reinstall_deps:
     steps:
       - run:
