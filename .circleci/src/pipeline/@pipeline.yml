@@ -178,12 +178,21 @@ commands:
 
   # Work around the CircleCI Windows save_cache bug that corrupts @-named
   # packages (https://github.com/cypress-io/cypress/issues/30343):
-  # reverse patch-package patches in every workspace that has a patches/
-  # directory so yarn's integrity check doesn't flag patched files as
-  # modified, then run `yarn install --check-files` so yarn re-extracts
-  # only genuinely missing/corrupt packages and the postinstall re-applies
-  # patches cleanly. Wrap the reverse in `|| true` — if a cache-corrupted
-  # package can't be reversed, --check-files will re-extract it anyway.
+  #   1. Reverse patch-package patches in every workspace that has a
+  #      patches/ directory so yarn's integrity check doesn't flag patched
+  #      files as modified.
+  #   2. `yarn install --check-files` re-extracts only genuinely
+  #      missing/corrupt packages.
+  #   3. Re-apply patches explicitly. `yarn install` only re-runs the
+  #      *root* postinstall; workspace postinstalls (where @packages/server
+  #      etc. apply their own patches) are skipped when their packages
+  #      weren't re-extracted, leaving the reversed patches un-reapplied
+  #      in the no-corruption case.
+  # `|| true` on reverse handles cache-corrupted packages that can't be
+  # reversed — step 2 re-extracts them. `|| true` on apply handles the
+  # case where step 2's postinstall already re-applied a patch.
+  # patch-package is idempotent, so re-applying already-applied patches
+  # is a no-op.
   windows_reinstall_deps:
     steps:
       - run:
@@ -194,6 +203,10 @@ commands:
               (cd "$(dirname "$p")" && npx patch-package --reverse) || true
             done
             yarn install --check-files
+            for p in patches cli/patches packages/*/patches; do
+              [ -d "$p" ] || continue
+              (cd "$(dirname "$p")" && npx patch-package) || true
+            done
 
   prepare-modules-cache:
     parameters:
