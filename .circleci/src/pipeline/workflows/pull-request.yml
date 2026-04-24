@@ -1,11 +1,18 @@
 # The workflow runs for:
 # External PR after approval (approved contributor PR that's not a main branch)
 # Internal PR for any branch that does is not develop or release/ related
-#
-# TEMP: pull_request workflow disabled so only the stripped-down windows
-# flake-hunt workflow fires. Revert before merge.
 when:
-  equal: [ true, false ]
+  and:
+    - not:
+        matches:
+            pattern: /^release\//
+            value: << pipeline.git.branch >>
+    - not:
+        matches:
+            pattern: /^develop/
+            value: << pipeline.git.branch >>
+    - not:
+        equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
 jobs:
   - node_modules_install:
