@@ -292,8 +292,8 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
   const pathToLocalFile = await getLocalFilePath()
 
   const tasks = pathToLocalFile ?
-    installFromLocal({ pathToLocalFile, installDir }) :
-    installFromRemote({ version: versionToInstall, installDir })
+    installFromLocal(pathToLocalFile, installDir) :
+    installFromRemote(versionToInstall, installDir)
 
   if (options.force) {
     debug('Cypress already installed at', installDir)
@@ -346,7 +346,7 @@ function downloadArchive ({ version, downloadDestination }: { version: string, d
   }
 }
 
-function installFromLocal ({ pathToLocalFile, installDir }): ListrTask[] {
+function installFromLocal (pathToLocalFile: string, installDir: string): ListrTask[] {
   const zipFilePath = path.resolve(pathToLocalFile)
 
   debug('found local file at', zipFilePath)
@@ -360,7 +360,7 @@ function installFromLocal ({ pathToLocalFile, installDir }): ListrTask[] {
   ]
 }
 
-function installFromRemote ({ version, installDir }: { version: string, installDir: string }): ListrTask[] {
+function installFromRemote (version: string, installDir: string): ListrTask[] {
   const downloadDestination = path.join(os.tmpdir(), `cypress-${process.pid}.zip`)
 
   debug('preparing to download and unzip version ', version, 'to path', installDir)
