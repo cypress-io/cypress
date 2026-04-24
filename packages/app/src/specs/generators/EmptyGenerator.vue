@@ -134,7 +134,11 @@ import Button from '@packages/frontend-shared/src/components/Button.vue'
 import { useVModels, whenever } from '@vueuse/core'
 import { gql, useMutation } from '@urql/vue'
 import SpecPatterns from '../../components/SpecPatterns.vue'
-import type { EmptyGeneratorFragment, GeneratorSuccessFileFragment } from '../../generated/graphql'
+import type {
+  EmptyGeneratorFragment,
+  EmptyGenerator_GenerateSpecMutation,
+  GeneratorSuccessFileFragment,
+} from '../../generated/graphql'
 import { EmptyGenerator_MatchSpecFileDocument, EmptyGenerator_GenerateSpecDocument } from '../../generated/graphql'
 import StandardModalFooter from '@packages/frontend-shared/src/components/StandardModalFooter.vue'
 import GeneratorSuccess from './GeneratorSuccess.vue'
@@ -174,12 +178,18 @@ mutation EmptyGenerator_generateSpec($codeGenCandidate: String!, $type: CodeGenT
   }
 }`
 
+export type EmptyGeneratorSpecCreatedPayload = {
+  generateSpecFromSource: NonNullable<EmptyGenerator_GenerateSpecMutation['generateSpecFromSource']>
+  scaffoldedFile: GeneratorSuccessFileFragment
+}
+
 const emits = defineEmits<{
   (event: 'update:title', value: string): void
   (event: 'update:description', value: string): void
   (event: 'restart'): void
   (event: 'close'): void
   (event: 'updateTitle', value: string): void
+  (event: 'specCreated', payload: EmptyGeneratorSpecCreatedPayload): void
 }>()
 
 const { title } = useVModels(props, emits)
@@ -232,7 +242,20 @@ const createSpec = async () => {
 
   const { data } = await writeFile.executeMutation({ codeGenCandidate: specFile.value, type: props.type })
 
-  result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
+  const specResult = data?.generateSpecFromSource?.generatedSpecResult
+  const success =
+    specResult && 'file' in specResult && specResult.file
+      ? (specResult as GeneratorSuccessFileFragment)
+      : null
+
+  result.value = success
+
+  if (success && data?.generateSpecFromSource) {
+    emits('specCreated', {
+      generateSpecFromSource: data.generateSpecFromSource,
+      scaffoldedFile: success,
+    })
+  }
 }
 
 watch(specFile, async (value) => {

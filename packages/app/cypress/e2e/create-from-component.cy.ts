@@ -191,10 +191,6 @@ function validateCreateFromReactComponentCard (beforeEachFn: () => void, expecte
       cy.contains(getPathForPlatform(expectedSpecPath)).should('be.visible')
       cy.findByRole('button', { name: 'Close' }).should('be.visible')
 
-      // There appears to be a race condition here where sometimes we try to run the spec
-      // before the file has been written to. Waiting here for 1 second resolves the issue.
-      cy.wait(2000)
-
       cy.findByRole('link', { name: 'Okay, run the spec' })
       .should('have.attr', 'href', `#/specs/runner?file=${expectedSpecPath}`).click()
     })

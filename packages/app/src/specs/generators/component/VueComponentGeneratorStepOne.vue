@@ -8,6 +8,7 @@
         :other-generators="false"
         :spec-file-name="generatedSpecError.fileName"
         @restart="cancelSpecNameCreation"
+        @spec-created="onEmptyGeneratorSpecCreated"
         @updateTitle="(value) => emits('update:title', value)"
       />
     </template>
@@ -27,7 +28,7 @@
           v-else-if="!result"
           v-model:extensionPattern="extensionPattern"
           :files="allFiles"
-          :loading="query.fetching.value"
+          :loading="isCodeGenCandidatesInitialLoad"
           @selectFile="makeSpec"
         />
         <GeneratorSuccess
@@ -42,9 +43,10 @@
         >
           <Button
             size="lg"
-            :to="{ name: 'SpecRunner', query: { file: posixify(result.file.relative) }, params: { shouldShowTroubleRenderingAlert: 'true' } }"
+            :to="runSpecTo"
             :prefix-icon="TestResultsIcon"
             prefix-icon-class="w-[16px] h-[16px] icon-dark-white"
+            @click.capture="seedActiveSpecBeforeRunnerNavigate"
             @click="emits('close')"
           >
             {{ t('createSpec.successPage.runSpecButton') }}
@@ -72,16 +74,22 @@ import { useVModels, whenever } from '@vueuse/core'
 import { useI18n } from '@cy/i18n'
 import FileChooser from '../FileChooser.vue'
 import GeneratorSuccess from '../GeneratorSuccess.vue'
-import { computed, ref } from 'vue'
-import { gql, useQuery, useMutation } from '@urql/vue'
-import type { ComponentGeneratorStepOne_CodeGenGlobFragment, GeneratorSuccessFileFragment } from '../../../generated/graphql'
-import { VueComponentGeneratorStepOneDocument, VueComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import StandardModalFooter from '@cy/components/StandardModalFooter.vue'
 import Button from '@cy/components/Button.vue'
 import PlusButtonIcon from '~icons/cy/add-large_x16.svg'
 import TestResultsIcon from '~icons/cy/test-results_x24.svg'
+import { computed, ref } from 'vue'
+import { gql, useQuery, useMutation } from '@urql/vue'
+import type {
+  ComponentGeneratorStepOne_CodeGenGlobFragment,
+  GeneratorSuccessFileFragment,
+} from '../../../generated/graphql'
+import { VueComponentGeneratorStepOneDocument, VueComponentGeneratorStepOne_GenerateSpecDocument } from '../../../generated/graphql'
 import EmptyGenerator from '../EmptyGenerator.vue'
 import { posixify } from '../../../paths'
+import { useSpecStore } from '../../../store'
+import type { SpecFile } from '@packages/types/src'
+import type { EmptyGeneratorSpecCreatedPayload } from '../EmptyGenerator.vue'
 
 const props = defineProps<{
   title: string
@@ -95,6 +103,7 @@ const emits = defineEmits<{
   (event: 'close'): void
 }>()
 const { title } = useVModels(props, emits)
+const specStore = useSpecStore()
 
 title.value = t('createSpec.component.importFromComponent.chooseAComponentHeader')
 
@@ -138,10 +147,13 @@ mutation VueComponentGeneratorStepOne_generateSpec($codeGenCandidate: String!, $
 const mutation = useMutation(VueComponentGeneratorStepOne_GenerateSpecDocument)
 const extensionPattern = ref(props.gql.codeGenGlobs.component)
 
+// Nested refs are not unwrapped by @urql/vue when building the operation; use a
+// computed so `glob` is always a plain string on the wire and in the cache key.
+const codeGenVariables = computed(() => ({ glob: extensionPattern.value }))
+
 const query = useQuery({
   query: VueComponentGeneratorStepOneDocument,
-  // @ts-ignore
-  variables: { glob: extensionPattern },
+  variables: codeGenVariables,
   requestPolicy: 'network-only',
 })
 const allFiles = computed((): any => {
@@ -151,29 +163,86 @@ const allFiles = computed((): any => {
 
   return []
 })
-const result = ref<GeneratorSuccessFileFragment | null>(null)
+
+// Hiding the file list on every network refetch drops rows mid-click; only treat
+// the list as loading before we have any candidates to render.
+const isCodeGenCandidatesInitialLoad = computed(() => {
+  return Boolean(
+    query.fetching.value &&
+    !query.data.value?.currentProject?.codeGenCandidates?.length,
+  )
+})
 const generatedSpecError = ref()
 const generateSpecFromSource = ref()
-
-whenever(result, () => {
-  title.value = t('createSpec.successPage.header')
-})
+const result = ref<GeneratorSuccessFileFragment | null>(null)
 
 whenever(generatedSpecError, () => {
   title.value = t('createSpec.component.importTemplateSpec.header')
 })
 
+whenever(result, () => {
+  title.value = t('createSpec.successPage.header')
+})
+
+const runSpecTo = computed(() => {
+  const rel = result.value?.file?.relative
+
+  return {
+    name: 'SpecRunner' as const,
+    query: { file: rel ? posixify(rel) : '' },
+    params: { shouldShowTroubleRenderingAlert: 'true' },
+  }
+})
+
+function seedActiveSpecBeforeRunnerNavigate () {
+  const rel = result.value?.file?.relative
+
+  if (!rel) {
+    return
+  }
+
+  const normalized = posixify(rel)
+  const specsList = generateSpecFromSource.value?.currentProject?.specs as ReadonlyArray<SpecFile> | undefined
+  const specForStore = specsList?.find((s) => posixify(s.relative) === normalized)
+
+  if (specForStore) {
+    specStore.setActiveSpec(specForStore)
+  }
+}
+
 const makeSpec = async (file) => {
+  generatedSpecError.value = null
+  result.value = null
+
   const { data } = await mutation.executeMutation({
     codeGenCandidate: file.absolute,
     type: 'component',
   })
 
   generateSpecFromSource.value = data?.generateSpecFromSource
-  result.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'ScaffoldedFile' ? data?.generateSpecFromSource?.generatedSpecResult : null
-  generatedSpecError.value = data?.generateSpecFromSource?.generatedSpecResult?.__typename === 'GeneratedSpecError' ? data?.generateSpecFromSource?.generatedSpecResult : null
+  const specResult = data?.generateSpecFromSource?.generatedSpecResult
+
+  if (specResult && 'file' in specResult && specResult.file) {
+    result.value = specResult as GeneratorSuccessFileFragment
+
+    return
+  }
+
+  if (specResult?.__typename === 'GeneratedSpecError' || (specResult && 'fileName' in specResult)) {
+    generatedSpecError.value = specResult
+
+    return
+  }
 }
+
+function onEmptyGeneratorSpecCreated (payload: EmptyGeneratorSpecCreatedPayload) {
+  generatedSpecError.value = null
+  generateSpecFromSource.value = payload.generateSpecFromSource
+  result.value = payload.scaffoldedFile
+}
+
 const cancelSpecNameCreation = () => {
   generatedSpecError.value = null
+  result.value = null
 }
 </script>
