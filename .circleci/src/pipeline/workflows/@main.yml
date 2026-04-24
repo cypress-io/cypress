@@ -591,20 +591,7 @@ darwin-arm64:
           - darwin-arm64-build
 
 windows:
-  # TEMP: run the windows workflow on this branch to flake-test the
-  # `yarn install --check-files` fix across every windows job. Each leaf
-  # test job is duplicated 5x; node_modules_install/build and
-  # create-build-artifacts remain 1x (deterministic/upload-sensitive).
-  # Also runs on the usual full-workflow branches. Revert before merging.
-  when:
-    or:
-      - equal: [ develop, << pipeline.git.branch >> ]
-      - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'mschile/peaceful-chatelet-ad60fb', << pipeline.git.branch >> ]
-      - matches:
-          pattern: /^release\/\d+\.\d+\.\d+$/
-          value: << pipeline.git.branch >>
-      - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
+  when: *full-workflow-filters
   jobs:
     - node_modules_install:
         name: windows-node-modules-install
@@ -620,39 +607,8 @@ windows:
         requires:
           - windows-node-modules-install
 
-    # TEMP: run each windows test job 5x to flake-test the `yarn install
-    # --check-files` fix across the full windows workflow. Revert this block
-    # before merging.
     - run-app-integration-tests-chrome:
-        name: windows-run-app-integration-tests-chrome-1
-        executor: windows
-        resource_class: windows.large
-        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
-        requires:
-          - windows-build
-    - run-app-integration-tests-chrome:
-        name: windows-run-app-integration-tests-chrome-2
-        executor: windows
-        resource_class: windows.large
-        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
-        requires:
-          - windows-build
-    - run-app-integration-tests-chrome:
-        name: windows-run-app-integration-tests-chrome-3
-        executor: windows
-        resource_class: windows.large
-        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
-        requires:
-          - windows-build
-    - run-app-integration-tests-chrome:
-        name: windows-run-app-integration-tests-chrome-4
-        executor: windows
-        resource_class: windows.large
-        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
-        requires:
-          - windows-build
-    - run-app-integration-tests-chrome:
-        name: windows-run-app-integration-tests-chrome-5
+        name: windows-run-app-integration-tests-chrome
         executor: windows
         resource_class: windows.large
         context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
@@ -660,35 +616,7 @@ windows:
           - windows-build
 
     - run-launchpad-integration-tests-chrome:
-        name: windows-run-launchpad-integration-tests-chrome-1
-        executor: windows
-        resource_class: windows.large
-        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
-        requires:
-          - windows-build
-    - run-launchpad-integration-tests-chrome:
-        name: windows-run-launchpad-integration-tests-chrome-2
-        executor: windows
-        resource_class: windows.large
-        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
-        requires:
-          - windows-build
-    - run-launchpad-integration-tests-chrome:
-        name: windows-run-launchpad-integration-tests-chrome-3
-        executor: windows
-        resource_class: windows.large
-        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
-        requires:
-          - windows-build
-    - run-launchpad-integration-tests-chrome:
-        name: windows-run-launchpad-integration-tests-chrome-4
-        executor: windows
-        resource_class: windows.large
-        context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
-        requires:
-          - windows-build
-    - run-launchpad-integration-tests-chrome:
-        name: windows-run-launchpad-integration-tests-chrome-5
+        name: windows-run-launchpad-integration-tests-chrome
         executor: windows
         resource_class: windows.large
         context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
@@ -696,70 +624,19 @@ windows:
           - windows-build
 
     - unit-tests:
-        name: windows-unit-tests-1
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - unit-tests:
-        name: windows-unit-tests-2
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - unit-tests:
-        name: windows-unit-tests-3
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - unit-tests:
-        name: windows-unit-tests-4
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - unit-tests:
-        name: windows-unit-tests-5
+        name: windows-unit-tests
         executor: windows
         resource_class: windows.medium
         requires:
           - windows-build
 
     - server-unit-tests-cloud-environment:
-        name: windows-server-unit-tests-cloud-environment-1
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - server-unit-tests-cloud-environment:
-        name: windows-server-unit-tests-cloud-environment-2
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - server-unit-tests-cloud-environment:
-        name: windows-server-unit-tests-cloud-environment-3
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - server-unit-tests-cloud-environment:
-        name: windows-server-unit-tests-cloud-environment-4
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - server-unit-tests-cloud-environment:
-        name: windows-server-unit-tests-cloud-environment-5
+        name: windows-server-unit-tests-cloud-environment
         executor: windows
         resource_class: windows.medium
         requires:
           - windows-build
 
-    # create-build-artifacts signs/uploads windows binaries. Keep it at 1x to
-    # avoid concurrent upload/signing collisions; the kitchensink job below
-    # fans back out to 5x against this single build-artifacts job.
     - create-build-artifacts:
         name: windows-create-build-artifacts
         executor: windows
@@ -773,88 +650,19 @@ windows:
           - windows-build
 
     - test-binary-against-kitchensink-chrome:
-        name: windows-test-binary-against-kitchensink-chrome-1
-        executor: windows
-        requires:
-          - windows-create-build-artifacts
-    - test-binary-against-kitchensink-chrome:
-        name: windows-test-binary-against-kitchensink-chrome-2
-        executor: windows
-        requires:
-          - windows-create-build-artifacts
-    - test-binary-against-kitchensink-chrome:
-        name: windows-test-binary-against-kitchensink-chrome-3
-        executor: windows
-        requires:
-          - windows-create-build-artifacts
-    - test-binary-against-kitchensink-chrome:
-        name: windows-test-binary-against-kitchensink-chrome-4
-        executor: windows
-        requires:
-          - windows-create-build-artifacts
-    - test-binary-against-kitchensink-chrome:
-        name: windows-test-binary-against-kitchensink-chrome-5
+        name: windows-test-binary-against-kitchensink-chrome
         executor: windows
         requires:
           - windows-create-build-artifacts
 
     - v8-integration-tests:
-        name: windows-v8-integration-tests-1
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - v8-integration-tests:
-        name: windows-v8-integration-tests-2
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - v8-integration-tests:
-        name: windows-v8-integration-tests-3
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - v8-integration-tests:
-        name: windows-v8-integration-tests-4
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - v8-integration-tests:
-        name: windows-v8-integration-tests-5
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-
-    - driver-integration-memory-tests:
-        name: windows-driver-integration-memory-tests-1
+        name: windows-v8-integration-tests
         executor: windows
         resource_class: windows.medium
         requires:
           - windows-build
     - driver-integration-memory-tests:
-        name: windows-driver-integration-memory-tests-2
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - driver-integration-memory-tests:
-        name: windows-driver-integration-memory-tests-3
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - driver-integration-memory-tests:
-        name: windows-driver-integration-memory-tests-4
-        executor: windows
-        resource_class: windows.medium
-        requires:
-          - windows-build
-    - driver-integration-memory-tests:
-        name: windows-driver-integration-memory-tests-5
+        name: windows-driver-integration-memory-tests
         executor: windows
         resource_class: windows.medium
         requires:
