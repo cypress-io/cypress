@@ -98,7 +98,16 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer,
   return 'latin1'
 }
 
-function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState: RemoteState, documentDomainInjection: DocumentDomainInjection) {
+function reqMatchesPolicyBasedOnDomain (req: CypressIncomingRequest, remoteState: RemoteState | undefined, documentDomainInjection: DocumentDomainInjection) {
+  // `remoteState` may be undefined while a project is (re)initializing — e.g.
+  // an in-flight proxy response from the previous AUT hits the new server
+  // before `remoteStates.set()` has been called for the new project. Treat
+  // that as "no match" so the caller falls back to a safe injection level
+  // instead of crashing on `undefined.strategy`.
+  if (!remoteState) {
+    return false
+  }
+
   if (remoteState.strategy === 'http') {
     return documentDomainInjection.urlsMatch(
       req.proxiedUrl,
