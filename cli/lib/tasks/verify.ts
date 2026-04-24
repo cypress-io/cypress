@@ -206,11 +206,6 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
 
   logger.log()
 
-  if (options.welcomeMessage) {
-    logger.log()
-    logger.log('Opening Cypress...')
-  }
-
   const verifyTaskRunner = new Listr([{
     title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
     task: async (ctx, task) => {
@@ -226,6 +221,7 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
       debug('write verified: true')
 
       await state.writeBinaryVerifiedAsync(true, binaryDir)
+
       task.title = util.titleize(
         chalk.green('Verified Cypress!'),
         chalk.gray(binaryDir),
@@ -235,7 +231,12 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
     silentRendererCondition: () => logger.logLevel() === 'silent',
   })
 
-  return verifyTaskRunner.run()
+  await verifyTaskRunner.run()
+
+  if (options.welcomeMessage) {
+    logger.log()
+    logger.log('Opening Cypress...')
+  }
 }
 
 export const start = async (options: any = {}): Promise<void> => {
