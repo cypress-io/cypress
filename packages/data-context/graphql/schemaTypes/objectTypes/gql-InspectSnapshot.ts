@@ -111,6 +111,8 @@ export const CommandLog = objectType({
     t.string('hookId', { description: 'Id of the hook containing this command, if any.' })
     t.string('error', { description: 'Error message for this command, if the command failed.' })
     t.string('wallClockStartedAt', { description: 'ISO 8601 timestamp of when the command was logged.' })
+    t.nonNull.int('attemptIndex', { description: 'Zero-based retry index of the attempt this command belongs to. First attempt is 0; subsequent attempts are 1, 2, ... Studio surfaces commands from every attempt on a failed-and-retried test.' })
+    t.nonNull.string('attemptState', { description: `Terminal state of the owning attempt — one of 'passed' | 'failed' | 'pending' | 'active' | 'processing'. Useful to distinguish commands recorded during a failed early attempt from commands on the current / last attempt.` })
   },
 })
 
@@ -201,6 +203,8 @@ export const ActiveRun = objectType({
             snapshotCount: typeof c.snapshotCount === 'number' ? c.snapshotCount : 0,
             hasSnapshot: typeof c.hasSnapshot === 'boolean' ? c.hasSnapshot : false,
             hasConsoleProps: typeof c.hasConsoleProps === 'boolean' ? c.hasConsoleProps : false,
+            attemptIndex: typeof c.attemptIndex === 'number' ? c.attemptIndex : 0,
+            attemptState: typeof c.attemptState === 'string' ? c.attemptState : '',
           }
         })
       },
@@ -295,7 +299,11 @@ export const InspectSnapshot = objectType({
         return {
           testId,
           logId: pinned.logId,
-          command,
+          command: {
+            ...command,
+            attemptIndex: typeof command.attemptIndex === 'number' ? command.attemptIndex : 0,
+            attemptState: typeof command.attemptState === 'string' ? command.attemptState : '',
+          },
           consolePropsJson: pinned.consolePropsJson,
         }
       },

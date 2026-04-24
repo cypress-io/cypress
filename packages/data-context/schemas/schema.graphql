@@ -1157,6 +1157,16 @@ type CommandLog {
   """One of 'dom' | 'primitive' | 'agent' | 'route' when an alias is set."""
   aliasType: String
 
+  """
+  Zero-based retry index of the attempt this command belongs to. First attempt is 0; subsequent attempts are 1, 2, ... Studio surfaces commands from every attempt on a failed-and-retried test.
+  """
+  attemptIndex: Int!
+
+  """
+  Terminal state of the owning attempt — one of 'passed' | 'failed' | 'pending' | 'active' | 'processing'. Useful to distinguish commands recorded during a failed early attempt from commands on the current / last attempt.
+  """
+  attemptState: String!
+
   """Optional display override for the command name."""
   displayName: String
 

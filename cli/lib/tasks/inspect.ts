@@ -162,6 +162,8 @@ interface CommandLog {
   hookId: string | null
   error: string | null
   wallClockStartedAt: string | null
+  attemptIndex: number
+  attemptState: string
 }
 
 interface PinnedCommand {
@@ -296,8 +298,23 @@ export const renderSpecTree = (node: SpecTreeNode, prefix = ''): string[] => {
   return lines
 }
 
+// Force stdout into blocking mode the first time we print JSON. Node.js
+// pipes are non-blocking by default, so a large payload followed by an
+// immediate `process.exit()` can be truncated at the pipe buffer (~64KB).
+// Blocking mode guarantees the full write drains before the process dies.
+let stdoutSetBlocking = false
 const printJson = (obj: any): void => {
-  logger.always(JSON.stringify(obj, null, 2))
+  if (!stdoutSetBlocking) {
+    const handle = (process.stdout as any)._handle
+
+    if (handle && typeof handle.setBlocking === 'function') {
+      handle.setBlocking(true)
+    }
+
+    stdoutSetBlocking = true
+  }
+
+  logger.always(JSON.stringify(obj))
 }
 
 /**
@@ -397,6 +414,8 @@ const snapshotQuery = `
           hookId
           error
           wallClockStartedAt
+          attemptIndex
+          attemptState
         }
       }
       specCount
@@ -436,6 +455,8 @@ const pinnedCommandQuery = `
           hookId
           error
           wallClockStartedAt
+          attemptIndex
+          attemptState
         }
       }
     }
@@ -471,6 +492,8 @@ const inspectCommandInfoQuery = `
             hookId
             error
             wallClockStartedAt
+            attemptIndex
+            attemptState
           }
         }
       }
@@ -1093,7 +1116,28 @@ const testCurrent = async (opts: InspectOpts): Promise<void> => {
     return
   }
 
+  const colorAttempt = (state: string): string => {
+    if (state === 'passed') return chalk.green(state)
+
+    if (state === 'failed') return chalk.red(state)
+
+    if (state === 'pending') return chalk.yellow(state)
+
+    return chalk.dim(state)
+  }
+
+  let lastAttempt: number | null = null
+  const uniqueAttempts = new Set(commands.map((c) => c.attemptIndex))
+  const showAttemptHeaders = uniqueAttempts.size > 1
+
   for (const cmd of commands) {
+    if (showAttemptHeaders && cmd.attemptIndex !== lastAttempt) {
+      if (lastAttempt !== null) logger.always('')
+
+      logger.always(`  ${chalk.dim(`Attempt ${cmd.attemptIndex} [${colorAttempt(cmd.attemptState)}]`)}`)
+      lastAttempt = cmd.attemptIndex
+    }
+
     const state = (() => {
       if (cmd.state === 'passed') return chalk.green(cmd.state)
 
@@ -1325,9 +1369,12 @@ const testClose = async (opts: InspectOpts): Promise<void> => {
 /**
  * Resolve a user-supplied command selector against the Studio test's command
  * log. Precedence mirrors `resolveTest`:
- *   1. Exact log id match (e.g. `'log-primary-7'`)
- *   2. Exact `number` match (1-based ordinal, stringified)
- *   3. Unique substring match against `name`
+ *   1. Exact log id match (e.g. `'log-primary-7'`) — resolved across ALL
+ *      attempts, since log ids are globally unique per session.
+ *   2. Exact `number` match (1-based ordinal, stringified) — scoped to the
+ *      latest attempt, since `number` resets per attempt.
+ *   3. Unique substring match against `name` — scoped to the latest attempt
+ *      for the same reason. Cross-attempt lookups should use the log id.
  *
  * Writes to stderr + exits 1 on miss / ambiguous.
  */
@@ -1336,15 +1383,18 @@ const resolveCommand = (selector: string, commands: CommandLog[]): CommandLog | 
 
   if (byId) return byId
 
+  const latestAttempt = commands.reduce((max, c) => Math.max(max, c.attemptIndex), 0)
+  const latestCommands = commands.filter((c) => c.attemptIndex === latestAttempt)
+
   const numeric = Number(selector)
 
   if (Number.isFinite(numeric)) {
-    const byNumber = commands.find((c) => c.number === numeric)
+    const byNumber = latestCommands.find((c) => c.number === numeric)
 
     if (byNumber) return byNumber
   }
 
-  const substringMatches = commands.filter((c) => c.name.includes(selector))
+  const substringMatches = latestCommands.filter((c) => c.name.includes(selector))
 
   if (substringMatches.length === 0) {
     writeStderr(`No command matching: ${selector}\n`)
@@ -1393,7 +1443,13 @@ const requireStudioSnapshot = async (instance: Instance): Promise<InspectSnapsho
  * test, with richer metadata than `inspect test` shows (snapshot count,
  * duration, element count, alias, hook context, etc.).
  *
+ * Studio keeps every attempt of a retried test, so commands are grouped by
+ * attempt (0-indexed). The latest attempt is always shown last; within an
+ * attempt, commands are ordered as they fired.
+ *
  * `--json` returns the raw `activeRun.commands` array for downstream scripts.
+ * Each entry carries `attemptIndex` / `attemptState` so scripts can filter
+ * without parsing the pretty output.
  */
 const commandList = async (opts: InspectOpts): Promise<void> => {
   const instance = await resolveOrExit(opts.instance)
@@ -1422,19 +1478,7 @@ const commandList = async (opts: InspectOpts): Promise<void> => {
     return
   }
 
-  const table = new Table({
-    head: [
-      chalk.white('#'),
-      chalk.white('STATE'),
-      chalk.white('NAME'),
-      chalk.white('MESSAGE'),
-      chalk.white('SNAPS'),
-      chalk.white('ELEMS'),
-      chalk.white('ALIAS'),
-    ],
-  })
-
-  const colorState = (state: CommandLog['state']): string => {
+  const colorCommandState = (state: CommandLog['state']): string => {
     if (state === 'passed') return chalk.green(state)
 
     if (state === 'failed') return chalk.red(state)
@@ -1444,16 +1488,66 @@ const commandList = async (opts: InspectOpts): Promise<void> => {
     return chalk.dim(state)
   }
 
-  for (const cmd of commands) {
-    const number = cmd.number != null ? String(cmd.number) : ''
-    const name = cmd.displayName || cmd.name
-    const elems = cmd.numElements != null ? String(cmd.numElements) : ''
-    const alias = cmd.alias ?? ''
+  const colorAttemptState = (state: string): string => {
+    if (state === 'passed') return chalk.green(state)
 
-    table.push([number, colorState(cmd.state), name, cmd.message, String(cmd.snapshotCount), elems, alias])
+    if (state === 'failed') return chalk.red(state)
+
+    if (state === 'pending') return chalk.yellow(state)
+
+    return chalk.dim(state)
   }
 
-  logger.always(table.toString())
+  // Group commands by attempt. Preserve attempt-index order so the final
+  // attempt prints last.
+  const attempts = new Map<number, { state: string, commands: CommandLog[] }>()
+
+  for (const cmd of commands) {
+    let bucket = attempts.get(cmd.attemptIndex)
+
+    if (!bucket) {
+      bucket = { state: cmd.attemptState, commands: [] }
+      attempts.set(cmd.attemptIndex, bucket)
+    }
+
+    bucket.commands.push(cmd)
+  }
+
+  const attemptIndexes = Array.from(attempts.keys()).sort((a, b) => a - b)
+  const hasMultipleAttempts = attemptIndexes.length > 1
+
+  attemptIndexes.forEach((attemptIndex, i) => {
+    const { state, commands: attemptCommands } = attempts.get(attemptIndex)!
+
+    if (hasMultipleAttempts) {
+      if (i > 0) logger.always('')
+
+      logger.always(`Attempt ${attemptIndex} [${colorAttemptState(state)}]`)
+    }
+
+    const table = new Table({
+      head: [
+        chalk.white('#'),
+        chalk.white('STATE'),
+        chalk.white('NAME'),
+        chalk.white('MESSAGE'),
+        chalk.white('SNAPS'),
+        chalk.white('ELEMS'),
+        chalk.white('ALIAS'),
+      ],
+    })
+
+    for (const cmd of attemptCommands) {
+      const number = cmd.number != null ? String(cmd.number) : ''
+      const name = cmd.displayName || cmd.name
+      const elems = cmd.numElements != null ? String(cmd.numElements) : ''
+      const alias = cmd.alias ?? ''
+
+      table.push([number, colorCommandState(cmd.state), name, cmd.message, String(cmd.snapshotCount), elems, alias])
+    }
+
+    logger.always(table.toString())
+  })
 }
 
 /**
@@ -1513,6 +1607,7 @@ const printCommandDetail = (cmd: CommandLog, consolePropsJson: string | null): v
   logger.always(`Id:        ${cmd.id}`)
   logger.always(`State:     ${cmd.state}`)
   logger.always(`Type:      ${cmd.type}`)
+  logger.always(`Attempt:   ${cmd.attemptIndex}${cmd.attemptState ? chalk.dim(` (${cmd.attemptState})`) : ''}`)
 
   if (cmd.message) logger.always(`Message:   ${cmd.message}`)
 

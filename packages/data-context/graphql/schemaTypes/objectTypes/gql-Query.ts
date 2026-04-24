@@ -256,6 +256,8 @@ export const Query = objectType({
               snapshotCount: typeof cmd.snapshotCount === 'number' ? cmd.snapshotCount : 0,
               hasSnapshot: typeof cmd.hasSnapshot === 'boolean' ? cmd.hasSnapshot : false,
               hasConsoleProps: typeof cmd.hasConsoleProps === 'boolean' ? cmd.hasConsoleProps : false,
+              attemptIndex: typeof cmd.attemptIndex === 'number' ? cmd.attemptIndex : 0,
+              attemptState: typeof cmd.attemptState === 'string' ? cmd.attemptState : '',
             },
             consolePropsJson: consolePropsById.get(id) ?? null,
           }

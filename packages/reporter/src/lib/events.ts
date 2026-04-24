@@ -79,6 +79,11 @@ type CollectRunStateCallback = (arg: ReporterRunState) => void
  * populated downstream by the event-manager from the driver log attrs (the
  * reporter only tracks `hasSnapshot` as a boolean), so it's optional on the
  * reporter-side wire shape.
+ *
+ * `attemptIndex` / `attemptState` are the zero-based retry index and
+ * terminal state of the owning attempt — Studio surfaces all attempts of
+ * a failed-and-retried test, so commands from earlier attempts can co-exist
+ * with commands from the latest attempt in the same snapshot.
  */
 interface CommandSnapshot {
   id: string
@@ -103,6 +108,8 @@ interface CommandSnapshot {
   hookId: string | null
   error: string | null
   wallClockStartedAt: string | null
+  attemptIndex: number
+  attemptState: string
 }
 
 const events: Events = {
@@ -207,54 +214,70 @@ const events: Events = {
     // from "unknown test".
     runner.on('request:commands:snapshot', (testId: string, cb: (snapshot: CommandSnapshot[] | null) => void) => {
       const test = runnablesStore.testById(testId)
-      const commands = test?.lastAttempt?.commands
+      const attempts = test?.attempts ?? []
       const knownIds = Object.keys(runnablesStore._tests)
 
       // eslint-disable-next-line no-console
       console.log('[inspect] request:commands:snapshot', {
         testId,
         testFound: !!test,
-        commandCount: commands?.length ?? null,
+        attemptCount: attempts.length,
+        commandCounts: attempts.map((a) => a.commands.length),
         knownTestIds: knownIds,
       })
 
-      if (!commands) {
+      if (!test) {
         cb(null)
 
         return
       }
 
-      cb(commands.map((c) => {
-        return {
-          id: String(c.id ?? ''),
-          name: c.name ?? '',
-          message: c.displayMessage ?? '',
-          state: c.state ?? '',
-          type: c.type ?? '',
-          testId: c.testId ?? null,
-          displayName: c.displayName ?? null,
-          number: typeof c.number === 'number' ? c.number : null,
-          // Default to 0 so the GraphQL non-null contract always holds — the
-          // event-manager overrides this with the real count from
-          // `Cypress.runner.getSnapshotPropsForLog` when the driver is
-          // available. If the driver isn't loaded (no spec launched yet),
-          // leaving this as 0 is accurate: no commands = no snapshots.
-          snapshotCount: 0,
-          hasSnapshot: !!c.hasSnapshot,
-          hasConsoleProps: !!c.hasConsoleProps,
-          timeout: typeof c.timeout === 'number' ? c.timeout : null,
-          numElements: typeof c.numElements === 'number' ? c.numElements : null,
-          visible: typeof c.visible === 'boolean' ? c.visible : null,
-          groupLevel: typeof c.groupLevel === 'number' ? c.groupLevel : null,
-          group: typeof c.group === 'number' ? c.group : null,
-          alias: normalizeAlias(c.alias),
-          aliasType: c.aliasType ?? null,
-          referencesAlias: normalizeReferencesAlias(c.referencesAlias),
-          hookId: c.hookId ?? null,
-          error: c.err?.message ?? null,
-          wallClockStartedAt: c.wallClockStartedAt ?? null,
+      // Flatten commands from every attempt, tagging each with the owning
+      // attempt's index + state. Studio shows all attempts on a retried test,
+      // so the CLI needs the full set to surface "failed attempt N had these
+      // commands" alongside the latest attempt.
+      const snapshot: CommandSnapshot[] = []
+
+      for (const attempt of attempts) {
+        const attemptIndex = attempt.id
+        const attemptState = attempt.state
+
+        for (const c of attempt.commands) {
+          snapshot.push({
+            id: String(c.id ?? ''),
+            name: c.name ?? '',
+            message: c.displayMessage ?? '',
+            state: c.state ?? '',
+            type: c.type ?? '',
+            testId: c.testId ?? null,
+            displayName: c.displayName ?? null,
+            number: typeof c.number === 'number' ? c.number : null,
+            // Default to 0 so the GraphQL non-null contract always holds — the
+            // event-manager overrides this with the real count from
+            // `Cypress.runner.getSnapshotPropsForLog` when the driver is
+            // available. If the driver isn't loaded (no spec launched yet),
+            // leaving this as 0 is accurate: no commands = no snapshots.
+            snapshotCount: 0,
+            hasSnapshot: !!c.hasSnapshot,
+            hasConsoleProps: !!c.hasConsoleProps,
+            timeout: typeof c.timeout === 'number' ? c.timeout : null,
+            numElements: typeof c.numElements === 'number' ? c.numElements : null,
+            visible: typeof c.visible === 'boolean' ? c.visible : null,
+            groupLevel: typeof c.groupLevel === 'number' ? c.groupLevel : null,
+            group: typeof c.group === 'number' ? c.group : null,
+            alias: normalizeAlias(c.alias),
+            aliasType: c.aliasType ?? null,
+            referencesAlias: normalizeReferencesAlias(c.referencesAlias),
+            hookId: c.hookId ?? null,
+            error: c.err?.message ?? null,
+            wallClockStartedAt: c.wallClockStartedAt ?? null,
+            attemptIndex,
+            attemptState,
+          })
         }
-      }))
+      }
+
+      cb(snapshot)
     })
 
     // Companion to `inspect:request-pinned-command` — reports the currently
@@ -295,8 +318,10 @@ const events: Events = {
 
       const testIdGuess = (() => {
         for (const t of Object.values(runnablesStore._tests)) {
-          for (const cmd of t.lastAttempt?.commands ?? []) {
-            if (cmd.id === appState.pinnedSnapshotId) return cmd.testId
+          for (const attempt of t.attempts ?? []) {
+            for (const cmd of attempt.commands ?? []) {
+              if (cmd.id === appState.pinnedSnapshotId) return cmd.testId
+            }
           }
         }
 

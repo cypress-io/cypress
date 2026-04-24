@@ -964,6 +964,8 @@ describe('lib/tasks/inspect', () => {
       hookId: null,
       error: null,
       wallClockStartedAt: '2026-04-22T00:00:00.000Z',
+      attemptIndex: 0,
+      attemptState: 'passed',
       ...overrides,
     })
 
@@ -1048,6 +1050,39 @@ describe('lib/tasks/inspect', () => {
         expect(text).toContain('SNAPS')
         expect(text).toContain('ELEMS')
         expect(text).toContain('get')
+      })
+
+      it('groups commands under attempt headers when multiple attempts exist', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse(withCommands([
+          makeCommand({ id: 'l1', name: 'visit', number: 1, attemptIndex: 0, attemptState: 'failed' }),
+          makeCommand({ id: 'l2', name: 'get', number: 2, attemptIndex: 0, attemptState: 'failed', state: 'failed' }),
+          makeCommand({ id: 'l3', name: 'visit', number: 1, attemptIndex: 1, attemptState: 'passed' }),
+          makeCommand({ id: 'l4', name: 'get', number: 2, attemptIndex: 1, attemptState: 'passed' }),
+        ]))
+
+        const out = createStdoutCapture()
+
+        await inspect.commandList({})
+
+        const text = out()
+
+        expect(text).toContain('Attempt 0')
+        expect(text).toContain('Attempt 1')
+        expect(text.indexOf('Attempt 0')).toBeLessThan(text.indexOf('Attempt 1'))
+      })
+
+      it('omits attempt headers when only the first attempt has fired', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+        mockSnapshotResponse(withCommands([
+          makeCommand({ attemptIndex: 0, attemptState: 'passed' }),
+        ]))
+
+        const out = createStdoutCapture()
+
+        await inspect.commandList({})
+
+        expect(out()).not.toContain('Attempt 0')
       })
     })
 
@@ -1169,6 +1204,40 @@ describe('lib/tasks/inspect', () => {
 
         expect(err()).toContain('No command matching')
         expect(processExitSpy).toHaveBeenCalledWith(1)
+      })
+
+      it('number selector resolves against the latest attempt', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+
+        mockSnapshotOnce(withCommands([
+          makeCommand({ id: 'lold', number: 1, attemptIndex: 0, attemptState: 'failed' }),
+          makeCommand({ id: 'lnew', number: 1, attemptIndex: 1, attemptState: 'passed' }),
+        ]))
+
+        mockMutation({ inspectPinCommand: { logId: 'lnew' } })
+
+        await inspect.commandPin({ selector: '1' })
+
+        const body = JSON.parse(fetchSpy.mock.calls[1][1].body)
+
+        expect(body.variables).toEqual({ logId: 'lnew' })
+      })
+
+      it('log id selector works for any attempt', async () => {
+        vi.mocked(resolveInstance).mockResolvedValue(makeInstance())
+
+        mockSnapshotOnce(withCommands([
+          makeCommand({ id: 'lold', number: 1, attemptIndex: 0, attemptState: 'failed' }),
+          makeCommand({ id: 'lnew', number: 1, attemptIndex: 1, attemptState: 'passed' }),
+        ]))
+
+        mockMutation({ inspectPinCommand: { logId: 'lold' } })
+
+        await inspect.commandPin({ selector: 'lold' })
+
+        const body = JSON.parse(fetchSpy.mock.calls[1][1].body)
+
+        expect(body.variables).toEqual({ logId: 'lold' })
       })
 
       it('server error code → stderr + exit 1', async () => {

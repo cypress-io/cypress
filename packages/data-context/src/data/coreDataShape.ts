@@ -161,6 +161,8 @@ export interface CommandSnapshotShape {
   hookId: string | null
   error: string | null
   wallClockStartedAt: string | null
+  attemptIndex: number
+  attemptState: string
 }
 
 /**
