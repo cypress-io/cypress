@@ -3,7 +3,6 @@ const path = require('path')
 const ospath = require('ospath')
 const Promise = require('bluebird')
 const la = require('lazy-ass')
-const check = require('check-more-types')
 const log = require('debug')('cypress:server:appdata')
 const pkg = require('@packages/root')
 const { fs } = require('../util/fs')
@@ -148,7 +147,7 @@ module.exports = {
   path (...paths) {
     const { env } = process
 
-    la(check.unemptyString(env.CYPRESS_INTERNAL_ENV),
+    la(typeof env.CYPRESS_INTERNAL_ENV === 'string' && Boolean(env.CYPRESS_INTERNAL_ENV),
       'expected CYPRESS_INTERNAL_ENV, found', env.CYPRESS_INTERNAL_ENV)
 
     // allow overriding the app_data folder
