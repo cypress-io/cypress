@@ -420,6 +420,13 @@ const cliModule = {
 
     const { CYPRESS_INTERNAL_ENV, CYPRESS_DOWNLOAD_USE_CA } = process.env
 
+    // `cypress inspect` subcommands are designed to be scripted (often with
+    // `--json` piped into `jq`). Silence logger-driven banners/warnings so
+    // stdout stays clean. Errors (logger.error) still print.
+    if (args[2] === 'inspect') {
+      process.env.npm_config_loglevel = 'silent'
+    }
+
     if (process.env.CYPRESS_DOWNLOAD_USE_CA) {
       let msg = `
         ${logSymbols.warning} Warning: It looks like you're setting CYPRESS_DOWNLOAD_USE_CA=${CYPRESS_DOWNLOAD_USE_CA}
