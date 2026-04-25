@@ -5,7 +5,7 @@ import $errUtils from '../../cypress/error_utils'
 
 type CyClock = Clock & {
   tick(ms: number | undefined, options?: Partial<Cypress.Loggable>): number
-  tickAsync(ms: number | undefined, options?: Partial<Cypress.Loggable>): Promise<number>
+  tickAsync?(ms: number | undefined, options?: Partial<Cypress.Loggable>): Promise<number>
   restore(options?: Partial<Cypress.Loggable>): void
 }
 
@@ -103,11 +103,12 @@ export default function (Commands, Cypress, cy, state) {
       const { tick, tickAsync } = clock
 
       const createTickLog = (ms: number | undefined, userOptions: Partial<Cypress.Loggable>) => {
-        if (ms !== null && typeof ms !== 'undefined' && !_.isNumber(ms)) {
+        const tickMs = ms ?? 0
+
+        if (!_.isNumber(tickMs) || Number.isNaN(tickMs)) {
           $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg: JSON.stringify(ms) } })
         }
 
-        const tickMs = ms ?? 0
         const shouldLog = userOptions.log ?? options.log
         const tickLog = log('tick', shouldLog, `${tickMs}ms`, false, {
           'Now': clock!.details().now + tickMs,
@@ -140,17 +141,11 @@ export default function (Commands, Cypress, cy, state) {
       clock.tickAsync = function (ms: number | undefined, userOptions?: Partial<Cypress.Loggable>) {
         const tickOptions = userOptions ?? {}
         const { tickMs, tickLog } = createTickLog(ms, tickOptions)
+        const tickResult = tickAsync
+          ? tickAsync.apply(this, [tickMs])
+          : Promise.resolve().then(() => tick.apply(this, [tickMs]))
 
-        return tickAsync.apply(this, [tickMs]).catch((error) => {
-          if (
-            !(error instanceof TypeError) ||
-              error.message !== 'originalSetTimeout is not a function'
-          ) {
-            throw error
-          }
-
-          return tick.apply(this, [tickMs])
-        }).finally(() => {
+        return Promise.resolve(tickResult).finally(() => {
           endTickLog(tickLog)
         })
       }
@@ -190,9 +185,16 @@ export default function (Commands, Cypress, cy, state) {
       }
 
       const tickOptions = options ?? {}
+      const tickClock = clock!
 
-      return clock!.tickAsync(ms, tickOptions).then(() => {
-        return clock
+      if (!tickClock.tickAsync) {
+        tickClock.tick(ms, tickOptions)
+
+        return Promise.resolve(tickClock)
+      }
+
+      return tickClock.tickAsync(ms, tickOptions).then(() => {
+        return tickClock
       })
     },
   })

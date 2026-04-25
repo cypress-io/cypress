@@ -131,17 +131,24 @@ describe('cy/commands/clock', () => {
     }
   })
 
+  it('should reject NaN milliseconds', () => {
+    const clock = commands.clock(undefined)
+
+    try {
+      expect(() => commands.tick(undefined, Number.NaN)).toThrow(
+        'only accepts a number as their argument',
+      )
+    } finally {
+      clock.restore({ log: false })
+    }
+  })
+
   it('should fall back to a synchronous tick when async ticking is unavailable', async () => {
     const tick = vi.fn().mockReturnValue(250)
-    const tickAsync = vi.fn().mockRejectedValue(
-      new TypeError(
-        'originalSetTimeout is not a function',
-      ),
-    )
 
     vi.spyOn(clockModule, 'create').mockReturnValue({
       tick,
-      tickAsync,
+      tickAsync: undefined,
       restore: vi.fn(),
       setSystemTime: vi.fn(),
       bind: vi.fn(),
@@ -157,11 +164,40 @@ describe('cy/commands/clock', () => {
       tick: expect.any(Function),
     })
 
-    expect(tickAsync).toHaveBeenCalledOnce()
     expect(tick).toHaveBeenCalledOnce()
     expect(tick).toHaveBeenCalledWith(250)
     expect(logs).toHaveLength(2)
     expect(logs[1].snapshot).toHaveBeenCalledTimes(2)
+    expect(logs[1].end).toHaveBeenCalledOnce()
+  })
+
+  it('should close the tick log when the synchronous fallback throws', async () => {
+    const tick = vi.fn().mockImplementation(() => {
+      throw new Error('boom')
+    })
+
+    vi.spyOn(clockModule, 'create').mockReturnValue({
+      tick,
+      tickAsync: undefined,
+      restore: vi.fn(),
+      setSystemTime: vi.fn(),
+      bind: vi.fn(),
+      details: vi.fn((): Pick<InstalledClock, 'now' | 'methods'> => {
+        return { now: 0, methods: ['setTimeout'] }
+      }),
+    })
+
+    registerCommands()
+    commands.clock(undefined)
+
+    await expect(commands.tick(undefined, 250)).rejects.toThrow('boom')
+
+    expect(logs).toHaveLength(2)
+    expect(logs[1].snapshot).toHaveBeenCalledTimes(2)
+    expect(logs[1].snapshot).toHaveBeenNthCalledWith(1, 'before', {
+      next: 'after',
+    })
+
     expect(logs[1].end).toHaveBeenCalledOnce()
   })
 })
