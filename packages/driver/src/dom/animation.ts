@@ -33,9 +33,9 @@ const pauseDocumentAnimations = (doc: Document) => {
     return playState === 'running'
   }) ?? []
 
-  pausedAnimations.forEach((animation) => {
+  for (const animation of pausedAnimations) {
     animation.pause()
-  })
+  }
 
   animationStateByDocument.set(doc, {
     disablerCount: 1,
@@ -52,9 +52,9 @@ const resumeDocumentAnimations = (doc: Document) => {
 
   if (animationState.disablerCount > 0) return
 
-  animationState.pausedAnimations.forEach((animation) => {
+  for (const animation of animationState.pausedAnimations) {
     if (animation.playState === 'paused') animation.play()
-  })
+  }
 
   animationStateByDocument.delete(doc)
 }
