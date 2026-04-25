@@ -24,9 +24,12 @@ export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
 
 export type PackageManager = typeof PACKAGE_MANAGERS[number]
 
-// Note: ONLY change this in code that will be merged into a release branch
-// for a new major version of Cypress
-export const GET_MAJOR_VERSION_FOR_CONTENT = () => semverMajor(packageInfo.version).toString()
+export const GET_MAJOR_VERSION_FOR_CONTENT = () => {
+  // @packages/root's Rollup build replaces the 0.0.0-development sentinel with
+  // the next computed release version (via scripts/get-next-version.js), so
+  // semverMajor always returns the correct major (e.g. 15) rather than 0.
+  return semverMajor(packageInfo.version).toString()
+}
 
 export const RUN_ALL_SPECS_KEY = '__all' as const
 
