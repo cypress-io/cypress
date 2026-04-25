@@ -60,10 +60,12 @@ export function getRunner ({ enumerateValues }: { enumerateValues: (hkey: HKEY, 
       POLICY_KEYS.map((key) => {
         return POLICY_HKEYS.map((hkey) => {
           return enumerateValues(hkey, key)
-          .map((value): RegistryValueWithPath => ({
-            ...value,
-            fullPath: `${hkey}\\${key}\\${value.name}`,
-          }))
+          .map((value): RegistryValueWithPath => {
+            return {
+              ...value,
+              fullPath: `${hkey}\\${key}\\${value.name}`,
+            }
+          })
         })
       }),
     )

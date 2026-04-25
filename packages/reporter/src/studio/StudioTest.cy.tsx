@@ -23,6 +23,7 @@ describe('StudioTest', () => {
       scrollHeight: 900,
       scrollTop: 0,
       addEventListener: cy.stub(),
+      removeEventListener: cy.stub(),
     } as unknown as Element
 
     // Set the container on the scroller

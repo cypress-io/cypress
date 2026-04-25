@@ -40,7 +40,6 @@
     "bluebird": "3.7.2",
     "body-parser": "1.20.4",
     "chalk": "2.4.2",
-    "check-more-types": "2.24.0",
     "chokidar": "3.5.1",
     "chrome-remote-interface": "0.33.3",
     "ci-info": "^4.1.0",

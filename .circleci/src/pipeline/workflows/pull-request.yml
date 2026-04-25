@@ -15,6 +15,7 @@ when:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
 jobs:
+  # Always run — these are cheap and catch broad issues regardless of what changed
   - node_modules_install:
       build-better-sqlite3: true
   - build:
@@ -55,8 +56,9 @@ jobs:
         branches:
           only: /^pull\/[0-9]+/
 
-  # The following jobs are only run for contributor PRs once they are approved
-  # unit, integration and e2e tests
+  # The following jobs are only run for contributor PRs once they are approved.
+  # Each job checks its pipeline parameter at startup and halts early if the
+  # changed files don't require it to run.
   - cli-visual-tests:
       context: test-runner:percy
       requires:
@@ -425,3 +427,61 @@ jobs:
         - driver-integration-tests-electron
         - driver-integration-tests-webkit
         - driver-integration-memory-tests
+
+  # Fan-in aggregator — the only required GitHub status check for PRs.
+  # All jobs in this workflow fan into this one. Jobs that halt early
+  # (because their pipeline parameter is false) still complete successfully,
+  # so this job runs once all included jobs finish.
+  - all-jobs-passed:
+      requires:
+        # Always-run jobs
+        - linux-lint
+        - check-ts
+        - health-check
+        - lint-types
+        - test-kitchensink
+        # Conditional jobs (halt early when not needed)
+        - cli-visual-tests
+        - unit-tests
+        - verify-release-readiness
+        - server-unit-tests
+        - server-integration-tests
+        - server-performance-tests
+        - system-tests-chrome
+        - system-tests-electron
+        - system-tests-firefox
+        - system-tests-webkit
+        - system-tests-non-root
+        - driver-integration-tests-chrome
+        - driver-integration-tests-chrome-inject-document-domain
+        - driver-integration-tests-chrome-beta
+        - driver-integration-tests-chrome-beta-inject-document-domain
+        - driver-integration-tests-firefox
+        - driver-integration-tests-electron
+        - driver-integration-tests-webkit
+        - driver-integration-memory-tests
+        - run-frontend-shared-component-tests-chrome
+        - run-launchpad-integration-tests-chrome
+        - run-launchpad-component-tests-chrome
+        - run-app-integration-tests-chrome
+        - run-app-component-tests-chrome
+        - run-reporter-component-tests-chrome
+        - reporter-integration-tests
+        - run-webpack-dev-server-integration-tests
+        - run-vite-dev-server-integration-tests
+        - npm-webpack-dev-server
+        - npm-vite-dev-server
+        - npm-vite-plugin-cypress-esm
+        - npm-webpack-preprocessor
+        - npm-webpack-batteries-included-preprocessor
+        - npm-vue
+        - npm-puppeteer-unit-tests
+        - npm-puppeteer-cypress-tests
+        - npm-react
+        - npm-angular
+        - npm-angular-zoneless
+        - npm-mount-utils
+        - npm-grep
+        - npm-eslint-plugin-dev
+        - npm-cypress-schematic
+        - v8-integration-tests

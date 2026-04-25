@@ -12,7 +12,7 @@ import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { graphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
-import type { RemoteStates } from './remote_states'
+import type { RemoteStates } from '@packages/network-tools'
 import bodyParser from 'body-parser'
 import path from 'path'
 import AppData from './util/app_data'
@@ -289,7 +289,7 @@ export const createCommonRoutes = ({
       // their own app.js files + spec.js files
       nodeProxy.web(req, res, {}, (e) => {
         if (e) {
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+          debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
         }
       })
     })

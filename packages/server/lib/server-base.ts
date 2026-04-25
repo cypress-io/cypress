@@ -19,7 +19,7 @@ import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlI
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
-import Request from './request'
+import { Request } from './request'
 import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
@@ -31,7 +31,8 @@ import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
-import { RemoteStates, RemoteState } from './remote_states'
+import { RemoteStates } from '@packages/network-tools'
+import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
@@ -171,8 +172,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   constructor (config: Cfg) {
     this.isListening = false
-    // @ts-ignore
-    this.request = Request()
+    this.request = new Request()
     this.socketAllowed = new SocketAllowed()
     this._eventBus = new EventEmitter()
     this._middleware = null
