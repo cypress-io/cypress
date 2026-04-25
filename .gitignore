@@ -406,3 +406,5 @@ system-tests/lib/validations
 !.cursor/BUGBOT.md
 
 settings.local.json
+
+.claude/*

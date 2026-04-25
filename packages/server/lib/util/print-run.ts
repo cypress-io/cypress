@@ -5,9 +5,9 @@ import chalk from 'chalk'
 import human from 'human-interval'
 import prettyBytes from 'pretty-bytes'
 import pkg from '@packages/root'
-import humanTime from './human_time'
-import duration from './duration'
-import newlines from './newlines'
+import * as humanTime from './human_time'
+import { format as durationFormat } from './duration'
+import { addNewlineAtEveryNChar } from './newlines'
 import * as env from './env'
 import * as terminal from './terminal'
 import { getIsCi } from './ci_provider'
@@ -101,7 +101,7 @@ function formatFooterSummary (results: any) {
   return [
     isCanceled ? '-' : formatSymbolSummary(totalFailed),
     color(phrase, c),
-    gray(duration.format(results.totalDuration)),
+    gray(durationFormat(results.totalDuration)),
     colorIf(results.totalTests, 'reset'),
     colorIf(results.totalPassed, 'green'),
     colorIf(totalFailed, 'red'),
@@ -159,7 +159,7 @@ function formatPath (name: string, n: number | undefined, pathColor = 'reset') {
 
   // add newLines at each n char and colorize the path
   if (n) {
-    let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
+    let nameWithNewLines = addNewlineAtEveryNChar(name, n)
 
     return `${color(nameWithNewLines, pathColor)}`
   }
@@ -349,7 +349,7 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
     _.each(runs, (run) => {
       const { spec, stats } = run
 
-      const ms = duration.format(stats.wallClockDuration || 0)
+      const ms = durationFormat(stats.wallClockDuration || 0)
 
       const formattedSpec = formatPath(spec.relativeToCommonRoot, getWidth(table2, 1))
 

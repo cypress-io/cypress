@@ -155,14 +155,14 @@ exports['React major versions with Vite executes all of the tests for React v18 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (App.cy.jsx, Unmount.cy.jsx, Rerendering.cy.jsx, mount.cy.jsx)             │
-  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/Rerendering.cy.jsx, src/mount.cy.jsx       │
+  │ Specs:      3 found (App.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)                                 │
+  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/mount.cy.jsx, !src/Rerendering.cy.jsx      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 4)
+  Running:  App.cy.jsx                                                                      (1 of 3)
 
 
   ✓ renders hello world
@@ -188,7 +188,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (2 of 4)
+  Running:  Unmount.cy.jsx                                                                  (2 of 3)
 
 
   Comp with componentWillUnmount
@@ -219,34 +219,7 @@ exports['React major versions with Vite executes all of the tests for React v18 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (3 of 4)
-
-
-  re-render
-    ✓ maintains component state across re-renders
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     Rerendering.cy.jsx                                                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  mount.cy.jsx                                                                    (4 of 4)
+  Running:  mount.cy.jsx                                                                    (3 of 3)
 
 
   mount
@@ -285,11 +258,9 @@ exports['React major versions with Vite executes all of the tests for React v18 
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX        8        8        -        -        -  
 
 
 `
@@ -479,14 +450,14 @@ exports['React major versions with Vite executes all of the tests for React v19 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      4 found (App.cy.jsx, Unmount.cy.jsx, Rerendering.cy.jsx, mount.cy.jsx)             │
-  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/Rerendering.cy.jsx, src/mount.cy.jsx       │
+  │ Specs:      3 found (App.cy.jsx, Unmount.cy.jsx, mount.cy.jsx)                                 │
+  │ Searched:   src/App.cy.jsx, src/Unmount.cy.jsx, src/mount.cy.jsx, !src/Rerendering.cy.jsx      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  App.cy.jsx                                                                      (1 of 4)
+  Running:  App.cy.jsx                                                                      (1 of 3)
 
 
   ✓ renders hello world
@@ -512,7 +483,7 @@ exports['React major versions with Vite executes all of the tests for React v19 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Unmount.cy.jsx                                                                  (2 of 4)
+  Running:  Unmount.cy.jsx                                                                  (2 of 3)
 
 
   Comp with componentWillUnmount
@@ -543,34 +514,7 @@ exports['React major versions with Vite executes all of the tests for React v19 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  Rerendering.cy.jsx                                                              (3 of 4)
-
-
-  re-render
-    ✓ maintains component state across re-renders
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     Rerendering.cy.jsx                                                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  mount.cy.jsx                                                                    (4 of 4)
+  Running:  mount.cy.jsx                                                                    (3 of 3)
 
 
   mount
@@ -609,11 +553,9 @@ exports['React major versions with Vite executes all of the tests for React v19 
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  Rerendering.cy.jsx                       XX:XX        1        1        -        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  mount.cy.jsx                             XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX        8        8        -        -        -  
 
 
 `

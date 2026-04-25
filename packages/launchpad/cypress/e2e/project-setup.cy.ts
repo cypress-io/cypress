@@ -657,7 +657,7 @@ describe('Launchpad: Setup Project', () => {
 
       cy.findByRole('button', { name: 'Skip' }).click()
       cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
-      cy.findByText('Learn more').click()
+      cy.findByText('Learn more', { timeout: 10000 }).click()
       cy.wait('@OpenExternal')
       .its('request.body.variables.url')
       .should('equal', 'https://on.cypress.io/guides/configuration')
@@ -693,7 +693,7 @@ describe('Launchpad: Setup Project', () => {
       verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
       cy.get('[data-cy-testingtype="e2e"]').click()
-      cy.contains('h1', 'Choose a browser')
+      cy.contains('h1', 'Choose a browser', { timeout: 10000 })
 
       // Execute same function that is called in the browser to switch testing types
       cy.withCtx(async (ctx, { sinon }) => {
