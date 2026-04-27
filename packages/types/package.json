@@ -21,7 +21,7 @@
   "devDependencies": {
     "@packages/root": "0.0.0-development",
     "@types/node": "22.18.7",
-    "axios": "^1.15.0",
+    "axios": "^1.15.1",
     "better-sqlite3": "12.4.1",
     "devtools-protocol": "0.0.1575685",
     "express": "4.21.0",
