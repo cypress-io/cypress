@@ -1026,9 +1026,10 @@ commands:
       - run:
           name: Post pre-release install comment
           command: |
-            node scripts/add-install-comment.js \
-              --npm << parameters.package_url_path >> \
-              --binary << parameters.binary_url_path >>
+            # TODO: Uncomment when the issue with github app permissions is resolved
+            # node scripts/add-install-comment.js \
+            #   --npm << parameters.package_url_path >> \
+            #   --binary << parameters.binary_url_path >>
 
   sanitize-verify-and-store-mocha-results:
     description: Double-check that Mocha tests ran as expected.
