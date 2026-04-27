@@ -11,7 +11,7 @@ import type { RemoteStates } from '@packages/network-tools'
 
 const debug = Debug('cypress:server:controllers')
 
-export = {
+const files = {
 
   async handleIframe (req: any, res: any, config: Cfg, remoteStates: RemoteStates, extraOptions: any) {
     const test = req.params[0]
@@ -173,3 +173,5 @@ export = {
     return this.prepareForBrowser(supportFile, projectRoot, namespace)
   },
 }
+
+export default files

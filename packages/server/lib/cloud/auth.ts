@@ -10,7 +10,7 @@ const { shell } = require('electron')
 
 const machineId = require('./machine_id')
 import { id as randomId } from '../util/random'
-const user = require('./user')
+const user = require('./user').default
 
 let app
 let authCallback

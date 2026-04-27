@@ -409,7 +409,7 @@ export function toObject (argv: string[]): ParsedCypressArgv {
 
   let { spec } = options
   const { env, expose, config, reporterOptions, outputPath, tag, autoCancelAfterFailures } = options
-  let project = (options.project ?? options.runProject) as string | undefined
+  let project = (options.project || options.runProject) as string | undefined
 
   // only accept project if it is a string
   if (typeof project !== 'string') {
