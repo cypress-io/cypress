@@ -155,7 +155,6 @@ jobs:
           - image: cimg/base:stable
       resource_class: small
       steps:
-          - cancel-draft-prs
           - checkout:
               method: blobless
           - attach_workspace:
