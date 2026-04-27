@@ -114,18 +114,7 @@ describe('lib/server-base', () => {
 
     context('remote state', () => {
       beforeEach(function () {
-        // Mirror the real `_listen` contract: invoke the synchronous
-        // `onListening` hook when `'listening'` would fire, then resolve.
-        // Production code uses this hook to set the primary remote state
-        // synchronously (see server-base._listen).
-        sinon.stub(this.server, '_listen').callsFake((port, onError, onListening) => {
-          if (onListening) {
-            onListening(port)
-          }
-
-          return Promise.resolve(port)
-        })
-
+        sinon.stub(this.server, '_listen').callsFake((port) => Promise.resolve(port))
         sinon.stub(this.server, '_port').returns(this.port)
       })
 
@@ -134,7 +123,7 @@ describe('lib/server-base', () => {
         const setSpy = sinon.spy(this.server._remoteStates, 'set')
 
         return this.server.createServer(this.app, { port: this.port, baseUrl: 'http://localhost:9999' })
-        .spread(() => {
+        .then(() => {
           expect(setSpy).to.have.been.calledWith('http://localhost:9999')
         })
       })
@@ -143,7 +132,7 @@ describe('lib/server-base', () => {
         const setSpy = sinon.spy(this.server._remoteStates, 'set')
 
         return this.server.createServer(this.app, { port: this.port })
-        .spread(() => {
+        .then(() => {
           expect(setSpy).to.have.been.calledWith('<root>')
         })
       })
@@ -209,7 +198,7 @@ describe('lib/server-base', () => {
 
     it('resolves with http server port', function () {
       return this.server.createServer(this.app, { port: this.port })
-      .spread((port) => {
+      .then(([port]) => {
         expect(port).to.eq(this.port)
       })
     })
@@ -260,7 +249,7 @@ describe('lib/server-base', () => {
       }
 
       return this.server.createServer(this.app, {})
-      .spread((port) => {
+      .then(([port]) => {
         return Promise.map(
           [
             port,
@@ -276,7 +265,7 @@ describe('lib/server-base', () => {
       sinon.stub(ensureUrl, 'isListening').rejects()
 
       return this.server.createServer(this.app, { port: this.port, baseUrl: `http://localhost:${this.port}` })
-      .spread((port, warning) => {
+      .then(([port, warning]) => {
         expect(warning.type).to.eq('CANNOT_CONNECT_BASE_URL_WARNING')
 
         expect(warning.message).to.include(this.port)

@@ -244,102 +244,70 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  createServer (
+  async createServer (
     app: Express,
     config: Cfg,
     onWarning: unknown,
-  ): Bluebird<[number, WarningErr?]> {
-    return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
+  ): Promise<[number, WarningErr?]> {
+    const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
-      this._server = this._createHttpServer(app)
+    this._server = this._createHttpServer(app)
 
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
+    debug('createServer connecting to server')
+
+    this.server.on('connect', this.onConnect.bind(this))
+    this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
+
+    // Start the file server first so its port is known before we begin
+    // listening for proxied requests on the main server. The primary
+    // remote state's `<root>` strategy reads `_fileServer.port()`
+    // synchronously, so the fileServer must exist before the primary
+    // is computed. The httpsProxy comes after — it depends on the main
+    // server's port.
+    this._fileServer = await fileServer.create(fileServerFolder as string) as FileServer
+
+    const listenedPort = await this._listen(port)
+
+    // Native `await` resumes its continuation as a microtask, which
+    // drains before the event loop returns to the poll phase to
+    // dispatch any pending I/O. So from the moment the OS socket is
+    // bound, every request the express stack ever sees is preceded by
+    // a populated remoteStates map — the race window between listen
+    // succeeding and the primary being set is closed.
+    this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
+
+    this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
+      onRequest: this.callListeners.bind(this),
+      onUpgrade: this.onSniUpgrade.bind(this),
+    }) as HttpsProxyServer
+
+    let warning: WarningErr | undefined
+
+    // if we have a baseUrl let's go ahead and make sure the server is
+    // connectable!
+    if (baseUrl) {
+      this._baseUrl = baseUrl
+
+      if (config.isTextTerminal) {
+        try {
+          await this._retryBaseUrlCheck(baseUrl, onWarning)
+        } catch (e) {
+          debug(e)
+          throw errors.get('CANNOT_CONNECT_BASE_URL')
+        }
+      } else {
+        try {
+          await ensureUrl.isListening(baseUrl)
+        } catch (err) {
+          debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+          warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl) as WarningErr
         }
       }
+    }
 
-      debug('createServer connecting to server')
-
-      this.server.on('connect', this.onConnect.bind(this))
-      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
-      this.server.once('error', onError)
-
-      this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
-
-      // Start the file server first so its port is known before we begin
-      // listening for proxied requests on the main server. The primary
-      // remote state needs both the server port and the fileServer port
-      // (see `_stateFromUrl` for `<root>` strategy), and we must establish
-      // the primary remote state inside the `'listening'` event handler
-      // itself so no request can arrive on the express stack with an
-      // empty remoteStates map. The httpsProxy is created later because
-      // it depends on the main server's port.
-      return Bluebird.resolve(fileServer.create(fileServerFolder as string))
-      .then((fs) => {
-        this._fileServer = fs as FileServer
-
-        return this._listen(port, (err) => {
-          // if the server bombs before starting
-          // and the err no is EADDRINUSE
-          // then we know to display the custom err message
-          if (err.code === 'EADDRINUSE') {
-            return reject(this.portInUseErr(port))
-          }
-        }, () => {
-          // CRITICAL: Set the primary remote state synchronously inside
-          // the `'listening'` event handler, before control returns to
-          // libuv. Bluebird `.then` schedules via setImmediate, which
-          // runs in the check phase — after the poll phase has already
-          // had a chance to dispatch incoming requests. Doing the set
-          // here closes that window entirely: from the moment the OS
-          // socket is bound, every request the express stack ever sees
-          // is preceded by a populated remoteStates map.
-          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
-        })
-      })
-      .then((port) => {
-        return Bluebird.resolve(createHttpsProxy(appData.path('proxy'), port, {
-          onRequest: this.callListeners.bind(this),
-          onUpgrade: this.onSniUpgrade.bind(this),
-        }))
-        .then((httpsProxy) => {
-          this._httpsProxy = httpsProxy as HttpsProxyServer
-
-          // if we have a baseUrl let's go ahead
-          // and make sure the server is connectable!
-          if (baseUrl) {
-            this._baseUrl = baseUrl
-
-            if (config.isTextTerminal) {
-              return this._retryBaseUrlCheck(baseUrl, onWarning)
-              .return(null)
-              .catch((e) => {
-                debug(e)
-
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
-              })
-            }
-
-            return ensureUrl.isListening(baseUrl)
-            .return(null)
-            .catch((err) => {
-              debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
-
-              return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
-            })
-          }
-
-          return undefined
-        }).then((warning) => {
-          return resolve([port, warning])
-        })
-      })
-    })
+    return [listenedPort, warning]
   }
 
   open (config: Cfg, {
@@ -399,7 +367,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     app.use(createCommonRoutes(routeOptions))
 
-    return this.createServer(app, config, onWarning)
+    // Preserve Bluebird-typed return value (some test callers use
+    // `.spread((port, warning) => …)` on the result).
+    return Bluebird.resolve(this.createServer(app, config, onWarning))
   }
 
   createExpressApp (config) {
@@ -561,8 +531,21 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return (this.server.address() as AddressInfo).port
   }
 
-  _listen (port, onError, onListening?: (port: number) => void) {
-    return new Bluebird<number>((resolve) => {
+  _listen (port: number | null | undefined): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const onError = (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
+        if (err.code === 'EADDRINUSE') {
+          reject(this.portInUseErr(port))
+        }
+        // Other error codes: preserve historical behavior of leaving the
+        // listener in place for upstream handling.
+      }
+
+      this.server.once('error', onError)
+
       const listener = () => {
         const address = this.server.address() as AddressInfo
 
@@ -572,21 +555,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
         this.server.removeListener('error', onError)
 
-        // Run the synchronous onListening hook (if provided) BEFORE
-        // resolving. This is the only execution context in which we can
-        // guarantee no event loop turn has happened between libuv firing
-        // the 'listening' event and us reacting to it. Bluebird `.then`
-        // chained on the returned promise schedules via setImmediate, so
-        // a `.then` handler can run after the poll phase has already
-        // dispatched incoming requests.
-        if (onListening) {
-          onListening(address.port)
-        }
-
-        return resolve(address.port)
+        resolve(address.port)
       }
 
-      return this.server.listen(port || 0, '127.0.0.1', listener)
+      this.server.listen(port || 0, '127.0.0.1', listener)
     })
   }
 
