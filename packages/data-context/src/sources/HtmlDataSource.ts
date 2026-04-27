@@ -89,12 +89,6 @@ export class HtmlDataSource {
       const remoteStates = this.ctx._apis.projectApi.getRemoteStates()
 
       if (remoteStates) {
-        // The primary may not be established yet if the project is being
-        // (re)initialized — wait briefly rather than shipping a config with
-        // an erased `remote` key. On timeout we rethrow so the browser gets
-        // a clear 500 (preserving pre-wait behavior where an unset primary
-        // surfaced immediately) rather than silently receiving a broken
-        // config.
         cfg.remote = await remoteStates.waitForPrimary()
       }
     }
