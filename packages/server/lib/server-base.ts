@@ -275,10 +275,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       // listening for proxied requests on the main server. The primary
       // remote state needs both the server port and the fileServer port
       // (see `_stateFromUrl` for `<root>` strategy), and we must establish
-      // the primary remote state synchronously after `_listen()` resolves
-      // so no request can arrive on the express stack with an empty
-      // remoteStates map. The httpsProxy is created later because it
-      // depends on the main server's port.
+      // the primary remote state inside the `'listening'` event handler
+      // itself so no request can arrive on the express stack with an
+      // empty remoteStates map. The httpsProxy is created later because
+      // it depends on the main server's port.
       return Bluebird.resolve(fileServer.create(fileServerFolder as string))
       .then((fs) => {
         this._fileServer = fs as FileServer
@@ -290,16 +290,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
           if (err.code === 'EADDRINUSE') {
             return reject(this.portInUseErr(port))
           }
+        }, () => {
+          // CRITICAL: Set the primary remote state synchronously inside
+          // the `'listening'` event handler, before control returns to
+          // libuv. Bluebird `.then` schedules via setImmediate, which
+          // runs in the check phase — after the poll phase has already
+          // had a chance to dispatch incoming requests. Doing the set
+          // here closes that window entirely: from the moment the OS
+          // socket is bound, every request the express stack ever sees
+          // is preceded by a populated remoteStates map.
+          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
         })
       })
       .then((port) => {
-        // CRITICAL: set the primary remote state synchronously, in the same
-        // tick that `_listen` resolved. This eliminates the race where the
-        // HTTP server begins accepting requests before any primary state
-        // exists. Any request arriving from this point forward will see a
-        // populated remoteStates map.
-        this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
-
         return Bluebird.resolve(createHttpsProxy(appData.path('proxy'), port, {
           onRequest: this.callListeners.bind(this),
           onUpgrade: this.onSniUpgrade.bind(this),
@@ -558,7 +561,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return (this.server.address() as AddressInfo).port
   }
 
-  _listen (port, onError) {
+  _listen (port, onError, onListening?: (port: number) => void) {
     return new Bluebird<number>((resolve) => {
       const listener = () => {
         const address = this.server.address() as AddressInfo
@@ -568,6 +571,17 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         debug('Server listening on ', address)
 
         this.server.removeListener('error', onError)
+
+        // Run the synchronous onListening hook (if provided) BEFORE
+        // resolving. This is the only execution context in which we can
+        // guarantee no event loop turn has happened between libuv firing
+        // the 'listening' event and us reacting to it. Bluebird `.then`
+        // chained on the returned promise schedules via setImmediate, so
+        // a `.then` handler can run after the poll phase has already
+        // dispatched incoming requests.
+        if (onListening) {
+          onListening(address.port)
+        }
 
         return resolve(address.port)
       }

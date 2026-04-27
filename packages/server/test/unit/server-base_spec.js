@@ -114,7 +114,18 @@ describe('lib/server-base', () => {
 
     context('remote state', () => {
       beforeEach(function () {
-        sinon.stub(this.server, '_listen').callsFake((port) => Promise.resolve(port))
+        // Mirror the real `_listen` contract: invoke the synchronous
+        // `onListening` hook when `'listening'` would fire, then resolve.
+        // Production code uses this hook to set the primary remote state
+        // synchronously (see server-base._listen).
+        sinon.stub(this.server, '_listen').callsFake((port, onError, onListening) => {
+          if (onListening) {
+            onListening(port)
+          }
+
+          return Promise.resolve(port)
+        })
+
         sinon.stub(this.server, '_port').returns(this.port)
       })
 
