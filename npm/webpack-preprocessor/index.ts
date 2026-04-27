@@ -287,6 +287,8 @@ const preprocessor: WebpackPreprocessor = (options?: PreprocessorOptions = {}): 
       try {
         const tsLoaderRule = getTsLoaderIfExists(opts?.module?.rules)
 
+        debug('tsLoaderRule: %o', tsLoaderRule)
+
         if (!tsLoaderRule) {
           debug('ts-loader not detected')
 
