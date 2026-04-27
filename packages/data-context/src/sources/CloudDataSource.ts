@@ -145,7 +145,8 @@ export class CloudDataSource {
       ],
       // Set this way so we can intercept the fetch on the context for testing
       fetch: async (uri, init) => {
-        const internalResponse = _.get(init, 'headers.INTERNAL_REQUEST')
+        /** Urql lowercases custom header keys in fetch init; Headers.get is case-insensitive. */
+        const internalResponse = _.get(init, 'headers.INTERNAL_REQUEST') ?? _.get(init, 'headers.internal_request')
 
         if (internalResponse) {
           return Promise.resolve(new Response(internalResponse, { status: 200 }))
