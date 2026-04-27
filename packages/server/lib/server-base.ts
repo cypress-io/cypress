@@ -270,12 +270,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     const listenedPort = await this._listen(port)
 
-    // Native `await` resumes its continuation as a microtask, which
-    // drains before the event loop returns to the poll phase to
-    // dispatch any pending I/O. So from the moment the OS socket is
-    // bound, every request the express stack ever sees is preceded by
-    // a populated remoteStates map — the race window between listen
-    // succeeding and the primary being set is closed.
     this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
     this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
@@ -367,8 +361,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     app.use(createCommonRoutes(routeOptions))
 
-    // Preserve Bluebird-typed return value (some test callers use
-    // `.spread((port, warning) => …)` on the result).
+    // Preserve Bluebird-typed return value.
     return Bluebird.resolve(this.createServer(app, config, onWarning))
   }
 
@@ -540,8 +533,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         if (err.code === 'EADDRINUSE') {
           reject(this.portInUseErr(port))
         }
-        // Other error codes: preserve historical behavior of leaving the
-        // listener in place for upstream handling.
       }
 
       this.server.once('error', onError)

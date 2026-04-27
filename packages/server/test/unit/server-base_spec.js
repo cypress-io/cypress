@@ -137,19 +137,10 @@ describe('lib/server-base', () => {
         })
       })
 
-      // Pins the invariant established to fix a config-reload race where the
-      // HTTP server began accepting requests before `_remoteStates.set()` had
-      // been called, allowing in-flight browser requests to crash on an empty
-      // remoteStates map. The primary remote state must be established AFTER
-      // fileServer.create (so its port is available to `_stateFromUrl`) and
-      // BEFORE the httpsProxy is created (which runs async I/O during which
-      // incoming requests would otherwise be dispatched on the express stack).
       it('calls fileServer.create before _listen', function () {
-        // In the fix, fileServer.create is awaited before _listen so its
+        // fileServer.create is awaited before _listen so its
         // port is known when the primary remote state is computed via
-        // _stateFromUrl('<root>'). The original buggy ordering ran
-        // _listen first and fileServer.create in parallel after — this
-        // test would fail under that ordering.
+        // _stateFromUrl('<root>').
         return this.server.createServer(this.app, { port: this.port })
         .then(() => {
           sinon.assert.callOrder(fileServer.create, this.server._listen)
