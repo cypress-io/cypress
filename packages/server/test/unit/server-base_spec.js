@@ -148,16 +148,11 @@ describe('lib/server-base', () => {
       })
 
       it('establishes primary remote state after fileServer is ready and before httpsProxy is assigned', function () {
-        // Capture observable state at the moment `_remoteStates.set` is
-        // invoked. With the race fix:
+        // At the moment `_remoteStates.set` runs:
         //  - `_fileServer` must already exist (its port is read
         //    synchronously by `_stateFromUrl('<root>')`).
         //  - `_httpsProxy` must NOT yet be assigned — `set` runs in the
-        //    `.then` chained directly to `_listen`'s resolution, before
-        //    `createHttpsProxy` is invoked. The original buggy ordering
-        //    assigned `_httpsProxy` first inside `Bluebird.all([…]).spread`
-        //    and called `set` afterwards — this test would fail under
-        //    that ordering.
+        //    microtask after `await _listen`, before `await createHttpsProxy`.
         let fileServerAtSetCall
         let httpsProxyAtSetCall
 
