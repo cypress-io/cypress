@@ -51,9 +51,9 @@ export const useGitTreeRuns = (online: Ref<boolean>): RunsComposable => {
   const query = useQuery({ query: RunsGitTreeDocument, variables, pause: shouldPauseQuery, requestPolicy: 'network-only' })
 
   const runs = computed(() => {
-    const nodes = query.data.value?.cloudNodesByIds?.filter((val): val is RunCardFragment => val?.__typename === 'CloudRun')
+    const nodes = query.data.value?.cloudNodesByIds?.filter((val) => val?.__typename === 'CloudRun')
 
-    return nodes
+    return nodes as RunCardFragment[] | undefined
   })
 
   const allRunIds = computed(() => {
