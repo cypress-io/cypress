@@ -28,6 +28,7 @@ fragment RunsGitTreeProject on Query {
     }
   }
   cloudNodesByIds(ids: $runIds) {
+    __typename
     id
     ...RunCard
   }

@@ -157,7 +157,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         href: 'https://on.cypress.io/adding-new-project',
       })
 
-      cy.get('button').get('[aria-label="Close"').click()
+      cy.get('button').get('[aria-label="Close"]').click()
       cy.get('[aria-modal="true"]').should('not.exist')
     })
 
@@ -263,7 +263,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.contains('button', 'Cypress Test Account 1').click()
       cy.findByText('aaa').should('exist')
 
-      cy.get('button').get('[aria-label="Close"').click()
+      cy.get('button').get('[aria-label="Close"]').click()
       cy.get('[aria-modal="true"]').should('not.exist')
     })
 
