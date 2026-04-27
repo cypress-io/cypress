@@ -1026,7 +1026,7 @@ commands:
       - run:
           name: Post pre-release install comment
           command: |
-            # TODO: Uncomment when the issue with github app authentication is resolved
+            # TODO: Uncomment when the issue with github app permissions is resolved
             # node scripts/add-install-comment.js \
             #   --npm << parameters.package_url_path >> \
             #   --binary << parameters.binary_url_path >>
