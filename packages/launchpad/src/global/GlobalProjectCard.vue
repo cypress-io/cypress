@@ -86,6 +86,7 @@ mutation GlobalProjectCard_setCurrentProject($path: String!) {
 
 gql`
 fragment GlobalProjectCard on GlobalProject {
+  __typename
   id
   title
   projectRoot
