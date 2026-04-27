@@ -140,57 +140,50 @@ describe('lib/server-base', () => {
       // Pins the invariant established to fix a config-reload race where the
       // HTTP server began accepting requests before `_remoteStates.set()` had
       // been called, allowing in-flight browser requests to crash on an empty
-      // remoteStates map. The primary remote state must be established
-      // synchronously after `_listen()` resolves and BEFORE any further async
-      // work (e.g. starting the https proxy) can yield to incoming requests.
-      it('primary remote state is populated as soon as _listen() resolves', function () {
-        // Snapshot whether `hasPrimary()` is true at the moment `_listen`
-        // resolves. With the race fix, `set()` runs synchronously in the
-        // microtask chained to `_listen()`'s resolution, so by the time the
-        // outer `createServer` promise resolves the primary is always set.
-        let hasPrimaryWhenListenResolved = null
-
-        this.server._listen.restore()
-        sinon.stub(this.server, '_listen').callsFake((port) => {
-          return Promise.resolve(port).then((p) => {
-            // Capture state in the same microtask chain. With the fix,
-            // set() will have been called by the time createServer's
-            // outer promise resolves regardless, but more importantly:
-            // there is no async I/O between listen-resolution and set().
-            return p
-          })
-        })
-
-        const setSpy = sinon.spy(this.server._remoteStates, 'set')
-
+      // remoteStates map. The primary remote state must be established AFTER
+      // fileServer.create (so its port is available to `_stateFromUrl`) and
+      // BEFORE the httpsProxy is created (which runs async I/O during which
+      // incoming requests would otherwise be dispatched on the express stack).
+      it('calls fileServer.create before _listen', function () {
+        // In the fix, fileServer.create is awaited before _listen so its
+        // port is known when the primary remote state is computed via
+        // _stateFromUrl('<root>'). The original buggy ordering ran
+        // _listen first and fileServer.create in parallel after — this
+        // test would fail under that ordering.
         return this.server.createServer(this.app, { port: this.port })
-        .spread(() => {
-          hasPrimaryWhenListenResolved = this.server._remoteStates.hasPrimary()
-          expect(setSpy).to.have.been.calledWith('<root>')
-          expect(hasPrimaryWhenListenResolved).to.be.true
+        .then(() => {
+          sinon.assert.callOrder(fileServer.create, this.server._listen)
         })
       })
 
-      it('sets primary remote state before httpsProxy creation begins', function () {
-        // We can't easily stub @packages/https-proxy's `createProxy` because
-        // it's destructured at module load. Instead, observe ordering by
-        // recording when `_remoteStates.set` runs vs. when `_httpsProxy` is
-        // assigned. With the race fix, `set` must have been called by the
-        // time `_httpsProxy` becomes truthy.
-        const order = []
-        const realSet = this.server._remoteStates.set.bind(this.server._remoteStates)
+      it('establishes primary remote state after fileServer is ready and before httpsProxy is assigned', function () {
+        // Capture observable state at the moment `_remoteStates.set` is
+        // invoked. With the race fix:
+        //  - `_fileServer` must already exist (its port is read
+        //    synchronously by `_stateFromUrl('<root>')`).
+        //  - `_httpsProxy` must NOT yet be assigned — `set` runs in the
+        //    `.then` chained directly to `_listen`'s resolution, before
+        //    `createHttpsProxy` is invoked. The original buggy ordering
+        //    assigned `_httpsProxy` first inside `Bluebird.all([…]).spread`
+        //    and called `set` afterwards — this test would fail under
+        //    that ordering.
+        let fileServerAtSetCall
+        let httpsProxyAtSetCall
 
-        sinon.stub(this.server._remoteStates, 'set').callsFake((...args) => {
-          order.push('remoteStates.set')
+        const realSet = this.server._remoteStates.set.bind(this.server._remoteStates)
+        const setStub = sinon.stub(this.server._remoteStates, 'set').callsFake((...args) => {
+          fileServerAtSetCall = this.server._fileServer
+          httpsProxyAtSetCall = this.server._httpsProxy
 
           return realSet(...args)
         })
 
         return this.server.createServer(this.app, { port: this.port })
         .then(() => {
-          // _httpsProxy is set after createHttpsProxy resolves; if set() ran
-          // first the order array's first entry must be 'remoteStates.set'.
-          expect(order[0]).to.equal('remoteStates.set')
+          expect(setStub).to.have.been.calledOnceWithExactly('<root>')
+          expect(fileServerAtSetCall, 'fileServer must be ready when set runs').to.exist
+          expect(httpsProxyAtSetCall, 'httpsProxy must not yet be assigned when set runs').to.be.undefined
+          // sanity: by the time createServer resolves, httpsProxy is up
           expect(this.server._httpsProxy).to.exist
         })
       })
