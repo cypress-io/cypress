@@ -484,12 +484,6 @@ describe('src/cy/commands/waiting', () => {
           .wait(['@foo', '@bar'])
         })
 
-        // Regression test: if cy.retry short-circuits via ended() during
-        // runnable teardown, waitString's Promise.map resolves with an
-        // array containing undefined entries. Previously `resp.map((r) =>
-        // r.routeId)` would throw a TypeError that surfaced as an
-        // unhandled bluebird rejection. The guard in waitString should
-        // bail out cleanly instead.
         it('does not throw when Promise.map resolves with undefined responses', (done) => {
           Promise.onPossiblyUnhandledRejection(done)
 

@@ -268,8 +268,7 @@ export default (Commands: Cypress.Commands, Cypress: Cypress.Cypress, cy: $Cy, s
     .then((responses) => {
       // cy.retry may resolve with undefined when the runnable has already
       // ended (canceled or transitioned). Bail out rather than dereferencing
-      // undefined entries below and surfacing a spurious TypeError as an
-      // unhandled rejection.
+      // undefined entries below.
       if (responses.some((r) => r == null)) {
         return
       }
