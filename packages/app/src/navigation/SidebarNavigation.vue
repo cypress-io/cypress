@@ -107,7 +107,7 @@ import { OutlineStatusIcon } from '@cypress-design/vue-statusicon'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import HideDuringScreenshot from '../runner/screenshot/HideDuringScreenshot.vue'
 import { SideBarNavigation_SetPreferencesDocument } from '../generated/graphql'
-import type { SidebarNavigationFragment } from '../generated/graphql'
+import type { SidebarNavigationFragment, SideBarNavigation_SetPreferencesMutation } from '../generated/graphql'
 import CypressLogo from '@packages/frontend-shared/src/assets/logos/cypress_s.png'
 import { useI18n } from '@cy/i18n'
 import { useRoute, RouterLink } from 'vue-router'
@@ -119,8 +119,11 @@ const { t } = useI18n()
 
 gql`
 fragment SidebarNavigation_Settings on Query {
+  __typename
   localSettings {
+    __typename
     preferences {
+      __typename
       isSideNavigationOpen
       isSpecsListOpen
       autoScrollingEnabled
@@ -359,19 +362,35 @@ const isNavBarExpanded = ref(true)
 const { width } = useWindowSize()
 
 watchEffect(() => {
+  // Read prefs on every run so preference updates (e.g. after setPreferences) stay tracked
+  // even when the narrow-width branch would otherwise skip that dependency.
+  const prefOpen = props.gql?.localSettings?.preferences?.isSideNavigationOpen ?? true
+
   if (width.value < NAV_EXPAND_MIN_SCREEN_WIDTH || route.meta?.navBarExpandedAllowed === false) {
     isNavBarExpanded.value = false
-  } else {
-    isNavBarExpanded.value = props.gql?.localSettings.preferences.isSideNavigationOpen ?? true
+
+    return
   }
+
+  isNavBarExpanded.value = prefOpen
 })
 
-const toggleNavbarIfAllowed = () => {
+const toggleNavbarIfAllowed = async () => {
   if (width.value < NAV_EXPAND_MIN_SCREEN_WIDTH || route.meta?.navBarExpandedAllowed === false) {
     return
   }
 
-  setPreferences.executeMutation({ value: JSON.stringify({ isSideNavigationOpen: !isNavBarExpanded.value }) })
+  const nextOpen = !isNavBarExpanded.value
+
+  // Apply expanded state from the mutation result. The fragment object is often mutated
+  // in place (server + CT stubs), which does not reliably trigger prop watchers on gql.
+  const result = await setPreferences.executeMutation({ value: JSON.stringify({ isSideNavigationOpen: nextOpen }) })
+
+  if (result.error) return
+
+  const open = (result.data as SideBarNavigation_SetPreferencesMutation | undefined)?.setPreferences?.localSettings?.preferences?.isSideNavigationOpen
+
+  isNavBarExpanded.value = typeof open === 'boolean' ? open : nextOpen
 }
 
 </script>

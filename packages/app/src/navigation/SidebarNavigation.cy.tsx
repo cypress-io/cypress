@@ -11,8 +11,8 @@ function mountComponent (props: { initialNavExpandedVal?: boolean, cloudProject?
   const withDefaults = { initialNavExpandedVal: false, isLoading: false, online: true, ...props }
   let _gql: SidebarNavigationFragment
 
-  cy.stubMutationResolver(SideBarNavigation_SetPreferencesDocument, (defineResult) => {
-    _gql.localSettings.preferences.isSideNavigationOpen = !_gql.localSettings.preferences.isSideNavigationOpen
+  cy.stubMutationResolver(SideBarNavigation_SetPreferencesDocument, (defineResult, variables) => {
+    Object.assign(_gql.localSettings.preferences, JSON.parse(variables.value))
 
     return defineResult({ setPreferences: _gql })
   })

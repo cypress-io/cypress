@@ -140,7 +140,16 @@ export const stubMutation: MaybeResolver<Mutation> = {
     return true
   },
   setPreferences (src, args, ctx) {
-    ctx.localSettings.preferences.isSideNavigationOpen = true
+    try {
+      const patch = JSON.parse(args.value)
+
+      ctx.localSettings.preferences = {
+        ...ctx.localSettings.preferences,
+        ...patch,
+      }
+    } catch {
+      // ignore invalid JSON in tests
+    }
 
     return {}
   },
