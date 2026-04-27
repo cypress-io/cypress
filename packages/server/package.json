@@ -33,7 +33,7 @@
     "@packages/stderr-filtering": "0.0.0-development",
     "@packages/telemetry": "0.0.0-development",
     "@types/mime": "^3.0.1",
-    "axios": "^1.15.0",
+    "axios": "^1.15.1",
     "base64url": "^3.0.1",
     "better-sqlite3": "12.4.1",
     "black-hole-stream": "0.0.1",

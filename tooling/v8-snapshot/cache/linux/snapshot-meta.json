@@ -1548,6 +1548,8 @@
     "./node_modules/@opentelemetry/semantic-conventions/build/src/resource/index.js",
     "./node_modules/@opentelemetry/semantic-conventions/build/src/trace/SemanticAttributes.js",
     "./node_modules/@opentelemetry/semantic-conventions/build/src/trace/index.js",
+    "./node_modules/@simple-git/args-pathspec/dist/index.cjs",
+    "./node_modules/@simple-git/argv-parser/dist/index.cjs",
     "./node_modules/@sindresorhus/df/node_modules/execa/index.js",
     "./node_modules/@sindresorhus/df/node_modules/execa/lib/command.js",
     "./node_modules/@sindresorhus/df/node_modules/execa/lib/error.js",
@@ -3920,5 +3922,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "d1fa243e3527e57e9c97e8a6499dc37a1a4d2acd5d80cce28a9a49383cd29c7d"
+  "deferredHash": "8bfeb7ef183515b68b4244409139295cc323262cd6ba74e94e65b37ad45be93d"
 }
