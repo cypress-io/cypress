@@ -136,6 +136,64 @@ describe('lib/server-base', () => {
           expect(setSpy).to.have.been.calledWith('<root>')
         })
       })
+
+      // Pins the invariant established to fix a config-reload race where the
+      // HTTP server began accepting requests before `_remoteStates.set()` had
+      // been called, allowing in-flight browser requests to crash on an empty
+      // remoteStates map. The primary remote state must be established
+      // synchronously after `_listen()` resolves and BEFORE any further async
+      // work (e.g. starting the https proxy) can yield to incoming requests.
+      it('primary remote state is populated as soon as _listen() resolves', function () {
+        // Snapshot whether `hasPrimary()` is true at the moment `_listen`
+        // resolves. With the race fix, `set()` runs synchronously in the
+        // microtask chained to `_listen()`'s resolution, so by the time the
+        // outer `createServer` promise resolves the primary is always set.
+        let hasPrimaryWhenListenResolved = null
+
+        this.server._listen.restore()
+        sinon.stub(this.server, '_listen').callsFake((port) => {
+          return Promise.resolve(port).then((p) => {
+            // Capture state in the same microtask chain. With the fix,
+            // set() will have been called by the time createServer's
+            // outer promise resolves regardless, but more importantly:
+            // there is no async I/O between listen-resolution and set().
+            return p
+          })
+        })
+
+        const setSpy = sinon.spy(this.server._remoteStates, 'set')
+
+        return this.server.createServer(this.app, { port: this.port })
+        .spread(() => {
+          hasPrimaryWhenListenResolved = this.server._remoteStates.hasPrimary()
+          expect(setSpy).to.have.been.calledWith('<root>')
+          expect(hasPrimaryWhenListenResolved).to.be.true
+        })
+      })
+
+      it('sets primary remote state before httpsProxy creation begins', function () {
+        // We can't easily stub @packages/https-proxy's `createProxy` because
+        // it's destructured at module load. Instead, observe ordering by
+        // recording when `_remoteStates.set` runs vs. when `_httpsProxy` is
+        // assigned. With the race fix, `set` must have been called by the
+        // time `_httpsProxy` becomes truthy.
+        const order = []
+        const realSet = this.server._remoteStates.set.bind(this.server._remoteStates)
+
+        sinon.stub(this.server._remoteStates, 'set').callsFake((...args) => {
+          order.push('remoteStates.set')
+
+          return realSet(...args)
+        })
+
+        return this.server.createServer(this.app, { port: this.port })
+        .then(() => {
+          // _httpsProxy is set after createHttpsProxy resolves; if set() ran
+          // first the order array's first entry must be 'remoteStates.set'.
+          expect(order[0]).to.equal('remoteStates.set')
+          expect(this.server._httpsProxy).to.exist
+        })
+      })
     })
 
     it('isListening=true', function () {

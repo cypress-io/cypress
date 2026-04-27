@@ -271,30 +271,41 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
       this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
 
-      return this._listen(port, (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
-        }
+      // Start the file server first so its port is known before we begin
+      // listening for proxied requests on the main server. The primary
+      // remote state needs both the server port and the fileServer port
+      // (see `_stateFromUrl` for `<root>` strategy), and we must establish
+      // the primary remote state synchronously after `_listen()` resolves
+      // so no request can arrive on the express stack with an empty
+      // remoteStates map. The httpsProxy is created later because it
+      // depends on the main server's port.
+      return Bluebird.resolve(fileServer.create(fileServerFolder as string))
+      .then((fs) => {
+        this._fileServer = fs as FileServer
+
+        return this._listen(port, (err) => {
+          // if the server bombs before starting
+          // and the err no is EADDRINUSE
+          // then we know to display the custom err message
+          if (err.code === 'EADDRINUSE') {
+            return reject(this.portInUseErr(port))
+          }
+        })
       })
       .then((port) => {
-        return Bluebird.all([
-          createHttpsProxy(appData.path('proxy'), port, {
-            onRequest: this.callListeners.bind(this),
-            onUpgrade: this.onSniUpgrade.bind(this),
-          }),
+        // CRITICAL: set the primary remote state synchronously, in the same
+        // tick that `_listen` resolved. This eliminates the race where the
+        // HTTP server begins accepting requests before any primary state
+        // exists. Any request arriving from this point forward will see a
+        // populated remoteStates map.
+        this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
-          fileServer.create(fileServerFolder as string),
-        ])
-        .spread((httpsProxy, fileServer) => {
+        return Bluebird.resolve(createHttpsProxy(appData.path('proxy'), port, {
+          onRequest: this.callListeners.bind(this),
+          onUpgrade: this.onSniUpgrade.bind(this),
+        }))
+        .then((httpsProxy) => {
           this._httpsProxy = httpsProxy as HttpsProxyServer
-          this._fileServer = fileServer as FileServer
-
-          // once we open the server, set the domain to root or baseUrl by default which
-          // prevents a situation where navigating to http sites redirects to /__/ cypress
-          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
           // if we have a baseUrl let's go ahead
           // and make sure the server is connectable!
@@ -319,6 +330,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
               return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
             })
           }
+
+          return undefined
         }).then((warning) => {
           return resolve([port, warning])
         })
