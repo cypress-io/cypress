@@ -1,5 +1,6 @@
 import type { DebugSpecListGroupsFragment, DebugSpecListSpecFragment, DebugSpecListTestsFragment, DebugSpecsFragment } from '../generated/graphql-test'
 import { DebugSpecsFragmentDoc, UseCohorts_DetermineCohortDocument } from '../generated/graphql-test'
+import { reactive } from 'vue'
 import DebugContainer from './DebugContainer.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
@@ -144,6 +145,8 @@ describe('<DebugContainer />', () => {
 
             result.currentProject.cloudProject.runByNumber = other
           }
+
+          return reactive(result) as DebugSpecsFragment
         },
         render: (gqlVal) => {
           return (
@@ -267,6 +270,8 @@ describe('<DebugContainer />', () => {
               totalInstanceCount: 3,
             } as typeof test
           }
+
+          return reactive(result) as DebugSpecsFragment
         },
         render: (gqlVal) =>
           <div class="h-[850px]">
@@ -301,6 +306,8 @@ describe('<DebugContainer />', () => {
               totalInstanceCount: 3,
             } as typeof test
           }
+
+          return reactive(result) as DebugSpecsFragment
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
@@ -332,6 +339,8 @@ describe('<DebugContainer />', () => {
               totalInstanceCount: 3,
             } as typeof test
           }
+
+          return reactive(result) as DebugSpecsFragment
         },
         render: (gqlVal) => {
           return <DebugContainer gql={gqlVal} />
@@ -448,6 +457,8 @@ describe('<DebugContainer />', () => {
               ...CloudRunStubs.failingWithTests,
             } as typeof test
           }
+
+          return reactive(result) as DebugSpecsFragment
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
@@ -470,6 +481,8 @@ describe('<DebugContainer />', () => {
               totalFailed: 120,
             } as typeof test
           }
+
+          return reactive(result) as DebugSpecsFragment
         },
         render: (gqlVal) => <DebugContainer gql={gqlVal} />,
       })
@@ -503,6 +516,8 @@ describe('<DebugContainer />', () => {
 
               result.currentProject.cloudProject.allRuns = [nextRunning, currentRun]
             }
+
+            return reactive(result) as DebugSpecsFragment
           },
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
         })
@@ -545,6 +560,8 @@ describe('<DebugContainer />', () => {
 
               result.currentProject.cloudProject.allRuns = [nextRunning, ...lotsOfRuns]
             }
+
+            return reactive(result) as DebugSpecsFragment
           },
           render: (gqlVal) => <DebugContainer gql={gqlVal} />,
         })
