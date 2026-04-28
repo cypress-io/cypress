@@ -3,13 +3,14 @@ import picomatch from 'picomatch'
 import type { Plugin } from 'vite'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 const debug = debugFn('cypress:vite-plugin-cypress-esm')
 
 const MODULE_IMPORTER_IDENTIFIER = '__cypressModule'
 const MODULE_DYNAMIC_IMPORTER_IDENTIFIER = '__cypressDynamicModule'
 
 const MODULE_CACHE_FILEPATH = path.resolve(
-  __dirname,
+  path.dirname(fileURLToPath(import.meta.url)),
   '../client/moduleCache.js',
 )
 

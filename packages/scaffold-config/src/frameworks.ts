@@ -101,16 +101,6 @@ export function getBundler (bundler: WizardBundler['type']): WizardBundler {
 
 const mountModule = <T extends string>(mountModule: T) => (projectPath: string) => Promise.resolve(mountModule)
 
-const angularMountModule = async (projectPath: string) => {
-  const angularCorePkg = await isDependencyInstalled(dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE, projectPath)
-
-  if (!angularCorePkg.detectedVersion || !semver.valid(angularCorePkg.detectedVersion)) {
-    return 'cypress/angular'
-  }
-
-  return semver.major(angularCorePkg.detectedVersion) >= 21 ? 'cypress/angular-zoneless' : 'cypress/angular'
-}
-
 export const SUPPORT_STATUSES: Readonly<Cypress.ResolvedComponentFrameworkDefinition['supportStatus'][]> = ['alpha', 'beta', 'full', 'community'] as const
 
 export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
@@ -193,12 +183,12 @@ export const CT_FRAMEWORKS: Cypress.ComponentFrameworkDefinition[] = [
         dependencies.WIZARD_DEPENDENCY_ANGULAR_DEVKIT_BUILD_ANGULAR,
         dependencies.WIZARD_DEPENDENCY_ANGULAR_CORE,
         dependencies.WIZARD_DEPENDENCY_ANGULAR_COMMON,
-        dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER_DYNAMIC,
+        dependencies.WIZARD_DEPENDENCY_ANGULAR_PLATFORM_BROWSER,
       ]
     },
     codeGenFramework: 'angular',
     glob: '*.component.ts',
-    mountModule: angularMountModule,
+    mountModule: mountModule('cypress/angular'),
     supportStatus: 'full',
     componentIndexHtml: componentIndexHtmlGenerator(),
     specPattern: '**/*.cy.ts',

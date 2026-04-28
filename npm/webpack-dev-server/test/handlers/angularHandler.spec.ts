@@ -17,48 +17,6 @@ import {
 import { scaffoldMigrationProject } from '../test-helpers/scaffoldProject'
 
 describe('angularHandler', { timeout: 60000 }, function () {
-  it('sources the config from angular-20', async () => {
-    const projectRoot = await scaffoldMigrationProject('angular-20')
-
-    process.chdir(projectRoot)
-    const devServerConfig = {
-      cypressConfig: {
-        projectRoot,
-        specPattern: 'src/**/*.cy.ts',
-      } as Cypress.PluginConfigOptions,
-      framework: 'angular',
-    } as AngularWebpackDevServerConfig
-    const { frameworkConfig: webpackConfig, sourceWebpackModulesResult } = await angularHandler(devServerConfig)
-
-    expect(webpackConfig).toBeDefined()
-    expect((webpackConfig?.entry as any).main).toBeUndefined()
-    expect(sourceWebpackModulesResult.framework?.importPath).toContain(path.join('@angular-devkit', 'build-angular'))
-    const projectConfig = await getProjectConfig(projectRoot)
-
-    expect(projectConfig).toEqual({
-      root: '',
-      sourceRoot: 'src',
-      buildOptions: {
-        browser: 'src/main.ts',
-        // because of the way the main fixtures are configured in the system-test projects, we need to run as a zone.js application
-        polyfills: [
-          'zone.js',
-        ],
-        tsConfig: 'tsconfig.app.json',
-        assets: ['src/favicon.ico', 'src/assets'],
-        styles: ['src/styles.scss'],
-        optimization: false,
-        extractLicenses: false,
-        sourceMap: true,
-      },
-    })
-
-    await expectLoadsAngularJson(projectRoot)
-    await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig, projectConfig.buildOptions, false)
-    expectLoadsAngularBuildOptions(projectConfig.buildOptions)
-  })
-
   it('sources the config from angular-21', async () => {
     const projectRoot = await scaffoldMigrationProject('angular-21')
 
@@ -105,11 +63,10 @@ describe('angularHandler', { timeout: 60000 }, function () {
         outputPath: 'dist/angular',
         index: 'src/index.html',
         main: 'src/main.ts',
-        polyfills: 'src/polyfills.ts',
         tsConfig: 'tsconfig.app.json',
-        inlineStyleLanguage: 'scss',
+        inlineStyleLanguage: 'css',
         assets: ['src/favicon.ico', 'src/assets'],
-        styles: ['src/styles.scss'],
+        styles: ['src/styles.css'],
         scripts: [],
         buildOptimizer: false,
         optimization: false,
@@ -139,7 +96,7 @@ describe('angularHandler', { timeout: 60000 }, function () {
     expect(sourceWebpackModulesResult.framework?.importPath).toContain(path.join('@angular-devkit', 'build-angular'))
     await expectLoadsAngularJson(projectRoot)
     await expectLoadsAngularCLiModules(projectRoot)
-    await expectGeneratesTsConfig(devServerConfig, customProjectConfig.buildOptions, true)
+    await expectGeneratesTsConfig(devServerConfig, customProjectConfig.buildOptions)
     expectLoadsAngularBuildOptions(customProjectConfig.buildOptions)
   })
 })

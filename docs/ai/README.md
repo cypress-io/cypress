@@ -34,14 +34,12 @@ CLAUDE.md                                    ← root (workflow rules + @AGENTS.
 cli/CLAUDE.md                                ← cli workspace
 cli/cypress/CLAUDE.md                        ← cypress main package
 cli/angular/CLAUDE.md
-cli/angular-zoneless/CLAUDE.md
 cli/mount-utils/CLAUDE.md
 cli/react/CLAUDE.md
 cli/svelte/CLAUDE.md
 cli/vue/CLAUDE.md
 npm/CLAUDE.md                                ← npm workspace
 npm/angular/CLAUDE.md
-npm/angular-zoneless/CLAUDE.md
 npm/eslint-plugin-dev/CLAUDE.md
 npm/grep/CLAUDE.md
 npm/mount-utils/CLAUDE.md

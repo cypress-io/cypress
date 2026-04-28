@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "resolveJsonModule": true,
-    "target": "ES2020",
+    "target": "es2022",
     "module": "node16",
     "moduleResolution": "node16",
     "lib": [
-      "es2015",
+      "es2022",
       "dom"
     ],
     "declaration": true,

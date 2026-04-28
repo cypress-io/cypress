@@ -10,8 +10,7 @@ The `npm/` directory contains the publicly published npm packages for the Cypres
 
 - **@cypress/react** — Mount React components (React 18+) in the Cypress test runner
 - **@cypress/vue** — Mount Vue 3 components in the Cypress test runner
-- **@cypress/angular** — Mount Angular components (Angular 18+) in the Cypress test runner using zone.js
-- **@cypress/angular-zoneless** — Mount Angular components (Angular 20+) without zone.js for zoneless change detection
+- **@cypress/angular** — Mount Angular components (Angular 21+) in the Cypress test runner
 - **@cypress/svelte** — Mount Svelte 5+ components in the Cypress test runner
 - **@cypress/mount-utils** — Shared utility types and helper functions consumed by all component testing adapters; not intended for direct use by end users
 
@@ -52,7 +51,7 @@ yarn nx run-many -t build --projects=tag:npm   # build all npm packages
 
 ## Notes
 
-- Several packages (`react`, `vue`, `angular`, `angular-zoneless`, `svelte`, `mount-utils`) run a `postbuild` script (`sync-exported-npm-with-cli.js`) that copies their `dist/` output into the `cli/` directory so the main `cypress` binary bundles them. Changes to these packages must be built before testing in the main binary.
+- Several packages (`react`, `vue`, `angular`, `svelte`, `mount-utils`) run a `postbuild` script (`sync-exported-npm-with-cli.js`) that copies their `dist/` output into the `cli/` directory so the main `cypress` binary bundles them. Changes to these packages must be built before testing in the main binary.
 - `@cypress/webpack-dev-server` and `@cypress/vite-dev-server` are bundled with the Cypress binary and generally do not need to be installed separately by end users; the object-syntax `devServer` config in `cypress.config.ts` is the primary API.
 - `@cypress/webpack-batteries-included-preprocessor` requires `@cypress/webpack-preprocessor` as a peer dependency and must be installed alongside it.
 - `@cypress/eslint-plugin-dev` is for internal Cypress development only — do not recommend it to end users; the user-facing ESLint plugin lives at `eslint-plugin-cypress` (a separate repository).

@@ -27,7 +27,6 @@
     "./node_modules/chalk/node_modules/supports-color/index.js",
     "./node_modules/chrome-remote-interface/node_modules/ws/lib/websocket.js",
     "./node_modules/ci-info/index.js",
-    "./node_modules/coffeescript/lib/coffeescript/helpers.js",
     "./node_modules/colors/lib/system/supports-colors.js",
     "./node_modules/compression/node_modules/debug/src/node.js",
     "./node_modules/debug/src/node.js",
@@ -277,10 +276,6 @@
     "./node_modules/chrome-remote-interface/node_modules/ws/lib/receiver.js",
     "./node_modules/chrome-remote-interface/node_modules/ws/lib/websocket-server.js",
     "./node_modules/clean-stack/index.js",
-    "./node_modules/coffeescript/lib/coffeescript/coffeescript.js",
-    "./node_modules/coffeescript/lib/coffeescript/index.js",
-    "./node_modules/coffeescript/lib/coffeescript/nodes.js",
-    "./node_modules/coffeescript/lib/coffeescript/register.js",
     "./node_modules/colors/lib/colors.js",
     "./node_modules/colors/safe.js",
     "./node_modules/combined-stream/lib/combined_stream.js",
@@ -1742,12 +1737,6 @@
     "./node_modules/cli-table3/src/utils.js",
     "./node_modules/cli-truncate/index.js",
     "./node_modules/cli-truncate/node_modules/slice-ansi/index.js",
-    "./node_modules/coffeescript/lib/coffeescript/lexer.js",
-    "./node_modules/coffeescript/lib/coffeescript/parser.js",
-    "./node_modules/coffeescript/lib/coffeescript/rewriter.js",
-    "./node_modules/coffeescript/lib/coffeescript/scope.js",
-    "./node_modules/coffeescript/lib/coffeescript/sourcemap.js",
-    "./node_modules/coffeescript/package.json",
     "./node_modules/color-convert/conversions.js",
     "./node_modules/color-convert/index.js",
     "./node_modules/color-convert/route.js",
@@ -3365,6 +3354,7 @@
     "./node_modules/zod/v3/locales/en.cjs",
     "./node_modules/zod/v3/types.cjs",
     "./packages/data-context/graphql/index.ts",
+    "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
     "./packages/data-context/node_modules/@babel/parser/lib/index.js",
     "./packages/data-context/node_modules/ast-types/def/babel-core.js",
     "./packages/data-context/node_modules/ast-types/def/babel.js",
@@ -3922,5 +3912,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "fddf9c79ab025664ed41c8fe69f7667c5c57f85eb493e468302eac90dc1f9498"
+  "deferredHash": "8b6cd08ca4e25f95c46140e7f8d2ff1bf30c402c91e9b1cb9ac1eb0b009de8b8"
 }
