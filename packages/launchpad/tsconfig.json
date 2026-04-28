@@ -11,6 +11,7 @@
     "../frontend-shared/cypress/**/*.ts"
   ],
   "compilerOptions": {
+    "importsNotUsedAsValues": "remove",
     "verbatimModuleSyntax": true,
     "types": ["cypress", "cypress-real-events", "@intlify/unplugin-vue-i18n/messages"],
     "paths": {
