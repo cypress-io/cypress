@@ -45,8 +45,8 @@ const expectCacheOverrides = (webpackConfig: Configuration, projectRoot: string)
 
 // can take a while since we install node_modules
 describe('nextHandler', { timeout: 60000 }, function () {
-  it('sources from a nextjs-configured project', async () => {
-    const projectRoot = await scaffoldMigrationProject('nextjs-configured')
+  it('sources from a next-16 project', async () => {
+    const projectRoot = await scaffoldMigrationProject('next-16')
 
     process.chdir(projectRoot)
 
@@ -65,7 +65,7 @@ describe('nextHandler', { timeout: 60000 }, function () {
   })
 
   it('throws if nodeVersion is set to bundled', async () => {
-    const projectRoot = await scaffoldMigrationProject('nextjs-configured')
+    const projectRoot = await scaffoldMigrationProject('next-16')
 
     process.chdir(projectRoot)
 
