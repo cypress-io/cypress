@@ -33,25 +33,25 @@
 
             <div class="mb-[16px]">
               <ExternalLink
-                href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v15#15-0-0"
+                href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0"
                 class="font-bold text-indigo-500"
               >
-                15.0.0
+                16.0.0
               </ExternalLink>
               <span class="font-light pl-[10px] text-gray-500 text-[14px]">
-                Released {{ versionReleaseDates['15'] }}
+                Released {{ versionReleaseDates['16'] }}
               </span>
             </div>
             <div class="children:mb-[16px]">
               <p>
-                This release prepares Cypress Studio for the next era of AI-assisted test creation. You can record interactions, add assertions by right-clicking, and now edit tests inline without leaving Cypress. Turn on <InlineCodeFragment>experimentalStudio</InlineCodeFragment> in your config to try it out and share your feedback.
+                This release continues the evolution of Cypress Studio with further improvements to AI-assisted test creation and inline editing. It also upgrades the underlying Electron runtime and drops support for several older integrations to keep Cypress lean and forward-looking.
               </p>
               <p>
-                We’ve also made important changes to improve reliability, future compatibility, and cross-origin support. Several older versions of Node.js, browser protocols, and Webpack integrations are no longer supported.
+                Built-in CoffeeScript support and Next.js 14 compatibility have been removed. If your project uses either, you will need to migrate before upgrading.
                 This version includes breaking changes that may require updates to your project.
               </p>
               <p>
-                For a complete list of updates, please review our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v15#15-0-0">
+                For a complete list of updates, please review our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0">
                   <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                   changelog</ExternalLink>.
               </p>
@@ -67,6 +67,27 @@
             </h2>
             <div class="pb-[8px]">
               <ExternalLink
+                href="https://on.cypress.io/changelog#15-0-0"
+                class="font-bold text-indigo-500"
+              >
+                15.0.0
+              </ExternalLink>
+              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
+                Released {{ versionReleaseDates['15'] }}
+              </span>
+            </div>
+            <p class="text-[14px] leading-[20px]">
+              This release prepared Cypress Studio for the next era of AI-assisted test creation with inline editing and right-click assertions.
+              <br>
+              <br>
+              Read about the v15.0.0 changes in our
+              <ExternalLink href="https://on.cypress.io/changelog#15-0-0">
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                changelog</ExternalLink>.
+            </p>
+            <br>
+            <div class="pb-[8px]">
+              <ExternalLink
                 href="https://on.cypress.io/changelog#14-0-0"
                 class="font-bold text-indigo-500"
               >
@@ -77,7 +98,7 @@
               </span>
             </div>
             <p class="text-[14px] leading-[20px]">
-              We’ve improved performance of component testing and added support for new framework and dev server versions.
+              We've improved performance of component testing and added support for new framework and dev server versions.
               <br>
               <br>
               Read about the v14.0.0 changes in our
@@ -105,31 +126,6 @@
               <br>
               Read about the v13.0.0 changes in our
               <ExternalLink href="https://on.cypress.io/cypress-13-release">
-                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
-                blog post</ExternalLink>.
-            </p>
-            <br>
-            <div class="pb-[8px]">
-              <ExternalLink
-                href="https://on.cypress.io/changelog#12-0-0"
-                class="font-bold text-indigo-500"
-              >
-                12.0.0
-              </ExternalLink>
-              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
-                Released {{ versionReleaseDates['12'] }}
-              </span>
-            </div>
-            <p class="text-[14px] leading-[20px]">
-              We made <ExternalLink href="https://on.cypress.io/origin">
-                <InlineCodeFragment>cy.origin()</InlineCodeFragment>
-              </ExternalLink>, <ExternalLink href="https://on.cypress.io/session">
-                <InlineCodeFragment>cy.session()</InlineCodeFragment>
-              </ExternalLink>, and test isolation generally available to allow users to test multiple origin workflows while allowing users to rehydrate test state in a consistent manner.
-              <br>
-              <br>
-              Read about the v12.0.0 changes in our
-              <ExternalLink href="https://on.cypress.io/cypress-12-release">
                 <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                 blog post</ExternalLink>.
             </p>
@@ -165,7 +161,6 @@
 import Button from '@cypress-design/vue-button'
 import { useI18n } from '@cy/i18n'
 import ExternalLink from '@packages/frontend-shared/src/gql-components/ExternalLink.vue'
-import InlineCodeFragment from '@cy/components/InlineCodeFragment.vue'
 import { useScroll, useElementSize, useTimeAgo } from '@vueuse/core'
 import { computed, ref } from 'vue'
 
@@ -193,6 +188,7 @@ const versionReleaseDates = computed(() => {
     '13': useTimeAgo(Date.UTC(2023, 7, 29)).value,
     '14': useTimeAgo(Date.UTC(2025, 0, 16)).value,
     '15': useTimeAgo(Date.UTC(2025, 7, 20)).value,
+    '16': useTimeAgo(Date.UTC(2026, 3, 28)).value,
   }
 })
 
