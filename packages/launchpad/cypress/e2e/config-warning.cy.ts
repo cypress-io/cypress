@@ -174,8 +174,8 @@ describe('component testing dependency warnings', () => {
   })
 
   it('does not show warning for project that does not require bundler to be installed', () => {
-    cy.scaffoldProject('nextjs-configured')
-    cy.openProject('nextjs-configured', ['--component'])
+    cy.scaffoldProject('next-16')
+    cy.openProject('next-16', ['--component'])
     cy.visitLaunchpad()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('Choose a browser', { timeout: 12000 })
