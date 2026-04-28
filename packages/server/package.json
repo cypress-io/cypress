@@ -190,7 +190,7 @@
     "socket.io": "4.0.1",
     "ssestream": "1.0.1",
     "supertest": "4.0.2",
-    "ts-loader": "9.5.2",
+    "ts-loader": "^9.5.7",
     "tsconfig-paths": "3.10.1",
     "webpack": "^5.88.2",
     "ws": "5.2.4",
