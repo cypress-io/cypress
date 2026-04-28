@@ -13,6 +13,7 @@
 
 - Upgraded `cachedir` from `^2.3.0` to `^2.4.0`. Addressed in [#33608](https://github.com/cypress-io/cypress/pull/33608).
 - Upgraded `simple-git` from `3.33.0` to `3.36.0` to address a [Remote Code Execution](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15456078) vulnerability reported in security scans. Addressed in [#33680](https://github.com/cypress-io/cypress/pull/33680).
+- Upgraded `ts-loader` from `9.5.2` to `9.5.7`. Addressed in [#33691](https://github.com/cypress-io/cypress/pull/33691)
 
 ## 15.14.1
 
