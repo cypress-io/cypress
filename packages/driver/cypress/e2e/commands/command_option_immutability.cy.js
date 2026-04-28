@@ -83,7 +83,7 @@ describe('command log', () => {
         cy.document(options)
       })
 
-      // Ignore cy.each(), cy.end() because they don't have options.
+      // Ignore cy.each() because it doesn't have options.
 
       testOptions('eq', { timeout: 1111 }, 1, (options) => {
         cy.get('input').eq(0, options)

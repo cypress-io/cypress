@@ -1370,13 +1370,6 @@ declare namespace Cypress {
     each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
 
     /**
-     * End a chain of commands
-     *
-     * @see https://on.cypress.io/end
-     */
-    end(): Chainable<null>
-
-    /**
      * Get A DOM element at a specific index in an array of elements.
      *
      * @see https://on.cypress.io/eq
