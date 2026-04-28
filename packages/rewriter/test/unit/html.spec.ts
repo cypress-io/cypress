@@ -40,6 +40,44 @@ describe('html rewriter', function () {
       expect(actual).toMatchSnapshot()
     })
 
+    describe('with <base> target', function () {
+      it('strips target="_top"', async function () {
+        const rewrite = await rewriteNoSourceMap('<base href="/" target="_top">')
+
+        expect(rewrite).toMatchSnapshot()
+      })
+
+      it('strips target="_parent"', async function () {
+        const rewrite = await rewriteNoSourceMap('<base target="_parent">')
+
+        expect(rewrite).toMatchSnapshot()
+      })
+
+      it('strips target case-insensitively', async function () {
+        const rewrite = await rewriteNoSourceMap('<base target="_TOP">')
+
+        expect(rewrite).toMatchSnapshot()
+      })
+
+      it('preserves target="_blank"', async function () {
+        const html = '<base target="_blank">'
+
+        expect(await rewriteNoSourceMap(html)).toEqual(html)
+      })
+
+      it('preserves target="_self"', async function () {
+        const html = '<base target="_self">'
+
+        expect(await rewriteNoSourceMap(html)).toEqual(html)
+      })
+
+      it('preserves <base> with no target', async function () {
+        const html = '<base href="/">'
+
+        expect(await rewriteNoSourceMap(html)).toEqual(html)
+      })
+    })
+
     describe('with inline scripts', function () {
       it('rewrites inline JS with no type', async function () {
         const rewrite = await rewriteNoSourceMap('<script>window.top</script>')
