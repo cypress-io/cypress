@@ -30950,7 +30950,7 @@ ts-jest@^29.4.4:
     type-fest "^4.41.0"
     yargs-parser "^21.1.1"
 
-ts-loader@9.5.7:
+ts-loader@^9.5.7:
   version "9.5.7"
   resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-9.5.7.tgz#582663e853646e18506cd5cc79feb354952731c0"
   integrity sha512-/ZNrKgA3K3PtpMYOC71EeMWIloGw3IYEa5/t1cyz2r5/PyUwTXGzYJvcD3kfUvmhlfpz1rhV8B2O6IVTQ0avsg==
