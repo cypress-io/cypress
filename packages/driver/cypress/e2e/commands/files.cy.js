@@ -109,12 +109,6 @@ describe('src/cy/commands/files', () => {
     })
 
     it('retries assertions until they pass', () => {
-      let retries = 0
-
-      cy.on('command:retry', () => {
-        retries += 1
-      })
-
       Cypress.backend.withArgs('run:privileged')
       .onFirstCall()
       .resolves({
@@ -126,9 +120,13 @@ describe('src/cy/commands/files', () => {
       })
 
       cy.readFile('foo.json').should('eq', 'quux').then(() => {
-        // Two retries: The first one triggers a backend request and throws a 'not ready' error.
-        // The second gets foobarbaz, triggering another request to the backend.
-        expect(retries).to.eq(2)
+        // Verify two calls were made: the first returns foobarbaz (failing the
+        // assertion), and the second returns quux (passing the assertion).
+        const readFilePrivilegedCalls = Cypress.backend.getCalls().filter(
+          (c) => c.args[0] === 'run:privileged' && c.args[1]?.commandName === 'readFile',
+        )
+
+        expect(readFilePrivilegedCalls.length).to.eq(2)
       })
     })
 

@@ -1126,9 +1126,9 @@ async function ready (options: ReadyOptions) {
       await writeOutput(options.outputPath, createPublicRunResults(results))
 
       return results
-    } else {
-      errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
     }
+
+    errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
   }
 
   if (browser.unsupportedVersion && browser.warning) {

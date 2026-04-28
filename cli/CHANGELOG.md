@@ -1,4 +1,4 @@
-<!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+<!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 16.0.0
 
 **Breaking Changes:**
@@ -10,6 +10,25 @@
 
 - Upgraded `electron` from `37.6.0` to `41.0.3`.
 - Upgraded bundled Chromium version to `146.0.7680.80`.
+
+## 15.14.2
+
+**Performance:**
+
+- Reduced main-thread overhead when scrolling the command log in `cypress open` by fixing an issue where the reporter could register more than one `scroll` listener on the log if its scroll container was set more than once. Addressed in [#33607](https://github.com/cypress-io/cypress/pull/33607).
+
+**Bugfixes:**
+
+- Fixed an issue where `cy.wait` on multiple aliases could surface an unhandled `Cannot read properties of undefined (reading 'routeId')` rejection when a retry short-circuited during runnable teardown. Fixed in [#33651](https://github.com/cypress-io/cypress/pull/33651).
+- Fixed an issue where an application under test containing `<base target="_top">` or `<base target="_parent">` would navigate out of the Cypress iframe when untargeted links were clicked or forms were submitted, breaking the test run. The unsafe `target` is now stripped from `<base>` tags as part of the existing `modifyObstructiveCode` rewriting (enabled by default for the primary super-domain, and extendable to third-party origins with `experimentalModifyObstructiveThirdPartyCode`). A runtime guard also neutralizes any `<base>` inserted or modified after load, matching the always-on behavior of the existing `<a>` / `<form>` target guards. Fixed in [#33667](https://github.com/cypress-io/cypress/pull/33667).
+- Fixed a race during `cypress open` config reload where the internal HTTP server would begin accepting requests before the primary remote state had been initialized, occasionally crashing in-flight browser requests (iframe loads) on an empty `remoteStates` map. Fixed in [#33686](https://github.com/cypress-io/cypress/pull/33686).
+
+**Dependency Updates:**
+
+- Upgraded `cachedir` from `^2.3.0` to `^2.4.0`. Addressed in [#33608](https://github.com/cypress-io/cypress/pull/33608).
+- Upgraded `listr2` from `3.8.3` to `^9.0.5`. Addressed in [#33640](https://github.com/cypress-io/cypress/pull/33640).
+- Upgraded `simple-git` from `3.33.0` to `3.36.0` to address a [Remote Code Execution](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15456078) vulnerability reported in security scans. Addressed in [#33680](https://github.com/cypress-io/cypress/pull/33680).
+- Upgraded `ts-loader` from `9.5.2` to `9.5.7`. Addresses [#33648](https://github.com/cypress-io/cypress/issues/33648). Addressed in [#33691](https://github.com/cypress-io/cypress/pull/33691)
 
 ## 15.14.1
 

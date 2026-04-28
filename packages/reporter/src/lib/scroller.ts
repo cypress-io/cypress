@@ -23,47 +23,69 @@ export class Scroller {
   private _userScrollCount = 0
   private _countUserScrollsTimeout?: number
   private _userScrollThresholdMs = SCROLL_THRESHOLD_MS
+  private _onUserScroll?: UserScrollCallback
+  private _scrollListenerAbort?: AbortController
 
   setContainer (container: Element, onUserScroll?: UserScrollCallback) {
-    this._container = container
+    this._detachScrollListener()
 
+    this._container = container
+    this._onUserScroll = onUserScroll
     this._userScrollCount = 0
 
-    this._listenToScrolls(onUserScroll)
+    this._attachScrollListener()
   }
 
-  _listenToScrolls (onUserScroll?: UserScrollCallback) {
+  _attachScrollListener () {
     if (!this._container) return
 
-    this._container.addEventListener('scroll', () => {
-      this._userScrollCount++
+    this._scrollListenerAbort = new AbortController()
+    this._container.addEventListener('scroll', this._onContainerScroll, { signal: this._scrollListenerAbort.signal })
+  }
 
-      if (this._userScrollCount <= 0) {
-        // programmatic scroll
-        return
+  /** Drops the active `scroll` subscription (AbortController + `removeEventListener`). */
+  _detachScrollListener () {
+    this._scrollListenerAbort?.abort()
+    this._scrollListenerAbort = undefined
+
+    if (!this._container) return
+
+    const { removeEventListener } = this._container
+
+    if (typeof removeEventListener !== 'function') return
+
+    removeEventListener.call(this._container, 'scroll', this._onContainerScroll)
+  }
+
+  /** Stable `scroll` handler so `removeEventListener` can match `addEventListener`. */
+  private readonly _onContainerScroll = () => {
+    this._userScrollCount++
+
+    if (this._userScrollCount <= 0) {
+      // programmatic scroll
+      return
+    }
+
+    // there can be false positives for user scrolls, so make sure we get 3
+    // or more scroll events within 50ms to count it as a user intending to scroll
+    if (this._userScrollCount >= 3) {
+      if (this._onUserScroll) {
+        this._onUserScroll()
       }
 
-      // there can be false positives for user scrolls, so make sure we get 3
-      // or more scroll events within 50ms to count it as a user intending to scroll
-      if (this._userScrollCount >= 3) {
-        if (onUserScroll) {
-          onUserScroll()
-        }
+      clearTimeout(this._countUserScrollsTimeout)
+      this._countUserScrollsTimeout = undefined
+      this._userScrollCount = 0
 
-        clearTimeout(this._countUserScrollsTimeout)
-        this._countUserScrollsTimeout = undefined
-        this._userScrollCount = 0
+      return
+    }
 
-        return
-      }
+    if (this._countUserScrollsTimeout) return
 
-      if (this._countUserScrollsTimeout) return
-
-      this._countUserScrollsTimeout = window.setTimeout(() => {
-        this._countUserScrollsTimeout = undefined
-        this._userScrollCount = 0
-      }, this._userScrollThresholdMs)
-    })
+    this._countUserScrollsTimeout = window.setTimeout(() => {
+      this._countUserScrollsTimeout = undefined
+      this._userScrollCount = 0
+    }, this._userScrollThresholdMs)
   }
 
   scrollIntoView (element: HTMLElement) {
@@ -123,7 +145,9 @@ export class Scroller {
 
   // for testing purposes
   __reset () {
+    this._detachScrollListener()
     this._container = null
+    this._onUserScroll = undefined
     this._userScrollCount = 0
     clearTimeout(this._countUserScrollsTimeout)
     this._countUserScrollsTimeout = undefined

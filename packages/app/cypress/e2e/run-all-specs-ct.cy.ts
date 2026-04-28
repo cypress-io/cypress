@@ -36,7 +36,7 @@ describe('run-all-specs-ct', () => {
         // in cy-in-cy only, runAllSpecs is always set AFTER initCypressTests is called inside the vite dev server, meaning that __RUN_ALL_SPECS__ on the window is out of date.
         // to hack around this, we reload the page to force the vite dev server to process the runAllSpecs again when the value is set properly.
         if (bundler === 'vite') {
-          cy.get('.runnable-loading-title').should('not.be.visible')
+          cy.contains('Your tests are loading...').should('not.exist')
           cy.reload()
         }
 
@@ -54,7 +54,7 @@ describe('run-all-specs-ct', () => {
         // in cy-in-cy only, runAllSpecs is always set AFTER initCypressTests is called inside the vite dev server, meaning that __RUN_ALL_SPECS__ on the window is out of date.
         // to hack around this, we reload the page to force the vite dev server to process the runAllSpecs again when the value is set properly.
         if (bundler === 'vite') {
-          cy.get('.runnable-loading-title').should('not.be.visible')
+          cy.contains('Your tests are loading...').should('not.exist')
           cy.reload()
         }
 
@@ -72,7 +72,7 @@ describe('run-all-specs-ct', () => {
         // in cy-in-cy only, runAllSpecs is always set AFTER initCypressTests is called inside the vite dev server, meaning that __RUN_ALL_SPECS__ on the window is out of date.
         // to hack around this, we reload the page to force the vite dev server to process the runAllSpecs again when the value is set properly.
         if (bundler === 'vite') {
-          cy.get('.runnable-loading-title').should('not.be.visible')
+          cy.contains('Your tests are loading...').should('not.exist')
           cy.reload()
         }
 
