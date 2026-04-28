@@ -1,6 +1,7 @@
 import type { Specs_InlineSpecListFragment } from '../generated/graphql-test'
 import { Specs_InlineSpecListFragmentDoc, SpecFilter_SetPreferencesDocument, RunAllSpecsDocument } from '../generated/graphql-test'
 import InlineSpecList from './InlineSpecList.vue'
+import { reactive } from 'vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
@@ -8,9 +9,22 @@ let specs: Array<any> = []
 
 describe('InlineSpecList', () => {
   const mountInlineSpecList = ({ specFilter, experimentalRunAllSpecs }: {specFilter?: string, experimentalRunAllSpecs?: boolean} = {}) => cy.mountFragment(Specs_InlineSpecListFragmentDoc, {
+    patchContext (clientCtx) {
+      if (!experimentalRunAllSpecs || !clientCtx.currentProject) {
+        return
+      }
+
+      const config = [...(clientCtx.currentProject.config || [])] as Array<{ field: string, value: unknown, from?: string }>
+
+      if (!config.some((c) => c.field === 'experimentalRunAllSpecs')) {
+        config.push({ field: 'experimentalRunAllSpecs', value: true, from: 'test' })
+      }
+
+      clientCtx.currentProject.config = config
+    },
     onResult: (ctx) => {
       if (!ctx.currentProject?.specs) {
-        return ctx
+        return reactive(ctx) as Specs_InlineSpecListFragment
       }
 
       specs = ctx.currentProject.specs = specs.map((spec) => ({ __typename: 'Spec', ...spec, id: spec.relative }))
@@ -18,11 +32,7 @@ describe('InlineSpecList', () => {
         ctx.currentProject.savedState = { specFilter }
       }
 
-      if (experimentalRunAllSpecs) {
-        ctx.currentProject.config = [{ field: 'experimentalRunAllSpecs', value: true }]
-      }
-
-      return ctx
+      return reactive(ctx) as Specs_InlineSpecListFragment
     },
     render: (gqlValue) => {
       return (
@@ -98,7 +108,7 @@ describe('InlineSpecList', () => {
             ctx.currentProject.specs = ctx.currentProject.specs.slice(0, 50)
           }
 
-          return ctx
+          return reactive(ctx) as Specs_InlineSpecListFragment
         },
         render (gqlValue) {
           _gqlValue = gqlValue

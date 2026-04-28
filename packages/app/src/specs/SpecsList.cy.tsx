@@ -18,6 +18,19 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
       variables: {
         hasRunIds: false,
       },
+      patchContext (clientCtx) {
+        if (!experimentalRunAllSpecs || !clientCtx.currentProject) {
+          return
+        }
+
+        const config = [...(clientCtx.currentProject.config || [])] as Array<{ field: string, value: unknown, from?: string }>
+
+        if (!config.some((c) => c.field === 'experimentalRunAllSpecs')) {
+          config.push({ field: 'experimentalRunAllSpecs', value: true, from: 'test' })
+        }
+
+        clientCtx.currentProject.config = config
+      },
       onResult: (ctx) => {
         if (!ctx.currentProject) throw new Error('need current project')
 
@@ -28,10 +41,6 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
 
         if (specFilter) {
           ctx.currentProject.savedState = { specFilter }
-        }
-
-        if (experimentalRunAllSpecs) {
-          ctx.currentProject.config = [{ field: 'experimentalRunAllSpecs', value: true }]
         }
 
         return ctx

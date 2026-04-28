@@ -59,6 +59,9 @@ export const registerMountFn = ({ plugins }: MountFnOptions = {}) => {
   function mountFragment<T extends TypedDocumentNode<any, any>> (source: T, options: MountFragmentConfig<T>, list: boolean = false): Cypress.Chainable<any> {
     let hasMounted = false
     const context = makeClientTestContext()
+
+    options.patchContext?.(context)
+
     const fieldName = list ? 'testFragmentMemberList' : 'testFragmentMember'
 
     const mountingOptions: MountingOptions<any, any> = {
@@ -220,6 +223,12 @@ type MountFragmentConfig<T extends TypedDocumentNode<any, any>> = {
    */
   variables?: VariablesOf<T>
   /**
+   * Runs on `ClientTestContext` immediately after it is created, before urql mounts.
+   * Use this when other operations (e.g. `RunAllSpecsData`) read from context before `onResult`
+   * runs on the fragment.
+   */
+  patchContext?: (context: ClientTestContext) => void
+  /**
    * When we are mounting a GraphQL Fragment, we can use `onResult`
    * to intercept the result and modify the contents on the fragment
    * before rendering the component
@@ -240,6 +249,7 @@ type MountFragmentListConfig<T extends TypedDocumentNode<any, any>> = {
   variableTypes?: Record<keyof VariablesOf<T>, string>
   variables?: VariablesOf<T>
   render: (frag: Exclude<ResultOf<T>, undefined>[]) => import('vue').VNode
+  patchContext?: (context: ClientTestContext) => void
   onResult?: (result: ResultOf<T>, ctx: ClientTestContext) => ResultOf<T> | void
   expectError?: boolean
 } & CyMountOptions<unknown>
