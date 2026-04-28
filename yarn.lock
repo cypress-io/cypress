@@ -30950,17 +30950,6 @@ ts-jest@^29.4.4:
     type-fest "^4.41.0"
     yargs-parser "^21.1.1"
 
-ts-loader@9.5.2:
-  version "9.5.2"
-  resolved "https://registry.npmjs.org/ts-loader/-/ts-loader-9.5.2.tgz#1f3d7f4bb709b487aaa260e8f19b301635d08020"
-  integrity sha512-Qo4piXvOTWcMGIgRiuFa6nHNm+54HbYaZCKqc9eeZCLRy3XqafQgwX2F7mofrbJG3g7EEb+lkiR+z2Lic2s3Zw==
-  dependencies:
-    chalk "^4.1.0"
-    enhanced-resolve "^5.0.0"
-    micromatch "^4.0.0"
-    semver "^7.3.4"
-    source-map "^0.7.4"
-
 ts-loader@9.5.7:
   version "9.5.7"
   resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-9.5.7.tgz#582663e853646e18506cd5cc79feb354952731c0"
