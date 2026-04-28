@@ -244,86 +244,64 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  createServer (
+  async createServer (
     app: Express,
     config: Cfg,
     onWarning: unknown,
-  ): Bluebird<[number, WarningErr?]> {
-    return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
+  ): Promise<[number, WarningErr?]> {
+    const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
-      this._server = this._createHttpServer(app)
+    this._server = this._createHttpServer(app)
 
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
+    debug('createServer connecting to server')
+
+    this.server.on('connect', this.onConnect.bind(this))
+    this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
+
+    // Start the file server first so its port is known before we begin
+    // listening for proxied requests on the main server. The primary
+    // remote state's `<root>` strategy reads `_fileServer.port()`
+    // synchronously, so the fileServer must exist before the primary
+    // is computed. The httpsProxy comes after — it depends on the main
+    // server's port.
+    this._fileServer = await fileServer.create(fileServerFolder as string) as FileServer
+
+    const listenedPort = await this._listen(port)
+
+    this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
+
+    this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
+      onRequest: this.callListeners.bind(this),
+      onUpgrade: this.onSniUpgrade.bind(this),
+    }) as HttpsProxyServer
+
+    let warning: WarningErr | undefined
+
+    // if we have a baseUrl let's go ahead and make sure the server is
+    // connectable!
+    if (baseUrl) {
+      this._baseUrl = baseUrl
+
+      if (config.isTextTerminal) {
+        try {
+          await this._retryBaseUrlCheck(baseUrl, onWarning)
+        } catch (e) {
+          debug(e)
+          throw errors.get('CANNOT_CONNECT_BASE_URL')
+        }
+      } else {
+        try {
+          await ensureUrl.isListening(baseUrl)
+        } catch (err) {
+          debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+          warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl) as WarningErr
         }
       }
+    }
 
-      debug('createServer connecting to server')
-
-      this.server.on('connect', this.onConnect.bind(this))
-      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
-      this.server.once('error', onError)
-
-      this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
-
-      return this._listen(port, (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
-        }
-      })
-      .then((port) => {
-        return Bluebird.all([
-          createHttpsProxy(appData.path('proxy'), port, {
-            onRequest: this.callListeners.bind(this),
-            onUpgrade: this.onSniUpgrade.bind(this),
-          }),
-
-          fileServer.create(fileServerFolder as string),
-        ])
-        .spread((httpsProxy, fileServer) => {
-          this._httpsProxy = httpsProxy as HttpsProxyServer
-          this._fileServer = fileServer as FileServer
-
-          // once we open the server, set the domain to root or baseUrl by default which
-          // prevents a situation where navigating to http sites redirects to /__/ cypress
-          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
-
-          // if we have a baseUrl let's go ahead
-          // and make sure the server is connectable!
-          if (baseUrl) {
-            this._baseUrl = baseUrl
-
-            if (config.isTextTerminal) {
-              return this._retryBaseUrlCheck(baseUrl, onWarning)
-              .return(null)
-              .catch((e) => {
-                debug(e)
-
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
-              })
-            }
-
-            return ensureUrl.isListening(baseUrl)
-            .return(null)
-            .catch((err) => {
-              debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
-
-              return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
-            })
-          }
-        }).then((warning) => {
-          return resolve([port, warning])
-        })
-      })
-    })
+    return [listenedPort, warning]
   }
 
   open (config: Cfg, {
@@ -383,7 +361,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     app.use(createCommonRoutes(routeOptions))
 
-    return this.createServer(app, config, onWarning)
+    // Preserve Bluebird-typed return value.
+    return Bluebird.resolve(this.createServer(app, config, onWarning))
   }
 
   createExpressApp (config) {
@@ -545,8 +524,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return (this.server.address() as AddressInfo).port
   }
 
-  _listen (port, onError) {
-    return new Bluebird<number>((resolve) => {
+  _listen (port: number | null | undefined): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const onError = (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
+        if (err.code === 'EADDRINUSE') {
+          reject(this.portInUseErr(port))
+        }
+      }
+
+      this.server.once('error', onError)
+
       const listener = () => {
         const address = this.server.address() as AddressInfo
 
@@ -556,10 +546,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
         this.server.removeListener('error', onError)
 
-        return resolve(address.port)
+        resolve(address.port)
       }
 
-      return this.server.listen(port || 0, '127.0.0.1', listener)
+      this.server.listen(port || 0, '127.0.0.1', listener)
     })
   }
 
