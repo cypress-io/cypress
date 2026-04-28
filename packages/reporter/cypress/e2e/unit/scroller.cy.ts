@@ -9,18 +9,39 @@ interface ContainerProps {
   scrollHeight?: number
   scrollTop?: number
   addEventListener?: SinonSpy
+  removeEventListener?: SinonSpy
 }
 
-type TestContainer = Element & {
-  addEventListener?: SinonSpy
+type TestContainer = Omit<Element, 'addEventListener' | 'removeEventListener'> & {
+  addEventListener: SinonSpy
+  removeEventListener: SinonSpy
 }
 
 const getContainer = (props?: ContainerProps): TestContainer => {
+  const scrollListeners: Array<(ev: Event) => void> = []
+
+  const addEventListener = sinon.spy((type: string, listener: (ev: Event) => void) => {
+    if (type === 'scroll') {
+      scrollListeners.push(listener)
+    }
+  })
+
+  const removeEventListener = sinon.spy((type: string, listener: (ev: Event) => void) => {
+    if (type === 'scroll') {
+      const idx = scrollListeners.lastIndexOf(listener)
+
+      if (idx !== -1) {
+        scrollListeners.splice(idx, 1)
+      }
+    }
+  })
+
   return _.extend<TestContainer>({
     clientHeight: 400,
     scrollHeight: 900,
     scrollTop: 0,
-    addEventListener: sinon.spy(),
+    addEventListener,
+    removeEventListener,
   }, props)
 }
 
@@ -34,6 +55,14 @@ const getElement = (props?: ElementProps): HTMLElement => {
     clientHeight: 20,
     offsetTop: 150,
   }, props)
+}
+
+/** Fire the scroll handler that is currently registered (last `addEventListener('scroll', …)`). */
+const fireContainerScroll = (container: TestContainer) => {
+  expect(container.addEventListener).to.have.been.calledWith('scroll')
+  const listener = container.addEventListener.lastCall.args[1] as () => void
+
+  listener()
 }
 
 describe('scroller', () => {
@@ -125,16 +154,34 @@ describe('scroller', () => {
       expect(container.addEventListener).to.have.been.calledWith('scroll')
     })
 
+    it('does not stack scroll listeners when setContainer is called repeatedly', () => {
+      const container = getContainer()
+      const onUserScroll = sinon.spy()
+
+      scroller.setContainer(container, onUserScroll)
+      scroller.setContainer(container, onUserScroll)
+
+      expect(container.removeEventListener).to.have.been.called
+      expect(container.removeEventListener.firstCall.args[0]).to.equal('scroll')
+
+      fireContainerScroll(container)
+      clock.tick(15)
+      fireContainerScroll(container)
+      clock.tick(15)
+      fireContainerScroll(container)
+      expect(onUserScroll).to.have.been.calledOnce
+    })
+
     it('calls onUserScroll callback if 3 or more user scroll events are detected within 50ms', () => {
       const container = getContainer()
       const onUserScroll = sinon.spy()
 
       scroller.setContainer(container, onUserScroll)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(15)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(15)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       expect(onUserScroll).to.have.been.called
     })
 
@@ -143,10 +190,10 @@ describe('scroller', () => {
       const onUserScroll = sinon.spy()
 
       scroller.setContainer(container, onUserScroll)
-      container.addEventListener.callArg(1)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
+      fireContainerScroll(container)
       clock.tick(50)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       expect(onUserScroll).not.to.have.been.called
     })
 
@@ -158,13 +205,13 @@ describe('scroller', () => {
       scroller.scrollIntoView(getElement({ offsetTop: 600 }))
       scroller.scrollIntoView(getElement({ offsetTop: 600 }))
       clock.tick(16)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(16)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(16)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       clock.tick(16)
-      container.addEventListener.callArg(1)
+      fireContainerScroll(container)
       expect(onUserScroll).not.to.have.been.called
     })
   })

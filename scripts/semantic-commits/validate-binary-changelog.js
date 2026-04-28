@@ -4,10 +4,12 @@ const { validateChangelog } = require('./validate-changelog')
 const { getCurrentReleaseData } = require('./get-current-release-data')
 const { getReleaseData } = require('./get-binary-release-data')
 const checkedInBinaryVersion = require('../../package.json').version
+const SENTINEL_VERSION = '0.0.0-development'
 
 const changelog = async () => {
   const latestReleaseInfo = await getCurrentReleaseData()
-  const hasVersionBump = !latestReleaseInfo.versions.includes(checkedInBinaryVersion) // account for branches behind develop
+  const hasVersionBump = checkedInBinaryVersion !== SENTINEL_VERSION &&
+    !latestReleaseInfo.versions.includes(checkedInBinaryVersion) // account for branches behind develop
 
   if (process.env.CIRCLECI) {
     console.log({ checkedInBinaryVersion })

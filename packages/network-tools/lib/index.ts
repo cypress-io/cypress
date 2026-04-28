@@ -7,3 +7,5 @@ export * from './uri'
 export * from './types'
 
 export * from './document-domain-injection'
+
+export * from './remote-states'

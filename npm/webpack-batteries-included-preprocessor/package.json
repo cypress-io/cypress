@@ -29,7 +29,7 @@
     "process": "^0.11.10",
     "semver": "^7.7.3",
     "stream-browserify": "^3.0.0",
-    "ts-loader": "9.5.2",
+    "ts-loader": "^9.5.7",
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "webpack": "^5.88.2",
     "webpack-bundle-analyzer": "4.10.2"

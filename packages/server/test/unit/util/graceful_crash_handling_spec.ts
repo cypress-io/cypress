@@ -5,49 +5,51 @@ import { expect } from 'chai'
 import type { ReporterResults } from '../../../lib/types/reporter'
 import { patchRunResultsAfterCrash } from '../../../lib/util/graceful_crash_handling'
 
-const baseReporterResults = (): ReporterResults => ({
-  reporter: 'spec',
-  reporterStats: {
-    suites: 1,
-    tests: 1,
-    passes: 0,
-    pending: 0,
-    failures: 0,
-    start: new Date(0).toJSON(),
-    end: new Date(0).toJSON(),
-    duration: 0,
-  },
-  hooks: [],
-  stats: {
-    failures: 0,
-    tests: 1,
-    passes: 0,
-    pending: 0,
-    suites: 1,
-    skipped: 1,
-    wallClockDuration: 0,
-    wallClockStartedAt: new Date(0).toJSON(),
-    wallClockEndedAt: new Date(0).toJSON(),
-  },
-  tests: [
-    {
-      testId: 'r1',
-      title: ['Suite', 'fails on crash'],
-      state: 'skipped',
-      body: '',
-      displayError: null,
-      attempts: [{
-        state: 'skipped',
-        error: null,
-        timings: null,
-        failedFromHookId: null,
-        wallClockStartedAt: new Date(0),
-        wallClockDuration: 0,
-        videoTimestamp: null,
-      }],
+const baseReporterResults = (): ReporterResults => {
+  return {
+    reporter: 'spec',
+    reporterStats: {
+      suites: 1,
+      tests: 1,
+      passes: 0,
+      pending: 0,
+      failures: 0,
+      start: new Date(0).toJSON(),
+      end: new Date(0).toJSON(),
+      duration: 0,
     },
-  ],
-})
+    hooks: [],
+    stats: {
+      failures: 0,
+      tests: 1,
+      passes: 0,
+      pending: 0,
+      suites: 1,
+      skipped: 1,
+      wallClockDuration: 0,
+      wallClockStartedAt: new Date(0).toJSON(),
+      wallClockEndedAt: new Date(0).toJSON(),
+    },
+    tests: [
+      {
+        testId: 'r1',
+        title: ['Suite', 'fails on crash'],
+        state: 'skipped',
+        body: '',
+        displayError: null,
+        attempts: [{
+          state: 'skipped',
+          error: null,
+          timings: null,
+          failedFromHookId: null,
+          wallClockStartedAt: new Date(0),
+          wallClockDuration: 0,
+          videoTimestamp: null,
+        }],
+      },
+    ],
+  }
+}
 
 describe('lib/util/graceful_crash_handling', () => {
   describe('patchRunResultsAfterCrash', () => {
