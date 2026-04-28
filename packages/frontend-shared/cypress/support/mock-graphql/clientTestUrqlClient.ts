@@ -27,6 +27,10 @@ export function testUrqlClient (context: ClientTestContext,
   registerSubscriptionHook?: (name: string, hook: SubscriptionHook) => void): Client {
   return createClient({
     url: '/__cypress/graphql',
+    // Exchange order follows composeExchanges reduceRight: last = innermost on forward.
+    // Results flow: execute → … → toward the first entries last.
+    // mountFragment's onResult must run AFTER graphcache: cache normalizes `data` to plain
+    // objects; if onResult ran before cache, reactive() on fragment fields was stripped.
     exchanges: [
       errorExchange({
         onError (error) {
@@ -34,7 +38,6 @@ export function testUrqlClient (context: ClientTestContext,
           console.error(error)
         },
       }),
-      makeCacheExchange(introspectionFromSchema(clientTestSchema)),
       ({ forward }) => {
         return (ops$) => {
           return pipe(
@@ -86,6 +89,7 @@ export function testUrqlClient (context: ClientTestContext,
           )
         }
       },
+      makeCacheExchange(introspectionFromSchema(clientTestSchema)),
       subscriptionExchange({
         forwardSubscription (op) {
           const raw = op.query

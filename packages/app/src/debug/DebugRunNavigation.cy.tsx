@@ -3,6 +3,7 @@ import type { DebugRunNavigationFragment } from '../generated/graphql-test'
 import { DebugRunNavigationFragmentDoc } from '../generated/graphql-test'
 import { createRun } from '../../cypress/support/fixtures'
 import type { CommitInfo } from '@packages/frontend-shared/cypress/support/generated/test-graphql-types.gen'
+import { reactive } from 'vue'
 
 const DebugSpecVariableTypes = {
   runNumber: 'Int',
@@ -22,7 +23,9 @@ function mountDebugDetailedView (data: {
       commitShas: ['sha-123', 'sha-456'],
     },
     onResult (result) {
-      result.allRuns = data.allRuns
+      // Deep-reactive runs so in-place updates (same object reference) notify dependents; plain
+      // GraphQL-shaped objects do not trigger watchEffect / shallow prop tracking on nested fields.
+      result.allRuns = reactive(data.allRuns) as typeof data.allRuns
     },
     render (gqlData) {
       return (
