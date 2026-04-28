@@ -41,7 +41,7 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
     cy.contains('16.0.0 Released just now')
     cy.contains('15.0.0 Released 8 months ago')
     cy.contains('14.0.0 Released last year')
-    cy.contains('13.0.0 Released 2 years ago')
+    cy.contains('13.0.0 Released 3 years ago')
     cy.tick(interval('1 minute'))
     cy.contains('16.0.0 Released 1 minute ago')
     cy.tick(interval('1 month'))
