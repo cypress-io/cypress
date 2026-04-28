@@ -1,6 +1,7 @@
 import SpecsList from './SpecsList.vue'
-import type { SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
+import type { SpecsListFragment, Specs_SpecsListFragment, TestingTypeEnum } from '../generated/graphql-test'
 import { Specs_SpecsListFragmentDoc, SpecFilter_SetPreferencesDocument } from '../generated/graphql-test'
+import { reactive } from 'vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
 
@@ -19,31 +20,36 @@ describe('<SpecsList />', { keystrokeDelay: 0 }, () => {
         hasRunIds: false,
       },
       patchContext (clientCtx) {
-        if (!experimentalRunAllSpecs || !clientCtx.currentProject) {
+        if (!clientCtx.currentProject) {
           return
         }
 
-        const config = [...(clientCtx.currentProject.config || [])] as Array<{ field: string, value: unknown, from?: string }>
+        // useTestingType() and useRunAllSpecsStore read separate urql queries against
+        // ClientTestContext before fragment onResult runs; mirror fragment setup here.
+        if (experimentalRunAllSpecs) {
+          const config = [...(clientCtx.currentProject.config || [])] as Array<{ field: string, value: unknown, from?: string }>
 
-        if (!config.some((c) => c.field === 'experimentalRunAllSpecs')) {
-          config.push({ field: 'experimentalRunAllSpecs', value: true, from: 'test' })
+          if (!config.some((c) => c.field === 'experimentalRunAllSpecs')) {
+            config.push({ field: 'experimentalRunAllSpecs', value: true, from: 'test' })
+          }
+
+          clientCtx.currentProject.config = config
         }
 
-        clientCtx.currentProject.config = config
+        if (testingType) {
+          clientCtx.currentProject.currentTestingType = testingType
+        }
+
+        if (specFilter) {
+          clientCtx.currentProject.savedState = { specFilter }
+        }
       },
       onResult: (ctx) => {
         if (!ctx.currentProject) throw new Error('need current project')
 
         specs = ctx.currentProject?.specs || []
-        if (testingType) {
-          ctx.currentProject.currentTestingType = testingType
-        }
 
-        if (specFilter) {
-          ctx.currentProject.savedState = { specFilter }
-        }
-
-        return ctx
+        return reactive(ctx) as Specs_SpecsListFragment
       },
       render: (gqlVal) => {
         return (
