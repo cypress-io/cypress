@@ -119,7 +119,7 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item-link').should('have.attr', 'href')
       cy.findAllByTestId('spec-item-link').contains('dom-content.spec.js').click()
 
-      cy.findByText('Your tests are loading...').should('not.be.visible')
+      cy.contains('Your tests are loading...').should('not.exist')
       cy.get('[data-cy="runnable-header"]').should('be.visible')
       cy.get('body').type('f')
 
@@ -132,7 +132,7 @@ describe('App: Spec List (E2E)', () => {
       cy.findAllByTestId('spec-item-link').contains('accounts_list.spec.js').click()
 
       // ensure the tests are loaded
-      cy.findByText('Your tests are loading...').should('not.be.visible')
+      cy.contains('Your tests are loading...').should('not.exist')
 
       cy.get('[data-cy="runnable-header"]').should('be.visible')
       // open the inline spec list

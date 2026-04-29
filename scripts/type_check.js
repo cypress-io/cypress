@@ -59,11 +59,12 @@ program
     concurrent: process.env.CI ? 4 : 1,
     renderer: process.env.CI ? 'verbose' : 'default',
     exitOnError: false,
+    collectErrors: 'minimal',
   })
 
   tasks.run()
   .then(() => {
-    if (tasks.err[0] && tasks.err[0].errors.length > 0) {
+    if (tasks.errors.length > 0) {
       process.exitCode = 1
 
       log('')
