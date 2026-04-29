@@ -465,6 +465,13 @@ export default {
     },
   },
 
+  end: {
+    deprecated: {
+      message: `${cmd('end')} has been deprecated and will be removed in a future release. ${cmd('end')} is no longer necessary because starting a new \`cy.\` command already begins a new chain. You can safely remove ${cmd('end')} from your code.`,
+      docsUrl: 'https://on.cypress.io/end',
+    },
+  },
+
   env: {
     docsUrl: 'https://on.cypress.io/api/env',
     invalid_argument: {
