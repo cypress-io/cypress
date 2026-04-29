@@ -7,6 +7,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
 - Fixed an issue where `cy.wait` on multiple aliases could surface an unhandled `Cannot read properties of undefined (reading 'routeId')` rejection when a retry short-circuited during runnable teardown. Fixed in [#33651](https://github.com/cypress-io/cypress/pull/33651).
 - Fixed an issue where an application under test containing `<base target="_top">` or `<base target="_parent">` would navigate out of the Cypress iframe when untargeted links were clicked or forms were submitted, breaking the test run. The unsafe `target` is now stripped from `<base>` tags as part of the existing `modifyObstructiveCode` rewriting (enabled by default for the primary super-domain, and extendable to third-party origins with `experimentalModifyObstructiveThirdPartyCode`). A runtime guard also neutralizes any `<base>` inserted or modified after load, matching the always-on behavior of the existing `<a>` / `<form>` target guards. Fixed in [#33667](https://github.com/cypress-io/cypress/pull/33667).
 - Fixed a race during `cypress open` config reload where the internal HTTP server would begin accepting requests before the primary remote state had been initialized, occasionally crashing in-flight browser requests (iframe loads) on an empty `remoteStates` map. Fixed in [#33686](https://github.com/cypress-io/cypress/pull/33686).
@@ -42,7 +43,6 @@
 
 **Bugfixes:**
 
-- Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228).
 - Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
 - Fixed an issue where `cy.wrap` would not preserve a custom `onFail` handler when wrapping a rejected promise. Fixed in [#33570](https://github.com/cypress-io/cypress/pull/33570).
 
