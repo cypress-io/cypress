@@ -33,7 +33,7 @@
     "fs-extra": "9.1.0",
     "gulp": "4.0.2",
     "rimraf": "6.1.1",
-    "ts-loader": "9.5.2",
+    "ts-loader": "^9.5.7",
     "vitest": "^3.2.4",
     "webextension-polyfill": "0.4.0",
     "webpack": "^5.88.2",
