@@ -12,11 +12,11 @@ import { iframesController } from './controllers/iframes'
 import type { FoundSpec } from '@packages/types'
 import { getCtx } from '@packages/data-context'
 import { graphQLHTTP } from '@packages/data-context/graphql/makeGraphQLServer'
-import type { RemoteStates } from './remote_states'
+import type { RemoteStates } from '@packages/network-tools'
 import bodyParser from 'body-parser'
 import path from 'path'
 import AppData from './util/app_data'
-import CacheBuster from './util/cache_buster'
+import { strip as cacheBusterStrip } from './util/cache_buster'
 import specController from './controllers/spec'
 import client from './controllers/client'
 import files from './controllers/files'
@@ -138,7 +138,7 @@ export const createCommonRoutes = ({
 
   router.get(`/${config.namespace}/tests`, (req, res, next) => {
     // slice out the cache buster
-    const test = CacheBuster.strip(req.query.p)
+    const test = cacheBusterStrip(req.query.p as string)
 
     specController.handle(test, req, res, config, next, onError)
   })
@@ -289,7 +289,7 @@ export const createCommonRoutes = ({
       // their own app.js files + spec.js files
       nodeProxy.web(req, res, {}, (e) => {
         if (e) {
-        debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
+          debug('Proxy request error. This is likely the socket hangup issue, we can basically ignore this because the stream will automatically continue once the asset will be available', e)
         }
       })
     })

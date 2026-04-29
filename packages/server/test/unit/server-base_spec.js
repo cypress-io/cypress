@@ -123,7 +123,7 @@ describe('lib/server-base', () => {
         const setSpy = sinon.spy(this.server._remoteStates, 'set')
 
         return this.server.createServer(this.app, { port: this.port, baseUrl: 'http://localhost:9999' })
-        .spread(() => {
+        .then(() => {
           expect(setSpy).to.have.been.calledWith('http://localhost:9999')
         })
       })
@@ -132,8 +132,45 @@ describe('lib/server-base', () => {
         const setSpy = sinon.spy(this.server._remoteStates, 'set')
 
         return this.server.createServer(this.app, { port: this.port })
-        .spread(() => {
+        .then(() => {
           expect(setSpy).to.have.been.calledWith('<root>')
+        })
+      })
+
+      it('calls fileServer.create before _listen', function () {
+        // fileServer.create is awaited before _listen so its
+        // port is known when the primary remote state is computed via
+        // _stateFromUrl('<root>').
+        return this.server.createServer(this.app, { port: this.port })
+        .then(() => {
+          sinon.assert.callOrder(fileServer.create, this.server._listen)
+        })
+      })
+
+      it('establishes primary remote state after fileServer is ready and before httpsProxy is assigned', function () {
+        // At the moment `_remoteStates.set` runs:
+        //  - `_fileServer` must already exist (its port is read
+        //    synchronously by `_stateFromUrl('<root>')`).
+        //  - `_httpsProxy` must NOT yet be assigned — `set` runs in the
+        //    microtask after `await _listen`, before `await createHttpsProxy`.
+        let fileServerAtSetCall
+        let httpsProxyAtSetCall
+
+        const realSet = this.server._remoteStates.set.bind(this.server._remoteStates)
+        const setStub = sinon.stub(this.server._remoteStates, 'set').callsFake((...args) => {
+          fileServerAtSetCall = this.server._fileServer
+          httpsProxyAtSetCall = this.server._httpsProxy
+
+          return realSet(...args)
+        })
+
+        return this.server.createServer(this.app, { port: this.port })
+        .then(() => {
+          expect(setStub).to.have.been.calledOnceWithExactly('<root>')
+          expect(fileServerAtSetCall, 'fileServer must be ready when set runs').to.exist
+          expect(httpsProxyAtSetCall, 'httpsProxy must not yet be assigned when set runs').to.be.undefined
+          // sanity: by the time createServer resolves, httpsProxy is up
+          expect(this.server._httpsProxy).to.exist
         })
       })
     })
@@ -147,7 +184,7 @@ describe('lib/server-base', () => {
 
     it('resolves with http server port', function () {
       return this.server.createServer(this.app, { port: this.port })
-      .spread((port) => {
+      .then(([port]) => {
         expect(port).to.eq(this.port)
       })
     })
@@ -198,7 +235,7 @@ describe('lib/server-base', () => {
       }
 
       return this.server.createServer(this.app, {})
-      .spread((port) => {
+      .then(([port]) => {
         return Promise.map(
           [
             port,
@@ -214,7 +251,7 @@ describe('lib/server-base', () => {
       sinon.stub(ensureUrl, 'isListening').rejects()
 
       return this.server.createServer(this.app, { port: this.port, baseUrl: `http://localhost:${this.port}` })
-      .spread((port, warning) => {
+      .then(([port, warning]) => {
         expect(warning.type).to.eq('CANNOT_CONNECT_BASE_URL_WARNING')
 
         expect(warning.message).to.include(this.port)
