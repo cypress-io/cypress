@@ -53,7 +53,7 @@ jobs:
     permissions:
       pull-requests: write
     env:
-      CYPRESS_BOT_APP_ID: ${{ secrets.RAM_APP }}
+      CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: ${{ inputs.branch || github.ref_name }}
       # Flex the generate from scratch option based on manual input or if we are on the weekly schedule
       GENERATE_FROM_SCRATCH: ${{ inputs.generate_from_scratch == true || (github.event_name == 'schedule' && github.event.schedule == '0 0 * * 3') }}
@@ -77,11 +77,17 @@ jobs:
       - name: Install setuptools - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
         run: sudo -H pip install setuptools
+      - name: Generate Cypress Bot App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
+          private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           ref: ${{ env.BASE_BRANCH }}
       - name: Set committer info
         ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916
@@ -126,7 +132,7 @@ jobs:
         run: |
           echo "number_of_prs_for_branch=$(gh api '/repos/cypress-io/cypress/pulls?head=cypress-io:${{ env.BRANCH_NAME }}' --jq length)" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         shell: bash
       - name: Check need for PR or branch update
         id: check-need-for-pr
@@ -134,7 +140,7 @@ jobs:
           echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_NAME != env.BASE_BRANCH && steps.check-number-of-existing-prs.outputs.number_of_prs_for_branch == '0' }}" >> $GITHUB_OUTPUT
           echo "needs_branch_update=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_EXISTS == 'true' }}" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ secrets.BOT_GITHUB_ACTION_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         shell: bash
       ## Update available and a branch/PR already exists
       - name: Checkout existing branch
@@ -163,6 +169,7 @@ jobs:
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
         uses: actions/github-script@v7
         with:
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')
 
