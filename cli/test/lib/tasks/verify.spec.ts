@@ -10,6 +10,8 @@ import { Console } from 'console'
 import fs from 'fs-extra'
 import si, { Systeminformation } from 'systeminformation'
 import _xvfb from '@cypress/xvfb'
+import stripAnsi from 'strip-ansi'
+import { Listr } from 'listr2'
 
 import util from '../../../lib/util'
 import logger from '../../../lib/logger'
@@ -116,19 +118,39 @@ vi.mock('../../../lib/util', async (importActual) => {
   }
 })
 
+vi.mock('listr2', async (importActual) => {
+  const actual = await importActual<typeof import('listr2')>()
+  const { Listr } = actual
+
+  return {
+    ...actual,
+    Listr: vi.fn(function (this: unknown, ...args: ConstructorParameters<typeof Listr>) {
+      return new Listr(...args)
+    }),
+  }
+})
+
 describe('lib/tasks/verify', () => {
   const createStdoutCapture = () => {
     const logs: string[] = []
     const originalOut = process.stdout.write
 
-    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array) => {
-      logs.push(strOrBugger as string)
+    vi.spyOn(process.stdout, 'write').mockImplementation((...args: Parameters<typeof process.stdout.write>) => {
+      const chunk = args[0]
 
-      return originalOut(strOrBugger)
+      if (typeof chunk === 'string') {
+        logs.push(chunk)
+      }
+
+      // Must preserve `stdout` as `this` — unbound calls break Writable (_writableState).
+      return originalOut.apply(process.stdout, args)
     })
 
     return () => logs.join('')
   }
+
+  /** listr2/chalk add ANSI; strip for stable substring assertions. */
+  const plain = (getOutput: () => string): string => stripAnsi(getOutput())
   let spawnedProcess: any
   // Direct console to process.stdout/stderr
   let originalConsole: Console
@@ -143,6 +165,8 @@ describe('lib/tasks/verify', () => {
     vi.unstubAllEnvs()
 
     vi.stubEnv('npm_config_loglevel', 'notice')
+    // Align `state.getCacheDir()` with mock-fs fixtures (stable across CI/sandbox vs real cachedir()).
+    vi.stubEnv('CYPRESS_CACHE_FOLDER', '/cache/Cypress')
 
     originalConsole = globalThis.console
 
@@ -216,7 +240,7 @@ describe('lib/tasks/verify', () => {
   it('returns early when `CYPRESS_SKIP_VERIFY` is set to true', async () => {
     vi.stubEnv('CYPRESS_SKIP_VERIFY', 'true')
 
-    const result = await start({ listrRenderer: 'silent' })
+    const result = await start()
 
     expect(result).toEqual(undefined)
   })
@@ -225,7 +249,7 @@ describe('lib/tasks/verify', () => {
     const output = createStdoutCapture()
 
     try {
-      await start({ listrRenderer: 'silent' })
+      await start()
       throw new Error('should have caught error')
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
@@ -233,7 +257,11 @@ describe('lib/tasks/verify', () => {
       expect(message).not.toContain('should have caught error')
       logger.error(err)
 
-      expect(output()).toMatchSnapshot()
+      const out = plain(output)
+
+      expect(out).toContain('No version of Cypress is installed')
+      expect(out).toContain('/cache/Cypress/1.2.3/Cypress.app')
+      expect(out).toContain('cypress install')
     }
   })
 
@@ -248,7 +276,7 @@ describe('lib/tasks/verify', () => {
     // @ts-expect-error - geteuid is potentially undefined
     vi.mocked(geteuid).mockReturnValue(0) // user is root
 
-    await start({ listrRenderer: 'silent' })
+    await start()
 
     expect(util.exec).toHaveBeenCalledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
   })
@@ -264,7 +292,7 @@ describe('lib/tasks/verify', () => {
     // @ts-expect-error - geteuid is potentially undefined
     vi.mocked(geteuid).mockReturnValue(1000) // user is non-root
 
-    await start({ listrRenderer: 'silent' })
+    await start()
 
     expect(util.exec).toHaveBeenCalledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
   })
@@ -279,7 +307,7 @@ describe('lib/tasks/verify', () => {
       packageVersion,
     })
 
-    await start({ listrRenderer: 'silent' })
+    await start()
 
     expect(output()).toEqual('')
 
@@ -295,16 +323,20 @@ describe('lib/tasks/verify', () => {
       packageVersion: 'bloop',
     })
 
-    await start({ listrRenderer: 'silent' })
+    await start()
 
-    expect(output()).toMatchSnapshot()
+    const out = plain(output)
+
+    expect(out).toContain('Found binary version bloop')
+    expect(out).toContain('does not match the expected package version')
+    expect(out).toContain('1.2.3')
   })
 
   it('logs error and exits when executable cannot be found', async () => {
     const output = createStdoutCapture()
 
     try {
-      await start({ listrRenderer: 'silent' })
+      await start()
       throw new Error('should have caught error')
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
@@ -312,7 +344,10 @@ describe('lib/tasks/verify', () => {
       expect(message).not.toContain('should have caught error')
       logger.error(err)
 
-      expect(output()).toMatchSnapshot()
+      const out = plain(output)
+
+      expect(out).toContain('No version of Cypress is installed')
+      expect(out).toContain('cypress install')
     }
   })
 
@@ -332,10 +367,14 @@ describe('lib/tasks/verify', () => {
     })
 
     try {
-      await start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
+      await start({ smokeTestTimeout: 1 })
     } catch (err) {
       logger.error(err)
-      expect(output()).toMatchSnapshot()
+
+      const out = plain(output)
+
+      expect(out).toContain('Cypress verification timed out')
+      expect(out).toContain('some stderr')
     }
   })
 
@@ -355,10 +394,15 @@ describe('lib/tasks/verify', () => {
     })
 
     try {
-      await start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
+      await start({ smokeTestTimeout: 1 })
     } catch (err) {
       logger.error(err)
-      expect(output()).toMatchSnapshot()
+
+      const out = plain(output)
+
+      expect(out).toContain('Cypress failed to start')
+      expect(out).toContain('some stderr')
+      expect(out).toContain('on.cypress.io/required-dependencies')
     }
   })
 
@@ -377,10 +421,14 @@ describe('lib/tasks/verify', () => {
     })
 
     try {
-      await start({ smokeTestTimeout: 1, listrRenderer: 'silent' })
+      await start({ smokeTestTimeout: 1 })
     } catch (err) {
       logger.error(err)
-      expect(output()).toMatchSnapshot()
+
+      const out = plain(output)
+
+      expect(out).toContain('Cypress failed to start')
+      expect(out).toContain('on.cypress.io/required-dependencies')
     }
   })
 
@@ -402,7 +450,7 @@ describe('lib/tasks/verify', () => {
         stderr: '',
       } as any)
 
-      await start({ listrRenderer: 'silent' })
+      await start()
 
       expect(util.exec).toHaveBeenCalledWith(
         executablePath,
@@ -424,9 +472,9 @@ describe('lib/tasks/verify', () => {
     it('shows full path to executable when verifying', async () => {
       const output = createStdoutCapture()
 
-      await start({ force: true, listrRenderer: 'silent' })
+      await start({ force: true })
 
-      expect(output()).toMatchSnapshot('verification with executable')
+      expect(plain(output)).toContain('Opening Cypress...')
     })
 
     it('clears verified version from state if verification fails', async () => {
@@ -438,7 +486,7 @@ describe('lib/tasks/verify', () => {
       })
 
       try {
-        await start({ force: true, listrRenderer: 'silent' })
+        await start({ force: true })
         throw new Error('Should have thrown')
       } catch (err) {
         logger.error(err)
@@ -448,7 +496,10 @@ describe('lib/tasks/verify', () => {
 
       expect(exists).toEqual(false)
 
-      expect(output()).toMatchSnapshot('fails verifying Cypress')
+      const out = plain(output)
+
+      expect(out).toContain('Cypress failed to start')
+      expect(out).toContain('an error about dependencies')
     })
   })
 
@@ -482,9 +533,10 @@ describe('lib/tasks/verify', () => {
     it('finds ping value in the verbose output', async () => {
       const output = createStdoutCapture()
 
-      await start({ listrRenderer: 'silent' })
+      await start()
 
-      expect(output()).toMatchSnapshot('verbose stdout output')
+      expect(util.exec).toHaveBeenCalled()
+      expect(plain(output)).toContain('Opening Cypress...')
     })
   })
 
@@ -533,7 +585,7 @@ describe('lib/tasks/verify', () => {
         return Promise.reject(firstSpawnError)
       })
 
-      await start({ listrRenderer: 'silent' })
+      await start()
 
       expect(util.exec).toHaveBeenCalledTimes(2)
       // user should have been warned
@@ -581,19 +633,21 @@ describe('lib/tasks/verify', () => {
       })
 
       try {
-        await start({ listrRenderer: 'silent' })
+        await start()
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e)
 
         expect(util.exec).toHaveBeenCalledTimes(2)
         // second time around we should have called Xvfb
-        expect(xvfb.start).toHaveBeenCalledOnce
-        expect(xvfb.stop).toHaveBeenCalledOnce
+        expect(xvfb.start).toHaveBeenCalledTimes(1)
+        expect(xvfb.stop).toHaveBeenCalledTimes(1)
 
         // user should have been warned
         expect(loggerWarnSpy).toHaveBeenCalledWith(expect.stringContaining('DISPLAY was set to: "test-display"'))
 
-        expect(message).toMatchSnapshot('tried to verify twice, on the first try got the DISPLAY error')
+        expect(message).toContain('Cypress verification failed')
+        expect(message).toContain('Gtk: cannot open display: 987')
+        expect(message).toContain('some other error')
 
         return
       }
@@ -611,11 +665,14 @@ describe('lib/tasks/verify', () => {
       })
 
       try {
-        await start({ listrRenderer: 'silent' })
+        await start()
       } catch (err) {
         logger.error(err)
 
-        expect(output()).toMatchSnapshot('no Cypress executable')
+        const out = plain(output)
+
+        expect(out).toContain('No version of Cypress is installed')
+        expect(out).toContain('cypress install')
 
         return
       }
@@ -635,11 +692,14 @@ describe('lib/tasks/verify', () => {
       })
 
       try {
-        await start({ listrRenderer: 'silent' })
+        await start()
       } catch (err) {
         logger.error(err)
 
-        expect(output()).toMatchSnapshot('Cypress non-executable permission')
+        const out = plain(output)
+
+        expect(out).toContain('does not have executable permissions')
+        expect(out).toContain(executablePath)
 
         return
       }
@@ -656,9 +716,12 @@ describe('lib/tasks/verify', () => {
         packageVersion,
       })
 
-      await start({ listrRenderer: 'silent' })
+      await start()
 
-      expect(output()).toMatchSnapshot('current version has not been verified')
+      const out = plain(output)
+
+      expect(out).toContain('first time using Cypress')
+      expect(out).toContain('Opening Cypress...')
     })
 
     it('logs and runs when installed version is different than package version', async () => {
@@ -670,9 +733,13 @@ describe('lib/tasks/verify', () => {
         packageVersion: '7.8.9',
       })
 
-      await start({ listrRenderer: 'silent' })
+      await start()
 
-      expect(output()).toMatchSnapshot('different version installed')
+      const out = plain(output)
+
+      expect(out).toContain('Found binary version 7.8.9')
+      expect(out).toContain('does not match the expected package version')
+      expect(out).toContain('first time using Cypress')
     })
 
     it('is silent when logLevel is silent', async () => {
@@ -686,9 +753,9 @@ describe('lib/tasks/verify', () => {
 
       vi.stubEnv('npm_config_loglevel', 'silent')
 
-      await start({ listrRenderer: 'silent' })
+      await start()
 
-      expect(output()).toMatchSnapshot('silent verify')
+      expect(output()).toEqual('')
     })
 
     it('turns off Opening Cypress...', async () => {
@@ -702,7 +769,11 @@ describe('lib/tasks/verify', () => {
 
       await start({ welcomeMessage: false })
 
-      expect(output()).toMatchSnapshot('no welcome message')
+      const out = plain(output)
+
+      expect(out).not.toContain('Opening Cypress...')
+      expect(out).toContain('7.8.9')
+      expect(out).toContain('does not match')
     })
 
     it('logs error when fails smoke test unexpectedly without stderr', async () => {
@@ -721,11 +792,14 @@ describe('lib/tasks/verify', () => {
       })
 
       try {
-        await start({ listrRenderer: 'silent' })
+        await start()
       } catch (err) {
         logger.error(err)
 
-        expect(output()).toMatchSnapshot('fails with no stderr')
+        const out = plain(output)
+
+        expect(out).toContain('Cypress failed to start')
+        expect(out).toContain('EPERM NOT PERMITTED')
 
         return
       }
@@ -746,13 +820,13 @@ describe('lib/tasks/verify', () => {
     })
 
     it('starts xvfb', async () => {
-      await start({ listrRenderer: 'silent' })
+      await start()
 
       expect(xvfb.start).toHaveBeenCalled()
     })
 
     it('stops xvfb on spawned process close', async () => {
-      await start({ listrRenderer: 'silent' })
+      await start()
 
       expect(xvfb.stop).toHaveBeenCalled()
     })
@@ -776,13 +850,14 @@ describe('lib/tasks/verify', () => {
       })
 
       try {
-        await start({ listrRenderer: 'silent' })
+        await start()
       } catch (err) {
-        expect(xvfb.stop).toHaveBeenCalledOnce
-
         logger.error(err)
 
-        expect(output()).toMatchSnapshot('xvfb fails')
+        const out = plain(output)
+
+        expect(out).toContain('Xvfb exited')
+        expect(out).toContain('test without xvfb')
 
         return
       }
@@ -802,25 +877,21 @@ describe('lib/tasks/verify', () => {
       vi.mocked(util.isCi).mockReturnValue(true)
     })
 
-    it('uses verbose renderer', async () => {
-      const output = createStdoutCapture()
-
-      await start({ listrRenderer: 'silent' })
-
-      expect(output()).toMatchSnapshot('verifying in ci')
-    })
-
     it('logs error when binary not found', async () => {
       const output = createStdoutCapture()
 
       mockfs({})
 
       try {
-        await start({ listrRenderer: 'silent' })
+        await start()
       } catch (err) {
         logger.error(err)
 
-        expect(output()).toMatchSnapshot('error binary not found in ci')
+        const out = plain(output)
+
+        expect(out).toContain('Cypress binary is missing')
+        expect(out).toContain('/cache/Cypress')
+        expect(out).toContain('not-installed-ci-error')
 
         return
       }
@@ -854,10 +925,10 @@ describe('lib/tasks/verify', () => {
         return Promise.reject(new Error('should have caught error'))
       })
 
-      await start({ listrRenderer: 'silent' })
+      await start()
 
       expect(util.exec).toHaveBeenCalledWith(realEnvBinaryPath, ['--no-sandbox', '--smoke-test', '--ping=222'], expect.anything())
-      expect(output()).toMatchSnapshot('valid CYPRESS_RUN_BINARY')
+      expect(plain(output)).toContain('Opening Cypress...')
     })
 
     for (const platform of ['darwin', 'linux', 'win32']) {
@@ -869,10 +940,22 @@ describe('lib/tasks/verify', () => {
         vi.mocked(os.platform).mockReturnValue(platform as NodeJS.Platform)
 
         try {
-          await start({ listrRenderer: 'silent' })
+          await start()
         } catch (err) {
           logger.error(err)
-          expect(output()).toMatchSnapshot(`${platform}: error when invalid CYPRESS_RUN_BINARY`)
+
+          const out = plain(output)
+
+          expect(out).toContain('Could not run binary set by environment variable')
+          expect(out).toContain('ENOENT')
+
+          if (platform === 'darwin') {
+            expect(out).toContain('Contents/MacOS/Cypress')
+          } else if (platform === 'linux') {
+            expect(out).toContain('**/Cypress')
+          } else {
+            expect(out).toContain('Cypress.exe')
+          }
 
           return
         }

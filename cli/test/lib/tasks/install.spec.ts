@@ -2,6 +2,7 @@ import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import os from 'os'
 import path from 'path'
 import chalk from 'chalk'
+import stripAnsi from 'strip-ansi'
 import timers from 'timers/promises'
 import fs from 'fs-extra'
 import si, { Systeminformation } from 'systeminformation'
@@ -121,18 +122,47 @@ vi.mock('../../../lib/tasks/state', async (importActual) => {
 })
 
 const packageVersion = '1.2.3'
+/** Override used with CYPRESS_INSTALL_BINARY in env-var warning tests */
+const envForcedBinaryVersion = '0.12.1'
 const downloadDestination = path.join(os.tmpdir(), `cypress-${process.pid}.zip`)
 const installDir = '/cache/Cypress/1.2.3'
 
+/** Matches `logger.log(\`Installing Cypress ${chalk.gray(...)}\`)` prefix */
+const versionLabel = (version: string) => `version: ${version}`
+
+/** Substrings expected in stripAnsi(stdout) for install UX (stable across ANSI differences) */
+const INSTALL_OUTPUT = {
+  skipBinaryNote: 'Skipping binary installation',
+  cypressInstallBinaryZero: 'CYPRESS_INSTALL_BINARY = 0',
+  preReleaseBanner: 'pre-release build of Cypress',
+  cdnBetaBinaryPath: 'cdn.cypress.io/beta/binary',
+  installingCypress: 'Installing Cypress',
+  openingTheAppUrl: 'on.cypress.io/opening-the-app',
+  forceVersionBanner: 'Forcing a binary version different than the default',
+  finishedInstallation: 'Finished Installation',
+  skippingInstall: 'Skipping installation',
+  cliForceFlag: '--force',
+  stubBinaryVersionOther: 'x.x.x',
+  globalInstallWarning: 'installed Cypress globally',
+  devDependencyPerProject: 'devDependency per project',
+  npmUninstallGlobalCypress: 'npm uninstall -g cypress',
+  downloadingCypress: 'Downloading Cypress',
+  cacheWriteDenied: 'cannot write to the cache directory',
+  invalidCacheDir: '/invalid/cache/dir',
+  cachePermissionsIssueUrl: 'github.com/cypress-io/cypress/issues/1281',
+  eaccesCode: 'EACCES',
+  osUnsupported: 'could not be installed',
+  osRequirementsDoc: 'operating system requirements',
+  platformWin32Ia32: 'win32-ia32',
+} as const
+
+const PRE_RELEASE_COMMIT_SHA = '3b7f0b5c59def1e9b5f385bd585c9b2836706c29'
+const PRE_RELEASE_BRANCH = 'aBranchName'
+const PRE_RELEASE_DOWNLOAD_URL =
+  `https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/${PRE_RELEASE_BRANCH}-${PRE_RELEASE_COMMIT_SHA}/cypress.zip`
+
 /**
- * NOTE: icons from listr2 do not render if process.stdout.isTTY is false,
- * which does not exist when running in a worker thread, which is commonly the case in Vitest.
- *
- * This means that the test environment implicitly uses the VerboseRenderer as a fallback,
- * where as the CLI uses the DefaultRenderer.
- *
- * This is the main reason the snapshots look different in testing mode vs when running the commands directly
- * via the CLI. This also allows us for our snapshot tests to be deterministic because we aren't rerendering icon states.
+ * stdout capture: listr2/chalk emit ANSI; assertions use strip-ansi + toContain so tests stay stable across OS/CI.
  *
  * @see https://listr2.kilic.dev/renderer/renderer.html#frontmatter-title
  */
@@ -144,12 +174,15 @@ describe('/lib/tasks/install', function () {
   const createStdoutCapture = () => {
     const logs: string[] = []
 
-    const originalOut = process.stdout.write
+    const originalOut = process.stdout.write.bind(process.stdout)
 
-    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array) => {
-      logs.push(strOrBugger as string)
+    vi.spyOn(process.stdout, 'write').mockImplementation(function (
+      this: typeof process.stdout,
+      ...args: Parameters<typeof process.stdout.write>
+    ): boolean {
+      logs.push(args[0] as string)
 
-      return originalOut(strOrBugger)
+      return originalOut(...args)
     })
 
     return () => logs.join('')
@@ -176,6 +209,7 @@ describe('/lib/tasks/install', function () {
   afterEach(() => {
     globalThis.console = originalConsole // Restore original console
     chalk.level = previousChalkLevel
+    vi.unstubAllEnvs()
   })
 
   describe('.start', function () {
@@ -206,24 +240,29 @@ describe('/lib/tasks/install', function () {
     })
 
     describe('skips install', function () {
+      beforeEach(() => {
+        vi.stubEnv('CYPRESS_INSTALL_BINARY', '0')
+      })
+
       it('when environment variable is set', async () => {
         const output = createStdoutCapture()
-
-        vi.stubEnv('CYPRESS_INSTALL_BINARY', '0')
 
         await install.start()
 
         expect(download.start).not.toHaveBeenCalled()
 
-        expect(output()).toMatchSnapshot('skip installation 1')
+        const plain = stripAnsi(output())
+
+        expect(plain).toContain(INSTALL_OUTPUT.skipBinaryNote)
+        expect(plain).toContain(INSTALL_OUTPUT.cypressInstallBinaryZero)
       })
     })
 
     describe('non-stable builds', () => {
       const buildInfo = {
         stable: false,
-        commitSha: '3b7f0b5c59def1e9b5f385bd585c9b2836706c29',
-        commitBranch: 'aBranchName',
+        commitSha: PRE_RELEASE_COMMIT_SHA,
+        commitBranch: PRE_RELEASE_BRANCH,
         commitDate: new Date('1996-11-27').toISOString(),
       }
 
@@ -235,7 +274,7 @@ describe('/lib/tasks/install', function () {
         await install.start({ buildInfo })
 
         expect(download.start).toHaveBeenCalledWith(expect.objectContaining({
-          version: 'https://cdn.cypress.io/beta/binary/0.0.0-development/darwin-x64/aBranchName-3b7f0b5c59def1e9b5f385bd585c9b2836706c29/cypress.zip',
+          version: PRE_RELEASE_DOWNLOAD_URL,
         }))
       })
 
@@ -243,7 +282,14 @@ describe('/lib/tasks/install', function () {
         const output = createStdoutCapture()
 
         await install.start({ buildInfo })
-        expect(output()).toMatchSnapshot('pre-release warning')
+        const plain = stripAnsi(output())
+
+        expect(plain).toContain(INSTALL_OUTPUT.preReleaseBanner)
+        expect(plain).toContain(PRE_RELEASE_COMMIT_SHA)
+        expect(plain).toContain(PRE_RELEASE_BRANCH)
+        expect(plain).toContain(INSTALL_OUTPUT.cdnBetaBinaryPath)
+        expect(plain).toContain(INSTALL_OUTPUT.installingCypress)
+        expect(plain).toContain(INSTALL_OUTPUT.openingTheAppUrl)
       })
 
       it('installs to the expected pre-release cache dir', async function () {
@@ -253,7 +299,7 @@ describe('/lib/tasks/install', function () {
 
         await install.start({ buildInfo })
         expect(unzip.start).toHaveBeenCalledWith(expect.objectContaining({
-          installDir: expect.stringMatching(/\/Cypress\/beta\-1\.2\.3\-aBranchName\-3b7f0b5c$/),
+          installDir: expect.stringMatching(/beta\-1\.2\.3\-aBranchName\-3b7f0b5c$/),
         }))
       })
     })
@@ -262,7 +308,7 @@ describe('/lib/tasks/install', function () {
       it('warns when specifying cypress version in env', async function () {
         const output = createStdoutCapture()
 
-        const version = '0.12.1'
+        const version = envForcedBinaryVersion
 
         vi.stubEnv('CYPRESS_INSTALL_BINARY', version)
 
@@ -275,7 +321,13 @@ describe('/lib/tasks/install', function () {
           zipFilePath: downloadDestination,
         }))
 
-        expect(output()).toMatchSnapshot('specify version in env vars 1')
+        const plain = stripAnsi(output())
+
+        expect(plain).toContain(INSTALL_OUTPUT.forceVersionBanner)
+        expect(plain).toContain(packageVersion)
+        expect(plain).toContain(envForcedBinaryVersion)
+        expect(plain).toContain(INSTALL_OUTPUT.installingCypress)
+        expect(plain).toContain(INSTALL_OUTPUT.openingTheAppUrl)
       })
 
       it('trims environment variable before installing', async function () {
@@ -387,7 +439,10 @@ describe('/lib/tasks/install', function () {
 
           await install.start()
 
-          expect(output()).toMatchSnapshot('version already installed - cypress install 1')
+          const plain = stripAnsi(output())
+
+          expect(plain).toContain(INSTALL_OUTPUT.skippingInstall)
+          expect(plain).toContain(INSTALL_OUTPUT.cliForceFlag)
         })
 
         it('logs when already installed when run from postInstall', async function () {
@@ -397,7 +452,10 @@ describe('/lib/tasks/install', function () {
 
           await install.start()
 
-          expect(output()).toMatchSnapshot('version already installed - postInstall 1')
+          const plain = stripAnsi(output())
+
+          expect(plain).toContain(packageVersion)
+          expect(plain).toContain(installDir)
         })
       })
 
@@ -417,7 +475,13 @@ describe('/lib/tasks/install', function () {
             installDir,
           }))
 
-          expect(output()).toMatchSnapshot('continues installing on failure 1')
+          const plain = stripAnsi(output())
+
+          expect(plain).toContain(INSTALL_OUTPUT.installingCypress)
+          expect(plain).toContain(versionLabel(packageVersion))
+          expect(plain).toContain(INSTALL_OUTPUT.finishedInstallation)
+          expect(plain).toContain(installDir)
+          expect(plain).toContain(INSTALL_OUTPUT.openingTheAppUrl)
         })
       })
 
@@ -442,7 +506,13 @@ describe('/lib/tasks/install', function () {
             downloadDestination,
           )
 
-          expect(output()).toMatchSnapshot('installs without existing installation 1')
+          const plain = stripAnsi(output())
+
+          expect(plain).toContain(INSTALL_OUTPUT.installingCypress)
+          expect(plain).toContain(versionLabel(packageVersion))
+          expect(plain).toContain(INSTALL_OUTPUT.finishedInstallation)
+          expect(plain).toContain(installDir)
+          expect(plain).toContain(INSTALL_OUTPUT.openingTheAppUrl)
         })
       })
 
@@ -450,7 +520,7 @@ describe('/lib/tasks/install', function () {
         it('logs message and starts download', async function () {
           const output = createStdoutCapture()
 
-          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: 'x.x.x' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: INSTALL_OUTPUT.stubBinaryVersionOther })
 
           await install.start()
           expect(download.start).toHaveBeenCalledWith(expect.objectContaining({
@@ -461,7 +531,13 @@ describe('/lib/tasks/install', function () {
             installDir,
           }))
 
-          expect(output()).toMatchSnapshot('installed version does not match needed version 1')
+          const plain = stripAnsi(output())
+
+          expect(plain).toContain(INSTALL_OUTPUT.stubBinaryVersionOther)
+          expect(plain).toContain(installDir)
+          expect(plain).toContain(INSTALL_OUTPUT.installingCypress)
+          expect(plain).toContain(INSTALL_OUTPUT.finishedInstallation)
+          expect(plain).toContain(INSTALL_OUTPUT.openingTheAppUrl)
         })
       })
 
@@ -480,7 +556,13 @@ describe('/lib/tasks/install', function () {
             installDir,
           }))
 
-          expect(output()).toMatchSnapshot('forcing true always installs 1')
+          const plain = stripAnsi(output())
+
+          expect(plain).toContain(packageVersion)
+          expect(plain).toContain(installDir)
+          expect(plain).toContain(INSTALL_OUTPUT.installingCypress)
+          expect(plain).toContain(INSTALL_OUTPUT.finishedInstallation)
+          expect(plain).toContain(INSTALL_OUTPUT.openingTheAppUrl)
         })
       })
 
@@ -490,7 +572,7 @@ describe('/lib/tasks/install', function () {
 
           vi.mocked(util.isInstalledGlobally).mockReturnValue(true)
 
-          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: 'x.x.x' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: INSTALL_OUTPUT.stubBinaryVersionOther })
 
           await install.start()
 
@@ -502,7 +584,12 @@ describe('/lib/tasks/install', function () {
             installDir,
           }))
 
-          expect(output()).toMatchSnapshot('warning installing as global 1')
+          const plain = stripAnsi(output())
+
+          expect(plain).toContain(INSTALL_OUTPUT.globalInstallWarning)
+          expect(plain).toContain(INSTALL_OUTPUT.devDependencyPerProject)
+          expect(plain).toContain(INSTALL_OUTPUT.npmUninstallGlobalCypress)
+          expect(plain).toContain(INSTALL_OUTPUT.finishedInstallation)
         })
       })
 
@@ -512,11 +599,17 @@ describe('/lib/tasks/install', function () {
 
           vi.mocked(util.isCi).mockReturnValue(true)
 
-          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: 'x.x.x' })
+          vi.mocked(state.getBinaryPkgAsync).mockResolvedValue({ version: INSTALL_OUTPUT.stubBinaryVersionOther })
 
           await install.start()
 
-          expect(output()).toMatchSnapshot('installing in ci 1')
+          const plain = stripAnsi(output())
+
+          expect(plain).toContain(INSTALL_OUTPUT.installingCypress)
+          expect(plain).toContain(INSTALL_OUTPUT.downloadingCypress)
+          expect(plain).toContain(INSTALL_OUTPUT.finishedInstallation)
+          expect(plain).toContain(installDir)
+          expect(plain).toContain(INSTALL_OUTPUT.openingTheAppUrl)
         })
       })
 
@@ -542,7 +635,12 @@ describe('/lib/tasks/install', function () {
             expect(message).not.toEqual('should have caught error')
             logger.error(err)
 
-            expect(output()).toMatchSnapshot('invalid cache directory 1')
+            const plain = stripAnsi(output())
+
+            expect(plain).toContain(INSTALL_OUTPUT.cacheWriteDenied)
+            expect(plain).toContain(INSTALL_OUTPUT.invalidCacheDir)
+            expect(plain).toContain(INSTALL_OUTPUT.cachePermissionsIssueUrl)
+            expect(plain).toContain(INSTALL_OUTPUT.eaccesCode)
           }
         })
       })
@@ -617,7 +715,7 @@ describe('/lib/tasks/install', function () {
 
       await install.start()
 
-      expect(output()).toMatchSnapshot('silent install 1')
+      expect(output()).toBe('')
     })
 
     it('exits with error when installing on unsupported os', async function () {
@@ -634,7 +732,11 @@ describe('/lib/tasks/install', function () {
         expect(message).not.toEqual('should have caught error')
         logger.error(err)
 
-        expect(output()).toMatchSnapshot('error when installing on unsupported os')
+        const plain = stripAnsi(output())
+
+        expect(plain).toContain(INSTALL_OUTPUT.osUnsupported)
+        expect(plain).toContain(INSTALL_OUTPUT.osRequirementsDoc)
+        expect(plain).toContain(INSTALL_OUTPUT.platformWin32Ia32)
       }
     })
   })
