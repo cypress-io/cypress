@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.14.2
 
+**Deprecations:**
+
+- The `cy.end()` command has been deprecated and will be removed in a future release. `cy.end()` is no longer necessary because starting a new `cy.` command already begins a new chain. You can safely remove `cy.end()` from your code. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
+
 **Performance:**
 
 - Reduced main-thread overhead when scrolling the command log in `cypress open` by fixing an issue where the reporter could register more than one `scroll` listener on the log if its scroll container was set more than once. Addressed in [#33607](https://github.com/cypress-io/cypress/pull/33607).
