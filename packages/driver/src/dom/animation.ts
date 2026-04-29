@@ -29,7 +29,7 @@ const pauseDocumentAnimations = (doc: Document) => {
     return
   }
 
-  const pausedAnimations = doc.getAnimations?.().filter(({ playState }) => {
+  const pausedAnimations = doc.getAnimations?.()?.filter(({ playState }) => {
     return playState === 'running'
   }) ?? []
 

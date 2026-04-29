@@ -101,4 +101,26 @@ describe('dom/animation', () => {
     expect(runningAnimation.play).toHaveBeenCalledOnce()
     expect(runningAnimation.playState).toBe('running')
   })
+
+  it('should fall back to css only animation disabling when `getAnimations` is unavailable', () => {
+    Object.defineProperty(document, 'getAnimations', {
+      configurable: true,
+      value: undefined,
+    })
+
+    const body = document.querySelector('body')
+
+    if (!body) {
+      throw new Error('Expected document.body to exist.')
+    }
+
+    const $body = $(body)
+
+    expect(() => {
+      $animation.addCssAnimationDisabler($body)
+      $animation.removeCssAnimationDisabler($body)
+    }).not.toThrow()
+
+    expect(document.querySelector('#__cypress-animation-disabler')).toBeNull()
+  })
 })
