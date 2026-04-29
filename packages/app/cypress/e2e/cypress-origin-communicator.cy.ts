@@ -54,12 +54,19 @@ describe('Cypress In Cypress Origin Communicator', () => {
           // @ts-ignore
           source: window.__cyCommunicatorMapTest,
         })
+
+        // @ts-ignore
+        removeAllListenersSpy = cy.spy(comm, 'removeAllListeners')
       })
 
       cy.get('a[href="#/runs"]').click()
       cy.location('hash').should('include', '/runs')
 
       cy.wrap(null).should(() => {
+        const noArgCalls = removeAllListenersSpy.getCalls().filter((c) => c.args.length === 0)
+
+        expect(noArgCalls.length).to.be.at.least(1)
+
         // @ts-ignore
         const comm = window.top[0].Cypress.primaryOriginCommunicator
         // @ts-ignore
