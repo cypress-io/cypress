@@ -36,6 +36,43 @@ describe('Cypress In Cypress Origin Communicator', () => {
       })
     })
 
+    it('clears cached spec bridge window targets when primaryOriginCommunicator.removeAllListeners() runs without an event', () => {
+      cy.visitApp()
+      cy.specsPageIsVisible()
+      cy.contains('dom-content.spec').click()
+      cy.waitForSpecToFinish()
+
+      cy.then(() => {
+        // @ts-ignore
+        const comm = window.top[0].Cypress.primaryOriginCommunicator
+
+        // @ts-ignore — hold stub across navigation for the assertion below
+        window.__cyCommunicatorMapTest = { postMessage: cy.stub() }
+
+        comm.onMessage({
+          data: { event: 'cross:origin:bridge:ready', origin: 'https://cypress-map-teardown-test.invalid' },
+          // @ts-ignore
+          source: window.__cyCommunicatorMapTest,
+        })
+      })
+
+      cy.get('a[href="#/runs"]').click()
+      cy.location('hash').should('include', '/runs')
+
+      cy.wrap(null).should(() => {
+        // @ts-ignore
+        const comm = window.top[0].Cypress.primaryOriginCommunicator
+        // @ts-ignore
+        const stub = window.__cyCommunicatorMapTest
+
+        stub.postMessage.resetHistory()
+        comm.toAllSpecBridges('test:map:should:not:reach:stub', {})
+        expect(stub.postMessage).not.to.have.been.called
+        // @ts-ignore
+        delete window.__cyCommunicatorMapTest
+      })
+    })
+
     it('cleans up the primaryOriginCommunicator events when navigating away from the /specs to /settings', () => {
       cy.visitApp()
       cy.specsPageIsVisible()
