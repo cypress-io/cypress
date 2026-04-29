@@ -106,7 +106,9 @@ export default function (Commands, Cypress, cy, state) {
         const tickMs = ms ?? 0
 
         if (!_.isNumber(tickMs) || Number.isNaN(tickMs)) {
-          $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg: JSON.stringify(ms) } })
+          const arg = Number.isNaN(ms) ? String(ms) : JSON.stringify(ms)
+
+          $errUtils.throwErrByPath('tick.invalid_argument', { args: { arg } })
         }
 
         const shouldLog = userOptions.log ?? options.log

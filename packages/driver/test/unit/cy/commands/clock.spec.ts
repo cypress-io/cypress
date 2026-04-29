@@ -136,7 +136,7 @@ describe('cy/commands/clock', () => {
 
     try {
       expect(() => commands.tick(undefined, Number.NaN)).toThrow(
-        'only accepts a number as their argument',
+        '`clock.tick()`/`cy.tick()` only accepts a number as their argument. You passed: `NaN`',
       )
     } finally {
       clock.restore({ log: false })
