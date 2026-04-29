@@ -5,7 +5,7 @@ import $errUtils from '../../cypress/error_utils'
 
 type CyClock = Clock & {
   tick(ms: number | undefined, options?: Partial<Cypress.Loggable>): number
-  tickAsync?(ms: number | undefined, options?: Partial<Cypress.Loggable>): Promise<number>
+  tickAsync(ms: number | undefined, options?: Partial<Cypress.Loggable>): Promise<number>
   restore(options?: Partial<Cypress.Loggable>): void
 }
 
@@ -77,8 +77,10 @@ export default function (Commands, Cypress, cy, state) {
         log: true,
       })
 
+      let wrappedClock: CyClock
+
       const log = (name, shouldLog, message = '', snapshot = true, consoleProps = {}) => {
-        const details = clock!.details()
+        const details = wrappedClock.details()
         const logNow = details.now
         const logMethods = details.methods.slice()
 
@@ -98,9 +100,8 @@ export default function (Commands, Cypress, cy, state) {
         })
       }
 
-      clock = createClock(state('window'), now, methods)
-
-      const { tick, tickAsync } = clock
+      const createdClock = createClock(state('window'), now, methods)
+      const { tick, tickAsync, restore } = createdClock
 
       const createTickLog = (ms: number | undefined, userOptions: Partial<Cypress.Loggable>) => {
         const tickMs = ms ?? 0
@@ -113,7 +114,7 @@ export default function (Commands, Cypress, cy, state) {
 
         const shouldLog = userOptions.log ?? options.log
         const tickLog = log('tick', shouldLog, `${tickMs}ms`, false, {
-          'Now': clock!.details().now + tickMs,
+          'Now': wrappedClock.details().now + tickMs,
           'Ticked': `${tickMs} milliseconds`,
         })
 
@@ -130,47 +131,46 @@ export default function (Commands, Cypress, cy, state) {
         }
       }
 
-      clock.tick = function (ms: number | undefined, userOptions?: Partial<Cypress.Loggable>) {
-        const tickOptions = userOptions ?? {}
-        const { tickMs, tickLog } = createTickLog(ms, tickOptions)
-        const result = tick.apply(this, [tickMs])
+      wrappedClock = {
+        ...createdClock,
+        tick (ms: number | undefined, userOptions: Partial<Cypress.Loggable> = {}) {
+          const { tickMs, tickLog } = createTickLog(ms, userOptions)
+          const result = tick.apply(this, [tickMs])
 
-        endTickLog(tickLog)
-
-        return result
-      }
-
-      clock.tickAsync = function (ms: number | undefined, userOptions?: Partial<Cypress.Loggable>) {
-        const tickOptions = userOptions ?? {}
-        const { tickMs, tickLog } = createTickLog(ms, tickOptions)
-        const tickResult = tickAsync
-          ? tickAsync.apply(this, [tickMs])
-          : Promise.resolve().then(() => tick.apply(this, [tickMs]))
-
-        return Promise.resolve(tickResult).finally(() => {
           endTickLog(tickLog)
-        })
+
+          return result
+        },
+        tickAsync (ms: number | undefined, userOptions: Partial<Cypress.Loggable> = {}) {
+          const { tickMs, tickLog } = createTickLog(ms, userOptions)
+          const tickResult = tickAsync
+            ? tickAsync.apply(this, [tickMs])
+            : Promise.resolve().then(() => tick.apply(this, [tickMs]))
+
+          return Promise.resolve(tickResult).finally(() => {
+            endTickLog(tickLog)
+          })
+        },
+        restore (userOptions: Partial<Cypress.Loggable> = {}) {
+          const ret = restore.apply(this)
+
+          userOptions = _.defaults({}, userOptions, {
+            log: options.log,
+          })
+
+          log('restore', userOptions.log)
+
+          ctx.clock = null
+
+          clock = null
+
+          state('clock', clock)
+
+          return ret
+        },
       }
 
-      const { restore } = clock
-
-      clock.restore = function (userOptions: Partial<Cypress.Loggable> = {}) {
-        const ret = restore.apply(this)
-
-        userOptions = _.defaults({}, userOptions, {
-          log: options.log,
-        })
-
-        log('restore', userOptions.log)
-
-        ctx.clock = null
-
-        clock = null
-
-        state('clock', clock)
-
-        return ret
-      }
+      clock = wrappedClock
 
       log('clock', options.log)
 
@@ -181,23 +181,17 @@ export default function (Commands, Cypress, cy, state) {
       return clock
     },
 
-    tick (subject, ms, options?: Partial<Cypress.Loggable>) {
+    tick (subject, ms: number | undefined, options?: Partial<Cypress.Loggable>) {
       if (!clock) {
         $errUtils.throwErrByPath('tick.no_clock')
+
+        return
       }
 
       const tickOptions = options ?? {}
-      const tickClock = clock!
+      const tickClock = clock
 
-      if (!tickClock.tickAsync) {
-        tickClock.tick(ms, tickOptions)
-
-        return Promise.resolve(tickClock)
-      }
-
-      return tickClock.tickAsync(ms, tickOptions).then(() => {
-        return tickClock
-      })
+      return tickClock.tickAsync(ms, tickOptions).then(() => tickClock)
     },
   })
 }
