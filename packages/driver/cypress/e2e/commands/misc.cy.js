@@ -28,19 +28,6 @@ describe('src/cy/commands/misc', () => {
         expect(Cypress.utils.warning).to.be.calledWithMatch('https://on.cypress.io/end')
       })
     })
-
-    it('only warns once per spec', () => {
-      cy.stub(Cypress.utils, 'warning')
-
-      cy.noop({}).end()
-      cy.noop({}).end().then(() => {
-        const endWarnings = Cypress.utils.warning.getCalls().filter(
-          (call) => call.args[0].includes('`cy.end()` has been deprecated'),
-        )
-
-        expect(endWarnings).to.have.length(1)
-      })
-    })
   })
 
   context('#log', () => {

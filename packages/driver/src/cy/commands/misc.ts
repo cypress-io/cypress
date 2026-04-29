@@ -11,13 +11,8 @@ interface InternalWrapOptions extends Partial<Cypress.Loggable & Cypress.Timeout
 }
 
 export default (Commands, Cypress, cy, state) => {
-  let endDeprecatedWarned = false
-
   Commands.add('end', () => {
-    if (!endDeprecatedWarned) {
-      endDeprecatedWarned = true
-      $errUtils.warnByPath('end.deprecated')
-    }
+    $errUtils.warnByPath('end.deprecated')
 
     return null
   })
