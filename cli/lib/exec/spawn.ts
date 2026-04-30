@@ -147,6 +147,8 @@ function createSpawnFunction (
             } else {
               resolve(128 + os.constants.signals[signal])
             }
+
+            return
           }
 
           resolve(code ?? 1)
