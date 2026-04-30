@@ -412,6 +412,10 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   private killChildProcess (): void {
+    this._childProcess.stdout?.removeAllListeners()
+    this._childProcess.stderr?.removeAllListeners()
+    this._childProcess.removeAllListeners()
+
     if (this._childProcess.killed || !this._childProcess.connected) {
       debug('child process %s already killed', this._childProcess.pid)
 
@@ -420,8 +424,5 @@ export class ProjectConfigIpc extends EventEmitter {
 
     debug('killing child process %s', this._childProcess.pid)
     this._childProcess.kill()
-    this._childProcess.stdout?.removeAllListeners()
-    this._childProcess.stderr?.removeAllListeners()
-    this._childProcess.removeAllListeners()
   }
 }
