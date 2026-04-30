@@ -8073,7 +8073,7 @@
     "@smithy/types" "^2.8.0"
     tslib "^2.5.0"
 
-"@socket.io/component-emitter@~3.1.0":
+"@socket.io/component-emitter@3.1.2", "@socket.io/component-emitter@~3.1.0":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz#821f8442f4175d8f0467b9daf26e3a18e2d02af2"
   integrity sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==
