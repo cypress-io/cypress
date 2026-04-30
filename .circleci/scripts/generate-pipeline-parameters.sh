@@ -4,10 +4,6 @@
 #
 # Output: JSON written to stdout, consumed by continuation/continue pipeline_parameters.
 #
-# Only path-filtering run-* keys belong here. publish-binary-branch,
-# force-persist-artifacts, live on the setup workflow trigger;
-# including them again in this payload conflicts with CircleCI’s continuation API.
-#
 # All run-* params default to true so that develop/release branches and
 # API-triggered pipelines run everything without needing to pass explicit params.
 
