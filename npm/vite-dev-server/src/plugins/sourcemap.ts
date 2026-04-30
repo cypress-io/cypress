@@ -32,7 +32,11 @@ export const CypressSourcemap = (
           */
 
           const sourcemap = this.getCombinedSourcemap()
-          const sourcemapUrl = sourcemap.toUrl()
+          // In Vite 8 / Rolldown, getCombinedSourcemap() returns a plain object without toUrl().
+          // Fall back to manually constructing the data URL in that case.
+          const sourcemapUrl = typeof sourcemap.toUrl === 'function'
+            ? sourcemap.toUrl()
+            : `data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(sourcemap)).toString('base64')}`
 
           if (/\/\/# sourceMappingURL=(?!['"])/i.test(code)) {
             // If the code already has a sourceMappingURL, it is not an inlined sourcemap
@@ -45,7 +49,7 @@ export const CypressSourcemap = (
 
           return {
             code,
-            map: { mappings: '' },
+            map: { mappings: '', file: id },
           }
         }
       } catch (_err) {

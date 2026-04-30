@@ -89,7 +89,8 @@
 
 <script lang="ts" setup>
 import { compact, groupBy } from 'lodash'
-import { computed, h, FunctionalComponent } from 'vue'
+import { computed, h } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import { useI18n } from '@cy/i18n'
 import RunCard from './RunCard.vue'
 import DebugCommitIcon from '../debug/DebugCommitIcon.vue'
@@ -108,7 +109,11 @@ const props = defineProps<{
   currentCommitInfo?: { sha: string, message: string } | null
 }>()
 
-const openLatest = useExternalLink(props.latestRunUrl)
+const openExternalLink = useExternalLink(props.latestRunUrl)
+
+const openLatest = () => {
+  void openExternalLink()
+}
 
 const Dot: FunctionalComponent = () => {
   return h('span', { ariaHidden: 'true', class: 'px-[8px] text-gray-300' }, '•')
