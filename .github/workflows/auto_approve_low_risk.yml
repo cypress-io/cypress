@@ -1,0 +1,113 @@
+name: 'Auto-approve low-risk PRs'
+
+on:
+  pull_request:
+    types:
+      - edited
+    branches:
+      - develop
+      - release/*
+
+permissions:
+  contents: read
+
+jobs:
+  auto-approve:
+    name: Auto-approve low-risk PR
+    runs-on: ubuntu-latest
+    if: github.repository == 'cypress-io/cypress'
+    steps:
+      - name: Check if PR author is a repository collaborator
+        id: collaborator-check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          HTTP_CODE=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/collaborators/${{ github.event.pull_request.user.login }}" \
+            --silent -i 2>/dev/null | head -1 | awk '{print $2}')
+
+          if [ "$HTTP_CODE" = "204" ]; then
+            echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_collaborator=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::PR author '${{ github.event.pull_request.user.login }}' is not a repository collaborator. Skipping auto-approve."
+          fi
+
+      - name: Extract risk level from CURSOR_SUMMARY
+        if: steps.collaborator-check.outputs.is_collaborator == 'true'
+        id: risk-check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+
+            const summaryMatch = body.match(/<!-- CURSOR_SUMMARY -->([\s\S]*?)<!-- \/CURSOR_SUMMARY -->/);
+            if (!summaryMatch) {
+              core.notice('No CURSOR_SUMMARY section found in PR body. Skipping auto-approve.');
+              core.setOutput('is_low_risk', 'false');
+              return;
+            }
+
+            const summaryContent = summaryMatch[1];
+
+            const hasMediumRisk = /\*\*Medium Risk\*\*/i.test(summaryContent);
+            const hasHighRisk = /\*\*High Risk\*\*/i.test(summaryContent);
+
+            if (hasMediumRisk || hasHighRisk) {
+              core.notice('PR is not low risk. Skipping auto-approve.');
+              core.setOutput('is_low_risk', 'false');
+              return;
+            }
+
+            const hasLowRisk = /\*\*Low Risk\*\*/i.test(summaryContent);
+            if (!hasLowRisk) {
+              core.notice('No recognized risk level found in CURSOR_SUMMARY. Skipping auto-approve.');
+              core.setOutput('is_low_risk', 'false');
+              return;
+            }
+
+            core.info('CURSOR_SUMMARY contains **Low Risk** assessment.');
+            core.setOutput('is_low_risk', 'true');
+
+      - name: Check for existing bot approval
+        if: steps.collaborator-check.outputs.is_collaborator == 'true' && steps.risk-check.outputs.is_low_risk == 'true'
+        id: existing-approval
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ALREADY_APPROVED=$(gh api \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
+            --jq '[.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED")] | length')
+
+          if [ "$ALREADY_APPROVED" -gt "0" ]; then
+            echo "already_approved=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::PR already approved by cypress-bot[bot]. Skipping."
+          else
+            echo "already_approved=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate Cypress Bot App token
+        if: >-
+          steps.collaborator-check.outputs.is_collaborator == 'true' &&
+          steps.risk-check.outputs.is_low_risk == 'true' &&
+          steps.existing-approval.outputs.already_approved == 'false'
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
+          private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
+
+      - name: Approve PR
+        if: >-
+          steps.collaborator-check.outputs.is_collaborator == 'true' &&
+          steps.risk-check.outputs.is_low_risk == 'true' &&
+          steps.existing-approval.outputs.already_approved == 'false'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh api \
+            --method POST \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
+            -f event="APPROVE" \
+            -f body="Auto-approved: Cursor Bugbot assessed this PR as **Low Risk**."
