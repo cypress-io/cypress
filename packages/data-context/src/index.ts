@@ -26,11 +26,6 @@ export { globalPubSub } from './globalPubSub'
 let ctx: DataContext | null = null
 
 export async function clearCtx () {
-  try {
-    debug('clearCtx() called; trace: %o', new Error().stack)
-  } catch (e) {
-    // noop
-  }
   if (ctx) {
     debug('signalling mainProcessWillDisconnect')
     await ctx.lifecycleManager.mainProcessWillDisconnect()
