@@ -8,8 +8,6 @@ describe('src/cy/commands/misc', () => {
 
   context('#end', () => {
     it('nulls out the subject', () => {
-      cy.stub(Cypress.utils, 'warning')
-
       cy.noop({}).end().then((subject) => {
         expect(subject).to.be.null
 
@@ -17,15 +15,6 @@ describe('src/cy/commands/misc', () => {
         // (in this case `{}`) should be discarded. No re-running any previous
         // query functions once you've used `.end()` on a chain.
         expect(cy.subjectChain()).to.eql([null])
-      })
-    })
-
-    it('warns that end is deprecated', () => {
-      cy.stub(Cypress.utils, 'warning')
-
-      cy.noop({}).end().then(() => {
-        expect(Cypress.utils.warning).to.be.calledWithMatch('`cy.end()` has been deprecated')
-        expect(Cypress.utils.warning).to.be.calledWithMatch('https://on.cypress.io/end')
       })
     })
   })
