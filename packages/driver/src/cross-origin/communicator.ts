@@ -72,15 +72,6 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   userInvocationStack?: string
 
   /**
-   * Drops the cached postMessage target for a secondary origin (e.g. when a
-   * `cy.origin()` visit completes). Prevents retaining dead `Window` references
-   * across many origins or repeated `cy.origin()` calls.
-   */
-  removeCrossOriginDriverWindow (origin: string) {
-    delete this.crossOriginDriverWindows[origin]
-  }
-
-  /**
    * Clears all cached spec-bridge windows. The runner calls this after
    * `test:before:after:run:async` (e.g. about:blank) so `window:load` can still
    * use `toAllSpecBridges('window:load', ...)` before references are dropped.

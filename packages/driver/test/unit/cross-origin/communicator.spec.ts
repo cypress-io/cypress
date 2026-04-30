@@ -14,25 +14,6 @@ describe('PrimaryOriginCommunicator', () => {
     }
   }
 
-  it('removeCrossOriginDriverWindow stops toAllSpecBridges from messaging that origin', () => {
-    const comm = new PrimaryOriginCommunicator()
-    const { postMessage, asWindow } = fakeBridgeWindow()
-
-    comm.onMessage({
-      data: { event: 'cross:origin:bridge:ready', origin: 'https://secondary.example' },
-      source: asWindow,
-    })
-
-    comm.toAllSpecBridges('sync:state', { duringUserTestExecution: false })
-    expect(postMessage).toHaveBeenCalledOnce()
-
-    comm.removeCrossOriginDriverWindow('https://secondary.example')
-    postMessage.mockClear()
-
-    comm.toAllSpecBridges('sync:state', { duringUserTestExecution: false })
-    expect(postMessage).not.toHaveBeenCalled()
-  })
-
   it('clearCrossOriginDriverWindows stops subsequent toAllSpecBridges from messaging', () => {
     const comm = new PrimaryOriginCommunicator()
     const { postMessage, asWindow } = fakeBridgeWindow()

@@ -11,7 +11,6 @@ declare namespace Cypress {
       toSpecBridge: (origin: string, event: string, data?: any, responseEvent?: string) => void
       userInvocationStack?: string
       toSource: (source: string, responseEvent: string, response: any) => void
-      removeCrossOriginDriverWindow: (origin: string) => void
       clearCrossOriginDriverWindows: () => void
     }
     backendRequestHandler: (backendRequestNamespace: string, emitter: Emitter, eventName: string, ...args: any[]) => Promise<any>
