@@ -6,11 +6,8 @@ import { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
 const { version } = require('socket.io-client/package.json')
 const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
 
-// socket.io types are incorrect
-type PatchedServerOptions = ServerOptions & { cookie: { name: string | boolean } }
-
 export class SocketIOServer extends SocketIOBaseServer {
-  constructor (srv: http.Server, opts?: Partial<PatchedServerOptions>) {
+  constructor (srv: http.Server, opts?: Partial<ServerOptions>) {
     opts = opts ?? {}
 
     // the maxHttpBufferSize is used to limit the message size sent over
