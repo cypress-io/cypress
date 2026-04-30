@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@cypress/get-windows-proxy": "1.6.3",
-    "@cypress/request": "^3.0.10",
+    "@cypress/request": "^4.0.0",
     "@cypress/request-promise": "^5.0.0",
     "@cypress/vite-dev-server": "0.0.0-development",
     "@cypress/webpack-batteries-included-preprocessor": "0.0.0-development",
