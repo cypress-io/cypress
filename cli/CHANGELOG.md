@@ -17,6 +17,7 @@
 - Upgraded `listr2` from `3.8.3` to `^9.0.5`. Addressed in [#33640](https://github.com/cypress-io/cypress/pull/33640).
 - Upgraded `simple-git` from `3.33.0` to `3.36.0` to address a [Remote Code Execution](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15456078) vulnerability reported in security scans. Addressed in [#33680](https://github.com/cypress-io/cypress/pull/33680).
 - Upgraded `ts-loader` from `9.5.2` to `9.5.7`. Addresses [#33648](https://github.com/cypress-io/cypress/issues/33648). Addressed in [#33691](https://github.com/cypress-io/cypress/pull/33691)
+- Upgraded `socket.io` from `4.0.1` to `4.8.3`, `socket.io-client` from `4.0.1` to `4.8.3`, and `socket.io-parser` from `4.0.5` to `4.2.6` to address a [Denial of Service](https://github.com/advisories/GHSA-677m-j7p3-52f9) vulnerability reported in security scans. The `engine.io`, `engine.io-client`, and `engine.io-parser` direct deps in `@packages/socket` were also bumped to keep transitive copies aligned and the existing browser-side patches applied. Addressed in [#33719](https://github.com/cypress-io/cypress/pull/33719).
 
 ## 15.14.1
 
