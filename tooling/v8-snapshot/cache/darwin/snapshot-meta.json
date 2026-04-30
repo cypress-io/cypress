@@ -1607,6 +1607,7 @@
     "./node_modules/adm-zip/zipEntry.js",
     "./node_modules/adm-zip/zipFile.js",
     "./node_modules/aggregate-error/index.js",
+    "./node_modules/aggregate-error/node_modules/indent-string/index.js",
     "./node_modules/ansi-regex/index.js",
     "./node_modules/ansi-styles/index.js",
     "./node_modules/ansi_up/ansi_up.js",
@@ -2289,7 +2290,6 @@
     "./node_modules/image-size/dist/types/webp.js",
     "./node_modules/image-size/dist/utils/bit-reader.js",
     "./node_modules/imurmurhash/imurmurhash.js",
-    "./node_modules/indent-string/index.js",
     "./node_modules/inflight/inflight.js",
     "./node_modules/inherits/inherits.js",
     "./node_modules/inherits/inherits_browser.js",
@@ -3923,5 +3923,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "8bfeb7ef183515b68b4244409139295cc323262cd6ba74e94e65b37ad45be93d"
+  "deferredHash": "e680f4418eecd32c982adb2825e3cba05a9d7758c41958ff87cf6cc95ff0f159"
 }

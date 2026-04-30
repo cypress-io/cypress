@@ -49,7 +49,7 @@ describe('AjaxList', () => {
         method: 'GET',
         url: '/users?_limit=3',
       }, {
-        delayMs: 1000,
+        delay: 1000,
         body: users,
       }).as('users')
 
