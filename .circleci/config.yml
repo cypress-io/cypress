@@ -16,6 +16,8 @@ parameters:
   publish-binary-branch:
     type: string
     default: main
+  # set to true when triggering the pipeline manually to have CI comment on the commit
+  # with links to published binaries
   force-persist-artifacts:
     type: boolean
     default: false
@@ -169,10 +171,6 @@ jobs:
                 fi
           - run:
               name: Generate path-filtered pipeline parameters
-              environment:
-                PUBLISH_BINARY_BRANCH: << pipeline.parameters.publish-binary-branch >>
-                FORCE_PERSIST_ARTIFACTS: << pipeline.parameters.force-persist-artifacts >>
-                RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
                   > /tmp/pipeline-parameters.json
