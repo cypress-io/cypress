@@ -3,7 +3,7 @@
 
 **Deprecations:**
 
-- The `cy.end()` command has been deprecated and will be removed in a future release. `cy.end()` is no longer necessary because starting a new `cy.` command already begins a new chain. You can safely remove `cy.end()` from your code. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
+- The `cy.end()` command has been deprecated and will be removed in a future release. `cy.end()` can be replaced by simply starting a new `cy.` command chain. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
 
 **Performance:**
 

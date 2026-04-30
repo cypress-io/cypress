@@ -1373,8 +1373,7 @@ declare namespace Cypress {
      * End a chain of commands
      *
      * @deprecated `cy.end()` has been deprecated and will be removed in a future release.
-     * `cy.end()` is no longer necessary because starting a new `cy.` command already
-     * begins a new chain. You can safely remove `cy.end()` from your code.
+     * `cy.end()` can be replaced by simply starting a new `cy.` command chain.
      * @see https://on.cypress.io/end
      */
     end(): Chainable<null>
