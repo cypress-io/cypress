@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.14.3
+
+**Misc:**
+
+- Additional CI environment variables are now captured to support a future failed test retry feature. Addressed in [#33714](https://github.com/cypress-io/cypress/pull/33714).
+
 ## 15.14.2
 
 **Performance:**
@@ -49,7 +55,7 @@
 
 - Upgraded `axios` to `1.15.0` to address [CVE-2025-62718](https://www.cve.org/CVERecord?id=CVE-2025-62718) and [CVE-2026-40175](https://www.cve.org/CVERecord?id=CVE-2026-40175) vulnerabilities reported in security scans. Fixes [#33590](https://github.com/cypress-io/cypress/issues/33590).
 
-## 15.13.1 
+## 15.13.1
 
 **Performance:**
 
