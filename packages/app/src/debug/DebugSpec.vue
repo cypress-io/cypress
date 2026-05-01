@@ -36,7 +36,7 @@
                     fill-color="gray-100"
                     hocus-stroke-color="indigo-400"
                     hocus-fill-color="indigo-200"
-                    size="16"
+                    size="14"
                     interactive-colors-on-group
                     class="min-w-[16px]"
                   />
