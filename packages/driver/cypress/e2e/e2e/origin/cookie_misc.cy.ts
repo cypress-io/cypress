@@ -73,30 +73,28 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       })
     })
 
-    // wait for the async XHR response to actually arrive (deterministic) rather than a wall-clock cy.wait
+    // wait for the async XHR response to actually arrive — deterministic, replaces relying on cy.wait(500) alone
     cy.wait('@async')
+    // small buffer for Firefox to commit the cookies to its store; cy.getAllCookies is a regular command, not a retrying query
+    cy.wait(500)
 
-    const isFirefox = Cypress.isBrowser({ family: 'firefox' })
-    const expectedLength = isFirefox ? 2 : 1
+    cy.getAllCookies().then((cookies) => {
+      const isFirefox = Cypress.isBrowser({ family: 'firefox' })
 
-    // For a cookie set via Set-Cookie with no SameSite attribute, Firefox's BiDi
-    // layer can report `sameSite` as either `default` (→ Cypress 'unspecified')
-    // or `lax` depending on which internal storage path wrote the cookie. Both
-    // are valid observations of the same cookie state; treat them as equivalent.
-    const normalizeFirefoxDefaultSameSite = (cookie: Cypress.Cookie) => {
-      if (!isFirefox) return cookie
+      // For a cookie set via Set-Cookie with no SameSite attribute, Firefox's BiDi
+      // layer can report `sameSite` as either `default` (→ Cypress 'unspecified')
+      // or `lax` depending on which internal storage path wrote the cookie. Both
+      // are valid observations of the same cookie state; treat them as equivalent.
+      const normalizeFirefoxDefaultSameSite = (cookie: Cypress.Cookie) => {
+        if (!isFirefox) return cookie
 
-      if (cookie.sameSite === 'unspecified' || cookie.sameSite === 'lax') {
-        return { ...cookie, sameSite: 'unspecified' }
+        if (cookie.sameSite === 'unspecified' || cookie.sameSite === 'lax') {
+          return { ...cookie, sameSite: 'unspecified' }
+        }
+
+        return cookie
       }
 
-      return cookie
-    }
-
-    // cy.getAllCookies is a query and retries on its assertion, so use the
-    // length assertion to wait for both cookies to land in Firefox's store
-    // rather than a fixed cy.wait(500).
-    cy.getAllCookies().should('have.length', expectedLength).then((cookies) => {
       const asyncCookie = {
         name: 'ASYNC_COOKIE',
         value: 'async',
@@ -122,12 +120,14 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       if (isFirefox) {
         // in Firefox both the foo=bar and ASYNC_COOKIE=async cookies will be set
         // SYNC_COOKIE=sync is not set because the intercept is not hit
+        expect(cookies).to.have.length(2)
         expect(normalizeFirefoxDefaultSameSite(cookies[0])).to.deep.equal(fooBarCookie)
         expect(normalizeFirefoxDefaultSameSite(cookies[1])).to.deep.equal(asyncCookie)
       } else {
         // in other browsers only the ASYNC_COOKIE=async cookie will be set
         // SYNC_COOKIE=sync is not set because the intercept is not hit
         // foo=bar is not set because the request is sync and we are not able to sync the cookie with the automation
+        expect(cookies).to.have.length(1)
         expect(cookies[0]).to.deep.equal(asyncCookie)
       }
     })
