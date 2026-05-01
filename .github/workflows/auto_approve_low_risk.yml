@@ -43,7 +43,7 @@ jobs:
 
             const summaryMatch = body.match(/<!-- CURSOR_SUMMARY -->([\s\S]*?)<!-- \/CURSOR_SUMMARY -->/);
             if (!summaryMatch) {
-              core.notice('No CURSOR_SUMMARY section found in PR body. Skipping auto-approve.');
+              core.notice('No CURSOR_SUMMARY section found in PR body.');
               core.setOutput('is_low_risk', 'false');
               return;
             }
@@ -54,14 +54,14 @@ jobs:
             const hasHighRisk = /\*\*High Risk\*\*/i.test(summaryContent);
 
             if (hasMediumRisk || hasHighRisk) {
-              core.notice('PR is not low risk. Skipping auto-approve.');
+              core.notice('PR is not low risk.');
               core.setOutput('is_low_risk', 'false');
               return;
             }
 
             const hasLowRisk = /\*\*Low Risk\*\*/i.test(summaryContent);
             if (!hasLowRisk) {
-              core.notice('No recognized risk level found in CURSOR_SUMMARY. Skipping auto-approve.');
+              core.notice('No recognized risk level found in CURSOR_SUMMARY.');
               core.setOutput('is_low_risk', 'false');
               return;
             }
@@ -69,28 +69,41 @@ jobs:
             core.info('CURSOR_SUMMARY contains **Low Risk** assessment.');
             core.setOutput('is_low_risk', 'true');
 
-      - name: Check for existing bot approval
-        if: steps.author-check.outputs.is_org_member == 'true' && steps.risk-check.outputs.is_low_risk == 'true'
+      - name: Find existing auto-approval
+        if: steps.author-check.outputs.is_org_member == 'true'
         id: existing-approval
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ALREADY_APPROVED=$(gh api \
+          REVIEW_ID=$(gh api \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
-            --jq '[.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED")] | length')
+            --jq '[.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED" and (.body // "" | startswith("Auto-approved:")))] | last | .id // empty')
 
-          if [ "$ALREADY_APPROVED" -gt "0" ]; then
-            echo "already_approved=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::PR already approved by cypress-bot[bot]. Skipping."
+          if [ -n "$REVIEW_ID" ]; then
+            echo "review_id=$REVIEW_ID" >> "$GITHUB_OUTPUT"
+            echo "::notice::Found existing auto-approval (review #$REVIEW_ID)."
           else
-            echo "already_approved=false" >> "$GITHUB_OUTPUT"
+            echo "review_id=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Decide reconciliation action
+        if: steps.author-check.outputs.is_org_member == 'true'
+        id: action
+        env:
+          IS_LOW_RISK: ${{ steps.risk-check.outputs.is_low_risk }}
+          REVIEW_ID: ${{ steps.existing-approval.outputs.review_id }}
+        run: |
+          if [ "$IS_LOW_RISK" = "true" ] && [ -z "$REVIEW_ID" ]; then
+            echo "action=approve" >> "$GITHUB_OUTPUT"
+          elif [ "$IS_LOW_RISK" = "false" ] && [ -n "$REVIEW_ID" ]; then
+            echo "action=dismiss" >> "$GITHUB_OUTPUT"
+          else
+            echo "action=noop" >> "$GITHUB_OUTPUT"
+            echo "::notice::No reconciliation needed (is_low_risk=$IS_LOW_RISK, has_existing_approval=$([ -n "$REVIEW_ID" ] && echo true || echo false))."
           fi
 
       - name: Generate Cypress Bot App token
-        if: >-
-          steps.author-check.outputs.is_org_member == 'true' &&
-          steps.risk-check.outputs.is_low_risk == 'true' &&
-          steps.existing-approval.outputs.already_approved == 'false'
+        if: steps.action.outputs.action == 'approve' || steps.action.outputs.action == 'dismiss'
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
@@ -98,10 +111,7 @@ jobs:
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
 
       - name: Approve PR
-        if: >-
-          steps.author-check.outputs.is_org_member == 'true' &&
-          steps.risk-check.outputs.is_low_risk == 'true' &&
-          steps.existing-approval.outputs.already_approved == 'false'
+        if: steps.action.outputs.action == 'approve'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
@@ -110,3 +120,13 @@ jobs:
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
             -f event="APPROVE" \
             -f body="Auto-approved: Cursor Bugbot assessed this PR as **Low Risk**."
+
+      - name: Dismiss stale approval
+        if: steps.action.outputs.action == 'dismiss'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh api \
+            --method PUT \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ steps.existing-approval.outputs.review_id }}/dismissals" \
+            -f message="Cursor Bugbot risk assessment is no longer **Low Risk**. Auto-approval dismissed; manual review required."
