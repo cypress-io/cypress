@@ -58,9 +58,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          REVIEW_ID=$(gh api \
+          REVIEW_ID=$(gh api --paginate \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
-            --jq '[.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED" and (.body // "" | startswith("Auto-approved:")))] | last | .id // empty')
+            --jq '.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED" and (.body // "" | startswith("Auto-approved:"))) | .id' \
+            | tail -n 1)
 
           if [ -n "$REVIEW_ID" ]; then
             echo "review_id=$REVIEW_ID" >> "$GITHUB_OUTPUT"
