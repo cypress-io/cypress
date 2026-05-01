@@ -84,7 +84,10 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       // For a cookie set via Set-Cookie with no SameSite attribute, Firefox's BiDi
       // layer can report `sameSite` as either `default` (→ Cypress 'unspecified')
       // or `lax` depending on which internal storage path wrote the cookie. Both
-      // are valid observations of the same cookie state; treat them as equivalent.
+      // describe the same cookie state — per `cli/types/cypress.d.ts`,
+      // `'unspecified'` is the documented default for Firefox 140+, and pre-140
+      // it was equivalent to `'no_restriction'`. CI runs FF 145+, so we
+      // normalize the two equivalent values into `'unspecified'` here.
       const normalizeFirefoxDefaultSameSite = (cookie: Cypress.Cookie) => {
         if (!isFirefox) return cookie
 
