@@ -12,11 +12,17 @@ permissions:
   contents: read
   pull-requests: read
 
+concurrency:
+  group: auto-approve-low-risk-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   auto-approve:
     name: Auto-approve low-risk PR
     runs-on: ubuntu-latest
-    if: github.repository == 'cypress-io/cypress'
+    if: >-
+      github.repository == 'cypress-io/cypress' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Extract risk level from CURSOR_SUMMARY
         id: risk-check
