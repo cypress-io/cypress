@@ -75,7 +75,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
     // wait for the async XHR response to arrive
     cy.wait('@async')
-    // small buffer for Firefox to commit the cookies to its store; cy.getAllCookies is a regular command, not a retrying query
+    // cy.getAllCookies does not wait for the cookies to be set, so we need to wait manually
     cy.wait(500)
 
     cy.getAllCookies().then((cookies) => {
