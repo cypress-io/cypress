@@ -2,9 +2,6 @@ import path from 'path'
 import { fileURLToPath } from 'node:url'
 import { vi, describe, it, beforeEach, expect } from 'vitest'
 import { EventEmitter } from 'events'
-import * as vite5 from 'vite-5'
-import * as vite6 from 'vite-6'
-import * as vite7 from 'vite-7'
 import * as vite8 from 'vite-8'
 import { scaffoldSystemTestProject } from './test-helpers/scaffoldProject'
 import { createViteDevServerConfig, JSX_REFRESH_SCRIPT_RE } from '../src/resolveConfig'
@@ -22,20 +19,7 @@ const getViteDevServerConfig = (projectRoot: string) => {
     framework: 'react',
   } as unknown as ViteDevServerConfig
 }
-const MAJOR_VERSIONS: ({version: 5, vite: any } | {version: 6, vite: any } | {version: 7, vite: any })[] = [
-
-  {
-    version: 5,
-    vite: vite5,
-  },
-  {
-    version: 6,
-    vite: vite6,
-  },
-  {
-    version: 7,
-    vite: vite7,
-  },
+const MAJOR_VERSIONS: ({version: 8, vite: typeof vite8})[] = [
   {
     version: 8,
     vite: vite8,
