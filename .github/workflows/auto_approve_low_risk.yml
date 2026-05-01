@@ -18,24 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'cypress-io/cypress'
     steps:
-      - name: Check if PR author is a Cypress org member
-        id: author-check
-        env:
-          AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
-          AUTHOR_LOGIN: ${{ github.event.pull_request.user.login }}
-        run: |
-          case "$AUTHOR_ASSOCIATION" in
-            OWNER|MEMBER)
-              echo "is_org_member=true" >> "$GITHUB_OUTPUT"
-              ;;
-            *)
-              echo "is_org_member=false" >> "$GITHUB_OUTPUT"
-              echo "::notice::PR author '$AUTHOR_LOGIN' has association '$AUTHOR_ASSOCIATION'. Skipping auto-approve."
-              ;;
-          esac
-
       - name: Extract risk level from CURSOR_SUMMARY
-        if: steps.author-check.outputs.is_org_member == 'true'
         id: risk-check
         uses: actions/github-script@v7
         with:
@@ -71,7 +54,6 @@ jobs:
             core.setOutput('is_low_risk', 'true');
 
       - name: Find existing auto-approval
-        if: steps.author-check.outputs.is_org_member == 'true'
         id: existing-approval
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -88,7 +70,6 @@ jobs:
           fi
 
       - name: Decide reconciliation action
-        if: steps.author-check.outputs.is_org_member == 'true'
         id: action
         env:
           IS_LOW_RISK: ${{ steps.risk-check.outputs.is_low_risk }}
@@ -111,8 +92,29 @@ jobs:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
 
-      - name: Approve PR
+      - name: Verify PR author has write access
         if: steps.action.outputs.action == 'approve'
+        id: author-check
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          AUTHOR_LOGIN: ${{ github.event.pull_request.user.login }}
+        run: |
+          PERMISSION=$(gh api \
+            "/repos/${{ github.repository }}/collaborators/$AUTHOR_LOGIN/permission" \
+            --jq '.permission')
+
+          case "$PERMISSION" in
+            admin|write|maintain)
+              echo "has_write=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "has_write=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::PR author '$AUTHOR_LOGIN' has '$PERMISSION' permission. Skipping auto-approve."
+              ;;
+          esac
+
+      - name: Approve PR
+        if: steps.action.outputs.action == 'approve' && steps.author-check.outputs.has_write == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
