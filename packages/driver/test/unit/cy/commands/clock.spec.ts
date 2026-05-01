@@ -97,6 +97,23 @@ describe('cy/commands/clock', () => {
     }
   })
 
+  it('should flush queued promises before running timers', async () => {
+    const onLoaded = vi.fn()
+    const clock = commands.clock(undefined)
+
+    try {
+      window.Promise.resolve().then(() => {
+        window.setTimeout(onLoaded, 0)
+      })
+
+      await commands.tick(undefined, 0)
+
+      expect(onLoaded).toHaveBeenCalledOnce()
+    } finally {
+      clock.restore({ log: false })
+    }
+  })
+
   it('should close the tick log when ticking rejects', async () => {
     const clock = commands.clock(undefined)
 
