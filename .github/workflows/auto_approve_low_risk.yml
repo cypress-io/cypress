@@ -64,6 +64,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -eo pipefail
           REVIEW_ID=$(gh api --paginate \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
             --jq '.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED" and (.body // "" | startswith("Auto-approved:"))) | .id' \
