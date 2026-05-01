@@ -60,17 +60,27 @@ function __stackReplacementMarker (fn, ctx, args) {
 
 declare let top: WindowProxy & { __alreadySetErrorHandlers__: boolean }
 
+const _noopOnerrorGet = function () {}
+const _noopOnerrorSet = function () {}
+
 // We only set top.onerror once since we make it configurable:false
-// but we update cy instance every run (page reload or rerun button)
+// but we update cy and Cypress instances every run (page reload or rerun button).
+// Both are module-level so that onTopError does NOT close over the Cypress
+// parameter from the first setTopOnError call — which would permanently retain
+// that Cypress instance (and everything it holds) via the top.addEventListener
+// event listener, preventing GC after reruns.
 let curCy: $Cy | null = null
+let curCypress: ICypress | null = null
 const setTopOnError = function (Cypress, cy: $Cy) {
   if (curCy) {
     curCy = cy
+    curCypress = Cypress
 
     return
   }
 
   curCy = cy
+  curCypress = Cypress
 
   try {
     // prevent overriding top.onerror twice when loading more than one
@@ -89,7 +99,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
     // in some callbacks like for cy.intercept, we catch the errors and then
     // rethrow them, causing them to get caught by the top frame
     // but they came from the spec, so we need to differentiate them
-    const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
+    const isSpecError = $errUtils.isSpecError(curCypress!.config('spec'), err)
 
     const handled = curCy!.onUncaughtException({
       err,
@@ -100,7 +110,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
     debugErrors('uncaught top error: %o', originalErr)
 
-    $errUtils.logError(Cypress, handlerType, originalErr, handled)
+    $errUtils.logError(curCypress!, handlerType, originalErr, handled)
 
     // return undefined so the browser does its default
     // uncaught exception behavior (logging to console)
@@ -111,8 +121,8 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
   // prevent Mocha from setting top.onerror
   Object.defineProperty(top, 'onerror', {
-    set () { },
-    get () { },
+    set: _noopOnerrorSet,
+    get: _noopOnerrorGet,
     configurable: false,
     enumerable: true,
   })

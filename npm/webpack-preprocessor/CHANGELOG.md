@@ -1,3 +1,10 @@
+# [@cypress/webpack-preprocessor-v7.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v7.0.2...@cypress/webpack-preprocessor-v7.1.0) (2026-04-13)
+
+
+### Features
+
+* TypeScript 6 compatibility for webpack preprocessor and CT wizard ([#33575](https://github.com/cypress-io/cypress/issues/33575)) ([8eaedab](https://github.com/cypress-io/cypress/commit/8eaedab0d8679a0ae595dc7711b1be2cc784f707))
+
 # [@cypress/webpack-preprocessor-v7.0.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v7.0.1...@cypress/webpack-preprocessor-v7.0.2) (2025-11-07)
 
 # [@cypress/webpack-preprocessor-v7.0.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v7.0.0...@cypress/webpack-preprocessor-v7.0.1) (2025-08-19)

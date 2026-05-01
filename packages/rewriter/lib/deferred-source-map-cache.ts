@@ -3,6 +3,7 @@ import Debug from 'debug'
 import { rewriteJsSourceMapAsync } from './async-rewriters'
 import * as sourceMaps from './util/source-maps'
 import url from 'url'
+import type cypressRequestPromise from '@cypress/request-promise'
 
 const debug = Debug('cypress:rewriter:deferred-source-map-cache')
 
@@ -39,10 +40,10 @@ const getSourceMapHeader = (headers) => {
 export class DeferredSourceMapCache {
   _idCounter = 0
   requests: DeferredSourceMapRequest[] = []
-  requestLib: any
+  requestPromise: typeof cypressRequestPromise
 
-  constructor (requestLib) {
-    this.requestLib = requestLib
+  constructor (requestPromiseInstance: typeof cypressRequestPromise) {
+    this.requestPromise = requestPromiseInstance
   }
 
   defer = (request: DeferredSourceMapRequest) => {
@@ -82,16 +83,17 @@ export class DeferredSourceMapCache {
 
     // try to load it from the web
     const req = {
-      url: url.resolve(request.url, sourceMapUrl),
+      uri: url.resolve(request.url, sourceMapUrl),
       // TODO: this assumes that the sourcemap is on the same base domain, so it's safe to send the same headers
       // the browser sent for this sourcemap request - but if sourcemap is on a different domain, this will not
       // be true. need to use browser's cookiejar instead.
       headers,
       timeout: 5000,
+      resolveWithFullResponse: true,
     }
 
     try {
-      const { body } = await this.requestLib(req, true)
+      const { body } = await this.requestPromise(req)
 
       return body
     } catch (error) {

@@ -6,7 +6,6 @@ import { stripIndent } from 'common-tags'
 import Bluebird from 'bluebird'
 import logSymbols from 'log-symbols'
 import os from 'os'
-import verbose from '../VerboseRenderer'
 import { throwFormErrorText, errors } from '../errors'
 import util from '../util'
 import logger from '../logger'
@@ -181,87 +180,67 @@ const runSmokeTest = (binaryDir: string, options: any): any => {
   return userFriendlySpawn(linuxWithDisplayEnv)
 }
 
-function testBinary (version: string, binaryDir: string, options: any): Promise<any> {
-  debug('running binary verification check', version)
+function logVersionMismatch (binaryVersion: string, binaryDir: string, packageVersion: string): void {
+  logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
+  logger.log()
+  logger.warn(stripIndent`
+
+
+  ${logSymbols.warning} Warning: Binary version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
+
+    These versions may not work properly together.
+  `)
+
+  logger.log()
+}
+
+async function verifyBinary (installedVersion: string, binaryDir: string, options: any): Promise<void> {
+  debug('running binary verification check', installedVersion)
 
   // if running from 'cypress verify', don't print this message
   if (!options.force) {
     logger.log(stripIndent`
-    It looks like this is your first time using Cypress: ${chalk.cyan(version)}
+    It looks like this is your first time using Cypress: ${chalk.cyan(installedVersion)}
     `)
   }
 
   logger.log()
 
-  // if we are running in CI then use
-  // the verbose renderer else use
-  // the default
-  let renderer = util.isCi() ? verbose : 'default'
+  const verifyTaskRunner = new Listr([{
+    title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
+    task: async (ctx, task) => {
+      debug('clearing out the verified version')
 
-  // NOTE: under test we set the listr renderer to 'silent' in order to get deterministic snapshots
-  if (logger.logLevel() === 'silent' || options.listrRenderer) renderer = 'silent'
+      await state.clearBinaryStateAsync(binaryDir)
 
-  const rendererOptions = {
-    renderer,
-  }
+      await Promise.all([
+        runSmokeTest(binaryDir, options),
+        Bluebird.delay(1500), // good user experience
+      ])
 
-  const tasks = new Listr([
-    {
-      title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
-      task: async (ctx: any, task: any) => {
-        debug('clearing out the verified version')
+      debug('write verified: true')
 
-        await state.clearBinaryStateAsync(binaryDir)
+      await state.writeBinaryVerifiedAsync(true, binaryDir)
 
-        await Promise.all([
-          runSmokeTest(binaryDir, options),
-          Bluebird.delay(1500), // good user experience
-        ])
-
-        debug('write verified: true')
-
-        await state.writeBinaryVerifiedAsync(true, binaryDir)
-
-        util.setTaskTitle(
-          task,
-          util.titleize(
-            chalk.green('Verified Cypress!'),
-            chalk.gray(binaryDir),
-          ),
-          rendererOptions.renderer as string,
-        )
-      },
+      task.title = util.titleize(
+        chalk.green('Verified Cypress!'),
+        chalk.gray(binaryDir),
+      )
     },
-  ] as any, rendererOptions as any)
+  }], {
+    silentRendererCondition: () => logger.logLevel() === 'silent',
+  })
 
-  return tasks.run()
-}
+  await verifyTaskRunner.run()
 
-const maybeVerify = async (installedVersion: string, binaryDir: string, options: any): Promise<void> => {
-  const isVerified = await state.getBinaryVerifiedAsync(binaryDir)
-
-  debug('is Verified ?', isVerified)
-
-  let shouldVerify = !isVerified
-
-  // force verify if options.force
-  if (options.force) {
-    debug('force verify')
-    shouldVerify = true
-  }
-
-  if (shouldVerify) {
-    await testBinary(installedVersion, binaryDir, options)
-
-    if (options.welcomeMessage) {
-      logger.log()
-      logger.log('Opening Cypress...')
-    }
+  if (options.welcomeMessage) {
+    logger.log()
+    logger.log('Opening Cypress...')
   }
 }
 
 export const start = async (options: any = {}): Promise<void> => {
-  debug('verifying Cypress app')
+  debug('verifying Cypress app with options %j', options)
 
   _.defaults(options, {
     dev: false,
@@ -351,20 +330,18 @@ export const start = async (options: any = {}): Promise<void> => {
     if (binaryVersion !== packageVersion) {
       // warn if we installed with CYPRESS_INSTALL_BINARY or changed version
       // in the package.json
-      logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
-      logger.log()
-      logger.warn(stripIndent`
-
-
-      ${logSymbols.warning} Warning: Binary version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
-
-        These versions may not work properly together.
-      `)
-
-      logger.log()
+      logVersionMismatch(binaryVersion, binaryDir, packageVersion)
     }
 
-    await maybeVerify(binaryVersion, binaryDir, options)
+    const isVerified = options.force ?
+      false :
+      await state.getBinaryVerifiedAsync(binaryDir)
+
+    debug('is Verified ?', isVerified)
+
+    if (!isVerified) {
+      await verifyBinary(binaryVersion, binaryDir, options)
+    }
   } catch (err: any) {
     if (err.known) {
       throw err

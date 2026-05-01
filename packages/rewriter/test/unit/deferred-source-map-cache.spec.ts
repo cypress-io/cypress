@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import cypressRequestPromise from '@cypress/request-promise'
 import { DeferredSourceMapCache } from '../../lib/deferred-source-map-cache'
 import {
   testSourceWithExternalSourceMap,
@@ -11,7 +12,7 @@ describe('DeferredSourceMapCache', function () {
   let cache: DeferredSourceMapCache
 
   beforeEach(() => {
-    cache = new DeferredSourceMapCache(vi.fn())
+    cache = new DeferredSourceMapCache(vi.fn() as unknown as typeof cypressRequestPromise)
   })
 
   describe('#defer', () => {
@@ -109,16 +110,18 @@ describe('DeferredSourceMapCache', function () {
               return
             }
 
-            expect(cache.requestLib).toHaveBeenCalledWith({
-              url: 'http://somedomain.net/dir/test.js.map',
+            expect(cache.requestPromise).toHaveBeenCalledWith({
+              uri: 'http://somedomain.net/dir/test.js.map',
               headers: {},
               timeout: 5000,
-            }, true)
+              resolveWithFullResponse: true,
+            })
           }
         }
 
         beforeEach(() => {
-          cache.requestLib.mockResolvedValue({ body: testSourceMap })
+          // @ts-expect-error: @cypress/request-promise not typed
+          cache.requestPromise.mockResolvedValue({ body: testSourceMap })
         })
 
         it('with inlined base64 sourceMappingURL', testExternalSourceMap(testSourceWithInlineSourceMap, {}, false))
