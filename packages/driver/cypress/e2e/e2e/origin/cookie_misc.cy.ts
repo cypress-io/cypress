@@ -73,7 +73,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       })
     })
 
-    // wait for the async XHR response to actually arrive — deterministic, replaces relying on cy.wait(500) alone
+    // wait for the async XHR response to arrive
     cy.wait('@async')
     // small buffer for Firefox to commit the cookies to its store; cy.getAllCookies is a regular command, not a retrying query
     cy.wait(500)
@@ -83,11 +83,8 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
 
       // For a cookie set via Set-Cookie with no SameSite attribute, Firefox's BiDi
       // layer can report `sameSite` as either `default` (→ Cypress 'unspecified')
-      // or `lax` depending on which internal storage path wrote the cookie. Both
-      // describe the same cookie state — per `cli/types/cypress.d.ts`,
-      // `'unspecified'` is the documented default for Firefox 140+, and pre-140
-      // it was equivalent to `'no_restriction'`. CI runs FF 145+, so we
-      // normalize the two equivalent values into `'unspecified'` here.
+      // or `lax`. Both describe the same cookie state — per `cli/types/cypress.d.ts`,
+      // `'unspecified'` is the documented default for Firefox 140+
       const normalizeFirefoxDefaultSameSite = (cookie: Cypress.Cookie) => {
         if (!isFirefox) return cookie
 
