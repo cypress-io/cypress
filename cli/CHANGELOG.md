@@ -5,6 +5,10 @@
 
 - The `cy.end()` command has been deprecated and will be removed in a future release. Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
 
+**Misc:**
+
+- Additional CI environment variables are now captured to support a future failed test retry feature. Addressed in [#33714](https://github.com/cypress-io/cypress/pull/33714).
+
 **Dependency Updates:**
 
 - Upgraded `socket.io` from `4.0.1` to `4.8.3`, `socket.io-client` from `4.0.1` to `4.8.3`, and `socket.io-parser` from `4.0.5` to `4.2.6` to address a [Denial of Service](https://github.com/advisories/GHSA-677m-j7p3-52f9) vulnerability reported in security scans. The `engine.io`, `engine.io-client`, and `engine.io-parser` direct deps in `@packages/socket` were also bumped to keep transitive copies aligned and the existing browser-side patches applied. Addressed in [#33719](https://github.com/cypress-io/cypress/pull/33719).
@@ -60,7 +64,7 @@
 
 - Upgraded `axios` to `1.15.0` to address [CVE-2025-62718](https://www.cve.org/CVERecord?id=CVE-2025-62718) and [CVE-2026-40175](https://www.cve.org/CVERecord?id=CVE-2026-40175) vulnerabilities reported in security scans. Fixes [#33590](https://github.com/cypress-io/cypress/issues/33590).
 
-## 15.13.1 
+## 15.13.1
 
 **Performance:**
 
