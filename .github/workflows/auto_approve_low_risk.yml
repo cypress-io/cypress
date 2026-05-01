@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Extract risk level from CURSOR_SUMMARY
         id: risk-check
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const body = context.payload.pull_request.body || '';
