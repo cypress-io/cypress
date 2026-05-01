@@ -84,12 +84,12 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
       // For a cookie set via Set-Cookie with no SameSite attribute, Firefox's BiDi
       // layer can report `sameSite` as either `default` (→ Cypress 'unspecified')
       // or `lax`. Both describe the same cookie state — per `cli/types/cypress.d.ts`,
-      // `'unspecified'` is the documented default for Firefox 140+
-      const normalizeFirefoxDefaultSameSite = (cookie: Cypress.Cookie) => {
-        if (!isFirefox) return cookie
-
-        if (cookie.sameSite === 'unspecified' || cookie.sameSite === 'lax') {
-          return { ...cookie, sameSite: 'unspecified' }
+      // `'unspecified'` is the documented default for Firefox 140+. Coerce to
+      // `'lax'` so the assertion matches the effective SameSite behavior used by
+      // every other browser.
+      const normalizeFirefoxSameSiteToLax = (cookie: Cypress.Cookie) => {
+        if (cookie.sameSite === 'unspecified') {
+          return { ...cookie, sameSite: 'lax' }
         }
 
         return cookie
@@ -103,7 +103,7 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         hostOnly: true,
         httpOnly: false,
         domain: 'www.foobar.com',
-        sameSite: isFirefox ? 'unspecified' : 'lax',
+        sameSite: 'lax',
       }
 
       const fooBarCookie = {
@@ -114,15 +114,15 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
         hostOnly: true,
         httpOnly: false,
         domain: 'www.foobar.com',
-        sameSite: isFirefox ? 'unspecified' : 'lax',
+        sameSite: 'lax',
       }
 
       if (isFirefox) {
         // in Firefox both the foo=bar and ASYNC_COOKIE=async cookies will be set
         // SYNC_COOKIE=sync is not set because the intercept is not hit
         expect(cookies).to.have.length(2)
-        expect(normalizeFirefoxDefaultSameSite(cookies[0])).to.deep.equal(fooBarCookie)
-        expect(normalizeFirefoxDefaultSameSite(cookies[1])).to.deep.equal(asyncCookie)
+        expect(normalizeFirefoxSameSiteToLax(cookies[0])).to.deep.equal(fooBarCookie)
+        expect(normalizeFirefoxSameSiteToLax(cookies[1])).to.deep.equal(asyncCookie)
       } else {
         // in other browsers only the ASYNC_COOKIE=async cookie will be set
         // SYNC_COOKIE=sync is not set because the intercept is not hit
