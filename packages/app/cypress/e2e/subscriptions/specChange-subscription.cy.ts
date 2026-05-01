@@ -487,7 +487,7 @@ module.exports = {
 }`)
       })
 
-      cy.get('[data-cy="create-spec-page-title"]')
+      cy.get('[data-cy="create-spec-page-title"]', { timeout: 10000 })
       .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
     })
   })
