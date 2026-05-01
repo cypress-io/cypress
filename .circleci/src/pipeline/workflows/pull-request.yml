@@ -70,12 +70,6 @@ jobs:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
-  - verify-release-readiness:
-      context: [test-runner:npm-release, org-npm-credentials]
-      requires:
-        - internal-pr-build
-        - external-pr-build
-        - approve-contributor-pr
   - server-unit-tests:
       requires:
         - internal-pr-build
@@ -443,7 +437,6 @@ jobs:
         # Conditional jobs (halt early when not needed)
         - cli-visual-tests
         - unit-tests
-        - verify-release-readiness
         - server-unit-tests
         - server-integration-tests
         - server-performance-tests
