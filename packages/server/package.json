@@ -156,6 +156,7 @@
     "@types/chai-as-promised": "7.1.8",
     "@types/chrome": "0.0.101",
     "@types/chrome-remote-interface": "0.31.14",
+    "@types/content-type": "1.1.9",
     "@types/http-proxy": "1.17.17",
     "@types/node": "22.18.7",
     "@types/request-promise": "^4.1.51",
