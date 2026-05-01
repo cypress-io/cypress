@@ -111,7 +111,7 @@ jobs:
             --jq '.permission')
 
           case "$PERMISSION" in
-            admin|write|maintain)
+            admin|write)
               echo "has_write=true" >> "$GITHUB_OUTPUT"
               ;;
             *)
