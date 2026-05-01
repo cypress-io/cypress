@@ -1,5 +1,9 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.14.3
+## 15.15.0
+
+**Deprecations:**
+
+- The `cy.end()` command has been deprecated and will be removed in a future release. Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
 
 **Misc:**
 
@@ -23,7 +27,7 @@
 - Upgraded `listr2` from `3.8.3` to `^9.0.5`. Addressed in [#33640](https://github.com/cypress-io/cypress/pull/33640).
 - Upgraded `simple-git` from `3.33.0` to `3.36.0` to address a [Remote Code Execution](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15456078) vulnerability reported in security scans. Addressed in [#33680](https://github.com/cypress-io/cypress/pull/33680).
 - Upgraded `ts-loader` from `9.5.2` to `9.5.7`. Addresses [#33648](https://github.com/cypress-io/cypress/issues/33648). Addressed in [#33691](https://github.com/cypress-io/cypress/pull/33691)
-
+- Upgraded `@cypress/request` from `^3.0.10` to `^4.0.0`. Addresses [#33668](https://github.com/cypress-io/cypress/issues/33668). Addressed in [#33712](https://github.com/cypress-io/cypress/pull/33712)
 ## 15.14.1
 
 **Performance:**
