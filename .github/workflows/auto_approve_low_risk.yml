@@ -20,19 +20,18 @@ jobs:
       - name: Check if PR author is a repository collaborator
         id: collaborator-check
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AUTHOR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          AUTHOR_LOGIN: ${{ github.event.pull_request.user.login }}
         run: |
-          HTTP_CODE=$(gh api \
-            -H "Accept: application/vnd.github+json" \
-            "/repos/${{ github.repository }}/collaborators/${{ github.event.pull_request.user.login }}" \
-            --silent -i 2>/dev/null | head -1 | awk '{print $2}')
-
-          if [ "$HTTP_CODE" = "204" ]; then
-            echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "is_collaborator=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::PR author '${{ github.event.pull_request.user.login }}' is not a repository collaborator. Skipping auto-approve."
-          fi
+          case "$AUTHOR_ASSOCIATION" in
+            OWNER|MEMBER|COLLABORATOR)
+              echo "is_collaborator=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "is_collaborator=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::PR author '$AUTHOR_LOGIN' has association '$AUTHOR_ASSOCIATION'. Skipping auto-approve."
+              ;;
+          esac
 
       - name: Extract risk level from CURSOR_SUMMARY
         if: steps.collaborator-check.outputs.is_collaborator == 'true'
