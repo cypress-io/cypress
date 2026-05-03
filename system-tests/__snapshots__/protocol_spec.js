@@ -6237,7 +6237,10 @@ exports['e2e events'] = `
     "r3"
   ],
   "responseEndedWithEmptyBody": [],
-  "responseStreamTimedOut": []
+  "responseStreamTimedOut": [],
+  "cyRequestWillBeSent": [],
+  "cyRequestResponseReceived": [],
+  "cyRequestFailed": []
 }
 `
 
@@ -8096,7 +8099,10 @@ exports['component events - experimentalSingleTabRunMode: true'] = `
   "pageLoading": [],
   "resetTest": [],
   "responseEndedWithEmptyBody": [],
-  "responseStreamTimedOut": []
+  "responseStreamTimedOut": [],
+  "cyRequestWillBeSent": [],
+  "cyRequestResponseReceived": [],
+  "cyRequestFailed": []
 }
 `
 
@@ -9955,6 +9961,1645 @@ exports['component events - experimentalSingleTabRunMode: false'] = `
   "pageLoading": [],
   "resetTest": [],
   "responseEndedWithEmptyBody": [],
-  "responseStreamTimedOut": []
+  "responseStreamTimedOut": [],
+  "cyRequestWillBeSent": [],
+  "cyRequestResponseReceived": [],
+  "cyRequestFailed": []
+}
+`
+
+exports['cy.request events'] = `
+{
+  "debugData": {},
+  "beforeSpec": [
+    {
+      "name": "/path/to/name",
+      "open": true,
+      "inTransaction": false,
+      "readonly": false,
+      "memory": false
+    }
+  ],
+  "afterSpec": [
+    true
+  ],
+  "beforeTest": [
+    {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrideLevel": "suite",
+            "overrides": {
+              "baseUrl": "http://localhost:3131"
+            },
+            "invocationDetails": {
+              "function": "eval",
+              "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+              "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+              "relativeFile": "cypress/e2e/cy-request.cy.js",
+              "absoluteFile": "/path/to/absoluteFile",
+              "line": 1,
+              "column": 0,
+              "whitespace": "    ",
+              "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+            }
+          }
+        ],
+        "unverifiedTestConfig": {
+          "baseUrl": "http://localhost:3131"
+        },
+        "applied": "complete"
+      },
+      "id": "r3",
+      "order": 1,
+      "title": "captures a successful cy.request",
+      "pending": false,
+      "body": "() => {\\n    cy.request('/index.html').then(response => {\\n      expect(response.status).to.eq(200);\\n    });\\n\\n    // Settling delay so the protocol stub records the events deterministically\\n    // (matches the convention used by the other specs in this project).\\n    // eslint-disable-next-line cypress/no-unnecessary-waiting\\n    cy.wait(1000, {\\n      log: false\\n    });\\n  }",
+      "type": "test",
+      "wallClockStartedAt": "Any.ISODate",
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+        "relativeFile": "cypress/e2e/cy-request.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 2,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:11:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+      },
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000,
+      "timestamp": "Any.Number"
+    },
+    {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrideLevel": "suite",
+            "overrides": {
+              "baseUrl": "http://localhost:3131"
+            },
+            "invocationDetails": {
+              "function": "eval",
+              "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+              "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+              "relativeFile": "cypress/e2e/cy-request.cy.js",
+              "absoluteFile": "/path/to/absoluteFile",
+              "line": 1,
+              "column": 0,
+              "whitespace": "    ",
+              "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+            }
+          }
+        ],
+        "unverifiedTestConfig": {
+          "baseUrl": "http://localhost:3131"
+        },
+        "applied": "complete"
+      },
+      "id": "r4",
+      "order": 2,
+      "title": "captures a non-2xx cy.request when failOnStatusCode is false",
+      "pending": false,
+      "body": "() => {\\n    cy.request({\\n      url: '/does-not-exist.html',\\n      failOnStatusCode: false\\n    }).then(response => {\\n      expect(response.status).to.eq(404);\\n    });\\n\\n    // eslint-disable-next-line cypress/no-unnecessary-waiting\\n    cy.wait(1000, {\\n      log: false\\n    });\\n  }",
+      "type": "test",
+      "wallClockStartedAt": "Any.ISODate",
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+        "relativeFile": "cypress/e2e/cy-request.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 13,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:23:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+      },
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000,
+      "timestamp": "Any.Number"
+    },
+    {
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrideLevel": "suite",
+            "overrides": {
+              "baseUrl": "http://localhost:3131"
+            },
+            "invocationDetails": {
+              "function": "eval",
+              "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+              "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+              "relativeFile": "cypress/e2e/cy-request.cy.js",
+              "absoluteFile": "/path/to/absoluteFile",
+              "line": 1,
+              "column": 0,
+              "whitespace": "    ",
+              "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+            }
+          }
+        ],
+        "unverifiedTestConfig": {
+          "baseUrl": "http://localhost:3131"
+        },
+        "applied": "complete"
+      },
+      "id": "r5",
+      "order": 3,
+      "title": "captures a network failure",
+      "pending": false,
+      "body": "() => {\\n    // Port 1 reliably refuses TCP — produces ECONNREFUSED.\\n    // cy.on('fail') swallows the rejection so the test passes once the\\n    // cyRequestFailed event has been recorded by the protocol.\\n    cy.on('fail', err => {\\n      expect(err.message).to.match(/ECONNREFUSED|ETIMEDOUT|ENOTFOUND/);\\n      return false;\\n    });\\n    cy.request({\\n      url: 'http://127.0.0.1:1/never',\\n      retryOnNetworkFailure: false,\\n      timeout: 2000\\n    });\\n  }",
+      "type": "test",
+      "wallClockStartedAt": "Any.ISODate",
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+        "relativeFile": "cypress/e2e/cy-request.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 25,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:36:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+      },
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000,
+      "timestamp": "Any.Number"
+    }
+  ],
+  "preAfterTest": [
+    {
+      "test": {
+        "_cypressTestStatusInfo": {
+          "strategy": "detect-flake-and-pass-on-threshold",
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
+        "_testConfig": {
+          "testConfigList": [
+            {
+              "overrideLevel": "suite",
+              "overrides": {
+                "baseUrl": "http://localhost:3131"
+              },
+              "invocationDetails": {
+                "function": "eval",
+                "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+                "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+                "relativeFile": "cypress/e2e/cy-request.cy.js",
+                "absoluteFile": "/path/to/absoluteFile",
+                "line": 1,
+                "column": 0,
+                "whitespace": "    ",
+                "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+              }
+            }
+          ],
+          "unverifiedTestConfig": {
+            "baseUrl": "http://localhost:3131"
+          },
+          "applied": "complete"
+        },
+        "id": "r3",
+        "order": 1,
+        "title": "captures a successful cy.request",
+        "state": "passed",
+        "pending": false,
+        "body": "() => {\\n    cy.request('/index.html').then(response => {\\n      expect(response.status).to.eq(200);\\n    });\\n\\n    // Settling delay so the protocol stub records the events deterministically\\n    // (matches the convention used by the other specs in this project).\\n    // eslint-disable-next-line cypress/no-unnecessary-waiting\\n    cy.wait(1000, {\\n      log: false\\n    });\\n  }",
+        "type": "test",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
+        "timings": {
+          "lifecycle": "Any.Number",
+          "test": {
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
+          }
+        },
+        "file": null,
+        "invocationDetails": {
+          "function": "Suite.eval",
+          "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+          "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+          "relativeFile": "cypress/e2e/cy-request.cy.js",
+          "absoluteFile": "/path/to/absoluteFile",
+          "line": 2,
+          "column": 2,
+          "whitespace": "    ",
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:11:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+        },
+        "final": true,
+        "currentRetry": 0,
+        "retries": 0,
+        "_slow": 10000
+      },
+      "options": {
+        "nextTestHasTestIsolationOn": true
+      }
+    },
+    {
+      "test": {
+        "_cypressTestStatusInfo": {
+          "strategy": "detect-flake-and-pass-on-threshold",
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
+        "_testConfig": {
+          "testConfigList": [
+            {
+              "overrideLevel": "suite",
+              "overrides": {
+                "baseUrl": "http://localhost:3131"
+              },
+              "invocationDetails": {
+                "function": "eval",
+                "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+                "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+                "relativeFile": "cypress/e2e/cy-request.cy.js",
+                "absoluteFile": "/path/to/absoluteFile",
+                "line": 1,
+                "column": 0,
+                "whitespace": "    ",
+                "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+              }
+            }
+          ],
+          "unverifiedTestConfig": {
+            "baseUrl": "http://localhost:3131"
+          },
+          "applied": "complete"
+        },
+        "id": "r4",
+        "order": 2,
+        "title": "captures a non-2xx cy.request when failOnStatusCode is false",
+        "state": "passed",
+        "pending": false,
+        "body": "() => {\\n    cy.request({\\n      url: '/does-not-exist.html',\\n      failOnStatusCode: false\\n    }).then(response => {\\n      expect(response.status).to.eq(404);\\n    });\\n\\n    // eslint-disable-next-line cypress/no-unnecessary-waiting\\n    cy.wait(1000, {\\n      log: false\\n    });\\n  }",
+        "type": "test",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
+        "timings": {
+          "lifecycle": "Any.Number",
+          "test": {
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
+          }
+        },
+        "file": null,
+        "invocationDetails": {
+          "function": "Suite.eval",
+          "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+          "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+          "relativeFile": "cypress/e2e/cy-request.cy.js",
+          "absoluteFile": "/path/to/absoluteFile",
+          "line": 13,
+          "column": 2,
+          "whitespace": "    ",
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:23:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+        },
+        "final": true,
+        "currentRetry": 0,
+        "retries": 0,
+        "_slow": 10000
+      },
+      "options": {
+        "nextTestHasTestIsolationOn": true
+      }
+    },
+    {
+      "test": {
+        "_cypressTestStatusInfo": {
+          "strategy": "detect-flake-and-pass-on-threshold",
+          "shouldAttemptsContinue": false,
+          "attempts": 1,
+          "outerStatus": "passed"
+        },
+        "_testConfig": {
+          "testConfigList": [
+            {
+              "overrideLevel": "suite",
+              "overrides": {
+                "baseUrl": "http://localhost:3131"
+              },
+              "invocationDetails": {
+                "function": "eval",
+                "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+                "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+                "relativeFile": "cypress/e2e/cy-request.cy.js",
+                "absoluteFile": "/path/to/absoluteFile",
+                "line": 1,
+                "column": 0,
+                "whitespace": "    ",
+                "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+              }
+            }
+          ],
+          "unverifiedTestConfig": {
+            "baseUrl": "http://localhost:3131"
+          },
+          "applied": "complete"
+        },
+        "id": "r5",
+        "order": 3,
+        "title": "captures a network failure",
+        "state": "passed",
+        "pending": false,
+        "body": "() => {\\n    // Port 1 reliably refuses TCP — produces ECONNREFUSED.\\n    // cy.on('fail') swallows the rejection so the test passes once the\\n    // cyRequestFailed event has been recorded by the protocol.\\n    cy.on('fail', err => {\\n      expect(err.message).to.match(/ECONNREFUSED|ETIMEDOUT|ENOTFOUND/);\\n      return false;\\n    });\\n    cy.request({\\n      url: 'http://127.0.0.1:1/never',\\n      retryOnNetworkFailure: false,\\n      timeout: 2000\\n    });\\n  }",
+        "type": "test",
+        "duration": "Any.Number",
+        "wallClockStartedAt": "Any.ISODate",
+        "timings": {
+          "lifecycle": "Any.Number",
+          "test": {
+            "fnDuration": "Any.Number",
+            "afterFnDuration": "Any.Number"
+          }
+        },
+        "file": null,
+        "invocationDetails": {
+          "function": "Suite.eval",
+          "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+          "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+          "relativeFile": "cypress/e2e/cy-request.cy.js",
+          "absoluteFile": "/path/to/absoluteFile",
+          "line": 25,
+          "column": 2,
+          "whitespace": "    ",
+          "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:36:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+        },
+        "final": true,
+        "currentRetry": 0,
+        "retries": 0,
+        "_slow": 10000
+      },
+      "options": {}
+    }
+  ],
+  "afterTest": [
+    {
+      "_cypressTestStatusInfo": {
+        "strategy": "detect-flake-and-pass-on-threshold",
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrideLevel": "suite",
+            "overrides": {
+              "baseUrl": "http://localhost:3131"
+            },
+            "invocationDetails": {
+              "function": "eval",
+              "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+              "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+              "relativeFile": "cypress/e2e/cy-request.cy.js",
+              "absoluteFile": "/path/to/absoluteFile",
+              "line": 1,
+              "column": 0,
+              "whitespace": "    ",
+              "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+            }
+          }
+        ],
+        "unverifiedTestConfig": {
+          "baseUrl": "http://localhost:3131"
+        },
+        "applied": "complete"
+      },
+      "id": "r3",
+      "order": 1,
+      "title": "captures a successful cy.request",
+      "state": "passed",
+      "pending": false,
+      "body": "() => {\\n    cy.request('/index.html').then(response => {\\n      expect(response.status).to.eq(200);\\n    });\\n\\n    // Settling delay so the protocol stub records the events deterministically\\n    // (matches the convention used by the other specs in this project).\\n    // eslint-disable-next-line cypress/no-unnecessary-waiting\\n    cy.wait(1000, {\\n      log: false\\n    });\\n  }",
+      "type": "test",
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
+      "timings": {
+        "lifecycle": "Any.Number",
+        "test": {
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
+        }
+      },
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+        "relativeFile": "cypress/e2e/cy-request.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 2,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:11:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+      },
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000
+    },
+    {
+      "_cypressTestStatusInfo": {
+        "strategy": "detect-flake-and-pass-on-threshold",
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrideLevel": "suite",
+            "overrides": {
+              "baseUrl": "http://localhost:3131"
+            },
+            "invocationDetails": {
+              "function": "eval",
+              "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+              "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+              "relativeFile": "cypress/e2e/cy-request.cy.js",
+              "absoluteFile": "/path/to/absoluteFile",
+              "line": 1,
+              "column": 0,
+              "whitespace": "    ",
+              "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+            }
+          }
+        ],
+        "unverifiedTestConfig": {
+          "baseUrl": "http://localhost:3131"
+        },
+        "applied": "complete"
+      },
+      "id": "r4",
+      "order": 2,
+      "title": "captures a non-2xx cy.request when failOnStatusCode is false",
+      "state": "passed",
+      "pending": false,
+      "body": "() => {\\n    cy.request({\\n      url: '/does-not-exist.html',\\n      failOnStatusCode: false\\n    }).then(response => {\\n      expect(response.status).to.eq(404);\\n    });\\n\\n    // eslint-disable-next-line cypress/no-unnecessary-waiting\\n    cy.wait(1000, {\\n      log: false\\n    });\\n  }",
+      "type": "test",
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
+      "timings": {
+        "lifecycle": "Any.Number",
+        "test": {
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
+        }
+      },
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+        "relativeFile": "cypress/e2e/cy-request.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 13,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:23:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+      },
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000
+    },
+    {
+      "_cypressTestStatusInfo": {
+        "strategy": "detect-flake-and-pass-on-threshold",
+        "shouldAttemptsContinue": false,
+        "attempts": 1,
+        "outerStatus": "passed"
+      },
+      "_testConfig": {
+        "testConfigList": [
+          {
+            "overrideLevel": "suite",
+            "overrides": {
+              "baseUrl": "http://localhost:3131"
+            },
+            "invocationDetails": {
+              "function": "eval",
+              "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+              "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+              "relativeFile": "cypress/e2e/cy-request.cy.js",
+              "absoluteFile": "/path/to/absoluteFile",
+              "line": 1,
+              "column": 0,
+              "whitespace": "    ",
+              "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+            }
+          }
+        ],
+        "unverifiedTestConfig": {
+          "baseUrl": "http://localhost:3131"
+        },
+        "applied": "complete"
+      },
+      "id": "r5",
+      "order": 3,
+      "title": "captures a network failure",
+      "state": "passed",
+      "pending": false,
+      "body": "() => {\\n    // Port 1 reliably refuses TCP — produces ECONNREFUSED.\\n    // cy.on('fail') swallows the rejection so the test passes once the\\n    // cyRequestFailed event has been recorded by the protocol.\\n    cy.on('fail', err => {\\n      expect(err.message).to.match(/ECONNREFUSED|ETIMEDOUT|ENOTFOUND/);\\n      return false;\\n    });\\n    cy.request({\\n      url: 'http://127.0.0.1:1/never',\\n      retryOnNetworkFailure: false,\\n      timeout: 2000\\n    });\\n  }",
+      "type": "test",
+      "duration": "Any.Number",
+      "wallClockStartedAt": "Any.ISODate",
+      "wallClockDuration": "Any.Number",
+      "timings": {
+        "lifecycle": "Any.Number",
+        "test": {
+          "fnDuration": "Any.Number",
+          "afterFnDuration": "Any.Number"
+        }
+      },
+      "file": null,
+      "invocationDetails": {
+        "function": "Suite.eval",
+        "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+        "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+        "relativeFile": "cypress/e2e/cy-request.cy.js",
+        "absoluteFile": "/path/to/absoluteFile",
+        "line": 25,
+        "column": 2,
+        "whitespace": "    ",
+        "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:36:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+      },
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0,
+      "_slow": 10000
+    }
+  ],
+  "addRunnables": [
+    {
+      "id": "r1",
+      "title": "",
+      "root": true,
+      "pending": false,
+      "type": "suite",
+      "file": "cypress/e2e/cy-request.cy.js",
+      "retries": -1,
+      "_slow": 10000,
+      "hooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "_testConfig": {
+            "baseUrl": "http://localhost:3131"
+          },
+          "id": "r2",
+          "title": "cy.request protocol capture",
+          "root": false,
+          "pending": false,
+          "type": "suite",
+          "file": null,
+          "invocationDetails": {
+            "function": "eval",
+            "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+            "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+            "relativeFile": "cypress/e2e/cy-request.cy.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 1,
+            "column": 0,
+            "whitespace": "    ",
+            "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+          },
+          "retries": -1,
+          "_slow": 10000,
+          "hooks": [],
+          "tests": [
+            {
+              "id": "r3",
+              "title": "captures a successful cy.request",
+              "pending": false,
+              "body": "() => {\\n    cy.request('/index.html').then(response => {\\n      expect(response.status).to.eq(200);\\n    });\\n\\n    // Settling delay so the protocol stub records the events deterministically\\n    // (matches the convention used by the other specs in this project).\\n    // eslint-disable-next-line cypress/no-unnecessary-waiting\\n    cy.wait(1000, {\\n      log: false\\n    });\\n  }",
+              "type": "test",
+              "file": null,
+              "invocationDetails": {
+                "function": "Suite.eval",
+                "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+                "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+                "relativeFile": "cypress/e2e/cy-request.cy.js",
+                "absoluteFile": "/path/to/absoluteFile",
+                "line": 2,
+                "column": 2,
+                "whitespace": "    ",
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:11:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+              },
+              "currentRetry": 0,
+              "retries": -1,
+              "_slow": 10000,
+              "hooks": [],
+              "_testConfig": {
+                "testConfigList": [
+                  {
+                    "overrideLevel": "suite",
+                    "overrides": {
+                      "baseUrl": "http://localhost:3131"
+                    },
+                    "invocationDetails": {
+                      "function": "eval",
+                      "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+                      "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+                      "relativeFile": "cypress/e2e/cy-request.cy.js",
+                      "absoluteFile": "/path/to/absoluteFile",
+                      "line": 1,
+                      "column": 0,
+                      "whitespace": "    ",
+                      "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+                    }
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "baseUrl": "http://localhost:3131"
+                }
+              },
+              "_titlePath": [
+                "cy.request protocol capture",
+                "captures a successful cy.request"
+              ]
+            },
+            {
+              "id": "r4",
+              "title": "captures a non-2xx cy.request when failOnStatusCode is false",
+              "pending": false,
+              "body": "() => {\\n    cy.request({\\n      url: '/does-not-exist.html',\\n      failOnStatusCode: false\\n    }).then(response => {\\n      expect(response.status).to.eq(404);\\n    });\\n\\n    // eslint-disable-next-line cypress/no-unnecessary-waiting\\n    cy.wait(1000, {\\n      log: false\\n    });\\n  }",
+              "type": "test",
+              "file": null,
+              "invocationDetails": {
+                "function": "Suite.eval",
+                "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+                "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+                "relativeFile": "cypress/e2e/cy-request.cy.js",
+                "absoluteFile": "/path/to/absoluteFile",
+                "line": 13,
+                "column": 2,
+                "whitespace": "    ",
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:23:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+              },
+              "currentRetry": 0,
+              "retries": -1,
+              "_slow": 10000,
+              "hooks": [],
+              "_testConfig": {
+                "testConfigList": [
+                  {
+                    "overrideLevel": "suite",
+                    "overrides": {
+                      "baseUrl": "http://localhost:3131"
+                    },
+                    "invocationDetails": {
+                      "function": "eval",
+                      "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+                      "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+                      "relativeFile": "cypress/e2e/cy-request.cy.js",
+                      "absoluteFile": "/path/to/absoluteFile",
+                      "line": 1,
+                      "column": 0,
+                      "whitespace": "    ",
+                      "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+                    }
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "baseUrl": "http://localhost:3131"
+                }
+              },
+              "_titlePath": [
+                "cy.request protocol capture",
+                "captures a non-2xx cy.request when failOnStatusCode is false"
+              ]
+            },
+            {
+              "id": "r5",
+              "title": "captures a network failure",
+              "pending": false,
+              "body": "() => {\\n    // Port 1 reliably refuses TCP — produces ECONNREFUSED.\\n    // cy.on('fail') swallows the rejection so the test passes once the\\n    // cyRequestFailed event has been recorded by the protocol.\\n    cy.on('fail', err => {\\n      expect(err.message).to.match(/ECONNREFUSED|ETIMEDOUT|ENOTFOUND/);\\n      return false;\\n    });\\n    cy.request({\\n      url: 'http://127.0.0.1:1/never',\\n      retryOnNetworkFailure: false,\\n      timeout: 2000\\n    });\\n  }",
+              "type": "test",
+              "file": null,
+              "invocationDetails": {
+                "function": "Suite.eval",
+                "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+                "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+                "relativeFile": "cypress/e2e/cy-request.cy.js",
+                "absoluteFile": "/path/to/absoluteFile",
+                "line": 25,
+                "column": 2,
+                "whitespace": "    ",
+                "stack": "Error\\n    at Suite.eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:36:3)\\n    at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)\\n    at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)\\n    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)\\n    at eval (cypress:///../driver/src/cypress/mocha.ts:187:16)"
+              },
+              "currentRetry": 0,
+              "retries": -1,
+              "_slow": 10000,
+              "hooks": [],
+              "_testConfig": {
+                "testConfigList": [
+                  {
+                    "overrideLevel": "suite",
+                    "overrides": {
+                      "baseUrl": "http://localhost:3131"
+                    },
+                    "invocationDetails": {
+                      "function": "eval",
+                      "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+                      "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+                      "relativeFile": "cypress/e2e/cy-request.cy.js",
+                      "absoluteFile": "/path/to/absoluteFile",
+                      "line": 1,
+                      "column": 0,
+                      "whitespace": "    ",
+                      "stack": "Error\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:8:1)\\n    at eval (http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js:51:12)\\n    at eval (<anonymous>)"
+                    }
+                  }
+                ],
+                "unverifiedTestConfig": {
+                  "baseUrl": "http://localhost:3131"
+                }
+              },
+              "_titlePath": [
+                "cy.request protocol capture",
+                "captures a network failure"
+              ]
+            }
+          ],
+          "suites": []
+        }
+      ],
+      "runtimeConfig": {},
+      "totalUnfilteredTests": 0
+    }
+  ],
+  "connectToBrowser": [
+    true
+  ],
+  "commandLogAdded": [
+    {
+      "id": "log-http://localhost:2121-1",
+      "defaultCollapsedState": "open",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "",
+      "name": "request",
+      "renderProps": {
+        "message": "GET --- http://localhost:3131/index.html",
+        "indicator": "pending"
+      },
+      "state": "pending",
+      "testId": "r3",
+      "timeout": 30000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-2",
+      "defaultCollapsedState": "open",
+      "end": true,
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "expected **200** to equal **200**",
+      "name": "assert",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-4",
+      "defaultCollapsedState": "open",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "",
+      "name": "request",
+      "renderProps": {
+        "message": "GET --- http://localhost:3131/does-not-exist.html",
+        "indicator": "pending"
+      },
+      "state": "pending",
+      "testId": "r4",
+      "timeout": 30000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-5",
+      "defaultCollapsedState": "open",
+      "end": true,
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "expected **404** to equal **404**",
+      "name": "assert",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-7",
+      "defaultCollapsedState": "open",
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "hidden": false,
+      "message": "",
+      "name": "request",
+      "renderProps": {
+        "message": "GET --- http://127.0.0.1:1/never",
+        "indicator": "pending"
+      },
+      "state": "pending",
+      "testId": "r5",
+      "timeout": 2000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-8",
+      "defaultCollapsedState": "open",
+      "end": true,
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "hidden": false,
+      "message": "expected **\`cy.request()\` failed trying to load:\\\\n\\\\nhttp://127.0.0.1:1/never\\\\n\\\\nWe attempted to make an http request to this URL",
+      "name": "assert",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r5",
+      "timeout": 0,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    }
+  ],
+  "commandLogChanged": [
+    {
+      "id": "log-http://localhost:2121-1",
+      "defaultCollapsedState": "open",
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "",
+      "name": "request",
+      "renderProps": {
+        "message": "GET 200 http://localhost:3131/index.html",
+        "indicator": "successful"
+      },
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 30000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-2",
+      "defaultCollapsedState": "open",
+      "end": true,
+      "event": false,
+      "hookId": "r3",
+      "instrument": "command",
+      "hidden": false,
+      "message": "expected **200** to equal **200**",
+      "name": "assert",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r3",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-4",
+      "defaultCollapsedState": "open",
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "",
+      "name": "request",
+      "renderProps": {
+        "message": "GET 404 http://localhost:3131/does-not-exist.html",
+        "indicator": "bad"
+      },
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 30000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-5",
+      "defaultCollapsedState": "open",
+      "end": true,
+      "event": false,
+      "hookId": "r4",
+      "instrument": "command",
+      "hidden": false,
+      "message": "expected **404** to equal **404**",
+      "name": "assert",
+      "renderProps": {},
+      "state": "passed",
+      "testId": "r4",
+      "timeout": 0,
+      "type": "child",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "snapshots": [
+        {
+          "timestamp": "Any.Number",
+          "htmlAttrs": {},
+          "body": {}
+        }
+      ],
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    },
+    {
+      "id": "log-http://localhost:2121-7",
+      "defaultCollapsedState": "open",
+      "err": {
+        "message": "\`cy.request()\` failed trying to load:\\n\\nhttp://127.0.0.1:1/never\\n\\nWe attempted to make an http request to this URL but the request failed without a response.\\n\\nWe received this error at the network level:\\n\\n  > Error: connect ECONNREFUSED 127.0.0.1:1\\n\\n-----------------------------------------------------------\\n\\nThe request we sent was:\\n\\nMethod: GET\\nURL: http://127.0.0.1:1/never\\n\\n-----------------------------------------------------------\\n\\nCommon situations why this would fail:\\n  - you don't have internet access\\n  - you forgot to run / boot your web server\\n  - your web server isn't accessible\\n  - you have weird network configuration settings on your computer\\n\\nhttps://on.cypress.io/request",
+        "name": "CypressError",
+        "stack": "CypressError: \`cy.request()\` failed trying to load:\\n\\nhttp://127.0.0.1:1/never\\n\\nWe attempted to make an http request to this URL but the request failed without a response.\\n\\nWe received this error at the network level:\\n\\n  > Error: connect ECONNREFUSED 127.0.0.1:1\\n\\n-----------------------------------------------------------\\n\\nThe request we sent was:\\n\\nMethod: GET\\nURL: http://127.0.0.1:1/never\\n\\n-----------------------------------------------------------\\n\\nCommon situations why this would fail:\\n  - you don't have internet access\\n  - you forgot to run / boot your web server\\n  - your web server isn't accessible\\n  - you have weird network configuration settings on your computer\\n\\nhttps://on.cypress.io/request\\n    at eval (cypress:///../driver/src/cy/commands/request.ts:398:70)\\n    at tryCatcher (cypress:///../../node_modules/bluebird/js/release/util.js:17:23)\\n    at eval (cypress:///../../node_modules/bluebird/js/release/catch_filter.js:34:37)\\n    at tryCatcher (cypress:///../../node_modules/bluebird/js/release/util.js:17:23)\\n    at Promise._settlePromiseFromHandler (cypress:///../../node_modules/bluebird/js/release/promise.js:513:31)\\n    at Promise._settlePromise (cypress:///../../node_modules/bluebird/js/release/promise.js:570:18)\\n    at Promise._settlePromise0 (cypress:///../../node_modules/bluebird/js/release/promise.js:615:10)\\n    at Promise._settlePromises (cypress:///../../node_modules/bluebird/js/release/promise.js:691:18)\\n    at _drainQueueStep (cypress:///../../node_modules/bluebird/js/release/async.js:139:12)\\n    at _drainQueue (cypress:///../../node_modules/bluebird/js/release/async.js:132:9)\\n    at Async._drainQueues (cypress:///../../node_modules/bluebird/js/release/async.js:148:5)\\n    at Async.drainQueues (cypress:///../../node_modules/bluebird/js/release/async.js:18:14)\\nFrom Your Spec Code:\\n    at Context.eval (webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js:35:7)\\n\\nFrom Node.js Internals:\\n  RequestError: Error: connect ECONNREFUSED 127.0.0.1:1\\n      at new RequestError (<embedded>:90439:14)\\n      at Request.plumbing.callback (<embedded>:90703:27)\\n      at Request.RP$callback [as _callback] (<embedded>:90674:28)\\n      at self2.callback (<embedded>:122796:26)\\n      at Request.emit (node:events:519:29)\\n      at Request.onRequestError (<embedded>:123331:12)\\n      at ClientRequest.emit (node:events:531:36)\\n      at emitErrorEvent (node:_http_client:105:12)\\n      at Socket.socketErrorListener (node:_http_client:518:6)\\n      at Socket.emit (node:events:519:29)\\n      at emitErrorNT (node:internal/streams/destroy:170:9)\\n      at emitErrorCloseNT (node:internal/streams/destroy:129:4)\\n      at processTicksAndRejections (node:internal/process/task_queues:90:22)",
+        "parsedStack": [
+          {
+            "message": "CypressError: \`cy.request()\` failed trying to load:",
+            "whitespace": ""
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "http://127.0.0.1:1/never",
+            "whitespace": ""
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "We attempted to make an http request to this URL but the request failed without a response.",
+            "whitespace": ""
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "We received this error at the network level:",
+            "whitespace": ""
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "> Error: connect ECONNREFUSED 127.0.0.1:1",
+            "whitespace": "  "
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "-----------------------------------------------------------",
+            "whitespace": ""
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "The request we sent was:",
+            "whitespace": ""
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "Method: GET",
+            "whitespace": ""
+          },
+          {
+            "message": "URL: http://127.0.0.1:1/never",
+            "whitespace": ""
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "-----------------------------------------------------------",
+            "whitespace": ""
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "Common situations why this would fail:",
+            "whitespace": ""
+          },
+          {
+            "message": "- you don't have internet access",
+            "whitespace": "  "
+          },
+          {
+            "message": "- you forgot to run / boot your web server",
+            "whitespace": "  "
+          },
+          {
+            "message": "- your web server isn't accessible",
+            "whitespace": "  "
+          },
+          {
+            "message": "- you have weird network configuration settings on your computer",
+            "whitespace": "  "
+          },
+          {
+            "function": "eval",
+            "fileUrl": "cypress:///../driver/src/cy/commands/request.ts",
+            "originalFile": "cypress:///../driver/src/cy/commands/request.ts",
+            "relativeFile": "../driver/src/cy/commands/request.ts",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 398,
+            "column": 70,
+            "whitespace": "    "
+          },
+          {
+            "function": "tryCatcher",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/util.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/util.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/util.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 17,
+            "column": 23,
+            "whitespace": "    "
+          },
+          {
+            "function": "eval",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/catch_filter.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/catch_filter.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/catch_filter.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 34,
+            "column": 37,
+            "whitespace": "    "
+          },
+          {
+            "function": "tryCatcher",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/util.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/util.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/util.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 17,
+            "column": 23,
+            "whitespace": "    "
+          },
+          {
+            "function": "Promise._settlePromiseFromHandler",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/promise.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 513,
+            "column": 31,
+            "whitespace": "    "
+          },
+          {
+            "function": "Promise._settlePromise",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/promise.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 570,
+            "column": 18,
+            "whitespace": "    "
+          },
+          {
+            "function": "Promise._settlePromise0",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/promise.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 615,
+            "column": 10,
+            "whitespace": "    "
+          },
+          {
+            "function": "Promise._settlePromises",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/promise.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/promise.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 691,
+            "column": 18,
+            "whitespace": "    "
+          },
+          {
+            "function": "_drainQueueStep",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/async.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/async.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/async.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 139,
+            "column": 12,
+            "whitespace": "    "
+          },
+          {
+            "function": "_drainQueue",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/async.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/async.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/async.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 132,
+            "column": 9,
+            "whitespace": "    "
+          },
+          {
+            "function": "Async._drainQueues",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/async.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/async.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/async.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 148,
+            "column": 5,
+            "whitespace": "    "
+          },
+          {
+            "function": "Async.drainQueues",
+            "fileUrl": "cypress:///../../node_modules/bluebird/js/release/async.js",
+            "originalFile": "cypress:///../../node_modules/bluebird/js/release/async.js",
+            "relativeFile": "../../node_modules/bluebird/js/release/async.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 18,
+            "column": 14,
+            "whitespace": "    "
+          },
+          {
+            "message": "From Your Spec Code:",
+            "whitespace": ""
+          },
+          {
+            "function": "Context.eval",
+            "fileUrl": "http://localhost:2121/__cypress/tests?p=cypress/e2e/cy-request.cy.js",
+            "originalFile": "webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js",
+            "relativeFile": "cypress/e2e/cy-request.cy.js",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 35,
+            "column": 7,
+            "whitespace": "    "
+          },
+          {
+            "message": "",
+            "whitespace": ""
+          },
+          {
+            "message": "From Node.js Internals:",
+            "whitespace": ""
+          },
+          {
+            "message": "RequestError: Error: connect ECONNREFUSED 127.0.0.1:1",
+            "whitespace": "  "
+          },
+          {
+            "function": "new RequestError",
+            "fileUrl": "<embedded>",
+            "originalFile": "<embedded>",
+            "relativeFile": "<embedded>",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 90439,
+            "column": 14,
+            "whitespace": "      "
+          },
+          {
+            "function": "Request.plumbing.callback",
+            "fileUrl": "<embedded>",
+            "originalFile": "<embedded>",
+            "relativeFile": "<embedded>",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 90703,
+            "column": 27,
+            "whitespace": "      "
+          },
+          {
+            "function": "Request.RP$callback [as _callback]",
+            "fileUrl": "<embedded>",
+            "originalFile": "<embedded>",
+            "relativeFile": "<embedded>",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 90674,
+            "column": 28,
+            "whitespace": "      "
+          },
+          {
+            "function": "self2.callback",
+            "fileUrl": "<embedded>",
+            "originalFile": "<embedded>",
+            "relativeFile": "<embedded>",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 122796,
+            "column": 26,
+            "whitespace": "      "
+          },
+          {
+            "function": "Request.emit",
+            "fileUrl": "node:events",
+            "originalFile": "node:events",
+            "relativeFile": "node:events",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 519,
+            "column": 29,
+            "whitespace": "      "
+          },
+          {
+            "function": "Request.onRequestError",
+            "fileUrl": "<embedded>",
+            "originalFile": "<embedded>",
+            "relativeFile": "<embedded>",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 123331,
+            "column": 12,
+            "whitespace": "      "
+          },
+          {
+            "function": "ClientRequest.emit",
+            "fileUrl": "node:events",
+            "originalFile": "node:events",
+            "relativeFile": "node:events",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 531,
+            "column": 36,
+            "whitespace": "      "
+          },
+          {
+            "function": "emitErrorEvent",
+            "fileUrl": "node:_http_client",
+            "originalFile": "node:_http_client",
+            "relativeFile": "node:_http_client",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 105,
+            "column": 12,
+            "whitespace": "      "
+          },
+          {
+            "function": "Socket.socketErrorListener",
+            "fileUrl": "node:_http_client",
+            "originalFile": "node:_http_client",
+            "relativeFile": "node:_http_client",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 518,
+            "column": 6,
+            "whitespace": "      "
+          },
+          {
+            "function": "Socket.emit",
+            "fileUrl": "node:events",
+            "originalFile": "node:events",
+            "relativeFile": "node:events",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 519,
+            "column": 29,
+            "whitespace": "      "
+          },
+          {
+            "function": "emitErrorNT",
+            "fileUrl": "node:internal/streams/destroy",
+            "originalFile": "node:internal/streams/destroy",
+            "relativeFile": "node:internal/streams/destroy",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 170,
+            "column": 9,
+            "whitespace": "      "
+          },
+          {
+            "function": "emitErrorCloseNT",
+            "fileUrl": "node:internal/streams/destroy",
+            "originalFile": "node:internal/streams/destroy",
+            "relativeFile": "node:internal/streams/destroy",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 129,
+            "column": 4,
+            "whitespace": "      "
+          },
+          {
+            "function": "processTicksAndRejections",
+            "fileUrl": "node:internal/process/task_queues",
+            "originalFile": "node:internal/process/task_queues",
+            "relativeFile": "node:internal/process/task_queues",
+            "absoluteFile": "/path/to/absoluteFile",
+            "line": 90,
+            "column": 22,
+            "whitespace": "      "
+          },
+          {
+            "message": "",
+            "whitespace": "  "
+          }
+        ],
+        "codeFrame": {
+          "line": 35,
+          "column": 8,
+          "originalFile": "cypress/e2e/cy-request.cy.js",
+          "relativeFile": "cypress/e2e/cy-request.cy.js",
+          "absoluteFile": "/path/to/absoluteFile",
+          "frame": "  33 |     })\\n  34 |\\n> 35 |     cy.request({\\n     |        ^\\n  36 |       url: 'http://127.0.0.1:1/never',\\n  37 |       retryOnNetworkFailure: false,\\n  38 |       timeout: 2000,",
+          "language": "js"
+        }
+      },
+      "event": false,
+      "hookId": "r5",
+      "instrument": "command",
+      "hidden": false,
+      "message": "",
+      "name": "request",
+      "renderProps": {
+        "message": "GET --- http://127.0.0.1:1/never",
+        "indicator": "pending"
+      },
+      "state": "failed",
+      "testId": "r5",
+      "timeout": 2000,
+      "type": "parent",
+      "url": "",
+      "wallClockStartedAt": "Any.ISODate",
+      "testCurrentRetry": 0,
+      "createdAtTimestamp": "Any.Number",
+      "updatedAtTimestamp": "Any.Number"
+    }
+  ],
+  "viewportChanged": [],
+  "urlChanged": [
+    {
+      "url": "",
+      "timestamp": "Any.Number"
+    },
+    {
+      "url": "",
+      "timestamp": "Any.Number"
+    },
+    {
+      "url": "",
+      "timestamp": "Any.Number"
+    }
+  ],
+  "pageLoading": [
+    {
+      "loading": true,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": false,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": true,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": false,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": true,
+      "timestamp": "Any.Number"
+    },
+    {
+      "loading": false,
+      "timestamp": "Any.Number"
+    }
+  ],
+  "resetTest": [],
+  "responseEndedWithEmptyBody": [],
+  "responseStreamTimedOut": [],
+  "cyRequestWillBeSent": [
+    {
+      "requestId": "cyrequest_Any.Number",
+      "runnableId": "r3",
+      "attempt": 1,
+      "logId": "Any.LogId",
+      "url": "http://localhost:3131/index.html",
+      "method": "GET",
+      "requestHeaders": {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36",
+        "accept": "*/*"
+      },
+      "requestBodyOriginalSize": 0,
+      "hasRequestBody": false,
+      "initiator": "cy.request",
+      "timestamp": "Any.Number",
+      "wallTime": "Any.Number",
+      "hasRequestBodyOnTheWire": false
+    },
+    {
+      "requestId": "cyrequest_Any.Number",
+      "runnableId": "r4",
+      "attempt": 1,
+      "logId": "Any.LogId",
+      "url": "http://localhost:3131/does-not-exist.html",
+      "method": "GET",
+      "requestHeaders": {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36",
+        "accept": "*/*"
+      },
+      "requestBodyOriginalSize": 0,
+      "hasRequestBody": false,
+      "initiator": "cy.request",
+      "timestamp": "Any.Number",
+      "wallTime": "Any.Number",
+      "hasRequestBodyOnTheWire": false
+    },
+    {
+      "requestId": "cyrequest_Any.Number",
+      "runnableId": "r5",
+      "attempt": 1,
+      "logId": "Any.LogId",
+      "url": "http://127.0.0.1:1/never",
+      "method": "GET",
+      "requestHeaders": {
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36",
+        "accept": "*/*"
+      },
+      "requestBodyOriginalSize": 0,
+      "hasRequestBody": false,
+      "initiator": "cy.request",
+      "timestamp": "Any.Number",
+      "wallTime": "Any.Number",
+      "hasRequestBodyOnTheWire": false
+    }
+  ],
+  "cyRequestResponseReceived": [
+    {
+      "requestId": "cyrequest_Any.Number",
+      "runnableId": "r3",
+      "attempt": 1,
+      "logId": "Any.LogId",
+      "finalUrl": "http://localhost:3131/index.html",
+      "status": 200,
+      "statusText": "OK",
+      "responseHeaders": {
+        "x-powered-by": "Express",
+        "accept-ranges": "bytes",
+        "cache-control": "public, max-age=0",
+        "last-modified": "Any.HeaderValue",
+        "etag": "Any.HeaderValue"5c-19dda32e578\\"",
+        "content-type": "text/html; charset=UTF-8",
+        "content-length": "92",
+        "date": "Any.HeaderValue",
+        "connection": "keep-alive",
+        "keep-alive": "timeout=5"
+      },
+      "responseBodyOriginalSize": 92,
+      "hasResponseBody": true,
+      "durationMs": "Any.Number",
+      "attemptsUsed": 1,
+      "timestamp": "Any.Number",
+      "hasResponseStream": true
+    },
+    {
+      "requestId": "cyrequest_Any.Number",
+      "runnableId": "r4",
+      "attempt": 1,
+      "logId": "Any.LogId",
+      "finalUrl": "http://localhost:3131/does-not-exist.html",
+      "status": 404,
+      "statusText": "Not Found",
+      "responseHeaders": {
+        "x-powered-by": "Express",
+        "content-security-policy": "default-src 'none'",
+        "x-content-type-options": "nosniff",
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "158",
+        "date": "Any.HeaderValue",
+        "connection": "keep-alive",
+        "keep-alive": "timeout=5"
+      },
+      "responseBodyOriginalSize": 158,
+      "hasResponseBody": true,
+      "durationMs": "Any.Number",
+      "attemptsUsed": 1,
+      "timestamp": "Any.Number",
+      "hasResponseStream": true
+    }
+  ],
+  "cyRequestFailed": [
+    {
+      "requestId": "cyrequest_Any.Number",
+      "runnableId": "r5",
+      "attempt": 1,
+      "logId": "Any.LogId",
+      "errorMessage": "Error: connect ECONNREFUSED 127.0.0.1:1",
+      "durationMs": "Any.Number",
+      "attemptsUsed": 1,
+      "timestamp": "Any.Number"
+    }
+  ]
 }
 `
