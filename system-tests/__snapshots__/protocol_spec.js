@@ -11025,7 +11025,7 @@ exports['cy.request events'] = `
       "err": {
         "message": "\`cy.request()\` failed trying to load:\\n\\nhttp://127.0.0.1:1/never\\n\\nWe attempted to make an http request to this URL but the request failed without a response.\\n\\nWe received this error at the network level:\\n\\n  > Error: connect ECONNREFUSED 127.0.0.1:1\\n\\n-----------------------------------------------------------\\n\\nThe request we sent was:\\n\\nMethod: GET\\nURL: http://127.0.0.1:1/never\\n\\n-----------------------------------------------------------\\n\\nCommon situations why this would fail:\\n  - you don't have internet access\\n  - you forgot to run / boot your web server\\n  - your web server isn't accessible\\n  - you have weird network configuration settings on your computer\\n\\nhttps://on.cypress.io/request",
         "name": "CypressError",
-        "stack": "CypressError: \`cy.request()\` failed trying to load:\\n\\nhttp://127.0.0.1:1/never\\n\\nWe attempted to make an http request to this URL but the request failed without a response.\\n\\nWe received this error at the network level:\\n\\n  > Error: connect ECONNREFUSED 127.0.0.1:1\\n\\n-----------------------------------------------------------\\n\\nThe request we sent was:\\n\\nMethod: GET\\nURL: http://127.0.0.1:1/never\\n\\n-----------------------------------------------------------\\n\\nCommon situations why this would fail:\\n  - you don't have internet access\\n  - you forgot to run / boot your web server\\n  - your web server isn't accessible\\n  - you have weird network configuration settings on your computer\\n\\nhttps://on.cypress.io/request\\n    at eval (cypress:///../driver/src/cy/commands/request.ts:398:70)\\n    at tryCatcher (cypress:///../../node_modules/bluebird/js/release/util.js:17:23)\\n    at eval (cypress:///../../node_modules/bluebird/js/release/catch_filter.js:34:37)\\n    at tryCatcher (cypress:///../../node_modules/bluebird/js/release/util.js:17:23)\\n    at Promise._settlePromiseFromHandler (cypress:///../../node_modules/bluebird/js/release/promise.js:513:31)\\n    at Promise._settlePromise (cypress:///../../node_modules/bluebird/js/release/promise.js:570:18)\\n    at Promise._settlePromise0 (cypress:///../../node_modules/bluebird/js/release/promise.js:615:10)\\n    at Promise._settlePromises (cypress:///../../node_modules/bluebird/js/release/promise.js:691:18)\\n    at _drainQueueStep (cypress:///../../node_modules/bluebird/js/release/async.js:139:12)\\n    at _drainQueue (cypress:///../../node_modules/bluebird/js/release/async.js:132:9)\\n    at Async._drainQueues (cypress:///../../node_modules/bluebird/js/release/async.js:148:5)\\n    at Async.drainQueues (cypress:///../../node_modules/bluebird/js/release/async.js:18:14)\\nFrom Your Spec Code:\\n    at Context.eval (webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js:35:7)\\n\\nFrom Node.js Internals:\\n  RequestError: Error: connect ECONNREFUSED 127.0.0.1:1\\n      at new RequestError (<embedded>:90439:14)\\n      at Request.plumbing.callback (<embedded>:90703:27)\\n      at Request.RP$callback [as _callback] (<embedded>:90674:28)\\n      at self2.callback (<embedded>:122796:26)\\n      at Request.emit (node:events:519:29)\\n      at Request.onRequestError (<embedded>:123331:12)\\n      at ClientRequest.emit (node:events:531:36)\\n      at emitErrorEvent (node:_http_client:105:12)\\n      at Socket.socketErrorListener (node:_http_client:518:6)\\n      at Socket.emit (node:events:519:29)\\n      at emitErrorNT (node:internal/streams/destroy:170:9)\\n      at emitErrorCloseNT (node:internal/streams/destroy:129:4)\\n      at processTicksAndRejections (node:internal/process/task_queues:90:22)",
+        "stack": "CypressError: \`cy.request()\` failed trying to load:\\n\\nhttp://127.0.0.1:1/never\\n\\nWe attempted to make an http request to this URL but the request failed without a response.\\n\\nWe received this error at the network level:\\n\\n  > Error: connect ECONNREFUSED 127.0.0.1:1\\n\\n-----------------------------------------------------------\\n\\nThe request we sent was:\\n\\nMethod: GET\\nURL: http://127.0.0.1:1/never\\n\\n-----------------------------------------------------------\\n\\nCommon situations why this would fail:\\n  - you don't have internet access\\n  - you forgot to run / boot your web server\\n  - your web server isn't accessible\\n  - you have weird network configuration settings on your computer\\n\\nhttps://on.cypress.io/request\\n    at eval (cypress:///../driver/src/cy/commands/request.ts:398:70)\\n    at tryCatcher (cypress:///../../node_modules/bluebird/js/release/util.js:17:23)\\n    at eval (cypress:///../../node_modules/bluebird/js/release/catch_filter.js:34:37)\\n    at tryCatcher (cypress:///../../node_modules/bluebird/js/release/util.js:17:23)\\n    at Promise._settlePromiseFromHandler (cypress:///../../node_modules/bluebird/js/release/promise.js:513:31)\\n    at Promise._settlePromise (cypress:///../../node_modules/bluebird/js/release/promise.js:570:18)\\n    at Promise._settlePromise0 (cypress:///../../node_modules/bluebird/js/release/promise.js:615:10)\\n    at Promise._settlePromises (cypress:///../../node_modules/bluebird/js/release/promise.js:691:18)\\n    at _drainQueueStep (cypress:///../../node_modules/bluebird/js/release/async.js:139:12)\\n    at _drainQueue (cypress:///../../node_modules/bluebird/js/release/async.js:132:9)\\n    at Async._drainQueues (cypress:///../../node_modules/bluebird/js/release/async.js:148:5)\\n    at Async.drainQueues (cypress:///../../node_modules/bluebird/js/release/async.js:18:14)\\nFrom Your Spec Code:\\n    at Context.eval (webpack://protocol-sample-project/./cypress/e2e/cy-request.cy.js:35:7)\\n\\nFrom Node.js Internals: Any.NodeStack",
         "parsedStack": [
           {
             "message": "CypressError: \`cy.request()\` failed trying to load:",
@@ -11269,140 +11269,7 @@ exports['cy.request events'] = `
             "message": "RequestError: Error: connect ECONNREFUSED 127.0.0.1:1",
             "whitespace": "  "
           },
-          {
-            "function": "new RequestError",
-            "fileUrl": "<embedded>",
-            "originalFile": "<embedded>",
-            "relativeFile": "<embedded>",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 90439,
-            "column": 14,
-            "whitespace": "      "
-          },
-          {
-            "function": "Request.plumbing.callback",
-            "fileUrl": "<embedded>",
-            "originalFile": "<embedded>",
-            "relativeFile": "<embedded>",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 90703,
-            "column": 27,
-            "whitespace": "      "
-          },
-          {
-            "function": "Request.RP$callback [as _callback]",
-            "fileUrl": "<embedded>",
-            "originalFile": "<embedded>",
-            "relativeFile": "<embedded>",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 90674,
-            "column": 28,
-            "whitespace": "      "
-          },
-          {
-            "function": "self2.callback",
-            "fileUrl": "<embedded>",
-            "originalFile": "<embedded>",
-            "relativeFile": "<embedded>",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 122796,
-            "column": 26,
-            "whitespace": "      "
-          },
-          {
-            "function": "Request.emit",
-            "fileUrl": "node:events",
-            "originalFile": "node:events",
-            "relativeFile": "node:events",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 519,
-            "column": 29,
-            "whitespace": "      "
-          },
-          {
-            "function": "Request.onRequestError",
-            "fileUrl": "<embedded>",
-            "originalFile": "<embedded>",
-            "relativeFile": "<embedded>",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 123331,
-            "column": 12,
-            "whitespace": "      "
-          },
-          {
-            "function": "ClientRequest.emit",
-            "fileUrl": "node:events",
-            "originalFile": "node:events",
-            "relativeFile": "node:events",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 531,
-            "column": 36,
-            "whitespace": "      "
-          },
-          {
-            "function": "emitErrorEvent",
-            "fileUrl": "node:_http_client",
-            "originalFile": "node:_http_client",
-            "relativeFile": "node:_http_client",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 105,
-            "column": 12,
-            "whitespace": "      "
-          },
-          {
-            "function": "Socket.socketErrorListener",
-            "fileUrl": "node:_http_client",
-            "originalFile": "node:_http_client",
-            "relativeFile": "node:_http_client",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 518,
-            "column": 6,
-            "whitespace": "      "
-          },
-          {
-            "function": "Socket.emit",
-            "fileUrl": "node:events",
-            "originalFile": "node:events",
-            "relativeFile": "node:events",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 519,
-            "column": 29,
-            "whitespace": "      "
-          },
-          {
-            "function": "emitErrorNT",
-            "fileUrl": "node:internal/streams/destroy",
-            "originalFile": "node:internal/streams/destroy",
-            "relativeFile": "node:internal/streams/destroy",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 170,
-            "column": 9,
-            "whitespace": "      "
-          },
-          {
-            "function": "emitErrorCloseNT",
-            "fileUrl": "node:internal/streams/destroy",
-            "originalFile": "node:internal/streams/destroy",
-            "relativeFile": "node:internal/streams/destroy",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 129,
-            "column": 4,
-            "whitespace": "      "
-          },
-          {
-            "function": "processTicksAndRejections",
-            "fileUrl": "node:internal/process/task_queues",
-            "originalFile": "node:internal/process/task_queues",
-            "relativeFile": "node:internal/process/task_queues",
-            "absoluteFile": "/path/to/absoluteFile",
-            "line": 90,
-            "column": 22,
-            "whitespace": "      "
-          },
-          {
-            "message": "",
-            "whitespace": "  "
-          }
+          { "frame": "Any.NodeStack" }
         ],
         "codeFrame": {
           "line": 35,
@@ -11488,7 +11355,7 @@ exports['cy.request events'] = `
       "url": "http://localhost:3131/index.html",
       "method": "GET",
       "requestHeaders": {
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36",
+        "user-agent": "Any.UserAgent",
         "accept": "*/*"
       },
       "requestBodyOriginalSize": 0,
@@ -11506,7 +11373,7 @@ exports['cy.request events'] = `
       "url": "http://localhost:3131/does-not-exist.html",
       "method": "GET",
       "requestHeaders": {
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36",
+        "user-agent": "Any.UserAgent",
         "accept": "*/*"
       },
       "requestBodyOriginalSize": 0,
@@ -11524,7 +11391,7 @@ exports['cy.request events'] = `
       "url": "http://127.0.0.1:1/never",
       "method": "GET",
       "requestHeaders": {
-        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/138.0.7204.251 Electron/37.6.0 Safari/537.36",
+        "user-agent": "Any.UserAgent",
         "accept": "*/*"
       },
       "requestBodyOriginalSize": 0,
@@ -11549,7 +11416,7 @@ exports['cy.request events'] = `
         "accept-ranges": "bytes",
         "cache-control": "public, max-age=0",
         "last-modified": "Any.HeaderValue",
-        "etag": "Any.HeaderValue"5c-19dda32e578\\"",
+        "etag": "Any.HeaderValue",
         "content-type": "text/html; charset=UTF-8",
         "content-length": "92",
         "date": "Any.HeaderValue",

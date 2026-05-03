@@ -16,13 +16,29 @@ const componentSpecPathRegex = /"(url|message)": "(http:\/\/localhost:2121\/__cy
 // SHA-1 hex (40 chars) — used by cy.request body hashes; varies per body bytes
 // even for deterministic content if the system adds a trailing newline, etc.
 const shaHashRegex = /"(requestBodyHash|responseBodyHash)": "[a-f0-9]{40}"/g
-// Server-emitted response headers that vary per run.
-const volatileResponseHeaderRegex = /"(date|etag|last-modified)": "[^"]*"/g
+// Server-emitted response headers that vary per run. Uses a JSON-string body
+// match so that values containing escaped quotes (e.g. weak ETags `W/"..."`)
+// are scrubbed in full rather than truncated at the first inner quote.
+const volatileResponseHeaderRegex = /"(date|etag|last-modified)": "(?:[^"\\]|\\.)*"/g
 // cy.request requestId counter resets each spec run but doesn't always start
 // from the same number when other code paths share `_.uniqueId('cyrequest_')`.
 const cyRequestIdRegex = /"requestId": "cyrequest_\d+"/g
 // log:added/log:changed log id format — varies per run.
 const cyRequestLogIdRegex = /"logId": "log-[^"]+"/g
+// User-Agent in cy.request requestHeaders varies by the OS the run executes on
+// (e.g. macOS locally vs. Linux in CI). The browser/Cypress version is asserted
+// elsewhere; here we only care that the header is captured.
+const userAgentHeaderRegex = /"user-agent": "(?:[^"\\]|\\.)*"/g
+// `From Node.js Internals:` section of the cy.request error stack contains
+// frame line/column numbers + function-name shapes that change across Node /
+// libuv builds and across operating systems. Strip the whole tail.
+const nodeInternalsStackRegex = /From Node\.js Internals:\\n[^"]*/g
+// Volatile parsedStack frames — those originating in `<embedded>` (the bundled
+// Cypress server code) or any `node:...` builtin module — drift across runs.
+// Match from the first such frame through the closing `]` of the array, which
+// also collapses any trailing empty `{ "message": "", "whitespace": "..." }`
+// entries that some Node versions append.
+const parsedStackVolatileTailRegex = /\{[^{}]*"originalFile": "(?:<embedded>|node:[^"]*)"[\s\S]*?\n(\s*)\]/g
 
 const normalizeEvents = (resultsJson) => {
   return resultsJson
@@ -32,6 +48,9 @@ const normalizeEvents = (resultsJson) => {
   .replace(componentSpecPathRegex, '"$1": "$2$4$5"')
   .replace(shaHashRegex, '"$1": "Any.Sha1Hash"')
   .replace(volatileResponseHeaderRegex, '"$1": "Any.HeaderValue"')
+  .replace(userAgentHeaderRegex, '"user-agent": "Any.UserAgent"')
+  .replace(nodeInternalsStackRegex, 'From Node.js Internals: Any.NodeStack')
+  .replace(parsedStackVolatileTailRegex, '{ "frame": "Any.NodeStack" }\n$1]')
   .replace(cyRequestIdRegex, '"requestId": "cyrequest_Any.Number"')
   .replace(cyRequestLogIdRegex, '"logId": "Any.LogId"')
 }

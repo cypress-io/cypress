@@ -31,7 +31,11 @@ describe('src/cy/commands/request', () => {
             retryIntervals: [0, 100, 200, 200],
           })
 
-          const options = backend.firstCall.args[1]
+          // protocolMetadata is attached by the driver only when capture-protocol
+          // is enabled (Chromium-based browsers in this suite); it's a runtime
+          // correlation field, not part of the cy.request argument signature
+          // being asserted here, so omit it from the comparison.
+          const options = _.omit(backend.firstCall.args[1], 'protocolMetadata')
 
           _.each(options, (value, key) => {
             expect(options[key]).to.deep.eq(opts[key], `failed on property: (${key})`)
