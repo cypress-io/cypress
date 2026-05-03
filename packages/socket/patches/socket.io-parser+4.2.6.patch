@@ -95,7 +95,7 @@ index f7e9957..65bcabe 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/cjs/index.js b/node_modules/socket.io-parser/build/cjs/index.js
-index e9cc933..c472c92 100644
+index e9cc933..e9bbbb8 100644
 --- a/node_modules/socket.io-parser/build/cjs/index.js
 +++ b/node_modules/socket.io-parser/build/cjs/index.js
 @@ -7,6 +7,7 @@ const binary_js_1 = require("./binary.js");
@@ -115,15 +115,6 @@ index e9cc933..c472c92 100644
          }
          debug("encoded %j as %s", obj, str);
          return str;
-@@ -122,7 +123,7 @@ class Decoder extends component_emitter_1.Emitter {
-         super();
-         this.opts = Object.assign({
-             reviver: undefined,
--            maxAttachments: 10,
-+            maxAttachments: Infinity,
-         }, typeof opts === "function" ? { reviver: opts } : opts);
-     }
-     /**
 @@ -236,19 +237,14 @@ class Decoder extends component_emitter_1.Emitter {
          // look up json data
          if (str.charAt(++i)) {
@@ -315,7 +306,7 @@ index 5d5c3d8..2855d98 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/esm-debug/index.js b/node_modules/socket.io-parser/build/esm-debug/index.js
-index 7a50263..d834cca 100644
+index 7a50263..5eee435 100644
 --- a/node_modules/socket.io-parser/build/esm-debug/index.js
 +++ b/node_modules/socket.io-parser/build/esm-debug/index.js
 @@ -1,8 +1,10 @@
@@ -338,15 +329,6 @@ index 7a50263..d834cca 100644
          }
          debug("encoded %j as %s", obj, str);
          return str;
-@@ -117,7 +119,7 @@ export class Decoder extends Emitter {
-         super();
-         this.opts = Object.assign({
-             reviver: undefined,
--            maxAttachments: 10,
-+            maxAttachments: Infinity,
-         }, typeof opts === "function" ? { reviver: opts } : opts);
-     }
-     /**
 @@ -231,19 +233,14 @@ export class Decoder extends Emitter {
          // look up json data
          if (str.charAt(++i)) {
@@ -530,7 +512,7 @@ index 5d5c3d8..2855d98 100644
          }
      }
 diff --git a/node_modules/socket.io-parser/build/esm/index.js b/node_modules/socket.io-parser/build/esm/index.js
-index f06c183..c20ce7f 100644
+index f06c183..3df4243 100644
 --- a/node_modules/socket.io-parser/build/esm/index.js
 +++ b/node_modules/socket.io-parser/build/esm/index.js
 @@ -1,6 +1,8 @@
@@ -551,15 +533,6 @@ index f06c183..c20ce7f 100644
          }
          return str;
      }
-@@ -113,7 +115,7 @@ export class Decoder extends Emitter {
-         super();
-         this.opts = Object.assign({
-             reviver: undefined,
--            maxAttachments: 10,
-+            maxAttachments: Infinity,
-         }, typeof opts === "function" ? { reviver: opts } : opts);
-     }
-     /**
 @@ -227,18 +229,13 @@ export class Decoder extends Emitter {
          // look up json data
          if (str.charAt(++i)) {

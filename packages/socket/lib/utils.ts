@@ -30,7 +30,9 @@ export const decode = (data: any): Promise<any> => {
   return new Promise((resolve, reject) => {
     try {
       const decoded = engineParser.decodePayload(data)
-      const decoder = new socketIoParser.Decoder()
+      // see comment in lib/node/socket.ts: lift socket.io-parser 4.2.x's
+      // maxAttachments cap for Cypress's trusted local channel
+      const decoder = new socketIoParser.Decoder({ maxAttachments: Infinity })
 
       decoder.on('decoded', (packet: any) => {
         decoder.destroy()
