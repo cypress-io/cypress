@@ -1,24 +1,7 @@
 import io, { ManagerOptions, SocketOptions } from 'socket.io-client'
-import * as socketIoParser from 'socket.io-parser'
+import { cypressParser } from '../utils'
 import { CDPBrowserSocket } from './cdp-browser'
 import type { SocketShape } from './cdp-browser'
-
-// socket.io-parser 4.2.x defaults the Decoder's maxAttachments to 10 as part of
-// the GHSA-677m-j7p3-52f9 / CVE-2026-33151 DoS fix. Cypress's driver↔server
-// channel is between two trusted local processes and routinely encodes payloads
-// (e.g. cy.request responses) with more than 10 binary fields, so the cap
-// produces false-positive 'too many attachments' errors. Lift the cap only for
-// the client-side Manager — socket.io-parser's library default stays untouched.
-class UnlimitedAttachmentsDecoder extends socketIoParser.Decoder {
-  constructor (opts?: any) {
-    super({ ...opts, maxAttachments: Infinity })
-  }
-}
-
-const cypressParser = {
-  ...socketIoParser,
-  Decoder: UnlimitedAttachmentsDecoder,
-}
 
 declare global {
   interface Window {

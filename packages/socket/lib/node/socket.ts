@@ -1,25 +1,7 @@
 import buffer from 'buffer'
 import type http from 'http'
 import { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
-import * as socketIoParser from 'socket.io-parser'
-
-// socket.io-parser 4.2.x defaults the Decoder's maxAttachments to 10 as part of
-// the GHSA-677m-j7p3-52f9 / CVE-2026-33151 DoS fix. Cypress's driver↔server
-// channel is between two trusted local processes and routinely encodes payloads
-// (e.g. cy.request responses) with more than 10 binary fields, so the cap
-// produces false-positive 'too many attachments' errors. Lift the cap only for
-// this Server instance — socket.io-parser's library default stays untouched for
-// any other consumer.
-class UnlimitedAttachmentsDecoder extends socketIoParser.Decoder {
-  constructor (opts?: any) {
-    super({ ...opts, maxAttachments: Infinity })
-  }
-}
-
-const cypressParser = {
-  ...socketIoParser,
-  Decoder: UnlimitedAttachmentsDecoder,
-}
+import { cypressParser } from '../utils'
 
 // TODO: this will need to be updated to use an ESM version of the package
 const { version } = require('socket.io-client/package.json')
