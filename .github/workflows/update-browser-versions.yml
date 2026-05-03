@@ -23,7 +23,6 @@ jobs:
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
-          repositories: cypress
       - name: Checkout
         uses: actions/checkout@v6
         with:

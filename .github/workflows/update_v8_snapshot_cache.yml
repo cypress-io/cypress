@@ -84,7 +84,6 @@ jobs:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: read
-          repositories: cypress
       - name: Checkout
         uses: actions/checkout@v6
         with:
@@ -129,7 +128,6 @@ jobs:
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
-          repositories: cypress
       ## actions/checkout persisted the *initial* token in git's config. On
       ## Windows the build can exceed the App token's 1h lifetime, so that
       ## persisted credential expires before we push. Re-run checkout with
