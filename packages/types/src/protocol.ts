@@ -33,6 +33,9 @@ export interface AppCaptureProtocolCommon {
   responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => void
   responseStreamReceived (options: ResponseStreamOptions): Readable | undefined
   responseStreamTimedOut (options: ResponseStreamTimedOutOptions): void
+  cyRequestWillBeSent (options: CyRequestWillBeSentOptions): void
+  cyRequestResponseReceived (options: CyRequestResponseReceivedOptions): void
+  cyRequestFailed (options: CyRequestFailedOptions): void
 }
 
 export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
@@ -163,4 +166,76 @@ export type ResponseStreamOptions = {
 export type ResponseStreamTimedOutOptions = {
   requestId: string
   timings: ProxyTimings
+}
+
+export type CyRequestBodyEncoding = 'utf8' | 'base64' | 'binary'
+
+export type CyRequestInitiator = 'cy.request' | 'cy.session'
+
+// Mirrors CDP's `redirectResponse` field on `Network.requestWillBeSent`. When a
+// redirect chain is followed, the cypress side fires one cyRequestWillBeSent
+// per hop (each sharing the same requestId); hops 2+ carry the prior hop's
+// response here so downstream tooling sees the same shape as browser-issued
+// redirect chains.
+export type CyRequestRedirectResponse = {
+  url: string
+  status: number
+  statusText: string
+  headers: IncomingHttpHeaders
+}
+
+export type CyRequestWillBeSentOptions = {
+  requestId: string
+  runnableId?: string
+  attempt?: number
+  logId?: string
+  url: string
+  method: string
+  requestHeaders: IncomingHttpHeaders
+  // Full request body, untruncated. The capture-protocol applies the size cap
+  // (cloud-tunable) before hashing — it's the source of truth for limits.
+  requestBody?: Buffer | string
+  requestBodyEncoding?: CyRequestBodyEncoding
+  requestBodyOriginalSize?: number
+  hasRequestBody: boolean
+  initiator: CyRequestInitiator
+  // Populated for hops 2+ in a redirect chain. Absent for the original request.
+  redirectResponse?: CyRequestRedirectResponse
+  timestamp: number
+  wallTime: number
+}
+
+export type CyRequestResponseReceivedOptions = {
+  requestId: string
+  runnableId?: string
+  attempt?: number
+  logId?: string
+  finalUrl: string
+  status: number
+  statusText: string
+  responseHeaders: IncomingHttpHeaders
+  // Untruncated response body stream — mirrors `responseStreamReceived` for CDP
+  // traffic. The capture-protocol pipes this through a length-limited Transform
+  // (cap is cloud-tunable) and then through `processAssetStream` for incremental
+  // hashing and tarball persistence. Undefined when `hasResponseBody === false`.
+  responseStream?: Readable
+  // Bytes observed on the wire — the protocol uses this to decide whether to
+  // truncate during streaming and to record `*Truncated` in the event payload.
+  responseBodyOriginalSize?: number
+  hasResponseBody: boolean
+  durationMs: number
+  attemptsUsed: number
+  timestamp: number
+}
+
+export type CyRequestFailedOptions = {
+  requestId: string
+  runnableId?: string
+  attempt?: number
+  logId?: string
+  errorMessage: string
+  errorCode?: string
+  durationMs: number
+  attemptsUsed: number
+  timestamp: number
 }

@@ -14,7 +14,7 @@ import { requireScript } from './require_script'
 import * as routes from './routes'
 
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, FoundSpec } from '@packages/types'
+import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, CyRequestWillBeSentOptions, CyRequestResponseReceivedOptions, CyRequestFailedOptions, AfterSpecDurations, FoundSpec } from '@packages/types'
 
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
@@ -303,6 +303,18 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('responseStreamTimedOut', { isEssential: false }, options)
   }
 
+  cyRequestWillBeSent (options: CyRequestWillBeSentOptions): void {
+    this.invokeSync('cyRequestWillBeSent', { isEssential: false }, options)
+  }
+
+  cyRequestResponseReceived (options: CyRequestResponseReceivedOptions): void {
+    this.invokeSync('cyRequestResponseReceived', { isEssential: false }, options)
+  }
+
+  cyRequestFailed (options: CyRequestFailedOptions): void {
+    this.invokeSync('cyRequestFailed', { isEssential: false }, options)
+  }
+
   canUpload (): boolean {
     return !!this._protocol && !!this._archivePath && !!this._db
   }
@@ -534,9 +546,19 @@ export class ProtocolManager implements ProtocolManagerShape {
       return
     }
 
+    // Forward-compat guard: silently no-op if the loaded protocol script
+    // doesn't implement this method. Older protocol modules paired with a
+    // newer Cypress would otherwise throw TypeError on every hook call.
+    const fn = (this._protocol as any)[method]
+
+    if (typeof fn !== 'function') {
+      debug('protocol method %s not implemented; skipping', method)
+
+      return
+    }
+
     try {
-      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return this._protocol[method].apply(this._protocol, args)
+      return fn.apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
         this.captureError({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
@@ -555,9 +577,18 @@ export class ProtocolManager implements ProtocolManagerShape {
       return undefined
     }
 
+    // Forward-compat guard: silently no-op if the loaded protocol script
+    // doesn't implement this method.
+    const fn = (this._protocol as any)[method]
+
+    if (typeof fn !== 'function') {
+      debug('protocol method %s not implemented; skipping', method)
+
+      return undefined
+    }
+
     try {
-      // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
-      return await this._protocol[method].apply(this._protocol, args)
+      return await fn.apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
         this.captureError({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })

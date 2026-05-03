@@ -393,6 +393,86 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.pageLoading).to.be.calledWith(input)
   })
 
+  describe('cy.request hooks', () => {
+    const baseWillBeSent = {
+      requestId: 'cyrequest_1',
+      runnableId: 'r3',
+      attempt: 1,
+      logId: 'log-1',
+      url: 'https://example.cypress.io/foo',
+      method: 'GET',
+      requestHeaders: { accept: '*/*' },
+      hasRequestBody: false,
+      initiator: 'cy.request' as const,
+      timestamp: 1700000000000,
+      wallTime: 1700000000,
+    }
+
+    it('forwards cyRequestWillBeSent to the loaded protocol', () => {
+      sinon.stub(protocol, 'cyRequestWillBeSent')
+
+      protocolManager.cyRequestWillBeSent(baseWillBeSent)
+
+      expect(protocol.cyRequestWillBeSent).to.be.calledWith(baseWillBeSent)
+    })
+
+    it('forwards cyRequestResponseReceived to the loaded protocol', () => {
+      sinon.stub(protocol, 'cyRequestResponseReceived')
+
+      const opts = {
+        requestId: 'cyrequest_1',
+        runnableId: 'r3',
+        attempt: 1,
+        logId: 'log-1',
+        finalUrl: 'https://example.cypress.io/foo',
+        status: 200,
+        statusText: 'OK',
+        responseHeaders: { 'content-type': 'application/json' },
+        hasResponseBody: true,
+        responseBodyOriginalSize: 17,
+        durationMs: 42,
+        attemptsUsed: 1,
+        timestamp: 1700000000100,
+      }
+
+      protocolManager.cyRequestResponseReceived(opts)
+
+      expect(protocol.cyRequestResponseReceived).to.be.calledWith(opts)
+    })
+
+    it('forwards cyRequestFailed to the loaded protocol', () => {
+      sinon.stub(protocol, 'cyRequestFailed')
+
+      const opts = {
+        requestId: 'cyrequest_1',
+        runnableId: 'r3',
+        attempt: 1,
+        logId: 'log-1',
+        errorMessage: 'connect ECONNREFUSED',
+        errorCode: 'ECONNREFUSED',
+        durationMs: 12,
+        attemptsUsed: 4,
+        timestamp: 1700000000050,
+      }
+
+      protocolManager.cyRequestFailed(opts)
+
+      expect(protocol.cyRequestFailed).to.be.calledWith(opts)
+    })
+
+    it('silently no-ops when the loaded protocol does not implement the hook (forward-compat guard)', () => {
+      // Older protocol modules paired with newer Cypress would lack these methods.
+      // The guard in invokeSync should detect that and skip without recording an error.
+      delete (protocol as any).cyRequestWillBeSent
+
+      protocolManager.cyRequestWillBeSent(baseWillBeSent)
+
+      // Non-fatal errors are accumulated on _errors before being dispatched.
+      // The guard must not push anything onto it.
+      expect((protocolManager as any)._errors).to.be.empty
+    })
+  })
+
   describe('.resetTest', () => {
     it('should be able to reset the test with no current retry', () => {
       sinon.stub(protocol, 'resetTest')

@@ -1050,6 +1050,213 @@ describe('lib/request', () => {
         })
       })
     })
+
+    context('protocolManager cy.request hooks', () => {
+      let req: Request
+      let protocolManager: any
+
+      beforeEach(function () {
+        req = new Request({ timeout: 100 })
+        protocolManager = {
+          cyRequestWillBeSent: sinon.stub(),
+          cyRequestResponseReceived: sinon.stub(),
+          cyRequestFailed: sinon.stub(),
+        }
+
+        req.setProtocolManager(protocolManager)
+      })
+
+      it('fires willBeSent + responseReceived on a successful request', function () {
+        nock('http://www.github.com')
+        .get('/foo')
+        .reply(200, 'hello', { 'Content-Type': 'text/plain' })
+
+        return req.sendPromise(undefined, this.fn, {
+          url: 'http://www.github.com/foo',
+          cookies: false,
+          protocolMetadata: { logId: 'log-1', runnableId: 'r3', attempt: 1, initiator: 'cy.request' },
+        })
+        .then(() => {
+          expect(protocolManager.cyRequestWillBeSent).to.be.calledOnce
+          expect(protocolManager.cyRequestResponseReceived).to.be.calledOnce
+          expect(protocolManager.cyRequestFailed).not.to.be.called
+
+          const wbs = protocolManager.cyRequestWillBeSent.getCall(0).args[0]
+
+          expect(wbs.requestId).to.match(/^cyrequest_/)
+          expect(wbs.url).to.eq('http://www.github.com/foo')
+          expect(wbs.method).to.eq('GET')
+          expect(wbs.logId).to.eq('log-1')
+          expect(wbs.runnableId).to.eq('r3')
+          expect(wbs.attempt).to.eq(1)
+          expect(wbs.initiator).to.eq('cy.request')
+
+          const rr = protocolManager.cyRequestResponseReceived.getCall(0).args[0]
+
+          expect(rr.requestId).to.eq(wbs.requestId)
+          expect(rr.status).to.eq(200)
+          expect(rr.statusText).to.eq('OK')
+          expect(rr.finalUrl).to.eq('http://www.github.com/foo')
+          expect(rr.attemptsUsed).to.eq(1)
+          expect(rr.hasResponseBody).to.be.true
+          expect(rr.responseBodyOriginalSize).to.eq(5) // 'hello'
+          expect(rr.responseStream).to.exist
+          expect(typeof rr.responseStream.pipe).to.eq('function')
+        })
+      })
+
+      it('exposes responseStream as a Readable that emits the body bytes', function () {
+        nock('http://www.github.com')
+        .get('/foo')
+        .reply(200, 'hello world', { 'Content-Type': 'text/plain' })
+
+        return req.sendPromise(undefined, this.fn, {
+          url: 'http://www.github.com/foo',
+          cookies: false,
+        })
+        .then(() => {
+          const rr = protocolManager.cyRequestResponseReceived.getCall(0).args[0]
+          const chunks: Buffer[] = []
+
+          return new Promise<void>((resolve, reject) => {
+            rr.responseStream.on('data', (c: Buffer) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)))
+            rr.responseStream.on('end', () => {
+              expect(Buffer.concat(chunks).toString('utf8')).to.eq('hello world')
+              resolve()
+            })
+
+            rr.responseStream.on('error', reject)
+          })
+        })
+      })
+
+      it('forwards the full response body without capping (parity with CDP responseStreamReceived)', function () {
+        const big = 'y'.repeat(6 * 1024 * 1024)
+
+        nock('http://www.github.com')
+        .get('/big')
+        .reply(200, big)
+
+        return req.sendPromise(undefined, this.fn, {
+          url: 'http://www.github.com/big',
+          cookies: false,
+        })
+        .then(() => {
+          const rr = protocolManager.cyRequestResponseReceived.getCall(0).args[0]
+
+          expect(rr.responseBodyOriginalSize).to.eq(6 * 1024 * 1024)
+          expect(rr.responseStream).to.exist
+        })
+      })
+
+      it('does NOT fire failed when failOnStatusCode would normally throw — request layer treats non-2xx as a normal response', function () {
+        nock('http://www.github.com')
+        .get('/foo')
+        .reply(500, 'oops')
+
+        return req.sendPromise(undefined, this.fn, {
+          url: 'http://www.github.com/foo',
+          cookies: false,
+        })
+        .then(() => {
+          expect(protocolManager.cyRequestResponseReceived).to.be.calledOnce
+          expect(protocolManager.cyRequestFailed).not.to.be.called
+
+          const rr = protocolManager.cyRequestResponseReceived.getCall(0).args[0]
+
+          expect(rr.status).to.eq(500)
+        })
+      })
+
+      it('fires one cyRequestWillBeSent per redirect hop with redirectResponse populated', function () {
+        this.fn.resolves()
+
+        nock('http://www.github.com')
+        .get('/dashboard').reply(301, null, { location: '/auth' })
+        .get('/auth').reply(302, null, { location: '/login' })
+        .get('/login').reply(200, 'log in', { 'Content-Type': 'text/html' })
+
+        return req.sendPromise(undefined, this.fn, {
+          url: 'http://www.github.com/dashboard',
+          cookies: false,
+        })
+        .then(() => {
+          // 1 original WBS + 2 redirect hops = 3 calls
+          expect(protocolManager.cyRequestWillBeSent).to.be.calledThrice
+
+          const calls = protocolManager.cyRequestWillBeSent.getCalls().map((c: any) => c.args[0])
+
+          // All hops share the same requestId (CDP parity)
+          expect(calls[0].requestId).to.match(/^cyrequest_/)
+          expect(calls[1].requestId).to.eq(calls[0].requestId)
+          expect(calls[2].requestId).to.eq(calls[0].requestId)
+
+          // Original request — no redirectResponse
+          expect(calls[0].url).to.eq('http://www.github.com/dashboard')
+          expect(calls[0].redirectResponse).to.be.undefined
+
+          // Hop 1: 301 from /dashboard → /auth
+          expect(calls[1].url).to.eq('http://www.github.com/auth')
+          expect(calls[1].redirectResponse?.status).to.eq(301)
+          expect(calls[1].redirectResponse?.url).to.eq('http://www.github.com/dashboard')
+
+          // Hop 2: 302 from /auth → /login
+          expect(calls[2].url).to.eq('http://www.github.com/login')
+          expect(calls[2].redirectResponse?.status).to.eq(302)
+          expect(calls[2].redirectResponse?.url).to.eq('http://www.github.com/auth')
+
+          // Final response captured normally
+          const rr = protocolManager.cyRequestResponseReceived.getCall(0).args[0]
+
+          expect(rr.finalUrl).to.eq('http://www.github.com/login')
+        })
+      })
+
+      it('forwards the full request body without capping (parity with CDP request capture)', function () {
+        const big = 'x'.repeat(70 * 1024)
+
+        nock('http://www.github.com')
+        .post('/upload')
+        .reply(200, '')
+
+        return req.sendPromise(undefined, this.fn, {
+          url: 'http://www.github.com/upload',
+          method: 'POST',
+          body: big,
+          cookies: false,
+        })
+        .then(() => {
+          const wbs = protocolManager.cyRequestWillBeSent.getCall(0).args[0]
+
+          expect(wbs.requestBodyOriginalSize).to.eq(70 * 1024)
+          expect(Buffer.byteLength(wbs.requestBody, 'utf8')).to.eq(70 * 1024)
+        })
+      })
+
+      it('fires failed and re-throws on transport error', function () {
+        nock('http://www.github.com')
+        .get('/foo')
+        .replyWithError({ message: 'connect ECONNREFUSED', code: 'ECONNREFUSED' })
+
+        return req.sendPromise(undefined, this.fn, {
+          url: 'http://www.github.com/foo',
+          cookies: false,
+          retryOnNetworkFailure: false,
+        })
+        .then(() => { throw new Error('expected sendPromise to reject') })
+        .catch((err) => {
+          expect(err).to.exist
+          expect(protocolManager.cyRequestFailed).to.be.calledOnce
+          expect(protocolManager.cyRequestResponseReceived).not.to.be.called
+
+          const failed = protocolManager.cyRequestFailed.getCall(0).args[0]
+
+          expect(failed.errorCode).to.eq('ECONNREFUSED')
+          expect(failed.errorMessage).to.match(/ECONNREFUSED/)
+          expect(failed.attemptsUsed).to.eq(1)
+        })
+      })
+    })
   })
 
   context('#sendStream', () => {

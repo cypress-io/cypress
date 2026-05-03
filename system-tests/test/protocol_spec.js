@@ -10,9 +10,19 @@ const {
 
 // source: https://www.myintervals.com/blog/2009/05/20/iso-8601-date-validation-that-doesnt-suck/
 const isoDateRegex = /"([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?"/g
-const numberRegex = /"(wallClockDuration|fnDuration|afterFnDuration|lifecycle|duration|timestamp|createdAtTimestamp|updatedAtTimestamp|x|y|top|left|topCenter|leftCenter|requestId|cdpRequestWillBeSentTimestamp|cdpRequestWillBeSentReceivedTimestamp|proxyRequestReceivedTimestamp|cdpLagDuration|proxyRequestCorrelationDuration)": \"?(0|[1-9]\d*)(\.\d+)?\"?/g
+const numberRegex = /"(wallClockDuration|fnDuration|afterFnDuration|lifecycle|duration|durationMs|timestamp|wallTime|createdAtTimestamp|updatedAtTimestamp|x|y|top|left|topCenter|leftCenter|requestId|cdpRequestWillBeSentTimestamp|cdpRequestWillBeSentReceivedTimestamp|proxyRequestReceivedTimestamp|cdpLagDuration|proxyRequestCorrelationDuration)": \"?(0|[1-9]\d*)(\.\d+)?\"?/g
 const pathRegex = /"(name|absoluteFile)": "\/[^"]+"/g
 const componentSpecPathRegex = /"(url|message)": "(http:\/\/localhost:2121\/__cypress\/iframes\/index.html\?specPath=)(.*)(\/protocol\/src\/components\/)(.*)"/g
+// SHA-1 hex (40 chars) — used by cy.request body hashes; varies per body bytes
+// even for deterministic content if the system adds a trailing newline, etc.
+const shaHashRegex = /"(requestBodyHash|responseBodyHash)": "[a-f0-9]{40}"/g
+// Server-emitted response headers that vary per run.
+const volatileResponseHeaderRegex = /"(date|etag|last-modified)": "[^"]*"/g
+// cy.request requestId counter resets each spec run but doesn't always start
+// from the same number when other code paths share `_.uniqueId('cyrequest_')`.
+const cyRequestIdRegex = /"requestId": "cyrequest_\d+"/g
+// log:added/log:changed log id format — varies per run.
+const cyRequestLogIdRegex = /"logId": "log-[^"]+"/g
 
 const normalizeEvents = (resultsJson) => {
   return resultsJson
@@ -20,6 +30,10 @@ const normalizeEvents = (resultsJson) => {
   .replace(numberRegex, '"$1": "Any.Number"')
   .replace(pathRegex, '"$1": "/path/to/$1"')
   .replace(componentSpecPathRegex, '"$1": "$2$4$5"')
+  .replace(shaHashRegex, '"$1": "Any.Sha1Hash"')
+  .replace(volatileResponseHeaderRegex, '"$1": "Any.HeaderValue"')
+  .replace(cyRequestIdRegex, '"requestId": "cyrequest_Any.Number"')
+  .replace(cyRequestLogIdRegex, '"logId": "Any.LogId"')
 }
 
 const getFilePath = (filename) => {
@@ -72,6 +86,23 @@ describe('capture-protocol', () => {
       const protocolEvents = await fs.promises.readFile(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
 
       expect(JSON.parse(protocolEvents).debugData.filePreprocessorHandlerText).to.equal('file=>{return file.filePath}')
+    })
+
+    it('verifies the cy.request protocol events are correct', function () {
+      return systemTests.exec(this, {
+        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+        project: 'protocol',
+        spec: 'cy-request.cy.js',
+        record: true,
+        expectedExitCode: 0,
+        port: 2121,
+      }).then(() => {
+        const protocolEvents = fs.readFileSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'), 'utf8')
+
+        systemTests.snapshot('cy.request events', normalizeEvents(protocolEvents))
+
+        fs.removeSync(getFilePath('e9e81b5e-cc58-4026-b2ff-8ae3161435a6.db'))
+      })
     })
   })
 

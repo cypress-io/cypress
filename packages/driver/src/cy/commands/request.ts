@@ -376,6 +376,18 @@ export default (Commands, Cypress, cy, state, config) => {
         }
       })
       .then(() => {
+        // Thread protocol-correlation metadata to the server so capture-protocol
+        // can correlate the cy.request network row with the matching command-log
+        // entry, runnable, and attempt.
+        const runnable = state('runnable') as { id?: string, _currentRetry?: number } | undefined
+
+        requestOpts.protocolMetadata = {
+          logId: options._log?.get('id'),
+          runnableId: runnable?.id,
+          attempt: (runnable?._currentRetry ?? 0) + 1,
+          initiator: 'cy.request',
+        }
+
         return Cypress.backend('http:request', requestOpts)
       })
       .timeout(options.timeout)

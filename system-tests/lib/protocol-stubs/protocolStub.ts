@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs-extra'
-import type { AppCaptureProtocolInterface, ProtocolManagerOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
+import type { AppCaptureProtocolInterface, CyRequestFailedOptions, CyRequestResponseReceivedOptions, CyRequestWillBeSentOptions, ProtocolManagerOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamOptions, ResponseStreamTimedOutOptions } from '@packages/types'
 import type { Readable } from 'stream'
 
 const getFilePath = (filename) => {
@@ -49,6 +49,9 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     resetTest: [],
     responseEndedWithEmptyBody: [],
     responseStreamTimedOut: [],
+    cyRequestWillBeSent: [],
+    cyRequestResponseReceived: [],
+    cyRequestFailed: [],
   }
   private cdpClient: any
   private scriptToEvaluateId: any
@@ -79,6 +82,9 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
     this.events.pageLoading = []
     this.events.responseEndedWithEmptyBody = []
     this.events.responseStreamTimedOut = []
+    this.events.cyRequestWillBeSent = []
+    this.events.cyRequestResponseReceived = []
+    this.events.cyRequestFailed = []
   }
 
   connectToBrowser = async (cdpClient) => {
@@ -188,6 +194,32 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
 
   responseStreamTimedOut (options: ResponseStreamTimedOutOptions): void {
     this.events.responseStreamTimedOut.push(options)
+  }
+
+  cyRequestWillBeSent (options: CyRequestWillBeSentOptions): void {
+    // Strip the request body (Buffer, not JSON-serializable) before recording
+    // so the captured events JSON stays clean for snapshotting.
+    const { requestBody, ...rest } = options
+
+    this.events.cyRequestWillBeSent.push({
+      ...rest,
+      hasRequestBodyOnTheWire: requestBody != null,
+    })
+  }
+
+  cyRequestResponseReceived (options: CyRequestResponseReceivedOptions): void {
+    // Strip the Readable responseStream — it's not serializable and the
+    // capture-protocol consumes it via processAssetStream anyway.
+    const { responseStream, ...rest } = options
+
+    this.events.cyRequestResponseReceived.push({
+      ...rest,
+      hasResponseStream: responseStream != null,
+    })
+  }
+
+  cyRequestFailed (options: CyRequestFailedOptions): void {
+    this.events.cyRequestFailed.push(options)
   }
 
   resetTest (testId: string): void {

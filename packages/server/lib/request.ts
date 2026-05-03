@@ -11,6 +11,8 @@ import { agent } from '@packages/network'
 import * as statusCode from './util/status_code'
 import { streamBuffer } from './util/stream_buffer'
 
+import type { CyRequestBodyEncoding, CyRequestInitiator, CyRequestRedirectResponse, ProtocolManagerShape } from '@packages/types'
+
 const debug = debugModule('cypress:server:request')
 
 const SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly', 'sameSite']
@@ -123,6 +125,13 @@ const caseInsensitiveSet = function (obj, property, val) {
 
 type AutomationFn = (event: string, data?: any) => Promise<any>
 
+interface RequestProtocolMetadata {
+  logId?: string
+  runnableId?: string
+  attempt?: number
+  initiator?: CyRequestInitiator
+}
+
 interface RequestOpts {
   requestId?: string
   retryIntervals?: number[]
@@ -145,7 +154,84 @@ interface RequestOpts {
   resolveWithFullResponse?: boolean
   strictSSL?: boolean
   onBeforeReqInit?: (fn: () => any) => any
+  protocolMetadata?: RequestProtocolMetadata
   [key: string]: any
+}
+
+// Normalize a request body (string | Buffer | object | null) into the shape the
+// capture-protocol expects. No truncation here — the cloud-served protocol
+// script applies the size cap so it can be tuned without releasing the app.
+const normalizeRequestBody = (body: any): {
+  body: Buffer | string | undefined
+  encoding: CyRequestBodyEncoding | undefined
+  originalSize: number
+  hasBody: boolean
+} => {
+  if (body == null) {
+    return { body: undefined, encoding: undefined, originalSize: 0, hasBody: false }
+  }
+
+  if (Buffer.isBuffer(body)) {
+    return { body: body.toString('base64'), encoding: 'base64', originalSize: body.length, hasBody: true }
+  }
+
+  if (typeof body === 'string') {
+    return { body, encoding: 'utf8', originalSize: Buffer.byteLength(body, 'utf8'), hasBody: true }
+  }
+
+  try {
+    const serialized = JSON.stringify(body)
+
+    return { body: serialized, encoding: 'utf8', originalSize: Buffer.byteLength(serialized, 'utf8'), hasBody: true }
+  } catch {
+    return { body: undefined, encoding: undefined, originalSize: 0, hasBody: false }
+  }
+}
+
+// Wrap the (already-buffered) response body in a Readable so the protocol can
+// consume it via its stream pipeline. No truncation here — protocol caps
+// downstream.
+const bodyToReadable = (body: any): {
+  stream: stream.Readable | undefined
+  originalSize: number
+  hasBody: boolean
+} => {
+  if (body == null) {
+    return { stream: undefined, originalSize: 0, hasBody: false }
+  }
+
+  let buf: Buffer
+
+  if (Buffer.isBuffer(body)) {
+    buf = body
+  } else if (typeof body === 'string') {
+    buf = Buffer.from(body, 'utf8')
+  } else {
+    try {
+      buf = Buffer.from(JSON.stringify(body), 'utf8')
+    } catch {
+      return { stream: undefined, originalSize: 0, hasBody: false }
+    }
+  }
+
+  const originalSize = buf.length
+
+  if (originalSize === 0) {
+    return { stream: undefined, originalSize: 0, hasBody: false }
+  }
+
+  return {
+    stream: stream.Readable.from(buf),
+    originalSize,
+    hasBody: true,
+  }
+}
+
+const computeAttemptsUsed = (opts: RequestOpts): number => {
+  const intervals = opts.retryIntervals?.length ?? 0
+  const remaining = opts.delaysRemaining?.length ?? intervals
+
+  return Math.max(1, intervals - remaining + 1)
 }
 
 interface RetryCallbackOptions {
@@ -163,6 +249,7 @@ interface RetryCallbackOptions {
 export class Request {
   private r: typeof cypressRequest
   rp: typeof cypressRequestPromise
+  private _protocolManager?: ProtocolManagerShape
 
   constructor (options: { timeout?: number } = {}) {
     const defaults = {
@@ -180,11 +267,15 @@ export class Request {
     this.rp = cypressRequestPromise.defaults(defaults)
   }
 
+  setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
+    this._protocolManager = protocolManager
+  }
+
   private static setDefaults (opts) {
     return _
     .chain(opts)
     .defaults({
-      requestId: _.uniqueId('request'),
+      requestId: _.uniqueId('cyrequest_'),
       retryIntervals: [],
       retryOnNetworkFailure: true,
       retryOnStatusCodeFailure: false,
@@ -770,6 +861,111 @@ export class Request {
 
     const self = this
 
+    // Snapshot before we mutate body downstream — capture-protocol gets
+    // the raw body the user sent. If bodyIsBase64Encoded was true above,
+    // options.body is already a Buffer at this point.
+    //
+    // Generate requestId here (rather than relying on setDefaults inside
+    // this.create()) so it's available to the hook calls that fire BEFORE
+    // create() runs. Persist it on options so create()'s _.defaults call
+    // is a no-op for this field downstream.
+    const protocolManager = this._protocolManager
+    const protocolMetadata = options.protocolMetadata
+
+    if (!options.requestId) {
+      options.requestId = _.uniqueId('cyrequest_')
+    }
+
+    const requestId = options.requestId
+    const requestStart = Date.now()
+    const performanceTimestamp = () => Date.now()
+    const wallTime = () => Date.now() / 1000
+
+    let responseHookFired = false
+
+    const fireWillBeSent = (overrides?: {
+      url?: string
+      method?: string
+      redirectResponse?: CyRequestRedirectResponse
+    }) => {
+      if (!protocolManager) return
+
+      const normalized = normalizeRequestBody(options.body)
+
+      try {
+        protocolManager.cyRequestWillBeSent({
+          requestId,
+          runnableId: protocolMetadata?.runnableId,
+          attempt: protocolMetadata?.attempt,
+          logId: protocolMetadata?.logId,
+          url: overrides?.url ?? options.url!,
+          method: overrides?.method ?? (options.method as string | undefined) ?? 'GET',
+          requestHeaders: options.headers ?? {},
+          requestBody: normalized.body,
+          requestBodyEncoding: normalized.encoding,
+          requestBodyOriginalSize: normalized.originalSize,
+          hasRequestBody: normalized.hasBody,
+          initiator: protocolMetadata?.initiator ?? 'cy.request',
+          redirectResponse: overrides?.redirectResponse,
+          timestamp: performanceTimestamp(),
+          wallTime: wallTime(),
+        })
+      } catch (err) {
+        debug('cyRequestWillBeSent threw: %o', err)
+      }
+    }
+
+    const fireResponseReceived = (resp: any, finalUrl: string) => {
+      if (!protocolManager) return
+
+      responseHookFired = true
+
+      const streamed = bodyToReadable(resp.body)
+
+      try {
+        protocolManager.cyRequestResponseReceived({
+          requestId,
+          runnableId: protocolMetadata?.runnableId,
+          attempt: protocolMetadata?.attempt,
+          logId: protocolMetadata?.logId,
+          finalUrl,
+          status: resp.status ?? 0,
+          statusText: resp.statusText ?? '',
+          responseHeaders: resp.headers ?? {},
+          responseStream: streamed.stream,
+          responseBodyOriginalSize: streamed.originalSize,
+          hasResponseBody: streamed.hasBody,
+          durationMs: resp.duration ?? (Date.now() - requestStart),
+          attemptsUsed: computeAttemptsUsed(options),
+          timestamp: performanceTimestamp(),
+        })
+      } catch (err) {
+        debug('cyRequestResponseReceived threw: %o', err)
+      }
+    }
+
+    const fireFailed = (err: any) => {
+      if (!protocolManager) return
+
+      if (responseHookFired) return
+
+      try {
+        protocolManager.cyRequestFailed({
+          requestId,
+          runnableId: protocolMetadata?.runnableId,
+          attempt: protocolMetadata?.attempt,
+          logId: protocolMetadata?.logId,
+          errorMessage: err?.message ?? String(err),
+          errorCode: err?.code,
+          durationMs: Date.now() - requestStart,
+          attemptsUsed: computeAttemptsUsed(options),
+          timestamp: performanceTimestamp(),
+        })
+      } catch (innerErr) {
+        debug('cyRequestFailed threw: %o', innerErr)
+      }
+    }
+
     const send = () => {
       const ms = Date.now()
 
@@ -791,6 +987,24 @@ export class Request {
 
           push(incomingRes)
 
+          // Fire one cyRequestWillBeSent per redirect hop (mirrors CDP's
+          // per-hop Network.requestWillBeSent with redirectResponse populated).
+          // The original WBS already fired before this.create() ran.
+          fireWillBeSent({
+            url: newUrl,
+            // Following 3xx (other than 307/308) drops to GET — match the
+            // request lib's default redirect behavior.
+            method: incomingRes.statusCode === 307 || incomingRes.statusCode === 308
+              ? (options.method as string | undefined) ?? 'GET'
+              : 'GET',
+            redirectResponse: {
+              url: currentUrl!,
+              status: incomingRes.statusCode,
+              statusText: incomingRes.statusMessage ?? '',
+              headers: incomingRes.headers,
+            },
+          })
+
           // and when we know we should follow the redirect
           // we need to override the init method and
           // first set the new cookies on the browser
@@ -805,6 +1019,8 @@ export class Request {
           })
         }
       }
+
+      fireWillBeSent()
 
       return this.create(options, true)
       .then(this.normalizeResponse.bind(this, push))
@@ -822,8 +1038,14 @@ export class Request {
           resp.redirectedToUrl = url.resolve(options.url!, resp.headers.location)
         }
 
+        fireResponseReceived(resp, currentUrl ?? options.url!)
+
         return this.setCookiesOnBrowser(resp, currentUrl!, automationFn)
         .return(resp)
+      })
+      .catch((err) => {
+        fireFailed(err)
+        throw err
       })
     }
 

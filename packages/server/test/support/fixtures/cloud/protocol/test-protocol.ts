@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3'
-import type { AppCaptureProtocolInterface, CDPClient, ResponseStreamOptions } from '@packages/types'
+import type { AppCaptureProtocolInterface, CDPClient, CyRequestFailedOptions, CyRequestResponseReceivedOptions, CyRequestWillBeSentOptions, ResponseStreamOptions } from '@packages/types'
 import { Readable } from 'stream'
 
 export class AppCaptureProtocol implements AppCaptureProtocolInterface {
@@ -43,4 +43,7 @@ export class AppCaptureProtocol implements AppCaptureProtocolInterface {
   pageLoading (input: any): void {}
   resetTest (testId: string): void {}
   cleanup (): void {}
+  cyRequestWillBeSent (options: CyRequestWillBeSentOptions): void {}
+  cyRequestResponseReceived (options: CyRequestResponseReceivedOptions): void {}
+  cyRequestFailed (options: CyRequestFailedOptions): void {}
 }

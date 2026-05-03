@@ -224,6 +224,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   setProtocolManager (protocolManager: ProtocolManagerShape | undefined) {
     this._socket?.setProtocolManager(protocolManager)
     this._networkProxy?.setProtocolManager(protocolManager)
+    this.request.setProtocolManager(protocolManager)
   }
 
   setPreRequestTimeout (timeout: number) {
