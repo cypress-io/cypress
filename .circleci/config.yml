@@ -170,8 +170,11 @@ jobs:
           - run:
               name: Generate path-filtered pipeline parameters
               environment:
-                PUBLISH_BINARY_BRANCH: << pipeline.parameters.publish-binary-branch >>
-                FORCE_PERSIST_ARTIFACTS: << pipeline.parameters.force-persist-artifacts >>
+                # publish-binary-branch and force-persist-artifacts are declared
+                # on both the setup and continuation pipelines and auto-propagate
+                # by name; passing them via the continuation JSON would conflict.
+                # Only run-all-jobs is setup-only, so only it needs to be threaded
+                # through to the script.
                 RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
               command: |
                 bash .circleci/scripts/generate-pipeline-parameters.sh \
