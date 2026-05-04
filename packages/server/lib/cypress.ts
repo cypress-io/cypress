@@ -9,7 +9,7 @@
 
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
-import argsUtils from './util/args'
+import { toObject, toArray } from './util/args'
 import { telemetry } from '@packages/telemetry'
 import { getCtx, hasCtx } from '@packages/data-context'
 import { warning as errorsWarning } from './errors'
@@ -134,7 +134,7 @@ export = {
           return resolve({ totalFailed: code })
         }
 
-        const args = require('./util/args').toArray(options)
+        const args = toArray(options)
 
         debug('electron open arguments %o', args)
 
@@ -156,7 +156,7 @@ export = {
     let options
 
     try {
-      options = argsUtils.toObject(argv)
+      options = toObject(argv)
 
       showWarningForInvalidConfig(options)
     } catch (argumentsError: any) {
