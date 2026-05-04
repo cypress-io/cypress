@@ -5,7 +5,7 @@ import { get as fixtureGet } from '../fixture'
 
 const fixturesRe = /^(fx:|fixture:)/
 
-export = {
+const xhrs = {
   handle (req, res, config, next) {
     const get = function (val, def?) {
       return decodeURI(req.get(val) || def)
@@ -116,3 +116,5 @@ export = {
   },
 
 }
+
+export default xhrs

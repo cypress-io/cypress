@@ -420,7 +420,7 @@ export class ProtocolManager implements ProtocolManagerShape {
    */
   private captureError (error: ProtocolError) {
     if (this.options?.mode === 'studio') {
-      this.dispatchErrors([error], {
+      void this.dispatchErrors([error], {
         osName: os.platform(),
         projectSlug: this.options?.projectId,
         specName: this._specName,
