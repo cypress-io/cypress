@@ -21,7 +21,6 @@ import isInstalledGlobally from 'is-installed-globally'
 import logger from './logger'
 import Debug from 'debug'
 import fs from 'fs-extra'
-import { readFile } from 'fs/promises'
 import { relativeToRepoRoot } from './relative-to-repo-root'
 
 const debug = Debug('cypress:cli')
@@ -401,13 +400,6 @@ const util = {
   secsRemaining (eta: number): string {
     // calculate the seconds reminaing with no decimal places
     return (_.isFinite(eta) ? (eta / 1000) : 0).toFixed(0)
-  },
-
-  setTaskTitle (task: any, title: string, renderer: string): void {
-    // only update the renderer title when not running in CI
-    if (renderer === 'default' && task.title !== title) {
-      task.title = title
-    }
   },
 
   isInstalledGlobally (): boolean {
