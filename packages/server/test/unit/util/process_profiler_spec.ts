@@ -12,7 +12,7 @@ import {
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 
-const browsers = require('../../../lib/browsers')
+const browsers = require('../../../lib/browsers').default
 const plugins = require('../../../lib/plugins')
 
 const BROWSER_PID = 11111
