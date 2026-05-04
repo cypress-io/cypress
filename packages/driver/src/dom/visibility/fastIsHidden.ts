@@ -58,7 +58,11 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
 
   let boundingRect = getBoundingClientRect(subject)
 
-  if (isOutsideViewport(subject, boundingRect)) {
+  // Don't scroll if any ancestor clips with `overflow: hidden`/`clip` —
+  // `scrollIntoView` would scroll the clipping container (it's programmatically
+  // scrollable even though it's not user-scrollable) and expose content the
+  // test author intentionally clipped.
+  if (isOutsideViewport(subject, boundingRect) && !hasClippingAncestor(subject)) {
     const scrollBehavior = Cypress.config('scrollBehavior')
 
     if (scrollBehavior !== false) {
@@ -119,6 +123,26 @@ function isOutsideViewport (el: HTMLElement, rect: DOMRect): boolean {
     rect.top >= win.innerHeight ||
     rect.left >= win.innerWidth
   )
+}
+
+function hasClippingAncestor (el: HTMLElement): boolean {
+  const win = el.ownerDocument.defaultView
+
+  if (!win) return false
+
+  let current: HTMLElement | null = el.parentElement
+
+  while (current) {
+    const { overflowX, overflowY } = win.getComputedStyle(current)
+
+    if (overflowX === 'hidden' || overflowX === 'clip' || overflowY === 'hidden' || overflowY === 'clip') {
+      return true
+    }
+
+    current = current.parentElement
+  }
+
+  return false
 }
 
 function subDivideRect ({ x, y, width, height }: DOMRect): DOMRect[] {
