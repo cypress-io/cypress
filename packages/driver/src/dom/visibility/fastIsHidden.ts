@@ -3,7 +3,7 @@ import { memoize } from './memoize'
 import { unwrap, wrap, isJquery } from '../jquery'
 import { scrollBehaviorOptionsMap } from '../../util/scrollBehavior'
 import { getShadowElementFromPoint } from '../elements/shadow'
-import { findParent } from '../elements/find'
+import { findParent, getParentNode } from '../elements/find'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:dom:visibility:fastIsHidden')
@@ -148,7 +148,9 @@ function hasClippingAncestor (el: HTMLElement, rect: DOMRect): boolean {
   const offscreenX = rect.right <= 0 || rect.left >= win.innerWidth
   const offscreenY = rect.bottom <= 0 || rect.top >= win.innerHeight
 
-  let current: HTMLElement | null = el.parentElement
+  // Walk via getParentNode so we cross shadow root boundaries — a shadow
+  // descendant's clipping ancestor often lives in the host's light tree.
+  let current: HTMLElement | null = getParentNode(el)
 
   while (current) {
     const { overflowX, overflowY } = win.getComputedStyle(current)
@@ -161,7 +163,7 @@ function hasClippingAncestor (el: HTMLElement, rect: DOMRect): boolean {
       return true
     }
 
-    current = current.parentElement
+    current = getParentNode(current)
   }
 
   return false
