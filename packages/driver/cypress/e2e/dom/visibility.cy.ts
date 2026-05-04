@@ -414,6 +414,30 @@ describe('src/cypress/dom/visibility', {
           }
         })
       })
+
+      // body { overflow-x: hidden } is a common pattern; per CSS spec, the orthogonal
+      // axis still scrolls. The clipping-ancestor guard must not block vertical scroll
+      // just because an ancestor clips horizontally.
+      it('still scrolls vertically when an ancestor only clips the horizontal axis', () => {
+        cy.visit('/fixtures/visibility/overflow.html')
+        cy.window().then((win) => {
+          const doc = win.document
+
+          doc.body.style.overflowX = 'hidden'
+
+          const el = doc.createElement('div')
+
+          el.textContent = 'below fold with body overflow-x hidden'
+          el.style.cssText = 'position: absolute; top: 5000px; width: 100px; height: 100px; background: green;'
+          doc.body.appendChild(el)
+
+          if (mode === 'fast') {
+            expect(dom.isVisible(el), 'should still scroll vertically when only the orthogonal axis is clipped').to.be.true
+          } else {
+            expect(dom.isVisible(el)).to.be.true
+          }
+        })
+      })
     })
   }
 

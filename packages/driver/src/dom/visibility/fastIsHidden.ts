@@ -58,11 +58,11 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
 
   let boundingRect = getBoundingClientRect(subject)
 
-  // Don't scroll if any ancestor clips with `overflow: hidden`/`clip` —
-  // `scrollIntoView` would scroll the clipping container (it's programmatically
-  // scrollable even though it's not user-scrollable) and expose content the
-  // test author intentionally clipped.
-  if (isOutsideViewport(subject, boundingRect) && !hasClippingAncestor(subject)) {
+  // Don't scroll if any ancestor clips the subject in the direction it is
+  // off-screen — `scrollIntoView` would scroll the clipping container (it's
+  // programmatically scrollable even though it's not user-scrollable) and
+  // expose content the test author intentionally clipped.
+  if (isOutsideViewport(subject, boundingRect) && !hasClippingAncestor(subject, boundingRect)) {
     const scrollBehavior = Cypress.config('scrollBehavior')
 
     if (scrollBehavior !== false) {
@@ -125,17 +125,27 @@ function isOutsideViewport (el: HTMLElement, rect: DOMRect): boolean {
   )
 }
 
-function hasClippingAncestor (el: HTMLElement): boolean {
+function hasClippingAncestor (el: HTMLElement, rect: DOMRect): boolean {
   const win = el.ownerDocument.defaultView
 
   if (!win) return false
+
+  // Only ancestors clipping on the off-screen axis matter — e.g. `body { overflow-x: hidden }`
+  // (a common pattern to suppress horizontal scrollbars) must not block vertical scrolling
+  // for elements below the fold.
+  const offscreenX = rect.right <= 0 || rect.left >= win.innerWidth
+  const offscreenY = rect.bottom <= 0 || rect.top >= win.innerHeight
 
   let current: HTMLElement | null = el.parentElement
 
   while (current) {
     const { overflowX, overflowY } = win.getComputedStyle(current)
 
-    if (overflowX === 'hidden' || overflowX === 'clip' || overflowY === 'hidden' || overflowY === 'clip') {
+    if (offscreenX && (overflowX === 'hidden' || overflowX === 'clip')) {
+      return true
+    }
+
+    if (offscreenY && (overflowY === 'hidden' || overflowY === 'clip')) {
       return true
     }
 
