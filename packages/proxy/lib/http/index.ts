@@ -50,7 +50,6 @@ export const debugVerbose = Debug('cypress-verbose:proxy:http')
 const createBrowserRequestCancelledError = () => {
   return Object.assign(new Error('Request was cancelled by the browser.'), {
     code: 'ERR_BROWSER_REQUEST_CANCELLED',
-    isBrowserRequestCancelled: true,
   })
 }
 
