@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const xhrs = require(`../../lib/controllers/xhrs`)
+const xhrs = require(`../../lib/controllers/xhrs`).default
 
 describe('lib/controllers/xhr', () => {
   describe('#parseHeaders', () => {
