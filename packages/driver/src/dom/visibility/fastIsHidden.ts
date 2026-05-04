@@ -137,6 +137,8 @@ function isOutsideViewport (el: HTMLElement, rect: DOMRect): boolean {
   )
 }
 
+const CLIPPING_OVERFLOW = new Set(['hidden', 'clip', 'scroll', 'auto'])
+
 function hasClippingAncestor (el: HTMLElement, rect: DOMRect): boolean {
   const win = el.ownerDocument.defaultView
 
@@ -144,7 +146,9 @@ function hasClippingAncestor (el: HTMLElement, rect: DOMRect): boolean {
 
   // Only ancestors clipping on the off-screen axis matter — e.g. `body { overflow-x: hidden }`
   // (a common pattern to suppress horizontal scrollbars) must not block vertical scrolling
-  // for elements below the fold.
+  // for elements below the fold. Treat `scroll` and `auto` as clipping too: the user has
+  // not scrolled, so out-of-bounds content is not visible right now and we should not
+  // surface it programmatically.
   const offscreenX = rect.right <= 0 || rect.left >= win.innerWidth
   const offscreenY = rect.bottom <= 0 || rect.top >= win.innerHeight
 
@@ -155,11 +159,11 @@ function hasClippingAncestor (el: HTMLElement, rect: DOMRect): boolean {
   while (current) {
     const { overflowX, overflowY } = win.getComputedStyle(current)
 
-    if (offscreenX && (overflowX === 'hidden' || overflowX === 'clip')) {
+    if (offscreenX && CLIPPING_OVERFLOW.has(overflowX)) {
       return true
     }
 
-    if (offscreenY && (overflowY === 'hidden' || overflowY === 'clip')) {
+    if (offscreenY && CLIPPING_OVERFLOW.has(overflowY)) {
       return true
     }
 
