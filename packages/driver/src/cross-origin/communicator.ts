@@ -81,11 +81,11 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   }
 
   override removeAllListeners (eventName?: string | symbol): this {
-    super.removeAllListeners(eventName)
-    // Full teardown (e.g. event-manager) clears all listeners but previously
-    // left `Window` references in this map — clear them alongside.
-    if (eventName === undefined) {
+    if (arguments.length === 0) {
+      super.removeAllListeners()
       this.crossOriginDriverWindows = {}
+    } else {
+      super.removeAllListeners(eventName)
     }
 
     return this

@@ -45,10 +45,34 @@ describe('PrimaryOriginCommunicator', () => {
     comm.on('sync:during:user:test:execution', vi.fn())
     comm.removeAllListeners()
 
+    expect(comm.listenerCount('sync:during:user:test:execution')).toBe(0)
+
     postMessage.mockClear()
 
     comm.toAllSpecBridges('sync:state', { duringUserTestExecution: false })
     expect(postMessage).not.toHaveBeenCalled()
+  })
+
+  it('removeAllListeners(undefined) does not clear all listeners or cached bridge windows', () => {
+    const comm = new PrimaryOriginCommunicator()
+    const { postMessage, asWindow } = fakeBridgeWindow()
+
+    comm.onMessage({
+      data: { event: 'cross:origin:bridge:ready', origin: 'https://explicit-undefined.example' },
+      source: asWindow,
+    })
+
+    const handler = vi.fn()
+
+    comm.on('sync:during:user:test:execution', handler)
+    comm.removeAllListeners(undefined)
+
+    expect(comm.listenerCount('sync:during:user:test:execution')).toBe(1)
+
+    postMessage.mockClear()
+
+    comm.toAllSpecBridges('sync:state', { duringUserTestExecution: false })
+    expect(postMessage).toHaveBeenCalledOnce()
   })
 
   it('removeAllListeners(eventName) does not clear cached spec bridge windows', () => {
