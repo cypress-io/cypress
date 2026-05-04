@@ -2,6 +2,8 @@ import $elements from '../elements'
 import { memoize } from './memoize'
 import { unwrap, wrap, isJquery } from '../jquery'
 import { scrollBehaviorOptionsMap } from '../../util/scrollBehavior'
+import { getShadowElementFromPoint } from '../elements/shadow'
+import { findParent } from '../elements/find'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:dom:visibility:fastIsHidden')
@@ -11,11 +13,21 @@ const { isOption, isOptgroup, isBody, isHTML } = $elements
 const getBoundingClientRect = memoize((el: HTMLElement) => el.getBoundingClientRect())
 
 const visibleAtPoint = memoize(function (el: HTMLElement, x: number, y: number): boolean {
-  const elAtPoint = el.ownerDocument.elementFromPoint(x, y)
+  const lightElAtPoint = el.ownerDocument.elementFromPoint(x, y)
+
+  if (!lightElAtPoint) return false
+
+  // Pierce nested shadow roots so the comparison reflects what the user actually sees.
+  const elAtPoint = getShadowElementFromPoint(lightElAtPoint, x, y)
 
   debug('visibleAtPoint', el, elAtPoint)
 
-  return Boolean(elAtPoint) && (elAtPoint === el || el.contains(elAtPoint))
+  if (!elAtPoint) return false
+
+  if (elAtPoint === el) return true
+
+  // Shadow-aware ancestor walk: findParent crosses shadow boundaries via getRootNode().host.
+  return findParent(elAtPoint, (parent: HTMLElement) => parent === el ? parent : null) === el
 })
 
 export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, options: { checkOpacity: boolean } = { checkOpacity: true }): boolean {
