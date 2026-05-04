@@ -274,6 +274,13 @@
     <div class="testCase" cy-expect="visible" cy-label="Element masked by CSS mask" style="width: 100px; height: 100px; background: lightcoral; mask: linear-gradient(black, black); mask-size: 0 0;">masked by CSS mask</div>
   </div>
 
+  <div class="test-section" cy-section="scrollable-viewport-scenarios" style="position: relative; min-height: 5000px;">
+    <h3>Scrollable Viewport Scenarios</h3>
+    <div class="testCase" cy-expect="visible" cy-label="Element below the fold" style="position: absolute; top: 3000px; width: 100px; height: 100px; background: lightgreen;">
+      Below the fold element
+    </div>
+  </div>
+
   <div cy-section="viewport-scenarios">
     <h3>Viewport Scenarios</h3>
     <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Position absolute element outside viewport" style="position: absolute; top: -100px; left: -100px; width: 100px; height: 100px; background: lightcoral;">Element outside viewport</div>

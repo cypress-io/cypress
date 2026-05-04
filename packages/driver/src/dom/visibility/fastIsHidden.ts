@@ -7,6 +7,13 @@ const debug = Debug('cypress:driver:dom:visibility:fastIsHidden')
 
 const { isOption, isOptgroup, isBody, isHTML } = $elements
 
+const scrollBehaviorBlockMap: Record<string, ScrollLogicalPosition> = {
+  top: 'start',
+  bottom: 'end',
+  center: 'center',
+  nearest: 'nearest',
+}
+
 const getBoundingClientRect = memoize((el: HTMLElement) => el.getBoundingClientRect())
 
 const visibleAtPoint = memoize(function (el: HTMLElement, x: number, y: number): boolean {
@@ -55,7 +62,18 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
     return true
   }
 
-  const boundingRect = getBoundingClientRect(subject)
+  let boundingRect = getBoundingClientRect(subject)
+
+  if (isOutsideViewport(subject, boundingRect)) {
+    const scrollBehavior = Cypress.config('scrollBehavior')
+
+    if (scrollBehavior !== false) {
+      const block = scrollBehaviorBlockMap[scrollBehavior as string] || 'start'
+
+      subject.scrollIntoView({ block, behavior: 'instant' as ScrollBehavior })
+      boundingRect = subject.getBoundingClientRect()
+    }
+  }
 
   if (visibleToUser(subject, boundingRect)) {
     debug('visibleToUser', subject, boundingRect)
@@ -94,6 +112,19 @@ function visibleToUser (el: HTMLElement, rect: DOMRect, maxDepth: number = 2, cu
   return subRects.some((subRect: DOMRect) => {
     return visibleToUser(el, subRect, maxDepth, currentDepth + 1)
   })
+}
+
+function isOutsideViewport (el: HTMLElement, rect: DOMRect): boolean {
+  const win = el.ownerDocument.defaultView
+
+  if (!win) return false
+
+  return (
+    rect.bottom <= 0 ||
+    rect.right <= 0 ||
+    rect.top >= win.innerHeight ||
+    rect.left >= win.innerWidth
+  )
 }
 
 function subDivideRect ({ x, y, width, height }: DOMRect): DOMRect[] {

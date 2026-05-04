@@ -329,6 +329,7 @@ describe('src/cypress/dom/visibility', {
             'overflow-flex-container',
             'overflow-complex-scenarios',
             Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'clip-path-scenarios' : undefined,
+            'scrollable-viewport-scenarios',
           ])
         })
 
@@ -364,6 +365,53 @@ describe('src/cypress/dom/visibility', {
             'multiple-3d',
             'backface-visibility',
           ])
+        })
+      })
+
+      it('scrolls off-screen elements into view before checking visibility', () => {
+        cy.visit('/fixtures/visibility/overflow.html')
+        cy.window().then((win) => {
+          const doc = win.document
+          const el = doc.createElement('div')
+
+          el.textContent = 'off-screen element'
+          el.style.cssText = 'position: absolute; top: 5000px; width: 100px; height: 100px; background: green;'
+          doc.body.appendChild(el)
+
+          const rect = el.getBoundingClientRect()
+
+          expect(rect.top, `element top (${rect.top}) should be greater than viewport height (${win.innerHeight})`).to.be.greaterThan(win.innerHeight)
+          expect(Cypress.config('experimentalFastVisibility'), `experimentalFastVisibility should be ${mode === 'fast'}`).to.eq(mode === 'fast')
+
+          if (mode === 'fast') {
+            expect(dom.isVisible(el), 'off-screen element should be visible in fast mode (scrolled into view)').to.be.true
+          } else {
+            expect(dom.isVisible(el), 'off-screen element should be visible in legacy mode').to.be.true
+          }
+        })
+      })
+
+      it('does not scroll when scrollBehavior is false', {
+        scrollBehavior: false,
+      }, () => {
+        cy.visit('/fixtures/visibility/overflow.html')
+        cy.window().then((win) => {
+          const doc = win.document
+          const el = doc.createElement('div')
+
+          el.textContent = 'off-screen element'
+          el.style.cssText = 'position: absolute; top: 5000px; width: 100px; height: 100px; background: green;'
+          doc.body.appendChild(el)
+
+          const rect = el.getBoundingClientRect()
+
+          expect(rect.top, `element top (${rect.top}) should be greater than viewport height (${win.innerHeight})`).to.be.greaterThan(win.innerHeight)
+
+          if (mode === 'fast') {
+            expect(dom.isVisible(el), 'off-screen element should be hidden in fast mode when scrollBehavior is false').to.be.false
+          } else {
+            expect(dom.isVisible(el), 'off-screen element should be visible in legacy mode').to.be.true
+          }
         })
       })
     })

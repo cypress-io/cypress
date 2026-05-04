@@ -29,12 +29,10 @@ Enable fast visibility if you experience:
 - Your tests rely heavily on Shadow DOM elements
 - You have comprehensive Shadow DOM test coverage
 - Your application uses Shadow DOM extensively
-- You rely extensively on asserting the visibility of elements that are outside the browser's viewport
 - You rely on asserting the visibility state of elements that have `pointer-events:none`
 
 **Current Limitations**:
 - The fast visibility algorithm does not yet fully support Shadow DOM elements. Tests that interact with Shadow DOM elements may fail or behave incorrectly.
-- The fast visibility algorithm considers any element that is outside of the browser's viewport as hidden. While this is an incompatibility with the legacy visibility approach, it is aligned with the visibility behavior of elements that are scrolled out of view within a scrollable container.
 
 ## Algorithm Differences
 
@@ -54,7 +52,7 @@ While comprehensive, this list may not be complete. Additional discrepancies may
 | **[overflow-scroll-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Parent with clip-path polygon that clips everything | ✅ Yes | ❌ No | ❌ No | `clip-path: polygon(0 0, 0 0, 0 0, 0 0)`  |
 | **[overflow-scroll-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element outside clip-path polygon | ✅ Yes | ❌ No | ❌ No | Child element of polygon clip-path parent |
 | **[overflow-scroll-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element outside clip-path inset | ✅ Yes | ❌ No | ❌ No | Child element of `clip-path: inset(25% 25% 25% 25%)` |
-| **[viewport-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Absolutely positioned element outside of the viewport | ✅ Yes | ❌ No | ❌ No | Elements that are outside of the viewport must be scrolled to before the fast algorithm will consider them visible. This is aligned with scroll-container visibility. |
+| **[viewport-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Absolutely positioned element outside of the viewport | ✅ Yes | ❌ No | ❌ No | Elements positioned outside the scrollable document bounds (e.g. negative absolute positioning) cannot be scrolled into view and remain hidden. Elements that are merely below the fold are automatically scrolled into view per the `scrollBehavior` config before visibility is checked. |
 | **[z-index-coverage](../../../cypress/fixtures/visibility/positioning.html)** | Covered by higher z-index element |  ✅ Yes | ❌ No | ❌ No | Element covered by another element with higher z-index |
 | **[clip-scenarios](../../../cypress/fixtures/visibility/overflow.html)** | Element clipped by CSS clip property | ✅ Yes | ❌ No | ❌ No | Element with `clip: rect(0, 0, 0, 0)` or similar clipping |
 | **[transform](../../../cypress/fixtures/visibility/transforms.html)** | Element transformed outside viewport | ✅ Yes | ❌ No | ❌ No | Element with `transform: translateX(-9999px)` or similar |
@@ -129,9 +127,11 @@ cy.get('.rotated-element').should('be.hidden')
 
 ### Issue 2: Elements Outside Viewport
 
-**Problem**: Elements positioned outside the viewport are now correctly identified as hidden.
+**Problem**: Elements positioned outside the scrollable document bounds (e.g. `position: absolute; top: -100px`) are identified as hidden because they cannot be scrolled into view.
 
-**Solution**: Scroll the element into view before testing:
+**Note**: Elements that are simply below the fold or off-screen but within the scrollable document are now automatically scrolled into view before visibility is checked, using the `scrollBehavior` configuration setting. This matches the behavior of action commands like `cy.click()`. If `scrollBehavior` is set to `false`, off-screen elements will still be considered hidden.
+
+**Solution** (for elements outside scrollable bounds):
 
 ```javascript
 // Before
@@ -290,7 +290,7 @@ cy.get('.modal').should('have.css', 'display', 'block')
 ## Troubleshooting
 
 **If the element should be visible, but Cypress determines that it is hidden:**
-- Verify that the element is actually visible, and within the browser viewport. If you have to scroll to view the element, Cypress will not consider it visible.
+- Verify that the element is actually visible. Elements below the fold are automatically scrolled into view before checking visibility (per the `scrollBehavior` config). Elements outside the scrollable document bounds (e.g. negative absolute positioning) cannot be scrolled into view and will be considered hidden.
 - Verify that the element has proper dimensions. If either its height or width are zero, re-assess if this is the best element to be interacting with.
 - Verify that the element does not have `pointer-events:none`
 - In some extreme CSS `transform` scenarios, the element can be so distorted that Cypress fails to sample a visible point. If you hit this edge case, re-assess the usefulness of the assertion and/or interaction.
