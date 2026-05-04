@@ -1,5 +1,6 @@
 module.exports = {
   e2e: {
+    allowCypressEnv: false,
     supportFile: false,
     setupNodeEvents (on, config) {
       // in the case the tests needed to be debugged:

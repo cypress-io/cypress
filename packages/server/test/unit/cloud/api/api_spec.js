@@ -243,6 +243,9 @@ describe('lib/cloud/api', () => {
       process.env.CYPRESS_API_URL = 'https://some.server.com'
 
       if (!prodApi) {
+        // Use stealthy-require to temporarily clear module cache and re-require
+        // with new environment variables. The routes module reads CYPRESS_CONFIG_ENV
+        // at module load time, so we need to re-evaluate it with the new env vars.
         prodApi = stealthyRequire(require.cache, () => {
           return require('../../../../lib/cloud/api').default
         }, () => {
@@ -1004,6 +1007,8 @@ describe('lib/cloud/api', () => {
     it('POSTs /instances/:id/tests strips arbitrarily large config values', function () {
       this.props.config = {
         projectId: 'abcd1234',
+        customBloat: { nested: 'x'.repeat(5000) },
+        _myPluginState: { foo: 'bar' },
         devServer: {
           bundler: 'webpack',
           framework: 'react',
@@ -1050,6 +1055,46 @@ describe('lib/cloud/api', () => {
       expect(expectedConfig.resolved).to.be.undefined
       expect(expectedConfig.devServer.webpackConfig).to.equal('omitted')
       expect(expectedConfig.devServer.viteConfig).to.equal('omitted')
+      expect(expectedConfig.customBloat).to.be.undefined
+      expect(expectedConfig._myPluginState).to.be.undefined
+
+      return api.postInstanceTests(this.props)
+    })
+
+    it('POSTs /instances/:id/tests keeps allowlisted component config keys', function () {
+      this.props.config = {
+        projectId: 'abcd1234',
+        indexHtmlFile: 'cypress/support/component-index.html',
+        devServerConfig: {
+          framework: 'react',
+          bundler: 'webpack',
+          mode: 'development',
+          webpackConfig: { entry: 'app' },
+        },
+      }
+
+      const expectedConfig = filterRuntimeConfigForRecording(this.props.config)
+
+      expect(expectedConfig.projectId).to.eq('abcd1234')
+      expect(expectedConfig.indexHtmlFile).to.eq('cypress/support/component-index.html')
+      expect(expectedConfig.devServerConfig).to.eql({
+        framework: 'react',
+        bundler: 'webpack',
+        mode: 'omitted: string',
+        webpackConfig: 'omitted: object',
+      })
+
+      nock(API_BASEURL)
+      .matchHeader('x-route-version', '1')
+      .matchHeader('x-cypress-run-id', this.props.runId)
+      .matchHeader('x-cypress-request-attempt', '0')
+      .matchHeader('x-os-name', OS_PLATFORM)
+      .matchHeader('x-cypress-version', pkg.version)
+      .post('/instances/instance-id-123/tests', {
+        ...this.bodyProps,
+        config: expectedConfig,
+      })
+      .reply(200)
 
       return api.postInstanceTests(this.props)
     })
@@ -1602,19 +1647,19 @@ describe('lib/cloud/api', () => {
         expect(errors.warning).to.be.calledThrice
         expect(errors.warning.firstCall.args[0]).to.eql('CLOUD_API_RESPONSE_FAILED_RETRYING')
         expect(errors.warning.firstCall.args[1]).to.eql({
-          delayMs: 30000,
+          delay: '30 seconds',
           tries: 3,
           response: err,
         })
 
         expect(errors.warning.secondCall.args[1]).to.eql({
-          delayMs: 60000,
+          delay: '1 minute',
           tries: 2,
           response: err,
         })
 
         expect(errors.warning.thirdCall.args[1]).to.eql({
-          delayMs: 120000,
+          delay: '2 minutes',
           tries: 1,
           response: err,
         })

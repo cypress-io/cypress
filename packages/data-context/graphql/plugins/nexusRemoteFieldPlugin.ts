@@ -45,7 +45,7 @@ export type RemoteFieldDefinitionConfig<TypeName extends string, FieldName exten
 } & AdditionalRemoteFieldProps<TypeName, FieldName, RemoteField>
 
 // If not every member of CloudQueryArgs is provided, then we will not issue the request
-export type AdditionalRemoteFieldProps<TypeName extends string, FieldName extends string, RemoteField extends CloudQueryFields> = RemoteField extends never ? {
+type AdditionalRemoteFieldProps<TypeName extends string, FieldName extends string, RemoteField extends CloudQueryFields> = RemoteField extends never ? {
   queryArgs?: RemoteQueryArgsResolver<TypeName, FieldName, any>
 } : {
   queryArgs: RemoteQueryArgsResolver<TypeName, FieldName, RemoteField>

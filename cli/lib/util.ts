@@ -21,7 +21,7 @@ import isInstalledGlobally from 'is-installed-globally'
 import logger from './logger'
 import Debug from 'debug'
 import fs from 'fs-extra'
-import pkg from '../package.json'
+import { relativeToRepoRoot } from './relative-to-repo-root'
 
 const debug = Debug('cypress:cli')
 
@@ -190,6 +190,7 @@ const parseOpts = (opts: any): any => {
     'e2e',
     'exit',
     'env',
+    'expose',
     'force',
     'global',
     'group',
@@ -200,6 +201,7 @@ const parseOpts = (opts: any): any => {
     'key',
     'path',
     'parallel',
+    'passWithNoTests',
     'port',
     'posixExitCodes',
     'project',
@@ -241,8 +243,8 @@ const getApplicationDataFolder = (...paths: string[]): string => {
 
   // allow overriding the app_data folder
   let folder = env.CYPRESS_CONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
-
-  // @ts-expect-error value exists but is not typed
+  // eslint-disable-next-line no-restricted-syntax
+  const pkg = JSON.parse(fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8'))
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
 
@@ -335,12 +337,19 @@ const util = {
   },
 
   pkgBuildInfo (): any {
-    // @ts-expect-error value exists but is not typed
-    return pkg.buildInfo
+    // making this async would require many changes
+    // eslint-disable-next-line no-restricted-syntax
+    const pkgContent = fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8')
+
+    return JSON.parse(pkgContent).buildInfo
   },
 
   pkgVersion (): string {
-    return pkg.version
+    // making this async would require many changes
+    // eslint-disable-next-line no-restricted-syntax
+    const pkgContent = fs.readFileSync(relativeToRepoRoot('package.json') as string, 'utf8')
+
+    return JSON.parse(pkgContent).version
   },
 
   // TODO: remove this method
@@ -393,13 +402,6 @@ const util = {
     return (_.isFinite(eta) ? (eta / 1000) : 0).toFixed(0)
   },
 
-  setTaskTitle (task: any, title: string, renderer: string): void {
-    // only update the renderer title when not running in CI
-    if (renderer === 'default' && task.title !== title) {
-      task.title = title
-    }
-  },
-
   isInstalledGlobally (): boolean {
     return isInstalledGlobally
   },
@@ -409,7 +411,7 @@ const util = {
   },
 
   isExecutableAsync (filePath: string): any {
-    return Bluebird.resolve(executable(filePath))
+    return Promise.resolve(executable(filePath))
   },
 
   isLinux,

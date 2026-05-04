@@ -16,6 +16,14 @@ parameters:
   publish-binary-branch:
     type: string
     default: main
+  force-persist-artifacts:
+    type: boolean
+    default: false
+  # Set to true when triggering the pipeline manually to bypass path filtering
+  # and run all CI jobs regardless of which files changed.
+  run-all-jobs:
+    type: boolean
+    default: false
 
 commands:
   persist:
@@ -148,6 +156,8 @@ jobs:
       resource_class: small
       steps:
           - cancel-draft-prs
+          - checkout:
+              method: blobless
           - attach_workspace:
               at: .
           - run:
@@ -157,5 +167,15 @@ jobs:
                     echo "❌ Primary workflow definition not found in .circleci/packed/pipeline.yml!"
                     exit 1
                 fi
+          - run:
+              name: Generate path-filtered pipeline parameters
+              environment:
+                RUN_ALL_JOBS: << pipeline.parameters.run-all-jobs >>
+              command: |
+                bash .circleci/scripts/generate-pipeline-parameters.sh \
+                  > /tmp/pipeline-parameters.json
+                echo "Generated parameters:"
+                cat /tmp/pipeline-parameters.json
           - continuation/continue:
               configuration_path: .circleci/packed/pipeline.yml
+              parameters: /tmp/pipeline-parameters.json

@@ -55,7 +55,7 @@ export async function addToCypressConfig (filePath: string, code: string, toAdd:
   }
 }
 
-export interface AddProjectIdToCypressConfigOptions {
+interface AddProjectIdToCypressConfigOptions {
   filePath: string
   projectId: string
 }
@@ -81,7 +81,7 @@ export async function addProjectIdToCypressConfig (options: AddProjectIdToCypres
   }
 }
 
-export interface AddToCypressConfigResult {
+interface AddToCypressConfigResult {
   result: 'ADDED' | 'MERGED' | 'NEEDS_MERGE'
   error?: Error
   codeToMerge?: string
@@ -162,7 +162,7 @@ function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }
         import { defineConfig } from 'cypress'
 
         export default defineConfig({
-
+          allowCypressEnv: false,
         })
       `
     }
@@ -171,7 +171,7 @@ function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }
       const { defineConfig } = require('cypress')
 
       module.exports = defineConfig({
-
+        allowCypressEnv: false,
       })
     `
   }
@@ -179,14 +179,14 @@ function getEmptyCodeBlock ({ outputType, isProjectUsingESModules, projectRoot }
   if (outputType === '.ts' || outputType === '.mjs' || isProjectUsingESModules) {
     return dedent`
       export default {
-
+        allowCypressEnv: false,
       }
     `
   }
 
   return dedent`
     module.exports = {
-
+      allowCypressEnv: false,
     }
   `
 }

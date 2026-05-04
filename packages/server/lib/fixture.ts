@@ -2,12 +2,11 @@ import path from 'path'
 import check from 'syntax-error'
 import debugModule from 'debug'
 import coffee from 'coffeescript'
-import Bluebird from 'bluebird'
 import jsonParseBetterErrors from 'json-parse-even-better-errors'
 import stripAnsi from 'strip-ansi'
 import * as errors from './errors'
 import { fs } from './util/fs'
-import glob from './util/glob'
+import { globAsync as glob } from './util/glob'
 import type { ObjectEncodingOptions } from 'fs-extra'
 
 const debug = debugModule('cypress:server:fixture')
@@ -82,7 +81,7 @@ export async function get (fixturesFolder: string, filePath: string, options: { 
   }
 }
 
-export async function fileExists (p: string) {
+async function fileExists (p: string) {
   const stat = await fs.statAsync(p)
 
   // check for files, not directories
@@ -96,9 +95,9 @@ export async function fileExists (p: string) {
   }
 }
 
-export async function parseFile (p: string, fixture: string, options: { encoding?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null } = {}) {
+async function parseFile (p: string, fixture: string, options: { encoding?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null } = {}) {
   if (queue[p]) {
-    await Bluebird.delay(1)
+    await new Promise<void>((resolve) => setTimeout(resolve, 1))
 
     return parseFile(p, fixture, options)
   }
@@ -124,7 +123,7 @@ export async function parseFile (p: string, fixture: string, options: { encoding
   }
 }
 
-export async function parseFileByExtension (p: string, fixture: string, ext: string, options: { encoding?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null } = {}) {
+async function parseFileByExtension (p: string, fixture: string, ext: string, options: { encoding?: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null } = {}) {
   // If an encoding is specified, return the raw file content instead of
   // parsing.
   if (typeof options.encoding !== 'undefined') {
@@ -143,7 +142,7 @@ export async function parseFileByExtension (p: string, fixture: string, ext: str
   }
 }
 
-export async function parseJson (p: string, fixture: string) {
+async function parseJson (p: string, fixture: string) {
   try {
     const content = await fs.readFileAsync(p, 'utf8')
 
@@ -153,7 +152,7 @@ export async function parseJson (p: string, fixture: string) {
   }
 }
 
-export async function parseJs (p: string, fixture: string) {
+async function parseJs (p: string, fixture: string) {
   try {
     const str = await fs.readFileAsync(p, 'utf8')
 
@@ -177,7 +176,7 @@ export async function parseJs (p: string, fixture: string) {
   }
 }
 
-export async function parseCoffee (p: string, fixture: string) {
+async function parseCoffee (p: string, fixture: string) {
   const dc = process.env.NODE_DISABLE_COLORS
 
   process.env.NODE_DISABLE_COLORS = '0'
@@ -195,7 +194,7 @@ export async function parseCoffee (p: string, fixture: string) {
   }
 }
 
-export async function parseHtml (p: string, fixture: string) {
+async function parseHtml (p: string, fixture: string) {
   try {
     const content = await fs.readFileAsync(p, 'utf8')
 
@@ -205,7 +204,7 @@ export async function parseHtml (p: string, fixture: string) {
   }
 }
 
-export async function parse (p: string, fixture: string, encoding: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null | undefined) {
+async function parse (p: string, fixture: string, encoding: (ObjectEncodingOptions & { flag?: string | undefined }) | BufferEncoding | null | undefined) {
   try {
     const content = await fs.readFileAsync(p, encoding)
 

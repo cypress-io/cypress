@@ -1,4 +1,5 @@
 module.exports = {
+  'allowCypressEnv': false,
   'projectId': 'pid123',
   'defaultCommandTimeout': 9999,
   'e2e': {

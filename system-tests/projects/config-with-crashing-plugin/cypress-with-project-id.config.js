@@ -1,4 +1,5 @@
 module.exports = {
+  'allowCypressEnv': false,
   'projectId': 'pid123',
   'e2e': {
     'supportFile': false,

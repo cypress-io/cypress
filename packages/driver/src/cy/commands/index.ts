@@ -16,6 +16,8 @@ import * as Cookies from './cookies'
 
 import * as Debugging from './debugging'
 
+import * as Env from './env'
+
 import * as Exec from './exec'
 
 import * as Files from './files'
@@ -64,6 +66,7 @@ export const allCommands = {
   Connectors,
   Cookies,
   Debugging,
+  Env,
   Exec,
   Files,
   Fixtures,

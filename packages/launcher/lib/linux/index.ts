@@ -109,7 +109,7 @@ function getLinuxBrowser (
 export function getVersionString (path: string) {
   debugVerbose('finding version string using command "%s --version"', path)
 
-  return Bluebird.resolve(utils.getOutput(path, ['--version']))
+  return utils.getOutput(path, ['--version'])
   .timeout(30000, `Timed out after 30 seconds getting browser version for ${path}`)
   .then((val) => val.stdout)
   .then((val) => val.trim())

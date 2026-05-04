@@ -7,12 +7,7 @@ import * as exec from '../exec'
 import * as files from '../files'
 import { fs } from '../util/fs'
 import task from '../task'
-
-export interface SpecChannelOptions {
-  isSpecBridge: boolean
-  url: string
-  key: string
-}
+import { getUserDefinedEnvironmentVariables } from '../getUserDefinedEnvs'
 
 interface SpecOriginatedCommand {
   name: string
@@ -102,6 +97,8 @@ class PrivilegedCommandsManager {
     }
 
     switch (commandName) {
+      case 'env':
+        return getUserDefinedEnvironmentVariables({ requestedKeys: options.envVars, userDefinedEnvironmentVariables: config.env || {} })
       case 'exec':
         return exec.run(config.projectRoot, options)
       case 'origin':

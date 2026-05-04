@@ -102,11 +102,26 @@
       justify-content: space-between;
       width: 100%;
 
-      .command-prompt-get-code {
-        cursor: pointer;
-        font-family: $font-system;
-        font-size: 12px;
+      .command-prompt-get-code-feedback-container {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        width: 100%;
+
+        .command-prompt-get-code,
+        .command-prompt-get-feedback {
+          cursor: pointer;
+          font-family: $font-system;
+          font-size: 12px;
+        }
+
+        // Override inline fill="#D0D2E0" on the chat bubble icon path - inline SVG attributes take precedence over Tailwind classes
+        .command-prompt-get-feedback svg path.icon-light-fill {
+          fill: $purple-900;
+        }
       }
+      
     }
   }
 

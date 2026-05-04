@@ -13,4 +13,5 @@ export const Dog: React.FC<DogProps> = () => {
   )
 }
 
+/** @alias */
 export default Dog

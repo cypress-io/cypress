@@ -3,7 +3,7 @@ const path = require('path')
 const { userFacingChanges } = require('./change-categories')
 const userFacingSections = Object.values(userFacingChanges).map(({ section }) => section)
 
-async function parseChangelog ({ pendingRelease = true, changelogContent = null } = {}) {
+async function parseChangelog ({ changelogContent = null } = {}) {
   const changelog = changelogContent || fs.readFileSync(path.join(__dirname, '..', '..', 'cli', 'CHANGELOG.md'), 'utf8')
   const changeLogLines = changelog.split('\n')
 
@@ -36,15 +36,6 @@ async function parseChangelog ({ pendingRelease = true, changelogContent = null 
       }
 
       sections['version'] = line
-    } else if (index === 3) {
-      nextKnownLineBreak = index + 1
-      if (pendingRelease && !/_Released \d+\/\d+\/\d+ \(PENDING\)_/.test(line)) {
-        throw new Error(`Expected line number ${index + 1} to include "_Released xx/xx/xxxx (PENDING)_"`)
-      } else if (!pendingRelease && !/_Released \d+\/\d+\/\d+_/.test(line)) {
-        throw new Error(`Expected line number ${index + 1} to include "_Released xx/xx/xxxx_"`)
-      }
-
-      sections['releaseDate'] = line
     } else if (index === nextKnownLineBreak) {
       if (line !== '') {
         throw new Error(`Expected line number ${index + 1} to be a line break`)

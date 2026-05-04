@@ -2,6 +2,6 @@
   "name": "config-with-custom-file-js",
   "version": "0.0.0-test",
   "devDependencies": {
-    "cypress": "file:../../../cli"
+    "cypress": "file:../../../cli/build"
   }
 }

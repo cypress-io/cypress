@@ -12,7 +12,7 @@ const debug = debugLib('cypress:data-context:sources:RelevantRunSpecsDataSource'
 type PartialCloudRunWithId = Partial<CloudRun> & Pick<CloudRun, 'id'>
 
 //Not ideal typing for this return since the query is not fetching all the fields, but better than nothing
-export type RelevantRunSpecsCloudResult = {
+type RelevantRunSpecsCloudResult = {
   cloudNodesByIds: Array<PartialCloudRunWithId>
 } & Pick<Query, 'pollingIntervals'>
 

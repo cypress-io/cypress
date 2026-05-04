@@ -34,7 +34,7 @@ type NamedSpan = Span & { name: string }
 
 export type findActiveSpanOptions = (element: NamedSpan, index: number) => boolean
 
-export interface TelemetryApi {
+interface TelemetryApi {
   startSpan(arg: startSpanOptions): Span | undefined | void
   getSpan(name: string): Span | undefined
   findActiveSpan(fn: findActiveSpanOptions): Span | undefined

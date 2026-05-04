@@ -18,5 +18,7 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
     throw error
   }
 
-  return _runStage(HttpStages.IncomingRequest, fullCtx, onError)
+  return _runStage(HttpStages.IncomingRequest, fullCtx, onError).then(() => {
+    Object.assign(ctx, fullCtx)
+  })
 }

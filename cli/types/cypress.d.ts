@@ -512,6 +512,7 @@ declare namespace Cypress {
      * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.config.{js,ts,mjs,cjs}"
      *
      * @see https://on.cypress.io/env
+     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
      */
     env(): ObjectLike
     /**
@@ -521,6 +522,7 @@ declare namespace Cypress {
      *    // cypress.config.js
      *    { "env": { "foo": "bar" } }
      *    Cypress.env("foo") // => bar
+     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
      */
     env(key: string): any
     /**
@@ -529,6 +531,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/env
      * @example
      *    Cypress.env("host", "http://server.dev.local")
+     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
      */
     env(key: string, value: any): void
     /**
@@ -536,8 +539,40 @@ declare namespace Cypress {
      * @see https://on.cypress.io/env
      * @example
      *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
+     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
      */
     env(object: ObjectLike): void
+    /**
+     * Returns all exposed public configuration variables set with --expose in the CLI or in "expose" object in "cypress.config.{js,ts,mjs,cjs}"
+     *
+     * @see https://on.cypress.io/expose
+     */
+
+    expose(): ObjectLike
+    /**
+     * Returns specific exposed public configuration variable or undefined
+     * @see https://on.cypress.io/expose
+     * @example
+     *    // cypress.config.js
+     *    { "expose": { "foo": "bar" } }
+     *    Cypress.expose("foo") // => bar
+     */
+    expose(key: string): any
+    /**
+     * Set value for an exposed public configuration variable.
+     * Any value you change will be permanently changed for the remainder of your tests.
+     * @see https://on.cypress.io/expose
+     * @example
+     *    Cypress.expose("host", "http://server.dev.local")
+     */
+    expose(key: string, value: any): void
+    /**
+     * Set values for multiple exposed public configuration variables at once. Values are merged with existing values.
+     * @see https://on.cypress.io/expose
+     * @example
+     *    Cypress.expose({ host: "http://server.dev.local", foo: "foo" })
+     */
+    expose(object: ObjectLike): void
 
     /**
      * @returns the number of test retries currently enabled for the run
@@ -1337,6 +1372,8 @@ declare namespace Cypress {
     /**
      * End a chain of commands
      *
+     * @deprecated `cy.end()` has been deprecated and will be removed in a future release.
+     * Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`.
      * @see https://on.cypress.io/end
      */
     end(): Chainable<null>
@@ -2192,6 +2229,25 @@ declare namespace Cypress {
     task<S = unknown>(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
+     * Gets multiple environment variables.
+     * @see https://on.cypress.io/env
+     * @example
+     *    cy.env(['KEY_1', 'KEY_2']).then(({ KEY_1, KEY_2 }) => { ... })
+     */
+    env(keys: string[]): Chainable<Record<string, any>>
+
+    /**
+     * Gets multiple environment variables with a specific type.
+     * @see https://on.cypress.io/env
+     * @example
+     *    cy.env<{ KEY_1: string, KEY_2: number }>(['KEY_1', 'KEY_2']).then(({ KEY_1, KEY_2 }) => {
+     *      expect(KEY_1).to.be.a('string')
+     *      expect(KEY_2).to.be.a('number')
+     *    })
+     */
+    env<T extends object>(keys: string[]): Chainable<T>
+
+    /**
      * Enables you to work with the subject yielded from the previous command.
      *
      * @see https://on.cypress.io/then
@@ -2934,11 +2990,28 @@ declare namespace Cypress {
      * @default null
      */
     baseUrl: string | null
+
+    /**
+     * Whether Cypress should allow [Cypress.env()](https://on.cypress.io/env) API to be available in the browser.
+     *
+     * Cypress recommends migrating to the cy.env() command and disabling this within your Cypress configuration.
+     *
+     * The use of Cypress.env() will warn and throw an error when this is set to false.
+     *
+     * This will be the default behavior in a future major version of Cypress and Cypress.env() will be removed.
+     * @default true
+     */
+    allowCypressEnv: boolean
     /**
      * Any values to be set as [environment variables](https://on.cypress.io/environment-variables)
      * @default {}
      */
     env: { [key: string]: any }
+    /**
+     * Any values to be set as [exposed public configuration variables](https://on.cypress.io/expose).
+     * @default {}
+     */
+    expose: { [key: string]: any }
     /**
      * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using a tool to test what files would match.
      * @default "*.hot-update.js"
@@ -3174,6 +3247,11 @@ declare namespace Cypress {
      */
     injectDocumentDomain: boolean
     /**
+     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
+     * @default false
+     */
+    experimentalRunAllSpecs?: boolean
+    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.
      * @default false
      */
@@ -3193,6 +3271,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalMemoryManagement: boolean
+    /**
+     * Enables an alternative, performance-optimized visibility algorithm.
+     * @default false
+     */
+    experimentalFastVisibility: boolean
     /**
      * Allows for just-in-time compiling of a component test, which will only compile assets related to the component.
      * This results in a smaller bundle under test, reducing resource constraints on a given machine. This option is recommended
@@ -3270,20 +3353,10 @@ declare namespace Cypress {
 
   interface EndToEndConfigOptions extends Omit<CoreConfigOptions, 'indexHtmlFile'> {
     /**
-     * Enables the "Run All Specs" UI feature, allowing the execution of multiple specs sequentially.
-     * @default false
-     */
-    experimentalRunAllSpecs?: boolean
-    /**
      * Enables support for `Cypress.require()` for including dependencies within the `cy.origin()` callback.
      * @default false
      */
     experimentalOriginDependencies?: boolean
-    /**
-     * Enables support for `cy.prompt`, an AI-powered command that turns natural language steps into executable Cypress test code.
-     * @default false
-     */
-    experimentalPromptCommand?: boolean
   }
 
   /**
@@ -3365,14 +3438,14 @@ declare namespace Cypress {
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalFastVisibility' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'experimentalFastVisibility' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number

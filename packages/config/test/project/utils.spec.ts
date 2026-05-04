@@ -9,6 +9,7 @@ import Fixtures from '@tooling/system-tests'
 
 import {
   checkIfResolveChangedRootFolder,
+  correctSymlinkedPath,
   parseEnv,
   getProcessEnvVars,
   resolveModule,
@@ -23,6 +24,7 @@ import {
 import { resetIssuedWarnings } from '../../src/browser'
 import path from 'node:path'
 import { Config } from '../../src/project/types'
+import fs from 'fs-extra'
 
 const debug = Debug('test')
 
@@ -35,6 +37,18 @@ vi.mock('@packages/errors', async (importActual) => {
       ...actual.default,
       throwErr: vi.fn(),
       warning: vi.fn(),
+    },
+  }
+})
+
+vi.mock('fs-extra', async (importActual) => {
+  const actual = await importActual()
+
+  return {
+    default: {
+      // @ts-expect-error
+      ...actual.default,
+      pathExists: vi.fn(),
     },
   }
 })
@@ -69,6 +83,10 @@ describe('config/src/project/utils', () => {
     const errorsActual = (await vi.importActual<typeof import('@packages/errors')>('@packages/errors')).default
 
     vi.mocked(errors.throwErr).mockImplementation(errorsActual.throwErr)
+
+    const fsActual = await vi.importActual('fs-extra') as typeof import('fs-extra')
+
+    vi.mocked(fs.pathExists).mockImplementation((fsActual as any).default.pathExists)
   })
 
   describe('checkIfResolveChangedRootFolder', () => {
@@ -82,6 +100,54 @@ describe('config/src/project/utils', () => {
 
     it('detects path switch', () => {
       expect(checkIfResolveChangedRootFolder('/private/foo/index.js', '/foo')).toBe(true)
+    })
+  })
+
+  describe('correctSymlinkedPath', () => {
+    it('corrects path when original path ends with filename', () => {
+      const resolvedPath = '/private/tmp/test-project/cypress/support/e2e.js'
+      const originalPath = '/tmp/test-project/cypress/support/e2e.js'
+
+      const result = correctSymlinkedPath(resolvedPath, originalPath)
+
+      expect(result).toBe('/tmp/test-project/cypress/support/e2e.js')
+    })
+
+    it('corrects path when original path is a directory', () => {
+      const resolvedPath = '/private/tmp/test-project/cypress/support/e2e.js'
+      const originalPath = '/tmp/test-project/cypress/support'
+
+      const result = correctSymlinkedPath(resolvedPath, originalPath)
+
+      expect(result).toBe('/tmp/test-project/cypress/support/e2e.js')
+    })
+
+    it('handles paths with different file extensions', () => {
+      const resolvedPath = '/private/tmp/project/support/index.ts'
+      const originalPath = '/tmp/project/support/index.ts'
+
+      const result = correctSymlinkedPath(resolvedPath, originalPath)
+
+      expect(result).toBe('/tmp/project/support/index.ts')
+    })
+
+    it('handles paths where filename appears multiple times in original path', () => {
+      const resolvedPath = '/private/tmp/e2e.js/cypress/support/e2e.js'
+      const originalPath = '/tmp/e2e.js/cypress/support/e2e.js'
+
+      const result = correctSymlinkedPath(resolvedPath, originalPath)
+
+      // Should use the directory of the original path since it ends with the filename
+      expect(result).toBe('/tmp/e2e.js/cypress/support/e2e.js')
+    })
+
+    it('handles paths with trailing slashes in original path', () => {
+      const resolvedPath = '/private/tmp/test-project/cypress/support/e2e.js'
+      const originalPath = '/tmp/test-project/cypress/support/'
+
+      const result = correctSymlinkedPath(resolvedPath, originalPath)
+
+      expect(result).toBe('/tmp/test-project/cypress/support/e2e.js')
     })
   })
 
@@ -642,6 +708,88 @@ describe('config/src/project/utils', () => {
         supportFile: supportFilename,
       })
     })
+
+    it('handles symlink resolution by switching back to original path when file exists', async () => {
+      const projectRoot = '/tmp/test-project'
+      const originalSupportFile = '/tmp/test-project/cypress/support/e2e.js'
+      const symlinkedResolvedPath = '/private/tmp/test-project/cypress/support/e2e.js'
+
+      const obj = setAbsolutePaths({
+        projectRoot,
+        supportFile: 'cypress/support/e2e.js',
+      })
+
+      const getFilesByGlob = vi.fn().mockReturnValue([originalSupportFile])
+
+      // Mock resolveModule to return a symlinked path (like /tmp -> /private/tmp on macOS)
+      vi.mocked(resolveModule).mockImplementation((args) => {
+        if (args === originalSupportFile) {
+          return symlinkedResolvedPath
+        }
+
+        throw new Error(`Unexpected resolveModule call: ${args}`)
+      })
+
+      // Mock pathExists to return true for the original path
+      vi.mocked(fs.pathExists).mockImplementation(async (filePath: string) => {
+        if (filePath === originalSupportFile) {
+          return true
+        }
+
+        return false
+      })
+
+      const result = await setSupportFileAndFolder(obj, getFilesByGlob)
+
+      expect(result).toEqual({
+        projectRoot,
+        supportFile: originalSupportFile,
+        supportFolder: '/tmp/test-project/cypress/support',
+      })
+
+      // Verify that pathExists was called with the original path
+      expect(fs.pathExists).toHaveBeenCalledWith(originalSupportFile)
+    })
+
+    it('throws error when symlink resolution switches path but original file does not exist', async () => {
+      const projectRoot = '/tmp/test-project'
+      const originalSupportFile = '/tmp/test-project/cypress/support/e2e.js'
+      const symlinkedResolvedPath = '/private/tmp/test-project/cypress/support/e2e.js'
+
+      const obj = setAbsolutePaths({
+        projectRoot,
+        supportFile: 'cypress/support/e2e.js',
+      })
+
+      const getFilesByGlob = vi.fn().mockReturnValue([originalSupportFile])
+
+      // Mock resolveModule to return a symlinked path
+      vi.mocked(resolveModule).mockImplementation((args) => {
+        if (args === originalSupportFile) {
+          return symlinkedResolvedPath
+        }
+
+        throw new Error(`Unexpected resolveModule call: ${args}`)
+      })
+
+      // Mock pathExists to return false (file doesn't exist at original path)
+      vi.mocked(fs.pathExists).mockImplementation(async () => {
+        return false
+      })
+
+      try {
+        await setSupportFileAndFolder(obj, getFilesByGlob)
+        throw new Error('Expected error to be thrown')
+      } catch (err: any) {
+        expect(errors.throwErr).toHaveBeenCalledWith(
+          'SUPPORT_FILE_NOT_FOUND',
+          'cypress/support/e2e.js',
+        )
+      }
+
+      // Verify that pathExists was called with the original path
+      expect(fs.pathExists).toHaveBeenCalledWith(originalSupportFile)
+    })
   })
 
   describe('.mergeDefaults', () => {
@@ -1034,20 +1182,22 @@ describe('config/src/project/utils', () => {
           clientCertificates: { value: [], from: 'default' },
           defaultBrowser: { value: null, from: 'default' },
           defaultCommandTimeout: { value: 4000, from: 'default' },
+          allowCypressEnv: { value: true, from: 'default' },
           downloadsFolder: { value: 'cypress/downloads', from: 'default' },
           env: {},
           excludeSpecPattern: { value: '*.hot-update.js', from: 'default' },
           execTimeout: { value: 60000, from: 'default' },
           experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
           experimentalCspAllowList: { value: false, from: 'default' },
+          experimentalFastVisibility: { value: false, from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
-          experimentalPromptCommand: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
           experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
+          expose: {},
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
           hosts: { value: null, from: 'default' },
@@ -1091,7 +1241,7 @@ describe('config/src/project/utils', () => {
         })
       })
 
-      it('sets config, envFile and env', async () => {
+      it('sets config, envFile, env, and expose', async () => {
         vi.stubEnv('CYPRESS_quux', 'quux')
         vi.stubEnv('CYPRESS_RECORD_KEY', 'foobarbazquux')
         vi.stubEnv('CYPRESS_PROJECT_ID', 'projectId123')
@@ -1107,11 +1257,17 @@ describe('config/src/project/utils', () => {
           envFile: {
             bar: 'bar',
           },
+          expose: {
+            baz: 'baz',
+          },
         }
 
         const options = {
           env: {
-            baz: 'baz',
+            qux: 'qux',
+          },
+          expose: {
+            quuz: 'quuz',
           },
         }
 
@@ -1129,6 +1285,7 @@ describe('config/src/project/utils', () => {
           clientCertificates: { value: [], from: 'default' },
           defaultBrowser: { value: null, from: 'default' },
           defaultCommandTimeout: { value: 4000, from: 'default' },
+          allowCypressEnv: { value: true, from: 'default' },
           downloadsFolder: { value: 'cypress/downloads', from: 'default' },
           env: {
             foo: {
@@ -1139,8 +1296,8 @@ describe('config/src/project/utils', () => {
               value: 'bar',
               from: 'envFile',
             },
-            baz: {
-              value: 'baz',
+            qux: {
+              value: 'qux',
               from: 'cli',
             },
             quux: {
@@ -1156,14 +1313,24 @@ describe('config/src/project/utils', () => {
           execTimeout: { value: 60000, from: 'default' },
           experimentalModifyObstructiveThirdPartyCode: { value: false, from: 'default' },
           experimentalCspAllowList: { value: false, from: 'default' },
+          experimentalFastVisibility: { value: false, from: 'default' },
           experimentalInteractiveRunEvents: { value: false, from: 'default' },
           experimentalMemoryManagement: { value: false, from: 'default' },
           experimentalOriginDependencies: { value: false, from: 'default' },
-          experimentalPromptCommand: { value: false, from: 'default' },
           experimentalRunAllSpecs: { value: false, from: 'default' },
           experimentalSingleTabRunMode: { value: false, from: 'default' },
           experimentalSourceRewriting: { value: false, from: 'default' },
           experimentalWebKitSupport: { value: false, from: 'default' },
+          expose: {
+            baz: {
+              value: 'baz',
+              from: 'config',
+            },
+            quuz: {
+              value: 'quuz',
+              from: 'cli',
+            },
+          },
           fileServerFolder: { value: '', from: 'default' },
           fixturesFolder: { value: 'cypress/fixtures', from: 'default' },
           hosts: { value: null, from: 'default' },

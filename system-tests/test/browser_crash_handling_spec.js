@@ -3,7 +3,9 @@ const systemTests = require('../lib/system-tests').default
 describe('Browser Crash Handling', () => {
   systemTests.setup({
     settings: {
-      e2e: {},
+      e2e: {
+        allowCypressEnv: false,
+      },
     },
   })
 

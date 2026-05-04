@@ -6,7 +6,7 @@ const mockfs = require('mock-fs')
 const extension = require('@packages/extension')
 const launch = require('@packages/launcher/lib/browsers')
 const plugins = require(`../../../lib/plugins`)
-const utils = require(`../../../lib/browsers/utils`)
+const utils = require(`../../../lib/browsers/utils`).default
 const chrome = require(`../../../lib/browsers/chrome`)
 const { fs } = require(`../../../lib/util/fs`)
 const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
@@ -751,6 +751,82 @@ describe('lib/browsers/chrome', () => {
 
       expect(chrome.connectCyPromptToBrowser({ cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
       expect(cyPromptManager.connectToBrowser).not.to.be.called
+    })
+  })
+
+  context('#connectStudioToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const studioManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const mockCurrentlyAttachedStudioTarget = {}
+
+      const pageCriClient = {
+        clone: sinon.stub().returns(mockCurrentlyAttachedStudioTarget),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+        currentlyAttachedStudioTarget: mockCurrentlyAttachedStudioTarget,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      await chrome.connectStudioToBrowser({ studioManager })
+
+      expect(pageCriClient.clone).not.to.be.called
+      expect(studioManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedStudioTarget)
+    })
+
+    it('connects to the browser cri client when the studio target has not been created', async function () {
+      const studioManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const mockCurrentlyAttachedStudioTarget = {}
+
+      const pageCriClient = {
+        clone: sinon.stub().resolves(mockCurrentlyAttachedStudioTarget),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: pageCriClient,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      await chrome.connectStudioToBrowser({ studioManager })
+
+      expect(pageCriClient.clone).to.be.called
+      expect(studioManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedStudioTarget)
+      expect(browserCriClient.currentlyAttachedStudioTarget).to.eq(mockCurrentlyAttachedStudioTarget)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      const studioManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(null)
+
+      expect(chrome.connectStudioToBrowser({ studioManager })).to.be.rejectedWith('Missing pageCriClient in connectStudioToBrowser')
+      expect(studioManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', function () {
+      const studioManager = {
+        connectToBrowser: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedTarget: null,
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+
+      expect(chrome.connectStudioToBrowser({ studioManager })).to.be.rejectedWith('Missing pageCriClient in connectStudioToBrowser')
+      expect(studioManager.connectToBrowser).not.to.be.called
     })
   })
 

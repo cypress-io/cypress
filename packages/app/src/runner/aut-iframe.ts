@@ -19,6 +19,9 @@ const jQueryRe = /jquery/i
 export class AutIframe {
   debouncedToggleSelectorPlayground: DebouncedFunc<(isEnabled: any) => void>
   $iframe?: JQuery<HTMLIFrameElement>
+  // the iframes used to display snapshots of the AUT (currently used to display the studio snapshots)
+  $snapshotIframes?: JQuery<HTMLIFrameElement>[]
+
   _highlightedEl?: Element
   private _currentHighlightingId: number = 0
 
@@ -30,7 +33,7 @@ export class AutIframe {
     this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
-  create (): JQuery<HTMLIFrameElement> {
+  create (): { autIframe: JQuery<HTMLIFrameElement>, autSnapshotIframes: JQuery<HTMLIFrameElement>[] } {
     const $iframe = this.$('<iframe>', {
       id: `Your project: '${this.projectName}'`,
       title: `Your project: '${this.projectName}'`,
@@ -39,15 +42,36 @@ export class AutIframe {
 
     this.$iframe = $iframe
 
-    return $iframe
+    // Create two iframes to facilitate before/after snapshot
+    // rendering with a double buffer.
+    this.$snapshotIframes = _.times(2, (index) => {
+      const $snapshotIframe = this.$('<iframe>', {
+        id: `AUT Snapshot - ${index}: '${this.projectName}'`,
+        title: `AUT Snapshot - ${index}: '${this.projectName}'`,
+        class: 'aut-snapshot-iframe',
+        'data-snapshot-index': index,
+      })
+
+      $snapshotIframe.hide() // Auto-hide the snapshot iframe
+
+      return $snapshotIframe
+    })
+
+    return {
+      autIframe: $iframe,
+      autSnapshotIframes: this.$snapshotIframes,
+    }
   }
 
   destroy () {
-    if (!this.$iframe) {
+    if (!this.$iframe || !this.$snapshotIframes) {
       throw Error(`Cannot call #remove without first calling #create`)
     }
 
     this.$iframe.remove()
+    this.$snapshotIframes.forEach((iframe) => {
+      iframe.remove()
+    })
   }
 
   _showInitialBlankPage () {
@@ -505,6 +529,11 @@ export class AutIframe {
 
     const selector = Cypress.ElementSelector._getSelector($el)
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+    // Skip highlighting if selector is null (element is detached from DOM)
+    if (selector === null) {
+      return
+    }
 
     this._addOrUpdateSelectorPlaygroundHighlight({
       $el,

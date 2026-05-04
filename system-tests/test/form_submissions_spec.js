@@ -87,7 +87,13 @@ buffer compare yielded: ${ret}\
 
 describe('e2e forms', () => {
   context('submissions with jquery XHR POST', () => {
-    systemTests.setup()
+    systemTests.setup({
+      settings: {
+        e2e: {
+          allowCypressEnv: false,
+        },
+      },
+    })
 
     systemTests.it('passing', {
       spec: 'form_submission_passing.cy.js',
@@ -108,7 +114,9 @@ describe('e2e forms', () => {
   context('<form> submissions', () => {
     systemTests.setup({
       settings: {
-        e2e: {},
+        e2e: {
+          allowCypressEnv: false,
+        },
         env: {
           PATH_TO_LARGE_IMAGE: pathToLargeImage,
         },

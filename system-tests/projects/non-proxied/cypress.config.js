@@ -4,6 +4,7 @@ const os = require('os')
 const socketIo = require('@packages/socket/browser/client')
 
 module.exports = {
+  'allowCypressEnv': false,
   'e2e': {
     'supportFile': false,
     setupNodeEvents (on, config) {

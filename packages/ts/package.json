@@ -23,6 +23,9 @@
     "register.js",
     "registerDir.js"
   ],
+  "types": [
+    "index.d.ts"
+  ],
   "license": "MIT",
   "nx": {}
 }

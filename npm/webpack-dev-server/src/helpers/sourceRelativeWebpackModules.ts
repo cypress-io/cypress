@@ -11,7 +11,7 @@ export type ModuleClass = typeof Module & {
   _cache: Record<string, Module>
 }
 
-export interface PackageJson {
+interface PackageJson {
   name: string
   version: string
 }
@@ -26,14 +26,14 @@ export interface SourcedWebpack extends SourcedDependency {
   majorVersion: 4 | 5
 }
 
-export interface SourcedWebpackDevServer extends SourcedDependency {
+interface SourcedWebpackDevServer extends SourcedDependency {
   module: {
     new (...args: unknown[]): unknown
   }
   majorVersion: 4 | 5
 }
 
-export interface SourcedHtmlWebpackPlugin extends SourcedDependency {
+interface SourcedHtmlWebpackPlugin extends SourcedDependency {
   module: unknown
   majorVersion: 4 | 5
 }
@@ -111,7 +111,7 @@ export function sourceFramework (config: WebpackDevServerConfig): SourcedDepende
 // Source the webpack module from the provided framework or projectRoot. We override the module resolution
 // so that other packages that import webpack resolve to the version we found.
 // If none is found, we fallback to the bundled version in '@cypress/webpack-batteries-included-preprocessor'.
-export function sourceWebpack (config: WebpackDevServerConfig, framework: SourcedDependency | null): SourcedWebpack {
+function sourceWebpack (config: WebpackDevServerConfig, framework: SourcedDependency | null): SourcedWebpack {
   const searchRoot = framework?.importPath ?? config.cypressConfig.projectRoot
 
   debug('Webpack: Attempting to source webpack from %s', searchRoot)

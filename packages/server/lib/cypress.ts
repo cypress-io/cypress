@@ -7,10 +7,9 @@
 // essentially do it all again when we boot the correct
 // mode.
 
-import Promise from 'bluebird'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
-import argsUtils from './util/args'
+import { toObject, toArray } from './util/args'
 import { telemetry } from '@packages/telemetry'
 import { getCtx, hasCtx } from '@packages/data-context'
 import { warning as errorsWarning } from './errors'
@@ -102,7 +101,7 @@ export = {
     // wrap all of this in a promise to force the
     // promise interface - even if it doesn't matter
     // in dev mode due to cp.spawn
-    return Promise.try(() => {
+    return Promise.resolve().then(() => {
       // if we have the electron property on versions
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
@@ -135,7 +134,7 @@ export = {
           return resolve({ totalFailed: code })
         }
 
-        const args = require('./util/args').toArray(options)
+        const args = toArray(options)
 
         debug('electron open arguments %o', args)
 
@@ -157,7 +156,7 @@ export = {
     let options
 
     try {
-      options = argsUtils.toObject(argv)
+      options = toObject(argv)
 
       showWarningForInvalidConfig(options)
     } catch (argumentsError: any) {
@@ -229,7 +228,8 @@ export = {
     try {
       switch (mode) {
         case 'version': {
-          const version = await require('./modes/pkg')(options).get('version')
+          const pkg = await require('./modes/pkg')(options)
+          const version = pkg.version
 
           // eslint-disable-next-line no-console
           console.log(version)
@@ -284,7 +284,7 @@ export = {
           return exit(results.totalFailed ?? 0)
         }
         default: {
-            throw new Error(`Cannot start. Invalid mode: '${mode}'`)
+          throw new Error(`Cannot start. Invalid mode: '${mode}'`)
         }
       }
     } catch (err) {

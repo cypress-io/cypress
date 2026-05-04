@@ -9,8 +9,12 @@ it('overrides config', () => {
 
 it('overrides env', () => {
   // overrides come from plugins
-  expect(Cypress.env('foo')).to.eq('bar')
+  cy.env(['foo']).then(({ foo }) => {
+    expect(foo).to.eq('bar')
+  })
 
   // overrides come from CLI
-  expect(Cypress.env('bar')).to.eq('bar')
+  cy.env(['bar']).then(({ bar }) => {
+    expect(bar).to.eq('bar')
+  })
 })

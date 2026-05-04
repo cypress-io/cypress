@@ -1,12 +1,12 @@
 import SpecRunnerHeaderOpenMode from './SpecRunnerHeaderOpenMode.vue'
-import { useAutStore } from '../store'
+import { useAutStore, useSelectorPlaygroundStore } from '../store'
 import { useStudioStore } from '../store/studio-store'
 import { SpecRunnerHeaderFragment, SpecRunnerHeaderFragmentDoc } from '../generated/graphql-test'
 import { createEventManager, createTestAutIframe } from '../../cypress/component/support/ctSupport'
 import { ExternalLink_OpenExternalDocument } from '@packages/frontend-shared/src/generated/graphql'
 import { cyGeneralGlobeX16 } from '@cypress-design/icon-registry'
 
-function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton = false, studioBetaAvailable = false) {
+function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton = false) {
   const eventManager = createEventManager()
   const autIframe = createTestAutIframe()
 
@@ -18,7 +18,6 @@ function renderWithGql (gqlVal: SpecRunnerHeaderFragment, shouldShowStudioButton
     eventManager={eventManager}
     getAutIframe={() => autIframe}
     shouldShowStudioButton={shouldShowStudioButton}
-    studioBetaAvailable={studioBetaAvailable}
   />)
 }
 
@@ -78,14 +77,14 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       cy.get('[data-cy="playground-activator"]').should('be.disabled')
     })
 
-    it('is hidden when studio beta is available', () => {
+    it('is visible by default', () => {
       cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
         render: (gqlVal) => {
-          return renderWithGql(gqlVal, true, true)
+          return renderWithGql(gqlVal, true)
         },
       })
 
-      cy.get('[data-cy="playground-activator"]').should('not.exist')
+      cy.get('[data-cy="playground-activator"]').should('be.visible')
     })
 
     it('opens and closes selector playground', () => {
@@ -97,6 +96,8 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
 
       cy.findByTestId('playground-activator').click()
       cy.get('#selector-playground').should('be.visible')
+
+      cy.percySnapshot()
 
       cy.findByTestId('playground-activator').click()
       cy.get('#selector-playground').should('not.exist')
@@ -408,6 +409,39 @@ describe('SpecRunnerHeaderOpenMode', { viewportHeight: 500 }, () => {
       })
 
       cy.findByTestId('studio-button').should('be.visible')
+    })
+  })
+
+  describe('selector playground and studio recording interaction', () => {
+    it('allows selector playground to remain open when studio is active', () => {
+      const studioStore = useStudioStore()
+      const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+      // Start with Studio already active
+      studioStore.setActive(true)
+
+      cy.mountFragment(SpecRunnerHeaderFragmentDoc, {
+        render: (gqlVal) => {
+          return renderWithGql(gqlVal, true)
+        },
+      })
+
+      // Open Selector Playground while Studio is active
+      cy.findByTestId('playground-activator').click()
+
+      cy.then(() => {
+        expect(selectorPlaygroundStore.show).to.be.true
+        expect(studioStore.isActive).to.be.true
+      })
+
+      cy.get('#selector-playground').should('be.visible')
+
+      // Playground should remain open - Studio will handle closing it when recording starts
+      cy.then(() => {
+        expect(selectorPlaygroundStore.show).to.be.true
+      })
+
+      cy.get('#selector-playground').should('be.visible')
     })
   })
 })

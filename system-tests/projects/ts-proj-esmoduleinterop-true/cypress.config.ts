@@ -5,6 +5,7 @@ if (commonjsExports.export1 !== 'export1' || commonjsExports.export2 !== 'export
 }
 
 module.exports = {
+  'allowCypressEnv': false,
   'e2e': {
     'supportFile': false,
   },

@@ -60,14 +60,26 @@ describe('initCypressTests', () => {
 
     global.import = vi.fn()
     // @ts-expect-error
-    global.window = {}
+    global.document = {
+      location: {
+        search: '',
+      },
+      body: {
+        querySelectorAll: vi.fn().mockReturnValue([]),
+      },
+    }
+
     // @ts-expect-error
     global.parent = {}
     // @ts-expect-error
     global.parent.Cypress = mockCypressInstance
+    // @ts-expect-error
+    global.window = { parent: global.parent }
   })
 
   afterEach(() => {
+    // @ts-expect-error
+    delete global.document
     // @ts-expect-error
     delete global.window
     // @ts-expect-error
@@ -196,6 +208,233 @@ describe('initCypressTests', () => {
             },
           ])
         })
+      })
+    })
+  })
+
+  describe('run all specs file loading', () => {
+    let mockRunAllSpecs: string[]
+    let mockRunModeSpecs: Array<{ relative: string, absolute: string }>
+
+    beforeEach(() => {
+      mockRunAllSpecs = ['src/Test1.cy.jsx', 'src/Test2.cy.jsx', 'src/Test3.cy.jsx']
+      mockRunModeSpecs = [
+        { relative: 'src/Test1.cy.jsx', absolute: '/users/mock_dir/mock_project/src/Test1.cy.jsx' },
+        { relative: 'src/Test2.cy.jsx', absolute: '/users/mock_dir/mock_project/src/Test2.cy.jsx' },
+        { relative: 'src/Test3.cy.jsx', absolute: '/users/mock_dir/mock_project/src/Test3.cy.jsx' },
+      ]
+
+      // @ts-expect-error
+      global.parent.__RUN_ALL_SPECS__ = mockRunAllSpecs
+      // @ts-expect-error
+      global.parent.__RUN_MODE_SPECS__ = mockRunModeSpecs
+    })
+
+    describe('when specPath is "__all"', () => {
+      beforeEach(() => {
+        // @ts-expect-error
+        global.document.location.search = '?specPath=__all'
+      })
+
+      it('doesn\'t load the support file if one is not provided', async () => {
+        mockSupportFile = undefined
+        await import('../client/initCypressTests.js')
+        // just includes the spec imports
+        expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test1.cy.jsx',
+            relative: 'src/Test1.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test1.cy.jsx',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test2.cy.jsx',
+            relative: 'src/Test2.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test2.cy.jsx',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test3.cy.jsx',
+            relative: 'src/Test3.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test3.cy.jsx',
+          },
+        ])
+      })
+
+      it('loads support file along with all specs', async () => {
+        await import('../client/initCypressTests.js')
+
+        expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/cypress/support/component.js',
+            relative: '/cypress/support/component.js',
+            relativeUrl: '/__cypress/src/cypress/support/component.js',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test1.cy.jsx',
+            relative: 'src/Test1.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test1.cy.jsx',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test2.cy.jsx',
+            relative: 'src/Test2.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test2.cy.jsx',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test3.cy.jsx',
+            relative: 'src/Test3.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test3.cy.jsx',
+          },
+        ])
+      })
+
+      describe('empty devServerPublicPathRoute', () => {
+        it('load the support file along with all specs', async () => {
+          mockDevServerPublicPathRoute = ''
+          await import('../client/initCypressTests.js')
+
+          expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
+            {
+              load: expect.any(Function),
+              absolute: '/users/mock_dir/mock_project/cypress/support/component.js',
+              relative: '/cypress/support/component.js',
+              relativeUrl: './cypress/support/component.js',
+            },
+            {
+              load: expect.any(Function),
+              absolute: '/users/mock_dir/mock_project/src/Test1.cy.jsx',
+              relative: 'src/Test1.cy.jsx',
+              relativeUrl: './@fs/users/mock_dir/mock_project/src/Test1.cy.jsx',
+            },
+            {
+              load: expect.any(Function),
+              absolute: '/users/mock_dir/mock_project/src/Test2.cy.jsx',
+              relative: 'src/Test2.cy.jsx',
+              relativeUrl: './@fs/users/mock_dir/mock_project/src/Test2.cy.jsx',
+            },
+            {
+              load: expect.any(Function),
+              absolute: '/users/mock_dir/mock_project/src/Test3.cy.jsx',
+              relative: 'src/Test3.cy.jsx',
+              relativeUrl: './@fs/users/mock_dir/mock_project/src/Test3.cy.jsx',
+            },
+          ])
+        })
+      })
+
+      describe('windows', () => {
+        beforeEach(() => {
+          mockPlatform = 'win32'
+          mockProjectRoot = 'C:\\users\\mock_user\\mock_dir\\mock_project'
+          mockSupportFile = 'C:\\users\\mock_user\\mock_dir\\mock_project\\cypress\\support\\component.js'
+          mockDevServerPublicPathRoute = '/__cypress/src'
+          mockRelativePath = '__all'
+          mockRunAllSpecs = ['src\\Test1.cy.jsx', 'src\\Test2.cy.jsx']
+          mockRunModeSpecs = [
+            { relative: 'src\\Test1.cy.jsx', absolute: 'C:/users/mock_user/mock_dir/mock_project/src/Test1.cy.jsx' },
+            { relative: 'src\\Test2.cy.jsx', absolute: 'C:/users/mock_user/mock_dir/mock_project/src/Test2.cy.jsx' },
+          ]
+
+          mockCypressInstance.spec.relative = '__all'
+          // @ts-expect-error
+          global.parent.__RUN_ALL_SPECS__ = mockRunAllSpecs
+          // @ts-expect-error
+          global.parent.__RUN_MODE_SPECS__ = mockRunModeSpecs
+        })
+
+        it('loads support file along with all specs', async () => {
+          await import('../client/initCypressTests.js')
+
+          expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
+            {
+              load: expect.any(Function),
+              absolute: 'C:\\users\\mock_user\\mock_dir\\mock_project\\cypress\\support\\component.js',
+              relative: '/cypress/support/component.js',
+              relativeUrl: '/__cypress/src/cypress/support/component.js',
+            },
+            {
+              load: expect.any(Function),
+              absolute: 'C:/users/mock_user/mock_dir/mock_project/src/Test1.cy.jsx',
+              relative: 'src\\Test1.cy.jsx',
+              relativeUrl: '/__cypress/src/@fs/C:/users/mock_user/mock_dir/mock_project/src/Test1.cy.jsx',
+            },
+            {
+              load: expect.any(Function),
+              absolute: 'C:/users/mock_user/mock_dir/mock_project/src/Test2.cy.jsx',
+              relative: 'src\\Test2.cy.jsx',
+              relativeUrl: '/__cypress/src/@fs/C:/users/mock_user/mock_dir/mock_project/src/Test2.cy.jsx',
+            },
+          ])
+        })
+      })
+    })
+
+    describe('when CypressInstance.spec.relative is "__all"', () => {
+      beforeEach(() => {
+        mockRelativePath = '__all'
+        mockCypressInstance.spec.relative = '__all'
+      })
+
+      it('doesn\'t load the support file if one is not provided', async () => {
+        mockSupportFile = undefined
+        await import('../client/initCypressTests.js')
+
+        expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test1.cy.jsx',
+            relative: 'src/Test1.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test1.cy.jsx',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test2.cy.jsx',
+            relative: 'src/Test2.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test2.cy.jsx',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test3.cy.jsx',
+            relative: 'src/Test3.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test3.cy.jsx',
+          },
+        ])
+      })
+
+      it('loads support file along with all specs', async () => {
+        await import('../client/initCypressTests.js')
+
+        expect(mockCypressInstance.onSpecWindow).toHaveBeenCalledWith(global.window, [
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/cypress/support/component.js',
+            relative: '/cypress/support/component.js',
+            relativeUrl: '/__cypress/src/cypress/support/component.js',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test1.cy.jsx',
+            relative: 'src/Test1.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test1.cy.jsx',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test2.cy.jsx',
+            relative: 'src/Test2.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test2.cy.jsx',
+          },
+          {
+            load: expect.any(Function),
+            absolute: '/users/mock_dir/mock_project/src/Test3.cy.jsx',
+            relative: 'src/Test3.cy.jsx',
+            relativeUrl: '/__cypress/src/@fs/users/mock_dir/mock_project/src/Test3.cy.jsx',
+          },
+        ])
       })
     })
   })

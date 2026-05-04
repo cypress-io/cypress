@@ -44,6 +44,8 @@ export function reportCyPromptError ({
     return
   }
 
+  const errorToReport = error instanceof AggregateError ? error.errors[error.errors.length - 1] : error
+
   // When developing locally, do not send to Sentry, but instead log to console.
   if (
     process.env.CYPRESS_LOCAL_CY_PROMPT_PATH ||
@@ -51,17 +53,17 @@ export function reportCyPromptError ({
     process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF
   ) {
     // eslint-disable-next-line no-console
-    console.error(`Error in ${cyPromptMethod}:`, error)
+    console.error(`Error in ${cyPromptMethod}:`, errorToReport)
 
     return
   }
 
   let errorObject: Error
 
-  if (!(error instanceof Error)) {
-    errorObject = new Error(String(error))
+  if (!(errorToReport instanceof Error)) {
+    errorObject = new Error(String(errorToReport))
   } else {
-    errorObject = error
+    errorObject = errorToReport
   }
 
   let cyPromptMethodArgsString: string | undefined

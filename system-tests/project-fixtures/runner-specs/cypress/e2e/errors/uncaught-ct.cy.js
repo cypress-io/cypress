@@ -1,5 +1,4 @@
 import Errors from '../../../src/Errors'
-import Bluebird from 'bluebird'
 import React from 'react'
 
 describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
@@ -63,13 +62,13 @@ describe('uncaught errors', { defaultCommandTimeout: 0 }, () => {
   })
 
   it('spec Bluebird unhandled rejection', () => {
-    Bluebird.reject(new Error('Unhandled promise rejection from the spec'))
+    Promise.reject(new Error('Unhandled promise rejection from the spec'))
 
     cy.wait(10000)
   })
 
   // eslint-disable-next-line mocha/handle-done-callback
   it('spec Bluebird unhandled rejection with done', (done) => {
-    Bluebird.reject(new Error('Unhandled promise rejection from the spec'))
+    Promise.reject(new Error('Unhandled promise rejection from the spec'))
   })
 })

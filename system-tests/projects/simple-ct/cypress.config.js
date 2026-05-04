@@ -1,4 +1,5 @@
 module.exports = {
+  allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     // In order for Webkit to correctly exit in single tab mode, we have to disable video which is now disabled by default

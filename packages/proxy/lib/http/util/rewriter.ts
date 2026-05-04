@@ -26,6 +26,7 @@ const doctypeRe = /<\!doctype.*?>/i
 const headRe = /<head(?!er).*?>/i
 const bodyRe = /<body.*?>/i
 const htmlRe = /<html.*?>/i
+const bootstrapScriptRe = /(<script[^>]*\bdata-cy-bootstrap\b[^>]*>)([\s\S]*?)(<\/script>)/i
 
 function getRewriter (useAstSourceRewriting: boolean) {
   return useAstSourceRewriting ? astRewriter : regexRewriter
@@ -89,6 +90,20 @@ export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
 
   if (!htmlToInject) {
     return html
+  }
+
+  const bootstrapMatch = html.match(bootstrapScriptRe)
+
+  if (bootstrapMatch) {
+    const contentToInject = htmlToInject.replace(/^<script[^>]*>|<\/script>$/g, '')
+    let openTag = bootstrapMatch[1]
+
+    // Ensure nonce is present if provided in options
+    if (opts.cspNonce && !openTag.includes('nonce=')) {
+      openTag = openTag.replace(/>$/, ` nonce="${opts.cspNonce}">`)
+    }
+
+    return html.replace(bootstrapScriptRe, `${openTag}${contentToInject}${bootstrapMatch[3]}`)
   }
 
   // TODO: move this into regex-rewriting and have ast-rewriting handle this in its own way

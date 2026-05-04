@@ -1,15 +1,238 @@
-<!-- See the ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.7.1
+<!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.15.0
 
-_Released 12/2/2025 (PENDING)_
+**Deprecations:**
+
+- The `cy.end()` command has been deprecated and will be removed in a future release. Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
+
+**Misc:**
+
+- Additional CI environment variables are now captured to support a future failed test retry feature. Addressed in [#33714](https://github.com/cypress-io/cypress/pull/33714).
+
+## 15.14.2
+
+**Performance:**
+
+- Reduced main-thread overhead when scrolling the command log in `cypress open` by fixing an issue where the reporter could register more than one `scroll` listener on the log if its scroll container was set more than once. Addressed in [#33607](https://github.com/cypress-io/cypress/pull/33607).
+
+**Bugfixes:**
+
+- Fixed an issue where `cy.wait` on multiple aliases could surface an unhandled `Cannot read properties of undefined (reading 'routeId')` rejection when a retry short-circuited during runnable teardown. Fixed in [#33651](https://github.com/cypress-io/cypress/pull/33651).
+- Fixed an issue where an application under test containing `<base target="_top">` or `<base target="_parent">` would navigate out of the Cypress iframe when untargeted links were clicked or forms were submitted, breaking the test run. The unsafe `target` is now stripped from `<base>` tags as part of the existing `modifyObstructiveCode` rewriting (enabled by default for the primary super-domain, and extendable to third-party origins with `experimentalModifyObstructiveThirdPartyCode`). A runtime guard also neutralizes any `<base>` inserted or modified after load, matching the always-on behavior of the existing `<a>` / `<form>` target guards. Fixed in [#33667](https://github.com/cypress-io/cypress/pull/33667).
+- Fixed a race during `cypress open` config reload where the internal HTTP server would begin accepting requests before the primary remote state had been initialized, occasionally crashing in-flight browser requests (iframe loads) on an empty `remoteStates` map. Fixed in [#33686](https://github.com/cypress-io/cypress/pull/33686).
+
+**Dependency Updates:**
+
+- Upgraded `cachedir` from `^2.3.0` to `^2.4.0`. Addressed in [#33608](https://github.com/cypress-io/cypress/pull/33608).
+- Upgraded `listr2` from `3.8.3` to `^9.0.5`. Addressed in [#33640](https://github.com/cypress-io/cypress/pull/33640).
+- Upgraded `simple-git` from `3.33.0` to `3.36.0` to address a [Remote Code Execution](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15456078) vulnerability reported in security scans. Addressed in [#33680](https://github.com/cypress-io/cypress/pull/33680).
+- Upgraded `ts-loader` from `9.5.2` to `9.5.7`. Addresses [#33648](https://github.com/cypress-io/cypress/issues/33648). Addressed in [#33691](https://github.com/cypress-io/cypress/pull/33691)
+- Upgraded `@cypress/request` from `^3.0.10` to `^4.0.0`. Addresses [#33668](https://github.com/cypress-io/cypress/issues/33668). Addressed in [#33712](https://github.com/cypress-io/cypress/pull/33712)
+## 15.14.1
+
+**Performance:**
+
+- Fixed a memory leak in `cypress open` where each spec rerun accumulated an additional `uncaughtException` listener, preventing the previous Mocha runner — and all the objects it retained (commands, snapshots, logs) — from being garbage collected. Fixed in [#33631](https://github.com/cypress-io/cypress/pull/33631).
+
+**Bugfixes:**
+
+ - Increased the limit for decrypted payloads to support large `cy.prompt` requests and responses. Fixed in [#33619](https://github.com/cypress-io/cypress/pull/33619).
+ - Fixed a race condition in `@cypress/vite-dev-server` where the Cypress iframe could attempt to import the support file before Vite had finished serving it, causing intermittent "Failed to fetch dynamically imported module" errors in component tests. The dev server now waits until the support file URL returns a successful response before signaling that it is ready. Addressed in [#33487](https://github.com/cypress-io/cypress/pull/33487).
+
+## 15.14.0
+
+**Performance:**
+
+- Reduced browser memory growth during long interactive runs by clearing stored command log data (messages, URLs, snapshots, console props, and other fields—including custom `Cypress.log` properties) once tests age out of `numTestsKeptInMemory`, so the runner can reclaim memory and stay more responsive. Addressed in [#33601](https://github.com/cypress-io/cypress/pull/33601).
+
+**Features:**
+
+- Cypress now officially supports TypeScript 6. Addresses [#33385](https://github.com/cypress-io/cypress/issues/33385) and [#33511](https://github.com/cypress-io/cypress/issues/33511).
+- Adds Vite 8 support for component testing. Addresses [#32550](https://github.com/cypress-io/cypress/issues/32550) and [#33078](https://github.com/cypress-io/cypress/issues/33078).
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress tests in open mode would not pick up on modified `env` values in the user's config file. Fixed in [#33567](https://github.com/cypress-io/cypress/pull/33567). Fixes [#33372](https://github.com/cypress-io/cypress/issues/33372).
+- Fixed an issue where `cy.wrap` would not preserve a custom `onFail` handler when wrapping a rejected promise. Fixed in [#33570](https://github.com/cypress-io/cypress/pull/33570).
+
+**Dependency Updates:**
+
+- Upgraded `axios` to `1.15.0` to address [CVE-2025-62718](https://www.cve.org/CVERecord?id=CVE-2025-62718) and [CVE-2026-40175](https://www.cve.org/CVERecord?id=CVE-2026-40175) vulnerabilities reported in security scans. Fixes [#33590](https://github.com/cypress-io/cypress/issues/33590).
+
+## 15.13.1
+
+**Performance:**
+
+- When recording to Cypress Cloud, the App now sends a smaller snapshot of your project config, which reduces payload size and can make Cloud recording faster. Addressed in [#33517](https://github.com/cypress-io/cypress/pull/33517).
+- Eliminated unnecessary `git status` and `git log` subprocess calls during `cypress run`, which were collecting spec file git metadata only used in the interactive GUI. Fixed in [#33552](https://github.com/cypress-io/cypress/pull/33552).
+
+**Bugfixes:**
+
+- Fixed an issue where [`cy.intercept`](https://docs.cypress.io/api/commands/intercept) `delay` values >= 2**31 (approximately 24.8 days) were silently ignored by `setTimeout`. A clear validation error is now thrown for such values. Fixed in [#33377](https://github.com/cypress-io/cypress/pull/33377). Fixes [#33183](https://github.com/cypress-io/cypress/issues/33183).
+
+**Dependency Updates:**
+
+- Upgraded `node-forge` from `1.3.x` to `^1.4.0` to address [CVE-2026-33896](https://security.snyk.io/vuln/SNYK-JS-NODEFORGE-15789771) vulnerability reported in security scans. Addressed in [#33546](https://github.com/cypress-io/cypress/pull/33546).
+
+## 15.13.0
+
+**Features:**
+
+- [`cy.prompt`](https://docs.cypress.io/api/commands/prompt) is now in beta and available without any configuration. `cy.prompt` is an AI-powered command that lets you write test steps in plain English instead of code. The `experimentalPromptCommand` flag was removed and can be deleted from your config. Addressed in [#33497](https://github.com/cypress-io/cypress/pull/33497).
+- Studio now allows adding a new test when focused on a single test, supporting a workflow to add new tests as you record. Addressed in [#33481](https://github.com/cypress-io/cypress/pull/33481)
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress may hang when running component tests and a connection to the dev server can no longer be made. Addressed in [#33469](https://github.com/cypress-io/cypress/pull/33469)
+
+**Misc:**
+
+- When a test is isolated in Studio, the 'rerun' button now properly says 'Run test'. Addressed in [#33466](https://github.com/cypress-io/cypress/pull/33466)
+- Studio now warns users before navigating if they try to exit when they have unsaved changes in the editor. Addressed in [#33457](https://github.com/cypress-io/cypress/pull/33457)
+
+**Dependency Updates:**
+
+- Upgraded `simple-git` from `3.27.0` to `3.32.3` to address [Improper Handling of Case Sensitivity](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15457646) (CVE-2026-28292) vulnerability reported in security scans. Addressed in [#33470](https://github.com/cypress-io/cypress/pull/33470)
+- Upgraded `minimatch` to `3.1.3` to address [CVE-2026-26996](https://nvd.nist.gov/vuln/detail/CVE-2026-26996), [CVE-2026-27903](https://nvd.nist.gov/vuln/detail/CVE-2026-27903), and [CVE-2026-27904](https://nvd.nist.gov/vuln/detail/CVE-2026-27904) ReDoS vulnerabilities reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
+- Upgraded `serialize-javascript` to `7.0.3` to address [GHSA-5c6j-r48x-rmvq](https://github.com/advisories/GHSA-5c6j-r48x-rmvq) vulnerability reported in security scans. Addressed in [#33461](https://github.com/cypress-io/cypress/pull/33461).
+- Upgraded `flatted` from `3.2.9` to `3.4.2` to address [Prototype Pollution](https://security.snyk.io/vuln/SNYK-JS-FLATTED-15700433) (CVE-2026-33228) vulnerability reported in security scans. Addressed in [#33501](https://github.com/cypress-io/cypress/pull/33501)
+
+## 15.12.0
+
+**Features:**
+
+- Adds an option to enable word wrap for Studio panel code. Addressed in [#33411](https://github.com/cypress-io/cypress/pull/33411).
+
+**Bugfixes:**
+
+- Fixed an issue where sending SIGINT (e.g. Ctrl+C) to exit Cypress left the terminal displaying raw characters. Fixes [#33367](https://github.com/cypress-io/cypress/issues/33367). Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
+- Fixed an issue in develop mode (when running Cypress via gulp with file watching) where closing the Electron window did not exit the gulp process, leaving it running. Addressed in [#33431](https://github.com/cypress-io/cypress/pull/33431).
+- Fixed an issue where internal tags on stderr streams were surfacing to the end user CLI during component testing. Addresses [#32769](https://github.com/cypress-io/cypress/issues/32769). Addressed in [#33400](https://github.com/cypress-io/cypress/pull/33400).
+- Fixed an issue where Cypress may hang when waiting on multiple intercepts and the page navigates causing a stability change. Addressed in [#33446](https://github.com/cypress-io/cypress/pull/33446).
+
+**Dependency Updates:**
+
+- Upgraded `basic-ftp` to `5.2.0` to address [CVE-2026-27699](https://github.com/advisories/GHSA-5rq4-664w-9x2c) vulnerability reported in security scans. Addresses [#33436](https://github.com/cypress-io/cypress/issues/33436).
+- Upgraded `fast-xml-parser` to `4.5.4` to address [CVE-2026-25896](https://github.com/advisories/GHSA-m7jm-9gc2-mpf2) vulnerability reported in security scans. Addresses [#33434](https://github.com/cypress-io/cypress/issues/33434).
+
+## 15.11.0
+
+**Features:**
+
+- Adds `--pass-with-no-tests` command line flag. Addresses [#23019](https://github.com/cypress-io/cypress/issues/23019). Addressed in [#33384](https://github.com/cypress-io/cypress/pull/33384).
+- Introduces manual bootstrap script injection via a `<script data-cy-bootstrap>` tag. This is a workaround to fix React SSR hydration mismatches, and enables React apps to use `suppressHydrationWarning` to ignore the mismatch. Addresses [#27204](https://github.com/cypress-io/cypress/issues/27204). Addressed in [#33295](https://github.com/cypress-io/cypress/pull/33295).
+- Added Brotli compression support to the proxy. Addresses [#6197](https://github.com/cypress-io/cypress/issues/6197).
+- Improved CI environment detection and CI/commit metadata capture for Cypress Cloud recorded runs. Added support for Harness CI, AWS Amplify Console, Buddy, Bitrise, and Cloudbees Unify and removed support for EOL providers. Addressed in [#33396](https://github.com/cypress-io/cypress/pull/33396).
+
+**Bugfixes:**
+
+- Fixed an issue where a cancelled or incomplete login attempt would not properly open a browser window or tab, and required a restart of Cypress to enable a new login attempt. Fixed in [#33366](https://github.com/cypress-io/cypress/pull/33366). Fixes [#33350](https://github.com/cypress-io/cypress/issues/33350).
+- Fixed an issue on Windows where extracting the Studio or Prompt bundle could fail with `EPERM: operation not permitted` when renaming extracted files. The extract step now retries on EPERM/EACCES with a short delay to handle transient file locks. Addressed in [#33330](https://github.com/cypress-io/cypress/pull/33330).
+- The capture protocol is now properly cleaned up when the protocol is re-initialized or when the run closes, ensuring CDP client listeners and resources are removed. Addressed in [#33391](https://github.com/cypress-io/cypress/pull/33391).
+
+**Misc:**
+
+- The Node.js path is now displayed correctly in run log headers for typical GitHub Actions paths. ANSI escape sequences are no longer incorrectly displayed for longer Node.js paths. Addresses [#32736](https://github.com/cypress-io/cypress/issues/32736).
+- Fixed an issue that caused a Node.js [DEP0169](https://nodejs.org/docs/latest/api/deprecations.html#DEP0169) deprecation warning to be output when executing `cypress install` to download and install the Cypress binary. Addresses [#33347](https://github.com/cypress-io/cypress/issues/33347).
+
+**Dependency Updates:**
+
+- Upgraded `qs` to `6.14.2` to address [CVE-2026-2391](https://github.com/advisories/GHSA-w7fw-mjwx-w883) vulnerability reported in security scans. Addresses [#33363](https://github.com/cypress-io/cypress/issues/33363).
+- Upgraded `rimraf` to `6.1.1` to address [CVE-2026-25547](https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2) vulnerability reported in security scans. Addressed in [#33336](https://github.com/cypress-io/cypress/pull/33336).
+- Upgraded `squirrelly` to `9.1.0` to address [CVE-2021-32819](https://nvd.nist.gov/vuln/detail/CVE-2021-32819) vulnerability reported in security scans. Addresses [#33354](https://github.com/cypress-io/cypress/issues/33354).
+- Upgraded `systeminformation` to `5.31.1` to address [CVE-2026-26280](https://github.com/advisories/GHSA-9c88-49p5-5ggf) and [CVE-2026-26318](https://github.com/advisories/GHSA-5vv4-hvf7-2h46) vulnerabilities reported in security scans. Addresses [#33389](https://github.com/cypress-io/cypress/issues/33389).
+
+## 15.10.0
+
+**Deprecations:**
+
+[`Cypress.env()`](https://docs.cypress.io/api/cypress-api/env) is now deprecated and will be removed in a future major release of Cypress. To understand why, and how to migrate, please read our [Migration Guide](https://on.cypress.io/cypress-env-migration). Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
+
+**Features:**
+
+- Introduced a new [`cy.env()`](https://docs.cypress.io/api/commands/env) command that can be used to asynchronously and securely access Cypress environment variables. Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
+- Added a [`allowCypressEnv`](https://docs.cypress.io/app/references/configuration#Global) configuration option that disallows use of the deprecated `Cypress.env()` API. Addressed in [#33181](https://github.com/cypress-io/cypress/pull/33181).
+- Introduced the new `Cypress.expose()` API, intended for use of public configuration of non-sensitive values. Addressed in [#33238](https://github.com/cypress-io/cypress/pull/33238).
+- Displays the resolved `expose` values in the App's resolved configuration user interface. Addressed in [#33322](https://github.com/cypress-io/cypress/pull/33322).
+
+**Bugfixes:**
+
+- Fixed an issue where the user did not always have the ability to create a new test in Studio. Also, fixed an issue where creating a new test from an empty spec would display the welcome to studio screen instead of the form to name the new test. Addressed in [#33236](https://github.com/cypress-io/cypress/pull/33236).
+
+**Misc:**
+
+- The icon in the 'Open in IDE' button in the command log is now the correct size. Addresses [#32779](https://github.com/cypress-io/cypress/issues/32779). Addressed in [#33217](https://github.com/cypress-io/cypress/pull/33217).
+
+**Dependency Updates:**
+
+- Upgraded `express` to `4.22.0` and `body-parser` to `1.20.4`. This removes the [CVE-2025-15284](https://github.com/advisories/GHSA-6rw7-vpxm-498p) vulnerability being reported in security scans. Addressed in [#33305](https://github.com/cypress-io/cypress/pull/33305).
+- Upgraded `lodash` to `4.17.23`. This removes the [CVE-2025-13465](https://github.com/advisories/GHSA-xxjr-mmjv-4gpg) vulnerability being reported in security scans. Addresses [#33269](https://github.com/cypress-io/cypress/issues/33269).
+- Upgraded `shell-env` to `4.0.1` and `@cypress/commit-info` to `2.2.2`. This removes the [GMS-2020-2](https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/npm/execa/GMS-2020-2.yml) vulnerability being reported in security scans. Addressed in [#33226](https://github.com/cypress-io/cypress/pull/33226) and [#33263](https://github.com/cypress-io/cypress/pull/33263).
+
+## 15.9.0
+
+**Features:**
+
+- The `experimentalRunAllSpecs` option can now be used for component testing as well as e2e testing. Addresses [#25636](https://github.com/cypress-io/cypress/issues/25636).
+
+## 15.8.2
+
+**Bugfixes:**
+
+- Fixed an issue where the ffprobe path was not properly configured for video operations. The path is now set at module load time, ensuring it's available for all video operations. Upgraded `@ffprobe-installer/ffprobe` from `1.1.0` to `2.1.2` to support darwin-arm64 (Apple Silicon). Addressed in [#33136](https://github.com/cypress-io/cypress/pull/33136).
+- Fixed an issue where `test:after:run` and `test:after:run:async` events were not firing after both a `before all` and `after all` hook failed. Addressed in [#33172](https://github.com/cypress-io/cypress/pull/33172).
+
+**Dependency Updates:**
+
+- Upgraded `@cypress/request` to `3.0.10`. This removes the [CVE-2025-15284](https://security.snyk.io/vuln/SNYK-JS-QS-14724253) vulnerability being reported in security scans. Addressed in [#33188](https://github.com/cypress-io/cypress/pull/33188).
+
+## 15.8.1
+
+**Dependency Updates:**
+
+- Upgraded `systeminformation` to `5.27.14`. This removes the [CVE-2025-68154](https://github.com/advisories/GHSA-wphj-fx3q-84ch) vulnerability being reported in security scans. Fixes [#33146](https://github.com/cypress-io/cypress/issues/33146). Addressed in [#33150](https://github.com/cypress-io/cypress/pull/33150).
+
+## 15.8.0
+
+**Performance:**
+
+- Introduced a new `experimentalFastVisibility` experiment. Enabling this experiment changes how Cypress performs visibility checks and assertions. Read more about [experimental fast visibility](https://on.cypress.io/experiments/#experimental-fast-visibility). Addresses [#33044](https://github.com/cypress-io/cypress/issues/33044). Addressed in [#32801](https://github.com/cypress-io/cypress/pull/32801).
+
+**Features:**
+
+- `Angular` version 21 is now supported within component testing. Addressed in [#33004](https://github.com/cypress-io/cypress/pull/33004).
+- Adds zoneless support for `Angular` Component Testing through the `angular-zoneless` mount function. Addresses [#31504](https://github.com/cypress-io/cypress/issues/31504) and [#30070](https://github.com/cypress-io/cypress/issues/30070).
+- After receiving feedback on its usefulness outside of Studio, the Selector Playground is now available for all users in open mode. When opened, the playground automatically enables interactive mode to help you build and test selectors directly in your application. Addresses [#32672](https://github.com/cypress-io/cypress/issues/32672). Addressed in [#33073](https://github.com/cypress-io/cypress/pull/33073).
+
+**Bugfixes:**
+
+- Fixed an issue where a EPIPE error shows up after CTRL+C is done in terminal. Fixes [#30659](https://github.com/cypress-io/cypress/issues/30659). Addressed in [#32873](https://github.com/cypress-io/cypress/pull/32873).
+- Fixed an issue where the browser would freeze when Cypress intercepts a synchronous XHR request and a `routeHandler` is used. Fixes [#32874](https://github.com/cypress-io/cypress/issues/32874). Addressed in [#32925](https://github.com/cypress-io/cypress/pull/32925).
+- Fixed an issue where `Next.js` Component Testing would not load correctly without a TypeScript-based Next config in versions 16.0.3 and up. Fixes [#32968](https://github.com/cypress-io/cypress/issues/32968).
+- Fixed an issue where the error message for `not.have.length` was not correctly displaying the expected length in the Command Log. Addressed in [#18927](https://github.com/cypress-io/cypress/issues/18927).
+- Fixed an issue where `removeAttribute()` would not work for attributes other than `target` on anchor or form elements after clicking links with `target="_top"` or `target="_parent"`. Fixes [#26206](https://github.com/cypress-io/cypress/issues/26206). Addressed in [#33051](https://github.com/cypress-io/cypress/pull/33051).
+
+**Dependency Updates:**
+
+- Removed extraneous dependencies that are no longer used. Addressed in [#33098](https://github.com/cypress-io/cypress/pull/33098).
+- Upgraded `brace-expansion`. This removes the [CVE-2025-5889](https://security.snyk.io/vuln/SNYK-JS-BRACEEXPANSION-9789073) vulnerability being reported in security scans. Addressed in [#33112](https://github.com/cypress-io/cypress/pull/33112).
+- Upgraded `form-data`. This removes the [CVE-2025-7783](https://security.snyk.io/vuln/SNYK-JS-FORMDATA-10841150) vulnerability being reported in security scans. Addressed in [#33113](https://github.com/cypress-io/cypress/pull/33113).
+
+## 15.7.1
 
 **Performance:**
 
 - Improved performance when viewing command snapshots in the Command Log. Element highlighting is now significantly faster, especially when highlighting multiple elements or complex pages. This is achieved by reducing redundant style calculations and batching DOM operations to minimize browser reflows. Addressed in [#32951](https://github.com/cypress-io/cypress/pull/32951).
 
-## 15.7.0
+**Bugfixes:**
 
-_Released 11/19/2025_
+- Updated the error message shown when the [`cy.prompt()`](https://docs.cypress.io/api/commands/prompt) bundle is deleted while in use. Ensured that the Cloud bundles are written atomically to avoid concurrent downloads causing issues. Addressed in [#33034](https://github.com/cypress-io/cypress/pull/33034).
+
+**Dependency Updates:**
+
+- Upgraded `yargs-unparser` from `1.6.0` to `1.6.4` (which upgraded `flat` from `4.1.1` to `5.0.2`) to resolve [CVE-2020-36632](https://github.com/advisories/GHSA-52f5-9888-hmc6). Addressed [#27763](https://github.com/cypress-io/cypress/issues/27763).
+
+## 15.7.0
 
 **Performance:**
 
@@ -32,8 +255,6 @@ _Released 11/19/2025_
 - The Cursor logo now correctly displays in the External editor dropdown. Addresses [#32062](https://github.com/cypress-io/cypress/issues/32062). Addressed in [#32911](https://github.com/cypress-io/cypress/pull/32911).
 
 ## 15.6.0
-
-_Released 11/4/2025_
 
 **Features:**
 
@@ -65,8 +286,6 @@ _Released 11/4/2025_
 
 ## 15.5.0
 
-_Released 10/17/2025_
-
 **Features:**
 
 - When `cypress run` is used with both `--record` and `--posix-exit-codes` enabled, Cypress will now exit with code `112` when it cannot determine which spec to run next due to network conditions. Addresses [#32485](https://github.com/cypress-io/cypress/issues/32485). Addressed in [#32635](https://github.com/cypress-io/cypress/pull/32635).
@@ -88,8 +307,6 @@ _Released 10/17/2025_
 
 ## 15.4.0
 
-_Released 10/7/2025_
-
 **Features:**
 
 - Cypress Studio is now available by default. You no longer have to set the `experimentalStudio` flag. Addresses [#30997](https://github.com/cypress-io/cypress/issues/30997). Addressed in [#32571](https://github.com/cypress-io/cypress/pull/32571).
@@ -99,7 +316,7 @@ _Released 10/7/2025_
 
 **Bugfixes:**
 
-- Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/guides/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
+- Fixed a regression introduced in [`15.0.0`](https://docs.cypress.io/app/references/changelog#15-0-0) where `dbus` connection error messages appear in docker containers when launching Cypress. Fixes [#32290](https://github.com/cypress-io/cypress/issues/32290).
 - Fixed code frames in [`cy.origin()`](https://docs.cypress.io/api/commands/origin) so that failed commands will show the correct line/column within the corresponding spec file. Addressed in [#32597](https://github.com/cypress-io/cypress/pull/32597).
 - Fixed Cypress cloud requests so that they properly verify SSL certificates. Addressed in [#32629](https://github.com/cypress-io/cypress/pull/32629).
 
@@ -118,8 +335,6 @@ _Released 10/7/2025_
 
 ## 15.3.0
 
-_Released 9/23/2025_
-
 **Features:**
 
 - Added Escape key support to [`cy.press()`](http://on.cypress.io/api/press). Addresses[#32429](https://github.com/cypress-io/cypress/issues/32429). Addressed in [#32545](https://github.com/cypress-io/cypress/pull/32545).
@@ -137,8 +352,6 @@ _Released 9/23/2025_
 
 ## 15.2.0
 
-_Released 9/9/2025_
-
 **Features:**
 
 - Added support for using [@cypress/grep](https://www.npmjs.com/package/@cypress/grep) with Cypress Studio. Addresses [#32292](https://github.com/cypress-io/cypress/issues/32292).
@@ -152,8 +365,6 @@ _Released 9/9/2025_
 - Updated [`better-sqlite3`](https://www.npmjs.com/package/better-sqlite3) from `11.9.1` to `11.10.0`. Addressed in [#32404](https://github.com/cypress-io/cypress/pull/32404).
 
 ## 15.1.0
-
-_Released 09/02/2025_
 
 **Features:**
 
@@ -179,8 +390,6 @@ _Released 09/02/2025_
 - Upgraded `axios` from `1.8.3` to `1.11.0`. Addresses [#32347](https://github.com/cypress-io/cypress/issues/32347).
 
 ## 15.0.0
-
-_Released 08/20/2025_
 
 **Breaking Changes:**
 
@@ -240,15 +449,11 @@ _Released 08/20/2025_
 
 ## 14.5.4
 
-_Released 8/07/2025_
-
 **Dependency Updates:**
 
 - Upgraded `tar-fs` to `2.1.3` and `3.1.0` in places we can control, to resolve [CVE-2024-12905](https://github.com/advisories/GHSA-pq67-2wwv-3xjx). `@puppeteer/browsers` still references `3.0.4`, but it is only used to download browsers which is not a feature of `puppeteer` that we utilize. Addressed in [#32160](https://github.com/cypress-io/cypress/pull/32160).
 
 ## 14.5.3
-
-_Released 7/25/2025_
 
 **Bugfixes:**
 
@@ -262,16 +467,12 @@ _Released 7/25/2025_
 
 ## 14.5.2
 
-_Released 7/15/2025_
-
 **Bugfixes:**
 
-- Fixed a regression introduced in [`14.5.0`](https://docs.cypress.io/guides/references/changelog#14-5-0) where the Stop button would not immediately stop the spec timer. Addresses [#31920](https://github.com/cypress-io/cypress/issues/31920).
+- Fixed a regression introduced in [`14.5.0`](https://docs.cypress.io/app/references/changelog#14-5-0) where the Stop button would not immediately stop the spec timer. Addresses [#31920](https://github.com/cypress-io/cypress/issues/31920).
 - Fixed an issue with the `CloudRequest` where it used the wrong port for `https` requests. Addressed in [#31992](https://github.com/cypress-io/cypress/pull/31992).
 
 ## 14.5.1
-
-_Released 7/01/2025_
 
 **Bugfixes:**
 
@@ -283,8 +484,6 @@ _Released 7/01/2025_
 
 ## 14.5.0
 
-_Released 6/17/2025_
-
 **Features:**
 
 - Install Cypress `win32-x64` binary on Windows `win32-arm64` systems. Cypress runs in emulation. Addresses [#30252](https://github.com/cypress-io/cypress/issues/30252).
@@ -294,8 +493,6 @@ _Released 6/17/2025_
 - Fixed an issue when using `Cypress.stop()` where a run may be aborted prior to receiving the required runner events causing Test Replay to not be available. Addresses [#31781](https://github.com/cypress-io/cypress/issues/31781).
 
 ## 14.4.1
-
-_Released 6/3/2025_
 
 **Bugfixes:**
 
@@ -310,8 +507,6 @@ _Released 6/3/2025_
 - Updated `@sinonjs/fake-timers` from `10.3.0` to `11.3.1`. Addressed in [#31746](https://github.com/cypress-io/cypress/pull/31746).
 
 ## 14.4.0
-
-_Released 5/20/2025_
 
 **Features:**
 
@@ -337,8 +532,6 @@ _Released 5/20/2025_
 
 ## 14.3.3
 
-_Released 5/6/2025_
-
 **Performance:**
 
 - Ensure the previous pausing event handlers are removed before new ones are added. Addressed in [#31596](https://github.com/cypress-io/cypress/pull/31596).
@@ -360,16 +553,12 @@ _Released 5/6/2025_
 
 ## 14.3.2
 
-_Released 4/22/2025_
-
 **Bugfixes:**
 
 - Fixed an issue where auto scroll in the Cypress Command Log was not scrolling correctly. Fixes [#31530](https://github.com/cypress-io/cypress/issues/31530).
 - Fixed an issue where a message pointing users to the Cypress Cloud was not displaying on runs with failures in CI. Fixes [#31550](https://github.com/cypress-io/cypress/issues/31550).
 
 ## 14.3.1
-
-_Released 4/17/2025_
 
 **Performance:**
 
@@ -387,8 +576,6 @@ _Released 4/17/2025_
 - Fixed an issue where the error message output when attempting to install Cypress on an unsupported architecture included an outdated documentation link to Cypress system requirements. Fixes [#31512](https://github.com/cypress-io/cypress/issues/31512).
 
 ## 14.3.0
-
-_Released 4/8/2025_
 
 **Features:**
 
@@ -413,8 +600,6 @@ _Released 4/8/2025_
 
 ## 14.2.1
 
-_Released 3/26/2025_
-
 **Bugfixes:**
 
 - Applies a fix from [#30730](https://github.com/cypress-io/cypress/pull/30730) and [#30099](https://github.com/cypress-io/cypress/pull/30099) related to Node.js turning on ESM flags by default in Node.js version `20.19.0`. Fixed in [#31308](https://github.com/cypress-io/cypress/pull/31308).
@@ -436,8 +621,6 @@ _Released 3/26/2025_
 
 ## 14.2.0
 
-_Released 3/12/2025_
-
 **Features:**
 
 - [`Cypress.stop()`](https://on.cypress.io/cypress-stop) is now available to stop the Cypress App on the current machine while tests are running. This can be useful for stopping test execution upon failures or other predefined conditions. Addresses [#518](https://github.com/cypress-io/cypress/issues/518). Addressed in [#31225](https://github.com/cypress-io/cypress/pull/31225).
@@ -454,8 +637,6 @@ _Released 3/12/2025_
 - Upgraded `simple-git` from `3.25.0` to `3.27.0`. Addressed in [#31198](https://github.com/cypress-io/cypress/pull/31198).
 
 ## 14.1.0
-
-_Released 2/25/2025_
 
 **Features:**
 
@@ -479,11 +660,9 @@ _Released 2/25/2025_
 
 ## 14.0.3
 
-_Released 2/11/2025_
-
 **Bugfixes:**
 
-- Fixed an issue in Cypress [`14.0.2`](https://docs.cypress.io/guides/references/changelog#14-0-2) where privileged commands did not run correctly when a spec file or support file contained certain encoded characters. Fixes [#31034](https://github.com/cypress-io/cypress/issues/31034) and [#31060](https://github.com/cypress-io/cypress/issues/31060).
+- Fixed an issue in Cypress [`14.0.2`](https://docs.cypress.io/app/references/changelog#14-0-2) where privileged commands did not run correctly when a spec file or support file contained certain encoded characters. Fixes [#31034](https://github.com/cypress-io/cypress/issues/31034) and [#31060](https://github.com/cypress-io/cypress/issues/31060).
 
 **Dependency Updates:**
 
@@ -492,13 +671,11 @@ _Released 2/11/2025_
 
 ## 14.0.2
 
-_Released 2/05/2025_
-
 **Bugfixes:**
 
-- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where error codeframes in the runner UI were not populated with the correct data in failed retry attempts. Fixes [#30927](https://github.com/cypress-io/cypress/issues/30927).
+- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/app/references/changelog#14-0-0) where error codeframes in the runner UI were not populated with the correct data in failed retry attempts. Fixes [#30927](https://github.com/cypress-io/cypress/issues/30927).
 - All commands performed in `after` and `afterEach` hooks will now correctly retry when a test fails. Commands that are actions like `.click()` and `.type()` will now perform the action in this situation also. Fixes [#2831](https://github.com/cypress-io/cypress/issues/2831).
-- Fixed an issue in Cypress [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where privileged commands did not run correctly when a spec file or support file contained characters that required encoding. Fixes [#30933](https://github.com/cypress-io/cypress/issues/30933).
+- Fixed an issue in Cypress [`14.0.0`](https://docs.cypress.io/app/references/changelog#14-0-0) where privileged commands did not run correctly when a spec file or support file contained characters that required encoding. Fixes [#30933](https://github.com/cypress-io/cypress/issues/30933).
 - Re-enabled retrying Cloud instance creation for runs that are parallel or recorded. Fixes [#31002](https://github.com/cypress-io/cypress/issues/31002).
 
 **Misc:**
@@ -511,13 +688,11 @@ _Released 2/05/2025_
 
 ## 14.0.1
 
-_Released 1/28/2025_
-
 **Bugfixes:**
 
 - Fixed an issue where Cypress would incorrectly navigate to `about:blank` when test isolation was disabled and the last test would fail and then retry. Fixes [#28527](https://github.com/cypress-io/cypress/issues/28527).
-- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where an element would not return the correct visibility if its offset parent was within the clipping element. Fixes [#30922](https://github.com/cypress-io/cypress/issues/30922).
-- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/guides/references/changelog#14-0-0) where the incorrect visibility would be returned when either `overflow-x` or `overflow-y` was visible but the other one was clipping. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
+- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/app/references/changelog#14-0-0) where an element would not return the correct visibility if its offset parent was within the clipping element. Fixes [#30922](https://github.com/cypress-io/cypress/issues/30922).
+- Fixed a regression introduced in [`14.0.0`](https://docs.cypress.io/app/references/changelog#14-0-0) where the incorrect visibility would be returned when either `overflow-x` or `overflow-y` was visible but the other one was clipping. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
 - Fixed an issue where an `option` element would not return the correct visibility if its parent element has a clipping overflow. Fixed in [#30934](https://github.com/cypress-io/cypress/pull/30934).
 - Fixed an issue where non-HTMLElement(s) may fail during assertions. Fixes [#30944](https://github.com/cypress-io/cypress/issues/30944)
 
@@ -527,8 +702,6 @@ _Released 1/28/2025_
 - Benign Mesa/GLX related warnings are now hidden in the terminal output when running Cypress in certain Linux environments or containers. Addresses [#29521](https://github.com/cypress-io/cypress/issues/29521) and [#29554](https://github.com/cypress-io/cypress/issues/29554).
 
 ## 14.0.0
-
-_Released 1/16/2025_
 
 **Breaking Changes:**
 
@@ -601,8 +774,6 @@ in this [GitHub issue](https://github.com/cypress-io/cypress/issues/30447). Addr
 
 ## 13.17.0
 
-_Released 12/17/2024_
-
 **Features:**
 
 - Added official support for the [Google Chrome for Testing](https://github.com/GoogleChromeLabs/chrome-for-testing) browser. Assuming the browser is in a location where it can be [auto-detected](https://on.cypress.io/troubleshooting-launching-browsers), it can be launched by providing the `--browser chrome-for-testing` option. If it can't be auto-detected, the path to the browser can also be provided. Previously [customizing the available browsers](https://on.cypress.io/customize-browsers) was required. Addresses [#28123](https://github.com/cypress-io/cypress/issues/28123) and [#28554](https://github.com/cypress-io/cypress/issues/28554).
@@ -623,15 +794,11 @@ _Released 12/17/2024_
 
 ## 13.16.1
 
-_Released 12/03/2024_
-
 **Bugfixes:**
 
 - During recorded or parallel runs, execution will fail if Cypress is unable to confirm the creation of an instance instead of skipping the spec. Addresses [#30628](https://github.com/cypress-io/cypress/issues/30628).
 
 ## 13.16.0
-
-_Released 11/19/2024_
 
 **Features:**
 
@@ -643,8 +810,6 @@ _Released 11/19/2024_
 - Fixed an issue where some JS assets were not properly getting sourcemaps included with the vite dev server if they had a cache busting query parameter in the URL. Fixed some scenarios to ensure that the sourcemaps that were included by the vite dev server were inlined. Addressed in [#30606](https://github.com/cypress-io/cypress/pull/30606).
 
 ## 13.15.2
-
-_Released 11/5/2024_
 
 **Bugfixes:**
 
@@ -662,8 +827,6 @@ _Released 11/5/2024_
 
 ## 13.15.1
 
-_Released 10/24/2024_
-
 **Bugfixes:**
 
 - Patched [find-process](https://github.com/yibn2008/find-process) to fix an issue where trying to clean up browser profiles can throw an error on Windows. Addresses [#30378](https://github.com/cypress-io/cypress/issues/30378).
@@ -680,8 +843,6 @@ _Released 10/24/2024_
 - Updated `simple-git` from `3.16.0` to `3.25.0`. Addressed in [#30076](https://github.com/cypress-io/cypress/pull/30076).
 
 ## 13.15.0
-
-_Released 9/25/2024_
 
 **Features:**
 
@@ -706,8 +867,6 @@ _Released 9/25/2024_
 
 ## 13.14.2
 
-_Released 9/4/2024_
-
 **Bugfixes:**
 
 - Fixed an issue where Cypress could crash with a `WebSocket Connection Closed` error. Fixes [#30100](https://github.com/cypress-io/cypress/issues/30100).
@@ -715,15 +874,11 @@ _Released 9/4/2024_
 
 ## 13.14.1
 
-_Released 8/29/2024_
-
 **Bugfixes:**
 
 - Fixed an issue where no description was available for the `experimentalJustInTimeCompile` feature inside the Cypress application settings page. Addresses [#30126](https://github.com/cypress-io/cypress/issues/30126).
 
 ## 13.14.0
-
-_Released 8/27/2024_
 
 **Performance:**
 
@@ -755,8 +910,6 @@ _Released 8/27/2024_
 
 ## 13.13.3
 
-_Released 8/14/2024_
-
 **Bugfixes:**
 
 - A console error will no longer display in Chrome about a deprecated unload call originating from jQuery. Addressed in [#29944](https://github.com/cypress-io/cypress/pull/29944).
@@ -771,8 +924,6 @@ _Released 8/14/2024_
 - Updated `image-size` from `0.8.3` to `1.1.1`. Addressed in [#30023](https://github.com/cypress-io/cypress/pull/30023).
 
 ## 13.13.2
-
-_Released 7/31/2024_
 
 **Performance:**
 
@@ -792,8 +943,6 @@ _Released 7/31/2024_
 
 ## 13.13.1
 
-_Released 7/16/2024_
-
 **Bugfixes:**
 
 - Fixed an issue where unhandled `WebSocket connection closed` exceptions would be thrown when CDP connections rapidly connect, disconnect, and connect again while there are pending commands. Fixes [#29572](https://github.com/cypress-io/cypress/issues/29572).
@@ -808,8 +957,6 @@ _Released 7/16/2024_
 - Updated `minimatch` from `3.0.4` to `3.1.2`. Addressed in [#29821](https://github.com/cypress-io/cypress/pull/29821).
 
 ## 13.13.0
-
-_Released 7/01/2024_
 
 **Performance:**
 
@@ -832,8 +979,6 @@ _Released 7/01/2024_
 - Updated `ws` from `5.2.3` to `5.2.4`. Addressed in [#29698](https://github.com/cypress-io/cypress/pull/29698).
 
 ## 13.12.0
-
-_Released 6/18/2024_
 
 **Features:**
 
@@ -859,8 +1004,6 @@ _Released 6/18/2024_
 
 ## 13.11.0
 
-_Released 6/4/2024_
-
 **Performance:**
 
 - Improved performance when setting console props within `Cypress.log`. Addressed in [#29501](https://github.com/cypress-io/cypress/pull/29501).
@@ -881,8 +1024,6 @@ _Released 6/4/2024_
 
 ## 13.10.0
 
-_Released 5/21/2024_
-
 **Features:**
 
 - Added support for `vite` `v5` to `@cypress/vite-dev-server`. Addresses [#28347](https://github.com/cypress-io/cypress/issues/28347).
@@ -901,8 +1042,6 @@ _Released 5/21/2024_
 - Updated randomstring from `1.1.5` to `1.3.0`. Addressed in [#29503](https://github.com/cypress-io/cypress/pull/29503).
 
 ## 13.9.0
-
-_Released 5/7/2024_
 
 **Features:**
 
@@ -925,15 +1064,13 @@ _Released 5/7/2024_
 
 ## 13.8.1
 
-_Released 4/23/2024_
-
 **Performance:**
 
 - Fixed a performance issue with activated service workers that aren't controlling clients which could lead to correlation timeouts. Fixes [#29333](https://github.com/cypress-io/cypress/issues/29333) and [#29126](https://github.com/cypress-io/cypress/issues/29126).
 
 **Bugfixes:**
 
-- Fixed a regression introduced in [`13.6.0`](https://docs.cypress.io/guides/references/changelog#13-6-0) where Cypress would occasionally exit with status code 1, even when a test run was successful, due to an unhandled WebSocket exception (`Error: WebSocket connection closed`). Addresses [#28523](https://github.com/cypress-io/cypress/issues/28523).
+- Fixed a regression introduced in [`13.6.0`](https://docs.cypress.io/app/references/changelog#13-6-0) where Cypress would occasionally exit with status code 1, even when a test run was successful, due to an unhandled WebSocket exception (`Error: WebSocket connection closed`). Addresses [#28523](https://github.com/cypress-io/cypress/issues/28523).
 - Fixed an issue where Cypress would hang on some commands when an invalid `timeout` option was provided. Fixes [#29323](https://github.com/cypress-io/cypress/issues/29323).
 
 **Misc:**
@@ -946,23 +1083,19 @@ _Released 4/23/2024_
 
 ## 13.8.0
 
-_Released 4/18/2024_
-
 **Features:**
 
 - Added support for `webpack-dev-server` `v5` to `@cypress/webpack-dev-server`. Addresses [#29305](https://github.com/cypress-io/cypress/issues/29305).
 
 **Bugfixes:**
 
-- Fixed a regression introduced in [`13.7.3`](https://docs.cypress.io/guides/references/changelog#13-7-3) where Cypress could hang handling long assertion messages. Fixes [#29350](https://github.com/cypress-io/cypress/issues/29350).
+- Fixed a regression introduced in [`13.7.3`](https://docs.cypress.io/app/references/changelog#13-7-3) where Cypress could hang handling long assertion messages. Fixes [#29350](https://github.com/cypress-io/cypress/issues/29350).
 
 **Misc:**
 
 - The [`SEMAPHORE_GIT_PR_NUMBER`](https://docs.semaphoreci.com/ci-cd-environment/environment-variables/#semaphore_git_pr_number) environment variable from [Semaphore](https://semaphoreci.com/) CI is now captured to display the linked PR number in the Cloud. Addressed in [#29314](https://github.com/cypress-io/cypress/pull/29314).
 
 ## 13.7.3
-
-_Released 4/11/2024_
 
 **Bugfixes:**
 
@@ -975,8 +1108,6 @@ _Released 4/11/2024_
 - Suppresses benign warnings that reference Vulkan on GPU-less hosts. Addresses [#29085](https://github.com/cypress-io/cypress/issues/29085). Addressed in [#29278](https://github.com/cypress-io/cypress/pull/29278).
 
 ## 13.7.2
-
-_Released 4/2/2024_
 
 **Performance:**
 
@@ -995,8 +1126,6 @@ _Released 4/2/2024_
 
 ## 13.7.1
 
-_Released 3/21/2024_
-
 **Bugfixes:**
 
 - Fixed an issue where Cypress was not executing beyond the first spec in `cypress run` for versions of Firefox 124 and up. Fixes [#29172](https://github.com/cypress-io/cypress/issues/29172).
@@ -1008,8 +1137,6 @@ _Released 3/21/2024_
 
 ## 13.7.0
 
-_Released 3/13/2024_
-
 **Features:**
 
 - Added shadow DOM snapshot support within Test Replay in order to highlight elements correctly within the Cypress reporter. Addressed in [#28823](https://github.com/cypress-io/cypress/pull/28823).
@@ -1018,7 +1145,7 @@ _Released 3/13/2024_
 
 **Performance:**
 
-- Fixed a performance regression from [`13.6.3`](https://docs.cypress.io/guides/references/changelog#13-6-3) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
+- Fixed a performance regression from [`13.6.3`](https://docs.cypress.io/app/references/changelog#13-6-3) where unhandled service worker requests may not correlate correctly. Fixes [#28868](https://github.com/cypress-io/cypress/issues/28868).
 - Reduces the number of attempts to retry failed Test Replay artifact uploads from 8 to 3, to reduce time spent on artifact upload attempts that will not succeed. Addressed in [#28986](https://github.com/cypress-io/cypress/pull/28986)
 
 **Bugfixes:**
@@ -1041,22 +1168,18 @@ _Released 3/13/2024_
 
 ## 13.6.6
 
-_Released 2/22/2024_
-
 **Bugfixes:**
 
 - Fixed an issue where `cypress verify` was failing for `nx` users. Fixes [#28982](https://github.com/cypress-io/cypress/issues/28982).
 
 ## 13.6.5
 
-_Released 2/20/2024_
-
 **Bugfixes:**
 
 - Fixed tests hanging when the Chrome browser extension is disabled. Fixes [#28392](https://github.com/cypress-io/cypress/issues/28392).
 - Fixed an issue which caused the browser to relaunch after closing the browser from the Launchpad. Fixes [#28852](https://github.com/cypress-io/cypress/issues/28852).
 - Fixed an issue with the unzip promise never being rejected when an empty error happens. Fixed in [#28850](https://github.com/cypress-io/cypress/pull/28850).
-- Fixed a regression introduced in [`13.6.3`](https://docs.cypress.io/guides/references/changelog#13-6-3) where Cypress could crash when processing service worker requests through our proxy. Fixes [#28950](https://github.com/cypress-io/cypress/issues/28950).
+- Fixed a regression introduced in [`13.6.3`](https://docs.cypress.io/app/references/changelog#13-6-3) where Cypress could crash when processing service worker requests through our proxy. Fixes [#28950](https://github.com/cypress-io/cypress/issues/28950).
 - Fixed incorrect type definition of `dom.getContainsSelector`. Fixed in [#28339](https://github.com/cypress-io/cypress/pull/28339).
 
 **Misc:**
@@ -1075,11 +1198,9 @@ _Released 2/20/2024_
 
 ## 13.6.4
 
-_Released 1/30/2024_
-
 **Performance:**
 
-- Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/guides/references/changelog#13.3.2) where aborted requests may not correlate correctly. Fixes [#28734](https://github.com/cypress-io/cypress/issues/28734).
+- Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/app/references/changelog#13.3.2) where aborted requests may not correlate correctly. Fixes [#28734](https://github.com/cypress-io/cypress/issues/28734).
 
 **Bugfixes:**
 
@@ -1091,8 +1212,6 @@ _Released 1/30/2024_
 
 ## 13.6.3
 
-_Released 1/16/2024_
-
 **Bugfixes:**
 
 - Force `moduleResolution` to `node` when `typescript` projects are detected to correctly run Cypress. This change should not have a large impact as `commonjs` is already forced when `ts-node` is registered. This fix does not impact the ESM Typescript configuration loader. Fixes [#27731](https://github.com/cypress-io/cypress/issues/27731).
@@ -1100,7 +1219,7 @@ _Released 1/16/2024_
 - Now `node_modules` will not be ignored if a project path or a provided path to spec files contains it. Fixes [#23616](https://github.com/cypress-io/cypress/issues/23616).
 - Updated display of assertions and commands with a URL argument to escape markdown formatting so that values are displayed as is and assertion values display as bold. Fixes [#24960](https://github.com/cypress-io/cypress/issues/24960) and [#28100](https://github.com/cypress-io/cypress/issues/28100).
 - When generating assertions via Cypress Studio, the preview of the generated assertions now correctly displays the past tense of 'expected' instead of 'expect'. Fixed in [#28593](https://github.com/cypress-io/cypress/pull/28593).
-- Fixed a regression in [`13.6.2`](https://docs.cypress.io/guides/references/changelog#13.6.2) where the `body` element was not highlighted correctly in Test Replay. Fixed in [#28627](https://github.com/cypress-io/cypress/pull/28627).
+- Fixed a regression in [`13.6.2`](https://docs.cypress.io/app/references/changelog#13.6.2) where the `body` element was not highlighted correctly in Test Replay. Fixed in [#28627](https://github.com/cypress-io/cypress/pull/28627).
 - Correctly sync `Cypress.currentRetry` with secondary origin so test retries that leverage `cy.origin()` render logs as expected. Fixes [#28574](https://github.com/cypress-io/cypress/issues/28574).
 - Fixed an issue where some cross-origin logs, like assertions or cy.clock(), were getting too many dom snapshots. Fixes [#28609](https://github.com/cypress-io/cypress/issues/28609).
 - Fixed asset capture for Test Replay for requests that are routed through service workers. This addresses an issue where styles were not being applied properly in Test Replay and `cy.intercept()` was not working properly for requests in this scenario. Fixes [#28516](https://github.com/cypress-io/cypress/issues/28516).
@@ -1110,7 +1229,7 @@ _Released 1/16/2024_
 
 **Performance:**
 
-- Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/guides/references/changelog#13.3.2) where requests may not correlate correctly when test isolation is off. Fixes [#28545](https://github.com/cypress-io/cypress/issues/28545).
+- Fixed a performance regression from [`13.3.2`](https://docs.cypress.io/app/references/changelog#13.3.2) where requests may not correlate correctly when test isolation is off. Fixes [#28545](https://github.com/cypress-io/cypress/issues/28545).
 
 **Dependency Updates:**
 
@@ -1126,12 +1245,10 @@ _Released 1/16/2024_
 
 ## 13.6.2
 
-_Released 12/26/2023_
-
 **Bugfixes:**
 
-- Fixed a regression in [`13.6.1`](https://docs.cypress.io/guides/references/changelog#13.6.1) where a malformed URI would crash Cypress. Fixes [#28521](https://github.com/cypress-io/cypress/issues/28521).
-- Fixed a regression in [`12.4.0`](https://docs.cypress.io/guides/references/changelog#12.4.0) where erroneous `<br>` tags were displaying in error messages in the Command Log making them less readable. Fixes [#28452](https://github.com/cypress-io/cypress/issues/28452).
+- Fixed a regression in [`13.6.1`](https://docs.cypress.io/app/references/changelog#13.6.1) where a malformed URI would crash Cypress. Fixes [#28521](https://github.com/cypress-io/cypress/issues/28521).
+- Fixed a regression in [`12.4.0`](https://docs.cypress.io/app/references/changelog#12.4.0) where erroneous `<br>` tags were displaying in error messages in the Command Log making them less readable. Fixes [#28452](https://github.com/cypress-io/cypress/issues/28452).
 
 **Performance:**
 
@@ -1142,8 +1259,6 @@ _Released 12/26/2023_
 - Updated ts-node from `10.9.1` to `10.9.2`. Cypress will longer error during `cypress run` or `cypress open` when using Typescript 5.3.2+ with `extends` in `tsconfig.json`. Addresses [#28385](https://github.com/cypress-io/cypress/issues/28385).
 
 ## 13.6.1
-
-_Released 12/5/2023_
 
 **Bugfixes:**
 
@@ -1158,8 +1273,6 @@ _Released 12/5/2023_
 - Artifact upload duration is now reported to Cypress Cloud. Fixes [#28238](https://github.com/cypress-io/cypress/issues/28238). Addressed in [#28418](https://github.com/cypress-io/cypress/pull/28418).
 
 ## 13.6.0
-
-_Released 11/21/2023_
 
 **Features:**
 
@@ -1185,17 +1298,13 @@ _Released 11/21/2023_
 
 ## 13.5.1
 
-_Released 11/14/2023_
-
 **Bugfixes:**
 
-- Fixed a regression in [`13.5.0`](https://docs.cypress.io/guides/references/changelog#13.5.0) where requests cached within a given spec may take longer to load than they did previously. Addresses [#28295](https://github.com/cypress-io/cypress/issues/28295).
+- Fixed a regression in [`13.5.0`](https://docs.cypress.io/app/references/changelog#13.5.0) where requests cached within a given spec may take longer to load than they did previously. Addresses [#28295](https://github.com/cypress-io/cypress/issues/28295).
 - Fixed an issue where pages opened in a new tab were missing response headers, causing them not to load properly. Fixes [#28293](https://github.com/cypress-io/cypress/issues/28293) and [#28303](https://github.com/cypress-io/cypress/issues/28303).
 - We now pass a flag to Chromium browsers to disable default component extensions. This is a common flag passed during browser automation. Fixed in [#28294](https://github.com/cypress-io/cypress/pull/28294).
 
 ## 13.5.0
-
-_Released 11/8/2023_
 
 **Features:**
 
@@ -1204,7 +1313,7 @@ _Released 11/8/2023_
 **Bugfixes:**
 
 - Fixed an issue in chromium based browsers, where global style updates can trigger flooding of font face requests in DevTools and Test Replay. This can affect performance due to the flooding of messages in CDP. Fixes [#28150](https://github.com/cypress-io/cypress/issues/28150) and [#28215](https://github.com/cypress-io/cypress/issues/28215).
-- Fixed a regression in [`13.3.3`](https://docs.cypress.io/guides/references/changelog#13.3.3) where Cypress would hang on loading shared workers when using `cy.reload` to reload the page. Fixes [#28248](https://github.com/cypress-io/cypress/issues/28248).
+- Fixed a regression in [`13.3.3`](https://docs.cypress.io/app/references/changelog#13.3.3) where Cypress would hang on loading shared workers when using `cy.reload` to reload the page. Fixes [#28248](https://github.com/cypress-io/cypress/issues/28248).
 - Fixed an issue where network requests made from tabs, or windows other than the main Cypress tab, would be delayed. Fixes [#28113](https://github.com/cypress-io/cypress/issues/28113).
 - Fixed an issue with 'other' targets (e.g. pdf documents embedded in an object tag) not fully loading. Fixes [#28228](https://github.com/cypress-io/cypress/issues/28228) and [#28162](https://github.com/cypress-io/cypress/issues/28162).
 - Fixed an issue where clicking a link to download a file could cause a page load timeout when the download attribute was missing. Note: download behaviors in experimental Webkit are still an issue. Fixes [#14857](https://github.com/cypress-io/cypress/issues/14857).
@@ -1215,19 +1324,15 @@ _Released 11/8/2023_
 
 ## 13.4.0
 
-_Released 10/30/2023_
-
 **Features:**
 
 - Introduced experimental configuration options for advanced retry logic: adds `experimentalStrategy` and `experimentalOptions` keys to the `retry` configuration key. See [Experimental Flake Detection Features](https://docs.cypress.io/guides/references/experiments/#Experimental-Flake-Detection-Features) in the documentation. Addressed in [#27930](https://github.com/cypress-io/cypress/pull/27930).
 
 **Bugfixes:**
 
-- Fixed a regression in [`13.3.2`](https://docs.cypress.io/guides/references/changelog#13.3.2) where Cypress would crash with 'Inspected target navigated or closed' or 'Session with given id not found'. Fixes [#28141](https://github.com/cypress-io/cypress/issues/28141) and [#28148](https://github.com/cypress-io/cypress/issues/28148).
+- Fixed a regression in [`13.3.2`](https://docs.cypress.io/app/references/changelog#13.3.2) where Cypress would crash with 'Inspected target navigated or closed' or 'Session with given id not found'. Fixes [#28141](https://github.com/cypress-io/cypress/issues/28141) and [#28148](https://github.com/cypress-io/cypress/issues/28148).
 
 ## 13.3.3
-
-_Released 10/24/2023_
 
 **Bugfixes:**
 
@@ -1236,8 +1341,6 @@ _Released 10/24/2023_
 - Fixed a regression in [10.0.0](#10.0.0), where search would not find a spec if the file name contains "-" or "\_", but search prompt contains " " instead (e.g. search file "spec-file.cy.ts" with prompt "spec file"). Fixes [#25303](https://github.com/cypress-io/cypress/issues/25303).
 
 ## 13.3.2
-
-_Released 10/18/2023_
 
 **Bugfixes:**
 
@@ -1254,8 +1357,6 @@ _Released 10/18/2023_
 
 ## 13.3.1
 
-_Released 10/11/2023_
-
 **Bugfixes:**
 
 - Fixed an issue where requests were correlated in the wrong order in the proxy. This could cause an issue where the wrong request is used for `cy.intercept` or assets (e.g. stylesheets or images) may not properly be available in Test Replay. Addressed in [#27892](https://github.com/cypress-io/cypress/pull/27892).
@@ -1267,8 +1368,6 @@ _Released 10/11/2023_
 
 ## 13.3.0
 
-_Released 09/27/2023_
-
 **Features:**
 
  - Introduces new layout for Runs page providing additional run information. Addresses [#27203](https://github.com/cypress-io/cypress/issues/27203).
@@ -1279,8 +1378,6 @@ _Released 09/27/2023_
 - Fixed network stubbing not permitting status code 999. Fixes [#27567](https://github.com/cypress-io/cypress/issues/27567). Addressed in [#27853](https://github.com/cypress-io/cypress/pull/27853).
 
 ## 13.2.0
-
-_Released 09/12/2023_
 
 **Features:**
 
@@ -1299,8 +1396,6 @@ _Released 09/12/2023_
 
 ## 13.1.0
 
-_Released 08/31/2023_
-
 **Features:**
 
  - Introduces a status icon representing the `latest` test run in the Sidebar for the Runs Page. Addresses [#27206](https://github.com/cypress-io/cypress/issues/27206).
@@ -1314,8 +1409,6 @@ _Released 08/31/2023_
 - Updated `plist` from `3.0.6` to `3.1.0` to address [CVE-2022-37616](https://github.com/advisories/GHSA-9pgh-qqpf-7wqj) and [CVE-2022-39353](https://github.com/advisories/GHSA-crh6-fp67-6883). Fixed in [#27710](https://github.com/cypress-io/cypress/pull/27710).
 
 ## 13.0.0
-
-_Released 08/29/2023_
 
 **Breaking Changes:**
 
@@ -1353,8 +1446,6 @@ _Released 08/29/2023_
 
 ## 12.17.4
 
-_Released 08/15/2023_
-
 **Bugfixes:**
 
 - Fixed an issue where having `cypress.config` in a nested directory would cause problems with locating the `component-index.html` file when using component testing. Fixes [#26400](https://github.com/cypress-io/cypress/issues/26400).
@@ -1366,8 +1457,6 @@ _Released 08/15/2023_
 
 ## 12.17.3
 
-_Released 08/01/2023_
-
 **Bugfixes:**
 
 - Fixed an issue where unexpected branch names were being recorded for cypress runs when executed by GitHub Actions. The HEAD branch name will now be recorded by default for pull request workflows if a branch name cannot otherwise be detected from user overrides or from local git data. Fixes [#27389](https://github.com/cypress-io/cypress/issues/27389).
@@ -1378,8 +1467,6 @@ _Released 08/01/2023_
 
 ## 12.17.2
 
-_Released 07/20/2023_
-
 **Bugfixes:**
 
 - Fixed an issue where commands would fail with the error `must only be invoked from the spec file or support file` if their arguments were mutated. Fixes [#27200](https://github.com/cypress-io/cypress/issues/27200).
@@ -1387,8 +1474,6 @@ _Released 07/20/2023_
 - Fixed an issue where web workers could not be created within a spec. Fixes [#27298](https://github.com/cypress-io/cypress/issues/27298).
 
 ## 12.17.1
-
-_Released 07/10/2023_
 
 **Bugfixes:**
 
@@ -1400,8 +1485,6 @@ _Released 07/10/2023_
 - Upgraded [`@cypress/request`](https://www.npmjs.com/package/@cypress/request) from `2.88.10` to `2.88.11` to address [CVE-2022-24999](https://www.cve.org/CVERecord?id=CVE-2022-24999) security vulnerability. Addressed in [#27005](https://github.com/cypress-io/cypress/pull/27005).
 
 ## 12.17.0
-
-_Released 07/05/2023_
 
 **Features:**
 
@@ -1423,8 +1506,6 @@ _Released 07/05/2023_
 
 ## 12.16.0
 
-_Released 06/26/2023_
-
 **Features:**
 
 - Added support for Angular 16.1.0 in Cypress Component Testing. Addresses [#27049](https://github.com/cypress-io/cypress/issues/27049).
@@ -1434,8 +1515,6 @@ _Released 06/26/2023_
 - Fixed an issue where certain commands would fail with the error `must only be invoked from the spec file or support file` when invoked with a large argument. Fixes [#27099](https://github.com/cypress-io/cypress/issues/27099).
 
 ## 12.15.0
-
-_Released 06/20/2023_
 
 **Features:**
 
@@ -1453,8 +1532,6 @@ _Released 06/20/2023_
 - Removed [`@cypress/mocha-teamcity-reporter`](https://www.npmjs.com/package/@cypress/mocha-teamcity-reporter) as this package was no longer being referenced. Addressed in [#26938](https://github.com/cypress-io/cypress/pull/26938).
 
 ## 12.14.0
-
-_Released 06/07/2023_
 
 **Features:**
 
@@ -1477,8 +1554,6 @@ during Component Testing onboarding. Addresses [#26852](https://github.com/cypre
 
 ## 12.13.0
 
-_Released 05/23/2023_
-
 **Features:**
 
 - Adds Git-related messages for the [Runs page](https://docs.cypress.io/guides/core-concepts/cypress-app#Runs) and [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) when users aren't using Git or there are no recorded runs for the current branch. Addresses [#26680](https://github.com/cypress-io/cypress/issues/26680).
@@ -1499,8 +1574,6 @@ _Released 05/23/2023_
 
 ## 12.12.0
 
-_Released 05/09/2023_
-
 **Features:**
 
 - Added a new informational banner to help get started with component testing from an existing end-to-end test suite. Addresses [#26511](https://github.com/cypress-io/cypress/issues/26511).
@@ -1519,8 +1592,6 @@ _Released 05/09/2023_
 - Upgraded [`@vue/test-utils`](https://www.npmjs.com/package/@vue/test-utils) from `2.0.2` to `2.3.2`. Addresses [#26575](https://github.com/cypress-io/cypress/issues/26575).
 
 ## 12.11.0
-
-_Released 04/26/2023_
 
 **Features:**
 
@@ -1541,8 +1612,6 @@ _Released 04/26/2023_
 - Upgraded [`vue`](https://www.npmjs.com/package/vue) from `3.2.31` to `3.2.47`. Addressed in [#26555](https://github.com/cypress-io/cypress/pull/26555).
 
 ## 12.10.0
-
-_Released 04/17/2023_
 
 **Features:**
 
@@ -1568,8 +1637,6 @@ _Released 04/17/2023_
 
 ## 12.9.0
 
-_Released 03/28/2023_
-
 **Features:**
 
 - The [Debug page](https://docs.cypress.io/guides/cloud/runs#Debug) now allows for navigating between all runs recorded for a commit. Addresses [#25899](https://github.com/cypress-io/cypress/issues/25899) and [#26018](https://github.com/cypress-io/cypress/issues/26018).
@@ -1589,19 +1656,15 @@ _Released 03/28/2023_
 
 ## 12.8.1
 
-_Released 03/15/2023_
-
 **Bugfixes:**
 
-- Fixed a regression in Cypress [10](https://docs.cypress.io/guides/references/changelog#10-0-0) where the reporter auto-scroll configuration inside user preferences was unintentionally being toggled off. User's must now explicitly enable/disable auto-scroll under user preferences, which is enabled by default. Fixes [#24171](https://github.com/cypress-io/cypress/issues/24171) and [#26113](https://github.com/cypress-io/cypress/issues/26113).
+- Fixed a regression in Cypress [10](https://docs.cypress.io/app/references/changelog#10-0-0) where the reporter auto-scroll configuration inside user preferences was unintentionally being toggled off. User's must now explicitly enable/disable auto-scroll under user preferences, which is enabled by default. Fixes [#24171](https://github.com/cypress-io/cypress/issues/24171) and [#26113](https://github.com/cypress-io/cypress/issues/26113).
 
 **Dependency Updates:**
 
 - Upgraded [`ejs`](https://www.npmjs.com/package/ejs) from `3.1.6` to `3.1.8` to address this [CVE-2022-29078](https://github.com/advisories/GHSA-phwq-j96m-2c2q) NVD security vulnerability. Addressed in [#25279](https://github.com/cypress-io/cypress/pull/25279).
 
 ## 12.8.0
-
-_Released 03/14/2023_
 
 **Features:**
 
@@ -1632,8 +1695,6 @@ _Released 03/14/2023_
 
 ## 12.7.0
 
-_Released 02/24/2023_
-
 **Features:**
 
 - It is now possible to set `hostOnly` cookies with [`cy.setCookie()`](https://docs.cypress.io/api/commands/setcookie) for a given domain. Addresses [#16856](https://github.com/cypress-io/cypress/issues/16856) and [#17527](https://github.com/cypress-io/cypress/issues/17527).
@@ -1658,8 +1719,6 @@ _Released 02/24/2023_
 - Made updates to the way that the Debug Page header displays information. Addresses [#25796](https://github.com/cypress-io/cypress/issues/25796) and [#25798](https://github.com/cypress-io/cypress/issues/25798).
 
 ## 12.6.0
-
-_Released 02/15/2023_
 
 **Features:**
 
@@ -1687,19 +1746,15 @@ _Released 02/15/2023_
 
 ## 12.5.1
 
-_Released 02/02/2023_
-
 **Bugfixes:**
 
-- Fixed a regression introduced in Cypress [12.5.0](https://docs.cypress.io/guides/references/changelog#12-5-0) where the `runnable` was not included in the [`test:after:run`](https://docs.cypress.io/api/events/catalog-of-events) event. Fixes [#25663](https://github.com/cypress-io/cypress/issues/25663).
+- Fixed a regression introduced in Cypress [12.5.0](https://docs.cypress.io/app/references/changelog#12-5-0) where the `runnable` was not included in the [`test:after:run`](https://docs.cypress.io/api/events/catalog-of-events) event. Fixes [#25663](https://github.com/cypress-io/cypress/issues/25663).
 
 **Dependency Updates:**
 
 - Upgraded [`simple-git`](https://github.com/steveukx/git-js) from `3.15.0` to `3.16.0` to address this [security vulnerability](https://github.com/advisories/GHSA-9p95-fxvg-qgq2) where Remote Code Execution (RCE) via the clone(), pull(), push() and listRemote() methods due to improper input sanitization was possible. Addressed in [#25603](https://github.com/cypress-io/cypress/pull/25603).
 
 ## 12.5.0
-
-_Released 01/31/2023_
 
 **Features:**
 
@@ -1719,19 +1774,15 @@ _Released 01/31/2023_
 
 ## 12.4.1
 
-_Released 01/27/2023_
-
 **Bugfixes:**
 
-- Fixed a regression from Cypress [12.4.0](https://docs.cypress.io/guides/references/changelog#12-4-0) where Cypress was not exiting properly when running multiple Component Testing specs in `electron` in `run` mode. Fixes [#25568](https://github.com/cypress-io/cypress/issues/25568).
+- Fixed a regression from Cypress [12.4.0](https://docs.cypress.io/app/references/changelog#12-4-0) where Cypress was not exiting properly when running multiple Component Testing specs in `electron` in `run` mode. Fixes [#25568](https://github.com/cypress-io/cypress/issues/25568).
 
 **Dependency Updates:**
 
 - Upgraded [`ua-parser-js`](https://github.com/faisalman/ua-parser-js) from `0.7.24` to `0.7.33` to address this [security vulnerability](https://github.com/faisalman/ua-parser-js/security/advisories/GHSA-fhg7-m89q-25r3) where crafting a very-very-long user-agent string with specific pattern, an attacker can turn the script to get stuck processing for a very long time which results in a denial of service (DoS) condition. Addressed in [#25561](https://github.com/cypress-io/cypress/pull/25561).
 
 ## 12.4.0
-
-_Released 1/24/2023_
 
 **Features:**
 

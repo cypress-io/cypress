@@ -19,6 +19,7 @@ vue
 react*
 mount-utils
 angular
+angular-zoneless
 svelte
 index.js
 lib/**/*.js

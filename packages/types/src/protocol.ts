@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
+import type { DebugData } from './studio/studio-server-types'
 import type { ProxyTimings } from './proxy'
 import type { FoundSpec } from './spec'
 
@@ -15,8 +16,6 @@ export interface CDPClient {
   on<T extends Extract<keyof Events, string>> (eventName: T, cb: (event: Event<T>[0]) => void): void
   off (eventName: string, cb: (event: any) => void): void
 }
-
-// TODO(protocol): This is basic for now but will evolve as we progress with the protocol work
 
 export interface AppCaptureProtocolCommon {
   cdpReconnect (): Promise<void>
@@ -41,6 +40,7 @@ export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   beforeSpec ({ spec, workingDirectory, archivePath, dbPath, db }: { spec: FoundSpec & { instanceId: string }, workingDirectory: string, archivePath: string, dbPath: string, db: Database.Database }): void
   uploadStallSamplingInterval: () => number
   connectToBrowser (cdpClient: CDPClient): Promise<void>
+  cleanup (): void
 }
 
 export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'prepareProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb' | 'UNKNOWN' | 'createProtocolArtifact' | 'protocolUploadUrl'
@@ -105,9 +105,7 @@ export type ProtocolManagerOptions = {
   }
   projectConfig: ProjectConfig
   mountVersion?: number
-  debugData?: {
-    filePreprocessorHandlerText?: string
-  }
+  debugData?: DebugData
   mode?: 'record' | 'studio'
 }
 
@@ -156,6 +154,7 @@ export type ResponseStreamOptions = {
   requestId: string
   responseHeaders: IncomingHttpHeaders
   isAlreadyGunzipped: boolean
+  isAlreadyBrotliDecompressed?: boolean
   responseStream: Readable
   res: Response
   timings: ProxyTimings

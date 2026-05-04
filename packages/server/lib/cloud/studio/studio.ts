@@ -1,12 +1,12 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, StudioConfig, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions, StudioCDPClient } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
-import { reportStudioError, ReportStudioErrorOptions } from '../api/studio/report_studio_error'
 import crypto, { BinaryLike } from 'crypto'
 import { StudioElectron } from './StudioElectron'
 import exception from '../exception'
+import type { DebugData } from '@packages/types'
 
 interface StudioServer { default: StudioServerDefaultShape }
 
@@ -17,6 +17,7 @@ interface SetupOptions {
   cloudApi: StudioCloudApi
   manifest: Record<string, string>
   getProjectOptions: StudioServerOptions['getProjectOptions']
+  debugData?: DebugData
 }
 
 const debug = Debug('cypress:server:studio')
@@ -27,7 +28,7 @@ export class StudioManager implements StudioManagerShape {
   private _studioServer: StudioServerShape | undefined
   private _studioElectron: StudioElectron | undefined
 
-  async setup ({ script, studioPath, studioHash, cloudApi, manifest, getProjectOptions }: SetupOptions): Promise<void> {
+  async setup ({ script, studioPath, studioHash, cloudApi, manifest, getProjectOptions, debugData }: SetupOptions): Promise<void> {
     const { createStudioServer } = requireScript<StudioServer>(script).default
 
     this._studioServer = await createStudioServer({
@@ -48,6 +49,7 @@ export class StudioManager implements StudioManagerShape {
         return actualHash === expectedHash
       },
       getProjectOptions,
+      debugData,
     })
 
     this.status = 'ENABLED'
@@ -74,6 +76,32 @@ export class StudioManager implements StudioManagerShape {
 
   async canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
     return !!(await this.invokeAsync('canAccessStudioAI', { isEssential: true }, browser))
+  }
+
+  async getStudioConfig (browser: Cypress.Browser): Promise<StudioConfig> {
+    const config = await this.invokeAsync('getStudioConfig', { isEssential: true }, browser)
+
+    if (config === undefined) {
+      throw new Error('Studio is not available: server not initialized or an error occurred')
+    }
+
+    return config
+  }
+
+  getCachedStudioConfig (): StudioConfig {
+    const config = this.invokeSync('getCachedStudioConfig', { isEssential: true })
+
+    if (config === undefined) {
+      throw new Error('Studio is not available: server not initialized or an error occurred')
+    }
+
+    return config
+  }
+
+  connectToBrowser (target: StudioCDPClient): void {
+    if (this._studioServer) {
+      return this.invokeSync('connectToBrowser', { isEssential: true }, target)
+    }
   }
 
   async initializeStudioAI (options: StudioAIInitializeOptions): Promise<void> {
@@ -119,6 +147,8 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
+      debug('invoking sync method %s with args %o', method, args)
+
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
@@ -152,6 +182,8 @@ export class StudioManager implements StudioManagerShape {
     }
 
     try {
+      debug('invoking async method %s with args %o', method, args)
+
       // @ts-expect-error - TS not associating the method & args properly, even though we know it's correct
       return await this._studioServer[method].apply(this._studioServer, args)
     } catch (error: unknown) {
@@ -178,11 +210,13 @@ export class StudioManager implements StudioManagerShape {
   }
 }
 
-// Helper types for invokeSync / invokeAsync
+// Helper types for invokeSync / invokeAsync (only method keys; exclude e.g. sessionId)
+type StudioServerMethodKey = Exclude<keyof StudioServerShape, 'sessionId'>
+
 type StudioServerSyncMethods = {
-  [K in keyof StudioServerShape]: ReturnType<StudioServerShape[K]> extends Promise<any> ? never : K
-}[keyof StudioServerShape]
+  [K in StudioServerMethodKey]: ReturnType<StudioServerShape[K]> extends Promise<any> ? never : K
+}[StudioServerMethodKey]
 
 type StudioServerAsyncMethods = {
-  [K in keyof StudioServerShape]: ReturnType<StudioServerShape[K]> extends Promise<any> ? K : never
-}[keyof StudioServerShape]
+  [K in StudioServerMethodKey]: ReturnType<StudioServerShape[K]> extends Promise<any> ? K : never
+}[StudioServerMethodKey]

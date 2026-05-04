@@ -162,9 +162,9 @@ This means that any global state set up by **defaults()** methods exists indepen
 
 The consequence of this is that users will need to call any given **defaults()** method again inside the **cy.origin()** callback if they wish to have the same behavior in that **secondary origin** as in the **primary origin**.
 
-### Cypress.config() / Cypress.env()
+### Cypress.config() / Cypress.env() / Cypress.expose()
 
-Config and env values are synced both ways between **primary** and **secondary** origins. All built-in config values are inherently serializable since they are passed between the server and the browser.
+Config, env, and expose values are synced both ways between **primary** and **secondary** origins. All built-in config values are inherently serializable since they are passed between the server and the browser.
 
 It’s possible for users to set custom key/value pairs where the value could be unserializable. In that case, the value is not synced and it behaves similar to state set by **defaults()** methods, where it persists only in the execution context of that origin.
 

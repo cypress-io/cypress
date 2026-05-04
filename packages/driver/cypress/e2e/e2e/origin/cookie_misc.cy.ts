@@ -38,6 +38,101 @@ describe('misc cookie tests', { browser: '!webkit' }, () => {
     })
   })
 
+  it('cookies are not set for XHR sync requests', { browser: '!webkit' }, () => {
+    // this intercept won't get hit because the request is sync
+    cy.intercept('http://www.foobar.com:3500/set-cookie*', (req) => {
+      req.reply({
+        headers: {
+          'set-cookie': 'SYNC_COOKIE=sync',
+        },
+        body: '',
+      })
+    })
+
+    cy.intercept('http://www.foobar.com:3500/async', {
+      headers: {
+        'set-cookie': 'ASYNC_COOKIE=async',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ foo: 1, bar: 2 }),
+    }).as('async')
+
+    cy.visit('http://localhost:3500/fixtures/empty.html')
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.visit('http://www.foobar.com:3500/')
+      cy.window().then((win) => {
+        const xhr = new win.XMLHttpRequest()
+
+        xhr.open('GET', '/set-cookie?cookie=foo=bar', false)
+        xhr.send()
+
+        const xhr2 = new win.XMLHttpRequest()
+
+        xhr2.open('GET', '/async', true)
+        xhr2.send()
+      })
+    })
+
+    // wait for the async XHR response to arrive
+    cy.wait('@async')
+    // cy.getAllCookies does not wait for the cookies to be set, so we need to wait manually
+    cy.wait(500)
+
+    cy.getAllCookies().then((cookies) => {
+      const isFirefox = Cypress.isBrowser({ family: 'firefox' })
+
+      // For a cookie set via Set-Cookie with no SameSite attribute, Firefox's BiDi
+      // layer can report `sameSite` as either `default` (→ Cypress 'unspecified')
+      // or `lax`. Both describe the same cookie state — per `cli/types/cypress.d.ts`,
+      // `'unspecified'` is the documented default for Firefox 140+. Coerce to
+      // `'lax'` so the assertion matches the effective SameSite behavior used by
+      // every other browser.
+      const normalizeFirefoxSameSiteToLax = (cookie: Cypress.Cookie) => {
+        if (cookie.sameSite === 'unspecified') {
+          return { ...cookie, sameSite: 'lax' }
+        }
+
+        return cookie
+      }
+
+      const asyncCookie = {
+        name: 'ASYNC_COOKIE',
+        value: 'async',
+        path: '/',
+        secure: false,
+        hostOnly: true,
+        httpOnly: false,
+        domain: 'www.foobar.com',
+        sameSite: 'lax',
+      }
+
+      const fooBarCookie = {
+        name: 'foo',
+        value: 'bar',
+        path: '/',
+        secure: false,
+        hostOnly: true,
+        httpOnly: false,
+        domain: 'www.foobar.com',
+        sameSite: 'lax',
+      }
+
+      if (isFirefox) {
+        // in Firefox both the foo=bar and ASYNC_COOKIE=async cookies will be set
+        // SYNC_COOKIE=sync is not set because the intercept is not hit
+        expect(cookies).to.have.length(2)
+        expect(normalizeFirefoxSameSiteToLax(cookies[0])).to.deep.equal(fooBarCookie)
+        expect(normalizeFirefoxSameSiteToLax(cookies[1])).to.deep.equal(asyncCookie)
+      } else {
+        // in other browsers only the ASYNC_COOKIE=async cookie will be set
+        // SYNC_COOKIE=sync is not set because the intercept is not hit
+        // foo=bar is not set because the request is sync and we are not able to sync the cookie with the automation
+        expect(cookies).to.have.length(1)
+        expect(cookies[0]).to.deep.equal(asyncCookie)
+      }
+    })
+  })
+
   /**
    * FIXES:
    * https://github.com/cypress-io/cypress/issues/25205 (cookies set with expired time with value deleted show up as set with value deleted)

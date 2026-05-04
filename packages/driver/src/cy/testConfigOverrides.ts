@@ -77,16 +77,32 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
 
   // only store the global config values that updated
   globalConfig = _.pick(globalConfig, Object.keys(localConfigOverrides))
-  const globalEnv = _.clone(env())
 
   const localConfigOverridesBackup = _.clone(localConfigOverrides)
 
-  if (localConfigOverrides.env) {
-    env(localConfigOverrides.env)
+  // Do not allow overriding test/suite environment variables via testConfigOverrides with allowCypressEnv=false
+  // as the server needs to be restarted. The environment variables needing to be overridden need to be injected via the Cypress server
+  // and are not permitted in the browser.
+  if (!config('allowCypressEnv') && localConfigOverrides.env) {
+    let err = $errUtils.errByPath('config.invalid_test_override_with_allow_cypress_env')
+
+    throw err
   }
 
-  const localTestEnv = env()
-  const localTestEnvBackup = _.clone(localTestEnv)
+  // only set if allowCypressEnv is enabled
+  let globalEnv
+  let localTestEnv
+  let localTestEnvBackup
+
+  if (config('allowCypressEnv')) {
+    globalEnv = _.clone(env())
+    if (localConfigOverrides.env) {
+      env(localConfigOverrides.env)
+    }
+
+    localTestEnv = env()
+    localTestEnvBackup = _.clone(localTestEnv)
+  }
 
   // we restore config back to what it was before the test ran
   // UNLESS the user mutated config with Cypress.config, in which case
@@ -105,17 +121,20 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
       }
     })
 
-    _.each(localTestEnv, (val, key) => {
-      if (localTestEnvBackup[key] !== val) {
-        globalEnv[key] = val
-      }
-    })
+    if (config('allowCypressEnv')) {
+      _.each(localTestEnv, (val, key) => {
+        if (localTestEnvBackup[key] !== val) {
+          globalEnv[key] = val
+        }
+      })
+    }
 
     // reset test config overrides
     config(globalConfig)
-
-    env.reset()
-    env(globalEnv)
+    if (config('allowCypressEnv')) {
+      env.reset()
+      env(globalEnv)
+    }
   }
 
   return restoreConfigFn

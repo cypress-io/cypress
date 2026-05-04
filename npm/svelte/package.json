@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@cypress/mount-utils": "0.0.0-development",
+    "rollup": "3.29.5",
     "svelte": "^5.4.0",
     "typescript": "~5.4.5"
   },

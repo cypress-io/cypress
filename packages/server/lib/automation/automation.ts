@@ -11,9 +11,9 @@ import { AutomationNotImplemented } from './automation_not_implemented'
 
 const debug = Debug('cypress:server:automation')
 
-export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => Promise<void>
+type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => Promise<void>
 
-export type AutomationOptions = {
+type AutomationOptions = {
   cyNamespace?: string
   cookieNamespace?: string
   screenshotsFolder?: string | false

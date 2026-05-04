@@ -20,7 +20,7 @@ type Configurations = {
   }
 }
 
-export type AngularJsonProjectConfig = {
+type AngularJsonProjectConfig = {
   projectType: string
   root: string
   sourceRoot: string

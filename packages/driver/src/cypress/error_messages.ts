@@ -281,6 +281,14 @@ export default {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
+    invalid_test_override_with_allow_cypress_env: {
+      message: `overriding environment variables via suite or test configuration is not allowed when \`allowCypressEnv\` is set to \`false\`.`,
+      docsUrl: 'https://on.cypress.io/cypress-env-migration',
+    },
+    allow_cypress_env: {
+      message: `\`Cypress.env()\` does not work when \`allowCypressEnv\` is set to \`false\`. Please migrate to \`cy.env()\` or leverage other stateful methods to manage variables. The variable being accessed was: \`{{key}}\``,
+      docsUrl: 'https://on.cypress.io/cypress-env-migration',
+    },
   },
 
   contains: {
@@ -454,6 +462,29 @@ export default {
     non_array: {
       message: `${cmd('each')} can only operate on an array like subject. Your subject was: \`{{subject}}\``,
       docsUrl: 'https://on.cypress.io/each',
+    },
+  },
+
+  env: {
+    docsUrl: 'https://on.cypress.io/api/env',
+    invalid_argument: {
+      message: `${cmd('env')} must be passed a non-empty list of strings. You passed: '{{envVar}}'.`,
+      docsUrl: 'https://on.cypress.io/env',
+    },
+    timed_out: {
+      message: `${cmd('env', '\'{{envVars}}\'')} timed out after waiting \`{{timeout}}ms\`.`,
+    },
+    server_timed_out: {
+      message: stripIndent`
+        ${cmd('env', '\'{{envVars}}\'')} timed out after waiting \`{{timeout}}ms\`.
+
+        {{error}}`,
+    },
+    failed: {
+      message: stripIndent`
+        ${cmd('env', '\'{{envVars}}\'')} failed with the following error:
+
+        > "{{error}}"`,
     },
   },
 
@@ -1354,20 +1385,17 @@ export default {
         docsUrl: 'https://on.cypress.io/prompt-download-error',
       }
     },
+    promptBundleNeedsRefresh: stripIndent`\
+      Your \`cy.prompt\` Cloud code needs to be refreshed.
+
+      Please restart the app to get the latest version.
+    `,
     promptProxyError: {
       message: stripIndent`\
       \`cy.prompt\` requires an internet connection. To continue, you may need to configure Cypress with your proxy settings.
       `,
       docsUrl: 'https://on.cypress.io/proxy-configuration',
     },
-    promptTestingTypeError: stripIndent`\
-      \`cy.prompt\` is currently only supported in end-to-end tests.
-    `,
-    experimentalPromptCommandError: stripIndent`\
-      \`cy.prompt\` cannot be called without the \`experimentalPromptCommand\` being set. 
-
-      Please set this in your Cypress config file to continue using \`cy.prompt\`.
-    `,
   },
 
   proxy: {

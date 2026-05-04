@@ -20,11 +20,11 @@ export const DEFAULT_SELECTOR_PRIORITIES = [
   'nth-child',
 ] as const
 
-export type Defaults = {
+type Defaults = {
   selectorPriority: Cypress.SelectorPriority[]
 }
 
-export type ElementSelectorDefaultsOptions = {
+type ElementSelectorDefaultsOptions = {
   selectorPriority?: Cypress.SelectorPriority[]
 }
 
@@ -35,7 +35,7 @@ export interface ElementSelectorAPI {
 
 interface ElementSelectorPrivate {
   _reset(): void
-  _getSelector($el: any): string
+  _getSelector($el: any): string | null
 }
 
 const reset = (): Defaults => {
@@ -51,7 +51,7 @@ const ElementSelector: ElementSelectorAPI & ElementSelectorPrivate = {
     defaults = reset()
   },
 
-  _getSelector ($el: any) {
+  _getSelector ($el: any): string | null {
     return uniqueSelector($el.get(0), {
       selectorTypes: defaults.selectorPriority,
     })

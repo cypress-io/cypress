@@ -17,7 +17,7 @@ import {
   setResponseFromFixture,
 } from './util'
 import { InterceptedRequest } from './intercepted-request'
-import type CyServer from '@packages/server'
+import type { SocketBroadcaster } from '@packages/socket'
 import type { BackendStaticResponse } from '../internal-types'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
@@ -109,7 +109,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
 type OnNetStubbingEventOpts = {
   eventName: string
   state: NetStubbingState
-  socket: CyServer.Socket
+  socket: SocketBroadcaster
   getFixture: GetFixtureFn
   args: any[]
   frame: NetEvent.ToServer.AddRoute<BackendStaticResponse> | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse

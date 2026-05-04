@@ -1,6 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import { CypressError, getError } from '@packages/errors'
-import type { FullConfig, TestingType } from '@packages/types'
+import type { DebugData, FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
 import EventEmitter from 'events'
 import path from 'path'
@@ -45,13 +45,9 @@ export interface LoadConfigReply {
   requires: string[]
 }
 
-export interface SerializedLoadConfigReply {
+interface SerializedLoadConfigReply {
   initialConfig: string // stringified Cypress.ConfigOptions
   requires: string[]
-}
-
-export interface DebugData {
-  filePreprocessorHandlerText?: string
 }
 
 /**
@@ -157,7 +153,16 @@ export class ProjectConfigIpc extends EventEmitter {
 
       let resolved = false
 
-      this._childProcess.on('error', (err) => {
+      this._childProcess.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EPIPE') {
+          debug('EPIPE error in loadConfig() of child process %s', err)
+
+          // @ts-ignore
+          resolve()
+
+          return
+        }
+
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
@@ -229,7 +234,16 @@ export class ProjectConfigIpc extends EventEmitter {
     return new Promise((resolve, reject) => {
       let resolved = false
 
-      this._childProcess.on('error', (err) => {
+      this._childProcess.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EPIPE') {
+          debug('EPIPE error in registerSetupIpcHandlers() of child process %s', err)
+
+          // @ts-ignore
+          resolve()
+
+          return
+        }
+
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
       })

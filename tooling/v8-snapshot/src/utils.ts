@@ -84,7 +84,7 @@ export async function canAccess (p: string) {
  * Tries to read the given file and returns it's contents if it succeeds.
  * @category utils
  */
-export async function tryReadFile (p: string): Promise<Buffer | undefined> {
+async function tryReadFile (p: string): Promise<Buffer | undefined> {
   if (!(await canAccess(p))) return
 
   return fs.promises.readFile(p)
@@ -150,7 +150,7 @@ export function ensureDirSync (dir: string) {
  * @throws Error if it isn't found or isn't a file.
  * @category utils
  */
-export function checkFileSync (p: string) {
+function checkFileSync (p: string) {
   if (!canAccessSync(p)) throw new Error(`Unable to find '${p}'`)
 
   const stat = fs.statSync(p)

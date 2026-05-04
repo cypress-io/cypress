@@ -3,11 +3,31 @@ import type RewritingStream from 'parse5-html-rewriting-stream'
 import { STRIPPED_INTEGRITY_TAG } from './constants.json'
 import * as js from './js'
 
+// A `<base target>` is inherited by every untargeted <a> and <form> on the page.
+// `_top` / `_parent` would navigate out of the AUT iframe, and the driver's
+// runtime guards only inspect the element's own `target` attribute — so the
+// attribute has to be stripped before the page loads.
+const UNSAFE_BASE_TARGETS = new Set(['_top', '_parent'])
+
 export function install (url: string, rewriter: RewritingStream, deferSourceMapRewrite?: js.DeferSourceMapRewriteFn) {
   let currentlyInsideJsScriptTag = false
   let inlineJsIndex = 0
 
   rewriter.on('startTag', (startTag, raw) => {
+    if (startTag.tagName === 'base') {
+      currentlyInsideJsScriptTag = false
+
+      const targetAttr = find(startTag.attrs, { name: 'target' })
+
+      if (targetAttr && UNSAFE_BASE_TARGETS.has(targetAttr.value.toLowerCase())) {
+        startTag.attrs = startTag.attrs.filter((attr) => attr !== targetAttr)
+
+        return rewriter.emitStartTag(startTag)
+      }
+
+      return rewriter.emitRaw(raw)
+    }
+
     if (startTag.tagName !== 'script') {
       currentlyInsideJsScriptTag = false
 

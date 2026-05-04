@@ -1,0 +1,902 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": [
+        "gulpfile.js",
+        "scripts/after-pack-hook.js",
+        "scripts/after-sign-hook.js",
+        "scripts/gulp/tasks/gulpGraphql.ts",
+        "scripts/add-install-comment.js",
+        "scripts/semantic-commits/get-binary-release-data.js",
+        "scripts/binary/binary-entry-point-source.js",
+        "scripts/binary/binary-byte-node-entry-point-source.js"
+      ],
+      "ignoreDependencies": [
+        "@electron/fuses",
+        "@electron/notarize",
+        "@graphql-codegen/add",
+        "@graphql-codegen/cli",
+        "@graphql-codegen/plugin-helpers",
+        "@graphql-codegen/typed-document-node",
+        "@graphql-codegen/typescript",
+        "@graphql-codegen/typescript-operations",
+        "@graphql-codegen/typescript-resolvers",
+        "@graphql-codegen/typescript-urql-graphcache",
+        "@graphql-tools/delegate",
+        "@graphql-tools/utils",
+        "@graphql-tools/wrap",
+        "@octokit/auth-app",
+        "@octokit/core",
+        "@percy/cli",
+        "bytenode",
+        "chai-as-promised",
+        "detect-port",
+        "mobx",
+        "mocha-banner",
+        "mocha-junit-reporter",
+        "mocha-multi-reporters",
+        "mock-fs",
+        "playwright-webkit",
+        "proxyquire",
+        "react-dom",
+        "semantic-release-monorepo",
+        "shelljs",
+        "snap-shot-it",
+        "tar",
+        "term-to-html",
+        "through",
+        "yaml",
+        "yarn-deduplicate"
+      ]
+    },
+    "cli": {
+      "entry": [
+        "bin/cypress",
+        "lib/bin/cypress.ts",
+        "lib/index.ts",
+        "lib/cli.ts",
+        "lib/exec/xvfb.ts",
+        "lib/exec/spawn.ts",
+        "scripts/**/*.{ts,js}",
+        "types/tests/**/*.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,js}",
+        "scripts/**/*.{ts,js}",
+        "types/**/*.ts"
+      ],
+      "ignoreDependencies": [
+        "buffer",
+        "process"
+      ]
+    },
+    "packages/app": {
+      "entry": [
+        "src/main.ts",
+        "src/router/router.ts",
+        "src/pages/**/*.vue",
+        "src/layouts/**/*.vue",
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "src/generated/**/*.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "cypress.config.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx,vue}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx,mjs}"
+      ]
+    },
+    "packages/frontend-shared": {
+      "entry": [
+        "index.js",
+        "src/index.ts",
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "src/utils/**/*.ts",
+        "src/graphql/urqlDetailedDebugExchange.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "script/**/*.{ts,tsx,js,jsx}",
+        "cypress.config.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx,vue}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "script/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx,mjs}"
+      ]
+    },
+    "packages/server": {
+      "entry": [
+        "start-cypress.js",
+        "lib/cypress.ts",
+        "lib/modes/**/*.ts",
+        "lib/browsers/**/*.ts",
+        "lib/capture.ts",
+        "lib/runner-ct.ts",
+        "lib/cloud/artifacts/upload_artifacts.ts",
+        "lib/plugins/child/default_plugins_file.js",
+        "lib/privileged-commands/privileged-channel.js",
+        "lib/util/**/*.{ts,js}",
+        "test/**/*.{ts,js}"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "tslib",
+        "xvfb-maybe",
+        "ts-loader",
+        "tsconfig-paths",
+        "@babel/core",
+        "@babel/preset-env",
+        "babel-loader",
+        "playwright-core",
+        "playwright-webkit",
+        "tsx"
+      ]
+    },
+    "packages/launchpad": {
+      "entry": [
+        "src/main.ts",
+        "src/Main.vue",
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "src/generated/**/*.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "cypress.config.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx,vue}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx,mjs}"
+      ]
+    },
+    "packages/example": {
+      "entry": [
+        "gulpfile.js",
+        "lib/example.d.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "bin/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "cypress-example-kitchensink"
+      ]
+    },
+    "packages/icons": {
+      "project": [
+        "scripts/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/root": {
+      "project": [
+        "*.{ts,tsx,js,jsx,mjs}"
+      ]
+    },
+    "packages/ts": {
+      "project": [
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "typescript-cached-transpile"
+      ]
+    },
+    "packages/extension": {
+      "entry": [
+        "gulpfile.ts",
+        "app/v3/**/*.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "app/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/web-config": {
+      "entry": [
+        "webpack.config.base.ts",
+        "node-register.js"
+      ],
+      "project": [
+        "**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@babel/helper-define-map",
+        "@babel/plugin-transform-object-rest-spread",
+        "@svgr/webpack",
+        "assert",
+        "browser-resolve",
+        "webpack-cli",
+        "buffer",
+        "process",
+        "url"
+      ]
+    },
+    "packages/reporter": {
+      "entry": [
+        "src/**/*.cy.{ts,tsx,js,jsx}",
+        "cypress.config.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@fortawesome/fontawesome-free",
+        "@fontsource/open-sans",
+        "@reach/dialog",
+        "cypress-multi-reporters",
+        "webpack-cli"
+      ]
+    },
+    "packages/config": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@babel/parser",
+        "@babel/plugin-syntax-typescript",
+        "@babel/plugin-transform-typescript"
+      ]
+    },
+    "packages/driver": {
+      "entry": [
+        "src/main.ts",
+        "src/cypress/commands.ts",
+        "cypress/plugins/server.js",
+        "cypress/plugins/index.js",
+        "cypress.config.ts",
+        "cypress/**/*.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "cypress-multi-reporters",
+        "buffer-es6",
+        "process-es6"
+      ]
+    },
+    "packages/runner": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "webpack-cli"
+      ]
+    },
+    "packages/errors": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/net-stubbing": {
+      "entry": [
+        "lib/server/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/proxy": {
+      "entry": [
+        "lib/http/util/rewriter.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/data-context": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "graphql/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/launcher": {
+      "entry": [
+        "index.ts",
+        "lib/detect.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/https-proxy": {
+      "entry": [
+        "lib/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "tsx"
+      ]
+    },
+    "packages/network": {
+      "entry": [
+        "lib/index.ts",
+        "test/support/servers.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/v8-snapshot-require": {
+      "entry": [
+        "src/constants.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/scaffold-config": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/electron": {
+      "entry": [
+        "src/index.ts",
+        "src/print-node-version.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@electron/packager"
+      ]
+    },
+    "packages/socket": {
+      "entry": [
+        "lib/node/index.ts",
+        "lib/client/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "engine.io",
+        "engine.io-client",
+        "flatted"
+      ]
+    },
+    "packages/packherd-require": {
+      "entry": [
+        "src/sourcemap-support.ts",
+        "src/transpile-ts.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/stderr-filtering": {
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/telemetry": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/types": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/eslint-config": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/network-tools": {
+      "entry": [
+        "lib/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/resolve-dist": {
+      "entry": [
+        "lib/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/rewriter": {
+      "entry": [
+        "lib/threads/worker.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "packages/*": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/eslint-plugin-dev": {
+      "entry": [
+        "lib/custom-rules/**/*.js"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/webpack-dev-server": {
+      "entry": [
+        "src/browser.ts",
+        "src/loader.ts",
+        "src/aut-runner.ts",
+        "cypress/e2e/webpack-dev-server.cy.ts",
+        "cypress/e2e/react.cy.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@angular-devkit/core",
+        "next",
+        "html-webpack-plugin"
+      ]
+    },
+    "npm/cypress-schematic": {
+      "entry": [
+        "src/schematics/**/*.ts",
+        "src/builders/**/*.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@angular-devkit/schematics-cli",
+        "@angular/cli",
+        "@schematics/angular"
+      ]
+    },
+    "npm/webpack-batteries-included-preprocessor": {
+      "entry": [
+        "index.ts",
+        "test/**/*.{ts,tsx,js,jsx,coffee,mjs,mts}"
+      ],
+      "project": [
+        "**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "buffer",
+        "process",
+        "@babel/plugin-transform-class-properties",
+        "@babel/plugin-transform-object-rest-spread",
+        "babel-plugin-add-module-exports",
+        "@paths/.+"
+      ]
+    },
+    "npm/webpack-preprocessor": {
+      "entry": [
+        "index.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "test/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "@babel/core",
+        "@babel/preset-env",
+        "babel-loader"
+      ]
+    },
+    "npm/vite-dev-server": {
+      "entry": [
+        "cypress/e2e/**/*.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "vite",
+        "tslib"
+      ]
+    },
+    "npm/puppeteer": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "express"
+      ]
+    },
+    "npm/svelte": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/react": {
+      "entry": [
+        "cypress/component/**/*.{jsx,tsx,cy.jsx,cy.tsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "react-router"
+      ]
+    },
+    "npm/grep": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/vue": {
+      "entry": [
+        "cypress/component/**/*.{vue,js,ts,cy.js,cy.ts}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{vue,ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/angular": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "npm/mount-utils": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx,mjs}"
+      ],
+      "ignoreDependencies": [
+        "@rollup/plugin-commonjs",
+        "@rollup/plugin-node-resolve",
+        "rollup",
+        "rollup-plugin-dts",
+        "rollup-plugin-typescript2",
+        "eslint"
+      ]
+    },
+    "npm/vite-plugin-cypress-esm": {
+      "entry": [
+        "cypress/component/**/*.{ts,tsx,cy.ts,cy.tsx}",
+        "cypress.config.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "cypress/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "react-router"
+      ]
+    },
+    "npm/*": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "tooling/v8-snapshot": {
+      "entry": [
+        "src/v8-snapshot.ts",
+        "src/setup/index.ts",
+        "src/generator/blueprint.ts",
+        "src/blueprint/**/*.js"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "cpr",
+        "stealthy-require",
+        "tslib"
+      ]
+    },
+    "tooling/electron-mksnapshot": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "tooling/packherd": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "tooling/*": {
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "lib/**/*.{ts,tsx,js,jsx}",
+        "scripts/**/*.{ts,js}",
+        "*.{ts,tsx,js,jsx}"
+      ]
+    },
+    "system-tests": {
+      "entry": [
+        "test/**/*.{ts,js}",
+        "lib/**/*.{ts,js}",
+        "scripts/**/*.{ts,js}"
+      ],
+      "project": [
+        "test/**/*.{ts,js}",
+        "lib/**/*.{ts,js}",
+        "scripts/**/*.{ts,js}",
+        "projects/**/*.{ts,js}"
+      ],
+      "ignoreDependencies": [
+        "@babel/core",
+        "@babel/preset-env",
+        "babel-loader",
+        "mochawesome-7.1.4",
+        "semver",
+        "systeminformation",
+        "https-proxy-agent"
+      ]
+    }
+  },
+  "ignore": [
+    "**/dist/**",
+    "**/build/**",
+    "**/cjs/**",
+    "**/esm/**",
+    "**/browser/**",
+    "**/node_modules/**",
+    "**/__snapshots__/**",
+    "**/cypress.config.{ts,js}",
+    "**/cypress.config-*.{ts,js}",
+    "**/cypress/support/component.{js,jsx,ts,tsx}",
+    "**/cypress/types.d.ts",
+    "**/.releaserc.js",
+    "**/index.d.ts",
+    "**/postcss.config.{js,ts,cjs,mjs}",
+    "**/apollo.config.{js,ts}",
+    "**/webpack.config.{js,ts,mjs}",
+    "**/babel.config.{js,ts,cjs,mjs}",
+    "**/gulpfile.{js,ts}",
+    "scripts/**",
+    "**/patches/**",
+    "packages/frontend-shared/src/components/**/*.vue",
+    "packages/frontend-shared/src/gql-components/**/*.vue",
+    "packages/frontend-shared/src/composables/examples/**/*.vue",
+    "packages/frontend-shared/src/gql-components/composables/useCohorts.ts",
+    "packages/frontend-shared/src/gql-components/composables/usePromptManager.ts",
+    "packages/frontend-shared/src/utils/base64.ts",
+    "packages/frontend-shared/src/utils/isAllowedFeature.ts",
+    "packages/frontend-shared/src/utils/isRunMode.ts",
+    "packages/frontend-shared/src/utils/isWindows.ts",
+    "packages/frontend-shared/src/utils/time.ts",
+    "packages/example/bin/convert.js",
+    "packages/extension/app/v3/content.ts",
+    "packages/extension/app/v3/service-worker.ts",
+    "npm/eslint-plugin-dev/lib/scripts/lint-pre-push.js",
+    "npm/eslint-plugin-dev/lib/scripts/lint-staged.js",
+    "**/*.gen.ts",
+    "**/*.gen.js",
+    "**/project-fixtures/**",
+    "**/projects/**",
+    "system-tests/lib/validations/**"
+  ],
+  "ignoreDependencies": [
+    "@types/*",
+    "eslint-*",
+    "prettier",
+    "mocha",
+    "chai",
+    "sinon",
+    "cypress",
+    "@cypress/*",
+    "@packages/*",
+    "@tooling/*",
+    "@iconify-json/mdi",
+    "@iconify-json/logos",
+    "@percy/cypress",
+    "@vue/compiler-core",
+    "@vue/compiler-dom",
+    "@vue/compiler-sfc",
+    "edgedriver",
+    "react-15.6.1",
+    "react-16.0.0",
+    "react-dom-15.6.1",
+    "react-dom-16.0.0",
+    "text-mask-addons",
+    "vanilla-text-mask",
+    "zone.js"
+  ],
+  "ignoreBinaries": [
+    "circleci",
+    "cypress",
+    "rm",
+    "tar",
+    "tslint",
+    "wc"
+  ],
+  "rules": {
+    "binaries": "error",
+    "catalog": "error",
+    "classMembers": "error",
+    "dependencies": "error",
+    "duplicates": "error",
+    "enumMembers": "error",
+    "exports": "error",
+    "nsExports": "error",
+    "nsTypes": "error",
+    "files": "error",
+    "types": "error",
+    "unlisted": "error",
+    "unresolved": "off"
+  },
+  "ignoreIssues": {
+    "cli/types/cy-blob-util.d.ts": [
+      "exports"
+    ],
+    "cli/types/cy-bluebird.d.ts": [
+      "exports"
+    ],
+    "cli/types/cy-minimatch.d.ts": [
+      "exports"
+    ],
+    "packages/launcher/lib/darwin/index.ts": [
+      "exports"
+    ],
+    "packages/launcher/lib/windows/index.ts": [
+      "exports"
+    ],
+    "packages/server/lib/cloud/protocol.ts": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/child/cross_origin.js": [
+      "exports"
+    ],
+    "packages/server/lib/plugins/child/dev-server.js": [
+      "exports"
+    ],
+    "packages/server/lib/video_capture.ts": [
+      "exports"
+    ],
+    "packages/data-context/graphql/index.ts": [
+      "exports",
+      "types"
+    ],
+    "packages/net-stubbing/lib/external-types.ts": [
+      "exports",
+      "types"
+    ],
+    "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
+      "exports"
+    ],
+    "packages/driver/src/cypress/events.ts": [
+      "exports",
+      "types"
+    ],
+    "packages/app/src/prompt/prompt-app-types.ts": [
+      "types"
+    ],
+    "packages/app/src/studio/studio-app-types.ts": [
+      "types"
+    ],
+    "packages/driver/src/cy/commands/prompt/prompt-driver-types.ts": [
+      "types"
+    ],
+    "packages/app/src/store/spec-dirty-data-store.ts": [
+      "types"
+    ],
+    "packages/data-context/graphql/stitching/remoteSchemaWrapped.ts": [
+      "types"
+    ],
+    "packages/data-context/src/data/coreDataShape.ts": [
+      "types"
+    ],
+    "packages/data-context/src/sources/ErrorDataSource.ts": [
+      "types"
+    ],
+    "packages/telemetry/src/client.ts": [
+      "types"
+    ],
+    "packages/telemetry/src/node.ts": [
+      "exports"
+    ],
+    "packages/proxy/lib/http/util/ast-rewriter.ts": [
+      "exports"
+    ],
+    "packages/errors/src/errTemplate.ts": [
+      "exports"
+    ],
+    "npm/webpack-dev-server/src/devServer.ts": [
+      "exports"
+    ],
+    "npm/vite-dev-server/cypress/support/commands.ts": [
+      "exports"
+    ],
+    "packages/driver/src/dom/visibility.ts": [
+      "exports"
+    ],
+    "packages/driver/src/config/lodash.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cypress/server.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/click.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/focus.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/hover.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/mount.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/scroll.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/select.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/selectFile.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/submit.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/actions/trigger.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/querying/focused.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/querying/querying.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/querying/root.ts": [
+      "exports"
+    ],
+    "packages/driver/src/cy/commands/querying/within.ts": [
+      "exports"
+    ],
+    "npm/react/cypress/component/basic/use-render/my-component.jsx": [
+      "exports"
+    ],
+    "packages/driver/src/cypress/command.ts": [
+      "exports"
+    ],
+    "packages/reporter/src/main-runner.scss.d.ts": [
+      "duplicates"
+    ],
+    "packages/reporter/src/main.scss.d.ts": [
+      "duplicates"
+    ],
+    "packages/runner/src/main.scss.d.ts": [
+      "duplicates"
+    ]
+  }
+}

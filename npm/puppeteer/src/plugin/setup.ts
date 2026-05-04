@@ -3,7 +3,7 @@ import defaultPuppeteer, { Browser, PuppeteerNode } from 'puppeteer-core'
 import { pluginError } from './util'
 import { activateMainTab } from './activateMainTab'
 
-export type MessageHandler = (browser: Browser, ...args: any[]) => any | Promise<any>
+type MessageHandler = (browser: Browser, ...args: any[]) => any | Promise<any>
 
 interface SetupOptions {
   onMessage: Record<string, MessageHandler>

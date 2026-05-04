@@ -121,7 +121,9 @@ describe('e2e visit', () => {
       settings: {
         responseTimeout: 500,
         pageLoadTimeout: 1000,
-        e2e: {},
+        e2e: {
+          allowCypressEnv: false,
+        },
       },
       servers: {
         port: 3434,
@@ -187,6 +189,9 @@ describe('e2e visit', () => {
       spec: 'visit_non_html_content_type_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: {
+        screenshotOnRunFailure: false,
+      },
     })
 
     systemTests.it('calls onBeforeLoad when overwriting cy.visit', {
@@ -199,7 +204,9 @@ describe('e2e visit', () => {
     systemTests.setup({
       settings: {
         responseTimeout: 2000,
-        e2e: {},
+        e2e: {
+          allowCypressEnv: false,
+        },
       },
       servers: {
         port: 3434,
@@ -219,7 +226,9 @@ describe('e2e visit', () => {
     systemTests.setup({
       settings: {
         pageLoadTimeout: 1000,
-        e2e: {},
+        e2e: {
+          allowCypressEnv: false,
+        },
       },
       servers: {
         port: 3434,

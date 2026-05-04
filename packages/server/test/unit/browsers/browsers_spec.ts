@@ -169,6 +169,20 @@ describe('lib/browsers/index', () => {
     })
   })
 
+  context('.connectStudioToBrowser', () => {
+    it('connects browser to studio', async () => {
+      sinon.stub(chrome, 'connectStudioToBrowser').resolves()
+      await browsers.connectStudioToBrowser({
+        browser: {
+          family: 'chromium',
+        },
+        studioManager: {} as any,
+      })
+
+      expect(chrome.connectStudioToBrowser).to.be.called
+    })
+  })
+
   context('.closeProtocolConnection', () => {
     it('calls close on instance', async () => {
       sinon.stub(chrome, 'closeProtocolConnection').resolves()

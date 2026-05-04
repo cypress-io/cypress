@@ -14,11 +14,12 @@ import {
 import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks'
 import { of } from 'rxjs'
 import { concatMap, map } from 'rxjs/operators'
+import { gte as isSemverGte } from 'semver'
 
 import { addPackageJsonDependency, NodeDependencyType } from '../utils/dependencies'
 import {
   getAngularJsonValue,
-  getAngularVersion,
+  getAngularSemverVersion,
   getLatestNodeVersion,
   NodePackage,
   getDirectoriesAndCreateSpecs,
@@ -36,7 +37,7 @@ type HandleFilesType = {
 
 export default function (_options: any): Rule {
   return (tree: Tree, _context: SchematicContext) => {
-    _options = { ..._options, __version__: getAngularVersion(tree) }
+    _options = { ..._options, __version__: getAngularSemverVersion(tree) }
 
     return chain([
       updateDependencies(),
@@ -141,10 +142,20 @@ function addCypressComponentTestingFiles (options: any): Rule {
       const angularJsonValue = getAngularJsonValue(tree)
       const { projects } = angularJsonValue
 
+      let applyPath = './files-ct'
+
+      try {
+        // if using Angular 21 or greater, we need to use the cypress/angular-zoneless mount function, which was introduced in Cypress 15.8.0
+        // and will likely be the default in the future in Cypress 16
+        applyPath = isSemverGte(options.__version__, '21.0.0') ? './files-ct-zoneless' : './files-ct'
+      } catch (error) {
+        context.logger.debug('Error checking Angular version', error)
+      }
+
       return handleFiles(tree, context, {
         projects,
         options,
-        applyPath: './files-ct',
+        applyPath,
         movePath: '/cypress/support',
         relativeToWorkspacePath: `/cypress`,
       })

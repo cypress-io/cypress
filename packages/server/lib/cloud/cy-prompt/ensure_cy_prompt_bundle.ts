@@ -1,9 +1,8 @@
-import { remove, ensureDir, readFile, pathExists } from 'fs-extra'
-
-import tar from 'tar'
+import { ensureDir, readFile, pathExists, remove } from 'fs-extra'
 import { getCyPromptBundle } from '../api/cy-prompt/get_cy_prompt_bundle'
 import path from 'path'
 import { verifySignature } from '../encryption'
+import { extractAtomic } from '../extract_atomic'
 
 interface EnsureCyPromptBundleOptions {
   cyPromptPath: string
@@ -21,19 +20,17 @@ interface EnsureCyPromptBundleOptions {
 export const ensureCyPromptBundle = async ({ cyPromptPath, cyPromptUrl, projectId }: EnsureCyPromptBundleOptions): Promise<Record<string, string>> => {
   const bundlePath = path.join(cyPromptPath, 'bundle.tar')
 
-  // First remove cyPromptPath to ensure we have a clean slate
-  await remove(cyPromptPath)
   await ensureDir(cyPromptPath)
 
+  const uniqueBundlePath = `${bundlePath}-${Math.random().toString(36).substring(2, 15)}`
   const responseManifestSignature: string = await getCyPromptBundle({
     cyPromptUrl,
     projectId,
-    bundlePath,
+    bundlePath: uniqueBundlePath,
   })
 
-  await tar.extract({
-    file: bundlePath,
-    cwd: cyPromptPath,
+  await extractAtomic(uniqueBundlePath, cyPromptPath).finally(async () => {
+    await remove(uniqueBundlePath).catch(() => { /* ignore */ })
   })
 
   const manifestPath = path.join(cyPromptPath, 'manifest.json')

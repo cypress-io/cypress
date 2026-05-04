@@ -19,7 +19,7 @@ import * as env from '../util/env'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
 import * as system from '../util/system'
-import chromePolicyCheck from '../util/chrome_policy_check'
+import { run as runChromePolicyCheck } from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import type { Cfg, ProjectBase } from '../project-base'
 import type { Browser } from '../browsers/types'
@@ -28,6 +28,8 @@ import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
+import { passWithNoTests } from './pass-with-no-tests'
+import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
@@ -437,7 +439,7 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
 }
 
 async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
-  if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
+  if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Promise.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
 
   // if exit is false, we need to intercept the resolution of tests - whether
   // an early exit with intermediate results, or a full run.
@@ -1035,6 +1037,7 @@ export interface ReadyOptions {
   tag: string
   testingType: TestingType
   webSecurity: boolean
+  passWithNoTests: boolean
 }
 
 async function ready (options: ReadyOptions) {
@@ -1111,6 +1114,20 @@ async function ready (options: ReadyOptions) {
   const specs = project.ctx.project.specs
 
   if (!specs.length) {
+    if (options.passWithNoTests) {
+      const results = await passWithNoTests({
+        ...options,
+        specs,
+        specPattern,
+        config,
+        browser,
+      } as EmptyRunOptions)
+
+      await writeOutput(options.outputPath, createPublicRunResults(results))
+
+      return results
+    }
+
     errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
   }
 
@@ -1119,7 +1136,7 @@ async function ready (options: ReadyOptions) {
   }
 
   if (browser.family === 'chromium') {
-    chromePolicyCheck.run(onWarning)
+    runChromePolicyCheck(onWarning)
   }
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {

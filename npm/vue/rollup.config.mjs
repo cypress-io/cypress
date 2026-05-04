@@ -4,14 +4,13 @@ const config = {
   external: [
     'vue',
     '@vue/compiler-dom',
-    '@vue/server-renderer'
+    '@vue/server-renderer',
   ],
   output: {
     globals: {
       vue: 'Vue',
-      vue: 'Vue',
       '@vue/compiler-dom': 'VueCompilerDOM',
-      '@vue/server-renderer': 'VueServerRenderer'
+      '@vue/server-renderer': 'VueServerRenderer',
     },
   },
 }

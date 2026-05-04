@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "skipLibCheck": true,
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
+    "allowJs": true,
+    "declaration": true,
+    "outDir": "dist",
+    "strict": true,
+    "baseUrl": "./",
+    "types": [
+      "cypress"
+    ],
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "noPropertyAccessFromIndexSignature": true,
+  },
+  "include": ["src/**/*.*"],
+  "exclude": ["src/**/*-spec.*"]
+}

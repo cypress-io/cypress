@@ -9,7 +9,7 @@ import Collapsible from '../collapsible/collapsible'
 import Tag from '../lib/tag'
 import type RouteModel from './route-model'
 
-export interface RouteProps {
+interface RouteProps {
   model: RouteModel
 }
 
@@ -30,11 +30,11 @@ const Route = observer(({ model }: RouteProps) => (
   </tr>
 ))
 
-export interface RouteListModel {
+interface RouteListModel {
   routes: Array<RouteModel>
 }
 
-export interface RouteListProps {
+interface RouteListProps {
   model: RouteListModel
 }
 
@@ -46,7 +46,7 @@ const RoutesList: React.FC<RouteListProps> = observer(({ model }: RouteListProps
 
 RoutesList.displayName = 'RoutesList'
 
-export interface RoutesProps {
+interface RoutesProps {
   model: RouteListModel
 }
 
@@ -94,7 +94,5 @@ const Routes: React.FC<RoutesProps> = observer(({ model }: RoutesProps) => {
 })
 
 Routes.displayName = 'Routes'
-
-export { Route, RoutesList }
 
 export default Routes

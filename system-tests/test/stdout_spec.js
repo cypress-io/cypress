@@ -17,7 +17,9 @@ describe('e2e stdout', () => {
         'www.apple.com': '127.0.0.1',
         '*.cypress.io': '127.0.0.1',
       },
-      e2e: {},
+      e2e: {
+        allowCypressEnv: false,
+      },
     },
   })
 

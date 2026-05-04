@@ -1,4 +1,4 @@
-export const StreamStalledErrorKind = 'StreamStalled'
+const StreamStalledErrorKind = 'StreamStalled'
 
 export class StreamStalledError extends Error {
   public readonly kind = StreamStalledErrorKind

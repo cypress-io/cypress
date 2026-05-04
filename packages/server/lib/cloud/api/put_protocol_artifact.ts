@@ -7,7 +7,7 @@ import { putFetch, ParseKinds } from '../network/fetch'
 import { isRetryableError } from '../network/is_retryable_error'
 const debug = Debug('cypress:server:cloud:api:protocol-artifact')
 
-export const _delay = linearDelay(500)
+const _delay = linearDelay(500)
 
 export const putProtocolArtifact = asyncRetry(
   async (artifactPath: string, maxFileSize: number, destinationUrl: string, uploadMonitorSamplingRate: number) => {

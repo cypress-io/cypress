@@ -179,9 +179,9 @@
     yargs "17.7.2"
 
 "@angular/common@^18.0.0":
-  version "18.2.13"
-  resolved "https://registry.npmjs.org/@angular/common/-/common-18.2.13.tgz#cb277651585a6d5aa17c9c1f8e4bbcd85c770517"
-  integrity sha512-4ZqrNp1PoZo7VNvW+sbSc2CB2axP1sCH2wXl8B0wdjsj8JY1hF1OhuugwhpAHtGxqewed2kCXayE+ZJqSTV4jw==
+  version "18.2.14"
+  resolved "https://registry.yarnpkg.com/@angular/common/-/common-18.2.14.tgz#d4ff0b2b7aabb17339bd9d304bbc5aca90d226e3"
+  integrity sha512-ZPRswzaVRiqcfZoowuAM22Hr2/z10ajWOUoFDoQ9tWqz/fH/773kJv2F9VvePIekgNPCzaizqv9gF6tGNqaAwg==
   dependencies:
     tslib "^2.3.0"
 
@@ -4945,9 +4945,9 @@ node-addon-api@^6.1.0:
   integrity sha512-+eawOlIgy680F0kBzPUNFhMZGtJ1YmqM6l4+Crf4IkImjYrO/mqPwRMh352g23uIaQKFItcQ64I7KMaJxHgAVA==
 
 node-forge@^1:
-  version "1.3.1"
-  resolved "https://registry.npmjs.org/node-forge/-/node-forge-1.3.1.tgz#be8da2af243b2417d5f646a770663a92b7e9ded3"
-  integrity sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-1.3.2.tgz#d0d2659a26eef778bf84d73e7f55c08144ee7750"
+  integrity sha512-6xKiQ+cph9KImrRh0VsjH2d8/GXA4FIMlgU4B757iI1ApvcyA9VlouP0yZJha01V+huImO+kKMU7ih+2+E14fw==
 
 node-gyp-build-optional-packages@5.2.2:
   version "5.2.2"

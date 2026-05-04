@@ -160,7 +160,7 @@ describe('supportFileComponent', () => {
   })
 
   describe('angular', () => {
-    for (const mountModule of ['cypress/angular'] as const) {
+    for (const mountModule of ['cypress/angular', 'cypress/angular-zoneless'] as const) {
       it(`handles ${mountModule} and TS`, () => {
         const actual = supportFileComponent('ts', mountModule)
 

@@ -28,13 +28,25 @@ export async function nextHandler (devServerConfig: WebpackDevServerConfig): Pro
  * `loadConfig` acquires the next.config.js
  * `getNextJsBaseWebpackConfig` acquires the webpackConfig dependent on the next.config.js
  */
-function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
+async function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   const resolvePaths = { paths: [devServerConfig.cypressConfig.projectRoot] }
   const packages = {} as {
     loadConfig: (phase: 'development', dir: string) => Promise<any>
     getNextJsBaseWebpackConfig: Function
     nextLoadJsConfig: Function
     getSupportedBrowsers: (dir: string, isDevelopment: boolean, nextJsConfig: any) => Promise<string[] | undefined>
+  }
+
+  // Starting with Next.js 16.0.3, we need to proactively install SWC bindings
+  // See: https://github.com/vercel/next.js/pull/85787
+  try {
+    const installBindingsPath = require.resolve('next/dist/build/swc/install-bindings', resolvePaths)
+    const { installBindings } = require(installBindingsPath)
+
+    await installBindings()
+  } catch (e: any) {
+    // installBindings doesn't exist in Next.js < 16.0.3, which is fine
+    debug('installBindings not available (Next.js < 16.0.3): %s', e.message ?? e)
   }
 
   try {
@@ -115,7 +127,7 @@ function getNextJsPackages (devServerConfig: WebpackDevServerConfig) {
   ]
  */
 async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Promise<Configuration> {
-  const { loadConfig, getNextJsBaseWebpackConfig, nextLoadJsConfig, getSupportedBrowsers } = getNextJsPackages(devServerConfig)
+  const { loadConfig, getNextJsBaseWebpackConfig, nextLoadJsConfig, getSupportedBrowsers } = await getNextJsPackages(devServerConfig)
 
   const nextConfig = await loadConfig('development', devServerConfig.cypressConfig.projectRoot)
   const runWebpackSpan = getRunWebpackSpan(devServerConfig)

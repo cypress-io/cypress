@@ -5,6 +5,7 @@ if (appName !== 'Best App Ever') {
 }
 
 module.exports = {
+  allowCypressEnv: false,
   e2e: {
     supportFile: false,
   },
