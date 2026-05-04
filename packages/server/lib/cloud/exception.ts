@@ -8,7 +8,7 @@ import { stripPath } from './strip_path'
 
 const { serializeError } = require('serialize-error')
 
-export = {
+const exception = {
   /**
    * Safely serializes an error object to a string, handling circular references
    * and other non-serializable values that would cause JSON.stringify to throw.
@@ -82,3 +82,5 @@ export = {
     }
   },
 }
+
+export default exception

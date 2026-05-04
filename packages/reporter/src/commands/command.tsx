@@ -521,6 +521,8 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
     return null
   }
 
+  const shouldShowCodeButton = model.state === 'passed' || (model.state === 'failed' && model.err?.name && !['PromptDisabledError', 'PromptAuthenticationError', 'PromptUsageLimitError'].includes(model.err.name))
+
   return (
     <>
       <li className={cs('command', `command-name-${commandName}`)}>
@@ -589,7 +591,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                     />
                     <span>Feedback</span>
                   </Button>
-                  {model.state === 'passed' && (
+                  {shouldShowCodeButton && (
                     <Button
                       variant="indigo-dark-mode"
                       size="20"

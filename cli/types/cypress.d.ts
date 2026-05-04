@@ -1372,6 +1372,8 @@ declare namespace Cypress {
     /**
      * End a chain of commands
      *
+     * @deprecated `cy.end()` has been deprecated and will be removed in a future release.
+     * Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`.
      * @see https://on.cypress.io/end
      */
     end(): Chainable<null>
@@ -3355,11 +3357,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalOriginDependencies?: boolean
-    /**
-     * Enables support for `cy.prompt`, an AI-powered command that turns natural language steps into executable Cypress test code.
-     * @default false
-     */
-    experimentalPromptCommand?: boolean
   }
 
   /**

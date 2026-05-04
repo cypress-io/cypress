@@ -28,7 +28,7 @@ describe('http', function () {
         [HttpStages.Error]: { error },
       }
 
-      httpOpts = { config, middleware } as ServerCtx & { middleware?: HttpMiddlewareStacks }
+      httpOpts = { config, middleware, request: { rp: vi.fn() } } as ServerCtx & { middleware?: HttpMiddlewareStacks } & { request: { rp: Mock } }
     })
 
     it('calls IncomingRequest stack, then IncomingResponse stack', async function () {
@@ -277,7 +277,7 @@ describe('http', function () {
     let httpOpts
 
     beforeEach(function () {
-      httpOpts = { config: {}, middleware: {} }
+      httpOpts = { config: {}, middleware: {}, request: { rp: vi.fn() } }
     })
 
     it('resets preRequests when resetBetweenSpecs is true', function () {
@@ -321,7 +321,7 @@ describe('http', function () {
         [HttpStages.Error]: { error },
       }
 
-      httpOpts = { config, middleware } as ServerCtx & { middleware?: HttpMiddlewareStacks }
+      httpOpts = { config, middleware, request: { rp: vi.fn() } } as ServerCtx & { middleware?: HttpMiddlewareStacks } & { request: { rp: Mock } }
     })
 
     it('properly ignores requests that are controlled by a service worker', () => {

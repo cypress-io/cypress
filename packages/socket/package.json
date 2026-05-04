@@ -26,7 +26,7 @@
     "engine.io": "6.4.2",
     "engine.io-client": "~5.0.0",
     "engine.io-parser": "4.0.2",
-    "flatted": "3.2.9",
+    "flatted": "3.4.2",
     "socket.io": "4.0.1",
     "socket.io-client": "4.0.1",
     "socket.io-parser": "4.0.5",

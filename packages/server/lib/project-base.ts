@@ -169,16 +169,14 @@ export class ProjectBase extends EE {
     process.chdir(this.projectRoot)
 
     this._server = new ServerBase(cfg)
-    if (cfg.experimentalPromptCommand) {
-      const cyPromptLifecycleManager = new CyPromptLifecycleManager()
 
-      cyPromptLifecycleManager.initializeCyPromptManager({
-        cloudDataSource: this.ctx.cloud,
-        ctx: this.ctx,
-        record: this.options.record,
-        key: this.options.key,
-      })
-    }
+    new CyPromptLifecycleManager().initializeCyPromptManager({
+      cloudDataSource: this.ctx.cloud,
+      ctx: this.ctx,
+      record: this.options.record,
+      key: this.options.key,
+      projectId: cfg.projectId,
+    })
 
     if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
@@ -771,7 +769,7 @@ export class ProjectBase extends EE {
 
     let state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
 
-    state.set(stateChanges)
+    await state.set(stateChanges)
     this.cfg.state = await state.get()
 
     return this.cfg.state
