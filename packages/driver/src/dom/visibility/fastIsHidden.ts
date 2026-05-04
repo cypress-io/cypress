@@ -1,18 +1,12 @@
 import $elements from '../elements'
 import { memoize } from './memoize'
 import { unwrap, wrap, isJquery } from '../jquery'
+import { scrollBehaviorOptionsMap } from '../../util/scrollBehavior'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:dom:visibility:fastIsHidden')
 
 const { isOption, isOptgroup, isBody, isHTML } = $elements
-
-const scrollBehaviorBlockMap: Record<string, ScrollLogicalPosition> = {
-  top: 'start',
-  bottom: 'end',
-  center: 'center',
-  nearest: 'nearest',
-}
 
 const getBoundingClientRect = memoize((el: HTMLElement) => el.getBoundingClientRect())
 
@@ -68,7 +62,7 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
     const scrollBehavior = Cypress.config('scrollBehavior')
 
     if (scrollBehavior !== false) {
-      const block = scrollBehaviorBlockMap[scrollBehavior as string] || 'start'
+      const block = scrollBehaviorOptionsMap[scrollBehavior as string] || 'start'
 
       subject.scrollIntoView({ block, behavior: 'instant' as ScrollBehavior })
       boundingRect = subject.getBoundingClientRect()

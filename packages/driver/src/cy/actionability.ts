@@ -9,6 +9,7 @@ import type { ElWindowPosition, ElViewportPosition, ElementPositioning } from '.
 import $elements from '../dom/elements'
 import $errUtils from '../cypress/error_utils'
 import { callNativeMethod, getNativeProp } from '../dom/elements/nativeProps'
+import { scrollBehaviorOptionsMap } from '../util/scrollBehavior'
 const debug = debugFn('cypress:driver:actionability')
 
 const delay = 50
@@ -25,13 +26,6 @@ const dispatchPrimedChangeEvents = function (state) {
   if (changeEvent) {
     return changeEvent()
   }
-}
-
-const scrollBehaviorOptionsMap = {
-  top: 'start',
-  bottom: 'end',
-  center: 'center',
-  nearest: 'nearest',
 }
 
 const getPositionFromArguments = function (positionOrX, y, options) {

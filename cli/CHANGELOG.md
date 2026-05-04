@@ -5,6 +5,10 @@
 
 - The `cy.end()` command has been deprecated and will be removed in a future release. Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
 
+**Bugfixes:**
+
+- Fixed an issue where, with `experimentalFastVisibility` enabled, elements scrolled below the fold were incorrectly reported as hidden. The fast visibility algorithm now scrolls off-screen subjects into view using the `scrollBehavior` config before sampling visibility, matching the behavior of action commands like `cy.click()`. Fixes [#33045](https://github.com/cypress-io/cypress/issues/33045).
+
 **Misc:**
 
 - Additional CI environment variables are now captured to support a future failed test retry feature. Addressed in [#33714](https://github.com/cypress-io/cypress/pull/33714).
