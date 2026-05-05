@@ -10,7 +10,6 @@ describe('<MajorVersionWelcome />', { viewportWidth: 1280, viewportHeight: 1400 
   it('renders expected interactive content', () => {
     const continueStub = cy.stub().as('clearLandingPage')
 
-    // @ts-expect-error
     cy.mount(<MajorVersionWelcome onClearLandingPage={continueStub}/>)
 
     cy.contains('h1', 'What\'s New in Cypress').should('be.visible')
