@@ -151,7 +151,8 @@ const CLIPPING_OVERFLOW = new Set(['hidden', 'clip', 'scroll', 'auto'])
 // outside the visible region is hidden right now and should not be surfaced
 // programmatically.
 function isClippedByAncestor (el: HTMLElement, rect: DOMRect): boolean {
-  const win = el.ownerDocument.defaultView
+  const doc = el.ownerDocument
+  const win = doc.defaultView
 
   if (!win) return false
 
@@ -161,6 +162,16 @@ function isClippedByAncestor (el: HTMLElement, rect: DOMRect): boolean {
   let current: HTMLElement | null = getParentNode(el)
 
   while (current) {
+    // Skip the document's root and body — they are the page's scroll container,
+    // not real clipping containers. Setting `overflow-x: hidden` on body, for
+    // example, makes computed `overflow-y` become `auto` per CSS, which would
+    // otherwise spuriously trip the clipping check on the off-screen axis and
+    // block legitimate vertical scrolling.
+    if (current === doc.body || current === doc.documentElement) {
+      current = getParentNode(current)
+      continue
+    }
+
     const { overflowX, overflowY } = win.getComputedStyle(current)
     const ancestorRect = current.getBoundingClientRect()
 
