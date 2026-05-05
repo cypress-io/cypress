@@ -138,10 +138,17 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
 
   webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
   webpackOptions.resolve.extensionAlias = webpackOptions.resolve.extensionAlias || { '.js': ['.ts', '.js'], '.mjs': ['.mts', '.mjs'] }
-  webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
-    configFile: configFile?.path,
-    silent: true,
-  })]
+
+  // Only register the paths plugin when we actually located a tsconfig.json.
+  // tsconfig-paths-webpack-plugin v4 no longer early-returns when its internal
+  // loadConfig fails, so passing an undefined configFile causes it to walk up
+  // from process.cwd() and crash with "matchPath is not a function" on resolve.
+  if (configFile?.path) {
+    webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
+      configFile: configFile.path,
+      silent: true,
+    })]
+  }
 
   // @ts-expect-error - not typed intentionally
   options.__typescriptSupportAdded = true
