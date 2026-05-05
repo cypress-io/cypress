@@ -74,7 +74,7 @@
               </span>
             </div>
             <p class="text-[14px] leading-[20px]">
-              This release prepared Cypress Studio for the next era of AI-assisted test creation, with right-click assertions and inline test editing. It also made changes to improve reliability, future compatibility, and cross-origin support.
+              This release prepares Cypress Studio for the next era of AI-assisted test creation. You can record interactions, add assertions by right-clicking, and now edit tests inline without leaving Cypress. Turn on <InlineCodeFragment>experimentalStudio</InlineCodeFragment> in your config to try it out and share your feedback.
               <br>
               <br>
               Read about the v15.0.0 changes in our
