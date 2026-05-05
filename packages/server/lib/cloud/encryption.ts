@@ -74,6 +74,19 @@ export function verifySignatureFromFile (file: string, signature: string, public
   })
 }
 
+export function createStreamingSignatureVerifier (publicKey?: crypto.KeyObject) {
+  const verify = crypto.createVerify('SHA256')
+
+  return {
+    update (chunk: BinaryLike) {
+      verify.update(chunk)
+    },
+    verify (signature: string): boolean {
+      return verify.verify(publicKey || getPublicKey(), signature, 'base64')
+    },
+  }
+}
+
 // Implements the https://www.rfc-editor.org/rfc/rfc7516 spec
 // Functionally equivalent to the behavior for AES-256-GCM encryption
 // in the jose library (https://github.com/panva/jose/blob/main/src/jwe/general/encrypt.ts),
