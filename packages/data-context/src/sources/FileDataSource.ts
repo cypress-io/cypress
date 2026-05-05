@@ -3,7 +3,8 @@ import type { DataContext } from '..'
 import * as path from 'path'
 import os from 'os'
 
-import globby, { GlobbyOptions } from 'globby'
+import globby from 'globby'
+import type { GlobbyOptions } from 'globby'
 import Debug from 'debug'
 import { toPosix } from '../util/file'
 

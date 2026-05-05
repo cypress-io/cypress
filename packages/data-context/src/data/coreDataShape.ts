@@ -1,5 +1,6 @@
 import type { FoundBrowser, Editor, AllowedState, AllModeOptions, TestingType, BrowserStatus, PACKAGE_MANAGERS, AuthStateName, StudioLifecycleManagerShape, CyPromptLifecycleManagerShape, Maybe } from '@packages/types'
-import { WizardBundler, CT_FRAMEWORKS, resolveComponentFrameworkDefinition, ErroredFramework } from '@packages/scaffold-config'
+import { CT_FRAMEWORKS, resolveComponentFrameworkDefinition } from '@packages/scaffold-config'
+import type { WizardBundler, ErroredFramework } from '@packages/scaffold-config'
 import type { NexusGenObjects } from '../gen/nxs.gen'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { App, BrowserWindow } from 'electron'

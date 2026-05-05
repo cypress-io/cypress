@@ -23,7 +23,8 @@
 <script setup lang="ts">
 import Button from '@cy/components/Button.vue'
 import SendIcon from '~icons/cy/paper-airplane_x16.svg'
-import { RequestAccessButtonFragment, RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
+import { RequestAccessButton_RequestAccessDocument } from '../generated/graphql'
+import type { RequestAccessButtonFragment } from '../generated/graphql'
 import { useI18n } from '@cy/i18n'
 import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'

@@ -262,6 +262,7 @@
     "**/@nx/devkit/minimatch": "9.0.7",
     "**/@types/cheerio": "0.22.35",
     "**/@types/node": "24.10.1",
+    "**/@urql/core": "2.4.4",
     "**/editorconfig/minimatch": "9.0.7",
     "**/form-data": "^4.0.5",
     "**/graphql-config/minimatch": "3.1.3",
