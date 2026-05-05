@@ -66,7 +66,7 @@ describe('Cypress In Cypress Origin Communicator', () => {
 
       cy.window().then((win) => {
         // @ts-ignore
-        const comm = win.Cypress.primaryOriginCommunicator
+        const comm = win.Cypress.primaryOriginCommunicator as any
 
         // @ts-ignore — hold stub across navigation for the assertion below
         window.__cyCommunicatorMapTest = { postMessage: cy.stub() }
@@ -85,7 +85,7 @@ describe('Cypress In Cypress Origin Communicator', () => {
 
       cy.window().then((win) => {
         // @ts-ignore
-        const comm = win.Cypress.primaryOriginCommunicator
+        const comm = win.Cypress.primaryOriginCommunicator as any
         // @ts-ignore
         const stub = window.__cyCommunicatorMapTest
 
