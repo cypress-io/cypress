@@ -11,9 +11,17 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
     describe(`${mode}`, {
       experimentalFastVisibility: mode === 'fast',
     }, () => {
-      // Tests where the fast (multi-sample) and legacy (center-point) algorithms
-      // diverge for shadow DOM subjects. Fixtures here were authored to legacy
-      // semantics; tracked as follow-up to https://github.com/cypress-io/cypress/issues/33046.
+      // Tests scoped-skipped under fast where fast and legacy fundamentally differ
+      // because of fast's reliance on `elementFromPoint`. The corresponding non-shadow
+      // fixtures either avoid these edge cases or aren't exercised by visibility.cy.ts:
+      //   - cover detection where the cover is narrower than the underneath element
+      //     (fast samples four corners; legacy only the center)
+      //   - `pointer-events: none` on the subject or an ancestor (browsers skip such
+      //     elements in `elementFromPoint`, so fast can never find the subject at any
+      //     sample point — even though the element is rendered)
+      //   - clipping ancestor between the subject and its containing block (legacy's
+      //     `canClipContent` uses `offsetParent` rules to ignore such ancestors)
+      // Tracked as follow-up to https://github.com/cypress-io/cypress/issues/33046.
       const itSkipFast = mode === 'fast' ? it.skip : it
 
       beforeEach(() => {
