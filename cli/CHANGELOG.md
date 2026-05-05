@@ -8,7 +8,7 @@
 **Bugfixes:**
 
 - Fixed an issue where multi-origin tests using [`cy.origin`](https://docs.cypress.io/api/commands/origin) could fail to talk to a secondary origin after test isolation, when the spec-bridge iframe was already present, or when more than one secondary origin became ready around the same time. Cached spec-bridge window targets are now cleared at the correct lifecycle points, improving performance of specs with cy.origin calls. Addressed in [#33704](https://github.com/cypress-io/cypress/pull/33704).
-- Fixed an issue where transient HTTP 500 responses during Test Replay artifact uploads were not retried, causing avoidable upload failures. Fixed in [#33718](https://github.com/cypress-io/cypress/pull/33718).
+- Fixed an issue where transient HTTP 500 responses from Cypress Cloud were not retried for idempotent requests (Test Replay artifact uploads, Studio bundle fetches, and `cy.prompt` bundle fetches), causing avoidable failures. Non-idempotent requests (Studio and `cy.prompt` session creation) continue to fail fast on 500 to avoid duplicating partially-applied work. Fixed in [#33718](https://github.com/cypress-io/cypress/pull/33718).
 
 **Misc:**
 

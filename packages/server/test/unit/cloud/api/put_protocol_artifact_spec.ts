@@ -137,10 +137,9 @@ describe('putProtocolArtifact', () => {
       shouldRetry = asyncRetryStub.firstCall.args[1].shouldRetry!
     })
 
-    // Test Replay uploads are idempotent, so retrying on 500 is safe — the
-    // shared `isRetryableError` predicate excludes 500 to avoid retrying
-    // potentially non-idempotent operations on other cloud endpoints.
-    it('retries on HTTP 500 in addition to the shared retryable statuses', () => {
+    // The PUT method is idempotent, so isRetryableError also returns true
+    // for HTTP 500 in addition to the always-retryable statuses.
+    it('retries on HTTP 500 in addition to the always-retryable statuses', () => {
       const retryableStatuses = [408, 429, 500, 502, 503, 504]
 
       retryableStatuses.forEach((status) => {
