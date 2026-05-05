@@ -14,7 +14,7 @@ describe('Command Options and UI Display Tests', () => {
       cy.log(obj)
     })
 
-    cy.get('div').each(($div) => { }).end()
+    cy.get('div').each(($div) => { })
 
     cy.fixture('uiStates')
 
