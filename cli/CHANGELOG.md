@@ -7,7 +7,7 @@
 
 **Bugfixes:**
 
-- Fixed an issue where a CSS selector built internally from element attributes could throw an uncaught `Syntax error, unrecognized expression` and crash the runner when an attribute value contained CSS-special characters (for example, an `<input>` with a `pattern` attribute containing regex metacharacters). Attribute values are now escaped with `CSS.escape()` before being interpolated into selectors, and the `cy.select()` duplicate-value detection now uses the same escaping. Fixes [#26967](https://github.com/cypress-io/cypress/issues/26967) and [#29345](https://github.com/cypress-io/cypress/issues/29345).
+- Fixed an issue where a CSS selector built internally from element attributes could throw an uncaught `Syntax error, unrecognized expression` and crash the runner when an attribute value contained CSS-special characters (for example, an `<input>` with a `pattern` attribute containing regex metacharacters). Fixes [#26967](https://github.com/cypress-io/cypress/issues/26967) and [#29345](https://github.com/cypress-io/cypress/issues/29345).
 
 **Misc:**
 
