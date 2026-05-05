@@ -7,6 +7,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where multi-origin tests using [`cy.origin`](https://docs.cypress.io/api/commands/origin) could fail to talk to a secondary origin after test isolation, when the spec-bridge iframe was already present, or when more than one secondary origin became ready around the same time. Cached spec-bridge window targets are now cleared at the correct lifecycle points, improving performance of specs with cy.origin calls. Addressed in [#33704](https://github.com/cypress-io/cypress/pull/33704).
 - Fixed an issue where a single `cy.tick()` could miss nested timers scheduled from resolved promises, requiring multiple `cy.tick()` calls to advance the clock. Fixes [#1273](https://github.com/cypress-io/cypress/issues/1273).
 
 **Misc:**

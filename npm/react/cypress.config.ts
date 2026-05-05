@@ -1,13 +1,13 @@
-module.exports = {
-  'viewportWidth': 400,
-  'viewportHeight': 400,
-  'projectId': 'z9dxah',
-  'env': {
-    'reactDevtools': true,
-  },
-  'component': {
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  allowCypressEnv: false,
+  viewportWidth: 400,
+  viewportHeight: 400,
+  projectId: 'z9dxah',
+  component: {
     experimentalSingleTabRunMode: true,
-    'excludeSpecPattern': [
+    excludeSpecPattern: [
       '**/__snapshots__/*',
       '**/__image_snapshots__/*',
       'examples/**/*',
@@ -17,4 +17,4 @@ module.exports = {
       bundler: 'vite',
     },
   },
-}
+})
