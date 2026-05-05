@@ -25,7 +25,7 @@ type EventData = {
 }
 
 type AlertComponentProps = InstanceType<typeof Alert>['$props']
-interface TrackedBannerComponentProps extends AlertComponentProps {
+interface TrackedBannerComponentProps extends /* @vue-ignore */ AlertComponentProps {
   bannerId: string
   hasBannerBeenShown: boolean
   eventData: EventData | undefined
