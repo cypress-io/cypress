@@ -1,6 +1,7 @@
 describe('Cypress In Cypress Origin Communicator', () => {
   describe('primary origin memory leak prevention', () => {
     let spies: Array<ReturnType<typeof cy.spy>>
+    let removeAllListenersSpy: ReturnType<typeof cy.spy>
 
     beforeEach(() => {
       spies = []
