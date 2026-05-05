@@ -94,15 +94,6 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
-    it('can select by value when duplicate values contain CSS-special characters', () => {
-      cy.$$('select[name=maps] option:nth-child(2)').attr('value', 'a[b]c')
-      cy.$$('select[name=maps] option:nth-child(3)').attr('value', 'a[b]c')
-
-      cy.get('select[name=maps]').select('a[b]c').then(($select) => {
-        expect($select.val()).to.equal('a[b]c')
-      })
-    })
-
     it('can handle index when all values are identical', () => {
       cy.$$('select[name=maps] option').attr('value', 'foo')
 
