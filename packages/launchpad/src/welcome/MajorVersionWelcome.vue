@@ -43,7 +43,7 @@
               </span>
             </div>
             <div class="children:mb-[16px]">
-              <!-- TODO: Replace with approved v16 launch copy. Approval process documented in prod-eng-docs. -->
+              <!-- TODO: Replace with approved v16 launch copy. -->
               <p>
                 Cypress 16 is here. This version includes breaking changes that may require updates to your project.
               </p>
@@ -74,8 +74,7 @@
               </span>
             </div>
             <p class="text-[14px] leading-[20px]">
-              <!-- TODO: Replace with approved v15 summary copy. -->
-              v15 advanced Cypress Studio with AI-assisted authoring and added cross-origin support improvements.
+              This release prepared Cypress Studio for the next era of AI-assisted test creation, with right-click assertions and inline test editing. It also made changes to improve reliability, future compatibility, and cross-origin support.
               <br>
               <br>
               Read about the v15.0.0 changes in our
@@ -212,7 +211,6 @@ const versionReleaseDates = computed(() => {
     '13': useTimeAgo(Date.UTC(2023, 7, 29)).value,
     '14': useTimeAgo(Date.UTC(2025, 0, 16)).value,
     '15': useTimeAgo(Date.UTC(2025, 7, 20)).value,
-    // TODO: replace placeholder with the real v16 release date before merging to release/16.0.0.
     '16': useTimeAgo(Date.UTC(2026, 4, 5)).value,
   }
 })
