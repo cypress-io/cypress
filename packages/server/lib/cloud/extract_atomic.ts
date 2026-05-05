@@ -1,6 +1,6 @@
 import { createReadStream } from 'fs'
 import tar from 'tar'
-import { ensureDir } from 'fs-extra'
+import { ensureDir, rename } from 'fs-extra'
 import path from 'path'
 import writeFileAtomic from 'write-file-atomic'
 
@@ -19,20 +19,12 @@ function delay (ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-async function writeFileAtomicWithRetry (
-  filePath: string,
-  content: Buffer,
-  options: { mode?: number },
-): Promise<void> {
+async function retryOnRenameError<T> (op: () => Promise<T>): Promise<T> {
   let lastError: unknown
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      await writeFileAtomic(filePath, content, {
-        mode: options.mode || 0o644,
-      })
-
-      return
+      return await op()
     } catch (err) {
       lastError = err
       if (attempt < MAX_RETRIES && isRetryableError(err)) {
@@ -44,6 +36,20 @@ async function writeFileAtomicWithRetry (
   }
 
   throw lastError
+}
+
+async function writeFileAtomicWithRetry (
+  filePath: string,
+  content: Buffer,
+  options: { mode?: number },
+): Promise<void> {
+  await retryOnRenameError(() => writeFileAtomic(filePath, content, {
+    mode: options.mode || 0o644,
+  }))
+}
+
+export async function renameAtomicWithRetry (src: string, dst: string): Promise<void> {
+  await retryOnRenameError(() => rename(src, dst))
 }
 
 export const extractAtomic = async (archivePath: string, destinationPath: string) => {
