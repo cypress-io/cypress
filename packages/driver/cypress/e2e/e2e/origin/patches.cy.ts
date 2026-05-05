@@ -1,4 +1,14 @@
 // Stubbing increases the time taken to make a backend request call, so we increase the default command timeout to avoid flake.
+
+/** Restore before re-stubbing on the primary `Cypress` (spec-bridge callbacks must inline the same pattern — `cy.origin` cannot see file-level helpers). */
+function restoreBackendRequestHandlerStubIfNeeded () {
+  const handler = Cypress.backendRequestHandler as unknown as { restore?: () => void }
+
+  if (typeof handler?.restore === 'function') {
+    handler.restore()
+  }
+}
+
 describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout: 10000 }, () => {
   context('submit', () => {
     beforeEach(() => {
@@ -461,8 +471,15 @@ describe('src/cross-origin/patches', { browser: '!webkit', defaultCommandTimeout
     describe('from the spec bridge', () => {
       beforeEach(() => {
         cy.intercept('/test-request').as('testRequest')
+        restoreBackendRequestHandlerStubIfNeeded()
         cy.stub(Cypress, 'backendRequestHandler').log(false).callThrough()
         cy.origin('http://www.foobar.com:3500', () => {
+          const handler = Cypress.backendRequestHandler as unknown as { restore?: () => void }
+
+          if (typeof handler?.restore === 'function') {
+            handler.restore()
+          }
+
           cy.stub(Cypress, 'backendRequestHandler').log(false).callThrough()
         })
 

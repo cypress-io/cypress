@@ -283,11 +283,9 @@ The project utilizes [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspac
 
 > **⚠ Running on Windows?**
 >
-> The project's `.npmrc` sets `script-shell=bash` so npm scripts behave the same on every platform. You'll need `bash` on your `PATH` — Git Bash (ships with [Git for Windows](https://gitforwindows.org/)) is the easiest option.
->
-> If you previously ran `yarn config set script-shell "C:\\Windows\\system32\\cmd.exe"` per older instructions, that setting in your `~/.yarnrc` will override the project's `.npmrc`. Remove it with:
+> If you are running a Windows operating system, you may encounter some commands that are not working. In order to resolve paths correctly during the development build process, you may need to explicitly set your default `yarn` shell script to Command Prompt by using the following command:
 >```bash
-> yarn config delete script-shell
+> yarn config set script-shell "C:\\Windows\\system32\\cmd.exe"
 >```
 
 **Install all dependencies:**

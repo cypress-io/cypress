@@ -1,6 +1,7 @@
 describe('Cypress In Cypress Origin Communicator', () => {
   describe('primary origin memory leak prevention', () => {
     let spies: Array<ReturnType<typeof cy.spy>>
+    let removeAllListenersSpy: ReturnType<typeof cy.spy>
 
     beforeEach(() => {
       spies = []
@@ -55,6 +56,50 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.location('hash').should('include', '/runs')
 
       assertZeroArgCleanupFired()
+    })
+
+    it('clears cached spec bridge window targets when primaryOriginCommunicator.removeAllListeners() runs without an event', () => {
+      cy.visitApp()
+      cy.specsPageIsVisible()
+      cy.contains('dom-content.spec').click()
+      cy.waitForSpecToFinish()
+
+      cy.then(() => {
+        // @ts-ignore
+        const comm = window.top[0].Cypress.primaryOriginCommunicator
+
+        // @ts-ignore — hold stub across navigation for the assertion below
+        window.__cyCommunicatorMapTest = { postMessage: cy.stub() }
+
+        comm.onMessage({
+          data: { event: 'cross:origin:bridge:ready', origin: 'https://cypress-map-teardown-test.invalid' },
+          // @ts-ignore
+          source: window.__cyCommunicatorMapTest,
+        })
+
+        // @ts-ignore
+        removeAllListenersSpy = cy.spy(comm, 'removeAllListeners')
+      })
+
+      cy.get('a[href="#/runs"]').click()
+      cy.location('hash').should('include', '/runs')
+
+      cy.wrap(null).should(() => {
+        const noArgCalls = removeAllListenersSpy.getCalls().filter((c) => c.args.length === 0)
+
+        expect(noArgCalls.length).to.be.at.least(1)
+
+        // @ts-ignore
+        const comm = window.top[0].Cypress.primaryOriginCommunicator
+        // @ts-ignore
+        const stub = window.__cyCommunicatorMapTest
+
+        stub.postMessage.resetHistory()
+        comm.toAllSpecBridges('test:map:should:not:reach:stub', {})
+        expect(stub.postMessage).not.to.have.been.called
+        // @ts-ignore
+        delete window.__cyCommunicatorMapTest
+      })
     })
 
     it('cleans up the primaryOriginCommunicator events when navigating away from the /specs to /settings', () => {

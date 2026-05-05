@@ -1,5 +1,3 @@
 export const fetchIngredients = () => {
-  return fetch(
-    'https://httpbin.org/anything?ingredients=bacon&ingredients=mozzarella&ingredients=pineapples',
-  ).then((r) => r.json())
+  return fetch('/api/pizza-ingredients').then((r) => r.json())
 }
