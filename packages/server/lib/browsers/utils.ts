@@ -480,7 +480,7 @@ const listenForDownload = (binding) => {
   }
 }
 
-export = {
+const browserUtils = {
 
   extendLaunchOptionsFromPlugins,
 
@@ -546,3 +546,5 @@ export = {
     })
   },
 }
+
+export default browserUtils

@@ -10,7 +10,7 @@ import os from 'os'
 import type { ChildProcess } from 'child_process'
 import Debug from 'debug'
 import { getPublicConfigKeys } from '@packages/config'
-import argsUtils from './util/args'
+import { toObject, toArray } from './util/args'
 import { telemetry } from '@packages/telemetry'
 import { warning as errorsWarning } from './errors'
 import { getCwd } from './cwd'
@@ -146,7 +146,7 @@ export = {
     let options
 
     try {
-      options = argsUtils.toObject(argv)
+      options = toObject(argv)
 
       showWarningForInvalidConfig(options)
     } catch (argumentsError: any) {

@@ -12,7 +12,7 @@ const savedState = require(`../../../lib/saved_state`)
 const { Automation } = require(`../../../lib/automation`)
 const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
 const electronApp = require('../../../lib/util/electron-app')
-const utils = require('../../../lib/browsers/utils')
+const utils = require('../../../lib/browsers/utils').default
 const { screencastOpts } = require('../../../lib/browsers/cdp_automation')
 
 const ELECTRON_PID = 10001

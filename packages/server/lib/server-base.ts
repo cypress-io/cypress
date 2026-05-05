@@ -39,7 +39,7 @@ import appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
 import * as statusCode from './util/status_code'
-import headersUtil from './util/headers'
+import { getContentType } from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
 import type Protocol from 'devtools-protocol'
@@ -872,7 +872,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
               }
 
               const isOk = statusIs2xxOrAllowedFailure()
-              const contentType = headersUtil.getContentType(incomingRes)
+              const contentType = getContentType(incomingRes)
 
               const details: Record<string, unknown> = {
                 isOkStatusCode: isOk,
