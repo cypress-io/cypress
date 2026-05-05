@@ -70,11 +70,12 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
 
   let boundingRect = getBoundingClientRect(subject)
 
-  // Don't scroll if any ancestor clips the subject in the direction it is
-  // off-screen — `scrollIntoView` would scroll the clipping container (it's
-  // programmatically scrollable even though it's not user-scrollable) and
-  // expose content the test author intentionally clipped.
-  if (isOutsideViewport(subject, boundingRect) && !hasClippingAncestor(subject, boundingRect)) {
+  // Don't scroll if the subject is out-of-bounds of a clipping ancestor on the
+  // off-screen axis — `scrollIntoView` would programmatically scroll the
+  // clipping container and surface content the test author intentionally
+  // clipped. When the subject is *in-bounds* of its clipping ancestor (just
+  // below the fold), scrolling is safe and necessary to bring it into view.
+  if (isOutsideViewport(subject, boundingRect) && !isClippedByAncestor(subject, boundingRect)) {
     const scrollBehavior = Cypress.config('scrollBehavior')
 
     if (scrollBehavior !== false) {
@@ -139,32 +140,40 @@ function isOutsideViewport (el: HTMLElement, rect: DOMRect): boolean {
 
 const CLIPPING_OVERFLOW = new Set(['hidden', 'clip', 'scroll', 'auto'])
 
-function hasClippingAncestor (el: HTMLElement, rect: DOMRect): boolean {
+// True iff some ancestor with clipping `overflow` on the same axis the subject is
+// off-screen has the subject *out-of-bounds* — i.e., the subject is intentionally
+// clipped from the user's view. Subjects merely below the fold of an in-bounds
+// clipping ancestor are not "clipped"; they're just scrolled away.
+//
+// Walk via getParentNode so the search crosses shadow root boundaries — a shadow
+// descendant's clipping ancestor often lives in the host's light tree. Treat
+// `scroll` and `auto` as clipping too: the user has not scrolled, so any content
+// outside the visible region is hidden right now and should not be surfaced
+// programmatically.
+function isClippedByAncestor (el: HTMLElement, rect: DOMRect): boolean {
   const win = el.ownerDocument.defaultView
 
   if (!win) return false
 
-  // Only ancestors clipping on the off-screen axis matter — e.g. `body { overflow-x: hidden }`
-  // (a common pattern to suppress horizontal scrollbars) must not block vertical scrolling
-  // for elements below the fold. Treat `scroll` and `auto` as clipping too: the user has
-  // not scrolled, so out-of-bounds content is not visible right now and we should not
-  // surface it programmatically.
   const offscreenX = rect.right <= 0 || rect.left >= win.innerWidth
   const offscreenY = rect.bottom <= 0 || rect.top >= win.innerHeight
 
-  // Walk via getParentNode so we cross shadow root boundaries — a shadow
-  // descendant's clipping ancestor often lives in the host's light tree.
   let current: HTMLElement | null = getParentNode(el)
 
   while (current) {
     const { overflowX, overflowY } = win.getComputedStyle(current)
+    const ancestorRect = current.getBoundingClientRect()
 
     if (offscreenX && CLIPPING_OVERFLOW.has(overflowX)) {
-      return true
+      if (rect.left < ancestorRect.left || rect.right > ancestorRect.right) {
+        return true
+      }
     }
 
     if (offscreenY && CLIPPING_OVERFLOW.has(overflowY)) {
-      return true
+      if (rect.top < ancestorRect.top || rect.bottom > ancestorRect.bottom) {
+        return true
+      }
     }
 
     current = getParentNode(current)

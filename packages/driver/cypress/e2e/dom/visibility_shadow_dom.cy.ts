@@ -460,7 +460,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           cy.wrap($elOutOfPosAbsParentBounds).find('span', { includeShadowDom: true }).should('not.be.visible')
         })
 
-        itSkipFast('is visible when parent absolutely positioned and overflow hidden and not out of bounds', () => {
+        it('is visible when parent absolutely positioned and overflow hidden and not out of bounds', () => {
           const $elInPosAbsParentsBounds = add(
         `<div style='width: 200px; height: 200px; overflow: hidden; position: relative;'>
           <div style='position: absolute;'>
@@ -550,7 +550,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           cy.wrap($elIsRelativeAndOutOfBoundsOfAncestorButAncestorShowsOverflow).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
-        itSkipFast('is visible when parent inside shadow dom is relatively positioned out of bounds but el is relatively positioned back in bounds', () => {
+        it('is visible when parent inside shadow dom is relatively positioned out of bounds but el is relatively positioned back in bounds', () => {
           const $insideParentOutOfBoundsButElInBounds = add(
         `<div style='position: relative; padding: 20px;'>
           <div style='overflow: hidden;'>
@@ -567,7 +567,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           cy.wrap($insideParentOutOfBoundsButElInBounds).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
-        itSkipFast('is visible when parent outside shadow dom is relatively positioned out of bounds but el is relatively positioned back in bounds', () => {
+        it('is visible when parent outside shadow dom is relatively positioned out of bounds but el is relatively positioned back in bounds', () => {
           const $outsideParentOutOfBoundsButElInBounds = add(
         `<div style='position: relative; padding: 20px;'>
           <div style='overflow: hidden;'>
