@@ -5,7 +5,7 @@ const _ = require('lodash')
 const preprocessor = require('../../../../lib/plugins/child/preprocessor')
 const util = require('../../../../lib/plugins/util')
 const resolve = require('../../../../lib/util/resolve')
-const browserUtils = require('../../../../lib/browsers/utils')
+const browserUtils = require('../../../../lib/browsers/utils').default
 const { RunPlugins } = require('../../../../lib/plugins/child/run_plugins')
 const crossOrigin = require('../../../../lib/plugins/child/cross_origin')
 

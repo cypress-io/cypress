@@ -3,6 +3,7 @@ const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 const { override: overrideTty } = require('./lib/util/tty')
+const { NetProfiler } = require('./lib/util/net_profiler')
 
 const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
 
@@ -68,7 +69,7 @@ patchFs(fs)
 overrideTty()
 
 if (process.env.CY_NET_PROFILE && isRunningElectron) {
-  const netProfiler = require('./lib/util/net_profiler')()
+  const netProfiler = new NetProfiler()
 
   process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
 }
