@@ -1,5 +1,4 @@
 import {
-  Exchange,
   Client,
   createClient,
   dedupExchange,
@@ -8,6 +7,7 @@ import {
   subscriptionExchange,
   CombinedError,
 } from '@urql/core'
+import type { Exchange } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'
 import type { SocketShape } from '@packages/socket/browser/client'

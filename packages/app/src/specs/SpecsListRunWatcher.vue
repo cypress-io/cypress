@@ -1,8 +1,14 @@
-/**
- Non rendering component used to watch running runs and emit an event
- when a run has changed. Used by the specs list to update spec information
- during a RUNNING run.
-*/
+<!--
+  Non-rendering component: watches running runs and emits when a run changes.
+  Used by the specs list to refresh spec data while a run is RUNNING.
+-->
+<template>
+  <span
+    class="hidden"
+    aria-hidden="true"
+  />
+</template>
+
 <script setup lang="ts">
 import { gql, useSubscription } from '@urql/vue'
 import { computed } from 'vue'
