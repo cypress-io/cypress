@@ -5,6 +5,7 @@ import { StreamActivityMonitor } from '../upload/stream_activity_monitor'
 import { asyncRetry, linearDelay } from '../../util/async_retry'
 import { putFetch, ParseKinds } from '../network/fetch'
 import { isRetryableError } from '../network/is_retryable_error'
+import { HttpError } from '../network/http_error'
 const debug = Debug('cypress:server:cloud:api:protocol-artifact')
 
 const _delay = linearDelay(500)
@@ -38,6 +39,6 @@ export const putProtocolArtifact = asyncRetry(
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
-    shouldRetry: isRetryableError,
+    shouldRetry: (err) => isRetryableError(err) || (HttpError.isHttpError(err) && err.status === 500),
   },
 )

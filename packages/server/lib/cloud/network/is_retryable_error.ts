@@ -20,7 +20,7 @@ export const isRetryableError = (error: any) => {
   }
 
   if (HttpError.isHttpError(error)) {
-    return [408, 429, 500, 502, 503, 504].includes(error.status)
+    return [408, 429, 502, 503, 504].includes(error.status)
   }
 
   return false
