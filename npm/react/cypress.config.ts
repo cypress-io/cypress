@@ -5,9 +5,6 @@ export default defineConfig({
   viewportWidth: 400,
   viewportHeight: 400,
   projectId: 'z9dxah',
-  env: {
-    reactDevtools: true,
-  },
   component: {
     experimentalSingleTabRunMode: true,
     excludeSpecPattern: [
