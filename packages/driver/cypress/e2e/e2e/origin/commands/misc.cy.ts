@@ -6,12 +6,6 @@ context('cy.origin misc', { browser: '!webkit' }, () => {
     cy.get('a[data-cy="dom-link"]').click()
   })
 
-  it('.end()', () => {
-    cy.origin('http://www.foobar.com:3500', () => {
-      cy.get('#button').end().should('be.null')
-    })
-  })
-
   it('.exec()', () => {
     cy.origin('http://www.foobar.com:3500', () => {
       cy.exec('echo foobar').its('stdout').should('contain', 'foobar')
@@ -221,7 +215,7 @@ it('verifies number of cy commands', () => {
     'check', 'uncheck', 'click', 'env', 'dblclick', 'rightclick', 'focus', 'blur', 'hover', 'scrollIntoView', 'scrollTo', 'select',
     'selectFile', 'submit', 'type', 'clear', 'trigger', 'should', 'and', 'clock', 'tick', 'spread', 'each', 'then',
     'invoke', 'its', 'getCookie', 'getCookies', 'setCookie', 'clearCookie', 'clearCookies', 'pause', 'debug', 'exec', 'readFile',
-    'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'end', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
+    'writeFile', 'fixture', 'clearLocalStorage', 'url', 'hash', 'location', 'noop', 'log', 'wrap', 'reload', 'go', 'visit',
     'focused', 'get', 'contains', 'shadow', 'within', 'request', 'session', 'screenshot', 'task', 'find', 'filter', 'not',
     'children', 'eq', 'closest', 'first', 'last', 'next', 'nextAll', 'nextUntil', 'parent', 'parents', 'parentsUntil', 'prev', 'press',
     'prevAll', 'prevUntil', 'prompt', 'siblings', 'wait', 'title', 'window', 'document', 'viewport', 'server', 'route', 'intercept', 'origin',
