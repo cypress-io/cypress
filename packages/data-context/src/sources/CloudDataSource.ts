@@ -3,22 +3,23 @@ import pkg from '@packages/root'
 import debugLib from 'debug'
 import DataLoader from 'dataloader'
 import { createBatchingExecutor } from '@graphql-tools/batch-execute'
-import { cacheExchange, Cache } from '@urql/exchange-graphcache'
+import { cacheExchange } from '@urql/exchange-graphcache'
+import type { Cache } from '@urql/exchange-graphcache'
 import fetch, { Response } from 'cross-fetch'
 import crypto from 'crypto'
 
 import type { DataContext } from '..'
 import getenv from 'getenv'
-import { print, DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, visit, OperationDefinitionNode } from 'graphql'
+import { print, visit } from 'graphql'
+import type { DocumentNode, ExecutionResult, GraphQLResolveInfo, OperationTypeNode, OperationDefinitionNode } from 'graphql'
 import {
   createClient,
   dedupExchange,
   fetchExchange,
   Client,
-  OperationResult,
   stringifyVariables,
-  RequestPolicy,
 } from '@urql/core'
+import type { OperationResult, RequestPolicy } from '@urql/core'
 import _ from 'lodash'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'
