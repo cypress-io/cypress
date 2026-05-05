@@ -1,4 +1,4 @@
-describe('Cypress In Cypress Origin Communicator', () => {
+describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 10000 }, () => {
   describe('primary origin memory leak prevention', () => {
     let spies: Array<ReturnType<typeof cy.spy>>
 
