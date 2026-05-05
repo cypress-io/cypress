@@ -111,12 +111,10 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
     isGreaterThanOrEqualToTs6 = !isLessThanTs6
   }
 
-  // tsconfig-paths-webpack-plugin v4 tolerates a missing baseUrl (the TS 6+ recommended
-  // shape, see https://github.com/cypress-io/cypress/issues/33733), but v3 rejects it.
-  // For TS < 6 we keep v3 to preserve resolution behavior in projects whose tsconfigs
-  // had paths without baseUrl and were unintentionally relying on the plugin no-oping.
-  const TsconfigPathsPlugin = isGreaterThanOrEqualToTs6
-    ? require('tsconfig-paths-webpack-plugin-v4')
+  // Use the v3 plugin for TS < 6 to remain passive; TS 6+ uses v4, which
+  // tolerates the missing-baseUrl shape recommended by TypeScript 6+.
+  const TsconfigPathsPlugin = isLessThanTs6
+    ? require('tsconfig-paths-webpack-plugin-v3')
     : require('tsconfig-paths-webpack-plugin')
 
   webpackOptions.module.rules.push({
