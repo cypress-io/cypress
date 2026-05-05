@@ -5,6 +5,10 @@
 
 - The `cy.end()` command has been deprecated and will be removed in a future release. Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
 
+**Bugfixes:**
+
+- Fixed an issue where a CSS selector built internally from element attributes could throw an uncaught `Syntax error, unrecognized expression` and crash the runner when an attribute value contained CSS-special characters (for example, an `<input>` with a `pattern` attribute containing regex metacharacters). Attribute values are now escaped with `CSS.escape()` before being interpolated into selectors, and the `cy.select()` duplicate-value detection now uses the same escaping. Fixes [#26967](https://github.com/cypress-io/cypress/issues/26967) and [#29345](https://github.com/cypress-io/cypress/issues/29345).
+
 **Misc:**
 
 - Additional CI environment variables are now captured to support a future failed test retry feature. Addressed in [#33714](https://github.com/cypress-io/cypress/pull/33714).
