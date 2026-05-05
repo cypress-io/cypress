@@ -94,9 +94,6 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
     return options
   }
 
-  const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
-  // node will try to load a projects tsconfig.json instead of the node
-
   // tsx parses the moduleResolution default to node10 as well as moduleResolution="node" to node10
   // ts-loader struggles to validate the node10 moduleResolution option depending on the version of typescript used,
   // so we set it to node which is the same as node 10. @see https://www.typescriptlang.org/tsconfig/#moduleResolution.
@@ -113,6 +110,14 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
     isLessThanTs6 = semver.lt(tsVersion, '6.0.0-0')
     isGreaterThanOrEqualToTs6 = !isLessThanTs6
   }
+
+  // tsconfig-paths-webpack-plugin v4 tolerates a missing baseUrl (the TS 6+ recommended
+  // shape, see https://github.com/cypress-io/cypress/issues/33733), but v3 rejects it.
+  // For TS < 6 we keep v3 to preserve resolution behavior in projects whose tsconfigs
+  // had paths without baseUrl and were unintentionally relying on the plugin no-oping.
+  const TsconfigPathsPlugin = isGreaterThanOrEqualToTs6
+    ? require('tsconfig-paths-webpack-plugin-v4')
+    : require('tsconfig-paths-webpack-plugin')
 
   webpackOptions.module.rules.push({
     test: typescriptExtensionRegex,

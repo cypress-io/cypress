@@ -79,8 +79,14 @@ describe('webpack-batteries-included-preprocessor features', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/33733
+    // TS 6 deprecates `baseUrl` for path-only setups; the v3 plugin rejects this
+    // shape, so we route TS 6+ to v4 (npm-aliased as tsconfig-paths-webpack-plugin-v4).
+    // Force the TS 6 install here so this test actually exercises the v4 branch
+    // regardless of the package's default `typescript` devDep.
     it('handles tsconfig paths without baseUrl (TypeScript 6+ style)', async () => {
-      await runAndEval('paths-no-baseurl/spec.ts', { ...options })
+      const typescriptV6 = require.resolve('typescript-v6/lib/typescript.js')
+
+      await runAndEval('paths-no-baseurl/spec.ts', { typescript: typescriptV6 })
     })
 
     it('handles tsx', async () => {
