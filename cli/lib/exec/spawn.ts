@@ -142,7 +142,7 @@ function createSpawnFunction (
           debug('child event fired %o', { event, code, signal })
 
           if (signal) {
-            if (signal === 'SIGINT' || signal === 'SIGKILL') {
+            if (signal === 'SIGINT') {
               resolve(0)
             } else {
               resolve(128 + os.constants.signals[signal])
