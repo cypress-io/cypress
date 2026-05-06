@@ -94,9 +94,6 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
     return options
   }
 
-  const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
-  // node will try to load a projects tsconfig.json instead of the node
-
   // tsx parses the moduleResolution default to node10 as well as moduleResolution="node" to node10
   // ts-loader struggles to validate the node10 moduleResolution option depending on the version of typescript used,
   // so we set it to node which is the same as node 10. @see https://www.typescriptlang.org/tsconfig/#moduleResolution.
@@ -113,6 +110,12 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
     isLessThanTs6 = semver.lt(tsVersion, '6.0.0-0')
     isGreaterThanOrEqualToTs6 = !isLessThanTs6
   }
+
+  // Use the v3 plugin for TS < 6 to remain passive; TS 6+ uses v4, which
+  // tolerates the missing-baseUrl shape recommended by TypeScript 6+.
+  const TsconfigPathsPlugin = isLessThanTs6
+    ? require('tsconfig-paths-webpack-plugin-v3')
+    : require('tsconfig-paths-webpack-plugin')
 
   webpackOptions.module.rules.push({
     test: typescriptExtensionRegex,
@@ -138,10 +141,17 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
 
   webpackOptions.resolve.extensions = webpackOptions.resolve.extensions.concat(['.ts', '.tsx'])
   webpackOptions.resolve.extensionAlias = webpackOptions.resolve.extensionAlias || { '.js': ['.ts', '.js'], '.mjs': ['.mts', '.mjs'] }
-  webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
-    configFile: configFile?.path,
-    silent: true,
-  })]
+
+  // Only register the paths plugin when we actually located a tsconfig.json.
+  // tsconfig-paths-webpack-plugin v4 no longer early-returns when its internal
+  // loadConfig fails, so passing an undefined configFile causes it to walk up
+  // from process.cwd() and crash with "matchPath is not a function" on resolve.
+  if (configFile?.path) {
+    webpackOptions.resolve.plugins = [new TsconfigPathsPlugin({
+      configFile: configFile.path,
+      silent: true,
+    })]
+  }
 
   // @ts-expect-error - not typed intentionally
   options.__typescriptSupportAdded = true
