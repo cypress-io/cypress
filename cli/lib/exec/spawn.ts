@@ -186,7 +186,7 @@ function createSpawnFunction (
         for (const signal of ['SIGINT', 'SIGTERM']) {
           debug('adding message for signal listener for %s', signal)
           process.once(signal, async function () {
-            console.log(`${signal} received; Attempting to exit gracefully. Force exit with ^C again if needed.`)
+            console.log(`\n\n${signal} received; Attempting to exit gracefully. Force exit with ^C again if needed.\n\n`)
           })
         }
       }
