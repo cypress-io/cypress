@@ -1,9 +1,43 @@
 import { proxyquire, sinon } from '../../../spec_helper'
 import { mkdtemp, remove } from 'fs-extra'
+import { Readable } from 'stream'
 import os from 'os'
 import path from 'path'
+import { BundleError } from '../../../../lib/cloud/bundles/bundle_error'
 import { SystemError } from '../../../../lib/cloud/network/system_error'
-import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
+import { HttpError } from '../../../../lib/cloud/network/http_error'
+
+const proxyquireWithFastDelay = (fetchStub: sinon.SinonStub) => {
+  // Pass-through asyncRetry but collapse the linear delay so tests don't
+  // sit in real setTimeouts while the retry budget burns.
+  const { asyncRetry } = require('../../../../lib/util/async_retry')
+
+  return proxyquire('../lib/cloud/bundles/stream_download_verify_extract', {
+    'cross-fetch': fetchStub,
+    '../../util/async_retry': {
+      asyncRetry,
+      linearDelay: () => () => 1,
+    },
+  })
+}
+
+const callIt = async (fn: any, kind: 'cy-prompt' | 'studio', staging: string) => {
+  let caught: any
+
+  try {
+    await fn({
+      url: `https://cdn.cypress.io/${kind}/abc123.tar`,
+      staging,
+      kind,
+    })
+  } catch (err) {
+    caught = err
+  }
+
+  return caught
+}
+
+const collectErrors = (caught: any): Error[] => caught?.errors ?? [caught]
 
 describe('streamDownloadVerifyExtract', () => {
   let tmp: string
@@ -16,46 +50,114 @@ describe('streamDownloadVerifyExtract', () => {
     await remove(tmp).catch(() => { /* ignore */ })
   })
 
-  it('wraps fetch timeout (AbortError) as a retryable SystemError so asyncRetry burns the full budget', async () => {
-    const abortError = Object.assign(new Error('The user aborted a request.'), { name: 'AbortError' })
-    const fetchStub = sinon.stub().rejects(abortError)
+  describe('error tagging + retry', () => {
+    it('wraps fetch timeout as BundleError(stage=network, cause: SystemError ETIMEDOUT) and burns full retry budget', async () => {
+      const abortError = Object.assign(new Error('The user aborted a request.'), { name: 'AbortError' })
+      const fetchStub = sinon.stub().rejects(abortError)
 
-    // Pass-through asyncRetry but collapse the linear delay so the test
-    // doesn't sit in real setTimeouts for ~1.5s while the budget burns.
-    const { asyncRetry } = require('../../../../lib/util/async_retry')
+      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+      const caught = await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
 
-    const { streamDownloadVerifyExtract } = proxyquire('../lib/cloud/bundles/stream_download_verify_extract', {
-      'cross-fetch': fetchStub,
-      '../../util/async_retry': {
-        asyncRetry,
-        linearDelay: () => () => 1,
-      },
+      // Full retry budget consumed via cause-based shouldRetry
+      expect(fetchStub.callCount).to.equal(3)
+
+      const errs = collectErrors(caught)
+
+      expect(errs.length).to.equal(3)
+      for (const e of errs) {
+        expect(BundleError.isBundleError(e)).to.equal(true)
+        expect((e as BundleError).stage).to.equal('network')
+        expect((e as BundleError).kind).to.equal('cy-prompt')
+
+        const cause = (e as Error & { cause?: unknown }).cause
+
+        expect(SystemError.isSystemError(cause as any), `${e?.message} cause should be SystemError`).to.equal(true)
+        expect((cause as SystemError).code).to.equal('ETIMEDOUT')
+      }
     })
 
-    let caught: any
+    it('wraps a non-retryable HTTP 404 as BundleError(stage=network, cause: HttpError) and does NOT retry', async () => {
+      const response = {
+        ok: false,
+        url: 'https://cdn.cypress.io/studio/abc123.tar',
+        status: 404,
+        statusText: 'Not Found',
+        text: async () => 'not found',
+      }
+      const fetchStub = sinon.stub().resolves(response)
 
-    try {
-      await streamDownloadVerifyExtract({
+      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+      const caught = await callIt(streamDownloadVerifyExtract, 'studio', path.join(tmp, 'staging'))
+
+      // 4xx is not retryable per isRetryableError, so only one attempt
+      expect(fetchStub.callCount).to.equal(1)
+
+      expect(BundleError.isBundleError(caught)).to.equal(true)
+      expect((caught as BundleError).stage).to.equal('network')
+      expect((caught as BundleError).kind).to.equal('studio')
+
+      const cause = (caught as Error & { cause?: unknown }).cause
+
+      expect(HttpError.isHttpError(cause as any)).to.equal(true)
+      expect((cause as HttpError).status).to.equal(404)
+    })
+
+    it('wraps a retryable HTTP 503 as BundleError(stage=network, cause: HttpError) and burns full retry budget', async () => {
+      const response = {
+        ok: false,
         url: 'https://cdn.cypress.io/cy-prompt/abc123.tar',
-        staging: path.join(tmp, 'staging'),
-        kind: 'cy-prompt',
+        status: 503,
+        statusText: 'Service Unavailable',
+        text: async () => 'busy',
+      }
+      const fetchStub = sinon.stub().resolves(response)
+
+      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+
+      await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
+
+      expect(fetchStub.callCount).to.equal(3)
+    })
+
+    it('wraps a non-syscall pipeline error as BundleError(stage=extract, cause preserved) and does NOT retry', async () => {
+      // Body that yields bytes which tar.Parse({ strict: true }) will reject.
+      const makeBody = () => Readable.from([Buffer.from('this is not a tar archive at all')])
+      const response = {
+        ok: true,
+        status: 200,
+        headers: {
+          get: (h: string) => {
+            if (h === 'x-cypress-signature') return 'sig'
+
+            if (h === 'x-cypress-manifest-signature') return 'manifest-sig'
+
+            return null
+          },
+        },
+        body: makeBody(),
+      }
+
+      const fetchStub = sinon.stub().callsFake(async () => {
+        // fresh body per attempt in case asyncRetry retries
+        return { ...response, body: makeBody() }
       })
-    } catch (err) {
-      caught = err
-    }
 
-    // Full retry budget consumed (asyncRetry maxAttempts: 3)
-    expect(fetchStub.callCount).to.equal(3)
+      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+      const caught = await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
 
-    // Every attempt's error is a retryable SystemError so future tweaks to
-    // the retry harness can't silently regress this back to a single attempt.
-    const errs: Error[] = caught?.errors ?? [caught]
+      // Tar parse error is not retryable (no errno/code, not Http/SystemError)
+      expect(fetchStub.callCount).to.equal(1)
 
-    expect(errs.length).to.equal(3)
-    for (const e of errs) {
-      expect(SystemError.isSystemError(e as any), `${e?.message} should be a SystemError`).to.equal(true)
-      expect(isRetryableError(e), `${e?.message} should be retryable`).to.equal(true)
-      expect((e as SystemError).code).to.equal('ETIMEDOUT')
-    }
+      expect(BundleError.isBundleError(caught)).to.equal(true)
+      expect((caught as BundleError).stage).to.equal('extract')
+      expect((caught as BundleError).kind).to.equal('cy-prompt')
+
+      // The original (tar) error is preserved as cause
+      const cause = (caught as Error & { cause?: unknown }).cause
+
+      expect(cause).to.be.instanceOf(Error)
+      expect(SystemError.isSystemError(cause as any)).to.equal(false)
+      expect(HttpError.isHttpError(cause as any)).to.equal(false)
+    })
   })
 })

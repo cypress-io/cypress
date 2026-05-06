@@ -14,7 +14,7 @@ import { HttpError } from '../network/http_error'
 import { SystemError } from '../network/system_error'
 import { PUBLIC_KEY_VERSION } from '../constants'
 import { createStreamingSignatureVerifier } from '../encryption'
-import { BundleError, type BundleKind } from './bundle_error'
+import { BundleError, BundleErrorStage, BundleKind } from './bundle_error'
 
 const pkg = require('@packages/root')
 
@@ -47,18 +47,81 @@ const buildHeaders = (projectId: string | undefined): Record<string, string> => 
   }
 }
 
-const wrapNetworkError = (err: any, url: string): Error => {
-  if (HttpError.isHttpError(err)) return err
+// Recognises POSIX-style errno codes (ECONNRESET, ETIMEDOUT, EAI_AGAIN,
+// ENOSPC, ...) while excluding domain-specific codes that happen to start
+// with E:
+//   - tar's TAR_BAD_ARCHIVE / zlib's Z_BUF_ERROR don't start with E at all.
+//   - Node's internal ERR_* codes (ERR_INVALID_URL, ERR_SOCKET_CLOSED, ...)
+//     are excluded explicitly so a thrown TypeError doesn't get
+//     misclassified as a retryable network error.
+const isPosixSyscallError = (err: any): boolean => {
+  if (err?.errno !== undefined) return true
 
-  if (err?.errno || err?.code) {
-    const sysError = new SystemError(err, url, err.code, err.errno)
+  const code = err?.code
 
-    sysError.stack = err.stack
+  if (typeof code !== 'string') return false
 
-    return sysError
+  if (code.startsWith('ERR_')) return false
+
+  return /^E[A-Z]/.test(code)
+}
+
+// Wraps any error from the fetch / pipeline phase as a BundleError carrying
+// the underlying HttpError / SystemError as its `cause`. The cause is what
+// asyncRetry's shouldRetry inspects (via isRetryableError), and it is also
+// what consumers filter on in Sentry alongside the BundleError's `stage`
+// and `kind` tags.
+//
+// `defaultStage` is used when the error has no HttpError shape and no POSIX
+// syscall code: 'network' for the fetch phase, 'extract' for the pipeline
+// phase (where a non-syscall error is overwhelmingly tar.Parse complaining
+// about malformed bytes).
+const wrapAsBundleError = (
+  err: any,
+  url: string,
+  kind: BundleKind,
+  defaultStage: BundleErrorStage,
+): BundleError => {
+  if (err?.name === 'AbortError') {
+    const message = `${kind} bundle fetch timed out after ${FETCH_TIMEOUT_MS}ms`
+    const sysError = new SystemError(new Error(message), url, 'ETIMEDOUT', undefined)
+
+    return new BundleError({ kind, stage: 'network', message, cause: sysError })
   }
 
-  return err
+  if (HttpError.isHttpError(err)) {
+    return new BundleError({
+      kind,
+      stage: 'network',
+      message: `${kind} bundle fetch failed with HTTP ${err.status} ${err.statusText ?? ''}`.trim(),
+      cause: err,
+    })
+  }
+
+  if (isPosixSyscallError(err)) {
+    const sysError = SystemError.isSystemError(err)
+      ? err
+      : Object.assign(new SystemError(err, url, err.code, err.errno), { stack: err.stack })
+
+    return new BundleError({
+      kind,
+      // Syscall-shaped errors during the fetch phase are network failures
+      // (DNS, connection reset, etc.); during pipeline they're typically
+      // mid-stream connection drops -- still network. Disk-side codes like
+      // ENOSPC do exist but are rare enough that mis-classifying them as
+      // network (and surfacing the SystemError as cause) is acceptable.
+      stage: 'network',
+      message: `${kind} bundle network error: ${err.message ?? err.code}`,
+      cause: sysError,
+    })
+  }
+
+  return new BundleError({
+    kind,
+    stage: defaultStage,
+    message: `${kind} bundle ${defaultStage} failed: ${err?.message ?? String(err)}`,
+    cause: err,
+  })
 }
 
 const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownloadVerifyExtractOptions): Promise<string> => {
@@ -114,40 +177,39 @@ const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownl
   try {
     debug('fetching %s bundle from %s', kind, url)
 
-    const response = await fetch(url, {
-      // @ts-expect-error - this is supported
-      agent: strictAgent,
-      method: 'GET',
-      headers: buildHeaders(projectId),
-      encrypt: 'signed',
-      signal: controller.signal,
-    })
+    let response: Awaited<ReturnType<typeof fetch>>
 
-    if (!response.ok) {
-      throw await HttpError.fromResponse(response)
+    try {
+      response = await fetch(url, {
+        // @ts-expect-error - this is supported
+        agent: strictAgent,
+        method: 'GET',
+        headers: buildHeaders(projectId),
+        encrypt: 'signed',
+        signal: controller.signal,
+      })
+
+      if (!response.ok) {
+        throw await HttpError.fromResponse(response)
+      }
+    } catch (err: any) {
+      throw wrapAsBundleError(err, url, kind, 'network')
     }
 
     bundleSig = response.headers.get('x-cypress-signature')
     manifestSig = response.headers.get('x-cypress-manifest-signature')
 
-    // @ts-expect-error - response.body is a Node Readable in cross-fetch's Node runtime
-    await pipeline(response.body, tee, parser)
-    await Promise.all(entryPromises)
-  } catch (err: any) {
-    // Drain any in-flight entry writes so they don't surface as unhandled rejections
-    // after the pipeline has already errored.
-    await Promise.allSettled(entryPromises)
+    try {
+      // @ts-expect-error - response.body is a Node Readable in cross-fetch's Node runtime
+      await pipeline(response.body, tee, parser)
+      await Promise.all(entryPromises)
+    } catch (err: any) {
+      // Drain any in-flight entry writes so they don't surface as unhandled
+      // rejections after the pipeline has already errored.
+      await Promise.allSettled(entryPromises)
 
-    if (err?.name === 'AbortError' || controller.signal.aborted) {
-      // SystemError so asyncRetry's isRetryableError accepts it and the timeout
-      // burns retry budget instead of failing on the first attempt.
-      const timeoutErr = new Error(`${kind} bundle fetch timed out after ${FETCH_TIMEOUT_MS}ms`)
-      const sysError = new SystemError(timeoutErr, url, 'ETIMEDOUT', undefined)
-
-      throw sysError
+      throw wrapAsBundleError(err, url, kind, 'extract')
     }
-
-    throw wrapNetworkError(err, url)
   } finally {
     clearTimeout(fetchTimeout)
   }
@@ -169,11 +231,24 @@ const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownl
   return manifestSig
 }
 
+// Decide retryability from the underlying cause when we've wrapped as
+// BundleError, so wrapping the network/extract errors above doesn't break
+// asyncRetry's existing isRetryableError-based classification.
+const shouldRetryBundleError = (err: unknown): boolean => {
+  if (BundleError.isBundleError(err)) {
+    const cause = (err as Error & { cause?: unknown }).cause
+
+    return cause !== undefined && isRetryableError(cause)
+  }
+
+  return isRetryableError(err)
+}
+
 export const streamDownloadVerifyExtract = async (options: StreamDownloadVerifyExtractOptions): Promise<string> => {
   return asyncRetry(runDownloadAttempt, {
     maxAttempts: MAX_ATTEMPTS,
     retryDelay: linearDelay(RETRY_DELAY_MS),
-    shouldRetry: isRetryableError,
+    shouldRetry: shouldRetryBundleError,
     onRetry: (delayMs, err) => {
       debug('retrying %s bundle download in %dms after error: %o', options.kind, delayMs, err)
     },
