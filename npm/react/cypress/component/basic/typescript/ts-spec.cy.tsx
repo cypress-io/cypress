@@ -1,7 +1,10 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 
-const Button = ({ children, ...rest }) => {
+const Button = ({
+  children,
+  ...rest
+}: React.PropsWithChildren<React.ButtonHTMLAttributes<HTMLButtonElement>>) => {
   return <button {...rest}>{children}</button>
 }
 

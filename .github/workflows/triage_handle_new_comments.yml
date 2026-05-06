@@ -9,6 +9,8 @@ on:
   issue_comment:
     types: [created]
 
+permissions: {}
+
 jobs:
   handle-comment-scenarios:
     runs-on: ubuntu-latest
