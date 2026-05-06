@@ -189,6 +189,9 @@ describe('e2e visit', () => {
       spec: 'visit_non_html_content_type_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: {
+        screenshotOnRunFailure: false,
+      },
     })
 
     systemTests.it('calls onBeforeLoad when overwriting cy.visit', {

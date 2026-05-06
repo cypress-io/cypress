@@ -1,7 +1,7 @@
 require('../spec_helper')
 
 const Bluebird = require('bluebird')
-const browsers = require(`../../lib/browsers`)
+const browsers = require(`../../lib/browsers`).default
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { openProject } = require('../../lib/open_project')
 const preprocessor = require(`../../lib/plugins/preprocessor`).default

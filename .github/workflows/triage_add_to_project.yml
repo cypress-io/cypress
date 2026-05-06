@@ -17,12 +17,12 @@ on:
     types:
       - opened
 
+permissions: {}
+
 jobs:
   add-to-triage-project:
     name: Add to triage project
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
     env:
       PROJECT_NUMBER: 9
       GITHUB_TOKEN: ${{ secrets.ADD_TO_TRIAGE_BOARD_TOKEN }}

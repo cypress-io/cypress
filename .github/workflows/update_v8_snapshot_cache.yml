@@ -83,6 +83,7 @@ jobs:
         with:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
+          permission-contents: read
       - name: Checkout
         uses: actions/checkout@v6
         with:
@@ -125,6 +126,30 @@ jobs:
         with:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      ## actions/checkout persisted the *initial* token in git's config. On
+      ## Windows the build can exceed the App token's 1h lifetime, so that
+      ## persisted credential expires before we push. Re-run checkout with
+      ## the refreshed token to overwrite the persisted credential. The action
+      ## does a force-checkout, so stash the freshly-generated snapshot file
+      ## first and restore it afterward.
+      - name: Stash snapshot changes for credential refresh
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        run: git stash push -- ${{ env.SNAPSHOT_FILES }}
+        shell: bash
+      - name: Refresh persisted git credentials
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token-refresh.outputs.token }}
+          ref: ${{ env.BASE_BRANCH }}
+          clean: false
+      - name: Restore snapshot changes
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        run: git stash pop
+        shell: bash
       - name: Determine branch name - commit directly to branch
         if: ${{ inputs.commit_directly_to_branch == true }}
         run: |
@@ -170,11 +195,9 @@ jobs:
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         run: |
           git diff-index --quiet HEAD || git commit -am "chore: updating v8 snapshot cache"
-      ## Push branch — use the refreshed App token explicitly. The persisted
-      ## credential from the initial checkout may have expired during the build.
       - name: Push branch to remote
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
-        run: git push "https://x-access-token:${{ steps.app-token-refresh.outputs.token }}@github.com/${{ github.repository }}.git" "${{ env.BRANCH_NAME }}"
+        run: git push origin "${{ env.BRANCH_NAME }}"
       # PR needs to be created
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}

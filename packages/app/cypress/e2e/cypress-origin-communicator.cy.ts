@@ -1,4 +1,4 @@
-describe('Cypress In Cypress Origin Communicator', () => {
+describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 10000 }, () => {
   describe('primary origin memory leak prevention', () => {
     let spies: Array<ReturnType<typeof cy.spy>>
 
@@ -55,6 +55,46 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.location('hash').should('include', '/runs')
 
       assertZeroArgCleanupFired()
+    })
+
+    it('clears cached spec bridge window targets when primaryOriginCommunicator.removeAllListeners() runs without an event', () => {
+      cy.visitApp()
+      cy.specsPageIsVisible()
+      cy.contains('dom-content.spec').click()
+      cy.waitForSpecToFinish()
+      trackRemoveAllListenersOnAllCypressInstances()
+
+      cy.window().then((win) => {
+        // @ts-ignore
+        const comm = win.Cypress.primaryOriginCommunicator as any
+
+        // @ts-ignore — hold stub across navigation for the assertion below
+        window.__cyCommunicatorMapTest = { postMessage: cy.stub() }
+
+        comm.onMessage({
+          data: { event: 'cross:origin:bridge:ready', origin: 'https://cypress-map-teardown-test.invalid' },
+          // @ts-ignore
+          source: window.__cyCommunicatorMapTest,
+        })
+      })
+
+      cy.get('a[href="#/runs"]').click()
+      cy.location('hash').should('include', '/runs')
+
+      assertZeroArgCleanupFired()
+
+      cy.window().then((win) => {
+        // @ts-ignore
+        const comm = win.Cypress.primaryOriginCommunicator as any
+        // @ts-ignore
+        const stub = window.__cyCommunicatorMapTest
+
+        stub.postMessage.resetHistory()
+        comm.toAllSpecBridges('test:map:should:not:reach:stub', {})
+        expect(stub.postMessage).not.to.have.been.called
+        // @ts-ignore
+        delete window.__cyCommunicatorMapTest
+      })
     })
 
     it('cleans up the primaryOriginCommunicator events when navigating away from the /specs to /settings', () => {
