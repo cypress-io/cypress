@@ -31,7 +31,7 @@ describe('Config options', () => {
 
         it('works', () => {
           mount(<App />)
-          cy.get('#hello').should('have.css', 'background-color', 'rgb(219, 234, 254)')
+          cy.get('#hello').should('have.css', 'background-color', 'oklch(0.932 0.032 255.585)')
         })
 
         it('dummy', () => {})
