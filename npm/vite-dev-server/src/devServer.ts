@@ -3,7 +3,7 @@ import semverMajor from 'semver/functions/major.js'
 import type { UserConfig } from 'vite-7'
 import { getVite, Vite_7, Vite_8 } from './getVite.js'
 import { createViteDevServerConfig, isVite8 } from './resolveConfig.js'
-import { getSupportFileRelativePath } from './waitForSupportFile.js'
+import { getSpecRelativeUrl, getSupportFileRelativePath } from './waitForSupportFile.js'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -47,23 +47,33 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
 
   debug('Successfully launched the vite server on port', port)
 
+  // Warm up every URL the browser will dynamically import via
+  // initCypressTests.js — the support file plus every spec the dev server
+  // was started with — so each one's transitive deps go through Vite's
+  // transform pipeline and the deps optimizer picks up any new node_modules
+  // imports. waitForRequestsIdle then blocks until all pending transforms
+  // (including a deps-optimizer run triggered by the warmups) have settled.
+  //
+  // After both resolve, the browser's subsequent fetches for the support
+  // file, the specs, and their transitive imports are served from Vite's
+  // cache without racing the optimizer — the source of the intermittent
+  // "Failed to fetch dynamically imported module" failures (#25913).
+  const warmupTargets: string[] = []
   const supportPath = getSupportFileRelativePath(config.cypressConfig)
 
   if (supportPath) {
-    // Walk the support file through Vite's transform pipeline so its module
-    // graph is populated and the deps optimizer can pick up any node_modules
-    // imports it needs to bundle. waitForRequestsIdle then blocks until any
-    // pending transforms (including a deps-optimizer run triggered by the
-    // warmup) have settled.
-    //
-    // After both resolve, the browser's subsequent fetches for the support
-    // file and its transitive imports can be served from Vite's cache without
-    // racing the optimizer — which was the source of the intermittent
-    // "Failed to fetch dynamically imported module" failures (#25913).
-    debug('Warming up support file dependency graph', supportPath)
-    await server.warmupRequest(supportPath)
+    warmupTargets.push(supportPath)
+  }
+
+  for (const spec of config.specs ?? []) {
+    warmupTargets.push(getSpecRelativeUrl(spec, config.cypressConfig))
+  }
+
+  if (warmupTargets.length > 0) {
+    debug('Warming up module graph for %d targets', warmupTargets.length)
+    await Promise.all(warmupTargets.map((target) => server.warmupRequest(target)))
     await server.waitForRequestsIdle()
-    debug('Support file dependency graph is ready')
+    debug('Module graph is ready')
   }
 
   return {
