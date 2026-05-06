@@ -139,12 +139,12 @@ const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownl
     await Promise.allSettled(entryPromises)
 
     if (err?.name === 'AbortError' || controller.signal.aborted) {
-      throw new BundleError({
-        kind,
-        stage: 'network',
-        message: `${kind} bundle fetch timed out after ${FETCH_TIMEOUT_MS}ms`,
-        cause: err,
-      })
+      // SystemError so asyncRetry's isRetryableError accepts it and the timeout
+      // burns retry budget instead of failing on the first attempt.
+      const timeoutErr = new Error(`${kind} bundle fetch timed out after ${FETCH_TIMEOUT_MS}ms`)
+      const sysError = new SystemError(timeoutErr, url, 'ETIMEDOUT', undefined)
+
+      throw sysError
     }
 
     throw wrapNetworkError(err, url)
