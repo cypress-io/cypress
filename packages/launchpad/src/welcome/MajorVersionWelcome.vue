@@ -33,25 +33,22 @@
 
             <div class="mb-[16px]">
               <ExternalLink
-                href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v15#15-0-0"
+                href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0"
                 class="font-bold text-indigo-500"
               >
-                15.0.0
+                16.0.0
               </ExternalLink>
               <span class="font-light pl-[10px] text-gray-500 text-[14px]">
-                Released {{ versionReleaseDates['15'] }}
+                Released {{ versionReleaseDates['16'] }}
               </span>
             </div>
             <div class="children:mb-[16px]">
+              <!-- TODO: Replace with approved v16 launch copy. -->
               <p>
-                This release prepares Cypress Studio for the next era of AI-assisted test creation. You can record interactions, add assertions by right-clicking, and now edit tests inline without leaving Cypress. Turn on <InlineCodeFragment>experimentalStudio</InlineCodeFragment> in your config to try it out and share your feedback.
+                Cypress 16 is here. This version includes breaking changes that may require updates to your project.
               </p>
               <p>
-                We’ve also made important changes to improve reliability, future compatibility, and cross-origin support. Several older versions of Node.js, browser protocols, and Webpack integrations are no longer supported.
-                This version includes breaking changes that may require updates to your project.
-              </p>
-              <p>
-                For a complete list of updates, please review our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v15#15-0-0">
+                For a complete list of updates, please review our <ExternalLink href="https://on.cypress.io/changelog?utm_source=Binary%3A+App&utm_medium=splash-page&utm_campaign=v16#16-0-0">
                   <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
                   changelog</ExternalLink>.
               </p>
@@ -65,6 +62,27 @@
             <h2 class="font-bold mt-[24px] mb-[12px] text-[14px] text-gray-600">
               Previous release highlights
             </h2>
+            <div class="pb-[8px]">
+              <ExternalLink
+                href="https://on.cypress.io/changelog#15-0-0"
+                class="font-bold text-indigo-500"
+              >
+                15.0.0
+              </ExternalLink>
+              <span class="font-light pl-[10px] text-gray-500 text-[14px]">
+                Released {{ versionReleaseDates['15'] }}
+              </span>
+            </div>
+            <p class="text-[14px] leading-[20px]">
+              This release prepares Cypress Studio for the next era of AI-assisted test creation. You can record interactions, add assertions by right-clicking, and now edit tests inline without leaving Cypress. Turn on <InlineCodeFragment>experimentalStudio</InlineCodeFragment> in your config to try it out and share your feedback.
+              <br>
+              <br>
+              Read about the v15.0.0 changes in our
+              <ExternalLink href="https://on.cypress.io/changelog#15-0-0">
+                <!--eslint-disable-next-line vue/multiline-html-element-content-newline-->
+                changelog</ExternalLink>.
+            </p>
+            <br>
             <div class="pb-[8px]">
               <ExternalLink
                 href="https://on.cypress.io/changelog#14-0-0"
@@ -193,6 +211,7 @@ const versionReleaseDates = computed(() => {
     '13': useTimeAgo(Date.UTC(2023, 7, 29)).value,
     '14': useTimeAgo(Date.UTC(2025, 0, 16)).value,
     '15': useTimeAgo(Date.UTC(2025, 7, 20)).value,
+    '16': useTimeAgo(Date.UTC(2026, 4, 5)).value,
   }
 })
 
