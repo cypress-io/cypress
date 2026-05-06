@@ -3,7 +3,7 @@ import semverMajor from 'semver/functions/major.js'
 import type { UserConfig } from 'vite-7'
 import { getVite, Vite_7, Vite_8 } from './getVite.js'
 import { createViteDevServerConfig, isVite8 } from './resolveConfig.js'
-import { getSpecRelativeUrl, getSupportFileRelativePath } from './waitForSupportFile.js'
+import { getSpecRelativeUrl, getSupportFileRelativePath } from './warmupTargets.js'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 

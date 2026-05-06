@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getSpecRelativeUrl, getSupportFileRelativePath } from '../src/waitForSupportFile'
+import { getSpecRelativeUrl, getSupportFileRelativePath } from '../src/warmupTargets'
 
 describe('getSupportFileRelativePath', () => {
   it('builds path matching client logic when devServerPublicPathRoute is set', () => {
