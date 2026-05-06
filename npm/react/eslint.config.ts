@@ -3,7 +3,7 @@ import { baseConfig } from '@packages/eslint-config'
 // Root config files outside tsconfig may use the default project (no ** globs allowed).
 const allowDefaultProject = [
   'babel.config.js',
-  'cypress.config.js',
+  'cypress.config.ts',
   'eslint.config.ts',
   'rollup.config.mjs',
   'vite.config.ts',
@@ -13,7 +13,7 @@ const allowDefaultProject = [
 const projectServiceFiles = [
   'src/**/*.ts',
   'babel.config.js',
-  'cypress.config.js',
+  'cypress.config.ts',
   'eslint.config.ts',
   'rollup.config.mjs',
   'vite.config.ts',
