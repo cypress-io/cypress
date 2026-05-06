@@ -7,7 +7,7 @@ import { parseHashFromBundleUrl } from './parse_hash_from_bundle_url'
 import { sweepOrphanStaging } from './sweep_orphan_staging'
 import { streamDownloadVerifyExtract } from './stream_download_verify_extract'
 import { publishStagingToFinal } from './publish_staging_to_final'
-import { BundleError, type BundleKind } from './bundle_error'
+import { BundleError, BundleKind } from './bundle_error'
 
 const debug = Debug('cypress:server:cloud:bundles:ensure-signed-bundle')
 
