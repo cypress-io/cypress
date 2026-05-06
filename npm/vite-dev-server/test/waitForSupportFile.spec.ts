@@ -48,33 +48,21 @@ describe('getSupportFileRelativePath', () => {
 })
 
 describe('getSpecRelativeUrl', () => {
-  it('builds @fs path matching client logic when devServerPublicPathRoute is set', () => {
+  it('builds /@fs path without the dev server base prefix', () => {
     const spec = { absolute: '/users/proj/src/components/Foo.cy.tsx' }
     const cypressConfig = {
-      devServerPublicPathRoute: '/__cypress/src',
       platform: 'darwin',
     } as Cypress.PluginConfigOptions
 
-    expect(getSpecRelativeUrl(spec, cypressConfig)).toBe('/__cypress/src/@fs/users/proj/src/components/Foo.cy.tsx')
-  })
-
-  it('uses ./@fs prefix when devServerPublicPathRoute is empty', () => {
-    const spec = { absolute: '/users/proj/src/components/Foo.cy.tsx' }
-    const cypressConfig = {
-      devServerPublicPathRoute: '',
-      platform: 'darwin',
-    } as Cypress.PluginConfigOptions
-
-    expect(getSpecRelativeUrl(spec, cypressConfig)).toBe('./@fs/users/proj/src/components/Foo.cy.tsx')
+    expect(getSpecRelativeUrl(spec, cypressConfig)).toBe('/@fs/users/proj/src/components/Foo.cy.tsx')
   })
 
   it('normalizes win32 backslashes to forward slashes', () => {
     const spec = { absolute: 'C:\\users\\proj\\src\\components\\Foo.cy.tsx' }
     const cypressConfig = {
-      devServerPublicPathRoute: '/__cypress/src',
       platform: 'win32',
     } as Cypress.PluginConfigOptions
 
-    expect(getSpecRelativeUrl(spec, cypressConfig)).toBe('/__cypress/src/@fs/C:/users/proj/src/components/Foo.cy.tsx')
+    expect(getSpecRelativeUrl(spec, cypressConfig)).toBe('/@fs/C:/users/proj/src/components/Foo.cy.tsx')
   })
 })

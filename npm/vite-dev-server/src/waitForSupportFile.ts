@@ -26,22 +26,24 @@ export function getSupportFileRelativePath (cypressConfig: Cypress.PluginConfigO
 }
 
 /**
- * Build the spec URL path matching the URL the browser-side client
- * (client/initCypressTests.js) constructs for a spec — `<base>/@fs/<absolute>`.
- * Specs are served via Vite's `@fs/` route so absolute paths outside the
- * project root resolve correctly. Used by devServer.ts to warmupRequest each
- * spec, ensuring its module graph is populated before the iframe imports it.
+ * Build the spec URL path passed to Vite's `server.warmupRequest()` so the
+ * spec's module graph is populated before the iframe dynamically imports it.
+ *
+ * Vite's `@fs/` route (which lets absolute paths outside the project root
+ * resolve) is mounted at the server root and does not have the dev server
+ * base prefix applied — passing `<base>/@fs/<absolute>` to warmupRequest
+ * yields a "Failed to load url" pre-transform error in Vite 8, while
+ * `/@fs/<absolute>` resolves cleanly. This intentionally diverges from the
+ * client-side URL the browser constructs (which does include the base, since
+ * the browser fetches over HTTP through the base-aware middleware).
  */
 export function getSpecRelativeUrl (
   spec: { absolute: string },
-  cypressConfig: Pick<Cypress.PluginConfigOptions, 'devServerPublicPathRoute' | 'platform'>,
+  cypressConfig: Pick<Cypress.PluginConfigOptions, 'platform'>,
 ): string {
-  const { devServerPublicPathRoute, platform } = cypressConfig
-  const devServerPublicPathBase = devServerPublicPathRoute === '' ? '.' : devServerPublicPathRoute
-
   let absolute = spec.absolute
 
-  if (platform === 'win32') {
+  if (cypressConfig.platform === 'win32') {
     absolute = absolute.replace(/\\/g, '/')
   }
 
@@ -49,5 +51,5 @@ export function getSpecRelativeUrl (
   // client constructs it (see client/initCypressTests.js).
   const normalizedAbsolute = absolute.replace(/^\//, '')
 
-  return `${devServerPublicPathBase}/@fs/${normalizedAbsolute}`
+  return `/@fs/${normalizedAbsolute}`
 }
