@@ -13,7 +13,7 @@ import { asyncRetry } from '../../util/async_retry'
 import { postStudioSession } from '../api/studio/post_studio_session'
 import type { StudioServerOptions, StudioStatus } from '@packages/types'
 import path from 'path'
-import os from 'os'
+import { parseHashFromBundleUrl } from '../bundles/parse_hash_from_bundle_url'
 import { ensureStudioBundle } from './ensure_studio_bundle'
 import chokidar from 'chokidar'
 import { readFile } from 'fs/promises'
@@ -31,7 +31,7 @@ const debug = Debug('cypress:server:studio-lifecycle-manager')
 const routes = require('../routes')
 
 export class StudioLifecycleManager {
-  private static hashLoadingMap: Map<string, Promise<Record<string, string>>> = new Map()
+  private static hashLoadingMap: Map<string, Promise<{ manifest: Record<string, string>, studioPath: string }>> = new Map()
   private static watcher: chokidar.FSWatcher | null = null
   private studioManagerPromise?: Promise<StudioManager | null>
   private studioManager?: StudioManager
@@ -198,10 +198,7 @@ export class StudioLifecycleManager {
 
     telemetryManager.mark(BUNDLE_LIFECYCLE_MARK_NAMES.ENSURE_STUDIO_BUNDLE_START)
     if (!process.env.CYPRESS_LOCAL_STUDIO_PATH) {
-      // The studio hash is the last part of the studio URL, after the last slash and before the extension
-      const studioHash = studioSession.studioUrl.split('/').pop()?.split('.')[0] as string
-
-      studioPath = path.join(os.tmpdir(), 'cypress', 'studio', studioHash)
+      const studioHash = parseHashFromBundleUrl(studioSession.studioUrl)
 
       debug('Setting current studio hash: %s', studioHash)
       // Store the current studio hash so that we can clear the cache entry when retrying
@@ -214,14 +211,16 @@ export class StudioLifecycleManager {
 
         hashLoadingPromise = ensureStudioBundle({
           studioUrl: studioSession.studioUrl,
-          studioPath,
           projectId: currentProjectOptions.projectSlug,
         })
 
         StudioLifecycleManager.hashLoadingMap.set(studioHash, hashLoadingPromise)
       }
 
-      manifest = await hashLoadingPromise
+      const result = await hashLoadingPromise
+
+      manifest = result.manifest
+      studioPath = result.studioPath
 
       debug('Manifest: %o', manifest)
     } else {
