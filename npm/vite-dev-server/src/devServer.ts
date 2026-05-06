@@ -3,7 +3,7 @@ import semverMajor from 'semver/functions/major.js'
 import type { UserConfig } from 'vite-7'
 import { getVite, Vite_7, Vite_8 } from './getVite.js'
 import { createViteDevServerConfig, isVite8 } from './resolveConfig.js'
-import { getSupportFileRelativePath, waitUntilUrlReady } from './waitForSupportFile.js'
+import { getSupportFileRelativePath } from './waitForSupportFile.js'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -39,7 +39,7 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   debug('Vite server created')
 
   await server.listen()
-  const { port, host } = server.config.server
+  const { port } = server.config.server
 
   if (!port) {
     throw new Error('Missing vite dev server port.')
@@ -50,12 +50,20 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   const supportPath = getSupportFileRelativePath(config.cypressConfig)
 
   if (supportPath) {
-    const baseUrl = `http://${typeof host === 'string' ? host : '127.0.0.1'}:${port}`
-    const supportFileUrl = new URL(supportPath, `${baseUrl}/`).href
-
-    debug('Waiting until support file is servable', supportFileUrl)
-    await waitUntilUrlReady(supportFileUrl)
-    debug('Support file is ready')
+    // Walk the support file through Vite's transform pipeline so its module
+    // graph is populated and the deps optimizer can pick up any node_modules
+    // imports it needs to bundle. waitForRequestsIdle then blocks until any
+    // pending transforms (including a deps-optimizer run triggered by the
+    // warmup) have settled.
+    //
+    // After both resolve, the browser's subsequent fetches for the support
+    // file and its transitive imports can be served from Vite's cache without
+    // racing the optimizer — which was the source of the intermittent
+    // "Failed to fetch dynamically imported module" failures (#25913).
+    debug('Warming up support file dependency graph', supportPath)
+    await server.warmupRequest(supportPath)
+    await server.waitForRequestsIdle()
+    debug('Support file dependency graph is ready')
   }
 
   return {
