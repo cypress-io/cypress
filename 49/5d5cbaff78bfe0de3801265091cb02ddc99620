@@ -1,0 +1,29 @@
+packages/server/test/unit/cloud/studio/StudioLifecycleManager_spec.ts
+  d1b7976ede1ba474 209,311,409,455,608,723,954,1025,1029-1032
+packages/server/lib/cloud/studio/StudioLifecycleManager.ts
+  d1b7976ede1ba474 16,34,201,220-223
+packages/server/test/unit/cloud/studio/ensure_studio_bundle_spec.ts
+  d1b7976ede1ba474 5,8,11-12,17-19,21-23,26-28,31-36,38-41,44-45,47,49-53,56-57,59,61-62
+packages/server/lib/cloud/studio/ensure_studio_bundle.ts
+  d1b7976ede1ba474 1,6-9,16-20,23-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "495d5cbaff78bfe0de3801265091cb02ddc99620",
+  "prompts": {
+    "d1b7976ede1ba474": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel",
+      "messages": [],
+      "total_additions": 69,
+      "total_deletions": 137,
+      "accepted_lines": 69,
+      "overriden_lines": 0
+    }
+  }
+}
