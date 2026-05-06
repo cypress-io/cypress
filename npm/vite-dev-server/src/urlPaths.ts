@@ -1,9 +1,15 @@
 /**
- * Build the support file URL matching the URL the browser-side client
- * (client/initCypressTests.js) constructs.
+ * Build the support file URL in Vite's internal format (without the dev
+ * server base prefix). `server.warmupRequest()` calls `transformRequest`
+ * directly, bypassing the base-aware HTTP middleware that would otherwise
+ * strip the base. Including the base would cause Vite's resolver to look
+ * for `<root>/__cypress/src/cypress/support/component.ts`, which doesn't
+ * exist, and the warmup would silently fail.
  */
-export function getSupportFileRelativeUrl (cypressConfig: Cypress.PluginConfigOptions): string {
-  const { projectRoot, supportFile, devServerPublicPathRoute } = cypressConfig
+export function getSupportFileRelativeUrl (
+  cypressConfig: Pick<Cypress.PluginConfigOptions, 'projectRoot' | 'supportFile' | 'platform'>,
+): string {
+  const { projectRoot, supportFile } = cypressConfig
 
   if (!supportFile) {
     return ''
@@ -18,9 +24,7 @@ export function getSupportFileRelativeUrl (cypressConfig: Cypress.PluginConfigOp
     supportRelativeToProjectRoot = supportRelativeToProjectRoot.replace(/\\/g, '/')
   }
 
-  const devServerPublicPathBase = devServerPublicPathRoute === '' ? '.' : devServerPublicPathRoute
-
-  return `${devServerPublicPathBase}${supportRelativeToProjectRoot}`
+  return supportRelativeToProjectRoot
 }
 
 /**

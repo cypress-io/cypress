@@ -58,7 +58,7 @@ describe('devServer warmup', () => {
 
     expect(mockServer.listen).toHaveBeenCalledOnce()
     expect(mockServer.warmupRequest).toHaveBeenCalledTimes(3)
-    expect(mockServer.warmupRequest).toHaveBeenCalledWith('/__cypress/src/cypress/support/component.ts')
+    expect(mockServer.warmupRequest).toHaveBeenCalledWith('/cypress/support/component.ts')
     expect(mockServer.warmupRequest).toHaveBeenCalledWith('/@fs/users/proj/src/Foo.cy.tsx')
     expect(mockServer.warmupRequest).toHaveBeenCalledWith('/@fs/users/proj/src/Bar.cy.tsx')
     expect(mockServer.waitForRequestsIdle).toHaveBeenCalledOnce()
@@ -87,7 +87,7 @@ describe('devServer warmup', () => {
     await devServer(buildDevServerConfig({ specs: [] }))
 
     expect(mockServer.warmupRequest).toHaveBeenCalledOnce()
-    expect(mockServer.warmupRequest).toHaveBeenCalledWith('/__cypress/src/cypress/support/component.ts')
+    expect(mockServer.warmupRequest).toHaveBeenCalledWith('/cypress/support/component.ts')
     expect(mockServer.waitForRequestsIdle).toHaveBeenCalledOnce()
   })
 
