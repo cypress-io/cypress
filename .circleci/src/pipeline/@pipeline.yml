@@ -964,14 +964,6 @@ commands:
         description: set to false to skip this job (not relevant to changed files)
         type: boolean
         default: true
-      spec:
-        description: optional single spec path (skips glob + parallel splitting)
-        type: string
-        default: ""
-      iterations:
-        description: number of times to invoke the test runner per container (1 = no loop)
-        type: integer
-        default: 1
     steps:
       - halt-if-skipped:
           guard: << parameters.guard >>
@@ -991,52 +983,19 @@ commands:
           environment:
             CYPRESS_COMMERCIAL_RECOMMENDATIONS: '0'
           command: |
-            if [[ -n "<<parameters.spec>>" ]]; then
-              SPECS="<<parameters.spec>>"
-            else
-              ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
-              SPECS=
-              for file in $ALL_SPECS; do
-                # filter out non_root tests, they have their own stage
-                if [[ "$file" == *"non_root"* ]]; then
-                  echo "Skipping $file"
-                  continue
-                fi
-                SPECS="$SPECS $file"
-              done
-              SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
-            fi
-            echo SPECS=$SPECS
-            iterations=<<parameters.iterations>>
-            if [[ "$iterations" -le 1 ]]; then
-              yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
-            else
-              passes=0
-              fails=0
-              failed_iters=()
-              for i in $(seq 1 "$iterations"); do
-                echo ""
-                echo "================================================================================"
-                echo "==== Stress iteration $i / $iterations ===="
-                echo "================================================================================"
-                if yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>; then
-                  passes=$((passes + 1))
-                  echo "==== Iteration $i: PASS ===="
-                else
-                  fails=$((fails + 1))
-                  failed_iters+=("$i")
-                  echo "==== Iteration $i: FAIL ===="
-                fi
-              done
-              echo ""
-              echo "================================================================================"
-              echo "==== Stress summary: $passes pass, $fails fail (out of $iterations) ===="
-              if [[ "$fails" -gt 0 ]]; then
-                echo "Failed iterations: ${failed_iters[*]}"
+            ALL_SPECS=`circleci tests glob "/root/cypress/system-tests/test/*spec*"`
+            SPECS=
+            for file in $ALL_SPECS; do
+              # filter out non_root tests, they have their own stage
+              if [[ "$file" == *"non_root"* ]]; then
+                echo "Skipping $file"
+                continue
               fi
-              echo "================================================================================"
-              exit "$fails"
-            fi
+              SPECS="$SPECS $file"
+            done
+            SPECS=`echo $SPECS | xargs -n 1 | circleci tests split --split-by=timings`
+            echo SPECS=$SPECS
+            yarn workspace @tooling/system-tests test:ci $SPECS --browser <<parameters.browser>>
       - sanitize-verify-and-store-mocha-results
 
   run-binary-system-tests:
@@ -2226,35 +2185,20 @@ jobs:
 
   system-tests-chrome:
     <<: *defaults
+    parameters:
+      <<: *defaultsParameters
+      # TEMPORARY: run-index lets the pull-request workflow fan this job out
+      # 20 times via matrix to validate #25913 fixes. Remove the parameter
+      # once validation is complete.
+      run-index:
+        type: integer
+        default: 1
     resource_class: medium+
     parallelism: 8
     steps:
       - run-system-tests:
           browser: chrome
           guard: << pipeline.parameters.run-system-tests >>
-
-  # TEMPORARY: focused stress job for the vite_dev_server_fresh system test,
-  # used to validate the @cypress/vite-dev-server fix for #25913. Runs only
-  # the one spec (parallelism: 1). Each invocation already exercises 8
-  # cypress runs (4 Vite versions × 2 specs); the iterations parameter
-  # multiplies that further. Remove this job — and its workflow entries —
-  # once validation is complete.
-  system-tests-vite-dev-server-fresh-chrome:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      iterations:
-        description: number of times to invoke the spec per container
-        type: integer
-        default: 3
-    resource_class: medium+
-    parallelism: 1
-    steps:
-      - run-system-tests:
-          browser: chrome
-          guard: << pipeline.parameters.run-system-tests >>
-          spec: /root/cypress/system-tests/test/vite_dev_server_fresh_spec.ts
-          iterations: <<parameters.iterations>>
 
   system-tests-electron:
     <<: *defaults
@@ -2332,66 +2276,6 @@ jobs:
           guard: << pipeline.parameters.run-launchpad-tests >>
           # debug: cypress:*,engine:socket
 
-  # TEMPORARY: stress-test variant of run-launchpad-component-tests-chrome.
-  # Runs the launchpad CT suite N times in a single container, clearing Vite's
-  # deps cache between iterations so each run forces a fresh deps-optimization
-  # (the timing window the @cypress/vite-dev-server fix targets). No Cypress
-  # Cloud recording, no parallelism — each container is a sequential loop.
-  # Remove this job once #25913 validation is complete.
-  run-launchpad-component-tests-stress-chrome:
-    <<: *defaults
-    parameters:
-      <<: *defaultsParameters
-      iterations:
-        description: number of cypress:run:ct invocations per container
-        type: integer
-        default: 5
-    parallelism: 1
-    resource_class: medium+
-    steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-launchpad-tests >>
-      - restore_cached_workspace
-      - install-browsers:
-          install-chrome: true
-          install-chrome-for-testing: true
-          install-firefox: false
-      - run:
-          name: Stress launchpad CT (<<parameters.iterations>> iterations, fresh deps cache each)
-          environment:
-            CYPRESS_INTERNAL_ENABLE_TELEMETRY: "true"
-          command: |
-            set -uo pipefail
-            iterations=<<parameters.iterations>>
-            passes=0
-            fails=0
-            failed_iters=()
-            for i in $(seq 1 "$iterations"); do
-              echo ""
-              echo "================================================================================"
-              echo "==== Stress iteration $i / $iterations ===="
-              echo "================================================================================"
-              # Clear Vite's deps cache so each iteration forces a fresh
-              # deps-optimization run, re-creating the race window we test.
-              rm -rf packages/launchpad/node_modules/.vite
-              if yarn workspace @packages/launchpad cypress:run:ct --browser chrome; then
-                passes=$((passes + 1))
-                echo "==== Iteration $i: PASS ===="
-              else
-                fails=$((fails + 1))
-                failed_iters+=("$i")
-                echo "==== Iteration $i: FAIL ===="
-              fi
-            done
-            echo ""
-            echo "================================================================================"
-            echo "==== Stress summary: $passes pass, $fails fail (out of $iterations) ===="
-            if [[ "$fails" -gt 0 ]]; then
-              echo "Failed iterations: ${failed_iters[*]}"
-            fi
-            echo "================================================================================"
-            exit "$fails"
-
   run-launchpad-integration-tests-chrome:
     <<: *defaults
     parameters:
@@ -2423,6 +2307,12 @@ jobs:
       percy:
         type: boolean
         default: false
+      # TEMPORARY: run-index lets the pull-request workflow fan this job out
+      # 20 times via matrix to validate #25913 fixes. Remove the parameter
+      # once validation is complete.
+      run-index:
+        type: integer
+        default: 1
     parallelism: 7
     steps:
       - run-new-ui-tests:
