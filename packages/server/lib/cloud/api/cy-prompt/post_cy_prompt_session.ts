@@ -26,6 +26,6 @@ export const postCyPromptSession = async ({ projectId }: PostCyPromptSessionOpti
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
-    shouldRetry: isRetryableError,
+    shouldRetry: (err) => isRetryableError(err, 'POST'),
   }))()
 }

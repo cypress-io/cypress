@@ -72,6 +72,26 @@ export class PrimaryOriginCommunicator extends EventEmitter {
   userInvocationStack?: string
 
   /**
+   * Clears all cached spec-bridge windows. The runner calls this after
+   * `test:before:after:run:async` (e.g. about:blank) so `window:load` can still
+   * use `toAllSpecBridges('window:load', ...)` before references are dropped.
+   */
+  clearCrossOriginDriverWindows () {
+    this.crossOriginDriverWindows = {}
+  }
+
+  override removeAllListeners (eventName?: string | symbol): this {
+    if (arguments.length === 0) {
+      super.removeAllListeners()
+      this.crossOriginDriverWindows = {}
+    } else {
+      super.removeAllListeners(eventName)
+    }
+
+    return this
+  }
+
+  /**
    * The callback handler that receives messages from secondary origins.
    * @param {MessageEvent.data} data - a reference to the MessageEvent.data sent through the postMessage event. See https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/data
    * @param {MessageEvent.source} source - a reference to the MessageEvent.source sent through the postMessage event. See https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent/source

@@ -68,6 +68,32 @@ describe('src/cy/commands/actions/select', () => {
       })
     })
 
+    it('can select by value when value contains a backslash', () => {
+      cy.$$('select[name=maps] option:nth-child(3)').attr('value', 'a\\b')
+
+      cy.get('select[name=maps]').select('a\\b').then(($select) => {
+        expect(($select[0] as HTMLSelectElement).selectedOptions[0].text).to.eq('nuke')
+      })
+    })
+
+    it('can select by value when value contains brackets', () => {
+      cy.$$('select[name=maps] option:nth-child(3)').attr('value', 'a[b]c')
+
+      cy.get('select[name=maps]').select('a[b]c').then(($select) => {
+        expect(($select[0] as HTMLSelectElement).selectedOptions[0].text).to.eq('nuke')
+      })
+    })
+
+    it('can select by value when value contains regex-like CSS-special characters', () => {
+      const regexLikeValue = '^(([^<>()[]\\.,;:\\s@"]+))$'
+
+      cy.$$('select[name=maps] option:nth-child(3)').attr('value', regexLikeValue)
+
+      cy.get('select[name=maps]').select(regexLikeValue).then(($select) => {
+        expect(($select[0] as HTMLSelectElement).selectedOptions[0].text).to.eq('nuke')
+      })
+    })
+
     it('can handle index when all values are identical', () => {
       cy.$$('select[name=maps] option').attr('value', 'foo')
 

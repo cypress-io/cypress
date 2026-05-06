@@ -99,7 +99,7 @@ export const getStudioBundle = async ({ studioUrl, bundlePath }: { studioUrl: st
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
-    shouldRetry: isRetryableError,
+    shouldRetry: (err) => isRetryableError(err, 'GET'),
   }))()
 
   if (!responseSignature) {
