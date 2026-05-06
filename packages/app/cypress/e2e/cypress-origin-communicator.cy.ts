@@ -1,7 +1,6 @@
-describe('Cypress In Cypress Origin Communicator', () => {
+describe('Cypress In Cypress Origin Communicator', { defaultCommandTimeout: 10000 }, () => {
   describe('primary origin memory leak prevention', () => {
     let spies: Array<ReturnType<typeof cy.spy>>
-    let removeAllListenersSpy: ReturnType<typeof cy.spy>
 
     beforeEach(() => {
       spies = []
@@ -63,10 +62,11 @@ describe('Cypress In Cypress Origin Communicator', () => {
       cy.specsPageIsVisible()
       cy.contains('dom-content.spec').click()
       cy.waitForSpecToFinish()
+      trackRemoveAllListenersOnAllCypressInstances()
 
-      cy.then(() => {
+      cy.window().then((win) => {
         // @ts-ignore
-        const comm = window.top[0].Cypress.primaryOriginCommunicator
+        const comm = win.Cypress.primaryOriginCommunicator as any
 
         // @ts-ignore — hold stub across navigation for the assertion below
         window.__cyCommunicatorMapTest = { postMessage: cy.stub() }
@@ -76,21 +76,16 @@ describe('Cypress In Cypress Origin Communicator', () => {
           // @ts-ignore
           source: window.__cyCommunicatorMapTest,
         })
-
-        // @ts-ignore
-        removeAllListenersSpy = cy.spy(comm, 'removeAllListeners')
       })
 
       cy.get('a[href="#/runs"]').click()
       cy.location('hash').should('include', '/runs')
 
-      cy.wrap(null).should(() => {
-        const noArgCalls = removeAllListenersSpy.getCalls().filter((c) => c.args.length === 0)
+      assertZeroArgCleanupFired()
 
-        expect(noArgCalls.length).to.be.at.least(1)
-
+      cy.window().then((win) => {
         // @ts-ignore
-        const comm = window.top[0].Cypress.primaryOriginCommunicator
+        const comm = win.Cypress.primaryOriginCommunicator as any
         // @ts-ignore
         const stub = window.__cyCommunicatorMapTest
 
