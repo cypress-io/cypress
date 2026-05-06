@@ -51,7 +51,7 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   // Vite's deps optimizer has fully processed any node_modules imports
   // they pull in before the browser fetches them. Skipping this can race
   // a mid-test optimizer re-bundle and surface "Failed to fetch
-  // dynamically imported module" (#25913, #33752).
+  // dynamically imported module".
   //
   // Per-spec warmup is required: preprocessor or auto-import plugins can
   // inject node_modules imports during transform that Vite's static deps

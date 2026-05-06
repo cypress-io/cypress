@@ -1,8 +1,6 @@
 /**
  * Build the support file path matching the URL the browser-side client
- * (client/initCypressTests.js) constructs. Used by devServer.ts to call
- * Vite's warmupRequest with the same path the iframe will dynamically
- * import.
+ * (client/initCypressTests.js) constructs.
  */
 export function getSupportFileRelativePath (cypressConfig: Cypress.PluginConfigOptions): string {
   const { projectRoot, supportFile, devServerPublicPathRoute } = cypressConfig
@@ -26,18 +24,13 @@ export function getSupportFileRelativePath (cypressConfig: Cypress.PluginConfigO
 }
 
 /**
- * Build the spec URL path passed to Vite's `server.warmupRequest()` so the
- * spec's module graph is populated — and any deps the cucumber/vue/svelte/
- * etc. transform pipeline injects are picked up by the deps optimizer —
- * before the iframe dynamically imports the spec.
+ * Build the spec URL path for Vite's `@fs/` route.
  *
- * Vite's `@fs/` route is mounted at the server root and bypasses the
- * base-aware request middleware, so passing `<base>/@fs/<absolute>` to
- * warmupRequest produces a "Failed to load url" pre-transform error in
- * Vite 8, while `/@fs/<absolute>` resolves cleanly. This intentionally
- * diverges from the client-side URL the browser constructs (which does
- * include the base, since the browser fetches over HTTP through the
- * base-aware middleware).
+ * The `@fs/` route is mounted at the server root and bypasses the
+ * base-aware request middleware, so the path is intentionally returned
+ * without the dev server base prefix — `<base>/@fs/<absolute>` produces a
+ * "Failed to load url" pre-transform error in Vite 8, while
+ * `/@fs/<absolute>` resolves cleanly.
  */
 export function getSpecRelativeUrl (
   spec: { absolute: string },
