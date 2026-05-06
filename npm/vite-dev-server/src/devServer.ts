@@ -47,27 +47,16 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
 
   debug('Successfully launched the vite server on port', port)
 
-  // Warm up every URL the browser will dynamically import via
-  // initCypressTests.js — the support file plus every spec the dev server
-  // was started with — so each one's transitive deps go through Vite's
-  // transform pipeline and the deps optimizer picks up any node_modules
-  // imports they need. waitForRequestsIdle then blocks until all pending
-  // transforms (including a deps-optimizer run triggered by the warmups)
-  // have settled.
+  // Warm up the support file and every spec, then waitForRequestsIdle, so
+  // Vite's deps optimizer has fully processed any node_modules imports
+  // they pull in before the browser fetches them. Skipping this can race
+  // a mid-test optimizer re-bundle and surface "Failed to fetch
+  // dynamically imported module" (#25913, #33752).
   //
-  // After both resolve, the browser's subsequent fetches for the support
-  // file, the specs, and their transitive imports are served from Vite's
-  // cache without racing the optimizer — the source of the intermittent
-  // "Failed to fetch dynamically imported module" failures (#25913).
-  //
-  // Per-spec warmup is required (not just support + optimizeDeps.entries):
-  // transform-injected node_modules imports — e.g. from
-  // @badeball/cypress-cucumber-preprocessor's rollup plugin compiling a
-  // .feature spec, or unplugin-auto-import injecting helpers — aren't
-  // visible to Vite's static deps scanner. Without warming the spec, the
-  // optimizer first sees those deps when the browser fetches the spec,
-  // which can trigger a mid-test "optimized dependencies changed.
-  // reloading" and reproduce #25913 / #33752.
+  // Per-spec warmup is required: preprocessor or auto-import plugins can
+  // inject node_modules imports during transform that Vite's static deps
+  // scanner doesn't see, so the optimizer would otherwise first discover
+  // them when the browser fetches the spec.
   const warmupTargets: string[] = []
   const supportPath = getSupportFileRelativePath(config.cypressConfig)
 
