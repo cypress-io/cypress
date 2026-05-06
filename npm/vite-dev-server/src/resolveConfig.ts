@@ -138,6 +138,14 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite_7 | Vite
   const viteConfig: InlineConfig_7 | InlineConfig_8 = {
     root: projectRoot,
     base: `${devServerPublicPathRoute}/`,
+    // Vite 8 Rolldown/react-plugin can wrap JSX specs with `import.meta.hot.accept`, re-evaluating
+    // the module in headed mode and registering describe/it twice. Excluding CT specs from JSX refresh fixes it.
+    // @see https://github.com/cypress-io/cypress/issues/33750
+    ...(isVite8(vite) ? {
+      oxc: {
+        jsxRefreshExclude: specs.map((s) => s.absolute),
+      },
+    } : {}),
     optimizeDeps: {
       ...options,
       entries: [
