@@ -879,13 +879,13 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 }
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
-  if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+  const notifyProtocolManagerOfEmptyBody = (isCached: boolean) => {
     if (this.protocolManager && this.req.browserPreRequest?.requestId) {
       const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
 
       this.protocolManager.responseEndedWithEmptyBody({
         requestId,
-        isCached: this.incomingRes.statusCode === 304,
+        isCached,
         timings: {
           cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
           cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
@@ -895,6 +895,10 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
         },
       })
     }
+  }
+
+  if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+    notifyProtocolManagerOfEmptyBody(this.incomingRes.statusCode === 304)
 
     this.res.end()
 
@@ -906,8 +910,18 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   // OmitProblematicHeaders has stripped Content-Length and Node's HTTP layer
   // adds `Transfer-Encoding: chunked`, which breaks clients that assume a
   // response for chunked encoding. See cypress-io/cypress#16469.
-  // Skip when downstream middleware will rewrite the body.
-  if (this.incomingResHadEmptyBody && !this.res.wantsInjection && !this.res.wantsSecurityRemoved) {
+  // Skip when downstream middleware will rewrite the body or when a cy.intercept
+  // route matched (the interceptor may have replaced the body without updating
+  // the upstream Content-Length header).
+  const wasIntercepted = !!this.netStubbingState?.requests?.[this.req.requestId]
+
+  if (
+    this.incomingResHadEmptyBody
+    && !wasIntercepted
+    && !this.res.wantsInjection
+    && !this.res.wantsSecurityRemoved
+  ) {
+    notifyProtocolManagerOfEmptyBody(false)
     this.res.setHeader('Content-Length', '0')
     this.res.end()
 

@@ -2069,6 +2069,51 @@ describe('http/response-middleware', function () {
         expect(end).toHaveBeenCalledOnce()
       })
 
+      it('notifies protocolManager that the response ended with an empty body', async function () {
+        prepareContext({
+          protocolManager: {
+            responseEndedWithEmptyBody: responseEndedWithEmptyBodyStub,
+          },
+          req: {
+            browserPreRequest: {
+              requestId: '123',
+              cdpRequestWillBeSentTimestamp: 1,
+              cdpRequestWillBeSentReceivedTimestamp: 2,
+              proxyRequestReceivedTimestamp: 3,
+              cdpLagDuration: 4,
+              proxyRequestCorrelationDuration: 5,
+            },
+          },
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader: vi.fn(),
+            end: vi.fn(),
+            wantsInjection: false,
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(responseEndedWithEmptyBodyStub).toHaveBeenCalledWith(
+          expect.objectContaining({
+            requestId: '123',
+            isCached: false,
+            timings: expect.objectContaining({
+              cdpRequestWillBeSentTimestamp: 1,
+              cdpRequestWillBeSentReceivedTimestamp: 2,
+              proxyRequestReceivedTimestamp: 3,
+              cdpLagDuration: 4,
+              proxyRequestCorrelationDuration: 5,
+            }),
+          }),
+        )
+      })
+
       it('does not short-circuit when downstream wants to inject HTML', async function () {
         const setHeader = vi.fn()
         const end = vi.fn()
@@ -2118,6 +2163,34 @@ describe('http/response-middleware', function () {
         expect(setHeader).not.toHaveBeenCalled()
         expect(end).not.toHaveBeenCalled()
       })
+
+      it('does not short-circuit when a cy.intercept route matched (interceptor may have replaced the body)', async function () {
+        const setHeader = vi.fn()
+        const end = vi.fn()
+
+        prepareContext({
+          req: { requestId: 'req-42' },
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          netStubbingState: {
+            requests: { 'req-42': {} },
+          },
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader,
+            end,
+            wantsInjection: false,
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(setHeader).not.toHaveBeenCalled()
+        expect(end).not.toHaveBeenCalled()
+      })
     })
 
     it('does not short-circuit a 200 response when origin did not send Content-Length: 0', async function () {
@@ -2149,6 +2222,7 @@ describe('http/response-middleware', function () {
         protocolManager: props.protocolManager,
         req: props.req,
         incomingResHadEmptyBody: props.incomingResHadEmptyBody,
+        netStubbingState: props.netStubbingState,
         res: props.res || {
           on: (event, listener) => {},
           off: (event, listener) => {},
