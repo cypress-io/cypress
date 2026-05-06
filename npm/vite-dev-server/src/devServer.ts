@@ -3,7 +3,7 @@ import semverMajor from 'semver/functions/major.js'
 import type { UserConfig } from 'vite-7'
 import { getVite, Vite_7, Vite_8 } from './getVite.js'
 import { createViteDevServerConfig, isVite8 } from './resolveConfig.js'
-import { getSpecRelativeUrl, getSupportFileRelativePath } from './waitForSupportFile.js'
+import { getSupportFileRelativePath } from './waitForSupportFile.js'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -47,31 +47,29 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
 
   debug('Successfully launched the vite server on port', port)
 
-  // Warm up every URL the browser will dynamically import via
-  // initCypressTests.js — the support file plus every spec the dev server
-  // was started with — so each one's transitive deps go through Vite's
-  // transform pipeline and the deps optimizer picks up any new node_modules
-  // imports. waitForRequestsIdle then blocks until all pending transforms
-  // (including a deps-optimizer run triggered by the warmups) have settled.
-  //
+  // Walk the support file through Vite's transform pipeline so its module
+  // graph is populated, then wait for the cascade — pre-transformed static
+  // imports plus any deps-optimizer run those imports trigger — to settle.
   // After both resolve, the browser's subsequent fetches for the support
-  // file, the specs, and their transitive imports are served from Vite's
-  // cache without racing the optimizer — the source of the intermittent
-  // "Failed to fetch dynamically imported module" failures (#25913).
-  const warmupTargets: string[] = []
+  // file and its transitive imports are served from Vite's cache without
+  // racing the optimizer (the source of the intermittent "Failed to fetch
+  // dynamically imported module" failures, #25913).
+  //
+  // Specs are intentionally not warmed up individually: `optimizeDeps.entries`
+  // (set in resolveConfig.ts) already includes every spec, so Vite's static
+  // deps scanner pre-bundles their node_modules imports as part of server
+  // startup. Skipping per-spec warmup avoids an O(N) Vite transform per spec
+  // for projects with large suites; the cost saved scales with spec count.
+  // The trade-off: plugin-injected (non-static) spec imports — e.g. from
+  // `unplugin-vue-components` — won't be discovered until the browser fetches
+  // the spec, which can re-trigger the optimizer. In practice those usually
+  // resolve to local project files (not new node_modules deps), so they
+  // don't trigger a re-bundle.
   const supportPath = getSupportFileRelativePath(config.cypressConfig)
 
   if (supportPath) {
-    warmupTargets.push(supportPath)
-  }
-
-  for (const spec of config.specs ?? []) {
-    warmupTargets.push(getSpecRelativeUrl(spec, config.cypressConfig))
-  }
-
-  if (warmupTargets.length > 0) {
-    debug('Warming up module graph for %d targets', warmupTargets.length)
-    await Promise.all(warmupTargets.map((target) => server.warmupRequest(target)))
+    debug('Warming up support file module graph', supportPath)
+    await server.warmupRequest(supportPath)
     await server.waitForRequestsIdle()
     debug('Module graph is ready')
   }
