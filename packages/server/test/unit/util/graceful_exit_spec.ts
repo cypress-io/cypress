@@ -2,6 +2,30 @@ import '../../spec_helper'
 
 import { GracefulExit } from '../../../lib/util/graceful-exit'
 
+/**
+ * Other packages (e.g. firefox-profile) register SIGINT handlers that call
+ * process.exit(130). process.emit('SIGINT') invokes every listener, so a stub
+ * on process.exit counts unrelated exits and flakes in CI when many listeners
+ * are present. Snapshot listeners, clear them, run the callback, then restore.
+ */
+function withoutForeignSigHandlers<T> (fn: () => Promise<T>): Promise<T> {
+  const sigintListeners = process.listeners('SIGINT').slice()
+  const sigtermListeners = process.listeners('SIGTERM').slice()
+
+  process.removeAllListeners('SIGINT')
+  process.removeAllListeners('SIGTERM')
+
+  return Promise.resolve()
+  .then(fn)
+  .finally(() => {
+    GracefulExit.resetForTesting()
+    process.removeAllListeners('SIGINT')
+    process.removeAllListeners('SIGTERM')
+    sigintListeners.forEach((listener) => process.on('SIGINT', listener))
+    sigtermListeners.forEach((listener) => process.on('SIGTERM', listener))
+  })
+}
+
 describe('lib/util/graceful-exit', () => {
   beforeEach(() => {
     GracefulExit.resetForTesting()
@@ -91,24 +115,31 @@ describe('lib/util/graceful-exit', () => {
 
   it('debounces duplicate SIGINT soon after teardown starts (single graceful exit)', async () => {
     const exitStub = sinon.stub(process, 'exit')
-    let resolveStep: () => void
-    const stepPromise = new Promise<void>((resolve) => {
-      resolveStep = resolve
+
+    await withoutForeignSigHandlers(async () => {
+      GracefulExit.resetForTesting()
+
+      let resolveStep: () => void
+      const stepPromise = new Promise<void>((resolve) => {
+        resolveStep = resolve
+      })
+
+      GracefulExit.addStep(async () => {
+        await stepPromise
+      }, 'slow-step')
+
+      process.emit('SIGINT' as NodeJS.Signals)
+      process.emit('SIGINT' as NodeJS.Signals)
+
+      resolveStep!()
+
+      await new Promise((r) => setImmediate(r))
+
+      expect(exitStub).to.have.been.calledOnce
+      expect(exitStub).to.have.been.calledWith(130)
     })
 
-    GracefulExit.addStep(async () => {
-      await stepPromise
-    }, 'slow-step')
-
-    process.emit('SIGINT' as NodeJS.Signals)
-    process.emit('SIGINT' as NodeJS.Signals)
-
-    resolveStep!()
-
-    await new Promise((r) => setImmediate(r))
-
-    expect(exitStub).to.have.been.calledOnce
-    expect(exitStub).to.have.been.calledWith(130)
+    exitStub.restore()
   })
 
   it('SIGINT after dedup window during hung teardown forces exit 1', async function () {
@@ -116,17 +147,23 @@ describe('lib/util/graceful-exit', () => {
 
     const exitStub = sinon.stub(process, 'exit')
 
-    GracefulExit.addStep(() => new Promise(() => {}), 'hang')
+    await withoutForeignSigHandlers(async () => {
+      GracefulExit.resetForTesting()
 
-    process.emit('SIGINT' as NodeJS.Signals)
+      GracefulExit.addStep(() => new Promise(() => {}), 'hang')
 
-    await new Promise((r) => setTimeout(r, 250))
+      process.emit('SIGINT' as NodeJS.Signals)
 
-    process.emit('SIGINT' as NodeJS.Signals)
+      await new Promise((r) => setTimeout(r, 250))
 
-    await new Promise((r) => setTimeout(r, 50))
+      process.emit('SIGINT' as NodeJS.Signals)
 
-    expect(exitStub).to.have.been.calledWith(1)
+      await new Promise((r) => setTimeout(r, 50))
+
+      expect(exitStub).to.have.been.calledWith(1)
+    })
+
+    exitStub.restore()
   })
 
   it('force exits after teardown timeout when a step never completes', async function () {

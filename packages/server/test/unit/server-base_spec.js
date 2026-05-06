@@ -89,10 +89,15 @@ describe('lib/server-base', () => {
       GracefulExit.resetForTesting()
       sinon.stub(process, 'exit')
       lastMorganFactoryArgs = undefined
+      // CI or other specs may set a low timeout; if the race timer wins before
+      // flushAndExit clears processTeardown, skip() still mirrors isShuttingDown
+      // and the post-await assertion flakes (see graceful_exit_spec teardown test).
+      delete process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT
     })
 
     afterEach(function () {
       GracefulExit.resetForTesting()
+      delete process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT
       process.exit.restore()
     })
 
