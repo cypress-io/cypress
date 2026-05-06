@@ -41,6 +41,10 @@ const prune = async (): Promise<void> => {
     const versions = await fs.readdir(cacheDir)
 
     for (const version of versions) {
+      // Only prune semver-shaped binary version dirs; ignore everything else
+      // (e.g. the bundles/ subdir used by cy-prompt and Studio bundle caching).
+      if (!util.isSemver(version)) continue
+
       if (version !== checkedInBinaryVersion) {
         deletedBinary = true
 
