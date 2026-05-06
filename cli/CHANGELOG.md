@@ -5,6 +5,10 @@
 
 - The `cy.end()` command has been deprecated and will be removed in a future release. Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
 
+**Bugfixes:**
+
+- Fixed an intermittent `ENOENT: no such file or directory, open <path>/bundle.tar-<rand>` error during `cy.prompt` initialization and Studio startup, observed primarily on Linux CI/dev hosts when external processes (e.g. `systemd-tmpfiles` cleanup or endpoint-detection agents) swept the temporary tar file in the window between download and extract. The cy-prompt and Studio bundle download paths now stream signature verification and tar extraction in a single pass into a per-process staging dir under `<cypress-cache>/bundles/<kind>/<hash>/`, eliminating the on-disk tar artifact entirely and moving the cache out of `os.tmpdir()`. The cache root honors `CYPRESS_CACHE_FOLDER`; `cypress cache clear` removes the bundles cache, and `cypress cache prune` now ignores it (only old binary versions are pruned).
+
 **Misc:**
 
 - Additional CI environment variables are now captured to support a future failed test retry feature. Addressed in [#33714](https://github.com/cypress-io/cypress/pull/33714).
