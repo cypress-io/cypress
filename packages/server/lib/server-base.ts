@@ -47,6 +47,7 @@ import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/ser
 import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
+import { GracefulExit } from './util/graceful-exit'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -409,7 +410,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   useMorgan () {
-    return require('morgan')('dev')
+    return require('morgan')('dev', {
+      skip: () => GracefulExit.isShuttingDown,
+    })
   }
 
   getHttpServer () {

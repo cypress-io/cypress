@@ -2,7 +2,12 @@ require('../spec_helper')
 
 const morganFn = function () {}
 
-mockery.registerMock('morgan', () => {
+// Set by the morgan mock when `useMorgan` runs.
+let lastMorganFactoryArgs
+
+mockery.registerMock('morgan', (format, options) => {
+  lastMorganFactoryArgs = { format, options }
+
   return morganFn
 })
 
@@ -17,6 +22,7 @@ const { SocketE2E } = require(`../../lib/socket-e2e`)
 const fileServer = require(`../../lib/file_server`)
 const ensureUrl = require(`../../lib/util/ensure-url`)
 const { getCtx } = require('@packages/data-context')
+const { GracefulExit } = require('../../lib/util/graceful-exit')
 
 function getOpenOptions (overrides = {}) {
   return {
@@ -75,6 +81,43 @@ describe('lib/server-base', () => {
       this.server.createExpressApp({ morgan: true })
 
       expect(useMorganStub).to.have.been.calledOnce
+    })
+  })
+
+  context('#useMorgan', () => {
+    beforeEach(function () {
+      GracefulExit.resetForTesting()
+      sinon.stub(process, 'exit')
+      lastMorganFactoryArgs = undefined
+    })
+
+    afterEach(function () {
+      GracefulExit.resetForTesting()
+      process.exit.restore()
+    })
+
+    it('passes dev format and skip that mirrors GracefulExit.isShuttingDown', async function () {
+      this.server.useMorgan()
+
+      expect(lastMorganFactoryArgs.format).to.eq('dev')
+      expect(lastMorganFactoryArgs.options.skip()).to.be.false
+
+      let resolveStep
+      const stepPromise = new Promise((resolve) => {
+        resolveStep = resolve
+      })
+
+      GracefulExit.addStep(() => stepPromise, 'slow-step')
+
+      const exitPromise = GracefulExit.exitGracefully(0)
+
+      expect(lastMorganFactoryArgs.options.skip()).to.be.true
+
+      resolveStep()
+
+      await exitPromise
+
+      expect(lastMorganFactoryArgs.options.skip()).to.be.false
     })
   })
 

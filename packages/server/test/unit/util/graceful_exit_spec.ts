@@ -12,6 +12,38 @@ describe('lib/util/graceful-exit', () => {
     delete process.env.CYPRESS_INTERNAL_TEARDOWN_TIMEOUT
   })
 
+  it('isShuttingDown is false when idle', () => {
+    expect(GracefulExit.isShuttingDown).to.be.false
+  })
+
+  it('isShuttingDown is true while exitGracefully is in progress and false after teardown completes', async () => {
+    const exitStub = sinon.stub(process, 'exit')
+
+    expect(GracefulExit.isShuttingDown).to.be.false
+
+    let resolveStep: () => void
+    const stepPromise = new Promise<void>((resolve) => {
+      resolveStep = resolve
+    })
+
+    GracefulExit.addStep(async () => {
+      await stepPromise
+    }, 'slow-step')
+
+    const exitPromise = GracefulExit.exitGracefully(0)
+
+    expect(GracefulExit.isShuttingDown).to.be.true
+
+    resolveStep!()
+
+    await exitPromise
+
+    expect(GracefulExit.isShuttingDown).to.be.false
+    expect(exitStub).to.have.been.calledOnce
+
+    exitStub.restore()
+  })
+
   it('runs registered teardown steps then exits with the requested code', async () => {
     const exitStub = sinon.stub(process, 'exit')
     const step = sinon.stub().resolves()

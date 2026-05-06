@@ -124,6 +124,10 @@ export class GracefulExit {
     GracefulExit.singleton.steps.delete(key)
   }
 
+  static get isShuttingDown (): boolean {
+    return GracefulExit.singleton.processTeardown != null
+  }
+
   private async flushSteps (code: number): Promise<number> {
     let hadErrors = false
 
