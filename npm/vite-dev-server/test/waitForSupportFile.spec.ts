@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getSupportFileRelativePath } from '../src/waitForSupportFile'
+import { getSpecRelativeUrl, getSupportFileRelativePath } from '../src/waitForSupportFile'
 
 describe('getSupportFileRelativePath', () => {
   it('builds path matching client logic when devServerPublicPathRoute is set', () => {
@@ -44,5 +44,25 @@ describe('getSupportFileRelativePath', () => {
     } as Cypress.PluginConfigOptions
 
     expect(getSupportFileRelativePath(cypressConfig)).toBe('./cypress/support/component.ts')
+  })
+})
+
+describe('getSpecRelativeUrl', () => {
+  it('builds /@fs path without the dev server base prefix', () => {
+    const spec = { absolute: '/users/proj/src/components/Foo.cy.tsx' }
+    const cypressConfig = {
+      platform: 'darwin',
+    } as Cypress.PluginConfigOptions
+
+    expect(getSpecRelativeUrl(spec, cypressConfig)).toBe('/@fs/users/proj/src/components/Foo.cy.tsx')
+  })
+
+  it('normalizes win32 backslashes to forward slashes', () => {
+    const spec = { absolute: 'C:\\users\\proj\\src\\components\\Foo.cy.tsx' }
+    const cypressConfig = {
+      platform: 'win32',
+    } as Cypress.PluginConfigOptions
+
+    expect(getSpecRelativeUrl(spec, cypressConfig)).toBe('/@fs/C:/users/proj/src/components/Foo.cy.tsx')
   })
 })
