@@ -655,6 +655,12 @@ export class ProjectConfigManager {
         resolve()
       })
 
+      this._eventsIpc.on('exit', (code, signal) => {
+        debug('child process %s exited with code %s and signal %s', this._eventsIpc?.childProcessPid, code, signal)
+        clearTimeout(timeoutId)
+        resolve()
+      })
+
       this._eventsIpc.on('disconnect', () => {
         debug('received disconnect event from child process %s', this._eventsIpc?.childProcessPid)
         clearTimeout(timeoutId)

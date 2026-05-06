@@ -32,9 +32,14 @@ exporter.attachIPC(ipc)
 let disconnection = null
 let willDisconnect = pDefer()
 
-process.on('disconnect', () => {
-  debug('received disconnect event')
-  willDisconnect.resolve()
+process.on('disconnect', async () => {
+  try {
+    debug('received disconnect event')
+    willDisconnect.resolve()
+    await Promise.resolve() // allow for diconnect teardown to complete, if in process
+  } finally {
+    process.exit()
+  }
 })
 
 debug('registering main:process:will:disconnect listener')

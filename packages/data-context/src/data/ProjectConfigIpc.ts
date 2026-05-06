@@ -121,6 +121,7 @@ export class ProjectConfigIpc extends EventEmitter {
   on(evt: 'main:process:will:disconnect:ack', listener: () => void): void
   on(evt: 'warning', listener: (warningErr: CypressError) => void): this
   on(evt: 'disconnect', listener: () => void): this
+  on(evt: 'exit', listener: (code: number, signal: string) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
   }
@@ -173,6 +174,12 @@ export class ProjectConfigIpc extends EventEmitter {
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
+      })
+
+      this._childProcess.on('exit', (code, signal) => {
+        debug('child process %s exited with code %s and signal %s', this._childProcess.pid, code, signal)
+        this.cleanupIpc()
+        this.emit('exit', code, signal)
       })
 
       /**
