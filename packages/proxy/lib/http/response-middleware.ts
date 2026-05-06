@@ -44,6 +44,13 @@ interface ResponseMiddlewareProps {
    * same order when multiple encodings (e.g. gzip, br) were present.
    */
   contentEncodingOrder: SupportedContentEncoding[]
+  /**
+   * Set in OmitProblematicHeaders when the origin response declared `Content-Length: 0`,
+   * before that header is stripped. Consumed by MaybeEndWithEmptyBody so the proxy can
+   * re-emit `Content-Length: 0` instead of letting Node's HTTP layer fall back to
+   * `Transfer-Encoding: chunked` for an empty body. See cypress-io/cypress#16469.
+   */
+  incomingResHadEmptyBody: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
 }
@@ -374,6 +381,8 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
 const OmitProblematicHeaders: ResponseMiddleware = function () {
   const span = telemetry.startSpan({ name: 'omit:problematic:header', parentSpan: this.resMiddlewareSpan, isVerbose })
+
+  this.incomingResHadEmptyBody = this.incomingRes.headers['content-length'] === '0'
 
   const headers = _.omit(this.incomingRes.headers, [
     'set-cookie',
@@ -887,6 +896,19 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
       })
     }
 
+    this.res.end()
+
+    return this.end()
+  }
+
+  // When the origin response declared `Content-Length: 0`, short-circuit with an
+  // explicit Content-Length: 0 instead of streaming an empty body — otherwise
+  // OmitProblematicHeaders has stripped Content-Length and Node's HTTP layer
+  // adds `Transfer-Encoding: chunked`, which breaks clients that assume a
+  // response for chunked encoding. See cypress-io/cypress#16469.
+  // Skip when downstream middleware will rewrite the body.
+  if (this.incomingResHadEmptyBody && !this.res.wantsInjection && !this.res.wantsSecurityRemoved) {
+    this.res.setHeader('Content-Length', '0')
     this.res.end()
 
     return this.end()
