@@ -670,6 +670,87 @@ describe('Log Serialization', () => {
         expect(reifiedSnapshot.querySelector('form input[value="bar"]')).to.have.property('checked').that.equals(true)
       })
     })
+
+    context('input with CSS-special characters in attributes', () => {
+      it('preprocess', () => {
+        const inputElement = document.createElement('input')
+
+        inputElement.type = 'email'
+        inputElement.setAttribute('pattern', '^(([^<>()[\\]\\\\.,;:\\s@"]+))$')
+        inputElement.setAttribute('data-cy', 'email-input')
+
+        const snapshot = buildSnapshot(inputElement)
+
+        const preprocessedSnapshot = preprocessDomElement(snapshot)
+
+        expect(preprocessedSnapshot).to.have.property('tagName').that.equals('BODY')
+        expect(preprocessedSnapshot).to.have.property('serializationKey').that.equals('dom')
+        expect(preprocessedSnapshot).to.have.property('innerHTML').that.includes('pattern=')
+      })
+
+      it('reifies without throwing on CSS-special characters in attribute values', () => {
+        const preprocessedSnapshot = {
+          tagName: 'BODY',
+          serializationKey: 'dom',
+          attributes: {
+            'data-testid': 'snapshot-wrapper',
+          },
+          innerHTML: `<div><h1>Mock Snapshot Header</h1><input type="email" pattern="^(([^<>()[\\]\\\\.,;:\\s@&quot;]+))$" data-cy="email-input"></div>`,
+        }
+
+        const reifiedSnapshot = reifyDomElement(preprocessedSnapshot)
+
+        expect(reifiedSnapshot).to.be.instanceOf(HTMLBodyElement)
+        expect(reifiedSnapshot.querySelector('input[type="email"]')).to.be.instanceOf(HTMLInputElement)
+      })
+
+      it('reifies a log with CSS-special characters in element attributes without crashing', () => {
+        const mockPreprocessedLogAttrs = {
+          $el: [
+            {
+              attributes: {
+                type: 'email',
+                'pattern': '^(([^<>()[\\]\\\\.,;:\\s@"]+))$',
+                'data-cy': 'email-input',
+              },
+              innerHTML: '',
+              serializationKey: 'dom',
+              tagName: 'INPUT',
+            },
+          ],
+          chainerId: 'mock-chainer-id',
+          consoleProps: {
+            name: 'type',
+            type: 'command',
+            props: {
+              ['Applied To']: {
+                attributes: {
+                  type: 'email',
+                  'pattern': '^(([^<>()[\\]\\\\.,;:\\s@"]+))$',
+                  'data-cy': 'email-input',
+                },
+                innerHTML: '',
+                serializationKey: 'dom',
+                tagName: 'INPUT',
+              },
+            },
+          },
+          id: 'mock-log-id',
+          instrument: 'command',
+          name: 'type',
+          state: 'passed',
+          testId: 'r4',
+        }
+
+        const { $el, consoleProps } = reifyLogFromSerialization(mockPreprocessedLogAttrs)
+
+        expect($el.length).to.equal(1)
+        expect($el[0]).to.be.instanceOf(HTMLInputElement)
+        expect($el[0].getAttribute('pattern')).to.equal('^(([^<>()[\\]\\\\.,;:\\s@"]+))$')
+        expect(consoleProps.props['Applied To']).to.be.instanceOf(HTMLInputElement)
+        expect(consoleProps.props['Applied To'].getAttribute('pattern')).to.equal('^(([^<>()[\\]\\\\.,;:\\s@"]+))$')
+      })
+    })
   })
 
   // purpose of these 'DOM Elements' tests is to give a very basic understanding of how DOM element serialization works in the log serializer

@@ -1,5 +1,24 @@
 import { findCrossOriginLogs } from '../../../../support/utils'
 
+/**
+ * Spec-bridge agent log names are `spy-1`, `spy-2`, … depending on order since the last sandbox reset.
+ * Pick the agent instrument log and its matching invoke event log for assertions.
+ */
+function findAgentInstrumentAndEventLogs (
+  logMap: Map<string, any>,
+  namePattern: RegExp,
+  matchingOrigin: string,
+) {
+  const propsList = Array.from(logMap.values()).map((log: any) => log.get()).filter((props: any) => {
+    return namePattern.test(props.name) && props.id.includes(matchingOrigin)
+  })
+
+  const agentLog = propsList.find((p) => p.instrument === 'agent')
+  const eventLog = propsList.find((p) => p.event === true && agentLog && p.name === agentLog.name)
+
+  return [agentLog, eventLog]
+}
+
 context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('/fixtures/primary-origin.html')
@@ -29,12 +48,24 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
   context('resets stubs', () => {
     it('creates the stub', () => {
       cy.origin('http://www.foobar.com:3500', () => {
+        const expose = Cypress.expose as unknown as { restore?: () => void }
+
+        if (typeof expose?.restore === 'function') {
+          expose.restore()
+        }
+
         const stubExpose = cy.stub(Cypress, 'expose').withArgs('foo').returns('bar')
 
         expect(Cypress.expose('foo')).to.equal('bar')
         expect(stubExpose).to.be.calledOnce
         // @ts-ignore
         expect(Cypress.expose.isSinonProxy).to.be.true
+
+        const stubbedExpose = Cypress.expose as unknown as { restore?: () => void }
+
+        if (typeof stubbedExpose?.restore === 'function') {
+          stubbedExpose.restore()
+        }
       })
     })
 
@@ -50,12 +81,24 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
   context('resets spies', () => {
     it('creates the spy', () => {
       cy.origin('http://www.foobar.com:3500', () => {
+        const expose = Cypress.expose as unknown as { restore?: () => void }
+
+        if (typeof expose?.restore === 'function') {
+          expose.restore()
+        }
+
         const stubExpose = cy.spy(Cypress, 'expose')
 
         Cypress.expose()
         expect(stubExpose).to.be.calledOnce
         // @ts-ignore
         expect(Cypress.expose.isSinonProxy).to.be.true
+
+        const spiedExpose = Cypress.expose as unknown as { restore?: () => void }
+
+        if (typeof spiedExpose?.restore === 'function') {
+          spiedExpose.restore()
+        }
       })
     })
 
@@ -109,17 +152,17 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const [spyLog, spyEvent] = findCrossOriginLogs('spy-1', logs, 'foobar.com')
+        const [spyLog, spyEvent] = findAgentInstrumentAndEventLogs(logs, /^spy-\d+$/, 'foobar.com')
 
-        expect(spyLog.instrument).to.equal('agent')
-        expect(spyLog.callCount).to.be.a('number')
-        expect(spyLog.functionName).to.equal('bar')
+        expect(spyLog?.instrument).to.equal('agent')
+        expect(spyLog?.callCount).to.be.a('number')
+        expect(spyLog?.functionName).to.equal('bar')
 
-        expect(spyEvent.instrument).to.equal('command')
+        expect(spyEvent?.instrument).to.equal('command')
 
         const consoleProps = spyEvent.consoleProps()
 
-        expect(consoleProps.name).to.equal('spy-1 called')
+        expect(consoleProps.name).to.equal(`${spyLog?.name} called`)
         expect(consoleProps.type).to.equal('event')
         expect(consoleProps.props).to.have.property('Alias', undefined)
         expect(consoleProps.props).to.have.property('Arguments')
@@ -140,16 +183,16 @@ context('cy.origin spies, stubs, and clock', { browser: '!webkit' }, () => {
       })
 
       cy.shouldWithTimeout(() => {
-        const [stubLog, stubEvent] = findCrossOriginLogs('stub-1', logs, 'foobar.com')
+        const [stubLog, stubEvent] = findAgentInstrumentAndEventLogs(logs, /^stub-\d+$/, 'foobar.com')
 
-        expect(stubLog.instrument).to.equal('agent')
-        expect(stubLog.callCount).to.be.a('number')
-        expect(stubLog.functionName).to.equal('bar')
+        expect(stubLog?.instrument).to.equal('agent')
+        expect(stubLog?.callCount).to.be.a('number')
+        expect(stubLog?.functionName).to.equal('bar')
 
-        expect(stubEvent.instrument).to.equal('command')
+        expect(stubEvent?.instrument).to.equal('command')
         const consoleProps = stubEvent.consoleProps()
 
-        expect(consoleProps.name).to.equal('stub-1 called')
+        expect(consoleProps.name).to.equal(`${stubLog?.name} called`)
         expect(consoleProps.type).to.equal('event')
         expect(consoleProps.props).to.have.property('Alias', undefined)
         expect(consoleProps.props).to.have.property('Arguments')
