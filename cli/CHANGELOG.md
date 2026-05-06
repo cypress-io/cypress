@@ -7,6 +7,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where the proxy stripped `Content-Length: 0` from empty responses (e.g. a `DELETE 200` with no body) and the resulting empty body was re-emitted with `Transfer-Encoding: chunked`, breaking clients that assume a fixed-length response. The proxy now re-emits `Content-Length: 0` and ends the response without piping when the origin advertised an empty body and no downstream injection is needed. Addresses [#16469](https://github.com/cypress-io/cypress/issues/16469). Fixed in [#33754](https://github.com/cypress-io/cypress/pull/33754).
 - Fixed an issue where multi-origin tests using [`cy.origin`](https://docs.cypress.io/api/commands/origin) could fail to talk to a secondary origin after test isolation, when the spec-bridge iframe was already present, or when more than one secondary origin became ready around the same time. Cached spec-bridge window targets are now cleared at the correct lifecycle points, improving performance of specs with cy.origin calls. Addressed in [#33704](https://github.com/cypress-io/cypress/pull/33704).
 
 **Misc:**
