@@ -1,15 +1,18 @@
 require('../spec_helper')
 
+const mockery = require('mockery')
+const { enable: enableMockery, mockElectron } = require('../mockery_helper')
+
 const morganFn = function () {}
 
 // Set by the morgan mock when `useMorgan` runs.
 let lastMorganFactoryArgs
 
-mockery.registerMock('morgan', (format, options) => {
+function morganMockFactory (format, options) {
   lastMorganFactoryArgs = { format, options }
 
   return morganFn
-})
+}
 
 const _ = require('lodash')
 const os = require('os')
@@ -39,6 +42,12 @@ function getOpenOptions (overrides = {}) {
 
 describe('lib/server-base', () => {
   beforeEach(function () {
+    // put_protocol_artifact_spec and others call mockery.deregisterAll(); re-enable and
+    // re-register per test so require('morgan') is always our mock.
+    enableMockery(mockery)
+    mockElectron(mockery)
+    mockery.registerMock('morgan', morganMockFactory)
+
     this.fileServer = {
       close () {},
       port () {
