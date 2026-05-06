@@ -2265,6 +2265,12 @@ jobs:
       percy:
         type: boolean
         default: false
+      # TEMPORARY: run-index lets the pull-request workflow fan this job out
+      # 20 times via matrix to validate #25913 fixes. Remove the parameter
+      # once validation is complete.
+      run-index:
+        type: integer
+        default: 1
     parallelism: 7
     steps:
       - run-new-ui-tests:
