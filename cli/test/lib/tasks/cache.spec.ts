@@ -263,6 +263,34 @@ describe('lib/tasks/cache', () => {
       expect(await fs.pathExists('/.cache/Cypress/bundles/cy-prompt/abc123/manifest.json')).toEqual(true)
       expect(await fs.pathExists('/.cache/Cypress/bundles/studio/def456/manifest.json')).toEqual(true)
     })
+
+    it('prunes beta/prerelease binary dirs produced by getVersionDir()', async function () {
+      // state.getVersionDir() formats non-stable builds as
+      // `beta-<version>-<branch>-<sha>`, which is not a valid semver. These
+      // must still be pruned alongside other non-current binary versions.
+      mockfs.restore()
+      mockfs({
+        '/.cache/Cypress': {
+          '1.2.3': { 'Cypress': { 'file1': 'current' } },
+          'beta-15.0.0-feat-abc12345': { 'Cypress.app': {} },
+          'beta-14.5.0-fix-deadbeef': { 'Cypress.app': {} },
+          'bundles': {
+            'cy-prompt': { 'abc123': { 'manifest.json': '{}' } },
+          },
+        },
+      })
+
+      vi.mocked(state.getCacheDir).mockReturnValue('/.cache/Cypress')
+      vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
+
+      await cache.prune()
+
+      // Beta dirs are pruned; current binary and bundles/ survive
+      expect(await fs.pathExists('/.cache/Cypress/beta-15.0.0-feat-abc12345')).toEqual(false)
+      expect(await fs.pathExists('/.cache/Cypress/beta-14.5.0-fix-deadbeef')).toEqual(false)
+      expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/bundles/cy-prompt/abc123/manifest.json')).toEqual(true)
+    })
   })
 
   describe('.list', () => {
