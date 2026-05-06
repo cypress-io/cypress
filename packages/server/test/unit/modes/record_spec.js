@@ -5,7 +5,7 @@ const debug = require('debug')('test')
 
 const errors = require(`../../../lib/errors`)
 const api = require(`../../../lib/cloud/api`).default
-const exception = require(`../../../lib/cloud/exception`)
+const exception = require(`../../../lib/cloud/exception`).default
 const commitInfo = require('../../../lib/util/commit-info')
 const recordMode = require(`../../../lib/modes/record`)
 const ciProvider = require(`../../../lib/util/ci_provider`)

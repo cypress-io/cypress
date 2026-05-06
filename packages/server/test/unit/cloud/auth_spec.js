@@ -1,7 +1,7 @@
 require('../../spec_helper')
 
 const auth = require(`../../../lib/cloud/auth`)
-const user = require(`../../../lib/cloud/user`)
+const user = require(`../../../lib/cloud/user`).default
 
 const electron = require('electron')
 const machineId = require('../../../lib/cloud/machine_id')
