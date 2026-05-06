@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import Card from './card-without-effect.jsx'
 import React from 'react'
 import { mount } from '@cypress/react'

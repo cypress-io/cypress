@@ -28,7 +28,7 @@ const ignoreEPIPE = () => {
   // be loaded by the browser instead
 }
 
-export = {
+const specController = {
   handle (spec: any, req: Request, res: Response, config: Cfg, next: any, onError: any) {
     debug('request for %o', { spec })
 
@@ -77,3 +77,5 @@ export = {
     })
   },
 }
+
+export default specController

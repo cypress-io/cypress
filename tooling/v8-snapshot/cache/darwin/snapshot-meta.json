@@ -3743,7 +3743,7 @@
     "./packages/server/lib/template_engine.js",
     "./packages/server/lib/unhandled_exceptions.ts",
     "./packages/server/lib/util/app_data.js",
-    "./packages/server/lib/util/args.js",
+    "./packages/server/lib/util/args.ts",
     "./packages/server/lib/util/async_retry.ts",
     "./packages/server/lib/util/cache_buster.ts",
     "./packages/server/lib/util/chrome_policy_check.ts",
@@ -3762,11 +3762,11 @@
     "./packages/server/lib/util/file-opener.ts",
     "./packages/server/lib/util/file.ts",
     "./packages/server/lib/util/find_process.ts",
-    "./packages/server/lib/util/get-windows-proxy.js",
+    "./packages/server/lib/util/get-windows-proxy.ts",
     "./packages/server/lib/util/graceful_crash_handling.ts",
-    "./packages/server/lib/util/headers.js",
+    "./packages/server/lib/util/headers.ts",
     "./packages/server/lib/util/human_time.ts",
-    "./packages/server/lib/util/net_profiler.js",
+    "./packages/server/lib/util/net_profiler.ts",
     "./packages/server/lib/util/network_failures.js",
     "./packages/server/lib/util/newlines.ts",
     "./packages/server/lib/util/patch-fs.ts",
@@ -3965,5 +3965,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "4e41cd66b7f6cdc3cb2a2fe715b885281553383969928ef8a80056f398d53a17"
+  "deferredHash": "72047ec003a2a9d261839b05c94e1917d8833f821eb6c6065ba7563bb66a6b72"
 }

@@ -1,5 +1,4 @@
 // test similar to https://reactjs.org/docs/testing-recipes.html#events
-/// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
 import Toggle from './toggle'

@@ -540,6 +540,7 @@
     },
     "npm/react": {
       "entry": [
+        "cypress/support/**/*.{js,jsx,ts,tsx}",
         "cypress/component/**/*.{jsx,tsx,cy.jsx,cy.tsx}"
       ],
       "project": [
