@@ -5,9 +5,17 @@ import {
 import { expect } from 'chai'
 import { proxyquire, sinon } from '../../../../spec_helper'
 
-proxyquire.noPreserveCache()
-
 describe('TelemetryReporter', () => {
+  // proxyquire.noPreserveCache() mutates the global proxyquire instance,
+  // and would persist for every other spec loaded after this one in the same
+  // mocha process -- causing later proxyquire calls to re-resolve transitive
+  // module deps, which surfaces as cross-spec pollution (e.g. CloudRequest in
+  // CyPromptLifecycleManager_spec ending up as a different function instance
+  // than the one the spec imported, breaking sinon's calledWith deep-equal).
+  // Scope it to just this describe block.
+  before(() => proxyquire.noPreserveCache())
+  after(() => proxyquire.preserveCache())
+
   let TelemetryReporter: typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter').TelemetryReporter
   let initializeTelemetryReporter: typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter').initializeTelemetryReporter
   let reportTelemetry: typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter').reportTelemetry
