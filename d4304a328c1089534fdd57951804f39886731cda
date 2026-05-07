@@ -1,0 +1,32 @@
+packages/app/src/specs/banners/TrackedBanner.vue
+  203a479bdff240f0 77-89,122-132
+packages/types/src/config.ts
+  203a479bdff240f0 43-49
+packages/app/src/specs/SpecsListBanners.vue
+  203a479bdff240f0 116,353-360,380-385
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "d4304a328c1089534fdd57951804f39886731cda",
+  "prompts": {
+    "203a479bdff240f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e211e5b-e61c-4497-8965-4ce498c824ba",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel",
+      "messages": [],
+      "total_additions": 323,
+      "total_deletions": 8,
+      "accepted_lines": 413,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_18fc77e9b83574": {
+      "author": "Ryan Manuel"
+    }
+  }
+}
