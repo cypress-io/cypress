@@ -14,7 +14,7 @@ const resolveCypressCacheRoot = (): string => {
   return cachedir('Cypress')
 }
 
-export const getBundleCacheRoot = (): string => {
+const getBundleCacheRoot = (): string => {
   return path.join(resolveCypressCacheRoot(), BUNDLES_DIRNAME)
 }
 

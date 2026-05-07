@@ -14,13 +14,13 @@ const debug = Debug('cypress:server:cloud:bundles:ensure-signed-bundle')
 const ORPHAN_STAGING_TTL_MS = 60 * 60 * 1000
 const STAGING_PREFIX = '.staging-'
 
-export interface EnsureSignedBundleOptions {
+interface EnsureSignedBundleOptions {
   url: string
   projectId?: string
   kind: BundleKind
 }
 
-export interface EnsureSignedBundleResult {
+interface EnsureSignedBundleResult {
   manifest: Record<string, string>
   bundleDir: string
 }
