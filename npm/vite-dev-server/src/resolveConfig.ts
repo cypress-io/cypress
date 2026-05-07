@@ -18,6 +18,12 @@ import type { Vite_7, Vite_8 } from './getVite.js'
 
 const debug = debugFn('cypress:vite-dev-server:resolve-config')
 
+// Limit jsxRefreshInclude/exclude matching to scripts. With only jsxRefreshExclude set, Vite builds
+// createFilter(undefined, exclude) which matches every non-excluded path — CSS would hit transformWithOxc and fail.
+// @see https://github.com/vitejs/vite/blob/main/packages/vite/src/node/plugins/oxc.ts (transform + jsxRefreshFilter)
+/** Passed as `oxc.jsxRefreshInclude` so JSX refresh excludes do not match CSS or other assets. */
+export const JSX_REFRESH_SCRIPT_RE = /\.(?:[cm]?js|[cm]?ts|[jt]sx)$/
+
 export const isVite8 = (vite: Vite_7 | Vite_8): boolean => {
   const isVite8 = vite.version && semverGte(vite.version, '8.0.0') || false
 
@@ -138,6 +144,15 @@ function makeCypressViteConfig (config: ViteDevServerConfig, vite: Vite_7 | Vite
   const viteConfig: InlineConfig_7 | InlineConfig_8 = {
     root: projectRoot,
     base: `${devServerPublicPathRoute}/`,
+    // Vite 8 Rolldown/react-plugin can wrap JSX specs with `import.meta.hot.accept`, re-evaluating
+    // the module in headed mode and registering describe/it twice. Excluding CT specs from JSX refresh fixes it.
+    // @see https://github.com/cypress-io/cypress/issues/33750
+    ...(isVite8(vite) ? {
+      oxc: {
+        jsxRefreshInclude: JSX_REFRESH_SCRIPT_RE,
+        jsxRefreshExclude: specs.map((s) => s.absolute),
+      },
+    } : {}),
     optimizeDeps: {
       ...options,
       entries: [
