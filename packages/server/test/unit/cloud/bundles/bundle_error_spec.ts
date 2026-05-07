@@ -26,4 +26,28 @@ describe('BundleError', () => {
     expect(BundleError.isBundleError(new Error('plain'))).to.equal(false)
     expect(BundleError.isBundleError(undefined)).to.equal(false)
   })
+
+  it('mirrors the cause syscall code on the BundleError itself', () => {
+    // StudioLifecycleManager#updateStatus reads `error?.code` to drive
+    // isCertError detection; without this mirror, a wrapped cert error loses
+    // its code and proxy-specific recovery messaging breaks.
+    const cause = Object.assign(new Error('cert err'), { code: 'CERT_HAS_EXPIRED' })
+    const err = new BundleError({ kind: 'studio', stage: 'network', message: 'wrapper', cause })
+
+    expect(err.code).to.equal('CERT_HAS_EXPIRED')
+  })
+
+  it('leaves code undefined when cause has no string code', () => {
+    const err1 = new BundleError({ kind: 'studio', stage: 'extract', message: 'm' })
+
+    expect(err1.code).to.equal(undefined)
+
+    const err2 = new BundleError({ kind: 'studio', stage: 'extract', message: 'm', cause: new Error('plain') })
+
+    expect(err2.code).to.equal(undefined)
+
+    const err3 = new BundleError({ kind: 'studio', stage: 'extract', message: 'm', cause: { code: 42 } })
+
+    expect(err3.code).to.equal(undefined)
+  })
 })
