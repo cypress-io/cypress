@@ -2,6 +2,7 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "compilerOptions": {
     "jsx": "react",
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@paths/*": ["paths-example-dir/*"]
