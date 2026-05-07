@@ -119,12 +119,27 @@ async function updateBannerState (field: 'lastShown' | 'dismissed') {
 
   set(savedBannerState, [props.bannerId, field], Date.now())
 
-  // Track total impressions for cloud-driven banners — used by
+  // Track total dismissals for cloud-driven banners — used by
   // `SpecsListBanners.isCloudMessageEligible` to enforce
-  // `dismissal.maxImpressions`. Local onboarding banners don't use the
-  // counter (they cap on `dismissed` + cooldowns), so we gate the increment
-  // on the `cloud:` namespace to avoid bloating their savedState.
-  if (field === 'lastShown' && isCloudBanner.value) {
+  // `dismissal.maxImpressions`. Counting at *dismissal* (not at mount)
+  // matters: incrementing during `onMounted` would write to savedState in
+  // the same tick as the banner's first render. urql graphcache reactivity
+  // re-runs the parent's `activeCloudMessage` computed, which re-checks
+  // `shownCount >= maxImpressions` and unmounts the banner mid-view — the
+  // banner would flash and disappear on its very first render for any
+  // message with `maxImpressions: 1`.
+  //
+  // Counting at dismissal sidesteps this entirely (the banner is already
+  // unmounting because the user dismissed it) and reads as: "the user has
+  // dismissed this message N times." A user who closes the app without
+  // dismissing gets to see the message again next session — defensible for
+  // awareness messaging, and the Hightouch `App Message Shown` event still
+  // fires per render so the analytics-side impression count is unaffected.
+  //
+  // Local onboarding banners don't use the counter (they cap on `dismissed`
+  // + cooldowns), so we gate the increment on the `cloud:` namespace to
+  // avoid bloating their savedState.
+  if (field === 'dismissed' && isCloudBanner.value) {
     const current = (savedBannerState[props.bannerId]?.shownCount ?? 0) as number
 
     set(savedBannerState, [props.bannerId, 'shownCount'], current + 1)

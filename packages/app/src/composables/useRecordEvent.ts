@@ -15,6 +15,15 @@ type EventParams = {
   cohort?: string
   payload?: Record<string, string | number | undefined | null>
   includeMachineId?: boolean
+  /**
+   * Optional explicit messageId. When set, this value is used instead of
+   * generating a fresh `nanoid()`. The intended use case is grouping multiple
+   * events that belong to the same logical banner-instance (impression →
+   * click → dismiss) so they can be joined in the warehouse. Pass the same
+   * id to every `record()` call for the same instance; omit for one-off
+   * events that don't need joining.
+   */
+  messageId?: string
 }
 
 export function useRecordEvent () {
@@ -23,7 +32,7 @@ export function useRecordEvent () {
   async function record (params: EventParams) {
     await recordEventMutation.executeMutation({
       ...params,
-      messageId: nanoid(),
+      messageId: params.messageId ?? nanoid(),
       includeMachineId: params.includeMachineId ?? false,
       payload: JSON.stringify(params.payload),
     })

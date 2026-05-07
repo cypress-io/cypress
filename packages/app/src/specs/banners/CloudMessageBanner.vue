@@ -10,26 +10,28 @@
     :has-banner-been-shown="hasBannerBeenShown"
     :event-data="eventData"
   >
-    <p
-      v-if="message.body"
-      class="mb-[24px] whitespace-pre-line"
-    >
-      {{ message.body }}
-    </p>
-    <div
-      v-if="message.ctas.length"
-      class="flex flex-row flex-wrap gap-x-[12px] gap-y-[8px] mt-[8px]"
-    >
-      <Button
-        v-for="cta in message.ctas"
-        :key="cta.href"
-        :variant="cta.style === 'primary' ? 'primary' : 'outline'"
-        :data-cy="`cloud-message-cta-${cta.style}`"
-        @click="onCtaClick(cta)"
+    <template #default="{ bannerInstanceId }">
+      <p
+        v-if="message.body"
+        class="mb-[24px] whitespace-pre-line"
       >
-        {{ cta.text }}
-      </Button>
-    </div>
+        {{ message.body }}
+      </p>
+      <div
+        v-if="message.ctas.length"
+        class="flex flex-row flex-wrap gap-x-[12px] gap-y-[8px] mt-[8px]"
+      >
+        <Button
+          v-for="cta in message.ctas"
+          :key="cta.href"
+          :variant="cta.style === 'primary' ? 'primary' : 'outline'"
+          :data-cy="`cloud-message-cta-${cta.style}`"
+          @click="onCtaClick(cta, bannerInstanceId)"
+        >
+          {{ cta.text }}
+        </Button>
+      </div>
+    </template>
   </TrackedBanner>
 </template>
 
@@ -98,18 +100,24 @@ const { record } = useRecordEvent()
 // and dismiss events are wired below — they don't fire from `TrackedBanner`
 // today, so we add them explicitly for cloud messages.
 
-function onCtaClick (cta: AppMessageCtaShape): void {
+function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
   // Fires `recordEvent` mutation → `/machine-collect` (because
   // `includeMachineId: true`) → Hightouch `App Message Clicked`. The
   // cypress-services side calls `tracker.identify(req.ctx.user)` first when
   // there's a session cookie, so logged-in users get linked to the event;
-  // logged-out users still produce a row keyed by machineId. Same messageId
-  // (banner instance nanoid) as the impression and dismiss events for the
-  // same banner instance, so warehouse funnel joins work.
+  // logged-out users still produce a row keyed by machineId.
+  //
+  // `messageId` is forwarded explicitly from `TrackedBanner`'s slot scope so
+  // it matches the impression and dismiss events fired for the same banner
+  // instance — this is the warehouse join key for the funnel
+  // (shown → clicked → dismissed). Without explicit forwarding,
+  // `useRecordEvent` would mint a fresh `nanoid()` per call and the click
+  // would be unjoinable to its own impression.
   void record({
     campaign: props.message.analytics.campaign,
     medium: 'Cloud Message Banner',
     includeMachineId: true,
+    messageId: bannerInstanceId,
     payload: {
       action: 'click',
       message_id: props.message.id,
