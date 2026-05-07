@@ -1,0 +1,29 @@
+packages/server/test/unit/cloud/cy-prompt/CyPromptLifecycleManager_spec.ts
+  d1b7976ede1ba474 141,210,268,328,358,515,561,721
+packages/server/lib/cloud/cy-prompt/ensure_cy_prompt_bundle.ts
+  d1b7976ede1ba474 1,8-11,13-18,20,23-25
+packages/server/lib/cloud/cy-prompt/CyPromptLifecycleManager.ts
+  d1b7976ede1ba474 12,22,181,194-197
+packages/server/test/unit/cloud/cy-prompt/ensure_cy_prompt_bundle_spec.ts
+  d1b7976ede1ba474 5,8,11-12,17-19,21-23,26-28,31-36,38-41,44-45,47,49-53,56-57,59,61-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "fa5aef528d94a29cf04b9b834f018de7558c4bdd",
+  "prompts": {
+    "d1b7976ede1ba474": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel",
+      "messages": [],
+      "total_additions": 67,
+      "total_deletions": 135,
+      "accepted_lines": 67,
+      "overriden_lines": 0
+    }
+  }
+}

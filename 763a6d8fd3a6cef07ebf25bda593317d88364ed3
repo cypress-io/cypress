@@ -1,0 +1,25 @@
+.circleci/scripts/generate-pipeline-parameters.sh
+  0a1785db7e2d80e9 37-44,46
+.circleci/config.yml
+  0a1785db7e2d80e9 173-177
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "763a6d8fd3a6cef07ebf25bda593317d88364ed3",
+  "prompts": {
+    "0a1785db7e2d80e9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b447c8d5-98ff-46d4-9d28-72bc2acc5995",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel",
+      "messages": [],
+      "total_additions": 28,
+      "total_deletions": 14,
+      "accepted_lines": 14,
+      "overriden_lines": 0
+    }
+  }
+}

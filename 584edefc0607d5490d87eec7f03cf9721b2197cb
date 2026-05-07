@@ -1,0 +1,25 @@
+cli/test/lib/tasks/cache.spec.ts
+  d1b7976ede1ba474 153-180,232-265
+cli/lib/tasks/cache.ts
+  d1b7976ede1ba474 44-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "584edefc0607d5490d87eec7f03cf9721b2197cb",
+  "prompts": {
+    "d1b7976ede1ba474": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel",
+      "messages": [],
+      "total_additions": 598,
+      "total_deletions": 0,
+      "accepted_lines": 66,
+      "overriden_lines": 0
+    }
+  }
+}

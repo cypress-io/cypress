@@ -1,0 +1,35 @@
+packages/server/lib/cloud/bundles/bundle_error.ts
+  d1b7976ede1ba474 1-28
+packages/server/lib/cloud/bundles/publish_staging_to_final.ts
+  d1b7976ede1ba474 1-53
+packages/server/lib/cloud/encryption.ts
+  d1b7976ede1ba474 77-89
+packages/server/lib/cloud/bundles/parse_hash_from_bundle_url.ts
+  d1b7976ede1ba474 1-10
+packages/server/lib/cloud/bundles/ensure_signed_bundle.ts
+  d1b7976ede1ba474 1-96
+packages/server/lib/cloud/bundles/stream_download_verify_extract.ts
+  d1b7976ede1ba474 1-181
+packages/server/lib/cloud/bundles/sweep_orphan_staging.ts
+  d1b7976ede1ba474 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "a865127881b7ada4a165abf1a1d433b60606ec4e",
+  "prompts": {
+    "d1b7976ede1ba474": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel",
+      "messages": [],
+      "total_additions": 424,
+      "total_deletions": 0,
+      "accepted_lines": 424,
+      "overriden_lines": 0
+    }
+  }
+}

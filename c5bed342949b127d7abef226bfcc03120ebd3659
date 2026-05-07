@@ -1,0 +1,30 @@
+packages/server/test/unit/cloud/bundles/stream_download_verify_extract_spec.ts
+  d1b7976ede1ba474 3,6,8-40,53-56,58-59,61-76,79-99,101-107,109-142,144-161
+packages/server/lib/cloud/bundles/stream_download_verify_extract.ts
+  d1b7976ede1ba474 17,50-58,60,62,64-98,101-124,180-196,202-209,211-212,234-246,251
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "c5bed342949b127d7abef226bfcc03120ebd3659",
+  "prompts": {
+    "d1b7976ede1ba474": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel",
+      "messages": [],
+      "total_additions": 664,
+      "total_deletions": 507,
+      "accepted_lines": 267,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_18fc77e9b83574": {
+      "author": "Ryan Manuel"
+    }
+  }
+}
