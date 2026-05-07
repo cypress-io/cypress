@@ -561,26 +561,42 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
     })
   })
 
-  // `cloudAppMessages` is a stitched remote field, so on a cold cache the
-  // fragment is delivered with the field still null/undefined while the
-  // deferred remote execute is in flight. Without the
-  // `cloudMessagesHaveResolved` gate, an onboarding banner (e.g. LoginBanner)
-  // would mount during this window and fire a spurious impression event +
-  // pollute savedState — see fix on SpecsListBanners.vue.
-  describe('cloudAppMessages in flight', () => {
-    it('does not render any onboarding banner while cloudAppMessages is null', () => {
+  // `cloudAppMessages` is a stitched remote field. The orchestrator
+  // distinguishes "still loading" (`undefined`) from "resolved" (`null`,
+  // `[]`, or populated) so a ghost onboarding banner doesn't mount during
+  // the cold-cache GraphQL round-trip and fire a spurious impression. Both
+  // `null` and `[]` are valid resolved states — `null` happens when the
+  // cloud query errors (companion services not deployed yet, schema
+  // mismatch, network outage), and we must NOT permanently suppress
+  // onboarding banners in that case.
+  describe('cloudAppMessages resolution gating', () => {
+    it('does not render any onboarding banner while cloudAppMessages is in flight (undefined)', () => {
       const userProjectStatusStore = useUserProjectStatusStore()
 
-      // Logged-out cohort would normally show LoginBanner.
+      // Logged-out cohort would normally show LoginBanner once cloud resolves.
       userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))
 
-      mountWithState({ cloudAppMessages: null } as any)
+      mountWithState({ cloudAppMessages: undefined } as any)
 
       cy.findByTestId('login-banner').should('not.exist')
       cy.findByTestId('cloud-message-banner').should('not.exist')
     })
 
-    it('renders the onboarding banner once cloudAppMessages resolves to an empty array', () => {
+    it('renders the onboarding banner when cloudAppMessages resolves to null (cloud error / services not yet deployed)', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))
+
+      // Mirrors what users see if the binary ships before the companion
+      // services PR deploys: the cloud schema doesn't have the field, the
+      // stitched query errors, and `cloudAppMessages` resolves to `null`.
+      // Onboarding must continue to work — null ≠ "still loading."
+      mountWithState({ cloudAppMessages: null } as any)
+
+      cy.findByTestId('login-banner').should('be.visible')
+    })
+
+    it('renders the onboarding banner when cloudAppMessages resolves to an empty array', () => {
       const userProjectStatusStore = useUserProjectStatusStore()
 
       userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))

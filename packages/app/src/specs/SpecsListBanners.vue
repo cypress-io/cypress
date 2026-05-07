@@ -377,16 +377,19 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
   return !local?.dismissed
 }
 
-// `cloudAppMessages` is a stitched remote field. While the deferred remote
-// execute is in flight it reads as `undefined` / `null`, even though the
-// server-side `AppMessagesDataSource.getManifestForClient` always returns an
-// array (empty or populated) in steady state. We use that invariant to
-// distinguish "still loading" from "definitively no cloud message" — gating
-// the onboarding-banner fallback prevents a ghost LoginBanner (or other
-// onboarding variant) from mounting during the GraphQL round-trip and firing
-// a spurious `recordBannerShown` event + writing `lastShown` to savedState.
+// `cloudAppMessages` is a stitched remote field. We gate the onboarding-
+// banner fallback on it having "resolved at all" so a ghost banner doesn't
+// mount during the GraphQL round-trip on cold cache and fire a spurious
+// `recordBannerShown` event + write `lastShown` to savedState.
+//
+// Treating `null` as "resolved" (rather than "still loading") matters: when
+// the cloud query genuinely errors — companion services not yet deployed,
+// schema mismatch, network outage — the field resolves to `null`. We must
+// fall through to the onboarding banners in that case; `null` ≠ "loading."
+// Only `undefined` (urql hasn't populated the field yet) is treated as
+// in-flight.
 const cloudMessagesHaveResolved = computed(() => {
-  return Array.isArray(props.gql.cloudAppMessages)
+  return props.gql.cloudAppMessages !== undefined
 })
 
 const activeCloudMessage = computed(() => {
