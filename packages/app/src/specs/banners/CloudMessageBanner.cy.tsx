@@ -136,15 +136,18 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
 
       cy.findAllByTestId('cloud-message-cta-secondary').first().click()
 
-      cy.get('@recordSeen').should(($recordSeen) => {
+      // Capture the impression's messageId via `cy.then` (not `cy.should`) so we can
+      // queue the follow-up `cy.get('@recordEvent')` assertion. Cypress disallows
+      // queueing commands inside a `cy.should` callback because it retries the
+      // callback and would re-enqueue commands.
+      cy.get('@recordSeen').then(($recordSeen) => {
         const seenCall = ($recordSeen as unknown as Sinon.SinonStub).getCall(0)
         const seenMessageId = seenCall.args[0].messageId
 
         expect(seenMessageId).to.be.a('string')
 
-        // Now assert the click event used the same messageId. Without the slot-scope
-        // forwarding fix, the click would have minted a fresh nanoid here and the
-        // join would fail.
+        // Without the slot-scope forwarding fix, the click would have minted a
+        // fresh nanoid here and the warehouse join would fail.
         cy.get('@recordEvent').should(($recordEvent) => {
           const clickCall = ($recordEvent as unknown as Sinon.SinonStub).getCall(0)
 
@@ -187,9 +190,9 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
       cy.get('@recordSeen').should('have.been.calledOnce')
 
       // Click the × on the alert to dismiss
-      cy.findByTestId('dismiss-button').click()
+      cy.findByTestId('alert-suffix-icon').click()
 
-      cy.get('@recordSeen').should(($seen) => {
+      cy.get('@recordSeen').then(($seen) => {
         const seenMessageId = ($seen as unknown as Sinon.SinonStub).getCall(0).args[0].messageId
 
         cy.get('@recordDismissed').should(($dismissed) => {
@@ -216,7 +219,7 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
         expect(arg.value).to.not.contain('shownCount')
       })
 
-      cy.findByTestId('dismiss-button').click()
+      cy.findByTestId('alert-suffix-icon').click()
 
       // Second setPrefs call is `dismissed` — should include shownCount: 1
       cy.get('@setPrefs').should('have.been.calledTwice')
