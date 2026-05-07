@@ -2,6 +2,79 @@
 ### Do not make changes to this file directly
 
 """
+Cloud-driven in-app message (banner content) eligible to be rendered in the binary. Audience filtering (channel feature flag, version targeting, cohort allow-lists) has already been applied server-side.
+"""
+type CloudAppMessage {
+  analytics: CloudAppMessageAnalytics!
+  body: String!
+  ctas: [CloudAppMessageCta!]!
+  dismissal: CloudAppMessageDismissal!
+  enabled: Boolean!
+
+  """
+  Cloud-defined message id (e.g. "ai_tools_education_2026q2"). Bumping the id is how a previously-dismissed message gets re-shown.
+  """
+  id: String!
+
+  """
+  Higher numeric value wins when multiple messages are eligible
+  """
+  priority: Int!
+  surface: CloudAppMessageSurface!
+  title: String!
+  visualStyle: CloudAppMessageVisualStyle!
+}
+
+"""
+Analytics metadata flowed through to recordEvent on impression / click / dismissal
+"""
+type CloudAppMessageAnalytics {
+  campaign: String!
+  category: String!
+}
+
+"""
+Call-to-action button rendered alongside an in-app cloud message banner
+"""
+type CloudAppMessageCta {
+  href: String!
+  style: CloudAppMessageCtaStyle!
+  text: String!
+}
+
+enum CloudAppMessageCtaStyle {
+  primary
+  secondary
+}
+
+type CloudAppMessageDismissal {
+  cooldownDays: Int!
+  maxImpressions: Int!
+  rePromptOnSeverityEscalation: Boolean!
+  scope: CloudAppMessageDismissalScope!
+}
+
+enum CloudAppMessageDismissalScope {
+  project
+  user
+}
+
+enum CloudAppMessageSurface {
+  modal
+  runner_toolbar
+  settings_card
+  specs_list_banner
+}
+
+enum CloudAppMessageVisualStyle {
+  critical
+  educational
+  info
+  promotional
+  warning
+}
+
+"""
 Information about the browser the tests were run on
 """
 type CloudBrowserInfo implements Node {
@@ -1318,6 +1391,16 @@ type PageInfo {
 }
 
 type Query {
+  """
+  Cloud-driven in-app messages eligible to be rendered as banners in the binary. Pre-filtered server-side by channel feature flag, version range, and cohort allow-lists. Public — accessible without authentication so logged-out users can still receive awareness messages. The binary may further filter on local state (run mode, env-var opt-out) before rendering.
+  """
+  cloudAppMessages(
+    """
+    Optional project slug used to scope cohort and channel-flag lookups. When omitted, only globally-targeted messages are returned.
+    """
+    projectSlug: String
+  ): [CloudAppMessage!]
+
   """
   Polling query to determine when to refetch spec data. A null value here means no data available in the cloud.
   """
