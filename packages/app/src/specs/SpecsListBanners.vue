@@ -119,7 +119,7 @@
   />
   <component
     :is="bannerComponentToShow"
-    v-else-if="bannerComponentToShow"
+    v-else-if="cloudMessagesHaveResolved && bannerComponentToShow"
     :has-banner-been-shown="hasCurrentBannerBeenShown"
     :cohort-option="currentCohortOption.cohort"
     :framework="ctFramework"
@@ -376,6 +376,18 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
 
   return !local?.dismissed
 }
+
+// `cloudAppMessages` is a stitched remote field. While the deferred remote
+// execute is in flight it reads as `undefined` / `null`, even though the
+// server-side `AppMessagesDataSource.getManifestForClient` always returns an
+// array (empty or populated) in steady state. We use that invariant to
+// distinguish "still loading" from "definitively no cloud message" — gating
+// the onboarding-banner fallback prevents a ghost LoginBanner (or other
+// onboarding variant) from mounting during the GraphQL round-trip and firing
+// a spurious `recordBannerShown` event + writing `lastShown` to savedState.
+const cloudMessagesHaveResolved = computed(() => {
+  return Array.isArray(props.gql.cloudAppMessages)
+})
 
 const activeCloudMessage = computed(() => {
   // Per product feedback (Dan, 2026-05-05): cloud messages outrank ALL

@@ -560,4 +560,34 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       })
     })
   })
+
+  // `cloudAppMessages` is a stitched remote field, so on a cold cache the
+  // fragment is delivered with the field still null/undefined while the
+  // deferred remote execute is in flight. Without the
+  // `cloudMessagesHaveResolved` gate, an onboarding banner (e.g. LoginBanner)
+  // would mount during this window and fire a spurious impression event +
+  // pollute savedState — see fix on SpecsListBanners.vue.
+  describe('cloudAppMessages in flight', () => {
+    it('does not render any onboarding banner while cloudAppMessages is null', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      // Logged-out cohort would normally show LoginBanner.
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))
+
+      mountWithState({ cloudAppMessages: null } as any)
+
+      cy.findByTestId('login-banner').should('not.exist')
+      cy.findByTestId('cloud-message-banner').should('not.exist')
+    })
+
+    it('renders the onboarding banner once cloudAppMessages resolves to an empty array', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))
+
+      mountWithState({ cloudAppMessages: [] })
+
+      cy.findByTestId('login-banner').should('be.visible')
+    })
+  })
 })
