@@ -1,0 +1,21 @@
+packages/server/test/unit/cloud/bundles/cache_root_spec.ts
+  s_d1b7976ede1ba4::t_3822c1e9a9edbd 1-89
+packages/server/lib/cloud/bundles/cache_root.ts
+  s_d1b7976ede1ba4::t_d057f2ad034391 7-42,44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "e1a1a3cfebfa701db9076a70f046525ce6ce73c9",
+  "prompts": {},
+  "sessions": {
+    "s_d1b7976ede1ba4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
