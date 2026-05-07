@@ -6,6 +6,7 @@ import { getYarnCommand } from './yarn'
 import { getNpmCommand } from './npm'
 import { getBunCommand } from './bun'
 import { getPnpmCommand } from './pnpm'
+import type { InstallCommand } from './types'
 
 type Dependencies = Record<string, string>
 
@@ -182,24 +183,13 @@ export async function scaffoldProjectNodeModules ({
   )
   const projectPkgJsonPath = path.join(projectDir, 'package.json')
 
-  const runCmd = async (cmd: string | { cmd: string, env?: Record<string, string> }, env?: Record<string, string>) => {
-    let command: string
-    let commandEnv: Record<string, string> | undefined
-
-    if (typeof cmd === 'string') {
-      command = cmd
-      commandEnv = env
-    } else {
-      command = cmd.cmd
-      commandEnv = { ...cmd.env, ...env }
-    }
-
-    log(`Running "${command}" in ${projectDir}`)
-    await execa(command, {
+  const runCmd = async (cmd: InstallCommand) => {
+    log(`Running "${cmd.cmd}" in ${projectDir}`)
+    await execa(cmd.cmd, {
       cwd: projectDir,
       stdio: 'inherit',
       shell: true,
-      env: commandEnv ? { ...process.env, ...commandEnv } : undefined,
+      env: cmd.env ? { ...process.env, ...cmd.env } : undefined,
     })
   }
 

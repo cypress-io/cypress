@@ -5,32 +5,12 @@ const { promisify } = require('util')
 const glob = promisify(require('glob'))
 const Fixtures = require('../lib/fixtures')
 const { scaffoldProjectNodeModules } = require('../lib/dep-installer')
+const { isWorkspacePackage } = require('../lib/is-workspace-package')
 
 const logTag = '[update-cache.js]'
 const log = (...args) => console.log(logTag, ...args)
 
-async function isWorkspacePackage (projectDir, projectsDir) {
-  const lockfiles = ['yarn.lock', 'package-lock.json', 'pnpm-lock.yaml', 'bun.lock']
-  let currentDir = path.dirname(projectDir)
-
-  // Check parent directories up to but not including the projectsDir
-  while (currentDir !== projectsDir && currentDir.startsWith(projectsDir)) {
-    for (const lockfile of lockfiles) {
-      const lockfilePath = path.join(currentDir, lockfile)
-      const hasLockfile = await fs.stat(lockfilePath).catch(() => false)
-
-      if (hasLockfile) {
-        return true
-      }
-    }
-
-    currentDir = path.dirname(currentDir)
-  }
-
-  return false
-}
-
-(async () => {
+async function main () {
   /**
    * For all system test projects that have a package.json, check and update
    * the node_modules cache using `yarn`.
@@ -82,7 +62,8 @@ async function isWorkspacePackage (projectDir, projectsDir) {
   }
 
   log('Updated node_modules for', packageJsons.length, 'projects.')
-})()
+}
 
-// Export for testing
-module.exports = { isWorkspacePackage }
+if (require.main === module) {
+  main()
+}

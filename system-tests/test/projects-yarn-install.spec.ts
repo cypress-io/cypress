@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs-extra'
 import { expect } from 'chai'
-import { isWorkspacePackage } from '../scripts/projects-yarn-install'
+import { isWorkspacePackage } from '../lib/is-workspace-package'
 
 describe('projects-yarn-install workspace package detection', () => {
   const projectsDir = path.join(__dirname, '../projects')
