@@ -30,6 +30,16 @@ Analytics metadata flowed through to recordEvent on impression / click / dismiss
 type CloudAppMessageAnalytics {
   campaign: String!
   category: String!
+  utm: CloudAppMessageUtm
+}
+
+"""
+Optional UTM tracking parameters appended to a CTA destination URL. Set at the CTA level for per-link granularity, or at the message level as a default; per-field, the CTA value wins. Fields not set produce no `utm_X=` query parameter — `utm_source` (binary context), `utm_medium` (always `Cloud Message Banner`), and `utm_campaign` (the message campaign id) are auto-injected by the binary and do not appear here.
+"""
+type CloudAppMessageUtm {
+  content: String
+  id: String
+  term: String
 }
 
 """
@@ -39,6 +49,7 @@ type CloudAppMessageCta {
   href: String!
   style: CloudAppMessageCtaStyle!
   text: String!
+  utm: CloudAppMessageUtm
 }
 
 enum CloudAppMessageCtaStyle {
@@ -56,10 +67,7 @@ enum CloudAppMessageDismissalScope {
 }
 
 enum CloudAppMessageVisualStyle {
-  critical
-  educational
   info
-  promotional
   warning
 }
 

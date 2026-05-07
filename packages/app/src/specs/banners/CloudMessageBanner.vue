@@ -41,6 +41,7 @@ import TrackedBanner from './TrackedBanner.vue'
 import Button from '@cy/components/Button.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useExternalLink } from '@packages/frontend-shared/src/gql-components/useExternalLink'
+import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { useRecordEvent } from '../../composables/useRecordEvent'
 import type { SpecsListBannersFragment } from '../../generated/graphql'
 
@@ -57,28 +58,14 @@ const props = defineProps<{
 const bannerId = computed(() => `cloud:${props.message.id}`)
 
 const alertStatus = computed(() => {
-  switch (props.message.visualStyle) {
-    case 'critical':
-      return 'error'
-    case 'warning':
-      return 'warning'
-    case 'promotional':
-      return 'promo'
-    case 'educational':
-    case 'info':
-    default:
-      return 'info'
-  }
+  return props.message.visualStyle === 'warning' ? 'warning' : 'info'
 })
 
 const messageIcon = computed(() => {
-  // Only warning/critical messages get an icon (the warning glyph). info /
-  // educational / promotional messages render without an icon — there isn't a
-  // generic "info" glyph in the design system, and using the warning icon for
-  // info-style content would misframe the visual severity.
-  return props.message.visualStyle === 'warning' || props.message.visualStyle === 'critical'
-    ? WarningIcon
-    : undefined
+  // Warning messages get the warning glyph; info renders without an icon —
+  // there isn't a generic "info" glyph in the design system, and using the
+  // warning icon for info-style content would misframe the visual severity.
+  return props.message.visualStyle === 'warning' ? WarningIcon : undefined
 })
 
 const eventData = computed(() => {
@@ -100,6 +87,32 @@ const { record } = useRecordEvent()
 // and dismiss events are wired below — they don't fire from `TrackedBanner`
 // today, so we add them explicitly for cloud messages.
 
+// UTM keys the catalog can populate. `source`, `medium`, and `campaign` are
+// auto-derived (binary context, fixed string, and `analytics.campaign`
+// respectively) and are NOT in this list — including them would invite drift
+// between catalog values and the rest of the binary's UTM convention.
+const UTM_FIELDS = ['content', 'term', 'id'] as const
+
+function resolveUtmParams (cta: AppMessageCtaShape): Record<string, string> {
+  // Per-field cascade: CTA-level wins, falls back to message-level. Truthy
+  // (not nullish) coalescing is intentional — `''` from the catalog should
+  // be treated as "not set," otherwise we'd emit `utm_content=` (a real-but-
+  // empty parameter that confuses analytics).
+  const ctaUtm = cta.utm
+  const messageUtm = props.message.analytics.utm
+  const params: Record<string, string> = {}
+
+  for (const field of UTM_FIELDS) {
+    const value = ctaUtm?.[field] || messageUtm?.[field]
+
+    if (value) {
+      params[`utm_${field}`] = value
+    }
+  }
+
+  return params
+}
+
 function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
   // Fires `recordEvent` mutation → `/machine-collect` (because
   // `includeMachineId: true`) → Hightouch `App Message Clicked`. The
@@ -110,14 +123,11 @@ function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
   // `messageId` is forwarded explicitly from `TrackedBanner`'s slot scope so
   // it matches the impression and dismiss events fired for the same banner
   // instance — this is the warehouse join key for the funnel
-  // (shown → clicked → dismissed). Without explicit forwarding,
-  // `useRecordEvent` would mint a fresh `nanoid()` per call and the click
-  // would be unjoinable to its own impression.
+  // (shown → clicked → dismissed).
   //
-  // Only `cta_href` is forwarded to analytics — the link URL is the stable,
-  // queryable key. CTA text and style are intentionally dropped (text is
-  // marketing copy that changes; style is the message author's visual
-  // weighting, not a useful warehouse dimension).
+  // Only `cta_href` is echoed to the analytics event — the bare URL is the
+  // stable, queryable key for funnel queries. CTA text/style are not
+  // forwarded; UTM params live in the destination URL only.
   void record({
     campaign: props.message.analytics.campaign,
     medium: 'Cloud Message Banner',
@@ -129,6 +139,20 @@ function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
     },
   })
 
-  openExternal(cta.href)
+  // Decorate the destination URL with UTMs. `getUrlWithParams` auto-injects
+  // `utm_source` from the binary context (Binary: App vs Binary: Launchpad);
+  // we add `utm_medium` (fixed) + `utm_campaign` (the message's analytics
+  // campaign id, which changes when a message is re-pitched) + any optional
+  // `utm_content / utm_term / utm_id` resolved via the cascade above.
+  const decoratedUrl = getUrlWithParams({
+    url: cta.href,
+    params: {
+      utm_medium: 'Cloud Message Banner',
+      utm_campaign: props.message.analytics.campaign,
+      ...resolveUtmParams(cta),
+    },
+  })
+
+  openExternal(decoratedUrl)
 }
 </script>

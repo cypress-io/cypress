@@ -20,12 +20,14 @@ const cloudMessage = {
       text: 'Learn about cy.prompt',
       href: 'https://docs.cypress.io/api/commands/prompt',
       style: 'secondary',
+      utm: null,
     },
     {
       __typename: 'CloudAppMessageCta',
       text: 'Learn about Studio AI',
       href: 'https://docs.cypress.io/app/guides/cypress-studio',
       style: 'secondary',
+      utm: null,
     },
   ],
   dismissal: {
@@ -36,6 +38,7 @@ const cloudMessage = {
     __typename: 'CloudAppMessageAnalytics',
     campaign: 'ai_tools_education_2026q2',
     category: 'educational',
+    utm: null,
   },
 }
 

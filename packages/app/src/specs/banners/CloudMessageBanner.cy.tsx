@@ -23,12 +23,14 @@ const baseMessage = {
       text: 'Learn about cy.prompt',
       href: 'https://docs.cypress.io/api/commands/prompt',
       style: 'secondary' as const,
+      utm: null,
     },
     {
       __typename: 'CloudAppMessageCta' as const,
       text: 'Learn about Studio AI',
       href: 'https://docs.cypress.io/app/guides/cypress-studio',
       style: 'secondary' as const,
+      utm: null,
     },
   ],
   dismissal: {
@@ -39,6 +41,7 @@ const baseMessage = {
     __typename: 'CloudAppMessageAnalytics' as const,
     campaign: 'ai_tools_education_2026q2',
     category: 'educational',
+    utm: null,
   },
 }
 
@@ -52,16 +55,16 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
     cy.contains('Learn about Studio AI').should('be.visible')
   })
 
-  it('renders without an icon for info / educational / promotional severities', () => {
+  it('renders without an icon for info severity', () => {
     cy.mount(<CloudMessageBanner hasBannerBeenShown={true} message={baseMessage} />)
     cy.findByTestId('alert-prefix-icon').should('not.exist')
   })
 
-  it('renders the warning icon for warning / critical severities', () => {
+  it('renders the warning icon for warning severity', () => {
     cy.mount(
       <CloudMessageBanner
         hasBannerBeenShown={true}
-        message={{ ...baseMessage, visualStyle: 'critical' }}
+        message={{ ...baseMessage, visualStyle: 'warning' }}
       />,
     )
 
@@ -172,14 +175,66 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
       })
     })
 
-    it('CTA click also opens the external link', () => {
+    it('CTA click opens the external link with auto-injected UTMs', () => {
       cy.mount(<CloudMessageBanner hasBannerBeenShown={true} message={baseMessage} />)
 
       cy.findAllByTestId('cloud-message-cta-secondary').first().click()
 
-      cy.get('@openExternal').should('have.been.calledWith', {
-        url: 'https://docs.cypress.io/api/commands/prompt',
-        includeGraphqlPort: false,
+      // The destination URL is decorated with UTM params before opening.
+      // `utm_source` is injected by `getUrlWithParams` based on the binary
+      // context (`Binary: App` in this component-test runner — but we don't
+      // assert the exact value to keep the test resilient to context changes).
+      // `utm_medium` is fixed; `utm_campaign` is derived from
+      // `analytics.campaign`. The base URL is preserved.
+      cy.get('@openExternal').should(($stub) => {
+        const url = ($stub as unknown as Sinon.SinonStub).getCall(0).args[0].url as string
+
+        expect(url).to.match(/^https:\/\/docs\.cypress\.io\/api\/commands\/prompt\?/)
+        expect(url).to.include('utm_medium=Cloud+Message+Banner')
+        expect(url).to.include('utm_campaign=ai_tools_education_2026q2')
+        expect(url).to.include('utm_source=')
+      })
+    })
+
+    it('CTA click cascades UTM block — CTA-level wins over message-level, missing fields are omitted', () => {
+      const messageWithUtm = {
+        ...baseMessage,
+        analytics: {
+          ...baseMessage.analytics,
+          utm: {
+            __typename: 'CloudAppMessageUtm' as const,
+            content: 'message-default',
+            term: 'message-term',
+            id: null,
+          },
+        },
+        ctas: [
+          {
+            ...baseMessage.ctas[0],
+            utm: {
+              __typename: 'CloudAppMessageUtm' as const,
+              content: 'cta-override',
+              term: null,
+              id: null,
+            },
+          },
+          baseMessage.ctas[1],
+        ],
+      }
+
+      cy.mount(<CloudMessageBanner hasBannerBeenShown={true} message={messageWithUtm} />)
+
+      cy.findAllByTestId('cloud-message-cta-secondary').first().click()
+
+      cy.get('@openExternal').should(($stub) => {
+        const url = ($stub as unknown as Sinon.SinonStub).getCall(0).args[0].url as string
+
+        // CTA-level `content` wins over message-level
+        expect(url).to.include('utm_content=cta-override')
+        // CTA didn't set `term` so message-level falls through
+        expect(url).to.include('utm_term=message-term')
+        // Neither set `id` — must not appear at all
+        expect(url).not.to.include('utm_id')
       })
     })
 

@@ -199,6 +199,11 @@ fragment SpecsListBanners on Query {
       text
       href
       style
+      utm {
+        content
+        term
+        id
+      }
     }
     dismissal {
       scope
@@ -206,6 +211,11 @@ fragment SpecsListBanners on Query {
     analytics {
       campaign
       category
+      utm {
+        content
+        term
+        id
+      }
     }
   }
 }
