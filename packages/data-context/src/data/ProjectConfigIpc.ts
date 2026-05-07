@@ -178,8 +178,8 @@ export class ProjectConfigIpc extends EventEmitter {
 
       this._childProcess.on('exit', (code, signal) => {
         debug('child process %s exited with code %s and signal %s', this._childProcess.pid, code, signal)
-        this.cleanupIpc()
         this.emit('exit', code, signal)
+        this.cleanupIpc()
       })
 
       /**
