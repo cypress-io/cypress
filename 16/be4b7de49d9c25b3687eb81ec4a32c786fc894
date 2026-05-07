@@ -1,0 +1,57 @@
+packages/app/src/specs/banners/TrackedBanner.vue
+  203a479bdff240f0 15,17,57-64,73,86-95,112-119,126-143
+packages/data-context/schemas/cloud.graphql
+  203a479bdff240f0 5-76,1394-1403
+packages/types/src/config.ts
+  203a479bdff240f0 59-65
+packages/app/src/specs/banners/index.ts
+  203a479bdff240f0 10-11
+packages/app/src/specs/banners/CloudMessageBanner.vue
+  203a479bdff240f0 1-81,84-86,89-124
+packages/data-context/schemas/schema.graphql
+  203a479bdff240f0 69-139,1858-1866
+packages/data-context/graphql/stitching/remoteSchemaWrapped.ts
+  203a479bdff240f0 12-29,60-70,96
+packages/data-context/src/sources/CloudDataSource.ts
+  203a479bdff240f0 57-66,304-308
+packages/app/src/specs/SpecsListBanners.vue
+  203a479bdff240f0 114-118,146,190-213,345-411
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "16be4b7de49d9c25b3687eb81ec4a32c786fc894",
+  "prompts": {
+    "203a479bdff240f0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e211e5b-e61c-4497-8965-4ce498c824ba",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel",
+      "messages": [],
+      "total_additions": 1743,
+      "total_deletions": 713,
+      "accepted_lines": 654,
+      "overriden_lines": 17
+    },
+    "f89d44e82876b322": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3b4267c6-ff0c-428a-ab0b-6576122e1ee4",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel",
+      "messages": [],
+      "total_additions": 5858,
+      "total_deletions": 211,
+      "accepted_lines": 3616,
+      "overriden_lines": 4
+    }
+  },
+  "humans": {
+    "h_18fc77e9b83574": {
+      "author": "Ryan Manuel"
+    }
+  }
+}
