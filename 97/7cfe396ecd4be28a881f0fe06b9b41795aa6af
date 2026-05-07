@@ -1,0 +1,32 @@
+packages/server/test/unit/cloud/studio/telemetry/TelemetryReporter_spec.ts
+  s_d1b7976ede1ba4::t_46a6326e99837c 9-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "977cfe396ecd4be28a881f0fe06b9b41795aa6af",
+  "prompts": {
+    "d1b7976ede1ba474": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>",
+      "total_additions": 2094,
+      "total_deletions": 249,
+      "accepted_lines": 14,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_d1b7976ede1ba4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
