@@ -8,6 +8,9 @@ const baseCypressConfig = {
   supportFile: '/users/proj/cypress/support/component.ts',
   devServerPublicPathRoute: '/__cypress/src',
   platform: 'darwin',
+  // Default test cases to run mode (`cypress run`); open-mode behaviour is
+  // covered by the dedicated tests below.
+  isTextTerminal: true,
 } as Cypress.PluginConfigOptions
 
 interface MockServer {
@@ -105,6 +108,32 @@ describe('devServer warmup', () => {
     mockServer.config.server.port = undefined as any
 
     await expect(devServer(buildDevServerConfig())).rejects.toThrow(/Missing vite dev server port/)
+    expect(mockServer.warmupRequest).not.toHaveBeenCalled()
+    expect(mockServer.waitForRequestsIdle).not.toHaveBeenCalled()
+  })
+
+  it('open mode: warms up only the support file, not specs', async () => {
+    await devServer(buildDevServerConfig({
+      specs: [
+        { absolute: '/users/proj/src/Foo.cy.tsx', relative: 'src/Foo.cy.tsx' } as Cypress.Spec,
+        { absolute: '/users/proj/src/Bar.cy.tsx', relative: 'src/Bar.cy.tsx' } as Cypress.Spec,
+      ],
+      cypressConfig: { ...baseCypressConfig, isTextTerminal: false },
+    }))
+
+    expect(mockServer.warmupRequest).toHaveBeenCalledOnce()
+    expect(mockServer.warmupRequest).toHaveBeenCalledWith('/cypress/support/component.ts')
+    expect(mockServer.waitForRequestsIdle).toHaveBeenCalledOnce()
+  })
+
+  it('open mode: skips warmup entirely when supportFile is unset', async () => {
+    await devServer(buildDevServerConfig({
+      specs: [
+        { absolute: '/users/proj/src/Foo.cy.tsx', relative: 'src/Foo.cy.tsx' } as Cypress.Spec,
+      ],
+      cypressConfig: { ...baseCypressConfig, supportFile: undefined as any, isTextTerminal: false },
+    }))
+
     expect(mockServer.warmupRequest).not.toHaveBeenCalled()
     expect(mockServer.waitForRequestsIdle).not.toHaveBeenCalled()
   })

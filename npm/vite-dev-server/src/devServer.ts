@@ -47,16 +47,23 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
 
   debug('Successfully launched the vite server on port', port)
 
-  // Warm up the support file and every spec, then waitForRequestsIdle, so
-  // Vite's deps optimizer has fully processed any node_modules imports
-  // they pull in before the browser fetches them. Skipping this can race
-  // a mid-test optimizer re-bundle and surface "Failed to fetch
-  // dynamically imported module".
+  // Warm up the support file (always) and every spec (run mode only),
+  // then waitForRequestsIdle, so Vite's deps optimizer has fully processed
+  // any node_modules imports they pull in before the browser fetches
+  // them. Skipping this can race a mid-test optimizer re-bundle and
+  // surface "Failed to fetch dynamically imported module".
   //
   // Per-spec warmup is required: preprocessor or auto-import plugins can
   // inject node_modules imports during transform that Vite's static deps
   // scanner doesn't see, so the optimizer would otherwise first discover
   // them when the browser fetches the spec.
+  //
+  // In open mode (`isTextTerminal === false`), we skip the per-spec
+  // warmup. The user picks specs interactively and is unlikely to run
+  // every spec in the suite, so warming all of them up front would pay
+  // for work that may never be needed. Support-file warmup is kept
+  // because the support file is always loaded and typically has the
+  // deepest dep tree.
   const warmupTargets: string[] = []
   const supportFileUrl = getSupportFileRelativeUrl(config.cypressConfig)
 
@@ -64,8 +71,10 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
     warmupTargets.push(supportFileUrl)
   }
 
-  for (const spec of config.specs ?? []) {
-    warmupTargets.push(getSpecRelativeUrl(spec, config.cypressConfig))
+  if (config.cypressConfig.isTextTerminal) {
+    for (const spec of config.specs ?? []) {
+      warmupTargets.push(getSpecRelativeUrl(spec, config.cypressConfig))
+    }
   }
 
   if (warmupTargets.length > 0) {
