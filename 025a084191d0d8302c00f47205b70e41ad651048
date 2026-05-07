@@ -1,0 +1,21 @@
+packages/server/test/unit/cloud/bundles/bundle_error_spec.ts
+  s_d1b7976ede1ba4::t_da691460121370 29-52
+packages/server/lib/cloud/bundles/bundle_error.ts
+  s_d1b7976ede1ba4::t_076195b8073f80 14-18,27-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "025a084191d0d8302c00f47205b70e41ad651048",
+  "prompts": {},
+  "sessions": {
+    "s_d1b7976ede1ba4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
