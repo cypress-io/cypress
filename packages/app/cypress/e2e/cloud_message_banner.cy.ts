@@ -11,7 +11,6 @@ const cloudMessage = {
   id: 'ai_tools_education',
   enabled: true,
   priority: 50,
-  surface: 'specs_list_banner',
   visualStyle: 'info',
   title: 'Cypress AI is here!',
   body: 'cy.prompt and Studio AI help you write tests faster.',
@@ -32,9 +31,6 @@ const cloudMessage = {
   dismissal: {
     __typename: 'CloudAppMessageDismissal',
     scope: 'user',
-    cooldownDays: 0,
-    maxDismissals: 1,
-    rePromptOnSeverityEscalation: false,
   },
   analytics: {
     __typename: 'CloudAppMessageAnalytics',
@@ -110,17 +106,14 @@ describe('App - Cloud Message Banner', () => {
     })
   })
 
-  it('dismisses on close click and persists shownCount via setPreferences', () => {
+  it('dismisses on close click and persists the dismissal via setPreferences', () => {
     cy.loginUser()
     stubCloudAppMessages([cloudMessage])
 
-    // Counting at dismissal (not at mount) is load-bearing — see the
-    // docstring on `BannerState.shownCount` and TrackedBanner.vue's
-    // `updateBannerState`. We assert via the mutation payload (rather than
-    // re-reading savedState) because `beforeEach` stubs
-    // `getCurrentProjectSavedState`, which would shadow whatever the
-    // dismissal writes back. The payload is the source of truth here: it's
-    // exactly what gets persisted to disk.
+    // We assert via the mutation payload (rather than re-reading savedState)
+    // because `beforeEach` stubs `getCurrentProjectSavedState`, which would
+    // shadow whatever the dismissal writes back. The payload is the source
+    // of truth here: it's exactly what gets persisted to disk.
     cy.intercept('mutation-TrackedBanner_SetProjectState').as('setPrefs')
 
     cy.visitApp()
@@ -128,24 +121,22 @@ describe('App - Cloud Message Banner', () => {
 
     cy.findByTestId('cloud-message-banner').should('be.visible')
 
-    // First `setPreferences` call fires from `onMounted` with `lastShown` —
-    // it must not include `shownCount` (counting at mount would create an
-    // unmount race; see TrackedBanner.vue).
+    // First `setPreferences` call fires from `onMounted` with `lastShown`.
     cy.wait('@setPrefs').then((interception) => {
       // Cypress auto-parses JSON request bodies, so `body` is already an object.
       const body = interception.request.body as { variables: { value: string } }
       const value = body.variables.value
 
       expect(value).to.contain('lastShown')
-      expect(value).to.not.contain('shownCount')
     })
 
     cy.findByTestId('alert-suffix-icon').click()
     cy.findByTestId('cloud-message-banner').should('not.exist')
 
     // Second `setPreferences` call fires from the dismissal — must include
-    // `dismissed` timestamp and `shownCount: 1` so future eligibility checks
-    // can enforce `maxDismissals`.
+    // a `dismissed` timestamp under the cloud-namespaced key so future
+    // eligibility checks suppress the banner. v1 is "show once, then
+    // never": no shownCount counter, no cooldown, no max-dismissal cap.
     cy.wait('@setPrefs').then((interception) => {
       // Cypress auto-parses JSON request bodies, so `body` is already an object.
       const body = interception.request.body as { variables: { value: string } }
@@ -154,7 +145,7 @@ describe('App - Cloud Message Banner', () => {
       expect(value).to.contain('"banners"')
       expect(value).to.contain('"cloud:ai_tools_education"')
       expect(value).to.contain('"dismissed"')
-      expect(value).to.contain('"shownCount":1')
+      expect(value).to.not.contain('shownCount')
     })
   })
 

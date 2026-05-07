@@ -113,6 +113,11 @@ function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
   // (shown → clicked → dismissed). Without explicit forwarding,
   // `useRecordEvent` would mint a fresh `nanoid()` per call and the click
   // would be unjoinable to its own impression.
+  //
+  // Only `cta_href` is forwarded to analytics — the link URL is the stable,
+  // queryable key. CTA text and style are intentionally dropped (text is
+  // marketing copy that changes; style is the message author's visual
+  // weighting, not a useful warehouse dimension).
   void record({
     campaign: props.message.analytics.campaign,
     medium: 'Cloud Message Banner',
@@ -120,10 +125,7 @@ function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
     messageId: bannerInstanceId,
     payload: {
       action: 'click',
-      message_id: props.message.id,
-      cta_text: cta.text,
       cta_href: cta.href,
-      cta_style: cta.style,
     },
   })
 

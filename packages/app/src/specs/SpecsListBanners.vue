@@ -192,7 +192,6 @@ fragment SpecsListBanners on Query {
     id
     enabled
     priority
-    surface
     visualStyle
     title
     body
@@ -203,9 +202,6 @@ fragment SpecsListBanners on Query {
     }
     dismissal {
       scope
-      cooldownDays
-      maxDismissals
-      rePromptOnSeverityEscalation
     }
     analytics {
       campaign
@@ -350,14 +346,6 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
     return false
   }
 
-  // Surface filter — this orchestrator only owns the specs-list-banner slot.
-  // The schema reserves other surfaces (`modal`, `runner_toolbar`,
-  // `settings_card`) for future renderers; messages targeting those surfaces
-  // must not leak into this slot regardless of priority.
-  if (msg.surface !== 'specs_list_banner') {
-    return false
-  }
-
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
   // Tests can short-circuit all banners via the `_disabled` flag.
@@ -365,40 +353,18 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
     return false
   }
 
-  // Dismissal scope: v1 reads from project-scoped savedState for both `'user'`
-  // and `'project'` scopes. User-scoped dismissal across multiple projects is
-  // tracked under "Future (not v1)" — wire-up is deferred until the
-  // global preferences store grows a `bannersGlobal` map.
-  const dismissalKey = cloudMessageDismissalKey(msg.id)
-  const dismissal = msg.dismissal
-  const local = bannersState?.[dismissalKey]
+  // v1 model: show once, then never. Dismissal is permanent for a given
+  // message id; re-pitching is done by bumping the id (e.g.
+  // `ai_tools_education` → `ai_tools_education_2026q3`), which mints a new
+  // savedState key and re-shows the message for everyone.
+  //
+  // `dismissal.scope` is preserved on the schema but currently has only one
+  // behavior — both `'user'` and `'project'` read from project-scoped
+  // savedState. Splitting them is deferred pending a product call on cross-
+  // project dismissal semantics.
+  const local = bannersState?.[cloudMessageDismissalKey(msg.id)]
 
-  if (!local) {
-    return true
-  }
-
-  // Hard cap on user dismissals. `shownCount` is incremented by
-  // `TrackedBanner` on each user-initiated dismissal (not on render — see
-  // the docstring on `BannerState.shownCount` for why). Without this cap, a
-  // message with `cooldownDays: 14, maxDismissals: 3` would re-appear
-  // indefinitely after each cooldown window.
-  if ((local.shownCount ?? 0) >= dismissal.maxDismissals) {
-    return false
-  }
-
-  if (local.dismissed) {
-    if (dismissal.cooldownDays === 0) {
-      return false
-    }
-
-    const cooldownMs = dismissal.cooldownDays * 24 * 60 * 60 * 1000
-
-    if (Date.now() - local.dismissed < cooldownMs) {
-      return false
-    }
-  }
-
-  return true
+  return !local?.dismissed
 }
 
 const activeCloudMessage = computed(() => {

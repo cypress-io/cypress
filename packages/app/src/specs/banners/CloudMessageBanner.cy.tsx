@@ -14,7 +14,6 @@ const baseMessage = {
   id: 'ai_tools_education',
   enabled: true,
   priority: 50,
-  surface: 'specs_list_banner' as const,
   visualStyle: 'info' as const,
   title: 'Cypress AI is here!',
   body: 'cy.prompt and Studio AI help you write tests faster.',
@@ -35,9 +34,6 @@ const baseMessage = {
   dismissal: {
     __typename: 'CloudAppMessageDismissal' as const,
     scope: 'user' as const,
-    cooldownDays: 0,
-    maxDismissals: 1,
-    rePromptOnSeverityEscalation: false,
   },
   analytics: {
     __typename: 'CloudAppMessageAnalytics' as const,
@@ -156,7 +152,7 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
       })
     })
 
-    it('CTA click forwards the cta payload (action, text, href, style)', () => {
+    it('CTA click forwards only the cta href (text/style intentionally dropped)', () => {
       cy.mount(<CloudMessageBanner hasBannerBeenShown={true} message={baseMessage} />)
 
       cy.findAllByTestId('cloud-message-cta-secondary').first().click()
@@ -168,8 +164,11 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
         expect(arg.medium).to.equal('Cloud Message Banner')
         expect(arg.includeMachineId).to.equal(true)
         expect(arg.payload).to.contain('"action":"click"')
-        expect(arg.payload).to.contain('"cta_text":"Learn about cy.prompt"')
         expect(arg.payload).to.contain('"cta_href":"https://docs.cypress.io/api/commands/prompt"')
+        // Text/style are deliberately not forwarded — see comment on
+        // `AppMessageClickedProps`.
+        expect(arg.payload).to.not.contain('cta_text')
+        expect(arg.payload).to.not.contain('cta_style')
       })
     })
 
@@ -201,33 +200,33 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
           expect(dismissCall.args[0].messageId).to.equal(seenMessageId)
           expect(dismissCall.args[0].includeMachineId).to.equal(true)
           expect(dismissCall.args[0].payload).to.contain('"action":"dismiss"')
-          expect(dismissCall.args[0].payload).to.contain('"banner_id":"cloud:ai_tools_education"')
         })
       })
     })
 
-    it('persists shownCount on dismissal (for maxDismissals enforcement) but not on mount', () => {
+    it('writes lastShown on mount and dismissed on close (no shownCount counter)', () => {
       cy.mount(<CloudMessageBanner hasBannerBeenShown={false} message={baseMessage} />)
 
-      // First setPrefs call is `lastShown` from onMounted — should NOT include shownCount
-      // (we deliberately count at dismissal, not mount, to avoid an unmount race).
+      // First setPrefs call fires from onMounted with `lastShown`.
       cy.get('@setPrefs').should('have.been.calledOnce')
       cy.get('@setPrefs').should(($stub) => {
         const arg = ($stub as unknown as Sinon.SinonStub).getCall(0).args[0]
 
         expect(arg.value).to.contain('lastShown')
-        expect(arg.value).to.not.contain('shownCount')
       })
 
       cy.findByTestId('alert-suffix-icon').click()
 
-      // Second setPrefs call is `dismissed` — should include shownCount: 1
+      // Second setPrefs call fires from the dismissal — writes `dismissed`.
+      // v1 collapses to "show once, then never," so we no longer track a
+      // dismissal counter alongside this; bumping the message id is the
+      // only re-pitch lever.
       cy.get('@setPrefs').should('have.been.calledTwice')
       cy.get('@setPrefs').should(($stub) => {
         const arg = ($stub as unknown as Sinon.SinonStub).getCall(1).args[0]
 
         expect(arg.value).to.contain('dismissed')
-        expect(arg.value).to.contain('"shownCount":1')
+        expect(arg.value).to.not.contain('shownCount')
       })
     })
   })

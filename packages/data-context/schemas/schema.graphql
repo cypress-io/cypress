@@ -83,7 +83,6 @@ type CloudAppMessage {
 
   """Higher numeric value wins when multiple messages are eligible"""
   priority: Int!
-  surface: CloudAppMessageSurface!
   title: String!
   visualStyle: CloudAppMessageVisualStyle!
 }
@@ -111,26 +110,12 @@ enum CloudAppMessageCtaStyle {
 }
 
 type CloudAppMessageDismissal {
-  cooldownDays: Int!
-
-  """
-  Hard cap on the total number of times the user can dismiss this message before it is permanently suppressed for them. The binary increments its dismissal counter on each user dismissal (not on each render) — the cap is on user acknowledgments, not raw impressions, to avoid the unmount race that mount-time counting would introduce.
-  """
-  maxDismissals: Int!
-  rePromptOnSeverityEscalation: Boolean!
   scope: CloudAppMessageDismissalScope!
 }
 
 enum CloudAppMessageDismissalScope {
   project
   user
-}
-
-enum CloudAppMessageSurface {
-  modal
-  runner_toolbar
-  settings_card
-  specs_list_banner
 }
 
 enum CloudAppMessageVisualStyle {
