@@ -1,0 +1,26 @@
+packages/app/src/specs/SpecsListBanners.vue
+  s_8a31958851d64b::t_6f7be78e61c03a 380-390,392
+packages/app/src/specs/SpecsListBanners.cy.tsx
+  s_8a31958851d64b::t_12ff4572b159bd 564-573,576,579,585-599
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "21028dc0ec14a95df7eed8d8c4b269544c271070",
+  "prompts": {},
+  "humans": {
+    "h_18fc77e9b83574": {
+      "author": "Ryan Manuel"
+    }
+  },
+  "sessions": {
+    "s_8a31958851d64b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b460f46b-6923-4faa-8c29-f8b4abb8219e",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
