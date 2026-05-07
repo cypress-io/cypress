@@ -38,6 +38,6 @@ export const putProtocolArtifact = asyncRetry(
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
-    shouldRetry: isRetryableError,
+    shouldRetry: (err) => isRetryableError(err, 'PUT'),
   },
 )

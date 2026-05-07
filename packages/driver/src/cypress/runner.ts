@@ -549,6 +549,9 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
           // This will navigate to about:blank if test isolation is on
           await testBeforeAfterRunAsync(test, Cypress, { nextTestHasTestIsolationOn })
+          // Clear cached spec-bridge targets after isolation; the runner must serve
+          // a current app build so `notifyCrossOriginBridgeReady` re-binds the iframe.
+          Cypress.primaryOriginCommunicator.clearCrossOriginDriverWindows()
         }
 
         testAfterRun(test, Cypress)
