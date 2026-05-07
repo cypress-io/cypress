@@ -10,7 +10,6 @@ import { StreamActivityMonitor } from '../../../../lib/cloud/upload/stream_activ
 import { HttpError } from '../../../../lib/cloud/network/http_error'
 import { putFetch, ParseKinds } from '../../../../lib/cloud/network/fetch'
 import { linearDelay, asyncRetry } from '../../../../lib/util/async_retry'
-import { isRetryableError } from '../../../../lib/cloud/network/is_retryable_error'
 import type { putProtocolArtifact } from '../../../../lib/cloud/api/put_protocol_artifact'
 
 chai.use(chaiAsPromised).use(sinonChai)
@@ -129,8 +128,32 @@ describe('putProtocolArtifact', () => {
 
     expect(options.maxAttempts).to.eq(3)
     expect(options.retryDelay).to.be.a('function')
-    // because of mockery, the isRetryableError ref here is different than the one imported into put_protocol_artifact_spec
-    expect(options.shouldRetry?.toString()).to.eq(isRetryableError.toString())
+  })
+
+  describe('shouldRetry', () => {
+    let shouldRetry: (err: any) => boolean
+
+    beforeEach(() => {
+      shouldRetry = asyncRetryStub.firstCall.args[1].shouldRetry!
+    })
+
+    // The PUT method is idempotent, so isRetryableError also returns true
+    // for HTTP 500 in addition to the always-retryable statuses.
+    it('retries on HTTP 500 in addition to the always-retryable statuses', () => {
+      const retryableStatuses = [408, 429, 500, 502, 503, 504]
+
+      retryableStatuses.forEach((status) => {
+        const err = new HttpError('some error', 'http://some/url', status, 'status text', '', sinon.createStubInstance(Response))
+
+        expect(shouldRetry(err), `status ${status}`).to.be.true
+      })
+    })
+
+    it('does not retry on non-retryable HTTP errors', () => {
+      const err = new HttpError('some error', 'http://some/url', 400, 'Bad Request', '', sinon.createStubInstance(Response))
+
+      expect(shouldRetry(err)).to.be.false
+    })
   })
 
   describe('when provided an artifact path that does not exist', () => {
