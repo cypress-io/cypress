@@ -1,0 +1,35 @@
+packages/app/cypress/e2e/cloud_message_banner.cy.ts
+  s_8a31958851d64b::t_00b07d5c1c75c7 48-53,56-61
+  s_8a31958851d64b::t_3e6a49e1f5daf5 1-47,54-55,65-70,75-78,94-112,114-116,126-129,143-145,158-160,165-170,172-187
+  h_5f6e5bd5f4342d 62,64,71-74
+  s_8a31958851d64b::t_acdbf1e08e41f2 135-137,150-152
+  s_8a31958851d64b::t_ecd35c4aa2e8d4 63
+  s_8a31958851d64b::t_163389b61126ad 117-125,130-134,138-142,146-149,153-157
+  s_8a31958851d64b::t_2d6a3355343c3e 79-93
+  s_8a31958851d64b::t_061a9e308e4bd5 113
+  s_8a31958851d64b::t_976198435aa700 161-164,171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "9d235bdd9a9477ec0cb5424f96265fe9eb4352e4",
+  "prompts": {},
+  "humans": {
+    "h_18fc77e9b83574": {
+      "author": "Ryan Manuel"
+    },
+    "h_5f6e5bd5f4342d": {
+      "author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  },
+  "sessions": {
+    "s_8a31958851d64b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b460f46b-6923-4faa-8c29-f8b4abb8219e",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
