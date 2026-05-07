@@ -1,10 +1,7 @@
-/// <reference types="cypress" />
-
 import React from 'react'
 import { mount } from '@cypress/react'
 import Button from './forward-ref.jsx'
 
-/* eslint-env mocha */
 describe('Button component', function () {
   it('works', function () {
     mount(<Button>Hello, World</Button>)
@@ -21,6 +18,5 @@ describe('Button component', function () {
     )
 
     expect(ref).to.have.property('current')
-    // expect(ref.current).not.be.null;
   })
 })

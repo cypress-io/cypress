@@ -1,6 +1,5 @@
 // https://medium.com/@pierrehedkvist/renderless-components-in-react-8d663746314c
-
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 
 export default function MouseMovement ({ onMoved }) {

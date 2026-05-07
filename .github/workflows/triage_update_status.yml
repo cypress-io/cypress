@@ -12,6 +12,8 @@ on:
       ADD_TO_TRIAGE_BOARD_TOKEN:
         required: true
 
+permissions: {}
+
 jobs:
   move-to-requested-status:
     runs-on: ubuntu-latest
