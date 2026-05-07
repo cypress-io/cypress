@@ -3009,7 +3009,7 @@ describe('capture-protocol api errors', () => {
     }))
   }
 
-  describe('upload 500 - does not retry', () => {
+  describe('upload 500 - tries 3 times and fails', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
@@ -3028,9 +3028,13 @@ describe('capture-protocol api errors', () => {
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
         expect(artifactReport?.protocol).to.exist
-        expect(artifactReport?.protocol?.error).to.equal(
-          'Failed to upload Test Replay: http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error',
-        )
+
+        const expectedUrl = `http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX`
+        const expectedErrorMessage = `${expectedUrl} responded with 500 Internal Server Error`
+
+        expect(artifactReport?.protocol?.error).to.equal(`Failed to upload Test Replay after 3 attempts. Errors: ${[expectedErrorMessage, expectedErrorMessage, expectedErrorMessage].join(', ')}`)
+        expect(artifactReport?.protocol?.errorStack).to.exist
+        expect(artifactReport?.protocol?.errorStack).to.not.be.empty
       })
     })
   })

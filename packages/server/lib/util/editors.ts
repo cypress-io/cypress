@@ -95,5 +95,5 @@ export const setUserEditor = async (editor: Editor) => {
 
   const state = await savedState.create()
 
-  state.set({ preferredOpener: editor })
+  await state.set({ preferredOpener: editor })
 }
