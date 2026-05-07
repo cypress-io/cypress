@@ -204,7 +204,7 @@ fragment SpecsListBanners on Query {
     dismissal {
       scope
       cooldownDays
-      maxImpressions
+      maxDismissals
       rePromptOnSeverityEscalation
     }
     analytics {
@@ -377,11 +377,12 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
     return true
   }
 
-  // Hard cap on total impressions. `shownCount` is incremented by
-  // `TrackedBanner` on each fresh render (per project, per banner id).
-  // Without this cap, a message with `cooldownDays: 14, maxImpressions: 3`
-  // would re-appear indefinitely after each cooldown window.
-  if ((local.shownCount ?? 0) >= dismissal.maxImpressions) {
+  // Hard cap on user dismissals. `shownCount` is incremented by
+  // `TrackedBanner` on each user-initiated dismissal (not on render — see
+  // the docstring on `BannerState.shownCount` for why). Without this cap, a
+  // message with `cooldownDays: 14, maxDismissals: 3` would re-appear
+  // indefinitely after each cooldown window.
+  if ((local.shownCount ?? 0) >= dismissal.maxDismissals) {
     return false
   }
 

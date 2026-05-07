@@ -49,7 +49,11 @@ enum CloudAppMessageCtaStyle {
 
 type CloudAppMessageDismissal {
   cooldownDays: Int!
-  maxImpressions: Int!
+
+  """
+  Hard cap on the total number of times the user can dismiss this message before it is permanently suppressed for them. The binary increments its dismissal counter on each user dismissal (not on each render) — the cap is on user acknowledgments, not raw impressions, to avoid the unmount race that mount-time counting would introduce.
+  """
+  maxDismissals: Int!
   rePromptOnSeverityEscalation: Boolean!
   scope: CloudAppMessageDismissalScope!
 }
