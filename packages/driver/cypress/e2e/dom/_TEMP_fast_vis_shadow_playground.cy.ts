@@ -6,10 +6,16 @@
 // flip between the two and see the difference. The assertions match what
 // visibility_shadow_dom.cy.ts asserts; the fixtures are duplicated here so the
 // runner shows them in isolation rather than scrolled past in a 60+ test list.
+//
+// Skipped under CI (`describeIfLocal`) so this exploratory spec doesn't add
+// noise to the suite — `visibility_shadow_dom.cy.ts` already provides the
+// authoritative coverage.
 
 export {} // make typescript see this as a module
 
 const { $ } = Cypress
+
+const describeIfLocal = Cypress.env('CI') ? describe.skip : describe
 
 const buildAdd = (win: Window) => {
   if (!(win.customElements as any).get('playground-host')) {
@@ -31,7 +37,7 @@ const buildAdd = (win: Window) => {
   }
 }
 
-describe('fast visibility + Shadow DOM playground', () => {
+describeIfLocal('fast visibility + Shadow DOM playground', () => {
   let add: (lightHTML: string, shadowHTML: string, hostSelector: string) => JQuery<HTMLElement>
 
   for (const mode of ['fast', 'legacy']) {
