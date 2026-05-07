@@ -74,6 +74,19 @@ const reportDismissedMutation = useMutation(TrackedBanner_RecordBannerDismissedD
 const bannerInstanceId = ref(nanoid())
 const isAlertDisplayed = ref(true)
 
+// Cloud-driven banners send `includeMachineId: true` so events route through
+// /machine-collect with the binary's machineId attached (used for unique-user
+// dedup in the warehouse, since IP alone is unreliable behind NAT/VPN). The
+// existing onboarding banners (Login / Connect / Record / CT-Available) keep
+// their long-standing /anon-collect path — changing their analytics shape now
+// would alter their historical data continuity.
+//
+// Declared before `watchEffect` below because the watcher fires synchronously
+// at component setup, and `recordBannerShown` reads `isCloudBanner.value`. With
+// the const declaration after the watcher, the binding is in the temporal dead
+// zone when the watcher first runs.
+const isCloudBanner = computed(() => props.bannerId.startsWith('cloud:'))
+
 watchEffect(() => {
   if (!props.hasBannerBeenShown && props.eventData) {
     // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
@@ -106,16 +119,19 @@ async function updateBannerState (field: 'lastShown' | 'dismissed') {
 
   set(savedBannerState, [props.bannerId, field], Date.now())
 
+  // Track total impressions for cloud-driven banners — used by
+  // `SpecsListBanners.isCloudMessageEligible` to enforce
+  // `dismissal.maxImpressions`. Local onboarding banners don't use the
+  // counter (they cap on `dismissed` + cooldowns), so we gate the increment
+  // on the `cloud:` namespace to avoid bloating their savedState.
+  if (field === 'lastShown' && isCloudBanner.value) {
+    const current = (savedBannerState[props.bannerId]?.shownCount ?? 0) as number
+
+    set(savedBannerState, [props.bannerId, 'shownCount'], current + 1)
+  }
+
   await setStateMutation.executeMutation({ value: JSON.stringify({ banners: savedBannerState }) })
 }
-
-// Cloud-driven banners send `includeMachineId: true` so events route through
-// /machine-collect with the binary's machineId attached (used for unique-user
-// dedup in the warehouse, since IP alone is unreliable behind NAT/VPN). The
-// existing onboarding banners (Login / Connect / Record / CT-Available) keep
-// their long-standing /anon-collect path — changing their analytics shape now
-// would alter their historical data continuity.
-const isCloudBanner = computed(() => props.bannerId.startsWith('cloud:'))
 
 function recordBannerShown ({ campaign, medium, cohort }: EventData): void {
   reportSeenMutation.executeMutation({

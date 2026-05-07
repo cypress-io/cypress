@@ -113,6 +113,7 @@
 
   <CloudMessageBanner
     v-else-if="activeCloudMessage"
+    :key="activeCloudMessage.id"
     :has-banner-been-shown="hasCloudMessageBeenShown"
     :message="activeCloudMessage"
   />
@@ -349,6 +350,14 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
     return false
   }
 
+  // Surface filter — this orchestrator only owns the specs-list-banner slot.
+  // The schema reserves other surfaces (`modal`, `runner_toolbar`,
+  // `settings_card`) for future renderers; messages targeting those surfaces
+  // must not leak into this slot regardless of priority.
+  if (msg.surface !== 'specs_list_banner') {
+    return false
+  }
+
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
   // Tests can short-circuit all banners via the `_disabled` flag.
@@ -366,6 +375,14 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
 
   if (!local) {
     return true
+  }
+
+  // Hard cap on total impressions. `shownCount` is incremented by
+  // `TrackedBanner` on each fresh render (per project, per banner id).
+  // Without this cap, a message with `cooldownDays: 14, maxImpressions: 3`
+  // would re-appear indefinitely after each cooldown window.
+  if ((local.shownCount ?? 0) >= dismissal.maxImpressions) {
+    return false
   }
 
   if (local.dismissed) {

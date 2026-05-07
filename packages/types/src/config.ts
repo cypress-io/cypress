@@ -40,6 +40,13 @@ export interface SettingsOptions {
 export type BannerState = {
   lastShown?: number
   dismissed?: number
+  /**
+   * Total number of times this banner id has been rendered into the slot.
+   * Used by cloud-driven banners to enforce `dismissal.maxImpressions`. Local
+   * onboarding banners ignore this field — they use `dismissed` and cooldowns
+   * exclusively.
+   */
+  shownCount?: number
 }
 
 export const BannerIds = {
