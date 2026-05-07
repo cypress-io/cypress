@@ -25,10 +25,10 @@ describe('dom utilities', () => {
       // Verify container was created
       expect(result.container).to.exist
       expect(result.container.classList.contains(className)).to.be.true
-      // NOTE: Chrome 148+ no longer reflects the `all` shorthand via the
-      // `style.all` getter (returns ''), so we assert against the serialized
-      // inline style instead.
-      expect(result.container.style.cssText).to.contain('all: initial')
+      // NOTE: Chrome 148+ expands `all: initial` into longhand declarations
+      // and no longer reflects the shorthand via `style.all` or `cssText`, so
+      // we assert a representative longhand was reset to `initial` instead.
+      expect(result.container.style.color).to.equal('initial')
       expect(result.container.style.position).to.equal('static')
 
       // Verify shadow root was created
