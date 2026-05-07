@@ -139,6 +139,13 @@ function isOutsideViewport (el: HTMLElement, rect: DOMRect): boolean {
 }
 
 const CLIPPING_OVERFLOW = new Set(['hidden', 'clip', 'scroll', 'auto'])
+// On the document root (`<body>`/`<html>`), only treat overflow as clipping when
+// it is *explicitly* `hidden` or `clip`. `scroll` and `auto` here are usually
+// the page's scroll container — and per the CSS spec, setting one axis to a
+// non-`visible` value (e.g. `body { overflow-x: hidden }`) computes the other
+// axis to `auto`. Treating that auto-converted value as clipping would block
+// programmatic vertical scroll on every page that hides horizontal scrollbars.
+const DOC_ROOT_CLIPPING_OVERFLOW = new Set(['hidden', 'clip'])
 
 // True iff some ancestor with clipping `overflow` on the same axis the subject is
 // off-screen has the subject *out-of-bounds* — i.e., the subject is intentionally
@@ -149,7 +156,8 @@ const CLIPPING_OVERFLOW = new Set(['hidden', 'clip', 'scroll', 'auto'])
 // descendant's clipping ancestor often lives in the host's light tree. Treat
 // `scroll` and `auto` as clipping too: the user has not scrolled, so any content
 // outside the visible region is hidden right now and should not be surfaced
-// programmatically.
+// programmatically. The exception is `<body>`/`<html>` (see
+// `DOC_ROOT_CLIPPING_OVERFLOW`).
 function isClippedByAncestor (el: HTMLElement, rect: DOMRect): boolean {
   const doc = el.ownerDocument
   const win = doc.defaultView
@@ -162,26 +170,18 @@ function isClippedByAncestor (el: HTMLElement, rect: DOMRect): boolean {
   let current: HTMLElement | null = getParentNode(el)
 
   while (current) {
-    // Skip the document's root and body — they are the page's scroll container,
-    // not real clipping containers. Setting `overflow-x: hidden` on body, for
-    // example, makes computed `overflow-y` become `auto` per CSS, which would
-    // otherwise spuriously trip the clipping check on the off-screen axis and
-    // block legitimate vertical scrolling.
-    if (current === doc.body || current === doc.documentElement) {
-      current = getParentNode(current)
-      continue
-    }
-
+    const isDocRoot = current === doc.body || current === doc.documentElement
+    const allowed = isDocRoot ? DOC_ROOT_CLIPPING_OVERFLOW : CLIPPING_OVERFLOW
     const { overflowX, overflowY } = win.getComputedStyle(current)
     const ancestorRect = current.getBoundingClientRect()
 
-    if (offscreenX && CLIPPING_OVERFLOW.has(overflowX)) {
+    if (offscreenX && allowed.has(overflowX)) {
       if (rect.left < ancestorRect.left || rect.right > ancestorRect.right) {
         return true
       }
     }
 
-    if (offscreenY && CLIPPING_OVERFLOW.has(overflowY)) {
+    if (offscreenY && allowed.has(overflowY)) {
       if (rect.top < ancestorRect.top || rect.bottom > ancestorRect.bottom) {
         return true
       }
