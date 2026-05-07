@@ -25,7 +25,10 @@ describe('dom utilities', () => {
       // Verify container was created
       expect(result.container).to.exist
       expect(result.container.classList.contains(className)).to.be.true
-      expect(result.container.style.all).to.equal('initial')
+      // NOTE: Chrome 148+ no longer reflects the `all` shorthand via the
+      // `style.all` getter (returns ''), so we assert against the serialized
+      // inline style instead.
+      expect(result.container.style.cssText).to.contain('all: initial')
       expect(result.container.style.position).to.equal('static')
 
       // Verify shadow root was created
