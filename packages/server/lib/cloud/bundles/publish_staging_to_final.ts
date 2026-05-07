@@ -45,7 +45,18 @@ export const publishStagingToFinal = async (staging: string, finalDir: string): 
   const others = allFiles.filter((rel) => rel !== MANIFEST_REL)
   const hasManifest = allFiles.includes(MANIFEST_REL)
 
-  await Promise.all(others.map((rel) => publishOne(staging, finalDir, rel)))
+  // Promise.all rejects on the first failure but leaves siblings running.
+  // Drain them with allSettled before throwing so the caller's `finally` can
+  // safely rm the staging dir without producing unhandled rejections from
+  // in-flight renames whose `src` path disappears mid-flight.
+  const otherPromises = others.map((rel) => publishOne(staging, finalDir, rel))
+
+  try {
+    await Promise.all(otherPromises)
+  } catch (err) {
+    await Promise.allSettled(otherPromises)
+    throw err
+  }
 
   if (hasManifest) {
     await publishOne(staging, finalDir, MANIFEST_REL)
