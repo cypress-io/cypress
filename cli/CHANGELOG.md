@@ -7,13 +7,10 @@
 
 **Bugfixes:**
 
-<<<<<<< fix/teardown-including-watchers
 - Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
-=======
 - Fixed an issue where multi-origin tests using [`cy.origin`](https://docs.cypress.io/api/commands/origin) could fail to talk to a secondary origin after test isolation, when the spec-bridge iframe was already present, or when more than one secondary origin became ready around the same time. Cached spec-bridge window targets are now cleared at the correct lifecycle points, improving performance of specs with cy.origin calls. Addressed in [#33704](https://github.com/cypress-io/cypress/pull/33704).
 - Fixed an issue where a CSS selector built internally from element attributes could throw an uncaught `Syntax error, unrecognized expression` and crash the runner when an attribute value contained CSS-special characters (for example, an `<input>` with a `pattern` attribute containing regex metacharacters). Fixes [#26967](https://github.com/cypress-io/cypress/issues/26967) and [#29345](https://github.com/cypress-io/cypress/issues/29345).
 - Fixed an issue where transient HTTP 500 responses from Cypress Cloud were not retried for idempotent requests. Fixed in [#33718](https://github.com/cypress-io/cypress/pull/33718).
->>>>>>> develop
 
 **Misc:**
 
