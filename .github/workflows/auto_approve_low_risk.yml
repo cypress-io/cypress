@@ -101,6 +101,25 @@ jobs:
             echo "::notice::No reconciliation needed (event=$EVENT_ACTION, is_low_risk=$IS_LOW_RISK, has_existing_approval=$([ -n "$REVIEW_ID" ] && echo true || echo false))."
           fi
 
+      - name: Require BugBot review on current head SHA
+        if: steps.action.outputs.action == 'approve'
+        id: bugbot-head-review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eo pipefail
+          REVIEWED=$(gh api --paginate \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
+            --jq "[.[] | select(.user.login == \"cursor[bot]\" and .commit_id == \"$HEAD_SHA\")] | length")
+
+          if [ "$REVIEWED" -eq 0 ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::BugBot has not reviewed head SHA $HEAD_SHA yet. Skipping approval."
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Generate Cypress Bot App token
         if: steps.action.outputs.action == 'approve' || steps.action.outputs.action == 'dismiss'
         id: app-token
@@ -137,6 +156,7 @@ jobs:
           steps.action.outputs.action == 'approve' &&
           github.event.sender.type == 'Bot' &&
           github.event.sender.login == 'cursor[bot]' &&
+          steps.bugbot-head-review.outputs.ok == 'true' &&
           steps.author-check.outputs.has_write == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
