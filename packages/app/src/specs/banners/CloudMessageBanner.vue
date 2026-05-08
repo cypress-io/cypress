@@ -101,8 +101,9 @@ function resolveUtmParams (cta: AppMessageCtaShape): Record<string, string> {
 }
 
 function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
-  // `messageId` matches the impression and dismiss events for this banner
-  // instance — warehouse join key for the shown → clicked → dismissed funnel.
+  // `messageId` joins this click to its impression and (eventual) dismiss for
+  // the shown → clicked → dismissed funnel; `cta_id` is the stable
+  // analytical key for which CTA was clicked (URL-revision-resilient).
   void record({
     campaign: props.message.analytics.campaign,
     medium: 'Cloud Message Banner',
@@ -110,7 +111,7 @@ function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
     messageId: bannerInstanceId,
     payload: {
       action: 'click',
-      cta_href: cta.href,
+      cta_id: cta.id,
     },
   })
 

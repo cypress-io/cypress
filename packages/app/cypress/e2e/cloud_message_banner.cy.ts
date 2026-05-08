@@ -12,6 +12,7 @@ const cloudMessage = {
   ctas: [
     {
       __typename: 'CloudAppMessageCta',
+      id: 'learn_cy_prompt',
       text: 'Learn about cy.prompt',
       href: 'https://docs.cypress.io/api/commands/prompt',
       style: 'secondary',
@@ -19,6 +20,7 @@ const cloudMessage = {
     },
     {
       __typename: 'CloudAppMessageCta',
+      id: 'learn_studio_ai',
       text: 'Learn about Studio AI',
       href: 'https://docs.cypress.io/app/guides/cypress-studio',
       style: 'secondary',

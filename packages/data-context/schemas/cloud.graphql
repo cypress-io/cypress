@@ -47,6 +47,11 @@ Call-to-action button rendered alongside an in-app cloud message banner
 """
 type CloudAppMessageCta {
   href: String!
+
+  """
+  Stable analytical key for this CTA, message-scoped (e.g. `learn_cy_prompt`). Sent as `ctaId` on `App Message Clicked` events for warehouse joins; survives URL revisions and disambiguates two CTAs that share a destination.
+  """
+  id: String!
   style: CloudAppMessageCtaStyle!
   text: String!
   utm: CloudAppMessageUtm

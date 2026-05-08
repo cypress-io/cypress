@@ -196,6 +196,7 @@ fragment SpecsListBanners on Query {
     title
     body
     ctas {
+      id
       text
       href
       style

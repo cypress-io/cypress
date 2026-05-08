@@ -21,6 +21,7 @@ const baseMessage = {
   ctas: [
     {
       __typename: 'CloudAppMessageCta' as const,
+      id: 'learn_cy_prompt',
       text: 'Learn about cy.prompt',
       href: 'https://docs.cypress.io/api/commands/prompt',
       style: 'secondary' as const,
@@ -28,6 +29,7 @@ const baseMessage = {
     },
     {
       __typename: 'CloudAppMessageCta' as const,
+      id: 'learn_studio_ai',
       text: 'Learn about Studio AI',
       href: 'https://docs.cypress.io/app/guides/cypress-studio',
       style: 'secondary' as const,
@@ -156,7 +158,7 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
       })
     })
 
-    it('CTA click forwards only the cta href (text/style intentionally dropped)', () => {
+    it('CTA click forwards only the cta id (href/text/style intentionally dropped)', () => {
       cy.mount(<CloudMessageBanner hasBannerBeenShown={true} message={baseMessage} />)
 
       cy.findAllByTestId('cloud-message-cta-secondary').first().click()
@@ -168,7 +170,8 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
         expect(arg.medium).to.equal('Cloud Message Banner')
         expect(arg.includeMachineId).to.equal(true)
         expect(arg.payload).to.contain('"action":"click"')
-        expect(arg.payload).to.contain('"cta_href":"https://docs.cypress.io/api/commands/prompt"')
+        expect(arg.payload).to.contain('"cta_id":"learn_cy_prompt"')
+        expect(arg.payload).to.not.contain('cta_href')
         expect(arg.payload).to.not.contain('cta_text')
         expect(arg.payload).to.not.contain('cta_style')
       })
