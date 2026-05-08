@@ -187,7 +187,7 @@
     "sinon": "17.0.1",
     "snap-shot-it": "7.9.10",
     "stealthy-require": "^1.1.1",
-    "socket.io": "4.0.1",
+    "socket.io": "4.8.3",
     "ssestream": "1.0.1",
     "supertest": "4.0.2",
     "ts-loader": "^9.5.7",
