@@ -283,6 +283,28 @@ describe('http/response-middleware', function () {
       })
     })
 
+    it('records incomingResHadEmptyBody=true when origin sent Content-Length: 0', async function () {
+      prepareContext({ 'content-length': '0' })
+
+      await testMiddleware([OmitProblematicHeaders], ctx)
+      expect(ctx.incomingResHadEmptyBody).toBe(true)
+    })
+
+    it('records incomingResHadEmptyBody=false when Content-Length is non-zero', async function () {
+      prepareContext({ 'content-length': '42' })
+
+      await testMiddleware([OmitProblematicHeaders], ctx)
+      expect(ctx.incomingResHadEmptyBody).toBe(false)
+    })
+
+    it('records incomingResHadEmptyBody=false when Content-Length is absent', async function () {
+      prepareContext()
+      delete ctx.incomingRes.headers['content-length']
+
+      await testMiddleware([OmitProblematicHeaders], ctx)
+      expect(ctx.incomingResHadEmptyBody).toBe(false)
+    })
+
     let badHeaders = {
       'bad-header ': 'value', //(contains trailling space)
       'Content Type': 'value', //(contains a space)
@@ -2018,12 +2040,190 @@ describe('http/response-middleware', function () {
       expect(responseEndedWithEmptyBodyStub).not.toHaveBeenCalled()
     })
 
+    describe('when origin response had Content-Length: 0', function () {
+      // Regression coverage for cypress-io/cypress#16469: a DELETE 200 (or any
+      // 200 with Content-Length: 0) was being re-emitted with Transfer-Encoding:
+      // chunked, which broke clients that assumed there would be content.
+      it('sends Content-Length: 0 and ends without piping a body', async function () {
+        const setHeader = vi.fn()
+        const end = vi.fn()
+
+        prepareContext({
+          req: {},
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader,
+            end,
+            wantsInjection: false,
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(setHeader).toHaveBeenCalledWith('Content-Length', '0')
+        expect(end).toHaveBeenCalledOnce()
+      })
+
+      it('notifies protocolManager that the response ended with an empty body', async function () {
+        prepareContext({
+          protocolManager: {
+            responseEndedWithEmptyBody: responseEndedWithEmptyBodyStub,
+          },
+          req: {
+            browserPreRequest: {
+              requestId: '123',
+              cdpRequestWillBeSentTimestamp: 1,
+              cdpRequestWillBeSentReceivedTimestamp: 2,
+              proxyRequestReceivedTimestamp: 3,
+              cdpLagDuration: 4,
+              proxyRequestCorrelationDuration: 5,
+            },
+          },
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader: vi.fn(),
+            end: vi.fn(),
+            wantsInjection: false,
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(responseEndedWithEmptyBodyStub).toHaveBeenCalledWith(
+          expect.objectContaining({
+            requestId: '123',
+            isCached: false,
+            timings: expect.objectContaining({
+              cdpRequestWillBeSentTimestamp: 1,
+              cdpRequestWillBeSentReceivedTimestamp: 2,
+              proxyRequestReceivedTimestamp: 3,
+              cdpLagDuration: 4,
+              proxyRequestCorrelationDuration: 5,
+            }),
+          }),
+        )
+      })
+
+      it('does not short-circuit when downstream wants to inject HTML', async function () {
+        const setHeader = vi.fn()
+        const end = vi.fn()
+
+        prepareContext({
+          req: {},
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader,
+            end,
+            wantsInjection: 'full',
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(setHeader).not.toHaveBeenCalled()
+        expect(end).not.toHaveBeenCalled()
+      })
+
+      it('does not short-circuit when downstream wants security stripped', async function () {
+        const setHeader = vi.fn()
+        const end = vi.fn()
+
+        prepareContext({
+          req: {},
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader,
+            end,
+            wantsInjection: false,
+            wantsSecurityRemoved: true,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(setHeader).not.toHaveBeenCalled()
+        expect(end).not.toHaveBeenCalled()
+      })
+
+      it('does not short-circuit when a cy.intercept route matched (interceptor may have replaced the body)', async function () {
+        const setHeader = vi.fn()
+        const end = vi.fn()
+
+        prepareContext({
+          req: { requestId: 'req-42' },
+          incomingRes: {
+            statusCode: 200,
+          },
+          incomingResHadEmptyBody: true,
+          netStubbingState: {
+            requests: { 'req-42': {} },
+          },
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+            setHeader,
+            end,
+            wantsInjection: false,
+            wantsSecurityRemoved: false,
+          },
+        })
+
+        await testMiddleware([MaybeEndWithEmptyBody], ctx)
+        expect(setHeader).not.toHaveBeenCalled()
+        expect(end).not.toHaveBeenCalled()
+      })
+    })
+
+    it('does not short-circuit a 200 response when origin did not send Content-Length: 0', async function () {
+      const setHeader = vi.fn()
+      const end = vi.fn()
+
+      prepareContext({
+        req: {},
+        incomingRes: {
+          statusCode: 200,
+        },
+        incomingResHadEmptyBody: false,
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+          setHeader,
+          end,
+        },
+      })
+
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+      expect(setHeader).not.toHaveBeenCalled()
+      expect(end).not.toHaveBeenCalled()
+    })
+
     function prepareContext (props) {
       ctx = {
         incomingRes: props.incomingRes,
         protocolManager: props.protocolManager,
         req: props.req,
-        res: {
+        incomingResHadEmptyBody: props.incomingResHadEmptyBody,
+        netStubbingState: props.netStubbingState,
+        res: props.res || {
           on: (event, listener) => {},
           off: (event, listener) => {},
           end: () => {},

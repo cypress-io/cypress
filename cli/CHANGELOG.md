@@ -7,6 +7,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where the proxy stripped `Content-Length: 0` from empty responses (e.g. a `DELETE 200` with no body) and the resulting empty body was re-emitted with `Transfer-Encoding: chunked`, breaking clients that assume a fixed-length response. Partially addresses [#16469](https://github.com/cypress-io/cypress/issues/16469). Fixed in [#33754](https://github.com/cypress-io/cypress/pull/33754).
 - Fixed an issue where component specs that defined local React components could register every `describe` / `it` block twice in `cypress open` when using Vite 8, because React refresh treated those specs as HMR self-accepting modules. `@cypress/vite-dev-server` now excludes component spec files from JSX refresh while leaving Fast Refresh enabled for application source. Fixes [#33750](https://github.com/cypress-io/cypress/issues/33750).
 - Fixed an issue where multi-origin tests using [`cy.origin`](https://docs.cypress.io/api/commands/origin) could fail to talk to a secondary origin after test isolation, when the spec-bridge iframe was already present, or when more than one secondary origin became ready around the same time. Cached spec-bridge window targets are now cleared at the correct lifecycle points, improving performance of specs with cy.origin calls. Addressed in [#33704](https://github.com/cypress-io/cypress/pull/33704).
 - Fixed an issue where a CSS selector built internally from element attributes could throw an uncaught `Syntax error, unrecognized expression` and crash the runner when an attribute value contained CSS-special characters (for example, an `<input>` with a `pattern` attribute containing regex metacharacters). Fixes [#26967](https://github.com/cypress-io/cypress/issues/26967) and [#29345](https://github.com/cypress-io/cypress/issues/29345).
@@ -15,6 +16,10 @@
 **Misc:**
 
 - Additional CI environment variables are now captured to support a future failed test retry feature. Addressed in [#33714](https://github.com/cypress-io/cypress/pull/33714).
+
+**Dependency Updates:**
+
+- Upgraded `socket.io` from `4.0.1` to `4.8.3`, `socket.io-client` from `4.0.1` to `4.8.3`, and `socket.io-parser` from `4.0.5` to `4.2.6` to address a [Denial of Service](https://github.com/advisories/GHSA-677m-j7p3-52f9) vulnerability reported in security scans. The `engine.io`, `engine.io-client`, and `engine.io-parser` direct deps in `@packages/socket` were also bumped to keep transitive copies aligned and the existing browser-side patches applied. Addressed in [#33719](https://github.com/cypress-io/cypress/pull/33719).
 
 ## 15.14.2
 
@@ -35,6 +40,7 @@
 - Upgraded `simple-git` from `3.33.0` to `3.36.0` to address a [Remote Code Execution](https://security.snyk.io/vuln/SNYK-JS-SIMPLEGIT-15456078) vulnerability reported in security scans. Addressed in [#33680](https://github.com/cypress-io/cypress/pull/33680).
 - Upgraded `ts-loader` from `9.5.2` to `9.5.7`. Addresses [#33648](https://github.com/cypress-io/cypress/issues/33648). Addressed in [#33691](https://github.com/cypress-io/cypress/pull/33691)
 - Upgraded `@cypress/request` from `^3.0.10` to `^4.0.0`. Addresses [#33668](https://github.com/cypress-io/cypress/issues/33668). Addressed in [#33712](https://github.com/cypress-io/cypress/pull/33712)
+
 ## 15.14.1
 
 **Performance:**
