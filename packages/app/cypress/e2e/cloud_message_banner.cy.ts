@@ -27,7 +27,11 @@ const cloudMessage = {
   ],
   dismissal: {
     __typename: 'CloudAppMessageDismissal',
-    scope: 'user',
+    // Test-fixture choice. Scope routing (user vs project) is unit-tested
+    // against the component directly in CloudMessageBanner.cy.tsx; here we
+    // pick `'project'` so the dismiss assertion can intercept the simpler
+    // project mutation without dragging the global state path through.
+    scope: 'project',
   },
   analytics: {
     __typename: 'CloudAppMessageAnalytics',
@@ -101,11 +105,11 @@ describe('App - Cloud Message Banner', () => {
     cy.loginUser()
     stubCloudAppMessages([cloudMessage])
 
-    // The v1 catalog message has `dismissal.scope: 'user'`, so writes route
-    // through the global mutation (not project). Assert via mutation payload
-    // — `beforeEach` stubs `getCurrentProjectSavedState`, which would shadow
-    // a savedState re-read regardless of scope.
-    cy.intercept('mutation-TrackedBanner_SetGlobalState').as('setPrefs')
+    // Assert via mutation payload — `beforeEach` stubs
+    // `getCurrentProjectSavedState`, which would shadow a savedState re-read.
+    // The fixture is project-scoped so this intercept matches; see
+    // `cloudMessage.dismissal.scope` above.
+    cy.intercept('mutation-TrackedBanner_SetProjectState').as('setPrefs')
 
     cy.visitApp()
     cy.specsPageIsVisible()
