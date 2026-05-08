@@ -130,23 +130,17 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
     it('CTA click fires recordEvent with the same messageId as the impression (warehouse join key)', () => {
       cy.mount(<CloudMessageBanner hasBannerBeenShown={false} message={baseMessage} />)
 
-      // First wait for the impression event to land so we can capture its messageId.
       cy.get('@recordSeen').should('have.been.calledOnce')
-
       cy.findAllByTestId('cloud-message-cta-secondary').first().click()
 
-      // Capture the impression's messageId via `cy.then` (not `cy.should`) so we can
-      // queue the follow-up `cy.get('@recordEvent')` assertion. Cypress disallows
-      // queueing commands inside a `cy.should` callback because it retries the
-      // callback and would re-enqueue commands.
+      // `cy.then` (not `cy.should`) so the inner `cy.get` doesn't re-enqueue
+      // on retry.
       cy.get('@recordSeen').then(($recordSeen) => {
         const seenCall = ($recordSeen as unknown as Sinon.SinonStub).getCall(0)
         const seenMessageId = seenCall.args[0].messageId
 
         expect(seenMessageId).to.be.a('string')
 
-        // Without the slot-scope forwarding fix, the click would have minted a
-        // fresh nanoid here and the warehouse join would fail.
         cy.get('@recordEvent').should(($recordEvent) => {
           const clickCall = ($recordEvent as unknown as Sinon.SinonStub).getCall(0)
 
@@ -168,8 +162,6 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
         expect(arg.includeMachineId).to.equal(true)
         expect(arg.payload).to.contain('"action":"click"')
         expect(arg.payload).to.contain('"cta_href":"https://docs.cypress.io/api/commands/prompt"')
-        // Text/style are deliberately not forwarded — see comment on
-        // `AppMessageClickedProps`.
         expect(arg.payload).to.not.contain('cta_text')
         expect(arg.payload).to.not.contain('cta_style')
       })
@@ -180,18 +172,13 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
 
       cy.findAllByTestId('cloud-message-cta-secondary').first().click()
 
-      // The destination URL is decorated with UTM params before opening.
-      // `utm_source` is injected by `getUrlWithParams` based on the binary
-      // context (`Binary: App` in this component-test runner — but we don't
-      // assert the exact value to keep the test resilient to context changes).
-      // `utm_medium` is fixed; `utm_campaign` is derived from
-      // `analytics.campaign`. The base URL is preserved.
       cy.get('@openExternal').should(($stub) => {
         const url = ($stub as unknown as Sinon.SinonStub).getCall(0).args[0].url as string
 
         expect(url).to.match(/^https:\/\/docs\.cypress\.io\/api\/commands\/prompt\?/)
         expect(url).to.include('utm_medium=Cloud+Message+Banner')
         expect(url).to.include('utm_campaign=ai_tools_education_2026q2')
+        // `utm_source` is auto-injected from running context; don't pin the value.
         expect(url).to.include('utm_source=')
       })
     })
@@ -262,7 +249,6 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
     it('writes lastShown on mount and dismissed on close (no shownCount counter)', () => {
       cy.mount(<CloudMessageBanner hasBannerBeenShown={false} message={baseMessage} />)
 
-      // First setPrefs call fires from onMounted with `lastShown`.
       cy.get('@setPrefs').should('have.been.calledOnce')
       cy.get('@setPrefs').should(($stub) => {
         const arg = ($stub as unknown as Sinon.SinonStub).getCall(0).args[0]
@@ -272,10 +258,6 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
 
       cy.findByTestId('alert-suffix-icon').click()
 
-      // Second setPrefs call fires from the dismissal — writes `dismissed`.
-      // v1 collapses to "show once, then never," so we no longer track a
-      // dismissal counter alongside this; bumping the message id is the
-      // only re-pitch lever.
       cy.get('@setPrefs').should('have.been.calledTwice')
       cy.get('@setPrefs').should(($stub) => {
         const arg = ($stub as unknown as Sinon.SinonStub).getCall(1).args[0]

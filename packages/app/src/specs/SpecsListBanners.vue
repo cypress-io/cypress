@@ -358,49 +358,26 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
 
   const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
-  // Tests can short-circuit all banners via the `_disabled` flag.
+  // `_disabled` is the test kill switch for all banners.
   if (bannersState?._disabled) {
     return false
   }
 
-  // v1 model: show once, then never. Dismissal is permanent for a given
-  // message id; re-pitching is done by bumping the id (e.g.
-  // `ai_tools_education` → `ai_tools_education_2026q3`), which mints a new
-  // savedState key and re-shows the message for everyone.
-  //
-  // `dismissal.scope` is preserved on the schema but currently has only one
-  // behavior — both `'user'` and `'project'` read from project-scoped
-  // savedState. Splitting them is deferred pending a product call on cross-
-  // project dismissal semantics.
   const local = bannersState?.[cloudMessageDismissalKey(msg.id)]
 
   return !local?.dismissed
 }
 
-// `cloudAppMessages` is a stitched remote field. We gate the onboarding-
-// banner fallback on it having "resolved at all" so a ghost banner doesn't
-// mount during the GraphQL round-trip on cold cache and fire a spurious
-// `recordBannerShown` event + write `lastShown` to savedState.
-//
-// Treating `null` as "resolved" (rather than "still loading") matters: when
-// the cloud query genuinely errors — companion services not yet deployed,
-// schema mismatch, network outage — the field resolves to `null`. We must
-// fall through to the onboarding banners in that case; `null` ≠ "loading."
-// Only `undefined` (urql hasn't populated the field yet) is treated as
-// in-flight.
+// Distinguishes "still loading" (undefined) from "resolved" (null on error,
+// or an array). Without this, an onboarding banner would mount during the
+// cold-cache round-trip and fire a spurious impression event.
 const cloudMessagesHaveResolved = computed(() => {
   return props.gql.cloudAppMessages !== undefined
 })
 
 const activeCloudMessage = computed(() => {
-  // Per product feedback (Dan, 2026-05-05): cloud messages outrank ALL
-  // onboarding banners — *"this is the first level, this trumps everything."*
-  // The orchestrator's `v-else-if` order in the template enforces the visual
-  // ordering; this computed just decides whether a cloud message is eligible
-  // at all.
+  // Server pre-filters and priority-sorts; client only re-checks dismissal.
   const messages = props.gql.cloudAppMessages ?? []
-  // Already pre-filtered & priority-sorted server-side; client only re-checks
-  // dismissal (which lives locally) and the test kill-switch.
   const eligible = messages.filter((m) => m && isCloudMessageEligible(m))
 
   return eligible[0] ?? null

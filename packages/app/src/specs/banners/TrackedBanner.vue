@@ -74,34 +74,22 @@ const reportDismissedMutation = useMutation(TrackedBanner_RecordBannerDismissedD
 const bannerInstanceId = ref(nanoid())
 const isAlertDisplayed = ref(true)
 
-// Cloud-driven banners send `includeMachineId: true` so events route through
-// /machine-collect with the binary's machineId attached (used for unique-user
-// dedup in the warehouse, since IP alone is unreliable behind NAT/VPN). The
-// existing onboarding banners (Login / Connect / Record / CT-Available) keep
-// their long-standing /anon-collect path — changing their analytics shape now
-// would alter their historical data continuity.
-//
-// Declared before `watchEffect` below because the watcher fires synchronously
-// at component setup, and `recordBannerShown` reads `isCloudBanner.value`. With
-// the const declaration after the watcher, the binding is in the temporal dead
-// zone when the watcher first runs.
+// `includeMachineId: true` routes cloud-banner events to /machine-collect for
+// warehouse dedup. Onboarding banners stay on /anon-collect to preserve
+// existing analytics continuity. Declared before `watchEffect` to avoid the
+// TDZ — the watcher fires synchronously during setup.
 const isCloudBanner = computed(() => props.bannerId.startsWith('cloud:'))
 
 watchEffect(() => {
   if (!props.hasBannerBeenShown && props.eventData) {
-    // We only want to record the banner being shown once per user, so only record if this is the *first* time the banner has been shown
     recordBannerShown(props.eventData)
   }
 })
 
 watch(() => isAlertDisplayed.value, async (newVal) => {
   if (!newVal) {
-    // Fire dismiss event for cloud-driven banners. Existing local banners
-    // (Login / Connect / Record / CT Available) historically don't report
-    // dismissal, and changing that would alter their analytics in ways their
-    // owners didn't sign up for — so we gate the event on the `cloud:`
-    // namespace. The funnel (shown → clicked → dismissed) only matters for
-    // the cloud channel anyway.
+    // Onboarding banners historically don't report dismissal; gating the
+    // event on the `cloud:` namespace preserves their analytics shape.
     if (props.bannerId.startsWith('cloud:') && props.eventData) {
       recordBannerDismissed(props.eventData)
     }
@@ -133,9 +121,7 @@ function recordBannerShown ({ campaign, medium, cohort }: EventData): void {
 }
 
 function recordBannerDismissed ({ campaign, medium }: EventData): void {
-  // Distinguished from impression by `payload.action: 'dismiss'`. Same
-  // `messageId` (instance nanoid) so warehouse joins can pair impression ↔
-  // dismissal for the same banner instance.
+  // Same `messageId` as the impression event — joins the funnel.
   reportDismissedMutation.executeMutation({
     campaign,
     messageId: bannerInstanceId.value,

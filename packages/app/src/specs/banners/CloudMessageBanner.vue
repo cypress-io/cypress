@@ -53,8 +53,7 @@ const props = defineProps<{
   message: AppMessageShape
 }>()
 
-// Namespaced bannerId — matches the dismissal-bookkeeping convention so cloud
-// message ids never collide with the static `BannerIds` enum.
+// `cloud:` namespace keeps cloud-message ids from colliding with `BannerIds`.
 const bannerId = computed(() => `cloud:${props.message.id}`)
 
 const alertStatus = computed(() => {
@@ -62,9 +61,6 @@ const alertStatus = computed(() => {
 })
 
 const messageIcon = computed(() => {
-  // Warning messages get the warning glyph; info renders without an icon —
-  // there isn't a generic "info" glyph in the design system, and using the
-  // warning icon for info-style content would misframe the visual severity.
   return props.message.visualStyle === 'warning' ? WarningIcon : undefined
 })
 
@@ -76,28 +72,18 @@ const eventData = computed(() => {
   }
 })
 
-// Composables — must be called once during setup, not inside event handlers
-// (they internally use `useMutation` which relies on component-instance
-// injection). The returned functions are then safe to call from handlers.
+// useMutation depends on component-instance injection, so these have to
+// resolve during setup, not inside event handlers.
 const openExternal = useExternalLink()
 const { record } = useRecordEvent()
 
-// Impression event is already wired via `TrackedBanner`'s `recordBannerShown`
-// (fires once per banner per project, gated on `hasBannerBeenShown`). Click
-// and dismiss events are wired below — they don't fire from `TrackedBanner`
-// today, so we add them explicitly for cloud messages.
-
-// UTM keys the catalog can populate. `source`, `medium`, and `campaign` are
-// auto-derived (binary context, fixed string, and `analytics.campaign`
-// respectively) and are NOT in this list — including them would invite drift
-// between catalog values and the rest of the binary's UTM convention.
+// `source / medium / campaign` are auto-derived; the catalog only populates
+// these supplementary keys.
 const UTM_FIELDS = ['content', 'term', 'id'] as const
 
 function resolveUtmParams (cta: AppMessageCtaShape): Record<string, string> {
-  // Per-field cascade: CTA-level wins, falls back to message-level. Truthy
-  // (not nullish) coalescing is intentional — `''` from the catalog should
-  // be treated as "not set," otherwise we'd emit `utm_content=` (a real-but-
-  // empty parameter that confuses analytics).
+  // CTA-level overrides message-level, per field. Truthy coalescing
+  // (not `??`) so empty strings in the catalog count as "not set."
   const ctaUtm = cta.utm
   const messageUtm = props.message.analytics.utm
   const params: Record<string, string> = {}
@@ -114,20 +100,8 @@ function resolveUtmParams (cta: AppMessageCtaShape): Record<string, string> {
 }
 
 function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
-  // Fires `recordEvent` mutation → `/machine-collect` (because
-  // `includeMachineId: true`) → Hightouch `App Message Clicked`. The
-  // cypress-services side calls `tracker.identify(req.ctx.user)` first when
-  // there's a session cookie, so logged-in users get linked to the event;
-  // logged-out users still produce a row keyed by machineId.
-  //
-  // `messageId` is forwarded explicitly from `TrackedBanner`'s slot scope so
-  // it matches the impression and dismiss events fired for the same banner
-  // instance — this is the warehouse join key for the funnel
-  // (shown → clicked → dismissed).
-  //
-  // Only `cta_href` is echoed to the analytics event — the bare URL is the
-  // stable, queryable key for funnel queries. CTA text/style are not
-  // forwarded; UTM params live in the destination URL only.
+  // `messageId` matches the impression and dismiss events for this banner
+  // instance — warehouse join key for the shown → clicked → dismissed funnel.
   void record({
     campaign: props.message.analytics.campaign,
     medium: 'Cloud Message Banner',
@@ -139,11 +113,7 @@ function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
     },
   })
 
-  // Decorate the destination URL with UTMs. `getUrlWithParams` auto-injects
-  // `utm_source` from the binary context (Binary: App vs Binary: Launchpad);
-  // we add `utm_medium` (fixed) + `utm_campaign` (the message's analytics
-  // campaign id, which changes when a message is re-pitched) + any optional
-  // `utm_content / utm_term / utm_id` resolved via the cascade above.
+  // `getUrlWithParams` auto-injects `utm_source` from the running context.
   const decoratedUrl = getUrlWithParams({
     url: cta.href,
     params: {

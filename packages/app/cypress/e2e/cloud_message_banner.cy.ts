@@ -1,10 +1,5 @@
-// E2E coverage for the cloud-driven app messaging banner. Component tests
-// (CloudMessageBanner.cy.tsx, SpecsListBanners.cy.tsx) cover rendering and
-// event-shape assertions in isolation; this spec exercises the actual
-// GraphQL stitching path — `cloudAppMessages` is a remote field on the
-// test-runner schema, fetched from cypress-services via `executeRemoteGraphQL`.
-// Without this test, the wiring between the binary's local query and the
-// cloud resolver is exercised only at deploy time.
+// Exercises the GraphQL stitching path that component tests can't reach —
+// `cloudAppMessages` is a remote field fetched from cypress-services.
 
 const cloudMessage = {
   __typename: 'CloudAppMessage',
@@ -42,14 +37,9 @@ const cloudMessage = {
   },
 }
 
-// `cloudAppMessages` is a stitched remote field. The binary's
-// `CloudDataSource.makeOperationName` produces names of the shape
-// `<rootOp>_cloudAppMessages`, but we don't pin to that shape — the test
-// schema (`stubCloudTypes.ts`) doesn't define a resolver for the field, so
-// `execute()` returns a non-null-field error and a null `data`. We
-// therefore detect cloudAppMessages requests by inspecting the parsed
-// document, and then return a wholesale-replacement result so the
-// upstream errors don't leak into urql's cache and suppress the banner.
+// Match by query body or operationName suffix — the test schema has no
+// resolver for `cloudAppMessages`, so we wholesale-replace the result rather
+// than letting an unresolved-field error reach urql.
 function stubCloudAppMessages (messages: typeof cloudMessage[] | []) {
   cy.remoteGraphQLIntercept((obj, _testState, options) => {
     const queryString = typeof obj.query === 'string' ? obj.query : ''
@@ -76,12 +66,10 @@ describe('App - Cloud Message Banner', () => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
 
-    // Pre-empt `startAppServer`'s default `getCurrentProjectSavedState` stub,
-    // which sets `banners._disabled = true` to suppress every banner during
-    // E2E. The cloud-message orchestrator honors that flag, so without this
-    // override the cloud banner never renders. We mirror the original mock
-    // (firstOpened / lastOpened / promptsShown to silence the CI prompt) but
-    // omit the `_disabled` flag so cloud messages can surface.
+    // `startAppServer` defaults `banners._disabled = true` which would
+    // suppress the cloud banner. Pre-stub savedState without that flag so
+    // banners can surface. Setting it before `startAppServer` short-circuits
+    // the default stub.
     cy.withCtx((ctx, { sinon }) => {
       sinon.stub(ctx._apis.projectApi, 'getCurrentProjectSavedState').resolves({
         firstOpened: 1609459200000,
@@ -113,10 +101,8 @@ describe('App - Cloud Message Banner', () => {
     cy.loginUser()
     stubCloudAppMessages([cloudMessage])
 
-    // We assert via the mutation payload (rather than re-reading savedState)
-    // because `beforeEach` stubs `getCurrentProjectSavedState`, which would
-    // shadow whatever the dismissal writes back. The payload is the source
-    // of truth here: it's exactly what gets persisted to disk.
+    // Assert via mutation payload — `beforeEach` stubs
+    // `getCurrentProjectSavedState`, which would shadow a savedState re-read.
     cy.intercept('mutation-TrackedBanner_SetProjectState').as('setPrefs')
 
     cy.visitApp()
@@ -124,24 +110,16 @@ describe('App - Cloud Message Banner', () => {
 
     cy.findByTestId('cloud-message-banner').should('be.visible')
 
-    // First `setPreferences` call fires from `onMounted` with `lastShown`.
     cy.wait('@setPrefs').then((interception) => {
-      // Cypress auto-parses JSON request bodies, so `body` is already an object.
       const body = interception.request.body as { variables: { value: string } }
-      const value = body.variables.value
 
-      expect(value).to.contain('lastShown')
+      expect(body.variables.value).to.contain('lastShown')
     })
 
     cy.findByTestId('alert-suffix-icon').click()
     cy.findByTestId('cloud-message-banner').should('not.exist')
 
-    // Second `setPreferences` call fires from the dismissal — must include
-    // a `dismissed` timestamp under the cloud-namespaced key so future
-    // eligibility checks suppress the banner. v1 is "show once, then
-    // never": no shownCount counter, no cooldown, no max-dismissal cap.
     cy.wait('@setPrefs').then((interception) => {
-      // Cypress auto-parses JSON request bodies, so `body` is already an object.
       const body = interception.request.body as { variables: { value: string } }
       const value = body.variables.value
 
@@ -153,9 +131,6 @@ describe('App - Cloud Message Banner', () => {
   })
 
   it('falls through to onboarding banners when the channel returns an empty manifest', () => {
-    // No login → logged-out cohort would normally show the LoginBanner.
-    // Asserting it still appears proves the empty-manifest case doesn't
-    // short-circuit the orchestrator.
     stubCloudAppMessages([])
 
     cy.visitApp()
@@ -166,10 +141,6 @@ describe('App - Cloud Message Banner', () => {
   })
 
   it('cloud message wins over onboarding banners when both are eligible', () => {
-    // No `cy.loginUser()` — the logged-out state would normally render the
-    // LoginBanner. With a cloud message in the manifest, the cloud banner
-    // must take precedence (per product spec, 2026-05-05 standup: cloud
-    // message outranks all onboarding banners).
     stubCloudAppMessages([cloudMessage])
 
     cy.visitApp()

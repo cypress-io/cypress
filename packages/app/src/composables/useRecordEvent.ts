@@ -16,12 +16,9 @@ type EventParams = {
   payload?: Record<string, string | number | undefined | null>
   includeMachineId?: boolean
   /**
-   * Optional explicit messageId. When set, this value is used instead of
-   * generating a fresh `nanoid()`. The intended use case is grouping multiple
-   * events that belong to the same logical banner-instance (impression →
-   * click → dismiss) so they can be joined in the warehouse. Pass the same
-   * id to every `record()` call for the same instance; omit for one-off
-   * events that don't need joining.
+   * Optional explicit messageId. Pass the same id to every `record()` call
+   * for events that belong to the same banner instance so the warehouse
+   * can join the impression → click → dismiss funnel.
    */
   messageId?: string
 }
