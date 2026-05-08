@@ -20,6 +20,7 @@
 **Dependency Updates:**
 
 - Upgraded `socket.io` from `4.0.1` to `4.8.3`, `socket.io-client` from `4.0.1` to `4.8.3`, and `socket.io-parser` from `4.0.5` to `4.2.6` to address a [Denial of Service](https://github.com/advisories/GHSA-677m-j7p3-52f9) vulnerability reported in security scans. The `engine.io`, `engine.io-client`, and `engine.io-parser` direct deps in `@packages/socket` were also bumped to keep transitive copies aligned and the existing browser-side patches applied. Addressed in [#33719](https://github.com/cypress-io/cypress/pull/33719).
+- Upgraded `uuid` from `8.3.2` to `11.1.1` to address an [Improper Validation of Specified Index, Position, or Offset in Input](https://security.snyk.io/vuln/SNYK-JS-UUID-16133035) vulnerability reported in security scans. A `**/uuid` resolution forces the fixed version across transitive paths through `sockjs` (in `webpack-dev-server`) and `trash`. Where it was safe, direct uses of `uuid.v4()` in `@packages/server` and `@packages/network` were also replaced with the native `crypto.randomUUID()` to reduce the dependency surface. Addressed in [#33765](https://github.com/cypress-io/cypress/pull/33765).
 
 ## 15.14.2
 
