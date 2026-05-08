@@ -111,7 +111,8 @@ jobs:
           set -eo pipefail
           REVIEWED=$(gh api --paginate \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
-            --jq "[.[] | select(.user.login == \"cursor[bot]\" and .commit_id == \"$HEAD_SHA\")] | length")
+            --jq ".[] | select(.user.login == \"cursor[bot]\" and .commit_id == \"$HEAD_SHA\") | .id" \
+            | wc -l | tr -d ' ')
 
           if [ "$REVIEWED" -eq 0 ]; then
             echo "ok=false" >> "$GITHUB_OUTPUT"
