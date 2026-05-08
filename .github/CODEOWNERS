@@ -11,5 +11,3 @@
 /.github/         @cypress-io/app
 /.circleci/       @cypress-io/app
 /scripts/         @cypress-io/app
-/package.json     @cypress-io/app
-/yarn.lock        @cypress-io/app
