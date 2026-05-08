@@ -7,6 +7,34 @@ const debug = Debug('cypress:server:browsers:firefox-util')
 
 let webdriverClient: WebDriverClient
 
+// geckodriver returns from `newSession` once the WebDriver-classic session is
+// up, but the BiDi WebSocket is established asynchronously and is not always
+// ready by the time we issue the first BiDi command. webdriver.io's
+// BidiHandler emits this message when the race loses; retry briefly.
+const BIDI_NOT_READY_MESSAGE = 'No connection to WebDriver Bidi was established'
+const BIDI_SUBSCRIBE_MAX_ATTEMPTS = 10
+const BIDI_SUBSCRIBE_RETRY_DELAY_MS = 200
+
+async function subscribeToBiDiEvents (client: WebDriverClient) {
+  for (let attempt = 1; attempt <= BIDI_SUBSCRIBE_MAX_ATTEMPTS; attempt++) {
+    try {
+      await client.sessionSubscribe({ events: BidiAutomation.BIDI_EVENTS })
+
+      return
+    } catch (err) {
+      const message = (err as Error)?.message ?? ''
+      const bidiNotReady = message.includes(BIDI_NOT_READY_MESSAGE)
+
+      if (!bidiNotReady || attempt === BIDI_SUBSCRIBE_MAX_ATTEMPTS) {
+        throw err
+      }
+
+      debug('BiDi connection not ready on sessionSubscribe (attempt %d/%d), retrying in %dms', attempt, BIDI_SUBSCRIBE_MAX_ATTEMPTS, BIDI_SUBSCRIBE_RETRY_DELAY_MS)
+      await new Promise((resolve) => setTimeout(resolve, BIDI_SUBSCRIBE_RETRY_DELAY_MS))
+    }
+  }
+}
+
 async function connectToNewSpecBiDi (options, automation: Automation, browserBiDiClient: BidiAutomation) {
   debug('firefox: reconnecting to blank tab')
   const { contexts } = await webdriverClient.browsingContextGetTree({})
@@ -28,7 +56,7 @@ async function connectToNewSpecBiDi (options, automation: Automation, browserBiD
 
 async function setupBiDi (webdriverClient: WebDriverClient, automation: Automation) {
   // webdriver needs to subscribe to the correct BiDi events or else the events we are expecting to stream in will not be sent
-  await webdriverClient.sessionSubscribe({ events: BidiAutomation.BIDI_EVENTS })
+  await subscribeToBiDiEvents(webdriverClient)
 
   const biDiClient = BidiAutomation.create(webdriverClient, automation)
 

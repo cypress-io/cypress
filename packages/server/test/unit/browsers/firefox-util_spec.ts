@@ -53,6 +53,37 @@ describe('Firefox-Util', () => {
         await FirefoxUtil.setup({ automation, onError, url, remotePort, webdriverClient, useWebDriverBiDi })
         expect(automation.use).to.have.been.calledWith(stubbedBiDiAutomation.automationMiddleware)
       })
+
+      it('retries sessionSubscribe when the BiDi connection is not ready yet', async () => {
+        const notReadyErr = new Error('Error: No connection to WebDriver Bidi was established')
+
+        webdriverClient.sessionSubscribe!
+        .onFirstCall().rejects(notReadyErr)
+        .onSecondCall().rejects(notReadyErr)
+        .onThirdCall().resolves()
+
+        await FirefoxUtil.setup({ automation, onError, url, remotePort, webdriverClient, useWebDriverBiDi })
+
+        expect(webdriverClient.sessionSubscribe).to.have.callCount(3)
+        expect(automation.use).to.have.been.calledWith(stubbedBiDiAutomation.automationMiddleware)
+      })
+
+      it('does not retry sessionSubscribe on unrelated errors', async () => {
+        const fatalErr = new Error('something else went wrong')
+
+        webdriverClient.sessionSubscribe!.rejects(fatalErr)
+
+        let caught: Error | undefined
+
+        try {
+          await FirefoxUtil.setup({ automation, onError, url, remotePort, webdriverClient, useWebDriverBiDi })
+        } catch (err) {
+          caught = err as Error
+        }
+
+        expect(caught).to.equal(fatalErr)
+        expect(webdriverClient.sessionSubscribe).to.have.callCount(1)
+      })
     })
   })
 })
