@@ -40,7 +40,7 @@
     "src/**/*.js"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=22.0.0"
   },
   "types": "dist/index.d.ts",
   "license": "MIT",

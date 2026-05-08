@@ -33,7 +33,6 @@ describe('ProjectConfigIpc', () => {
 
       projectConfigIpc = new ProjectConfigIpc(
         undefined,
-        undefined,
         projectPath,
         '',
         false,

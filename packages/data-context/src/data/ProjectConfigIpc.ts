@@ -12,7 +12,6 @@ import { getTsconfig } from 'get-tsconfig'
 import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
 import _ from 'lodash'
 import os from 'os'
-import semver from 'semver'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry, encodeTelemetryContext } from '@packages/telemetry'
 
@@ -62,7 +61,6 @@ export class ProjectConfigIpc extends EventEmitter {
 
   constructor (
     readonly nodePath: string | undefined | null,
-    readonly nodeVersion: string | undefined | null,
     readonly projectRoot: string,
     readonly configFilePath: string,
     readonly configFile: string | false,
@@ -329,11 +327,10 @@ export class ProjectConfigIpc extends EventEmitter {
     /**
      * use --import for node versions
      * 20.6.0 and above for 20.x.x as --import is supported
-     * use --loader for node under 20.6.0 for 20.x.x.
      * NOTE: we need to use double quotes around the tsx path to account for paths with spaces or special characters.
      * @see https://tsx.is/dev-api/node-cli#node-js-cli
      */
-    let tsxLoader = this.nodeVersion && semver.lt(this.nodeVersion, '20.6.0') ? `--loader "${tsx}"` : `--import "${tsx}"`
+    const tsxLoader = `--import "${tsx}"`
 
     // If they've got TypeScript installed, we can use tsx for CommonJS and ESM.
     // @see https://tsx.is/dev-api/node-cli#node-js-cli
