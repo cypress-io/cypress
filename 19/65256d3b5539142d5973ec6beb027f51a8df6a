@@ -1,0 +1,19 @@
+packages/app/src/specs/banners/CloudMessageBanner.vue
+  s_8ba41a65cd792d::t_287ad9990ff4ac 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "1965256d3b5539142d5973ec6beb027f51a8df6a",
+  "prompts": {},
+  "sessions": {
+    "s_8ba41a65cd792d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ac67cab-cece-411f-8e35-367668770e48",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
