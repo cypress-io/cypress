@@ -78,7 +78,10 @@ jobs:
             // We require this so we can verify Cursor's review was for the current head SHA
             // before approving — Cursor doesn't post a review object on clean Low Risk PRs,
             // so this is the only signal that ties the assessment to a specific commit.
-            const shaMatch = summaryContent.match(/Reviewed by .*?Cursor Bugbot.*? for commit ([0-9a-f]{40})/i);
+            // Match the literal markdown-link format: if Cursor ever drops the link wrapper
+            // we'll fail loudly (auto-approval stops) and can update this on purpose, rather
+            // than silently matching something slightly different.
+            const shaMatch = summaryContent.match(/Reviewed by \[Cursor Bugbot\]\([^)]*\) for commit ([0-9a-f]{40})/i);
             if (!shaMatch) {
               core.notice('CURSOR_SUMMARY is Low Risk but is missing the reviewed-commit footer; cannot verify the review SHA.');
               return;
