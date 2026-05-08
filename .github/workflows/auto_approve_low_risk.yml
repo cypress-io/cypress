@@ -42,11 +42,6 @@ jobs:
             core.setOutput('is_low_risk', 'false');
             core.setOutput('reviewed_sha', '');
 
-            // Require exactly one CURSOR_SUMMARY block. A write-access author could
-            // otherwise prepend a fake `**Low Risk**` block above the template's markers;
-            // when BugBot fills in the template's (separate) markers with a Medium/High
-            // assessment, a first-match regex would pick the attacker's planted block
-            // and we'd auto-approve based on a forged risk level.
             const summaryMatches = [...body.matchAll(/<!-- CURSOR_SUMMARY -->([\s\S]*?)<!-- \/CURSOR_SUMMARY -->/g)];
             if (summaryMatches.length === 0) {
               core.notice('No CURSOR_SUMMARY section found in PR body.');
@@ -75,12 +70,6 @@ jobs:
 
             // Extract the SHA Cursor Bugbot states it reviewed, from the summary footer:
             //   "Reviewed by [Cursor Bugbot](...) for commit <40-hex-char-sha>."
-            // We require this so we can verify Cursor's review was for the current head SHA
-            // before approving — Cursor doesn't post a review object on clean Low Risk PRs,
-            // so this is the only signal that ties the assessment to a specific commit.
-            // Match the literal markdown-link format: if Cursor ever drops the link wrapper
-            // we'll fail loudly (auto-approval stops) and can update this on purpose, rather
-            // than silently matching something slightly different.
             const shaMatch = summaryContent.match(/Reviewed by \[Cursor Bugbot\]\([^)]*\) for commit ([0-9a-f]{40})/i);
             if (!shaMatch) {
               core.notice('CURSOR_SUMMARY is Low Risk but is missing the reviewed-commit footer; cannot verify the review SHA.');
@@ -99,7 +88,7 @@ jobs:
           set -eo pipefail
           LATEST=$(gh api --paginate \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
-            --jq '.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED" and (.body // "" | startswith("Auto-approved:"))) | [.id, .commit_id] | @tsv' \
+            --jq '.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED") | [.id, .commit_id] | @tsv' \
             | tail -n 1)
 
           if [ -n "$LATEST" ]; then
@@ -146,10 +135,7 @@ jobs:
           #   - the event was triggered by cursor[bot] (i.e., BugBot just wrote/updated the
           #     summary; human edits to the body don't trigger approval)
           #   - the SHA Cursor states it reviewed (parsed from the summary footer) matches
-          #     the current head SHA — Cursor doesn't post a review object on clean Low Risk
-          #     PRs, so this footer is the only signal tying the assessment to a commit.
-          #     This also closes the race where a push lands between Cursor's analysis and
-          #     its body update: REVIEWED_SHA would lag HEAD_SHA and we'd skip approval.
+          #     the current head SHA
           #   - either no approval exists, or the existing one is being dismissed in this run
           #     (SHA mismatch case)
           if [ "$IS_LOW_RISK" = "true" ] \
@@ -183,9 +169,6 @@ jobs:
         if: steps.action.outputs.should_dismiss == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          # Pass via env (not direct ${{ }} interpolation into the run block) per
-          # GitHub's security hardening guide — defense-in-depth in case the message
-          # ever incorporates user-controlled content.
           DISMISS_MESSAGE: ${{ steps.action.outputs.dismiss_reason }}
         run: |
           gh api \
@@ -225,5 +208,4 @@ jobs:
             --method POST \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
             -f commit_id="${{ github.event.pull_request.head.sha }}" \
-            -f event="APPROVE" \
-            -f body="Auto-approved: Cursor Bugbot assessed this PR as **Low Risk**."
+            -f event="APPROVE"
