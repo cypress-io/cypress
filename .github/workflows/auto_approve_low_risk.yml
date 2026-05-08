@@ -32,17 +32,19 @@ jobs:
       github.repository == 'cypress-io/cypress' &&
       github.event.pull_request.head.repo.full_name == github.repository
     steps:
-      - name: Extract risk level from CURSOR_SUMMARY
+      - name: Extract risk level and reviewed SHA from CURSOR_SUMMARY
         id: risk-check
         uses: actions/github-script@v9
         with:
           script: |
             const body = context.payload.pull_request.body || '';
 
+            core.setOutput('is_low_risk', 'false');
+            core.setOutput('reviewed_sha', '');
+
             const summaryMatch = body.match(/<!-- CURSOR_SUMMARY -->([\s\S]*?)<!-- \/CURSOR_SUMMARY -->/);
             if (!summaryMatch) {
               core.notice('No CURSOR_SUMMARY section found in PR body.');
-              core.setOutput('is_low_risk', 'false');
               return;
             }
 
@@ -53,19 +55,29 @@ jobs:
 
             if (hasMediumRisk || hasHighRisk) {
               core.notice('PR is not low risk.');
-              core.setOutput('is_low_risk', 'false');
               return;
             }
 
             const hasLowRisk = /\*\*Low Risk\*\*/i.test(summaryContent);
             if (!hasLowRisk) {
               core.notice('No recognized risk level found in CURSOR_SUMMARY.');
-              core.setOutput('is_low_risk', 'false');
               return;
             }
 
-            core.info('CURSOR_SUMMARY contains **Low Risk** assessment.');
+            // Extract the SHA Cursor Bugbot states it reviewed, from the summary footer:
+            //   "Reviewed by [Cursor Bugbot](...) for commit <40-hex-char-sha>."
+            // We require this so we can verify Cursor's review was for the current head SHA
+            // before approving — Cursor doesn't post a review object on clean Low Risk PRs,
+            // so this is the only signal that ties the assessment to a specific commit.
+            const shaMatch = summaryContent.match(/Reviewed by .*?Cursor Bugbot.*? for commit ([0-9a-f]{40})/i);
+            if (!shaMatch) {
+              core.notice('CURSOR_SUMMARY is Low Risk but is missing the reviewed-commit footer; cannot verify the review SHA.');
+              return;
+            }
+
+            core.info(`CURSOR_SUMMARY contains **Low Risk** assessment for ${shaMatch[1].slice(0, 7)}.`);
             core.setOutput('is_low_risk', 'true');
+            core.setOutput('reviewed_sha', shaMatch[1]);
 
       - name: Find existing auto-approval
         id: existing-approval
@@ -89,42 +101,16 @@ jobs:
             echo "commit_id=" >> "$GITHUB_OUTPUT"
           fi
 
-      # Only run when the approve path is plausible (Low Risk + cursor[bot] sender). This
-      # short-circuits the common no-op cases (human PR-body edits, synchronize events)
-      # before we mint any privileged tokens.
-      - name: Require BugBot review on current head SHA
-        if: >-
-          steps.risk-check.outputs.is_low_risk == 'true' &&
-          github.event.sender.type == 'Bot' &&
-          github.event.sender.login == 'cursor[bot]'
-        id: bugbot-head-review
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -eo pipefail
-          REVIEWED=$(gh api --paginate \
-            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
-            --jq ".[] | select(.user.login == \"cursor[bot]\" and .commit_id == \"$HEAD_SHA\") | .id" \
-            | wc -l | tr -d ' ')
-
-          if [ "$REVIEWED" -eq 0 ]; then
-            echo "ok=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::BugBot has not reviewed head SHA $HEAD_SHA yet. Skipping approval."
-          else
-            echo "ok=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Decide reconciliation actions
         id: action
         env:
           IS_LOW_RISK: ${{ steps.risk-check.outputs.is_low_risk }}
+          REVIEWED_SHA: ${{ steps.risk-check.outputs.reviewed_sha }}
           REVIEW_ID: ${{ steps.existing-approval.outputs.review_id }}
           APPROVAL_SHA: ${{ steps.existing-approval.outputs.commit_id }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           SENDER_TYPE: ${{ github.event.sender.type }}
           SENDER_LOGIN: ${{ github.event.sender.login }}
-          BUGBOT_HEAD_OK: ${{ steps.bugbot-head-review.outputs.ok }}
         run: |
           SHOULD_DISMISS=false
           SHOULD_APPROVE=false
@@ -147,13 +133,17 @@ jobs:
           #   - current state is Low Risk
           #   - the event was triggered by cursor[bot] (i.e., BugBot just wrote/updated the
           #     summary; human edits to the body don't trigger approval)
-          #   - BugBot has actually reviewed the current head SHA
+          #   - the SHA Cursor states it reviewed (parsed from the summary footer) matches
+          #     the current head SHA — Cursor doesn't post a review object on clean Low Risk
+          #     PRs, so this footer is the only signal tying the assessment to a commit.
+          #     This also closes the race where a push lands between Cursor's analysis and
+          #     its body update: REVIEWED_SHA would lag HEAD_SHA and we'd skip approval.
           #   - either no approval exists, or the existing one is being dismissed in this run
           #     (SHA mismatch case)
           if [ "$IS_LOW_RISK" = "true" ] \
              && [ "$SENDER_TYPE" = "Bot" ] \
              && [ "$SENDER_LOGIN" = "cursor[bot]" ] \
-             && [ "$BUGBOT_HEAD_OK" = "true" ]; then
+             && [ "$REVIEWED_SHA" = "$HEAD_SHA" ]; then
             if [ -z "$REVIEW_ID" ] || [ "$SHOULD_DISMISS" = "true" ]; then
               SHOULD_APPROVE=true
             fi
@@ -164,7 +154,7 @@ jobs:
           echo "dismiss_reason=$DISMISS_REASON" >> "$GITHUB_OUTPUT"
 
           if [ "$SHOULD_DISMISS" = "false" ] && [ "$SHOULD_APPROVE" = "false" ]; then
-            echo "::notice::No reconciliation needed (is_low_risk=$IS_LOW_RISK, approval=${REVIEW_ID:-none} for ${APPROVAL_SHA:0:7}, head=${HEAD_SHA:0:7})."
+            echo "::notice::No reconciliation needed (is_low_risk=$IS_LOW_RISK, reviewed_sha=${REVIEWED_SHA:0:7}, head_sha=${HEAD_SHA:0:7}, approval=${REVIEW_ID:-none} for ${APPROVAL_SHA:0:7})."
           fi
 
       - name: Generate Cypress Bot App token
