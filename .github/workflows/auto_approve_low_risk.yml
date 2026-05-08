@@ -198,5 +198,6 @@ jobs:
           gh api \
             --method POST \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
+            -f commit_id="${{ github.event.pull_request.head.sha }}" \
             -f event="APPROVE" \
             -f body="Auto-approved: Cursor Bugbot assessed this PR as **Low Risk**."
