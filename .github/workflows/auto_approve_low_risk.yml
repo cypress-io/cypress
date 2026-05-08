@@ -133,7 +133,11 @@ jobs:
           esac
 
       - name: Approve PR
-        if: steps.action.outputs.action == 'approve' && steps.author-check.outputs.has_write == 'true'
+        if: >-
+          steps.action.outputs.action == 'approve' &&
+          github.event.sender.type == 'Bot' &&
+          github.event.sender.login == 'cursor[bot]' &&
+          steps.author-check.outputs.has_write == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
