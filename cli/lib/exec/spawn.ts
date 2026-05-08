@@ -13,6 +13,7 @@ import { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
 import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
 import { PassThrough } from 'stream'
+import * as tty from 'tty'
 
 const debug = Debug('cypress:cli')
 const debugElectron = Debug('cypress:electron')
@@ -188,6 +189,8 @@ function createSpawnFunction (
           process.once(signal, async function () {
             console.log(`\n\n${signal} received; Attempting to exit gracefully. Force exit with ^C again if needed.\n\n`)
           })
+
+          process.stdin.setRawMode(false)
         }
       }
 
