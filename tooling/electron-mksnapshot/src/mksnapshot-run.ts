@@ -14,18 +14,25 @@ const logError = debug('cypress:mksnapshot:error')
 // with a V8 fatal error on Windows CI runners. The crash is non-deterministic
 // and a fresh process invocation typically succeeds, so we retry on failure.
 const SPAWN_MAX_ATTEMPTS = 2
-const SPAWN_TIMEOUT_MS = 20_000
+
+export interface RunMksnapshotOptions {
+  // Per-attempt timeout in milliseconds. Disabled by default — production
+  // snapshot builds bundle the whole Cypress app and routinely exceed any
+  // small timeout. Tests set this to bound a hung child process.
+  spawnTimeoutMs?: number
+}
 
 function spawnWithRetry (
   command: string,
   args: string[],
   options: Parameters<typeof spawnSync>[2],
   description: string,
+  spawnTimeoutMs?: number,
 ) {
   let result: ReturnType<typeof spawnSync> | undefined
 
   for (let attempt = 1; attempt <= SPAWN_MAX_ATTEMPTS; attempt++) {
-    result = spawnSync(command, args, { ...options, timeout: SPAWN_TIMEOUT_MS })
+    result = spawnSync(command, args, { ...options, timeout: spawnTimeoutMs })
 
     if (result.status === 0) {
       if (attempt > 1) {
@@ -149,6 +156,7 @@ function createSnapshotBlob (
   mksnapshotCommand: string,
   mksnapshotArgs: string[],
   outputDir: string,
+  spawnTimeoutMs?: number,
 ) {
   const stdio: StdioOptions = 'inherit'
   const snapshotBlobOptions = {
@@ -168,6 +176,7 @@ function createSnapshotBlob (
     mksnapshotArgs,
     snapshotBlobOptions,
     'mksnapshot',
+    spawnTimeoutMs,
   )
 
   if (mksnapshotProcess.status !== 0) {
@@ -196,6 +205,7 @@ function createSnapshotBlob (
 function createV8ContextSnapshot (
   mksnapshotBinaryDir: string,
   outputDir: string,
+  spawnTimeoutMs?: number,
 ) {
   const v8ContextGenCommand = path.join(
     mksnapshotBinaryDir,
@@ -225,6 +235,7 @@ function createV8ContextSnapshot (
     v8ContextGenArgs,
     v8ContextGenOptions,
     'v8_context_snapshot_generator',
+    spawnTimeoutMs,
   )
 
   if (v8ContextGenProcess.status !== 0) {
@@ -240,7 +251,7 @@ function createV8ContextSnapshot (
   }
 }
 
-export function runMksnapshot (args: string[]) {
+export function runMksnapshot (args: string[], options: RunMksnapshotOptions = {}) {
   logDebug('Provided args: %o', args)
   checkArgs(args)
   let { outputDir, mksnapshotArgs } = extractOutdir(args)
@@ -257,7 +268,8 @@ export function runMksnapshot (args: string[]) {
     mksnapshotCommand,
     mksnapshotArgs,
     outputDir,
+    options.spawnTimeoutMs,
   )
 
-  createV8ContextSnapshot(mksnapshotBinaryDir, outputDir)
+  createV8ContextSnapshot(mksnapshotBinaryDir, outputDir, options.spawnTimeoutMs)
 }
