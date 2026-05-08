@@ -107,6 +107,7 @@ function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
   void record({
     campaign: props.message.analytics.campaign,
     medium: 'Cloud Message Banner',
+    cohort: props.message.analytics.category,
     includeMachineId: true,
     messageId: bannerInstanceId,
     payload: {

@@ -168,6 +168,7 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
         const arg = ($stub as unknown as Sinon.SinonStub).getCall(0).args[0]
 
         expect(arg.medium).to.equal('Cloud Message Banner')
+        expect(arg.cohort).to.equal('educational')
         expect(arg.includeMachineId).to.equal(true)
         expect(arg.payload).to.contain('"action":"click"')
         expect(arg.payload).to.contain('"cta_id":"learn_cy_prompt"')
