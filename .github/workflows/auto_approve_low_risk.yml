@@ -16,6 +16,12 @@ permissions:
 
 concurrency:
   group: auto-approve-low-risk-${{ github.event.pull_request.number }}
+  # cancel-in-progress: false so a synchronize run's dismissal can't be
+  # interrupted mid-flight by a subsequent edited event. Per-PR runs queue
+  # serially. GitHub only retains ONE pending run per group; if multiple
+  # events fire while a run is in-progress, intermediate events are
+  # silently dropped — the SHA-based reconciliation in the action step is
+  # what guarantees we still converge to correct state when that happens.
   cancel-in-progress: false
 
 jobs:
@@ -83,6 +89,32 @@ jobs:
             echo "commit_id=" >> "$GITHUB_OUTPUT"
           fi
 
+      # Only run when the approve path is plausible (Low Risk + cursor[bot] sender). This
+      # short-circuits the common no-op cases (human PR-body edits, synchronize events)
+      # before we mint any privileged tokens.
+      - name: Require BugBot review on current head SHA
+        if: >-
+          steps.risk-check.outputs.is_low_risk == 'true' &&
+          github.event.sender.type == 'Bot' &&
+          github.event.sender.login == 'cursor[bot]'
+        id: bugbot-head-review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eo pipefail
+          REVIEWED=$(gh api --paginate \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
+            --jq ".[] | select(.user.login == \"cursor[bot]\" and .commit_id == \"$HEAD_SHA\") | .id" \
+            | wc -l | tr -d ' ')
+
+          if [ "$REVIEWED" -eq 0 ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::BugBot has not reviewed head SHA $HEAD_SHA yet. Skipping approval."
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Decide reconciliation actions
         id: action
         env:
@@ -90,6 +122,9 @@ jobs:
           REVIEW_ID: ${{ steps.existing-approval.outputs.review_id }}
           APPROVAL_SHA: ${{ steps.existing-approval.outputs.commit_id }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SENDER_TYPE: ${{ github.event.sender.type }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+          BUGBOT_HEAD_OK: ${{ steps.bugbot-head-review.outputs.ok }}
         run: |
           SHOULD_DISMISS=false
           SHOULD_APPROVE=false
@@ -108,9 +143,17 @@ jobs:
             fi
           fi
 
-          # Approve when current state is Low Risk and either no approval exists, or the
-          # existing one is being dismissed in this run (SHA mismatch case).
-          if [ "$IS_LOW_RISK" = "true" ]; then
+          # Approve only when:
+          #   - current state is Low Risk
+          #   - the event was triggered by cursor[bot] (i.e., BugBot just wrote/updated the
+          #     summary; human edits to the body don't trigger approval)
+          #   - BugBot has actually reviewed the current head SHA
+          #   - either no approval exists, or the existing one is being dismissed in this run
+          #     (SHA mismatch case)
+          if [ "$IS_LOW_RISK" = "true" ] \
+             && [ "$SENDER_TYPE" = "Bot" ] \
+             && [ "$SENDER_LOGIN" = "cursor[bot]" ] \
+             && [ "$BUGBOT_HEAD_OK" = "true" ]; then
             if [ -z "$REVIEW_ID" ] || [ "$SHOULD_DISMISS" = "true" ]; then
               SHOULD_APPROVE=true
             fi
@@ -138,31 +181,15 @@ jobs:
         if: steps.action.outputs.should_dismiss == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          # Pass via env (not direct ${{ }} interpolation into the run block) per
+          # GitHub's security hardening guide — defense-in-depth in case the message
+          # ever incorporates user-controlled content.
+          DISMISS_MESSAGE: ${{ steps.action.outputs.dismiss_reason }}
         run: |
           gh api \
             --method PUT \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ steps.existing-approval.outputs.review_id }}/dismissals" \
-            -f message="${{ steps.action.outputs.dismiss_reason }}"
-
-      - name: Require BugBot review on current head SHA
-        if: steps.action.outputs.should_approve == 'true'
-        id: bugbot-head-review
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -eo pipefail
-          REVIEWED=$(gh api --paginate \
-            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
-            --jq ".[] | select(.user.login == \"cursor[bot]\" and .commit_id == \"$HEAD_SHA\") | .id" \
-            | wc -l | tr -d ' ')
-
-          if [ "$REVIEWED" -eq 0 ]; then
-            echo "ok=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::BugBot has not reviewed head SHA $HEAD_SHA yet. Skipping approval."
-          else
-            echo "ok=true" >> "$GITHUB_OUTPUT"
-          fi
+            -f message="$DISMISS_MESSAGE"
 
       - name: Verify PR author has write access
         if: steps.action.outputs.should_approve == 'true'
@@ -188,9 +215,6 @@ jobs:
       - name: Approve PR
         if: >-
           steps.action.outputs.should_approve == 'true' &&
-          github.event.sender.type == 'Bot' &&
-          github.event.sender.login == 'cursor[bot]' &&
-          steps.bugbot-head-review.outputs.ok == 'true' &&
           steps.author-check.outputs.has_write == 'true'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
