@@ -67,44 +67,65 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -eo pipefail
-          REVIEW_ID=$(gh api --paginate \
+          LATEST=$(gh api --paginate \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
-            --jq '.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED" and (.body // "" | startswith("Auto-approved:"))) | .id' \
+            --jq '.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED" and (.body // "" | startswith("Auto-approved:"))) | [.id, .commit_id] | @tsv' \
             | tail -n 1)
 
-          if [ -n "$REVIEW_ID" ]; then
+          if [ -n "$LATEST" ]; then
+            REVIEW_ID=$(echo "$LATEST" | cut -f1)
+            COMMIT_ID=$(echo "$LATEST" | cut -f2)
             echo "review_id=$REVIEW_ID" >> "$GITHUB_OUTPUT"
-            echo "::notice::Found existing auto-approval (review #$REVIEW_ID)."
+            echo "commit_id=$COMMIT_ID" >> "$GITHUB_OUTPUT"
+            echo "::notice::Found existing auto-approval (review #$REVIEW_ID for ${COMMIT_ID:0:7})."
           else
             echo "review_id=" >> "$GITHUB_OUTPUT"
+            echo "commit_id=" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Decide reconciliation action
+      - name: Decide reconciliation actions
         id: action
         env:
-          EVENT_ACTION: ${{ github.event.action }}
           IS_LOW_RISK: ${{ steps.risk-check.outputs.is_low_risk }}
           REVIEW_ID: ${{ steps.existing-approval.outputs.review_id }}
+          APPROVAL_SHA: ${{ steps.existing-approval.outputs.commit_id }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          # On synchronize (new commits), force-dismiss any prior auto-approval so
-          # BugBot must re-review the new head SHA before re-approval can fire.
-          if [ "$EVENT_ACTION" = "synchronize" ] && [ -n "$REVIEW_ID" ]; then
-            echo "action=dismiss" >> "$GITHUB_OUTPUT"
-            echo "dismiss_reason=New commits pushed. Auto-approval dismissed pending Cursor Bugbot re-review of the new head SHA." >> "$GITHUB_OUTPUT"
-          elif [ "$EVENT_ACTION" = "synchronize" ]; then
-            echo "action=noop" >> "$GITHUB_OUTPUT"
-          elif [ "$IS_LOW_RISK" = "true" ] && [ -z "$REVIEW_ID" ]; then
-            echo "action=approve" >> "$GITHUB_OUTPUT"
-          elif [ "$IS_LOW_RISK" = "false" ] && [ -n "$REVIEW_ID" ]; then
-            echo "action=dismiss" >> "$GITHUB_OUTPUT"
-            echo "dismiss_reason=Cursor Bugbot risk assessment is no longer **Low Risk**. Auto-approval dismissed; manual review required." >> "$GITHUB_OUTPUT"
-          else
-            echo "action=noop" >> "$GITHUB_OUTPUT"
-            echo "::notice::No reconciliation needed (event=$EVENT_ACTION, is_low_risk=$IS_LOW_RISK, has_existing_approval=$([ -n "$REVIEW_ID" ] && echo true || echo false))."
+          SHOULD_DISMISS=false
+          SHOULD_APPROVE=false
+          DISMISS_REASON=""
+
+          # Existing approval is stale if it's for a different SHA or the risk is no longer Low.
+          # Reconcile on every event so we converge to the correct state even if a synchronize
+          # event is dropped by concurrency queueing (only one pending run is retained).
+          if [ -n "$REVIEW_ID" ]; then
+            if [ "$APPROVAL_SHA" != "$HEAD_SHA" ]; then
+              SHOULD_DISMISS=true
+              DISMISS_REASON="New commits pushed (auto-approval was for ${APPROVAL_SHA:0:7}, head is now ${HEAD_SHA:0:7}). Auto-approval dismissed pending Cursor Bugbot re-review of the new head SHA."
+            elif [ "$IS_LOW_RISK" != "true" ]; then
+              SHOULD_DISMISS=true
+              DISMISS_REASON="Cursor Bugbot risk assessment is no longer **Low Risk**. Auto-approval dismissed; manual review required."
+            fi
+          fi
+
+          # Approve when current state is Low Risk and either no approval exists, or the
+          # existing one is being dismissed in this run (SHA mismatch case).
+          if [ "$IS_LOW_RISK" = "true" ]; then
+            if [ -z "$REVIEW_ID" ] || [ "$SHOULD_DISMISS" = "true" ]; then
+              SHOULD_APPROVE=true
+            fi
+          fi
+
+          echo "should_dismiss=$SHOULD_DISMISS" >> "$GITHUB_OUTPUT"
+          echo "should_approve=$SHOULD_APPROVE" >> "$GITHUB_OUTPUT"
+          echo "dismiss_reason=$DISMISS_REASON" >> "$GITHUB_OUTPUT"
+
+          if [ "$SHOULD_DISMISS" = "false" ] && [ "$SHOULD_APPROVE" = "false" ]; then
+            echo "::notice::No reconciliation needed (is_low_risk=$IS_LOW_RISK, approval=${REVIEW_ID:-none} for ${APPROVAL_SHA:0:7}, head=${HEAD_SHA:0:7})."
           fi
 
       - name: Require BugBot review on current head SHA
-        if: steps.action.outputs.action == 'approve'
+        if: steps.action.outputs.should_approve == 'true'
         id: bugbot-head-review
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -124,7 +145,7 @@ jobs:
           fi
 
       - name: Generate Cypress Bot App token
-        if: steps.action.outputs.action == 'approve' || steps.action.outputs.action == 'dismiss'
+        if: steps.action.outputs.should_dismiss == 'true' || steps.action.outputs.should_approve == 'true'
         id: app-token
         uses: actions/create-github-app-token@v2
         with:
@@ -134,7 +155,7 @@ jobs:
           permission-metadata: read
 
       - name: Verify PR author has write access
-        if: steps.action.outputs.action == 'approve'
+        if: steps.action.outputs.should_approve == 'true'
         id: author-check
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -154,9 +175,19 @@ jobs:
               ;;
           esac
 
+      - name: Dismiss stale approval
+        if: steps.action.outputs.should_dismiss == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh api \
+            --method PUT \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ steps.existing-approval.outputs.review_id }}/dismissals" \
+            -f message="${{ steps.action.outputs.dismiss_reason }}"
+
       - name: Approve PR
         if: >-
-          steps.action.outputs.action == 'approve' &&
+          steps.action.outputs.should_approve == 'true' &&
           github.event.sender.type == 'Bot' &&
           github.event.sender.login == 'cursor[bot]' &&
           steps.bugbot-head-review.outputs.ok == 'true' &&
@@ -169,13 +200,3 @@ jobs:
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
             -f event="APPROVE" \
             -f body="Auto-approved: Cursor Bugbot assessed this PR as **Low Risk**."
-
-      - name: Dismiss stale approval
-        if: steps.action.outputs.action == 'dismiss'
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          gh api \
-            --method PUT \
-            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ steps.existing-approval.outputs.review_id }}/dismissals" \
-            -f message="${{ steps.action.outputs.dismiss_reason }}"
