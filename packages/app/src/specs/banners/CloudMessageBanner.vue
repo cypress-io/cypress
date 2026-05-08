@@ -24,7 +24,7 @@
       >
         <Button
           v-for="cta in message.ctas"
-          :key="cta.href"
+          :key="cta.id"
           :variant="cta.style === 'primary' ? 'primary' : 'outline'"
           :data-cy="`cloud-message-cta-${cta.style}`"
           @click="onCtaClick(cta, bannerInstanceId)"
