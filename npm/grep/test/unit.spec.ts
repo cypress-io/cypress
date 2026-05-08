@@ -442,13 +442,13 @@ describe('utils', () => {
       const mockConfig = {
         specPattern: ['**/*.cy.ts'],
         excludeSpecPattern: [],
-        env: {},
+        expose: {},
       }
 
       it('handles boolean true', () => {
         const config = {
           ...mockConfig,
-          env: { grepFilterSpecs: true },
+          expose: { grepFilterSpecs: true },
         }
         const result = plugin(config)
 
@@ -458,7 +458,7 @@ describe('utils', () => {
       it('handles string "true"', () => {
         const config = {
           ...mockConfig,
-          env: { grepFilterSpecs: 'true' },
+          expose: { grepFilterSpecs: 'true' },
         }
         const result = plugin(config)
 
@@ -468,7 +468,7 @@ describe('utils', () => {
       it('handles string "TRUE"', () => {
         const config = {
           ...mockConfig,
-          env: { grepFilterSpecs: 'TRUE' },
+          expose: { grepFilterSpecs: 'TRUE' },
         }
         const result = plugin(config)
 
@@ -478,7 +478,7 @@ describe('utils', () => {
       it('handles string "True" (mixed case)', () => {
         const config = {
           ...mockConfig,
-          env: { grepFilterSpecs: 'True' },
+          expose: { grepFilterSpecs: 'True' },
         }
         const result = plugin(config)
 
@@ -488,7 +488,7 @@ describe('utils', () => {
       it('handles boolean false', () => {
         const config = {
           ...mockConfig,
-          env: { grepFilterSpecs: false },
+          expose: { grepFilterSpecs: false },
         }
         const result = plugin(config)
 
@@ -498,7 +498,7 @@ describe('utils', () => {
       it('handles string "false"', () => {
         const config = {
           ...mockConfig,
-          env: { grepFilterSpecs: 'false' },
+          expose: { grepFilterSpecs: 'false' },
         }
         const result = plugin(config)
 
@@ -508,7 +508,7 @@ describe('utils', () => {
       it('handles undefined', () => {
         const config = {
           ...mockConfig,
-          env: {},
+          expose: {},
         }
         const result = plugin(config)
 

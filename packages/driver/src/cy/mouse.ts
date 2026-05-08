@@ -8,7 +8,7 @@ import debugFn from 'debug'
 import type { StateFunc } from '../cypress/state'
 import type { IFocused } from './focused'
 import type { ICypress } from '../cypress'
-import type { ElViewportPostion } from '../dom/coordinates'
+import type { ElViewportPosition } from '../dom/coordinates'
 
 const debug = debugFn('cypress:driver:mouse')
 
@@ -213,7 +213,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
       }, modifiersEventOptions, coordsEventOptions)
     },
 
-    move (fromElViewport: ElViewportPostion, forceEl?: ForceEl) {
+    move (fromElViewport: ElViewportPosition, forceEl?: ForceEl) {
       debug('mouse.move', fromElViewport)
 
       const lastHoveredEl = getLastHoveredEl(state)
@@ -245,7 +245,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
      * - send move events to elToHover (bubbles)
      * - elLastHovered = elToHover
      */
-    _moveEvents (el: HTMLElement, coords: ElViewportPostion) {
+    _moveEvents (el: HTMLElement, coords: ElViewportPosition) {
       // events are not fired on disabled elements, so we don't have to take that into account
       const win = $dom.getWindowByElement(el)
       const { x, y } = coords
@@ -390,7 +390,7 @@ export const create = (state: StateFunc, keyboard: Keyboard, focused: IFocused, 
      * @param {Coords} coords
      * @returns {HTMLElement}
      */
-    getElAtCoords ({ x, y, doc }: ElViewportPostion) {
+    getElAtCoords ({ x, y, doc }: ElViewportPosition) {
       const el = $dom.elementFromPoint(doc, x, y)
 
       return el

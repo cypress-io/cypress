@@ -4,6 +4,7 @@
 [...Array(100).keys()].map((x) => `${x}`)
 
 module.exports = {
+  'allowCypressEnv': false,
   'e2e': {
     'supportFile': false,
   },

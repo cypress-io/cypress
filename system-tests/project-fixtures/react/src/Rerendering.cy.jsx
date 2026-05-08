@@ -15,6 +15,11 @@ function StatefulComponent ({ foo }) {
 }
 
 describe('re-render', () => {
+  // FIXME: For Vite (works with webpack).
+  // This test works as expected in the wild, but fails in the repo
+  // because we are mixing react versions in npm/react and the system tests that run this fixture
+  // skipping this test until we can find a resolution to the issue
+  // @see https://github.com/cypress-io/cypress/issues/30881
   it('maintains component state across re-renders', () => {
     cy.mount(<StatefulComponent foo="baz" />).then(({ rerender }) => {
       cy.get('button').should('have.text', 'baz 0')

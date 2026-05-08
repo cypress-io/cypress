@@ -127,9 +127,15 @@ describe('AutIframe', () => {
       const result = autIframe.create()
 
       expect(result).to.have.property('autIframe')
-      expect(result).to.have.property('autSnapshotIframe')
+      expect(result).to.have.property('autSnapshotIframes')
       expect(autIframe.$iframe).to.equal(result.autIframe)
-      expect(autIframe.$snapshotIframe).to.equal(result.autSnapshotIframe)
+      expect(autIframe.$snapshotIframes).to.equal(result.autSnapshotIframes)
+      expect(result.autSnapshotIframes.length).to.equal(2)
+      result.autSnapshotIframes.forEach((iframe) => {
+        expect(iframe.is(':hidden')).to.be.true
+        expect(iframe.hasClass('aut-snapshot-iframe')).to.be.true
+        expect(iframe.attr('data-snapshot-index')).to.exist
+      })
     })
 
     it('should create aut iframe with correct attributes', () => {
@@ -143,20 +149,21 @@ describe('AutIframe', () => {
 
     it('should create snapshot iframe with correct attributes', () => {
       const result = autIframe.create()
-      const snapshotIframeElement = result.autSnapshotIframe[0] as HTMLIFrameElement
 
-      expect(snapshotIframeElement.id).to.equal('AUT Snapshot: \'Test Project\'')
-      expect(snapshotIframeElement.title).to.equal('AUT Snapshot: \'Test Project\'')
-      expect(snapshotIframeElement.className).to.equal('aut-snapshot-iframe')
+      result.autSnapshotIframes.forEach((iframe) => {
+        expect(iframe[0].id).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
+        expect(iframe[0].title).to.equal(`AUT Snapshot - ${iframe.data('snapshot-index')}: \'Test Project\'`)
+        expect(iframe[0].className).to.equal('aut-snapshot-iframe')
+      })
     })
 
     it('verify the snapshot iframe is hidden', () => {
       const result = autIframe.create()
 
-      result.autSnapshotIframe.appendTo(document.body)
+      result.autSnapshotIframes[0].appendTo(document.body)
       result.autIframe.appendTo(document.body)
 
-      expect(result.autSnapshotIframe.is(':hidden')).to.be.true
+      expect(result.autSnapshotIframes[0].is(':hidden')).to.be.true
       expect(result.autIframe.is(':hidden')).to.be.false
     })
   })
@@ -165,7 +172,7 @@ describe('AutIframe', () => {
     it('should remove both aut iframe and snapshot iframe', () => {
       const result = autIframe.create()
       let autIframeRemoved = false
-      let snapshotIframeRemoved = false
+      let snapshotIframesRemoved = [false, false]
 
       // Mock remove methods
       result.autIframe.remove = () => {
@@ -174,16 +181,18 @@ describe('AutIframe', () => {
         return result.autIframe
       }
 
-      result.autSnapshotIframe.remove = () => {
-        snapshotIframeRemoved = true
+      result.autSnapshotIframes.forEach((snapshotIframe, index) => {
+        snapshotIframe.remove = () => {
+          snapshotIframesRemoved[index] = true
 
-        return result.autSnapshotIframe
-      }
+          return result.autSnapshotIframes[index]
+        }
+      })
 
       autIframe.destroy()
 
       expect(autIframeRemoved).to.be.true
-      expect(snapshotIframeRemoved).to.be.true
+      expect(snapshotIframesRemoved.every((removed) => removed)).to.be.true
     })
 
     it('should throw error when destroy is called without create', () => {

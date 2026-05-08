@@ -43,7 +43,7 @@ export function stripProtocolAndDefaultPorts (urlToCheck: string) {
   return host
 }
 
-export function removePort (urlObject: any) {
+function removePort (urlObject: any) {
   const parsed = parseClone(urlObject)
 
   // set host to undefined else url.format(...) will ignore the port property

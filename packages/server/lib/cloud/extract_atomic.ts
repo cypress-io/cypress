@@ -4,6 +4,48 @@ import { ensureDir } from 'fs-extra'
 import path from 'path'
 import writeFileAtomic from 'write-file-atomic'
 
+const MAX_RETRIES = 3
+const RETRY_DELAY_MS = 100
+
+function isRetryableError (err: unknown): err is NodeJS.ErrnoException {
+  const code = typeof err === 'object' && err !== null && 'code' in err
+    ? (err as NodeJS.ErrnoException).code
+    : undefined
+
+  return code === 'EPERM' || code === 'EACCES'
+}
+
+function delay (ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function writeFileAtomicWithRetry (
+  filePath: string,
+  content: Buffer,
+  options: { mode?: number },
+): Promise<void> {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      await writeFileAtomic(filePath, content, {
+        mode: options.mode || 0o644,
+      })
+
+      return
+    } catch (err) {
+      lastError = err
+      if (attempt < MAX_RETRIES && isRetryableError(err)) {
+        await delay(RETRY_DELAY_MS)
+      } else {
+        throw err
+      }
+    }
+  }
+
+  throw lastError
+}
+
 export const extractAtomic = async (archivePath: string, destinationPath: string) => {
   const entryPromises: Promise<void>[] = []
 
@@ -29,7 +71,7 @@ export const extractAtomic = async (archivePath: string, destinationPath: string
 
       const content = Buffer.concat(chunks)
 
-      await writeFileAtomic(targetPath, content, {
+      await writeFileAtomicWithRetry(targetPath, content, {
         mode: entry.mode || 0o644,
       })
     })()
@@ -45,10 +87,9 @@ export const extractAtomic = async (archivePath: string, destinationPath: string
   // Wait for parser to finish and all entry writes to complete
   await new Promise<void>((resolve, reject) => {
     parser.on('end', resolve)
-    // Parser extends NodeJS.ReadWriteStream (EventEmitter), so it supports 'error' events
+    // @ts-expect-error Parser extends NodeJS.ReadWriteStream (EventEmitter), so it supports 'error' events
     // even though the types don't explicitly declare it
-
-    ;(parser as NodeJS.ReadWriteStream).on('error', reject)
+    parser.on('error', reject)
     stream.on('error', reject)
   })
 

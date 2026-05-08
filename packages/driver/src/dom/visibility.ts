@@ -289,12 +289,12 @@ const canClipContent = function ($el: JQuery<HTMLElement>, $ancestor: JQuery<HTM
   return true
 }
 
-export const isW3CRendered = (el) => {
+const isW3CRendered = (el) => {
   // @see https://html.spec.whatwg.org/multipage/rendering.html#being-rendered
   return !(parentHasDisplayNone(wrap(el)) || wrap(el).css('visibility') === 'hidden')
 }
 
-export const isW3CFocusable = (el) => {
+const isW3CFocusable = (el) => {
   // @see https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
   return isFocusable(wrap(el)) && isW3CRendered(el)
 }

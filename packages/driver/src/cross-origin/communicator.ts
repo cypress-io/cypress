@@ -1,6 +1,6 @@
 import debugFn from 'debug'
 import { EventEmitter } from 'events'
-import { preprocessConfig, preprocessEnv } from '../util/config'
+import { preprocessConfig, preprocessEnv, preprocessExpose } from '../util/config'
 import { preprocessForSerialization, reifySerializedError } from '../util/serialization'
 import { $Location } from '../cypress/location'
 import { preprocessLogForSerialization, reifyLogFromSerialization, preprocessSnapshotForSerialization, reifySnapshotFromSerialization } from '../util/serialization/log'
@@ -70,6 +70,26 @@ const sharedPromiseSetup = ({
 export class PrimaryOriginCommunicator extends EventEmitter {
   private crossOriginDriverWindows: {[key: string]: Window} = {}
   userInvocationStack?: string
+
+  /**
+   * Clears all cached spec-bridge windows. The runner calls this after
+   * `test:before:after:run:async` (e.g. about:blank) so `window:load` can still
+   * use `toAllSpecBridges('window:load', ...)` before references are dropped.
+   */
+  clearCrossOriginDriverWindows () {
+    this.crossOriginDriverWindows = {}
+  }
+
+  override removeAllListeners (eventName?: string | symbol): this {
+    if (arguments.length === 0) {
+      super.removeAllListeners()
+      this.crossOriginDriverWindows = {}
+    } else {
+      super.removeAllListeners(eventName)
+    }
+
+    return this
+  }
 
   /**
    * The callback handler that receives messages from secondary origins.
@@ -272,7 +292,8 @@ export class SpecBridgeCommunicator extends EventEmitter {
   private syncGlobalsToPrimary = () => {
     this.toPrimary('sync:globals', {
       config: preprocessConfig(Cypress.config()),
-      env: preprocessEnv(Cypress.env()),
+      env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
+      expose: preprocessExpose(Cypress.expose()),
     })
   }
 

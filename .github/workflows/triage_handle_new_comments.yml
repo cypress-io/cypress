@@ -9,6 +9,8 @@ on:
   issue_comment:
     types: [created]
 
+permissions: {}
+
 jobs:
   handle-comment-scenarios:
     runs-on: ubuntu-latest
@@ -20,7 +22,7 @@ jobs:
           ref: 'master'
           ssh-key: ${{ secrets.WORKFLOW_DEPLOY_KEY }} 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 'lts/*'
       - name: Run comment_workflow.js Script

@@ -1,3 +1,33 @@
+# [@cypress/vite-dev-server-v7.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.0...@cypress/vite-dev-server-v7.3.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* (vite-dev-server) wait for support file ([#33487](https://github.com/cypress-io/cypress/issues/33487)) ([f652605](https://github.com/cypress-io/cypress/commit/f652605d31877666ac5f9bbc7258c4f88f987795))
+
+# [@cypress/vite-dev-server-v7.3.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.2.1...@cypress/vite-dev-server-v7.3.0) (2026-04-16)
+
+
+### Features
+
+* support vite 8 for component testing ([#33580](https://github.com/cypress-io/cypress/issues/33580)) ([acf1eef](https://github.com/cypress-io/cypress/commit/acf1eef15c654af212152720d748c80d85ce8b0d))
+
+# [@cypress/vite-dev-server-v7.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.2.0...@cypress/vite-dev-server-v7.2.1) (2026-03-16)
+
+# [@cypress/vite-dev-server-v7.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.1.0...@cypress/vite-dev-server-v7.2.0) (2026-01-22)
+
+
+### Features
+
+* add `cy.env()`,` allowCypressEnv`, and deprecate `Cypress.env()` ([#33181](https://github.com/cypress-io/cypress/issues/33181)) ([ebe4a2c](https://github.com/cypress-io/cypress/commit/ebe4a2cab7312df76b28f59c3b0a91fc4a5e2444))
+
+# [@cypress/vite-dev-server-v7.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.0.1...@cypress/vite-dev-server-v7.1.0) (2026-01-13)
+
+
+### Features
+
+* experimentalRunAllSpecs for component testing ([#32926](https://github.com/cypress-io/cypress/issues/32926)) ([f25153a](https://github.com/cypress-io/cypress/commit/f25153a58347d4ffffa354270d7e5277c7cdab1d))
+
 # [@cypress/vite-dev-server-v7.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.0.0...@cypress/vite-dev-server-v7.0.1) (2025-11-04)
 
 

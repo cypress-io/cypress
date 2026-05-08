@@ -15,19 +15,20 @@ describe('$Cypress', () => {
   describe('initialize', () => {
     it('should store autIframe and snapshotIframe', () => {
       const mockAutIframe = { id: 'aut-iframe' } as any
-      const mockSnapshotIframe = { id: 'snapshot-iframe' } as any
+      const mockSnapshotIframes = [{ id: 'snapshot-iframe' }] as any
       const mockOnSpecReady = vi.fn()
       const mockWaitForStudio = vi.fn()
 
       Cypress.initialize({
         $autIframe: mockAutIframe,
-        $autSnapshotIframe: mockSnapshotIframe,
+        $autSnapshotIframes: mockSnapshotIframes,
         onSpecReady: mockOnSpecReady,
         waitForStudio: mockWaitForStudio,
       })
 
       expect(Cypress.$autIframe).toBe(mockAutIframe)
-      expect(Cypress.$autSnapshotIframe).toBe(mockSnapshotIframe)
+      expect(Cypress.$autSnapshotIframes).toBe(mockSnapshotIframes)
+      expect(Cypress.$autSnapshotIframe).toBe(mockSnapshotIframes[0])
       expect(Cypress.onSpecReady).toBe(mockOnSpecReady)
       expect(Cypress.waitForStudio).toBe(mockWaitForStudio)
     })
@@ -38,13 +39,13 @@ describe('$Cypress', () => {
 
       Cypress.initialize({
         $autIframe: mockAutIframe,
-        $autSnapshotIframe: undefined,
+        $autSnapshotIframes: undefined,
         onSpecReady: mockOnSpecReady,
         waitForStudio: undefined,
       })
 
       expect(Cypress.$autIframe).toBe(mockAutIframe)
-      expect(Cypress.$autSnapshotIframe).toBeUndefined()
+      expect(Cypress.$autSnapshotIframes).toBeUndefined()
       expect(Cypress.onSpecReady).toBe(mockOnSpecReady)
       expect(Cypress.waitForStudio).toBeUndefined()
     })
@@ -58,7 +59,7 @@ describe('$Cypress', () => {
 
       Cypress.initialize({
         $autIframe: mockAutIframe,
-        $autSnapshotIframe: undefined,
+        $autSnapshotIframes: undefined,
         onSpecReady: vi.fn(),
         waitForStudio: undefined,
       })
@@ -72,7 +73,7 @@ describe('$Cypress', () => {
 
       Cypress.initialize({
         $autIframe: mockAutIframe,
-        $autSnapshotIframe: undefined,
+        $autSnapshotIframes: undefined,
         onSpecReady: vi.fn(),
         waitForStudio: undefined,
       })

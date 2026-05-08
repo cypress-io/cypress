@@ -73,20 +73,6 @@ export function reset () {
   windows = {}
 }
 
-export function destroy (type: string) {
-  let win
-
-  if (type && (win = getByType(type))) {
-    return win.destroy()
-  }
-}
-
-export function get (type: string) {
-  return getByType(type) || (() => {
-    throw new Error(`No window exists for: '${type}'`)
-  })()
-}
-
 export function showAll () {
   return _.invoke(windows, 'showInactive')
 }
@@ -114,7 +100,7 @@ export function getByWebContents (webContents) {
   return BrowserWindow.fromWebContents(webContents)
 }
 
-export function _newBrowserWindow (options) {
+function _newBrowserWindow (options) {
   return new BrowserWindow(options)
 }
 

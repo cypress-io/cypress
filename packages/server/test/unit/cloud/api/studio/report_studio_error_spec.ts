@@ -342,5 +342,43 @@ describe('lib/cloud/api/studio/report_studio_error', () => {
       // Just verify the post was called, don't check debug output
       expect(cloudRequestStub).to.be.called
     })
+
+    it('extracts last error from AggregateError', () => {
+      const aggregateError = new AggregateError(
+        [new Error('First error'), new Error('Second error')],
+        'Multiple errors',
+      )
+
+      reportStudioError({
+        cloudApi,
+        studioHash: 'abc123',
+        projectSlug: 'test-project',
+        error: aggregateError,
+        studioMethod: 'testMethod',
+      })
+
+      expect(cloudRequestStub).to.be.calledWithMatch(
+        'http://localhost:1234/studio/errors',
+        {
+          studioHash: 'abc123',
+          projectSlug: 'test-project',
+          errors: [{
+            name: 'Error',
+            message: 'Second error',
+            stack: sinon.match((stack) => stack.includes('<stripped-path>report_studio_error_spec.ts')),
+            code: undefined,
+            errno: undefined,
+            studioMethod: 'testMethod',
+            studioMethodArgs: undefined,
+          }],
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-cypress-version': '1.2.3',
+          },
+        },
+      )
+    })
   })
 })

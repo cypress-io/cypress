@@ -5,7 +5,7 @@ import tmp from 'tmp'
 import fs from 'fs-extra'
 import open from '../../lib/exec/open'
 import run from '../../lib/exec/run'
-import cypress from '../../lib/cypress'
+import * as cypress from '../../lib/cypress'
 
 vi.mock('fs-extra', async (importActual) => {
   const actual = await importActual()
@@ -234,6 +234,7 @@ describe('cypress', function () {
     describe('.parseRunArguments', function () {
       it('parses CLI cypress run arguments', async () => {
         const args = 'cypress run --browser chrome --spec my/test/spec.js'.split(' ')
+
         const options = await cypress.cli.parseRunArguments(args)
 
         expect(options).toEqual({

@@ -404,3 +404,7 @@ system-tests/lib/validations
 # IDE files
 .cursor/*
 !.cursor/BUGBOT.md
+
+settings.local.json
+
+.claude/*

@@ -80,11 +80,11 @@ const CYPRESS_ENV_PREFIX = 'CYPRESS_'
 
 const CYPRESS_ENV_PREFIX_LENGTH = CYPRESS_ENV_PREFIX.length
 
-export const CYPRESS_RESERVED_ENV_VARS = [
+const CYPRESS_RESERVED_ENV_VARS = [
   'CYPRESS_INTERNAL_ENV',
 ]
 
-export const CYPRESS_SPECIAL_ENV_VARS = [
+const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]
 
@@ -154,6 +154,30 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
   // processEnvs is from process env vars
   // cliEnvs is from CLI arguments
   return _.extend(configEnv, envFile, processEnvs, cliEnvs)
+}
+
+function parseExposed (cfg: Record<string, any>, cliExposeVars: Record<string, any>, resolved: Record<string, any> = {}) {
+  const exposeVars: any = (resolved.expose = {})
+
+  const resolveFrom = (from: string, obj = {}) => {
+    return _.each(obj, (val, key) => {
+      return exposeVars[key] = {
+        value: val,
+        from,
+      }
+    })
+  }
+
+  const configExpose = cfg.expose != null ? cfg.expose : {}
+
+  cliExposeVars = cliExposeVars != null ? cliExposeVars : {}
+
+  resolveFrom('config', configExpose)
+  resolveFrom('cli', cliExposeVars)
+
+  // configExpose is from cypress.config.{js,ts,mjs,cjs}
+  // cliExposedVars is from CLI arguments
+  return _.extend(configExpose, cliExposeVars)
 }
 
 // combines the default configuration object with values specified in the
@@ -370,6 +394,7 @@ export function mergeDefaults (
   _
   .chain(allowed({ ...cliConfig, ...options }))
   .omit('env')
+  .omit('expose')
   .omit('browsers')
   .each((val: any, key) => {
     // If users pass in testing-type specific keys (eg, specPattern),
@@ -413,9 +438,19 @@ export function mergeDefaults (
     additionalIgnorePattern,
   }
 
+  // we want the allowCypressEnv option to be inherited by e2e/component config when evaluating
+  // breaking options in order to correctly hide the error that Cypress.env() is deprecated when allowCypressEnv is false
+  // unless the value is explicitly set
+  config.allowCypressEnv = config.allowCypressEnv ?? true
+  if (!_.has(config[testingType], 'allowCypressEnv') && _.isObject(config[testingType])) {
+    config[testingType].allowCypressEnv = config.allowCypressEnv
+  }
+
   // split out our own app wide env from user env variables
   // and delete envFile
   config.env = parseEnv(config, { ...cliConfig.env, ...options.env }, resolved)
+
+  config.expose = parseExposed(config, { ...cliConfig.expose, ...options.expose }, resolved)
 
   config.cypressEnv = process.env.CYPRESS_INTERNAL_ENV
   debug('using CYPRESS_INTERNAL_ENV %s', config.cypressEnv)

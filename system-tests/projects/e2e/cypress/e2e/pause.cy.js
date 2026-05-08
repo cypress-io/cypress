@@ -18,14 +18,16 @@ describe('cy.pause()', { browser: '!webkit' }, () => {
     })
 
     cy.pause().wrap({}).should('deep.eq', {}).then(function () {
-      if (Cypress.env('SHOULD_PAUSE')) {
-        expect(didPause).to.be.true
+      cy.env(['SHOULD_PAUSE']).then(({ SHOULD_PAUSE }) => {
+        if (SHOULD_PAUSE) {
+          expect(didPause).to.be.true
 
-        // should no longer have onPaused
-        expect(cy.state('onPaused')).to.be.null
-      } else {
-        expect(didPause).to.be.false
-      }
+          // should no longer have onPaused
+          expect(cy.state('onPaused')).to.be.null
+        } else {
+          expect(didPause).to.be.false
+        }
+      })
     })
   })
 })

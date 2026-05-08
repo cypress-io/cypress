@@ -25,7 +25,7 @@ import WarningList from '../warning/WarningList.vue'
 import { OpenBrowserDocument, OpenBrowser_CloseBrowserDocument, OpenBrowser_ClearTestingTypeDocument, OpenBrowser_LaunchProjectDocument, OpenBrowser_FocusActiveBrowserWindowDocument, OpenBrowser_ResetLatestVersionTelemetryDocument, OpenBrowser_LocalSettingsDocument } from '../generated/graphql'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 
 const { t } = useI18n()
 
@@ -117,15 +117,25 @@ const launch = async () => {
   }
 }
 
-const launchIfBrowserSetInCli = async () => {
-  const shouldLaunchBrowser = (await lsQuery).data.value?.localSettings?.preferences?.shouldLaunchBrowserFromOpenBrowser
+const shouldLaunchBrowserFromOpenBrowser = computed(() => {
+  return lsQuery.data.value?.localSettings?.preferences?.shouldLaunchBrowserFromOpenBrowser
+})
 
-  if (shouldLaunchBrowser) {
-    await launch()
-  }
+const currentTestingType = computed(() => {
+  return query.data.value?.currentProject?.currentTestingType
+})
 
-  return
-}
+// Auto-launch when --browser was passed alone: wait for both LocalSettings and
+// currentProject (so launch() has testingType and actually runs the mutation).
+watch(
+  () => shouldLaunchBrowserFromOpenBrowser.value && currentTestingType.value,
+  (shouldAutoLaunch) => {
+    if (shouldAutoLaunch) {
+      launch()
+    }
+  },
+  { immediate: true },
+)
 
 const backFn = () => {
   clearCurrentTestingType.executeMutation({})
@@ -147,7 +157,6 @@ const setFocusToActiveBrowserWindow = () => {
 
 onMounted(() => {
   resetLatestVersionTelemetry.executeMutation({})
-  launchIfBrowserSetInCli()
 })
 
 </script>

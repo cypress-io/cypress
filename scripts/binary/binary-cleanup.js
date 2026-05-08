@@ -66,6 +66,8 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     // end needed deps for geckodriver
     // better-sqlite3 is needed to be loaded in dynamically in studio
     'node_modules/better-sqlite3/lib/index.js',
+    // shell-env is dynamically imported via tsx in @packages/server/lib/exec.ts
+    'node_modules/shell-env/index.js',
   ]
 
   let entryPoints = new Set([

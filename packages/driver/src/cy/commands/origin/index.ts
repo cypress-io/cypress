@@ -5,7 +5,7 @@ import { Validator } from './validator'
 import { isFunction } from 'lodash'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
-import { preprocessConfig, preprocessEnv, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin } from '../../../util/config'
+import { preprocessConfig, preprocessEnv, preprocessExpose, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin, syncExposeToCurrentOrigin } from '../../../util/config'
 import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
@@ -100,6 +100,7 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
           communicator.off('queue:finished', onQueueFinished)
           communicator.off('sync:globals', onSyncGlobals)
+          communicator.off('bridge:ready', onBridgeReady)
         }
 
         onCancel && onCancel(() => {
@@ -129,9 +130,12 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
           _resolve({ subject, unserializableSubjectType })
         }
 
-        const onSyncGlobals = ({ config, env }) => {
+        const onSyncGlobals = ({ config, env, expose }) => {
           syncConfigToCurrentOrigin(config)
-          syncEnvToCurrentOrigin(env)
+          syncExposeToCurrentOrigin(expose)
+          if (Cypress.config('allowCypressEnv')) {
+            syncEnvToCurrentOrigin(env)
+          }
         }
 
         communicator.once('sync:globals', onSyncGlobals)
@@ -177,93 +181,101 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
           _reject($errUtils.errByPath('origin.failed_to_create_spec_bridge'))
         }, timeout)
 
-        // fired once the spec bridge is set up and ready to receive messages
-        communicator.once('bridge:ready', async (_data, { origin: specBridgeOrigin }) => {
-          if (specBridgeOrigin === origin) {
-            clearTimeout(timeoutId)
-            // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
-            communicator.toSpecBridge(origin, 'initialize:cypress', {
-              config: preprocessConfig(Cypress.config()),
-              env: preprocessEnv(Cypress.env()),
-              isProtocolEnabled: Cypress.state('isProtocolEnabled'),
+        // Use `on` (not `once`): a `bridge:ready` for a different origin must not
+        // remove the listener, or we never hear the matching event.
+        async function onBridgeReady (_data, { origin: specBridgeOrigin }) {
+          if (specBridgeOrigin !== origin) {
+            return
+          }
+
+          communicator.off('bridge:ready', onBridgeReady)
+          clearTimeout(timeoutId)
+          // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
+          communicator.toSpecBridge(origin, 'initialize:cypress', {
+            config: preprocessConfig(Cypress.config()),
+            env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
+            expose: preprocessExpose(Cypress.expose()),
+            isProtocolEnabled: Cypress.state('isProtocolEnabled'),
+          })
+
+          // Attach the spec bridge to the window to be tested.
+          communicator.toSpecBridge(origin, 'attach:to:window')
+          const fn = isFunction(callbackFn) ? callbackFn.toString() : callbackFn
+          const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, $sourceMapUtils.getSourceMapProjectRoot())?.absoluteFile
+
+          try {
+            // origin is a privileged command, meaning it has to be invoked
+            // from the spec or support file
+            await runPrivilegedCommand({
+              commandName: 'origin',
+              cy,
+              Cypress: (Cypress as unknown) as InternalCypress.Cypress,
+              options: {
+                specBridgeOrigin,
+              },
             })
 
-            // Attach the spec bridge to the window to be tested.
-            communicator.toSpecBridge(origin, 'attach:to:window')
-            const fn = isFunction(callbackFn) ? callbackFn.toString() : callbackFn
-            const file = $stackUtils.getSourceDetailsForFirstLine(userInvocationStack, $sourceMapUtils.getSourceMapProjectRoot())?.absoluteFile
-
-            try {
-              // origin is a privileged command, meaning it has to be invoked
-              // from the spec or support file
-              await runPrivilegedCommand({
-                commandName: 'origin',
-                cy,
-                Cypress: (Cypress as unknown) as InternalCypress.Cypress,
-                options: {
-                  specBridgeOrigin,
-                },
-              })
-
-              // once the secondary origin page loads, send along the
-              // user-specified callback to run in that origin
-              communicator.toSpecBridge(origin, 'run:origin:fn', {
-                args: options?.args || undefined,
-                fn,
-                file,
-                // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
-                // this should only be used for internal testing. Cast to boolean to guarantee serialization
-                // @ts-ignore
-                skipConfigValidation: !!window.top.__cySkipValidateConfig,
-                state: {
-                  viewportWidth: Cypress.state('viewportWidth'),
-                  viewportHeight: Cypress.state('viewportHeight'),
-                  runnable: serializeRunnable(Cypress.state('runnable')),
-                  duringUserTestExecution: Cypress.state('duringUserTestExecution'),
-                  hookId: Cypress.state('hookId'),
-                  originCommandBaseUrl: location.href,
-                  isStable: Cypress.state('isStable'),
-                  autLocation: Cypress.state('autLocation')?.href,
-                  crossOriginCookies: Cypress.state('crossOriginCookies'),
-                  isProtocolEnabled: Cypress.state('isProtocolEnabled'),
-                  originUserInvocationStack: userInvocationStack,
-                },
-                config: preprocessConfig(Cypress.config()),
-                env: preprocessEnv(Cypress.env()),
-                logCounter: LogUtils.getCounter(),
-              })
-            } catch (err: any) {
-              if (err.isNonSpec) {
-                return _reject($errUtils.errByPath('miscellaneous.non_spec_invocation', {
-                  cmd: 'origin',
-                }))
-              }
-
-              const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
-                error: err.message,
-              })
-
-              wrappedErr.name = err.name
-
-              const stack = $stackUtils.replacedStack(wrappedErr, userInvocationStack)
-
-              // add the actual stack, since it might be useful for debugging
-              // the failure
-              wrappedErr.stack = $stackUtils.stackWithContentAppended({
-                appendToStack: {
-                  title: 'From Cypress Internals',
-                  content: $stackUtils.stackWithoutMessage(err.stack),
-                },
-              }, stack)
-
-              // @ts-ignore - This keeps Bluebird from messing with the stack.
-              // It tries to add a bunch of stuff that's not useful and ends up
-              // messing up the stack that we want on the error
-              wrappedErr.__stackCleaned__ = true
-              _reject(wrappedErr)
+            // once the secondary origin page loads, send along the
+            // user-specified callback to run in that origin
+            communicator.toSpecBridge(origin, 'run:origin:fn', {
+              args: options?.args || undefined,
+              fn,
+              file,
+              // let the spec bridge version of Cypress know if config read-only values can be overwritten since window.top cannot be accessed in cross-origin iframes
+              // this should only be used for internal testing. Cast to boolean to guarantee serialization
+              // @ts-ignore
+              skipConfigValidation: !!window.top.__cySkipValidateConfig,
+              state: {
+                viewportWidth: Cypress.state('viewportWidth'),
+                viewportHeight: Cypress.state('viewportHeight'),
+                runnable: serializeRunnable(Cypress.state('runnable')),
+                duringUserTestExecution: Cypress.state('duringUserTestExecution'),
+                hookId: Cypress.state('hookId'),
+                originCommandBaseUrl: location.href,
+                isStable: Cypress.state('isStable'),
+                autLocation: Cypress.state('autLocation')?.href,
+                crossOriginCookies: Cypress.state('crossOriginCookies'),
+                isProtocolEnabled: Cypress.state('isProtocolEnabled'),
+                originUserInvocationStack: userInvocationStack,
+              },
+              config: preprocessConfig(Cypress.config()),
+              env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
+              expose: preprocessExpose(Cypress.expose()),
+              logCounter: LogUtils.getCounter(),
+            })
+          } catch (err: any) {
+            if (err.isNonSpec) {
+              return _reject($errUtils.errByPath('miscellaneous.non_spec_invocation', {
+                cmd: 'origin',
+              }))
             }
+
+            const wrappedErr = $errUtils.errByPath('origin.run_origin_fn_errored', {
+              error: err.message,
+            })
+
+            wrappedErr.name = err.name
+
+            const stack = $stackUtils.replacedStack(wrappedErr, userInvocationStack)
+
+            // add the actual stack, since it might be useful for debugging
+            // the failure
+            wrappedErr.stack = $stackUtils.stackWithContentAppended({
+              appendToStack: {
+                title: 'From Cypress Internals',
+                content: $stackUtils.stackWithoutMessage(err.stack),
+              },
+            }, stack)
+
+            // @ts-ignore - This keeps Bluebird from messing with the stack.
+            // It tries to add a bunch of stuff that's not useful and ends up
+            // messing up the stack that we want on the error
+            wrappedErr.__stackCleaned__ = true
+            _reject(wrappedErr)
           }
-        })
+        }
+
+        communicator.on('bridge:ready', onBridgeReady)
 
         // this signals to the runner to create the spec bridge for the specified origin
         communicator.emit('expect:origin', location)

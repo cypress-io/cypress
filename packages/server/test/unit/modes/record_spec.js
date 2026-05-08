@@ -2,12 +2,11 @@ require('../../spec_helper')
 
 const _ = require('lodash')
 const debug = require('debug')('test')
-const commitInfo = require('@cypress/commit-info')
-const mockedEnv = require('mocked-env')
 
 const errors = require(`../../../lib/errors`)
 const api = require(`../../../lib/cloud/api`).default
-const exception = require(`../../../lib/cloud/exception`)
+const exception = require(`../../../lib/cloud/exception`).default
+const commitInfo = require('../../../lib/util/commit-info')
 const recordMode = require(`../../../lib/modes/record`)
 const ciProvider = require(`../../../lib/util/ci_provider`)
 
@@ -87,17 +86,6 @@ describe('lib/modes/record', () => {
       expect(commit.branch).to.eq('bem/buildkite')
     })
 
-    it('gets branch from process.env.CI_BRANCH for codeship', () => {
-      process.env.CI_NAME = 'codeship'
-      process.env.CI_BRANCH = 'bem/ci'
-
-      const commit = recordMode.getCommitFromGitOrCi(gitCommit)
-
-      debug(commit)
-
-      expect(commit.branch).to.eq('bem/ci')
-    })
-
     it('gets branch from process.env.APPVEYOR_REPO_BRANCH for AppVeyor', () => {
       process.env.APPVEYOR = '1'
       process.env.APPVEYOR_REPO_BRANCH = 'bem/app'
@@ -115,34 +103,29 @@ describe('lib/modes/record', () => {
   })
 
   context('.createRunAndRecordSpecs', () => {
-    describe('fallback commit information', () => {
-      let resetEnv = null
-
-      const env = {
-        COMMIT_INFO_BRANCH: 'my-branch-221',
-        COMMIT_INFO_MESSAGE: 'best commit ever',
-        COMMIT_INFO_EMAIL: 'user@company.com',
-        COMMIT_INFO_AUTHOR: 'Agent Smith',
-        COMMIT_INFO_SHA: '0123456',
-        COMMIT_INFO_REMOTE: 'remote repo',
+    describe('commit information from commitInfo', () => {
+      const commitData = {
+        branch: 'my-branch-221',
+        message: 'best commit ever',
+        email: 'user@company.com',
+        author: 'Agent Smith',
+        sha: '0123456',
+        timestamp: null,
+        remote: 'remote repo',
       }
 
       beforeEach(() => {
-        // stub git commands to return nulls
-        sinon.stub(commitInfo, 'getBranch').resolves(null)
-        sinon.stub(commitInfo, 'getMessage').resolves(null)
-        sinon.stub(commitInfo, 'getEmail').resolves(null)
-        sinon.stub(commitInfo, 'getAuthor').resolves(null)
-        sinon.stub(commitInfo, 'getSha').resolves(null)
-        sinon.stub(commitInfo, 'getRemoteOrigin').resolves(null)
-        resetEnv = mockedEnv(env, { clear: true })
+        // Stub commitInfo to return test data
+        // Note: The actual env var fallback/override behavior is tested in commit-info_spec.ts
+        // This test verifies that record module correctly uses values from commitInfo.commitInfo()
+        sinon.stub(commitInfo, 'commitInfo').resolves(commitData)
       })
 
       afterEach(() => {
-        resetEnv()
+        sinon.restore()
       })
 
-      it('calls api.createRun with the commit extracted from environment variables', () => {
+      it('calls api.createRun with commit information from commitInfo', () => {
         const createRun = sinon.stub(api, 'createRun').resolves()
         const runAllSpecs = sinon.stub()
 
@@ -161,70 +144,12 @@ describe('lib/modes/record', () => {
           debug('git is %o', commit)
 
           expect(commit).to.deep.equal({
-            sha: env.COMMIT_INFO_SHA,
-            branch: env.COMMIT_INFO_BRANCH,
-            authorName: env.COMMIT_INFO_AUTHOR,
-            authorEmail: env.COMMIT_INFO_EMAIL,
-            message: env.COMMIT_INFO_MESSAGE,
-            remoteOrigin: env.COMMIT_INFO_REMOTE,
-            defaultBranch: null,
-          })
-        })
-      })
-    })
-
-    describe('override commit information', () => {
-      let resetEnv = null
-
-      const env = {
-        COMMIT_INFO_BRANCH: 'my-branch-221',
-        COMMIT_INFO_MESSAGE: 'best commit ever',
-        COMMIT_INFO_EMAIL: 'user@company.com',
-        COMMIT_INFO_AUTHOR: 'Agent Smith',
-        COMMIT_INFO_SHA: '0123456',
-        COMMIT_INFO_REMOTE: 'remote repo',
-      }
-
-      beforeEach(() => {
-        // stub git commands to return values
-        sinon.stub(commitInfo, 'getBranch').resolves('my-ci-branch')
-        sinon.stub(commitInfo, 'getMessage').resolves('my ci msg')
-        sinon.stub(commitInfo, 'getEmail').resolves('my.ci@email.com')
-        sinon.stub(commitInfo, 'getAuthor').resolves('My CI Name')
-        sinon.stub(commitInfo, 'getSha').resolves('mycisha')
-        sinon.stub(commitInfo, 'getRemoteOrigin').resolves('my ci remote')
-        resetEnv = mockedEnv(env, { clear: true })
-      })
-
-      afterEach(() => {
-        resetEnv()
-      })
-
-      it('calls api.createRun with the commit overridden from environment variables', () => {
-        const createRun = sinon.stub(api, 'createRun').resolves()
-        const runAllSpecs = sinon.stub()
-
-        return recordMode.createRunAndRecordSpecs({
-          key: 'foo',
-          sys: {},
-          browser: {},
-          runAllSpecs,
-        })
-        .then(() => {
-          expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
-          expect(createRun).to.have.been.calledOnce
-          expect(createRun.firstCall.args).to.have.length(1)
-          const { commit } = createRun.firstCall.args[0]
-
-          debug('git is %o', commit)
-
-          expect(commit).to.deep.equal({
-            sha: env.COMMIT_INFO_SHA,
-            branch: env.COMMIT_INFO_BRANCH,
-            authorName: env.COMMIT_INFO_AUTHOR,
-            authorEmail: env.COMMIT_INFO_EMAIL,
-            message: env.COMMIT_INFO_MESSAGE,
-            remoteOrigin: env.COMMIT_INFO_REMOTE,
+            sha: commitData.sha,
+            branch: commitData.branch,
+            authorName: commitData.author,
+            authorEmail: commitData.email,
+            message: commitData.message,
+            remoteOrigin: commitData.remote,
             defaultBranch: null,
           })
         })
@@ -287,6 +212,7 @@ describe('lib/modes/record', () => {
         const browser = {
           displayName: 'chrome',
           version: '59',
+          family: 'chromium',
         }
         const tag = 'nightly,develop'
         const testingType = 'e2e'
@@ -342,6 +268,7 @@ describe('lib/modes/record', () => {
             osVersion: 4,
             browserName: 'chrome',
             browserVersion: '59',
+            browserFamily: 'chromium',
           },
           ci: {
             params: {
@@ -368,8 +295,52 @@ describe('lib/modes/record', () => {
 
         await beforeSpecRun()
 
-        expect(api.createInstance).to.have.been.called
+        expect(api.createInstance).to.have.been.calledWith('run-id', sinon.match({
+          platform: sinon.match({
+            browserFamily: 'chromium',
+            browserName: 'chrome',
+            browserVersion: '59',
+          }),
+        }))
+
         expect(ctx.actions.currentRecording.startInstance).to.have.been.calledWith('instance-id')
+      })
+
+      it('passes browser.family as platform.browserFamily for non-chromium browsers', async () => {
+        const runAllSpecs = sinon.stub()
+        const sys = { osCpus: 1, osName: 'linux', osMemory: 8, osVersion: '1' }
+        const browser = {
+          displayName: 'firefox',
+          version: '120',
+          family: 'firefox',
+        }
+        const project = { setOnTestsReceived: sinon.stub() }
+        const ctx = {
+          actions: {
+            currentRecording: { startRun: sinon.stub(), startInstance: sinon.stub() },
+          },
+        }
+
+        await recordMode.createRunAndRecordSpecs({
+          key: 'k',
+          sys,
+          specs,
+          browser,
+          projectRoot: 'root',
+          specPattern: ['a'],
+          runAllSpecs,
+          testingType: 'e2e',
+          project,
+          ctx,
+        })
+
+        expect(api.createRun).to.have.been.calledWith(sinon.match({
+          platform: sinon.match({
+            browserFamily: 'firefox',
+            browserName: 'firefox',
+            browserVersion: '120',
+          }),
+        }))
       })
     })
   })

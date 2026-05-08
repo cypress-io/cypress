@@ -2,7 +2,7 @@ import { getOffset } from './dimensions'
 
 export const INT32_MAX = 2147483647
 
-export function getZIndex (el) {
+function getZIndex (el) {
   const value = getComputedStyle(el, null).getPropertyValue('z-index')
 
   if (/^(auto|0)$/.test(value)) {

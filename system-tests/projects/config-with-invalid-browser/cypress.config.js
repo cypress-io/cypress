@@ -1,4 +1,5 @@
 module.exports = {
+  allowCypressEnv: false,
   'browsers': [
     {
       'name': 'bad browser',

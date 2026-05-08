@@ -175,16 +175,17 @@ export function runCypressInCypressMochaEventsTest (snapToCompare: string, done:
     }).then((snapshot) => {
       cy.task('readMochaEventSnapshot', { filename }).then((existingSnapshots: any) => {
         existingSnapshots ||= {}
-
-        if (Cypress.env('SNAPSHOT_UPDATE') === 1) {
-          // overwrite the existing snapshot and write it to disk
-          existingSnapshots[snapToCompare] = snapshot
-          cy.task('writeMochaEventSnapshot', { filename, snapshots: existingSnapshots }).then(() => {
+        cy.env(['SNAPSHOT_UPDATE']).then(({ SNAPSHOT_UPDATE }) => {
+          if (SNAPSHOT_UPDATE === 1) {
+            // overwrite the existing snapshot and write it to disk
+            existingSnapshots[snapToCompare] = snapshot
+            cy.task('writeMochaEventSnapshot', { filename, snapshots: existingSnapshots }).then(() => {
+              bus.emit('assert:cypress:in:cypress', existingSnapshots, snapshot)
+            })
+          } else {
             bus.emit('assert:cypress:in:cypress', existingSnapshots, snapshot)
-          })
-        } else {
-          bus.emit('assert:cypress:in:cypress', existingSnapshots, snapshot)
-        }
+          }
+        })
       })
     })
   }

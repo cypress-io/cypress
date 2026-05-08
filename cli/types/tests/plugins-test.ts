@@ -18,7 +18,7 @@ declare namespace Cypress {
      * We have added a label property to "cy" object.
      * @example console.log(cy.myLabel)
     */
-    myLabel: string,
+    myLabel: string
     /**
      * Definition for a custom command "login" that was added separately
      * using `Cypress.Commands.add('login', (username, password) => {...})`.
@@ -44,7 +44,7 @@ cy.myLabel
 
 // new custom command "cy.login"
 // $ExpectType Chainable<any>
-cy.login(Cypress.env('username'), Cypress.env('password'))
+cy.login('USERNAME_HYDRATED_THROUGH_CY_ENV', 'PASSWORD_HYDRATED_THROUGH_CY_ENV')
 
 // "myLabel" property has been added to "interface cy"
 // thus it is NOT of the command chain.

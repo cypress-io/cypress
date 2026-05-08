@@ -14,7 +14,7 @@ import $errUtils from '../../cypress/error_utils'
 // user-facing StaticResponse only
 export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delay']
 
-export const STATIC_RESPONSE_WITH_OPTIONS_KEYS: (keyof StaticResponseWithOptions)[] = [...STATIC_RESPONSE_KEYS, 'log']
+const STATIC_RESPONSE_WITH_OPTIONS_KEYS: (keyof StaticResponseWithOptions)[] = [...STATIC_RESPONSE_KEYS, 'log']
 
 export function validateStaticResponse (cmd: string, staticResponse: StaticResponse): void {
   const err = (message) => {
@@ -55,6 +55,14 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 
   if (delay && (!_.isFinite(delay) || delay < 0)) {
     err('`delay` must be a finite, positive number.')
+  }
+
+  // setTimeout uses a 32-bit signed integer internally, so delays >= 2**31
+  // (about 24.8 days) are silently treated as 1ms and effectively ignored.
+  const MAX_TIMEOUT = 2147483647 // 2**31 - 1
+
+  if (delay && delay > MAX_TIMEOUT) {
+    err(`\`delay\` must be less than ${MAX_TIMEOUT + 1}ms (approximately 24.8 days). Larger values are silently ignored by the timer implementation.`)
   }
 }
 
@@ -129,7 +137,7 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
   return backendStaticResponse
 }
 
-export function hasStaticResponseKeys (obj: any) {
+function hasStaticResponseKeys (obj: any) {
   return !_.isArray(obj) && (_.intersection(_.keys(obj), STATIC_RESPONSE_KEYS).length || _.isEmpty(obj))
 }
 

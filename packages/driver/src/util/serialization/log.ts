@@ -110,7 +110,7 @@ export const reifyDomElement = (props: any) => {
  * @param {boolean} [attemptToSerializeFunctions=false] - Whether or not the function should attempt to preprocess a function by invoking it.
  * @returns
  */
-export const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions = false) => {
+const preprocessObjectLikeForSerialization = (props, attemptToSerializeFunctions = false) => {
   if (_.isArray(props)) {
     return props.map((prop) => preprocessLogLikeForSerialization(prop, attemptToSerializeFunctions))
   }
@@ -154,7 +154,7 @@ export const preprocessObjectLikeForSerialization = (props, attemptToSerializeFu
  * @param {boolean} matchElementsAgainstSnapshotDOM - whether DOM elements within the Object/Array should be matched against
  * @returns {Object|Proxy} - a reified version of the Object or Array (Proxy).
  */
-export const reifyObjectLikeForSerialization = (props, matchElementsAgainstSnapshotDOM) => {
+const reifyObjectLikeForSerialization = (props, matchElementsAgainstSnapshotDOM) => {
   let reifiedObjectOrArray = {}
 
   _.forIn(props, (value, key) => {
@@ -275,7 +275,7 @@ export const preprocessLogLikeForSerialization = (props, attemptToSerializeFunct
  * against the currently rendered DOM (usually against a rendered snapshot) or should be completely recreated from scratch (common with snapshots as they will replace the DOM)
  * @returns {any} the reified version of the generic.
  */
-export const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapshotDOM = true) => {
+const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapshotDOM = true) => {
   try {
     if (props?.serializationKey === 'dom') {
       props.reifyElement = function () {
@@ -285,16 +285,20 @@ export const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapsho
         // where elements need to be evaluated LAZILY after the snapshot is attached to the page.
         // this option is set to false when reifying snapshots, since they will be replacing the current DOM when the user interacts with said snapshot.
         if (matchElementsAgainstSnapshotDOM) {
-          const attributes = Object.keys(props.attributes).map((attribute) => {
-            return `[${attribute}="${props.attributes[attribute]}"]`
-          }).join('')
+          try {
+            const attributes = Object.keys(props.attributes).map((attribute) => {
+              return `[${CSS.escape(attribute)}="${CSS.escape(props.attributes[attribute])}"]`
+            }).join('')
 
-          const selector = `${props.tagName}${attributes}`
+            const selector = `${props.tagName}${attributes}`
 
-          reifiedElement = Cypress.$(selector)
+            reifiedElement = Cypress.$(selector)
 
-          if (reifiedElement.length) {
-            return reifiedElement.length > 1 ? reifiedElement : reifiedElement[0]
+            if (reifiedElement.length) {
+              return reifiedElement.length > 1 ? reifiedElement : reifiedElement[0]
+            }
+          } catch {
+            // fall through to reifyDomElement
           }
         }
 

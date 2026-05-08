@@ -1,7 +1,6 @@
 import os from 'os'
 import assert from 'assert'
 import _ from 'lodash'
-import url from 'url'
 import path from 'path'
 import Debug from 'debug'
 import request from '@cypress/request'
@@ -60,7 +59,7 @@ const getCA = async (): Promise<string | undefined> => {
 }
 
 const prepend = (arch: string, urlPath: string, version: string): string => {
-  const endpoint = url.resolve(getBaseUrl(), urlPath)
+  const endpoint = new URL(urlPath, getBaseUrl()).toString()
   const platform = os.platform()
   const pathTemplate = util.getEnv('CYPRESS_DOWNLOAD_PATH_TEMPLATE', true)
 

@@ -136,6 +136,7 @@ export class AuthActions {
       this.setAuthenticatedUser(null)
       this.ctx.cloud.reset()
       this.ctx.emitter.authChange()
+      this.ctx.emitter.toApp()
     }
   }
 

@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
 
@@ -12,8 +11,7 @@ const DocumentTest = ({ reportHeight }) => {
             document.documentElement.clientHeight,
             document.body.clientHeight,
           )
-        }
-        }
+        }}
       >
       Report height
       </button>

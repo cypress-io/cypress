@@ -15,11 +15,11 @@ import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
-import { DocumentDomainInjection, getPath, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
+import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
-import Request from './request'
+import { Request } from './request'
 import type { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import { ensureProp } from './util/class-helpers'
@@ -31,20 +31,22 @@ import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
 import type { Server as WebSocketServer } from 'ws'
-import { RemoteStates, RemoteState } from './remote_states'
+import { RemoteStates } from '@packages/network-tools'
+import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
-import { resourceTypeAndCredentialManager, ResourceTypeAndCredentialManager } from './util/resourceTypeAndCredentialManager'
 import * as fileServer from './file_server'
+import type { FileServer } from './file_server'
 import appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import * as statusCode from './util/status_code'
-import headersUtil from './util/headers'
+import { getContentType } from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookies'
+import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -133,15 +135,9 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
-export type WarningErr = Record<string, any>
+type WarningErr = Record<string, any>
 
-type FileServer = {
-  token: string
-  port: () => number
-  close: () => void
-}
-
-export interface OpenServerOptions {
+interface OpenServerOptions {
   SocketCtor: typeof SocketE2E | typeof SocketCt
   testingType: Cypress.TestingType
   onError: any
@@ -156,7 +152,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected request: Request
   protected isListening: boolean
   protected socketAllowed: SocketAllowed
-  protected resourceTypeAndCredentialManager: ResourceTypeAndCredentialManager
   protected _fileServer: FileServer | null
   protected _baseUrl: string | null
   protected _server?: DestroyableHttpServer
@@ -177,8 +172,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   constructor (config: Cfg) {
     this.isListening = false
-    // @ts-ignore
-    this.request = Request()
+    this.request = new Request()
     this.socketAllowed = new SocketAllowed()
     this._eventBus = new EventEmitter()
     this._middleware = null
@@ -195,8 +189,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     }
 
     this._remoteStates = new RemoteStates(remoteStatePorts, this._documentDomainInjection)
-
-    this.resourceTypeAndCredentialManager = resourceTypeAndCredentialManager
   }
 
   ensureProp = ensureProp
@@ -247,90 +239,69 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.socket.toDriver('cross:origin:cookies', cookies)
     })
 
-    this.socket.localBus.on('request:sent:with:credentials', this.resourceTypeAndCredentialManager.set)
+    this.socket.localBus.on('request:sent:with:credentials', (credentials: { url: string, resourceType: ResourceType, credentialStatus: RequestCredentialLevel }) => {
+      this._networkProxy?.setCredentials(credentials)
+    })
   }
 
-  createServer (
+  async createServer (
     app: Express,
     config: Cfg,
     onWarning: unknown,
-  ): Bluebird<[number, WarningErr?]> {
-    return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
+  ): Promise<[number, WarningErr?]> {
+    const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
-      this._server = this._createHttpServer(app)
+    this._server = this._createHttpServer(app)
 
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
+    debug('createServer connecting to server')
+
+    this.server.on('connect', this.onConnect.bind(this))
+    this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
+
+    // Start the file server first so its port is known before we begin
+    // listening for proxied requests on the main server. The primary
+    // remote state's `<root>` strategy reads `_fileServer.port()`
+    // synchronously, so the fileServer must exist before the primary
+    // is computed. The httpsProxy comes after — it depends on the main
+    // server's port.
+    this._fileServer = await fileServer.create(fileServerFolder as string) as FileServer
+
+    const listenedPort = await this._listen(port)
+
+    this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
+
+    this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
+      onRequest: this.callListeners.bind(this),
+      onUpgrade: this.onSniUpgrade.bind(this),
+    }) as HttpsProxyServer
+
+    let warning: WarningErr | undefined
+
+    // if we have a baseUrl let's go ahead and make sure the server is
+    // connectable!
+    if (baseUrl) {
+      this._baseUrl = baseUrl
+
+      if (config.isTextTerminal) {
+        try {
+          await this._retryBaseUrlCheck(baseUrl, onWarning)
+        } catch (e) {
+          debug(e)
+          throw errors.get('CANNOT_CONNECT_BASE_URL')
+        }
+      } else {
+        try {
+          await ensureUrl.isListening(baseUrl)
+        } catch (err) {
+          debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+          warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl) as WarningErr
         }
       }
+    }
 
-      debug('createServer connecting to server')
-
-      this.server.on('connect', this.onConnect.bind(this))
-      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
-      this.server.once('error', onError)
-
-      this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
-
-      return this._listen(port, (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
-        }
-      })
-      .then((port) => {
-        return Bluebird.all([
-          createHttpsProxy(appData.path('proxy'), port, {
-            onRequest: this.callListeners.bind(this),
-            onUpgrade: this.onSniUpgrade.bind(this),
-          }),
-
-          fileServer.create(fileServerFolder as string),
-        ])
-        .spread((httpsProxy, fileServer) => {
-          this._httpsProxy = httpsProxy as HttpsProxyServer
-          this._fileServer = fileServer as FileServer
-
-          // if we have a baseUrl let's go ahead
-          // and make sure the server is connectable!
-          if (baseUrl) {
-            this._baseUrl = baseUrl
-
-            if (config.isTextTerminal) {
-              return this._retryBaseUrlCheck(baseUrl, onWarning)
-              .return(null)
-              .catch((e) => {
-                debug(e)
-
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
-              })
-            }
-
-            return ensureUrl.isListening(baseUrl)
-            .return(null)
-            .catch((err) => {
-              debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
-
-              return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
-            })
-          }
-        }).then((warning) => {
-          // once we open set the domain to root by default
-          // which prevents a situation where navigating
-          // to http sites redirects to /__/ cypress
-          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
-
-          return resolve([port, warning])
-        })
-      })
-    })
+    return [listenedPort, warning]
   }
 
   open (config: Cfg, {
@@ -364,7 +335,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.createNetworkProxy({
       config,
       remoteStates: this._remoteStates,
-      resourceTypeAndCredentialManager: this.resourceTypeAndCredentialManager,
       shouldCorrelatePreRequests,
       getCurrentBrowser,
     })
@@ -391,7 +361,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     app.use(createCommonRoutes(routeOptions))
 
-    return this.createServer(app, config, onWarning)
+    // Preserve Bluebird-typed return value.
+    return Bluebird.resolve(this.createServer(app, config, onWarning))
   }
 
   createExpressApp (config) {
@@ -454,7 +425,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return e
   }
 
-  createNetworkProxy ({ config, remoteStates, resourceTypeAndCredentialManager, shouldCorrelatePreRequests, getCurrentBrowser }) {
+  createNetworkProxy ({ config, remoteStates, shouldCorrelatePreRequests, getCurrentBrowser }) {
     const getFileServerToken = () => {
       return this._fileServer?.token
     }
@@ -471,7 +442,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       netStubbingState: this.netStubbingState,
       request: this.request,
       serverBus: this._eventBus,
-      resourceTypeAndCredentialManager,
       getCurrentBrowser,
     })
   }
@@ -489,7 +459,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.networkProxy.reset({ resetBetweenSpecs: false })
       this.netStubbingState.reset()
       this._remoteStates.reset()
-      this.resourceTypeAndCredentialManager.clear()
+      this.networkProxy.clearCredentials()
     }
 
     const ios = this.socket.startListening(this.server, automation, config, options)
@@ -554,8 +524,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return (this.server.address() as AddressInfo).port
   }
 
-  _listen (port, onError) {
-    return new Bluebird<number>((resolve) => {
+  _listen (port: number | null | undefined): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const onError = (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
+        if (err.code === 'EADDRINUSE') {
+          reject(this.portInUseErr(port))
+        }
+      }
+
+      this.server.once('error', onError)
+
       const listener = () => {
         const address = this.server.address() as AddressInfo
 
@@ -565,10 +546,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
         this.server.removeListener('error', onError)
 
-        return resolve(address.port)
+        resolve(address.port)
       }
 
-      return this.server.listen(port || 0, '127.0.0.1', listener)
+      this.server.listen(port || 0, '127.0.0.1', listener)
     })
   }
 
@@ -652,7 +633,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   reset () {
     this._networkProxy?.reset({ resetBetweenSpecs: true })
-    this.resourceTypeAndCredentialManager.clear()
+    this._networkProxy?.clearCredentials()
     const baseUrl = this._baseUrl ?? '<root>'
 
     return this._remoteStates.set(baseUrl)
@@ -881,7 +862,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
               }
 
               const isOk = statusIs2xxOrAllowedFailure()
-              const contentType = headersUtil.getContentType(incomingRes)
+              const contentType = getContentType(incomingRes)
 
               const details: Record<string, unknown> = {
                 isOkStatusCode: isOk,
@@ -929,7 +910,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
                     && !originsMatchByPolicy
                     || options.isFromSpecBridge
 
-                  debug('urlDoesNotMatchPolicy?', {
+                  debug('urlDoesNotMatchPolicy?: %o', {
                     urlDoesNotMatchPolicyBasedOnDomain,
                     hasAlreadyVisited: options.hasAlreadyVisited,
                     originsMatchByPolicy,
@@ -981,6 +962,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         delete options.body
       }
 
+      // HTTP header names are case-insensitive; convert all keys to lowercase
+      options.headers = _.mapKeys(options.headers, (value, key) => key.toLowerCase())
+
       _.assign(options, {
         // turn off gzip since we need to eventually
         // rewrite these contents
@@ -988,7 +972,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         url: urlFile != null ? urlFile : urlStr,
         headers: _.assign({
           accept: 'text/html,*/*',
-        }, options.headers),
+        }, options.headers, {
+          'accept-encoding': getSupportedAcceptEncoding(options.headers['accept-encoding']),
+        }),
         onBeforeReqInit: runPhase,
         followRedirect (incomingRes) {
           const status = incomingRes.statusCode

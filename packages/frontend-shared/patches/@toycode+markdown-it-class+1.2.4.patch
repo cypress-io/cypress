@@ -1,5 +1,5 @@
 diff --git a/node_modules/@toycode/markdown-it-class/index.js b/node_modules/@toycode/markdown-it-class/index.js
-index 8e8c8f4..5e2539d 100644
+index 8e8c8f4..69234f9 100644
 --- a/node_modules/@toycode/markdown-it-class/index.js
 +++ b/node_modules/@toycode/markdown-it-class/index.js
 @@ -8,7 +8,7 @@ const toArray = a => (Array.isArray(a) ? a : [a])
@@ -11,3 +11,10 @@ index 8e8c8f4..5e2539d 100644
        const orig = splitWithSpace(token.attrGet('class'))
        const addition = toArray(mapping[token.tag])
        token.attrSet('class', [...orig, ...addition].join(' '))
+@@ -29,4 +29,5 @@ function markdownitTagToClass(md, _mapping) {
+   md.core.ruler.push('markdownit-tag-to-class', parseState)
+ }
+ 
+-module.exports = markdownitTagToClass
++export default markdownitTagToClass
++

@@ -37,7 +37,7 @@ export const icons = () => {
   return require('@packages/icons')
 }
 
-export function checkCurrentVersion (pathToVersion: string) {
+function checkCurrentVersion (pathToVersion: string) {
   // read in the version file
   return fs.readFile(pathToVersion, 'utf8').then((str) => {
     const version = str.replace('v', '')
@@ -52,7 +52,7 @@ export function checkCurrentVersion (pathToVersion: string) {
   })
 }
 
-export async function getFileHash (filePath: string): Promise<string> {
+async function getFileHash (filePath: string): Promise<string> {
   const hash = crypto.createHash('sha1')
   const stream = createReadStream(filePath)
 
@@ -61,7 +61,7 @@ export async function getFileHash (filePath: string): Promise<string> {
   return hash.digest('hex')
 }
 
-export async function checkIconVersion () {
+async function checkIconVersion () {
   // TODO: this seems wrong, it's hard coding the check only for OSX and not windows or linux (!?)
   const mainIconsPath = icons().getPathToIcon('cypress.icns')
   const cachedIconsPath = path.join(
@@ -78,11 +78,7 @@ export async function checkIconVersion () {
   }
 }
 
-export function checkExecExistence (pathToExec: string) {
-  return fs.stat(pathToExec)
-}
-
-export async function checkBinaryArchCpuArch (
+async function checkBinaryArchCpuArch (
   pathToExec: string,
   platform: string,
   arch: string,
@@ -114,7 +110,7 @@ export async function packageAndExit () {
   process.exit()
 }
 
-export async function getRealArch (platform: string, arch: string) {
+async function getRealArch (platform: string, arch: string) {
   if (platform === 'darwin' && arch === 'x64') {
     // see this comment for explanation of x64 -> arm64 translation
     // https://github.com/cypress-io/cypress/pull/25014/files#diff-85c4db7620ed2731baf5669a9c9993e61e620693a008199ca7c584e621b6a1fdR11
@@ -141,7 +137,7 @@ interface PkgElectronAppOptions {
   icon: string
 }
 
-export async function pkgElectronApp (
+async function pkgElectronApp (
   options: Partial<PkgElectronAppOptions> = {},
 ) {
   /**
@@ -209,7 +205,7 @@ export async function pkgElectronApp (
   }
 }
 
-export function ensure () {
+function ensure () {
   const arch = os.arch()
   const platform = os.platform()
   const pathToExec = getPathToExec()

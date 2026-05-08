@@ -993,6 +993,15 @@ describe('network stubbing', { retries: 15 }, function () {
             },
             'must be a number',
           ],
+          // @see https://github.com/cypress-io/cypress/issues/33183
+          [
+            'delay exceeds maximum setTimeout value',
+            {
+              body: 'test',
+              delay: 2147483648,
+            },
+            'must be less than 2147483648ms',
+          ],
         ].forEach(function ([name, handler, expectedErr]) {
           it(`${name} fails`, function (done) {
             testFail((err) => {
@@ -3657,6 +3666,36 @@ describe('network stubbing', { retries: 15 }, function () {
       })
       .wait('@foo.bar.request')
       .wait('@foo.bar.request', { timeout: 100 })
+    })
+
+    it('does not hang when waiting on multiple aliases across navigation', function (done) {
+      const triggerUrl = uniqueRoute('/trigger-navigation')
+      const neverAUrl = uniqueRoute('/never-a')
+      const neverBUrl = uniqueRoute('/never-b')
+      const slowPageUrl = '/fixtures/empty.html?stability-repro=1'
+
+      testFailWaiting((err) => {
+        expect(err.message).to.contain('`cy.wait()` timed out waiting')
+        done()
+      })
+
+      cy.intercept(`${triggerUrl}*`, 'ok').as('trigger')
+      cy.intercept(`${neverAUrl}*`).as('neverA')
+      cy.intercept(`${neverBUrl}*`).as('neverB')
+      cy.intercept('/fixtures/empty.html?stability-repro=1', {
+        delay: 2000,
+        fixture: 'empty.html',
+      })
+      .then(() => {
+        const win = cy.state('window')
+
+        setTimeout(() => {
+          $.get(triggerUrl).always(() => {
+            win.location.href = slowPageUrl
+          })
+        }, 50)
+      })
+      .wait(['@neverA', '@neverB', '@trigger'], { timeout: 300 })
     })
 
     it('can alias a route without stubbing it', function () {

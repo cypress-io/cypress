@@ -52,8 +52,6 @@ The `@cypress/`-namespaced NPM packages that live inside the [`/npm`](../npm) di
 
 If you don't have access to 1Password, ask a team member who has done a deploy.
 
-Tip: Use [as-a](https://github.com/bahmutov/as-a) to manage environment variables for different situations.
-
 ### Before Publishing a New Version
 
 In order to publish a new version of the `cypress` package to the npm registry, CI must build and test it across multiple platforms and test projects. CI is set up to do the following on every commit to `develop`:
@@ -143,6 +141,7 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
 11. Review the release-specific documentation and changelog PR in [cypress-documentation](https://github.com/cypress-io/cypress-documentation). If there is not already a release-specific PR open, create one.
     - Copy the changelog content for this version from the release PR above into `/docs/app/references/changelog.mdx`. Adjust any `docs.cypress.io` links to use host-relative paths.
+    - Add the release date in `_Released MM/DD/YYYY_` format below the version header in the `changelog.mdx` entry.
     - Merge any release-specific documentation changes into the main release PR.
     - You can view the doc's [branch deploy preview](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md#pull-requests) by clicking 'Details' on the PR's `netlify-cypress-docs/deploy-preview` GitHub status check.
 

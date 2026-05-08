@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-/// <reference types="../../lib" />
 import { Users } from './2-users-fetch.jsx'
 import React from 'react'
 import { mount } from '@cypress/react'
@@ -11,7 +9,6 @@ describe('Users with Fetch', () => {
     cy.get('li', { timeout: 20000 }).should('have.length', 3)
   })
 
-  // https://github.com/bahmutov/@cypress/react/issues/347
   context('mocking', () => {
     it('can inspect real data from the server', () => {
       // spy on the request

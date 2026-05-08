@@ -1,11 +1,10 @@
 import _ from 'lodash'
 import path from 'path'
 import la from 'lazy-ass'
-import check from 'check-more-types'
 import Debug from 'debug'
 import Promise from 'bluebird'
 import isForkPr from 'is-fork-pr'
-import commitInfo from '@cypress/commit-info'
+import commitInfo from '../util/commit-info'
 import { telemetry } from '@packages/telemetry'
 import { hideKeys } from '@packages/config'
 
@@ -16,9 +15,8 @@ import type { AllCypressErrorNames } from '@packages/errors'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
 import * as capture from '../capture'
 import * as env from '../util/env'
-import ciProvider from '../util/ci_provider'
+import * as ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
-import { countStudioUsage } from '../util/spec_writer'
 import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
 
 import type { Cfg } from '../project-base'
@@ -170,7 +168,7 @@ const updateInstanceStdout = async (options: any = {}) => {
 }
 
 const postInstanceResults = (options: any = {}) => {
-  const { runId, instanceId, results, group, parallel, ciBuildId, metadata } = options
+  const { runId, instanceId, results, group, parallel, ciBuildId } = options
   let { stats, tests, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
@@ -196,7 +194,6 @@ const postInstanceResults = (options: any = {}) => {
     video,
     reporterStats,
     screenshots,
-    metadata,
   })
   .catch((err: any) => {
     debug('failed updating instance %o', {
@@ -208,7 +205,7 @@ const postInstanceResults = (options: any = {}) => {
 }
 
 const getCommitFromGitOrCi = (git: any) => {
-  la(check.object(git), 'expected git information object', git)
+  la(_.isPlainObject(git), 'expected git information object', git)
 
   return ciProvider.commitDefaults({
     sha: git.sha,
@@ -512,6 +509,7 @@ interface InstanceOptions {
     osVersion: any
     browserName: any
     browserVersion: any
+    browserFamily: any
   }
   parallel?: any
   ciBuildId?: any
@@ -604,6 +602,7 @@ const createRunAndRecordSpecs = (options: any = {}) => {
       osVersion: sys.osVersion,
       browserName: browser.displayName,
       browserVersion: browser.version,
+      browserFamily: browser.family,
     }
 
     telemetry.startSpan({ name: 'record:createRun' })
@@ -691,17 +690,13 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
         debug('after spec run %o', { spec })
 
-        return countStudioUsage(spec.absolute)
-        .then((metadata) => {
-          return postInstanceResults({
-            group,
-            config,
-            results,
-            parallel,
-            ciBuildId,
-            instanceId,
-            metadata,
-          })
+        return postInstanceResults({
+          group,
+          config,
+          results,
+          parallel,
+          ciBuildId,
+          instanceId,
         })
         .then((resp: any) => {
           if (!resp) {

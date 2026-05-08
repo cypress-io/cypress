@@ -42,6 +42,7 @@ import type { SpecDirtyDataStore } from '../store/spec-dirty-data-store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
 import { getAutIframeModel } from '../runner'
 import { closePlayground } from '../runner/selector-playground/utils'
+import type { SnapshotStore } from '../runner/snapshot-store'
 
 // Mirrors the ReactDOM.Root type since incorporating those types
 // messes up vue typing elsewhere
@@ -68,6 +69,8 @@ const props = defineProps<{
   hasRequestedProjectAccess: boolean
   requestProjectAccessMutation: UseMutationResponse<any, any>
   specDirtyDataStore: SpecDirtyDataStore
+  autSnapshotStore: SnapshotStore
+  pendingNavigationResume?: (() => void) | null
 }>()
 
 interface StudioApp { default: StudioAppDefaultShape }
@@ -140,6 +143,8 @@ const maybeRenderReactComponent = () => {
     specDirtyDataStore: props.specDirtyDataStore,
     isSelectorPlaygroundOpen: isSelectorPlaygroundOpen.value,
     onCloseSelectorPlayground,
+    autSnapshotStore: props.autSnapshotStore,
+    pendingNavigationResume: props.pendingNavigationResume,
   })
 
   // Store the react root in a weak map keyed by the container. We do this so that we have a reference
@@ -159,6 +164,8 @@ const maybeRenderReactComponent = () => {
 watch(() => props.canAccessStudioAI, maybeRenderReactComponent)
 watch(() => props.cloudStudioSessionId, maybeRenderReactComponent)
 watch(() => isSelectorPlaygroundOpen.value, maybeRenderReactComponent)
+watch(() => props.autSnapshotStore.isSnapshotPinned, maybeRenderReactComponent)
+watch(() => props.pendingNavigationResume, maybeRenderReactComponent)
 
 const unmountReactComponent = () => {
   if (!ReactStudioPanel.value || !container.value) {

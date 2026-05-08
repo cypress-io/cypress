@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const info = require(`../../../lib/modes/info`)
 const capture = require(`../../../lib/capture`)
-const browserUtils = require(`../../../lib/browsers/utils`)
+const browserUtils = require(`../../../lib/browsers/utils`).default
 const { fs } = require(`../../../lib/util/fs`)
 const detect = require('@packages/launcher/lib/detect')
 const snapshot = require('snap-shot-it')

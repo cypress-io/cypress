@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@tooling/system-tests": "0.0.0-development",
-    "chai-as-promised": "7.1.1",
+    "chai-as-promised": "7.1.2",
     "cpr": "^3.0.1",
     "mocha": "7.0.1",
     "snap-shot-it": "7.9.10",

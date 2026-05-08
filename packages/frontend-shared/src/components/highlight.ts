@@ -33,6 +33,4 @@ export async function initHighlighter () {
   })
 }
 
-const inheritAttrs = false
-
-export { highlighter, inheritAttrs }
+export { highlighter }

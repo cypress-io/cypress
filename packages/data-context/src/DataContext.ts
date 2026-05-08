@@ -44,13 +44,7 @@ import { resetIssuedWarnings } from '@packages/config'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
-export type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
-
-export type CurrentProjectUpdater = (proj: Exclude<CoreDataShape['currentProject'], null | undefined>) => void | undefined | CoreDataShape['currentProject']
-
-export interface InternalDataContextOptions {
-  loadCachedProjects: boolean
-}
+type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
 
 export interface DataContextConfig {
   schema: GraphQLSchema

@@ -7,6 +7,7 @@ import * as launcher from '@packages/launcher'
 import type { Automation } from '../automation'
 import type { Browser } from './types'
 import type { CriClient } from './cri-client'
+import * as profileCleaner from '../util/profile_cleaner'
 
 declare global {
   interface Window {
@@ -23,7 +24,6 @@ const getPort = require('get-port')
 const { fs } = require('../util/fs')
 const extension = require('@packages/extension')
 const appData = require('../util/app_data')
-const profileCleaner = require('../util/profile_cleaner')
 const { telemetry } = require('@packages/telemetry')
 
 const pathToBrowsers = appData.path('browsers')
@@ -318,6 +318,7 @@ const parseBrowserOption = (opt) => {
 }
 
 function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
+
 function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
 
 async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
@@ -479,7 +480,7 @@ const listenForDownload = (binding) => {
   }
 }
 
-export = {
+const browserUtils = {
 
   extendLaunchOptionsFromPlugins,
 
@@ -545,3 +546,5 @@ export = {
     })
   },
 }
+
+export default browserUtils

@@ -78,6 +78,11 @@ export class HtmlDataSource {
       // Error getting config, we will show an error screen when we render the page
     }
 
+    // If mitigating secrets via setting allowCypressEnv, we need to delete the env object and avoid serializing it completely to the browser
+    if (!cfg.allowCypressEnv) {
+      delete cfg.env
+    }
+
     // for project-base config, the remote state we wish to convey should be whatever top is set to, also known as the primary domain
     // whenever the app is served/re-served
     if (this.ctx.coreData.currentTestingType === 'e2e') {
@@ -120,6 +125,8 @@ export class HtmlDataSource {
       <body>
         <script>
           window.__RUN_MODE_SPECS__ = ${JSON.stringify(this.ctx.project.specs)}
+          // __RUN_ALL_SPECS__ is only set if experimentalRunAllSpecs is set to true
+          window.__RUN_ALL_SPECS__ = ${JSON.stringify(this.ctx.project.runAllSpecs)}
           window.__CYPRESS_MODE__ = ${JSON.stringify(this.ctx.isRunMode && !process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE ? 'run' : 'open')};
           window.__CYPRESS_CONFIG__ = ${JSON.stringify(serveConfig)};
           window.__CYPRESS_TESTING_TYPE__ = '${this.ctx.coreData.currentTestingType}'

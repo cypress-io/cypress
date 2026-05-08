@@ -1,11 +1,13 @@
 describe('Superfluous screenshots.', { retries: 1 }, function () {
+  let foo = undefined
+
   afterEach(function () {
-    Cypress.env('SOMEVARIABLE', 'X')
+    foo = 'X'
     expect(this.currentTest.state).not.to.equal('failed')
   })
 
   it('Failing test which passes for the second time.', () => {
-    expect(Cypress.env('SOMEVARIABLE')).to.equal('X')
+    expect(foo).to.equal('X')
   })
 
   it('Passing test 1.', () => {

@@ -26,7 +26,7 @@
     "engine.io": "6.4.2",
     "engine.io-client": "~5.0.0",
     "engine.io-parser": "4.0.2",
-    "flatted": "3.2.9",
+    "flatted": "3.4.2",
     "socket.io": "4.0.1",
     "socket.io-client": "4.0.1",
     "socket.io-parser": "4.0.5",
@@ -35,10 +35,9 @@
   "devDependencies": {
     "@packages/types": "0.0.0-development",
     "@types/uuid": "8.3.4",
-    "cross-env": "7.0.3",
-    "devtools-protocol": "0.0.1528500",
+    "devtools-protocol": "0.0.1575685",
     "resolve-pkg": "2.0.0",
-    "rimraf": "6.0.1",
+    "rimraf": "6.1.1",
     "vitest": "^3.2.4"
   },
   "files": [

@@ -123,6 +123,27 @@ describe('env variables', () => {
   })
 })
 
+describe('expose variables', () => {
+  const projectFolder = fromFolder('expose')
+
+  beforeEach(() => {
+    chdir.to(projectFolder)
+  })
+
+  afterEach(chdir.back)
+
+  it('passes expose configuration in the object', () => {
+    return cypress.run({
+      spec: 'cypress/e2e/expose-spec.cy.js',
+      expose: {
+        CY_EXPOSE_FOO: 'foo',
+        CY_EXPOSE_BAR: 'bar',
+        CY_EXPOSE_ONE: 1,
+      },
+    })
+  })
+})
+
 describe('failing test', () => {
   beforeEach(() => {
     chdir.to(fromFolder('failing'))
