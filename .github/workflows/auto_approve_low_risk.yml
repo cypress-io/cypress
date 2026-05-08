@@ -42,13 +42,22 @@ jobs:
             core.setOutput('is_low_risk', 'false');
             core.setOutput('reviewed_sha', '');
 
-            const summaryMatch = body.match(/<!-- CURSOR_SUMMARY -->([\s\S]*?)<!-- \/CURSOR_SUMMARY -->/);
-            if (!summaryMatch) {
+            // Require exactly one CURSOR_SUMMARY block. A write-access author could
+            // otherwise prepend a fake `**Low Risk**` block above the template's markers;
+            // when BugBot fills in the template's (separate) markers with a Medium/High
+            // assessment, a first-match regex would pick the attacker's planted block
+            // and we'd auto-approve based on a forged risk level.
+            const summaryMatches = [...body.matchAll(/<!-- CURSOR_SUMMARY -->([\s\S]*?)<!-- \/CURSOR_SUMMARY -->/g)];
+            if (summaryMatches.length === 0) {
               core.notice('No CURSOR_SUMMARY section found in PR body.');
               return;
             }
+            if (summaryMatches.length > 1) {
+              core.notice(`Multiple (${summaryMatches.length}) CURSOR_SUMMARY sections found in PR body; refusing to auto-approve.`);
+              return;
+            }
 
-            const summaryContent = summaryMatch[1];
+            const summaryContent = summaryMatches[0][1];
 
             const hasMediumRisk = /\*\*Medium Risk\*\*/i.test(summaryContent);
             const hasHighRisk = /\*\*High Risk\*\*/i.test(summaryContent);
