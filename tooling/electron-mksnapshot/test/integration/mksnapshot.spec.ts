@@ -19,6 +19,7 @@ describe('mksnapshot', () => {
     const { version, snapshotBlobFile, v8ContextFile } = await syncAndRun(
       providedVersion,
       args,
+      { spawnTimeoutMs: 20_000 },
     )
 
     expect(version).to.equal(providedVersion)
@@ -31,7 +32,7 @@ describe('mksnapshot', () => {
     const args = [invalidSnapshot, '--output_dir', outputDir]
 
     try {
-      await syncAndRun(providedVersion, args)
+      await syncAndRun(providedVersion, args, { spawnTimeoutMs: 20_000 })
       assert.fail('should fail making invalid snapshot')
     } catch (err) {
       expect(err.message.includes('Failed to create snapshot blob'), 'fails with helpful error message').to.be.true
@@ -44,6 +45,7 @@ describe('mksnapshot', () => {
     const { version, snapshotBlobFile, v8ContextFile } = await syncAndRun(
       providedVersion,
       args,
+      { spawnTimeoutMs: 20_000 },
     )
 
     expect(version).to.equal(providedVersion)
