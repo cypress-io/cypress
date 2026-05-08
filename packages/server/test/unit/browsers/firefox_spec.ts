@@ -13,7 +13,7 @@ import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
 const path = require('path')
 const mockfs = require('mock-fs')
 const FirefoxProfile = require('firefox-profile')
-const utils = require('../../../lib/browsers/utils')
+const utils = require('../../../lib/browsers/utils').default
 const plugins = require('../../../lib/plugins')
 const specUtil = require('../../specUtils')
 

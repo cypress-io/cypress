@@ -1,8 +1,8 @@
 delete global.fs
 
 const api = require('../../../lib/cloud/api').default
-const user = require('../../../lib/cloud/user')
-const exception = require('../../../lib/cloud/exception')
+const user = require('../../../lib/cloud/user').default
+const exception = require('../../../lib/cloud/exception').default
 const system = require('../../../lib/util/system')
 const pkg = require('@packages/root')
 

@@ -769,7 +769,7 @@ export class ProjectBase extends EE {
 
     let state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
 
-    state.set(stateChanges)
+    await state.set(stateChanges)
     this.cfg.state = await state.get()
 
     return this.cfg.state
