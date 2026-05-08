@@ -30,11 +30,10 @@
     "socket.io": "4.8.3",
     "socket.io-client": "4.8.3",
     "socket.io-parser": "4.2.6",
-    "uuid": "8.3.2"
+    "uuid": "11.1.1"
   },
   "devDependencies": {
     "@packages/types": "0.0.0-development",
-    "@types/uuid": "8.3.4",
     "devtools-protocol": "0.0.1575685",
     "resolve-pkg": "2.0.0",
     "rimraf": "6.1.1",
