@@ -101,9 +101,11 @@ describe('App - Cloud Message Banner', () => {
     cy.loginUser()
     stubCloudAppMessages([cloudMessage])
 
-    // Assert via mutation payload — `beforeEach` stubs
-    // `getCurrentProjectSavedState`, which would shadow a savedState re-read.
-    cy.intercept('mutation-TrackedBanner_SetProjectState').as('setPrefs')
+    // The v1 catalog message has `dismissal.scope: 'user'`, so writes route
+    // through the global mutation (not project). Assert via mutation payload
+    // — `beforeEach` stubs `getCurrentProjectSavedState`, which would shadow
+    // a savedState re-read regardless of scope.
+    cy.intercept('mutation-TrackedBanner_SetGlobalState').as('setPrefs')
 
     cy.visitApp()
     cy.specsPageIsVisible()
