@@ -3,3 +3,13 @@
 # Changes to the Module API, after:run, or after:spec results should be
 # reviewed by Brian and/or Jennifer
 /system-tests/__snapshots__/results_spec.ts.js @brian-mann @jennifer-shehane
+
+# Supply-chain-sensitive paths require a code-owner review. The auto-approve
+# workflow runs from the PR head ref, so any in-workflow check can be bypassed
+# by a PR that edits the workflow itself — CODEOWNERS is enforced server-side
+# by GitHub and is the only protection that survives that bypass.
+/.github/         @cypress-io/app
+/.circleci/       @cypress-io/app
+/scripts/         @cypress-io/app
+/package.json     @cypress-io/app
+/yarn.lock        @cypress-io/app
