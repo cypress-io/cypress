@@ -16,7 +16,7 @@ permissions:
 
 concurrency:
   group: auto-approve-low-risk-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   auto-approve:
@@ -90,12 +90,14 @@ jobs:
           # BugBot must re-review the new head SHA before re-approval can fire.
           if [ "$EVENT_ACTION" = "synchronize" ] && [ -n "$REVIEW_ID" ]; then
             echo "action=dismiss" >> "$GITHUB_OUTPUT"
+            echo "dismiss_reason=New commits pushed. Auto-approval dismissed pending Cursor Bugbot re-review of the new head SHA." >> "$GITHUB_OUTPUT"
           elif [ "$EVENT_ACTION" = "synchronize" ]; then
             echo "action=noop" >> "$GITHUB_OUTPUT"
           elif [ "$IS_LOW_RISK" = "true" ] && [ -z "$REVIEW_ID" ]; then
             echo "action=approve" >> "$GITHUB_OUTPUT"
           elif [ "$IS_LOW_RISK" = "false" ] && [ -n "$REVIEW_ID" ]; then
             echo "action=dismiss" >> "$GITHUB_OUTPUT"
+            echo "dismiss_reason=Cursor Bugbot risk assessment is no longer **Low Risk**. Auto-approval dismissed; manual review required." >> "$GITHUB_OUTPUT"
           else
             echo "action=noop" >> "$GITHUB_OUTPUT"
             echo "::notice::No reconciliation needed (event=$EVENT_ACTION, is_low_risk=$IS_LOW_RISK, has_existing_approval=$([ -n "$REVIEW_ID" ] && echo true || echo false))."
@@ -176,4 +178,4 @@ jobs:
           gh api \
             --method PUT \
             "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ steps.existing-approval.outputs.review_id }}/dismissals" \
-            -f message="Cursor Bugbot risk assessment is no longer **Low Risk**. Auto-approval dismissed; manual review required."
+            -f message="${{ steps.action.outputs.dismiss_reason }}"
