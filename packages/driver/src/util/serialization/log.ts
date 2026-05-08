@@ -285,16 +285,20 @@ const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapshotDOM = 
         // where elements need to be evaluated LAZILY after the snapshot is attached to the page.
         // this option is set to false when reifying snapshots, since they will be replacing the current DOM when the user interacts with said snapshot.
         if (matchElementsAgainstSnapshotDOM) {
-          const attributes = Object.keys(props.attributes).map((attribute) => {
-            return `[${attribute}="${props.attributes[attribute]}"]`
-          }).join('')
+          try {
+            const attributes = Object.keys(props.attributes).map((attribute) => {
+              return `[${CSS.escape(attribute)}="${CSS.escape(props.attributes[attribute])}"]`
+            }).join('')
 
-          const selector = `${props.tagName}${attributes}`
+            const selector = `${props.tagName}${attributes}`
 
-          reifiedElement = Cypress.$(selector)
+            reifiedElement = Cypress.$(selector)
 
-          if (reifiedElement.length) {
-            return reifiedElement.length > 1 ? reifiedElement : reifiedElement[0]
+            if (reifiedElement.length) {
+              return reifiedElement.length > 1 ? reifiedElement : reifiedElement[0]
+            }
+          } catch {
+            // fall through to reifyDomElement
           }
         }
 
