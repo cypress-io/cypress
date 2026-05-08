@@ -3,7 +3,9 @@ name: 'Auto-approve low-risk PRs'
 on:
   pull_request:
     types:
+      - opened
       - edited
+      - synchronize
     branches:
       - develop
       - release/*
@@ -80,16 +82,23 @@ jobs:
       - name: Decide reconciliation action
         id: action
         env:
+          EVENT_ACTION: ${{ github.event.action }}
           IS_LOW_RISK: ${{ steps.risk-check.outputs.is_low_risk }}
           REVIEW_ID: ${{ steps.existing-approval.outputs.review_id }}
         run: |
-          if [ "$IS_LOW_RISK" = "true" ] && [ -z "$REVIEW_ID" ]; then
+          # On synchronize (new commits), force-dismiss any prior auto-approval so
+          # BugBot must re-review the new head SHA before re-approval can fire.
+          if [ "$EVENT_ACTION" = "synchronize" ] && [ -n "$REVIEW_ID" ]; then
+            echo "action=dismiss" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT_ACTION" = "synchronize" ]; then
+            echo "action=noop" >> "$GITHUB_OUTPUT"
+          elif [ "$IS_LOW_RISK" = "true" ] && [ -z "$REVIEW_ID" ]; then
             echo "action=approve" >> "$GITHUB_OUTPUT"
           elif [ "$IS_LOW_RISK" = "false" ] && [ -n "$REVIEW_ID" ]; then
             echo "action=dismiss" >> "$GITHUB_OUTPUT"
           else
             echo "action=noop" >> "$GITHUB_OUTPUT"
-            echo "::notice::No reconciliation needed (is_low_risk=$IS_LOW_RISK, has_existing_approval=$([ -n "$REVIEW_ID" ] && echo true || echo false))."
+            echo "::notice::No reconciliation needed (event=$EVENT_ACTION, is_low_risk=$IS_LOW_RISK, has_existing_approval=$([ -n "$REVIEW_ID" ] && echo true || echo false))."
           fi
 
       - name: Generate Cypress Bot App token
