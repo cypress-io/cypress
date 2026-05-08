@@ -124,6 +124,26 @@ jobs:
             echo "::notice::No reconciliation needed (is_low_risk=$IS_LOW_RISK, approval=${REVIEW_ID:-none} for ${APPROVAL_SHA:0:7}, head=${HEAD_SHA:0:7})."
           fi
 
+      - name: Generate Cypress Bot App token
+        if: steps.action.outputs.should_dismiss == 'true' || steps.action.outputs.should_approve == 'true'
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
+          private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
+          permission-metadata: read
+
+      - name: Dismiss stale approval
+        if: steps.action.outputs.should_dismiss == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh api \
+            --method PUT \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ steps.existing-approval.outputs.review_id }}/dismissals" \
+            -f message="${{ steps.action.outputs.dismiss_reason }}"
+
       - name: Require BugBot review on current head SHA
         if: steps.action.outputs.should_approve == 'true'
         id: bugbot-head-review
@@ -143,16 +163,6 @@ jobs:
           else
             echo "ok=true" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Generate Cypress Bot App token
-        if: steps.action.outputs.should_dismiss == 'true' || steps.action.outputs.should_approve == 'true'
-        id: app-token
-        uses: actions/create-github-app-token@v3
-        with:
-          app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
-          private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
-          permission-pull-requests: write
-          permission-metadata: read
 
       - name: Verify PR author has write access
         if: steps.action.outputs.should_approve == 'true'
@@ -174,16 +184,6 @@ jobs:
               echo "::notice::PR author '$AUTHOR_LOGIN' has '$PERMISSION' permission. Skipping auto-approve."
               ;;
           esac
-
-      - name: Dismiss stale approval
-        if: steps.action.outputs.should_dismiss == 'true'
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          gh api \
-            --method PUT \
-            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ steps.existing-approval.outputs.review_id }}/dismissals" \
-            -f message="${{ steps.action.outputs.dismiss_reason }}"
 
       - name: Approve PR
         if: >-
