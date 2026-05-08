@@ -10,6 +10,46 @@ const logInfo = debug('cypress:mksnapshot:info')
 const logDebug = debug('cypress:mksnapshot:debug')
 const logError = debug('cypress:mksnapshot:error')
 
+// The mksnapshot/v8_context_snapshot_generator binaries occasionally crash
+// with a V8 fatal error on Windows CI runners. The crash is non-deterministic
+// and a fresh process invocation typically succeeds, so we retry on failure.
+const SPAWN_MAX_ATTEMPTS = 2
+const SPAWN_TIMEOUT_MS = 20_000
+
+function spawnWithRetry (
+  command: string,
+  args: string[],
+  options: Parameters<typeof spawnSync>[2],
+  description: string,
+) {
+  let result: ReturnType<typeof spawnSync> | undefined
+
+  for (let attempt = 1; attempt <= SPAWN_MAX_ATTEMPTS; attempt++) {
+    result = spawnSync(command, args, { ...options, timeout: SPAWN_TIMEOUT_MS })
+
+    if (result.status === 0) {
+      if (attempt > 1) {
+        logInfo('%s succeeded on attempt %d', description, attempt)
+      }
+
+      return result
+    }
+
+    if (attempt < SPAWN_MAX_ATTEMPTS) {
+      logError(
+        '%s failed on attempt %d/%d (status: %s, signal: %s); retrying',
+        description,
+        attempt,
+        SPAWN_MAX_ATTEMPTS,
+        result.status,
+        result.signal,
+      )
+    }
+  }
+
+  return result!
+}
+
 const workingDir = path.join(tempDir, 'mksnapshot-workdir')
 
 fs.ensureDirSync(workingDir)
@@ -123,10 +163,11 @@ function createSnapshotBlob (
   logDebug({ mksnapshotBinaryDir, mksnapshotCommand, mksnapshotArgs })
   logDebug(cmd)
 
-  const mksnapshotProcess = spawnSync(
+  const mksnapshotProcess = spawnWithRetry(
     mksnapshotCommand,
     mksnapshotArgs,
     snapshotBlobOptions,
+    'mksnapshot',
   )
 
   if (mksnapshotProcess.status !== 0) {
@@ -179,10 +220,11 @@ function createV8ContextSnapshot (
   logInfo(`Generating ${v8ContextFile}`)
   logDebug(cmd)
 
-  const v8ContextGenProcess = spawnSync(
+  const v8ContextGenProcess = spawnWithRetry(
     v8ContextGenCommand,
     v8ContextGenArgs,
     v8ContextGenOptions,
+    'v8_context_snapshot_generator',
   )
 
   if (v8ContextGenProcess.status !== 0) {
