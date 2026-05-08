@@ -218,6 +218,11 @@ fragment SpecsListBanners on Query {
       }
     }
   }
+  localSettings {
+    preferences {
+      banners
+    }
+  }
 }
 `
 
@@ -351,21 +356,34 @@ const ctBundler = computed(() => props.gql.wizard?.bundler?.name)
 
 const cloudMessageDismissalKey = (id: string) => `cloud:${id}` as const
 
+function getDismissalState (msg: NonNullable<SpecsListBannersFragment['cloudAppMessages']>[number]) {
+  // `dismissal.scope` chooses where the dismissal record lives — global
+  // appData for `'user'` (cross-project), project savedState otherwise.
+  if (msg.dismissal.scope === 'user') {
+    const globalBanners = props.gql.localSettings?.preferences?.banners as AllowedState['banners']
+
+    return globalBanners?.[cloudMessageDismissalKey(msg.id)]
+  }
+
+  const projectBanners = (props.gql.currentProject?.savedState as AllowedState)?.banners
+
+  return projectBanners?.[cloudMessageDismissalKey(msg.id)]
+}
+
 function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['cloudAppMessages']>[number]) {
   if (!msg.enabled) {
     return false
   }
 
-  const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
+  // `_disabled` is the project-scoped test kill switch — kills banners of
+  // any scope so E2E test setup remains a single lever.
+  const projectBanners = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
-  // `_disabled` is the test kill switch for all banners.
-  if (bannersState?._disabled) {
+  if (projectBanners?._disabled) {
     return false
   }
 
-  const local = bannersState?.[cloudMessageDismissalKey(msg.id)]
-
-  return !local?.dismissed
+  return !getDismissalState(msg)?.dismissed
 }
 
 // Distinguishes "still loading" (undefined) from "resolved" (null on error,
@@ -390,9 +408,7 @@ const hasCloudMessageBeenShown = computed(() => {
     return false
   }
 
-  const bannersState = (props.gql.currentProject?.savedState as AllowedState)?.banners
-
-  return !!bannersState?.[cloudMessageDismissalKey(msg.id)]?.lastShown
+  return !!getDismissalState(msg)?.lastShown
 })
 
 </script>

@@ -57,6 +57,15 @@ export const LocalSettingsPreferences = objectType({
       },
     })
 
+    t.json('banners', {
+      description: 'User-scoped banner state — used by cloud-driven messages whose `dismissal.scope` is `user`. The shape mirrors `currentProject.savedState.banners` but lives in global appData.',
+      resolve: async (source, args, ctx) => {
+        const preferences = await ctx._apis.localSettingsApi.getPreferences()
+
+        return preferences.banners || {}
+      },
+    })
+
     t.boolean('debugSlideshowComplete')
     t.boolean('desktopNotificationsEnabled')
     t.dateTime('dismissNotificationBannerUntil')

@@ -4,6 +4,7 @@ import {
   TrackedBanner_RecordBannerSeenDocument,
   TrackedBanner_RecordBannerDismissedDocument,
   TrackedBanner_SetProjectStateDocument,
+  TrackedBanner_SetGlobalStateDocument,
   UseRecordEvent_RecordEventDocument,
   ExternalLink_OpenExternalDocument,
 } from '../../generated/graphql'
@@ -104,6 +105,12 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
       })
 
       cy.stubMutationResolver(TrackedBanner_SetProjectStateDocument, (defineResult, event) => {
+        setPrefs(event)
+
+        return defineResult({ __typename: 'Mutation', setPreferences: { __typename: 'Query' } as any })
+      })
+
+      cy.stubMutationResolver(TrackedBanner_SetGlobalStateDocument, (defineResult, event) => {
         setPrefs(event)
 
         return defineResult({ __typename: 'Mutation', setPreferences: { __typename: 'Query' } as any })
@@ -265,6 +272,47 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
         expect(arg.value).to.contain('dismissed')
         expect(arg.value).to.not.contain('shownCount')
       })
+    })
+  })
+
+  // Verifies that `dismissal.scope` actually drives mutation routing —
+  // user-scoped messages persist via the global mutation, project-scoped via
+  // the project mutation. The `events` block above unifies both stubs so its
+  // assertions are scope-agnostic; this block keeps them separate.
+  context('dismissal scope routing', () => {
+    beforeEach(() => {
+      const projectWrite = cy.stub().as('projectWrite')
+      const globalWrite = cy.stub().as('globalWrite')
+
+      cy.stubMutationResolver(TrackedBanner_SetProjectStateDocument, (defineResult, event) => {
+        projectWrite(event)
+
+        return defineResult({ __typename: 'Mutation', setPreferences: { __typename: 'Query' } as any })
+      })
+
+      cy.stubMutationResolver(TrackedBanner_SetGlobalStateDocument, (defineResult, event) => {
+        globalWrite(event)
+
+        return defineResult({ __typename: 'Mutation', setPreferences: { __typename: 'Query' } as any })
+      })
+    })
+
+    it('user-scoped messages persist to global preferences', () => {
+      cy.mount(<CloudMessageBanner hasBannerBeenShown={true} message={{ ...baseMessage, dismissal: { ...baseMessage.dismissal, scope: 'user' } }} />)
+
+      cy.findByTestId('alert-suffix-icon').click()
+
+      cy.get('@globalWrite').should('have.been.called')
+      cy.get('@projectWrite').should('not.have.been.called')
+    })
+
+    it('project-scoped messages persist to project saved state', () => {
+      cy.mount(<CloudMessageBanner hasBannerBeenShown={true} message={{ ...baseMessage, dismissal: { ...baseMessage.dismissal, scope: 'project' } }} />)
+
+      cy.findByTestId('alert-suffix-icon').click()
+
+      cy.get('@projectWrite').should('have.been.called')
+      cy.get('@globalWrite').should('not.have.been.called')
     })
   })
 })

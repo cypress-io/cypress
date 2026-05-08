@@ -9,6 +9,7 @@
     dismissible
     :has-banner-been-shown="hasBannerBeenShown"
     :event-data="eventData"
+    :dismissal-scope="message.dismissal.scope"
   >
     <template #default="{ bannerInstanceId }">
       <p
