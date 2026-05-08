@@ -571,7 +571,14 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
 
       userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))
 
-      mountWithState({ cloudAppMessages: undefined } as any)
+      // `delete` rather than `mountWithState({ cloudAppMessages: undefined })`
+      // because lodash assign skips source values that are `undefined`.
+      cy.mountFragment(SpecsListBannersFragmentDoc, {
+        onResult: (result) => {
+          delete (result as any).cloudAppMessages
+        },
+        render: (gql) => <SpecsListBanners gql={gql} />,
+      })
 
       cy.findByTestId('login-banner').should('not.exist')
       cy.findByTestId('cloud-message-banner').should('not.exist')
