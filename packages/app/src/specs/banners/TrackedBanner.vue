@@ -99,14 +99,7 @@ const reportDismissedMutation = useMutation(TrackedBanner_RecordBannerDismissedD
 const bannerInstanceId = ref(nanoid())
 const isAlertDisplayed = ref(true)
 
-// `includeMachineId: true` routes cloud-banner events to /machine-collect for
-// warehouse dedup. Onboarding banners stay on /anon-collect to preserve
-// existing analytics continuity. Declared before `watchEffect` to avoid the
-// TDZ — the watcher fires synchronously during setup.
 const isCloudBanner = computed(() => props.bannerId.startsWith('cloud:'))
-
-// User-scoping is opt-in and only meaningful for cloud banners. Onboarding
-// banners are always project-scoped to preserve their existing behavior.
 const isUserScoped = computed(() => isCloudBanner.value && props.dismissalScope === 'user')
 
 watchEffect(() => {
@@ -117,9 +110,8 @@ watchEffect(() => {
 
 watch(() => isAlertDisplayed.value, async (newVal) => {
   if (!newVal) {
-    // Onboarding banners historically don't report dismissal; gating the
-    // event on the `cloud:` namespace preserves their analytics shape.
-    if (props.bannerId.startsWith('cloud:') && props.eventData) {
+    // Only cloud banners emit a dismiss event.
+    if (isCloudBanner.value && props.eventData) {
       recordBannerDismissed(props.eventData)
     }
 
@@ -158,7 +150,6 @@ function recordBannerShown ({ campaign, medium, cohort }: EventData): void {
 }
 
 function recordBannerDismissed ({ campaign, medium, cohort }: EventData): void {
-  // Same `messageId` as the impression event — joins the funnel.
   reportDismissedMutation.executeMutation({
     campaign,
     messageId: bannerInstanceId.value,

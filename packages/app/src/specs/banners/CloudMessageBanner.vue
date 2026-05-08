@@ -54,7 +54,6 @@ const props = defineProps<{
   message: AppMessageShape
 }>()
 
-// `cloud:` namespace keeps cloud-message ids from colliding with `BannerIds`.
 const bannerId = computed(() => `cloud:${props.message.id}`)
 
 const alertStatus = computed(() => {
@@ -73,18 +72,14 @@ const eventData = computed(() => {
   }
 })
 
-// useMutation depends on component-instance injection, so these have to
-// resolve during setup, not inside event handlers.
+// useMutation must resolve during setup, not inside handlers.
 const openExternal = useExternalLink()
 const { record } = useRecordEvent()
 
-// `source / medium / campaign` are auto-derived; the catalog only populates
-// these supplementary keys.
 const UTM_FIELDS = ['content', 'term', 'id'] as const
 
 function resolveUtmParams (cta: AppMessageCtaShape): Record<string, string> {
-  // CTA-level overrides message-level, per field. Truthy coalescing
-  // (not `??`) so empty strings in the catalog count as "not set."
+  // Truthy `||` (not `??`): empty strings in the catalog count as "not set."
   const ctaUtm = cta.utm
   const messageUtm = props.message.analytics.utm
   const params: Record<string, string> = {}
@@ -101,9 +96,6 @@ function resolveUtmParams (cta: AppMessageCtaShape): Record<string, string> {
 }
 
 function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
-  // `messageId` joins this click to its impression and (eventual) dismiss for
-  // the shown → clicked → dismissed funnel; `cta_id` is the stable
-  // analytical key for which CTA was clicked (URL-revision-resilient).
   void record({
     campaign: props.message.analytics.campaign,
     medium: 'Cloud Message Banner',
@@ -116,7 +108,7 @@ function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
     },
   })
 
-  // `getUrlWithParams` auto-injects `utm_source` from the running context.
+  // utm_source is injected by getUrlWithParams.
   const decoratedUrl = getUrlWithParams({
     url: cta.href,
     params: {

@@ -42,11 +42,7 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
     GenerateSpecResponse: (data) => data.__typename,
     CloudFeatureNotEnabled: () => null,
     UsageLimitExceeded: () => null,
-    // Cloud app message value objects: embed on the parent message instead of
-    // normalizing. Dismissal/Analytics have no id; CloudAppMessageCta has an
-    // `id` but it's message-scoped (not globally unique — would alias across
-    // messages); CloudAppMessageUtm's `id` is a UTM parameter, not an entity
-    // key.
+    // Embed on parent CloudAppMessage; ids are not globally unique entity keys.
     CloudAppMessageDismissal: () => null,
     CloudAppMessageAnalytics: () => null,
     CloudAppMessageCta: () => null,

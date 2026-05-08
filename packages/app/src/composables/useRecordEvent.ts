@@ -15,11 +15,8 @@ type EventParams = {
   cohort?: string
   payload?: Record<string, string | number | undefined | null>
   includeMachineId?: boolean
-  /**
-   * Optional explicit messageId. Pass the same id to every `record()` call
-   * for events that belong to the same banner instance so the warehouse
-   * can join the impression → click → dismiss funnel.
-   */
+  // Pass the same messageId to every record() for events that belong to the
+  // same banner instance so the warehouse can join the funnel.
   messageId?: string
 }
 
@@ -31,6 +28,7 @@ export function useRecordEvent () {
       ...params,
       messageId: params.messageId ?? nanoid(),
       includeMachineId: params.includeMachineId ?? false,
+      cohort: params.cohort ?? null,
       payload: JSON.stringify(params.payload),
     })
   }

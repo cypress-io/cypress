@@ -358,8 +358,6 @@ const ctBundler = computed(() => props.gql.wizard?.bundler?.name)
 const cloudMessageDismissalKey = (id: string) => `cloud:${id}` as const
 
 function getDismissalState (msg: NonNullable<SpecsListBannersFragment['cloudAppMessages']>[number]) {
-  // `dismissal.scope` chooses where the dismissal record lives — global
-  // appData for `'user'` (cross-project), project savedState otherwise.
   if (msg.dismissal.scope === 'user') {
     const globalBanners = props.gql.localSettings?.preferences?.banners as AllowedState['banners']
 
@@ -376,8 +374,7 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
     return false
   }
 
-  // `_disabled` is the project-scoped test kill switch — kills banners of
-  // any scope so E2E test setup remains a single lever.
+  // `_disabled` is the E2E-test kill switch for all banners.
   const projectBanners = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
   if (projectBanners?._disabled) {
@@ -387,15 +384,12 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
   return !getDismissalState(msg)?.dismissed
 }
 
-// Distinguishes "still loading" (undefined) from "resolved" (null on error,
-// or an array). Without this, an onboarding banner would mount during the
-// cold-cache round-trip and fire a spurious impression event.
+// Gates onboarding banners until the cloud query resolves (undefined → loading).
 const cloudMessagesHaveResolved = computed(() => {
   return props.gql.cloudAppMessages !== undefined
 })
 
 const activeCloudMessage = computed(() => {
-  // Server pre-filters and priority-sorts; client only re-checks dismissal.
   const messages = props.gql.cloudAppMessages ?? []
   const eligible = messages.filter((m) => m && isCloudMessageEligible(m))
 
