@@ -561,29 +561,13 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
     })
   })
 
-  // `cloudAppMessages` is a stitched remote field. The orchestrator suppresses
-  // onboarding banners only while `undefined` (in flight); both `null`
-  // (errored / no-data) and `[]` (empty) are resolved states that fall
-  // through to onboarding normally.
-  describe('cloudAppMessages resolution gating', () => {
-    it('does not render any onboarding banner while cloudAppMessages is in flight (undefined)', () => {
-      const userProjectStatusStore = useUserProjectStatusStore()
-
-      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))
-
-      // `delete` rather than `mountWithState({ cloudAppMessages: undefined })`
-      // because lodash assign skips source values that are `undefined`.
-      cy.mountFragment(SpecsListBannersFragmentDoc, {
-        onResult: (result) => {
-          delete (result as any).cloudAppMessages
-        },
-        render: (gql) => <SpecsListBanners gql={gql} />,
-      })
-
-      cy.findByTestId('login-banner').should('not.exist')
-      cy.findByTestId('cloud-message-banner').should('not.exist')
-    })
-
+  // Renders an onboarding banner once cloudAppMessages resolves. The
+  // in-flight (`undefined`) case is exercised at the E2E layer rather than
+  // here because mountFragment's auto-mock normalizes nullable list fields
+  // to `null` at the GraphQL response boundary, so a true `undefined` state
+  // can't be simulated through this mocking layer. Scope-routing for cloud
+  // banner dismissal is unit-tested in `CloudMessageBanner.cy.tsx`.
+  describe('cloudAppMessages fallthrough', () => {
     it('renders the onboarding banner when cloudAppMessages resolves to null (cloud error / services not yet deployed)', () => {
       const userProjectStatusStore = useUserProjectStatusStore()
 
@@ -602,72 +586,6 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       mountWithState({ cloudAppMessages: [] })
 
       cy.findByTestId('login-banner').should('be.visible')
-    })
-  })
-
-  // Eligibility branches on `dismissal.scope`: user-scoped messages read
-  // dismissal state from `localSettings.preferences.banners` (global appData),
-  // project-scoped read from `currentProject.savedState.banners`.
-  describe('cloud message dismissal scope', () => {
-    const cloudMessage = (scope: 'user' | 'project') => ({
-      __typename: 'CloudAppMessage' as const,
-      id: 'ai_tools_education',
-      enabled: true,
-      priority: 50,
-      visualStyle: 'info' as const,
-      title: 'Cypress AI is here!',
-      body: 'body',
-      ctas: [],
-      dismissal: { __typename: 'CloudAppMessageDismissal' as const, scope },
-      analytics: { __typename: 'CloudAppMessageAnalytics' as const, campaign: 'c', category: 'cat', utm: null },
-    })
-
-    it('suppresses a user-scoped message when global savedState has dismissed it', () => {
-      cy.mountFragment(SpecsListBannersFragmentDoc, {
-        onResult: (result) => {
-          assignIn(result, {
-            cloudAppMessages: [cloudMessage('user')],
-            localSettings: {
-              preferences: {
-                banners: { 'cloud:ai_tools_education': { dismissed: Date.now() } },
-              },
-            },
-          })
-        },
-        render: (gql) => <SpecsListBanners gql={gql} />,
-      })
-
-      cy.findByTestId('cloud-message-banner').should('not.exist')
-    })
-
-    it('still renders a user-scoped message when only the project savedState has dismissed it', () => {
-      // Verifies the scopes are independent: project-side dismissal of a
-      // user-scoped message does not suppress it.
-      cy.mountFragment(SpecsListBannersFragmentDoc, {
-        onResult: (result) => {
-          assignIn(result, { cloudAppMessages: [cloudMessage('user')] })
-          set(result, 'currentProject.savedState', {
-            banners: { 'cloud:ai_tools_education': { dismissed: Date.now() } },
-          })
-        },
-        render: (gql) => <SpecsListBanners gql={gql} />,
-      })
-
-      cy.findByTestId('cloud-message-banner').should('be.visible')
-    })
-
-    it('suppresses a project-scoped message when project savedState has dismissed it', () => {
-      cy.mountFragment(SpecsListBannersFragmentDoc, {
-        onResult: (result) => {
-          assignIn(result, { cloudAppMessages: [cloudMessage('project')] })
-          set(result, 'currentProject.savedState', {
-            banners: { 'cloud:ai_tools_education': { dismissed: Date.now() } },
-          })
-        },
-        render: (gql) => <SpecsListBanners gql={gql} />,
-      })
-
-      cy.findByTestId('cloud-message-banner').should('not.exist')
     })
   })
 })
