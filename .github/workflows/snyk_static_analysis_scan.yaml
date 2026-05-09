@@ -33,6 +33,8 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
+          # Cache only on pull_request (internal PRs) — pull_request_target writes scope to the base branch and could be poisoned by an approved fork PR.
+          cache: ${{ github.event_name == 'pull_request' && 'yarn' || '' }}
       - name: Run yarn
         run: yarn
       - name: Run build
