@@ -8,6 +8,10 @@ name: Snyk Software Composition Analysis Scan
 # implemented PAT token for actions to resolve an issue with the action not
 # running and reporting back to the PR status checks
 on:
+  pull_request:
+    branches:
+      - develop
+      - release/*
   pull_request_target:
     branches:
       - develop
@@ -17,9 +21,11 @@ permissions:
 jobs:
   Snyk_SCA_Scan:
     runs-on: ubuntu-latest
-    # Fork PRs require manual approval via the fork-pr-review environment.
-    # Internal PRs run without an environment gate.
-    environment: ${{ github.event.pull_request.head.repo.full_name != github.repository && 'fork-pr-review' || '' }}
+    # Route each PR to exactly one event: internal -> pull_request, fork -> pull_request_target.
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository)
+    environment: ${{ github.event_name == 'pull_request_target' && 'fork-pr-review' || '' }}
     strategy:
       matrix:
         node-version: [22.x]

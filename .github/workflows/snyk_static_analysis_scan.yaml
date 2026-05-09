@@ -4,6 +4,10 @@ name: Snyk Static Analysis Scan
 # "develop" branch. We use this as a control to prevent vulnerabilities
 # from being introduced into the codebase.
 on:
+  pull_request:
+    branches:
+      - develop
+      - release/*
   pull_request_target:
     branches:
       - develop
@@ -13,9 +17,11 @@ permissions:
 jobs:
   Snyk_SAST_Scan:
     runs-on: ubuntu-latest
-    # Fork PRs require manual approval via the fork-pr-review environment.
-    # Internal PRs run without an environment gate.
-    environment: ${{ github.event.pull_request.head.repo.full_name != github.repository && 'fork-pr-review' || '' }}
+    # Route each PR to exactly one event: internal -> pull_request, fork -> pull_request_target.
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository)
+    environment: ${{ github.event_name == 'pull_request_target' && 'fork-pr-review' || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
