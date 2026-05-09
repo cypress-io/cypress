@@ -26,7 +26,9 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: 'yarn'
+        # Yarn caching intentionally disabled: with `pull_request_target`,
+        # cache writes are scoped to the base branch, so an approved fork
+        # PR could poison the develop cache. See actions/setup-node#1358.
       - name: Run yarn
         run: yarn
       - name: Run build
