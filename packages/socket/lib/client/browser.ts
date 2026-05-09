@@ -1,4 +1,5 @@
 import io, { ManagerOptions, SocketOptions } from 'socket.io-client'
+import { cypressParser } from '../utils'
 import { CDPBrowserSocket } from './cdp-browser'
 import type { SocketShape } from './cdp-browser'
 
@@ -27,7 +28,7 @@ export function client (uri: string, opts?: Partial<ManagerOptions & SocketOptio
     return window.cypressSockets[fullNamespace] as unknown as SocketShape
   }
 
-  return io(uri, opts)
+  return io(uri, { parser: cypressParser, ...opts })
 }
 
 export function createWebsocket ({ path, browserFamily }: { path: string, browserFamily: string}): SocketShape {
@@ -54,5 +55,6 @@ export function createWebsocket ({ path, browserFamily }: { path: string, browse
     // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
     // https://github.com/cypress-io/cypress/issues/23807
     transports: browserFamily === 'webkit' ? ['polling'] : ['websocket'],
+    parser: cypressParser,
   })
 }
