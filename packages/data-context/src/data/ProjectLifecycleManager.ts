@@ -61,6 +61,8 @@ export class ProjectLifecycleManager {
   private _cachedFullConfig: FullConfig | undefined
   private _initializedProject: unknown | undefined
   private _eventRegistrar: EventRegistrar
+  private _refreshPromise: Promise<void> | null = null
+  private _refreshQueued = false
 
   constructor (private ctx: DataContext) {
     this._eventRegistrar = new EventRegistrar()
@@ -356,11 +358,37 @@ export class ProjectLifecycleManager {
       return
     }
 
+    // If a refresh is already running, queue another iteration and await the
+    // in-flight chain. This both coalesces redundant calls (when a watcher
+    // fires while refresh is mid-flight) and makes awaited callers (e.g.
+    // WizardActions) wait for the queued work to actually finish, instead of
+    // racing ahead against stale state.
+    if (this._refreshPromise) {
+      this._refreshQueued = true
+
+      return this._refreshPromise
+    }
+
+    this._refreshPromise = (async () => {
+      try {
+        do {
+          this._refreshQueued = false
+          await this._doRefreshLifecycle()
+        } while (this._refreshQueued)
+      } finally {
+        this._refreshPromise = null
+      }
+    })()
+
+    return this._refreshPromise
+  }
+
+  private async _doRefreshLifecycle (): Promise<void> {
     // Make sure remote states in the server are reset when the project is reloaded.
     // TODO: maybe we should also reset the server state here as well?
     this.ctx._apis.projectApi.getRemoteStates()?.reset()
 
-    this._configManager.resetLoadingState()
+    this._configManager!.resetLoadingState()
 
     // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
     this.ctx.emitter.toLaunchpad()
@@ -375,7 +403,7 @@ export class ProjectLifecycleManager {
         this.ctx._apis.projectApi.getDevServer().close()
       }
 
-      this._configManager.loadTestingType()
+      this._configManager!.loadTestingType()
     } else {
       this.setAndLoadCurrentTestingType(null)
     }
