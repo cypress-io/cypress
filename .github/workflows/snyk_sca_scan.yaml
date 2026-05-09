@@ -8,7 +8,7 @@ name: Snyk Software Composition Analysis Scan
 # implemented PAT token for actions to resolve an issue with the action not
 # running and reporting back to the PR status checks
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - develop
       - release/*
@@ -16,9 +16,10 @@ permissions:
   contents: read
 jobs:
   Snyk_SCA_Scan:
-    # Skip this job on PRs from forks
-    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    # Fork PRs require manual approval via the fork-pr-review environment.
+    # Internal PRs run without an environment gate.
+    environment: ${{ github.event.pull_request.head.repo.full_name != github.repository && 'fork-pr-review' || '' }}
     strategy:
       matrix:
         node-version: [22.x]
@@ -26,6 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v5
