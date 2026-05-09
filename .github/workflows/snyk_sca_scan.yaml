@@ -47,3 +47,4 @@ jobs:
           snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=.nx,system-tests,tooling,docker,Dockerfile --severity-threshold=critical --org=cypress-opensource
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_API: https://api.snyk.io
