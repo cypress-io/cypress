@@ -52,6 +52,22 @@ describe('utils', () => {
     expect(decoded).toEqual(message)
   })
 
+  // socket.io-parser 4.2.x defaults the Decoder's maxAttachments to 10 as part
+  // of the GHSA-677m-j7p3-52f9 fix. Cypress's encode/decode helpers must lift
+  // that cap so cy.request responses with many binary fields keep flowing.
+  it('encodes and decodes a message with more than 10 binary attachments', async () => {
+    const buffers = Array.from({ length: 25 }, (_, i) => Buffer.from(`bin-${i}`))
+    const message = [{ type: 'test', data: { buffers } }]
+    const encoded = await encode(message, '/namespace')
+
+    const stringifiedEncoded = JSON.stringify(encoded)
+    const parsedEncoded = JSON.parse(stringifiedEncoded)
+
+    const decoded = await decode(parsedEncoded)
+
+    expect(decoded).toEqual(message)
+  })
+
   it('encodes and decodes a message with circular data', async () => {
     const inner = { foo: 'bar' }
 

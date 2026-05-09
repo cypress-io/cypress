@@ -1,0 +1,94 @@
+diff --git a/node_modules/engine.io-parser/build/cjs/encodePacket.browser.js b/node_modules/engine.io-parser/build/cjs/encodePacket.browser.js
+index 959d870..ce13107 100644
+--- a/node_modules/engine.io-parser/build/cjs/encodePacket.browser.js
++++ b/node_modules/engine.io-parser/build/cjs/encodePacket.browser.js
+@@ -7,6 +7,15 @@ const withNativeBlob = typeof Blob === "function" ||
+     (typeof Blob !== "undefined" &&
+         Object.prototype.toString.call(Blob) === "[object BlobConstructor]");
+ const withNativeArrayBuffer = typeof ArrayBuffer === "function";
++/**
++ * Returns true if obj is an ArrayBuffer.
++ * This extra check is made because the "instanceof ArrayBuffer" check does not work
++ * across different execution contexts.
++ * @private
++ */
++function isArrayBuffer(obj) {
++    return typeof obj === "object" && obj !== null && Object.prototype.toString.call(obj) === "[object ArrayBuffer]";
++}
+ // ArrayBuffer.isView method is not defined in IE10
+ const isView = (obj) => {
+     return typeof ArrayBuffer.isView === "function"
+@@ -23,7 +32,7 @@ const encodePacket = ({ type, data }, supportsBinary, callback) => {
+         }
+     }
+     else if (withNativeArrayBuffer &&
+-        (data instanceof ArrayBuffer || isView(data))) {
++        (data instanceof ArrayBuffer || isArrayBuffer(data) || isView(data))) {
+         if (supportsBinary) {
+             return callback(data);
+         }
+@@ -47,7 +56,7 @@ function toArray(data) {
+     if (data instanceof Uint8Array) {
+         return data;
+     }
+-    else if (data instanceof ArrayBuffer) {
++    else if (data instanceof ArrayBuffer || isArrayBuffer(data)) {
+         return new Uint8Array(data);
+     }
+     else {
+@@ -60,7 +69,7 @@ function encodePacketToBinary(packet, callback) {
+         return packet.data.arrayBuffer().then(toArray).then(callback);
+     }
+     else if (withNativeArrayBuffer &&
+-        (packet.data instanceof ArrayBuffer || isView(packet.data))) {
++        (packet.data instanceof ArrayBuffer || isArrayBuffer(packet.data) || isView(packet.data))) {
+         return callback(toArray(packet.data));
+     }
+     encodePacket(packet, false, (encoded) => {
+diff --git a/node_modules/engine.io-parser/build/esm/encodePacket.browser.js b/node_modules/engine.io-parser/build/esm/encodePacket.browser.js
+index 11eb4fa..de25cac 100644
+--- a/node_modules/engine.io-parser/build/esm/encodePacket.browser.js
++++ b/node_modules/engine.io-parser/build/esm/encodePacket.browser.js
+@@ -3,6 +3,15 @@ const withNativeBlob = typeof Blob === "function" ||
+     (typeof Blob !== "undefined" &&
+         Object.prototype.toString.call(Blob) === "[object BlobConstructor]");
+ const withNativeArrayBuffer = typeof ArrayBuffer === "function";
++/**
++ * Returns true if obj is an ArrayBuffer.
++ * This extra check is made because the "instanceof ArrayBuffer" check does not work
++ * across different execution contexts.
++ * @private
++ */
++function isArrayBuffer(obj) {
++    return typeof obj === "object" && obj !== null && Object.prototype.toString.call(obj) === "[object ArrayBuffer]";
++}
+ // ArrayBuffer.isView method is not defined in IE10
+ const isView = (obj) => {
+     return typeof ArrayBuffer.isView === "function"
+@@ -19,7 +28,7 @@ const encodePacket = ({ type, data }, supportsBinary, callback) => {
+         }
+     }
+     else if (withNativeArrayBuffer &&
+-        (data instanceof ArrayBuffer || isView(data))) {
++        (data instanceof ArrayBuffer || isArrayBuffer(data) || isView(data))) {
+         if (supportsBinary) {
+             return callback(data);
+         }
+@@ -42,7 +51,7 @@ function toArray(data) {
+     if (data instanceof Uint8Array) {
+         return data;
+     }
+-    else if (data instanceof ArrayBuffer) {
++    else if (data instanceof ArrayBuffer || isArrayBuffer(data)) {
+         return new Uint8Array(data);
+     }
+     else {
+@@ -55,7 +64,7 @@ export function encodePacketToBinary(packet, callback) {
+         return packet.data.arrayBuffer().then(toArray).then(callback);
+     }
+     else if (withNativeArrayBuffer &&
+-        (packet.data instanceof ArrayBuffer || isView(packet.data))) {
++        (packet.data instanceof ArrayBuffer || isArrayBuffer(packet.data) || isView(packet.data))) {
+         return callback(toArray(packet.data));
+     }
+     encodePacket(packet, false, (encoded) => {
