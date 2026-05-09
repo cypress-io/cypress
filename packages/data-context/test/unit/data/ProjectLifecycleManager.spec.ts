@@ -375,6 +375,57 @@ describe('ProjectLifecycleManager', () => {
       expect(callIndex).toBe(2)
     })
 
+    it('does not hand stale refresh promises to callers after a project switch', async () => {
+      // If a project switch (resetInternalState) happens while a refresh is
+      // in flight, the in-flight promise is doomed (its config manager is
+      // about to be destroyed). The new project's first refresh must start a
+      // fresh chain instead of latching onto the old promise.
+      setupReady()
+
+      const oldRefresh = deferred()
+      const newRefresh = deferred()
+
+      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      .mockImplementationOnce(() => oldRefresh.promise)
+      .mockImplementationOnce(() => newRefresh.promise)
+      .mockImplementation(() => Promise.resolve())
+
+      // First call kicks off the in-flight refresh on the old project
+      const a = ctx.lifecycleManager.refreshLifecycle()
+
+      // Project switch happens — must drop the in-flight reference so the
+      // new project doesn't get handed the old (doomed) promise
+      // @ts-expect-error - private method
+      await ctx.lifecycleManager.resetInternalState()
+
+      // Re-arm the project so the next refresh passes the readiness guard
+      setupReady()
+
+      // A new refresh on the (new) project starts a fresh chain — confirms
+      // resetInternalState cleared `_refreshPromise`
+      const b = ctx.lifecycleManager.refreshLifecycle()
+
+      expect(spy).toHaveBeenCalledTimes(2)
+
+      // The old promise settles WHILE the new chain is still in flight. The
+      // old IIFE's `finally` must not clobber the new chain's slot — if it
+      // does, a follow-up call would skip the in-flight new chain and start
+      // a third one, breaking serialization.
+      oldRefresh.reject(new Error('config manager destroyed'))
+      await a.catch(() => {})
+
+      // The new chain is still in flight, so a follow-up call should reuse
+      // it (no new `_doRefreshLifecycle` call). Without the ownership-check
+      // guard, the old IIFE's finally would have nulled `_refreshPromise`
+      // and this call would synchronously kick off a third chain.
+      const c = ctx.lifecycleManager.refreshLifecycle()
+
+      expect(spy).toHaveBeenCalledTimes(2)
+
+      newRefresh.resolve()
+      await Promise.all([b, c])
+    })
+
     it('rejects all in-flight callers and clears state when a refresh throws', async () => {
       setupReady()
 

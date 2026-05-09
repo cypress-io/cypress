@@ -371,18 +371,29 @@ export class ProjectLifecycleManager {
       return this._refreshPromise
     }
 
-    this._refreshPromise = (async () => {
+    // Capture the IIFE's promise locally so the finally only clears the slot
+    // if it still owns it. If `resetInternalState` (project switch) wipes
+    // `_refreshPromise` while this iteration is in flight, a fresh chain may
+    // have taken its place — we don't want to clobber the new chain's slot
+    // when this old one finally settles.
+    let localPromise!: Promise<void>
+
+    localPromise = (async () => {
       try {
         do {
           this._refreshQueued = false
           await this._doRefreshLifecycle()
         } while (this._refreshQueued)
       } finally {
-        this._refreshPromise = null
+        if (this._refreshPromise === localPromise) {
+          this._refreshPromise = null
+        }
       }
     })()
 
-    return this._refreshPromise
+    this._refreshPromise = localPromise
+
+    return localPromise
   }
 
   private async _doRefreshLifecycle (): Promise<void> {
@@ -587,6 +598,13 @@ export class ProjectLifecycleManager {
   }
 
   private async resetInternalState () {
+    // Drop our reference to any in-flight refresh chain — its config manager
+    // is about to be destroyed, so the new project shouldn't be handed the
+    // old (doomed) promise from the `_refreshPromise` guard. The old chain
+    // is left to settle and its `finally` will no-op since the slot is null.
+    this._refreshPromise = null
+    this._refreshQueued = false
+
     if (this._configManager) {
       await this._configManager.destroy()
       this._configManager = undefined
