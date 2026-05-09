@@ -358,11 +358,13 @@ export class ProjectLifecycleManager {
       return
     }
 
-    // If a refresh is already running, queue another iteration and await the
-    // in-flight chain. This both coalesces redundant calls (when a watcher
-    // fires while refresh is mid-flight) and makes awaited callers (e.g.
-    // WizardActions) wait for the queued work to actually finish, instead of
-    // racing ahead against stale state.
+    // If a refresh is already running, flag that a follow-up iteration is
+    // needed and return the in-flight promise. The flag is a single boolean,
+    // so N concurrent calls all coalesce into the *same* follow-up iteration
+    // — the next run reads the current config from disk, so collapsing many
+    // events into one re-run captures the same final state. Awaited callers
+    // (e.g. WizardActions) get the chain's full drain, not just the
+    // in-flight iteration, so they don't race ahead against stale state.
     if (this._refreshPromise) {
       this._refreshQueued = true
 
