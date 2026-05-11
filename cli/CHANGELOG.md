@@ -5,7 +5,6 @@
 
 - The `cy.end()` command has been deprecated and will be removed in a future release. Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
 
-**Features:**
 **Bugfixes:**
 
 - Fixed an issue where the proxy stripped `Content-Length: 0` from empty responses (e.g. a `DELETE 200` with no body) and the resulting empty body was re-emitted with `Transfer-Encoding: chunked`, breaking clients that assume a fixed-length response. Partially addresses [#16469](https://github.com/cypress-io/cypress/issues/16469). Fixed in [#33754](https://github.com/cypress-io/cypress/pull/33754).
