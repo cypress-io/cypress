@@ -61,6 +61,31 @@ const isPosixSyscallError = (err: any): boolean => {
   return /^E[A-Z]/.test(code)
 }
 
+// Network-class POSIX codes that can surface mid-pipeline from the response
+// body stream (TCP drop, DNS flake, etc.). Everything else syscall-y during
+// extract (ENOSPC, EACCES, EROFS, EIO, ...) is a filesystem error from the
+// tar-entry write — non-transient, must not be retried.
+const NETWORK_SYSCALL_CODES = new Set([
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'ECONNABORTED',
+  'ETIMEDOUT',
+  'EAI_AGAIN',
+  'EHOSTUNREACH',
+  'EHOSTDOWN',
+  'ENETUNREACH',
+  'ENETDOWN',
+  'ENOTFOUND',
+  'EPIPE',
+  'EAGAIN',
+])
+
+const isNetworkSyscallError = (err: any): boolean => {
+  const code = err?.code
+
+  return typeof code === 'string' && NETWORK_SYSCALL_CODES.has(code)
+}
+
 // Wraps fetch/pipeline errors as BundleError. `cause` carries the underlying
 // HttpError/SystemError so asyncRetry's shouldRetry can classify via
 // isRetryableError. `defaultStage` is used when the err has no HTTP/syscall
@@ -88,15 +113,30 @@ const wrapAsBundleError = (
   }
 
   if (isPosixSyscallError(err)) {
-    const sysError = SystemError.isSystemError(err)
-      ? err
-      : Object.assign(new SystemError(err, url, err.code, err.errno), { stack: err.stack })
+    // From the fetch phase any syscall is network. From the pipeline phase,
+    // only the network-class codes (mid-stream TCP drop, DNS flake) should be
+    // treated as network/retryable; everything else (ENOSPC, EACCES, EROFS,
+    // EIO, ...) is a filesystem error from the tar-entry write and must NOT
+    // be wrapped as SystemError, since isRetryableError treats SystemError as
+    // always-retryable and would burn the full retry budget.
+    if (defaultStage === 'network' || isNetworkSyscallError(err)) {
+      const sysError = SystemError.isSystemError(err)
+        ? err
+        : Object.assign(new SystemError(err, url, err.code, err.errno), { stack: err.stack })
+
+      return new BundleError({
+        kind,
+        stage: 'network',
+        message: `${kind} bundle network error: ${err.message ?? err.code}`,
+        cause: sysError,
+      })
+    }
 
     return new BundleError({
       kind,
-      stage: 'network',
-      message: `${kind} bundle network error: ${err.message ?? err.code}`,
-      cause: sysError,
+      stage: defaultStage,
+      message: `${kind} bundle ${defaultStage} failed: ${err.message ?? err.code}`,
+      cause: err,
     })
   }
 

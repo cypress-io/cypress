@@ -135,6 +135,94 @@ describe('streamDownloadVerifyExtract', () => {
       expect(fetchStub.callCount).to.equal(3)
     })
 
+    it('wraps a filesystem-class syscall (ENOSPC) from the pipeline as BundleError(stage=extract) and does NOT retry', async () => {
+      const enospc = Object.assign(new Error('no space left on device'), { code: 'ENOSPC', errno: -28 })
+
+      const makeBody = () => new Readable({
+        read () {
+          this.destroy(enospc)
+        },
+      })
+
+      const response = {
+        ok: true,
+        status: 200,
+        headers: {
+          get: (h: string) => {
+            if (h === 'x-cypress-signature') return 'sig'
+
+            if (h === 'x-cypress-manifest-signature') return 'manifest-sig'
+
+            return null
+          },
+        },
+        body: makeBody(),
+      }
+
+      const fetchStub = sinon.stub().callsFake(async () => ({ ...response, body: makeBody() }))
+
+      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+      const caught = await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
+
+      // Filesystem syscall is non-transient — must not retry
+      expect(fetchStub.callCount).to.equal(1)
+
+      expect(BundleError.isBundleError(caught)).to.equal(true)
+      expect((caught as BundleError).stage).to.equal('extract')
+      expect((caught as BundleError).kind).to.equal('cy-prompt')
+
+      // Cause is the raw error, NOT a SystemError (which would flag retryable)
+      const cause = (caught as Error & { cause?: unknown }).cause
+
+      expect(SystemError.isSystemError(cause as any)).to.equal(false)
+      expect((cause as any).code).to.equal('ENOSPC')
+    })
+
+    it('still treats network-class syscalls (ECONNRESET) mid-pipeline as stage=network and retries', async () => {
+      const econnreset = Object.assign(new Error('socket hang up'), { code: 'ECONNRESET', errno: -54 })
+
+      const makeBody = () => new Readable({
+        read () {
+          this.destroy(econnreset)
+        },
+      })
+
+      const response = {
+        ok: true,
+        status: 200,
+        headers: {
+          get: (h: string) => {
+            if (h === 'x-cypress-signature') return 'sig'
+
+            if (h === 'x-cypress-manifest-signature') return 'manifest-sig'
+
+            return null
+          },
+        },
+        body: makeBody(),
+      }
+
+      const fetchStub = sinon.stub().callsFake(async () => ({ ...response, body: makeBody() }))
+
+      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+      const caught = await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
+
+      // Network-class syscall → retryable → full retry budget
+      expect(fetchStub.callCount).to.equal(3)
+
+      const errs = collectErrors(caught)
+
+      for (const e of errs) {
+        expect(BundleError.isBundleError(e)).to.equal(true)
+        expect((e as BundleError).stage).to.equal('network')
+
+        const cause = (e as Error & { cause?: unknown }).cause
+
+        expect(SystemError.isSystemError(cause as any)).to.equal(true)
+        expect((cause as SystemError).code).to.equal('ECONNRESET')
+      }
+    })
+
     it('wraps a non-syscall pipeline error as BundleError(stage=extract, cause preserved) and does NOT retry', async () => {
       // Body that yields bytes which tar.Parse({ strict: true }) will reject.
       const makeBody = () => Readable.from([Buffer.from('this is not a tar archive at all')])
