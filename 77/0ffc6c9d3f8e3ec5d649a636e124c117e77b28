@@ -1,0 +1,203 @@
+npm/react/cypress/component/advanced/mocking-imports/spec.cy.jsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 5
+packages/driver/cypress/e2e/e2e/origin/commands/screenshot.cy.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 27-32,47-52,65-70,103-108,120-125,144-149,162-167,181-186,197-202,213-218,236-241,275-280,306,311-316,335,342-347,371-376,403-408,435-440,468-473,501-506,533-538,566-571,599-604,645-650,666
+npm/react/cypress/support/component.jsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-2
+npm/webpack-batteries-included-preprocessor/test/fixtures/tsconfig.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 5
+npm/react/cypress/component/basic/typescript/ts-spec.cy.tsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 4-7
+packages/proxy/test/unit/http/response-middleware.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 286-307,2043-2218,2224-2226
+packages/socket/lib/client/browser.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 2,31,58
+packages/driver/src/cypress/runner.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 552-554
+npm/vite-dev-server/test/resolveConfig.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-2,10,120-160
+npm/webpack-batteries-included-preprocessor/test/fixtures/paths-no-baseurl/spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-4
+npm/vite-dev-server/src/urlPaths.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-54
+packages/driver/cypress/e2e/e2e/origin/basic_login.cy.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 21-22,24-32,35
+packages/server/lib/socket-base.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 131
+packages/socket/lib/utils.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 5-25,54
+npm/webpack-batteries-included-preprocessor/test/fixtures/paths-no-baseurl/tsconfig.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-8
+npm/react/eslint.config.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 6,16
+packages/server/test/unit/cloud/api/put_protocol_artifact_spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 131-156
+packages/driver/types/internal-types-lite.d.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 14
+packages/server/package.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 134,191
+packages/driver/src/cy/commands/actions/select.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 131
+packages/driver/src/cy/commands/origin/index.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 103,184-240,244,246-251,253-255,257,259,261-274,276-278
+scripts/lerna-build.js
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-23
+npm/webpack-batteries-included-preprocessor/test/fixtures/paths-no-baseurl/paths-example-dir/paths-example-file.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1
+packages/app/src/runner/event-manager.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 752-764,1009-1025
+packages/server/lib/util/ci_provider.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 160-163
+packages/server/lib/project-base.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 33,482,516
+packages/socket/package.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 24,26-28,30-33
+packages/server/lib/cloud/api/studio/post_studio_session.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 29
+tooling/v8-snapshot/cache/darwin/snapshot-meta.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 85,552-553,901-913,919,1559,3068-3069,3701,3720,3722,3724,3856-3862,3864-3868,3913
+packages/types/package.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 29
+packages/driver/test/unit/cross-origin/communicator.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-95
+npm/react/cypress/component/advanced/lazy-loaded/App.jsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1,8-10
+npm/webpack-batteries-included-preprocessor/CHANGELOG.md
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-7
+tooling/v8-snapshot/cache/win32/snapshot-meta.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 85,555-556,908-920,926,1564,1612,3071-3072,3701,3719,3721,3723,3855-3861,3863-3867,3912
+npm/webpack-batteries-included-preprocessor/test/e2e/features.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 81-84
+npm/webpack-batteries-included-preprocessor/package.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 37-38,51-52
+tooling/v8-snapshot/cache/linux/snapshot-meta.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 85,551-552,900-912,918,1558,1606,3067-3068,3700,3719,3721,3723,3855-3861,3863-3867,3912
+npm/webpack-dev-server/src/helpers/angularHandler.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1,156,163-167
+system-tests/test/record_spec.js
+  s_d1b7976ede1ba4::t_c68bec0d90c055 3012,3031-3037
+packages/network/test/unit/client_certificates.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 9,277
+npm/react/cypress/component/advanced/lazy-loaded/app.cy.jsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 5
+packages/app/cypress/e2e/cypress-origin-communicator.cy.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1,60-97
+packages/driver/src/util/serialization/log.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 288-291,293,295,297-301
+packages/server/test/integration/http_requests_spec.js
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1025-1026,1049,1064,1074-1076
+tooling/electron-mksnapshot/test/.mocharc.js
+  s_d1b7976ede1ba4::t_c68bec0d90c055 7
+packages/driver/cypress/e2e/e2e/origin/commands/spies_stubs_clocks.cy.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 3-21,51-56,63-68,84-89,96-101,155,157-159,161,165,186,188-190,192,195
+packages/driver/cypress/e2e/e2e/origin/patches.cy.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 2-11,474,477-482
+.github/workflows/auto_approve_low_risk.yml
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-211
+packages/socket/test/socket.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 4-5,27,29,46,48
+packages/proxy/lib/http/response-middleware.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 47-53,385-386,882,888,898-906,908-925
+npm/vite-dev-server/CHANGELOG.md
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-8
+npm/webpack-dev-server/CHANGELOG.md
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-7
+knip.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 543
+npm/react/cypress/component/advanced/lazy-loaded-suspense/LazyComponent.tsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 3-8
+packages/socket/lib/client/cdp-browser.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 4,6-8,20
+packages/socket/test/utils.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 55-70
+npm/webpack-batteries-included-preprocessor/index.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 114-119,144-154
+tooling/electron-mksnapshot/src/mksnapshot.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 5,12,40
+packages/driver/cypress/e2e/util/serialization.cy.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 673-753
+packages/socket/patches/engine.io-parser+5.2.3.patch
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-94
+npm/vite-dev-server/src/devServer.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 6,42,50-68,70-78,80-84
+npm/react/cypress/component/advanced/renderless/mouse-movement.jsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 2
+system-tests/test/visit_spec.js
+  s_d1b7976ede1ba4::t_c68bec0d90c055 207-227
+.circleci/src/pipeline/@pipeline.yml
+  s_d1b7976ede1ba4::t_c68bec0d90c055 8,1029-1031
+packages/server/lib/automation/automation.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 2,108
+packages/server/test/unit/cloud/network/is_retryable_error_spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 49-83
+scripts/binary/util/testStaticAssets.js
+  s_d1b7976ede1ba4::t_c68bec0d90c055 51,60,62,66
+.github/CODEOWNERS
+  s_d1b7976ede1ba4::t_c68bec0d90c055 6-11
+npm/react/cypress.config.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-20
+npm/vite-dev-server/src/resolveConfig.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 21-26,147-155
+packages/driver/src/cross-origin/communicator.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 75-93
+package.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 17,276
+packages/server/lib/cloud/api/put_protocol_artifact.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 41
+CONTRIBUTING.md
+  s_d1b7976ede1ba4::t_c68bec0d90c055 286,288
+npm/react/cypress/component/basic/wrap.cy.jsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 10
+npm/react/tsconfig.cypress.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-17
+packages/app/src/runner/dom.cy.tsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 28-31
+packages/server/test/unit/util/ci_provider_spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 47-48,56-57,1119-1120,1133-1134
+packages/socket/lib/node/socket.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 4,11,21
+tooling/electron-mksnapshot/src/mksnapshot-run.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 13-59,159,174,178-179,208,233,237-238,254,271,274
+packages/server/lib/privileged-commands/privileged-commands-manager.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 4,42
+npm/react/cypress/component/advanced/mocking-imports/services.jsx
+  s_d1b7976ede1ba4::t_c68bec0d90c055 2
+tooling/electron-mksnapshot/test/integration/mksnapshot.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 22,35,48
+npm/vite-dev-server/test/urlPaths.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-54
+packages/driver/cypress/e2e/commands/actions/select.cy.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 71-96
+packages/server/lib/cloud/api/cy-prompt/post_cy_prompt_session.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 29
+packages/driver/cypress/e2e/e2e/origin/commands/files.cy.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 31-36,73-78,96-100
+packages/server/lib/cloud/network/is_retryable_error.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 8-22,25-26,37-45
+packages/socket/patches/socket.io-parser+4.2.6.patch
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-622
+npm/vite-dev-server/test/devServer.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-140
+npm/webpack-dev-server/test/handlers/angularHandler.spec.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 147-181,209
+npm/react/package.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 9,21,25-26
+npm/react/cypress/tsconfig.json
+  s_d1b7976ede1ba4::t_c68bec0d90c055 7-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "770ffc6c9d3f8e3ec5d649a636e124c117e77b28",
+  "prompts": {},
+  "sessions": {
+    "s_d1b7976ede1ba4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
