@@ -7,13 +7,9 @@ const debug = Debug('cypress:server:browsers:firefox-util')
 
 let webdriverClient: WebDriverClient
 
-// geckodriver returns from `newSession` once the WebDriver-classic session is
-// up, but the BiDi WebSocket is established asynchronously: webdriver.io
-// fires `_bidiHandler.connect()` without awaiting it before returning the
-// client (see `webdriver/build/node.js`). If we issue the first BiDi command
-// before the WebSocket opens, `BidiHandler.sendAsync` throws "No connection
-// to WebDriver Bidi was established" and the run exits with code 1 before
-// any spec executes. Await the connect promise instead of racing it.
+// The BiDi WebSocket opens asynchronously after geckodriver returns, so
+// any BiDi command issued before it's ready will fail. Wait for the
+// connection before proceeding.
 async function awaitBiDiConnection (client: WebDriverClient) {
   const handler = client._bidiHandler
 

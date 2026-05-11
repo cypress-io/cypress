@@ -562,9 +562,6 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     })
     .catch((err) => {
       const isTimeout = err instanceof Bluebird.TimeoutError
-      // FIREFOX_COULD_NOT_CONNECT can be thrown when geckodriver returns from
-      // newSession before the BiDi WebSocket is fully established. Treat it as
-      // a transient launch failure so the existing retry path takes over.
       const isFirefoxConnect = (err as CypressError)?.type === 'FIREFOX_COULD_NOT_CONNECT'
 
       if (isTimeout || isFirefoxConnect) {
