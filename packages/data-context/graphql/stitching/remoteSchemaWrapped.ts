@@ -12,8 +12,8 @@ const debug = debugLib('cypress:graphql:remoteSchemaWrapped')
 // Cloud fields that bypass the unauthenticated short-circuit in executeRemoteGraphQL.
 const PUBLIC_CLOUD_FIELDS = new Set<string>(['cloudAppMessages'])
 
-const APP_MESSAGES_DISABLED = (): boolean => {
-  return process.env.CYPRESS_CLOUD_APP_MESSAGES === '0' || process.env.CYPRESS_CLOUD_APP_MESSAGES === 'false'
+const COMMERCIAL_RECOMMENDATIONS_DISABLED = (): boolean => {
+  return process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS === '0' || process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS === 'false'
 }
 
 export interface RemoteExecutionRoot {
@@ -46,8 +46,8 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
     assert(obj.context?.cloud, 'Cannot execute without a DataContext')
     assert(info, 'Cannot execute without GraphQLResolveInfo')
 
-    if (info.fieldName === 'cloudAppMessages' && APP_MESSAGES_DISABLED()) {
-      debug('cloudAppMessages disabled via CYPRESS_CLOUD_APP_MESSAGES env var; returning empty')
+    if (info.fieldName === 'cloudAppMessages' && COMMERCIAL_RECOMMENDATIONS_DISABLED()) {
+      debug('cloudAppMessages disabled via CYPRESS_COMMERCIAL_RECOMMENDATIONS env var; returning empty')
 
       return { data: { cloudAppMessages: [] } }
     }
