@@ -34,9 +34,6 @@ describe('lib/browsers/firefox', () => {
       sessionSubscribe: sinon.stub(),
       browsingContextGetTree: sinon.stub(),
       browsingContextNavigate: sinon.stub(),
-      _bidiHandler: {
-        waitForConnected: sinon.stub().resolves(true),
-      },
       capabilities: {
         // @ts-expect-error
         'moz:processID': 1234,

@@ -1,31 +1,11 @@
 import Debug from 'debug'
 import { BidiAutomation } from './bidi_automation'
-import type { BidiHandler, Client as WebDriverClient } from 'webdriver'
+import type { Client as WebDriverClient } from 'webdriver'
 import type { Automation } from '../automation'
-
-type ClientWithBidiHandler = WebDriverClient & { _bidiHandler?: BidiHandler }
 
 const debug = Debug('cypress:server:browsers:firefox-util')
 
 let webdriverClient: WebDriverClient
-
-// The BiDi WebSocket opens asynchronously after geckodriver returns, so
-// any BiDi command issued before it's ready will fail. Wait for the
-// connection before proceeding.
-async function awaitBiDiConnection (client: WebDriverClient) {
-  const handler = (client as ClientWithBidiHandler)._bidiHandler
-
-  if (!handler) {
-    throw new Error('WebDriver BiDi handler is not available on the client')
-  }
-
-  const connected = await handler.waitForConnected()
-
-  debug('BiDi connection established: %s', connected)
-  if (!connected) {
-    throw new Error('WebDriver BiDi connection failed to establish')
-  }
-}
 
 async function connectToNewSpecBiDi (options, automation: Automation, browserBiDiClient: BidiAutomation) {
   debug('firefox: reconnecting to blank tab')
@@ -47,9 +27,6 @@ async function connectToNewSpecBiDi (options, automation: Automation, browserBiD
 }
 
 async function setupBiDi (webdriverClient: WebDriverClient, automation: Automation) {
-  // wait for the BiDi WebSocket to be established before issuing any BiDi
-  // commands; otherwise the first one races geckodriver's async connect
-  await awaitBiDiConnection(webdriverClient)
   // webdriver needs to subscribe to the correct BiDi events or else the events we are expecting to stream in will not be sent
   await webdriverClient.sessionSubscribe({ events: BidiAutomation.BIDI_EVENTS })
 
