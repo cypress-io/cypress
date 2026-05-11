@@ -13,6 +13,8 @@ let webdriverClient: WebDriverClient
 async function awaitBiDiConnection (client: WebDriverClient) {
   // `_bidiHandler` is part of webdriver.io's public typed surface; lifecycle
   // methods like `waitForConnected` are only reachable via the handler.
+  // @see https://github.com/webdriverio/webdriverio/blob/v9.14.0/packages/webdriver/src/index.ts#L166
+  // @see https://github.com/webdriverio/webdriverio/blob/v9.14.0/packages/webdriver/src/bidi/core.ts#L96
   const handler = client._bidiHandler
 
   if (!handler) {
