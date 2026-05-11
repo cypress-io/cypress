@@ -61,8 +61,8 @@ export class ProjectLifecycleManager {
   private _cachedFullConfig: FullConfig | undefined
   private _initializedProject: unknown | undefined
   private _eventRegistrar: EventRegistrar
-  private _refreshPromise: Promise<void> | null = null
-  private _refreshQueued = false
+  private _activeLifecycleRefresh: Promise<void> | null = null
+  private _isLifecycleRefreshQueued = false
 
   constructor (private ctx: DataContext) {
     this._eventRegistrar = new EventRegistrar()
@@ -365,35 +365,35 @@ export class ProjectLifecycleManager {
     // events into one re-run captures the same final state. Awaited callers
     // (e.g. WizardActions) get the chain's full drain, not just the
     // in-flight iteration, so they don't race ahead against stale state.
-    if (this._refreshPromise) {
-      this._refreshQueued = true
+    if (this._activeLifecycleRefresh) {
+      this._isLifecycleRefreshQueued = true
 
-      return this._refreshPromise
+      return this._activeLifecycleRefresh
     }
 
-    // Capture the IIFE's promise locally so the finally only clears the slot
-    // if it still owns it. If `resetInternalState` (project switch) wipes
-    // `_refreshPromise` while this iteration is in flight, a fresh chain may
-    // have taken its place — we don't want to clobber the new chain's slot
-    // when this old one finally settles.
-    let localPromise!: Promise<void>
+    // Capture the IIFE locally so the finally only clears the slot if it
+    // still owns it. If `resetInternalState` (project switch) wipes
+    // `_activeLifecycleRefresh` while this iteration is in flight, a fresh
+    // chain may have taken its place — we don't want to clobber the new
+    // chain's slot when this old one finally settles.
+    let invokedLifecycleRefresh!: Promise<void>
 
-    localPromise = (async () => {
+    invokedLifecycleRefresh = (async () => {
       try {
         do {
-          this._refreshQueued = false
+          this._isLifecycleRefreshQueued = false
           await this._doRefreshLifecycle()
-        } while (this._refreshQueued)
+        } while (this._isLifecycleRefreshQueued)
       } finally {
-        if (this._refreshPromise === localPromise) {
-          this._refreshPromise = null
+        if (this._activeLifecycleRefresh === invokedLifecycleRefresh) {
+          this._activeLifecycleRefresh = null
         }
       }
     })()
 
-    this._refreshPromise = localPromise
+    this._activeLifecycleRefresh = invokedLifecycleRefresh
 
-    return localPromise
+    return invokedLifecycleRefresh
   }
 
   private async _doRefreshLifecycle (): Promise<void> {
@@ -600,10 +600,11 @@ export class ProjectLifecycleManager {
   private async resetInternalState () {
     // Drop our reference to any in-flight refresh chain — its config manager
     // is about to be destroyed, so the new project shouldn't be handed the
-    // old (doomed) promise from the `_refreshPromise` guard. The old chain
-    // is left to settle and its `finally` will no-op since the slot is null.
-    this._refreshPromise = null
-    this._refreshQueued = false
+    // old (doomed) promise from the `_activeLifecycleRefresh` guard. The old
+    // chain is left to settle and its `finally` will no-op since the slot
+    // is null.
+    this._activeLifecycleRefresh = null
+    this._isLifecycleRefreshQueued = false
 
     if (this._configManager) {
       await this._configManager.destroy()

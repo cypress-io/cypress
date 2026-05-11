@@ -402,7 +402,7 @@ describe('ProjectLifecycleManager', () => {
       setupReady()
 
       // A new refresh on the (new) project starts a fresh chain — confirms
-      // resetInternalState cleared `_refreshPromise`
+      // resetInternalState cleared `_activeLifecycleRefresh`
       const b = ctx.lifecycleManager.refreshLifecycle()
 
       expect(spy).toHaveBeenCalledTimes(2)
@@ -416,8 +416,9 @@ describe('ProjectLifecycleManager', () => {
 
       // The new chain is still in flight, so a follow-up call should reuse
       // it (no new `_doRefreshLifecycle` call). Without the ownership-check
-      // guard, the old IIFE's finally would have nulled `_refreshPromise`
-      // and this call would synchronously kick off a third chain.
+      // guard, the old IIFE's finally would have nulled
+      // `_activeLifecycleRefresh` and this call would synchronously kick
+      // off a third chain.
       const c = ctx.lifecycleManager.refreshLifecycle()
 
       expect(spy).toHaveBeenCalledTimes(2)
