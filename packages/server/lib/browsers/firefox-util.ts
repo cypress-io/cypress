@@ -17,6 +17,10 @@ let webdriverClient: WebDriverClient
 // (`WebDriverError` etc.) with a `code` or `name` we could check, and the
 // handler's `_isConnected` flag isn't exposed on the client. Revisit if
 // upstream adds a typed error or a readiness API.
+//
+// firefox-util_spec.ts asserts this string still exists in the installed
+// `webdriver` package — that guard will fail on any future dep bump that
+// reworks the message, so this stays in sync with upstream.
 // @see https://github.com/webdriverio/webdriverio — `BidiHandler.sendAsync`
 const BIDI_NOT_READY_MESSAGE = 'No connection to WebDriver Bidi was established'
 const BIDI_SUBSCRIBE_MAX_ATTEMPTS = 10

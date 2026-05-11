@@ -2,6 +2,8 @@ require('../../spec_helper')
 import FirefoxUtil from '../../../lib/browsers/firefox-util'
 import sinon from 'sinon'
 import { expect } from 'chai'
+import fs from 'fs'
+import path from 'path'
 import { Automation } from '../../../lib/automation'
 import { Client as WebDriverClient } from 'webdriver'
 import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
@@ -66,6 +68,24 @@ describe('Firefox-Util', () => {
 
         expect(webdriverClient.sessionSubscribe).to.have.callCount(3)
         expect(automation.use).to.have.been.calledWith(stubbedBiDiAutomation.automationMiddleware)
+      })
+
+      // Guards against silent breakage if webdriver.io reworks the error
+      // thrown by `BidiHandler.sendAsync`. If this test fails after a
+      // webdriver bump, revisit the message constant in firefox-util.ts (or
+      // switch to a typed-error check if upstream has added one).
+      it('matches the error message thrown by the installed webdriver package', () => {
+        const webdriverPkgEntry = require.resolve('webdriver')
+        const webdriverBuildDir = path.dirname(webdriverPkgEntry)
+        const candidates = fs.readdirSync(webdriverBuildDir)
+        .filter((f) => f.endsWith('.js'))
+        .map((f) => path.join(webdriverBuildDir, f))
+
+        const found = candidates.some((file) => {
+          return fs.readFileSync(file, 'utf8').includes('No connection to WebDriver Bidi was established')
+        })
+
+        expect(found, 'expected webdriver package to still throw "No connection to WebDriver Bidi was established"').to.be.true
       })
 
       it('does not retry sessionSubscribe on unrelated errors', async () => {
