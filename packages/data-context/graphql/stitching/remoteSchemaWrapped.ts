@@ -43,13 +43,11 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
   executor: (obj) => {
     const info = obj.info
 
+    // eslint-disable-next-line no-console
+    console.log(`[remoteSchemaWrapped] executor field=${info?.fieldName} path=${info?.path && JSON.stringify(info.path)} envVar=${JSON.stringify(process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS)} disabled=${COMMERCIAL_RECOMMENDATIONS_DISABLED()}`)
+
     assert(obj.context?.cloud, 'Cannot execute without a DataContext')
     assert(info, 'Cannot execute without GraphQLResolveInfo')
-
-    if (info.fieldName === 'cloudAppMessages') {
-      // eslint-disable-next-line no-console
-      console.log(`[remoteSchemaWrapped] cloudAppMessages executor called; CYPRESS_COMMERCIAL_RECOMMENDATIONS=${JSON.stringify(process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS)} disabled=${COMMERCIAL_RECOMMENDATIONS_DISABLED()}`)
-    }
 
     if (info.fieldName === 'cloudAppMessages' && COMMERCIAL_RECOMMENDATIONS_DISABLED()) {
       debug('cloudAppMessages disabled via CYPRESS_COMMERCIAL_RECOMMENDATIONS env var; returning empty')
