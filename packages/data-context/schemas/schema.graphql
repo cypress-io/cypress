@@ -71,6 +71,10 @@ In-app banner content. Audience filtering (channel flag, version, cohort) is app
 """
 type CloudAppMessage {
   analytics: CloudAppMessageAnalytics!
+
+  """
+  Banner body text. Rendered as markdown (bold, italic, inline code, links). Raw HTML is escaped.
+  """
   body: String!
   ctas: [CloudAppMessageCta!]!
   dismissal: CloudAppMessageDismissal!
@@ -101,7 +105,7 @@ type CloudAppMessageCta {
   href: String!
 
   """
-  Stable analytical key for this CTA, message-scoped (e.g. `learn_cy_prompt`). Sent as `ctaId` on `App Message Clicked` events for warehouse joins; survives URL revisions and disambiguates two CTAs that share a destination.
+  Message-scoped analytical key (e.g. `learn_cy_prompt`). Sent as `ctaId` on click events; survives URL revisions.
   """
   id: String!
   style: CloudAppMessageCtaStyle!
@@ -124,7 +128,7 @@ enum CloudAppMessageDismissalScope {
 }
 
 """
-Optional UTM params appended to CTA destination URLs. Per-field, CTA-level overrides message-level; unset fields produce no `utm_X=` parameter. `utm_source / utm_medium / utm_campaign` are auto-injected by the binary and never appear here.
+Optional UTM params for CTA destination URLs. CTA-level overrides message-level. utm_source/medium/campaign are auto-injected by the binary.
 """
 type CloudAppMessageUtm {
   content: String

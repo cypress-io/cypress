@@ -12,12 +12,13 @@
     :dismissal-scope="message.dismissal.scope"
   >
     <template #default="{ bannerInstanceId }">
-      <p
+      <div
         v-if="message.body"
-        class="mb-[24px] whitespace-pre-line"
-      >
-        {{ message.body }}
-      </p>
+        ref="bodyTarget"
+        data-cy="cloud-message-banner-body"
+        class="cloud-message-body mb-[24px]"
+        v-html="bodyMarkdown"
+      />
       <div
         v-if="message.ctas.length"
         class="flex flex-row flex-wrap gap-x-[12px] gap-y-[8px] mt-[8px]"
@@ -37,11 +38,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import TrackedBanner from './TrackedBanner.vue'
 import Button from '@cy/components/Button.vue'
 import WarningIcon from '~icons/cy/warning_x16.svg'
 import { useExternalLink } from '@packages/frontend-shared/src/gql-components/useExternalLink'
+import { useMarkdown } from '@packages/frontend-shared/src/composables/useMarkdown'
 import { getUrlWithParams } from '@packages/frontend-shared/src/utils/getUrlWithParams'
 import { useRecordEvent } from '../../composables/useRecordEvent'
 import type { SpecsListBannersFragment } from '../../generated/graphql'
@@ -55,6 +57,14 @@ const props = defineProps<{
 }>()
 
 const bannerId = computed(() => `cloud:${props.message.id}`)
+
+// `html: false` so raw HTML in the catalog body is escaped, not rendered.
+const bodyTarget = ref()
+const { markdown: bodyMarkdown } = useMarkdown(
+  bodyTarget,
+  computed(() => props.message.body ?? ''),
+  { html: false },
+)
 
 const alertStatus = computed(() => {
   return props.message.visualStyle === 'warning' ? 'warning' : 'info'
@@ -121,3 +131,25 @@ function onCtaClick (cta: AppMessageCtaShape, bannerInstanceId: string): void {
   openExternal(decoratedUrl)
 }
 </script>
+
+<style scoped lang="scss">
+.cloud-message-body {
+  :deep(p) {
+    @apply m-0 text-sm;
+
+    & + p {
+      @apply mt-[12px];
+    }
+  }
+
+  // Tailwind preflight's `font-weight: bolder` on <strong> doesn't render
+  // distinctly inside the banner — set it explicitly.
+  :deep(strong) {
+    @apply font-bold;
+  }
+
+  :deep(em) {
+    @apply italic;
+  }
+}
+</style>

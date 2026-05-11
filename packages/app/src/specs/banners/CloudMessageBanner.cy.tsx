@@ -74,6 +74,37 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
     cy.findByTestId('alert-prefix-icon').should('be.visible')
   })
 
+  it('renders body markdown as bold / italic / links', () => {
+    const messageWithMarkdown = {
+      ...baseMessage,
+      body: 'Stop **writing** every command. Use *Studio AI* to [generate assertions](https://docs.cypress.io).',
+    }
+
+    cy.mount(<CloudMessageBanner hasBannerBeenShown={true} message={messageWithMarkdown} />)
+
+    cy.findByTestId('cloud-message-banner-body').within(() => {
+      cy.contains('strong', 'writing').should('be.visible')
+      cy.contains('em', 'Studio AI').should('be.visible')
+      cy.contains('a', 'generate assertions').should('have.attr', 'href', 'https://docs.cypress.io')
+    })
+  })
+
+  it('escapes raw HTML in the body instead of rendering it', () => {
+    const messageWithHtml = {
+      ...baseMessage,
+      body: 'Plain text with <script>alert(1)</script> and <strong>raw bold</strong>.',
+    }
+
+    cy.mount(<CloudMessageBanner hasBannerBeenShown={true} message={messageWithHtml} />)
+
+    cy.findByTestId('cloud-message-banner-body').within(() => {
+      cy.get('script').should('not.exist')
+      cy.get('strong').should('not.exist')
+      cy.contains('<script>alert(1)</script>').should('be.visible')
+      cy.contains('<strong>raw bold</strong>').should('be.visible')
+    })
+  })
+
   context('events', () => {
     beforeEach(() => {
       const recordSeen = cy.stub().as('recordSeen')

@@ -6,6 +6,10 @@ In-app banner content. Audience filtering (channel flag, version, cohort) is app
 """
 type CloudAppMessage {
   analytics: CloudAppMessageAnalytics!
+
+  """
+  Banner body text. Rendered as markdown (bold, italic, inline code, links). Raw HTML is escaped.
+  """
   body: String!
   ctas: [CloudAppMessageCta!]!
   dismissal: CloudAppMessageDismissal!
