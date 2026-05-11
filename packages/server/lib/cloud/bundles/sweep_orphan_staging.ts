@@ -18,10 +18,9 @@ export const sweepOrphanStaging = async (baseDir: string, olderThanMs: number): 
   }
 
   const now = Date.now()
-  let removed = 0
 
-  await Promise.all(entries.map(async (entry) => {
-    if (!entry.startsWith(STAGING_PREFIX)) return
+  const results = await Promise.all(entries.map(async (entry): Promise<boolean> => {
+    if (!entry.startsWith(STAGING_PREFIX)) return false
 
     const fullPath = path.join(baseDir, entry)
 
@@ -29,15 +28,18 @@ export const sweepOrphanStaging = async (baseDir: string, olderThanMs: number): 
       const stats = await stat(fullPath)
       const age = now - stats.mtimeMs
 
-      if (age < olderThanMs) return
+      if (age < olderThanMs) return false
 
       await remove(fullPath)
-      removed++
       debug('removed orphan staging dir %s (age %dms)', fullPath, age)
+
+      return true
     } catch (err) {
       debug('failed to sweep %s: %o', fullPath, err)
+
+      return false
     }
   }))
 
-  return removed
+  return results.filter(Boolean).length
 }
