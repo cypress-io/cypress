@@ -101,6 +101,23 @@ describe('streamDownloadVerifyExtract', () => {
       expect((cause as HttpError).status).to.equal(404)
     })
 
+    it('retries on HTTP 500 (idempotent GET) and burns full retry budget', async () => {
+      const response = {
+        ok: false,
+        url: 'https://cdn.cypress.io/cy-prompt/abc123.tar',
+        status: 500,
+        statusText: 'Internal Server Error',
+        text: async () => 'boom',
+      }
+      const fetchStub = sinon.stub().resolves(response)
+
+      const { streamDownloadVerifyExtract } = proxyquireWithFastDelay(fetchStub)
+
+      await callIt(streamDownloadVerifyExtract, 'cy-prompt', path.join(tmp, 'staging'))
+
+      expect(fetchStub.callCount).to.equal(3)
+    })
+
     it('wraps a retryable HTTP 503 as BundleError(stage=network, cause: HttpError) and burns full retry budget', async () => {
       const response = {
         ok: false,

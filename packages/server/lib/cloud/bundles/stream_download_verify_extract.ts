@@ -215,14 +215,16 @@ const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownl
   return manifestSig
 }
 
+// All bundle fetches are GET, so pass that through to isRetryableError so it
+// retries HTTP 500 in addition to the always-retryable statuses.
 const shouldRetryBundleError = (err: unknown): boolean => {
   if (BundleError.isBundleError(err)) {
     const cause = (err as Error & { cause?: unknown }).cause
 
-    return cause !== undefined && isRetryableError(cause)
+    return cause !== undefined && isRetryableError(cause, 'GET')
   }
 
-  return isRetryableError(err)
+  return isRetryableError(err, 'GET')
 }
 
 export const streamDownloadVerifyExtract = async (options: StreamDownloadVerifyExtractOptions): Promise<string> => {
