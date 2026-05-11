@@ -1,0 +1,19 @@
+cli/CHANGELOG.md
+  s_d1b7976ede1ba4::t_1f98044a1e90e1 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "2853d93e788ef1b608cd6cf88b22bd25116c03f7",
+  "prompts": {},
+  "sessions": {
+    "s_d1b7976ede1ba4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
