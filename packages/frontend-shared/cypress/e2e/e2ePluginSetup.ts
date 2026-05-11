@@ -77,6 +77,12 @@ export async function e2ePluginSetup (on: Cypress.PluginEvents, config: Cypress.
   delete process.env.CYPRESS_INTERNAL_VITE_DEV
   delete process.env.CYPRESS_INTERNAL_VITE_APP_PORT
   delete process.env.CYPRESS_INTERNAL_VITE_LAUNCHPAD_PORT
+  // CI sets this org-wide to '0' to silence the end-of-run commercial-
+  // recommendations message. That same flag also short-circuits the
+  // cloudAppMessages stitching executor, which breaks any E2E spec that
+  // exercises the channel. The cypress-in-cypress AUT is a test environment;
+  // the opt-out doesn't apply.
+  delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
 
   // Set this to a dedicate port so we can debug the state of the tests
   process.env.CYPRESS_INTERNAL_GRAPHQL_PORT = '5555'
