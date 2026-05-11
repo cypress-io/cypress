@@ -28,6 +28,12 @@ context('cy.origin files', { browser: '!webkit' }, () => {
     cy.origin('http://www.foobar.com:3500', () => {
       const contents = JSON.stringify({ foo: 'bar' })
 
+      const backend = Cypress.backend as unknown as { restore?: () => void }
+
+      if (typeof backend?.restore === 'function') {
+        backend.restore()
+      }
+
       cy.stub(Cypress, 'backend').log(false).resolves({
         contents,
         filePath: 'foo.json',
@@ -64,6 +70,12 @@ context('cy.origin files', { browser: '!webkit' }, () => {
 
     it('.readFile()', () => {
       cy.origin('http://www.foobar.com:3500', () => {
+        const backend = Cypress.backend as unknown as { restore?: () => void }
+
+        if (typeof backend?.restore === 'function') {
+          backend.restore()
+        }
+
         cy.readFile('cypress/fixtures/example.json')
       })
 
@@ -80,6 +92,12 @@ context('cy.origin files', { browser: '!webkit' }, () => {
     it('.writeFile()', () => {
       cy.origin('http://www.foobar.com:3500', () => {
         const contents = JSON.stringify({ foo: 'bar' })
+
+        const backend = Cypress.backend as unknown as { restore?: () => void }
+
+        if (typeof backend?.restore === 'function') {
+          backend.restore()
+        }
 
         cy.stub(Cypress, 'backend').log(false).resolves({
           contents,

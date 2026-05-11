@@ -173,16 +173,21 @@ function isClippedByAncestor (el: HTMLElement, rect: DOMRect): boolean {
     const isDocRoot = current === doc.body || current === doc.documentElement
     const allowed = isDocRoot ? DOC_ROOT_CLIPPING_OVERFLOW : CLIPPING_OVERFLOW
     const { overflowX, overflowY } = win.getComputedStyle(current)
-    const ancestorRect = current.getBoundingClientRect()
+    const clipsX = offscreenX && allowed.has(overflowX)
+    const clipsY = offscreenY && allowed.has(overflowY)
 
-    if (offscreenX && allowed.has(overflowX)) {
-      if (rect.left < ancestorRect.left || rect.right > ancestorRect.right) {
+    if (clipsX || clipsY) {
+      const ancestorRect = current.getBoundingClientRect()
+
+      // Treat the subject as clipped only when it is *fully outside* the
+      // ancestor on the off-screen axis. Partial overlap means the subject
+      // has visible pixels inside the ancestor's clip region, so scrolling
+      // is still appropriate.
+      if (clipsX && (rect.right <= ancestorRect.left || rect.left >= ancestorRect.right)) {
         return true
       }
-    }
 
-    if (offscreenY && allowed.has(overflowY)) {
-      if (rect.top < ancestorRect.top || rect.bottom > ancestorRect.bottom) {
+      if (clipsY && (rect.bottom <= ancestorRect.top || rect.top >= ancestorRect.bottom)) {
         return true
       }
     }

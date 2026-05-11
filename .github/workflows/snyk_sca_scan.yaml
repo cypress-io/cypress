@@ -12,13 +12,20 @@ on:
     branches:
       - develop
       - release/*
+  pull_request_target:
+    branches:
+      - develop
+      - release/*
 permissions:
   contents: read
 jobs:
   Snyk_SCA_Scan:
-    # Skip this job on PRs from forks
-    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    # Route each PR to exactly one event: internal -> pull_request, fork -> pull_request_target.
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository)
+    environment: ${{ github.event_name == 'pull_request_target' && 'fork-pr-review' || '' }}
     strategy:
       matrix:
         node-version: [22.x]
@@ -26,12 +33,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+          persist-credentials: false
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: 'yarn'
+          # Cache only on pull_request (internal PRs) — pull_request_target writes scope to the base branch and could be poisoned by an approved fork PR.
+          cache: ${{ github.event_name == 'pull_request' && 'yarn' || '' }}
       - name: Run yarn
         run: yarn
       - name: Run build
@@ -45,3 +55,4 @@ jobs:
           snyk test --all-projects --strict-out-of-sync=false --detection-depth=6 --exclude=.nx,system-tests,tooling,docker,Dockerfile --severity-threshold=critical --org=cypress-opensource
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_API: https://api.snyk.io

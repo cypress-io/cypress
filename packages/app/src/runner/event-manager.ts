@@ -749,9 +749,19 @@ export class EventManager {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', window.origin)
     })
 
-    // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state
-    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', (_data, { origin, responseEvent }) => {
-      Cypress.primaryOriginCommunicator.toSpecBridge(origin, responseEvent, cy.state('duringUserTestExecution'))
+    // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state.
+    // Prefer `toSource(source)` so replies work even when `crossOriginDriverWindows` was cleared
+    // (e.g. after test isolation); `toSpecBridge(origin)` would no-op without a map entry.
+    Cypress.primaryOriginCommunicator.on('sync:during:user:test:execution', (_data, { origin, source, responseEvent }) => {
+      const value = cy.state('duringUserTestExecution')
+
+      if (source) {
+        Cypress.primaryOriginCommunicator.toSource(source, responseEvent, value)
+
+        return
+      }
+
+      Cypress.primaryOriginCommunicator.toSpecBridge(origin, responseEvent, value)
     })
 
     Cypress.primaryOriginCommunicator.on('before:unload', (origin) => {
@@ -996,7 +1006,23 @@ export class EventManager {
   }
 
   notifyCrossOriginBridgeReady (origin) {
-    // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit
+    // Any multi-origin event appends the origin as the third parameter and we do the same here for this short circuit.
+    // When the spec-bridge iframe already exists, the driver may have cleared
+    // `crossOriginDriverWindows` (e.g. after test isolation). Re-run the same
+    // path as a real postMessage (`onMessage`) so the map is repopulated before
+    // `bridge:ready` listeners run; emitting alone would leave `toSpecBridge` a no-op.
+    const id = `Spec Bridge: ${origin}`
+    const iframe = document.getElementById(id) as HTMLIFrameElement | null
+
+    if (iframe?.contentWindow) {
+      Cypress.primaryOriginCommunicator.onMessage({
+        data: { event: 'cross:origin:bridge:ready', origin },
+        source: iframe.contentWindow,
+      })
+
+      return
+    }
+
     Cypress.primaryOriginCommunicator.emit('bridge:ready', undefined, { origin })
   }
 

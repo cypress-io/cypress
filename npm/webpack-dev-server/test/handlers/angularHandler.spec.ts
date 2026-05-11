@@ -144,6 +144,41 @@ describe('angularHandler', { timeout: 60000 }, function () {
   })
 })
 
+describe('getTempDir', () => {
+  it('returns a directory keyed on the project name when no projectRoot is provided', async () => {
+    const tempDir = await getTempDir('my-project')
+
+    expect(path.basename(tempDir)).toEqual('my-project')
+    expect(path.basename(path.dirname(tempDir))).toEqual('cypress-angular-ct')
+  })
+
+  it('namespaces the directory with a hash of projectRoot so sibling projects with the same basename do not collide', async () => {
+    // Simulates an Nx-style monorepo where two libraries share `path.basename(projectRoot)`
+    // (e.g. `libs/feature-a/feat-shell` and `libs/feature-b/feat-shell`). Without the
+    // hash suffix, both would resolve to the same `tsconfig.json` and race in parallel
+    // runs. See https://github.com/cypress-io/cypress/issues/33634.
+    const projectRootA = path.join(path.sep, 'workspace', 'libs', 'feature-a', 'feat-shell')
+    const projectRootB = path.join(path.sep, 'workspace', 'libs', 'feature-b', 'feat-shell')
+    const projectName = path.basename(projectRootA)
+
+    const tempDirA = await getTempDir(projectName, projectRootA)
+    const tempDirB = await getTempDir(projectName, projectRootB)
+
+    expect(tempDirA).not.toEqual(tempDirB)
+    expect(path.basename(tempDirA)).toMatch(/^feat-shell-[0-9a-f]{8}$/)
+    expect(path.basename(tempDirB)).toMatch(/^feat-shell-[0-9a-f]{8}$/)
+  })
+
+  it('is deterministic for a given projectRoot', async () => {
+    const projectRoot = path.join(path.sep, 'workspace', 'libs', 'feature-a', 'feat-shell')
+
+    const first = await getTempDir(path.basename(projectRoot), projectRoot)
+    const second = await getTempDir(path.basename(projectRoot), projectRoot)
+
+    expect(first).toEqual(second)
+  })
+})
+
 const expectLoadsAngularJson = async (projectRoot: string) => {
   const angularJson = await getAngularJson(projectRoot)
 
@@ -171,7 +206,7 @@ const expectLoadsAngularBuildOptions = (buildOptions: BuildOptions) => {
 const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerConfig, buildOptions: any, hasPolyfillsConfigured: boolean = false) => {
   const { projectRoot } = devServerConfig.cypressConfig
   let tsConfigPath = await generateTsConfig(devServerConfig, buildOptions)
-  const tempDir = await getTempDir(path.basename(projectRoot))
+  const tempDir = await getTempDir(path.basename(projectRoot), projectRoot)
 
   expect(tsConfigPath).toEqual(path.join(tempDir, 'tsconfig.json'))
 

@@ -30,11 +30,10 @@ import type {
   AutomationCommands,
 } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
-import { createHmac } from 'crypto'
+import { createHmac, randomUUID } from 'crypto'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { v4 } from 'uuid'
 import { StudioLifecycleManager } from './cloud/studio/StudioLifecycleManager'
 import { CyPromptLifecycleManager } from './cloud/cy-prompt/CyPromptLifecycleManager'
 import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
@@ -480,7 +479,7 @@ export class ProjectBase extends EE {
 
         // Only need a new session if Studio is being entered from a non-opened
         // state. If the test is being re-run, we use the existing session
-        const cloudStudioSessionId = sessionId ?? v4()
+        const cloudStudioSessionId = sessionId ?? randomUUID()
 
         try {
           const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
@@ -514,7 +513,7 @@ export class ProjectBase extends EE {
             this.protocolManager.setupProtocol()
             this.protocolManager.beforeSpec({
               ...this.spec,
-              instanceId: v4(),
+              instanceId: randomUUID(),
             })
 
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
