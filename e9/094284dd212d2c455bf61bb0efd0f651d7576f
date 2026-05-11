@@ -1,0 +1,20 @@
+packages/data-context/graphql/stitching/remoteSchemaWrapped.ts
+  s_7a176fd83fef98::t_af5cace9aa7276 15-16
+  s_7a176fd83fef98::t_37a7a6b6238a1e 49-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "e9094284dd212d2c455bf61bb0efd0f651d7576f",
+  "prompts": {},
+  "sessions": {
+    "s_7a176fd83fef98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "546534c1-4ce2-49ce-bb40-b6f93ef2f19b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
