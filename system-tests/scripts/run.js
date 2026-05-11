@@ -77,12 +77,12 @@ if (options['inspect-brk']) {
 // max HTTP header size 8kb -> 1mb
 // https://github.com/cypress-io/cypress/issues/76
 commandAndArguments.args.push(
-    `--max-http-header-size=${1024 * 1024}`,
+  `--max-http-header-size=${1024 * 1024}`,
 )
 
 // https://github.com/nodejs/node/issues/49210
 commandAndArguments.args.push(
-    `--tls-cipher-list=DEFAULT@SECLEVEL=0`,
+  `--tls-cipher-list=DEFAULT@SECLEVEL=0`,
 )
 
 if (!isWindows()) {

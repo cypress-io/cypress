@@ -325,8 +325,7 @@ export class ProjectConfigIpc extends EventEmitter {
     }
 
     /**
-     * use --import for node versions
-     * 20.6.0 and above for 20.x.x as --import is supported
+     * use --import for node versions 20.6.0 and above
      * NOTE: we need to use double quotes around the tsx path to account for paths with spaces or special characters.
      * @see https://tsx.is/dev-api/node-cli#node-js-cli
      */
