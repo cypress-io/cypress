@@ -8,7 +8,7 @@ function isRetryableError (err: unknown): err is NodeJS.ErrnoException {
     ? (err as NodeJS.ErrnoException).code
     : undefined
 
-  return code === 'EPERM' || code === 'EACCES'
+  return code === 'EPERM' || code === 'EACCES' || code === 'EBUSY'
 }
 
 function delay (ms: number): Promise<void> {

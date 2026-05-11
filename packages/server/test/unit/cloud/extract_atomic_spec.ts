@@ -46,6 +46,17 @@ describe('renameAtomicWithRetry', () => {
     expect(renameStub).to.be.calledTwice
   })
 
+  it('should retry on EBUSY (Windows: file in use by AV / another process) and succeed on a subsequent attempt', async () => {
+    const ebusyError = Object.assign(new Error('EBUSY: resource busy or locked'), { code: 'EBUSY' })
+
+    renameStub.onFirstCall().rejects(ebusyError)
+    renameStub.onSecondCall().resolves()
+
+    await renameAtomicWithRetry('/src/file', '/dst/file')
+
+    expect(renameStub).to.be.calledTwice
+  })
+
   it('should throw the last error when EPERM persists past the retry budget', async () => {
     const epermError = Object.assign(new Error('EPERM: operation not permitted, rename'), { code: 'EPERM' })
 
