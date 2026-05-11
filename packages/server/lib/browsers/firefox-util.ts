@@ -13,17 +13,17 @@ let webdriverClient: WebDriverClient
 async function awaitBiDiConnection (client: WebDriverClient) {
   const handler = client._bidiHandler
 
+  // `_bidiHandler` is how BiDi commands are dispatched; if it's missing we
+  // can't make any BiDi calls, so fail fast and let the outer
+  // FIREFOX_COULD_NOT_CONNECT retry path relaunch the browser.
   if (!handler) {
-    debug('webdriver client has no _bidiHandler; skipping BiDi readiness wait')
-
-    return
+    throw new Error('WebDriver BiDi handler is not available on the client')
   }
 
   const connected = await handler.waitForConnected()
 
   debug('BiDi connection established: %s', connected)
   if (!connected) {
-    // Let the outer FIREFOX_COULD_NOT_CONNECT retry path relaunch the browser.
     throw new Error('WebDriver BiDi connection failed to establish')
   }
 }

@@ -78,6 +78,21 @@ describe('Firefox-Util', () => {
         expect(caught?.message).to.include('WebDriver BiDi connection failed to establish')
         expect(webdriverClient.sessionSubscribe).to.not.have.been.called
       })
+
+      it('throws if the client has no _bidiHandler', async () => {
+        webdriverClient._bidiHandler = undefined
+
+        let caught: Error | undefined
+
+        try {
+          await FirefoxUtil.setup({ automation, onError, url, remotePort, webdriverClient, useWebDriverBiDi })
+        } catch (err) {
+          caught = err as Error
+        }
+
+        expect(caught?.message).to.include('WebDriver BiDi handler is not available on the client')
+        expect(webdriverClient.sessionSubscribe).to.not.have.been.called
+      })
     })
   })
 })
