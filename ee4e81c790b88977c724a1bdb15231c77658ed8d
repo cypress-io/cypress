@@ -1,0 +1,36 @@
+packages/app/src/specs/banners/CloudMessageBanner.vue
+  s_8a31958851d64b::t_64e5ada1fd1be8 104-106
+  s_8a31958851d64b::t_06fb3a6ba9962f 114
+packages/app/src/specs/banners/CloudMessageBanner.cy.tsx
+  s_8a31958851d64b::t_beed8c658ee377 24,32
+  s_8a31958851d64b::t_230533adde3aef 161,173-174
+packages/app/src/specs/SpecsListBanners.vue
+  s_8a31958851d64b::t_ceb8d0057575ab 199
+packages/app/cypress/e2e/cloud_message_banner.cy.ts
+  s_8a31958851d64b::t_4e4ae149929276 15,23
+packages/data-context/schemas/schema.graphql
+  s_8a31958851d64b::t_34353d864ddf75 102-106
+packages/data-context/schemas/cloud.graphql
+  s_8a31958851d64b::t_63db43bc70416f 50-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "ee4e81c790b88977c724a1bdb15231c77658ed8d",
+  "prompts": {},
+  "humans": {
+    "h_18fc77e9b83574": {
+      "author": "Ryan Manuel"
+    }
+  },
+  "sessions": {
+    "s_8a31958851d64b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b460f46b-6923-4faa-8c29-f8b4abb8219e",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}

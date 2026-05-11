@@ -1,0 +1,19 @@
+packages/app/src/specs/SpecsListBanners.vue
+  s_8ba41a65cd792d::t_3b533e48680638 395,397
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "9552d327597c181db859861d95a0734c8dead1c0",
+  "prompts": {},
+  "sessions": {
+    "s_8ba41a65cd792d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8ac67cab-cece-411f-8e35-367668770e48",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
