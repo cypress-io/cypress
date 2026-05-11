@@ -125,7 +125,7 @@ onMounted(async () => {
 
 async function updateBannerState (field: 'lastShown' | 'dismissed') {
   if (isUserScoped.value) {
-    const globalBanners = stateQuery.data.value?.localSettings?.preferences?.banners ?? {}
+    const globalBanners = { ...(stateQuery.data.value?.localSettings?.preferences?.banners ?? {}) }
 
     set(globalBanners, [props.bannerId, field], Date.now())
     await setGlobalStateMutation.executeMutation({ value: JSON.stringify({ banners: globalBanners }) })
@@ -133,7 +133,7 @@ async function updateBannerState (field: 'lastShown' | 'dismissed') {
     return
   }
 
-  const projectBanners = stateQuery.data.value?.currentProject?.savedState?.banners ?? {}
+  const projectBanners = { ...(stateQuery.data.value?.currentProject?.savedState?.banners ?? {}) }
 
   set(projectBanners, [props.bannerId, field], Date.now())
   await setProjectStateMutation.executeMutation({ value: JSON.stringify({ banners: projectBanners }) })
