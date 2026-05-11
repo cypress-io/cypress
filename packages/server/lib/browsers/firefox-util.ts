@@ -8,41 +8,27 @@ const debug = Debug('cypress:server:browsers:firefox-util')
 let webdriverClient: WebDriverClient
 
 // geckodriver returns from `newSession` once the WebDriver-classic session is
-// up, but the BiDi WebSocket is established asynchronously and is not always
-// ready by the time we issue the first BiDi command. Retry briefly when the
-// race loses.
-//
-// We match on the error message because webdriver.io throws a bare `Error`
-// from its private `BidiHandler.sendAsync` rather than a typed class
-// (`WebDriverError` etc.) with a `code` or `name` we could check, and the
-// handler's `_isConnected` flag isn't exposed on the client. Revisit if
-// upstream adds a typed error or a readiness API.
-//
-// firefox-util_spec.ts asserts this string still exists in the installed
-// `webdriver` package — that guard will fail on any future dep bump that
-// reworks the message, so this stays in sync with upstream.
-// @see https://github.com/webdriverio/webdriverio — `BidiHandler.sendAsync`
-const BIDI_NOT_READY_MESSAGE = 'No connection to WebDriver Bidi was established'
-const BIDI_SUBSCRIBE_MAX_ATTEMPTS = 10
-const BIDI_SUBSCRIBE_RETRY_DELAY_MS = 200
+// up, but the BiDi WebSocket is established asynchronously: webdriver.io
+// fires `_bidiHandler.connect()` without awaiting it before returning the
+// client (see `webdriver/build/node.js`). If we issue the first BiDi command
+// before the WebSocket opens, `BidiHandler.sendAsync` throws "No connection
+// to WebDriver Bidi was established" and the run exits with code 1 before
+// any spec executes. Await the connect promise instead of racing it.
+async function awaitBiDiConnection (client: WebDriverClient) {
+  const handler = client._bidiHandler
 
-async function subscribeToBiDiEvents (client: WebDriverClient) {
-  for (let attempt = 1; attempt <= BIDI_SUBSCRIBE_MAX_ATTEMPTS; attempt++) {
-    try {
-      await client.sessionSubscribe({ events: BidiAutomation.BIDI_EVENTS })
+  if (!handler) {
+    debug('webdriver client has no _bidiHandler; skipping BiDi readiness wait')
 
-      return
-    } catch (err) {
-      const message = (err as Error)?.message ?? ''
-      const bidiNotReady = message.includes(BIDI_NOT_READY_MESSAGE)
+    return
+  }
 
-      if (!bidiNotReady || attempt === BIDI_SUBSCRIBE_MAX_ATTEMPTS) {
-        throw err
-      }
+  const connected = await handler.waitForConnected()
 
-      debug('BiDi connection not ready on sessionSubscribe (attempt %d/%d), retrying in %dms', attempt, BIDI_SUBSCRIBE_MAX_ATTEMPTS, BIDI_SUBSCRIBE_RETRY_DELAY_MS)
-      await new Promise((resolve) => setTimeout(resolve, BIDI_SUBSCRIBE_RETRY_DELAY_MS))
-    }
+  debug('BiDi connection established: %s', connected)
+  if (!connected) {
+    // Let the outer FIREFOX_COULD_NOT_CONNECT retry path relaunch the browser.
+    throw new Error('WebDriver BiDi connection failed to establish')
   }
 }
 
@@ -66,8 +52,11 @@ async function connectToNewSpecBiDi (options, automation: Automation, browserBiD
 }
 
 async function setupBiDi (webdriverClient: WebDriverClient, automation: Automation) {
+  // wait for the BiDi WebSocket to be established before issuing any BiDi
+  // commands; otherwise the first one races geckodriver's async connect
+  await awaitBiDiConnection(webdriverClient)
   // webdriver needs to subscribe to the correct BiDi events or else the events we are expecting to stream in will not be sent
-  await subscribeToBiDiEvents(webdriverClient)
+  await webdriverClient.sessionSubscribe({ events: BidiAutomation.BIDI_EVENTS })
 
   const biDiClient = BidiAutomation.create(webdriverClient, automation)
 

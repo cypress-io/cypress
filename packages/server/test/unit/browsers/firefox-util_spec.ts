@@ -2,8 +2,6 @@ require('../../spec_helper')
 import FirefoxUtil from '../../../lib/browsers/firefox-util'
 import sinon from 'sinon'
 import { expect } from 'chai'
-import fs from 'fs'
-import path from 'path'
 import { Automation } from '../../../lib/automation'
 import { Client as WebDriverClient } from 'webdriver'
 import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
@@ -13,6 +11,7 @@ describe('Firefox-Util', () => {
   let onError: sinon.SinonStub<[Error], void>
   let url: string
   let remotePort: number | undefined
+  let waitForConnected: sinon.SinonStub<[], Promise<boolean>>
   let webdriverClient: Partial<sinon.SinonStubbedInstance<WebDriverClient>>
   let useWebDriverBiDi: boolean
   let stubbedBiDiAutomation: sinon.SinonStubbedInstance<BidiAutomation>
@@ -22,7 +21,9 @@ describe('Firefox-Util', () => {
     onError = sinon.stub<[Error], void>()
     url = 'http://some-url'
     remotePort = 8000
+    waitForConnected = sinon.stub<[], Promise<boolean>>().resolves(true)
     webdriverClient = {
+      _bidiHandler: { waitForConnected } as any,
       sessionSubscribe: sinon.stub<
         Parameters<WebDriverClient['sessionSubscribe']>,
         ReturnType<WebDriverClient['sessionSubscribe']>
@@ -56,42 +57,15 @@ describe('Firefox-Util', () => {
         expect(automation.use).to.have.been.calledWith(stubbedBiDiAutomation.automationMiddleware)
       })
 
-      it('retries sessionSubscribe when the BiDi connection is not ready yet', async () => {
-        const notReadyErr = new Error('Error: No connection to WebDriver Bidi was established')
-
-        webdriverClient.sessionSubscribe!
-        .onFirstCall().rejects(notReadyErr)
-        .onSecondCall().rejects(notReadyErr)
-        .onThirdCall().resolves()
-
+      it('awaits the BiDi connection before subscribing to events', async () => {
         await FirefoxUtil.setup({ automation, onError, url, remotePort, webdriverClient, useWebDriverBiDi })
 
-        expect(webdriverClient.sessionSubscribe).to.have.callCount(3)
-        expect(automation.use).to.have.been.calledWith(stubbedBiDiAutomation.automationMiddleware)
+        expect(waitForConnected).to.have.been.calledOnce
+        expect(webdriverClient.sessionSubscribe).to.have.been.calledAfter(waitForConnected)
       })
 
-      // Guards against silent breakage if webdriver.io reworks the error
-      // thrown by `BidiHandler.sendAsync`. If this test fails after a
-      // webdriver bump, revisit the message constant in firefox-util.ts (or
-      // switch to a typed-error check if upstream has added one).
-      it('matches the error message thrown by the installed webdriver package', () => {
-        const webdriverPkgEntry = require.resolve('webdriver')
-        const webdriverBuildDir = path.dirname(webdriverPkgEntry)
-        const candidates = fs.readdirSync(webdriverBuildDir)
-        .filter((f) => f.endsWith('.js'))
-        .map((f) => path.join(webdriverBuildDir, f))
-
-        const found = candidates.some((file) => {
-          return fs.readFileSync(file, 'utf8').includes('No connection to WebDriver Bidi was established')
-        })
-
-        expect(found, 'expected webdriver package to still throw "No connection to WebDriver Bidi was established"').to.be.true
-      })
-
-      it('does not retry sessionSubscribe on unrelated errors', async () => {
-        const fatalErr = new Error('something else went wrong')
-
-        webdriverClient.sessionSubscribe!.rejects(fatalErr)
+      it('throws if the BiDi connection fails to establish', async () => {
+        waitForConnected.resolves(false)
 
         let caught: Error | undefined
 
@@ -101,8 +75,8 @@ describe('Firefox-Util', () => {
           caught = err as Error
         }
 
-        expect(caught).to.equal(fatalErr)
-        expect(webdriverClient.sessionSubscribe).to.have.callCount(1)
+        expect(caught?.message).to.include('WebDriver BiDi connection failed to establish')
+        expect(webdriverClient.sessionSubscribe).to.not.have.been.called
       })
     })
   })
