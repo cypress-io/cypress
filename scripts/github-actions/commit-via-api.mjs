@@ -1,6 +1,6 @@
-const fs = require('fs')
+import fs from 'node:fs'
 
-const commitViaApi = async ({ context, github, baseBranch, branchName, filePaths, message }) => {
+export const commitViaApi = async ({ context, github, baseBranch, branchName, filePaths, message }) => {
   const owner = context.repo.owner
   const repo = context.repo.repo
   const repositoryNameWithOwner = `${owner}/${repo}`
@@ -61,8 +61,4 @@ const commitViaApi = async ({ context, github, baseBranch, branchName, filePaths
   })
 
   return createCommitOnBranch.commit
-}
-
-module.exports = {
-  commitViaApi,
 }
