@@ -15,11 +15,13 @@ export function hasBunInstalled () {
  * are not hidden. CircleCI installs Bun in `run-system-tests` before Mocha runs.
  */
 export function shouldSkipBunSystemTests (): boolean {
-  if (process.env.CI && !hasBunInstalled()) {
+  const bunInstalled = hasBunInstalled()
+
+  if (process.env.CI && !bunInstalled) {
     throw new Error(
       'Bun system tests are running in CI but `bun` was not found on PATH. Install Bun before the "Run system tests" step (see `.circleci/src/pipeline/@pipeline.yml` command `run-system-tests`).',
     )
   }
 
-  return !hasBunInstalled()
+  return !bunInstalled
 }
