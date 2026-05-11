@@ -6,7 +6,7 @@ const __dirname = import.meta.dirname
 export default defineConfig({
   allowCypressEnv: false,
   component: {
-    // experimentalSingleTabRunMode: true,
+    experimentalSingleTabRunMode: true,
     devServer: {
       framework: 'react',
       bundler: 'vite',

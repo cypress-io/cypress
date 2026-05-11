@@ -2,7 +2,6 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-/** Resolve installed package entry to an absolute path (ESM; Node 20.10+). */
 function resolvePackage (specifier) {
   return fileURLToPath(import.meta.resolve(specifier))
 }

@@ -50,8 +50,6 @@ for (const project of VITE_REACT) {
       cy.get('.passed > .num').should('contain', 1)
     })
 
-    // AFAICT, vite 8 with rolldown support bundles react differently, so it is available in the "missing react" components and passes
-
     it('MissingReactInSpec: should fail, rerun, succeed', () => {
       cy.on('uncaught:exception', () => {
         // Ignore the uncaught exception in the AUT
