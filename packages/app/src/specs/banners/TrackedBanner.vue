@@ -15,7 +15,6 @@ import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import { computed, onMounted, ref, watchEffect, watch } from 'vue'
 import { gql, useMutation, useQuery } from '@urql/vue'
 import { TrackedBanner_StateDocument, TrackedBanner_RecordBannerSeenDocument, TrackedBanner_RecordBannerDismissedDocument, TrackedBanner_SetProjectStateDocument, TrackedBanner_SetGlobalStateDocument } from '../../generated/graphql'
-import { set } from 'lodash'
 import { nanoid } from 'nanoid'
 
 type EventData = {
@@ -124,18 +123,26 @@ onMounted(async () => {
 })
 
 async function updateBannerState (field: 'lastShown' | 'dismissed') {
-  if (isUserScoped.value) {
-    const globalBanners = { ...(stateQuery.data.value?.localSettings?.preferences?.banners ?? {}) }
+  const stamp = Date.now()
 
-    set(globalBanners, [props.bannerId, field], Date.now())
+  if (isUserScoped.value) {
+    const cached = stateQuery.data.value?.localSettings?.preferences?.banners
+    const globalBanners = {
+      ...(cached ?? {}),
+      [props.bannerId]: { ...(cached?.[props.bannerId] ?? {}), [field]: stamp },
+    }
+
     await setGlobalStateMutation.executeMutation({ value: JSON.stringify({ banners: globalBanners }) })
 
     return
   }
 
-  const projectBanners = { ...(stateQuery.data.value?.currentProject?.savedState?.banners ?? {}) }
+  const cached = stateQuery.data.value?.currentProject?.savedState?.banners
+  const projectBanners = {
+    ...(cached ?? {}),
+    [props.bannerId]: { ...(cached?.[props.bannerId] ?? {}), [field]: stamp },
+  }
 
-  set(projectBanners, [props.bannerId, field], Date.now())
   await setProjectStateMutation.executeMutation({ value: JSON.stringify({ banners: projectBanners }) })
 }
 
