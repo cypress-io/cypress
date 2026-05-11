@@ -9,8 +9,15 @@ let webdriverClient: WebDriverClient
 
 // geckodriver returns from `newSession` once the WebDriver-classic session is
 // up, but the BiDi WebSocket is established asynchronously and is not always
-// ready by the time we issue the first BiDi command. webdriver.io's
-// BidiHandler emits this message when the race loses; retry briefly.
+// ready by the time we issue the first BiDi command. Retry briefly when the
+// race loses.
+//
+// We match on the error message because webdriver.io throws a bare `Error`
+// from its private `BidiHandler.sendAsync` rather than a typed class
+// (`WebDriverError` etc.) with a `code` or `name` we could check, and the
+// handler's `_isConnected` flag isn't exposed on the client. Revisit if
+// upstream adds a typed error or a readiness API.
+// @see https://github.com/webdriverio/webdriverio — `BidiHandler.sendAsync`
 const BIDI_NOT_READY_MESSAGE = 'No connection to WebDriver Bidi was established'
 const BIDI_SUBSCRIBE_MAX_ATTEMPTS = 10
 const BIDI_SUBSCRIBE_RETRY_DELAY_MS = 200
