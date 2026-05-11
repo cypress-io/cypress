@@ -28,9 +28,6 @@ describe('BundleError', () => {
   })
 
   it('mirrors the cause syscall code on the BundleError itself', () => {
-    // StudioLifecycleManager#updateStatus reads `error?.code` to drive
-    // isCertError detection; without this mirror, a wrapped cert error loses
-    // its code and proxy-specific recovery messaging breaks.
     const cause = Object.assign(new Error('cert err'), { code: 'CERT_HAS_EXPIRED' })
     const err = new BundleError({ kind: 'studio', stage: 'network', message: 'wrapper', cause })
 

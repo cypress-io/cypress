@@ -2,8 +2,6 @@ import '../../../spec_helper'
 import path from 'path'
 
 describe('getBundleCacheDir', () => {
-  // Each case fully owns process.env.CYPRESS_CACHE_FOLDER + the npm_config_*
-  // fallbacks; restore from a captured snapshot in afterEach.
   const ENV_KEYS = [
     'CYPRESS_CACHE_FOLDER',
     'npm_config_CYPRESS_CACHE_FOLDER',
@@ -26,8 +24,7 @@ describe('getBundleCacheDir', () => {
     }
   })
 
-  // Bypass require cache so each test re-evaluates resolveCypressCacheRoot
-  // with the current process.env state.
+  // Bypass require cache so each test sees the current env state.
   const loadCacheRoot = () => {
     delete require.cache[require.resolve('../../../../lib/cloud/bundles/cache_root')]
 
@@ -81,8 +78,7 @@ describe('getBundleCacheDir', () => {
     process.env.CYPRESS_CACHE_FOLDER = '   '
     const { getBundleCacheDir } = loadCacheRoot()
 
-    // cachedir('Cypress') varies by OS; just assert the bundles/<kind> tail and
-    // that the path is NOT the empty-override one.
+    // cachedir('Cypress') varies by OS; just assert the bundles/<kind> tail.
     expect(getBundleCacheDir('studio')).to.match(/[/\\]bundles[/\\]studio$/)
     expect(getBundleCacheDir('studio')).to.not.equal(path.resolve('bundles/studio'))
   })

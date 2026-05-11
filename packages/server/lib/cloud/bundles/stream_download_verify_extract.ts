@@ -47,13 +47,8 @@ const buildHeaders = (projectId: string | undefined): Record<string, string> => 
   }
 }
 
-// Recognises POSIX-style errno codes (ECONNRESET, ETIMEDOUT, EAI_AGAIN,
-// ENOSPC, ...) while excluding domain-specific codes that happen to start
-// with E:
-//   - tar's TAR_BAD_ARCHIVE / zlib's Z_BUF_ERROR don't start with E at all.
-//   - Node's internal ERR_* codes (ERR_INVALID_URL, ERR_SOCKET_CLOSED, ...)
-//     are excluded explicitly so a thrown TypeError doesn't get
-//     misclassified as a retryable network error.
+// POSIX-style errno codes (ECONNRESET, ETIMEDOUT, EAI_AGAIN, ...).
+// Excludes Node's ERR_* codes so a thrown TypeError isn't misclassified.
 const isPosixSyscallError = (err: any): boolean => {
   if (err?.errno !== undefined) return true
 
@@ -66,16 +61,10 @@ const isPosixSyscallError = (err: any): boolean => {
   return /^E[A-Z]/.test(code)
 }
 
-// Wraps any error from the fetch / pipeline phase as a BundleError carrying
-// the underlying HttpError / SystemError as its `cause`. The cause is what
-// asyncRetry's shouldRetry inspects (via isRetryableError), and it is also
-// what consumers filter on in Sentry alongside the BundleError's `stage`
-// and `kind` tags.
-//
-// `defaultStage` is used when the error has no HttpError shape and no POSIX
-// syscall code: 'network' for the fetch phase, 'extract' for the pipeline
-// phase (where a non-syscall error is overwhelmingly tar.Parse complaining
-// about malformed bytes).
+// Wraps fetch/pipeline errors as BundleError. `cause` carries the underlying
+// HttpError/SystemError so asyncRetry's shouldRetry can classify via
+// isRetryableError. `defaultStage` is used when the err has no HTTP/syscall
+// shape: 'network' for the fetch phase, 'extract' for the pipeline phase.
 const wrapAsBundleError = (
   err: any,
   url: string,
@@ -105,11 +94,6 @@ const wrapAsBundleError = (
 
     return new BundleError({
       kind,
-      // Syscall-shaped errors during the fetch phase are network failures
-      // (DNS, connection reset, etc.); during pipeline they're typically
-      // mid-stream connection drops -- still network. Disk-side codes like
-      // ENOSPC do exist but are rare enough that mis-classifying them as
-      // network (and surfacing the SystemError as cause) is acceptable.
       stage: 'network',
       message: `${kind} bundle network error: ${err.message ?? err.code}`,
       cause: sysError,
@@ -231,9 +215,6 @@ const runDownloadAttempt = async ({ url, projectId, staging, kind }: StreamDownl
   return manifestSig
 }
 
-// Decide retryability from the underlying cause when we've wrapped as
-// BundleError, so wrapping the network/extract errors above doesn't break
-// asyncRetry's existing isRetryableError-based classification.
 const shouldRetryBundleError = (err: unknown): boolean => {
   if (BundleError.isBundleError(err)) {
     const cause = (err as Error & { cause?: unknown }).cause

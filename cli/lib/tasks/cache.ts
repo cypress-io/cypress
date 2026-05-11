@@ -13,8 +13,7 @@ import getFolderSize from './get-folder-size'
 
 dayjs.extend(relativeTime)
 
-// Subdirs that live under the cache root but are not Cypress binary version
-// dirs and must be ignored by `cypress cache prune`.
+// Subdirs under the cache root that are not binary version dirs.
 const NON_BINARY_CACHE_ENTRIES = new Set(['bundles'])
 
 // output colors for the table
@@ -45,11 +44,6 @@ const prune = async (): Promise<void> => {
     const versions = await fs.readdir(cacheDir)
 
     for (const version of versions) {
-      // Skip non-binary subdirs colocated under the cache root (currently:
-      // the bundles/ tree used by cy-prompt and Studio). Beta/prerelease
-      // binary dirs from getVersionDir() (e.g. 'beta-15.0.0-feat-abc12345')
-      // intentionally fall through and are pruned like other non-current
-      // binary versions.
       if (NON_BINARY_CACHE_ENTRIES.has(version)) continue
 
       if (version !== checkedInBinaryVersion) {

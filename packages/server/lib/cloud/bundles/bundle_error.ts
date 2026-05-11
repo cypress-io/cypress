@@ -11,10 +11,7 @@ export class BundleError extends Error {
   public readonly name = 'BundleError'
   public readonly kind: BundleKind
   public readonly stage: BundleErrorStage
-  // Mirror the wrapped cause's syscall/HTTP code on the BundleError itself
-  // so consumers that read `error.code` (e.g. StudioLifecycleManager's cert
-  // detection via isNonRetriableCertErrorCode) keep working when network /
-  // pipeline failures get wrapped here.
+  // Mirrored from `cause.code` so consumers reading `error.code` keep working.
   public readonly code?: string
 
   constructor (options: { kind: BundleKind, stage: BundleErrorStage, message: string, cause?: unknown }) {

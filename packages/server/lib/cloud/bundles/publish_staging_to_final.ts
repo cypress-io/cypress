@@ -32,23 +32,16 @@ const publishOne = async (staging: string, finalDir: string, rel: string): Promi
   await renameAtomicWithRetry(src, dst)
 }
 
-// Publishes every file from `staging` into `finalDir` via per-file atomic
-// rename. `manifest.json` is always renamed last so that a concurrent reader
-// that observes the manifest is guaranteed to see every other file in its
-// new-version state.
-//
-// Per-file rename (vs directory rename) preserves the cross-process safety
-// property from PR #33034: a reader in another process always sees a
-// complete prior-version or new-version of any single file, never absent.
+// Per-file atomic rename of `staging` into `finalDir`, with `manifest.json`
+// renamed last so a reader that sees the manifest is guaranteed to see every
+// other file in its new-version state. Per PR #33034.
 export const publishStagingToFinal = async (staging: string, finalDir: string): Promise<void> => {
   const allFiles = await walkFiles(staging)
   const others = allFiles.filter((rel) => rel !== MANIFEST_REL)
   const hasManifest = allFiles.includes(MANIFEST_REL)
 
-  // Promise.all rejects on the first failure but leaves siblings running.
-  // Drain them with allSettled before throwing so the caller's `finally` can
-  // safely rm the staging dir without producing unhandled rejections from
-  // in-flight renames whose `src` path disappears mid-flight.
+  // allSettled drains in-flight renames so the caller's staging cleanup can't
+  // race them into unhandled ENOENT rejections.
   const otherPromises = others.map((rel) => publishOne(staging, finalDir, rel))
 
   try {

@@ -88,12 +88,6 @@ describe('publishStagingToFinal', () => {
   })
 
   it('drains in-flight renames before throwing when one rejects (no unhandled-rejection leakage)', async () => {
-    // Stub renameAtomicWithRetry: one call rejects fast, another resolves slowly.
-    // If publishStagingToFinal threw immediately on the fast rejection without
-    // awaiting the slow one, the slow promise would settle later -- and a
-    // caller's `finally { remove(staging) }` would race the slow rename's src
-    // read, producing an unhandled rejection. Assert no unhandled rejection
-    // fires during the test window.
     await populateStaging(staging, FIXTURE_FILES)
 
     const fastReject = sinon.stub().rejects(Object.assign(new Error('EACCES: denied'), { code: 'EACCES' }))
@@ -103,7 +97,6 @@ describe('publishStagingToFinal', () => {
       slowResolved = true
     })
     const renameStub = sinon.stub().callsFake(async (src: string, _dst: string) => {
-      // First (alphabetic) non-manifest file rejects fast; the rest resolve slowly.
       if (src.endsWith('assets/file_000.txt')) return fastReject(src, _dst)
 
       return slowResolve(src, _dst)
@@ -120,7 +113,6 @@ describe('publishStagingToFinal', () => {
 
     try {
       await expect(publishStagingToFinal(staging, finalDir)).to.be.rejectedWith(/EACCES/)
-      // Give the macrotask queue a tick so any orphaned rejections surface.
       await new Promise((r) => setTimeout(r, 100))
     } finally {
       process.off('unhandledRejection', onUnhandled)
@@ -131,8 +123,6 @@ describe('publishStagingToFinal', () => {
   })
 
   it('cross-process: parallel publishers + reader sees no absent or partial bytes', async function () {
-    // Generous timeout: spawning two TS-register children + a reader loop can take
-    // a few seconds on slow CI runners.
     this.timeout(30000)
 
     const stagingA = path.join(tmp, 'staging-a')
@@ -140,9 +130,8 @@ describe('publishStagingToFinal', () => {
     const watchedFile = 'assets/file_010.txt'
     const expectedContent = FIXTURE_FILES[watchedFile]
 
-    // Pre-place a prior-version of the watched file so the reader has a baseline
-    // to read before either publisher renames over it. This simulates a second
-    // run where finalDir already exists from a prior process.
+    // Pre-place the watched file so the reader has a baseline before either
+    // publisher renames over it.
     await ensureDir(path.dirname(path.join(finalDir, watchedFile)))
     await writeFile(path.join(finalDir, watchedFile), expectedContent)
 

@@ -4,9 +4,7 @@ import untildify from 'untildify'
 
 const BUNDLES_DIRNAME = 'bundles'
 
-// Strip a single pair of surrounding double quotes -- mirrors the CLI's
-// dequote() so values like Windows CMD's `set FOO="C:\path"` resolve
-// correctly. https://github.com/cypress-io/cypress/issues/4506
+// Matches the CLI's getEnv() / dequote() so env handling stays in sync.
 const dequote = (str: string): string => {
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.slice(1, -1)
@@ -15,10 +13,6 @@ const dequote = (str: string): string => {
   return str
 }
 
-// Mirrors cli/lib/util.ts `getEnv()`: checks the env var, then the
-// npm_config_* / npm_package_config_* fallbacks (so values from .npmrc or
-// `--cypress-cache-folder=...` reach the server), trims whitespace, and
-// strips wrapping double quotes before returning.
 const readEnvVar = (varName: string): string | undefined => {
   const candidates = [
     varName,

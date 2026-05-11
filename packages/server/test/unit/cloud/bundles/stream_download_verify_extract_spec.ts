@@ -8,8 +8,7 @@ import { SystemError } from '../../../../lib/cloud/network/system_error'
 import { HttpError } from '../../../../lib/cloud/network/http_error'
 
 const proxyquireWithFastDelay = (fetchStub: sinon.SinonStub) => {
-  // Pass-through asyncRetry but collapse the linear delay so tests don't
-  // sit in real setTimeouts while the retry budget burns.
+  // Collapse the retry delay so the budget burns in milliseconds.
   const { asyncRetry } = require('../../../../lib/util/async_retry')
 
   return proxyquire('../lib/cloud/bundles/stream_download_verify_extract', {
