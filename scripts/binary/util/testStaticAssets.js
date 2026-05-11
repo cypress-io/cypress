@@ -48,7 +48,7 @@ const testStaticAssets = async (buildResourcePath) => {
       ],
     }),
     testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/socket/node_modules/socket.io-parser/dist/binary.js`,
+      assetGlob: `${buildResourcePath}/packages/socket/node_modules/socket.io-parser/build/cjs/binary.js`,
       badStrings: [
         'pack.data = _deconstructPacket(packetData, buffers);',
       ],
@@ -57,13 +57,13 @@ const testStaticAssets = async (buildResourcePath) => {
       ],
     }),
     testPackageStaticAssets({
-      assetGlob: `${buildResourcePath}/packages/socket/node_modules/engine.io-parser/lib/encodePacket.browser.js`,
+      assetGlob: `${buildResourcePath}/packages/socket/node_modules/engine.io-parser/build/cjs/encodePacket.browser.js`,
       badStrings: [
-        'return callback(data instanceof ArrayBuffer ? data : data.buffer);',
+        '(data instanceof ArrayBuffer || isView(data))',
       ],
       goodStrings: [
         'This extra check is made because the "instanceof ArrayBuffer" check does not work',
-        'return callback((data instanceof ArrayBuffer || isArrayBuffer(data)) ? data : data.buffer);',
+        '(data instanceof ArrayBuffer || isArrayBuffer(data) || isView(data))',
       ],
     }),
     testPackageStaticAssets({

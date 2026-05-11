@@ -157,6 +157,10 @@ const _userProvidedProviderCiParams = () => {
     'CYPRESS_PULL_REQUEST_ID',
     'CYPRESS_PULL_REQUEST_URL',
     'CYPRESS_CI_BUILD_URL',
+    // Users can set these to override automatic detection of a rerun or enable
+    // it for unsupported CI providers
+    'CYPRESS_RERUN_GROUP_ID', // ID shared by a run and its retries
+    'CYPRESS_RERUN_ALL_TESTS', // Opt out of only rerunning failed tests and force all tests to be rerun
   ])
 }
 // TODO: don't forget about buildNumber!

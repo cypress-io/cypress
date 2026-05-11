@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import HelloWorld from './stateless-alert.jsx'
 import React from 'react'
 import ReactDom from 'react-dom'
