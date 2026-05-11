@@ -1,0 +1,34 @@
+packages/app/src/specs/banners/CloudMessageBanner.cy.tsx
+  s_7a176fd83fef98::t_ff9d53a95c9775 77-107
+packages/data-context/schemas/cloud.graphql
+  s_7a176fd83fef98::t_b0fb09d0b2cf3a 9-12
+packages/frontend-shared/src/composables/useMarkdown.ts
+  s_7a176fd83fef98::t_b03d97a5ed0be5 91,97
+  s_7a176fd83fef98::t_34adbf986bdaca 17
+  s_7a176fd83fef98::t_c4edbbb9b12eeb 18
+packages/app/src/specs/banners/CloudMessageBanner.vue
+  s_7a176fd83fef98::t_6fd31800cd860b 19
+  s_7a176fd83fef98::t_6b6e456fe102fa 145-146
+  s_7a176fd83fef98::t_3ff9cfc707aef9 63-68
+  s_7a176fd83fef98::t_448007360565d1 134-144,147-155
+  s_7a176fd83fef98::t_1f56beade2b6ba 62
+  s_7a176fd83fef98::t_a37864c0173c17 61
+  s_7a176fd83fef98::t_edfb471f9fdc42 41,46
+  s_7a176fd83fef98::t_ae0b599c39f069 15,17-18,20-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "4755aa3c806fe3c85dca5de46ce21ed102444880",
+  "prompts": {},
+  "sessions": {
+    "s_7a176fd83fef98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "546534c1-4ce2-49ce-bb40-b6f93ef2f19b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
