@@ -438,6 +438,33 @@ describe('src/cypress/dom/visibility', {
           }
         })
       })
+
+      // Many UI patterns wrap content in `overflow: hidden` for cosmetic clipping
+      // (border-radius, layout containment) without intent to hide child content.
+      // The clipping-ancestor guard must only short-circuit when the subject is
+      // actually outside the ancestor's bounds on the off-screen axis.
+      it('still scrolls a below-the-fold element fully contained in an overflow: hidden card', () => {
+        cy.visit('/fixtures/visibility/overflow.html')
+        cy.window().then((win) => {
+          const doc = win.document
+          const card = doc.createElement('div')
+
+          card.style.cssText = 'position: absolute; top: 5000px; left: 50px; width: 200px; height: 200px; overflow: hidden; border-radius: 12px;'
+          doc.body.appendChild(card)
+
+          const el = doc.createElement('div')
+
+          el.textContent = 'in-bounds child of overflow:hidden card'
+          el.style.cssText = 'width: 100px; height: 50px; margin: 20px; background: green;'
+          card.appendChild(el)
+
+          if (mode === 'fast') {
+            expect(dom.isVisible(el), 'in-bounds child of overflow:hidden card should be visible when scrolled into view').to.be.true
+          } else {
+            expect(dom.isVisible(el)).to.be.true
+          }
+        })
+      })
     })
   }
 

@@ -132,7 +132,9 @@ function hasClippingAncestor (el: HTMLElement, rect: DOMRect): boolean {
 
   // Only ancestors clipping on the off-screen axis matter — e.g. `body { overflow-x: hidden }`
   // (a common pattern to suppress horizontal scrollbars) must not block vertical scrolling
-  // for elements below the fold.
+  // for elements below the fold. And the subject must actually be *outside* the ancestor's
+  // bounds on that axis — many UI patterns use `overflow: hidden` for cosmetic clipping
+  // (border-radius, layout containment) without intent to hide in-bounds content.
   const offscreenX = rect.right <= 0 || rect.left >= win.innerWidth
   const offscreenY = rect.bottom <= 0 || rect.top >= win.innerHeight
 
@@ -140,13 +142,19 @@ function hasClippingAncestor (el: HTMLElement, rect: DOMRect): boolean {
 
   while (current) {
     const { overflowX, overflowY } = win.getComputedStyle(current)
+    const clipsX = overflowX === 'hidden' || overflowX === 'clip'
+    const clipsY = overflowY === 'hidden' || overflowY === 'clip'
 
-    if (offscreenX && (overflowX === 'hidden' || overflowX === 'clip')) {
-      return true
-    }
+    if ((offscreenX && clipsX) || (offscreenY && clipsY)) {
+      const ancestorRect = current.getBoundingClientRect()
 
-    if (offscreenY && (overflowY === 'hidden' || overflowY === 'clip')) {
-      return true
+      if (offscreenX && clipsX && (rect.right <= ancestorRect.left || rect.left >= ancestorRect.right)) {
+        return true
+      }
+
+      if (offscreenY && clipsY && (rect.bottom <= ancestorRect.top || rect.top >= ancestorRect.bottom)) {
+        return true
+      }
     }
 
     current = current.parentElement
