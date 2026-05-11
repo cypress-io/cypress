@@ -1,0 +1,20 @@
+packages/app/cypress/e2e/cloud_message_banner.cy.ts
+  s_7a176fd83fef98::t_1554ec050a51a1 77
+  s_7a176fd83fef98::t_74e4453f8a73b0 71-76,78-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "ef3ee2c05f6d08ff755b7009200c17e9cb591dbc",
+  "prompts": {},
+  "sessions": {
+    "s_7a176fd83fef98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "546534c1-4ce2-49ce-bb40-b6f93ef2f19b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
