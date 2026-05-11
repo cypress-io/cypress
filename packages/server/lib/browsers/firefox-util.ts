@@ -11,6 +11,10 @@ let webdriverClient: WebDriverClient
 // any BiDi command issued before it's ready will fail. Wait for the
 // connection before proceeding.
 async function awaitBiDiConnection (client: WebDriverClient) {
+  // `_bidiHandler` is named with an underscore but is part of webdriver.io's
+  // public typed surface — see `WebDriver.reloadSession` in webdriver's
+  // index.d.ts. BiDi lifecycle methods like `waitForConnected` only live on
+  // the handler; only protocol commands are forwarded onto the client.
   const handler = client._bidiHandler
 
   if (!handler) {
