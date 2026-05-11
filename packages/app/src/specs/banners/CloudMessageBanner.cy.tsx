@@ -167,7 +167,7 @@ describe('<CloudMessageBanner />', { viewportWidth: 1200 }, () => {
       cy.get('@recordSeen').should('not.have.been.called')
     })
 
-    it('CTA click fires recordEvent with the same messageId as the impression (warehouse join key)', () => {
+    it('CTA click fires recordEvent with the same messageId as the impression', () => {
       cy.mount(<CloudMessageBanner hasBannerBeenShown={false} message={baseMessage} />)
 
       cy.get('@recordSeen').should('have.been.calledOnce')

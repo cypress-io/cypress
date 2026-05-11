@@ -15,8 +15,7 @@ type EventParams = {
   cohort?: string
   payload?: Record<string, string | number | undefined | null>
   includeMachineId?: boolean
-  // Pass the same messageId to every record() for events that belong to the
-  // same banner instance so the warehouse can join the funnel.
+  // Reuse across all events for one banner instance.
   messageId?: string
 }
 
