@@ -7,6 +7,10 @@
 - Removed built-in CoffeeScript support. The default `@cypress/webpack-batteries-included-preprocessor` no longer bundles `coffee-loader` or `coffeescript`. Use JavaScript/TypeScript for specs, fixtures, and support files, or add CoffeeScript to your own webpack config via `@cypress/webpack-preprocessor`. Addressed in [#33654](https://github.com/cypress-io/cypress/pull/33654).
 - Removed the `cy.end()` command, which ended a chain of commands by yielding `null`. A Cypress chain is already terminated when the next `cy.<command>()` starts a new chain, so existing `.end()` calls can simply be removed. Addressed in [#33696](https://github.com/cypress-io/cypress/pull/33696).
 
+**Bugfixes:**
+
+- The experimental `experimentalFastVisibility` algorithm has been rewritten to delegate to the browser's native `Element.checkVisibility()` API with a zero-dimension guard, replacing the prior point-sampling implementation. Shadow DOM, slotted content, and manual slot assignment are now supported, and several false-negative cases the prior implementation produced (notably `perspective(...) rotateY(...)` transforms and elements with `pointer-events: none`) are resolved. As a documented trade-off, the algorithm no longer detects ancestor `overflow` clipping, scroll-out-of-bounds, sibling occlusion, or `clip-path` clipping as hidden — users who rely on those detections should leave `experimentalFastVisibility` disabled. See the [migration guide](https://github.com/cypress-io/cypress/blob/develop/packages/driver/src/dom/visibility/MIGRATION_GUIDE.md) for details. Fixes [#33046](https://github.com/cypress-io/cypress/issues/33046).
+
 **Dependency Updates:**
 
 - Upgraded `electron` from `37.6.0` to `41.0.3`.
