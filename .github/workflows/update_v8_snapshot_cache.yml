@@ -156,7 +156,10 @@ jobs:
         with:
           github-token: ${{ steps.app-token-refresh.outputs.token }}
           script: |
-            const { commitViaApi } = await import('./scripts/github-actions/commit-via-api.mjs')
+            const path = require('node:path')
+            const { pathToFileURL } = require('node:url')
+            const moduleUrl = pathToFileURL(path.join(process.cwd(), 'scripts/github-actions/commit-via-api.mjs')).href
+            const { commitViaApi } = await import(moduleUrl)
 
             // SNAPSHOT_FILES is wrapped in single quotes for shell consumers;
             // strip them before handing the path to Node.
