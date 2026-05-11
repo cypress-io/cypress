@@ -1,0 +1,37 @@
+packages/server/test/unit/cloud/bundles/cache_root_spec.ts
+  s_d1b7976ede1ba4::t_a1fdf4bee97450 27
+  s_d1b7976ede1ba4::t_6aa0d251b6bf58 81
+packages/server/test/unit/cloud/bundles/publish_staging_to_final_spec.ts
+  s_d1b7976ede1ba4::t_70670c5f7147a9 133-134
+packages/server/test/unit/cloud/studio/telemetry/TelemetryReporter_spec.ts
+  s_d1b7976ede1ba4::t_3c59d6c33064b0 9-10
+packages/server/lib/cloud/bundles/publish_staging_to_final.ts
+  s_d1b7976ede1ba4::t_8d6aa50dbb4e44 35-37,43-44
+packages/server/lib/cloud/bundles/bundle_error.ts
+  s_d1b7976ede1ba4::t_bcb414d1e1fcd7 14
+packages/server/test/unit/cloud/bundles/stream_download_verify_extract_spec.ts
+  s_d1b7976ede1ba4::t_b74d2d303b7ffa 11
+packages/server/lib/cloud/bundles/stream_download_verify_extract.ts
+  s_d1b7976ede1ba4::t_78fea475912b8e 64-67
+  s_d1b7976ede1ba4::t_130a5779b0356a 50-51
+cli/lib/tasks/cache.ts
+  s_d1b7976ede1ba4::t_7227b72e2ea1ac 16
+packages/server/lib/cloud/bundles/cache_root.ts
+  s_d1b7976ede1ba4::t_a5b4c54499d7f0 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "4707a7d697f29080c150491b4d221cea85634e16",
+  "prompts": {},
+  "sessions": {
+    "s_d1b7976ede1ba4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
