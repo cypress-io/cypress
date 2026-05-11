@@ -3,10 +3,6 @@ import { BidiAutomation } from './bidi_automation'
 import type { BidiHandler, Client as WebDriverClient } from 'webdriver'
 import type { Automation } from '../automation'
 
-// `_bidiHandler` is exposed on the client at runtime but isn't part of the
-// `Client` interface — webdriver.io only types it as an intersection on
-// `reloadSession`'s parameter (`Client & { _bidiHandler?: BidiHandler }`).
-// Mirror that intersection here so we can access it without `any`.
 type ClientWithBidiHandler = WebDriverClient & { _bidiHandler?: BidiHandler }
 
 const debug = Debug('cypress:server:browsers:firefox-util')
@@ -19,9 +15,6 @@ let webdriverClient: WebDriverClient
 async function awaitBiDiConnection (client: WebDriverClient) {
   const handler = (client as ClientWithBidiHandler)._bidiHandler
 
-  // `_bidiHandler` is how BiDi commands are dispatched; if it's missing we
-  // can't make any BiDi calls, so fail fast and let the outer
-  // FIREFOX_COULD_NOT_CONNECT retry path relaunch the browser.
   if (!handler) {
     throw new Error('WebDriver BiDi handler is not available on the client')
   }
