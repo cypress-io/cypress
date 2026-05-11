@@ -44,9 +44,10 @@ async function main () {
     // Skip bun projects during cache update as bun is not installed in CI
     // Bun projects will be installed at test runtime when needed
     const hasBunLock = await fs.stat(path.join(projectDir, 'bun.lock')).catch(() => false)
+    const hasBunLockb = await fs.stat(path.join(projectDir, 'bun.lockb')).catch(() => false)
 
-    if (hasBunLock) {
-      log(`found project ${project} with bun.lock, skipping dependency install as bun is not available in CI cache step`)
+    if (hasBunLock || hasBunLockb) {
+      log(`found project ${project} with a Bun lockfile (bun.lock / bun.lockb), skipping dependency install as bun is not available in CI cache step`)
       log('bun projects will be installed at test runtime when needed')
       continue
     }

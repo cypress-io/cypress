@@ -178,7 +178,10 @@ export class ProjectLifecycleManager {
       return 'pnpm'
     }
 
-    if (fs.existsSync(path.join(projectRoot, 'bun.lock'))) {
+    if (
+      fs.existsSync(path.join(projectRoot, 'bun.lock')) ||
+      fs.existsSync(path.join(projectRoot, 'bun.lockb'))
+    ) {
       return 'bun'
     }
 

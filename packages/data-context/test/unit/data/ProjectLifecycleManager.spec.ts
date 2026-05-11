@@ -1,5 +1,7 @@
 import { describe, expect, it, beforeEach, jest } from '@jest/globals'
 import type { DataContext } from '../../../src'
+import fs from 'fs-extra'
+import os from 'os'
 import path from 'path'
 import { createTestDataContext } from '../helper'
 import { FoundBrowser, FullConfig } from '@packages/types'
@@ -208,6 +210,32 @@ describe('ProjectLifecycleManager', () => {
       expect(ctx.modeOptions.browser).toEqual('chrome:beta')
       expect(ctx.coreData.cliBrowser).toEqual('chrome:beta')
       expect(ctx.coreData.activeBrowser).toEqual(browsers[2])
+    })
+  })
+
+  describe('#getPackageManagerUsed', () => {
+    let tmpDir: string
+
+    beforeEach(async () => {
+      tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'cy-plm-pm-'))
+    })
+
+    afterEach(async () => {
+      await fs.remove(tmpDir).catch(() => {})
+    })
+
+    it('detects bun when bun.lockb is present (legacy Bun binary lockfile)', () => {
+      fs.writeFileSync(path.join(tmpDir, 'bun.lockb'), Buffer.alloc(0))
+
+      // @ts-expect-error — private method
+      expect(ctx.lifecycleManager.getPackageManagerUsed(tmpDir)).toEqual('bun')
+    })
+
+    it('detects bun when bun.lock is present', () => {
+      fs.writeFileSync(path.join(tmpDir, 'bun.lock'), '{}')
+
+      // @ts-expect-error — private method
+      expect(ctx.lifecycleManager.getPackageManagerUsed(tmpDir)).toEqual('bun')
     })
   })
 

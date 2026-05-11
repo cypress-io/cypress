@@ -88,14 +88,16 @@ async function getLockFilename (dir: string) {
   const hasNpmLock = !!await fs.stat(path.join(dir, 'package-lock.json')).catch(() => false)
   const hasPnpmLock = !!await fs.stat(path.join(dir, 'pnpm-lock.yaml')).catch(() => false)
   const hasBunLock = !!await fs.stat(path.join(dir, 'bun.lock')).catch(() => false)
+  const hasBunLockb = !!await fs.stat(path.join(dir, 'bun.lockb')).catch(() => false)
+  const hasBun = hasBunLock || hasBunLockb
 
-  const lockfileCount = [hasYarnLock, hasNpmLock, hasPnpmLock, hasBunLock].filter(Boolean).length
+  const lockfileCount = [hasYarnLock, hasNpmLock, hasPnpmLock, hasBun].filter(Boolean).length
 
   if (lockfileCount > 1) {
     throw new Error(`The example project at '${dir}' has conflicting lockfiles. Only use one package manager's lockfile per project.`)
   }
 
-  if (hasBunLock) return 'bun.lock'
+  if (hasBun) return hasBunLock ? 'bun.lock' : 'bun.lockb'
 
   if (hasPnpmLock) return 'pnpm-lock.yaml'
 
@@ -110,6 +112,10 @@ function getRelativePathToProjectDir (projectDir: string) {
 }
 
 async function restoreLockFileRelativePaths (opts: { projectDir: string, lockFilePath: string, relativePathToMonorepoRoot: string }) {
+  if (path.basename(opts.lockFilePath) === 'bun.lockb') {
+    return
+  }
+
   const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
   const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
   .replaceAll(opts.relativePathToMonorepoRoot.replace(/\\+/g, '/'), relativePathToProjectDir.replace(/\\+/g, '/'))
@@ -118,6 +124,10 @@ async function restoreLockFileRelativePaths (opts: { projectDir: string, lockFil
 }
 
 async function normalizeLockFileRelativePaths (opts: { project: string, projectDir: string, lockFilePath: string, lockFilename: string, relativePathToMonorepoRoot: string }) {
+  if (opts.lockFilename === 'bun.lockb') {
+    return
+  }
+
   const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
   const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
   .replaceAll(relativePathToProjectDir.replace(/\\+/g, '/'), opts.relativePathToMonorepoRoot.replace(/\\+/g, '/'))
@@ -222,7 +232,7 @@ export async function scaffoldProjectNodeModules ({
     const lockFilename = await getLockFilename(projectDir)
     const hasYarnLock = lockFilename === 'yarn.lock'
     const hasPnpmLock = lockFilename === 'pnpm-lock.yaml'
-    const hasBunLock = lockFilename === 'bun.lock'
+    const hasBunLock = lockFilename === 'bun.lock' || lockFilename === 'bun.lockb'
 
     // 1. Ensure there is a cache directory set up for this test project's `node_modules`.
     await ensureCacheDir(cacheNodeModulesDir)
