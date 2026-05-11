@@ -391,8 +391,8 @@ const cloudMessagesHaveResolved = computed(() => {
 
 const activeCloudMessage = computed(() => {
   const messages = props.gql.cloudAppMessages ?? []
-  const eligible = messages.filter((m) => m && isCloudMessageEligible(m))
-  const sorted = [...eligible].sort((a, b) => b!.priority - a!.priority)
+  const eligible = messages.filter((m): m is NonNullable<typeof m> => !!m && isCloudMessageEligible(m))
+  const sorted = [...eligible].sort((a, b) => b.priority - a.priority)
 
   return sorted[0] ?? null
 })
