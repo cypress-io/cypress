@@ -5,7 +5,9 @@ const { $ } = Cypress
 describe('src/cypress/dom/visibility - shadow dom', () => {
   let add: (el: string, shadowEl: string, rootIdentifier: string) => JQuery<HTMLElement>
 
-  // #TODO: support shadow dom in fast visibility algorithm: https://github.com/cypress-io/cypress/issues/33046
+  // The cases in this file rely on the legacy algorithm's ancestor-walking overflow/clipping/occlusion detection,
+  // which the fast algorithm intentionally does not implement. Fast-mode shadow DOM coverage lives in
+  // visibility_shadow_and_slots.cy.ts.
   const modes = ['legacy']
 
   for (const mode of modes) {

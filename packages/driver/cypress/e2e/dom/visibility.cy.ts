@@ -315,11 +315,10 @@ describe('src/cypress/dom/visibility', {
 
           assertVisibilityForSections([
             'zero-dimensions-with-overflow-hidden',
-            // TODO: Firefox has slightly different behavior than chromium - address with test harness changes in https://github.com/cypress-io/cypress/issues/33127
-            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'text-content-with-zero-dimensions' : undefined,
+            'text-content-with-zero-dimensions',
             'positive-dimensions-with-overflow-hidden',
             'overflow-auto-with-zero-dimensions',
-            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'mixed-dimension-scenarios' : undefined,
+            'mixed-dimension-scenarios',
             'overflow-hidden',
             'overflow-y-hidden',
             'overflow-x-hidden',
@@ -328,7 +327,7 @@ describe('src/cypress/dom/visibility', {
             'overflow-relative-positioning',
             'overflow-flex-container',
             'overflow-complex-scenarios',
-            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'clip-path-scenarios' : undefined,
+            'clip-path-scenarios',
           ])
         })
 
@@ -355,7 +354,7 @@ describe('src/cypress/dom/visibility', {
 
           assertVisibilityForSections([
             'scaling',
-            Cypress.browser.name !== 'firefox' || mode === 'legacy' ? 'translation' : undefined,
+            'translation',
             'rotation',
             'skew',
             'matrix',
