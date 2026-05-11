@@ -96,7 +96,7 @@
     <div class="testCase" cy-expect="visible" cy-label="Transform with rotation only" style="transform: rotate(20deg)">Rotated with text</div>
     
     <!-- Transform with zero dimensions but text content -->
-    <div class="testCase" cy-expect="visible" cy-label="Transform with zero height but text content" style="transform: translate(0, 0); height: 0;">Text content</div>
+    <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Transform with zero height but text content" style="transform: translate(0, 0); height: 0;">Text content</div>
     <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Transform with zero width but text content" style="transform: rotateX(30deg); width: 0;">Text content</div>
     
     <!-- Transform with zero dimensions and overflow -->
