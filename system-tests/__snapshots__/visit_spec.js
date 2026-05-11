@@ -522,7 +522,7 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
 
 `
 
-exports['e2e visit / low response timeout / passes with experimentalSourceRewriting'] = `
+exports['e2e visit / source rewriting / passes with experimentalSourceRewriting'] = `
 
 ====================================================================================================
 
