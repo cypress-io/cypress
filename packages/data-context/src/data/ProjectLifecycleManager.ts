@@ -61,6 +61,8 @@ export class ProjectLifecycleManager {
   private _cachedFullConfig: FullConfig | undefined
   private _initializedProject: unknown | undefined
   private _eventRegistrar: EventRegistrar
+  private _activeLifecycleRefresh: Promise<void> | null = null
+  private _isLifecycleRefreshQueued = false
 
   constructor (private ctx: DataContext) {
     this._eventRegistrar = new EventRegistrar()
@@ -356,11 +358,50 @@ export class ProjectLifecycleManager {
       return
     }
 
+    // If a refresh is already running, flag that a follow-up iteration is
+    // needed and return the in-flight promise. The flag is a single boolean,
+    // so N concurrent calls all coalesce into the *same* follow-up iteration
+    // — the next run reads the current config from disk, so collapsing many
+    // events into one re-run captures the same final state. Awaited callers
+    // (e.g. WizardActions) get the chain's full drain, not just the
+    // in-flight iteration, so they don't race ahead against stale state.
+    if (this._activeLifecycleRefresh) {
+      this._isLifecycleRefreshQueued = true
+
+      return this._activeLifecycleRefresh
+    }
+
+    // Capture the IIFE locally so the finally only clears the slot if it
+    // still owns it. If `resetInternalState` (project switch) wipes
+    // `_activeLifecycleRefresh` while this iteration is in flight, a fresh
+    // chain may have taken its place — we don't want to clobber the new
+    // chain's slot when this old one finally settles.
+    let invokedLifecycleRefresh!: Promise<void>
+
+    invokedLifecycleRefresh = (async () => {
+      try {
+        do {
+          this._isLifecycleRefreshQueued = false
+          await this._doRefreshLifecycle()
+        } while (this._isLifecycleRefreshQueued)
+      } finally {
+        if (this._activeLifecycleRefresh === invokedLifecycleRefresh) {
+          this._activeLifecycleRefresh = null
+        }
+      }
+    })()
+
+    this._activeLifecycleRefresh = invokedLifecycleRefresh
+
+    return invokedLifecycleRefresh
+  }
+
+  private async _doRefreshLifecycle (): Promise<void> {
     // Make sure remote states in the server are reset when the project is reloaded.
     // TODO: maybe we should also reset the server state here as well?
     this.ctx._apis.projectApi.getRemoteStates()?.reset()
 
-    this._configManager.resetLoadingState()
+    this._configManager!.resetLoadingState()
 
     // Emit here so that the user gets the impression that we're loading rather than waiting for a full refresh of the config for an update
     this.ctx.emitter.toLaunchpad()
@@ -375,7 +416,7 @@ export class ProjectLifecycleManager {
         this.ctx._apis.projectApi.getDevServer().close()
       }
 
-      this._configManager.loadTestingType()
+      this._configManager!.loadTestingType()
     } else {
       this.setAndLoadCurrentTestingType(null)
     }
@@ -557,6 +598,14 @@ export class ProjectLifecycleManager {
   }
 
   private async resetInternalState () {
+    // Drop our reference to any in-flight refresh chain — its config manager
+    // is about to be destroyed, so the new project shouldn't be handed the
+    // old (doomed) promise from the `_activeLifecycleRefresh` guard. The old
+    // chain is left to settle and its `finally` will no-op since the slot
+    // is null.
+    this._activeLifecycleRefresh = null
+    this._isLifecycleRefreshQueued = false
+
     if (this._configManager) {
       await this._configManager.destroy()
       this._configManager = undefined
