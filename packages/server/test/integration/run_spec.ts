@@ -8,6 +8,7 @@ import browserUtils from '../../lib/browsers'
 import { fs as fsUtil } from '../../lib/util/fs'
 import { getCtx } from '../../lib/makeDataContext'
 import { OpenProject } from '../../lib/open_project'
+import * as errors from '../../lib/errors'
 
 describe('lib/modes/run', () => {
   let browserConnectTimeoutPlaceholder
@@ -172,5 +173,29 @@ describe('lib/modes/run', () => {
     const result = await run(options, Promise.resolve())
 
     expect(result).to.be.an('object')
+  })
+
+  it('retries launching the browser when FIREFOX_COULD_NOT_CONNECT is thrown', async () => {
+    let launchAttempt = 0
+
+    // @ts-expect-error
+    sinon.stub(OpenProject.prototype, 'launch').callsFake((_browser, _spec, _browserOpts) => {
+      launchAttempt++
+
+      // Reject the first launch with FIREFOX_COULD_NOT_CONNECT to simulate the
+      // transient BiDi-not-ready failure. Subsequent attempts succeed so the
+      // retry path can complete.
+      if (launchAttempt === 1) {
+        return Promise.reject(errors.get('FIREFOX_COULD_NOT_CONNECT', new Error('No connection to WebDriver Bidi was established')))
+      }
+
+      return Promise.resolve()
+    })
+
+    await run(options, Promise.resolve())
+
+    // Initial launch + retry for the first spec, then a successful launch per
+    // remaining spec — assert we retried at least once past the initial failure.
+    expect(launchAttempt).to.be.greaterThan(1)
   })
 })
