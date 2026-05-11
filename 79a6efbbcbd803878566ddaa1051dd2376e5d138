@@ -1,0 +1,21 @@
+packages/server/lib/cloud/extract_atomic.ts
+  s_d1b7976ede1ba4::t_eac3d686d3f6ba 11
+packages/server/test/unit/cloud/extract_atomic_spec.ts
+  s_d1b7976ede1ba4::t_7115cdf8e230ab 49-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "79a6efbbcbd803878566ddaa1051dd2376e5d138",
+  "prompts": {},
+  "sessions": {
+    "s_d1b7976ede1ba4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
