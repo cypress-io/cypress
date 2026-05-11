@@ -78,6 +78,10 @@ describe('webpack-batteries-included-preprocessor features', () => {
       await runAndEval('ts_spec.ts', { ...options })
     })
 
+    it('handles tsconfig paths without baseUrl (TypeScript 6+ style)', async () => {
+      await runAndEval('paths-no-baseurl/spec.ts', { ...options })
+    })
+
     it('handles tsx', async () => {
       await runAndEval('tsx_spec.tsx', { ...options })
     })

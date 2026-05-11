@@ -1,3 +1,4 @@
+import { createHash } from 'crypto'
 import * as fs from 'fs-extra'
 import { tmpdir, platform } from 'os'
 import * as path from 'path'
@@ -152,15 +153,18 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
     include: includePaths,
   }, null, 2)
 
-  const tsConfigPath = path.join(await getTempDir(path.basename(projectRoot)), 'tsconfig.json')
+  const tsConfigPath = path.join(await getTempDir(path.basename(projectRoot), projectRoot), 'tsconfig.json')
 
   await fs.writeFile(tsConfigPath, tsConfigContent)
 
   return tsConfigPath
 }
 
-export async function getTempDir (projectName: string): Promise<string> {
-  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct', projectName)
+export async function getTempDir (projectName: string, projectRoot?: string): Promise<string> {
+  const uniqueName = projectRoot
+    ? `${projectName}-${createHash('sha1').update(projectRoot).digest('hex').slice(0, 8)}`
+    : projectName
+  const cypressTempDir = path.join(tmpdir(), 'cypress-angular-ct', uniqueName)
 
   await fs.ensureDir(cypressTempDir)
 

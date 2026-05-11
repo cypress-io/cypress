@@ -69,7 +69,7 @@ export const getCyPromptBundle = async ({ cyPromptUrl, projectId, bundlePath }: 
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
-    shouldRetry: isRetryableError,
+    shouldRetry: (err) => isRetryableError(err, 'GET'),
   }))()
 
   if (!responseSignature) {
