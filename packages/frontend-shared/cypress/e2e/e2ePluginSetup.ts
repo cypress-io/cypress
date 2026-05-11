@@ -259,9 +259,6 @@ async function makeE2ETasks () {
 
           operationCount[operationName ?? 'unknown']++
 
-          // eslint-disable-next-line no-console
-          console.log(`[gql-stub] saw op=${operationName} batched=${operationName?.startsWith('batchTestRunnerExecutionQuery')} hasIntercept=${!!remoteGraphQLIntercept} hasBatchedIntercept=${!!remoteGraphQLInterceptBatched}`)
-
           if (operationName?.startsWith('batchTestRunnerExecutionQuery') && remoteGraphQLInterceptBatched) {
             const fn = remoteGraphQLInterceptBatched
             const keys: string[] = []
@@ -325,8 +322,6 @@ async function makeE2ETasks () {
               extensions: result.extensions,
             }
           } else if (remoteGraphQLIntercept) {
-            // eslint-disable-next-line no-console
-            console.log(`[gql-intercept] op=${operationName} pre=${JSON.stringify((result as any)?.data)}`)
             try {
               result = await Promise.resolve(remoteGraphQLIntercept({
                 operationName,
@@ -337,9 +332,6 @@ async function makeE2ETasks () {
                 callCount: operationCount[operationName ?? 'unknown'],
                 Response,
               }, testState, remoteGraphQLOptions ?? {}))
-
-              // eslint-disable-next-line no-console
-              console.log(`[gql-intercept] op=${operationName} post=${JSON.stringify((result as any)?.data)}`)
             } catch (e) {
               const err = e as Error
 

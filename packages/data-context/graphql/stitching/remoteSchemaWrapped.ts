@@ -43,9 +43,6 @@ export const remoteSchemaWrapped = wrapSchema<DataContext>({
   executor: (obj) => {
     const info = obj.info
 
-    // eslint-disable-next-line no-console
-    console.log(`[remoteSchemaWrapped] executor field=${info?.fieldName} path=${info?.path && JSON.stringify(info.path)} envVar=${JSON.stringify(process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS)} disabled=${COMMERCIAL_RECOMMENDATIONS_DISABLED()}`)
-
     assert(obj.context?.cloud, 'Cannot execute without a DataContext')
     assert(info, 'Cannot execute without GraphQLResolveInfo')
 

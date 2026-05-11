@@ -377,9 +377,6 @@ function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['clou
   // `_disabled` is the E2E-test kill switch for all banners.
   const projectBanners = (props.gql.currentProject?.savedState as AllowedState)?.banners
 
-  // eslint-disable-next-line no-console
-  console.log('[banner-eligible]', { id: msg.id, enabled: msg.enabled, _disabled: projectBanners?._disabled, dismissal: getDismissalState(msg), savedState: props.gql.currentProject?.savedState })
-
   if (projectBanners?._disabled) {
     return false
   }
@@ -394,9 +391,6 @@ const cloudMessagesHaveResolved = computed(() => {
 
 const activeCloudMessage = computed(() => {
   const messages = props.gql.cloudAppMessages ?? []
-
-  // eslint-disable-next-line no-console
-  console.log('[banner-cloudAppMessages]', JSON.stringify(props.gql.cloudAppMessages))
   const eligible = messages.filter((m): m is NonNullable<typeof m> => !!m && isCloudMessageEligible(m))
   const sorted = [...eligible].sort((a, b) => b.priority - a.priority)
 

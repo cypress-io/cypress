@@ -68,6 +68,29 @@ Cypress.on('window:before:load', (win) => {
 })
 
 describe('App - Cloud Message Banner', () => {
+  // CI sets CYPRESS_COMMERCIAL_RECOMMENDATIONS=0 org-wide so the cloudAppMessages
+  // executor short-circuits to an empty array. This spec specifically exercises
+  // the channel — clear the var for the duration of the describe and restore
+  // after so we don't leak the deletion into sibling specs in the same process.
+  before(() => {
+    cy.withCtx(() => {
+      (global as any).__originalCypressCommercialRecommendations = process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+      delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+    })
+  })
+
+  after(() => {
+    cy.withCtx(() => {
+      const original = (global as any).__originalCypressCommercialRecommendations
+
+      if (original !== undefined) {
+        process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS = original
+      }
+
+      delete (global as any).__originalCypressCommercialRecommendations
+    })
+  })
+
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
