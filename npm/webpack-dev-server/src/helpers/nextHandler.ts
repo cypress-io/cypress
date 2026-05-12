@@ -156,26 +156,16 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
 
 /**
  * Check if Next is using the SWC compiler. Compilation will fail if user has `nodeVersion: "bundled"` set
- * due to SWC certificate issues.
+ * due to SWC certificate issues. Next.js 15+ always uses SWC, so no need to scan webpack rules.
  */
 function checkSWC (
-  webpackConfig: Configuration,
+  _webpackConfig: Configuration,
   cypressConfig: Cypress.PluginConfigOptions,
 ) {
-  const hasSWCLoader = webpackConfig.module?.rules?.some((rule) => {
-    return typeof rule !== 'string' && rule.oneOf?.some(
-      (oneOf) => (oneOf.use as any)?.loader === 'next-swc-loader',
-    )
-  })
-
-  // "resolvedNodePath" is only set when using the user's Node.js, which is required to compile Next.js with SWC optimizations
-  // If it is not set, they have either explicitly set "nodeVersion" to "bundled" or are are using Cypress < 9.0.0 where it was set to "bundled" by default
   // @ts-expect-error nodeVersion has been removed as of 13.0.0 however this plugin can be used with many versions of cypress
-  if (hasSWCLoader && cypressConfig.nodeVersion === 'bundled') {
+  if (cypressConfig.nodeVersion === 'bundled') {
     throw new Error(`Cypress cannot compile your Next.js application when "nodeVersion" is set to "bundled". Please remove this option from your Cypress configuration file.`)
   }
-
-  return false
 }
 
 const exists = async (file: string) => {
