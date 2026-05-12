@@ -119,7 +119,7 @@
     "cypress": "bin/cypress"
   },
   "engines": {
-    "node": "^20.1.0 || ^22.0.0 || >=24.0.0"
+    "node": "^22.0.0 || ^24.0.0 || >=26.0.0"
   },
   "types": "types",
   "exports": {
