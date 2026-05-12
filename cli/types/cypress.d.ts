@@ -3736,9 +3736,9 @@ declare namespace Cypress {
     /**
     * Time, in milliseconds, between each keystroke when typing. (Pass 0 to disable)
     *
-    * @default null
+    * @default 0
     */
-    keystrokeDelay: number | null
+    keystrokeDelay: number
   }
 
   /**
