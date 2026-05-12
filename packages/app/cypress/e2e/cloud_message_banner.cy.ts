@@ -68,8 +68,6 @@ Cypress.on('window:before:load', (win) => {
 })
 
 describe('App - Cloud Message Banner', () => {
-  // Tasks (not cy.withCtx) because webpack rewrites process.env in spec code
-  // and the rewritten access fails when serialized into a withCtx callback.
   before(() => {
     cy.task('__internal_optInToCloudAppMessages')
   })
