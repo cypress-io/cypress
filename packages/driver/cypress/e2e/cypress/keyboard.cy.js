@@ -1,7 +1,7 @@
 const { Keyboard } = Cypress
 
 const DEFAULTS = {
-  keystrokeDelay: 10,
+  keystrokeDelay: null,
 }
 
 describe('src/cypress/keyboard', () => {
@@ -21,7 +21,7 @@ describe('src/cypress/keyboard', () => {
     it('does not allow mutation of config', () => {
       const config = Keyboard.getConfig()
 
-      config.keystrokeDelay = 0
+      config.keystrokeDelay = 999
 
       expect(Keyboard.getConfig().keystrokeDelay).to.eq(DEFAULTS.keystrokeDelay)
     })

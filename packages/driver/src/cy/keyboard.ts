@@ -1358,7 +1358,7 @@ let _defaults
 
 const reset = () => {
   _defaults = {
-    keystrokeDelay: 10,
+    keystrokeDelay: null,
   }
 }
 
