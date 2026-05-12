@@ -1,6 +1,9 @@
-const path = require('path')
+import path from 'path'
+import { defineConfig } from 'cypress'
 
-module.exports = {
+const __dirname = import.meta.dirname
+
+export default defineConfig({
   allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
@@ -11,4 +14,4 @@ module.exports = {
     indexHtmlFile: path.join(__dirname, 'index.html'),
     supportFile: path.join(__dirname, 'support.js'),
   },
-}
+})
