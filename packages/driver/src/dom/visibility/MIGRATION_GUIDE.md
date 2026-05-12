@@ -2,31 +2,31 @@
 
 ## Overview
 
-The experimental fast visibility algorithm (`experimentalFastVisibility: true`) replaces Cypress's bespoke ancestor-walking visibility detection with a direct delegation to the browser's native [`Element.checkVisibility()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/checkVisibility) API, plus a small zero-dimension guard.
+The experimental fast visibility algorithm (`experimentalFastVisibility: true`) replaces Cypress's bespoke ancestor-walking visibility detection with a direct delegation to the browser's native [`Element.checkVisibility()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/checkVisibility), plus a zero-dimension guard.
 
-This guide explains the behavioral differences between the legacy and fast algorithms and how to update tests when migrating.
+This guide describes the algorithm and how its verdicts differ from the legacy algorithm.
 
 ## Why migrate?
 
-Cypress runs its visibility algorithm not only when you assert `should('be.visible')` but also as part of every actionability check (`cy.click()`, `cy.type()`, etc.). The legacy algorithm walks the DOM tree, computing styles and bounding rects up the chain of ancestors — for complex pages this can dominate test runtime.
+Cypress runs its visibility algorithm not only for `should('be.visible')` assertions but also during every actionability check (`cy.click()`, `cy.type()`, etc.). The legacy algorithm walks the DOM tree, computing styles and bounding rects up the ancestor chain — for complex pages this can dominate test runtime.
 
 The fast algorithm hands the question off to the browser, which already has the correctly cached layout and style information. In addition:
 
-- It is **significantly faster** on complex DOM structures.
+- It is significantly faster on complex DOM structures.
 - It works correctly across **Shadow DOM and slot boundaries** because the browser walks the flat tree natively.
 - It treats `display: contents`, `content-visibility`, `<details>`, `<template>`, and similar modern primitives the way the spec describes them.
 
 ## What the fast algorithm checks
 
-Given an element `el`, the fast algorithm reports it hidden if **any** of the following are true:
+Given an element `el`, the algorithm reports it hidden if any of the following are true:
 
-1. The element is not `<body>` / `<html>` (those are always visible) and …
+1. `el` is not `<body>` / `<html>` (those are always visible) and …
 2. … `el.checkVisibility({ contentVisibilityAuto: true, opacityProperty: true, visibilityProperty: true })` returns `false` — i.e. the element (or any flat-tree ancestor) has `display: none`, `display: contents`, `visibility: hidden`/`collapse`, `opacity: 0`, `content-visibility: hidden`, or `content-visibility: auto` with rendering currently skipped.
-3. … or its `getBoundingClientRect()` reports `width <= 0` or `height <= 0` (the zero-dimension guard).
+3. … or its `getBoundingClientRect()` reports `width <= 0` **or** `height <= 0` (the zero-dimension guard).
 
-`<option>` and `<optgroup>` elements have no layout box of their own; they defer to their parent `<select>`.
+`<option>` and `<optgroup>` have no layout box of their own; they defer to their parent `<select>`.
 
-When `checkOpacity: false` is passed (used internally during actionability), the `opacityProperty` check is disabled so that `opacity: 0` elements remain "visible" enough to be clicked.
+When `checkOpacity: false` is passed (used internally during actionability), the `opacityProperty` check is disabled so `opacity: 0` elements remain "visible" enough to be clicked.
 
 ## Browser support
 
@@ -36,129 +36,96 @@ When `checkOpacity: false` is passed (used internally during actionability), the
 - Firefox 106+
 - Safari / WebKit 17.4+
 
-Cypress's published browser-support policy ("latest 3 major versions of Chrome, Firefox, Edge") and the bundled Electron (Chromium 138) all comfortably exceed these floors.
+Cypress's published browser-support policy ("latest 3 major versions of Chrome, Firefox, Edge") and the bundled Electron (Chromium 138+) all comfortably exceed these floors.
 
 ## Behavioral differences vs. the legacy algorithm
 
-Because the fast algorithm asks the browser instead of walking the DOM itself, several scenarios that legacy *did* (or *did not*) catch behave differently:
+Both algorithms agree in the common cases (`display: none`, `visibility: hidden/collapse`, `opacity: 0` on the element or any ancestor, closed `<details>`, elements inside `<template>`, elements with `width: 0; height: 0` and no overflowing content). The cases below diverge.
 
-| Scenario | Legacy says | Fast says | Notes |
-|---|---|---|---|
-| `display: none` (any ancestor) | hidden | hidden | Both agree. |
-| `visibility: hidden` / `collapse` (any ancestor) | hidden | hidden | Both agree. |
-| `opacity: 0` (any ancestor) | hidden | hidden | Both agree. With `checkOpacity: false`, both treat as visible. |
-| `display: contents` | visible | **hidden** | The element has no layout box per spec. |
-| `content-visibility: hidden` / skipped `auto` | visible | **hidden** | Native browser support. |
-| Closed `<details>` descendant | hidden | hidden | Both agree. |
-| Element inside `<template>` | hidden | hidden | Both agree. |
-| Element with `width: 0` or `height: 0` | hidden | hidden | Fast preserves this via the dimension guard. |
-| Element inside Shadow DOM with hidden host | hidden | hidden | Fast walks the flat tree natively (legacy required custom logic). |
-| Slotted light-DOM child of a hidden host | hidden | hidden | Native flat-tree handling. |
-| Element clipped out of an `overflow: hidden` ancestor | hidden | **visible** | Fast does not check overflow clipping. |
-| Element scrolled off-screen in a scroll container | hidden | **visible** | Fast does not check scroll containers. |
-| Element positioned outside the viewport | visible | visible | Both agree (legacy didn't check this either). |
-| Element with `transform: translate(-9999px, 0)` | visible | visible | Both agree. |
-| Element covered by a higher-z-index sibling | visible | visible | Fast does not detect occlusion. |
-| Element clipped by `clip-path` / `clip` | visible | visible | Fast does not detect CSS clipping. |
-| Element with `pointer-events: none` | visible | visible | Both agree. |
+### Fast considers visible, legacy considers hidden
 
-## When NOT to enable fast visibility
+The legacy algorithm walks ancestors looking for clipping and overlap; the fast algorithm relies on the browser's CSS-level visibility check and does not.
 
-Stay on the legacy algorithm if your tests rely on Cypress detecting any of the following as **hidden**:
+| Scenario | Notes |
+|---|---|
+| Element clipped out of an ancestor `overflow: hidden`/`auto`/`scroll` | Fast does not walk ancestor overflow. |
+| Element scrolled outside a scrollable container | Same. |
+| Element covered by a sibling with `position: fixed` (legacy-only overlap detection) | Legacy detects this specific case via fixed-position overlap heuristics; fast does not. |
+| `backface-visibility: hidden` + 180° rotation | Legacy's point sampling treated the back face as hidden. |
+| `transform: scaleZ(0)` | Legacy point-samples through the rotated element; fast trusts `checkVisibility()`. |
+| Inner content of a zero-dimension `overflow: hidden` ancestor | Legacy detects ancestor clipping; fast only checks the element's own dims. |
 
-- Elements clipped out of an `overflow: hidden`/`auto`/`scroll` ancestor.
-- Elements scrolled outside a scroll container.
-- Elements covered by another element (z-index occlusion).
-- Elements clipped via `clip-path` or `clip: rect(...)`.
+Both algorithms agree that elements covered by a higher-z-index sibling, elements clipped by `clip-path` or `clip: rect(...)`, elements positioned outside the viewport by `transform: translate(...)`, and elements with `pointer-events: none` are **visible** — legacy never reliably detected those either, and the fixtures previously claiming otherwise have been corrected.
 
-The fast algorithm intentionally does not implement these checks; it trusts the browser's native definition of CSS visibility. If you depend on these behaviors, asserting on the *cause* (the covering element, the scroll container) instead of the covered element is usually a more reliable test pattern.
+### Fast considers hidden, legacy considers visible
 
-## Migration steps
+| Scenario | Notes |
+|---|---|
+| `display: contents` element | No own layout box per spec; `checkVisibility()` returns false. |
+| `content-visibility: hidden`, or `content-visibility: auto` currently skipping rendering | Native browser support via `contentVisibilityAuto: true`. |
+| Element whose own `getBoundingClientRect()` reports `width <= 0` or `height <= 0`, even when text content overflows visibly | Legacy treated `width: 0; height: 100px` with text as visible because the text painted outside the box; fast's dimension guard fires on either axis. |
 
-### 1. Enable fast visibility
+### Shadow DOM and slots
 
-```javascript
-// cypress.config.js
-module.exports = {
-  experimentalFastVisibility: true,
-}
-```
+`checkVisibility()` walks the flat tree, so the fast algorithm naturally handles cases legacy needed custom logic for (or didn't handle at all):
 
-### 2. Run your test suite and analyze failures
+- A light-DOM child slotted into a `<slot>` with `display: none` reports hidden under fast; legacy walks DOM parents and never sees the slot, so it reports visible.
+- A light-DOM child with no matching slot reports hidden under fast (no flat-tree position); legacy reports visible.
+- Manually-assigned slots (`attachShadow({ slotAssignment: 'manual' })` + `slot.assign(...)`) participate in fast's verdict; legacy does not differentiate assigned vs unassigned light children.
 
-Most failures will fall into one of three buckets:
+## Migrating existing tests
 
-1. **The new behavior is more correct.** Update the assertion. Example: `should('be.visible')` on a `display: contents` element should be `should('be.hidden')`.
-2. **The new behavior is incompatible with what you intended to test.** Either narrow the assertion to the underlying cause (e.g. assert on the covering element instead of the covered one) or scope `experimentalFastVisibility: false` to that suite.
-3. **There is a bug in the application.** Fix the application, not the test.
+### A test asserts hidden on a clipped / overlapped / scrolled-out element
 
-### 3. Scope the flag where needed
-
-You can opt individual specs in or out:
+Update the assertion to match the cause the user actually experiences. For example, if a modal covers the element, assert on the modal instead:
 
 ```javascript
-describe('legacy-only suite', { experimentalFastVisibility: false }, () => {
-  // ...
-})
-```
-
-## Common compatibility issues
-
-### Element clipped by an `overflow: hidden` ancestor
-
-```javascript
-// Before — relied on legacy's overflow-walking
-cy.get('.scrolled-off').should('be.hidden')
-
-// After — assert on the visible state instead, e.g. by scrolling
-cy.get('.scrolled-off').scrollIntoView().should('be.visible')
-```
-
-### Element covered by another element
-
-```javascript
-// Before — relied on legacy's overlap heuristic (which was inconsistent)
+// Legacy: relied on ancestor-overflow walking
 cy.get('.behind-modal').should('be.hidden')
 
-// After — test the user-facing cause
+// New: assert the user-visible cause
 cy.get('.modal').should('be.visible')
 ```
 
-### `display: contents` element
+For elements scrolled outside their container, scroll first:
 
 ```javascript
-// Before — legacy reported visible
-cy.get('.contents-wrapper').should('be.visible')
+cy.get('.scrolled-off').scrollIntoView().should('be.visible')
+```
 
-// After — element has no layout box; assert on a real child instead
+### A test asserts visible on a `display: contents` element
+
+`display: contents` elements have no layout box. Target a real child instead:
+
+```javascript
 cy.get('.contents-wrapper > .real-child').should('be.visible')
 ```
 
-## Shadow DOM
+### A test asserts visible on a zero-dimension element with overflowing text
 
-Shadow DOM is supported by the fast algorithm out of the box. `checkVisibility()` walks the flat tree, so:
+Style the element so it has the dimensions you intend to test, or assert on the overflowing child:
 
-- A light-DOM child slotted into an open shadow root inherits visibility from the host.
-- A `display: none` ancestor outside the shadow root hides descendants inside it.
-- Named slots, default slots, and manually-assigned slots (`slot.assign(...)`) all participate in visibility correctly.
+```javascript
+cy.get('.overflowing-text > span').should('be.visible')
+```
 
-If you encounter a Shadow DOM scenario that the fast algorithm seems to mis-classify, please open an issue with a reproduction.
-
-## Debugging visibility issues
+## Debugging
 
 ```javascript
 cy.get('.element').then(($el) => {
-  console.log('Cypress.dom.isVisible:', Cypress.dom.isVisible($el[0]))
-  console.log('checkVisibility (no opts):', $el[0].checkVisibility())
-  console.log('checkVisibility (cypress opts):', $el[0].checkVisibility({
+  // eslint-disable-next-line no-console
+  console.log('isVisible:', Cypress.dom.isVisible($el[0]))
+  // eslint-disable-next-line no-console
+  console.log('checkVisibility:', $el[0].checkVisibility({
     contentVisibilityAuto: true,
     opacityProperty: true,
     visibilityProperty: true,
   }))
+  // eslint-disable-next-line no-console
   console.log('rect:', $el[0].getBoundingClientRect())
 })
 ```
 
-## Final words
+## Test fixtures
 
-The fast algorithm is intentionally simpler than legacy: it asks the browser instead of re-implementing visibility logic. That trades some legacy-specific heuristics (overflow clipping, occlusion) for spec-aligned correctness, native Shadow DOM support, and significant performance gains. As an experimental flag we may continue to refine which heuristics land on top of `checkVisibility()`; if you encounter a case that surprises you, please open an issue.
+The driver's [visibility fixtures](../../../cypress/fixtures/visibility/) annotate each test case with either `cy-expect="visible|hidden"` (both algorithms agree) or both `cy-legacy-expect` and `cy-fast-expect` (they disagree). [`visibility.cy.ts`](../../../cypress/e2e/dom/visibility.cy.ts) and [`visibility_shadow_dom.cy.ts`](../../../cypress/e2e/dom/visibility_shadow_dom.cy.ts) exercise the fixtures and inline scenarios under both modes; the per-mode divergences in those specs are the canonical reference.

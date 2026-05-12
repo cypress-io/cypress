@@ -364,6 +364,62 @@ describe('src/cypress/dom/visibility', {
             'backface-visibility',
           ])
         })
+
+        // Modern primitives the existing fixtures don't cover. Tests branch on `isFast`
+        // when the algorithms disagree so the divergence is visible at the assertion site.
+        describe('edge cases', () => {
+          const isFast = mode === 'fast'
+
+          beforeEach(() => {
+            cy.visit('/fixtures/empty.html')
+          })
+
+          it('`display: contents` element is hidden in both modes', () => {
+            // Per spec the element has no layout box; legacy's dim check and fast's
+            // checkVisibility() both report it hidden.
+            cy.$$('body').append('<div id="contents-el" style="display: contents;">contents</div>')
+            cy.get('#contents-el').should('be.hidden')
+          })
+
+          it('child of `display: contents` parent is visible in both modes', () => {
+            cy.$$('body').append('<div style="display: contents;"><span class="contents-child">child</span></div>')
+            cy.get('.contents-child').should('be.visible')
+          })
+
+          it('`content-visibility: hidden`', () => {
+            // Fast catches this via checkVisibility(); legacy doesn't model content-visibility.
+            cy.$$('body').append('<div id="cv-hidden" style="content-visibility: hidden;">cv hidden</div>')
+            cy.get('#cv-hidden').should(isFast ? 'be.hidden' : 'be.visible')
+          })
+
+          it('element inside a <template> fragment is hidden in both modes', () => {
+            const tmpl = cy.$$('body').get(0).ownerDocument.createElement('template')
+
+            tmpl.innerHTML = '<div id="in-template">never rendered</div>'
+            cy.$$('body').get(0).appendChild(tmpl)
+            const inTemplate = tmpl.content.querySelector('#in-template') as HTMLElement
+
+            // Element lives in a detached document fragment with no layout box.
+            expect(Cypress.dom.isHidden(inTemplate)).to.be.true
+          })
+
+          it('single-axis zero (`width: 0; height: 100px`) with overflowing text', () => {
+            // Legacy preserves visibility because text overflows the zero-width box.
+            // Fast hides it via the dim guard regardless of overflowing content.
+            cy.$$('body').append('<div id="single-axis-zero" style="width: 0; height: 100px;">overflowing text</div>')
+            cy.get('#single-axis-zero').should(isFast ? 'be.hidden' : 'be.visible')
+          })
+
+          it('`inert` element is visible (affects interactivity, not layout)', () => {
+            cy.$$('body').append('<div id="inert-el" inert style="width: 100px; height: 100px;">inert</div>')
+            cy.get('#inert-el').should('be.visible')
+          })
+
+          it('`aria-hidden="true"` element is visible (semantics, not rendering)', () => {
+            cy.$$('body').append('<div id="aria-hidden-el" aria-hidden="true" style="width: 100px; height: 100px;">aria</div>')
+            cy.get('#aria-hidden-el').should('be.visible')
+          })
+        })
       })
     })
   }
