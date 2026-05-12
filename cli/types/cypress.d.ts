@@ -3734,7 +3734,7 @@ declare namespace Cypress {
    */
   interface KeyboardDefaultsOptions {
     /**
-    * Time, in milliseconds, between each keystroke when typing. (Pass 0 to disable)
+    * Time, in milliseconds, between each keystroke when typing.
     *
     * @default 0
     */
