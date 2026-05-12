@@ -1,3 +1,10 @@
+# [@cypress/webpack-batteries-included-preprocessor-v4.1.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.1.0...@cypress/webpack-batteries-included-preprocessor-v4.1.1) (2026-05-09)
+
+
+### Bug Fixes
+
+* **deps:** support tsconfig paths without baseUrl (TS6+) in webpack-batteries-included-preprocessor ([#33747](https://github.com/cypress-io/cypress/issues/33747)) ([d96f158](https://github.com/cypress-io/cypress/commit/d96f158f14b87731ec79084c85bcebf0542203f0))
+
 # [@cypress/webpack-batteries-included-preprocessor-v4.1.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-batteries-included-preprocessor-v4.0.4...@cypress/webpack-batteries-included-preprocessor-v4.1.0) (2026-04-13)
 
 
