@@ -1,8 +1,10 @@
-import { createRequire } from 'module'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const require = createRequire(import.meta.url)
+function resolvePackage (specifier) {
+  return fileURLToPath(import.meta.resolve(specifier))
+}
 
 export default defineConfig({
   logLevel: 'silent',
@@ -13,9 +15,9 @@ export default defineConfig({
   resolve: {
     // Force a single React instance so the adapter (cypress/react) and spec files use the same React.
     alias: {
-      'react': require.resolve('react'),
-      'react-dom/client': require.resolve('react-dom/client'),
-      'react-dom': require.resolve('react-dom'),
+      'react': resolvePackage('react'),
+      'react-dom/client': resolvePackage('react-dom/client'),
+      'react-dom': resolvePackage('react-dom'),
     },
   },
   plugins: [react({ jsxRuntime: 'classic' })],

@@ -1,13 +1,12 @@
-const { defineConfig } = require('cypress')
-
-module.exports = defineConfig({
+export default {
   allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     supportFile: false,
     devServer: {
-      framework: 'vue',
       bundler: 'vite',
+      framework: 'react',
     },
+    indexHtmlFile: 'cypress/component/support/component-index.html',
   },
-})
+}
