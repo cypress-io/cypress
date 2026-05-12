@@ -227,6 +227,11 @@ type ExecOptions = {
    * May include argv prefixes separated by spaces (for example `bun run cypress open`); these are
    * prepended before harness args. `child_process.spawn` requires a single binary name; multi-token
    * strings are split on whitespace (shell quoting is not supported).
+   *
+   * When the command invokes the Cypress CLI (argv contains a `cypress` segment), harness args are
+   * CLI flags (`--dev`, `--project`, …), not `node` + `@packages/server` argv. Otherwise (e.g.
+   * `bun install`) harness args are empty and the child process `cwd` defaults to the scaffolded
+   * project directory unless overridden via `spawnOpts.cwd`.
    */
   command?: string
   /**
@@ -335,6 +340,151 @@ function resolveSpawnCommand (options: ExecOptions, harnessArgs: string[]): { cm
   return {
     cmd: segments[0],
     args: [...segments.slice(1), ...harnessArgs],
+  }
+}
+
+/**
+ * True when `command` runs the `cypress` CLI (e.g. `bun run cypress open`), as opposed to a
+ * package-manager-only command like `bun install`.
+ */
+function customSpawnCommandReferencesCypress (command: string): boolean {
+  return command.trim().split(/\s+/).includes('cypress')
+}
+
+/**
+ * Token after `cypress` in a spawn command string, e.g. `open` for `bun run cypress open`.
+ */
+function parseCypressCliSubcommandFromSpawnCommand (command: string): string | undefined {
+  const segments = command.trim().split(/\s+/)
+  const idx = segments.lastIndexOf('cypress')
+
+  return segments[idx + 1]
+}
+
+/**
+ * When the harness spawns a real Cypress CLI (see `resolveSpawnCommand`), argv must be
+ * CLI-compatible. Server-only flags like `--run-project` are invalid on `cypress open` / `cypress run`.
+ */
+function buildInitialCliHarnessArgs (
+  options: ExecOptions,
+  projectPath: string,
+  command: string,
+): string[] {
+  const subcommand = parseCypressCliSubcommandFromSpawnCommand(command)
+  const args: string[] = []
+
+  // Monorepo system tests hit the CLI package on disk; `--dev` switches spawn to `scripts/start.js`.
+  // `cypress install` does not define `--dev` on its subcommand, so omit it there.
+  if (subcommand !== 'install') {
+    args.push('--dev')
+  }
+
+  switch (subcommand) {
+    case 'run':
+    case 'open':
+      args.push(`--project=${projectPath}`)
+      args.push(options.testingType === 'component' ? '--component' : '--e2e')
+      break
+    case 'install':
+    case 'verify':
+      break
+    default:
+      args.push(`--project=${projectPath}`)
+      args.push(options.testingType === 'component' ? '--component' : '--e2e')
+      break
+  }
+
+  return args
+}
+
+function appendExecHarnessOptionSuffixes (args: string[], options: ExecOptions) {
+  if (options.spec) {
+    args.push(`--spec=${options.spec}`)
+  }
+
+  if (options.port) {
+    ensurePort(options.port)
+    args.push(`--port=${options.port}`)
+  }
+
+  if (!_.isUndefined(options.headed)) {
+    args.push('--headed', String(options.headed))
+  }
+
+  if (options.record) {
+    args.push('--record')
+  }
+
+  if (options.quiet) {
+    args.push('--quiet')
+  }
+
+  if (options.parallel) {
+    args.push('--parallel')
+  }
+
+  if (options.group) {
+    args.push(`--group=${options.group}`)
+  }
+
+  if (options.ciBuildId) {
+    args.push(`--ci-build-id=${options.ciBuildId}`)
+  }
+
+  if (options.key) {
+    args.push(`--key=${options.key}`)
+  }
+
+  if (options.reporter) {
+    args.push(`--reporter=${options.reporter}`)
+  }
+
+  if (options.reporterOptions) {
+    args.push(`--reporter-options=${options.reporterOptions}`)
+  }
+
+  if (options.browser) {
+    args.push(`--browser=${options.browser}`)
+  }
+
+  if (options.config) {
+    args.push('--config', JSON.stringify(options.config))
+  }
+
+  if (options.env) {
+    args.push('--env', options.env)
+  }
+
+  if (options.outputPath) {
+    args.push('--output-path', options.outputPath)
+  }
+
+  if (options.noExit) {
+    args.push('--no-exit')
+  }
+
+  if (options.tag) {
+    args.push(`--tag=${options.tag}`)
+  }
+
+  if (options.configFile) {
+    args.push(`--config-file=${options.configFile}`)
+  }
+
+  if (options.userNodePath) {
+    args.push(`--userNodePath=${options.userNodePath}`)
+  }
+
+  if (options.userNodeVersion) {
+    args.push(`--userNodeVersion=${options.userNodeVersion}`)
+  }
+
+  if (options.passWithNoTests) {
+    args.push('--pass-with-no-tests')
+  }
+
+  if (options.posixExitCodes) {
+    args.push('--posix-exit-codes')
   }
 }
 
@@ -721,6 +871,23 @@ const systemTests = {
     debug('converting options to args %o', { options })
 
     const projectPath = Fixtures.projectPath(options.project)
+
+    if (options.command) {
+      if (customSpawnCommandReferencesCypress(options.command)) {
+        const args = buildInitialCliHarnessArgs(options, projectPath, options.command)
+        const subcommand = parseCypressCliSubcommandFromSpawnCommand(options.command)
+
+        if (subcommand !== 'install' && subcommand !== 'verify') {
+          appendExecHarnessOptionSuffixes(args, options)
+        }
+
+        return args
+      }
+
+      // e.g. `bun install` — not a Cypress invocation; no server/CLI runner argv.
+      return []
+    }
+
     const args = options.withBinary ? [
       `run`,
       `--project=${projectPath}`,
@@ -733,94 +900,7 @@ const systemTests = {
       `--testingType=${options.testingType || 'e2e'}`,
     ]
 
-    if (options.spec) {
-      args.push(`--spec=${options.spec}`)
-    }
-
-    if (options.port) {
-      ensurePort(options.port)
-      args.push(`--port=${options.port}`)
-    }
-
-    if (!_.isUndefined(options.headed)) {
-      args.push('--headed', String(options.headed))
-    }
-
-    if (options.record) {
-      args.push('--record')
-    }
-
-    if (options.quiet) {
-      args.push('--quiet')
-    }
-
-    if (options.parallel) {
-      args.push('--parallel')
-    }
-
-    if (options.group) {
-      args.push(`--group=${options.group}`)
-    }
-
-    if (options.ciBuildId) {
-      args.push(`--ci-build-id=${options.ciBuildId}`)
-    }
-
-    if (options.key) {
-      args.push(`--key=${options.key}`)
-    }
-
-    if (options.reporter) {
-      args.push(`--reporter=${options.reporter}`)
-    }
-
-    if (options.reporterOptions) {
-      args.push(`--reporter-options=${options.reporterOptions}`)
-    }
-
-    if (options.browser) {
-      args.push(`--browser=${options.browser}`)
-    }
-
-    if (options.config) {
-      args.push('--config', JSON.stringify(options.config))
-    }
-
-    if (options.env) {
-      args.push('--env', options.env)
-    }
-
-    if (options.outputPath) {
-      args.push('--output-path', options.outputPath)
-    }
-
-    if (options.noExit) {
-      args.push('--no-exit')
-    }
-
-    if (options.tag) {
-      args.push(`--tag=${options.tag}`)
-    }
-
-    if (options.configFile) {
-      args.push(`--config-file=${options.configFile}`)
-    }
-
-    if (options.userNodePath) {
-      args.push(`--userNodePath=${options.userNodePath}`)
-    }
-
-    if (options.userNodeVersion) {
-      args.push(`--userNodeVersion=${options.userNodeVersion}`)
-    }
-
-    if (options.passWithNoTests) {
-      args.push('--pass-with-no-tests')
-    }
-
-    if (options.posixExitCodes) {
-      args.push('--posix-exit-codes')
-    }
+    appendExecHarnessOptionSuffixes(args, options)
 
     return args
   },
@@ -975,6 +1055,10 @@ const systemTests = {
     const { cmd, args: spawnArgs } = resolveSpawnCommand(options, args)
 
     debug('spawning Cypress %o', { cmd, args: spawnArgs })
+
+    if (options.command && !customSpawnCommandReferencesCypress(options.command)) {
+      options.spawnOpts = { cwd: projectPath, ...options.spawnOpts }
+    }
 
     const env = _.chain(process.env)
     .omit('CYPRESS_DEBUG')

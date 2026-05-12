@@ -47,6 +47,7 @@ schemas/               JSON schema definitions
 - Tests run with `--experimental-vm-modules` because the test suite uses Jest with ES module support. The runner is Jest (not vitest) for this package.
 - The `browser` field in `package.json` points to `src/index.ts` (source), which allows Vite-based consumers (`app`, `launchpad`, `frontend-shared`) to import TypeScript directly without a pre-build step.
 - The GraphQL schema is built in two phases: (1) `build:schema` emits a JSON SDL, (2) `build:graphql` runs graphql-codegen against it for downstream consumers.
+- **CI coverage for schema / codegen**: The CircleCI `build` job runs `yarn build`, which invokes `lerna run build` and therefore this package’s `build` script (`build:schema`, `build:graphql`, `nexus-build`). Changes to `PACKAGE_MANAGERS` in `@packages/types`, Nexus `PackageManagerEnum`, or hand-edited `schemas/schema.graphql` must leave `yarn workspace @packages/data-context build` (and committed generated artifacts where applicable) passing so PRs stay green.
 
 ## Integration Points
 

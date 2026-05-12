@@ -167,6 +167,11 @@ export class ProjectLifecycleManager {
     this._projectRoot = undefined
   }
 
+  /**
+   * Lockfile precedence when multiple files exist: `package-lock.json` wins, then `yarn.lock`,
+   * then `pnpm-lock.yaml`, then Bun (`bun.lock` / `bun.lockb`). Projects should ship only one
+   * package-manager lockfile; mixed lockfiles are ambiguous and may not reflect the tool in use.
+   */
   private getPackageManagerUsed (projectRoot: string) {
     if (fs.existsSync(path.join(projectRoot, 'package-lock.json'))) {
       return 'npm'
