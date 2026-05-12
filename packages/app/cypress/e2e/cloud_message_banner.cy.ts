@@ -68,6 +68,20 @@ Cypress.on('window:before:load', (win) => {
 })
 
 describe('App - Cloud Message Banner', () => {
+  // CI sets CYPRESS_COMMERCIAL_RECOMMENDATIONS=0 org-wide and that short-
+  // circuits the cloudAppMessages stitching executor to []. This spec
+  // exercises the channel — clear the env var for the duration of the suite
+  // (in the plain-Node plugin process; can't use cy.withCtx here because
+  // webpack rewrites process.env references in spec code) and restore it
+  // after so we don't leak the deletion into sibling specs.
+  before(() => {
+    cy.task('__internal_optInToCloudAppMessages')
+  })
+
+  after(() => {
+    cy.task('__internal_restoreCommercialRecommendations')
+  })
+
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
     cy.openProject('cypress-in-cypress')
