@@ -113,7 +113,7 @@ async function makeE2ETasks () {
   const { toObject } = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('./prod-dependencies')
   const Fixtures = require('@tooling/system-tests') as FixturesShape
-  const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
+  const { scaffoldCommonNodeModules, scaffoldProjectNodeModules, clearCachedNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
   const cli = require('../../../../cli/lib/cli').default
   const cliUtil = require('../../../../cli/lib/util').default
@@ -165,6 +165,10 @@ async function makeE2ETasks () {
       if (isRetry) {
         throw e
       }
+
+      // Clear the cached node_modules to avoid reusing a corrupted cache
+      // (e.g. from a previously interrupted install)
+      await clearCachedNodeModules(projectName)
 
       // If we have an error, it's likely that we don't have a lockfile, or it's out of date.
       // Let's run a quick "yarn" in the directory, kill the node_modules, and try again
