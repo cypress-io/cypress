@@ -10,6 +10,53 @@ const logInfo = debug('cypress:mksnapshot:info')
 const logDebug = debug('cypress:mksnapshot:debug')
 const logError = debug('cypress:mksnapshot:error')
 
+// The mksnapshot/v8_context_snapshot_generator binaries occasionally crash
+// with a V8 fatal error on Windows CI runners. The crash is non-deterministic
+// and a fresh process invocation typically succeeds, so we retry on failure.
+const SPAWN_MAX_ATTEMPTS = 2
+
+export interface RunMksnapshotOptions {
+  // Per-attempt timeout in milliseconds. Disabled by default — production
+  // snapshot builds bundle the whole Cypress app and routinely exceed any
+  // small timeout. Tests set this to bound a hung child process.
+  spawnTimeoutMs?: number
+}
+
+function spawnWithRetry (
+  command: string,
+  args: string[],
+  options: Parameters<typeof spawnSync>[2],
+  description: string,
+  spawnTimeoutMs?: number,
+) {
+  let result: ReturnType<typeof spawnSync> | undefined
+
+  for (let attempt = 1; attempt <= SPAWN_MAX_ATTEMPTS; attempt++) {
+    result = spawnSync(command, args, { ...options, timeout: spawnTimeoutMs })
+
+    if (result.status === 0) {
+      if (attempt > 1) {
+        logInfo('%s succeeded on attempt %d', description, attempt)
+      }
+
+      return result
+    }
+
+    if (attempt < SPAWN_MAX_ATTEMPTS) {
+      logError(
+        '%s failed on attempt %d/%d (status: %s, signal: %s); retrying',
+        description,
+        attempt,
+        SPAWN_MAX_ATTEMPTS,
+        result.status,
+        result.signal,
+      )
+    }
+  }
+
+  return result!
+}
+
 const workingDir = path.join(tempDir, 'mksnapshot-workdir')
 
 fs.ensureDirSync(workingDir)
@@ -109,6 +156,7 @@ function createSnapshotBlob (
   mksnapshotCommand: string,
   mksnapshotArgs: string[],
   outputDir: string,
+  spawnTimeoutMs?: number,
 ) {
   const stdio: StdioOptions = 'inherit'
   const snapshotBlobOptions = {
@@ -123,10 +171,12 @@ function createSnapshotBlob (
   logDebug({ mksnapshotBinaryDir, mksnapshotCommand, mksnapshotArgs })
   logDebug(cmd)
 
-  const mksnapshotProcess = spawnSync(
+  const mksnapshotProcess = spawnWithRetry(
     mksnapshotCommand,
     mksnapshotArgs,
     snapshotBlobOptions,
+    'mksnapshot',
+    spawnTimeoutMs,
   )
 
   if (mksnapshotProcess.status !== 0) {
@@ -155,6 +205,7 @@ function createSnapshotBlob (
 function createV8ContextSnapshot (
   mksnapshotBinaryDir: string,
   outputDir: string,
+  spawnTimeoutMs?: number,
 ) {
   const v8ContextGenCommand = path.join(
     mksnapshotBinaryDir,
@@ -179,10 +230,12 @@ function createV8ContextSnapshot (
   logInfo(`Generating ${v8ContextFile}`)
   logDebug(cmd)
 
-  const v8ContextGenProcess = spawnSync(
+  const v8ContextGenProcess = spawnWithRetry(
     v8ContextGenCommand,
     v8ContextGenArgs,
     v8ContextGenOptions,
+    'v8_context_snapshot_generator',
+    spawnTimeoutMs,
   )
 
   if (v8ContextGenProcess.status !== 0) {
@@ -198,7 +251,7 @@ function createV8ContextSnapshot (
   }
 }
 
-export function runMksnapshot (args: string[]) {
+export function runMksnapshot (args: string[], options: RunMksnapshotOptions = {}) {
   logDebug('Provided args: %o', args)
   checkArgs(args)
   let { outputDir, mksnapshotArgs } = extractOutdir(args)
@@ -215,7 +268,8 @@ export function runMksnapshot (args: string[]) {
     mksnapshotCommand,
     mksnapshotArgs,
     outputDir,
+    options.spawnTimeoutMs,
   )
 
-  createV8ContextSnapshot(mksnapshotBinaryDir, outputDir)
+  createV8ContextSnapshot(mksnapshotBinaryDir, outputDir, options.spawnTimeoutMs)
 }

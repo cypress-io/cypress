@@ -14,6 +14,8 @@ import { mapValues, isArray, flatten } from 'lodash'
 
 export interface UseMarkdownOptions {
   openExternal?: boolean
+  // MarkdownIt `html` flag. Defaults to true. Pass `false` to escape raw HTML.
+  html?: boolean
   classes?: {
     overwrite?: boolean
     h1?: string[] | string
@@ -86,12 +88,13 @@ export const useMarkdown = (target: Ref<HTMLElement>, text: MaybeRef<string>, op
   const normalizedOptions: UseMarkdownOptions = {
     ...options,
     openExternal: options.openExternal ?? true,
+    html: options.html ?? true,
   }
 
   const classes = buildClasses(normalizedOptions)
 
   const md = new MarkdownIt({
-    html: true,
+    html: normalizedOptions.html,
     linkify: true,
     highlight (str) {
       return `<pre class="${classes.pre.join(' ')}"><code>${str}</code></pre>`
