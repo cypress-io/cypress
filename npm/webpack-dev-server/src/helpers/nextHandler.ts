@@ -204,7 +204,7 @@ async function findPagesDir (projectRoot: string) {
   return projectRoot
 }
 
-// 'next/dist/trace/trace' has been the trace location since Next.js 12.0; try-catch in case the module is unavailable
+// 'next/dist/trace/trace' has been the trace location since Next.js 12.0
 function getRunWebpackSpan (devServerConfig: WebpackDevServerConfig): { runWebpackSpan?: any } {
   try {
     const traceImportPath = require.resolve('next/dist/trace/trace', { paths: [devServerConfig.cypressConfig.projectRoot] })
