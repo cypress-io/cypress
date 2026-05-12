@@ -149,11 +149,6 @@ async function makeWorkspacePackagesAbsolute (pathToPkgJson: string, projectDir:
   return updatedDeps
 }
 
-/**
- * Given a `system-tests` project name, detect and install the `node_modules`
- * specified in the project's `package.json`. No-op if no `package.json` is found.
- * Will use `yarn` or `npm` based on the lockfile present.
- */
 export async function clearCachedNodeModules (project: string): Promise<void> {
   const cacheDir = path.join('/tmp', 'cy-system-tests-node-modules', project)
 
@@ -165,6 +160,11 @@ export async function clearCachedNodeModules (project: string): Promise<void> {
   }
 }
 
+/**
+ * Given a `system-tests` project name, detect and install the `node_modules`
+ * specified in the project's `package.json`. No-op if no `package.json` is found.
+ * Will use `yarn` or `npm` based on the lockfile present.
+ */
 export async function scaffoldProjectNodeModules ({
   project,
   updateLockFile = !!process.env.UPDATE_LOCK_FILE,
