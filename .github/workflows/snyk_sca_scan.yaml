@@ -26,9 +26,6 @@ jobs:
       (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
       (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository)
     environment: ${{ github.event_name == 'pull_request_target' && 'fork-pr-review' || '' }}
-    strategy:
-      matrix:
-        node-version: [24.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
