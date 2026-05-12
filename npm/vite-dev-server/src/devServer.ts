@@ -1,9 +1,8 @@
 import debugFn from 'debug'
-import semverMajor from 'semver/functions/major.js'
-import type { UserConfig } from 'vite-7'
-import { getVite, Vite_7, Vite_8 } from './getVite.js'
-import { createViteDevServerConfig, isVite8 } from './resolveConfig.js'
+import { getVite, Vite } from './getVite.js'
+import { createViteDevServerConfig } from './resolveConfig.js'
 import { getSupportFileRelativePath, waitUntilUrlReady } from './waitForSupportFile.js'
+import type { UserConfig } from 'vite-8'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -23,15 +22,6 @@ export type ViteDevServerConfig = {
 export async function devServer (config: ViteDevServerConfig): Promise<Cypress.ResolvedDevServerConfig> {
   // This has to be the first thing we do as we need to source vite from their project's dependencies
   const vite = await getVite(config)
-
-  let majorVersion: number | undefined = undefined
-
-  if (vite.version) {
-    majorVersion = semverMajor(vite.version)
-    debug(`Found vite version v${majorVersion}`)
-  } else {
-    debug(`vite version not found`)
-  }
 
   debug('Creating Vite Server')
   const server = await devServer.create(config, vite)
@@ -72,19 +62,11 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   }
 }
 
-devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite_7 | Vite_8) {
+devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite) {
   try {
-    // Handling here is mainly for conditional generics to make sure we get the types correct between vite 7 and vite 8.
-    // Eventually, vite 8 will be the default and we can remove this logic
-    if (isVite8(vite)) {
-      const config = await createViteDevServerConfig<Vite_8>(devServerConfig, vite as Vite_8)
+    const config = await createViteDevServerConfig(devServerConfig, vite)
 
-      return await (vite as Vite_8).createServer(config)
-    }
-
-    const config = await createViteDevServerConfig<Vite_7>(devServerConfig, vite as Vite_7)
-
-    return await (vite as Vite_7).createServer(config)
+    return await (vite).createServer(config)
   } catch (err) {
     if (err instanceof Error) {
       throw err

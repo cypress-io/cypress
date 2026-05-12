@@ -1,6 +1,6 @@
 import debugFn from 'debug'
-import type { PluginOption } from 'vite-7'
-import type { Vite_7, Vite_8 } from '../getVite.js'
+import type { PluginOption } from 'vite-8'
+import type { Vite } from '../getVite.js'
 
 import type { ViteDevServerConfig } from '../devServer.js'
 
@@ -8,7 +8,7 @@ const debug = debugFn('cypress:vite-dev-server:plugins:sourcemap')
 
 export const CypressSourcemap = (
   options: ViteDevServerConfig,
-  vite: Vite_7 | Vite_8,
+  vite: Vite,
 ): PluginOption => {
   return {
     name: 'cypress:sourcemap',
