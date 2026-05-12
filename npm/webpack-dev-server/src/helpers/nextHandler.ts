@@ -14,7 +14,7 @@ export async function nextHandler (devServerConfig: WebpackDevServerConfig): Pro
 
   debug('resolved next.js webpack config %o', webpackConfig)
 
-  checkSWC(webpackConfig, devServerConfig.cypressConfig)
+  checkNodeVersion(webpackConfig, devServerConfig.cypressConfig)
   watchEntryPoint(webpackConfig)
   allowGlobalStylesImports(webpackConfig)
   changeNextCachePath(webpackConfig)
@@ -159,10 +159,9 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
 }
 
 /**
- * Check if Next is using the SWC compiler. Compilation will fail if user has `nodeVersion: "bundled"` set
- * due to SWC certificate issues. Next.js 15+ always uses SWC, so no need to scan webpack rules.
+ * Compilation will fail if user has `nodeVersion: "bundled"` set due to SWC certificate issues.
  */
-function checkSWC (
+function checkNodeVersion (
   _webpackConfig: Configuration,
   cypressConfig: Cypress.PluginConfigOptions,
 ) {
@@ -205,6 +204,7 @@ async function findPagesDir (projectRoot: string) {
   return projectRoot
 }
 
+// 'next/dist/trace/trace' has been the trace location since Next.js 12.0; try-catch in case the module is unavailable
 function getRunWebpackSpan (devServerConfig: WebpackDevServerConfig): { runWebpackSpan?: any } {
   try {
     const traceImportPath = require.resolve('next/dist/trace/trace', { paths: [devServerConfig.cypressConfig.projectRoot] })
