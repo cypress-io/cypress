@@ -365,8 +365,6 @@ describe('src/cypress/dom/visibility', {
           ])
         })
 
-        // Modern primitives the existing fixtures don't cover. Tests branch on `isFast`
-        // when the algorithms disagree so the divergence is visible at the assertion site.
         describe('edge cases', () => {
           const isFast = mode === 'fast'
 

@@ -45,7 +45,7 @@ describe('visibility', () => {
 
         // TODO: move with tests added in this PR when it merges: https://github.com/cypress-io/cypress/pull/8166
         // #shadow-element-10 uses `backface-visibility: hidden` + `rotateY(180deg)`. Legacy's
-        // point-sampling treats the back-facing element as hidden; fast does not.
+        // transform analysis treats the back-facing element as hidden; fast does not.
         it('non-visible ancestor causes element to not be visible', () => {
           cy.visit('/fixtures/shadow-dom.html')
           cy

@@ -6,7 +6,7 @@
 - Upgraded bundled Node.js version from `22.19.0` to `24.14.0`. Addressed in [#33494](https://github.com/cypress-io/cypress/pull/33494).
 - Removed built-in CoffeeScript support. The default `@cypress/webpack-batteries-included-preprocessor` no longer bundles `coffee-loader` or `coffeescript`. Use JavaScript/TypeScript for specs, fixtures, and support files, or add CoffeeScript to your own webpack config via `@cypress/webpack-preprocessor`. Addressed in [#33654](https://github.com/cypress-io/cypress/pull/33654).
 - Removed the `cy.end()` command, which ended a chain of commands by yielding `null`. A Cypress chain is already terminated when the next `cy.<command>()` starts a new chain, so existing `.end()` calls can simply be removed. Addressed in [#33696](https://github.com/cypress-io/cypress/pull/33696).
-- Rewrote the experimental `experimentalFastVisibility` algorithm to delegate to the browser's native `Element.checkVisibility()` with a zero-dimension guard. Fixes [#33046](https://github.com/cypress-io/cypress/issues/33046). Addressed in [#33781](https://github.com/cypress-io/cypress/pull/33781).
+- Rewrote the experimental `experimentalFastVisibility` algorithm to delegate to the browser's native `Element.checkVisibility()` with a zero-dimension guard. Addressed in [#33781](https://github.com/cypress-io/cypress/pull/33781).
 
 **Dependency Updates:**
 

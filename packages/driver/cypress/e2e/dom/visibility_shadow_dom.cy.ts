@@ -5,9 +5,6 @@ const { $ } = Cypress
 describe('src/cypress/dom/visibility - shadow dom', () => {
   let add: (el: string, shadowEl: string, rootIdentifier: string) => JQuery<HTMLElement>
 
-  // Runs every test in this file under both visibility algorithms. Tests where the algorithms
-  // disagree branch on `isFast` so the divergence is visible at the assertion site rather than
-  // hidden in spec-pattern filters.
   const modes = ['fast', 'legacy']
 
   for (const mode of modes) {
@@ -69,8 +66,6 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           scrollThisIntoView.get(1).scrollIntoView()
         })
       })
-
-      // --- Both algorithms agree: CSS hiding propagates into / across shadow DOM ----------------
 
       describe('css visibility', () => {
         it('is hidden if parent is shadow root and has .css(visibility) hidden', () => {
@@ -294,11 +289,6 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
         })
       })
 
-      // --- Legacy walks ancestor overflow/clipping; fast does not -------------------------------
-      //
-      // The cases below assert hidden in legacy and visible in fast (or vice versa); legacy's
-      // ancestor-walking algorithm catches them, fast's checkVisibility() + dim-guard does not.
-
       describe('width and height', () => {
         it('parent is shadow root and has overflow: hidden and no width', () => {
           const $shadowRootNoWidth = add(
@@ -517,10 +507,9 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
         })
       })
 
+      // All tests in this block exercise legacy's ancestor-overflow walking. Fast considers them
+      // visible because checkVisibility() doesn't walk ancestor overflow.
       describe('css overflow', () => {
-        // All assertions below test legacy's ancestor-overflow walking. Fast considers them
-        // visible because checkVisibility() doesn't walk ancestor overflow.
-
         it('parent outside of shadow dom overflow hidden and out of bounds to left', () => {
           const $elOutOfParentBoundsToLeft = add(
         `<div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
