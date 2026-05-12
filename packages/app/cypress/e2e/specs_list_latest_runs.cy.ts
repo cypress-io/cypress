@@ -584,9 +584,6 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
   })
 })
 
-// Separate describe so the branch stub installs before startAppServer.
-// Nesting under the suite above means the binary boots with git state and
-// urql caches runs from it; a later override races against the cache.
 describe('App/Cloud Integration - Latest runs (no branch)', { viewportWidth: 1200, viewportHeight: 900 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')
