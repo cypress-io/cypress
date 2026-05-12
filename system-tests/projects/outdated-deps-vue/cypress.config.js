@@ -1,12 +1,13 @@
-export default {
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
   allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     supportFile: false,
     devServer: {
+      framework: 'vue',
       bundler: 'vite',
-      framework: 'react',
     },
-    indexHtmlFile: 'cypress/component/support/component-index.html',
   },
-}
+})

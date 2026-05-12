@@ -522,8 +522,7 @@
       ],
       "ignoreDependencies": [
         "vite",
-        "tslib",
-        "vite-6"
+        "tslib"
       ]
     },
     "npm/puppeteer": {

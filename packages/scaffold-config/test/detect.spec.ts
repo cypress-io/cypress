@@ -59,7 +59,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('vue3-vite-ts-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [
-      { devDependency: 'vite', version: '5.0.0' },
+      { devDependency: 'vite', version: '8.0.0' },
       { dependency: 'vue', version: '3.0.0' },
     ])
 
@@ -100,7 +100,7 @@ describe('detectFramework', () => {
     })
   })
 
-  ;['5.0.0', '6.0.0'].forEach((v) => {
+  ;['8.0.0'].forEach((v) => {
     it(`Svelte and Vite v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('svelte-vite-unconfigured')
 
