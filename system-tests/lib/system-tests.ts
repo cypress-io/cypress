@@ -223,7 +223,10 @@ type ExecOptions = {
    */
   configFile?: string
   /**
-   * Set a custom executable to run instead of the default.
+   * Set a custom executable to run instead of the default (`node` or `cypress` when `withBinary`).
+   * May include argv prefixes separated by spaces (for example `bun run cypress open`); these are
+   * prepended before harness args. `child_process.spawn` requires a single binary name; multi-token
+   * strings are split on whitespace (shell quoting is not supported).
    */
   command?: string
   /**
@@ -303,6 +306,36 @@ const cpSpawner: Spawner = (cmd, args, env, options) => {
     env,
     ...options.spawnOpts,
   })
+}
+
+/**
+ * `child_process.spawn` expects a single executable as `cmd`, not a shell string like `bun run cypress`.
+ * When `options.command` contains spaces, split into `[executable, ...prefixArgv]` and prepend prefix
+ * argv before the harness-generated arguments.
+ */
+function resolveSpawnCommand (options: ExecOptions, harnessArgs: string[]): { cmd: string, args: string[] } {
+  if (!options.command) {
+    return {
+      cmd: options.withBinary ? 'cypress' : 'node',
+      args: harnessArgs,
+    }
+  }
+
+  const trimmed = options.command.trim()
+
+  if (!trimmed.includes(' ')) {
+    return {
+      cmd: trimmed,
+      args: harnessArgs,
+    }
+  }
+
+  const segments = trimmed.split(/\s+/)
+
+  return {
+    cmd: segments[0],
+    args: [...segments.slice(1), ...harnessArgs],
+  }
 }
 
 const serverPath = path.dirname(require.resolve('@packages/server'))
@@ -939,9 +972,9 @@ const systemTests = {
       }
     }
 
-    debug('spawning Cypress %o', { args })
+    const { cmd, args: spawnArgs } = resolveSpawnCommand(options, args)
 
-    const cmd = options.command || (options.withBinary ? 'cypress' : 'node')
+    debug('spawning Cypress %o', { cmd, args: spawnArgs })
 
     const env = _.chain(process.env)
     .omit('CYPRESS_DEBUG')
@@ -983,7 +1016,7 @@ const systemTests = {
     .value()
 
     const spawnerFn: Spawner = options.dockerImage ? dockerSpawner : cpSpawner
-    const sp: SpawnerResult = await spawnerFn(cmd, args, env, options)
+    const sp: SpawnerResult = await spawnerFn(cmd, spawnArgs, env, options)
 
     options.onSpawn && options.onSpawn(sp)
 
