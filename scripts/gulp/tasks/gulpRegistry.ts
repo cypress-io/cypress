@@ -90,7 +90,9 @@ async function exitHandler (exitCode: number) {
 }
 
 async function signalHandler (signal: NodeJS.Signals) {
-  process.stdin.setRawMode(false)
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(false)
+  }
   hasExited = true
   try {
     await exitAllProcesses()
