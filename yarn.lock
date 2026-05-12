@@ -9139,11 +9139,6 @@
     "@types/node" "*"
     fast-glob "^3.3.2"
 
-"@types/signal-exit@3.0.2":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@types/signal-exit/-/signal-exit-3.0.2.tgz#64d97a10f06f1d94bac89456069680631fc6400d"
-  integrity sha512-ofhmMb/rrf446sNpLoBb2UPyNQv07DEotKnlV+elPHkbS4Ykyp7WzKoLPpkBp2KclG0UV72pMLACQtn2anvdrg==
-
 "@types/sinon-chai@3.2.12":
   version "3.2.12"
   resolved "https://registry.yarnpkg.com/@types/sinon-chai/-/sinon-chai-3.2.12.tgz#c7cb06bee44a534ec84f3a5534c3a3a46fd779b6"
