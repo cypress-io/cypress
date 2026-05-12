@@ -14,7 +14,7 @@ base-internal-trixie: &base-internal-trixie cypress/base-internal:24.14.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.14.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
-base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20.15.0
+base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.15.1
 
 parameters:
   publish-binary-branch:
