@@ -21,6 +21,14 @@ permissions:
 jobs:
   Snyk_SCA_Scan:
     runs-on: ubuntu-latest
+    # Route each PR to exactly one event: internal -> pull_request, fork -> pull_request_target.
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository)
+    environment: ${{ github.event_name == 'pull_request_target' && 'fork-pr-review' || '' }}
+    strategy:
+      matrix:
+        node-version: [24.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -32,7 +40,8 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
-          cache: 'yarn'
+          # Cache only on pull_request (internal PRs) — pull_request_target writes scope to the base branch and could be poisoned by an approved fork PR.
+          cache: ${{ github.event_name == 'pull_request' && 'yarn' || '' }}
       - name: Run yarn
         run: yarn
       - name: Run build
