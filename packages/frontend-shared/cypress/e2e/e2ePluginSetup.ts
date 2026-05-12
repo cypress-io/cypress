@@ -384,8 +384,6 @@ async function makeE2ETasks () {
 
       return null
     },
-    // CI sets CYPRESS_COMMERCIAL_RECOMMENDATIONS=0 org-wide; cloud_message_banner.cy.ts
-    // needs the cloudAppMessages channel live, other specs keep the short-circuit.
     __internal_optInToCloudAppMessages () {
       cachedCommercialRecommendations = process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
       delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
