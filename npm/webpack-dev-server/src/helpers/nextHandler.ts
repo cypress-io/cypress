@@ -146,8 +146,11 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       ...runWebpackSpan,
       // Client webpack config for Next.js > 12.1.5
       compilerType: 'client',
+      // Required for Next.js > 13.2.0 to respect TS/JS config
       jsConfig: jsConfigResult.jsConfig,
+      // Required for Next.js > 13.2.0 to respect tsconfig.compilerOptions.baseUrl
       resolvedBaseUrl: jsConfigResult.resolvedBaseUrl,
+      // Added in Next.js 13, passed via `...info`: https://github.com/vercel/next.js/pull/45637/files
       supportedBrowsers,
     },
   )
@@ -163,6 +166,8 @@ function checkSWC (
   _webpackConfig: Configuration,
   cypressConfig: Cypress.PluginConfigOptions,
 ) {
+  // "resolvedNodePath" is only set when using the user's Node.js, which is required to compile Next.js with SWC optimizations
+  // If it is not set, they have either explicitly set "nodeVersion" to "bundled" or are are using Cypress < 9.0.0 where it was set to "bundled" by default
   // @ts-expect-error nodeVersion has been removed as of 13.0.0 however this plugin can be used with many versions of cypress
   if (cypressConfig.nodeVersion === 'bundled') {
     throw new Error(`Cypress cannot compile your Next.js application when "nodeVersion" is set to "bundled". Please remove this option from your Cypress configuration file.`)
