@@ -6,7 +6,7 @@
 - Upgraded bundled Node.js version from `22.19.0` to `24.14.0`. Addressed in [#33494](https://github.com/cypress-io/cypress/pull/33494).
 - Removed built-in CoffeeScript support. The default `@cypress/webpack-batteries-included-preprocessor` no longer bundles `coffee-loader` or `coffeescript`. Use JavaScript/TypeScript for specs, fixtures, and support files, or add CoffeeScript to your own webpack config via `@cypress/webpack-preprocessor`. Addressed in [#33654](https://github.com/cypress-io/cypress/pull/33654).
 - Removed the `cy.end()` command, which ended a chain of commands by yielding `null`. A Cypress chain is already terminated when the next `cy.<command>()` starts a new chain, so existing `.end()` calls can simply be removed. Addressed in [#33696](https://github.com/cypress-io/cypress/pull/33696).
-- The default `keystrokeDelay` for `cy.type()` has been changed from `10` to `0` to improve performance of typing-heavy test runs. Users who relied on the implicit 10ms delay can restore it by setting `keystrokeDelay: 10` in their Cypress config or per-test. Addresses [#33523](https://github.com/cypress-io/cypress/issues/33523).
+- The default `keystrokeDelay` for `cy.type()` has been changed from `10` to `0` to improve performance of typing-heavy test runs. Users who relied on the implicit 10ms delay can restore it by setting `keystrokeDelay: 10` in their Cypress config or on `Cypress.Keyboard`. Addresses [#33523](https://github.com/cypress-io/cypress/issues/33523).
 
 **Dependency Updates:**
 
