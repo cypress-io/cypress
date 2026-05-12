@@ -584,13 +584,9 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
   })
 })
 
-// Standalone describe: the "no branch" scenario can't live inside the suite
-// above because that suite's beforeEach calls startAppServer and *then* stubs
-// the branch to 'fakeBranch' with git hashes set. By the time a nested
-// override runs, the binary has already booted with the populated git state
-// and the urql cache holds runs derived from it — re-stubbing branch to
-// undefined races against cached state. Installing the stub before
-// startAppServer makes the binary boot with no branch and no cached runs.
+// Separate describe so the branch stub installs before startAppServer.
+// Nesting under the suite above means the binary boots with git state and
+// urql caches runs from it; a later override races against the cache.
 describe('App/Cloud Integration - Latest runs (no branch)', { viewportWidth: 1200, viewportHeight: 900 }, () => {
   beforeEach(() => {
     cy.scaffoldProject('cypress-in-cypress')

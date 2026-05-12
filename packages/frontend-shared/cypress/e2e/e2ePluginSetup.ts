@@ -139,7 +139,6 @@ async function makeE2ETasks () {
   let remoteGraphQLOptions: Record<string, any> | undefined
   let remoteGraphQLInterceptBatched: RemoteGraphQLBatchInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
-  // Spec-scoped opt-in (see __internal_optInToCloudAppMessages task below).
   let cachedCommercialRecommendations: string | undefined
 
   const cachedCwd = process.cwd()
@@ -385,12 +384,8 @@ async function makeE2ETasks () {
 
       return null
     },
-    // Targeted at cloud_message_banner.cy.ts: CI sets
-    // CYPRESS_COMMERCIAL_RECOMMENDATIONS=0 org-wide to silence the end-of-run
-    // commercial-recommendations message. The same flag short-circuits the
-    // cloudAppMessages stitching executor — that spec is the one place we need
-    // to defeat it. Other specs keep the flag and short-circuit as before, so
-    // we don't introduce extra cloudAppMessages traffic into unrelated suites.
+    // CI sets CYPRESS_COMMERCIAL_RECOMMENDATIONS=0 org-wide; cloud_message_banner.cy.ts
+    // needs the cloudAppMessages channel live, other specs keep the short-circuit.
     __internal_optInToCloudAppMessages () {
       cachedCommercialRecommendations = process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
       delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
