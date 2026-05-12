@@ -1,3 +1,11 @@
+# [@cypress/vite-dev-server-v7.3.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.1...@cypress/vite-dev-server-v7.3.2) (2026-05-09)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** exclude CT specs from Vite 8 JSX refresh ([#33751](https://github.com/cypress-io/cypress/issues/33751)) ([d9b2be4](https://github.com/cypress-io/cypress/commit/d9b2be464b382d1337c21e2aa48db8a479ea01f4)), closes [#33750](https://github.com/cypress-io/cypress/issues/33750)
+* **vite-dev-server:** warm up module graph before signaling ready ([#33755](https://github.com/cypress-io/cypress/issues/33755)) ([884c4e7](https://github.com/cypress-io/cypress/commit/884c4e741744ffb4f19c2a52991cf05f2671f1ca))
+
 # [@cypress/vite-dev-server-v7.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.0...@cypress/vite-dev-server-v7.3.1) (2026-04-20)
 
 

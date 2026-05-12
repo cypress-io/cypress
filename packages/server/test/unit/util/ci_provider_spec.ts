@@ -44,6 +44,8 @@ describe('lib/util/ci_provider', () => {
       CYPRESS_PULL_REQUEST_ID: 'cypressPullRequestId',
       CYPRESS_PULL_REQUEST_URL: 'cypressPullRequestUrl',
       CYPRESS_CI_BUILD_URL: 'cypressCiBuildUrl',
+      CYPRESS_RERUN_GROUP_ID: 'cypressRerunGroupId',
+      CYPRESS_RERUN_ALL_TESTS: 'cypressRerunAllTests',
     }, { clear: true })
 
     expectsName(null)
@@ -51,6 +53,8 @@ describe('lib/util/ci_provider', () => {
       cypressPullRequestId: 'cypressPullRequestId',
       cypressPullRequestUrl: 'cypressPullRequestUrl',
       cypressCiBuildUrl: 'cypressCiBuildUrl',
+      cypressRerunGroupId: 'cypressRerunGroupId',
+      cypressRerunAllTests: 'cypressRerunAllTests',
     })
 
     return expectsCommitParams(null)
@@ -1112,6 +1116,8 @@ describe('lib/util/ci_provider', () => {
         CYPRESS_PULL_REQUEST_ID: 'cypressPullRequestId',
         CYPRESS_PULL_REQUEST_URL: 'cypressPullRequestUrl',
         CYPRESS_CI_BUILD_URL: 'cypressCiBuildUrl',
+        CYPRESS_RERUN_GROUP_ID: 'cypressRerunGroupId',
+        CYPRESS_RERUN_ALL_TESTS: 'cypressRerunAllTests',
 
         GIT_COMMIT: 'gitCommit',
         GIT_BRANCH: 'gitBranch',
@@ -1124,6 +1130,8 @@ describe('lib/util/ci_provider', () => {
         cypressPullRequestId: 'cypressPullRequestId',
         cypressPullRequestUrl: 'cypressPullRequestUrl',
         cypressCiBuildUrl: 'cypressCiBuildUrl',
+        cypressRerunGroupId: 'cypressRerunGroupId',
+        cypressRerunAllTests: 'cypressRerunAllTests',
       })
 
       return expectsCommitParams({

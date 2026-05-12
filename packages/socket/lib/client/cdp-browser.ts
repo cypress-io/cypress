@@ -1,9 +1,11 @@
 /// <reference lib="dom" />
 import { v4 as uuidv4 } from 'uuid'
 import { decode, encode } from '../utils'
-import Emitter from 'component-emitter'
+import { Emitter, DefaultEventsMap } from '@socket.io/component-emitter'
 
-export type SocketShape = Emitter
+// Match the shape socket.io-client's `Socket` exposes (it also extends this Emitter), so
+// `client()` and `createWebsocket()` can return either a real Socket or a CDPBrowserSocket.
+export type SocketShape = Emitter<DefaultEventsMap, DefaultEventsMap>
 
 type CDPSocketNamespaceKey = `cypressSocket-${string}`
 type CDPSendToServerNamespaceKey = `cypressSendToServer-${string}`
@@ -15,7 +17,7 @@ declare global {
   }
 }
 
-export class CDPBrowserSocket extends Emitter implements SocketShape {
+export class CDPBrowserSocket extends Emitter<DefaultEventsMap, DefaultEventsMap> implements SocketShape {
   private _namespace: string
 
   constructor (namespace: string) {

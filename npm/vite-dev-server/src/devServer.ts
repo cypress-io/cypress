@@ -1,7 +1,7 @@
 import debugFn from 'debug'
 import { getVite, Vite } from './getVite.js'
 import { createViteDevServerConfig } from './resolveConfig.js'
-import { getSupportFileRelativePath, waitUntilUrlReady } from './waitForSupportFile.js'
+import { getSpecRelativeUrl, getSupportFileRelativeUrl } from './urlPaths.js'
 import type { UserConfig } from 'vite-8'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
@@ -29,7 +29,7 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   debug('Vite server created')
 
   await server.listen()
-  const { port, host } = server.config.server
+  const { port } = server.config.server
 
   if (!port) {
     throw new Error('Missing vite dev server port.')
@@ -37,15 +37,41 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
 
   debug('Successfully launched the vite server on port', port)
 
-  const supportPath = getSupportFileRelativePath(config.cypressConfig)
+  // Warm up the support file (always) and every spec (run mode only),
+  // then waitForRequestsIdle, so Vite's deps optimizer has fully processed
+  // any node_modules imports they pull in before the browser fetches
+  // them. Skipping this can race a mid-test optimizer re-bundle and
+  // surface "Failed to fetch dynamically imported module".
+  //
+  // Per-spec warmup is required: preprocessor or auto-import plugins can
+  // inject node_modules imports during transform that Vite's static deps
+  // scanner doesn't see, so the optimizer would otherwise first discover
+  // them when the browser fetches the spec.
+  //
+  // In open mode (`isTextTerminal === false`), we skip the per-spec
+  // warmup. The user picks specs interactively and is unlikely to run
+  // every spec in the suite, so warming all of them up front would pay
+  // for work that may never be needed. Support-file warmup is kept
+  // because the support file is always loaded and typically has the
+  // deepest dep tree.
+  const warmupTargets: string[] = []
+  const supportFileUrl = getSupportFileRelativeUrl(config.cypressConfig)
 
-  if (supportPath) {
-    const baseUrl = `http://${typeof host === 'string' ? host : '127.0.0.1'}:${port}`
-    const supportFileUrl = new URL(supportPath, `${baseUrl}/`).href
+  if (supportFileUrl) {
+    warmupTargets.push(supportFileUrl)
+  }
 
-    debug('Waiting until support file is servable', supportFileUrl)
-    await waitUntilUrlReady(supportFileUrl)
-    debug('Support file is ready')
+  if (config.cypressConfig.isTextTerminal) {
+    for (const spec of config.specs ?? []) {
+      warmupTargets.push(getSpecRelativeUrl(spec, config.cypressConfig))
+    }
+  }
+
+  if (warmupTargets.length > 0) {
+    debug('Warming up module graph for %d targets', warmupTargets.length)
+    await Promise.all(warmupTargets.map((target) => server.warmupRequest(target)))
+    await server.waitForRequestsIdle()
+    debug('Module graph is ready')
   }
 
   return {
