@@ -144,6 +144,7 @@ async function loadWebpackConfig (devServerConfig: WebpackDevServerConfig): Prom
       entrypoints: {},
       rewrites: { fallback: [], afterFiles: [], beforeFiles: [] },
       ...runWebpackSpan,
+      // Client webpack config for Next.js > 12.1.5
       compilerType: 'client',
       jsConfig: jsConfigResult.jsConfig,
       resolvedBaseUrl: jsConfigResult.resolvedBaseUrl,
