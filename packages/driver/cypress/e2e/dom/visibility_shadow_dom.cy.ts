@@ -131,6 +131,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<button>inside</button>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('button', { includeShadowDom: true }).should('be.hidden')
+          cy.wrap($host).find('button', { includeShadowDom: true }).should('not.be.visible')
         })
 
         it('reports descendant as hidden when an ancestor outside the shadow root has `display: none`', () => {
@@ -140,6 +141,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<button>inside</button>`).appendTo(host.shadowRoot)
 
           cy.wrap($wrap).find('button', { includeShadowDom: true }).should('be.hidden')
+          cy.wrap($wrap).find('button', { includeShadowDom: true }).should('not.be.visible')
         })
 
         it('reports descendant as visible when shadow host and its ancestors are visible', () => {
@@ -148,6 +150,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<button>inside</button>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('button', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($host).find('button', { includeShadowDom: true }).should('not.be.hidden')
         })
       })
 
@@ -165,6 +168,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<slot></slot>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('.slotted').should('be.visible')
+          cy.wrap($host).find('.slotted').should('not.be.hidden')
         })
 
         it('reports a slotted child as hidden when host has `display: none`', () => {
@@ -173,6 +177,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<slot></slot>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('.slotted').should('be.hidden')
+          cy.wrap($host).find('.slotted').should('not.be.visible')
         })
 
         it('reports a slotted child as hidden by `display: none` on the slot', () => {
@@ -183,6 +188,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<slot style="display: none;"></slot>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('.slotted').should('be.hidden')
+          cy.wrap($host).find('.slotted').should('not.be.visible')
         })
 
         it('reports an unslotted light-DOM child as hidden when no slot exists for it', () => {
@@ -193,6 +199,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<span>shadow-only</span>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('.orphan').should('be.hidden')
+          cy.wrap($host).find('.orphan').should('not.be.visible')
         })
 
         it('reports default-slot fallback content as visible when no light-DOM child is assigned', () => {
@@ -201,6 +208,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<slot><span class="fallback">fallback</span></slot>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('.fallback', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($host).find('.fallback', { includeShadowDom: true }).should('not.be.hidden')
         })
       })
 
@@ -211,6 +219,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<slot name="header"></slot>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('.named').should('be.visible')
+          cy.wrap($host).find('.named').should('not.be.hidden')
         })
 
         it('reports a named-slotted child as hidden when its named slot has `display: none`', () => {
@@ -219,6 +228,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<slot name="header" style="display: none;"></slot>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('.named').should('be.hidden')
+          cy.wrap($host).find('.named').should('not.be.visible')
         })
 
         it('reports a child with no matching slot name as hidden', () => {
@@ -228,6 +238,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           $(`<slot name="header"></slot>`).appendTo(($host[0] as HTMLElement & { shadowRoot: ShadowRoot }).shadowRoot)
 
           cy.wrap($host).find('.mismatched').should('be.hidden')
+          cy.wrap($host).find('.mismatched').should('not.be.visible')
         })
       })
 
@@ -241,6 +252,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           slot.assign($host.find('.m-child')[0])
 
           cy.wrap($host).find('.m-child').should('be.visible')
+          cy.wrap($host).find('.m-child').should('not.be.hidden')
         })
 
         it('reports an unassigned light-DOM child as hidden', () => {
@@ -252,6 +264,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           // intentionally do NOT assign anything to the slot
 
           cy.wrap($host).find('.m-orphan').should('be.hidden')
+          cy.wrap($host).find('.m-orphan').should('not.be.visible')
         })
 
         it('reflects reassignment between manual slots', () => {
@@ -266,14 +279,18 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           slot.assign($host.find('.m-a')[0])
 
           cy.wrap($host).find('.m-a').should('be.visible')
+          cy.wrap($host).find('.m-a').should('not.be.hidden')
           cy.wrap($host).find('.m-b').should('be.hidden')
+          cy.wrap($host).find('.m-b').should('not.be.visible')
 
           cy.then(() => {
             slot.assign($host.find('.m-b')[0])
           })
 
           cy.wrap($host).find('.m-a').should('be.hidden')
+          cy.wrap($host).find('.m-a').should('not.be.visible')
           cy.wrap($host).find('.m-b').should('be.visible')
+          cy.wrap($host).find('.m-b').should('not.be.hidden')
         })
       })
 
@@ -293,6 +310,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($shadowRootNoWidth).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($shadowRootNoWidth).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent outside of shadow dom has overflow: hidden and no width', () => {
@@ -307,6 +325,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($outsideParentNoWidth).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($outsideParentNoWidth).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent is shadow root and has overflow: hidden and no height', () => {
@@ -319,6 +338,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($shadowRootNoHeight).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($shadowRootNoHeight).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent outside of shadow dom has overflow: hidden and no height', () => {
@@ -333,6 +353,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($outsideParentNoHeight).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($outsideParentNoHeight).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
       })
 
@@ -349,6 +370,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($childPosAbs).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($childPosAbs).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible if child has position: fixed', () => {
@@ -363,6 +385,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($childPosFixed).find('button', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($childPosFixed).find('button', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible if descendent from parent has position: absolute and descendent is outside shadow dom', () => {
@@ -377,6 +400,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($descendentPosAbsOutside).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($descendentPosAbsOutside).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible if descendent from parent has position: absolute and descendent is inside shadow dom', () => {
@@ -391,6 +415,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($descendentPosAbsInside).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($descendentPosAbsInside).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible if descendent from parent has position: fixed and descendent is outside shadow dom', () => {
@@ -405,6 +430,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($descendentPosFixedOutside).find('button', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($descendentPosFixedOutside).find('button', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible if descendent from parent has position: fixed and descendent is inside shadow dom', () => {
@@ -419,6 +445,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($descendentPosFixedInside).find('button', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($descendentPosFixedInside).find('button', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is hidden if position: fixed and covered by element outside of shadow dom (legacy only)', () => {
@@ -432,6 +459,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($coveredUpByOutsidePosFixed).find('#inside-underneath', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($coveredUpByOutsidePosFixed).find('#inside-underneath', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('is hidden if outside of shadow dom with position: fixed and covered by element inside of shadow dom (legacy only)', () => {
@@ -445,6 +473,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($coveredUpByShadowPosFixed).find('#outside-underneath', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($coveredUpByShadowPosFixed).find('#outside-underneath', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('is visible if position: fixed and parent outside shadow dom has pointer-events: none', () => {
@@ -457,6 +486,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($parentPointerEventsNone).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($parentPointerEventsNone).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is hidden if covered when position: fixed and parent outside shadow dom has pointer-events: none (legacy only)', () => {
@@ -470,6 +500,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($parentPointerEventsNoneCovered).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($parentPointerEventsNoneCovered).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('is visible if pointer-events: none and parent outside shadow dom has position: fixed', () => {
@@ -482,6 +513,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($childPointerEventsNone).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($childPointerEventsNone).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
       })
 
@@ -499,6 +531,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfParentBoundsToLeft).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfParentBoundsToLeft).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent outside of shadow dom overflow hidden and out of bounds to right', () => {
@@ -511,6 +544,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfParentBoundsToRight).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfParentBoundsToRight).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent outside of shadow dom overflow hidden and out of bounds above', () => {
@@ -523,6 +557,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfParentBoundsAbove).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfParentBoundsAbove).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent outside of shadow dom overflow hidden and out of bounds below', () => {
@@ -535,6 +570,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfParentBoundsBelow).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfParentBoundsBelow).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent outside of shadow dom overflow hidden-y and out of bounds', () => {
@@ -547,6 +583,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfParentWithOverflowYHiddenBounds).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfParentWithOverflowYHiddenBounds).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent outside of shadow dom overflow hidden-x and out of bounds', () => {
@@ -559,6 +596,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfParentWithOverflowXHiddenBounds).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfParentWithOverflowXHiddenBounds).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('is visible when parent overflow hidden but el in a closer parent outside of shadow dom with position absolute', () => {
@@ -573,6 +611,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($elOutOfParentWithOverflowHiddenBoundsButCloserPositionAbsoluteParent).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('parent is wide and ancestor outside shadow dom is overflow auto', () => {
@@ -587,6 +626,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfAncestorOverflowAutoBoundsOutside).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfAncestorOverflowAutoBoundsOutside).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent is wide and ancestor inside shadow dom is overflow auto', () => {
@@ -601,6 +641,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfAncestorOverflowAutoBoundsInside).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfAncestorOverflowAutoBoundsInside).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent outside of shadow dom has overflow scroll and out of bounds', () => {
@@ -613,6 +654,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfScrollingParentBounds).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfScrollingParentBounds).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('parent absolutely positioned and overflow hidden and out of bounds', () => {
@@ -629,6 +671,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elOutOfPosAbsParentBounds).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elOutOfPosAbsParentBounds).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('is visible when parent absolutely positioned and overflow hidden and not out of bounds', () => {
@@ -643,6 +686,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elInPosAbsParentsBounds).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($elInPosAbsParentsBounds).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible when parent overflow hidden and not out of bounds', () => {
@@ -655,6 +699,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elInParentBounds).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($elInParentBounds).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible when ancestor outside shadow dom is overflow hidden but more distant ancestor is the offset parent', () => {
@@ -671,6 +716,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elIsOutOfBoundsOfOutsideAncestorsOverflowButWithinRelativeAncestor).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($elIsOutOfBoundsOfOutsideAncestorsOverflowButWithinRelativeAncestor).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible when ancestor inside shadow dom is overflow hidden but more distant ancestor is the offset parent', () => {
@@ -687,6 +733,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elIsOutOfBoundsOfInsideAncestorsOverflowButWithinRelativeAncestor).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($elIsOutOfBoundsOfInsideAncestorsOverflowButWithinRelativeAncestor).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('relatively positioned outside of ancestor outside shadow dom with overflow hidden', () => {
@@ -701,6 +748,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elIsRelativeAndOutOfBoundsOfAncestorOverflow).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($elIsRelativeAndOutOfBoundsOfAncestorOverflow).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('is visible when relatively positioned outside of ancestor outside shadow dom that does not hide overflow', () => {
@@ -713,6 +761,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($elIsRelativeAndOutOfBoundsOfAncestorButAncestorShowsOverflow).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($elIsRelativeAndOutOfBoundsOfAncestorButAncestorShowsOverflow).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible when parent inside shadow dom is relatively positioned out of bounds but el is relatively positioned back in bounds', () => {
@@ -729,6 +778,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($insideParentOutOfBoundsButElInBounds).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($insideParentOutOfBoundsButElInBounds).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible when parent outside shadow dom is relatively positioned out of bounds but el is relatively positioned back in bounds', () => {
@@ -745,6 +795,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($outsideParentOutOfBoundsButElInBounds).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($outsideParentOutOfBoundsButElInBounds).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible when element is statically positioned and parent element is absolutely positioned and ancestor has overflow hidden', function () {
@@ -761,6 +812,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap(el).find('#visible-button', { includeShadowDom: true }).should('be.visible')
+          cy.wrap(el).find('#visible-button', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('is visible when element is relatively positioned and parent element is absolutely positioned and ancestor has overflow auto', function () {
@@ -785,6 +837,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap(el).find('#visible-button', { includeShadowDom: true }).should('be.visible')
+          cy.wrap(el).find('#visible-button', { includeShadowDom: true }).should('not.be.hidden')
         })
       })
 
@@ -799,6 +852,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($parentWithTransformScaleElOutsideScale).find('span', { includeShadowDom: true }).should('be.hidden')
+          cy.wrap($parentWithTransformScaleElOutsideScale).find('span', { includeShadowDom: true }).should('not.be.visible')
         })
 
         it('is visible when inside parent outside of shadow dom transform scale', () => {
@@ -811,6 +865,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($parentWithTransformScaleElInsideScale).find('span', { includeShadowDom: true }).should('be.visible')
+          cy.wrap($parentWithTransformScaleElInsideScale).find('span', { includeShadowDom: true }).should('not.be.hidden')
         })
 
         it('out of ancestor bounds due to ancestor within shadow dom transform', () => {
@@ -827,6 +882,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($ancestorInsideTransformMakesElOutOfBoundsOfAncestor).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($ancestorInsideTransformMakesElOutOfBoundsOfAncestor).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
 
         it('out of ancestor bounds due to ancestor outside shadow dom transform', () => {
@@ -843,6 +899,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
           )
 
           cy.wrap($ancestorOutsideTransformMakesElOutOfBoundsOfAncestor).find('span', { includeShadowDom: true }).should(isFast ? 'be.visible' : 'be.hidden')
+          cy.wrap($ancestorOutsideTransformMakesElOutOfBoundsOfAncestor).find('span', { includeShadowDom: true }).should(isFast ? 'not.be.hidden' : 'not.be.visible')
         })
       })
     })
