@@ -1,5 +1,5 @@
-The experimentalPromptCommand option was removed in Cypress version 15.13.0.
-
-`cy.prompt` is now available for all users.
-
-You can safely remove this option from your config.
+[31mThe [33mexperimentalPromptCommand[39m[31m option was removed in Cypress version 15.13.0.[39m
+[31m[39m
+[31m`cy.prompt` is now available for all users.[39m
+[31m[39m
+[31mYou can safely remove this option from your config.[39m

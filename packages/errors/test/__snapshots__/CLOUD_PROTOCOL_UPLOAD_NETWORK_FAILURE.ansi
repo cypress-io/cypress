@@ -1,9 +1,9 @@
-Warning: We encountered a network error while uploading the Test Replay recording for this spec.
-
-Please verify your network configuration for accessing https://some/url
-
-These results will not display Test Replay recordings.
-
-This error will not affect or change the exit code.
-
-Error: fail whale
+[31mWarning: We encountered a network error while uploading the Test Replay recording for this spec.[39m
+[31m[39m
+[31mPlease verify your network configuration for accessing [94mhttps://some/url[39m[31m[39m
+[31m[39m
+[31mThese results will not display Test Replay recordings.[39m
+[31m[39m
+[31mThis error will not affect or change the exit code.[39m
+[31m[39m
+[31m[95mError: fail whale[39m[31m[39m

@@ -1,18 +1,18 @@
-Can't run because you've entered an invalid browser name.
-
-Browser: invalid-browser was not found on your system or is not supported by Cypress.
-
-Cypress supports the following browsers:
- - electron
- - chrome
- - chromium
- - chrome-for-testing
- - edge
- - firefox
-
-You can also use a custom browser: https://on.cypress.io/customize-browsers
-
-Available browsers found on your system are:
- - Chrome 120
- - Firefox 121
- - Edge 119
+[31mCan't run because you've entered an invalid browser name.[39m
+[31m[39m
+[31mBrowser: [33minvalid-browser[39m[31m was not found on your system or is not supported by Cypress.[39m
+[31m[39m
+[31mCypress supports the following browsers:[39m
+[31m[90m - [39m[31m[94melectron[39m[31m[39m
+[31m[90m - [39m[31m[94mchrome[39m[31m[39m
+[31m[90m - [39m[31m[94mchromium[39m[31m[39m
+[31m[90m - [39m[31m[94mchrome-for-testing[39m[31m[39m
+[31m[90m - [39m[31m[94medge[39m[31m[39m
+[31m[90m - [39m[31m[94mfirefox[39m[31m[39m
+[31m[39m
+[31mYou can also use a custom browser: https://on.cypress.io/customize-browsers[39m
+[31m[39m
+[31mAvailable browsers found on your system are:[39m
+[31m[90m - [39m[31m[94mChrome 120[39m[31m[39m
+[31m[90m - [39m[31m[94mFirefox 121[39m[31m[39m
+[31m[90m - [39m[31m[94mEdge 119[39m[31m[39m

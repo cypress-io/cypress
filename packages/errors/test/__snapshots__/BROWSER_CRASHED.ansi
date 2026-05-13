@@ -1,11 +1,11 @@
-We detected that the Chrome process just crashed with code 'code' and signal 'signal'.
-
-We have failed the current spec but will continue running the next spec.
-
-This can happen for many different reasons:
-
-- You wrote an endless loop and you must fix your own code
-- You are running lots of tests on a memory intense application
-- You are running in a memory starved VM environment
-- There are problems with your GPU / GPU drivers
-- There are browser bugs
+[31mWe detected that the [33mChrome[39m[31m process just crashed with code '[33mcode[39m[31m' and signal '[33msignal[39m[31m'.[39m
+[31m[39m
+[31mWe have failed the current spec but will continue running the next spec.[39m
+[31m[39m
+[31mThis can happen for many different reasons:[39m
+[31m[39m
+[31m- You wrote an endless loop and you must fix your own code[39m
+[31m- You are running lots of tests on a memory intense application[39m
+[31m- You are running in a memory starved VM environment[39m
+[31m- There are problems with your GPU / GPU drivers[39m
+[31m- There are browser bugs[39m

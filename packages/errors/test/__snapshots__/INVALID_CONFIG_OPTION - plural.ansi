@@ -1,6 +1,7 @@
-The following configuration options are invalid:
-
- - foo
- - bar
-
-https://on.cypress.io/configuration
+[31mThe following configuration options are invalid:[39m
+[31m[39m
+[31m[90m - [39m[31m[33mfoo[39m[31m[39m
+[31m[90m - [39m[31m[33mbar[39m[31m[39m
+[31m[39m
+[31mhttps://on.cypress.io/configuration[39m
+[31m[39m

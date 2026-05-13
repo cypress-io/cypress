@@ -1,16 +1,16 @@
-You passed the --group or --parallel flag but we could not automatically determine or generate a ciBuildId.
-
-The --group flag you passed was: foo
-The --parallel flag you passed was: false
-
-In order to use either of these features a ciBuildId must be determined.
-
-The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
-
- - GitHub Actions
- - CircleCI
- - Jenkins
-
-Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
-
-https://on.cypress.io/indeterminate-ci-build-id
+[31mYou passed the [95m--group[39m[31m or [95m--parallel[39m[31m flag but we could not automatically determine or generate a ciBuildId.[39m
+[31m[39m
+[31mThe --group flag you passed was: [33mfoo[39m[31m[39m
+[31mThe --parallel flag you passed was: [33mfalse[39m[31m[39m
+[31m[39m
+[31mIn order to use either of these features a ciBuildId must be determined.[39m
+[31m[39m
+[31mThe ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:[39m
+[31m[39m
+[31m[90m - [39m[31m[94mGitHub Actions[39m[31m[39m
+[31m[90m - [39m[31m[94mCircleCI[39m[31m[39m
+[31m[90m - [39m[31m[94mJenkins[39m[31m[39m
+[31m[39m
+[31mBecause the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.[39m
+[31m[39m
+[31mhttps://on.cypress.io/indeterminate-ci-build-id[39m
