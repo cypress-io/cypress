@@ -3,14 +3,15 @@ import { shouldSkipBunSystemTests } from './bun_support'
 
 describe('bun TypeScript support', () => {
   systemTests.setup()
+
   const skip = shouldSkipBunSystemTests()
 
   systemTests.it('can run TypeScript specs with bun', {
     snapshot: false,
-    browser: 'chrome',
+    browser: 'electron',
     project: 'bun-component-testing',
     testingType: 'component',
-    spec: '**/*.cy.{ts,tsx}',
+    spec: 'cypress/component/bun-component.cy.tsx',
     skip,
   })
 
@@ -18,6 +19,7 @@ describe('bun TypeScript support', () => {
     snapshot: false,
     browser: 'electron',
     project: 'bun-component-testing',
+    testingType: 'component',
     configFile: 'cypress.config.ts',
     skip,
   })

@@ -1,8 +1,11 @@
 import systemTests from '../lib/system-tests'
-import { shouldSkipBunSystemTests } from './bun_support'
+import { bunFixtureHttpServer, shouldSkipBunSystemTests } from './bun_support'
 
 describe('bun workspace support', () => {
-  systemTests.setup()
+  systemTests.setup({
+    servers: bunFixtureHttpServer('bun-workspace'),
+  })
+
   const skip = shouldSkipBunSystemTests()
 
   systemTests.it('can handle bun workspace dependencies', {

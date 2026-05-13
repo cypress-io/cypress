@@ -1,8 +1,11 @@
 import systemTests from '../lib/system-tests'
-import { shouldSkipBunSystemTests } from './bun_support'
+import { bunFixtureHttpServer, shouldSkipBunSystemTests } from './bun_support'
 
 describe('bun CLI commands', () => {
-  systemTests.setup()
+  systemTests.setup({
+    servers: bunFixtureHttpServer('bun-with-deps'),
+  })
+
   const skip = shouldSkipBunSystemTests()
 
   systemTests.it('can run cypress version with bun', {
@@ -26,6 +29,8 @@ describe('bun CLI commands', () => {
     browser: 'electron',
     project: 'bun-with-deps',
     command: 'bun run cypress install',
+    // Avoid CDN download in dev/CI: monorepo dev version has no matching hosted binary.
+    processEnv: { CYPRESS_INSTALL_BINARY: '0' },
     skip,
   })
 

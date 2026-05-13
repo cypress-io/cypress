@@ -1,4 +1,21 @@
 import { execSync } from 'child_process'
+import path from 'path'
+import express from 'express'
+
+/**
+ * Serves `system-tests/projects/<dir>` on port 5000 so `baseUrl: 'http://localhost:5000'` and
+ * `cy.visit('/cypress/fixtures/...')` resolve during system tests (see `systemTests.setup` servers).
+ */
+export function bunFixtureHttpServer (projectDir: 'bun-with-deps' | 'bun-workspace') {
+  const root = path.join(__dirname, '../projects', projectDir)
+
+  return {
+    port: 5000,
+    onServer (app: express.Application) {
+      app.use(express.static(root))
+    },
+  }
+}
 
 export function hasBunInstalled () {
   try {

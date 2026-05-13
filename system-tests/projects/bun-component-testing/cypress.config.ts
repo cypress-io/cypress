@@ -4,10 +4,9 @@ export default defineConfig({
   component: {
     devServer: {
       framework: 'react',
-      bundler: 'webpack',
+      bundler: 'vite',
     },
-  },
-  e2e: {
-    baseUrl: 'http://localhost:5000',
+    indexHtmlFile: 'cypress/component/support/component-index.html',
+    supportFile: false,
   },
 })
