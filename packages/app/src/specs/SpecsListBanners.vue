@@ -111,9 +111,15 @@
     <RequestAccessButton :gql="props.gql" />
   </Alert>
 
+  <CloudMessageBanner
+    v-else-if="activeCloudMessage"
+    :key="activeCloudMessage.id"
+    :has-banner-been-shown="hasCloudMessageBeenShown"
+    :message="activeCloudMessage"
+  />
   <component
     :is="bannerComponentToShow"
-    v-else-if="bannerComponentToShow"
+    v-else-if="cloudMessagesHaveResolved && bannerComponentToShow"
     :has-banner-been-shown="hasCurrentBannerBeenShown"
     :cohort-option="currentCohortOption.cohort"
     :framework="ctFramework"
@@ -138,7 +144,7 @@ import RequestAccessButton from './RequestAccessButton.vue'
 import { gql } from '@urql/vue'
 import { SpecsListBannersFragment, SpecsListBanners_CheckCloudOrgMembershipDocument } from '../generated/graphql'
 import { AllowedState, BannerIds } from '@packages/types'
-import { LoginBanner, ComponentTestingAvailableBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner } from './banners'
+import { LoginBanner, ComponentTestingAvailableBanner, CreateOrganizationBanner, ConnectProjectBanner, RecordBanner, CloudMessageBanner } from './banners'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { usePromptManager } from '@packages/frontend-shared/src/gql-components/composables/usePromptManager'
 import { CohortConfig, CohortOption, useCohorts } from '@packages/frontend-shared/src/gql-components/composables/useCohorts'
@@ -180,6 +186,42 @@ fragment SpecsListBanners on Query {
     bundler {
       id
       name
+    }
+  }
+  cloudAppMessages {
+    id
+    enabled
+    priority
+    visualStyle
+    title
+    body
+    ctas {
+      id
+      text
+      href
+      style
+      utm {
+        content
+        term
+        id
+      }
+    }
+    dismissal {
+      scope
+    }
+    analytics {
+      campaign
+      category
+      utm {
+        content
+        term
+        id
+      }
+    }
+  }
+  localSettings {
+    preferences {
+      banners
     }
   }
 }
@@ -312,5 +354,57 @@ const ctFramework = computed(() => {
 })
 
 const ctBundler = computed(() => props.gql.wizard?.bundler?.name)
+
+const cloudMessageDismissalKey = (id: string) => `cloud:${id}` as const
+
+function getDismissalState (msg: NonNullable<SpecsListBannersFragment['cloudAppMessages']>[number]) {
+  if (msg.dismissal.scope === 'user') {
+    const globalBanners = props.gql.localSettings?.preferences?.banners as AllowedState['banners']
+
+    return globalBanners?.[cloudMessageDismissalKey(msg.id)]
+  }
+
+  const projectBanners = (props.gql.currentProject?.savedState as AllowedState)?.banners
+
+  return projectBanners?.[cloudMessageDismissalKey(msg.id)]
+}
+
+function isCloudMessageEligible (msg: NonNullable<SpecsListBannersFragment['cloudAppMessages']>[number]) {
+  if (!msg.enabled) {
+    return false
+  }
+
+  // `_disabled` is the E2E-test kill switch for all banners.
+  const projectBanners = (props.gql.currentProject?.savedState as AllowedState)?.banners
+
+  if (projectBanners?._disabled) {
+    return false
+  }
+
+  return !getDismissalState(msg)?.dismissed
+}
+
+// Gates onboarding banners until the cloud query resolves (undefined → loading).
+const cloudMessagesHaveResolved = computed(() => {
+  return props.gql.cloudAppMessages !== undefined
+})
+
+const activeCloudMessage = computed(() => {
+  const messages = props.gql.cloudAppMessages ?? []
+  const eligible = messages.filter((m): m is NonNullable<typeof m> => !!m && isCloudMessageEligible(m))
+  const sorted = [...eligible].sort((a, b) => b.priority - a.priority)
+
+  return sorted[0] ?? null
+})
+
+const hasCloudMessageBeenShown = computed(() => {
+  const msg = activeCloudMessage.value
+
+  if (!msg) {
+    return false
+  }
+
+  return !!getDismissalState(msg)?.lastShown
+})
 
 </script>
