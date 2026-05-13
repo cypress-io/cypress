@@ -8,6 +8,10 @@
 - Removed the `cy.end()` command, which ended a chain of commands by yielding `null`. A Cypress chain is already terminated when the next `cy.<command>()` starts a new chain, so existing `.end()` calls can simply be removed. Addressed in [#33696](https://github.com/cypress-io/cypress/pull/33696).
 - Rewrote the experimental `experimentalFastVisibility` algorithm to delegate to the browser's native `Element.checkVisibility()` with a zero-dimension guard. Addressed in [#33781](https://github.com/cypress-io/cypress/pull/33781).
 
+**Features:**
+
+- The `experimentalFastVisibility` boolean flag has been replaced with a new `visibilityStrategy` config option that accepts `'legacy'` or `'modern'`, defaulting to `'modern'`. The modern visibility algorithm (based on `Element.checkVisibility()`) is now the default for all users. The option is deprecated — set `visibilityStrategy: 'legacy'` only if you need the old algorithm. Addressed in [#33794](https://github.com/cypress-io/cypress/pull/33794).
+
 **Dependency Updates:**
 
 - Upgraded `electron` from `37.6.0` to `41.0.3`.
