@@ -89,7 +89,7 @@ describe('FileRow', () => {
     cy.percySnapshot()
   })
 
-  it('opens on click', { visibilityStrategy: 'legacy' }, () => {
+  it('opens on click', () => {
     cy.mount(() => (
       <div class="w-full p-5">
         <FileRow
@@ -118,7 +118,10 @@ describe('FileRow', () => {
     cy.get('.shiki').should('be.visible')
     cy.contains('cypress/integration/command.js').click()
 
-    cy.get('.shiki').should('not.be.visible')
+    // The Collapsible wrapper sets aria-hidden="true" and collapses to
+    // max-height: 0 when closed. The modern visibility algorithm doesn't
+    // detect the resulting overflow clipping, so assert aria-hidden instead.
+    cy.get('.shiki').closest('[aria-hidden]').should('have.attr', 'aria-hidden', 'true')
   })
 
   it('responds nice to small screens', { viewportWidth: 500 }, () => {

@@ -128,21 +128,33 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
     })
   })
 
-  it('.scrollIntoView()', { visibilityStrategy: 'legacy' }, () => {
+  it('.scrollIntoView()', () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
     cy.origin('http://www.foobar.com:3500', () => {
       cy.get('#scroll-into-view-vertical h5')
-      .should('not.be.visible')
+      .then(($el) => {
+        // Before scrolling, the heading is below the scroll container's
+        // visible area. The modern visibility algorithm no longer reports
+        // scroll-clipped elements as hidden, so assert the geometry directly.
+        const container = $el[0].closest('#scroll-into-view-vertical') as HTMLElement
+
+        expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+      })
       .scrollIntoView().should('be.visible')
     })
   })
 
-  it('.scrollTo()', { visibilityStrategy: 'legacy' }, () => {
+  it('.scrollTo()', () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
     cy.origin('http://www.foobar.com:3500', () => {
-      cy.get('#scroll-into-view-vertical h5').should('not.be.visible')
+      cy.get('#scroll-into-view-vertical h5').then(($el) => {
+        const container = $el[0].closest('#scroll-into-view-vertical') as HTMLElement
+
+        expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+      })
+
       cy.get('#scroll-into-view-vertical').scrollTo(0, 300)
       cy.get('#scroll-into-view-vertical h5').should('be.visible')
     })
@@ -833,12 +845,16 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
       })
     })
 
-    it('.scrollIntoView()', { visibilityStrategy: 'legacy' }, () => {
+    it('.scrollIntoView()', () => {
       cy.get('a[data-cy="scrolling-link"]').click()
       cy.origin('http://www.foobar.com:3500', () => {
         // FIXME: snapshot of primary is showing for scrollIntoView
         cy.get('#scroll-into-view-vertical h5')
-        .should('not.be.visible')
+        .then(($el) => {
+          const container = $el[0].closest('#scroll-into-view-vertical') as HTMLElement
+
+          expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+        })
         .scrollIntoView()
       })
 
@@ -861,11 +877,16 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
       })
     })
 
-    it('.scrollTo()', { visibilityStrategy: 'legacy' }, () => {
+    it('.scrollTo()', () => {
       cy.get('a[data-cy="scrolling-link"]').click()
 
       cy.origin('http://www.foobar.com:3500', () => {
-        cy.get('#scroll-into-view-vertical h5').should('not.be.visible')
+        cy.get('#scroll-into-view-vertical h5').then(($el) => {
+          const container = $el[0].closest('#scroll-into-view-vertical') as HTMLElement
+
+          expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+        })
+
         cy.get('#scroll-into-view-vertical').scrollTo(0, 300)
       })
 

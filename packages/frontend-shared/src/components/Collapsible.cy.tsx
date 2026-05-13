@@ -57,7 +57,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
     .should('not.exist')
   })
 
-  it('overflows properly', { visibilityStrategy: 'legacy' }, () => {
+  it('overflows properly', () => {
     const overflowedContentSelector = '[data-testid=overflowed-content]'
 
     cy.mount(() => (<Collapsible maxHeight="200px" v-slots={defaultSlots}>
@@ -66,7 +66,14 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
     </Collapsible>))
     .get(targetSelector).click()
     .get(overflowedContentSelector)
-    .should('not.be.visible')
+    // The modern visibility algorithm no longer reports scroll-clipped
+    // elements as hidden, so assert geometrically that the overflowed
+    // content sits below the scroll container's visible area.
+    .then(($el) => {
+      const container = $el[0].closest('.overflow-auto') as HTMLElement
+
+      expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+    })
     .parent()
     .scrollTo('bottom')
     .get(overflowedContentSelector)
