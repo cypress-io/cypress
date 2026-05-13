@@ -89,7 +89,7 @@ describe('FileRow', () => {
     cy.percySnapshot()
   })
 
-  it('opens on click', () => {
+  it('opens on click', { visibilityStrategy: 'legacy' }, () => {
     cy.mount(() => (
       <div class="w-full p-5">
         <FileRow

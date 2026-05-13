@@ -57,7 +57,7 @@ describe('<Collapsible />', { viewportHeight: 450, viewportWidth: 350 }, () => {
     .should('not.exist')
   })
 
-  it('overflows properly', () => {
+  it('overflows properly', { visibilityStrategy: 'legacy' }, () => {
     const overflowedContentSelector = '[data-testid=overflowed-content]'
 
     cy.mount(() => (<Collapsible maxHeight="200px" v-slots={defaultSlots}>
