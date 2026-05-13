@@ -3267,7 +3267,9 @@ declare namespace Cypress {
      * `'modern'` uses a performance-optimized algorithm based on `checkVisibility()`.
      * `'legacy'` uses the traditional ancestor-walking algorithm.
      * @default 'modern'
-     * @deprecated The legacy algorithm will be removed in a future version.
+     * @deprecated This option is deprecated. It exists only as a migration path
+     * for tests that still need the legacy algorithm. The `'legacy'` value and
+     * this entire option will be removed in a future version of Cypress.
      */
     visibilityStrategy: 'legacy' | 'modern'
     /**
