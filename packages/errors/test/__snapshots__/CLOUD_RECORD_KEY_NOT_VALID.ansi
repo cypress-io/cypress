@@ -1,7 +1,7 @@
-[31mYour Record Key [33mrecord-key-123[39m[31m is not valid with this projectId: [95mproject-id-123[39m[31m[39m
-[31m[39m
-[31mIt may have been recently revoked by you or another user.[39m
-[31m[39m
-[31mPlease log into Cypress Cloud to see the valid Record Keys.[39m
-[31m[39m
-[31mhttps://on.cypress.io/dashboard/projects/project-id-123[39m
+Your Record Key record-key-123 is not valid with this projectId: project-id-123
+
+It may have been recently revoked by you or another user.
+
+Please log into Cypress Cloud to see the valid Record Keys.
+
+https://on.cypress.io/dashboard/projects/project-id-123

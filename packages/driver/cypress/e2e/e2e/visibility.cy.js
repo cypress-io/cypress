@@ -3,7 +3,7 @@ describe('visibility', () => {
 
   for (const mode of modes) {
     describe(`${mode}`, {
-      experimentalFastVisibility: mode === 'fast',
+      visibilityStrategy: mode === 'fast' ? 'modern' : 'legacy',
     }, () => {
       const isFast = mode === 'fast'
 

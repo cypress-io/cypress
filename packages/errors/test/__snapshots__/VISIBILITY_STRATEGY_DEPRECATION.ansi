@@ -1,0 +1,3 @@
+Warning: The visibilityStrategy: 'legacy' option is deprecated. The legacy visibility algorithm will be removed in a future version of Cypress.
+
+Remove the visibilityStrategy option from your configuration to use the modern algorithm.
