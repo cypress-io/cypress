@@ -561,7 +561,7 @@ describe('<DebugContainer />', () => {
         // elements as hidden, so assert geometrically that run-423 sits
         // below the scroll container's visible area before scrolling.
         cy.findByTestId('run-423').then(($el) => {
-          const container = $el[0].closest('[data-testid=debug-runs-container]') as HTMLElement
+          const container = $el[0].closest('#debug-runs-container') as HTMLElement
 
           expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
         })
