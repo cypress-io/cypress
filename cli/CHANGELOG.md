@@ -7,10 +7,7 @@
 - Removed built-in CoffeeScript support. The default `@cypress/webpack-batteries-included-preprocessor` no longer bundles `coffee-loader` or `coffeescript`. Use JavaScript/TypeScript for specs, fixtures, and support files, or add CoffeeScript to your own webpack config via `@cypress/webpack-preprocessor`. Addressed in [#33654](https://github.com/cypress-io/cypress/pull/33654).
 - Removed the `cy.end()` command, which ended a chain of commands by yielding `null`. A Cypress chain is already terminated when the next `cy.<command>()` starts a new chain, so existing `.end()` calls can simply be removed. Addressed in [#33696](https://github.com/cypress-io/cypress/pull/33696).
 - Rewrote the experimental `experimentalFastVisibility` algorithm to delegate to the browser's native `Element.checkVisibility()` with a zero-dimension guard. Addressed in [#33781](https://github.com/cypress-io/cypress/pull/33781).
-
-**Features:**
-
-- The `experimentalFastVisibility` boolean flag has been replaced with a new `visibilityStrategy` config option that accepts `'legacy'` or `'modern'`, defaulting to `'modern'`. The modern visibility algorithm (based on `Element.checkVisibility()`) is now the default for all users. The option is deprecated — set `visibilityStrategy: 'legacy'` only if you need the old algorithm. Addressed in [#33794](https://github.com/cypress-io/cypress/pull/33794).
+- The `experimentalFastVisibility` boolean flag has been replaced with a new `visibilityStrategy` config option that accepts `'legacy'` or `'modern'`, defaulting to `'modern'`. The modern visibility algorithm (based on `Element.checkVisibility()`) is now the default for all users. The option is deprecated — set `visibilityStrategy: 'legacy'` only if you need the old algorithm when migrating to the modern visibility algorithm. Addressed in [#33794](https://github.com/cypress-io/cypress/pull/33794).
 
 **Dependency Updates:**
 
