@@ -151,6 +151,7 @@ describe('Next.js', {
     // stack frame offsets vary across React versions; message is sufficient
     // to validate error reporting behaviour.
     // hasCodeFrame: false — code frames are not fully supported with Next.js 15/16.
+    // TODO: file an issue to root-cause why code frames are not rendered with Next.js 15/16.
     verify('error on mount', {
       uncaught: true,
       uncaughtMessage: 'mount error',
