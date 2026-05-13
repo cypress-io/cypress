@@ -150,7 +150,8 @@ describe('Next.js', {
     // line/column omitted: Next.js 16 bundles React internally and the exact
     // stack frame offsets vary across React versions; message is sufficient
     // to validate error reporting behaviour.
-    // hasCodeFrame: false — code frames are not fully supported with Next.js 15/16. https://github.com/cypress-io/cypress/issues/30667
+    // hasCodeFrame: false — code frames are not fully supported with Next.js 15/16.
+    // see: https://github.com/cypress-io/cypress/issues/30667
     verify('error on mount', {
       uncaught: true,
       uncaughtMessage: 'mount error',
