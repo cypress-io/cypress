@@ -1084,7 +1084,9 @@ commands:
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
-            git checkout $NEXT_VERSION || true
+            # Prefer a `release/<version>` branch (current convention) and
+            # fall back to a bare `<version>` branch for older versions.
+            git checkout "release/$NEXT_VERSION" || git checkout "$NEXT_VERSION" || true
       - when:
           condition: <<parameters.pull_request_id>>
           steps:
