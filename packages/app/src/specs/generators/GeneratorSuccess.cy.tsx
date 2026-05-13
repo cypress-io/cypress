@@ -23,7 +23,7 @@ describe('<GeneratorSuccess />', () => {
     .contains(spec.relative)
   })
 
-  it('can be collapsed to hide the content', () => {
+  it('can be collapsed to hide the content', { visibilityStrategy: 'legacy' }, () => {
     cy.mount(() => (<GeneratorSuccess file={{ ...spec, contents: content }} />))
     .get(targetSelector)
     .click()
