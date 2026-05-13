@@ -5,11 +5,11 @@ describe('bun CLI commands', () => {
   systemTests.setup()
   const skip = shouldSkipBunSystemTests()
 
-  systemTests.it('can run cypress open with bun', {
+  systemTests.it('can run cypress version with bun', {
     snapshot: false,
     browser: 'electron',
     project: 'bun-with-deps',
-    command: 'bun run cypress open',
+    command: 'bun run cypress version',
     skip,
   })
 

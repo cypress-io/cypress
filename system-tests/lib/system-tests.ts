@@ -224,7 +224,7 @@ type ExecOptions = {
   configFile?: string
   /**
    * Set a custom executable to run instead of the default (`node` or `cypress` when `withBinary`).
-   * May include argv prefixes separated by spaces (for example `bun run cypress open`); these are
+   * May include argv prefixes separated by spaces (for example `bun run cypress run`); these are
    * prepended before harness args. `child_process.spawn` requires a single binary name; multi-token
    * strings are split on whitespace (shell quoting is not supported).
    *
@@ -344,7 +344,7 @@ function resolveSpawnCommand (options: ExecOptions, harnessArgs: string[]): { cm
 }
 
 /**
- * True when `command` runs the `cypress` CLI (e.g. `bun run cypress open`), as opposed to a
+ * True when `command` runs the `cypress` CLI (e.g. `bun run cypress run`), as opposed to a
  * package-manager-only command like `bun install`.
  */
 function customSpawnCommandReferencesCypress (command: string): boolean {
@@ -352,7 +352,7 @@ function customSpawnCommandReferencesCypress (command: string): boolean {
 }
 
 /**
- * Token after `cypress` in a spawn command string, e.g. `open` for `bun run cypress open`.
+ * Token after `cypress` in a spawn command string, e.g. `run` for `bun run cypress run`.
  */
 function parseCypressCliSubcommandFromSpawnCommand (command: string): string | undefined {
   const segments = command.trim().split(/\s+/)
@@ -364,6 +364,7 @@ function parseCypressCliSubcommandFromSpawnCommand (command: string): string | u
 /**
  * When the harness spawns a real Cypress CLI (see `resolveSpawnCommand`), argv must be
  * CLI-compatible. Server-only flags like `--run-project` are invalid on `cypress open` / `cypress run`.
+ * Non-run subcommands (`install`, `verify`, `version`, `help`) omit project and harness run flags.
  */
 function buildInitialCliHarnessArgs (
   options: ExecOptions,
@@ -374,8 +375,8 @@ function buildInitialCliHarnessArgs (
   const args: string[] = []
 
   // Monorepo system tests hit the CLI package on disk; `--dev` switches spawn to `scripts/start.js`.
-  // `cypress install` does not define `--dev` on its subcommand, so omit it there.
-  if (subcommand !== 'install') {
+  // `cypress install` / `version` / `help` do not accept that global flag in this position.
+  if (subcommand !== 'install' && subcommand !== 'version' && subcommand !== 'help') {
     args.push('--dev')
   }
 
@@ -387,6 +388,8 @@ function buildInitialCliHarnessArgs (
       break
     case 'install':
     case 'verify':
+    case 'version':
+    case 'help':
       break
     default:
       args.push(`--project=${projectPath}`)
@@ -877,7 +880,12 @@ const systemTests = {
         const args = buildInitialCliHarnessArgs(options, projectPath, options.command)
         const subcommand = parseCypressCliSubcommandFromSpawnCommand(options.command)
 
-        if (subcommand !== 'install' && subcommand !== 'verify') {
+        if (
+          subcommand !== 'install'
+          && subcommand !== 'verify'
+          && subcommand !== 'version'
+          && subcommand !== 'help'
+        ) {
           appendExecHarnessOptionSuffixes(args, options)
         }
 
