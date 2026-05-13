@@ -128,7 +128,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
     })
   })
 
-  it('.scrollIntoView()', () => {
+  it('.scrollIntoView()', { visibilityStrategy: 'legacy' }, () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
     cy.origin('http://www.foobar.com:3500', () => {
@@ -138,7 +138,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
     })
   })
 
-  it('.scrollTo()', () => {
+  it('.scrollTo()', { visibilityStrategy: 'legacy' }, () => {
     cy.get('a[data-cy="scrolling-link"]').click()
 
     cy.origin('http://www.foobar.com:3500', () => {
@@ -833,7 +833,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
       })
     })
 
-    it('.scrollIntoView()', () => {
+    it('.scrollIntoView()', { visibilityStrategy: 'legacy' }, () => {
       cy.get('a[data-cy="scrolling-link"]').click()
       cy.origin('http://www.foobar.com:3500', () => {
         // FIXME: snapshot of primary is showing for scrollIntoView
@@ -861,7 +861,7 @@ context('cy.origin actions', { browser: '!webkit' }, () => {
       })
     })
 
-    it('.scrollTo()', () => {
+    it('.scrollTo()', { visibilityStrategy: 'legacy' }, () => {
       cy.get('a[data-cy="scrolling-link"]').click()
 
       cy.origin('http://www.foobar.com:3500', () => {
