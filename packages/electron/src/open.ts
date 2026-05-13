@@ -100,11 +100,16 @@ export async function open (
     })
 
     for (const signal of ['SIGINT', 'SIGTERM']) {
-      process.on(signal, async () => {
-        debugElectron('electron received signal %s', signal)
-        const code = await childClosed.promise
+      process.once(signal, async () => {
+        try {
+          debugElectron('electron received signal %s', signal)
+          const code = await childClosed.promise
 
-        process.exit(code)
+          process.exit(code)
+        } catch (err) {
+          console.error(err)
+          process.exit(1)
+        }
       })
     }
 

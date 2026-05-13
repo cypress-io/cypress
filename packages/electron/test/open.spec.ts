@@ -313,6 +313,59 @@ describe('open', () => {
     })
   })
 
+  /**
+   * `open` registers SIGINT/SIGTERM with `process.on`. If a second signal arrives
+   * while the first handler is still awaiting `childClosed.promise`, Node invokes
+   * the listener again — there is no de-duplication. Both continuations then call
+   * `process.exit` with the same code (benign but redundant; `process.once` would
+   * match the CLI spawn path).
+   */
+  describe('process signal handlers', () => {
+    let closeCb: (code: number, signal: NodeJS.Signals | null) => void
+
+    beforeEach(async () => {
+      process.removeAllListeners('SIGINT')
+      process.removeAllListeners('SIGTERM')
+
+      vi.spyOn(process, 'exit').mockImplementation(() => {})
+
+      vi.mocked(mockChildProcess.on).mockImplementation((event: string, fn) => {
+        if (event === 'close') {
+          closeCb = fn
+        }
+
+        return mockChildProcess
+      })
+
+      await open(appPath, argv)
+    })
+
+    afterEach(() => {
+      process.removeAllListeners('SIGINT')
+      process.removeAllListeners('SIGTERM')
+    })
+
+    it('calls process.exit once per stacked SIGINT while the child close promise is pending', async () => {
+      process.emit('SIGINT')
+      process.emit('SIGINT')
+
+      closeCb(0, null)
+      await new Promise((resolve) => setImmediate(resolve))
+
+      expect(process.exit).toHaveBeenCalledTimes(1)
+    })
+
+    it('calls process.exit once per stacked SIGTERM while the child close promise is pending', async () => {
+      process.emit('SIGTERM')
+      process.emit('SIGTERM')
+
+      closeCb(0, null)
+      await new Promise((resolve) => setImmediate(resolve))
+
+      expect(process.exit).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('when inspector.url() returns a URL', () => {
     const port = 9229
     const nextPort = 9230
