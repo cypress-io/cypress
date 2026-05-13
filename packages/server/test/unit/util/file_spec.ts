@@ -11,6 +11,13 @@ import { File as FileUtil } from '../../../lib/util/file'
 
 const lockFile = Promise.promisifyAll(lockFileModule)
 
+/** Introspect GracefulExit for regressions on File teardown registration (not public API). */
+function countUnlockLockfileSteps (): number {
+  const singleton = (GracefulExit as unknown as { singleton: { steps: Map<string, { name: string }> } }).singleton
+
+  return [...singleton.steps.values()].filter((s) => s.name === 'unlock lockfile').length
+}
+
 describe('lib/util/file', () => {
   beforeEach(function () {
     this.dir = path.join(os.tmpdir(), 'cypress', 'file_spec')
@@ -43,6 +50,21 @@ describe('lib/util/file', () => {
       addStepStub.restore()
       unlockSpy.restore()
     })
+  })
+
+  it('does not leave orphaned GracefulExit unlock steps when ephemeral File instances are discarded', function () {
+    const before = countUnlockLockfileSteps()
+
+    for (let i = 0; i < 3; i++) {
+      new FileUtil({ path: path.join(this.dir, `ephemeral-${i}.json`) })
+    }
+
+    // Each File should remove its GracefulExit step when the instance is no longer needed, so
+    // unreferenced instances must not accumulate unlock handlers (see lib/util/file.ts).
+    expect(
+      countUnlockLockfileSteps(),
+      'ephemeral File instances must not leave GracefulExit unlock steps registered after they are discarded',
+    ).to.equal(before)
   })
 
   context('#transaction', () => {
