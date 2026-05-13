@@ -139,7 +139,9 @@ describe('Command Options and UI Display Tests', () => {
   it('verify element visibility state', () => {
     cy.visit('cypress/fixtures/commandsActions.html')
 
-    cy.get('#scroll-horizontal button')
+    // `.action-input-hidden` starts with the `hidden` class (display: none),
+    // which the modern visibility algorithm detects.
+    cy.get('.action-input-hidden')
     .should('not.be.visible')
   })
 
