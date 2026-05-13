@@ -1,13 +1,15 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.16.0
+
+**Features:**
+
+- Added [Bun](https://bun.sh) as a recognized package manager. The `cypress` npm package can now be installed and invoked with Bun (for example `bun run cypress open` or `bun run cypress run`). Addresses [#28962](https://github.com/cypress-io/cypress/issues/28962).
+
 ## 15.15.0
 
 **Deprecations:**
 
 - The `cy.end()` command has been deprecated and will be removed in a future release. Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`. Addressed in [#33707](https://github.com/cypress-io/cypress/pull/33707).
-
-**Features:**
-
-- Added [Bun](https://bun.sh) as a recognized package manager. The `cypress` npm package can now be installed and invoked with Bun (for example `bun run cypress open` or `bun run cypress run`). Addresses [#28962](https://github.com/cypress-io/cypress/issues/28962).
 
 **Bugfixes:**
 
