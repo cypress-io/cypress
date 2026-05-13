@@ -137,11 +137,11 @@ describe('Command Options and UI Display Tests', () => {
   })
 
   it('verify element visibility state', () => {
-    cy.visit('cypress/fixtures/commandsActions.html')
+    cy.visit('cypress/fixtures/uiStates.html')
 
-    // `.action-input-hidden` starts with the `hidden` class (display: none),
-    // which the modern visibility algorithm detects.
-    cy.get('.action-input-hidden')
+    // `#c` has inline `style="display: none"`, which the modern visibility
+    // algorithm detects (scroll-clipping is no longer treated as hidden).
+    cy.get('#c')
     .should('not.be.visible')
   })
 
