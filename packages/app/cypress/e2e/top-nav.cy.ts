@@ -442,12 +442,12 @@ describe('App Top Nav Workflows', () => {
           cy.findByRole('button', { name: 'Log in' }).click()
         })
 
-        cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
+        cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
           cy.findByRole('button', { name: 'Log in' }).click()
 
           // The Log in button transitions through a few states as the browser launch lifecycle completes
           cy.findByRole('button', { name: 'Opening browser' }).should('be.visible').and('be.disabled')
-          cy.findByRole('button', { name: 'Waiting for you to log in' }).should('be.visible').and('be.disabled')
+          cy.findByRole('button', { name: 'Waiting for browser...' }).should('be.visible').and('be.disabled')
         })
 
         cy.findByRole('dialog', { name: 'Login successful' }).within(() => {

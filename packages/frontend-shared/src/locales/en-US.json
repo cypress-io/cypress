@@ -373,7 +373,7 @@
       "actionLogout": "Log out",
       "actionContinue": "Continue",
       "actionOpening": "Opening browser",
-      "actionWaiting": "Waiting for you to log in",
+      "actionWaiting": "Waiting for browser...",
       "actionTryAgain": "Try again",
       "actionCancel": "Cancel"
     },
