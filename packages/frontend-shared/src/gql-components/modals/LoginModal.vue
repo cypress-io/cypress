@@ -38,7 +38,7 @@
           <i18n-t
             v-else-if="viewer"
             scope="global"
-            :keypath="successBodyKey"
+            keypath="topNav.login.bodySuccess"
           >
             <ExternalLink
               href="https://on.cypress.io/dashboard/profile"
@@ -54,7 +54,7 @@
               <i-cy-errored-outline_x16 class="h-[16px] min-w-[16px] w-[16px] icon-dark-red-400" />
               {{ t('topNav.login.bodyBrowserError') }}
             </div>
-            {{ t(browserErrorDetailsKey) }}
+            {{ t('topNav.login.bodyBrowserErrorDetails') }}
 
             <CopyText
               v-if="props.gql.authState.message"
@@ -63,7 +63,7 @@
             />
           </div>
           <div v-else-if="error === 'AUTH_ERROR_DURING_LOGIN'">
-            {{ t(genericErrorBodyKey) }}
+            {{ t('topNav.login.bodyError') }}
             <div
               class="rounded flex bg-red-100 mt-[16px] p-[16px] text-red-600 gap-[8px] items-center"
             >
@@ -151,13 +151,10 @@ const error = computed(() => {
 
 const showFooter = computed(() => error.value !== 'AUTH_COULD_NOT_LAUNCH_BROWSER')
 const initialBodyKey = computed(() => isSignup.value ? 'topNav.login.bodyInitialSignup' : 'topNav.login.bodyInitial')
-const successBodyKey = computed(() => isSignup.value ? 'topNav.login.bodySuccessSignup' : 'topNav.login.bodySuccess')
-const genericErrorBodyKey = computed(() => isSignup.value ? 'topNav.login.bodyErrorSignup' : 'topNav.login.bodyError')
-const browserErrorDetailsKey = computed(() => isSignup.value ? 'topNav.login.bodyBrowserErrorDetailsSignup' : 'topNav.login.bodyBrowserErrorDetails')
 
 const title = computed(() => {
   if (viewer.value) {
-    return isSignup.value ? t('topNav.login.titleSuccessSignup') : t('topNav.login.titleSuccess')
+    return t('topNav.login.titleSuccess')
   }
 
   if (error.value === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
@@ -165,7 +162,7 @@ const title = computed(() => {
   }
 
   if (error.value === 'AUTH_ERROR_DURING_LOGIN') {
-    return isSignup.value ? t('topNav.login.titleFailedSignup') : t('topNav.login.titleFailed')
+    return t('topNav.login.titleFailed')
   }
 
   if (isSignup.value) {

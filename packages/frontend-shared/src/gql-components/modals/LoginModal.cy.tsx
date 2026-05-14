@@ -28,7 +28,7 @@ type TestCloudViewer = {
   fullName: string | null
 }
 
-const mountSuccess = (viewer: TestCloudViewer = cloudViewer, authFlow?: 'login' | 'signup') => {
+const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
   const finalViewer = {
     ...CloudUserStubs.me,
     organizations: null,
@@ -54,7 +54,6 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer, authFlow?: 'login' 
         <LoginModal
           gql={gqlVal}
           utmMedium="testing"
-          authFlow={authFlow}
         />
       </div>),
   })
@@ -110,13 +109,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains(text.login.bodySuccess.replace('{0}', cloudViewer.fullName)).should('be.visible')
       cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
     })
-
-    it('shows successful signup status when auth flow is signup', () => {
-      mountSuccess(cloudViewer, 'signup')
-      cy.contains('h2', text.login.titleSuccessSignup).should('be.visible')
-      cy.contains(text.login.bodySuccessSignup.replace('{0}', cloudViewer.fullName)).should('be.visible')
-      cy.contains('a', cloudViewer.fullName).should('have.attr', 'href', 'https://on.cypress.io/dashboard/profile')
-    })
   })
 
   describe('errors', () => {
@@ -144,22 +136,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains('button', 'Copy').should('be.visible')
     })
 
-    it('shows signup-specific browser error details during signup', () => {
-      cy.mountFragment(LoginModalFragmentDoc, {
-        onResult: (result) => {
-          result.__typename = 'Query'
-          result.authState.name = 'AUTH_COULD_NOT_LAUNCH_BROWSER'
-          result.authState.message = 'http://127.0.0.1:0000/redirect-to-auth'
-        },
-        render: (gqlVal) =>
-          (<div class="border-current border h-[700px] resize overflow-auto">
-            <LoginModal gql={gqlVal} authFlow="signup" utmMedium="testing"/>
-          </div>),
-      })
-
-      cy.contains(text.login.bodyBrowserErrorDetailsSignup).should('be.visible')
-    })
-
     it('shows non-browser errors from login process', () => {
       const cancelSpy = cy.spy().as('cancelSpy')
       const errorText = 'The flux capacitor ran out of battery'
@@ -185,25 +161,6 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       // but we can test that cancelling closes the modal here:
       cy.contains('button', text.login.actionCancel).click()
       cy.get('@cancelSpy').should('have.been.called')
-    })
-
-    it('shows signup-specific title and body when auth fails during signup', () => {
-      const errorText = 'The flux capacitor ran out of battery'
-
-      cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => {
-          gqlVal.authState.name = 'AUTH_ERROR_DURING_LOGIN'
-          gqlVal.authState.message = errorText
-
-          return (<div class="border-current border h-[700px] resize overflow-auto">
-            <LoginModal gql={gqlVal} authFlow="signup" utmMedium="testing"/>
-          </div>)
-        },
-      })
-
-      cy.contains(text.login.titleFailedSignup).should('be.visible')
-      cy.contains(text.login.bodyErrorSignup).should('be.visible')
-      cy.contains(errorText).should('be.visible')
     })
   })
 
