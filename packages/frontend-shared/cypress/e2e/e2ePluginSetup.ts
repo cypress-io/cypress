@@ -113,7 +113,7 @@ async function makeE2ETasks () {
   const { toObject } = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('./prod-dependencies')
   const Fixtures = require('@tooling/system-tests') as FixturesShape
-  const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
+  const { scaffoldCommonNodeModules, scaffoldProjectNodeModules, clearCachedNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
   const cli = require('../../../../cli/lib/cli').default
   const cliUtil = require('../../../../cli/lib/util').default
@@ -139,6 +139,7 @@ async function makeE2ETasks () {
   let remoteGraphQLOptions: Record<string, any> | undefined
   let remoteGraphQLInterceptBatched: RemoteGraphQLBatchInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
+  let cachedCommercialRecommendations: string | undefined
 
   const cachedCwd = process.cwd()
 
@@ -164,6 +165,10 @@ async function makeE2ETasks () {
       if (isRetry) {
         throw e
       }
+
+      // Clear the cached node_modules to avoid reusing a corrupted cache
+      // (e.g. from a previously interrupted install)
+      await clearCachedNodeModules(projectName)
 
       // If we have an error, it's likely that we don't have a lockfile, or it's out of date.
       // Let's run a quick "yarn" in the directory, kill the node_modules, and try again
@@ -380,6 +385,21 @@ async function makeE2ETasks () {
     },
     __internal_remoteGraphQLInterceptBatched (fn: string) {
       remoteGraphQLInterceptBatched = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLBatchInterceptor
+
+      return null
+    },
+    __internal_optInToCloudAppMessages () {
+      cachedCommercialRecommendations = process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+      delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+
+      return null
+    },
+    __internal_restoreCommercialRecommendations () {
+      if (cachedCommercialRecommendations !== undefined) {
+        process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS = cachedCommercialRecommendations
+      }
+
+      cachedCommercialRecommendations = undefined
 
       return null
     },

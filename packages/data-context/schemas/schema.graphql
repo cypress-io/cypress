@@ -66,6 +66,81 @@ type CachedUser implements Node {
   id: ID!
 }
 
+"""
+In-app banner content. Audience filtering (channel flag, version, cohort) is applied server-side before delivery.
+"""
+type CloudAppMessage {
+  analytics: CloudAppMessageAnalytics!
+
+  """
+  Banner body text. Rendered as markdown (bold, italic, inline code, links). Raw HTML is escaped.
+  """
+  body: String!
+  ctas: [CloudAppMessageCta!]!
+  dismissal: CloudAppMessageDismissal!
+  enabled: Boolean!
+
+  """Cloud-defined id. Bump to re-show a previously-dismissed message."""
+  id: String!
+
+  """Higher wins when multiple messages are eligible."""
+  priority: Int!
+  title: String!
+  visualStyle: CloudAppMessageVisualStyle!
+}
+
+"""
+Analytics metadata flowed through to recordEvent on impression / click / dismissal
+"""
+type CloudAppMessageAnalytics {
+  campaign: String!
+  category: String!
+  utm: CloudAppMessageUtm
+}
+
+"""
+Call-to-action button rendered alongside an in-app cloud message banner
+"""
+type CloudAppMessageCta {
+  href: String!
+
+  """
+  Message-scoped analytical key (e.g. `learn_cy_prompt`). Sent as `ctaId` on click events; survives URL revisions.
+  """
+  id: String!
+  style: CloudAppMessageCtaStyle!
+  text: String!
+  utm: CloudAppMessageUtm
+}
+
+enum CloudAppMessageCtaStyle {
+  primary
+  secondary
+}
+
+type CloudAppMessageDismissal {
+  scope: CloudAppMessageDismissalScope!
+}
+
+enum CloudAppMessageDismissalScope {
+  project
+  user
+}
+
+"""
+Optional UTM params for CTA destination URLs. CTA-level overrides message-level. utm_source/medium/campaign are auto-injected by the binary.
+"""
+type CloudAppMessageUtm {
+  content: String
+  id: String
+  term: String
+}
+
+enum CloudAppMessageVisualStyle {
+  info
+  warning
+}
+
 """Information about the browser the tests were run on"""
 type CloudBrowserInfo implements Node {
   """The formatted name of the browser, e.g. `Electron`"""
@@ -1409,6 +1484,11 @@ type LocalSettings {
 """local setting preferences"""
 type LocalSettingsPreferences {
   autoScrollingEnabled: Boolean
+
+  """
+  User-scoped banner state — used by cloud-driven messages whose `dismissal.scope` is `user`. The shape mirrors `currentProject.savedState.banners` but lives in global appData.
+  """
+  banners: JSON
   codeEditorLineWrap: Boolean
   debugSlideshowComplete: Boolean
   desktopNotificationsEnabled: Boolean
@@ -1783,6 +1863,16 @@ type Query {
   authState: AuthState!
   baseError: ErrorWrapper
   cachedUser: CachedUser
+
+  """
+  Cloud-driven in-app messages eligible to be rendered as banners in the binary. Pre-filtered server-side by channel feature flag, version range, and cohort allow-lists. Public — accessible without authentication so logged-out users can still receive awareness messages. The binary may further filter on local state (run mode, env-var opt-out) before rendering.
+  """
+  cloudAppMessages(
+    """
+    Optional project slug used to scope cohort and channel-flag lookups. When omitted, only globally-targeted messages are returned.
+    """
+    projectSlug: String
+  ): [CloudAppMessage!]
 
   """
   Polling query to determine when to refetch spec data. A null value here means no data available in the cloud.
