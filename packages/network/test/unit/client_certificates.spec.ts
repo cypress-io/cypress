@@ -250,6 +250,9 @@ function createPfxFiles (
     '-inkey', keyTmp,
     '-out', pfxFilepath,
     '-password', `pass:${passphrase}`,
+    '-keypbe', 'AES-256-CBC',
+    '-certpbe', 'AES-256-CBC',
+    '-macalg', 'sha256',
   ], { stdio: 'ignore' })
 
   fs.removeSync(certTmp)
