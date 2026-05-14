@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an intermittent `ENOENT: no such file or directory, open <path>/bundle.tar-<rand>` error during `cy.prompt` and Studio bundle initialization. Fixed in [#33748](https://github.com/cypress-io/cypress/pull/33748).
 
 ## 15.15.0
