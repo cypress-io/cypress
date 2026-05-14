@@ -113,12 +113,6 @@ const wrapAsBundleError = (
   }
 
   if (isPosixSyscallError(err)) {
-    // From the fetch phase any syscall is network. From the pipeline phase,
-    // only the network-class codes (mid-stream TCP drop, DNS flake) should be
-    // treated as network/retryable; everything else (ENOSPC, EACCES, EROFS,
-    // EIO, ...) is a filesystem error from the tar-entry write and must NOT
-    // be wrapped as SystemError, since isRetryableError treats SystemError as
-    // always-retryable and would burn the full retry budget.
     if (defaultStage === 'network' || isNetworkSyscallError(err)) {
       const sysError = SystemError.isSystemError(err)
         ? err
