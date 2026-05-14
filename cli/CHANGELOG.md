@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.15.1
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
+
 ## 15.15.0
 
 **Deprecations:**
@@ -7,7 +13,6 @@
 
 **Bugfixes:**
 
-- Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
 - Fixed an issue where the proxy stripped `Content-Length: 0` from empty responses (e.g. a `DELETE 200` with no body) and the resulting empty body was re-emitted with `Transfer-Encoding: chunked`, breaking clients that assume a fixed-length response. Partially addresses [#16469](https://github.com/cypress-io/cypress/issues/16469). Fixed in [#33754](https://github.com/cypress-io/cypress/pull/33754).
 - Fixed an issue where component specs that defined local React components could register every `describe` / `it` block twice in `cypress open` when using Vite 8, because React refresh treated those specs as HMR self-accepting modules. `@cypress/vite-dev-server` now excludes component spec files from JSX refresh while leaving Fast Refresh enabled for application source. Fixes [#33750](https://github.com/cypress-io/cypress/issues/33750).
 - Fixed an issue where multi-origin tests using [`cy.origin`](https://docs.cypress.io/api/commands/origin) could fail to talk to a secondary origin after test isolation, when the spec-bridge iframe was already present, or when more than one secondary origin became ready around the same time. Cached spec-bridge window targets are now cleared at the correct lifecycle points, improving performance of specs with cy.origin calls. Addressed in [#33704](https://github.com/cypress-io/cypress/pull/33704).
