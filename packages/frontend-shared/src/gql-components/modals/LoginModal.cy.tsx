@@ -83,7 +83,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} authFlow="signup" utmMedium="testing" /></div>,
       })
 
-      cy.contains('h2', text.login.titleInitialSignup).should('be.visible')
+      cy.contains('h2', text.login.titleInitial).should('be.visible')
       cy.findByRole('button', { name: text.login.actionSignup }).should('be.visible')
     })
 

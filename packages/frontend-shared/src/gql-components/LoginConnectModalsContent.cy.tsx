@@ -20,12 +20,12 @@ describe('<LoginConnectModalsContent />', () => {
           },
         })
 
-        cy.contains('Log in to Cypress')
+        cy.contains('Continue in your browser')
         .should('not.exist')
         .then(() => {
           openLoginConnectModal({ utmMedium: 'testing', utmContent: content })
 
-          cy.contains('Log in to Cypress').should('be.visible')
+          cy.contains('Continue in your browser').should('be.visible')
         })
 
         const loginStub = cy.stub().as('createProjectStub')
@@ -60,12 +60,12 @@ describe('<LoginConnectModalsContent />', () => {
         },
       })
 
-      cy.contains('Sign up for Cypress')
+      cy.contains('Continue in your browser')
       .should('not.exist')
       .then(() => {
         openSignupConnectModal({ utmMedium: 'studio', utmContent: 'signup' })
 
-        cy.contains('Sign up for Cypress').should('be.visible')
+        cy.contains('Continue in your browser').should('be.visible')
       })
 
       const signupStub = cy.stub().as('signupStub')
