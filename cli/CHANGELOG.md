@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
 
 ## 15.15.0
