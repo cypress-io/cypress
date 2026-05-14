@@ -1,0 +1,23 @@
+packages/data-context/graphql/schema.ts
+  s_7a176fd83fef98::t_82c7a2dbe90122 33-35
+packages/data-context/schemas/schema.graphql
+  s_7a176fd83fef98::t_ded3b7fac2ebf0 1868,1870
+packages/data-context/graphql/schemaTypes/objectTypes/gql-Query.ts
+  s_7a176fd83fef98::t_86918d6127399e 132-146
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "bece31ad1222693e23e72eeb05461cf016c352ae",
+  "prompts": {},
+  "sessions": {
+    "s_7a176fd83fef98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "546534c1-4ce2-49ce-bb40-b6f93ef2f19b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
