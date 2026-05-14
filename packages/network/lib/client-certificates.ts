@@ -71,24 +71,14 @@ export class UrlMatcher {
  */
 export class UrlClientCertificates {
   constructor (url: string) {
-    this.subjects = ''
     this.url = url
     this.pathnameLength = new URL(url).pathname.length
     this.clientCertificates = new ClientCertificates()
   }
   clientCertificates: ClientCertificates
   url: string
-  subjects: string
   pathnameLength: number
   matchRule: ParsedUrl | undefined
-
-  addSubject (subject: string) {
-    if (!this.subjects) {
-      this.subjects = subject
-    } else {
-      this.subjects = `${this.subjects} - ${subject}`
-    }
-  }
 }
 
 /**
@@ -160,9 +150,7 @@ export class ClientCertificateStore {
 
         return null
       case 1:
-        debug(
-          `using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`,
-        )
+        debug(`using client certificate(s) for url '${requestUrl.href}'`)
 
         return matchingCerts[0].clientCertificates
       default:
@@ -170,9 +158,7 @@ export class ClientCertificateStore {
           return b.pathnameLength - a.pathnameLength
         })
 
-        debug(
-          `using client certificate(s) '${matchingCerts[0].subjects}' for url '${requestUrl.href}'`,
-        )
+        debug(`using client certificate(s) for url '${requestUrl.href}'`)
 
         return matchingCerts[0].clientCertificates
     }
@@ -265,10 +251,10 @@ export function loadClientCertificateConfig (config: Config) {
 
             debug(`loading PEM cert from '${cert.cert}'`)
             const pemRaw = loadBinaryFromFile(cert.cert)
-            let pemParsed: X509Certificate | undefined = undefined
 
             try {
-              pemParsed = new X509Certificate(pemRaw)
+              // eslint-disable-next-line no-new
+              new X509Certificate(pemRaw)
             } catch (error: any) {
               throw new Error(`Cannot parse PEM cert: ${error.message}`)
             }
@@ -301,11 +287,8 @@ export function loadClientCertificateConfig (config: Config) {
               new PemKey(pemKeyRaw, passphrase),
             )
 
-            const subject = extractSubjectFromPem(pemParsed)
-
-            urlClientCertificates.addSubject(subject)
             debug(
-              `loaded client PEM certificate: ${subject} for url: ${urlClientCertificates.url}`,
+              `loaded client PEM certificate for url: ${urlClientCertificates.url}`,
             )
           }
 
@@ -369,19 +352,6 @@ function loadTextFromFile (filepath: string): string {
   // TODO: update to async
   // eslint-disable-next-line no-restricted-syntax
   return fs.readFileSync(filepath, 'utf8').toString()
-}
-
-/**
- * Extract subject from supplied pem instance
- */
-function extractSubjectFromPem (pem: X509Certificate): string {
-  try {
-    // X509Certificate.subject is a newline-separated `key=value` string;
-    // normalize to comma-separated to match the existing debug log format.
-    return pem.subject.split('\n').join(', ')
-  } catch (e: any) {
-    throw new Error(`Unable to extract subject from PEM file: ${e.message}`)
-  }
 }
 
 function loadPfx (pfx: Buffer, passphrase: string | undefined): void {
