@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.16.0
+
+**Features:**
+
+- Cypress Cloud **sign up** is supported from the Cypress desktop app in addition to log in. Addressed in [#33805](https://github.com/cypress-io/cypress/pull/33805).
+
 ## 15.15.0
 
 **Deprecations:**
