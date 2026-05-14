@@ -16,6 +16,7 @@ const PORT = 9001
 const REDIRECT_URL = `http://127.0.0.1:${PORT}/redirect-to-auth`
 const FULL_LOGIN_URL = `https://foo.invalid/login.html?port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&cypressVersion=${pkg.version}&platform=linux`
 const FULL_LOGIN_URL_UTM = `https://foo.invalid/login.html?utm_source=UTM%20Source&utm_medium=UTM%20Medium&utm_campaign=Log%20In&utm_content=UTM%20Content&port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&cypressVersion=${pkg.version}&platform=linux`
+const FULL_SIGNUP_URL_UTM = `https://foo.invalid/login.html?utm_source=UTM%20Source&utm_medium=UTM%20Medium&utm_campaign=Sign%20Up&utm_content=UTM%20Content&port=${PORT}&state=${RANDOM_STRING}&machineId=abc123&cypressVersion=${pkg.version}&platform=linux`
 
 describe('lib/cloud/auth', function () {
   beforeEach(() => {
@@ -76,6 +77,13 @@ describe('lib/cloud/auth', function () {
         expect(url).to.eq(FULL_LOGIN_URL_UTM)
       })
     })
+
+    it('uses signup utm campaign to form a trackable signup URL', function () {
+      return auth._internal.buildFullSignupUrl(BASE_URL, this.server, 'UTM Source', 'UTM Medium', 'UTM Content')
+      .then((url) => {
+        expect(url).to.eq(FULL_SIGNUP_URL_UTM)
+      })
+    })
   })
 
   context('_internal.launchNativeAuth', function () {
@@ -132,6 +140,21 @@ describe('lib/cloud/auth', function () {
 
       await auth.start(() => {}, 'code')
 
+      expect(auth._internal.stopServer).to.be.calledOnce
+    })
+
+    it('resolves upon successful signup auth', async () => {
+      sinon.stub(user, 'getBaseSignupUrl').resolves('www.foo.bar')
+      sinon.stub(Promise, 'fromCallback').resolves()
+      sinon.stub(auth._internal, 'launchServer').resolves()
+      sinon.stub(auth._internal, 'buildLoginRedirectUrl').resolves('www.redirect.url')
+      sinon.stub(auth._internal, 'launchNativeAuth').resolves()
+      sinon.stub(auth._internal, 'stopServer')
+
+      await auth.startSignup(() => {}, 'code')
+
+      expect(user.getBaseSignupUrl).to.be.calledOnce
+      expect(auth._internal.launchServer).to.be.calledWith('www.foo.bar', sinon.match.func, 'code', undefined, undefined, 'signup')
       expect(auth._internal.stopServer).to.be.calledOnce
     })
 

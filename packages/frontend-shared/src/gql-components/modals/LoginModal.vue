@@ -27,7 +27,7 @@
           <i18n-t
             v-if="!viewer && !error"
             scope="global"
-            keypath="topNav.login.bodyInitial"
+            :keypath="initialBodyKey"
           >
             <ExternalLink
               href="https://on.cypress.io/dashboard-introduction"
@@ -78,6 +78,7 @@
         >
           <Auth
             :gql="props.gql"
+            :auth-flow="authFlow"
             :show-retry="!!error"
             :utm-medium="props.utmMedium"
             :utm-content="props.utmContent"
@@ -108,6 +109,7 @@ import {
 } from '@headlessui/vue'
 
 import type { LoginModalFragment } from '../../generated/graphql'
+import type { AuthFlow } from '../../store/user-project-status-store'
 
 const online = useOnline()
 
@@ -118,6 +120,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   gql: LoginModalFragment
+  authFlow?: AuthFlow
   utmMedium: string
   utmContent?: string
 }>()
@@ -131,6 +134,8 @@ fragment LoginModal on Query {
 hideAllPoppers()
 
 const { t } = useI18n()
+const authFlow = computed(() => props.authFlow || 'login')
+const isSignup = computed(() => authFlow.value === 'signup')
 
 const viewer = computed(() => props.gql?.cloudViewer)
 
@@ -145,6 +150,7 @@ const error = computed(() => {
 })
 
 const showFooter = computed(() => error.value !== 'AUTH_COULD_NOT_LAUNCH_BROWSER')
+const initialBodyKey = computed(() => isSignup.value ? 'topNav.login.bodyInitialSignup' : 'topNav.login.bodyInitial')
 
 const title = computed(() => {
   if (viewer.value) {
@@ -157,6 +163,10 @@ const title = computed(() => {
 
   if (error.value === 'AUTH_ERROR_DURING_LOGIN') {
     return t('topNav.login.titleFailed')
+  }
+
+  if (isSignup.value) {
+    return t('topNav.login.titleInitialSignup')
   }
 
   return t('topNav.login.titleInitial')

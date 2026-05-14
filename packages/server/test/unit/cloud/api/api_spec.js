@@ -26,6 +26,7 @@ const API_PROD_PROXY_BASEURL = 'https://api-proxy.cypress.io'
 const CLOUD_BASEURL = 'http://localhost:3000'
 const AUTH_URLS = {
   'dashboardAuthUrl': 'http://localhost:3000/test-runner.html',
+  'dashboardSignupUrl': 'http://localhost:3000/test-runner-signup',
   'dashboardLogoutUrl': 'http://localhost:3000/logout',
 }
 

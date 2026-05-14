@@ -12,6 +12,7 @@ describe('AuthActions', () => {
     beforeEach(() => {
       ctx = createTestDataContext('open')
       jest.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      jest.mocked(ctx._apis.authApi.signUp).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
 
       actions = new AuthActions(ctx)
     })
@@ -127,6 +128,40 @@ describe('AuthActions', () => {
       await actions.login()
 
       expect(ctx._apis.electronApi.focusMainWindow).not.toHaveBeenCalled()
+      expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('.signup', () => {
+    let ctx: DataContext
+    let actions: AuthActions
+
+    beforeEach(() => {
+      ctx = createTestDataContext('open')
+      jest.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      jest.mocked(ctx._apis.authApi.signUp).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+
+      actions = new AuthActions(ctx)
+    })
+
+    it('sets coreData.user', async () => {
+      await actions.signup('Binary: App', 'Studio', 'Signup')
+      expect(ctx.coreData.user).toEqual(expect.objectContaining({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' }))
+    })
+
+    it('calls authApi.signUp with utm parameters', async () => {
+      await actions.signup('Binary: App', 'Studio', 'Signup')
+
+      expect(ctx._apis.authApi.signUp).toHaveBeenCalledWith(expect.any(Function), 'Binary: App', 'Studio', 'Signup')
+      expect(ctx._apis.authApi.logIn).not.toHaveBeenCalled()
+    })
+
+    it('focuses the main window after successful signup auth', async () => {
+      ctx.coreData.activeBrowser = null
+
+      await actions.signup('Binary: App', 'Studio', 'Signup')
+
+      expect(ctx._apis.electronApi.focusMainWindow).toHaveBeenCalledTimes(1)
       expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
     })
   })
