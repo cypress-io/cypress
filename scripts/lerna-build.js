@@ -10,8 +10,8 @@ const concurrency = Math.min(4, os.availableParallelism())
 
 const child = spawn(
   'lerna',
-  ['run', 'build', '--stream', `--concurrency=${concurrency}`],
-  { stdio: 'inherit', shell: true },
+  ['run', 'build', '--stream', `--concurrency=${concurrency}`, ...process.argv.slice(2)],
+  { stdio: 'inherit' },
 )
 
 child.on('exit', (code, signal) => {
