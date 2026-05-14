@@ -37,8 +37,6 @@ export const publishStagingToFinal = async (staging: string, finalDir: string): 
   const others = allFiles.filter((rel) => rel !== MANIFEST_REL)
   const hasManifest = allFiles.includes(MANIFEST_REL)
 
-  // allSettled drains in-flight renames so the caller's staging cleanup can't
-  // race them into unhandled ENOENT rejections.
   const otherPromises = others.map((rel) => publishOne(staging, finalDir, rel))
 
   try {
