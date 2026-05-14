@@ -3,7 +3,7 @@
 
 **Bugfixes:**
 
-- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates at startup with `Cannot parse PEM cert: ... OID is not RSA.` Cert and key validation now goes through Node's built-in `crypto` and `tls` primitives, which accept both RSA and ECDSA keys. RSA certificates continue to work unchanged. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
+- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 
 ## 15.15.0
 
