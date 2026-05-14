@@ -32,9 +32,6 @@ const publishOne = async (staging: string, finalDir: string, rel: string): Promi
   await renameAtomicWithRetry(src, dst)
 }
 
-// Per-file atomic rename of `staging` into `finalDir`, with `manifest.json`
-// renamed last so a reader that sees the manifest is guaranteed to see every
-// other file in its new-version state. Per PR #33034.
 export const publishStagingToFinal = async (staging: string, finalDir: string): Promise<void> => {
   const allFiles = await walkFiles(staging)
   const others = allFiles.filter((rel) => rel !== MANIFEST_REL)
