@@ -1,9 +1,8 @@
 import debugFn from 'debug'
-import semverMajor from 'semver/functions/major.js'
-import type { UserConfig } from 'vite-7'
-import { getVite, Vite_7, Vite_8 } from './getVite.js'
-import { createViteDevServerConfig, isVite8 } from './resolveConfig.js'
-import { getSupportFileRelativePath, waitUntilUrlReady } from './waitForSupportFile.js'
+import { getVite, Vite } from './getVite.js'
+import { createViteDevServerConfig } from './resolveConfig.js'
+import { getSpecRelativeUrl, getSupportFileRelativeUrl } from './urlPaths.js'
+import type { UserConfig } from 'vite-8'
 
 const debug = debugFn('cypress:vite-dev-server:devServer')
 
@@ -24,22 +23,13 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   // This has to be the first thing we do as we need to source vite from their project's dependencies
   const vite = await getVite(config)
 
-  let majorVersion: number | undefined = undefined
-
-  if (vite.version) {
-    majorVersion = semverMajor(vite.version)
-    debug(`Found vite version v${majorVersion}`)
-  } else {
-    debug(`vite version not found`)
-  }
-
   debug('Creating Vite Server')
   const server = await devServer.create(config, vite)
 
   debug('Vite server created')
 
   await server.listen()
-  const { port, host } = server.config.server
+  const { port } = server.config.server
 
   if (!port) {
     throw new Error('Missing vite dev server port.')
@@ -47,15 +37,41 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
 
   debug('Successfully launched the vite server on port', port)
 
-  const supportPath = getSupportFileRelativePath(config.cypressConfig)
+  // Warm up the support file (always) and every spec (run mode only),
+  // then waitForRequestsIdle, so Vite's deps optimizer has fully processed
+  // any node_modules imports they pull in before the browser fetches
+  // them. Skipping this can race a mid-test optimizer re-bundle and
+  // surface "Failed to fetch dynamically imported module".
+  //
+  // Per-spec warmup is required: preprocessor or auto-import plugins can
+  // inject node_modules imports during transform that Vite's static deps
+  // scanner doesn't see, so the optimizer would otherwise first discover
+  // them when the browser fetches the spec.
+  //
+  // In open mode (`isTextTerminal === false`), we skip the per-spec
+  // warmup. The user picks specs interactively and is unlikely to run
+  // every spec in the suite, so warming all of them up front would pay
+  // for work that may never be needed. Support-file warmup is kept
+  // because the support file is always loaded and typically has the
+  // deepest dep tree.
+  const warmupTargets: string[] = []
+  const supportFileUrl = getSupportFileRelativeUrl(config.cypressConfig)
 
-  if (supportPath) {
-    const baseUrl = `http://${typeof host === 'string' ? host : '127.0.0.1'}:${port}`
-    const supportFileUrl = new URL(supportPath, `${baseUrl}/`).href
+  if (supportFileUrl) {
+    warmupTargets.push(supportFileUrl)
+  }
 
-    debug('Waiting until support file is servable', supportFileUrl)
-    await waitUntilUrlReady(supportFileUrl)
-    debug('Support file is ready')
+  if (config.cypressConfig.isTextTerminal) {
+    for (const spec of config.specs ?? []) {
+      warmupTargets.push(getSpecRelativeUrl(spec, config.cypressConfig))
+    }
+  }
+
+  if (warmupTargets.length > 0) {
+    debug('Warming up module graph for %d targets', warmupTargets.length)
+    await Promise.all(warmupTargets.map((target) => server.warmupRequest(target)))
+    await server.waitForRequestsIdle()
+    debug('Module graph is ready')
   }
 
   return {
@@ -72,19 +88,11 @@ export async function devServer (config: ViteDevServerConfig): Promise<Cypress.R
   }
 }
 
-devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite_7 | Vite_8) {
+devServer.create = async function createDevServer (devServerConfig: ViteDevServerConfig, vite: Vite) {
   try {
-    // Handling here is mainly for conditional generics to make sure we get the types correct between vite 7 and vite 8.
-    // Eventually, vite 8 will be the default and we can remove this logic
-    if (isVite8(vite)) {
-      const config = await createViteDevServerConfig<Vite_8>(devServerConfig, vite as Vite_8)
+    const config = await createViteDevServerConfig(devServerConfig, vite)
 
-      return await (vite as Vite_8).createServer(config)
-    }
-
-    const config = await createViteDevServerConfig<Vite_7>(devServerConfig, vite as Vite_7)
-
-    return await (vite as Vite_7).createServer(config)
+    return await (vite).createServer(config)
   } catch (err) {
     if (err instanceof Error) {
       throw err

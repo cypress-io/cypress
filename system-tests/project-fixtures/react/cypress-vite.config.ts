@@ -1,5 +1,6 @@
 import { defineConfig } from 'cypress'
 import type * as vite from 'vite'
+import viteConfig from './vite.config.mjs'
 
 declare global {
   namespace Cypress {
@@ -10,8 +11,6 @@ declare global {
 }
 
 const port = 8888
-
-const viteConfig = require('./vite.config.js')
 
 viteConfig.server ??= {}
 viteConfig.server.port = port

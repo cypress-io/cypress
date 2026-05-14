@@ -462,7 +462,7 @@ export function isArray (key: string, value: any) {
 }
 
 export function isNumberOrFalse (key: string, value: any): ErrResult | true {
-  if (_.isNumber(value) || isFalse(value)) {
+  if (value == null || _.isNumber(value) || isFalse(value)) {
     return true
   }
 
