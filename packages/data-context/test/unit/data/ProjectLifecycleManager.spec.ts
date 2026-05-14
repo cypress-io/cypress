@@ -209,6 +209,44 @@ describe('ProjectLifecycleManager', () => {
       expect(ctx.coreData.cliBrowser).toEqual('chrome:beta')
       expect(ctx.coreData.activeBrowser).toEqual(browsers[2])
     })
+
+    it('returns early without throwing if the project was cleared mid-setup', async () => {
+      // Simulates the user clearing the project (e.g. clicking "back to projects"
+      // or switching projects) while setupNodeEvents is still in flight.
+      // @ts-expect-error - private field
+      ctx.lifecycleManager._projectRoot = undefined
+      ctx.coreData.activeBrowser = null
+      ctx.coreData.cliBrowser = null
+
+      await expect(ctx.lifecycleManager.setInitialActiveBrowser()).resolves.toBeUndefined()
+      expect(ctx.coreData.activeBrowser).toBeNull()
+    })
+  })
+
+  describe('onFinalConfigLoaded', () => {
+    it('returns early without throwing if the project was cleared mid-setup', async () => {
+      // Simulates the user clearing the project (e.g. clicking "back to projects"
+      // or switching projects) while setupNodeEvents is still in flight.
+
+      // Grab the onFinalConfigLoaded callback the way the ProjectConfigManager
+      // would when it finishes resolving setupNodeEvents.
+      // @ts-expect-error - private method
+      const configManager = ctx.lifecycleManager.createConfigManager()
+      const onFinalConfigLoaded = (configManager as any).options.onFinalConfigLoaded as (config: FullConfig, options: { shouldRestartBrowser: boolean }) => Promise<void>
+
+      const setSpecsSpy = jest.spyOn(ctx.actions.project, 'setSpecsFoundBySpecPattern').mockResolvedValue(undefined)
+      const setInitialActiveBrowserSpy = jest.spyOn(ctx.lifecycleManager, 'setInitialActiveBrowser').mockResolvedValue(undefined)
+
+      // @ts-expect-error - private field
+      ctx.lifecycleManager._projectRoot = undefined
+
+      await expect(onFinalConfigLoaded(fullConfig, { shouldRestartBrowser: false })).resolves.toBeUndefined()
+
+      expect(setSpecsSpy).not.toHaveBeenCalled()
+      expect(setInitialActiveBrowserSpy).not.toHaveBeenCalled()
+      // @ts-expect-error - private field
+      expect(ctx.lifecycleManager._cachedFullConfig).toBeUndefined()
+    })
   })
 
   describe('#eventProcessPid', () => {
