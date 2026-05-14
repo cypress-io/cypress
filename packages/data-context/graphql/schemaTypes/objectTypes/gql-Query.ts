@@ -129,6 +129,21 @@ export const Query = objectType({
       description: 'Unique node machine identifier for this instance - may be nil if unable to resolve',
       resolve: async (source, args, ctx) => await ctx.coreData.machineId,
     })
+
+    t.list.nonNull.field('cloudAppMessages', {
+      type: 'CloudAppMessage',
+      description: 'Cloud-driven in-app banner content. Local override of the merged cloud field so we can inject the current project slug for per-project feature-flag scoping.',
+      resolve: async (root, args, ctx, info) => {
+        const projectId = await ctx.project.projectId()
+
+        return ctx.cloud.delegateCloudField({
+          field: 'cloudAppMessages',
+          args: { projectSlug: projectId },
+          ctx,
+          info,
+        })
+      },
+    })
   },
   sourceType: {
     module: path.join(__dirname, '../../'),
