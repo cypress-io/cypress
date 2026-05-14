@@ -136,9 +136,12 @@ export const Query = objectType({
       resolve: async (root, args, ctx, info) => {
         const projectId = await ctx.project.projectId()
 
+        // Omit projectSlug entirely in global mode — passing null is not the
+        // same as omitting in GraphQL, and the remote field's doc contract
+        // says "When omitted, only globally-targeted messages are returned."
         return ctx.cloud.delegateCloudField({
           field: 'cloudAppMessages',
-          args: { projectSlug: projectId },
+          args: projectId ? { projectSlug: projectId } : {},
           ctx,
           info,
         })
