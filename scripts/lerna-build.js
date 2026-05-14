@@ -5,17 +5,15 @@
 // segfaults inside V8's bytecode-cache deserializer (#33730).
 const { spawn } = require('child_process')
 const os = require('os')
+const minimist = require('minimist')
 
+const argv = minimist(process.argv.slice(2), { string: ['scope'] })
 const concurrency = Math.min(4, os.availableParallelism())
 
 const args = ['run', 'build', '--stream', `--concurrency=${concurrency}`]
 
-const scopeIdx = process.argv.indexOf('--scope')
-
-if (scopeIdx !== -1 && process.argv[scopeIdx + 1]) {
-  args.push('--scope', process.argv[scopeIdx + 1])
-} else if (process.argv.find((a) => a.startsWith('--scope='))) {
-  args.push(process.argv.find((a) => a.startsWith('--scope=')))
+if (argv.scope) {
+  args.push('--scope', argv.scope)
 }
 
 const child = spawn(
