@@ -8,9 +8,19 @@ const os = require('os')
 
 const concurrency = Math.min(4, os.availableParallelism())
 
+const args = ['run', 'build', '--stream', `--concurrency=${concurrency}`]
+
+const scopeIdx = process.argv.indexOf('--scope')
+
+if (scopeIdx !== -1 && process.argv[scopeIdx + 1]) {
+  args.push('--scope', process.argv[scopeIdx + 1])
+} else if (process.argv.find((a) => a.startsWith('--scope='))) {
+  args.push(process.argv.find((a) => a.startsWith('--scope=')))
+}
+
 const child = spawn(
   'lerna',
-  ['run', 'build', '--stream', `--concurrency=${concurrency}`, ...process.argv.slice(2)],
+  args,
   { stdio: 'inherit', shell: true },
 )
 
