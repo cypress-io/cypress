@@ -4,8 +4,11 @@
 // arm.medium (2 CPU) runs 4 simultaneous tsc startups and intermittently
 // segfaults inside V8's bytecode-cache deserializer (#33730).
 const { spawn } = require('child_process')
+const path = require('path')
 const os = require('os')
 const minimist = require('minimist')
+
+const lerna = path.resolve(__dirname, '..', 'node_modules', '.bin', 'lerna')
 
 const argv = minimist(process.argv.slice(2), { string: ['scope'] })
 const concurrency = Math.min(4, os.availableParallelism())
@@ -17,7 +20,7 @@ if (argv.scope) {
 }
 
 const child = spawn(
-  'lerna',
+  lerna,
   args,
   { stdio: 'inherit', shell: true },
 )
