@@ -1,4 +1,5 @@
 <!-- Thanks for contributing! PLEASE...
+- Before writing any code, confirm an open issue exists for this work and that you have commented on it to indicate your intent. See: https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md#pull-requests
 - Read our contributing guidelines: https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md 
 - Read our Code Review Checklist on coding standards and what needs to be done before a PR can be merged: https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md#Code-Review-Checklist
 - Mark this PR as "Draft" if it is not ready for review.
@@ -37,6 +38,7 @@ If a task does not apply, write [na] instead of checking the box.
 DO NOT DELETE the PR checklist.
 -->
 
+- [ ] Is there an associated issue that has been commented on to confirm the team is willing to accept this contribution?
 - [ ] Have tests been added/updated?
 - [ ] Has a PR for user-facing changes been opened in [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)? <!-- Link to PR here -->
 - [ ] Have API changes been updated in the [`type definitions`](https://github.com/cypress-io/cypress/blob/develop/cli/types/cypress.d.ts)?
