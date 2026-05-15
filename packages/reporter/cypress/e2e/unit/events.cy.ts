@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events'
 import sinon, { SinonSpy, SinonStub } from 'sinon'
 
 import events from '../../../src/lib/events'
@@ -8,12 +9,14 @@ import { StatsStore } from '../../../src/header/stats-store'
 
 interface RunnerStub {
   on: SinonSpy
+  off: SinonSpy
   emit: SinonSpy
 }
 
 const runnerStub = (): RunnerStub => {
   return {
     on: sinon.stub(),
+    off: sinon.stub(),
     emit: sinon.spy(),
   }
 }
@@ -264,6 +267,16 @@ describe('events', () => {
       appState.pinnedSnapshotId = 'c1'
       runner.on.withArgs('reporter:snapshot:unpinned').callArgWith(1)
       expect(appState.pinnedSnapshotId).to.be.null
+    })
+
+    it('detaches prior listeners when listen is called again on the same runner', () => {
+      const bus = new EventEmitter()
+
+      events.listen(bus)
+      events.listen(bus)
+      bus.emit('test:after:run', { state: 'passed', final: true }, false)
+
+      expect(statsStore.incrementCount).to.have.been.calledOnce
     })
   })
 

@@ -428,13 +428,15 @@ function openFile () {
   })
 }
 
+let cleanupGqlListeners: (() => void) | undefined
+
 onMounted(() => {
-  const eventManager = getEventManager()
+  const em = getEventManager()
 
   // these events use GraphQL
   // ideally, we should make these more loosely coupled
   // so we don't need to mix GraphQL and the event manager lifecycle.
-  eventManager.on('open:file', (file) => {
+  const onOpenFile = (file: FileDetails) => {
     fileToOpen = file
 
     if (props.gql.localSettings.preferences.preferredEditorBinary) {
@@ -442,24 +444,36 @@ onMounted(() => {
     } else {
       runnerUiStore.setShowChooseExternalEditorModal(true)
     }
-  })
+  }
 
-  eventManager.on('save:app:state', (state) => {
+  const onSaveAppState = (state: any) => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
     preferences.update('showFetchRequests', state.showFetchRequests)
     preferences.update('codeEditorLineWrap', state.codeEditorLineWrap)
-  })
+  }
 
-  eventManager.on('open:login:connect:modal', ({ utmMedium, utmContent }) => {
+  const onOpenLoginModal = ({ utmMedium, utmContent }: any) => {
     userProjectStatusStore.openLoginConnectModal({
       utmMedium,
       utmContent,
     })
-  })
+  }
+
+  em.on('open:file', onOpenFile)
+  em.on('save:app:state', onSaveAppState)
+  em.on('open:login:connect:modal', onOpenLoginModal)
+
+  cleanupGqlListeners = () => {
+    em.off('open:file', onOpenFile)
+    em.off('save:app:state', onSaveAppState)
+    em.off('open:login:connect:modal', onOpenLoginModal)
+    cleanupGqlListeners = undefined
+  }
 })
 
 onBeforeUnmount(() => {
+  cleanupGqlListeners?.()
   cleanupRunner()
 })
 

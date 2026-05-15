@@ -23,9 +23,19 @@ export function useEventManager () {
     await UnifiedRunnerAPI.executeSpec(specStore.activeSpec, isRerun)
   }
 
+  let detachLifecycleEvents: (() => void) | undefined
+
   function initializeRunnerLifecycleEvents () {
+    detachLifecycleEvents?.()
+
+    const detachFns: Array<() => void> = []
+    const on = (event: string, handler: (...args: any[]) => void) => {
+      eventManager.on(event, handler)
+      detachFns.push(() => eventManager.off(event, handler))
+    }
+
     // these events do not use GraphQL
-    eventManager.on('restart', async () => {
+    on('restart', async () => {
       // If we get the event to restart but have already navigated away from the runner, don't execute the spec
       if (specStore.activeSpec) {
         const isRerun = true
@@ -34,27 +44,27 @@ export function useEventManager () {
       }
     })
 
-    eventManager.on('script:error', (err) => {
+    on('script:error', (err) => {
       autStore.setScriptError(err)
     })
 
-    eventManager.on('visit:failed', (payload) => {
+    on('visit:failed', (payload) => {
       getAutIframeModel().showVisitFailure(payload)
     })
 
-    eventManager.on('visit:blank', async ({ testIsolation }) => {
+    on('visit:blank', async ({ testIsolation }) => {
       await getAutIframeModel().visitBlankPage(testIsolation)
     })
 
-    eventManager.on('run:end', () => {
+    on('run:end', () => {
       if (studioStore.isLoading) {
         getAutIframeModel().startStudio()
       }
     })
 
-    eventManager.on('expect:origin', addCrossOriginIframe)
+    on('expect:origin', addCrossOriginIframe)
 
-    eventManager.on('testFilter:cloudDebug:dismiss', async () => {
+    on('testFilter:cloudDebug:dismiss', async () => {
       const currentRoute = router.currentRoute.value
 
       const { mode, ...query } = currentRoute.query
@@ -62,6 +72,11 @@ export function useEventManager () {
       // Delete runId from query which will remove the test filter and trigger a rerun
       await router.replace({ ...currentRoute, query })
     })
+
+    detachLifecycleEvents = () => {
+      detachFns.forEach((fn) => fn())
+      detachLifecycleEvents = undefined
+    }
   }
 
   const startSpecWatcher = () => {
@@ -73,6 +88,8 @@ export function useEventManager () {
   }
 
   function cleanupRunner () {
+    detachLifecycleEvents?.()
+
     // Clean up the AUT and Reporter every time we leave the route.
     empty(getRunnerElement())
 
