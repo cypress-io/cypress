@@ -20,12 +20,16 @@ type Promisified<T extends (...args: any) => any>
 
 interface PromisifiedFsExtra {
   statAsync: (path: string | Buffer) => Bluebird<ReturnType<typeof fsExtra.statSync>>
+  copyAsync: Promisified<typeof fsExtra.copySync>
   removeAsync: Promisified<typeof fsExtra.removeSync>
   readFileAsync: Promisified<typeof fsExtra.readFileSync>
   writeFileAsync: Promisified<typeof fsExtra.writeFileSync>
   pathExistsAsync: Promisified<typeof fsExtra.pathExistsSync>
   outputFileAsync: Promisified<typeof fsExtra.outputFileSync>
   readJsonAsync: Promisified<typeof fsExtra.readJsonSync>
+  /** Added by Bluebird.promisifyAll on fs-extra's promise-based helpers */
+  ensureDirAsync: (dir: string) => Bluebird<void>
+  ensureSymlinkAsync: (src: string, dest: string, type?: 'dir' | 'file' | 'junction') => Bluebird<void>
 }
 
 interface Clip {
