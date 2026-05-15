@@ -89,7 +89,7 @@ export function parseDomain (input: string, options: ParseDomainOptions = {}): P
     ...options,
   }
 
-  const hostname = input.replace(/^\.+/, '').trim()
+  const hostname = input.trim().replace(/^\.+/, '')
 
   if (!hostname) {
     return null

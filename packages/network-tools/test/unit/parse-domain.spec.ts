@@ -19,6 +19,14 @@ describe('lib/parse-domain', () => {
       })
     })
 
+    it('strips leading whitespace then cookie-style leading dots', () => {
+      expect(parseDomain(' .www.example.com')).toEqual({
+        subdomain: 'www',
+        domain: 'example',
+        tld: 'com',
+      })
+    })
+
     it('falls back like the old default customTlds when tldts has an empty public suffix', () => {
       expect(parseDomain('12.')).toEqual({
         subdomain: '',
