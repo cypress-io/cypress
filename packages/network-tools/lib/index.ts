@@ -1,5 +1,7 @@
 export * from './accept-encoding'
 
+export * from './parse-domain'
+
 export * from './cors'
 
 export * from './uri'
