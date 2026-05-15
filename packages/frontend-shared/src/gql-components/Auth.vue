@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { gql } from '@urql/core'
 import { useMutation } from '@urql/vue'
 import { useOnline } from '@vueuse/core'
@@ -92,14 +92,18 @@ const { t } = useI18n()
 
 const isOnline = useOnline()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   gql: AuthFragment
   authFlow?: AuthFlow
+  /** When true (e.g. login modal), start login/signup as soon as preconditions are met without a second click */
+  autoStartAuth?: boolean
   showRetry?: boolean
   showLogout?: boolean
   utmMedium: string
   utmContent?: string
-}>()
+}>(), {
+  autoStartAuth: false,
+})
 
 gql`
 fragment Auth on Query {
@@ -170,9 +174,53 @@ const reset = useMutation(Auth_ResetAuthStateDocument)
 
 const loginButtonRef = ref(Button)
 const loginInitiated = ref(false)
+const didAttemptAutoStart = ref(false)
+
+const startAuthFlow = () => {
+  loginInitiated.value = true
+  executeAuthMutation()
+}
+
+const tryStartAuthIfNeeded = () => {
+  if (!props.autoStartAuth || props.showRetry || props.showLogout) {
+    return
+  }
+
+  if (didAttemptAutoStart.value) {
+    return
+  }
+
+  if (!isOnline.value) {
+    return
+  }
+
+  if (userProjectStatusStore.user.isLoggedIn) {
+    didAttemptAutoStart.value = true
+    if (props.gql.cloudViewer) {
+      return
+    }
+
+    emit('close')
+
+    return
+  }
+
+  didAttemptAutoStart.value = true
+  startAuthFlow()
+}
 
 onMounted(() => {
-  loginButtonRef?.value?.$el?.focus()
+  if (!props.autoStartAuth) {
+    loginButtonRef?.value?.$el?.focus()
+  }
+
+  tryStartAuthIfNeeded()
+})
+
+watch(isOnline, () => {
+  if (props.autoStartAuth) {
+    tryStartAuthIfNeeded()
+  }
 })
 
 onBeforeUnmount(() => {
@@ -233,10 +281,7 @@ const handleLoginOrContinue = async () => {
   }
 
   // user has not already logged in, kick off the login process
-
-  loginInitiated.value = true
-
-  executeAuthMutation()
+  startAuthFlow()
 }
 
 const handleCancel = () => {
@@ -250,7 +295,7 @@ const handleLogout = () => {
 const handleTryAgain = async () => {
   await reset.executeMutation({})
 
-  executeAuthMutation()
+  startAuthFlow()
 }
 
 const buttonText = computed(() => {

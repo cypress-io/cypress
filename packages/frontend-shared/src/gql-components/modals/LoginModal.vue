@@ -79,6 +79,7 @@
           <Auth
             :gql="props.gql"
             :auth-flow="authFlow"
+            :auto-start-auth="props.autoStartAuth"
             :show-retry="!!error"
             :utm-medium="props.utmMedium"
             :utm-content="props.utmContent"
@@ -118,12 +119,15 @@ const emit = defineEmits<{
   (event: 'cancel'): void
 }>()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   gql: LoginModalFragment
   authFlow?: AuthFlow
   utmMedium: string
   utmContent?: string
-}>()
+  autoStartAuth?: boolean
+}>(), {
+  autoStartAuth: true,
+})
 
 gql`
 fragment LoginModal on Query {
