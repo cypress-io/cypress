@@ -82,7 +82,12 @@ async function unpackCircleCache () {
   const paths = glob.sync(p('globbed_node_modules/*/*/'))
 
   if (paths.length === 0) {
-    throw new Error('Should have found globbed node_modules to unpack')
+    // Cache miss is recoverable downstream (e.g. Windows runs
+    // windows_reinstall_deps right after this); warn and let the job continue
+    // rather than failing before recovery can run.
+    console.warn('No globbed node_modules to unpack — assuming a cache miss; downstream reinstall should recover.')
+
+    return
   }
 
   await Promise.all(
