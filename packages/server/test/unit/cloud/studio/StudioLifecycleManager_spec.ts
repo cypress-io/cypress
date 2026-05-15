@@ -199,7 +199,7 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
       await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
@@ -212,7 +212,6 @@ describe('StudioLifecycleManager', () => {
 
       expect(mockCtx.update).to.be.calledOnce
       expect(ensureStudioBundleStub).to.be.calledWith({
-        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
         studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
         projectId: 'abc123',
       })
@@ -302,7 +301,7 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
       await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
@@ -407,7 +406,7 @@ describe('StudioLifecycleManager', () => {
 
       const mockManifest = {}
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
       await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
@@ -453,7 +452,7 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'a1',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
       await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
@@ -606,7 +605,7 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
     })
 
     it('registers a listener that will be called when studio is ready', () => {
@@ -721,7 +720,7 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
     })
 
     it('updates status and emits events when status changes', async () => {
@@ -952,7 +951,7 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
       // First initialize with some state
       await studioLifecycleManager.initializeStudioManager({
@@ -1023,11 +1022,14 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
       // Add some cached promises to the static map
       const dummyPromise = Promise.resolve({
-        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+        manifest: {
+          'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+        },
+        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
       })
 
       // @ts-expect-error - accessing private static property
