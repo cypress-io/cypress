@@ -91,7 +91,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
         o.sinon.stub(ctx._apis.authApi, 'logIn')
       })
 
-      cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
+      cy.findByRole('dialog', { name: 'Continue in your browser' }).within(() => {
         cy.contains('button', 'Log in').click()
       })
 
@@ -298,7 +298,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.contains('button', 'Connect to Cypress Cloud').click()
 
-      cy.findByRole('dialog', { name: 'Log in to Cypress' }).as('logInModal').within(() => {
+      cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
         cy.findByRole('button', { name: 'Log in' }).click()
       })
 
