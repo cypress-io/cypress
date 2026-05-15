@@ -1,0 +1,30 @@
+packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts
+  s_7a176fd83fef98::t_922e478e583682 262-264
+  s_7a176fd83fef98::t_39ee3088d38f2b 328-329,341-342
+  s_7a176fd83fef98::t_eb12fc5a7c31b5 340
+packages/app/src/specs/SpecsListBanners.vue
+  s_7a176fd83fef98::t_f65b828cf08ea3 380-382
+  ai_agent 397
+  s_7a176fd83fef98::t_84005d5a996894 398-399
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "af437b7931967158104b5e6ef7a262ebc2d0a4cf",
+  "prompts": {},
+  "humans": {
+    "h_5f6e5bd5f4342d": {
+      "author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  },
+  "sessions": {
+    "s_7a176fd83fef98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "546534c1-4ce2-49ce-bb40-b6f93ef2f19b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}

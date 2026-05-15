@@ -1,0 +1,21 @@
+packages/app/src/composables/useRecordEvent.ts
+  s_7a176fd83fef98::t_ad9290eaa203b7 18
+packages/app/src/specs/banners/CloudMessageBanner.cy.tsx
+  s_7a176fd83fef98::t_ced173582c1b50 170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "acc2838b6d4845403ca13c05512e47ba5ff7199c",
+  "prompts": {},
+  "sessions": {
+    "s_7a176fd83fef98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "546534c1-4ce2-49ce-bb40-b6f93ef2f19b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}

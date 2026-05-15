@@ -1,0 +1,19 @@
+packages/app/src/specs/banners/TrackedBanner.vue
+  s_7a176fd83fef98::t_611b9506936ed0 126-127,129-133,140-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "200ae44158c9040202c5c0b7faa333875208efa9",
+  "prompts": {},
+  "sessions": {
+    "s_7a176fd83fef98": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "546534c1-4ce2-49ce-bb40-b6f93ef2f19b",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
