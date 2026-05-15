@@ -7,6 +7,10 @@
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
 - Fixed an intermittent `ENOENT: no such file or directory, open <path>/bundle.tar-<rand>` error during `cy.prompt` and Studio bundle initialization. Fixed in [#33748](https://github.com/cypress-io/cypress/pull/33748).
 
+**Dependency Updates:**
+
+- Upgraded `esbuild` to `^0.28.0` to address [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in the bundled `esbuild` Go binary (incorrect TLS certificate validation during session resumption), as reported in container and image security scans. Fixes [#33599](https://github.com/cypress-io/cypress/issues/33599). Addressed in [#33816](https://github.com/cypress-io/cypress/pull/33816).
+
 ## 15.15.0
 
 **Deprecations:**
