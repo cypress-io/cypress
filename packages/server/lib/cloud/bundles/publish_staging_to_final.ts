@@ -7,21 +7,20 @@ const MANIFEST_REL = 'manifest.json'
 const walkFiles = async (root: string, currentRel: string = ''): Promise<string[]> => {
   const fullDir = path.join(root, currentRel)
   const entries = await readdir(fullDir)
-  const results: string[] = []
 
-  await Promise.all(entries.map(async (entry) => {
+  const nested = await Promise.all(entries.map(async (entry): Promise<string[]> => {
     const entryRel = path.join(currentRel, entry)
     const entryFull = path.join(root, entryRel)
     const entryStat = await stat(entryFull)
 
-    if (entryStat.isDirectory()) {
-      results.push(...await walkFiles(root, entryRel))
-    } else if (entryStat.isFile()) {
-      results.push(entryRel)
-    }
+    if (entryStat.isDirectory()) return walkFiles(root, entryRel)
+
+    if (entryStat.isFile()) return [entryRel]
+
+    return []
   }))
 
-  return results
+  return nested.flat()
 }
 
 const publishOne = async (staging: string, finalDir: string, rel: string): Promise<void> => {
