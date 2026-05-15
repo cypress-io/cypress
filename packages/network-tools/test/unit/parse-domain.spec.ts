@@ -11,12 +11,24 @@ describe('lib/parse-domain', () => {
       expect(parseDomain('   ')).toBeNull()
     })
 
-    it('strips a leading dot (cookie-style domain attribute)', () => {
+    it('strips leading dots (cookie-style domain attribute)', () => {
       expect(parseDomain('.www.example.com')).toEqual({
         subdomain: 'www',
         domain: 'example',
         tld: 'com',
       })
+    })
+
+    it('falls back like the old default customTlds when tldts has an empty public suffix', () => {
+      expect(parseDomain('12.')).toEqual({
+        subdomain: '',
+        domain: '',
+        tld: '12.',
+      })
+    })
+
+    it('returns null for a trailing-dot hostname when no legacy customTlds rule matches', () => {
+      expect(parseDomain('ab.')).toBeNull()
     })
 
     it('trims surrounding whitespace before parsing', () => {
@@ -95,7 +107,7 @@ describe('lib/parse-domain', () => {
       })
     })
 
-    it('accepts customTlds in options without throwing (compat; not applied as RegExp)', () => {
+    it('accepts customTlds in options without throwing (compat; option is ignored)', () => {
       expect(parseDomain('www.example.com', {
         customTlds: /\.local$/,
       })).toEqual({
