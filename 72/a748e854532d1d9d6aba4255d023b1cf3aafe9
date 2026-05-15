@@ -1,0 +1,23 @@
+cli/lib/tasks/state.ts
+  s_eb9513f80d88fb::t_9841f039e3b50e 78-83
+packages/server/lib/cloud/bundles/cache_root.ts
+  s_eb9513f80d88fb::t_0b85ab420d91c8 7-8
+cli/test/lib/tasks/state.spec.ts
+  s_eb9513f80d88fb::t_7334adb64017a6 388-408
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "72a748e854532d1d9d6aba4255d023b1cf3aafe9",
+  "prompts": {},
+  "sessions": {
+    "s_eb9513f80d88fb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5b3dc8bb-fb3a-4e93-a57a-f745f95e48fd",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
