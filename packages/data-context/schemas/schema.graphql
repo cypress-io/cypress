@@ -1865,14 +1865,9 @@ type Query {
   cachedUser: CachedUser
 
   """
-  Cloud-driven in-app messages eligible to be rendered as banners in the binary. Pre-filtered server-side by channel feature flag, version range, and cohort allow-lists. Public — accessible without authentication so logged-out users can still receive awareness messages. The binary may further filter on local state (run mode, env-var opt-out) before rendering.
+  Cloud-driven in-app banner content. Local override of the merged cloud field so we can inject the current project slug for per-project feature-flag scoping.
   """
-  cloudAppMessages(
-    """
-    Optional project slug used to scope cohort and channel-flag lookups. When omitted, only globally-targeted messages are returned.
-    """
-    projectSlug: String
-  ): [CloudAppMessage!]
+  cloudAppMessages: [CloudAppMessage!]
 
   """
   Polling query to determine when to refetch spec data. A null value here means no data available in the cloud.

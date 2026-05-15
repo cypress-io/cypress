@@ -38,15 +38,6 @@ type CloudAppMessageAnalytics {
 }
 
 """
-Optional UTM params for CTA destination URLs. CTA-level overrides message-level. utm_source/medium/campaign are auto-injected by the binary.
-"""
-type CloudAppMessageUtm {
-  content: String
-  id: String
-  term: String
-}
-
-"""
 Call-to-action button rendered alongside an in-app cloud message banner
 """
 type CloudAppMessageCta {
@@ -73,6 +64,15 @@ type CloudAppMessageDismissal {
 enum CloudAppMessageDismissalScope {
   project
   user
+}
+
+"""
+Optional UTM params for CTA destination URLs. CTA-level overrides message-level. utm_source/medium/campaign are auto-injected by the binary.
+"""
+type CloudAppMessageUtm {
+  content: String
+  id: String
+  term: String
 }
 
 enum CloudAppMessageVisualStyle {
