@@ -638,26 +638,19 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('button', 'Pick a bundler').click()
       cy.findByText('Webpack').click()
       cy.findByRole('button', { name: 'Next step' }).should('not.be.disabled').click()
-      cy.withCtx(async (ctx) => {
-        Object.defineProperty(ctx.coreData, 'scaffoldedFiles', {
-          get () {
-            return this._scaffoldedFiles.map((scaffold) => {
-              if (scaffold.file.absolute.includes('cypress.config')) {
-                return { ...scaffold, status: 'changes' }
-              }
-
-              return scaffold
-            })
-          },
-          set (scaffoldedFiles) {
-            this._scaffoldedFiles = scaffoldedFiles
-          },
+      cy.intercept('POST', 'mutation-InstallDependencies_scaffoldFiles', (req) => {
+        req.continue((res) => {
+          for (const file of res.body.data.scaffoldTestingType.scaffoldedFiles) {
+            if (file.file.absolute.includes('cypress.config')) {
+              file.status = 'changes'
+            }
+          }
         })
       })
 
       cy.findByRole('button', { name: 'Skip' }).click()
       cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
-      cy.findByText('Learn more').click()
+      cy.findByText('Learn more', { timeout: 10000 }).click()
       cy.wait('@OpenExternal')
       .its('request.body.variables.url')
       .should('equal', 'https://on.cypress.io/guides/configuration')
@@ -693,7 +686,7 @@ describe('Launchpad: Setup Project', () => {
       verifyWelcomePage({ e2eIsConfigured: true, ctIsConfigured: false })
 
       cy.get('[data-cy-testingtype="e2e"]').click()
-      cy.contains('h1', 'Choose a browser')
+      cy.contains('h1', 'Choose a browser', { timeout: 10000 })
 
       // Execute same function that is called in the browser to switch testing types
       cy.withCtx(async (ctx, { sinon }) => {

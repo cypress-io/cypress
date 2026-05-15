@@ -1,12 +1,11 @@
 require('../spec_helper')
 
-const { makeDataContext, setCtx, getCtx } = require('../../lib/makeDataContext')
-
-setCtx(makeDataContext({}))
+const { getCtx, setCtx, makeDataContext, clearCtx } = require('../../lib/makeDataContext')
 
 const cp = require('child_process')
 const fse = require('fs-extra')
 const os = require('os')
+const fs = require('fs')
 const path = require('path')
 const _ = require('lodash')
 const { expect } = require('chai')
@@ -26,7 +25,72 @@ const { ServerBase } = require('../../lib/server-base')
 const { SocketE2E } = require('../../lib/socket-e2e')
 const { _getArgs } = require('../../lib/browsers/chrome')
 
-const CHROME_PATH = 'google-chrome'
+/**
+ * Resolves an absolute or PATH-resolvable Chrome/Chromium binary for `cp.spawn`.
+ * CI/Linux often exposes `google-chrome`; macOS and Windows need well-known install
+ * locations or an explicit env override.
+ *
+ * Resolution order:
+ * 1. `PROXY_PERF_CHROME` — preferred override for this spec only.
+ * 2. `CHROME_PATH` — generic override if the first is unset.
+ * 3. macOS: `/Applications/Google Chrome.app/...` then Chrome Canary.
+ * 4. Windows: standard `Program Files` Chrome paths.
+ * 5. Unix: first hit from `which` for `google-chrome`, `google-chrome-stable`, `chromium`, `chromium-browser`.
+ * 6. Fallback `google-chrome` (relies on PATH; matches typical Linux CI images).
+ */
+const resolveChromePathForProxyPerformance = () => {
+  const fromEnv = process.env.PROXY_PERF_CHROME || process.env.CHROME_PATH
+
+  if (fromEnv) {
+    return fromEnv
+  }
+
+  const platform = os.platform()
+
+  if (platform === 'darwin') {
+    const macPaths = [
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+    ]
+
+    for (const macPath of macPaths) {
+      if (fs.existsSync(macPath)) {
+        return macPath
+      }
+    }
+  }
+
+  if (platform === 'win32') {
+    const winPaths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    ]
+
+    for (const winPath of winPaths) {
+      if (fs.existsSync(winPath)) {
+        return winPath
+      }
+    }
+  }
+
+  const nixNames = ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser']
+
+  for (const nixName of nixNames) {
+    const r = cp.spawnSync('which', [nixName], { encoding: 'utf8' })
+
+    if (r.status === 0) {
+      const found = String(r.stdout || '').trim().split('\n')[0]
+
+      if (found) {
+        return found
+      }
+    }
+  }
+
+  return 'google-chrome'
+}
+
+const CHROME_PATH = resolveChromePathForProxyPerformance()
 const URLS_UNDER_TEST = [
   'https://test-page-speed.cypress.io/index1000.html',
   'http://test-page-speed.cypress.io/index1000.html',
@@ -334,49 +398,56 @@ describe('Proxy Performance', function () {
   })
 
   before(function () {
-    setCtx(makeDataContext({}))
+    // When this file runs after other specs (e.g. cy_visit_performance_spec.js loads first
+    // alphabetically), the prior test's spec_helper `afterEach` has already run `clearCtx`.
+    // Nested suite `before` runs before the next test's root `beforeEach`, so the global
+    // DataContext is still unset here unless we call `setCtx` again.
+    return Promise.resolve(clearCtx()).then(() => {
+      setCtx(makeDataContext({}))
+      const getFilesByGlob = getCtx().file.getFilesByGlob
 
-    const getFilesByGlob = getCtx().file.getFilesByGlob
+      return CA.create()
+      .then((ca) => {
+        return ca.generateServerCertificateKeys('localhost')
+      })
+      .then(([cert, key]) => {
+        return Promise.join(
+          new DebuggingProxy().start(PROXY_PORT),
 
-    return CA.create()
-    .then((ca) => {
-      return ca.generateServerCertificateKeys('localhost')
-    })
-    .spread((cert, key) => {
-      return Promise.join(
-        new DebuggingProxy().start(PROXY_PORT),
+          new DebuggingProxy({
+            https: { cert, key },
+          }).start(HTTPS_PROXY_PORT),
 
-        new DebuggingProxy({
-          https: { cert, key },
-        }).start(HTTPS_PROXY_PORT),
+          setupFullConfigWithDefaults({
+            projectRoot: '/tmp/a',
+            config: {
+              supportFile: false,
+            },
+          }, getFilesByGlob).then((config) => {
+            config.port = CY_PROXY_PORT
 
-        setupFullConfigWithDefaults({
-          projectRoot: '/tmp/a',
-          config: {
-            supportFile: false,
-          },
-        }, getFilesByGlob).then((config) => {
-          config.port = CY_PROXY_PORT
+            // turn off morgan
+            config.morgan = false
 
-          // turn off morgan
-          config.morgan = false
+            cyServer = new ServerBase(config)
 
-          cyServer = new ServerBase()
-
-          return cyServer.open(config, {
-            SocketCtor: SocketE2E,
-            createRoutes,
-            testingType: 'e2e',
-            getCurrentBrowser: () => null,
-          })
-        }),
-      )
+            return cyServer.open(config, {
+              SocketCtor: SocketE2E,
+              createRoutes,
+              testingType: 'e2e',
+              getCurrentBrowser: () => null,
+            })
+          }),
+        )
+      })
     })
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
     // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23214
-    describe(urlUnderTest, { retries: 15 }, function () {
+    describe(urlUnderTest, function () {
+      this.retries(15)
+
       let baseline
       const testCases = _.cloneDeep(TEST_CASES)
 

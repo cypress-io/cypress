@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
 import MouseMovement from './mouse-movement'

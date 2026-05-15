@@ -1,4 +1,8 @@
+import Debug from 'debug'
+
 import type { DataContext } from './DataContext'
+
+const debug = Debug('cypress:data-context')
 
 export { DocumentNodeBuilder } from './util/DocumentNodeBuilder'
 
@@ -23,9 +27,14 @@ let ctx: DataContext | null = null
 
 export async function clearCtx () {
   if (ctx) {
+    debug('signalling mainProcessWillDisconnect')
     await ctx.lifecycleManager.mainProcessWillDisconnect()
+    debug('destroying data-context')
     await ctx.destroy()
+    debug('data-context destroyed')
     ctx = null
+  } else {
+    debug('no data-context to clear')
   }
 }
 

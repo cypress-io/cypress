@@ -3,3 +3,9 @@
 # Changes to the Module API, after:run, or after:spec results should be
 # reviewed by Brian and/or Jennifer
 /system-tests/__snapshots__/results_spec.ts.js @brian-mann @jennifer-shehane
+
+# Protect potentially sensitive paths that affect our builds — changes here
+# require a code-owner review.
+/.github/         @cypress-io/app
+/.circleci/       @cypress-io/app
+/scripts/         @cypress-io/app

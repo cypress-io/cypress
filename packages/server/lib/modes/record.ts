@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
 import la from 'lazy-ass'
-import check from 'check-more-types'
 import Debug from 'debug'
 import Promise from 'bluebird'
 import isForkPr from 'is-fork-pr'
@@ -206,7 +205,7 @@ const postInstanceResults = (options: any = {}) => {
 }
 
 const getCommitFromGitOrCi = (git: any) => {
-  la(check.object(git), 'expected git information object', git)
+  la(_.isPlainObject(git), 'expected git information object', git)
 
   return ciProvider.commitDefaults({
     sha: git.sha,

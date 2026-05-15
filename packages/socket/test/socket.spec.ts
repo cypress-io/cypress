@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import fs from 'fs'
 import path from 'path'
-import parser from 'socket.io-parser'
-import { hasBinary } from 'socket.io-parser/dist/is-binary'
+import * as parser from 'socket.io-parser'
+const { hasBinary } = parser
 import pkg from '../package.json'
 import * as lib from '../lib/node'
 import * as browserLib from '../lib/client'
@@ -24,8 +24,9 @@ describe('Socket', function () {
 
     // @ts-expect-error
     expect(socket.io.opts.path).toEqual('/path')
+    // socket.io-client 4.6+ normalizes string transports into transport classes; the websocket transport class is named "WS".
     // @ts-expect-error
-    expect(socket.io.opts.transports[0]).toEqual('websocket')
+    expect(socket.io.opts.transports[0].name).toEqual('WS')
   })
 
   it('creates a websocket for chromium browsers', function () {
@@ -42,8 +43,9 @@ describe('Socket', function () {
 
     // @ts-expect-error
     expect(socket.io.opts.path).toEqual('/path')
+    // socket.io-client 4.6+ normalizes string transports into transport classes; the polling transport class is named "XHR".
     // @ts-expect-error
-    expect(socket.io.opts.transports[0]).toEqual('polling')
+    expect(socket.io.opts.transports[0].name).toEqual('XHR')
   })
 
   describe('.getPathToClientSource', function () {
