@@ -30,6 +30,9 @@ export const graphqlSchema = makeSchema({
     schema: remoteSchemaWrapped,
     skipFields: {
       Mutation: ['test'],
+      // Override so we can inject projectSlug from local context — needed for
+      // per-project feature-flag scoping. Local declaration in gql-Query.ts.
+      Query: ['cloudAppMessages'],
     },
   },
   plugins: [

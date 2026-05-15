@@ -129,6 +129,24 @@ export const Query = objectType({
       description: 'Unique node machine identifier for this instance - may be nil if unable to resolve',
       resolve: async (source, args, ctx) => await ctx.coreData.machineId,
     })
+
+    t.list.nonNull.field('cloudAppMessages', {
+      type: 'CloudAppMessage',
+      description: 'Cloud-driven in-app banner content. Local override of the merged cloud field so we can inject the current project slug for per-project feature-flag scoping.',
+      resolve: async (root, args, ctx, info) => {
+        const projectId = await ctx.project.projectId()
+
+        // Omit projectSlug entirely in global mode — passing null is not the
+        // same as omitting in GraphQL, and the remote field's doc contract
+        // says "When omitted, only globally-targeted messages are returned."
+        return ctx.cloud.delegateCloudField({
+          field: 'cloudAppMessages',
+          args: projectId ? { projectSlug: projectId } : {},
+          ctx,
+          info,
+        })
+      },
+    })
   },
   sourceType: {
     module: path.join(__dirname, '../../'),
