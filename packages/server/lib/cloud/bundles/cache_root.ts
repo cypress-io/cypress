@@ -4,7 +4,8 @@ import untildify from 'untildify'
 
 const BUNDLES_DIRNAME = 'bundles'
 
-// Matches the CLI's getEnv() / dequote() so env handling stays in sync.
+// Matches the CLI's getEnv(varName, /* trim */ true) / dequote() in
+// cli/lib/tasks/state.ts so the two sides resolve identical paths.
 const dequote = (str: string): string => {
   if (str.length > 1 && str[0] === '"' && str[str.length - 1] === '"') {
     return str.slice(1, -1)
