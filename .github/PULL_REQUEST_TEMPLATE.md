@@ -24,8 +24,11 @@ This is not meant to be the only testing performed by a reviewer, just the "happ
 -->
 
 ### How has the user experience changed?
-<!-- Provide before and after examples of the change.
-Screenshots or GIFs are preferred. -->
+<!--
+For any change that affects what a user sees or interacts with, or changes behavior, include before/after screenshots or a short video.
+Screenshots or videos are strongly preferred — they make it much faster for reviewers to verify the change.
+If there is no visual or behavioral change, write "No change" to confirm this section was considered.
+-->
 
 ### PR Tasks
 <!-- 

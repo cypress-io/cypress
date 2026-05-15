@@ -11,12 +11,15 @@ body:
         If you are running in `cypress open` mode, you can also try lowering [`numTestsKeptInMemory`](https://docs.cypress.io/guides/references/configuration#Options) in your config file.
 
         If you are still experiencing the issue, please fill out the following information.
+
+        > **Reproduction required.** Issues without a working reproduction are difficult to investigate and may be closed. Please fork [cypress-test-tiny](https://github.com/cypress-io/cypress-test-tiny), add a failing test, and link to your fork.
   - type: textarea
     id: reproduction
     attributes:
       label: Test code to reproduce
-      description: Please provide a failing test or repo we can run. You can fork [this repo](https://github.com/cypress-io/cypress-test-tiny), set up a failing test, then link to your fork. If you have never done this before, watch [this video](https://youtu.be/NnriKHmj5T8) for example.
-      placeholder: Here is my failing test code and the app code to run the tests on...
+      description: >
+        Fork [cypress-test-tiny](https://github.com/cypress-io/cypress-test-tiny), add the minimal code needed to reproduce the memory issue, and paste the link to your fork here. Keep the reproduction as small as possible — remove any code not needed to trigger the issue.
+      placeholder: Link to your fork of cypress-test-tiny...
     validations:
       required: true
   - type: dropdown
