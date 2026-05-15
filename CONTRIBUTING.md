@@ -156,7 +156,7 @@ See [Documentation Contributing Guidelines](https://github.com/cypress-io/cypres
 
 ## Writing code
 
-Working on your first Pull Request? You can learn how from this free series [How to Contribute to an Open Source Project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github). If you are looking for a good place to start, check out issues labeled [`good first issue`](https://github.com/cypress-io/cypress/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22) — these are scoped to be approachable for contributors who are new to the codebase.
+Working on your first Pull Request? You can learn how from this free series [How to Contribute to an Open Source Project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github).
 
 ### What you need to know before getting started
 
