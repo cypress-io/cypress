@@ -158,6 +158,13 @@ describe('lib/cloud/auth', function () {
       expect(auth._internal.stopServer).to.be.calledOnce
     })
 
+    it('resolves when signup auth fails', async () => {
+      sinon.stub(user, 'getBaseSignupUrl').rejects(new Error('test error'))
+      sinon.stub(auth._internal, 'stopServer')
+
+      await auth.startSignup(() => {}, 'code')
+    })
+
     it('resolves when auth fails', async () => {
       sinon.stub(user, 'getBaseLoginUrl').rejects(new Error('test error'))
       sinon.stub(auth._internal, 'stopServer')
@@ -172,6 +179,21 @@ describe('lib/cloud/auth', function () {
       const onMessageSpy = sinon.spy()
 
       await auth.start(onMessageSpy, 'code')
+
+      expect(onMessageSpy).to.be.calledWith({
+        name: 'AUTH_ERROR_DURING_LOGIN',
+        message: 'unexpected error',
+        browserOpened: false,
+      })
+    })
+
+    it('sends an AUTH_ERROR_DURING_LOGIN message on unhandled signup errors', async () => {
+      sinon.stub(user, 'getBaseSignupUrl').resolves('www.foo.bar')
+      sinon.stub(auth._internal, 'launchServer').rejects(new Error('unexpected error'))
+
+      const onMessageSpy = sinon.spy()
+
+      await auth.startSignup(onMessageSpy, 'code')
 
       expect(onMessageSpy).to.be.calledWith({
         name: 'AUTH_ERROR_DURING_LOGIN',
