@@ -2,7 +2,8 @@ import { afterAll, beforeAll, describe, expect, it } from '@jest/globals'
 import fetch from 'cross-fetch'
 import WebSocket from 'ws'
 
-import { setCtx, type DataContext } from '../../../src'
+import { setCtx } from '../../../src'
+import type { DataContext } from '../../../src'
 import { makeGraphQLServer } from '../../../graphql/makeGraphQLServer'
 import { createTestDataContext } from '../helper'
 
