@@ -164,5 +164,12 @@ describe('AuthActions', () => {
       expect(ctx._apis.electronApi.focusMainWindow).toHaveBeenCalledTimes(1)
       expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
     })
+
+    it('rejects and does not set coreData.user when signUp rejects', async () => {
+      jest.mocked(ctx._apis.authApi.signUp).mockRejectedValue(new Error('signup error'))
+
+      await expect(actions.signup('Binary: App', 'Studio', 'Signup')).rejects.toThrow('signup error')
+      expect(ctx.coreData.user).toBeNull()
+    })
   })
 })
