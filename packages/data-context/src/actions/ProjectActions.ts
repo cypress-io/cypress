@@ -397,6 +397,8 @@ export class ProjectActions {
       throw Error('could not find pattern to load specs')
     }
 
+    debug('setSpecsFoundBySpecPattern: globbing specPattern=%o configSpecPattern=%o', specPattern, configSpecPattern)
+
     const specs = await this.ctx.project.findSpecs({
       projectRoot,
       testingType,
@@ -406,6 +408,7 @@ export class ProjectActions {
       additionalIgnorePattern,
     })
 
+    debug('setSpecsFoundBySpecPattern: found %d specs, calling setSpecs', specs.length)
     this.ctx.actions.project.setSpecs(specs)
 
     await this.ctx.project.startSpecWatcher({
@@ -416,6 +419,8 @@ export class ProjectActions {
       excludeSpecPattern,
       additionalIgnorePattern,
     })
+
+    debug('setSpecsFoundBySpecPattern: spec watcher restarted')
   }
 
   setForceReconfigureProjectByTestingType ({ forceReconfigureProject, testingType }: SetForceReconfigureProjectByTestingType) {

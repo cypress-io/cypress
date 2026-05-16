@@ -2318,6 +2318,9 @@ jobs:
       percy:
         type: boolean
         default: false
+      debug:
+        type: string
+        default: ''
     resource_class: << parameters.resource_class >>
     parallelism: 8
     steps:
@@ -2327,6 +2330,7 @@ jobs:
           percy: << parameters.percy >>
           package: app
           type: e2e
+          debug: << parameters.debug >>
           guard: << pipeline.parameters.run-app-ui-tests >>
 
   driver-integration-tests-chrome:

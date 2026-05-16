@@ -441,10 +441,15 @@ export class ProjectConfigManager {
   }
 
   private addWatcherFor (file: string) {
+    debug('attaching watcher for %s', file)
     const w = this.addWatcher(file)
 
-    w.on('all', (evt) => {
-      debug(`changed ${file}: ${evt}`)
+    w.on('ready', () => {
+      debug('watcher ready for %s', file)
+    })
+
+    w.on('all', (evt, changedPath) => {
+      debug(`changed ${file}: ${evt} (path=${changedPath})`)
       this.options.refreshLifecycle().catch(this.onLoadError)
     })
 

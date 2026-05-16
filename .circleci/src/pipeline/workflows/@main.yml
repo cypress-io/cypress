@@ -612,6 +612,9 @@ windows:
         executor: windows
         resource_class: windows.large
         context: [ test-runner:cypress-record-key, test-runner:launchpad-tests ]
+        # Temporary: capture watcher/lifecycle/spec-change chain logs to diagnose
+        # the 'responds to a cypress.config.js file change' Windows flake.
+        debug: 'cypress:lifecycle:*,cypress:data-context:ProjectActions'
         requires:
           - windows-build
 

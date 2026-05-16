@@ -9,6 +9,7 @@
 import path from 'path'
 import _ from 'lodash'
 import fs from 'fs'
+import debugLib from 'debug'
 
 import { getError, CypressError } from '@packages/errors'
 import type { DataContext } from '..'
@@ -24,6 +25,8 @@ import { detectLanguage } from '@packages/scaffold-config'
 import { validateNeedToRestartOnChange } from '@packages/config'
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { telemetry } from '@packages/telemetry'
+
+const debug = debugLib('cypress:lifecycle:ProjectLifecycleManager')
 
 const POTENTIAL_CONFIG_FILES = [
   'cypress.config.ts',
@@ -199,9 +202,12 @@ export class ProjectLifecycleManager {
         this.ctx.emitter.toApp()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => {
+        debug('onFinalConfigLoaded: testingType=%s specPattern=%o', this._currentTestingType, finalConfig.specPattern)
         // if we no longer have a project, just return
         // can happen when the user clears the project while setupNodeEvents is in flight
         if (!this._projectRoot) {
+          debug('onFinalConfigLoaded: bailing — no projectRoot')
+
           return
         }
 
@@ -367,6 +373,8 @@ export class ProjectLifecycleManager {
 
   async refreshLifecycle (): Promise<void> {
     if (!this._projectRoot || !this._configManager || !this.readyToInitialize(this._projectRoot)) {
+      debug('refreshLifecycle: bailing — not ready (projectRoot=%s, configManager=%s)', !!this._projectRoot, !!this._configManager)
+
       return
     }
 
@@ -378,10 +386,13 @@ export class ProjectLifecycleManager {
     // (e.g. WizardActions) get the chain's full drain, not just the
     // in-flight iteration, so they don't race ahead against stale state.
     if (this._activeLifecycleRefresh) {
+      debug('refreshLifecycle: coalescing into in-flight refresh')
       this._isLifecycleRefreshQueued = true
 
       return this._activeLifecycleRefresh
     }
+
+    debug('refreshLifecycle: starting fresh refresh chain')
 
     // Capture the IIFE locally so the finally only clears the slot if it
     // still owns it. If `resetInternalState` (project switch) wipes
@@ -392,9 +403,14 @@ export class ProjectLifecycleManager {
 
     invokedLifecycleRefresh = (async () => {
       try {
+        let iteration = 0
+
         do {
           this._isLifecycleRefreshQueued = false
+          iteration++
+          debug('refreshLifecycle: iteration %d starting', iteration)
           await this._doRefreshLifecycle()
+          debug('refreshLifecycle: iteration %d complete (queued=%s)', iteration, this._isLifecycleRefreshQueued)
         } while (this._isLifecycleRefreshQueued)
       } finally {
         if (this._activeLifecycleRefresh === invokedLifecycleRefresh) {
