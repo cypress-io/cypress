@@ -638,20 +638,13 @@ describe('Launchpad: Setup Project', () => {
       cy.contains('button', 'Pick a bundler').click()
       cy.findByText('Webpack').click()
       cy.findByRole('button', { name: 'Next step' }).should('not.be.disabled').click()
-      cy.withCtx(async (ctx) => {
-        Object.defineProperty(ctx.coreData, 'scaffoldedFiles', {
-          get () {
-            return this._scaffoldedFiles.map((scaffold) => {
-              if (scaffold.file.absolute.includes('cypress.config')) {
-                return { ...scaffold, status: 'changes' }
-              }
-
-              return scaffold
-            })
-          },
-          set (scaffoldedFiles) {
-            this._scaffoldedFiles = scaffoldedFiles
-          },
+      cy.intercept('POST', 'mutation-InstallDependencies_scaffoldFiles', (req) => {
+        req.continue((res) => {
+          for (const file of res.body.data.scaffoldTestingType.scaffoldedFiles) {
+            if (file.file.absolute.includes('cypress.config')) {
+              file.status = 'changes'
+            }
+          }
         })
       })
 
