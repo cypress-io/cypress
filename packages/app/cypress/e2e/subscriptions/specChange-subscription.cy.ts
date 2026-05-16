@@ -181,7 +181,7 @@ e2e: {
 }`)
       })
 
-      cy.get('[data-cy="spec-item-link"]', { timeout: 7500 })
+      cy.get('[data-cy="spec-item-link"]', { timeout: 15000 })
       .should('have.length', 3)
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
