@@ -3847,10 +3847,19 @@ describe('network stubbing', { retries: 15 }, function () {
         })
 
         cy.visit('http://localhost:3500/fixtures/generic.html?navigation=1')
-        cy.wait(`@${alias}`).then((interception) => {
-          expect(interception.state).to.eq('Errored')
-          expect(interception).to.have.nested.property('error.message', 'Request was cancelled by the browser.')
-          expect(interception).to.have.nested.property('error.code', 'ERR_BROWSER_REQUEST_CANCELLED')
+        cy.wait(`@${alias}`).then(({ error, state }) => {
+          const interceptionError = error as Error & { code?: string }
+
+          expect(state).to.eq('Errored')
+          expect({
+            name: interceptionError.name,
+            code: interceptionError.code,
+            message: interceptionError.message,
+          }).to.deep.equal({
+            name: 'Error',
+            code: 'ERR_BROWSER_CONNECTION_CLOSED',
+            message: 'The browser closed the connection before the response completed.',
+          })
         })
       })
     })
