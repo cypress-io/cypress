@@ -2,7 +2,9 @@ require('../../spec_helper')
 const os = require('os')
 const osPath = require('ospath')
 const path = require('path')
+const Promise = require('bluebird')
 
+const { fs } = require('../../../lib/util/fs')
 const AppData = require(`../../../lib/util/app_data`)
 
 describe('lib/util/app_data', () => {
@@ -28,6 +30,30 @@ describe('lib/util/app_data', () => {
       }
 
       expect(tryWithoutPath).to.throw('Missing project path')
+    })
+  })
+
+  context('#ensure', () => {
+    it('does not create the symlink until the appData directory exists', async () => {
+      let ensureDirCompleted = false
+      let ensureDirCompletedAtSymlinkCall = null
+
+      sinon.stub(fs, 'removeAsync').resolves()
+      sinon.stub(fs, 'ensureDirAsync').callsFake(() => {
+        return Promise.delay(50).then(() => {
+          ensureDirCompleted = true
+        })
+      })
+
+      sinon.stub(fs, 'ensureSymlinkAsync').callsFake(() => {
+        ensureDirCompletedAtSymlinkCall = ensureDirCompleted
+
+        return Promise.resolve()
+      })
+
+      await AppData.ensure()
+
+      expect(ensureDirCompletedAtSymlinkCall, 'ensureSymlinkAsync was called before the appData directory existed').to.be.true
     })
   })
 

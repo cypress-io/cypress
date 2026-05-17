@@ -305,24 +305,6 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     })
   })
 
-  context('when not using a branch', () => {
-    beforeEach(() => {
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value(undefined)
-      })
-
-      cy.loginUser()
-
-      cy.visitApp()
-      cy.specsPageIsVisible()
-      cy.findByTestId('sidebar-link-specs-page').click()
-    })
-
-    it('shows placeholders for all visible specs', () => {
-      allVisibleSpecsShouldBePlaceholders()
-    })
-  })
-
   context('when runs are recorded', () => {
     beforeEach(() => {
       cy.loginUser()
@@ -599,6 +581,28 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       cy.get(dotSelector('accounts_new.spec.js', 'latest')).trigger('mouseleave')
       cy.get(averageDurationSelector('accounts_list.spec.js')).contains('0:13')
     })
+  })
+})
+
+describe('App/Cloud Integration - Latest runs (no branch)', { viewportWidth: 1200, viewportHeight: 900 }, () => {
+  beforeEach(() => {
+    cy.scaffoldProject('cypress-in-cypress')
+    cy.openProject('cypress-in-cypress')
+
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx.lifecycleManager.git!, 'currentBranch').value(undefined)
+    })
+
+    cy.startAppServer()
+    cy.loginUser()
+
+    cy.visitApp()
+    cy.specsPageIsVisible()
+    cy.findByTestId('sidebar-link-specs-page').click()
+  })
+
+  it('shows placeholders for all visible specs', () => {
+    allVisibleSpecsShouldBePlaceholders()
   })
 })
 

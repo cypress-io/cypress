@@ -135,7 +135,8 @@
         "babel-loader",
         "playwright-core",
         "playwright-webkit",
-        "tsx"
+        "tsx",
+        "mocha"
       ]
     },
     "packages/launchpad": {
@@ -656,6 +657,7 @@
         "@babel/core",
         "@babel/preset-env",
         "babel-loader",
+        "mocha",
         "mochawesome-7.1.4",
         "semver",
         "systeminformation",
@@ -709,7 +711,6 @@
     "@types/*",
     "eslint-*",
     "prettier",
-    "mocha",
     "chai",
     "sinon",
     "cypress",

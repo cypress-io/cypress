@@ -9,7 +9,7 @@ import xvfb from './xvfb'
 import { needsSandbox } from '../tasks/verify'
 import { throwFormErrorText, getErrorSync, errors } from '../errors'
 import readline from 'readline'
-import { stdin, stdout, stderr } from 'process'
+import process, { stdin, stdout, stderr } from 'process'
 import { relativeToRepoRoot } from '../relative-to-repo-root'
 import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
 import { PassThrough } from 'stream'
@@ -141,18 +141,17 @@ function createSpawnFunction (
         return function (code: any, signal: NodeJS.Signals): void {
           debug('child event fired %o', { event, code, signal })
 
-          if (code === null) {
-            const errorObject = errors.childProcessKilled(event, signal)
-
-            errorObject.platform = platform
-            const err = getErrorSync(errorObject, platform)
-
-            reject(err)
+          if (signal) {
+            if (signal === 'SIGINT') {
+              resolve(0)
+            } else {
+              resolve(128 + os.constants.signals[signal])
+            }
 
             return
           }
 
-          resolve(code)
+          resolve(code ?? 1)
         }
       }
 
@@ -177,6 +176,22 @@ function createSpawnFunction (
 
           kill(child.pid as number, 'SIGINT')
         })
+      } else {
+        // Adding listeners here prevents immediate process.exit() for these signals.
+        // Exiting when the child process exits instead will allow the child process
+        // to log during the exit process.
+
+        // Unlike in windows, we do not need to propagate these signals to the child process
+        // tree.
+        for (const signal of ['SIGINT', 'SIGTERM']) {
+          debug('adding message for signal listener for %s', signal)
+          process.once(signal, async function () {
+            console.log(`\n\n${signal} received; Attempting to exit gracefully. Force exit with ^C again if needed.\n\n`)
+            if (process.stdin.isTTY) {
+              process.stdin.setRawMode(false)
+            }
+          })
+        }
       }
 
       // if stdio options is set to 'pipe', then
@@ -236,6 +251,7 @@ function createSpawnFunction (
       // to have any effect. so we're just catching the
       // error here and not doing anything.
       stdin.on('error', (err: any) => {
+        debug('error on stdin', err)
         if (['EPIPE', 'ENOTCONN'].includes(err.code)) {
           return
         }

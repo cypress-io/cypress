@@ -51,7 +51,6 @@ describe('e2e headless', function () {
       },
     },
     headed: false,
-    snapshot: true,
   })
 
   // NOTE: cypress run --headed

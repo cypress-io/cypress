@@ -42,6 +42,11 @@ export const urqlCacheKeys: Partial<UrqlCacheKeys> = {
     GenerateSpecResponse: (data) => data.__typename,
     CloudFeatureNotEnabled: () => null,
     UsageLimitExceeded: () => null,
+    // Embed on parent CloudAppMessage; ids are not globally unique entity keys.
+    CloudAppMessageDismissal: () => null,
+    CloudAppMessageAnalytics: () => null,
+    CloudAppMessageCta: () => null,
+    CloudAppMessageUtm: () => null,
   },
   resolvers: {
     CloudProject: {

@@ -385,6 +385,27 @@ describe('lib/tasks/state', function () {
       expect(ret).toEqual(path.resolve('/cache/folder/Cypress'))
     })
 
+    it('strips surrounding double quotes from CYPRESS_CACHE_FOLDER (Windows CMD)', () => {
+      vi.stubEnv('CYPRESS_CACHE_FOLDER', '"/path/to/dir"')
+      const ret = state.getCacheDir()
+
+      expect(ret).toEqual('/path/to/dir')
+    })
+
+    it('trims surrounding whitespace on CYPRESS_CACHE_FOLDER', () => {
+      vi.stubEnv('CYPRESS_CACHE_FOLDER', '   /path/to/dir   ')
+      const ret = state.getCacheDir()
+
+      expect(ret).toEqual('/path/to/dir')
+    })
+
+    it('treats whitespace-only CYPRESS_CACHE_FOLDER as unset and falls back to cachedir()', () => {
+      vi.stubEnv('CYPRESS_CACHE_FOLDER', '   ')
+      const ret = state.getCacheDir()
+
+      expect(ret).toEqual(cacheDir)
+    })
+
     it('resolves ~ with user home folder', () => {
       const homeDir = os.homedir()
 

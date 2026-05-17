@@ -54,6 +54,16 @@ interface CloudExecuteRemote extends CloudExecuteQuery {
   operationType?: OperationTypeNode
   requestPolicy?: RequestPolicy
   onUpdatedResult?: (data: any) => any
+  /**
+   * Opt-in: when set, the query is allowed to hit the remote schema even when
+   * there's no authenticated user. Default behavior short-circuits to
+   * `{ data: null }` for logged-out users (correct for queries that depend on
+   * a user, like `cloudViewer` / project lists). Set this for genuinely public
+   * fields — e.g. `cloudAppMessages`, where logged-out users still need to
+   * receive content. Use sparingly; greppable so it's easy to audit which
+   * queries opt in.
+   */
+  allowUnauthenticated?: boolean
 }
 
 interface CloudExecuteDelegateFieldParams<F extends CloudQueryField> {
@@ -291,8 +301,11 @@ export class CloudDataSource {
    * as a remote request mechanism for a stitched schema, we reject the promise if we see any errors.
    */
   executeRemoteGraphQL <T = any> (config: CloudExecuteRemote): Promise<CloudDataResponse<T>> | CloudDataResponse<T> {
-    // We do not want unauthenticated requests to hit the remote schema
-    if (!this.#user) {
+    // By default we don't want unauthenticated requests to hit the remote
+    // schema — most cloud queries are user-scoped and have nothing to return
+    // for a logged-out user. Callers can opt in via `allowUnauthenticated: true`
+    // for genuinely public fields (see field comment on `CloudExecuteRemote`).
+    if (!this.#user && !config.allowUnauthenticated) {
       return { data: null }
     }
 
