@@ -5,9 +5,12 @@ import {
 import { expect } from 'chai'
 import { proxyquire, sinon } from '../../../../spec_helper'
 
-proxyquire.noPreserveCache()
-
 describe('TelemetryReporter', () => {
+  // noPreserveCache() mutates the global proxyquire instance; scope it so it
+  // doesn't leak into specs loaded after this one.
+  before(() => proxyquire.noPreserveCache())
+  after(() => proxyquire.preserveCache())
+
   let TelemetryReporter: typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter').TelemetryReporter
   let initializeTelemetryReporter: typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter').initializeTelemetryReporter
   let reportTelemetry: typeof import('../../../../../lib/cloud/studio/telemetry/TelemetryReporter').reportTelemetry

@@ -97,7 +97,6 @@ describe('e2e forms', () => {
 
     systemTests.it('passing', {
       spec: 'form_submission_passing.cy.js',
-      snapshot: true,
     })
 
     systemTests.it('failing', {

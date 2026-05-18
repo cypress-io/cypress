@@ -29,6 +29,7 @@ import appData from './util/app_data'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
 import { remoteSchemaWrapped } from '@packages/data-context/graphql'
+import { GracefulExit } from './util/graceful-exit'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -222,6 +223,10 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
   })
+
+  GracefulExit.addStep(async () => {
+    await clearCtx()
+  }, 'clear data context')
 
   return ctx
 }

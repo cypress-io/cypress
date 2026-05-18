@@ -23,10 +23,13 @@ const IS_DEVELOPMENT = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
 let gqlSocketServer: SocketIONamespace
 let gqlServer: Server
+/** Keeps graphql-ws teardown in sync when `reinitializeCypress` replaces ctx but reuses the same HTTP server */
+let gqlGraphqlWsDispose: (() => Promise<void>) | undefined
 
 globalPubSub.on('reset:data-context', (ctx) => {
   ctx.actions.servers.setGqlServer(gqlServer)
   ctx.actions.servers.setGqlSocketServer(gqlSocketServer)
+  ctx.actions.servers.setGqlGraphqlWsDispose(gqlGraphqlWsDispose)
 })
 
 export async function makeGraphQLServer () {
@@ -120,7 +123,10 @@ export async function makeGraphQLServer () {
 
   gqlSocketServer = socketSrv.of('/data-context')
 
-  graphqlWS(srv, '/__launchpad/graphql-ws')
+  const gqlWs = graphqlWS(srv, '/__launchpad/graphql-ws')
+
+  gqlGraphqlWsDispose = gqlWs.dispose
+  ctx.actions.servers.setGqlGraphqlWsDispose(gqlWs.dispose)
 
   gqlSocketServer.on('connection', (socket) => {
     socket.on('graphql:request', handleGraphQLSocketRequest)
@@ -180,9 +186,14 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
  *
  * @param httpServer The http server we are utilizing for the websocket
  * @param targetRoute Route to target in the server upgrade event
- * @returns Disposable Function to cleanup the created server resource
+ * @returns WebSocket server and graphql-ws dispose — call `dispose()` before destroying the HTTP server.
  */
-export const graphqlWS = (httpServer: Server, targetRoute: string) => {
+export interface GraphqlWsHandle {
+  server: WebSocketServer
+  dispose: () => Promise<void>
+}
+
+export const graphqlWS = (httpServer: Server, targetRoute: string): GraphqlWsHandle => {
   const graphqlWs = new WebSocketServer({ noServer: true })
 
   httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
@@ -193,12 +204,15 @@ export const graphqlWS = (httpServer: Server, targetRoute: string) => {
     }
   })
 
-  useServer({
+  const { dispose } = useServer({
     schema: graphqlSchema,
     context: () => getCtx(),
   }, graphqlWs)
 
-  return graphqlWs
+  return {
+    server: graphqlWs,
+    dispose: () => Promise.resolve(dispose()),
+  }
 }
 
 /**

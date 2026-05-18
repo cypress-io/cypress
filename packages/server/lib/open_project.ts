@@ -1,9 +1,8 @@
 import _ from 'lodash'
 import la from 'lazy-ass'
 import Debug from 'debug'
-import Bluebird from 'bluebird'
 import assert from 'assert'
-
+import { EventEmitter } from 'events'
 import { ProjectBase } from './project-base'
 import browsers from './browsers'
 import * as errors from './errors'
@@ -19,13 +18,15 @@ import type { BrowserInstance, Browser } from './browsers/types'
 
 const debug = Debug('cypress:server:open_project')
 
-export class OpenProject {
+export class OpenProject extends EventEmitter {
   private projectBase: ProjectBase | null = null
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
 
   constructor () {
+    super()
+
     return autoBindDebug(this)
   }
 
@@ -348,6 +349,8 @@ export class OpenProject {
         throw (err)
       }
     }
+
+    this.emit('ready')
 
     return this
   }
