@@ -49,7 +49,7 @@ export const WIZARD_DEPENDENCY_VITE = {
   package: 'vite',
   installer: 'vite',
   description: 'Vite is dev server that serves your source files over native ES modules',
-  minVersion: '^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0',
+  minVersion: '^8.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_NEXT = {
@@ -61,7 +61,7 @@ export const WIZARD_DEPENDENCY_NEXT = {
   // next 15.0.0 -> 15.0.3 use the React 19 RC as a dependency
   // Since we do not support the React 19 RC and only the official React 19 release,
   // we will only be supporting Next.js 15.0.4 officially (the others previously mentioned should still work)
-  minVersion: '^14.0.0 || ^15.0.4 || ^16.0.0',
+  minVersion: '^15.0.4 || ^16.0.0',
 } as const
 
 export const WIZARD_DEPENDENCY_ANGULAR_CLI = {

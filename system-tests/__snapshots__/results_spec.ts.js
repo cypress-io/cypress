@@ -39,7 +39,7 @@ exports['module api and after:run results'] = `
     "excludeSpecPattern": "*.hot-update.js",
     "includeShadowDom": false,
     "justInTimeCompile": true,
-    "keystrokeDelay": 0,
+    "keystrokeDelay": null,
     "modifyObstructiveCode": true,
     "numTestsKeptInMemory": 0,
     "platform": "linux",

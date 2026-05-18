@@ -25,7 +25,7 @@ export default function (Commands, Cypress, cy, state, config) {
       log: true,
       verify: true,
       force: false,
-      delay: config('keystrokeDelay') || $Keyboard.getConfig().keystrokeDelay,
+      delay: config('keystrokeDelay') ?? $Keyboard.getConfig().keystrokeDelay ?? 0,
       release: true,
       parseSpecialCharSequences: true,
       waitForAnimations: config('waitForAnimations'),
@@ -128,7 +128,7 @@ export default function (Commands, Cypress, cy, state, config) {
     }
 
     const isInvalidDelay = (delay) => {
-      return delay !== undefined && (!_.isNumber(delay) || delay < 0)
+      return delay != null && (!_.isNumber(delay) || delay < 0)
     }
 
     if (isInvalidDelay(userOptions.delay)) {

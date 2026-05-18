@@ -544,8 +544,14 @@ describe('config/src/validation', () => {
       expect(result).toBe(true)
     })
 
-    it('returns error message when value is a not number or false', () => {
+    it('returns true for value=null', () => {
       const result = validation.isNumberOrFalse(mockKey, null)
+
+      expect(result).toBe(true)
+    })
+
+    it('returns error message when value is a not number or false', () => {
+      const result = validation.isNumberOrFalse(mockKey, 'string')
 
       expect(result).not.toBe(true)
       expect(result).toMatchSnapshot()

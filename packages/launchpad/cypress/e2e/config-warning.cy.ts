@@ -123,39 +123,55 @@ describe('experimentalOriginDependencies', () => {
 })
 
 describe('component testing dependency warnings', () => {
-  it('warns against outdated react and vite version', () => {
+  // This is a bit different than traditional implementations of warning against outdated dependencies
+  // Instead, with vite, we know for a fact that vite 7 and less will NOT work with the vite-dev-server
+  // so we need to throw an error to prevent the user from continuing with the project.
+  // However, future versions (9+) MAY work. This is tested in cypress/vite-dev-server itself as a unit test
+  it('throws an error if vite version is below the supported minimum', () => {
     cy.scaffoldProject('component-testing-outdated-dependencies')
     cy.addProject('component-testing-outdated-dependencies')
     cy.openGlobalMode()
     cy.visitLaunchpad()
     cy.contains('component-testing-outdated-dependencies').click()
+    cy.get('[data-cy="alert-header"]').should('not.exist')
+    cy.contains('a', 'Projects').click()
+    cy.get('[data-cy-testingtype="component"]').click()
+    cy.get('[data-cy="collapsible"]', { timeout: 12000 }).should('exist')
+    .should('contain.text', 'ViteVersionNotSupportedError')
+    .should('contain.text', 'Vite 8 is the required version to use cypress/vite-dev-server. Found Vite version v7.3.3')
+  })
+
+  it('warns against outdated react version', () => {
+    cy.scaffoldProject('outdated-deps-react')
+    cy.addProject('outdated-deps-react')
+    cy.openGlobalMode()
+    cy.visitLaunchpad()
+    cy.contains('outdated-deps-react').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('a', 'Projects').click()
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', 'vite. Expected ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0, found 4.5.12')
-    .should('contain.text', 'react. Expected ^18.0.0 || ^19.0.0, found 15.6.2.')
+    .should('contain.text', 'react. Expected ^18.0.0 || ^19.0.0, found 17.0.2.')
     .should('contain.text', 'react-dom. Expected ^18.0.0 || ^19.0.0 but dependency was not found.')
 
-    cy.get('.warning-markdown').find('li').should('have.length', 3)
+    cy.get('.warning-markdown').find('li').should('have.length', 2)
   })
 
-  it('warns against outdated vue/vite dependency', () => {
-    cy.scaffoldProject('outdated-deps-vue-vite')
-    cy.addProject('outdated-deps-vue-vite')
+  it('warns against outdated vue dependency', () => {
+    cy.scaffoldProject('outdated-deps-vue')
+    cy.addProject('outdated-deps-vue')
     cy.openGlobalMode()
     cy.visitLaunchpad()
-    cy.contains('outdated-deps-vue-vite').click()
+    cy.contains('outdated-deps-vue').click()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('a', 'Projects').click()
     cy.get('[data-cy-testingtype="component"]', { timeout: 12000 }).click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', 'vite. Expected ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0, found 4.5.12.')
     .should('contain.text', 'vue. Expected ^3.0.0, found 2.7.8.')
 
-    cy.get('.warning-markdown').find('li').should('have.length', 2)
+    cy.get('.warning-markdown').find('li').should('have.length', 1)
   })
 
   it('does not show warning for project with supported dependencies', () => {
@@ -174,8 +190,8 @@ describe('component testing dependency warnings', () => {
   })
 
   it('does not show warning for project that does not require bundler to be installed', () => {
-    cy.scaffoldProject('next-14')
-    cy.openProject('next-14', ['--component'])
+    cy.scaffoldProject('next-16')
+    cy.openProject('next-16', ['--component'])
     cy.visitLaunchpad()
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('Choose a browser', { timeout: 12000 })

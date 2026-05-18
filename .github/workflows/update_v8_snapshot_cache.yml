@@ -90,11 +90,6 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ env.BASE_BRANCH }}
-      - name: Set committer info
-        ## attribute the commit to cypress-bot: https://github.community/t/logging-into-git-as-a-github-app/115916
-        run: |
-          git config --local user.email "${{ env.CYPRESS_BOT_APP_ID }}+cypress-bot[bot]@users.noreply.github.com"
-          git config --local user.name "cypress-bot[bot]"
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
@@ -118,86 +113,69 @@ jobs:
         shell: bash
       ## The build steps above can run for >1h on a from-scratch / Windows pass,
       ## which is longer than the App installation token's lifetime. Mint a
-      ## fresh token here so all subsequent auth-requiring steps (gh api, git
-      ## push, github-script) use a token that's guaranteed to still be valid.
+      ## fresh token here so the API-driven commit and PR steps below use a
+      ## token that's guaranteed to still be valid.
       - name: Refresh Cypress Bot App token
         id: app-token-refresh
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
-      ## actions/checkout persisted the *initial* token in git's config. On
-      ## Windows the build can exceed the App token's 1h lifetime, so that
-      ## persisted credential expires before we push. Re-run checkout with
-      ## the refreshed token to overwrite the persisted credential. The action
-      ## does a force-checkout, so stash the freshly-generated snapshot file
-      ## first and restore it afterward.
-      - name: Stash snapshot changes for credential refresh
-        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
-        run: git stash push -- ${{ env.SNAPSHOT_FILES }}
-        shell: bash
-      - name: Refresh persisted git credentials
-        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          token: ${{ steps.app-token-refresh.outputs.token }}
-          ref: ${{ env.BASE_BRANCH }}
-          clean: false
-      - name: Restore snapshot changes
-        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
-        run: git stash pop
-        shell: bash
       - name: Determine branch name - commit directly to branch
         if: ${{ inputs.commit_directly_to_branch == true }}
-        run: |
-          echo "BRANCH_NAME=${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
-          echo "BRANCH_EXISTS=true" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
         shell: bash
       - name: Determine branch name - commit to separate branch
         if: ${{ inputs.commit_directly_to_branch != true }}
-        run: |
-          echo "BRANCH_NAME=update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}-${{ env.PLATFORM }}" >> $GITHUB_ENV
-          echo "BRANCH_EXISTS=$(git show-ref --verify --quiet refs/remotes/origin/update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}-${{ env.PLATFORM }} && echo 'true')" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}-${{ env.PLATFORM }}" >> $GITHUB_ENV
         shell: bash
       - name: Check number of existing prs
         id: check-number-of-existing-prs
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         run: |
           echo "number_of_prs_for_branch=$(gh api '/repos/cypress-io/cypress/pulls?head=cypress-io:${{ env.BRANCH_NAME }}' --jq length)" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ steps.app-token-refresh.outputs.token }}
         shell: bash
-      - name: Check need for PR or branch update
+      - name: Check need for PR
         id: check-need-for-pr
+        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
         run: |
-          echo "needs_pr=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_NAME != env.BASE_BRANCH && steps.check-number-of-existing-prs.outputs.number_of_prs_for_branch == '0' }}" >> $GITHUB_OUTPUT
-          echo "needs_branch_update=${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' && env.BRANCH_EXISTS == 'true' }}" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ steps.app-token-refresh.outputs.token }}
+          echo "needs_pr=${{ env.BRANCH_NAME != env.BASE_BRANCH && steps.check-number-of-existing-prs.outputs.number_of_prs_for_branch == '0' }}" >> $GITHUB_OUTPUT
         shell: bash
-      ## Update available and a branch/PR already exists
-      - name: Checkout existing branch
-        if: ${{ steps.check-need-for-pr.outputs.needs_branch_update == 'true' }}
-        run: |
-          git stash push -- ${{ env.SNAPSHOT_FILES }}
-          git reset --hard
-          git checkout ${{ env.BRANCH_NAME }}
-          git pull origin ${{ env.BRANCH_NAME }}
-          git merge -Xtheirs stash
-      ## Update available and a PR doesn't already exist
-      - name: Checkout new branch
-        if: ${{ steps.check-need-for-pr.outputs.needs_branch_update != 'true' }}
-        run: git checkout -b ${{ env.BRANCH_NAME }} ${{ env.BASE_BRANCH }}
-      ## Commit changes if present
-      - name: Commit the changes
+      - name: Commit snapshot update via API
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
-        run: |
-          git diff-index --quiet HEAD || git commit -am "chore: updating v8 snapshot cache"
-      - name: Push branch to remote
-        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
-        run: git push origin "${{ env.BRANCH_NAME }}"
+        uses: actions/github-script@v7
+        env:
+          SNAPSHOT_FILES: ${{ env.SNAPSHOT_FILES }}
+          BASE_BRANCH: ${{ env.BASE_BRANCH }}
+          BRANCH_NAME: ${{ env.BRANCH_NAME }}
+        with:
+          github-token: ${{ steps.app-token-refresh.outputs.token }}
+          script: |
+            const { join } = await import('node:path')
+            const { pathToFileURL } = await import('node:url')
+            const moduleUrl = pathToFileURL(join(process.cwd(), 'scripts/github-actions/commit-via-api.mjs')).href
+            const { commitViaApi } = await import(moduleUrl)
+
+            // SNAPSHOT_FILES is wrapped in single quotes for shell consumers;
+            // strip them before handing the path to Node.
+            const filePaths = process.env.SNAPSHOT_FILES
+              .split(/\s+/)
+              .map((p) => p.replace(/^'|'$/g, ''))
+              .filter(Boolean)
+
+            await commitViaApi({
+              context,
+              github,
+              baseBranch: process.env.BASE_BRANCH,
+              branchName: process.env.BRANCH_NAME,
+              filePaths,
+              message: 'chore: updating v8 snapshot cache',
+            })
       # PR needs to be created
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}

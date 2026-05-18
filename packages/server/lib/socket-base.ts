@@ -7,7 +7,7 @@ import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeG
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
-import type { SocketBroadcaster } from '@packages/socket'
+import type { SocketBroadcaster, Socket } from '@packages/socket'
 import * as errors from './errors'
 import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
@@ -21,8 +21,6 @@ import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
 import type { Automation } from './automation'
 import { openExternal } from './gui/links'
-
-import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import { RUN_ALL_SPECS_KEY } from '@packages/types'
@@ -128,9 +126,7 @@ export class SocketBase implements SocketBroadcaster {
   createSocketIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
     return new socketIo.SocketIOServer(server, {
       path,
-      cookie: {
-        name: cookie,
-      },
+      cookie: typeof cookie === 'string' ? { name: cookie } : cookie,
       destroyUpgrade: false,
       serveClient: false,
       // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
