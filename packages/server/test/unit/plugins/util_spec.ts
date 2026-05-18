@@ -1,6 +1,5 @@
-require('../../spec_helper')
-
-const util = require(`../../../lib/plugins/util`)
+import '../../spec_helper'
+import * as util from '../../../lib/plugins/util'
 
 describe('lib/plugins/util', () => {
   context('#wrapIpc', () => {
