@@ -516,7 +516,7 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 
 - Break down pull requests into the smallest necessary parts to address the original issue or feature. This helps you get a timely review and helps the reviewer clearly understand which pieces of the code changes are relevant. A well-scoped PR:
   - Addresses **one concern** — a single bug, a single feature, a single refactor. Do not combine a functional change with an unrelated cleanup or style refactor, even if the cleanup is small.
-  - Is **readable in a single sitting**. As a rough guide, aim for logic diffs under ~50 lines. If your PR is growing beyond that, look for a natural seam to split it: extract a preparatory refactor PR first, then a feature PR on top.
+  - Is **readable in a single sitting**. As a rough guide, aim for logic diffs under ~50 lines (excluding tests). If your PR is growing beyond that, look for a natural seam to split it: extract a preparatory refactor PR first, then a feature PR on top.
   - Avoids mixing concerns. If you notice an unrelated bug while fixing another, open a separate issue and PR rather than bundling the fix.
   - When in doubt, split. Reviewers can merge a short PR quickly; a large PR with mixed concerns slows everyone down.
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area`. If there's not an associated open issue, **[create an issue](https://github.com/cypress-io/cypress/issues/new/choose)**.
@@ -587,7 +587,7 @@ Reviewers may ask clarifying questions about changes. As with any contribution, 
 
 ### Write Some Tests
 
-If you are adding a new feature or fixing a regression, ensure you add tests for it. PRs that introduce new behavior or fix a bug without corresponding tests are unlikely to be approved. The PR Tasks checklist in the pull request template requires confirming tests have been added or updated — this is a merge requirement, not a suggestion.
+Tests are required when developing new features or fixing regressions. PRs that introduce new behavior or fix a bug without corresponding tests are unlikely to be approved. The PR Tasks checklist in the pull request template requires confirming tests have been added or updated — this is a merge requirement, not a suggestion.
 
 Broadly speaking, there are four categories of tests you might consider:
 
