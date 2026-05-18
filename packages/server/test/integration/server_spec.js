@@ -3,8 +3,9 @@ require('../spec_helper')
 const _ = require('lodash')
 const http = require('http')
 const rp = require('@cypress/request-promise')
-const Promise = require('bluebird')
 const evilDns = require('evil-dns')
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 const { setupFullConfigWithDefaults } = require('@packages/config')
 const httpsServer = require(`@packages/https-proxy/test/helpers/https_server`)
 const config = require(`../../lib/config`)
@@ -91,7 +92,7 @@ describe('Server', () => {
               testingType: 'e2e',
               getCurrentBrowser: () => null,
             })
-            .spread(async (port) => {
+            .then(async ([port]) => {
               const automationStub = {
                 use: () => { },
               }
@@ -119,10 +120,10 @@ describe('Server', () => {
 
       evilDns.clear()
 
-      return Promise.join(
+      return Promise.all([
         this.server.close(),
         httpsServer.stop(),
-      )
+      ])
     })
 
     describe('file', () => {
@@ -378,7 +379,7 @@ describe('Server', () => {
             // put the first request in flight
             const p1 = this.server._onResolveUrl(`http://localhost:${this.httpPort}/${path}/1000`, {}, this.automationRequest)
 
-            return Promise.delay(100)
+            return delay(100)
             .then(() => {
               // the p1 should not have a current promise phase or reqStream until it's canceled
               expect(p1).not.to.have.property('currentPromisePhase')

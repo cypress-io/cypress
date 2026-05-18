@@ -1,6 +1,9 @@
-import Promise from 'bluebird'
+import '../spec_helper'
+
 import { cache } from '../../lib/cache'
 import { fs } from '../../lib/util/fs'
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 describe('lib/cache', () => {
   beforeEach(async () => {
@@ -86,7 +89,7 @@ describe('lib/cache', () => {
       expect(paths).to.deep.eq(['/Users/brian/app'])
       // we have to wait on the write event because
       // of process.nextTick
-      await Promise.delay(100)
+      await delay(100)
       const projects = await cache.__get('PROJECTS')
 
       expect(projects).to.deep.eq(['/Users/brian/app'])

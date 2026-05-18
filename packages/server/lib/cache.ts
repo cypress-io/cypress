@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import { globalPubSub } from '@packages/data-context'
 import { fs } from './util/fs'
 import appData from './util/app_data'
@@ -58,7 +58,7 @@ export const cache = {
     // @ts-expect-error - transaction is untyped currently
     return fileUtil.transaction((tx: Transaction) => {
       return this._getProjects(tx).then((projects) => {
-        const pathsToRemove = Promise.reduce(projects, (memo: string[], path: string) => {
+        const pathsToRemove = Bluebird.reduce(projects, (memo: string[], path: string) => {
           return fs.statAsync(path)
           .catch(() => {
             memo.push(path)
