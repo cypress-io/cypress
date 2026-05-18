@@ -2,18 +2,17 @@ import api from './api'
 import { cache } from '../cache'
 
 import type { CachedUser } from '@packages/types'
-import type Bluebird from 'bluebird'
 
 const cloudUser = {
-  get (): Bluebird<CachedUser> {
+  get (): Promise<CachedUser> {
     return cache.getUser()
   },
 
-  set (user: CachedUser): Bluebird<void> {
+  set (user: CachedUser): Promise<void> {
     return cache.setUser(user)
   },
 
-  getBaseLoginUrl (): Bluebird<string> {
+  getBaseLoginUrl (): Promise<string> {
     return api.getAuthUrls().get('dashboardAuthUrl')
   },
 
