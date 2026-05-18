@@ -54,7 +54,7 @@ describe('src/cypress/dom/visibility', {
     }
   }
 
-  const modes = ['modern', 'legacy']
+  const modes: ('modern' | 'legacy')[] = ['modern', 'legacy']
 
   for (const mode of modes) {
     describe(`${mode}`, {

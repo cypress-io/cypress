@@ -5,7 +5,7 @@ const { $ } = Cypress
 describe('src/cypress/dom/visibility - shadow dom', () => {
   let add: (el: string, shadowEl: string, rootIdentifier: string) => JQuery<HTMLElement>
 
-  const modes = ['modern', 'legacy']
+  const modes: ('modern' | 'legacy')[] = ['modern', 'legacy']
 
   for (const mode of modes) {
     describe(`${mode}`, {
