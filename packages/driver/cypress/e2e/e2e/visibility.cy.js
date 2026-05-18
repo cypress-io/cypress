@@ -1,11 +1,11 @@
 describe('visibility', () => {
-  const modes = ['fast', 'legacy']
+  const modes = ['modern', 'legacy']
 
   for (const mode of modes) {
     describe(`${mode}`, {
-      experimentalFastVisibility: mode === 'fast',
+      experimentalFastVisibility: mode === 'modern',
     }, () => {
-      const isFast = mode === 'fast'
+      const isModern = mode === 'modern'
 
       // https://github.com/cypress-io/cypress/issues/631
       describe('with overflow and transform - slider', () => {
@@ -13,25 +13,25 @@ describe('visibility', () => {
           cy.visit('/fixtures/issue-631.html')
 
           // Legacy walks ancestor overflow:hidden and reports slides 2/3 as hidden;
-          // fast does not, so it considers all slides visible based on their own dims.
+          // modern does not, so it considers all slides visible based on their own dims.
           cy.get('[name="test1"]').should('be.visible')
-          cy.get('[name="test2"]').should(isFast ? 'be.visible' : 'be.hidden')
-          cy.get('[name="test3"]').should(isFast ? 'be.visible' : 'be.hidden')
+          cy.get('[name="test2"]').should(isModern ? 'be.visible' : 'be.hidden')
+          cy.get('[name="test3"]').should(isModern ? 'be.visible' : 'be.hidden')
         })
 
         it('second slide', () => {
           cy.get('#button-2').click()
 
-          cy.get('[name="test1"]').should(isFast ? 'be.visible' : 'be.hidden')
+          cy.get('[name="test1"]').should(isModern ? 'be.visible' : 'be.hidden')
           cy.get('[name="test2"]').should('be.visible')
-          cy.get('[name="test3"]').should(isFast ? 'be.visible' : 'be.hidden')
+          cy.get('[name="test3"]').should(isModern ? 'be.visible' : 'be.hidden')
         })
 
         it('third slide', () => {
           cy.get('#button-3').click()
 
-          cy.get('[name="test1"]').should(isFast ? 'be.visible' : 'be.hidden')
-          cy.get('[name="test2"]').should(isFast ? 'be.visible' : 'be.hidden')
+          cy.get('[name="test1"]').should(isModern ? 'be.visible' : 'be.hidden')
+          cy.get('[name="test2"]').should(isModern ? 'be.visible' : 'be.hidden')
           cy.get('[name="test3"]').should('be.visible')
         })
       })
@@ -45,13 +45,13 @@ describe('visibility', () => {
 
         // TODO: move with tests added in this PR when it merges: https://github.com/cypress-io/cypress/pull/8166
         // #shadow-element-10 uses `backface-visibility: hidden` + `rotateY(180deg)`. Legacy's
-        // transform analysis treats the back-facing element as hidden; fast does not.
+        // transform analysis treats the back-facing element as hidden; modern does not.
         it('non-visible ancestor causes element to not be visible', () => {
           cy.visit('/fixtures/shadow-dom.html')
           cy
           .get('#shadow-element-10')
           .find('.shadow-div', { includeShadowDom: true })
-          .should(isFast ? 'be.visible' : 'not.be.visible')
+          .should(isModern ? 'be.visible' : 'not.be.visible')
         })
       })
 
