@@ -3,9 +3,10 @@ name: debugging-cypress-artifacts
 description: >-
   Debugs Cypress bugs that only reproduce in packaged artifacts (cli/build CLI
   plus binary-package output), not yarn dev. Covers the git commit/build/clean/
-  reset debug loop, CYPRESS_RUN_BINARY, DEBUG and inspect flags, and workspace
-  recovery without stash. Use when investigating artifact-only bugs, debugging
-  after binary-build, or running a packaged cypress open/run repro loop.
+  reset debug loop, env -u ELECTRON_RUN_AS_NODE for binary-build on agent hosts,
+  CYPRESS_RUN_BINARY, DEBUG and inspect flags, and workspace recovery without
+  stash. Use when investigating artifact-only bugs, binary-build electron
+  MODULE_NOT_FOUND, or a packaged cypress open/run repro loop.
 ---
 
 # Debugging Cypress packaged artifacts
@@ -13,6 +14,20 @@ description: >-
 Some bugs only appear in **release-shaped** code: Rollup output under **`cli/build/`** (not `yarn dev`), plus the **packaged Electron app** from `binary-package` (not `scripts/start.js` / **`cypress open --dev`**).
 
 Build steps: see [building-cypress-binary](../building-cypress-binary/SKILL.md).
+
+## Agent execution (avoid repeated permission prompts)
+
+Run this workflow **without asking the user to approve each command**. Use elevated permissions up front:
+
+| Phase | Command pattern | Permissions |
+|-------|-----------------|-------------|
+| Install | `yarn` from repo root (if `node_modules/.bin/lerna` missing) | `network` |
+| CLI build | `yarn lerna run build-cli --scope cypress` | `network` |
+| Binary build | `env -u ELECTRON_RUN_AS_NODE yarn binary-build` / `binary-package` with `--version` / `--platform` | `all` (long-running, writes outside workspace temp dirs). **Unset `ELECTRON_RUN_AS_NODE`** — see building skill. |
+| Repro / logs | `node cli/build/dist/bin/cypress …`, `node packages/server/index.js --version` | `network` if debug ingest uses HTTP |
+| Cleanup | `git clean -xfd`, then `yarn` | `all` for clean; `network` for yarn |
+
+Do **not** re-prompt for sandbox/network on every step in the same session once the user has asked for a full artifact debug loop.
 
 ## Git workflow for a debug loop (single checkout)
 
@@ -22,31 +37,36 @@ Use a **WIP commit** as a bookmark, then **reset** (not **`git revert`**) to res
 
 1. **`git checkout -b debug/<topic>`** (or stay on an existing debug branch).
 2. **Analysis edits** (logging, temporary probes, etc.). Commit only what you mean — prefer **`git add <paths>`** over blind **`git commit -a`**, so build noise on tracked files is not swept into the WIP commit.
-3. **`git commit -m "wip: debug …"`** if there are changes worth preserving.
-4. **Build** packaged CLI and binary (see building skill): e.g. `yarn workspace cypress build-cli`, then `yarn binary-build` / `yarn binary-package` with non-interactive flags as needed.
+3. **`git commit -m "wip: debug …"`** if there are changes worth preserving (see **Husky** below if commit fails).
+4. **Build** packaged CLI and binary (see building skill): `yarn lerna run build-cli --scope cypress`, then **`env -u ELECTRON_RUN_AS_NODE yarn binary-build`** / **`binary-package`** with matching **`--version`** (discover via `env -u ELECTRON_RUN_AS_NODE node packages/server/index.js --version`) and **`--platform`**.
 5. **Repro** with packaged entrypoints (below).
 6. **Restore workspace:**
    ```bash
    git clean -xfd && yarn
-   git reset HEAD~1    # mixed (default): WIP commit → unstaged changes, same as before step 3
    ```
-   Use **`git reset --soft HEAD~1`** if you want changes to stay staged. **Do not `git revert`** for this — revert adds a new undo commit; it does not put your WIP back in the working tree.
+   Then either:
+   - **`git reset HEAD~1`** (mixed, default) if step 3 succeeded — WIP commit becomes unstaged changes again; **not `git revert`**.
+   - **`git restore --staged --worktree <paths>`** if there was **no WIP commit** (instrumentation-only files listed in step 2). Remove any temporary helper files (e.g. `packages/server/lib/util/debug-agent-log.js`) with `rm`.
 
 7. Repeat from step 2.
 
-**Rules:** Do not **`git reset HEAD~1`** after pushing that WIP commit unless you intend to rewrite remote history. Untracked files not in the WIP commit are **gone** after `git clean -xfd`.
+**Rules:** Do not **`git reset HEAD~1`** after pushing that WIP commit unless you intend to rewrite remote history. Untracked files not in the WIP commit are **gone** after `git clean -xfd`. **`.cursor/skills/`** is gitignored except `!.cursor/skills` — skills survive `git clean -xfd`; other `.cursor/*` files may not.
+
+**Husky:** If **`git commit`** fails with missing **`.husky/_/husky.sh`**, do not loop on commit. Proceed with staged instrumentation, then restore via **`git restore`** in step 6 (or fix Husky / run `yarn` so hooks install, then commit).
 
 **Alternative:** a **separate git worktree** for binary-only work avoids the commit/reset dance; see the building skill’s reset section.
 
 ## Packaged CLI entrypoint
 
-After **`yarn workspace cypress build-cli`** (or **`yarn lerna run build-cli`**):
+After **`yarn lerna run build-cli --scope cypress`**:
 
 ```bash
-<repo>/cli/build/bin/cypress <command>
+node <repo>/cli/build/dist/bin/cypress <command>
 ```
 
-It loads **`cli/build/dist/cli`**. Prefer an absolute path to the bin when cwd might confuse postinstall-relative logic.
+Rollup emits the instrumented entry at **`cli/build/dist/bin/cypress`**. **`cli/build/bin/cypress`** is a **thin copy** of `cli/bin/cypress` (loads `../dist/cli` via a different path) and is **not** the same as the Rollup bundle — do not use it for artifact or agent-log repro.
+
+Prefer an absolute path when cwd might confuse postinstall-relative logic.
 
 ## Point the CLI at your packaged binary
 
@@ -73,8 +93,17 @@ Align **CLI package version** with the **binary `--version`** used at build time
 
 ## Attach debuggers
 
-- **CLI (Node):** `node --inspect-brk <repo>/cli/build/bin/cypress <command>`
-- **Electron main (packaged):** `<repo>/cli/build/bin/cypress open --inspect-brk` (or `--inspect`); forwarded in `cli/lib/exec/open.ts` / `run.ts`. Use with **`CYPRESS_RUN_BINARY`** so the debuggee is your local package output.
+- **CLI (Node):** `node --inspect-brk <repo>/cli/build/dist/bin/cypress <command>`
+- **Electron main (packaged):** `node <repo>/cli/build/dist/bin/cypress open --inspect-brk` (or `--inspect`); forwarded in `cli/lib/exec/open.ts` / `run.ts`. Use with **`CYPRESS_RUN_BINARY`** so the debuggee is your local package output.
+
+## Debug-session instrumentation (agents)
+
+When using Cursor debug-mode HTTP ingest (`127.0.0.1:7709`, session log under **`.cursor/debug-<session>.log`**):
+
+- **Entry layers** to tag: CLI bin → CLI `init` → CLI `spawn` (only when the binary is spawned, not for `version`) → `packages/server/index.js` (`startCypress`) → `packages/server/start-cypress.js`.
+- **Short-lived CLI:** fire-and-forget `fetch` alone often loses events because the process exits first. Also **`appendFileSync`** the same NDJSON line to the session log path (or a small `debug-agent-log.js` helper on the server side) in addition to `fetch`.
+- **Verify server layers** without a full green binary: `env -u ELECTRON_RUN_AS_NODE node packages/server/index.js --version` from `packages/server` (exercises index + start-cypress; **unset `ELECTRON_RUN_AS_NODE`** if the agent host sets it).
+- **Verify CLI layers:** `node cli/build/dist/bin/cypress version` (does not hit spawn). CLI bin is unaffected by `ELECTRON_RUN_AS_NODE` for the version subcommand, but binary-build still needs the var unset.
 
 ## What to skip
 
