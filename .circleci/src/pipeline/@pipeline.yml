@@ -2493,7 +2493,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/webpack-preprocessor
+          command: node scripts/lerna-build.js --scope=@cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -2544,7 +2544,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vue
+          command: node scripts/lerna-build.js --scope=@cypress/vue
       - run:
           name: Run tests
           command: yarn test
@@ -2560,7 +2560,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/angular
+          command: node scripts/lerna-build.js --scope=@cypress/angular
 
   npm-angular-zoneless:
     <<: *defaults
@@ -2570,7 +2570,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/angular-zoneless
+          command: node scripts/lerna-build.js --scope @cypress/angular-zoneless
 
   npm-puppeteer-unit-tests:
     <<: *defaults
@@ -2580,7 +2580,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/puppeteer
+          command: node scripts/lerna-build.js --scope=@cypress/puppeteer
       - run:
           name: Run tests
           command: yarn test
@@ -2611,7 +2611,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/react
+          command: node scripts/lerna-build.js --scope=@cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -2627,7 +2627,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vite-plugin-cypress-esm
+          command: node scripts/lerna-build.js --scope=@cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2643,7 +2643,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/mount-utils
+          command: node scripts/lerna-build.js --scope=@cypress/mount-utils
 
   npm-grep:
     <<: *defaults
@@ -2701,7 +2701,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn lerna run build --scope=@cypress/schematic
+            node scripts/lerna-build.js --scope=@cypress/schematic
       - run:
           name: Run unit tests
           command: |
