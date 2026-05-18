@@ -17,7 +17,7 @@ We will also attempt to scaffold a configuration file for projects using React a
 | Angular | -          | Webpack    | 5           | Angular 21 | `@cypress/angular@latest`  | [Link](../../system-tests/projects/angular-cli-configured)         |
 | Svelte  | -          | Vite       | 8           | Svelte 5               | `@cypress/svelte@latest`  | [Link](../../system-tests/projects/svelte-vite-configured)         |
 | Svelte  | -          | Webpack    | 5           | Svelte 5               | `@cypress/svelte@latest`  | [Link](../../system-tests/projects/svelte-webpack-configured)      |
-| Next.js | 14, 15, 16 | Webpack    | 5           | React 18, 19           | `@cypress/react@latest`   | [Link](../../system-tests/projects/nextjs-configured)              |
+| Next.js | 15, 16     | Webpack    | 5           | React 18, 19           | `@cypress/react@latest`   | [Link](../../system-tests/projects/nextjs-configured)              |
 
 ### Adding More Projects
 

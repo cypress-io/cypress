@@ -6,7 +6,7 @@ import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
 import Forge from 'node-forge'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 const { pki, pkcs12, asn1 } = Forge
 
 function urlShouldMatch (url: string, matcher: string) {
@@ -274,7 +274,7 @@ function createCaFile (filepath: string) {
 }
 
 function createUniqueUrl (): string {
-  return `http://${uuidv4()}`
+  return `http://${randomUUID()}`
 }
 
 function createSinglePemConfig (

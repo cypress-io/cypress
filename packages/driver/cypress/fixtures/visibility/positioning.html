@@ -40,7 +40,7 @@
   <div class="test-section" cy-section="position-fixed-element-covered-by-another">
 
     <!-- Position fixed element covered by another element -->
-    <div class="testCase" cy-expect="hidden" cy-label="Fixed positioned element covered by another" style="position: fixed; bottom: 0; left: 0; background: lightcoral; width: 100px; height: 100px;">underneath</div>
+    <div class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Fixed positioned element covered by another" style="position: fixed; bottom: 0; left: 0; background: lightcoral; width: 100px; height: 100px;">underneath</div>
     <div class="testCase" cy-expect="visible" cy-label="Element covering fixed positioned element" style="position: fixed; bottom: 0; left: 0; background: lightskyblue; width: 100px; height: 100px;">on top</div>
   </div>
 
@@ -69,8 +69,8 @@
       </div>
 
       <!-- Parent with pointer-events: none covered by another element -->
-      <div class="testCase" cy-expect="hidden" cy-label="Fixed child under pointer-events none parent covered by another" style="pointer-events: none; background: lightsteelblue;">
-        <span class="testCase" cy-expect="hidden" cy-label="Fixed child covered by another element" style="position: fixed; top: 40px;">parent pointer-events: none</span>
+      <div class="testCase" cy-expect="visible" cy-label="Fixed child under pointer-events none parent covered by another" style="pointer-events: none; background: lightsteelblue;">
+        <span class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Fixed child covered by another element" style="position: fixed; top: 40px;">parent pointer-events: none</span>
       </div>
       <div class="testCase" cy-expect="visible" cy-label="Element covering fixed child with pointer-events none parent" style="position: fixed; top: 40px; background: red;">covering the element with pointer-events: none</div>
 
@@ -79,14 +79,14 @@
     <h3>Position Absolute Scenarios</h3>
     
     <!-- Position absolute child under normal parent -->
-    <div class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Normal parent with absolute positioned child" style="width: 0; height: 100px; overflow: hidden; background: lightblue;">
+    <div class="testCase" cy-expect="hidden" cy-label="Normal parent with absolute positioned child" style="width: 0; height: 100px; overflow: hidden; background: lightblue;">
       <div class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Parent container for absolute child" style="height: 500px; width: 500px;">
         <span class="testCase" cy-expect="visible" cy-label="Absolute positioned child" style="position: absolute;">position: absolute</span>
       </div>
     </div>
 
     <!-- Position absolute descendant under normal ancestor -->
-    <div class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Normal ancestor with absolute positioned descendant" style="width: 0; height: 100px; overflow: hidden; background: lightgreen;">
+    <div class="testCase" cy-expect="hidden" cy-label="Normal ancestor with absolute positioned descendant" style="width: 0; height: 100px; overflow: hidden; background: lightgreen;">
       <div class="testCase" cy-expect="visible" cy-label="Parent container for absolute descendant" style="height: 500px; width: 500px; position: absolute;">
         <span class="testCase" cy-expect="visible" cy-label="Absolute positioned descendant" style="position: absolute;">no width, descendant position: absolute</span>
       </div>
@@ -94,8 +94,8 @@
 
     <!-- Parent with position absolute but child not positioned -->
     <div class="testCase" cy-expect="hidden" cy-label="Parent with absolute positioning but child not positioned" style="width: 0; height: 100px; overflow: hidden; position: absolute; background: lightcoral;">
-      <div class="testCase" cy-expect="hidden" cy-label="Child container under absolute parent" style="height: 500px; width: 500px;">
-        <span class="testCase" cy-expect="hidden" cy-label="Non-positioned child under absolute parent">parent position: absolute</span>
+      <div class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Child container under absolute parent" style="height: 500px; width: 500px;">
+        <span class="testCase" cy-legacy-expect="hidden" cy-fast-expect="visible" cy-label="Non-positioned child under absolute parent">parent position: absolute</span>
       </div>
     </div>
   </div>
@@ -115,7 +115,7 @@
     <!-- Element covered by an absolutely positioned cousin -->
      <div style="position: relative;">
       <div style="width: 200px; height: 100px; background: lightblue;">
-        <span class="testCase" cy-fast-expect="hidden" cy-legacy-expect="visible" cy-label="Target element to be covered" style="display: block; width: 100px; height: 50px; background: lightgreen;">Target element</span>
+        <span class="testCase" cy-expect="visible" cy-label="Target element to be covered" style="display: block; width: 100px; height: 50px; background: lightgreen;">Target element</span>
       </div>
       <div class="testCase" cy-expect="visible" cy-label="Absolutely positioned cousin covering target" style="position: absolute; top: 0px; left: 0px; width: 100px; height: 50px; background: lightcoral;">Covering cousin</div>
     </div>
@@ -126,7 +126,7 @@
     
     <!-- Element covered by higher z-index element -->
     <div style="position: relative; width: 300px; height: 150px; background: lightgray;">
-      <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Element covered by higher z-index" style="position: absolute; top: 20px; left: 20px; width: 100px; height: 100px; background: lightgreen; z-index: 1;">Lower z-index element</div>
+      <div class="testCase" cy-expect="visible" cy-label="Element covered by higher z-index" style="position: absolute; top: 20px; left: 20px; width: 100px; height: 100px; background: lightgreen; z-index: 1;">Lower z-index element</div>
       <div class="testCase" cy-expect="visible" cy-label="Higher z-index covering element" style="position: absolute; top: 20px; left: 20px; width: 100px; height: 100px; background: lightcoral; z-index: 2;">Higher z-index element</div>
     </div>
   </div>

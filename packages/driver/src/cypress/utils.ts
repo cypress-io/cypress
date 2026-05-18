@@ -17,7 +17,7 @@ const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
 
 const defaultOptions = {
-  delay: 10,
+  delay: 0,
   force: false,
   timeout: null,
   interval: null,

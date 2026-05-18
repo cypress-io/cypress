@@ -4,8 +4,8 @@ import { nanoid } from 'nanoid'
 import { decodeBase64Unicode } from '@packages/frontend-shared/src/utils/base64'
 
 gql`
-mutation useRecordEvent_recordEvent ($messageId: String!, $campaign: String!, $medium: String!, $payload: String!, $includeMachineId: Boolean) {
-  recordEvent(includeMachineId: $includeMachineId, messageId: $messageId, campaign: $campaign, medium: $medium, payload: $payload)
+mutation useRecordEvent_recordEvent ($messageId: String!, $campaign: String!, $medium: String!, $payload: String!, $cohort: String, $includeMachineId: Boolean) {
+  recordEvent(includeMachineId: $includeMachineId, messageId: $messageId, campaign: $campaign, medium: $medium, cohort: $cohort, payload: $payload)
 }
 `
 
@@ -15,6 +15,8 @@ type EventParams = {
   cohort?: string
   payload?: Record<string, string | number | undefined | null>
   includeMachineId?: boolean
+  // Reuse across all events for one banner instance.
+  messageId?: string
 }
 
 export function useRecordEvent () {
@@ -23,8 +25,9 @@ export function useRecordEvent () {
   async function record (params: EventParams) {
     await recordEventMutation.executeMutation({
       ...params,
-      messageId: nanoid(),
+      messageId: params.messageId ?? nanoid(),
       includeMachineId: params.includeMachineId ?? false,
+      cohort: params.cohort ?? null,
       payload: JSON.stringify(params.payload),
     })
   }

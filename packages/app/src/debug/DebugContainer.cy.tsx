@@ -557,7 +557,14 @@ describe('<DebugContainer />', () => {
 
         //test scrolling
 
-        cy.findByTestId('run-423').should('not.be.visible')
+        // The modern visibility algorithm doesn't detect scroll-clipped
+        // elements as hidden, so assert geometrically that run-423 sits
+        // below the scroll container's visible area before scrolling.
+        cy.findByTestId('run-423').then(($el) => {
+          const container = $el[0].closest('#debug-runs-container') as HTMLElement
+
+          expect($el[0].getBoundingClientRect().top).to.be.greaterThan(container.getBoundingClientRect().bottom)
+        })
 
         cy.findByTestId('debug-runs-container').scrollTo('bottom')
 

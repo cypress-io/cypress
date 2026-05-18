@@ -23,7 +23,7 @@ const isVisible = (el) => {
 // as elements with `opacity: 0` are hidden yet actionable
 
 const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true }) => {
-  if (Cypress.config('experimentalFastVisibility')) {
+  if (Cypress.config('visibilityStrategy') === 'modern') {
     ensureEl(el, methodName)
 
     return fastIsHidden(el, options)

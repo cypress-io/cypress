@@ -228,4 +228,231 @@ describe('ProjectLifecycleManager', () => {
       expect(ctx.lifecycleManager.eventProcessPid).toEqual(undefined)
     })
   })
+
+  describe('#refreshLifecycle', () => {
+    type Deferred = { promise: Promise<void>, resolve: () => void, reject: (err: Error) => void }
+
+    function deferred (): Deferred {
+      let resolve!: () => void
+      let reject!: (err: Error) => void
+      const promise = new Promise<void>((res, rej) => {
+        resolve = res
+        reject = rej
+      })
+
+      return { promise, resolve, reject }
+    }
+
+    function setupReady () {
+      // @ts-expect-error - private field
+      ctx.lifecycleManager._configManager = { destroy: () => {} }
+      // @ts-expect-error - private method
+      jest.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
+    }
+
+    it('skips when the project is not ready to initialize', async () => {
+      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
+
+      // _projectRoot is set in createDataContext, but _configManager is undefined
+      // and readyToInitialize will be false in this state
+      await ctx.lifecycleManager.refreshLifecycle()
+
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it('runs the refresh exactly once for a single call', async () => {
+      setupReady()
+      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle').mockResolvedValue(undefined)
+
+      await ctx.lifecycleManager.refreshLifecycle()
+
+      expect(spy).toHaveBeenCalledTimes(1)
+    })
+
+    it('coalesces concurrent calls into a single re-run after the in-flight refresh', async () => {
+      setupReady()
+
+      const first = deferred()
+      const second = deferred()
+      const calls: Array<Deferred> = [first, second]
+
+      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      .mockImplementation(() => calls.shift()?.promise ?? Promise.resolve())
+
+      // First call kicks off the refresh
+      const a = ctx.lifecycleManager.refreshLifecycle()
+
+      // Two more calls arrive while the first is still in flight — they should
+      // queue exactly one extra iteration, not two
+      const b = ctx.lifecycleManager.refreshLifecycle()
+      const c = ctx.lifecycleManager.refreshLifecycle()
+
+      expect(spy).toHaveBeenCalledTimes(1)
+
+      first.resolve()
+      // Yield so the do/while loop can pick up the queued flag and start the
+      // second iteration before we assert on the call count
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(spy).toHaveBeenCalledTimes(2)
+
+      second.resolve()
+      await Promise.all([a, b, c])
+
+      // Only one extra run, even though two concurrent calls came in
+      expect(spy).toHaveBeenCalledTimes(2)
+    })
+
+    it('makes awaited callers wait for the queued iteration to finish, not just the in-flight one', async () => {
+      setupReady()
+
+      const first = deferred()
+      const second = deferred()
+      const calls = [first, second]
+      const resolved: string[] = []
+
+      jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      .mockImplementation(() => calls.shift()?.promise ?? Promise.resolve())
+
+      const a = ctx.lifecycleManager.refreshLifecycle().then(() => resolved.push('a'))
+      const b = ctx.lifecycleManager.refreshLifecycle().then(() => resolved.push('b'))
+
+      // Resolve only the first iteration. `b` was queued during `a`, so it
+      // should still be pending until the second iteration finishes too.
+      first.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(resolved).toEqual([])
+
+      second.resolve()
+      await Promise.all([a, b])
+
+      expect(resolved).toEqual(['a', 'b'])
+    })
+
+    it('serializes overlapping refreshes so initializeConfig never runs concurrently', async () => {
+      // Regression for the race that surfaced as ERR_STREAM_DESTROYED on
+      // packages/app/cypress/e2e/subscriptions/specChange-subscription.cy.ts:
+      // when a watcher fired a second refresh while the first was still
+      // running, both calls hit `initializeConfig` concurrently and corrupted
+      // the shared IPC state. This test asserts that no two `initializeConfig`
+      // calls are ever in flight at once.
+
+      // @ts-expect-error - private field
+      ctx.lifecycleManager._configManager = { destroy: () => {}, resetLoadingState: () => {} }
+      // @ts-expect-error - private method
+      jest.spyOn(ctx.lifecycleManager, 'readyToInitialize').mockReturnValue(true)
+      ctx._apis.projectApi.getRemoteStates = (() => undefined) as any
+      jest.spyOn(ctx.lifecycleManager, 'setAndLoadCurrentTestingType').mockImplementation(() => {})
+
+      let inFlight = 0
+      let maxInFlight = 0
+      const gates = [deferred(), deferred()]
+      let callIndex = 0
+
+      jest.spyOn(ctx.lifecycleManager, 'initializeConfig').mockImplementation(async () => {
+        inFlight++
+        maxInFlight = Math.max(maxInFlight, inFlight)
+        await gates[callIndex++]?.promise
+        inFlight--
+
+        return {} as any
+      })
+
+      const a = ctx.lifecycleManager.refreshLifecycle()
+      const b = ctx.lifecycleManager.refreshLifecycle()
+
+      gates[0]!.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+
+      gates[1]!.resolve()
+      await Promise.all([a, b])
+
+      expect(maxInFlight).toBe(1)
+      expect(callIndex).toBe(2)
+    })
+
+    it('does not hand stale refresh promises to callers after a project switch', async () => {
+      // If a project switch (resetInternalState) happens while a refresh is
+      // in flight, the in-flight promise is doomed (its config manager is
+      // about to be destroyed). The new project's first refresh must start a
+      // fresh chain instead of latching onto the old promise.
+      setupReady()
+
+      const oldRefresh = deferred()
+      const newRefresh = deferred()
+
+      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      .mockImplementationOnce(() => oldRefresh.promise)
+      .mockImplementationOnce(() => newRefresh.promise)
+      .mockImplementation(() => Promise.resolve())
+
+      // First call kicks off the in-flight refresh on the old project
+      const a = ctx.lifecycleManager.refreshLifecycle()
+
+      // Project switch happens — must drop the in-flight reference so the
+      // new project doesn't get handed the old (doomed) promise
+      // @ts-expect-error - private method
+      await ctx.lifecycleManager.resetInternalState()
+
+      // Re-arm the project so the next refresh passes the readiness guard
+      setupReady()
+
+      // A new refresh on the (new) project starts a fresh chain — confirms
+      // resetInternalState cleared `_activeLifecycleRefresh`
+      const b = ctx.lifecycleManager.refreshLifecycle()
+
+      expect(spy).toHaveBeenCalledTimes(2)
+
+      // The old promise settles WHILE the new chain is still in flight. The
+      // old IIFE's `finally` must not clobber the new chain's slot — if it
+      // does, a follow-up call would skip the in-flight new chain and start
+      // a third one, breaking serialization.
+      oldRefresh.reject(new Error('config manager destroyed'))
+      await a.catch(() => {})
+
+      // The new chain is still in flight, so a follow-up call should reuse
+      // it (no new `_doRefreshLifecycle` call). Without the ownership-check
+      // guard, the old IIFE's finally would have nulled
+      // `_activeLifecycleRefresh` and this call would synchronously kick
+      // off a third chain.
+      const c = ctx.lifecycleManager.refreshLifecycle()
+
+      expect(spy).toHaveBeenCalledTimes(2)
+
+      newRefresh.resolve()
+      await Promise.all([b, c])
+    })
+
+    it('rejects all in-flight callers and clears state when a refresh throws', async () => {
+      setupReady()
+
+      const failing = deferred()
+      const succeeding = deferred()
+
+      const spy = jest.spyOn(ctx.lifecycleManager as any, '_doRefreshLifecycle')
+      .mockImplementationOnce(() => failing.promise)
+      .mockImplementationOnce(() => succeeding.promise)
+
+      const a = ctx.lifecycleManager.refreshLifecycle()
+      const b = ctx.lifecycleManager.refreshLifecycle()
+
+      failing.reject(new Error('boom'))
+
+      await expect(a).rejects.toThrow('boom')
+      await expect(b).rejects.toThrow('boom')
+
+      // After rejection, state should be cleared so the next call kicks off
+      // a fresh chain rather than re-throwing the previous error.
+      const c = ctx.lifecycleManager.refreshLifecycle()
+
+      succeeding.resolve()
+      await c
+
+      expect(spy).toHaveBeenCalledTimes(2)
+    })
+  })
 })

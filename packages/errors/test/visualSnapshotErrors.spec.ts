@@ -1139,5 +1139,15 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    EXPERIMENTAL_FAST_VISIBILITY_RENAMED: () => {
+      return {
+        default: [],
+      }
+    },
+    VISIBILITY_STRATEGY_DEPRECATION: () => {
+      return {
+        default: [],
+      }
+    },
   })
 })

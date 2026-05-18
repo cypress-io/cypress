@@ -347,6 +347,7 @@ linux-x64:
                 - 'update-v8-snapshot-cache-on-develop'
                 # temporary branches that can be removed after merging
                 - 'mschile/electron_41'
+                - 'mschile/keen-mclean-72c131'
         requires:
           - build
     - test-kitchensink:

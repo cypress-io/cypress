@@ -47,6 +47,7 @@ describe('<CreateOrganizationBanner />', () => {
         medium: 'Specs Create Organization Banner',
         messageId: Cypress.sinon.match.string,
         cohort: null,
+        includeMachineId: false,
       })
     })
 
