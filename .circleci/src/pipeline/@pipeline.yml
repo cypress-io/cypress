@@ -273,7 +273,7 @@ commands:
               [ -d "$p" ] || continue
               (cd "$(dirname "$p")" && npx patch-package --reverse) || true
             done
-            yarn install --check-files
+            yarn install --check-files --frozen-lockfile
             for p in patches cli/patches packages/*/patches; do
               [ -d "$p" ] || continue
               (cd "$(dirname "$p")" && npx patch-package) || true
