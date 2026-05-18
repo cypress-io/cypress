@@ -5,7 +5,7 @@ import $elements from './elements'
 import $coordinates from './coordinates'
 import * as $transform from './transform'
 const { isElement, isBody, isHTML, isOption, isOptgroup, getParent, getFirstParentWithTagName, isAncestor, isChild, getAllParents, isDescendent, isUndefinedOrHTMLBodyDoc, elOrAncestorIsFixedOrSticky, isDetached, isFocusable, stringify: stringifyElement } = $elements
-import { fastIsHidden } from './visibility/fastIsHidden'
+import { modernIsHidden } from './visibility/modernIsHidden'
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
 const OVERFLOW_PROPS = ['hidden', 'clip', 'scroll', 'auto']
@@ -26,7 +26,7 @@ const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true 
   if (Cypress.config('visibilityStrategy') === 'modern') {
     ensureEl(el, methodName)
 
-    return fastIsHidden(el, options)
+    return modernIsHidden(el, options)
   }
 
   if (isStrictlyHidden(el, methodName, options, isHidden)) {

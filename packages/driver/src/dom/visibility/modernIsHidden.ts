@@ -2,12 +2,12 @@ import $elements from '../elements'
 import { unwrap, wrap, isJquery } from '../jquery'
 import Debug from 'debug'
 
-const debug = Debug('cypress:driver:dom:visibility:fastIsHidden')
+const debug = Debug('cypress:driver:dom:visibility:modernIsHidden')
 
 const { isOption, isOptgroup, isBody, isHTML } = $elements
 
-export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, options: { checkOpacity: boolean } = { checkOpacity: true }): boolean {
-  debug('fastIsHidden', subject)
+export function modernIsHidden (subject: JQuery<HTMLElement> | HTMLElement, options: { checkOpacity: boolean } = { checkOpacity: true }): boolean {
+  debug('modernIsHidden', subject)
 
   if (isBody(subject) || isHTML(subject)) {
     return false
@@ -17,10 +17,10 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
     const subjects = unwrap(subject) as HTMLElement | HTMLElement[]
 
     if (Array.isArray(subjects)) {
-      return subjects.some((subject: HTMLElement) => fastIsHidden(subject, options))
+      return subjects.some((subject: HTMLElement) => modernIsHidden(subject, options))
     }
 
-    return fastIsHidden(subjects, options)
+    return modernIsHidden(subjects, options)
   }
 
   if (isOption(subject) || isOptgroup(subject)) {
@@ -31,7 +31,7 @@ export function fastIsHidden (subject: JQuery<HTMLElement> | HTMLElement, option
     const select = subject.closest('select')
 
     if (select) {
-      return fastIsHidden(wrap(select), options)
+      return modernIsHidden(wrap(select), options)
     }
   }
 
