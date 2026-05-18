@@ -185,9 +185,9 @@
     "semver": "^7.7.3",
     "sinon": "17.0.1",
     "snap-shot-it": "7.9.10",
-    "stealthy-require": "^1.1.1",
     "socket.io": "4.8.3",
     "ssestream": "1.0.1",
+    "stealthy-require": "^1.1.1",
     "supertest": "4.0.2",
     "ts-loader": "^9.5.7",
     "tsconfig-paths": "3.10.1",
@@ -205,6 +205,7 @@
   ],
   "types": "index.d.ts",
   "productName": "Cypress",
+  "license": "MIT",
   "workspaces": {
     "nohoist": [
       "axios",
@@ -223,6 +224,5 @@
     "fsevents": "^2.3.3",
     "registry-js": "1.15.0"
   },
-  "license": "MIT",
   "nx": {}
 }

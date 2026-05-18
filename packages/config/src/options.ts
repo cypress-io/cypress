@@ -30,6 +30,8 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'EXPERIMENTAL_STUDIO_REMOVED',
   'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
   'CYPRESS_ENV_DEPRECATION',
+  'EXPERIMENTAL_FAST_VISIBILITY_RENAMED',
+  'VISIBILITY_STRATEGY_DEPRECATION',
 ] as const
 
 type ValidationOptions = {
@@ -277,10 +279,9 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     isExperimental: true,
     requireRestartOnChange: 'server',
   }, {
-    name: 'experimentalFastVisibility',
-    defaultValue: false,
-    validation: validate.isBoolean,
-    isExperimental: true,
+    name: 'visibilityStrategy',
+    defaultValue: 'modern',
+    validation: validate.isOneOf('legacy', 'modern'),
     overrideLevel: 'any',
   }, {
     name: 'fileServerFolder',
@@ -665,6 +666,17 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
     errorKey: 'CYPRESS_ENV_DEPRECATION',
     // Display this warning if the value is not present or is explicitly false
     shouldDisplayOrThrow: (value: any) => value !== false,
+    isWarning: true,
+  },
+  {
+    name: 'experimentalFastVisibility',
+    errorKey: 'EXPERIMENTAL_FAST_VISIBILITY_RENAMED',
+    isWarning: true,
+  },
+  {
+    name: 'visibilityStrategy',
+    errorKey: 'VISIBILITY_STRATEGY_DEPRECATION',
+    shouldDisplayOrThrow: (value: any) => value === 'legacy',
     isWarning: true,
   },
 ] as const

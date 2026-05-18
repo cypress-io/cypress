@@ -1264,6 +1264,18 @@ export const AllCypressErrors = {
       Read the migration guide for Cypress v14.0.0: https://on.cypress.io/migration-guide
     `
   },
+  EXPERIMENTAL_FAST_VISIBILITY_RENAMED: () => {
+    return errTemplate`\
+      The ${fmt.highlight('experimentalFastVisibility')} configuration option has been removed. The modern visibility algorithm is now the default.
+
+      Please remove ${fmt.highlight('experimentalFastVisibility')} from your configuration. To use the legacy algorithm instead, set ${fmt.highlightSecondary(`visibilityStrategy: 'legacy'`)}.`
+  },
+  VISIBILITY_STRATEGY_DEPRECATION: () => {
+    return errTemplate`\
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight(`visibilityStrategy: 'legacy'`)} option is deprecated. The legacy visibility algorithm will be removed in a future version of Cypress.
+
+      Remove the ${fmt.highlight('visibilityStrategy')} option from your configuration to use the modern algorithm.`
+  },
   CYPRESS_ENV_DEPRECATION: () => {
     return errTemplate`\
       ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('allowCypressEnv')} configuration option is enabled. This allows any browser code to read values from ${fmt.highlight('Cypress.env()')}. This is insecure and will be removed in a future major version.
@@ -1570,6 +1582,7 @@ export const AllCypressErrors = {
   },
 } as const
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
 
 export type AllCypressErrorObj = typeof AllCypressErrors

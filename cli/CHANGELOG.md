@@ -9,6 +9,7 @@
 - Removed the `cy.end()` command, which ended a chain of commands by yielding `null`. A Cypress chain is already terminated when the next `cy.<command>()` starts a new chain, so existing `.end()` calls can simply be removed. Addressed in [#33696](https://github.com/cypress-io/cypress/pull/33696).
 - The default `keystrokeDelay` for `cy.type()` has been changed from `10` to `0` to improve performance of typing-heavy test runs. Users who relied on the implicit 10ms delay can restore it by setting `keystrokeDelay: 10` in their Cypress config or on `Cypress.Keyboard`. Addresses [#33523](https://github.com/cypress-io/cypress/issues/33523).
 - Rewrote the experimental `experimentalFastVisibility` algorithm to delegate to the browser's native `Element.checkVisibility()` with a zero-dimension guard. Addressed in [#33781](https://github.com/cypress-io/cypress/pull/33781).
+- The `experimentalFastVisibility` boolean flag has been replaced with a new `visibilityStrategy` config option that accepts `'legacy'` or `'modern'`, defaulting to `'modern'`. The modern visibility algorithm (based on `Element.checkVisibility()`) is now the default for all users. The option is deprecated — set `visibilityStrategy: 'legacy'` only if you need the old algorithm when migrating to the modern visibility algorithm. Addressed in [#33794](https://github.com/cypress-io/cypress/pull/33794).
 
 **Dependency Updates:**
 

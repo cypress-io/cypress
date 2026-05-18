@@ -1,0 +1,3 @@
+[31m[95mWarning:[39m[31m The [33mvisibilityStrategy: 'legacy'[39m[31m option is deprecated. The legacy visibility algorithm will be removed in a future version of Cypress.[39m
+[31m[39m
+[31mRemove the [33mvisibilityStrategy[39m[31m option from your configuration to use the modern algorithm.[39m

@@ -33,7 +33,7 @@ exports['module api and after:run results'] = `
     "experimentalSourceRewriting": false,
     "experimentalSingleTabRunMode": false,
     "experimentalWebKitSupport": false,
-    "experimentalFastVisibility": false,
+    "visibilityStrategy": "modern",
     "fileServerFolder": "/path/to/fileServerFolder",
     "fixturesFolder": "/path/to/fixturesFolder",
     "excludeSpecPattern": "*.hot-update.js",

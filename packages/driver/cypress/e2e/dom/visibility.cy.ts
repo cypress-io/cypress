@@ -5,9 +5,7 @@ describe('src/cypress/dom/visibility', {
   slowTestThreshold: 500,
 }, () => {
   function assertVisibilityForEl (el: HTMLElement) {
-    // once experimentalFastVisibility is added, switch based on the config value
-    // and use `cy-fast-expect` instead of `cy-legacy-expect` when it is enabled.
-    const breakingChangeExpectedProp = Cypress.config('experimentalFastVisibility') ? 'cy-fast-expect' : 'cy-legacy-expect'
+    const breakingChangeExpectedProp = Cypress.config('visibilityStrategy') === 'modern' ? 'cy-fast-expect' : 'cy-legacy-expect'
     const expected = el.getAttribute('cy-expect') ?? el.getAttribute(breakingChangeExpectedProp)
 
     if (!expected) {
@@ -60,7 +58,7 @@ describe('src/cypress/dom/visibility', {
 
   for (const mode of modes) {
     describe(`${mode}`, {
-      experimentalFastVisibility: mode === 'fast',
+      visibilityStrategy: mode === 'fast' ? 'modern' : 'legacy',
     }, () => {
       beforeEach(() => {
         cy.visit('/fixtures/generic.html')
