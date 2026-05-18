@@ -149,7 +149,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   it('increases the timeout delta', () => {
     cy.spy(cy, 'timeout')
 
-    cy.get(':text:first').type('foo{enter}').then(() => {
+    cy.get(':text:first').type('foo{enter}', { delay: 10 }).then(() => {
       expect(cy.timeout).to.be.calledWith(40, true, 'type')
 
       expect(cy.timeout).to.be.calledWith(50, true, 'type')
@@ -710,11 +710,11 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('delay', () => {
-    it('adds default delay to delta for each key sequence', () => {
+    it('adds delay to delta for each key sequence when delay is set', () => {
       cy.spy(cy, 'timeout')
 
       cy.get(':text:first')
-      .type('foo{enter}bar{leftarrow}')
+      .type('foo{enter}bar{leftarrow}', { delay: 10 })
       .then(() => {
         expect(cy.timeout).to.be.calledWith(10 * 8, true, 'type')
       })
@@ -746,7 +746,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         , 50)
       })
 
-      cy.get(':text:first').type('foo{enter}bar{leftarrow}')
+      cy.get(':text:first').type('foo{enter}bar{leftarrow}', { delay: 10 })
     })
 
     it('test config keystrokeDelay overrides global value', { keystrokeDelay: 5 }, () => {
@@ -1163,7 +1163,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      cy.get('#input-without-value').type('foo').then(($input) => {
+      cy.get('#input-without-value').type('foo', { delay: 10 }).then(($input) => {
         expect($input).to.have.value('f-o-o-')
       })
     })

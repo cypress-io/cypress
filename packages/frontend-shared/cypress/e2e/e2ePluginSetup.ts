@@ -127,6 +127,7 @@ async function makeE2ETasks () {
   let remoteGraphQLOptions: Record<string, any> | undefined
   let remoteGraphQLInterceptBatched: RemoteGraphQLBatchInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
+  let cachedCommercialRecommendations: string | undefined
 
   const cachedCwd = process.cwd()
 
@@ -368,6 +369,21 @@ async function makeE2ETasks () {
     },
     __internal_remoteGraphQLInterceptBatched (fn: string) {
       remoteGraphQLInterceptBatched = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLBatchInterceptor
+
+      return null
+    },
+    __internal_optInToCloudAppMessages () {
+      cachedCommercialRecommendations = process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+      delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+
+      return null
+    },
+    __internal_restoreCommercialRecommendations () {
+      if (cachedCommercialRecommendations !== undefined) {
+        process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS = cachedCommercialRecommendations
+      }
+
+      cachedCommercialRecommendations = undefined
 
       return null
     },

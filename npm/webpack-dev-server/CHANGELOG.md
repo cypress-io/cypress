@@ -1,3 +1,10 @@
+# [@cypress/webpack-dev-server-v5.6.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.6.0...@cypress/webpack-dev-server-v5.6.1) (2026-05-09)
+
+
+### Bug Fixes
+
+* namespace Angular CT temp tsconfig by projectRoot hash ([#33635](https://github.com/cypress-io/cypress/issues/33635)) ([99bec89](https://github.com/cypress-io/cypress/commit/99bec89905816bc6c9b67461a2cd39063a137e2e)), closes [#33634](https://github.com/cypress-io/cypress/issues/33634)
+
 # [@cypress/webpack-dev-server-v5.6.0](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.5.0...@cypress/webpack-dev-server-v5.6.0) (2026-01-22)
 
 

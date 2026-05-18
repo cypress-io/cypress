@@ -9,6 +9,8 @@ exports[`config/src/index > .getBreakingKeys > returns list of breaking config k
   "experimentalStudio",
   "experimentalPromptCommand",
   "allowCypressEnv",
+  "experimentalFastVisibility",
+  "visibilityStrategy",
 ]
 `;
 
@@ -41,7 +43,6 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "excludeSpecPattern": "*.hot-update.js",
   "execTimeout": 60000,
   "experimentalCspAllowList": false,
-  "experimentalFastVisibility": false,
   "experimentalInteractiveRunEvents": false,
   "experimentalMemoryManagement": false,
   "experimentalModifyObstructiveThirdPartyCode": false,
@@ -62,7 +63,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "isInteractive": true,
   "isTextTerminal": false,
   "justInTimeCompile": true,
-  "keystrokeDelay": 0,
+  "keystrokeDelay": null,
   "modifyObstructiveCode": true,
   "morgan": true,
   "namespace": "__cypress",
@@ -104,6 +105,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "videosFolder": "cypress/videos",
   "viewportHeight": 660,
   "viewportWidth": 1000,
+  "visibilityStrategy": "modern",
   "waitForAnimations": true,
   "watchForFileChanges": true,
 }
@@ -138,7 +140,6 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "excludeSpecPattern": "*.hot-update.js",
   "execTimeout": 60000,
   "experimentalCspAllowList": false,
-  "experimentalFastVisibility": false,
   "experimentalInteractiveRunEvents": false,
   "experimentalMemoryManagement": false,
   "experimentalModifyObstructiveThirdPartyCode": false,
@@ -159,7 +160,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "isInteractive": true,
   "isTextTerminal": false,
   "justInTimeCompile": true,
-  "keystrokeDelay": 0,
+  "keystrokeDelay": null,
   "modifyObstructiveCode": true,
   "morgan": true,
   "namespace": "__cypress",
@@ -201,6 +202,7 @@ exports[`config/src/index > .getDefaultValues > returns list of public config ke
   "videosFolder": "cypress/videos",
   "viewportHeight": 660,
   "viewportWidth": 1000,
+  "visibilityStrategy": "modern",
   "waitForAnimations": true,
   "watchForFileChanges": true,
 }
@@ -233,7 +235,7 @@ exports[`config/src/index > .getPublicConfigKeys > returns list of public config
   "experimentalSourceRewriting",
   "experimentalSingleTabRunMode",
   "experimentalWebKitSupport",
-  "experimentalFastVisibility",
+  "visibilityStrategy",
   "fileServerFolder",
   "fixturesFolder",
   "excludeSpecPattern",
