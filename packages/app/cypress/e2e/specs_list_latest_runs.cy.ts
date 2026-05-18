@@ -230,6 +230,10 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
     })
 
     it('shows correct tooltips with log in buttons', () => {
+      cy.withCtx((ctx, o) => {
+        o.sinon.stub(ctx._apis.authApi, 'logIn')
+      })
+
       cy.findByTestId('latest-runs-header').trigger('mouseenter')
       cy.get('.v-popper__popper--shown')
       .should('contain', 'Connect to Cypress Cloud to see the status of your latest runs')
@@ -237,8 +241,11 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       .should('have.text', 'Log in to Cypress Cloud')
       .click()
 
+      cy.withCtx((ctx) => {
+        expect(ctx._apis.authApi.logIn).to.have.been.called
+      })
+
       cy.findByRole('dialog', { name: 'Continue in your browser' }).within(() => {
-        cy.get('button').contains('Log in')
         cy.get('[aria-label="Close"]').click()
       })
 
@@ -252,7 +259,6 @@ describe('App/Cloud Integration - Latest runs and Average duration', { viewportW
       .click()
 
       cy.findByRole('dialog', { name: 'Continue in your browser' }).within(() => {
-        cy.get('button').contains('Log in')
         cy.get('[aria-label="Close"]').click()
       })
 

@@ -86,14 +86,13 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
       cy.visitApp()
       cy.specsPageIsVisible()
       moveToRunsPage()
-      cy.contains(defaultMessages.runs.connect.buttonUser).click()
       cy.withCtx((ctx, o) => {
         o.sinon.stub(ctx._apis.authApi, 'logIn')
       })
 
-      cy.findByRole('dialog', { name: 'Continue in your browser' }).within(() => {
-        cy.contains('button', 'Log in').click()
-      })
+      cy.contains(defaultMessages.runs.connect.buttonUser).click()
+
+      cy.findByRole('dialog', { name: 'Continue in your browser' }).should('be.visible')
 
       cy.withCtx((ctx, o) => {
         // validate utmSource
@@ -298,9 +297,7 @@ describe('App: Runs', { viewportWidth: 1200 }, () => {
 
       cy.contains('button', 'Connect to Cypress Cloud').click()
 
-      cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
-        cy.findByRole('button', { name: 'Log in' }).click()
-      })
+      cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').should('be.visible')
 
       cy.findByRole('dialog', { name: 'Login successful' }).within(() => {
         cy.findByRole('button', { name: 'Connect project' }).click()

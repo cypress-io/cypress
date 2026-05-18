@@ -443,9 +443,7 @@ describe('App Top Nav Workflows', () => {
         })
 
         cy.findByRole('dialog', { name: 'Continue in your browser' }).as('logInModal').within(() => {
-          cy.findByRole('button', { name: 'Log in' }).click()
-
-          // The Log in button transitions through a few states as the browser launch lifecycle completes
+          // The login flow auto-starts when the modal opens; the CTA transitions through pending states
           cy.findByRole('button', { name: 'Opening browser' }).should('be.visible').and('be.disabled')
           cy.findByRole('button', { name: 'Waiting for browser...' }).should('be.visible').and('be.disabled')
         })
@@ -557,8 +555,6 @@ describe('App Top Nav Workflows', () => {
           })
 
           cy.findByRole('dialog').within(() => {
-            cy.findByRole('button', { name: 'Log in' }).click()
-
             cy.contains('http://127.0.0.1:0000/redirect-to-auth').should('be.visible')
             cy.contains(loginText.titleBrowserError).should('be.visible')
             cy.contains(loginText.bodyBrowserError).should('be.visible')
@@ -589,8 +585,6 @@ describe('App Top Nav Workflows', () => {
           })
 
           cy.findByRole('dialog').within(() => {
-            cy.findByRole('button', { name: 'Log in' }).click()
-
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
@@ -639,8 +633,6 @@ describe('App Top Nav Workflows', () => {
           })
 
           cy.findByRole('dialog').within(() => {
-            cy.findByRole('button', { name: 'Log in' }).click()
-
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
@@ -653,8 +645,25 @@ describe('App Top Nav Workflows', () => {
             cy.contains('button', loginText.actionCancel).click()
           })
 
+          cy.withCtx((ctx, o) => {
+            (ctx._apis.authApi.logIn as SinonStub).callsFake(async (onMessage) => {
+              onMessage({
+                name: 'AUTH_BROWSER_LAUNCHED',
+                message: '',
+                browserOpened: true,
+              })
+
+              return new Promise(() => {})
+            })
+          })
+
           cy.get('@loginButton').click()
-          cy.contains(loginText.titleInitial).should('be.visible')
+
+          cy.withCtx((ctx) => {
+            expect(ctx._apis.authApi.logIn).to.have.been.called
+          })
+
+          cy.findByRole('dialog', { name: loginText.titleInitial }).should('be.visible')
         })
 
         it('closing modal correctly clears error state', () => {
@@ -676,7 +685,6 @@ describe('App Top Nav Workflows', () => {
           })
 
           cy.findByRole('dialog').within(() => {
-            cy.findByRole('button', { name: 'Log in' }).click()
             cy.contains(loginText.titleFailed).should('be.visible')
             cy.contains(loginText.bodyError).should('be.visible')
             cy.contains('An unexpected error occurred').should('be.visible')
@@ -684,8 +692,24 @@ describe('App Top Nav Workflows', () => {
             cy.findByLabelText(defaultMessages.actions.close).click()
           })
 
+          cy.withCtx((ctx, o) => {
+            (ctx._apis.authApi.logIn as SinonStub).callsFake(async (onMessage) => {
+              onMessage({
+                name: 'AUTH_BROWSER_LAUNCHED',
+                message: '',
+                browserOpened: true,
+              })
+
+              return new Promise(() => {})
+            })
+          })
+
           cy.get('@loginButton').click()
-          cy.contains(loginText.titleInitial).should('be.visible')
+          cy.withCtx((ctx) => {
+            expect(ctx._apis.authApi.logIn).to.have.been.called
+          })
+
+          cy.findByRole('dialog', { name: loginText.titleInitial }).should('be.visible')
         })
       })
     })

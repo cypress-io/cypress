@@ -564,9 +564,7 @@ describe('App: Settings without cloud', () => {
     })
 
     cy.contains('button', 'Connect to Cypress Cloud').click()
-    cy.findByRole('dialog', { name: 'Continue in your browser' }).within(() => {
-      cy.contains('button', 'Log in').click()
-    })
+    cy.findByRole('dialog', { name: 'Continue in your browser' }).should('be.visible')
 
     cy.withCtx((ctx, o) => {
       // validate utmSource

@@ -11,6 +11,14 @@ describe('<LoginConnectModalsContent />', () => {
       it(`shows login modal with utmContent: ${content}`, () => {
         const { openLoginConnectModal } = useUserProjectStatusStore()
 
+        const loginStub = cy.stub().as('loginStub')
+
+        cy.stubMutationResolver(Auth_LoginDocument, (defineResult, variables) => {
+          loginStub(variables)
+
+          return defineResult({} as any)
+        })
+
         cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
           onResult: (result) => {
             result.cloudViewer = null
@@ -20,36 +28,33 @@ describe('<LoginConnectModalsContent />', () => {
           },
         })
 
-        cy.contains('Continue in your browser')
-        .should('not.exist')
-        .then(() => {
+        cy.contains('Continue in your browser').should('not.exist')
+
+        cy.then(() => {
           openLoginConnectModal({ utmMedium: 'testing', utmContent: content })
-
-          cy.contains('Continue in your browser').should('be.visible')
         })
 
-        const loginStub = cy.stub().as('createProjectStub')
+        cy.contains('Continue in your browser').should('be.visible')
 
-        cy.stubMutationResolver(Auth_LoginDocument, (defineResult, variables) => {
-          loginStub(variables)
-
-          return defineResult({} as any)
-        })
-
-        cy.contains('button', 'Log in')
-        .click()
-        .then(() => {
-          expect(loginStub.lastCall.args[0]).to.deep.eq({
-            utmSource: 'Binary: Launchpad',
-            utmMedium: 'testing',
-            utmContent: content || null,
-          })
+        cy.get('@loginStub').should('have.been.calledOnce')
+        cy.get('@loginStub').its('lastCall.args.0').should('deep.equal', {
+          utmSource: 'Binary: Launchpad',
+          utmMedium: 'testing',
+          utmContent: content || null,
         })
       })
     })
 
     it('shows signup modal and uses signup mutation variables', () => {
       const { openSignupConnectModal } = useUserProjectStatusStore()
+
+      const signupStub = cy.stub().as('signupStub')
+
+      cy.stubMutationResolver(Auth_SignupDocument, (defineResult, variables) => {
+        signupStub(variables)
+
+        return defineResult({} as any)
+      })
 
       cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
         onResult: (result) => {
@@ -60,30 +65,19 @@ describe('<LoginConnectModalsContent />', () => {
         },
       })
 
-      cy.contains('Continue in your browser')
-      .should('not.exist')
-      .then(() => {
+      cy.contains('Continue in your browser').should('not.exist')
+
+      cy.then(() => {
         openSignupConnectModal({ utmMedium: 'studio', utmContent: 'signup' })
-
-        cy.contains('Continue in your browser').should('be.visible')
       })
 
-      const signupStub = cy.stub().as('signupStub')
+      cy.contains('Continue in your browser').should('be.visible')
 
-      cy.stubMutationResolver(Auth_SignupDocument, (defineResult, variables) => {
-        signupStub(variables)
-
-        return defineResult({} as any)
-      })
-
-      cy.contains('button', 'Sign up')
-      .click()
-      .then(() => {
-        expect(signupStub.lastCall.args[0]).to.deep.eq({
-          utmSource: 'Binary: Launchpad',
-          utmMedium: 'studio',
-          utmContent: 'signup',
-        })
+      cy.get('@signupStub').should('have.been.calledOnce')
+      cy.get('@signupStub').its('lastCall.args.0').should('deep.equal', {
+        utmSource: 'Binary: Launchpad',
+        utmMedium: 'studio',
+        utmContent: 'signup',
       })
     })
   })
