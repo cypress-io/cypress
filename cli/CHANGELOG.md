@@ -4,6 +4,7 @@
 **Features:**
 
 - Cypress Cloud **sign up** is supported from the Cypress desktop app in addition to log in. Addressed in [#33805](https://github.com/cypress-io/cypress/pull/33805).
+- The Cypress Cloud log in and sign up modals in the Cypress desktop app now automatically start the browser-based authentication flow when opened, removing the extra "Log in" click. Addressed in [#33831](https://github.com/cypress-io/cypress/pull/33831).
 
 **Bugfixes:**
 
