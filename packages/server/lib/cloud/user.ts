@@ -16,6 +16,10 @@ const cloudUser = {
     return api.getAuthUrls().then((urls) => urls.dashboardAuthUrl)
   },
 
+  getBaseSignupUrl (): Bluebird<string> {
+    return api.getAuthUrls().get('dashboardSignupUrl')
+  },
+
   logOut () {
     return this.get().then((user) => {
       const authToken = user && user.authToken

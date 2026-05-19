@@ -78,6 +78,15 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       .and('be.disabled')
     })
 
+    it('renders signup copy for signup auth flow', () => {
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} authFlow="signup" utmMedium="testing" /></div>,
+      })
+
+      cy.contains('h2', text.login.titleInitial).should('be.visible')
+      cy.findByRole('button', { name: text.login.actionSignup }).should('be.visible')
+    })
+
     it('shows correct "waiting for login" status', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
         render: (gqlVal) => {

@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.15.1
 
+**Features:**
+
+- Cypress Cloud **sign up** is supported from the Cypress desktop app in addition to log in. Addressed in [#33805](https://github.com/cypress-io/cypress/pull/33805).
+
 **Bugfixes:**
 
 - Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).

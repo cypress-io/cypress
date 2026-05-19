@@ -1,4 +1,4 @@
-import { Auth_LoginDocument, LoginConnectModalsContentFragmentDoc } from '../generated/graphql-test'
+import { Auth_LoginDocument, Auth_SignupDocument, LoginConnectModalsContentFragmentDoc } from '../generated/graphql-test'
 import LoginConnectModalsContent from './LoginConnectModalsContent.vue'
 import { CloudUserStubs } from '@packages/data-context/test/graphql/stubCloudTypes'
 import { SelectCloudProjectModal_CreateCloudProjectDocument } from '../generated/graphql'
@@ -20,12 +20,12 @@ describe('<LoginConnectModalsContent />', () => {
           },
         })
 
-        cy.contains('Log in to Cypress')
+        cy.contains('Continue in your browser')
         .should('not.exist')
         .then(() => {
           openLoginConnectModal({ utmMedium: 'testing', utmContent: content })
 
-          cy.contains('Log in to Cypress').should('be.visible')
+          cy.contains('Continue in your browser').should('be.visible')
         })
 
         const loginStub = cy.stub().as('createProjectStub')
@@ -44,6 +44,45 @@ describe('<LoginConnectModalsContent />', () => {
             utmMedium: 'testing',
             utmContent: content || null,
           })
+        })
+      })
+    })
+
+    it('shows signup modal and uses signup mutation variables', () => {
+      const { openSignupConnectModal } = useUserProjectStatusStore()
+
+      cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
+        onResult: (result) => {
+          result.cloudViewer = null
+        },
+        render: (gqlVal) => {
+          return <LoginConnectModalsContent gql={gqlVal} />
+        },
+      })
+
+      cy.contains('Continue in your browser')
+      .should('not.exist')
+      .then(() => {
+        openSignupConnectModal({ utmMedium: 'studio', utmContent: 'signup' })
+
+        cy.contains('Continue in your browser').should('be.visible')
+      })
+
+      const signupStub = cy.stub().as('signupStub')
+
+      cy.stubMutationResolver(Auth_SignupDocument, (defineResult, variables) => {
+        signupStub(variables)
+
+        return defineResult({} as any)
+      })
+
+      cy.contains('button', 'Sign up')
+      .click()
+      .then(() => {
+        expect(signupStub.lastCall.args[0]).to.deep.eq({
+          utmSource: 'Binary: Launchpad',
+          utmMedium: 'studio',
+          utmContent: 'signup',
         })
       })
     })

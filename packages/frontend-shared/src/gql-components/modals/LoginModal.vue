@@ -78,6 +78,7 @@
         >
           <Auth
             :gql="props.gql"
+            :auth-flow="authFlow"
             :show-retry="!!error"
             :utm-medium="props.utmMedium"
             :utm-content="props.utmContent"
@@ -108,6 +109,7 @@ import {
 } from '@headlessui/vue'
 
 import type { LoginModalFragment } from '../../generated/graphql'
+import type { AuthFlow } from '../../store/user-project-status-store'
 
 const online = useOnline()
 
@@ -118,6 +120,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   gql: LoginModalFragment
+  authFlow?: AuthFlow
   utmMedium: string
   utmContent?: string
 }>()
@@ -131,6 +134,7 @@ fragment LoginModal on Query {
 hideAllPoppers()
 
 const { t } = useI18n()
+const authFlow = computed(() => props.authFlow || 'login')
 
 const viewer = computed(() => props.gql?.cloudViewer)
 

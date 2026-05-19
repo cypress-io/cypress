@@ -76,6 +76,7 @@ import {
   Auth_LoginDocument,
   Auth_LogoutDocument,
   Auth_ResetAuthStateDocument,
+  Auth_SignupDocument,
 } from '../generated/graphql'
 import type {
   AuthFragment,
@@ -83,6 +84,7 @@ import type {
 import Button from '@cy/components/Button.vue'
 import { useI18n } from '@cy/i18n'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
+import type { AuthFlow } from '@packages/frontend-shared/src/store/user-project-status-store'
 
 const userProjectStatusStore = useUserProjectStatusStore()
 
@@ -92,6 +94,7 @@ const isOnline = useOnline()
 
 const props = defineProps<{
   gql: AuthFragment
+  authFlow?: AuthFlow
   showRetry?: boolean
   showLogout?: boolean
   utmMedium: string
@@ -145,6 +148,14 @@ mutation Auth_Login ($utmSource: String!, $utmMedium: String!, $utmContent: Stri
 `
 
 gql`
+mutation Auth_Signup ($utmSource: String!, $utmMedium: String!, $utmContent: String) {
+  signup (utmSource: $utmSource, utmContent: $utmContent, utmMedium: $utmMedium) {
+    ...Auth
+  }
+}
+`
+
+gql`
 mutation Auth_ResetAuthState {
   resetAuthState {
     ...Auth
@@ -153,6 +164,7 @@ mutation Auth_ResetAuthState {
 `
 
 const login = useMutation(Auth_LoginDocument)
+const signup = useMutation(Auth_SignupDocument)
 const logout = useMutation(Auth_LogoutDocument)
 const reset = useMutation(Auth_ResetAuthStateDocument)
 
@@ -194,6 +206,14 @@ const browserOpened = computed(() => {
   return props.gql.authState.browserOpened
 })
 
+const authFlow = computed(() => props.authFlow || 'login')
+
+const executeAuthMutation = () => {
+  const variables = { utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() }
+
+  return authFlow.value === 'signup' ? signup.executeMutation(variables) : login.executeMutation(variables)
+}
+
 // We determine that a login is pending if there is no current cloudViewer and
 // either a login has been initiated from this component, or the browser has been
 // successfully opened.
@@ -216,7 +236,7 @@ const handleLoginOrContinue = async () => {
 
   loginInitiated.value = true
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
+  executeAuthMutation()
 }
 
 const handleCancel = () => {
@@ -230,12 +250,13 @@ const handleLogout = () => {
 const handleTryAgain = async () => {
   await reset.executeMutation({})
 
-  login.executeMutation({ utmMedium: props.utmMedium, utmContent: props.utmContent || null, utmSource: getUtmSource() })
+  executeAuthMutation()
 }
 
 const buttonText = computed(() => {
   const strings = {
     login: t('topNav.login.actionLogin'),
+    signup: t('topNav.login.actionSignup'),
     connectProject: t('runs.connect.modal.selectProject.connectProject'),
     continue: t('topNav.login.actionContinue'),
   }
@@ -248,7 +269,7 @@ const buttonText = computed(() => {
     return strings.continue
   }
 
-  return strings.login
+  return authFlow.value === 'signup' ? strings.signup : strings.login
 })
 
 const buttonPrefixIcon = computed(() => {
