@@ -7,14 +7,16 @@ import type { DataContext } from '../../../src'
 import { makeGraphQLServer } from '../../../graphql/makeGraphQLServer'
 import { createTestDataContext } from '../helper'
 
-const LOCALHOST_ORIGIN = 'http://localhost:9999'
 const EVIL_ORIGIN = 'https://evil.example.com'
-const CLOUD_ORIGIN = 'https://cloud.cypress.io'
+const PRODUCTION_CLOUD_ORIGIN = 'https://cloud.cypress.io'
+const DEV_CLOUD_ORIGIN = 'http://localhost:3000'
+const OTHER_LOCALHOST_ORIGIN = 'http://localhost:9999'
 
 describe('makeGraphQLServer (integration)', () => {
   let ctx: DataContext
   let port: number
   let baseUrl: string
+  let ownOrigin: string
 
   beforeAll(async () => {
     delete process.env.CYPRESS_INTERNAL_GRAPHQL_PORT
@@ -22,6 +24,7 @@ describe('makeGraphQLServer (integration)', () => {
     setCtx(ctx)
     port = await makeGraphQLServer()
     baseUrl = `http://127.0.0.1:${port}`
+    ownOrigin = `http://localhost:${port}`
   })
 
   afterAll(async () => {
@@ -37,16 +40,28 @@ describe('makeGraphQLServer (integration)', () => {
   })
 
   describe('HTTP CORS', () => {
-    it('echoes Access-Control-Allow-Origin for localhost origins on /__launchpad/graphql', async () => {
+    it('echoes Access-Control-Allow-Origin for the server\'s own origin on /__launchpad/graphql', async () => {
       const res = await fetch(`${baseUrl}/__launchpad/graphql`, {
         method: 'OPTIONS',
         headers: {
-          'Origin': LOCALHOST_ORIGIN,
+          'Origin': ownOrigin,
           'Access-Control-Request-Method': 'POST',
         },
       })
 
-      expect(res.headers.get('access-control-allow-origin')).toBe(LOCALHOST_ORIGIN)
+      expect(res.headers.get('access-control-allow-origin')).toBe(ownOrigin)
+    })
+
+    it('omits Access-Control-Allow-Origin for a different-port localhost origin', async () => {
+      const res = await fetch(`${baseUrl}/__launchpad/graphql`, {
+        method: 'OPTIONS',
+        headers: {
+          'Origin': OTHER_LOCALHOST_ORIGIN,
+          'Access-Control-Request-Method': 'POST',
+        },
+      })
+
+      expect(res.headers.get('access-control-allow-origin')).toBeNull()
     })
 
     it('omits Access-Control-Allow-Origin for non-localhost origins on /__launchpad/graphql', async () => {
@@ -65,7 +80,7 @@ describe('makeGraphQLServer (integration)', () => {
       const res = await fetch(`${baseUrl}/__launchpad/graphql`, {
         method: 'OPTIONS',
         headers: {
-          'Origin': CLOUD_ORIGIN,
+          'Origin': PRODUCTION_CLOUD_ORIGIN,
           'Access-Control-Request-Method': 'POST',
         },
       })
@@ -73,13 +88,22 @@ describe('makeGraphQLServer (integration)', () => {
       expect(res.headers.get('access-control-allow-origin')).toBeNull()
     })
 
-    it('echoes Access-Control-Allow-Origin for Cypress Cloud origin on /cloud-notification', async () => {
+    it('echoes Access-Control-Allow-Origin for production Cypress Cloud on /cloud-notification', async () => {
       const res = await fetch(`${baseUrl}/cloud-notification?operationName=orgCreated`, {
-        headers: { 'Origin': CLOUD_ORIGIN },
+        headers: { 'Origin': PRODUCTION_CLOUD_ORIGIN },
       })
 
       expect(res.status).toBe(200)
-      expect(res.headers.get('access-control-allow-origin')).toBe(CLOUD_ORIGIN)
+      expect(res.headers.get('access-control-allow-origin')).toBe(PRODUCTION_CLOUD_ORIGIN)
+    })
+
+    it('echoes Access-Control-Allow-Origin for dev Cypress Cloud (localhost:3000) on /cloud-notification', async () => {
+      const res = await fetch(`${baseUrl}/cloud-notification?operationName=orgCreated`, {
+        headers: { 'Origin': DEV_CLOUD_ORIGIN },
+      })
+
+      expect(res.status).toBe(200)
+      expect(res.headers.get('access-control-allow-origin')).toBe(DEV_CLOUD_ORIGIN)
     })
 
     it('omits Access-Control-Allow-Origin for arbitrary origins on /cloud-notification', async () => {
@@ -134,10 +158,17 @@ describe('makeGraphQLServer (integration)', () => {
       expect(result.opened).toBe(true)
     })
 
-    it('accepts upgrade with localhost Origin', async () => {
-      const result = await openWs(LOCALHOST_ORIGIN)
+    it('accepts upgrade with the server\'s own origin', async () => {
+      const result = await openWs(ownOrigin)
 
       expect(result.opened).toBe(true)
+    })
+
+    it('rejects upgrade with a different-port localhost origin (403)', async () => {
+      const result = await openWs(OTHER_LOCALHOST_ORIGIN)
+
+      expect(result.opened).toBe(false)
+      expect(result.statusCode).toBe(403)
     })
 
     it('rejects upgrade with non-localhost Origin (403)', async () => {
@@ -148,7 +179,7 @@ describe('makeGraphQLServer (integration)', () => {
     })
 
     it('rejects upgrade with Cypress Cloud Origin (no cloud exception for WS)', async () => {
-      const result = await openWs(CLOUD_ORIGIN)
+      const result = await openWs(PRODUCTION_CLOUD_ORIGIN)
 
       expect(result.opened).toBe(false)
       expect(result.statusCode).toBe(403)
@@ -190,10 +221,16 @@ describe('makeGraphQLServer (integration)', () => {
       })
     }
 
-    it('accepts handshake with localhost Origin', async () => {
-      const result = await attemptSocketIoUpgrade(LOCALHOST_ORIGIN)
+    it('accepts handshake with the server\'s own origin', async () => {
+      const result = await attemptSocketIoUpgrade(ownOrigin)
 
       expect(result.opened).toBe(true)
+    })
+
+    it('rejects handshake with a different-port localhost origin', async () => {
+      const result = await attemptSocketIoUpgrade(OTHER_LOCALHOST_ORIGIN)
+
+      expect(result.opened).toBe(false)
     })
 
     it('rejects handshake with non-localhost Origin', async () => {
@@ -203,7 +240,7 @@ describe('makeGraphQLServer (integration)', () => {
     })
 
     it('rejects handshake with Cypress Cloud Origin', async () => {
-      const result = await attemptSocketIoUpgrade(CLOUD_ORIGIN)
+      const result = await attemptSocketIoUpgrade(PRODUCTION_CLOUD_ORIGIN)
 
       expect(result.opened).toBe(false)
     })

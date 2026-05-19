@@ -4,22 +4,32 @@ import { isLocalhost } from '@packages/network-tools'
 
 import { CLOUD_URLS } from '../src/util/cloudUrls'
 
-const CYPRESS_CLOUD_ORIGINS: ReadonlySet<string> = new Set([CLOUD_URLS.production, CLOUD_URLS.staging])
+const CYPRESS_CLOUD_ORIGINS: ReadonlySet<string> = new Set([
+  CLOUD_URLS.development,
+  CLOUD_URLS.staging,
+  CLOUD_URLS.production,
+])
 
-function isLocalhostOrigin (origin: string): boolean {
+function isOwnOrigin (origin: string, expectedPort: number): boolean {
   try {
-    return isLocalhost(new URL(origin))
+    const url = new URL(origin)
+
+    return isLocalhost(url) && url.port === String(expectedPort)
   } catch {
     return false
   }
 }
 
-export function isOriginAllowed (origin: string | undefined): boolean {
+export function isOriginAllowed (origin: string | undefined, expectedPort: number | undefined): boolean {
   if (!origin) {
     return true
   }
 
-  return isLocalhostOrigin(origin)
+  if (!expectedPort) {
+    return false
+  }
+
+  return isOwnOrigin(origin, expectedPort)
 }
 
 export const corsOriginDelegate: CorsOptionsDelegate<Request> = (req, callback) => {
@@ -27,7 +37,7 @@ export const corsOriginDelegate: CorsOptionsDelegate<Request> = (req, callback) 
   const allowed: CorsOptions = { origin: true }
   const denied: CorsOptions = { origin: false }
 
-  if (isOriginAllowed(origin)) {
+  if (isOriginAllowed(origin, req.socket.localPort)) {
     return callback(null, allowed)
   }
 

@@ -118,7 +118,7 @@ export async function makeGraphQLServer () {
     path: '/__launchpad/socket',
     transports: ['websocket'],
     allowRequest: (req, callback) => {
-      callback(null, isOriginAllowed(req.headers.origin))
+      callback(null, isOriginAllowed(req.headers.origin, req.socket.localPort))
     },
   })
 
@@ -191,7 +191,7 @@ export const graphqlWS = (httpServer: Server, targetRoute: string) => {
 
   httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
     if (req.url?.startsWith(targetRoute)) {
-      if (!isOriginAllowed(req.headers.origin)) {
+      if (!isOriginAllowed(req.headers.origin, req.socket.localPort)) {
         socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
         socket.destroy()
 
