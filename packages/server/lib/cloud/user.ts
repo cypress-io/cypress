@@ -13,7 +13,7 @@ const cloudUser = {
   },
 
   getBaseLoginUrl (): Promise<string> {
-    return api.getAuthUrls().get('dashboardAuthUrl')
+    return api.getAuthUrls().then((urls) => urls.dashboardAuthUrl)
   },
 
   logOut () {
