@@ -86,6 +86,7 @@
     "supertest": "4.0.2",
     "systeminformation": "^5.27.7",
     "temp-dir": "^2.0.0",
+    "tree-kill": "1.2.2",
     "ws": "5.2.4"
   },
   "types": "lib/fixtures.ts",

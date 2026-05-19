@@ -80,6 +80,45 @@ describe('<LoginConnectModalsContent />', () => {
         utmContent: 'signup',
       })
     })
+
+    it('shows signup modal and uses signup mutation variables', () => {
+      const { openSignupConnectModal } = useUserProjectStatusStore()
+
+      cy.mountFragment(LoginConnectModalsContentFragmentDoc, {
+        onResult: (result) => {
+          result.cloudViewer = null
+        },
+        render: (gqlVal) => {
+          return <LoginConnectModalsContent gql={gqlVal} />
+        },
+      })
+
+      cy.contains('Continue in your browser')
+      .should('not.exist')
+      .then(() => {
+        openSignupConnectModal({ utmMedium: 'studio', utmContent: 'signup' })
+
+        cy.contains('Continue in your browser').should('be.visible')
+      })
+
+      const signupStub = cy.stub().as('signupStub')
+
+      cy.stubMutationResolver(Auth_SignupDocument, (defineResult, variables) => {
+        signupStub(variables)
+
+        return defineResult({} as any)
+      })
+
+      cy.contains('button', 'Sign up')
+      .click()
+      .then(() => {
+        expect(signupStub.lastCall.args[0]).to.deep.eq({
+          utmSource: 'Binary: Launchpad',
+          utmMedium: 'studio',
+          utmContent: 'signup',
+        })
+      })
+    })
   })
 
   context('when user is logged in', () => {

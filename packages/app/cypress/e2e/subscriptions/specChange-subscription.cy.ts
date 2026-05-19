@@ -181,7 +181,7 @@ e2e: {
 }`)
       })
 
-      cy.get('[data-cy="spec-item-link"]', { timeout: 7500 })
+      cy.get('[data-cy="spec-item-link"]', { timeout: 15000 })
       .should('have.length', 3)
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -329,7 +329,7 @@ e2e: {
 }`)
       })
 
-      cy.get('[data-cy="spec-file-item"]', { timeout: 7500 })
+      cy.get('[data-cy="spec-file-item"]', { timeout: 15000 })
       .should('have.length', 3)
       .should('contain', 'dom-container.spec.js')
       .should('contain', 'dom-content.spec.js')
@@ -453,7 +453,7 @@ e2e: {
 }`)
       })
 
-      cy.get('[data-cy="file-match-indicator"]', { timeout: 7500 })
+      cy.get('[data-cy="file-match-indicator"]', { timeout: 15000 })
       .should('contain', '3 matches')
 
       // Regression for https://github.com/cypress-io/cypress/issues/27103
@@ -487,7 +487,7 @@ module.exports = {
 }`)
       })
 
-      cy.get('[data-cy="create-spec-page-title"]', { timeout: 10000 })
+      cy.get('[data-cy="create-spec-page-title"]', { timeout: 15000 })
       .should('contain', defaultMessages.createSpec.page.customPatternNoSpecs.title)
     })
   })

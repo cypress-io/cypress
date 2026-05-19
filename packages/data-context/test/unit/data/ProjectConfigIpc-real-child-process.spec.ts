@@ -65,6 +65,9 @@ describe('ProjectConfigIpc', () => {
       await projectConfigIpc.loadConfig()
       await projectConfigIpc.registerSetupIpcHandlers()
 
+      // Constructor forwards child `error` to `this.emit('error')`; Node throws if nothing listens.
+      projectConfigIpc.on('error', () => {})
+
       projectConfigIpc._childProcess.emit('error', err)
 
       expect(globalThis.debugMessages.at(-2)).toEqual('EPIPE error in loadConfig() of child process %s')
