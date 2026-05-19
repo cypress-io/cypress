@@ -38,7 +38,7 @@ If a task does not apply, write [na] instead of checking the box.
 DO NOT DELETE the PR checklist.
 -->
 
-- [ ] Is there an associated issue with maintainer approval for PR submission?
+- [ ] Is there an associated issue with maintainer approval for PR submission? <!-- Not required for purely mechanical changes (typo fixes, documentation corrections) — explain in the PR description instead. -->
 - [ ] Have tests been added/updated?
 - [ ] Has a PR for user-facing changes been opened in [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)? <!-- Link to PR here -->
 - [ ] Have API changes been updated in the [`type definitions`](https://github.com/cypress-io/cypress/blob/develop/cli/types/cypress.d.ts)?
