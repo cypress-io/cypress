@@ -105,6 +105,38 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       .and('be.disabled')
     })
 
+    it('does not start login mutation when browser is already open', () => {
+      const loginSpy = cy.spy().as('loginSpy')
+
+      cy.stubMutationResolver(Auth_LoginDocument, (defineResult) => {
+        loginSpy()
+
+        return defineResult({} as any)
+      })
+
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => {
+          gqlVal.authState.browserOpened = true
+
+          return (
+            <div class="border-current border h-[700px] resize overflow-auto">
+              <LoginModal
+                gql={gqlVal}
+                utmMedium="testing"
+                autoStartAuth={true}
+              />
+            </div>
+          )
+        },
+      })
+
+      cy.get('@loginSpy').should('not.have.been.called')
+
+      cy.findByRole('button', { name: text.login.actionWaiting })
+      .should('be.visible')
+      .and('be.disabled')
+    })
+
     it('renders signup copy for signup auth flow', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
         render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} authFlow="signup" utmMedium="testing" autoStartAuth={false} /></div>,

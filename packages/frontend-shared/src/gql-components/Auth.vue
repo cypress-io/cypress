@@ -206,6 +206,11 @@ const tryStartAuthIfNeeded = () => {
   }
 
   didAttemptAutoStart.value = true
+
+  if (browserOpened.value) {
+    return
+  }
+
   startAuthFlow()
 }
 
