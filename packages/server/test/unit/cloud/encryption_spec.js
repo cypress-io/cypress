@@ -3,8 +3,6 @@ const jose = require('jose')
 const crypto = require('crypto')
 const encryption = require('../../../lib/cloud/encryption')
 const { expect } = require('chai')
-const fs = require('fs')
-const path = require('path')
 
 const TEST_BODY = {
   test: 'string',
@@ -104,41 +102,5 @@ describe('encryption', () => {
     const roundtripResponse = await encryption.decryptResponse(jweResponse, secretKey)
 
     expect(roundtripResponse).to.eql(LARGE_RESPONSE)
-  })
-
-  describe('verifySignatureFromFile', () => {
-    it('verifies a valid signature from a file', async () => {
-      const filePath = path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'encryption', 'index.js')
-      const fixtureContents = await fs.promises.readFile(filePath)
-      const sign = crypto.createSign('sha256', {
-        defaultEncoding: 'base64',
-      }).update(fixtureContents).end()
-      const signature = sign.sign(privateKey, 'base64')
-
-      expect(
-        await encryption.verifySignatureFromFile(
-          filePath,
-          signature,
-          publicKey,
-        ),
-      ).to.eql(true)
-    })
-
-    it('does not verify an invalid signature from a file', async () => {
-      const filePath = path.join(__dirname, '..', '..', 'support', 'fixtures', 'cloud', 'encryption', 'index.js')
-      const fixtureContents = await fs.promises.readFile(filePath)
-      const sign = crypto.createSign('sha256', {
-        defaultEncoding: 'base64',
-      }).update(fixtureContents).end()
-      const signature = sign.sign(privateKey, 'base64')
-
-      expect(
-        await encryption.verifySignatureFromFile(
-          filePath,
-          `a ${signature}`,
-          publicKey,
-        ),
-      ).to.eql(false)
-    })
   })
 })

@@ -217,6 +217,7 @@ describe('runnables', () => {
     })
 
     it('adds a scroll listener in open mode', () => {
+      appState.autoScrollingEnabled = false
       appState.startRunning()
       cy.get('.container')
       .trigger('scroll')

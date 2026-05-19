@@ -7,6 +7,7 @@ import * as cyIcons from '@packages/icons'
 import * as savedState from '../saved_state'
 import menu from '../gui/menu'
 import * as Windows from '../gui/windows'
+import { GracefulExit } from '../util/graceful-exit'
 import { makeGraphQLServer } from '@packages/data-context/graphql/makeGraphQLServer'
 import { globalPubSub, getCtx, clearCtx } from '@packages/data-context'
 import { telemetry } from '@packages/telemetry'
@@ -173,38 +174,22 @@ export = {
       makeGraphQLServer(),
     ])
 
-    // Before the electron app quits, we interrupt and ensure the current
-    // DataContext is completely destroyed prior to quitting the process.
-    // Parts of the DataContext teardown are asynchronous, particularly the
-    // closing of open file watchers, and not awaiting these can cause
-    // the electron process to throw.
+    // Ctrl+C (SIGINT) on macOS/Unix is routed to app.quit() in Electron; the
+    // Node process.on('SIGINT') path often does not run. Use before-quit (not
+    // will-quit), which still fires for that quit path.
+    // The dev Node launcher relays SIGINT to this process and must not exit first
+    // or quit lifecycle never completes (see cypress runElectron + GracefulExit.detachProcessSignalHandlers).
     // https://github.com/cypress-io/cypress/issues/22026
 
-    app.once('will-quit', (event: Electron.Event) => {
-      // We must call synchronously call preventDefault on the will-quit event
-      // to halt the current quit lifecycle
+    app.on('before-quit', async (event: Electron.Event) => {
       event.preventDefault()
-
-      debug('clearing DataContext prior to quit')
-
-      // We use setImmediate to guarantee that app.quit will be called asynchronously;
-      // synchronously calling app.quit in the will-quit handler prevent the subsequent
-      // close from occurring
       setImmediate(async () => {
         try {
-          await clearCtx()
+          await GracefulExit.exitGracefully(0)
         } catch (e) {
-          // Silently handle clearCtx errors, we still need to quit the app
-          debug(`DataContext cleared with error: ${e?.message}`)
+          debug(`graceful exit errored during quit: ${(e as Error)?.message}`)
+          process.exit(1)
         }
-
-        debug('DataContext cleared, quitting app')
-
-        telemetry.getSpan('cypress')?.end()
-
-        await telemetry.shutdown()
-
-        app.quit()
       })
     })
 

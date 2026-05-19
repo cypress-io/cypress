@@ -16,6 +16,24 @@
 - Upgraded `electron` from `37.6.0` to `41.0.3`.
 - Upgraded bundled Chromium version to `146.0.7680.80`.
 
+## 15.15.1
+
+**Features:**
+
+- Cypress Cloud **sign up** is supported from the Cypress desktop app in addition to log in. Addressed in [#33805](https://github.com/cypress-io/cypress/pull/33805).
+- The Cypress Cloud log in and sign up modals in the Cypress desktop app now automatically start the browser-based authentication flow when opened, removing the extra "Log in" click. Addressed in [#33831](https://github.com/cypress-io/cypress/pull/33831).
+
+**Bugfixes:**
+
+- Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
+- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
+- Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
+- Fixed an intermittent `ENOENT: no such file or directory, open <path>/bundle.tar-<rand>` error during `cy.prompt` and Studio bundle initialization. Fixed in [#33748](https://github.com/cypress-io/cypress/pull/33748).
+
+**Dependency Updates:**
+
+- Upgraded `esbuild` to `^0.28.0` to address [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in the bundled `esbuild` Go binary (incorrect TLS certificate validation during session resumption), as reported in container and image security scans. Fixes [#33599](https://github.com/cypress-io/cypress/issues/33599). Addressed in [#33816](https://github.com/cypress-io/cypress/pull/33816).
+
 ## 15.15.0
 
 **Deprecations:**
