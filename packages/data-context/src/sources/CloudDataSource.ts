@@ -23,6 +23,8 @@ import _ from 'lodash'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
+import { CLOUD_URLS } from '../util/cloudUrls'
+import type { CloudEnv } from '../util/cloudUrls'
 import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
 import { pathToArray } from 'graphql/jsutils/Path'
@@ -30,13 +32,7 @@ import { pathToArray } from 'graphql/jsutils/Path'
 export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationResult<T | null>> & { executing?: Promise<ExecutionResult<T> & Partial<OperationResult<T | null>>> }
 
 const debug = debugLib('cypress:data-context:sources:CloudDataSource')
-const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
-
-const REMOTE_SCHEMA_URLS = {
-  staging: 'https://cloud-staging.cypress.io',
-  development: 'http://localhost:3000',
-  production: 'https://cloud.cypress.io',
-}
+const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as CloudEnv
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T : never
@@ -372,8 +368,8 @@ export class CloudDataSource {
     return JSON.parse(this.#lastCache ?? '')
   }
 
-  getCloudUrl (env: keyof typeof REMOTE_SCHEMA_URLS) {
-    return REMOTE_SCHEMA_URLS[env]
+  getCloudUrl (env: CloudEnv) {
+    return CLOUD_URLS[env]
   }
 
   /**

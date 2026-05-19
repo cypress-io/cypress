@@ -3,6 +3,7 @@ import type { AddressInfo, Socket } from 'net'
 import { DataContext, getCtx, globalPubSub, GraphQLRequestInfo } from '../src'
 import pDefer from 'p-defer'
 import cors from 'cors'
+import { corsOriginDelegate, isOriginAllowed } from './corsOriginDelegate'
 import { SocketIONamespace, SocketIOServer } from '@packages/socket'
 import type { Server } from 'http'
 import { graphqlHTTP } from 'express-graphql'
@@ -36,7 +37,7 @@ export async function makeGraphQLServer () {
   const dfd = pDefer<number>()
   const app = express()
 
-  app.use(cors())
+  app.use(cors(corsOriginDelegate))
 
   app.get('/cloud-notification', (req, res) => {
     const ctx = getCtx()
@@ -119,6 +120,9 @@ export async function makeGraphQLServer () {
   const socketSrv = new SocketIOServer(srv, {
     path: '/__launchpad/socket',
     transports: ['websocket'],
+    allowRequest: (req, callback) => {
+      callback(null, isOriginAllowed(req.headers.origin, req.socket.localPort))
+    },
   })
 
   gqlSocketServer = socketSrv.of('/data-context')
@@ -198,6 +202,13 @@ export const graphqlWS = (httpServer: Server, targetRoute: string): GraphqlWsHan
 
   httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
     if (req.url?.startsWith(targetRoute)) {
+      if (!isOriginAllowed(req.headers.origin, req.socket.localPort)) {
+        socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
+        socket.destroy()
+
+        return
+      }
+
       return graphqlWs.handleUpgrade(req, socket, head, (client) => {
         graphqlWs.emit('connection', client, req)
       })
