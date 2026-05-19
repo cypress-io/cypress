@@ -64,8 +64,12 @@ if (isRunningElectron) {
       span?.end()
     } catch (error) {
       debug('Error during cleanup of telemetry span on exit: %o', error)
-    } finally {
+    }
+
+    try {
       await telemetry.shutdown()
+    } catch (error) {
+      debug('Error during telemetry shutdown on exit: %o', error)
     }
   }, 'finalize telemetry')
 
