@@ -5,7 +5,7 @@ describe('src/cypress/dom/visibility', {
   slowTestThreshold: 500,
 }, () => {
   function assertVisibilityForEl (el: HTMLElement) {
-    const breakingChangeExpectedProp = Cypress.config('visibilityStrategy') === 'modern' ? 'cy-fast-expect' : 'cy-legacy-expect'
+    const breakingChangeExpectedProp = Cypress.config('visibilityStrategy') === 'modern' ? 'cy-modern-expect' : 'cy-legacy-expect'
     const expected = el.getAttribute('cy-expect') ?? el.getAttribute(breakingChangeExpectedProp)
 
     if (!expected) {
@@ -54,11 +54,11 @@ describe('src/cypress/dom/visibility', {
     }
   }
 
-  const modes = ['fast', 'legacy']
+  const modes: ('modern' | 'legacy')[] = ['modern', 'legacy']
 
   for (const mode of modes) {
     describe(`${mode}`, {
-      visibilityStrategy: mode === 'fast' ? 'modern' : 'legacy',
+      visibilityStrategy: mode,
     }, () => {
       beforeEach(() => {
         cy.visit('/fixtures/generic.html')
@@ -364,14 +364,14 @@ describe('src/cypress/dom/visibility', {
         })
 
         describe('edge cases', () => {
-          const isFast = mode === 'fast'
+          const isModern = mode === 'modern'
 
           beforeEach(() => {
             cy.visit('/fixtures/empty.html')
           })
 
           it('`display: contents` element is hidden in both modes', () => {
-            // Per spec the element has no layout box; legacy's dim check and fast's
+            // Per spec the element has no layout box; legacy's dim check and modern's
             // checkVisibility() both report it hidden.
             cy.$$('body').append('<div id="contents-el" style="display: contents;">contents</div>')
             cy.get('#contents-el').should('be.hidden')
@@ -383,9 +383,9 @@ describe('src/cypress/dom/visibility', {
           })
 
           it('`content-visibility: hidden`', () => {
-            // Fast catches this via checkVisibility(); legacy doesn't model content-visibility.
+            // Modern catches this via checkVisibility(); legacy doesn't model content-visibility.
             cy.$$('body').append('<div id="cv-hidden" style="content-visibility: hidden;">cv hidden</div>')
-            cy.get('#cv-hidden').should(isFast ? 'be.hidden' : 'be.visible')
+            cy.get('#cv-hidden').should(isModern ? 'be.hidden' : 'be.visible')
           })
 
           it('element inside a <template> fragment is hidden in both modes', () => {
@@ -401,9 +401,9 @@ describe('src/cypress/dom/visibility', {
 
           it('single-axis zero (`width: 0; height: 100px`) with overflowing text', () => {
             // Legacy preserves visibility because text overflows the zero-width box.
-            // Fast hides it via the dim guard regardless of overflowing content.
+            // Modern hides it via the dim guard regardless of overflowing content.
             cy.$$('body').append('<div id="single-axis-zero" style="width: 0; height: 100px;">overflowing text</div>')
-            cy.get('#single-axis-zero').should(isFast ? 'be.hidden' : 'be.visible')
+            cy.get('#single-axis-zero').should(isModern ? 'be.hidden' : 'be.visible')
           })
 
           it('`inert` element is visible (affects interactivity, not layout)', () => {
