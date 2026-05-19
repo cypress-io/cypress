@@ -195,7 +195,7 @@ const { arrivedState, y: scrollerY } = useScroll(scroller)
 const { height: wrapperHeight } = useElementSize(wrapper)
 
 const emit = defineEmits<{
-  clearLandingPage: []
+  (e: 'clearLandingPage'): void
 }>()
 
 const handleClick = () => {
