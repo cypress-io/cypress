@@ -310,11 +310,29 @@ describe('graphqlWS helper', () => {
     })
   }
 
-  describe('without enforceOrigin (default — used by the test-runner server)', () => {
-    it('accepts upgrade when Origin port does not match the server listen port', async () => {
+  describe('with default options (enforceOrigin: true)', () => {
+    it('rejects upgrade when Origin port does not match the server listen port', async () => {
       const { port } = await startServerWithGraphqlWS({})
 
       const result = await openWs(port, 'http://localhost:3000')
+
+      expect(result.opened).toBe(false)
+      expect(result.statusCode).toBe(403)
+    })
+
+    it('rejects upgrade with a non-localhost Origin', async () => {
+      const { port } = await startServerWithGraphqlWS({})
+
+      const result = await openWs(port, EVIL_ORIGIN)
+
+      expect(result.opened).toBe(false)
+      expect(result.statusCode).toBe(403)
+    })
+
+    it('accepts upgrade with the server\'s own origin', async () => {
+      const { port } = await startServerWithGraphqlWS({})
+
+      const result = await openWs(port, `http://localhost:${port}`)
 
       expect(result.opened).toBe(true)
     })
@@ -326,30 +344,29 @@ describe('graphqlWS helper', () => {
 
       expect(result.opened).toBe(true)
     })
+  })
+
+  describe('with enforceOrigin: false (used by the test-runner server)', () => {
+    it('accepts upgrade when Origin port does not match the server listen port', async () => {
+      const { port } = await startServerWithGraphqlWS({ enforceOrigin: false })
+
+      const result = await openWs(port, 'http://localhost:3000')
+
+      expect(result.opened).toBe(true)
+    })
 
     it('accepts upgrade with a non-localhost Origin', async () => {
-      const { port } = await startServerWithGraphqlWS({})
+      const { port } = await startServerWithGraphqlWS({ enforceOrigin: false })
 
       const result = await openWs(port, EVIL_ORIGIN)
 
       expect(result.opened).toBe(true)
     })
-  })
 
-  describe('with enforceOrigin: true (used by the launchpad GraphQL server)', () => {
-    it('rejects upgrade when Origin port does not match the server listen port', async () => {
-      const { port } = await startServerWithGraphqlWS({ enforceOrigin: true })
+    it('accepts upgrade with no Origin header', async () => {
+      const { port } = await startServerWithGraphqlWS({ enforceOrigin: false })
 
-      const result = await openWs(port, 'http://localhost:3000')
-
-      expect(result.opened).toBe(false)
-      expect(result.statusCode).toBe(403)
-    })
-
-    it('accepts upgrade with the server\'s own origin', async () => {
-      const { port } = await startServerWithGraphqlWS({ enforceOrigin: true })
-
-      const result = await openWs(port, `http://localhost:${port}`)
+      const result = await openWs(port, undefined)
 
       expect(result.opened).toBe(true)
     })
