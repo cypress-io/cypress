@@ -1,0 +1,19 @@
+packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts
+  s_e328c89c86c08b::t_3642a294c81fe6 371-381
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "da91a90c3c8d6d41fed13dc75455b039b4c1dc9d",
+  "prompts": {},
+  "sessions": {
+    "s_e328c89c86c08b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "694a5e95-4eca-40d0-8387-358a7f7dd0ea",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
