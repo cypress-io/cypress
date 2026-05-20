@@ -94,7 +94,21 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (configFilePath: string): Promise<ConfigFileExport> => {
-    let errorLoadingESMConfig: Error | null = null
+    let errorLoadingCJSConfig: Error | null = null
+
+    try {
+      debug('Loading file %s', configFilePath)
+
+      return require(configFilePath)
+    } catch (err) {
+      const loadErr = err as Error
+
+      if (!loadErr.stack?.includes('[ERR_REQUIRE_ESM]') && !loadErr.stack?.includes('SyntaxError: Cannot use import statement outside a module')) {
+        errorLoadingCJSConfig = loadErr
+      }
+    }
+
+    debug('User may be trying to load an ESM config file')
 
     try {
       // We cannot replace the initial `require` with `await import` because
@@ -102,26 +116,17 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
       // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
       const fileURL = pathToFileURL(configFilePath).href
 
-      debug(`attempting to load config as an ESM file %s`, fileURL)
+      debug(`importing config as esm file %s`, fileURL)
       const config = await import(fileURL)
 
       return config as ConfigFileExport
     } catch (err) {
-      errorLoadingESMConfig = err as Error
-    }
-
-    try {
-      debug('attempting to load config as a CJS file %s', configFilePath)
-
-      return require(configFilePath)
-    } catch (err) {
       const loadErr = err as Error
 
-      debug('error loading file via require %s', loadErr.message)
-
-      if (errorLoadingESMConfig) {
-        debug('ESM loading initially failed. Rethrowing %s', errorLoadingESMConfig.message)
-        throw errorLoadingESMConfig
+      debug('error loading file via native Node.js module loader %s', loadErr.message)
+      if (errorLoadingCJSConfig) {
+        debug('CJS loading initially failed. Rethrowing %s', errorLoadingCJSConfig.message)
+        throw errorLoadingCJSConfig
       }
 
       throw loadErr
