@@ -243,7 +243,7 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
     unverifiedTestConfig: _.reduce(testConfigList, (acc: Record<string, any>, { overrides }) => {
       const result = _.extend({}, acc, overrides)
 
-      if (overrides.metadata) {
+      if (overrides?.metadata) {
         result.metadata = {
           ...acc.metadata,
           ...overrides.metadata,
