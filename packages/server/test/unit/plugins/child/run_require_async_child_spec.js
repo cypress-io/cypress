@@ -39,7 +39,7 @@ describe('lib/plugins/child/run_require_async_child', () => {
       expect(this.ipc.send).to.be.calledWith('childProcess:unhandledError', this.err)
     })
 
-    it('sends the serialized Bluebird error via ipc on process unhandledRejection', function () {
+    it('unwraps object rejection reason from event.reason on process unhandledRejection', function () {
       process.on.withArgs('unhandledRejection').yield({ reason: this.err })
 
       expect(this.ipc.send).to.be.calledWith('childProcess:unhandledError', this.err)

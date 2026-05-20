@@ -11,7 +11,6 @@ const mochaColor = mochaReporters.Base.color
 const mochaSymbols = mochaReporters.Base.symbols
 
 const debug = require('debug')('cypress:server:reporter')
-const Promise = require('bluebird')
 const { overrideRequire } = require('./override_require')
 
 // override calls to `require('mocha*')` when to always resolve with a mocha we control

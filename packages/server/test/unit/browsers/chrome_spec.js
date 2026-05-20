@@ -67,10 +67,15 @@ describe('lib/browsers/chrome', () => {
       }
 
       this.onCriEvent = (event, data, options) => {
-        this.pageCriClient.on.withArgs(event).yieldsAsync(data)
+        let eventHandler
+
+        this.pageCriClient.on.withArgs(event).callsFake((_eventName, callback) => {
+          eventHandler = callback
+        })
 
         return chrome.open({ isHeadless: true }, 'http://', { ...openOpts, ...options }, this.automation)
         .then(() => {
+          eventHandler(data)
           this.pageCriClient.on = undefined
         })
       }
