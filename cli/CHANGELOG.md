@@ -8,6 +8,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue introduced in [#33811](https://github.com/cypress-io/cypress/pull/33811) where the GraphQL WebSocket subscription transport on the test-runner server (`/__socket-graphql`) was rejected with a 403 when the application under test ran on a different origin from the Cypress server, causing Studio and other subscription-driven UI to hang. The origin/port check is now scoped to the launchpad GraphQL server, which is the only place it is meaningful. Fixed in [#33874](https://github.com/cypress-io/cypress/pull/33874).
 - Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
 - Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
