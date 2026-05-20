@@ -98,6 +98,12 @@ function formatFooterSummary (results: any) {
     return `${failingRuns} of ${total} failed (${percent}%)`
   })()
 
+  const totalFlaky = _.sumBy(runs, (run: any) => {
+    if (!run.tests) return 0
+
+    return run.tests.filter((t: any) => t.state === 'passed' && t.attempts && t.attempts.length > 1).length
+  })
+
   return [
     isCanceled ? '-' : formatSymbolSummary(totalFailed),
     color(phrase, c),
@@ -107,6 +113,7 @@ function formatFooterSummary (results: any) {
     colorIf(totalFailed, 'red'),
     colorIf(results.totalPending, 'cyan'),
     colorIf(results.totalSkipped, 'blue'),
+    colorIf(totalFlaky, 'magenta'),
   ]
 }
 
@@ -123,7 +130,11 @@ function macOSRemovePrivate (str: string) {
   return str
 }
 
-function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[], spec?: any, stats?: any }, estimated: number) {
+function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[], spec?: any, stats?: any, tests?: any[] }, estimated: number) {
+  const flaky = obj.tests
+    ? obj.tests.filter((t) => t.state === 'passed' && t.attempts && t.attempts.length > 1).length
+    : 0
+
   return {
     name: _.get(obj, 'spec.name'),
     relativeToCommonRoot: _.get(obj, 'spec.relativeToCommonRoot'),
@@ -136,6 +147,7 @@ function collectTestResults (obj: { video?: boolean, screenshots?: Screenshot[],
     estimated: estimated && humanTime.long(estimated),
     screenshots: obj.screenshots && obj.screenshots.length,
     video: Boolean(obj.video),
+    flaky,
   }
 }
 
@@ -314,23 +326,17 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
   })
 
   if (runs && runs.length) {
-    const colAligns: HorizontalAlignment[] = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right']
-    const colWidths = [3, 41, 11, 9, 9, 9, 9, 9]
+    const colAligns: HorizontalAlignment[] = ['left', 'left', 'right', 'right', 'right', 'right', 'right', 'right', 'right']
+
+    const colWidths = [3, 32, 11, 9, 9, 9, 9, 9, 9]
+
+    const table1Head = ['', gray('Spec'), '', gray('Tests'), gray('Passing'), gray('Failing'), gray('Pending'), gray('Skipped'), gray('Flaky')]
 
     const table1 = terminal.table({
       colAligns,
       colWidths,
       type: 'noBorder',
-      head: [
-        '',
-        gray('Spec'),
-        '',
-        gray('Tests'),
-        gray('Passing'),
-        gray('Failing'),
-        gray('Pending'),
-        gray('Skipped'),
-      ],
+      head: table1Head,
     })
 
     const table2 = terminal.table({
@@ -354,14 +360,16 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
       const formattedSpec = formatPath(spec.relativeToCommonRoot, getWidth(table2, 1))
 
       if (run.skippedSpec) {
-        return table2.push([
-          '-',
-          formattedSpec, color('SKIPPED', 'gray'),
-          '-', '-', '-', '-', '-',
-        ])
+        const skippedRow = ['-', formattedSpec, color('SKIPPED', 'gray'), '-', '-', '-', '-', '-', '-']
+
+        return table2.push(skippedRow)
       }
 
-      return table2.push([
+      const flaky = run.tests
+        ? run.tests.filter((t: any) => t.state === 'passed' && t.attempts && t.attempts.length > 1).length
+        : 0
+
+      const row = [
         formatSymbolSummary(stats.failures),
         formattedSpec,
         color(ms, 'gray'),
@@ -370,7 +378,10 @@ export function renderSummaryTable (runUrl: string | undefined, results: Cypress
         colorIf(stats.failures, 'red'),
         colorIf(stats.pending, 'cyan'),
         colorIf(stats.skipped, 'blue'),
-      ])
+        colorIf(flaky, 'magenta'),
+      ]
+
+      return table2.push(row)
     })
 
     console.log('')
@@ -420,6 +431,7 @@ export function displayResults (obj: { screenshots?: Screenshot[] }, estimated: 
     ['Failing:', results.failures],
     ['Pending:', results.pending],
     ['Skipped:', results.skipped],
+    ['Flaky:', results.flaky],
     ['Screenshots:', results.screenshots],
     ['Video:', results.video],
     ['Duration:', results.duration],
