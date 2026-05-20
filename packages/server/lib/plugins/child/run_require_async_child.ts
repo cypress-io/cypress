@@ -1,9 +1,9 @@
-// require('graceful-fs').gracefulify(require('fs'))
 import debugLib from 'debug'
 import { pathToFileURL } from 'url'
 import * as util from '../util'
 import { RunPlugins } from './run_plugins'
 import type { ConfigFileExport, DevServerInfo, PluginChildIpc, SetupNodeEventsFn } from './types'
+import { getError } from '@packages/errors'
 import type { TestingType } from '@packages/types'
 import type { TransformError } from '@packages/types'
 
@@ -15,6 +15,9 @@ interface BluebirdRejectionEvent {
 
 /**
  * Executes and returns the passed `file` (usually `configFile`) file in the ipc `loadConfig` event
+ * @param {*} ipc Inter Process Communication protocol
+ * @param {*} file the file we are trying to load
+ * @param {*} projectRoot the root of the typescript project
  */
 export function run (ipc: PluginChildIpc, file: string, projectRoot: string): void {
   debug('configFile:', file)
@@ -51,7 +54,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
 
     if (testingTypeConfig?.setupNodeEvents && typeof testingTypeConfig.setupNodeEvents !== 'function') {
       ipc.send('setupTestingType:error', util.serializeError(
-        require('@packages/errors').getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', file, testingType, testingTypeConfig.setupNodeEvents),
+        getError('SETUP_NODE_EVENTS_IS_NOT_FUNCTION', file, testingType, testingTypeConfig.setupNodeEvents),
       ))
 
       return false
@@ -60,7 +63,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
     return true
   }
 
-  const getValidDevServer = (config: NonNullable<ConfigFileExport['component']>): DevServerInfo | false => {
+  const getValidDevServer = async (config: NonNullable<ConfigFileExport['component']>): Promise<DevServerInfo | false> => {
     const { devServer } = config
 
     if (devServer && typeof devServer === 'function') {
@@ -69,17 +72,20 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
 
     if (devServer && typeof devServer === 'object') {
       if ((devServer as { bundler?: string }).bundler === 'webpack') {
-        return { devServer: require('@cypress/webpack-dev-server').devServer as DevServerInfo['devServer'], objApi: true }
+        const { devServer } = await import('@cypress/webpack-dev-server')
+
+        return { devServer: devServer as DevServerInfo['devServer'], objApi: true }
       }
 
       if ((devServer as { bundler?: string }).bundler === 'vite') {
-        // tsx magic allows this import to work even though its a ESM module and we are in a CJS context
-        return { devServer: require('@cypress/vite-dev-server').devServer as DevServerInfo['devServer'], objApi: true }
+        const { devServer } = await import('@cypress/vite-dev-server')
+
+        return { devServer: devServer as DevServerInfo['devServer'], objApi: true }
       }
     }
 
     ipc.send('setupTestingType:error', util.serializeError(
-      require('@packages/errors').getError('CONFIG_FILE_DEV_SERVER_IS_NOT_VALID', file, config),
+      getError('CONFIG_FILE_DEV_SERVER_IS_NOT_VALID', file, config),
     ))
 
     return false
@@ -143,7 +149,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
 
       let hasSetup = false
 
-      ipc.on('setupTestingType', (testingType: TestingType, options: Cypress.PluginConfigOptions) => {
+      ipc.on('setupTestingType', async (testingType: TestingType, options: Cypress.PluginConfigOptions) => {
         if (hasSetup) {
           throw new Error('Already Setup')
         }
@@ -159,7 +165,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
         }
 
         if (testingType === 'component') {
-          const devServerInfo = getValidDevServer(result.component || {})
+          const devServerInfo = await getValidDevServer(result.component || {})
 
           if (!devServerInfo) {
             return
@@ -170,9 +176,9 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
           runPlugins.runSetupNodeEvents(options, (on, config) => {
             const setupNodeEvents = (result.component?.setupNodeEvents || ((_, _cfg) => ({}))) as SetupNodeEventsFn
 
-            const onConfigNotFound = (devServerName: string, root: string, searchedFor: string) => {
+            const onConfigNotFound = (devServerName: 'vite' | 'webpack', root: string, searchedFor: string[]) => {
               ipc.send('setupTestingType:error', util.serializeError(
-                require('@packages/errors').getError('DEV_SERVER_CONFIG_FILE_NOT_FOUND', devServerName, root, searchedFor),
+                getError('DEV_SERVER_CONFIG_FILE_NOT_FOUND', devServerName, root, searchedFor),
               ))
             }
 
@@ -234,7 +240,7 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
       }
 
       ipc.send('loadConfig:error', util.serializeError(
-        require('@packages/errors').getError('CONFIG_FILE_REQUIRE_ERROR', file, loadErr),
+        getError('CONFIG_FILE_REQUIRE_ERROR', file, loadErr),
       ))
     }
   })
