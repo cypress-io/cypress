@@ -127,7 +127,7 @@ export async function makeGraphQLServer () {
 
   gqlSocketServer = socketSrv.of('/data-context')
 
-  const gqlWs = graphqlWS(srv, '/__launchpad/graphql-ws')
+  const gqlWs = graphqlWS(srv, '/__launchpad/graphql-ws', { enforceOrigin: true })
 
   gqlGraphqlWsDispose = gqlWs.dispose
   ctx.actions.servers.setGqlGraphqlWsDispose(gqlWs.dispose)
@@ -190,6 +190,7 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
  *
  * @param httpServer The http server we are utilizing for the websocket
  * @param targetRoute Route to target in the server upgrade event
+ * @param options.enforceOrigin When true, reject upgrades whose Origin port does not match the server's listen port. Only safe when the WS server is directly addressed by the browser (i.e. the launchpad GraphQL server).
  * @returns WebSocket server and graphql-ws dispose — call `dispose()` before destroying the HTTP server.
  */
 export interface GraphqlWsHandle {
@@ -197,12 +198,16 @@ export interface GraphqlWsHandle {
   dispose: () => Promise<void>
 }
 
-export const graphqlWS = (httpServer: Server, targetRoute: string): GraphqlWsHandle => {
+export interface GraphqlWsOptions {
+  enforceOrigin?: boolean
+}
+
+export const graphqlWS = (httpServer: Server, targetRoute: string, options: GraphqlWsOptions = {}): GraphqlWsHandle => {
   const graphqlWs = new WebSocketServer({ noServer: true })
 
   httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
     if (req.url?.startsWith(targetRoute)) {
-      if (!isOriginAllowed(req.headers.origin, req.socket.localPort)) {
+      if (options.enforceOrigin && !isOriginAllowed(req.headers.origin, req.socket.localPort)) {
         socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
         socket.destroy()
 
