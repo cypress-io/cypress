@@ -138,13 +138,12 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       await cyPromptReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
       expect(ensureCyPromptBundleStub).to.be.calledWith({
-        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
         projectId: 'test-project-id',
       })
@@ -208,13 +207,12 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       await cyPromptReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
       expect(ensureCyPromptBundleStub).to.be.calledWith({
-        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
         projectId: 'test-project-id',
       })
@@ -267,13 +265,12 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       await cyPromptReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
       expect(ensureCyPromptBundleStub).to.be.calledWith({
-        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
         projectId: 'test-project-id',
       })
@@ -328,7 +325,7 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       await cyPromptReadyPromise
 
@@ -358,7 +355,7 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       const cyPromptManager1 = await cyPromptReadyPromise1
 
@@ -381,7 +378,6 @@ describe('CyPromptLifecycleManager', () => {
 
       expect(ensureCyPromptBundleStub).to.be.calledOnce
       expect(ensureCyPromptBundleStub).to.be.calledWith({
-        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
         projectId: 'test-project-id',
       })
@@ -516,7 +512,7 @@ describe('CyPromptLifecycleManager', () => {
 
       const mockManifest = {}
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       cyPromptLifecycleManager.initializeCyPromptManager({
         cloudDataSource: mockCloudDataSource,
@@ -562,7 +558,7 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'a1',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       cyPromptLifecycleManager.initializeCyPromptManager({
         cloudDataSource: mockCloudDataSource,
@@ -722,7 +718,7 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
     })
 
     it('registers a listener that will be called when cy-prompt is ready', () => {

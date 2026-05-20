@@ -3,6 +3,7 @@
     <LoginModal
       v-if="cloudStatusMatches('isLoggedOut') || keepLoginOpen"
       :gql="gqlRef"
+      :auth-flow="userProjectStatusStore.authFlow"
       :utm-medium="userProjectStatusStore.utmMedium"
       :utm-content="userProjectStatusStore.utmContent"
       @cancel="closeLoginConnectModal"

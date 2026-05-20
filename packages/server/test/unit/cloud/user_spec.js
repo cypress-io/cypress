@@ -60,4 +60,16 @@ describe('lib/cloud/user', () => {
       })
     })
   })
+
+  context('.getBaseSignupUrl', () => {
+    it('returns dashboardSignupUrl from api.getAuthUrls', () => {
+      sinon.stub(api, 'getAuthUrls').resolves({
+        'dashboardSignupUrl': 'https://cloud.cypress.io/test-runner-signup?utm_source=Binary',
+      })
+
+      return user.getBaseSignupUrl().then((url) => {
+        expect(url).to.eq('https://cloud.cypress.io/test-runner-signup?utm_source=Binary')
+      })
+    })
+  })
 })

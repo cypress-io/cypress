@@ -5,9 +5,18 @@ import urllib from 'url'
 import fs from 'fs-extra'
 import os from 'os'
 import path from 'path'
-import Forge from 'node-forge'
+import { execFileSync } from 'child_process'
 import { randomUUID } from 'crypto'
-const { pki, pkcs12, asn1 } = Forge
+
+type CertAlgo = 'rsa' | 'ec'
+
+function opensslNewkeyArgs (algo: CertAlgo): string[] {
+  return algo === 'ec'
+    ? ['-newkey', 'ec', '-pkeyopt', 'ec_paramgen_curve:P-256']
+    : ['-newkey', 'rsa:2048']
+}
+
+const testSubject = '/CN=example.org/C=US/ST=California/L=San Fran/O=Test/OU=Test'
 
 function urlShouldMatch (url: string, matcher: string) {
   let rule = UrlMatcher.buildMatcherRule(matcher)
@@ -187,90 +196,87 @@ describe('lib/client-certificates', () => {
 //
 // Neither PEM nor PFX supplied
 
-function createCertAndKey (): [object, object] {
-  let keys = pki.rsa.generateKeyPair(2048)
-  let cert = pki.createCertificate()
-
-  cert.publicKey = keys.publicKey
-  cert.serialNumber = '01'
-  cert.validity.notBefore = new Date()
-  cert.validity.notAfter = new Date()
-  cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
-
-  let attrs = [
-    {
-      name: 'commonName',
-      value: 'example.org',
-    },
-    {
-      name: 'countryName',
-      value: 'US',
-    },
-    {
-      shortName: 'ST',
-      value: 'California',
-    },
-    {
-      name: 'localityName',
-      value: 'San Fran',
-    },
-    {
-      name: 'organizationName',
-      value: 'Test',
-    },
-    {
-      shortName: 'OU',
-      value: 'Test',
-    },
-  ]
-
-  cert.setSubject(attrs)
-  cert.setIssuer(attrs)
-  cert.sign(keys.privateKey)
-
-  return [cert, keys.privateKey]
-}
-
 function createPemFiles (
   certFilepath: string,
   keyFilepath: string,
   passphraseFilepath: string | undefined,
   passphrase: string | undefined,
+  algo: CertAlgo = 'rsa',
 ) {
-  const certInfo = createCertAndKey()
+  const args = [
+    'req', '-x509',
+    ...opensslNewkeyArgs(algo),
+    '-keyout', keyFilepath,
+    '-out', certFilepath,
+    '-days', '1',
+    '-subj', testSubject,
+  ]
 
-  fs.writeFileSync(certFilepath, pki.certificateToPem(certInfo[0]))
-  const key = passphrase
-    ? pki.encryptRsaPrivateKey(certInfo[1], passphrase)
-    : pki.privateKeyToPem(certInfo[1])
+  if (passphrase) {
+    args.push('-passout', `pass:${passphrase}`)
+  } else {
+    args.push('-nodes')
+  }
 
-  fs.writeFileSync(keyFilepath, key)
+  execFileSync('openssl', args, { stdio: 'ignore' })
 
-  if (passphraseFilepath) {
+  if (passphraseFilepath && passphrase) {
     fs.writeFileSync(passphraseFilepath, passphrase)
   }
 }
 
 function createPfxFiles (
-  certFilepath: string,
+  pfxFilepath: string,
   passphraseFilepath: string | undefined,
-  passphrase: string | undefined,
+  passphrase: string,
+  algo: CertAlgo = 'rsa',
 ) {
-  const certInfo = createCertAndKey()
+  const certTmp = `${pfxFilepath}.cert.tmp`
+  const keyTmp = `${pfxFilepath}.key.tmp`
 
-  let p12Asn1 = pkcs12.toPkcs12Asn1(certInfo[1], [certInfo[0]], passphrase)
+  execFileSync('openssl', [
+    'req', '-x509',
+    ...opensslNewkeyArgs(algo),
+    '-nodes',
+    '-keyout', keyTmp,
+    '-out', certTmp,
+    '-days', '1',
+    '-subj', testSubject,
+  ], { stdio: 'ignore' })
 
-  fs.writeFileSync(certFilepath, asn1.toDer(p12Asn1).getBytes(), { encoding: 'binary' })
+  execFileSync('openssl', [
+    'pkcs12', '-export',
+    '-in', certTmp,
+    '-inkey', keyTmp,
+    '-out', pfxFilepath,
+    '-password', `pass:${passphrase}`,
+    '-keypbe', 'AES-256-CBC',
+    '-certpbe', 'AES-256-CBC',
+    '-macalg', 'sha256',
+  ], { stdio: 'ignore' })
+
+  fs.removeSync(certTmp)
+  fs.removeSync(keyTmp)
 
   if (passphraseFilepath) {
     fs.writeFileSync(passphraseFilepath, passphrase)
   }
 }
 
-function createCaFile (filepath: string) {
-  const certInfo = createCertAndKey()
+function createCaFile (filepath: string, algo: CertAlgo = 'rsa') {
+  const keyTmp = `${filepath}.key.tmp`
 
-  fs.writeFileSync(filepath, pki.certificateToPem(certInfo[0]))
+  execFileSync('openssl', [
+    'req', '-x509',
+    ...opensslNewkeyArgs(algo),
+    '-nodes',
+    '-keyout', keyTmp,
+    '-out', filepath,
+    '-days', '1',
+    '-subj', testSubject,
+  ], { stdio: 'ignore' })
+
+  fs.removeSync(keyTmp)
 }
 
 function createUniqueUrl (): string {
@@ -526,6 +532,104 @@ describe('lib/client-certificates', () => {
       expect(options.key[0].passphrase).toBeUndefined()
     })
 
+    it('loads valid single EC PEM (no passphrase)', () => {
+      createPemFiles(pemFilepath, pemKeyFilepath, undefined, undefined, 'ec')
+      createCaFile(caFilepath, 'ec')
+
+      const url = createUniqueUrl()
+      const config = createSinglePemConfig(
+        url,
+        caFilepath,
+        pemFilepath,
+        pemKeyFilepath,
+        undefined,
+      )
+      const pemFileData = fs.readFileSync(pemFilepath)
+      const keyFileData = fs.readFileSync(pemKeyFilepath)
+      const caFileData = fs.readFileSync(caFilepath)
+
+      loadClientCertificateConfig(config)
+      const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
+        urllib.parse(url),
+      )
+
+      expect(options).not.toBeNull()
+      expect(options.ca.length).toEqual(1)
+      expect(options.ca[0]).toEqual(caFileData)
+      expect(options.pfx).toHaveLength(0)
+      expect(options.cert.length).toEqual(1)
+      expect(options.cert[0]).toEqual(pemFileData)
+      expect(options.key.length).toEqual(1)
+      expect(options.key[0].passphrase).toBeUndefined()
+      expect(options.key[0].pem).toEqual(keyFileData)
+    })
+
+    it('loads valid single EC PEM (with passphrase)', () => {
+      const passphrase = 'ec_phrase'
+
+      createPemFiles(
+        pemFilepath,
+        pemKeyFilepath,
+        pemPassphraseFilepath,
+        passphrase,
+        'ec',
+      )
+
+      const url = createUniqueUrl()
+      const config = createSinglePemConfig(
+        url,
+        undefined,
+        pemFilepath,
+        pemKeyFilepath,
+        pemPassphraseFilepath,
+      )
+      const pemFileData = fs.readFileSync(pemFilepath)
+      const keyFileData = fs.readFileSync(pemKeyFilepath)
+
+      loadClientCertificateConfig(config)
+      const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
+        urllib.parse(url),
+      )
+
+      expect(options).not.toBeNull()
+      expect(options.ca.length).toEqual(0)
+      expect(options.pfx).toHaveLength(0)
+      expect(options.cert.length).toEqual(1)
+      expect(options.cert[0]).toEqual(pemFileData)
+      expect(options.key.length).toEqual(1)
+      expect(options.key[0].passphrase).toEqual(passphrase)
+      expect(options.key[0].pem).toEqual(keyFileData)
+    })
+
+    it('detects invalid EC PEM passphrase', () => {
+      const passphrase = 'ec_phrase'
+
+      createPemFiles(
+        pemFilepath,
+        pemKeyFilepath,
+        pemPassphraseFilepath,
+        passphrase,
+        'ec',
+      )
+
+      fs.writeFileSync(pemPassphraseFilepath, 'not-the-passphrase')
+
+      const url = createUniqueUrl()
+      const config = createSinglePemConfig(
+        url,
+        undefined,
+        pemFilepath,
+        pemKeyFilepath,
+        pemPassphraseFilepath,
+      )
+
+      expect(() => {
+        loadClientCertificateConfig(config)
+      }).toThrow(
+        `Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn't have unexpected whitespace at the end)`,
+      )
+    })
+
     // TODO: fix this flaky test
     it.skip('detects invalid PEM key passphrase', () => {
       const passphrase = 'a_phrase'
@@ -570,7 +674,7 @@ describe('lib/client-certificates', () => {
 
       expect(() => {
         loadClientCertificateConfig(config)
-      }).toThrow('Invalid PEM formatted message')
+      }).toThrow('Cannot parse PEM key')
     })
 
     it('detects invalid PEM key file (with passphrase)', () => {
@@ -596,7 +700,7 @@ describe('lib/client-certificates', () => {
 
       expect(() => {
         loadClientCertificateConfig(config)
-      }).toThrow('Invalid PEM formatted message')
+      }).toThrow('Cannot parse PEM key')
     })
 
     it('detects invalid PEM cert file', () => {
@@ -730,6 +834,33 @@ describe('lib/client-certificates', () => {
       }).toThrow('no such file or directory')
     })
 
+    it('loads valid single EC PFX', () => {
+      const passphrase = 'ec_pfx_passphrase'
+
+      createPfxFiles(pfxFilepath, pfxPassphraseFilepath, passphrase, 'ec')
+
+      const url = createUniqueUrl()
+      const config = createSinglePfxConfig(
+        url,
+        undefined,
+        pfxFilepath,
+        pfxPassphraseFilepath,
+      )
+      const pfxFileData = fs.readFileSync(pfxFilepath)
+
+      loadClientCertificateConfig(config)
+
+      const options = clientCertificateStoreSingleton.getClientCertificateAgentOptionsForUrl(
+        urllib.parse(url),
+      )
+
+      expect(options).not.toBeNull()
+      expect(options.cert).toHaveLength(0)
+      expect(options.pfx.length).toEqual(1)
+      expect(options.pfx[0].buf).toEqual(pfxFileData)
+      expect(options.pfx[0].passphrase).toEqual(passphrase)
+    })
+
     it('loads valid single PFX', () => {
       const passphrase = 'a_passphrase'
 
@@ -772,7 +903,7 @@ describe('lib/client-certificates', () => {
 
       expect(() => {
         loadClientCertificateConfig(config)
-      }).toThrow('Invalid password?')
+      }).toThrow('mac verify failure')
     })
 
     it('detects missing PFX passphrase file', () => {
@@ -789,7 +920,7 @@ describe('lib/client-certificates', () => {
 
       expect(() => {
         loadClientCertificateConfig(config)
-      }).toThrow('Invalid password?')
+      }).toThrow('mac verify failure')
     })
 
     it('detects invalid PFX file', () => {
@@ -804,7 +935,7 @@ describe('lib/client-certificates', () => {
 
       expect(() => {
         loadClientCertificateConfig(config)
-      }).toThrow('Unable to load PFX file: Too few bytes to read ASN.1 value')
+      }).toThrow('Unable to load PFX file: not enough data')
     })
 
     it('detects missing PFX file', () => {
@@ -817,7 +948,7 @@ describe('lib/client-certificates', () => {
 
       expect(() => {
         loadClientCertificateConfig(config)
-      }).toThrow('Unable to load PFX file: Too few bytes to read ASN.1 value')
+      }).toThrow('Unable to load PFX file: not enough data')
     })
 
     it('detects neither PEM nor PFX supplied', () => {

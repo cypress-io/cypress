@@ -114,14 +114,12 @@ module.exports = {
   },
 
   ensure () {
+    // ensureSymlinkAsync lstats its src, so the appData dir must exist
+    // before symlink() runs — these can't be parallelized.
     const ensure = () => {
       return this.removeSymlink()
-      .then(() => {
-        return Promise.join(
-          fs.ensureDirAsync(this.path()),
-          !isProduction() ? this.symlink() : undefined,
-        )
-      })
+      .then(() => fs.ensureDirAsync(this.path()))
+      .then(() => (!isProduction() ? this.symlink() : undefined))
     }
 
     // try twice to ensure the dir

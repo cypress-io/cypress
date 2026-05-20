@@ -7,8 +7,10 @@ import Promise from 'bluebird'
 import lockFileModule from 'lockfile'
 import { fs } from './fs'
 import * as env from './env'
-import exit from './exit'
 import pQueue from 'p-queue'
+import { GracefulExit } from './graceful-exit'
+import type { ExitStepKey } from './graceful-exit'
+
 const lockFile = Promise.promisifyAll(lockFileModule)
 
 const debugVerbose = debugModule('cypress-verbose:server:util:file')
@@ -18,8 +20,8 @@ const LOCK_TIMEOUT = 2000
 
 function getUid () {
   try {
-    // @ts-expect-error - process.geteuid is defined
-    return process.geteuid()
+    // eslint-disable-next-line no-restricted-properties
+    return process.geteuid?.() ?? 1
   } catch (err) {
     // process.geteuid() can fail, return a constant
     // @see https://github.com/cypress-io/cypress/issues/17415
@@ -33,6 +35,8 @@ export class File {
   _queue!: pQueue
   _cache!: Record<string, any>
   _lastRead!: number
+  /** Set while a lock may be held; removed in `_unlock` so GracefulExit steps do not accumulate per unused File. */
+  _gracefulExitStepKey: ExitStepKey | null = null
   path: string
 
   static noopFile = {
@@ -56,9 +60,13 @@ export class File {
     this.path = options.path
     this.initialize()
 
-    exit.ensure(() => {
+    // Preserve prior behavior of invoking GracefulExit.addStep from the constructor (see file_spec),
+    // but do not leave a registered step until we actually take a lock — avoids orphaned teardown steps.
+    const ctorExitKey = GracefulExit.addStep(async () => {
       return lockFile.unlockSync(this._lockFilePath)
-    })
+    }, 'unlock lockfile')
+
+    GracefulExit.removeStep(ctorExitKey)
   }
 
   initialize () {
@@ -74,6 +82,11 @@ export class File {
   }
 
   __resetForTest () {
+    if (this._gracefulExitStepKey) {
+      GracefulExit.removeStep(this._gracefulExitStepKey)
+      this._gracefulExitStepKey = null
+    }
+
     this._queue.clear()
     lockFile.unlockSync(this._lockFilePath)
     this.initialize()
@@ -251,6 +264,13 @@ export class File {
       // polls every 100ms up to 2000ms to obtain lock, otherwise rejects
       return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
     })
+    .then(() => {
+      if (!this._gracefulExitStepKey) {
+        this._gracefulExitStepKey = GracefulExit.addStep(async () => {
+          return lockFile.unlockSync(this._lockFilePath)
+        }, 'unlock lockfile')
+      }
+    })
     .finally(() => {
       return debugVerbose('getting lock succeeded or failed for %s', this.path)
     })
@@ -266,6 +286,11 @@ export class File {
       debugVerbose(`unlock timeout error for %s`, this._lockFilePath)
     })
     .finally(() => {
+      if (this._gracefulExitStepKey) {
+        GracefulExit.removeStep(this._gracefulExitStepKey)
+        this._gracefulExitStepKey = null
+      }
+
       return debugVerbose('unlock succeeded or failed for %s', this.path)
     })
   }
