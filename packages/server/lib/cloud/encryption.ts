@@ -55,23 +55,17 @@ export function verifySignature (body: BinaryLike, signature: string, publicKey?
   return verify.verify(publicKey || getPublicKey(), signature, 'base64')
 }
 
-export function verifySignatureFromFile (file: string, signature: string, publicKey?: crypto.KeyObject): Promise<boolean> {
+export function createStreamingSignatureVerifier (publicKey?: crypto.KeyObject) {
   const verify = crypto.createVerify('SHA256')
 
-  const stream = fs.createReadStream(file)
-
-  stream.on('data', (chunk: crypto.BinaryLike) => {
-    verify.update(chunk)
-  })
-
-  return new Promise<boolean>((resolve, reject) => {
-    stream.on('end', () => {
-      verify.end()
-      resolve(verify.verify(publicKey || getPublicKey(), signature, 'base64'))
-    })
-
-    stream.on('error', reject)
-  })
+  return {
+    update (chunk: BinaryLike) {
+      verify.update(chunk)
+    },
+    verify (signature: string): boolean {
+      return verify.verify(publicKey || getPublicKey(), signature, 'base64')
+    },
+  }
 }
 
 // Implements the https://www.rfc-editor.org/rfc/rfc7516 spec

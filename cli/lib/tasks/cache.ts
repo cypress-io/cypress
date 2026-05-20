@@ -13,6 +13,9 @@ import getFolderSize from './get-folder-size'
 
 dayjs.extend(relativeTime)
 
+// Subdirs under the cache root that are not binary version dirs.
+const EXTERNAL_CACHE_ENTRIES = new Set(['bundles'])
+
 // output colors for the table
 const colors = {
   titles: chalk.white,
@@ -41,6 +44,8 @@ const prune = async (): Promise<void> => {
     const versions = await fs.readdir(cacheDir)
 
     for (const version of versions) {
+      if (EXTERNAL_CACHE_ENTRIES.has(version)) continue
+
       if (version !== checkedInBinaryVersion) {
         deletedBinary = true
 

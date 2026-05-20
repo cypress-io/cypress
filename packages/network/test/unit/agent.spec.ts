@@ -23,7 +23,7 @@ import {
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
 import { clientCertificateStoreSingleton, UrlClientCertificates, ClientCertificates, PemKey } from '../../lib/client-certificates'
-import { pki } from 'node-forge'
+import { execFileSync } from 'child_process'
 import fetch from 'cross-fetch'
 import os from 'os'
 import path from 'path'
@@ -40,48 +40,27 @@ if (!fs.existsSync(tempDirPath)) {
   fs.mkdirSync(tempDirPath)
 }
 
-function createCertAndKey (): [pki.Certificate, pki.rsa.PrivateKey] {
-  let keys = pki.rsa.generateKeyPair(2048)
-  let cert = pki.createCertificate()
+function createCertAndKey (): { cert: string, key: string } {
+  const certTmp = path.join(tempDirPath, `agent-cert-${Date.now()}-${Math.random()}.pem`)
+  const keyTmp = path.join(tempDirPath, `agent-key-${Date.now()}-${Math.random()}.pem`)
 
-  cert.publicKey = keys.publicKey
-  cert.serialNumber = '01'
-  cert.validity.notBefore = new Date()
-  cert.validity.notAfter = new Date()
-  cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
+  execFileSync('openssl', [
+    'req', '-x509',
+    '-newkey', 'rsa:2048',
+    '-nodes',
+    '-keyout', keyTmp,
+    '-out', certTmp,
+    '-days', '1',
+    '-subj', '/CN=example.org/C=US/ST=California/L=San Fran/O=Test/OU=Test',
+  ], { stdio: 'ignore' })
 
-  let attrs = [
-    {
-      name: 'commonName',
-      value: 'example.org',
-    },
-    {
-      name: 'countryName',
-      value: 'US',
-    },
-    {
-      shortName: 'ST',
-      value: 'California',
-    },
-    {
-      name: 'localityName',
-      value: 'San Fran',
-    },
-    {
-      name: 'organizationName',
-      value: 'Test',
-    },
-    {
-      shortName: 'OU',
-      value: 'Test',
-    },
-  ]
+  const cert = fs.readFileSync(certTmp, 'utf-8')
+  const key = fs.readFileSync(keyTmp, 'utf-8')
 
-  cert.setSubject(attrs)
-  cert.setIssuer(attrs)
-  cert.sign(keys.privateKey)
+  fs.unlinkSync(certTmp)
+  fs.unlinkSync(keyTmp)
 
-  return [cert, keys.privateKey]
+  return { cert, key }
 }
 
 describe('lib/agent', function () {
@@ -764,15 +743,14 @@ describe('lib/agent', function () {
 
           if (testCase.presentClientCertificate) {
             clientCertificateStoreSingleton.clear()
-            const certAndKey = createCertAndKey()
-            const pemCert = pki.certificateToPem(certAndKey[0])
+            const { cert: pemCert, key: pemKey } = createCertAndKey()
 
             clientCert = pemCert
             const testCerts = new UrlClientCertificates(`https://localhost`)
 
             testCerts.clientCertificates = new ClientCertificates()
             testCerts.clientCertificates.cert.push(Buffer.from(pemCert, 'utf-8'))
-            testCerts.clientCertificates.key.push(new PemKey(Buffer.from(pki.privateKeyToPem(certAndKey[1]), 'utf-8'), undefined))
+            testCerts.clientCertificates.key.push(new PemKey(Buffer.from(pemKey, 'utf-8'), undefined))
             clientCertificateStoreSingleton.addClientCertificatesForUrl(testCerts)
           } else {
             clientCert = ''
