@@ -3412,6 +3412,7 @@
     "./node_modules/zod/v3/helpers/util.cjs",
     "./node_modules/zod/v3/locales/en.cjs",
     "./node_modules/zod/v3/types.cjs",
+    "./packages/data-context/graphql/corsOriginDelegate.ts",
     "./packages/data-context/graphql/index.ts",
     "./packages/data-context/node_modules/@babel/code-frame/lib/index.js",
     "./packages/data-context/node_modules/@babel/parser/lib/index.js",
@@ -3517,6 +3518,7 @@
     "./packages/data-context/src/sources/WizardDataSource.ts",
     "./packages/data-context/src/util/DocumentNodeBuilder.ts",
     "./packages/data-context/src/util/autoBindDebug.ts",
+    "./packages/data-context/src/util/cloudUrls.ts",
     "./packages/data-context/src/util/config-file-updater.ts",
     "./packages/data-context/src/util/file.ts",
     "./packages/data-context/src/util/files.ts",
@@ -3960,5 +3962,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "e4a104beb813efc7db311cf1dc16e81996159c55f40544715d18ed3e236f8946"
+  "deferredHash": "ae82be13995f763fc047c71c97785673bde6aa606ddea9a542c0dd5a77bd4de3"
 }
