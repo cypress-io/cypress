@@ -198,11 +198,7 @@ export interface GraphqlWsHandle {
   dispose: () => Promise<void>
 }
 
-export interface GraphqlWsOptions {
-  enforceOrigin?: boolean
-}
-
-export const graphqlWS = (httpServer: Server, targetRoute: string, options: GraphqlWsOptions = {}): GraphqlWsHandle => {
+export const graphqlWS = (httpServer: Server, targetRoute: string, options: { enforceOrigin?: boolean } = {}): GraphqlWsHandle => {
   const { enforceOrigin = true } = options
   const graphqlWs = new WebSocketServer({ noServer: true })
 
