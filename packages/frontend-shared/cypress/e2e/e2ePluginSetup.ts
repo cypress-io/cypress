@@ -368,11 +368,6 @@ async function makeE2ETasks () {
           }), { status: 200 })
         }
 
-        // Cypress-in-cypress safety net: never let test runs hit the real
-        // event collector endpoints. `EventCollectorActions.recordEvent`
-        // posts here, and `cloudEnv` defaults to 'production'
-        // (cloud.cypress.io). Tests that mount banners or otherwise trigger
-        // `recordEvent` would otherwise leak events to production every run.
         const urlStr = String(url)
 
         if (urlStr.endsWith('/machine-collect') || urlStr.endsWith('/anon-collect')) {
