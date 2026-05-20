@@ -2083,6 +2083,9 @@ jobs:
           install-firefox: true
       - run:
           command: yarn workspace @packages/server test-performance
+      - store_artifacts:
+          path: /tmp/artifacts
+          when: always
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
