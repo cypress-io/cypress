@@ -436,6 +436,11 @@ declare namespace Cypress {
     currentRetry: number
 
     /**
+     * Metadata for the current run.
+     */
+    metadata: Map<string, any>
+
+    /**
      * Information about the browser currently running the tests
      */
     browser: Browser
@@ -3442,6 +3447,7 @@ declare namespace Cypress {
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
+    metadata?: Record<string, any>
   }
 
   interface TestConfigOverrides extends Partial<
@@ -3449,6 +3455,7 @@ declare namespace Cypress {
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
+    metadata?: Record<string, any>
   }
 
   /**

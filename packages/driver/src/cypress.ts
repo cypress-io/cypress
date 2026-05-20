@@ -52,6 +52,8 @@ import { telemetry } from '@packages/telemetry/browser/client'
 
 const debug = debugFn('cypress:driver:cypress')
 
+const testMetaData = new Map<string, any>()
+
 declare global {
   interface Window {
     __cySkipValidateConfig: boolean
@@ -966,6 +968,10 @@ class $Cypress {
   // Cypress.require() is only valid inside the cy.origin() callback
   require () {
     $errUtils.throwErrByPath('require.invalid_outside_origin')
+  }
+
+  get metadata (): Map<string, any> {
+    return testMetaData
   }
 
   get currentTest () {

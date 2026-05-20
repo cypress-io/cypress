@@ -1,0 +1,6 @@
+{
+  "name": "metadata-api",
+  "version": "0.0.0-development",
+  "description": "Metadata API for the system tests",
+  "type": "module"
+}

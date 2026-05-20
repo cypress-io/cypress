@@ -1040,6 +1040,18 @@ namespace CypressCurrentTest {
   Cypress.currentTest() // $ExpectError
 }
 
+namespace CypressMetadata {
+  Cypress.metadata // $ExpectType Map<string, any>
+  Cypress.metadata.get('key') // $ExpectType any
+  Cypress.metadata.set('key', 'value')
+  Cypress.metadata.delete('key')
+  Cypress.metadata.clear()
+  Cypress.metadata.has('key') // $ExpectType boolean
+  Cypress.metadata.keys() // $ExpectType string[]
+  Cypress.metadata.values() // $ExpectType any[]
+  Cypress.metadata.entries() // $ExpectType [string, any][]
+}
+
 namespace CypressKeyboardTests {
   Cypress.Keyboard.defaults({
     keystrokeDelay: 0,

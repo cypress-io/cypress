@@ -37,7 +37,38 @@ type TestConfig = {
 
 type ConfigOverrides = {
   env: Object | undefined
+  metadata?: Record<string, any>
 };
+
+type MetadataKeyBackup =
+  | { existed: true, value: any }
+  | { existed: false }
+
+/**
+ * Saves an existing metadata key and returns the original value to be restored after the test runs.
+ * @param key {string} - The key to backup.
+ * @returns {MetadataKeyBackup} - The backup of the metadata value and whether it existed. If it did not exist, the backup will be undefined.
+ */
+function backupMetadataKey (key: string): MetadataKeyBackup {
+  if (Cypress.metadata.has(key)) {
+    return { existed: true, value: _.cloneDeep(Cypress.metadata.get(key)) }
+  }
+
+  return { existed: false }
+}
+
+/**
+ * Restores a metadata key from a backup value after the test runs. If no value existed, the key will be deleted.
+ * @param key {string} - The key to restore.
+ * @param backup {MetadataKeyBackup} - The backup of the metadata key.
+ */
+function restoreMetadataKey (key: string, backup: MetadataKeyBackup) {
+  if (backup.existed) {
+    Cypress.metadata.set(key, _.cloneDeep(backup.value))
+  } else {
+    Cypress.metadata.delete(key)
+  }
+}
 
 function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigOverrides: ConfigOverrides = { env: undefined }) {
   const { testConfigList = [] } = testConfig
@@ -48,12 +79,16 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
     if (_.isArray(testConfigOverride)) {
       setConfig(resolvedConfig as ResolvedTestConfigOverride, config, localConfigOverrides)
     } else if (Object.keys(testConfigOverride).length) {
-      delete testConfigOverride.browser
+      const testConfigOverrideCopy = { ...testConfigOverride }
+      const metadataOverride = testConfigOverrideCopy.metadata
+
+      delete testConfigOverrideCopy.browser
+      delete testConfigOverrideCopy.metadata
 
       try {
         testConfig.applied = overrideLevel
 
-        config(testConfigOverride)
+        config(testConfigOverrideCopy)
       } catch (e: any) {
         let err = $errUtils.errByPath('config.invalid_test_override', {
           errMsg: e.message,
@@ -63,7 +98,14 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
         err.stack = $errUtils.stackWithReplacedProps({ stack: invocationDetails.stack }, err)
         throw err
       }
-      localConfigOverrides = { ...localConfigOverrides, ...testConfigOverride }
+      localConfigOverrides = { ...localConfigOverrides, ...testConfigOverrideCopy }
+
+      if (metadataOverride) {
+        localConfigOverrides.metadata = {
+          ...localConfigOverrides.metadata,
+          ...metadataOverride,
+        }
+      }
     }
   })
 
@@ -93,6 +135,7 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
   let globalEnv
   let localTestEnv
   let localTestEnvBackup
+  let testMetadataBackup: Map<string, MetadataKeyBackup> | undefined
 
   if (config('allowCypressEnv')) {
     globalEnv = _.clone(env())
@@ -104,6 +147,22 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
     localTestEnvBackup = _.clone(localTestEnv)
   }
 
+  // For users that are leveraging the metadata API, we need to back up the metadata and restore it after the test runs
+  // Any value that is specified in the test config override will be persisted across the test.
+  // However, if this value is overridden someplace within the test as a specified override, it will not persist to the rest of the tests
+  // and will eventually be reset to the original value (which may be undefined).
+  if (localConfigOverrides.metadata) {
+    const metadataBackup = new Map<string, MetadataKeyBackup>()
+
+    testMetadataBackup = metadataBackup
+    _.each(localConfigOverrides.metadata, (val, key) => {
+      if (_.has(localConfigOverrides.metadata, key)) {
+        metadataBackup.set(key, backupMetadataKey(key))
+        Cypress.metadata.set(key, _.cloneDeep(val))
+      }
+    })
+  }
+
   // we restore config back to what it was before the test ran
   // UNLESS the user mutated config with Cypress.config, in which case
   // we apply those changes to the global config
@@ -111,6 +170,10 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
   //   do not allow global mutations inside test
   const restoreConfigFn = function () {
     _.each(localConfigOverrides, (val, key) => {
+      if (key === 'metadata') {
+        return
+      }
+
       if (localConfigOverridesBackup[key] !== val) {
         globalConfig[key] = val
       }
@@ -127,6 +190,16 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
           globalEnv[key] = val
         }
       })
+    }
+
+    // restore the metadata to the original values pre test config overrides.
+    // This can lead to global state being polluted across specs. if this is used heavily,
+    // This is recommended for plugin authors to clean up within their library code.
+    // Worst case scenario, users can use Cypress.metadata.clear() to reset the metadata to the original values.
+    if (testMetadataBackup) {
+      for (const [key, backup] of testMetadataBackup) {
+        restoreMetadataKey(key, backup)
+      }
     }
 
     // reset test config overrides
@@ -167,7 +240,18 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
   const testConfig = {
     testConfigList: testConfigList.filter(({ overrides }) => overrides !== undefined),
     // collect test overrides to send to the Cypress Cloud api when @packages/server is ran in record mode
-    unverifiedTestConfig: _.reduce(testConfigList, (acc, { overrides }) => _.extend(acc, overrides), {}),
+    unverifiedTestConfig: _.reduce(testConfigList, (acc: Record<string, any>, { overrides }) => {
+      const result = _.extend({}, acc, overrides)
+
+      if (overrides.metadata) {
+        result.metadata = {
+          ...acc.metadata,
+          ...overrides.metadata,
+        }
+      }
+
+      return result
+    }, {} as Record<string, any>),
   }
 
   return testConfig
