@@ -12,6 +12,7 @@
 - Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
 - Fixed an intermittent `ENOENT: no such file or directory, open <path>/bundle.tar-<rand>` error during `cy.prompt` and Studio bundle initialization. Fixed in [#33748](https://github.com/cypress-io/cypress/pull/33748).
+- Fixed a regression in [14.3.3](#14-3-3) where deleting `results.video` in `after:spec` to keep videos only for failing specs could leave an empty `*-compressed.mp4` file in `cypress/videos`. Fixes [#32883](https://github.com/cypress-io/cypress/issues/32883).
 
 **Dependency Updates:**
 
@@ -69,7 +70,6 @@
 
  - Increased the limit for decrypted payloads to support large `cy.prompt` requests and responses. Fixed in [#33619](https://github.com/cypress-io/cypress/pull/33619).
  - Fixed a race condition in `@cypress/vite-dev-server` where the Cypress iframe could attempt to import the support file before Vite had finished serving it, causing intermittent "Failed to fetch dynamically imported module" errors in component tests. The dev server now waits until the support file URL returns a successful response before signaling that it is ready. Addressed in [#33487](https://github.com/cypress-io/cypress/pull/33487).
-- Fixed a regression in [14.3.3](#14-3-3) where deleting `results.video` in `after:spec` to keep videos only for failing specs could leave an empty `*-compressed.mp4` file in `cypress/videos`. Fixes [#32883](https://github.com/cypress-io/cypress/issues/32883).
 
 ## 15.14.0
 

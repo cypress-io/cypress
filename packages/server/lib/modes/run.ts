@@ -685,7 +685,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   await protocolManager?.afterSpec()
 
   const videoName = videoRecording?.api.videoName
-  const compressedVideoName = videoRecording?.api.compressedVideoName
   const videoExists = videoName && await fs.pathExists(videoName)
 
   if (!videoExists) {
@@ -693,8 +692,11 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     // possibly because the user deleted it in the after:spec event
     debug(`No video found after spec ran - skipping compression. Video path: ${videoName}`)
 
+    const compressedVideoName = videoRecording?.api.compressedVideoName
+
     if (compressedVideoName) {
       try {
+        debug('removing compressed video file: %s', compressedVideoName)
         await fs.remove(compressedVideoName)
       } catch (err) {
         debug('Error removing compressed video file: %o', err)
