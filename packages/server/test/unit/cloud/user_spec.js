@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const api = require('../../../lib/cloud/api').default
 const cache = require('../../../lib/cache').cache
-const user = require('../../../lib/cloud/user')
+const user = require('../../../lib/cloud/user').default
 
 describe('lib/cloud/user', () => {
   context('.get', () => {
@@ -57,6 +57,18 @@ describe('lib/cloud/user', () => {
 
       return user.getBaseLoginUrl().then((url) => {
         expect(url).to.eq('https://github.com/login')
+      })
+    })
+  })
+
+  context('.getBaseSignupUrl', () => {
+    it('returns dashboardSignupUrl from api.getAuthUrls', () => {
+      sinon.stub(api, 'getAuthUrls').resolves({
+        'dashboardSignupUrl': 'https://cloud.cypress.io/test-runner-signup?utm_source=Binary',
+      })
+
+      return user.getBaseSignupUrl().then((url) => {
+        expect(url).to.eq('https://cloud.cypress.io/test-runner-signup?utm_source=Binary')
       })
     })
   })

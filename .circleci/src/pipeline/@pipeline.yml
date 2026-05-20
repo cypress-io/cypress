@@ -5,10 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "147.0.7727.116"
-chrome-beta-version: &chrome-beta-version "148.0.7778.56"
+chrome-stable-version: &chrome-stable-version "148.0.7778.178"
+chrome-beta-version: &chrome-beta-version "149.0.7827.14"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "148.0.7778.56"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "148.0.7778.178"
 firefox-stable-version: &firefox-stable-version "145.0.2"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
@@ -273,7 +273,7 @@ commands:
               [ -d "$p" ] || continue
               (cd "$(dirname "$p")" && npx patch-package --reverse) || true
             done
-            yarn install --check-files
+            yarn install --check-files --frozen-lockfile
             for p in patches cli/patches packages/*/patches; do
               [ -d "$p" ] || continue
               (cd "$(dirname "$p")" && npx patch-package) || true
@@ -1026,10 +1026,9 @@ commands:
       - run:
           name: Post pre-release install comment
           command: |
-            # TODO: Uncomment when the issue with github app permissions is resolved
-            # node scripts/add-install-comment.js \
-            #   --npm << parameters.package_url_path >> \
-            #   --binary << parameters.binary_url_path >>
+            node scripts/add-install-comment.js \
+              --npm << parameters.package_url_path >> \
+              --binary << parameters.binary_url_path >>
 
   sanitize-verify-and-store-mocha-results:
     description: Double-check that Mocha tests ran as expected.
@@ -2494,7 +2493,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/webpack-preprocessor
+          command: node scripts/lerna-build.js --scope=@cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -2545,7 +2544,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vue
+          command: node scripts/lerna-build.js --scope=@cypress/vue
       - run:
           name: Run tests
           command: yarn test
@@ -2561,7 +2560,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/angular
+          command: node scripts/lerna-build.js --scope=@cypress/angular
 
   npm-angular-zoneless:
     <<: *defaults
@@ -2571,7 +2570,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/angular-zoneless
+          command: node scripts/lerna-build.js --scope @cypress/angular-zoneless
 
   npm-puppeteer-unit-tests:
     <<: *defaults
@@ -2581,7 +2580,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/puppeteer
+          command: node scripts/lerna-build.js --scope=@cypress/puppeteer
       - run:
           name: Run tests
           command: yarn test
@@ -2612,7 +2611,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/react
+          command: node scripts/lerna-build.js --scope=@cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -2628,7 +2627,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vite-plugin-cypress-esm
+          command: node scripts/lerna-build.js --scope=@cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2644,7 +2643,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/mount-utils
+          command: node scripts/lerna-build.js --scope=@cypress/mount-utils
 
   npm-grep:
     <<: *defaults
@@ -2702,7 +2701,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn lerna run build --scope=@cypress/schematic
+            node scripts/lerna-build.js --scope=@cypress/schematic
       - run:
           name: Run unit tests
           command: |

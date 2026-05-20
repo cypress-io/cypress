@@ -560,10 +560,17 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     .then(() => {
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
     })
-    .catch(Bluebird.TimeoutError, async (err) => {
-      debug('Catch on waitForBrowserToConnect')
+    .catch((err) => {
+      const isTimeout = err instanceof Bluebird.TimeoutError
+      const isFirefoxConnect = (err as CypressError)?.type === 'FIREFOX_COULD_NOT_CONNECT'
 
-      return retryOnError(err as CypressError)
+      if (isTimeout || isFirefoxConnect) {
+        debug('Catch on waitForBrowserToConnect: %s', isTimeout ? 'timeout' : 'firefox could not connect')
+
+        return retryOnError(err as CypressError)
+      }
+
+      throw err
     })
   }
 

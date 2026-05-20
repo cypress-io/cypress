@@ -14,7 +14,7 @@ const savedState = require(`../../lib/saved_state`)
 const runEvents = require(`../../lib/plugins/run_events`).default
 const system = require(`../../lib/util/system`)
 const { getCtx } = require(`../../lib/makeDataContext`)
-const browsers = require('../../lib/browsers')
+const browsers = require('../../lib/browsers').default
 const { CyPromptLifecycleManager } = require('../../lib/cloud/cy-prompt/CyPromptLifecycleManager')
 const { StudioLifecycleManager } = require('../../lib/cloud/studio/StudioLifecycleManager')
 const { StudioManager } = require('../../lib/cloud/studio/studio')
@@ -61,11 +61,11 @@ describe('lib/project-base', () => {
     this.project._cfg = this.config
   })
 
-  afterEach(function () {
+  afterEach(async function () {
     Fixtures.remove()
 
     if (this.project) {
-      this.project.close()
+      await this.project.close()
     }
   })
 

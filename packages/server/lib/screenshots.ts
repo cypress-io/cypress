@@ -328,7 +328,7 @@ const getPathToScreenshot = function (data: Data, details: Details, screenshotsF
   return getPath(data, ext, screenshotsFolder, data.overwrite)
 }
 
-export = {
+const screenshots = {
   crop,
 
   getPath,
@@ -465,3 +465,5 @@ export = {
   },
 
 }
+
+export default screenshots

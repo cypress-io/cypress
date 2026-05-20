@@ -1,10 +1,15 @@
+const Debug = require('debug')
 const electronApp = require('./lib/util/electron-app')
 const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 const { override: overrideTty } = require('./lib/util/tty')
+const { GracefulExit } = require('./lib/util/graceful-exit')
+const { NetProfiler } = require('./lib/util/net_profiler')
 
 const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
+
+const debug = Debug('cypress:server:start-cypress')
 
 process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
 configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
@@ -51,6 +56,23 @@ if (isRunningElectron) {
 
   telemetry.startSpan({ name: 'cypress', attachType: 'root', active: true, opts: { startTime: global.cypressBinaryStartTime } })
 
+  GracefulExit.addStep(async (code) => {
+    try {
+      const span = telemetry.getSpan('cypress')
+
+      span?.setAttribute('exitCode', code)
+      span?.end()
+    } catch (error) {
+      debug('Error during cleanup of telemetry span on exit: %o', error)
+    }
+
+    try {
+      await telemetry.shutdown()
+    } catch (error) {
+      debug('Error during telemetry shutdown on exit: %o', error)
+    }
+  }, 'finalize telemetry')
+
   const v8SnapshotSpan = telemetry.startSpan({ name: 'v8snapshot:startup', opts: { startTime: global.cypressServerStartTime } })
 
   v8SnapshotSpan?.end(endTime)
@@ -68,7 +90,7 @@ patchFs(fs)
 overrideTty()
 
 if (process.env.CY_NET_PROFILE && isRunningElectron) {
-  const netProfiler = require('./lib/util/net_profiler')()
+  const netProfiler = new NetProfiler()
 
   process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
 }

@@ -6,7 +6,7 @@ const socketIo = require('@packages/socket')
 const clientSourcePath = socketIo.getPathToClientSource()
 const clientVersion = socketIo.getClientVersion()
 
-export = {
+const client = {
   handle (req: any, res: any) {
     const etag = req.get('if-none-match')
 
@@ -24,3 +24,5 @@ export = {
     .sendFile(clientSourcePath)
   },
 }
+
+export default client

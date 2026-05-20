@@ -641,6 +641,8 @@ describe('Launchpad: Setup Project', () => {
       cy.withCtx(async (ctx) => {
         Object.defineProperty(ctx.coreData, 'scaffoldedFiles', {
           get () {
+            if (!this._scaffoldedFiles) return this._scaffoldedFiles
+
             return this._scaffoldedFiles.map((scaffold) => {
               if (scaffold.file.absolute.includes('cypress.config')) {
                 return { ...scaffold, status: 'changes' }
@@ -655,8 +657,9 @@ describe('Launchpad: Setup Project', () => {
         })
       })
 
-      cy.findByRole('button', { name: 'Skip' }).click()
       cy.intercept('POST', 'mutation-ExternalLink_OpenExternal', { 'data': { 'openExternal': true } }).as('OpenExternal')
+
+      cy.findByRole('button', { name: 'Skip' }).click()
       cy.findByText('Learn more', { timeout: 10000 }).click()
       cy.wait('@OpenExternal')
       .its('request.body.variables.url')

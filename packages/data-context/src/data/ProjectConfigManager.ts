@@ -640,15 +640,29 @@ export class ProjectConfigManager {
         return
       }
 
+      debug('sending main:process:will:disconnect message')
       this._eventsIpc.send('main:process:will:disconnect')
 
       // If for whatever reason we don't get an ack in 5s, bail.
       const timeoutId = setTimeout(() => {
         debug(`mainProcessWillDisconnect message timed out`)
-        reject()
+        reject(new Error('mainProcessWillDisconnect message timed out'))
       }, 5000)
 
       this._eventsIpc.on('main:process:will:disconnect:ack', () => {
+        debug('Received main:process:will:disconnect:ack')
+        clearTimeout(timeoutId)
+        resolve()
+      })
+
+      this._eventsIpc.on('exit', (code, signal) => {
+        debug('child process %s exited with code %s and signal %s', this._eventsIpc?.childProcessPid, code, signal)
+        clearTimeout(timeoutId)
+        resolve()
+      })
+
+      this._eventsIpc.on('disconnect', () => {
+        debug('received disconnect event from child process %s', this._eventsIpc?.childProcessPid)
         clearTimeout(timeoutId)
         resolve()
       })

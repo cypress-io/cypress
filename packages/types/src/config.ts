@@ -56,7 +56,13 @@ type BannerKeys = keyof typeof BannerIds
 type BannerId = typeof BannerIds[BannerKeys]
 export type BannersState = {
   [bannerId in BannerId]?: BannerState
-} & { _disabled?: boolean } // used for testing
+} & {
+  _disabled?: boolean // used for testing
+  // Cloud-driven banners are namespaced as `cloud:<message_id>` and stored under
+  // the same `BannersState` shape. They aren't part of the static `BannerIds` enum
+  // since the id list is minted by the cloud catalog at runtime.
+  [cloudId: `cloud:${string}`]: BannerState | undefined
+}
 
 export type MajorVersionWelcomeDismissed = {
   [key: string]: number

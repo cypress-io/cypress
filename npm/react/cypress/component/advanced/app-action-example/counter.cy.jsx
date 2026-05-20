@@ -1,9 +1,7 @@
-/// <reference types="cypress" />
 import React from 'react'
 import { mount } from '@cypress/react'
 import { Counter } from './counter.jsx'
 
-/* eslint-env mocha */
 describe('Counter with access', () => {
   it('works', () => {
     mount(<Counter />)

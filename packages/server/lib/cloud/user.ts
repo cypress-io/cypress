@@ -4,7 +4,7 @@ import { cache } from '../cache'
 import type { CachedUser } from '@packages/types'
 import type Bluebird from 'bluebird'
 
-export = {
+const cloudUser = {
   get (): Bluebird<CachedUser> {
     return cache.getUser()
   },
@@ -15,6 +15,10 @@ export = {
 
   getBaseLoginUrl (): Bluebird<string> {
     return api.getAuthUrls().get('dashboardAuthUrl')
+  },
+
+  getBaseSignupUrl (): Bluebird<string> {
+    return api.getAuthUrls().get('dashboardSignupUrl')
   },
 
   logOut () {
@@ -31,3 +35,5 @@ export = {
     })
   },
 }
+
+export default cloudUser

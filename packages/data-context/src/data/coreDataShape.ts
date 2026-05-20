@@ -31,6 +31,11 @@ interface ServersDataShape {
   gqlServer?: Maybe<Server>
   gqlServerPort?: Maybe<number>
   gqlSocketServer?: Maybe<SocketIONamespace>
+  /**
+   * graphql-ws `useServer` dispose — must run before `gqlServer.destroy()` so
+   * protocol clients close before the HTTP server tears down sockets.
+   */
+  gqlGraphqlWsDispose?: Maybe<() => Promise<void>>
 }
 
 export interface DevStateShape {

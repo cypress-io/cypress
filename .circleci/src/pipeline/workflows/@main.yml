@@ -309,14 +309,9 @@ linux-x64:
           - v8-integration-tests
 
     - npm-release:
-        filters: &mainBuildFilters
-            branches:
-              only:
-                - develop
-                - /^release\/\d+\.\d+\.\d+$/
-                # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-                - 'update-v8-snapshot-cache-on-develop'
-                - 'feat/cy-prompt'
+        # Expression-based filter: branch-based allowlist OR force-persist-artifacts pipeline parameter.
+        # 'update-v8-snapshot-cache-on-develop' is included so v8 snapshot cache updates are fully tested.
+        filters: &mainBuildFilters pipeline.git.branch == "develop" or pipeline.git.branch matches /^release\/\d+\.\d+\.\d+$/ or pipeline.git.branch == "update-v8-snapshot-cache-on-develop" or pipeline.parameters.force-persist-artifacts == true
         context: [test-runner:npm-release, org-npm-credentials]
         requires:
           - ready-to-release

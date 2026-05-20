@@ -44,6 +44,8 @@ describe('lib/util/ci_provider', () => {
       CYPRESS_PULL_REQUEST_ID: 'cypressPullRequestId',
       CYPRESS_PULL_REQUEST_URL: 'cypressPullRequestUrl',
       CYPRESS_CI_BUILD_URL: 'cypressCiBuildUrl',
+      CYPRESS_RERUN_GROUP_ID: 'cypressRerunGroupId',
+      CYPRESS_RERUN_ALL_TESTS: 'cypressRerunAllTests',
     }, { clear: true })
 
     expectsName(null)
@@ -51,6 +53,8 @@ describe('lib/util/ci_provider', () => {
       cypressPullRequestId: 'cypressPullRequestId',
       cypressPullRequestUrl: 'cypressPullRequestUrl',
       cypressCiBuildUrl: 'cypressCiBuildUrl',
+      cypressRerunGroupId: 'cypressRerunGroupId',
+      cypressRerunAllTests: 'cypressRerunAllTests',
     })
 
     return expectsCommitParams(null)
@@ -395,6 +399,7 @@ describe('lib/util/ci_provider', () => {
       BITBUCKET_PR_ID: 'bitbucketPrId',
       BITBUCKET_PR_DESTINATION_BRANCH: 'bitbucketPrDestinationBranch',
       BITBUCKET_PR_DESTINATION_COMMIT: 'bitbucketPrDestinationCommit',
+      BITBUCKET_PIPELINE_UUID: 'bitbucketPipelineUuid',
     }, { clear: true })
 
     expectsName('bitbucket')
@@ -407,6 +412,7 @@ describe('lib/util/ci_provider', () => {
       bitbucketPrId: 'bitbucketPrId',
       bitbucketPrDestinationBranch: 'bitbucketPrDestinationBranch',
       bitbucketPrDestinationCommit: 'bitbucketPrDestinationCommit',
+      bitbucketPipelineUuid: 'bitbucketPipelineUuid',
     })
 
     expectsCommitParams({
@@ -588,6 +594,8 @@ describe('lib/util/ci_provider', () => {
       CIRCLE_PULL_REQUEST: 'circlePullRequest',
       CIRCLE_REPOSITORY_URL: 'circleRepositoryUrl',
       CI_PULL_REQUEST: 'ciPullRequest',
+      CIRCLE_PROJECT_REPONAME: 'circleProjectReponame',
+      CIRCLE_WORKFLOW_WORKSPACE_ID: 'circleWorkflowWorkspaceId',
 
       CIRCLE_SHA1: 'circleSha',
       CIRCLE_BRANCH: 'circleBranch',
@@ -609,6 +617,8 @@ describe('lib/util/ci_provider', () => {
       circlePullRequest: 'circlePullRequest',
       circleRepositoryUrl: 'circleRepositoryUrl',
       ciPullRequest: 'ciPullRequest',
+      circleProjectReponame: 'circleProjectReponame',
+      circleWorkflowWorkspaceId: 'circleWorkflowWorkspaceId',
     })
 
     return expectsCommitParams({
@@ -1106,6 +1116,8 @@ describe('lib/util/ci_provider', () => {
         CYPRESS_PULL_REQUEST_ID: 'cypressPullRequestId',
         CYPRESS_PULL_REQUEST_URL: 'cypressPullRequestUrl',
         CYPRESS_CI_BUILD_URL: 'cypressCiBuildUrl',
+        CYPRESS_RERUN_GROUP_ID: 'cypressRerunGroupId',
+        CYPRESS_RERUN_ALL_TESTS: 'cypressRerunAllTests',
 
         GIT_COMMIT: 'gitCommit',
         GIT_BRANCH: 'gitBranch',
@@ -1118,6 +1130,8 @@ describe('lib/util/ci_provider', () => {
         cypressPullRequestId: 'cypressPullRequestId',
         cypressPullRequestUrl: 'cypressPullRequestUrl',
         cypressCiBuildUrl: 'cypressCiBuildUrl',
+        cypressRerunGroupId: 'cypressRerunGroupId',
+        cypressRerunAllTests: 'cypressRerunAllTests',
       })
 
       return expectsCommitParams({
@@ -1283,6 +1297,8 @@ describe('lib/util/ci_provider', () => {
       SYSTEM_STAGEATTEMPT: 'stageAttempt',
       SYSTEM_PHASEATTEMPT: 'phaseAttempt',
       SYSTEM_JOBATTEMPT: 'jobAttempt',
+      SYSTEM_TEAMPROJECT: 'teamProject',
+      BUILD_DEFINITIONNAME: 'buildDefinitionName',
 
       BUILD_SOURCEVERSION: 'commit',
       BUILD_SOURCEBRANCHNAME: 'branch',
@@ -1305,6 +1321,8 @@ describe('lib/util/ci_provider', () => {
       systemStageattempt: 'stageAttempt',
       systemPhaseattempt: 'phaseAttempt',
       systemJobattempt: 'jobAttempt',
+      systemTeamproject: 'teamProject',
+      buildDefinitionname: 'buildDefinitionName',
     })
 
     return expectsCommitParams({

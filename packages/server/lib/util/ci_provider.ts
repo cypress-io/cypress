@@ -157,6 +157,10 @@ const _userProvidedProviderCiParams = () => {
     'CYPRESS_PULL_REQUEST_ID',
     'CYPRESS_PULL_REQUEST_URL',
     'CYPRESS_CI_BUILD_URL',
+    // Users can set these to override automatic detection of a rerun or enable
+    // it for unsupported CI providers
+    'CYPRESS_RERUN_GROUP_ID', // ID shared by a run and its retries
+    'CYPRESS_RERUN_ALL_TESTS', // Opt out of only rerunning failed tests and force all tests to be rerun
   ])
 }
 // TODO: don't forget about buildNumber!
@@ -187,6 +191,8 @@ const _providerCiParams = () => {
       'SYSTEM_PULLREQUEST_PULLREQUESTNUMBER',
       'SYSTEM_PULLREQUEST_TARGETBRANCH',
       'SYSTEM_PULLREQUEST_TARGETBRANCHNAME',
+      'SYSTEM_TEAMPROJECT',
+      'BUILD_DEFINITIONNAME',
     ]),
     awsCodeBuild: extract([
       'CODEBUILD_BUILD_ID',
@@ -259,6 +265,7 @@ const _providerCiParams = () => {
       'BITBUCKET_PR_ID',
       'BITBUCKET_PR_DESTINATION_BRANCH',
       'BITBUCKET_PR_DESTINATION_COMMIT',
+      'BITBUCKET_PIPELINE_UUID',
     ]),
     // https://buildkite.com/docs/pipelines/configure/environment-variables
     buildkite: extract([
@@ -288,6 +295,8 @@ const _providerCiParams = () => {
       'CIRCLE_PULL_REQUEST',
       'CIRCLE_REPOSITORY_URL',
       'CI_PULL_REQUEST',
+      'CIRCLE_PROJECT_REPONAME',
+      'CIRCLE_WORKFLOW_WORKSPACE_ID',
     ]),
     cloudbeesUnify: extract([
       'CLOUDBEES_WORKSPACE',

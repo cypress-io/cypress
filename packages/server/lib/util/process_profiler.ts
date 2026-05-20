@@ -4,7 +4,7 @@ import _ from 'lodash'
 import si from 'systeminformation'
 import { concatStream } from '@packages/network'
 
-const browsers = require('../browsers')
+const browsers = require('../browsers').default
 const plugins = require('../plugins')
 
 type Group = 'browser' | 'cypress' | 'launchpad' | 'plugin' | 'ffmpeg' | 'electron-shared' | 'other'
