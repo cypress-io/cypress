@@ -2563,16 +2563,6 @@ jobs:
           name: Build
           command: node scripts/lerna-build.js --scope=@cypress/angular
 
-  npm-angular-zoneless:
-    <<: *defaults
-    steps:
-      - halt-if-skipped:
-          guard: << pipeline.parameters.run-npm-angular-tests >>
-      - restore_cached_workspace
-      - run:
-          name: Build
-          command: node scripts/lerna-build.js --scope @cypress/angular-zoneless
-
   npm-puppeteer-unit-tests:
     <<: *defaults
     steps:

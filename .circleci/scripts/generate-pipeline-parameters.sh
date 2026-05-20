@@ -290,10 +290,6 @@ while IFS= read -r file; do
       npm_angular_tests=true
       system_tests=true
       ;;
-    npm/angular-zoneless/*)
-      npm_angular_tests=true
-      system_tests=true
-      ;;
     npm/svelte/*)
       system_tests=true
       ;;
