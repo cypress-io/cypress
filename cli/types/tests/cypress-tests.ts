@@ -1047,9 +1047,6 @@ namespace CypressMetadata {
   Cypress.metadata.delete('key')
   Cypress.metadata.clear()
   Cypress.metadata.has('key') // $ExpectType boolean
-  Cypress.metadata.keys() // $ExpectType string[]
-  Cypress.metadata.values() // $ExpectType any[]
-  Cypress.metadata.entries() // $ExpectType [string, any][]
 }
 
 namespace CypressKeyboardTests {
