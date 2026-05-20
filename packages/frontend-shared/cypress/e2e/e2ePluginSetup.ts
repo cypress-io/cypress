@@ -356,6 +356,12 @@ async function makeE2ETasks () {
           }), { status: 200 })
         }
 
+        const urlStr = String(url)
+
+        if (urlStr.endsWith('/machine-collect') || urlStr.endsWith('/anon-collect')) {
+          return new Response('{}', { status: 200 })
+        }
+
         return fetchApi(url, init)
       })
 

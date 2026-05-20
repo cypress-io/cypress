@@ -1,6 +1,6 @@
 # The workflow runs for:
 # External PR after approval (approved contributor PR that's not a main branch)
-# Internal PR for any branch that does is not develop, release/x.x.x, or electron/x.x.x related
+# Internal PR for any branch that is not develop, release/x.x.x, or electron/x.x.x related
 when:
   and:
     - not:
