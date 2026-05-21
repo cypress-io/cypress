@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import mime from 'mime'
-import Promise from 'bluebird'
+import { promisify } from 'util'
 import dataUriToBuffer from 'data-uri-to-buffer'
 import Jimp from 'jimp'
 import sizeOf from 'image-size'
@@ -304,10 +304,7 @@ const getBuffer = function (details) {
     return Promise.resolve(details.buffer)
   }
 
-  return Promise
-  .promisify(details.image.getBuffer)
-  // @ts-expect-error
-  .call(details.image, Jimp.AUTO)
+  return promisify(details.image.getBuffer.bind(details.image))(Jimp.AUTO)
 }
 
 const getDimensions = function (details) {
@@ -423,7 +420,7 @@ const screenshots = {
         return fs.outputFile(pathToScreenshot, buffer)
       }).then(() => {
         // @ts-expect-error TODO: size is not assignable here
-        return fs.statAsync(pathToScreenshot).get('size')
+        return fs.statAsync(pathToScreenshot).then((stat) => stat.size)
       }).then((size) => {
         const dimensions = getDimensions(details)
 

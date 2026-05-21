@@ -4,7 +4,6 @@ require('../spec_helper')
 const ws = require('ws')
 const httpsProxyAgent = require('https-proxy-agent')
 const evilDns = require('evil-dns')
-const Promise = require('bluebird')
 // NOTE: we need to import the client from the lib directory because the browser/client directory is compiled to ESM.
 // we are unable to import ESM into a CommonJS test context, even if we await import() the module.
 const socketIo = require('@packages/socket/lib/client')
@@ -70,10 +69,10 @@ describe('Web Sockets', () => {
     this.ws.close()
     this.wss.close()
 
-    return Promise.join(
+    return Promise.all([
       this.server.close(),
       httpsServer.stop(),
-    )
+    ])
   })
 
   context('proxying external websocket requests', () => {
