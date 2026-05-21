@@ -1,5 +1,5 @@
-describe('metadata API', { metadata: { describe: 'describe metadata' } }, () => {
-  describe('inner hook testing', () => {
+describe('Cypress.metadata.clear() resets entries mid-test and suite override is reapplied for subsequent tests', { metadata: { describe: 'describe metadata' } }, () => {
+  describe('clear() empties the map and is visible in afterEach and after hooks', () => {
     before(() => {
       expect(Cypress.metadata.get('describe')).to.eq('describe metadata')
       Cypress.metadata.set('describe', 'before')
@@ -22,14 +22,14 @@ describe('metadata API', { metadata: { describe: 'describe metadata' } }, () => 
       expect(Cypress.metadata.get('it')).to.eq(undefined)
     })
 
-    it('allows mutation / editing / clearing of metadata at any given point in the test', { metadata: { it: 'it2' } }, () => {
+    it('calling clear() mid-test empties the map; afterEach and after see no entries', { metadata: { it: 'it2' } }, () => {
       expect(Cypress.metadata.get('describe')).to.eq('beforeEach')
       expect(Cypress.metadata.get('it')).to.eq('it2')
       Cypress.metadata.clear()
     })
   })
 
-  it('resets metadata to the original / overridden values pre test config overrides', { metadata: { it: 'it2' } }, () => {
+  it('suite override is reapplied for a subsequent test after a sibling test called clear()', { metadata: { it: 'it2' } }, () => {
     expect(Cypress.metadata.get('describe')).to.eq('describe metadata')
     expect(Cypress.metadata.get('it')).to.eq('it2')
   })

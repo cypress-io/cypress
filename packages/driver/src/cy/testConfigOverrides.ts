@@ -156,10 +156,8 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
 
     testMetadataBackup = metadataBackup
     _.each(localConfigOverrides.metadata, (val, key) => {
-      if (_.has(localConfigOverrides.metadata, key)) {
-        metadataBackup.set(key, backupMetadataKey(key))
-        Cypress.metadata.set(key, _.cloneDeep(val))
-      }
+      metadataBackup.set(key, backupMetadataKey(key))
+      Cypress.metadata.set(key, _.cloneDeep(val))
     })
   }
 
@@ -272,6 +270,8 @@ export class TestConfigOverride {
 
     if (Object.keys(resolvedTestConfig.unverifiedTestConfig).length > 0) {
       this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
+    } else {
+      this.restoreTestConfigFn = null
     }
 
     resolvedTestConfig.applied = 'complete'
