@@ -1,9 +1,9 @@
 {
-    "compilerOptions": {
-        "target": "ES2024",
-        "module": "ES2024",
-        "moduleResolution": "NodeNext",
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-    }
+  "compilerOptions": {
+    "target": "ES2024",
+    "module": "ES2024",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+  }
 }
