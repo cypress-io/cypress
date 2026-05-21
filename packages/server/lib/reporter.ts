@@ -1,17 +1,18 @@
-const _ = require('lodash')
-const path = require('path')
-const { stackUtils } = require('@packages/errors')
+import _ from 'lodash'
+import path from 'path'
+import { stackUtils } from '@packages/errors'
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 // and prevents accidentally upgrading this one
 // TODO: look into upgrading this to version in driver
-const Mocha = require('mocha-7.2.0')
-const mochaReporters = require('mocha-7.2.0/lib/reporters')
-const mochaCreateStatsCollector = require('mocha-7.2.0/lib/stats-collector')
+import Mocha from 'mocha-7.2.0'
+import mochaReporters from 'mocha-7.2.0/lib/reporters'
+import mochaCreateStatsCollector from 'mocha-7.2.0/lib/stats-collector'
+import Debug from 'debug'
+import { overrideRequire } from './override_require'
+
+const debug = Debug('cypress:server:reporter')
 const mochaColor = mochaReporters.Base.color
 const mochaSymbols = mochaReporters.Base.symbols
-
-const debug = require('debug')('cypress:server:reporter')
-const { overrideRequire } = require('./override_require')
 
 // override calls to `require('mocha*')` when to always resolve with a mocha we control
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
@@ -274,7 +275,7 @@ const events = {
   'test:before:run': mergeRunnable('test:before:run'), // our own custom event
 }
 
-class Reporter {
+export class Reporter {
   constructor (reporterName = 'spec', reporterOptions = {}, projectRoot) {
     if (!(this instanceof Reporter)) {
       return new Reporter(reporterName)
@@ -725,5 +726,3 @@ class Reporter {
     ])
   }
 }
-
-module.exports = Reporter

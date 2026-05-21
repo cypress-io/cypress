@@ -1,7 +1,7 @@
-require('../spec_helper')
+import '../spec_helper'
 
-const Reporter = require(`../../lib/reporter`)
-const snapshot = require('snap-shot-it')
+import { Reporter } from '../../lib/reporter'
+import snapshot from 'snap-shot-it'
 
 describe('lib/reporter', () => {
   beforeEach(function () {
