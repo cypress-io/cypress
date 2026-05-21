@@ -225,7 +225,6 @@
     "./node_modules/@ffprobe-installer/ffprobe/index.js",
     "./node_modules/@ffprobe-installer/ffprobe/lib/verify-file.js",
     "./node_modules/@graphql-tools/batch-execute/index.js",
-    "./node_modules/@graphql-tools/batch-execute/node_modules/dataloader/index.js",
     "./node_modules/@jimp/core/dist/index.js",
     "./node_modules/@jimp/core/dist/request.js",
     "./node_modules/@jimp/custom/dist/index.js",
@@ -304,6 +303,7 @@
     "./node_modules/compression/node_modules/debug/src/index.js",
     "./node_modules/concat-stream/index.js",
     "./node_modules/convert-source-map/index.js",
+    "./node_modules/dataloader/index.js",
     "./node_modules/debug/src/browser.js",
     "./node_modules/debug/src/index.js",
     "./node_modules/delayed-stream/lib/delayed_stream.js",
@@ -737,7 +737,6 @@
     "./packages/data-context/node_modules/body-parser/node_modules/debug/src/browser.js",
     "./packages/data-context/node_modules/body-parser/node_modules/debug/src/index.js",
     "./packages/data-context/node_modules/chalk/source/index.js",
-    "./packages/data-context/node_modules/dataloader/index.js",
     "./packages/data-context/node_modules/express/lib/application.js",
     "./packages/data-context/node_modules/express/lib/request.js",
     "./packages/data-context/node_modules/express/lib/response.js",
@@ -3962,5 +3961,5 @@
     "./tooling/v8-snapshot/cache/linux/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "b887713cfcb5f220fd49ac0537417f54758295bb4a375080aff86722bbaf7162"
+  "deferredHash": "f5ae9070da4ef8d3d3110dfce7910cb54d6fdeda974da40db6cf0ef0440eb6ec"
 }
