@@ -16,10 +16,7 @@ type OnNetStubbingEventFrame =
   | NetEvent.ToServer.EventHandlerResolved
   | NetEvent.ToServer.SendStaticResponse
 
-/**
- * {@link ForInterceptRegistration} adapter — delegates to legacy `onNetStubbingEvent`.
- * Stage 1a: not wired in socket-base yet.
- */
+/** {@link ForInterceptRegistration} adapter — delegates to legacy `onNetStubbingEvent`. */
 export class DriverInterceptRegistrationAdapter implements ForInterceptRegistration {
   constructor (private readonly options: DriverInterceptRegistrationAdapterOptions) {}
 
