@@ -5,10 +5,12 @@ import proxyquire from 'proxyquire'
 const TLS_WARNING = 'Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to \'0\' makes TLS connections and HTTPS requests insecure by disabling certificate verification.'
 
 describe('lib/util/suppress_warnings', function () {
-  it('passes through NODE_TLS_REJECT_UNAUTHORIZED warnings when not suppressed', () => {
+  it('passes through non-TLS warnings when suppressed', () => {
     const emitWarning = sinon.spy(process, 'emitWarning')
+    const { suppress } = proxyquire('../../../lib/util/suppress_warnings', {})
 
-    process.emitWarning(TLS_WARNING)
+    suppress()
+    process.emitWarning('some unrelated warning')
 
     expect(emitWarning).to.be.calledOnce
   })
