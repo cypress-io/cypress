@@ -1,4 +1,5 @@
 import type { NetEvent } from '../types'
+import type { NetworkPolicy } from '../policies/types'
 
 export type InterceptRegistrationEventName =
   | 'route:added'
@@ -24,10 +25,7 @@ export interface ForInterceptRegistration {
 /**
  * Driving port: Cypress configurator (CSP, default rewrites, blockHosts).
  */
-export interface NetworkPolicyHooks {
-  // Expanded in Stage 2a/2b.
-}
-
 export interface ForNetworkPolicyRegistration {
-  registerPolicy (hooks: NetworkPolicyHooks): void
+  add (policy: NetworkPolicy): void
+  getPolicies (): ReadonlyArray<NetworkPolicy>
 }
