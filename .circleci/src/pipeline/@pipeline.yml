@@ -1293,11 +1293,13 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
       - run:
           # Explicitly install the binary in case the tarball's postinstall did not run.
+          # npm_config_loglevel=silent forces Listr's silent renderer so the install
+          # runs without a spinner that can stall in CI.
           name: Ensure Cypress binary is installed
           working_directory: /tmp/<<parameters.repo>>
           command: |
             source ./ci-ensure-node.sh
-            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npx cypress install
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm_config_loglevel=silent ./node_modules/.bin/cypress install
       - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
