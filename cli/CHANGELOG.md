@@ -12,6 +12,7 @@
 - Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
 - Fixed an intermittent `ENOENT: no such file or directory, open <path>/bundle.tar-<rand>` error during `cy.prompt` and Studio bundle initialization. Fixed in [#33748](https://github.com/cypress-io/cypress/pull/33748).
+- Fixed an issue where Cypress's bundled TypeScript type definitions could fail to compile in a project that also installed `@sinonjs/fake-timers@>=15.3.0`, because the bundled `@types/sinon` file imported `FakeTimers` from `@sinonjs/fake-timers` and TypeScript would prefer the user's installed copy over the bundled `@types/sinonjs__fake-timers`. The shipped types now reference the `@types` package directly so resolution is independent of the user's installed version. Fixes [#33829](https://github.com/cypress-io/cypress/issues/33829). Fixed in [#33886](https://github.com/cypress-io/cypress/pull/33886).
 
 **Dependency Updates:**
 
