@@ -22,6 +22,7 @@ import type {
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
+import type { NetworkPolicyCore } from '@packages/network-policy'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -97,6 +98,7 @@ export type ServerCtx = Readonly<{
   remoteStates: RemoteStates
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
+  networkPolicyCore: NetworkPolicyCore
   middleware: HttpMiddlewareStacks
   socket: SocketBroadcaster
   request: ServerRequest
@@ -109,6 +111,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'config',
   'getFileServerToken',
   'netStubbingState',
+  'networkPolicyCore',
   'next',
   'end',
   'onResponse',
@@ -272,6 +275,7 @@ export class Http {
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
+  networkPolicyCore: NetworkPolicyCore
   preRequests: PreRequests = new PreRequests()
   getCurrentBrowser: () => FoundBrowser
   request: ServerRequest
@@ -292,6 +296,7 @@ export class Http {
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
+    this.networkPolicyCore = opts.networkPolicyCore
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
@@ -321,6 +326,7 @@ export class Http {
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
+      networkPolicyCore: this.networkPolicyCore,
       socket: this.socket,
       serverBus: this.serverBus,
       getCookieJar: this.getCookieJar,

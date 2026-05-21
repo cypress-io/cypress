@@ -14,9 +14,12 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
-    "@packages/types": "0.0.0-development"
+    "@packages/types": "0.0.0-development",
+    "lodash": "^4.17.15",
+    "minimatch": "^3.1.2"
   },
   "devDependencies": {
+    "@types/minimatch": "^3.0.3",
     "vitest": "^3.2.4"
   },
   "files": [

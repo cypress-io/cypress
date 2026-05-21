@@ -3,6 +3,7 @@ import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { defaultMiddleware } from '@packages/proxy/lib/http'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration } from '@packages/network-policy'
+import { NetworkPolicyCore } from '@packages/network-policy'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar } from './util/cookies'
@@ -28,6 +29,7 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   networkProxy: NetworkProxy
   netStubbingState: NetStubbingState
   networkPolicyRegistration: ForNetworkPolicyRegistration
+  networkPolicyCore: NetworkPolicyCore
 }
 
 /**
@@ -36,6 +38,7 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
   const stubbingState = netStubbingState()
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
+  const networkPolicyCore = new NetworkPolicyCore()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)
 
@@ -47,6 +50,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     getCookieJar: deps.getCookieJar,
     socket: deps.socket,
     netStubbingState: stubbingState,
+    networkPolicyCore,
     request: deps.request,
     serverBus: deps.serverBus,
     getCurrentBrowser: deps.getCurrentBrowser,
@@ -58,6 +62,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     networkProxy,
     netStubbingState: stubbingState,
     networkPolicyRegistration,
+    networkPolicyCore,
     handleHttpRequest (req, res) {
       return networkProxy.handleHttpRequest(req, res)
     },

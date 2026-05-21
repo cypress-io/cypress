@@ -8,7 +8,7 @@ export type RegisterDefaultNetworkPoliciesConfig = {
 
 /**
  * Register configurator policies derived from Cypress project config.
- * Policies are stored in the registry only — proxy middleware is unchanged until Stage 3+.
+ * Policies are stored in the registry; request-phase enforcement is wired in Stage 3+ via {@link NetworkPolicyCore}.
  */
 export function registerDefaultNetworkPolicies (
   policies: ForNetworkPolicyRegistration,
