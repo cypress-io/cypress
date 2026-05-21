@@ -29,7 +29,6 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 
 /**
  * Composition-root factory for the proxy-default network runtime.
- * Stage 0a: not wired in ServerBase — strangler-tested in isolation.
  */
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
   const stubbingState = netStubbingState()
