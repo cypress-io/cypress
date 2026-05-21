@@ -9,8 +9,6 @@ import { expect, nock } from '../spec_helper'
 import pDefer from 'p-defer'
 import sinon from 'sinon'
 
-// import Bluebird from 'bluebird'
-
 const debug = Debug('cypress:server:tests')
 
 const wsServerPort = 20000

@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import Bluebird from 'bluebird'
 import pkg from '@packages/root'
 import api from './api'
 import user from './user'
@@ -71,7 +70,7 @@ const exception = {
     }
 
     try {
-      const [body, authToken] = await Bluebird.all([
+      const [body, authToken] = await Promise.all([
         this.getBody(err),
         this.getAuthToken(),
       ])

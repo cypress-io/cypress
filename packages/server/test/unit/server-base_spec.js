@@ -17,7 +17,6 @@ function morganMockFactory (format, options) {
 const _ = require('lodash')
 const os = require('os')
 const express = require('express')
-const Promise = require('bluebird')
 const { connect } = require('@packages/network')
 const { setupFullConfigWithDefaults } = require('@packages/config')
 const { ServerBase } = require(`../../lib/server-base`)
@@ -293,14 +292,11 @@ describe('lib/server-base', () => {
 
       return this.server.createServer(this.app, {})
       .then(([port]) => {
-        return Promise.map(
-          [
-            port,
-            this.server._fileServer.port(),
-            this.server._httpsProxy._sniPort,
-          ],
-          tryOnlyLoopbackConnect,
-        )
+        return Promise.all([
+          port,
+          this.server._fileServer.port(),
+          this.server._httpsProxy._sniPort,
+        ].map(tryOnlyLoopbackConnect))
       })
     })
 
@@ -405,7 +401,7 @@ describe('lib/server-base', () => {
     })
 
     it('returns a promise', function () {
-      expect(this.server.close()).to.be.instanceof(Promise)
+      expect(this.server.close()).to.respondTo('then')
     })
 
     it('calls close on this.server', function () {

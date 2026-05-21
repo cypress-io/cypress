@@ -1,16 +1,20 @@
 # The workflow runs for:
 # External PR after approval (approved contributor PR that's not a main branch)
-# Internal PR for any branch that does is not develop or release/ related
+# Internal PR for any branch that is not develop, release/x.x.x, or electron/x.x.x related
 when:
   and:
     - not:
         matches:
-            pattern: /^release\//
+            pattern: /^release\/\d+\.\d+\.\d+$/
             value: << pipeline.git.branch >>
     - not:
         matches:
-            pattern: /^develop/
+            pattern: /^electron\/\d+\.\d+\.\d+$/
             value: << pipeline.git.branch >>
+    - not:
+        equal: [ 'develop', << pipeline.git.branch >> ]
+    - not:
+        equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
