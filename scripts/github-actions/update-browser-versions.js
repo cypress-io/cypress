@@ -6,7 +6,9 @@ const CHROME_STABLE_KEY = 'chrome-stable-version'
 const CHROME_BETA_KEY = 'chrome-beta-version'
 const CHROME_FOR_TESTING_STABLE_KEY = 'chrome-for-testing-stable-version'
 const FIREFOX_STABLE_KEY = 'firefox-stable-version'
-const FIREFOX_BETA_KEY = 'firefox-beta-version'
+// Mozilla's "released devel" channel — what they market as "Beta". Cypress's launcher detects
+// these builds as the firefox:dev channel because their version string ends in `bN`.
+const FIREFOX_DEV_KEY = 'firefox-dev-version'
 
 // This is the path to the CircleCI file that contains the browser version anchors
 const CIRCLECI_WORKFLOWS_FILEPATH = path.join(__dirname, '../../.circleci/src/pipeline/@pipeline.yml')
@@ -30,6 +32,27 @@ const compareChromeVersions = (a, b) => {
   }
 
   return 0
+}
+
+/**
+ * Compares Firefox version strings — handles both stable (`145.0.2`) and dev/beta (`152.0b1`).
+ * The `b<N>` suffix denotes a Mozilla Beta release; we order by the main version first, then by
+ * the trailing beta number. This prevents the daily workflow from opening a downgrade PR if the
+ * pinned beta is somehow ahead of what Mozilla currently publishes.
+ *
+ * @returns {number} negative if a < b, 0 if equal, positive if a > b
+ */
+const compareFirefoxVersions = (a, b) => {
+  const [aMain, aBeta] = a.split('b')
+  const [bMain, bBeta] = b.split('b')
+
+  const mainCmp = compareChromeVersions(aMain, bMain)
+
+  if (mainCmp !== 0) {
+    return mainCmp
+  }
+
+  return (parseInt(aBeta, 10) || 0) - (parseInt(bBeta, 10) || 0)
 }
 
 // https://developer.chrome.com/docs/versionhistory/reference/#platform-identifiers
@@ -71,17 +94,17 @@ const getLatestFirefoxVersions = async () => {
 
   const data = JSON.parse(await response.text())
   const stable = data?.LATEST_FIREFOX_VERSION
-  const beta = data?.LATEST_FIREFOX_RELEASED_DEVEL_VERSION
+  const dev = data?.LATEST_FIREFOX_RELEASED_DEVEL_VERSION
 
   if (!stable || typeof stable !== 'string') {
     throw new Error('Firefox versions JSON missing LATEST_FIREFOX_VERSION')
   }
 
-  if (!beta || typeof beta !== 'string') {
+  if (!dev || typeof dev !== 'string') {
     throw new Error('Firefox versions JSON missing LATEST_FIREFOX_RELEASED_DEVEL_VERSION')
   }
 
-  return { stable, beta }
+  return { stable, dev }
 }
 
 const findValue = (doc, key) => doc.contents.items.find((item) => item.key.value === key).value.value
@@ -94,7 +117,7 @@ const getVersions = async ({ core }) => {
     const currentChromeBeta = findValue(doc, CHROME_BETA_KEY)
     const currentChromeForTestingStable = findValue(doc, CHROME_FOR_TESTING_STABLE_KEY)
     const currentFirefoxStable = findValue(doc, FIREFOX_STABLE_KEY)
-    const currentFirefoxBeta = findValue(doc, FIREFOX_BETA_KEY)
+    const currentFirefoxDev = findValue(doc, FIREFOX_DEV_KEY)
 
     const [stableDataText, betaDataText, latestChromeForTestingStable, latestFirefox] = await Promise.all([
       getLatestVersionData({ channel: 'stable', currentVersion: currentChromeStable }),
@@ -108,10 +131,9 @@ const getVersions = async ({ core }) => {
     const hasStableUpdate = stableData.versions.length > 0
     const hasBetaUpdate = betaData.versions.length > 0
     const hasChromeForTestingUpdate = compareChromeVersions(latestChromeForTestingStable, currentChromeForTestingStable) > 0
-    // Firefox stable versions are dotted-numeric and orderable; beta versions contain "b" (e.g. "152.0b1"),
-    // so just compare for inequality — Mozilla's product-details endpoint always points at the current beta.
-    const hasFirefoxStableUpdate = compareChromeVersions(latestFirefox.stable, currentFirefoxStable) > 0
-    const hasFirefoxBetaUpdate = latestFirefox.beta !== currentFirefoxBeta
+    // "Newer only" — never open a downgrade PR if upstream regresses or we've manually pinned ahead.
+    const hasFirefoxStableUpdate = compareFirefoxVersions(latestFirefox.stable, currentFirefoxStable) > 0
+    const hasFirefoxDevUpdate = compareFirefoxVersions(latestFirefox.dev, currentFirefoxDev) > 0
     let description = 'Update '
 
     const parts = []
@@ -132,13 +154,13 @@ const getVersions = async ({ core }) => {
       parts.push(`Firefox (stable) to ${latestFirefox.stable}`)
     }
 
-    if (hasFirefoxBetaUpdate) {
-      parts.push(`Firefox (beta) to ${latestFirefox.beta}`)
+    if (hasFirefoxDevUpdate) {
+      parts.push(`Firefox (dev) to ${latestFirefox.dev}`)
     }
 
     description += parts.join(' and ')
 
-    const hasUpdate = hasStableUpdate || hasBetaUpdate || hasChromeForTestingUpdate || hasFirefoxStableUpdate || hasFirefoxBetaUpdate
+    const hasUpdate = hasStableUpdate || hasBetaUpdate || hasChromeForTestingUpdate || hasFirefoxStableUpdate || hasFirefoxDevUpdate
 
     core.setOutput('has_update', hasUpdate ? 'true' : 'false')
     core.setOutput('current_stable_version', currentChromeStable)
@@ -149,8 +171,8 @@ const getVersions = async ({ core }) => {
     core.setOutput('latest_chrome_for_testing_stable_version', hasChromeForTestingUpdate ? latestChromeForTestingStable : currentChromeForTestingStable)
     core.setOutput('current_firefox_stable_version', currentFirefoxStable)
     core.setOutput('latest_firefox_stable_version', hasFirefoxStableUpdate ? latestFirefox.stable : currentFirefoxStable)
-    core.setOutput('current_firefox_beta_version', currentFirefoxBeta)
-    core.setOutput('latest_firefox_beta_version', hasFirefoxBetaUpdate ? latestFirefox.beta : currentFirefoxBeta)
+    core.setOutput('current_firefox_dev_version', currentFirefoxDev)
+    core.setOutput('latest_firefox_dev_version', hasFirefoxDevUpdate ? latestFirefox.dev : currentFirefoxDev)
     core.setOutput('description', description)
   } catch (err) {
     console.log('Errored checking for new browser versions:', err.stack)
@@ -165,7 +187,7 @@ const checkNeedForBranchUpdate = ({
   latestBetaVersion,
   latestChromeForTestingStableVersion,
   latestFirefoxStableVersion,
-  latestFirefoxBetaVersion,
+  latestFirefoxDevVersion,
 }) => {
   const doc = yaml.parseDocument(fs.readFileSync(CIRCLECI_WORKFLOWS_FILEPATH, 'utf8'))
 
@@ -173,20 +195,20 @@ const checkNeedForBranchUpdate = ({
   const currentChromeBeta = findValue(doc, CHROME_BETA_KEY)
   const currentChromeForTestingStable = findValue(doc, CHROME_FOR_TESTING_STABLE_KEY)
   const currentFirefoxStable = findValue(doc, FIREFOX_STABLE_KEY)
-  const currentFirefoxBeta = findValue(doc, FIREFOX_BETA_KEY)
+  const currentFirefoxDev = findValue(doc, FIREFOX_DEV_KEY)
 
   const hasNewerStableVersion = currentChromeStable !== latestStableVersion
   const hasNewerBetaVersion = currentChromeBeta !== latestBetaVersion
   const hasNewerChromeForTestingVersion = currentChromeForTestingStable !== latestChromeForTestingStableVersion
   const hasNewerFirefoxStableVersion = currentFirefoxStable !== latestFirefoxStableVersion
-  const hasNewerFirefoxBetaVersion = currentFirefoxBeta !== latestFirefoxBetaVersion
+  const hasNewerFirefoxDevVersion = currentFirefoxDev !== latestFirefoxDevVersion
 
   const hasNewerUpdate = (
     hasNewerStableVersion ||
     hasNewerBetaVersion ||
     hasNewerChromeForTestingVersion ||
     hasNewerFirefoxStableVersion ||
-    hasNewerFirefoxBetaVersion
+    hasNewerFirefoxDevVersion
   )
 
   core.setOutput('has_newer_update', hasNewerUpdate ? 'true' : 'false')
@@ -197,7 +219,7 @@ const updateBrowserVersionsFile = ({
   latestStableVersion,
   latestChromeForTestingStableVersion,
   latestFirefoxStableVersion,
-  latestFirefoxBetaVersion,
+  latestFirefoxDevVersion,
 }) => {
   const doc = yaml.parseDocument(fs.readFileSync(CIRCLECI_WORKFLOWS_FILEPATH, 'utf8'))
 
@@ -205,13 +227,13 @@ const updateBrowserVersionsFile = ({
   const currentChromeBetaYamlRef = doc.contents.items.find((item) => item.key.value === CHROME_BETA_KEY)
   const currentChromeForTestingYamlRef = doc.contents.items.find((item) => item.key.value === CHROME_FOR_TESTING_STABLE_KEY)
   const currentFirefoxStableYamlRef = doc.contents.items.find((item) => item.key.value === FIREFOX_STABLE_KEY)
-  const currentFirefoxBetaYamlRef = doc.contents.items.find((item) => item.key.value === FIREFOX_BETA_KEY)
+  const currentFirefoxDevYamlRef = doc.contents.items.find((item) => item.key.value === FIREFOX_DEV_KEY)
 
   currentChromeStableYamlRef.value.value = latestStableVersion
   currentChromeBetaYamlRef.value.value = latestBetaVersion
   currentChromeForTestingYamlRef.value.value = latestChromeForTestingStableVersion
   currentFirefoxStableYamlRef.value.value = latestFirefoxStableVersion
-  currentFirefoxBetaYamlRef.value.value = latestFirefoxBetaVersion
+  currentFirefoxDevYamlRef.value.value = latestFirefoxDevVersion
 
   fs.writeFileSync(CIRCLECI_WORKFLOWS_FILEPATH, yaml.stringify(doc), 'utf8')
 }

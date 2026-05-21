@@ -10,9 +10,11 @@ chrome-stable-version: &chrome-stable-version "148.0.7778.178"
 chrome-beta-version: &chrome-beta-version "149.0.7827.22"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.22"
-# Pin from https://product-details.mozilla.org/1.0/firefox_versions.json (LATEST_FIREFOX_VERSION, LATEST_FIREFOX_RELEASED_DEVEL_VERSION)
+# Pin from https://product-details.mozilla.org/1.0/firefox_versions.json (LATEST_FIREFOX_VERSION, LATEST_FIREFOX_RELEASED_DEVEL_VERSION).
+# Cypress identifies the released-devel (Mozilla Beta) channel as firefox:dev — its version regex matches the
+# `\S+b\S*` pattern, e.g. "Mozilla Firefox 152.0b1" — so we name the anchor and job to match Cypress's channel.
 firefox-stable-version: &firefox-stable-version "145.0.2"
-firefox-beta-version: &firefox-beta-version "152.0b1"
+firefox-dev-version: &firefox-dev-version "152.0b1"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
@@ -777,11 +779,11 @@ commands:
                 firefox-version: << parameters.firefox-version >>
       - when:
           condition:
-            equal: [ firefox:beta, << parameters.browser >> ]
+            equal: [ firefox:dev, << parameters.browser >> ]
           steps:
             - install-browsers:
                 install-firefox: true
-                firefox-version: *firefox-beta-version
+                firefox-version: *firefox-dev-version
       - when:
           condition:
             equal: [ webkit, << parameters.browser >> ]
@@ -2394,13 +2396,13 @@ jobs:
           browser: firefox
           guard: << pipeline.parameters.run-driver-tests >>
 
-  driver-integration-tests-firefox-beta:
+  driver-integration-tests-firefox-dev:
     <<: *defaults
     resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
-          browser: firefox:beta
+          browser: firefox:dev
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-electron:
