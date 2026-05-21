@@ -47,12 +47,12 @@ const eventValidators: Record<string, EventValidator> = {
 }
 
 export const validateEvent = (
-  event?: string,
-  handler?: unknown,
+  event: string,
+  handler: unknown,
   config?: Cypress.PluginConfigOptions,
   errConstructorFn?: () => void,
 ): ValidateEventResult => {
-  const validator = event ? eventValidators[event] : undefined
+  const validator = eventValidators[event]
 
   if (!validator) {
     const userEvents = _.reject(_.keys(eventValidators), (registeredEvent) => {
@@ -74,7 +74,7 @@ export const validateEvent = (
     }
   }
 
-  const result = validator(event!, handler, config)
+  const result = validator(event, handler, config)
 
   if (!result.isValid) {
     result.error.name = 'InvalidEventHandlerError'

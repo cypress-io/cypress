@@ -24,8 +24,6 @@ import type {
 
 const debug = debugLib(`cypress:lifecycle:child:RunPlugins:${process.pid}`)
 
-const UNDEFINED_SERIALIZED = '__cypress_undefined__'
-
 export class RunPlugins {
   private ipc: PluginChildIpc
   private projectRoot: string
@@ -184,27 +182,6 @@ export class RunPlugins {
     const event = this.registeredEventsById[eventId]
 
     return (event.handler as (...handlerArgs: any[]) => any)(...args)
-  }
-
-  wrapChildPromise (
-    invoke: (eventId: number, args?: any[]) => any,
-    ids: PluginInvokeIds,
-    args: any[] = [],
-  ) {
-    return Promise.try(() => {
-      return invoke(ids.eventId, args)
-    })
-    .then((value) => {
-      // undefined is coerced into null when sent over ipc, but we need
-      // to differentiate between them for 'task' event
-      if (value === undefined) {
-        value = UNDEFINED_SERIALIZED
-      }
-
-      return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
-    }).catch((err) => {
-      return this.ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
-    })
   }
 
   taskGetBody (ids: PluginInvokeIds, args: any[]) {

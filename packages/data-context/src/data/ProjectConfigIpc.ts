@@ -20,10 +20,7 @@ const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 const debugVerbose = debugLib(`cypress-verbose:lifecycle:ProjectConfigIpc`)
 
-// If in development, use the TypeScript require_async_child file
-// Otherwise, the binary will be using the transpiled version of the Typescript file
-// into whatever @packages/server JavaScript target is defined in the tsconfig.json
-
+// In dev the .ts source exists; in production only the compiled .js is present.
 const resolveRequireAsyncChildPath = (): string => {
   const serverRoot = path.dirname(require.resolve('@packages/server/package.json'))
   const tsPath = path.join(serverRoot, 'lib/plugins/child/require_async_child.ts')
