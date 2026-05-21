@@ -2,13 +2,15 @@ import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { defaultMiddleware } from '@packages/proxy/lib/http'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import type { NetworkInterceptionRuntime } from '@packages/network-policy'
+import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration } from '@packages/network-policy'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar } from './util/cookies'
 import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
+import { ConfiguratorNetworkPolicyAdapter } from './adapters/configurator-network-policy'
+import { registerDefaultNetworkPolicies } from './register-default-network-policies'
 
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
@@ -25,6 +27,7 @@ export type CreateProxyRuntimeDeps = {
 export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   networkProxy: NetworkProxy
   netStubbingState: NetStubbingState
+  networkPolicyRegistration: ForNetworkPolicyRegistration
 }
 
 /**
@@ -32,6 +35,10 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
  */
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
   const stubbingState = netStubbingState()
+  const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
+
+  registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)
+
   const networkProxy = new NetworkProxy({
     config: deps.config,
     shouldCorrelatePreRequests: deps.shouldCorrelatePreRequests,
@@ -50,6 +57,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
   return {
     networkProxy,
     netStubbingState: stubbingState,
+    networkPolicyRegistration,
     handleHttpRequest (req, res) {
       return networkProxy.handleHttpRequest(req, res)
     },

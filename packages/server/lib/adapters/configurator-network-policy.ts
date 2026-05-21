@@ -3,7 +3,6 @@ import type { ForNetworkPolicyRegistration, NetworkPolicy } from '@packages/netw
 
 /**
  * Server-side {@link ForNetworkPolicyRegistration} adapter for configurator policies.
- * Stage 2a: not wired at server startup yet.
  */
 export class ConfiguratorNetworkPolicyAdapter implements ForNetworkPolicyRegistration {
   constructor (private readonly registry: NetworkPolicyRegistry = new NetworkPolicyRegistry()) {}
@@ -16,7 +15,7 @@ export class ConfiguratorNetworkPolicyAdapter implements ForNetworkPolicyRegistr
     return this.registry.getPolicies()
   }
 
-  /** Exposed for Stage 2b wiring and unit tests. */
+  /** Exposed for policy registry access and unit tests. */
   getRegistry (): NetworkPolicyRegistry {
     return this.registry
   }
