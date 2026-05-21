@@ -1292,8 +1292,7 @@ commands:
             fi
           working_directory: /tmp/<<parameters.repo>>
       - run:
-          # Explicitly install the binary in case the tarball's postinstall did
-          # not run.
+          # Explicitly install the binary in case the tarball's postinstall did not run.
           name: Ensure Cypress binary is installed
           working_directory: /tmp/<<parameters.repo>>
           command: |
