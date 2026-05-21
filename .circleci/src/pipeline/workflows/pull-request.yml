@@ -437,7 +437,8 @@ jobs:
         - run-webpack-dev-server-integration-tests
         - run-vite-dev-server-integration-tests
         - driver-integration-tests-firefox
-        - driver-integration-tests-firefox-dev
+        # NOTE: driver-integration-tests-firefox-dev (Mozilla Beta) is intentionally
+        # omitted — it's an advisory canary, not a merge gate.
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
         - driver-integration-tests-chrome-beta-inject-document-domain
@@ -473,7 +474,8 @@ jobs:
         - driver-integration-tests-chrome-beta
         - driver-integration-tests-chrome-beta-inject-document-domain
         - driver-integration-tests-firefox
-        - driver-integration-tests-firefox-dev
+        # NOTE: driver-integration-tests-firefox-dev (Mozilla Beta) is intentionally
+        # omitted — it's an advisory canary, not a merge gate.
         - driver-integration-tests-electron
         - driver-integration-tests-webkit
         - driver-integration-memory-tests

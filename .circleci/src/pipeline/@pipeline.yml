@@ -2396,6 +2396,10 @@ jobs:
           browser: firefox
           guard: << pipeline.parameters.run-driver-tests >>
 
+  # Advisory canary against Mozilla's Beta channel (Cypress identifies this build as firefox:dev).
+  # Intentionally NOT wired into the all-jobs-passed / ready-to-release aggregators — beta builds
+  # often surface upstream regressions (cookie ordering, selectionchange firing, etc.) that we
+  # want to see early but that should not block routine PR merges or releases.
   driver-integration-tests-firefox-dev:
     <<: *defaults
     resource_class: medium+
