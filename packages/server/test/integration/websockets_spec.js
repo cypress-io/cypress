@@ -328,7 +328,7 @@ describe('Web Sockets', () => {
     })
   })
 
-  context('graphql-ws handling on __socket-graphql', () => {
+  describe('graphql-ws handling on __socket-graphql', () => {
     beforeEach(function () {
       const automation = new Automation({
         cyNamespace: this.cfg.namespace,
@@ -339,7 +339,7 @@ describe('Web Sockets', () => {
       return this.server.startWebsockets(automation, this.cfg, {})
     })
 
-    const openGraphqlWs = function (origin) {
+    const openGraphqlWs = (origin) => {
       const agent = new httpsProxyAgent(`http://localhost:${cyPort}`)
       const headers = {}
 
@@ -379,22 +379,22 @@ describe('Web Sockets', () => {
       })
     }
 
-    it('accepts upgrade when Origin port differs from cypress server port', function () {
-      return openGraphqlWs(`http://localhost:${otherPort}`).then((result) => {
-        expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
-      })
+    it('accepts upgrade when Origin port differs from cypress server port', async () => {
+      const result = await openGraphqlWs(`http://localhost:${otherPort}`)
+
+      expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
     })
 
-    it('accepts upgrade when Origin hostname is not localhost', function () {
-      return openGraphqlWs('http://foobar.com:4455').then((result) => {
-        expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
-      })
+    it('accepts upgrade when Origin hostname is not localhost', async () => {
+      const result = await openGraphqlWs('http://foobar.com:4455')
+
+      expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
     })
 
-    it('accepts upgrade with no Origin header', function () {
-      return openGraphqlWs(undefined).then((result) => {
-        expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
-      })
+    it('accepts upgrade with no Origin header', async () => {
+      const result = await openGraphqlWs(undefined)
+
+      expect(result.opened, `expected upgrade to succeed; got statusCode=${result.statusCode}`).to.be.true
     })
   })
 })

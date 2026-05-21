@@ -1,6 +1,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from '@jest/globals'
-import { createServer, Server } from 'http'
-import { AddressInfo } from 'net'
+import { createServer } from 'http'
+import type { Server } from 'http'
+import type { AddressInfo } from 'net'
 import fetch from 'cross-fetch'
 import WebSocket from 'ws'
 
