@@ -1292,6 +1292,14 @@ commands:
             fi
           working_directory: /tmp/<<parameters.repo>>
       - run:
+          # Explicitly install the binary in case the tarball's postinstall did
+          # not run (observed on npm 11.13.0, which is bundled with Node 24.16+).
+          name: Ensure Cypress binary is installed
+          working_directory: /tmp/<<parameters.repo>>
+          command: |
+            source ./ci-ensure-node.sh
+            CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npx cypress install
+      - run:
           name: Print Cypress version
           working_directory: /tmp/<<parameters.repo>>
           command: |
