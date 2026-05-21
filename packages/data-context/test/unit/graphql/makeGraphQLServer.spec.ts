@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from '@jest/globals'
 import { createServer } from 'http'
-import type { Server } from 'http'
+import type { ClientRequest, IncomingMessage, Server } from 'http'
 import type { AddressInfo } from 'net'
 import fetch from 'cross-fetch'
 import WebSocket from 'ws'
@@ -300,13 +300,14 @@ describe('graphqlWS helper', () => {
         ws.close()
       })
 
-      ws.once('unexpected-response', (_req, res) => {
+      ws.once('unexpected-response', (_req: ClientRequest, res: IncomingMessage) => {
         statusCode = res.statusCode
         ws.terminate()
         finish()
       })
 
       ws.once('close', () => finish())
+      // Swallow socket-level errors (e.g. ECONNRESET on the server's 403 close); 'unexpected-response' and 'close' are what we read.
       ws.once('error', () => {})
     })
   }
