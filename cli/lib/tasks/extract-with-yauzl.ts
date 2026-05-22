@@ -25,7 +25,7 @@ const MAX_SYMLINK_TARGET_BYTES = 4096
  * per archive entry processed. Refuses entries whose resolved path would
  * escape the destination directory.
  */
-export const extractWithYauzl = async (
+const extractWithYauzl = async (
   zipFilePath: string,
   destDir: string,
   onEntry: () => void,
