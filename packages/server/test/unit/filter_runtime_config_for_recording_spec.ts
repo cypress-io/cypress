@@ -1,8 +1,7 @@
-require('../spec_helper')
-
-const _ = require('lodash')
-const { filterRuntimeConfigForRecording } = require('../../lib/config')
-const { getCloudRecordingConfigKeys } = require('@packages/config')
+import '../spec_helper'
+import _ from 'lodash'
+import { filterRuntimeConfigForRecording } from '../../lib/config'
+import { getCloudRecordingConfigKeys } from '@packages/config'
 
 describe('lib/config filterRuntimeConfigForRecording', () => {
   it('returns an empty object for an empty config', () => {
