@@ -17,7 +17,6 @@
 
 **Dependency Updates:**
 
-- Upgraded `yauzl` from `^2.10.0` to `^3.3.1` and removed `extract-zip` from the `cypress` package's `cli` dependencies. Addressed in [#33887](https://github.com/cypress-io/cypress/pull/33887).
 - Upgraded `esbuild` to `^0.28.0` to address [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in the bundled `esbuild` Go binary (incorrect TLS certificate validation during session resumption), as reported in container and image security scans. Fixes [#33599](https://github.com/cypress-io/cypress/issues/33599). Addressed in [#33816](https://github.com/cypress-io/cypress/pull/33816).
 
 ## 15.15.0
