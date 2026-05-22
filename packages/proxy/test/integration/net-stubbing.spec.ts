@@ -13,7 +13,10 @@ import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import { NetworkPolicyCore } from '@packages/network-policy'
 import {
+  ProxyCommandLogAdapter,
+  ProxyCookieStateAdapter,
   ProxyDocumentPreparationAdapter,
+  ProxyNetworkCaptureAdapter,
   ProxyRequestInterceptionAdapter,
   ProxyResponseInterceptionAdapter,
 } from '../../lib/adapters'
@@ -62,6 +65,9 @@ describe('network stubbing', () => {
         requestInterception: new ProxyRequestInterceptionAdapter(),
         responseInterception: new ProxyResponseInterceptionAdapter(),
         documentPreparation: new ProxyDocumentPreparationAdapter(),
+        networkCapture: new ProxyNetworkCaptureAdapter(),
+        cookieState: new ProxyCookieStateAdapter(),
+        commandLog: new ProxyCommandLogAdapter(),
       }),
       config,
       middleware: defaultMiddleware,

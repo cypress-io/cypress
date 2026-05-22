@@ -1,7 +1,10 @@
 import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import {
+  ProxyCommandLogAdapter,
+  ProxyCookieStateAdapter,
   ProxyDocumentPreparationAdapter,
+  ProxyNetworkCaptureAdapter,
   ProxyRequestInterceptionAdapter,
   ProxyResponseInterceptionAdapter,
 } from '@packages/proxy/lib/adapters'
@@ -47,6 +50,9 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     requestInterception: new ProxyRequestInterceptionAdapter(),
     responseInterception: new ProxyResponseInterceptionAdapter(),
     documentPreparation: new ProxyDocumentPreparationAdapter(),
+    networkCapture: new ProxyNetworkCaptureAdapter(),
+    cookieState: new ProxyCookieStateAdapter(),
+    commandLog: new ProxyCommandLogAdapter(),
   })
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)

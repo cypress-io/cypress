@@ -51,6 +51,9 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkPolicyCore.requestInterception).to.exist
     expect(runtime.networkPolicyCore.responseInterception).to.exist
     expect(runtime.networkPolicyCore.documentPreparation).to.exist
+    expect(runtime.networkPolicyCore.networkCapture).to.exist
+    expect(runtime.networkPolicyCore.cookieState).to.exist
+    expect(runtime.networkPolicyCore.commandLog).to.exist
   })
 
   it('registers configurator CSP and document rewrite policies at startup', () => {

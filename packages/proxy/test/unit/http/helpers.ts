@@ -1,7 +1,10 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
 import { NetworkPolicyCore } from '@packages/network-policy'
 import {
+  ProxyCommandLogAdapter,
+  ProxyCookieStateAdapter,
   ProxyDocumentPreparationAdapter,
+  ProxyNetworkCaptureAdapter,
   ProxyRequestInterceptionAdapter,
   ProxyResponseInterceptionAdapter,
 } from '../../../lib/adapters'
@@ -11,6 +14,9 @@ export function createTestNetworkPolicyCore () {
     requestInterception: new ProxyRequestInterceptionAdapter(),
     responseInterception: new ProxyResponseInterceptionAdapter(),
     documentPreparation: new ProxyDocumentPreparationAdapter(),
+    networkCapture: new ProxyNetworkCaptureAdapter(),
+    cookieState: new ProxyCookieStateAdapter(),
+    commandLog: new ProxyCommandLogAdapter(),
   })
 }
 
