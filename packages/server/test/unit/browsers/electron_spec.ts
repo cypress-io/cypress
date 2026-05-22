@@ -1,20 +1,19 @@
-require('../../spec_helper')
-
-const _ = require('lodash')
-const EE = require('events')
-const la = require('lazy-ass')
-
-const menu = require(`../../../lib/gui/menu`)
-const plugins = require(`../../../lib/plugins`)
-const Windows = require(`../../../lib/gui/windows`)
-const electron = require(`../../../lib/browsers/electron`)
-const savedState = require(`../../../lib/saved_state`)
-const { Automation } = require(`../../../lib/automation`)
-const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
-const electronApp = require('../../../lib/util/electron-app')
-const utils = require('../../../lib/browsers/utils').default
-const { screencastOpts } = require('../../../lib/browsers/cdp_automation')
-
+import '../../spec_helper'
+import _ from 'lodash'
+import EE from 'events'
+import la from 'lazy-ass'
+import sinon from 'sinon'
+import { Automation } from '../../../lib/automation'
+import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import * as electronApp from '../../../lib/util/electron-app'
+import utils from '../../../lib/browsers/utils'
+import { screencastOpts } from '../../../lib/browsers/cdp_automation'
+import menu from '../../../lib/gui/menu'
+import * as plugins from '../../../lib/plugins'
+import * as Windows from '../../../lib/gui/windows'
+import electron from '../../../lib/browsers/electron'
+import * as savedState from '../../../lib/saved_state'
+import type { BrowserLaunchOpts } from '@packages/types'
 const ELECTRON_PID = 10001
 
 describe('lib/browsers/electron', () => {
@@ -37,17 +36,18 @@ describe('lib/browsers/electron', () => {
       isTextTerminal: false,
       some: 'var',
       projectRoot: '/foo/',
-      onWarning: sinon.stub().returns(),
+      onWarning: sinon.stub().returns(undefined),
       browser: {
         isHeadless: false,
       },
       onError: () => {},
-    }
+    } as unknown as BrowserLaunchOpts & { some: string }
 
     this.automation = new Automation({
       cyNamespace: 'foo',
       cookieNamespace: 'bar',
       screenshotsFolder: 'baz',
+      onServiceWorkerClientEvent: sinon.stub(),
     })
 
     this.win = _.extend(new EE(), {
@@ -80,7 +80,7 @@ describe('lib/browsers/electron', () => {
 
     sinon.stub(Windows, 'installExtension').returns()
     sinon.stub(Windows, 'removeAllExtensions').returns()
-    sinon.stub(electronApp, 'getRemoteDebuggingPort').resolves(1234)
+    sinon.stub(electronApp, 'getRemoteDebuggingPort').resolves('1234')
     sinon.stub(utils, 'initializeCDP').resolves()
 
     // mock CRI client during testing
@@ -120,6 +120,7 @@ describe('lib/browsers/electron', () => {
   context('.connectToNewSpec', () => {
     it('throws an error', async function () {
       expect(() => {
+        // @ts-expect-error
         electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
       }).to.throw('Attempting to connect to a new spec is not supported for electron, use open instead')
     })
@@ -128,22 +129,27 @@ describe('lib/browsers/electron', () => {
   context('.open', () => {
     beforeEach(async function () {
       // shortcut to set the browserCriClient singleton variable
+      // @ts-expect-error
       await electron._getAutomation({}, { onError: () => {} }, {})
 
       await this.stubForOpen()
     })
 
     it('calls render with url, state, and options', function () {
+      // @ts-expect-error
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
+        // @ts-expect-error
         let options = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
 
         options = Windows.defaults(options)
 
+        // @ts-expect-error
         const preferencesKeys = _.keys(electron._render.firstCall.args[2])
 
         expect(_.keys(options)).to.deep.eq(preferencesKeys)
 
+        // @ts-expect-error
         const electronOptionsArg = electron._render.firstCall.args[3]
 
         expect(electronOptionsArg.projectRoot).to.eq(this.options.projectRoot)
@@ -157,8 +163,10 @@ describe('lib/browsers/electron', () => {
     })
 
     it('returns custom object emitter interface', function () {
+      // @ts-expect-error
       return electron.open('electron', this.url, this.options, this.automation)
       .then((obj) => {
+        // @ts-expect-error
         expect(obj.browserWindow).to.eq(this.win)
         expect(obj.kill).to.be.a('function')
         expect(obj.removeAllListeners).to.be.a('function')
@@ -171,11 +179,15 @@ describe('lib/browsers/electron', () => {
     })
 
     it('executeBeforeBrowserLaunch is noop when before:browser:launch yields null', function () {
+      // @ts-expect-error
       plugins.has.returns(true)
+      // @ts-expect-error
       plugins.execute.resolves(null)
 
+      // @ts-expect-error
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
+        // @ts-expect-error
         const options = electron._render.firstCall.args[2]
 
         expect(options).to.include.keys('onFocus', 'onNewWindow', 'onCrashed')
@@ -184,15 +196,19 @@ describe('lib/browsers/electron', () => {
 
     // https://github.com/cypress-io/cypress/issues/1992
     it('it merges in user preferences without removing essential options', function () {
+      // @ts-expect-error
       plugins.has.returns(true)
+      // @ts-expect-error
       plugins.execute.withArgs('before:browser:launch').resolves({
         preferences: {
           foo: 'bar',
         },
       })
 
+      // @ts-expect-error
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
+        // @ts-expect-error
         const options = electron._render.firstCall.args[2]
 
         expect(options).to.include.keys('foo', 'onFocus', 'onNewWindow', 'onCrashed')
@@ -200,11 +216,15 @@ describe('lib/browsers/electron', () => {
     })
 
     it('installs supplied extensions from before:browser:launch and warns on failure', function () {
+      // @ts-expect-error
       plugins.has.returns(true)
+      // @ts-expect-error
       plugins.execute.resolves({ extensions: ['foo', 'bar'] })
 
+      // @ts-expect-error
       Windows.installExtension.withArgs(sinon.match.any, 'bar').throws()
 
+      // @ts-expect-error
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
         expect(Windows.removeAllExtensions).to.be.calledOnce
@@ -227,9 +247,12 @@ describe('lib/browsers/electron', () => {
     })
 
     it('sends after:browser:launch with debugger url', function () {
+      // @ts-expect-error
       plugins.has.returns(true)
+      // @ts-expect-error
       plugins.execute.resolves(null)
 
+      // @ts-expect-error
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
         expect(plugins.execute).to.be.calledWith('after:browser:launch', 'electron', {
@@ -239,6 +262,7 @@ describe('lib/browsers/electron', () => {
     })
 
     it('executeAfterBrowserLaunch is noop if after:browser:launch is not registered', function () {
+      // @ts-expect-error
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
         expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
@@ -379,6 +403,7 @@ describe('lib/browsers/electron', () => {
         currentlyAttachedProtocolTarget: mockCurrentlyAttachedProtocolTarget,
       }
 
+      // @ts-expect-error
       sinon.stub(electron, '_getBrowserCriClient').returns(browserCriClient)
 
       await electron.closeProtocolConnection()
@@ -390,6 +415,7 @@ describe('lib/browsers/electron', () => {
 
   context('.kill', () => {
     beforeEach(async function () {
+      // @ts-expect-error
       await electron._getAutomation({}, { onError: () => {} }, {})
 
       await this.stubForOpen()
@@ -398,6 +424,7 @@ describe('lib/browsers/electron', () => {
     })
 
     it('does not terminate the browserCriClient if the instance is an orphaned process', async function () {
+      // @ts-expect-error
       const instance = await electron.open('electron', this.url, this.options, this.automation)
 
       instance.isOrphanedBrowserProcess = true
@@ -407,6 +434,7 @@ describe('lib/browsers/electron', () => {
     })
 
     it('terminates the browserCriClient otherwise', async function () {
+      // @ts-expect-error
       const instance = await electron.open('electron', this.url, this.options, this.automation)
 
       instance.kill()
@@ -425,12 +453,15 @@ describe('lib/browsers/electron', () => {
     })
 
     it('sets menu.set whether or not its in headless mode', function () {
+      // @ts-expect-error
       return electron._launch(this.win, this.url, this.automation, { show: true, onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then(() => {
         expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
       }).then(() => {
+        // @ts-expect-error
         menu.set.reset()
 
+        // @ts-expect-error
         return electron._launch(this.win, this.url, this.automation, { show: false, onError: () => {} })
       }).then(() => {
         expect(menu.set).not.to.be.called
@@ -442,6 +473,7 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expect(electron._setUserAgent).not.to.be.called
       }).then(() => {
+        // @ts-expect-error
         return electron._launch(this.win, this.url, this.automation, { userAgent: 'foo', onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
       }).then(() => {
         expect(electron._setUserAgent).to.be.calledWith(this.win.webContents, 'foo')
@@ -453,6 +485,7 @@ describe('lib/browsers/electron', () => {
       .then(() => {
         expect(electron._setProxy).not.to.be.called
       }).then(() => {
+        // @ts-expect-error
         return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo', onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
       }).then(() => {
         expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo')
@@ -960,42 +993,49 @@ describe('lib/browsers/electron', () => {
     })
 
     it('uses default width if there isn\'t one saved', function () {
+      // @ts-expect-error
       const opts = electron._defaultOptions('/foo', this.state, this.options)
 
       expect(opts.width).to.eq(1280)
     })
 
     it('uses saved width if there is one', function () {
+      // @ts-expect-error
       const opts = electron._defaultOptions('/foo', { browserWidth: 1024 }, this.options)
 
       expect(opts.width).to.eq(1024)
     })
 
     it('uses default height if there isn\'t one saved', function () {
+      // @ts-expect-error
       const opts = electron._defaultOptions('/foo', this.state, this.options)
 
       expect(opts.height).to.eq(720)
     })
 
     it('uses saved height if there is one', function () {
+      // @ts-expect-error
       const opts = electron._defaultOptions('/foo', { browserHeight: 768 }, this.options)
 
       expect(opts.height).to.eq(768)
     })
 
     it('uses saved x if there is one', function () {
+      // @ts-expect-error
       const opts = electron._defaultOptions('/foo', { browserX: 200 }, this.options)
 
       expect(opts.x).to.eq(200)
     })
 
     it('uses saved y if there is one', function () {
+      // @ts-expect-error
       const opts = electron._defaultOptions('/foo', { browserY: 300 }, this.options)
 
       expect(opts.y).to.eq(300)
     })
 
     it('tracks browser state', function () {
+      // @ts-expect-error
       const opts = electron._defaultOptions('/foo', { browserY: 300 }, this.options)
 
       const args = _.pick(opts.trackState, 'width', 'height', 'x', 'y', 'devTools')
@@ -1015,6 +1055,7 @@ describe('lib/browsers/electron', () => {
       headlessOpts.onFocus()
       expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
 
+      // @ts-expect-error
       menu.set.reset()
 
       const headedOpts = electron._defaultOptions('/foo', this.state, { browser: { isHeadless: true } }, undefined, undefined, { attachCDPClient: sinon.stub() })
@@ -1043,8 +1084,10 @@ describe('lib/browsers/electron', () => {
 
       it('adds pid of new BrowserWindow to allPids list', async function () {
         // shortcut to set the browserCriClient singleton variable
+        // @ts-expect-error
         await electron._getAutomation({}, { onError: () => {} }, {})
 
+        // @ts-expect-error
         const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
 
         const NEW_WINDOW_PID = ELECTRON_PID * 2
@@ -1053,10 +1096,12 @@ describe('lib/browsers/electron', () => {
 
         child.webContents.getOSProcessId = sinon.stub().returns(NEW_WINDOW_PID)
 
+        // @ts-expect-error
         electron._launchChild.resolves(child)
 
         return this.stubForOpen()
         .then(() => {
+          // @ts-expect-error
           return electron.open('electron', this.url, opts, this.automation)
         }).then((instance) => {
           return opts.onNewWindow.call(this.win, {}, this.url)
@@ -1077,6 +1122,7 @@ describe('lib/browsers/electron', () => {
         webContents: new EE(),
       })
 
+      // @ts-expect-error
       Windows.create.onCall(1).resolves(this.childWin)
 
       this.event = { preventDefault: sinon.stub() }
@@ -1085,7 +1131,7 @@ describe('lib/browsers/electron', () => {
       }
 
       this.openNewWindow = (options) => {
-        // eslint-disable-next-line no-undef
+        // @ts-expect-error
         return launcher.launch('electron', this.url, options).then(() => {
           return this.win.webContents.emit('new-window', this.event, 'some://other.url')
         })
@@ -1100,6 +1146,7 @@ describe('lib/browsers/electron', () => {
 
     it('creates child window', function () {
       return this.openNewWindow().then(() => {
+        // @ts-expect-error
         const args = Windows.create.lastCall.args[0]
 
         expect(Windows.create).to.be.calledTwice
@@ -1112,6 +1159,7 @@ describe('lib/browsers/electron', () => {
 
     it('offsets it from parent by 100px', function () {
       return this.openNewWindow().then(() => {
+        // @ts-expect-error
         const args = Windows.create.lastCall.args[0]
 
         expect(args.x).to.equal(104)
@@ -1122,6 +1170,7 @@ describe('lib/browsers/electron', () => {
 
     it('passes along web security', function () {
       return this.openNewWindow({ chromeWebSecurity: false }).then(() => {
+        // @ts-expect-error
         const args = Windows.create.lastCall.args[0]
 
         expect(args.chromeWebSecurity).to.be.false
@@ -1130,10 +1179,12 @@ describe('lib/browsers/electron', () => {
 
     it('sets unique PROJECT type on each new window', function () {
       return this.openNewWindow().then(() => {
+        // @ts-expect-error
         const firstArgs = Windows.create.lastCall.args[0]
 
         expect(firstArgs.type).to.match(/^PROJECT-CHILD-\d/)
         this.win.webContents.emit('new-window', this.event, 'yet://another.url')
+        // @ts-expect-error
         const secondArgs = Windows.create.lastCall.args[0]
 
         expect(secondArgs.type).to.match(/^PROJECT-CHILD-\d/)
@@ -1145,6 +1196,7 @@ describe('lib/browsers/electron', () => {
     it('set newGuest on child window', function () {
       return this.openNewWindow()
       .then(() => {
+        // @ts-expect-error
         return Promise.delay(1)
       }).then(() => {
         expect(this.event.newGuest).to.equal(this.childWin)
@@ -1162,6 +1214,7 @@ describe('lib/browsers/electron', () => {
 
     it('sets menu with dev tools on focus', function () {
       return this.openNewWindow().then(() => {
+        // @ts-expect-error
         Windows.create.lastCall.args[0].onFocus()
         // once for main window, once for child, once for focus
         expect(menu.set).to.be.calledThrice
@@ -1173,6 +1226,7 @@ describe('lib/browsers/electron', () => {
     it('it closes the child window when the parent window is closed', function () {
       return this.openNewWindow()
       .then(() => {
+        // @ts-expect-error
         return Promise.delay(1)
       }).then(() => {
         this.win.emit('close')
@@ -1184,6 +1238,7 @@ describe('lib/browsers/electron', () => {
     it('does not close the child window when it is already destroyed', function () {
       return this.openNewWindow()
       .then(() => {
+        // @ts-expect-error
         return Promise.delay(1)
       }).then(() => {
         this.childWin.isDestroyed.returns(true)
@@ -1200,6 +1255,7 @@ describe('lib/browsers/electron', () => {
         webContents: new EE(),
       })
 
+      // @ts-expect-error
       Windows.create.onCall(2).resolves(this.grandchildWin)
       this.childWin.getPosition = () => {
         return [104, 102]
@@ -1207,6 +1263,7 @@ describe('lib/browsers/electron', () => {
 
       return this.openNewWindow().then(() => {
         this.childWin.webContents.emit('new-window', this.event, 'yet://another.url')
+        // @ts-expect-error
         const args = Windows.create.lastCall.args[0]
 
         expect(Windows.create).to.be.calledThrice
