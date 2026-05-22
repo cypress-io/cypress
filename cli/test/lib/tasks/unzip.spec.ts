@@ -2,7 +2,6 @@ import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest'
 import events from 'events'
 import os from 'os'
 import path from 'path'
-import extract from 'extract-zip'
 import cp from 'child_process'
 import createDebug from 'debug'
 import readline from 'readline'
@@ -13,13 +12,14 @@ import { Console } from 'console'
 import logger from '../../../lib/logger'
 import util from '../../../lib/util'
 import unzip from '../../../lib/tasks/unzip'
+import extractWithYauzl from '../../../lib/tasks/extract-with-yauzl'
 
 const debug = createDebug('test')
 
 const version = '1.2.3'
 const installDir = path.join(os.tmpdir(), 'Cypress', version)
 
-vi.mock('extract-zip')
+vi.mock('../../../lib/tasks/extract-with-yauzl')
 vi.mock('child_process')
 vi.mock('readline')
 vi.mock('fs-extra')
@@ -64,7 +64,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 describe('lib/tasks/unzip', function () {
   const createStdoutCapture = () => {
     const logs: string[] = []
-    // eslint-disable-next-line no-console
+
     const originalOut = process.stdout.write
 
     vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
@@ -87,10 +87,9 @@ describe('lib/tasks/unzip', function () {
       release: 'OsVersion',
     } as Systeminformation.OsData)
 
-    // @ts-expect-error - default import
-    const actualExtract = (await vi.importActual<typeof import('extract-zip')>('extract-zip')).default
+    const actualExtract = (await vi.importActual<typeof import('../../../lib/tasks/extract-with-yauzl')>('../../../lib/tasks/extract-with-yauzl')).default
 
-    vi.mocked(extract).mockImplementation(actualExtract)
+    vi.mocked(extractWithYauzl).mockImplementation(actualExtract)
 
     // @ts-expect-error - default import
     const actualChildProcess = (await vi.importActual<typeof import('child_process')>('child_process')).default
@@ -176,12 +175,7 @@ describe('lib/tasks/unzip', function () {
     it('can try unzip first then fall back to node unzip', async function () {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      vi.mocked(extract).mockImplementation((filePath: any, opts: any) => {
-        debug('unzip extract called with %s', filePath)
-        expect(filePath, 'zipfile is the same').toEqual(zipFilePath)
-
-        return Promise.resolve(undefined)
-      })
+      vi.mocked(extractWithYauzl).mockResolvedValue(undefined)
 
       const unzipChildProcess = new events.EventEmitter()
 
@@ -213,16 +207,13 @@ describe('lib/tasks/unzip', function () {
 
       debug('checking if unzip was called')
       expect(cp.spawn).toHaveBeenCalledExactlyOnceWith('unzip', ['-o', zipFilePath, '-d', installDir])
-      expect(extract).toHaveBeenCalledExactlyOnceWith(zipFilePath, expect.objectContaining({
-        dir: installDir,
-        onEntry: expect.any(Function),
-      }))
+      expect(extractWithYauzl).toHaveBeenCalledExactlyOnceWith(zipFilePath, installDir, expect.any(Function))
     })
 
     it('can try unzip first then fall back to node unzip and fails with an empty error', async function () {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      vi.mocked(extract).mockRejectedValue(undefined)
+      vi.mocked(extractWithYauzl).mockRejectedValue(undefined)
 
       const unzipChildProcess = new events.EventEmitter()
 
@@ -264,12 +255,7 @@ describe('lib/tasks/unzip', function () {
     it('calls node unzip just once', async function () {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      vi.mocked(extract).mockImplementation((filePath: any, opts: any) => {
-        debug('unzip extract called with %s', filePath)
-        expect(filePath, 'zipfile is the same').toEqual(zipFilePath)
-
-        return Promise.resolve(undefined)
-      })
+      vi.mocked(extractWithYauzl).mockResolvedValue(undefined)
 
       const unzipChildProcess = new events.EventEmitter()
 
@@ -307,10 +293,7 @@ describe('lib/tasks/unzip', function () {
 
       debug('checking if unzip was called')
       expect(cp.spawn).toHaveBeenCalledExactlyOnceWith('unzip', ['-o', zipFilePath, '-d', installDir])
-      expect(extract).toHaveBeenCalledExactlyOnceWith(zipFilePath, expect.objectContaining({
-        dir: installDir,
-        onEntry: expect.any(Function),
-      }))
+      expect(extractWithYauzl).toHaveBeenCalledExactlyOnceWith(zipFilePath, installDir, expect.any(Function))
     })
   })
 
@@ -322,12 +305,7 @@ describe('lib/tasks/unzip', function () {
     it('calls node unzip just once', async function () {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      vi.mocked(extract).mockImplementation((filePath: any, opts: any) => {
-        debug('unzip extract called with %s', filePath)
-        expect(filePath, 'zipfile is the same').toEqual(zipFilePath)
-
-        return Promise.resolve(undefined)
-      })
+      vi.mocked(extractWithYauzl).mockResolvedValue(undefined)
 
       const unzipChildProcess = new events.EventEmitter()
 
@@ -364,10 +342,7 @@ describe('lib/tasks/unzip', function () {
 
       debug('checking if unzip was called')
       expect(cp.spawn).toHaveBeenCalledExactlyOnceWith('ditto', ['-xkV', zipFilePath, installDir])
-      expect(extract).toHaveBeenCalledExactlyOnceWith(zipFilePath, expect.objectContaining({
-        dir: installDir,
-        onEntry: expect.any(Function),
-      }))
+      expect(extractWithYauzl).toHaveBeenCalledExactlyOnceWith(zipFilePath, installDir, expect.any(Function))
     })
   })
 })
