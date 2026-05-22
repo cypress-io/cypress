@@ -1,5 +1,5 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.15.1
+## 15.16.0
 
 **Features:**
 
