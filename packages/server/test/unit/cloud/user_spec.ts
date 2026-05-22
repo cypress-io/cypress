@@ -1,11 +1,10 @@
-require('../../spec_helper')
-
-const api = require('../../../lib/cloud/api').default
-const cache = require('../../../lib/cache').cache
-const user = require('../../../lib/cloud/user').default
+import '../../spec_helper'
+import api from '../../../lib/cloud/api'
+import { cache } from '../../../lib/cache'
+import user from '../../../lib/cloud/user'
 
 describe('lib/cloud/user', () => {
-  context('.get', () => {
+  describe('.get', () => {
     it('calls cache.getUser', () => {
       sinon.stub(cache, 'getUser').resolves({ name: 'brian' })
 
@@ -15,7 +14,7 @@ describe('lib/cloud/user', () => {
     })
   })
 
-  context('.logOut', () => {
+  describe('.logOut', () => {
     it('calls api.postLogout + removes the session from cache', () => {
       sinon.stub(api, 'postLogout').withArgs('abc-123').resolves()
       sinon.stub(cache, 'getUser').resolves({ name: 'brian', authToken: 'abc-123' })
@@ -49,7 +48,7 @@ describe('lib/cloud/user', () => {
     })
   })
 
-  context('.getBaseLoginUrl', () => {
+  describe('.getBaseLoginUrl', () => {
     it('calls api.getAuthUrls', () => {
       sinon.stub(api, 'getAuthUrls').resolves({
         'dashboardAuthUrl': 'https://github.com/login',
@@ -61,7 +60,7 @@ describe('lib/cloud/user', () => {
     })
   })
 
-  context('.getBaseSignupUrl', () => {
+  describe('.getBaseSignupUrl', () => {
     it('returns dashboardSignupUrl from api.getAuthUrls', () => {
       sinon.stub(api, 'getAuthUrls').resolves({
         'dashboardSignupUrl': 'https://cloud.cypress.io/test-runner-signup?utm_source=Binary',
