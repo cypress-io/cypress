@@ -230,9 +230,8 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
       )
     },
   }], {
-    // In CI we want timestamped, line-per-event output that survives
-    // pseudo-TTY environments without COLUMNS set. Locally, the default
-    // in-place spinner is the better experience.
+    // In CI we want timestamped, line-per-event output. Locally,
+    // the default in-place spinner is the better experience.
     renderer: isCi ? 'verbose' : 'default',
     ...(isCi && { rendererOptions: { timestamp: PRESET_TIMESTAMP } }),
     silentRendererCondition: () => logger.logLevel() === 'silent',
