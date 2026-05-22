@@ -31,6 +31,7 @@ import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
+import { isRunningAsElectronProcess } from '../util/electron-app'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 export type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -1232,7 +1233,7 @@ async function ready (options: ReadyOptions) {
 export async function run (options, loading: Promise<void>) {
   debug('run start')
   // Check if running as electron process
-  if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
+  if (isRunningAsElectronProcess({ debug })) {
     // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
     const app = require('electron').app
 

@@ -19,6 +19,7 @@ import { toNumber } from 'lodash'
 import { GracefulExit } from './util/graceful-exit'
 import type { BrowserWindow } from 'electron'
 import type { CypressRunResult } from './modes/results'
+import { isRunning, scale, setRemoteDebuggingPort } from './util/electron-app'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
@@ -85,7 +86,7 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
 
 export = {
   isCurrentlyRunningElectron () {
-    return require('./util/electron-app').isRunning()
+    return isRunning()
   },
 
   runElectron (mode: Mode, options: any): Promise<RunElectronResult> {
@@ -136,7 +137,7 @@ export = {
     })
   },
 
-  start (argv: any = []) {
+  async start (argv: any = []) {
     debug('starting cypress with argv %o', argv)
 
     // if the CLI passed "--" somewhere, we need to remove it
@@ -176,36 +177,35 @@ export = {
       // to force retina screens to not
       // upsample their images when offscreen
       // rendering
-      require('./util/electron-app').scale()
+      await scale()
     }
 
     // make sure we have the appData folder
-    return Promise.all([
+    await Promise.all([
       require('./util/app_data').ensure(),
-      require('./util/electron-app').setRemoteDebuggingPort(),
+      setRemoteDebuggingPort(),
     ])
-    .then(() => {
-      // else determine the mode by
-      // the passed in arguments / options
-      // and normalize this mode
-      let mode = options.mode || 'interactive'
 
-      if (options.version) {
-        mode = 'version'
-      } else if (options.smokeTest) {
-        mode = 'smokeTest'
-      } else if (options.returnPkg) {
-        mode = 'returnPkg'
-      } else if (!(options.exitWithCode == null)) {
-        mode = 'exitWithCode'
-      } else if (options.runProject) {
-        // go into headless mode when running
-        // until completion + exit
-        mode = 'run'
-      }
+    // else determine the mode by
+    // the passed in arguments / options
+    // and normalize this mode
+    let mode = options.mode || 'interactive'
 
-      return this.startInMode(mode, options)
-    })
+    if (options.version) {
+      mode = 'version'
+    } else if (options.smokeTest) {
+      mode = 'smokeTest'
+    } else if (options.returnPkg) {
+      mode = 'returnPkg'
+    } else if (!(options.exitWithCode == null)) {
+      mode = 'exitWithCode'
+    } else if (options.runProject) {
+      // go into headless mode when running
+      // until completion + exit
+      mode = 'run'
+    }
+
+    return this.startInMode(mode, options)
   },
 
   async startInMode (mode: Mode, options: any) {
