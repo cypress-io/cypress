@@ -8,6 +8,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue on Node 24.16.0+ where installing Cypress could silently extract only the first file from the binary archive, leaving the test runner unable to launch with a "Cypress binary is missing" error. The Node-based unzip fallback no longer goes through `extract-zip` / `fd-slicer`, whose stream-based deflate pipeline stalls on the new Node release; it now uses a small `yauzl`-based extractor that preserves Unix file modes and refuses path-traversal entries. Addressed in [#33887](https://github.com/cypress-io/cypress/pull/33887).
 - Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
 - Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
@@ -16,6 +17,7 @@
 
 **Dependency Updates:**
 
+- Upgraded `yauzl` from `^2.10.0` to `^3.3.1` and removed `extract-zip` from the `cypress` package's `cli` dependencies. Addressed in [#33887](https://github.com/cypress-io/cypress/pull/33887).
 - Upgraded `esbuild` to `^0.28.0` to address [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in the bundled `esbuild` Go binary (incorrect TLS certificate validation during session resumption), as reported in container and image security scans. Fixes [#33599](https://github.com/cypress-io/cypress/issues/33599). Addressed in [#33816](https://github.com/cypress-io/cypress/pull/33816).
 
 ## 15.15.0
