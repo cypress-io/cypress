@@ -1,15 +1,14 @@
-require('../../spec_helper')
+import '../../spec_helper'
+import _ from 'lodash'
+import Debug from 'debug'
+import * as errors from '../../../lib/errors'
+import api from '../../../lib/cloud/api'
+import exception from '../../../lib/cloud/exception'
+import commitInfo from '../../../lib/util/commit-info'
+import recordMode from '../../../lib/modes/record'
+import * as ciProvider from '../../../lib/util/ci_provider'
 
-const _ = require('lodash')
-const debug = require('debug')('test')
-
-const errors = require(`../../../lib/errors`)
-const api = require(`../../../lib/cloud/api`).default
-const exception = require(`../../../lib/cloud/exception`).default
-const commitInfo = require('../../../lib/util/commit-info')
-const recordMode = require(`../../../lib/modes/record`)
-const ciProvider = require(`../../../lib/util/ci_provider`)
-
+const debug = Debug('test')
 const initialEnv = _.clone(process.env)
 
 // NOTE: the majority of the logic of record_spec is
@@ -27,7 +26,7 @@ describe('lib/modes/record', () => {
 
   // QUESTION: why are these tests here when
   // this is a module... ?
-  context('.getCommitFromGitOrCi', () => {
+  describe('.getCommitFromGitOrCi', () => {
     const gitCommit = {
       branch: null,
     }
@@ -102,7 +101,7 @@ describe('lib/modes/record', () => {
     })
   })
 
-  context('.createRunAndRecordSpecs', () => {
+  describe('.createRunAndRecordSpecs', () => {
     describe('commit information from commitInfo', () => {
       const commitData = {
         branch: 'my-branch-221',
@@ -345,7 +344,7 @@ describe('lib/modes/record', () => {
     })
   })
 
-  context('.updateInstanceStdout', () => {
+  describe('.updateInstanceStdout', () => {
     beforeEach(function () {
       sinon.stub(api, 'updateInstanceStdout')
 
@@ -395,7 +394,7 @@ describe('lib/modes/record', () => {
     })
   })
 
-  context('.createInstance', () => {
+  describe('.createInstance', () => {
     beforeEach(function () {
       sinon.stub(api, 'createInstance')
 
@@ -443,7 +442,7 @@ describe('lib/modes/record', () => {
     })
   })
 
-  context('.createRun', () => {
+  describe('.createRun', () => {
     beforeEach(function () {
       sinon.stub(api, 'createRun')
       sinon.stub(ciProvider, 'ciParams').returns({})
@@ -474,7 +473,7 @@ describe('lib/modes/record', () => {
     })
   })
 
-  context('.postInstanceTests', () => {
+  describe('.postInstanceTests', () => {
     beforeEach(function () {
       sinon.stub(api, 'postInstanceTests')
       sinon.stub(ciProvider, 'ciParams').returns({})
@@ -488,7 +487,7 @@ describe('lib/modes/record', () => {
     })
   })
 
-  context('.postInstanceResults', () => {
+  describe('.postInstanceResults', () => {
     beforeEach(function () {
       sinon.stub(api, 'postInstanceResults')
       sinon.stub(ciProvider, 'ciParams').returns({})
