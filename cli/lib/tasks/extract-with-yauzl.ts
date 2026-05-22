@@ -2,10 +2,9 @@ import _ from 'lodash'
 import path from 'path'
 import yauzl from 'yauzl'
 import fs from 'fs'
+import fsp from 'fs/promises'
 import { promisify } from 'util'
 import stream from 'stream'
-
-const fsp = fs.promises
 
 const pipelineAsync = promisify(stream.pipeline)
 
@@ -44,6 +43,7 @@ const extractWithYauzl = async (
       }
 
       const finish = _.once((err?: Error) => {
+        zipFile.removeAllListeners?.()
         zipFile.close?.()
         if (err) {
           return reject(err)
