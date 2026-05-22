@@ -11,7 +11,7 @@ import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
-import { CookieJar } from '@packages/server/lib/util/cookies'
+import { NetworkPolicyCore } from '@packages/network-policy'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
@@ -53,6 +53,7 @@ describe('network stubbing', () => {
     const proxy = new NetworkProxy({
       socket,
       netStubbingState,
+      networkPolicyCore: new NetworkPolicyCore(),
       config,
       middleware: defaultMiddleware,
       getCookieJar: () => new CookieJar(),

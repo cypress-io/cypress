@@ -1,4 +1,5 @@
 import { NetworkProxy } from '@packages/proxy'
+import { NetworkPolicyCore } from '@packages/network-policy'
 import { createProxyRuntime } from '../../lib/network-runtime'
 import '../spec_helper'
 
@@ -46,6 +47,7 @@ describe('lib/network-runtime', () => {
     expect(policies).to.have.length(1)
     expect(policies[0].name).to.eq('blocked-hosts')
     expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
+    expect(runtime.networkPolicyCore).to.be.instanceOf(NetworkPolicyCore)
   })
 
   it('handleHttpRequest delegates to networkProxy.handleHttpRequest', async () => {
