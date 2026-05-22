@@ -1,11 +1,16 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
-import { NetworkPolicyCore } from '@packages/network-policy'
-import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../../lib/adapters'
+import { NetworkInterceptionCore } from '@packages/network-interception'
+import {
+  ProxyDocumentPreparationAdapter,
+  ProxyRequestInterceptionAdapter,
+  ProxyResponseInterceptionAdapter,
+} from '../../../lib/adapters'
 
-export function createTestNetworkPolicyCore () {
-  return new NetworkPolicyCore({
+export function createTestNetworkInterceptionCore () {
+  return new NetworkInterceptionCore({
     requestInterception: new ProxyRequestInterceptionAdapter(),
     responseInterception: new ProxyResponseInterceptionAdapter(),
+    documentPreparation: new ProxyDocumentPreparationAdapter(),
   })
 }
 
@@ -15,7 +20,7 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
     req: {},
     res: {},
     config: {},
-    networkPolicyCore: createTestNetworkPolicyCore(),
+    networkInterceptionCore: createTestNetworkInterceptionCore(),
 
     middleware: {
       0: middleware,

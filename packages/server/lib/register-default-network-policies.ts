@@ -1,9 +1,14 @@
 import { blocked } from '@packages/network'
 import type { ForNetworkPolicyRegistration } from '@packages/network-interception'
+import { CspAllowList, DocumentRewrite } from '@packages/network-interception'
 import { createBlockedHosts } from './network-policies/blocked-hosts'
 
 type RegisterDefaultNetworkPoliciesConfig = {
   blockHosts?: string | string[] | null
+  experimentalCspAllowList?: boolean | string[] | null
+  modifyObstructiveCode?: boolean
+  experimentalModifyObstructiveThirdPartyCode?: boolean
+  experimentalSourceRewriting?: boolean
 }
 
 /**
@@ -18,5 +23,15 @@ export function registerDefaultNetworkPolicies (
   policies.add(createBlockedHosts({
     blockHosts: config.blockHosts,
     matchesBlockedHost: blocked.matches,
+  }))
+
+  policies.add(CspAllowList({
+    experimentalCspAllowList: config.experimentalCspAllowList,
+  }))
+
+  policies.add(DocumentRewrite({
+    modifyObstructiveCode: config.modifyObstructiveCode,
+    experimentalModifyObstructiveThirdPartyCode: config.experimentalModifyObstructiveThirdPartyCode,
+    experimentalSourceRewriting: config.experimentalSourceRewriting,
   }))
 }

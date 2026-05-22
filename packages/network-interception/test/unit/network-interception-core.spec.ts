@@ -135,4 +135,30 @@ describe('NetworkInterceptionCore', () => {
 
     await expect(core.interceptResponse({})).rejects.toThrow(/responseInterception/)
   })
+
+  it('delegates document preparation methods to documentPreparation port', async () => {
+    const setInjectionLevel = vi.fn().mockResolvedValue(undefined)
+    const injectHtml = vi.fn().mockResolvedValue(undefined)
+    const removeSecurity = vi.fn().mockResolvedValue(undefined)
+    const core = new NetworkPolicyCore({
+      documentPreparation: { setInjectionLevel, injectHtml, removeSecurity },
+    })
+    const ctx = { res: {} }
+
+    await core.setInjectionLevel(ctx)
+    await core.injectHtml(ctx)
+    await core.removeSecurity(ctx)
+
+    expect(setInjectionLevel).toHaveBeenCalledWith(ctx)
+    expect(injectHtml).toHaveBeenCalledWith(ctx)
+    expect(removeSecurity).toHaveBeenCalledWith(ctx)
+  })
+
+  it('throws when documentPreparation port is missing', async () => {
+    const core = new NetworkPolicyCore()
+
+    await expect(core.setInjectionLevel({})).rejects.toThrow(/documentPreparation/)
+    await expect(core.injectHtml({})).rejects.toThrow(/documentPreparation/)
+    await expect(core.removeSecurity({})).rejects.toThrow(/documentPreparation/)
+  })
 })
