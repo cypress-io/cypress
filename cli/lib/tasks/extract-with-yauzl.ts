@@ -33,7 +33,10 @@ export const extractWithYauzl = async (
   const resolvedDest = path.resolve(destDir)
 
   await new Promise<void>((resolve, reject) => {
-    yauzl.open(zipFilePath, { lazyEntries: true }, (err: any, zipFile: any) => {
+    // autoClose: false — `finish` below owns closing the zipfile, so we don't
+    // want yauzl's internal end-listener closing it first and tripping a
+    // double-close (EBADF) when we do.
+    yauzl.open(zipFilePath, { lazyEntries: true, autoClose: false }, (err: any, zipFile: any) => {
       if (err) {
         return reject(err)
       }
