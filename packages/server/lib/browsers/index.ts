@@ -107,7 +107,7 @@ async function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): 
 
 process.once('exit', () => kill({ isProcessExit: true }))
 
-export = {
+const browsers = {
   ensureAndGetByNameOrPath: utils.ensureAndGetByNameOrPath,
 
   isBrowserFamily,
@@ -312,3 +312,5 @@ export = {
     await browserLauncher.closeExtraTargets()
   },
 } as const
+
+export default browsers

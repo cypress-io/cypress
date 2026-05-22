@@ -6,7 +6,7 @@ const mockfs = require('mock-fs')
 const extension = require('@packages/extension')
 const launch = require('@packages/launcher/lib/browsers')
 const plugins = require(`../../../lib/plugins`)
-const utils = require(`../../../lib/browsers/utils`)
+const utils = require(`../../../lib/browsers/utils`).default
 const chrome = require(`../../../lib/browsers/chrome`)
 const { fs } = require(`../../../lib/util/fs`)
 const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
@@ -67,10 +67,15 @@ describe('lib/browsers/chrome', () => {
       }
 
       this.onCriEvent = (event, data, options) => {
-        this.pageCriClient.on.withArgs(event).yieldsAsync(data)
+        let eventHandler
+
+        this.pageCriClient.on.withArgs(event).callsFake((_eventName, callback) => {
+          eventHandler = callback
+        })
 
         return chrome.open({ isHeadless: true }, 'http://', { ...openOpts, ...options }, this.automation)
         .then(() => {
+          eventHandler(data)
           this.pageCriClient.on = undefined
         })
       }

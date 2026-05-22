@@ -3,7 +3,6 @@ import pDefer from 'p-defer'
 import treeKill from 'tree-kill'
 import gulp from 'gulp'
 import os from 'os'
-import { psTreeSync } from '../utils/psTreeSync'
 
 const childProcesses = new Set<ChildProcess>()
 const exitedPids = new Set<number>()
@@ -90,23 +89,20 @@ async function exitHandler (exitCode: number) {
   process.exit(exitCode)
 }
 
-function signalHandler (signal: NodeJS.Signals, code: number) {
-  hasExited = true
-  try {
-    // Windows doesn't automatically send signals to the whole process tree
-    if (os.platform().startsWith('win')) {
-      // signal handlers must be synchronous, so we can't use tree-kill
-      const tree = psTreeSync(process.pid).filter((pid) => pid !== process.pid)
-
-      for (const pid of tree) {
-        process.kill(pid, signal)
-      }
-    }
-  } catch (error) {
-    console.error(`An error occurred while handling signal ${signal}: ${error}`)
+async function signalHandler (signal: NodeJS.Signals) {
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(false)
   }
 
-  process.exit(128 + code)
+  hasExited = true
+  try {
+    await exitAllProcesses()
+  } catch (error) {
+    console.error(`An error occurred while handling signal ${signal}: ${error}`)
+    process.exit(1)
+  }
+
+  process.exit(128 + os.constants.signals[signal])
 }
 
 async function uncaughtExceptionHandler (error: Error) {

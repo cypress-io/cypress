@@ -297,12 +297,12 @@ const createRun = Promise.method((options: any = {}) => {
     autoCancelAfterFailures,
     project,
   })
-  .tap((response: any) => {
+  .then((response: any) => {
     if (!(response && response.warnings && response.warnings.length)) {
-      return
+      return response
     }
 
-    return _.each(response.warnings, (warning: any) => {
+    _.each(response.warnings, (warning: any) => {
       switch (warning.code) {
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
           return errorsWarning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
@@ -342,6 +342,8 @@ const createRun = Promise.method((options: any = {}) => {
           })
       }
     })
+
+    return response
   }).catch((err: any) => {
     debug('failed creating run with status %o',
       _.pick(err, ['name', 'message', 'statusCode', 'stack']))

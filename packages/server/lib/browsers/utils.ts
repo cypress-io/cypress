@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
@@ -8,6 +7,13 @@ import type { Automation } from '../automation'
 import type { Browser } from './types'
 import type { CriClient } from './cri-client'
 import * as profileCleaner from '../util/profile_cleaner'
+import * as appData from '../util/app_data'
+import path from 'path'
+import Debug from 'debug'
+import { telemetry } from '@packages/telemetry'
+import { fs } from '../util/fs'
+import * as extension from '@packages/extension'
+import getPort from 'get-port'
 
 declare global {
   interface Window {
@@ -18,13 +24,7 @@ declare global {
   }
 }
 
-const path = require('path')
-const debug = require('debug')('cypress:server:browsers:utils')
-const getPort = require('get-port')
-const { fs } = require('../util/fs')
-const extension = require('@packages/extension')
-const appData = require('../util/app_data')
-const { telemetry } = require('@packages/telemetry')
+const debug = Debug('cypress:server:browsers:utils')
 
 const pathToBrowsers = appData.path('browsers')
 const legacyProfilesWildcard = path.join(pathToBrowsers, '*')
@@ -124,7 +124,7 @@ const removeOldProfiles = function (browser) {
   // no longer active, or isnt a cypress related process
   const pathToPartitions = appData.electronPartitionsPath()
 
-  return Bluebird.all([
+  return Promise.all([
     removeLegacyProfiles(),
     profileCleaner.removeInactiveByPid(getProfileWildcard(browser), 'run-'),
     profileCleaner.removeInactiveByPid(pathToPartitions, 'run-'),
@@ -137,7 +137,7 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   if (plugins.has('before:browser:launch')) {
     const span = telemetry.startSpan({ name: 'lifecycle:before:browser:launch' })
 
-    span?.setAttribute({
+    span?.setAttributes({
       name: browser.name,
       channel: browser.channel,
       version: browser.version,
@@ -164,7 +164,7 @@ async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowse
   if (plugins.has('after:browser:launch')) {
     const span = telemetry.startSpan({ name: 'lifecycle:after:browser:launch' })
 
-    span?.setAttribute({
+    span?.setAttributes({
       name: browser.name,
       channel: browser.channel,
       version: browser.version,
@@ -217,7 +217,7 @@ const getWebKitBrowserVersion = async () => {
     // after launching the browser, this is available at browser.version(), but we don't have a browser instance til later
     const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
     const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
-    const wkBrowserContents = await fs.readFile(wkBrowserPath)
+    const wkBrowserContents = await fs.readFile(wkBrowserPath, 'utf8')
     const result = wkBrowserVersionRe.exec(wkBrowserContents)
 
     if (!result || !result.groups!.version) return '0'
@@ -317,11 +317,10 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-// eslint-disable-next-line no-redeclare
-function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
-// eslint-disable-next-line no-redeclare
-function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
-// eslint-disable-next-line no-redeclare
+function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Promise<FoundBrowser>
+
+function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Promise<FoundBrowser[]>
+
 async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
   const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
 
@@ -481,7 +480,7 @@ const listenForDownload = (binding) => {
   }
 }
 
-export = {
+const browserUtils = {
 
   extendLaunchOptionsFromPlugins,
 
@@ -543,7 +542,9 @@ export = {
         // and overwrite background.js with the final string bytes
         return fs.writeFileAsync(extensionBg, str)
       })
-      .return(extensionDest)
+      .then(() => extensionDest)
     })
   },
 }
+
+export default browserUtils

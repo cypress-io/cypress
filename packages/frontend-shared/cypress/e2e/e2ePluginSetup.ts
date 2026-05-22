@@ -109,10 +109,11 @@ interface FixturesShape {
 async function makeE2ETasks () {
   // require'd from @packages/server & @tooling/system-tests so we don't import
   // types which would pollute strict type checking
-  const argUtils = require('@packages/server/lib/util/args')
+
+  const { toObject } = require('@packages/server/lib/util/args')
   const { makeDataContext } = require('./prod-dependencies')
   const Fixtures = require('@tooling/system-tests') as FixturesShape
-  const { scaffoldCommonNodeModules, scaffoldProjectNodeModules } = require('@tooling/system-tests/lib/dep-installer')
+  const { scaffoldCommonNodeModules, scaffoldProjectNodeModules, clearCachedNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 
   const cli = require('../../../../cli/lib/cli').default
   const cliUtil = require('../../../../cli/lib/util').default
@@ -138,6 +139,7 @@ async function makeE2ETasks () {
   let remoteGraphQLOptions: Record<string, any> | undefined
   let remoteGraphQLInterceptBatched: RemoteGraphQLBatchInterceptor | undefined
   let scaffoldedProjects = new Set<string>()
+  let cachedCommercialRecommendations: string | undefined
 
   const cachedCwd = process.cwd()
 
@@ -163,6 +165,10 @@ async function makeE2ETasks () {
       if (isRetry) {
         throw e
       }
+
+      // Clear the cached node_modules to avoid reusing a corrupted cache
+      // (e.g. from a previously interrupted install)
+      await clearCachedNodeModules(projectName)
 
       // If we have an error, it's likely that we don't have a lockfile, or it's out of date.
       // Let's run a quick "yarn" in the directory, kill the node_modules, and try again
@@ -362,6 +368,12 @@ async function makeE2ETasks () {
           }), { status: 200 })
         }
 
+        const urlStr = String(url)
+
+        if (urlStr.endsWith('/machine-collect') || urlStr.endsWith('/anon-collect')) {
+          return new Response('{}', { status: 200 })
+        }
+
         return fetchApi(url, init)
       })
 
@@ -379,6 +391,21 @@ async function makeE2ETasks () {
     },
     __internal_remoteGraphQLInterceptBatched (fn: string) {
       remoteGraphQLInterceptBatched = new Function('console', 'obj', 'testState', `return (${fn})(obj, testState)`).bind(null, console) as RemoteGraphQLBatchInterceptor
+
+      return null
+    },
+    __internal_optInToCloudAppMessages () {
+      cachedCommercialRecommendations = process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+      delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
+
+      return null
+    },
+    __internal_restoreCommercialRecommendations () {
+      if (cachedCommercialRecommendations !== undefined) {
+        process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS = cachedCommercialRecommendations
+      }
+
+      cachedCommercialRecommendations = undefined
 
       return null
     },
@@ -405,7 +432,7 @@ async function makeE2ETasks () {
       // which probably needs a bit of refactoring / consolidating
       const cliOptions = await cli.parseOpenCommand(['open', ...argv])
       const processedArgv = cliOpen.processOpenOptions(cliOptions)
-      const modeOptions = { ...argUtils.toObject(processedArgv), invokedFromCli: true }
+      const modeOptions = { ...toObject(processedArgv), invokedFromCli: true }
 
       // Reset the state of the context
       await ctx.reinitializeCypress(modeOptions)
@@ -451,7 +478,7 @@ async function makeE2ETasks () {
       // which probably needs a bit of refactoring / consolidating
       const cliOptions = await cli.parseOpenCommand(['open', ...openArgv])
       const processedArgv = cliOpen.processOpenOptions(cliOptions)
-      const modeOptions = { ...argUtils.toObject(processedArgv), invokedFromCli: true }
+      const modeOptions = { ...toObject(processedArgv), invokedFromCli: true }
 
       // Reset the state of the context
       await ctx.reinitializeCypress(modeOptions)

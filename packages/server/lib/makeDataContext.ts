@@ -25,10 +25,11 @@ import { graphqlSchema } from '@packages/data-context/graphql/schema'
 import { openExternal } from './gui/links'
 import { getUserEditor } from './util/editors'
 import * as savedState from './saved_state'
-import appData from './util/app_data'
+import * as appData from './util/app_data'
 import browsers from './browsers'
 import devServer from './plugins/dev-server'
 import { remoteSchemaWrapped } from '@packages/data-context/graphql'
+import { GracefulExit } from './util/graceful-exit'
 
 const { getBrowsers, ensureAndGetByNameOrPath } = browserUtils
 
@@ -60,7 +61,12 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
     appApi: {
-      appData,
+      appData: {
+        path: appData.path,
+        toHashName: appData.toHashName,
+        ensure: appData.ensure,
+        remove: appData.remove,
+      },
     },
     authApi: {
       getUser () {
@@ -68,6 +74,9 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
       logIn (onMessage, utmSource, utmMedium, utmContent) {
         return auth.start(onMessage, utmSource, utmMedium, utmContent)
+      },
+      signUp (onMessage, utmSource, utmMedium, utmContent) {
+        return auth.startSignup(onMessage, utmSource, utmMedium, utmContent)
       },
       logOut () {
         return user.logOut()
@@ -222,6 +231,10 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       },
     },
   })
+
+  GracefulExit.addStep(async () => {
+    await clearCtx()
+  }, 'clear data context')
 
   return ctx
 }
