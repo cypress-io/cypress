@@ -1,5 +1,5 @@
 import { NetworkProxy } from '@packages/proxy'
-import { NetworkPolicyCore } from '@packages/network-policy'
+import { NetworkInterceptionCore } from '@packages/network-interception'
 import { createProxyRuntime } from '../../lib/network-runtime'
 import '../spec_helper'
 
@@ -47,13 +47,13 @@ describe('lib/network-runtime', () => {
     expect(policies).to.have.length(3)
     expect(policies[0].name).to.eq('blocked-hosts')
     expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
-    expect(runtime.networkPolicyCore).to.be.instanceOf(NetworkPolicyCore)
-    expect(runtime.networkPolicyCore.requestInterception).to.exist
-    expect(runtime.networkPolicyCore.responseInterception).to.exist
-    expect(runtime.networkPolicyCore.documentPreparation).to.exist
-    expect(runtime.networkPolicyCore.networkCapture).to.exist
-    expect(runtime.networkPolicyCore.cookieState).to.exist
-    expect(runtime.networkPolicyCore.commandLog).to.exist
+    expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
+    expect(runtime.networkInterceptionCore.requestInterception).to.exist
+    expect(runtime.networkInterceptionCore.responseInterception).to.exist
+    expect(runtime.networkInterceptionCore.documentPreparation).to.exist
+    expect(runtime.networkInterceptionCore.networkCapture).to.exist
+    expect(runtime.networkInterceptionCore.cookieState).to.exist
+    expect(runtime.networkInterceptionCore.commandLog).to.exist
   })
 
   it('registers configurator CSP and document rewrite policies at startup', () => {

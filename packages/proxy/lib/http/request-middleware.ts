@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { blocked } from '@packages/network'
 import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
@@ -94,7 +93,7 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
 }
 
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
-  return this.networkPolicyCore.correlateBrowserPreRequest(this)
+  return this.networkInterceptionCore.correlateBrowserPreRequest(this)
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
@@ -135,11 +134,11 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
 }
 
 const MaybeAttachCrossOriginCookies: RequestMiddleware = async function () {
-  return this.networkPolicyCore.attachCrossOriginCookies(this)
+  return this.networkInterceptionCore.attachCrossOriginCookies(this)
 }
 
 const SendToDriver: RequestMiddleware = function () {
-  this.networkPolicyCore.notifyIncomingRequest(this)
+  this.networkInterceptionCore.notifyIncomingRequest(this)
 }
 
 const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
@@ -199,35 +198,8 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   this.next()
 }
 
-const EndRequestsToBlockedHosts: RequestMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'end:requests:to:block:hosts', parentSpan: this.reqMiddlewareSpan, isVerbose })
-
-  const { blockHosts } = this.config
-
-  span?.setAttributes({
-    areBlockHostsConfigured: !!blockHosts,
-  })
-
-  if (blockHosts) {
-    const matches = blocked.matches(this.req.proxiedUrl, blockHosts as string[])
-
-    span?.setAttributes({
-      didUrlMatchBlockedHosts: !!matches,
-    })
-
-    if (matches) {
-      this.res.set('x-cypress-matched-blocked-host', matches)
-      this.debug('blocking request %o', { matches })
-
-      this.res.status(503).end()
-
-      span?.end()
-
-      return this.end()
-    }
-  }
-
-  this.next()
+const EndRequestsToBlockedHosts: RequestMiddleware = async function () {
+  return this.networkInterceptionCore.endRequestIfBlocked(this)
 }
 
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
@@ -281,7 +253,7 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
 }
 
 const SendRequestOutgoing: RequestMiddleware = function () {
-  this.networkPolicyCore.forwardToOrigin(this)
+  this.networkInterceptionCore.forwardToOrigin(this)
 }
 
 export default {

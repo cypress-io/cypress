@@ -2,11 +2,16 @@ import type { ForNetworkPolicyRegistration } from '../ports/driving-ports'
 import type { NetworkExchange } from '../exchange/network-exchange'
 import type { NetworkPolicy, PolicyContext, PolicyPhase } from '../policies/types'
 
+export type RunPoliciesResult = {
+  ended: boolean
+  state: Record<string, unknown>
+}
+
 export type RunPoliciesOptions = {
   phase: PolicyPhase
   exchange: NetworkExchange
-  onContinue: () => void
-  onEnd: () => void
+  onContinue?: () => void
+  onEnd?: () => void
 }
 
 /**
@@ -25,21 +30,22 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
 
   /**
    * Run registered policies for a phase. First matching policy that calls `end()` stops the chain.
-   * Not wired into proxy middleware until Stage 2b+.
    */
-  async runPolicies (options: RunPoliciesOptions): Promise<void> {
+  async runPolicies (options: RunPoliciesOptions): Promise<RunPoliciesResult> {
     const { phase, exchange, onContinue, onEnd } = options
     let ended = false
+    const state: Record<string, unknown> = {}
 
     const ctx: PolicyContext = {
       phase,
       exchange,
+      state,
       continue () {
         // no-op — chain continues to next policy
       },
       end () {
         ended = true
-        onEnd()
+        onEnd?.()
       },
     }
 
@@ -59,12 +65,14 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
       await policy.apply(ctx)
 
       if (ended) {
-        return
+        return { ended: true, state }
       }
     }
 
     if (!ended) {
-      onContinue()
+      onContinue?.()
     }
+
+    return { ended, state }
   }
 }

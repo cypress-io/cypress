@@ -1,4 +1,4 @@
-import type { ForNetworkCapture } from '@packages/network-policy'
+import type { ForNetworkCapture } from '@packages/network-interception'
 import { notifyResponseEndedWithEmptyBody, notifyResponseStreamReceived } from './network-capture'
 import type { ResponseInterceptionMiddlewareCtx } from './types'
 

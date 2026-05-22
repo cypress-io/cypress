@@ -1,5 +1,5 @@
 /**
- * Normalized request/response snapshot passed from adapters to NetworkPolicyCore.
+ * Normalized request/response snapshot passed from adapters to NetworkInterceptionCore.
  */
 export interface NetworkExchange {
   requestId?: string

@@ -10,4 +10,4 @@ export * from './document-preparation'
 
 export * from './request-logging'
 
-export * from './network-policy-core'
+export * from './network-interception-core'

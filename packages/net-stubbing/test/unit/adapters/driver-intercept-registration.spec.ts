@@ -3,7 +3,7 @@ import { DriverInterceptRegistrationAdapter } from '../../../lib/adapters/driver
 import { onNetStubbingEvent } from '../../../lib/server/driver-events'
 import { state as netStubbingState } from '../../../lib/server/state'
 import { InterceptedRequest } from '../../../lib/server/intercepted-request'
-import type { InterceptRegistrationRequest } from '@packages/network-policy'
+import type { InterceptRegistrationRequest } from '@packages/network-interception'
 
 vi.mock('../../../lib/server/driver-events', async (importOriginal) => {
   const original = await importOriginal<typeof import('../../../lib/server/driver-events')>()

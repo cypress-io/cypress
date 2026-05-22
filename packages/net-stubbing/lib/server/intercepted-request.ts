@@ -10,7 +10,7 @@ import type {
   Subscription,
 } from '../types'
 import type { BackendRoute, NetStubbingState } from './types'
-import { planSubscriptions } from '@packages/network-policy'
+import { planSubscriptions } from '@packages/network-interception'
 import * as errors from '@packages/errors'
 import { emit, sendStaticResponse } from './util'
 import type { SocketBroadcaster } from '@packages/socket'

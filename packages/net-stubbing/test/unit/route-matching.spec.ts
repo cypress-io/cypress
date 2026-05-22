@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import {
-  _doesRouteMatch,
-  _getMatchableForRequest,
+  doesRouteMatch,
+  getMatchableForRequest,
   getRoutesForRequest,
-} from '../../lib/server/route-matching'
+} from '@packages/network-interception'
 import { RouteMatcherOptions } from '../../lib/types'
 import { CypressIncomingRequest } from '@packages/proxy'
 import { BackendRoute } from '../../lib/server/types'
@@ -21,7 +21,7 @@ describe('intercept-request', function () {
         proxiedUrl: 'https://google.com/asdf?1234=a',
       } as unknown as CypressIncomingRequest
 
-      const matchable = _getMatchableForRequest(req)
+      const matchable = getMatchableForRequest(req)
 
       expect(matchable).toEqual({
         auth: {
@@ -51,7 +51,7 @@ describe('intercept-request', function () {
         ...req,
       }
 
-      expect(_doesRouteMatch(matcher, req as CypressIncomingRequest)).toEqual(expected)
+      expect(doesRouteMatch(matcher, req as CypressIncomingRequest)).toEqual(expected)
     }
 
     it('matches exact URL', function () {

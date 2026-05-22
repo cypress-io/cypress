@@ -1,4 +1,4 @@
-import type { CommandLogInterceptionInput, CommandLogInterceptionResult, ForCommandLog } from '@packages/network-policy'
+import type { CommandLogInterceptionInput, CommandLogInterceptionResult, ForCommandLog } from '@packages/network-interception'
 import { sendToDriver } from './send-to-driver'
 import type { RequestInterceptionMiddlewareCtx } from './types'
 

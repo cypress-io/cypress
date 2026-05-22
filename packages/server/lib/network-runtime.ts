@@ -1,17 +1,9 @@
 import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import {
-  ProxyCommandLogAdapter,
-  ProxyCookieStateAdapter,
-  ProxyDocumentPreparationAdapter,
-  ProxyNetworkCaptureAdapter,
-  ProxyRequestInterceptionAdapter,
-  ProxyResponseInterceptionAdapter,
-} from '@packages/proxy/lib/adapters'
+import { createDefaultNetworkInterceptionCore } from '@packages/proxy/lib/adapters/create-default-network-interception-core'
 import { defaultMiddleware } from '@packages/proxy/lib/http'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration } from '@packages/network-policy'
-import { NetworkPolicyCore } from '@packages/network-policy'
+import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar } from './util/cookies'
@@ -37,7 +29,7 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   networkProxy: NetworkProxy
   netStubbingState: NetStubbingState
   networkPolicyRegistration: ForNetworkPolicyRegistration
-  networkPolicyCore: NetworkPolicyCore
+  networkInterceptionCore: NetworkInterceptionCore
 }
 
 /**
@@ -46,16 +38,12 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
   const stubbingState = netStubbingState()
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
-  const networkPolicyCore = new NetworkPolicyCore({
-    requestInterception: new ProxyRequestInterceptionAdapter(),
-    responseInterception: new ProxyResponseInterceptionAdapter(),
-    documentPreparation: new ProxyDocumentPreparationAdapter(),
-    networkCapture: new ProxyNetworkCaptureAdapter(),
-    cookieState: new ProxyCookieStateAdapter(),
-    commandLog: new ProxyCommandLogAdapter(),
-  })
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)
+
+  const networkInterceptionCore = createDefaultNetworkInterceptionCore({
+    policyRegistration: networkPolicyRegistration,
+  })
 
   const networkProxy = new NetworkProxy({
     config: deps.config,
@@ -65,7 +53,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     getCookieJar: deps.getCookieJar,
     socket: deps.socket,
     netStubbingState: stubbingState,
-    networkPolicyCore,
+    networkInterceptionCore,
     request: deps.request,
     serverBus: deps.serverBus,
     getCurrentBrowser: deps.getCurrentBrowser,
@@ -77,7 +65,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     networkProxy,
     netStubbingState: stubbingState,
     networkPolicyRegistration,
-    networkPolicyCore,
+    networkInterceptionCore,
     handleHttpRequest (req, res) {
       return networkProxy.handleHttpRequest(req, res)
     },

@@ -7,13 +7,16 @@ import type {
   ForRequestInterception,
   ForResponseInterception,
 } from '../ports/driven-ports'
+import type { ForNetworkPolicyRegistration } from '../ports/driving-ports'
+import type { NetworkExchange } from '../exchange/network-exchange'
 import type { BackendRoute } from '../types/backend-route'
 import type { CyHttpMessages } from '../types/external-types'
 import { mergeIncomingRequestChanges, type MergeIncomingRequestChangesOptions } from './merge-handler-result'
 import { planSubscriptions, type PlanSubscriptionsOptions, type PlannedRouteSubscriptions } from './plan-subscriptions'
 import { matchRoutes, matchesRoutePreflight, type RouteMatchableRequest } from './route-matching'
 
-export type NetworkPolicyCoreOptions = {
+export type NetworkInterceptionCoreOptions = {
+  policyRegistration?: ForNetworkPolicyRegistration
   requestInterception?: ForRequestInterception
   responseInterception?: ForResponseInterception
   documentPreparation?: ForDocumentPreparation
@@ -23,14 +26,14 @@ export type NetworkPolicyCoreOptions = {
   browserNetworkAutomation?: ForBrowserNetworkAutomation
 }
 
-export type HandleInterceptRequestFn = (core: NetworkPolicyCore) => Promise<void>
+export type HandleInterceptRequestFn = (core: NetworkInterceptionCore) => Promise<void>
 
 /**
  * Orchestrates route matching, subscription planning, and handler merge logic.
  * Side-effectful proxy/driver I/O stays in net-stubbing adapters until Stage 4+.
  */
-export class NetworkPolicyCore {
-  constructor (private readonly options: NetworkPolicyCoreOptions = {}) {}
+export class NetworkInterceptionCore {
+  constructor (private readonly options: NetworkInterceptionCoreOptions = {}) {}
 
   matchRoutes (routes: BackendRoute[], req: RouteMatchableRequest): BackendRoute[] {
     return matchRoutes(routes, req)
@@ -59,11 +62,44 @@ export class NetworkPolicyCore {
     return run(this)
   }
 
+  async endRequestIfBlocked (ctx: unknown): Promise<void> {
+    const port = this.options.requestInterception
+
+    if (!port) {
+      throw new Error('NetworkInterceptionCore.requestInterception is not configured')
+    }
+
+    return port.endRequestIfBlocked(ctx, () => this.runRequestPolicies(ctx))
+  }
+
+  private buildRequestExchange (ctx: unknown): NetworkExchange {
+    const mw = ctx as { req: { proxiedUrl?: string, method?: string, requestId?: string } }
+
+    return {
+      url: mw.req.proxiedUrl,
+      method: mw.req.method,
+      requestId: mw.req.requestId,
+    }
+  }
+
+  async runRequestPolicies (ctx: unknown) {
+    const registration = this.options.policyRegistration
+
+    if (!registration) {
+      throw new Error('NetworkInterceptionCore.policyRegistration is not configured')
+    }
+
+    return registration.runPolicies({
+      phase: 'request',
+      exchange: this.buildRequestExchange(ctx),
+    })
+  }
+
   async correlateBrowserPreRequest (ctx: unknown): Promise<void> {
     const port = this.options.requestInterception
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.requestInterception is not configured')
+      throw new Error('NetworkInterceptionCore.requestInterception is not configured')
     }
 
     return port.correlateBrowserPreRequest(ctx)
@@ -76,7 +112,7 @@ export class NetworkPolicyCore {
     const port = this.options.requestInterception
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.requestInterception is not configured')
+      throw new Error('NetworkInterceptionCore.requestInterception is not configured')
     }
 
     return port.forwardToOrigin(ctx)
@@ -86,7 +122,7 @@ export class NetworkPolicyCore {
     const port = this.options.responseInterception
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.responseInterception is not configured')
+      throw new Error('NetworkInterceptionCore.responseInterception is not configured')
     }
 
     return port.interceptResponse(ctx)
@@ -96,7 +132,7 @@ export class NetworkPolicyCore {
     const port = this.options.documentPreparation
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.documentPreparation is not configured')
+      throw new Error('NetworkInterceptionCore.documentPreparation is not configured')
     }
 
     return port.setInjectionLevel(ctx)
@@ -106,7 +142,7 @@ export class NetworkPolicyCore {
     const port = this.options.documentPreparation
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.documentPreparation is not configured')
+      throw new Error('NetworkInterceptionCore.documentPreparation is not configured')
     }
 
     return port.injectHtml(ctx)
@@ -116,7 +152,7 @@ export class NetworkPolicyCore {
     const port = this.options.documentPreparation
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.documentPreparation is not configured')
+      throw new Error('NetworkInterceptionCore.documentPreparation is not configured')
     }
 
     return port.removeSecurity(ctx)
@@ -126,7 +162,7 @@ export class NetworkPolicyCore {
     const port = this.options.commandLog
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.commandLog is not configured')
+      throw new Error('NetworkInterceptionCore.commandLog is not configured')
     }
 
     return port.notifyIncomingRequest(ctx)
@@ -136,7 +172,7 @@ export class NetworkPolicyCore {
     const port = this.options.cookieState
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.cookieState is not configured')
+      throw new Error('NetworkInterceptionCore.cookieState is not configured')
     }
 
     return port.attachCrossOriginCookies(ctx)
@@ -146,7 +182,7 @@ export class NetworkPolicyCore {
     const port = this.options.cookieState
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.cookieState is not configured')
+      throw new Error('NetworkInterceptionCore.cookieState is not configured')
     }
 
     return port.copyCookiesFromResponse(ctx)
@@ -156,7 +192,7 @@ export class NetworkPolicyCore {
     const port = this.options.networkCapture
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.networkCapture is not configured')
+      throw new Error('NetworkInterceptionCore.networkCapture is not configured')
     }
 
     return port.notifyResponseStreamReceived(ctx)
@@ -166,7 +202,7 @@ export class NetworkPolicyCore {
     const port = this.options.networkCapture
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.networkCapture is not configured')
+      throw new Error('NetworkInterceptionCore.networkCapture is not configured')
     }
 
     return port.notifyResponseEndedWithEmptyBody(ctx, options)

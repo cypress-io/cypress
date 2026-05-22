@@ -409,7 +409,7 @@ const MaybeSetOriginAgentClusterHeader: ResponseMiddleware = function () {
 }
 
 const SetInjectionLevel: ResponseMiddleware = async function () {
-  return this.networkPolicyCore.setInjectionLevel(this)
+  return this.networkInterceptionCore.setInjectionLevel(this)
 }
 
 // https://github.com/cypress-io/cypress/issues/6480
@@ -453,7 +453,7 @@ const MaybePreventCaching: ResponseMiddleware = function () {
 }
 
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
-  return this.networkPolicyCore.copyCookiesFromResponse(this)
+  return this.networkInterceptionCore.copyCookiesFromResponse(this)
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
@@ -511,7 +511,7 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
-    this.networkPolicyCore.notifyResponseEndedWithEmptyBody(this, {
+    this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, {
       isCached: this.incomingRes.statusCode === 304,
     })
 
@@ -528,7 +528,7 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
     && !this.res.wantsInjection
     && !this.res.wantsSecurityRemoved
   ) {
-    this.networkPolicyCore.notifyResponseEndedWithEmptyBody(this, { isCached: false })
+    this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, { isCached: false })
     this.res.setHeader('Content-Length', '0')
     this.res.end()
 
@@ -539,11 +539,11 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
 }
 
 const MaybeInjectHtml: ResponseMiddleware = async function () {
-  return this.networkPolicyCore.injectHtml(this)
+  return this.networkInterceptionCore.injectHtml(this)
 }
 
 const MaybeRemoveSecurity: ResponseMiddleware = async function () {
-  return this.networkPolicyCore.removeSecurity(this)
+  return this.networkInterceptionCore.removeSecurity(this)
 }
 
 const MaybeInjectServiceWorker: ResponseMiddleware = function () {
@@ -580,7 +580,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 }
 
 const CompressBody: ResponseMiddleware = async function () {
-  await this.networkPolicyCore.notifyResponseStreamReceived(this)
+  await this.networkInterceptionCore.notifyResponseStreamReceived(this)
 
   // Re-compress in the same order as the original content-encoding (innermost first).
   const order = this.contentEncodingOrder ?? []

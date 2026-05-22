@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
-  NetworkPolicyCore,
+  NetworkInterceptionCore,
   doesRouteMatch,
   getMatchableForRequest,
   matchRoutes,
@@ -126,9 +126,9 @@ describe('core/merge-handler-result', () => {
   })
 })
 
-describe('NetworkPolicyCore', () => {
+describe('NetworkInterceptionCore', () => {
   it('delegates matchRoutes and handleRequest to supplied runner', async () => {
-    const core = new NetworkPolicyCore()
+    const core = new NetworkInterceptionCore()
     const run = vi.fn().mockResolvedValue(undefined)
 
     await core.handleRequest(run)
@@ -138,8 +138,12 @@ describe('NetworkPolicyCore', () => {
 
   it('delegates correlateBrowserPreRequest to requestInterception port', async () => {
     const correlateBrowserPreRequest = vi.fn().mockResolvedValue(undefined)
-    const core = new NetworkPolicyCore({
-      requestInterception: { correlateBrowserPreRequest, forwardToOrigin: vi.fn() },
+    const core = new NetworkInterceptionCore({
+      requestInterception: {
+        correlateBrowserPreRequest,
+        forwardToOrigin: vi.fn(),
+        endRequestIfBlocked: vi.fn(),
+      },
     })
     const ctx = { req: {} }
 
@@ -150,8 +154,12 @@ describe('NetworkPolicyCore', () => {
 
   it('delegates forwardToOrigin to requestInterception port', () => {
     const forwardToOrigin = vi.fn()
-    const core = new NetworkPolicyCore({
-      requestInterception: { correlateBrowserPreRequest: vi.fn(), forwardToOrigin },
+    const core = new NetworkInterceptionCore({
+      requestInterception: {
+        correlateBrowserPreRequest: vi.fn(),
+        forwardToOrigin,
+        endRequestIfBlocked: vi.fn(),
+      },
     })
     const ctx = { req: {} }
 
@@ -162,7 +170,7 @@ describe('NetworkPolicyCore', () => {
 
   it('delegates interceptResponse to responseInterception port', async () => {
     const interceptResponse = vi.fn().mockResolvedValue(undefined)
-    const core = new NetworkPolicyCore({
+    const core = new NetworkInterceptionCore({
       responseInterception: { interceptResponse },
     })
     const ctx = { req: {} }
@@ -173,14 +181,15 @@ describe('NetworkPolicyCore', () => {
   })
 
   it('throws when requestInterception port is missing', async () => {
-    const core = new NetworkPolicyCore()
+    const core = new NetworkInterceptionCore()
 
     await expect(core.correlateBrowserPreRequest({})).rejects.toThrow(/requestInterception/)
     expect(() => core.forwardToOrigin({})).toThrow(/requestInterception/)
+    await expect(core.endRequestIfBlocked({})).rejects.toThrow(/requestInterception/)
   })
 
   it('throws when responseInterception port is missing', async () => {
-    const core = new NetworkPolicyCore()
+    const core = new NetworkInterceptionCore()
 
     await expect(core.interceptResponse({})).rejects.toThrow(/responseInterception/)
   })
@@ -189,7 +198,7 @@ describe('NetworkPolicyCore', () => {
     const setInjectionLevel = vi.fn().mockResolvedValue(undefined)
     const injectHtml = vi.fn().mockResolvedValue(undefined)
     const removeSecurity = vi.fn().mockResolvedValue(undefined)
-    const core = new NetworkPolicyCore({
+    const core = new NetworkInterceptionCore({
       documentPreparation: { setInjectionLevel, injectHtml, removeSecurity },
     })
     const ctx = { res: {} }
@@ -204,7 +213,7 @@ describe('NetworkPolicyCore', () => {
   })
 
   it('throws when documentPreparation port is missing', async () => {
-    const core = new NetworkPolicyCore()
+    const core = new NetworkInterceptionCore()
 
     await expect(core.setInjectionLevel({})).rejects.toThrow(/documentPreparation/)
     await expect(core.injectHtml({})).rejects.toThrow(/documentPreparation/)
@@ -218,7 +227,7 @@ describe('NetworkPolicyCore', () => {
     const notifyResponseStreamReceived = vi.fn().mockResolvedValue(undefined)
     const notifyResponseEndedWithEmptyBody = vi.fn()
 
-    const core = new NetworkPolicyCore({
+    const core = new NetworkInterceptionCore({
       commandLog: { notifyIncomingRequest, logInterception: vi.fn() },
       cookieState: { attachCrossOriginCookies, copyCookiesFromResponse },
       networkCapture: { notifyResponseStreamReceived, notifyResponseEndedWithEmptyBody },
