@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import chalk from 'chalk'
-import { Listr } from 'listr2'
+import { Listr, PRESET_TIMESTAMP } from 'listr2'
 import Debug from 'debug'
 import { stripIndent } from 'common-tags'
 import Bluebird from 'bluebird'
@@ -228,7 +228,11 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
       )
     },
   }], {
-    renderer: 'simple',
+    // In CI we want timestamped, line-per-event output that survives
+    // pseudo-TTY environments without COLUMNS set. Locally, the default
+    // in-place spinner is the better experience.
+    renderer: util.isCi() ? 'verbose' : 'default',
+    rendererOptions: { timestamp: PRESET_TIMESTAMP },
     silentRendererCondition: () => logger.logLevel() === 'silent',
   })
 
