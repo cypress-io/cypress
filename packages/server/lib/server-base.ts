@@ -259,7 +259,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.server.on('connect', this.onConnect.bind(this))
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
-    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
+    // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, { enforceOrigin: false })
 
     // Start the file server first so its port is known before we begin
     // listening for proxied requests on the main server. The primary
