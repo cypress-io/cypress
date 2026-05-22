@@ -44,12 +44,33 @@ describe('lib/network-runtime', () => {
 
     const policies = runtime.networkPolicyRegistration.getPolicies()
 
-    expect(policies).to.have.length(1)
+    expect(policies).to.have.length(3)
     expect(policies[0].name).to.eq('blocked-hosts')
     expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
     expect(runtime.networkPolicyCore).to.be.instanceOf(NetworkPolicyCore)
     expect(runtime.networkPolicyCore.requestInterception).to.exist
     expect(runtime.networkPolicyCore.responseInterception).to.exist
+    expect(runtime.networkPolicyCore.documentPreparation).to.exist
+  })
+
+  it('registers configurator CSP and document rewrite policies at startup', () => {
+    const runtime = createProxyRuntime({
+      ...baseDeps(),
+      config: {
+        clientRoute: '/__/',
+        responseTimeout: 30000,
+        experimentalCspAllowList: ['script-src'],
+        modifyObstructiveCode: true,
+      } as Cypress.Config,
+    })
+
+    const policies = runtime.networkPolicyRegistration.getPolicies()
+
+    expect(policies.map((p) => p.name)).to.include.members([
+      'blocked-hosts',
+      'csp-allow-list',
+      'document-rewrite',
+    ])
   })
 
   it('handleHttpRequest delegates to networkProxy.handleHttpRequest', async () => {
