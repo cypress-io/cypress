@@ -35,14 +35,18 @@ const compareChromeVersions = (a, b) => {
 }
 
 /**
- * Compares Firefox version strings — handles both stable (`145.0.2`) and beta (`152.0b1`).
- * The `b<N>` suffix denotes a Mozilla Beta release; we order by the main version first, then by
- * the trailing beta number. This prevents the daily workflow from opening a downgrade PR if the
- * pinned beta is somehow ahead of what Mozilla currently publishes.
+ * Compares browser version strings — handles both purely dotted-numeric versions like Chrome's
+ * `148.0.7778.178` or Firefox stable's `145.0.2`, and the Mozilla Beta `<main>b<N>` format like
+ * `152.0b1`. Orders by the main (dotted) portion first and uses the trailing beta number as a
+ * tiebreaker. Strings without a `b` segment compare as if `b` were `0`, so this is safe to use
+ * for any vendor's version output.
+ *
+ * Used to ensure the daily workflow never opens a downgrade PR if upstream regresses or we've
+ * manually pinned ahead.
  *
  * @returns {number} negative if a < b, 0 if equal, positive if a > b
  */
-const compareFirefoxVersions = (a, b) => {
+const compareBrowserVersions = (a, b) => {
   const [aMain, aBeta] = a.split('b')
   const [bMain, bBeta] = b.split('b')
 
@@ -133,8 +137,8 @@ const getVersions = async ({ core }) => {
     const hasBetaUpdate = betaData.versions.length > 0
     const hasChromeForTestingUpdate = compareChromeVersions(latestChromeForTestingStable, currentChromeForTestingStable) > 0
     // "Newer only" — never open a downgrade PR if upstream regresses or we've manually pinned ahead.
-    const hasFirefoxStableUpdate = compareFirefoxVersions(latestFirefox.stable, currentFirefoxStable) > 0
-    const hasFirefoxBetaUpdate = compareFirefoxVersions(latestFirefox.beta, currentFirefoxBeta) > 0
+    const hasFirefoxStableUpdate = compareBrowserVersions(latestFirefox.stable, currentFirefoxStable) > 0
+    const hasFirefoxBetaUpdate = compareBrowserVersions(latestFirefox.beta, currentFirefoxBeta) > 0
     let description = 'Update '
 
     const parts = []
