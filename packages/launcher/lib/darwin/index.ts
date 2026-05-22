@@ -62,6 +62,14 @@ export const browsers: Detectors = {
       bundleId: 'org.mozilla.firefoxdeveloperedition',
       versionProperty: 'CFBundleShortVersionString',
     },
+    beta: {
+      // Mozilla's Beta channel installer reuses the stable Firefox.app bundle —
+      // the version string is what differentiates them at runtime.
+      appName: 'Firefox.app',
+      executable: 'Contents/MacOS/firefox',
+      bundleId: 'org.mozilla.firefox',
+      versionProperty: 'CFBundleShortVersionString',
+    },
     nightly: {
       appName: 'Firefox Nightly.app',
       executable: 'Contents/MacOS/firefox',

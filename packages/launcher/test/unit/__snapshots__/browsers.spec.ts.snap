@@ -73,6 +73,18 @@ exports[`browsers > returns the expected list of browsers 1`] = `
   },
   {
     "binary": [
+      "firefox-beta",
+      "firefox",
+    ],
+    "channel": "beta",
+    "displayName": "Firefox Beta",
+    "family": "firefox",
+    "name": "firefox",
+    "validator": [Function],
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
       "firefox-nightly",
       "firefox-trunk",
     ],

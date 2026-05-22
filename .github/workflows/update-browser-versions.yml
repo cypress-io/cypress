@@ -52,7 +52,7 @@ jobs:
       - name: Determine name of new branch and if it already exists
         id: check-branch
         env:
-          BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.latest_stable_version }}-beta-from-${{ steps.get-versions.outputs.latest_beta_version }}-cft-from-${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}-firefox-stable-from-${{ steps.get-versions.outputs.latest_firefox_stable_version }}-dev-from-${{ steps.get-versions.outputs.latest_firefox_dev_version }}
+          BRANCH_NAME: update-chrome-stable-from-${{ steps.get-versions.outputs.latest_stable_version }}-beta-from-${{ steps.get-versions.outputs.latest_beta_version }}-cft-from-${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}-firefox-stable-from-${{ steps.get-versions.outputs.latest_firefox_stable_version }}-beta-from-${{ steps.get-versions.outputs.latest_firefox_beta_version }}
         run: |
           echo "branch_name=${{ env.BRANCH_NAME }}" >> $GITHUB_OUTPUT
           echo "branch_exists=$(git show-ref --verify --quiet refs/remotes/origin/${{ env.BRANCH_NAME }} && echo 'true')" >> $GITHUB_OUTPUT
@@ -79,7 +79,7 @@ jobs:
               latestBetaVersion: '${{ steps.get-versions.outputs.latest_beta_version }}',
               latestChromeForTestingStableVersion: '${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}',
               latestFirefoxStableVersion: '${{ steps.get-versions.outputs.latest_firefox_stable_version }}',
-              latestFirefoxDevVersion: '${{ steps.get-versions.outputs.latest_firefox_dev_version }}',
+              latestFirefoxBetaVersion: '${{ steps.get-versions.outputs.latest_firefox_beta_version }}',
             })
       ## Both
       - name: Update Browser Versions File
@@ -94,7 +94,7 @@ jobs:
               latestBetaVersion: '${{ steps.get-versions.outputs.latest_beta_version }}',
               latestChromeForTestingStableVersion: '${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}',
               latestFirefoxStableVersion: '${{ steps.get-versions.outputs.latest_firefox_stable_version }}',
-              latestFirefoxDevVersion: '${{ steps.get-versions.outputs.latest_firefox_dev_version }}',
+              latestFirefoxBetaVersion: '${{ steps.get-versions.outputs.latest_firefox_beta_version }}',
             })
       - name: Commit and push via API
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}

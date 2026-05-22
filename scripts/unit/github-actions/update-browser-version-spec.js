@@ -22,21 +22,21 @@ const coreStub = () => {
 }
 
 const DEFAULT_FIREFOX_STABLE = '100.0'
-const DEFAULT_FIREFOX_DEV = '101.0b1'
+const DEFAULT_FIREFOX_BETA = '101.0b1'
 
 const pipelineStubContent = ({
   betaVersion,
   stableVersion,
   chromeForTestingStableVersion,
   firefoxStableVersion = DEFAULT_FIREFOX_STABLE,
-  firefoxDevVersion = DEFAULT_FIREFOX_DEV,
+  firefoxBetaVersion = DEFAULT_FIREFOX_BETA,
 }) => {
   return [
     `chrome-stable-version: &chrome-stable-version "${stableVersion}"`,
     `chrome-beta-version: &chrome-beta-version "${betaVersion}"`,
     `chrome-for-testing-stable-version: &chrome-for-testing-stable-version "${chromeForTestingStableVersion}"`,
     `firefox-stable-version: &firefox-stable-version "${firefoxStableVersion}"`,
-    `firefox-dev-version: &firefox-dev-version "${firefoxDevVersion}"`,
+    `firefox-beta-version: &firefox-beta-version "${firefoxBetaVersion}"`,
     '',
   ].join('\n')
 }
@@ -46,7 +46,7 @@ const stubRepoVersions = ({
   stableVersion,
   chromeForTestingStableVersion = '1.0',
   firefoxStableVersion = DEFAULT_FIREFOX_STABLE,
-  firefoxDevVersion = DEFAULT_FIREFOX_DEV,
+  firefoxBetaVersion = DEFAULT_FIREFOX_BETA,
 }) => {
   mockfs({
     [CIRCLECI_WORKFLOWS_FILEPATH]: pipelineStubContent({
@@ -54,7 +54,7 @@ const stubRepoVersions = ({
       stableVersion,
       chromeForTestingStableVersion,
       firefoxStableVersion,
-      firefoxDevVersion,
+      firefoxBetaVersion,
     }),
   })
 }
@@ -64,7 +64,7 @@ const stubChromeVersions = ({
   stableVersion,
   chromeForTestingStableVersion,
   firefoxStableVersion = DEFAULT_FIREFOX_STABLE,
-  firefoxDevVersion = DEFAULT_FIREFOX_DEV,
+  firefoxBetaVersion = DEFAULT_FIREFOX_BETA,
 }) => {
   if (!global.originalFetch) {
     global.originalFetch = global.fetch
@@ -89,7 +89,7 @@ const stubChromeVersions = ({
 
   const firefoxBody = JSON.stringify({
     LATEST_FIREFOX_VERSION: firefoxStableVersion,
-    LATEST_FIREFOX_RELEASED_DEVEL_VERSION: firefoxDevVersion,
+    LATEST_FIREFOX_RELEASED_DEVEL_VERSION: firefoxBetaVersion,
   })
 
   global.fetch = sinon.stub().callsFake((url) => {
@@ -200,10 +200,10 @@ describe('update browser version github action', () => {
       expect(core.setOutput).to.be.calledWith('has_update', 'true')
     })
 
-    it('sets has_update: true when there is a Firefox dev update', async () => {
+    it('sets has_update: true when there is a Firefox beta update', async () => {
       stubChromeVersions({
         chromeForTestingStableVersion: '1.0',
-        firefoxDevVersion: '102.0b3',
+        firefoxBetaVersion: '102.0b3',
       })
 
       const core = coreStub()
@@ -243,7 +243,7 @@ describe('update browser version github action', () => {
         stableVersion: '2.0',
         chromeForTestingStableVersion: '3.0',
         firefoxStableVersion: '101.0',
-        firefoxDevVersion: '102.0b3',
+        firefoxBetaVersion: '102.0b3',
       })
 
       const core = coreStub()
@@ -258,8 +258,8 @@ describe('update browser version github action', () => {
       expect(core.setOutput).to.be.calledWith('latest_chrome_for_testing_stable_version', '3.0')
       expect(core.setOutput).to.be.calledWith('current_firefox_stable_version', DEFAULT_FIREFOX_STABLE)
       expect(core.setOutput).to.be.calledWith('latest_firefox_stable_version', '101.0')
-      expect(core.setOutput).to.be.calledWith('current_firefox_dev_version', DEFAULT_FIREFOX_DEV)
-      expect(core.setOutput).to.be.calledWith('latest_firefox_dev_version', '102.0b3')
+      expect(core.setOutput).to.be.calledWith('current_firefox_beta_version', DEFAULT_FIREFOX_BETA)
+      expect(core.setOutput).to.be.calledWith('latest_firefox_beta_version', '102.0b3')
     })
 
     it('sets description correctly when there is a stable update', async () => {
@@ -327,17 +327,17 @@ describe('update browser version github action', () => {
       expect(core.setOutput).to.be.calledWith('description', 'Update Firefox (stable) to 101.0')
     })
 
-    it('sets description correctly when there is a Firefox dev update', async () => {
+    it('sets description correctly when there is a Firefox beta update', async () => {
       stubChromeVersions({
         chromeForTestingStableVersion: '1.0',
-        firefoxDevVersion: '102.0b3',
+        firefoxBetaVersion: '102.0b3',
       })
 
       const core = coreStub()
 
       await getVersions({ core })
 
-      expect(core.setOutput).to.be.calledWith('description', 'Update Firefox (dev) to 102.0b3')
+      expect(core.setOutput).to.be.calledWith('description', 'Update Firefox (beta) to 102.0b3')
     })
 
     it('sets description correctly when Chrome and Firefox both update', async () => {
@@ -345,7 +345,7 @@ describe('update browser version github action', () => {
         stableVersion: '2.0',
         chromeForTestingStableVersion: '1.0',
         firefoxStableVersion: '101.0',
-        firefoxDevVersion: '102.0b3',
+        firefoxBetaVersion: '102.0b3',
       })
 
       const core = coreStub()
@@ -354,7 +354,7 @@ describe('update browser version github action', () => {
 
       expect(core.setOutput).to.be.calledWith(
         'description',
-        'Update Chrome (stable) to 2.0 and Firefox (stable) to 101.0 and Firefox (dev) to 102.0b3',
+        'Update Chrome (stable) to 2.0 and Firefox (stable) to 101.0 and Firefox (beta) to 102.0b3',
       )
     })
 
@@ -398,47 +398,47 @@ describe('update browser version github action', () => {
       expect(core.setOutput).to.be.calledWith('latest_firefox_stable_version', '150.0')
     })
 
-    it('does not set latest_firefox_dev_version below the pinned value when the upstream beta is older', async () => {
+    it('does not set latest_firefox_beta_version below the pinned value when the upstream beta is older', async () => {
       stubRepoVersions({
         betaVersion: '1.1',
         stableVersion: '1.0',
         chromeForTestingStableVersion: '1.0',
-        firefoxDevVersion: '152.0b5',
+        firefoxBetaVersion: '152.0b5',
       })
 
       stubChromeVersions({
         chromeForTestingStableVersion: '1.0',
         // Upstream regressed within the same main version (152.0b1 < 152.0b5).
-        firefoxDevVersion: '152.0b1',
+        firefoxBetaVersion: '152.0b1',
       })
 
       const core = coreStub()
 
       await getVersions({ core })
 
-      expect(core.setOutput).to.be.calledWith('latest_firefox_dev_version', '152.0b5')
+      expect(core.setOutput).to.be.calledWith('latest_firefox_beta_version', '152.0b5')
       expect(core.setOutput).to.be.calledWith('has_update', 'false')
     })
 
-    it('does not set latest_firefox_dev_version below the pinned value when upstream main version regressed', async () => {
+    it('does not set latest_firefox_beta_version below the pinned value when upstream main version regressed', async () => {
       stubRepoVersions({
         betaVersion: '1.1',
         stableVersion: '1.0',
         chromeForTestingStableVersion: '1.0',
-        firefoxDevVersion: '152.0b1',
+        firefoxBetaVersion: '152.0b1',
       })
 
       stubChromeVersions({
         chromeForTestingStableVersion: '1.0',
         // Mozilla rolled back to a 151 beta — don't downgrade.
-        firefoxDevVersion: '151.0b9',
+        firefoxBetaVersion: '151.0b9',
       })
 
       const core = coreStub()
 
       await getVersions({ core })
 
-      expect(core.setOutput).to.be.calledWith('latest_firefox_dev_version', '152.0b1')
+      expect(core.setOutput).to.be.calledWith('latest_firefox_beta_version', '152.0b1')
     })
   })
 
@@ -460,7 +460,7 @@ describe('update browser version github action', () => {
         latestStableVersion: '2.0',
         latestChromeForTestingStableVersion: '1.0',
         latestFirefoxStableVersion: DEFAULT_FIREFOX_STABLE,
-        latestFirefoxDevVersion: DEFAULT_FIREFOX_DEV,
+        latestFirefoxBetaVersion: DEFAULT_FIREFOX_BETA,
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
@@ -475,7 +475,7 @@ describe('update browser version github action', () => {
         latestStableVersion: '1.0',
         latestChromeForTestingStableVersion: '1.0',
         latestFirefoxStableVersion: DEFAULT_FIREFOX_STABLE,
-        latestFirefoxDevVersion: DEFAULT_FIREFOX_DEV,
+        latestFirefoxBetaVersion: DEFAULT_FIREFOX_BETA,
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
@@ -490,7 +490,7 @@ describe('update browser version github action', () => {
         latestStableVersion: '2.0',
         latestChromeForTestingStableVersion: '1.0',
         latestFirefoxStableVersion: DEFAULT_FIREFOX_STABLE,
-        latestFirefoxDevVersion: DEFAULT_FIREFOX_DEV,
+        latestFirefoxBetaVersion: DEFAULT_FIREFOX_BETA,
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
@@ -505,7 +505,7 @@ describe('update browser version github action', () => {
         latestStableVersion: '1.0',
         latestChromeForTestingStableVersion: '2.0',
         latestFirefoxStableVersion: DEFAULT_FIREFOX_STABLE,
-        latestFirefoxDevVersion: DEFAULT_FIREFOX_DEV,
+        latestFirefoxBetaVersion: DEFAULT_FIREFOX_BETA,
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
@@ -520,13 +520,13 @@ describe('update browser version github action', () => {
         latestStableVersion: '1.0',
         latestChromeForTestingStableVersion: '1.0',
         latestFirefoxStableVersion: '999.0',
-        latestFirefoxDevVersion: DEFAULT_FIREFOX_DEV,
+        latestFirefoxBetaVersion: DEFAULT_FIREFOX_BETA,
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
     })
 
-    it('sets has_newer_update: true when there is a Firefox dev update', () => {
+    it('sets has_newer_update: true when there is a Firefox beta update', () => {
       const core = coreStub()
 
       checkNeedForBranchUpdate({
@@ -535,7 +535,7 @@ describe('update browser version github action', () => {
         latestStableVersion: '1.0',
         latestChromeForTestingStableVersion: '1.0',
         latestFirefoxStableVersion: DEFAULT_FIREFOX_STABLE,
-        latestFirefoxDevVersion: '999.0b9',
+        latestFirefoxBetaVersion: '999.0b9',
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'true')
@@ -550,7 +550,7 @@ describe('update browser version github action', () => {
         latestStableVersion: '1.0',
         latestChromeForTestingStableVersion: '1.0',
         latestFirefoxStableVersion: DEFAULT_FIREFOX_STABLE,
-        latestFirefoxDevVersion: DEFAULT_FIREFOX_DEV,
+        latestFirefoxBetaVersion: DEFAULT_FIREFOX_BETA,
       })
 
       expect(core.setOutput).to.be.calledWith('has_newer_update', 'false')
@@ -572,7 +572,7 @@ describe('update browser version github action', () => {
         latestStableVersion: '2.0',
         latestChromeForTestingStableVersion: '2.2',
         latestFirefoxStableVersion: '101.0',
-        latestFirefoxDevVersion: '102.0b3',
+        latestFirefoxBetaVersion: '102.0b3',
       })
 
       expect(fs.writeFileSync).to.be.calledWith(
@@ -582,7 +582,7 @@ describe('update browser version github action', () => {
           betaVersion: '2.1',
           chromeForTestingStableVersion: '2.2',
           firefoxStableVersion: '101.0',
-          firefoxDevVersion: '102.0b3',
+          firefoxBetaVersion: '102.0b3',
         }),
         'utf8',
       )

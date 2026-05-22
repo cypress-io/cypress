@@ -100,6 +100,18 @@ export const knownBrowsers: Browser[] = [
   {
     name: 'firefox',
     family: 'firefox',
+    channel: 'beta',
+    displayName: 'Firefox Beta',
+    // Mozilla Firefox 152.0b1 — shares the version-string format with Developer Edition
+    versionRegex: /^Mozilla Firefox (\S+b\S*)$/m,
+    // Mozilla's Beta installer / browser-tools orb leave the binary at `firefox`;
+    // Ubuntu's beta PPA installs it as `firefox-beta`.
+    binary: ['firefox-beta', 'firefox'],
+    validator: firefoxValidatorFn,
+  },
+  {
+    name: 'firefox',
+    family: 'firefox',
     channel: 'nightly',
     displayName: 'Firefox Nightly',
     // Mozilla Firefox 74.0a1

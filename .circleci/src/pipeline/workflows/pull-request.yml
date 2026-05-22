@@ -158,7 +158,7 @@ jobs:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
-  - driver-integration-tests-firefox-dev:
+  - driver-integration-tests-firefox-beta:
       context: test-runner:cypress-record-key
       requires:
         - internal-pr-build
@@ -437,7 +437,7 @@ jobs:
         - run-webpack-dev-server-integration-tests
         - run-vite-dev-server-integration-tests
         - driver-integration-tests-firefox
-        # NOTE: driver-integration-tests-firefox-dev (Mozilla Beta) is intentionally
+        # NOTE: driver-integration-tests-firefox-beta (Mozilla Beta) is intentionally
         # omitted — it's an advisory canary, not a merge gate.
         - driver-integration-tests-chrome
         - driver-integration-tests-chrome-inject-document-domain
@@ -474,7 +474,7 @@ jobs:
         - driver-integration-tests-chrome-beta
         - driver-integration-tests-chrome-beta-inject-document-domain
         - driver-integration-tests-firefox
-        # NOTE: driver-integration-tests-firefox-dev (Mozilla Beta) is intentionally
+        # NOTE: driver-integration-tests-firefox-beta (Mozilla Beta) is intentionally
         # omitted — it's an advisory canary, not a merge gate.
         - driver-integration-tests-electron
         - driver-integration-tests-webkit

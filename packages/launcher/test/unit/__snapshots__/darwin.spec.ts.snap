@@ -129,6 +129,26 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
   },
   {
     "binary": [
+      "firefox-beta",
+      "firefox",
+    ],
+    "channel": "beta",
+    "displayName": "Firefox Beta",
+    "family": "firefox",
+    "findAppParams": {
+      "appName": "Firefox.app",
+      "bundleId": "org.mozilla.firefox",
+      "executable": "Contents/MacOS/firefox",
+      "versionProperty": "CFBundleShortVersionString",
+    },
+    "name": "firefox",
+    "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
+    "validator": [Function],
+    "version": "someVersion",
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
       "firefox-nightly",
       "firefox-trunk",
     ],
