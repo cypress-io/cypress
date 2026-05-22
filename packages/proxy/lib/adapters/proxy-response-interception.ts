@@ -1,0 +1,10 @@
+import type { ForResponseInterception } from '@packages/network-policy'
+import { handleInterceptResponse } from '@packages/net-stubbing/lib/server/handle-intercept-response'
+import type { ResponseInterceptionMiddlewareCtx } from './types'
+
+/** {@link ForResponseInterception} adapter — delegates to legacy net-stubbing response middleware. */
+export class ProxyResponseInterceptionAdapter implements ForResponseInterception {
+  interceptResponse (ctx: unknown): Promise<void> {
+    return handleInterceptResponse(ctx as ResponseInterceptionMiddlewareCtx)
+  }
+}

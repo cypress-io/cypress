@@ -12,6 +12,7 @@ import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import { NetworkPolicyCore } from '@packages/network-policy'
+import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../lib/adapters'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
@@ -53,7 +54,10 @@ describe('network stubbing', () => {
     const proxy = new NetworkProxy({
       socket,
       netStubbingState,
-      networkPolicyCore: new NetworkPolicyCore(),
+      networkPolicyCore: new NetworkPolicyCore({
+        requestInterception: new ProxyRequestInterceptionAdapter(),
+        responseInterception: new ProxyResponseInterceptionAdapter(),
+      }),
       config,
       middleware: defaultMiddleware,
       getCookieJar: () => new CookieJar(),

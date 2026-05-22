@@ -59,6 +59,39 @@ export class NetworkPolicyCore {
     return run(this)
   }
 
+  async correlateBrowserPreRequest (ctx: unknown): Promise<void> {
+    const port = this.options.requestInterception
+
+    if (!port) {
+      throw new Error('NetworkPolicyCore.requestInterception is not configured')
+    }
+
+    return port.correlateBrowserPreRequest(ctx)
+  }
+
+  /**
+   * HTTP/2 bypass boundary — see {@link ForRequestInterception.forwardToOrigin}.
+   */
+  forwardToOrigin (ctx: unknown): void {
+    const port = this.options.requestInterception
+
+    if (!port) {
+      throw new Error('NetworkPolicyCore.requestInterception is not configured')
+    }
+
+    return port.forwardToOrigin(ctx)
+  }
+
+  async interceptResponse (ctx: unknown): Promise<void> {
+    const port = this.options.responseInterception
+
+    if (!port) {
+      throw new Error('NetworkPolicyCore.responseInterception is not configured')
+    }
+
+    return port.interceptResponse(ctx)
+  }
+
   get requestInterception (): ForRequestInterception | undefined {
     return this.options.requestInterception
   }
