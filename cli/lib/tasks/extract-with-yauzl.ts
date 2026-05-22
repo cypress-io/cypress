@@ -96,7 +96,7 @@ const handleEntry = async (zipFile: any, entry: any, resolvedDest: string): Prom
       throw new Error(`Refusing to extract symlink with target larger than ${MAX_SYMLINK_TARGET_BYTES} bytes: ${entry.fileName}`)
     }
 
-    const linkTarget = await readEntryAsString(zipFile, entry)
+    const linkTarget = await readEntryAsString(zipFile, entry, MAX_SYMLINK_TARGET_BYTES)
     const resolvedTarget = path.resolve(path.dirname(fileDest), linkTarget)
 
     if (
@@ -129,18 +129,43 @@ const handleEntry = async (zipFile: any, entry: any, resolvedDest: string): Prom
   await pipelineAsync(readStream, writeStream)
 }
 
-const readEntryAsString = (zipFile: any, entry: any): Promise<string> => {
+const readEntryAsString = (zipFile: any, entry: any, maxBytes: number): Promise<string> => {
   return new Promise((resolve, reject) => {
-    zipFile.openReadStream(entry, (err: any, rs: NodeJS.ReadableStream) => {
+    zipFile.openReadStream(entry, (err: any, rs: NodeJS.ReadableStream & { destroy?: (err?: Error) => void }) => {
       if (err) {
         return reject(err)
       }
 
       const chunks: Buffer[] = []
+      let received = 0
+      let bailed = false
 
-      rs.on('data', (chunk: Buffer) => chunks.push(chunk))
-      rs.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
-      rs.on('error', reject)
+      const bail = (err: Error) => {
+        if (bailed) return
+
+        bailed = true
+        rs.destroy?.(err)
+        reject(err)
+      }
+
+      rs.on('data', (chunk: Buffer) => {
+        received += chunk.length
+        if (received > maxBytes) {
+          bail(new Error(`Refusing to read entry body larger than ${maxBytes} bytes: ${entry.fileName}`))
+
+          return
+        }
+
+        chunks.push(chunk)
+      })
+
+      rs.on('end', () => {
+        if (bailed) return
+
+        resolve(Buffer.concat(chunks).toString('utf8'))
+      })
+
+      rs.on('error', bail)
     })
   })
 }
