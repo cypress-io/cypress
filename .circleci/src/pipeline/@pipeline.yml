@@ -3246,6 +3246,86 @@ jobs:
             npm run fail; echo "EXIT=$?"
             exit 0
 
+  # Second-pass diagnostic — v1 showed CircleCI reports exit_code=0 for every
+  # bash.exe step on the windows executor, even bare `exit 1`. This job varies
+  # one dimension at a time to isolate the trigger:
+  #   - with/without `when: always`
+  #   - inline-string vs block-scalar `command:`
+  #   - silent failure vs failure with stdout
+  #   - alternate shells (powershell.exe, cmd.exe)
+  #   - explicit re-propagation patterns
+  # TODO: remove with the rest of the diagnostic infrastructure.
+  windows-exit-code-diagnostic-v2:
+    parallelism: 1
+    working_directory: ~/diag
+    executor: windows
+    resource_class: windows.medium
+    steps:
+      # DIM-A is intentionally the FIRST step with NO when:always. If CircleCI
+      # reports this as FAILED, then `when: always` is what's masking exit codes
+      # in v1. If reported PASSED, when:always is not the trigger.
+      - run:
+          name: "DIM-A: inline command 'exit 1' (NO when:always — first step)"
+          command: exit 1
+      # All subsequent steps use when:always so they still run regardless of DIM-A
+      - run:
+          name: "DIM-B: block scalar 'exit 1' (with when:always)"
+          when: always
+          command: |
+            exit 1
+      - run:
+          name: "DIM-C: stdout before exit (with when:always)"
+          when: always
+          command: |
+            echo "About to exit 1"
+            exit 1
+      - run:
+          name: "DIM-D: 'false' as last command (with when:always)"
+          when: always
+          command: |
+            false
+      - run:
+          name: "DIM-E: explicit re-propagation: bash -c then exit $?"
+          when: always
+          command: |
+            bash -c "exit 1"
+            rc=$?
+            echo "captured rc=$rc"
+            exit $rc
+      - run:
+          name: "DIM-F: shell powershell.exe, command 'exit 1'"
+          when: always
+          shell: powershell.exe
+          command: exit 1
+      - run:
+          name: "DIM-G: shell cmd.exe /c, command 'exit 1'"
+          when: always
+          shell: cmd.exe /c
+          command: exit 1
+      - run:
+          name: "DIM-H: shell bash.exe with --login + -eo pipefail"
+          when: always
+          shell: bash.exe --login -eo pipefail
+          command: |
+            exit 1
+      - run:
+          name: "DIM-I: write rc to file (workaround prototype)"
+          when: always
+          command: |
+            false
+            echo "$?" > /tmp/rc.txt
+            cat /tmp/rc.txt
+            test "$(cat /tmp/rc.txt)" -eq 0
+      - run:
+          name: "INSPECT: confirm bash still sees exit codes locally"
+          when: always
+          command: |
+            set +e
+            false; echo "false EXIT=$?"
+            (exit 1); echo "(exit 1) EXIT=$?"
+            bash -c "exit 1"; echo "bash -c 'exit 1' EXIT=$?"
+            exit 0
+
   test-binary-against-cypress-realworld-app:
     <<: *defaults
     resource_class: medium+

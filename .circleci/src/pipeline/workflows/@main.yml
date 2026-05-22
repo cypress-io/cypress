@@ -680,3 +680,4 @@ windows-diagnostic:
       value: << pipeline.git.branch >>
   jobs:
     - windows-npm-exit-code-diagnostic
+    - windows-exit-code-diagnostic-v2
