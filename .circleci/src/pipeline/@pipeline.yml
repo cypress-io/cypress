@@ -10,8 +10,8 @@ chrome-beta-version: &chrome-beta-version "149.0.7827.14"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "148.0.7778.178"
 firefox-stable-version: &firefox-stable-version "145.0.2"
-base-internal-trixie: &base-internal-trixie cypress/base-internal:24.14.0-trixie
-base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.14.0-yarn-berry
+base-internal-trixie: &base-internal-trixie cypress/base-internal:24.15.0-trixie
+base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:24.15.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
 base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.15.1
@@ -706,9 +706,9 @@ commands:
             if [[ ! -f better_sqlite3.node ]]; then
               set -x
               apt update && apt install -y docker.io
-              docker run -d --name better-sqlite3-builder cypress/base-internal:24.14.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
+              docker run -d --name better-sqlite3-builder cypress/base-internal:24.15.0-glibc-2.31 /bin/bash -c "sleep 1000000000"
               docker cp ~/cypress/node_modules/better-sqlite3 better-sqlite3-builder:/better-sqlite3
-              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 41.0.3 --include-regex 'better_sqlite3.node$'"
+              docker exec -it better-sqlite3-builder /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 41.7.0 --include-regex 'better_sqlite3.node$'"
               docker cp better-sqlite3-builder:/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node
               docker rm -f better-sqlite3-builder
               cp ~/cypress/node_modules/better-sqlite3/build/Release/better_sqlite3.node ~/cypress/better_sqlite3.node
