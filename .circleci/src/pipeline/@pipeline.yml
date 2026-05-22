@@ -3101,6 +3101,97 @@ jobs:
           browser: chrome
           executor: << parameters.executor >>
 
+  # Temporary diagnostic job for investigating why npm on Windows (Node 24.16.0)
+  # appears to swallow non-zero exit codes, causing `test-binary-against-kitchensink-chrome`
+  # to falsely report success when `npm install` and `cypress run` fail.
+  # Gated on `diagnose/*` branch prefix — push to a branch like `diagnose/npm-exit-codes`.
+  # TODO: remove once root cause is confirmed and a fix is in place.
+  windows-npm-exit-code-diagnostic:
+    parallelism: 1
+    working_directory: ~/diag
+    executor: windows
+    resource_class: windows.medium
+    steps:
+      - run:
+          name: "Setup Node 24.16.0 via nvm (mirror failing job environment)"
+          command: |
+            nvm install 24.16.0
+            nvm use 24.16.0
+            sleep 2s
+      - run:
+          name: "ENV: Environment info"
+          when: always
+          command: |
+            echo "=== bash ==="
+            bash --version
+            echo "=== shell options ==="
+            set -o
+            echo "=== node ==="
+            type -a node || true
+            node --version
+            echo "=== npm ==="
+            type -a npm || true
+            ls -la "$(dirname "$(which npm)")"/npm* 2>/dev/null || true
+            npm --version
+            echo "=== PATH ==="
+            echo "$PATH"
+      - run:
+          name: "BASELINE 1: bash exit 1 (expect step FAILED)"
+          when: always
+          command: exit 1
+      - run:
+          name: "BASELINE 2: bash false (expect step FAILED — confirms -e works)"
+          when: always
+          command: |
+            false
+      - run:
+          name: "TEST 1: node -e process.exit(1) (expect FAILED)"
+          when: always
+          command: |
+            node -e "process.exit(1)"
+      - run:
+          name: "TEST 2: cmd.exe //c exit 1 (expect FAILED)"
+          when: always
+          command: |
+            cmd.exe //c "exit 1"
+      - run:
+          name: "TEST 3: npm install nonexistent.tgz (should FAIL — suspected PASS)"
+          when: always
+          command: |
+            mkdir -p /tmp/npm-test && cd /tmp/npm-test
+            rm -f package.json package-lock.json
+            npm install ./does-not-exist.tgz
+      - run:
+          name: "TEST 4: npm run fail-script that calls process.exit(1) (should FAIL — suspected PASS)"
+          when: always
+          command: |
+            mkdir -p /tmp/npm-test && cd /tmp/npm-test
+            cat > package.json \<<'EOF'
+            {"name":"diag","version":"1.0.0","scripts":{"fail":"node -e \"process.exit(1)\""}}
+            EOF
+            npm run fail
+      - run:
+          name: "INSPECT: capture each command's exit code with set +e (always exits 0)"
+          when: always
+          command: |
+            set +e
+            mkdir -p /tmp/npm-test && cd /tmp/npm-test
+            echo "--- bash false ---"
+            false; echo "EXIT=$?"
+            echo "--- node -e process.exit(1) ---"
+            node -e "process.exit(1)"; echo "EXIT=$?"
+            echo "--- cmd.exe //c exit 1 ---"
+            cmd.exe //c "exit 1"; echo "EXIT=$?"
+            echo "--- npm install nonexistent.tgz ---"
+            rm -f package.json package-lock.json
+            npm install ./does-not-exist.tgz; echo "EXIT=$?"
+            echo "--- npm run fail ---"
+            cat > package.json \<<'EOF'
+            {"name":"diag","version":"1.0.0","scripts":{"fail":"node -e \"process.exit(1)\""}}
+            EOF
+            npm run fail; echo "EXIT=$?"
+            exit 0
+
   test-binary-against-cypress-realworld-app:
     <<: *defaults
     resource_class: medium+
