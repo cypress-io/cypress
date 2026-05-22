@@ -1,14 +1,14 @@
-require('../spec_helper')
-
-const _ = require('lodash')
-const { Automation } = require(`../../lib/automation`)
+import '../spec_helper'
+import _ from 'lodash'
+import { Automation } from '../../lib/automation'
 
 describe('lib/automation', () => {
   beforeEach(function () {
+    // @ts-expect-error
     this.automation = new Automation({})
   })
 
-  context('.reset', () => {
+  describe('.reset', () => {
     it('resets middleware', function () {
       const m = this.automation.getMiddleware()
 
