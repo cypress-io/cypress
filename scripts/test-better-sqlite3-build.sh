@@ -5,7 +5,7 @@
 # Usage:
 #   ./scripts/test-better-sqlite3-build.sh <docker-image>
 # Example:
-#   ./scripts/test-better-sqlite3-build.sh cypress/base-internal:24.14.0-glibc-2.31
+#   ./scripts/test-better-sqlite3-build.sh cypress/base-internal:24.15.0-glibc-2.31
 
 set -e
 
@@ -39,7 +39,7 @@ echo "Copying better-sqlite3 into container ..."
 docker cp "$CYPRESS_ROOT/node_modules/better-sqlite3" "$CONTAINER_NAME:/better-sqlite3"
 
 echo "Building better_sqlite3.node ..."
-docker exec "$CONTAINER_NAME" /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 41.0.3 --include-regex 'better_sqlite3.node$'"
+docker exec "$CONTAINER_NAME" /bin/bash -c "cd /better-sqlite3 && source /root/.bashrc && chown -R root:root . && npm install --ignore-scripts && npx --no-install prebuild -r electron -t 41.7.0 --include-regex 'better_sqlite3.node$'"
 
 BUILT_NODE_PATH='/better-sqlite3/build/Release/better_sqlite3.node'
 
