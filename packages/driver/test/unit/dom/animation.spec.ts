@@ -123,4 +123,73 @@ describe('dom/animation', () => {
 
     expect(document.querySelector('#__cypress-animation-disabler')).toBeNull()
   })
+
+  it('should resume already paused animations if pausing later animations errors', () => {
+    const firstAnimation = createAnimation('running')
+    const secondAnimation = createAnimation('running')
+
+    const getAnimations = vi.fn(() => [firstAnimation, secondAnimation])
+
+    secondAnimation.pause.mockImplementation(() => {
+      throw new Error('pause failed')
+    })
+
+    Object.defineProperty(document, 'getAnimations', {
+      configurable: true,
+      value: getAnimations,
+    })
+
+    const body = document.querySelector('body')
+
+    if (!body) {
+      throw new Error('Expected document.body to exist.')
+    }
+
+    const $body = $(body)
+
+    expect(() => {
+      $animation.addCssAnimationDisabler($body)
+    }).toThrow('pause failed')
+
+    expect(firstAnimation.pause).toHaveBeenCalledOnce()
+    expect(document.querySelector('#__cypress-animation-disabler')).not.toBeNull()
+
+    $animation.removeCssAnimationDisabler($body)
+
+    expect(firstAnimation.play).toHaveBeenCalledOnce()
+    expect(firstAnimation.playState).toBe('running')
+    expect(document.querySelector('#__cypress-animation-disabler')).toBeNull()
+  })
+
+  it('should remove the disabler even if resuming an animation errors', () => {
+    const runningAnimation = createAnimation('running')
+
+    const getAnimations = vi.fn(() => [runningAnimation])
+
+    runningAnimation.play.mockImplementation(() => {
+      throw new Error('play failed')
+    })
+
+    Object.defineProperty(document, 'getAnimations', {
+      configurable: true,
+      value: getAnimations,
+    })
+
+    const body = document.querySelector('body')
+
+    if (!body) {
+      throw new Error('Expected document.body to exist.')
+    }
+
+    const $body = $(body)
+
+    $animation.addCssAnimationDisabler($body)
+
+    expect(() => {
+      $animation.removeCssAnimationDisabler($body)
+    }).toThrow('play failed')
+
+    expect(runningAnimation.play).toHaveBeenCalledOnce()
+    expect(document.querySelector('#__cypress-animation-disabler')).toBeNull()
+  })
 })

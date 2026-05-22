@@ -32,15 +32,17 @@ const pauseDocumentAnimations = (doc: Document) => {
   const pausedAnimations = doc.getAnimations?.()?.filter(({ playState }) => {
     return playState === 'running'
   }) ?? []
+  const animationState: DocumentAnimationState = {
+    disablerCount: 1,
+    pausedAnimations: [],
+  }
+
+  animationStateByDocument.set(doc, animationState)
 
   for (const animation of pausedAnimations) {
     animation.pause()
+    animationState.pausedAnimations.push(animation)
   }
-
-  animationStateByDocument.set(doc, {
-    disablerCount: 1,
-    pausedAnimations,
-  })
 }
 
 const resumeDocumentAnimations = (doc: Document) => {
@@ -52,11 +54,21 @@ const resumeDocumentAnimations = (doc: Document) => {
 
   if (animationState.disablerCount > 0) return
 
+  let resumeError: unknown
+
   for (const animation of animationState.pausedAnimations) {
-    if (animation.playState === 'paused') animation.play()
+    if (animation.playState !== 'paused') continue
+
+    try {
+      animation.play()
+    } catch (error) {
+      resumeError ??= error
+    }
   }
 
   animationStateByDocument.delete(doc)
+
+  if (typeof resumeError !== 'undefined') throw resumeError
 }
 
 const addCssAnimationDisabler = ($body: JQuery<HTMLBodyElement>) => {
@@ -84,10 +96,12 @@ const removeCssAnimationDisabler = ($body: JQuery<HTMLBodyElement>) => {
     return
   }
 
-  resumeDocumentAnimations(doc)
-
-  if (!animationStateByDocument.has(doc)) {
-    $body.find(animationDisablerSelector).remove()
+  try {
+    resumeDocumentAnimations(doc)
+  } finally {
+    if (!animationStateByDocument.has(doc)) {
+      $body.find(animationDisablerSelector).remove()
+    }
   }
 }
 
