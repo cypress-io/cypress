@@ -560,10 +560,17 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     .then(() => {
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
     })
-    .catch(Bluebird.TimeoutError, async (err) => {
-      debug('Catch on waitForBrowserToConnect')
+    .catch((err) => {
+      const isTimeout = err instanceof Bluebird.TimeoutError
+      const isFirefoxConnect = (err as CypressError)?.type === 'FIREFOX_COULD_NOT_CONNECT'
 
-      return retryOnError(err as CypressError)
+      if (isTimeout || isFirefoxConnect) {
+        debug('Catch on waitForBrowserToConnect: %s', isTimeout ? 'timeout' : 'firefox could not connect')
+
+        return retryOnError(err as CypressError)
+      }
+
+      throw err
     })
   }
 
@@ -684,6 +691,17 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     // the video file no longer exists at the path where we expect it,
     // possibly because the user deleted it in the after:spec event
     debug(`No video found after spec ran - skipping compression. Video path: ${videoName}`)
+
+    const compressedVideoName = videoRecording?.api.compressedVideoName
+
+    if (compressedVideoName) {
+      try {
+        debug('removing compressed video file: %s', compressedVideoName)
+        await fs.remove(compressedVideoName)
+      } catch (err) {
+        debug('Error removing compressed video file: %o', err)
+      }
+    }
 
     results.video = null
   }

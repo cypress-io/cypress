@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
 import * as errors from '../errors'
@@ -124,7 +123,7 @@ const removeOldProfiles = function (browser) {
   // no longer active, or isnt a cypress related process
   const pathToPartitions = appData.electronPartitionsPath()
 
-  return Bluebird.all([
+  return Promise.all([
     removeLegacyProfiles(),
     profileCleaner.removeInactiveByPid(getProfileWildcard(browser), 'run-'),
     profileCleaner.removeInactiveByPid(pathToPartitions, 'run-'),
@@ -317,9 +316,9 @@ const parseBrowserOption = (opt) => {
   }
 }
 
-function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Bluebird<FoundBrowser>
+function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: false, browsers?: FoundBrowser[]): Promise<FoundBrowser>
 
-function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Bluebird<FoundBrowser[]>
+function ensureAndGetByNameOrPath (nameOrPath: string, returnAll: true, browsers?: FoundBrowser[]): Promise<FoundBrowser[]>
 
 async function ensureAndGetByNameOrPath (nameOrPath: string, returnAll = false, prevKnownBrowsers: FoundBrowser[] = []) {
   const browsers = prevKnownBrowsers.length ? prevKnownBrowsers : (await getBrowsers())
@@ -542,7 +541,7 @@ const browserUtils = {
         // and overwrite background.js with the final string bytes
         return fs.writeFileAsync(extensionBg, str)
       })
-      .return(extensionDest)
+      .then(() => extensionDest)
     })
   },
 }

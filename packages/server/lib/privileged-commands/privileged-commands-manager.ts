@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 
 import * as exec from '../exec'
 import * as files from '../files'
@@ -39,7 +39,7 @@ class PrivilegedCommandsManager {
     // no-op if already set up for url
     if (this.channelKeys[options.url]) return
 
-    const key = uuidv4()
+    const key = randomUUID()
 
     this.channelKeys[options.url] = key
 

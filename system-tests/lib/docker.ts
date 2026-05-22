@@ -22,6 +22,9 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
   stdout = new stream.PassThrough()
   stderr = new stream.PassThrough()
 
+  /** Placeholder; Cypress runs in Docker — harness interrupt does not tree-kill this pid. */
+  pid = 0
+
   constructor (private dockerImage: string) {
     super()
   }
@@ -100,7 +103,7 @@ class DockerProcess extends EventEmitter implements SpawnerResult {
         }
 
         log('Docker run exited:', { err, data })
-        this.emit('exit', data.StatusCode)
+        this.emit('exit', data.StatusCode, null)
       },
     )
   }

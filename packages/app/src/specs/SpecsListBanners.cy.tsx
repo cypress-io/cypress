@@ -560,4 +560,32 @@ describe('<SpecsListBanners />', { viewportHeight: 260, defaultCommandTimeout: 1
       })
     })
   })
+
+  // Renders an onboarding banner once cloudAppMessages resolves. The
+  // in-flight (`undefined`) case is exercised at the E2E layer rather than
+  // here because mountFragment's auto-mock normalizes nullable list fields
+  // to `null` at the GraphQL response boundary, so a true `undefined` state
+  // can't be simulated through this mocking layer. Scope-routing for cloud
+  // banner dismissal is unit-tested in `CloudMessageBanner.cy.tsx`.
+  describe('cloudAppMessages fallthrough', () => {
+    it('renders the onboarding banner when cloudAppMessages resolves to null (cloud error / services not yet deployed)', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))
+
+      mountWithState({ cloudAppMessages: null } as any)
+
+      cy.findByTestId('login-banner').should('be.visible')
+    })
+
+    it('renders the onboarding banner when cloudAppMessages resolves to an empty array', () => {
+      const userProjectStatusStore = useUserProjectStatusStore()
+
+      userProjectStatusStore.setCypressFirstOpened(Date.now() - interval('4 days'))
+
+      mountWithState({ cloudAppMessages: [] })
+
+      cy.findByTestId('login-banner').should('be.visible')
+    })
+  })
 })

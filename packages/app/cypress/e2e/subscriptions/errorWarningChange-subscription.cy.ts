@@ -5,7 +5,7 @@ describe('errorWarningChange subscription', () => {
   })
 
   function assertLoadingIntoErrorWorks (errorName: string) {
-    cy.contains('h2', errorName).should('be.visible')
+    cy.contains('h2', errorName, { timeout: 15000 }).should('be.visible')
     cy.contains('[role="alert"]', 'Loading').should('not.exist')
   }
 

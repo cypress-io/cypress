@@ -147,6 +147,28 @@ function mockEE () {
   return ee
 }
 
+/**
+ * `cypress.start` resolves only after graceful exit runs `clearCtx`, so
+ * `openProject.getProject()` is null in a `.then` on that promise.
+ * Register assertions that need `cfg` / `ProjectBase` in `assertWhileOpen`; it runs
+ * when `openProject` emits `ready` (project fully opened), before the run finishes and exit runs.
+ *
+ * @param {Promise<unknown>} startPromise - return value of `cypress.start(...)`
+ * @param {(project: import('../../lib/project-base').ProjectBase) => void | Promise<void>} assertWhileOpen
+ * @returns {Promise<void>}
+ */
+async function assertWithOpenProjectAfterReady (startPromise, assertWhileOpen) {
+  const whenReady = new Promise((resolve, reject) => {
+    openProject.once('ready', () => {
+      Promise.resolve(assertWhileOpen(openProject.getProject()))
+        .then(resolve)
+        .catch(reject)
+    })
+  })
+
+  await Promise.all([whenReady, startPromise])
+}
+
 let ctx
 
 describe('lib/cypress', () => {
@@ -196,6 +218,8 @@ describe('lib/cypress', () => {
     this.expectExitWith = (code) => {
       expect(process.exit).to.be.calledWith(code)
     }
+
+    this.assertWithOpenProjectAfterReady = assertWithOpenProjectAfterReady
 
     // returns error object
     this.expectExitWithErr = (type, msg1, msg2) => {
@@ -940,14 +964,16 @@ describe('lib/cypress', () => {
       })
 
       it('does not save project state', function () {
-        return cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`])
-        .then(() => {
+        return assertWithOpenProjectAfterReady(
+          cypress.start([`--run-project=${this.todosPath}`, `--spec=${this.todosPath}/tests/test2.coffee`]),
+          (project) => {
+            // this should not save the project's state
+            // because its a noop in 'cypress run' mode
+            return project.saveState()
+          },
+        ).then(() => {
           this.expectExitWith(0)
 
-          // this should not save the project's state
-          // because its a noop in 'cypress run' mode
-          return openProject.getProject().saveState()
-        }).then(() => {
           return fs.statAsync(this.statePath)
           .then(() => {
             throw new Error(`saved state should not exist but it did here: ${this.statePath}`)
@@ -958,9 +984,12 @@ describe('lib/cypress', () => {
 
     describe('morgan', () => {
       it('sets morgan to false', function () {
-        return cypress.start([`--run-project=${this.todosPath}`])
-        .then(() => {
-          expect(openProject.getProject().cfg.morgan).to.be.false
+        return assertWithOpenProjectAfterReady(
+          cypress.start([`--run-project=${this.todosPath}`]),
+          (project) => {
+            expect(project.cfg.morgan).to.be.false
+          },
+        ).then(() => {
           this.expectExitWith(0)
         })
       })
@@ -972,62 +1001,66 @@ describe('lib/cypress', () => {
       })
 
       it('can override default values', function () {
-        return cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=true'])
-        .then(() => {
-          const { cfg } = openProject.getProject()
+        return assertWithOpenProjectAfterReady(
+          cypress.start([`--run-project=${this.todosPath}`, '--config=requestTimeout=1234,videoCompression=true']),
+          (project) => {
+            const { cfg } = project
 
-          expect(cfg.videoCompression).to.be.true
-          expect(cfg.requestTimeout).to.eq(1234)
+            expect(cfg.videoCompression).to.be.true
+            expect(cfg.requestTimeout).to.eq(1234)
 
-          expect(cfg.resolved.videoCompression).to.deep.eq({
-            value: true,
-            from: 'cli',
-          })
+            expect(cfg.resolved.videoCompression).to.deep.eq({
+              value: true,
+              from: 'cli',
+            })
 
-          expect(cfg.resolved.requestTimeout).to.deep.eq({
-            value: 1234,
-            from: 'cli',
-          })
-
+            expect(cfg.resolved.requestTimeout).to.deep.eq({
+              value: 1234,
+              from: 'cli',
+            })
+          },
+        ).then(() => {
           this.expectExitWith(0)
         })
       })
 
       it('can override values in plugins', function () {
-        return cypress.start([
-          `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=true',
-          '--env=foo=foo,bar=bar',
-        ])
-        .then(() => {
-          const { cfg } = openProject.getProject()
+        return assertWithOpenProjectAfterReady(
+          cypress.start([
+            `--run-project=${this.pluginConfig}`, '--config=requestTimeout=1234,videoCompression=true',
+            '--env=foo=foo,bar=bar',
+          ]),
+          (project) => {
+            const { cfg } = project
 
-          expect(cfg.videoCompression).to.eq(20)
-          expect(cfg.defaultCommandTimeout).to.eq(500)
-          expect(cfg.env).to.deep.eq({
-            foo: 'bar',
-            bar: 'bar',
-          })
+            expect(cfg.videoCompression).to.eq(20)
+            expect(cfg.defaultCommandTimeout).to.eq(500)
+            expect(cfg.env).to.deep.eq({
+              foo: 'bar',
+              bar: 'bar',
+            })
 
-          expect(cfg.resolved.videoCompression).to.deep.eq({
-            value: 20,
-            from: 'plugin',
-          })
+            expect(cfg.resolved.videoCompression).to.deep.eq({
+              value: 20,
+              from: 'plugin',
+            })
 
-          expect(cfg.resolved.requestTimeout).to.deep.eq({
-            value: 1234,
-            from: 'cli',
-          })
+            expect(cfg.resolved.requestTimeout).to.deep.eq({
+              value: 1234,
+              from: 'cli',
+            })
 
-          expect(cfg.resolved.env.foo).to.deep.eq({
-            value: 'bar',
-            from: 'plugin',
-          })
+            expect(cfg.resolved.env.foo).to.deep.eq({
+              value: 'bar',
+              from: 'plugin',
+            })
 
-          expect(cfg.resolved.env.bar).to.deep.eq({
-            value: 'bar',
-            from: 'cli',
-          })
-
+            expect(cfg.resolved.env.bar).to.deep.eq({
+              value: 'bar',
+              from: 'cli',
+            })
+          },
+        ).then(() => {
           this.expectExitWith(0)
         })
       })
@@ -1162,9 +1195,12 @@ describe('lib/cypress', () => {
         const listen = sinon.spy(http.Server.prototype, 'listen')
         const open = sinon.spy(ServerBase.prototype, 'open')
 
-        return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
-        .then(() => {
-          expect(openProject.getProject().cfg.port).to.eq(5544)
+        return assertWithOpenProjectAfterReady(
+          cypress.start([`--run-project=${this.todosPath}`, '--port=5544']),
+          (project) => {
+            expect(project.cfg.port).to.eq(5544)
+          },
+        ).then(() => {
           expect(listen).to.be.calledWith(5544)
           expect(open).to.be.calledWithMatch({ port: 5544 })
           this.expectExitWith(0)
@@ -1195,37 +1231,41 @@ describe('lib/cypress', () => {
       })
 
       it('can set specific environment variables', function () {
-        return cypress.start([
-          `--run-project=${this.todosPath}`,
-          '--video=false',
-          '--env',
-          'version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor',
-        ])
-        .then(() => {
-          expect(openProject.getProject().cfg.env).to.deep.eq({
-            version: '0.12.1',
-            foo: 'bar',
-            host: 'http://localhost:8888',
-            baz: 'quux=dolor',
-          })
-
+        return assertWithOpenProjectAfterReady(
+          cypress.start([
+            `--run-project=${this.todosPath}`,
+            '--video=false',
+            '--env',
+            'version=0.12.1,foo=bar,host=http://localhost:8888,baz=quux=dolor',
+          ]),
+          (project) => {
+            expect(project.cfg.env).to.deep.eq({
+              version: '0.12.1',
+              foo: 'bar',
+              host: 'http://localhost:8888',
+              baz: 'quux=dolor',
+            })
+          },
+        ).then(() => {
           this.expectExitWith(0)
         })
       })
 
       it('parses environment variables with empty values', function () {
-        return cypress.start([
-          `--run-project=${this.todosPath}`,
-          '--video=false',
-          '--env=FOO=,BAR=,BAZ=ipsum',
-        ])
-        .then(() => {
-          expect(openProject.getProject().cfg.env).to.deep.eq({
-            FOO: '',
-            BAR: '',
-            BAZ: 'ipsum',
-          })
-
+        return assertWithOpenProjectAfterReady(
+          cypress.start([
+            `--run-project=${this.todosPath}`,
+            '--video=false',
+            '--env=FOO=,BAR=,BAZ=ipsum',
+          ]),
+          (project) => {
+            expect(project.cfg.env).to.deep.eq({
+              FOO: '',
+              BAR: '',
+              BAZ: 'ipsum',
+            })
+          },
+        ).then(() => {
           this.expectExitWith(0)
         })
       })

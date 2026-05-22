@@ -1,23 +1,30 @@
 # The workflow runs for:
 # External PR after approval (approved contributor PR that's not a main branch)
-# Internal PR for any branch that does is not develop or release/ related
+# Internal PR for any branch that is not develop, release/x.x.x, or electron/x.x.x related
 when:
   and:
     - not:
         matches:
-            pattern: /^release\//
+            pattern: /^release\/\d+\.\d+\.\d+$/
             value: << pipeline.git.branch >>
     - not:
         matches:
-            pattern: /^develop/
+            pattern: /^electron\/\d+\.\d+\.\d+$/
             value: << pipeline.git.branch >>
+    - not:
+        equal: [ 'develop', << pipeline.git.branch >> ]
+    - not:
+        equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
     - not:
         equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
 
 jobs:
-  # Always run — these are cheap and catch broad issues regardless of what changed
+  # Internal PRs — install and build run immediately
   - node_modules_install:
       build-better-sqlite3: true
+      filters:
+        branches:
+          ignore: /^pull\/[0-9]+/
   - build:
       name: internal-pr-build
       context: test-runner:env-canary
@@ -26,10 +33,25 @@ jobs:
       filters:
         branches:
           ignore: /^pull\/[0-9]+/
+
+  # External (contributor) PRs — everything gates behind manual approval
+  - approve-contributor-pr:
+      type: approval
+      filters:
+        branches:
+          only: /^pull\/[0-9]+/
+  - node_modules_install:
+      name: contributor-node-modules-install
+      build-better-sqlite3: true
+      requires:
+        - approve-contributor-pr
+      filters:
+        branches:
+          only: /^pull\/[0-9]+/
   - build:
       name: external-pr-build
       requires:
-        - node_modules_install
+        - contributor-node-modules-install
       filters:
         branches:
           only: /^pull\/[0-9]+/
@@ -50,12 +72,6 @@ jobs:
       requires:
         - internal-pr-build
         - external-pr-build
-  - approve-contributor-pr:
-      type: approval
-      filters:
-        branches:
-          only: /^pull\/[0-9]+/
-
   # The following jobs are only run for contributor PRs once they are approved.
   # Each job checks its pipeline parameter at startup and halts early if the
   # changed files don't require it to run.

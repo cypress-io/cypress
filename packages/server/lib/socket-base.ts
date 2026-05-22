@@ -128,9 +128,7 @@ export class SocketBase implements SocketBroadcaster {
   createSocketIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
     return new socketIo.SocketIOServer(server, {
       path,
-      cookie: {
-        name: cookie,
-      },
+      cookie: typeof cookie === 'string' ? { name: cookie } : cookie,
       destroyUpgrade: false,
       serveClient: false,
       // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling

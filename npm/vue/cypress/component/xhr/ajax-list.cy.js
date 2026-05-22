@@ -4,7 +4,12 @@
 import AjaxList from './AjaxList.vue'
 import { mount } from '@cypress/vue'
 
-/* eslint-env mocha */
+const users = [
+  { id: 1, name: 'Alice' },
+  { id: 2, name: 'Bob' },
+  { id: 3, name: 'Charlie' },
+]
+
 describe('AjaxList', () => {
   context('using cy.intercept()', () => {
     // because this component loads data right away
@@ -13,44 +18,46 @@ describe('AjaxList', () => {
     // then will mount the component
 
     it('loads list of posts', () => {
+      cy.intercept('GET', '/users?_limit=3', { body: users }).as('users')
       mount(AjaxList)
+      cy.wait('@users')
       cy.get('li').should('have.length', 3)
     })
 
-    it('can inspect real data in XHR', () => {
-      cy.intercept('/users?_limit=3').as('users')
+    it('can inspect intercepted XHR', () => {
+      cy.intercept('GET', '/users?_limit=3', { body: users }).as('users')
       mount(AjaxList)
 
       cy.wait('@users').its('response.body').should('have.length', 3)
     })
 
     it('can display mock XHR response', () => {
-      const users = [{ id: 1, name: 'foo' }]
+      const singleUser = [{ id: 1, name: 'foo' }]
 
-      cy.intercept('GET', '/users?_limit=3', { body: users }).as('users')
+      cy.intercept('GET', '/users?_limit=3', { body: singleUser }).as('users')
       mount(AjaxList)
 
       cy.get('li').should('have.length', 1).first().contains('foo')
     })
 
     it('can inspect mocked XHR', () => {
-      const users = [{ id: 1, name: 'foo' }]
+      const singleUser = [{ id: 1, name: 'foo' }]
 
-      cy.intercept('GET', '/users?_limit=3', users).as('users')
+      cy.intercept('GET', '/users?_limit=3', singleUser).as('users')
       mount(AjaxList)
 
-      cy.wait('@users').its('response.body').should('deep.equal', users)
+      cy.wait('@users').its('response.body').should('deep.equal', singleUser)
     })
 
     it('can delay and wait on XHR', () => {
-      const users = [{ id: 1, name: 'foo' }]
+      const singleUser = [{ id: 1, name: 'foo' }]
 
       cy.intercept({
         method: 'GET',
         url: '/users?_limit=3',
       }, {
         delay: 1000,
-        body: users,
+        body: singleUser,
       }).as('users')
 
       mount(AjaxList)

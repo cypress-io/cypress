@@ -75,8 +75,12 @@ const isInstallingFromPostinstallHook = (): boolean => {
 const getCacheDir = (): string => {
   let cache_directory = util.getCacheDir()
 
-  if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
-    const envVarCacheDir = untildify(util.getEnv('CYPRESS_CACHE_FOLDER') as string)
+  // Pass trim=true so we strip surrounding double quotes and whitespace.
+  // Windows CMD's `set CYPRESS_CACHE_FOLDER="C:\path"` embeds literal quotes
+  // into the env value; without dequoting, the resolved cache directory ends
+  // up with quote chars in its name (see cypress-io/cypress#4506).
+  if (util.getEnv('CYPRESS_CACHE_FOLDER', true)) {
+    const envVarCacheDir = untildify(util.getEnv('CYPRESS_CACHE_FOLDER', true) as string)
 
     debug('using environment variable CYPRESS_CACHE_FOLDER %s', envVarCacheDir)
 
