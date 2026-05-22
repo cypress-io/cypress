@@ -21,7 +21,7 @@ import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
 import { Request } from './request'
 import type { SocketE2E } from './socket-e2e'
-import templateEngine from './template_engine'
+import { render as renderTemplate } from './template_engine'
 import { ensureProp } from './util/class-helpers'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
@@ -35,7 +35,7 @@ import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
-import appData from './util/app_data'
+import * as appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
 import * as statusCode from './util/status_code'
@@ -376,7 +376,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     // since we use absolute paths, configure express-handlebars to not automatically find layouts
     // https://github.com/cypress-io/cypress/issues/2891
-    app.engine('html', templateEngine.render)
+    app.engine('html', renderTemplate)
 
     // handle the proxied url in case
     // we have not yet started our websocket server
