@@ -1,9 +1,11 @@
 import _ from 'lodash'
 import path from 'path'
 import yauzl from 'yauzl'
-import fs from 'fs-extra'
+import fs from 'fs'
 import { promisify } from 'util'
 import stream from 'stream'
+
+const fsp = fs.promises
 
 const pipelineAsync = promisify(stream.pipeline)
 
@@ -82,12 +84,12 @@ const handleEntry = async (zipFile: any, entry: any, resolvedDest: string): Prom
   const isSymlink = (unixMode & S_IFMT) === S_IFLNK
 
   if (isDir) {
-    await fs.ensureDir(fileDest)
+    await fsp.mkdir(fileDest, { recursive: true })
 
     return
   }
 
-  await fs.ensureDir(path.dirname(fileDest))
+  await fsp.mkdir(path.dirname(fileDest), { recursive: true })
 
   if (isSymlink) {
     if (entry.uncompressedSize > MAX_SYMLINK_TARGET_BYTES) {
@@ -104,8 +106,8 @@ const handleEntry = async (zipFile: any, entry: any, resolvedDest: string): Prom
       throw new Error(`Refusing to extract symlink pointing outside of destination: ${entry.fileName} -> ${linkTarget}`)
     }
 
-    await fs.remove(fileDest).catch(() => undefined)
-    await fs.symlink(linkTarget, fileDest)
+    await fsp.rm(fileDest, { recursive: true, force: true })
+    await fsp.symlink(linkTarget, fileDest)
 
     return
   }
