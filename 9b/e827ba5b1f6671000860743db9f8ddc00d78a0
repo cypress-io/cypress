@@ -1,0 +1,679 @@
+packages/server/lib/cloud/bundles/stream_download_verify_extract.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-273
+packages/server/test/unit/cloud/api/api_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 29
+.github/workflows/snyk_sca_scan.yaml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 15-20,24-28,36,38,43-44,58
+packages/server/test/unit/cloud/api/put_protocol_artifact_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 131-156
+tooling/electron-mksnapshot/src/mksnapshot-run.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 13-59,159,174,178-179,208,233,237-238,254,271,274
+.github/ISSUE_TEMPLATE/4-memory-issue.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 14-15,20-22
+packages/driver/cypress/e2e/e2e/origin/basic_login.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 21-22,24-32,35
+packages/frontend-shared/src/gql-components/modals/LoginModal.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1,65-66,74-101,108-148,154,248,261,299
+packages/server/lib/plugins/preprocessor.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6
+packages/server/test/unit/cloud/studio/telemetry/TelemetryReporter_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 9-13
+packages/https-proxy/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 29
+npm/vue/cypress/component/xhr/ajax-list.cy.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 7-12,21,23,27-28,35,37,44,46,49,53,59-60
+packages/server/patches/axios+1.15.2.patch
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-17
+packages/server/test/unit/util/process_profiler_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 15
+.github/CODEOWNERS
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6-11
+cli/types/cypress.d.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1375-1376
+packages/server/test/unit/screenshots_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 11
+cli/lib/exec/spawn.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 12,144-149,154,179-194,254
+packages/server/test/unit/cloud/extract_atomic_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3-5,8,10,12-13,15,18-19,21,23-24,27-28,30-31,33,35,38,41-42,44,46,49-50,52-53,55,57,60-61,63,65-67,70-71,73,75-77,79-80,82,84-85
+scripts/binary/util/testStaticAssets.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 51,60,62,66
+packages/data-context/graphql/schemaTypes/objectTypes/gql-Query.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 132-149
+packages/network/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 32
+.circleci/cache-version.txt
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2
+packages/server/test/unit/iframes_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4
+.github/workflows/auto_approve_low_risk.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-211
+packages/socket/lib/client/browser.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2,31,58
+system-tests/test/record_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3012,3031-3037
+knip.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 138-139,544,660
+cli/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 26,65
+packages/server/test/unit/browsers/chrome_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 9,70-74,78
+npm/webpack-batteries-included-preprocessor/test/fixtures/paths-no-baseurl/tsconfig.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-8
+packages/server/test/unit/cloud/exceptions_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4-5
+packages/driver/cypress/e2e/e2e/origin/cookie_behavior.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 747-750,1349-1352
+packages/server/lib/open_project.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5,21,28-29,353
+packages/data-context/graphql/schema.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 33-35
+packages/server/test/unit/cloud/user_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5,63-71
+system-tests/test/clean_process_exit_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-50
+npm/react/cypress/component/advanced/lazy-loaded/App.jsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1,8-10
+packages/frontend-shared/src/locales/en-US.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 366,371,376
+packages/socket/patches/engine.io-parser+5.2.3.patch
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-94
+packages/server/lib/automation/automation.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2,108
+packages/server/test/unit/cloud/bundles/parse_hash_from_bundle_url_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-24
+packages/socket/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 24,26-28,30-33
+packages/socket/patches/socket.io-parser+4.2.6.patch
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-622
+npm/webpack-dev-server/test/handlers/angularHandler.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 147-181,209
+packages/app/cypress/e2e/subscriptions/specChange-subscription.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 184,332,456,490
+packages/driver/cypress/e2e/util/serialization.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 673-753
+packages/server/lib/controllers/spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 31,80-81
+packages/frontend-shared/src/gql-components/modals/LoginModal.vue
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 81-82,113,122,124,127-130,141
+packages/server/lib/browsers/electron.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 56,62
+packages/launchpad/cypress/e2e/project-setup.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 644-645,661-662
+packages/server/lib/util/trash.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 19,21
+system-tests/test/visit_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 174-176,207-227
+packages/server/lib/socket-base.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 131
+packages/server/lib/controllers/files.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 14,176-177
+packages/server/test/integration/run_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 11,177-199
+packages/server/lib/modes/run.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 34,564-566,568-574,696-706,1236
+packages/server/lib/util/ci_provider.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 160-163,194-195,268,298-299
+.circleci/src/pipeline/workflows/pull-request.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3,8,12,14-17,22,25-27,36-50,54
+cli/test/lib/tasks/state.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 388-408
+npm/vite-dev-server/CHANGELOG.md
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-10
+packages/data-context/src/data/ProjectConfigIpc.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 73-74,78,83,109-110,114-115,123-124,179-184,416,421,425-433
+packages/data-context/test/unit/graphql/corsOriginDelegate.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-110
+packages/server/lib/cloud/cy-prompt/CyPromptLifecycleManager.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 12,18-19,23,25-31,189,202-205,293-298,301-303
+packages/server/test/unit/util/ci_provider_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 47-48,56-57,402,415,597-598,620-621,1119-1120,1133-1134,1300-1301,1324-1325
+packages/types/src/config.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 59-65
+npm/react/cypress/tsconfig.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 7-9
+cli/test/lib/exec/spawn.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 12,75,92,100,439-460,463-465
+system-tests/lib/system-tests.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 32-34,49-51,257-261,301,306-369,888-891,928-938,941-944,1027,1076-1079,1083-1084,1086-1087,1089-1090,1092,1094-1095,1097-1116,1118,1120-1127,1129-1135
+packages/server/test/unit/saved_state_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 36
+packages/driver/src/cross-origin/communicator.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 75-93
+packages/server/test/unit/util/args_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-941
+packages/frontend-shared/src/gql-components/LoginConnectModalsContent.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1,14-21,31-33,35-37,39-43,45-46,48-49,51,53-54,56-80
+packages/server/test/integration/cypress_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 29,36,38,150-171,222-223,464-467,967-974,987-992,1004-1007,1009-1010,1012-1015,1017-1022,1028-1041,1043-1046,1048-1051,1053-1056,1058-1063,1198-1203,1234-1249,1255-1268
+packages/data-context/src/data/ProjectLifecycleManager.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 64-65,202-207,297-302,373-411,416,431,613-620
+npm/webpack-dev-server/CHANGELOG.md
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-7
+packages/frontend-shared/src/gql-components/Auth.vue
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 68,79,87,95,97-99,104-106,154-161,171,177-215,218-228,262-269,289,303,309,322
+system-tests/lib/dep-installer/index.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 152-162
+packages/server/test/unit/cloud/bundles/bundle_error_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-50
+.github/workflows/snyk_static_analysis_scan.yaml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 11-16,20-24,29,31,36-37,49
+npm/react/cypress/component/advanced/lazy-loaded/app.cy.jsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5
+packages/app/src/specs/banners/LoginBanner.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 38
+packages/server/test/spec_helper.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 27-28,106
+packages/server/lib/saved_state.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4
+packages/server/test/unit/cloud/bundles/sweep_orphan_staging_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-67
+npm/vite-dev-server/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 25
+npm/react/cypress.config.ts
+  s_d1b7976ede1ba4::t_c68bec0d90c055 1-20
+packages/data-context/src/DataContext.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 335-338
+tooling/packherd/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 17
+tooling/v8-snapshot/cache/darwin/snapshot-meta.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 85,263,553-554,625-626,810,896-908,914,1554,3062-3063,3276,3282-3300,3636-3641,3712,3730-3731,3733,3735,3865-3871,3873-3877,3922
+packages/app/src/specs/SpecsListBanners.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 563-590
+packages/frontend-shared/cypress/e2e/e2ePluginSetup.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 112-113,116,142,169-172,371-376,397-411,435,481
+scripts/binary/binary-cleanup.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 94-96,149
+packages/server/lib/cloud/bundles/bundle_error.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-36
+packages/app/src/runner/event-manager.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 752-764,1009-1025
+packages/server/lib/util/headers.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-11
+packages/server/test/unit/cloud/cy-prompt/CyPromptLifecycleManager_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 141,210,268,328,358,515,561,721
+packages/server/lib/cloud/extract_atomic.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1,11,18,23,37-38
+packages/server/lib/plugins/child/require_async_child.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2-5,11-12,23,32-45,47,49,53-60,62,65-84,86
+packages/server/lib/cloud/network/is_retryable_error.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 8-22,25-26,37-45
+packages/server/lib/server-base.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 38,40,42,50,166,263-264,415-417,665-681,880
+packages/server/lib/util/fs.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 23,30-32
+.github/workflows/triage_add_to_routed_project.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 11
+packages/server/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 24,42,121,125,133,158,171,190
+packages/server/test/unit/modes/info_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5
+packages/server/test/unit/spec_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3
+.github/workflows/semantic-pull-request.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 33
+packages/driver/src/cy/commands/origin/index.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 103,184-240,244,246-251,253-255,257,259,261-274,276-278
+packages/server/test/unit/cloud/bundles/cache_root_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-85
+packages/app/src/specs/banners/RecordBanner.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 49
+packages/server/lib/cloud/bundles/cache_root.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-54
+packages/server/test/unit/cloud/bundles/stream_download_verify_extract_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-267
+packages/server/test/unit/util/app_data_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-154
+.github/workflows/triage_update_status.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 15-16
+cli/test/lib/tasks/cache.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 54,153-180,232-292
+packages/server/lib/cloud/encryption.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 58,61-68
+cli/test/lib/tasks/unzip.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 15,22,67,90,92,178,210,216,258,296,308,345
+packages/server/test/unit/cloud/studio/StudioLifecycleManager_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 202-209,304-311,409,411,455,457,608,699,723,770,796,954,957,977,999,1005,1010,1014,1025,1029-1032,1041,1058,1091,1105
+packages/data-context/src/data/ProjectConfigManager.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 643,649,653-665
+packages/packherd-require/src/transpile-ts.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 14
+packages/app/src/specs/banners/ConnectProjectBanner.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 38
+packages/app/cypress/e2e/specs_list_latest_runs.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 233-236,244-248,261,593-611
+packages/server/lib/cloud/api/studio/post_studio_session.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 29
+packages/server/lib/cloud/protocol.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 435
+packages/server/test/performance/proxy_performance_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3,8,28-93,401-442,448-450
+scripts/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 7
+.github/ISSUE_TEMPLATE/1-bug-report.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10-12,31-33
+packages/server/lib/util/process_profiler.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 7
+packages/socket/lib/node/socket.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4,11,21
+system-tests/projects/config-cjs-and-esm/config-with-ts-module-and-esbuild/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3
+tooling/packherd/src/create-bundle.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6
+tooling/v8-snapshot/cache/win32/snapshot-meta.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 85,265,556-557,630-631,816,903-915,921,1559,1607,3065-3066,3277,3283-3301,3636-3641,3712,3729-3730,3732,3734,3864-3870,3872-3876,3921
+cli/lib/tasks/state.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 78-83
+npm/react/cypress/component/advanced/mocking-imports/services.jsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2
+npm/vite-dev-server/test/resolveConfig.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-2,10,120-160
+packages/driver/src/cy/commands/actions/select.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 131
+packages/electron/src/open.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10,33-36,83-84,88,95-98,102-114
+packages/data-context/graphql/schemaTypes/objectTypes/gql-Mutation.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 294-308
+tooling/v8-snapshot/cache/linux/snapshot-meta.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 85,263,552-553,624-625,809,895-907,913,1553,1601,3061-3062,3275,3281-3299,3373,3478,3637-3642,3713,3731-3732,3734,3736,3866-3872,3874-3878,3923
+packages/driver/types/internal-types-lite.d.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 14
+packages/data-context/src/actions/ServersActions.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 44-49,51-62
+packages/server/lib/cloud/api/index.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 176,184-185,444,449-450
+packages/server/lib/cloud/cy-prompt/ensure_cy_prompt_bundle.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1,8-11,13-18,20,23-25
+packages/server/lib/privileged-commands/privileged-commands-manager.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4,42
+.github/workflows/update_v8_snapshot_cache.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 56,80-86,91,114-126,129,133,137,141,143,147-149,151-178,184
+packages/app/cypress/e2e/cypress-origin-communicator.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1,60-97
+packages/data-context/test/unit/data/ProjectConfigIpc-real-child-process.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 68-70
+packages/socket/test/socket.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4-5,27,29,46,48
+packages/data-context/src/util/cloudUrls.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-7
+system-tests/lib/docker.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 25-27,106
+packages/app/src/composables/useRecordEvent.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 7-8,18-19,28,30
+packages/server/lib/browsers/utils.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10-16,27,127,140,167,220,320-323,483,545,549-550
+npm/webpack-batteries-included-preprocessor/test/e2e/features.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 81-84
+packages/server/lib/browsers/index.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 110,315-316
+packages/server/lib/cloud/bundles/sweep_orphan_staging.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-45
+packages/server/lib/makeDataContext.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 28,32,64-69,78-80,235-237
+system-tests/projects/protocol/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 11
+tooling/electron-mksnapshot/src/mksnapshot.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5,12,40
+packages/data-context/test/unit/graphql/makeGraphQLServer.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-376
+guides/release-process.md
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 144
+packages/data-context/src/data/coreDataShape.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 34-38
+packages/server/index.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2-3,10-16,19
+packages/server/lib/cloud/api/put_protocol_artifact.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 41
+packages/server/lib/util/file.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 11-13,23-24,38-39,63-65,67-69,85-89,266-272,288-292
+packages/data-context/src/index.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-2,5-6,30,32,34,36-37
+packages/network/lib/client-certificates.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5-6,153,161,222-224,256-257,275,277-282,291,309-310,317,357,359,361
+packages/server/test/unit/cache_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-2,6-7,92
+packages/server/test/unit/project-base_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 17,64,68
+npm/react/cypress/support/component.jsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-2
+system-tests/test-binary/node_versions_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 37,51
+packages/server/lib/util/shell.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 102,105-111
+npm/webpack-batteries-included-preprocessor/CHANGELOG.md
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-7
+packages/server/lib/util/server_destroy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2,9,16
+packages/server/lib/util/app_data.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-182
+packages/proxy/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 34
+packages/server/lib/cloud/user.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6-7,11,15-20,37-38
+packages/server/test/unit/cloud/studio/ensure_studio_bundle_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5,8,11-12,17-19,21-23,26-28,31-36,38-41,44-45,47,49-53,56-57,59,61-62
+npm/react/tsconfig.cypress.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-17
+packages/data-context/schemas/schema.graphql
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 69-143,1487-1491,1743-1745,1870-1873
+packages/server/test/unit/plugins/child/require_async_child_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5-6,9-62,79
+cli/lib/tasks/unzip.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6,16-22,26,40-43,56-58,85
+packages/data-context/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 87
+packages/extension/app/v2/background.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 66
+packages/app/src/specs/banners/ComponentTestingAvailableBanner.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 59
+packages/server/test/unit/util/electron-app_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-33
+packages/server/lib/modes/record.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 300,302,305,345-346
+packages/data-context/src/sources/CloudDataSource.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 26-27,35,53-62,300-304,371-372
+packages/app/src/specs/banners/CreateOrganizationBanner.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 50
+cli/test/lib/tasks/extract-with-yauzl.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-227
+packages/app/src/specs/banners/TrackedBanner.vue
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 15,17,26-27,33-35,39,44-48,66-73,77-81,83-95,97,101-103,112-116,126-133,135-144,146,155-166
+npm/vite-dev-server/src/resolveConfig.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 21-26,147-155
+packages/data-context/test/unit/data/ProjectLifecycleManager.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 212-249,269-493
+packages/app/cypress/e2e/top-nav.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 445-446,448,648-659,661-666,695-706,708-712
+packages/driver/cypress/e2e/e2e/origin/commands/files.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 31-36,73-78,96-100
+packages/proxy/lib/http/response-middleware.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 47-53,385-386,882,888,898-906,908-925
+packages/server/test/unit/modes/record_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 8
+packages/server/test/unit/util/graceful_exit_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-184
+.github/workflows/triage_handle_new_comments.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 12-13
+npm/react/cypress/component/advanced/mocking-imports/spec.cy.jsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5
+.github/workflows/triage_add_to_project.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 20-21
+packages/server/test/integration/http_requests_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1025-1026,1049,1064,1074-1076
+packages/server/test/unit/browsers/firefox_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 16
+packages/server/test/unit/plugins/child/run_plugins_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 8
+packages/frontend-shared/src/composables/useMarkdown.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 17-18,91,97
+packages/server/lib/cache.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2,5,60,66,145,147,152
+packages/server/lib/modes/interactive.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10,177-181,184,188,190-191
+packages/frontend-shared/src/store/user-project-status-store.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10-11,15,73,106-112,118
+packages/app/src/specs/banners/CloudMessageBanner.vue
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-155
+packages/server/test/unit/plugins/util_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 90,92
+packages/data-context/graphql/schemaTypes/objectTypes/gql-LocalSettings.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 60-68
+packages/server/test/unit/task_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3-4,64
+npm/webpack-batteries-included-preprocessor/test/fixtures/tsconfig.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5
+packages/app/src/specs/banners/CloudMessageBanner.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-353
+packages/server/lib/controllers/xhrs.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 8,119-120
+npm/react/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 9,21,25-26
+packages/electron/test/open.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 275,281-285,291,294-296,302-305,307-310,316-365
+npm/react/cypress/component/advanced/renderless/mouse-movement.jsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2
+.github/workflows/update-browser-versions.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 18-25,30,95,97-113,119,136
+packages/driver/cypress/e2e/commands/actions/select.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 71-96
+.circleci/src/pipeline/@pipeline.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 8-9,11-12,107,125,202,275,572,615,1028-1030,1086-1088,1254,1521,2087-2089,2500,2551,2567,2577,2587,2617,2633,2649,2707,2945,2985
+packages/server/lib/util/editors.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 98
+packages/server/test/unit/open_project_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4
+packages/driver/cypress/e2e/e2e/origin/commands/spies_stubs_clocks.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3-21,51-56,63-68,84-89,96-101,155,157-159,161,165,186,188-190,192,195
+tooling/electron-mksnapshot/test/.mocharc.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 7
+cli/lib/tasks/extract-with-yauzl.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-192
+packages/packherd-require/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 25
+packages/driver/src/util/serialization/log.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 288-291,293,295,297-301
+packages/server/lib/routes.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 18
+packages/server/lib/util/net_profiler.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-334
+packages/server/test/unit/cloud/auth_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4,19,80-86,146-167,189-196
+packages/server/test/unit/xhrs_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3
+packages/telemetry/src/span-exporters/cloud-span-exporter.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 143-144
+system-tests/test/plugin_run_events_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1,3,29-41
+packages/server/lib/util/get-windows-proxy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-3
+packages/reporter/cypress/e2e/runnables.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 220
+packages/socket/test/utils.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 55-70
+npm/vite-dev-server/test/urlPaths.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-54
+packages/data-context/graphql/corsOriginDelegate.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-49
+packages/socket/lib/utils.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5-25,54
+scripts/binary/build.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 106-108,113
+npm/webpack-batteries-included-preprocessor/index.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 114-119,144-154
+packages/app/cypress/e2e/cloud_message_banner.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-168
+npm/react/cypress/component/basic/typescript/ts-spec.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4-7
+packages/server/lib/project-base.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 33,183,482,516,771
+system-tests/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 25,58,89
+packages/app/cypress/e2e/settings.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 102,567
+packages/server/test/integration/server_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 7-8,95,123,126,382
+packages/server/test/performance/cy_visit_performance_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-44
+npm/webpack-batteries-included-preprocessor/test/fixtures/paths-no-baseurl/paths-example-dir/paths-example-file.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1
+packages/app/cypress/e2e/studio/studio-state-management.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 73
+.github/PULL_REQUEST_TEMPLATE.md
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2,28-32,41
+packages/app/cypress/e2e/subscriptions/errorWarningChange-subscription.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 8
+packages/data-context/src/actions/AuthActions.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 8,60-71,88-89,109
+packages/server/lib/cloud/exception.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10,73,84-85
+tooling/electron-mksnapshot/test/integration/mksnapshot.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 22,35,48
+packages/data-context/schemas/cloud.graphql
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5-82,1400-1409
+packages/server/test/unit/util/file_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-2,9,14-20,37-44,47-67
+packages/network/test/unit/agent.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 26,43-63,746,753
+packages/proxy/test/unit/http/response-middleware.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 286-307,2043-2218,2224-2226
+packages/server/lib/controllers/client.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 9,27-28
+packages/server/test/integration/websockets_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 72,75,330-397
+packages/server/lib/browsers/chrome.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 11,598
+scripts/lerna-build.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-34
+packages/server/lib/cloud/studio/StudioLifecycleManager.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 16,29-30,36-37,62,72,140,204,223-226,342-347,366,369-377,431,458
+packages/server/lib/cloud/bundles/publish_staging_to_final.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-51
+packages/server/lib/util/graceful-exit.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-207
+packages/driver/cypress/e2e/e2e/origin/cookie_misc.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 76-77,83-97,106,117,124-125
+packages/app/cypress/e2e/runs.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 93-95,300
+packages/server/lib/cloud/auth.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 13,22-32,39,41,63,73-80,90,101-103,105,202,204,214,223,225-227,232-233,235,253-263,266
+packages/server/lib/util/args.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-550
+packages/driver/src/cypress/runner.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 552-554
+packages/frontend-shared/src/gql-components/LoginConnectModalsContent.vue
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6
+system-tests/projects/config-with-ts-module-error/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3
+npm/webpack-batteries-included-preprocessor/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 37-38,51-52
+package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 17,79,261,277
+packages/driver/cypress/e2e/e2e/origin/patches.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2-11,474,477-482
+packages/server/lib/cloud/studio/ensure_studio_bundle.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1,6-9,16-20,23-25
+packages/server/test/unit/plugins/child/run_child_fixture.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 8-24,46,48
+packages/app/src/specs/banners/index.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10-11
+packages/server/test/unit/cloud/bundles/publish_staging_to_final_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-196
+scripts/github-actions/commit-via-api.mjs
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-64
+packages/electron/README.md
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 168
+packages/server/test/unit/browsers/electron_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-1296
+packages/server/test/unit/cloud/cy-prompt/ensure_cy_prompt_bundle_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5,8,11-12,17-19,21-23,26-28,31-36,38-41,44-45,47,49-53,56-57,59,61-62
+packages/data-context/graphql/makeGraphQLServer.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6,27-28,33,40,123-125,130-133,193-194,196-202,207-213,220,225-228
+packages/data-context/src/util/index.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6
+packages/server/lib/cloud/bundles/ensure_signed_bundle.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-96
+cli/lib/tasks/cache.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 16-18,47-48
+packages/data-context/test/unit/actions/AuthActions.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 15,134-172
+packages/server/test/unit/modes/interactive_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10,189-190,202,204,206,208,210,215-216,219-221,225-226,230,236,240-243,245-254
+packages/server/lib/util/performance_benchmark.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-35
+packages/driver/cypress/e2e/e2e/origin/commands/screenshot.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 27-32,47-52,65-70,103-108,120-125,144-149,162-167,181-186,197-202,213-218,236-241,275-280,306,311-316,335,342-347,371-376,403-408,435-440,468-473,501-506,533-538,566-571,599-604,645-650,666
+packages/server/test/unit/cloud/bundles/ensure_signed_bundle_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-212
+.circleci/src/pipeline/workflows/@main.yml
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10-12,315,344-346
+npm/vite-dev-server/src/urlPaths.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-54
+packages/data-context/src/util/urqlCacheKeys.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 45-49
+packages/server/lib/gui/menu.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 5
+packages/server/test/support/cross_process_publish_worker.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-18
+scripts/gulp/tasks/gulpRegistry.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 92-96,99,102,105
+npm/react/eslint.config.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6,16
+npm/vite-dev-server/test/devServer.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-140
+packages/app/src/runner/dom.cy.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 28-31
+packages/data-context/graphql/stitching/remoteSchemaWrapped.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 12-18,49-54,80
+packages/server/lib/util/electron-app.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-62
+npm/react/cypress/component/basic/wrap.cy.jsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 10
+npm/vite-dev-server/src/devServer.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 6,42,50-68,70-78,80-84
+npm/webpack-batteries-included-preprocessor/test/fixtures/paths-no-baseurl/spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-4
+CONTRIBUTING.md
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 159,515-522,543-549,590-592
+npm/webpack-dev-server/src/helpers/angularHandler.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1,156,163-167
+packages/launchpad/cypress/e2e/top-nav-launchpad.cy.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 389-390,392,598-609,611-615,644-655,657-661
+packages/server/lib/screenshots.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4,307,328,423,465-466
+packages/server/test/unit/plugins/child/run_require_async_child_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 42
+npm/react/cypress/component/advanced/lazy-loaded-suspense/LazyComponent.tsx
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3-8
+packages/server/lib/cloud/api/cy-prompt/post_cy_prompt_session.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 29
+packages/server/lib/cypress.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 9-10,13,19-23,28-30,32-37,39-43,81,85,90,93,114,125-136,141,151,181,185-187,190-209,236-241,243,245,258,264-267,271,274-283,285-286,289,300
+packages/server/start-cypress.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-2,7-9,13-14,20,58-74,92
+packages/server/test/unit/server-base_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 3-5,8-13,15,27,44-49,95-136,295-299,404
+packages/driver/test/unit/cross-origin/communicator.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-95
+packages/types/package.json
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 29
+cli/CHANGELOG.md
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 2-43,62,95
+packages/app/src/specs/SpecsListBanners.vue
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 114-119,122,147,191-226,358-408
+packages/server/test/unit/cloud/network/is_retryable_error_spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 49-83
+packages/data-context/test/unit/helper.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 60-62
+packages/socket/lib/client/cdp-browser.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4,6-8,20
+packages/server/test/unit/errors_spec.js
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 4
+packages/server/lib/cloud/bundles/parse_hash_from_bundle_url.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 1-10
+packages/network/test/unit/client_certificates.spec.ts
+  s_d9e910623d43d0::t_ab4c97ec75b8f6 8-19,204,206-213,215-219,221,223,229,231-232,234-259,266-277,279,283,535-632,677,703,837-863,906,923,938,951
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "9be827ba5b1f6671000860743db9f8ddc00d78a0",
+  "prompts": {},
+  "sessions": {
+    "s_d1b7976ede1ba4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d27e9abd-4bbc-4117-8208-292b2bb39ad8",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    },
+    "s_d9e910623d43d0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9066dbe3-d8b3-4df8-aa8c-6fa70a277fc5",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
