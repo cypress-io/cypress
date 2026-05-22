@@ -43,7 +43,13 @@ const extractWithYauzl = async (
         return reject(err)
       }
 
+      // `settled` guards against an in-flight `handleEntry` calling
+      // `zipFile.readEntry()` on a now-closed handle when extraction has
+      // already failed (e.g. yauzl emitted 'error' while we were writing
+      // an entry to disk).
+      let settled = false
       const finish = _.once((err?: Error) => {
+        settled = true
         zipFile.removeAllListeners?.()
         zipFile.close?.()
         if (err) {
@@ -65,6 +71,8 @@ const extractWithYauzl = async (
       zipFile.on('entry', (entry: any) => {
         handleEntry(zipFile, entry, resolvedDest)
         .then(() => {
+          if (settled) return
+
           onEntry()
           zipFile.readEntry()
         })
