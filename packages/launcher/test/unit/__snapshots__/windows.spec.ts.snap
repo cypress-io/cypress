@@ -107,20 +107,6 @@ exports[`windows browser detection > detects Firefox local installs 1`] = `
   },
   {
     "binary": [
-      "firefox-developer-edition",
-      "firefox",
-    ],
-    "channel": "dev",
-    "displayName": "Firefox Developer Edition",
-    "family": "firefox",
-    "name": "firefox",
-    "path": "C:/Users/flotwig/AppData/Local/Firefox Developer Edition/firefox.exe",
-    "validator": [Function],
-    "version": "300",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
-  },
-  {
-    "binary": [
       "firefox-beta",
       "firefox",
     ],
@@ -131,6 +117,20 @@ exports[`windows browser detection > detects Firefox local installs 1`] = `
     "path": "C:/Users/flotwig/AppData/Local/Firefox Beta/firefox.exe",
     "validator": [Function],
     "version": "400",
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
+      "firefox-developer-edition",
+      "firefox",
+    ],
+    "channel": "dev",
+    "displayName": "Firefox Developer Edition",
+    "family": "firefox",
+    "name": "firefox",
+    "path": "C:/Users/flotwig/AppData/Local/Firefox Developer Edition/firefox.exe",
+    "validator": [Function],
+    "version": "300",
     "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
   },
   {
@@ -223,20 +223,6 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
   },
   {
     "binary": [
-      "firefox-developer-edition",
-      "firefox",
-    ],
-    "channel": "dev",
-    "displayName": "Firefox Developer Edition",
-    "family": "firefox",
-    "name": "firefox",
-    "path": "C:/Program Files (x86)/Firefox Developer Edition/firefox.exe",
-    "validator": [Function],
-    "version": "73",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
-  },
-  {
-    "binary": [
       "firefox-beta",
       "firefox",
     ],
@@ -247,6 +233,20 @@ exports[`windows browser detection > detects browsers as expected 1`] = `
     "path": "C:/Program Files/Firefox Beta/firefox.exe",
     "validator": [Function],
     "version": "152",
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
+      "firefox-developer-edition",
+      "firefox",
+    ],
+    "channel": "dev",
+    "displayName": "Firefox Developer Edition",
+    "family": "firefox",
+    "name": "firefox",
+    "path": "C:/Program Files (x86)/Firefox Developer Edition/firefox.exe",
+    "validator": [Function],
+    "version": "73",
     "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
   },
   {

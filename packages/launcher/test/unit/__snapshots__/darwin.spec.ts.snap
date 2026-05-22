@@ -109,26 +109,6 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
   },
   {
     "binary": [
-      "firefox-developer-edition",
-      "firefox",
-    ],
-    "channel": "dev",
-    "displayName": "Firefox Developer Edition",
-    "family": "firefox",
-    "findAppParams": {
-      "appName": "Firefox Developer Edition.app",
-      "bundleId": "org.mozilla.firefoxdeveloperedition",
-      "executable": "Contents/MacOS/firefox",
-      "versionProperty": "CFBundleShortVersionString",
-    },
-    "name": "firefox",
-    "path": "/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox",
-    "validator": [Function],
-    "version": "someVersion",
-    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
-  },
-  {
-    "binary": [
       "firefox-beta",
       "firefox",
     ],
@@ -143,6 +123,26 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     },
     "name": "firefox",
     "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
+    "validator": [Function],
+    "version": "someVersion",
+    "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
+  },
+  {
+    "binary": [
+      "firefox-developer-edition",
+      "firefox",
+    ],
+    "channel": "dev",
+    "displayName": "Firefox Developer Edition",
+    "family": "firefox",
+    "findAppParams": {
+      "appName": "Firefox Developer Edition.app",
+      "bundleId": "org.mozilla.firefoxdeveloperedition",
+      "executable": "Contents/MacOS/firefox",
+      "versionProperty": "CFBundleShortVersionString",
+    },
+    "name": "firefox",
+    "path": "/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox",
     "validator": [Function],
     "version": "someVersion",
     "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,

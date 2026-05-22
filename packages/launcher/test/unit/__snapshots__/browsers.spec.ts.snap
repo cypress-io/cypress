@@ -61,11 +61,11 @@ exports[`browsers > returns the expected list of browsers 1`] = `
   },
   {
     "binary": [
-      "firefox-developer-edition",
+      "firefox-beta",
       "firefox",
     ],
-    "channel": "dev",
-    "displayName": "Firefox Developer Edition",
+    "channel": "beta",
+    "displayName": "Firefox Beta",
     "family": "firefox",
     "name": "firefox",
     "validator": [Function],
@@ -73,11 +73,11 @@ exports[`browsers > returns the expected list of browsers 1`] = `
   },
   {
     "binary": [
-      "firefox-beta",
+      "firefox-developer-edition",
       "firefox",
     ],
-    "channel": "beta",
-    "displayName": "Firefox Beta",
+    "channel": "dev",
+    "displayName": "Firefox Developer Edition",
     "family": "firefox",
     "name": "firefox",
     "validator": [Function],

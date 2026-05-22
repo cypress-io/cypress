@@ -109,10 +109,10 @@ const formPaths: WindowsBrowserPaths = {
   },
   firefox: {
     stable: getFirefoxPaths('Mozilla Firefox'),
-    dev: getFirefoxPaths('Firefox Developer Edition'),
     // Mozilla's Beta installer reuses the Mozilla Firefox path; the Firefox Beta folder
     // here matches PPA-style or side-by-side beta installs that are kept separate.
     beta: getFirefoxPaths('Firefox Beta'),
+    dev: getFirefoxPaths('Firefox Developer Edition'),
     nightly: getFirefoxPaths('Firefox Nightly'),
   },
   edge: {
