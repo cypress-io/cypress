@@ -1,29 +1,34 @@
-require('../spec_helper')
+import '../spec_helper'
+import _ from 'lodash'
+import stripAnsi from 'strip-ansi'
+import { stripIndent } from 'common-tags'
+import Fixtures from '@tooling/system-tests'
+import { getCtx } from '@packages/data-context'
+import { sinon } from '../spec_helper'
 
-const _ = require('lodash')
-const stripAnsi = require('strip-ansi')
-const { stripIndent } = require('common-tags')
-const Fixtures = require('@tooling/system-tests')
-const { getCtx } = require('@packages/data-context')
-const { sinon } = require('../spec_helper')
+type MutableProcessVersions = typeof process.versions & {
+  chrome?: string
+}
+
+const processVersions = process.versions as MutableProcessVersions
+const originalChromeVersion = processVersions.chrome
 
 describe('lib/config', () => {
   before(function () {
     this.env = process.env
-    this.versions = process.versions
 
     process.env = _.omit(process.env, 'CYPRESS_DEBUG')
-    process.versions.chrome = '0'
+    processVersions.chrome = '0'
 
     Fixtures.scaffold()
   })
 
   after(function () {
     process.env = this.env
-    process.versions = this.versions
+    processVersions.chrome = originalChromeVersion
   })
 
-  context('.get', () => {
+  describe('.get', () => {
     beforeEach(async function () {
       delete process.env.CYPRESS_COMMERCIAL_RECOMMENDATIONS
 
@@ -76,7 +81,7 @@ describe('lib/config', () => {
       })
     })
 
-    context('port', () => {
+    describe('port', () => {
       beforeEach(function () {
         return this.setup({}, { foo: 'bar' })
       })
@@ -103,7 +108,7 @@ describe('lib/config', () => {
       })
     })
 
-    context('validation', () => {
+    describe('validation', () => {
       beforeEach(function () {
         this.expectValidationPasses = () => {
           return this.ctx.lifecycleManager.getFullInitialConfig() // shouldn't throw
@@ -137,7 +142,7 @@ describe('lib/config', () => {
         return this.expectValidationPasses()
       })
 
-      context('animationDistanceThreshold', () => {
+      describe('animationDistanceThreshold', () => {
         it('passes if a number', function () {
           this.setup({ animationDistanceThreshold: 10 })
 
@@ -160,7 +165,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('baseUrl', () => {
+      describe('baseUrl', () => {
         it('passes if begins with http://', function () {
           this.setup({ e2e: { baseUrl: 'http://example.com', supportFile: false } })
 
@@ -192,7 +197,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('chromeWebSecurity', () => {
+      describe('chromeWebSecurity', () => {
         it('passes if a boolean', function () {
           this.setup({ chromeWebSecurity: false })
 
@@ -209,7 +214,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('modifyObstructiveCode', () => {
+      describe('modifyObstructiveCode', () => {
         it('passes if a boolean', function () {
           this.setup({ modifyObstructiveCode: false })
 
@@ -226,7 +231,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('component', () => {
+      describe('component', () => {
         it('passes if an object with valid properties', function () {
           this.setup({
             component: {
@@ -256,7 +261,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('e2e', () => {
+      describe('e2e', () => {
         it('passes if an object with valid properties', function () {
           this.setup({
             e2e: {
@@ -294,7 +299,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('defaultCommandTimeout', () => {
+      describe('defaultCommandTimeout', () => {
         it('passes if a number', function () {
           this.setup({ defaultCommandTimeout: 10 })
 
@@ -311,7 +316,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('env', () => {
+      describe('env', () => {
         it('passes if an object', function () {
           this.setup({ env: {} })
 
@@ -325,7 +330,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('execTimeout', () => {
+      describe('execTimeout', () => {
         it('passes if a number', function () {
           this.setup({ execTimeout: 10 })
 
@@ -339,7 +344,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('taskTimeout', () => {
+      describe('taskTimeout', () => {
         it('passes if a number', function () {
           this.setup({ taskTimeout: 10 })
 
@@ -353,7 +358,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('fileServerFolder', () => {
+      describe('fileServerFolder', () => {
         it('passes if a string', function () {
           this.setup({ fileServerFolder: '_files' })
 
@@ -376,7 +381,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('fixturesFolder', () => {
+      describe('fixturesFolder', () => {
         it('passes if a string', function () {
           this.setup({ fixturesFolder: '_fixtures' })
 
@@ -396,7 +401,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('excludeSpecPattern', () => {
+      describe('excludeSpecPattern', () => {
         it('passes if a string', function () {
           this.setup({ e2e: { excludeSpecPattern: '*.jsx', supportFile: false } })
 
@@ -431,7 +436,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('downloadsFolder', () => {
+      describe('downloadsFolder', () => {
         it('passes if a string', function () {
           this.setup({ downloadsFolder: '_downloads' })
 
@@ -445,7 +450,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('userAgent', () => {
+      describe('userAgent', () => {
         it('passes if a string', function () {
           this.setup({ userAgent: '_tests' })
 
@@ -459,7 +464,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('numTestsKeptInMemory', () => {
+      describe('numTestsKeptInMemory', () => {
         it('passes if a number', function () {
           this.setup({ numTestsKeptInMemory: 10 })
 
@@ -473,7 +478,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('pageLoadTimeout', () => {
+      describe('pageLoadTimeout', () => {
         it('passes if a number', function () {
           this.setup({ pageLoadTimeout: 10 })
 
@@ -487,7 +492,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('port', () => {
+      describe('port', () => {
         it('passes if a number', function () {
           this.setup({ port: 10 })
 
@@ -501,7 +506,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('reporter', () => {
+      describe('reporter', () => {
         it('passes if a string', function () {
           this.setup({ reporter: '_custom' })
 
@@ -515,7 +520,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('requestTimeout', () => {
+      describe('requestTimeout', () => {
         it('passes if a number', function () {
           this.setup({ requestTimeout: 10 })
 
@@ -529,7 +534,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('responseTimeout', () => {
+      describe('responseTimeout', () => {
         it('passes if a number', function () {
           this.setup({ responseTimeout: 10 })
 
@@ -543,7 +548,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('specPattern', () => {
+      describe('specPattern', () => {
         it('passes if a string', function () {
           this.setup({ e2e: { supportFile: false, specPattern: '**/*.coffee' } })
 
@@ -578,7 +583,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('experimentalCspAllowList', () => {
+      describe('experimentalCspAllowList', () => {
         const experimentalCspAllowedDirectives = JSON.stringify(['script-src-elem', 'script-src', 'default-src', 'form-action', 'child-src', 'frame-src']).split(',').join(', ')
 
         it('passes if false', function () {
@@ -636,7 +641,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('supportFile', () => {
+      describe('supportFile', () => {
         it('passes if false', function () {
           this.setup({ e2e: { supportFile: false } })
 
@@ -659,7 +664,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('trashAssetsBeforeRuns', () => {
+      describe('trashAssetsBeforeRuns', () => {
         it('passes if a boolean', function () {
           this.setup({ trashAssetsBeforeRuns: false })
 
@@ -673,7 +678,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('videoCompression', () => {
+      describe('videoCompression', () => {
         it('passes if a number', function () {
           this.setup({ videoCompression: 10 })
 
@@ -705,7 +710,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('video', () => {
+      describe('video', () => {
         it('passes if a boolean', function () {
           this.setup({ video: false })
 
@@ -719,7 +724,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('videosFolder', () => {
+      describe('videosFolder', () => {
         it('passes if a string', function () {
           this.setup({ videosFolder: '_videos' })
 
@@ -733,7 +738,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('screenshotOnRunFailure', () => {
+      describe('screenshotOnRunFailure', () => {
         it('passes if a boolean', function () {
           this.setup({ screenshotOnRunFailure: false })
 
@@ -747,7 +752,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('viewportHeight', () => {
+      describe('viewportHeight', () => {
         it('passes if a number', function () {
           this.setup({ viewportHeight: 10 })
 
@@ -761,7 +766,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('viewportWidth', () => {
+      describe('viewportWidth', () => {
         it('passes if a number', function () {
           this.setup({ viewportWidth: 10 })
 
@@ -775,7 +780,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('waitForAnimations', () => {
+      describe('waitForAnimations', () => {
         it('passes if a boolean', function () {
           this.setup({ waitForAnimations: false })
 
@@ -789,7 +794,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('scrollBehavior', () => {
+      describe('scrollBehavior', () => {
         it('passes if false', function () {
           this.setup({ scrollBehavior: false })
 
@@ -839,7 +844,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('watchForFileChanges', () => {
+      describe('watchForFileChanges', () => {
         it('passes if a boolean', function () {
           this.setup({ watchForFileChanges: false })
 
@@ -853,7 +858,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('blockHosts', () => {
+      describe('blockHosts', () => {
         it('passes if a string', function () {
           this.setup({ blockHosts: 'google.com' })
 
@@ -888,7 +893,7 @@ describe('lib/config', () => {
         })
       })
 
-      context('retries', () => {
+      describe('retries', () => {
         // need to keep the const here or it'll get stripped by the build
 
         const cases = [
@@ -949,7 +954,7 @@ describe('lib/config', () => {
         }
       }
 
-      context('clientCertificates', () => {
+      describe('clientCertificates', () => {
         it('accepts valid PEM config', function () {
           this.setup(pemCertificate())
 
