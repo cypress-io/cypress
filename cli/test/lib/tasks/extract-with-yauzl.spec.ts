@@ -127,6 +127,16 @@ describe('lib/tasks/extract-with-yauzl', () => {
     expect(onEntry).toHaveBeenCalledTimes(2)
   })
 
+  it('treats entries with the Unix directory mode as directories even without a trailing slash', async () => {
+    // S_IFDIR (0o040000) in the high 16 bits of externalFileAttributes,
+    // and no trailing slash on the entry name.
+    const zip = writeZip([{ name: 'sub', unixMode: 0o040755, store: true }])
+
+    await extractWithYauzl(zip, destDir, onEntry)
+
+    expect((await fsp.stat(path.join(destDir, 'sub'))).isDirectory()).to.equal(true)
+  })
+
   it('preserves Unix file modes on extracted files', async () => {
     const zip = writeZip([{ name: 'bin', body: Buffer.from('payload'), unixMode: 0o755 }])
 
@@ -200,5 +210,18 @@ describe('lib/tasks/extract-with-yauzl', () => {
     await expect(extractWithYauzl(bogus, destDir, onEntry)).rejects.toThrow()
 
     await fsp.unlink(bogus)
+  })
+
+  it('rejects (not resolves) when a per-entry write fails — even with a falsy rejection', async () => {
+    // simulate a write failure by making the destination a file that already
+    // has a child path that should be a directory — fsp.mkdir on the parent
+    // will reject, and we want to make sure that rejection surfaces.
+    const blocker = path.join(destDir, 'blocked')
+
+    await fsp.writeFile(blocker, 'i am a file, not a directory')
+
+    const zip = writeZip([{ name: 'blocked/inside.txt', body: Buffer.from('hi') }])
+
+    await expect(extractWithYauzl(zip, destDir, onEntry)).rejects.toThrow()
   })
 })

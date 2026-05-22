@@ -11,6 +11,7 @@ const pipelineAsync = promisify(stream.pipeline)
 // Unix file mode masks for entries stored in zip's externalFileAttributes
 // (the high 16 bits when the file was zipped on a Unix host).
 const S_IFMT = 0o170000
+const S_IFDIR = 0o040000
 const S_IFLNK = 0o120000
 
 // PATH_MAX on Linux/macOS is 4096; symlink targets larger than this are not
@@ -52,7 +53,14 @@ const extractWithYauzl = async (
         return resolve()
       })
 
-      zipFile.on('error', finish)
+      // Normalize any thrown / emitted value into a real Error so that a
+      // falsy rejection (e.g. `Promise.reject(undefined)`) doesn't get
+      // misread by `finish` as a successful completion.
+      const fail = (err: unknown) => {
+        finish(err instanceof Error ? err : new Error(typeof err === 'string' && err ? err : 'zip extraction failed'))
+      }
+
+      zipFile.on('error', fail)
       zipFile.on('end', () => finish())
       zipFile.on('entry', (entry: any) => {
         handleEntry(zipFile, entry, resolvedDest)
@@ -60,7 +68,7 @@ const extractWithYauzl = async (
           onEntry()
           zipFile.readEntry()
         })
-        .catch(finish)
+        .catch(fail)
       })
 
       zipFile.readEntry()
@@ -80,7 +88,10 @@ const handleEntry = async (zipFile: any, entry: any, resolvedDest: string): Prom
   }
 
   const unixMode = (entry.externalFileAttributes >>> 16) & 0xffff
-  const isDir = /\/$/.test(entry.fileName)
+  // Some archivers mark directories by Unix mode bits instead of (or in
+  // addition to) a trailing slash; honor both so we don't extract a
+  // directory entry as a zero-byte file.
+  const isDir = /\/$/.test(entry.fileName) || (unixMode & S_IFMT) === S_IFDIR
   const isSymlink = (unixMode & S_IFMT) === S_IFLNK
 
   if (isDir) {
