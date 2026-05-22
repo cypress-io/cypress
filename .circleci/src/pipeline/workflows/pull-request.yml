@@ -1,6 +1,9 @@
 # The workflow runs for:
 # External PR after approval (approved contributor PR that's not a main branch)
 # Internal PR for any branch that is not develop, release/x.x.x, or electron/x.x.x related
+# Also excludes `diagnose/*` branches, which are reserved for the temporary
+# windows-diagnostic workflow (TODO: remove diagnose/* exclusion once the
+# windows-npm-exit-code-diagnostic job is removed).
 when:
   and:
     - not:
@@ -10,6 +13,10 @@ when:
     - not:
         matches:
             pattern: /^electron\/\d+\.\d+\.\d+$/
+            value: << pipeline.git.branch >>
+    - not:
+        matches:
+            pattern: /^diagnose\/.*$/
             value: << pipeline.git.branch >>
     - not:
         equal: [ 'develop', << pipeline.git.branch >> ]
