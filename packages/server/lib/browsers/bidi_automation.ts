@@ -289,17 +289,29 @@ export class BidiAutomation {
       this.autContextId = undefined
       this.setTopLevelContextId(undefined)
       if (this.interceptId) {
+        const interceptToRemove = this.interceptId
+
+        // Clear state up-front so the field stays consistent regardless of how the BiDi call resolves.
+        this.interceptId = undefined
+
         // since we either have:
         //   1. a new upper level browser context created above with shouldKeepTabOpen set to true.
         //   2. all the previous contexts are destroyed.
-        // we should clean up our top level interceptor to prevent a memory leak as we no longer need it
-        await this.webDriverClient.networkRemoveIntercept({
-          intercept: this.interceptId,
-        })
+        // we should clean up our top level interceptor to prevent a memory leak as we no longer need it.
+        //
+        // On Firefox 144 BiDi, network.removeIntercept can race with the browsingContext.close
+        // that just destroyed the context owning this intercept and never ack — which kills the
+        // automation socket and aborts the run. Cap the wait so a wedged server can't take us down.
+        try {
+          await Promise.race([
+            this.webDriverClient.networkRemoveIntercept({ intercept: interceptToRemove }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('networkRemoveIntercept timed out (best-effort cleanup)')), 2000)),
+          ])
 
-        debug(`destroyed network intercept ${this.interceptId}`)
-
-        this.interceptId = undefined
+          debug(`destroyed network intercept ${interceptToRemove}`)
+        } catch (err) {
+          debug(`networkRemoveIntercept best-effort cleanup failed for ${interceptToRemove}: %s`, (err as Error).message)
+        }
       }
     }
 

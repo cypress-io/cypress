@@ -1,7 +1,11 @@
 import EventEmitter from 'node:events'
 import type { Client as WebDriverClient } from 'webdriver'
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
 import sinon from 'sinon'
+import sinonChai from '@cypress/sinon-chai'
+import chaiAsPromised from 'chai-as-promised'
+
+chai.use(sinonChai).use(chaiAsPromised)
 import { toInteger } from 'lodash'
 import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
 import type { NetworkBeforeRequestSentParametersModified } from '../../../lib/browsers/bidi_automation'
@@ -195,6 +199,56 @@ describe('lib/browsers/bidi_automation', () => {
             expect(bidiAutomationInstance.topLevelContextId).to.be.undefined
             // @ts-expect-error
             expect(bidiAutomationInstance.interceptId).to.be.undefined
+            // @ts-expect-error
+            expect(bidiAutomationInstance.autContextId).to.equal(undefined)
+          })
+
+          // Regression: Firefox 144 BiDi can leave network.removeIntercept hanging when it races
+          // with the browsingContext.close of the owning context. The handler must not block the
+          // automation socket indefinitely on a wedged BiDi server.
+          it('does not block automation when networkRemoveIntercept hangs', async function () {
+            this.timeout(5000)
+
+            // never-resolving promise simulates a wedged Firefox BiDi server
+            mockWebdriverClient.networkRemoveIntercept = sinon.stub().returns(new Promise(() => {}))
+
+            const bidiAutomationInstance = BidiAutomation.create(mockWebdriverClient, mockAutomationClient)
+
+            bidiAutomationInstance.setTopLevelContextId('123')
+
+            mockWebdriverClient.emit('browsingContext.contextCreated', {
+              parent: '123',
+              context: '456',
+              url: 'www.foobar.com',
+              userContext: '',
+              children: [],
+            })
+
+            await flushPromises()
+            await waitForAsyncOperation(mockWebdriverClient.networkAddIntercept as sinon.SinonStub)
+
+            // @ts-expect-error
+            expect(bidiAutomationInstance.interceptId).to.equal('mockInterceptId')
+
+            mockWebdriverClient.emit('browsingContext.contextDestroyed', {
+              parent: null,
+              context: '123',
+              url: 'www.foobar.com',
+              userContext: '',
+              children: ['456'],
+            })
+
+            // wait past the 2s best-effort timeout so the swallowed rejection has fired
+            await new Promise((resolve) => setTimeout(resolve, 2500))
+
+            expect(mockWebdriverClient.networkRemoveIntercept).to.have.been.calledWith({
+              intercept: 'mockInterceptId',
+            })
+
+            // @ts-expect-error — even though the BiDi call never resolved, internal state is clean
+            expect(bidiAutomationInstance.interceptId).to.be.undefined
+            // @ts-expect-error
+            expect(bidiAutomationInstance.topLevelContextId).to.be.undefined
             // @ts-expect-error
             expect(bidiAutomationInstance.autContextId).to.equal(undefined)
           })
