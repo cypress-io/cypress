@@ -1,4 +1,4 @@
-const snapshot = require('snap-shot-it')
+import snapshot from 'snap-shot-it'
 
 describe('snapshots', () => {
 // sanity check to make sure backtick escape works with our snapshots
