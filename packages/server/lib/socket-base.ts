@@ -4,7 +4,7 @@ import EventEmitter from 'events'
 import _ from 'lodash'
 import { getCtx } from '@packages/data-context'
 import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeGraphQLServer'
-import { onNetStubbingEvent } from '@packages/net-stubbing'
+import type { ForInterceptRegistration } from '@packages/network-policy'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
 import type { SocketBroadcaster } from '@packages/socket'
@@ -35,6 +35,16 @@ type StartListeningCallbacks = {
 }
 
 const debug = Debug('cypress:server:socket-base')
+
+function getInterceptRegistration (options: { interceptRegistration?: ForInterceptRegistration }): ForInterceptRegistration {
+  const { interceptRegistration } = options
+
+  if (!interceptRegistration) {
+    throw new Error('Driver intercept registration is not configured')
+  }
+
+  return interceptRegistration
+}
 
 const retry = (fn: (res: any) => void) => {
   return Bluebird.delay(25).then(fn)
@@ -526,13 +536,9 @@ export class SocketBase implements SocketBroadcaster {
               case 'get:fixture':
                 return getFixture(args[0], args[1])
               case 'net':
-                return onNetStubbingEvent({
+                return getInterceptRegistration(options).handleEvent({
                   eventName: args[0],
                   frame: args[1],
-                  state: options.netStubbingState,
-                  socket: this,
-                  getFixture,
-                  args,
                 })
               case 'save:session':
                 return session.saveSession(args[0])
