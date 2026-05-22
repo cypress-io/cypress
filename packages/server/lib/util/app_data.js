@@ -1,7 +1,6 @@
 const os = require('os')
 const path = require('path')
 const ospath = require('ospath')
-const Promise = require('bluebird')
 const la = require('lazy-ass')
 const log = require('debug')('cypress:server:appdata')
 const pkg = require('@packages/root')
@@ -10,6 +9,8 @@ const cwd = require('../cwd').getCwd
 const md5 = require('md5')
 const sanitize = require('sanitize-filename')
 const replace = require('lodash/replace')
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const PRODUCT_NAME = pkg.productName || pkg.name
 
@@ -114,19 +115,17 @@ module.exports = {
   },
 
   ensure () {
+    // ensureSymlinkAsync lstats its src, so the appData dir must exist
+    // before symlink() runs — these can't be parallelized.
     const ensure = () => {
       return this.removeSymlink()
-      .then(() => {
-        return Promise.join(
-          fs.ensureDirAsync(this.path()),
-          !isProduction() ? this.symlink() : undefined,
-        )
-      })
+      .then(() => fs.ensureDirAsync(this.path()))
+      .then(() => (!isProduction() ? this.symlink() : undefined))
     }
 
     // try twice to ensure the dir
     return ensure()
-    .tapCatch(() => Promise.delay(100))
+    .catch((err) => delay(100).then(() => { throw err }))
     .catch(ensure)
   },
 
@@ -173,10 +172,10 @@ module.exports = {
   },
 
   remove () {
-    return Promise.join(
+    return Promise.all([
       fs.removeAsync(this.path()),
       this.removeSymlink(),
-    )
+    ])
   },
 
 }

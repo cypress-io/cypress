@@ -46,6 +46,7 @@ describe('<RecordBanner />', () => {
       medium: 'Specs Record Runs Banner',
       messageId: Cypress.sinon.match.string,
       cohort: 'n/a',
+      includeMachineId: false,
     })
   })
 })

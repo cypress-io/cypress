@@ -35,6 +35,7 @@ describe('<LoginBanner />', () => {
         medium: 'Specs Login Banner',
         messageId: Cypress.sinon.match.string,
         cohort: null,
+        includeMachineId: false,
       })
     })
 

@@ -2,8 +2,64 @@ const childProcess = require('child_process')
 const path = require('path')
 
 const PROJECT_ROOT = path.join(path.dirname(require.resolve('@tooling/system-tests/package.json')), 'projects/kill-child-process')
+const REQUIRE_ASYNC_CHILD_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
+const CONFIG_FILE = path.join(PROJECT_ROOT, 'cypress.config.js')
 
 describe('require_async_child', () => {
+  it('exits with code 0 when the parent closes the IPC channel (disconnect handler)', function (done) {
+    this.timeout(15_000)
+
+    const child = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', PROJECT_ROOT, '--file', CONFIG_FILE], {
+      env: {
+        ...process.env,
+        // Match real config-child loading (see run_child_fixture / ProjectConfigIpc)
+        NODE_OPTIONS: '--import tsx',
+      },
+    })
+
+    let settled = false
+    const finish = (err) => {
+      if (settled) {
+        return
+      }
+
+      settled = true
+      clearTimeout(watchdog)
+      done(err)
+    }
+
+    const watchdog = setTimeout(() => {
+      child.kill('SIGKILL')
+      finish(new Error('timed out waiting for require_async_child to exit after IPC disconnect'))
+    }, 12_000)
+
+    child.on('exit', (code, signal) => {
+      if (settled) {
+        return
+      }
+
+      if (signal) {
+        return finish(new Error(`Expected exit without signal after graceful IPC disconnect, got signal ${signal}`))
+      }
+
+      if (code !== 0) {
+        return finish(new Error(`Expected exit code 0 after disconnect teardown (process.exit()), got ${code}`))
+      }
+
+      finish()
+    })
+
+    child.on('error', finish)
+
+    child.on('message', (msg) => {
+      if (msg?.event === 'ready') {
+        // Closing the IPC channel triggers `process.on('disconnect')` in require_async_child,
+        // which must call process.exit() so the child cannot run orphaned.
+        child.disconnect()
+      }
+    })
+  })
+
   it('disconnects if the parent ipc is closed', (done) => {
     const child = childProcess.fork(path.join(__dirname, 'run_child_fixture'))
 
@@ -20,7 +76,7 @@ describe('require_async_child', () => {
             event: 'setupTestingType',
             args: ['e2e', {
               ...JSON.parse(msg.childMessage.args[0].initialConfig),
-              configFile: path.join(PROJECT_ROOT, 'cypress.config.js'),
+              configFile: CONFIG_FILE,
               projectRoot: PROJECT_ROOT,
               testingType: 'e2e',
               env: {},

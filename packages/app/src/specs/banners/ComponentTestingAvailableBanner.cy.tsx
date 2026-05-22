@@ -56,6 +56,7 @@ describe('<ComponentTestingBanner />', { viewportWidth: 1200 }, () => {
         medium: 'Specs CT Available Banner',
         messageId: Cypress.sinon.match.string,
         cohort: null,
+        includeMachineId: false,
       })
     })
 

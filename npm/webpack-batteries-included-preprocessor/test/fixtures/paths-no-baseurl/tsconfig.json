@@ -1,0 +1,8 @@
+{
+  "include": ["**/*.ts"],
+  "compilerOptions": {
+    "paths": {
+      "@paths/*": ["./paths-example-dir/*"]
+    }
+  }
+}

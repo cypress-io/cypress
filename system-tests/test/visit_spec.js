@@ -147,24 +147,6 @@ describe('e2e visit', () => {
       },
     })
 
-    systemTests.it('passes with experimentalSourceRewriting', {
-      browser: '!webkit', // TODO(webkit): fix+unskip
-      spec: 'source_rewriting.cy.js',
-      config: {
-        experimentalSourceRewriting: true,
-      },
-      snapshot: true,
-      onRun (exec) {
-        return startTlsV1Server(6776)
-        .then((serv) => {
-          return exec()
-          .then(() => {
-            return serv.destroy()
-          })
-        })
-      },
-    })
-
     // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23252
     systemTests.it.skip('fails when network connection immediately fails', {
       spec: 'visit_http_network_error_failing.cy.js',
@@ -219,6 +201,30 @@ describe('e2e visit', () => {
       spec: 'visit_response_never_ends_failing.cy.js',
       snapshot: true,
       expectedExitCode: 3,
+    })
+  })
+
+  context('source rewriting', () => {
+    systemTests.setup({
+      servers: {
+        port: 3434,
+        static: true,
+        onServer,
+      },
+      settings: {
+        e2e: {
+          allowCypressEnv: false,
+        },
+      },
+    })
+
+    systemTests.it('passes with experimentalSourceRewriting', {
+      browser: '!webkit', // TODO(webkit): fix+unskip
+      spec: 'source_rewriting.cy.js',
+      config: {
+        experimentalSourceRewriting: true,
+      },
+      snapshot: true,
     })
   })
 

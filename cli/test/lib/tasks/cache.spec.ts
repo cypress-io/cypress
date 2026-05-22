@@ -51,7 +51,7 @@ vi.mock('../../../lib/util', async (importActual) => {
 describe('lib/tasks/cache', () => {
   const createStdoutCapture = () => {
     const logs: string[] = []
-    // eslint-disable-next-line no-console
+
     const originalOut = process.stdout.write
 
     vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
@@ -150,6 +150,34 @@ describe('lib/tasks/cache', () => {
       expect(exists).toEqual(false)
       expect(output()).toMatchSnapshot()
     })
+
+    it('removes the bundles/ subdir alongside binary version dirs', async function () {
+      mockfs.restore()
+      mockfs({
+        '/.cache/Cypress': {
+          '1.2.3': { 'Cypress': { 'file1': 'binary' } },
+          'bundles': {
+            'cy-prompt': {
+              'abc123': {
+                'manifest.json': '{}',
+                'server': { 'index.js': '// ...' },
+              },
+            },
+            'studio': {
+              'def456': {
+                'manifest.json': '{}',
+              },
+            },
+          },
+        },
+      })
+
+      vi.mocked(state.getCacheDir).mockReturnValue('/.cache/Cypress')
+
+      await cache.clear()
+
+      expect(await fs.pathExists('/.cache/Cypress')).toEqual(false)
+    })
   })
 
   describe('.prune', () => {
@@ -200,6 +228,68 @@ describe('lib/tasks/cache', () => {
       await cache.prune()
 
       expect(output()).toMatchSnapshot()
+    })
+
+    it('preserves the bundles/ subdir while pruning old binary versions', async function () {
+      mockfs.restore()
+      mockfs({
+        '/.cache/Cypress': {
+          '1.2.3': { 'Cypress': { 'file1': 'current' } },
+          '2.3.4': { 'Cypress.app': {} },
+          'bundles': {
+            'cy-prompt': {
+              'abc123': {
+                'manifest.json': '{}',
+                'server': { 'index.js': '// hi' },
+              },
+            },
+            'studio': {
+              'def456': {
+                'manifest.json': '{}',
+              },
+            },
+          },
+        },
+      })
+
+      vi.mocked(state.getCacheDir).mockReturnValue('/.cache/Cypress')
+      vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
+
+      await cache.prune()
+
+      // Old binary version is removed, current one and bundles/ survive
+      expect(await fs.pathExists('/.cache/Cypress/2.3.4')).toEqual(false)
+      expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/bundles/cy-prompt/abc123/manifest.json')).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/bundles/studio/def456/manifest.json')).toEqual(true)
+    })
+
+    it('prunes beta/prerelease binary dirs produced by getVersionDir()', async function () {
+      // state.getVersionDir() formats non-stable builds as
+      // `beta-<version>-<branch>-<sha>`, which is not a valid semver. These
+      // must still be pruned alongside other non-current binary versions.
+      mockfs.restore()
+      mockfs({
+        '/.cache/Cypress': {
+          '1.2.3': { 'Cypress': { 'file1': 'current' } },
+          'beta-15.0.0-feat-abc12345': { 'Cypress.app': {} },
+          'beta-14.5.0-fix-deadbeef': { 'Cypress.app': {} },
+          'bundles': {
+            'cy-prompt': { 'abc123': { 'manifest.json': '{}' } },
+          },
+        },
+      })
+
+      vi.mocked(state.getCacheDir).mockReturnValue('/.cache/Cypress')
+      vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
+
+      await cache.prune()
+
+      // Beta dirs are pruned; current binary and bundles/ survive
+      expect(await fs.pathExists('/.cache/Cypress/beta-15.0.0-feat-abc12345')).toEqual(false)
+      expect(await fs.pathExists('/.cache/Cypress/beta-14.5.0-fix-deadbeef')).toEqual(false)
+      expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/bundles/cy-prompt/abc123/manifest.json')).toEqual(true)
     })
   })
 

@@ -30,7 +30,6 @@ import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
-import type { Server as WebSocketServer } from 'ws'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
@@ -38,6 +37,7 @@ import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
 import appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
+import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
 import * as statusCode from './util/status_code'
 import { getContentType } from './util/headers'
 import stream from 'stream'
@@ -47,6 +47,7 @@ import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/ser
 import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
+import { GracefulExit } from './util/graceful-exit'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -162,7 +163,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
-  protected _graphqlWS?: WebSocketServer
+  protected _graphqlWS?: GraphqlWsHandle
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
@@ -409,7 +410,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   useMorgan () {
-    return require('morgan')('dev')
+    return require('morgan')('dev', {
+      skip: () => GracefulExit.isShuttingDown,
+    })
   }
 
   getHttpServer () {
@@ -657,13 +660,23 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
-    return Bluebird.all([
-      this._close(),
-      this._socket?.close(),
-      this._fileServer?.close(),
-      this._httpsProxy?.close(),
-      this._graphqlWS?.close(),
-    ])
+    // graphql-ws clients must be closed before the HTTP server is destroyed.
+    const graphqlDispose = this._graphqlWS?.dispose
+      ? Bluebird.resolve(this._graphqlWS.dispose()).finally(() => {
+        // graphql-ws dispose() closes the ws server; repeating close() rejects with
+        // "The server is not running". Clear handle so subsequent close() is a no-op for gql.
+        this._graphqlWS = undefined
+      })
+      : Bluebird.resolve()
+
+    return graphqlDispose.then(() => {
+      return Bluebird.all([
+        this._close(),
+        this._socket?.close(),
+        this._fileServer?.close(),
+        this._httpsProxy?.close(),
+      ])
+    })
     .then((res) => {
       this._middleware = null
 

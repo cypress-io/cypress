@@ -1,7 +1,5 @@
 require('../../spec_helper')
 
-const Promise = require('bluebird')
-
 const util = require(`../../../lib/plugins/util`)
 
 describe('lib/plugins/util', () => {
@@ -89,9 +87,9 @@ describe('lib/plugins/util', () => {
     })
 
     it('wraps the invocation in a promise', function () {
-      this.invoke.throws('some error') // test that we're Promise.try-ing invoke
+      this.invoke.throws('some error') // test that invoke is run inside a promise wrapper
 
-      expect(util.wrapChildPromise(this.ipc, this.invoke, this.ids)).to.be.an.instanceOf(Promise)
+      expect(util.wrapChildPromise(this.ipc, this.invoke, this.ids)).to.respondTo('then')
     })
 
     it('sends "promise:fulfilled:{invocationId}" with value when promise resolves', function () {

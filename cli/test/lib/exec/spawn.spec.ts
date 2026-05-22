@@ -9,7 +9,7 @@ import { EventEmitter } from 'events'
 import readline from 'readline'
 import createDebug from 'debug'
 import { PassThrough } from 'stream'
-import { stdin, stdout, stderr } from 'process'
+import process, { stdin, stdout, stderr } from 'process'
 
 import state from '../../../lib/tasks/state'
 import xvfb from '../../../lib/exec/xvfb'
@@ -72,6 +72,7 @@ vi.mock('process', async (importActual) => {
       on: vi.fn(),
       emit: vi.fn(),
       pipe: vi.fn(),
+      setRawMode: vi.fn(),
     },
     stdout: vi.fn(),
     stderr: {
@@ -88,6 +89,7 @@ vi.mock('process', async (importActual) => {
         on: vi.fn(),
         emit: vi.fn(),
         pipe: vi.fn(),
+        setRawMode: vi.fn(),
       },
       stdout: vi.fn(),
       stderr: {
@@ -95,6 +97,7 @@ vi.mock('process', async (importActual) => {
         ...actual.default.stderr,
         write: vi.fn(),
       },
+      once: vi.fn(),
     },
   }
 })
@@ -428,20 +431,38 @@ describe('lib/exec/spawn', function () {
 
     describe('detects kill signal', async () => {
       it('exits with error on SIGKILL', async () => {
-        try {
           const startPromise = start('--foo')
 
           await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('exit', expect.any(Function)))
           spawnedProcess.emit('exit', null, 'SIGKILL')
 
+          await expect(startPromise).resolves.toEqual(137)
+      })
+    })
+
+    describe('on signal exits', () => {
+      for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+        it(`disables raw mode on ${signal}`, async () => {
+          vi.mocked(process.stdin).isTTY = true
+          const startPromise = start('--foo')
+
+          await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+          await vi.waitFor(() => {
+            expect(process.once).toHaveBeenCalledWith(signal, expect.any(Function))
+          })
+
+          const handler = vi.mocked(process.once).mock.calls.find((c) => c[0] === signal)?.[1] as () => void
+
+          expect(handler).toBeDefined()
+          await handler()
+
+          spawnedProcess.emit('exit', null, signal)
+
           await startPromise
 
-          throw new Error('should have hit error handler but did not')
-        } catch (e) {
-          expect(e.message).toMatch(/SIGKILL/)
-          expect(e.message).toMatchSnapshot()
-        }
-      })
+          expect(process.stdin.setRawMode).toHaveBeenCalledWith(false)
+        })
+      }
     })
 
     it('does not start xvfb when its not needed', async () => {

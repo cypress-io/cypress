@@ -1,13 +1,22 @@
+import '../../spec_helper'
+
 import os from 'os'
 import path from 'path'
 import Promise from 'bluebird'
 import lockFileModule from 'lockfile'
 import { fs } from '../../../lib/util/fs'
 import * as env from '../../../lib/util/env'
-import exit from '../../../lib/util/exit'
+import { GracefulExit } from '../../../lib/util/graceful-exit'
 import { File as FileUtil } from '../../../lib/util/file'
 
 const lockFile = Promise.promisifyAll(lockFileModule)
+
+/** Introspect GracefulExit for regressions on File teardown registration (not public API). */
+function countUnlockLockfileSteps (): number {
+  const singleton = (GracefulExit as unknown as { singleton: { steps: Map<string, { name: string }> } }).singleton
+
+  return [...singleton.steps.values()].filter((s) => s.name === 'unlock lockfile').length
+}
 
 describe('lib/util/file', () => {
   beforeEach(function () {
@@ -25,12 +34,37 @@ describe('lib/util/file', () => {
   })
 
   it('unlocks file on exit', function () {
-    sinon.spy(lockFile, 'unlockSync')
-    sinon.stub(exit, 'ensure')
-    new FileUtil({ path: this.path })
-    exit.ensure.yield()
+    const unlockSpy = sinon.spy(lockFile, 'unlockSync')
+    let teardownStep: () => Promise<void>
+    const addStepStub = sinon.stub(GracefulExit, 'addStep').callsFake((fn: () => Promise<void> | void) => {
+      teardownStep = fn as () => Promise<void>
 
-    expect(lockFile.unlockSync).to.be.called
+      return 'test-step'
+    })
+
+    new FileUtil({ path: this.path })
+
+    return teardownStep!().then(() => {
+      expect(lockFile.unlockSync).to.be.called
+    }).finally(() => {
+      addStepStub.restore()
+      unlockSpy.restore()
+    })
+  })
+
+  it('does not leave orphaned GracefulExit unlock steps when ephemeral File instances are discarded', function () {
+    const before = countUnlockLockfileSteps()
+
+    for (let i = 0; i < 3; i++) {
+      new FileUtil({ path: path.join(this.dir, `ephemeral-${i}.json`) })
+    }
+
+    // Each File should remove its GracefulExit step when the instance is no longer needed, so
+    // unreferenced instances must not accumulate unlock handlers (see lib/util/file.ts).
+    expect(
+      countUnlockLockfileSteps(),
+      'ephemeral File instances must not leave GracefulExit unlock steps registered after they are discarded',
+    ).to.equal(before)
   })
 
   context('#transaction', () => {

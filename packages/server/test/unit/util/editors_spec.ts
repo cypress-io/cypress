@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import chaiSubset from 'chai-subset'
