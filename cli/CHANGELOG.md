@@ -8,6 +8,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue on Node 24.16.0+ and Node 26.1.0+ where installing Cypress could silently extract only the first file from the binary archive, causing the test runner to fail to launch with a "Cypress binary is missing" error. Addresses [#33891](https://github.com/cypress-io/cypress/issues/33891). Addressed in [#33887](https://github.com/cypress-io/cypress/pull/33887).
 - Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
 - Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).

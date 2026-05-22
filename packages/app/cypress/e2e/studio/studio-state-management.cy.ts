@@ -70,7 +70,7 @@ describe('Cypress Studio - State Management', () => {
 
     // since we aren't logged in, we need to close the connect to cloud panel
     cy.get('[data-cy="studio-error"]').within(() => {
-      cy.contains('Connect to Cypress Cloud').should('be.visible')
+      cy.contains('Login').should('be.visible')
       cy.get('[aria-label="Close"]').click()
     })
 
