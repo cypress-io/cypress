@@ -45,6 +45,23 @@ describe('NetworkPolicyRegistry', () => {
     expect(onContinue).not.toHaveBeenCalled()
   })
 
+  it('runPolicies returns blockedHostMatch in state when blocked', async () => {
+    const registry = new NetworkPolicyRegistry()
+
+    registry.add(BlockedHosts({
+      blockHosts: ['*.evil.com'],
+      matchesBlockedHost: () => 'evil.com',
+    }))
+
+    const result = await registry.runPolicies({
+      phase: 'request',
+      exchange: { url: 'http://evil.com/' },
+    })
+
+    expect(result.ended).toBe(true)
+    expect(result.state.blockedHostMatch).toBe('evil.com')
+  })
+
   it('runPolicies calls onContinue when no policy matches', async () => {
     const registry = new NetworkPolicyRegistry()
     const onContinue = vi.fn()

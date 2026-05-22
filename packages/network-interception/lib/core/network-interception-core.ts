@@ -7,16 +7,16 @@ import type {
   ForRequestInterception,
   ForResponseInterception,
 } from '../ports/driven-ports'
+import type { ForNetworkPolicyRegistration } from '../ports/driving-ports'
+import type { NetworkExchange } from '../exchange/network-exchange'
 import type { BackendRoute } from '../types/backend-route'
 import type { CyHttpMessages } from '../types/external-types'
-import { mergeIncomingRequestChanges } from './merge-handler-result'
-import type { MergeIncomingRequestChangesOptions } from './merge-handler-result'
-import { planSubscriptions } from './plan-subscriptions'
-import type { PlanSubscriptionsOptions, PlannedRouteSubscriptions } from './plan-subscriptions'
-import { matchRoutes, matchesRoutePreflight } from './route-matching'
-import type { RouteMatchableRequest } from './route-matching'
+import { mergeIncomingRequestChanges, type MergeIncomingRequestChangesOptions } from './merge-handler-result'
+import { planSubscriptions, type PlanSubscriptionsOptions, type PlannedRouteSubscriptions } from './plan-subscriptions'
+import { matchRoutes, matchesRoutePreflight, type RouteMatchableRequest } from './route-matching'
 
 export type NetworkInterceptionCoreOptions = {
+  policyRegistration?: ForNetworkPolicyRegistration
   requestInterception?: ForRequestInterception
   responseInterception?: ForResponseInterception
   documentPreparation?: ForDocumentPreparation
@@ -60,6 +60,39 @@ export class NetworkInterceptionCore {
    */
   async handleRequest (run: HandleInterceptRequestFn): Promise<void> {
     return run(this)
+  }
+
+  async endRequestIfBlocked (ctx: unknown): Promise<void> {
+    const port = this.options.requestInterception
+
+    if (!port) {
+      throw new Error('NetworkInterceptionCore.requestInterception is not configured')
+    }
+
+    return port.endRequestIfBlocked(ctx, () => this.runRequestPolicies(ctx))
+  }
+
+  private buildRequestExchange (ctx: unknown): NetworkExchange {
+    const mw = ctx as { req: { proxiedUrl?: string, method?: string, requestId?: string } }
+
+    return {
+      url: mw.req.proxiedUrl,
+      method: mw.req.method,
+      requestId: mw.req.requestId,
+    }
+  }
+
+  async runRequestPolicies (ctx: unknown) {
+    const registration = this.options.policyRegistration
+
+    if (!registration) {
+      throw new Error('NetworkInterceptionCore.policyRegistration is not configured')
+    }
+
+    return registration.runPolicies({
+      phase: 'request',
+      exchange: this.buildRequestExchange(ctx),
+    })
   }
 
   async correlateBrowserPreRequest (ctx: unknown): Promise<void> {

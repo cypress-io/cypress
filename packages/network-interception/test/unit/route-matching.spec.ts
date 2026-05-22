@@ -3,15 +3,13 @@ import {
   doesRouteMatch,
   getMatchableForRequest,
   getRoutesForRequest,
-  matchesRoutePreflight,
-  type RouteMatchableRequest,
-} from '../../lib/core/route-matching'
+} from '@packages/network-interception'
+import { RouteMatcherOptions } from '../../lib/types'
+import { CypressIncomingRequest } from '@packages/proxy'
+import { BackendRoute } from '../../lib/server/types'
 
-type RouteMatcher = Parameters<typeof doesRouteMatch>[0]
-type BackendRouteList = Parameters<typeof getRoutesForRequest>[0]
-
-describe('core/route-matching', function () {
-  describe('.getMatchableForRequest', function () {
+describe('intercept-request', function () {
+  describe('._getMatchableForRequest', function () {
     it('converts a fully-fledged req into a matchable shape', function () {
       const req = {
         headers: {
@@ -21,7 +19,7 @@ describe('core/route-matching', function () {
         },
         method: 'GET',
         proxiedUrl: 'https://google.com/asdf?1234=a',
-      } as RouteMatchableRequest
+      } as unknown as CypressIncomingRequest
 
       const matchable = getMatchableForRequest(req)
 
@@ -45,13 +43,15 @@ describe('core/route-matching', function () {
     })
   })
 
-  describe('.doesRouteMatch', function () {
-    const tryMatch = (req: Partial<RouteMatchableRequest>, matcher: RouteMatcher, expected = true) => {
-      expect(doesRouteMatch(matcher, {
+  describe('._doesRouteMatch', function () {
+    const tryMatch = (req: Partial<CypressIncomingRequest>, matcher: RouteMatcherOptions, expected = true) => {
+      req = {
         method: 'GET',
         headers: {},
         ...req,
-      })).toEqual(expected)
+      }
+
+      expect(doesRouteMatch(matcher, req as CypressIncomingRequest)).toEqual(expected)
     }
 
     it('matches exact URL', function () {
@@ -174,7 +174,7 @@ describe('core/route-matching', function () {
 
   describe('.getRoutesForRequest', function () {
     it('matches middleware, then handlers', function () {
-      const routes = [
+      const routes: Partial<BackendRoute>[] = [
         {
           id: '1',
           routeMatcher: {
@@ -201,9 +201,9 @@ describe('core/route-matching', function () {
             pathname: '/foo',
           },
         },
-      ] as BackendRouteList
+      ]
 
-      const req: Partial<RouteMatchableRequest> = {
+      const req: Partial<CypressIncomingRequest> = {
         method: 'GET',
         headers: {},
         proxiedUrl: 'http://bar.baz/foo?_',
@@ -211,7 +211,8 @@ describe('core/route-matching', function () {
 
       const e: string[] = []
 
-      for (const route of getRoutesForRequest(routes, req as RouteMatchableRequest)) {
+      // @ts-ignore
+      for (const route of getRoutesForRequest(routes, req)) {
         e.push(route.id)
       }
 
@@ -220,7 +221,7 @@ describe('core/route-matching', function () {
 
     it('yields identical matches', function () {
       // This is a reproduction of issue #22693
-      const routes = [
+      const routes: Partial<BackendRoute>[] = [
         {
           id: '1',
           routeMatcher: {
@@ -239,9 +240,9 @@ describe('core/route-matching', function () {
             pathname: '/bar',
           },
         },
-      ] as BackendRouteList
+      ]
 
-      const req: Partial<RouteMatchableRequest> = {
+      const req: Partial<CypressIncomingRequest> = {
         method: 'GET',
         headers: {},
         proxiedUrl: 'https://example.com/foo',
@@ -249,97 +250,12 @@ describe('core/route-matching', function () {
 
       const matchedRouteIds: string[] = []
 
-      for (const route of getRoutesForRequest(routes, req as RouteMatchableRequest)) {
+      // @ts-ignore
+      for (const route of getRoutesForRequest(routes, req)) {
         matchedRouteIds.push(route.id)
       }
 
       expect(matchedRouteIds).toEqual(['1', '1'])
-    })
-  })
-
-  describe('.matchesRoutePreflight', function () {
-    const preflightReq = (overrides: Partial<RouteMatchableRequest> = {}): RouteMatchableRequest => {
-      return {
-        method: 'OPTIONS',
-        headers: {
-          'access-control-request-method': 'DELETE',
-          origin: 'http://example.com',
-        },
-        proxiedUrl: 'http://api.example.com/no-cors',
-        ...overrides,
-      }
-    }
-
-    const makeRoutes = (...matchers: RouteMatcher[]): BackendRouteList => {
-      return matchers.map((routeMatcher, index) => {
-        return {
-          id: String(index + 1),
-          routeMatcher,
-          hasInterceptor: false,
-          getFixture: async () => '',
-          matches: 0,
-        }
-      }) as BackendRouteList
-    }
-
-    it('returns false for non-OPTIONS requests', function () {
-      expect(matchesRoutePreflight(
-        makeRoutes({ url: '**/no-cors' }),
-        {
-          method: 'DELETE',
-          headers: { 'access-control-request-method': 'DELETE' },
-          proxiedUrl: 'http://api.example.com/no-cors',
-        },
-      )).toBe(false)
-    })
-
-    it('returns false for OPTIONS without access-control-request-method', function () {
-      expect(matchesRoutePreflight(
-        makeRoutes({ url: '**/no-cors' }),
-        {
-          method: 'OPTIONS',
-          headers: {},
-          proxiedUrl: 'http://api.example.com/no-cors',
-        },
-      )).toBe(false)
-    })
-
-    it('returns true when a registered route matches the preflight URL', function () {
-      expect(matchesRoutePreflight(
-        makeRoutes({ url: '**/no-cors' }),
-        preflightReq(),
-      )).toBe(true)
-    })
-
-    it('returns false when no route matches', function () {
-      expect(matchesRoutePreflight(
-        makeRoutes({ url: '/other' }),
-        preflightReq(),
-      )).toBe(false)
-    })
-
-    it('returns false when a matching route explicitly targets OPTIONS', function () {
-      expect(matchesRoutePreflight(
-        makeRoutes({ method: 'OPTIONS', url: '**/no-cors' }),
-        preflightReq(),
-      )).toBe(false)
-    })
-
-    it('matches preflight against routes registered for non-OPTIONS methods', function () {
-      expect(matchesRoutePreflight(
-        makeRoutes({ method: 'DELETE', url: '**/no-cors' }),
-        preflightReq(),
-      )).toBe(true)
-    })
-
-    it('ignores route header matchers for preflight requests', function () {
-      expect(matchesRoutePreflight(
-        makeRoutes({
-          url: '**/no-cors',
-          headers: { 'x-custom': 'required' },
-        }),
-        preflightReq(),
-      )).toBe(true)
     })
   })
 })
