@@ -228,6 +228,7 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
       )
     },
   }], {
+    renderer: 'simple',
     silentRendererCondition: () => logger.logLevel() === 'silent',
   })
 

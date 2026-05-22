@@ -307,6 +307,7 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
   const taskRunner = new Listr(
     tasks,
     {
+      renderer: 'simple',
       silentRendererCondition: () => logger.logLevel() === 'silent',
     },
   )
