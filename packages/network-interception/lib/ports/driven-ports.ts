@@ -1,3 +1,5 @@
+import type { RunPoliciesResult } from '../registry/network-policy-registry'
+
 /**
  * Driven port: correlate pre-requests, continue/fulfill, forward to origin.
  */
@@ -9,6 +11,11 @@ export interface ForRequestInterception {
    * Not used on the browser-automation (CDP Fetch) path in the HTTP/2 program.
    */
   forwardToOrigin (ctx: unknown): void
+
+  endRequestIfBlocked (
+    ctx: unknown,
+    runPolicies: () => Promise<RunPoliciesResult>,
+  ): Promise<void>
 }
 
 /**

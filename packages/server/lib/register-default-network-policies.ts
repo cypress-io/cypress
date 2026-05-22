@@ -1,9 +1,8 @@
 import { blocked } from '@packages/network'
+import { BlockedHosts, CspAllowList, DocumentRewrite } from '@packages/network-interception'
 import type { ForNetworkPolicyRegistration } from '@packages/network-interception'
-import { CspAllowList, DocumentRewrite } from '@packages/network-interception'
-import { createBlockedHosts } from './network-policies/blocked-hosts'
 
-type RegisterDefaultNetworkPoliciesConfig = {
+export type RegisterDefaultNetworkPoliciesConfig = {
   blockHosts?: string | string[] | null
   experimentalCspAllowList?: boolean | string[] | null
   modifyObstructiveCode?: boolean
@@ -13,14 +12,13 @@ type RegisterDefaultNetworkPoliciesConfig = {
 
 /**
  * Register configurator policies derived from Cypress project config.
- * Server-owned mapping from config → {@link NetworkPolicy} instances.
- * Policies are stored via the driving port only; middleware is unchanged until stage 7.
+ * Policies are stored in the registry; request-phase enforcement is wired in Stage 3+ via {@link NetworkInterceptionCore}.
  */
 export function registerDefaultNetworkPolicies (
   policies: ForNetworkPolicyRegistration,
   config: RegisterDefaultNetworkPoliciesConfig,
 ): void {
-  policies.add(createBlockedHosts({
+  policies.add(BlockedHosts({
     blockHosts: config.blockHosts,
     matchesBlockedHost: blocked.matches,
   }))

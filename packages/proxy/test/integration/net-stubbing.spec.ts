@@ -11,13 +11,9 @@ import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
-import { NetworkInterceptionCore } from '@packages/network-interception'
+import { NetworkPolicyRegistry } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
-import { ProxyCommandLogAdapter } from '../../lib/adapters/proxy-command-log'
-import { ProxyCookieStateAdapter } from '../../lib/adapters/proxy-cookie-state'
-import { ProxyDocumentPreparationAdapter } from '../../lib/adapters/proxy-document-preparation'
-import { ProxyNetworkCaptureAdapter } from '../../lib/adapters/proxy-network-capture'
-import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../lib/adapters'
+import { createDefaultNetworkInterceptionCore } from '../../lib/adapters/create-default-network-interception-core'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
@@ -59,13 +55,8 @@ describe('network stubbing', () => {
     const proxy = new NetworkProxy({
       socket,
       netStubbingState,
-      networkInterceptionCore: new NetworkInterceptionCore({
-        requestInterception: new ProxyRequestInterceptionAdapter(),
-        responseInterception: new ProxyResponseInterceptionAdapter(),
-        documentPreparation: new ProxyDocumentPreparationAdapter(),
-        networkCapture: new ProxyNetworkCaptureAdapter(),
-        cookieState: new ProxyCookieStateAdapter(),
-        commandLog: new ProxyCommandLogAdapter(),
+      networkInterceptionCore: createDefaultNetworkInterceptionCore({
+        policyRegistration: new NetworkPolicyRegistry(),
       }),
       config,
       middleware: defaultMiddleware,

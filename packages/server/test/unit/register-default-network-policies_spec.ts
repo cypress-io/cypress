@@ -1,11 +1,11 @@
 import { blocked } from '@packages/network'
+import { BlockedHosts } from '@packages/network-interception'
 import { NetworkPolicyRegistry } from '@packages/network-interception'
 import { registerDefaultNetworkPolicies } from '../../lib/register-default-network-policies'
-import { createBlockedHosts } from '../../lib/network-policies/blocked-hosts'
 import '../spec_helper'
 
 describe('lib/register-default-network-policies', () => {
-  it('registers blocked-hosts policy from config', () => {
+  it('registers BlockedHosts from config', () => {
     const registry = new NetworkPolicyRegistry()
 
     registerDefaultNetworkPolicies(registry, {
@@ -29,7 +29,7 @@ describe('lib/register-default-network-policies', () => {
       blockHosts: ['localhost:3131'],
     })
 
-    const [policy] = registry.getPolicies() as ReturnType<typeof createBlockedHosts>[]
+    const [policy] = registry.getPolicies() as ReturnType<typeof BlockedHosts>[]
 
     policy.when({ url: 'http://localhost:3131/' })
 
