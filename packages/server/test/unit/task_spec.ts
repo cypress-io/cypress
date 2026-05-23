@@ -1,9 +1,8 @@
-require('../spec_helper')
+import '../spec_helper'
+import * as plugins from '../../lib/plugins'
+import * as task from '../../lib/task'
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-
-const plugins = require(`../../lib/plugins`)
-const task = require(`../../lib/task`)
 
 describe('lib/task', () => {
   beforeEach(function () {

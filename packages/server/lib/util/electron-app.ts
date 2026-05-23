@@ -1,8 +1,8 @@
-const getPort = require('get-port')
+import getPort from 'get-port'
 
-const scale = () => {
+export const scale = async () => {
   try {
-    const { app } = require('electron')
+    const { app } = await import('electron')
 
     return app.commandLine.appendSwitch('force-device-scale-factor', '1')
   } catch (err) {
@@ -11,9 +11,9 @@ const scale = () => {
   }
 }
 
-const getRemoteDebuggingPort = () => {
+export const getRemoteDebuggingPort = async () => {
   try {
-    const { app } = require('electron')
+    const { app } = await import('electron')
 
     return app.commandLine.getSwitchValue('remote-debugging-port')
   } catch (err) {
@@ -22,9 +22,9 @@ const getRemoteDebuggingPort = () => {
   }
 }
 
-const setRemoteDebuggingPort = async () => {
+export const setRemoteDebuggingPort = async () => {
   try {
-    const { app } = require('electron')
+    const { app } = await import('electron')
 
     // if port was already set via passing from environment variable ELECTRON_EXTRA_LAUNCH_ARGS,
     // then just keep the supplied value
@@ -42,12 +42,16 @@ const setRemoteDebuggingPort = async () => {
   }
 }
 
-const isRunning = () => {
+export const isRunning = () => {
   // are we in the electron or the node process?
   return Boolean(process.env.ELECTRON_RUN_AS_NODE || process.versions && process.versions.electron)
 }
 
-const isRunningAsElectronProcess = ({ debug } = {}) => {
+type IsRunningAsElectronProcessOpts = {
+  debug?: (message: string) => void
+}
+
+export const isRunningAsElectronProcess = ({ debug }: IsRunningAsElectronProcessOpts = {}) => {
   const isElectronProcess = !process.env.ELECTRON_RUN_AS_NODE
 
   if (!isElectronProcess && debug) {
@@ -55,16 +59,4 @@ const isRunningAsElectronProcess = ({ debug } = {}) => {
   }
 
   return isElectronProcess
-}
-
-module.exports = {
-  scale,
-
-  getRemoteDebuggingPort,
-
-  setRemoteDebuggingPort,
-
-  isRunning,
-
-  isRunningAsElectronProcess,
 }

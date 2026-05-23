@@ -32,7 +32,7 @@ const errors = require(`../../lib/errors`)
 const cypress = require(`../../lib/cypress`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { ServerBase } = require(`../../lib/server-base`)
-const Reporter = require(`../../lib/reporter`)
+const { Reporter } = require(`../../lib/reporter`)
 const browsers = require(`../../lib/browsers`).default
 const videoCapture = require(`../../lib/video_capture`)
 const browserUtils = require(`../../lib/browsers/utils`).default
@@ -461,10 +461,10 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('throws an error if both --headed and --headless are true', function () {
-      // error is thrown synchronously
-      expect(() => cypress.start([`--run-project=${this.todosPath}`, '--headless', '--headed']))
-      .to.throw('Impossible options: both headless and headed are true')
+    it('rejects if both --headed and --headless are true', function () {
+      return expect(
+        cypress.start([`--run-project=${this.todosPath}`, '--headless', '--headed']),
+      ).to.be.rejectedWith('Impossible options: both headless and headed are true')
     })
 
     describe('strips --', () => {
