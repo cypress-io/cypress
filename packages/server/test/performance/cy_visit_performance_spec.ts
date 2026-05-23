@@ -1,4 +1,4 @@
-const systemTests = require('@tooling/system-tests/lib/system-tests').default
+import systemTests from '@tooling/system-tests/lib/system-tests'
 
 // https://github.com/cypress-io/cypress/issues/4313
 context('cy.visit performance tests', function () {

@@ -3,7 +3,6 @@ import '../../spec_helper'
 import _ from 'lodash'
 import fs from 'fs'
 import stream from 'stream'
-import Promise from 'bluebird'
 import { concatStream } from '@packages/network'
 import { streamBuffer } from '../../../lib/util/stream_buffer'
 

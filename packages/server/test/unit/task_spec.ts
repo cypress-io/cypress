@@ -1,8 +1,8 @@
-require('../spec_helper')
+import '../spec_helper'
+import * as plugins from '../../lib/plugins'
+import * as task from '../../lib/task'
 
-const Promise = require('bluebird')
-const plugins = require(`../../lib/plugins`)
-const task = require(`../../lib/task`)
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 describe('lib/task', () => {
   beforeEach(function () {
@@ -60,7 +60,7 @@ describe('lib/task', () => {
   })
 
   it('throws if it times out', function () {
-    plugins.execute.withArgs('task').resolves(Promise.delay(250))
+    plugins.execute.withArgs('task').resolves(delay(250))
     plugins.execute.withArgs('_get:task:body').resolves('function () {}')
 
     return task.run(this.configFilePath, { task: 'some:task', arg: 'some:arg', timeout: 10 }).catch((err) => {

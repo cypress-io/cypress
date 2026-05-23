@@ -1,10 +1,13 @@
-import { afterAll, beforeAll, describe, expect, it } from '@jest/globals'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from '@jest/globals'
+import { createServer } from 'http'
+import type { ClientRequest, IncomingMessage, Server } from 'http'
+import type { AddressInfo } from 'net'
 import fetch from 'cross-fetch'
 import WebSocket from 'ws'
 
 import { setCtx } from '../../../src'
 import type { DataContext } from '../../../src'
-import { makeGraphQLServer } from '../../../graphql/makeGraphQLServer'
+import { graphqlWS, makeGraphQLServer } from '../../../graphql/makeGraphQLServer'
 import { createTestDataContext } from '../helper'
 
 const EVIL_ORIGIN = 'https://evil.example.com'
@@ -243,6 +246,131 @@ describe('makeGraphQLServer (integration)', () => {
       const result = await attemptSocketIoUpgrade(PRODUCTION_CLOUD_ORIGIN)
 
       expect(result.opened).toBe(false)
+    })
+  })
+})
+
+describe('graphqlWS helper', () => {
+  const servers: Array<{ server: Server, dispose: () => Promise<void> }> = []
+
+  afterEach(async () => {
+    while (servers.length > 0) {
+      const { server, dispose } = servers.pop()!
+
+      await dispose()
+      await new Promise<void>((resolve) => server.close(() => resolve()))
+    }
+  })
+
+  async function startServerWithGraphqlWS (options: { enforceOrigin?: boolean }) {
+    const server = createServer()
+    const handle = graphqlWS(server, '/__socket-graphql', options)
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+
+    const port = (server.address() as AddressInfo).port
+
+    servers.push({ server, dispose: handle.dispose })
+
+    return { port }
+  }
+
+  function openWs (port: number, origin: string | undefined): Promise<{ opened: boolean, statusCode?: number }> {
+    return new Promise((resolve) => {
+      const headers: Record<string, string> = {}
+
+      if (origin !== undefined) {
+        headers.Origin = origin
+      }
+
+      const ws = new WebSocket(`ws://127.0.0.1:${port}/__socket-graphql`, 'graphql-transport-ws', { headers })
+      let opened = false
+      let statusCode: number | undefined
+      let done = false
+
+      const finish = () => {
+        if (done) return
+
+        done = true
+        resolve({ opened, statusCode })
+      }
+
+      ws.once('open', () => {
+        opened = true
+        ws.close()
+      })
+
+      ws.once('unexpected-response', (_req: ClientRequest, res: IncomingMessage) => {
+        statusCode = res.statusCode
+        ws.terminate()
+        finish()
+      })
+
+      ws.once('close', () => finish())
+      // Swallow socket-level errors (e.g. ECONNRESET on the server's 403 close); 'unexpected-response' and 'close' are what we read.
+      ws.once('error', () => {})
+    })
+  }
+
+  describe('with default options (enforceOrigin: true)', () => {
+    it('rejects upgrade when Origin port does not match the server listen port', async () => {
+      const { port } = await startServerWithGraphqlWS({})
+
+      const result = await openWs(port, 'http://localhost:3000')
+
+      expect(result.opened).toBe(false)
+      expect(result.statusCode).toBe(403)
+    })
+
+    it('rejects upgrade with a non-localhost Origin', async () => {
+      const { port } = await startServerWithGraphqlWS({})
+
+      const result = await openWs(port, EVIL_ORIGIN)
+
+      expect(result.opened).toBe(false)
+      expect(result.statusCode).toBe(403)
+    })
+
+    it('accepts upgrade with the server\'s own origin', async () => {
+      const { port } = await startServerWithGraphqlWS({})
+
+      const result = await openWs(port, `http://localhost:${port}`)
+
+      expect(result.opened).toBe(true)
+    })
+
+    it('accepts upgrade with no Origin header', async () => {
+      const { port } = await startServerWithGraphqlWS({})
+
+      const result = await openWs(port, undefined)
+
+      expect(result.opened).toBe(true)
+    })
+  })
+
+  describe('with enforceOrigin: false (used by the test-runner server)', () => {
+    it('accepts upgrade when Origin port does not match the server listen port', async () => {
+      const { port } = await startServerWithGraphqlWS({ enforceOrigin: false })
+
+      const result = await openWs(port, 'http://localhost:3000')
+
+      expect(result.opened).toBe(true)
+    })
+
+    it('accepts upgrade with a non-localhost Origin', async () => {
+      const { port } = await startServerWithGraphqlWS({ enforceOrigin: false })
+
+      const result = await openWs(port, EVIL_ORIGIN)
+
+      expect(result.opened).toBe(true)
+    })
+
+    it('accepts upgrade with no Origin header', async () => {
+      const { port } = await startServerWithGraphqlWS({ enforceOrigin: false })
+
+      const result = await openWs(port, undefined)
+
+      expect(result.opened).toBe(true)
     })
   })
 })

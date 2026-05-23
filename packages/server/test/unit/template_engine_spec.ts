@@ -1,11 +1,10 @@
-require('../spec_helper')
-
-const os = require('os')
-const path = require('path')
-const Bluebird = require('bluebird')
-const { cache, render } = require('../../lib/template_engine')
-const { fs } = require('../../lib/util/fs')
-const { sinon } = require('../spec_helper')
+import '../spec_helper'
+import os from 'os'
+import path from 'path'
+import Bluebird from 'bluebird'
+import { cache, render } from '../../lib/template_engine'
+import { fs } from '../../lib/util/fs'
+import { sinon } from '../spec_helper'
 
 describe('lib/template_engine', () => {
   it('renders and caches a template function', () => {

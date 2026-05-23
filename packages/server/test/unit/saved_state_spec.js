@@ -1,7 +1,6 @@
 require('../spec_helper')
 
 const path = require('path')
-const Promise = require('bluebird')
 const { fs } = require(`../../lib/util/fs`)
 const FileUtil = require(`../../lib/util/file`).File
 const appData = require(`../../lib/util/app_data`)
@@ -34,7 +33,7 @@ describe('lib/saved_state', () => {
       return Promise.all([
         savedState.create('/foo/bar'),
         savedState.create('/foo/bar'),
-      ]).spread((a, b) => {
+      ]).then(([a, b]) => {
         expect(a).to.equal(b)
       })
     })

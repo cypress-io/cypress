@@ -53,13 +53,13 @@ const tryToCall = function (win, method) {
 const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
   if (!options.onError) throw new Error('Missing onError in electron#_launch')
 
-  const port = getRemoteDebuggingPort()
+  const port = await getRemoteDebuggingPort()
 
   if (!browserCriClient) {
     debug(`browser CRI is not set. Creating...`)
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
-      port,
+      port: Number(port),
       browserName: 'electron',
       onAsynchronousError: options.onError,
       onReconnect: () => {},
