@@ -31,18 +31,17 @@ describe('lib/project-base', () => {
 
     ctx = getCtx()
 
-    // // needed to run these tests locally
-    // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
-    //   {
-    //     channel: 'stable',
-    //     displayName: 'Electron',
-    //     family: 'chromium',
-    //     majorVersion: '123',
-    //     name: 'electron',
-    //     path: 'path-to-browser-one',
-    //     version: '123.45.67',
-    //   },
-    // ])
+    sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+      {
+        channel: 'stable',
+        displayName: 'Electron',
+        family: 'chromium',
+        majorVersion: '123',
+        name: 'electron',
+        path: 'path-to-browser-one',
+        version: '123.45.67',
+      },
+    ])
 
     Fixtures.scaffold()
 
