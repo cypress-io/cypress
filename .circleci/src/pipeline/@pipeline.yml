@@ -19,7 +19,7 @@ base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22
 parameters:
   publish-binary-branch:
     type: string
-    default: release/16.0.0
+    default: electron/41.7.0
   force-persist-artifacts:
     type: boolean
     default: false
