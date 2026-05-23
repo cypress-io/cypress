@@ -1,11 +1,12 @@
 const Debug = require('debug')
-const electronApp = require('./lib/util/electron-app')
+const { isRunning: isElectronRunning } = require('./lib/util/electron-app')
 const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 const { override: overrideTty } = require('./lib/util/tty')
 const { GracefulExit } = require('./lib/util/graceful-exit')
 const { NetProfiler } = require('./lib/util/net_profiler')
+const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 
 const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
 
@@ -16,7 +17,7 @@ configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
 process.env['CYPRESS'] = 'true'
 
 // are we in the main node process or the electron process?
-const isRunningElectron = electronApp.isRunning()
+const isRunningElectron = isElectronRunning()
 
 const pkg = require('@packages/root')
 
@@ -48,8 +49,6 @@ if (isRunningElectron) {
     version: pkg.version,
     exporter,
   })
-
-  const { debugElapsedTime } = require('./lib/util/performance_benchmark')
 
   const v8SnapshotStartupTime = debugElapsedTime('v8-snapshot-startup-time')
   const endTime = v8SnapshotStartupTime + global.cypressServerStartTime

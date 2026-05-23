@@ -10,7 +10,7 @@ Learn more at https://on.cypress.io/reporters
 
 Error: Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
-- lib/reporter.js
+- lib/reporter.ts
       [stack trace lines]
 `
 

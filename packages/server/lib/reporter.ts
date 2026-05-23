@@ -1,32 +1,55 @@
-const _ = require('lodash')
-const path = require('path')
-const { stackUtils } = require('@packages/errors')
+import _ from 'lodash'
+import path from 'path'
+import { stackUtils } from '@packages/errors'
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 // and prevents accidentally upgrading this one
 // TODO: look into upgrading this to version in driver
-const Mocha = require('mocha-7.2.0')
-const mochaReporters = require('mocha-7.2.0/lib/reporters')
-const mochaCreateStatsCollector = require('mocha-7.2.0/lib/stats-collector')
+import Mocha from 'mocha-7.2.0'
+import mochaReporters from 'mocha-7.2.0/lib/reporters'
+import mochaCreateStatsCollector from 'mocha-7.2.0/lib/stats-collector'
+import Debug from 'debug'
+import { overrideRequire } from './override_require'
+import type {
+  CypressTestStatusInfo,
+  InternalRunnable,
+  ReporterEventHandlers,
+  ReporterEventName,
+  ReporterHook,
+  ReporterResults,
+  ReporterStats,
+  ReporterTest,
+  ReporterTestAttempt,
+  ReporterTestError,
+  RetriesConfig,
+  RunnableAttemptPayload,
+  RunnablePayload,
+  RunnableState,
+} from './types/reporter'
+
+const debug = Debug('cypress:server:reporter')
 const mochaColor = mochaReporters.Base.color
 const mochaSymbols = mochaReporters.Base.symbols
-
-const debug = require('debug')('cypress:server:reporter')
-const { overrideRequire } = require('./override_require')
 
 // override calls to `require('mocha*')` when to always resolve with a mocha we control
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
 const customReporterMochaPath = path.dirname(require.resolve('mocha-7.2.0'))
 
-const buildAttemptMessage = (currentRetry, totalRetries) => {
+interface IconStatus {
+  overallStatusSymbol: string | undefined
+  overallStatusSymbolColor: string | undefined
+  overallStatusColor: string
+}
+
+const buildAttemptMessage = (currentRetry: number, totalRetries: number): string => {
   return `(Attempt ${currentRetry} of ${totalRetries})`
 }
 
 // Used for experimentalRetries, where we want to display the passed/failed
 // status of an attempt in the console
-const getIconStatus = (status) => {
-  let overallStatusSymbol
-  let overallStatusSymbolColor
-  let overallStatusColor
+const getIconStatus = (status: RunnableState | undefined): IconStatus => {
+  let overallStatusSymbol: string | undefined
+  let overallStatusSymbolColor: string | undefined
+  let overallStatusColor: string
 
   switch (status) {
     case 'passed':
@@ -75,7 +98,7 @@ overrideRequire((depPath, _load) => {
 // Mocha.Runnable.prototype.titlePath = ->
 //   @parent.titlePath().concat([@title])
 
-const getTitlePath = function (runnable, titles = []) {
+const getTitlePath = function (runnable: InternalRunnable, titles: string[] = []): string[] {
   // `originalTitle` is a Mocha Hook concept used to associated the
   // hook to the test that executed it
   if (runnable.originalTitle) {
@@ -97,7 +120,7 @@ const getTitlePath = function (runnable, titles = []) {
   return titles
 }
 
-const createSuite = function (obj, parent) {
+const createSuite = function (obj: RunnablePayload, parent?: InternalRunnable) {
   const suite = new Mocha.Suite(obj.title, {})
 
   if (parent) {
@@ -107,10 +130,10 @@ const createSuite = function (obj, parent) {
   suite.file = obj.file
   suite.root = !!obj.root
 
-  return suite
+  return suite as unknown as InternalRunnable
 }
 
-const createRunnable = function (obj, parent) {
+const createRunnable = function (obj: RunnablePayload, parent?: InternalRunnable) {
   let fn
   const { body } = obj
 
@@ -137,10 +160,10 @@ const createRunnable = function (obj, parent) {
   }
 
   if (parent) {
-    runnable.parent = parent
+    runnable.parent = parent as unknown as Mocha.Suite
   }
 
-  return runnable
+  return runnable as unknown as InternalRunnable
 }
 
 const mochaProps = {
@@ -148,17 +171,17 @@ const mochaProps = {
   'retries': '_retries',
 }
 
-const toMochaProps = (testProps) => {
+const toMochaProps = (testProps: Record<string, unknown>) => {
   return _.each(mochaProps, (val, key) => {
     if (testProps.hasOwnProperty(key)) {
       testProps[val] = testProps[key]
 
-      return delete testProps[key]
+      delete testProps[key]
     }
   })
 }
 
-const toAttemptProps = (runnable) => {
+const toAttemptProps = (runnable: InternalRunnable): RunnableAttemptPayload => {
   return _.pick(runnable, [
     'err',
     'state',
@@ -169,14 +192,14 @@ const toAttemptProps = (runnable) => {
   ])
 }
 
-const mergeRunnable = (eventName) => {
-  return (function (testProps, runnables) {
-    toMochaProps(testProps)
+const mergeRunnable = (eventName: ReporterEventName) => {
+  return (function (testProps: RunnablePayload, runnables: Record<string, InternalRunnable>) {
+    toMochaProps(testProps as Record<string, unknown>)
 
-    const runnable = runnables[testProps.id]
+    const runnable = runnables[testProps.id!]
 
     if (eventName === 'test:before:run') {
-      if (testProps._currentRetry > runnable._currentRetry) {
+      if ((testProps._currentRetry ?? 0) > (runnable._currentRetry ?? 0)) {
         debug('test retried:', testProps.title)
         const prevAttempts = runnable.prevAttempts || []
 
@@ -190,14 +213,14 @@ const mergeRunnable = (eventName) => {
       }
     }
 
-    return [_.extend(runnable, testProps)]
+    return [_.extend(runnable, testProps) as InternalRunnable]
   })
 }
 
-const safelyMergeRunnable = function (hookProps, runnables) {
+const safelyMergeRunnable = function (hookProps: RunnablePayload, runnables: Record<string, InternalRunnable>) {
   const { hookId, title, hookName, body, type } = hookProps
 
-  if (!runnables[hookId]) {
+  if (hookId && !runnables[hookId]) {
     runnables[hookId] = {
       hookId,
       type,
@@ -207,13 +230,13 @@ const safelyMergeRunnable = function (hookProps, runnables) {
     }
   }
 
-  return [_.extend({}, runnables[hookProps.id], hookProps)]
+  return [_.extend({}, runnables[hookProps.id!], hookProps) as InternalRunnable]
 }
 
-const mergeErr = function (runnable, runnables, stats) {
+const mergeErr = function (runnable: RunnablePayload, runnables: Record<string, InternalRunnable>, _stats: ReporterStats) {
   // this will always be a test because
   // we reset hook id's to match tests
-  let test = runnables[runnable.id]
+  let test = runnables[runnable.id!]
 
   test.err = runnable.err
   test.state = 'failed'
@@ -230,19 +253,17 @@ const mergeErr = function (runnable, runnables, stats) {
   // in the terminal, as well as updating the test state as it may have changed in the client-side runner.
   test = _.extend({}, test, { title: runnable.title, _cypressTestStatusInfo: runnable._cypressTestStatusInfo, state: runnable.state })
 
-  return [test, test.err]
+  return [test, test.err] as [InternalRunnable, ReporterTestError | string | undefined]
 }
 
-const setDate = function (obj, runnables, stats) {
-  let e; let s
-
-  s = obj.start
+const setDate = function (obj: RunnablePayload, _runnables: Record<string, InternalRunnable>, stats: ReporterStats) {
+  const s = obj.start
 
   if (s) {
     stats.wallClockStartedAt = new Date(s)
   }
 
-  e = obj.end
+  const e = obj.end
 
   if (e) {
     stats.wallClockEndedAt = new Date(e)
@@ -251,13 +272,13 @@ const setDate = function (obj, runnables, stats) {
   return []
 }
 
-const orNull = function (prop) {
+const orNull = function <T>(prop: T | null | undefined): T | null {
   if (prop == null) return null
 
   return prop
 }
 
-const events = {
+const events: ReporterEventHandlers = {
   'start': setDate,
   'end': setDate,
   'suite': mergeRunnable('suite'),
@@ -274,8 +295,18 @@ const events = {
   'test:before:run': mergeRunnable('test:before:run'), // our own custom event
 }
 
-class Reporter {
-  constructor (reporterName = 'spec', reporterOptions = {}, projectRoot) {
+export class Reporter {
+  reporterName!: string
+  projectRoot!: string | undefined
+  reporterOptions!: Record<string, unknown>
+  stats!: ReporterStats
+  retriesConfig!: RetriesConfig
+  runnables!: Record<string, InternalRunnable>
+  mocha!: Mocha
+  runner!: Mocha.Runner
+  reporter!: Mocha.reporters.Base & { done?: (failures: number, resolve: () => void) => void }
+
+  constructor (reporterName = 'spec', reporterOptions: Record<string, unknown> = {}, projectRoot?: string) {
     if (!(this instanceof Reporter)) {
       return new Reporter(reporterName)
     }
@@ -283,24 +314,31 @@ class Reporter {
     this.reporterName = reporterName
     this.projectRoot = projectRoot
     this.reporterOptions = reporterOptions
+    this.retriesConfig = {}
     this.normalizeTest = this.normalizeTest.bind(this)
   }
 
-  setRunnables (rootRunnable, cypressConfig) {
-    if (!rootRunnable) {
+  setRunnables (rootRunnable: RunnablePayload | unknown | undefined, cypressConfig?: unknown) {
+    if (Array.isArray(rootRunnable)) {
+      rootRunnable = rootRunnable[0] as RunnablePayload | undefined
+    }
+
+    if (!rootRunnable || typeof rootRunnable !== 'object') {
       rootRunnable = { title: '' }
     }
 
+    const config = cypressConfig as { retries?: RetriesConfig } | undefined
+
     // manage stats ourselves
-    this.stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
-    this.retriesConfig = cypressConfig ? cypressConfig.retries : {}
+    this.stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0, wallClockDuration: 0 }
+    this.retriesConfig = config?.retries ?? {}
     this.runnables = {}
-    rootRunnable = this._createRunnable(rootRunnable, 'suite')
+    rootRunnable = this._createRunnable(rootRunnable as RunnablePayload, 'suite')
     const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
 
     this.mocha = new Mocha({ reporter })
-    this.mocha.suite = rootRunnable
-    this.runner = new Mocha.Runner(rootRunnable)
+    this.mocha.suite = rootRunnable as unknown as Mocha.Suite
+    this.runner = new Mocha.Runner(rootRunnable as unknown as Mocha.Suite)
     mochaCreateStatsCollector(this.runner)
 
     this.reporter = new this.mocha._reporter(this.runner, {
@@ -323,9 +361,9 @@ class Reporter {
 
       // Override the default reporter to always show test timing even for fast tests
       // and display slow ones in yellow rather than red
-      this.runner._events.pass[2] = function (test) {
+      this.runner._events.pass[2] = function (test: InternalRunnable) {
         // can possibly be undefined if the test fails before being run, such as in before/beforeEach hooks
-        const cypressTestMetaData = test._cypressTestStatusInfo
+        const cypressTestMetaData: CypressTestStatusInfo | undefined = test._cypressTestStatusInfo
 
         const durationColor = test.speed === 'slow' ? 'medium' : 'fast'
 
@@ -345,19 +383,20 @@ class Reporter {
         } else {
           // If there have been no retries and experimental retries is configured,
           // DON'T decorate the last test in the console as an attempt.
-          if (cypressTestMetaData?.attempts > 1) {
+          if ((cypressTestMetaData?.attempts ?? 0) > 1) {
             const lastTestStatus = getIconStatus(test.state)
+            const attempts = cypressTestMetaData!.attempts!
 
             fmt =
               Array(indents).join('  ') +
-              mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.retries + 1)}`)
+              mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(attempts, (test.retries ?? 0) + 1)}`)
 
             // or Log: `✓(Attempt 3 of 3) test title` when the overall outerStatus of a test has passed
             // eslint-disable-next-line no-console
             console.log(fmt, test.title)
           }
 
-          const finalTestStatus = getIconStatus(cypressTestMetaData.outerStatus || test.state)
+          const finalTestStatus = getIconStatus(cypressTestMetaData?.outerStatus || test.state)
 
           const finalMessaging =
             Array(indents).join('  ') +
@@ -375,9 +414,9 @@ class Reporter {
 
       const originalFailPrint = this.runner._events.fail[2]
 
-      this.runner._events.fail[2] = function (test) {
+      this.runner._events.fail[2] = function (test: InternalRunnable) {
         // can possibly be undefined if the test fails before being run, such as in before/beforeEach hooks
-        const cypressTestMetaData = test._cypressTestStatusInfo
+        const cypressTestMetaData: CypressTestStatusInfo | undefined = test._cypressTestStatusInfo
 
         // print the default if the experiment is not configured
         if (!retriesConfig?.experimentalStrategy) {
@@ -388,12 +427,13 @@ class Reporter {
 
         // If there have been no retries and experimental retries is configured,
         // DON'T decorate the last test in the console as an attempt.
-        if (cypressTestMetaData?.attempts > 1) {
+        if ((cypressTestMetaData?.attempts ?? 0) > 1) {
           const lastTestStatus = getIconStatus(test.state)
+          const attempts = cypressTestMetaData!.attempts!
 
           const fmt =
             Array(indents).join('  ') +
-            mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(cypressTestMetaData.attempts, test.retries + 1)}`)
+            mochaColor(lastTestStatus.overallStatusColor, `  ${ lastTestStatus.overallStatusSymbol}${buildAttemptMessage(attempts, (test.retries ?? 0) + 1)}`)
 
           // Log: `✖(Attempt 3 of 3) test title (300ms)` when a test fails and none of the retries have passed
           // eslint-disable-next-line no-console
@@ -417,7 +457,7 @@ class Reporter {
     }
   }
 
-  _createRunnable (runnableProps, type, parent) {
+  _createRunnable (runnableProps: RunnablePayload, type: 'suite' | 'test', parent?: InternalRunnable): InternalRunnable {
     const runnable = (() => {
       switch (type) {
         case 'suite':
@@ -442,54 +482,56 @@ class Reporter {
 
     runnable.id = runnableProps.id
 
-    this.runnables[runnableProps.id] = runnable
+    this.runnables[runnableProps.id!] = runnable
 
     return runnable
   }
 
-  emit (event, arg) {
+  emit (event: ReporterEventName | string, arg?: RunnablePayload) {
     // iI using GA retries, log the retry attempt as the status of the attempt is not used
-    if (event === 'retry' && this.reporterName === 'spec' && !this.retriesConfig?.experimentalStrategy) {
+    if (event === 'retry' && this.reporterName === 'spec' && !this.retriesConfig?.experimentalStrategy && arg) {
       this._logRetry(arg)
     }
 
     // If using experimental retries, log the attempt after the test attempt runs to accurately represent the attempt pass/fail status
     // We don't log the last attempt as this is handled by the main pass/fail handler defined above, and would ultimately log AFTER the test complete test status is reported
     // from the mocha:pass/mocha:fail event
-    if (event === 'test:after:run' && this.reporterName === 'spec' && this.retriesConfig?.experimentalStrategy && !arg.final) {
+    if (event === 'test:after:run' && this.reporterName === 'spec' && this.retriesConfig?.experimentalStrategy && arg && !arg.final) {
       this._logRetry(arg)
     }
 
     // ignore the event if we haven't accounted for it
-    if (!events[event]) return
+    if (!(event in events)) return
 
-    const args = this.parseArgs(event, arg)
+    const args = this.parseArgs(event as ReporterEventName, arg)
 
-    return this.runner && this.runner.emit.apply(this.runner, args)
+    return this.runner && this.runner.emit.apply(this.runner, args as Parameters<Mocha.Runner['emit']>)
   }
 
-  parseArgs (event, arg) {
+  parseArgs (event: ReporterEventName, arg?: RunnablePayload): [string, ...unknown[]] {
     const normalizeArgs = events[event]
 
     const args = _.isFunction(normalizeArgs)
-      ? normalizeArgs.call(this, arg, this.runnables, this.stats)
+      ? normalizeArgs.call(this, arg ?? { id: '' }, this.runnables, this.stats)
       : [arg]
 
     // the normalizeArgs function needs the id property, but we want to remove
     // and other private props before logging/emitting to mocha
-    args[0] = _.isPlainObject(args[0]) ? _.omit(args[0], ['id', 'hookId']) : args[0]
+    if (_.isPlainObject(args[0])) {
+      args[0] = _.omit(args[0] as object, ['id', 'hookId'])
+    }
 
     debug('got mocha event \'%s\' with args: %o', event, args)
 
-    return [event].concat(args)
+    return [event, ...args] as [string, ...unknown[]]
   }
 
-  _logRetry (test) {
-    const runnable = this.runnables[test.id]
+  _logRetry (test: RunnablePayload) {
+    const runnable = this.runnables[test.id!]
 
     // Merge the runnable with the updated test props to gain most recent status from the app runnable (in the case a passed test is retried).
     _.extend(runnable, test)
-    const padding = '  '.repeat(runnable.titlePath().length)
+    const padding = '  '.repeat(runnable.titlePath!().length)
 
     // Don't display a pass/fail symbol if we don't know the status.
     let mochaSymbolToDisplay = ''
@@ -510,7 +552,7 @@ class Reporter {
       }
     }
 
-    const attemptMessage = mochaColor(mochaColorScheme, buildAttemptMessage(test.currentRetry + 1, test.retries + 1))
+    const attemptMessage = mochaColor(mochaColorScheme, buildAttemptMessage((test.currentRetry ?? 0) + 1, (test.retries ?? 0) + 1))
 
     // Log: `(Attempt 1 of 2) test title` when a test attempts without experimentalRetries configured.
     // OR
@@ -521,7 +563,7 @@ class Reporter {
     return console.log(`${padding}${mochaSymbolToDisplay}${attemptMessage} ${test.title}`)
   }
 
-  normalizeHook (hook = {}) {
+  normalizeHook (hook: InternalRunnable = {}): ReporterHook {
     return {
       hookId: hook.hookId,
       hookName: hook.hookName,
@@ -530,8 +572,8 @@ class Reporter {
     }
   }
 
-  normalizeTest (test = {}) {
-    let outerTest = _.clone(test)
+  normalizeTest (test: InternalRunnable = {}): ReporterTest {
+    const outerTest = _.clone(test)
 
     // In the case tests were skipped or another case where they haven't run,
     // test._cypressTestStatusInfo.outerStatus will be undefined. In this case,
@@ -554,21 +596,34 @@ class Reporter {
       title: getTitlePath(outerTest),
       state: orNull(outerTest.state),
       body: orNull(outerTest.body),
-      displayError: orNull(outerTest.err && outerTest.err.stack),
-      attempts: _.map((outerTest.prevAttempts || []).concat([test]), (attempt) => {
-        const err = attempt.err && {
-          name: attempt.err.name,
-          message: attempt.err.message,
-          stack: attempt.err.stack && stackUtils.stackWithoutMessage(attempt.err.stack),
-          codeFrame: attempt.err.codeFrame,
-        }
+      displayError: orNull(
+        typeof outerTest.err === 'object' && outerTest.err?.stack
+          ? outerTest.err.stack
+          : null,
+      ),
+      attempts: _.map((outerTest.prevAttempts || []).concat([test]), (attempt): ReporterTestAttempt => {
+        const errSource = attempt.err
+        const err = errSource ? {
+          name: typeof errSource === 'object' ? errSource.name : undefined,
+          message: typeof errSource === 'object' ? errSource.message : undefined,
+          stack: typeof errSource === 'object'
+            ? errSource.stack
+              ? stackUtils.stackWithoutMessage(errSource.stack)
+              : errSource.stack
+            : undefined,
+          codeFrame: typeof errSource === 'object' ? errSource.codeFrame : undefined,
+        } : undefined
 
         return {
           state: orNull(attempt.state),
           error: orNull(err),
           timings: orNull(attempt.timings),
           failedFromHookId: orNull(attempt.failedFromHookId),
-          wallClockStartedAt: orNull(attempt.wallClockStartedAt && new Date(attempt.wallClockStartedAt)),
+          wallClockStartedAt: orNull(
+            attempt.wallClockStartedAt != null
+              ? new Date(attempt.wallClockStartedAt)
+              : null,
+          ),
           wallClockDuration: orNull(attempt.wallClockDuration),
           videoTimestamp: null,
         }
@@ -578,14 +633,14 @@ class Reporter {
     return normalizedTest
   }
 
-  end () {
+  end (): Promise<ReporterResults> | ReporterResults {
     if (this.reporter.done) {
       const {
         failures,
       } = this.runner
 
-      return new Promise((resolve, reject) => {
-        return this.reporter.done(failures, resolve)
+      return new Promise<void>((resolve) => {
+        return this.reporter.done!(failures, resolve)
       }).then(() => {
         return this.results()
       })
@@ -594,7 +649,7 @@ class Reporter {
     return this.results()
   }
 
-  results () {
+  results (): ReporterResults {
     const tests = _
     .chain(this.runnables)
     .filter({ type: 'test' })
@@ -618,7 +673,10 @@ class Reporter {
     const { wallClockStartedAt, wallClockEndedAt } = this.stats
 
     if (wallClockStartedAt && wallClockEndedAt) {
-      this.stats.wallClockDuration = wallClockEndedAt - wallClockStartedAt
+      const startedAt = wallClockStartedAt instanceof Date ? wallClockStartedAt.getTime() : Date.parse(String(wallClockStartedAt))
+      const endedAt = wallClockEndedAt instanceof Date ? wallClockEndedAt.getTime() : Date.parse(String(wallClockEndedAt))
+
+      this.stats.wallClockDuration = endedAt - startedAt
     }
 
     this.stats.suites = suites.length
@@ -644,26 +702,25 @@ class Reporter {
     }
   }
 
-  static setVideoTimestamp (videoStart, tests = []) {
-    return _.map(tests, (test) => {
-      // if we have a wallClockStartedAt
-      let wcs
+  static setVideoTimestamp (videoStart: Date | number, tests: ReporterTestAttempt[] = []) {
+    const videoStartMs = videoStart instanceof Date ? videoStart.getTime() : videoStart
 
-      wcs = test.wallClockStartedAt
+    return _.map(tests, (test) => {
+      const wcs = test.wallClockStartedAt
 
       if (wcs) {
-        test.videoTimestamp = test.wallClockStartedAt - videoStart
+        test.videoTimestamp = wcs.getTime() - videoStartMs
       }
 
       return test
     })
   }
 
-  static create (reporterName, reporterOptions, projectRoot) {
+  static create (reporterName: string, reporterOptions: Record<string, unknown>, projectRoot?: string) {
     return new Reporter(reporterName, reporterOptions, projectRoot)
   }
 
-  static loadReporter (reporterName, projectRoot) {
+  static loadReporter (reporterName: string, projectRoot?: string): string | unknown {
     let p
 
     debug('trying to load reporter:', reporterName)
@@ -692,7 +749,7 @@ class Reporter {
     // that is local (./custom-reporter.js)
     // or one installed by the user through npm
     try {
-      p = path.resolve(projectRoot, reporterName)
+      p = path.resolve(projectRoot ?? '', reporterName)
 
       // try local
       debug('trying to require local reporter with path:', p)
@@ -701,15 +758,15 @@ class Reporter {
       // absolute path as the reporterName which avoids
       // joining projectRoot unnecessarily
       return require(p)
-    } catch (err) {
-      if (err.code !== 'MODULE_NOT_FOUND') {
+    } catch (err: unknown) {
+      if ((err as NodeJS.ErrnoException).code !== 'MODULE_NOT_FOUND') {
         // bail early if the error wasn't MODULE_NOT_FOUND
         // because that means theres something actually wrong
         // with the found reporter
         throw err
       }
 
-      p = path.resolve(projectRoot, 'node_modules', reporterName)
+      p = path.resolve(projectRoot ?? '', 'node_modules', reporterName)
 
       // try npm. if this fails, we're out of options, so let it throw
       debug('trying to require local reporter with path:', p)
@@ -718,12 +775,10 @@ class Reporter {
     }
   }
 
-  static getSearchPathsForReporter (reporterName, projectRoot) {
+  static getSearchPathsForReporter (reporterName: string, projectRoot?: string): string[] {
     return _.uniq([
-      path.resolve(projectRoot, reporterName),
-      path.resolve(projectRoot, 'node_modules', reporterName),
+      path.resolve(projectRoot ?? '', reporterName),
+      path.resolve(projectRoot ?? '', 'node_modules', reporterName),
     ])
   }
 }
-
-module.exports = Reporter

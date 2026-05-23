@@ -1,11 +1,10 @@
-require('../../spec_helper')
-const os = require('os')
-const osPath = require('ospath')
-const path = require('path')
-const Promise = require('bluebird')
-
-const { fs } = require('../../../lib/util/fs')
-const AppData = require(`../../../lib/util/app_data`)
+import '../../spec_helper'
+import os from 'os'
+import osPath from 'ospath'
+import path from 'path'
+import Promise from 'bluebird'
+import { fs } from '../../../lib/util/fs'
+import * as AppData from '../../../lib/util/app_data'
 
 describe('lib/util/app_data', () => {
   context('#toHashName', () => {

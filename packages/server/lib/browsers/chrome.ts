@@ -8,7 +8,7 @@ import * as extension from '@packages/extension'
 import mime from 'mime'
 import { launch } from '@packages/launcher'
 
-import appData from '../util/app_data'
+import * as appData from '../util/app_data'
 import { fs } from '../util/fs'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
@@ -595,7 +595,7 @@ export = {
       _getChromePreferences(userDir),
     ])
 
-    const defaultArgs = this._getArgs(browser, options, port)
+    const defaultArgs = this._getArgs(browser, options, String(port))
 
     const defaultLaunchOptions = utils.getDefaultLaunchOptions({
       preferences: rawPreferences,
