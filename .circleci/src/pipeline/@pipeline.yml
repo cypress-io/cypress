@@ -2594,7 +2594,6 @@ jobs:
 
   npm-puppeteer-cypress-tests:
     <<: *defaults
-    resource_class: small
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-npm-puppeteer-tests >>

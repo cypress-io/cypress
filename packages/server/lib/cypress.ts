@@ -20,6 +20,7 @@ import { GracefulExit } from './util/graceful-exit'
 import type { BrowserWindow } from 'electron'
 import type { CypressRunResult } from './modes/results'
 import { isRunning, scale, setRemoteDebuggingPort } from './util/electron-app'
+import * as appData from './util/app_data'
 const debug = Debug('cypress:server:cypress')
 
 type Mode = 'exit' | 'info' | 'interactive' | 'pkg' | 'record' | 'results' | 'run' | 'smokeTest' | 'version' | 'returnPkg' | 'exitWithCode'
@@ -182,7 +183,7 @@ export = {
 
     // make sure we have the appData folder
     await Promise.all([
-      require('./util/app_data').ensure(),
+      appData.ensure(),
       setRemoteDebuggingPort(),
     ])
 
