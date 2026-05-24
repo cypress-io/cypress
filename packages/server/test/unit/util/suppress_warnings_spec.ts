@@ -1,37 +1,29 @@
 import '../../spec_helper'
 import { expect } from 'chai'
-import execa from 'execa'
 import proxyquire from 'proxyquire'
 
-const ERROR_MESSAGE = 'Setting the NODE_TLS_REJECT_UNAUTHORIZED'
-
-const TLS_CONNECT = `require('tls').connect('5000').on('error', ()=>{});`
-const SUPPRESS_WARNING = `require('${__dirname}/../../../lib/util/suppress_warnings').suppress();`
+const TLS_WARNING = 'Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to \'0\' makes TLS connections and HTTPS requests insecure by disabling certificate verification.'
 
 describe('lib/util/suppress_warnings', function () {
-  it('tls.connect emits warning if NODE_TLS_REJECT_UNAUTHORIZED=0 and not suppressed', function () {
-    return execa(`node -e "${TLS_CONNECT}"`, {
-      shell: true,
-      env: {
-        'NODE_TLS_REJECT_UNAUTHORIZED': '0',
-      },
-    })
-    .then(({ stderr }) => {
-      expect(stderr).to.contain(ERROR_MESSAGE)
-    })
+  it('passes through non-TLS warnings when suppressed', () => {
+    const emitWarning = sinon.spy(process, 'emitWarning')
+    const { suppress } = proxyquire('../../../lib/util/suppress_warnings', {})
+
+    suppress()
+    process.emitWarning('some unrelated warning')
+
+    expect(emitWarning).to.be.calledOnce
   })
 
-  it('tls.connect does not emit warning if NODE_TLS_REJECT_UNAUTHORIZED=0 and suppressed', function () {
-    // test 2 sequential tls.connects
-    return execa(`node -e "${SUPPRESS_WARNING} ${TLS_CONNECT} ${TLS_CONNECT}"`, {
-      shell: true,
-      env: {
-        'NODE_TLS_REJECT_UNAUTHORIZED': '0',
-      },
-    })
-    .then(({ stderr }) => {
-      expect(stderr).to.not.contain(ERROR_MESSAGE)
-    })
+  it('suppresses NODE_TLS_REJECT_UNAUTHORIZED warnings', () => {
+    const emitWarning = sinon.spy(process, 'emitWarning')
+    const { suppress } = proxyquire('../../../lib/util/suppress_warnings', {})
+
+    suppress()
+    process.emitWarning(TLS_WARNING)
+    process.emitWarning(TLS_WARNING)
+
+    expect(emitWarning).not.to.be.called
   })
 
   it('does not emit buffer deprecation warnings', () => {

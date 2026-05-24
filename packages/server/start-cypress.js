@@ -7,6 +7,7 @@ const { override: overrideTty } = require('./lib/util/tty')
 const { GracefulExit } = require('./lib/util/graceful-exit')
 const { NetProfiler } = require('./lib/util/net_profiler')
 const { debugElapsedTime } = require('./lib/util/performance_benchmark')
+const { suppress } = require('./lib/util/suppress_warnings')
 
 const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
 
@@ -112,6 +113,6 @@ process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
 // always show stack traces for Electron deprecation warnings
 process.traceDeprecation = true
 
-require('./lib/util/suppress_warnings').suppress()
+suppress()
 
 module.exports = require('./lib/cypress').start(process.argv)
