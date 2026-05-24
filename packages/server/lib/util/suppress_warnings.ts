@@ -1,11 +1,11 @@
-const _ = require('lodash')
-const Debug = require('debug')
+import _ from 'lodash'
+import Debug from 'debug'
 
 const debug = Debug('cypress:server:lib:util:suppress_warnings')
 
 let suppressed = false
 
-const suppress = () => {
+export const suppress = (): void => {
   if (suppressed) {
     return
   }
@@ -14,7 +14,12 @@ const suppress = () => {
 
   const originalEmitWarning = process.emitWarning
 
-  process.emitWarning = (warning, type, code, ...args) => {
+  process.emitWarning = ((
+    warning: string | Error,
+    type?: string,
+    code?: string,
+    ...args: unknown[]
+  ) => {
     /**
      * Don't emit the NODE_TLS_REJECT_UNAUTHORIZED warning while
      * we work on proper SSL verification.
@@ -40,10 +45,6 @@ const suppress = () => {
       return
     }
 
-    return originalEmitWarning.call(process, warning, type, code, ...args)
-  }
-}
-
-module.exports = {
-  suppress,
+    return (originalEmitWarning as (warning: string | Error, type?: string, code?: string, ...args: unknown[]) => void).call(process, warning, type, code, ...args)
+  }) as typeof process.emitWarning
 }
