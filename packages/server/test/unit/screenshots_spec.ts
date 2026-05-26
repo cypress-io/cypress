@@ -25,7 +25,6 @@ describe('lib/screenshots', () => {
     setCtx(makeDataContext({}))
     ctx = require('../../lib/makeDataContext').getCtx()
 
-    // needed to run these tests locally
     sinon.stub(ctx.browser, 'machineBrowsers').resolves([
       {
         channel: 'stable',
