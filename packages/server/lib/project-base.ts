@@ -10,7 +10,7 @@ import * as config from './config'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
-import Reporter from './reporter'
+import { Reporter } from './reporter'
 import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
@@ -180,7 +180,7 @@ export class ProjectBase extends EE {
     if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: this.ctx.cloud,
         cfg,
         debugData: this.configDebugData,

@@ -7,7 +7,9 @@ body:
         ## If you are a customer of Cypress Cloud please utilize our [Support Portal](https://www.cypress.io/support/) for our fastest support!
 
         ### Have a question? 👉 [Ask in chat](https://on.cypress.io/chat) or [start a new discussion](https://github.com/cypress-io/cypress/discussions).
-        Issues in the Cypress repo are reserved for bugs and feature requests only.  Questions on how to use Cypress will be closed.
+        Issues in the Cypress repo are reserved for bugs and feature requests only. Questions on how to use Cypress will be closed.
+
+        > **Reproduction required.** Issues without a working reproduction are difficult to investigate and may be closed. Please provide a fork of [cypress-test-tiny](https://github.com/cypress-io/cypress-test-tiny) with a failing test, or clear steps to reproduce.
   - type: textarea
     id: current-behavior
     attributes:
@@ -26,8 +28,9 @@ body:
     id: reproduction
     attributes:
       label: Test code to reproduce
-      description: Please provide a failing test or repo we can run. You can fork [this repo](https://github.com/cypress-io/cypress-test-tiny), set up a failing test, then link to your fork. If you have never done this before, watch [this video](https://youtu.be/NnriKHmj5T8) for example.
-      placeholder: Here is my failing test code and the app code to run the tests on...
+      description: >
+        Provide a way to reproduce the bug. This can be a link to a fork of [cypress-test-tiny](https://github.com/cypress-io/cypress-test-tiny) with a failing test added, or clear steps to reproduce (e.g. shell commands or a minimal project setup). Keep it as small as possible — remove anything not needed to trigger the issue.
+      placeholder: Link to your fork of cypress-test-tiny, or steps to reproduce...
     validations:
       required: true
   - type: input

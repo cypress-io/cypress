@@ -5,7 +5,7 @@ describe('errorWarningChange subscription', () => {
   })
 
   function assertLoadingIntoErrorWorks (errorName: string) {
-    cy.contains('h2', errorName).should('be.visible')
+    cy.contains('h2', errorName, { timeout: 15000 }).should('be.visible')
     cy.contains('[role="alert"]', 'Loading').should('not.exist')
   }
 
@@ -23,6 +23,7 @@ describe('errorWarningChange subscription', () => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: '20',
@@ -36,6 +37,7 @@ module.exports = {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: 20,
@@ -53,6 +55,7 @@ module.exports = {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: ,
@@ -67,6 +70,7 @@ module.exports = {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: 20,

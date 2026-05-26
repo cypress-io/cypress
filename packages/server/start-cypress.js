@@ -1,18 +1,24 @@
-const electronApp = require('./lib/util/electron-app')
+const Debug = require('debug')
+const { isRunning: isElectronRunning } = require('./lib/util/electron-app')
 const { telemetry, OTLPTraceExporterCloud } = require('@packages/telemetry')
 const { apiRoutes } = require('./lib/cloud/routes')
 const encryption = require('./lib/cloud/encryption')
 const { override: overrideTty } = require('./lib/util/tty')
+const { GracefulExit } = require('./lib/util/graceful-exit')
 const { NetProfiler } = require('./lib/util/net_profiler')
+const { debugElapsedTime } = require('./lib/util/performance_benchmark')
+const { suppress } = require('./lib/util/suppress_warnings')
 
 const { calculateCypressInternalEnv, configureLongStackTraces } = require('./lib/environment')
+
+const debug = Debug('cypress:server:start-cypress')
 
 process.env['CYPRESS_INTERNAL_ENV'] = calculateCypressInternalEnv()
 configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
 process.env['CYPRESS'] = 'true'
 
 // are we in the main node process or the electron process?
-const isRunningElectron = electronApp.isRunning()
+const isRunningElectron = isElectronRunning()
 
 const pkg = require('@packages/root')
 
@@ -45,12 +51,27 @@ if (isRunningElectron) {
     exporter,
   })
 
-  const { debugElapsedTime } = require('./lib/util/performance_benchmark')
-
   const v8SnapshotStartupTime = debugElapsedTime('v8-snapshot-startup-time')
   const endTime = v8SnapshotStartupTime + global.cypressServerStartTime
 
   telemetry.startSpan({ name: 'cypress', attachType: 'root', active: true, opts: { startTime: global.cypressBinaryStartTime } })
+
+  GracefulExit.addStep(async (code) => {
+    try {
+      const span = telemetry.getSpan('cypress')
+
+      span?.setAttribute('exitCode', code)
+      span?.end()
+    } catch (error) {
+      debug('Error during cleanup of telemetry span on exit: %o', error)
+    }
+
+    try {
+      await telemetry.shutdown()
+    } catch (error) {
+      debug('Error during telemetry shutdown on exit: %o', error)
+    }
+  }, 'finalize telemetry')
 
   const v8SnapshotSpan = telemetry.startSpan({ name: 'v8snapshot:startup', opts: { startTime: global.cypressServerStartTime } })
 
@@ -92,6 +113,6 @@ process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
 // always show stack traces for Electron deprecation warnings
 process.traceDeprecation = true
 
-require('./lib/util/suppress_warnings').suppress()
+suppress()
 
 module.exports = require('./lib/cypress').start(process.argv)

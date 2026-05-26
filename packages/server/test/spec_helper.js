@@ -17,13 +17,14 @@ global.proxyquire = require('proxyquire')
 global.sinon = require('sinon')
 
 const _ = require('lodash')
-const Promise = require('bluebird')
 const cache = require('../lib/cache').cache
 
 require('chai')
 .use(require('@cypress/sinon-chai'))
 .use(require('chai-uuid'))
 .use(require('chai-as-promised'))
+
+const { GracefulExit } = require('../lib/util/graceful-exit')
 
 if (process.env.UPDATE) {
   throw new Error('You\'re using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
@@ -102,6 +103,7 @@ before(async () => {
 })
 
 beforeEach(async function () {
+  GracefulExit.resetForTesting()
   await clearCtx()
   setCtx(makeDataContext({}))
   this.originalEnv = originalEnv

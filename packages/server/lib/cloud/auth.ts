@@ -19,14 +19,26 @@ let openExternalAttempted = false
 let authRedirectReached = false
 let server
 
+const AUTH_FLOWS = {
+  login: {
+    campaign: 'Log In',
+    getBaseUrl: () => user.getBaseLoginUrl(),
+  },
+  signup: {
+    campaign: 'Sign Up',
+    getBaseUrl: () => user.getBaseSignupUrl(),
+  },
+}
+
 const buildLoginRedirectUrl = (server) => {
   const { port } = server.address()
 
   return `http://127.0.0.1:${port}/redirect-to-auth`
 }
 
-const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent) => {
+const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, flow = 'login') => {
   const { port } = server.address()
+  const authFlow = AUTH_FLOWS[flow] || AUTH_FLOWS.login
 
   if (!authState) {
     authState = randomId(32)
@@ -48,7 +60,7 @@ const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmConten
       authUrl.query = {
         utm_source: utmSource,
         utm_medium: utmMedium,
-        utm_campaign: 'Log In',
+        utm_campaign: authFlow.campaign,
         utm_content: utmContent,
         ...authUrl.query,
       }
@@ -56,6 +68,14 @@ const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmConten
 
     return authUrl.format()
   })
+}
+
+const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent) => {
+  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'login')
+}
+
+const buildFullSignupUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent) => {
+  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'signup')
 }
 
 const getOriginFromUrl = (originalUrl) => {
@@ -67,7 +87,7 @@ const getOriginFromUrl = (originalUrl) => {
 /**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent) => {
+const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent, flow = 'login') => {
   if (!server) {
     // launch an express server to listen for the auth callback from Cypress Cloud
     const origin = getOriginFromUrl(baseLoginUrl)
@@ -78,11 +98,11 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      buildFullLoginUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent)
-      .then((fullLoginUrl) => {
-        debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
+      buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, flow)
+      .then((fullAuthUrl) => {
+        debug('Received GET to /redirect-to-auth, redirecting: %o', { fullAuthUrl })
 
-        res.redirect(303, fullLoginUrl)
+        res.redirect(303, fullAuthUrl)
 
         sendMessage('AUTH_BROWSER_LAUNCHED')
       })
@@ -179,7 +199,9 @@ const launchNativeAuth = Promise.method((loginUrl, sendMessage) => {
  */
 const _internal = {
   buildLoginRedirectUrl,
+  buildFullAuthUrl,
   buildFullLoginUrl,
+  buildFullSignupUrl,
   getOriginFromUrl,
   launchServer,
   stopServer,
@@ -189,7 +211,7 @@ const _internal = {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage, utmSource, utmMedium, utmContent) => {
+const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent) => {
   function sendMessage (name, message) {
     onMessage({
       name,
@@ -198,18 +220,19 @@ const start = (onMessage, utmSource, utmMedium, utmContent) => {
     })
   }
   authRedirectReached = false
+  const authFlow = AUTH_FLOWS[flow] || AUTH_FLOWS.login
 
-  return user.getBaseLoginUrl()
-  .then((baseLoginUrl) => {
-    return _internal.launchServer(baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent)
+  return authFlow.getBaseUrl()
+  .then((baseAuthUrl) => {
+    return _internal.launchServer(baseAuthUrl, sendMessage, utmSource, utmMedium, utmContent, flow)
   })
   .then(() => {
     return _internal.buildLoginRedirectUrl(server)
   })
-  .then((loginRedirectUrl) => {
-    debug('Trying to open native auth to URL %s', loginRedirectUrl)
+  .then((authRedirectUrl) => {
+    debug('Trying to open native auth to URL %s', authRedirectUrl)
 
-    return _internal.launchNativeAuth(loginRedirectUrl, sendMessage)
+    return _internal.launchNativeAuth(authRedirectUrl, sendMessage)
     .then(() => {
       debug('successfully opened native auth url')
     })
@@ -227,8 +250,20 @@ const start = (onMessage, utmSource, utmMedium, utmContent) => {
   })
 }
 
+/**
+ * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
+ */
+const start = (onMessage, utmSource, utmMedium, utmContent) => {
+  return startAuth('login', onMessage, utmSource, utmMedium, utmContent)
+}
+
+const startSignup = (onMessage, utmSource, utmMedium, utmContent) => {
+  return startAuth('signup', onMessage, utmSource, utmMedium, utmContent)
+}
+
 export = {
   start,
+  startSignup,
   stopServer,
   _internal,
 }

@@ -57,6 +57,9 @@ export function createTestDataContext (mode: DataContextConfig['mode'] = 'run', 
       logIn: jest.fn().mockImplementation(() => {
         throw new Error('not stubbed')
       }),
+      signUp: jest.fn().mockImplementation(() => {
+        throw new Error('not stubbed')
+      }),
       resetAuthState: jest.fn(),
     } as unknown as AuthApiShape,
     projectApi: {

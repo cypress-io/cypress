@@ -1,5 +1,5 @@
 import type { ProjectBase } from '../project-base'
-import type { BaseReporterResults, ReporterResults } from '../types/reporter'
+import type { BaseReporterResults, ReporterResults, ReporterTestError } from '../types/reporter'
 import { log, stackUtils, stripAnsi } from '@packages/errors'
 import Debug from 'debug'
 import pDefer, { DeferredPromise } from 'p-defer'
@@ -7,8 +7,8 @@ import pDefer, { DeferredPromise } from 'p-defer'
 const debug = Debug('cypress:util:crash_handling')
 
 /** Matches attempt `error` shape from `reporter.js` `normalizeTest` for Cypress Cloud. */
-export const fatalErrorToAttemptError = (error: Error) => {
-  const codeFrame = (error as { codeFrame?: unknown }).codeFrame
+export const fatalErrorToAttemptError = (error: Error): ReporterTestError => {
+  const codeFrame = (error as { codeFrame?: ReporterTestError['codeFrame'] }).codeFrame
   const stackLines = error.stack ? stackUtils.stackWithoutMessage(error.stack) : undefined
 
   return {
@@ -19,14 +19,27 @@ export const fatalErrorToAttemptError = (error: Error) => {
   }
 }
 
+const parseReporterTimestamp = (value?: Date | string): number | undefined => {
+  if (!value) {
+    return undefined
+  }
+
+  if (value instanceof Date) {
+    return value.getTime()
+  }
+
+  return Date.parse(value)
+}
+
 export const patchRunResultsAfterCrash = (
   error: Error,
   reporterResults: ReporterResults,
   mostRecentRunnable: { id?: string } | undefined,
 ): ReporterResults => {
-  const endTime: number = reporterResults?.stats?.wallClockEndedAt ? Date.parse(reporterResults?.stats?.wallClockEndedAt) : new Date().getTime()
-  const wallClockDuration = reporterResults?.stats?.wallClockStartedAt ?
-    endTime - Date.parse(reporterResults.stats.wallClockStartedAt) : 0
+  const endTime: number = parseReporterTimestamp(reporterResults?.stats?.wallClockEndedAt) ?? new Date().getTime()
+  const wallClockStartedAt = parseReporterTimestamp(reporterResults?.stats?.wallClockStartedAt)
+  const wallClockDuration = wallClockStartedAt ?
+    endTime - wallClockStartedAt : 0
   const endTimeStamp = new Date(endTime).toJSON()
 
   // in crash situations, the most recent report will not have the triggering test
@@ -127,10 +140,10 @@ export class EarlyExitTerminator {
     console.log('')
     log(error)
 
-    const runResults: BaseReporterResults = (this.intermediateStats && this.pendingRunnable) ?
+    const runResults = (this.intermediateStats && this.pendingRunnable) ?
       patchRunResultsAfterCrash(error, this.intermediateStats, this.pendingRunnable) :
       defaultStats(error)
 
-    this.terminator.resolve(runResults)
+    this.terminator.resolve(runResults as BaseReporterResults)
   }
 }

@@ -189,13 +189,6 @@ describe('StudioLifecycleManager', () => {
         return Promise.resolve()
       })
 
-      studioLifecycleManager.initializeStudioManager({
-        cloudDataSource: mockCloudDataSource,
-        ctx: mockCtx,
-        cfg: mockCfg,
-        debugData,
-      })
-
       const studioReadyPromise = new Promise((resolve) => {
         studioLifecycleManager?.registerStudioReadyListener((studioManager) => {
           resolve(studioManager)
@@ -206,13 +199,19 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
+
+      await studioLifecycleManager.initializeStudioManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData,
+      })
 
       await studioReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
       expect(ensureStudioBundleStub).to.be.calledWith({
-        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
         studioUrl: 'https://cloud.cypress.io/studio/bundle/abc.tgz',
         projectId: 'abc123',
       })
@@ -292,13 +291,6 @@ describe('StudioLifecycleManager', () => {
         return Promise.resolve()
       })
 
-      studioLifecycleManager.initializeStudioManager({
-        cloudDataSource: mockCloudDataSource,
-        ctx: mockCtx,
-        cfg: mockCfg,
-        debugData: {},
-      })
-
       const studioReadyPromise = new Promise((resolve) => {
         studioLifecycleManager?.registerStudioReadyListener((studioManager) => {
           resolve(studioManager)
@@ -309,7 +301,14 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
+
+      await studioLifecycleManager.initializeStudioManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        cfg: mockCfg,
+        debugData: {},
+      })
 
       await studioReadyPromise
 
@@ -407,9 +406,9 @@ describe('StudioLifecycleManager', () => {
 
       const mockManifest = {}
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -453,9 +452,9 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'a1',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -606,7 +605,7 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
     })
 
     it('registers a listener that will be called when studio is ready', () => {
@@ -697,7 +696,7 @@ describe('StudioLifecycleManager', () => {
         }),
       ])
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -721,7 +720,7 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
     })
 
     it('updates status and emits events when status changes', async () => {
@@ -768,7 +767,7 @@ describe('StudioLifecycleManager', () => {
     it('handles status updates properly during initialization', async () => {
       const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         cfg: mockCfg,
         debugData: {},
@@ -794,7 +793,7 @@ describe('StudioLifecycleManager', () => {
 
       const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         cfg: mockCfg,
         debugData: {},
@@ -952,10 +951,10 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
       // First initialize with some state
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -975,7 +974,7 @@ describe('StudioLifecycleManager', () => {
 
       const initialCallCount = postStudioSessionStub.callCount
 
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       // Verify state was cleared
       expect(studioLifecycleManager.getCurrentStatus()).to.equal('INITIALIZING')
@@ -997,22 +996,22 @@ describe('StudioLifecycleManager', () => {
       expect(ensureStudioBundleStub.callCount).to.equal(initialCallCount + 1)
     })
 
-    it('sets status to IN_ERROR when no initialization parameters are available', () => {
+    it('sets status to IN_ERROR when no initialization parameters are available', async () => {
       // Set up ctx so retry doesn't return early
       // @ts-expect-error - accessing private property
       studioLifecycleManager.ctx = mockCtx
 
       // Don't initialize first, so no params are stored
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       expect(studioLifecycleManager.getCurrentStatus()).to.equal('IN_ERROR')
     })
 
-    it('does nothing when no ctx is available', () => {
+    it('does nothing when no ctx is available', async () => {
       const statusChangesSpy = sinon.spy(studioLifecycleManager as any, 'updateStatus')
 
       // Call retry without ctx
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       // Should not have updated status
       expect(statusChangesSpy).not.to.be.called
@@ -1023,11 +1022,14 @@ describe('StudioLifecycleManager', () => {
         'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
       }
 
-      ensureStudioBundleStub.resolves(mockManifest)
+      ensureStudioBundleStub.resolves({ manifest: mockManifest, studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc') })
 
       // Add some cached promises to the static map
       const dummyPromise = Promise.resolve({
-        'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+        manifest: {
+          'server/index.js': 'e1ed3dc8ba9eb8ece23914004b99ad97bba37e80a25d8b47c009e1e4948a6159',
+        },
+        studioPath: path.join(os.tmpdir(), 'cypress', 'studio', 'abc'),
       })
 
       // @ts-expect-error - accessing private static property
@@ -1036,7 +1038,7 @@ describe('StudioLifecycleManager', () => {
       StudioLifecycleManager.hashLoadingMap.set('abc', dummyPromise) // This should be the current hash (from studioUrl)
 
       // Initialize with ctx so retry will work
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -1053,7 +1055,7 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       // Verify only the current studio hash was cleared (abc from the studioUrl)
       // @ts-expect-error - accessing private static property
@@ -1086,7 +1088,7 @@ describe('StudioLifecycleManager', () => {
       expect(StudioLifecycleManager.hashLoadingMap.size).to.equal(2)
 
       // Initialize with ctx so retry will work
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
         cfg: mockCfg,
@@ -1100,7 +1102,7 @@ describe('StudioLifecycleManager', () => {
         })
       })
 
-      studioLifecycleManager.retry()
+      await studioLifecycleManager.retry()
 
       // Wait for retry to complete
       await new Promise((resolve) => {

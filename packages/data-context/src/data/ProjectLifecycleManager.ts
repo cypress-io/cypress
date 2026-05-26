@@ -211,6 +211,12 @@ export class ProjectLifecycleManager {
         this.ctx.emitter.toApp()
       },
       onFinalConfigLoaded: async (finalConfig: FullConfig, options: OnFinalConfigLoadedOptions) => {
+        // if we no longer have a project, just return
+        // can happen when the user clears the project while setupNodeEvents is in flight
+        if (!this._projectRoot) {
+          return
+        }
+
         if (this._currentTestingType && finalConfig.specPattern) {
           await this.ctx.actions.project.setSpecsFoundBySpecPattern({
             projectRoot: this.projectRoot,
@@ -300,6 +306,12 @@ export class ProjectLifecycleManager {
    *  4. The first browser found.
    */
   async setInitialActiveBrowser () {
+    // if we no longer have a project, just return
+    // can happen when the user clears the project while we are setting up
+    if (!this._projectRoot) {
+      return
+    }
+
     const configDefaultBrowser = this.loadedFullConfig?.defaultBrowser
 
     // if we have a default browser from the config and a CLI browser wasn't passed and the active browser hasn't been set

@@ -2,6 +2,17 @@ diff --git a/node_modules/@types/sinon/index.d.ts b/node_modules/@types/sinon/in
 index 07ba706..fd32cbe 100644
 --- a/node_modules/@types/sinon/index.d.ts
 +++ b/node_modules/@types/sinon/index.d.ts
+@@ -12,7 +12,9 @@
+ //                 Roey Berman <https://github.com/bergundy>
+ // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+
+-import * as FakeTimers from '@sinonjs/fake-timers';
++// Import via the @types name so TS resolves to the bundled
++// @types/sinonjs__fake-timers (cypress-io/cypress#33829).
++import * as FakeTimers from 'sinonjs__fake-timers';
+
+ // sinon uses DOM dependencies which are absent in browser-less environment like node.js
+ // to avoid compiler errors this monkey patch is used
 @@ -45,7 +45,7 @@ declare namespace Sinon {
           * so a call that received the provided arguments (in the same spots) and possibly others as well will return true.
           * @param args
