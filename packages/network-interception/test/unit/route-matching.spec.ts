@@ -1,15 +1,15 @@
 import { describe, it, expect } from 'vitest'
 import {
-  _doesRouteMatch,
-  _getMatchableForRequest,
+  doesRouteMatch,
+  getMatchableForRequest,
   getRoutesForRequest,
-} from '../../lib/server/route-matching'
-import { RouteMatcherOptions } from '../../lib/types'
-import { CypressIncomingRequest } from '@packages/proxy'
-import { BackendRoute } from '../../lib/server/types'
+} from '../../lib'
+import type { BackendRoute } from '../../lib/types/backend-route'
+import type { RouteMatcherOptions } from '../../lib/types/external-types'
+import type { RouteMatchableRequest } from '../../lib/core/route-matching'
 
-describe('intercept-request', function () {
-  describe('._getMatchableForRequest', function () {
+describe('core/route-matching', function () {
+  describe('.getMatchableForRequest', function () {
     it('converts a fully-fledged req into a matchable shape', function () {
       const req = {
         headers: {
@@ -19,9 +19,9 @@ describe('intercept-request', function () {
         },
         method: 'GET',
         proxiedUrl: 'https://google.com/asdf?1234=a',
-      } as unknown as CypressIncomingRequest
+      } as RouteMatchableRequest
 
-      const matchable = _getMatchableForRequest(req)
+      const matchable = getMatchableForRequest(req)
 
       expect(matchable).toEqual({
         auth: {
@@ -43,15 +43,13 @@ describe('intercept-request', function () {
     })
   })
 
-  describe('._doesRouteMatch', function () {
-    const tryMatch = (req: Partial<CypressIncomingRequest>, matcher: RouteMatcherOptions, expected = true) => {
-      req = {
+  describe('.doesRouteMatch', function () {
+    const tryMatch = (req: Partial<RouteMatchableRequest>, matcher: RouteMatcherOptions, expected = true) => {
+      expect(doesRouteMatch(matcher, {
         method: 'GET',
         headers: {},
         ...req,
-      }
-
-      expect(_doesRouteMatch(matcher, req as CypressIncomingRequest)).toEqual(expected)
+      })).toEqual(expected)
     }
 
     it('matches exact URL', function () {
@@ -203,7 +201,7 @@ describe('intercept-request', function () {
         },
       ]
 
-      const req: Partial<CypressIncomingRequest> = {
+      const req: Partial<RouteMatchableRequest> = {
         method: 'GET',
         headers: {},
         proxiedUrl: 'http://bar.baz/foo?_',
@@ -211,8 +209,7 @@ describe('intercept-request', function () {
 
       const e: string[] = []
 
-      // @ts-ignore
-      for (const route of getRoutesForRequest(routes, req)) {
+      for (const route of getRoutesForRequest(routes as BackendRoute[], req as RouteMatchableRequest)) {
         e.push(route.id)
       }
 
@@ -242,7 +239,7 @@ describe('intercept-request', function () {
         },
       ]
 
-      const req: Partial<CypressIncomingRequest> = {
+      const req: Partial<RouteMatchableRequest> = {
         method: 'GET',
         headers: {},
         proxiedUrl: 'https://example.com/foo',
@@ -250,8 +247,7 @@ describe('intercept-request', function () {
 
       const matchedRouteIds: string[] = []
 
-      // @ts-ignore
-      for (const route of getRoutesForRequest(routes, req)) {
+      for (const route of getRoutesForRequest(routes as BackendRoute[], req as RouteMatchableRequest)) {
         matchedRouteIds.push(route.id)
       }
 
