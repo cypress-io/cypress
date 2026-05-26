@@ -4,7 +4,7 @@ import type { GetFixtureFn, NetStubbingState } from '../server/types'
 import { onNetStubbingEvent } from '../server/driver-events'
 import type { BackendStaticResponse, NetEvent } from '../types'
 
-export type DriverInterceptRegistrationAdapterOptions = {
+type DriverInterceptRegistrationAdapterOptions = {
   state: NetStubbingState
   socket: SocketBroadcaster
   getFixture: GetFixtureFn

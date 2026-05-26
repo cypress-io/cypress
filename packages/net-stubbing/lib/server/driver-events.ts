@@ -108,7 +108,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
 
 type OnNetStubbingEventFrame = NetEvent.ToServer.AddRoute<BackendStaticResponse> | NetEvent.ToServer.Subscribe | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.SendStaticResponse
 
-export type OnNetStubbingEventOpts = {
+type OnNetStubbingEventOpts = {
   eventName: string
   state: NetStubbingState
   socket: SocketBroadcaster
