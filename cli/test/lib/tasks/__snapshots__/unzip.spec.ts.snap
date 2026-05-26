@@ -27,7 +27,7 @@ https://github.com/cypress-io/cypress/issues
 
 ----------
 
-Error: end of central directory record signature not found
+Error: End of central directory record signature not found. Either not a zip file, or file is truncated.
 
 ----------
 

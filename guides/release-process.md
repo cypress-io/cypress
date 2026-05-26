@@ -86,11 +86,11 @@ _Note: It is advisable to notify the team that the `develop` branch is locked do
 
 2. Ensure all changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) have been merged to `develop` and deployed.
 
-3. Create a Release PR -
+3. (optional) Create a Release PR -
    Bump, submit, get approvals on, and merge a new PR. This PR should:
-    - Bump the Cypress `version` in [`package.json`](package.json)
     - Bump the [`packages/example`](../packages/example) dependency if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, and `yarn` to ensure the lockfile is up to date.
     - Follow the writing the [Cypress Changelog release steps](./writing-the-cypress-changelog.md#release) to update the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md).
+    - NOTE: If edits to the [`cli/CHANGELOG.md`](../cli/CHANGELOG.md) are not needed, nor is a new version of [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases), this step can be skipped and the last build off `develop` can be used below.
 
 4. Once the `develop` branch is passing in CI and you have confirmed the `cypress-bot` has commented on the commit with the pre-release versions for `darwin-x64`, `darwin-arm64`, `linux-x64`,`linux-arm64`, and `win32-x64`, publishing can proceed.
     Tips for getting a green build:

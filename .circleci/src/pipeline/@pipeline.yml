@@ -5,11 +5,11 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "148.0.7778.167"
-chrome-beta-version: &chrome-beta-version "149.0.7827.14"
+chrome-stable-version: &chrome-stable-version "148.0.7778.178"
+chrome-beta-version: &chrome-beta-version "149.0.7827.22"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "148.0.7778.167"
-firefox-stable-version: &firefox-stable-version "145.0.2"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.22"
+firefox-stable-version: &firefox-stable-version "151.0.1"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
@@ -104,7 +104,7 @@ defaults: &defaults
   parameters: &defaultsParameters
     executor:
       type: executor
-      default: cy-doc
+      default: cy-docker
     only-cache-for-root-user:
       type: boolean
       default: false
@@ -122,8 +122,7 @@ defaults: &defaults
     LINES: 24
 
 executors:
-  # the Docker image with Cypress dependencies and Chrome browser
-  cy-doc:
+  cy-docker:
     docker:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
@@ -200,7 +199,7 @@ commands:
             if [[ "<< pipeline.parameters.force-persist-artifacts >>" == "true" ]]; then
               echo 'export SHOULD_PERSIST_ARTIFACTS=true' >> "$BASH_ENV"
             else
-              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* ]]; then
+              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "electron/"* ]]; then
                   export SHOULD_PERSIST_ARTIFACTS=true
               fi' >> "$BASH_ENV"
             fi
@@ -570,7 +569,7 @@ commands:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run: pwd
       ##- run:
@@ -613,7 +612,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
       install-chrome:
         description: whether or not to install google chrome
         type: boolean
@@ -1084,7 +1083,9 @@ commands:
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
-            git checkout $NEXT_VERSION || true
+            # Prefer a `release/<version>` branch (current convention) and
+            # fall back to a bare `<version>` branch for older versions.
+            git checkout "release/$NEXT_VERSION" || git checkout "$NEXT_VERSION" || true
       - when:
           condition: <<parameters.pull_request_id>>
           steps:
@@ -1250,7 +1251,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Install yarn if not already installed
@@ -1517,7 +1518,7 @@ commands:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Bump NPM version
@@ -2083,6 +2084,9 @@ jobs:
           install-firefox: true
       - run:
           command: yarn workspace @packages/server test-performance
+      - store_artifacts:
+          path: /tmp/artifacts
+          when: always
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
@@ -2493,7 +2497,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/webpack-preprocessor
+          command: node scripts/lerna-build.js --scope=@cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -2544,7 +2548,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vue
+          command: node scripts/lerna-build.js --scope=@cypress/vue
       - run:
           name: Run tests
           command: yarn test
@@ -2560,7 +2564,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/angular
+          command: node scripts/lerna-build.js --scope=@cypress/angular
 
   npm-angular-zoneless:
     <<: *defaults
@@ -2570,7 +2574,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/angular-zoneless
+          command: node scripts/lerna-build.js --scope @cypress/angular-zoneless
 
   npm-puppeteer-unit-tests:
     <<: *defaults
@@ -2580,7 +2584,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/puppeteer
+          command: node scripts/lerna-build.js --scope=@cypress/puppeteer
       - run:
           name: Run tests
           command: yarn test
@@ -2590,7 +2594,6 @@ jobs:
 
   npm-puppeteer-cypress-tests:
     <<: *defaults
-    resource_class: small
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-npm-puppeteer-tests >>
@@ -2611,7 +2614,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/react
+          command: node scripts/lerna-build.js --scope=@cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -2627,7 +2630,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vite-plugin-cypress-esm
+          command: node scripts/lerna-build.js --scope=@cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2643,7 +2646,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/mount-utils
+          command: node scripts/lerna-build.js --scope=@cypress/mount-utils
 
   npm-grep:
     <<: *defaults
@@ -2701,7 +2704,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn lerna run build --scope=@cypress/schematic
+            node scripts/lerna-build.js --scope=@cypress/schematic
       - run:
           name: Run unit tests
           command: |
@@ -2939,7 +2942,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
       wd:
         description: Working directory, should be OUTSIDE cypress monorepo folder
         type: string
@@ -2979,7 +2982,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
     <<: *defaults
     resource_class: small
     steps:

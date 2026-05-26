@@ -1,0 +1,1368 @@
+import '../spec_helper'
+import '../../lib/environment'
+
+import path from 'path'
+import chokidar from 'chokidar'
+import pkg from '@packages/root'
+import Fixtures from '@tooling/system-tests'
+import { sinon } from '../spec_helper'
+import * as config from '../../lib/config'
+import { ServerBase } from '../../lib/server-base'
+import { ProjectBase } from '../../lib/project-base'
+import { Automation } from '../../lib/automation'
+import * as savedState from '../../lib/saved_state'
+import runEvents from '../../lib/plugins/run_events'
+import * as system from '../../lib/util/system'
+import { getCtx } from '../../lib/makeDataContext'
+import browsers from '../../lib/browsers'
+import { CyPromptLifecycleManager } from '../../lib/cloud/cy-prompt/CyPromptLifecycleManager'
+import { StudioLifecycleManager } from '../../lib/cloud/studio/StudioLifecycleManager'
+import { StudioManager } from '../../lib/cloud/studio/studio'
+import { telemetryManager, MARK_NAMES, TELEMETRY_GROUP_NAMES } from '../../lib/cloud/studio/telemetry/TelemetryManager'
+import { TelemetryReporter } from '../../lib/cloud/studio/telemetry/TelemetryReporter'
+
+let ctx
+
+// NOTE: todo: come back to this
+describe('lib/project-base', () => {
+  beforeEach(async function () {
+    delete process.env.CYPRESS_LOCAL_STUDIO_PATH
+    delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+
+    ctx = getCtx()
+
+    sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+      {
+        channel: 'stable',
+        displayName: 'Electron',
+        family: 'chromium',
+        majorVersion: '123',
+        name: 'electron',
+        path: 'path-to-browser-one',
+        version: '123.45.67',
+      },
+    ])
+
+    Fixtures.scaffold()
+
+    this.todosPath = Fixtures.projectPath('todos')
+    this.idsPath = Fixtures.projectPath('ids')
+    this.pristinePath = Fixtures.projectPath('pristine-with-e2e-testing')
+
+    sinon.stub(chokidar, 'watch').returns({
+      on: () => {},
+      close: () => {},
+    })
+
+    sinon.stub(runEvents, 'execute').resolves()
+
+    this.testStudioManager = {
+      initializeRoutes: () => {},
+      status: 'INITIALIZED',
+      destroy: () => Promise.resolve(),
+    }
+
+    await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
+    this.config = await ctx.project.getConfig()
+
+    this.project = new ProjectBase({ projectRoot: this.todosPath, testingType: 'e2e' })
+    this.project._server = {
+      close () {},
+      setProtocolManager () {},
+    }
+
+    this.project._cfg = this.config
+  })
+
+  afterEach(async function () {
+    Fixtures.remove()
+
+    if (this.project) {
+      await this.project.close()
+    }
+  })
+
+  it('requires a projectRoot', function () {
+    const fn = () => new ProjectBase({})
+
+    expect(fn).to.throw('Instantiating lib/project requires a projectRoot!')
+  })
+
+  it('always resolves the projectRoot to be absolute', function () {
+    const p = new ProjectBase({ projectRoot: path.join('..', 'foo', 'bar'), testingType: 'e2e' })
+
+    expect(p.projectRoot).not.to.eq(path.join('..', 'foo', 'bar'))
+    expect(p.projectRoot).to.eq(path.resolve(path.join('..', 'foo', 'bar')))
+  })
+
+  describe('#getSavedState', () => {
+    beforeEach(async function () {
+      const globalState = await savedState.create()
+
+      await globalState.remove()
+      await globalState.set({ reporterWidth: 400 })
+
+      const projectState = await savedState.create(this.project.projectRoot)
+
+      await projectState.remove()
+      await projectState.set({ reporterWidth: 500 })
+    })
+
+    it('returns global state when type is global', async function () {
+      const state = await this.project.getSavedState({ type: 'global' })
+
+      expect(state).to.deep.eq({ reporterWidth: 400 })
+    })
+
+    it('returns project state when type is project', async function () {
+      const state = await this.project.getSavedState({ type: 'project' })
+
+      expect(state).to.deep.eq({ reporterWidth: 500 })
+    })
+
+    it('returns project state when type is undefined', async function () {
+      const state = await this.project.getSavedState()
+
+      expect(state).to.deep.eq({ reporterWidth: 500 })
+    })
+  })
+
+  describe('#saveState', function () {
+    beforeEach(async function () {
+      const globalState = await savedState.create()
+
+      await globalState.remove()
+
+      const projectState = await savedState.create(this.project.projectRoot)
+
+      await projectState.remove()
+    })
+
+    afterEach(function () {
+      return savedState.create(this.project.projectRoot)
+      .then((state) => state.remove())
+    })
+
+    it('saves state without modification', function () {
+      return this.project.saveState()
+      .then((state) => expect(state).to.deep.eq({}))
+    })
+
+    it('adds property', function () {
+      return this.project.saveState()
+      .then(() => this.project.saveState({ appWidth: 42 }))
+      .then((state) => expect(state).to.deep.eq({ appWidth: 42 }))
+    })
+
+    it('adds second property', function () {
+      return this.project.saveState()
+      .then(() => this.project.saveState({ appWidth: 42 }))
+      .then(() => this.project.saveState({ appHeight: true }))
+      .then((state) => expect(state).to.deep.eq({ appWidth: 42, appHeight: true }))
+    })
+
+    it('modifies property', function () {
+      return this.project.saveState()
+      .then(() => this.project.saveState({ appWidth: 42 }))
+      .then(() => this.project.saveState({ appWidth: 'modified' }))
+      .then((state) => expect(state).to.deep.eq({ appWidth: 'modified' }))
+    })
+
+    it('saves global state when type is global', async function () {
+      await this.project.saveState({ reporterWidth: 1 }, { type: 'global' })
+
+      const state = await savedState.create()
+      .then((state) => state.get())
+
+      expect(state).to.deep.eq({ reporterWidth: 1 })
+    })
+
+    it('saves project state when type is project', async function () {
+      await this.project.saveState({ reporterWidth: 2 }, { type: 'project' })
+
+      const state = await savedState.create(this.project.projectRoot)
+      .then((state) => state.get())
+
+      expect(state).to.deep.eq({ reporterWidth: 2 })
+    })
+
+    it('saves project state when type is undefined', async function () {
+      await this.project.saveState({ reporterWidth: 3 })
+
+      const state = await savedState.create(this.project.projectRoot)
+      .then((state) => state.get())
+
+      expect(state).to.deep.eq({ reporterWidth: 3 })
+    })
+  })
+
+  describe('#initializeConfig', () => {
+    const supportFile = path.join('foo', 'bar', 'baz')
+
+    it('resolves with saved state when in open mode', async function () {
+      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig')
+      .resolves({
+        supportFile,
+        isTextTerminal: false,
+        baz: 'quux',
+      })
+
+      sinon.stub(savedState, 'create')
+      .withArgs(this.todosPath, false)
+      .resolves({
+        get () {
+          return { reporterWidth: 225 }
+        },
+      })
+
+      const cfg = await this.project.initializeConfig()
+
+      expect(cfg).to.deep.eq({
+        supportFile,
+        isTextTerminal: false,
+        baz: 'quux',
+        state: {
+          reporterWidth: 225,
+        },
+        testingType: 'e2e',
+      })
+    })
+
+    it('resolves without saved state when in run mode', async function () {
+      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig')
+      .resolves({
+        supportFile,
+        isTextTerminal: true,
+        baz: 'quux',
+      })
+
+      const cfg = await this.project.initializeConfig()
+
+      expect(cfg).to.deep.eq({
+        supportFile,
+        isTextTerminal: true,
+        baz: 'quux',
+        testingType: 'e2e',
+      })
+
+      expect(cfg).to.not.have.property('state')
+    })
+
+    // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    it.skip('attaches warning to non-chrome browsers when chromeWebSecurity:false', async function () {
+      const cfg = Object.assign({}, {
+        supportFile,
+        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
+        chromeWebSecurity: false,
+      })
+
+      ctx.lifecycleManager.getFullInitialConfig.restore()
+      sinon.stub(config, 'get').returns(cfg)
+
+      await this.project.initializeConfig()
+      .then(() => {
+        const cfg = this.project.getConfig()
+
+        expect(cfg.chromeWebSecurity).eq(false)
+        expect(cfg.browsers).deep.eq([
+          {
+            family: 'chromium',
+            name: 'Canary',
+          },
+          {
+            family: 'some-other-family',
+            name: 'some-other-name',
+            warning: `\
+Your project has set the configuration option: \`chromeWebSecurity\` to \`false\`.
+
+This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
+`,
+          },
+        ])
+
+        expect(cfg).ok
+      })
+    })
+
+    // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    // https://github.com/cypress-io/cypress/issues/17614
+    it.skip('only attaches warning to non-chrome browsers when chromeWebSecurity:true', async function () {
+      ctx.lifecycleManager.restore?.()
+      sinon.stub(ctx.lifecycleManager, 'getFullInitialConfig').returns({
+        supportFile,
+        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
+        chromeWebSecurity: true,
+      })
+
+      await this.project.initializeConfig()
+      .then(() => {
+        const cfg = this.project.getConfig()
+
+        expect(cfg.chromeWebSecurity).eq(true)
+        expect(cfg.browsers).deep.eq([
+          {
+            family: 'chromium',
+            name: 'Canary',
+          },
+          {
+            family: 'some-other-family',
+            name: 'some-other-name',
+          },
+        ])
+      })
+    })
+  })
+
+  describe('#getConfig', () => {
+    it('returns the enabled state of the protocol manager if it is defined', function () {
+      this.project.protocolManager = {
+        isProtocolEnabled: true,
+      }
+
+      const config = this.project.getConfig()
+
+      expect(config.isDefaultProtocolEnabled).to.be.true
+    })
+
+    it('returns false for isDefaultProtocolEnabled if the protocol manager is undefined', function () {
+      const config = this.project.getConfig()
+
+      expect(config.isDefaultProtocolEnabled).to.be.false
+    })
+
+    describe('hideCommandLog', () => {
+      it('returns true if NO_COMMAND_LOG is set', function () {
+        this.project._cfg.env.NO_COMMAND_LOG = 1
+
+        const config = this.project.getConfig()
+
+        expect(config.hideCommandLog).to.be.true
+      })
+
+      it('returns false if NO_COMMAND_LOG is not set', function () {
+        const config = this.project.getConfig()
+
+        expect(config.hideCommandLog).to.be.false
+      })
+    })
+
+    describe('hideRunnerUi', () => {
+      beforeEach(function () {
+        this.project.options.args = {}
+      })
+
+      it('returns true if runnerUi arg is set to false', function () {
+        this.project.options.args.runnerUi = false
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.true
+      })
+
+      it('returns false if runnerUi arg is set to true', function () {
+        this.project.options.args.runnerUi = true
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.false
+      })
+
+      it('returns true if runnerUi arg is not set and protocol is enabled', function () {
+        this.project.protocolManager = { isProtocolEnabled: true }
+        this.project.cfg.isTextTerminal = true
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.true
+      })
+
+      it('returns false if runnerUi arg is not set and protocol is not enabled', function () {
+        this.project.protocolManager = { isProtocolEnabled: false }
+        this.project.cfg.isTextTerminal = true
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.false
+      })
+
+      it('returns false if runnerUi arg is set to true and protocol is enabled', function () {
+        this.project.protocolManager = { isProtocolEnabled: true }
+        this.project.options.args.runnerUi = true
+        this.project.cfg.isTextTerminal = true
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.false
+      })
+
+      it('sets hideCommandLog to true if hideRunnerUi arg is set to true even if NO_COMMAND_LOG is 0', function () {
+        this.project.options.args.runnerUi = false
+        this.project._cfg.env.NO_COMMAND_LOG = 0
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.true
+        expect(config.hideCommandLog).to.be.true
+      })
+
+      it('returns true if in run mode and protocol is enabled', function () {
+        this.project.protocolManager = { isProtocolEnabled: true }
+        this.project.cfg.isTextTerminal = true
+
+        const config = this.project.getConfig()
+
+        expect(config.hideRunnerUi).to.be.true
+      })
+    })
+  })
+
+  describe('#open', () => {
+    beforeEach(function () {
+      sinon.stub(this.project, 'startWebsockets')
+      sinon.stub(this.project, 'getConfig').returns(this.config)
+      sinon.stub(ServerBase.prototype, 'open').resolves([])
+      sinon.stub(ServerBase.prototype, 'reset')
+    })
+
+    it('calls #startWebsockets with options + config', function () {
+      const onFocusTests = sinon.stub()
+
+      this.project.__setOptions({
+        onFocusTests,
+      })
+
+      return this.project.open().then(() => {
+        expect(this.project.startWebsockets).to.be.calledWith({
+          onReloadBrowser: undefined,
+          onFocusTests,
+          onSpecChanged: undefined,
+        }, {
+          socketIoCookie: '__socket',
+          namespace: '__cypress',
+          screenshotsFolder: path.join(this.project.projectRoot, 'cypress', 'screenshots'),
+          report: undefined,
+          reporter: 'spec',
+          reporterOptions: null,
+          projectRoot: this.todosPath,
+        })
+      })
+    })
+
+    it('executes before:run if in interactive mode', function () {
+      const sysInfo = {
+        osName: 'darwin',
+        osVersion: '1.2.3',
+      }
+
+      sinon.stub(system, 'info').resolves(sysInfo)
+      this.config.experimentalInteractiveRunEvents = true
+      this.config.isTextTerminal = false
+
+      return this.project.open()
+      .then(() => {
+        expect(runEvents.execute).to.be.calledWith('before:run', {
+          config: this.config,
+          cypressVersion: pkg.version,
+          system: sysInfo,
+        })
+      })
+    })
+
+    it('does not get system info or execute before:run if not in interactive mode', function () {
+      sinon.stub(system, 'info')
+      this.config.experimentalInteractiveRunEvents = true
+      this.config.isTextTerminal = true
+
+      return this.project.open()
+      .then(() => {
+        expect(system.info).not.to.be.called
+        expect(runEvents.execute).not.to.be.calledWith('before:run')
+      })
+    })
+
+    // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    it.skip('does not call startSpecWatcher if not in interactive mode', function () {
+      const startSpecWatcherStub = sinon.stub()
+
+      sinon.stub(ProjectBase.prototype, 'initializeSpecStore').resolves({
+        startSpecWatcher: startSpecWatcherStub,
+      })
+
+      this.config.isTextTerminal = true
+
+      return this.project.open()
+      .then(() => {
+        expect(startSpecWatcherStub).not.to.be.called
+      })
+    })
+
+    // FIXME: NEED TO MOVE TO DATA_CONTEXT PACKAGE
+    it.skip('calls startSpecWatcher if in interactive mode', function () {
+      const startSpecWatcherStub = sinon.stub()
+
+      sinon.stub(ProjectBase.prototype, 'initializeSpecStore').resolves({
+        startSpecWatcher: startSpecWatcherStub,
+      })
+
+      this.config.isTextTerminal = false
+
+      return this.project.open()
+      .then(() => {
+        expect(startSpecWatcherStub).to.be.called
+      })
+    })
+
+    it('does not get system info or execute before:run if experimental flag is not enabled', function () {
+      sinon.stub(system, 'info')
+      this.config.experimentalInteractiveRunEvents = false
+      this.config.isTextTerminal = false
+
+      return this.project.open()
+      .then(() => {
+        expect(system.info).not.to.be.called
+        expect(runEvents.execute).not.to.be.calledWith('before:run')
+      })
+    })
+
+    describe('CyPromptLifecycleManager', function () {
+      let initializeCyPromptManagerStub
+
+      afterEach(function () {
+        initializeCyPromptManagerStub.restore()
+      })
+
+      it('initializes cy prompt lifecycle manager', function () {
+        this.config.projectId = 'abc123'
+        this.project.options.record = true
+        this.project.options.key = '123e4567-e89b-12d3-a456-426614174000'
+
+        initializeCyPromptManagerStub = sinon.stub(CyPromptLifecycleManager.prototype, 'initializeCyPromptManager')
+
+        return this.project.open()
+        .then(() => {
+          expect(initializeCyPromptManagerStub).to.be.calledWith({
+            cloudDataSource: ctx.cloud,
+            ctx,
+            record: true,
+            key: '123e4567-e89b-12d3-a456-426614174000',
+            projectId: 'abc123',
+          })
+        })
+      })
+    })
+
+    describe('saved state', function () {
+      beforeEach(function () {
+        this._time = 1609459200000
+        this._dateStub = sinon.stub(Date, 'now').returns(this._time)
+      })
+
+      it('sets firstOpened and lastOpened on first open', function () {
+        return this.project.open()
+        .then(() => {
+          const cfg = this.project.getConfig()
+
+          expect(cfg.state).to.eql({
+            firstOpened: this._time,
+            lastOpened: this._time,
+            lastProjectId: 'abc123',
+          })
+        })
+      })
+
+      it('only sets lastOpened on subsequent opens', function () {
+        return this.project.open()
+        .then(() => {
+          this._dateStub.returns(this._time + 100000)
+        })
+        .then(() => this.project.open())
+        .then(() => {
+          const cfg = this.project.getConfig()
+
+          expect(cfg.state).to.eql({
+            firstOpened: this._time,
+            lastOpened: this._time + 100000,
+            lastProjectId: 'abc123',
+          })
+        })
+      })
+
+      it('updates config.state when saved state changes', function () {
+        sinon.spy(this.project, 'saveState')
+
+        const options = { onSavedStateChanged: (...args) => this.project.saveState(...args) }
+
+        this.project.__setOptions(options)
+
+        return this.project.open()
+        .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
+        .then(() => {
+          const cfg = this.project.getConfig()
+
+          expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false })
+
+          expect(cfg.state).to.eql({
+            autoScrollingEnabled: false,
+            firstOpened: this._time,
+            lastOpened: this._time,
+            lastProjectId: 'abc123',
+          })
+        })
+      })
+    })
+
+    describe('studio initialization', function () {
+      it('does not create studio lifecycle manager when in text terminal mode', async function () {
+        this.project.cfg.isTextTerminal = true
+        sinon.stub(this.project, 'saveState').resolves()
+
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
+      })
+
+      it('does not create studio lifecycle manager for component testing', async function () {
+        this.project.testingType = 'component'
+
+        sinon.stub(this.project, 'saveState').resolves()
+
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.be.undefined
+      })
+
+      it('creates studio lifecycle manager for e2e testing', async function () {
+        sinon.stub(this.project, 'saveState').resolves()
+
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.not.be.undefined
+      })
+
+      it('creates studio lifecycle manager when CYPRESS_INTERNAL_SIMULATE_OPEN_MODE is set even in text terminal mode', async function () {
+        this.project.cfg.isTextTerminal = true
+        process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE = '1'
+
+        sinon.stub(this.project, 'saveState').resolves()
+        sinon.stub(process, 'chdir')
+
+        await this.project.open()
+
+        expect(this.project.ctx.coreData.studioLifecycleManager).to.not.be.undefined
+
+        // Clean up environment variable
+        delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+      })
+    })
+  })
+
+  describe('#close', () => {
+    beforeEach(function () {
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
+
+      this.project._server = { close () {} }
+      this.project._isServerOpen = true
+
+      sinon.stub(this.project, 'getConfig').returns(this.config)
+    })
+
+    it('closes server', function () {
+      this.project._server = sinon.stub({ close () {} })
+
+      return this.project.close().then(() => {
+        expect(this.project._server.close).to.be.calledOnce
+      })
+    })
+
+    it('can close when server + watchers arent open', function () {
+      return this.project.close()
+    })
+
+    it('executes after:run if in interactive mode', function () {
+      this.config.experimentalInteractiveRunEvents = true
+      this.config.isTextTerminal = false
+
+      return this.project.close()
+      .then(() => {
+        expect(runEvents.execute).to.be.calledWith('after:run')
+      })
+    })
+
+    it('does not execute after:run if not in interactive mode', function () {
+      this.config.experimentalInteractiveRunEvents = true
+      this.config.isTextTerminal = true
+
+      return this.project.close()
+      .then(() => {
+        expect(runEvents.execute).not.to.be.calledWith('after:run')
+      })
+    })
+
+    it('does not execute after:run if experimental flag is not enabled', function () {
+      this.config.experimentalInteractiveRunEvents = false
+      this.config.isTextTerminal = false
+
+      return this.project.close()
+      .then(() => {
+        expect(runEvents.execute).not.to.be.calledWith('after:run')
+      })
+    })
+  })
+
+  describe('#reset', () => {
+    beforeEach(function () {
+      this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
+      this.project._automation = { reset: sinon.stub() }
+      this.project._server = { close () {}, reset: sinon.stub() }
+    })
+
+    it('resets server + automation', function () {
+      this.project._cfg = {}
+
+      this.project.ctx.coreData.studioLifecycleManager = {
+        isStudioReady: sinon.stub().returns(true),
+        getStudio: sinon.stub().resolves({
+          isProtocolEnabled: false,
+        }),
+      }
+
+      let protocolManagerValue
+
+      sinon.stub(this.project, 'protocolManager').get(() => protocolManagerValue).set((val) => {
+        protocolManagerValue = val
+      })
+
+      this.project.reset()
+      expect(this.project._automation.reset).to.be.calledOnce
+      expect(this.project.server.reset).to.be.calledOnce
+    })
+
+    it('resets server + automation with studio protocol enabled', function () {
+      // Set up minimal test structure
+      this.project._cfg = {}
+      this.project._protocolManager = { close: sinon.stub() }
+
+      const studioLifecycleManager = new StudioLifecycleManager()
+
+      this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+      const studio = { isProtocolEnabled: true }
+
+      studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+      sinon.stub(studioLifecycleManager, 'getStudio').resolves(studio)
+
+      let protocolManagerValue = this.project._protocolManager
+
+      sinon.stub(this.project, 'protocolManager').get(() => protocolManagerValue).set((val) => {
+        protocolManagerValue = val
+      })
+
+      // Call reset
+      this.project.reset()
+
+      // Verify expected behaviors
+      expect(this.project._automation.reset).to.be.calledOnce
+      expect(this.project.server.reset).to.be.calledOnce
+    })
+  })
+
+  describe('#startWebsockets', () => {
+    beforeEach(function () {
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
+      this.project.watchers = {}
+      this.project._server = { close () {}, startWebsockets: sinon.stub(), setProtocolManager: sinon.stub() }
+      sinon.stub(ProjectBase.prototype, 'open').resolves()
+    })
+
+    it('calls server.startWebsockets with automation + config', async function () {
+      const c = {}
+
+      this.project.__setConfig(c)
+      this.project.startWebsockets({}, c)
+
+      const args = this.project.server.startWebsockets.lastCall.args
+
+      expect(args[0]).to.be.an.instanceof(Automation)
+      expect(args[1]).to.equal(c)
+    })
+
+    it('passes onReloadBrowser callback', function () {
+      const fn = sinon.stub()
+
+      this.project.server.startWebsockets.yieldsTo('onReloadBrowser')
+
+      this.project.startWebsockets({ onReloadBrowser: fn }, {})
+
+      expect(fn).to.be.calledOnce
+    })
+
+    describe('studio', () => {
+      let markStub
+      let reportTelemetryStub
+
+      beforeEach(function () {
+        markStub = sinon.stub()
+        reportTelemetryStub = sinon.stub()
+
+        telemetryManager.mark = markStub
+        TelemetryReporter.getInstance = sinon.stub().returns({
+          reportTelemetry: reportTelemetryStub,
+        })
+      })
+
+      it('passes onStudioInit callback with AI enabled and a protocol manager', async function () {
+        const mockSetupProtocol = sinon.stub()
+        const mockBeforeSpec = sinon.stub()
+        const mockAccessStudioAI = sinon.stub().resolves(true)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
+        const mockUpdateSessionId = sinon.stub()
+
+        this.project.spec = {}
+
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        studioManager.protocolManager = {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+          db: { test: 'db' },
+          dbPath: 'test-db-path',
+        }
+
+        studioManager.updateSessionId = mockUpdateSessionId
+
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        // Set up the studio manager promise directly
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        sinon.stub(this.project, 'resetBrowserState').resolves()
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit()
+        })
+
+        this.project.startWebsockets({}, {})
+
+        const { canAccessStudioAI } = await studioInitPromise
+
+        expect(canAccessStudioAI).to.be.true
+
+        expect(mockSetupProtocol).to.be.calledOnce
+        expect(mockBeforeSpec).to.be.calledOnce
+        expect(mockAccessStudioAI).to.be.calledWith({
+          family: 'chromium',
+          name: 'chrome',
+        })
+
+        expect(mockUpdateSessionId.getCall(0).args[0]).to.be.a.uuid()
+
+        expect(browsers.connectProtocolToBrowser).to.be.calledWith({
+          browser: this.project.browser,
+          foundBrowsers: this.project.options.browsers,
+          protocolManager: studioManager.protocolManager,
+        })
+
+        expect(browsers.connectStudioToBrowser).to.be.calledWith({
+          browser: this.project.browser,
+          foundBrowsers: this.project.options.browsers,
+          studioManager: studioManager,
+        })
+
+        expect(this.project['_protocolManager']).to.eq(studioManager.protocolManager)
+
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_END)
+        expect(reportTelemetryStub).to.be.calledWith(TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
+          status: 'success',
+          canAccessStudioAI: true,
+        })
+      })
+
+      it('onStudioInit uses existing session ID if provided', async function () {
+        const mockSetupProtocol = sinon.stub()
+        const mockBeforeSpec = sinon.stub()
+        const mockAccessStudioAI = sinon.stub().resolves(true)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
+        const mockUpdateSessionId = sinon.stub()
+
+        this.project.spec = {}
+
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        studioManager.protocolManager = {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+          db: { test: 'db' },
+          dbPath: 'test-db-path',
+        }
+
+        studioManager.updateSessionId = mockUpdateSessionId
+
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        // Set up the studio manager promise directly
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        sinon.stub(this.project, 'resetBrowserState').resolves()
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit({ sessionId: 'existing-session-id' })
+        })
+
+        this.project.startWebsockets({}, {})
+
+        const { cloudStudioSessionId } = await studioInitPromise
+
+        expect(cloudStudioSessionId).to.equal('existing-session-id')
+        expect(mockUpdateSessionId).to.be.calledOnceWith('existing-session-id')
+      })
+
+      it('calls resetBrowserState during onStudioInit when AI is enabled', async function () {
+        const mockSetupProtocol = sinon.stub()
+        const mockBeforeSpec = sinon.stub()
+        const mockAccessStudioAI = sinon.stub().resolves(true)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
+
+        this.project.spec = {}
+
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        studioManager.protocolManager = {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+          dbPath: 'test-db-path',
+        }
+
+        const resetStub = sinon.stub(this.project, 'resetBrowserState').resolves()
+
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        // Set up the studio manager promise directly
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit()
+        })
+
+        this.project.startWebsockets({}, {})
+
+        await studioInitPromise
+
+        expect(resetStub).to.be.calledOnce
+      })
+
+      it('passes onStudioInit callback with AI enabled but no protocol manager', async function () {
+        const mockSetupProtocol = sinon.stub()
+        const mockBeforeSpec = sinon.stub()
+        const mockAccessStudioAI = sinon.stub().resolves(true)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
+
+        this.project.spec = {}
+
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit()
+        })
+
+        this.project.startWebsockets({}, {})
+
+        const { canAccessStudioAI } = await studioInitPromise
+
+        expect(canAccessStudioAI).to.be.false
+
+        expect(mockSetupProtocol).not.to.be.called
+        expect(mockBeforeSpec).not.to.be.called
+        expect(mockAccessStudioAI).not.to.be.called
+
+        expect(browsers.connectProtocolToBrowser).not.to.be.called
+        expect(this.project['_protocolManager']).to.be.undefined
+
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_END)
+        expect(reportTelemetryStub).to.be.calledWith(TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
+          status: 'success',
+          canAccessStudioAI: false,
+        })
+      })
+
+      it('passes onStudioInit callback with AI disabled', async function () {
+        const mockSetupProtocol = sinon.stub()
+        const mockBeforeSpec = sinon.stub()
+        const mockAccessStudioAI = sinon.stub().resolves(false)
+        const mockCaptureStudioEvent = sinon.stub().resolves()
+
+        this.project.spec = {}
+
+        this.project._cfg = this.project._cfg || {}
+        this.project._cfg.projectId = 'test-project-id'
+        this.project.ctx.coreData.user = { email: 'test@example.com' }
+        this.project.ctx.coreData.machineId = Promise.resolve('test-machine-id')
+
+        const studioManager = new StudioManager()
+
+        studioManager.canAccessStudioAI = mockAccessStudioAI
+        studioManager.captureStudioEvent = mockCaptureStudioEvent
+        studioManager.protocolManager = {
+          setupProtocol: mockSetupProtocol,
+          beforeSpec: mockBeforeSpec,
+        }
+
+        const studioLifecycleManager = new StudioLifecycleManager()
+
+        this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
+
+        studioLifecycleManager.studioManagerPromise = Promise.resolve(studioManager)
+
+        studioLifecycleManager.isStudioReady = sinon.stub().returns(true)
+
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
+        sinon.stub(browsers, 'connectStudioToBrowser').resolves()
+        sinon.stub(this.project, 'protocolManager').get(() => {
+          return this.project['_protocolManager']
+        }).set((protocolManager) => {
+          this.project['_protocolManager'] = protocolManager
+        })
+
+        let studioInitPromise
+
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          studioInitPromise = callbacks.onStudioInit()
+        })
+
+        this.project.startWebsockets({}, {})
+
+        const { canAccessStudioAI } = await studioInitPromise
+
+        expect(canAccessStudioAI).to.be.false
+
+        expect(mockSetupProtocol).not.to.be.called
+        expect(mockBeforeSpec).not.to.be.called
+        expect(browsers.connectProtocolToBrowser).not.to.be.called
+        expect(browsers.connectStudioToBrowser).not.to.be.called
+        expect(this.project['_protocolManager']).to.be.undefined
+
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.INITIALIZATION_END)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_START)
+        expect(markStub).to.be.calledWith(MARK_NAMES.CAN_ACCESS_STUDIO_AI_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_END)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_START)
+        expect(markStub).not.to.be.calledWith(MARK_NAMES.INITIALIZE_STUDIO_AI_END)
+        expect(reportTelemetryStub).to.be.calledWith(TELEMETRY_GROUP_NAMES.INITIALIZE_STUDIO, {
+          status: 'success',
+          canAccessStudioAI: false,
+        })
+      })
+
+      it('onStudioDestroy destroys studio when it is initialized', async function () {
+        this.project._isStudioInitialized = true
+
+        // Create a studio manager with minimal properties
+        const protocolManager = { close: sinon.stub().resolves() }
+        const studioManager = {
+          destroy: sinon.stub().resolves(),
+          protocolManager,
+        }
+
+        this.project.ctx.coreData.studioLifecycleManager = {
+          getStudio: sinon.stub().resolves(studioManager),
+          isStudioReady: sinon.stub().resolves(true),
+        }
+
+        this.project['_protocolManager'] = protocolManager
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        // Modify the startWebsockets stub to track the callbacks
+        const callbackPromise = new Promise((resolve) => {
+          this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+            await callbacks.onStudioDestroy()
+            resolve()
+          })
+        })
+
+        this.project.startWebsockets({}, {})
+
+        await callbackPromise
+
+        expect(studioManager.destroy).to.have.been.calledOnce
+        expect(browsers.closeProtocolConnection).to.have.been.calledOnce
+        expect(protocolManager.close).to.have.been.calledOnce
+        expect(this.project['_protocolManager']).to.be.undefined
+      })
+
+      it('onStudioDestroy does not destroy studio when it is not initialized', async function () {
+        const protocolManager = { close: sinon.stub().resolves() }
+        const studioManager = {
+          destroy: sinon.stub().resolves(),
+          protocolManager,
+        }
+
+        this.project.ctx.coreData.studioLifecycleManager = {
+          getStudio: sinon.stub().resolves(studioManager),
+          isStudioReady: sinon.stub().resolves(true),
+        }
+
+        this.project['_protocolManager'] = protocolManager
+
+        // Create a browser object
+        this.project.browser = {
+          name: 'chrome',
+          family: 'chromium',
+        }
+
+        this.project.options = { browsers: [this.project.browser] }
+
+        sinon.stub(browsers, 'closeProtocolConnection').resolves()
+
+        // Modify the startWebsockets stub to track the callbacks
+        const callbackPromise = new Promise((resolve) => {
+          this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+            await callbacks.onStudioDestroy()
+            resolve()
+          })
+        })
+
+        this.project.startWebsockets({}, {})
+
+        await callbackPromise
+
+        expect(studioManager.destroy).not.to.have.been.called
+        expect(browsers.closeProtocolConnection).not.to.have.been.called
+        expect(protocolManager.close).not.to.have.been.called
+      })
+    })
+
+    it('passes onCyPromptReady callback', async function () {
+      const mockCyPromptManager = {
+        foo: 'bar',
+      }
+
+      // Create a browser object
+      this.project.browser = {
+        name: 'chrome',
+        family: 'chromium',
+      }
+
+      this.project.options = { browsers: [this.project.browser] }
+
+      sinon.stub(browsers, 'connectCyPromptToBrowser')
+
+      // Modify the startWebsockets stub to track the callbacks
+      const callbackPromise = new Promise((resolve) => {
+        this.project.server.startWebsockets.callsFake(async (automation, config, callbacks) => {
+          await callbacks.onCyPromptReady(mockCyPromptManager)
+          resolve()
+        })
+      })
+
+      this.project.startWebsockets({}, {})
+
+      await callbackPromise
+
+      expect(browsers.connectCyPromptToBrowser).to.have.been.calledWith({
+        browser: this.project.browser,
+        foundBrowsers: this.project.options.browsers,
+        cyPromptManager: mockCyPromptManager,
+      })
+    })
+  })
+
+  describe('#getProjectId', () => {
+    beforeEach(function () {
+      this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
+      sinon.stub(ctx.lifecycleManager, 'getProjectId').resolves('id-123')
+    })
+
+    it('returns the project id from data-context', function () {
+      return this.project.getProjectId()
+      .then((id) => {
+        expect(ctx.lifecycleManager.getProjectId).to.be.calledOnce
+        expect(id).to.eq('id-123')
+      })
+    })
+  })
+})
+
+describe('lib/project-base #isRunnerSocketConnected', () => {
+  it('calls through to socket method', () => {
+    const isRunnerSocketConnected = sinon.stub().returns(true)
+
+    this.project = new ProjectBase({ projectRoot: Fixtures.projectPath('todos'), testingType: 'e2e' })
+    this.project._server = {
+      socket: {
+        isRunnerSocketConnected,
+      },
+    }
+
+    const result = this.project.isRunnerSocketConnected()
+
+    expect(result).to.eq(true)
+    expect(isRunnerSocketConnected).to.have.been.calledOnce
+  })
+})

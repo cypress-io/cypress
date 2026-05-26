@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto'
 import * as exec from '../exec'
 import * as files from '../files'
 import { fs } from '../util/fs'
-import task from '../task'
+import * as task from '../task'
 import { getUserDefinedEnvironmentVariables } from '../getUserDefinedEnvs'
 
 interface SpecOriginatedCommand {

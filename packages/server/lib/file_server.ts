@@ -8,7 +8,7 @@ import send from 'send'
 import { httpUtils } from '@packages/network'
 import { allowDestroy } from './util/server_destroy'
 import { id as randomId } from './util/random'
-import networkFailures from './util/network_failures'
+import { get as getNetworkFailures } from './util/network_failures'
 import type { AddressInfo } from 'net'
 
 const debug = debugModule('cypress:server:file_server')
@@ -53,7 +53,7 @@ const onRequest = function (req: http.IncomingMessage, res: http.ServerResponse,
     res.setHeader('content-type', 'text/html')
     res.statusCode = err.status
 
-    return res.end(networkFailures.get(file, err.status))
+    return res.end(getNetworkFailures(file, err.status))
   }).pipe(res)
 }
 

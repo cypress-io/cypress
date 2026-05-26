@@ -140,6 +140,8 @@ export class OTLPTraceExporter extends OTLPTraceExporterHttp {
 
     if (this.requirementsToExport === 'unmet') {
       onError(new Error('Spans cannot be sent, exporter has unmet requirements, either project id or record key are undefined.'))
+
+      return
     }
 
     let serviceRequest: string
