@@ -10,7 +10,7 @@ import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 
-export type CreateProxyRuntimeDeps = {
+type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
   remoteStates: RemoteStates
@@ -22,7 +22,7 @@ export type CreateProxyRuntimeDeps = {
   getCurrentBrowser: () => FoundBrowser
 }
 
-export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
+type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   networkProxy: NetworkProxy
   netStubbingState: NetStubbingState
 }
