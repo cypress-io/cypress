@@ -2,7 +2,7 @@ import { blocked } from '@packages/network'
 import { BlockedHosts } from '@packages/network-policy'
 import type { ForNetworkPolicyRegistration } from '@packages/network-policy'
 
-export type RegisterDefaultNetworkPoliciesConfig = {
+type RegisterDefaultNetworkPoliciesConfig = {
   blockHosts?: string | string[] | null
 }
 
