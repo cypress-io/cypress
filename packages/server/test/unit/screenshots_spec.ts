@@ -1,20 +1,19 @@
-require('../spec_helper')
+import '../spec_helper'
+import _ from 'lodash'
+import path from 'path'
+import Jimp from 'jimp'
+import sinon from 'sinon'
+import { Buffer } from 'buffer'
+import dataUriToBuffer from 'data-uri-to-buffer'
+import sizeOf from 'image-size'
+import Fixtures from '@tooling/system-tests'
+import screenshots from '../../lib/screenshots'
+import { fs } from '../../lib/util/fs'
+import * as plugins from '../../lib/plugins'
+import { Screenshot } from '../../lib/automation/screenshot'
 
-const _ = require('lodash')
-const path = require('path')
-const Jimp = require('jimp')
-const sinon = require('sinon')
-const { Buffer } = require('buffer')
-const dataUriToBuffer = require('data-uri-to-buffer')
-const sizeOf = require('image-size')
-const Fixtures = require('@tooling/system-tests')
-const screenshots = require(`../../lib/screenshots`).default
-const { fs } = require(`../../lib/util/fs`)
-const plugins = require(`../../lib/plugins`)
-const { Screenshot } = require(`../../lib/automation/screenshot`)
 const image = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAALlJREFUeNpi1F3xYAIDA4MBA35wgQWqyB5dRoaVmeHJ779wPhOM0aQtyBAoyglmOwmwM6z1lWY44CMDFgcBFmRTGp3EGGJe/WIQ5mZm4GRlBGJmhlm3PqGaeODpNzCtKsbGIARUCALvvv6FWw9XeOvrH4bbQNOQwfabnzHdGK3AwyAjyAqX2HPzC0Pn7Y9wPtyNIMGlD74wmAqwMZz+8AvFxzATVZAFQIqwABWQiWtgAY5uCnKAAwQYAPr8OZysiz4PAAAAAElFTkSuQmCC'
 const iso8601Regex = /^\d{4}\-\d{2}\-\d{2}T\d{2}\:\d{2}\:\d{2}\.?\d*Z?$/
-
 let ctx
 
 describe('lib/screenshots', () => {
@@ -25,6 +24,18 @@ describe('lib/screenshots', () => {
     await clearCtx()
     setCtx(makeDataContext({}))
     ctx = require('../../lib/makeDataContext').getCtx()
+
+    sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+      {
+        channel: 'stable',
+        displayName: 'Electron',
+        family: 'chromium',
+        majorVersion: '123',
+        name: 'electron',
+        path: 'path-to-browser-one',
+        version: '123.45.67',
+      },
+    ])
 
     Fixtures.scaffold()
     this.todosPath = Fixtures.projectPath('todos')
@@ -79,7 +90,7 @@ describe('lib/screenshots', () => {
     return Fixtures.remove()
   })
 
-  context('.capture', () => {
+  describe('.capture', () => {
     beforeEach(function () {
       this.getPixelColor = sinon.stub()
       this.getPixelColor.withArgs(0, 0).returns('grey')
@@ -478,7 +489,7 @@ describe('lib/screenshots', () => {
     })
   })
 
-  context('.crop', () => {
+  describe('.crop', () => {
     beforeEach(function () {
       this.dimensions = (overrides) => {
         return _.extend({ x: 0, y: 0, width: 10, height: 10 }, overrides)
@@ -522,7 +533,7 @@ describe('lib/screenshots', () => {
     })
   })
 
-  context('.save', () => {
+  describe('.save', () => {
     it('outputs file and returns details', function () {
       const buf = dataUriToBuffer(image)
 
@@ -609,7 +620,7 @@ describe('lib/screenshots', () => {
     })
   })
 
-  context('.getPath', () => {
+  describe('.getPath', () => {
     beforeEach(() => {
       sinon.stub(fs, 'outputFileAsync').resolves()
     })
@@ -730,7 +741,7 @@ describe('lib/screenshots', () => {
     })
   })
 
-  context('.afterScreenshot', () => {
+  describe('.afterScreenshot', () => {
     beforeEach(function () {
       this.data = {
         titles: ['the', 'title'],

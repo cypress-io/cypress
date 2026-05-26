@@ -1,4 +1,4 @@
-require('../../spec_helper')
+import '../../spec_helper'
 
 describe('lib/cloud/routes', () => {
   const routes = () => {
@@ -77,7 +77,7 @@ describe('lib/cloud/routes', () => {
     })
 
     it('supports test environment', () => {
-      process.env.CYPRESS_INTERNAL_ENV = 'test'
+      ;(process.env as Record<string, string | undefined>)['CYPRESS_INTERNAL_ENV'] = 'test'
 
       expect(routes().apiRoutes.api()).to.eq('http://localhost:1234/')
     })
@@ -91,7 +91,8 @@ describe('lib/cloud/routes', () => {
 
     it('honors CYPRESS_CONFIG_ENV', () => {
       process.env.CYPRESS_CONFIG_ENV = 'staging'
-      process.env.CYPRESS_INTERNAL_ENV = 'test'
+
+      ;(process.env as Record<string, string | undefined>)['CYPRESS_INTERNAL_ENV'] = 'test'
 
       expect(routes().apiRoutes.api()).to.eq('https://api-staging.cypress.io/')
     })

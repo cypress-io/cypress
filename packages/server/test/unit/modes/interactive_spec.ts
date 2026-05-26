@@ -1,16 +1,15 @@
-require('../../spec_helper')
-
-const _ = require('lodash')
-const os = require('os')
-const electron = require('electron')
-const savedState = require(`../../../lib/saved_state`)
-const menu = require(`../../../lib/gui/menu`)
-const Windows = require(`../../../lib/gui/windows`)
-const interactiveMode = require(`../../../lib/modes/interactive`)
-const { GracefulExit } = require(`../../../lib/util/graceful-exit`)
+import '../../spec_helper'
+import _ from 'lodash'
+import os from 'os'
+import electron from 'electron'
+import * as savedState from '../../../lib/saved_state'
+import menu from '../../../lib/gui/menu'
+import * as Windows from '../../../lib/gui/windows'
+import interactiveMode from '../../../lib/modes/interactive'
+import { GracefulExit } from '../../../lib/util/graceful-exit'
 
 describe('gui/interactive', () => {
-  context('.isMac', () => {
+  describe('.isMac', () => {
     it('returns true if os.platform is darwin', () => {
       sinon.stub(os, 'platform').returns('darwin')
 
@@ -24,7 +23,7 @@ describe('gui/interactive', () => {
     })
   })
 
-  context('.getWindowArgs', () => {
+  describe('.getWindowArgs', () => {
     it('quits app when onClose is called', () => {
       electron.app.quit = sinon.stub()
       interactiveMode.getWindowArgs('http://app', {}).onClose()
@@ -121,7 +120,7 @@ describe('gui/interactive', () => {
     })
   })
 
-  context('.ready', () => {
+  describe('.ready', () => {
     beforeEach(async function () {
       this.win = {}
       this.state = {}
@@ -170,7 +169,7 @@ describe('gui/interactive', () => {
     })
   })
 
-  context('.run', () => {
+  describe('.run', () => {
     beforeEach(() => {
       sinon.stub(electron.app, 'whenReady').resolves()
     })

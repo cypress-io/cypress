@@ -1,6 +1,8 @@
-const path = require('path')
-const proxyquire = require('proxyquire').preserveCache()
-const sinon = require('sinon')
+import path from 'path'
+import proxyquire from 'proxyquire'
+import sinon from 'sinon'
+
+proxyquire.preserveCache()
 
 describe('unhandled_exceptions: infinite loop guard', () => {
   const INFINITE_LOOP_GUARD = 5

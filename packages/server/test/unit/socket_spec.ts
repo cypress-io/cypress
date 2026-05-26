@@ -1,26 +1,23 @@
-require('../spec_helper')
-
-const _ = require('lodash')
-const path = require('path')
-const httpsAgent = require('https-proxy-agent')
+import '../spec_helper'
+import _ from 'lodash'
+import path from 'path'
+import httpsAgent from 'https-proxy-agent'
 // NOTE: we need to import the client from the lib directory because the browser/client directory is compiled to ESM.
 // we are unable to import ESM into a CommonJS test context, even if we await import() the module.
-const socketIo = require('@packages/socket/lib/client')
-
-const Fixtures = require('@tooling/system-tests')
-
-const errors = require('../../lib/errors')
-const { SocketE2E } = require('../../lib/socket-e2e')
-const { ServerBase } = require('../../lib/server-base')
-const { Automation } = require('../../lib/automation')
-const preprocessor = require('../../lib/plugins/preprocessor').default
-const { fs } = require('../../lib/util/fs')
-const session = require('../../lib/session')
-const devServer = require('../../lib/plugins/dev-server').default
-const { createRoutes } = require('../../lib/routes')
-const { getCtx } = require('../../lib/makeDataContext')
-const { sinon } = require('../spec_helper')
-const { SocketCt } = require('../../lib/socket-ct')
+import * as socketIo from '@packages/socket/lib/client'
+import Fixtures from '@tooling/system-tests'
+import * as errors from '../../lib/errors'
+import { SocketE2E } from '../../lib/socket-e2e'
+import { ServerBase } from '../../lib/server-base'
+import { Automation } from '../../lib/automation'
+import preprocessor from '../../lib/plugins/preprocessor'
+import { fs } from '../../lib/util/fs'
+import * as session from '../../lib/session'
+import devServer from '../../lib/plugins/dev-server'
+import * as createRoutes from '../../lib/routes'
+import { getCtx } from '../../lib/makeDataContext'
+import { sinon } from '../spec_helper'
+import { SocketCt } from '../../lib/socket-ct'
 
 let ctx
 
@@ -31,18 +28,17 @@ describe('lib/socket', () => {
       path: 'path-to-browser-one',
     }
 
-    // needed to run these tests locally
-    // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
-    //   {
-    //     channel: 'stable',
-    //     displayName: 'Electron',
-    //     family: 'chromium',
-    //     majorVersion: '123',
-    //     name: 'electron',
-    //     path: 'path-to-browser-one',
-    //     version: '123.45.67',
-    //   },
-    // ])
+    sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+      {
+        channel: 'stable',
+        displayName: 'Electron',
+        family: 'chromium',
+        majorVersion: '123',
+        name: 'electron',
+        path: 'path-to-browser-one',
+        version: '123.45.67',
+      },
+    ])
 
     // Don't bother initializing the child process, etc for this
     sinon.stub(ctx.actions.project, 'initializeActiveProject')
@@ -69,7 +65,7 @@ describe('lib/socket', () => {
     return this.server.close()
   })
 
-  context('integration', () => {
+  describe('integration', () => {
     let mockCyPrompt
 
     beforeEach(function (done) {
@@ -182,7 +178,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(automation:push:request)', () => {
+    describe('on(automation:push:request)', () => {
       beforeEach(function (done) {
         this.socketClient.on('automation:client:connected', () => {
           return done()
@@ -208,7 +204,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(watch:test:file)', () => {
+    describe('on(watch:test:file)', () => {
       it('calls socket#watchTestFileByPath with config, spec argument', function (done) {
         sinon.stub(this.socket, 'watchTestFileByPath')
 
@@ -222,7 +218,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(app:connect)', () => {
+    describe('on(app:connect)', () => {
       it('calls options.onConnect with socketId and socket', function (done) {
         this.options.onConnect = function (socketId, socket) {
           expect(socketId).to.eq('sid-123')
@@ -235,7 +231,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, get:fixture)', () => {
+    describe('on(backend:request, get:fixture)', () => {
       it('returns the fixture object', function (done) {
         const cb = function (resp) {
           expect(resp.response).to.deep.eq([
@@ -270,7 +266,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, http:request)', () => {
+    describe('on(backend:request, http:request)', () => {
       it('calls socket#onRequest', function (done) {
         sinon.stub(this.options, 'onRequest').resolves({ foo: 'bar' })
 
@@ -294,7 +290,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, wait:for:prompt:ready)', () => {
+    describe('on(backend:request, wait:for:prompt:ready)', () => {
       it('awaits cy prompt ready and returns true if cy prompt is ready', function (done) {
         const mockCyPrompt = {
           cyPromptManager: {
@@ -349,7 +345,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(get:app:state)', () => {
+    describe('on(get:app:state)', () => {
       it('calls getSavedState with options and returns the state', function (done) {
         this.options.getSavedState.resolves({ reporterWidth: 500 })
 
@@ -375,7 +371,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(save:app:state)', () => {
+    describe('on(save:app:state)', () => {
       it('calls onSavedStateChanged with the state and options', function (done) {
         this.client.emit('save:app:state', { reporterWidth: 500, __options: { type: 'global' } }, () => {
           expect(this.options.onSavedStateChanged).to.be.calledWith({ reporterWidth: 500 }, { type: 'global' })
@@ -385,7 +381,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(studio:init)', () => {
+    describe('on(studio:init)', () => {
       it('calls onStudioInit', async function () {
         this.options.onStudioInit.resolves({ canAccessStudioAI: true, cloudStudioSessionId: 'test-session-id' })
 
@@ -444,7 +440,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(studio:destroy)', () => {
+    describe('on(studio:destroy)', () => {
       it('calls onStudioDestroy', async function () {
         this.options.onStudioDestroy.resolves()
 
@@ -471,7 +467,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(prompt:reset)', () => {
+    describe('on(prompt:reset)', () => {
       it('calls reset', async function () {
         await new Promise((resolve) => {
           this.client.emit('prompt:reset', () => {
@@ -501,7 +497,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('studio.addSocketListeners', () => {
+    describe('studio.addSocketListeners', () => {
       it('calls addSocketListeners on studio when socket connects', async function () {
         preprocessor.emitter.on.reset()
 
@@ -547,7 +543,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('cy.prompt.addSocketListeners', () => {
+    describe('cy.prompt.addSocketListeners', () => {
       it('calls addSocketListeners on cy prompt when socket connects', async function () {
         preprocessor.emitter.on.reset()
 
@@ -591,12 +587,12 @@ describe('lib/socket', () => {
       })
     })
 
-    context('#isRunnerSocketConnected', function () {
+    describe('#isRunnerSocketConnected', function () {
       it('returns false when runner is not connected', function () {
         expect(this.socket.isRunnerSocketConnected()).to.eq(false)
       })
 
-      context('runner connected', () => {
+      describe('runner connected', () => {
         beforeEach(function (done) {
           this.socketClient.on('automation:client:connected', () => {
             this.socketClient.on('runner:connected', () => {
@@ -615,7 +611,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, save:session)', () => {
+    describe('on(backend:request, save:session)', () => {
       it('saves spec sessions', function (done) {
         const sessionData = {
           id: 'spec',
@@ -666,7 +662,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, clear:sessions)', () => {
+    describe('on(backend:request, clear:sessions)', () => {
       it('clears spec sessions', function (done) {
         let state = session.getState()
 
@@ -712,7 +708,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, get:session)', () => {
+    describe('on(backend:request, get:session)', () => {
       it('returns global session', function (done) {
         const state = session.getState()
 
@@ -762,7 +758,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('on(backend:request, reset:cached:test:state)', () => {
+    describe('on(backend:request, reset:cached:test:state)', () => {
       it('clears spec sessions', function (done) {
         const state = session.getState()
 
@@ -824,8 +820,8 @@ describe('lib/socket', () => {
     })
   })
 
-  context('unit', () => {
-    context('e2e', () => {
+  describe('unit', () => {
+    describe('e2e', () => {
       beforeEach(function () {
         this.mockClient = sinon.stub({
           on () {},
@@ -865,7 +861,7 @@ describe('lib/socket', () => {
         })
       })
 
-      context('constructor', () => {
+      describe('constructor', () => {
         it('listens for \'file:updated\' on preprocessor', function () {
           this.cfg.watchForFileChanges = true
           new SocketE2E(this.cfg)
@@ -882,7 +878,7 @@ describe('lib/socket', () => {
         })
       })
 
-      context('#sendFocusBrowserMessage', function () {
+      describe('#sendFocusBrowserMessage', function () {
         it('sends an automation request of focus:browser:window', function () {
           sinon.stub(this.automation, 'request')
 
@@ -892,7 +888,7 @@ describe('lib/socket', () => {
         })
       })
 
-      context('#close', () => {
+      describe('#close', () => {
         it('calls close on #io', function () {
           this.socket.close()
 
@@ -904,7 +900,7 @@ describe('lib/socket', () => {
         })
       })
 
-      context('#watchTestFileByPath', () => {
+      describe('#watchTestFileByPath', () => {
         beforeEach(function () {
           this.socket.testsDir = Fixtures.project('todos/tests')
           this.filePath = `${this.socket.testsDir}/test1.js`
@@ -993,7 +989,7 @@ describe('lib/socket', () => {
         })
       })
 
-      context('#startListening', () => {
+      describe('#startListening', () => {
         describe('watch:test:file', () => {
           it('listens for watch:test:file event', function () {
             this.socket.startListening(this.server.getHttpServer(), this.automation, this.cfg, {})
@@ -1104,7 +1100,7 @@ describe('lib/socket', () => {
       })
     })
 
-    context('ct', () => {
+    describe('ct', () => {
       beforeEach(function () {
         this.mockClient = sinon.stub({
           on () {},

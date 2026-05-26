@@ -1,9 +1,8 @@
-const path = require('path')
-
-require('../../spec_helper')
-const { fs } = require('../../../lib/util/fs')
-const settings = require(`../../../lib/util/settings`)
-const { getCtx } = require('../../../lib/makeDataContext')
+import '../../spec_helper'
+import path from 'path'
+import { fs } from '../../../lib/util/fs'
+import * as settings from '../../../lib/util/settings'
+import { getCtx } from '../../../lib/makeDataContext'
 
 const projectRoot = process.cwd()
 

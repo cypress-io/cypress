@@ -1,7 +1,6 @@
-require('../../spec_helper')
-
-const path = require('path')
-const { fs } = require('../../../lib/util/fs')
+import '../../spec_helper'
+import path from 'path'
+import { fs } from '../../../lib/util/fs'
 
 describe('privileged channel', () => {
   let runPrivilegedChannel

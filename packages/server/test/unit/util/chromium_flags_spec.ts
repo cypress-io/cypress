@@ -1,9 +1,8 @@
-require('../../spec_helper')
-
-const { formatChromeFlags, formatElectronFlags } = require(`../../../lib/util/chromium_flags`)
+import '../../spec_helper'
+import { formatChromeFlags, formatElectronFlags } from '../../../lib/util/chromium_flags'
 
 describe('lib/util/chromium_flags', () => {
-  context('#formatChromeFlags', () => {
+  describe('#formatChromeFlags', () => {
     it('formats flags with --', () => {
       const flags = ['one', 'two', 'three']
       const chromeFlags = formatChromeFlags(flags)
@@ -12,7 +11,7 @@ describe('lib/util/chromium_flags', () => {
     })
   })
 
-  context('#formatElectronFlags', () => {
+  describe('#formatElectronFlags', () => {
     it('formats flags as objects with name', () => {
       const flags = ['one', 'two', 'three']
       const electronFlags = formatElectronFlags(flags)

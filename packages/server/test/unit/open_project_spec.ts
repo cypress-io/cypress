@@ -1,13 +1,12 @@
-require('../spec_helper')
-
-const Bluebird = require('bluebird')
-const browsers = require(`../../lib/browsers`).default
-const ProjectBase = require(`../../lib/project-base`).ProjectBase
-const { openProject } = require('../../lib/open_project')
-const preprocessor = require(`../../lib/plugins/preprocessor`).default
-const runEvents = require(`../../lib/plugins/run_events`).default
-const Fixtures = require('@tooling/system-tests')
-const delay = require('lodash/delay')
+import '../spec_helper'
+import Bluebird from 'bluebird'
+import browsers from '../../lib/browsers'
+import { ProjectBase } from '../../lib/project-base'
+import { openProject } from '../../lib/open_project'
+import preprocessor from '../../lib/plugins/preprocessor'
+import runEvents from '../../lib/plugins/run_events'
+import Fixtures from '@tooling/system-tests'
+import delay from 'lodash/delay'
 
 const todosPath = Fixtures.projectPath('todos')
 
@@ -43,7 +42,7 @@ describe('lib/open_project', () => {
     })
   })
 
-  context('#launch', () => {
+  describe('#launch', () => {
     beforeEach(async function () {
       await openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
       openProject.getProject().__setConfig({
@@ -216,7 +215,7 @@ describe('lib/open_project', () => {
     })
   })
 
-  context('#sendFocusBrowserMessage', () => {
+  describe('#sendFocusBrowserMessage', () => {
     it('focuses browser if runner is connected', async () => {
       // Stubbing out relaunchBrowser function created during launch
       openProject.relaunchBrowser = sinon.stub()
@@ -256,7 +255,7 @@ describe('lib/open_project', () => {
     })
   })
 
-  context('#connectProtocolToBrowser', () => {
+  describe('#connectProtocolToBrowser', () => {
     it('connects protocol to browser', async () => {
       sinon.stub(browsers, 'connectProtocolToBrowser').resolves()
       const options = sinon.stub()
@@ -267,7 +266,7 @@ describe('lib/open_project', () => {
     })
   })
 
-  context('#connectCyPromptToBrowser', () => {
+  describe('#connectCyPromptToBrowser', () => {
     it('connects cy prompt to browser', async () => {
       sinon.stub(browsers, 'connectCyPromptToBrowser').resolves()
       const options = sinon.stub()
