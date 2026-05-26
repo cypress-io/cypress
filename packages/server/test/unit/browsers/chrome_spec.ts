@@ -1,17 +1,15 @@
-require('../../spec_helper')
-
-const os = require('os')
-const mockfs = require('mock-fs')
-
-const extension = require('@packages/extension')
-const launch = require('@packages/launcher/lib/browsers')
-const plugins = require(`../../../lib/plugins`)
-const utils = require(`../../../lib/browsers/utils`).default
-const chrome = require(`../../../lib/browsers/chrome`)
-const { fs } = require(`../../../lib/util/fs`)
-const { BrowserCriClient } = require('../../../lib/browsers/browser-cri-client')
-const protocol = require(`../../../lib/browsers/protocol`)
-const { expect } = require('chai')
+import '../../spec_helper'
+import os from 'os'
+import mockfs from 'mock-fs'
+import * as extension from '@packages/extension'
+import * as launch from '@packages/launcher/lib/browsers'
+import * as plugins from '../../../lib/plugins'
+import utils from '../../../lib/browsers/utils'
+import chrome from '../../../lib/browsers/chrome'
+import { fs } from '../../../lib/util/fs'
+import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import * as protocol from '../../../lib/browsers/protocol'
+import { expect } from 'chai'
 
 const openOpts = {
   onError: () => {},
@@ -38,7 +36,7 @@ const mockGetDefaultChromePreferences = () => {
 }
 
 describe('lib/browsers/chrome', () => {
-  context('#open', () => {
+  describe('#open', () => {
     beforeEach(function () {
       // mock CRI client during testing
       this.pageCriClient = {
@@ -87,6 +85,7 @@ describe('lib/browsers/chrome', () => {
       sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
       sinon.stub(utils, 'ensureCleanCache').resolves('/profile/dir/CypressCache')
       sinon.stub(utils, 'initializeCDP').resolves()
+      sinon.stub(fs, 'outputJson').withArgs('/profile/dir/Default/Preferences').resolves()
 
       this.readJson = sinon.stub(fs, 'readJson')
       this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
@@ -216,20 +215,18 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    context('when IGNORE_CHROME_PREFERENCES env is set', () => {
+    describe('when IGNORE_CHROME_PREFERENCES env is set', () => {
       let oldPref
-      let writeJson
 
       beforeEach(function () {
         oldPref = process.env.IGNORE_CHROME_PREFERENCES
         process.env.IGNORE_CHROME_PREFERENCES = true
         this.readJson.rejects({ code: 'ENOENT' })
-        writeJson = sinon.stub(fs, 'outputJson').resolves()
       })
 
       afterEach(() => {
         process.env.IGNORE_CHROME_PREFERENCES = oldPref
-        writeJson.restore()
+        fs.outputJson.restore()
       })
 
       it('does not read or write preferences', async function () {
@@ -243,7 +240,7 @@ describe('lib/browsers/chrome', () => {
           channel: 'stable',
         }, 'http://', openOpts, this.automation)
 
-        expect(writeJson).not.to.be.called
+        expect(fs.outputJson).not.to.be.called
         expect(this.readJson).not.to.be.called
       })
     })
@@ -328,7 +325,7 @@ describe('lib/browsers/chrome', () => {
         },
       })
 
-      sinon.stub(fs, 'outputJson').resolves()
+      fs.outputJson.resolves()
 
       return chrome.open({ isHeadless: true }, 'http://', openOpts, this.automation)
       .then(() => {
@@ -547,7 +544,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#connectToNewSpec', () => {
+  describe('#connectToNewSpec', () => {
     it('launches a new tab, connects a cri client to it, starts video, navigates to the spec url, and handles downloads', async function () {
       const protocolManager = {
         connectToBrowser: sinon.stub().resolves(),
@@ -607,7 +604,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#connectProtocolToBrowser', () => {
+  describe('#connectProtocolToBrowser', () => {
     it('connects to the browser cri client', async function () {
       const protocolManager = {
         connectToBrowser: sinon.stub().resolves(),
@@ -683,7 +680,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#connectCyPromptToBrowser', () => {
+  describe('#connectCyPromptToBrowser', () => {
     it('connects to the browser cri client', async function () {
       const cyPromptManager = {
         connectToBrowser: sinon.stub().resolves(),
@@ -759,7 +756,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#connectStudioToBrowser', () => {
+  describe('#connectStudioToBrowser', () => {
     it('connects to the browser cri client', async function () {
       const studioManager = {
         connectToBrowser: sinon.stub().resolves(),
@@ -835,7 +832,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#closeProtocolConnection', () => {
+  describe('#closeProtocolConnection', () => {
     it('closes the protocol connection', async function () {
       const mockCurrentlyAttachedProtocolTarget = {
         close: sinon.stub().resolves(),
@@ -854,7 +851,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_getArgs', () => {
+  describe('#_getArgs', () => {
     it('disables gpu when linux', () => {
       sinon.stub(os, 'platform').returns('linux')
 
@@ -946,7 +943,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_getChromePreferences', () => {
+  describe('#_getChromePreferences', () => {
     it('returns map of empty if the files do not exist', () => {
       sinon.stub(fs, 'readJson')
       .withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
@@ -974,7 +971,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_mergeChromePreferences', () => {
+  describe('#_mergeChromePreferences', () => {
     it('merges as expected', () => {
       const originalPrefs = {
         default: {},
@@ -1013,7 +1010,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_writeChromePreferences', () => {
+  describe('#_writeChromePreferences', () => {
     it('writes json as expected', () => {
       const outputJson = sinon.stub(fs, 'outputJson')
       const defaultPrefs = outputJson.withArgs('/foo/Default/Preferences').resolves()
@@ -1099,7 +1096,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_getDefaultChromePreferences', () => {
+  describe('#_getDefaultChromePreferences', () => {
     it('returns expected default preferences', () => {
       const defaultPrefs = chrome._getDefaultChromePreferences()
 
@@ -1110,7 +1107,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_getChromePreferencesWithDefaults', () => {
+  describe('#_getChromePreferencesWithDefaults', () => {
     beforeEach(() => {
       sinon.stub(fs, 'readJson')
     })
@@ -1171,7 +1168,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_getChromePreferences with IGNORE_CHROME_PREFERENCES', () => {
+  describe('#_getChromePreferences with IGNORE_CHROME_PREFERENCES', () => {
     beforeEach(() => {
       process.env.IGNORE_CHROME_PREFERENCES = 'true'
     })
@@ -1192,7 +1189,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_writeChromePreferences with IGNORE_CHROME_PREFERENCES', () => {
+  describe('#_writeChromePreferences with IGNORE_CHROME_PREFERENCES', () => {
     beforeEach(() => {
       process.env.IGNORE_CHROME_PREFERENCES = 'true'
     })
@@ -1214,7 +1211,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_mergeChromePreferences with user preferences', () => {
+  describe('#_mergeChromePreferences with user preferences', () => {
     it('merges user preferences with defaults correctly', () => {
       // Mock _getDefaultChromePreferences to return fake preferences for testing
       const mockDefaultPrefs = mockGetDefaultChromePreferences()
@@ -1307,7 +1304,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#_getChromePreferences error handling', () => {
+  describe('#_getChromePreferences error handling', () => {
     beforeEach(() => {
       sinon.stub(fs, 'readJson')
     })
@@ -1346,7 +1343,7 @@ describe('lib/browsers/chrome', () => {
     })
   })
 
-  context('#open integration with preferences', () => {
+  describe('#open integration with preferences', () => {
     beforeEach(function () {
       // Mock all the dependencies
       this.pageCriClient = {

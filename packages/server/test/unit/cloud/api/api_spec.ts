@@ -1,24 +1,22 @@
-const crypto = require('crypto')
-const jose = require('jose')
-const base64Url = require('base64url')
-const stealthyRequire = require('stealthy-require')
+import '../../../spec_helper'
 
-require('../../../spec_helper')
+import crypto from 'crypto'
+import * as jose from 'jose'
+import base64Url from 'base64url'
+import stealthyRequire from 'stealthy-require'
 
-const _ = require('lodash')
-const os = require('os')
-const encryption = require('../../../../lib/cloud/encryption')
-const { filterRuntimeConfigForRecording } = require('../../../../lib/config')
+import _ from 'lodash'
+import os from 'os'
+import * as encryption from '../../../../lib/cloud/encryption'
+import { filterRuntimeConfigForRecording } from '../../../../lib/config'
 
-const {
-  agent,
-} = require('@packages/network')
-const pkg = require('@packages/root')
-const api = require('../../../../lib/cloud/api').default
-const cache = require('../../../../lib/cache').cache
-const errors = require('../../../../lib/errors')
-const machineId = require('../../../../lib/cloud/machine_id')
-const Promise = require('bluebird')
+import { agent } from '@packages/network'
+import pkg from '@packages/root'
+import api from '../../../../lib/cloud/api'
+import { cache } from '../../../../lib/cache'
+import * as errors from '../../../../lib/errors'
+import * as machineId from '../../../../lib/cloud/machine_id'
+import Promise from 'bluebird'
 
 const API_BASEURL = 'http://localhost:1234'
 const API_PROD_BASEURL = 'https://api.cypress.io'
@@ -140,7 +138,7 @@ describe('lib/cloud/api', () => {
     sinon.restore()
   })
 
-  context('.rp', () => {
+  describe('.rp', () => {
     beforeEach(() => {
       sinon.spy(agent, 'addRequest')
 
@@ -175,7 +173,7 @@ describe('lib/cloud/api', () => {
       })
     })
 
-    context('with a proxy defined', () => {
+    describe('with a proxy defined', () => {
       beforeEach(function () {
         nock.cleanAll()
       })
@@ -197,7 +195,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.ping', () => {
+  describe('.ping', () => {
     it('GET /ping', () => {
       nock(API_BASEURL)
       .matchHeader('x-os-name', OS_PLATFORM)
@@ -228,7 +226,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.sendPreflight', () => {
+  describe('.sendPreflight', () => {
     let prodApi
     let originalCypressConfigEnv = process.env.CYPRESS_CONFIG_ENV
     let originalCypressAPIUrl = process.env.CYPRESS_API_URL
@@ -611,7 +609,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.createRun', () => {
+  describe('.createRun', () => {
     beforeEach(function () {
       this.protocolManager = {
         prepareAndSetupProtocol: sinon.stub(),
@@ -979,7 +977,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.postInstanceTests', () => {
+  describe('.postInstanceTests', () => {
     beforeEach(function () {
       this.props = {
         runId: 'run-id-123',
@@ -1177,7 +1175,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.postInstanceResults', () => {
+  describe('.postInstanceResults', () => {
     beforeEach(function () {
       this.updateProps = {
         runId: 'run-id-123',
@@ -1282,7 +1280,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.updateInstanceStdout', () => {
+  describe('.updateInstanceStdout', () => {
     it('PUTs /instances/:id/stdout', () => {
       nock(API_BASEURL)
       .matchHeader('x-os-name', OS_PLATFORM)
@@ -1380,7 +1378,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.getAuthUrls', () => {
+  describe('.getAuthUrls', () => {
     it('GET /auth + returns the urls', () => {
       return api.getAuthUrls().then((urls) => {
         expect(urls).to.deep.eq(AUTH_URLS)
@@ -1416,7 +1414,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.postLogout', () => {
+  describe('.postLogout', () => {
     beforeEach(() => {
       return sinon.stub(machineId, 'machineId').resolves('foo')
     })
@@ -1454,7 +1452,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.createCrashReport', () => {
+  describe('.createCrashReport', () => {
     beforeEach(function () {
       this.setup = (body, authToken, delay = 0) => {
         return nock(API_BASEURL)
@@ -1518,7 +1516,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.retryWithBackoff', () => {
+  describe('.retryWithBackoff', () => {
     beforeEach(() => {
       process.env.DISABLE_API_RETRIES = ''
 
@@ -1681,7 +1679,7 @@ describe('lib/cloud/api', () => {
     })
   })
 
-  context('.updateInstanceArtifacts', () => {
+  describe('.updateInstanceArtifacts', () => {
     beforeEach(function () {
       this.artifactOptions = {
         runId: 'run-id-123',

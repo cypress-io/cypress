@@ -227,7 +227,7 @@ export = {
           break
         }
         case 'info': {
-          await require('./modes/info')(options)
+          await require('./modes/info').info(options)
           break
         }
         case 'smokeTest': {

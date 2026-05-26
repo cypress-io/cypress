@@ -1,13 +1,12 @@
-require('../../spec_helper')
-
-const info = require(`../../../lib/modes/info`)
-const capture = require(`../../../lib/capture`)
-const browserUtils = require(`../../../lib/browsers/utils`).default
-const { fs } = require(`../../../lib/util/fs`)
-const detect = require('@packages/launcher/lib/detect')
-const snapshot = require('snap-shot-it')
-const stripAnsi = require('strip-ansi')
-const _ = require('lodash')
+import '../../spec_helper'
+import { info } from '../../../lib/modes/info'
+import * as capture from '../../../lib/capture'
+import browserUtils from '../../../lib/browsers/utils'
+import { fs } from '../../../lib/util/fs'
+import * as detect from '@packages/launcher/lib/detect'
+import snapshot from 'snap-shot-it'
+import stripAnsi from 'strip-ansi'
+import _ from 'lodash'
 
 describe('lib/modes/info', () => {
   beforeEach(() => {

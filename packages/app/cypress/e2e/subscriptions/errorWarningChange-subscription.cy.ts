@@ -23,6 +23,7 @@ describe('errorWarningChange subscription', () => {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: '20',
@@ -36,6 +37,7 @@ module.exports = {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: 20,
@@ -53,6 +55,7 @@ module.exports = {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: ,
@@ -67,6 +70,7 @@ module.exports = {
           await ctx.actions.file.writeFileInProject('cypress.config.js',
 `   
 module.exports = {
+  allowCypressEnv: false,
   projectId: 'abc123',
   component: {
     viewportHeight: 20,

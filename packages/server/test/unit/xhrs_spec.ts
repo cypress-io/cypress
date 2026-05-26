@@ -1,11 +1,10 @@
-require('../spec_helper')
-
-const xhrs = require(`../../lib/controllers/xhrs`).default
+import '../spec_helper'
+import xhrs from '../../lib/controllers/xhrs'
 
 describe('lib/controllers/xhr', () => {
   describe('#parseHeaders', () => {
     it('returns object literal on undefined', () => {
-      const obj = xhrs.parseHeaders(undefined)
+      const obj = xhrs.parseHeaders(undefined, undefined)
 
       expect(obj).to.deep.eq({
         'content-type': 'text/plain',

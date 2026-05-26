@@ -1,9 +1,8 @@
-require('../spec_helper')
-
-const { getExperiments, formatExperiments } = require(`../../lib/experiments.ts`)
+import '../spec_helper'
+import { getExperiments, formatExperiments } from '../../lib/experiments'
 
 describe('experiments', () => {
-  context('#formatExperiments', () => {
+  describe('#formatExperiments', () => {
     it('forms single string with all values', () => {
       const exp = {
         featureA: { value: true },
@@ -16,7 +15,7 @@ describe('experiments', () => {
     })
   })
 
-  context('#getExperiments', () => {
+  describe('#getExperiments', () => {
     it('returns enabled experiments', () => {
       const names = {
         experimentalFoo: 'experiment foo',

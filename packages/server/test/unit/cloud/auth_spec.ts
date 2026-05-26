@@ -1,14 +1,12 @@
-require('../../spec_helper')
-
-const auth = require(`../../../lib/cloud/auth`)
-const user = require(`../../../lib/cloud/user`).default
-
-const electron = require('electron')
-const machineId = require('../../../lib/cloud/machine_id')
-const os = require('os')
-const pkg = require('@packages/root')
-const Promise = require('bluebird')
-const random = require('../../../lib/util/random')
+import '../../spec_helper'
+import auth from '../../../lib/cloud/auth'
+import user from '../../../lib/cloud/user'
+import electron from 'electron'
+import * as machineId from '../../../lib/cloud/machine_id'
+import os from 'os'
+import pkg from '@packages/root'
+import Promise from 'bluebird'
+import * as random from '../../../lib/util/random'
 
 const BASE_URL = 'https://foo.invalid/login.html'
 const RANDOM_STRING = 'a'.repeat(32)
@@ -28,7 +26,7 @@ describe('lib/cloud/auth', function () {
     auth._internal.stopServer()
   })
 
-  context('_internal.getOriginFromUrl', function () {
+  describe('_internal.getOriginFromUrl', function () {
     it('given an https URL, returns the origin', function () {
       const origin = auth._internal.getOriginFromUrl(FULL_LOGIN_URL)
 
@@ -42,7 +40,7 @@ describe('lib/cloud/auth', function () {
     })
   })
 
-  context('_internal.buildFullLoginUrl', function () {
+  describe('_internal.buildFullLoginUrl', function () {
     beforeEach(function () {
       sinon.stub(random, 'id').returns(RANDOM_STRING)
       this.server = {
@@ -86,7 +84,7 @@ describe('lib/cloud/auth', function () {
     })
   })
 
-  context('_internal.launchNativeAuth', function () {
+  describe('_internal.launchNativeAuth', function () {
     it('is catchable if `shell` does not exist', function () {
       return auth._internal.launchNativeAuth(REDIRECT_URL)
       .then(() => {
@@ -95,7 +93,7 @@ describe('lib/cloud/auth', function () {
       .catchReturn(TypeError)
     })
 
-    context('with `shell` available', function () {
+    describe('with `shell` available', function () {
       beforeEach(function () {
         this.oldOpenExternal = electron.shell.openExternal
         electron.shell.openExternal = () => {}
@@ -129,7 +127,7 @@ describe('lib/cloud/auth', function () {
     })
   })
 
-  context('.start', () => {
+  describe('.start', () => {
     it('resolves upon successful auth', async () => {
       sinon.stub(user, 'getBaseLoginUrl').resolves('www.foo.bar')
       sinon.stub(Promise, 'fromCallback').resolves()
