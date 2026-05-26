@@ -206,8 +206,6 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
 
   logger.log()
 
-  const isCi = util.isCi()
-
   const verifyTaskRunner = new Listr([{
     title: util.titleize('Verifying Cypress can run', chalk.gray(binaryDir)),
     task: async (ctx, task) => {
@@ -232,8 +230,8 @@ async function verifyBinary (installedVersion: string, binaryDir: string, option
   }], {
     // In CI we want timestamped, line-per-event output. Locally,
     // the default in-place spinner is the better experience.
-    renderer: isCi ? 'verbose' : 'default',
-    ...(isCi && { rendererOptions: { timestamp: PRESET_TIMESTAMP } }),
+    renderer: util.isCi() ? 'verbose' : 'default',
+    ...(util.isCi() && { rendererOptions: { timestamp: PRESET_TIMESTAMP } }),
     silentRendererCondition: () => logger.logLevel() === 'silent',
   })
 

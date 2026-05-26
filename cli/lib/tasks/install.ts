@@ -304,15 +304,13 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
   logger.log(`Installing Cypress ${chalk.gray(`(version: ${versionToInstall})`)}`)
   logger.log()
 
-  const isCi = util.isCi()
-
   const taskRunner = new Listr(
     tasks,
     {
       // In CI we want timestamped, line-per-event output. Locally,
       // the default in-place spinner is the better experience.
-      renderer: isCi ? 'verbose' : 'default',
-      ...(isCi && { rendererOptions: { timestamp: PRESET_TIMESTAMP } }),
+      renderer: util.isCi() ? 'verbose' : 'default',
+      ...(util.isCi() && { rendererOptions: { timestamp: PRESET_TIMESTAMP } }),
       silentRendererCondition: () => logger.logLevel() === 'silent',
     },
   )
