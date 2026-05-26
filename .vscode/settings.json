@@ -38,4 +38,5 @@
   "volar.takeOverMode.enabled": "auto",
 
   "editor.tabSize": 2,
+  "snyk.advanced.autoSelectOrganization": true,
 }

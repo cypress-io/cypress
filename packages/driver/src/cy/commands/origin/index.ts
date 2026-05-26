@@ -5,7 +5,7 @@ import { Validator } from './validator'
 import { isFunction } from 'lodash'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
-import { preprocessConfig, preprocessEnv, preprocessExpose, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin, syncExposeToCurrentOrigin } from '../../../util/config'
+import { preprocessConfig, preprocessExpose, syncConfigToCurrentOrigin, syncExposeToCurrentOrigin } from '../../../util/config'
 import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
@@ -130,12 +130,9 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
           _resolve({ subject, unserializableSubjectType })
         }
 
-        const onSyncGlobals = ({ config, env, expose }) => {
+        const onSyncGlobals = ({ config, expose }) => {
           syncConfigToCurrentOrigin(config)
           syncExposeToCurrentOrigin(expose)
-          if (Cypress.config('allowCypressEnv')) {
-            syncEnvToCurrentOrigin(env)
-          }
         }
 
         communicator.once('sync:globals', onSyncGlobals)
@@ -193,7 +190,6 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
           // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
           communicator.toSpecBridge(origin, 'initialize:cypress', {
             config: preprocessConfig(Cypress.config()),
-            env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
             expose: preprocessExpose(Cypress.expose()),
             isProtocolEnabled: Cypress.state('isProtocolEnabled'),
           })
@@ -239,7 +235,6 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
                 originUserInvocationStack: userInvocationStack,
               },
               config: preprocessConfig(Cypress.config()),
-              env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
               expose: preprocessExpose(Cypress.expose()),
               logCounter: LogUtils.getCounter(),
             })

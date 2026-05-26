@@ -1,7 +1,6 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
-  allowCypressEnv: false,
   fixturesFolder: false,
   component: {
     experimentalSingleTabRunMode: true,

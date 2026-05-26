@@ -35,11 +35,7 @@ type TestConfig = {
   }
 };
 
-type ConfigOverrides = {
-  env: Object | undefined
-};
-
-function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigOverrides: ConfigOverrides = { env: undefined }) {
+function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigOverrides: Record<string, any> = {}) {
   const { testConfigList = [] } = testConfig
 
   testConfigList.forEach((resolvedConfig) => {
@@ -63,14 +59,14 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
         err.stack = $errUtils.stackWithReplacedProps({ stack: invocationDetails.stack }, err)
         throw err
       }
-      localConfigOverrides = { ...localConfigOverrides, ...testConfigOverride }
+      Object.assign(localConfigOverrides, testConfigOverride)
     }
   })
 
   return localConfigOverrides
 }
 
-function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, env) {
+function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config) {
   let globalConfig = _.clone(config())
 
   const localConfigOverrides = setConfig(testConfig, config)
@@ -80,28 +76,12 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
 
   const localConfigOverridesBackup = _.clone(localConfigOverrides)
 
-  // Do not allow overriding test/suite environment variables via testConfigOverrides with allowCypressEnv=false
-  // as the server needs to be restarted. The environment variables needing to be overridden need to be injected via the Cypress server
-  // and are not permitted in the browser.
-  if (!config('allowCypressEnv') && localConfigOverrides.env) {
-    let err = $errUtils.errByPath('config.invalid_test_override_with_allow_cypress_env')
+  // Environment variables cannot be overridden in the browser. Use cy.env() to read
+  // values from the Cypress server or Cypress.expose() for public configuration.
+  if (localConfigOverrides.env) {
+    let err = $errUtils.errByPath('config.invalid_test_override_env')
 
     throw err
-  }
-
-  // only set if allowCypressEnv is enabled
-  let globalEnv
-  let localTestEnv
-  let localTestEnvBackup
-
-  if (config('allowCypressEnv')) {
-    globalEnv = _.clone(env())
-    if (localConfigOverrides.env) {
-      env(localConfigOverrides.env)
-    }
-
-    localTestEnv = env()
-    localTestEnvBackup = _.clone(localTestEnv)
   }
 
   // we restore config back to what it was before the test ran
@@ -121,20 +101,8 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
       }
     })
 
-    if (config('allowCypressEnv')) {
-      _.each(localTestEnv, (val, key) => {
-        if (localTestEnvBackup[key] !== val) {
-          globalEnv[key] = val
-        }
-      })
-    }
-
     // reset test config overrides
     config(globalConfig)
-    if (config('allowCypressEnv')) {
-      env.reset()
-      env(globalEnv)
-    }
   }
 
   return restoreConfigFn
@@ -176,7 +144,7 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
 export class TestConfigOverride {
   private restoreTestConfigFn: Cypress.Nullable<() => void> = null
 
-  restoreAndSetTestConfigOverrides (test, config, env) {
+  restoreAndSetTestConfigOverrides (test, config) {
     if (this.restoreTestConfigFn) {
       test._testConfig.applied = 'restoring'
       this.restoreTestConfigFn()
@@ -187,7 +155,7 @@ export class TestConfigOverride {
     }
 
     if (Object.keys(resolvedTestConfig.unverifiedTestConfig).length > 0) {
-      this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
+      this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config)
     }
 
     resolvedTestConfig.applied = 'complete'

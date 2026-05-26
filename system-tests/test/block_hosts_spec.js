@@ -26,7 +26,6 @@ describe('e2e blockHosts', () => {
     settings: {
       blockHosts: 'localhost:3131',
       e2e: {
-        allowCypressEnv: false,
         baseUrl: 'http://localhost:3232',
       },
     },

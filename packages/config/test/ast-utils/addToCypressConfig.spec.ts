@@ -38,9 +38,7 @@ describe('addToCypressConfig', () => {
       import { defineConfig } from "cypress";
 
       export default defineConfig({
-        allowCypressEnv: false,
-
-        e2e: {
+e2e: {
           setupNodeEvents(on, config) {
             // implement node event listeners here
           },
@@ -68,9 +66,7 @@ describe('addToCypressConfig', () => {
           import { defineConfig } from "cypress";
 
           export default defineConfig({
-            allowCypressEnv: false,
-
-            e2e: {
+e2e: {
               setupNodeEvents(on, config) {
                 // implement node event listeners here
               },
@@ -98,9 +94,7 @@ describe('addToCypressConfig', () => {
           const { defineConfig } = require("cypress");
     
           module.exports = defineConfig({
-            allowCypressEnv: false,
-
-            e2e: {
+e2e: {
               setupNodeEvents(on, config) {
                 // implement node event listeners here
               },
@@ -126,9 +120,7 @@ describe('addToCypressConfig', () => {
 
     expect(secondArgTrimmed).toEqual(dedent`
       module.exports = {
-        allowCypressEnv: false,
-
-        e2e: {
+e2e: {
           setupNodeEvents(on, config) {
             // implement node event listeners here
           },
@@ -154,9 +146,7 @@ describe('addToCypressConfig', () => {
 
     expect(secondArgTrimmed).toEqual(dedent`
       export default {
-        allowCypressEnv: false,
-
-        e2e: {
+e2e: {
           setupNodeEvents(on, config) {
             // implement node event listeners here
           },

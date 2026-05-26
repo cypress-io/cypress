@@ -25,21 +25,21 @@ describe('per-test config', () => {
 
   it('set various config values', {
     defaultCommandTimeout: 200,
-    env: {
+    expose: {
       FOO_VALUE: 'foo',
     },
   }, () => {
     cy.visit('/fixtures/generic.html')
     expect(Cypress.config().defaultCommandTimeout).eq(200)
     expect(Cypress.config('defaultCommandTimeout')).eq(200)
-    expect(Cypress.env('FOO_VALUE')).eq('foo')
+    expect(Cypress.expose('FOO_VALUE')).eq('foo')
   })
 
   it('does not leak various config values', {
   }, () => {
     expect(Cypress.config().defaultCommandTimeout).not.eq(200)
     expect(Cypress.config('defaultCommandTimeout')).not.eq(200)
-    expect(Cypress.env('FOO_VALUE')).not.eq('foo')
+    expect(Cypress.expose('FOO_VALUE')).not.eq('foo')
   })
 
   it('can set viewport', {
@@ -85,66 +85,56 @@ describe('per-test config', () => {
     expect(Cypress.browser.name).eq('webkit')
   })
 
-  describe('mutating global config via Cypress.config and Cypress.env', () => {
-    it('1/2 global config and env', {
+  describe('mutating global config via Cypress.config', () => {
+    it('1/2 global config', {
       defaultCommandTimeout: 1234,
-      env: {
-        FOO: '0',
-      },
     }, () => {
       Cypress.config('responseTimeout', 1111)
       expect(Cypress.config('responseTimeout')).eq(1111)
       expect(Cypress.config('defaultCommandTimeout')).eq(1234)
-
-      Cypress.env('BAR', '1')
-      expect(Cypress.env('FOO')).eq('0')
-      expect(Cypress.env('BAR')).eq('1')
     })
 
-    it('2/2 global config and env', () => {
+    it('2/2 global config', () => {
       expect(Cypress.config('responseTimeout')).eq(1111)
       expect(Cypress.config('defaultCommandTimeout')).eq(4000)
-
-      expect(Cypress.env('FOO')).eq(undefined)
-      expect(Cypress.env('BAR')).eq('1')
     })
   })
 
   describe('in beforeEach', () => {
     it('set various config values', {
       defaultCommandTimeout: 200,
-      env: {
+      expose: {
         FOO_VALUE: 'foo',
       },
     }, () => {
       expect(Cypress.config().defaultCommandTimeout).eq(200)
       expect(Cypress.config('defaultCommandTimeout')).eq(200)
-      expect(Cypress.env('FOO_VALUE')).eq('foo')
+      expect(Cypress.expose('FOO_VALUE')).eq('foo')
     })
 
     beforeEach(() => {
       expect(Cypress.config().defaultCommandTimeout).eq(200)
       expect(Cypress.config('defaultCommandTimeout')).eq(200)
-      expect(Cypress.env('FOO_VALUE')).eq('foo')
+      expect(Cypress.expose('FOO_VALUE')).eq('foo')
     })
   })
 
   describe('in afterEach', () => {
     it('set various config values', {
       defaultCommandTimeout: 200,
-      env: {
+      expose: {
         FOO_VALUE: 'foo',
       },
     }, () => {
       expect(Cypress.config().defaultCommandTimeout).eq(200)
       expect(Cypress.config('defaultCommandTimeout')).eq(200)
-      expect(Cypress.env('FOO_VALUE')).eq('foo')
+      expect(Cypress.expose('FOO_VALUE')).eq('foo')
     })
 
     afterEach(() => {
       expect(Cypress.config().defaultCommandTimeout).eq(200)
       expect(Cypress.config('defaultCommandTimeout')).eq(200)
-      expect(Cypress.env('FOO_VALUE')).eq('foo')
+      expect(Cypress.expose('FOO_VALUE')).eq('foo')
     })
   })
 

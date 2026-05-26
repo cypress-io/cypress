@@ -1,7 +1,5 @@
-describe('allowCypressEnv', () => {
-  it('invokes Cypress.env()', () => {
-    expect(Cypress.env('CY_ENV_FOO'))
+describe('Cypress.env removal', () => {
+  it('does not expose Cypress.env', () => {
+    expect(Cypress.env).to.eq(undefined)
   })
-
-  // testConfigOverrides are tested in /system-tests/test/testConfigOverrides_spec.ts
 })

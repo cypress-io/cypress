@@ -38,7 +38,6 @@ describe('e2e experimentalCspAllowList', () => {
         '*.foobar.com': '127.0.0.1',
       },
       e2e: {
-        allowCypressEnv: false,
       },
     },
   })

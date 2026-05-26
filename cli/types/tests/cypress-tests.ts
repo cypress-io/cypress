@@ -46,16 +46,6 @@ namespace CypressConfigTests {
   Cypress.config('includeShadowDom') // $ExpectType boolean
 }
 
-namespace CypressEnvTests {
-  // Just making sure these are valid - no real type safety
-  Cypress.env('foo')
-  Cypress.env('foo', 'bar')
-  Cypress.env().foo
-  Cypress.env({
-    foo: 'bar',
-  })
-}
-
 namespace CypressExposeTests {
   // Just making sure these are valid - no real type safety
   Cypress.expose('foo')

@@ -1134,7 +1134,7 @@ describe('visual error templates', () => {
         default: ['http://localhost:8080'],
       }
     },
-    CYPRESS_ENV_DEPRECATION: () => {
+    ALLOW_CYPRESS_ENV_REMOVED: () => {
       return {
         default: [],
       }

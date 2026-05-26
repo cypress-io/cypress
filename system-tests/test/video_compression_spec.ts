@@ -49,12 +49,13 @@ describe('e2e video compression', () => {
       snapshot: false,
       headed,
       config: {
-        allowCypressEnv: true,
         video: true,
         videoCompression: 32,
         env: {
-          NUM_TESTS,
           MS_PER_TEST,
+        },
+        expose: {
+          NUM_TESTS,
         },
       },
       async onRun (exec, browserName) {
@@ -116,9 +117,11 @@ describe('video compression 0', () => {
     browser: 'chrome',
     spec: 'video_compression.cy.js',
     config: {
-      allowCypressEnv: true,
       video: true,
       videoCompression: 0,
+      expose: {
+        NUM_TESTS,
+      },
     },
     snapshot: true,
   })
@@ -137,10 +140,12 @@ describe('video compression true', () => {
     spec: 'video_compression.cy.js',
     record: true,
     config: {
-      allowCypressEnv: true,
       // override the value in the config to set videoCompression to true
       videoCompression: true,
       video: true,
+      expose: {
+        NUM_TESTS,
+      },
     },
     snapshot: true,
     onStdout: (stdout) => {

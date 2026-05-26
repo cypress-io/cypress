@@ -281,12 +281,8 @@ export default {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
-    invalid_test_override_with_allow_cypress_env: {
-      message: `overriding environment variables via suite or test configuration is not allowed when \`allowCypressEnv\` is set to \`false\`.`,
-      docsUrl: 'https://on.cypress.io/cypress-env-migration',
-    },
-    allow_cypress_env: {
-      message: `\`Cypress.env()\` does not work when \`allowCypressEnv\` is set to \`false\`. Please migrate to \`cy.env()\` or leverage other stateful methods to manage variables. The variable being accessed was: \`{{key}}\``,
+    invalid_test_override_env: {
+      message: `overriding environment variables via suite or test configuration is not allowed. Use \`cy.env()\` to read environment variables or \`Cypress.expose()\` for public configuration.`,
       docsUrl: 'https://on.cypress.io/cypress-env-migration',
     },
   },

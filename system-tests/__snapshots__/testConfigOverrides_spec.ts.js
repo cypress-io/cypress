@@ -1631,7 +1631,7 @@ exports['testConfigOverrides / experimental retries specific behavior / succeeds
 
 `
 
-exports['testConfigOverrides / fails when trying to perform testConfigOverrides for Cypress.env() with allowCypressEnv=false'] = `
+exports['testConfigOverrides / fails when trying to perform testConfigOverrides for env'] = `
 
 ====================================================================================================
 
@@ -1650,16 +1650,16 @@ exports['testConfigOverrides / fails when trying to perform testConfigOverrides 
   Running:  allow_cypress_env.cy.js                                                         (1 of 1)
 
 
-  testConfigOverrides with allowCypressEnv=false
-    1) fails when trying to perform testConfigOverrides for Cypress.env()
+  testConfigOverrides env
+    1) fails when trying to perform testConfigOverrides for env
 
 
   0 passing
   1 failing
 
-  1) testConfigOverrides with allowCypressEnv=false
-       fails when trying to perform testConfigOverrides for Cypress.env():
-     CypressError: overriding environment variables via suite or test configuration is not allowed when \`allowCypressEnv\` is set to \`false\`.
+  1) testConfigOverrides env
+       fails when trying to perform testConfigOverrides for env:
+     CypressError: overriding environment variables via suite or test configuration is not allowed. Use \`cy.env()\` to read environment variables or \`Cypress.expose()\` for public configuration.
 
 https://on.cypress.io/cypress-env-migration
       [stack trace lines]

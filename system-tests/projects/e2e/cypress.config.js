@@ -2,7 +2,6 @@ const { defineConfig } = require('cypress')
 const plugin = require('./cypress/plugins')
 
 module.exports = defineConfig({
-  allowCypressEnv: false,
   retries: null,
   e2e: {
     specPattern: 'cypress/e2e/**/*.{js,jsx,mjs,ts,tsx}',

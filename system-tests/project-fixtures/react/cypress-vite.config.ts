@@ -16,7 +16,6 @@ viteConfig.server ??= {}
 viteConfig.server.port = port
 
 export default defineConfig({
-  allowCypressEnv: false,
   env: {
     PORT_CHECK: port,
   },

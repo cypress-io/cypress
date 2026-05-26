@@ -59,12 +59,6 @@ export const syncConfigToCurrentOrigin = (config: Cypress.Config) => {
   Cypress.config(valuesToSync)
 }
 
-export const syncEnvToCurrentOrigin = (env: Cypress.ObjectLike) => {
-  const shallowConfigDiff = syncToCurrentOrigin(env, Cypress.env())
-
-  Cypress.env(shallowConfigDiff)
-}
-
 export const syncExposeToCurrentOrigin = (expose: Cypress.ObjectLike) => {
   const shallowConfigDiff = syncToCurrentOrigin(expose, Cypress.expose())
 
@@ -73,10 +67,6 @@ export const syncExposeToCurrentOrigin = (expose: Cypress.ObjectLike) => {
 
 export const preprocessConfig = (config: Cypress.Config) => {
   return preprocessForSerialization(config) as Cypress.Config
-}
-
-export const preprocessEnv = (env: Cypress.ObjectLike) => {
-  return preprocessForSerialization(env) as Cypress.Config
 }
 
 export const preprocessExpose = (expose: Cypress.ObjectLike) => {

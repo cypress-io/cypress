@@ -90,7 +90,6 @@ describe('e2e forms', () => {
     systemTests.setup({
       settings: {
         e2e: {
-          allowCypressEnv: false,
         },
       },
     })
@@ -114,7 +113,6 @@ describe('e2e forms', () => {
     systemTests.setup({
       settings: {
         e2e: {
-          allowCypressEnv: false,
         },
         env: {
           PATH_TO_LARGE_IMAGE: pathToLargeImage,
