@@ -47,10 +47,17 @@ const isVerbose = isVerboseTelemetry
 
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
+class BrowserConnectionClosedError extends Error {
+  code = 'ERR_BROWSER_CONNECTION_CLOSED'
+
+  constructor (message: string) {
+    super(message)
+    this.name = 'BrowserConnectionClosedError'
+  }
+}
+
 const createBrowserConnectionClosedError = () => {
-  return Object.assign(new Error('The browser closed the connection before the response completed.'), {
-    code: 'ERR_BROWSER_CONNECTION_CLOSED',
-  })
+  return new BrowserConnectionClosedError('The browser closed the connection before the response completed.')
 }
 
 export enum HttpStages {

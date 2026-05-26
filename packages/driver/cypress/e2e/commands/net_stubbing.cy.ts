@@ -3856,7 +3856,7 @@ describe('network stubbing', { retries: 15 }, function () {
             code: interceptionError.code,
             message: interceptionError.message,
           }).to.deep.equal({
-            name: 'Error',
+            name: 'BrowserConnectionClosedError',
             code: 'ERR_BROWSER_CONNECTION_CLOSED',
             message: 'The browser closed the connection before the response completed.',
           })
