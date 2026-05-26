@@ -132,22 +132,27 @@ cy.getCookies().should('have.length', 1).should((cookies) => {
 cy.setCookie('key', 'value')
 cy.setCookie('key', 'value', { domain: 'example.com' })
 
-// cy.getAllCookies() yields an array of cookies
+// cy.getAllCookies() yields an array of cookies (order is not guaranteed)
 cy.getAllCookies().should('have.length', 2).should((cookies) => {
-  // each cookie has these properties
-  expect(cookies[0]).to.have.property('name', 'key')
-  expect(cookies[0]).to.have.property('value', 'value')
-  expect(cookies[0]).to.have.property('httpOnly', false)
-  expect(cookies[0]).to.have.property('secure', false)
-  expect(cookies[0]).to.have.property('domain')
-  expect(cookies[0]).to.have.property('path')
+  const hostCookie = cookies.find((cookie) => cookie.domain !== '.example.com')
+  const exampleCookie = cookies.find((cookie) => cookie.domain === '.example.com')
 
-  expect(cookies[1]).to.have.property('name', 'key')
-  expect(cookies[1]).to.have.property('value', 'value')
-  expect(cookies[1]).to.have.property('httpOnly', false)
-  expect(cookies[1]).to.have.property('secure', false)
-  expect(cookies[1]).to.have.property('domain', 'example.com')
-  expect(cookies[1]).to.have.property('path')
+  // each cookie has these properties
+  expect(hostCookie).to.exist
+  expect(hostCookie).to.have.property('name', 'key')
+  expect(hostCookie).to.have.property('value', 'value')
+  expect(hostCookie).to.have.property('httpOnly', false)
+  expect(hostCookie).to.have.property('secure', false)
+  expect(hostCookie).to.have.property('domain')
+  expect(hostCookie).to.have.property('path')
+
+  expect(exampleCookie).to.exist
+  expect(exampleCookie).to.have.property('name', 'key')
+  expect(exampleCookie).to.have.property('value', 'value')
+  expect(exampleCookie).to.have.property('httpOnly', false)
+  expect(exampleCookie).to.have.property('secure', false)
+  expect(exampleCookie).to.have.property('domain', '.example.com')
+  expect(exampleCookie).to.have.property('path')
 })</code></pre>
         </div>
         <div class="col-xs-5">
