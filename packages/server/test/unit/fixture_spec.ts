@@ -23,18 +23,17 @@ describe('lib/fixture', () => {
 
     await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(this.todosPath)
 
-    // needed to run these tests locally
-    // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
-    //   {
-    //     channel: 'stable',
-    //     displayName: 'Electron',
-    //     family: 'chromium',
-    //     majorVersion: '123',
-    //     name: 'electron',
-    //     path: 'path-to-browser-one',
-    //     version: '123.45.67',
-    //   },
-    // ])
+    sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+      {
+        channel: 'stable',
+        displayName: 'Electron',
+        family: 'chromium',
+        majorVersion: '123',
+        name: 'electron',
+        path: 'path-to-browser-one',
+        version: '123.45.67',
+      },
+    ])
 
     const cfg = await ctx.lifecycleManager.getFullInitialConfig()
 
@@ -174,18 +173,18 @@ describe('lib/fixture', () => {
 
     // https://github.com/cypress-io/cypress/issues/3739
     it('can load a fixture with no extension when a same-named folder also exists', async () => {
-      // needed to run these tests locally
-      // sinon.stub(ctx.browser, 'machineBrowsers').resolves([
-      //   {
-      //     channel: 'stable',
-      //     displayName: 'Electron',
-      //     family: 'chromium',
-      //     majorVersion: '123',
-      //     name: 'electron',
-      //     path: 'path-to-browser-one',
-      //     version: '123.45.67',
-      //   },
-      // ])
+      sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+        {
+          channel: 'stable',
+          displayName: 'Electron',
+          family: 'chromium',
+          majorVersion: '123',
+          name: 'electron',
+          path: 'path-to-browser-one',
+          version: '123.45.67',
+        },
+      ])
+
       const projectPath = FixturesHelper.projectPath('folder-same-as-fixture')
 
       await ctx.actions.project.setCurrentProjectAndTestingTypeForTestSetup(projectPath)

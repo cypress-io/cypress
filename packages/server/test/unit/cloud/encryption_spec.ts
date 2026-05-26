@@ -1,8 +1,8 @@
-require('../../spec_helper')
-const jose = require('jose')
-const crypto = require('crypto')
-const encryption = require('../../../lib/cloud/encryption')
-const { expect } = require('chai')
+import '../../spec_helper'
+import * as jose from 'jose'
+import crypto from 'crypto'
+import * as encryption from '../../../lib/cloud/encryption'
+import { expect } from 'chai'
 
 const TEST_BODY = {
   test: 'string',

@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
-require('../spec_helper')
 
-const exception = require(`../../lib/cloud/exception`).default
-const chalk = require('chalk')
-const errors = require('../../lib/errors')
+import '../spec_helper'
+import chalk from 'chalk'
+import exception from '../../lib/cloud/exception'
+import * as errors from '../../lib/errors'
 
-context('.logException', () => {
+describe('.logException', () => {
   beforeEach(() => {
     sinon.stub(console, 'log')
   })

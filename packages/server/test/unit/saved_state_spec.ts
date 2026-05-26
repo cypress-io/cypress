@@ -1,14 +1,13 @@
-require('../spec_helper')
-
-const path = require('path')
-const { fs } = require(`../../lib/util/fs`)
-const FileUtil = require(`../../lib/util/file`).File
-const appData = require(`../../lib/util/app_data`)
-const { START_TAG, END_TAG } = require(`@packages/stderr-filtering`)
-const savedState = require(`../../lib/saved_state`)
+import '../spec_helper'
+import path from 'path'
+import { fs } from '../../lib/util/fs'
+import { File as FileUtil } from '../../lib/util/file'
+import * as appData from '../../lib/util/app_data'
+import { START_TAG, END_TAG } from '@packages/stderr-filtering'
+import * as savedState from '../../lib/saved_state'
 
 describe('lib/saved_state', () => {
-  context('#create', () => {
+  describe('#create', () => {
     beforeEach(() => {
       return savedState.create().then((state) => {
         return fs.unlinkAsync(state.path)

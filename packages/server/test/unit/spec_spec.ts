@@ -1,7 +1,6 @@
-require('../spec_helper')
-
-const spec = require(`../../lib/controllers/spec`).default
-const preprocessor = require(`../../lib/plugins/preprocessor`).default
+import '../spec_helper'
+import spec from '../../lib/controllers/spec'
+import preprocessor from '../../lib/plugins/preprocessor'
 
 describe('lib/controllers/spec', () => {
   const specName = 'sample.js'

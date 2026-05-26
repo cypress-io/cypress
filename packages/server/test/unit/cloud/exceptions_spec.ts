@@ -1,13 +1,14 @@
 delete global.fs
 
-const api = require('../../../lib/cloud/api').default
-const user = require('../../../lib/cloud/user').default
-const exception = require('../../../lib/cloud/exception').default
-const system = require('../../../lib/util/system')
-const pkg = require('@packages/root')
+import '../../spec_helper'
+import api from '../../../lib/cloud/api'
+import user from '../../../lib/cloud/user'
+import exception from '../../../lib/cloud/exception'
+import * as system from '../../../lib/util/system'
+import pkg from '@packages/root'
 
 describe('lib/cloud/exceptions', () => {
-  context('.getAuthToken', () => {
+  describe('.getAuthToken', () => {
     it('returns authToken from cache', () => {
       sinon.stub(user, 'get').resolves({ authToken: 'auth-token-123' })
 
@@ -25,7 +26,7 @@ describe('lib/cloud/exceptions', () => {
     })
   })
 
-  context('.getErr', () => {
+  describe('.getErr', () => {
     it('returns an object literal', () => {
       const err = new Error()
 
@@ -35,7 +36,6 @@ describe('lib/cloud/exceptions', () => {
     describe('fields', () => {
       beforeEach(function () {
         try {
-          // eslint-disable-next-line no-undef
           return foo.bar()
         } catch (err) {
           this.err = err
@@ -120,7 +120,7 @@ at bar <stripped-path>bar.js:92\
     })
   })
 
-  context('.getVersion', () => {
+  describe('.getVersion', () => {
     it('returns version from package.json', () => {
       sinon.stub(pkg, 'version').value('0.1.2')
 
@@ -128,7 +128,7 @@ at bar <stripped-path>bar.js:92\
     })
   })
 
-  context('.getBody', () => {
+  describe('.getBody', () => {
     beforeEach(function () {
       this.err = new Error()
       sinon.stub(pkg, 'version').value('0.1.2')
@@ -157,7 +157,7 @@ at bar <stripped-path>bar.js:92\
     })
   })
 
-  context('.create', () => {
+  describe('.create', () => {
     beforeEach(function () {
       this.env = process.env['CYPRESS_INTERNAL_ENV']
 
@@ -227,7 +227,7 @@ at bar <stripped-path>bar.js:92\
     })
   })
 
-  context('.safeErrorSerialize', () => {
+  describe('.safeErrorSerialize', () => {
     it('returns string as-is when error is already a string', () => {
       const stringError = 'Simple string error'
 

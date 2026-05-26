@@ -1,25 +1,25 @@
-require('../spec_helper')
-require('../../lib/environment')
+import '../spec_helper'
+import '../../lib/environment'
 
-const path = require('path')
-const chokidar = require('chokidar')
-const pkg = require('@packages/root')
-const Fixtures = require('@tooling/system-tests')
-const { sinon } = require('../spec_helper')
-const config = require(`../../lib/config`)
-const { ServerBase } = require(`../../lib/server-base`)
-const { ProjectBase } = require(`../../lib/project-base`)
-const { Automation } = require(`../../lib/automation`)
-const savedState = require(`../../lib/saved_state`)
-const runEvents = require(`../../lib/plugins/run_events`).default
-const system = require(`../../lib/util/system`)
-const { getCtx } = require(`../../lib/makeDataContext`)
-const browsers = require('../../lib/browsers').default
-const { CyPromptLifecycleManager } = require('../../lib/cloud/cy-prompt/CyPromptLifecycleManager')
-const { StudioLifecycleManager } = require('../../lib/cloud/studio/StudioLifecycleManager')
-const { StudioManager } = require('../../lib/cloud/studio/studio')
-const { telemetryManager, MARK_NAMES, TELEMETRY_GROUP_NAMES } = require('../../lib/cloud/studio/telemetry/TelemetryManager')
-const { TelemetryReporter } = require('../../lib/cloud/studio/telemetry/TelemetryReporter')
+import path from 'path'
+import chokidar from 'chokidar'
+import pkg from '@packages/root'
+import Fixtures from '@tooling/system-tests'
+import { sinon } from '../spec_helper'
+import * as config from '../../lib/config'
+import { ServerBase } from '../../lib/server-base'
+import { ProjectBase } from '../../lib/project-base'
+import { Automation } from '../../lib/automation'
+import * as savedState from '../../lib/saved_state'
+import runEvents from '../../lib/plugins/run_events'
+import * as system from '../../lib/util/system'
+import { getCtx } from '../../lib/makeDataContext'
+import browsers from '../../lib/browsers'
+import { CyPromptLifecycleManager } from '../../lib/cloud/cy-prompt/CyPromptLifecycleManager'
+import { StudioLifecycleManager } from '../../lib/cloud/studio/StudioLifecycleManager'
+import { StudioManager } from '../../lib/cloud/studio/studio'
+import { telemetryManager, MARK_NAMES, TELEMETRY_GROUP_NAMES } from '../../lib/cloud/studio/telemetry/TelemetryManager'
+import { TelemetryReporter } from '../../lib/cloud/studio/telemetry/TelemetryReporter'
 
 let ctx
 
@@ -30,6 +30,19 @@ describe('lib/project-base', () => {
     delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
 
     ctx = getCtx()
+
+    sinon.stub(ctx.browser, 'machineBrowsers').resolves([
+      {
+        channel: 'stable',
+        displayName: 'Electron',
+        family: 'chromium',
+        majorVersion: '123',
+        name: 'electron',
+        path: 'path-to-browser-one',
+        version: '123.45.67',
+      },
+    ])
+
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
@@ -82,7 +95,7 @@ describe('lib/project-base', () => {
     expect(p.projectRoot).to.eq(path.resolve(path.join('..', 'foo', 'bar')))
   })
 
-  context('#getSavedState', () => {
+  describe('#getSavedState', () => {
     beforeEach(async function () {
       const globalState = await savedState.create()
 
@@ -114,12 +127,8 @@ describe('lib/project-base', () => {
     })
   })
 
-  context('#saveState', function () {
+  describe('#saveState', function () {
     beforeEach(async function () {
-      const supportFile = path.join('the', 'save', 'state', 'test')
-
-      this.project.cfg = { supportFile }
-
       const globalState = await savedState.create()
 
       await globalState.remove()
@@ -187,7 +196,7 @@ describe('lib/project-base', () => {
     })
   })
 
-  context('#initializeConfig', () => {
+  describe('#initializeConfig', () => {
     const supportFile = path.join('foo', 'bar', 'baz')
 
     it('resolves with saved state when in open mode', async function () {
@@ -304,7 +313,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#getConfig', () => {
+  describe('#getConfig', () => {
     it('returns the enabled state of the protocol manager if it is defined', function () {
       this.project.protocolManager = {
         isProtocolEnabled: true,
@@ -321,7 +330,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       expect(config.isDefaultProtocolEnabled).to.be.false
     })
 
-    context('hideCommandLog', () => {
+    describe('hideCommandLog', () => {
       it('returns true if NO_COMMAND_LOG is set', function () {
         this.project._cfg.env.NO_COMMAND_LOG = 1
 
@@ -337,7 +346,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    context('hideRunnerUi', () => {
+    describe('hideRunnerUi', () => {
       beforeEach(function () {
         this.project.options.args = {}
       })
@@ -407,7 +416,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#open', () => {
+  describe('#open', () => {
     beforeEach(function () {
       sinon.stub(this.project, 'startWebsockets')
       sinon.stub(this.project, 'getConfig').returns(this.config)
@@ -653,7 +662,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#close', () => {
+  describe('#close', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
 
@@ -706,7 +715,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#reset', () => {
+  describe('#reset', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: this.pristinePath, testingType: 'e2e' })
       this.project._automation = { reset: sinon.stub() }
@@ -716,9 +725,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     it('resets server + automation', function () {
       this.project._cfg = {}
 
-      // Create proper structure for ctx and coreData
-      this.project.ctx = this.project.ctx || {}
-      this.project.ctx.coreData = this.project.ctx.coreData || {}
       this.project.ctx.coreData.studioLifecycleManager = {
         isStudioReady: sinon.stub().returns(true),
         getStudio: sinon.stub().resolves({
@@ -744,8 +750,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       const studioLifecycleManager = new StudioLifecycleManager()
 
-      this.project.ctx = this.project.ctx || {}
-      this.project.ctx.coreData = this.project.ctx.coreData || {}
       this.project.ctx.coreData.studioLifecycleManager = studioLifecycleManager
 
       const studio = { isProtocolEnabled: true }
@@ -768,7 +772,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#startWebsockets', () => {
+  describe('#startWebsockets', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       this.project.watchers = {}
@@ -1208,9 +1212,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('onStudioDestroy destroys studio when it is initialized', async function () {
-        // Set up minimal required properties
-        this.project.ctx = this.project.ctx || {}
-        this.project.ctx.coreData = this.project.ctx.coreData || {}
         this.project._isStudioInitialized = true
 
         // Create a studio manager with minimal properties
@@ -1256,11 +1257,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
 
       it('onStudioDestroy does not destroy studio when it is not initialized', async function () {
-        // Set up minimal required properties
-        this.project.ctx = this.project.ctx || {}
-        this.project.ctx.coreData = this.project.ctx.coreData || {}
-
-        // Create a studio manager with minimal properties
         const protocolManager = { close: sinon.stub().resolves() }
         const studioManager = {
           destroy: sinon.stub().resolves(),
@@ -1337,7 +1333,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
   })
 
-  context('#getProjectId', () => {
+  describe('#getProjectId', () => {
     beforeEach(function () {
       this.project = new ProjectBase({ projectRoot: '/_test-output/path/to/project-e2e', testingType: 'e2e' })
       sinon.stub(ctx.lifecycleManager, 'getProjectId').resolves('id-123')

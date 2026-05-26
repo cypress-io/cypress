@@ -1,7 +1,17 @@
-require('../spec_helper')
-
-const mockery = require('mockery')
-const { enable: enableMockery, mockElectron } = require('../mockery_helper')
+import '../spec_helper'
+import mockery from 'mockery'
+import { enable as enableMockery, mockElectron } from '../mockery_helper'
+import _ from 'lodash'
+import os from 'os'
+import express from 'express'
+import { connect } from '@packages/network'
+import { setupFullConfigWithDefaults } from '@packages/config'
+import { ServerBase } from '../../lib/server-base'
+import { SocketE2E } from '../../lib/socket-e2e'
+import * as fileServer from '../../lib/file_server'
+import * as ensureUrl from '../../lib/util/ensure-url'
+import { getCtx } from '@packages/data-context'
+import { GracefulExit } from '../../lib/util/graceful-exit'
 
 const morganFn = function () {}
 
@@ -13,18 +23,6 @@ function morganMockFactory (format, options) {
 
   return morganFn
 }
-
-const _ = require('lodash')
-const os = require('os')
-const express = require('express')
-const { connect } = require('@packages/network')
-const { setupFullConfigWithDefaults } = require('@packages/config')
-const { ServerBase } = require(`../../lib/server-base`)
-const { SocketE2E } = require(`../../lib/socket-e2e`)
-const fileServer = require(`../../lib/file_server`)
-const ensureUrl = require(`../../lib/util/ensure-url`)
-const { getCtx } = require('@packages/data-context')
-const { GracefulExit } = require('../../lib/util/graceful-exit')
 
 function getOpenOptions (overrides = {}) {
   return {
@@ -70,7 +68,7 @@ describe('lib/server-base', () => {
     return this.server && this.server.close()
   })
 
-  context('#createExpressApp', () => {
+  describe('#createExpressApp', () => {
     beforeEach(function () {
       this.use = sinon.spy(express.application, 'use')
     })
@@ -92,7 +90,7 @@ describe('lib/server-base', () => {
     })
   })
 
-  context('#useMorgan', () => {
+  describe('#useMorgan', () => {
     beforeEach(function () {
       GracefulExit.resetForTesting()
       sinon.stub(process, 'exit')
@@ -134,7 +132,7 @@ describe('lib/server-base', () => {
     })
   })
 
-  context('#open', () => {
+  describe('#open', () => {
     beforeEach(function () {
       sinon.stub(this.server, 'createServer').resolves()
     })
@@ -162,13 +160,13 @@ describe('lib/server-base', () => {
     })
   })
 
-  context('#createServer', () => {
+  describe('#createServer', () => {
     beforeEach(function () {
       this.port = 54321
       this.app = this.server.createExpressApp({ morgan: true })
     })
 
-    context('remote state', () => {
+    describe('remote state', () => {
       beforeEach(function () {
         sinon.stub(this.server, '_listen').callsFake((port) => Promise.resolve(port))
         sinon.stub(this.server, '_port').returns(this.port)
@@ -311,7 +309,7 @@ describe('lib/server-base', () => {
       })
     })
 
-    context('errors', () => {
+    describe('errors', () => {
       it('rejects with portInUse', function () {
         return this.server.createServer(this.app, { port: this.port })
         .then(() => {
@@ -327,7 +325,7 @@ describe('lib/server-base', () => {
     })
   })
 
-  context('#end', () => {
+  describe('#end', () => {
     it('calls this._socket.end', function () {
       const socket = sinon.stub({
         end () {},
@@ -346,7 +344,7 @@ describe('lib/server-base', () => {
     })
   })
 
-  context('#startWebsockets', () => {
+  describe('#startWebsockets', () => {
     beforeEach(function () {
       this.startListening = sinon.stub(SocketE2E.prototype, 'startListening')
     })
@@ -363,7 +361,7 @@ describe('lib/server-base', () => {
     })
   })
 
-  context('#reset', () => {
+  describe('#reset', () => {
     beforeEach(function () {
       return this.server.open(this.config, getOpenOptions())
       .then(() => {
@@ -393,7 +391,7 @@ describe('lib/server-base', () => {
     })
   })
 
-  context('#close', () => {
+  describe('#close', () => {
     it('resolves true successfully bailing out early', function () {
       return this.server.close().then((res) => {
         expect(res[0]).to.be.true
@@ -430,7 +428,7 @@ describe('lib/server-base', () => {
     })
   })
 
-  context('#proxyWebsockets', () => {
+  describe('#proxyWebsockets', () => {
     beforeEach(function () {
       this.proxy = sinon.stub({
         ws () {},

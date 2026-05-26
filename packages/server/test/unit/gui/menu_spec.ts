@@ -1,10 +1,9 @@
-require('../../spec_helper')
-
-const _ = require('lodash')
-const os = require('os')
-const electron = require('electron')
-const appData = require(`../../../lib/util/app_data`)
-const menu = require(`../../../lib/gui/menu`)
+import '../../spec_helper'
+import _ from 'lodash'
+import os from 'os'
+import electron from 'electron'
+import * as appData from '../../../lib/util/app_data'
+import menu from '../../../lib/gui/menu'
 
 const getMenuItem = function (label) {
   return _.find(electron.Menu.buildFromTemplate.lastCall.args[0], { label })
@@ -35,7 +34,7 @@ describe('gui/menu', function () {
     expect(electron.Menu.setApplicationMenu).to.be.calledWith('menu')
   })
 
-  context('Cypress', function () {
+  describe('Cypress', function () {
     it('on darwin has appMenu role', () => {
       menu.set()
       const cyMenu = getMenuItem('Cypress')
@@ -50,7 +49,7 @@ describe('gui/menu', function () {
     })
   })
 
-  context('File', function () {
+  describe('File', function () {
     it('contains changelog, logout, close window', () => {
       menu.set()
       const labels = getLabels(getMenuItem('File').submenu)
@@ -128,7 +127,7 @@ describe('gui/menu', function () {
     })
   })
 
-  context('Edit', () => {
+  describe('Edit', () => {
     it('contains undo, redo, cut, copy, paste, selectall', () => {
       menu.set()
 
@@ -170,7 +169,7 @@ describe('gui/menu', function () {
     })
   })
 
-  context('View', () => {
+  describe('View', () => {
     it('contains zoom actions', () => {
       menu.set()
 
@@ -194,7 +193,7 @@ describe('gui/menu', function () {
     })
   })
 
-  context('Window', () => {
+  describe('Window', () => {
     it('contains minimize', () => {
       menu.set()
 
@@ -212,7 +211,7 @@ describe('gui/menu', function () {
     })
   })
 
-  context('Help', () => {
+  describe('Help', () => {
     it('contains report an issue, docs, chat', () => {
       menu.set()
       const labels = getLabels(getMenuItem('Help').submenu)
@@ -250,7 +249,7 @@ describe('gui/menu', function () {
     })
   })
 
-  context('Developer Tools', () => {
+  describe('Developer Tools', () => {
     it('exists by default', () => {
       menu.set()
       expect(getMenuItem('Developer Tools')).to.be.defined
