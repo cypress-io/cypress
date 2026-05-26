@@ -7,7 +7,7 @@ import type {
   BackendStaticResponse,
 } from '../types'
 
-export { getAllStringMatcherFields } from '@packages/network-policy'
+export { getAllStringMatcherFields } from '@packages/network-interception'
 
 import { Readable, PassThrough } from 'stream'
 import { Socket } from 'net'

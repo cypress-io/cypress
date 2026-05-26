@@ -11,7 +11,7 @@ import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
-import { NetworkPolicyCore } from '@packages/network-policy'
+import { NetworkPolicyCore } from '@packages/network-interception'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 

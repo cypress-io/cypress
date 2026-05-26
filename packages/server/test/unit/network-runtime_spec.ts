@@ -1,5 +1,5 @@
 import { NetworkProxy } from '@packages/proxy'
-import { NetworkPolicyCore } from '@packages/network-policy'
+import { NetworkPolicyCore } from '@packages/network-interception'
 import { createProxyRuntime } from '../../lib/network-runtime'
 import '../spec_helper'
 

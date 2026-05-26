@@ -7,4 +7,4 @@ export {
   getRoutesForRequest,
   matchesRoutePreflight,
   type RouteMatchableRequest,
-} from '@packages/network-policy'
+} from '@packages/network-interception'

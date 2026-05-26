@@ -22,7 +22,7 @@ import type {
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import type { NetworkPolicyCore } from '@packages/network-policy'
+import type { NetworkPolicyCore } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
