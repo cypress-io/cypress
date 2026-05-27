@@ -1,6 +1,9 @@
 import Promise from 'bluebird'
+import debugFn from 'debug'
 import type { ICypress } from '../cypress'
 import type { StateFunc } from '../cypress/state'
+
+const debug = debugFn('cypress:driver:stability')
 
 export const create = (Cypress: ICypress, state: StateFunc) => {
   const whenStableQueue: Array<{
@@ -11,6 +14,8 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
 
   const reset = () => {
     const pending = whenStableQueue.splice(0)
+
+    debug('reset: rejecting %d pending waiters', pending.length)
 
     // reject each waiter so they don't run in the next test
     for (const waiter of pending) {
@@ -26,8 +31,12 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
         return
       }
 
+      const queueLengthBefore = whenStableQueue.length
+
       // set the state to the desired state
       state('isStable', stable)
+
+      debug('isStable(%s, %s): queueLength=%d', stable, event, queueLengthBefore)
 
       // we notify the outside world because this is what the runner uses to
       // show the 'loading spinner' during an app page loading transition event
@@ -43,6 +52,8 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
       .then(async () => {
         // get the waiters to release
         const waitersToRelease = whenStableQueue.splice(0)
+
+        debug('releasing %d waiters after isStable(true, %s)', waitersToRelease.length, event)
 
         // if there are no waiters to release, return
         if (!waitersToRelease.length) {
@@ -68,6 +79,7 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
       return new Promise((resolve, reject) => {
         // queue one waiter per caller while unstable so no registrations can overwrite each other
         whenStableQueue.push({ fn, resolve, reject })
+        debug('whenStable: queued waiter, queueLength=%d, isStable=%s', whenStableQueue.length, state('isStable'))
       })
     },
   }

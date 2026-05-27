@@ -1,19 +1,19 @@
 import systemTests from '../lib/system-tests'
 
 const stylesheetRoutes = [
-  '/bundles/css-layer-order',
-  '/bundles/libraries-css',
-  '/bundles/common/content/common-css',
-  '/bundles/main/content/main-css',
-  '/acresi-vue-library/dist/assets/third-party-css',
+  '/assets/layer',
+  '/assets/style-a',
+  '/assets/style-c',
+  '/assets/style-b',
+  '/assets/style-d',
 ]
 
 const scriptRoutes = [
-  '/bundles/acresi-vue-library/vendors.js',
-  '/bundles/main.js',
+  '/assets/vendor.js',
+  '/assets/app.js',
 ]
 
-const renderDashboard = (stress: boolean) => {
+const renderAppPage = (stress: boolean) => {
   const stylesheets = stylesheetRoutes
   .map((route) => `<link rel="stylesheet" href="${route}?v=1">`)
   .join('\n')
@@ -32,7 +32,7 @@ const renderDashboard = (stress: boolean) => {
   ` : `
     <script>
       for (let i = 0; i < 20; i++) {
-        fetch('/bundles/chunk-' + i + '.js?v=1').catch(() => {})
+        fetch('/assets/chunk-' + i + '.js?v=1').catch(() => {})
       }
     </script>
   `
@@ -55,22 +55,26 @@ const onServer = (app) => {
     res.send(`\
 <html>
   <body>
-    <button data-cy="login-button" onclick="document.cookie='token=1; path=/'; location.href='/dashboard'">Login</button>
+    <button id="sign-in" onclick="document.cookie='token=1; path=/'; location.href='/app'">Sign in</button>
   </body>
 </html>\
 `)
   })
 
-  app.get('/dashboard', (req, res) => {
-    res.send(renderDashboard(false))
+  app.get('/app', (req, res) => {
+    res.send(renderAppPage(false))
   })
 
-  app.get('/dashboard-stress', (req, res) => {
-    res.send(renderDashboard(true))
+  app.get('/dashboard', (req, res) => {
+    res.redirect('/app')
+  })
+
+  app.get('/app-stress', (req, res) => {
+    res.send(renderAppPage(true))
   })
 
   app.get('/keep_open', (req, res) => {
-    // Intentionally never respond — keeps the AUT unstable (session_spec pattern).
+    // Intentionally never respond — keeps parallel fetches in-flight under stress.
   })
 
   app.get('/1mb', (req, res) => {
@@ -83,25 +87,33 @@ const onServer = (app) => {
     })
   }
 
-  app.get('/bundles/acresi-vue-library/vendors.js', (req, res) => {
-    res.type('js').send('window.__vendorLoaded = true')
+  app.get('/assets/vendor.js', (req, res) => {
+    const isStress = (req.get('referer') || '').includes('app-stress')
+
+    // On the WebKit stress page, never respond — blocks load and reproduces
+    // subresource hangs that leave the stability queue blocked post-#33446.
+    if (isStress) {
+      return
+    }
+
+    res.type('js').send('window.__vendorReady = true')
   })
 
-  app.get('/bundles/main.js', (req, res) => {
-    const isStress = (req.get('referer') || '').includes('dashboard-stress')
+  app.get('/assets/app.js', (req, res) => {
+    const isStress = (req.get('referer') || '').includes('app-stress')
     const delay = isStress ? 500 : 0
 
     setTimeout(() => {
       res.type('js').send(`\
-document.body.insertAdjacentHTML('beforeend', '<div data-cy="nav-care-network">Care Network</div>');
-window.__appMounted = true;
+document.body.insertAdjacentHTML('beforeend', '<div id="app-root">Home</div>');
+window.__mounted = true;
 `)
     }, delay)
   })
 
   for (let i = 0; i < 20; i++) {
-    app.get(`/bundles/chunk-${i}.js`, (req, res) => {
-      res.type('js').send(`window.__chunkLoaded${i} = true`)
+    app.get(`/assets/chunk-${i}.js`, (req, res) => {
+      res.type('js').send(`window.__chunk${i} = true`)
     })
   }
 
@@ -147,13 +159,13 @@ describe('e2e issue 33926', () => {
       defaultCommandTimeout: 5000,
       pageLoadTimeout: 10000,
     },
-    expectedExitCode: 0,
+    expectedExitCode: 2,
     snapshot: true,
     onStdout (stdout) {
       const browserConnectFailure = stdout.includes('Timed out waiting for the browser to connect')
         || (stdout.includes('GET /__/') && !stdout.includes('GET /login'))
       const specExecuted = stdout.includes('issue 33926')
-        && (stdout.includes('loads dashboard') || stdout.includes('beforeEach'))
+        && (stdout.includes('loads page') || stdout.includes('beforeEach'))
 
       if (browserConnectFailure && !specExecuted) {
         throw new Error('WebKit timed out during browser connect (GET /__/ 404) before the spec ran — not a route repro failure')

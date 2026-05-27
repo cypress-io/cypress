@@ -97,6 +97,126 @@ describe('src/cy/stability', () => {
     })
   })
 
+  it('does not release waiters until isStable(true) is signaled', () => {
+    const state = createState({ isStable: false })
+    const CypressMock = {
+      action: (name: string) => {
+        if (name === 'cy:before:stability:release') {
+          return Promise.resolve()
+        }
+
+        return undefined
+      },
+    }
+    const stability = create(CypressMock as any, state)
+    let resolved = false
+
+    const pending = stability.whenStable(() => {
+      resolved = true
+    })
+
+    return Promise.race([
+      pending.then(() => {
+        throw new Error('waiter should not resolve without isStable(true)')
+      }),
+      new Promise((resolve) => setTimeout(resolve, 20)),
+    ]).then(() => {
+      expect(resolved).toBe(false)
+    })
+  })
+
+  it('releases all waiters after prolonged instability once isStable(true) fires', () => {
+    const order: string[] = []
+    const state = createState({ isStable: false })
+    const CypressMock = {
+      action: (name: string) => {
+        if (name === 'cy:before:stability:release') {
+          return Promise.resolve()
+        }
+
+        return undefined
+      },
+    }
+    const stability = create(CypressMock as any, state)
+
+    const waiters = [
+      stability.whenStable(() => order.push('first')),
+      stability.whenStable(() => order.push('second')),
+      stability.whenStable(() => order.push('third')),
+    ]
+
+    return new Promise((resolve) => setTimeout(resolve, 20))
+    .then(() => {
+      stability.isStable(true, 'delayed load')
+
+      return Promise.all(waiters)
+    })
+    .then(() => {
+      expect(order).toEqual(['first', 'second', 'third'])
+    })
+  })
+
+  it('documents pre-33446 overwrite behavior where only the last waiter is kept', () => {
+    const state = createState({ isStable: false })
+    let whenStableCallback: (() => Promise<void>) | null = null
+
+    const pre33446Stability = {
+      isStable: (stable: boolean = true) => {
+        if (state('isStable') === stable) {
+          return
+        }
+
+        state('isStable', stable)
+
+        if (!stable || !whenStableCallback) {
+          return
+        }
+
+        const callback = whenStableCallback
+
+        whenStableCallback = null
+
+        return callback()
+      },
+      whenStable: (fn: () => any) => {
+        if (state('isStable') !== false) {
+          return Promise.resolve(fn())
+        }
+
+        return new Promise((resolve, reject) => {
+          whenStableCallback = () => {
+            return Promise.resolve(fn()).then(resolve).catch(reject)
+          }
+        })
+      },
+    }
+
+    const order: string[] = []
+    let firstResolved = false
+    const first = pre33446Stability.whenStable(() => {
+      order.push('first')
+      firstResolved = true
+    })
+    const second = pre33446Stability.whenStable(() => {
+      order.push('second')
+    })
+
+    pre33446Stability.isStable(true)
+
+    return second.then(() => {
+      expect(order).toEqual(['second'])
+
+      return Promise.race([
+        first.then(() => {
+          throw new Error('overwritten waiter should never resolve')
+        }),
+        new Promise((resolve) => setTimeout(resolve, 20)),
+      ]).then(() => {
+        expect(firstResolved).toBe(false)
+      })
+    })
+  })
+
   it('reset() clears queue and rejects pending waiters to avoid test pollution', () => {
     const order: string[] = []
     const state = createState({ isStable: false })

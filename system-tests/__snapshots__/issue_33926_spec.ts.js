@@ -26,25 +26,37 @@ Learn more: https://on.cypress.io/cypress-env-migration
 
 
   issue 33926
-    1) loads dashboard with subresources
-    2) restores session and loads dashboard on second test
+    1) loads page with subresources
+    2) restores session on second test
 
 
   0 passing
   2 failing
 
   1) issue 33926
-       loads dashboard with subresources:
-     CypressError: Timed out retrying after 5000ms: \`cy.wait()\` timed out waiting \`5000ms\` for the 1st request to the route: \`vueLibrary\`. No request ever occurred.
+       loads page with subresources:
+     CypressError: Timed out after waiting \`10000ms\` for your remote page to load.
 
-https://on.cypress.io/wait
+Your page did not fire its \`load\` event within \`10000ms\`.
+
+You can try increasing the \`pageLoadTimeout\` value in \`cypress.config.js\` to wait longer.
+
+Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
+
+When this \`load\` event occurs, Cypress will continue running commands.
       [stack trace lines]
 
   2) issue 33926
-       restores session and loads dashboard on second test:
-     CypressError: Timed out retrying after 5000ms: \`cy.wait()\` timed out waiting \`5000ms\` for the 1st request to the route: \`vueLibrary\`. No request ever occurred.
+       restores session on second test:
+     CypressError: Timed out after waiting \`10000ms\` for your remote page to load.
 
-https://on.cypress.io/wait
+Your page did not fire its \`load\` event within \`10000ms\`.
+
+You can try increasing the \`pageLoadTimeout\` value in \`cypress.config.js\` to wait longer.
+
+Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
+
+When this \`load\` event occurs, Cypress will continue running commands.
       [stack trace lines]
 
 
@@ -67,10 +79,10 @@ https://on.cypress.io/wait
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/issue_33926.cy.js/issue 33926 -- loads dashboar     (1280x720)
-     d with subresources (failed).png                                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_33926.cy.js/issue 33926 -- loads page wit     (1280x720)
+     h subresources (failed).png                                                                    
   -  /XXX/XXX/XXX/cypress/screenshots/issue_33926.cy.js/issue 33926 -- restores sessi     (1280x720)
-     on and loads dashboard on second test (failed).png                                             
+     on on second test (failed).png                                                                 
 
 
 ====================================================================================================

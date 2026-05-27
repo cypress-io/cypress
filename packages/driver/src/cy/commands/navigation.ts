@@ -41,6 +41,10 @@ const isValidVisitMethod = (method) => {
 const timedOutWaitingForPageLoad = (ms, log) => {
   debug('timedOutWaitingForPageLoad')
 
+  // The page never reached a load event, but queued commands must not
+  // remain blocked on whenStable forever (regression from #33446 / #33926).
+  cy.isStable(true, 'pageLoadTimeout')
+
   $errUtils.throwErrByPath('navigation.timed_out', {
     args: {
       configFile: Cypress.config('configFile'),
