@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.17.0
+
+**Features:**
+
+- Improved CI environment detection and commit metadata capture for Cypress Cloud recorded runs within Argo CD and Argo Workflows. Addressed in [#33932](https://github.com/cypress-io/cypress/pull/33932).
+
 ## 15.16.0
 
 **Features:**
