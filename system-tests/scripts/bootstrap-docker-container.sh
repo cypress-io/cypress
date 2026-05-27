@@ -36,8 +36,11 @@ export CYPRESS_INSTALL_BINARY=$ZIP_PATH
 export CYPRESS_CACHE_FOLDER=/tmp/CYPRESS_CACHE_FOLDER/
 
 if [ "$USE_YARN_TO_INSTALL_CYPRESS_BINARY" = true ]; then
-  # if using yarn to install the built cypress binary, we can just install the tarball that is in the monorepo root directory
+  # if using yarn to install the built cypress binary, we can just install the tarball that is in the monorepo root directory.
+  # Yarn Berry leaves enableScripts off by default, so the cypress postinstall (which extracts the binary)
+  # is skipped — invoke `cypress install` explicitly afterwards rather than relaxing yarn's defaults.
   yarn add cypress@file:$TARBALL_PATH
+  yarn cypress install
 else
   export npm_config_cache=/tmp/npm_config_cache/
   export npm_config_package_lock=false

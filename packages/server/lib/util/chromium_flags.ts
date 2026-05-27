@@ -94,6 +94,8 @@ const DEFAULT_FLAGS = [
   `simulate-outdated-no-au='Tue, 31 Dec 2099 23:59:59 GMT'`,
   'disable-default-apps',
 
+  `disable-features=${disabledFeatures.join(',')}`,
+
   // These flags are for webcam/WebRTC testing
   // https://github.com/cypress-io/cypress/issues/2704
   'use-fake-ui-for-media-stream',
@@ -123,11 +125,6 @@ const DEFAULT_FLAGS = [
   //`--enable-features=PermissionsPolicyUnload,DeprecateUnload`,
 ]
 
-const makeDefaultFlags = (featureDisableList: string[]) => [
-  ...DEFAULT_FLAGS,
-  `disable-features=${featureDisableList.join(',')}`,
-]
-
 // prepend -- to each flag and concatenate them together
 export const formatChromeFlags = (flags) => flags.map((flag) => `--${flag}`)
 
@@ -141,15 +138,6 @@ export const formatElectronFlags = (flags) => {
   })
 }
 
-export const DEFAULT_CHROME_FLAGS = formatChromeFlags(makeDefaultFlags(disabledFeatures))
+export const DEFAULT_CHROME_FLAGS = formatChromeFlags(DEFAULT_FLAGS)
 
-const disabledFeaturesElectron = [
-  ...disabledFeatures,
-  // Electron 41 broke the ability to load PDFs when using the --disable-site-isolation-trials flag
-  // @see https://github.com/electron/electron/issues/50657
-  'PdfOopif',
-]
-
-export const DEFAULT_ELECTRON_FLAGS = [
-  ...formatElectronFlags(formatChromeFlags(makeDefaultFlags(disabledFeaturesElectron))),
-]
+export const DEFAULT_ELECTRON_FLAGS = formatElectronFlags(DEFAULT_CHROME_FLAGS)

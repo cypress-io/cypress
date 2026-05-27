@@ -2,7 +2,7 @@
 # Manual changes might be lost - proceed with caution!
 
 __metadata:
-  version: 8
+  version: 10
   cacheKey: 10c0
 
 "axe-core@npm:^4.10.3":
@@ -22,9 +22,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yarn-v4.3.1-pnp-dep-resolution@workspace:.":
+"yarn-v4.15.0-pnp-dep-resolution@workspace:.":
   version: 0.0.0-use.local
-  resolution: "yarn-v4.3.1-pnp-dep-resolution@workspace:."
+  resolution: "yarn-v4.15.0-pnp-dep-resolution@workspace:."
   dependencies:
     axe-core: "npm:^4.10.3"
     cypress-axe: "npm:^1.6.0"

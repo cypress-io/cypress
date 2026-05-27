@@ -1,2 +1,5 @@
-console.log(process.version.replace('v', ''))
-process.exit(0)
+import { app } from 'electron'
+
+process.stdout.write(`${process.version.replace('v', '')}\n`, () => {
+  app.exit(0)
+})

@@ -135,7 +135,7 @@
     "dedent": "^0.7.0",
     "del": "3.0.0",
     "detect-port": "^2.1.0",
-    "electron": "41.0.3",
+    "electron": "41.7.0",
     "electron-builder": "^25.1.8",
     "eslint": "^8.56.0",
     "eslint-plugin-cypress": "3.6.0",
@@ -203,7 +203,7 @@
     "yarn-deduplicate": "3.1.0"
   },
   "engines": {
-    "node": ">=24.14.0",
+    "node": ">=24.15.0",
     "yarn": ">=1.22.22"
   },
   "productName": "Cypress",
