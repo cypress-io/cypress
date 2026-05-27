@@ -16,7 +16,7 @@ import type { PlanSubscriptionsOptions, PlannedRouteSubscriptions } from './plan
 import { matchRoutes, matchesRoutePreflight } from './route-matching'
 import type { RouteMatchableRequest } from './route-matching'
 
-export type NetworkPolicyCoreOptions = {
+export type NetworkInterceptionCoreOptions = {
   requestInterception?: ForRequestInterception
   responseInterception?: ForResponseInterception
   documentPreparation?: ForDocumentPreparation
@@ -26,14 +26,14 @@ export type NetworkPolicyCoreOptions = {
   browserNetworkAutomation?: ForBrowserNetworkAutomation
 }
 
-export type HandleInterceptRequestFn = (core: NetworkPolicyCore) => Promise<void>
+export type HandleInterceptRequestFn = (core: NetworkInterceptionCore) => Promise<void>
 
 /**
  * Orchestrates route matching, subscription planning, and handler merge logic.
  * Side-effectful proxy/driver I/O stays in net-stubbing adapters until Stage 4+.
  */
-export class NetworkPolicyCore {
-  constructor (private readonly options: NetworkPolicyCoreOptions = {}) {}
+export class NetworkInterceptionCore {
+  constructor (private readonly options: NetworkInterceptionCoreOptions = {}) {}
 
   matchRoutes (routes: BackendRoute[], req: RouteMatchableRequest): BackendRoute[] {
     return matchRoutes(routes, req)

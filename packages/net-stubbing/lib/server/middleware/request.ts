@@ -25,7 +25,7 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
     return this.next()
   }
 
-  if (this.networkPolicyCore.matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
+  if (this.networkInterceptionCore.matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(this, {
       statusCode: 204,
@@ -39,7 +39,7 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
     })
   }
 
-  this.req.matchingRoutes = this.networkPolicyCore.matchRoutes(this.netStubbingState.routes, this.req)
+  this.req.matchingRoutes = this.networkInterceptionCore.matchRoutes(this.netStubbingState.routes, this.req)
 
   span?.end()
   this.next()
@@ -49,5 +49,5 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
  * Called when a new request is received in the proxy layer.
  */
 export const InterceptRequest: RequestMiddleware = async function () {
-  return this.networkPolicyCore.handleRequest((core) => handleInterceptRequest(this, core))
+  return this.networkInterceptionCore.handleRequest((core) => handleInterceptRequest(this, core))
 }

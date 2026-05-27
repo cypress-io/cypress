@@ -2,7 +2,7 @@ import _ from 'lodash'
 import url from 'url'
 import { concatStream } from '@packages/network'
 import type { RequestMiddleware } from '@packages/proxy'
-import type { NetworkPolicyCore } from '@packages/network-interception'
+import type { NetworkInterceptionCore } from '@packages/network-interception'
 import {
   CyHttpMessages,
   SERIALIZABLE_REQ_PROPS,
@@ -17,11 +17,11 @@ import { telemetry } from '@packages/telemetry'
 type InterceptRequestMiddleware = RequestMiddleware extends (this: infer T) => any ? T : never
 
 /**
- * Legacy intercept-request orchestration — invoked via {@link NetworkPolicyCore.handleRequest}.
+ * Legacy intercept-request orchestration — invoked via {@link NetworkInterceptionCore.handleRequest}.
  */
 export async function handleInterceptRequest (
   mw: InterceptRequestMiddleware,
-  core: NetworkPolicyCore,
+  core: NetworkInterceptionCore,
 ): Promise<void> {
   const span = telemetry.startSpan({ name: 'intercept:request', parentSpan: mw.reqMiddlewareSpan, isVerbose: true })
 

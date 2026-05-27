@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
-  NetworkPolicyCore,
+  NetworkInterceptionCore,
   planSubscriptions,
   mergeIncomingRequestChanges,
 } from '../../lib'
@@ -77,9 +77,9 @@ describe('core/merge-handler-result', () => {
   })
 })
 
-describe('NetworkPolicyCore', () => {
+describe('NetworkInterceptionCore', () => {
   it('delegates matchRoutes and handleRequest to supplied runner', async () => {
-    const core = new NetworkPolicyCore()
+    const core = new NetworkInterceptionCore()
     const run = vi.fn().mockResolvedValue(undefined)
 
     await core.handleRequest(run)

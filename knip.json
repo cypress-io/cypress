@@ -806,7 +806,7 @@
     "packages/network-interception/lib/exchange/network-exchange.ts": [
       "types"
     ],
-    "packages/network-policy/lib/core/route-matching.ts": [
+    "packages/network-interception/lib/core/route-matching.ts": [
       "duplicates"
     ],
     "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [
