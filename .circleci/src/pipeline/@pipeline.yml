@@ -25,7 +25,7 @@ parameters:
     default: false  
   run-all-jobs:
     type: boolean
-    default: true
+    default: false
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
   # Default true so develop/release branches run everything without explicit params.
   run-driver-tests:
