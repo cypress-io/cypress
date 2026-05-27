@@ -173,7 +173,7 @@ const rp = request.defaults((params, callback) => {
     // @ts-expect-error - we're hoping that the method is valid here
     return request[method](params, callback).promise() as RequestPromise<any>
   })
-  .tap((resp) => {
+  .then((resp) => {
     if (params.cacheable) {
       debug('caching response for ', params.url)
       cacheResponse(resp, params)
@@ -181,6 +181,8 @@ const rp = request.defaults((params, callback) => {
 
     debug(`${params.method} ${params.url} response received`)
     debugVerbose('response: %o', resp)
+
+    return resp
   })
 })
 
@@ -439,11 +441,13 @@ export default {
             'x-cypress-request-attempt': attemptIndex,
           },
         })
-        .tap((result) => {
+        .then((result) => {
           // Tack on any preflight warnings prior to run warnings
           if (warnings) {
             result.warnings = warnings.concat(result.warnings ?? [])
           }
+
+          return result
         })
       })
     })

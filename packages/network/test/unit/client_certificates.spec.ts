@@ -630,8 +630,7 @@ describe('lib/client-certificates', () => {
       )
     })
 
-    // TODO: fix this flaky test
-    it.skip('detects invalid PEM key passphrase', () => {
+    it('detects invalid PEM key passphrase', () => {
       const passphrase = 'a_phrase'
 
       createPemFiles(

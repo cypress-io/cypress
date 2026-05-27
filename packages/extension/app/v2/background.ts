@@ -1,6 +1,5 @@
 import get from 'lodash/get'
 import once from 'lodash/once'
-import Bluebird from 'bluebird'
 import browser from 'webextension-polyfill'
 
 import { connect as clientConnect } from './client'
@@ -64,7 +63,7 @@ const connect = function (host: string, path: string, extraOpts?: any) {
       return ws.emit('automation:response', id, { response: data })
     }
 
-    return Bluebird.try(() => {
+    return Promise.resolve().then(() => {
       // @ts-expect-error
       return automation[method].apply(automation, args.concat(respond))
     }).catch((err) => {

@@ -11,7 +11,7 @@ type EnhancedModule = NodeModule & {
 }
 
 const DEFAULT_TRANSFORM_OPTS: TransformOptions = {
-  target: ['node14.5'],
+  target: ['node20'],
   loader: 'ts',
   format: 'cjs',
   sourcemap: 'inline',

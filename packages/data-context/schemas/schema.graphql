@@ -1740,6 +1740,9 @@ type Mutation {
   """Show system notification via Electron"""
   showSystemNotification(body: String!, title: String!): Boolean
 
+  """Sign up and auth with Cypress Cloud"""
+  signup(utmContent: String, utmMedium: String!, utmSource: String!): Query
+
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
 
