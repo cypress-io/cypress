@@ -1,4 +1,4 @@
-import type { ForInterceptRegistration, InterceptRegistrationRequest } from '@packages/network-policy'
+import type { ForInterceptRegistration, InterceptRegistrationRequest } from '@packages/network-interception'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { GetFixtureFn, NetStubbingState } from '../server/types'
 import { onNetStubbingEvent } from '../server/driver-events'
