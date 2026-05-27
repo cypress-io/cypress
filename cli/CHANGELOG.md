@@ -5,6 +5,10 @@
 
 - Improved CI environment detection and commit metadata capture for Cypress Cloud recorded runs within Argo CD and Argo Workflows. Addressed in [#33932](https://github.com/cypress-io/cypress/pull/33932).
 
+**Bugfixes:**
+
+- Fixed an issue where a visit that never fired the page `load` event could leave subsequent commands blocked on the stability queue after `pageLoadTimeout`, instead of failing with the page load timeout error. Fixes [#33926](https://github.com/cypress-io/cypress/issues/33926). Addressed in [#33934](https://github.com/cypress-io/cypress/pull/33934).
+
 ## 15.16.0
 
 **Features:**
@@ -14,7 +18,6 @@
 
 **Bugfixes:**
 
-- Fixed an issue where a visit that never fired the page `load` event could leave subsequent commands blocked on the stability queue after `pageLoadTimeout`, instead of failing with the page load timeout error. Fixes [#33926](https://github.com/cypress-io/cypress/issues/33926). Addressed in [#33934](https://github.com/cypress-io/cypress/pull/33934).
 - Fixed an issue on Node 24.16.0+ and Node 26.1.0+ where installing Cypress could silently extract only the first file from the binary archive, causing the test runner to fail to launch with a "Cypress binary is missing" error. Addresses [#33891](https://github.com/cypress-io/cypress/issues/33891). Addressed in [#33887](https://github.com/cypress-io/cypress/pull/33887).
 - Fixed a regression in [15.14.2](#15-14-2) where the `cypress install` and `cypress verify` task list output could render one character per line in CI environments that allocate a pseudo-TTY without setting `COLUMNS`. Fixed in [#33890](https://github.com/cypress-io/cypress/pull/33890).
 - Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
