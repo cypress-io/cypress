@@ -1,17 +1,24 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.16.0
+## 15.17.0
 
 **Features:**
 
 - Added [Bun](https://bun.sh) as a recognized package manager. The `cypress` npm package can now be installed and invoked with Bun (for example `bun run cypress open` or `bun run cypress run`). Addresses [#28962](https://github.com/cypress-io/cypress/issues/28962). Addressed in [#32580](https://github.com/cypress-io/cypress/pull/32580).
+- Improved CI environment detection and commit metadata capture for Cypress Cloud recorded runs within Argo CD and Argo Workflows. Addressed in [#33932](https://github.com/cypress-io/cypress/pull/33932).
+
+## 15.16.0
+
+**Features:**
+
 - Cypress Cloud **sign up** is supported from the Cypress desktop app in addition to log in. Addressed in [#33805](https://github.com/cypress-io/cypress/pull/33805).
 - The Cypress Cloud log in and sign up modals in the Cypress desktop app now automatically start the browser-based authentication flow when opened, removing the extra "Log in" click. Addressed in [#33831](https://github.com/cypress-io/cypress/pull/33831).
 
 **Bugfixes:**
 
 - Fixed an issue on Node 24.16.0+ and Node 26.1.0+ where installing Cypress could silently extract only the first file from the binary archive, causing the test runner to fail to launch with a "Cypress binary is missing" error. Addresses [#33891](https://github.com/cypress-io/cypress/issues/33891). Addressed in [#33887](https://github.com/cypress-io/cypress/pull/33887).
+- Fixed a regression in [15.14.2](#15-14-2) where the `cypress install` and `cypress verify` task list output could render one character per line in CI environments that allocate a pseudo-TTY without setting `COLUMNS`. Fixed in [#33890](https://github.com/cypress-io/cypress/pull/33890).
 - Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
-- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
+- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/app/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
 - Fixed an intermittent `ENOENT: no such file or directory, open <path>/bundle.tar-<rand>` error during `cy.prompt` and Studio bundle initialization. Fixed in [#33748](https://github.com/cypress-io/cypress/pull/33748).
 - Fixed a regression in [14.3.3](#14-3-3) where deleting `results.video` in `after:spec` to keep videos only for failing specs could leave an empty `*-compressed.mp4` file in `cypress/videos`. Fixes [#32883](https://github.com/cypress-io/cypress/issues/32883).
