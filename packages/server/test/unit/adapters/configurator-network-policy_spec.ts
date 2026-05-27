@@ -1,5 +1,5 @@
 import { ConfiguratorNetworkPolicyAdapter } from '../../../lib/adapters/configurator-network-policy'
-import { BlockedHosts } from '@packages/network-policy'
+import { BlockedHosts } from '@packages/network-interception'
 import '../../spec_helper'
 
 describe('lib/adapters/configurator-network-policy', () => {

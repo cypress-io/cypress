@@ -50,7 +50,7 @@ import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createProxyRuntime } from './network-runtime'
-import type { ForNetworkPolicyRegistration } from '@packages/network-policy'
+import type { ForNetworkPolicyRegistration } from '@packages/network-interception'
 
 const debug = Debug('cypress:server:server-base')
 

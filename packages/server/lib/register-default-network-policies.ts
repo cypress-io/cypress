@@ -1,6 +1,6 @@
 import { blocked } from '@packages/network'
-import { BlockedHosts } from '@packages/network-policy'
-import type { ForNetworkPolicyRegistration } from '@packages/network-policy'
+import { BlockedHosts } from '@packages/network-interception'
+import type { ForNetworkPolicyRegistration } from '@packages/network-interception'
 
 type RegisterDefaultNetworkPoliciesConfig = {
   blockHosts?: string | string[] | null

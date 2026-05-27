@@ -1,5 +1,5 @@
-import { NetworkPolicyRegistry } from '@packages/network-policy'
-import type { ForNetworkPolicyRegistration, NetworkPolicy } from '@packages/network-policy'
+import { NetworkPolicyRegistry } from '@packages/network-interception'
+import type { ForNetworkPolicyRegistration, NetworkPolicy } from '@packages/network-interception'
 
 /**
  * Server-side {@link ForNetworkPolicyRegistration} adapter for configurator policies.
