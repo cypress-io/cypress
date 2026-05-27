@@ -1,139 +1,114 @@
 # @packages/network-interception
 
-Shared types and **interface boundaries** for Cypress network interception — `cy.intercept`, config policies (`blockHosts`, CSP, rewrites), and the proxy middleware stack.
+Types and **port interfaces** for Cypress network interception (`cy.intercept`, config policies, proxy middleware). Part of the stacked refactor in [#33919](https://github.com/cypress-io/cypress/issues/33919) to support HTTP/2 (CDP Fetch / BiDi) without rewriting intercept logic.
 
-Part of the stacked refactor in [#33919](https://github.com/cypress-io/cypress/issues/33919). Goal: support HTTP/2 interception via CDP Fetch / BiDi **without rewriting** route matching, handler merge, or policy logic.
-
-> **Stack stage 0 of 8.** Package scaffold only: shared types, interface stubs, and `createProxyRuntime()` composition root. **No behavior change** — proxy middleware and net-stubbing paths are unchanged; implementations come in later stages.
+> **Stack stage 0 of 8.** Package scaffold: shared types, port interface stubs, `createProxyRuntime()` composition root. **No behavior change.**
 
 ---
 
-## Problem (today's code layout)
+## Why this refactor uses ports and adapters
 
-Intercept logic is spread across packages with tight coupling:
+Intercept code today lives inside `@packages/proxy` and `@packages/net-stubbing` middleware with a hard dependency on the MITM proxy transport. The HTTP/2 program needs the **same** matching, handler, and policy behavior while swapping **how** requests leave the browser (proxy vs CDP Fetch).
 
-| Package | What it owns today |
-| --- | --- |
-| `@packages/proxy` | MITM proxy middleware — correlate pre-requests, forward to origin, inject HTML, cookies, command log |
-| `@packages/net-stubbing` | Route matching, subscription handlers, driver IPC for `cy.intercept` |
-| `@packages/server` | Wires `NetworkProxy`, sockets, config |
-
-Everything assumes **one transport**: the browser sends traffic through Cypress's MITM proxy, and middleware calls Node HTTP to reach origins.
-
-The HTTP/2 program adds a second path: the browser's own network stack (CDP Fetch / BiDi). Matching, fulfill, and policy rules must stay the same; only **where bytes move** changes.
+The codebase adopts **hexagonal architecture** (also called **ports and adapters**): keep interception rules in a transport-agnostic center, isolate I/O behind interfaces, plug in different implementations per transport.
 
 ---
 
-## Approach: interfaces first, implementations stay put
+## Hexagonal terms → this repo
 
-This stage **does not move intercept logic**. It establishes:
+In hexagonal architecture, a **port** is a boundary interface; an **adapter** is the code on the other side of that boundary that talks to the real world. We use normal TypeScript `interface` types as ports and prefix them with `For`.
 
-1. **Shared types** — `NetEvent`, `BackendRoute`, handler shapes moved from net-stubbing into `lib/types/` (net-stubbing re-exports for backward compat)
-2. **TypeScript interface stubs** — contracts in `lib/ports/` with no implementations yet
-3. **Composition root** — `createProxyRuntime()` in `packages/server/lib/network-runtime.ts` extracts `NetworkProxy` construction from `ServerBase`
+| Hex term | Role | In this monorepo |
+| --- | --- | --- |
+| **Port** | Contract at the edge of the interception "inside" | `For*` types in `lib/ports/` |
+| **Adapter** | Implements a port by delegating to existing Cypress code | `*Adapter` classes under `packages/*/lib/adapters/` |
+| **Driving port** (primary) | Outside actors **call into** interception — they drive the app | `ForInterceptRegistration` (driver IPC), `ForNetworkPolicyRegistration` (config) |
+| **Driven port** (secondary) | Interception **calls out** for I/O and side effects | `ForRequestInterception`, `ForCookieState`, `ForCommandLog`, … |
+| **Core** | Domain logic with no proxy/CDP imports; orchestrates ports | `NetworkPolicyCore` (stage 3; renamed `NetworkInterceptionCore` in stage 7) |
+| **Composition root** | Where concrete adapters are constructed and injected | `createProxyRuntime()` in `packages/server/lib/network-runtime.ts` |
 
-Implementations will live in the package that already owns the code:
+**Direction mnemonic:** *Driving* = something external drives work **in**. *Driven* = the core drives work **out** to infrastructure.
 
 ```
-packages/net-stubbing/lib/adapters/   → driver IPC (stage 1)
-packages/proxy/lib/adapters/          → proxy middleware I/O (stages 4–6)
-packages/server/lib/adapters/         → configurator policy registration (stage 2)
+                    DRIVING PORTS (inbound)
+              driver IPC          config policies
+                    │                    │
+                    ▼                    ▼
+         ┌──────────────────────────────────────┐
+         │  @packages/network-interception      │
+         │  types · port interfaces · (later)   │
+         │  core orchestration                  │
+         └──────────────────────────────────────┘
+                    │
+                    │ calls driven ports
+                    ▼
+              DRIVEN PORTS (outbound)
+    forward HTTP · cookies · HTML inject · command log · CDP (future)
+                    │
+                    ▼
+         adapters in proxy / net-stubbing / driver
 ```
 
-This package **must not** import from `@packages/proxy` or `@packages/net-stubbing`.
+This package holds **ports and (later) core** — not adapters. Adapters stay in the package that owns the legacy implementation so we wrap rather than relocate thousands of lines at once.
 
-### Vocabulary (used throughout this stack)
-
-| Term in this repo | Meaning |
-| --- | --- |
-| **Interface** (`For*` in `lib/ports/`) | A TypeScript interface describing one capability interception needs. |
-| **Implementation / adapter** | A class elsewhere that `implements` the interface and calls existing functions. |
-| **Inbound interface** | Outside → interception — e.g. driver sending `route:added`. `ForInterceptRegistration`, `ForNetworkPolicyRegistration`. |
-| **Outbound interface** | Interception → side effects — e.g. forward HTTP, write cookies. `ForRequestInterception`, `ForCookieState`, etc. |
-| **Core** (stage 3+) | Orchestrator with pure logic that calls outbound interfaces. |
-| **Composition root** | Where implementations are wired — `createProxyRuntime()`. |
+**Dependency rule:** `@packages/network-interception` must not import `@packages/proxy` or `@packages/net-stubbing`. Adapters import ports; not the reverse.
 
 ---
 
-## What this stage adds
+## What stage 0 delivers
 
-### Types (`lib/types/`)
+### Shared types (`lib/types/`)
 
-Previously owned by `@packages/net-stubbing`. Moved here so both net-stubbing and future HTTP/2 code share one source of truth:
-
-- `external-types.ts` — public `NetEvent`, route types (synced to CLI typedefs via `cli/scripts/sync-typedefs.ts`)
-- `internal-types.ts` — server-side handler shapes
-- `backend-route.ts` — route definition types
-
-Net-stubbing files now re-export:
+`NetEvent`, route/handler types moved from net-stubbing. Net-stubbing re-exports for backward compatibility:
 
 ```typescript
-// packages/net-stubbing/lib/external-types.ts
 export * from '@packages/network-interception/lib/types/external-types'
 ```
 
-### Interface stubs (`lib/ports/`)
+### Port stubs (`lib/ports/`)
 
-All inbound and outbound interfaces are **declared but empty or minimal**. They document the planned boundary without changing call sites yet.
+All driving and driven ports are **declared**; methods are empty or minimal until later stack PRs. The names and file split (`driving-ports.ts` vs `driven-ports.ts`) follow hex primary/secondary port layout.
 
-| Interface | Direction | Stage with first implementation |
+| Port | Hex kind | First adapter (stage) |
 | --- | --- | --- |
-| `ForInterceptRegistration` | Inbound | 1 |
-| `ForNetworkPolicyRegistration` | Inbound | 2 |
-| `ForRequestInterception` | Outbound | 4 |
-| `ForResponseInterception` | Outbound | 4 |
-| `ForDocumentPreparation` | Outbound | 5 |
-| `ForNetworkCapture` | Outbound | 6 |
-| `ForCookieState` | Outbound | 6 |
-| `ForCommandLog` | Outbound | 6 |
-| `ForBrowserNetworkAutomation` | Outbound | HTTP/2 epic (stub) |
+| `ForInterceptRegistration` | Driving | `DriverInterceptRegistrationAdapter` (1) |
+| `ForNetworkPolicyRegistration` | Driving | `ConfiguratorNetworkPolicyAdapter` (2) |
+| `ForRequestInterception` | Driven | `ProxyRequestInterceptionAdapter` (4) |
+| `ForResponseInterception` | Driven | (4) |
+| `ForDocumentPreparation` | Driven | (5) |
+| `ForNetworkCapture` | Driven | (6) |
+| `ForCookieState` | Driven | (6) |
+| `ForCommandLog` | Driven | (6) |
+| `ForBrowserNetworkAutomation` | Driven | HTTP/2 epic (stub) |
 
 ### Runtime facade (`lib/runtime.ts`)
 
-```typescript
-interface NetworkInterceptionRuntime {
-  handleHttpRequest (req, res): Promise<void>
-  setProtocolManager (protocolManager?): void
-  reset (options?): void
-  clearCredentials (): void
-  addBrowserPreRequest (preRequest): Promise<void>
-}
-```
+`NetworkInterceptionRuntime` — server-level handle so the composition root can eventually swap proxy-default vs browser-automation runtimes without rewriting `ServerBase`.
 
-`createProxyRuntime()` returns this shape today by delegating to `NetworkProxy`. Later stages inject a core; HTTP/2 may swap the backing implementation without changing `ServerBase`'s call sites.
+### Composition root extraction
 
-### Composition root change
-
-**Before:** `ServerBase` constructed `NetworkProxy` inline.
-
-**After:** `ServerBase` calls `createProxyRuntime(deps)` in `packages/server/lib/network-runtime.ts`.
-
-Middleware stack, `defaultMiddleware`, and net-stubbing state are **identical** to pre-refactor behavior.
+`ServerBase` no longer constructs `NetworkProxy` inline; it calls `createProxyRuntime()`. Middleware stack and behavior are unchanged — this PR only names the wiring point where adapters will be injected in later stages.
 
 ---
 
-## HTTP/2: what will change vs what will not
+## HTTP/2 and the driven-port boundary
 
-**Will stay the same:** route tables, `cy.intercept` handlers, policy rules, command log semantics.
-
-**Will change (later):** transport — MITM proxy vs CDP Fetch. Outbound method `ForRequestInterception.forwardToOrigin` (stage 4) is the documented split: proxy path uses Node HTTP; browser-automation path must not.
+Today, outbound HTTP uses the MITM proxy and Node `http.request` (via `ForRequestInterception.forwardToOrigin` once implemented in stage 4). The HTTP/2 path will use **different driven-port adapters** (CDP Fetch) for the same core. Driving ports (`cy.intercept` registration) stay the same.
 
 ---
 
-## Stacked PR roadmap
+## Stack roadmap
 
-| Stage | Branch | Deliverable |
+| Stage | Branch | Adds |
 | --- | --- | --- |
-| **0** | **`refactor/ports-adapters-0`** | **This PR — package, types, stubs, `createProxyRuntime`** |
-| 1 | `refactor/ports-adapters-1` | Wire `ForInterceptRegistration` + driver adapter |
-| 2 | `refactor/ports-adapters-2` | Policy registry + `BlockedHosts` registration |
-| 3 | `refactor/ports-adapters-3` | `NetworkPolicyCore` pure orchestration |
-| 4 | `refactor/ports-adapters-4` | Request/response outbound interfaces + proxy adapters |
-| 5 | `refactor/ports-adapters-5` | Document prep + CSP/rewrite policies |
-| 6 | `refactor/ports-adapters-6` | Capture, cookie, command-log adapters |
-| 7 | `refactor/ports-adapters-7` | Rename core → `NetworkInterceptionCore`, wire enforcement |
+| **0** | `refactor/ports-adapters-0` | Package, types, port stubs, composition root |
+| 1 | `refactor/ports-adapters-1` | First driving-port adapter (driver IPC) |
+| 2 | `refactor/ports-adapters-2` | Policy registry driving port |
+| 3 | `refactor/ports-adapters-3` | Core extraction |
+| 4–6 | … | Driven-port adapters (proxy, driver) |
+| 7 | `refactor/ports-adapters-7` | Core rename, policy enforcement wired |
 
-Program overview: [#33919](https://github.com/cypress-io/cypress/issues/33919)
+[#33919](https://github.com/cypress-io/cypress/issues/33919) has the full program diagram.
 
 ---
 
@@ -142,6 +117,5 @@ Program overview: [#33919](https://github.com/cypress-io/cypress/issues/33919)
 ```bash
 yarn workspace @packages/network-interception test
 yarn workspace @packages/network-interception check-ts
-yarn workspace @packages/network-interception lint
 yarn workspace @packages/server test-unit --grep network-runtime
 ```
