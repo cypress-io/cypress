@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import type { NetEvent } from '../../lib/types'
 import type { BackendRoute } from '../../lib/types/backend-route'
 
-describe('@packages/network-policy types', () => {
+describe('@packages/network-interception types', () => {
   it('exports NetEvent driver protocol types', () => {
     const event: NetEvent.ToServer.AddRoute<unknown> = {
       routeMatcher: { url: { type: 'glob', value: '**/api/*' } },

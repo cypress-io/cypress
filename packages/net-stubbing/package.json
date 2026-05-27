@@ -14,7 +14,7 @@
     "tslint": "tslint --config ../ts/tslint.json --project ."
   },
   "dependencies": {
-    "@packages/network-policy": "0.0.0-development",
+    "@packages/network-interception": "0.0.0-development",
     "@packages/socket": "0.0.0-development",
     "debug": "^4.4.0",
     "is-html": "^2.0.0",

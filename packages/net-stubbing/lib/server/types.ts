@@ -1,9 +1,9 @@
-import type { BackendRoute } from '@packages/network-policy'
+import type { BackendRoute } from '@packages/network-interception'
 import type {
   InterceptedRequest,
 } from './intercepted-request'
 
-export type { BackendRoute, GetFixtureFn } from '@packages/network-policy'
+export type { BackendRoute, GetFixtureFn } from '@packages/network-interception'
 
 export { ResourceType } from '../types'
 

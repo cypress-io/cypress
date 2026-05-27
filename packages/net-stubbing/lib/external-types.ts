@@ -1,1 +1,1 @@
-export * from '@packages/network-policy/lib/types/external-types'
+export * from '@packages/network-interception/lib/types/external-types'
