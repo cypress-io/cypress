@@ -90,6 +90,19 @@ const isJenkins = () => {
     process.env.HUDSON_HOME
 }
 
+// Argo CD injects build env vars during manifest generation (Helm, Kustomize, CMPs).
+// Ref: https://argo-cd.readthedocs.io/en/stable/user-guide/build-environment/
+const isArgoCd = () => {
+  return Boolean(process.env.ARGOCD_APP_NAME && process.env.ARGOCD_APP_REVISION)
+}
+
+// Argo Workflows injects executor env vars on workflow pods.
+// Ref: https://github.com/argoproj/argo-workflows/blob/main/workflow/common/common.go
+const isArgoWorkflows = () => {
+  // Injected together on workflow executor pods; avoids matching unrelated ARGO_* operator env vars.
+  return Boolean(process.env.ARGO_WORKFLOW_NAME && process.env.ARGO_NODE_ID)
+}
+
 /**
  * We detect CI providers by detecting an environment variable
  * unique to the provider, or by calling a function that returns true
@@ -100,6 +113,8 @@ const isJenkins = () => {
  */
 const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
+  argoCd: isArgoCd,
+  argoWorkflows: isArgoWorkflows,
   'azure': isAzureCi,
   // Amplify Console runs on CodeBuild and can expose CODEBUILD_* env vars.
   // Since provider detection picks the first match, the more specific provider
@@ -176,6 +191,30 @@ const _providerCiParams = () => {
       'APPVEYOR_BUILD_VERSION',
       'APPVEYOR_PULL_REQUEST_NUMBER',
       'APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH',
+    ]),
+    // https://argo-cd.readthedocs.io/en/stable/user-guide/build-environment/
+    argoCd: extract([
+      'ARGOCD_APP_NAME',
+      'ARGOCD_APP_NAMESPACE',
+      'ARGOCD_APP_PROJECT_NAME',
+      'ARGOCD_APP_REVISION',
+      'ARGOCD_APP_REVISION_SHORT',
+      'ARGOCD_APP_REVISION_SHORT_8',
+      'ARGOCD_APP_SOURCE_PATH',
+      'ARGOCD_APP_SOURCE_REPO_URL',
+      'ARGOCD_APP_SOURCE_TARGET_REVISION',
+      'KUBE_VERSION',
+      'KUBE_API_VERSIONS',
+    ]),
+    // https://github.com/argoproj/argo-workflows/blob/main/workflow/common/common.go
+    argoWorkflows: extract([
+      'ARGO_WORKFLOW_NAME',
+      'ARGO_WORKFLOW_UID',
+      'ARGO_NODE_ID',
+      'ARGO_POD_NAME',
+      'ARGO_POD_UID',
+      'ARGO_CONTAINER_NAME',
+      'ARGO_INSTANCE_ID',
     ]),
     // https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
     azure: extract([
@@ -521,6 +560,13 @@ const _providerCommitParams = () => {
       // remoteOrigin: ???
       // defaultBranch: ???
     },
+    argoCd: {
+      sha: env.ARGOCD_APP_REVISION,
+      branch: env.ARGOCD_APP_SOURCE_TARGET_REVISION,
+      remoteOrigin: env.ARGOCD_APP_SOURCE_REPO_URL,
+      // message, authorName, authorEmail, defaultBranch: not provided by Argo CD build env
+    },
+    argoWorkflows: {},
     awsCodeBuild: {
       sha: env.CODEBUILD_RESOLVED_SOURCE_VERSION,
       // branch: ???,
