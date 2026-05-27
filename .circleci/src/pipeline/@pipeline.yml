@@ -23,6 +23,11 @@ parameters:
   force-persist-artifacts:
     type: boolean
     default: false
+  # Manual override from CircleCI "Trigger Pipeline" — must default false so PR path
+  # filtering is not bypassed unless explicitly requested (see generate-pipeline-parameters.sh).
+  run-all-jobs:
+    type: boolean
+    default: false
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
   # Default true so develop/release branches run everything without explicit params.
   run-driver-tests:

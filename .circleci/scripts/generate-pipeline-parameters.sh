@@ -92,7 +92,9 @@ fi
 # contributor's fork. This ensures fork PRs compare against the real develop branch.
 UPSTREAM_URL="https://github.com/${CIRCLE_PROJECT_USERNAME:-cypress-io}/${CIRCLE_PROJECT_REPONAME:-cypress}.git"
 MERGE_BASE=""
-if git fetch "$UPSTREAM_URL" develop 2>/dev/null; then
+if [[ "${PIPELINE_PARAMS_SKIP_FETCH:-}" == "true" ]]; then
+  echo "PIPELINE_PARAMS_SKIP_FETCH=true — using HEAD~1 for changed files" >&2
+elif git fetch "$UPSTREAM_URL" develop 2>/dev/null; then
   MERGE_BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo "")
 else
   echo "Could not fetch upstream develop" >&2
