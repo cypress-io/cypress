@@ -29,7 +29,7 @@ export interface InitializeRoutes {
   config: Cfg
   getSpec: () => FoundSpec | null
   nodeProxy: httpProxy
-  networkProxy: NetworkProxy
+  networkProxy?: NetworkProxy
   remoteStates: RemoteStates
   onError: (...args: unknown[]) => any
   testingType: Cypress.TestingType
@@ -107,10 +107,18 @@ export const createCommonRoutes = ({
   // to the child project. We also add a utility route for testing HTTP status code UI
   if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
     router.get('/__cypress-studio/*', async (req, res) => {
+      if (!networkProxy) {
+        return res.sendStatus(404)
+      }
+
       await networkProxy.handleHttpRequest(req, res)
     })
 
     router.get('/__cypress-cy-prompt/*', async (req, res) => {
+      if (!networkProxy) {
+        return res.sendStatus(404)
+      }
+
       await networkProxy.handleHttpRequest(req, res)
     })
 
@@ -172,6 +180,10 @@ export const createCommonRoutes = ({
   })
 
   router.get(`/${config.namespace}/automation/setLocalStorage`, (req, res) => {
+    if (!networkProxy) {
+      return res.sendStatus(404)
+    }
+
     const origin = req.originalUrl.slice(req.originalUrl.indexOf('?') + 1)
 
     networkProxy.http.getRenderedHTMLOrigins()[origin] = true
@@ -180,6 +192,10 @@ export const createCommonRoutes = ({
   })
 
   router.get(`/${config.namespace}/source-maps/:id.map`, async (req, res) => {
+    if (!networkProxy) {
+      return res.sendStatus(404)
+    }
+
     await networkProxy.handleSourceMapRequest(req, res)
   })
 
@@ -295,9 +311,11 @@ export const createCommonRoutes = ({
     })
   }
 
-  router.all('*', async (req, res) => {
-    await networkProxy.handleHttpRequest(req, res)
-  })
+  if (networkProxy) {
+    router.all('*', async (req, res) => {
+      await networkProxy.handleHttpRequest(req, res)
+    })
+  }
 
   // when we experience uncaught errors
   // during routing just log them out to

@@ -15,6 +15,7 @@ import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
+import { isProxyDisabled } from './util/is-proxy-disabled'
 import * as system from './util/system'
 import type {
   BannersState,
@@ -211,7 +212,9 @@ export class ProjectBase extends EE {
       _.extend(cfg, config.setUrls(cfg))
     }
 
-    cfg.proxyServer = cfg.proxyUrl
+    if (!isProxyDisabled()) {
+      cfg.proxyServer = cfg.proxyUrl
+    }
 
     // store the cfg from
     // opening the server
