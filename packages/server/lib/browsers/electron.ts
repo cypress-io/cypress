@@ -12,7 +12,7 @@ import type { Browser, BrowserInstance, GracefulShutdownOptions } from './types'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
-import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, CyPromptManagerShape, RunModeVideoApi } from '@packages/types'
+import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
@@ -53,13 +53,13 @@ const tryToCall = function (win, method) {
 const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
   if (!options.onError) throw new Error('Missing onError in electron#_launch')
 
-  const port = getRemoteDebuggingPort()
+  const port = await getRemoteDebuggingPort()
 
   if (!browserCriClient) {
     debug(`browser CRI is not set. Creating...`)
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
-      port,
+      port: Number(port),
       browserName: 'electron',
       onAsynchronousError: options.onError,
       onReconnect: () => {},
@@ -513,6 +513,19 @@ export = {
     }
 
     await options.cyPromptManager?.connectToBrowser(browserCriClient.currentlyAttachedCyPromptTarget)
+  },
+
+  async connectStudioToBrowser (options: { studioManager?: StudioManagerShape }) {
+    const browserCriClient = this._getBrowserCriClient()
+
+    if (!browserCriClient?.currentlyAttachedTarget) throw new Error('Missing pageCriClient in connectStudioToBrowser')
+
+    // Clone the target here so that we separate the studio client and the main client.
+    if (!browserCriClient.currentlyAttachedStudioTarget) {
+      browserCriClient.currentlyAttachedStudioTarget = await browserCriClient.currentlyAttachedTarget.clone()
+    }
+
+    await options.studioManager?.connectToBrowser(browserCriClient.currentlyAttachedStudioTarget)
   },
 
   async closeProtocolConnection () {

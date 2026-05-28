@@ -99,9 +99,7 @@ describe('App: Settings', () => {
       cy.findByTestId('spec-list-container').scrollTo('bottom')
       // Visit the test to trigger the ws.off() for the TR websockets
       cy.contains('test1.js').click()
-      cy.waitForSpecToFinish()
-      // Wait for the test to pass, so the test is completed
-      cy.get('.passed > .num').should('contain', 1)
+      cy.waitForSpecToFinish({ passCount: 1 })
       cy.get(SidebarSettingsLinkSelector).click()
       cy.contains('Cypress Cloud settings').click()
       // Assert the data is not there before it arrives
@@ -256,6 +254,8 @@ describe('App: Settings', () => {
         cy.get('[data-cy-config="env"]').contains('INTERNAL_GRAPHQL_PORT')
         cy.get('[data-cy-config="cli"]').contains('fromCli')
         cy.get('[data-cy-config="cli"]').contains('4455')
+        cy.get('[data-cy-config="expose"]').contains('INTERNAL_E2E_TESTING_SELF')
+        cy.get('[data-cy-config="expose"]').contains('value').should('not.exist')
       })
     })
 
@@ -564,9 +564,7 @@ describe('App: Settings without cloud', () => {
     })
 
     cy.contains('button', 'Connect to Cypress Cloud').click()
-    cy.findByRole('dialog', { name: 'Log in to Cypress' }).within(() => {
-      cy.contains('button', 'Log in').click()
-    })
+    cy.findByRole('dialog', { name: 'Continue in your browser' }).should('be.visible')
 
     cy.withCtx((ctx, o) => {
       // validate utmSource

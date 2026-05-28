@@ -3,6 +3,7 @@ import type { EventManager } from '../runner/event-manager'
 import type { UseMutationResponse } from '@urql/vue'
 import StudioPanel from './StudioPanel.vue'
 import type { SpecDirtyDataStore } from '../store/spec-dirty-data-store'
+import type { SnapshotStore } from '../runner/snapshot-store'
 
 describe('StudioPanel', () => {
   it('renders the error panel with a certificate error', () => {
@@ -10,6 +11,7 @@ describe('StudioPanel', () => {
     const mockUserProjectStatusStore = {} as unknown as UserProjectStatusStore
     const mockRequestProjectAccessMutation = {} as unknown as UseMutationResponse<any, any>
     const mockSpecDirtyDataStore = {} as unknown as SpecDirtyDataStore
+    const mockAutSnapshotStore = {} as unknown as SnapshotStore
 
     cy.mount(<StudioPanel
       isCertError={true}
@@ -22,6 +24,7 @@ describe('StudioPanel', () => {
       requestProjectAccessMutation={mockRequestProjectAccessMutation}
       autUrlSelector="https://example.com"
       specDirtyDataStore={mockSpecDirtyDataStore}
+      autSnapshotStore={mockAutSnapshotStore}
     />)
 
     cy.findByTestId('studio-error-panel').should('be.visible')

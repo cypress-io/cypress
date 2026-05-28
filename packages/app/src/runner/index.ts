@@ -44,7 +44,7 @@ export function createWebsocket (config: Cypress.Config) {
   return ws
 }
 
-export function initializeEventManager (UnifiedRunner: any) {
+function initializeEventManager (UnifiedRunner: any) {
   if (!window.ws) {
     throw Error('Need window.ws to exist before initializing event manager')
   }
@@ -128,17 +128,10 @@ function setupRunner () {
   getEventManager().start(config)
 
   const autStore = useAutStore()
-  const studioStore = useStudioStore()
 
   watchEffect(() => {
     autStore.viewportUpdateCallback?.()
   }, { flush: 'post' })
-
-  watchEffect(() => {
-    window.UnifiedRunner.MobX.runInAction(() => {
-      mobxRunnerStore.setCanSaveStudioLogs(studioStore.logs.length > 0)
-    })
-  })
 
   _autIframeModel = new AutIframe(
     'Test Project',
@@ -187,7 +180,7 @@ function teardownSpec (isRerun: boolean = false) {
  * This will teardown the reporter, event manager, and
  * any associated events.
  */
-export async function teardown () {
+async function teardown () {
   UnifiedReporterAPI.setInitializedReporter(false)
   _eventManager?.stop()
   await _eventManager?.teardown(getMobxRunnerStore())
@@ -240,7 +233,10 @@ function runSpecCT (config, spec: SpecFile) {
 
   // create new AUT
   const autIframe = getAutIframeModel()
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+
+  const { autIframe: $autIframe } = autIframe.create()
+
+  $autIframe.appendTo($container)
 
   // the iframe controller will forward the specpath via header to the devserver.
   // using a query parameter allows us to recognize relative requests and proxy them to the devserver.
@@ -255,7 +251,7 @@ function runSpecCT (config, spec: SpecFile) {
   $autIframe.prop('src', specSrc)
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config)
+  getEventManager().initialize({ $autIframe, config })
 }
 
 /**
@@ -295,6 +291,7 @@ async function runSpecE2E (config, spec: SpecFile) {
   // create root for new AUT
   const $container = document.createElement('div')
 
+  $container.id = 'aut-iframes-container'
   $container.classList.add('screenshot-height-container')
 
   $runnerRoot.append($container)
@@ -302,7 +299,13 @@ async function runSpecE2E (config, spec: SpecFile) {
   // create new AUT
   const autIframe = getAutIframeModel()
 
-  const $autIframe: JQuery<HTMLIFrameElement> = autIframe.create().appendTo($container)
+  const { autIframe: $autIframe, autSnapshotIframes: $autSnapshotIframes } = autIframe.create()
+
+  $autIframe.appendTo($container)
+
+  $autSnapshotIframes.forEach((iframe) => {
+    iframe.appendTo($container)
+  })
 
   // Remove the spec bridge iframe
   document.querySelectorAll('iframe.spec-bridge-iframe').forEach((el) => {
@@ -327,7 +330,7 @@ async function runSpecE2E (config, spec: SpecFile) {
   })
 
   // initialize Cypress (driver) with the AUT!
-  getEventManager().initialize($autIframe, config)
+  getEventManager().initialize({ $autIframe, $autSnapshotIframes, config })
 }
 
 /**

@@ -7,11 +7,11 @@ import Collapsible from '../collapsible/collapsible'
 import type AgentModel from './agent-model'
 import type { Alias } from '../instruments/instrument-model'
 
-export interface AgentProps {
+interface AgentComponentProps {
   model: AgentModel
 }
 
-const Agent = observer(({ model }: AgentProps) => (
+const Agent = observer(({ model }: AgentComponentProps) => (
   <tr className={cs('agent-item', { 'no-calls': !model.callCount })}>
     <td>{model.name}</td>
     <td>{model.functionName}</td>
@@ -20,11 +20,11 @@ const Agent = observer(({ model }: AgentProps) => (
   </tr>
 ))
 
-export interface AgentsModel {
+interface AgentsModel {
   agents: Array<AgentModel>
 }
 
-export interface AgentsProps {
+interface AgentsProps {
   model: AgentsModel
 }
 
@@ -70,7 +70,5 @@ const Agents: React.FC<AgentsProps> = observer(({ model }: AgentsProps) => {
 })
 
 Agents.displayName = 'Agents'
-
-export { Agent, AgentsList }
 
 export default Agents

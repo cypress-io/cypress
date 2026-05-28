@@ -481,7 +481,7 @@ describe('src/cy/commands/window', () => {
     })
 
     describe('errors', {
-      defaultCommandTimeout: 50,
+      defaultCommandTimeout: 200,
     }, () => {
       beforeEach(function () {
         this.logs = []

@@ -1,14 +1,11 @@
 import type { TestFilter } from '@packages/types'
 import _ from 'lodash'
 import { action, observable, makeObservable } from 'mobx'
-import type AgentModel from '../agents/agent-model'
 import type { AgentProps } from '../agents/agent-model'
-import type CommandModel from '../commands/command-model'
 import type { CommandProps } from '../commands/command-model'
 import type { HookProps } from '../hooks/hook-model'
 import appState, { AppState } from '../lib/app-state'
 import scroller, { Scroller } from '../lib/scroller'
-import type RouteModel from '../routes/route-model'
 import type { RouteProps } from '../routes/route-model'
 import TestModel, { TestProps, UpdatableTestProps, UpdateTestCallback } from '../test/test-model'
 import type RunnableModel from './runnable-model'
@@ -18,7 +15,6 @@ const defaults = {
   hasSingleTest: false,
   hasTests: false,
   isReady: false,
-
   attemptingShowSnapshot: false,
   showingSnapshot: false,
 }
@@ -31,8 +27,6 @@ interface Props {
 export type LogProps = AgentProps | CommandProps | RouteProps
 
 export type RunnableArray = Array<TestModel | SuiteModel>
-
-export type Log = AgentModel | CommandModel | RouteModel
 
 export interface RootRunnable {
   hooks?: Array<HookProps>

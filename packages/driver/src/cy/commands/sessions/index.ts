@@ -11,6 +11,7 @@ import {
   SESSION_STEPS,
   statusMap,
 } from './utils'
+import $sourceMapUtils from '../../../cypress/source_map_utils'
 
 /**
  * Session data should be cleared with spec browser launch.
@@ -263,7 +264,7 @@ export default function (Commands, Cypress, cy) {
               err = $errUtils.enhanceStack({
                 err,
                 userInvocationStack,
-                projectRoot: Cypress.config('projectRoot'),
+                projectRoot: $sourceMapUtils.getSourceMapProjectRoot(),
               })
 
               // show validation error and allow sessions workflow to recreate the session

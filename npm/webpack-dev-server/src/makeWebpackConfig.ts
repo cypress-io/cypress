@@ -6,7 +6,6 @@ import type { Configuration, EntryObject } from 'webpack'
 import { makeCypressWebpackConfig } from './makeDefaultWebpackConfig'
 import type { CreateFinalWebpackConfig } from './createWebpackDevServer'
 import { configFiles } from './constants'
-import { dynamicImport } from './dynamic-import'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
@@ -61,9 +60,16 @@ function modifyWebpackConfigForCypress (webpackConfig: Partial<Configuration>) {
 }
 
 async function getWebpackConfigFromProjectRoot (projectRoot: string) {
-  const { findUp } = await dynamicImport<typeof import('find-up')>('find-up')
+  // NOTE: @cypress/webpack-dev-server is a CJS package, but find-up +6.0.0 is an ESM only package.
+  // In order to dynamically import the find-up package, we need to use tsx to do so until @cypress/webpack-dev-server is an ESM-only package,
+  // which would be a breaking change to @cypress/webpack-dev-server and cypress.
+  const { tsImport } = require('tsx/esm/api')
 
-  return await findUp(configFiles, { cwd: projectRoot })
+  const { findUp } = await tsImport('find-up', __filename) as typeof import('find-up')
+
+  const findUpResult = await findUp(configFiles, { cwd: projectRoot })
+
+  return findUpResult
 }
 
 /**

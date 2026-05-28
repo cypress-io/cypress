@@ -4,6 +4,9 @@ import execa from 'execa'
 import { cyTmpDir, projectPath, projects, root } from '../fixtures'
 import { getYarnCommand } from './yarn'
 import { getNpmCommand } from './npm'
+import { getBunCommand } from './bun'
+import { getPnpmCommand } from './pnpm'
+import type { InstallCommand } from './types'
 
 type Dependencies = Record<string, string>
 
@@ -83,8 +86,20 @@ async function copyNodeModulesFromCache (tmpNodeModulesDir: string, cacheDir: st
 async function getLockFilename (dir: string) {
   const hasYarnLock = !!await fs.stat(path.join(dir, 'yarn.lock')).catch(() => false)
   const hasNpmLock = !!await fs.stat(path.join(dir, 'package-lock.json')).catch(() => false)
+  const hasPnpmLock = !!await fs.stat(path.join(dir, 'pnpm-lock.yaml')).catch(() => false)
+  const hasBunLock = !!await fs.stat(path.join(dir, 'bun.lock')).catch(() => false)
+  const hasBunLockb = !!await fs.stat(path.join(dir, 'bun.lockb')).catch(() => false)
+  const hasBun = hasBunLock || hasBunLockb
 
-  if (hasYarnLock && hasNpmLock) throw new Error(`The example project at '${dir}' has conflicting lockfiles. Only use one package manager's lockfile per project.`)
+  const lockfileCount = [hasYarnLock, hasNpmLock, hasPnpmLock, hasBun].filter(Boolean).length
+
+  if (lockfileCount > 1) {
+    throw new Error(`The example project at '${dir}' has conflicting lockfiles. Only use one package manager's lockfile per project.`)
+  }
+
+  if (hasBun) return hasBunLock ? 'bun.lock' : 'bun.lockb'
+
+  if (hasPnpmLock) return 'pnpm-lock.yaml'
 
   if (hasNpmLock) return 'package-lock.json'
 
@@ -97,6 +112,10 @@ function getRelativePathToProjectDir (projectDir: string) {
 }
 
 async function restoreLockFileRelativePaths (opts: { projectDir: string, lockFilePath: string, relativePathToMonorepoRoot: string }) {
+  if (path.basename(opts.lockFilePath) === 'bun.lockb') {
+    return
+  }
+
   const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
   const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
   .replaceAll(opts.relativePathToMonorepoRoot.replace(/\\+/g, '/'), relativePathToProjectDir.replace(/\\+/g, '/'))
@@ -105,6 +124,10 @@ async function restoreLockFileRelativePaths (opts: { projectDir: string, lockFil
 }
 
 async function normalizeLockFileRelativePaths (opts: { project: string, projectDir: string, lockFilePath: string, lockFilename: string, relativePathToMonorepoRoot: string }) {
+  if (opts.lockFilename === 'bun.lockb') {
+    return
+  }
+
   const relativePathToProjectDir = getRelativePathToProjectDir(opts.projectDir)
   const lockFileContents = (await fs.readFile(opts.lockFilePath, 'utf8'))
   .replaceAll(relativePathToProjectDir.replace(/\\+/g, '/'), opts.relativePathToMonorepoRoot.replace(/\\+/g, '/'))
@@ -119,28 +142,45 @@ async function normalizeLockFileRelativePaths (opts: { project: string, projectD
  * the Internet to obtain these packages once it runs in the temp dir.
  * @returns a list of dependency names that were updated
  */
-async function makeWorkspacePackagesAbsolute (pathToPkgJson: string): Promise<string[]> {
+async function makeWorkspacePackagesAbsolute (pathToPkgJson: string, projectDir: string): Promise<string[]> {
   const pkgJson = await fs.readJson(pathToPkgJson)
+
   const updatedDeps: string[] = []
 
-  for (const deps of [pkgJson.dependencies, pkgJson.devDependencies, pkgJson.optionalDependencies]) {
-    for (const dep in deps) {
-      const version = deps[dep]
+  try {
+    for (const deps of [pkgJson.dependencies, pkgJson.devDependencies, pkgJson.optionalDependencies]) {
+      for (const dep in deps) {
+        const version = deps[dep]
 
-      if (version.startsWith('file:')) {
-        const absPath = pathToPackage(dep)
+        if (version.startsWith('file:')) {
+          const absPath = path.resolve(__dirname, '../../projects', projectDir, version.replace('file:', ''))
 
-        log(`Setting absolute path in package.json for ${dep}: ${absPath}.`)
+          log(`Setting absolute path in package.json for ${dep} @ ${version}: ${absPath}.`)
 
-        deps[dep] = `file:${absPath}`
-        updatedDeps.push(dep)
+          deps[dep] = `file:${absPath}`
+          updatedDeps.push(dep)
+        }
       }
     }
+  } catch (err) {
+    log(`Error making workspace packages absolute: ${err}`)
+    throw err
   }
 
   await fs.writeJson(pathToPkgJson, pkgJson)
 
   return updatedDeps
+}
+
+export async function clearCachedNodeModules (project: string): Promise<void> {
+  const cacheDir = path.join('/tmp', 'cy-system-tests-node-modules', project)
+
+  try {
+    await fs.remove(cacheDir)
+    log(`Cleared cached node_modules for ${project}`)
+  } catch {
+    // ignore if cache dir doesn't exist
+  }
 }
 
 /**
@@ -164,9 +204,14 @@ export async function scaffoldProjectNodeModules ({
   )
   const projectPkgJsonPath = path.join(projectDir, 'package.json')
 
-  const runCmd = async (cmd) => {
-    log(`Running "${cmd}" in ${projectDir}`)
-    await execa(cmd, { cwd: projectDir, stdio: 'inherit', shell: true })
+  const runCmd = async (cmd: InstallCommand) => {
+    log(`Running "${cmd.cmd}" in ${projectDir}`)
+    await execa(cmd.cmd, {
+      cwd: projectDir,
+      stdio: 'inherit',
+      shell: true,
+      env: cmd.env ? { ...process.env, ...cmd.env } : undefined,
+    })
   }
 
   const cacheNodeModulesDir = path.join('/tmp', 'cy-system-tests-node-modules', project, 'node_modules')
@@ -197,6 +242,8 @@ export async function scaffoldProjectNodeModules ({
 
     const lockFilename = await getLockFilename(projectDir)
     const hasYarnLock = lockFilename === 'yarn.lock'
+    const hasPnpmLock = lockFilename === 'pnpm-lock.yaml'
+    const hasBunLock = lockFilename === 'bun.lock' || lockFilename === 'bun.lockb'
 
     // 1. Ensure there is a cache directory set up for this test project's `node_modules`.
     await ensureCacheDir(cacheNodeModulesDir)
@@ -213,7 +260,7 @@ export async function scaffoldProjectNodeModules ({
 
     // 2. Before running the package installer, resolve workspace deps to absolute paths.
     // This is required to fix install for workspace-only packages.
-    const workspaceDeps = await makeWorkspacePackagesAbsolute(projectPkgJsonPath)
+    const workspaceDeps = await makeWorkspacePackagesAbsolute(projectPkgJsonPath, project)
 
     // 3. Delete cached workspace packages since the pkg manager will create a fresh symlink during install.
     await removeWorkspacePackages(workspaceDeps)
@@ -226,8 +273,8 @@ export async function scaffoldProjectNodeModules ({
     log(`Writing ${lockFilename} with fixed relative paths to temp dir`)
     await restoreLockFileRelativePaths({ projectDir, lockFilePath, relativePathToMonorepoRoot })
 
-    // 5. Run `yarn/npm install`.
-    const getCommandFn = hasYarnLock ? getYarnCommand : getNpmCommand
+    // 5. Run `yarn/npm/bun/pnpm install`.
+    const getCommandFn = hasBunLock ? getBunCommand : (hasYarnLock ? getYarnCommand : (hasPnpmLock ? getPnpmCommand : getNpmCommand))
     const cmd = getCommandFn({
       updateLockFile,
       yarnV311: pkgJson._cyYarnV311,

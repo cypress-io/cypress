@@ -1,18 +1,13 @@
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 
 import * as exec from '../exec'
-import files from '../files'
+import * as files from '../files'
 import { fs } from '../util/fs'
-import task from '../task'
-
-export interface SpecChannelOptions {
-  isSpecBridge: boolean
-  url: string
-  key: string
-}
+import * as task from '../task'
+import { getUserDefinedEnvironmentVariables } from '../getUserDefinedEnvs'
 
 interface SpecOriginatedCommand {
   name: string
@@ -44,7 +39,7 @@ class PrivilegedCommandsManager {
     // no-op if already set up for url
     if (this.channelKeys[options.url]) return
 
-    const key = uuidv4()
+    const key = randomUUID()
 
     this.channelKeys[options.url] = key
 
@@ -102,6 +97,8 @@ class PrivilegedCommandsManager {
     }
 
     switch (commandName) {
+      case 'env':
+        return getUserDefinedEnvironmentVariables({ requestedKeys: options.envVars, userDefinedEnvironmentVariables: config.env || {} })
       case 'exec':
         return exec.run(config.projectRoot, options)
       case 'origin':

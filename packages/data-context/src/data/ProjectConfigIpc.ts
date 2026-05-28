@@ -1,6 +1,6 @@
 /* eslint-disable no-dupe-class-members */
 import { CypressError, getError } from '@packages/errors'
-import type { FullConfig, TestingType } from '@packages/types'
+import type { DebugData, FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
 import EventEmitter from 'events'
 import path from 'path'
@@ -45,13 +45,9 @@ export interface LoadConfigReply {
   requires: string[]
 }
 
-export interface SerializedLoadConfigReply {
+interface SerializedLoadConfigReply {
   initialConfig: string // stringified Cypress.ConfigOptions
   requires: string[]
-}
-
-export interface DebugData {
-  filePreprocessorHandlerText?: string
 }
 
 /**
@@ -74,15 +70,17 @@ export class ProjectConfigIpc extends EventEmitter {
   ) {
     super()
     this._childProcess = this.forkConfigProcess()
-    this._childProcess.on('error', (err) => {
-      // this.emit('error', err)
+    this._childProcess.on('error', (err: any) => {
+      debug('child process error: %s', err)
     })
 
     this._childProcess.on('message', (msg: { event: string, args: any[] }) => {
+      debug('received %s message from child process %s with args %o', msg.event, this._childProcess.pid, msg.args)
       this.emit(msg.event, ...msg.args)
     })
 
     this._childProcess.once('disconnect', () => {
+      debug('received disconnect event from child process %s', this._childProcess.pid)
       this.emit('disconnect')
     })
 
@@ -108,8 +106,12 @@ export class ProjectConfigIpc extends EventEmitter {
   send(event: 'main:process:will:disconnect'): void
   send (event: string, ...args: any[]) {
     if (this._childProcess.killed || !this._childProcess.connected) {
+      debug('not sending %s message to child process. Killed? %s, Connected? %s', event, this._childProcess.killed, this._childProcess.connected)
+
       return false
     }
+
+    debug('sending %s message to child process %s with args %o', event, this._childProcess.pid, args)
 
     return this._childProcess.send({ event, args })
   }
@@ -118,6 +120,8 @@ export class ProjectConfigIpc extends EventEmitter {
   on(evt: 'export:telemetry', listener: (data: string) => void): void
   on(evt: 'main:process:will:disconnect:ack', listener: () => void): void
   on(evt: 'warning', listener: (warningErr: CypressError) => void): this
+  on(evt: 'disconnect', listener: () => void): this
+  on(evt: 'exit', listener: (code: number, signal: string) => void): this
   on (evt: string, listener: (...args: any[]) => void) {
     return super.on(evt, listener)
   }
@@ -157,10 +161,25 @@ export class ProjectConfigIpc extends EventEmitter {
 
       let resolved = false
 
-      this._childProcess.on('error', (err) => {
+      this._childProcess.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EPIPE') {
+          debug('EPIPE error in loadConfig() of child process %s', err)
+
+          // @ts-ignore
+          resolve()
+
+          return
+        }
+
         debug('unhandled error in child process %s', err)
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
+      })
+
+      this._childProcess.on('exit', (code, signal) => {
+        debug('child process %s exited with code %s and signal %s', this._childProcess.pid, code, signal)
+        this.emit('exit', code, signal)
+        this.cleanupIpc()
       })
 
       /**
@@ -229,7 +248,16 @@ export class ProjectConfigIpc extends EventEmitter {
     return new Promise((resolve, reject) => {
       let resolved = false
 
-      this._childProcess.on('error', (err) => {
+      this._childProcess.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EPIPE') {
+          debug('EPIPE error in registerSetupIpcHandlers() of child process %s', err)
+
+          // @ts-ignore
+          resolve()
+
+          return
+        }
+
         this.handleChildProcessError(err, this, resolved, reject)
         reject(err)
       })
@@ -246,6 +274,7 @@ export class ProjectConfigIpc extends EventEmitter {
       })
 
       this.once('file:preprocessor:overridden', ({ handlerText }) => {
+        debug('file:preprocessor:overridden: %s', handlerText)
         this.onDebugData({
           filePreprocessorHandlerText: handlerText,
         })
@@ -384,14 +413,23 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   cleanupIpc () {
+    debug('cleaning up IPC')
     this.killChildProcess()
     this.removeAllListeners()
   }
 
-  private killChildProcess () {
-    this._childProcess.kill()
+  private killChildProcess (): void {
     this._childProcess.stdout?.removeAllListeners()
     this._childProcess.stderr?.removeAllListeners()
     this._childProcess.removeAllListeners()
+
+    if (this._childProcess.killed || !this._childProcess.connected) {
+      debug('child process %s already killed', this._childProcess.pid)
+
+      return
+    }
+
+    debug('killing child process %s', this._childProcess.pid)
+    this._childProcess.kill()
   }
 }

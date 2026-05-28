@@ -1,5 +1,10 @@
 {
   "extends": "../ts/tsconfig.json",
+  "include": [
+    "src/**/*",
+    "cypress/**/*",
+    "*.d.ts"
+  ],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "ESNext"],
@@ -13,8 +18,6 @@
     },
     "types": [
       "chrome",
-      "./vue-shims",
-      "./vite-env",
       "@intlify/unplugin-vue-i18n/messages",
       "@testing-library/cypress",
       "cypress-real-events", 

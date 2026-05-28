@@ -45,7 +45,7 @@ describe('detectFramework', () => {
     const projectPath = await scaffoldMigrationProject('react-vite-ts-unconfigured')
 
     fakeDepsInNodeModules(projectPath, [
-      { devDependency: 'vite', version: '5.0.0' },
+      { devDependency: 'vite', version: '8.0.0' },
       { dependency: 'react', version: '18.0.0' },
     ])
 
@@ -69,12 +69,12 @@ describe('detectFramework', () => {
     expect(actual.bundler).toEqual('vite')
   })
 
-  ;['14.0.0', '15.0.4'].forEach((v) => {
+  ;['15.0.4', '16.0.0'].forEach((v) => {
     it(`Next.js v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('nextjs-unconfigured')
 
       fakeDepsInNodeModules(projectPath, [
-        { dependency: 'react', version: v === '15.0.0' ? '19.0.0' : '18.0.0' },
+        { dependency: 'react', version: '19.0.0' },
         { dependency: 'next', version: v },
       ])
 
@@ -85,7 +85,7 @@ describe('detectFramework', () => {
     })
   })
 
-  ;['18.2.0', '19.2.9'].forEach((v) => {
+  ;['20.1.0', '21.0.0'].forEach((v) => {
     it(`Angular CLI v${v}`, async () => {
       const projectPath = await scaffoldMigrationProject('angular-cli-unconfigured')
 

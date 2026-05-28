@@ -9,7 +9,7 @@ import fs from 'fs-extra'
 import type { SinonStub } from 'sinon'
 
 class TestClient extends EventEmitter {
-  send: sinon.SinonStub = sinon.stub()
+  send: SinonStub = sinon.stub()
 }
 
 const mockDb = sinon.stub()
@@ -93,6 +93,86 @@ describe('lib/cloud/protocol', () => {
     ])
   })
 
+  it('should unregister listener when off() is called on wrapped CDP client', async () => {
+    const mockCdpClient = new TestClient()
+
+    sinon.stub(protocol, 'connectToBrowser').resolves()
+
+    await protocolManager.connectToBrowser(mockCdpClient as any)
+
+    const newCdpClient = (protocol.connectToBrowser as SinonStub).getCall(0).args[0]
+    const listener = sinon.stub()
+
+    newCdpClient.on('Page.loadEventFired', listener)
+    mockCdpClient.emit('Page.loadEventFired')
+    expect(listener).to.have.been.calledOnce
+
+    newCdpClient.off('Page.loadEventFired', listener)
+    mockCdpClient.emit('Page.loadEventFired')
+    expect(listener).to.have.been.calledOnce
+  })
+
+  it('uses event+listener composite key so same listener on multiple events does not leak wrappers', async () => {
+    const mockCdpClient = new TestClient()
+    const onCalls: Array<{ event: string, listener: Function }> = []
+    const offCalls: Array<{ event: string, listener: Function }> = []
+
+    const originalOn = mockCdpClient.on.bind(mockCdpClient)
+    const originalOff = mockCdpClient.off.bind(mockCdpClient)
+
+    mockCdpClient.on = function (event: string, listener: Function) {
+      onCalls.push({ event, listener })
+
+      return originalOn(event, listener)
+    }
+
+    mockCdpClient.off = function (event: string, listener: Function) {
+      offCalls.push({ event, listener })
+
+      return originalOff(event, listener)
+    }
+
+    let capturedWrappedClient: any
+
+    sinon.stub(protocolManager as any, 'invokeAsync').callsFake(async (_method: string, _opts: any, cdpClient: any) => {
+      capturedWrappedClient = cdpClient
+    })
+
+    await protocolManager.connectToBrowser(mockCdpClient as any)
+
+    expect(capturedWrappedClient).to.exist
+
+    const sharedListener = sinon.stub()
+
+    capturedWrappedClient.on('Page.frameAttached', sharedListener)
+    capturedWrappedClient.on('Page.frameDetached', sharedListener)
+
+    expect(onCalls).to.have.length(2)
+
+    const wrapperForAttached = onCalls.find((c) => c.event === 'Page.frameAttached')!.listener
+    const wrapperForDetached = onCalls.find((c) => c.event === 'Page.frameDetached')!.listener
+
+    expect(wrapperForAttached).to.not.equal(wrapperForDetached)
+
+    capturedWrappedClient.off('Page.frameAttached', sharedListener)
+    expect(offCalls).to.have.length(1)
+    expect(offCalls[0].event).to.equal('Page.frameAttached')
+    expect(offCalls[0].listener).to.equal(wrapperForAttached)
+
+    capturedWrappedClient.off('Page.frameDetached', sharedListener)
+    expect(offCalls).to.have.length(2)
+    expect(offCalls[1].event).to.equal('Page.frameDetached')
+    expect(offCalls[1].listener).to.equal(wrapperForDetached)
+  })
+
+  it('should call cleanup on existing protocol when setupProtocol is called again', () => {
+    const cleanupStub = sinon.stub(protocol, 'cleanup')
+
+    protocolManager.setupProtocol()
+
+    expect(cleanupStub).to.have.been.calledOnce
+  })
+
   it('should be able to initialize a new spec', () => {
     sinon.stub(protocol, 'beforeSpec')
 
@@ -131,6 +211,9 @@ describe('lib/cloud/protocol', () => {
       nativeBinding: path.join(require.resolve('better-sqlite3/build/Release/better_sqlite3.node')),
       verbose: sinon.match.func,
     })
+
+    expect(protocolManager['_instanceId']).to.equal('instanceId')
+    expect(protocolManager['_specName']).to.equal('spec')
   })
 
   it('should be able to initialize a new test', async () => {
@@ -310,14 +393,27 @@ describe('lib/cloud/protocol', () => {
     expect(protocol.pageLoading).to.be.calledWith(input)
   })
 
-  it('should be able to reset the test', () => {
-    sinon.stub(protocol, 'resetTest')
+  describe('.resetTest', () => {
+    it('should be able to reset the test with no current retry', () => {
+      sinon.stub(protocol, 'resetTest')
 
-    const testId = 'r3'
+      const testId = 'r3'
 
-    protocolManager.resetTest(testId)
+      protocolManager.resetTest(testId)
 
-    expect(protocol.resetTest).to.be.calledWith(testId)
+      expect(protocol.resetTest).to.be.calledWith(testId)
+    })
+
+    it('should be able to reset the test with a current retry', () => {
+      sinon.stub(protocol, 'resetTest')
+
+      const testId = 'r3'
+      const currentRetry = 1
+
+      protocolManager.resetTest(testId, currentRetry)
+
+      expect(protocol.resetTest).to.be.calledWith(testId, currentRetry)
+    })
   })
 
   describe('.reset', () => {
@@ -346,6 +442,20 @@ describe('lib/cloud/protocol', () => {
       expect(protocolManager['_instanceId']).to.be.undefined
       expect(protocolManager['_runId']).to.be.undefined
       expect(protocolManager['_errors']).to.be.empty
+      expect(protocolManager['_protocol']).to.be.undefined
+    })
+
+    it('calls cleanup on protocol before clearing it', () => {
+      const cleanupStub = sinon.stub(protocol, 'cleanup')
+
+      protocolManager['_db'] = { close: sinon.stub() }
+      protocolManager['_dbPath'] = '/path/to/db'
+      protocolManager['_archivePath'] = '/path/to/archive'
+      sinon.stub(fs, 'unlink').resolves()
+
+      protocolManager.close()
+
+      expect(cleanupStub).to.have.been.calledOnce
       expect(protocolManager['_protocol']).to.be.undefined
     })
   })
@@ -572,6 +682,50 @@ describe('lib/cloud/protocol', () => {
             expect(threw).to.be.false
             expect(fs.unlink).to.be.called
           })
+        })
+      })
+    })
+  })
+
+  describe('.captureError', () => {
+    beforeEach(() => {
+      sinon.stub(protocolManager, 'dispatchErrors').resolves()
+    })
+
+    describe('when mode is `record`', () => {
+      beforeEach(() => {
+        protocolManager['options']['mode'] = 'record'
+      })
+
+      it('should store error into array for later reporting', () => {
+        const err = { captureMethod: 'cdpClient.on', error: new Error(), args: { test: 'test1' } }
+
+        protocolManager['captureError'](err)
+
+        expect(protocolManager['_errors']).to.have.length(1)
+        expect(protocolManager['_errors'][0]).to.include(err)
+        expect(protocolManager['dispatchErrors']).not.to.have.been.called
+      })
+    })
+
+    describe('when mode is `studio`', () => {
+      beforeEach(() => {
+        protocolManager['options']['mode'] = 'studio'
+      })
+
+      it('should immediately dispatch errors to the cloud', () => {
+        const err = { captureMethod: 'cdpClient.on', error: new Error(), args: { test: 'test1' } }
+
+        protocolManager['captureError'](err)
+
+        expect(protocolManager['_errors']).to.have.length(0)
+        expect(protocolManager['dispatchErrors']).to.have.been.called
+        expect(protocolManager['dispatchErrors'].getCall(0).args[0]).to.deep.equal([err])
+        expect(protocolManager['dispatchErrors'].getCall(0).args[1]).to.deep.equal({
+          osName: os.platform(),
+          projectSlug: protocolManager['options']['projectId'],
+          specName: protocolManager['_specName'],
+          mode: 'studio',
         })
       })
     })

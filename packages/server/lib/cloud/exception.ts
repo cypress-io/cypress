@@ -1,14 +1,13 @@
 import _ from 'lodash'
-import Bluebird from 'bluebird'
 import pkg from '@packages/root'
 import api from './api'
 import user from './user'
-import system from '../util/system'
+import * as system from '../util/system'
 import { stripPath } from './strip_path'
 
 const { serializeError } = require('serialize-error')
 
-export = {
+const exception = {
   /**
    * Safely serializes an error object to a string, handling circular references
    * and other non-serializable values that would cause JSON.stringify to throw.
@@ -71,7 +70,7 @@ export = {
     }
 
     try {
-      const [body, authToken] = await Bluebird.all([
+      const [body, authToken] = await Promise.all([
         this.getBody(err),
         this.getAuthToken(),
       ])
@@ -82,3 +81,5 @@ export = {
     }
   },
 }
+
+export default exception

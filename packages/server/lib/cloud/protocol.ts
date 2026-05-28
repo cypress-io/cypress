@@ -8,7 +8,7 @@ import os from 'os'
 import path from 'path'
 import { strictAgent } from '@packages/network'
 import pkg from '@packages/root'
-import env from '../util/env'
+import * as env from '../util/env'
 import { putProtocolArtifact } from './api/put_protocol_artifact'
 import { requireScript } from './require_script'
 import * as routes from './routes'
@@ -36,6 +36,7 @@ type AppCaptureProtocolConstructor = new (options: ProtocolManagerOptions) => Ap
 export class ProtocolManager implements ProtocolManagerShape {
   private _runId?: string
   private _instanceId?: string
+  private _specName?: string
   private _db?: Database.Database
   private _dbPath?: string
   private _archivePath?: string
@@ -72,6 +73,7 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug('preparing protocol via script')
 
     try {
+      this.options = options
       this._runId = options.runId
       if (script) {
         const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
@@ -81,11 +83,10 @@ export class ProtocolManager implements ProtocolManagerShape {
         const { AppCaptureProtocol } = requireScript<{ AppCaptureProtocol: AppCaptureProtocolConstructor }>(script)
 
         this.AppCaptureProtocol = AppCaptureProtocol
-        this.options = options
       }
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({
+        this.captureError({
           error,
           args: [script],
           captureMethod: 'prepareProtocol',
@@ -101,6 +102,9 @@ export class ProtocolManager implements ProtocolManagerShape {
     debug('setting up protocol')
 
     try {
+      // Cleanup the previous protocol
+      this.cleanup()
+
       if (!this.AppCaptureProtocol || !this.options) {
         throw new Error('Cannot setup protocol without a prepared protocol')
       }
@@ -108,7 +112,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       this._protocol = new this.AppCaptureProtocol(this.options)
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({
+        this.captureError({
           error,
           captureMethod: 'setupProtocol',
           fatal: true,
@@ -125,22 +129,45 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   async connectToBrowser (cdpClient: CDPClient) {
-    // Wrap the cdp client listeners so that we can be notified of any errors that may occur
+    // Keyed by event name then by original listener so that the same function
+    // registered for multiple events doesn't collide and leak wrappers.
+    const listenerMap = new Map<string, Map<Function, Function>>()
+
     const newCdpClient: CDPClient = {
       ...cdpClient,
       on: (event, listener) => {
-        cdpClient.on(event, async (message) => {
+        // Wrap the cdp client listeners so that we can be notified of any errors that may occur
+        const wrapper = async (message) => {
           try {
             await listener(message)
           } catch (error) {
             if (CAPTURE_ERRORS) {
-              this._errors.push({ captureMethod: 'cdpClient.on', fatal: false, error, args: [event, message] })
+              this.captureError({ captureMethod: 'cdpClient.on', fatal: false, error, args: [event, message] })
             } else {
               debug('error in cdpClient.on %o', { error, event, message })
               throw error
             }
           }
-        })
+        }
+
+        if (!listenerMap.has(event)) {
+          listenerMap.set(event, new Map())
+        }
+
+        listenerMap.get(event)!.set(listener, wrapper)
+        cdpClient.on(event, wrapper)
+      },
+      off: (event, listener) => {
+        const eventListeners = listenerMap.get(event)
+        const wrapper = eventListeners?.get(listener)
+
+        if (wrapper) {
+          cdpClient.off(event, wrapper as any)
+          eventListeners!.delete(listener)
+          if (eventListeners!.size === 0) {
+            listenerMap.delete(event)
+          }
+        }
       },
     }
 
@@ -165,10 +192,10 @@ export class ProtocolManager implements ProtocolManagerShape {
       this._beforeSpec(spec)
     } catch (error) {
       // Clear out protocol since we will not have a valid state when spec has failed
-      this._protocol = undefined
+      this.cleanup()
 
       if (CAPTURE_ERRORS) {
-        this._errors.push({ captureMethod: 'beforeSpec', fatal: true, error, args: [spec], runnableId: this._runnableId })
+        this.captureError({ captureMethod: 'beforeSpec', fatal: true, error, args: [spec], runnableId: this._runnableId })
       } else {
         throw error
       }
@@ -177,6 +204,7 @@ export class ProtocolManager implements ProtocolManagerShape {
 
   private _beforeSpec (spec: FoundSpec & { instanceId: string }) {
     this._instanceId = spec.instanceId
+    this._specName = spec.name
     const cypressProtocolDirectory = path.join(os.tmpdir(), 'cypress', 'protocol')
     const archivePath = path.join(cypressProtocolDirectory, `${spec.instanceId}.tar`)
     const dbPath = path.join(cypressProtocolDirectory, `${spec.instanceId}.db`)
@@ -259,8 +287,8 @@ export class ProtocolManager implements ProtocolManagerShape {
     this.invokeSync('pageLoading', { isEssential: false }, input)
   }
 
-  resetTest (testId: string): void {
-    this.invokeSync('resetTest', { isEssential: false }, testId)
+  resetTest (testId: string, currentRetry?: number): void {
+    this.invokeSync('resetTest', { isEssential: false }, testId, currentRetry)
   }
 
   responseEndedWithEmptyBody (options: ResponseEndedWithEmptyBodyOptions): void {
@@ -284,7 +312,7 @@ export class ProtocolManager implements ProtocolManagerShape {
   }
 
   addFatalError (captureMethod: ProtocolCaptureMethod, error: Error, args?: any) {
-    this._errors.push({
+    this.captureError({
       fatal: true,
       error,
       captureMethod,
@@ -358,7 +386,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       }
     } catch (e) {
       if (captureErrors) {
-        this._errors.push({
+        this.captureError({
           error: e,
           captureMethod: 'uploadCaptureArtifact',
           fatal: true,
@@ -382,13 +410,53 @@ export class ProtocolManager implements ProtocolManagerShape {
     await this.invokeAsync('cdpReconnect', { isEssential: true })
   }
 
+  /**
+   * Central handling for errors - if we're in studio mode it will
+   * immediately be dispatched to the cloud for recording, otherwise
+   * it will be stored and the batch will be dispatched when protocol assets
+   * are uploaded.
+   *
+   * @param error
+   */
+  private captureError (error: ProtocolError) {
+    if (this.options?.mode === 'studio') {
+      void this.dispatchErrors([error], {
+        osName: os.platform(),
+        projectSlug: this.options?.projectId,
+        specName: this._specName,
+        mode: this.options?.mode,
+      })
+    } else {
+      this._errors.push(error)
+    }
+  }
+
   async reportNonFatalErrors (context?: {
     osName: string
-    projectSlug: string
-    specName: string
+    projectSlug?: string
+    specName?: string
+    mode?: 'record' | 'studio'
   }) {
     const errors = this._errors.filter(({ fatal }) => !fatal)
 
+    await this.dispatchErrors(errors, context)
+
+    this._errors = []
+  }
+
+  /**
+   * Transmit errors to the cloud.
+   *
+   * @param errors
+   * @param context
+   * @returns
+   */
+  private async dispatchErrors (errors: ProtocolError[], context?: {
+    osName: string
+    projectSlug?: string
+    specName?: string
+    mode?: 'record' | 'studio'
+  }) {
     if (errors.length === 0) {
       return
     }
@@ -428,8 +496,6 @@ export class ProtocolManager implements ProtocolManagerShape {
     } catch (e) {
       debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, errors)
     }
-
-    this._errors = []
   }
 
   close (): void {
@@ -448,8 +514,14 @@ export class ProtocolManager implements ProtocolManagerShape {
 
     this._archivePath = undefined
     this._instanceId = undefined
+    this._specName = undefined
     this._runId = undefined
     this._errors = []
+    this.cleanup()
+  }
+
+  cleanup (): void {
+    this.invokeSync('cleanup', { isEssential: false })
     this._protocol = undefined
   }
 
@@ -467,7 +539,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
+        this.captureError({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
       } else {
         throw error
       }
@@ -488,7 +560,7 @@ export class ProtocolManager implements ProtocolManagerShape {
       return await this._protocol[method].apply(this._protocol, args)
     } catch (error) {
       if (CAPTURE_ERRORS) {
-        this._errors.push({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
+        this.captureError({ captureMethod: method, fatal: isEssential, error, args, runnableId: this._runnableId })
       } else {
         throw error
       }
@@ -515,4 +587,5 @@ type ProtocolAsyncMethods = {
   [K in keyof AppCaptureProtocolInterface]: ReturnType<AppCaptureProtocolInterface[K]> extends Promise<any> ? K : never
 }[keyof AppCaptureProtocolInterface]
 
+/** @alias */
 export default ProtocolManager

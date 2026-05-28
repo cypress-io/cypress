@@ -53,9 +53,14 @@ Thanks for taking the time to contribute! :smile:
       - [Docker](#docker)
       - [Docker as a performance constrained environment](#docker-as-a-performance-constrained-environment)
     - [Packages](#packages)
+    - [AI assistant guidance files](#ai-assistant-guidance-files)
+      - [Files used by AI tools](#files-used-by-ai-tools)
+      - [Maintenance expectations](#maintenance-expectations)
+      - [External references](#external-references)
   - [Committing Code](#committing-code)
     - [Branches](#branches)
     - [Pull Requests](#pull-requests)
+    - [AI-Assisted Contributions](#ai-assisted-contributions)
     - [Write Some Tests](#write-some-tests)
     - [Dependencies](#dependencies)
   - [Reviewing Code](#reviewing-code)
@@ -151,7 +156,7 @@ See [Documentation Contributing Guidelines](https://github.com/cypress-io/cypres
 
 ## Writing code
 
-Working on your first Pull Request? You can learn how from this free series [How to Contribute to an Open Source Project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
+Working on your first Pull Request? You can learn how from this free series [How to Contribute to an Open Source Project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github).
 
 ### What you need to know before getting started
 
@@ -215,6 +220,7 @@ Here is a list of the npm packages in this repository:
  | Folder Name                                            | Package Name                       | Purpose                                                                      |
  | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
  | [angular](./npm/angular)                               | `@cypress/angular`                   | Cypress component testing for Angular.     |
+ | [angular-zoneless](./npm/angular-zoneless)             | `@cypress/angular-zoneless`        | Cypress component testing for Angular using zoneless change detection.       |
  | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.          |
  | [grep](./npm/grep)                                       | `@cypress/grep`                     | Filter tests using substring                        |
  | [mount-utils](./npm/mount-utils)                       | `@cypress/mount-utils`             | Common functionality for Vue/React/Angular adapters. |
@@ -263,7 +269,7 @@ If you do not disable these restrictions for the affected Ubuntu versions, then 
 
 Follow the instructions in [Using Python on Windows](https://docs.python.org/3/using/windows.html) to install the current [version of Python](https://www.python.org/downloads/) (`3.14`).
 
-Install the [Visual Studio Community 2022](https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community) edition, selecting the `Desktop development with C++` workload.
+Install [Visual Studio 2022 Build Tools](https://aka.ms/vs/17/release/vs_buildtools.exe), selecting the `Desktop development with C++` workload.
 
 Refer to the `node-gyp` [Windows](https://github.com/nodejs/node-gyp/blob/main/README.md#on-windows) documentation section for a description of alternate ways of providing the `node-gyp` execution environment and for troubleshooting information.
 
@@ -382,8 +388,6 @@ Each package is responsible for building itself and testing itself and can do so
 When executing top or package level scripts, [Vite](https://vitejs.dev/) may be used to build/host parts of the application. This section is to serve as a general reference for these environment variables that may be leverage throughout the repository.
 ##### `CYPRESS_INTERNAL_VITE_DEV`
 Set to `1` if wanting to leverage [vite's](https://vitejs.dev/guide/#command-line-interface) `vite dev` over `vite build` to avoid a full [production build](https://vitejs.dev/guide/build.html).
-##### `CYPRESS_INTERNAL_VITE_INSPECT`
-Used internally to leverage [vite-plugin-inspect](https://github.com/antfu/vite-plugin-inspect) to view intermediary vite plugin state. The `CYPRESS_INTERNAL_VITE_DEV` is required for this to be applied correctly. Set to `1` to enable.
 ##### `CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING`
 Leveraged only for internal cy-in-cy type tests to access the Cypress instance from the parent frame. Please see the [E2E Open Mode Testing](./guides/e2e-open-testing.md) Guide. Set to `true` when doing
 ##### `CYPRESS_INTERNAL_VITE_APP_PORT`
@@ -465,6 +469,35 @@ Each package documents how to best work with it, so consult the `README.md` of e
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
+### AI assistant guidance files
+
+This repository includes lightweight AI guidance files used by common AI coding tools.
+
+These files are intended to make project structure and conventions more discoverable
+to AI assistants while remaining transparent and minimal for human contributors.
+
+#### Files used by AI tools
+
+- `CLAUDE.md` — Used by Claude Code (Claude loads these by walking upward from the working directory).
+- `AGENTS.md` — Used by Codex CLI and Cursor. Claude references this via `@import`.
+
+The root `AGENTS.md` provides project-wide context. Workspace and package-level
+`AGENTS.md` files add scoped details.
+
+#### Maintenance expectations
+
+These files should be treated like other repository documentation:
+
+- If you change repository structure, commands, conventions, or workflows,
+  update the relevant `AGENTS.md` / `CLAUDE.md` in the same PR.
+- Keep repo-local guidance factual and descriptive (what exists),
+  not aspirational process.
+
+#### External references
+
+Some AI-related documentation may reference Cypress-internal resources.
+Contributing to this repository does not require access to those systems.
+
 ## Committing Code
 
 ### Branches
@@ -479,8 +512,14 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 
 ### Pull Requests
 
-- Break down pull requests into the smallest necessary parts to address the original issue or feature. This helps you get a timely review and helps the reviewer clearly understand which pieces of the code changes are relevant.
-- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area`. If there's not an associated open issue, **[create an issue](https://github.com/cypress-io/cypress/issues/new/choose)**.
+**Before writing any code**, confirm that an open issue exists for the work and comment on it to let the team know you are interested in contributing. This gives us the opportunity to confirm we are willing to accept the contribution before you invest time in implementation. If no issue exists, [open one](https://github.com/cypress-io/cypress/issues/new/choose) first. For purely mechanical changes (typo fixes, documentation corrections), an issue is not required — include a brief explanation in the PR description instead.
+
+- Break down pull requests into the smallest necessary parts to address the original issue or feature. This helps you get a timely review and helps the reviewer clearly understand which pieces of the code changes are relevant. A well-scoped PR:
+  - Addresses **one concern** — a single bug, a single feature, a single refactor. Do not combine a functional change with an unrelated cleanup or style refactor, even if the cleanup is small.
+  - Is **readable in a single sitting**. As a rough guide, aim for logic diffs under ~50 lines (excluding tests). If your PR is growing beyond that, look for a natural seam to split it: extract a preparatory refactor PR first, then a feature PR on top.
+  - Avoids mixing concerns. If you notice an unrelated bug while fixing another, open a separate issue and PR rather than bundling the fix.
+  - When in doubt, split. Reviewers can merge a short PR quickly; a large PR with mixed concerns slows everyone down.
+- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area`.
 - PRs can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
 - Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format using one of the following definitions. Once committed to develop, this prefix will determine the appropriate 'next version' of Cypress or the corresponding npm module.
   - Changes has user-facing impact:
@@ -501,6 +540,13 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PRs will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
+- Before marking your PR as Ready for Review, do a self-review of your own diff:
+  - Read every changed line as if you were the reviewer seeing it for the first time.
+  - Verify that no debug output, commented-out code, or unintended files are included.
+  - Confirm that the PR title prefix and changelog entry (if required) are correct.
+  - Check that the PR template is fully filled out and tests have been added or updated.
+
+  Self-review catches the most common reviewer feedback before it is ever left as a comment.
 - After you have submitted a PR you may see that GitHub shows a status message "This branch has conflicts that must be resolved" or "This branch is out-of-date with the base branch".
 - It is the submitter's responsibility to resolve any conflicts by rebasing on the base branch (usually `develop`).
 - In the case of an out-of-date branch, the submitter may use the GitHub PR "Update branch" button which merges the base branch into the submitter's branch and starts a new CircleCI test run.
@@ -515,9 +561,35 @@ We do not continuously deploy the Cypress binary, so `develop` contains all of t
 1. When converting files to another language and there is a clear commit history needed to maintain from the file conversion.
 2. When merging a `release/*` branch to `develop`. Individual PRs were already squashed when they were merged to the release branch, and we want that history intact on develop.
 
+### AI-Assisted Contributions
+
+AI coding assistants (such as Claude, Codex, Cursor, etc.) are increasingly common tools for developers. Contributions to Cypress may be created with or without AI assistance. AI tools are a normal part of modern development workflows, but contributors remain responsible for the changes they submit.
+
+We do not restrict or require disclosure of AI usage, but contributors are responsible for all code they submit regardless of how it was produced.
+
+When submitting a pull request, please ensure that:
+
+- **You understand the code you are submitting.**  
+  You should be able to explain how the change works and why it is correct.
+
+- **You have reviewed and validated AI-assisted changes.**  
+  AI-generated output may contain mistakes, unnecessary complexity, or patterns that do not match the repository.
+
+- **Your changes follow the existing codebase conventions and architecture.**
+
+- **Your pull request remains focused and reviewable.**  
+  Avoid submitting large AI-generated changes that you have not carefully reviewed.
+
+- **The repository's pull request template is preserved.**  
+  AI tools may help draft content, but contributors should keep the template structure intact and ensure the final content is accurate.
+
+Reviewers may ask clarifying questions about changes. As with any contribution, authors remain responsible for the correctness, maintainability, and quality of the code they submit.
+
 ### Write Some Tests
 
-If you are adding a new feature or fixing a regression, ensure you add tests for it. Broadly speaking, there are four categories of tests you might consider:
+Tests are required when developing new features or fixing regressions. PRs that introduce new behavior or fix a bug without corresponding tests are unlikely to be approved. The PR Tasks checklist in the pull request template requires confirming tests have been added or updated — this is a merge requirement, not a suggestion.
+
+Broadly speaking, there are four categories of tests you might consider:
 
 1. Unit tests. Those are inside of `test/unit`, if the package has them. These are the fastest and cheapest to execute.
 2. Component Tests. These are co-located with components in the `src` directory of UI-related packages. These test individual UI components in isolation. They can exhaustively test all expected variations of a component and are faster than E2E tests.

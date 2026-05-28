@@ -38,15 +38,17 @@ const fastVisitSpec = function (url) {
       return [p, percentile(p)]
     })
 
-    cy.task('record:fast_visit_spec', {
-      percentiles,
-      url,
-      browser: Cypress.config('browser').name,
-      currentRetry: Cypress.env('currentRetry'),
-    })
-    .then(() => {
-      expect(percentile(80)).to.be.lte(100)
-      expect(percentile(95)).to.be.lte(250)
+    cy.env(['currentRetry']).then(({ currentRetry }) => {
+      cy.task('record:fast_visit_spec', {
+        percentiles,
+        url,
+        browser: Cypress.config('browser').name,
+        currentRetry,
+      })
+      .then(() => {
+        expect(percentile(80)).to.be.lte(100)
+        expect(percentile(95)).to.be.lte(250)
+      })
     })
   })
 }

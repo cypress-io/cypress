@@ -2,19 +2,21 @@ import _ from 'lodash'
 import os from 'os'
 import cp from 'child_process'
 import path from 'path'
-import Bluebird from 'bluebird'
 import Debug from 'debug'
 import util from '../util'
 import state from '../tasks/state'
 import xvfb from './xvfb'
 import { needsSandbox } from '../tasks/verify'
-import { throwFormErrorText, getError, errors } from '../errors'
+import { throwFormErrorText, getErrorSync, errors } from '../errors'
 import readline from 'readline'
-import { stdin, stdout, stderr } from 'process'
+import process, { stdin, stdout, stderr } from 'process'
+import { relativeToRepoRoot } from '../relative-to-repo-root'
+import { filter, DEBUG_PREFIX } from '@packages/stderr-filtering'
+import { PassThrough } from 'stream'
 
 const debug = Debug('cypress:cli')
-
-const DBUS_ERROR_PATTERN = /ERROR:dbus\/(bus|object_proxy)\.cc/
+const debugElectron = Debug('cypress:electron')
+const debugStderr = Debug('cypress:internal-stderr')
 
 function isPlatform (platform: string): boolean {
   return os.platform() === platform
@@ -58,7 +60,7 @@ function createSpawnFunction (
   options: any,
 ) {
   return (overrides: any = {}): any => {
-    return new Bluebird((resolve: any, reject: any) => {
+    return new Promise(async (resolve: any, reject: any) => {
       _.defaults(overrides, {
         onStderrData: false,
       })
@@ -74,9 +76,12 @@ function createSpawnFunction (
         executable = 'node'
         // if we're in dev then reset
         // the launch cmd to be 'npm run dev'
-        startScriptPath = path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
-
-        debug('in dev mode the args became %o', args)
+        // This path is correct in the build output, but not the source code. This file gets bundled into
+        // `dist/spawn-<hash>.js`, which makes this resolution appear incorrect at first glance.
+        startScriptPath = relativeToRepoRoot('scripts/start.js')
+        if (!startScriptPath) {
+          throw new Error(`Cypress start script (scripts/start.js) not found in parent directory of ${__dirname}`)
+        }
       }
 
       if (!options.dev && needsSandbox()) {
@@ -126,26 +131,36 @@ function createSpawnFunction (
       debug('spawn args %o %o', args, _.omit(stdioOptions, 'env'))
       debug('spawning Cypress with executable: %s', executable)
 
-      const child = cp.spawn(executable, args, stdioOptions)
+      const platform = await util.getPlatformInfo().catch((e) => reject(e))
+
+      if (!platform) {
+        return
+      }
 
       function resolveOn (event: any): any {
-        return async function (code: any, signal: any): Promise<any> {
+        return function (code: any, signal: NodeJS.Signals): void {
           debug('child event fired %o', { event, code, signal })
 
-          if (code === null) {
-            const errorObject = errors.childProcessKilled(event, signal)
+          if (signal) {
+            if (signal === 'SIGINT') {
+              resolve(0)
+            } else {
+              resolve(128 + os.constants.signals[signal])
+            }
 
-            const err = await getError(errorObject)
-
-            return reject(err)
+            return
           }
 
-          resolve(code)
+          resolve(code ?? 1)
         }
       }
 
+      const child = cp.spawn(executable, args, stdioOptions)
+
       child.on('close', resolveOn('close'))
+
       child.on('exit', resolveOn('exit'))
+
       child.on('error', reject)
 
       if (isPlatform('win32')) {
@@ -161,6 +176,22 @@ function createSpawnFunction (
 
           kill(child.pid as number, 'SIGINT')
         })
+      } else {
+        // Adding listeners here prevents immediate process.exit() for these signals.
+        // Exiting when the child process exits instead will allow the child process
+        // to log during the exit process.
+
+        // Unlike in windows, we do not need to propagate these signals to the child process
+        // tree.
+        for (const signal of ['SIGINT', 'SIGTERM']) {
+          debug('adding message for signal listener for %s', signal)
+          process.once(signal, async function () {
+            console.log(`\n\n${signal} received; Attempting to exit gracefully. Force exit with ^C again if needed.\n\n`)
+            if (process.stdin.isTTY) {
+              process.stdin.setRawMode(false)
+            }
+          })
+        }
       }
 
       // if stdio options is set to 'pipe', then
@@ -182,22 +213,34 @@ function createSpawnFunction (
       // to filter out the garbage
       if (child.stderr) {
         debug('piping child STDERR to process STDERR')
+
+        const sourceStream = new PassThrough()
+
+        child.on('close', () => {
+          sourceStream.end()
+        })
+
         child.stderr.on('data', (data: any) => {
           const str = data.toString()
 
-          // if we have a callback and this explicitly returns
-          // false then bail
           if (onStderrData && onStderrData(str)) {
             return
           }
 
-          if (str.match(DBUS_ERROR_PATTERN)) {
-            debug(str)
-          } else {
-          // else pass it along!
-            stderr.write(data)
+          if (sourceStream.writable) {
+            sourceStream.write(data)
           }
         })
+
+        if (
+          (process.env.ELECTRON_ENABLE_LOGGING ?? '') === '1' ||
+          debugElectron.enabled ||
+          (process.env.CYPRESS_INTERNAL_ENV ?? '') === 'development'
+        ) {
+          sourceStream.pipe(stderr, { end: false })
+        } else {
+          sourceStream.pipe(filter(stderr, debugStderr, DEBUG_PREFIX))
+        }
       }
 
       // https://github.com/cypress-io/cypress/issues/1841
@@ -208,11 +251,12 @@ function createSpawnFunction (
       // to have any effect. so we're just catching the
       // error here and not doing anything.
       stdin.on('error', (err: any) => {
+        debug('error on stdin', err)
         if (['EPIPE', 'ENOTCONN'].includes(err.code)) {
           return
         }
 
-        throw err
+        reject(err)
       })
 
       if (stdioOptions.detached) {
@@ -226,6 +270,7 @@ async function spawnInXvfb (spawn: ReturnType<typeof createSpawnFunction>): Prom
   try {
     await xvfb.start()
 
+    debug('xvfb started')
     const code = await userFriendlySpawn(spawn)
 
     return code
@@ -257,6 +302,7 @@ async function userFriendlySpawn (spawn: ReturnType<typeof createSpawnFunction>,
   try {
     const code: number = await spawn(overrides)
 
+    debug('tried spawning without xvfb, code', code, brokenGtkDisplay)
     if (code !== 0 && brokenGtkDisplay) {
       util.logBrokenGtkDisplayWarning()
 
@@ -265,6 +311,7 @@ async function userFriendlySpawn (spawn: ReturnType<typeof createSpawnFunction>,
 
     return code
   } catch (error: any) {
+    debug('error in userFriendlySpawn', error)
     // we can format and handle an error message from the code above
     // prevent wrapping error again by using "known: undefined" filter
     if ((error as any).known === undefined) {
@@ -311,6 +358,8 @@ export async function start (args: string | string[], options: StartOptions = {}
   const spawn = createSpawnFunction(executable, decoratedArgs, { stdio, dev, detached, env })
 
   if (needsXvfb) {
+    debug('starting xvfb')
+
     return spawnInXvfb(spawn)
   }
 
@@ -318,6 +367,8 @@ export async function start (args: string | string[], options: StartOptions = {}
   // set, then we may need to rerun cypress after
   // spawning our own Xvfb server
   const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
+
+  debug('linuxWithDisplayEnv', linuxWithDisplayEnv)
 
   return userFriendlySpawn(spawn, linuxWithDisplayEnv)
 }

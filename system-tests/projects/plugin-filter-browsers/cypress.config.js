@@ -1,6 +1,7 @@
 const debug = require('debug')('cypress:system-tests')
 
 module.exports = {
+  'allowCypressEnv': false,
   'e2e': {
     'supportFile': false,
     setupNodeEvents (on, config) {

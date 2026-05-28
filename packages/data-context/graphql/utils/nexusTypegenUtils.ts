@@ -3,8 +3,6 @@
 import { spawn, execSync } from 'child_process'
 import chalk from 'chalk'
 import pDefer from 'p-defer'
-import chokidar from 'chokidar'
-import _ from 'lodash'
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -33,7 +31,7 @@ async function windowsTouch (filename: string, time: Date) {
   }
 }
 
-export async function nexusTypegen (cfg: NexusTypegenCfg) {
+async function nexusTypegen (cfg: NexusTypegenCfg) {
   const dfd = pDefer()
 
   if (cfg.outputPath) {
@@ -82,41 +80,6 @@ export async function nexusTypegen (cfg: NexusTypegenCfg) {
   })
 
   out.on('error', dfd.reject)
-
-  return dfd.promise
-}
-
-let debounced: Record<string, Function> = {}
-
-const nexusTypegenDebounced = (cfg: NexusTypegenCfg) => {
-  debounced[cfg.filePath] =
-    debounced[cfg.filePath] ?? _.debounce(nexusTypegen, 500)
-
-  debounced[cfg.filePath]?.(cfg)
-}
-
-interface NexusTypegenWatchCfg extends NexusTypegenCfg {
-  watchPaths: string[]
-}
-
-export async function watchNexusTypegen (cfg: NexusTypegenWatchCfg) {
-  const dfd = pDefer()
-
-  const watcher = chokidar.watch(cfg.watchPaths, {
-    cwd: cfg.cwd,
-    ignored: /\.gen\.ts/,
-    ignoreInitial: true,
-  })
-
-  watcher.on('all', (evt, path) => {
-    console.log(prefixTypegen(`${evt} ${path}`))
-    nexusTypegenDebounced(cfg)
-  })
-
-  watcher.on('ready', () => {
-    console.log(prefixTypegen(`Codegen Watcher Ready for ${cfg.filePath}`))
-    nexusTypegen(cfg).then(dfd.resolve, dfd.reject)
-  })
 
   return dfd.promise
 }

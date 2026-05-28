@@ -1,179 +1,157 @@
-import * as sinon from 'sinon'
-const { expect } = require('chai')
-const proxyquire = require('proxyquire').noPreserveCache()
+import { expect, it, describe, beforeEach, vi, Mock } from 'vitest'
+import { getTypescript } from '../../lib/get-typescript'
+import { CreateProgramOptions } from 'typescript'
 
 type Typescript = {
-  createProgram: sinon.SinonStub
+  createProgram: Mock
   version: string
 }
 
-let typescript: Typescript
+vi.mock('../../lib/get-typescript', () => {
+  return {
+    getTypescript: vi.fn(),
+  }
+})
+
 let createProgram: Typescript['createProgram']
 
 describe('./lib/typescript-overrides', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
   describe('TypeScript v5', () => {
     beforeEach(() => {
-      createProgram = sinon.stub()
-      typescript = {
-        createProgram,
+      createProgram = vi.fn()
+
+      vi.mocked(getTypescript).mockReturnValue({
         version: '5.4.5',
-      }
+        createProgram,
+      } as unknown as typeof import('typescript'))
     })
 
-    context('.overrideSourceMaps', () => {
-      it('does not call createProgram on TypeScript v5 as it is an ESM wither getter accessors only', () => {
-        const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-          typescript,
-        })
+    describe('.overrideSourceMaps', () => {
+      it('does not call createProgram on TypeScript v5 as it is an ESM wither getter accessors only', async () => {
+        const { overrideSourceMaps } = await import('../../lib/typescript-overrides')
 
-        typescriptOverrides.overrideSourceMaps(true)
+        overrideSourceMaps(true)
 
-        expect(createProgram).not.to.be.called
+        expect(vi.mocked(getTypescript).mock.results[0].value.createProgram).not.toHaveBeenCalled()
       })
     })
   })
 
   describe('TypeScript v4', () => {
+    let mockedTypescript: typeof import('typescript')
+
     beforeEach(() => {
-      createProgram = sinon.stub()
-      typescript = {
-        createProgram,
+      mockedTypescript = {
         version: '4.5.0',
-      }
+        createProgram: vi.fn(),
+      } as unknown as typeof import('typescript')
+
+      vi.mocked(getTypescript).mockReturnValue(mockedTypescript)
     })
 
-    context('.overrideSourceMaps', () => {
-      it('it sets sourceMap: true', () => {
-        const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-          typescript,
-        })
+    describe('.overrideSourceMaps', () => {
+      it('it sets sourceMap: true', async () => {
+        // Save the original createProgram function as we are going to override it
+        const originalCreateProgram = mockedTypescript.createProgram
 
-        typescriptOverrides.overrideSourceMaps(true)
+        const { overrideSourceMaps } = await import('../../lib/typescript-overrides')
 
-        typescript.createProgram({
+        overrideSourceMaps(true)
+
+        mockedTypescript.createProgram({
           options: {
             sourceMap: false,
             inlineSources: true,
             inlineSourceMap: true,
           },
-        })
+        } as CreateProgramOptions)
 
-        expect(createProgram).to.be.calledWith({
+        expect(originalCreateProgram).toHaveBeenCalledWith({
           options: {
             sourceMap: true,
           },
         })
       })
 
-      it('it sets sourceMap: false', () => {
-        const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-          typescript,
-        })
+      it('it sets sourceMap: false', async () => {
+        // Save the original createProgram function as we are going to override it
+        const originalCreateProgram = mockedTypescript.createProgram
 
-        typescriptOverrides.overrideSourceMaps(false)
+        const { overrideSourceMaps } = await import('../../lib/typescript-overrides')
 
-        typescript.createProgram({
+        overrideSourceMaps(false)
+
+        mockedTypescript.createProgram({
           options: {
             sourceMap: true,
             inlineSources: true,
             inlineSourceMap: true,
           },
-        })
+        } as CreateProgramOptions)
 
-        expect(createProgram).to.be.calledWith({
+        expect(originalCreateProgram).toHaveBeenCalledWith({
           options: {
             sourceMap: false,
           },
         })
       })
 
-      it('sets options when given an array', () => {
-        const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-          typescript,
-        })
+      it('sets options when given an array', async () => {
+        // Save the original createProgram function as we are going to override it
+        const originalCreateProgram = mockedTypescript.createProgram
 
-        typescriptOverrides.overrideSourceMaps(true)
+        const { overrideSourceMaps } = await import('../../lib/typescript-overrides')
 
-        typescript.createProgram([], {
+        overrideSourceMaps(true)
+
+        mockedTypescript.createProgram([], {
           sourceMap: false,
           inlineSources: true,
           inlineSourceMap: true,
         })
 
-        expect(createProgram).to.be.calledWith([], {
+        expect(originalCreateProgram).toHaveBeenCalledWith([], {
           sourceMap: true,
         })
       })
 
-      it('require "default" typescript if typescript option not specified', () => {
-        const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-          typescript,
-        })
+      it('does not run twice', async () => {
+        // Save the original createProgram function as we are going to override it
+        const originalCreateProgram = mockedTypescript.createProgram
 
-        typescriptOverrides.overrideSourceMaps(true)
+        const { overrideSourceMaps } = await import('../../lib/typescript-overrides')
 
-        typescript.createProgram([], {
+        overrideSourceMaps(true)
+
+        mockedTypescript.createProgram([], {
           sourceMap: false,
           inlineSources: true,
           inlineSourceMap: true,
         })
 
-        expect(createProgram).to.be.calledOn(typescript)
-      })
+        expect(originalCreateProgram).toHaveBeenCalledOnce()
 
-      it('requires typescript from typescript option if specified', () => {
-        const userCreateProgram = sinon.stub()
-        const userTypescript = {
-          createProgram: userCreateProgram,
-          version: '4.5.0',
-        }
-
-        const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-          typescript,
-          '/path/to/user/typescript': userTypescript,
-        })
-
-        typescriptOverrides.overrideSourceMaps(true, '/path/to/user/typescript')
-
-        userTypescript.createProgram([], {
-          sourceMap: false,
-          inlineSources: true,
-          inlineSourceMap: true,
-        })
-
-        expect(userCreateProgram).to.be.calledOn(userTypescript)
-      })
-
-      it('does not run twice', () => {
-        const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-          typescript,
-        })
-
-        typescriptOverrides.overrideSourceMaps(true)
-
-        typescript.createProgram([], {
-          sourceMap: false,
-          inlineSources: true,
-          inlineSourceMap: true,
-        })
-
-        expect(createProgram).to.be.calledOn(typescript)
-
-        const result = typescriptOverrides.overrideSourceMaps(true)
+        overrideSourceMaps(true)
 
         // result will be the error if it tries to require typescript again
-        expect(result).to.be.undefined
+        expect(originalCreateProgram).toHaveBeenCalledOnce()
       })
 
-      it('gracefully returns error when typescript cannot be required', () => {
-        const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-          typescript: null,
-        })
+      it('gracefully returns error when typescript cannot be required', async () => {
+        const { getTypescript: actualGetTypescript } = (await vi.importActual<typeof import('../../lib/get-typescript')>('../../lib/get-typescript'))
 
-        const err = typescriptOverrides.overrideSourceMaps(true)
+        vi.mocked(getTypescript).mockImplementation(actualGetTypescript)
 
-        expect(err).to.be.instanceOf(Error)
-        expect(err.message).to.match(/Cannot find module '.*typescript\.js'/)
+        const { overrideSourceMaps } = await import('../../lib/typescript-overrides')
+
+        const err = overrideSourceMaps(true, 'nonexistent/typescript.js')
+
+        expect(err).toBeInstanceOf(Error)
+        expect(err.message).toMatch(/Cannot find module 'nonexistent\/typescript\.js'/)
       })
     })
   })

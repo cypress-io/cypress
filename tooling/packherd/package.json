@@ -14,8 +14,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "debug": "^4.3.4",
-    "esbuild": "^0.25.2"
+    "esbuild": "^0.28.0"
   },
   "devDependencies": {
     "@packages/ts": "0.0.0-development",

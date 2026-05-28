@@ -1,5 +1,7 @@
 it('has expected resolvedNodePath and resolvedNodeVersion', () => {
-  expect(Cypress.config('resolvedNodePath')).to.be.null
+  cy.env(['expectedNodeVersion']).then(({ expectedNodeVersion }) => {
+    expect(Cypress.config('resolvedNodePath')).to.be.null
 
-  expect(Cypress.config('resolvedNodeVersion')).to.eq(Cypress.env('expectedNodeVersion'))
+    expect(Cypress.config('resolvedNodeVersion')).to.eq(expectedNodeVersion)
+  })
 })

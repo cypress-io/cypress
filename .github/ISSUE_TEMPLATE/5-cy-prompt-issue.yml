@@ -11,7 +11,7 @@ body:
     id: current-behavior
     attributes:
       label: Current behavior
-      description: Please provide a description including screenshots, stack traces, etc. [Troubleshooting tips](https://on.cypress.io/troubleshooting).
+      description: Please provide a description including screenshots, stack traces, etc. [Troubleshooting tips](https://docs.cypress.io/app/references/troubleshooting).
       placeholder: Currently...
     validations:
       required: true

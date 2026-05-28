@@ -86,7 +86,7 @@ const thirdPartyDefinitionPrefixes = {
   globalPrefix: 'cypress-ct-',
 }
 
-export function isThirdPartyDefinition (framework: string) {
+function isThirdPartyDefinition (framework: string) {
   return framework.startsWith(thirdPartyDefinitionPrefixes.globalPrefix) ||
     thirdPartyDefinitionPrefixes.namespacedPrefixRe.test(framework)
 }
@@ -141,4 +141,5 @@ devServer.create = async function (devServerConfig: WebpackDevServerConfig) {
   return result
 }
 
+/** @alias */
 export default devServer

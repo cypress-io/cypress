@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "echo 'internal-scripts build: no build necessary'",
-    "lint": "eslint --ext .js,.ts,.json, ."
+    "lint": "eslint --ext .js,.mjs,.ts,.json, ."
   },
   "dependencies": {
     "@packages/electron": "0.0.0-development"

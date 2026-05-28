@@ -1,7 +1,6 @@
 /// <reference path="./cy/logGroup.d.ts" />
 /// <reference path="./cypress/log.d.ts" />
 // All of the types needed by packages/app, without any of the additional APIs used in the driver only
-
 declare namespace Cypress {
   interface Cypress {
     runner: any
@@ -12,6 +11,7 @@ declare namespace Cypress {
       toSpecBridge: (origin: string, event: string, data?: any, responseEvent?: string) => void
       userInvocationStack?: string
       toSource: (source: string, responseEvent: string, response: any) => void
+      clearCrossOriginDriverWindows: () => void
     }
     backendRequestHandler: (backendRequestNamespace: string, emitter: Emitter, eventName: string, ...args: any[]) => Promise<any>
   }

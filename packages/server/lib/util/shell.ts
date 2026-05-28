@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
 import execa from 'execa'
 import os from 'os'
 import commandExistsModule from 'command-exists'
@@ -100,10 +99,16 @@ export const getShell = function (shell) {
 
 export const commandExists = (command) => {
   return Promise.resolve(commandExistsModule(command))
-  .return(true)
+  .then(() => true)
   // commandExists rejects with no error if command does not exist
   // otherwise, it's a legitimate error
-  .catchReturn(_.isNil, false)
+  .catch((err) => {
+    if (_.isNil(err)) {
+      return false
+    }
+
+    throw err
+  })
 }
 
 // for testing

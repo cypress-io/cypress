@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM Stress Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #007acc;
+            color: white;
+            padding: 15px 20px;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .section-content {
+            padding: 20px;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary {
+            background: #007acc;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #005a9e;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .list-container {
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            background: white;
+            overflow-y: auto;
+            position: relative;
+            height: 400px;
+        }
+        
+        .item {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 60px;
+        }
+        
+        .item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-content {
+            flex: 1;
+        }
+        
+        .item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .item-description {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .item-btn {
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .item-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #dc3545;
+            background: #f8d7da;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .metric {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007acc;
+        }
+        
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .scroll-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .info-message {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="scroll-indicator" id="scrollIndicator">
+        Scroll: <span id="scrollPosition">0</span>px
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>DOM Stress Test</h1>
+            <p>This test page creates non-virtualized lists with thousands to hundreds of thousands of DOM elements rendered simultaneously. This tests browser stability and Cypress performance when dealing with extremely large DOM trees.</p>
+            <div class="status status-warning">
+                ⚠️ Warning: This test may cause browser crashes or performance issues. Use with caution!
+            </div>
+            <div class="info-message">
+                <strong>Note:</strong> This test intentionally creates anti-patterns (rendering all DOM elements at once) to stress-test browser stability. In production applications, virtual scrolling should be used for large lists.
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="section-header">Test Large DOM Tree</h2>
+            <div class="section-content" id="test-content">
+                <div class="controls">
+                    <input type="number"  data-cy="item-count" value="10" min="1" max="100000">
+                    <input type="text"  data-cy="list-id" />
+                    <button  data-cy="add-list" class="btn btn-primary">Add List</button>
+                    <button  data-cy="clear-all" class="btn btn-primary">Clear All Lists</button>
+                    <button data-cy="stress-scroll" class="btn btn-primary">Stress Scroll</button>
+                    
+                </div>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="basicItems">0</div>
+                        <div class="metric-label">Items Rendered</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="basicScrolls">0</div>
+                        <div class="metric-label">Scroll Events</div>
+                    </div>
+                </div></div>
+        </div>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('[data-cy="add-list"]').addEventListener('click', () => {
+                const id = document.querySelector('[data-cy="list-id"]').value;
+                const count = Number(document.querySelector('[data-cy="item-count"]').value);
+                addList(id);
+                const container = document.getElementById(id);
+                addBasicItems(count, container);
+            });
+            document.querySelector('[data-cy="stress-scroll"]').addEventListener('click', () => {
+                const id = document.querySelector('[data-cy="list-id"]').value;
+                const container = document.getElementById(id);
+                stressScrollBasic(container);
+            });
+        });
+
+        // Update scroll indicator
+        function updateScrollIndicator() {
+            const indicator = document.getElementById('scrollIndicator');
+            const position = window.pageYOffset;
+            document.getElementById('scrollPosition').textContent = position;
+        }
+
+        window.addEventListener('scroll', updateScrollIndicator);
+
+        // Create item element
+        function createItem(index, item, isDynamic = false) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+            
+            if (isDynamic) {
+                const height = 50 + (index % 5) * 20;
+                itemDiv.style.height = `${height}px`;
+            }
+            
+            itemDiv.innerHTML = `
+                <div class="item-content">
+                    <div class="item-title">${isDynamic ? 'Dynamic' : 'Item'} #${index + 1}</div>
+                    <div class="item-description">${item.description}</div>
+                    ${isDynamic ? `<div style="font-size: 12px; color: #999;">Height: ${50 + (index % 5) * 20}px | Index: ${index}</div>` : ''}
+                </div>
+                <div class="item-actions">
+                    <button class="item-btn" onclick="console.log('Click', ${index})">Click</button>
+                    <button class="item-btn" onclick="console.log('Edit', ${index})">Edit</button>
+                </div>
+            `;
+
+            return itemDiv;
+        }
+
+        // Add all items to DOM at once
+        function addBasicItems(count, container, isDynamic = false)
+        {
+            container.innerHTML = '<div class="loading">Loading items...</div>';
+
+            
+            setTimeout(() => {
+                const fragment = document.createDocumentFragment();
+                for (let i = 0; i < count; i++) {
+                    fragment.appendChild(createItem(i, { id: i, description: `This is item number ${i + 1} with some additional content to make it more realistic. Lorem ipsum dolor sit amet, consectetur adipiscing elit.` }));
+                }
+                container.appendChild(fragment);
+            })
+        }
+
+        function addList(id)
+        {
+            const list = document.createElement('div');
+            list.setAttribute('id', id);
+            list.setAttribute('data-cy', 'list-container');
+            list.classList.add('list-container');
+
+            document.getElementById('test-content').appendChild(list);
+        }
+
+        function clearAllLists()
+        {
+            const [, ...listsToClear] = Array.from(document.querySelectorAll('[data-cy="list-container"]'))
+            for (const list of listsToClear) {
+                list.remove();
+            }
+            document.getElementById('nativeScrollingLists').textContent = '1';
+        }
+
+
+        function stressScrollBasic(container) {
+            if (container.children.length > 0) {
+                let scrollPosition = 0;
+                const interval = setInterval(() => {
+                    scrollPosition += 100;
+                    container.scrollTop = scrollPosition;
+                    if (scrollPosition > 10000) {
+                        clearInterval(interval);
+                    }
+                }, 10);
+            }
+        }
+        // Initialize
+        console.log('DOM Stress Test loaded');
+        console.log('This test creates non-virtualized lists with all DOM elements rendered simultaneously');
+    </script>
+</body>
+</html>
+

@@ -122,6 +122,28 @@ describe('xhrs', () => {
     })
   })
 
+  it('displays warnings in the terminal when using sync XHR requests', () => {
+    // this intercept won't get hit because the request is sync
+    cy.intercept('http://www.foobar.com:1919/json', (req) => {
+      req.reply({
+        body: '',
+      })
+    })
+
+    cy.origin('http://www.foobar.com:1919', () => {
+      cy.visit('/')
+      cy.window().then((win) => {
+        const xhr = new win.XMLHttpRequest
+
+        // create a sync request
+        xhr.open('GET', '/json', false)
+        xhr.send()
+
+        expect(JSON.parse(xhr.response)).to.deep.eq({ content: 'json' })
+      })
+    })
+  })
+
   describe('server with 1 visit', () => {
     beforeEach(() => {
       cy.visit('/xhr.html')

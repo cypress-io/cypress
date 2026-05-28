@@ -3,7 +3,7 @@ import structuredClonePonyfill from 'core-js-pure/actual/structured-clone'
 import $stackUtils from '../../cypress/stack_utils'
 import $errUtils from '../../cypress/error_utils'
 
-export const UNSERIALIZABLE = '__cypress_unserializable_value'
+const UNSERIALIZABLE = '__cypress_unserializable_value'
 
 // If a native structuredClone exists, use that to determine if a value can be serialized or not. Otherwise, use the ponyfill.
 // we need this because some implementations of SCA treat certain values as unserializable (ex: Error is serializable in ponyfill but NOT in firefox implementations)

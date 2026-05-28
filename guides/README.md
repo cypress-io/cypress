@@ -12,6 +12,7 @@ For general contributor information, check out [`CONTRIBUTING.md`](../CONTRIBUTI
 
 * [App lifecycle](./app-lifecycle.md)
 * [App <--> Cloud Testing](./app-cloud-testing.md)
+* [CI](./continuous-integration.md)
 * [Building release artifacts](./building-release-artifacts.md)
 * [Code signing](./code-signing.md)
 * [Debug logs](./debug-logs.md)

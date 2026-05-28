@@ -28,7 +28,7 @@ import { computed, ref } from 'vue'
 import LaunchpadHeader from './LaunchpadHeader.vue'
 import { useI18n } from '@cy/i18n'
 
-export type CurrentStep = 'selectFramework' | 'installDependencies'
+type CurrentStep = 'selectFramework' | 'installDependencies'
 
 const props = defineProps<{
   gql: WizardFragment

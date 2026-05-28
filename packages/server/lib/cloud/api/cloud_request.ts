@@ -12,7 +12,7 @@ import { installErrorTransform } from './axios_middleware/transform_error'
 import { installLogging } from './axios_middleware/logging'
 import { installEncryption } from './axios_middleware/encryption'
 
-export interface CreateCloudRequestOptions {
+interface CreateCloudRequestOptions {
   /**
    * The baseURL for all requests for this Cloud Request instance
    */

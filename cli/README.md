@@ -11,7 +11,7 @@ The CLI is used to build the [cypress npm module](https://www.npmjs.com/package/
 - Allow users to open Cypress in the interactive Test Runner.
 - Allow users to verify that Cypress is installed correctly and executable
 - Allow users to manages the Cypress binary cache
-- Allow users to pass in options that change way tests are ran or recorded (browsers used, specfiles ran, grouping, parallelization)
+- Allow users to pass in options that change the way tests are run or recorded (browsers used, specfiles ran, grouping, parallelization)
 
 ## Building
 

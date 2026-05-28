@@ -5,19 +5,98 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "141.0.7390.107"
-chrome-beta-version: &chrome-beta-version "142.0.7444.34"
-firefox-stable-version: &firefox-stable-version "142.0"
-base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.19.0-bullseye
+chrome-stable-version: &chrome-stable-version "148.0.7778.178"
+chrome-beta-version: &chrome-beta-version "149.0.7827.22"
+# Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.22"
+firefox-stable-version: &firefox-stable-version "151.0.1"
+base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
 # See https://docs.cypress.io/app/get-started/install-cypress#Nodejs
 base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:20.15.0
-ubuntu-2004-current: &ubuntu-2004-current ubuntu-2004:2024.11.1
-ubuntu-2004-older: &ubuntu-2004-older ubuntu-2004:2024.05.1
+
+parameters:
+  publish-binary-branch:
+    type: string
+    default: main
+  force-persist-artifacts:
+    type: boolean
+    default: false
+  # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
+  # Default true so develop/release branches run everything without explicit params.
+  run-driver-tests:
+    type: boolean
+    default: true
+  run-server-tests:
+    type: boolean
+    default: true
+  run-app-ui-tests:
+    type: boolean
+    default: true
+  run-launchpad-tests:
+    type: boolean
+    default: true
+  run-reporter-tests:
+    type: boolean
+    default: true
+  run-frontend-shared-tests:
+    type: boolean
+    default: true
+  run-system-tests:
+    type: boolean
+    default: true
+  run-v8-tests:
+    type: boolean
+    default: true
+  run-cli-tests:
+    type: boolean
+    default: true
+  run-unit-tests:
+    type: boolean
+    default: true
+  run-npm-webpack-dev-server-tests:
+    type: boolean
+    default: true
+  run-npm-vite-dev-server-tests:
+    type: boolean
+    default: true
+  run-npm-webpack-preprocessor-tests:
+    type: boolean
+    default: true
+  run-npm-webpack-batteries-tests:
+    type: boolean
+    default: true
+  run-npm-vue-tests:
+    type: boolean
+    default: true
+  run-npm-react-tests:
+    type: boolean
+    default: true
+  run-npm-angular-tests:
+    type: boolean
+    default: true
+  run-npm-puppeteer-tests:
+    type: boolean
+    default: true
+  run-npm-vite-plugin-esm-tests:
+    type: boolean
+    default: true
+  run-npm-mount-utils-tests:
+    type: boolean
+    default: true
+  run-npm-grep-tests:
+    type: boolean
+    default: true
+  run-npm-eslint-plugin-tests:
+    type: boolean
+    default: true
+  run-npm-schematic-tests:
+    type: boolean
+    default: true
 
 orbs:
-  browser-tools: circleci/browser-tools@2.3.1
+  browser-tools: circleci/browser-tools@2.4.1
 
 defaults: &defaults
   parallelism: 1
@@ -25,7 +104,7 @@ defaults: &defaults
   parameters: &defaultsParameters
     executor:
       type: executor
-      default: cy-doc
+      default: cy-docker
     only-cache-for-root-user:
       type: boolean
       default: false
@@ -43,10 +122,9 @@ defaults: &defaults
     LINES: 24
 
 executors:
-  # the Docker image with Cypress dependencies and Chrome browser
-  cy-doc:
+  cy-docker:
     docker:
-      - image: *base-internal-bullseye
+      - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -54,7 +132,7 @@ executors:
 
   kitchensink-executor:
     docker:
-      - image: *base-internal-bullseye
+      - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
     resource_class: medium
     environment:
@@ -63,7 +141,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: *base-internal-bullseye
+      - image: *base-internal-trixie
         user: node
     environment:
       PLATFORM: linux
@@ -118,9 +196,13 @@ commands:
           name: Set environment variable to determine whether or not to persist artifacts
           command: |
             echo "Setting SHOULD_PERSIST_ARTIFACTS variable"
-            echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "chore/fix_builds" ]]; then
-                export SHOULD_PERSIST_ARTIFACTS=true
-            fi' >> "$BASH_ENV"
+            if [[ "<< pipeline.parameters.force-persist-artifacts >>" == "true" ]]; then
+              echo 'export SHOULD_PERSIST_ARTIFACTS=true' >> "$BASH_ENV"
+            else
+              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "electron/"* ]]; then
+                  export SHOULD_PERSIST_ARTIFACTS=true
+              fi' >> "$BASH_ENV"
+            fi
   # You must run `setup_should_persist_artifacts` command and be using bash before running this command
   verify_should_persist_artifacts:
     steps:
@@ -163,6 +245,38 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+
+  # Work around the CircleCI Windows save_cache bug that corrupts @-named
+  # packages (https://github.com/cypress-io/cypress/issues/30343):
+  #   1. Reverse patch-package patches in every workspace that has a
+  #      patches/ directory so yarn's integrity check doesn't flag patched
+  #      files as modified.
+  #   2. `yarn install --check-files` re-extracts only genuinely
+  #      missing/corrupt packages.
+  #   3. Re-apply patches explicitly. `yarn install` only re-runs the
+  #      *root* postinstall; workspace postinstalls (where @packages/server
+  #      etc. apply their own patches) are skipped when their packages
+  #      weren't re-extracted, leaving the reversed patches un-reapplied
+  #      in the no-corruption case.
+  # `|| true` on reverse handles cache-corrupted packages that can't be
+  # reversed — step 2 re-extracts them. `|| true` on apply handles the
+  # case where step 2's postinstall already re-applied a patch.
+  # patch-package is idempotent, so re-applying already-applied patches
+  # is a no-op.
+  windows_reinstall_deps:
+    steps:
+      - run:
+          name: reinstall dependencies to work around cache issue (Windows only)
+          command: |
+            for p in patches cli/patches packages/*/patches; do
+              [ -d "$p" ] || continue
+              (cd "$(dirname "$p")" && npx patch-package --reverse) || true
+            done
+            yarn install --check-files --frozen-lockfile
+            for p in patches cli/patches packages/*/patches; do
+              [ -d "$p" ] || continue
+              (cd "$(dirname "$p")" && npx patch-package) || true
+            done
 
   prepare-modules-cache:
     parameters:
@@ -455,7 +569,7 @@ commands:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run: pwd
       ##- run:
@@ -464,16 +578,6 @@ commands:
       - run:
           name: print yarn version
           command: yarn versions
-      - unless:
-          condition:
-            # stop-only does not correctly match on windows: https://github.com/bahmutov/stop-only/issues/78
-            equal: [ *windows-executor, << parameters.executor >> ]
-          steps:
-            - run:
-                name: Stop .only # this will catch ".only"s in js/coffee as well
-                command: |
-                  source ./scripts/ensure-node.sh
-                  yarn stop-only-all
       - run:
           name: Check terminal variables
           ## make sure the TERM is set to 'xterm' in node (Linux only)
@@ -508,7 +612,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
       install-chrome:
         description: whether or not to install google chrome
         type: boolean
@@ -531,7 +635,7 @@ commands:
         description: Google Chrome for Testing version to install
         type: string
         # latest can also be used here
-        default: *chrome-stable-version
+        default: *chrome-for-testing-stable-version
       install-firefox:
         description: whether or not to install firefox
         type: boolean
@@ -587,7 +691,7 @@ commands:
                       version: << parameters.google-chrome-for-testing-version >>
                       install_chromedriver: false
 
-  # This code builds better-sqlite3 on Debian 11 (Bullseye). This is necessary because Debian 10 has the oldest glibc version (2.31) that we support.
+  # This code builds better-sqlite3 on Debian 11 (Bullseye). This is necessary because Debian 11 has the oldest glibc version (2.31) that we support.
   #
   # Since this is running Docker remote (because the job running the command may not be using an executor with the appropriate glibc version), we need to 
   # copy the project into the container, and copy the built plugin out of the container because the host running docker does not have access to the 
@@ -638,8 +742,14 @@ commands:
         description: run subset of tests with injectDocumentDomain config enabled
         type: boolean
         default: false
+      guard:
+        description: set to false to skip this job (not relevant to changed files)
+        type: boolean
+        default: true
 
     steps:
+      - halt-if-skipped:
+          guard: << parameters.guard >>
       - restore_cached_workspace
       - when:
           condition:
@@ -713,7 +823,33 @@ commands:
           command: |
             # install with `--ignore-checksums` to avoid checksum error
             # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
-            [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]] && choco install googlechrome -y --ignore-checksums || [[ $PLATFORM != 'windows' ]]
+            # Retry to tolerate 504s from the Chocolatey community feed. `choco install`
+            # exits 0 on "installed 0/0 packages", so gate the retry on whether chrome.exe
+            # actually exists, not on choco's exit code.
+            if [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]]; then
+              chrome_installed() {
+                [[ -f "/c/Program Files/Google/Chrome/Application/chrome.exe" || -f "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" ]]
+              }
+              max_attempts=3
+              n=0
+              until [ $n -ge $max_attempts ]; do
+                choco install googlechrome -y --ignore-checksums --no-progress || true
+                if chrome_installed; then
+                  break
+                fi
+                n=$((n+1))
+                if [ $n -lt $max_attempts ]; then
+                  echo "Chrome not installed (attempt $n); retrying in 15s..."
+                  sleep 15
+                else
+                  echo "Chrome not installed (attempt $n); no retries left"
+                fi
+              done
+              if ! chrome_installed; then
+                echo "ERROR: Chrome not installed after choco install"
+                exit 1
+              fi
+            fi
 
   run-new-ui-tests:
     parameters:
@@ -739,7 +875,13 @@ commands:
         description: debug option
         type: string
         default: ''
+      guard:
+        description: set to false to skip this job (not relevant to changed files)
+        type: boolean
+        default: true
     steps:
+      - halt-if-skipped:
+          guard: << parameters.guard >>
       - restore_cached_workspace
       # this is a temporary work around while we wait for circle to resolve issues with packages
       # with an @ character in windows during save_cache.
@@ -748,9 +890,7 @@ commands:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+            - windows_reinstall_deps
       - install-browsers:
           install-chrome: true
           install-firefox: true
@@ -819,7 +959,17 @@ commands:
       browser:
         description: browser shortname to target
         type: string
+      guard:
+        description: set to false to skip this job (not relevant to changed files)
+        type: boolean
+        default: true
+      bun-release:
+        description: pinned Bun release tag passed to https://bun.sh/install (e.g. bun-v1.2.22)
+        type: string
+        default: bun-v1.2.22
     steps:
+      - halt-if-skipped:
+          guard: << parameters.guard >>
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       - when:
@@ -831,6 +981,39 @@ commands:
           install-chrome: true
           install-chrome-for-testing: true
           install-firefox: true
+      - restore_cache:
+          name: Restore Bun install cache
+          keys:
+            - v1-bun-system-tests-<< parameters.bun-release >>
+      - run:
+          name: Install Bun for Bun package manager system tests
+          command: |
+            set -euo pipefail
+            BUN_RELEASE="<< parameters.bun-release >>"
+
+            if command -v bun >/dev/null 2>&1; then
+              bun --version
+              exit 0
+            fi
+
+            if [[ -x "${HOME}/.bun/bin/bun" ]]; then
+              echo 'export PATH="${HOME}/.bun/bin:${PATH}"' >> "${BASH_ENV}"
+              export PATH="${HOME}/.bun/bin:${PATH}"
+              command -v bun
+              bun --version
+              exit 0
+            fi
+
+            curl -fsSL https://bun.sh/install | bash -s "${BUN_RELEASE}"
+            echo 'export PATH="${HOME}/.bun/bin:${PATH}"' >> "${BASH_ENV}"
+            export PATH="${HOME}/.bun/bin:${PATH}"
+            command -v bun
+            bun --version
+      - save_cache:
+          name: Save Bun install cache
+          key: v1-bun-system-tests-<< parameters.bun-release >>
+          paths:
+            - ~/.bun
       - run:
           name: Run system tests
           environment:
@@ -937,7 +1120,9 @@ commands:
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
-            git checkout $NEXT_VERSION || true
+            # Prefer a `release/<version>` branch (current convention) and
+            # fall back to a bare `<version>` branch for older versions.
+            git checkout "release/$NEXT_VERSION" || git checkout "$NEXT_VERSION" || true
       - when:
           condition: <<parameters.pull_request_id>>
           steps:
@@ -1103,7 +1288,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Install yarn if not already installed
@@ -1366,24 +1551,11 @@ commands:
           paths:
             - cypress/cypress.zip
 
-  trigger-publish-binary-pipeline:
-    steps:
-      - run:
-          name: "Trigger publish-binary pipeline"
-          command: |
-            source ./scripts/ensure-node.sh
-            echo $SHOULD_PERSIST_ARTIFACTS
-            node ./scripts/binary/trigger-publish-binary-pipeline.js
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - triggered_pipeline.json
-
   build-cypress-npm-package:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Bump NPM version
@@ -1431,14 +1603,14 @@ commands:
             node scripts/binary.js upload-build-artifact \
               --type binary \
               --file cypress.zip \
-              --version $(node -p "require('./package.json').version")
+              --version $(node ./scripts/get-next-version.js)
       - run:
           name: Upload NPM package to S3
           command: |
             node scripts/binary.js upload-build-artifact \
               --type npm-package \
               --file cypress.tgz \
-              --version $(node -p "require('./package.json').version")
+              --version $(node ./scripts/get-next-version.js)
       - run: ls -l
       - run: cat binary-url.json
       - run: cat npm-package-url.json
@@ -1458,6 +1630,24 @@ commands:
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
 
+  # Halts a job immediately if its guard parameter is false.
+  # Used to skip jobs that are not relevant to the changed files in a PR.
+  # The job still exits with "success" so downstream jobs and all-jobs-passed
+  # are not blocked.
+  halt-if-skipped:
+    parameters:
+      guard:
+        type: boolean
+        default: true
+    steps:
+      - when:
+          condition:
+            not: << parameters.guard >>
+          steps:
+            - run:
+                name: Skipping job — not relevant to changed files
+                command: circleci-agent step halt
+
 jobs:
   ## Checks if we already have a valid cache for the node_modules_install and if it has,
   ## skips ahead to the build step, otherwise installs and caches the node_modules
@@ -1473,7 +1663,8 @@ jobs:
         default: false
     resource_class: << parameters.resource_class >>
     steps:
-      - checkout
+      - checkout:
+          method: full
       - install-required-node
       - verify-build-setup:
           executor: << parameters.executor >>
@@ -1506,9 +1697,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+            - windows_reinstall_deps
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -1542,6 +1731,15 @@ jobs:
           name: Check TS Types
           command: NODE_OPTIONS=--max_old_space_size=4096 yarn check-ts --concurrency=1
 
+  health-check:
+    <<: *defaults
+    steps:
+      - restore_cached_workspace
+      - install-required-node
+      - run:
+          name: Health Check (Knip)
+          command: yarn health-check
+
   # a special job that closes the Percy build started by the required jobs
   percy-finalize:
     <<: *defaults
@@ -1551,6 +1749,24 @@ jobs:
       required_env_var:
         type: env_var_name
     steps:
+      # Uses an inline when: not: or: instead of halt-if-skipped because this
+      # job depends on multiple parameters. CircleCI boolean parameters cannot
+      # express or: logic, so a multi-condition inline step is required here.
+      - when:
+          condition:
+            not:
+              or:
+                - << pipeline.parameters.run-cli-tests >>
+                - << pipeline.parameters.run-reporter-tests >>
+                - << pipeline.parameters.run-app-ui-tests >>
+                - << pipeline.parameters.run-frontend-shared-tests >>
+                - << pipeline.parameters.run-launchpad-tests >>
+                - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
+                - << pipeline.parameters.run-npm-vite-dev-server-tests >>
+          steps:
+            - run:
+                name: Skipping job — not relevant to changed files
+                command: circleci-agent step halt
       - restore_cached_workspace
       - run:
           # if this is an external pull request, the environment variables
@@ -1577,6 +1793,24 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      # Uses an inline when: not: or: instead of halt-if-skipped because this
+      # job depends on multiple parameters. CircleCI boolean parameters cannot
+      # express or: logic, so a multi-condition inline step is required here.
+      - when:
+          condition:
+            not:
+              or:
+                - << pipeline.parameters.run-reporter-tests >>
+                - << pipeline.parameters.run-app-ui-tests >>
+                - << pipeline.parameters.run-frontend-shared-tests >>
+                - << pipeline.parameters.run-launchpad-tests >>
+                - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
+                - << pipeline.parameters.run-npm-vite-dev-server-tests >>
+                - << pipeline.parameters.run-driver-tests >>
+          steps:
+            - run:
+                name: Skipping job — not relevant to changed files
+                command: circleci-agent step halt
       - run: |
           if [[ -z "$MAIN_RECORD_KEY" ]]; then
             echo "skipping for contributor PRs since we don't record to the cloud"
@@ -1610,6 +1844,8 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-cli-tests >>
       - restore_cached_workspace
       - run: mkdir -p cli/visual-snapshots
       - run:
@@ -1641,6 +1877,8 @@ jobs:
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-v8-tests >>
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       # this is a temporary work around while we wait for circle to resolve issues with packages
@@ -1650,9 +1888,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+            - windows_reinstall_deps
       # TODO: Remove this once we switch off self-hosted M1 runners
       - when:
           condition:
@@ -1694,6 +1930,8 @@ jobs:
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-driver-tests >>
       - restore_cached_workspace
       # this is a temporary work around while we wait for circle to resolve issues with packages
       # with an @ character in windows during save_cache.
@@ -1702,9 +1940,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+            - windows_reinstall_deps
       - run:
           name: Driver memory tests in Electron
           environment:
@@ -1737,6 +1973,8 @@ jobs:
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
       - install-browsers:
           install-chrome: true
@@ -1793,6 +2031,8 @@ jobs:
     environment:
       GITHUB_TOKEN: $GH_TOKEN
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
       - update_known_hosts
       - run: yarn test-npm-package-release-script
@@ -1819,6 +2059,8 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-server-tests >>
       - restore_cached_workspace
       - run: yarn test-unit --scope=@packages/server
       - sanitize-verify-and-store-mocha-results:
@@ -1834,6 +2076,8 @@ jobs:
     resource_class: << parameters.resource_class >>
     parallelism: 1
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-server-tests >>
       - restore_cached_workspace
       # TODO: Remove this once we switch off self-hosted M1 runners
       - when:
@@ -1848,9 +2092,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+            - windows_reinstall_deps
       - run: yarn workspace @packages/server test-unit cloud/environment_spec.ts
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
@@ -1859,6 +2101,8 @@ jobs:
     <<: *defaults
     parallelism: 1
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-server-tests >>
       - restore_cached_workspace
       - install-browsers:
           install-chrome: true
@@ -1869,18 +2113,38 @@ jobs:
   server-performance-tests:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-server-tests >>
       - restore_cached_workspace
       - install-browsers:
           install-chrome: true
           install-firefox: true
       - run:
           command: yarn workspace @packages/server test-performance
+      - store_artifacts:
+          path: /tmp/artifacts
+          when: always
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
   system-tests-node-modules-install:
     <<: *defaults
     steps:
+      # Uses an inline when: not: or: instead of halt-if-skipped because this
+      # job depends on multiple parameters. CircleCI boolean parameters cannot
+      # express or: logic, so a multi-condition inline step is required here.
+      - when:
+          condition:
+            not:
+              or:
+                - << pipeline.parameters.run-system-tests >>
+                - << pipeline.parameters.run-npm-webpack-dev-server-tests >>
+                - << pipeline.parameters.run-npm-vite-dev-server-tests >>
+                - << pipeline.parameters.run-v8-tests >>
+          steps:
+            - run:
+                name: Skipping job — not relevant to changed files
+                command: circleci-agent step halt
       - restore_cached_workspace
       - update_cached_system_tests_deps
 
@@ -1937,7 +2201,7 @@ jobs:
     parallelism: 1
     working_directory: ~/cypress
     docker:
-      - image: *base-internal-bullseye
+      - image: *base-internal-trixie
     environment:
       # needed to inform the bootstrap-docker-container.sh script to link the binary in the system-test project directory
       REPO_DIR: /root/cypress
@@ -1966,6 +2230,7 @@ jobs:
     steps:
       - run-system-tests:
           browser: chrome
+          guard: << pipeline.parameters.run-system-tests >>
 
   system-tests-electron:
     <<: *defaults
@@ -1974,6 +2239,7 @@ jobs:
     steps:
       - run-system-tests:
           browser: electron
+          guard: << pipeline.parameters.run-system-tests >>
 
   system-tests-firefox:
     <<: *defaults
@@ -1982,6 +2248,7 @@ jobs:
     steps:
       - run-system-tests:
           browser: firefox
+          guard: << pipeline.parameters.run-system-tests >>
 
   system-tests-webkit:
     <<: *defaults
@@ -1990,10 +2257,13 @@ jobs:
     steps:
       - run-system-tests:
           browser: webkit
+          guard: << pipeline.parameters.run-system-tests >>
 
   system-tests-non-root:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-system-tests >>
       - restore_cached_workspace
       - run:
           environment:
@@ -2010,6 +2280,7 @@ jobs:
         type: boolean
         default: false
     parallelism: 3
+    resource_class: large
     steps:
       - run-new-ui-tests:
           browser: chrome
@@ -2017,6 +2288,7 @@ jobs:
           percy: << parameters.percy >>
           package: frontend-shared
           type: ct
+          guard: << pipeline.parameters.run-frontend-shared-tests >>
 
   run-launchpad-component-tests-chrome:
     <<: *defaults
@@ -2033,6 +2305,7 @@ jobs:
           percy: << parameters.percy >>
           package: launchpad
           type: ct
+          guard: << pipeline.parameters.run-launchpad-tests >>
           # debug: cypress:*,engine:socket
 
   run-launchpad-integration-tests-chrome:
@@ -2054,6 +2327,7 @@ jobs:
           percy: << parameters.percy >>
           package: launchpad
           type: e2e
+          guard: << pipeline.parameters.run-launchpad-tests >>
 
   run-app-component-tests-chrome:
     <<: *defaults
@@ -2073,6 +2347,7 @@ jobs:
           percy: << parameters.percy >>
           package: app
           type: ct
+          guard: << pipeline.parameters.run-app-ui-tests >>
 
   run-app-integration-tests-chrome:
     <<: *defaults
@@ -2093,6 +2368,7 @@ jobs:
           percy: << parameters.percy >>
           package: app
           type: e2e
+          guard: << pipeline.parameters.run-app-ui-tests >>
 
   driver-integration-tests-chrome:
     <<: *defaults
@@ -2102,6 +2378,7 @@ jobs:
       - run-driver-integration-tests:
           browser: chrome
           install-chrome-channel: stable
+          guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-chrome-inject-document-domain:
     <<: *defaults
@@ -2112,6 +2389,7 @@ jobs:
           browser: chrome
           install-chrome-channel: stable
           inject-document-domain: true
+          guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-chrome-beta:
     <<: *defaults
@@ -2121,6 +2399,7 @@ jobs:
       - run-driver-integration-tests:
           browser: chrome:beta
           install-chrome-channel: beta
+          guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-chrome-beta-inject-document-domain:
     <<: *defaults
@@ -2131,6 +2410,7 @@ jobs:
           browser: chrome:beta
           install-chrome-channel: beta
           inject-document-domain: true
+          guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-firefox:
     <<: *defaults
@@ -2139,13 +2419,16 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: firefox
+          guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-electron:
     <<: *defaults
+    resource_class: medium+
     parallelism: 5
     steps:
       - run-driver-integration-tests:
           browser: electron
+          guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-webkit:
     <<: *defaults
@@ -2156,6 +2439,7 @@ jobs:
           browser: webkit
           # inject document domain must be true for webkit, as cy.origin is not supported
           inject-document-domain: true
+          guard: << pipeline.parameters.run-driver-tests >>
 
   run-reporter-component-tests-chrome:
     <<: *defaults
@@ -2172,12 +2456,15 @@ jobs:
           percy: << parameters.percy >>
           package: reporter
           type: ct
+          guard: << pipeline.parameters.run-reporter-tests >>
 
   reporter-integration-tests:
     <<: *defaults
     resource_class: medium+
     parallelism: 3
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-reporter-tests >>
       - restore_cached_workspace
       - run:
           command: yarn build-for-tests
@@ -2199,6 +2486,8 @@ jobs:
     resource_class: medium+
     parallelism: 2
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-webpack-dev-server-tests >>
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       - install-browsers:
@@ -2219,6 +2508,8 @@ jobs:
     <<: *defaults
     # parallelism: 3 TODO: Add parallelism once we have more specs
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-vite-dev-server-tests >>
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       - install-browsers:
@@ -2238,10 +2529,12 @@ jobs:
   npm-webpack-preprocessor:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-webpack-preprocessor-tests >>
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/webpack-preprocessor
+          command: node scripts/lerna-build.js --scope=@cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -2249,6 +2542,8 @@ jobs:
   npm-webpack-dev-server:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-webpack-dev-server-tests >>
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       - run:
@@ -2261,6 +2556,8 @@ jobs:
   npm-vite-dev-server:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-vite-dev-server-tests >>
       - restore_cached_workspace
       - run:
           name: Run tests
@@ -2273,6 +2570,8 @@ jobs:
     <<: *defaults
     resource_class: small
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-webpack-batteries-tests >>
       - restore_cached_workspace
       - run:
           name: Run tests
@@ -2281,10 +2580,12 @@ jobs:
   npm-vue:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-vue-tests >>
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vue
+          command: node scripts/lerna-build.js --scope=@cypress/vue
       - run:
           name: Run tests
           command: yarn test
@@ -2295,18 +2596,32 @@ jobs:
   npm-angular:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-angular-tests >>
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/angular
+          command: node scripts/lerna-build.js --scope=@cypress/angular
+
+  npm-angular-zoneless:
+    <<: *defaults
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-angular-tests >>
+      - restore_cached_workspace
+      - run:
+          name: Build
+          command: node scripts/lerna-build.js --scope @cypress/angular-zoneless
 
   npm-puppeteer-unit-tests:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-puppeteer-tests >>
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/puppeteer
+          command: node scripts/lerna-build.js --scope=@cypress/puppeteer
       - run:
           name: Run tests
           command: yarn test
@@ -2316,8 +2631,9 @@ jobs:
 
   npm-puppeteer-cypress-tests:
     <<: *defaults
-    resource_class: small
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-puppeteer-tests >>
       - restore_cached_workspace
       - restore_cached_system_tests_deps
       - install-browsers:
@@ -2330,10 +2646,12 @@ jobs:
   npm-react:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-react-tests >>
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/react
+          command: node scripts/lerna-build.js --scope=@cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -2344,10 +2662,12 @@ jobs:
   npm-vite-plugin-cypress-esm:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-vite-plugin-esm-tests >>
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vite-plugin-cypress-esm
+          command: node scripts/lerna-build.js --scope=@cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2358,15 +2678,19 @@ jobs:
   npm-mount-utils:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-mount-utils-tests >>
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/mount-utils
+          command: node scripts/lerna-build.js --scope=@cypress/mount-utils
 
   npm-grep:
     <<: *defaults
     resource_class: small
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-grep-tests >>
       - restore_cached_workspace
       - run: yarn workspace @cypress/grep and
       - run: yarn workspace @cypress/grep and:not
@@ -2401,6 +2725,8 @@ jobs:
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-eslint-plugin-tests >>
       - restore_cached_workspace
       - run:
           name: Run tests
@@ -2409,11 +2735,13 @@ jobs:
   npm-cypress-schematic:
     <<: *defaults
     steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-npm-schematic-tests >>
       - restore_cached_workspace
       - run:
           name: Build + Install
           command: |
-            yarn lerna run build --scope=@cypress/schematic
+            node scripts/lerna-build.js --scope=@cypress/schematic
       - run:
           name: Run unit tests
           command: |
@@ -2446,9 +2774,7 @@ jobs:
           condition:
             equal: [ *windows-executor, << parameters.executor >> ]
           steps:
-            - run:
-                name: reinstall dependencies to work around cache issue (Windows only)
-                command: rm -rf node_modules && yarn
+            - windows_reinstall_deps
       - check-if-binary-exists
       - build-and-package-binary
       - build-cypress-npm-package:
@@ -2471,7 +2797,8 @@ jobs:
       - restore_cached_workspace
       - check-if-binary-exists
       - setup_should_persist_artifacts
-      - trigger-publish-binary-pipeline
+      - trigger-publish-binary-pipeline:
+          target-repo-branch: << pipeline.parameters.publish-binary-branch >>
 
   get-published-artifacts:
     <<: *defaults
@@ -2652,7 +2979,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
       wd:
         description: Working directory, should be OUTSIDE cypress monorepo folder
         type: string
@@ -2692,7 +3019,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
     <<: *defaults
     resource_class: small
     steps:
@@ -2858,3 +3185,13 @@ jobs:
           name: Run Cypress binary
           working_directory: /tmp/cypress-test-tiny
           command: DEBUG=cypress:cli $(yarn bin cypress) run
+
+  # Aggregator job — the only required GitHub status check for PRs.
+  all-jobs-passed:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: All jobs passed
+          command: echo "✅ All required jobs passed"

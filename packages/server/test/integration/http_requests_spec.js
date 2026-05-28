@@ -9,7 +9,6 @@ const express = require('express')
 const http = require('http')
 const url = require('url')
 let zlib = require('zlib')
-const str = require('underscore.string')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
 const { SocketE2E } = require(`../../lib/socket-e2e`)
@@ -24,7 +23,6 @@ const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`).default
 const resolve = require(`../../lib/util/resolve`)
 const { fs } = require(`../../lib/util/fs`)
-const CacheBuster = require(`../../lib/util/cache_buster`)
 const Fixtures = require('@tooling/system-tests')
 const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 /**
@@ -38,9 +36,6 @@ const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-
 
 zlib = Promise.promisifyAll(zlib)
 
-// force supertest-session to use promises provided in supertest
-const session = proxyquire('supertest-session', { supertest })
-
 const absolutePathRegex = /"\/[^{}]*?cy-projects/g
 let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
@@ -49,8 +44,10 @@ const replaceAbsolutePaths = (content) => {
 }
 
 const removeWhitespace = function (c) {
-  c = str.clean(c)
-  c = str.lines(c).join(' ')
+  // trims and collapses whitespace
+  c = c.trim().replace(/\s+/g, ' ')
+  // split by newlines then join with space
+  c = c.split('\n').join(' ')
 
   return c
 }
@@ -86,7 +83,6 @@ describe('Routes', () => {
     ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-    sinon.stub(CacheBuster, 'get').returns('-123')
     sinon.stub(ServerBase.prototype, 'reset')
     sinon.stub(pluginsModule, 'has').returns(false)
 
@@ -183,8 +179,6 @@ describe('Routes', () => {
 
                 this.srv = this.server.getHttpServer()
 
-                this.session = session(this.srv)
-
                 this.proxy = `http://localhost:${port}`
 
                 this.networkProxy = this.server._networkProxy
@@ -212,7 +206,6 @@ describe('Routes', () => {
   afterEach(function () {
     evilDns.clear()
     nock.cleanAll()
-    this.session.destroy()
     preprocessor.close()
     this.project = null
 
@@ -1029,10 +1022,9 @@ describe('Routes', () => {
       })
 
       it('properly correlates when proxy failure come first', function () {
+        const followupPreRequestTimeout = 1000
+
         this.networkProxy.setPreRequestTimeout(50)
-        // If this takes longer than the Promise.delay and the prerequest timeout then the second
-        // call has hit the prerequest timeout which is a problem
-        this.timeout(900)
 
         nock(this.server.remoteStates.current().origin)
         .get('/')
@@ -1054,7 +1046,7 @@ describe('Routes', () => {
 
         // Wait 100 ms to make sure the request times out
         return Promise.delay(100).then(() => {
-          this.networkProxy.setPreRequestTimeout(1000)
+          this.networkProxy.setPreRequestTimeout(followupPreRequestTimeout)
           nock(this.server.remoteStates.current().origin)
           .get('/')
           .once()
@@ -1069,6 +1061,7 @@ describe('Routes', () => {
             url: 'http://www.github.com/',
           })
 
+          const followupStart = Date.now()
           const followupRequestPromise = this.rp({
             url: 'http://www.github.com/',
             headers: {
@@ -1078,6 +1071,9 @@ describe('Routes', () => {
           })
 
           return followupRequestPromise.then((res) => {
+            // If the followup hit the pre-request timeout, the proxy incorrectly correlated
+            // with the stale pre-request from the first (timed-out) request.
+            expect(Date.now() - followupStart, 'followup request hit the pre-request timeout').to.be.lessThan(followupPreRequestTimeout)
             expect(res.statusCode).to.eq(200)
 
             expect(res.body).to.include('hello from baz!')
@@ -1261,7 +1257,7 @@ describe('Routes', () => {
         return this.setup('http://www.github.com')
       })
 
-      it('unzips, injects, and then rezips initial content', function () {
+      it('unzips, injects, and then rezips initial content (full injection)', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
@@ -1279,15 +1275,12 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('<html>')
-          expect(res.body).to.include('gzip')
-          expect(res.body).to.include('parent.Cypress')
-
-          expect(res.body).to.include('</html>')
+          expect(res.body).to.include('e=window.Cypress=parent.Cypress')
+          expect(res.body).to.include('gzip</html>')
         })
       })
 
-      it('unzips, injects, and then rezips regular http content', function () {
+      it('unzips, injects, and then rezips regular http content (partial injection)', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/gzip')
         .matchHeader('accept-encoding', 'gzip')
@@ -1306,10 +1299,32 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('<html>')
-          expect(res.body).to.include('gzip')
 
-          expect(res.body).to.include('</html>')
+          expect(res.body).to.eq('<html> <head> <script type=\'text/javascript\'> </script> </head>gzip</html>')
+        })
+      })
+
+      it('unzips, injects, and then rezips cross-origin http content (fullCrossOrigin injection)', function () {
+        nock('http://www.cypress.io')
+        .get('/gzip')
+        .matchHeader('accept-encoding', 'gzip')
+        .replyWithFile(200, Fixtures.path('server/gzip.html.gz'), {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'gzip',
+        })
+
+        return this.rp({
+          url: 'http://www.cypress.io/gzip',
+          gzip: true,
+          headers: {
+            'Cookie': '__cypress.initial=true',
+            'x-cypress-is-aut-frame': 'true',
+          },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include('injection_cross_origin.js')
+          expect(res.body).to.include('gzip</html>')
         })
       })
 
@@ -1328,10 +1343,7 @@ describe('Routes', () => {
         })
         .then((res) => {
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('<html>')
-          expect(res.body).to.include('gzip')
-
-          expect(res.body).to.include('</html>')
+          expect(res.body).to.eq('<html>gzip</html>')
         })
       })
 
@@ -1386,20 +1398,238 @@ describe('Routes', () => {
       })
     })
 
+    context('brotli', () => {
+      const response = '<html>brotli</html>'
+      const compressed = zlib.brotliCompressSync(Buffer.from(response, 'utf8'))
+
+      beforeEach(function () {
+        return this.setup('http://www.github.com')
+      })
+
+      it('decompresses, injects, and then recompresses initial content (full injection)', function () {
+        nock(this.server.remoteStates.current().origin)
+        .get('/brotli')
+        .matchHeader('accept-encoding', 'br')
+        .reply(200, compressed, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'br',
+        })
+
+        return this.rp({
+          url: 'http://www.github.com/brotli',
+          encoding: null,
+          headers: {
+            'Accept-Encoding': 'br',
+            'Cookie': '__cypress.initial=true',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const decompressed = zlib.brotliDecompressSync(body).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('br')
+          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('brotli</html>')
+        })
+      })
+
+      it('decompresses, injects, and then recompresses regular http content (partial injection)', function () {
+        nock(this.server.remoteStates.current().origin)
+        .get('/brotli')
+        .matchHeader('accept-encoding', 'br')
+        .reply(200, compressed, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'br',
+        })
+
+        return this.rp({
+          url: 'http://www.github.com/brotli',
+          encoding: null,
+          headers: {
+            'Cookie': '__cypress.initial=false',
+            'Accept-Encoding': 'br',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const decompressed = zlib.brotliDecompressSync(body).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('br')
+          expect(decompressed).to.eq('<html> <head> <script type=\'text/javascript\'> </script> </head>brotli</html>')
+        })
+      })
+
+      it('decompresses, injects, and then recompresses cross-origin http content (fullCrossOrigin injection)', function () {
+        nock('http://www.cypress.io')
+        .get('/brotli')
+        .matchHeader('accept-encoding', 'br')
+        .reply(200, compressed, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'br',
+        })
+
+        return this.rp({
+          url: 'http://www.cypress.io/brotli',
+          encoding: null,
+          headers: {
+            'Accept-Encoding': 'br',
+            'x-cypress-is-aut-frame': 'true',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const decompressed = zlib.brotliDecompressSync(body).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('br')
+          expect(decompressed).to.include('injection_cross_origin.js')
+          expect(decompressed).to.include('brotli</html>')
+        })
+      })
+
+      it('does not inject on regular brotli\'d content', function () {
+        nock(this.server.remoteStates.current().origin)
+        .get('/brotli')
+        .matchHeader('accept-encoding', 'br')
+        .reply(200, compressed, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'br',
+        })
+
+        return this.rp({
+          url: 'http://www.github.com/brotli',
+          encoding: null,
+          headers: {
+            'Accept-Encoding': 'br',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const decompressed = zlib.brotliDecompressSync(body).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('br')
+          expect(decompressed).to.eq('<html>brotli</html>')
+        })
+      })
+    })
+
+    context('layered encoding', () => {
+      beforeEach(function () {
+        return this.setup('http://www.github.com')
+      })
+
+      it('decompresses, injects, and recompresses content-encoding "gzip, br" (full injection)', function () {
+        const plaintext = '<html>layered-gzip-br</html>'
+        const gzipThenBr = zlib.brotliCompressSync(zlib.gzipSync(Buffer.from(plaintext, 'utf8')))
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/layered')
+        .matchHeader('accept-encoding', 'gzip,br')
+        .reply(200, gzipThenBr, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'gzip, br',
+        })
+
+        return this.rp({
+          url: 'http://www.github.com/layered',
+          encoding: null,
+          headers: {
+            'Accept-Encoding': 'gzip, br',
+            'Cookie': '__cypress.initial=true',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const afterBr = zlib.brotliDecompressSync(body)
+          const decompressed = zlib.gunzipSync(afterBr).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('gzip, br')
+          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('layered-gzip-br</html>')
+        })
+      })
+
+      it('decompresses, injects, and recompresses content-encoding "br, gzip" (full injection)', function () {
+        const plaintext = '<html>layered-br-gzip</html>'
+        const brThenGzip = zlib.gzipSync(zlib.brotliCompressSync(Buffer.from(plaintext, 'utf8')))
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/layered')
+        .matchHeader('accept-encoding', 'br,gzip')
+        .reply(200, brThenGzip, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'br, gzip',
+        })
+
+        return this.rp({
+          url: 'http://www.github.com/layered',
+          encoding: null,
+          headers: {
+            'Accept-Encoding': 'br, gzip',
+            'Cookie': '__cypress.initial=true',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const afterGzip = zlib.gunzipSync(body)
+          const decompressed = zlib.brotliDecompressSync(afterGzip).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('br, gzip')
+          expect(decompressed).to.include('e=window.Cypress=parent.Cypress')
+          expect(decompressed).to.include('layered-br-gzip</html>')
+        })
+      })
+
+      it('does not inject on layered content (no initial cookie)', function () {
+        const plaintext = '<html>layered-no-inject</html>'
+        const gzipThenBr = zlib.brotliCompressSync(zlib.gzipSync(Buffer.from(plaintext, 'utf8')))
+
+        nock(this.server.remoteStates.current().origin)
+        .get('/layered')
+        .matchHeader('accept-encoding', 'gzip,br')
+        .reply(200, gzipThenBr, {
+          'Content-Type': 'text/html',
+          'Content-Encoding': 'gzip, br',
+        })
+
+        return this.rp({
+          url: 'http://www.github.com/layered',
+          encoding: null,
+          headers: {
+            'Accept-Encoding': 'gzip, br',
+          },
+        })
+        .then((res) => {
+          const body = Buffer.isBuffer(res.body) ? res.body : Buffer.from(res.body)
+          const afterBr = zlib.brotliDecompressSync(body)
+          const decompressed = zlib.gunzipSync(afterBr).toString('utf8')
+
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['content-encoding']).to.eq('gzip, br')
+          expect(decompressed).to.eq('<html>layered-no-inject</html>')
+        })
+      })
+    })
+
     context('accept-encoding', () => {
       beforeEach(function () {
         return this.setup('http://www.github.com')
       })
 
-      it('strips unsupported deflate and br encoding', function () {
+      it('strips unsupported deflate encoding', function () {
         nock(this.server.remoteStates.current().origin)
         .get('/accept')
-        .matchHeader('accept-encoding', 'gzip')
+        .matchHeader('accept-encoding', 'gzip,br')
         .reply(200, '<html>accept</html>')
 
         return this.rp({
           url: 'http://www.github.com/accept',
-          gzip: true,
           headers: {
             'accept-encoding': 'gzip,deflate,br',
           },

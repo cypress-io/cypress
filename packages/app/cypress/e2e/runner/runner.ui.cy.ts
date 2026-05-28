@@ -292,6 +292,10 @@ describe('src/cypress/runner', () => {
         filePath: 'runner/stop-execution.runner.cy.js',
       })
 
+      // Wait for the command to start running (ensure it's in retry mode)
+      // The command will be retrying cy.get('.not-exist')
+      cy.get('.command-state-pending, .command-state-running', { timeout: 5000 })
+
       // Click the stop button to stop execution
       cy.get('.stop').click()
 
@@ -299,8 +303,10 @@ describe('src/cypress/runner', () => {
       cy.get('.stop', { timeout: 100 }).should('not.exist')
       cy.get('.restart', { timeout: 100 }).should('be.visible')
 
-      cy.get('.runnable-err-message').should('not.contain', 'ran afterEach even though specs were stopped')
-      cy.get('.runnable-err-message').should('contain', 'Cypress test was stopped while running this command.')
+      // Wait for the error message to appear - it may take time to propagate
+      cy.get('.runnable-err-message', { timeout: 5000 })
+      .should('not.contain', 'ran afterEach even though specs were stopped')
+      .and('contain', 'Cypress test was stopped while running this command.')
     })
   })
 })

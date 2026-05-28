@@ -12,6 +12,10 @@ const getArtifactJobName = (platformKey) => {
     return 'linux-amd-publish-binary'
   }
 
+  if (platformKey === 'linux-arm64') {
+    return 'linux-arm64-publish-binary'
+  }
+
   return 'publish-binary'
 }
 

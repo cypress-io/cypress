@@ -1,5 +1,5 @@
-export const NON_RETRIABLE_CERT_ERROR_CODES = Object.freeze({
-  // The leaf certificate signature can’t be verified
+const NON_RETRIABLE_CERT_ERROR_CODES = Object.freeze({
+  // The leaf certificate signature can't be verified
   UNABLE_TO_VERIFY_LEAF_SIGNATURE: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
   // The certificate is a self-signed certificate and not in trusted root store
   DEPTH_ZERO_SELF_SIGNED_CERT: 'DEPTH_ZERO_SELF_SIGNED_CERT',

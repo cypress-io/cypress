@@ -187,7 +187,6 @@ describe('e2e record', () => {
 
       const thirdInstancePostTests = requests[14].body
 
-      expect(thirdInstancePostTests.tests[0].config.env.foo).eq(true)
       expect(thirdInstancePostTests.tests).length(2)
       expect(thirdInstancePostTests.hooks).length(0)
       expect(thirdInstancePostTests.config).is.an('object')
@@ -417,30 +416,6 @@ describe('e2e record', () => {
     })
   })
 
-  context('metadata', () => {
-    setupStubbedServer(createRoutes())
-
-    // TODO: fix failing test https://github.com/cypress-io/cypress/issues/23151
-    it.skip('sends Studio usage metadata', function () {
-      return systemTests.exec(this, {
-        key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
-        configFile: 'cypress-with-project-id.config.js',
-        spec: 'studio_written.cy.js',
-        record: true,
-        snapshot: true,
-      })
-      .then(() => {
-        const requests = getRequests()
-        const postResults = requests[3]
-
-        expect(postResults.url).to.eq(`POST /instances/${instanceId}/results`)
-
-        expect(postResults.body.metadata.studioCreated).to.eq(2)
-        expect(postResults.body.metadata.studioExtended).to.eq(4)
-      })
-    })
-  })
-
   context('misconfiguration', () => {
     setupStubbedServer([])
 
@@ -529,6 +504,50 @@ describe('e2e record', () => {
     })
   })
 
+  context('platform.browserFamily', () => {
+    setupStubbedServer(createRoutes())
+
+    const familyByBrowser = {
+      electron: 'chromium',
+      chrome: 'chromium',
+      'chrome-for-testing': 'chromium',
+      firefox: 'firefox',
+      webkit: 'webkit',
+    }
+
+    systemTests.it('is sent on POST /runs and instance create matching the launched browser', {
+      key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+      configFile: 'cypress-with-project-id.config.js',
+      config: {
+        experimentalWebKitSupport: true,
+      },
+      spec: 'record_pass.cy.js',
+      record: true,
+      snapshot: false,
+      expectedExitCode: 0,
+      onRun (execFn, browser) {
+        return execFn().then(() => {
+          const expectedFamily = familyByBrowser[browser]
+
+          expect(expectedFamily, `no browserFamily mapping for browser: ${browser}`).to.exist
+
+          const requests = getRequests()
+          const postRun = requests.find((r) => r.url === 'POST /runs')
+
+          expect(postRun, 'POST /runs').to.exist
+          expect(postRun.body.platform.browserFamily).to.eq(expectedFamily)
+
+          const instanceCreate = requests.find((r) => {
+            return r.url.startsWith('POST /runs/') && r.url.endsWith('/instances')
+          })
+
+          expect(instanceCreate, 'POST /runs/:id/instances').to.exist
+          expect(instanceCreate.body.platform.browserFamily).to.eq(expectedFamily)
+        })
+      },
+    })
+  })
+
   context('recordKey', () => {
     setupStubbedServer(createRoutes())
 
@@ -602,20 +621,10 @@ describe('e2e record', () => {
       const requests = getRequests()
 
       expect(requests[2].body.config.defaultCommandTimeout).eq(1111)
-      expect(requests[2].body.config.resolved.defaultCommandTimeout).deep.eq({
-        value: 1111,
-        from: 'runtime',
-      })
-
       expect(requests[2].body.config.pageLoadTimeout).eq(3333)
-      expect(requests[2].body.config.resolved.pageLoadTimeout).deep.eq({
-        value: 3333,
-        from: 'runtime',
-      })
 
       expect(requests[2].body.tests[0].config).deep.eq({
         defaultCommandTimeout: 1234,
-        env: { foo: true },
         retries: 2,
       })
 
@@ -2712,6 +2721,18 @@ describe('e2e record', () => {
             expect(postResultsRequest.body.stats.passes).to.equal(1)
             expect(postResultsRequest.body.stats.failures).to.equal(1)
             expect(postResultsRequest.body.stats.skipped).to.equal(0)
+
+            // Early-exit crash patching should attach structured error to the impacted test for Cloud
+            const failedWithCrashOnAttempt = postResultsRequest.body.tests.filter((t) => {
+              if (t.state !== 'failed' || !t.attempts?.length) return false
+
+              const err = t.attempts[t.attempts.length - 1].error
+
+              return err && err.message && err.message.includes('Chrome')
+            })
+
+            expect(failedWithCrashOnAttempt, 'failed test should carry crash error on last attempt').to.have.length.greaterThan(0)
+            expect(failedWithCrashOnAttempt[0].displayError).to.be.a('string').and.not.empty
           })
         })
       })
@@ -2915,7 +2936,7 @@ describe('e2e record', () => {
               const errorReport = getRequests().find(({ url }) => url === reportErrorUrl).body
 
               debug(errorReport)
-              expect(errorReport.errors).to.be.length(4)
+              expect(errorReport.errors).to.be.length(5)
 
               errorReport.errors.forEach((e) => {
                 expect(e.captureMethod).to.eq('commandLogAdded')
@@ -2988,7 +3009,7 @@ describe('capture-protocol api errors', () => {
     }))
   }
 
-  describe('upload 500 - does not retry', () => {
+  describe('upload 500 - tries 3 times and fails', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
@@ -3007,9 +3028,13 @@ describe('capture-protocol api errors', () => {
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
         expect(artifactReport?.protocol).to.exist
-        expect(artifactReport?.protocol?.error).to.equal(
-          'Failed to upload Test Replay: http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error',
-        )
+
+        const expectedUrl = `http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX`
+        const expectedErrorMessage = `${expectedUrl} responded with 500 Internal Server Error`
+
+        expect(artifactReport?.protocol?.error).to.equal(`Failed to upload Test Replay after 3 attempts. Errors: ${[expectedErrorMessage, expectedErrorMessage, expectedErrorMessage].join(', ')}`)
+        expect(artifactReport?.protocol?.errorStack).to.exist
+        expect(artifactReport?.protocol?.errorStack).to.not.be.empty
       })
     })
   })

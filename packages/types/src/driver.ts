@@ -3,6 +3,7 @@ import type { ReporterRunState } from './reporter'
 interface MochaRunnerState {
   startTime?: number
   currentId?: string | null
+  currentRetry?: number | null
   emissions?: Emissions
   tests?: Record<string, Cypress.ObjectLike>
   passed?: number
@@ -14,6 +15,7 @@ interface MochaRunnerState {
 export type RunState = MochaRunnerState & ReporterRunState & {
   isSpecsListOpen?: boolean
   showFetchRequests?: boolean
+  codeEditorLineWrap?: boolean
 }
 
 export interface Emissions {

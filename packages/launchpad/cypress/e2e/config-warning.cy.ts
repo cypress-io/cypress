@@ -1,5 +1,3 @@
-const THIRTY_SECONDS = 1000 * 30
-
 describe('baseUrl', () => {
   it('should show baseUrl warning if Cypress cannot connect to provided baseUrl', () => {
     cy.scaffoldProject('config-with-base-url-warning')
@@ -90,38 +88,6 @@ describe('experimentalSingleTabRunMode', () => {
   })
 })
 
-describe('experimentalRunAllSpecs', () => {
-  it('is a valid config for e2e testing', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
-    cy.scaffoldProject('run-all-specs')
-    cy.openProject('run-all-specs')
-
-    cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.findByTestId('launchpad-Choose a browser')
-    cy.get('h1').contains('Choose a browser')
-  })
-
-  it('is not a valid config for component testing', () => {
-    cy.scaffoldProject('run-all-specs')
-    cy.openProject('run-all-specs', ['--config-file', 'cypress-invalid-component.config.js'])
-
-    cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="component"]').click()
-    cy.findByTestId('error-header')
-    cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing')
-  })
-
-  it('is not valid config when specified at root', { defaultCommandTimeout: THIRTY_SECONDS }, () => {
-    cy.scaffoldProject('run-all-specs')
-    cy.openProject('run-all-specs', ['--config-file', 'cypress-invalid-root.config.js'])
-
-    cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.findByTestId('error-header')
-    cy.contains('The experimentalRunAllSpecs experiment is currently only supported for End to End Testing')
-  })
-})
-
 describe('experimentalOriginDependencies', () => {
   it('is a valid config for e2e testing', () => {
     cy.scaffoldProject('session-and-origin-e2e-specs')
@@ -168,7 +134,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]').click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', 'vite. Expected ^5.0.0 || ^6.0.0 || ^7.0.0, found 3.2.11')
+    .should('contain.text', 'vite. Expected ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0, found 4.5.12')
     .should('contain.text', 'react. Expected ^18.0.0 || ^19.0.0, found 15.6.2.')
     .should('contain.text', 'react-dom. Expected ^18.0.0 || ^19.0.0 but dependency was not found.')
 
@@ -186,7 +152,7 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy-testingtype="component"]', { timeout: 12000 }).click()
     cy.get('[data-cy="warning-alert"]', { timeout: 12000 }).should('exist')
     .should('contain.text', 'Warning: Component Testing Mismatched Dependencies')
-    .should('contain.text', 'vite. Expected ^5.0.0 || ^6.0.0 || ^7.0.0, found 3.2.11.')
+    .should('contain.text', 'vite. Expected ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0, found 4.5.12.')
     .should('contain.text', 'vue. Expected ^3.0.0, found 2.7.8.')
 
     cy.get('.warning-markdown').find('li').should('have.length', 2)
@@ -214,27 +180,5 @@ describe('component testing dependency warnings', () => {
     cy.get('[data-cy="warning-alert"]').should('not.exist')
     cy.contains('Choose a browser', { timeout: 12000 })
     cy.get('[data-cy="warning-alert"]').should('not.exist')
-  })
-})
-
-describe('experimentalPromptCommand', () => {
-  it('is not a valid config for component testing', () => {
-    cy.scaffoldProject('experimentalPromptCommand')
-    cy.openProject('experimentalPromptCommand', ['--config-file', 'cypress-invalid-prompt-experiment.config.js'])
-
-    cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="component"]').click()
-    cy.findByTestId('error-header')
-    cy.contains('The experimentalPromptCommand experiment is currently only supported for End to End Testing')
-  })
-
-  it('is not a valid config when specified at root', () => {
-    cy.scaffoldProject('experimentalPromptCommand')
-    cy.openProject('experimentalPromptCommand', ['--config-file', 'cypress-invalid-prompt-experiment-root.config.js'])
-
-    cy.visitLaunchpad()
-    cy.get('[data-cy-testingtype="e2e"]').click()
-    cy.findByTestId('error-header')
-    cy.contains('The experimentalPromptCommand experiment is currently only supported for End to End Testing')
   })
 })

@@ -11,10 +11,10 @@
 /* global cypressConfig */
 
 import { createTimers } from './timers'
-import { patchDocumentCookie } from './patches/cookies'
-import { patchElementIntegrity } from './patches/setAttribute'
-import { patchFetch } from './patches/fetch'
-import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
+import { patchDocumentCookie } from './patches/cross-origin/cookies'
+import { patchElementIntegrity } from './patches/cross-origin/setAttribute'
+import { patchFetch } from './patches/cross-origin/fetch'
+import { patchXmlHttpRequest } from './patches/cross-origin/xmlHttpRequest'
 
 const findCypress = () => {
   for (let index = 0; index < window.parent.frames.length; index++) {

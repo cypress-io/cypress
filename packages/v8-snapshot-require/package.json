@@ -29,5 +29,6 @@
     "src/snapshot-require.ts"
   ],
   "types": "src/snapshot-require.ts",
+  "license": "MIT",
   "nx": {}
 }

@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import type { IncomingHttpHeaders } from 'http'
 import type { Readable } from 'stream'
+import type { DebugData } from './studio/studio-server-types'
 import type { ProxyTimings } from './proxy'
 import type { FoundSpec } from './spec'
 
@@ -16,8 +17,6 @@ export interface CDPClient {
   off (eventName: string, cb: (event: any) => void): void
 }
 
-// TODO(protocol): This is basic for now but will evolve as we progress with the protocol work
-
 export interface AppCaptureProtocolCommon {
   cdpReconnect (): Promise<void>
   addRunnables (runnables: any): void
@@ -30,7 +29,7 @@ export interface AppCaptureProtocolCommon {
   afterTest(test: Record<string, any>): Promise<void>
   afterSpec (): Promise<{ durations: AfterSpecDurations } | undefined>
   pageLoading (input: any): void
-  resetTest (testId: string): void
+  resetTest (testId: string, currentRetry?: number): void
   responseEndedWithEmptyBody: (options: ResponseEndedWithEmptyBodyOptions) => void
   responseStreamReceived (options: ResponseStreamOptions): Readable | undefined
   responseStreamTimedOut (options: ResponseStreamTimedOutOptions): void
@@ -41,6 +40,7 @@ export interface AppCaptureProtocolInterface extends AppCaptureProtocolCommon {
   beforeSpec ({ spec, workingDirectory, archivePath, dbPath, db }: { spec: FoundSpec & { instanceId: string }, workingDirectory: string, archivePath: string, dbPath: string, db: Database.Database }): void
   uploadStallSamplingInterval: () => number
   connectToBrowser (cdpClient: CDPClient): Promise<void>
+  cleanup (): void
 }
 
 export type ProtocolCaptureMethod = keyof AppCaptureProtocolInterface | 'setupProtocol' | 'prepareProtocol' | 'uploadCaptureArtifact' | 'getCaptureProtocolScript' | 'cdpClient.on' | 'getZippedDb' | 'UNKNOWN' | 'createProtocolArtifact' | 'protocolUploadUrl'
@@ -105,9 +105,7 @@ export type ProtocolManagerOptions = {
   }
   projectConfig: ProjectConfig
   mountVersion?: number
-  debugData?: {
-    filePreprocessorHandlerText?: string
-  }
+  debugData?: DebugData
   mode?: 'record' | 'studio'
 }
 
@@ -156,6 +154,7 @@ export type ResponseStreamOptions = {
   requestId: string
   responseHeaders: IncomingHttpHeaders
   isAlreadyGunzipped: boolean
+  isAlreadyBrotliDecompressed?: boolean
   responseStream: Readable
   res: Response
   timings: ProxyTimings

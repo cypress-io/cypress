@@ -123,10 +123,13 @@ describe('src/cy/commands/cookies - no stub', () => {
 
       cy.getCookies({ domain: 'www.foobar.com' }).then((cookies) => {
         expect(cookies).to.have.length(2)
-        expect(cookies[0].name).to.equal('key1')
-        expect(cookies[0].domain).to.match(/\.?www\.foobar\.com/)
-        expect(cookies[1].name).to.equal('key2')
-        expect(cookies[1].domain).to.match(/\.?foobar\.com/)
+
+        const sortedCookies = Cypress._.sortBy(cookies, 'name')
+
+        expect(sortedCookies[0].name).to.equal('key1')
+        expect(sortedCookies[0].domain).to.match(/\.?www\.foobar\.com/)
+        expect(sortedCookies[1].name).to.equal('key2')
+        expect(sortedCookies[1].domain).to.match(/\.?foobar\.com/)
       })
 
       cy.getCookies({ domain: 'barbaz.com' }).then((cookies) => {
@@ -1380,8 +1383,12 @@ describe('src/cy/commands/cookies', () => {
       // other browsers do not return sameSite at all
       const sameSite = (
         Cypress.isBrowser('webkit')
-      ) ? 'no_restriction' :
-        Cypress.isBrowser('firefox') ? 'unspecified' : null
+        // There is an odd inconsistency when setting an undefined cookie context in WebKit in WebKit 26.
+        // On linux based machines, the sameSite will be set to `lax`, but on MacOS the sameSite is set to `None` (no_restriction).
+        // There is no difference in the webkit-automation logic within cypress so the inconsistency must lie in the OS
+        // implement of WebKit
+      ) ? Cypress.platform === 'darwin' ? 'no_restriction' : 'lax'
+        : Cypress.isBrowser('firefox') ? 'unspecified' : null
 
       if (sameSite) {
         cy.getCookie('five').should('include', { sameSite })

@@ -91,19 +91,19 @@ export default defineConfig({
 Run tests with "login" in the title:
 
 ```shell
-npx cypress run --env grep="login"
+npx cypress run --expose grep="login"
 ```
 
 Run tests with "user authentication" in the title:
 
 ```shell
-npx cypress run --env grep="user authentication"
+npx cypress run --expose grep="user authentication"
 ```
 
 Multiple title patterns (OR logic):
 
 ```shell
-npx cypress run --env grep="login; logout; signup"
+npx cypress run --expose grep="login; logout; signup"
 ```
 
 ### Filter by Tags
@@ -134,25 +134,25 @@ Then run by tags:
 Run tests with @smoke tag:
 
 ```shell
-npx cypress run --env grepTags="@smoke"
+npx cypress run --expose grepTags="@smoke"
 ```
 
 Run tests with @smoke OR @critical tags:
 
 ```shell
-npx cypress run --env grepTags="@smoke @critical"
+npx cypress run --expose grepTags="@smoke @critical"
 ```
 
 Run tests with BOTH @smoke AND @critical tags:
 
 ```shell
-npx cypress run --env grepTags="@smoke+@critical"
+npx cypress run --expose grepTags="@smoke+@critical"
 ```
 
 Run tests with @smoke tag but NOT @slow tag:
 
 ```shell
-npx cypress run --env grepTags="@smoke+-@slow"
+npx cypress run --expose grepTags="@smoke+-@slow"
 ```
 
 ### Combine Title and Tag Filters
@@ -160,13 +160,13 @@ npx cypress run --env grepTags="@smoke+-@slow"
 Run tests with "login" in title AND tagged @smoke:
 
 ```shell
-npx cypress run --env grep="login",grepTags="@smoke"
+npx cypress run --expose grep="login",grepTags="@smoke"
 ```
 
 Run tests with "user" in title AND tagged @critical OR @smoke:
 
 ```shell
-npx cypress run --env grep="user",grepTags="@critical @smoke"
+npx cypress run --expose grep="user",grepTags="@critical @smoke"
 ```
 
 ## Advanced Features
@@ -178,13 +178,13 @@ Skip loading specs that don't contain matching tests (requires plugin setup):
 Only run specs containing tests with "login" in title:
 
 ```shell
-npx cypress run --env grep="login",grepFilterSpecs=true
+npx cypress run --expose grep="login",grepFilterSpecs=true
 ```
 
 Only run specs containing tests tagged @smoke:
 
 ```shell
-npx cypress run --env grepTags="@smoke",grepFilterSpecs=true
+npx cypress run --expose grepTags="@smoke",grepFilterSpecs=true
 ```
 
 ### Omit Filtered Tests
@@ -192,7 +192,7 @@ npx cypress run --env grepTags="@smoke",grepFilterSpecs=true
 By default, filtered tests are marked as pending. To completely omit them:
 
 ```shell
-npx cypress run --env grep="login",grepOmitFiltered=true
+npx cypress run --expose grep="login",grepOmitFiltered=true
 ```
 
 ### Test Burning (Repeat Tests)
@@ -202,13 +202,13 @@ Run filtered tests multiple times to catch flaky behavior:
 Run matching tests 5 times:
 
 ```shell
-npx cypress run --env grep="login",burn=5
+npx cypress run --expose grep="login",burn=5
 ```
 
 Run all tests 10 times:
 
 ```shell
-npx cypress run --env burn=10
+npx cypress run --expose burn=10
 ```
 
 ### Inverted Filters
@@ -216,19 +216,19 @@ npx cypress run --env burn=10
 Run tests WITHOUT "slow" in the title:
 
 ```shell
-npx cypress run --env grep="-slow"
+npx cypress run --expose grep="-slow"
 ```
 
 Run tests WITHOUT @slow tag:
 
 ```shell
-npx cypress run --env grepTags="-@slow"
+npx cypress run --expose grepTags="-@slow"
 ```
 
 Complex combinations:
 
 ```shell
-npx cypress run --env grep="login; -slow",grepTags="@smoke+-@regression"
+npx cypress run --expose grep="login; -slow",grepTags="@smoke+-@regression"
 ```
 
 ### Run Untagged Tests
@@ -236,7 +236,7 @@ npx cypress run --env grep="login; -slow",grepTags="@smoke+-@regression"
 Run only tests without any tags:
 
 ```shell
-npx cypress run --env grepUntagged=true
+npx cypress run --expose grepUntagged=true
 ```
 
 ## Configuration Examples
@@ -248,7 +248,7 @@ import { defineConfig } from 'cypress'
 import { plugin as cypressGrepPlugin } from '@cypress/grep/plugin'
 
 export default defineConfig({
-  env: {
+  expose: {
     // Always filter by viewport tests
     grep: "viewport",
     // Always enable spec filtering
@@ -270,10 +270,10 @@ export default defineConfig({
 ```json
 {
   "scripts": {
-    "cy:smoke": "cypress run --env grepTags=@smoke",
-    "cy:critical": "cypress run --env grepTags=@critical",
-    "cy:fast": "cypress run --env grepTags=@fast",
-    "cy:burn": "cypress run --env grepTags=@smoke,burn=5"
+    "cy:smoke": "cypress run --expose grepTags=@smoke",
+    "cy:critical": "cypress run --expose grepTags=@critical",
+    "cy:fast": "cypress run --expose grepTags=@fast",
+    "cy:burn": "cypress run --expose grepTags=@smoke,burn=5"
   }
 }
 ```
@@ -338,7 +338,7 @@ Cypress.grep()
 
 1. **Spec Loading**: When not using `grepFilterSpecs`, all spec files are loaded before filtering occurs
 2. **Inverted Filters**: Negative filters (`-tag`, `-title`) are not compatible with `grepFilterSpecs`
-3. **Runtime Changes**: Cannot change grep filters at runtime using `Cypress.env()`
+3. **Runtime Changes**: Cannot change grep filters at runtime using `Cypress.expose()`
 4. **Cloud Recordings**: Filtered tests may still appear in Cypress Cloud recordings as pending tests
 
 ## Best Practices
@@ -369,7 +369,7 @@ it('should work', { tags: ['@smoke', '@fast'] }, () => {
 1. Run smoke tests first:
 
 ```shell
-npx cypress run --env grepTags="@smoke"
+npx cypress run --expose grepTags="@smoke"
 ```
 
 2. If smoke tests pass, run all tests:
@@ -381,11 +381,11 @@ npx cypress run
 3. For debugging, run specific test groups:
 
 ```shell
-npx cypress run --env grep="user management"
+npx cypress run --expose grep="user management"
 ```
 
 ```shell
-npx cypress run --env grepTags="@critical"
+npx cypress run --expose grepTags="@critical"
 ```
 
 ### Performance Tips
@@ -403,7 +403,7 @@ Enable debug logging to see what's happening:
 Terminal debug (for plugin):
 
 ```shell
-DEBUG=@cypress/grep npx cypress run --env grep="login"
+DEBUG=@cypress/grep npx cypress run --expose grep="login"
 ```
 
 Browser debug (for support file):
@@ -421,6 +421,21 @@ Then refresh and run tests.
 - [todo-graphql-example](https://github.com/bahmutov/todo-graphql-example) - Real-world usage
 
 ## Migration
+
+### From v5 to v6
+
+`Cypress.env()` is deprecated in Cypress 15.10.0. For public configuration, the API has been replaced with `Cypress.expose()`
+
+To migrate, change your `--env`/`-e` CLI arguments from
+```sh
+npx cypress run --env grepTags="tag1 tag2"
+```
+
+to the following to use `--expose`/`-x`
+```sh
+npx cypress run --expose grepTags="tag1 tag2"
+```
+
 
 ### From v4 to v5
 

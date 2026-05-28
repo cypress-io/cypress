@@ -1,6 +1,8 @@
 import { createRouter as _createRouter, createWebHashHistory } from 'vue-router'
 import generatedRoutes from 'virtual:generated-pages'
 import { setupLayouts } from 'virtual:generated-layouts'
+import { installStudioExitNavigationGuard } from '../runner/studio-unsaved-changes-guard'
+import { useSpecDirtyDataStore } from '../store/spec-dirty-data-store'
 
 /**
  * Generated Routes are created via https://github.com/hannoeru/vite-plugin-pages
@@ -65,8 +67,13 @@ export const createRouter = () => {
     },
   })
 
-  return _createRouter({
+  const router = _createRouter({
     history: createWebHashHistory(),
     routes,
   })
+
+  // Check if there are unsaved changes when exiting the studio and block the navigation if there are
+  installStudioExitNavigationGuard(router, () => useSpecDirtyDataStore())
+
+  return router
 }

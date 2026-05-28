@@ -2,6 +2,7 @@
 
 - [Cypress App](https://on.cypress.io/changelog)
 - [`@cypress/angular`](https://github.com/cypress-io/cypress/blob/develop/npm/angular/CHANGELOG.md)
+- [`@cypress/angular-zoneless`](https://github.com/cypress-io/cypress/blob/develop/npm/angular-zoneless/CHANGELOG.md)
 - [`@cypress/eslint-plugin-dev`](https://github.com/cypress-io/cypress/blob/develop/npm/eslint-plugin-dev/CHANGELOG.md)
 - [`@cypress/mount-utils`](https://github.com/cypress-io/cypress/blob/develop/npm/mount-utils/CHANGELOG.md)
 - [`@cypress/react`](https://github.com/cypress-io/cypress/blob/develop/npm/react/CHANGELOG.md)

@@ -5,7 +5,7 @@ const { $: $cypress } = Cypress.$Cypress
 const ElementSelector = Cypress.ElementSelector as ElementSelectorAPI & {
   _reset(): void
   getSelectorPriority(): Cypress.SelectorPriority[]
-  _getSelector($el: any): string
+  _getSelector($el: any): string | null
 }
 
 const SELECTOR_DEFAULTS: Cypress.SelectorPriority[] = [...DEFAULT_SELECTOR_PRIORITIES]
@@ -119,6 +119,21 @@ describe('src/cypress/element_selector', () => {
       })
 
       expect(ElementSelector._getSelector($div)).to.eq('[data-foo="bar"]')
+    })
+
+    it('returns null for detached elements', () => {
+      const $div = $cypress('<div data-cy=\'test\' />')
+
+      Cypress.$('body').append($div)
+
+      // Verify it works when attached
+      expect(ElementSelector._getSelector($div)).to.eq('[data-cy="test"]')
+
+      // Detach the element from DOM
+      $div.remove()
+
+      // Should return null for detached elements
+      expect(ElementSelector._getSelector($div)).to.be.null
     })
   })
 

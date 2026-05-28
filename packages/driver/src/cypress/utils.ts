@@ -9,6 +9,10 @@ import $jquery from '../dom/jquery'
 import { $Location } from './location'
 import $errUtils from './error_utils'
 
+const customProtocolRegex = /^[^:\/]+:\/{1,3}/
+// Find 'namespace' values (like `_N_E` for Next apps) without adjusting relative paths (like `../`)
+const webpackDevtoolNamespaceRegex = /webpack:\/{2}([^.]*)?\.\//
+
 const tagOpen = /\[([a-z\s='"-]+)\]/g
 const tagClosed = /\[\/([a-z]+)\]/g
 
@@ -45,7 +49,7 @@ const USER_FRIENDLY_TYPE_DETECTORS = _.map([
   [_.stubTrue, 'unknown'],
 ], ([fn, type]) => {
   return [fn, _.constant(type)]
-}) as [(val: any) => boolean, (val: Function) => Function][]
+}) as unknown as [(val: any) => boolean, (val: Function) => Function][]
 
 export default {
   warning (msg) {
@@ -164,11 +168,14 @@ export default {
     return obj
   },
 
-  stringifyActualObj (obj) {
+  stringifyActualObj (obj, visited?: WeakSet<any>) {
+    // Ensure visited is always a WeakSet - create new one if not provided or invalid
+    const visitedSet = (visited && visited instanceof WeakSet) ? visited : new WeakSet()
+
     obj = this.normalizeObjWithLength(obj)
 
     const str = _.reduce(obj, (memo, value, key) => {
-      memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value)}`)
+      memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value, visitedSet)}`)
 
       return memo
     }, [] as string[])
@@ -176,7 +183,10 @@ export default {
     return `{${str.join(', ')}}`
   },
 
-  stringifyActual (value) {
+  stringifyActual (value, visited?: WeakSet<any>) {
+    // Ensure visited is always a WeakSet - create new one if not provided or invalid
+    const visitedSet = (visited && visited instanceof WeakSet) ? visited : new WeakSet()
+
     if ($dom.isDom(value)) {
       return $dom.stringify(value, 'short')
     }
@@ -186,13 +196,30 @@ export default {
     }
 
     if (_.isArray(value)) {
+      // Check for circular reference first to prevent infinite recursion
+      if (visitedSet.has(value)) {
+        return '[Circular]'
+      }
+
       const len = value.length
 
       if (len > 3) {
+        // Add to visited set to prevent infinite recursion in nested structures
+        visitedSet.add(value)
+
         return `Array[${len}]`
       }
 
-      return `[${_.map(value, _.bind(this.stringifyActual, this)).join(', ')}]`
+      // For arrays with length <= 3, recurse into elements
+      // Add to visited set before recursing
+      visitedSet.add(value)
+
+      const result = `[${_.map(value, (item) => this.stringifyActual(item, visitedSet)).join(', ')}]`
+
+      // Note: We don't remove from visited set because WeakSet automatically handles cleanup
+      // and we want to detect circular references even after the first level
+
+      return result
     }
 
     if (_.isRegExp(value)) {
@@ -205,14 +232,30 @@ export default {
         return `jQuery{${(value as JQueryStatic).length}}`
       }
 
+      // Check for circular reference first to prevent infinite recursion
+      if (visitedSet.has(value)) {
+        return '[Circular]'
+      }
+
       const len = _.keys(value).length
 
       if (len > 2) {
+        // Add to visited set to prevent infinite recursion in nested structures
+        visitedSet.add(value)
+
         return `Object{${len}}`
       }
 
+      // Add to visited set before recursing
+      visitedSet.add(value)
+
       try {
-        return this.stringifyActualObj(value)
+        const result = this.stringifyActualObj(value, visitedSet)
+
+        // Note: We don't remove from visited set because WeakSet automatically handles cleanup
+        // and we want to detect circular references even after the first level
+
+        return result
       } catch (err) {
         return String(value)
       }
@@ -419,5 +462,30 @@ export default {
   isPromiseLike (ret) {
     // @ts-ignore
     return ret && _.isObject(ret) && 'then' in ret && _.isFunction(ret.then) && 'catch' in ret && _.isFunction(ret.catch)
+  },
+
+  stripCustomProtocol (filePath: string) {
+    if (!filePath) {
+      return
+    }
+
+    // if the file path (after all said and done)
+    // still starts with "http://" or "https://" then
+    // it is an URL and we have no idea how it maps
+    // to a physical file location on disk. Let it be.
+    const httpProtocolRegex = /^https?:\/\//
+
+    if (httpProtocolRegex.test(filePath)) {
+      return
+    }
+
+    // Check the path to see if custom namespaces have been applied and, if so, remove them
+    // For example, in Next.js we end up with paths like `_N_E/pages/index.cy.js`, and we
+    // need to strip off the `_N_E` so that "Open in IDE" links work correctly
+    if (webpackDevtoolNamespaceRegex.test(filePath)) {
+      return filePath.replace(webpackDevtoolNamespaceRegex, '')
+    }
+
+    return filePath.replace(customProtocolRegex, '')
   },
 }

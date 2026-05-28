@@ -11,7 +11,7 @@ import type { NetworkFetchErrorParameters, NetworkResponseCompletedParameters, N
 // make sure testing promises resolve before asserting on async function conditions
 const flushPromises = () => {
   return new Promise<void>((resolve) => {
-    setTimeout(resolve)
+    setTimeout(resolve, 100)
   })
 }
 

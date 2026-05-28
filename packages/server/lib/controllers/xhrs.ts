@@ -1,11 +1,11 @@
 import { parseContentType } from '@packages/net-stubbing/lib/server/util'
 import _ from 'lodash'
 import Promise from 'bluebird'
-import fixture from '../fixture'
+import { get as fixtureGet } from '../fixture'
 
 const fixturesRe = /^(fx:|fixture:)/
 
-export = {
+const xhrs = {
   handle (req, res, config, next) {
     const get = function (val, def?) {
       return decodeURI(req.get(val) || def)
@@ -70,18 +70,19 @@ export = {
     return respond()
   },
 
-  _get (resp: string, config: { fixturesFolder: string }): Promise<{ data: any, encoding?: string }> {
-    const options: { encoding?: string } = {}
+  _get (resp: string, config: { fixturesFolder: string }): Promise<{ data: any, encoding?: BufferEncoding }> {
+    const options: { encoding?: BufferEncoding } = {}
 
     const file = resp.replace(fixturesRe, '')
 
     const [filePath, encoding] = file.split(',')
 
     if (encoding) {
-      options.encoding = encoding
+      options.encoding = encoding as BufferEncoding
     }
 
-    return fixture.get(config.fixturesFolder, filePath, options)
+    // @ts-expect-error - bluebird to promise type mismatch
+    return fixtureGet(config.fixturesFolder, filePath, options)
     .then((bytes: any) => {
       return {
         data: bytes,
@@ -115,3 +116,5 @@ export = {
   },
 
 }
+
+export default xhrs

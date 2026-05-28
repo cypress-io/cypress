@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 
 export default defineConfig({
+  allowCypressEnv: false,
   projectId: 'pid123',
   e2e: {
     supportFile: false,

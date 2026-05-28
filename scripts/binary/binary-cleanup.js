@@ -39,10 +39,10 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
   const startingEntryPoints = [
     'packages/server/lib/plugins/child/require_async_child.js',
-    'packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor/index.js',
+    'packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor/dist/index.js',
     'packages/server/node_modules/ts-loader/index.js',
     'packages/rewriter/lib/threads/worker.js',
-    'npm/webpack-batteries-included-preprocessor/index.js',
+    'npm/webpack-batteries-included-preprocessor/dist/index.js',
     // needed in the server entry point
     'node_modules/tsx/dist/cjs/index.cjs',
     'node_modules/tsx/dist/loader.mjs',
@@ -66,6 +66,8 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     // end needed deps for geckodriver
     // better-sqlite3 is needed to be loaded in dynamically in studio
     'node_modules/better-sqlite3/lib/index.js',
+    // shell-env is dynamically imported via tsx in @packages/server/lib/exec.ts
+    'node_modules/shell-env/index.js',
   ]
 
   let entryPoints = new Set([
@@ -89,6 +91,9 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       external: [
         './transpile-ts',
         './start-cypress',
+        // TypeScript lowers `import('electron')` to `require('electron')`; esbuild must not
+        // try to bundle it (electron is not installed under the packed app tree).
+        'electron',
         'fsevents',
         'pnpapi',
         '@swc/core',
@@ -141,6 +146,7 @@ const createServerEntryPointBundle = async (buildAppDir) => {
     external: [
       './transpile-ts',
       './start-cypress',
+      'electron',
     ],
   })
 

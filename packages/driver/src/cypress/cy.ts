@@ -33,6 +33,7 @@ import { historyNavigationTriggeredHashChange } from '../cy/navigation'
 import { EventEmitter2 } from 'eventemitter2'
 import { handleCrossOriginCookies } from '../cross-origin/events/cookies'
 import { trackTopUrl } from '../util/trackTopUrl'
+import $sourceMapUtils from './source_map_utils'
 
 import type { ICypress } from '../cypress'
 import type { ICookies } from './cookies'
@@ -59,17 +60,27 @@ function __stackReplacementMarker (fn, ctx, args) {
 
 declare let top: WindowProxy & { __alreadySetErrorHandlers__: boolean }
 
+const _noopOnerrorGet = function () {}
+const _noopOnerrorSet = function () {}
+
 // We only set top.onerror once since we make it configurable:false
-// but we update cy instance every run (page reload or rerun button)
+// but we update cy and Cypress instances every run (page reload or rerun button).
+// Both are module-level so that onTopError does NOT close over the Cypress
+// parameter from the first setTopOnError call — which would permanently retain
+// that Cypress instance (and everything it holds) via the top.addEventListener
+// event listener, preventing GC after reruns.
 let curCy: $Cy | null = null
+let curCypress: ICypress | null = null
 const setTopOnError = function (Cypress, cy: $Cy) {
   if (curCy) {
     curCy = cy
+    curCypress = Cypress
 
     return
   }
 
   curCy = cy
+  curCypress = Cypress
 
   try {
     // prevent overriding top.onerror twice when loading more than one
@@ -88,7 +99,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
     // in some callbacks like for cy.intercept, we catch the errors and then
     // rethrow them, causing them to get caught by the top frame
     // but they came from the spec, so we need to differentiate them
-    const isSpecError = $errUtils.isSpecError(Cypress.config('spec'), err)
+    const isSpecError = $errUtils.isSpecError(curCypress!.config('spec'), err)
 
     const handled = curCy!.onUncaughtException({
       err,
@@ -99,7 +110,7 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
     debugErrors('uncaught top error: %o', originalErr)
 
-    $errUtils.logError(Cypress, handlerType, originalErr, handled)
+    $errUtils.logError(curCypress!, handlerType, originalErr, handled)
 
     // return undefined so the browser does its default
     // uncaught exception behavior (logging to console)
@@ -110,8 +121,8 @@ const setTopOnError = function (Cypress, cy: $Cy) {
 
   // prevent Mocha from setting top.onerror
   Object.defineProperty(top, 'onerror', {
-    set () { },
-    get () { },
+    set: _noopOnerrorSet,
+    get: _noopOnerrorGet,
     configurable: false,
     enumerable: true,
   })
@@ -194,6 +205,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   getStyles: ISnapshots['getStyles']
 
   resetTimer: ReturnType<typeof createTimer>['reset']
+  resetStability: ReturnType<typeof createStability>['reset']
   overrides: IOverrides
 
   // Private methods
@@ -253,6 +265,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     this.isStable = stability.isStable
     this.whenStable = stability.whenStable
+    this.resetStability = stability.reset
 
     const assertions = createAssertions(Cypress, this)
 
@@ -399,7 +412,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
     err = $errUtils.enhanceStack({
       err,
       userInvocationStack,
-      projectRoot: this.config('projectRoot'),
+      projectRoot: $sourceMapUtils.getSourceMapProjectRoot(),
     })
 
     err = $errUtils.processErr(err, this.config)
@@ -654,6 +667,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.queue.reset()
       this.queue.clear()
       this.resetTimer()
+      this.resetStability()
       this.removeAllListeners()
       this.testConfigOverride.restoreAndSetTestConfigOverrides(test, this.Cypress.config, this.Cypress.env)
     } catch (err) {

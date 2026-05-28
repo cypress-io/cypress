@@ -17,10 +17,8 @@
   "dependencies": {
     "@packages/icons": "0.0.0-development",
     "@packages/stderr-filtering": "0.0.0-development",
-    "bluebird": "3.5.3",
     "debug": "^4.3.4",
     "fs-extra": "9.1.0",
-    "lodash": "^4.17.21",
     "minimist": "1.2.8"
   },
   "devDependencies": {
@@ -29,7 +27,6 @@
     "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.31.0",
     "execa": "4.1.0",
-    "mocha": "3.5.3",
     "systeminformation": "^5.27.7",
     "vitest": "^3.2.4"
   },
@@ -45,5 +42,6 @@
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx}": "eslint --fix"
   },
+  "license": "MIT",
   "nx": {}
 }

@@ -75,7 +75,6 @@
             :event-manager="eventManager"
             :get-aut-iframe="getAutIframeModel"
             :should-show-studio-button="shouldShowStudioButton"
-            :studio-beta-available="studioBetaAvailable"
           />
         </HideDuringScreenshot>
 
@@ -113,6 +112,8 @@
             :has-requested-project-access="hasRequestedProjectAccess"
             :request-project-access-mutation="requestProjectAccessMutation"
             :spec-dirty-data-store="specDirtyDataStore"
+            :aut-snapshot-store="snapshotStore"
+            :pending-navigation-resume="pendingNavigationResume"
           />
         </HideDuringScreenshot>
       </template>
@@ -156,6 +157,8 @@ import PromptMoreInfoNeededModal from '../prompt/PromptMoreInfoNeededModal.vue'
 import { usePromptStore } from '../store/prompt-store'
 import { useUserProjectStatusStore } from '@packages/frontend-shared/src/store/user-project-status-store'
 import { useSpecDirtyDataStore } from '../store/spec-dirty-data-store'
+import { useSnapshotStore } from './snapshot-store'
+import { setUnsavedChangesCallback } from './studio-unsaved-changes-guard'
 
 // this is used by the StudioPanel to access the AUT URL input
 const autUrlSelector = '.aut-url-input'
@@ -171,6 +174,7 @@ const {
 
 const userProjectStatusStore = useUserProjectStatusStore()
 const specDirtyDataStore = useSpecDirtyDataStore()
+const snapshotStore = useSnapshotStore()
 
 gql`
 fragment SpecRunner_Preferences on Query {
@@ -180,6 +184,7 @@ fragment SpecRunner_Preferences on Query {
       isSpecsListOpen
       autoScrollingEnabled
       showFetchRequests
+      codeEditorLineWrap
       reporterWidth
       specListWidth
       studioWidth
@@ -190,7 +195,6 @@ fragment SpecRunner_Preferences on Query {
 
 gql`
 fragment SpecRunner_Studio on Query {
-  cloudStudioRequested
   currentProject {
     id
     projectId
@@ -294,6 +298,16 @@ const handleStudioPanelClose = () => {
   eventManager.emit('studio:cancel', undefined)
 }
 
+const pendingNavigationResume = ref<(() => void) | null>(null)
+
+setUnsavedChangesCallback((resume) => {
+  pendingNavigationResume.value = resume
+})
+
+onBeforeUnmount(() => {
+  setUnsavedChangesCallback(null)
+})
+
 const specsListWidthPreferences = computed(() => {
   return props.gql.localSettings.preferences.specListWidth ?? runnerUiStore.specListWidth
 })
@@ -324,28 +338,18 @@ useSubscription({ query: StudioStatus_ChangeDocument }, (_, data) => {
   return data
 })
 
-const cloudStudioRequested = computed(() => {
-  studioStore.setCloudStudioRequested(props.gql.cloudStudioRequested || false)
-
-  return props.gql.cloudStudioRequested
-})
-
-const studioBetaAvailable = computed(() => {
-  return !!cloudStudioRequested.value
-})
-
 const shouldShowStudioButton = computed(() => {
   // Check if we're running all specs by looking at the route query
   const isRunningAllSpecs = route.query.file === '__all'
 
-  // Studio can only be enabled for e2e testing
+  // Studio is only available for e2e testing (always cloud-delivered)
   const isE2ETesting = props.gql.currentProject?.currentTestingType === 'e2e'
 
-  return !!cloudStudioRequested.value && !studioStore.isOpen && !isRunningAllSpecs && isE2ETesting
+  return !studioStore.isOpen && !isRunningAllSpecs && isE2ETesting
 })
 
 const shouldShowStudioPanel = computed(() => {
-  return !!cloudStudioRequested.value && (studioStore.isLoading || studioStore.isActive) && !screenshotStore.isScreenshotting
+  return (studioStore.isLoading || studioStore.isActive) && !screenshotStore.isScreenshotting
 })
 
 const hideCommandLog = runnerUiStore.hideCommandLog
@@ -358,7 +362,7 @@ onMounted(() => {
 })
 
 preferences.update('autoScrollingEnabled', props.gql.localSettings.preferences.autoScrollingEnabled ?? true)
-
+preferences.update('codeEditorLineWrap', props.gql.localSettings.preferences.codeEditorLineWrap ?? false)
 preferences.update('showFetchRequests', props.gql.localSettings.preferences.showFetchRequests ?? true)
 
 // if the CYPRESS_NO_COMMAND_LOG environment variable is set,
@@ -444,6 +448,14 @@ onMounted(() => {
     preferences.update('isSpecsListOpen', state.isSpecsListOpen)
     preferences.update('autoScrollingEnabled', state.autoScrollingEnabled)
     preferences.update('showFetchRequests', state.showFetchRequests)
+    preferences.update('codeEditorLineWrap', state.codeEditorLineWrap)
+  })
+
+  eventManager.on('open:login:connect:modal', ({ utmMedium, utmContent }) => {
+    userProjectStatusStore.openLoginConnectModal({
+      utmMedium,
+      utmContent,
+    })
   })
 })
 

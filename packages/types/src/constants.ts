@@ -20,13 +20,16 @@ export const CODE_LANGUAGES = [
 
 export type CodeLanguage = typeof CODE_LANGUAGES[number]
 
-export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
+export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm', 'bun'] as const
 
 export type PackageManager = typeof PACKAGE_MANAGERS[number]
 
-// Note: ONLY change this in code that will be merged into a release branch
-// for a new major version of Cypress
-export const GET_MAJOR_VERSION_FOR_CONTENT = () => semverMajor(packageInfo.version).toString()
+export const GET_MAJOR_VERSION_FOR_CONTENT = () => {
+  // @packages/root's Rollup build replaces the 0.0.0-development sentinel with
+  // the next computed release version (via scripts/get-next-version.js), so
+  // semverMajor always returns the correct major (e.g. 15) rather than 0.
+  return semverMajor(packageInfo.version).toString()
+}
 
 export const RUN_ALL_SPECS_KEY = '__all' as const
 
@@ -49,3 +52,11 @@ export const CY_IN_CY_SIMULATE_RUN_MODE = 'CY_IN_CY_SIMULATE_RUN_MODE'
 export const CYPRESS_REMOTE_MANIFEST_URL = 'https://download.cypress.io/desktop.json'
 
 export const NPM_CYPRESS_REGISTRY_URL = 'https://registry.npmjs.org/cypress'
+
+/**
+ * Maximum number of elements to check for visibility for the command log.
+ * Beyond this limit, the visibility check is skipped to prevent browser crashes
+ * when dealing with very large element sets.
+ * This number is fairly arbitrary.
+ */
+export const MAX_VISIBILITY_CHECK_ELEMENTS = 10

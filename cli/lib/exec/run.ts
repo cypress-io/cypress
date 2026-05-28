@@ -71,6 +71,10 @@ const processRunOptions = (options: any = {}): string[] => {
     args.push('--env', options.env)
   }
 
+  if (options.expose) {
+    args.push('--expose', options.expose)
+  }
+
   if (options.exit === false) {
     args.push('--no-exit')
   }
@@ -108,6 +112,10 @@ const processRunOptions = (options: any = {}): string[] => {
 
   if (options.parallel) {
     args.push('--parallel')
+  }
+
+  if (options.passWithNoTests) {
+    args.push('--pass-with-no-tests')
   }
 
   if (options.posixExitCodes) {

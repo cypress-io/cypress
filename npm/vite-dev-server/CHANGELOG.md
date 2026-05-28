@@ -1,3 +1,50 @@
+# [@cypress/vite-dev-server-v7.3.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.2...@cypress/vite-dev-server-v7.3.3) (2026-05-20)
+
+# [@cypress/vite-dev-server-v7.3.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.1...@cypress/vite-dev-server-v7.3.2) (2026-05-09)
+
+
+### Bug Fixes
+
+* **vite-dev-server:** exclude CT specs from Vite 8 JSX refresh ([#33751](https://github.com/cypress-io/cypress/issues/33751)) ([d9b2be4](https://github.com/cypress-io/cypress/commit/d9b2be464b382d1337c21e2aa48db8a479ea01f4)), closes [#33750](https://github.com/cypress-io/cypress/issues/33750)
+* **vite-dev-server:** warm up module graph before signaling ready ([#33755](https://github.com/cypress-io/cypress/issues/33755)) ([884c4e7](https://github.com/cypress-io/cypress/commit/884c4e741744ffb4f19c2a52991cf05f2671f1ca))
+
+# [@cypress/vite-dev-server-v7.3.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.0...@cypress/vite-dev-server-v7.3.1) (2026-04-20)
+
+
+### Bug Fixes
+
+* (vite-dev-server) wait for support file ([#33487](https://github.com/cypress-io/cypress/issues/33487)) ([f652605](https://github.com/cypress-io/cypress/commit/f652605d31877666ac5f9bbc7258c4f88f987795))
+
+# [@cypress/vite-dev-server-v7.3.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.2.1...@cypress/vite-dev-server-v7.3.0) (2026-04-16)
+
+
+### Features
+
+* support vite 8 for component testing ([#33580](https://github.com/cypress-io/cypress/issues/33580)) ([acf1eef](https://github.com/cypress-io/cypress/commit/acf1eef15c654af212152720d748c80d85ce8b0d))
+
+# [@cypress/vite-dev-server-v7.2.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.2.0...@cypress/vite-dev-server-v7.2.1) (2026-03-16)
+
+# [@cypress/vite-dev-server-v7.2.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.1.0...@cypress/vite-dev-server-v7.2.0) (2026-01-22)
+
+
+### Features
+
+* add `cy.env()`,` allowCypressEnv`, and deprecate `Cypress.env()` ([#33181](https://github.com/cypress-io/cypress/issues/33181)) ([ebe4a2c](https://github.com/cypress-io/cypress/commit/ebe4a2cab7312df76b28f59c3b0a91fc4a5e2444))
+
+# [@cypress/vite-dev-server-v7.1.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.0.1...@cypress/vite-dev-server-v7.1.0) (2026-01-13)
+
+
+### Features
+
+* experimentalRunAllSpecs for component testing ([#32926](https://github.com/cypress-io/cypress/issues/32926)) ([f25153a](https://github.com/cypress-io/cypress/commit/f25153a58347d4ffffa354270d7e5277c7cdab1d))
+
+# [@cypress/vite-dev-server-v7.0.1](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.0.0...@cypress/vite-dev-server-v7.0.1) (2025-11-04)
+
+
+### Bug Fixes
+
+* ensure that absolute paths can be found via source maps ([#32820](https://github.com/cypress-io/cypress/issues/32820)) ([e6e91a0](https://github.com/cypress-io/cypress/commit/e6e91a0c976eee43ad23b4dc654e83fe29016856))
+
 # [@cypress/vite-dev-server-v7.0.0](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v6.0.3...@cypress/vite-dev-server-v7.0.0) (2025-08-08)
 
 

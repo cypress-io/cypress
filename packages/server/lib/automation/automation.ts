@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 import type { BrowserPreRequest } from '@packages/proxy'
@@ -11,9 +11,9 @@ import { AutomationNotImplemented } from './automation_not_implemented'
 
 const debug = Debug('cypress:server:automation')
 
-export type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => Promise<void>
+type OnBrowserPreRequest = (browserPreRequest: BrowserPreRequest) => Promise<void>
 
-export type AutomationOptions = {
+type AutomationOptions = {
   cyNamespace?: string
   cookieNamespace?: string
   screenshotsFolder?: string | false
@@ -105,7 +105,7 @@ export class Automation {
 
   requestAutomationResponse (message: string, data: any, fn: (...args: any) => any) {
     return new Bluebird((resolve, reject) => {
-      const id = uuidv4()
+      const id = randomUUID()
 
       this.requests[id] = function (obj) {
         // normalize the error from automation responses

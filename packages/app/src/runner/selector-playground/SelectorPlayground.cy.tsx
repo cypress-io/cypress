@@ -30,18 +30,29 @@ describe('SelectorPlayground', () => {
     cy.get('[data-cy="playground-selector"]').should('have.value', 'body')
   })
 
-  it('toggles enabled', () => {
+  it('is enabled when playground is open', () => {
     const selectorPlaygroundStore = useSelectorPlaygroundStore()
 
-    expect(selectorPlaygroundStore.isEnabled).to.be.false
+    // Reset to disabled state before mounting
+    selectorPlaygroundStore.setEnabled(false)
+    selectorPlaygroundStore.setShowingHighlight(false)
 
-    const { autIframe } = mountSelectorPlayground()
+    // Create autIframe and set up spies BEFORE mounting, since onMounted will call these methods
+    const autIframe = createTestAutIframe()
 
     cy.spy(autIframe, 'toggleSelectorPlayground')
+    cy.spy(autIframe, 'toggleSelectorHighlight')
+    cy.spy(selectorPlaygroundStore, 'setShowingHighlight')
 
-    cy.get('[data-cy="playground-toggle"]').click().then(() => {
+    mountSelectorPlayground(createEventManager(), autIframe)
+
+    // When the playground component is mounted (visible), it should automatically be enabled
+    // and initialize highlighting functionality
+    cy.then(() => {
       expect(selectorPlaygroundStore.isEnabled).to.be.true
-      expect(autIframe.toggleSelectorPlayground).to.have.been.called
+      expect(autIframe.toggleSelectorPlayground).to.have.been.calledWith(true)
+      expect(selectorPlaygroundStore.setShowingHighlight).to.have.been.calledWith(true)
+      expect(autIframe.toggleSelectorHighlight).to.have.been.calledWith(true)
     })
   })
 
@@ -188,5 +199,95 @@ describe('SelectorPlayground', () => {
     mountSelectorPlayground()
 
     cy.get('[data-cy="playground-selector"]').should('have.attr', 'autocomplete', 'off')
+  })
+
+  it('triggers highlight on mouseover', () => {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+    const { autIframe } = mountSelectorPlayground()
+
+    cy.spy(autIframe, 'toggleSelectorHighlight')
+    cy.spy(selectorPlaygroundStore, 'setShowingHighlight')
+
+    cy.get('[data-cy="playground-selector"]').parent().trigger('mouseover')
+
+    cy.then(() => {
+      expect(selectorPlaygroundStore.setShowingHighlight).to.have.been.calledWith(true)
+      expect(autIframe.toggleSelectorHighlight).to.have.been.calledWith(true)
+    })
+  })
+
+  it('updates store and triggers highlight when typing', () => {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+    const { autIframe } = mountSelectorPlayground()
+
+    cy.spy(autIframe, 'toggleSelectorHighlight')
+
+    cy.get('[data-cy="playground-selector"]').clear().type('.test-selector')
+
+    cy.then(() => {
+      expect(selectorPlaygroundStore.getSelector).to.eq('.test-selector')
+      expect(autIframe.toggleSelectorHighlight).to.have.been.calledWith(true)
+    })
+  })
+
+  it('shows correct selector value when switching methods', () => {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+    selectorPlaygroundStore.getSelector = '.get-selector'
+    selectorPlaygroundStore.containsSelector = '.contains-selector'
+
+    mountSelectorPlayground()
+
+    cy.get('[data-cy="playground-selector"]').should('have.value', '.get-selector')
+
+    cy.get('[aria-label="Selector methods"]').click()
+    cy.findByRole('menuitem', { name: 'cy.contains' }).click()
+
+    cy.get('[data-cy="playground-selector"]').should('have.value', '.contains-selector')
+
+    cy.get('[aria-label="Selector methods"]').click()
+    cy.findByRole('menuitem', { name: 'cy.get' }).click()
+
+    cy.get('[data-cy="playground-selector"]').should('have.value', '.get-selector')
+  })
+
+  it('has correct input attributes to prevent autocomplete', () => {
+    mountSelectorPlayground()
+
+    cy.get('[data-cy="playground-selector"]')
+    .should('have.attr', 'autocomplete', 'off')
+    .should('have.attr', 'autocapitalize', 'none')
+    .should('have.attr', 'autocorrect', 'off')
+    .should('have.attr', 'spellcheck', 'false')
+  })
+
+  it('resets show state when component unmounts to prevent inconsistent state', () => {
+    const selectorPlaygroundStore = useSelectorPlaygroundStore()
+
+    // Set up initial state: show=true and component is enabled
+    selectorPlaygroundStore.setShow(true)
+    selectorPlaygroundStore.setEnabled(true)
+
+    const { element } = mountSelectorPlayground()
+
+    // Verify component is visible and state is consistent
+    cy.get('#selector-playground').should('be.visible')
+    cy.then(() => {
+      expect(selectorPlaygroundStore.show).to.be.true
+      expect(selectorPlaygroundStore.isEnabled).to.be.true
+    })
+
+    // Unmount the component (simulating navigation or parent unmount)
+    // This should trigger onUnmounted which calls setShow(false)
+    // In Cypress Vue component testing, cy.mount returns { wrapper, component }
+    element.then(({ wrapper }) => {
+      wrapper.unmount()
+    })
+
+    // After unmount, show should be false to prevent inconsistent state
+    // where show=true but component is not rendered, causing unexpected re-appearance
+    cy.then(() => {
+      expect(selectorPlaygroundStore.show).to.be.false
+    })
   })
 })

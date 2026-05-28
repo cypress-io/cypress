@@ -7,20 +7,28 @@ import { isRetryableError } from '../network/is_retryable_error'
 import { asyncRetry } from '../../util/async_retry'
 import { postCyPromptSession } from '../api/cy-prompt/post_cy_prompt_session'
 import path from 'path'
-import os from 'os'
 import { readFile } from 'fs-extra'
 import { ensureCyPromptBundle } from './ensure_cy_prompt_bundle'
+import { parseHashFromBundleUrl } from '../bundles/parse_hash_from_bundle_url'
 import chokidar from 'chokidar'
 import { getCloudMetadata } from '../get_cloud_metadata'
 import type { CyPromptAuthenticatedUserShape, CyPromptServerOptions } from '@packages/types'
 import crypto from 'crypto'
 import { reportCyPromptError } from '../api/cy-prompt/report_cy_prompt_error'
-
+import { GracefulExit } from '../../util/graceful-exit'
+import type { ExitStepKey } from '../../util/graceful-exit'
 const debug = Debug('cypress:server:cy-prompt-lifecycle-manager')
 
 export class CyPromptLifecycleManager {
-  private static hashLoadingMap: Map<string, Promise<Record<string, string>>> = new Map()
+  private static hashLoadingMap: Map<string, Promise<{ manifest: Record<string, string>, cyPromptPath: string }>> = new Map()
   private static watcher: chokidar.FSWatcher | null = null
+  private static teardown: ExitStepKey | null = null
+
+  static async close () {
+    CyPromptLifecycleManager.watcher?.removeAllListeners()
+    await CyPromptLifecycleManager.watcher?.close().catch(() => {})
+  }
+
   private cyPromptManagerPromise?: Promise<{
     cyPromptManager?: CyPromptManager
     error?: Error
@@ -42,11 +50,17 @@ export class CyPromptLifecycleManager {
     ctx,
     record,
     key,
+    projectId: fallbackProjectSlug,
   }: {
     cloudDataSource: CloudDataSource
     ctx: DataContext
     record?: boolean
     key?: string
+    /**
+     * Resolved from ProjectBase config when cy-prompt initializes. Used when
+     * `ctx.project.getConfig()` is not available yet (no ProjectConfigManager).
+     */
+    projectId?: string | null
   }): void {
     // Register this instance in the data context
     ctx.update((data) => {
@@ -62,15 +76,25 @@ export class CyPromptLifecycleManager {
       },
     }
 
+    const resolveProjectSlug = async (): Promise<string | undefined> => {
+      try {
+        const config = await ctx.project.getConfig()
+
+        return config.projectId || undefined
+      } catch {
+        return fallbackProjectSlug || undefined
+      }
+    }
+
     const getProjectOptions = async () => {
-      const [user, config] = await Promise.all([
+      const [user, projectSlug] = await Promise.all([
         ctx.actions.auth.authApi.getUser(),
-        ctx.project.getConfig(),
+        resolveProjectSlug(),
       ])
 
       return {
         user,
-        projectSlug: config.projectId || undefined,
+        projectSlug,
         record,
         key,
         isOpenMode: ctx.isOpenMode,
@@ -88,7 +112,13 @@ export class CyPromptLifecycleManager {
       const cloudUrl = ctx.cloud.getCloudUrl(cloudEnv)
       const cloudHeaders = await ctx.cloud.additionalHeaders()
 
-      const lastError = error instanceof AggregateError ? error.errors[error.errors.length - 1] : error
+      let projectSlug: string | undefined
+
+      try {
+        projectSlug = (await ctx.project.getConfig()).projectId || undefined
+      } catch {
+        projectSlug = fallbackProjectSlug || undefined
+      }
 
       reportCyPromptError({
         cloudApi: {
@@ -100,14 +130,16 @@ export class CyPromptLifecycleManager {
         },
         additionalHeaders: cloudHeaders,
         cyPromptHash: this.cyPromptHash,
-        projectSlug: (await ctx.project.getConfig()).projectId || undefined,
-        error: lastError,
+        projectSlug,
+        error,
         cyPromptMethod: 'initializeCyPromptManager',
         cyPromptMethodArgs: [],
       })
 
       // Clean up any registered listeners
       this.listeners = []
+
+      const lastError = error instanceof AggregateError ? error.errors[error.errors.length - 1] : error
 
       return { error: lastError }
     })
@@ -130,6 +162,12 @@ export class CyPromptLifecycleManager {
     return cyPromptManager
   }
 
+  resetCyPrompt (): void {
+    if (this.cyPromptManager) {
+      this.cyPromptManager.reset()
+    }
+  }
+
   private async createCyPromptManager ({
     cloudDataSource,
     getProjectOptions,
@@ -148,9 +186,7 @@ export class CyPromptLifecycleManager {
     })
 
     if (!process.env.CYPRESS_LOCAL_CY_PROMPT_PATH) {
-      // The cy prompt hash is the last part of the cy prompt URL, after the last slash and before the extension
-      this.cyPromptHash = cyPromptSession.cyPromptUrl.split('/').pop()?.split('.')[0] as string
-      cyPromptPath = path.join(os.tmpdir(), 'cypress', 'cy-prompt', this.cyPromptHash)
+      this.cyPromptHash = parseHashFromBundleUrl(cyPromptSession.cyPromptUrl)
 
       let hashLoadingPromise = CyPromptLifecycleManager.hashLoadingMap.get(this.cyPromptHash)
 
@@ -158,13 +194,15 @@ export class CyPromptLifecycleManager {
         hashLoadingPromise = ensureCyPromptBundle({
           cyPromptUrl: cyPromptSession.cyPromptUrl,
           projectId,
-          cyPromptPath,
         })
 
         CyPromptLifecycleManager.hashLoadingMap.set(this.cyPromptHash, hashLoadingPromise)
       }
 
-      manifest = await hashLoadingPromise
+      const result = await hashLoadingPromise
+
+      manifest = result.manifest
+      cyPromptPath = result.cyPromptPath
     } else {
       cyPromptPath = process.env.CYPRESS_LOCAL_CY_PROMPT_PATH
       this.cyPromptHash = 'local'
@@ -252,9 +290,17 @@ export class CyPromptLifecycleManager {
 
     // Close the watcher if a previous watcher exists
     if (CyPromptLifecycleManager.watcher) {
-      CyPromptLifecycleManager.watcher.removeAllListeners()
-      CyPromptLifecycleManager.watcher.close().catch(() => {})
+      CyPromptLifecycleManager.close().catch(() => {})
     }
+
+    if (CyPromptLifecycleManager.teardown) {
+      GracefulExit.removeStep(CyPromptLifecycleManager.teardown)
+      CyPromptLifecycleManager.teardown = null
+    }
+
+    CyPromptLifecycleManager.teardown = GracefulExit.addStep(async () => {
+      await CyPromptLifecycleManager.close()
+    }, 'close cy prompt watcher')
 
     // Watch for changes to the cy prompt bundle
     CyPromptLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_CY_PROMPT_PATH, 'server', 'index.js'), {

@@ -1,3 +1,5 @@
+@import "../lib/mixins.scss";
+
 .studio-single-test-container {
   display: flex;
   flex-direction: column;
@@ -15,6 +17,7 @@
   font-size: 14px;
   line-height: 20px;
   flex-shrink: 0;
+  @include sticky-header-with-shadow;
 
   .state-icon {
     height: 32px;

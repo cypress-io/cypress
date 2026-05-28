@@ -1,9 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import style from 'ansi-styles'
 import chalk from 'chalk'
-import sinon, { SinonSpy } from 'sinon'
 import * as errors from '../src'
 import { parseResolvedPattern } from '../src/errorUtils'
+
+// ANSI escape codes for color testing
+const ansiStyles = {
+  red: {
+    open: '\u001b[31m',
+    close: '\u001b[39m',
+  },
+  yellow: {
+    open: '\u001b[33m',
+    close: '\u001b[39m',
+  },
+} as const
 
 describe('lib/errors', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
@@ -33,7 +43,7 @@ describe('lib/errors', () => {
 
       const {
         red,
-      } = style
+      } = ansiStyles
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining(red.open))
 
@@ -49,7 +59,7 @@ describe('lib/errors', () => {
 
       const {
         yellow,
-      } = style
+      } = ansiStyles
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining(yellow.open))
 

@@ -164,7 +164,7 @@ describe('runnables', () => {
 
         cy.contains('Cypress Studio').click()
 
-        cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', { suiteId: 'r1', entrySource: undefined })
+        cy.wrap(runner.emit).should('be.calledWith', 'studio:init:suite', { suiteId: 'r1', entrySource: 'new-test-root' })
       })
     })
 
@@ -217,6 +217,7 @@ describe('runnables', () => {
     })
 
     it('adds a scroll listener in open mode', () => {
+      appState.autoScrollingEnabled = false
       appState.startRunning()
       cy.get('.container')
       .trigger('scroll')

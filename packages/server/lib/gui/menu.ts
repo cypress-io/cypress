@@ -2,7 +2,7 @@ import _ from 'lodash'
 import os from 'os'
 // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
 import { Menu, shell } from 'electron'
-import appData from '../util/app_data'
+import * as appData from '../util/app_data'
 
 // hoist up options and allow calling menu.set({})
 // to override existing options or be called multiple

@@ -1,4 +1,4 @@
-import type { BannersState, Editor, MajorVersionWelcomeDismissed } from '.'
+import type { BannersState, Editor, MajorVersionWelcomeDismissed, Maybe } from '.'
 
 export const NotifyCompletionStatuses = ['passed', 'failed', 'cancelled', 'errored'] as const
 
@@ -13,6 +13,7 @@ export const defaultPreferences: AllowedState = {
   notifyWhenRunStarts: false,
   notifyWhenRunStartsFailing: true,
   notifyWhenRunCompletes: ['failed'],
+  codeEditorLineWrap: false,
 }
 
 export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
@@ -54,9 +55,8 @@ export const allowedKeys: Readonly<Array<keyof AllowedState>> = [
   'notifyWhenRunStartsFailing',
   'notifyWhenRunCompletes',
   'studioFirstUseInstructionsDismissed',
+  'codeEditorLineWrap',
 ] as const
-
-type Maybe<T> = T | null | undefined
 
 export type AllowedState = Partial<{
   appWidth: Maybe<number>
@@ -98,4 +98,5 @@ export type AllowedState = Partial<{
   notifyWhenRunStartsFailing: Maybe<boolean>
   notifyWhenRunCompletes: Maybe<NotifyWhenRunCompletes[]>
   studioFirstUseInstructionsDismissed: Maybe<boolean>
+  codeEditorLineWrap: Maybe<boolean>
 }>

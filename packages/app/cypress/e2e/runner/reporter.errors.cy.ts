@@ -17,7 +17,7 @@ function loadErrorSpec (options: specLoader.LoadSpecOptions): VerifyFunc {
   specLoader.loadSpec(options)
 
   // Return scoped verify function with spec options baked in
-  return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde, mode })
+  return createVerify({ fileName: Cypress._.last(filePath.split('/')), filePath, hasPreferredIde, mode })
 }
 
 describe('errors ui', {
@@ -204,7 +204,7 @@ describe('errors ui', {
 
     verify('spec Bluebird unhandled rejection', {
       uncaught: true,
-      column: 21,
+      column: 20,
       originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',
@@ -214,7 +214,7 @@ describe('errors ui', {
 
     verify('spec Bluebird unhandled rejection with done', {
       uncaught: true,
-      column: 21,
+      column: 20,
       originalMessage: 'Unhandled promise rejection from the spec',
       message: [
         'The following error originated from your test code',

@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`makeWebpackConfig > ignores userland webpack \`output.publicPath\` and \`devServer.overlay\` with webpack-dev-server v5 1`] = `
+{
+  "devServer": {
+    "client": {
+      "overlay": false,
+      "progress": false,
+    },
+    "port": undefined,
+  },
+  "devtool": "inline-source-map",
+  "mode": "development",
+  "optimization": {
+    "emitOnErrors": true,
+    "sideEffects": false,
+    "splitChunks": {
+      "chunks": "all",
+    },
+  },
+  "output": {
+    "filename": "[name].js",
+    "publicPath": "/test-public-path/",
+  },
+  "plugins": [
+    "HtmlWebpackPlugin",
+    "CypressCTWebpackPlugin",
+  ],
+}
+`;

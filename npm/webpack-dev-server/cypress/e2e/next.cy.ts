@@ -106,7 +106,7 @@ for (const project of NEXT_PROJECTS) {
   })
 }
 
-const NEXT_PROJECTS_TSCONFIG_TAILWIND: ProjectFixtureDir[] = ['next-14-tsconfig-tailwind', 'next-15-tsconfig-tailwind']
+const NEXT_PROJECTS_TSCONFIG_TAILWIND: ProjectFixtureDir[] = ['next-14-tsconfig-tailwind', 'next-15-tsconfig-tailwind', 'next-16-tsconfig-tailwind']
 
 for (const project of NEXT_PROJECTS_TSCONFIG_TAILWIND) {
   // Since next-tsconfig-tailwind does not use the fixture directory we need to write our own test suite
@@ -143,9 +143,11 @@ for (const project of NEXT_PROJECTS_TSCONFIG_TAILWIND) {
       })
 
       cy.waitForSpecToFinish({ failCount: 1 })
-      if (project !== 'next-15-tsconfig-tailwind') {
-        // code frames not fully working with next 15
+      if (project !== 'next-15-tsconfig-tailwind' && project !== 'next-16-tsconfig-tailwind') {
+        // code frames not fully working with next 15/16
         cy.get('.test-err-code-frame').should('be.visible')
+      } else {
+        cy.get('.runnable-err-message').should('be.visible')
       }
 
       cy.withCtx(async (ctx) => {

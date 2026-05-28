@@ -11,8 +11,9 @@ import type {
 } from '../types'
 import type { BackendRoute, NetStubbingState } from './types'
 import { emit, sendStaticResponse } from './util'
-import type CyServer from '@packages/server'
+import type { SocketBroadcaster } from '@packages/socket'
 import type { BackendStaticResponse } from '../internal-types'
+import * as errors from '@packages/errors'
 
 export class InterceptedRequest {
   id: string
@@ -40,7 +41,7 @@ export class InterceptedRequest {
   req: CypressIncomingRequest
   res: CypressOutgoingResponse
   state: NetStubbingState
-  socket: CyServer.Socket
+  socket: SocketBroadcaster
 
   constructor (opts: Pick<InterceptedRequest, 'req' | 'res' | 'continueRequest' | 'onError' | 'onResponse' | 'state' | 'socket'>) {
     this.id = _.uniqueId('interceptedRequest')
@@ -74,6 +75,14 @@ export class InterceptedRequest {
 
     for (const route of this.req.matchingRoutes) {
       if (route.disabled) {
+        continue
+      }
+
+      // if the request is sync and the route has an interceptor (i.e. routeHandler), then skip the intercept
+      // because the we cannot wait on the before:request event when the sync request is blocking
+      if (this.req.isSyncRequest && route.hasInterceptor) {
+        errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', this.req.proxiedUrl)
+
         continue
       }
 

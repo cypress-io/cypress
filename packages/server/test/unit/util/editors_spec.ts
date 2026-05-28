@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import chaiSubset from 'chai-subset'
@@ -54,7 +53,7 @@ describe('lib/util/editors', () => {
       sinon.stub(shellUtil, 'commandExists').callsFake((command) => {
         const exists = ['code', 'subl', 'vim'].includes(command)
 
-        return Bluebird.resolve(exists)
+        return Promise.resolve(exists)
       })
 
       platform = process.platform
@@ -70,7 +69,7 @@ describe('lib/util/editors', () => {
       // @ts-ignore
       savedState.create.resolves({
         get () {
-          return Bluebird.resolve({ isOther: true, binary: '/path/to/editor', id: 'other' })
+          return Promise.resolve({ isOther: true, binary: '/path/to/editor', id: 'other' })
         },
       })
     })
@@ -112,7 +111,7 @@ describe('lib/util/editors', () => {
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return Bluebird.resolve({ preferredOpener })
+            return Promise.resolve({ preferredOpener })
           },
         })
 
@@ -130,7 +129,7 @@ describe('lib/util/editors', () => {
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return Bluebird.resolve({ preferredOpener })
+            return Promise.resolve({ preferredOpener })
           },
         })
 

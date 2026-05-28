@@ -22,8 +22,3 @@ export const has = (event) => {
 export const execute = (event, ...args) => {
   return getCtx().lifecycleManager.executeNodeEvent(event, args)
 }
-
-// for testing purposes
-export const _reset = () => {
-  return getCtx().lifecycleManager.reinitializeCypress()
-}

@@ -10,12 +10,12 @@ import * as config from './config'
 import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
-import Reporter from './reporter'
+import { Reporter } from './reporter'
 import * as savedState from './saved_state'
 import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
-import system from './util/system'
+import * as system from './util/system'
 import type {
   BannersState,
   FoundBrowser,
@@ -30,11 +30,10 @@ import type {
   AutomationCommands,
 } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
-import { createHmac } from 'crypto'
+import { createHmac, randomUUID } from 'crypto'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
-import { v4 } from 'uuid'
 import { StudioLifecycleManager } from './cloud/studio/StudioLifecycleManager'
 import { CyPromptLifecycleManager } from './cloud/cy-prompt/CyPromptLifecycleManager'
 import { telemetryManager } from './cloud/studio/telemetry/TelemetryManager'
@@ -169,21 +168,19 @@ export class ProjectBase extends EE {
     process.chdir(this.projectRoot)
 
     this._server = new ServerBase(cfg)
-    if (cfg.experimentalPromptCommand) {
-      const cyPromptLifecycleManager = new CyPromptLifecycleManager()
 
-      cyPromptLifecycleManager.initializeCyPromptManager({
-        cloudDataSource: this.ctx.cloud,
-        ctx: this.ctx,
-        record: this.options.record,
-        key: this.options.key,
-      })
-    }
+    new CyPromptLifecycleManager().initializeCyPromptManager({
+      cloudDataSource: this.ctx.cloud,
+      ctx: this.ctx,
+      record: this.options.record,
+      key: this.options.key,
+      projectId: cfg.projectId,
+    })
 
     if ((!cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE) && this.testingType === 'e2e') {
       const studioLifecycleManager = new StudioLifecycleManager()
 
-      studioLifecycleManager.initializeStudioManager({
+      await studioLifecycleManager.initializeStudioManager({
         cloudDataSource: this.ctx.cloud,
         cfg,
         debugData: this.configDebugData,
@@ -482,7 +479,7 @@ export class ProjectBase extends EE {
 
         // Only need a new session if Studio is being entered from a non-opened
         // state. If the test is being re-run, we use the existing session
-        const cloudStudioSessionId = sessionId ?? v4()
+        const cloudStudioSessionId = sessionId ?? randomUUID()
 
         try {
           const isStudioReady = this.ctx.coreData.studioLifecycleManager?.isStudioReady()
@@ -516,12 +513,16 @@ export class ProjectBase extends EE {
             this.protocolManager.setupProtocol()
             this.protocolManager.beforeSpec({
               ...this.spec,
-              instanceId: v4(),
+              instanceId: randomUUID(),
             })
 
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
             await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: studio.protocolManager })
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_START)
+            await browsers.connectStudioToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, studioManager: studio })
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_END)
 
             if (!studio.protocolManager.dbPath) {
               debug('Protocol database path is not set after initializing protocol manager')
@@ -767,7 +768,7 @@ export class ProjectBase extends EE {
 
     let state = await savedState.create(options.type === 'project' ? this.projectRoot : undefined, this.cfg.isTextTerminal)
 
-    state.set(stateChanges)
+    await state.set(stateChanges)
     this.cfg.state = await state.get()
 
     return this.cfg.state

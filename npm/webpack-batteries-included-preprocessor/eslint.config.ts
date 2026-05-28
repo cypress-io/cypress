@@ -9,6 +9,9 @@ export default [
   {
     files: ['**/*.js', '**/*.ts'],
     languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+      },
       globals: {
         ...globals.node,
       },

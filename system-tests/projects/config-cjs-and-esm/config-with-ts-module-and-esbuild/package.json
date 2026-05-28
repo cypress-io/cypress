@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "esbuild": "0.25.2",
+    "esbuild": "0.28.0",
     "typescript": "5.6.3"
   },
   "type": "module",

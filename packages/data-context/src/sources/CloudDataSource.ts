@@ -23,6 +23,8 @@ import _ from 'lodash'
 import type { core } from 'nexus'
 import { delegateToSchema } from '@graphql-tools/delegate'
 import { urqlCacheKeys } from '../util/urqlCacheKeys'
+import { CLOUD_URLS } from '../util/cloudUrls'
+import type { CloudEnv } from '../util/cloudUrls'
 import { urqlSchema } from '../gen/urql-introspection.gen'
 import type { AuthenticatedUserShape } from '../data'
 import { pathToArray } from 'graphql/jsutils/Path'
@@ -30,13 +32,7 @@ import { pathToArray } from 'graphql/jsutils/Path'
 export type CloudDataResponse<T = any> = ExecutionResult<T> & Partial<OperationResult<T | null>> & { executing?: Promise<ExecutionResult<T> & Partial<OperationResult<T | null>>> }
 
 const debug = debugLib('cypress:data-context:sources:CloudDataSource')
-const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as keyof typeof REMOTE_SCHEMA_URLS
-
-const REMOTE_SCHEMA_URLS = {
-  staging: 'https://cloud-staging.cypress.io',
-  development: 'http://localhost:3000',
-  production: 'https://cloud.cypress.io',
-}
+const cloudEnv = getenv('CYPRESS_INTERNAL_CLOUD_ENV', process.env.CYPRESS_INTERNAL_ENV || 'development') as CloudEnv
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type StartsWith<T, Prefix extends string> = T extends `${Prefix}${infer _U}` ? T : never
@@ -48,22 +44,32 @@ export interface CloudExecuteQuery {
   operationVariables: any
 }
 
-export interface CloudExecuteRemote extends CloudExecuteQuery {
+interface CloudExecuteRemote extends CloudExecuteQuery {
   fieldName: string
   shouldBatch?: boolean
   operationType?: OperationTypeNode
   requestPolicy?: RequestPolicy
   onUpdatedResult?: (data: any) => any
+  /**
+   * Opt-in: when set, the query is allowed to hit the remote schema even when
+   * there's no authenticated user. Default behavior short-circuits to
+   * `{ data: null }` for logged-out users (correct for queries that depend on
+   * a user, like `cloudViewer` / project lists). Set this for genuinely public
+   * fields — e.g. `cloudAppMessages`, where logged-out users still need to
+   * receive content. Use sparingly; greppable so it's easy to audit which
+   * queries opt in.
+   */
+  allowUnauthenticated?: boolean
 }
 
-export interface CloudExecuteDelegateFieldParams<F extends CloudQueryField> {
+interface CloudExecuteDelegateFieldParams<F extends CloudQueryField> {
   field: F
   args: core.ArgsValue<'Query', F>
   ctx: DataContext
   info: GraphQLResolveInfo
 }
 
-export interface CloudDataSourceParams {
+interface CloudDataSourceParams {
   fetch: typeof fetch
   getUser(): AuthenticatedUserShape | null
   logout(): void
@@ -291,8 +297,11 @@ export class CloudDataSource {
    * as a remote request mechanism for a stitched schema, we reject the promise if we see any errors.
    */
   executeRemoteGraphQL <T = any> (config: CloudExecuteRemote): Promise<CloudDataResponse<T>> | CloudDataResponse<T> {
-    // We do not want unauthenticated requests to hit the remote schema
-    if (!this.#user) {
+    // By default we don't want unauthenticated requests to hit the remote
+    // schema — most cloud queries are user-scoped and have nothing to return
+    // for a logged-out user. Callers can opt in via `allowUnauthenticated: true`
+    // for genuinely public fields (see field comment on `CloudExecuteRemote`).
+    if (!this.#user && !config.allowUnauthenticated) {
       return { data: null }
     }
 
@@ -359,8 +368,8 @@ export class CloudDataSource {
     return JSON.parse(this.#lastCache ?? '')
   }
 
-  getCloudUrl (env: keyof typeof REMOTE_SCHEMA_URLS) {
-    return REMOTE_SCHEMA_URLS[env]
+  getCloudUrl (env: CloudEnv) {
+    return CLOUD_URLS[env]
   }
 
   /**

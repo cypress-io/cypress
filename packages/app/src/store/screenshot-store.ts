@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export interface ScreenshotStore {
+interface ScreenshotStore {
   isScreenshotting: boolean
 }
 

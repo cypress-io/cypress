@@ -44,13 +44,7 @@ import { resetIssuedWarnings } from '@packages/config'
 
 const IS_DEV_ENV = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
-export type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
-
-export type CurrentProjectUpdater = (proj: Exclude<CoreDataShape['currentProject'], null | undefined>) => void | undefined | CoreDataShape['currentProject']
-
-export interface InternalDataContextOptions {
-  loadCachedProjects: boolean
-}
+type Updater = (proj: CoreDataShape) => void | undefined | CoreDataShape
 
 export interface DataContextConfig {
   schema: GraphQLSchema
@@ -338,10 +332,10 @@ export class DataContext {
   }
 
   async destroy () {
-    return Promise.all([
-      this.actions.servers.destroyGqlServer(),
-      this._reset(),
-    ])
+    // Close graphql-ws clients and the GQL HTTP server before lifecycle teardown so
+    // in-flight GraphQL/subscription work does not write to sockets mid-destroy (ERR_STREAM_DESTROYED).
+    await this.actions.servers.destroyGqlServer()
+    await this._reset()
   }
 
   /**

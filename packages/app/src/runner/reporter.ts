@@ -7,7 +7,7 @@ import { useRunnerUiStore } from '../store/runner-ui-store'
 let hasInitializeReporter = false
 let reactDomRoot: any = null
 
-export function setInitializedReporter (val: boolean) {
+function setInitializedReporter (val: boolean) {
   hasInitializeReporter = val
 }
 
@@ -54,6 +54,7 @@ function renderReporter (
     studioEnabled: window.__CYPRESS_TESTING_TYPE__ === 'e2e',
     runnerStore: store,
     testFilter: specsStore.testFilter,
+    codeEditorLineWrap: runnerUiStore.codeEditorLineWrap,
   })
 
   reactDomRoot = window.UnifiedRunner.ReactDOM.createRoot(root)

@@ -1,4 +1,4 @@
-import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName } from './helper'
+import { launchStudio, loadProjectAndRunSpec, incrementCounter, inputNewTestName, openNewTestFromSpecHeader } from './helper'
 
 describe('Cypress Studio - New Test Creation', () => {
   it('does not enter single test mode when creating a new test', () => {
@@ -12,27 +12,13 @@ describe('Cypress Studio - New Test Creation', () => {
     cy.get('.runnable-title').its(3).should('contain.text', 'visits a basic html page 3')
   })
 
-  it('creates a new test from spec header', () => {
-    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSpecHeader: true })
+  describe('from spec header', () => {
+    const assertRootCreatedTest = () => {
+      // we should have the commands we executed after we save
+      cy.withCtx(async (ctx) => {
+        const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec-w-visit.cy.js')
 
-    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
-
-    cy.contains('new-test').click()
-
-    cy.percySnapshot()
-
-    cy.get('.cm-content').invoke('text', 'cy.visit("cypress/e2e/index.html")')
-
-    cy.findByTestId('studio-save-button').click()
-
-    // verify recording is enabled to ensure the panel is fully ready
-    cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
-
-    // we should have the commands we executed after we save
-    cy.withCtx(async (ctx) => {
-      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec-w-visit.cy.js')
-
-      expect(spec.trim().replace(/\r/g, '')).to.equal(`
+        expect(spec.trim().replace(/\r/g, '')).to.equal(`
 describe('studio functionality', () => {
   beforeEach(() => {
     cy.visit('cypress/e2e/index.html')
@@ -46,6 +32,70 @@ describe('studio functionality', () => {
 it('new-test', function() {
   cy.visit("cypress/e2e/index.html")
 });`.trim())
+      })
+    }
+
+    const saveNewTest = () => {
+      inputNewTestName()
+
+      cy.contains('new-test').click()
+
+      cy.percySnapshot()
+
+      cy.get('.cm-content').invoke('text', 'cy.visit("cypress/e2e/index.html")')
+
+      cy.findByTestId('studio-save-button').click()
+
+      // verify recording is enabled to ensure the panel is fully ready
+      cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
+    }
+
+    it('outside of studio', () => {
+      loadProjectAndRunSpec({ specName: 'spec-w-visit.cy.js' })
+      openNewTestFromSpecHeader()
+
+      saveNewTest()
+
+      assertRootCreatedTest()
+    })
+
+    it('in studio welcome screen', () => {
+      launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSpecHeader: true })
+
+      saveNewTest()
+
+      assertRootCreatedTest()
+    })
+
+    it('in studio single test mode', () => {
+      launchStudio({ specName: 'spec-w-visit.cy.js' })
+
+      openNewTestFromSpecHeader()
+
+      saveNewTest()
+
+      // we should have the commands we executed after we save
+      cy.withCtx(async (ctx) => {
+        const spec = await ctx.actions.file.readFileInProject('cypress/e2e/spec-w-visit.cy.js')
+
+        return spec.trim().replace(/\r/g, '')
+      }).then((normalizedSpec) => {
+        expect(normalizedSpec).to.equal(`
+describe('studio functionality', () => {
+  beforeEach(() => {
+    cy.visit('cypress/e2e/index.html')
+  });
+
+  it('visits a basic html page', () => {
+    cy.get('h1').should('have.text', 'Hello, Studio!')
+  })
+
+  it('new-test', function() {
+    cy.visit("cypress/e2e/index.html")
+  });
+})
+`.trim())
+      })
     })
   })
 
@@ -128,7 +178,7 @@ describe('studio functionality', () => {
   it('creates a new test for a specific suite with the url already defined', () => {
     launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
 
-    inputNewTestName({ creatingNewTestFromWelcomeScreen: false })
+    inputNewTestName()
 
     // make sure that the visit has run and we're recording studio commands
     cy.get('[data-cy="record-button-recording"]').should('be.visible')
@@ -188,6 +238,38 @@ it('new-test', function() {
     })
   })
 
+  it('opens the name test screen from the welcome screen and creates a new test from an empty spec', () => {
+    loadProjectAndRunSpec({ specName: 'empty.cy.js', specSelector: 'title' })
+
+    cy.findByTestId('studio-button').click()
+
+    cy.get('[data-cy="studio-panel"]').should('be.visible')
+
+    cy.contains('Create test with Cypress Studio').click()
+
+    inputNewTestName()
+
+    // Cypress re-runs after the new test is saved.
+    cy.waitForSpecToFinish()
+
+    cy.get('.cm-content').invoke('text', 'cy.visit("cypress/e2e/index.html")')
+
+    cy.findByTestId('studio-save-button').click()
+
+    // verify recording is enabled to ensure the panel is fully ready
+    cy.findByTestId('record-button-recording').should('have.text', 'Recording...')
+
+    // we should have the commands we executed after we save
+    cy.withCtx(async (ctx) => {
+      const spec = await ctx.actions.file.readFileInProject('cypress/e2e/empty.cy.js')
+
+      expect(spec.trim().replace(/\r/g, '')).to.equal(`
+it('new-test', function() {
+    cy.visit("cypress/e2e/index.html")
+});`.trim())
+    })
+  })
+
   it('allows .only tests to be edited in studio', () => {
     loadProjectAndRunSpec({ specName: 'spec-with-only.cy.js' })
 
@@ -211,11 +293,10 @@ it('new-test', function() {
 
     cy.get('.test').should('have.length', 1)
     cy.get('.test').contains('should be the only test to run normally').should('be.visible')
+    // create a new test from the spec header
+    openNewTestFromSpecHeader()
 
-    // launch studio and create a new test
-    cy.findByTestId('studio-button').click()
     cy.findByTestId('studio-panel').should('be.visible').within(() => {
-      cy.contains('button', 'New test').click()
       cy.get('[data-cy="test-name-input"]').type('new test{enter}')
     })
 
@@ -224,8 +305,50 @@ it('new-test', function() {
     cy.get('[data-cy="studio-single-test-title"]').should('have.text', 'new test')
   })
 
+  it('continues to display the welcome screen after reloading', () => {
+    loadProjectAndRunSpec({ specName: 'spec-w-visit.cy.js' })
+
+    // open welcome screen
+    cy.findByTestId('studio-button').click()
+
+    cy.findByTestId('new-test-features').should('be.visible')
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=').and('contain', 'entrySource=welcome')
+
+    cy.reload()
+
+    cy.findByTestId('new-test-features').should('be.visible')
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=').and('contain', 'entrySource=welcome')
+  })
+
+  it('continues to display the name test screen after reloading the page for a new test from root suite', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSpecHeader: true })
+
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=').and('contain', 'entrySource=new-test-root')
+
+    cy.get('[data-cy="name-test-container"]').should('be.visible')
+
+    cy.reload()
+
+    cy.location().its('hash').should('contain', 'suiteId=r1').and('contain', 'studio=').and('contain', 'entrySource=new-test-root')
+
+    cy.get('[data-cy="name-test-container"]').should('be.visible')
+  })
+
+  it('continues to display the name test screen after reloading the page for a new test from suite', () => {
+    launchStudio({ specName: 'spec-w-visit.cy.js', createNewTestFromSuite: true })
+
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=').and('contain', 'entrySource=new-test-suite')
+
+    cy.get('[data-cy="name-test-container"]').should('be.visible')
+
+    cy.reload()
+
+    cy.location().its('hash').should('contain', 'suiteId=r2').and('contain', 'studio=').and('contain', 'entrySource=new-test-suite')
+
+    cy.get('[data-cy="name-test-container"]').should('be.visible')
+  })
+
   describe('prompt for a new url', () => {
-    const urlPrompt = '// Visit a page by entering a url in the address bar or typing a cy.visit command here'
     const autUrl = 'http://localhost:4455/cypress/e2e/index.html'
     const visitUrl = 'cypress/e2e/index.html'
 
@@ -240,13 +363,13 @@ it('new-test', function() {
 
       cy.findByTestId('aut-url-input').should('have.focus')
 
-      cy.get('.cm-line').should('contain.text', urlPrompt)
+      cy.findByTestId('studio-error-visit-url-banner').should('exist')
     }
 
     const assertAutUrlInput = () => {
       cy.findByTestId('aut-url-input').should('have.value', autUrl)
 
-      cy.get('.cm-line').should('not.contain.text', urlPrompt)
+      cy.findByTestId('studio-error-visit-url-banner').should('not.exist')
 
       cy.get('.cm-line').should('contain.text', `cy.visit('${visitUrl}')`)
     }

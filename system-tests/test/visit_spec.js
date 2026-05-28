@@ -121,7 +121,9 @@ describe('e2e visit', () => {
       settings: {
         responseTimeout: 500,
         pageLoadTimeout: 1000,
-        e2e: {},
+        e2e: {
+          allowCypressEnv: false,
+        },
       },
       servers: {
         port: 3434,
@@ -139,24 +141,6 @@ describe('e2e visit', () => {
         .then((serv) => {
           return exec()
           .finally(() => {
-            return serv.destroy()
-          })
-        })
-      },
-    })
-
-    systemTests.it('passes with experimentalSourceRewriting', {
-      browser: '!webkit', // TODO(webkit): fix+unskip
-      spec: 'source_rewriting.cy.js',
-      config: {
-        experimentalSourceRewriting: true,
-      },
-      snapshot: true,
-      onRun (exec) {
-        return startTlsV1Server(6776)
-        .then((serv) => {
-          return exec()
-          .then(() => {
             return serv.destroy()
           })
         })
@@ -187,6 +171,9 @@ describe('e2e visit', () => {
       spec: 'visit_non_html_content_type_failing.cy.js',
       snapshot: true,
       expectedExitCode: 1,
+      config: {
+        screenshotOnRunFailure: false,
+      },
     })
 
     systemTests.it('calls onBeforeLoad when overwriting cy.visit', {
@@ -199,7 +186,9 @@ describe('e2e visit', () => {
     systemTests.setup({
       settings: {
         responseTimeout: 2000,
-        e2e: {},
+        e2e: {
+          allowCypressEnv: false,
+        },
       },
       servers: {
         port: 3434,
@@ -215,11 +204,37 @@ describe('e2e visit', () => {
     })
   })
 
+  context('source rewriting', () => {
+    systemTests.setup({
+      servers: {
+        port: 3434,
+        static: true,
+        onServer,
+      },
+      settings: {
+        e2e: {
+          allowCypressEnv: false,
+        },
+      },
+    })
+
+    systemTests.it('passes with experimentalSourceRewriting', {
+      browser: '!webkit', // TODO(webkit): fix+unskip
+      spec: 'source_rewriting.cy.js',
+      config: {
+        experimentalSourceRewriting: true,
+      },
+      snapshot: true,
+    })
+  })
+
   context('normal response timeouts', () => {
     systemTests.setup({
       settings: {
         pageLoadTimeout: 1000,
-        e2e: {},
+        e2e: {
+          allowCypressEnv: false,
+        },
       },
       servers: {
         port: 3434,

@@ -8,6 +8,7 @@
  */
 
 import { createTimers } from './timers'
+import { patchXmlHttpRequest } from './patches/xmlHttpRequest'
 
 const Cypress = window.Cypress = parent.Cypress
 
@@ -15,6 +16,8 @@ if (!Cypress) {
   throw new Error('Something went terribly wrong and we cannot proceed. We expected to find the global \
 Cypress in the parent window but it is missing. This should never happen and likely is a bug. Please open an issue.')
 }
+
+patchXmlHttpRequest(window)
 
 // We wrap timers in the injection code because if we do it in the driver (like
 // we used to do), any uncaught errors thrown in the timer callbacks would

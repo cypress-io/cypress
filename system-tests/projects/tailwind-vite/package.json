@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@cypress/vite-dev-server": "file:../../../npm/vite-dev-server",
-    "autoprefixer": "10.4.20",
+    "autoprefixer": "10.4.22",
     "postcss": "8.4.47",
     "react": "18.3.1",
     "react-dom": "18.3.1",

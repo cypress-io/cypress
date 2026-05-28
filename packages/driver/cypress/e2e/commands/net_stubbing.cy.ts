@@ -335,6 +335,147 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
+    it('does not intercept an XHR sync request with a route handler', () => {
+      cy.intercept('/', {
+        body: `
+          <!DOCTYPE html>
+          <html>
+          <body>
+            <div id="sync_response"></div>
+            <div id="async_response"></div>
+            <script>
+              const xhr = new window.XMLHttpRequest()
+              xhr.open('GET', '/fixtures/valid.json', false)
+              xhr.send()
+              document.querySelector('#sync_response').innerHTML = JSON.stringify(JSON.parse(xhr.responseText))
+
+              const xhr2 = new window.XMLHttpRequest()
+              xhr2.open('GET', '/async', true)
+              xhr2.onload = () => {
+                document.querySelector('#async_response').innerHTML = xhr2.responseText
+              }
+              xhr2.send()
+            </script>
+          </body>
+          </html>
+        `,
+      })
+
+      // this intercept won't get hit because the request is sync
+      cy.intercept('/fixtures/valid.json', () => {}).as('sync')
+
+      // this intercept will get hit because the request is async
+      cy.intercept('/async', (req) => {
+        req.reply({ body: 'async' })
+      }).as('async')
+
+      cy.visit('/')
+      cy.get('#sync_response').should('contain', '{"foo":1,"bar":{"baz":"cypress"}}')
+      cy.get('#async_response').should('contain', 'async')
+      cy.wait('@async')
+    })
+
+    it('does not intercept a cross-origin XHR sync request with a route handler', { browser: '!webkit' }, () => {
+      cy.intercept('http://www.foobar.com:3500/', {
+        body: `
+          <!DOCTYPE html>
+          <html>
+          <body>
+            <div id="sync_response"></div>
+            <div id="async_response"></div>
+            <script>
+              const xhr = new window.XMLHttpRequest()
+              xhr.open('GET', '/fixtures/valid.json', false)
+              xhr.send()
+              document.querySelector('#sync_response').innerHTML = JSON.stringify(JSON.parse(xhr.responseText))
+
+              const xhr2 = new window.XMLHttpRequest()
+              xhr2.open('GET', '/async', true)
+              xhr2.onload = () => {
+                document.querySelector('#async_response').innerHTML = xhr2.responseText
+              }
+              xhr2.send()
+            </script>
+          </body>
+          </html>
+        `,
+      })
+
+      // this intercept won't get hit because the request is sync
+      cy.intercept('http://www.foobar.com:3500/fixtures/valid.json', (req) => {
+        req.reply({ body: '' })
+      })
+
+      // this intercept will get hit because the request is async
+      cy.intercept('http://www.foobar.com:3500/async', (req) => {
+        req.reply({ body: 'async' })
+      }).as('async')
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        cy.visit('http://www.foobar.com:3500/')
+        cy.get('#sync_response').should('contain', '{"foo":1,"bar":{"baz":"cypress"}}')
+        cy.get('#async_response').should('contain', 'async')
+      })
+
+      cy.wait('@async')
+    })
+
+    it('intercepts a sync XHR request from a Worker with a route handler', () => {
+      cy.intercept('/', {
+        body: `
+          <!DOCTYPE html>
+          <html>
+          <body>
+            <div id="sync_response"></div>
+            <div id="async_response"></div>
+            <script>
+              const workerScript = \`
+                const xhr = new XMLHttpRequest()
+                xhr.open('GET', 'http://localhost:3500/fixtures/valid.json', false)
+                xhr.send()
+                postMessage({ type: 'sync', data: JSON.stringify(JSON.parse(xhr.responseText)) })
+
+                const xhr2 = new XMLHttpRequest()
+                xhr2.open('GET', 'http://localhost:3500/async', true)
+                xhr2.onload = () => {
+                  postMessage({ type: 'async', data: xhr2.responseText })
+                }
+                xhr2.send()
+              \`
+              const blob = new Blob([workerScript], { type: 'application/javascript' })
+              const workerURL = URL.createObjectURL(blob)
+              const worker = new Worker(workerURL)
+              
+              worker.onmessage = (m) => {
+                if (m.data.type === 'sync') {
+                  document.querySelector('#sync_response').innerHTML = m.data.data
+                } else if (m.data.type === 'async') {
+                  document.querySelector('#async_response').innerHTML = m.data.data
+                }
+              }
+            </script>
+          </body>
+          </html>
+        `,
+      })
+
+      // this intercept will get hit because the sync XHR request is sent from the worker
+      cy.intercept('http://localhost:3500/fixtures/valid.json', (req) => {
+        req.reply({ body: '{"foo":"bar"}' })
+      }).as('sync')
+
+      // this intercept will get hit because the request is async
+      cy.intercept('http://localhost:3500/async', (req) => {
+        req.reply({ body: 'async' })
+      }).as('async')
+
+      cy.visit('/')
+      cy.get('#sync_response').should('contain', '{"foo":"bar"}')
+      cy.get('#async_response').should('contain', 'async')
+      cy.wait('@sync')
+      cy.wait('@async')
+    })
+
     context('overrides', function () {
       it('chains middleware with string matcher as expected', function () {
         const e: string[] = []
@@ -851,6 +992,15 @@ describe('network stubbing', { retries: 15 }, function () {
               statusCode: -1,
             },
             'must be a number',
+          ],
+          // @see https://github.com/cypress-io/cypress/issues/33183
+          [
+            'delay exceeds maximum setTimeout value',
+            {
+              body: 'test',
+              delay: 2147483648,
+            },
+            'must be less than 2147483648ms',
           ],
         ].forEach(function ([name, handler, expectedErr]) {
           it(`${name} fails`, function (done) {
@@ -3516,6 +3666,36 @@ describe('network stubbing', { retries: 15 }, function () {
       })
       .wait('@foo.bar.request')
       .wait('@foo.bar.request', { timeout: 100 })
+    })
+
+    it('does not hang when waiting on multiple aliases across navigation', function (done) {
+      const triggerUrl = uniqueRoute('/trigger-navigation')
+      const neverAUrl = uniqueRoute('/never-a')
+      const neverBUrl = uniqueRoute('/never-b')
+      const slowPageUrl = '/fixtures/empty.html?stability-repro=1'
+
+      testFailWaiting((err) => {
+        expect(err.message).to.contain('`cy.wait()` timed out waiting')
+        done()
+      })
+
+      cy.intercept(`${triggerUrl}*`, 'ok').as('trigger')
+      cy.intercept(`${neverAUrl}*`).as('neverA')
+      cy.intercept(`${neverBUrl}*`).as('neverB')
+      cy.intercept('/fixtures/empty.html?stability-repro=1', {
+        delay: 2000,
+        fixture: 'empty.html',
+      })
+      .then(() => {
+        const win = cy.state('window')
+
+        setTimeout(() => {
+          $.get(triggerUrl).always(() => {
+            win.location.href = slowPageUrl
+          })
+        }, 50)
+      })
+      .wait(['@neverA', '@neverB', '@trigger'], { timeout: 300 })
     })
 
     it('can alias a route without stubbing it', function () {

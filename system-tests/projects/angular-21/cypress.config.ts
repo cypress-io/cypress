@@ -1,0 +1,32 @@
+import { defineConfig } from 'cypress'
+
+export default defineConfig({
+  allowCypressEnv: false,
+  component: {
+    experimentalSingleTabRunMode: true,
+    devServer: {
+      framework: 'angular',
+      bundler: 'webpack',
+      webpackConfig: {
+        resolve: {
+          alias: {
+            '@angular/common/http': require.resolve('@angular/common/http'),
+            '@angular/common/testing': require.resolve('@angular/common/testing'),
+            '@angular/common': require.resolve('@angular/common'),
+            '@angular/core/testing': require.resolve('@angular/core/testing'),
+            '@angular/core/primitives/di': require.resolve('@angular/core/primitives/di'),
+            '@angular/core/primitives/event-dispatch': require.resolve('@angular/core/primitives/event-dispatch'),
+            '@angular/core/primitives/signals': require.resolve('@angular/core/primitives/signals'),
+            '@angular/core/rxjs-interop': require.resolve('@angular/core/rxjs-interop'),
+            '@angular/core': require.resolve('@angular/core'),
+            '@angular/platform-browser/testing': require.resolve('@angular/platform-browser/testing'),
+            '@angular/platform-browser': require.resolve('@angular/platform-browser'),
+            '@angular/platform-browser-dynamic/testing': require.resolve('@angular/platform-browser-dynamic/testing'),
+            '@angular/platform-browser-dynamic': require.resolve('@angular/platform-browser-dynamic'),
+          },
+        },
+      },
+    },
+    specPattern: 'src/**/*.cy.ts',
+  },
+})

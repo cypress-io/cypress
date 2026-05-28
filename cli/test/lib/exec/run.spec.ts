@@ -229,6 +229,11 @@ describe('exec run', () => {
       expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--auto-cancel-after-failures', false], expect.anything())
     })
 
+    it('spawns with --pass-with-no-tests', async () => {
+      await run.start({ passWithNoTests: true })
+      expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--pass-with-no-tests'], expect.anything())
+    })
+
     it('spawns with --runner-ui', async () => {
       await run.start({ runnerUi: true })
       expect(spawnStart).toHaveBeenCalledWith(['--run-project', process.cwd(), '--runner-ui', true], expect.anything())

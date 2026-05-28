@@ -122,6 +122,10 @@ class $Cypress {
   downloads: any
   Commands: any
   $autIframe: any
+  $autSnapshotIframe?: JQuery<HTMLIFrameElement> | null
+  $autSnapshotIframes?: JQuery<HTMLIFrameElement>[] | null
+  $autIframesContainer?: JQuery<HTMLElement> | null
+  $autPanelContainer?: JQuery<HTMLElement> | null
   onSpecReady: any
   waitForStudio: any
   events: any
@@ -136,6 +140,7 @@ class $Cypress {
   originalConfig: any
   config: any
   env: any
+  expose: any
   getTestRetries: any
   Cookies!: ICookies
   ProxyLogging: any
@@ -202,6 +207,7 @@ class $Cypress {
   lolex = fakeTimers
   handlePrimaryOriginSocketEvent = handlePrimaryOriginSocketEvent
   areSourceMapsAvailable: boolean = false
+  sourceMapProjectRoot: string = ''
 
   static $: any
   static utils: any
@@ -214,6 +220,10 @@ class $Cypress {
     this.downloads = null
     this.Commands = null
     this.$autIframe = null
+    this.$autSnapshotIframe = null
+    this.$autSnapshotIframes = null
+    this.$autIframesContainer = null
+    this.$autPanelContainer = null
     this.onSpecReady = null
     this.waitForStudio = null
     this.primaryOriginCommunicator = new PrimaryOriginCommunicator()
@@ -251,7 +261,7 @@ class $Cypress {
     // not we're in a text terminal, but we keep this
     // as a separate property so we can potentially
     // slice up the behavior
-    config.isInteractive = !config.isTextTerminal || config.env.INTERNAL_SIMULATE_OPEN_MODE
+    config.isInteractive = !config.isTextTerminal || config.env?.INTERNAL_SIMULATE_OPEN_MODE
 
     // true if this Cypress belongs to a cross origin spec bridge
     this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
@@ -268,9 +278,9 @@ class $Cypress {
 
     // TODO: env is unintentionally preserved between soft reruns unlike config.
     // change this in the NEXT_BREAKING
-    const { env } = config
+    const { env, expose } = config
 
-    config = _.omit(config, 'env', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
+    config = _.omit(config, 'env', 'expose', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
 
@@ -308,7 +318,18 @@ class $Cypress {
       return validateConfig(this.state, config, skipConfigOverrideValidation)
     })
 
-    this.env = $SetterGetter.create(env)
+    const isAllowCypressEnvEnabled = this.config('allowCypressEnv')
+
+    const failCypressEnvWithWarning = (key) => {
+      const err = $errUtils.errByPath('config.allow_cypress_env', { key })
+
+      $utils.warning(err.message)
+
+      throw err
+    }
+
+    this.env = !isAllowCypressEnvEnabled ? failCypressEnvWithWarning : $SetterGetter.create(env)
+    this.expose = $SetterGetter.create(expose)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
 
@@ -341,8 +362,29 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ({ $autIframe, onSpecReady, waitForStudio }) {
+  initialize ({ $autIframe, $autSnapshotIframes, onSpecReady, waitForStudio }) {
     this.$autIframe = $autIframe
+
+    // Cypress-provided iframe elements used by Studio to render DOM snapshots
+    // for Studio integrations.
+    //
+    // Including the first snapshot as $autSnapshotIframe for compatibility with
+    // some Studio versions.
+    this.$autSnapshotIframes = $autSnapshotIframes
+    this.$autSnapshotIframe = $autSnapshotIframes?.[0] ?? null
+
+    // The container element holding the scaled AUT iframe and any $autSnapshotIframes.
+    // Used by Studio to portal dynamic content.
+    const autIframesContainerElement = document.getElementById('aut-iframes-container')
+
+    this.$autIframesContainer = autIframesContainerElement ? $(autIframesContainerElement) : null
+
+    // The container element holding all AUT panel contents, including the AUT frame, snapshot controls, etc.
+    // Used by Studio to portal dynamic content.
+    const autPanelContainerElement = document.getElementById('aut-panel')
+
+    this.$autPanelContainer = autPanelContainerElement ? $(autPanelContainerElement) : null
+
     this.onSpecReady = onSpecReady
     this.waitForStudio = waitForStudio
     if (this._onInitialize) {
@@ -406,9 +448,13 @@ class $Cypress {
         scripts,
         specWindow,
         testingType: this.testingType,
+        projectRoot: this.config('projectRoot'),
+        specRelativePath: this.spec.relative,
+        specAbsolutePath: this.spec.absolute,
       })
       .then(() => {
         this.areSourceMapsAvailable = $sourceMapUtils.areSourceMapsAvailable()
+        this.sourceMapProjectRoot = $sourceMapUtils.getSourceMapProjectRoot()
         if (this.testingType === 'e2e') {
           return setSpecContentSecurityPolicy(specWindow)
         }
@@ -856,6 +902,7 @@ class $Cypress {
     const tests = this.runner.getTestsState(testId)
     let runState: RunState = {
       currentId: testId,
+      currentRetry: this.currentRetry,
       tests,
       startTime: this.runner.getStartTime(),
       emissions: this.runner.getEmissions(),

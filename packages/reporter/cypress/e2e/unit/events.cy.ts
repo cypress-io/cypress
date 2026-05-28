@@ -355,11 +355,13 @@ describe('events', () => {
       appState.autoScrollingUserPref = false
       appState.isSpecsListOpen = true
       appState.showFetchRequests = false
+      appState.codeEditorLineWrap = false
       events.emit('save:state')
       expect(runner.emit).to.have.been.calledWith('save:state', {
         autoScrollingEnabled: false,
         isSpecsListOpen: true,
         showFetchRequests: false,
+        codeEditorLineWrap: false,
       })
     })
 
@@ -373,19 +375,9 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('studio:init:suite', { suiteId: 'suite id', entrySource: undefined })
     })
 
-    it('emits studio:remove:command with command id on studio:remove:command', () => {
-      events.emit('studio:remove:command', 'command id')
-      expect(runner.emit).to.have.been.calledWith('studio:remove:command', 'command id')
-    })
-
     it('emits studio:cancel on studio:cancel', () => {
       events.emit('studio:cancel')
       expect(runner.emit).to.have.been.calledWith('studio:cancel')
-    })
-
-    it('emits studio:save on studio:save', () => {
-      events.emit('studio:save')
-      expect(runner.emit).to.have.been.calledWith('studio:save')
     })
   })
 })

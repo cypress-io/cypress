@@ -95,7 +95,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
   return resultCode + fileContents.slice(nextStartingIndex)
 }
 
-export function isDefineConfigFunction (ast: File, functionName: string): boolean {
+function isDefineConfigFunction (ast: File, functionName: string): boolean {
   let value = false
 
   visit(ast, {

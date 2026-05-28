@@ -2,6 +2,7 @@ import { Ref, onMounted, ref, watch, watchEffect, onBeforeUnmount, readonly } fr
 import { getAutIframeModel, UnifiedRunnerAPI } from '../runner'
 import { useSpecStore } from '../store'
 import { useSelectorPlaygroundStore } from '../store/selector-playground-store'
+import { closePlayground } from './selector-playground/utils'
 import { RUN_ALL_SPECS, RUN_ALL_SPECS_KEY, SpecFile } from '@packages/types/src'
 import { LocationQuery, useRoute } from 'vue-router'
 import { getPathForPlatform, posixify } from '../paths'
@@ -80,9 +81,7 @@ export function useUnifiedRunner () {
         if (selectorPlaygroundStore.show) {
           const autIframe = getAutIframeModel()
 
-          autIframe.toggleSelectorPlayground(false)
-          selectorPlaygroundStore.setEnabled(false)
-          selectorPlaygroundStore.setShow(false)
+          closePlayground(autIframe)
         }
       }, { flush: 'post' })
     },

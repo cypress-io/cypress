@@ -67,14 +67,14 @@ When Electron is upgraded, the bundled Node.js version often changes. Sync this 
 ```bash
 # File: /docker-compose.yml
 # Update the base-internal image reference:
-# "cypress/base-internal:22.18.0-bullseye" -> "cypress/base-internal:NEW_NODE_VERSION-bullseye"
+# "cypress/base-internal:22.18.0-trixie" -> "cypress/base-internal:NEW_NODE_VERSION-trixie"
 ```
 
 ### CircleCI Workflows
 ```bash
 # File: /.circleci/src/@workflows.yml
 # Update base-internal image references:
-# "base-internal-bullseye: &base-internal-bullseye cypress/base-internal:22.18.0-bullseye" -> "base-internal-bullseye: &base-internal-bullseye cypress/base-internal:NEW_NODE_VERSION-bullseye"
+# "base-internal-trixie: &base-internal-trixie cypress/base-internal:22.18.0-trixie" -> "base-internal-trixie: &base-internal-trixie cypress/base-internal:NEW_NODE_VERSION-trixie"
 # "base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.18.0-yarn-berry" -> "base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:NEW_NODE_VERSION-yarn-berry"
 # "base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:22.18.0" -> "base-internal-minimum-node: &base-internal-minimum-node cypress/base-internal:NEW_NODE_VERSION"
 ```

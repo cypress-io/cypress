@@ -1,18 +1,13 @@
-import Chai, { expect } from 'chai'
+import { expect, it, describe, beforeEach, vi } from 'vitest'
 import EventEmitter from 'events'
-import snapshot from 'snap-shot-it'
 import path from 'path'
 import debug from 'debug'
 import { IgnorePlugin } from 'webpack'
 import { WebpackDevServerConfig } from '../src/devServer'
 import { CYPRESS_WEBPACK_ENTRYPOINT, makeWebpackConfig } from '../src/makeWebpackConfig'
 import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResult'
-import sinon from 'sinon'
-import SinonChai from 'sinon-chai'
 import type { SourceRelativeWebpackResult } from '../src/helpers/sourceRelativeWebpackModules'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
-
-Chai.use(SinonChai)
 
 const WEBPACK_DEV_SERVER_VERSIONS: (5)[] = [5]
 
@@ -59,8 +54,8 @@ describe('makeWebpackConfig', () => {
     delete actual.output.path
     delete actual.entry
 
-    expect(actual.output.publicPath).to.eq('/test-public-path/')
-    snapshot(actual)
+    expect(actual.output.publicPath).toEqual('/test-public-path/')
+    expect(actual).toMatchSnapshot()
   })
 
   WEBPACK_DEV_SERVER_VERSIONS.forEach((VERSION) => {
@@ -85,7 +80,7 @@ describe('makeWebpackConfig', () => {
           }),
         })
 
-        expect(actual.entry).eq(CYPRESS_WEBPACK_ENTRYPOINT)
+        expect(actual.entry).toEqual(CYPRESS_WEBPACK_ENTRYPOINT)
       })
 
       it(`removes entrypoint from merged webpackConfig`, async () => {
@@ -108,7 +103,7 @@ describe('makeWebpackConfig', () => {
           }),
         })
 
-        expect(actual.entry).eq(CYPRESS_WEBPACK_ENTRYPOINT)
+        expect(actual.entry).toEqual(CYPRESS_WEBPACK_ENTRYPOINT)
       })
 
       it(`preserves entrypoint from merged webpackConfig if framework = angular`, async () => {
@@ -132,13 +127,13 @@ describe('makeWebpackConfig', () => {
           }),
         })
 
-        expect(actual.entry).deep.eq({
+        expect(actual.entry).toEqual({
           main: 'src/index.js',
           'cypress-entry': CYPRESS_WEBPACK_ENTRYPOINT,
         })
       })
 
-      context('config resolution', () => {
+      describe('config resolution', () => {
         it('with <project-root>/webpack.config.js', async () => {
           const devServerConfig: WebpackDevServerConfig = {
             specs: [],
@@ -157,8 +152,8 @@ describe('makeWebpackConfig', () => {
             }),
           })
 
-          expect(actual.plugins.map((p) => p.constructor.name)).to.have.members(
-            ['CypressCTWebpackPlugin', 'HtmlWebpackPlugin', 'FromWebpackConfigFile'],
+          expect(actual.plugins.map((p) => p.constructor.name).sort()).toEqual(
+            ['CypressCTWebpackPlugin', 'FromWebpackConfigFile', 'HtmlWebpackPlugin'],
           )
         })
 
@@ -187,8 +182,8 @@ describe('makeWebpackConfig', () => {
             }),
           })
 
-          expect(actual.plugins.map((p) => p.constructor.name)).to.have.members(
-            ['CypressCTWebpackPlugin', 'HtmlWebpackPlugin', 'FromInlineWebpackConfig'],
+          expect(actual.plugins.map((p) => p.constructor.name).sort()).toEqual(
+            ['CypressCTWebpackPlugin', 'FromInlineWebpackConfig', 'HtmlWebpackPlugin'],
           )
         })
 
@@ -198,7 +193,7 @@ describe('makeWebpackConfig', () => {
             resourceRegExp: /bbb/,
           })
 
-          const modifyConfig = sinon.spy(async () => {
+          const modifyConfig = vi.fn().mockImplementation(async () => {
             return {
               plugins: [testPlugin],
             }
@@ -224,13 +219,13 @@ describe('makeWebpackConfig', () => {
             }),
           })
 
-          expect(actual.plugins.length).to.eq(3)
-          expect(modifyConfig).to.have.been.called
+          expect(actual.plugins).toHaveLength(3)
+          expect(modifyConfig).toHaveBeenCalled()
           // merged plugins get added at the top of the chain by default
           // should be merged, not overriding existing plugins
-          expect(actual.plugins[0].constructor.name).to.eq('IgnorePlugin')
-          expect(actual.plugins[1].constructor.name).to.eq('HtmlWebpackPlugin')
-          expect(actual.plugins[2].constructor.name).to.eq('CypressCTWebpackPlugin')
+          expect(actual.plugins[0].constructor.name).toEqual('IgnorePlugin')
+          expect(actual.plugins[1].constructor.name).toEqual('HtmlWebpackPlugin')
+          expect(actual.plugins[2].constructor.name).toEqual('CypressCTWebpackPlugin')
         })
       })
     })
@@ -270,7 +265,7 @@ describe('makeWebpackConfig', () => {
           sourceWebpackModulesResult,
         })
 
-        expect(actual.watchOptions.ignored).to.eql('**/*')
+        expect(actual.watchOptions.ignored).toEqual('**/*')
       })
 
       it('uses defaults in open mode', async () => {
@@ -281,7 +276,7 @@ describe('makeWebpackConfig', () => {
           sourceWebpackModulesResult,
         })
 
-        expect(actual.watchOptions?.ignored).to.be.undefined
+        expect(actual.watchOptions?.ignored).toBeUndefined()
       })
     })
   })
@@ -331,7 +326,7 @@ describe('makeWebpackConfig', () => {
               }),
             })
 
-            expect(actual.watchOptions?.ignored).to.deep.equal(/node_modules/)
+            expect(actual.watchOptions?.ignored).toEqual(/node_modules/)
           })
         })
       })
@@ -372,8 +367,8 @@ describe('makeWebpackConfig', () => {
           }),
         })
 
-        expect(actual.plugins).to.have.length(3)
-        expect(actual.plugins[2]).to.be.instanceOf(BundleAnalyzerPlugin)
+        expect(actual.plugins).toHaveLength(3)
+        expect(actual.plugins[2]).toBeInstanceOf(BundleAnalyzerPlugin)
       })
     })
   })

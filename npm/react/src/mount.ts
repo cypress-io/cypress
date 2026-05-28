@@ -4,11 +4,11 @@ import { getContainerEl } from '@cypress/mount-utils'
 import {
   makeMountFn,
   makeUnmountFn,
-} from './index'
+} from './createMount'
 import type {
   MountOptions,
   InternalMountOptions,
-} from './index'
+} from './types'
 
 let root: ReactDOM.Root | null
 

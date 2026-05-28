@@ -4,10 +4,13 @@ linux-x64:
       - equal: [ develop, << pipeline.git.branch >> ]
       # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
       - equal: [ 'update-v8-snapshot-cache-on-develop', << pipeline.git.branch >> ]
-      - equal: [ 'chore/fix_builds', << pipeline.git.branch >> ]
       - matches:
           pattern: /^release\/\d+\.\d+\.\d+$/
           value: << pipeline.git.branch >>
+      - matches:
+          pattern: /^electron\/\d+\.\d+\.\d+$/
+          value: << pipeline.git.branch >>
+      - equal: [ true, << pipeline.parameters.force-persist-artifacts >> ]
   jobs:
     - node_modules_install:
         build-better-sqlite3: true
@@ -16,6 +19,9 @@ linux-x64:
         requires:
           - node_modules_install
     - check-ts:
+        requires:
+          - build
+    - health-check:
         requires:
           - build
     - lint:
@@ -233,6 +239,9 @@ linux-x64:
     - npm-angular:
         requires:
           - build
+    - npm-angular-zoneless:
+        requires:
+          - build
     - npm-mount-utils:
         requires:
           - build
@@ -253,7 +262,9 @@ linux-x64:
         # filters: *mainBuildFilters
         requires:
           - check-ts
+          - health-check
           - npm-angular
+          - npm-angular-zoneless
           - npm-eslint-plugin-dev
           - npm-puppeteer-unit-tests
           - npm-puppeteer-cypress-tests
@@ -301,15 +312,11 @@ linux-x64:
           - v8-integration-tests
 
     - npm-release:
-        filters: &mainBuildFilters
+        filters:
             branches:
               only:
                 - develop
-                - /^release\/\d+\.\d+\.\d+$/
-                # use the following branch as well to ensure that v8 snapshot cache updates are fully tested
-                - 'update-v8-snapshot-cache-on-develop'
-                - 'feat/cy-prompt'
-        context: test-runner:npm-release
+        context: [test-runner:npm-release, org-npm-credentials]
         requires:
           - ready-to-release
 
@@ -334,7 +341,9 @@ linux-x64:
     # and testing it on a real project
     - test-against-staging:
         context: test-runner:record-tests
-        filters: *mainBuildFilters
+        # Expression-based filter: branch-based allowlist OR force-persist-artifacts pipeline parameter.
+        # 'update-v8-snapshot-cache-on-develop' is included so v8 snapshot cache updates are fully tested.
+        filters: &mainBuildFilters pipeline.git.branch == "develop" or pipeline.git.branch matches /^release\/\d+\.\d+\.\d+$/ or pipeline.git.branch matches /^electron\/\d+\.\d+\.\d+$/ or pipeline.git.branch == "update-v8-snapshot-cache-on-develop" or pipeline.parameters.force-persist-artifacts == true
         requires:
           - build
     - test-kitchensink:

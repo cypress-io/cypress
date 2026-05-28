@@ -3,7 +3,7 @@ import systemTests from '../lib/system-tests'
 describe('module API', () => {
   systemTests.it('can run module API Mocha spec', {
     timeout: 240000,
-    dockerImage: 'cypress/base-internal:22.19.0-bullseye',
+    dockerImage: 'cypress/base-internal:22.19.0-trixie',
     withBinary: true,
     project: 'module-api',
     browser: 'electron',

@@ -1,8 +1,13 @@
 /// <reference types="cypress" />
 
-import type { StudioServerShape, StudioServerDefaultShape, StudioEvent } from '@packages/types'
+import type { StudioServerShape, StudioServerDefaultShape, StudioEvent, StudioCDPClient, StudioConfig } from '@packages/types'
 import type { Router } from 'express'
 import type { Socket } from '@packages/socket'
+
+const stubStudioConfig: StudioConfig = {
+  AI: { enabled: true },
+  featureFlags: { studioNonNativeEvents: false, studioAI: true },
+}
 
 class StudioServer implements StudioServerShape {
   initializeRoutes (router: Router): void {
@@ -11,6 +16,14 @@ class StudioServer implements StudioServerShape {
 
   canAccessStudioAI (browser: Cypress.Browser): Promise<boolean> {
     return Promise.resolve(true)
+  }
+
+  getStudioConfig (browser: Cypress.Browser): Promise<StudioConfig> {
+    return Promise.resolve(stubStudioConfig)
+  }
+
+  getCachedStudioConfig (): StudioConfig {
+    return stubStudioConfig
   }
 
   initializeStudioAI (): Promise<void> {
@@ -35,6 +48,10 @@ class StudioServer implements StudioServerShape {
 
   updateSessionId (sessionId: string): void {
     // This is a test implementation that does nothing
+  }
+
+  connectToBrowser (cdpClient: StudioCDPClient): Promise<void> {
+    return Promise.resolve()
   }
 }
 

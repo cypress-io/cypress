@@ -3,7 +3,7 @@ import defaultMessages from '@packages/frontend-shared/src/locales/en-US.json'
 
 // Assert that either the the dialog is presented or the mutation is emitted, depending on
 // whether the test has a preferred IDE defined.
-const verifyIdeOpen = ({ fileName, action, hasPreferredIde, line, column }) => {
+const verifyIdeOpen = ({ fileName, filePath, action, hasPreferredIde, line, column }) => {
   if (hasPreferredIde) {
     cy.withCtx((ctx, o) => {
       // @ts-expect-error - check if we've stubbed it already, only need to stub it once
@@ -15,8 +15,8 @@ const verifyIdeOpen = ({ fileName, action, hasPreferredIde, line, column }) => {
     action()
 
     cy.withCtx((ctx, o) => {
-      expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`${o.fileName}$`)), o.line, o.column)
-    }, { fileName, line, column })
+      expect(ctx.actions.file.openFile).to.have.been.calledWith(o.sinon.match(new RegExp(`cypress/e2e/${o.filePath}$`)), o.line, o.column)
+    }, { fileName, filePath, line, column })
   } else {
     action()
 
@@ -38,6 +38,7 @@ const verifyFailure = (options) => {
     command,
     stack,
     fileName,
+    filePath,
     uncaught = false,
     uncaughtMessage,
     line,
@@ -138,6 +139,7 @@ const verifyFailure = (options) => {
   if (verifyOpenInIde) {
     verifyIdeOpen({
       fileName,
+      filePath,
       hasPreferredIde,
       action: () => {
         cy.get('@Root').contains('.runnable-err-stack-trace .runnable-err-file-path a', fileName)
@@ -185,6 +187,7 @@ const verifyFailure = (options) => {
   if (verifyOpenInIde) {
     verifyIdeOpen({
       fileName,
+      filePath,
       hasPreferredIde,
       action: () => {
         cy.get('@Root').contains('.test-err-code-frame .runnable-err-file-path a', fileName)
@@ -198,12 +201,13 @@ const verifyFailure = (options) => {
 
 type ChainableVerify = (specTitle: string, props: any) => Cypress.Chainable
 
-export const createVerify = ({ fileName, hasPreferredIde, mode }): ChainableVerify => {
+export const createVerify = ({ fileName, filePath, hasPreferredIde, mode }): ChainableVerify => {
   return (specTitle: string, props: any) => {
     props.specTitle ||= specTitle
     props.fileName ||= fileName
     props.hasPreferredIde = hasPreferredIde
     props.mode = mode
+    props.filePath ||= filePath
 
     return cy.wrap(
       (props.verifyFn || verifyFailure).call(null, props),

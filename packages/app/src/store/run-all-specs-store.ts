@@ -76,15 +76,13 @@ export const useRunAllSpecsStore = defineStore('runAllSpecs', () => {
     directoryChildrenRef.value = directoryChildren
   }
 
-  const query = useQuery({ query: RunAllSpecsDataDocument, pause: isRunMode || window.__CYPRESS_TESTING_TYPE__ === 'component' })
+  const query = useQuery({ query: RunAllSpecsDataDocument, pause: isRunMode })
 
   const isRunAllSpecsAllowed = computed(() => {
-    const isE2E = query.data.value?.currentProject?.currentTestingType === 'e2e'
-
     const config: ResolvedConfig = query.data.value?.currentProject?.config || []
     const hasExperiment = config.some(({ field, value }) => field === 'experimentalRunAllSpecs' && value === true)
 
-    return (isE2E && hasExperiment)
+    return hasExperiment
   })
 
   return {

@@ -1,0 +1,211 @@
+name: 'Auto-approve low-risk PRs'
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+    branches:
+      - develop
+      - release/*
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: auto-approve-low-risk-${{ github.event.pull_request.number }}
+  # cancel-in-progress: false so a synchronize run's dismissal can't be
+  # interrupted mid-flight by a subsequent edited event. Per-PR runs queue
+  # serially. GitHub only retains ONE pending run per group; if multiple
+  # events fire while a run is in-progress, intermediate events are
+  # silently dropped — the SHA-based reconciliation in the action step is
+  # what guarantees we still converge to correct state when that happens.
+  cancel-in-progress: false
+
+jobs:
+  auto-approve:
+    name: Auto-approve low-risk PR
+    runs-on: ubuntu-latest
+    if: >-
+      github.repository == 'cypress-io/cypress' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Extract risk level and reviewed SHA from CURSOR_SUMMARY
+        id: risk-check
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+
+            core.setOutput('is_low_risk', 'false');
+            core.setOutput('reviewed_sha', '');
+
+            const summaryMatches = [...body.matchAll(/<!-- CURSOR_SUMMARY -->([\s\S]*?)<!-- \/CURSOR_SUMMARY -->/g)];
+            if (summaryMatches.length === 0) {
+              core.notice('No CURSOR_SUMMARY section found in PR body.');
+              return;
+            }
+            if (summaryMatches.length > 1) {
+              core.notice(`Multiple (${summaryMatches.length}) CURSOR_SUMMARY sections found in PR body; refusing to auto-approve.`);
+              return;
+            }
+
+            const summaryContent = summaryMatches[0][1];
+
+            const hasMediumRisk = /\*\*Medium Risk\*\*/i.test(summaryContent);
+            const hasHighRisk = /\*\*High Risk\*\*/i.test(summaryContent);
+
+            if (hasMediumRisk || hasHighRisk) {
+              core.notice('PR is not low risk.');
+              return;
+            }
+
+            const hasLowRisk = /\*\*Low Risk\*\*/i.test(summaryContent);
+            if (!hasLowRisk) {
+              core.notice('No recognized risk level found in CURSOR_SUMMARY.');
+              return;
+            }
+
+            // Extract the SHA Cursor Bugbot states it reviewed, from the summary footer:
+            //   "Reviewed by [Cursor Bugbot](...) for commit <40-hex-char-sha>."
+            const shaMatch = summaryContent.match(/Reviewed by \[Cursor Bugbot\]\([^)]*\) for commit ([0-9a-f]{40})/i);
+            if (!shaMatch) {
+              core.notice('CURSOR_SUMMARY is Low Risk but is missing the reviewed-commit footer; cannot verify the review SHA.');
+              return;
+            }
+
+            core.info(`CURSOR_SUMMARY contains **Low Risk** assessment for ${shaMatch[1].slice(0, 7)}.`);
+            core.setOutput('is_low_risk', 'true');
+            core.setOutput('reviewed_sha', shaMatch[1]);
+
+      - name: Find existing auto-approval
+        id: existing-approval
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eo pipefail
+          LATEST=$(gh api --paginate \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
+            --jq '.[] | select(.user.login == "cypress-bot[bot]" and .state == "APPROVED") | [.id, .commit_id] | @tsv' \
+            | tail -n 1)
+
+          if [ -n "$LATEST" ]; then
+            REVIEW_ID=$(echo "$LATEST" | cut -f1)
+            COMMIT_ID=$(echo "$LATEST" | cut -f2)
+            echo "review_id=$REVIEW_ID" >> "$GITHUB_OUTPUT"
+            echo "commit_id=$COMMIT_ID" >> "$GITHUB_OUTPUT"
+            echo "::notice::Found existing auto-approval (review #$REVIEW_ID for ${COMMIT_ID:0:7})."
+          else
+            echo "review_id=" >> "$GITHUB_OUTPUT"
+            echo "commit_id=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Decide reconciliation actions
+        id: action
+        env:
+          IS_LOW_RISK: ${{ steps.risk-check.outputs.is_low_risk }}
+          REVIEWED_SHA: ${{ steps.risk-check.outputs.reviewed_sha }}
+          REVIEW_ID: ${{ steps.existing-approval.outputs.review_id }}
+          APPROVAL_SHA: ${{ steps.existing-approval.outputs.commit_id }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          SENDER_TYPE: ${{ github.event.sender.type }}
+          SENDER_LOGIN: ${{ github.event.sender.login }}
+        run: |
+          SHOULD_DISMISS=false
+          SHOULD_APPROVE=false
+          DISMISS_REASON=""
+
+          # Existing approval is stale if it's for a different SHA or the risk is no longer Low.
+          # Reconcile on every event so we converge to the correct state even if a synchronize
+          # event is dropped by concurrency queueing (only one pending run is retained).
+          if [ -n "$REVIEW_ID" ]; then
+            if [ "$APPROVAL_SHA" != "$HEAD_SHA" ]; then
+              SHOULD_DISMISS=true
+              DISMISS_REASON="New commits pushed (auto-approval was for ${APPROVAL_SHA:0:7}, head is now ${HEAD_SHA:0:7}). Auto-approval dismissed pending Cursor Bugbot re-review of the new head SHA."
+            elif [ "$IS_LOW_RISK" != "true" ]; then
+              SHOULD_DISMISS=true
+              DISMISS_REASON="Cursor Bugbot risk assessment is no longer **Low Risk**. Auto-approval dismissed; manual review required."
+            fi
+          fi
+
+          # Approve only when:
+          #   - current state is Low Risk
+          #   - the event was triggered by cursor[bot] (i.e., BugBot just wrote/updated the
+          #     summary; human edits to the body don't trigger approval)
+          #   - the SHA Cursor states it reviewed (parsed from the summary footer) matches
+          #     the current head SHA
+          #   - either no approval exists, or the existing one is being dismissed in this run
+          #     (SHA mismatch case)
+          if [ "$IS_LOW_RISK" = "true" ] \
+             && [ "$SENDER_TYPE" = "Bot" ] \
+             && [ "$SENDER_LOGIN" = "cursor[bot]" ] \
+             && [ "$REVIEWED_SHA" = "$HEAD_SHA" ]; then
+            if [ -z "$REVIEW_ID" ] || [ "$SHOULD_DISMISS" = "true" ]; then
+              SHOULD_APPROVE=true
+            fi
+          fi
+
+          echo "should_dismiss=$SHOULD_DISMISS" >> "$GITHUB_OUTPUT"
+          echo "should_approve=$SHOULD_APPROVE" >> "$GITHUB_OUTPUT"
+          echo "dismiss_reason=$DISMISS_REASON" >> "$GITHUB_OUTPUT"
+
+          if [ "$SHOULD_DISMISS" = "false" ] && [ "$SHOULD_APPROVE" = "false" ]; then
+            echo "::notice::No reconciliation needed (is_low_risk=$IS_LOW_RISK, reviewed_sha=${REVIEWED_SHA:0:7}, head_sha=${HEAD_SHA:0:7}, approval=${REVIEW_ID:-none} for ${APPROVAL_SHA:0:7})."
+          fi
+
+      - name: Generate Cypress Bot App token
+        if: steps.action.outputs.should_dismiss == 'true' || steps.action.outputs.should_approve == 'true'
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
+          private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
+          permission-pull-requests: write
+          permission-metadata: read
+
+      - name: Dismiss stale approval
+        if: steps.action.outputs.should_dismiss == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          DISMISS_MESSAGE: ${{ steps.action.outputs.dismiss_reason }}
+        run: |
+          gh api \
+            --method PUT \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ steps.existing-approval.outputs.review_id }}/dismissals" \
+            -f message="$DISMISS_MESSAGE"
+
+      - name: Verify PR author has write access
+        if: steps.action.outputs.should_approve == 'true'
+        id: author-check
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          AUTHOR_LOGIN: ${{ github.event.pull_request.user.login }}
+        run: |
+          PERMISSION=$(gh api \
+            "/repos/${{ github.repository }}/collaborators/$AUTHOR_LOGIN/permission" \
+            --jq '.permission')
+
+          case "$PERMISSION" in
+            admin|write)
+              echo "has_write=true" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "has_write=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::PR author '$AUTHOR_LOGIN' has '$PERMISSION' permission. Skipping auto-approve."
+              ;;
+          esac
+
+      - name: Approve PR
+        if: >-
+          steps.action.outputs.should_approve == 'true' &&
+          steps.author-check.outputs.has_write == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh api \
+            --method POST \
+            "/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
+            -f commit_id="${{ github.event.pull_request.head.sha }}" \
+            -f event="APPROVE"

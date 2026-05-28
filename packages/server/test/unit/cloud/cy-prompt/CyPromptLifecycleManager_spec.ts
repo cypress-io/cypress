@@ -138,13 +138,12 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       await cyPromptReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
       expect(ensureCyPromptBundleStub).to.be.calledWith({
-        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
         projectId: 'test-project-id',
       })
@@ -208,13 +207,12 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       await cyPromptReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
       expect(ensureCyPromptBundleStub).to.be.calledWith({
-        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
         projectId: 'test-project-id',
       })
@@ -249,7 +247,7 @@ describe('CyPromptLifecycleManager', () => {
       await expect(getProjectOptions()).to.be.rejectedWith('getUser failed')
     })
 
-    it('handles errors when getProjectConfig fails', async () => {
+    it('uses no project slug when getProjectConfig fails without fallback projectId', async () => {
       cyPromptLifecycleManager.initializeCyPromptManager({
         cloudDataSource: mockCloudDataSource,
         ctx: mockCtx,
@@ -267,13 +265,12 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       await cyPromptReadyPromise
 
       expect(mockCtx.update).to.be.calledOnce
       expect(ensureCyPromptBundleStub).to.be.calledWith({
-        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
         projectId: 'test-project-id',
       })
@@ -304,8 +301,40 @@ describe('CyPromptLifecycleManager', () => {
       mockCtx.project.getConfig = sinon.stub().rejects(new Error('getProjectConfig failed'))
 
       const getProjectOptions = cyPromptManagerSetupStub.args[0][0].getProjectOptions
+      const projectOptions = await getProjectOptions()
 
-      await expect(getProjectOptions()).to.be.rejectedWith('getProjectConfig failed')
+      expect(projectOptions.projectSlug).to.be.undefined
+    })
+
+    it('uses fallback projectId when getProjectConfig fails', async () => {
+      cyPromptLifecycleManager.initializeCyPromptManager({
+        cloudDataSource: mockCloudDataSource,
+        ctx: mockCtx,
+        record: false,
+        key: undefined,
+        projectId: 'fallback-project',
+      })
+
+      const cyPromptReadyPromise = new Promise((resolve) => {
+        cyPromptLifecycleManager?.registerCyPromptReadyListener(async (cyPromptManager) => {
+          resolve(cyPromptManager)
+        })
+      })
+
+      const mockManifest = {
+        'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
+      }
+
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
+
+      await cyPromptReadyPromise
+
+      mockCtx.project.getConfig = sinon.stub().rejects(new Error('getProjectConfig failed'))
+
+      const getProjectOptions = cyPromptManagerSetupStub.args[0][0].getProjectOptions
+      const projectOptions = await getProjectOptions()
+
+      expect(projectOptions.projectSlug).to.equal('fallback-project')
     })
 
     it('only calls ensureCyPromptBundle once per cy prompt hash', async () => {
@@ -326,7 +355,7 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       const cyPromptManager1 = await cyPromptReadyPromise1
 
@@ -349,7 +378,6 @@ describe('CyPromptLifecycleManager', () => {
 
       expect(ensureCyPromptBundleStub).to.be.calledOnce
       expect(ensureCyPromptBundleStub).to.be.calledWith({
-        cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc'),
         cyPromptUrl: 'https://cloud.cypress.io/cy-prompt/bundle/abc.tgz',
         projectId: 'test-project-id',
       })
@@ -484,7 +512,7 @@ describe('CyPromptLifecycleManager', () => {
 
       const mockManifest = {}
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       cyPromptLifecycleManager.initializeCyPromptManager({
         cloudDataSource: mockCloudDataSource,
@@ -530,7 +558,7 @@ describe('CyPromptLifecycleManager', () => {
         'server/index.js': 'a1',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
 
       cyPromptLifecycleManager.initializeCyPromptManager({
         cloudDataSource: mockCloudDataSource,
@@ -637,7 +665,7 @@ describe('CyPromptLifecycleManager', () => {
         },
         cyPromptHash: 'abc',
         projectSlug: 'test-project-id',
-        error: aggregateError.errors[aggregateError.errors.length - 1],
+        error: aggregateError,
         cyPromptMethod: 'initializeCyPromptManager',
         cyPromptMethodArgs: [],
         additionalHeaders: {
@@ -667,13 +695,30 @@ describe('CyPromptLifecycleManager', () => {
     })
   })
 
+  describe('resetCyPrompt', () => {
+    it('does nothing when cy prompt manager is not assigned', () => {
+      cyPromptLifecycleManager.resetCyPrompt()
+    })
+
+    it('calls reset on the manager when assigned', () => {
+      const resetStub = sinon.stub()
+
+      // @ts-expect-error - partial mock
+      cyPromptLifecycleManager.cyPromptManager = { reset: resetStub }
+
+      cyPromptLifecycleManager.resetCyPrompt()
+
+      expect(resetStub).to.be.calledOnce
+    })
+  })
+
   describe('registerCyPromptReadyListener', () => {
     beforeEach(() => {
       const mockManifest = {
         'server/index.js': 'c3c4ab913ca059819549f105e756a4c4471df19abef884ce85eafc7b7970e7b4',
       }
 
-      ensureCyPromptBundleStub.resolves(mockManifest)
+      ensureCyPromptBundleStub.resolves({ manifest: mockManifest, cyPromptPath: path.join(os.tmpdir(), 'cypress', 'cy-prompt', 'abc') })
     })
 
     it('registers a listener that will be called when cy-prompt is ready', () => {

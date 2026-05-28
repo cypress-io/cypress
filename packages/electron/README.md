@@ -165,6 +165,7 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
     - [ ] `@types/node` used throughout the monorepo to determine compatible node types. The major version of this package must reflect the node version set in [`/.node-version`](../../.node-version).
     - [ ] [github workflows](../../.github) - used for repository templates, vulnerability detection, and V8 snapshots. If the node version for Snyk needs to be updated, then the required pull request check into `develop` must also be updated. A repository administrator will need to accomplish this.
     - [ ] [`/package.json`](../../package.json) - update `engines`
+    - [ ] When the **minimum major** Node version in [`/cli/package.json`](../../cli/package.json) `engines.node` changes, update esbuild's `target` in [`/packages/packherd-require/src/transpile-ts.ts`](../../packages/packherd-require/src/transpile-ts.ts) and [`/tooling/packherd/src/create-bundle.ts`](../../tooling/packherd/src/create-bundle.ts) to match (for example `node20`, `node22`) so packherd bundles and on-the-fly TypeScript transpilation stay compatible with the oldest Node still supported by the published `cypress` package.
     - [ ] [`docker-compose.yml`](../../docker-compose.yml) - update Docker image to the new matching `internal` image
     - [ ] [`/system-tests/test-binary/*`](../../system-tests/test-binary) - update binary system tests to use the newly published Ubuntu and Node images mentioned above, if applicable
     - [ ] Do a global search for the old Node.js version to identify any new areas that may need updating/unification, and update those locations (and this document!)  
@@ -176,9 +177,8 @@ Upgrading `electron` involves more than just bumping this package's `package.jso
   - [ ] Update `electron` version in `package.json`
   - [ ] Update the target `electron` version in the circle configuration
   - [ ] Update the docker image to the new browsers-internal image made in the previous step
-  - [ ] Temporarily update the circle configuration to allow `cypress` to run against the branch
-  - [ ] Temporarily set target `cypress-publish-binary` branch as a `branch` property on the request body in [../../scripts/binary/trigger-publish-binary-pipeline.js](../../scripts/binary/trigger-publish-binary-pipeline.js) script, so that you can test against this branch from the electron upgrade branch. This property must be set both at the root of the body object, and on the `parameters` key. If it is not set at the root, the binary pipeline will continue to use the primary branch. 
-
+  - [ ] Add your branch name to the `&full-workflow-filters` anchor in [`@pipeline.yml`](../../.circleci/src/pipeline/@pipeline.yml)
+  - [ ] Trigger the pipeline in CircleCI's UI, and set the `publish-binary-branch` parameter to the branch you created in the `cypress-publish-binary` repository.
 
 - [ ] **Manually smoke test `cypress open`.** Upgrading Electron can break the `desktop-gui` in unexpected ways. Since testing in this area is weak, double-check that things like launching `cypress open`, signing into Cypress Cloud, and launching Electron tests still work.
 - [ ] **Manually smoke test `cypress run` in record mode** Upgrading Electron can cause `better-sqlite3` to SIGSEGV the Electron process.

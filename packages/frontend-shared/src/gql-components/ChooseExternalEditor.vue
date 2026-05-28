@@ -65,6 +65,7 @@ import Icon from '@cy/components/Icon.vue'
 import { useI18n } from '@cy/i18n'
 import Select from '@cy/components/Select.vue'
 import Input from '@cy/components/Input.vue'
+import Cursor from '~icons/logos/cursor'
 import VSCode from '~icons/logos/visual-studio-code'
 import Atom from '~icons/logos/atom-icon'
 import Webstorm from '~icons/logos/webstorm'
@@ -78,6 +79,7 @@ import type { ChooseExternalEditorFragment } from '../generated/graphql'
 
 const icons: Record<string, FunctionalComponent<SVGAttributes, {}>> = {
   'code': VSCode,
+  'cursor': Cursor,
   'webstorm': Webstorm,
   'atom': Atom,
   'sublimetext': Sublime,

@@ -9,17 +9,17 @@ import assert from 'assert'
 
 import recordMode from './record'
 import * as errors from '../errors'
-import Reporter from '../reporter'
+import { Reporter } from '../reporter'
 import browserUtils from '../browsers'
 import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
 import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
-import env from '../util/env'
+import * as env from '../util/env'
 import trash from '../util/trash'
-import random from '../util/random'
-import system from '../util/system'
-import chromePolicyCheck from '../util/chrome_policy_check'
+import { id as randomId } from '../util/random'
+import * as system from '../util/system'
+import { run as runChromePolicyCheck } from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import type { Cfg, ProjectBase } from '../project-base'
 import type { Browser } from '../browsers/types'
@@ -28,7 +28,10 @@ import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
+import { passWithNoTests } from './pass-with-no-tests'
+import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
+import { isRunningAsElectronProcess } from '../util/electron-app'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 export type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -437,7 +440,7 @@ function launchBrowser (options: { browser: Browser, spec: SpecWithRelativeRoot,
 }
 
 async function listenForProjectEnd (project: ProjectBase, exit: boolean): Promise<any> {
-  if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Bluebird.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
+  if (globalThis.CY_TEST_MOCK?.listenForProjectEnd) return Promise.resolve(globalThis.CY_TEST_MOCK.listenForProjectEnd)
 
   // if exit is false, we need to intercept the resolution of tests - whether
   // an early exit with intermediate results, or a full run.
@@ -558,10 +561,17 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     .then(() => {
       telemetry.getSpan(`waitForBrowserToConnect:attempt:${browserLaunchAttempt}`)?.end()
     })
-    .catch(Bluebird.TimeoutError, async (err) => {
-      debug('Catch on waitForBrowserToConnect')
+    .catch((err) => {
+      const isTimeout = err instanceof Bluebird.TimeoutError
+      const isFirefoxConnect = (err as CypressError)?.type === 'FIREFOX_COULD_NOT_CONNECT'
 
-      return retryOnError(err as CypressError)
+      if (isTimeout || isFirefoxConnect) {
+        debug('Catch on waitForBrowserToConnect: %s', isTimeout ? 'timeout' : 'firefox could not connect')
+
+        return retryOnError(err as CypressError)
+      }
+
+      throw err
     })
   }
 
@@ -683,6 +693,17 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     // possibly because the user deleted it in the after:spec event
     debug(`No video found after spec ran - skipping compression. Video path: ${videoName}`)
 
+    const compressedVideoName = videoRecording?.api.compressedVideoName
+
+    if (compressedVideoName) {
+      try {
+        debug('removing compressed video file: %s', compressedVideoName)
+        await fs.remove(compressedVideoName)
+      } catch (err) {
+        debug('Error removing compressed video file: %o', err)
+      }
+    }
+
     results.video = null
   }
 
@@ -764,7 +785,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
 function screenshotMetadata (data: any, resp: any) {
   return {
-    screenshotId: random.id(),
+    screenshotId: randomId(),
     name: data.name || null,
     testId: data.testId,
     testAttemptIndex: data.testAttemptIndex,
@@ -1035,6 +1056,7 @@ export interface ReadyOptions {
   tag: string
   testingType: TestingType
   webSecurity: boolean
+  passWithNoTests: boolean
 }
 
 async function ready (options: ReadyOptions) {
@@ -1111,6 +1133,20 @@ async function ready (options: ReadyOptions) {
   const specs = project.ctx.project.specs
 
   if (!specs.length) {
+    if (options.passWithNoTests) {
+      const results = await passWithNoTests({
+        ...options,
+        specs,
+        specPattern,
+        config,
+        browser,
+      } as EmptyRunOptions)
+
+      await writeOutput(options.outputPath, createPublicRunResults(results))
+
+      return results
+    }
+
     errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
   }
 
@@ -1119,7 +1155,7 @@ async function ready (options: ReadyOptions) {
   }
 
   if (browser.family === 'chromium') {
-    chromePolicyCheck.run(onWarning)
+    runChromePolicyCheck(onWarning)
   }
 
   async function runAllSpecs ({ beforeSpecRun, afterSpecRun, runUrl, parallel }: { beforeSpecRun?: BeforeSpecRun, afterSpecRun?: AfterSpecRun, runUrl?: string, parallel?: boolean }) {
@@ -1131,6 +1167,7 @@ async function ready (options: ReadyOptions) {
       socketId,
       parallel,
       onError,
+      // @ts-expect-error - browser is not typed correctly
       browser,
       project,
       runUrl,
@@ -1196,7 +1233,7 @@ async function ready (options: ReadyOptions) {
 export async function run (options, loading: Promise<void>) {
   debug('run start')
   // Check if running as electron process
-  if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
+  if (isRunningAsElectronProcess({ debug })) {
     // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
     const app = require('electron').app
 

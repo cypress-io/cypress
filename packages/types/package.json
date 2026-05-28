@@ -16,17 +16,17 @@
     "watch": "yarn build:cjs --watch & yarn build:esm --watch"
   },
   "dependencies": {
-    "semver": "^7.7.1"
+    "semver": "^7.7.3"
   },
   "devDependencies": {
     "@packages/root": "0.0.0-development",
     "@types/node": "22.18.7",
-    "axios": "^1.8.3",
+    "axios": "^1.15.1",
     "better-sqlite3": "12.4.1",
-    "devtools-protocol": "0.0.1528500",
+    "devtools-protocol": "0.0.1575685",
     "express": "4.21.0",
-    "rimraf": "^6.0.1",
-    "socket.io": "4.0.1",
+    "rimraf": "^6.1.1",
+    "socket.io": "4.8.3",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4"
   },
@@ -35,6 +35,7 @@
     "esm/*"
   ],
   "types": "cjs/index.d.ts",
+  "license": "MIT",
   "module": "esm/index.js",
   "workspaces": {
     "nohoist": [

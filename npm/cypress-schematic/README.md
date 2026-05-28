@@ -31,7 +31,11 @@
 
 ## Requirements
 
-- Angular 18.0.0+ (`@cypress/schematic@2` supports Angular 13 - 16 and `@cypress/schematic@3` supports Angular 17)
+- Cypress `^15.8.0`
+- Angular `>=20.0.0` 
+    - `@cypress/schematic@4` supports Angular 18 - 19
+    - `@cypress/schematic@3` supports Angular 17
+    - `@cypress/schematic@2` supports Angular 13 - 16
 ## Usage ⏯
 
 ### Adding E2E and Component Testing

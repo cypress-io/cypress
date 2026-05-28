@@ -70,8 +70,8 @@ export function resetIssuedWarnings () {
 }
 
 const validateNoBreakingOptions = (breakingCfgOptions: Readonly<BreakingOption[]>, cfg: any, onWarning: ErrorHandler, onErr: ErrorHandler, testingType?: TestingType) => {
-  breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value }) => {
-    if (_.has(cfg, name)) {
+  breakingCfgOptions.forEach(({ name, errorKey, newName, isWarning, value, shouldDisplayOrThrow }) => {
+    if (_.has(cfg, name) && (!shouldDisplayOrThrow || shouldDisplayOrThrow(cfg[name]))) {
       if (value && cfg[name] !== value) {
         // Bail if a value is specified but the config does not have that value.
         return
@@ -132,6 +132,23 @@ export const getDefaultValues = (runtimeOptions: { [k: string]: any } = {}) => {
 
 export const getPublicConfigKeys = () => {
   return publicConfigKeys
+}
+
+/**
+ * Keys allowed on Cypress Cloud recording payloads: public config options (same basis as
+ * config.resolved) plus flattened component-testing-only fields not listed as top-level
+ * `options[].name` entries (see mergeDefaults in project/utils).
+ */
+const cloudRecordingConfigExtraKeys = ['devServer', 'devServerConfig', 'indexHtmlFile'] as const
+
+let cloudRecordingConfigKeysCache: string[] | undefined
+
+export const getCloudRecordingConfigKeys = (): string[] => {
+  if (!cloudRecordingConfigKeysCache) {
+    cloudRecordingConfigKeysCache = [...publicConfigKeys, ...cloudRecordingConfigExtraKeys]
+  }
+
+  return cloudRecordingConfigKeysCache
 }
 
 export const matchesConfigKey = (key: string) => {

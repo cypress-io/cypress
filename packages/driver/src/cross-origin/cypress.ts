@@ -22,8 +22,8 @@ import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
 import { patchFormElementSubmit } from './patches/submit'
-import { patchFetch } from '@packages/runner/injection/patches/fetch'
-import { patchXmlHttpRequest } from '@packages/runner/injection/patches/xmlHttpRequest'
+import { patchFetch } from '@packages/runner/injection/patches/cross-origin/fetch'
+import { patchXmlHttpRequest } from '@packages/runner/injection/patches/cross-origin/xmlHttpRequest'
 
 import $Mocha from '../cypress/mocha'
 
@@ -31,9 +31,9 @@ const createCypress = () => {
   // @ts-ignore
   const Cypress = window.Cypress = new $Cypress() as Cypress.Cypress
 
-  Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env, isProtocolEnabled }) => {
+  Cypress.specBridgeCommunicator.once('initialize:cypress', ({ config, env, expose, isProtocolEnabled }) => {
     // eventually, setup will get called again on rerun and cy will get re-created
-    setup({ cypressConfig: config, env, isProtocolEnabled })
+    setup({ cypressConfig: config, env, expose, isProtocolEnabled })
   })
 
   Cypress.specBridgeCommunicator.on('attach:to:window', () => {
@@ -85,12 +85,13 @@ const createCypress = () => {
   Cypress.specBridgeCommunicator.toPrimary('bridge:ready')
 }
 
-const setup = ({ cypressConfig, env, isProtocolEnabled }: { cypressConfig: Cypress.Config, env: Cypress.ObjectLike, isProtocolEnabled: boolean }) => {
+const setup = ({ cypressConfig, env, expose, isProtocolEnabled }: { cypressConfig: Cypress.Config, env: Cypress.ObjectLike, expose: Cypress.ObjectLike, isProtocolEnabled: boolean }) => {
   const Cypress = window.Cypress
 
   Cypress.configure({
     ...cypressConfig,
     env,
+    expose,
     // never turn on video for a spec bridge when syncing the config. This is handled in the primary.
     video: false,
     isCrossOriginSpecBridge: true,

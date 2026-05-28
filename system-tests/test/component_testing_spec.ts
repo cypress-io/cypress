@@ -46,7 +46,8 @@ describe(`React major versions with Vite`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
         configFile: 'cypress-vite-default.config.ts',
-        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
+        // @see https://github.com/cypress-io/cypress/issues/30881 and src/Rerendering.cy.jsx for details on skipping.
+        spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/mount.cy.jsx,!src/Rerendering.cy.jsx',
         testingType: 'component',
         browser: 'chrome',
         snapshot: true,
@@ -88,6 +89,16 @@ describe(`Angular CLI versions`, () => {
       expectedExitCode: 0,
     })
   }
+
+  // NOTE: Angular 21 has to be tested separate because it uses the zoneless mount function,
+  // which doesn't support zone.js any longer OR support autoDetectChanges or autoSpyOutputs
+  systemTests.it(`v21 with mount tests`, {
+    project: `angular-21`,
+    spec: 'src/**/*.cy.ts,!src/app/errors.cy.ts',
+    testingType: 'component',
+    browser: 'chrome',
+    expectedExitCode: 0,
+  })
 
   systemTests.it('angular 19 custom config', {
     project: 'angular-custom-config',

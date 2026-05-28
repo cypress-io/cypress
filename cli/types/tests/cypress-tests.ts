@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-exclusive-tests -- dtslint-style samples for Mocha/Cypress API typings */
 namespace CypressLodashTests {
   Cypress._ // $ExpectType LoDashStatic
   Cypress._.each([1], (item) => {
@@ -51,6 +52,16 @@ namespace CypressEnvTests {
   Cypress.env('foo', 'bar')
   Cypress.env().foo
   Cypress.env({
+    foo: 'bar',
+  })
+}
+
+namespace CypressExposeTests {
+  // Just making sure these are valid - no real type safety
+  Cypress.expose('foo')
+  Cypress.expose('foo', 'bar')
+  Cypress.expose().foo
+  Cypress.expose({
     foo: 'bar',
   })
 }

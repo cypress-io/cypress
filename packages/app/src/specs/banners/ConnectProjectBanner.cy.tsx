@@ -35,6 +35,7 @@ describe('<ConnectProjectBanner />', () => {
         medium: 'Specs Create Project Banner',
         messageId: Cypress.sinon.match.string,
         cohort: null,
+        includeMachineId: false,
       })
     })
 

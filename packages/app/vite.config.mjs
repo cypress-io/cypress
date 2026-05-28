@@ -8,7 +8,6 @@ import { resolve } from 'path'
 const config = makeConfig({
   optimizeDeps: {
     include: [
-      'javascript-time-ago',
       'ansi-to-html',
       'fuzzysort',
       '@cypress-design/**',
@@ -31,7 +30,6 @@ const config = makeConfig({
       'dayjs/plugin/customParseFormat',
       'dayjs/plugin/utc',
       'markdown-it',
-      '@toycode/markdown-it-class',
       '@cypress-design/vue-tabs',
       'gravatar',
       '@opentelemetry/sdk-trace-web',
@@ -42,6 +40,11 @@ const config = makeConfig({
       '@opentelemetry/exporter-trace-otlp-http',
       '@opentelemetry/core',
       'semver/functions/major',
+      '@vueuse/core',
+      'javascript-time-ago',
+    ],
+    exclude: [
+      '@toycode/markdown-it-class',
     ],
     esbuildOptions: {
       target: 'ES2022',

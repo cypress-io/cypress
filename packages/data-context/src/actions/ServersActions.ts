@@ -41,8 +41,25 @@ export class ServersActions {
     })
   }
 
+  setGqlGraphqlWsDispose (dispose: (() => Promise<void>) | undefined) {
+    this.ctx.update((d) => {
+      d.servers.gqlGraphqlWsDispose = dispose
+    })
+  }
+
   async destroyGqlServer () {
-    const destroy = this.ctx.coreData.servers.gqlServer?.destroy
+    const { gqlGraphqlWsDispose, gqlSocketServer, gqlServer } = this.ctx.coreData.servers
+
+    if (gqlGraphqlWsDispose) {
+      await gqlGraphqlWsDispose().catch(this.ctx.logTraceError)
+      this.ctx.update((d) => {
+        d.servers.gqlGraphqlWsDispose = undefined
+      })
+    }
+
+    gqlSocketServer?.disconnectSockets(true)
+
+    const destroy = gqlServer?.destroy
 
     if (!destroy) {
       return

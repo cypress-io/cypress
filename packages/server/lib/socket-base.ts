@@ -7,9 +7,9 @@ import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeG
 import { onNetStubbingEvent } from '@packages/net-stubbing'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
-
+import type { SocketBroadcaster } from '@packages/socket'
 import * as errors from './errors'
-import fixture from './fixture'
+import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile, OpenFileDetails } from './util/file-opener'
@@ -25,6 +25,7 @@ import { openExternal } from './gui/links'
 import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types'
 import memory from './browsers/memory'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import type { StudioInitOptions } from './types/studio'
@@ -45,7 +46,7 @@ type ExtendedSocketIoNamespace = socketIo.SocketIONamespace & GenericHandler
 
 type ExtendedCDPSocketServer = CDPSocketServer & GenericHandler
 
-export class SocketBase {
+export class SocketBase implements SocketBroadcaster {
   private _sendResetBrowserTabsForNextSpecMessage
   private _sendResetBrowserStateMessage
   private _isRunnerSocketConnected
@@ -127,9 +128,7 @@ export class SocketBase {
   createSocketIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
     return new socketIo.SocketIOServer(server, {
       path,
-      cookie: {
-        name: cookie,
-      },
+      cookie: typeof cookie === 'string' ? { name: cookie } : cookie,
       destroyUpgrade: false,
       serveClient: false,
       // TODO(webkit): the websocket socket.io transport is busted in WebKit, need polling
@@ -202,7 +201,7 @@ export class SocketBase {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
-    const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
+    const getFixture = (path, opts) => fixtureGet(config.fixturesFolder, path, opts)
 
     this.getIos().forEach((io) => {
       io?.on('connection', (socket: Socket & { inReporterRoom?: boolean, inRunnerRoom?: boolean }) => {
@@ -409,10 +408,20 @@ export class SocketBase {
           const ctx = await getCtx()
           const devServer = await ctx._apis.projectApi.getDevServer()
 
-          // update the dev server with the spec running
-          debug(`updating CT dev-server with spec: ${spec.relative}`)
-          // @ts-expect-error
-          await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
+          if (spec.relative === RUN_ALL_SPECS_KEY) {
+            const specsToCompile = ctx.project.runAllSpecs.map((relPath) => {
+              return ctx.project.specs.find((s) => s.relative === relPath)
+            }).filter(Boolean) as Cypress.Spec[]
+
+            debug(`updating CT dev-server with ${specsToCompile.length} specs`)
+            // @ts-expect-error
+            await devServer.updateSpecs(specsToCompile, { neededForJustInTimeCompile: true })
+          } else {
+            // update the dev server with the spec running
+            debug(`updating CT dev-server with spec: ${spec.relative}`)
+            // @ts-expect-error
+            await devServer.updateSpecs([spec], { neededForJustInTimeCompile: true })
+          }
 
           return socket.emit('dev-server:on-spec-updated')
         })
@@ -478,15 +487,13 @@ export class SocketBase {
           }
         })
 
-        socket.on('prompt:reset', async (cb) => {
+        socket.on('prompt:reset', (cb) => {
           try {
-            const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()
-
             // If we have runState, then we shouldn't reset the full prompt manager because
             // we are just changing top. We will clear the prompt manager for a specific test
             // later.
             if (!runState) {
-              cyPrompt?.cyPromptManager?.reset()
+              getCtx().coreData.cyPromptLifecycleManager?.resetCyPrompt()
             }
           } finally {
             cb()
@@ -617,8 +624,9 @@ export class SocketBase {
             // the test state on the protocol manager and prompt manager
             if (s.currentId) {
               const testId = s.currentId
+              const currentRetry = s.currentRetry ?? undefined
 
-              this._protocolManager?.resetTest(testId)
+              this._protocolManager?.resetTest(testId, currentRetry)
 
               try {
                 const cyPrompt = await getCtx().coreData.cyPromptLifecycleManager?.getCyPrompt()

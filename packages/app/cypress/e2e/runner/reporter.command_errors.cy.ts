@@ -17,7 +17,7 @@ function loadErrorSpec (options: specLoader.LoadSpecOptions): VerifyFunc {
   specLoader.loadSpec(options)
 
   // Return scoped verify function with spec options baked in
-  return createVerify({ fileName: Cypress._.last(filePath.split('/')), hasPreferredIde, mode })
+  return createVerify({ filePath, fileName: Cypress._.last(filePath.split('/')), hasPreferredIde, mode })
 }
 
 describe('errors ui', {
@@ -49,6 +49,37 @@ describe('errors ui', {
     })
 
     verify('with assert.<foo>()', {
+      line: 11,
+      column: 12,
+      message: `expected 'actual' to equal 'expected'`,
+      verifyOpenInIde: true,
+    })
+  })
+
+  it('assertion failures with new sourcemap root', () => {
+    const verifyWithNewSourcemapRoot = loadErrorSpec({
+      filePath: 'errors/assertions.cy.js',
+      hasPreferredIde: true,
+      failCount: 3,
+      projectName: 'runner-e2e-specs-new-sourcemap-root',
+      configFile: 'cypress.config.mjs',
+    })
+
+    verifyWithNewSourcemapRoot('with expect().<foo>', {
+      line: 3,
+      column: 25,
+      message: `expected 'actual' to equal 'expected'`,
+      verifyOpenInIde: true,
+    })
+
+    verifyWithNewSourcemapRoot('with assert()', {
+      line: 7,
+      column: [5, 12], // [chrome, firefox]
+      message: `should be true`,
+      verifyOpenInIde: true,
+    })
+
+    verifyWithNewSourcemapRoot('with assert.<foo>()', {
       line: 11,
       column: 12,
       message: `expected 'actual' to equal 'expected'`,

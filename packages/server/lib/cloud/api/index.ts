@@ -26,12 +26,13 @@ import type { OptionsWithUrl } from 'request-promise'
 import { fs } from '../../util/fs'
 import ProtocolManager from '../protocol'
 import type { ProjectBase } from '../../project-base'
-
+import * as humanTime from '../../util/human_time'
 import { PUBLIC_KEY_VERSION } from '../constants'
 
 import { transformError } from './axios_middleware/transform_error'
 import { DecryptionError } from './cloud_request_errors'
 import { isNonRetriableCertErrorCode } from '../network/non_retriable_cert_error_codes'
+import { filterRuntimeConfigForRecording } from '../../config'
 
 // Import cloud validation types for better type safety
 import type {
@@ -50,6 +51,7 @@ import type {
 type PutInstanceArtifactsResponseType = any
 const debug = debugModule('cypress:server:cloud:api')
 const debugProtocol = debugModule('cypress:server:protocol')
+const debugVerbose = debugModule('cypress-verbose:server:cloud:api')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -81,8 +83,19 @@ export interface CypressRequestOptions extends OptionsWithUrl {
   cacheable?: boolean
 }
 
+// We extend the RequestPromiseOptions interface with our own properties in an
+// ad-hoc manner. Declaring this extension allows us to use typedefs without
+// having to modify the original type definitions (which would be incorrect)
+declare module '@cypress/request-promise' {
+  interface RequestPromiseOptions {
+    cacheable?: boolean
+    url?: string
+    encrypt?: boolean | 'always' | 'signed'
+  }
+}
+
 // TODO: migrate to fetch from @cypress/request
-const rp = request.defaults((params: CypressRequestOptions, callback) => {
+const rp = request.defaults((params, callback) => {
   let resp
 
   if (params.cacheable && (resp = getCachedResponse(params))) {
@@ -107,7 +120,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
     'x-cypress-version': pkg.version,
   })
 
-  const method = params.method.toLowerCase()
+  const method = params.method?.toLowerCase()
 
   // use %j argument to ensure deep nested properties are serialized
   debug(
@@ -128,6 +141,7 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
         const options = this // request promise options
 
         const throwStatusCodeErrWithResp = (message, responseBody) => {
+          // @ts-ignore - server's check-ts fails on this, but driver's check-ts does not, so expect-error is not appropriate
           throw new RequestErrors.StatusCodeError(response.statusCode, message, options, responseBody)
         }
 
@@ -166,15 +180,19 @@ const rp = request.defaults((params: CypressRequestOptions, callback) => {
       headers['x-cypress-encrypted'] = PUBLIC_KEY_VERSION
     }
 
-    return request[method](params, callback).promise()
+    // @ts-expect-error - we're hoping that the method is valid here
+    return request[method](params, callback).promise() as RequestPromise<any>
   })
-  .tap((resp) => {
+  .then((resp) => {
     if (params.cacheable) {
       debug('caching response for ', params.url)
       cacheResponse(resp, params)
     }
 
-    return debug('response %o', resp)
+    debug(`${params.method} ${params.url} response received`)
+    debugVerbose('response: %o', resp)
+
+    return resp
   })
 })
 
@@ -212,7 +230,7 @@ const retryWithBackoff = (fn, options: { displayRetryErrors?: boolean } = { disp
       if (options.displayRetryErrors) {
         errors.warning(
           'CLOUD_API_RESPONSE_FAILED_RETRYING', {
-            delayMs,
+            delay: humanTime.long(delayMs, false),
             tries: delays.length - retryIndex,
             response: err,
           },
@@ -401,11 +419,13 @@ export default {
             'x-cypress-request-attempt': attemptIndex,
           },
         })
-        .tap((result) => {
+        .then((result) => {
           // Tack on any preflight warnings prior to run warnings
           if (warnings) {
             result.warnings = warnings.concat(result.warnings ?? [])
           }
+
+          return result
         })
       })
     })
@@ -495,7 +515,10 @@ export default {
           'x-cypress-run-id': runId,
           'x-cypress-request-attempt': attemptIndex,
         },
-        body,
+        body: {
+          ...body,
+          config: filterRuntimeConfigForRecording(config ?? {}),
+        },
       })
       .catch(RequestErrors.StatusCodeError, transformError)
       .catch(tagError)
@@ -578,7 +601,7 @@ export default {
         bearer: authToken,
       },
     })
-    .timeout(timeout)
+    .timeout(maxTimeout)
     .catch(tagError)
   },
 

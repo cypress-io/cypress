@@ -14,7 +14,7 @@
     "test-unit": "echo 'no unit tests'"
   },
   "devDependencies": {
-    "cypress-example-kitchensink": "5.1.2",
+    "cypress-example-kitchensink": "6.0.2",
     "gh-pages": "5.0.0",
     "gulp": "4.0.2",
     "gulp-clean": "0.4.0",
@@ -26,6 +26,7 @@
     "lib"
   ],
   "types": "index.d.ts",
+  "license": "MIT",
   "nx": {
     "targets": {
       "build": {

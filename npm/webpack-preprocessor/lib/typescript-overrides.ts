@@ -3,6 +3,7 @@ import _ from 'lodash'
 import semverLt from 'semver/functions/lt'
 
 import { CompilerOptions, CreateProgramOptions } from 'typescript'
+import { getTypescript } from './get-typescript'
 
 const debug = debugModule('cypress:webpack')
 
@@ -18,11 +19,7 @@ export const overrideSourceMaps = (sourceMap: boolean, typescriptPath?: string) 
   // targeted project's `typescript`, which breaks monkeypatching. resolving from the
   // CWD avoids this issue.
   try {
-    const projectTsPath = require.resolve(typescriptPath || 'typescript', {
-      paths: [process.cwd()],
-    })
-
-    const typescript = require(projectTsPath) as typeof import('typescript')
+    const typescript = getTypescript(typescriptPath)
     const { createProgram } = typescript
     // NOTE: typescript.createProgram can only be monkey-patched in TypeScript versions 4 and under.
     // This is due to TypeScript v5 being an ESM package build with ESBuild, meaning the exports are

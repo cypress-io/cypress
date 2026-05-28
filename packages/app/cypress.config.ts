@@ -1,8 +1,14 @@
 import { defineConfig } from 'cypress'
 import { initGitRepoForTestProject, resetGitRepoForTestProject } from './cypress/tasks/git'
 import { writeMochaEventSnapshot, readMochaEventSnapshot } from './cypress/tasks/mochaEvents'
+import { setupCyInCyVariables } from '@packages/frontend-shared/cypress/tasks/cy-in-cy-variables'
 
 export default defineConfig({
+  /**
+   * NOTE: currently using Cypress.env() in the test config, so we need to set allowCypressEnv to true
+   * @percy/cypress: https://github.com/percy/percy-cypress/blob/master/index.js#L13
+   */
+  allowCypressEnv: true,
   projectId: 'ypt4pf',
   retries: {
     runMode: 2,
@@ -15,6 +21,7 @@ export default defineConfig({
   experimentalMemoryManagement: true,
   experimentalCspAllowList: false,
   experimentalInteractiveRunEvents: true,
+  experimentalRunAllSpecs: true,
   component: {
     experimentalSingleTabRunMode: true,
     viewportWidth: 800,
@@ -29,8 +36,7 @@ export default defineConfig({
   hosts: {
     'foobar.com': '127.0.0.1',
   },
-  'e2e': {
-    experimentalRunAllSpecs: true,
+  e2e: {
     experimentalOriginDependencies: true,
     baseUrl: 'http://localhost:5555',
     supportFile: 'cypress/e2e/support/e2eSupport.ts',
@@ -45,13 +51,18 @@ export default defineConfig({
       delete process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       process.env.CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING = 'true'
+
       const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
+
+      const { setCyInCyVariables, getCyInCyVariables } = setupCyInCyVariables()
 
       on('task', {
         initGitRepoForTestProject,
         resetGitRepoForTestProject,
         writeMochaEventSnapshot,
         readMochaEventSnapshot,
+        setCyInCyVariables,
+        getCyInCyVariables,
       })
 
       return await e2ePluginSetup(on, config)

@@ -1,7 +1,5 @@
+import { expect, it, describe, beforeEach, afterEach, vi } from 'vitest'
 import path from 'path'
-import { expect } from 'chai'
-import sinon from 'sinon'
-
 import { createModuleMatrixResult } from './test-helpers/createModuleMatrixResult'
 import EventEmitter from 'events'
 import debug from 'debug'
@@ -12,33 +10,38 @@ const cypressConfig = {
   indexHtmlFile: path.join(__dirname, 'component-index.html'),
 } as Cypress.PluginConfigOptions
 
-describe('devServer', function () {
-  this.timeout(10 * 1000)
+vi.mock('../src/helpers/sourceRelativeWebpackModules', async (importActual) => {
+  const actual = await importActual()
 
+  return {
+    // @ts-expect-error
+    ...actual,
+    sourceDefaultWebpackDependencies: vi.fn(),
+  }
+})
+
+describe('devServer', { timeout: 10000 }, function () {
   it('creates a new devServer webpack5, webpackDevServer5', async () => {
-    const sourceRelativeWebpackModules = require('../src/helpers/sourceRelativeWebpackModules')
-    const stub = sinon.stub(sourceRelativeWebpackModules, 'sourceDefaultWebpackDependencies')
-    .returns(createModuleMatrixResult({
+    const sourceRelativeWebpackModules = await import('../src/helpers/sourceRelativeWebpackModules')
+
+    vi.mocked(sourceRelativeWebpackModules.sourceDefaultWebpackDependencies).mockReturnValue(createModuleMatrixResult({
       webpack: 5,
       webpackDevServer: 5,
     }))
 
-    try {
-      const devServerModule = require('../src/devServer')
-      const { devServer } = devServerModule
+    const { devServer } = await import('../src/devServer')
 
-      const result = await devServer.create({
-        specs: [],
-        cypressConfig,
-        webpackConfig: {},
-        devServerEvents: new EventEmitter(),
-      })
+    const result = await devServer.create({
+      specs: [],
+      cypressConfig,
+      webpackConfig: {},
+      devServerEvents: new EventEmitter(),
+    })
 
-      expect(result.server).to.be.instanceOf(require('webpack-dev-server'))
-      expect(result.version).to.eq(5)
-    } finally {
-      stub.restore()
-    }
+    const webpackDevServer = await import('webpack-dev-server')
+
+    expect(result.server).toBeInstanceOf(webpackDevServer.default)
+    expect(result.version).toEqual(5)
   })
 
   // Writing to disk includes the correct source map size, where the difference will be made up from stat size vs parsed size
@@ -56,28 +59,24 @@ describe('devServer', function () {
 
     WEBPACK_DEV_SERVER_VERSIONS.forEach((version) => {
       it(`works for webpack-dev-server v${version}`, async () => {
-        const sourceRelativeWebpackModules = require('../src/helpers/sourceRelativeWebpackModules')
-        const stub = sinon.stub(sourceRelativeWebpackModules, 'sourceDefaultWebpackDependencies')
-        .returns(createModuleMatrixResult({
+        const sourceRelativeWebpackModules = await import('../src/helpers/sourceRelativeWebpackModules')
+
+        vi.mocked(sourceRelativeWebpackModules.sourceDefaultWebpackDependencies).mockReturnValue(createModuleMatrixResult({
           webpack: version,
           webpackDevServer: version,
         }))
 
-        try {
-          const devServerModule = require('../src/devServer')
-          const { devServer } = devServerModule
+        const { devServer } = await import('../src/devServer')
 
-          const result = await devServer.create({
-            specs: [],
-            cypressConfig,
-            webpackConfig: {},
-            devServerEvents: new EventEmitter(),
-          })
+        const result = await devServer.create({
+          specs: [],
+          cypressConfig,
+          webpackConfig: {},
+          devServerEvents: new EventEmitter(),
+        })
 
-          expect(result.server.options.devMiddleware.writeToDisk).to.be.true
-        } finally {
-          stub.restore()
-        }
+        // @ts-expect-error - options isn't typed
+        expect(result.server.options.devMiddleware.writeToDisk).toBe(true)
       })
     })
   })

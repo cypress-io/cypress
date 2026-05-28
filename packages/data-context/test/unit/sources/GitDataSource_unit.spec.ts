@@ -50,6 +50,39 @@ describe('GitDataSource', () => {
   })
 
   describe('Unit', () => {
+    describe('in run mode', () => {
+      it('does not load git info when setSpecs is called', async () => {
+        const revparseP = pDefer<void>()
+
+        stubbedSimpleGit.revparse.mockImplementationOnce((opts: string) => {
+          revparseP.resolve()
+
+          return Promise.resolve('/root') as unknown as R<'revparse'>
+        })
+
+        const onGitInfoChange = jest.fn()
+
+        const gds = new GitDataSource({
+          isRunMode: true,
+          projectRoot: '/root',
+          onBranchChange: jest.fn(),
+          onGitInfoChange,
+          onError: jest.fn(),
+          onGitLogChange: jest.fn(),
+        })
+
+        await revparseP.promise
+
+        gds.setSpecs(['/root/cypress/e2e/spec.cy.ts'])
+
+        // In run mode, setSpecs should be a no-op — no git status or git log calls
+        expect(stubbedSimpleGit.status).not.toHaveBeenCalled()
+        expect(onGitInfoChange).not.toHaveBeenCalled()
+
+        await gds.destroy()
+      })
+    })
+
     describe('in open mode', () => {
       let gds: GitDataSource
       let projectRoot: string
