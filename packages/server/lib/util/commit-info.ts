@@ -156,5 +156,4 @@ export = {
   commitInfo,
   getGitCommands,
   getRemoteOrigin,
-  sanitizeRemoteOrigin,
 }
