@@ -501,8 +501,8 @@ export default {
     }) as Bluebird<CreateInstanceResponse>
   },
 
-  postInstanceTests (options: { instanceId: string, runId: string, timeout?: number, [key: string]: any }): Bluebird<PostInstanceTestsResponseType> {
-    const { instanceId, runId, timeout, ...body } = options
+  postInstanceTests (options: { instanceId: string, runId: string, timeout?: number, config?: any, [key: string]: any }): Bluebird<PostInstanceTestsResponseType> {
+    const { instanceId, runId, timeout, config, ...body } = options
 
     return retryWithBackoff((attemptIndex) => {
       return rp.post({
