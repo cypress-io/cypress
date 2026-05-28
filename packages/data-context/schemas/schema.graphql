@@ -1777,6 +1777,7 @@ enum OverLimitActionTypeEnum {
 }
 
 enum PackageManagerEnum {
+  bun
   npm
   pnpm
   yarn

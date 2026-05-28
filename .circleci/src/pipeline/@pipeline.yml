@@ -963,6 +963,10 @@ commands:
         description: set to false to skip this job (not relevant to changed files)
         type: boolean
         default: true
+      bun-release:
+        description: pinned Bun release tag passed to https://bun.sh/install (e.g. bun-v1.2.22)
+        type: string
+        default: bun-v1.2.22
     steps:
       - halt-if-skipped:
           guard: << parameters.guard >>
@@ -977,6 +981,39 @@ commands:
           install-chrome: true
           install-chrome-for-testing: true
           install-firefox: true
+      - restore_cache:
+          name: Restore Bun install cache
+          keys:
+            - v1-bun-system-tests-<< parameters.bun-release >>
+      - run:
+          name: Install Bun for Bun package manager system tests
+          command: |
+            set -euo pipefail
+            BUN_RELEASE="<< parameters.bun-release >>"
+
+            if command -v bun >/dev/null 2>&1; then
+              bun --version
+              exit 0
+            fi
+
+            if [[ -x "${HOME}/.bun/bin/bun" ]]; then
+              echo 'export PATH="${HOME}/.bun/bin:${PATH}"' >> "${BASH_ENV}"
+              export PATH="${HOME}/.bun/bin:${PATH}"
+              command -v bun
+              bun --version
+              exit 0
+            fi
+
+            curl -fsSL https://bun.sh/install | bash -s "${BUN_RELEASE}"
+            echo 'export PATH="${HOME}/.bun/bin:${PATH}"' >> "${BASH_ENV}"
+            export PATH="${HOME}/.bun/bin:${PATH}"
+            command -v bun
+            bun --version
+      - save_cache:
+          name: Save Bun install cache
+          key: v1-bun-system-tests-<< parameters.bun-release >>
+          paths:
+            - ~/.bun
       - run:
           name: Run system tests
           environment:
