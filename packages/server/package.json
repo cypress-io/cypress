@@ -151,6 +151,7 @@
     "@packages/socket": "0.0.0-development",
     "@packages/ts": "0.0.0-development",
     "@packages/types": "0.0.0-development",
+    "@packages/v8-snapshot-require": "0.0.0-development",
     "@tooling/system-tests": "0.0.0-development",
     "@types/chai-as-promised": "7.1.8",
     "@types/chrome": "0.0.101",
@@ -201,6 +202,7 @@
     "hook-require.js",
     "lib",
     "patches",
+    "index.js",
     "start-cypress.js",
     "v8-snapshot-entry.js"
   ],

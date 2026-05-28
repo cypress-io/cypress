@@ -1,1 +1,1 @@
-require('./start-cypress')
+require('./start-cypress.js').run()

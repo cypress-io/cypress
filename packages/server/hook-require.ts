@@ -1,14 +1,14 @@
-const path = require('path')
+import path from 'path'
+import { snapshotRequire } from '@packages/v8-snapshot-require'
 const env = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'prod' : 'dev'
 
-process.env.PROJECT_BASE_DIR = process.env.PROJECT_BASE_DIR ?? path.join(__dirname, '..', '..')
+const projectBaseDir = process.env.PROJECT_BASE_DIR ?? path.join(__dirname, '..', '..')
+
+process.env.PROJECT_BASE_DIR = projectBaseDir
 
 const isDev = env === 'dev'
 
-function runWithSnapshot (forceTypeScript) {
-  const { snapshotRequire } = require('@packages/v8-snapshot-require')
-  const projectBaseDir = process.env.PROJECT_BASE_DIR
-
+export const runWithSnapshot = (forceTypeScript: boolean) => {
   const supportTS = forceTypeScript || typeof global.getSnapshotResult === 'undefined' || global.supportTypeScript
 
   snapshotRequire(projectBaseDir, {
@@ -30,14 +30,11 @@ function runWithSnapshot (forceTypeScript) {
   })
 }
 
-const hookRequire = ({ forceTypeScript }) => {
+export const hookRequire = ({ forceTypeScript }) => {
+  // @ts-expect-error - getSnapshotResult is global
   if (['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) || typeof getSnapshotResult === 'undefined') {
-    require('@packages/ts/register')
+    require('tsx/cjs')
   } else {
     runWithSnapshot(forceTypeScript)
   }
-}
-
-module.exports = {
-  hookRequire,
 }
