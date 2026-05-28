@@ -18,6 +18,30 @@ interface GitCommand {
   transform?: (result: string) => string | number | null
 }
 
+// Strips HTTP basic auth credentials from a remote origin URL to prevent them
+// from leaking into query parameters, proxy logs, or other storage.
+// SSH remotes (e.g. git@github.com:org/repo.git) are returned unchanged.
+function sanitizeRemoteOrigin (remoteOrigin: string): string {
+  if (!/\/\//.test(remoteOrigin)) {
+    return remoteOrigin
+  }
+
+  try {
+    const parsed = new URL(remoteOrigin)
+
+    if (parsed.username || parsed.password) {
+      parsed.username = ''
+      parsed.password = ''
+
+      return parsed.toString()
+    }
+  } catch {
+    // not a valid URL, return as-is
+  }
+
+  return remoteOrigin
+}
+
 /**
  * Returns the git command configuration for all commit info properties.
  * Exported for use in tests.
@@ -57,6 +81,7 @@ function getGitCommands (): Record<keyof CommitInfo, GitCommand> {
     remote: {
       envVar: 'COMMIT_INFO_REMOTE',
       gitCmd: ['config', '--get', 'remote.origin.url'],
+      transform: sanitizeRemoteOrigin,
     },
   }
 }
@@ -94,6 +119,13 @@ function getGitValue (
     .catch(() => null)
 }
 
+function getRemoteOrigin (folder?: string): Promise<string | null> {
+  const cwd = folder ? path.resolve(folder) : process.cwd()
+  const { remote } = getGitCommands()
+
+  return getGitValue(cwd, remote.envVar, remote.gitCmd, remote.transform) as Promise<string | null>
+}
+
 /**
  * Collects Git commit info using git CLI commands.
  * Falls back to environment variables if git commands fail.
@@ -123,4 +155,6 @@ function commitInfo (folder?: string): Promise<CommitInfo> {
 export = {
   commitInfo,
   getGitCommands,
+  getRemoteOrigin,
+  sanitizeRemoteOrigin,
 }
