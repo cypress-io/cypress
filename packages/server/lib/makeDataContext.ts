@@ -86,14 +86,14 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
         return user.get()
       },
       logIn (onMessage, utmSource, utmMedium, utmContent, signal) {
-        return resolveAuthRemoteOrigin().then((remoteOrigin) => {
+        return resolveAuthRemoteOrigin().catch(() => {}).then((remoteOrigin) => {
           if (signal?.aborted) return
 
           return auth.start(onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
         })
       },
       signUp (onMessage, utmSource, utmMedium, utmContent, signal) {
-        return resolveAuthRemoteOrigin().then((remoteOrigin) => {
+        return resolveAuthRemoteOrigin().catch(() => {}).then((remoteOrigin) => {
           if (signal?.aborted) return
 
           return auth.startSignup(onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
