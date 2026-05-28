@@ -18,10 +18,16 @@ interface GitCommand {
   transform?: (result: string) => string | number | null
 }
 
-// Strips credentials from HTTP/HTTPS remote origin URLs to prevent them from
-// leaking into query parameters, proxy logs, or other storage. Only http/https
-// schemes are stripped — ssh:// usernames (e.g. git@) are protocol components,
-// not credentials, and must be preserved.
+// Strips credentials from remote origin URLs to prevent them from leaking into
+// proxy logs or other storage. For HTTP/HTTPS, any username or password is
+// removed. For other schemes (e.g. ssh://), only passwords are removed —
+// usernames like "git" are protocol components and must be preserved.
+//
+// Known gaps (intentional tradeoffs):
+//   - ssh://token@host (username-as-token, no password): indistinguishable from
+//     legitimate ssh://git@host without a scheme-specific allowlist.
+//   - Tokens embedded in query params (e.g. ?token=secret): clearing all query
+//     params would break remotes that use them for non-credential purposes.
 function sanitizeRemoteOrigin (remoteOrigin: string): string {
   if (!/\/\//.test(remoteOrigin)) {
     return remoteOrigin
@@ -31,8 +37,9 @@ function sanitizeRemoteOrigin (remoteOrigin: string): string {
     const parsed = new URL(remoteOrigin)
 
     const isHttpUrl = parsed.protocol === 'https:' || parsed.protocol === 'http:'
+    const hasCredentials = parsed.password || (isHttpUrl && parsed.username)
 
-    if (isHttpUrl && (parsed.username || parsed.password)) {
+    if (hasCredentials) {
       parsed.username = ''
       parsed.password = ''
 

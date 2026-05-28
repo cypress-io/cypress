@@ -262,6 +262,11 @@ describe('lib/util/commit-info', () => {
       .to.eq('ssh://git@github.com/org/repo.git')
     })
 
+    it('strips username and password from an ssh:// remote with embedded credentials', () => {
+      expect(sanitizeRemoteOrigin('ssh://user:password@host/repo.git'))
+      .to.eq('ssh://host/repo.git')
+    })
+
     it('leaves a git:// remote unchanged', () => {
       expect(sanitizeRemoteOrigin('git://github.com/org/repo.git'))
       .to.eq('git://github.com/org/repo.git')
