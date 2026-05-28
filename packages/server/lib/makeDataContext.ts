@@ -43,7 +43,7 @@ export { getCtx, setCtx, clearCtx }
 
 async function resolveAuthRemoteOrigin (): Promise<string | undefined> {
   const ctx = getCtx()
-  const projectRoot = ctx?.coreData.currentProject
+  const projectRoot = ctx.coreData.currentProject
 
   if (!projectRoot) {
     return Promise.resolve(undefined)
