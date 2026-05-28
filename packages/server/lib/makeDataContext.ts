@@ -46,12 +46,11 @@ async function resolveAuthRemoteOrigin (): Promise<string | undefined> {
   const projectRoot = ctx.coreData.currentProject
 
   if (!projectRoot) {
-    return Promise.resolve(undefined)
+    return
   }
 
-  const commit = await commitInfo.commitInfo(projectRoot)
-
-  return commit?.remote ?? undefined
+  return commitInfo.getRemoteOrigin(projectRoot)
+    .then((value) => value ?? undefined)
 }
 
 export function makeDataContext (options: MakeDataContextOptions): DataContext {

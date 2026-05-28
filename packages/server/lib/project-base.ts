@@ -509,20 +509,17 @@ export class ProjectBase extends EE {
               return { canAccessStudioAI, cloudStudioSessionId }
             }
 
-            const protocolManager = studio.protocolManager
-
-            protocolManager.setupProtocol()
-            protocolManager.beforeSpec({
+            this.protocolManager = studio.protocolManager
+            this.protocolManager.setupProtocol()
+            this.protocolManager.beforeSpec({
               ...this.spec,
               instanceId: randomUUID(),
             })
 
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_START)
-            await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager })
-            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
+            await browsers.connectProtocolToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, protocolManager: studio.protocolManager })
 
-            // Attach to the proxy only after connectToBrowser has initialized network capture.
-            this.protocolManager = protocolManager
+            telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_PROTOCOL_TO_BROWSER_END)
 
             telemetryManager.mark(INITIALIZATION_MARK_NAMES.CONNECT_STUDIO_TO_BROWSER_START)
             await browsers.connectStudioToBrowser({ browser: this.browser, foundBrowsers: this.options.browsers, studioManager: studio })
