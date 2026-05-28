@@ -18,9 +18,10 @@ interface GitCommand {
   transform?: (result: string) => string | number | null
 }
 
-// Strips HTTP basic auth credentials from a remote origin URL to prevent them
-// from leaking into query parameters, proxy logs, or other storage.
-// SSH remotes (e.g. git@github.com:org/repo.git) are returned unchanged.
+// Strips credentials from HTTP/HTTPS remote origin URLs to prevent them from
+// leaking into query parameters, proxy logs, or other storage. Only http/https
+// schemes are stripped — ssh:// usernames (e.g. git@) are protocol components,
+// not credentials, and must be preserved.
 function sanitizeRemoteOrigin (remoteOrigin: string): string {
   if (!/\/\//.test(remoteOrigin)) {
     return remoteOrigin
@@ -29,7 +30,9 @@ function sanitizeRemoteOrigin (remoteOrigin: string): string {
   try {
     const parsed = new URL(remoteOrigin)
 
-    if (parsed.username || parsed.password) {
+    const isHttpUrl = parsed.protocol === 'https:' || parsed.protocol === 'http:'
+
+    if (isHttpUrl && (parsed.username || parsed.password)) {
       parsed.username = ''
       parsed.password = ''
 
@@ -156,4 +159,5 @@ export = {
   commitInfo,
   getGitCommands,
   getRemoteOrigin,
+  sanitizeRemoteOrigin,
 }

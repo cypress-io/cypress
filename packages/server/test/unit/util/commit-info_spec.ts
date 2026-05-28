@@ -252,9 +252,14 @@ describe('lib/util/commit-info', () => {
       .to.eq('https://github.com/org/repo.git')
     })
 
-    it('leaves an SSH remote unchanged', () => {
+    it('leaves an SCP-style SSH remote unchanged', () => {
       expect(sanitizeRemoteOrigin('git@github.com:org/repo.git'))
       .to.eq('git@github.com:org/repo.git')
+    })
+
+    it('leaves an ssh:// remote unchanged, preserving the git username', () => {
+      expect(sanitizeRemoteOrigin('ssh://git@github.com/org/repo.git'))
+      .to.eq('ssh://git@github.com/org/repo.git')
     })
 
     it('leaves a git:// remote unchanged', () => {
