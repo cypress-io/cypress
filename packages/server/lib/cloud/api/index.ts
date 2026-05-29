@@ -601,7 +601,7 @@ export default {
         bearer: authToken,
       },
     })
-    .timeout(maxTimeout)
+    .timeout(timeout)
     .catch(tagError)
   },
 

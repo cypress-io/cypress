@@ -23,6 +23,8 @@ import type { Cfg } from '../project-base'
 import type { RunResult } from './results'
 import type { ReadyOptions } from './run'
 
+import type { PostRunRequest_v3Type } from '../validations/cloudValidations'
+
 const debug = Debug('cypress:server:record')
 const debugCiInfo = Debug('cypress:server:record:ci-info')
 
@@ -204,7 +206,7 @@ const postInstanceResults = (options: any = {}) => {
   })
 }
 
-const getCommitFromGitOrCi = (git: any) => {
+const getCommitFromGitOrCi = (git: any): PostRunRequest_v3Type['commit'] => {
   la(_.isPlainObject(git), 'expected git information object', git)
 
   return ciProvider.commitDefaults({
@@ -215,7 +217,7 @@ const getCommitFromGitOrCi = (git: any) => {
     message: git.message,
     remoteOrigin: git.remote,
     defaultBranch: null,
-  })
+  }) as PostRunRequest_v3Type['commit']
 }
 
 const billingLink = (orgId: any) => {
