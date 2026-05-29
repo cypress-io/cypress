@@ -121,6 +121,18 @@ export class AuthActions {
 
     this.#cancelActiveLogin = null
 
+    if (user.projectSlug) {
+      try {
+        await this.ctx.actions.project.setProjectIdInConfigFile(user.projectSlug)
+      } catch {
+        this.ctx.update((coreData) => {
+          coreData.autoProvisionedProjectId = user.projectSlug ?? null
+        })
+
+        this.ctx.emitter.toApp()
+      }
+    }
+
     this.resetAuthState()
   }
 
