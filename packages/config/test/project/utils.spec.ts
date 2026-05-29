@@ -284,6 +284,38 @@ describe('config/src/project/utils', () => {
         baz: 'quux',
       })
     })
+
+    it('warns and ignores CYPRESS_env when set to a non-object string value', () => {
+      vi.stubEnv('CYPRESS_env', 'notAnObject')
+
+      const obj = { env: { existing: 'value' } }
+
+      const result = parseEnv(obj, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 'notAnObject')
+      expect(result).toEqual({ existing: 'value' })
+    })
+
+    it('warns and ignores CYPRESS_env when set to a numeric string', () => {
+      vi.stubEnv('CYPRESS_env', '42')
+
+      const obj = { env: {} }
+
+      const result = parseEnv(obj, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 42)
+      expect(result).toEqual({})
+    })
+
+    it('does not warn when CYPRESS_env is set to a valid JSON object', () => {
+      vi.stubEnv('CYPRESS_env', '{"foo":"bar"}')
+
+      const obj = { env: {} }
+
+      parseEnv(obj, {})
+
+      expect(errors.warning).not.toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', expect.anything())
+    })
   })
 
   describe('.resolveConfigValues', () => {

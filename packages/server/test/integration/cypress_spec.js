@@ -882,13 +882,25 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when project has invalid config values from env vars', function () {
+    it('logs warning and continues when project has invalid config values from env vars', function () {
       process.env.CYPRESS_BASE_URL = 'localhost:9999'
 
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
-        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
-        this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'An invalid configuration value was set.')
+        delete process.env.CYPRESS_BASE_URL
+        expect(console.log).to.be.calledWithMatch('CYPRESS_baseUrl')
+        this.expectExitWith(0)
+      })
+    })
+
+    it('logs warning and continues when CYPRESS_env is set to a non-object value', function () {
+      process.env.CYPRESS_env = 'invalid-string'
+
+      return cypress.start([`--run-project=${this.todosPath}`])
+      .then(() => {
+        delete process.env.CYPRESS_env
+        expect(console.log).to.be.calledWithMatch('CYPRESS_env')
+        this.expectExitWith(0)
       })
     })
 

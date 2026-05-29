@@ -123,6 +123,15 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
     const cfgKey = matchesConfigKey(key)
 
     if (cfgKey) {
+      const validationFn = options.find((o) => o.name === cfgKey)?.validation
+
+      if (validationFn && validationFn(cfgKey, val) !== true) {
+        errors.warning('INVALID_CYPRESS_ENV_OVERRIDE', cfgKey, val)
+        memo.push(key)
+
+        return memo
+      }
+
       // only change the value if it hasn't been
       // set by the CLI. override default + config
       if (resolved[cfgKey] !== 'cli') {
