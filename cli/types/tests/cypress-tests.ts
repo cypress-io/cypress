@@ -904,6 +904,7 @@ namespace CypressTestConfigOverridesTests {
     animationDistanceThreshold: 10,
     defaultCommandTimeout: 6000,
     env: {},
+    expose: {},
     execTimeout: 6000,
     includeShadowDom: true,
     requestTimeout: 6000,
