@@ -29,7 +29,7 @@ sync_cloud_validations() {
   
   # Download types only (safer than downloading executable .js schemas)
   echo "Downloading types..."
-  curl -s -D /tmp/types_headers "$VALIDATION_BASE/cypress-app/validations/types" > "$DTS_FILE"
+  curl -sf -D /tmp/types_headers "$VALIDATION_BASE/cypress-app/validations/types" > "$DTS_FILE"
   
   # TODO: Download .js validations when cloud package publishes an npm SDK
   # For now, we only download TypeScript definitions for type safety

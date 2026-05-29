@@ -284,7 +284,7 @@ function noProxyPreflightTimeout (): number {
 }
 
 // Use cloud validation types for better type safety
-export type CreateRunOptions = CreateRunRequestType & {
+type CreateRunOptions = CreateRunRequestType & {
   projectRoot: string
   project: ProjectBase
   timeout?: number

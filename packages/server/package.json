@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "yarn ensure-cloud-validations && tsc || echo 'built, with type errors'",
+    "build-prod": "yarn ensure-cloud-validations && (tsc || echo 'built, with type errors')",
     "check-ts": "yarn ensure-cloud-validations && tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "dev": "node index.js",
