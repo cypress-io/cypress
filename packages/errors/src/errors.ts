@@ -1127,6 +1127,15 @@ export const AllCypressErrors = {
 
         CYPRESS_INTERNAL_ENV is reserved for internal use and cannot be modified.`
   },
+  INVALID_CYPRESS_ENV_OVERRIDE: (cfgKey: string, val: any) => {
+    return errTemplate`\
+        The ${fmt.highlightSecondary(`CYPRESS_${cfgKey}`)} environment variable must be a valid JSON object, but received: ${fmt.highlight(String(val))}
+
+        To pass individual key-value pairs, use the ${fmt.highlightSecondary(`--${cfgKey}`)} CLI flag instead:
+        ${fmt.highlightSecondary(`cypress run --${cfgKey} key=value`)}
+
+        The ${fmt.highlightSecondary(`CYPRESS_${cfgKey}`)} override will be ignored.`
+  },
   CDP_COULD_NOT_CONNECT: (browserName: string, port: number, err: Error) => {
     // we include a stack trace here because it may contain useful information
     // to debug since this is an "uncontrolled" error even though it doesn't

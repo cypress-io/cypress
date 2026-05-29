@@ -37,7 +37,38 @@ type TestConfig = {
 
 type ConfigOverrides = {
   env: Object | undefined
+  expose?: Record<string, any>
 };
+
+type ExposeKeyBackup =
+  | { existed: true, value: any }
+  | { existed: false }
+
+type ExposeFn = Cypress.Cypress['expose']
+
+/**
+ * Saves an existing expose key and returns the original value to be restored after the test runs.
+ */
+function backupExposeKey (key: string, expose: ExposeFn): ExposeKeyBackup {
+  const allExpose = expose()
+
+  if (Object.prototype.hasOwnProperty.call(allExpose, key)) {
+    return { existed: true, value: _.cloneDeep(expose(key)) }
+  }
+
+  return { existed: false }
+}
+
+/**
+ * Restores an expose key from a backup value after the test runs. If no value existed, the key will be deleted.
+ */
+function restoreExposeKey (key: string, backup: ExposeKeyBackup, expose: ExposeFn) {
+  if (backup.existed) {
+    expose(key, _.cloneDeep(backup.value))
+  } else {
+    delete expose()[key]
+  }
+}
 
 function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigOverrides: ConfigOverrides = { env: undefined }) {
   const { testConfigList = [] } = testConfig
@@ -48,12 +79,16 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
     if (_.isArray(testConfigOverride)) {
       setConfig(resolvedConfig as ResolvedTestConfigOverride, config, localConfigOverrides)
     } else if (Object.keys(testConfigOverride).length) {
-      delete testConfigOverride.browser
+      const testConfigOverrideCopy = { ...testConfigOverride }
+      const exposeOverride = testConfigOverrideCopy.expose
+
+      delete testConfigOverrideCopy.browser
+      delete testConfigOverrideCopy.expose
 
       try {
         testConfig.applied = overrideLevel
 
-        config(testConfigOverride)
+        config(testConfigOverrideCopy)
       } catch (e: any) {
         let err = $errUtils.errByPath('config.invalid_test_override', {
           errMsg: e.message,
@@ -63,14 +98,21 @@ function setConfig (testConfig: ResolvedTestConfigOverride, config, localConfigO
         err.stack = $errUtils.stackWithReplacedProps({ stack: invocationDetails.stack }, err)
         throw err
       }
-      localConfigOverrides = { ...localConfigOverrides, ...testConfigOverride }
+      localConfigOverrides = { ...localConfigOverrides, ...testConfigOverrideCopy }
+
+      if (exposeOverride) {
+        localConfigOverrides.expose = {
+          ...localConfigOverrides.expose,
+          ...exposeOverride,
+        }
+      }
     }
   })
 
   return localConfigOverrides
 }
 
-function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, env) {
+function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, env, expose: ExposeFn) {
   let globalConfig = _.clone(config())
 
   const localConfigOverrides = setConfig(testConfig, config)
@@ -93,6 +135,7 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
   let globalEnv
   let localTestEnv
   let localTestEnvBackup
+  let testExposeBackup: Map<string, ExposeKeyBackup> | undefined
 
   if (config('allowCypressEnv')) {
     globalEnv = _.clone(env())
@@ -104,6 +147,18 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
     localTestEnvBackup = _.clone(localTestEnv)
   }
 
+  // Expose overrides are applied at test start and restored after each test for only the overridden keys
+  // so hook-level values remain intact.
+  if (localConfigOverrides.expose) {
+    const exposeBackup = new Map<string, ExposeKeyBackup>()
+
+    testExposeBackup = exposeBackup
+    _.each(localConfigOverrides.expose, (val, key) => {
+      exposeBackup.set(key, backupExposeKey(key, expose))
+      expose(key, _.cloneDeep(val))
+    })
+  }
+
   // we restore config back to what it was before the test ran
   // UNLESS the user mutated config with Cypress.config, in which case
   // we apply those changes to the global config
@@ -111,6 +166,10 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
   //   do not allow global mutations inside test
   const restoreConfigFn = function () {
     _.each(localConfigOverrides, (val, key) => {
+      if (key === 'expose') {
+        return
+      }
+
       if (localConfigOverridesBackup[key] !== val) {
         globalConfig[key] = val
       }
@@ -127,6 +186,12 @@ function mutateConfiguration (testConfig: ResolvedTestConfigOverride, config, en
           globalEnv[key] = val
         }
       })
+    }
+
+    if (testExposeBackup) {
+      for (const [key, backup] of testExposeBackup) {
+        restoreExposeKey(key, backup, expose)
+      }
     }
 
     // reset test config overrides
@@ -167,7 +232,18 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
   const testConfig = {
     testConfigList: testConfigList.filter(({ overrides }) => overrides !== undefined),
     // collect test overrides to send to the Cypress Cloud api when @packages/server is ran in record mode
-    unverifiedTestConfig: _.reduce(testConfigList, (acc, { overrides }) => _.extend(acc, overrides), {}),
+    unverifiedTestConfig: _.reduce(testConfigList, (acc: Record<string, any>, { overrides }) => {
+      const result = _.extend({}, acc, overrides)
+
+      if (overrides?.expose) {
+        result.expose = {
+          ...acc.expose,
+          ...overrides.expose,
+        }
+      }
+
+      return result
+    }, {} as Record<string, any>),
   }
 
   return testConfig
@@ -176,7 +252,7 @@ export function getResolvedTestConfigOverride (test): ResolvedTestConfigOverride
 export class TestConfigOverride {
   private restoreTestConfigFn: Cypress.Nullable<() => void> = null
 
-  restoreAndSetTestConfigOverrides (test, config, env) {
+  restoreAndSetTestConfigOverrides (test, config, env, expose: ExposeFn) {
     if (this.restoreTestConfigFn) {
       test._testConfig.applied = 'restoring'
       this.restoreTestConfigFn()
@@ -187,7 +263,9 @@ export class TestConfigOverride {
     }
 
     if (Object.keys(resolvedTestConfig.unverifiedTestConfig).length > 0) {
-      this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env)
+      this.restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, config, env, expose)
+    } else {
+      this.restoreTestConfigFn = null
     }
 
     resolvedTestConfig.applied = 'complete'

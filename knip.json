@@ -414,6 +414,14 @@
         "lib/**/*.{ts,tsx,js,jsx}"
       ]
     },
+    "packages/network-interception": {
+      "entry": [
+        "lib/index.ts"
+      ],
+      "project": [
+        "lib/**/*.{ts,tsx,js,jsx}"
+      ]
+    },
     "packages/resolve-dist": {
       "entry": [
         "lib/index.ts"
@@ -789,6 +797,19 @@
     ],
     "packages/net-stubbing/lib/external-types.ts": [
       "exports",
+      "types"
+    ],
+    "packages/network-interception/lib/types/external-types.ts": [
+      "exports",
+      "types"
+    ],
+    "packages/network-interception/lib/ports/driven-ports.ts": [
+      "types"
+    ],
+    "packages/network-interception/lib/ports/driving-ports.ts": [
+      "types"
+    ],
+    "packages/network-interception/lib/exchange/network-exchange.ts": [
       "types"
     ],
     "npm/react/cypress/component/advanced/lazy-loaded-suspense/Dog.tsx": [

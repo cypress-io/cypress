@@ -41,6 +41,9 @@ if [ "$USE_YARN_TO_INSTALL_CYPRESS_BINARY" = true ]; then
   # is skipped — invoke `cypress install` explicitly afterwards rather than relaxing yarn's defaults.
   yarn add cypress@file:$TARBALL_PATH
   yarn cypress install
+elif [ "$USE_BUN_TO_INSTALL_CYPRESS_BINARY" = true ]; then
+  # if using bun to install the built cypress binary, we can just install the tarball that is in the monorepo root directory
+  bun add cypress@file:$TARBALL_PATH
 else
   export npm_config_cache=/tmp/npm_config_cache/
   export npm_config_package_lock=false

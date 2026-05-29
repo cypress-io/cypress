@@ -3438,6 +3438,7 @@ declare namespace Cypress {
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
+    expose?: Record<string, any>
   }
 
   interface TestConfigOverrides extends Partial<
@@ -3445,6 +3446,7 @@ declare namespace Cypress {
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
+    expose?: Record<string, any>
   }
 
   /**

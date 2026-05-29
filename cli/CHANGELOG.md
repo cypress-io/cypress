@@ -16,7 +16,20 @@
 - Upgraded `electron` from `37.6.0` to `41.7.0`.
 - Upgraded bundled Chromium version to `146.0.7680.216`.
 
-## 15.15.1
+## 15.17.0
+
+**Features:**
+
+- Added [Bun](https://bun.sh) as a recognized package manager. The `cypress` npm package can now be installed and invoked with Bun (for example `bun run cypress open` or `bun run cypress run`). Addresses [#28962](https://github.com/cypress-io/cypress/issues/28962). Addressed in [#32580](https://github.com/cypress-io/cypress/pull/32580).
+- Improved CI environment detection and commit metadata capture for Cypress Cloud recorded runs within Argo CD and Argo Workflows. Addressed in [#33932](https://github.com/cypress-io/cypress/pull/33932).
+- [`Cypress.expose()`](https://on.cypress.io/expose) values can now be overridden per suite or test via test config overrides (for example, `describe()`, `context()`, `it()`, or `test()`) using `{ expose: { key: value } }`. Suite- and test-level overrides are merged, with test-level keys taking precedence; override keys are applied at test start and restored after each test without affecting unrelated values set in hooks. Addresses [#33356](https://github.com/cypress-io/cypress/issues/33356). Addressed in [#33925](https://github.com/cypress-io/cypress/pull/33925).
+
+**Bugfixes:**
+
+- Fixed an issue where invalid `CYPRESS_env` or `CYPRESS_expose` environment variables (for example, a plain string instead of a JSON object) were silently ignored with no warning. Cypress now emits a warning explaining that a JSON object is required and points to the `--env` or `--expose` CLI flags for setting individual values. Fixes [#29682](https://github.com/cypress-io/cypress/issues/29682) and [#19508](https://github.com/cypress-io/cypress/issues/19508). Fixed in [#33945](https://github.com/cypress-io/cypress/pull/33945).
+- Fixed an issue where HTML markup passed as a Sinon spy argument (for example `expect(spy).to.have.been.calledOnceWith('<svg>...</svg>')`) was rendered as live DOM in the Cypress command log, truncating the assertion message and breaking the log layout. The assertion message is now HTML-escaped and the markup is shown as literal text. Fixes [#33416](https://github.com/cypress-io/cypress/issues/33416). Fixed in [#33941](https://github.com/cypress-io/cypress/pull/33941).
+
+## 15.16.0
 
 **Features:**
 
@@ -26,8 +39,9 @@
 **Bugfixes:**
 
 - Fixed an issue on Node 24.16.0+ and Node 26.1.0+ where installing Cypress could silently extract only the first file from the binary archive, causing the test runner to fail to launch with a "Cypress binary is missing" error. Addresses [#33891](https://github.com/cypress-io/cypress/issues/33891). Addressed in [#33887](https://github.com/cypress-io/cypress/pull/33887).
+- Fixed a regression in [15.14.2](#15-14-2) where the `cypress install` and `cypress verify` task list output could render one character per line in CI environments that allocate a pseudo-TTY without setting `COLUMNS`. Fixed in [#33890](https://github.com/cypress-io/cypress/pull/33890).
 - Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
-- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
+- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/app/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
 - Fixed an intermittent `ENOENT: no such file or directory, open <path>/bundle.tar-<rand>` error during `cy.prompt` and Studio bundle initialization. Fixed in [#33748](https://github.com/cypress-io/cypress/pull/33748).
 - Fixed a regression in [14.3.3](#14-3-3) where deleting `results.video` in `after:spec` to keep videos only for failing specs could leave an empty `*-compressed.mp4` file in `cypress/videos`. Fixes [#32883](https://github.com/cypress-io/cypress/issues/32883).
