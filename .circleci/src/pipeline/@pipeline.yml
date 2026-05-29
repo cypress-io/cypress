@@ -5,7 +5,7 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "148.0.7778.178"
+chrome-stable-version: &chrome-stable-version "148.0.7778.215"
 chrome-beta-version: &chrome-beta-version "149.0.7827.22"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.22"
@@ -964,7 +964,8 @@ commands:
         type: boolean
         default: true
       bun-release:
-        description: pinned Bun release tag passed to https://bun.sh/install (e.g. bun-v1.2.22)
+        description: pinned Bun release tag passed to https://bun.sh/install (e.g.
+          bun-v1.2.22)
         type: string
         default: bun-v1.2.22
     steps:

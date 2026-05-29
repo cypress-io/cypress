@@ -5,6 +5,7 @@
 
 - Added [Bun](https://bun.sh) as a recognized package manager. The `cypress` npm package can now be installed and invoked with Bun (for example `bun run cypress open` or `bun run cypress run`). Addresses [#28962](https://github.com/cypress-io/cypress/issues/28962). Addressed in [#32580](https://github.com/cypress-io/cypress/pull/32580).
 - Improved CI environment detection and commit metadata capture for Cypress Cloud recorded runs within Argo CD and Argo Workflows. Addressed in [#33932](https://github.com/cypress-io/cypress/pull/33932).
+- [`Cypress.expose()`](https://on.cypress.io/expose) values can now be overridden per suite or test via test config overrides (for example, `describe()`, `context()`, `it()`, or `test()`) using `{ expose: { key: value } }`. Suite- and test-level overrides are merged, with test-level keys taking precedence; override keys are applied at test start and restored after each test without affecting unrelated values set in hooks. Addresses [#33356](https://github.com/cypress-io/cypress/issues/33356). Addressed in [#33925](https://github.com/cypress-io/cypress/pull/33925).
 
 **Bugfixes:**
 

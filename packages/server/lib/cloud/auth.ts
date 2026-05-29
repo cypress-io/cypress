@@ -36,7 +36,7 @@ const buildLoginRedirectUrl = (server) => {
   return `http://127.0.0.1:${port}/redirect-to-auth`
 }
 
-const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, flow = 'login') => {
+const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, flow = 'login', remoteOrigin) => {
   const { port } = server.address()
   const authFlow = AUTH_FLOWS[flow] || AUTH_FLOWS.login
 
@@ -56,6 +56,10 @@ const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent
       platform: os.platform(),
     }
 
+    if (remoteOrigin) {
+      authUrl.query.remoteOrigin = remoteOrigin
+    }
+
     if (utmMedium) {
       authUrl.query = {
         utm_source: utmSource,
@@ -70,12 +74,12 @@ const buildFullAuthUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent
   })
 }
 
-const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent) => {
-  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'login')
+const buildFullLoginUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, remoteOrigin) => {
+  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'login', remoteOrigin)
 }
 
-const buildFullSignupUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent) => {
-  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'signup')
+const buildFullSignupUrl = (baseLoginUrl, server, utmSource, utmMedium, utmContent, remoteOrigin) => {
+  return buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, 'signup', remoteOrigin)
 }
 
 const getOriginFromUrl = (originalUrl) => {
@@ -87,7 +91,7 @@ const getOriginFromUrl = (originalUrl) => {
 /**
  * @returns the currently running auth server instance, launches one if there is not one
  */
-const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent, flow = 'login') => {
+const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmContent, flow = 'login', remoteOrigin) => {
   if (!server) {
     // launch an express server to listen for the auth callback from Cypress Cloud
     const origin = getOriginFromUrl(baseLoginUrl)
@@ -98,7 +102,7 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, flow)
+      buildFullAuthUrl(baseLoginUrl, server, utmSource, utmMedium, utmContent, flow, remoteOrigin)
       .then((fullAuthUrl) => {
         debug('Received GET to /redirect-to-auth, redirecting: %o', { fullAuthUrl })
 
@@ -211,7 +215,7 @@ const _internal = {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent) => {
+const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent, remoteOrigin) => {
   function sendMessage (name, message) {
     onMessage({
       name,
@@ -224,7 +228,7 @@ const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent) => {
 
   return authFlow.getBaseUrl()
   .then((baseAuthUrl) => {
-    return _internal.launchServer(baseAuthUrl, sendMessage, utmSource, utmMedium, utmContent, flow)
+    return _internal.launchServer(baseAuthUrl, sendMessage, utmSource, utmMedium, utmContent, flow, remoteOrigin)
   })
   .then(() => {
     return _internal.buildLoginRedirectUrl(server)
@@ -253,12 +257,12 @@ const startAuth = (flow, onMessage, utmSource, utmMedium, utmContent) => {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage, utmSource, utmMedium, utmContent) => {
-  return startAuth('login', onMessage, utmSource, utmMedium, utmContent)
+const start = (onMessage, utmSource, utmMedium, utmContent, remoteOrigin) => {
+  return startAuth('login', onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
 }
 
-const startSignup = (onMessage, utmSource, utmMedium, utmContent) => {
-  return startAuth('signup', onMessage, utmSource, utmMedium, utmContent)
+const startSignup = (onMessage, utmSource, utmMedium, utmContent, remoteOrigin) => {
+  return startAuth('signup', onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
 }
 
 export = {
