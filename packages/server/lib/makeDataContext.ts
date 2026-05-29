@@ -18,6 +18,7 @@ import type {
 import browserUtils from './browsers/utils'
 import auth from './cloud/auth'
 import user from './cloud/user'
+import commitInfo from './util/commit-info'
 import * as cohorts from './cohorts'
 import { openProject } from './open_project'
 import { cache } from './cache'
@@ -39,6 +40,18 @@ interface MakeDataContextOptions {
 }
 
 export { getCtx, setCtx, clearCtx }
+
+async function resolveAuthRemoteOrigin (): Promise<string | undefined> {
+  const ctx = getCtx()
+  const projectRoot = ctx.coreData.currentProject
+
+  if (!projectRoot) {
+    return
+  }
+
+  return commitInfo.getRemoteOrigin(projectRoot)
+    .then((value) => value ?? undefined)
+}
 
 export function makeDataContext (options: MakeDataContextOptions): DataContext {
   const ctx = new DataContext({
@@ -72,11 +85,19 @@ export function makeDataContext (options: MakeDataContextOptions): DataContext {
       getUser () {
         return user.get()
       },
-      logIn (onMessage, utmSource, utmMedium, utmContent) {
-        return auth.start(onMessage, utmSource, utmMedium, utmContent)
+      logIn (onMessage, utmSource, utmMedium, utmContent, signal) {
+        return resolveAuthRemoteOrigin().catch(() => {}).then((remoteOrigin) => {
+          if (signal?.aborted) return
+
+          return auth.start(onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
+        })
       },
-      signUp (onMessage, utmSource, utmMedium, utmContent) {
-        return auth.startSignup(onMessage, utmSource, utmMedium, utmContent)
+      signUp (onMessage, utmSource, utmMedium, utmContent, signal) {
+        return resolveAuthRemoteOrigin().catch(() => {}).then((remoteOrigin) => {
+          if (signal?.aborted) return
+
+          return auth.startSignup(onMessage, utmSource, utmMedium, utmContent, remoteOrigin)
+        })
       },
       logOut () {
         return user.logOut()

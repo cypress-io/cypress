@@ -82,6 +82,40 @@ describe('lib/cloud/auth', function () {
         expect(url).to.eq(FULL_SIGNUP_URL_UTM)
       })
     })
+
+    it('includes remoteOrigin in the auth URL when provided', function () {
+      return auth._internal.buildFullSignupUrl(
+        BASE_URL,
+        this.server,
+        'UTM Source',
+        'UTM Medium',
+        'UTM Content',
+        'https://github.com/cypress-io/cypress.git',
+      )
+      .then((url) => {
+        expect(url).to.include('remoteOrigin=')
+        expect(decodeURIComponent(url)).to.include(
+          'https://github.com/cypress-io/cypress.git',
+        )
+      })
+    })
+
+    it('includes remoteOrigin in the login URL when provided', function () {
+      return auth._internal.buildFullLoginUrl(
+        BASE_URL,
+        this.server,
+        'UTM Source',
+        'UTM Medium',
+        'UTM Content',
+        'https://github.com/cypress-io/cypress.git',
+      )
+      .then((url) => {
+        expect(url).to.include('remoteOrigin=')
+        expect(decodeURIComponent(url)).to.include(
+          'https://github.com/cypress-io/cypress.git',
+        )
+      })
+    })
   })
 
   describe('_internal.launchNativeAuth', function () {
