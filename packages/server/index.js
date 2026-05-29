@@ -5,16 +5,12 @@
 //
 // In dev:
 //   1. Register tsx so require() can load TypeScript sources.
-//   2. Delegate to index.ts and call start().
+//   2. Require index.ts, which auto-starts on load.
 //
 // In production (binary build):
 //   build-prod (tsc) compiles index.ts → index.js, replacing this shim before packaging.
 //   binary-cleanup.js then esbuilds that compiled index.js into the app bundle (plain JS,
-//   no tsx, no .ts files). The bundle auto-starts via require.main === module in index.ts.
+//   no tsx, no .ts files). The compiled index.js also auto-starts on require.
 require('tsx/cjs')
 
-require('./index.ts').start().catch((error) => {
-  // eslint-disable-next-line no-console
-  console.error(error)
-  process.exit(1)
-})
+require('./index.ts')

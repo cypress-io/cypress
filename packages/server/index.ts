@@ -1,6 +1,5 @@
 import minimist from 'minimist'
 import { initializeStartTime } from './lib/util/performance_benchmark'
-import { runWithSnapshot } from './hook-require'
 import { calculateCypressInternalEnv, configureLongStackTraces } from './lib/environment'
 
 const runChildProcess = async (entryPoint: string) => {
@@ -16,10 +15,9 @@ const startCypress = async () => {
     configureLongStackTraces(process.env['CYPRESS_INTERNAL_ENV'])
     process.env['CYPRESS'] = 'true'
 
-    // @ts-expect-error - getSnapshotResult is global
-    if (!['1', 'true'].includes(process.env.DISABLE_SNAPSHOT_REQUIRE) && typeof getSnapshotResult !== 'undefined') {
-      runWithSnapshot(false)
-    }
+    const { hookRequire } = require('./hook-require')
+
+    hookRequire({ forceTypeScript: false })
 
     const { run: runCypress } = require('./start-cypress')
 
@@ -41,12 +39,10 @@ export const start = async () => {
   }
 }
 
-// When bundled as the binary entry point, Electron loads this file directly.
-// In dev, index.js registers tsx and calls start() explicitly instead.
-if (require.main === module) {
-  void start().catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error(error)
-    process.exit(1)
-  })
-}
+// Auto-start when loaded as the package main (scripts/start.js, dev index.js shim, or
+// `node packages/server/index.js` for system tests). Matches legacy index.js behavior.
+void start().catch((error) => {
+  // eslint-disable-next-line no-console
+  console.error(error)
+  process.exit(1)
+})
