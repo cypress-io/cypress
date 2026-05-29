@@ -29,7 +29,7 @@ const startCypress = async () => {
   }
 }
 
-export const start = async () => {
+const start = async () => {
   const { entryPoint } = minimist(process.argv.slice(1))
 
   if (entryPoint) {

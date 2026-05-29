@@ -1,5 +1,6 @@
 import path from 'path'
 import { snapshotRequire } from '@packages/v8-snapshot-require'
+import { DirtSimpleFileCache } from 'dirt-simple-file-cache'
 const env = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'prod' : 'dev'
 
 const projectBaseDir = process.env.PROJECT_BASE_DIR ?? path.join(__dirname, '..', '..')
@@ -17,7 +18,7 @@ export const runWithSnapshot = (forceTypeScript: boolean) => {
     transpileOpts: {
       supportTS,
       initTranspileCache: supportTS
-        ? () => require('dirt-simple-file-cache').DirtSimpleFileCache.initSync(projectBaseDir, { cacheDir: path.join(projectBaseDir, 'node_modules', '.dsfc'), keepInMemoryCache: true })
+        ? () => DirtSimpleFileCache.initSync(projectBaseDir, { cacheDir: path.join(projectBaseDir, 'node_modules', '.dsfc'), keepInMemoryCache: true })
         : undefined,
       tsconfig: {
         compilerOptions: {

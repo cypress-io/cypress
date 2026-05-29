@@ -108,7 +108,10 @@
     },
     "packages/server": {
       "entry": [
-        "start-cypress.js",
+        "index.ts",
+        "hook-require.ts",
+        "v8-snapshot-entry.js",
+        "start-cypress.ts",
         "lib/cypress.ts",
         "lib/modes/**/*.ts",
         "lib/browsers/**/*.ts",
