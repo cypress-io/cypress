@@ -1,4 +1,5 @@
 const fs = require('fs-extra')
+const os = require('os')
 const path = require('path')
 const { consolidateDeps, getSnapshotCacheDir } = require('@tooling/v8-snapshot')
 const del = require('del')
@@ -37,6 +38,9 @@ async function removeEmptyDirectories (directory) {
 
 const getDependencyPathsToKeep = async (buildAppDir) => {
   const unixBuildAppDir = buildAppDir.split(path.sep).join(path.posix.sep)
+  const platformArch = `${os.platform()}-${os.arch()}`
+  const ffprobeBinary = os.platform() === 'win32' ? 'ffprobe.exe' : 'ffprobe'
+  const ffmpegBinary = os.platform() === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
   const startingEntryPoints = [
     'packages/server/lib/plugins/child/require_async_child.js',
     'packages/server/node_modules/@cypress/webpack-batteries-included-preprocessor/dist/index.js',
@@ -68,6 +72,13 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     'node_modules/better-sqlite3/lib/index.js',
     // shell-env is dynamically imported via tsx in @packages/server/lib/exec.ts
     'node_modules/shell-env/index.js',
+    // @ffprobe-installer resolves platform binaries via dynamic require; keep them on disk
+    // in case snapshot export cache is bypassed and the deferred module re-executes.
+    `node_modules/@ffprobe-installer/${platformArch}/package.json`,
+    `node_modules/@ffprobe-installer/${platformArch}/${ffprobeBinary}`,
+    // @ffmpeg-installer resolves platform binaries via path probing at runtime
+    `node_modules/@ffmpeg-installer/${platformArch}/package.json`,
+    `node_modules/@ffmpeg-installer/${platformArch}/${ffmpegBinary}`,
   ]
 
   let entryPoints = new Set([
