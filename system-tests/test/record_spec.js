@@ -2721,6 +2721,18 @@ describe('e2e record', () => {
             expect(postResultsRequest.body.stats.passes).to.equal(1)
             expect(postResultsRequest.body.stats.failures).to.equal(1)
             expect(postResultsRequest.body.stats.skipped).to.equal(0)
+
+            // Early-exit crash patching should attach structured error to the impacted test for Cloud
+            const failedWithCrashOnAttempt = postResultsRequest.body.tests.filter((t) => {
+              if (t.state !== 'failed' || !t.attempts?.length) return false
+
+              const err = t.attempts[t.attempts.length - 1].error
+
+              return err && err.message && err.message.includes('Chrome')
+            })
+
+            expect(failedWithCrashOnAttempt, 'failed test should carry crash error on last attempt').to.have.length.greaterThan(0)
+            expect(failedWithCrashOnAttempt[0].displayError).to.be.a('string').and.not.empty
           })
         })
       })
@@ -2997,7 +3009,7 @@ describe('capture-protocol api errors', () => {
     }))
   }
 
-  describe('upload 500 - does not retry', () => {
+  describe('upload 500 - tries 3 times and fails', () => {
     stubbedServerWithErrorOn('putCaptureProtocolUpload')
     it('continues', function () {
       process.env.API_RETRY_INTERVALS = '1000'
@@ -3016,9 +3028,13 @@ describe('capture-protocol api errors', () => {
         const artifactReport = getRequests().find(({ url }) => url === `PUT /instances/${instanceId}/artifacts`)?.body
 
         expect(artifactReport?.protocol).to.exist
-        expect(artifactReport?.protocol?.error).to.equal(
-          'Failed to upload Test Replay: http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX responded with 500 Internal Server Error',
-        )
+
+        const expectedUrl = `http://localhost:1234/capture-protocol/upload/?x-amz-credential=XXXXXXXX&x-amz-signature=XXXXXXXXXXXXX`
+        const expectedErrorMessage = `${expectedUrl} responded with 500 Internal Server Error`
+
+        expect(artifactReport?.protocol?.error).to.equal(`Failed to upload Test Replay after 3 attempts. Errors: ${[expectedErrorMessage, expectedErrorMessage, expectedErrorMessage].join(', ')}`)
+        expect(artifactReport?.protocol?.errorStack).to.exist
+        expect(artifactReport?.protocol?.errorStack).to.not.be.empty
       })
     })
   })

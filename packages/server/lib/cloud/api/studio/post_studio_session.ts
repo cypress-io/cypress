@@ -26,6 +26,6 @@ export const postStudioSession = async ({ projectId }: PostStudioSessionOptions)
   }, {
     maxAttempts: 3,
     retryDelay: _delay,
-    shouldRetry: isRetryableError,
+    shouldRetry: (err) => isRetryableError(err, 'POST'),
   }))()
 }

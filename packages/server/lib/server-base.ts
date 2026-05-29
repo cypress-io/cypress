@@ -19,9 +19,9 @@ import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlI
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
-import Request from './request'
+import { Request } from './request'
 import type { SocketE2E } from './socket-e2e'
-import templateEngine from './template_engine'
+import { render as renderTemplate } from './template_engine'
 import { ensureProp } from './util/class-helpers'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
@@ -30,15 +30,16 @@ import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
-import type { Server as WebSocketServer } from 'ws'
-import { RemoteStates, RemoteState } from './remote_states'
+import { RemoteStates } from '@packages/network-tools'
+import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
-import appData from './util/app_data'
+import * as appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
+import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
 import * as statusCode from './util/status_code'
-import headersUtil from './util/headers'
+import { getContentType } from './util/headers'
 import stream from 'stream'
 import isHtml from 'is-html'
 import type Protocol from 'devtools-protocol'
@@ -46,6 +47,7 @@ import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/ser
 import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
+import { GracefulExit } from './util/graceful-exit'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -161,7 +163,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
-  protected _graphqlWS?: WebSocketServer
+  protected _graphqlWS?: GraphqlWsHandle
   protected _eventBus: EventEmitter
   protected _remoteStates: RemoteStates
   private getCurrentBrowser: undefined | (() => Browser)
@@ -171,8 +173,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   constructor (config: Cfg) {
     this.isListening = false
-    // @ts-ignore
-    this.request = Request()
+    this.request = new Request()
     this.socketAllowed = new SocketAllowed()
     this._eventBus = new EventEmitter()
     this._middleware = null
@@ -244,86 +245,65 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
-  createServer (
+  async createServer (
     app: Express,
     config: Cfg,
     onWarning: unknown,
-  ): Bluebird<[number, WarningErr?]> {
-    return new Bluebird((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
+  ): Promise<[number, WarningErr?]> {
+    const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
-      this._server = this._createHttpServer(app)
+    this._server = this._createHttpServer(app)
 
-      const onError = (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
+    debug('createServer connecting to server')
+
+    this.server.on('connect', this.onConnect.bind(this))
+    this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
+
+    // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, { enforceOrigin: false })
+
+    // Start the file server first so its port is known before we begin
+    // listening for proxied requests on the main server. The primary
+    // remote state's `<root>` strategy reads `_fileServer.port()`
+    // synchronously, so the fileServer must exist before the primary
+    // is computed. The httpsProxy comes after — it depends on the main
+    // server's port.
+    this._fileServer = await fileServer.create(fileServerFolder as string) as FileServer
+
+    const listenedPort = await this._listen(port)
+
+    this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
+
+    this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
+      onRequest: this.callListeners.bind(this),
+      onUpgrade: this.onSniUpgrade.bind(this),
+    }) as HttpsProxyServer
+
+    let warning: WarningErr | undefined
+
+    // if we have a baseUrl let's go ahead and make sure the server is
+    // connectable!
+    if (baseUrl) {
+      this._baseUrl = baseUrl
+
+      if (config.isTextTerminal) {
+        try {
+          await this._retryBaseUrlCheck(baseUrl, onWarning)
+        } catch (e) {
+          debug(e)
+          throw errors.get('CANNOT_CONNECT_BASE_URL')
+        }
+      } else {
+        try {
+          await ensureUrl.isListening(baseUrl)
+        } catch (err) {
+          debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
+          warning = errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl) as WarningErr
         }
       }
+    }
 
-      debug('createServer connecting to server')
-
-      this.server.on('connect', this.onConnect.bind(this))
-      this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
-      this.server.once('error', onError)
-
-      this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
-
-      return this._listen(port, (err) => {
-        // if the server bombs before starting
-        // and the err no is EADDRINUSE
-        // then we know to display the custom err message
-        if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
-        }
-      })
-      .then((port) => {
-        return Bluebird.all([
-          createHttpsProxy(appData.path('proxy'), port, {
-            onRequest: this.callListeners.bind(this),
-            onUpgrade: this.onSniUpgrade.bind(this),
-          }),
-
-          fileServer.create(fileServerFolder as string),
-        ])
-        .spread((httpsProxy, fileServer) => {
-          this._httpsProxy = httpsProxy as HttpsProxyServer
-          this._fileServer = fileServer as FileServer
-
-          // once we open the server, set the domain to root or baseUrl by default which
-          // prevents a situation where navigating to http sites redirects to /__/ cypress
-          this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
-
-          // if we have a baseUrl let's go ahead
-          // and make sure the server is connectable!
-          if (baseUrl) {
-            this._baseUrl = baseUrl
-
-            if (config.isTextTerminal) {
-              return this._retryBaseUrlCheck(baseUrl, onWarning)
-              .return(null)
-              .catch((e) => {
-                debug(e)
-
-                return reject(errors.get('CANNOT_CONNECT_BASE_URL'))
-              })
-            }
-
-            return ensureUrl.isListening(baseUrl)
-            .return(null)
-            .catch((err) => {
-              debug('ensuring baseUrl (%s) errored: %o', baseUrl, err)
-
-              return errors.get('CANNOT_CONNECT_BASE_URL_WARNING', baseUrl)
-            })
-          }
-        }).then((warning) => {
-          return resolve([port, warning])
-        })
-      })
-    })
+    return [listenedPort, warning]
   }
 
   open (config: Cfg, {
@@ -383,7 +363,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     app.use(createCommonRoutes(routeOptions))
 
-    return this.createServer(app, config, onWarning)
+    // Preserve Bluebird-typed return value.
+    return Bluebird.resolve(this.createServer(app, config, onWarning))
   }
 
   createExpressApp (config) {
@@ -395,7 +376,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     // since we use absolute paths, configure express-handlebars to not automatically find layouts
     // https://github.com/cypress-io/cypress/issues/2891
-    app.engine('html', templateEngine.render)
+    app.engine('html', renderTemplate)
 
     // handle the proxied url in case
     // we have not yet started our websocket server
@@ -430,7 +411,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   useMorgan () {
-    return require('morgan')('dev')
+    return require('morgan')('dev', {
+      skip: () => GracefulExit.isShuttingDown,
+    })
   }
 
   getHttpServer () {
@@ -545,8 +528,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return (this.server.address() as AddressInfo).port
   }
 
-  _listen (port, onError) {
-    return new Bluebird<number>((resolve) => {
+  _listen (port: number | null | undefined): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const onError = (err) => {
+        // if the server bombs before starting
+        // and the err no is EADDRINUSE
+        // then we know to display the custom err message
+        if (err.code === 'EADDRINUSE') {
+          reject(this.portInUseErr(port))
+        }
+      }
+
+      this.server.once('error', onError)
+
       const listener = () => {
         const address = this.server.address() as AddressInfo
 
@@ -556,10 +550,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
         this.server.removeListener('error', onError)
 
-        return resolve(address.port)
+        resolve(address.port)
       }
 
-      return this.server.listen(port || 0, '127.0.0.1', listener)
+      this.server.listen(port || 0, '127.0.0.1', listener)
     })
   }
 
@@ -667,13 +661,23 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   close () {
-    return Bluebird.all([
-      this._close(),
-      this._socket?.close(),
-      this._fileServer?.close(),
-      this._httpsProxy?.close(),
-      this._graphqlWS?.close(),
-    ])
+    // graphql-ws clients must be closed before the HTTP server is destroyed.
+    const graphqlDispose = this._graphqlWS?.dispose
+      ? Bluebird.resolve(this._graphqlWS.dispose()).finally(() => {
+        // graphql-ws dispose() closes the ws server; repeating close() rejects with
+        // "The server is not running". Clear handle so subsequent close() is a no-op for gql.
+        this._graphqlWS = undefined
+      })
+      : Bluebird.resolve()
+
+    return graphqlDispose.then(() => {
+      return Bluebird.all([
+        this._close(),
+        this._socket?.close(),
+        this._fileServer?.close(),
+        this._httpsProxy?.close(),
+      ])
+    })
     .then((res) => {
       this._middleware = null
 
@@ -872,7 +876,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
               }
 
               const isOk = statusIs2xxOrAllowedFailure()
-              const contentType = headersUtil.getContentType(incomingRes)
+              const contentType = getContentType(incomingRes)
 
               const details: Record<string, unknown> = {
                 isOkStatusCode: isOk,

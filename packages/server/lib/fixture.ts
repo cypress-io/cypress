@@ -6,7 +6,7 @@ import jsonParseBetterErrors from 'json-parse-even-better-errors'
 import stripAnsi from 'strip-ansi'
 import * as errors from './errors'
 import { fs } from './util/fs'
-import glob from './util/glob'
+import { globAsync as glob } from './util/glob'
 import type { ObjectEncodingOptions } from 'fs-extra'
 
 const debug = debugModule('cypress:server:fixture')

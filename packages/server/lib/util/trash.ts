@@ -2,7 +2,6 @@ import { fs } from './fs'
 import os from 'os'
 import path from 'path'
 import trash from 'trash'
-import Bluebird from 'bluebird'
 
 // Moves a folder's contents to the trash (or empties it on Linux)
 export const folder = async (pathToFolder: string): Promise<void> => {
@@ -17,9 +16,9 @@ export const folder = async (pathToFolder: string): Promise<void> => {
 
     const items = await fs.readdir(pathToFolder)
 
-    await Bluebird.map(items, (item: string) => {
+    await Promise.all(items.map((item: string) => {
       return trash([path.join(pathToFolder, item)])
-    })
+    }))
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       return

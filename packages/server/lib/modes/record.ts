@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
 import la from 'lazy-ass'
-import check from 'check-more-types'
 import Debug from 'debug'
 import Promise from 'bluebird'
 import isForkPr from 'is-fork-pr'
@@ -16,7 +15,7 @@ import type { AllCypressErrorNames } from '@packages/errors'
 import { get as getErrors, warning as errorsWarning, throwErr } from '../errors'
 import * as capture from '../capture'
 import * as env from '../util/env'
-import ciProvider from '../util/ci_provider'
+import * as ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
 import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
 
@@ -206,7 +205,7 @@ const postInstanceResults = (options: any = {}) => {
 }
 
 const getCommitFromGitOrCi = (git: any) => {
-  la(check.object(git), 'expected git information object', git)
+  la(_.isPlainObject(git), 'expected git information object', git)
 
   return ciProvider.commitDefaults({
     sha: git.sha,
@@ -298,12 +297,12 @@ const createRun = Promise.method((options: any = {}) => {
     autoCancelAfterFailures,
     project,
   })
-  .tap((response: any) => {
+  .then((response: any) => {
     if (!(response && response.warnings && response.warnings.length)) {
-      return
+      return response
     }
 
-    return _.each(response.warnings, (warning: any) => {
+    _.each(response.warnings, (warning: any) => {
       switch (warning.code) {
         case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
           return errorsWarning('FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS', {
@@ -343,6 +342,8 @@ const createRun = Promise.method((options: any = {}) => {
           })
       }
     })
+
+    return response
   }).catch((err: any) => {
     debug('failed creating run with status %o',
       _.pick(err, ['name', 'message', 'statusCode', 'stack']))

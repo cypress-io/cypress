@@ -1372,6 +1372,8 @@ declare namespace Cypress {
     /**
      * End a chain of commands
      *
+     * @deprecated `cy.end()` has been deprecated and will be removed in a future release.
+     * Instead of using `.end()` to break a chain, start a new chain of commands off of `cy`.
      * @see https://on.cypress.io/end
      */
     end(): Chainable<null>
@@ -3440,6 +3442,7 @@ declare namespace Cypress {
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
+    expose?: Record<string, any>
   }
 
   interface TestConfigOverrides extends Partial<
@@ -3447,6 +3450,7 @@ declare namespace Cypress {
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
+    expose?: Record<string, any>
   }
 
   /**

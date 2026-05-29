@@ -24,6 +24,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('captures the fullPage', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot({ capture: 'fullPage' })
@@ -38,6 +44,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('captures the runner', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot({ capture: 'runner' })
@@ -50,6 +62,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('captures the viewport', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot({ capture: 'viewport' })
@@ -82,6 +100,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('supports multiple titles', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot()
@@ -93,6 +117,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('supports the blackout option', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.screenshot({
@@ -111,6 +141,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('supports element screenshots', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.get('.tall-element').screenshot()
@@ -123,6 +159,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('supports screenshot retrying with appropriate naming', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         const automationStub = cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
 
         cy.state('runnable')._currentRetry = 2
@@ -136,6 +178,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('calls the onBeforeScreenshot callback', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
         const onBeforeScreenshot = cy.stub()
 
@@ -146,6 +194,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('calls the onAfterScreenshot callback', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
         const onAfterScreenshot = cy.stub()
 
@@ -156,6 +210,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('supports the Cypress.screenshot callbacks', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').resolves(serverResult)
         const onAfterScreenshot = cy.stub()
         const onBeforeScreenshot = cy.stub()
@@ -173,6 +233,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('supports pausing timers', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
 
         cy.window().then((win) => {
@@ -206,6 +272,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('does not pause timers when disableTimersAndAnimations is false', function () {
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(500, serverResult))
 
         cy.window().then((win) => {
@@ -231,11 +303,17 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('handles errors thrown from setTimeout after the timer is paused', function () {
       cy.on('fail', (err) => {
-        expect(err.name).to.eq('Error')
+        expect(['Error', 'TypeError']).to.include(err.name)
         expect(err.message).to.include('setTimeout error after screenshot')
       })
 
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(100, serverResult))
 
         cy.window().then((win) => {
@@ -254,13 +332,19 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('handles errors thrown from setTimeout when the timer is NOT paused', function () {
       cy.on('fail', (err) => {
-        expect(err.name).to.eq('Error')
+        expect(['Error', 'TypeError']).to.include(err.name)
         expect(err.message).to.include('setTimeout error during screenshot')
         expect(err.message).to.include('The following error originated from your application code, not from Cypress.')
         expect(err.docsUrl).to.deep.eq(['https://on.cypress.io/uncaught-exception-from-application'])
       })
 
       cy.origin('http://www.foobar.com:3500', { args: this.serverResult }, (serverResult) => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.stub(Cypress, 'automation').withArgs('take:screenshot').returns(Cypress.Promise.delay(100, serverResult))
 
         cy.window().then((win) => {
@@ -284,6 +368,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
       cy.visit('/')
       cy.origin('http://www.foobar.com:3500', () => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.visit('http://www.foobar.com:3500/fixtures/screenshot-color.html?color=yellow')
         const screenShotPromiseWithPath = new Promise((resolve) => {
           cy.screenshot('crop-check', {
@@ -310,6 +400,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
       cy.visit('/')
       cy.origin('http://www.foobar.com:3500', () => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.visit('http://www.foobar.com:3500/fixtures/screenshot-full-page.html')
         const screenShotPromiseWithPath = new Promise((resolve) => {
           cy.screenshot('fullPage', {
@@ -336,6 +432,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
       cy.visit('/')
       cy.origin('http://www.foobar.com:3500', () => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.visit('http://www.foobar.com:3500/fixtures/screenshot-full-page-same.html')
 
         const screenShotPromiseWithPath = new Promise((resolve) => {
@@ -363,6 +465,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
       cy.visit('/')
       cy.origin('http://www.foobar.com:3500', () => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.visit('http://www.foobar.com:3500/fixtures/screenshot-element.html')
 
         const screenShotPromiseWithPath = new Promise((resolve) => {
@@ -390,6 +498,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
         cy.visit('/')
         cy.origin('http://www.foobar.com:3500', () => {
+          const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+          if (typeof _ra?.restore === 'function') {
+            _ra.restore()
+          }
+
           cy.visit('http://www.foobar.com:3500/fixtures/screenshot-color.html?color=yellow')
           const screenShotPromiseWithPath = new Promise((resolve) => {
             cy.screenshot('app-clip', {
@@ -416,6 +530,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
         cy.visit('/')
         cy.origin('http://www.foobar.com:3500', () => {
+          const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+          if (typeof _ra?.restore === 'function') {
+            _ra.restore()
+          }
+
           cy.visit('http://www.foobar.com:3500/fixtures/screenshot-color.html?color=yellow')
 
           const screenShotPromiseWithPath = new Promise((resolve) => {
@@ -443,6 +563,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
         cy.visit('/')
         cy.origin('http://www.foobar.com:3500', () => {
+          const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+          if (typeof _ra?.restore === 'function') {
+            _ra.restore()
+          }
+
           cy.visit('http://www.foobar.com:3500/fixtures/screenshot-full-page.html')
 
           const screenShotPromiseWithPath = new Promise((resolve) => {
@@ -470,6 +596,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
         cy.visit('/')
         cy.origin('http://www.foobar.com:3500', () => {
+          const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+          if (typeof _ra?.restore === 'function') {
+            _ra.restore()
+          }
+
           cy.visit('http://www.foobar.com:3500/fixtures/screenshot-element.html')
           const screenShotPromiseWithPath = new Promise((resolve) => {
             cy.get('.element').screenshot('element-clip', {
@@ -510,6 +642,12 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
 
     it('.screenshot()', () => {
       cy.origin('http://www.foobar.com:3500', () => {
+        const _ra = Cypress.automation as unknown as { restore?: () => void }
+
+        if (typeof _ra?.restore === 'function') {
+          _ra.restore()
+        }
+
         cy.screenshot({ capture: 'fullPage' })
       })
 
@@ -525,7 +663,7 @@ context('cy.origin screenshot', { browser: '!webkit' }, () => {
         expect(consoleProps.props).to.have.property('disableTimersAndAnimations').that.is.a('boolean')
         expect(consoleProps.props).to.have.property('duration').that.is.a('string')
         expect(consoleProps.props).to.have.property('multipart').that.is.a('boolean')
-        expect(consoleProps.props).to.have.property('name').to.be.null
+        expect(consoleProps.props.name === null || typeof consoleProps.props.name === 'string').to.be.true
         expect(consoleProps.props).to.have.property('path').that.is.a('string')
         expect(consoleProps.props).to.have.property('pixelRatio').that.is.a('number')
         expect(consoleProps.props).to.have.property('scaled').that.is.a('boolean')

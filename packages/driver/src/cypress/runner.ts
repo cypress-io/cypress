@@ -549,6 +549,9 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
           // This will navigate to about:blank if test isolation is on
           await testBeforeAfterRunAsync(test, Cypress, { nextTestHasTestIsolationOn })
+          // Clear cached spec-bridge targets after isolation; the runner must serve
+          // a current app build so `notifyCrossOriginBridgeReady` re-binds the iframe.
+          Cypress.primaryOriginCommunicator.clearCrossOriginDriverWindows()
         }
 
         testAfterRun(test, Cypress)
@@ -1414,10 +1417,6 @@ export default {
       // and mocha may never fire this because our
       // runnable may never finish
       _runner.emit('end')
-
-      // remove all the listeners
-      // so no more events fire
-      _runner.removeAllListeners()
     }
 
     overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests, cy, abort)
@@ -1635,10 +1634,13 @@ export default {
           // the run, then just set _runner.stopped to true here
           _runner.stopped = true
 
-          // remove all the listeners
-          // so no more events fire
-          // since a test failure may 'leak' after a run completes
-          _runner.removeAllListeners()
+          // Dispose the mocha runner to remove all listeners so no additional events
+          // fire — a test failure may 'leak' after a run completes. This also ensures
+          // the Runner itself is properly released; otherwise each rerun retains the
+          // previous Runner (and everything it holds — Cypress, window, commands,
+          // snapshots, logs, etc.).
+          // @see https://github.com/cypress-io/cypress/pull/33631
+          _runner.dispose()
 
           // TODO this functions is not correctly
           // synchronized with the 'end' event that

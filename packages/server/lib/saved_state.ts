@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import path from 'path'
 import Debug from 'debug'
-import appData from './util/app_data'
+import * as appData from './util/app_data'
 import { getCwd } from './cwd'
 import { File as FileUtil } from './util/file'
 import fsExtra from 'fs-extra'

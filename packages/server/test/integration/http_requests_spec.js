@@ -23,7 +23,6 @@ const pluginsModule = require(`../../lib/plugins`)
 const preprocessor = require(`../../lib/plugins/preprocessor`).default
 const resolve = require(`../../lib/util/resolve`)
 const { fs } = require(`../../lib/util/fs`)
-const CacheBuster = require(`../../lib/util/cache_buster`)
 const Fixtures = require('@tooling/system-tests')
 const { scaffoldCommonNodeModules } = require('@tooling/system-tests/lib/dep-installer')
 /**
@@ -84,7 +83,6 @@ describe('Routes', () => {
     ctx = getCtx()
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-    sinon.stub(CacheBuster, 'get').returns('-123')
     sinon.stub(ServerBase.prototype, 'reset')
     sinon.stub(pluginsModule, 'has').returns(false)
 
@@ -1024,10 +1022,9 @@ describe('Routes', () => {
       })
 
       it('properly correlates when proxy failure come first', function () {
+        const followupPreRequestTimeout = 1000
+
         this.networkProxy.setPreRequestTimeout(50)
-        // If this takes longer than the Promise.delay and the prerequest timeout then the second
-        // call has hit the prerequest timeout which is a problem
-        this.timeout(900)
 
         nock(this.server.remoteStates.current().origin)
         .get('/')
@@ -1049,7 +1046,7 @@ describe('Routes', () => {
 
         // Wait 100 ms to make sure the request times out
         return Promise.delay(100).then(() => {
-          this.networkProxy.setPreRequestTimeout(1000)
+          this.networkProxy.setPreRequestTimeout(followupPreRequestTimeout)
           nock(this.server.remoteStates.current().origin)
           .get('/')
           .once()
@@ -1064,6 +1061,7 @@ describe('Routes', () => {
             url: 'http://www.github.com/',
           })
 
+          const followupStart = Date.now()
           const followupRequestPromise = this.rp({
             url: 'http://www.github.com/',
             headers: {
@@ -1073,6 +1071,9 @@ describe('Routes', () => {
           })
 
           return followupRequestPromise.then((res) => {
+            // If the followup hit the pre-request timeout, the proxy incorrectly correlated
+            // with the stale pre-request from the first (timed-out) request.
+            expect(Date.now() - followupStart, 'followup request hit the pre-request timeout').to.be.lessThan(followupPreRequestTimeout)
             expect(res.statusCode).to.eq(200)
 
             expect(res.body).to.include('hello from baz!')

@@ -4,7 +4,8 @@ import { gql } from '@urql/core'
 
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
-  logIn(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string, utmContent: string | null): Promise<AuthenticatedUserShape>
+  logIn(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string, utmContent: string | null, signal?: AbortSignal): Promise<AuthenticatedUserShape | undefined>
+  signUp(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string, utmContent: string | null, signal?: AbortSignal): Promise<AuthenticatedUserShape | undefined>
   logOut(): Promise<void>
   resetAuthState(): void
 }
@@ -56,6 +57,18 @@ export class AuthActions {
   }
 
   async login (utmSource: string, utmMedium: string, utmContent?: string | null) {
+    return this.#authenticate((onMessage, utmSource, utmMedium, utmContent, signal) => {
+      return this.authApi.logIn(onMessage, utmSource, utmMedium, utmContent, signal)
+    }, utmSource, utmMedium, utmContent)
+  }
+
+  async signup (utmSource: string, utmMedium: string, utmContent?: string | null) {
+    return this.#authenticate((onMessage, utmSource, utmMedium, utmContent, signal) => {
+      return this.authApi.signUp(onMessage, utmSource, utmMedium, utmContent, signal)
+    }, utmSource, utmMedium, utmContent)
+  }
+
+  async #authenticate (authenticate: AuthApiShape['logIn'], utmSource: string, utmMedium: string, utmContent?: string | null) {
     const onMessage = (authState: AuthStateShape) => {
       this.ctx.update((coreData) => {
         coreData.authState = authState
@@ -66,14 +79,20 @@ export class AuthActions {
       this.ctx.emitter.authChange()
     }
 
-    const user = await new Promise<AuthenticatedUserShape | null>((resolve, reject) => {
+    const ac = new AbortController()
+
+    const user = await new Promise<AuthenticatedUserShape | null | undefined>((resolve, reject) => {
       // A resolver is exposed to the instance so that we can
       // resolve this promise and the original mutation promise
-      // if a reset occurs
-      this.#cancelActiveLogin = () => resolve(null)
+      // if a reset occurs. We also abort the signal so any async
+      // work gated on it (e.g. the git-origin lookup) is skipped.
+      this.#cancelActiveLogin = () => {
+        ac.abort()
+        resolve(null)
+      }
 
-      // NOTE: auth.logIn should never reject, it uses `onMessage` to propagate state changes (including errors) to the frontend.
-      this.authApi.logIn(onMessage, utmSource, utmMedium, utmContent || null).then(resolve, reject)
+      // NOTE: auth should never reject, it uses `onMessage` to propagate state changes (including errors) to the frontend.
+      authenticate(onMessage, utmSource, utmMedium, utmContent || null, ac.signal).then(resolve, reject)
     })
 
     const isMainWindowFocused = this.ctx._apis.electronApi.isMainWindowFocused()
@@ -93,7 +112,7 @@ export class AuthActions {
 
     if (!user) {
       // if the user is null, this promise is resolving due to a
-      // login mutation cancellation. the state should already
+      // pending auth mutation cancellation. the state should already
       // be reset, so abort early.
       return
     }

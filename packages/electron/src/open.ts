@@ -7,6 +7,7 @@ import inspector from 'inspector'
 import { ChildProcess, spawn } from 'child_process'
 import Debug from 'debug'
 import os from 'os'
+import pDefer from 'p-defer'
 
 function getInspectFromUrl (url: string): string {
   const flag = process.execArgv.some((f) => f === '--inspect' || f.startsWith('--inspect=')) ? '--inspect' : '--inspect-brk'
@@ -29,7 +30,10 @@ function getInspectFromOpts (argv: string[]): string | undefined {
   return undefined
 }
 
-export async function open (appPath: string, argv: string[]): Promise<ChildProcess> {
+export async function open (
+  appPath: string,
+  argv: string[],
+): Promise<ChildProcess> {
   const debugElectron = Debug('cypress:electron')
   const debugStderr = Debug('cypress:internal-stderr')
 
@@ -76,22 +80,38 @@ export async function open (appPath: string, argv: string[]): Promise<ChildProce
       { stdio: 'pipe' },
     )
 
+    const childClosed = pDefer<number>()
+
     spawned.on('error', (err) => {
       console.error(err)
 
-      process.exit(1)
+      childClosed.resolve(1)
     })
 
     spawned.on('close', (code, signal) => {
       debugElectron('electron closing %o', { code, signal })
 
       if (signal) {
-        debugElectron('electron exited with a signal, forcing code = 1 %o', { signal })
-        code = 1
+        debugElectron('electron exited with a signal %s', signal)
+        childClosed.resolve(128 + os.constants.signals[signal])
+      } else {
+        childClosed.resolve(code ?? 0)
       }
-
-      process.exit(code)
     })
+
+    for (const signal of ['SIGINT', 'SIGTERM']) {
+      process.once(signal, async () => {
+        try {
+          debugElectron('electron received signal %s', signal)
+          const code = await childClosed.promise
+
+          process.exit(code)
+        } catch (err) {
+          console.error(err)
+          process.exit(1)
+        }
+      })
+    }
 
     if (
       (process.env.ELECTRON_ENABLE_LOGGING ?? '') === '1' ||

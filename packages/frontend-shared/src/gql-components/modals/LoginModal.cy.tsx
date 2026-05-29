@@ -1,4 +1,4 @@
-import { LoginModalFragmentDoc } from '../../generated/graphql-test'
+import { Auth_LoginDocument, LoginModalFragmentDoc } from '../../generated/graphql-test'
 import LoginModal from './LoginModal.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { defaultMessages } from '@cy/i18n'
@@ -62,6 +62,8 @@ const mountSuccess = (viewer: TestCloudViewer = cloudViewer) => {
 describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
   describe('progress communication', () => {
     it('renders and reaches "opening browser" status', () => {
+      cy.stubMutationResolver(Auth_LoginDocument, (defineResult) => defineResult({} as any))
+
       cy.mountFragment(LoginModalFragmentDoc, {
         render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>,
       })
@@ -69,13 +71,79 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
       cy.contains('h2', text.login.titleInitial).should('be.visible')
       cy.contains('a', text.login.cloud).should('be.visible').should('have.attr', 'href', 'https://on.cypress.io/dashboard-introduction')
 
-      // begin the login process
-      cy.findByRole('button', { name: text.login.actionLogin }).click()
-
-      // ensure we reach "browser is opening" status on the CTA
       cy.findByRole('button', { name: text.login.actionOpening })
       .should('be.visible')
       .and('be.disabled')
+    })
+
+    it('automatically starts login mutation when autoStartAuth is true', () => {
+      const loginSpy = cy.spy().as('loginSpy')
+
+      cy.stubMutationResolver(Auth_LoginDocument, (defineResult) => {
+        loginSpy()
+
+        return defineResult({} as any)
+      })
+
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => (
+          <div class="border-current border h-[700px] resize overflow-auto">
+            <LoginModal
+              gql={gqlVal}
+              utmMedium="testing"
+              autoStartAuth={true}
+            />
+          </div>
+        ),
+      })
+
+      // Mutation fires on mount — no button click required
+      cy.get('@loginSpy').should('have.been.called')
+
+      cy.findByRole('button', { name: text.login.actionOpening })
+      .should('be.visible')
+      .and('be.disabled')
+    })
+
+    it('does not start login mutation when browser is already open', () => {
+      const loginSpy = cy.spy().as('loginSpy')
+
+      cy.stubMutationResolver(Auth_LoginDocument, (defineResult) => {
+        loginSpy()
+
+        return defineResult({} as any)
+      })
+
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => {
+          gqlVal.authState.browserOpened = true
+
+          return (
+            <div class="border-current border h-[700px] resize overflow-auto">
+              <LoginModal
+                gql={gqlVal}
+                utmMedium="testing"
+                autoStartAuth={true}
+              />
+            </div>
+          )
+        },
+      })
+
+      cy.get('@loginSpy').should('not.have.been.called')
+
+      cy.findByRole('button', { name: text.login.actionWaiting })
+      .should('be.visible')
+      .and('be.disabled')
+    })
+
+    it('renders signup copy for signup auth flow', () => {
+      cy.mountFragment(LoginModalFragmentDoc, {
+        render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} authFlow="signup" utmMedium="testing" autoStartAuth={false} /></div>,
+      })
+
+      cy.contains('h2', text.login.titleInitial).should('be.visible')
+      cy.findByRole('button', { name: text.login.actionSignup }).should('be.visible')
     })
 
     it('shows correct "waiting for login" status', () => {
@@ -83,7 +151,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         render: (gqlVal) => {
           gqlVal.authState.browserOpened = true
 
-          return <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" /></div>
+          return <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" autoStartAuth={false} /></div>
         },
       })
 
@@ -177,7 +245,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('renders correct components if there is no internet connection', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" autoStartAuth={false} /></div>,
       })
 
       cy.goOffline()
@@ -190,7 +258,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
 
     it('shows login action when the internet is back', () => {
       cy.mountFragment(LoginModalFragmentDoc, {
-        render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing"/></div>,
+        render: (gqlVal) => <div class="border-current border h-[700px] resize overflow-auto"><LoginModal gql={gqlVal} utmMedium="testing" autoStartAuth={false} /></div>,
       })
 
       cy.goOffline()
@@ -228,7 +296,7 @@ describe('<LoginModal />', { viewportWidth: 1000, viewportHeight: 750 }, () => {
         return (
           <div>
             <Tooltip v-slots={tooltipSlots} isInteractive />
-            {isOpen.value && <LoginModal gql={gqlVal} utmMedium="testing" />}
+            {isOpen.value && <LoginModal gql={gqlVal} utmMedium="testing" autoStartAuth={false} />}
           </div>
         )
       },
