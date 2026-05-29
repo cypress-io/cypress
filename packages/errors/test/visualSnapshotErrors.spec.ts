@@ -881,6 +881,11 @@ describe('visual error templates', () => {
         default: ['foo'],
       }
     },
+    INVALID_CYPRESS_ENV_OVERRIDE: () => {
+      return {
+        default: ['env', 'notAnObject'],
+      }
+    },
     CDP_COULD_NOT_CONNECT: () => {
       return {
         default: ['chrome', 2345, makeErr()],
