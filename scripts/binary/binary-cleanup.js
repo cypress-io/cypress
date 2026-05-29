@@ -140,7 +140,7 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
     })
   }
 
-  return [...Object.keys(esbuildResult.metafile.inputs), ...entryPoints, 'package.json']
+  return [...Object.keys(esbuildResult.metafile.inputs), ...startingEntryPoints, 'package.json']
 }
 
 const createServerEntryPointBundle = async (buildAppDir) => {
