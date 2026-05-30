@@ -6,9 +6,9 @@ version: 2.1
 # - ./scripts/github-actions/update-browser-versions.js
 
 chrome-stable-version: &chrome-stable-version "148.0.7778.215"
-chrome-beta-version: &chrome-beta-version "149.0.7827.22"
+chrome-beta-version: &chrome-beta-version "149.0.7827.53"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.22"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.54"
 firefox-stable-version: &firefox-stable-version "151.0.1"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
@@ -22,7 +22,7 @@ parameters:
     default: main
   force-persist-artifacts:
     type: boolean
-    default: false  
+    default: false
   run-all-jobs:
     type: boolean
     default: false
