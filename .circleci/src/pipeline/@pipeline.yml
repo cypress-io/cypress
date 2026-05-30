@@ -2343,6 +2343,11 @@ jobs:
       percy:
         type: boolean
         default: false
+      # Unused at runtime; lets a workflow fan this job out via matrix
+      # (e.g. for flake-rate experiments). Drop when the loop workflow is removed.
+      iteration:
+        type: string
+        default: ""
     parallelism: 7
     steps:
       - run-new-ui-tests:

@@ -1,0 +1,54 @@
+when:
+  equal: [ 'mschile/flake-loop-release-16', << pipeline.git.branch >> ]
+
+jobs:
+  - node_modules_install:
+      build-better-sqlite3: true
+  - build:
+      name: internal-pr-build
+      context: test-runner:env-canary
+      requires:
+        - node_modules_install
+  - run-app-component-tests-chrome:
+      matrix:
+        parameters:
+          iteration:
+            - "01"
+            - "02"
+            - "03"
+            - "04"
+            - "05"
+            - "06"
+            - "07"
+            - "08"
+            - "09"
+            - "10"
+            - "11"
+            - "12"
+            - "13"
+            - "14"
+            - "15"
+            - "16"
+            - "17"
+            - "18"
+            - "19"
+            - "20"
+            - "21"
+            - "22"
+            - "23"
+            - "24"
+            - "25"
+            - "26"
+            - "27"
+            - "28"
+            - "29"
+            - "30"
+      context:
+        [
+          test-runner:cypress-record-key,
+          test-runner:launchpad-tests,
+          test-runner:percy
+        ]
+      percy: false
+      requires:
+        - internal-pr-build

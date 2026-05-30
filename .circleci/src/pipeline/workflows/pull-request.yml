@@ -20,6 +20,8 @@ when:
     # temporary branches that can be removed after merging
     - not:
         equal: [ 'mschile/electron_41', << pipeline.git.branch >> ]
+    - not:
+        equal: [ 'mschile/flake-loop-release-16', << pipeline.git.branch >> ]
 
 jobs:
   # Internal PRs — install and build run immediately
