@@ -13,6 +13,10 @@
 - Fixed an issue where HTML markup passed as a Sinon spy argument (for example `expect(spy).to.have.been.calledOnceWith('<svg>...</svg>')`) was rendered as live DOM in the Cypress command log, truncating the assertion message and breaking the log layout. The assertion message is now HTML-escaped and the markup is shown as literal text. Fixes [#33416](https://github.com/cypress-io/cypress/issues/33416). Fixed in [#33941](https://github.com/cypress-io/cypress/pull/33941).
 - Fixed an issue where a recorded Chrome or Electron run could hang for the duration of the spec timeout when the renderer crashed mid-spec, instead of failing the affected spec and continuing. Fixed in [#33943](https://github.com/cypress-io/cypress/pull/33943).
 
+**Misc:**
+
+- Improved TypeScript types for `cy.get('@alias')` and `cy.wait('@alias')` so that `@`-prefixed strings correctly resolve to `Chainable<S>` instead of `Chainable<JQuery<HTMLElement>>`. Users can now pass an explicit type parameter — for example `cy.get<MyType>('@alias')` — to get a properly typed alias value. Addresses [#8762](https://github.com/cypress-io/cypress/issues/8762).
+
 ## 15.16.0
 
 **Features:**
