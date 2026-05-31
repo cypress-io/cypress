@@ -452,7 +452,7 @@ describe('utils', () => {
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).not.toContain('@cypress/grep: will omit filtered tests')
+        expect(calls).not.toContain('@cypress/grep: non-matching tests will be omitted from results (not skipped)')
         consoleSpy.mockRestore()
       })
 
@@ -463,7 +463,7 @@ describe('utils', () => {
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).toContain('@cypress/grep: will omit filtered tests')
+        expect(calls).toContain('@cypress/grep: non-matching tests will be omitted from results (not skipped)')
         consoleSpy.mockRestore()
       })
 
@@ -474,7 +474,7 @@ describe('utils', () => {
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).toContain('@cypress/grep: will omit filtered tests')
+        expect(calls).toContain('@cypress/grep: non-matching tests will be omitted from results (not skipped)')
         consoleSpy.mockRestore()
       })
 
@@ -485,7 +485,7 @@ describe('utils', () => {
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).toContain('@cypress/grep: will omit filtered tests')
+        expect(calls).toContain('@cypress/grep: non-matching tests will be omitted from results (not skipped)')
         consoleSpy.mockRestore()
       })
     })
