@@ -61,7 +61,7 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
 
   const omitFiltered = expose.grepOmitFiltered || expose['grep-omit-filtered']
 
-  if (omitFiltered) {
+  if (omitFiltered && (grep || grepTags || grepUntagged)) {
     console.log('@cypress/grep: will omit filtered tests')
   }
 
