@@ -1164,6 +1164,15 @@ async function ready (options: ReadyOptions) {
     errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
   }
 
+  if (specPatternFromCli) {
+    const relativePatterns = Array.isArray(specPattern) ? specPattern : [specPattern as string]
+    const unmatchedPatterns = project.ctx.project.getUnmatchedPatterns(relativePatterns, specs)
+
+    for (const pattern of unmatchedPatterns) {
+      errors.warning('SPEC_FILE_NOT_FOUND', projectRoot, pattern)
+    }
+  }
+
   if (browser.unsupportedVersion && browser.warning) {
     errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
   }

@@ -758,6 +758,17 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}`
   },
+  SPEC_FILE_NOT_FOUND: (folderPath: string, pattern: string) => {
+    const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
+    const globPath = path.join(resolvedBasePath!, theme.yellow(resolvedPattern!))
+
+    return errTemplate`\
+        No spec files were found for the pattern:
+
+        ${fmt.listItem(globPath)}
+
+        We searched for specs in: ${fmt.path(folderPath)}`
+  },
   RENDERER_CRASHED: (browserName: string) => {
     return errTemplate`\
         We detected that the ${fmt.highlight(browserName)} Renderer process just crashed.
