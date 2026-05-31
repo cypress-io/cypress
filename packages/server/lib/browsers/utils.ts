@@ -209,25 +209,43 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const wkBrowserVersionRe = /BROWSER_VERSION\s*=\s*(['"])(?<version>[\d.]+)\1/gm
+// note: no `g` flag - it must not be set, as it makes the regex stateful (`lastIndex`) and breaks repeated calls
+const wkBrowserVersionRe = /BROWSER_VERSION\s*=\s*(['"])(?<version>[\d.]+)\1/
 
-const getWebKitBrowserVersion = async () => {
-  try {
-    // this seems to be the only way to accurately capture the WebKit version - it's not exported, and invoking the webkit binary with `--version` does not give the correct result
-    // after launching the browser, this is available at browser.version(), but we don't have a browser instance til later
-    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
-    const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
-    const wkBrowserContents = await fs.readFile(wkBrowserPath, 'utf8')
-    const result = wkBrowserVersionRe.exec(wkBrowserContents)
+// older versions of playwright-core ship the (non-exported) wkBrowser.js source, where the
+// WebKit version is hardcoded as BROWSER_VERSION. This is the most accurate source of the
+// version, so we prefer it when available.
+// after launching the browser, the version is available at browser.version(), but we don't have a browser instance til later
+const getWebKitBrowserVersionFromSource = async (pwCorePath: string) => {
+  const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
+  const wkBrowserContents = await fs.readFile(wkBrowserPath, 'utf8')
+  const result = wkBrowserVersionRe.exec(wkBrowserContents)
 
-    if (!result || !result.groups!.version) return '0'
+  return result?.groups?.version
+}
 
-    return result.groups!.version
-  } catch (err) {
-    debug('Error detecting WebKit browser version %o', err)
+// newer versions of playwright-core (1.60.0+) no longer ship wkBrowser.js, so we fall back to
+// reading the bundled browsers.json, which records the WebKit browserVersion (e.g. '26.4').
+const getWebKitBrowserVersionFromManifest = async (pwCorePath: string) => {
+  const browsersJsonPath = path.join(pwCorePath, 'browsers.json')
+  const browsersJsonContents = await fs.readFile(browsersJsonPath, 'utf8')
+  const { browsers } = JSON.parse(browsersJsonContents) as { browsers?: { name: string, browserVersion?: string }[] }
 
-    return '0'
+  return browsers?.find((browser) => browser.name === 'webkit')?.browserVersion
+}
+
+export const getWebKitBrowserVersion = async (pwCorePath: string = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))) => {
+  for (const getVersion of [getWebKitBrowserVersionFromSource, getWebKitBrowserVersionFromManifest]) {
+    try {
+      const version = await getVersion(pwCorePath)
+
+      if (version) return version
+    } catch (err) {
+      debug('Error detecting WebKit browser version %o', err)
+    }
   }
+
+  return '0'
 }
 
 async function getWebKitBrowser () {

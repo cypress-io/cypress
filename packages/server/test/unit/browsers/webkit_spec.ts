@@ -1,7 +1,9 @@
 import { proxyquire } from '../../spec_helper'
 import { expect } from 'chai'
-import utils from '../../../lib/browsers/utils'
+import utils, { getWebKitBrowserVersion } from '../../../lib/browsers/utils'
 import * as plugins from '../../../lib/plugins'
+import { fs } from '../../../lib/util/fs'
+import path from 'path'
 
 function getWebkit (dependencies = {}) {
   return proxyquire('../lib/browsers/webkit', dependencies) as typeof import('../../../lib/browsers/webkit')
@@ -67,6 +69,41 @@ describe('lib/browsers/webkit', () => {
       await webkit.open(browser as any, 'http://the.url', options as any, automation as any)
 
       expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
+    })
+  })
+
+  context('#getWebKitBrowserVersion', () => {
+    const pwCorePath = '/fake/playwright-core'
+    const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
+    const browsersJsonPath = path.join(pwCorePath, 'browsers.json')
+
+    it('reads the version from wkBrowser.js when available', async () => {
+      sinon.stub(fs, 'readFile')
+      .withArgs(wkBrowserPath, 'utf8').resolves('const BROWSER_VERSION = \'18.4\';')
+
+      expect(await getWebKitBrowserVersion(pwCorePath)).to.eq('18.4')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/33953
+    it('falls back to browsers.json when wkBrowser.js is not shipped (playwright-core >= 1.60.0)', async () => {
+      sinon.stub(fs, 'readFile')
+      .withArgs(wkBrowserPath, 'utf8').rejects(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }))
+      .withArgs(browsersJsonPath, 'utf8').resolves(JSON.stringify({
+        browsers: [
+          { name: 'chromium', browserVersion: '148.0' },
+          { name: 'webkit', browserVersion: '26.4' },
+        ],
+      }))
+
+      expect(await getWebKitBrowserVersion(pwCorePath)).to.eq('26.4')
+    })
+
+    it('returns "0" when neither source yields a version', async () => {
+      sinon.stub(fs, 'readFile')
+      .withArgs(wkBrowserPath, 'utf8').rejects(new Error('ENOENT'))
+      .withArgs(browsersJsonPath, 'utf8').rejects(new Error('ENOENT'))
+
+      expect(await getWebKitBrowserVersion(pwCorePath)).to.eq('0')
     })
   })
 
