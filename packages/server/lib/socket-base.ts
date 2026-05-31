@@ -701,6 +701,15 @@ export class SocketBase implements SocketBroadcaster {
 
         if (this.supportsRunEvents) {
           socket.on('plugins:before:spec', (spec, cb) => {
+            // If runState is set, the runner is reloading mid-spec (e.g., due to a
+            // cross-origin navigation). The before:spec event must only fire once per
+            // spec, so skip re-execution on reload.
+            if (runState) {
+              cb()
+
+              return
+            }
+
             const beforeSpecSpan = telemetry.startSpan({ name: 'lifecycle:before:spec' })
 
             beforeSpecSpan?.setAttributes({ spec })
