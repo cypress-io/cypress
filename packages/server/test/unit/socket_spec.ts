@@ -18,6 +18,7 @@ import * as createRoutes from '../../lib/routes'
 import { getCtx } from '../../lib/makeDataContext'
 import { sinon } from '../spec_helper'
 import { SocketCt } from '../../lib/socket-ct'
+import runEvents from '../../lib/plugins/run_events'
 
 let ctx
 
@@ -1195,6 +1196,83 @@ describe('lib/socket', () => {
           this.socket.onAfterSave(this.cfg)
 
           expect(devServer.emitter.off).not.to.be.called
+        })
+      })
+    })
+  })
+
+  describe('run events', () => {
+    // Separate describe block so we can open the server with isTextTerminal: true,
+    // which sets supportsRunEvents: true on the SocketBase instance.
+    beforeEach(function (done) {
+      sinon.stub(runEvents, 'execute').resolves()
+
+      this.cfg.isTextTerminal = true
+
+      this.server.open(this.cfg, {
+        SocketCtor: SocketE2E,
+        createRoutes,
+        testingType: 'e2e',
+        getCurrentBrowser: () => null,
+      })
+      .then(() => {
+        this.automation = new Automation({
+          cyNamespace: this.cfg.namespace,
+          cookieNamespace: this.cfg.socketIoCookie,
+          screenshotsFolder: this.cfg.screenshotsFolder,
+        })
+
+        this.server.startWebsockets(this.automation, this.cfg, {})
+        this.socket = this.server._socket
+
+        done = _.once(done)
+
+        this.socket.socketIo.on('connection', () => {
+          done()
+        })
+
+        const { proxyUrl, socketIoRoute } = this.cfg
+
+        this.agent = new httpsAgent(`http://localhost:${this.cfg.port}`)
+
+        this.client = socketIo.client(proxyUrl, {
+          agent: this.agent,
+          path: socketIoRoute,
+          transports: ['websocket'],
+        })
+      })
+    })
+
+    afterEach(function () {
+      return this.client.disconnect()
+    })
+
+    describe('on(plugins:before:spec)', () => {
+      it('executes before:spec on a fresh spec start', async function () {
+        const spec = { relative: 'cypress/e2e/foo.cy.js' }
+
+        await new Promise<void>((resolve) => {
+          this.client.emit('plugins:before:spec', spec, () => {
+            expect(runEvents.execute).to.be.calledWith('before:spec', spec)
+            resolve()
+          })
+        })
+      })
+
+      it('does not execute before:spec when runState is set (mid-spec reload)', async function () {
+        // Simulate preserve:run:state being sent before a cross-origin navigation
+        await new Promise<void>((resolve) => {
+          this.client.emit('backend:request', 'preserve:run:state', { currentId: 'r3' }, () => {
+            resolve()
+          })
+        })
+
+        // plugins:before:spec arrives again after reload — should be a no-op
+        await new Promise<void>((resolve) => {
+          this.client.emit('plugins:before:spec', { relative: 'cypress/e2e/foo.cy.js' }, () => {
+            expect(runEvents.execute).not.to.have.been.called
+            resolve()
+          })
         })
       })
     })
