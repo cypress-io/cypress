@@ -15,7 +15,7 @@
 
 **Dependency Updates:**
 
-- Upgraded `tsx` from `4.20.6` to `4.22.4` so the bundled `esbuild` Go binary it depends on no longer reports [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) (incorrect TLS certificate validation during session resumption) in container and image security scans. This is a follow-on to [#33599](https://github.com/cypress-io/cypress/issues/33599), which addressed the direct `esbuild` dependency but not the copy pulled in transitively through `tsx`. Fixes [#33954](https://github.com/cypress-io/cypress/issues/33954).
+- Upgraded `tsx` from `4.20.6` to `4.22.4`. This resolves two issues stemming from the older pin: (1) the bundled `esbuild` Go binary it depended on no longer reports [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) (incorrect TLS certificate validation during session resumption) in container and image security scans — a follow-on to [#33599](https://github.com/cypress-io/cypress/issues/33599), which addressed the direct `esbuild` dependency but not the copy pulled in transitively through `tsx`; and (2) loading TypeScript config files no longer triggers the Node.js `[DEP0205] module.register() is deprecated` warning, because `tsx` now uses `module.registerHooks()` natively when available. Fixes [#33954](https://github.com/cypress-io/cypress/issues/33954) and [#33744](https://github.com/cypress-io/cypress/issues/33744).
 
 ## 15.16.0
 
