@@ -215,5 +215,40 @@ describe('lib/reporter', () => {
         expect(result.attempts[0].error.stack).to.equal('')
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/27956
+    // The reporter UI derives non-terminal, display-only states (e.g. 'processing',
+    // 'active') for tests that have not reached a terminal state. These must never be
+    // reported to Cypress Cloud or the module API.
+    describe('non-terminal test/attempt states', () => {
+      it('normalizes a `processing` test state to null', () => {
+        const result = reporter.normalizeTest({ id: 'r4', state: 'processing', prevAttempts: [] })
+
+        expect(result.state).to.be.null
+      })
+
+      it('normalizes a `processing` attempt state to null', () => {
+        const result = reporter.normalizeTest({ id: 'r4', state: 'processing', prevAttempts: [{ state: 'processing' }] })
+
+        expect(result.attempts[0].state).to.be.null
+        expect(result.attempts[1].state).to.be.null
+      })
+
+      it('normalizes an `active` test state to null', () => {
+        const result = reporter.normalizeTest({ id: 'r4', state: 'active', prevAttempts: [] })
+
+        expect(result.state).to.be.null
+      })
+
+      it('preserves terminal states', () => {
+        for (const state of ['passed', 'failed', 'pending', 'skipped']) {
+          const result = reporter.normalizeTest({ id: 'r4', state, prevAttempts: [{ state }] })
+
+          expect(result.state).to.equal(state)
+          expect(result.attempts[0].state).to.equal(state)
+          expect(result.attempts[1].state).to.equal(state)
+        }
+      })
+    })
   })
 })

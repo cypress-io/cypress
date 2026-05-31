@@ -278,6 +278,22 @@ const orNull = function <T>(prop: T | null | undefined): T | null {
   return prop
 }
 
+const RUNNABLE_STATES: ReadonlySet<RunnableState> = new Set<RunnableState>(['passed', 'failed', 'pending', 'skipped'])
+
+// Coerce a runnable's state into a value that is valid to report to Cypress Cloud
+// and the module API (the `RunnableState | null` contract).
+//
+// The reporter UI (@packages/reporter) derives non-terminal, display-only states
+// such as 'processing' and 'active' for tests/attempts that have not reached a
+// terminal state (e.g. an interrupted or crashed run). These must never be sent to
+// the cloud, so any state outside of RUNNABLE_STATES is normalized to null.
+// See https://github.com/cypress-io/cypress/issues/27956.
+const toRunnableState = function (state: unknown): RunnableState | null {
+  return typeof state === 'string' && RUNNABLE_STATES.has(state as RunnableState)
+    ? state as RunnableState
+    : null
+}
+
 const events: ReporterEventHandlers = {
   'start': setDate,
   'end': setDate,
@@ -594,7 +610,7 @@ export class Reporter {
     const normalizedTest = {
       testId: orNull(outerTest.id),
       title: getTitlePath(outerTest),
-      state: orNull(outerTest.state),
+      state: toRunnableState(outerTest.state),
       body: orNull(outerTest.body),
       displayError: orNull(
         typeof outerTest.err === 'object' && outerTest.err?.stack
@@ -615,7 +631,7 @@ export class Reporter {
         } : undefined
 
         return {
-          state: orNull(attempt.state),
+          state: toRunnableState(attempt.state),
           error: orNull(err),
           timings: orNull(attempt.timings),
           failedFromHookId: orNull(attempt.failedFromHookId),
