@@ -215,6 +215,124 @@ describe('lib/open_project', () => {
     })
   })
 
+  describe('#launch - onBeforeRequest specName middleware', () => {
+    beforeEach(async function () {
+      await openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
+      openProject.getProject().__setConfig({
+        browserUrl: 'http://localhost:8888/__/',
+        projectRoot: todosPath,
+        specType: 'integration',
+        e2e: {
+          specPattern: 'cypress/integration/**/*',
+        },
+      })
+
+      openProject.getProject().options = {
+        onError: this.onError,
+      }
+
+      this.browser = { name: 'chrome' }
+    })
+
+    it('sets specName from the spec passed to launch', async function () {
+      const spec = { name: 'cypress/e2e/my-spec.cy.js', absolute: '/path/to/spec', relative: 'cypress/e2e/my-spec.cy.js' }
+
+      await openProject.launch(this.browser, spec)
+
+      // Get the onBeforeRequest middleware installed by the specName injection
+      const middleware = this.automation.use.lastCall.args[0]
+      const data: any = {}
+
+      await middleware.onBeforeRequest('take:screenshot', data)
+
+      expect(data.specName).to.equal('cypress/e2e/my-spec.cy.js')
+    })
+
+    it('reads specName from projectBase.spec so changeUrlToSpec updates are reflected', async function () {
+      const initialSpec = { name: '', absolute: '', relative: '' }
+
+      await openProject.launch(this.browser, initialSpec)
+
+      // Get the onBeforeRequest middleware installed by the specName injection
+      const middleware = this.automation.use.lastCall.args[0]
+      const data: any = {}
+
+      await middleware.onBeforeRequest('take:screenshot', data)
+
+      expect(data.specName).to.equal('')
+
+      // Simulate user clicking a new spec in cypress open (updates projectBase.spec directly)
+      openProject.getProject().spec = { name: 'cypress/e2e/new-spec.cy.js' } as any
+
+      const data2: any = {}
+
+      await middleware.onBeforeRequest('take:screenshot', data2)
+
+      expect(data2.specName).to.equal('cypress/e2e/new-spec.cy.js')
+    })
+  })
+
+  describe('#changeUrlToSpec', () => {
+    beforeEach(async function () {
+      await openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
+      openProject.getProject().__setConfig({
+        browserUrl: 'http://localhost:8888/__/',
+        projectRoot: todosPath,
+        specType: 'integration',
+        e2e: {
+          specPattern: 'cypress/integration/**/*',
+        },
+      })
+
+      openProject.getProject().options = {
+        onError: this.onError,
+      }
+
+      this.browser = { name: 'chrome' }
+      this.changeToUrl = sinon.stub()
+      sinon.stub(ProjectBase.prototype, 'server').get(() => ({
+        socket: { changeToUrl: this.changeToUrl },
+      }))
+    })
+
+    it('updates projectBase.spec with the new spec', async function () {
+      const initialSpec = { name: '', absolute: '', relative: '' }
+
+      await openProject.launch(this.browser, initialSpec)
+
+      expect(openProject.getProject().spec).to.deep.include({ name: '' })
+
+      const newSpec = { name: 'cypress/e2e/my-spec.cy.js', absolute: '/path/to/spec', relative: 'cypress/e2e/my-spec.cy.js' }
+
+      openProject.changeUrlToSpec(newSpec)
+
+      expect(openProject.getProject().spec).to.deep.include({ name: 'cypress/e2e/my-spec.cy.js' })
+    })
+
+    it('ensures onBeforeRequest middleware uses the updated specName after changeUrlToSpec', async function () {
+      const initialSpec = { name: '', absolute: '', relative: '' }
+
+      await openProject.launch(this.browser, initialSpec)
+
+      const middleware = this.automation.use.lastCall.args[0]
+      const data: any = {}
+
+      await middleware.onBeforeRequest('take:screenshot', data)
+
+      expect(data.specName).to.equal('')
+
+      const newSpec = { name: 'cypress/e2e/my-spec.cy.js', absolute: '/path/to/spec', relative: 'cypress/e2e/my-spec.cy.js' }
+
+      openProject.changeUrlToSpec(newSpec)
+
+      const data2: any = {}
+
+      await middleware.onBeforeRequest('take:screenshot', data2)
+
+      expect(data2.specName).to.equal('cypress/e2e/my-spec.cy.js')
+    })
+  })
+
   describe('#sendFocusBrowserMessage', () => {
     it('focuses browser if runner is connected', async () => {
       // Stubbing out relaunchBrowser function created during launch

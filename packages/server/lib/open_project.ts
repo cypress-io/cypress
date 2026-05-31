@@ -121,10 +121,14 @@ export class OpenProject extends EventEmitter {
     }
 
     if (!am || !am.onBeforeRequest) {
+      const projectBase = this.projectBase!
+
       automation.use({
         onBeforeRequest<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> {
           if (message === 'take:screenshot') {
-            data.specName = spec.name
+            // Use the current spec from projectBase, which is updated by changeUrlToSpec
+            // when the user navigates to a new spec without relaunching the browser
+            data.specName = projectBase.spec?.name ?? spec.name
 
             return data
           }
@@ -246,6 +250,10 @@ export class OpenProject extends EventEmitter {
 
       return
     }
+
+    // Update the current spec so the onBeforeRequest middleware can report the correct specName
+    // for screenshots taken without a full browser relaunch (e.g. clicking a spec in cypress open)
+    this.projectBase.spec = spec as any
 
     const newSpecUrl = getSpecUrl({
       projectRoot: this.projectBase.projectRoot,
