@@ -7,6 +7,7 @@ import {
   shouldTestRun,
   shouldTestRunTags,
   shouldTestRunTitle,
+  isSuiteExcluded,
 } from '../src/utils'
 import { plugin } from '../src/plugin'
 
@@ -514,6 +515,80 @@ describe('utils', () => {
 
         expect(result).toBeDefined()
       })
+    })
+  })
+
+  describe('isSuiteExcluded', () => {
+    it('returns false when there is no tag filter', () => {
+      expect(isSuiteExcluded([], ['@smoke'])).toBe(false)
+    })
+
+    it('returns false when the suite has no effective tags', () => {
+      const tags = parseTagsGrep('-@smoke')
+
+      expect(isSuiteExcluded(tags, [])).toBe(false)
+    })
+
+    it('returns true when the negated tag matches the suite tag (the primary bug case)', () => {
+      // filter: -@smoke, describe: { tags: '@smoke' }
+      const tags = parseTagsGrep('-@smoke')
+
+      expect(isSuiteExcluded(tags, ['@smoke'])).toBe(true)
+    })
+
+    it('returns false when the suite tag is positively required by the filter', () => {
+      // filter: @smoke, describe: { tags: '@smoke' } — suite SHOULD run
+      const tags = parseTagsGrep('@smoke')
+
+      expect(isSuiteExcluded(tags, ['@smoke'])).toBe(false)
+    })
+
+    it('returns false when the filter requires a positive tag not present in the suite', () => {
+      // filter: @regression, describe: { tags: '@smoke' }
+      // Individual tests inside might add @regression, so the suite must NOT be skipped
+      const tags = parseTagsGrep('@regression')
+
+      expect(isSuiteExcluded(tags, ['@smoke'])).toBe(false)
+    })
+
+    it('returns false when only one OR-group has the negated suite tag', () => {
+      // filter: @regression -@smoke (two OR groups: [@regression] and [-@smoke])
+      // Tests can match via the @regression OR-group, so the suite must NOT be skipped
+      const tags = parseTagsGrep('@regression -@smoke')
+
+      expect(isSuiteExcluded(tags, ['@smoke'])).toBe(false)
+    })
+
+    it('returns true when an explicit global NOT tag matches the suite tag', () => {
+      // filter: @regression --@smoke (--@smoke added to every OR group)
+      const tags = parseTagsGrep('@regression --@smoke')
+
+      expect(isSuiteExcluded(tags, ['@smoke'])).toBe(true)
+    })
+
+    it('returns true when grepUntagged is true and the suite has tags', () => {
+      // When running only untagged tests, any tagged suite is excluded
+      expect(isSuiteExcluded([], ['@smoke'], true)).toBe(true)
+    })
+
+    it('returns false when grepUntagged is true and the suite has no tags', () => {
+      expect(isSuiteExcluded([], [], true)).toBe(false)
+    })
+
+    it('returns true when all OR-groups have matching negated tags', () => {
+      // filter: -@smoke -@regression, describe: { tags: ['@smoke', '@regression'] }
+      // Both suite tags are negated across all OR groups
+      const tags = parseTagsGrep('-@smoke -@regression')
+
+      expect(isSuiteExcluded(tags, ['@smoke', '@regression'])).toBe(true)
+    })
+
+    it('returns false when only some OR-groups have a matching negated tag', () => {
+      // filter: -@smoke -@other, describe: { tags: '@smoke' }
+      // -@other OR-group: suite has @smoke but not @other, so tests may match -@other
+      const tags = parseTagsGrep('-@smoke -@other')
+
+      expect(isSuiteExcluded(tags, ['@smoke'])).toBe(false)
     })
   })
 })

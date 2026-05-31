@@ -136,6 +136,30 @@ export const shouldTestRunTitle = (parsedGrep: TitleGrep[], testName: string): b
   )
 }
 
+// Returns true when every tag OR-group in the filter has at least one negated tag that
+// matches one of the suite's effective (inherited) tags. In that case every test in the
+// suite also has those tags and would be excluded, so the entire suite can be skipped.
+export const isSuiteExcluded = (
+  parsedGrepTags: TagGrep[][],
+  effectiveSuiteTags: string[],
+  grepUntagged: boolean = false,
+): boolean => {
+  if (grepUntagged) {
+    // When running untagged tests only, any suite that carries tags excludes all children.
+    return effectiveSuiteTags.length > 0
+  }
+
+  if (!parsedGrepTags.length || !effectiveSuiteTags.length) {
+    return false
+  }
+
+  return parsedGrepTags.every((orGroup) => {
+    return orGroup.some((condition) => {
+      return condition.invert && effectiveSuiteTags.includes(condition.tag)
+    })
+  })
+}
+
 export const shouldTestRun = (parsedGrep: { title: TitleGrep[], tags: TagGrep[][] }, testName: string, tags: string[] = [], grepUntagged: boolean = false): boolean => {
   if (grepUntagged) {
     return !tags.length

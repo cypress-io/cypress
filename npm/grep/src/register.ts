@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import { parseGrep, shouldTestRun } from './utils'
+import { parseGrep, shouldTestRun, isSuiteExcluded } from './utils'
 import { version } from '../package.json'
 import debug from 'debug'
 // @ts-ignore
@@ -171,6 +171,26 @@ export function register (): void {
     }
 
     stackItem.tags = configTags
+
+    // All tests in this suite inherit its effective tags (parent tags + own configTags).
+    // When every OR-group of the filter negates one of those inherited tags, no test
+    // inside can ever match — so skip the entire suite (including before/after hooks).
+    const effectiveTags = suiteStack.flatMap((item) => item.tags).filter(Boolean) as string[]
+    const suiteIsExcluded = isSuiteExcluded(parsedGrep.tags, effectiveTags, !!grepUntagged)
+
+    if (suiteIsExcluded) {
+      if (omitFiltered) {
+        suiteStack.pop()
+
+        return
+      }
+
+      _describe.skip(name, options, callback)
+      suiteStack.pop()
+
+      return
+    }
+
     _describe(name, options, callback)
     suiteStack.pop()
   }

@@ -1,0 +1,19 @@
+[
+  {
+    "name": "describe-before-exclude.cy.ts",
+    "tests": [
+      {
+        "name": "filtered out smoke suite",
+        "state": "pending"
+      },
+      {
+        "name": "verify hooks were not called when parent suite was excluded",
+        "state": "passed"
+      },
+      {
+        "name": "verify hooks were not called when parent suite was excluded",
+        "state": "passed"
+      }
+    ]
+  }
+]

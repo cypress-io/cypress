@@ -26,6 +26,7 @@
     "tags:before": "PROJECT_NAME=tags-before node ../../scripts/cypress.js run --expose grepTags=@staging --config specPattern='**/before.cy.ts'",
     "tags:config": "PROJECT_NAME=tags-config node ../../scripts/cypress.js run --expose grepTags=config --config specPattern='**/config-tags.cy.ts'",
     "tags:describe": "PROJECT_NAME=tags-describe node ../../scripts/cypress.js run --expose grepTags=@smoke --config specPattern='**/describe-tags.cy.ts'",
+    "tags:describe:exclude": "PROJECT_NAME=tags-describe-exclude node ../../scripts/cypress.js run --expose grepTags='-@smoke' --config specPattern='**/describe-before-exclude.cy.ts'",
     "tags:filter:specs": "PROJECT_NAME=tags-filter-specs node ../../scripts/cypress.js run --expose grepTags='regression',grepFilterSpecs=true --config specPattern='**/tags/*.cy.ts'",
     "tags:inherit": "PROJECT_NAME=tags-inherit node ../../scripts/cypress.js run --expose grepTags=@screen-b --config specPattern='**/inherits-tag.cy.ts'",
     "tags:nested-describe": "PROJECT_NAME=tags-nested-describe node ../../scripts/cypress.js run --expose grepTags='@smoke @integration' --config specPattern='**/nested-describe.cy.ts'",
