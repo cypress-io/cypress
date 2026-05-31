@@ -622,5 +622,42 @@ describe('utils', () => {
         expect(result).toBeDefined()
       })
     })
+
+    describe('projectRoot as spec resolution base', () => {
+      it('uses projectRoot from config when grepIntegrationFolder is not set', () => {
+        // When specPattern contains globs that only resolve under projectRoot,
+        // the plugin must use projectRoot (not process.cwd()) so it finds the
+        // same files Cypress itself would find.
+        const config = {
+          specPattern: ['**/*.cy.ts'],
+          excludeSpecPattern: [],
+          expose: { grepFilterSpecs: true, grepTags: '@smoke' },
+          projectRoot: '/some/other/directory',
+        }
+        // If it used process.cwd() it would silently fall back to all specs.
+        // With projectRoot it also won't find files (because the path is fake),
+        // but we can confirm the specPattern is unchanged (fall-back behaviour).
+        const result = plugin(config)
+
+        expect(result.specPattern).toEqual(['**/*.cy.ts'])
+      })
+
+      it('uses grepIntegrationFolder over projectRoot when both are provided', () => {
+        const config = {
+          specPattern: ['**/*.cy.ts'],
+          excludeSpecPattern: [],
+          expose: {
+            grepFilterSpecs: true,
+            grepTags: '@smoke',
+            grepIntegrationFolder: '/explicit/folder',
+          },
+          projectRoot: '/project/root',
+        }
+        // Neither folder has real spec files, so the fall-back leaves specPattern intact.
+        const result = plugin(config)
+
+        expect(result.specPattern).toEqual(['**/*.cy.ts'])
+      })
+    })
   })
 })

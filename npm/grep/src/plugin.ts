@@ -10,6 +10,7 @@ interface CypressConfigOptions {
   expose?: Record<string, any>
   specPattern?: string | string[]
   excludeSpecPattern?: string | string[]
+  projectRoot?: string
 }
 
 /**
@@ -66,7 +67,7 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
   }
 
   const { specPattern, excludeSpecPattern } = config
-  const integrationFolder = expose.grepIntegrationFolder || process.cwd()
+  const integrationFolder = expose.grepIntegrationFolder || config.projectRoot || process.cwd()
 
   const grepFilterSpecs = expose.grepFilterSpecs === true || String(expose.grepFilterSpecs).toLowerCase() === 'true'
 
