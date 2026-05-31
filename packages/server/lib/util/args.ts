@@ -519,6 +519,9 @@ export function toObject (argv: string[]): ParsedCypressArgv {
   // normalize project to projectRoot
   if (project) {
     options.projectRoot = path.resolve(String(options.cwd), project)
+  } else {
+    // fall back to cwd so projectRoot is never left undefined
+    options.projectRoot = String(options.cwd)
   }
 
   // normalize output path from previous current working directory

@@ -296,7 +296,7 @@ const getBrowsers = async () => {
 }
 
 const isValidPathToBrowser = (str) => {
-  return path.basename(str) !== str
+  return typeof str === 'string' && path.basename(str) !== str
 }
 
 const parseBrowserOption = (opt) => {

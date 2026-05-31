@@ -93,16 +93,16 @@ describe('lib/util/args', () => {
       expect(options.projectRoot).to.eq(projectRoot)
     })
 
-    it('is undefined if not specified', function () {
+    it('defaults to cwd if not specified', function () {
       const options = toObject([])
 
-      expect(options.projectRoot).to.eq(undefined)
+      expect(options.projectRoot).to.eq(getCwd())
     })
 
-    it('handles bool project parameter', function () {
+    it('defaults to cwd for invalid bool project parameter', function () {
       const options = toObject(['--project', true] as unknown as string[])
 
-      expect(options.projectRoot).to.eq(undefined)
+      expect(options.projectRoot).to.eq(getCwd())
     })
   })
 
