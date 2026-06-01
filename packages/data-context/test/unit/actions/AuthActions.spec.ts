@@ -245,6 +245,85 @@ describe('AuthActions', () => {
     })
   })
 
+  describe('signup with projectSlug', () => {
+    let ctx: DataContext
+    let actions: AuthActions
+
+    beforeEach(() => {
+      ctx = createTestDataContext('open')
+      jest.mocked(ctx._apis.authApi.signUp).mockResolvedValue({
+        name: 'steve',
+        email: 'steve@apple.com',
+        authToken: 'foo',
+        projectSlug: 'my-project',
+      })
+
+      actions = new AuthActions(ctx)
+    })
+
+    it('calls setProjectIdInConfigFile with the projectSlug on successful signup', async () => {
+      const setProjectIdSpy = jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
+
+      await actions.signup('Binary: App', 'Studio', 'Signup')
+
+      expect(setProjectIdSpy).toHaveBeenCalledWith('my-project')
+      expect(ctx.coreData.autoProvisionedProjectId).toBeNull()
+    })
+
+    it('sets autoProvisionedProjectId and calls toApp() when setProjectIdInConfigFile fails during signup', async () => {
+      jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockRejectedValue(new Error('write error'))
+      const toAppSpy = jest.spyOn(ctx.emitter, 'toApp')
+
+      await actions.signup('Binary: App', 'Studio', 'Signup')
+
+      expect(ctx.coreData.autoProvisionedProjectId).toBe('my-project')
+      expect(toAppSpy).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('login without projectSlug', () => {
+    it('does not call setProjectIdInConfigFile when projectSlug is absent', async () => {
+      const ctx = createTestDataContext('open')
+
+      jest.mocked(ctx._apis.authApi.logIn).mockResolvedValue({ name: 'steve', email: 'steve@apple.com', authToken: 'foo' })
+      const setProjectIdSpy = jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile')
+
+      // @ts-expect-error - incorrect number of arguments
+      await new AuthActions(ctx).login()
+
+      expect(setProjectIdSpy).not.toHaveBeenCalled()
+      expect(ctx.coreData.autoProvisionedProjectId).toBeNull()
+    })
+  })
+
+  describe('autoProvisionedProjectId query', () => {
+    it('returns null when not set', async () => {
+      const ctx = createTestDataContext('open')
+
+      const result = await execute({
+        schema: graphqlSchema,
+        document: parse(`{ autoProvisionedProjectId }`),
+        contextValue: ctx,
+      })
+
+      expect(result.data?.autoProvisionedProjectId).toBeNull()
+    })
+
+    it('returns the project slug when set', async () => {
+      const ctx = createTestDataContext('open')
+
+      ctx.coreData.autoProvisionedProjectId = 'my-project'
+
+      const result = await execute({
+        schema: graphqlSchema,
+        document: parse(`{ autoProvisionedProjectId }`),
+        contextValue: ctx,
+      })
+
+      expect(result.data?.autoProvisionedProjectId).toBe('my-project')
+    })
+  })
+
   describe('clearAutoProvisionedProjectId mutation', () => {
     let ctx: DataContext
 
