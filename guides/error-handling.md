@@ -25,6 +25,7 @@ Errors can be compared directly in your code error. Comparing old vs new errors 
 7. To make edits, re-run the `yarn test -u` command. `-u` will update the test snapshots.
 8. Run `yarn test` after updating the snapshot to validate the changes were applied.
 9. Commit the files changed in `./test/__snapshots__`.
+10. If you added or removed an error key, regenerate and commit `packages/data-context/schemas/schema.graphql` in the same PR (`yarn workspace @packages/data-context build`).
 
 ### Technical Overview
 
