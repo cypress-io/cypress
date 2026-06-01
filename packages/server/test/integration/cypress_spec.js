@@ -29,6 +29,7 @@ const cwd = require(`../../lib/cwd`).getCwd
 const user = require(`../../lib/cloud/user`).default
 const cache = require(`../../lib/cache`).cache
 const errors = require(`../../lib/errors`)
+const errorsPkg = require('@packages/errors')
 const cypress = require(`../../lib/cypress`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { ServerBase } = require(`../../lib/server-base`)
@@ -199,10 +200,17 @@ describe('lib/cypress', () => {
     sinon.stub(detect, 'detect').resolves([...TYPICAL_BROWSERS])
     sinon.stub(process, 'exit')
     sinon.stub(ServerBase.prototype, 'reset')
-    sinon.stub(errors, 'warning')
-    .callThrough()
-    .withArgs('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
-    .returns(null)
+    const originalWarning = errorsPkg.default.warning
+
+    sinon.stub(errorsPkg.default, 'warning').callsFake((type, ...args) => {
+      if (type === 'INVOKED_BINARY_OUTSIDE_NPM_MODULE') {
+        return null
+      }
+
+      return originalWarning(type, ...args)
+    })
+
+    sinon.stub(errors, 'warning').callsFake((type, ...args) => errorsPkg.default.warning(type, ...args))
 
     sinon.spy(errors, 'log')
     sinon.spy(errors, 'logException')
@@ -887,8 +895,23 @@ describe('lib/cypress', () => {
 
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
+        delete process.env.CYPRESS_BASE_URL
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'An invalid configuration value was set.')
+      })
+    })
+
+    it('logs warning and continues when CYPRESS_env is set to a non-object value', function () {
+      process.env.CYPRESS_env = 'invalid-string'
+
+      return cypress.start([`--run-project=${this.todosPath}`])
+      .then(() => {
+        delete process.env.CYPRESS_env
+        expect(errorsPkg.default.warning).to.be.calledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 'invalid-string')
+        expect(console.log).to.be.calledWithMatch('CYPRESS_env')
+        expect(console.log).to.be.calledWithMatch('must be a valid JSON object')
+        expect(console.log).to.be.calledWithMatch('--env')
+        this.expectExitWith(0)
       })
     })
 

@@ -284,6 +284,77 @@ describe('config/src/project/utils', () => {
         baz: 'quux',
       })
     })
+
+    it('warns and ignores CYPRESS_env when set to a non-object string value', () => {
+      vi.stubEnv('CYPRESS_env', 'notAnObject')
+
+      const obj = { env: { existing: 'value' } }
+
+      const result = parseEnv(obj, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 'notAnObject')
+      expect(result).toEqual({ existing: 'value' })
+    })
+
+    it('does not spread invalid CYPRESS_env into indexed env keys', () => {
+      vi.stubEnv('CYPRESS_env', 'bad')
+
+      const result = parseEnv({ env: { existing: 'value' } }, {})
+
+      expect(result).toEqual({ existing: 'value' })
+      expect(result).not.toHaveProperty('0')
+    })
+
+    it('warns and ignores CYPRESS_env when set to a numeric string', () => {
+      vi.stubEnv('CYPRESS_env', '42')
+
+      const obj = { env: {} }
+
+      const result = parseEnv(obj, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 42)
+      expect(result).toEqual({})
+    })
+
+    it('warns and ignores CYPRESS_env when set to a JSON array', () => {
+      vi.stubEnv('CYPRESS_env', '[]')
+
+      const result = parseEnv({ env: { existing: 'value' } }, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', [])
+      expect(result).toEqual({ existing: 'value' })
+    })
+
+    it('warns and ignores CYPRESS_ENV regardless of casing', () => {
+      vi.stubEnv('CYPRESS_ENV', 'notAnObject')
+
+      const result = parseEnv({ env: { existing: 'value' } }, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 'notAnObject')
+      expect(result).toEqual({ existing: 'value' })
+    })
+
+    it('applies CYPRESS_env when set to a valid JSON object', () => {
+      vi.stubEnv('CYPRESS_env', '{"foo":"bar"}')
+
+      const obj = { env: {} }
+
+      parseEnv(obj, {})
+
+      expect(errors.warning).not.toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', expect.anything())
+      expect(obj.env).toEqual({ foo: 'bar' })
+    })
+
+    it('warns and ignores CYPRESS_expose when set to a non-object string value', () => {
+      vi.stubEnv('CYPRESS_expose', 'notAnObject')
+
+      const obj = { expose: { existing: 'value' } }
+
+      parseEnv(obj, {})
+
+      expect(errors.warning).toHaveBeenCalledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'expose', 'notAnObject')
+      expect(obj.expose).toEqual({ existing: 'value' })
+    })
   })
 
   describe('.resolveConfigValues', () => {

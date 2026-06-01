@@ -5,10 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "148.0.7778.178"
-chrome-beta-version: &chrome-beta-version "149.0.7827.22"
+chrome-stable-version: &chrome-stable-version "148.0.7778.215"
+chrome-beta-version: &chrome-beta-version "149.0.7827.53"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.22"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.54"
 firefox-stable-version: &firefox-stable-version "151.0.1"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
@@ -21,6 +21,9 @@ parameters:
     type: string
     default: main
   force-persist-artifacts:
+    type: boolean
+    default: false
+  run-all-jobs:
     type: boolean
     default: false
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
@@ -963,6 +966,11 @@ commands:
         description: set to false to skip this job (not relevant to changed files)
         type: boolean
         default: true
+      bun-release:
+        description: pinned Bun release tag passed to https://bun.sh/install (e.g.
+          bun-v1.2.22)
+        type: string
+        default: bun-v1.2.22
     steps:
       - halt-if-skipped:
           guard: << parameters.guard >>
@@ -977,6 +985,39 @@ commands:
           install-chrome: true
           install-chrome-for-testing: true
           install-firefox: true
+      - restore_cache:
+          name: Restore Bun install cache
+          keys:
+            - v1-bun-system-tests-<< parameters.bun-release >>
+      - run:
+          name: Install Bun for Bun package manager system tests
+          command: |
+            set -euo pipefail
+            BUN_RELEASE="<< parameters.bun-release >>"
+
+            if command -v bun >/dev/null 2>&1; then
+              bun --version
+              exit 0
+            fi
+
+            if [[ -x "${HOME}/.bun/bin/bun" ]]; then
+              echo 'export PATH="${HOME}/.bun/bin:${PATH}"' >> "${BASH_ENV}"
+              export PATH="${HOME}/.bun/bin:${PATH}"
+              command -v bun
+              bun --version
+              exit 0
+            fi
+
+            curl -fsSL https://bun.sh/install | bash -s "${BUN_RELEASE}"
+            echo 'export PATH="${HOME}/.bun/bin:${PATH}"' >> "${BASH_ENV}"
+            export PATH="${HOME}/.bun/bin:${PATH}"
+            command -v bun
+            bun --version
+      - save_cache:
+          name: Save Bun install cache
+          key: v1-bun-system-tests-<< parameters.bun-release >>
+          paths:
+            - ~/.bun
       - run:
           name: Run system tests
           environment:
@@ -2298,10 +2339,11 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium+
+        default: large
       percy:
         type: boolean
         default: false
+    resource_class: << parameters.resource_class >>
     parallelism: 7
     steps:
       - run-new-ui-tests:

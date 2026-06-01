@@ -7,6 +7,8 @@ import mockedEnv from 'mocked-env'
 let execaStub: ReturnType<typeof sinon.stub>
 let commitInfo: typeof import('../../../lib/util/commit-info').commitInfo
 let getGitCommands: typeof import('../../../lib/util/commit-info').getGitCommands
+let getRemoteOrigin: typeof import('../../../lib/util/commit-info').getRemoteOrigin
+let sanitizeRemoteOrigin: typeof import('../../../lib/util/commit-info').sanitizeRemoteOrigin
 let resetEnv: (() => void) | null = null
 
 // Helper to get git command key string from property name
@@ -90,6 +92,8 @@ describe('lib/util/commit-info', () => {
 
     commitInfo = commitInfoModule.commitInfo
     getGitCommands = commitInfoModule.getGitCommands
+    getRemoteOrigin = commitInfoModule.getRemoteOrigin
+    sanitizeRemoteOrigin = commitInfoModule.sanitizeRemoteOrigin
   })
 
   afterEach(() => {
@@ -228,6 +232,79 @@ describe('lib/util/commit-info', () => {
 
       return commitInfo(customFolder).then(() => {
         expect(execaStub.called).to.be.true
+      })
+    })
+  })
+
+  context('sanitizeRemoteOrigin', () => {
+    it('strips username and password from an HTTPS remote', () => {
+      expect(sanitizeRemoteOrigin('https://user:secret@github.com/org/repo.git'))
+      .to.eq('https://github.com/org/repo.git')
+    })
+
+    it('strips only the password when username is absent', () => {
+      expect(sanitizeRemoteOrigin('https://:secret@github.com/org/repo.git'))
+      .to.eq('https://github.com/org/repo.git')
+    })
+
+    it('leaves an HTTPS remote without credentials unchanged', () => {
+      expect(sanitizeRemoteOrigin('https://github.com/org/repo.git'))
+      .to.eq('https://github.com/org/repo.git')
+    })
+
+    it('leaves an SCP-style SSH remote unchanged', () => {
+      expect(sanitizeRemoteOrigin('git@github.com:org/repo.git'))
+      .to.eq('git@github.com:org/repo.git')
+    })
+
+    it('leaves an ssh:// remote unchanged, preserving the git username', () => {
+      expect(sanitizeRemoteOrigin('ssh://git@github.com/org/repo.git'))
+      .to.eq('ssh://git@github.com/org/repo.git')
+    })
+
+    it('strips username and password from an ssh:// remote with embedded credentials', () => {
+      expect(sanitizeRemoteOrigin('ssh://user:password@host/repo.git'))
+      .to.eq('ssh://host/repo.git')
+    })
+
+    it('leaves a git:// remote unchanged', () => {
+      expect(sanitizeRemoteOrigin('git://github.com/org/repo.git'))
+      .to.eq('git://github.com/org/repo.git')
+    })
+
+    it('leaves an unparseable value unchanged', () => {
+      expect(sanitizeRemoteOrigin('not-a-url')).to.eq('not-a-url')
+    })
+
+    it('strips credentials from a remote returned by git via commitInfo', () => {
+      execaStub.callsFake(createGitResponses({
+        remote: { stdout: 'https://token:x-oauth-basic@github.com/org/repo.git' },
+      }))
+
+      return commitInfo().then((info) => {
+        expect(info.remote).to.eq('https://github.com/org/repo.git')
+      })
+    })
+
+    it('strips credentials from a remote returned by getRemoteOrigin', () => {
+      execaStub.callsFake(createGitResponses({
+        remote: { stdout: 'https://token:x-oauth-basic@github.com/org/repo.git' },
+      }))
+
+      return getRemoteOrigin().then((remote) => {
+        expect(remote).to.eq('https://github.com/org/repo.git')
+      })
+    })
+
+    it('strips credentials from COMMIT_INFO_REMOTE env var', () => {
+      resetEnv = mockedEnv({
+        COMMIT_INFO_REMOTE: 'https://user:pass@bitbucket.org/org/repo.git',
+      }, { clear: true })
+
+      execaStub.callsFake(() => Promise.reject(new Error('Git should not be called')))
+
+      return commitInfo().then((info) => {
+        expect(info.remote).to.eq('https://bitbucket.org/org/repo.git')
       })
     })
   })

@@ -33,6 +33,7 @@ export class WizardDataSource {
       'npm': 'npm install -D',
       'pnpm': 'pnpm add -D',
       'yarn': 'yarn add -D',
+      'bun': 'bun add -D',
     } as const
 
     const deps = (await this.ctx.wizard.packagesToInstall())

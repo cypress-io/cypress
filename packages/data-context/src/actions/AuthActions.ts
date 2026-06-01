@@ -4,8 +4,8 @@ import { gql } from '@urql/core'
 
 export interface AuthApiShape {
   getUser(): Promise<Partial<AuthenticatedUserShape>>
-  logIn(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string, utmContent: string | null, signal?: AbortSignal): Promise<AuthenticatedUserShape>
-  signUp(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string, utmContent: string | null, signal?: AbortSignal): Promise<AuthenticatedUserShape>
+  logIn(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string, utmContent: string | null, signal?: AbortSignal): Promise<AuthenticatedUserShape | undefined>
+  signUp(onMessage: (message: AuthStateShape) => void, utmSource: string, utmMedium: string, utmContent: string | null, signal?: AbortSignal): Promise<AuthenticatedUserShape | undefined>
   logOut(): Promise<void>
   resetAuthState(): void
 }
@@ -81,7 +81,7 @@ export class AuthActions {
 
     const ac = new AbortController()
 
-    const user = await new Promise<AuthenticatedUserShape | null>((resolve, reject) => {
+    const user = await new Promise<AuthenticatedUserShape | null | undefined>((resolve, reject) => {
       // A resolver is exposed to the instance so that we can
       // resolve this promise and the original mutation promise
       // if a reset occurs. We also abort the signal so any async

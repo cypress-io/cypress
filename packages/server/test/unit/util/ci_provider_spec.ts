@@ -89,6 +89,8 @@ describe('lib/util/ci_provider', () => {
 
     expect(providers).to.deep.eq([
       'appveyor',
+      'argoCd',
+      'argoWorkflows',
       'awsAmplifyConsole',
       'awsCodeBuild',
       'azure',
@@ -167,6 +169,70 @@ describe('lib/util/ci_provider', () => {
     return expectsCommitParams({
       message: 'repoCommitMessage\nrepoCommitMessageExtended',
     })
+  })
+
+  it('argoCd', () => {
+    resetEnv = mockedEnv({
+      ARGOCD_APP_NAME: 'argoCdAppName',
+      ARGOCD_APP_NAMESPACE: 'argoCdAppNamespace',
+      ARGOCD_APP_PROJECT_NAME: 'argoCdAppProjectName',
+      ARGOCD_APP_REVISION: 'argoCdAppRevision',
+      ARGOCD_APP_REVISION_SHORT: 'argoCdAppRevisionShort',
+      ARGOCD_APP_REVISION_SHORT_8: 'argoCdRev8',
+      ARGOCD_APP_SOURCE_PATH: 'argoCdAppSourcePath',
+      ARGOCD_APP_SOURCE_REPO_URL: 'https://github.com/org/repo.git',
+      ARGOCD_APP_SOURCE_TARGET_REVISION: 'main',
+      KUBE_VERSION: '1.28.0',
+      KUBE_API_VERSIONS: 'apps/v1,batch/v1',
+    }, { clear: true })
+
+    expectsName('argoCd')
+    expectsCiParams({
+      argocdAppName: 'argoCdAppName',
+      argocdAppNamespace: 'argoCdAppNamespace',
+      argocdAppProjectName: 'argoCdAppProjectName',
+      argocdAppRevision: 'argoCdAppRevision',
+      argocdAppRevisionShort: 'argoCdAppRevisionShort',
+      argocdAppRevisionShort8: 'argoCdRev8',
+      argocdAppSourcePath: 'argoCdAppSourcePath',
+      argocdAppSourceRepoUrl: 'https://github.com/org/repo.git',
+      argocdAppSourceTargetRevision: 'main',
+      kubeVersion: '1.28.0',
+      kubeApiVersions: 'apps/v1,batch/v1',
+    })
+
+    expectsCommitParams({
+      sha: 'argoCdAppRevision',
+      branch: 'main',
+      remoteOrigin: 'https://github.com/org/repo.git',
+    })
+
+    return undefined
+  })
+
+  it('argoWorkflows', () => {
+    resetEnv = mockedEnv({
+      ARGO_WORKFLOW_NAME: 'argoWorkflowName',
+      ARGO_WORKFLOW_UID: 'argoWorkflowUid',
+      ARGO_NODE_ID: 'argoNodeId',
+      ARGO_POD_NAME: 'argoPodName',
+      ARGO_POD_UID: 'argoPodUid',
+      ARGO_CONTAINER_NAME: 'argoContainerName',
+      ARGO_INSTANCE_ID: 'argoInstanceId',
+    }, { clear: true })
+
+    expectsName('argoWorkflows')
+    expectsCiParams({
+      argoWorkflowName: 'argoWorkflowName',
+      argoWorkflowUid: 'argoWorkflowUid',
+      argoNodeId: 'argoNodeId',
+      argoPodName: 'argoPodName',
+      argoPodUid: 'argoPodUid',
+      argoContainerName: 'argoContainerName',
+      argoInstanceId: 'argoInstanceId',
+    })
+
+    return expectsCommitParams({})
   })
 
   it('awsCodeBuild', () => {

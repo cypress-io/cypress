@@ -20,7 +20,7 @@ export const CODE_LANGUAGES = [
 
 export type CodeLanguage = typeof CODE_LANGUAGES[number]
 
-export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm'] as const
+export const PACKAGE_MANAGERS = ['npm', 'yarn', 'pnpm', 'bun'] as const
 
 export type PackageManager = typeof PACKAGE_MANAGERS[number]
 

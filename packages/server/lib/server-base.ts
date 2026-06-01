@@ -13,10 +13,10 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import { getRoutesForRequest, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
-import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
+import type { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
 import { Request } from './request'
@@ -48,6 +48,7 @@ import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
+import { createProxyRuntime } from './network-runtime'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -434,20 +435,20 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return this._fileServer?.token
     }
 
-    this._netStubbingState = netStubbingState()
-    // @ts-ignore
-    this._networkProxy = new NetworkProxy({
+    const runtime = createProxyRuntime({
       config,
       shouldCorrelatePreRequests,
       remoteStates,
       getFileServerToken,
       getCookieJar: () => cookieJar,
       socket: this.socket,
-      netStubbingState: this.netStubbingState,
       request: this.request,
       serverBus: this._eventBus,
       getCurrentBrowser,
     })
+
+    this._netStubbingState = runtime.netStubbingState
+    this._networkProxy = runtime.networkProxy
   }
 
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {
