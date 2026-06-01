@@ -1,10 +1,9 @@
 import _ from 'lodash'
 import EE from 'events'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import type Bluebird from 'bluebird'
 import type { CompilerErrorLocation, ProcessIpcWrapper, TransformError } from '@packages/types'
 import { stackUtils } from '@packages/errors'
 import type { SerializedError } from '@packages/errors'
@@ -186,7 +185,7 @@ export const wrapChildPromise = (
   ids: PluginInvokeIds,
   args: any[] = [],
 ): Bluebird<void> => {
-  return Promise.try(() => {
+  return Bluebird.try(() => {
     return invoke(ids.eventId, args)
   })
   .then((value) => {
