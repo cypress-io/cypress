@@ -1,4 +1,4 @@
-import { expect, describe, it, vi } from 'vitest'
+import { expect, describe, it, vi, beforeEach, afterEach } from 'vitest'
 import {
   parseGrep,
   parseTitleGrep,
@@ -9,6 +9,10 @@ import {
   shouldTestRunTitle,
 } from '../src/utils'
 import { plugin } from '../src/plugin'
+
+vi.mock('globby', () => ({
+  sync: vi.fn().mockReturnValue([]),
+}))
 
 describe('utils', () => {
   describe('parseTitleGrep', () => {
@@ -624,39 +628,65 @@ describe('utils', () => {
     })
 
     describe('projectRoot as spec resolution base', () => {
-      it('uses projectRoot from config when grepIntegrationFolder is not set', () => {
-        // When specPattern contains globs that only resolve under projectRoot,
-        // the plugin must use projectRoot (not process.cwd()) so it finds the
-        // same files Cypress itself would find.
-        const config = {
+      let globbySync: ReturnType<typeof vi.fn>
+
+      beforeEach(async () => {
+        const globby = await import('globby')
+
+        globbySync = vi.mocked(globby.sync)
+        globbySync.mockReturnValue([])
+      })
+
+      afterEach(() => {
+        vi.clearAllMocks()
+      })
+
+      it('passes config.projectRoot as cwd to globby when grepIntegrationFolder is not set', () => {
+        plugin({
           specPattern: ['**/*.cy.ts'],
           excludeSpecPattern: [],
           expose: { grepFilterSpecs: true, grepTags: '@smoke' },
-          projectRoot: '/some/other/directory',
-        }
-        // If it used process.cwd() it would silently fall back to all specs.
-        // With projectRoot it also won't find files (because the path is fake),
-        // but we can confirm the specPattern is unchanged (fall-back behaviour).
-        const result = plugin(config)
+          projectRoot: '/my/project/root',
+        })
 
-        expect(result.specPattern).toEqual(['**/*.cy.ts'])
+        expect(globbySync).toHaveBeenCalledOnce()
+        expect(globbySync).toHaveBeenCalledWith(
+          ['**/*.cy.ts'],
+          expect.objectContaining({ cwd: '/my/project/root' }),
+        )
       })
 
-      it('uses grepIntegrationFolder over projectRoot when both are provided', () => {
-        const config = {
+      it('prefers grepIntegrationFolder over config.projectRoot when both are set', () => {
+        plugin({
           specPattern: ['**/*.cy.ts'],
           excludeSpecPattern: [],
           expose: {
             grepFilterSpecs: true,
             grepTags: '@smoke',
-            grepIntegrationFolder: '/explicit/folder',
+            grepIntegrationFolder: '/explicit/override',
           },
-          projectRoot: '/project/root',
-        }
-        // Neither folder has real spec files, so the fall-back leaves specPattern intact.
-        const result = plugin(config)
+          projectRoot: '/my/project/root',
+        })
 
-        expect(result.specPattern).toEqual(['**/*.cy.ts'])
+        expect(globbySync).toHaveBeenCalledOnce()
+        expect(globbySync).toHaveBeenCalledWith(
+          ['**/*.cy.ts'],
+          expect.objectContaining({ cwd: '/explicit/override' }),
+        )
+      })
+
+      it('falls back to process.cwd() when neither grepIntegrationFolder nor projectRoot is set', () => {
+        plugin({
+          specPattern: ['**/*.cy.ts'],
+          excludeSpecPattern: [],
+          expose: { grepFilterSpecs: true, grepTags: '@smoke' },
+        })
+
+        expect(globbySync).toHaveBeenCalledOnce()
+        expect(globbySync).toHaveBeenCalledWith(
+          ['**/*.cy.ts'],
+          expect.objectContaining({ cwd: process.cwd() }),
+        )
       })
     })
   })
