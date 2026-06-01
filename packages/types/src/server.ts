@@ -94,6 +94,7 @@ export interface LaunchArgs {
   _: [string] // Cypress App binary location
   config: Record<string, unknown>
   cwd: string
+  emitWhenReady?: boolean
   browser?: string
   configFile?: string
   // Global mode is triggered by CLI via `--global` or when there is no `projectRoot` (essentially when the Cypress Config file can't be found)
