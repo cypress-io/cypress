@@ -1,1 +1,1 @@
-export * from '@packages/network-interception/lib/types/external-types'
+export type * from '@packages/network-interception/cjs/types/external-types'

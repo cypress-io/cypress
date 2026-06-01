@@ -93,7 +93,10 @@ Adapter details: [`packages/net-stubbing/lib/adapters/README.md`](../net-stubbin
 ## Development
 
 ```bash
+yarn workspace @packages/network-interception build-prod
 yarn workspace @packages/network-interception test
 yarn workspace @packages/net-stubbing test
 yarn workspace @packages/server test-unit --grep network-runtime
 ```
+
+Compiled output lives in `cjs/` and `esm/` (gitignored). Source stays in `lib/`.
