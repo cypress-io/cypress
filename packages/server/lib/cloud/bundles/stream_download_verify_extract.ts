@@ -15,6 +15,7 @@ import { SystemError } from '../network/system_error'
 import { PUBLIC_KEY_VERSION } from '../constants'
 import { createStreamingSignatureVerifier } from '../encryption'
 import { BundleError, BundleErrorStage, BundleKind } from './bundle_error'
+import { isInsideDir } from './is_inside_dir'
 
 const pkg = require('@packages/root')
 
@@ -29,12 +30,6 @@ interface StreamDownloadVerifyExtractOptions {
   projectId?: string
   staging: string
   kind: BundleKind
-}
-
-const isInsideDir = (parent: string, child: string): boolean => {
-  const rel = path.relative(parent, child)
-
-  return rel !== '' && !rel.startsWith('..') && !path.isAbsolute(rel)
 }
 
 const buildHeaders = (projectId: string | undefined): Record<string, string> => {
