@@ -134,9 +134,11 @@ describe('lib/browsers/firefox', () => {
 
         await firefox.open(this.browser, 'http://', this.options, this.automation)
 
-        // reset call history so we only assert on what connectToNewSpec does
+        // reset call history so we only assert on what connectToNewSpec does (open() also
+        // records video and navigates)
         videoApi.useFfmpegVideoController.resetHistory()
         videoApi.onProjectCaptureVideoFrames.resetHistory()
+        wdInstance.browsingContextNavigate.resetHistory()
 
         this.options.url = 'next-spec-url'
         await firefox.connectToNewSpec(this.browser, this.options, this.automation)
@@ -146,6 +148,12 @@ describe('lib/browsers/firefox', () => {
         // @see https://github.com/cypress-io/cypress/issues/18415
         expect(videoApi.useFfmpegVideoController).to.have.been.calledWith({ webmInput: true })
         expect(videoApi.onProjectCaptureVideoFrames).to.have.been.calledWith(writeVideoFrame)
+
+        // the new spec's frame handler must be registered *after* navigation unloads the previous
+        // page, otherwise trailing frames from the finished spec's MediaRecorder bleed into the new
+        // spec's video stream.
+        expect(videoApi.useFfmpegVideoController).to.have.been.calledAfter(wdInstance.browsingContextNavigate)
+        expect(videoApi.onProjectCaptureVideoFrames).to.have.been.calledAfter(wdInstance.browsingContextNavigate)
       })
     })
 

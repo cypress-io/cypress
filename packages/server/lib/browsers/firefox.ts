@@ -390,16 +390,25 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   debug('connectToNewSpec bidi')
 
+  // navigate to the new spec first, then (re-)establish video recording.
+  //
   // the browser is reused between specs in run mode, so we need to re-establish the video
   // recording controller for each new spec. Without this, the per-spec videoRecording object
   // created in run mode never gets its controller set, and video compression fails with
   // "Cannot read properties of undefined (reading 'postProcessFfmpegOptions')".
+  //
+  // It is important that recordVideo runs *after* navigation. The previous spec's page — and its
+  // in-browser MediaRecorder — stays alive until navigation unloads it, and can keep emitting
+  // chunks. If we registered the new spec's capture:video:frames handler before navigating, those
+  // trailing frames from the finished spec would be written into the new spec's ffmpeg stream.
+  // Frames that arrive before this point are safely dropped by the previous spec's controller,
+  // which has already ended capture.
   // @see https://github.com/cypress-io/cypress/issues/18415
+  await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
+
   if (options.videoApi) {
     await recordVideo(options.videoApi)
   }
-
-  await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
 }
 
 export function connectToExisting () {
