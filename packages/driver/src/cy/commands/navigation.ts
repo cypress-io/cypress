@@ -482,10 +482,17 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
     log: true,
     // @ts-expect-error
     timeout: config('pageLoadTimeout'),
+    onBeforeLoad () {},
+    onLoad () {},
   })
 
+  const onLoadIsUserDefined = !!userOptions?.onLoad
+  const onBeforeLoadIsUserDefined = !!userOptions?.onBeforeLoad
+
+  const runnable = state('runnable')
+
   const reload = () => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       forceReload = forceReload || false
       userOptions = userOptions || {}
 
@@ -501,15 +508,69 @@ export const reload = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: Sta
 
       options._log?.snapshot('before', { next: 'after' })
 
+      let onBeforeLoadError
+
+      const onBeforeLoad = (contentWindow) => {
+        try {
+          options.onBeforeLoad?.call(runnable.ctx, contentWindow)
+        } catch (err: any) {
+          // mark these as user callback errors, so they're treated differently
+          // than Node.js errors when caught below
+          err.isCallbackError = true
+          onBeforeLoadError = err
+        }
+      }
+
+      const onLoad = (contentWindow) => {
+        // If we are reloading a cross origin page and have onLoad or onBeforeLoad
+        // options specified, throw an error since the callbacks can't run.
+        if (!isRunnerAbleToCommunicateWithAut()) {
+          if (onLoadIsUserDefined) {
+            const err: any = $errUtils.errByPath('reload.invalid_cross_origin_on_load', { autLocation: Cypress.state('autLocation') })
+
+            err.isCallbackError = true
+
+            return reject(err)
+          }
+
+          if (onBeforeLoadIsUserDefined) {
+            const err: any = $errUtils.errByPath('reload.invalid_cross_origin_on_before_load', { autLocation: Cypress.state('autLocation') })
+
+            err.isCallbackError = true
+
+            return reject(err)
+          }
+        }
+
+        if (onBeforeLoadError) {
+          return reject(onBeforeLoadError)
+        }
+
+        try {
+          options.onLoad?.call(runnable.ctx, contentWindow)
+        } catch (err: any) {
+          // mark these as user callback errors, so they're treated differently
+          // than Node.js errors when caught below
+          err.isCallbackError = true
+
+          return reject(err)
+        }
+
+        return resolve(contentWindow)
+      }
+
       cleanup = () => {
         knownCommandCausedInstability = false
 
-        return cy.removeListener('window:load', resolve)
+        cy.removeListener('window:before:load', onBeforeLoad)
+
+        return cy.removeListener('window:load', onLoad)
       }
 
       knownCommandCausedInstability = true
 
-      cy.once('window:load', resolve)
+      cy.once('window:before:load', onBeforeLoad)
+      cy.once('window:load', onLoad)
 
       // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to reload the page
       return Cypress.isBrowser('webkit') ? $utils.locReload(forceReload, state('window')) : Cypress.automation('reload:aut:frame', {

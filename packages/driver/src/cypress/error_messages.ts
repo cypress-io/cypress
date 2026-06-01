@@ -1415,6 +1415,36 @@ export default {
       message: `${cmd('reload')} can only accept a boolean or \`options\` as its arguments.`,
       docsUrl: 'https://on.cypress.io/reload',
     },
+    invalid_cross_origin_on_load (args) {
+      return {
+        message: stripIndent`${cmd('reload')} was called on a cross origin site with an \`onLoad\` callback. \`onLoad\` callbacks can only be used with same origin sites.
+          If you wish to specify an \`onLoad\` callback please use the \`cy.origin\` command to setup a \`window:load\` event prior to reloading the cross origin site.
+
+          \`cy.origin('${args.autLocation.origin}', () => {\`
+          \`  cy.on('window:load', () => {\`
+          \`    <onLoad callback goes here>\`
+          \`  })\`
+          \`})\`
+          \`cy.reload()\`
+        `,
+        docsUrl: 'https://on.cypress.io/reload',
+      }
+    },
+    invalid_cross_origin_on_before_load (args) {
+      return {
+        message: stripIndent`${cmd('reload')} was called on a cross origin site with an \`onBeforeLoad\` callback. \`onBeforeLoad\` callbacks can only be used with same origin sites.
+        If you wish to specify an \`onBeforeLoad\` callback please use the \`cy.origin\` command to setup a \`window:before:load\` event prior to reloading the cross origin site.
+
+        \`cy.origin('${args.autLocation.origin}', () => {\`
+        \`  cy.on('window:before:load', () => {\`
+        \`    <onBeforeLoad callback goes here>\`
+        \`  })\`
+        \`})\`
+        \`cy.reload()\`
+      `,
+        docsUrl: 'https://on.cypress.io/reload',
+      }
+    },
   },
 
   request: {

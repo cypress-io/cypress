@@ -1922,13 +1922,20 @@ declare namespace Cypress {
      * Reload the page.
      *
      * @see https://on.cypress.io/reload
-     * @param {Partial<Loggable & Timeoutable>} options Pass in an options object to modify the default behavior of cy.reload()
+     * @param {Partial<ReloadOptions>} options Pass in an options object to modify the default behavior of cy.reload()
      * @example
      *    // Reload the page, do not log it in the command log and timeout after 15s
      *    cy.visit('http://localhost:3000/admin')
      *    cy.reload({log: false, timeout: 15000})
+     * @example
+     *    // Reload the page, stubbing window properties in the onBeforeLoad callback
+     *    cy.reload({
+     *      onBeforeLoad (win) {
+     *        win.fetch = myStubbedFetch
+     *      },
+     *    })
      */
-    reload(options: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
+    reload(options: Partial<ReloadOptions>): Chainable<AUTWindow>
     /**
      * Reload the page without cache
      *
@@ -1945,13 +1952,13 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/reload
      * @param {Boolean} forceReload Whether to reload the current page without using the cache. true forces the reload without cache.
-     * @param {Partial<Loggable & Timeoutable>} options Pass in an options object to modify the default behavior of cy.reload()
+     * @param {Partial<ReloadOptions>} options Pass in an options object to modify the default behavior of cy.reload()
      * @example
      *    // Reload the page without using the cache, do not log it in the command log and timeout after 15s
      *    cy.visit('http://localhost:3000/admin')
      *    cy.reload(true, {log: false, timeout: 15000})
      */
-    reload(forceReload: boolean, options: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
+    reload(forceReload: boolean, options: Partial<ReloadOptions>): Chainable<AUTWindow>
 
     /**
      * Make an HTTP GET request.
@@ -4017,6 +4024,25 @@ declare namespace Cypress {
      * @default true
      */
     release: boolean
+  }
+
+  /**
+   * Options that control how `cy.reload()` behaves.
+   */
+  interface ReloadOptions extends Loggable, Timeoutable {
+    /**
+     * Called before your page has loaded all of its resources.
+     *
+     * @param {AUTWindow} contentWindow the remote page's window object
+     */
+    onBeforeLoad(win: AUTWindow): void
+
+    /**
+     * Called once your page has fired its load event.
+     *
+     * @param {AUTWindow} contentWindow the remote page's window object
+     */
+    onLoad(win: AUTWindow): void
   }
 
   /**

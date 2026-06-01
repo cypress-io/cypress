@@ -642,6 +642,24 @@ namespace CypressAUTWindowTests {
     win // $ExpectType AUTWindow
   })
 
+  cy.reload({
+    onBeforeLoad (win) {
+      win // $ExpectType AUTWindow
+    },
+    onLoad (win) {
+      win // $ExpectType AUTWindow
+    },
+  })
+
+  cy.reload(true, {
+    onBeforeLoad (win) {
+      win // $ExpectType AUTWindow
+    },
+    onLoad (win) {
+      win // $ExpectType AUTWindow
+    },
+  })
+
   cy.visit('https://google.com').then((win) => {
     win // $ExpectType AUTWindow
   })

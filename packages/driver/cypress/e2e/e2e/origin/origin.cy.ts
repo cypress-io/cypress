@@ -137,6 +137,48 @@ describe('cy.origin', { browser: '!webkit' }, () => {
         },
       })
     })
+
+    it('errors if you try to use onLoad when reloading a cross origin page', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`\`cy.reload()\` was called on a cross origin site with an \`onLoad\` callback. \`onLoad\` callbacks can only be used with same origin sites.
+          If you wish to specify an \`onLoad\` callback please use the \`cy.origin\` command to setup a \`window:load\` event prior to reloading the cross origin site.`)
+
+        expect(err.message).to.include(`\`cy.origin('http://www.idp.com:3500', () => {\``)
+        expect(err.message).to.include(`\`  cy.on('window:load', () => {\``)
+        expect(err.message).to.include(`  \`    <onLoad callback goes here>\``)
+        expect(err.message).to.include(`  \`cy.reload()\``)
+
+        done()
+      })
+
+      cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
+      cy.reload({
+        onLoad: () => {
+          cy.log('onLoad')
+        },
+      })
+    })
+
+    it('errors if you try to use onBeforeLoad when reloading a cross origin page', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include(`\`cy.reload()\` was called on a cross origin site with an \`onBeforeLoad\` callback. \`onBeforeLoad\` callbacks can only be used with same origin sites.
+        If you wish to specify an \`onBeforeLoad\` callback please use the \`cy.origin\` command to setup a \`window:before:load\` event prior to reloading the cross origin site.`)
+
+        expect(err.message).to.include(`\`cy.origin('http://www.idp.com:3500', () => {\``)
+        expect(err.message).to.include(`\`  cy.on('window:before:load', () => {\``)
+        expect(err.message).to.include(`  \`    <onBeforeLoad callback goes here>\``)
+        expect(err.message).to.include(`  \`cy.reload()\``)
+
+        done()
+      })
+
+      cy.visit('http://www.idp.com:3500/fixtures/auth/index.html')
+      cy.reload({
+        onBeforeLoad: () => {
+          cy.log('onBeforeLoad')
+        },
+      })
+    })
   })
 
   context('withBeforeEach', () => {

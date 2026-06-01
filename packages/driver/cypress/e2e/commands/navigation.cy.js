@@ -95,6 +95,69 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
+    it('invokes onLoad callback with cy context', function (done) {
+      const ctx = this
+
+      cy.reload({
+        onLoad (contentWindow) {
+          const thisValue = this === ctx
+
+          expect(thisValue).to.be.true
+          expect(!!contentWindow.Cypress).to.be.true
+
+          done()
+        },
+      })
+    })
+
+    it('invokes onBeforeLoad callback with cy context', function (done) {
+      const ctx = this
+
+      cy.reload({
+        onBeforeLoad (contentWindow) {
+          const thisValue = this === ctx
+
+          expect(thisValue).to.be.true
+          expect(!!contentWindow.Cypress).to.be.true
+
+          done()
+        },
+      })
+    })
+
+    it('invokes onBeforeLoad before onLoad', () => {
+      const order = []
+
+      cy.reload({
+        onBeforeLoad () {
+          order.push('onBeforeLoad')
+        },
+        onLoad () {
+          order.push('onLoad')
+        },
+      }).then(() => {
+        expect(order).to.deep.eq(['onBeforeLoad', 'onLoad'])
+      })
+    })
+
+    it('invokes onBeforeLoad and onLoad with forceReload + options', () => {
+      const onBeforeLoad = cy.stub()
+      const onLoad = cy.stub()
+
+      cy.reload(true, { onBeforeLoad, onLoad }).then(() => {
+        expect(onBeforeLoad).to.be.calledOnce
+        expect(onLoad).to.be.calledOnce
+      })
+    })
+
+    it('does not error without onBeforeLoad/onLoad callbacks', () => {
+      cy.reload().then(() => {
+        const prev = cy.state('current').get('prev')
+
+        expect(prev.get('name')).to.eq('reload')
+      })
+    })
+
     describe('errors', {
       defaultCommandTimeout: 100,
     }, () => {
