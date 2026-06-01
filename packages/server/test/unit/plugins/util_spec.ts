@@ -1,6 +1,6 @@
-require('../../spec_helper')
-
-const util = require(`../../../lib/plugins/util`)
+import '../../spec_helper'
+import path from 'path'
+import * as util from '../../../lib/plugins/util'
 
 describe('lib/plugins/util', () => {
   context('#wrapIpc', () => {
@@ -167,6 +167,44 @@ describe('lib/plugins/util', () => {
         },
         message: 'Error compiling file\n/my/project/root/cypress.config.ts:12:15: ERROR: Unexpected ","',
         originalMessage: 'Transform failed with 1 error:\n/my/project/root/cypress.config.ts:12:15: ERROR: Unexpected ","',
+      })
+    })
+  })
+
+  context('#buildErrorLocationFromConfigFileError', () => {
+    const projectRoot = path.join(__dirname, '../../../../../system-tests/projects/config-with-import-error')
+    const configFilePath = path.join(projectRoot, 'cypress.config.js')
+
+    it('parses the config file frame from the stack when present', async () => {
+      const err = {
+        name: 'Error',
+        message: 'Cannot find module \'./webpack.config.js\'',
+        stack: `Error: Cannot find module './webpack.config.js'
+    at node:internal/modules/cjs/loader:1383:15
+    at Object.<anonymous> (${configFilePath}:3:23)`,
+      }
+
+      expect(await util.buildErrorLocationFromConfigFileError(err, configFilePath, projectRoot)).to.eql({
+        filePath: 'cypress.config.js',
+        line: 3,
+        column: 23,
+      })
+    })
+
+    it('falls back to requireStack when node 24 omits the config file from the stack', async () => {
+      const err = {
+        name: 'Error',
+        message: 'Cannot find module \'./webpack.config.js\'',
+        requireStack: [configFilePath, `${projectRoot}/[eval]`],
+        stack: `Error: Cannot find module './webpack.config.js'
+    at node:internal/modules/cjs/loader:1500:15
+    at T._resolveFilename (file:///my/project/root/node_modules/tsx/dist/register-CqMfTiWi.mjs:2:14889)`,
+      }
+
+      expect(await util.buildErrorLocationFromConfigFileError(err, configFilePath, projectRoot)).to.eql({
+        filePath: 'cypress.config.js',
+        line: 3,
+        column: 23,
       })
     })
   })

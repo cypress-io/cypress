@@ -1,12 +1,18 @@
-const _ = require('lodash')
-const EE = require('events')
-const util = require('../util')
+import _ from 'lodash'
+import EE from 'events'
+import * as util from '../util'
+import type { PluginChildIpc, PluginInvokeIds, PreprocessorFileObject } from './types'
 
-let fileObjects = {}
+let fileObjects: Record<string, PreprocessorFileObject> = {}
 
 let wrappedClose = false
 
-const wrap = (ipc, invoke, ids, args) => {
+export const wrap = (
+  ipc: PluginChildIpc,
+  invoke: (eventId: number, args?: any[]) => any,
+  ids: PluginInvokeIds,
+  args: any[],
+): void => {
   const file = _.pick(args[0], 'filePath', 'outputPath', 'shouldWatch')
   let childFile = fileObjects[file.filePath]
 
@@ -14,7 +20,7 @@ const wrap = (ipc, invoke, ids, args) => {
   // TODO: Move this to RunPlugins so we don't need to guard this way
   if (!wrappedClose) {
     wrappedClose = true
-    ipc.on('preprocessor:close', (filePath) => {
+    ipc.on('preprocessor:close', (filePath?: string) => {
       // no filePath means close all
       if (!filePath) {
         Object.values(fileObjects).forEach((_child) => {
@@ -38,7 +44,7 @@ const wrap = (ipc, invoke, ids, args) => {
   // the emitter methods don't come through from the parent process
   // so we have to re-apply them here
   if (!childFile) {
-    childFile = fileObjects[file.filePath] = _.extend(new EE(), file)
+    childFile = fileObjects[file.filePath] = _.extend(new EE(), file) as PreprocessorFileObject
     childFile.on('rerun', () => {
       ipc.send('preprocessor:rerun', file.filePath)
     })
@@ -47,17 +53,12 @@ const wrap = (ipc, invoke, ids, args) => {
   util.wrapChildPromise(ipc, invoke, ids, [childFile])
 }
 
-module.exports = {
-  wrap,
+export const _clearFiles = (): void => {
+  for (const file in fileObjects) {
+    delete fileObjects[file]
+  }
+}
 
-  // for testing purposes
-  _clearFiles: () => {
-    for (let file in fileObjects) {
-      delete fileObjects[file]
-    }
-  },
-
-  _getFiles: () => {
-    return fileObjects
-  },
+export const _getFiles = (): Record<string, PreprocessorFileObject> => {
+  return fileObjects
 }
