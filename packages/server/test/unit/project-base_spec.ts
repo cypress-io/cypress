@@ -416,6 +416,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     })
 
     describe('isInteractive', () => {
+      afterEach(function () {
+        delete process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+      })
+
       it('returns true in open mode', function () {
         this.project.cfg.isTextTerminal = false
 
