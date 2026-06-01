@@ -1,16 +1,26 @@
 process.title = 'Cypress: Config Manager'
-const os = require('os')
-const pDefer = require('p-defer')
-const Debug = require('debug')
+
+import os from 'os'
+import pDefer from 'p-defer'
+import Debug from 'debug'
+import { telemetry, OTLPTraceExporterIpc, decodeTelemetryContext } from '@packages/telemetry'
+import minimist from 'minimist'
+import fs from 'fs'
+import * as util from '../util'
+import { gracefulify } from 'graceful-fs'
+import { suppress as suppressWarnings } from '../../util/suppress_warnings'
+import { run as runRequireAsyncChild } from './run_require_async_child'
+
 const debug = Debug('cypress:lifecycle:require_async_child')
 
-const { telemetry, OTLPTraceExporterIpc, decodeTelemetryContext } = require('@packages/telemetry')
-
-const { file, projectRoot, telemetryCtx } = require('minimist')(process.argv.slice(2))
+const argv = minimist(process.argv.slice(2))
+const file = argv.file as string
+const projectRoot = argv.projectRoot as string
+const telemetryCtx = argv.telemetryCtx as string | undefined
 
 debug('initializing telemetry')
 
-const { context, version } = decodeTelemetryContext(telemetryCtx)
+const { context, version } = decodeTelemetryContext(telemetryCtx ?? '')
 
 const exporter = new OTLPTraceExporterIpc()
 
@@ -21,16 +31,15 @@ if (version && context) {
 const span = telemetry.startSpan({ name: 'child:process', active: true })
 
 debug('child:process span initialized')
-require('../../util/suppress_warnings').suppress()
+suppressWarnings()
 
-require('graceful-fs').gracefulify(require('fs'))
-const util = require('../util')
-const ipc = util.wrapIpc(process)
+gracefulify(fs)
+const ipc = util.wrapIpc(process as unknown as util.WrappedIpcProcess)
 
 exporter.attachIPC(ipc)
 
-let disconnection = null
-let willDisconnect = pDefer()
+let disconnection: Promise<void> | null = null
+const willDisconnect = pDefer<void>()
 
 process.on('disconnect', async () => {
   try {
@@ -67,7 +76,7 @@ ipc.on('main:process:will:disconnect', async () => {
     debug('received signal', signal)
     await Promise.race([
       willDisconnect.promise,
-      new Promise((resolve) => {
+      new Promise<void>((resolve) => {
         setTimeout(() => {
           debug('timeout waiting for main:process:will:disconnect signal')
           resolve()
@@ -79,8 +88,6 @@ ipc.on('main:process:will:disconnect', async () => {
   })
 })
 
-const run = require('./run_require_async_child')
-
 debug('run')
-run(ipc, file, projectRoot)
+runRequireAsyncChild(ipc, file, projectRoot)
 debug('run complete')

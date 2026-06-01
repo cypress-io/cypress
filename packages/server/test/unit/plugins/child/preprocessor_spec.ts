@@ -1,9 +1,7 @@
-require('../../../spec_helper')
-
-const EE = require('events')
-
-const util = require(`../../../../lib/plugins/util`)
-const preprocessor = require(`../../../../lib/plugins/child/preprocessor`)
+import '../../../spec_helper'
+import EE from 'events'
+import * as util from '../../../../lib/plugins/util'
+import * as preprocessor from '../../../../lib/plugins/child/preprocessor'
 
 // NOTE: todo come back to this
 describe.skip('lib/plugins/child/preprocessor', () => {

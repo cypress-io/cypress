@@ -1,7 +1,7 @@
-require('../../../spec_helper')
+import '../../../spec_helper'
+import _ from 'lodash'
 
-const _ = require('lodash')
-const validateEvent = require('../../../../lib/plugins/child/validate_event')
+import { validateEvent } from '../../../../lib/plugins/child/validate_event'
 
 const events = [
   ['after:browser:launch', 'a function', () => {}],

@@ -1,14 +1,12 @@
-const md5 = require('md5')
-const { fs } = require('memfs')
-const path = require('path')
-const webpack = require('webpack')
-const VirtualModulesPlugin = require('webpack-virtual-modules')
+import md5 from 'md5'
+import { fs } from 'memfs'
+import path from 'path'
+import webpack from 'webpack'
+import VirtualModulesPlugin from 'webpack-virtual-modules'
+import * as resolve from '../../util/resolve'
+import type { CrossOriginCallbackArgs } from './types'
 
-const resolve = require('../../util/resolve')
-
-fs.join = path.join
-
-const processCallback = ({ file, fn, projectRoot }) => {
+export const processCallback = ({ file, fn, projectRoot }: CrossOriginCallbackArgs): Promise<string> => {
   const { getFullWebpackOptions } = require('@cypress/webpack-batteries-included-preprocessor')
 
   const source = fn.replace(/Cypress\.require/g, 'require')
@@ -42,10 +40,11 @@ const processCallback = ({ file, fn, projectRoot }) => {
 
   const compiler = webpack(modifiedWebpackOptions)
 
-  compiler.outputFileSystem = fs
+  // memfs is compatible at runtime but its types don't match webpack's OutputFileSystem
+  compiler.outputFileSystem = fs as unknown as webpack.Compiler['outputFileSystem']
 
-  return new Promise((resolve, reject) => {
-    const handle = (err) => {
+  return new Promise((resolvePromise, reject) => {
+    const handle = (err?: Error | null) => {
       if (err) {
         return reject(err)
       }
@@ -55,13 +54,9 @@ const processCallback = ({ file, fn, projectRoot }) => {
       // eslint-disable-next-line no-restricted-syntax
       const result = fs.readFileSync(outputPath).toString()
 
-      resolve(result)
+      resolvePromise(result)
     }
 
     compiler.run(handle)
   })
-}
-
-module.exports = {
-  processCallback,
 }
