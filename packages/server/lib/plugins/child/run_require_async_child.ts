@@ -237,6 +237,8 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
         if (firstError?.location?.file) {
           loadErr.compilerErrorLocation = { filePath: firstError.location.file, line: Number(firstError.location.line), column: Number(firstError.location.column) }
         }
+      } else {
+        loadErr.compilerErrorLocation = await util.buildErrorLocationFromConfigFileError(loadErr, file, projectRoot) ?? undefined
       }
 
       ipc.send('loadConfig:error', util.serializeError(
