@@ -5,6 +5,17 @@
 
 - Added [Bun](https://bun.sh) as a recognized package manager. The `cypress` npm package can now be installed and invoked with Bun (for example `bun run cypress open` or `bun run cypress run`). Addresses [#28962](https://github.com/cypress-io/cypress/issues/28962). Addressed in [#32580](https://github.com/cypress-io/cypress/pull/32580).
 - Improved CI environment detection and commit metadata capture for Cypress Cloud recorded runs within Argo CD and Argo Workflows. Addressed in [#33932](https://github.com/cypress-io/cypress/pull/33932).
+- [`Cypress.expose()`](https://on.cypress.io/expose) values can now be overridden per suite or test via test config overrides (for example, `describe()`, `context()`, `it()`, or `test()`) using `{ expose: { key: value } }`. Suite- and test-level overrides are merged, with test-level keys taking precedence; override keys are applied at test start and restored after each test without affecting unrelated values set in hooks. Addresses [#33356](https://github.com/cypress-io/cypress/issues/33356). Addressed in [#33925](https://github.com/cypress-io/cypress/pull/33925).
+
+**Bugfixes:**
+
+- Fixed an issue where invalid `CYPRESS_env` or `CYPRESS_expose` environment variables (for example, a plain string instead of a JSON object) were silently ignored with no warning. Cypress now emits a warning explaining that a JSON object is required and points to the `--env` or `--expose` CLI flags for setting individual values. Fixes [#29682](https://github.com/cypress-io/cypress/issues/29682) and [#19508](https://github.com/cypress-io/cypress/issues/19508). Fixed in [#33945](https://github.com/cypress-io/cypress/pull/33945).
+- Fixed an issue where HTML markup passed as a Sinon spy argument (for example `expect(spy).to.have.been.calledOnceWith('<svg>...</svg>')`) was rendered as live DOM in the Cypress command log, truncating the assertion message and breaking the log layout. The assertion message is now HTML-escaped and the markup is shown as literal text. Fixes [#33416](https://github.com/cypress-io/cypress/issues/33416). Fixed in [#33941](https://github.com/cypress-io/cypress/pull/33941).
+- Fixed an issue where a recorded Chrome or Electron run could hang for the duration of the spec timeout when the renderer crashed mid-spec, instead of failing the affected spec and continuing. Fixed in [#33943](https://github.com/cypress-io/cypress/pull/33943).
+
+**Dependency Updates:**
+
+- Upgraded `tsx` from `4.20.6` to `4.22.4`. Its bundled `esbuild` Go binary no longer reports [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in security scans, and loading TypeScript config files no longer emits the Node.js `[DEP0205] module.register() is deprecated` warning. Fixes [#33954](https://github.com/cypress-io/cypress/issues/33954) and [#33744](https://github.com/cypress-io/cypress/issues/33744).
 
 ## 15.16.0
 

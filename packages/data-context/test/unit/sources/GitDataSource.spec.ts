@@ -24,10 +24,10 @@ describe('GitDataSource', () => {
 
     if (process.env.CI) {
       // need to set a user on CI
-      await Promise.all([
-        git.addConfig('user.name', 'Test User', true, 'global'),
-        git.addConfig('user.email', 'test-user@example.com', true, 'global'),
-      ])
+      // run sequentially: concurrent writes to ~/.gitconfig race on the
+      // .gitconfig.lock file and intermittently fail with "could not lock"
+      await git.addConfig('user.name', 'Test User', true, 'global')
+      await git.addConfig('user.email', 'test-user@example.com', true, 'global')
     }
 
     await git.init()

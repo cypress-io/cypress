@@ -1,3 +1,5 @@
+# [@cypress/webpack-dev-server-v5.6.2](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.6.1...@cypress/webpack-dev-server-v5.6.2) (2026-05-31)
+
 # [@cypress/webpack-dev-server-v5.6.1](https://github.com/cypress-io/cypress/compare/@cypress/webpack-dev-server-v5.6.0...@cypress/webpack-dev-server-v5.6.1) (2026-05-09)
 
 

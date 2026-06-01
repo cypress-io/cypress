@@ -36,7 +36,7 @@
     "mock-require": "3.0.3",
     "semantic-release": "22.0.12",
     "strip-ansi": "6.0.1",
-    "tsx": "4.20.6",
+    "tsx": "4.22.4",
     "typescript": "~5.4.5",
     "vitest": "^3.2.4",
     "webpack": "^5.39.0"

@@ -404,6 +404,7 @@ system-tests/lib/validations
 # IDE files
 .cursor/*
 !.cursor/BUGBOT.md
+!.cursor/skills
 
 settings.local.json
 

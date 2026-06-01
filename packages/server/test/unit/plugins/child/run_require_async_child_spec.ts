@@ -1,6 +1,6 @@
-require('../../../spec_helper')
+import '../../../spec_helper'
 
-const runRequireAsyncChild = require('../../../../lib/plugins/child/run_require_async_child')
+import { run as runRequireAsyncChild } from '../../../../lib/plugins/child/run_require_async_child'
 
 describe('lib/plugins/child/run_require_async_child', () => {
   beforeEach(function () {

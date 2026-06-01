@@ -229,6 +229,20 @@ export class CriClient implements ICriClient {
     return this._crashed
   }
 
+  /**
+   * Synchronously mark this CRI client as crashed. Used to propagate a crash
+   * notification from a sibling client (e.g. the page client to the protocol,
+   * cy-prompt, and studio clones) before any of them can race against the
+   * separate `Target.targetCrashed` event delivery on their own connections.
+   *
+   * Without this, the sibling client may not yet have observed the crash event
+   * on its own websocket and a subsequent `send()` will hang forever because
+   * the renderer is dead and will never respond.
+   */
+  public markCrashed = () => {
+    this._crashed = true
+  }
+
   public connect = async () => {
     debug('connecting %o', { connected: this._connected, target: this.targetId })
 

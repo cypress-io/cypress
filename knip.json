@@ -115,7 +115,6 @@
         "lib/capture.ts",
         "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
-        "lib/plugins/child/default_plugins_file.js",
         "lib/privileged-commands/privileged-channel.js",
         "lib/util/**/*.{ts,js}",
         "test/**/*.{ts,js}"
@@ -780,12 +779,6 @@
       "exports"
     ],
     "packages/server/lib/cloud/protocol.ts": [
-      "exports"
-    ],
-    "packages/server/lib/plugins/child/cross_origin.js": [
-      "exports"
-    ],
-    "packages/server/lib/plugins/child/dev-server.js": [
       "exports"
     ],
     "packages/server/lib/video_capture.ts": [

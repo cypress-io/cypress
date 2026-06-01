@@ -21,6 +21,7 @@ import {
 } from '../browser'
 import { hideKeys, setUrls, coerce } from '../utils'
 import { options } from '../options'
+import { isPlainObject } from '../validation'
 
 const debug = Debug('cypress:config:project:utils')
 
@@ -88,6 +89,10 @@ const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]
 
+// CYPRESS_env and CYPRESS_expose must be JSON objects. Invalid strings are coerced
+// then spread via _.extend, producing indexed keys that pass isPlainObject validation.
+const PLAIN_OBJECT_CONFIG_KEYS_FROM_ENV = new Set(['env', 'expose'])
+
 const isCypressEnvLike = (key: string) => {
   return _.chain(key)
   .invoke('toUpperCase')
@@ -123,6 +128,17 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
     const cfgKey = matchesConfigKey(key)
 
     if (cfgKey) {
+      if (PLAIN_OBJECT_CONFIG_KEYS_FROM_ENV.has(cfgKey)) {
+        const validationResult = isPlainObject(cfgKey, val)
+
+        if (validationResult !== true) {
+          errors.warning('INVALID_CYPRESS_ENV_OVERRIDE', cfgKey, val)
+          memo.push(key)
+
+          return memo
+        }
+      }
+
       // only change the value if it hasn't been
       // set by the CLI. override default + config
       if (resolved[cfgKey] !== 'cli') {
