@@ -13,6 +13,7 @@
 - Fixed an issue where HTML markup passed as a Sinon spy argument (for example `expect(spy).to.have.been.calledOnceWith('<svg>...</svg>')`) was rendered as live DOM in the Cypress command log, truncating the assertion message and breaking the log layout. The assertion message is now HTML-escaped and the markup is shown as literal text. Fixes [#33416](https://github.com/cypress-io/cypress/issues/33416). Fixed in [#33941](https://github.com/cypress-io/cypress/pull/33941).
 - Fixed an issue where a recorded Chrome or Electron run could hang for the duration of the spec timeout when the renderer crashed mid-spec, instead of failing the affected spec and continuing. Fixed in [#33943](https://github.com/cypress-io/cypress/pull/33943).
 - Fixed an issue where the version of `WebKit` was incorrectly displayed as version 0 when `playwright` version `1.60.0` was installed. Fixes [#33953](https://github.com/cypress-io/cypress/issues/33953).
+- Fixed an issue where [`cy.prompt()`](https://on.cypress.io/prompt) and Cypress Studio could intermittently fail to load with a "Failed to publish bundle from staging" error — most often on Windows — when their downloaded bundle was reused across runs. Cypress now verifies and reuses the cached bundle instead of re-downloading and re-publishing it on every run. Fixed in [#33979](https://github.com/cypress-io/cypress/pull/33979).
 
 **Dependency Updates:**
 
