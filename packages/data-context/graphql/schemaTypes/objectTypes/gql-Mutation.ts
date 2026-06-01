@@ -545,6 +545,7 @@ export const mutation = mutationType({
         })
 
         ctx.emitter.toApp()
+        ctx.emitter.toLaunchpad()
 
         return true
       },

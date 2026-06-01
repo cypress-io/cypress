@@ -122,11 +122,13 @@ export class AuthActions {
     this.#cancelActiveLogin = null
 
     if (user.projectSlug) {
+      const projectSlug = user.projectSlug
+
       try {
-        await this.ctx.actions.project.setProjectIdInConfigFile(user.projectSlug)
+        await this.ctx.actions.project.setProjectIdInConfigFile(projectSlug)
       } catch {
         this.ctx.update((coreData) => {
-          coreData.autoProvisionedProjectId = user.projectSlug ?? null
+          coreData.autoProvisionedProjectId = projectSlug
         })
 
         this.ctx.emitter.toApp()
