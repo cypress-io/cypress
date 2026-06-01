@@ -209,20 +209,21 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const wkBrowserVersionRe = /BROWSER_VERSION\s*=\s*(['"])(?<version>[\d.]+)\1/gm
-
 const getWebKitBrowserVersion = async () => {
   try {
-    // this seems to be the only way to accurately capture the WebKit version - it's not exported, and invoking the webkit binary with `--version` does not give the correct result
-    // after launching the browser, this is available at browser.version(), but we don't have a browser instance til later
     const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
-    const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
-    const wkBrowserContents = await fs.readFile(wkBrowserPath, 'utf8')
-    const result = wkBrowserVersionRe.exec(wkBrowserContents)
+    const browsersJsonPath = path.join(pwCorePath, 'browsers.json')
+    const browsersJsonContents = await fs.readFile(browsersJsonPath, 'utf8')
+    const browsersJson = JSON.parse(browsersJsonContents)
+    const webkitEntry = browsersJson.browsers.find((b) => b.name === 'webkit')
 
-    if (!result || !result.groups!.version) return '0'
+    if (!webkitEntry || !webkitEntry.browserVersion) {
+      debug('Could not find webkit browserVersion in playwright-core browsers.json %o', { webkitEntry })
 
-    return result.groups!.version
+      return '0'
+    }
+
+    return webkitEntry.browserVersion
   } catch (err) {
     debug('Error detecting WebKit browser version %o', err)
 

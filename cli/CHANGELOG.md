@@ -13,6 +13,7 @@
 - Fixed an issue where HTML markup passed as a Sinon spy argument (for example `expect(spy).to.have.been.calledOnceWith('<svg>...</svg>')`) was rendered as live DOM in the Cypress command log, truncating the assertion message and breaking the log layout. The assertion message is now HTML-escaped and the markup is shown as literal text. Fixes [#33416](https://github.com/cypress-io/cypress/issues/33416). Fixed in [#33941](https://github.com/cypress-io/cypress/pull/33941).
 - Fixed an issue where a recorded Chrome or Electron run could hang for the duration of the spec timeout when the renderer crashed mid-spec, instead of failing the affected spec and continuing. Fixed in [#33943](https://github.com/cypress-io/cypress/pull/33943).
 - Fixed an issue where `cypress run` could crash with `TypeError: The "path" argument must be of type string. Received undefined` when the project path was not resolved (for example, due to an unset CI environment variable) or when `--browser` was passed without a value. Cypress now falls back to the current working directory in the first case and emits a clear "browser not found" error in the second. Fixes [#15418](https://github.com/cypress-io/cypress/issues/15418). Fixed in [#33958](https://github.com/cypress-io/cypress/pull/33958).
+- Fixed an issue where the version of `WebKit` was incorrectly displayed as version 0 when `playwright` version `1.60.0` was installed. Fixes [#33953](https://github.com/cypress-io/cypress/issues/33953).
 
 **Dependency Updates:**
 

@@ -1,11 +1,10 @@
-require('../../spec_helper')
+import '../../spec_helper'
 
-const Fixtures = require('@tooling/system-tests')
-const path = require('path')
-const appData = require(`../../../lib/util/app_data`)
-
-const plugins = require(`../../../lib/plugins`)
-const preprocessor = require(`../../../lib/plugins/preprocessor`).default
+import * as Fixtures from '@tooling/system-tests'
+import path from 'path'
+import * as appData from '../../../lib/util/app_data'
+import * as plugins from '../../../lib/plugins'
+import preprocessor from '../../../lib/plugins/preprocessor'
 
 describe('lib/plugins/preprocessor', () => {
   beforeEach(function () {

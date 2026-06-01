@@ -1,13 +1,10 @@
-require('../../../spec_helper')
-
-const _ = require('lodash')
-
-const preprocessor = require('../../../../lib/plugins/child/preprocessor')
-const util = require('../../../../lib/plugins/util')
-const resolve = require('../../../../lib/util/resolve')
-const browserUtils = require('../../../../lib/browsers/utils').default
-const { RunPlugins } = require('../../../../lib/plugins/child/run_plugins')
-const crossOrigin = require('../../../../lib/plugins/child/cross_origin')
+import _ from 'lodash'
+import * as preprocessor from '../../../../lib/plugins/child/preprocessor'
+import * as util from '../../../../lib/plugins/util'
+import * as resolve from '../../../../lib/util/resolve'
+import browserUtils from '../../../../lib/browsers/utils'
+import { RunPlugins } from '../../../../lib/plugins/child/run_plugins'
+import * as crossOrigin from '../../../../lib/plugins/child/cross_origin'
 
 describe('lib/plugins/child/run_plugins', () => {
   let ipc
@@ -300,7 +297,7 @@ describe('lib/plugins/child/run_plugins', () => {
         expect(util.wrapChildPromise).to.be.called
         const result = util.wrapChildPromise.lastCall.args[1]('1')
 
-        expect(result.replace(/\s+/g, '')).to.equal('\'a:third:task\'(){return\'foo\'}')
+        expect(result.replace(/\s+/g, '')).to.equal('\'a:third:task\'(){return\'foo\';}')
       })
 
       it('returns an empty string if event handler cannot be found', () => {

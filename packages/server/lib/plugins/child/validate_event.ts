@@ -1,29 +1,36 @@
-const _ = require('lodash')
+import _ from 'lodash'
+import type { ValidateEventResult } from './types'
 
-const createErrorResult = (errorMessage) => {
+const createErrorResult = (errorMessage: string): ValidateEventResult => {
   return {
     isValid: false,
     error: new Error(errorMessage),
   }
 }
 
-const createSuccessResult = () => {
+const createSuccessResult = (): ValidateEventResult => {
   return { isValid: true }
 }
 
-const validate = (func, arg, errorMessage) => {
+const validate = (
+  func: (arg: unknown) => boolean,
+  arg: unknown,
+  errorMessage: string,
+): ValidateEventResult => {
   return func(arg) ? createSuccessResult() : createErrorResult(errorMessage)
 }
 
-const isFunction = (event, handler) => {
+const isFunction = (event: string, handler: unknown): ValidateEventResult => {
   return validate(_.isFunction, handler, `The handler for the event \`${event}\` must be a function`)
 }
 
-const isObject = (event, handler) => {
+const isObject = (event: string, handler: unknown): ValidateEventResult => {
   return validate(_.isPlainObject, handler, `The handler for the event \`${event}\` must be an object`)
 }
 
-const eventValidators = {
+type EventValidator = (event: string, handler: unknown, config?: Cypress.PluginConfigOptions) => ValidateEventResult
+
+const eventValidators: Record<string, EventValidator> = {
   '_get:task:body': isFunction,
   '_get:task:keys': isFunction,
   '_process:cross:origin:callback': isFunction,
@@ -39,14 +46,19 @@ const eventValidators = {
   'task': isObject,
 }
 
-const validateEvent = (event, handler, config, errConstructorFn) => {
+export const validateEvent = (
+  event: string,
+  handler: unknown,
+  config?: Cypress.PluginConfigOptions,
+  errConstructorFn?: () => void,
+): ValidateEventResult => {
   const validator = eventValidators[event]
 
   if (!validator) {
-    const userEvents = _.reject(_.keys(eventValidators), (event) => {
+    const userEvents = _.reject(_.keys(eventValidators), (registeredEvent) => {
       // we're currently not documenting after:browser:launch, so it shouldn't
       // appear in the list of valid events
-      return event.startsWith('_') || event === 'after:browser:launch'
+      return registeredEvent.startsWith('_') || registeredEvent === 'after:browser:launch'
     })
 
     const error = new Error(`invalid event name registered: ${event}`)
@@ -72,5 +84,3 @@ const validateEvent = (event, handler, config, errConstructorFn) => {
 
   return result
 }
-
-module.exports = validateEvent
