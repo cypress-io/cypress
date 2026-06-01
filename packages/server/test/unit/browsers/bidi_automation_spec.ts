@@ -2272,7 +2272,7 @@ describe('lib/browsers/bidi_automation', () => {
 
           bidiAutomationInstance.setTopLevelContextId('123')
 
-          const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', undefined)
+          const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})
 
           expect(returnValue).to.be.undefined
           expect(mockWebdriverClient.inputPerformActions).to.have.been.calledOnce
@@ -2301,7 +2301,7 @@ describe('lib/browsers/bidi_automation', () => {
         it('fails gracefully if no top-level context is initialized', async () => {
           bidiAutomationInstance.setTopLevelContextId(undefined)
 
-          await expect(bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', undefined)).to.be.rejectedWith('Cannot perform user gesture: no top-level context initialized')
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})).to.be.rejectedWith('Cannot perform user gesture: no top-level context initialized')
         })
       })
 

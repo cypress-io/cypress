@@ -16,7 +16,7 @@ export const initVideoRecorder = async (Cypress) => {
     // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1729889
     // @see https://github.com/cypress-io/cypress/issues/18415
     try {
-      await Cypress.automation('perform:user:gesture')
+      await Cypress.automation('perform:user:gesture', {})
     } catch {
       // If the gesture can't be performed, getUserMedia is likely to fail below; that error is
       // surfaced there. We don't want a failed gesture to throw out of video recorder setup.
