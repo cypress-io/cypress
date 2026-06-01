@@ -1041,6 +1041,7 @@ export interface ReadyOptions {
   browser: string
   browsers?: FoundBrowser[]
   ciBuildId: string
+  cwd?: string
   exit: boolean
   group: string
   headed: boolean
@@ -1048,7 +1049,7 @@ export interface ReadyOptions {
   onError?: (err: Error) => void
   outputPath: string
   parallel: boolean
-  projectRoot: string
+  projectRoot?: string
   quiet: boolean
   record: boolean
   socketId: string
@@ -1072,12 +1073,13 @@ async function ready (options: ReadyOptions) {
     quiet: false,
   })
 
-  // projectRoot can be undefined when a CI environment variable used as the
-  // --key value is unset, causing Commander to consume the --project token as
-  // the key value and leave the project unresolved. Fall back to cwd here
-  // rather than in args.ts, which would incorrectly set currentProject in
-  // global open mode and bypass the Launchpad project picker.
-  const projectRoot: string = options.projectRoot ?? String(options.cwd ?? process.cwd())
+  // projectRoot can be undefined when --project/--run-project is omitted, or when
+  // argv parsing leaves project as a boolean (for example `--project` with no
+  // path). Fall back to cwd here rather than in args.ts, which would
+  // incorrectly set currentProject in global open mode and bypass the Launchpad
+  // project picker.
+  options.projectRoot = options.projectRoot ?? String(options.cwd ?? process.cwd())
+  const projectRoot = options.projectRoot
   const { record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
   assert(socketId)
