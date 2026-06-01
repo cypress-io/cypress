@@ -149,10 +149,13 @@ describe('lib/browsers/firefox', () => {
         expect(videoApi.useFfmpegVideoController).to.have.been.calledWith({ webmInput: true })
         expect(videoApi.onProjectCaptureVideoFrames).to.have.been.calledWith(writeVideoFrame)
 
-        // the new spec's frame handler must be registered *after* navigation unloads the previous
-        // page, otherwise trailing frames from the finished spec's MediaRecorder bleed into the new
-        // spec's video stream.
-        expect(videoApi.useFfmpegVideoController).to.have.been.calledAfter(wdInstance.browsingContextNavigate)
+        // the ffmpeg controller must be created *before* navigation so the per-spec videoRecording
+        // object has its controller set in time for compression — a fast spec could otherwise
+        // finish before the async controller is ready.
+        expect(videoApi.useFfmpegVideoController).to.have.been.calledBefore(wdInstance.browsingContextNavigate)
+
+        // but frame capture must only begin *after* navigation unloads the previous page, otherwise
+        // trailing frames from the finished spec's MediaRecorder bleed into the new spec's video.
         expect(videoApi.onProjectCaptureVideoFrames).to.have.been.calledAfter(wdInstance.browsingContextNavigate)
       })
     })
