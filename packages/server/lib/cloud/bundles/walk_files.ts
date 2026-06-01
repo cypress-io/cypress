@@ -1,11 +1,7 @@
 import { readdir, stat } from 'fs-extra'
 import path from 'path'
 
-/**
- * Recursively list every file under `root`, returned as POSIX-agnostic relative
- * paths (using the platform separator). Directories are descended into; non-file
- * entries (sockets, fifos, etc.) are ignored.
- */
+// Recursively list every file under `root` as relative paths; non-file entries are ignored.
 export const walkFiles = async (root: string, currentRel: string = ''): Promise<string[]> => {
   const fullDir = path.join(root, currentRel)
   const entries = await readdir(fullDir)

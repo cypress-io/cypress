@@ -11,8 +11,7 @@ export class BundleError extends Error {
   public readonly name = 'BundleError'
   public readonly kind: BundleKind
   public readonly stage: BundleErrorStage
-  // Mirrored from the cause so consumers reading `error.code`/`error.errno`/
-  // `error.syscall` (and crash reporters) keep working through the wrapper.
+  // Mirrored from the cause so `error.code`/`errno`/`syscall` survive the wrapper.
   public readonly code?: string
   public readonly errno?: number
   public readonly syscall?: string

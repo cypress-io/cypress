@@ -42,10 +42,7 @@ export const ensureSignedBundle = async ({
 
   await ensureDir(baseDir)
 
-  // Cache hit: if a previously-published bundle is already on disk and verifies
-  // against its signed manifest, reuse it and skip the download+publish entirely.
-  // This avoids re-publishing over an already-loaded bundle (the dominant cause
-  // of publish-stage rename failures on Windows).
+  // Reuse an already-cached bundle that still verifies, skipping download and publish.
   const cachedManifest = await verifyBundleOnDisk(finalDir).catch(() => null)
 
   if (cachedManifest) {
@@ -87,10 +84,8 @@ export const ensureSignedBundle = async ({
       })
     }
 
-    // Persist the manifest signature alongside the bundle so a future process
-    // can re-verify this cached bundle offline (see verifyBundleOnDisk). Written
-    // into staging before publish so it lands before manifest.json (the atomic
-    // commit marker) and thus is always present whenever manifest.json is.
+    // Persist the signature before publish so it lands before manifest.json (the
+    // commit marker) and is always present whenever manifest.json is.
     await writeFile(path.join(staging, MANIFEST_SIG_FILE), manifestSig, 'utf8')
 
     try {
