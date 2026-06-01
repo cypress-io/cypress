@@ -5,7 +5,7 @@ import { Validator } from './validator'
 import { isFunction } from 'lodash'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
-import { preprocessConfig, preprocessExpose, syncConfigToCurrentOrigin, syncExposeToCurrentOrigin } from '../../../util/config'
+import { preprocessConfig, preprocessConfigForSpecBridge, preprocessExpose, syncConfigToCurrentOrigin, syncExposeToCurrentOrigin } from '../../../util/config'
 import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
@@ -189,7 +189,10 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
           clearTimeout(timeoutId)
           // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
           communicator.toSpecBridge(origin, 'initialize:cypress', {
-            config: preprocessConfig(Cypress.config()),
+            config: preprocessConfigForSpecBridge(Cypress.config(), {
+              isInteractive: Cypress.originalConfig.isInteractive,
+              isTextTerminal: Cypress.originalConfig.isTextTerminal,
+            }),
             expose: preprocessExpose(Cypress.expose()),
             isProtocolEnabled: Cypress.state('isProtocolEnabled'),
           })

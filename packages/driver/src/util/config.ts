@@ -69,6 +69,23 @@ export const preprocessConfig = (config: Cypress.Config) => {
   return preprocessForSerialization(config) as Cypress.Config
 }
 
+/**
+ * Prepares config to initialize a cross-origin spec bridge.
+ * isInteractive is read-only and must reflect the server-computed run/open mode value
+ * from bootstrap, not testing overrides on the primary origin (e.g. defaults.js).
+ */
+export const preprocessConfigForSpecBridge = (
+  config: Cypress.Config,
+  originalConfig: { isInteractive?: boolean, isTextTerminal?: boolean },
+) => {
+  const preprocessed = preprocessConfig(config)
+
+  return {
+    ..._.omit(preprocessed, 'isInteractive'),
+    isInteractive: originalConfig.isInteractive ?? !originalConfig.isTextTerminal,
+  }
+}
+
 export const preprocessExpose = (expose: Cypress.ObjectLike) => {
   return preprocessForSerialization(expose) as Cypress.Config
 }
