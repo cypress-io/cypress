@@ -13,15 +13,15 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { getRoutesForRequest, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import { getRoutesForRequest, NetStubbingState } from '@packages/net-stubbing'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
-import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
+import type { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
 import { Request } from './request'
 import type { SocketE2E } from './socket-e2e'
-import templateEngine from './template_engine'
+import { render as renderTemplate } from './template_engine'
 import { ensureProp } from './util/class-helpers'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
@@ -35,7 +35,7 @@ import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
-import appData from './util/app_data'
+import * as appData from './util/app_data'
 import { graphqlWS } from '@packages/data-context/graphql/makeGraphQLServer'
 import type { GraphqlWsHandle } from '@packages/data-context/graphql/makeGraphQLServer'
 import * as statusCode from './util/status_code'
@@ -48,6 +48,7 @@ import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
+import { createProxyRuntime } from './network-runtime'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -259,7 +260,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this.server.on('connect', this.onConnect.bind(this))
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
-    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`)
+    // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
+    this._graphqlWS = graphqlWS(this.server, `${socketIoRoute}-graphql`, { enforceOrigin: false })
 
     // Start the file server first so its port is known before we begin
     // listening for proxied requests on the main server. The primary
@@ -375,7 +377,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     // since we use absolute paths, configure express-handlebars to not automatically find layouts
     // https://github.com/cypress-io/cypress/issues/2891
-    app.engine('html', templateEngine.render)
+    app.engine('html', renderTemplate)
 
     // handle the proxied url in case
     // we have not yet started our websocket server
@@ -433,20 +435,20 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       return this._fileServer?.token
     }
 
-    this._netStubbingState = netStubbingState()
-    // @ts-ignore
-    this._networkProxy = new NetworkProxy({
+    const runtime = createProxyRuntime({
       config,
       shouldCorrelatePreRequests,
       remoteStates,
       getFileServerToken,
       getCookieJar: () => cookieJar,
       socket: this.socket,
-      netStubbingState: this.netStubbingState,
       request: this.request,
       serverBus: this._eventBus,
       getCurrentBrowser,
     })
+
+    this._netStubbingState = runtime.netStubbingState
+    this._networkProxy = runtime.networkProxy
   }
 
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {

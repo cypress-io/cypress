@@ -8,7 +8,7 @@ import * as extension from '@packages/extension'
 import mime from 'mime'
 import { launch } from '@packages/launcher'
 
-import appData from '../util/app_data'
+import * as appData from '../util/app_data'
 import { fs } from '../util/fs'
 import { CdpAutomation, screencastOpts } from './cdp_automation'
 import * as protocol from './protocol'
@@ -540,6 +540,16 @@ export = {
         return
       }
 
+      // Synchronously mark sibling CRI clients (which share the same targetId)
+      // as crashed. Each sibling has its own websocket and its own listener for
+      // Target.targetCrashed, but those listeners fire when Chrome happens to
+      // deliver the event on that connection — which can be after spec
+      // cleanup runs. Without this propagation, the protocol's `afterSpec`
+      // hook can call `cdpClient.send` on a crashed page and hang forever.
+      browserCriClient.currentlyAttachedProtocolTarget?.markCrashed()
+      browserCriClient.currentlyAttachedCyPromptTarget?.markCrashed()
+      browserCriClient.currentlyAttachedStudioTarget?.markCrashed()
+
       const err = errors.get('RENDERER_CRASHED', browser.displayName)
 
       await memory.endProfiling()
@@ -595,7 +605,7 @@ export = {
       _getChromePreferences(userDir),
     ])
 
-    const defaultArgs = this._getArgs(browser, options, port)
+    const defaultArgs = this._getArgs(browser, options, String(port))
 
     const defaultLaunchOptions = utils.getDefaultLaunchOptions({
       preferences: rawPreferences,

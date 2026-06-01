@@ -190,6 +190,7 @@ export async function handleGraphQLSocketRequest (uid: string, payload: string, 
  *
  * @param httpServer The http server we are utilizing for the websocket
  * @param targetRoute Route to target in the server upgrade event
+ * @param options.enforceOrigin Defaults to true: reject upgrades whose Origin port does not match the server's listen port. Set to false only when the server receives proxied upgrades whose Origin reflects an upstream host (i.e. the test-runner server) and another allowlist gates inbound connections.
  * @returns WebSocket server and graphql-ws dispose — call `dispose()` before destroying the HTTP server.
  */
 export interface GraphqlWsHandle {
@@ -197,12 +198,13 @@ export interface GraphqlWsHandle {
   dispose: () => Promise<void>
 }
 
-export const graphqlWS = (httpServer: Server, targetRoute: string): GraphqlWsHandle => {
+export const graphqlWS = (httpServer: Server, targetRoute: string, options: { enforceOrigin?: boolean } = {}): GraphqlWsHandle => {
+  const { enforceOrigin = true } = options
   const graphqlWs = new WebSocketServer({ noServer: true })
 
   httpServer.on('upgrade', (req: Request, socket: Socket, head) => {
     if (req.url?.startsWith(targetRoute)) {
-      if (!isOriginAllowed(req.headers.origin, req.socket.localPort)) {
+      if (enforceOrigin && !isOriginAllowed(req.headers.origin, req.socket.localPort)) {
         socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
         socket.destroy()
 

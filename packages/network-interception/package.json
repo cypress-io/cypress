@@ -1,0 +1,27 @@
+{
+  "name": "@packages/network-interception",
+  "version": "0.0.0-development",
+  "private": true,
+  "main": "./lib/index",
+  "scripts": {
+    "build-prod": "tsc --project .",
+    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "clean-deps": "rimraf node_modules",
+    "lint": "eslint --ext .ts,.json, .",
+    "test": "vitest",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
+    "test-watch": "vitest watch",
+    "tslint": "tslint --config ../ts/tslint.json --project ."
+  },
+  "dependencies": {
+    "@packages/types": "0.0.0-development"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  },
+  "files": [
+    "lib"
+  ],
+  "license": "MIT",
+  "nx": {}
+}

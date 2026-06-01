@@ -53,13 +53,13 @@ const tryToCall = function (win, method) {
 const _getAutomation = async function (win, options: BrowserLaunchOpts, parent) {
   if (!options.onError) throw new Error('Missing onError in electron#_launch')
 
-  const port = getRemoteDebuggingPort()
+  const port = await getRemoteDebuggingPort()
 
   if (!browserCriClient) {
     debug(`browser CRI is not set. Creating...`)
     browserCriClient = await BrowserCriClient.create({
       hosts: ['127.0.0.1'],
-      port,
+      port: Number(port),
       browserName: 'electron',
       onAsynchronousError: options.onError,
       onReconnect: () => {},
@@ -180,6 +180,17 @@ export = {
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
       async onCrashed () {
+        // Synchronously mark sibling CRI clients (which share the same targetId)
+        // as crashed. Each sibling has its own websocket and its own listener for
+        // Target.targetCrashed, but those listeners fire when Chromium happens
+        // to deliver the event on that connection — which can be after spec
+        // cleanup runs. Without this propagation, the protocol's `afterSpec`
+        // hook can call `cdpClient.send` on a crashed page and hang forever.
+        // See the chrome.ts handler for the analogous case.
+        browserCriClient?.currentlyAttachedProtocolTarget?.markCrashed()
+        browserCriClient?.currentlyAttachedCyPromptTarget?.markCrashed()
+        browserCriClient?.currentlyAttachedStudioTarget?.markCrashed()
+
         const err = errors.get('RENDERER_CRASHED', 'Electron')
 
         await memory.endProfiling()

@@ -1,3 +1,5 @@
+# [@cypress/grep-v6.0.1](https://github.com/cypress-io/cypress/compare/@cypress/grep-v6.0.0...@cypress/grep-v6.0.1) (2026-06-01)
+
 # [@cypress/grep-v6.0.0](https://github.com/cypress-io/cypress/compare/@cypress/grep-v5.1.0...@cypress/grep-v6.0.0) (2026-02-05)
 
 
