@@ -1,0 +1,19 @@
+packages/server/lib/cloud/bundles/publish_staging_to_final.ts
+  s_2c18404c97edd6::t_a0f28af282d1dd 1,4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2e2332ffa4b671fc7b307f4ead906aa550a2649e",
+  "prompts": {},
+  "sessions": {
+    "s_2c18404c97edd6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af7de886-fc70-4489-a158-847e074e0dd3",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
