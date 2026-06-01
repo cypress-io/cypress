@@ -33,7 +33,7 @@
     "@packages/root": "0.0.0-development",
     "@packages/scaffold-config": "0.0.0-development",
     "@packages/types": "0.0.0-development",
-    "@percy/cypress": "^3.1.7",
+    "@percy/cypress": "^3.1.8",
     "@purge-icons/generated": "0.8.1",
     "@tooling/system-tests": "0.0.0-development",
     "@types/dedent": "^0.7.2",

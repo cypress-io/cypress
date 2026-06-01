@@ -11,7 +11,6 @@ describe('e2e downloads', () => {
     settings: {
       e2e: {
         supportFile: false,
-        allowCypressEnv: false,
       },
     },
   })
