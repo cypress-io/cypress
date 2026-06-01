@@ -8,7 +8,7 @@ import { isInsideDir } from './is_inside_dir'
 
 const debug = Debug('cypress:server:cloud:bundles:verify-bundle-on-disk')
 
-export const MANIFEST_FILE = 'manifest.json'
+const MANIFEST_FILE = 'manifest.json'
 
 // Signature sidecar written at publish time so a cached bundle can be re-verified offline.
 export const MANIFEST_SIG_FILE = '.manifest-sig'
