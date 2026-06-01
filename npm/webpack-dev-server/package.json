@@ -23,7 +23,7 @@
     "local-pkg": "0.4.1",
     "semver": "^7.7.3",
     "tslib": "^2.3.1",
-    "tsx": "^4.20.6",
+    "tsx": "^4.22.4",
     "webpack-bundle-analyzer": "4.10.2",
     "webpack-dev-server": "^5.1.0",
     "webpack-merge": "^5.4.0"
