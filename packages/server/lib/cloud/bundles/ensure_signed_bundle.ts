@@ -1,4 +1,4 @@
-import { ensureDir, readFile, remove } from 'fs-extra'
+import { ensureDir, readFile, remove, writeFile } from 'fs-extra'
 import path from 'path'
 import Debug from 'debug'
 import { verifySignature } from '../encryption'
@@ -7,6 +7,7 @@ import { parseHashFromBundleUrl } from './parse_hash_from_bundle_url'
 import { sweepOrphanStaging } from './sweep_orphan_staging'
 import { streamDownloadVerifyExtract } from './stream_download_verify_extract'
 import { publishStagingToFinal } from './publish_staging_to_final'
+import { verifyBundleOnDisk, MANIFEST_SIG_FILE } from './verify_bundle_on_disk'
 import { BundleError, BundleKind } from './bundle_error'
 
 const debug = Debug('cypress:server:cloud:bundles:ensure-signed-bundle')
@@ -40,6 +41,19 @@ export const ensureSignedBundle = async ({
   debug('ensuring %s bundle hash=%s baseDir=%s', kind, hash, baseDir)
 
   await ensureDir(baseDir)
+
+  // Cache hit: if a previously-published bundle is already on disk and verifies
+  // against its signed manifest, reuse it and skip the download+publish entirely.
+  // This avoids re-publishing over an already-loaded bundle (the dominant cause
+  // of publish-stage rename failures on Windows).
+  const cachedManifest = await verifyBundleOnDisk(finalDir).catch(() => null)
+
+  if (cachedManifest) {
+    debug('%s bundle cache hit hash=%s', kind, hash)
+
+    return { manifest: cachedManifest, bundleDir: finalDir }
+  }
+
   await ensureDir(finalDir)
 
   const sweptCount = await sweepOrphanStaging(baseDir, ORPHAN_STAGING_TTL_MS).catch(() => 0)
@@ -72,6 +86,12 @@ export const ensureSignedBundle = async ({
         message: `Unable to verify ${kind} manifest signature`,
       })
     }
+
+    // Persist the manifest signature alongside the bundle so a future process
+    // can re-verify this cached bundle offline (see verifyBundleOnDisk). Written
+    // into staging before publish so it lands before manifest.json (the atomic
+    // commit marker) and thus is always present whenever manifest.json is.
+    await writeFile(path.join(staging, MANIFEST_SIG_FILE), manifestSig, 'utf8')
 
     try {
       await publishStagingToFinal(staging, finalDir)
