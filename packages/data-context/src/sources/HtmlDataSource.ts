@@ -57,6 +57,7 @@ export class HtmlDataSource {
       'namespace',
       'socketIoRoute',
       'isDefaultProtocolEnabled',
+      'isInteractive',
       'hideCommandLog',
       'hideRunnerUi',
     ]

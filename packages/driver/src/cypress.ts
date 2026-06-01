@@ -257,12 +257,6 @@ class $Cypress {
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
 
-    // we assume we're interactive based on whether or
-    // not we're in a text terminal, but we keep this
-    // as a separate property so we can potentially
-    // slice up the behavior
-    config.isInteractive = !config.isTextTerminal || config.env?.INTERNAL_SIMULATE_OPEN_MODE
-
     // true if this Cypress belongs to a cross origin spec bridge
     this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
 
