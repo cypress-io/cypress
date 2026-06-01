@@ -1072,7 +1072,13 @@ async function ready (options: ReadyOptions) {
     quiet: false,
   })
 
-  const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
+  // projectRoot can be undefined when a CI environment variable used as the
+  // --key value is unset, causing Commander to consume the --project token as
+  // the key value and leave the project unresolved. Fall back to cwd here
+  // rather than in args.ts, which would incorrectly set currentProject in
+  // global open mode and bypass the Launchpad project picker.
+  const projectRoot: string = options.projectRoot ?? String(options.cwd ?? process.cwd())
+  const { record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
   assert(socketId)
 
