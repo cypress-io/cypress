@@ -1,0 +1,24 @@
+packages/server/lib/cloud/bundles/is_inside_dir.ts
+  s_2c18404c97edd6::t_eac60bdf49d94b 1-8
+packages/server/lib/cloud/bundles/verify_bundle_on_disk.ts
+  s_2c18404c97edd6::t_9ab79c08ef3bd4 7,13,19-23
+  s_2c18404c97edd6::t_fdb61a35fcb3fe 90
+packages/server/lib/cloud/bundles/stream_download_verify_extract.ts
+  s_2c18404c97edd6::t_38f11ad41835fa 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "eebeaa805f2dd54fcde5cdd2b8c0c0d327758032",
+  "prompts": {},
+  "sessions": {
+    "s_2c18404c97edd6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af7de886-fc70-4489-a158-847e074e0dd3",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
