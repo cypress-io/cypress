@@ -9,6 +9,8 @@ import type { TransformError } from '@packages/types'
 
 const debug = debugLib(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 
+const dynamicImport = new Function('id', 'return import(id)') as (id: string) => Promise<unknown>
+
 interface BluebirdRejectionEvent {
   reason?: unknown
 }
@@ -74,7 +76,8 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
       }
 
       if ((devServer as { bundler?: string }).bundler === 'vite') {
-        const { devServer } = await import('@cypress/vite-dev-server')
+        // Preserves native dynamic import when compiled to CJS
+        const { devServer } = (await dynamicImport('@cypress/vite-dev-server')) as { devServer: DevServerInfo['devServer'] }
 
         return { devServer: devServer as DevServerInfo['devServer'], objApi: true }
       }
@@ -113,9 +116,10 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
       const fileURL = pathToFileURL(configFilePath).href
 
       debug(`importing config as esm file %s`, fileURL)
-      const config = await import(fileURL)
+      // Preserves native dynamic import when compiled to CJS
+      const config = (await dynamicImport(fileURL)) as ConfigFileExport
 
-      return config as ConfigFileExport
+      return config
     } catch (err) {
       const loadErr = err as Error
 
