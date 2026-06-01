@@ -389,6 +389,16 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
 
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   debug('connectToNewSpec bidi')
+
+  // the browser is reused between specs in run mode, so we need to re-establish the video
+  // recording controller for each new spec. Without this, the per-spec videoRecording object
+  // created in run mode never gets its controller set, and video compression fails with
+  // "Cannot read properties of undefined (reading 'postProcessFfmpegOptions')".
+  // @see https://github.com/cypress-io/cypress/issues/18415
+  if (options.videoApi) {
+    await recordVideo(options.videoApi)
+  }
+
   await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
 }
 

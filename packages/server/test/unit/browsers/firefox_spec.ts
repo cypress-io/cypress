@@ -122,6 +122,31 @@ describe('lib/browsers/firefox', () => {
 
         expect(this.automation.use).to.have.been.calledWith(bidiAutomationClient.automationMiddleware)
       })
+
+      it('re-establishes video recording for the new spec when a videoApi is provided', async function () {
+        const writeVideoFrame = sinon.stub()
+        const videoApi = {
+          useFfmpegVideoController: sinon.stub().resolves({ writeVideoFrame }),
+          onProjectCaptureVideoFrames: sinon.stub(),
+        }
+
+        this.options.videoApi = videoApi
+
+        await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        // reset call history so we only assert on what connectToNewSpec does
+        videoApi.useFfmpegVideoController.resetHistory()
+        videoApi.onProjectCaptureVideoFrames.resetHistory()
+
+        this.options.url = 'next-spec-url'
+        await firefox.connectToNewSpec(this.browser, this.options, this.automation)
+
+        // the browser is reused across specs, so the per-spec video controller must be
+        // re-created or compression fails with a missing controller.
+        // @see https://github.com/cypress-io/cypress/issues/18415
+        expect(videoApi.useFfmpegVideoController).to.have.been.calledWith({ webmInput: true })
+        expect(videoApi.onProjectCaptureVideoFrames).to.have.been.calledWith(writeVideoFrame)
+      })
     })
 
     it('executes before:browser:launch if registered', async function () {
