@@ -9,7 +9,7 @@
     "clean-deps": "rimraf node_modules",
     "dev": "node index.js",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
-    "postinstall": "patch-package && yarn sync-cloud-validations",
+    "postinstall": "patch-package",
     "lint": "eslint",
     "rebuild-better-sqlite3": "electron-rebuild -f -o better-sqlite3",
     "start": "node ../../scripts/cypress open --dev --global",
