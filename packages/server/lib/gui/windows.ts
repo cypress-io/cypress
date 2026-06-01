@@ -175,6 +175,18 @@ export function create (projectRoot, _options: WindowOptions, newBrowserWindow =
     return options.onCrashed.apply(win, args)
   })
 
+  // When the page under test registers a `beforeunload` handler that requests a
+  // confirmation prompt (e.g. `window.onbeforeunload = () => 'msg'` or setting
+  // `event.returnValue`), Electron fires `will-prevent-unload` instead of showing
+  // the native panel. Cypress always proceeds with navigation during a test run,
+  // so we preventDefault here to dismiss the would-be prompt and allow the unload.
+  // Without this, the prompt is never answered, the page never unloads, and
+  // navigation hangs until pageLoadTimeout.
+  // @see https://github.com/cypress-io/cypress/issues/2118
+  win.webContents.on('will-prevent-unload', (event) => {
+    event.preventDefault()
+  })
+
   // As of Electron v22, the 'new-window' event has been removed for 'setWindowOpenHandler'.
   // @see https://github.com/electron/electron/blob/v21.0.0/docs/api/web-contents.md#event-new-window-deprecated
   // @see https://github.com/electron/electron/pull/34526

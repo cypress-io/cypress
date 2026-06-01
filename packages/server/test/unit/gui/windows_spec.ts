@@ -70,6 +70,16 @@ describe('lib/gui/windows', () => {
 
       expect(this.win.webContents.openDevTools).not.to.be.calledTwice
     })
+
+    it('prevents the default beforeunload prompt on will-prevent-unload so navigation is not blocked', function () {
+      Windows.create('/foo/', {}, () => this.win)
+
+      const event = { preventDefault: sinon.stub() }
+
+      this.win.webContents.emit('will-prevent-unload', event)
+
+      expect(event.preventDefault).to.be.calledOnce
+    })
   })
 
   // TODO: test everything else going on in this method!
