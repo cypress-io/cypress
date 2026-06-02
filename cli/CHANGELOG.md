@@ -14,6 +14,7 @@
 - Fixed an issue where a recorded Chrome or Electron run could hang for the duration of the spec timeout when the renderer crashed mid-spec, instead of failing the affected spec and continuing. Fixed in [#33943](https://github.com/cypress-io/cypress/pull/33943).
 - Fixed an issue where `cypress run` could crash with `TypeError: The "path" argument must be of type string. Received undefined` when the project path was not resolved (for example, due to an unset CI environment variable) or when `--browser` was passed without a value. Cypress now falls back to the current working directory in the first case and emits a clear "browser not found" error in the second. Fixes [#15418](https://github.com/cypress-io/cypress/issues/15418). Fixed in [#33958](https://github.com/cypress-io/cypress/pull/33958).
 - Fixed an issue where the version of `WebKit` was incorrectly displayed as version 0 when `playwright` version `1.60.0` was installed. Fixes [#33953](https://github.com/cypress-io/cypress/issues/33953).
+- Fixed an issue where clicking a [`cy.origin`](https://docs.cypress.io/api/commands/origin) command in the Command Log to print its details to the console threw an error when the callback yielded a value that could not be serialized across origins (for example, the page's `window` after a `cy.visit`). The command now prints to the console without erroring. Fixes [#27385](https://github.com/cypress-io/cypress/issues/27385).
 
 **Dependency Updates:**
 
