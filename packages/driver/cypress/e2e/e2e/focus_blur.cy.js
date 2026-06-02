@@ -510,6 +510,9 @@ describe('polyfill programmatic blur events', () => {
 })
 
 // TODO(webkit): fix+unskip for webkit release
+// In Firefox 151 and earlier, focusing a non-text element (anchor, button, select, [tabindex])
+// fired a spurious selectionchange via the focus-navigation code path; Firefox 152 decoupled
+// that path from the selection (Mozilla Bug 2034851) so it now matches Chrome/Electron behavior.
 describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
   beforeEach(() => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
@@ -540,7 +543,7 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    if (Cypress.isBrowser('firefox')) {
+    if (Cypress.isBrowser('firefox') && Number(Cypress.browser.majorVersion) < 152) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -557,7 +560,7 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    if (Cypress.isBrowser('firefox')) {
+    if (Cypress.isBrowser('firefox') && Number(Cypress.browser.majorVersion) < 152) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -574,7 +577,7 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    if (Cypress.isBrowser('firefox')) {
+    if (Cypress.isBrowser('firefox') && Number(Cypress.browser.majorVersion) < 152) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -600,7 +603,7 @@ describe('intercept blur methods correctly', { browser: '!webkit' }, () => {
     $el.appendTo(cy.$$('body'))
     $el[0].focus()
 
-    if (Cypress.isBrowser('firefox')) {
+    if (Cypress.isBrowser('firefox') && Number(Cypress.browser.majorVersion) < 152) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return

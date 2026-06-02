@@ -2437,10 +2437,6 @@ jobs:
           browser: firefox
           guard: << pipeline.parameters.run-driver-tests >>
 
-  # Advisory canary against Mozilla's Beta channel.
-  # Intentionally NOT wired into the all-jobs-passed / ready-to-release aggregators — beta builds
-  # often surface upstream regressions (cookie ordering, selectionchange firing, etc.) that we
-  # want to see early but that should not block routine PR merges or releases.
   driver-integration-tests-firefox-beta:
     <<: *defaults
     resource_class: medium+
