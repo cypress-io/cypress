@@ -16,16 +16,20 @@ The codebase adopts **hexagonal architecture** (also called **ports and adapters
 
 ## Hexagonal terms → this repo
 
+In hexagonal architecture, a **port** is a boundary interface; an **adapter** is the code on the other side of that boundary that talks to the real world. We use normal TypeScript `interface` types as ports and prefix them with `For`.
+
 | Hex term | Role | In this monorepo |
 | --- | --- | --- |
 | **Port** | Contract at the edge of the interception "inside" | `For*` types in `lib/ports/` |
 | **Adapter** | Implements a port by delegating to existing Cypress code | `*Adapter` classes under `packages/*/lib/adapters/` |
-| **Driving port** (primary) | Outside actors **call into** interception | `ForInterceptRegistration` (driver IPC), `ForNetworkPolicyRegistration` (server config) |
-| **Driven port** (secondary) | Interception **calls out** for I/O | `ForRequestInterception`, `ForCookieState`, … |
-| **Core** | Domain orchestration without transport imports | `NetworkPolicyCore` (stage 3) |
-| **Composition root** | Constructs and injects adapters | `createProxyRuntime()` in `@packages/server` |
+| **Driving port** (primary) | Outside actors **call into** interception — they drive the app | `ForInterceptRegistration` (driver IPC), `ForNetworkPolicyRegistration` (server config) |
+| **Driven port** (secondary) | Interception **calls out** for I/O and side effects | `ForRequestInterception`, `ForCookieState`, `ForCommandLog`, … |
+| **Core** | Domain logic with no proxy/CDP imports; orchestrates ports | `NetworkPolicyCore` (stage 3; renamed `NetworkInterceptionCore` in stage 7) |
+| **Composition root** | Where concrete adapters are constructed and injected | `createProxyRuntime()` in `packages/server/lib/network-runtime.ts` |
 
-**Dependency rule:** this package must not import `@packages/proxy` or `@packages/net-stubbing`.
+**Direction mnemonic:** *Driving* = something external drives work **in**. *Driven* = the core drives work **out** to infrastructure.
+
+This package holds **ports and (later) core** — not adapters. **Dependency rule:** `@packages/network-interception` must not import `@packages/proxy` or `@packages/net-stubbing`.
 
 **Config vs test intercepts:** both match proxied traffic, but differ by **who drives registration**. Test intercepts use `ForInterceptRegistration` (driver IPC). Config rules use `ForNetworkPolicyRegistration` — the port interface lives here; **`@packages/server` owns the config → policy mapping** via `registerDefaultNetworkPolicies()`.
 
@@ -67,6 +71,17 @@ createProxyRuntime()  (@packages/server)
 
 ---
 
+## Ports not yet wired (later stages)
+
+| Port | Hex kind | Stage |
+| --- | --- | --- |
+| `ForRequestInterception` / `ForResponseInterception` | Driven | 4 |
+| `ForDocumentPreparation` | Driven | 5 |
+| `ForNetworkCapture` / `ForCookieState` / `ForCommandLog` | Driven | 6 |
+| `ForBrowserNetworkAutomation` | Driven | HTTP/2 epic |
+
+---
+
 ## Stack roadmap
 
 | Stage | Branch | Adds |
@@ -86,6 +101,7 @@ createProxyRuntime()  (@packages/server)
 ```bash
 yarn workspace @packages/network-interception build-prod
 yarn workspace @packages/network-interception test
+yarn workspace @packages/net-stubbing test
 yarn workspace @packages/server test-unit --grep "blocked-hosts|register-default|network-runtime"
 ```
 

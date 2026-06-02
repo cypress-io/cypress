@@ -1,6 +1,6 @@
 import type { NetworkPolicy } from '@packages/network-interception'
 
-export type BlockedHostsConfig = {
+type BlockedHostsConfig = {
   blockHosts?: string | string[] | null
   matchesBlockedHost?: (url: string, blockHosts: string | string[]) => string | false | null | undefined
 }

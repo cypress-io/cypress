@@ -1,6 +1,6 @@
 export { onNetStubbingEvent } from './driver-events'
 
-export { DriverInterceptRegistrationAdapter } from '../adapters/driver-intercept-registration'
+export { DriverInterceptRegistrationAdapter } from '../adapters'
 
 export { InterceptError } from './middleware/error'
 
