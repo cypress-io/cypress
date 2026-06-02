@@ -10,6 +10,7 @@
 **Bugfixes:**
 
 - Fixed an issue where HTML markup passed as a Sinon spy argument (for example `expect(spy).to.have.been.calledOnceWith('<svg>...</svg>')`) was rendered as live DOM in the Cypress command log, truncating the assertion message and breaking the log layout. The assertion message is now HTML-escaped and the markup is shown as literal text. Fixes [#33416](https://github.com/cypress-io/cypress/issues/33416). Fixed in [#33941](https://github.com/cypress-io/cypress/pull/33941).
+- Fixed an issue where a cross-origin navigation back to a previously-visited origin (for example, completing a login that redirects from an identity provider back to your application) could intermittently load the Cypress app interface instead of your application, causing flaky tests. Fixed in [#33991](https://github.com/cypress-io/cypress/pull/33991).
 
 ## 15.16.0
 
