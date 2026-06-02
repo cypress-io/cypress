@@ -106,13 +106,15 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
   return ret
 }
 
+export type OnNetStubbingEventFrame = NetEvent.ToServer.AddRoute<BackendStaticResponse> | NetEvent.ToServer.Subscribe | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.SendStaticResponse
+
 type OnNetStubbingEventOpts = {
   eventName: string
   state: NetStubbingState
   socket: SocketBroadcaster
   getFixture: GetFixtureFn
   args: any[]
-  frame: NetEvent.ToServer.AddRoute<BackendStaticResponse> | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.Subscribe | NetEvent.ToServer.SendStaticResponse
+  frame: OnNetStubbingEventFrame
 }
 
 export async function onNetStubbingEvent (opts: OnNetStubbingEventOpts): Promise<any> {
