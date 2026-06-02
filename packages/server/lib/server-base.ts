@@ -13,7 +13,8 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { getRoutesForRequest, NetStubbingState } from '@packages/net-stubbing'
+import { DriverInterceptRegistrationAdapter, getRoutesForRequest, NetStubbingState } from '@packages/net-stubbing'
+import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
 import type { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
@@ -456,7 +457,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
-    options.netStubbingState = this.netStubbingState
+    options.interceptRegistration = new DriverInterceptRegistrationAdapter({
+      state: this.netStubbingState,
+      socket: this.socket,
+      getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
+    })
+
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
