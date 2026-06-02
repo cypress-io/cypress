@@ -30,7 +30,7 @@
     "@cypress/request-promise": "^5.0.0",
     "@packages/network": "0.0.0-development",
     "@types/semaphore": "1.1.4",
-    "tsx": "^4.20.6",
+    "tsx": "^4.22.4",
     "vitest": "^3.2.4"
   },
   "files": [

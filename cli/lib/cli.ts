@@ -124,6 +124,8 @@ const descriptions: any = {
   group: 'a named group for recorded runs in Cypress Cloud',
   headed: 'displays the browser instead of running headlessly',
   headless: 'hide the browser instead of running headed (default for cypress run)',
+  inspect: 'enable the Node.js inspector to debug the Cypress development process. only available when used with --dev',
+  inspectBrk: 'enable the Node.js inspector and break before the Cypress development process starts. only available when used with --dev',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   passWithNoTests: 'pass when no tests are found',
@@ -273,7 +275,6 @@ const addCypressRunCommand = (program: any): any => {
   .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
   .option('-s, --spec <spec>', text('spec'))
   .option('-t, --tag <tag>', text('tag'))
-  .option('--dev', text('dev'), coerceFalse)
 }
 
 const addCypressOpenCommand = (program: any): any => {
@@ -292,14 +293,26 @@ const addCypressOpenCommand = (program: any): any => {
   .option('--global', text('global'))
   .option('-p, --port <port>', text('port'))
   .option('-P, --project <project-path>', text('project'))
-  .option('--dev', text('dev'), coerceFalse)
 }
 
-const maybeAddInspectFlags = (program: any): any => {
-  if (process.argv.includes('--dev')) {
+// `--dev`, `--inspect` and `--inspect-brk` are internal flags used when
+// developing Cypress itself. They are intentionally hidden from the public
+// `--help` output and only registered when `--dev` is actually passed, so that
+// released versions don't advertise flags that error for end users.
+// See https://github.com/cypress-io/cypress/issues/21320
+const maybeAddDevFlag = (program: any, args: string[]): any => {
+  if (args.includes('--dev')) {
+    return program.option('--dev', text('dev'), coerceFalse)
+  }
+
+  return program
+}
+
+const maybeAddInspectFlags = (program: any, args: string[]): any => {
+  if (args.includes('--dev')) {
     return program
-    .option('--inspect', 'Node option')
-    .option('--inspect-brk', 'Node option')
+    .option('--inspect', text('inspect'))
+    .option('--inspect-brk', text('inspectBrk'))
   }
 
   return program
@@ -349,7 +362,7 @@ const cliModule = {
       debug('creating program parser')
       const program = createProgram()
 
-      maybeAddInspectFlags(addCypressRunCommand(program))
+      maybeAddInspectFlags(maybeAddDevFlag(addCypressRunCommand(program), cliArgs), cliArgs)
       .action((...fnArgs: any[]) => {
         debug('parsed Cypress run %o', fnArgs)
         const options = parseVariableOpts(fnArgs, cliArgs)
@@ -390,7 +403,7 @@ const cliModule = {
       debug('creating program parser')
       const program = createProgram()
 
-      maybeAddInspectFlags(addCypressOpenCommand(program))
+      maybeAddInspectFlags(maybeAddDevFlag(addCypressOpenCommand(program), cliArgs), cliArgs)
       .action((...fnArgs: any[]) => {
         debug('parsed Cypress open %o', fnArgs)
         const options = parseVariableOpts(fnArgs, cliArgs)
@@ -479,7 +492,7 @@ const cliModule = {
     .command('version')
     .description(text('version')))
 
-    maybeAddInspectFlags(addCypressOpenCommand(program))
+    maybeAddInspectFlags(maybeAddDevFlag(addCypressOpenCommand(program), args), args)
     .action(async (opts: any) => {
       debug('opening Cypress')
 
@@ -492,7 +505,7 @@ const cliModule = {
       }
     })
 
-    maybeAddInspectFlags(addCypressRunCommand(program))
+    maybeAddInspectFlags(maybeAddDevFlag(addCypressRunCommand(program), args), args)
     .action(async (...fnArgs: any[]) => {
       debug('running Cypress with args %o', fnArgs)
       try {
@@ -519,13 +532,12 @@ const cliModule = {
       }
     })
 
-    program
+    maybeAddDevFlag(program
     .command('verify')
     .usage('[options]')
     .description(
       'Verifies that Cypress is installed correctly and executable',
-    )
-    .option('--dev', text('dev'), coerceFalse)
+    ), args)
     .action(async (opts: any) => {
       const defaultOpts = { force: true, welcomeMessage: false }
       const parsedOpts = util.parseOpts(opts)
@@ -582,11 +594,10 @@ const cliModule = {
       cache[command]()
     })
 
-    program
+    maybeAddDevFlag(program
     .command('info')
     .usage('[command]')
-    .description('Prints Cypress and system information')
-    .option('--dev', text('dev'), coerceFalse)
+    .description('Prints Cypress and system information'), args)
     .action(async (opts: any) => {
       try {
         const code = await infoModule.start(opts)

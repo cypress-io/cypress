@@ -99,6 +99,20 @@ describe('formattedMessage', () => {
 
       expect(result).to.equal('My Custom Message: expected <strong>abcdef</strong> to equal <strong>abcdef</strong>')
     })
+
+    it('escapes HTML in unwrapped trailing clause (sinon calledWith args)', () => {
+      const specialMessage = 'expected method to have been called once with <svg viewBox="0 0 10 10"></svg>'
+      const result = formattedMessage(specialMessage, 'assert')
+
+      expect(result).to.equal('expected method to have been called once with &lt;svg viewBox=&quot;0 0 10 10&quot;&gt;&lt;/svg&gt;')
+    })
+
+    it('escapes HTML in unwrapped subject clause', () => {
+      const specialMessage = 'expected <img onerror=x> to be visible'
+      const result = formattedMessage(specialMessage, 'assert')
+
+      expect(result).to.equal('expected &lt;img onerror=x&gt; to be visible')
+    })
   })
 
   describe('when command that accepts url', () => {

@@ -1,0 +1,6 @@
+[31mThe [95mCYPRESS_env[39m[31m environment variable must be a valid JSON object, but received: [33mnotAnObject[39m[31m[39m
+[31m[39m
+[31mTo pass individual key-value pairs, use the [95m--env[39m[31m CLI flag instead:[39m
+[31m[95mcypress run --env key=value[39m[31m[39m
+[31m[39m
+[31mThe [95mCYPRESS_env[39m[31m override will be ignored.[39m
