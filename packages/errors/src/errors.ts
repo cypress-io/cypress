@@ -1140,6 +1140,23 @@ export const AllCypressErrors = {
     // we include a stack trace here because it may contain useful information
     // to debug since this is an "uncontrolled" error even though it doesn't
     // come from a user
+
+    // The RemoteDebuggingAllowed enterprise/group policy only applies to
+    // standalone Chromium-based browsers (Chrome, Edge), not Electron, so only
+    // surface that hint for those browsers.
+    if (browserName.toLowerCase() !== 'electron') {
+      return errTemplate`\
+          Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
+
+          This usually indicates there was a problem opening the ${fmt.off(_.capitalize(browserName))} browser.
+
+          The CDP port requested was ${fmt.highlight(port)}.
+
+          This can also happen when remote debugging is disabled by an enterprise or group policy. Cypress relies on remote debugging to control the browser, so it is worth checking whether the ${fmt.highlightSecondary('RemoteDebuggingAllowed')} policy has been set to disabled in your environment. You can review the applied policies by visiting ${fmt.url('chrome://policy')} (or ${fmt.url('edge://policy')} for Edge) in the affected browser.
+
+          ${fmt.stackTrace(err)}`
+    }
+
     return errTemplate`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
