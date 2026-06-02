@@ -1,5 +1,6 @@
-import '../../../spec_helper'
+import { proxyquire, sinon } from '../../../spec_helper'
 import path from 'path'
+import os from 'os'
 
 describe('getBundleCacheDir', () => {
   const ENV_KEYS = [
@@ -81,5 +82,55 @@ describe('getBundleCacheDir', () => {
     // cachedir('Cypress') varies by OS; just assert the bundles/<kind> tail.
     expect(getBundleCacheDir('studio')).to.match(/[/\\]bundles[/\\]studio$/)
     expect(getBundleCacheDir('studio')).to.not.equal(path.resolve('bundles/studio'))
+  })
+
+  describe('ensureWritableBundleCacheDir', () => {
+    const load = (ensureDirStub: sinon.SinonStub) => {
+      return proxyquire('../lib/cloud/bundles/cache_root', {
+        'fs-extra': { ensureDir: ensureDirStub },
+      })
+    }
+
+    it('returns the configured cache dir when it is writable', async () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
+      const ensureDirStub = sinon.stub().resolves()
+      const { ensureWritableBundleCacheDir } = load(ensureDirStub)
+
+      const dir = await ensureWritableBundleCacheDir('cy-prompt')
+
+      expect(dir).to.equal(path.resolve('/tmp/cypress-cache-test/bundles/cy-prompt'))
+      expect(ensureDirStub).to.be.calledOnceWith(dir)
+    })
+
+    it('falls back to the OS temp dir when the cache dir is not writable', async () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
+      const primary = path.resolve('/tmp/cypress-cache-test/bundles/studio')
+      const fallback = path.join(os.tmpdir(), 'cypress-cache', 'bundles', 'studio')
+      const ensureDirStub = sinon.stub()
+
+      ensureDirStub.withArgs(primary).rejects(Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' }))
+      ensureDirStub.withArgs(fallback).resolves()
+
+      const { ensureWritableBundleCacheDir } = load(ensureDirStub)
+
+      expect(await ensureWritableBundleCacheDir('studio')).to.equal(fallback)
+      expect(ensureDirStub).to.be.calledWith(fallback)
+    })
+
+    it('rethrows errors that are not permission related', async () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
+      const ensureDirStub = sinon.stub().rejects(Object.assign(new Error('ENOSPC: no space left'), { code: 'ENOSPC' }))
+      const { ensureWritableBundleCacheDir } = load(ensureDirStub)
+
+      let caught: any
+
+      try {
+        await ensureWritableBundleCacheDir('cy-prompt')
+      } catch (err) {
+        caught = err
+      }
+
+      expect(caught?.code).to.equal('ENOSPC')
+    })
   })
 })

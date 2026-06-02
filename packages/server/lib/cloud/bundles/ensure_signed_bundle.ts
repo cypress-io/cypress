@@ -2,7 +2,7 @@ import { ensureDir, readFile, remove, writeFile } from 'fs-extra'
 import path from 'path'
 import Debug from 'debug'
 import { verifySignature } from '../encryption'
-import { getBundleCacheDir } from './cache_root'
+import { ensureWritableBundleCacheDir } from './cache_root'
 import { parseHashFromBundleUrl } from './parse_hash_from_bundle_url'
 import { sweepOrphanStaging } from './sweep_orphan_staging'
 import { streamDownloadVerifyExtract } from './stream_download_verify_extract'
@@ -34,13 +34,11 @@ export const ensureSignedBundle = async ({
   kind,
 }: EnsureSignedBundleOptions): Promise<EnsureSignedBundleResult> => {
   const hash = parseHashFromBundleUrl(url)
-  const baseDir = getBundleCacheDir(kind)
+  const baseDir = await ensureWritableBundleCacheDir(kind)
   const finalDir = path.join(baseDir, hash)
   const staging = path.join(baseDir, `${STAGING_PREFIX}${randomSuffix()}`)
 
   debug('ensuring %s bundle hash=%s baseDir=%s', kind, hash, baseDir)
-
-  await ensureDir(baseDir)
 
   // Reuse an already-cached bundle that still verifies, skipping download and publish.
   const cachedManifest = await verifyBundleOnDisk(finalDir).catch(() => null)

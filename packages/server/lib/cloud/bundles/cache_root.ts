@@ -1,6 +1,11 @@
 import path from 'path'
+import os from 'os'
+import { ensureDir } from 'fs-extra'
 import cachedir from 'cachedir'
 import untildify from 'untildify'
+import Debug from 'debug'
+
+const debug = Debug('cypress:server:cloud:bundles:cache-root')
 
 const BUNDLES_DIRNAME = 'bundles'
 
@@ -51,4 +56,37 @@ const getBundleCacheRoot = (): string => {
 
 export const getBundleCacheDir = (kind: 'cy-prompt' | 'studio'): string => {
   return path.join(getBundleCacheRoot(), kind)
+}
+
+const getFallbackBundleCacheDir = (kind: 'cy-prompt' | 'studio'): string => {
+  return path.join(os.tmpdir(), 'cypress-cache', BUNDLES_DIRNAME, kind)
+}
+
+const isPermissionError = (err: unknown): boolean => {
+  const code = (err as NodeJS.ErrnoException | null)?.code
+
+  return code === 'EACCES' || code === 'EPERM' || code === 'EROFS'
+}
+
+// Ensure a writable bundle cache dir, returning the directory that was created.
+// When the configured Cypress cache folder is not writable (e.g. a root-owned or
+// read-only cache in locked-down CI), fall back to the OS temp dir rather than
+// failing outright.
+export const ensureWritableBundleCacheDir = async (kind: 'cy-prompt' | 'studio'): Promise<string> => {
+  const primary = getBundleCacheDir(kind)
+
+  try {
+    await ensureDir(primary)
+
+    return primary
+  } catch (err) {
+    if (!isPermissionError(err)) throw err
+
+    const fallback = getFallbackBundleCacheDir(kind)
+
+    debug('bundle cache dir %s not writable (%s); falling back to %s', primary, (err as NodeJS.ErrnoException).code, fallback)
+    await ensureDir(fallback)
+
+    return fallback
+  }
 }
