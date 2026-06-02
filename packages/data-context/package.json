@@ -73,7 +73,7 @@
     "server-destroy": "1.0.1",
     "simple-git": "^3.32.3",
     "stringify-object": "^3.0.0",
-    "tsx": "4.20.6",
+    "tsx": "4.22.4",
     "underscore.string": "^3.3.6",
     "ws": "^8.5.0"
   },

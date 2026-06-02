@@ -1,0 +1,6 @@
+{
+  "name": "expose-test-config-overrides",
+  "version": "0.0.0-development",
+  "description": "Cypress.expose() test config overrides",
+  "type": "module"
+}

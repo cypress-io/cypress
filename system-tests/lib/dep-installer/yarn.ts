@@ -1,13 +1,14 @@
 import path from 'path'
 import tempDir from 'temp-dir'
 import { homedir } from 'os'
+import type { InstallCommand } from './types'
 
 export function getYarnCommand (opts: {
   yarnV311: boolean
   updateLockFile: boolean
   isCI: boolean
   runScripts: boolean
-}): string {
+}): InstallCommand {
   let cmd = `yarn install`
 
   if (opts.yarnV311) {
@@ -16,7 +17,7 @@ export function getYarnCommand (opts: {
 
     if (!opts.updateLockFile) cmd += ' --immutable'
 
-    return cmd
+    return { cmd }
   }
 
   cmd += ' --prefer-offline'
@@ -33,5 +34,5 @@ export function getYarnCommand (opts: {
   if (opts.isCI) cmd += ` --cache-folder=${homedir()}/.yarn`
   else cmd += ` --cache-folder=${path.join(tempDir, 'cy-system-tests-yarn-cache', String(Date.now()))}`
 
-  return cmd
+  return { cmd }
 }
