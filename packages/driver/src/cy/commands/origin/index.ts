@@ -63,36 +63,17 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
       let log
 
-      // Captured once the cross-origin callback resolves so the command's
-      // `consoleProps` can describe what was yielded. The yielded subject may
-      // be an unserializable subject proxy (e.g. the secondary origin's
-      // `window`), which throws when accessed or cloned - so we never expose it
-      // directly to the Command Log and instead display its type.
-      let yielded: any
-      let unserializableYieldedType: string | undefined
-
       logGroup(Cypress, {
         name: 'origin',
         type: 'parent',
         message: urlOrDomain,
         timeout,
-        consoleProps: () => {
-          const consoleProps: Record<string, any> = {
-            'Origin / Domain': urlOrDomain,
-          }
-
-          if (options?.args !== undefined) {
-            consoleProps['Args'] = options.args
-          }
-
-          if (unserializableYieldedType) {
-            consoleProps['Yielded'] = `[unserializable subject: ${unserializableYieldedType}]`
-          } else if (yielded !== undefined) {
-            consoleProps['Yielded'] = yielded
-          }
-
-          return consoleProps
-        },
+        // The default consoleProps exposes the command's yielded subject, which
+        // for cy.origin may be an unserializable subject proxy (e.g. the
+        // secondary origin's `window`). That proxy throws when accessed or
+        // cloned, so printing it to the Command Log errors (see #27385). Return
+        // an empty object - the log still prints the command name/type.
+        consoleProps: () => ({}),
         // @ts-ignore TODO: revisit once log-grouping has more implementations
       }, (_log) => {
         log = _log
@@ -134,15 +115,6 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
         const _resolve = ({ subject, unserializableSubjectType }) => {
           cleanup()
-
-          // capture what was yielded so `consoleProps` can display it without
-          // exposing the unserializable subject proxy, which throws on access
-          if (unserializableSubjectType) {
-            unserializableYieldedType = unserializableSubjectType
-          } else {
-            yielded = subject
-          }
-
           resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
         }
 

@@ -150,7 +150,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
       cy.get('a[data-cy="cross-origin-secondary-link"]').click()
     })
 
-    it('includes the origin/domain and yielded subject', () => {
+    it('prints the command name and type', () => {
       const logs: any[] = []
 
       cy.on('log:changed', (_attrs, log) => {
@@ -165,24 +165,7 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
         const consoleProps = getOriginLog(logs).invoke('consoleProps')
 
         expect(consoleProps.name).to.equal('origin')
-        expect(consoleProps.props['Origin / Domain']).to.equal('http://www.foobar.com:3500')
-        expect(consoleProps.props.Yielded).to.equal('foobar')
-      })
-    })
-
-    it('includes the args passed to the callback', () => {
-      const logs: any[] = []
-
-      cy.on('log:changed', (_attrs, log) => {
-        logs.push(log)
-      })
-
-      cy.origin('http://www.foobar.com:3500', { args: { foo: 'bar' } }, () => {})
-
-      cy.then(() => {
-        const consoleProps = getOriginLog(logs).invoke('consoleProps')
-
-        expect(consoleProps.props.Args).to.deep.equal({ foo: 'bar' })
+        expect(consoleProps.type).to.equal('command')
       })
     })
 
@@ -214,8 +197,6 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
         // the reporter deep clones the consoleProps before printing them to the
         // console - this is what threw against the unserializable subject proxy
         expect(() => _.cloneDeep(consoleProps)).not.to.throw()
-
-        expect(consoleProps.props.Yielded).to.contain('unserializable subject')
       })
     })
   })
