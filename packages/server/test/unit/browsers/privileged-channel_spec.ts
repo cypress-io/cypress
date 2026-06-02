@@ -188,6 +188,28 @@ describe('privileged channel', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/27784
+  describe('stack trace limit', () => {
+    it('raises Error.stackTraceLimit while capturing the stack and restores it', () => {
+      let limitDuringCapture
+
+      win.Error.stackTraceLimit = 5
+      win.Error.captureStackTrace = sinon.stub().callsFake(() => {
+        limitDuringCapture = win.Error.stackTraceLimit
+      })
+
+      const { onCommandInvocation } = runPrivilegedChannel()
+
+      onCommandInvocation({ name: 'task', args: [] })
+
+      // raised to capture the full stack so deeply-nested invocations
+      // aren't truncated...
+      expect(limitDuringCapture).to.equal(Infinity)
+      // ...then restored so user code is unaffected
+      expect(win.Error.stackTraceLimit).to.equal(5)
+    })
+  })
+
   describe('#dropRightUndefined', () => {
     it('removes undefined values from the right side of the array', () => {
       const { dropRightUndefined } = runPrivilegedChannel()

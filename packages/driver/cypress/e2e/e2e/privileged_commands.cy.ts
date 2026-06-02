@@ -209,6 +209,27 @@ describe('privileged commands', () => {
         // cy.get('#basic').selectFile('cypress/fixtures/valid.json')
       })
     })
+
+    // regression test for deeply-nested invocations: the stack frame used to
+    // validate the command originated from the spec (here, `invokeOriginFn`)
+    // sits below the user code, so enough synchronous frames push it past the
+    // browser's default stack-trace limit and the command was incorrectly
+    // rejected as non-spec. https://github.com/cypress-io/cypress/issues/27784
+    // cy.origin() doesn't currently have webkit support
+    it('passes when deeply nested in the .origin() callback', { browser: '!webkit' }, () => {
+      cy.origin('http://foobar.com:3500', () => {
+        const deeplyNestedTask = (depth) => {
+          if (depth === 0) {
+            return cy.task('return:arg', 'arg')
+          }
+
+          return deeplyNestedTask(depth - 1)
+        }
+
+        // 20 frames comfortably exceeds the default limit of 10
+        deeplyNestedTask(20)
+      })
+    })
   })
 
   describe('in AUT', () => {

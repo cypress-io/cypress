@@ -173,6 +173,19 @@
   }
 
   function onCommandInvocation (command) {
+    // browsers cap the number of captured stack frames (10 by default in
+    // V8/chromium). when a privileged command is invoked from deeply-nested
+    // code - e.g. inside a custom command or the cy.origin() callback - the
+    // frame we rely on to validate the spec/support origin (the spec/support
+    // file url or the `invokeOriginFn` frame) can be truncated off the bottom
+    // of the stack, causing the command to be incorrectly rejected as
+    // non-spec. raise the limit while we capture so the relevant frame is
+    // always present, then restore it to avoid affecting user code.
+    // see https://github.com/cypress-io/cypress/issues/27784
+    const originalStackTraceLimit = Err.stackTraceLimit
+
+    Err.stackTraceLimit = Infinity
+
     // message doesn't really matter since we're only interested in the stack
     const err = new Err('command stack error')
 
@@ -181,6 +194,16 @@
     if (captureStackTrace) {
       captureStackTrace.call(Err, err, onCommandInvocation)
     }
+
+    // accessing the stack here forces engines that materialize it lazily to
+    // do so while the raised limit is still in effect, before we restore it
+    const stack = err.stack
+
+    Err.stackTraceLimit = originalStackTraceLimit
+
+    // re-assign in case the property is a one-time-materializing getter, so
+    // the downstream checks operate on the fully-captured stack
+    err.stack = stack
 
     if (arrayIncludes.call(callbackCommands, command.name)) {
       hasValidCallbackContext = stackIsFromSpecFrame(err)
