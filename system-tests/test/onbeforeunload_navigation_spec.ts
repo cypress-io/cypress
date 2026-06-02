@@ -14,8 +14,5 @@ describe('e2e onbeforeunload navigation', () => {
     spec: 'navigate_away_beforeunload.cy.ts',
     snapshot: false,
     expectedExitCode: 0,
-    config: {
-      video: false,
-    },
   })
 })
