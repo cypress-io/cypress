@@ -1151,8 +1151,12 @@ export default (Commands, Cypress, cy, state, config) => {
           visitFailedByErr(err, url, () => {
             // a socket timeout (the server never sent its initial response in
             // time) is governed by `responseTimeout`, not `pageLoadTimeout`, so
-            // surface a dedicated message that points users at the right option
-            const isResponseTimeoutErr = err.code === 'ESOCKETTIMEDOUT' || err.code === 'ETIMEDOUT'
+            // surface a dedicated message that points users at the right option.
+            // match on `code` when present, but fall back to the error text since
+            // that's the one thing we can rely on being populated.
+            const isResponseTimeoutErr = err.code === 'ESOCKETTIMEDOUT' ||
+              err.code === 'ETIMEDOUT' ||
+              /ESOCKETTIMEDOUT|ETIMEDOUT/.test(err.message || '')
 
             $errUtils.throwErrByPath(isResponseTimeoutErr ? 'visit.loading_network_timed_out' : 'visit.loading_network_failed', {
               onFail: options._log,

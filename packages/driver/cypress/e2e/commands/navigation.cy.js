@@ -1586,6 +1586,25 @@ describe('src/cy/commands/navigation', () => {
         cy.visit('/foo.html')
       })
 
+      // even when the error arrives without a `code`, the timeout text in the
+      // message should still route us to the dedicated responseTimeout error
+      it('displays loading_network_timed_out when the error has no code but the message is a timeout', function (done) {
+        const err1 = new Error('ESOCKETTIMEDOUT')
+
+        cy.stub(Cypress, 'backend').log(false)
+        .withArgs('resolve:url')
+        .rejects(err1)
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('This timeout is controlled by \'responseTimeout\'')
+          expect(err.message).not.to.include('you forgot to run / boot your web server')
+
+          done()
+        })
+
+        cy.visit('/foo.html')
+      })
+
       it('displays loading_file_failed when _resolveUrl resp is not ok', function (done) {
         const obj = {
           isOkStatusCode: false,
