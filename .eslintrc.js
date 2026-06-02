@@ -65,6 +65,23 @@ module.exports = {
       files: ['*.json'],
       extends: 'plugin:@cypress/dev/general',
     },
+    {
+      // v8 snapshot bundling fails on mixed inline type + value imports
+      files: [
+        'packages/**/lib/**/*.{js,ts,tsx}',
+        'packages/**/src/**/*.{js,ts,tsx}',
+        'packages/server/**/*.{js,ts,tsx}',
+      ],
+      excludedFiles: [
+        '**/test/**',
+        '**/*.spec.*',
+        '**/cypress/**',
+        '**/__snapshots__/**',
+      ],
+      rules: {
+        'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+      },
+    },
   ],
   rules: {
     'no-duplicate-imports': 'off',
