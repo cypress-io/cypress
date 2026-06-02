@@ -2,11 +2,8 @@ import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { defaultMiddleware } from '@packages/proxy/lib/http'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import {
-  NetworkPolicyRegistry,
-  type ForNetworkPolicyRegistration,
-  type NetworkInterceptionRuntime,
-} from '@packages/network-interception'
+import { NetworkPolicyRegistry } from '@packages/network-interception'
+import type { ForNetworkPolicyRegistration, NetworkInterceptionRuntime } from '@packages/network-interception'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar } from './util/cookies'
