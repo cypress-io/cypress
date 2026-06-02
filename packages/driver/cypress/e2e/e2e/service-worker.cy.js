@@ -63,7 +63,7 @@ describe('service workers', { defaultCommandTimeout: 1000, pageLoadTimeout: 1000
     cy.wrap(navigator.serviceWorker.getRegistrations(), { timeout }).then((registrations) => {
       cy.wrap(
         Promise.all(registrations.map((registration) => registration.unregister())),
-        { timeout }
+        { timeout },
       )
     })
   }
