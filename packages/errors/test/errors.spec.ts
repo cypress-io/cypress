@@ -207,4 +207,39 @@ describe('lib/errors', () => {
       expect(resolvedPattern).toEqual('/cypress/integration/**notfound**')
     })
   })
+
+  describe('RENDERER_CRASHED', () => {
+    it('includes the crash reason and exit code when both are provided', () => {
+      const { message } = errors.get('RENDERER_CRASHED', 'Electron', 'oom', 9)
+      const text = errors.stripAnsi(message)
+
+      expect(text).toContain('Electron Renderer process just crashed')
+      expect(text).toContain('reason: oom')
+      expect(text).toContain('exit code: 9')
+    })
+
+    it('includes an exit code of 0', () => {
+      const { message } = errors.get('RENDERER_CRASHED', 'Chrome', 'crashed', 0)
+      const text = errors.stripAnsi(message)
+
+      expect(text).toContain('reason: crashed')
+      expect(text).toContain('exit code: 0')
+    })
+
+    it('falls back to "unknown" when a detail is missing', () => {
+      const { message } = errors.get('RENDERER_CRASHED', 'Electron', 'oom')
+      const text = errors.stripAnsi(message)
+
+      expect(text).toContain('reason: oom')
+      expect(text).toContain('exit code: unknown')
+    })
+
+    it('omits the crash details line when no reason or exit code is provided', () => {
+      const { message } = errors.get('RENDERER_CRASHED', 'Electron')
+      const text = errors.stripAnsi(message)
+
+      expect(text).toContain('Electron Renderer process just crashed')
+      expect(text).not.toContain('exited unexpectedly')
+    })
+  })
 })
