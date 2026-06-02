@@ -1,11 +1,7 @@
-import type { NetworkPolicy } from './types'
+import type { NetworkPolicy } from '@packages/network-interception'
 
 export type BlockedHostsConfig = {
   blockHosts?: string | string[] | null
-  /**
-   * Host matcher injected by the composition root (e.g. `blocked.matches` from proxy).
-   * Keeps `@packages/network-interception` free of proxy dependencies.
-   */
   matchesBlockedHost?: (url: string, blockHosts: string | string[]) => string | false | null | undefined
 }
 

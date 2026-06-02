@@ -1,24 +1,22 @@
 # Server adapters
 
-**Adapters** for `@packages/network-interception` **driving ports** owned by the server composition root.
+**Adapters** for `@packages/network-interception` ports owned by the server composition root.
 
 See [`packages/network-interception/README.md`](../../network-interception/README.md).
 
 ---
 
-## Stage 2 — `ConfiguratorNetworkPolicyAdapter`
+## Stage 2 — configurator policy registration (no server adapter)
 
-| Hex role | Name |
+`ForNetworkPolicyRegistration` is a **driving port** exported by `@packages/network-interception`. The composition root instantiates `NetworkPolicyRegistry` and registers policies via that port interface.
+
+Policy **definitions and config mapping** live in server:
+
+| File | Role |
 | --- | --- |
-| **Driving port** | `ForNetworkPolicyRegistration` |
-| **Adapter** | `ConfiguratorNetworkPolicyAdapter` |
-| **Delegate** | `NetworkPolicyRegistry` (`@packages/network-interception/lib/registry/`) |
-
-Forwards `add`, `getPolicies`, and `runPolicies` to a registry instance created in `createProxyRuntime()`.
-
-### `registerDefaultNetworkPolicies`
-
-Called from `createProxyRuntime()` before `NetworkProxy` construction:
+| `lib/network-policies/blocked-hosts.ts` | Config policy factory conforming to `NetworkPolicy` |
+| `register-default-network-policies.ts` | Maps config → policy instances, calls `policies.add()` |
+| `network-runtime.ts` | Creates registry, calls `registerDefaultNetworkPolicies()` before `NetworkProxy` |
 
 | Config | Policy (stage 2) |
 | --- | --- |
@@ -28,7 +26,8 @@ Policies are **registered only** — middleware enforcement is stage 7.
 
 ### Tests
 
-- `packages/server/test/unit/adapters/configurator-network-policy_spec.ts`
+- `packages/server/test/unit/network-policies/blocked-hosts_spec.ts`
 - `packages/server/test/unit/register-default-network-policies_spec.ts`
+- `packages/server/test/unit/network-runtime_spec.ts`
 
 [#33919](https://github.com/cypress-io/cypress/issues/33919)

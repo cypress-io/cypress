@@ -1,12 +1,22 @@
 import { describe, it, expect, vi } from 'vitest'
-import { NetworkPolicyRegistry, BlockedHosts } from '../../lib'
+import type { NetworkPolicy } from '../../lib'
+import { NetworkPolicyRegistry } from '../../lib'
+
+function testPolicy (overrides: Partial<NetworkPolicy> & Pick<NetworkPolicy, 'when' | 'apply'>): NetworkPolicy {
+  return {
+    name: 'test-policy',
+    provenance: 'config',
+    phases: ['request'],
+    ...overrides,
+  }
+}
 
 describe('NetworkPolicyRegistry', () => {
   it('registers and returns policies in insertion order', () => {
     const registry = new NetworkPolicyRegistry()
-    const policy = BlockedHosts({
-      blockHosts: ['*.evil.com'],
-      matchesBlockedHost: (url) => (url.includes('evil.com') ? 'evil.com' : false),
+    const policy = testPolicy({
+      when: () => true,
+      apply: () => {},
     })
 
     registry.add(policy)
@@ -19,9 +29,9 @@ describe('NetworkPolicyRegistry', () => {
     const onContinue = vi.fn()
     const onEnd = vi.fn()
 
-    registry.add(BlockedHosts({
-      blockHosts: ['*.evil.com'],
-      matchesBlockedHost: () => 'evil.com',
+    registry.add(testPolicy({
+      when: () => true,
+      apply: (ctx) => ctx.end(),
     }))
 
     await registry.runPolicies({
@@ -40,9 +50,9 @@ describe('NetworkPolicyRegistry', () => {
     const onContinue = vi.fn()
     const onEnd = vi.fn()
 
-    registry.add(BlockedHosts({
-      blockHosts: ['*.evil.com'],
-      matchesBlockedHost: () => false,
+    registry.add(testPolicy({
+      when: () => false,
+      apply: (ctx) => ctx.end(),
     }))
 
     await registry.runPolicies({
@@ -55,26 +65,28 @@ describe('NetworkPolicyRegistry', () => {
     expect(onContinue).toHaveBeenCalledTimes(1)
     expect(onEnd).not.toHaveBeenCalled()
   })
-})
 
-describe('BlockedHosts policy', () => {
-  it('does not match without a matcher or blockHosts config', () => {
-    const policy = BlockedHosts({})
+  it('runPolicies calls onEnd only once when a policy calls end() multiple times', async () => {
+    const registry = new NetworkPolicyRegistry()
+    const onContinue = vi.fn()
+    const onEnd = vi.fn()
 
-    expect(policy.when({ url: 'http://evil.com/' })).toBe(false)
-  })
-
-  it('matches blocked URLs via injected matcher', () => {
-    const policy = BlockedHosts({
-      blockHosts: ['*.evil.com'],
-      matchesBlockedHost: (url, hosts) => {
-        expect(hosts).toEqual(['*.evil.com'])
-
-        return url.includes('evil.com') ? 'evil.com' : false
+    registry.add(testPolicy({
+      when: () => true,
+      apply: async (ctx) => {
+        ctx.end()
+        ctx.end()
       },
+    }))
+
+    await registry.runPolicies({
+      phase: 'request',
+      exchange: { url: 'http://example.com/' },
+      onContinue,
+      onEnd,
     })
 
-    expect(policy.when({ url: 'http://evil.com/path' })).toBe(true)
-    expect(policy.when({ url: 'http://example.com/' })).toBe(false)
+    expect(onEnd).toHaveBeenCalledTimes(1)
+    expect(onContinue).not.toHaveBeenCalled()
   })
 })

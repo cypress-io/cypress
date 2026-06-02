@@ -23,7 +23,10 @@ export interface ForInterceptRegistration {
 }
 
 /**
- * Driving port: Cypress configurator (CSP, default rewrites, blockHosts).
+ * Driving port: composition root registers configurator policies (blockHosts, CSP, rewrites).
+ *
+ * Implemented by {@link NetworkPolicyRegistry}. `@packages/server` calls `add()` at startup;
+ * policy definitions and config mapping live in server, not inside network-interception.
  */
 export interface ForNetworkPolicyRegistration {
   add (policy: NetworkPolicy): void

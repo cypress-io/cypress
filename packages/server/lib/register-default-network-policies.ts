@@ -1,6 +1,6 @@
 import { blocked } from '@packages/network'
-import { BlockedHosts } from '@packages/network-interception'
 import type { ForNetworkPolicyRegistration } from '@packages/network-interception'
+import { BlockedHosts } from './network-policies/blocked-hosts'
 
 type RegisterDefaultNetworkPoliciesConfig = {
   blockHosts?: string | string[] | null
@@ -8,7 +8,8 @@ type RegisterDefaultNetworkPoliciesConfig = {
 
 /**
  * Register configurator policies derived from Cypress project config.
- * Policies are stored in the registry only — proxy middleware is unchanged until Stage 3+.
+ * Server-owned mapping from config → {@link NetworkPolicy} instances.
+ * Policies are stored via the driving port only; middleware is unchanged until stage 7.
  */
 export function registerDefaultNetworkPolicies (
   policies: ForNetworkPolicyRegistration,

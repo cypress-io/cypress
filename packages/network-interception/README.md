@@ -2,7 +2,7 @@
 
 Types and **port interfaces** for Cypress network interception (`cy.intercept`, config policies, proxy middleware). Part of the stacked refactor in [#33919](https://github.com/cypress-io/cypress/issues/33919) to support HTTP/2 (CDP Fetch / BiDi) without rewriting intercept logic.
 
-> **Stack stage 2 of 8.** Second **driving port**: `ForNetworkPolicyRegistration`, `NetworkPolicyRegistry`, `BlockedHosts` registered at startup. Registry is populated; **proxy middleware does not call `runPolicies` yet** (stage 7).
+> **Stack stage 2 of 8.** Driving port `ForNetworkPolicyRegistration`, default impl `NetworkPolicyRegistry`. `@packages/server` defines and registers config policies (e.g. `BlockedHosts`) at startup. Registry is populated; **proxy middleware does not call `runPolicies` yet** (stage 7).
 
 ---
 
@@ -20,41 +20,46 @@ The codebase adopts **hexagonal architecture** (also called **ports and adapters
 | --- | --- | --- |
 | **Port** | Contract at the edge of the interception "inside" | `For*` types in `lib/ports/` |
 | **Adapter** | Implements a port by delegating to existing Cypress code | `*Adapter` classes under `packages/*/lib/adapters/` |
-| **Driving port** (primary) | Outside actors **call into** interception | `ForInterceptRegistration`, `ForNetworkPolicyRegistration` |
+| **Driving port** (primary) | Outside actors **call into** interception | `ForInterceptRegistration` (driver IPC), `ForNetworkPolicyRegistration` (server config) |
 | **Driven port** (secondary) | Interception **calls out** for I/O | `ForRequestInterception`, `ForCookieState`, … |
 | **Core** | Domain orchestration without transport imports | `NetworkPolicyCore` (stage 3) |
-| **Composition root** | Constructs and injects adapters | `createProxyRuntime()` |
+| **Composition root** | Constructs and injects adapters | `createProxyRuntime()` in `@packages/server` |
 
 **Dependency rule:** this package must not import `@packages/proxy` or `@packages/net-stubbing`.
+
+**Config vs test intercepts:** both match proxied traffic, but differ by **who drives registration**. Test intercepts use `ForInterceptRegistration` (driver IPC). Config rules use `ForNetworkPolicyRegistration` — the port interface lives here; **`@packages/server` owns the config → policy mapping** via `registerDefaultNetworkPolicies()`.
 
 ---
 
 ## What stage 2 delivers
 
-### Policy registry (`lib/registry/network-policy-registry.ts`)
+### Driving port: `ForNetworkPolicyRegistration`
 
-Configurator rules (`blockHosts`, later CSP and document rewrite) become **`NetworkPolicy`** objects in a registry instead of inline `if (config.blockHosts)` in middleware.
+Exported from this package so `@packages/server` knows how to register configurator policies without importing registry internals.
 
-| API | Purpose |
+| Method | Purpose |
 | --- | --- |
 | `add(policy)` | Register in insertion order |
 | `getPolicies()` | Read registered list |
-| `runPolicies({ phase, ctx, onContinue, onEnd })` | Evaluate policies for a request phase (wired in stage 7) |
 
-### Driving port: `ForNetworkPolicyRegistration`
+**Default implementation:** `NetworkPolicyRegistry` (also owns `runPolicies`, wired in stage 7).
 
-**Adapter:** `ConfiguratorNetworkPolicyAdapter` (`packages/server/lib/adapters/`) — wraps the registry.
-
-**Startup:** `registerDefaultNetworkPolicies(adapter, config)` in `createProxyRuntime()` adds `BlockedHosts` from `config.blockHosts`.
+**Server-owned policies:** `@packages/server` defines configurator policy implementations (e.g. `BlockedHosts` in `lib/network-policies/`) and registers them via `registerDefaultNetworkPolicies(policies, config)`. This package accepts any value conforming to `NetworkPolicy`.
 
 ```
-createProxyRuntime()
-  → ConfiguratorNetworkPolicyAdapter  (driving-port adapter)
-  → registerDefaultNetworkPolicies()  → policies.add(BlockedHosts(...))
+createProxyRuntime()  (@packages/server)
+  → networkPolicyRegistration: ForNetworkPolicyRegistration = new NetworkPolicyRegistry()
+  → registerDefaultNetworkPolicies(networkPolicyRegistration, config)
   → networkPolicyRegistration exposed on runtime (not yet used by middleware)
 ```
 
-Server adapter details: [`packages/server/lib/adapters/README.md`](../../server/lib/adapters/README.md)
+### Policy runner (`NetworkPolicyRegistry.runPolicies`)
+
+| API | Purpose |
+| --- | --- |
+| `runPolicies({ phase, exchange, onContinue, onEnd })` | Evaluate policies for a request phase (wired in stage 7) |
+
+`ctx.continue()` is intentionally a no-op — chain advancement is implicit via the loop. `onContinue` / `onEnd` fire at the runner boundary when middleware is wired in stage 7.
 
 ### Stage 1 recap
 
@@ -67,7 +72,7 @@ Server adapter details: [`packages/server/lib/adapters/README.md`](../../server/
 | Stage | Branch | Adds |
 | --- | --- | --- |
 | 0–1 | … | Package, driver driving port |
-| **2** | **`refactor/ports-adapters-2`** | **Policy registry + `BlockedHosts` registration** |
+| **2** | **`refactor/ports-adapters-2`** | **Policy driving port + registry + server-side registration** |
 | 3 | `refactor/ports-adapters-3` | Core extraction |
 | 4–6 | … | Driven-port adapters |
 | 7 | `refactor/ports-adapters-7` | `runPolicies` enforcement in middleware |
@@ -81,7 +86,7 @@ Server adapter details: [`packages/server/lib/adapters/README.md`](../../server/
 ```bash
 yarn workspace @packages/network-interception build-prod
 yarn workspace @packages/network-interception test
-yarn workspace @packages/server test-unit --grep "configurator-network-policy|register-default|network-runtime"
+yarn workspace @packages/server test-unit --grep "blocked-hosts|register-default|network-runtime"
 ```
 
 Compiled output lives in `cjs/` and `esm/` (gitignored). Source stays in `lib/`.

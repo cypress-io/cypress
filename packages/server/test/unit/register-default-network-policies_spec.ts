@@ -1,7 +1,7 @@
 import { blocked } from '@packages/network'
-import { BlockedHosts } from '@packages/network-interception'
 import { NetworkPolicyRegistry } from '@packages/network-interception'
 import { registerDefaultNetworkPolicies } from '../../lib/register-default-network-policies'
+import { BlockedHosts } from '../../lib/network-policies/blocked-hosts'
 import '../spec_helper'
 
 describe('lib/register-default-network-policies', () => {

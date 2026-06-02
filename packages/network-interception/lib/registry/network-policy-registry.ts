@@ -10,7 +10,9 @@ export type RunPoliciesOptions = {
 }
 
 /**
- * In-memory registry for configurator {@link NetworkPolicy} instances.
+ * Default {@link ForNetworkPolicyRegistration} implementation and internal rule runner.
+ *
+ * Policy instances are added by `@packages/server` via the driving port at the composition root.
  */
 export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
   private readonly policies: NetworkPolicy[] = []
@@ -25,7 +27,7 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
 
   /**
    * Run registered policies for a phase. First matching policy that calls `end()` stops the chain.
-   * Not wired into proxy middleware until Stage 2b+.
+   * Not wired into proxy middleware until stage 7.
    */
   async runPolicies (options: RunPoliciesOptions): Promise<void> {
     const { phase, exchange, onContinue, onEnd } = options
@@ -35,9 +37,15 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
       phase,
       exchange,
       continue () {
-        // no-op — chain continues to next policy
+        // Intentional no-op: chain advancement is implicit via the loop below.
+        // Policies call continue() for API symmetry with end(); onContinue fires
+        // only when every matching policy completes without ending the chain.
       },
       end () {
+        if (ended) {
+          return
+        }
+
         ended = true
         onEnd()
       },
@@ -53,6 +61,7 @@ export class NetworkPolicyRegistry implements ForNetworkPolicyRegistration {
       }
 
       if (!policy.when(exchange)) {
+        // e.g. policy when() returns false — try the next registered policy.
         continue
       }
 
