@@ -31,11 +31,18 @@ function openProject (testingType: typeof testingTypes[number]) {
 // For Cypress-in-Cypress tests that do not vary based on testing type
 describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 10000 }, () => {
   testingTypes.forEach((testingType) => {
-    it(`handles automation disconnects in ${testingType}`, () => {
+    it(`handles automation disconnects for the Firefox extension in ${testingType}`, () => {
       startAtSpecsPage(testingType)
 
       cy.get('[data-cy="spec-item"]').first().click()
       cy.waitForSpecToFinish()
+
+      // the disconnect view only applies to browsers that automate via the
+      // Cypress extension, so simulate Firefox. See
+      // https://github.com/cypress-io/cypress/issues/28932
+      cy.window().then((win) => {
+        cy.stub(win.getEventManager(), 'isBrowserFamily').callsFake((family) => family === 'firefox')
+      })
 
       cy.withCtx((ctx) => {
         ctx.coreData.servers.cdpSocketServer?.emit('automation:disconnected')
@@ -56,7 +63,23 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
       // cy.percySnapshot() // TODO: restore when Percy CSS is fixed. See https://github.com/cypress-io/cypress/issues/23435
     })
 
-    it(`handles automation missing in ${testingType}`, () => {
+    it(`does not block on automation disconnects for non-extension browsers in ${testingType}`, () => {
+      startAtSpecsPage(testingType)
+
+      cy.get('[data-cy="spec-item"]').first().click()
+      cy.waitForSpecToFinish()
+
+      // Chromium-based browsers (the default harness browser) automate via CDP
+      // and should never be blocked by an extension disconnect.
+      cy.withCtx((ctx) => {
+        ctx.coreData.servers.cdpSocketServer?.emit('automation:disconnected')
+      })
+
+      cy.get('#unified-reporter').should('be.visible')
+      cy.contains('h2', 'The Cypress extension has disconnected').should('not.exist')
+    })
+
+    it(`handles automation missing for the Firefox extension in ${testingType}`, () => {
       let connectedCallback: any
 
       startAtSpecsPage(testingType)
@@ -80,6 +103,14 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
 
       cy.get('[data-cy="spec-item"]').first().click()
       cy.waitForSpecToFinish()
+
+      // the missing view only applies to browsers that automate via the
+      // Cypress extension, so simulate Firefox. See
+      // https://github.com/cypress-io/cypress/issues/28932
+      cy.window().then((win) => {
+        cy.stub(win.getEventManager(), 'isBrowserFamily').callsFake((family) => family === 'firefox')
+      })
+
       cy.get('#unified-reporter').should('be.visible').then(() => {
         connectedCallback(false)
       })
@@ -102,6 +133,41 @@ describe('Cypress in Cypress', { viewportWidth: 1500, defaultCommandTimeout: 100
         expect(ctx.coreData.activeBrowser?.displayName).eq('Electron')
         expect(ctx.actions.project.launchProject).to.have.been.called
       })
+    })
+
+    it(`does not block on automation missing for non-extension browsers in ${testingType}`, () => {
+      let connectedCallback: any
+
+      startAtSpecsPage(testingType)
+
+      cy.window().then((win) => {
+        if (!win.ws) {
+          throw new Error('"window.ws" is expected to be available')
+        }
+
+        const originalEmit: Function = win.ws.emit
+        const stub = cy.stub(win.ws as any, 'emit')
+
+        stub.callsFake((...args) => {
+          if (args[0] === 'is:automation:client:connected') {
+            connectedCallback = args[2]
+          }
+
+          originalEmit.call(win.ws, ...args)
+        })
+      })
+
+      cy.get('[data-cy="spec-item"]').first().click()
+      cy.waitForSpecToFinish()
+
+      // Chromium-based browsers (the default harness browser) automate via CDP,
+      // so a "missing" automation client must not block the runner.
+      cy.get('#unified-reporter').should('be.visible').then(() => {
+        connectedCallback(false)
+      })
+
+      cy.get('#unified-reporter').should('be.visible')
+      cy.contains('h2', 'The Cypress extension is missing').should('not.exist')
     })
 
     describe('dragging panels', () => {

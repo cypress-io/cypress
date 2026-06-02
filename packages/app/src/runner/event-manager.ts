@@ -115,7 +115,12 @@ export class EventManager {
     const runnerUiStore = useRunnerUiStore()
 
     this.ws.emit('is:automation:client:connected', connectionInfo, (isConnected: boolean) => {
-      const connected = isConnected ? automation.CONNECTED : automation.MISSING
+      // Only Firefox relies on the Cypress browser extension as its automation
+      // client. Chromium-based browsers (Chrome, Edge, Electron) and WebKit
+      // automate via CDP/BiDi, so a missing or disconnected extension should
+      // never block the user with the AutomationMissing/AutomationDisconnected
+      // views. See https://github.com/cypress-io/cypress/issues/28932
+      const connected = (isConnected || !this.isBrowserFamily('firefox')) ? automation.CONNECTED : automation.MISSING
 
       // legacy MobX integration
       // TODO: UNIFY-1318 - can we delete this, or does the driver depend on this somehow?
@@ -124,13 +129,17 @@ export class EventManager {
       })
 
       this.ws.on('automation:disconnected', () => {
+        // Ignore extension disconnects for browsers that do not rely on the
+        // extension as their automation client (e.g. Chrome automates via CDP).
+        if (!this.isBrowserFamily('firefox')) {
+          return
+        }
+
         this.Mobx.runInAction(() => {
           state.automation = automation.DISCONNECTED
         })
-      })
 
-      // unified integration
-      this.ws.on('automation:disconnected', () => {
+        // unified integration
         runnerUiStore.setAutomationStatus('DISCONNECTED')
       })
 
