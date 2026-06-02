@@ -66,7 +66,6 @@ module.exports = {
       extends: 'plugin:@cypress/dev/general',
     },
     {
-      // v8 snapshot bundling fails on mixed inline type + value imports
       files: [
         'packages/**/lib/**/*.{js,ts,tsx}',
         'packages/**/src/**/*.{js,ts,tsx}',
