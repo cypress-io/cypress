@@ -447,13 +447,24 @@ export class ProjectDataSource {
 
         // Use stats when available to determine if this is a directory.
         // When stats are absent (chokidar is inconsistent about providing them),
-        // infer from the path: no extension AND not a dotfile (e.g. .gitignore)
-        // strongly suggests a directory. This avoids statSync while still
-        // allowing chokidar to continue traversal into subdirectories.
+        // infer from the path: no extension strongly suggests a directory.
+        // Dot-prefixed entries (e.g. .e2e/) are ambiguous — a statSync on just
+        // those keeps the sync I/O rare while correctly handling dot-directories.
         const basename = path.basename(file)
-        const isDirectory = stats
-          ? stats.isDirectory()
-          : !path.extname(file) && !basename.startsWith('.')
+        let isDirectory: boolean
+
+        if (stats) {
+          isDirectory = stats.isDirectory()
+        } else if (!path.extname(file) && basename.startsWith('.')) {
+          try {
+            // eslint-disable-next-line no-restricted-syntax
+            isDirectory = fs.statSync(file).isDirectory()
+          } catch {
+            isDirectory = false
+          }
+        } else {
+          isDirectory = !path.extname(file)
+        }
 
         if (isDirectory) {
           return false
