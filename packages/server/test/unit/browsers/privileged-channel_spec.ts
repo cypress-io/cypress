@@ -202,10 +202,26 @@ describe('privileged channel', () => {
 
       onCommandInvocation({ name: 'task', args: [] })
 
-      // raised to capture the full stack so deeply-nested invocations
-      // aren't truncated...
-      expect(limitDuringCapture).to.equal(Infinity)
+      // raised so deeply-nested invocations aren't truncated, but bounded
+      // (not Infinity) so we don't capture/format an unbounded stack on
+      // every command
+      expect(limitDuringCapture).to.be.greaterThan(5)
+      expect(limitDuringCapture).not.to.equal(Infinity)
       // ...then restored so user code is unaffected
+      expect(win.Error.stackTraceLimit).to.equal(5)
+    })
+
+    it('does not capture a stack for non-callback, non-privileged commands', () => {
+      win.Error.stackTraceLimit = 5
+
+      const { onCommandInvocation } = runPrivilegedChannel()
+
+      onCommandInvocation({ name: 'get', args: [] })
+
+      // the stack is never captured nor the limit touched for commands that
+      // don't require validation
+      expect(win.Error.captureStackTrace).not.to.be.called
+      expect(win.fetch).not.to.be.called
       expect(win.Error.stackTraceLimit).to.equal(5)
     })
   })

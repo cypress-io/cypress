@@ -29,6 +29,18 @@
 
   const queryStringRegex = /\?.*$/
 
+  // browsers cap the number of captured stack frames (10 by default in
+  // V8/chromium). when a privileged command is invoked from deeply-nested
+  // code - e.g. inside a custom command or the cy.origin() callback - the
+  // frame we rely on to validate the spec/support origin (the spec/support
+  // file url or the `invokeOriginFn` frame) can be truncated off the bottom of
+  // the stack, causing the command to be incorrectly rejected as non-spec. we
+  // raise the limit (in onCommandInvocation) to a generous-but-bounded value
+  // so the relevant frame is present, without paying to capture and format an
+  // unbounded stack on every invocation (which would be costly for deeply
+  // recursive user code). see https://github.com/cypress-io/cypress/issues/27784
+  const stackTraceLimit = 200
+
   let hasValidCallbackContext = false
 
   // since this function is eval'd, the scripts are included as stringified JSON
@@ -173,18 +185,19 @@
   }
 
   function onCommandInvocation (command) {
-    // browsers cap the number of captured stack frames (10 by default in
-    // V8/chromium). when a privileged command is invoked from deeply-nested
-    // code - e.g. inside a custom command or the cy.origin() callback - the
-    // frame we rely on to validate the spec/support origin (the spec/support
-    // file url or the `invokeOriginFn` frame) can be truncated off the bottom
-    // of the stack, causing the command to be incorrectly rejected as
-    // non-spec. raise the limit while we capture so the relevant frame is
-    // always present, then restore it to avoid affecting user code.
-    // see https://github.com/cypress-io/cypress/issues/27784
+    const isCallbackCommand = arrayIncludes.call(callbackCommands, command.name)
+    const isPrivilegedCommand = arrayIncludes.call(privilegedCommands, command.name)
+
+    // only callback and privileged commands need their stack inspected, so
+    // avoid the cost of capturing one for every other command
+    if (!isCallbackCommand && !isPrivilegedCommand) return
+
+    // raise the captured-frame limit so deeply-nested invocations aren't
+    // truncated (see stackTraceLimit above), then restore it so user code is
+    // unaffected
     const originalStackTraceLimit = Err.stackTraceLimit
 
-    Err.stackTraceLimit = Infinity
+    Err.stackTraceLimit = stackTraceLimit
 
     // message doesn't really matter since we're only interested in the stack
     const err = new Err('command stack error')
@@ -205,11 +218,11 @@
     // the downstream checks operate on the fully-captured stack
     err.stack = stack
 
-    if (arrayIncludes.call(callbackCommands, command.name)) {
+    if (isCallbackCommand) {
       hasValidCallbackContext = stackIsFromSpecFrame(err)
     }
 
-    if (!arrayIncludes.call(privilegedCommands, command.name)) return
+    if (!isPrivilegedCommand) return
 
     // if stack is not validated as being from the spec frame, don't add
     // it as a verified command
