@@ -2339,10 +2339,11 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium+
+        default: large
       percy:
         type: boolean
         default: false
+    resource_class: << parameters.resource_class >>
     parallelism: 7
     steps:
       - run-new-ui-tests:

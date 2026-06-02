@@ -1136,6 +1136,57 @@ describe('lib/util/ci_provider', () => {
       return expectsName('jenkins')
     })
 
+    it('strips the remote prefix the Git plugin adds to GIT_BRANCH', () => {
+      resetEnv = mockedEnv({
+        JENKINS_URL: 'true',
+
+        GIT_COMMIT: 'gitCommit',
+        GIT_BRANCH: 'origin/feature/foo',
+      }, { clear: true })
+
+      expectsName('jenkins')
+
+      return expectsCommitParams({
+        sha: 'gitCommit',
+        branch: 'feature/foo',
+      })
+    })
+
+    it('prefers the unprefixed BRANCH_NAME (multibranch pipeline) over GIT_BRANCH', () => {
+      resetEnv = mockedEnv({
+        JENKINS_URL: 'true',
+
+        GIT_COMMIT: 'gitCommit',
+        BRANCH_NAME: 'branchName',
+        GIT_BRANCH: 'origin/branchName',
+      }, { clear: true })
+
+      expectsName('jenkins')
+
+      return expectsCommitParams({
+        sha: 'gitCommit',
+        branch: 'branchName',
+      })
+    })
+
+    it('prefers the unprefixed GIT_LOCAL_BRANCH over GIT_BRANCH', () => {
+      resetEnv = mockedEnv({
+        JENKINS_URL: 'true',
+
+        GIT_COMMIT: 'gitCommit',
+        GIT_LOCAL_BRANCH: 'localBranch',
+        BRANCH_NAME: 'branchName',
+        GIT_BRANCH: 'origin/branchName',
+      }, { clear: true })
+
+      expectsName('jenkins')
+
+      return expectsCommitParams({
+        sha: 'gitCommit',
+        branch: 'localBranch',
+      })
+    })
+
     it('with change request params (PR Scenario)', () => {
       resetEnv = mockedEnv({
         JENKINS_URL: 'true',
