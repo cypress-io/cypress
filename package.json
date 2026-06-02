@@ -140,7 +140,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-cypress": "3.6.0",
     "eslint-plugin-graphql": "4.0.0",
-    "eslint-plugin-import": "2.25.4",
+    "eslint-plugin-import": "2.29.1",
     "eslint-plugin-json-format": "2.0.1",
     "eslint-plugin-mocha": "8.2.0",
     "eslint-plugin-react": "7.37.5",
@@ -279,6 +279,7 @@
     "@types/react": "18.3.12",
     "browserify-sign": "4.2.5",
     "devtools-protocol": "0.0.1575685",
+    "eslint-plugin-import": "2.29.1",
     "node-abi": "4.9.0",
     "vue-template-compiler": "2.6.12",
     "yargs-unparser": "1.6.4"
