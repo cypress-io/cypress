@@ -1,0 +1,8 @@
+  Bug 1 — Promise never resolved early (spawn.ts:262): child.unref() was called but the Promise only ever resolved on
+  child.on('close')/child.on('exit'). The CLI process stayed blocked until the GUI closed. Fix: when detached, call child.unref()
+  then resolve(0) immediately and return before setting up any event listeners or pipes.
+  
+  Bug 2 — stdio pipes kept the parent alive (spawn.ts:95, child_process behavior): getStdioStrategy() returned 'inherit' or
+  ['inherit', 'inherit', 'pipe'] regardless of detached mode. Node.js holds open pipe endpoints after unref(), so the event loop
+  stayed alive. Fix: override stdioOptions.stdio = 'ignore' before spawning when detached — this also means
+  child.stdin/stdout/stderr are all null, so the piping blocks naturally short-circuit.

@@ -410,33 +410,52 @@ export class ProjectDataSource {
   }
 
   _makeSpecWatcher ({ projectRoot, specPattern, excludeSpecPattern, additionalIgnorePattern }: { projectRoot: string, excludeSpecPattern: string[], additionalIgnorePattern: string[], specPattern: string[] }) {
-    return chokidar.watch('.', {
+    // Scope the watch to only the directories implied by each specPattern rather
+    // than the entire project root, avoiding traversal of unrelated files.
+    // 'cypress/e2e/**/*.cy.ts' → watch 'cypress/e2e/' only.
+    // For root-anchored patterns like '**/*.cy.ts', base is empty and we fall
+    // back to watching '.'.  We also resolve each base to the nearest existing
+    // ancestor so chokidar has a real directory to register from startup.
+    const watchRoots = [...new Set(
+      specPattern.map((p) => {
+        const base = parseGlob(p).base
+
+        if (!base) return '.'
+
+        let dir = base
+
+        while (dir && dir !== '.') {
+          if (fs.existsSync(path.resolve(projectRoot, dir))) return dir
+
+          dir = path.dirname(dir)
+        }
+
+        return '.'
+      }),
+    )]
+
+    return chokidar.watch(watchRoots.length ? watchRoots : ['.'], {
       ignoreInitial: true,
       ignorePermissionErrors: true,
       cwd: projectRoot,
       ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string, stats?: fs.Stats) => {
-        // Add a extra safe to prevent watching node_modules, in case the glob
-        // pattern is not taken into account by the ignored
+        // Extra guard against node_modules in case the glob pattern above
+        // doesn't cover all forms of the path.
         if (file.includes('node_modules')) {
           return true
         }
 
-        // We need stats arg to make the determination of whether to watch it, because we need to watch directories
-        // chokidar is extremely inconsistent in whether or not it has the stats arg internally
-        if (!stats) {
-          try {
-            // TODO: find a way to avoid this sync call - might require patching chokidar
-            // eslint-disable-next-line no-restricted-syntax
-            stats = fs.statSync(file)
-          } catch {
-            // If the file/folder is removed do not ignore it, in case it is added
-            // again
-            return false
-          }
-        }
+        // Use stats when available to determine if this is a directory.
+        // When stats are absent (chokidar is inconsistent about providing them),
+        // infer from the path: no extension AND not a dotfile (e.g. .gitignore)
+        // strongly suggests a directory. This avoids statSync while still
+        // allowing chokidar to continue traversal into subdirectories.
+        const basename = path.basename(file)
+        const isDirectory = stats
+          ? stats.isDirectory()
+          : !path.extname(file) && !basename.startsWith('.')
 
-        // don't ignore directories
-        if (stats.isDirectory()) {
+        if (isDirectory) {
           return false
         }
 
