@@ -46,6 +46,7 @@ export default function (_options: any): Rule {
       addCtSpecs(_options),
       addCypressTestScriptsToPackageJson(),
       modifyAngularJson(_options),
+      excludeCypressFromRootTsConfig(),
       addDefaultSchematic(),
     ])(tree, _context)
   }
@@ -342,6 +343,57 @@ function addDefaultSchematic (): Rule {
     }
 
     throw new SchematicsException('angular.json not found')
+  }
+}
+
+// Cypress ships ambient global type definitions (Chai's `expect`, Mocha's
+// `describe`/`it`) that collide with the Jasmine globals Angular projects use
+// for their `*.spec.ts` unit tests. Once an editor's TypeScript program reaches
+// a file that imports Cypress (e.g. `cypress.config.ts` or anything under the
+// `cypress/` folder), those globals leak across the whole program, producing
+// errors like `Property 'toBeTruthy' does not exist on type 'Assertion'`.
+//
+// The Cypress files already get their types from the generated
+// `cypress/tsconfig.json`, so excluding the Cypress config and folder from the
+// root `tsconfig.json` keeps the Jasmine globals intact for the rest of the
+// project without affecting the Cypress tests. See:
+// https://github.com/cypress-io/cypress/issues/7552
+function excludeCypressFromRootTsConfig (): Rule {
+  return (tree: Tree, context: SchematicContext) => {
+    const rootTsConfigPath = '/tsconfig.json'
+
+    if (!tree.exists(rootTsConfigPath)) {
+      context.logger.debug('No root tsconfig.json found, skipping Cypress type exclusion')
+
+      return tree
+    }
+
+    const angularJsonVal = getAngularJsonValue(tree)
+    const { projects } = angularJsonVal
+
+    if (!projects) {
+      throw new SchematicsException('projects in angular.json is not defined')
+    }
+
+    const rootTsConfig = new JSONFile(tree, rootTsConfigPath)
+    const existingExclude = (rootTsConfig.get(['exclude']) as string[] | undefined) ?? []
+    const exclude = [...existingExclude]
+
+    Object.keys(projects).forEach((name) => {
+      const project = projects[name]
+      const prefix = project.root ? `${project.root}/` : ''
+
+      ;[`${prefix}cypress`, `${prefix}cypress.config.ts`].forEach((path) => {
+        if (!exclude.includes(path)) {
+          context.logger.debug(`Excluding ${path} from ${rootTsConfigPath} to avoid Cypress/Jasmine type conflicts`)
+          exclude.push(path)
+        }
+      })
+    })
+
+    rootTsConfig.modify(['exclude'], exclude)
+
+    return tree
   }
 }
 

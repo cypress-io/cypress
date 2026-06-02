@@ -30,6 +30,10 @@ describe('@cypress/schematic: ng-add', () => {
     return tree.readJson('/angular.json') as JsonObject
   }
 
+  const readRootTsConfig = (tree: UnitTestTree) => {
+    return tree.readJson('/tsconfig.json') as JsonObject
+  }
+
   beforeEach(async () => {
     appTree = await schematicRunner.runExternalSchematic('@schematics/angular', 'workspace', workspaceOptions)
     appTree = await schematicRunner.runExternalSchematic('@schematics/angular', 'application', appOptions, appTree)
@@ -61,6 +65,45 @@ describe('@cypress/schematic: ng-add', () => {
       expect(files).to.contain('/projects/sandbox/cypress.config.ts')
       expect(files).to.contain('/projects/sandbox/cypress/fixtures/example.json')
     })
+  })
+
+  it('should exclude the Cypress config and folder from the root tsconfig.json to avoid Jasmine type conflicts', async () => {
+    const tree = await schematicRunner.runSchematic('ng-add', {}, appTree)
+    const tsConfig = readRootTsConfig(tree)
+
+    expect(tsConfig.exclude).to.include.members([
+      'projects/sandbox/cypress',
+      'projects/sandbox/cypress.config.ts',
+    ])
+  })
+
+  it('should preserve existing root tsconfig.json exclude entries', async () => {
+    let tsConfig = readRootTsConfig(appTree)
+
+    appTree.overwrite('/tsconfig.json', JSON.stringify({
+      ...tsConfig,
+      exclude: ['some/existing/path'],
+    }))
+
+    const tree = await schematicRunner.runSchematic('ng-add', {}, appTree)
+
+    tsConfig = readRootTsConfig(tree)
+
+    expect(tsConfig.exclude).to.include.members([
+      'some/existing/path',
+      'projects/sandbox/cypress',
+      'projects/sandbox/cypress.config.ts',
+    ])
+  })
+
+  it('should not duplicate exclude entries when run against an already configured tsconfig.json', async () => {
+    const firstRun = await schematicRunner.runSchematic('ng-add', {}, appTree)
+    const secondRun = await schematicRunner.runSchematic('ng-add', {}, firstRun)
+    const tsConfig = readRootTsConfig(secondRun)
+    const exclude = tsConfig.exclude as string[]
+
+    expect(exclude.filter((p) => p === 'projects/sandbox/cypress')).to.have.length(1)
+    expect(exclude.filter((p) => p === 'projects/sandbox/cypress.config.ts')).to.have.length(1)
   })
 
   it('should add @cypress/schematic to the schemaCollections array', async () => {
