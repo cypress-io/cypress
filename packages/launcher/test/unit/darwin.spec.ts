@@ -77,12 +77,24 @@ describe('darwin browser detection', () => {
       }
     }
 
+    // Firefox stable + beta both look at /Applications/Firefox.app (Mozilla's Beta installer
+    // reuses the stable bundle), and `darwinHelper.detect()` then runs the channel's
+    // versionRegex against the plist version to decide which channel claims the install.
+    // Return a beta-flavored version for Firefox.app so the test exercises that routing.
+    const versionByAppName: Record<string, string> = {
+      'Firefox.app': '152.0b6',
+      'Firefox Developer Edition.app': '152.0b1',
+      'Firefox Nightly.app': '153.0a1',
+    }
+
     // @ts-expect-error
     vi.mocked(fs.readFile).mockImplementation((file: string, _options: any): Promise<string> => {
       const foundAppParams = flatFindAppParams.find((findAppParams) => `/Applications/${findAppParams.appName}/Contents/Info.plist` === file)
 
       if (foundAppParams) {
-        return Promise.resolve(generatePlist(foundAppParams.versionProperty, 'someVersion'))
+        const version = versionByAppName[foundAppParams.appName] ?? 'someVersion'
+
+        return Promise.resolve(generatePlist(foundAppParams.versionProperty, version))
       }
 
       throw new Error('File not found')
@@ -91,14 +103,23 @@ describe('darwin browser detection', () => {
     const mappedBrowsers = []
 
     for (const browser of knownBrowsers) {
-      const foundBrowser = await darwinHelper.detect(browser)
-      const findAppParams = darwinHelper.browsers[browser.name][browser.channel]
+      try {
+        const foundBrowser = await darwinHelper.detect(browser)
+        const findAppParams = darwinHelper.browsers[browser.name]?.[browser.channel]
 
-      mappedBrowsers.push({
-        ...browser,
-        ...foundBrowser,
-        findAppParams,
-      })
+        mappedBrowsers.push({
+          ...browser,
+          ...foundBrowser,
+          findAppParams,
+        })
+      } catch (err) {
+        // Channels whose version doesn't match the channel's versionRegex are treated as
+        // not installed for this channel — e.g. Firefox.app at 152.0b6 doesn't satisfy the
+        // stable channel's `[^\sab]+` pattern.
+        if (!(err as { notInstalled?: boolean }).notInstalled) {
+          throw err
+        }
+      }
     }
 
     expect(mappedBrowsers).toMatchSnapshot()

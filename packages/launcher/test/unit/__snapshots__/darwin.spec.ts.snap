@@ -91,9 +91,12 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "versionRegex": /Chromium \\(\\\\S\\+\\)/m,
   },
   {
-    "binary": "firefox",
-    "channel": "stable",
-    "displayName": "Firefox",
+    "binary": [
+      "firefox-beta",
+      "firefox",
+    ],
+    "channel": "beta",
+    "displayName": "Firefox Beta",
     "family": "firefox",
     "findAppParams": {
       "appName": "Firefox.app",
@@ -104,27 +107,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "firefox",
     "path": "/Applications/Firefox.app/Contents/MacOS/firefox",
     "validator": [Function],
-    "version": "someVersion",
-    "versionRegex": /\\^Mozilla Firefox \\(\\[\\^\\\\sab\\]\\+\\)\\$/m,
-  },
-  {
-    "binary": [
-      "firefox-beta",
-      "firefox",
-    ],
-    "channel": "beta",
-    "displayName": "Firefox Beta",
-    "family": "firefox",
-    "findAppParams": {
-      "appName": "Firefox Beta.app",
-      "bundleId": "org.mozilla.firefox.beta",
-      "executable": "Contents/MacOS/firefox",
-      "versionProperty": "CFBundleShortVersionString",
-    },
-    "name": "firefox",
-    "path": "/Applications/Firefox Beta.app/Contents/MacOS/firefox",
-    "validator": [Function],
-    "version": "someVersion",
+    "version": "152.0b6",
     "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
   },
   {
@@ -144,7 +127,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "firefox",
     "path": "/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox",
     "validator": [Function],
-    "version": "someVersion",
+    "version": "152.0b1",
     "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+b\\\\S\\*\\)\\$/m,
   },
   {
@@ -164,7 +147,7 @@ exports[`darwin browser detection > detects browsers as expected 1`] = `
     "name": "firefox",
     "path": "/Applications/Firefox Nightly.app/Contents/MacOS/firefox",
     "validator": [Function],
-    "version": "someVersion",
+    "version": "153.0a1",
     "versionRegex": /\\^Mozilla Firefox \\(\\\\S\\+a\\\\S\\*\\)\\$/m,
   },
   {
