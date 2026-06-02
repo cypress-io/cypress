@@ -824,20 +824,19 @@ commands:
           # TODO: How can we have preinstalled browsers on CircleCI?
           name: 'Install Chrome on Windows'
           command: |
-            # install with `--ignore-checksums` to avoid checksum error
-            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
-            # Retry to tolerate 504s from the Chocolatey community feed. `choco install`
-            # exits 0 on "installed 0/0 packages", so gate the retry on whether chrome.exe
-            # actually exists, not on choco's exit code.
+            # Download Google's standalone enterprise MSI directly from dl.google.com.
             if [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]]; then
               chrome_installed() {
                 [[ -f "/c/Program Files/Google/Chrome/Application/chrome.exe" || -f "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" ]]
               }
+              msi_url="https://dl.google.com/chrome/install/GoogleChromeStandaloneEnterprise64.msi"
+              msi_path="$(mktemp -d)/googlechrome.msi"
               max_attempts=3
               n=0
               until [ $n -ge $max_attempts ]; do
-                choco install googlechrome -y --ignore-checksums --no-progress || true
-                if chrome_installed; then
+                if curl -fsSL --connect-timeout 30 --max-time 240 --retry 2 --retry-connrefused -o "$msi_path" "$msi_url" \
+                    && MSYS_NO_PATHCONV=1 msiexec.exe /i "$(cygpath -w "$msi_path")" /qn /norestart \
+                    && chrome_installed; then
                   break
                 fi
                 n=$((n+1))
@@ -849,7 +848,7 @@ commands:
                 fi
               done
               if ! chrome_installed; then
-                echo "ERROR: Chrome not installed after choco install"
+                echo "ERROR: Chrome not installed after MSI install"
                 exit 1
               fi
             fi
