@@ -1270,6 +1270,13 @@ export default {
     const onSpecError = (handlerType: HandlerType) => (event) => {
       let { originalErr, err } = $errUtils.errorFromUncaughtEvent(handlerType, event)
 
+      // benign browser notifications such as "ResizeObserver loop ..." are not
+      // real errors, so ignore them rather than failing or generating a test.
+      // https://github.com/cypress-io/cypress/issues/31479
+      if ($errUtils.isBenignResizeObserverError(err)) {
+        return undefined
+      }
+
       debugErrors('uncaught spec error: %o', originalErr)
 
       $errUtils.logError(Cypress, handlerType, originalErr)

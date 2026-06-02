@@ -909,6 +909,14 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   }
 
   onUncaughtException ({ handlerType, frameType, err, promise }) {
+    // some browser-emitted errors (e.g. "ResizeObserver loop ...") are benign
+    // notifications rather than real application errors, so we ignore them by
+    // default instead of failing the test. return true to signal the error was
+    // handled. https://github.com/cypress-io/cypress/issues/31479
+    if ($errUtils.isBenignResizeObserverError(err)) {
+      return true
+    }
+
     err = $errUtils.createUncaughtException({
       handlerType,
       frameType,

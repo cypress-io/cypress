@@ -22,6 +22,21 @@ const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 const crossOriginScriptRe = /^script error/i
 
+// ResizeObserver "loop" errors are benign, non-fatal notifications that the
+// browser emits on the window (via an `error` event) when resize observations
+// can't settle within a single animation frame. They do not represent a real
+// application error and have no effect on the page, so we ignore them by
+// default rather than failing the test. This matches how other test tooling
+// (Playwright, Karma, react-error-overlay, etc.) treats them.
+// The first variant is emitted by modern Chromium; the second by older
+// Chromium and Firefox.
+// https://github.com/cypress-io/cypress/issues/31479
+const resizeObserverLoopErrorRe = /^ResizeObserver loop (limit exceeded|completed with undelivered notifications)/
+
+const isBenignResizeObserverError = (err: any): boolean => {
+  return !!err && typeof err.message === 'string' && resizeObserverLoopErrorRe.test(err.message)
+}
+
 let allErrorMessages = $errorMessages
 
 if (!Error.captureStackTrace) {
@@ -614,6 +629,10 @@ const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
 }
 
 const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = false) => {
+  // benign browser notifications such as "ResizeObserver loop ..." are ignored
+  // (see isBenignResizeObserverError), so don't surface them in the command log
+  if (isBenignResizeObserverError(err)) return
+
   const error = toLoggableError(err)
 
   Cypress.log({
@@ -694,6 +713,7 @@ export default {
   getUnsupportedPlugin,
   getUserInvocationStack,
   isAssertionErr,
+  isBenignResizeObserverError,
   isChaiValidationErr,
   isCypressErr,
   isSpecError,
