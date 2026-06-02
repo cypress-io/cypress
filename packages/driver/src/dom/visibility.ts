@@ -534,6 +534,12 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   let parentNode
   let $select
 
+  if (Cypress.config('visibilityStrategy') === 'modern') {
+    const style = getComputedStyle($el[0])
+
+    return `This element \`${node}\` is not visible per \`Element.checkVisibility()\`. Computed: \`display: ${style.display}\`, \`visibility: ${style.visibility}\`, \`opacity: ${style.opacity}\`, \`content-visibility: ${style.contentVisibility}\`, size: \`${width} x ${height}\` pixels.`
+  }
+
   // if the element is an option or optgroup then we need to get the
   // select so it can be used when determining the hidden reason
   if (isOption($el[0]) || isOptgroup($el[0])) {

@@ -420,7 +420,7 @@ describe('src/cypress/dom/visibility', {
     })
   }
 
-  context('#getReasonIsHidden', () => {
+  context('#getReasonIsHidden', { visibilityStrategy: 'legacy' }, () => {
     const reasonIs = ($el: JQuery, str: string) => {
       expect(dom.getReasonIsHidden($el)).to.eq(str)
     }
@@ -571,6 +571,35 @@ describe('src/cypress/dom/visibility', {
 
       cy.$$('body').append(visible)
       reasonIs(visible, 'This element `<div>` is not visible.')
+    })
+  })
+
+  context('#getReasonIsHidden (modern)', { visibilityStrategy: 'modern' }, () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/visibility/basic-css-properties.html')
+    })
+
+    it('returns the generic checkVisibility message with computed values', () => {
+      prepareFixtureSection('display-property')
+      cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.match(/^This element `<div\.testCase>` is not visible per `Element\.checkVisibility\(\)`\./)
+        expect(reason).to.include('`display: none`')
+        expect(reason).to.include('`visibility: visible`')
+        expect(reason).to.include('`opacity: 1`')
+        expect(reason).to.include('pixels')
+      })
+    })
+
+    it('does not branch on specific css properties (always generic)', () => {
+      prepareFixtureSection('opacity-property')
+      cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.match(/^This element `<div\.testCase>` is not visible per `Element\.checkVisibility\(\)`\./)
+        expect(reason).to.include('`opacity: 0`')
+      })
     })
   })
 })
