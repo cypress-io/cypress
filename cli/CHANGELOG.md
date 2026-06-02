@@ -15,6 +15,10 @@
 - Fixed an issue where `cypress run` could crash with `TypeError: The "path" argument must be of type string. Received undefined` when the project path was not resolved (for example, due to an unset CI environment variable) or when `--browser` was passed without a value. Cypress now falls back to the current working directory in the first case and emits a clear "browser not found" error in the second. Fixes [#15418](https://github.com/cypress-io/cypress/issues/15418). Fixed in [#33958](https://github.com/cypress-io/cypress/pull/33958).
 - Fixed an issue where the version of `WebKit` was incorrectly displayed as version 0 when `playwright` version `1.60.0` was installed. Fixes [#33953](https://github.com/cypress-io/cypress/issues/33953).
 
+**Misc:**
+
+- When Cypress cannot connect to a Chromium-based browser such as Chrome or Edge over the Chrome DevTools Protocol, the resulting error now suggests checking whether remote debugging has been disabled by an enterprise or group policy. Because Cypress relies on remote debugging to control the browser, the `RemoteDebuggingAllowed` policy being disabled prevents Cypress from connecting, and the error now points to `chrome://policy` or `edge://policy` to investigate. Addresses [#32526](https://github.com/cypress-io/cypress/issues/32526).
+
 **Dependency Updates:**
 
 - Upgraded `tsx` from `4.20.6` to `4.22.4`. Its bundled `esbuild` Go binary no longer reports [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in security scans, and loading TypeScript config files no longer emits the Node.js `[DEP0205] module.register() is deprecated` warning. Fixes [#33954](https://github.com/cypress-io/cypress/issues/33954) and [#33744](https://github.com/cypress-io/cypress/issues/33744).
