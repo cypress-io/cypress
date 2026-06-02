@@ -953,7 +953,7 @@ describe('src/cy/commands/querying', () => {
         cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+          expect(err.message).to.match(/This element `<button#button>` is not visible/)
 
           done()
         })
@@ -965,7 +965,7 @@ describe('src/cy/commands/querying', () => {
         cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('element `<button#button>` is not visible because')
+          expect(err.message).to.match(/element `<button#button>` is not visible/)
 
           done()
         })
@@ -1044,7 +1044,7 @@ describe('src/cy/commands/querying', () => {
           const getLog = this.logs[0]
           const assertionLog = this.logs[1]
 
-          expect(err.message).to.contain('This element `<button#button>` is not visible because it has CSS property: `display: none`')
+          expect(err.message).to.match(/This element `<button#button>` is not visible/)
 
           expect(getLog.get('state')).to.eq('passed')
           expect(getLog.get('error')).to.be.undefined

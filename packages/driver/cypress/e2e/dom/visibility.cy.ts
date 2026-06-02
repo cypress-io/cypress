@@ -601,5 +601,10 @@ describe('src/cypress/dom/visibility', {
         expect(reason).to.include('`opacity: 0`')
       })
     })
+
+    // The zero-dimension guard in `modernIsHidden` mirrors a defensive check that may not be
+    // reachable in modern Chrome (where `Element.checkVisibility()` already rejects 0x0 elements),
+    // so we don't unit-test that branch here. The implementation in `getReasonIsHidden` still mirrors
+    // `modernIsHidden`'s logic so the attribution stays correct in browsers where the guard does fire.
   })
 })
