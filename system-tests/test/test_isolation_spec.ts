@@ -93,4 +93,17 @@ describe('Test Isolation', () => {
     headed: true,
     noExit: false,
   })
+
+  // https://github.com/cypress-io/cypress/issues/29927
+  // When the first test in a suite is skipped, the page visited in the `before`
+  // hook must still be reset before the next test runs (test isolation), so the
+  // following test does not inherit that page. If the reset is skipped, the
+  // second test wrongly passes; with the fix all tests pass (exit code 0).
+  systemTests.it('resets state for the test that runs after a skipped test', {
+    project: 'test-isolation-skipped',
+    spec: 'test-isolation-after-skipped-test.cy.js',
+    expectedExitCode: 0,
+    timeout: 20000,
+    browser: 'chrome',
+  })
 })

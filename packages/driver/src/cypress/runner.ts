@@ -97,6 +97,36 @@ const testBeforeAfterRunAsync = (test, Cypress, ...args) => {
   })
 }
 
+// determines if the next test to run has test isolation enabled, either via a
+// test-level override or by falling back to the top-level config value.
+const getNextTestHasTestIsolationOn = (nextTest, Cypress) => {
+  const nextTestIsolationOverride = nextTest?._testConfig.unverifiedTestConfig.testIsolation
+  const topLevelTestIsolation = Cypress.originalConfig['testIsolation']
+
+  return nextTestIsolationOverride || (nextTestIsolationOverride === undefined && topLevelTestIsolation)
+}
+
+// Performs the between-tests state reset for test isolation: navigates the AUT to
+// about:blank (when the upcoming test has test isolation enabled) and clears the
+// cross-origin spec bridge windows. This normally runs from the afterEach/afterAll
+// hook phase, but is also invoked before a test that follows a skipped (pending)
+// test, since pending tests never run those hooks.
+// https://github.com/cypress-io/cypress/issues/29927
+const applyTestIsolationReset = async (test, Cypress, cy, nextTestHasTestIsolationOn) => {
+  cy.state('duringUserTestExecution', false)
+  Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
+  // Remove window:load and window:before:load listeners so that navigating to about:blank doesn't fire in user code.
+  cy.removeAllListeners('internal:window:load')
+  cy.removeAllListeners('window:before:load')
+  cy.removeAllListeners('window:load')
+
+  // This will navigate to about:blank if test isolation is on
+  await testBeforeAfterRunAsync(test, Cypress, { nextTestHasTestIsolationOn })
+  // Clear cached spec-bridge targets after isolation; the runner must serve
+  // a current app build so `notifyCrossOriginBridgeReady` re-binds the iframe.
+  Cypress.primaryOriginCommunicator.clearCrossOriginDriverWindows()
+}
+
 const testAfterRunAsync = (test, Cypress) => {
   return Promise.try(() => {
     if (!fired(TEST_AFTER_RUN_ASYNC_EVENT, test)) {
@@ -534,24 +564,11 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
           if (!isLastTestThatWillRunInSuite) {
             const nextTest = nextTestThatWillRunInSuite(test, getAllSiblingTests(topSuite, getTestById))
-            const nextTestIsolationOverride = nextTest?._testConfig.unverifiedTestConfig.testIsolation
-            const topLevelTestIsolation = Cypress.originalConfig['testIsolation']
 
-            nextTestHasTestIsolationOn = nextTestIsolationOverride || (nextTestIsolationOverride === undefined && topLevelTestIsolation)
+            nextTestHasTestIsolationOn = getNextTestHasTestIsolationOn(nextTest, Cypress)
           }
 
-          cy.state('duringUserTestExecution', false)
-          Cypress.primaryOriginCommunicator.toAllSpecBridges('sync:state', { 'duringUserTestExecution': false })
-          // Remove window:load and window:before:load listeners so that navigating to about:blank doesn't fire in user code.
-          cy.removeAllListeners('internal:window:load')
-          cy.removeAllListeners('window:before:load')
-          cy.removeAllListeners('window:load')
-
-          // This will navigate to about:blank if test isolation is on
-          await testBeforeAfterRunAsync(test, Cypress, { nextTestHasTestIsolationOn })
-          // Clear cached spec-bridge targets after isolation; the runner must serve
-          // a current app build so `notifyCrossOriginBridgeReady` re-binds the iframe.
-          Cypress.primaryOriginCommunicator.clearCrossOriginDriverWindows()
+          await applyTestIsolationReset(test, Cypress, cy, nextTestHasTestIsolationOn)
         }
 
         testAfterRun(test, Cypress)
@@ -1147,6 +1164,13 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
 
     if (_.last(tests) !== test) {
       test.final = true
+
+      // A skipped (pending) test does not run Mocha's afterEach/afterAll hook
+      // phase, so the test isolation reset that navigates the AUT to about:blank
+      // between tests never fires. Record the skipped test so the next test to
+      // run performs that reset first and does not inherit state from a `before`
+      // hook or a prior test. https://github.com/cypress-io/cypress/issues/29927
+      _runner._testNeedingIsolationReset = test
 
       return fire(TEST_AFTER_RUN_EVENT, test, Cypress)
     }
@@ -1830,8 +1854,22 @@ export default {
         // if its a hook, and then we fire the
         // test:before:run:async action if its not
         // been fired before for this test
-        return Promise.try(() => {
+        return Promise.try(async () => {
           if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+            // If a preceding sibling test was skipped, Mocha never ran its
+            // afterEach/afterAll hooks, so the test isolation reset between tests
+            // did not happen. Perform it now — before this test runs — so leftover
+            // state from a `before` hook or a prior test does not leak in. It is
+            // keyed to the skipped test so this test's own post-run reset is not
+            // suppressed by the per-test fired guard.
+            // https://github.com/cypress-io/cypress/issues/29927
+            const skippedTest = _runner._testNeedingIsolationReset
+
+            if (skippedTest) {
+              _runner._testNeedingIsolationReset = null
+              await applyTestIsolationReset(skippedTest, Cypress, cy, getNextTestHasTestIsolationOn(test, Cypress))
+            }
+
             cy.reset(test)
             test.slow(Cypress.config('slowTestThreshold'))
             test._retries = Cypress.getTestRetries() ?? -1
