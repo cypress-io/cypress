@@ -703,13 +703,13 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
-  const areCookiesPresent = !cookies || !cookies.length
+  const areCookiesAbsent = !cookies || !cookies.length
 
   span?.setAttributes({
-    areCookiesPresent,
+    areCookiesAbsent,
   })
 
-  if (areCookiesPresent) {
+  if (areCookiesAbsent) {
     setSimulatedCookies(this)
 
     span?.end()

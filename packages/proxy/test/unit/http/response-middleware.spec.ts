@@ -1156,7 +1156,7 @@ describe('http/response-middleware', function () {
       expect(appendStub).not.toHaveBeenCalled()
     })
 
-    it('still records cookies in the jar to keep it in sync, but does not sync via automation, when top does NOT need simulating', async function () {
+    it('records cookie in jar but skips browser automation sync when top does not need simulating', async function () {
       const appendStub = vi.fn()
 
       const cookieJar = {
@@ -1204,7 +1204,7 @@ describe('http/response-middleware', function () {
     // keeps a stale value and overwrites the browser's fresh cookie on the next
     // top-level navigation (e.g. a reload following the request).
     ;['fetch', 'xhr'].forEach((resourceType) => {
-      it(`records same-origin ${resourceType} cookies in the jar even when top does NOT need simulating, so the jar does not go stale`, async function () {
+      it(`records same-origin ${resourceType} response cookie in jar without browser automation sync`, async function () {
         const appendStub = vi.fn()
 
         const cookieJar = {

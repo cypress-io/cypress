@@ -365,7 +365,7 @@ describe('cross-origin cookies, set:cookies', () => {
   })
 })
 
-describe('reused stale cookie', () => {
+describe('cookie jar stays in sync after same-origin requests', () => {
   const onServer = (app) => {
     app.use(parser())
 
@@ -405,7 +405,7 @@ describe('reused stale cookie', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/25841
-  it('does not reuse a stale cookie after a same-origin fetch updates it', {
+  it('keeps the cookie jar in sync after a same-origin fetch or XHR updates a cookie', {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       baseUrl: `http://localhost:${httpPort}`,
