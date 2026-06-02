@@ -1,6 +1,6 @@
 import path from 'path'
 import os from 'os'
-import { ensureDir } from 'fs-extra'
+import { ensureDir, remove } from 'fs-extra'
 import cachedir from 'cachedir'
 import untildify from 'untildify'
 import Debug from 'debug'
@@ -68,6 +68,20 @@ const isPermissionError = (err: unknown): boolean => {
   return code === 'EACCES' || code === 'EPERM' || code === 'EROFS'
 }
 
+const randomSuffix = (): string => Math.random().toString(36).substring(2, 15)
+
+// `ensureDir` is a no-op on an existing directory and never checks whether we can
+// write into it, so confirm writability by creating (and removing) a sentinel
+// child — the same `mkdir`-of-a-child operation the bundle flow later performs.
+const ensureDirWritable = async (dir: string): Promise<void> => {
+  await ensureDir(dir)
+
+  const probe = path.join(dir, `.probe-${randomSuffix()}`)
+
+  await ensureDir(probe)
+  await remove(probe).catch(() => { /* best-effort cleanup */ })
+}
+
 // Ensure a writable bundle cache dir, returning the directory that was created.
 // When the configured Cypress cache folder is not writable (e.g. a root-owned or
 // read-only cache in locked-down CI), fall back to the OS temp dir rather than
@@ -76,7 +90,7 @@ export const ensureWritableBundleCacheDir = async (kind: 'cy-prompt' | 'studio')
   const primary = getBundleCacheDir(kind)
 
   try {
-    await ensureDir(primary)
+    await ensureDirWritable(primary)
 
     return primary
   } catch (err) {
@@ -85,7 +99,7 @@ export const ensureWritableBundleCacheDir = async (kind: 'cy-prompt' | 'studio')
     const fallback = getFallbackBundleCacheDir(kind)
 
     debug('bundle cache dir %s not writable (%s); falling back to %s', primary, (err as NodeJS.ErrnoException).code, fallback)
-    await ensureDir(fallback)
+    await ensureDirWritable(fallback)
 
     return fallback
   }
