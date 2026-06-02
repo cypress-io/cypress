@@ -2412,10 +2412,23 @@ export default {
         - you don't have internet access
         - you forgot to run / boot your web server
         - your web server isn't accessible
-        - you have weird network configuration settings on your computer
-        - your web server took too long to send its first response
+        - you have weird network configuration settings on your computer`,
+    loading_network_timed_out: stripIndent`\
+      ${cmd('visit')} failed trying to load:
 
-      If the error above is 'ESOCKETTIMEDOUT', your web server did not send a response within the 'responseTimeout' (30000ms by default). Note that 'pageLoadTimeout' (and the 'timeout' option on 'cy.visit()') does not apply to this initial response - increase 'responseTimeout' in your config or pass it to 'cy.visit()' instead: cy.visit(url, { responseTimeout: 60000 }).`,
+      {{url}}
+
+      We waited for the server to respond, but it did not send back the initial response within the 'responseTimeout' of {{responseTimeout}}ms.
+
+      We received this error at the network level:
+
+        > {{error}}
+
+      This timeout is controlled by 'responseTimeout' - not 'pageLoadTimeout' or the 'timeout' option passed to ${cmd('visit')}. To wait longer for the initial response, increase 'responseTimeout' in your Cypress config or pass it to ${cmd('visit')} directly:
+
+        cy.visit(url, { responseTimeout: 60000 })
+
+      If the server is taking this long unexpectedly, it may not be ready yet - for example, a dev server still compiling, or a web server that has not finished booting.`,
     loading_file_failed (obj) {
       return stripIndent`
         ${cmd('visit')} failed trying to load:

@@ -1149,11 +1149,17 @@ export default (Commands, Cypress, cy, state, config) => {
           }
 
           visitFailedByErr(err, url, () => {
-            $errUtils.throwErrByPath('visit.loading_network_failed', {
+            // a socket timeout (the server never sent its initial response in
+            // time) is governed by `responseTimeout`, not `pageLoadTimeout`, so
+            // surface a dedicated message that points users at the right option
+            const isResponseTimeoutErr = err.code === 'ESOCKETTIMEDOUT' || err.code === 'ETIMEDOUT'
+
+            $errUtils.throwErrByPath(isResponseTimeoutErr ? 'visit.loading_network_timed_out' : 'visit.loading_network_failed', {
               onFail: options._log,
               args: {
                 url,
                 error: err,
+                responseTimeout: options.responseTimeout,
               },
               errProps: {
                 appendToStack: {

@@ -358,20 +358,17 @@ exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when re
 
 http://localhost:3434/response_never_finishes
 
-We attempted to make an http request to this URL but the request failed without a response.
+We waited for the server to respond, but it did not send back the initial response within the 'responseTimeout' of 2000ms.
 
 We received this error at the network level:
 
   > Error: ESOCKETTIMEDOUT
 
-Common situations why this would fail:
-  - you don't have internet access
-  - you forgot to run / boot your web server
-  - your web server isn't accessible
-  - you have weird network configuration settings on your computer
-  - your web server took too long to send its first response
+This timeout is controlled by 'responseTimeout' - not 'pageLoadTimeout' or the 'timeout' option passed to \`cy.visit()\`. To wait longer for the initial response, increase 'responseTimeout' in your Cypress config or pass it to \`cy.visit()\` directly:
 
-If the error above is 'ESOCKETTIMEDOUT', your web server did not send a response within the 'responseTimeout' (30000ms by default). Note that 'pageLoadTimeout' (and the 'timeout' option on 'cy.visit()') does not apply to this initial response - increase 'responseTimeout' in your config or pass it to 'cy.visit()' instead: cy.visit(url, { responseTimeout: 60000 }).
+  cy.visit(url, { responseTimeout: 60000 })
+
+If the server is taking this long unexpectedly, it may not be ready yet - for example, a dev server still compiling, or a web server that has not finished booting.
       [stack trace lines]
   
   From Node.js Internals:
@@ -384,20 +381,17 @@ If the error above is 'ESOCKETTIMEDOUT', your web server did not send a response
 
 http://localhost:3434/response_never_finishes
 
-We attempted to make an http request to this URL but the request failed without a response.
+We waited for the server to respond, but it did not send back the initial response within the 'responseTimeout' of 2000ms.
 
 We received this error at the network level:
 
   > Error: ESOCKETTIMEDOUT
 
-Common situations why this would fail:
-  - you don't have internet access
-  - you forgot to run / boot your web server
-  - your web server isn't accessible
-  - you have weird network configuration settings on your computer
-  - your web server took too long to send its first response
+This timeout is controlled by 'responseTimeout' - not 'pageLoadTimeout' or the 'timeout' option passed to \`cy.visit()\`. To wait longer for the initial response, increase 'responseTimeout' in your Cypress config or pass it to \`cy.visit()\` directly:
 
-If the error above is 'ESOCKETTIMEDOUT', your web server did not send a response within the 'responseTimeout' (30000ms by default). Note that 'pageLoadTimeout' (and the 'timeout' option on 'cy.visit()') does not apply to this initial response - increase 'responseTimeout' in your config or pass it to 'cy.visit()' instead: cy.visit(url, { responseTimeout: 60000 }).
+  cy.visit(url, { responseTimeout: 60000 })
+
+If the server is taking this long unexpectedly, it may not be ready yet - for example, a dev server still compiling, or a web server that has not finished booting.
       [stack trace lines]
   
   From Node.js Internals:
@@ -410,20 +404,17 @@ If the error above is 'ESOCKETTIMEDOUT', your web server did not send a response
 
 http://localhost:3434/timeout?ms=1000
 
-We attempted to make an http request to this URL but the request failed without a response.
+We waited for the server to respond, but it did not send back the initial response within the 'responseTimeout' of 500ms.
 
 We received this error at the network level:
 
   > Error: ESOCKETTIMEDOUT
 
-Common situations why this would fail:
-  - you don't have internet access
-  - you forgot to run / boot your web server
-  - your web server isn't accessible
-  - you have weird network configuration settings on your computer
-  - your web server took too long to send its first response
+This timeout is controlled by 'responseTimeout' - not 'pageLoadTimeout' or the 'timeout' option passed to \`cy.visit()\`. To wait longer for the initial response, increase 'responseTimeout' in your Cypress config or pass it to \`cy.visit()\` directly:
 
-If the error above is 'ESOCKETTIMEDOUT', your web server did not send a response within the 'responseTimeout' (30000ms by default). Note that 'pageLoadTimeout' (and the 'timeout' option on 'cy.visit()') does not apply to this initial response - increase 'responseTimeout' in your config or pass it to 'cy.visit()' instead: cy.visit(url, { responseTimeout: 60000 }).
+  cy.visit(url, { responseTimeout: 60000 })
+
+If the server is taking this long unexpectedly, it may not be ready yet - for example, a dev server still compiling, or a web server that has not finished booting.
       [stack trace lines]
   
   From Node.js Internals:

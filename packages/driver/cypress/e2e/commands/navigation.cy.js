@@ -1561,6 +1561,31 @@ describe('src/cy/commands/navigation', () => {
         cy.visit('/foo.html')
       })
 
+      it('displays loading_network_timed_out when _resolveUrl throws ESOCKETTIMEDOUT', function (done) {
+        const err1 = new Error('ESOCKETTIMEDOUT')
+
+        err1.code = 'ESOCKETTIMEDOUT'
+
+        // dont log else we create an endless loop!
+        const emit = cy.spy(Cypress, 'emit').log(false)
+
+        cy.stub(Cypress, 'backend').log(false)
+        .withArgs('resolve:url')
+        .rejects(err1)
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('it did not send back the initial response within the \'responseTimeout\'')
+          expect(err.message).to.include('This timeout is controlled by \'responseTimeout\'')
+          // it should not show the generic network failure hints
+          expect(err.message).not.to.include('you forgot to run / boot your web server')
+          expect(emit).to.be.calledWith('visit:failed', err1)
+
+          done()
+        })
+
+        cy.visit('/foo.html')
+      })
+
       it('displays loading_file_failed when _resolveUrl resp is not ok', function (done) {
         const obj = {
           isOkStatusCode: false,

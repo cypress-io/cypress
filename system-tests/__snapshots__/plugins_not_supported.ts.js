@@ -44,9 +44,6 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-  - your web server took too long to send its first response
-
-If the error above is 'ESOCKETTIMEDOUT', your web server did not send a response within the 'responseTimeout' (30000ms by default). Note that 'pageLoadTimeout' (and the 'timeout' option on 'cy.visit()') does not apply to this initial response - increase 'responseTimeout' in your config or pass it to 'cy.visit()' instead: cy.visit(url, { responseTimeout: 60000 }).
       [stack trace lines]
   
   From Node.js Internals:
