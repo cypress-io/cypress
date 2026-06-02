@@ -2,19 +2,13 @@ import type { ForInterceptRegistration, InterceptRegistrationRequest } from '@pa
 import type { SocketBroadcaster } from '@packages/socket'
 import type { GetFixtureFn, NetStubbingState } from '../server/types'
 import { onNetStubbingEvent } from '../server/driver-events'
-import type { BackendStaticResponse, NetEvent } from '../types'
+import type { OnNetStubbingEventFrame } from '../server/driver-events'
 
 type DriverInterceptRegistrationAdapterOptions = {
   state: NetStubbingState
   socket: SocketBroadcaster
   getFixture: GetFixtureFn
 }
-
-type OnNetStubbingEventFrame =
-  | NetEvent.ToServer.AddRoute<BackendStaticResponse>
-  | NetEvent.ToServer.Subscribe
-  | NetEvent.ToServer.EventHandlerResolved
-  | NetEvent.ToServer.SendStaticResponse
 
 /**
  * {@link ForInterceptRegistration} adapter — delegates to legacy `onNetStubbingEvent`.

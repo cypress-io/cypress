@@ -106,7 +106,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
   return ret
 }
 
-type OnNetStubbingEventFrame = NetEvent.ToServer.AddRoute<BackendStaticResponse> | NetEvent.ToServer.Subscribe | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.SendStaticResponse
+export type OnNetStubbingEventFrame = NetEvent.ToServer.AddRoute<BackendStaticResponse> | NetEvent.ToServer.Subscribe | NetEvent.ToServer.EventHandlerResolved | NetEvent.ToServer.SendStaticResponse
 
 type OnNetStubbingEventOpts = {
   eventName: string

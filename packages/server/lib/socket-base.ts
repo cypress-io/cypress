@@ -36,14 +36,8 @@ type StartListeningCallbacks = {
 
 const debug = Debug('cypress:server:socket-base')
 
-function getInterceptRegistration (options: { interceptRegistration?: ForInterceptRegistration }): ForInterceptRegistration {
-  const { interceptRegistration } = options
-
-  if (!interceptRegistration) {
-    throw new Error('Driver intercept registration is not configured')
-  }
-
-  return interceptRegistration
+function getInterceptRegistration (options: { interceptRegistration: ForInterceptRegistration }): ForInterceptRegistration {
+  return options.interceptRegistration
 }
 
 const retry = (fn: (res: any) => void) => {
