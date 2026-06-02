@@ -434,7 +434,7 @@ export class ProjectDataSource {
       }),
     )]
 
-    return chokidar.watch(watchRoots.length ? watchRoots : ['.'], {
+    return chokidar.watch(watchRoots.includes('.') ? ['.'] : watchRoots, {
       ignoreInitial: true,
       ignorePermissionErrors: true,
       cwd: projectRoot,
