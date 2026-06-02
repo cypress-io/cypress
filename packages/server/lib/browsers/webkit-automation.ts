@@ -243,6 +243,22 @@ export class WebKitAutomation {
 
       const response = await request.response()
 
+      // Responses fulfilled by a service worker's fetch handler are served
+      // without hitting the network, so the proxy never receives a matching
+      // request for the pre-request we emitted. Remove the pre-request so it
+      // doesn't linger in the proxy's pending pre-request queue. This mirrors
+      // the CDP & BiDi automations, which remove the pre-request for cached
+      // and service-worker responses.
+      // NOTE: playwright does not expose whether a response was served from
+      // the HTTP (disk/memory) cache, so those pre-requests are not removed
+      // here and instead rely on the proxy's periodic sweep to be discarded.
+      if (response?.fromServiceWorker()) {
+        debug('received requestfinished from service worker, removing pre-request %o', { requestId })
+        this.automation.onRemoveBrowserPreRequest?.(requestId)
+
+        return
+      }
+
       const responseReceived = {
         requestId,
         status: response?.status(),
@@ -252,6 +268,21 @@ export class WebKitAutomation {
       debug('received requestfinished %o', { responseReceived })
 
       this.automation.onRequestEvent?.('response:received', responseReceived)
+    })
+
+    // when a request fails or is aborted, playwright emits 'requestfailed'
+    // instead of 'requestfinished'. These requests never complete through the
+    // proxy, so we remove the pre-request we emitted in the 'request' handler
+    // to avoid it accumulating in the proxy's pending pre-request queue. This
+    // mirrors the CDP automation's onRequestFailed handler.
+    this.page.on('requestfailed', (request) => {
+      const requestId = requestIdMap.get(request)
+
+      if (!requestId) return
+
+      debug('received requestfailed, removing pre-request %o', { requestId })
+
+      this.automation.onRemoveBrowserPreRequest?.(requestId)
     })
   }
 
