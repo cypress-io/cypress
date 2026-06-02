@@ -33,6 +33,7 @@ src/
 
 ## Gotchas / Notes
 
+- `CYPRESS_env` and `CYPRESS_expose` must be valid JSON objects (e.g. `{"key":"value"}`). Plain strings are warned and ignored; use `--env key=value` for individual Cypress env vars instead.
 - Builds to both `cjs/` and `esm/` directories. The `browser` field in `package.json` points to the ESM build so bundlers targeting the browser get a tree-shakeable subset without Node.js-only imports.
 - The `ast-utils/` directory uses Babel's parser and `recast` to perform lossless source transforms on config files (preserving comments and formatting).
 - Tests use `vitest run` — no watch mode by default; use `test-debug` for breakpoint debugging with `--inspect-brk`.

@@ -154,6 +154,26 @@ describe('lib/browsers/index', () => {
         return normalizeSnapshot(err.message)
       })
     })
+
+    it('throws BROWSER_NOT_FOUND_BY_NAME when --browser is passed without a value', () => {
+      const foundBrowsers: TestBrowser[] = [
+        { name: 'chrome', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ]
+
+      return expect(browsers.ensureAndGetByNameOrPath(true as any, false, foundBrowsers as FoundBrowser[]))
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' } as any)
+    })
+
+    it('throws BROWSER_NOT_FOUND_BY_NAME when nameOrPath is undefined', () => {
+      const foundBrowsers: TestBrowser[] = [
+        { name: 'chrome', channel: 'stable' },
+        { name: 'electron', channel: 'stable' },
+      ]
+
+      return expect(browsers.ensureAndGetByNameOrPath(undefined as any, false, foundBrowsers as FoundBrowser[]))
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' } as any)
+    })
   })
 
   context('.connectCyPromptToBrowser', () => {

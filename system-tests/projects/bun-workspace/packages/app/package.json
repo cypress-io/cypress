@@ -1,0 +1,10 @@
+{
+  "name": "@bun-workspace/app",
+  "version": "0.0.0-test",
+  "dependencies": {
+    "@bun-workspace/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
