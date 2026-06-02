@@ -4098,6 +4098,21 @@ declare namespace Cypress {
      * Query parameters to append to the `url` of the request.
      */
     qs: object
+
+    /**
+     * Time to wait (ms) for the visited server to send back the initial response
+     * before failing with an `ESOCKETTIMEDOUT` error. This is distinct from the
+     * `timeout` option, which maps to `pageLoadTimeout` and governs how long
+     * Cypress waits for the `load` event to fire *after* a response is received.
+     * If your server is slow to send its first byte (for example, an app that
+     * compiles on the fly in CI), increase `responseTimeout` rather than `timeout`.
+     *
+     * @default responseTimeout (30000)
+     * @see https://on.cypress.io/configuration#Timeouts
+     * @example
+     *    cy.visit('/slow-to-respond', { responseTimeout: 60000 })
+     */
+    responseTimeout: number
   }
 
   /**

@@ -646,6 +646,8 @@ namespace CypressAUTWindowTests {
     win // $ExpectType AUTWindow
   })
 
+  cy.visit('https://google.com', { responseTimeout: 60000 })
+
   cy.window().then((win) => {
     win // $ExpectType AUTWindow
   })

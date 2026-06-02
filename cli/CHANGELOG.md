@@ -20,6 +20,7 @@
 
 **Misc:**
 
+- When `cy.visit()` fails with `ESOCKETTIMEDOUT` because the server did not send its initial response in time, the error message now explains that this timeout is governed by `responseTimeout` (not `pageLoadTimeout` or the `timeout` option) and shows how to increase it. The `responseTimeout` option is now also documented on the `cy.visit()` TypeScript definition. Addresses [#7062](https://github.com/cypress-io/cypress/issues/7062).
 - When Cypress cannot connect to a Chromium-based browser such as Chrome or Edge over the Chrome DevTools Protocol, the resulting error now suggests checking whether remote debugging has been disabled by an enterprise or group policy. Because Cypress relies on remote debugging to control the browser, the `RemoteDebuggingAllowed` policy being disabled prevents Cypress from connecting, and the error now points to `chrome://policy` or `edge://policy` to investigate. Addresses [#32526](https://github.com/cypress-io/cypress/issues/32526).
 
 **Dependency Updates:**
