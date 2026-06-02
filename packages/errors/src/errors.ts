@@ -758,9 +758,19 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}`
   },
-  RENDERER_CRASHED: (browserName: string) => {
+  RENDERER_CRASHED: (browserName: string, reason?: string, exitCode?: number) => {
+    // Surface the crash reason/exit code reported by the browser (Electron's
+    // 'render-process-gone' details or CDP's Target.targetCrashed event) when
+    // available. This helps distinguish out-of-memory crashes from process
+    // kills (e.g. "bad IPC message" terminations) when diagnosing the cause.
+    const crashDetails = (reason != null || exitCode != null)
+      ? errPartial`The renderer process exited unexpectedly (reason: ${fmt.highlightSecondary(reason ?? 'unknown')}, exit code: ${fmt.highlightSecondary(String(exitCode ?? 'unknown'))}).`
+      : null
+
     return errTemplate`\
         We detected that the ${fmt.highlight(browserName)} Renderer process just crashed.
+
+        ${crashDetails}
 
         We have failed the current spec but will continue running the next spec.
 

@@ -550,7 +550,7 @@ export = {
       browserCriClient.currentlyAttachedCyPromptTarget?.markCrashed()
       browserCriClient.currentlyAttachedStudioTarget?.markCrashed()
 
-      const err = errors.get('RENDERER_CRASHED', browser.displayName)
+      const err = errors.get('RENDERER_CRASHED', browser.displayName, event.status, event.errorCode)
 
       await memory.endProfiling()
 

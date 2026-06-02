@@ -18,7 +18,7 @@ export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
   trackState?: TrackStateMap
   onFocus?: () => void
   onNewWindow?: ({ disposition, features, frameName, postBody, referrer, url }) => Promise<void>
-  onCrashed?: () => void
+  onCrashed?: (event: Electron.Event, details?: Electron.RenderProcessGoneDetails) => void
 }
 
 export type WindowOpenOptions = WindowOptions & { url: string }

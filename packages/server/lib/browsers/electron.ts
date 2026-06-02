@@ -179,7 +179,7 @@ export = {
       // prevents a tiny 1px padding around the window
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
-      async onCrashed () {
+      async onCrashed (_event: Electron.Event, details?: Electron.RenderProcessGoneDetails) {
         // Synchronously mark sibling CRI clients (which share the same targetId)
         // as crashed. Each sibling has its own websocket and its own listener for
         // Target.targetCrashed, but those listeners fire when Chromium happens
@@ -191,7 +191,7 @@ export = {
         browserCriClient?.currentlyAttachedCyPromptTarget?.markCrashed()
         browserCriClient?.currentlyAttachedStudioTarget?.markCrashed()
 
-        const err = errors.get('RENDERER_CRASHED', 'Electron')
+        const err = errors.get('RENDERER_CRASHED', 'Electron', details?.reason, details?.exitCode)
 
         await memory.endProfiling()
 
