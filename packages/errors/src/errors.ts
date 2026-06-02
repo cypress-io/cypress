@@ -1147,6 +1147,8 @@ export const AllCypressErrors = {
 
         The CDP port requested was ${fmt.highlight(port)}.
 
+        If you are using a Chromium-based browser (such as Chrome or Edge), this can happen when remote debugging is disabled by an enterprise or group policy. Cypress relies on remote debugging to control the browser, so it is worth checking whether the ${fmt.highlightSecondary('RemoteDebuggingAllowed')} policy has been set to disabled in your environment. You can review the applied policies by visiting ${fmt.url('chrome://policy')} (or ${fmt.url('edge://policy')} for Edge) in the affected browser.
+
         ${fmt.stackTrace(err)}`
   },
   FIREFOX_COULD_NOT_CONNECT: (arg1: Error) => {
