@@ -20,7 +20,10 @@ const projectFixtureDirs = fs.readdirSync(projectFixtures, { withFileTypes: true
 
 const safeRemove = (path) => {
   try {
-    fs.removeSync(path)
+    // Use native fs.rmSync with retries to absorb transient filesystem races
+    // (ENOTEMPTY/EBUSY/EPERM) caused by child processes still writing to a
+    // subdirectory at cleanup time.
+    fs.rmSync(path, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
   } catch (_err) {
     const err = _err as NodeJS.ErrnoException
 
