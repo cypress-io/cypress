@@ -57,11 +57,15 @@ export const browsers: Detectors = {
       versionProperty: 'CFBundleShortVersionString',
     },
     beta: {
-      // Mozilla's Beta channel installer reuses the stable Firefox.app bundle —
-      // the version string is what differentiates them at runtime.
-      appName: 'Firefox.app',
+      // Mozilla's standard macOS Beta installer overwrites /Applications/Firefox.app with the
+      // same bundle id as stable, so a Beta install through the official installer detects as
+      // firefox:stable (running `--browser firefox` launches it correctly). This entry only
+      // matches a side-by-side "Firefox Beta.app" install (e.g. a renamed bundle), which is
+      // uncommon. firefox:beta CI coverage runs on Linux where the orb installs a separately
+      // identifiable beta binary.
+      appName: 'Firefox Beta.app',
       executable: 'Contents/MacOS/firefox',
-      bundleId: 'org.mozilla.firefox',
+      bundleId: 'org.mozilla.firefox.beta',
       versionProperty: 'CFBundleShortVersionString',
     },
     dev: {
