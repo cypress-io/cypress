@@ -1,4 +1,4 @@
-import { expect, describe, it } from 'vitest'
+import { expect, describe, it, vi } from 'vitest'
 import {
   parseGrep,
   parseTitleGrep,
@@ -438,6 +438,58 @@ describe('utils', () => {
   })
 
   describe('plugin', () => {
+    describe('grepOmitFiltered message', () => {
+      const mockConfig = {
+        specPattern: ['**/*.cy.ts'],
+        excludeSpecPattern: [],
+        expose: {},
+      }
+
+      it('does not print "will omit filtered tests" when no filter is set', () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+        plugin({ ...mockConfig, expose: { grepOmitFiltered: true } })
+
+        const calls = consoleSpy.mock.calls.map((args) => args[0])
+
+        expect(calls).not.toContain('@cypress/grep: non-matching tests will be omitted from results (not skipped)')
+        consoleSpy.mockRestore()
+      })
+
+      it('prints "will omit filtered tests" when grep filter is set', () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+        plugin({ ...mockConfig, expose: { grepOmitFiltered: true, grep: 'myTest' } })
+
+        const calls = consoleSpy.mock.calls.map((args) => args[0])
+
+        expect(calls).toContain('@cypress/grep: non-matching tests will be omitted from results (not skipped)')
+        consoleSpy.mockRestore()
+      })
+
+      it('prints "will omit filtered tests" when grepTags filter is set', () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+        plugin({ ...mockConfig, expose: { grepOmitFiltered: true, grepTags: '@smoke' } })
+
+        const calls = consoleSpy.mock.calls.map((args) => args[0])
+
+        expect(calls).toContain('@cypress/grep: non-matching tests will be omitted from results (not skipped)')
+        consoleSpy.mockRestore()
+      })
+
+      it('prints "will omit filtered tests" when grepUntagged is set', () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+        plugin({ ...mockConfig, expose: { grepOmitFiltered: true, grepUntagged: true } })
+
+        const calls = consoleSpy.mock.calls.map((args) => args[0])
+
+        expect(calls).toContain('@cypress/grep: non-matching tests will be omitted from results (not skipped)')
+        consoleSpy.mockRestore()
+      })
+    })
+
     describe('grepFilterSpecs handling', () => {
       const mockConfig = {
         specPattern: ['**/*.cy.ts'],

@@ -1,8 +1,7 @@
-require('../../spec_helper')
-
-const errors = require(`../../../lib/errors`)
-const plugins = require(`../../../lib/plugins`)
-const runEvents = require(`../../../lib/plugins/run_events`).default
+import '../../spec_helper'
+import * as errors from '../../../lib/errors'
+import * as plugins from '../../../lib/plugins'
+import runEvents from '../../../lib/plugins/run_events'
 
 describe('lib/plugins/run_events', () => {
   context('#execute', () => {

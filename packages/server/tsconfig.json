@@ -9,5 +9,6 @@
   ],
   "compilerOptions": {
     "lib": ["esnext"],
+    "target": "ES2022",
   }
 }

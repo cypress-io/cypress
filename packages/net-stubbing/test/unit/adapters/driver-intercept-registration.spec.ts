@@ -136,4 +136,41 @@ describe('DriverInterceptRegistrationAdapter', () => {
 
     expect(state.pendingEventHandlers['event-1']).toBeUndefined()
   })
+
+  it('forwards send:static:response to the matching intercepted request', async () => {
+    const adapter = createAdapter()
+    const onResponse = vi.fn()
+    const interceptedRequest = new InterceptedRequest({
+      req: {
+        matchingRoutes: [{
+          id: 'route-1',
+          hasInterceptor: true,
+          routeMatcher: {},
+        }],
+      } as any,
+      res: {} as any,
+      continueRequest: vi.fn(),
+      onError: vi.fn(),
+      onResponse,
+      state,
+      socket,
+    })
+
+    interceptedRequest.id = 'req-1'
+    state.requests[interceptedRequest.id] = interceptedRequest
+
+    await adapter.handleEvent({
+      eventName: 'send:static:response',
+      frame: {
+        requestId: 'req-1',
+        staticResponse: {
+          statusCode: 200,
+          body: 'response body',
+        },
+      },
+    })
+
+    expect(onResponse).toHaveBeenCalledTimes(1)
+    expect(interceptedRequest.res.body).toBe('response body')
+  })
 })

@@ -34,6 +34,7 @@ src/
 
 ## Gotchas / Notes
 
+- **Adding or removing keys in `src/errors.ts`** updates `AllCypressErrors`, which drives `ErrorTypeEnum` in `@packages/data-context`. Regenerate and commit `packages/data-context/schemas/schema.graphql` in the same PR (`yarn workspace @packages/data-context build`).
 - Builds to both `cjs/` and `esm/` directories. The `browser` field in `package.json` points to the ESM build, making it safe to import in browser bundles.
 - See `guides/error-handling.md` at the repo root for the full authoring guide on how to add new errors.
 - `errTemplate` uses `chalk` for ANSI coloring in Node.js and `ansi_up` for converting ANSI to HTML in browser contexts — do not import Node.js-only APIs inside error definitions.

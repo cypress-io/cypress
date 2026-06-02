@@ -79,6 +79,9 @@ Server adapter details: [`packages/server/lib/adapters/README.md`](../../server/
 ## Development
 
 ```bash
+yarn workspace @packages/network-interception build-prod
 yarn workspace @packages/network-interception test
 yarn workspace @packages/server test-unit --grep "configurator-network-policy|register-default|network-runtime"
 ```
+
+Compiled output lives in `cjs/` and `esm/` (gitignored). Source stays in `lib/`.

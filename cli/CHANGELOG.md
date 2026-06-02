@@ -5,6 +5,25 @@
 
 - Added [Bun](https://bun.sh) as a recognized package manager. The `cypress` npm package can now be installed and invoked with Bun (for example `bun run cypress open` or `bun run cypress run`). Addresses [#28962](https://github.com/cypress-io/cypress/issues/28962). Addressed in [#32580](https://github.com/cypress-io/cypress/pull/32580).
 - Improved CI environment detection and commit metadata capture for Cypress Cloud recorded runs within Argo CD and Argo Workflows. Addressed in [#33932](https://github.com/cypress-io/cypress/pull/33932).
+- [`Cypress.expose()`](https://on.cypress.io/expose) values can now be overridden per suite or test via test config overrides (for example, `describe()`, `context()`, `it()`, or `test()`) using `{ expose: { key: value } }`. Suite- and test-level overrides are merged, with test-level keys taking precedence; override keys are applied at test start and restored after each test without affecting unrelated values set in hooks. Addresses [#33356](https://github.com/cypress-io/cypress/issues/33356). Addressed in [#33925](https://github.com/cypress-io/cypress/pull/33925).
+
+**Bugfixes:**
+
+- Fixed an issue where runs recorded to Cypress Cloud from Jenkins could show the branch name with the remote prefix included (for example `origin/main` instead of `main`), or report the wrong branch in multibranch pipelines. Cypress now reports the actual branch name. Fixes [#20833](https://github.com/cypress-io/cypress/issues/20833).
+- Fixed an issue where invalid `CYPRESS_env` or `CYPRESS_expose` environment variables (for example, a plain string instead of a JSON object) were silently ignored with no warning. Cypress now emits a warning explaining that a JSON object is required and points to the `--env` or `--expose` CLI flags for setting individual values. Fixes [#29682](https://github.com/cypress-io/cypress/issues/29682) and [#19508](https://github.com/cypress-io/cypress/issues/19508). Fixed in [#33945](https://github.com/cypress-io/cypress/pull/33945).
+- Fixed an issue where HTML markup passed as a Sinon spy argument (for example `expect(spy).to.have.been.calledOnceWith('<svg>...</svg>')`) was rendered as live DOM in the Cypress command log, truncating the assertion message and breaking the log layout. The assertion message is now HTML-escaped and the markup is shown as literal text. Fixes [#33416](https://github.com/cypress-io/cypress/issues/33416). Fixed in [#33941](https://github.com/cypress-io/cypress/pull/33941).
+- Fixed an issue where a recorded Chrome or Electron run could hang for the duration of the spec timeout when the renderer crashed mid-spec, instead of failing the affected spec and continuing. Fixed in [#33943](https://github.com/cypress-io/cypress/pull/33943).
+- Fixed an issue where `cypress run` could crash with `TypeError: The "path" argument must be of type string. Received undefined` when the project path was not resolved (for example, due to an unset CI environment variable) or when `--browser` was passed without a value. Cypress now falls back to the current working directory in the first case and emits a clear "browser not found" error in the second. Fixes [#15418](https://github.com/cypress-io/cypress/issues/15418). Fixed in [#33958](https://github.com/cypress-io/cypress/pull/33958).
+- Fixed an issue where the version of `WebKit` was incorrectly displayed as version 0 when `playwright` version `1.60.0` was installed. Fixes [#33953](https://github.com/cypress-io/cypress/issues/33953).
+- The internal `--dev`, `--inspect`, and `--inspect-brk` command line flags are no longer listed in the `cypress` CLI help output. These flags are only intended for developing Cypress itself and would error when used against an installed version, so they are no longer advertised to users. Fixes [#21320](https://github.com/cypress-io/cypress/issues/21320) and addresses [#23058](https://github.com/cypress-io/cypress/issues/23058).
+
+**Misc:**
+
+- When Cypress cannot connect to a Chromium-based browser such as Chrome or Edge over the Chrome DevTools Protocol, the resulting error now suggests checking whether remote debugging has been disabled by an enterprise or group policy. Because Cypress relies on remote debugging to control the browser, the `RemoteDebuggingAllowed` policy being disabled prevents Cypress from connecting, and the error now points to `chrome://policy` or `edge://policy` to investigate. Addresses [#32526](https://github.com/cypress-io/cypress/issues/32526).
+
+**Dependency Updates:**
+
+- Upgraded `tsx` from `4.20.6` to `4.22.4`. Its bundled `esbuild` Go binary no longer reports [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in security scans, and loading TypeScript config files no longer emits the Node.js `[DEP0205] module.register() is deprecated` warning. Fixes [#33954](https://github.com/cypress-io/cypress/issues/33954) and [#33744](https://github.com/cypress-io/cypress/issues/33744).
 
 ## 15.16.0
 
