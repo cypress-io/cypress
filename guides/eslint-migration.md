@@ -10,8 +10,8 @@
 
 ### Batch 2: Framework adapters
 - [x] npm/react ✅ **COMPLETED**
-- [ ] npm/vue
-- [ ] npm/svelte
+- [x] npm/vue ✅ **COMPLETED**
+- [x] npm/svelte ✅ **COMPLETED**
 
 ### Batch 3: Build-related
 - [x] npm/webpack-batteries-included-preprocessor
