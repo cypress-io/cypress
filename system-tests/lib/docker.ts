@@ -127,6 +127,8 @@ const checkBuiltBinary = async () => {
   }
 }
 
+// Pre-pulls all images in parallel before tests run so per-test pulls hit the local cache.
+// Uses allSettled so a transient failure doesn't abort the suite — dockerSpawner retries individually.
 export const prePullImages = async (images: string[]): Promise<void> => {
   await Promise.allSettled(images.map((image) => new DockerProcess(image).pull()))
 }
