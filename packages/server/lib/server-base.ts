@@ -481,9 +481,19 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   createHosts (hosts: { [key: string]: string } | null = {}) {
-    return _.each(hosts, (ip, host) => {
-      return evilDns.add(host, ip)
+    _.each(hosts, (ip, host) => {
+      evilDns.add(host, ip)
     })
+
+    // Browsers resolve `*.localhost` to the loopback address per RFC 6761, but
+    // Node's DNS resolver does not. As a result, requests the application under
+    // test makes to localhost subdomains (e.g. http://api.localhost) fail to
+    // resolve when forwarded through the Cypress proxy, even though they work in
+    // a normal browser. Register a default override so these resolve the same way
+    // the browser would. User-defined `hosts` are added first and take precedence,
+    // since evil-dns matches in insertion order.
+    // https://github.com/cypress-io/cypress/issues/5895
+    evilDns.add('*.localhost', '127.0.0.1')
   }
 
   async addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {

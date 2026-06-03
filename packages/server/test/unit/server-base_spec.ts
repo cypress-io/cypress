@@ -3,6 +3,8 @@ import mockery from 'mockery'
 import { enable as enableMockery, mockElectron } from '../mockery_helper'
 import _ from 'lodash'
 import os from 'os'
+import dns from 'dns'
+import evilDns from 'evil-dns'
 import express from 'express'
 import { connect } from '@packages/network'
 import { setupFullConfigWithDefaults } from '@packages/config'
@@ -129,6 +131,43 @@ describe('lib/server-base', () => {
       await exitPromise
 
       expect(lastMorganFactoryArgs.options.skip()).to.be.false
+    })
+  })
+
+  describe('#createHosts', () => {
+    // resolve the same way Node's socket layer does (single address), which is
+    // the path that evil-dns overrides for proxied requests to the AUT
+    const resolve = (host) => {
+      return new Promise((res, rej) => {
+        dns.lookup(host, (err, address) => err ? rej(err) : res(address))
+      })
+    }
+
+    afterEach(() => {
+      evilDns.clear()
+    })
+
+    // https://github.com/cypress-io/cypress/issues/5895
+    it('resolves *.localhost subdomains to the loopback address like the browser does', async function () {
+      this.server.createHosts()
+
+      expect(await resolve('api.localhost')).to.equal('127.0.0.1')
+      expect(await resolve('foo.bar.localhost')).to.equal('127.0.0.1')
+    })
+
+    it('does not override bare localhost (left to the OS resolver)', function () {
+      this.server.createHosts()
+
+      // the default override is for subdomains only and must not match `localhost`
+      const matchesBareLocalhost = evilDns.domains.some(({ domain }) => 'localhost'.match(domain))
+
+      expect(matchesBareLocalhost).to.be.false
+    })
+
+    it('lets user-defined hosts take precedence over the localhost default', async function () {
+      this.server.createHosts({ '*.localhost': '127.0.0.5' })
+
+      expect(await resolve('api.localhost')).to.equal('127.0.0.5')
     })
   })
 
