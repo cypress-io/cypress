@@ -18,6 +18,40 @@ interface GitCommand {
   transform?: (result: string) => string | number | null
 }
 
+// Strips credentials from remote origin URLs to prevent them from leaking into
+// proxy logs or other storage. For HTTP/HTTPS, any username or password is
+// removed. For other schemes (e.g. ssh://), only passwords are removed —
+// usernames like "git" are protocol components and must be preserved.
+//
+// Known gaps (intentional tradeoffs):
+//   - ssh://token@host (username-as-token, no password): indistinguishable from
+//     legitimate ssh://git@host without a scheme-specific allowlist.
+//   - Tokens embedded in query params (e.g. ?token=secret): clearing all query
+//     params would break remotes that use them for non-credential purposes.
+function sanitizeRemoteOrigin (remoteOrigin: string): string {
+  if (!/\/\//.test(remoteOrigin)) {
+    return remoteOrigin
+  }
+
+  try {
+    const parsed = new URL(remoteOrigin)
+
+    const isHttpUrl = parsed.protocol === 'https:' || parsed.protocol === 'http:'
+    const hasCredentials = parsed.password || (isHttpUrl && parsed.username)
+
+    if (hasCredentials) {
+      parsed.username = ''
+      parsed.password = ''
+
+      return parsed.toString()
+    }
+  } catch {
+    // not a valid URL, return as-is
+  }
+
+  return remoteOrigin
+}
+
 /**
  * Returns the git command configuration for all commit info properties.
  * Exported for use in tests.
@@ -57,6 +91,7 @@ function getGitCommands (): Record<keyof CommitInfo, GitCommand> {
     remote: {
       envVar: 'COMMIT_INFO_REMOTE',
       gitCmd: ['config', '--get', 'remote.origin.url'],
+      transform: sanitizeRemoteOrigin,
     },
   }
 }
@@ -94,6 +129,13 @@ function getGitValue (
     .catch(() => null)
 }
 
+function getRemoteOrigin (folder?: string): Promise<string | null> {
+  const cwd = folder ? path.resolve(folder) : process.cwd()
+  const { remote } = getGitCommands()
+
+  return getGitValue(cwd, remote.envVar, remote.gitCmd, remote.transform) as Promise<string | null>
+}
+
 /**
  * Collects Git commit info using git CLI commands.
  * Falls back to environment variables if git commands fail.
@@ -123,4 +165,6 @@ function commitInfo (folder?: string): Promise<CommitInfo> {
 export = {
   commitInfo,
   getGitCommands,
+  getRemoteOrigin,
+  sanitizeRemoteOrigin,
 }

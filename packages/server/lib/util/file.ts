@@ -258,7 +258,6 @@ export class File {
     debugVerbose('attempt to get lock on %s', this.path)
 
     return fs
-    // @ts-expect-error
     .ensureDirAsync(this._lockFileDir)
     .then(() => {
       // polls every 100ms up to 2000ms to obtain lock, otherwise rejects

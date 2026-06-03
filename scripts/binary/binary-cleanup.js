@@ -91,6 +91,9 @@ const getDependencyPathsToKeep = async (buildAppDir) => {
       external: [
         './transpile-ts',
         './start-cypress',
+        // TypeScript lowers `import('electron')` to `require('electron')`; esbuild must not
+        // try to bundle it (electron is not installed under the packed app tree).
+        'electron',
         'fsevents',
         'pnpapi',
         '@swc/core',
@@ -143,6 +146,7 @@ const createServerEntryPointBundle = async (buildAppDir) => {
     external: [
       './transpile-ts',
       './start-cypress',
+      'electron',
     ],
   })
 

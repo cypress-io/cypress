@@ -1,5 +1,36 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.15.1
+## 15.17.0
+
+**Features:**
+
+- Added [Bun](https://bun.sh) as a recognized package manager. The `cypress` npm package can now be installed and invoked with Bun (for example `bun run cypress open` or `bun run cypress run`). Addresses [#28962](https://github.com/cypress-io/cypress/issues/28962). Addressed in [#32580](https://github.com/cypress-io/cypress/pull/32580).
+- Improved CI environment detection and commit metadata capture for Cypress Cloud recorded runs within Argo CD and Argo Workflows. Addressed in [#33932](https://github.com/cypress-io/cypress/pull/33932).
+- [`Cypress.expose()`](https://on.cypress.io/expose) values can now be overridden per suite or test via test config overrides (for example, `describe()`, `context()`, `it()`, or `test()`) using `{ expose: { key: value } }`. Suite- and test-level overrides are merged, with test-level keys taking precedence; override keys are applied at test start and restored after each test without affecting unrelated values set in hooks. Addresses [#33356](https://github.com/cypress-io/cypress/issues/33356). Addressed in [#33925](https://github.com/cypress-io/cypress/pull/33925).
+
+**Bugfixes:**
+
+- Fixed an issue where runs recorded to Cypress Cloud from Jenkins could show the branch name with the remote prefix included (for example `origin/main` instead of `main`), or report the wrong branch in multibranch pipelines. Cypress now reports the actual branch name. Fixes [#20833](https://github.com/cypress-io/cypress/issues/20833).
+- Fixed an issue where invalid `CYPRESS_env` or `CYPRESS_expose` environment variables (for example, a plain string instead of a JSON object) were silently ignored with no warning. Cypress now emits a warning explaining that a JSON object is required and points to the `--env` or `--expose` CLI flags for setting individual values. Fixes [#29682](https://github.com/cypress-io/cypress/issues/29682) and [#19508](https://github.com/cypress-io/cypress/issues/19508). Fixed in [#33945](https://github.com/cypress-io/cypress/pull/33945).
+- Fixed an issue where HTML markup passed as a Sinon spy argument (for example `expect(spy).to.have.been.calledOnceWith('<svg>...</svg>')`) was rendered as live DOM in the Cypress command log, truncating the assertion message and breaking the log layout. The assertion message is now HTML-escaped and the markup is shown as literal text. Fixes [#33416](https://github.com/cypress-io/cypress/issues/33416). Fixed in [#33941](https://github.com/cypress-io/cypress/pull/33941).
+- Fixed an issue where a recorded Chrome or Electron run could hang for the duration of the spec timeout when the renderer crashed mid-spec, instead of failing the affected spec and continuing. Fixed in [#33943](https://github.com/cypress-io/cypress/pull/33943).
+- Fixed an issue where, in the Electron browser, navigating away from a page whose `beforeunload` handler requested a confirmation prompt (for example `window.onbeforeunload = () => 'message'` or a `beforeunload` listener that sets `event.returnValue`) would hang and eventually fail the command with a page load timeout. Such navigations — including `cy.visit()`, `cy.reload()`, and clicking links — now proceed automatically without the confirmation prompt blocking the test, matching the behavior in Chrome. Fixes [#2118](https://github.com/cypress-io/cypress/issues/2118).
+- Fixed an issue where `cypress run` could crash with `TypeError: The "path" argument must be of type string. Received undefined` when the project path was not resolved (for example, due to an unset CI environment variable) or when `--browser` was passed without a value. Cypress now falls back to the current working directory in the first case and emits a clear "browser not found" error in the second. Fixes [#15418](https://github.com/cypress-io/cypress/issues/15418). Fixed in [#33958](https://github.com/cypress-io/cypress/pull/33958).
+- Fixed an issue where the version of `WebKit` was incorrectly displayed as version 0 when `playwright` version `1.60.0` was installed. Fixes [#33953](https://github.com/cypress-io/cypress/issues/33953).
+- Fixed an issue where, after a same-origin `fetch` or XHR request updated a cookie, a subsequent page navigation or reload could send the previous (stale) cookie value to the server instead of the updated one. Fixes [#25841](https://github.com/cypress-io/cypress/issues/25841).
+- The internal `--dev`, `--inspect`, and `--inspect-brk` command line flags are no longer listed in the `cypress` CLI help output. These flags are only intended for developing Cypress itself and would error when used against an installed version, so they are no longer advertised to users. Fixes [#21320](https://github.com/cypress-io/cypress/issues/21320) and addresses [#23058](https://github.com/cypress-io/cypress/issues/23058).
+- Fixed an issue where `cy.wait('@alias')` could time out when the connection to the browser closed before an aliased intercepted request's response completed, including during navigation such as `cy.visit()`. Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
+- Fixed an issue where a cross-origin navigation back to a previously-visited origin (for example, completing a login that redirects from an identity provider back to your application) could intermittently load the Cypress app interface instead of your application, causing flaky tests. Fixed in [#33991](https://github.com/cypress-io/cypress/pull/33991).
+- Fixed an issue where a single `cy.tick()` could miss nested timers scheduled from resolved promises, requiring multiple `cy.tick()` calls to advance the clock. Fixes [#1273](https://github.com/cypress-io/cypress/issues/1273).
+
+**Misc:**
+
+- When Cypress cannot connect to a Chromium-based browser such as Chrome or Edge over the Chrome DevTools Protocol, the resulting error now suggests checking whether remote debugging has been disabled by an enterprise or group policy. Because Cypress relies on remote debugging to control the browser, the `RemoteDebuggingAllowed` policy being disabled prevents Cypress from connecting, and the error now points to `chrome://policy` or `edge://policy` to investigate. Addresses [#32526](https://github.com/cypress-io/cypress/issues/32526).
+
+**Dependency Updates:**
+
+- Upgraded `tsx` from `4.20.6` to `4.22.4`. Its bundled `esbuild` Go binary no longer reports [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in security scans, and loading TypeScript config files no longer emits the Node.js `[DEP0205] module.register() is deprecated` warning. Fixes [#33954](https://github.com/cypress-io/cypress/issues/33954) and [#33744](https://github.com/cypress-io/cypress/issues/33744).
+
+## 15.16.0
 
 **Features:**
 
@@ -8,12 +39,14 @@
 
 **Bugfixes:**
 
+- Fixed an issue on Node 24.16.0+ and Node 26.1.0+ where installing Cypress could silently extract only the first file from the binary archive, causing the test runner to fail to launch with a "Cypress binary is missing" error. Addresses [#33891](https://github.com/cypress-io/cypress/issues/33891). Addressed in [#33887](https://github.com/cypress-io/cypress/pull/33887).
+- Fixed a regression in [15.14.2](#15-14-2) where the `cypress install` and `cypress verify` task list output could render one character per line in CI environments that allocate a pseudo-TTY without setting `COLUMNS`. Fixed in [#33890](https://github.com/cypress-io/cypress/pull/33890).
 - Fixed an issue where Cypress would abort the process and show a crash dialog when it received a SIGINT. Fixes [#29228](https://github.com/cypress-io/cypress/issues/29228). Fixed in [#33542](https://github.com/cypress-io/cypress/pull/33542/).
-- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/guides/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
+- Fixed an issue where the [`clientCertificates`](https://docs.cypress.io/app/references/client-certificates) config option failed to load ECDSA (EC) PEM or PKCS#12 client certificates. Fixes [#33767](https://github.com/cypress-io/cypress/issues/33767). Fixed in [#33799](https://github.com/cypress-io/cypress/pull/33799).
 - Fixed an issue where clicking "back to projects" or switching projects while a project's initial config load was still in flight could fail. Fixed in [#33810](https://github.com/cypress-io/cypress/pull/33810).
 - Fixed an intermittent `ENOENT: no such file or directory, open <path>/bundle.tar-<rand>` error during `cy.prompt` and Studio bundle initialization. Fixed in [#33748](https://github.com/cypress-io/cypress/pull/33748).
 - Fixed a regression in [14.3.3](#14-3-3) where deleting `results.video` in `after:spec` to keep videos only for failing specs could leave an empty `*-compressed.mp4` file in `cypress/videos`. Fixes [#32883](https://github.com/cypress-io/cypress/issues/32883).
-- Fixed an issue where a single `cy.tick()` could miss nested timers scheduled from resolved promises, requiring multiple `cy.tick()` calls to advance the clock. Fixes [#1273](https://github.com/cypress-io/cypress/issues/1273).
+- Fixed an issue where Cypress's bundled TypeScript type definitions could fail to compile in a project that also installed `@sinonjs/fake-timers@>=15.3.0`, because the bundled `@types/sinon` file imported `FakeTimers` from `@sinonjs/fake-timers` and TypeScript would prefer the user's installed copy over the bundled `@types/sinonjs__fake-timers`. The shipped types now reference the `@types` package directly so resolution is independent of the user's installed version. Fixes [#33829](https://github.com/cypress-io/cypress/issues/33829). Fixed in [#33886](https://github.com/cypress-io/cypress/pull/33886).
 
 **Dependency Updates:**
 

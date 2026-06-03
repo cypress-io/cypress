@@ -3,6 +3,7 @@ import { CypressError, getError } from '@packages/errors'
 import type { DebugData, FullConfig, TestingType } from '@packages/types'
 import { ChildProcess, fork, ForkOptions, spawn } from 'child_process'
 import EventEmitter from 'events'
+import fs from 'fs'
 import path from 'path'
 import inspector from 'inspector'
 import debugLib from 'debug'
@@ -13,13 +14,27 @@ import os from 'os'
 import semver from 'semver'
 import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry, encodeTelemetryContext } from '@packages/telemetry'
+import { TagStream } from '@packages/stderr-filtering'
 
 const pkg = require('@packages/root')
 const debug = debugLib(`cypress:lifecycle:ProjectConfigIpc`)
 const debugVerbose = debugLib(`cypress-verbose:lifecycle:ProjectConfigIpc`)
 
-const CHILD_PROCESS_FILE_PATH = require.resolve('@packages/server/lib/plugins/child/require_async_child')
-import { TagStream } from '@packages/stderr-filtering'
+// In dev the .ts source exists; in production only the compiled .js is present.
+const resolveRequireAsyncChildPath = (): string => {
+  const serverRoot = path.dirname(require.resolve('@packages/server/package.json'))
+  const tsPath = path.join(serverRoot, 'lib/plugins/child/require_async_child.ts')
+
+  if (fs.existsSync(tsPath)) {
+    return tsPath
+  }
+
+  return require.resolve('@packages/server/lib/plugins/child/require_async_child.js')
+}
+
+const CHILD_PROCESS_FILE_PATH = resolveRequireAsyncChildPath()
+
+debugVerbose(' using child process file path: %s', CHILD_PROCESS_FILE_PATH)
 
 // NOTE: need the file:// prefix to avoid https://nodejs.org/api/errors.html#err_unsupported_esm_url_scheme on windows
 const tsx = os.platform() === 'win32' ? `file://${toPosix(require.resolve('tsx'))}` : toPosix(require.resolve('tsx'))

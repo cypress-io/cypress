@@ -158,6 +158,11 @@ while IFS= read -r file; do
       driver_tests=true
       system_tests=true
       ;;
+    packages/network-interception/*)
+      server_tests=true
+      driver_tests=true
+      system_tests=true
+      ;;
     packages/rewriter/*)
       server_tests=true
       system_tests=true

@@ -353,14 +353,30 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
 
   const hasAppUnloaded = this.req.cookies['__cypress.unload']
 
-  span?.setAttributes({
-    hasAppUnloaded,
-  })
-
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
+  //
+  // The `__cypress.unload` cookie is set (browser-side) when the primary app's
+  // top window unloads and is only cleared on the corresponding
+  // `unload`/`pagehide` event. That event is unreliable, so the cookie can
+  // linger on a domain that was previously the primary after the runner has
+  // navigated to a different super-domain. Only the primary app is meant to be
+  // recovered via this redirect, so restrict it to requests that match the
+  // current primary super-domain origin. A request to a non-primary origin is a
+  // normal cross-origin navigation (handled by cy.origin) and must be served —
+  // not redirected to the client route — even if a stale unload cookie is
+  // present on that domain. Without this guard, e.g. visiting an IdP as the
+  // primary origin and then redirecting back to the app origin to complete
+  // login would be wrongly bounced to the Cypress specs UI.
+  const isPrimarySuperDomainOrigin = this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl)
+
+  span?.setAttributes({
+    hasAppUnloaded,
+    isPrimarySuperDomainOrigin,
+  })
+
   // We do not redirect if we are in cypress in cypress since this can be caused by a reload of the internal Cypress app
-  if (hasAppUnloaded && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
+  if (hasAppUnloaded && isPrimarySuperDomainOrigin && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
     span?.setAttributes({
       redirectedTo: this.config.clientRoute,
     })

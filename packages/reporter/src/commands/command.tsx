@@ -73,7 +73,7 @@ export const formattedMessage = (message: string, name?: string) => {
     }
     // for assertions print the exact text so that characters like _ and *
     // are not escaped in the assertion display when comparing values
-    const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
+    const result = assertionArray.flatMap((s, index) => [_.escape(s), expectedActualArray()[index]])
 
     return result.join('')
   }

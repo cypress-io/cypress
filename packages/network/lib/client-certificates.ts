@@ -274,7 +274,17 @@ export function loadClientCertificateConfig (config: Config) {
             try {
               createPrivateKey({ key: pemKeyRaw, passphrase })
             } catch (error: any) {
-              if (passphrase && error.code === 'ERR_OSSL_BAD_DECRYPT') {
+              // OpenSSL 3 may surface a wrong passphrase as either ERR_OSSL_BAD_DECRYPT (cipher
+              // padding/MAC check fails) or "DECODER routines::unsupported" (decrypted bytes are
+              // garbage the DER decoder can't classify). Which one fires is data-dependent, so
+              // also treat the DECODER error as a passphrase failure — but only when the key
+              // actually looks like an encrypted PEM, to avoid masking a genuinely malformed key.
+              const isBadDecrypt = error.code === 'ERR_OSSL_BAD_DECRYPT'
+                || (typeof error.message === 'string'
+                  && error.message.includes('DECODER routines::unsupported')
+                  && isEncryptedPemKey(pemKeyRaw))
+
+              if (passphrase && isBadDecrypt) {
                 throw new Error(
                   `Cannot decrypt PEM key with supplied passphrase (check the passphrase file content and that it doesn't have unexpected whitespace at the end)`,
                 )
@@ -344,6 +354,15 @@ function loadBinaryFromFile (filepath: string): Buffer {
   // TODO: update to async
   // eslint-disable-next-line no-restricted-syntax
   return fs.readFileSync(filepath)
+}
+
+function isEncryptedPemKey (pem: Buffer): boolean {
+  const text = pem.toString('utf8')
+
+  // PKCS#8 encrypted (`-----BEGIN ENCRYPTED PRIVATE KEY-----`) or a traditional PEM that
+  // declares `Proc-Type: 4,ENCRYPTED` in its headers.
+  return /-----BEGIN ENCRYPTED PRIVATE KEY-----/.test(text)
+    || /Proc-Type:\s*4,ENCRYPTED/i.test(text)
 }
 
 function loadTextFromFile (filepath: string): string {

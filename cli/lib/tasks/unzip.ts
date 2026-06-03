@@ -3,7 +3,7 @@ import cp from 'child_process'
 import os from 'os'
 import yauzl from 'yauzl'
 import Debug from 'debug'
-import extract from 'extract-zip'
+import extractWithYauzl from './extract-with-yauzl'
 import readline from 'readline'
 import fs from 'fs-extra'
 import { throwFormErrorText, errors } from '../errors'
@@ -13,11 +13,17 @@ import assert from 'assert'
 const debug = Debug('cypress:cli:unzip')
 
 const unzipTools = {
-  extract,
+  extractWithYauzl,
+}
+
+interface UnzipOpts {
+  zipFilePath: string
+  installDir: string
+  progress: { onProgress: (percent: number, secsRemaining: string) => unknown }
 }
 
 // expose this function for simple testing
-const unzip = async ({ zipFilePath, installDir, progress }: any): Promise<void> => {
+const unzip = async ({ zipFilePath, installDir, progress }: UnzipOpts): Promise<void> => {
   debug('unzipping from %s', zipFilePath)
   debug('into', installDir)
 
@@ -31,7 +37,10 @@ const unzip = async ({ zipFilePath, installDir, progress }: any): Promise<void> 
   await fs.ensureDir(installDir)
 
   await new Promise<void>((resolve, reject) => {
-    return yauzl.open(zipFilePath, (err: any, zipFile: any) => {
+    // Open with lazyEntries so yauzl doesn't auto-emit entries (which would
+    // require the fd to stay open for the duration of the OS-tool extraction).
+    // We only need the entryCount here for the progress calculation.
+    return yauzl.open(zipFilePath, { lazyEntries: true }, (err: any, zipFile: any) => {
       yauzlDoneTime = Date.now()
 
       if (err) {
@@ -43,6 +52,9 @@ const unzip = async ({ zipFilePath, installDir, progress }: any): Promise<void> 
       const total = zipFile.entryCount
 
       debug('zipFile entries count', total)
+
+      // Close the count-only handle — the Node fallback re-opens the zip for extraction.
+      zipFile.close()
 
       const started = new Date()
 
@@ -69,15 +81,8 @@ const unzip = async ({ zipFilePath, installDir, progress }: any): Promise<void> 
       const unzipWithNode = async (): Promise<any> => {
         debug('unzipping with node.js (slow)')
 
-        const opts = {
-          dir: installDir,
-          onEntry: tick,
-        }
-
-        debug('calling Node extract tool %s %o', zipFilePath, opts)
-
         try {
-          await unzipTools.extract(zipFilePath, opts)
+          await unzipTools.extractWithYauzl(zipFilePath, installDir, tick)
           debug('node unzip finished')
 
           return resolve()

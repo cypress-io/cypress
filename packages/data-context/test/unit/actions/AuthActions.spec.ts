@@ -1,6 +1,7 @@
 import { describe, expect, jest, it } from '@jest/globals'
 import type { DataContext } from '../../../src'
 import { AuthActions } from '../../../src/actions/AuthActions'
+import type { AuthenticatedUserShape } from '../../../src/data'
 import { createTestDataContext } from '../helper'
 import { FoundBrowser } from '@packages/types'
 
@@ -130,6 +131,37 @@ describe('AuthActions', () => {
       expect(ctx._apis.electronApi.focusMainWindow).not.toHaveBeenCalled()
       expect(ctx._apis.browserApi.focusActiveBrowserWindow).not.toHaveBeenCalled()
     })
+
+    it('aborts the pending auth and does not set user when resetAuthState is called during login', async () => {
+      let capturedSignal: AbortSignal | undefined
+
+      jest.mocked(ctx._apis.authApi.logIn).mockImplementation(
+        (_onMessage, _utmSource, _utmMedium, _utmContent, signal) => {
+          capturedSignal = signal
+
+          // Simulate the async git-origin lookup being in flight — never resolves
+          return new Promise<AuthenticatedUserShape>(() => {})
+        },
+      )
+
+      const loginPromise = actions.login('Binary: App', 'In-App')
+
+      // The mock is called synchronously before the first await in #authenticate,
+      // so capturedSignal is already set here
+      expect(capturedSignal).toBeInstanceOf(AbortSignal)
+      expect(capturedSignal!.aborted).toBe(false)
+
+      // User cancels while the git-origin lookup is in flight
+      actions.resetAuthState()
+
+      // resetAuthState must have aborted the signal so the logIn implementation
+      // can gate auth.start on signal.aborted and bail out
+      expect(capturedSignal!.aborted).toBe(true)
+
+      // The outer promise resolves via #cancelActiveLogin; user must not be set
+      await loginPromise
+      expect(ctx.coreData.user).toBeNull()
+    })
   })
 
   describe('.signup', () => {
@@ -152,7 +184,7 @@ describe('AuthActions', () => {
     it('calls authApi.signUp with utm parameters', async () => {
       await actions.signup('Binary: App', 'Studio', 'Signup')
 
-      expect(ctx._apis.authApi.signUp).toHaveBeenCalledWith(expect.any(Function), 'Binary: App', 'Studio', 'Signup')
+      expect(ctx._apis.authApi.signUp).toHaveBeenCalledWith(expect.any(Function), 'Binary: App', 'Studio', 'Signup', expect.any(AbortSignal))
       expect(ctx._apis.authApi.logIn).not.toHaveBeenCalled()
     })
 

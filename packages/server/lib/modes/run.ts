@@ -9,7 +9,7 @@ import assert from 'assert'
 
 import recordMode from './record'
 import * as errors from '../errors'
-import Reporter from '../reporter'
+import { Reporter } from '../reporter'
 import browserUtils from '../browsers'
 import { openProject } from '../open_project'
 import * as videoCapture from '../video_capture'
@@ -31,6 +31,7 @@ import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
+import { isRunningAsElectronProcess } from '../util/electron-app'
 
 type SetScreenshotMetadata = (data: TakeScreenshotProps) => void
 export type ScreenshotMetadata = ReturnType<typeof screenshotMetadata>
@@ -1040,6 +1041,7 @@ export interface ReadyOptions {
   browser: string
   browsers?: FoundBrowser[]
   ciBuildId: string
+  cwd?: string
   exit: boolean
   group: string
   headed: boolean
@@ -1047,7 +1049,7 @@ export interface ReadyOptions {
   onError?: (err: Error) => void
   outputPath: string
   parallel: boolean
-  projectRoot: string
+  projectRoot?: string
   quiet: boolean
   record: boolean
   socketId: string
@@ -1071,7 +1073,14 @@ async function ready (options: ReadyOptions) {
     quiet: false,
   })
 
-  const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
+  // projectRoot can be undefined when --project/--run-project is omitted, or when
+  // argv parsing leaves project as a boolean (for example `--project` with no
+  // path). Fall back to cwd here rather than in args.ts, which would
+  // incorrectly set currentProject in global open mode and bypass the Launchpad
+  // project picker.
+  options.projectRoot = options.projectRoot ?? String(options.cwd ?? process.cwd())
+  const projectRoot = options.projectRoot
+  const { record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
   assert(socketId)
 
@@ -1232,7 +1241,7 @@ async function ready (options: ReadyOptions) {
 export async function run (options, loading: Promise<void>) {
   debug('run start')
   // Check if running as electron process
-  if (require('../util/electron-app').isRunningAsElectronProcess({ debug })) {
+  if (isRunningAsElectronProcess({ debug })) {
     // tslint:disable-next-line no-implicit-dependencies - electron dep needs to be defined
     const app = require('electron').app
 
