@@ -10,6 +10,12 @@
 
 **Bugfixes:**
 
+- Fixed an issue where Cypress could load the config file through the wrong module system (for example, treating an ESM config as CommonJS), so ESM-only APIs such as `import.meta.resolve` were unavailable in config and plugin code. Cypress now picks ESM or CJS before loading, using Node.js rules from the config file extension and the nearest `package.json` `"type"`, then loads only via `import()` or `require()` and fails outright on error instead of retrying the other format:
+  - `.mjs` and `.mts` always load as ESM
+  - `.cjs` and `.cts` always load as CJS
+  - `.js` and `.ts` load as ESM when the nearest `package.json` has `"type": "module"`; CJS is loaded otherwise
+
+  Fixes [#33801](https://github.com/cypress-io/cypress/issues/33801). Addresses [#33892](https://github.com/cypress-io/cypress/issues/33892).
 - Fixed an issue where `config.isInteractive` was always `true` in the config passed to the plugins / `setupNodeEvents` function, even during `cypress run`. The value is now correctly `false` in run mode and `true` in open mode, so plugins can reliably distinguish between the two. Fixes [#20789](https://github.com/cypress-io/cypress/issues/20789).
 - Fixed an issue where component tests, and end-to-end tests using a local `baseUrl`, could fail to start with `Cypress could not verify that this server is running` when an `HTTP_PROXY` environment variable was set. Local hosts excluded from the proxy via `NO_PROXY` (such as `localhost`, `127.0.0.1`, and `::1`, which includes the component testing dev server) are now verified with a direct connection instead of being routed through the proxy. Fixes [#27990](https://github.com/cypress-io/cypress/issues/27990).
 - Video recording no longer silently fails on Firefox 93+, where it previously produced no video and ended with a `We failed processing this video` or operation timed out warning. Fixes [#18415](https://github.com/cypress-io/cypress/issues/18415). Fixed in [#33960](https://github.com/cypress-io/cypress/pull/33960).
