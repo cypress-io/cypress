@@ -70,6 +70,10 @@ module.exports = (on, config) => {
       return null
     },
 
+    'return:arg' (arg) {
+      return arg
+    },
+
     'console:error' (msg) {
       console.error(msg)
 
