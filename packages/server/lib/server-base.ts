@@ -233,6 +233,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy?.setPreRequestTimeout(timeout)
   }
 
+  updateBlockHosts (blockHosts: string | string[]) {
+    this._networkProxy?.updateBlockHosts(blockHosts)
+  }
+
   setupCrossOriginRequestHandling () {
     this._eventBus.on('cross:origin:cookies', (cookies: SerializableAutomationCookie[]) => {
       this.socket.localBus.once('cross:origin:cookies:received', () => {
@@ -471,6 +475,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       this.netStubbingState.reset()
       this._remoteStates.reset()
       this.networkProxy.clearCredentials()
+    }
+
+    options.onUpdateBlockHosts = (blockHosts) => {
+      this.updateBlockHosts(blockHosts)
     }
 
     const ios = this.socket.startListening(this.server, automation, config, options)

@@ -266,6 +266,9 @@ function getUniqueRequestId (requestId: string) {
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
+  // the blockHosts value resolved from the project config, used to restore the
+  // value in between specs after it may have been mutated by a test-level override
+  originalBlockHosts: CyServer.Config['blockHosts']
   shouldCorrelatePreRequests: () => boolean
   deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string | undefined
@@ -287,6 +290,7 @@ export class Http {
     this.buffers = new HttpBuffers()
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request.rp)
     this.config = opts.config
+    this.originalBlockHosts = opts.config.blockHosts
     this.shouldCorrelatePreRequests = opts.shouldCorrelatePreRequests || (() => false)
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
@@ -459,6 +463,9 @@ export class Http {
     this.setAUTUrl(undefined)
 
     if (options.resetBetweenSpecs) {
+      // restore the project-level blockHosts in case it was mutated by a
+      // test-level override in the previous spec
+      this.config.blockHosts = this.originalBlockHosts
       this.preRequests.reset()
       this.serviceWorkerManager = new ServiceWorkerManager()
     }
@@ -507,6 +514,14 @@ export class Http {
   setProtocolManager (protocolManager: ProtocolManagerShape) {
     this.protocolManager = protocolManager
     this.preRequests.setProtocolManager(protocolManager)
+  }
+
+  // blockHosts can be overridden at the suite/test level. Since the value is read
+  // from the config on each proxied request, updating it here applies the override
+  // to all subsequent requests without requiring a server restart. The original
+  // value is restored in between specs (see `reset`).
+  updateBlockHosts (blockHosts: CyServer.Config['blockHosts']) {
+    this.config.blockHosts = blockHosts
   }
 
   setPreRequestTimeout (timeout: number) {

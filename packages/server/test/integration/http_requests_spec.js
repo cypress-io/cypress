@@ -4538,6 +4538,39 @@ describe('Routes', () => {
           return expectedHeader(responses[4], '*adwords.com')
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/21151
+      it('applies blockHosts updated at runtime (e.g. test config override) to subsequent requests', function () {
+        this.server.updateBlockHosts([
+          '*.google.com',
+          'shop.apple.com',
+          'cypress.io',
+          'localhost:6666',
+          '*adwords.com',
+          'runtime-blocked.test',
+        ])
+
+        return this.rp('https://runtime-blocked.test/foo')
+        .then((res) => {
+          expect(res.statusCode).to.eq(503)
+          expect(res.body).to.be.empty
+          expect(res.headers['x-cypress-matched-blocked-host']).to.eq('runtime-blocked.test')
+        })
+      })
+
+      it('restores the configured blockHosts when the proxy is reset between specs', function () {
+        // override the blockHosts at runtime, dropping all of the configured entries
+        this.server.updateBlockHosts(['only-this.test'])
+
+        // the proxy is reset in between specs, which should restore the configured value
+        this.networkProxy.reset({ resetBetweenSpecs: true })
+
+        return this.rp('https://cypress.io')
+        .then((res) => {
+          expect(res.statusCode).to.eq(503)
+          expect(res.headers['x-cypress-matched-blocked-host']).to.eq('cypress.io')
+        })
+      })
     })
 
     context('client aborts', () => {

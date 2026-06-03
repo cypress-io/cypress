@@ -299,6 +299,37 @@ describe('http', function () {
 
       expect(http.preRequests.reset).not.toHaveBeenCalled()
     })
+
+    it('restores the original blockHosts when resetBetweenSpecs is true', function () {
+      const http = new Http({ ...httpOpts, config: { blockHosts: '*.pendo.io' } })
+
+      http.updateBlockHosts('')
+      expect(http.config.blockHosts).to.eq('')
+
+      http.reset({ resetBetweenSpecs: true })
+
+      expect(http.config.blockHosts).to.eq('*.pendo.io')
+    })
+
+    it('does not restore the original blockHosts when resetBetweenSpecs is false', function () {
+      const http = new Http({ ...httpOpts, config: { blockHosts: '*.pendo.io' } })
+
+      http.updateBlockHosts('')
+
+      http.reset({ resetBetweenSpecs: false })
+
+      expect(http.config.blockHosts).to.eq('')
+    })
+  })
+
+  describe('Http.updateBlockHosts', function () {
+    it('overrides the configured blockHosts so subsequent requests use the new value', function () {
+      const http = new Http({ config: { blockHosts: '*.pendo.io' }, middleware: {}, request: { rp: vi.fn() } } as any)
+
+      http.updateBlockHosts(['*.pendo.io', '*.osano.com'])
+
+      expect(http.config.blockHosts).to.deep.eq(['*.pendo.io', '*.osano.com'])
+    })
   })
 
   describe('Service Worker', function () {

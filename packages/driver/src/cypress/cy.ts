@@ -361,6 +361,25 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
     if (!Cypress.isCrossOriginSpecBridge) {
       trackTopUrl()
+
+      // `blockHosts` can be overridden at the suite/test level, but the value that
+      // actually blocks requests lives in the Node-side network proxy. Sync any change
+      // to the effective value to the server before each test runs so the override
+      // takes effect. Only the primary origin syncs since the proxy is process-global.
+      // See https://github.com/cypress-io/cypress/issues/21151.
+      let lastSyncedBlockHosts = Cypress.config('blockHosts') ?? null
+
+      Cypress.on('test:before:run:async', () => {
+        const blockHosts = Cypress.config('blockHosts') ?? null
+
+        if (_.isEqual(blockHosts, lastSyncedBlockHosts)) {
+          return
+        }
+
+        lastSyncedBlockHosts = blockHosts
+
+        return Cypress.backend('update:block:hosts', blockHosts)
+      })
     }
 
     handleCrossOriginCookies(Cypress)
