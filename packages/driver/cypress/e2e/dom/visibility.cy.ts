@@ -602,9 +602,19 @@ describe('src/cypress/dom/visibility', {
       })
     })
 
-    // The zero-dimension guard in `modernIsHidden` mirrors a defensive check that may not be
-    // reachable in modern Chrome (where `Element.checkVisibility()` already rejects 0x0 elements),
-    // so we don't unit-test that branch here. The implementation in `getReasonIsHidden` still mirrors
-    // `modernIsHidden`'s logic so the attribution stays correct in browsers where the guard does fire.
+    it('attributes zero-dimension elements to the dimension guard, not checkVisibility', () => {
+      // `Element.checkVisibility()` does not inspect element dimensions in any major browser
+      // (verified across Chrome, Firefox, and Electron), so a 0x0 element passes checkVisibility()
+      // and is only rejected by `modernIsHidden`'s zero-dimension guard. The reason should attribute
+      // the failure to the dimension guard.
+      cy.$$('body').append('<div id="zero-dim" style="width: 0; height: 0;">zero</div>')
+      cy.get('#zero-dim').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.match(/^This element `<div#zero-dim>` is not visible because it has zero width or height\./)
+        expect(reason).to.not.include('Element.checkVisibility()')
+        expect(reason).to.include('size: `0 x 0` pixels')
+      })
+    })
   })
 })
