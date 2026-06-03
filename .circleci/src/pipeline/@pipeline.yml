@@ -2718,6 +2718,7 @@ jobs:
       - run: yarn workspace @cypress/grep tags:inherit
       - run: yarn workspace @cypress/grep tags:nested-describe
       - run: yarn workspace @cypress/grep tags:omit:specs
+      - run: yarn workspace @cypress/grep tags:skip:omit
       - run: yarn workspace @cypress/grep tags:or
       - run: yarn workspace @cypress/grep this
       - run: yarn workspace @cypress/grep untagged

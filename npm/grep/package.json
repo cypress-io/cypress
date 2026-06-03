@@ -30,6 +30,7 @@
     "tags:inherit": "PROJECT_NAME=tags-inherit node ../../scripts/cypress.js run --expose grepTags=@screen-b --config specPattern='**/inherits-tag.cy.ts'",
     "tags:nested-describe": "PROJECT_NAME=tags-nested-describe node ../../scripts/cypress.js run --expose grepTags='@smoke @integration' --config specPattern='**/nested-describe.cy.ts'",
     "tags:omit:specs": "PROJECT_NAME=tags-omit-specs node ../../scripts/cypress.js run --expose grepTags='regression',grepOmitFiltered=true --config specPattern='**/tags/*.cy.ts'",
+    "tags:skip:omit": "PROJECT_NAME=tags-skip-omit node ../../scripts/cypress.js run --expose grepTags='@tag1',grepOmitFiltered=true --config specPattern='**/skip-tags/*.cy.ts'",
     "tags:or": "PROJECT_NAME=tags-or node ../../scripts/cypress.js run --expose grepTags='regression high' --config specPattern='**/tags/*.cy.ts'",
     "this": "PROJECT_NAME=this node ../../scripts/cypress.js run --expose grep='this context' --config specPattern='**/this.cy.ts'",
     "untagged": "PROJECT_NAME=untagged node ../../scripts/cypress.js run --expose grepUntagged=true --config specPattern='**/tags/*.cy.ts'"

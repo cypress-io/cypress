@@ -73,17 +73,13 @@ export function register (): void {
     return
   }
 
-  // @ts-expect-error - it is missing only, skip, and retries which are overridden below
-  it = function itGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Test | void[] {
-    if (typeof options === 'function') {
-      callback = options
-      options = {}
-    }
+  const suiteStack: SuiteStackItem[] = []
 
-    if (!callback) {
-      return _it(name, options)
-    }
-
+  // Determines whether a test with the given name/options should run under the
+  // current grep filter, taking inherited suite tags into account. Shared by
+  // both the `it` and `it.skip` overrides so that explicitly skipped tests
+  // respect the grep filter the same way active tests do.
+  const shouldTestRunGrep = (name: string, options: any): boolean => {
     let configTags = options && options.tags
 
     if (typeof configTags === 'string') {
@@ -117,7 +113,21 @@ export function register (): void {
       debugInstance('should test "%s" run? %s', nameToGrep, shouldRun)
     }
 
-    if (shouldRun) {
+    return shouldRun
+  }
+
+  // @ts-expect-error - it is missing only, skip, and retries which are overridden below
+  it = function itGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Test | void[] {
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
+
+    if (!callback) {
+      return _it(name, options)
+    }
+
+    if (shouldTestRunGrep(name, options)) {
       if (grepBurn > 1) {
         return Cypress._.times(grepBurn, (k) => {
           const fullName = `${name}: burning ${k + 1} of ${grepBurn}`
@@ -135,8 +145,6 @@ export function register (): void {
 
     return _it.skip(name, options, callback)
   }
-
-  const suiteStack: SuiteStackItem[] = []
 
     // @ts-expect-error - it is missing only and skip which are overridden below
   describe = function describeGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Suite {
@@ -178,7 +186,30 @@ export function register (): void {
   context = describe
   specify = it
 
-  it.skip = _it.skip
+  // Route explicitly skipped tests through the grep filter as well. Without
+  // this, `it.skip(...)` would bypass filtering entirely and always register a
+  // pending test, causing skipped tests to leak into the report regardless of
+  // their tags (e.g. when filtering by a tag they don't have). When the test
+  // doesn't match the filter and `grepOmitFiltered` is set, it is omitted just
+  // like a filtered-out active test. See https://github.com/cypress-io/cypress/issues/24455
+  // @ts-expect-error - skip is missing the full Mocha.TestFunction signature
+  it.skip = function itSkipGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Test | void {
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
+
+    if (!shouldTestRunGrep(name, options) && omitFiltered) {
+      return
+    }
+
+    if (!callback) {
+      return _it.skip(name, options)
+    }
+
+    return _it.skip(name, options, callback)
+  }
+
   it.only = _it.only
   it.retries = _it.retries
   // @ts-expect-error - is missing each on Mocha.TestFunction type

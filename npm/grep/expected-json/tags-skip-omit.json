@@ -1,0 +1,19 @@
+[
+  {
+    "name": "file1.cy.ts",
+    "tests": [
+      {
+        "name": "Spec 1",
+        "state": "passed"
+      },
+      {
+        "name": "Spec 1",
+        "state": "passed"
+      }
+    ]
+  },
+  {
+    "name": "file2.cy.ts",
+    "tests": []
+  }
+]
