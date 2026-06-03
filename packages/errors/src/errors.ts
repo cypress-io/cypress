@@ -781,7 +781,7 @@ export const AllCypressErrors = {
           - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.`
     } else if (reason === 'killed') {
       guidance = errPartial`\
-        The renderer process was terminated externally rather than running out of memory, so increasing available memory is unlikely to help. This can be caused by the operating system, a resource limit, or the browser terminating the renderer process itself.
+        The renderer process was terminated externally. This can be caused by the operating system, a resource limit, or the browser terminating the renderer process itself.
           - Try running your tests in a different browser to see if the crash is specific to ${fmt.highlight(browserName)}.`
     } else {
       guidance = errPartial`\
