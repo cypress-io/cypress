@@ -1,0 +1,15 @@
+[
+  {
+    "name": "only.cy.ts",
+    "tests": [
+      {
+        "name": "tests that use it.only",
+        "state": "passed"
+      },
+      {
+        "name": "a focused suite",
+        "state": "passed"
+      }
+    ]
+  }
+]

@@ -2706,6 +2706,7 @@ jobs:
       - run: yarn workspace @cypress/grep inverted
       - run: yarn workspace @cypress/grep multiple-registrations
       - run: yarn workspace @cypress/grep omit:specs
+      - run: yarn workspace @cypress/grep only
       - run: yarn workspace @cypress/grep or
       - run: yarn workspace @cypress/grep skip
       - run: yarn workspace @cypress/grep tags:inverted

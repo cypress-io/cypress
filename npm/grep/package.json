@@ -17,6 +17,7 @@
     "lint": "eslint",
     "multiple-registrations": "PROJECT_NAME=multiple-registrations node ../../scripts/cypress.js run --config specPattern='**/multiple-registrations.cy.ts'",
     "omit:specs": "PROJECT_NAME=omit-specs node ../../scripts/cypress.js run --expose grep='Test 2',grepOmitFiltered=true --config specPattern='**/tags/*.cy.ts'",
+    "only": "PROJECT_NAME=only node ../../scripts/cypress.js run --expose grepTags='@smoke',grepOmitFiltered=true --config specPattern='**/only.cy.ts'",
     "or": "PROJECT_NAME=or node ../../scripts/cypress.js run --expose grep='Test 1',grepTags='regression high' --config specPattern='**/tags/*.cy.ts'",
     "skip": "PROJECT_NAME=skip node ../../scripts/cypress.js run --config specPattern='**/*skip.cy.ts'",
     "tags:inverted": "PROJECT_NAME=tag-inverted node ../../scripts/cypress.js run --expose grepTags='-regression' --config specPattern='**/tags/*.cy.ts'",

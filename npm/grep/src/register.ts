@@ -73,17 +73,10 @@ export function register (): void {
     return
   }
 
-  // @ts-expect-error - it is missing only, skip, and retries which are overridden below
-  it = function itGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Test | void[] {
-    if (typeof options === 'function') {
-      callback = options
-      options = {}
-    }
+  const suiteStack: SuiteStackItem[] = []
 
-    if (!callback) {
-      return _it(name, options)
-    }
-
+  // shared grep decision used by both `it` and `it.only`
+  const shouldTestRunWithGrep = (name: string, options: any): boolean => {
     let configTags = options && options.tags
 
     if (typeof configTags === 'string') {
@@ -117,7 +110,20 @@ export function register (): void {
       debugInstance('should test "%s" run? %s', nameToGrep, shouldRun)
     }
 
-    if (shouldRun) {
+    return shouldRun
+  }
+
+  const itGrep = function itGrep (name: string, options: any, callback?: Mocha.Func | Mocha.AsyncFunc): Mocha.Test | void[] {
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
+
+    if (!callback) {
+      return _it(name, options)
+    }
+
+    if (shouldTestRunWithGrep(name, options)) {
       if (grepBurn > 1) {
         return Cypress._.times(grepBurn, (k) => {
           const fullName = `${name}: burning ${k + 1} of ${grepBurn}`
@@ -136,10 +142,56 @@ export function register (): void {
     return _it.skip(name, options, callback)
   }
 
-  const suiteStack: SuiteStackItem[] = []
+  // Mocha's `it.only` re-invokes the global `it` to build the test it then marks
+  // as exclusive. Because we've replaced the global `it` with the grep wrapper,
+  // we apply the grep decision here and, when the focused test should run,
+  // temporarily restore the underlying `it` for that call. Letting the wrapper
+  // run for the inner call would drop the test's `options.tags` (mocha forwards
+  // only the title and callback) and could wrongly filter or burn the focused
+  // test, or crash mocha when the wrapper returns `undefined`/an array instead
+  // of a test (see https://github.com/cypress-io/cypress/issues/25062).
+  const itGrepOnly = function itGrepOnly (name: string, options: any, callback?: Mocha.Func | Mocha.AsyncFunc): Mocha.Test | void[] {
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
 
-    // @ts-expect-error - it is missing only and skip which are overridden below
-  describe = function describeGrep (name: string, options: any, callback?: Func | AsyncFunc): Mocha.Suite {
+    if (!callback) {
+      // eslint-disable-next-line mocha/no-exclusive-tests -- delegating to mocha's it.only
+      return _it.only(name, options)
+    }
+
+    if (!shouldTestRunWithGrep(name, options)) {
+      if (omitFiltered) {
+        return
+      }
+
+      return _it.skip(name, options, callback)
+    }
+
+    it = _it
+    try {
+      if (grepBurn > 1) {
+        return Cypress._.times(grepBurn, (k) => {
+          const fullName = `${name}: burning ${k + 1} of ${grepBurn}`
+
+          // eslint-disable-next-line mocha/no-exclusive-tests -- delegating to mocha's it.only
+          _it.only(fullName, options, callback)
+        })
+      }
+
+      // eslint-disable-next-line mocha/no-exclusive-tests -- delegating to mocha's it.only
+      return _it.only(name, options, callback)
+    } finally {
+      // @ts-expect-error - it is missing only, skip, and retries which are overridden below
+      it = itGrep
+    }
+  }
+
+  // @ts-expect-error - it is missing only, skip, and retries which are overridden below
+  it = itGrep
+
+  const describeGrep = function describeGrep (name: string, options: any, callback?: (this: Mocha.Suite) => void): Mocha.Suite {
     if (typeof options === 'function') {
       callback = options
       options = {}
@@ -163,23 +215,28 @@ export function register (): void {
       configTags = [configTags]
     }
 
-    if (!configTags || !configTags.length) {
-      _describe(name, options, callback)
-      suiteStack.pop()
-
-      return
+    if (configTags && configTags.length) {
+      stackItem.tags = configTags
     }
 
-    stackItem.tags = configTags
-    _describe(name, options, callback)
+    // NOTE: return the created suite so mocha's `describe.only` (which calls the
+    // global `describe` to build the suite it marks as exclusive) does not crash
+    const result = _describe(name, options, callback)
+
     suiteStack.pop()
+
+    return result
   }
+
+  // @ts-expect-error - it is missing only and skip which are overridden below
+  describe = describeGrep
 
   context = describe
   specify = it
 
   it.skip = _it.skip
-  it.only = _it.only
+  // @ts-expect-error - itGrepOnly requires a name and options, ExclusiveTestFunction allows fewer args
+  it.only = itGrepOnly
   it.retries = _it.retries
   // @ts-expect-error - is missing each on Mocha.TestFunction type
   if (typeof _it.each === 'function') {
