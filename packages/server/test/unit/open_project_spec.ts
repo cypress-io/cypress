@@ -213,6 +213,43 @@ describe('lib/open_project', () => {
         expect(browsers.open).to.have.been.calledOnce
       })
     })
+
+    describe('take:screenshot automation', function () {
+      const getScreenshotMiddleware = (automation) => {
+        return automation.use.getCalls()
+        .map((call) => call.args[0])
+        .find((middleware) => middleware && middleware.onBeforeRequest)
+      }
+
+      it('sets specName to the launched spec name', async function () {
+        this.spec.name = 'foo/bar.cy.js'
+
+        await openProject.launch(this.browser, this.spec)
+
+        const middleware = getScreenshotMiddleware(this.automation)
+        const data = { titles: ['test'] } as any
+
+        middleware.onBeforeRequest('take:screenshot', data)
+
+        expect(data.specName).to.equal('foo/bar.cy.js')
+      })
+
+      // when running all specs together, the launched spec is a placeholder
+      // ("All E2E Specs"), so the driver provides the actual spec each
+      // screenshot belongs to. https://github.com/cypress-io/cypress/issues/2319
+      it('preserves a specName provided by the driver when running all specs', async function () {
+        this.spec.name = 'All E2E Specs'
+
+        await openProject.launch(this.browser, this.spec)
+
+        const middleware = getScreenshotMiddleware(this.automation)
+        const data = { titles: ['test'], specName: 'cypress/e2e/folder-a/spec-a.cy.ts' } as any
+
+        middleware.onBeforeRequest('take:screenshot', data)
+
+        expect(data.specName).to.equal('cypress/e2e/folder-a/spec-a.cy.ts')
+      })
+    })
   })
 
   describe('#sendFocusBrowserMessage', () => {

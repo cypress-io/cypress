@@ -10,6 +10,7 @@ import $errUtils from '../../cypress/error_utils'
 import $utils from '../../cypress/utils'
 import type { Log } from '../../cypress/log'
 import type { StateFunc } from '../../cypress/state'
+import type { InvocationDetails } from '../../cypress/stack_utils'
 
 interface InternalScreenshotOptions extends Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.ScreenshotOptions> {
   _log?: Log
@@ -28,6 +29,7 @@ type TakeScreenshotOptions = {
   testFailure?: boolean
   runnable: (Mocha.Test | Mocha.Hook) & {
     id: string
+    invocationDetails?: InvocationDetails
   }
   log?: Log
   timeout?: number
@@ -77,12 +79,23 @@ const automateScreenshot = (state: StateFunc, options: TakeScreenshotOptions) =>
 
   getParentTitle(runnable)
 
+  // When running multiple specs together ("Run All Specs"), the spec the
+  // browser was launched with is a placeholder ("All E2E Specs"). Determine the
+  // actual spec each screenshot belongs to from the runnable's invocation
+  // details so the screenshot is saved under its own spec's directory rather
+  // than a single "All Specs" directory.
+  // https://github.com/cypress-io/cypress/issues/2319
+  const specName = Cypress.isRunningAllSpecs
+    ? runnable.invocationDetails?.relativeFile
+    : undefined
+
   const props = _.extend({
     titles,
     testId: runnable.id,
     takenPaths: state('screenshotPaths'),
     // @ts-ignore
     testAttemptIndex: $utils.getTestFromRunnable(runnable)._currentRetry,
+    ...(specName ? { specName } : {}),
   }, _.omit(options, 'runnable', 'timeout', 'log', 'subject'))
 
   const automate = () => {

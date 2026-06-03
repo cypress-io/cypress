@@ -124,7 +124,13 @@ export class OpenProject extends EventEmitter {
       automation.use({
         onBeforeRequest<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> {
           if (message === 'take:screenshot') {
-            data.specName = spec.name
+            // When running multiple specs together ("Run All Specs"), the
+            // launched spec is a placeholder ("All E2E Specs"). The driver
+            // provides the actual spec each screenshot belongs to so it is
+            // saved under its own spec's directory instead of a single
+            // "All Specs" directory.
+            // https://github.com/cypress-io/cypress/issues/2319
+            data.specName = data.specName || spec.name
 
             return data
           }

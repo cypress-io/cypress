@@ -57,6 +57,7 @@ declare namespace Cypress {
     mocha: $Mocha
     configure: (config: Cypress.ObjectLike) => void
     isCrossOriginSpecBridge: boolean
+    isRunningAllSpecs: boolean
     originalConfig: Cypress.ObjectLike
     cy: $Cy
     Location: {
