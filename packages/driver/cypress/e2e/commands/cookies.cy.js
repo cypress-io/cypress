@@ -701,20 +701,20 @@ describe('src/cy/commands/cookies', () => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
+    })
 
-      it('clears the current timeout and restores after success', () => {
-        Cypress.automation.resolves([])
+    // https://github.com/cypress-io/cypress/issues/4802
+    it('retries reading cookies until an assertion passes', () => {
+      const get = Cypress.automation.withArgs('get:cookies')
 
-        cy.timeout(100)
+      get.resolves([])
+      get.onCall(2).resolves([
+        { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false },
+      ])
 
-        cy.spy(cy, 'clearTimeout')
-
-        cy.getCookies().then(() => {
-          expect(cy.clearTimeout).to.be.calledWith('get:cookies')
-
-          // restores the timeout afterwards
-          expect(cy.timeout()).to.eq(100)
-        })
+      cy.getCookies().should('have.length', 1).then((cookies) => {
+        expect(cookies[0].name).to.eq('foo')
+        expect(get.callCount).to.be.gte(3)
       })
     })
 
@@ -1097,20 +1097,20 @@ describe('src/cy/commands/cookies', () => {
           expect(timeout).to.be.calledWith(1000)
         })
       })
+    })
 
-      it('clears the current timeout and restores after success', () => {
-        Cypress.automation.resolves(null)
+    // https://github.com/cypress-io/cypress/issues/4802
+    it('retries reading the cookie until an assertion passes', () => {
+      const get = Cypress.automation.withArgs('get:cookie')
 
-        cy.timeout(100)
+      get.resolves(null)
+      get.onCall(2).resolves({
+        name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
+      })
 
-        cy.spy(cy, 'clearTimeout')
-
-        cy.getCookie('foo').then(() => {
-          expect(cy.clearTimeout).to.be.calledWith('get:cookie')
-
-          // restores the timeout afterwards
-          expect(cy.timeout()).to.eq(100)
-        })
+      cy.getCookie('foo').should('exist').then((cookie) => {
+        expect(cookie.value).to.eq('bar')
+        expect(get.callCount).to.be.gte(3)
       })
     })
 
