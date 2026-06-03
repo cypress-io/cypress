@@ -12,8 +12,8 @@ const MS_PER_TEST = 500
 // ffmpeg command that extracts the final frame as a jpg. If the video only
 // contains a single frozen frame (or no frames at all) this cannot produce a
 // seekable ending frame.
-function outputFinalFrameAsJpg (inputFile, outputFile) {
-  return new Promise((resolve, reject) => {
+function outputFinalFrameAsJpg (inputFile: string, outputFile: string): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
     return ffmpeg(inputFile)
     .inputOption('-sseof -3')
     .outputOptions(['-vsync 2', '-update 1'])

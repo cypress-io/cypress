@@ -402,11 +402,18 @@ export async function connectToNewSpec (browser: Browser, options: BrowserNewTab
   // trailing frames would otherwise bleed into this spec's video stream. So we create the
   // controller, navigate, then subscribe to frames.
   // @see https://github.com/cypress-io/cypress/issues/18415
-  const startCapturingFrames = options.videoApi ? await createVideoController(options.videoApi) : undefined
+  const video = options.videoApi ? await createVideoController(options.videoApi) : undefined
 
-  await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
+  try {
+    await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
+  } catch (err) {
+    // if navigation/BiDi setup fails, tear down the ffmpeg encoder we just started so it isn't
+    // left orphaned (and so a retry doesn't start a second one alongside it).
+    await video?.controller.endVideoCapture(false).catch(() => {})
+    throw err
+  }
 
-  startCapturingFrames?.()
+  video?.startCapturingFrames()
 }
 
 export function connectToExisting () {
@@ -441,9 +448,12 @@ async function recordVideo (videoApi: RunModeVideoApi) {
 // navigation (so trailing frames from the previous spec don't bleed into this spec's video).
 // @see https://github.com/cypress-io/cypress/issues/18415
 async function createVideoController (videoApi: RunModeVideoApi) {
-  const { writeVideoFrame } = await videoApi.useFfmpegVideoController({ webmInput: true })
+  const controller = await videoApi.useFfmpegVideoController({ webmInput: true })
 
-  return () => videoApi.onProjectCaptureVideoFrames(writeVideoFrame)
+  return {
+    controller,
+    startCapturingFrames: () => videoApi.onProjectCaptureVideoFrames(controller.writeVideoFrame),
+  }
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
