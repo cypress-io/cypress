@@ -15,7 +15,7 @@ export type PlanSubscriptionsOptions = {
   onSyncInterceptSkipped?: (proxiedUrl: string) => void
 }
 
-const DEFAULT_NOTIFICATION_EVENTS = ['response:callback', 'after:response', 'network:error'] as const
+const DEFAULT_NOTIFICATION_EVENTS = Object.freeze(['response:callback', 'after:response', 'network:error']) as readonly ['response:callback', 'after:response', 'network:error']
 
 /**
  * Pure subscription plan for matched intercept routes (from `InterceptedRequest.addDefaultSubscriptions`).
