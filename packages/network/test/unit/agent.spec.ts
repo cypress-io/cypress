@@ -19,6 +19,7 @@ import {
   CombinedAgent,
   _resetBaseCaOptionsPromise,
   getFirstWorkingFamily,
+  shouldProxyForUrl,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
@@ -1131,6 +1132,54 @@ describe('lib/agent', function () {
       const family = await getFamilyAsPromise('localhost', 2222, familyCache)
 
       expect(family).toEqual(2)
+    })
+  })
+
+  describe('.shouldProxyForUrl', function () {
+    it('returns false when no proxy is configured', () => {
+      vi.stubEnv('HTTP_PROXY', '')
+      vi.stubEnv('HTTPS_PROXY', '')
+      vi.stubEnv('NO_PROXY', '')
+
+      expect(shouldProxyForUrl('http://example.com')).toBe(false)
+    })
+
+    it('returns true when a proxy is configured and the url is not excluded', () => {
+      vi.stubEnv('HTTP_PROXY', 'http://localhost:12345')
+      vi.stubEnv('HTTPS_PROXY', 'http://localhost:12345')
+      vi.stubEnv('NO_PROXY', '')
+
+      expect(shouldProxyForUrl('http://example.com')).toBe(true)
+    })
+
+    it('returns false for urls excluded from the proxy via NO_PROXY', () => {
+      vi.stubEnv('HTTP_PROXY', 'http://localhost:12345')
+      vi.stubEnv('HTTPS_PROXY', 'http://localhost:12345')
+      vi.stubEnv('NO_PROXY', 'example.com')
+
+      expect(shouldProxyForUrl('http://example.com')).toBe(false)
+      // a host still subject to the proxy is unaffected
+      expect(shouldProxyForUrl('http://cypress.io')).toBe(true)
+    })
+
+    it('returns false for local hosts when Cypress adds them to NO_PROXY by default', () => {
+      // Cypress populates NO_PROXY with these local hosts by default, which
+      // includes the component testing dev server's baseUrl (localhost)
+      vi.stubEnv('HTTP_PROXY', 'http://localhost:12345')
+      vi.stubEnv('HTTPS_PROXY', 'http://localhost:12345')
+      vi.stubEnv('NO_PROXY', 'localhost,127.0.0.1,::1')
+
+      expect(shouldProxyForUrl('http://localhost:8080')).toBe(false)
+      expect(shouldProxyForUrl('http://127.0.0.1:8080')).toBe(false)
+    })
+
+    it('returns true for an origin matching HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS even without HTTP_PROXY', () => {
+      vi.stubEnv('HTTP_PROXY', '')
+      vi.stubEnv('HTTPS_PROXY', '')
+      vi.stubEnv('NO_PROXY', '')
+      vi.stubEnv('HTTP_PROXY_TARGET_FOR_ORIGIN_REQUESTS', 'http://localhost:1234')
+
+      expect(shouldProxyForUrl('http://localhost:1234/foo')).toBe(true)
     })
   })
 })

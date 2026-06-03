@@ -3524,6 +3524,8 @@
     "./packages/net-stubbing/node_modules/mime/index.js",
     "./packages/net-stubbing/node_modules/mime/types/other.js",
     "./packages/net-stubbing/node_modules/mime/types/standard.js",
+    "./packages/network-interception/lib/types/external-types.ts",
+    "./packages/network-interception/lib/types/internal-types.ts",
     "./packages/network-tools/cjs/accept-encoding.js",
     "./packages/network-tools/cjs/types.js",
     "./packages/network/cjs/allow-destroy.js",
@@ -3695,6 +3697,7 @@
     "./packages/server/lib/modes/pkg.ts",
     "./packages/server/lib/modes/results.ts",
     "./packages/server/lib/modes/smoke_test.ts",
+    "./packages/server/lib/network-runtime.ts",
     "./packages/server/lib/override_require.ts",
     "./packages/server/lib/plugins/index.ts",
     "./packages/server/lib/privileged-commands/privileged-commands-manager.ts",
@@ -3920,5 +3923,5 @@
     "./tooling/v8-snapshot/cache/darwin/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "664c089668c2b87fee1020e74f90fcccd3583bbc76758da2b3e97af9de48b1a7"
+  "deferredHash": "4ae89e6265ff9a8d11a7b55a1a0ff04fd34357d7970b3cda7822b914c184e8bb"
 }
