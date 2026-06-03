@@ -151,8 +151,9 @@ function isPreflightRequest (req: RouteMatchableRequest) {
 }
 
 /**
- * Is this a CORS preflight request that could be for an existing route?
- * If there is a matching route with method = 'OPTIONS', returns false.
+ * Whether the proxy should auto-respond to this CORS preflight OPTIONS request.
+ * Returns true when the request is a preflight, at least one route matches (ignoring
+ * method/headers/auth on the matcher), and no matching route explicitly handles OPTIONS.
  */
 export function matchesRoutePreflight (routes: BackendRoute[], req: RouteMatchableRequest) {
   if (!isPreflightRequest(req)) {

@@ -12,6 +12,7 @@ import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import { NetworkInterceptionCore } from '@packages/network-interception'
+import { CookieJar } from '@packages/server/lib/util/cookies'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
