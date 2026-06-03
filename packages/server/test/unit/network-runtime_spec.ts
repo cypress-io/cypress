@@ -31,6 +31,23 @@ describe('lib/network-runtime', () => {
     expect(runtime.netStubbingState.requests).to.deep.equal({})
   })
 
+  it('registers default configurator network policies at startup', () => {
+    const runtime = createProxyRuntime({
+      ...baseDeps(),
+      config: {
+        clientRoute: '/__/',
+        responseTimeout: 30000,
+        blockHosts: ['localhost:3131'],
+      } as Cypress.Config,
+    })
+
+    const policies = runtime.networkPolicyRegistration.getPolicies()
+
+    expect(policies).to.have.length(1)
+    expect(policies[0].name).to.eq('blocked-hosts')
+    expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
+  })
+
   it('handleHttpRequest delegates to networkProxy.handleHttpRequest', async () => {
     const runtime = createProxyRuntime(baseDeps())
     const req = { proxiedUrl: 'http://example.com/' }
