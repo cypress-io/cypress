@@ -127,8 +127,8 @@ const checkBuiltBinary = async () => {
   }
 }
 
-export const prePullImages = (images: string[]): Promise<void[]> => {
-  return Promise.all(images.map((image) => new DockerProcess(image).pull()))
+export const prePullImages = async (images: string[]): Promise<void> => {
+  await Promise.allSettled(images.map((image) => new DockerProcess(image).pull()))
 }
 
 export const dockerSpawner: Spawner = async (cmd, args, env, options) => {
