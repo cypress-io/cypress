@@ -353,10 +353,6 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
 
   const hasAppUnloaded = this.req.cookies['__cypress.unload']
 
-  span?.setAttributes({
-    hasAppUnloaded,
-  })
-
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
   //
@@ -373,6 +369,11 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   // primary origin and then redirecting back to the app origin to complete
   // login would be wrongly bounced to the Cypress specs UI.
   const isPrimarySuperDomainOrigin = this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl)
+
+  span?.setAttributes({
+    hasAppUnloaded,
+    isPrimarySuperDomainOrigin,
+  })
 
   // We do not redirect if we are in cypress in cypress since this can be caused by a reload of the internal Cypress app
   if (hasAppUnloaded && isPrimarySuperDomainOrigin && !process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF_PARENT_PROJECT) {
