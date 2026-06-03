@@ -1,3 +1,10 @@
+# [@cypress/grep-v6.0.2](https://github.com/cypress-io/cypress/compare/@cypress/grep-v6.0.1...@cypress/grep-v6.0.2) (2026-06-03)
+
+
+### Bug Fixes
+
+* improve grep warning message when all specs are filtered ([#33999](https://github.com/cypress-io/cypress/issues/33999)) ([a991400](https://github.com/cypress-io/cypress/commit/a991400a3dcc95e4f12bc2dee701531ecfcd28d6)), closes [#24568](https://github.com/cypress-io/cypress/issues/24568)
+
 # [@cypress/grep-v6.0.1](https://github.com/cypress-io/cypress/compare/@cypress/grep-v6.0.0...@cypress/grep-v6.0.1) (2026-06-01)
 
 # [@cypress/grep-v6.0.0](https://github.com/cypress-io/cypress/compare/@cypress/grep-v5.1.0...@cypress/grep-v6.0.0) (2026-02-05)

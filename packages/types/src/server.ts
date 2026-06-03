@@ -147,6 +147,7 @@ export interface AutomationCommands {
   'remote:debugger:protocol': CommandSignature
   'response:received': CommandSignature
   'key:press': CommandSignature<KeyPressParams, void>
+  'perform:user:gesture': CommandSignature<Record<string, never>, void>
   'get:aut:url': CommandSignature<void, string>
   'reload:aut:frame': CommandSignature<{ forceReload: boolean }, void>
   'navigate:aut:history': CommandSignature<{ historyNumber: number }, void>

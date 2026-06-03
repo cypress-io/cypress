@@ -50,6 +50,7 @@ import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createProxyRuntime } from './network-runtime'
+import type { ForNetworkPolicyRegistration } from '@packages/network-interception'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -162,6 +163,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
+  protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -214,6 +216,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   get netStubbingState () {
     return this.ensureProp(this._netStubbingState, 'open')
+  }
+
+  get networkPolicyRegistration () {
+    return this.ensureProp(this._networkPolicyRegistration, 'open')
   }
 
   get httpsProxy () {
@@ -450,6 +456,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this._netStubbingState = runtime.netStubbingState
     this._networkProxy = runtime.networkProxy
+    this._networkPolicyRegistration = runtime.networkPolicyRegistration
   }
 
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {

@@ -148,12 +148,15 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
 
     if (greppedSpecs.length) {
       config.specPattern = greppedSpecs
-    } else {
-      // hmm, we filtered out all specs, probably something is wrong
-      console.warn('grep and/or grepTags has eliminated all specs')
-      grep ? console.warn('grep: %s', grep) : null
-      grepTags ? console.warn('grepTags: %s', grepTags) : null
-      console.warn('Will leave all specs to run to filter at run-time')
+    } else if (grep || grepTags) {
+      // Static pre-filtering found no spec whose tests match the filter. This
+      // is not necessarily a problem — titles/tags built at run-time can't be
+      // detected by static analysis — so fall back to running every spec and
+      // let the run-time filter select the individual tests.
+      console.log('@cypress/grep: could not pre-filter specs because none appeared to contain tests matching the filter:')
+      grep ? console.log('@cypress/grep:   grep: %s', grep) : null
+      grepTags ? console.log('@cypress/grep:   grepTags: %s', grepTags) : null
+      console.log('@cypress/grep: running all specs and applying the filter to individual tests at run-time instead.')
     }
   }
 

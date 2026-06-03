@@ -4,8 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit",
+    "build-prod": "yarn ensure-cloud-validations && (tsc || echo 'built, with type errors')",
+    "check-ts": "yarn ensure-cloud-validations && tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "dev": "node index.js",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
@@ -17,7 +17,9 @@
     "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",
     "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
     "test-unit": "node ./test/scripts/run.js --glob-in-dir=test/unit",
-    "test-watch": "./test/scripts/watch test"
+    "test-watch": "./test/scripts/watch test",
+    "sync-cloud-validations": "./scripts/sync-cloud-validations.sh sync",
+    "ensure-cloud-validations": "./scripts/sync-cloud-validations.sh"
   },
   "dependencies": {
     "@cypress/get-windows-proxy": "1.6.3",
@@ -195,7 +197,8 @@
     "tsconfig-paths": "3.10.1",
     "webpack": "^5.88.2",
     "ws": "5.2.4",
-    "xvfb-maybe": "0.2.1"
+    "xvfb-maybe": "0.2.1",
+    "zod": "^3.23.8"
   },
   "files": [
     "config",
