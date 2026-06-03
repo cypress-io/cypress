@@ -542,12 +542,10 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   // actually tripped.
   if (Cypress.config('visibilityStrategy') === 'modern' && modernIsHidden($el, options)) {
     const el = $el[0]
-    const style = getComputedStyle(el)
-    const contentVisibility = style.getPropertyValue('content-visibility') || 'visible'
-    const computedDetails = `Computed: \`display: ${style.display}\`, \`visibility: ${style.visibility}\`, \`opacity: ${style.opacity}\`, \`content-visibility: ${contentVisibility}\`, size: \`${width} x ${height}\` pixels.`
 
     // mirror modernIsHidden: checkVisibility() runs first, then a zero-dimension guard.
-    // attribute the failure to whichever check actually rejected the element.
+    // attribute the failure to whichever check actually rejected the element and report
+    // only the values relevant to that check.
     const passesCheckVisibility = el.checkVisibility({
       contentVisibilityAuto: true,
       opacityProperty: options.checkOpacity,
@@ -555,10 +553,13 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     } as CheckVisibilityOptions)
 
     if (!passesCheckVisibility) {
-      return `This element \`${node}\` is not visible per \`Element.checkVisibility()\`. ${computedDetails}`
+      const style = getComputedStyle(el)
+      const contentVisibility = style.getPropertyValue('content-visibility') || 'visible'
+
+      return `This element \`${node}\` is not visible per \`Element.checkVisibility()\`. Computed: \`display: ${style.display}\`, \`visibility: ${style.visibility}\`, \`opacity: ${style.opacity}\`, \`content-visibility: ${contentVisibility}\`.`
     }
 
-    return `This element \`${node}\` is not visible because it has zero width or height. ${computedDetails}`
+    return `This element \`${node}\` is not visible because it has an effective width and height of: \`${width} x ${height}\` pixels.`
   }
 
   // if the element is an option or optgroup then we need to get the

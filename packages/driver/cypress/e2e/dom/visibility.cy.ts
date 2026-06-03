@@ -584,11 +584,7 @@ describe('src/cypress/dom/visibility', {
       cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
         const reason = dom.getReasonIsHidden($el)
 
-        expect(reason).to.match(/^This element `<div\.testCase>` is not visible per `Element\.checkVisibility\(\)`\./)
-        expect(reason).to.include('`display: none`')
-        expect(reason).to.include('`visibility: visible`')
-        expect(reason).to.include('`opacity: 1`')
-        expect(reason).to.include('pixels')
+        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
       })
     })
 
@@ -597,23 +593,16 @@ describe('src/cypress/dom/visibility', {
       cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
         const reason = dom.getReasonIsHidden($el)
 
-        expect(reason).to.match(/^This element `<div\.testCase>` is not visible per `Element\.checkVisibility\(\)`\./)
-        expect(reason).to.include('`opacity: 0`')
+        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: block`, `visibility: visible`, `opacity: 0`, `content-visibility: visible`.')
       })
     })
 
     it('attributes zero-dimension elements to the dimension guard, not checkVisibility', () => {
-      // `Element.checkVisibility()` does not inspect element dimensions in any major browser
-      // (verified across Chrome, Firefox, and Electron), so a 0x0 element passes checkVisibility()
-      // and is only rejected by `modernIsHidden`'s zero-dimension guard. The reason should attribute
-      // the failure to the dimension guard.
       cy.$$('body').append('<div id="zero-dim" style="width: 0; height: 0;">zero</div>')
       cy.get('#zero-dim').then(($el) => {
         const reason = dom.getReasonIsHidden($el)
 
-        expect(reason).to.match(/^This element `<div#zero-dim>` is not visible because it has zero width or height\./)
-        expect(reason).to.not.include('Element.checkVisibility()')
-        expect(reason).to.include('size: `0 x 0` pixels')
+        expect(reason).to.eq('This element `<div#zero-dim>` is not visible because it has an effective width and height of: `0 x 0` pixels.')
       })
     })
 
