@@ -10,6 +10,7 @@ interface CypressConfigOptions {
   expose?: Record<string, any>
   specPattern?: string | string[]
   excludeSpecPattern?: string | string[]
+  projectRoot?: string
 }
 
 /**
@@ -66,7 +67,12 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
   }
 
   const { specPattern, excludeSpecPattern } = config
-  const integrationFolder = expose.grepIntegrationFolder || process.cwd()
+  // `specPattern` is anchored to the project root, so spec globbing must use the
+  // same base. `config.projectRoot` is the absolute project root resolved by
+  // Cypress; prefer it over `process.cwd()`, which points at the config file's
+  // directory when running with `--config-file <subdir>/cypress.config.ts` and
+  // would cause the glob to match no specs (see #26642).
+  const integrationFolder = expose.grepIntegrationFolder || config.projectRoot || process.cwd()
 
   const grepFilterSpecs = expose.grepFilterSpecs === true || String(expose.grepFilterSpecs).toLowerCase() === 'true'
 

@@ -341,6 +341,29 @@ Cypress.grep()
 3. **Runtime Changes**: Cannot change grep filters at runtime using `Cypress.expose()`
 4. **Cloud Recordings**: Filtered tests may still appear in Cypress Cloud recordings as pending tests
 
+### Spec pre-filtering base directory
+
+When `grepFilterSpecs=true`, the plugin globs your `specPattern` to find matching
+specs before the browser launches. These globs are resolved relative to the
+Cypress project root (`config.projectRoot`), which works automatically even when
+the config file lives in a subdirectory (e.g.
+`cypress run --config-file cypress/cypress.config.ts`).
+
+If your `specPattern` is anchored somewhere other than the project root, set the
+`grepIntegrationFolder` value to the absolute path that the pattern should be
+resolved against:
+
+```js
+// cypress.config.js
+module.exports = defineConfig({
+  e2e: {
+    expose: {
+      grepIntegrationFolder: '/absolute/path/to/specs/base',
+    },
+  },
+})
+```
+
 ## Best Practices
 
 ### Tag Naming Convention

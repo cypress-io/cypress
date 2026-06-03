@@ -1,4 +1,7 @@
 import { expect, describe, it, vi } from 'vitest'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs'
+import { tmpdir } from 'os'
+import { join } from 'path'
 import {
   parseGrep,
   parseTitleGrep,
@@ -565,6 +568,47 @@ describe('utils', () => {
         const result = plugin(config)
 
         expect(result).toBeDefined()
+      })
+    })
+
+    describe('spec pre-filtering base directory', () => {
+      // Regression test for https://github.com/cypress-io/cypress/issues/26642
+      // `specPattern` is anchored to the project root, so spec globbing must use
+      // the project root as its base — not `process.cwd()`, which points at the
+      // config file's directory when running with `--config-file <subdir>/...`.
+      it('globs specs relative to config.projectRoot, not process.cwd()', () => {
+        const projectRoot = mkdtempSync(join(tmpdir(), 'cypress-grep-26642-'))
+
+        try {
+          mkdirSync(join(projectRoot, 'cypress', 'e2e'), { recursive: true })
+          const specPath = join(projectRoot, 'cypress', 'e2e', 'login.cy.ts')
+
+          writeFileSync(
+            specPath,
+            `describe('The Login Page', () => { it('passes', () => {}) })`,
+          )
+
+          const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+          const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+          const config = {
+            specPattern: ['cypress/e2e/**/*.cy.{js,jsx,ts,tsx}'],
+            excludeSpecPattern: [],
+            // process.cwd() here is the test runner's directory, which does NOT
+            // contain the temp spec — only projectRoot does.
+            projectRoot,
+            expose: { grep: 'The Login Page', grepFilterSpecs: true },
+          }
+
+          const result = plugin(config)
+
+          consoleSpy.mockRestore()
+          warnSpy.mockRestore()
+
+          expect(result.specPattern).toEqual([specPath])
+        } finally {
+          rmSync(projectRoot, { recursive: true, force: true })
+        }
       })
     })
   })
