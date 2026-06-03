@@ -213,13 +213,18 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     buildOptions: () => AutomationEventsAndOptions[CookieQuery]
     onResult: (result: any) => void
     log?: Cypress.Log
+    // governs how long the query retries (re-reading + re-asserting). defaults
+    // to `defaultCommandTimeout`, consistent with other query commands.
     timeout: number
+    // governs how long a single automation round-trip may take. defaults to
+    // `responseTimeout`, preserving the historical getCookie(s) behavior.
+    responseTimeout: number
   }
 
   // shared retry/automation plumbing for the getCookie(s) query commands.
   // returns a `fetch` function that (re-)reads cookies in the background and a
   // `getSubject` function suitable for returning from a query command.
-  function createCookieQuery ({ commandName, event, action, buildOptions, onResult, log, timeout }: CookieQueryParams) {
+  function createCookieQuery ({ commandName, event, action, buildOptions, onResult, log, timeout, responseTimeout }: CookieQueryParams) {
     let hasResult = false
     let result: any
     let pending: Promise<void> | null = null
@@ -235,16 +240,28 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       }
 
       hasResult = false
-      pending = Promise.try(() => {
+
+      let automationOptions: AutomationEventsAndOptions[CookieQuery]
+
+      try {
         // ensure we can communicate with the AUT before reading its location
-        // (in getDefaultDomain) or cookies. if we can't, this throws and the
-        // query retries until the AUT is reachable or the command times out.
+        // (in getDefaultDomain, via buildOptions) or cookies. a cross-origin
+        // mismatch here is retryable - keep retrying until the AUT is reachable
+        // or the command times out (matching the previous
+        // retryIfCommandAUTOriginMismatch behavior).
         // @ts-expect-error
         Cypress.ensure.commandCanCommunicateWithAUT(cy)
+        automationOptions = buildOptions()
+      } catch (err: any) {
+        mostRecentError = err
 
-        return Cypress.automation(event, buildOptions())
+        return
+      }
+
+      pending = Promise.try(() => {
+        return Cypress.automation(event, automationOptions)
       })
-      .timeout(timeout)
+      .timeout(responseTimeout)
       .then(pickCookieProps)
       .then((res) => {
         result = res
@@ -253,20 +270,13 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       })
       .catch(Promise.TimeoutError, () => {
         mostRecentError = $errUtils.cypressErrByPath('cookies.timed_out', {
-          args: { cmd: commandName, timeout },
+          args: { cmd: commandName, timeout: responseTimeout },
         })
       })
       .catch((err) => {
-        // a CypressError here (e.g. a cross-origin AUT mismatch) is retryable -
-        // keep retrying until the AUT is reachable or the command times out
-        if (err.name === 'CypressError') {
-          mostRecentError = err
-
-          return
-        }
-
-        // any other error is an unexpected backend failure - surface it
-        // immediately rather than retrying until the command times out
+        // an automation failure is an unexpected backend error. handleBackendError
+        // re-throws CypressErrors as-is and wraps everything else - either way we
+        // surface it immediately rather than retrying until the command times out.
         try {
           handleBackendError(commandName, action, log)(err)
         } catch (cypressErr: any) {
@@ -306,7 +316,8 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       log: true,
     })
 
-    const timeout = options.timeout || config('responseTimeout')
+    const timeout = options.timeout || config('defaultCommandTimeout')
+    const responseTimeout = options.timeout || config('responseTimeout')
 
     this.set('timeout', timeout)
 
@@ -347,6 +358,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       },
       log,
       timeout,
+      responseTimeout,
     })
 
     // when an assertion attached to this command fails, throw away the existing
@@ -361,7 +373,8 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       log: true,
     })
 
-    const timeout = options.timeout || config('responseTimeout')
+    const timeout = options.timeout || config('defaultCommandTimeout')
+    const responseTimeout = options.timeout || config('responseTimeout')
 
     this.set('timeout', timeout)
 
@@ -396,6 +409,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       },
       log,
       timeout,
+      responseTimeout,
     })
 
     // when an assertion attached to this command fails, throw away the existing
