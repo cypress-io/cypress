@@ -2265,6 +2265,46 @@ describe('lib/browsers/bidi_automation', () => {
         })
       })
 
+      describe('perform:user:gesture', () => {
+        it('synthesizes a trusted pointer click in the top-level context to grant transient activation', async () => {
+          mockWebdriverClient.inputPerformActions = sinon.stub().resolves()
+          mockWebdriverClient.inputReleaseActions = sinon.stub().resolves()
+
+          bidiAutomationInstance.setTopLevelContextId('123')
+
+          const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})
+
+          expect(returnValue).to.be.undefined
+          expect(mockWebdriverClient.inputPerformActions).to.have.been.calledOnce
+
+          // the `id` is non-deterministic (timestamped) so assert on the meaningful shape directly
+          const performArgs = (mockWebdriverClient.inputPerformActions as sinon.SinonStub).firstCall.args[0]
+
+          expect(performArgs.context).to.equal('123')
+          expect(performArgs.actions).to.have.length(1)
+          expect(performArgs.actions[0]).to.include({
+            type: 'pointer',
+          })
+
+          expect(performArgs.actions[0].parameters).to.deep.equal({ pointerType: 'mouse' })
+          expect(performArgs.actions[0].actions).to.deep.equal([
+            { type: 'pointerMove', x: 0, y: 0 },
+            { type: 'pointerDown', button: 0 },
+            { type: 'pointerUp', button: 0 },
+          ])
+
+          expect(mockWebdriverClient.inputReleaseActions).to.have.been.calledWith({
+            context: '123',
+          })
+        })
+
+        it('fails gracefully if no top-level context is initialized', async () => {
+          bidiAutomationInstance.setTopLevelContextId(undefined)
+
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})).to.be.rejectedWith('Cannot perform user gesture: no top-level context initialized')
+        })
+      })
+
       describe('get:aut:url', () => {
         it('gets the application url', async () => {
           mockWebdriverClient.browsingContextGetTree = sinon.stub().resolves({
