@@ -606,6 +606,20 @@ describe('src/cypress/dom/visibility', {
       })
     })
 
+    it('describes the first hidden element in a multi-element jQuery subject', () => {
+      // modernIsHidden returns true if *any* element in the jQuery subject is hidden, so the
+      // message must describe the element that actually tripped — not blindly $el[0].
+      cy.$$('body').append('<div id="multi-visible" style="width: 100px; height: 20px;">visible</div>')
+      cy.$$('body').append('<div id="multi-hidden" style="display: none;">hidden</div>')
+      cy.then(() => {
+        const $els = Cypress.$('#multi-visible, #multi-hidden')
+        const reason = dom.getReasonIsHidden($els)
+
+        expect(reason).to.match(/^This element `<div#multi-hidden>` is not visible per `Element\.checkVisibility\(\)`\./)
+        expect(reason).to.include('`display: none`')
+      })
+    })
+
     it('falls through to legacy reasons for an option inside a hidden select', () => {
       // modernIsHidden recurses into the parent <select> for option/optgroup. The reason
       // should attribute the failure to the select, not to the option's own properties.

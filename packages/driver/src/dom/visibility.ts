@@ -547,25 +547,30 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   const isOptionOrOptgroup = isOption($el[0]) || isOptgroup($el[0])
 
   if (Cypress.config('visibilityStrategy') === 'modern' && !isOptionOrOptgroup && modernIsHidden($el, options)) {
-    const el = $el[0]
+    // for a multi-element subject, describe the first element that modernIsHidden actually caught —
+    // checking only $el[0] would misattribute the cause when a later element is the hidden one.
+    const hiddenEl = $el.toArray().find((e) => modernIsHidden(e, options)) ?? $el[0]
+    const hiddenNode = stringifyElement($jquery.wrap(hiddenEl), 'short')
 
     // mirror modernIsHidden: checkVisibility() runs first, then a zero-dimension guard.
     // attribute the failure to whichever check actually rejected the element and report
     // only the values relevant to that check.
-    const passesCheckVisibility = el.checkVisibility({
+    const passesCheckVisibility = hiddenEl.checkVisibility({
       contentVisibilityAuto: true,
       opacityProperty: options.checkOpacity,
       visibilityProperty: true,
     } as CheckVisibilityOptions)
 
     if (!passesCheckVisibility) {
-      const style = getComputedStyle(el)
+      const style = getComputedStyle(hiddenEl)
       const contentVisibility = style.getPropertyValue('content-visibility') || 'visible'
 
-      return `This element \`${node}\` is not visible per \`Element.checkVisibility()\`. Computed: \`display: ${style.display}\`, \`visibility: ${style.visibility}\`, \`opacity: ${style.opacity}\`, \`content-visibility: ${contentVisibility}\`.`
+      return `This element \`${hiddenNode}\` is not visible per \`Element.checkVisibility()\`. Computed: \`display: ${style.display}\`, \`visibility: ${style.visibility}\`, \`opacity: ${style.opacity}\`, \`content-visibility: ${contentVisibility}\`.`
     }
 
-    return `This element \`${node}\` is not visible because it has an effective width and height of: \`${width} x ${height}\` pixels.`
+    const rect = hiddenEl.getBoundingClientRect()
+
+    return `This element \`${hiddenNode}\` is not visible because it has an effective width and height of: \`${rect.width} x ${rect.height}\` pixels.`
   }
 
   // if the element is an option or optgroup then we need to get the
