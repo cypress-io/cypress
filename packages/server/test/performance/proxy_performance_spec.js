@@ -477,7 +477,9 @@ describe('Proxy Performance', function () {
           // scenario. The `before`-hook baseline can drift relative to current machine
           // load on shared CI; without re-measuring, all 15 retries compare against the
           // same stale baseline. Scoped locally so it doesn't leak to sibling tests.
-          const baselineForAttempt = this.currentTest.currentRetry() === 0
+          // Inside `it`, the running test is `this.test` (not `this.currentTest`,
+          // which is only defined in hooks).
+          const baselineForAttempt = this.test.currentRetry() === 0
             ? Promise.resolve(baseline)
             : runBrowserTest(urlUnderTest, testCases[0]).then((runtime) => {
               debug('re-measured baseline runtime is: ', runtime)
