@@ -17,6 +17,7 @@
 - Fixed an issue where the version of `WebKit` was incorrectly displayed as version 0 when `playwright` version `1.60.0` was installed. Fixes [#33953](https://github.com/cypress-io/cypress/issues/33953).
 - Fixed an issue where, after a same-origin `fetch` or XHR request updated a cookie, a subsequent page navigation or reload could send the previous (stale) cookie value to the server instead of the updated one. Fixes [#25841](https://github.com/cypress-io/cypress/issues/25841).
 - The internal `--dev`, `--inspect`, and `--inspect-brk` command line flags are no longer listed in the `cypress` CLI help output. These flags are only intended for developing Cypress itself and would error when used against an installed version, so they are no longer advertised to users. Fixes [#21320](https://github.com/cypress-io/cypress/issues/21320) and addresses [#23058](https://github.com/cypress-io/cypress/issues/23058).
+- Fixed an issue where full-page and element screenshots could repeat the above-the-fold content and leave out content further down the page when the page's `html` and `body` used `height: 100%` or smooth scrolling. Screenshots now capture the full content in these cases without needing CSS workarounds. Fixes [#2681](https://github.com/cypress-io/cypress/issues/2681).
 
 **Misc:**
 
