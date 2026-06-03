@@ -149,11 +149,13 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
     if (greppedSpecs.length) {
       config.specPattern = greppedSpecs
     } else if (grep || grepTags) {
-      // hmm, we filtered out all specs, probably something is wrong
-      console.warn('grep and/or grepTags has eliminated all specs')
-      grep ? console.warn('grep: %s', grep) : null
-      grepTags ? console.warn('grepTags: %s', grepTags) : null
-      console.warn('Will leave all specs to run to filter at run-time')
+      // none of the specs contained a test matching the filter, so there is
+      // nothing to pre-filter — fall back to loading every spec and let the
+      // run-time filter narrow down the individual tests
+      console.warn('@cypress/grep: No specs contained tests matching the provided filter, so no specs could be pre-filtered.')
+      grep ? console.warn('@cypress/grep: grep filter: %s', grep) : null
+      grepTags ? console.warn('@cypress/grep: grepTags filter: %s', grepTags) : null
+      console.warn('@cypress/grep: All specs will be run and the filter applied to individual tests at run-time instead.')
     }
   }
 

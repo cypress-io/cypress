@@ -505,7 +505,7 @@ describe('utils', () => {
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).not.toContain('grep and/or grepTags has eliminated all specs')
+        expect(calls).not.toContain('@cypress/grep: No specs contained tests matching the provided filter, so no specs could be pre-filtered.')
         consoleSpy.mockRestore()
       })
 
@@ -516,7 +516,7 @@ describe('utils', () => {
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).toContain('grep and/or grepTags has eliminated all specs')
+        expect(calls).toContain('@cypress/grep: No specs contained tests matching the provided filter, so no specs could be pre-filtered.')
         consoleSpy.mockRestore()
       })
 
@@ -527,7 +527,7 @@ describe('utils', () => {
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).toContain('grep and/or grepTags has eliminated all specs')
+        expect(calls).toContain('@cypress/grep: No specs contained tests matching the provided filter, so no specs could be pre-filtered.')
         consoleSpy.mockRestore()
       })
     })
