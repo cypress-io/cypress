@@ -540,7 +540,13 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   // clipping, fixed-position covering); if one of those rejected the element while modernIsHidden
   // did not, fall through to the legacy reason finder so the message describes the check that
   // actually tripped.
-  if (Cypress.config('visibilityStrategy') === 'modern' && modernIsHidden($el, options)) {
+  //
+  // Option/optgroup elements are also handled by the legacy reason finder: `modernIsHidden`
+  // recurses into the parent `<select>` to decide hiddenness, so describing the option's own
+  // computed style or bounding rect would misattribute the cause.
+  const isOptionOrOptgroup = isOption($el[0]) || isOptgroup($el[0])
+
+  if (Cypress.config('visibilityStrategy') === 'modern' && !isOptionOrOptgroup && modernIsHidden($el, options)) {
     const el = $el[0]
 
     // mirror modernIsHidden: checkVisibility() runs first, then a zero-dimension guard.
