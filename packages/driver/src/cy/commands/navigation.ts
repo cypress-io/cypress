@@ -660,8 +660,18 @@ export default (Commands, Cypress, cy, state, config) => {
   Cypress.on('test:before:run:async', () => {
     state('redirectionCount', {})
 
+    // When test isolation is disabled, state is intentionally preserved
+    // between tests, so we must not reset the backend here. Doing so would
+    // wipe `cy.intercept` routes, remote states, and buffered requests -
+    // including intercepts registered in a `before` hook or a previous test -
+    // which causes `cy.wait('@alias')` to fail. This mirrors how session
+    // state is preserved when testIsolation is disabled.
+    // See https://github.com/cypress-io/cypress/issues/27648
+    if (!config('testIsolation')) {
+      return
+    }
+
     // reset any state on the backend
-    // TODO: this is a bug in e2e it needs to be returned
     return Cypress.backend('reset:server:state')
   })
 
