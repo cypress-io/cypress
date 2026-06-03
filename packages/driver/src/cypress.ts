@@ -45,6 +45,7 @@ import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origi
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState, ReporterRunState, RunState } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types'
 import { DocumentDomainInjection } from '@packages/network-tools'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
@@ -132,6 +133,7 @@ class $Cypress {
   $: any
   arch: any
   spec: any
+  isRunningAllSpecs: boolean = false
   version: any
   browser: any
   platform: any
@@ -249,6 +251,12 @@ class $Cypress {
     // and the current version of Cypress
     this.arch = config.arch
     this.spec = config.spec
+    // When running all specs, `Cypress.spec` is initialized to the `RUN_ALL_SPECS`
+    // placeholder ({ relative: '__all', absolute: '__all', ... }) because every spec
+    // is bundled and executed within a single run. Track this so we can update
+    // `Cypress.spec` before each test to reflect the spec actually running.
+    // https://github.com/cypress-io/cypress/issues/3090
+    this.isRunningAllSpecs = config.spec?.relative === RUN_ALL_SPECS_KEY
     this.version = config.version
     this.browser = config.browser
     this.platform = config.platform
@@ -500,6 +508,39 @@ class $Cypress {
     this.emit('cypress:in:cypress:runner:event', ...args)
   }
 
+  // When running all specs, `Cypress.spec` is the `RUN_ALL_SPECS` placeholder
+  // for the entire run. Before each test runs, update `Cypress.spec` to reflect
+  // the spec the test is actually defined in, derived from the test's invocation
+  // details. This fires before the test's hooks (e.g. `beforeEach`), so consumers
+  // reading `Cypress.spec` (e.g. plugins deriving snapshot/screenshot filenames)
+  // see the correct spec. https://github.com/cypress-io/cypress/issues/3090
+  setSpecFromInvocationDetails (test) {
+    if (!this.isRunningAllSpecs) {
+      return
+    }
+
+    const { absoluteFile: absolute, relativeFile: relative } = test?.invocationDetails ?? {}
+
+    if (!absolute || !relative) {
+      return
+    }
+
+    const baseName = relative.split(/[\\/]/).pop() || relative
+    const lastDotIndex = baseName.lastIndexOf('.')
+    const fileExtension = lastDotIndex >= 0 ? baseName.slice(lastDotIndex) : ''
+    const fileName = lastDotIndex >= 0 ? baseName.slice(0, lastDotIndex) : baseName
+
+    this.spec = {
+      ...this.spec,
+      absolute,
+      relative,
+      name: baseName,
+      baseName,
+      fileName,
+      fileExtension,
+    }
+  }
+
   action (eventName, ...args) {
     // normalizes all the various ways
     // other objects communicate intent
@@ -656,6 +697,8 @@ class $Cypress {
         return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
+        this.setSpecFromInvocationDetails(args[0])
+
         this.maybeEmitCypressInCypress('mocha', 'test:before:run', args[0])
 
         if (this.config('isTextTerminal')) {

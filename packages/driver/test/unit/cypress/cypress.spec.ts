@@ -82,4 +82,62 @@ describe('$Cypress', () => {
       expect(Cypress.$autIframe).toBe(mockAutIframe)
     })
   })
+
+  describe('setSpecFromInvocationDetails', () => {
+    const runAllSpecsSpec = {
+      name: 'All E2E Specs',
+      relative: '__all',
+      absolute: '__all',
+      baseName: '__all',
+      fileName: '__all',
+    }
+
+    const test = {
+      invocationDetails: {
+        absoluteFile: '/Users/janelane/app/cypress/e2e/filter.spec.js',
+        relativeFile: 'cypress/e2e/filter.spec.js',
+      },
+    }
+
+    it('updates Cypress.spec from the test invocation details when running all specs', () => {
+      Cypress.spec = runAllSpecsSpec
+      Cypress.isRunningAllSpecs = true
+
+      Cypress.setSpecFromInvocationDetails(test)
+
+      expect(Cypress.spec).toEqual({
+        name: 'filter.spec.js',
+        relative: 'cypress/e2e/filter.spec.js',
+        absolute: '/Users/janelane/app/cypress/e2e/filter.spec.js',
+        baseName: 'filter.spec.js',
+        fileName: 'filter.spec',
+        fileExtension: '.js',
+      })
+    })
+
+    it('does not modify Cypress.spec when not running all specs', () => {
+      const realSpec = {
+        name: 'filter.spec.js',
+        relative: 'cypress/e2e/filter.spec.js',
+        absolute: '/Users/janelane/app/cypress/e2e/filter.spec.js',
+      }
+
+      Cypress.spec = realSpec
+      Cypress.isRunningAllSpecs = false
+
+      Cypress.setSpecFromInvocationDetails(test)
+
+      expect(Cypress.spec).toBe(realSpec)
+    })
+
+    it('does not modify Cypress.spec when invocation details are missing', () => {
+      Cypress.spec = runAllSpecsSpec
+      Cypress.isRunningAllSpecs = true
+
+      Cypress.setSpecFromInvocationDetails({})
+      Cypress.setSpecFromInvocationDetails(undefined)
+
+      expect(Cypress.spec).toBe(runAllSpecsSpec)
+    })
+  })
 })
