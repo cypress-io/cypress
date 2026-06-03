@@ -19,7 +19,7 @@
 
 **Misc:**
 
-- When the Chrome or Electron renderer process crashes during a run, the "Renderer process just crashed" error now includes the crash reason and exit code reported by the browser (for example `reason: oom` or `reason: crashed`), making it easier to tell an out-of-memory crash apart from other terminations. Addresses [#31072](https://github.com/cypress-io/cypress/issues/31072).
+- When the Chrome or Electron renderer process crashes during a run, the "Renderer process just crashed" error now includes the crash reason and exit code reported by the browser (for example `reason: oom` or `reason: killed`), and tailors its guidance to that reason so out-of-memory crashes and externally-terminated processes are no longer given the same memory-focused advice. Addresses [#31072](https://github.com/cypress-io/cypress/issues/31072).
 
 **Dependency Updates:**
 

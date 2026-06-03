@@ -767,6 +767,32 @@ export const AllCypressErrors = {
       ? errPartial`The renderer process exited unexpectedly (reason: ${fmt.highlightSecondary(reason ?? 'unknown')}, exit code: ${fmt.highlightSecondary(String(exitCode ?? 'unknown'))}).`
       : null
 
+    // Tailor the guidance to the reported reason. Electron's documented memory
+    // reasons are 'oom' (ran out of memory) and 'memory-eviction' (proactively
+    // terminated to avoid a future OOM); 'killed' means the process was sent a
+    // SIGTERM or otherwise terminated externally, which is not a memory issue.
+    let guidance
+
+    if (reason === 'oom' || reason === 'memory-eviction') {
+      guidance = errPartial`\
+        This crash was caused by memory pressure.
+          - Try increasing the CPU/memory on the machine you're running on.
+          - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+          - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.`
+    } else if (reason === 'killed') {
+      guidance = errPartial`\
+        The renderer process was terminated externally rather than running out of memory, so increasing available memory is unlikely to help. This can be caused by the operating system, a resource limit, or the browser terminating the renderer process itself.
+          - Try running your tests in a different browser to see if the crash is specific to ${fmt.highlight(browserName)}.`
+    } else {
+      guidance = errPartial`\
+        This can happen for a number of different reasons.
+
+        If you're running lots of tests on a memory intense application.
+          - Try increasing the CPU/memory on the machine you're running on.
+          - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
+          - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.`
+    }
+
     return errTemplate`\
         We detected that the ${fmt.highlight(browserName)} Renderer process just crashed.
 
@@ -774,12 +800,7 @@ export const AllCypressErrors = {
 
         We have failed the current spec but will continue running the next spec.
 
-        This can happen for a number of different reasons.
-
-        If you're running lots of tests on a memory intense application.
-          - Try increasing the CPU/memory on the machine you're running on.
-          - Try enabling ${fmt.highlight('experimentalMemoryManagement')} in your config file.
-          - Try lowering ${fmt.highlight('numTestsKeptInMemory')} in your config file during 'cypress open'.
+        ${guidance}
 
         You can learn more here:
 

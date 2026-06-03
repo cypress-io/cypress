@@ -241,5 +241,32 @@ describe('lib/errors', () => {
       expect(text).toContain('Electron Renderer process just crashed')
       expect(text).not.toContain('exited unexpectedly')
     })
+
+    it('gives memory guidance for out-of-memory reasons', () => {
+      for (const reason of ['oom', 'memory-eviction']) {
+        const { message } = errors.get('RENDERER_CRASHED', 'Electron', reason, 9)
+        const text = errors.stripAnsi(message)
+
+        expect(text).toContain('memory pressure')
+        expect(text).toContain('experimentalMemoryManagement')
+      }
+    })
+
+    it('gives non-memory guidance when the process was killed', () => {
+      const { message } = errors.get('RENDERER_CRASHED', 'Electron', 'killed', 9)
+      const text = errors.stripAnsi(message)
+
+      expect(text).toContain('terminated externally')
+      expect(text).toContain('different browser')
+      expect(text).not.toContain('experimentalMemoryManagement')
+    })
+
+    it('falls back to generic guidance for other or unknown reasons', () => {
+      const { message } = errors.get('RENDERER_CRASHED', 'Electron')
+      const text = errors.stripAnsi(message)
+
+      expect(text).toContain('This can happen for a number of different reasons')
+      expect(text).toContain('experimentalMemoryManagement')
+    })
   })
 })
