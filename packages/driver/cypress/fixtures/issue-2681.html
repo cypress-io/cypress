@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html style="height: 100%; scroll-behavior: smooth;">
+  <head>
+    <title>Issue 2681 Fixture</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body style="height: 100%; margin: 0;">
+    <!--
+      `html, body { height: 100% }` constrains the document to the viewport
+      height even though this content overflows it. A correct fullPage capture
+      must scroll through the entire 1000px of content rather than repeating the
+      first viewport. https://github.com/cypress-io/cypress/issues/2681
+    -->
+    <div style="height: 1000px; background: linear-gradient(yellow, blue, red);"></div>
+  </body>
+</html>

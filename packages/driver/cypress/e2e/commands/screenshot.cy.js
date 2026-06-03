@@ -577,6 +577,42 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/2681
+    describe('capture: fullPage with html/body height: 100%', () => {
+      beforeEach(function () {
+        Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+        cy.viewport(600, 200)
+        cy.visit('/fixtures/issue-2681.html')
+      })
+
+      it('captures the full content height instead of repeating the viewport', () => {
+        const win = cy.state('window')
+        const scrollTo = cy.spy(win, 'scrollTo')
+
+        cy.screenshot({ capture: 'fullPage' })
+        .then(() => {
+          // content is 1000px tall in a 200px viewport => 5 screenshots
+          expect(Cypress.automation.withArgs('take:screenshot')).to.have.callCount(5)
+
+          // the page must actually scroll past the first viewport, all the way
+          // to the bottom of the 1000px of content
+          expect(scrollTo.getCall(0).args.join(',')).to.equal('0,0')
+          expect(scrollTo.getCall(4).args.join(',')).to.equal('0,800')
+        })
+      })
+
+      it('restores the original html/body height and scroll-behavior styles', () => {
+        const doc = cy.state('document')
+
+        cy.screenshot({ capture: 'fullPage' })
+        .then(() => {
+          expect(doc.documentElement.style.height).to.equal('100%')
+          expect(doc.documentElement.style.scrollBehavior).to.equal('smooth')
+          expect(doc.body.style.height).to.equal('100%')
+        })
+      })
+    })
+
     describe('element capture', () => {
       beforeEach(function () {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)

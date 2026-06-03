@@ -113,6 +113,10 @@ const automateScreenshot = (state: StateFunc, options: TakeScreenshotOptions) =>
 const scrollOverrides = (win: Window, doc: Document) => {
   const originalOverflow = doc.documentElement.style.overflow
   const originalBodyOverflowY = doc.body.style.overflowY
+  const originalHtmlHeight = doc.documentElement.style.height
+  const originalBodyHeight = doc.body.style.height
+  const originalHtmlScrollBehavior = doc.documentElement.style.scrollBehavior
+  const originalBodyScrollBehavior = doc.body.style.scrollBehavior
   const originalX = win.scrollX
   const originalY = win.scrollY
 
@@ -123,6 +127,27 @@ const scrollOverrides = (win: Window, doc: Document) => {
 
   // hide scrollbars
   doc.documentElement.style.overflow = 'hidden'
+
+  // `html, body { height: 100% }` (and similar viewport-constraining heights)
+  // cap the measured document height at the viewport height, so the "scroll and
+  // stitch" capture under-counts the screenshots needed and repeats the
+  // above-the-fold content instead of capturing what's below the fold. Forcing
+  // the height to `auto` lets the document grow to its true content height while
+  // we measure and capture. The original values are restored afterwards.
+  // https://github.com/cypress-io/cypress/issues/2681
+  doc.documentElement.style.height = 'auto'
+  if (doc.body) {
+    doc.body.style.height = 'auto'
+  }
+
+  // `scroll-behavior: smooth` makes `window.scrollTo` animate asynchronously, so
+  // a screenshot can be taken before the page finishes scrolling, producing
+  // duplicated/sheared stitched images. Force instant scrolling during capture.
+  // https://github.com/cypress-io/cypress/issues/2681
+  doc.documentElement.style.scrollBehavior = 'auto'
+  if (doc.body) {
+    doc.body.style.scrollBehavior = 'auto'
+  }
 
   // this body class is used to set some other overflow-related CSS
   // around the resizable panels in the Runner
@@ -139,8 +164,12 @@ const scrollOverrides = (win: Window, doc: Document) => {
 
   return () => {
     doc.documentElement.style.overflow = originalOverflow
+    doc.documentElement.style.height = originalHtmlHeight
+    doc.documentElement.style.scrollBehavior = originalHtmlScrollBehavior
     if (doc.body) {
       doc.body.style.overflowY = originalBodyOverflowY
+      doc.body.style.height = originalBodyHeight
+      doc.body.style.scrollBehavior = originalBodyScrollBehavior
     }
 
     document.querySelector('body')?.classList.remove('screenshot-scrolling')
