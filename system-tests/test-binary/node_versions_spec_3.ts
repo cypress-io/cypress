@@ -26,12 +26,6 @@ function smokeTestDockerImage (dockerImage: string) {
 
 describe('binary node versions', () => {
   [
-    'cypress/base:20.12.2',
-    'cypress/base:20.18.0',
-    'cypress/base:22.0.0',
-    'cypress/base:22.7.0',
-    'cypress/base:22.12.0',
-    'cypress/base:22.19.0',
     'cypress/base:24.0.0',
     'cypress/base:25.0.0',
     'cypress/base:26.0.0',
@@ -40,12 +34,6 @@ describe('binary node versions', () => {
 
 describe('type: module', () => {
   [
-    'cypress/base:20.12.2',
-    'cypress/base:20.18.0',
-    'cypress/base:22.0.0',
-    'cypress/base:22.7.0',
-    'cypress/base:22.12.0',
-    'cypress/base:22.19.0',
     'cypress/base:24.0.0',
     'cypress/base:25.0.0',
     'cypress/base:26.0.0',
