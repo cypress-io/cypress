@@ -2708,6 +2708,7 @@ jobs:
       - run: yarn workspace @cypress/grep omit:specs
       - run: yarn workspace @cypress/grep or
       - run: yarn workspace @cypress/grep skip
+      - run: yarn workspace @cypress/grep subdir:filter:specs
       - run: yarn workspace @cypress/grep tags:inverted
       - run: yarn workspace @cypress/grep tags:and
       - run: yarn workspace @cypress/grep tags:and:not

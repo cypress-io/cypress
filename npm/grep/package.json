@@ -19,6 +19,7 @@
     "omit:specs": "PROJECT_NAME=omit-specs node ../../scripts/cypress.js run --expose grep='Test 2',grepOmitFiltered=true --config specPattern='**/tags/*.cy.ts'",
     "or": "PROJECT_NAME=or node ../../scripts/cypress.js run --expose grep='Test 1',grepTags='regression high' --config specPattern='**/tags/*.cy.ts'",
     "skip": "PROJECT_NAME=skip node ../../scripts/cypress.js run --config specPattern='**/*skip.cy.ts'",
+    "subdir:filter:specs": "PROJECT_NAME=subdir-filter-specs node ../../scripts/cypress.js run --config-file cypress/cypress.config.ts --expose grepTags='regression',grepFilterSpecs=true",
     "tags:inverted": "PROJECT_NAME=tag-inverted node ../../scripts/cypress.js run --expose grepTags='-regression' --config specPattern='**/tags/*.cy.ts'",
     "tags": "PROJECT_NAME=tags node ../../scripts/cypress.js run --expose grepTags=smoke --config specPattern='**/tags/*.cy.ts'",
     "tags:and": "PROJECT_NAME=tags-and node ../../scripts/cypress.js run --expose grepTags='smoke+high' --config specPattern='**/tags/*.cy.ts'",
