@@ -490,6 +490,48 @@ describe('utils', () => {
       })
     })
 
+    describe('"eliminated all specs" warning', () => {
+      // use a spec pattern that matches no files so the outcome is deterministic
+      const mockConfig = {
+        specPattern: ['**/__does_not_exist__/*.cy.ts'],
+        excludeSpecPattern: [],
+        expose: {},
+      }
+
+      it('does not warn when grepFilterSpecs is set but no grep/grepTags is in use', () => {
+        const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+        plugin({ ...mockConfig, expose: { grepFilterSpecs: true } })
+
+        const calls = consoleSpy.mock.calls.map((args) => args[0])
+
+        expect(calls).not.toContain('grep and/or grepTags has eliminated all specs')
+        consoleSpy.mockRestore()
+      })
+
+      it('warns when grep is set but eliminates all specs', () => {
+        const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+        plugin({ ...mockConfig, expose: { grepFilterSpecs: true, grep: 'noMatch' } })
+
+        const calls = consoleSpy.mock.calls.map((args) => args[0])
+
+        expect(calls).toContain('grep and/or grepTags has eliminated all specs')
+        consoleSpy.mockRestore()
+      })
+
+      it('warns when grepTags is set but eliminates all specs', () => {
+        const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+        plugin({ ...mockConfig, expose: { grepFilterSpecs: true, grepTags: '@noMatch' } })
+
+        const calls = consoleSpy.mock.calls.map((args) => args[0])
+
+        expect(calls).toContain('grep and/or grepTags has eliminated all specs')
+        consoleSpy.mockRestore()
+      })
+    })
+
     describe('grepFilterSpecs handling', () => {
       const mockConfig = {
         specPattern: ['**/*.cy.ts'],

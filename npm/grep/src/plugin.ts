@@ -148,7 +148,7 @@ export function plugin (config: CypressConfigOptions): CypressConfigOptions {
 
     if (greppedSpecs.length) {
       config.specPattern = greppedSpecs
-    } else {
+    } else if (grep || grepTags) {
       // hmm, we filtered out all specs, probably something is wrong
       console.warn('grep and/or grepTags has eliminated all specs')
       grep ? console.warn('grep: %s', grep) : null
