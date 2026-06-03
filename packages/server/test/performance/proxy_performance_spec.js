@@ -444,7 +444,6 @@ describe('Proxy Performance', function () {
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
-    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23214
     describe(urlUnderTest, function () {
       this.retries(15)
 
@@ -456,6 +455,22 @@ describe('Proxy Performance', function () {
         return runBrowserTest(urlUnderTest, testCases[0])
         .then((runtime) => {
           debug('baseline runtime is: ', runtime)
+
+          baseline = runtime
+        })
+      })
+
+      // Re-measure baseline on retry. The ratio assertion is only meaningful when
+      // baseline and scenario are captured under similar machine load; on shared CI,
+      // load can drift between the `before` hook and a later test case, leaving the
+      // first-pass baseline unfairly low. Without this, retries compare against the
+      // same stale baseline and can fail 15× in a row.
+      beforeEach(function () {
+        if (this.currentTest.currentRetry() === 0) return
+
+        return runBrowserTest(urlUnderTest, testCases[0])
+        .then((runtime) => {
+          debug('re-measured baseline runtime is: ', runtime)
 
           baseline = runtime
         })
