@@ -430,6 +430,27 @@ context('lib/browsers/cdp_automation', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/5599
+      it('reads back the cookie that was just set, not a pre-existing cookie with the same name on a host-only domain', function () {
+        this.sendDebuggerCommand
+        .withArgs('Network.setCookie', { domain: '.en.wikipedia.org', name: 'WMF-Last-Access', value: 'value', path: '/', expires: 10000000000 })
+        .resolves({ success: true })
+        .withArgs('Network.getAllCookies')
+        .resolves({
+          cookies: [
+            // the pre-existing, server-set cookie - host only, secure & httpOnly, no expiry
+            { name: 'WMF-Last-Access', value: 'original', path: '/', domain: 'en.wikipedia.org', secure: true, httpOnly: true },
+            // the cookie Cypress just set on the broadened (.en.wikipedia.org) domain
+            { name: 'WMF-Last-Access', value: 'value', path: '/', domain: '.en.wikipedia.org', secure: false, httpOnly: false, expires: 10000000000 },
+          ],
+        })
+
+        return this.onRequest('set:cookie', { domain: 'en.wikipedia.org', name: 'WMF-Last-Access', value: 'value', path: '/', expirationDate: 10000000000 })
+        .then((resp) => {
+          expect(resp).to.deep.eq({ domain: '.en.wikipedia.org', expirationDate: 10000000000, httpOnly: false, name: 'WMF-Last-Access', value: 'value', path: '/', secure: false, sameSite: undefined })
+        })
+      })
+
       it('rejects with error', function () {
         return this.onRequest('set:cookie', { domain: 'foo', path: '/bar' })
         .then(() => {

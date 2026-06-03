@@ -361,12 +361,12 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     }
   }
 
-  private getAllCookies = (filter: CyCookieFilter) => {
+  private getAllCookies = (filter: CyCookieFilter, options?: { strictDomain: boolean }) => {
     return this.sendDebuggerCommandFn('Network.getAllCookies')
     .then((result: Protocol.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
-        const matches = cookieMatches(cookie, filter)
+        const matches = cookieMatches(cookie, filter, options)
 
         debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
 
@@ -396,8 +396,8 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     })
   }
 
-  private getCookie = (filter: CyCookieFilter): Promise<CyCookie | null> => {
-    return this.getAllCookies(filter)
+  private getCookie = (filter: CyCookieFilter, options?: { strictDomain: boolean }): Promise<CyCookie | null> => {
+    return this.getAllCookies(filter, options)
     .then((cookies) => {
       return _.get(cookies, 0, null)
     })
@@ -569,7 +569,15 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
             throw new Error(`Network.setCookie failed to set cookie: ${JSON.stringify(setCookie)}`)
           }
 
-          return this.getCookie(data)
+          // Read the cookie back using the exact domain it was just written to.
+          // A cookie with the same name may already exist on a host-only or
+          // parent domain (e.g. an httpOnly + secure cookie set by the server).
+          // Without strictly matching the domain we just wrote to, getCookie
+          // could return that pre-existing cookie instead of the one we just
+          // set, making it appear as though the requested props (e.g. expiry)
+          // were ignored.
+          // @see https://github.com/cypress-io/cypress/issues/5599
+          return this.getCookie({ ...data, domain: setCookie.domain || data.domain }, { strictDomain: true })
         })
 
       case 'add:cookies':
