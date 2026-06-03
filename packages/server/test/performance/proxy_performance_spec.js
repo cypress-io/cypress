@@ -460,22 +460,6 @@ describe('Proxy Performance', function () {
         })
       })
 
-      // Re-measure baseline on retry. The ratio assertion is only meaningful when
-      // baseline and scenario are captured under similar machine load; on shared CI,
-      // load can drift between the `before` hook and a later test case, leaving the
-      // first-pass baseline unfairly low. Without this, retries compare against the
-      // same stale baseline and can fail 15× in a row.
-      beforeEach(function () {
-        if (this.currentTest.currentRetry() === 0) return
-
-        return runBrowserTest(urlUnderTest, testCases[0])
-        .then((runtime) => {
-          debug('re-measured baseline runtime is: ', runtime)
-
-          baseline = runtime
-        })
-      })
-
       // slice(1) since first test is used as baseline above
       testCases.slice(1).map((testCase) => {
         let multiplier = 3
@@ -489,9 +473,22 @@ describe('Proxy Performance', function () {
         it(`${testCase.name} loads 1000 images less than ${multiplier}x as slowly as Chrome`, function () {
           debug('Current test: ', testCase.name)
 
-          return runBrowserTest(urlUnderTest, testCase)
-          .then((results) => {
-            expect(results['Total']).to.be.lessThan(multiplier * baseline['Total'])
+          // On retry, re-measure baseline so the ratio stays paired in time with this
+          // scenario. The `before`-hook baseline can drift relative to current machine
+          // load on shared CI; without re-measuring, all 15 retries compare against the
+          // same stale baseline. Scoped locally so it doesn't leak to sibling tests.
+          const baselineForAttempt = this.currentTest.currentRetry() === 0
+            ? Promise.resolve(baseline)
+            : runBrowserTest(urlUnderTest, testCases[0]).then((runtime) => {
+              debug('re-measured baseline runtime is: ', runtime)
+
+              return runtime
+            })
+
+          return baselineForAttempt.then((currentBaseline) => {
+            return runBrowserTest(urlUnderTest, testCase).then((results) => {
+              expect(results['Total']).to.be.lessThan(multiplier * currentBaseline['Total'])
+            })
           })
         })
       })
