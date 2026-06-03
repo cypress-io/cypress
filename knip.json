@@ -135,7 +135,8 @@
         "playwright-core",
         "playwright-webkit",
         "tsx",
-        "mocha"
+        "mocha",
+        "zod"
       ]
     },
     "packages/launchpad": {

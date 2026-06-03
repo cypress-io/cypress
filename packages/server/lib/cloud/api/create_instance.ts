@@ -4,29 +4,13 @@ import * as errors from '../../errors'
 import { isAxiosError } from 'axios'
 import * as humanTime from '../../util/human_time'
 
+// Import cloud validation types for better type safety
+import type {
+  PostRunInstanceRequest_v2Type as CreateInstanceRequestBody,
+  PostRunInstanceResponse_v2 as CreateInstanceResponse,
+} from '../../validations/cloudValidations'
+
 const MAX_RETRIES = 3
-
-export interface CreateInstanceResponse {
-  spec: string | null
-  instanceId: string | null
-  claimedInstances: number
-  estimatedWallClockDuration: number | null
-  totalInstances: number
-}
-
-export interface CreateInstanceRequestBody {
-  spec: string | null
-  groupId: string
-  machineId: string
-  platform: {
-    browserName: string
-    browserVersion: string
-    osCpus: any[]
-    osMemory: Record<string, any> | null
-    osName: string
-    osVersion: string
-  }
-}
 
 export const createInstance = async (runId: string, instanceData: CreateInstanceRequestBody, timeout: number = 0): Promise<CreateInstanceResponse> => {
   let attemptNumber = 0
