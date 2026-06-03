@@ -1,5 +1,5 @@
 import systemTests from '../lib/system-tests'
-import { prePullImages } from '../lib/docker'
+import { beforePrePullImages } from '../lib/docker'
 
 const IMAGES = [
   'cypress/base:24.0.0',
@@ -7,9 +7,7 @@ const IMAGES = [
   'cypress/base:26.0.0',
 ]
 
-before(async () => {
-  await prePullImages(IMAGES)
-})
+beforePrePullImages(IMAGES)
 
 function smokeTestDockerImage (dockerImage: string) {
   context('e2e', () => {
