@@ -130,16 +130,17 @@ export class AuthActions {
         if (this.ctx.coreData.autoProvisionedProjectId) {
           this.ctx.update((coreData) => {
             coreData.autoProvisionedProjectId = null
+            this.ctx.emitter.toApp()
+            this.ctx.emitter.toLaunchpad()
+            await this.ctx.lifecycleManager.refreshLifecycle()
           })
         }
       } catch {
         this.ctx.update((coreData) => {
           coreData.autoProvisionedProjectId = projectSlug
+          this.ctx.emitter.toApp()
+          this.ctx.emitter.toLaunchpad()
         })
-      } finally {
-        this.ctx.emitter.toApp()
-        this.ctx.emitter.toLaunchpad()
-        await this.ctx.lifecycleManager.refreshLifecycle()
       }
     }
 
