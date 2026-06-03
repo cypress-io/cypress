@@ -11,6 +11,15 @@ const onServer = function (app) {
   })
 }
 
+// passing `hosts` via `config` (a `--config` CLI flag) rather than `settings`
+// is important: `settings` rewrites the project's cypress.config.js and would
+// drop its setupNodeEvents (and the registered tasks), whereas `config` merges
+const commonConfig = {
+  hosts: {
+    '*.foobar.com': '127.0.0.1',
+  },
+}
+
 // https://github.com/cypress-io/cypress/issues/27784
 describe('e2e cy.origin privileged commands', () => {
   systemTests.setup({
@@ -18,14 +27,6 @@ describe('e2e cy.origin privileged commands', () => {
       port: 4466,
       onServer,
     }],
-    settings: {
-      hosts: {
-        '*.foobar.com': '127.0.0.1',
-      },
-      e2e: {
-        allowCypressEnv: false,
-      },
-    },
   })
 
   systemTests.it('allows a deeply nested privileged command inside a cy.origin() callback', {
@@ -33,6 +34,7 @@ describe('e2e cy.origin privileged commands', () => {
     // keep the port the same as the cy.origin callback target
     port: PORT,
     spec: 'cy_origin_privileged_deeply_nested.cy.ts',
+    config: commonConfig,
     expectedExitCode: 0,
     async onRun (exec) {
       const { stdout } = await exec()
