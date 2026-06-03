@@ -1,4 +1,15 @@
 import systemTests from '../lib/system-tests'
+import { prePullImages } from '../lib/docker'
+
+const IMAGES = [
+  'cypress/base:24.0.0',
+  'cypress/base:25.0.0',
+  'cypress/base:26.0.0',
+]
+
+before(async () => {
+  await prePullImages(IMAGES)
+})
 
 function smokeTestDockerImage (dockerImage: string) {
   context('e2e', () => {
@@ -25,19 +36,11 @@ function smokeTestDockerImage (dockerImage: string) {
 }
 
 describe('binary node versions', () => {
-  [
-    'cypress/base:24.0.0',
-    'cypress/base:25.0.0',
-    'cypress/base:26.0.0',
-  ].forEach(smokeTestDockerImage)
+  IMAGES.forEach(smokeTestDockerImage)
 })
 
 describe('type: module', () => {
-  [
-    'cypress/base:24.0.0',
-    'cypress/base:25.0.0',
-    'cypress/base:26.0.0',
-  ].forEach((dockerImage) => {
+  IMAGES.forEach((dockerImage) => {
     systemTests.it(`can run in ${dockerImage}`, {
       withBinary: true,
       project: 'config-cjs-and-esm/config-with-ts-module',
