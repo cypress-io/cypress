@@ -50,8 +50,6 @@ jobs:
         platform: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
     if: github.repository == 'cypress-io/cypress'
-    permissions:
-      pull-requests: write
     env:
       CYPRESS_BOT_APP_ID: ${{ secrets.CYPRESS_BOT_APP_ID }}
       BASE_BRANCH: ${{ inputs.branch || github.ref_name }}
@@ -61,18 +59,18 @@ jobs:
       - name: Determine snapshot files - Windows
         if: ${{ matrix.platform == 'windows-latest' }}
         run: |
-          echo "SNAPSHOT_FILES='tooling\v8-snapshot\cache\win32\snapshot-meta.json'" >> $GITHUB_ENV
-          echo "PLATFORM=windows" >> $GITHUB_ENV
+          echo "SNAPSHOT_FILE=tooling/v8-snapshot/cache/win32/snapshot-meta.json" >> $GITHUB_ENV
+          echo "PLATFORM=win32" >> $GITHUB_ENV
         shell: bash
       - name: Determine snapshot files - Linux
         if: ${{ matrix.platform == 'ubuntu-latest' }}
         run: |
-          echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/linux/snapshot-meta.json'" >> $GITHUB_ENV
+          echo "SNAPSHOT_FILE=tooling/v8-snapshot/cache/linux/snapshot-meta.json" >> $GITHUB_ENV
           echo "PLATFORM=linux" >> $GITHUB_ENV
       - name: Determine snapshot files - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
         run: |
-          echo "SNAPSHOT_FILES='tooling/v8-snapshot/cache/darwin/snapshot-meta.json'" >> $GITHUB_ENV
+          echo "SNAPSHOT_FILE=tooling/v8-snapshot/cache/darwin/snapshot-meta.json" >> $GITHUB_ENV
           echo "PLATFORM=darwin" >> $GITHUB_ENV
       - name: Install setuptools - Mac
         if: ${{ matrix.platform == 'macos-latest' }}
@@ -109,63 +107,112 @@ jobs:
       - name: Check for v8 snapshot cache changes
         id: check-for-v8-snapshot-cache-changes
         run: |
-          echo "has_changes=$(test "$(git status --porcelain -- ${{ env.SNAPSHOT_FILES }})" && echo 'true')" >> $GITHUB_OUTPUT
+          echo "has_changes=$(test "$(git status --porcelain -- ${{ env.SNAPSHOT_FILE }})" && echo 'true')" >> $GITHUB_OUTPUT
         shell: bash
-      ## The build steps above can run for >1h on a from-scratch / Windows pass,
-      ## which is longer than the App installation token's lifetime. Mint a
-      ## fresh token here so the API-driven commit and PR steps below use a
-      ## token that's guaranteed to still be valid.
-      - name: Refresh Cypress Bot App token
-        id: app-token-refresh
+      - name: Upload snapshot artifact
         if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: v8-snapshot-cache-${{ env.PLATFORM }}
+          path: ${{ env.SNAPSHOT_FILE }}
+          if-no-files-found: error
+          retention-days: 1
+  consolidate-and-create-pr:
+    needs: update-v8-snapshot-cache
+    runs-on: ubuntu-latest
+    if: github.repository == 'cypress-io/cypress'
+    env:
+      BASE_BRANCH: ${{ inputs.branch || github.ref_name }}
+    steps:
+      - name: Generate Cypress Bot App token
+        id: app-token
         uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.CYPRESS_BOT_APP_ID }}
           private-key: ${{ secrets.CYPRESS_BOT_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ env.BASE_BRANCH }}
+      - name: Download snapshot artifacts
+        id: download
+        # If no matrix job uploaded an artifact (i.e. no platform's cache
+        # changed), download-artifact@v4 fails the step. Allow the workflow
+        # to continue so the stage step below can exit cleanly with
+        # has_changes=false.
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: v8-snapshot-cache-*
+          path: artifacts/
+          merge-multiple: false
+      - name: Stage updated snapshots
+        id: stage
+        run: |
+          set -e
+          changed_files=()
+          for platform in linux darwin win32; do
+            # upload-artifact@v4 preserves workspace-relative paths inside
+            # the artifact, so the file lands under the same tree it was
+            # uploaded from.
+            artifact_file="artifacts/v8-snapshot-cache-${platform}/tooling/v8-snapshot/cache/${platform}/snapshot-meta.json"
+            target_file="tooling/v8-snapshot/cache/${platform}/snapshot-meta.json"
+            if [[ -f "${artifact_file}" ]]; then
+              mkdir -p "$(dirname "${target_file}")"
+              cp "${artifact_file}" "${target_file}"
+              changed_files+=("${target_file}")
+            fi
+          done
+          if [[ ${#changed_files[@]} -eq 0 ]]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "files=${changed_files[*]}" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
       - name: Determine branch name - commit directly to branch
         if: ${{ inputs.commit_directly_to_branch == true }}
         run: echo "BRANCH_NAME=${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
         shell: bash
       - name: Determine branch name - commit to separate branch
         if: ${{ inputs.commit_directly_to_branch != true }}
-        run: echo "BRANCH_NAME=update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}-${{ env.PLATFORM }}" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=update-v8-snapshot-cache-on-${{ env.BASE_BRANCH }}" >> $GITHUB_ENV
         shell: bash
       - name: Check number of existing prs
         id: check-number-of-existing-prs
-        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        if: ${{ steps.stage.outputs.has_changes == 'true' }}
         run: |
           echo "number_of_prs_for_branch=$(gh api '/repos/cypress-io/cypress/pulls?head=cypress-io:${{ env.BRANCH_NAME }}' --jq length)" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ steps.app-token-refresh.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         shell: bash
       - name: Check need for PR
         id: check-need-for-pr
-        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        if: ${{ steps.stage.outputs.has_changes == 'true' }}
         run: |
           echo "needs_pr=${{ env.BRANCH_NAME != env.BASE_BRANCH && steps.check-number-of-existing-prs.outputs.number_of_prs_for_branch == '0' }}" >> $GITHUB_OUTPUT
         shell: bash
       - name: Commit snapshot update via API
-        if: ${{ steps.check-for-v8-snapshot-cache-changes.outputs.has_changes == 'true' }}
+        if: ${{ steps.stage.outputs.has_changes == 'true' }}
         uses: actions/github-script@v7
         env:
-          SNAPSHOT_FILES: ${{ env.SNAPSHOT_FILES }}
+          SNAPSHOT_FILES: ${{ steps.stage.outputs.files }}
           BASE_BRANCH: ${{ env.BASE_BRANCH }}
           BRANCH_NAME: ${{ env.BRANCH_NAME }}
         with:
-          github-token: ${{ steps.app-token-refresh.outputs.token }}
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const { join } = await import('node:path')
             const { pathToFileURL } = await import('node:url')
             const moduleUrl = pathToFileURL(join(process.cwd(), 'scripts/github-actions/commit-via-api.mjs')).href
             const { commitViaApi } = await import(moduleUrl)
 
-            // SNAPSHOT_FILES is wrapped in single quotes for shell consumers;
-            // strip them before handing the path to Node.
             const filePaths = process.env.SNAPSHOT_FILES
               .split(/\s+/)
-              .map((p) => p.replace(/^'|'$/g, ''))
               .filter(Boolean)
 
             await commitViaApi({
@@ -176,12 +223,11 @@ jobs:
               filePaths,
               message: 'chore: updating v8 snapshot cache',
             })
-      # PR needs to be created
       - name: Create Pull Request
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' }}
         uses: actions/github-script@v7
         with:
-          github-token: ${{ steps.app-token-refresh.outputs.token }}
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const { createPullRequest } = require('./scripts/github-actions/create-pull-request.js')
 
@@ -190,7 +236,7 @@ jobs:
               github,
               baseBranch: '${{ env.BASE_BRANCH }}',
               branchName: '${{ env.BRANCH_NAME }}',
-              description: 'Update v8 snapshot cache - ${{ env.PLATFORM }}',
+              description: 'Update v8 snapshot cache',
               body: 'This PR was automatically generated by the [update-v8-snapshot-cache](https://github.com/cypress-io/cypress/actions/workflows/update_v8_snapshot_cache.yml) github action.',
               team_reviewers: ['app']
             })

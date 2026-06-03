@@ -207,10 +207,38 @@ yarn clean-deps && yarn
 
 ## CI/CD
 
-- **Primary CI**: CircleCI. Config lives in `.circleci/src/` (modular) and is compiled to `.circleci/packed/pipeline.yml`.
+- **Primary CI**: CircleCI. Config lives in `.circleci/src/` (modular) and is compiled to `.circleci/packed/pipeline.yml`. See [`.circleci/AGENTS.md`](.circleci/AGENTS.md) for when to add a branch to the full-CI allowlist (binary tests, Windows jobs, v8 snapshot validation).
 - **Supplementary**: GitHub Actions for security scanning (Snyk), SBOM generation, browser version auto-updates, and PR validation.
 - **Base branch**: `develop` — all PRs target `develop`; release branches follow `release/X.Y.Z`.
 - **Multi-platform matrix**: Linux x64, Linux ARM64, macOS x64, macOS ARM64, Windows — all run in parallel.
 - **Release gate**: All tests must pass through the `ready-to-release` aggregation job before `npm-release` runs.
 - **External PRs**: Require manual approval via `approve-contributor-pr` gate before CI runs.
 - **Binary builds**: Triggered separately after npm release; cross-platform binaries are assembled and distributed via CDN.
+
+## Cursor Cloud specific instructions
+
+### Environment
+
+- Node.js >= 22.19.0 and Yarn 1.22.22 are pre-installed. The update script runs `yarn` which triggers the full postinstall (patch-package, yarn-deduplicate, rebuild better-sqlite3, lerna build, V8 snapshot).
+- Xvfb is already running on `DISPLAY=:1`. Chrome is available at `/usr/bin/google-chrome-stable`.
+
+### Running Cypress in dev mode
+
+- `yarn dev` starts the Cypress Electron GUI in global/dev mode (Launchpad). It builds Vite bundles for `@packages/app` and `@packages/launchpad`, then launches Electron. The GraphQL server runs at `http://localhost:4444/__launchpad/graphql`.
+- `yarn cypress:run -- --project <path> --browser chrome --headless` runs Cypress headlessly in dev mode. The config file at the target project must NOT `require('cypress')` since it resolves from the project root.
+
+### Running tests
+
+- Prefer scoped tests: `yarn workspace @packages/<name> test` (vitest) or `yarn test --scope @packages/<name>` (lerna).
+- Some test suites (e.g., `@packages/network`) require privileged ports (443) and will fail with EACCES in unprivileged containers — this is expected.
+- `@packages/config` has 2 tests that assert `cypressBinaryRoot` contains `'cypress'`; these fail when the workspace directory name differs (e.g., `/workspace`). This is a known path-dependent issue, not a code bug.
+
+### Linting
+
+- `yarn lint --scope @packages/<name>` for focused lint. Full monorepo lint: `yarn lint`.
+
+### Key caveats
+
+- The postinstall takes ~4-5 minutes (build + V8 snapshot generation). If `yarn` is interrupted, re-run it.
+- `yarn --frozen-lockfile` should be preferred when the lockfile hasn't changed; it falls back to `yarn` (which runs postinstall) if it fails.
+- Do not run `yarn` from within sub-packages. Always run from the repo root.
