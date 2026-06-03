@@ -104,6 +104,21 @@ describe('getBundleCacheDir', () => {
       expect(ensureDirStub).to.be.calledWith(dir)
     })
 
+    it('names the writability probe with the .staging- prefix so it is swept if cleanup fails', async () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
+      const dir = path.resolve('/tmp/cypress-cache-test/bundles/cy-prompt')
+      const ensureDirStub = sinon.stub().resolves()
+      const { ensureWritableBundleCacheDir } = load(ensureDirStub)
+
+      await ensureWritableBundleCacheDir('cy-prompt')
+
+      const probeCall = ensureDirStub.getCalls().find((c) => c.args[0] !== dir)
+
+      expect(probeCall, 'a probe child was created').to.exist
+      expect(path.basename(probeCall!.args[0])).to.match(/^\.staging-probe-/)
+      expect(path.dirname(probeCall!.args[0])).to.equal(dir)
+    })
+
     it('falls back to the OS temp dir when the cache dir cannot be created', async () => {
       process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
       const primary = path.resolve('/tmp/cypress-cache-test/bundles/studio')

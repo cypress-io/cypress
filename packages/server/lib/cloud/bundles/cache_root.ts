@@ -73,10 +73,12 @@ const randomSuffix = (): string => Math.random().toString(36).substring(2, 15)
 // `ensureDir` is a no-op on an existing directory and never checks whether we can
 // write into it, so confirm writability by creating (and removing) a sentinel
 // child — the same `mkdir`-of-a-child operation the bundle flow later performs.
+// The `.staging-` prefix means a probe left behind by a failed cleanup is reaped
+// by sweepOrphanStaging rather than lingering forever.
 const ensureDirWritable = async (dir: string): Promise<void> => {
   await ensureDir(dir)
 
-  const probe = path.join(dir, `.probe-${randomSuffix()}`)
+  const probe = path.join(dir, `.staging-probe-${randomSuffix()}`)
 
   await ensureDir(probe)
   await remove(probe).catch(() => { /* best-effort cleanup */ })
