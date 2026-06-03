@@ -490,7 +490,8 @@ describe('utils', () => {
       })
     })
 
-    describe('"eliminated all specs" warning', () => {
+    describe('could-not-pre-filter notice', () => {
+      const noMatchMessage = '@cypress/grep: could not pre-filter specs because none appeared to contain tests matching the filter:'
       // use a spec pattern that matches no files so the outcome is deterministic
       const mockConfig = {
         specPattern: ['**/__does_not_exist__/*.cy.ts'],
@@ -498,37 +499,49 @@ describe('utils', () => {
         expose: {},
       }
 
-      it('does not warn when grepFilterSpecs is set but no grep/grepTags is in use', () => {
-        const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      it('says nothing when grepFilterSpecs is set but no grep/grepTags is in use', () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
         plugin({ ...mockConfig, expose: { grepFilterSpecs: true } })
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).not.toContain('@cypress/grep: No specs contained tests matching the provided filter, so no specs could be pre-filtered.')
+        expect(calls).not.toContain(noMatchMessage)
         consoleSpy.mockRestore()
       })
 
-      it('warns when grep is set but eliminates all specs', () => {
-        const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      it('logs the notice when grep is set but matches no specs', () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
         plugin({ ...mockConfig, expose: { grepFilterSpecs: true, grep: 'noMatch' } })
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).toContain('@cypress/grep: No specs contained tests matching the provided filter, so no specs could be pre-filtered.')
+        expect(calls).toContain(noMatchMessage)
         consoleSpy.mockRestore()
       })
 
-      it('warns when grepTags is set but eliminates all specs', () => {
-        const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      it('logs the notice when grepTags is set but matches no specs', () => {
+        const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
         plugin({ ...mockConfig, expose: { grepFilterSpecs: true, grepTags: '@noMatch' } })
 
         const calls = consoleSpy.mock.calls.map((args) => args[0])
 
-        expect(calls).toContain('@cypress/grep: No specs contained tests matching the provided filter, so no specs could be pre-filtered.')
+        expect(calls).toContain(noMatchMessage)
         consoleSpy.mockRestore()
+      })
+
+      it('does not emit the notice as a warning', () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+        vi.spyOn(console, 'log').mockImplementation(() => {})
+        plugin({ ...mockConfig, expose: { grepFilterSpecs: true, grep: 'noMatch' } })
+
+        const warnCalls = warnSpy.mock.calls.map((args) => args[0])
+
+        expect(warnCalls).not.toContain(noMatchMessage)
+        vi.restoreAllMocks()
       })
     })
 
