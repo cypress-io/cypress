@@ -616,5 +616,21 @@ describe('src/cypress/dom/visibility', {
         expect(reason).to.include('size: `0 x 0` pixels')
       })
     })
+
+    it('falls through to legacy reasons when modernIsHidden did not catch the element', () => {
+      // Actionability commands (cy.click, etc.) still call `isStrictlyHidden` / `isHiddenByAncestors`,
+      // which run legacy-only checks (overflow clipping, fixed-position covering, etc.) that
+      // `modernIsHidden` does not perform. When such a legacy check rejects the element but
+      // modernIsHidden does not, the modern message would be misleading — the reason should
+      // describe the legacy check that actually tripped.
+      cy.visit('/fixtures/visibility/overflow.html')
+      prepareFixtureSection('overflow-hidden')
+      cy.get('[cy-section="overflow-hidden"] .testCase[cy-label="Element out of bounds right"]').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.include('content is being clipped by one of its parent elements')
+        expect(reason).to.not.include('Element.checkVisibility()')
+      })
+    })
   })
 })

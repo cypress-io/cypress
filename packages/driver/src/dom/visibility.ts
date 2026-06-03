@@ -534,7 +534,13 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   let parentNode
   let $select
 
-  if (Cypress.config('visibilityStrategy') === 'modern') {
+  // Under the modern visibility strategy, only emit the modern reason when `modernIsHidden`
+  // actually caught the element. Actionability commands (cy.click, cy.type, etc.) still call
+  // `isStrictlyHidden` / `isHiddenByAncestors`, which run legacy-only checks (transform, overflow
+  // clipping, fixed-position covering); if one of those rejected the element while modernIsHidden
+  // did not, fall through to the legacy reason finder so the message describes the check that
+  // actually tripped.
+  if (Cypress.config('visibilityStrategy') === 'modern' && modernIsHidden($el, options)) {
     const el = $el[0]
     const style = getComputedStyle(el)
     const contentVisibility = style.getPropertyValue('content-visibility') || 'visible'
