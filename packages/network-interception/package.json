@@ -2,10 +2,14 @@
   "name": "@packages/network-interception",
   "version": "0.0.0-development",
   "private": true,
-  "main": "./lib/index",
+  "main": "cjs/index.js",
   "scripts": {
-    "build-prod": "tsc --project .",
-    "check-ts": "tsc --noEmit && yarn -s tslint",
+    "build": "yarn build:esm && yarn build:cjs",
+    "build-prod": "yarn build",
+    "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
+    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
+    "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint",
+    "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",
     "lint": "eslint --ext .ts,.json, .",
     "test": "vitest",
@@ -17,11 +21,15 @@
     "@packages/types": "0.0.0-development"
   },
   "devDependencies": {
+    "rimraf": "6.1.1",
     "vitest": "^3.2.4"
   },
   "files": [
-    "lib"
+    "cjs",
+    "esm"
   ],
+  "types": "cjs/index.d.ts",
   "license": "MIT",
+  "module": "esm/index.js",
   "nx": {}
 }

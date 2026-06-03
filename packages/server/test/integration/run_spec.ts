@@ -165,6 +165,38 @@ describe('lib/modes/run', () => {
     await run(options, Promise.resolve())
   })
 
+  it('falls back to cwd when projectRoot is unset', async () => {
+    const fallbackRoot = '/path/to/cwd/fallback'
+    const mockedRelativeSupportFilePath = 'cypress/support/e2e.js'
+
+    options = {
+      ...options,
+      projectRoot: undefined,
+      cwd: fallbackRoot,
+    }
+
+    // @ts-expect-error
+    fsUtil.access.withArgs(fallbackRoot).resolves()
+    // @ts-expect-error
+    process.chdir.withArgs(fallbackRoot).returns()
+    // @ts-expect-error
+    fs.statSync.withArgs(fallbackRoot).returns({
+      isDirectory: () => true,
+    })
+
+    // @ts-expect-error
+    fsExtra.pathExists.withArgs(`${fallbackRoot}/${mockedRelativeSupportFilePath}`).resolves(true)
+    // @ts-expect-error
+    FileDataSource.prototype.getFilesByGlob.withArgs(fallbackRoot, 'cypress/support/e2e.{js,jsx,ts,tsx}').resolves([`${fallbackRoot}/${mockedRelativeSupportFilePath}`])
+
+    // @ts-expect-error
+    sinon.stub(OpenProject.prototype, 'launch').resolves()
+
+    await run(options, Promise.resolve())
+
+    expect(fsUtil.access).to.have.been.calledWith(fallbackRoot)
+  })
+
   it('completes successfully when no specs are found and passWithNoTests is true', async () => {
     specs = []
     ctx.project._specs = []

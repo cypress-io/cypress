@@ -5,7 +5,7 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "148.0.7778.215"
+chrome-stable-version: &chrome-stable-version "149.0.7827.53"
 chrome-beta-version: &chrome-beta-version "149.0.7827.53"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.54"
@@ -22,7 +22,7 @@ parameters:
     default: main
   force-persist-artifacts:
     type: boolean
-    default: false
+    default: false  
   run-all-jobs:
     type: boolean
     default: false
@@ -824,20 +824,19 @@ commands:
           # TODO: How can we have preinstalled browsers on CircleCI?
           name: 'Install Chrome on Windows'
           command: |
-            # install with `--ignore-checksums` to avoid checksum error
-            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
-            # Retry to tolerate 504s from the Chocolatey community feed. `choco install`
-            # exits 0 on "installed 0/0 packages", so gate the retry on whether chrome.exe
-            # actually exists, not on choco's exit code.
+            # Download Google's standalone enterprise MSI directly from dl.google.com.
             if [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]]; then
               chrome_installed() {
                 [[ -f "/c/Program Files/Google/Chrome/Application/chrome.exe" || -f "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" ]]
               }
+              msi_url="https://dl.google.com/chrome/install/GoogleChromeStandaloneEnterprise64.msi"
+              msi_path="$(mktemp -d)/googlechrome.msi"
               max_attempts=3
               n=0
               until [ $n -ge $max_attempts ]; do
-                choco install googlechrome -y --ignore-checksums --no-progress || true
-                if chrome_installed; then
+                if curl -fsSL --connect-timeout 30 --max-time 240 --retry 2 --retry-connrefused -o "$msi_path" "$msi_url" \
+                    && MSYS_NO_PATHCONV=1 msiexec.exe /i "$(cygpath -w "$msi_path")" /qn /norestart \
+                    && chrome_installed; then
                   break
                 fi
                 n=$((n+1))
@@ -849,7 +848,7 @@ commands:
                 fi
               done
               if ! chrome_installed; then
-                echo "ERROR: Chrome not installed after choco install"
+                echo "ERROR: Chrome not installed after MSI install"
                 exit 1
               fi
             fi
@@ -2153,7 +2152,7 @@ jobs:
       - update_cached_system_tests_deps
 
   binary-system-tests:
-    parallelism: 2
+    parallelism: 5
     working_directory: ~/cypress
     environment:
       <<: *defaultsEnvironment
@@ -2339,10 +2338,11 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium+
+        default: large
       percy:
         type: boolean
         default: false
+    resource_class: << parameters.resource_class >>
     parallelism: 7
     steps:
       - run-new-ui-tests:
