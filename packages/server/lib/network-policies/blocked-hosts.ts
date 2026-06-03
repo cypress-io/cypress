@@ -5,7 +5,7 @@ type BlockedHostsConfig = {
   matchesBlockedHost?: (url: string, blockHosts: string | string[]) => string | false | null | undefined
 }
 
-export function BlockedHosts (config: BlockedHostsConfig): NetworkPolicy {
+export function createBlockedHosts (config: BlockedHostsConfig): NetworkPolicy {
   return {
     name: 'blocked-hosts',
     provenance: 'config',

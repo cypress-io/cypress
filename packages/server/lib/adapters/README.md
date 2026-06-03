@@ -20,7 +20,7 @@ Policy **definitions and config mapping** live in server:
 
 | Config | Policy (stage 2) |
 | --- | --- |
-| `blockHosts` | `BlockedHosts` |
+| `blockHosts` | `createBlockedHosts()` |
 
 Policies are **registered only** — middleware enforcement is stage 7.
 

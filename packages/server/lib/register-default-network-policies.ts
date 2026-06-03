@@ -1,6 +1,6 @@
 import { blocked } from '@packages/network'
 import type { ForNetworkPolicyRegistration } from '@packages/network-interception'
-import { BlockedHosts } from './network-policies/blocked-hosts'
+import { createBlockedHosts } from './network-policies/blocked-hosts'
 
 type RegisterDefaultNetworkPoliciesConfig = {
   blockHosts?: string | string[] | null
@@ -15,7 +15,7 @@ export function registerDefaultNetworkPolicies (
   policies: ForNetworkPolicyRegistration,
   config: RegisterDefaultNetworkPoliciesConfig,
 ): void {
-  policies.add(BlockedHosts({
+  policies.add(createBlockedHosts({
     blockHosts: config.blockHosts,
     matchesBlockedHost: blocked.matches,
   }))

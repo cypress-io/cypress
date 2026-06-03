@@ -2,7 +2,7 @@
 
 Types and **port interfaces** for Cypress network interception (`cy.intercept`, config policies, proxy middleware). Part of the stacked refactor in [#33919](https://github.com/cypress-io/cypress/issues/33919) to support HTTP/2 (CDP Fetch / BiDi) without rewriting intercept logic.
 
-> **Stack stage 2 of 8.** Driving port `ForNetworkPolicyRegistration`, default impl `NetworkPolicyRegistry`. `@packages/server` defines and registers config policies (e.g. `BlockedHosts`) at startup. Registry is populated; **proxy middleware does not call `runPolicies` yet** (stage 7).
+> **Stack stage 2 of 8.** Driving port `ForNetworkPolicyRegistration`, default impl `NetworkPolicyRegistry`. `@packages/server` defines and registers config policies (e.g. `createBlockedHosts()`) at startup. Registry is populated; **proxy middleware does not call `runPolicies` yet** (stage 7).
 
 ---
 
@@ -48,7 +48,7 @@ Exported from this package so `@packages/server` knows how to register configura
 
 **Default implementation:** `NetworkPolicyRegistry` (also owns `runPolicies`, wired in stage 7).
 
-**Server-owned policies:** `@packages/server` defines configurator policy implementations (e.g. `BlockedHosts` in `lib/network-policies/`) and registers them via `registerDefaultNetworkPolicies(policies, config)`. This package accepts any value conforming to `NetworkPolicy`.
+**Server-owned policies:** `@packages/server` defines configurator policy factories (e.g. `createBlockedHosts()` in `lib/network-policies/`) and registers them via `registerDefaultNetworkPolicies(policies, config)`. This package accepts any value conforming to `NetworkPolicy`.
 
 ```
 createProxyRuntime()  (@packages/server)
