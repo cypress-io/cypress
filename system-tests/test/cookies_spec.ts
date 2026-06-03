@@ -364,3 +364,53 @@ describe('cross-origin cookies, set:cookies', () => {
     spec: 'multi_cookies.cy.js',
   })
 })
+
+describe('cookie jar stays in sync after same-origin requests', () => {
+  const onServer = (app) => {
+    app.use(parser())
+
+    // Renders the current value of the `flash` cookie. On the first visit (no
+    // cookie yet) it seeds `flash=stale`, so the server-side cookie jar is
+    // primed with a value via the navigation request.
+    app.get('/stale_cookie', (req, res) => {
+      const flash = req.cookies.flash
+
+      if (!flash) {
+        res.cookie('flash', 'stale')
+      }
+
+      return res
+      .type('html')
+      .send(`<html><body><div id="flash">flash: ${flash || 'stale'}</div></body></html>`)
+    })
+
+    // A same-origin XHR/fetch endpoint that updates the `flash` cookie to a
+    // fresh value via Set-Cookie, mirroring an AJAX request that mutates a
+    // cookie before the page is reloaded.
+    app.post('/stale_cookie/update', (req, res) => {
+      res.cookie('flash', 'fresh')
+
+      return res.json({ ok: true })
+    })
+  }
+
+  systemTests.setup({
+    servers: [{
+      onServer,
+      port: httpPort,
+    }],
+    settings: {
+      e2e: {},
+    },
+  })
+
+  // https://github.com/cypress-io/cypress/issues/25841
+  it('keeps the cookie jar in sync after a same-origin fetch or XHR updates a cookie', {
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
+    config: {
+      baseUrl: `http://localhost:${httpPort}`,
+      allowCypressEnv: false,
+    },
+    spec: 'stale_cookie.cy.js',
+  })
+})
