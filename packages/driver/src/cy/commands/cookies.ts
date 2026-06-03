@@ -213,18 +213,16 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     buildOptions: () => AutomationEventsAndOptions[CookieQuery]
     onResult: (result: any) => void
     log?: Cypress.Log
-    // governs how long the query retries (re-reading + re-asserting). defaults
-    // to `defaultCommandTimeout`, consistent with other query commands.
+    // governs how long the query retries (re-reading + re-asserting) and how
+    // long a single automation round-trip may take. defaults to
+    // `defaultCommandTimeout`, consistent with other query commands.
     timeout: number
-    // governs how long a single automation round-trip may take. defaults to
-    // `responseTimeout`, preserving the historical getCookie(s) behavior.
-    responseTimeout: number
   }
 
   // shared retry/automation plumbing for the getCookie(s) query commands.
   // returns a `fetch` function that (re-)reads cookies in the background and a
   // `getSubject` function suitable for returning from a query command.
-  function createCookieQuery ({ commandName, event, action, buildOptions, onResult, log, timeout, responseTimeout }: CookieQueryParams) {
+  function createCookieQuery ({ commandName, event, action, buildOptions, onResult, log, timeout }: CookieQueryParams) {
     let hasResult = false
     let result: any
     let pending: Promise<void> | null = null
@@ -261,7 +259,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       pending = Promise.try(() => {
         return Cypress.automation(event, automationOptions)
       })
-      .timeout(responseTimeout)
+      .timeout(timeout)
       .then(pickCookieProps)
       .then((res) => {
         result = res
@@ -270,7 +268,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       })
       .catch(Promise.TimeoutError, () => {
         mostRecentError = $errUtils.cypressErrByPath('cookies.timed_out', {
-          args: { cmd: commandName, timeout: responseTimeout },
+          args: { cmd: commandName, timeout },
         })
       })
       .catch((err) => {
@@ -317,7 +315,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     })
 
     const timeout = options.timeout || config('defaultCommandTimeout')
-    const responseTimeout = options.timeout || config('responseTimeout')
 
     this.set('timeout', timeout)
 
@@ -358,7 +355,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       },
       log,
       timeout,
-      responseTimeout,
     })
 
     // when an assertion attached to this command fails, throw away the existing
@@ -374,7 +370,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     })
 
     const timeout = options.timeout || config('defaultCommandTimeout')
-    const responseTimeout = options.timeout || config('responseTimeout')
 
     this.set('timeout', timeout)
 
@@ -409,7 +404,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       },
       log,
       timeout,
-      responseTimeout,
     })
 
     // when an assertion attached to this command fails, throw away the existing

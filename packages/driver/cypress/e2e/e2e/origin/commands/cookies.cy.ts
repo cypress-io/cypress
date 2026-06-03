@@ -51,7 +51,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
         logs = []
       })
 
-      it('.getCookie()', { responseTimeout: 100 }, (done) => {
+      it('.getCookie()', { defaultCommandTimeout: 100 }, (done) => {
         cy.on('fail', (err) => {
           assertLogLength(logs, 1)
           expect(logs[0].get('error')).to.eq(err)
@@ -66,7 +66,7 @@ describe('cy.origin cookies', { browser: '!webkit' }, () => {
         cy.getCookie('foo')
       })
 
-      it('.getCookies()', { responseTimeout: 100 }, (done) => {
+      it('.getCookies()', { defaultCommandTimeout: 100 }, (done) => {
         cy.on('fail', (err) => {
           assertLogLength(logs, 1)
           expect(logs[0].get('error')).to.eq(err)

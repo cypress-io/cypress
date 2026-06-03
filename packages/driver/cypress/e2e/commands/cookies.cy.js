@@ -680,8 +680,8 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', {
-        responseTimeout: 2500,
+      it('sets timeout to Cypress.config(defaultCommandTimeout)', {
+        defaultCommandTimeout: 2500,
       }, () => {
         Cypress.automation.resolves([])
 
@@ -1076,8 +1076,8 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', {
-        responseTimeout: 2500,
+      it('sets timeout to Cypress.config(defaultCommandTimeout)', {
+        defaultCommandTimeout: 2500,
       }, () => {
         Cypress.automation.resolves(null)
 
