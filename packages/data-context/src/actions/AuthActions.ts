@@ -139,7 +139,7 @@ export class AuthActions {
       } finally {
         this.ctx.emitter.toApp()
         this.ctx.emitter.toLaunchpad()
-        this.ctx.lifecycleManager.refreshLifecycle()
+        await this.ctx.lifecycleManager.refreshLifecycle()
       }
     }
 
