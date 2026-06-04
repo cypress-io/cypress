@@ -11,7 +11,7 @@ describe('require_async_child', () => {
   it('exits with code 0 when the parent closes the IPC channel (disconnect handler)', function (done) {
     this.timeout(15_000)
 
-    const child = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', PROJECT_ROOT, '--file', CONFIG_FILE], {
+    const child = childProcess.fork(REQUIRE_ASYNC_CHILD_PATH, ['--projectRoot', PROJECT_ROOT, '--file', CONFIG_FILE, '--shouldLoadAsEsm', 'false'], {
       env: {
         ...process.env,
         // Match real config-child loading (see run_child_fixture / ProjectConfigIpc)

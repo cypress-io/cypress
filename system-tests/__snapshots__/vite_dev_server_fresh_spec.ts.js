@@ -1456,24 +1456,45 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  MissingReact.cy.jsx                                                             (4 of 8)
 
 
-  ✓ is missing React
+  1) is missing React
 
-  1 passing
+  0 passing
+  1 failing
+
+  1) is missing React:
+     ReferenceError: The following error originated from your application code, not from Cypress.
+
+  > React is not defined
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReact.cy.jsx                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReact.cy.jsx/is missing React (failed).p     (1280x633)
+     ng                                                                                             
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1481,24 +1502,37 @@ https://on.cypress.io/uncaught-exception-from-application
   Running:  MissingReactInSpec.cy.jsx                                                       (5 of 8)
 
 
-  ✓ is missing React in this file
+  1) is missing React in this file
 
-  1 passing
+  0 passing
+  1 failing
+
+  1) is missing React in this file:
+     ReferenceError: React is not defined
+      [stack trace lines]
+
+
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     MissingReactInSpec.cy.jsx                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/MissingReactInSpec.cy.jsx/is missing React in t     (1280x633)
+     his file (failed).png                                                                          
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -1600,9 +1634,9 @@ https://on.cypress.io/uncaught-exception-from-application
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  Errors.cy.jsx                            XX:XX        4        -        4        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  MissingReact.cy.jsx                      XX:XX        1        1        -        -        - │
+  │ ✖  MissingReact.cy.jsx                      XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  MissingReactInSpec.cy.jsx                XX:XX        1        1        -        -        - │
+  │ ✖  MissingReactInSpec.cy.jsx                XX:XX        1        -        1        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  Unmount.cy.jsx                           XX:XX        3        3        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -1610,7 +1644,7 @@ https://on.cypress.io/uncaught-exception-from-application
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✔  port.cy.jsx                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  2 of 8 failed (25%)                      XX:XX       16       11        5        -        -  
+    ✖  4 of 8 failed (50%)                      XX:XX       16        9        7        -        -  
 
 
 `
