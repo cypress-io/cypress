@@ -1,6 +1,7 @@
 import type { CyPromptCloudApi } from '@packages/types/src/cy-prompt/cy-prompt-server-types'
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
+import { stackWithCause } from '../../error_with_cause'
 const debug = Debug('cypress:server:cloud:api:cy-prompt:report_cy_prompt_error')
 
 export interface ReportCyPromptErrorOptions {
@@ -84,7 +85,7 @@ export function reportCyPromptError ({
       projectSlug,
       errors: [{
         name: stripPath(errorObject.name ?? `Unknown name`),
-        stack: stripPath(errorObject.stack ?? `Unknown stack`),
+        stack: stripPath(stackWithCause(errorObject)),
         message: stripPath(errorObject.message ?? `Unknown message`),
         code: 'code' in errorObject ? errorObject.code as string : undefined,
         errno: 'errno' in errorObject ? errorObject.errno as number : undefined,

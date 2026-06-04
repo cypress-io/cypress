@@ -3,12 +3,12 @@ import Debug from 'debug'
 import mime from 'mime'
 import isHtml from 'is-html'
 import { IncomingMessage } from 'http'
-import {
-  RouteMatcherOptionsGeneric,
-  STRING_MATCHER_FIELDS,
-  DICT_STRING_MATCHER_FIELDS,
+import type {
   BackendStaticResponse,
 } from '../types'
+
+export { getAllStringMatcherFields } from '@packages/network-interception'
+
 import { Readable, PassThrough } from 'stream'
 import { Socket } from 'net'
 import type { GetFixtureFn } from './types'
@@ -58,28 +58,6 @@ export function emit (socket: SocketBroadcaster, eventName: string, data: object
   }
 
   socket.toDriver('net:stubbing:event', eventName, data)
-}
-
-export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<any>) {
-  return _.concat(
-    _.filter(STRING_MATCHER_FIELDS, _.partial(_.has, options)),
-    // add the nested DictStringMatcher values to the list of fields
-    _.flatten(
-      _.filter(
-        DICT_STRING_MATCHER_FIELDS.map((field) => {
-          const value = options[field]
-
-          if (value) {
-            return _.keys(value).map((key) => {
-              return `${field}.${key}`
-            })
-          }
-
-          return ''
-        }),
-      ),
-    ),
-  )
 }
 
 /**
