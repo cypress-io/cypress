@@ -293,9 +293,15 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         throw fatalError
       }
 
-      // once we've read the cookie(s), that remains the result until a failed
-      // assertion clears it (via the command's onFail handler) and re-fetches.
       if (hasResult) {
+        // we have a result, but kick off a fresh read so the next assertion
+        // retry sees up-to-date cookie(s). this is required when assertions are
+        // chained through another query (e.g. `cy.getCookie('x').its('value')`),
+        // because this command's retry of getSubject - not its onFail handler -
+        // is what re-runs upstream. fetch() marks the cached result stale; we
+        // return it once for the current attempt.
+        fetch()
+
         return result
       }
 
@@ -306,7 +312,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       throw mostRecentError
     }
 
-    return { fetch, getSubject }
+    return getSubject
   }
 
   Commands.addQuery('getCookie', function getCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
@@ -343,7 +349,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
     validateDomainOption(userOptions.domain, 'getCookie', log)
 
-    const { fetch, getSubject } = createCookieQuery({
+    return createCookieQuery({
       commandName: 'getCookie',
       event: 'get:cookie',
       action: 'reading the requested cookie from',
@@ -356,12 +362,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       log,
       timeout,
     })
-
-    // when an assertion attached to this command fails, throw away the existing
-    // result and re-read the cookie so the assertion can be retried.
-    this.set('onFail', () => fetch())
-
-    return getSubject
   })
 
   Commands.addQuery('getCookies', function getCookies (userOptions: Cypress.CookieOptions = {}) {
@@ -392,7 +392,7 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
 
     validateDomainOption(userOptions.domain, 'getCookies', log)
 
-    const { fetch, getSubject } = createCookieQuery({
+    return createCookieQuery({
       commandName: 'getCookies',
       event: 'get:cookies',
       action: 'reading cookies from',
@@ -405,12 +405,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       log,
       timeout,
     })
-
-    // when an assertion attached to this command fails, throw away the existing
-    // result and re-read the cookies so the assertion can be retried.
-    this.set('onFail', () => fetch())
-
-    return getSubject
   })
 
   return Commands.addAll({

@@ -1114,6 +1114,20 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/4802
+    // the cookie must be re-read on retries even when the failing assertion is
+    // chained through another query (e.g. `.its()`).
+    it('retries reading the cookie when assertions are chained through another query', () => {
+      const get = Cypress.automation.withArgs('get:cookie')
+
+      get.resolves({ name: 'foo', value: 'stale', domain: 'localhost', path: '/', secure: true, httpOnly: false })
+      get.onCall(2).resolves({ name: 'foo', value: 'fresh', domain: 'localhost', path: '/', secure: true, httpOnly: false })
+
+      cy.getCookie('foo').its('value').should('eq', 'fresh').then(() => {
+        expect(get.callCount).to.be.gte(3)
+      })
+    })
+
     describe('errors', {
       defaultCommandTimeout: 100,
     }, () => {
