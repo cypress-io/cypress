@@ -21,8 +21,7 @@ describe('@cypress/vite-dev-server', function () {
           snapshot: true,
           // @see https://github.com/cypress-io/cypress/issues/30881 and src/Rerendering.cy.jsx for details on skipping.
           spec: 'src/**/*.cy.jsx,!src/Rerendering.cy.jsx',
-          // AFAICT, vite 8 with rolldown support bundles react differently, so it is available in the "missing react" components and passes
-          expectedExitCode: project === 'vite8.0.0-react' ? 5 : 7,
+          expectedExitCode: 7,
         })
       })
 

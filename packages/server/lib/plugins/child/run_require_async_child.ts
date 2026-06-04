@@ -21,9 +21,10 @@ interface BluebirdRejectionEvent {
  * @param {*} file the file we are trying to load
  * @param {*} projectRoot the root of the typescript project
  */
-export function run (ipc: PluginChildIpc, file: string, projectRoot: string): void {
+export function run (ipc: PluginChildIpc, file: string, projectRoot: string, shouldLoadAsEsm: boolean): void {
   debug('configFile:', file)
   debug('projectRoot:', projectRoot)
+  debug('shouldLoadAsEsm:', shouldLoadAsEsm)
   if (!projectRoot) {
     throw new Error('Unexpected: projectRoot should be a string')
   }
@@ -93,44 +94,19 @@ export function run (ipc: PluginChildIpc, file: string, projectRoot: string): vo
   // Config file loading of modules is tested within
   // system-tests/projects/config-cjs-and-esm/*
   const loadFile = async (configFilePath: string): Promise<ConfigFileExport> => {
-    let errorLoadingCJSConfig: Error | null = null
-
-    try {
-      debug('Loading file %s', configFilePath)
-
-      return require(configFilePath)
-    } catch (err) {
-      const loadErr = err as Error
-
-      if (!loadErr.stack?.includes('[ERR_REQUIRE_ESM]') && !loadErr.stack?.includes('SyntaxError: Cannot use import statement outside a module')) {
-        errorLoadingCJSConfig = loadErr
-      }
-    }
-
-    debug('User may be trying to load an ESM config file')
-
-    try {
-      // We cannot replace the initial `require` with `await import` because
-      // Certain modules cannot be dynamically imported.
+    if (shouldLoadAsEsm) {
       // pathToFileURL for windows interop: https://github.com/nodejs/node/issues/31710
       const fileURL = pathToFileURL(configFilePath).href
 
-      debug(`importing config as esm file %s`, fileURL)
+      debug('importing config as esm file %s', fileURL)
+
       // Preserves native dynamic import when compiled to CJS
-      const config = (await dynamicImport(fileURL)) as ConfigFileExport
-
-      return config
-    } catch (err) {
-      const loadErr = err as Error
-
-      debug('error loading file via native Node.js module loader %s', loadErr.message)
-      if (errorLoadingCJSConfig) {
-        debug('CJS loading initially failed. Rethrowing %s', errorLoadingCJSConfig.message)
-        throw errorLoadingCJSConfig
-      }
-
-      throw loadErr
+      return (await dynamicImport(fileURL)) as ConfigFileExport
     }
+
+    debug('loading config as cjs file %s', configFilePath)
+
+    return require(configFilePath)
   }
 
   ipc.on('loadConfig', async () => {

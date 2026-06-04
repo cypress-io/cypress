@@ -16,6 +16,7 @@ const debug = Debug('cypress:lifecycle:require_async_child')
 const argv = minimist(process.argv.slice(2))
 const file = argv.file as string
 const projectRoot = argv.projectRoot as string
+const shouldLoadAsEsm = argv.shouldLoadAsEsm === true || argv.shouldLoadAsEsm === 'true'
 const telemetryCtx = argv.telemetryCtx as string | undefined
 
 debug('initializing telemetry')
@@ -89,5 +90,5 @@ ipc.on('main:process:will:disconnect', async () => {
 })
 
 debug('run')
-runRequireAsyncChild(ipc, file, projectRoot)
+runRequireAsyncChild(ipc, file, projectRoot, shouldLoadAsEsm)
 debug('run complete')
