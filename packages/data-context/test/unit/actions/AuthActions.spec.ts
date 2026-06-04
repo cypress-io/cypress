@@ -233,18 +233,16 @@ describe('AuthActions', () => {
       expect(ctx.coreData.autoProvisionedProjectId).toBeNull()
     })
 
-    it('clears a stale autoProvisionedProjectId and notifies app and launchpad when setProjectIdInConfigFile succeeds', async () => {
+    it('clears a stale autoProvisionedProjectId and refreshes lifecycle when setProjectIdInConfigFile succeeds', async () => {
       ctx.coreData.autoProvisionedProjectId = 'my-project'
       jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
-      const toAppSpy = jest.spyOn(ctx.emitter, 'toApp')
-      const toLaunchpadSpy = jest.spyOn(ctx.emitter, 'toLaunchpad')
+      const refreshLifecycleSpy = jest.spyOn(ctx.lifecycleManager, 'refreshLifecycle').mockResolvedValue(undefined)
 
       // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
       expect(ctx.coreData.autoProvisionedProjectId).toBeNull()
-      expect(toAppSpy).toHaveBeenCalledTimes(1)
-      expect(toLaunchpadSpy).toHaveBeenCalledTimes(1)
+      expect(refreshLifecycleSpy).toHaveBeenCalledTimes(1)
     })
 
     it('sets autoProvisionedProjectId when setProjectIdInConfigFile fails', async () => {
@@ -281,17 +279,15 @@ describe('AuthActions', () => {
       expect(ctx.coreData.autoProvisionedProjectId).toBeNull()
     })
 
-    it('clears a stale autoProvisionedProjectId and notifies app and launchpad when setProjectIdInConfigFile succeeds during signup', async () => {
+    it('clears a stale autoProvisionedProjectId and refreshes lifecycle when setProjectIdInConfigFile succeeds during signup', async () => {
       ctx.coreData.autoProvisionedProjectId = 'my-project'
       jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockResolvedValue(undefined)
-      const toAppSpy = jest.spyOn(ctx.emitter, 'toApp')
-      const toLaunchpadSpy = jest.spyOn(ctx.emitter, 'toLaunchpad')
+      const refreshLifecycleSpy = jest.spyOn(ctx.lifecycleManager, 'refreshLifecycle').mockResolvedValue(undefined)
 
       await actions.signup('Binary: App', 'Studio', 'Signup')
 
       expect(ctx.coreData.autoProvisionedProjectId).toBeNull()
-      expect(toAppSpy).toHaveBeenCalledTimes(1)
-      expect(toLaunchpadSpy).toHaveBeenCalledTimes(1)
+      expect(refreshLifecycleSpy).toHaveBeenCalledTimes(1)
     })
 
     it('sets autoProvisionedProjectId when setProjectIdInConfigFile fails during signup', async () => {
