@@ -1,5 +1,6 @@
-import '../../../spec_helper'
+import { proxyquire, sinon } from '../../../spec_helper'
 import path from 'path'
+import os from 'os'
 
 describe('getBundleCacheDir', () => {
   const ENV_KEYS = [
@@ -81,5 +82,89 @@ describe('getBundleCacheDir', () => {
     // cachedir('Cypress') varies by OS; just assert the bundles/<kind> tail.
     expect(getBundleCacheDir('studio')).to.match(/[/\\]bundles[/\\]studio$/)
     expect(getBundleCacheDir('studio')).to.not.equal(path.resolve('bundles/studio'))
+  })
+
+  describe('ensureWritableBundleCacheDir', () => {
+    const EACCES = () => Object.assign(new Error('EACCES: permission denied'), { code: 'EACCES' })
+
+    const load = (ensureDirStub: sinon.SinonStub) => {
+      return proxyquire('../lib/cloud/bundles/cache_root', {
+        'fs-extra': { ensureDir: ensureDirStub, remove: sinon.stub().resolves() },
+      })
+    }
+
+    it('returns the configured cache dir when it is writable', async () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
+      const ensureDirStub = sinon.stub().resolves()
+      const { ensureWritableBundleCacheDir } = load(ensureDirStub)
+
+      const dir = await ensureWritableBundleCacheDir('cy-prompt')
+
+      expect(dir).to.equal(path.resolve('/tmp/cypress-cache-test/bundles/cy-prompt'))
+      expect(ensureDirStub).to.be.calledWith(dir)
+    })
+
+    it('names the writability probe with the .staging- prefix so it is swept if cleanup fails', async () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
+      const dir = path.resolve('/tmp/cypress-cache-test/bundles/cy-prompt')
+      const ensureDirStub = sinon.stub().resolves()
+      const { ensureWritableBundleCacheDir } = load(ensureDirStub)
+
+      await ensureWritableBundleCacheDir('cy-prompt')
+
+      const probeCall = ensureDirStub.getCalls().find((c) => c.args[0] !== dir)
+
+      expect(probeCall, 'a probe child was created').to.exist
+      expect(path.basename(probeCall!.args[0])).to.match(/^\.staging-probe-/)
+      expect(path.dirname(probeCall!.args[0])).to.equal(dir)
+    })
+
+    it('falls back to the OS temp dir when the cache dir cannot be created', async () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
+      const primary = path.resolve('/tmp/cypress-cache-test/bundles/studio')
+      const fallback = path.join(os.tmpdir(), 'cypress-cache', 'bundles', 'studio')
+      const ensureDirStub = sinon.stub().resolves()
+
+      ensureDirStub.withArgs(primary).rejects(EACCES())
+
+      const { ensureWritableBundleCacheDir } = load(ensureDirStub)
+
+      expect(await ensureWritableBundleCacheDir('studio')).to.equal(fallback)
+      expect(ensureDirStub).to.be.calledWith(fallback)
+    })
+
+    it('falls back when the cache dir exists but is not writable (probe child fails)', async () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
+      const primary = path.resolve('/tmp/cypress-cache-test/bundles/studio')
+      const fallback = path.join(os.tmpdir(), 'cypress-cache', 'bundles', 'studio')
+
+      // primary itself exists (ensureDir resolves), but creating any child under
+      // it — the writability probe, mirroring the later `.staging-*` mkdir — fails.
+      const ensureDirStub = sinon.stub().callsFake(async (dir: string) => {
+        if (dir !== primary && dir.startsWith(`${primary}${path.sep}`)) {
+          throw EACCES()
+        }
+      })
+
+      const { ensureWritableBundleCacheDir } = load(ensureDirStub)
+
+      expect(await ensureWritableBundleCacheDir('studio')).to.equal(fallback)
+    })
+
+    it('rethrows errors that are not permission related', async () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/tmp/cypress-cache-test'
+      const ensureDirStub = sinon.stub().rejects(Object.assign(new Error('ENOSPC: no space left'), { code: 'ENOSPC' }))
+      const { ensureWritableBundleCacheDir } = load(ensureDirStub)
+
+      let caught: any
+
+      try {
+        await ensureWritableBundleCacheDir('cy-prompt')
+      } catch (err) {
+        caught = err
+      }
+
+      expect(caught?.code).to.equal('ENOSPC')
+    })
   })
 })

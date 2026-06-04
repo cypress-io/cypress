@@ -8,7 +8,7 @@ import path from 'path'
 import inspector from 'inspector'
 import debugLib from 'debug'
 import { getTsconfig } from 'get-tsconfig'
-import { autoBindDebug, hasTypeScriptInstalled, toPosix } from '../util'
+import { autoBindDebug, hasTypeScriptInstalled, shouldLoadConfigAsEsm, toPosix } from '../util'
 import _ from 'lodash'
 import os from 'os'
 import semver from 'semver'
@@ -306,7 +306,11 @@ export class ProjectConfigIpc extends EventEmitter {
   }
 
   private forkConfigProcess (): ChildProcess {
-    const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath]
+    const shouldLoadAsEsm = shouldLoadConfigAsEsm(this.configFilePath)
+
+    debug('config file %s will load as %s', this.configFilePath, shouldLoadAsEsm ? 'esm' : 'cjs')
+
+    const configProcessArgs = ['--projectRoot', this.projectRoot, '--file', this.configFilePath, '--shouldLoadAsEsm', String(shouldLoadAsEsm)]
     // we do NOT want telemetry enabled within our cy-in-cy tests as it isn't configured to handled it
     const env = _.omit(process.env, 'CYPRESS_INTERNAL_E2E_TESTING_SELF', 'CYPRESS_INTERNAL_ENABLE_TELEMETRY')
 
