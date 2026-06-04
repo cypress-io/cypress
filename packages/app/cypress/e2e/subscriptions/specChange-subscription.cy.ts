@@ -496,3 +496,88 @@ module.exports = {
     })
   })
 })
+
+// Regression for https://github.com/cypress-io/cypress/issues/5426
+// File watching uses chokidar, which glob-interprets the watched path. When the
+// project root contains glob characters (e.g. `[` `]`) this silently breaks all
+// file watching unless `disableGlobbing` is set. Here we open the project from a
+// path containing brackets and verify the watcher still reacts to file changes.
+describe('specChange subscription - project path with glob characters', () => {
+  beforeEach(() => {
+    cy.scaffoldProject('cypress-in-cypress')
+
+    // Copy the scaffolded project to a sibling directory whose name contains
+    // bracket characters. The name still starts with the known fixture dir name,
+    // so `cy.openProject` path validation passes.
+    cy.withCtx(async (ctx, o) => {
+      const fs = o.require('fs-extra')
+      const source = o.projectDir('cypress-in-cypress')
+
+      await fs.copy(source, `${source} [5426]`)
+    })
+
+    cy.openProject('cypress-in-cypress [5426]')
+    cy.startAppServer()
+    cy.visitApp()
+    cy.specsPageIsVisible()
+  })
+
+  it('responds to an added spec file', () => {
+    cy.get('[data-cy="spec-item-link"]')
+    .should('contain', 'dom-list.spec.js')
+    .should('not.contain', 'new-file.spec.js')
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.writeFileInProject(o.path, '')
+    }, { path: getPathForPlatform('cypress/e2e/new-file.spec.js') })
+
+    cy.get('[data-cy="spec-item-link"]')
+    .should('contain', 'dom-list.spec.js')
+    .should('contain', 'new-file.spec.js')
+  })
+
+  it('responds to a removed spec file', () => {
+    cy.get('[data-cy="spec-item-link"]')
+    .should('contain', 'dom-list.spec.js')
+
+    cy.withCtx(async (ctx, o) => {
+      await ctx.actions.file.removeFileInProject(o.path)
+    }, { path: getPathForPlatform('cypress/e2e/dom-list.spec.js') })
+
+    cy.get('[data-cy="spec-item-link"]')
+    .should('not.contain', 'dom-list.spec.js')
+  })
+
+  it('responds to a cypress.config.js file change', () => {
+    cy.get('[data-cy="spec-item-link"]')
+    .should('contain', 'dom-list.spec.js')
+
+    cy.withCtx(async (ctx) => {
+      await ctx.actions.file.writeFileInProject('cypress.config.js',
+`
+module.exports = {
+allowCypressEnv: false,
+projectId: 'abc123',
+experimentalInteractiveRunEvents: true,
+component: {
+  specPattern: 'src/**/*.{spec,cy}.{js,jsx,ts,tsx}',
+  supportFile: false,
+  devServer: {
+    framework: 'react',
+    bundler: 'webpack',
+  }
+},
+e2e: {
+  specPattern: 'cypress/e2e/**/dom-cont*.spec.{js,ts}',
+  supportFile: false,
+},
+}`)
+    })
+
+    cy.get('[data-cy="spec-item-link"]', { timeout: 15000 })
+    .should('have.length', 3)
+    .should('contain', 'dom-container.spec.js')
+    .should('contain', 'dom-content.spec.js')
+    .should('contain', 'dom-content-scrollable-commands.spec.js')
+  })
+})
