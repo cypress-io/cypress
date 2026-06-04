@@ -1,8 +1,8 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-
 ## 15.17.1
 
 **Bugfixes:**
+
 - Fixed an issue where `cypress open --detached` blocked the CLI process until the GUI was closed rather than returning once Cypress was ready to use.
 
 ## 15.17.0
