@@ -25,6 +25,7 @@
 - Fixed an issue where `cy.wait('@alias')` could time out when the connection to the browser closed before an aliased intercepted request's response completed, including during navigation such as `cy.visit()`. Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 - Fixed an issue where a cross-origin navigation back to a previously-visited origin (for example, completing a login that redirects from an identity provider back to your application) could intermittently load the Cypress app interface instead of your application, causing flaky tests. Fixed in [#33991](https://github.com/cypress-io/cypress/pull/33991).
 - Fixed an issue where `cypress open --detached` blocked the CLI process until the GUI was closed rather than returning once Cypress was ready to use.
+- Fixed an issue where [`cy.request()`](https://on.cypress.io/request) with a `FormData` body failed to upload when a `Content-Type` header was provided with non-lowercase casing (for example `'Content-Type': 'multipart/form-data'`). Cypress now correctly replaces the user-provided header with the generated `multipart/form-data` boundary instead of sending two conflicting `content-type` headers, which previously caused the server to reject the request with a `400` or empty body. Fixes [#21173](https://github.com/cypress-io/cypress/issues/21173).
 
 **Misc:**
 
