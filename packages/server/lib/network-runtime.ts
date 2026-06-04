@@ -1,5 +1,6 @@
 import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
+import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '@packages/proxy/lib/adapters'
 import { defaultMiddleware } from '@packages/proxy/lib/http'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { NetworkPolicyRegistry, NetworkInterceptionCore } from '@packages/network-interception'
@@ -37,7 +38,10 @@ type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
   const stubbingState = netStubbingState()
   const networkPolicyRegistration: ForNetworkPolicyRegistration = new NetworkPolicyRegistry()
-  const networkInterceptionCore = new NetworkInterceptionCore()
+  const networkInterceptionCore = new NetworkInterceptionCore({
+    requestInterception: new ProxyRequestInterceptionAdapter(),
+    responseInterception: new ProxyResponseInterceptionAdapter(),
+  })
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)
 
