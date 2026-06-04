@@ -228,7 +228,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       cy.get('[data-cy="cookie-login-https"]').click()
 
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
+        // the https prelogin -> foobar.com redirect can exceed the default 4s
+        // timeout, so wait longer for the cross-origin page to be ready
+        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
         cy.get('[data-cy="cookieProps"]').type('Secure')
         cy.get('[data-cy="login"]').click()
       })
@@ -256,7 +258,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       cy.get('[data-cy="cookie-login-https"]').click()
 
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
+        // the https prelogin -> foobar.com redirect can exceed the default 4s
+        // timeout, so wait longer for the cross-origin page to be ready
+        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
         cy.get('[data-cy="login"]').click()
       })
 
@@ -569,7 +573,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
 
     it('__Host- + Secure + Path=/ -> logged in', () => {
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
+        // the https prelogin -> foobar.com redirect can exceed the default 4s
+        // timeout, so wait longer for the cross-origin page to be ready
+        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
         cy.get('[data-cy="cookieKey"]').clear().type('__Host-user')
         cy.get('[data-cy="cookieProps"]').type('Secure; Path=/')
         cy.get('[data-cy="login"]').click()
@@ -580,7 +586,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
 
     it('__Host-, no Secure -> not logged in', () => {
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
+        // the https prelogin -> foobar.com redirect can exceed the default 4s
+        // timeout, so wait longer for the cross-origin page to be ready
+        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
         cy.get('[data-cy="cookieKey"]').clear().type('__Host-user')
         cy.get('[data-cy="cookieProps"]').type('Path=/')
         cy.get('[data-cy="login"]').click()
@@ -592,7 +600,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
 
     it('__Host-, no Path -> logged in', () => {
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
+        // the https prelogin -> foobar.com redirect can exceed the default 4s
+        // timeout, so wait longer for the cross-origin page to be ready
+        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
         cy.get('[data-cy="cookieKey"]').clear().type('__Host-user')
         cy.get('[data-cy="cookieProps"]').type('Secure')
         cy.get('[data-cy="login"]').click()
@@ -603,7 +613,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
 
     it('__Host-, disallowed Path -> not logged in', () => {
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
+        // the https prelogin -> foobar.com redirect can exceed the default 4s
+        // timeout, so wait longer for the cross-origin page to be ready
+        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
         cy.get('[data-cy="cookieKey"]').clear().type('__Host-user')
         cy.get('[data-cy="cookieProps"]').type('Secure; Path=/nope')
         cy.get('[data-cy="login"]').click()
@@ -615,7 +627,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
 
     it('__Host- + Domain -> not logged in', () => {
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
+        // the https prelogin -> foobar.com redirect can exceed the default 4s
+        // timeout, so wait longer for the cross-origin page to be ready
+        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
         cy.get('[data-cy="cookieKey"]').clear().type('__Host-user')
         cy.get('[data-cy="cookieProps"]').type('Secure; Path=/; Domain=foobar.com')
         cy.get('[data-cy="login"]').click()
@@ -638,7 +652,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
 
     it('__Secure- + Secure flag -> logged in', () => {
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
+        // the https prelogin -> foobar.com redirect can exceed the default 4s
+        // timeout, so wait longer for the cross-origin page to be ready
+        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
         cy.get('[data-cy="cookieKey"]').clear().type('__Secure-user')
         cy.get('[data-cy="cookieProps"]').type('Secure')
         cy.get('[data-cy="login"]').click()
@@ -649,7 +665,9 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
 
     it('__Secure, no Secure flag -> not logged in', () => {
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        cy.get('[data-cy="username"]').type(username)
+        // the https prelogin -> foobar.com redirect can exceed the default 4s
+        // timeout, so wait longer for the cross-origin page to be ready
+        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
         cy.get('[data-cy="cookieKey"]').clear().type('__Secure-user')
         cy.get('[data-cy="login"]').click()
       })
