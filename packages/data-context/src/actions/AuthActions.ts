@@ -141,9 +141,6 @@ export class AuthActions {
         this.ctx.update((coreData) => {
           coreData.autoProvisionedProjectId = projectSlug
         })
-
-        this.ctx.emitter.toApp()
-        this.ctx.emitter.toLaunchpad()
       }
     }
 

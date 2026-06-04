@@ -247,17 +247,12 @@ describe('AuthActions', () => {
       expect(toLaunchpadSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('sets autoProvisionedProjectId and notifies app and launchpad when setProjectIdInConfigFile fails', async () => {
+    it('sets autoProvisionedProjectId when setProjectIdInConfigFile fails', async () => {
       jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockRejectedValue(new Error('write error'))
-      const toAppSpy = jest.spyOn(ctx.emitter, 'toApp')
-      const toLaunchpadSpy = jest.spyOn(ctx.emitter, 'toLaunchpad')
-
       // @ts-expect-error - incorrect number of arguments
       await actions.login()
 
       expect(ctx.coreData.autoProvisionedProjectId).toBe('my-project')
-      expect(toAppSpy).toHaveBeenCalledTimes(1)
-      expect(toLaunchpadSpy).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -299,16 +294,11 @@ describe('AuthActions', () => {
       expect(toLaunchpadSpy).toHaveBeenCalledTimes(1)
     })
 
-    it('sets autoProvisionedProjectId and notifies app and launchpad when setProjectIdInConfigFile fails during signup', async () => {
+    it('sets autoProvisionedProjectId when setProjectIdInConfigFile fails during signup', async () => {
       jest.spyOn(ctx.actions.project, 'setProjectIdInConfigFile').mockRejectedValue(new Error('write error'))
-      const toAppSpy = jest.spyOn(ctx.emitter, 'toApp')
-      const toLaunchpadSpy = jest.spyOn(ctx.emitter, 'toLaunchpad')
-
       await actions.signup('Binary: App', 'Studio', 'Signup')
 
       expect(ctx.coreData.autoProvisionedProjectId).toBe('my-project')
-      expect(toAppSpy).toHaveBeenCalledTimes(1)
-      expect(toLaunchpadSpy).toHaveBeenCalledTimes(1)
     })
   })
 
