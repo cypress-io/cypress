@@ -200,7 +200,6 @@ describe('e2e cookies', () => {
       browser: '!webkit', // TODO(webkit): fix+unskip
       config: {
         baseUrl,
-        allowCypressEnv: false,
         env: {
           baseUrl,
           expectedDomain: 'localhost',
@@ -255,7 +254,6 @@ describe('e2e cookies', () => {
           browser: '!webkit', // TODO(webkit): fix+unskip
           config: {
             baseUrl,
-            allowCypressEnv: false,
             env: {
               baseUrl,
               expectedDomain: baseDomain,
@@ -279,7 +277,6 @@ describe('e2e cookies', () => {
       it('passes with no baseurl', {
         browser: '!webkit', // TODO(webkit): fix+unskip
         config: {
-          allowCypressEnv: false,
           env: {
             httpUrl,
             httpsUrl,
@@ -355,7 +352,6 @@ describe('cross-origin cookies, set:cookies', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       baseUrl: `http://127.0.0.3:${httpPort}`,
-      allowCypressEnv: false,
       env: {
         HTTP: httpPort,
         HTTPS: httpsPort,

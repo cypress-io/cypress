@@ -16,7 +16,6 @@ describe('e2e baseUrl', () => {
       },
       settings: {
         e2e: {
-          allowCypressEnv: false,
           baseUrl: 'https://localhost/app',
         },
       },
@@ -37,7 +36,6 @@ describe('e2e baseUrl', () => {
       },
       settings: {
         e2e: {
-          allowCypressEnv: false,
           baseUrl: 'https://test:test@localhost/app',
         },
       },
@@ -73,7 +71,6 @@ describe('e2e baseUrl', () => {
       },
       settings: {
         e2e: {
-          allowCypressEnv: false,
           baseUrl: 'http://localhost:9999/app',
         },
       },

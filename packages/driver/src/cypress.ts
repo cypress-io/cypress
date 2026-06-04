@@ -257,12 +257,6 @@ class $Cypress {
     // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
 
-    // we assume we're interactive based on whether or
-    // not we're in a text terminal, but we keep this
-    // as a separate property so we can potentially
-    // slice up the behavior
-    config.isInteractive = !config.isTextTerminal || config.env?.INTERNAL_SIMULATE_OPEN_MODE
-
     // true if this Cypress belongs to a cross origin spec bridge
     this.isCrossOriginSpecBridge = config.isCrossOriginSpecBridge || false
 
@@ -276,11 +270,9 @@ class $Cypress {
       longStackTraces: config.isInteractive,
     })
 
-    // TODO: env is unintentionally preserved between soft reruns unlike config.
-    // change this in the NEXT_BREAKING
-    const { env, expose } = config
+    const { expose } = config
 
-    config = _.omit(config, 'env', 'expose', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
+    config = _.omit(config, 'expose', 'rawJson', 'remote', 'resolved', 'scaffoldedFiles', 'state', 'testingType', 'isCrossOriginSpecBridge')
 
     _.extend(this, browserInfo(config))
 
@@ -318,17 +310,6 @@ class $Cypress {
       return validateConfig(this.state, config, skipConfigOverrideValidation)
     })
 
-    const isAllowCypressEnvEnabled = this.config('allowCypressEnv')
-
-    const failCypressEnvWithWarning = (key) => {
-      const err = $errUtils.errByPath('config.allow_cypress_env', { key })
-
-      $utils.warning(err.message)
-
-      throw err
-    }
-
-    this.env = !isAllowCypressEnvEnabled ? failCypressEnvWithWarning : $SetterGetter.create(env)
     this.expose = $SetterGetter.create(expose)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')

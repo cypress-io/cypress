@@ -1,5 +1,4 @@
 module.exports = {
-  'allowCypressEnv': false,
   'fixturesFolder': 'tests/_fixtures',
   'port': 8888,
   'projectId': 'abc123',

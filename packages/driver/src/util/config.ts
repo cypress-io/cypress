@@ -59,12 +59,6 @@ export const syncConfigToCurrentOrigin = (config: Cypress.Config) => {
   Cypress.config(valuesToSync)
 }
 
-export const syncEnvToCurrentOrigin = (env: Cypress.ObjectLike) => {
-  const shallowConfigDiff = syncToCurrentOrigin(env, Cypress.env())
-
-  Cypress.env(shallowConfigDiff)
-}
-
 export const syncExposeToCurrentOrigin = (expose: Cypress.ObjectLike) => {
   const shallowConfigDiff = syncToCurrentOrigin(expose, Cypress.expose())
 
@@ -75,8 +69,21 @@ export const preprocessConfig = (config: Cypress.Config) => {
   return preprocessForSerialization(config) as Cypress.Config
 }
 
-export const preprocessEnv = (env: Cypress.ObjectLike) => {
-  return preprocessForSerialization(env) as Cypress.Config
+/**
+ * Prepares config to initialize a cross-origin spec bridge.
+ * isInteractive is read-only and must reflect the server-computed run/open mode value
+ * from bootstrap, not testing overrides on the primary origin (e.g. defaults.js).
+ */
+export const preprocessConfigForSpecBridge = (
+  config: Cypress.Config,
+  originalConfig: { isInteractive?: boolean, isTextTerminal?: boolean },
+) => {
+  const preprocessed = preprocessConfig(config)
+
+  return {
+    ..._.omit(preprocessed, 'isInteractive'),
+    isInteractive: originalConfig.isInteractive ?? !originalConfig.isTextTerminal,
+  }
 }
 
 export const preprocessExpose = (expose: Cypress.ObjectLike) => {

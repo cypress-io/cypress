@@ -1,5 +1,4 @@
 module.exports = {
-  allowCypressEnv: false,
   component: {
     experimentalSingleTabRunMode: true,
     supportFile: false,

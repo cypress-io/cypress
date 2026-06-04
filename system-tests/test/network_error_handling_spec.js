@@ -241,7 +241,6 @@ describe('e2e network error handling', function () {
     settings: {
       e2e: {
         supportFile: false,
-        allowCypressEnv: false,
         baseUrl: `http://localhost:${PORT}/`,
       },
     },
