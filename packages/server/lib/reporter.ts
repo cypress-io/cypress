@@ -280,18 +280,34 @@ const orNull = function <T>(prop: T | null | undefined): T | null {
 
 const RUNNABLE_STATES: ReadonlySet<RunnableState> = new Set<RunnableState>(['passed', 'failed', 'pending', 'skipped'])
 
+// States the reporter UI (@packages/reporter) derives for display while a test or
+// attempt is in flight and has not reached a terminal state (e.g. an interrupted or
+// crashed run). These are never valid to report to Cypress Cloud or the Module API.
+const NON_TERMINAL_STATES: ReadonlySet<string> = new Set(['processing', 'active'])
+
 // Coerce a runnable's state into a value that is valid to report to Cypress Cloud
-// and the module API (the `RunnableState | null` contract).
+// and the Module API (the `RunnableState | null` contract).
 //
-// The reporter UI (@packages/reporter) derives non-terminal, display-only states
-// such as 'processing' and 'active' for tests/attempts that have not reached a
-// terminal state (e.g. an interrupted or crashed run). These must never be sent to
-// the cloud, so any state outside of RUNNABLE_STATES is normalized to null.
+// Terminal states pass through unchanged. In-flight, display-only states such as
+// 'processing' and 'active' are reported as 'pending' rather than leaking through:
+// since these results are final, a test left mid-flight effectively did not run to
+// completion, and 'pending' is a valid Cloud state (whereas the Cloud rejects both
+// 'processing' and a non-terminal 'running', which would appear to run forever).
 // See https://github.com/cypress-io/cypress/issues/27956.
 const toRunnableState = function (state: unknown): RunnableState | null {
-  return typeof state === 'string' && RUNNABLE_STATES.has(state as RunnableState)
-    ? state as RunnableState
-    : null
+  if (typeof state !== 'string') {
+    return null
+  }
+
+  if (RUNNABLE_STATES.has(state as RunnableState)) {
+    return state as RunnableState
+  }
+
+  if (NON_TERMINAL_STATES.has(state)) {
+    return 'pending'
+  }
+
+  return null
 }
 
 const events: ReporterEventHandlers = {
