@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import path from 'path'
 import { scaffoldMigrationProject as scaffoldProject } from '../helper'
 import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
 
@@ -35,8 +36,8 @@ describe('ProjectConfigIpc', () => {
         undefined,
         undefined,
         projectPath,
-        '',
-        false,
+        path.join(projectPath, 'cypress.config.js'),
+        'cypress.config.js',
         (error) => {},
         () => {},
         () => {},
