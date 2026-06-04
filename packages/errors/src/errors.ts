@@ -763,11 +763,11 @@ export const AllCypressErrors = {
     const globPath = path.join(resolvedBasePath!, theme.yellow(resolvedPattern!))
 
     return errTemplate`\
-        No spec files were found for the pattern:
+        The following ${fmt.flag('--spec')} pattern did not match any spec files and will be ignored:
 
         ${fmt.listItem(globPath)}
 
-        We searched for specs in: ${fmt.path(folderPath)}`
+        Other spec files that matched will still run.`
   },
   RENDERER_CRASHED: (browserName: string) => {
     return errTemplate`\
