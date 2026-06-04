@@ -444,7 +444,6 @@ describe('Proxy Performance', function () {
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
-    // TODO: fix flaky tests https://github.com/cypress-io/cypress/issues/23214
     describe(urlUnderTest, function () {
       this.retries(15)
 
@@ -474,9 +473,24 @@ describe('Proxy Performance', function () {
         it(`${testCase.name} loads 1000 images less than ${multiplier}x as slowly as Chrome`, function () {
           debug('Current test: ', testCase.name)
 
-          return runBrowserTest(urlUnderTest, testCase)
-          .then((results) => {
-            expect(results['Total']).to.be.lessThan(multiplier * baseline['Total'])
+          // On retry, re-measure baseline so the ratio stays paired in time with this
+          // scenario. The `before`-hook baseline can drift relative to current machine
+          // load on shared CI; without re-measuring, all 15 retries compare against the
+          // same stale baseline. Scoped locally so it doesn't leak to sibling tests.
+          // Inside `it`, the running test is `this.test` (not `this.currentTest`,
+          // which is only defined in hooks).
+          const baselineForAttempt = this.test.currentRetry() === 0
+            ? Promise.resolve(baseline)
+            : runBrowserTest(urlUnderTest, testCases[0]).then((runtime) => {
+              debug('re-measured baseline runtime is: ', runtime)
+
+              return runtime
+            })
+
+          return baselineForAttempt.then((currentBaseline) => {
+            return runBrowserTest(urlUnderTest, testCase).then((results) => {
+              expect(results['Total']).to.be.lessThan(multiplier * currentBaseline['Total'])
+            })
           })
         })
       })

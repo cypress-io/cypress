@@ -2,7 +2,7 @@
 
 Types and **port interfaces** for Cypress network interception (`cy.intercept`, config policies, proxy middleware). Part of the stacked refactor in [#33919](https://github.com/cypress-io/cypress/issues/33919) to support HTTP/2 (CDP Fetch / BiDi) without rewriting intercept logic.
 
-> **Stack stage 1 of 8.** First **driving port** wired: `ForInterceptRegistration` + `DriverInterceptRegistrationAdapter`. Driver→server `cy.intercept` IPC goes through the port; implementation still calls `onNetStubbingEvent`. **No behavior change.**
+> **Stack stage 2 of 8.** Driving port `ForNetworkPolicyRegistration`, default impl `NetworkPolicyRegistry`. `@packages/server` defines and registers config policies (e.g. `createBlockedHosts()`) at startup. Registry is populated; **proxy middleware does not call `runPolicies` yet** (stage 7).
 
 ---
 
@@ -22,7 +22,7 @@ In hexagonal architecture, a **port** is a boundary interface; an **adapter** is
 | --- | --- | --- |
 | **Port** | Contract at the edge of the interception "inside" | `For*` types in `lib/ports/` |
 | **Adapter** | Implements a port by delegating to existing Cypress code | `*Adapter` classes under `packages/*/lib/adapters/` |
-| **Driving port** (primary) | Outside actors **call into** interception — they drive the app | `ForInterceptRegistration` (driver IPC), `ForNetworkPolicyRegistration` (config) |
+| **Driving port** (primary) | Outside actors **call into** interception — they drive the app | `ForInterceptRegistration` (driver IPC), `ForNetworkPolicyRegistration` (server config) |
 | **Driven port** (secondary) | Interception **calls out** for I/O and side effects | `ForRequestInterception`, `ForCookieState`, `ForCommandLog`, … |
 | **Core** | Domain logic with no proxy/CDP imports; orchestrates ports | `NetworkPolicyCore` (stage 3; renamed `NetworkInterceptionCore` in stage 7) |
 | **Composition root** | Where concrete adapters are constructed and injected | `createProxyRuntime()` in `packages/server/lib/network-runtime.ts` |
@@ -31,37 +31,43 @@ In hexagonal architecture, a **port** is a boundary interface; an **adapter** is
 
 This package holds **ports and (later) core** — not adapters. **Dependency rule:** `@packages/network-interception` must not import `@packages/proxy` or `@packages/net-stubbing`.
 
+**Config vs test intercepts:** both match proxied traffic, but differ by **who drives registration**. Test intercepts use `ForInterceptRegistration` (driver IPC). Config rules use `ForNetworkPolicyRegistration` — the port interface lives here; **`@packages/server` owns the config → policy mapping** via `registerDefaultNetworkPolicies()`.
+
 ---
 
-## What stage 1 delivers
+## What stage 2 delivers
 
-### Driving port: `ForInterceptRegistration`
+### Driving port: `ForNetworkPolicyRegistration`
 
-**Port** (`lib/ports/driving-ports.ts`):
+Exported from this package so `@packages/server` knows how to register configurator policies without importing registry internals.
 
-```typescript
-interface ForInterceptRegistration {
-  handleEvent (request: InterceptRegistrationRequest): Promise<unknown>
-}
+| Method | Purpose |
+| --- | --- |
+| `add(policy)` | Register in insertion order |
+| `getPolicies()` | Read registered list |
+
+**Default implementation:** `NetworkPolicyRegistry` (also owns `runPolicies`, wired in stage 7).
+
+**Server-owned policies:** `@packages/server` defines configurator policy factories (e.g. `createBlockedHosts()` in `lib/network-policies/`) and registers them via `registerDefaultNetworkPolicies(policies, config)`. This package accepts any value conforming to `NetworkPolicy`.
+
+```
+createProxyRuntime()  (@packages/server)
+  → networkPolicyRegistration: ForNetworkPolicyRegistration = new NetworkPolicyRegistry()
+  → registerDefaultNetworkPolicies(networkPolicyRegistration, config)
+  → networkPolicyRegistration exposed on runtime (not yet used by middleware)
 ```
 
-**Adapter:** `DriverInterceptRegistrationAdapter` in `packages/net-stubbing/lib/adapters/` — implements the port, delegates to `onNetStubbingEvent`.
+### Policy runner (`NetworkPolicyRegistry.runPolicies`)
 
-**Call site:** `SocketBase` (`packages/server/lib/socket-base.ts`) receives driver `net` socket events and calls the port instead of importing net-stubbing handlers directly.
+| API | Purpose |
+| --- | --- |
+| `runPolicies({ phase, exchange, onContinue, onEnd })` | Evaluate policies for a request phase (wired in stage 7) |
 
-```
-cy.intercept() → driver socket ('net')
-  → SocketBase
-  → ForInterceptRegistration.handleEvent({ eventName, frame })
-  → DriverInterceptRegistrationAdapter
-  → onNetStubbingEvent()
-```
+`ctx.continue()` is intentionally a no-op — chain advancement is implicit via the loop. `onContinue` / `onEnd` fire at the runner boundary when middleware is wired in stage 7.
 
-Adapter details: [`packages/net-stubbing/lib/adapters/README.md`](../net-stubbing/lib/adapters/README.md)
+### Stage 1 recap
 
-### Typed request shape
-
-`InterceptRegistrationRequest` pairs `eventName` (`route:added` | `subscribe` | `event:handler:resolved` | `send:static:response`) with the existing `NetEvent.ToServer.DriverEvent` frame.
+`ForInterceptRegistration` + `DriverInterceptRegistrationAdapter` — [`packages/net-stubbing/lib/adapters/README.md`](../net-stubbing/lib/adapters/README.md)
 
 ---
 
@@ -69,7 +75,6 @@ Adapter details: [`packages/net-stubbing/lib/adapters/README.md`](../net-stubbin
 
 | Port | Hex kind | Stage |
 | --- | --- | --- |
-| `ForNetworkPolicyRegistration` | Driving | 2 |
 | `ForRequestInterception` / `ForResponseInterception` | Driven | 4 |
 | `ForDocumentPreparation` | Driven | 5 |
 | `ForNetworkCapture` / `ForCookieState` / `ForCommandLog` | Driven | 6 |
@@ -81,10 +86,11 @@ Adapter details: [`packages/net-stubbing/lib/adapters/README.md`](../net-stubbin
 
 | Stage | Branch | Adds |
 | --- | --- | --- |
-| 0 | `refactor/ports-adapters-0` | Package, types, port stubs, composition root |
-| **1** | **`refactor/ports-adapters-1`** | **First driving-port adapter (driver IPC)** |
-| 2 | `refactor/ports-adapters-2` | Policy registry driving port |
-| 3–7 | … | Core, driven-port adapters, enforcement |
+| 0–1 | … | Package, driver driving port |
+| **2** | **`refactor/ports-adapters-2`** | **Policy driving port + registry + server-side registration** |
+| 3 | `refactor/ports-adapters-3` | Core extraction |
+| 4–6 | … | Driven-port adapters |
+| 7 | `refactor/ports-adapters-7` | `runPolicies` enforcement in middleware |
 
 [#33919](https://github.com/cypress-io/cypress/issues/33919)
 
@@ -96,7 +102,7 @@ Adapter details: [`packages/net-stubbing/lib/adapters/README.md`](../net-stubbin
 yarn workspace @packages/network-interception build-prod
 yarn workspace @packages/network-interception test
 yarn workspace @packages/net-stubbing test
-yarn workspace @packages/server test-unit --grep network-runtime
+yarn workspace @packages/server test-unit --grep "blocked-hosts|register-default|network-runtime"
 ```
 
 Compiled output lives in `cjs/` and `esm/` (gitignored). Source stays in `lib/`.
