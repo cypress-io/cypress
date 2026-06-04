@@ -9,6 +9,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where `config.isInteractive` was always `true` in the config passed to the plugins / `setupNodeEvents` function, even during `cypress run`. The value is now correctly `false` in run mode and `true` in open mode, so plugins can reliably distinguish between the two. Fixes [#20789](https://github.com/cypress-io/cypress/issues/20789).
 - Fixed an issue where component tests, and end-to-end tests using a local `baseUrl`, could fail to start with `Cypress could not verify that this server is running` when an `HTTP_PROXY` environment variable was set. Local hosts excluded from the proxy via `NO_PROXY` (such as `localhost`, `127.0.0.1`, and `::1`, which includes the component testing dev server) are now verified with a direct connection instead of being routed through the proxy. Fixes [#27990](https://github.com/cypress-io/cypress/issues/27990).
 - Video recording no longer silently fails on Firefox 93+, where it previously produced no video and ended with a `We failed processing this video` or operation timed out warning. Fixes [#18415](https://github.com/cypress-io/cypress/issues/18415). Fixed in [#33960](https://github.com/cypress-io/cypress/pull/33960).
 - Fixed an issue where runs recorded to Cypress Cloud from Jenkins could show the branch name with the remote prefix included (for example `origin/main` instead of `main`), or report the wrong branch in multibranch pipelines. Cypress now reports the actual branch name. Fixes [#20833](https://github.com/cypress-io/cypress/issues/20833).
@@ -23,6 +24,7 @@
 - The internal `--dev`, `--inspect`, and `--inspect-brk` command line flags are no longer listed in the `cypress` CLI help output. These flags are only intended for developing Cypress itself and would error when used against an installed version, so they are no longer advertised to users. Fixes [#21320](https://github.com/cypress-io/cypress/issues/21320) and addresses [#23058](https://github.com/cypress-io/cypress/issues/23058).
 - Fixed an issue where `cy.wait('@alias')` could time out when the connection to the browser closed before an aliased intercepted request's response completed, including during navigation such as `cy.visit()`. Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 - Fixed an issue where a cross-origin navigation back to a previously-visited origin (for example, completing a login that redirects from an identity provider back to your application) could intermittently load the Cypress app interface instead of your application, causing flaky tests. Fixed in [#33991](https://github.com/cypress-io/cypress/pull/33991).
+- Fixed an issue where `cypress open --detached` blocked the CLI process until the GUI was closed rather than returning once Cypress was ready to use.
 
 **Misc:**
 
