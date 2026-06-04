@@ -34,6 +34,22 @@ describe('BundleError', () => {
     expect(err.code).to.equal('CERT_HAS_EXPIRED')
   })
 
+  it('mirrors errno and syscall from the cause (fs errors)', () => {
+    const cause = Object.assign(new Error('rename failed'), { code: 'EPERM', errno: -4048, syscall: 'rename' })
+    const err = new BundleError({ kind: 'cy-prompt', stage: 'publish', message: 'wrapper', cause })
+
+    expect(err.code).to.equal('EPERM')
+    expect(err.errno).to.equal(-4048)
+    expect(err.syscall).to.equal('rename')
+  })
+
+  it('leaves errno and syscall undefined when the cause lacks them', () => {
+    const err = new BundleError({ kind: 'studio', stage: 'publish', message: 'm', cause: new Error('plain') })
+
+    expect(err.errno).to.equal(undefined)
+    expect(err.syscall).to.equal(undefined)
+  })
+
   it('leaves code undefined when cause has no string code', () => {
     const err1 = new BundleError({ kind: 'studio', stage: 'extract', message: 'm' })
 

@@ -1,6 +1,7 @@
 import type { StudioCloudApi } from '@packages/types/src/studio/studio-server-types'
 import Debug from 'debug'
 import { stripPath } from '../../strip_path'
+import { stackWithCause } from '../../error_with_cause'
 const debug = Debug('cypress:server:cloud:api:studio:report_studio_errors')
 import { logError } from '@packages/stderr-filtering'
 import exception from '../../exception'
@@ -86,7 +87,7 @@ export function reportStudioError ({
       projectSlug,
       errors: [{
         name: stripPath(errorObject.name ?? `Unknown name`),
-        stack: stripPath(errorObject.stack ?? `Unknown stack`),
+        stack: stripPath(stackWithCause(errorObject)),
         message: stripPath(errorObject.message ?? `Unknown message`),
         code: 'code' in errorObject ? errorObject.code as string | number : undefined,
         errno: 'errno' in errorObject ? errorObject.errno as string | number : undefined,

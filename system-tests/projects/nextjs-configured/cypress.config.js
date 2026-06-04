@@ -11,8 +11,8 @@ export default defineConfig({
       webpackConfig: {
         resolve: {
           alias: {
-            'react': path.resolve(__dirname, './node_modules/react'),
-            'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
+            'react': path.resolve(import.meta.dirname, './node_modules/react'),
+            'react-dom': path.resolve(import.meta.dirname, './node_modules/react-dom'),
           },
         },
       },

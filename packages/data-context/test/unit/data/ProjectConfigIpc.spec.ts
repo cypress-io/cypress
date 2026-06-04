@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
 import childProcess from 'child_process'
+import path from 'path'
 import semver from 'semver'
 import { scaffoldMigrationProject as scaffoldProject } from '../helper'
 import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
@@ -66,6 +67,104 @@ describe('ProjectConfigIpc', () => {
       projectConfigIpc.cleanupIpc()
     })
 
+    describe('config module format detection', () => {
+      const MOCK_NODE_PATH = '/Users/foo/.nvm/versions/node/v22.15.0/bin/node'
+      const MOCK_NODE_VERSION = '22.15.0'
+
+      beforeEach(() => {
+        // @ts-expect-error - mock
+        childProcess.fork.mockImplementation(() => {
+          return {
+            on: jest.fn(),
+            once: jest.fn(),
+            emit: jest.fn(),
+            kill: jest.fn(),
+            removeAllListeners: jest.fn(),
+          }
+        })
+      })
+
+      const MODULE_FORMAT_CASES = [
+        {
+          description: '.mts without type:module',
+          project: 'config-cjs-and-esm/config-with-ts-tsconfig-es2015',
+          // synthetic path — fixture has cypress.config.ts only
+          configFile: 'cypress.config.mts',
+          shouldLoadAsEsm: 'true',
+        },
+        {
+          description: '.mts with type:module',
+          project: 'config-cjs-and-esm/config-with-ts-module',
+          // synthetic path — fixture has cypress.config.ts only
+          configFile: 'cypress.config.mts',
+          shouldLoadAsEsm: 'true',
+        },
+        {
+          description: '.cts without type:module',
+          project: 'config-cjs-and-esm/config-with-ts-tsconfig-es2015',
+          // synthetic path — fixture has cypress.config.ts only
+          configFile: 'cypress.config.cts',
+          shouldLoadAsEsm: 'false',
+        },
+        {
+          description: '.cts with type:module',
+          project: 'config-cjs-and-esm/config-with-ts-module',
+          // synthetic path — fixture has cypress.config.ts only
+          configFile: 'cypress.config.cts',
+          shouldLoadAsEsm: 'false',
+        },
+        {
+          description: '.ts without type:module',
+          project: 'config-cjs-and-esm/config-with-ts-tsconfig-es2015',
+          configFile: 'cypress.config.ts',
+          shouldLoadAsEsm: 'false',
+        },
+        {
+          description: '.ts with type:module',
+          project: 'config-cjs-and-esm/config-with-ts-module',
+          configFile: 'cypress.config.ts',
+          shouldLoadAsEsm: 'true',
+        },
+        {
+          description: '.mjs without type:module',
+          project: 'config-cjs-and-esm/config-with-mjs',
+          // real fixture file
+          configFile: 'cypress.config.mjs',
+          shouldLoadAsEsm: 'true',
+        },
+        {
+          description: '.mjs with type:module',
+          project: 'config-cjs-and-esm/config-with-js-module',
+          // synthetic path — fixture has cypress.config.js only
+          configFile: 'cypress.config.mjs',
+          shouldLoadAsEsm: 'true',
+        },
+      ] as const
+
+      MODULE_FORMAT_CASES.forEach(({ description, project, configFile, shouldLoadAsEsm }) => {
+        it(`passes shouldLoadAsEsm=${shouldLoadAsEsm} for ${description}`, async () => {
+          const projectPath = await scaffoldProject(project)
+          const configFilePath = path.join(projectPath, configFile)
+
+          projectConfigIpc = new ProjectConfigIpc(
+            MOCK_NODE_PATH,
+            MOCK_NODE_VERSION,
+            projectPath,
+            configFilePath,
+            false,
+            (error) => {},
+            () => {},
+            () => {},
+          )
+
+          expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining([
+            '--shouldLoadAsEsm',
+            shouldLoadAsEsm,
+          ]), expect.any(Object))
+        })
+      })
+    })
+
     describe('typescript', () => {
       [...NODE_VERSIONS].forEach((nodeVersion) => {
         const MOCK_NODE_PATH = `/Users/foo/.nvm/versions/node/v${nodeVersion}/bin/node`
@@ -73,21 +172,34 @@ describe('ProjectConfigIpc', () => {
 
         describe(`node v${nodeVersion}`, () => {
           const PROJECTS = [
-            'config-cjs-and-esm/config-with-ts-module',
-            'config-cjs-and-esm/config-with-module-resolution-bundler',
-            'config-cjs-and-esm/config-with-js-module',
-            'config-cjs-and-esm/config-with-cjs',
+            {
+              project: 'config-cjs-and-esm/config-with-ts-module',
+              configFile: 'cypress.config.ts',
+            },
+            {
+              project: 'config-cjs-and-esm/config-with-module-resolution-bundler',
+              configFile: 'cypress.config.js',
+            },
+            {
+              project: 'config-cjs-and-esm/config-with-js-module',
+              configFile: 'cypress.config.js',
+            },
+            {
+              project: 'config-cjs-and-esm/config-with-cjs',
+              configFile: 'cypress.config.cjs',
+            },
           ]
 
-          PROJECTS.forEach((project) => {
+          PROJECTS.forEach(({ project, configFile }) => {
             it(`${project}: tsx generic loader (esm/commonjs/typescript)`, async () => {
               const projectPath = await scaffoldProject(project)
+              const configFilePath = path.join(projectPath, configFile)
 
               projectConfigIpc = new ProjectConfigIpc(
                 MOCK_NODE_PATH,
                 MOCK_NODE_VERSION,
                 projectPath,
-                'cypress.config.js',
+                configFilePath,
                 false,
                 (error) => {},
                 () => {},
