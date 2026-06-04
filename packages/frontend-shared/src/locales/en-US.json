@@ -714,6 +714,12 @@
           "warning": "We couldn't add the projectId to your cypress.config.js file automatically.",
           "mainMessage": "Manually add the {projectId} to the root of the config object in your {configFile} file.",
           "waitingButton": "Waiting for you to add the projectId..."
+        },
+        "autoProvision": {
+          "title": "Add your project ID to finish setup",
+          "body": "We couldn't update your config file automatically. Copy the project ID below and paste it into your configuration file.",
+          "openInIDE": "Open config file in your IDE",
+          "close": "Close"
         }
       },
       "errors": {

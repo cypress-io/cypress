@@ -2,7 +2,7 @@ import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { defaultMiddleware } from '@packages/proxy/lib/http'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { NetworkPolicyRegistry } from '@packages/network-interception'
+import { NetworkPolicyRegistry, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionRuntime } from '@packages/network-interception'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
@@ -28,6 +28,7 @@ type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   networkProxy: NetworkProxy
   netStubbingState: NetStubbingState
   networkPolicyRegistration: ForNetworkPolicyRegistration
+  networkInterceptionCore: NetworkInterceptionCore
 }
 
 /**
@@ -36,6 +37,7 @@ type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
   const stubbingState = netStubbingState()
   const networkPolicyRegistration: ForNetworkPolicyRegistration = new NetworkPolicyRegistry()
+  const networkInterceptionCore = new NetworkInterceptionCore()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)
 
@@ -47,6 +49,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     getCookieJar: deps.getCookieJar,
     socket: deps.socket,
     netStubbingState: stubbingState,
+    networkInterceptionCore,
     request: deps.request,
     serverBus: deps.serverBus,
     getCurrentBrowser: deps.getCurrentBrowser,
@@ -58,6 +61,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     networkProxy,
     netStubbingState: stubbingState,
     networkPolicyRegistration,
+    networkInterceptionCore,
     handleHttpRequest (req, res) {
       return networkProxy.handleHttpRequest(req, res)
     },
