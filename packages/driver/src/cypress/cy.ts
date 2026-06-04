@@ -18,6 +18,7 @@ import { Keyboard } from '../cy/keyboard'
 import { create as createLocation, ILocation } from '../cy/location'
 import { create as createAssertions, IAssertions } from '../cy/assertions'
 import { bindToListeners } from '../cy/listeners'
+import { patchFormElementSubmit } from '../cy/top_attr_guards'
 import { $Chainer } from './chainer'
 import { create as createTimer, ITimer } from '../cy/timers'
 import { create as createTimeouts, ITimeouts } from '../cy/timeouts'
@@ -1115,6 +1116,12 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
 
   private contentWindowListeners (contentWindow) {
     const cy = this
+
+    // The capture-phase submit guard in `bindToListeners` only fires for real
+    // `submit` events. Programmatic `form.submit()` skips that path, so patch
+    // the prototype to neutralize `_top`/`_parent` targets there too.
+    // https://github.com/cypress-io/cypress/issues/26029
+    patchFormElementSubmit(contentWindow)
 
     bindToListeners(contentWindow, {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces

@@ -125,3 +125,34 @@ export function handleInvalidTarget (el: HTMLFormElement | HTMLAnchorElement) {
     })
   }
 }
+
+type PatchableSubmit = HTMLFormElement['submit'] & { __cypressPatched?: boolean }
+
+/**
+ * `HTMLFormElement.submit()` submits the form *without* dispatching a `submit`
+ * event (unlike `requestSubmit()`), so the capture-phase submit guard in
+ * `listeners.ts` never sees a programmatically-submitted form. A dynamically
+ * created form with `target="_top"` would therefore escape the AUT iframe.
+ * Wrapping the prototype routes those submits through `handleInvalidTarget` too.
+ *
+ * @see https://github.com/cypress-io/cypress/issues/26029
+ */
+export const patchFormElementSubmit = (window: Window) => {
+  const originalSubmit = window.HTMLFormElement.prototype.submit as PatchableSubmit
+
+  // The guards are (re)bound on every AUT load — and more than once per load in
+  // some flows — so bail if we've already wrapped this window's prototype to
+  // avoid stacking redundant layers.
+  if (originalSubmit.__cypressPatched) {
+    return
+  }
+
+  const patchedSubmit: PatchableSubmit = function (this: HTMLFormElement) {
+    handleInvalidTarget(this)
+    originalSubmit.apply(this)
+  }
+
+  patchedSubmit.__cypressPatched = true
+
+  window.HTMLFormElement.prototype.submit = patchedSubmit
+}

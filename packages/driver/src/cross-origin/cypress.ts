@@ -21,7 +21,7 @@ import { handleScreenshots } from './events/screenshots'
 import { handleTestEvents } from './events/test'
 import { handleMiscEvents } from './events/misc'
 import { handleUnsupportedAPIs } from './unsupported_apis'
-import { patchFormElementSubmit } from './patches/submit'
+import { patchFormElementSubmit } from '../cy/top_attr_guards'
 import { patchFetch } from '@packages/runner/injection/patches/cross-origin/fetch'
 import { patchXmlHttpRequest } from '@packages/runner/injection/patches/cross-origin/xmlHttpRequest'
 
