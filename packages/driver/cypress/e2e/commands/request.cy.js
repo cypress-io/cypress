@@ -630,11 +630,18 @@ describe('src/cy/commands/request', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/21173
-      // When a user sets a non-lowercase `Content-Type` header, the existing
-      // header must be stripped so the multipart boundary can be applied.
-      // Otherwise two conflicting content-type headers are sent and the
-      // server fails to parse the multipart body.
-      it('can send FormData with a user-provided capitalized Content-Type header', () => {
+      // When a user sets a `Content-Type` header with non-lowercase casing, the
+      // existing header must be stripped so the generated `content-type` with the
+      // multipart boundary is the only one sent. Otherwise two conflicting
+      // content-type headers are produced and the server fails to parse the body.
+      // We assert on the options sent to the backend (rather than the response)
+      // because downstream case-insensitive header de-duplication can mask the
+      // bug end-to-end.
+      it('strips a user-provided capitalized Content-Type header and sends a single lowercase content-type with the boundary', () => {
+        const backend = Cypress.backend
+        .withArgs('http:request')
+        .resolves({ isOkStatusCode: true, status: 200 })
+
         const formData = new FormData()
 
         formData.set('file', new File(['1,2,3,4'], 'upload.txt'), 'upload.txt')
@@ -647,13 +654,13 @@ describe('src/cy/commands/request', () => {
             'Content-Type': 'multipart/form-data',
           },
         })
-        .then((response) => {
-          expect(response.status).to.equal(200)
-          const dec = new TextDecoder()
-          const result = dec.decode(response.body)
+        .then(() => {
+          const { headers } = backend.firstCall.args[1]
+          const contentTypeKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'content-type')
 
-          expect(result).to.contain('Tony Stark')
-          expect(result).to.contain('upload.txt')
+          // the capitalized header was removed, leaving only the generated one
+          expect(contentTypeKeys).to.deep.equal(['content-type'])
+          expect(headers['content-type']).to.match(/^multipart\/form-data; boundary=/)
         })
       })
     })
