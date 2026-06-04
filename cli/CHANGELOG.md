@@ -25,6 +25,7 @@
 - Fixed an issue where `cy.wait('@alias')` could time out when the connection to the browser closed before an aliased intercepted request's response completed, including during navigation such as `cy.visit()`. Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 - Fixed an issue where a cross-origin navigation back to a previously-visited origin (for example, completing a login that redirects from an identity provider back to your application) could intermittently load the Cypress app interface instead of your application, causing flaky tests. Fixed in [#33991](https://github.com/cypress-io/cypress/pull/33991).
 - Fixed an issue where `cypress open --detached` blocked the CLI process until the GUI was closed rather than returning once Cypress was ready to use.
+- Fixed an issue where PDFs opened via `window.open` (or a link) during `cypress run` in Chrome were rendered inline in a new tab instead of being downloaded, which could stall the run. Chrome is now configured to download PDFs to the `downloadsFolder`, restoring the behavior from before Chrome's new headless mode. Fixes [#27342](https://github.com/cypress-io/cypress/issues/27342).
 
 **Misc:**
 

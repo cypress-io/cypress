@@ -1104,6 +1104,11 @@ describe('lib/browsers/chrome', () => {
       expect(defaultPrefs).to.have.property('default')
       expect(defaultPrefs).to.have.property('defaultSecure')
       expect(defaultPrefs).to.have.property('localState')
+
+      // PDFs should be downloaded rather than opened inline so that downloads
+      // triggered via window.open work in Chrome's new headless mode.
+      // https://github.com/cypress-io/cypress/issues/27342
+      expect(defaultPrefs.default).to.have.property('plugins').that.deep.includes({ always_open_pdf_externally: true })
     })
   })
 

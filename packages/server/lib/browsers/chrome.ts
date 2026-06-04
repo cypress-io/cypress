@@ -57,6 +57,15 @@ const _getDefaultChromePreferences = (): ChromePreferences => {
         profile_enabled: false, // Disable Chrome's "Save address" pop up
         credit_card_enabled: false, // Disable Chrome's "Save card" pop up
       },
+      plugins: {
+        // Download PDFs instead of opening them in Chrome's built-in viewer.
+        // Chrome's "new" headless mode (default since Cypress 12.15.0 for Chrome >= 112)
+        // ships the PDFium viewer, so PDFs opened via window.open render inline in a new
+        // tab instead of downloading, which stalls the run. The old headless mode had no
+        // viewer and downloaded PDFs; this preference restores that behavior.
+        // https://github.com/cypress-io/cypress/issues/27342
+        always_open_pdf_externally: true,
+      },
     },
     defaultSecure: {},
     localState: {
