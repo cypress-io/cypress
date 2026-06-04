@@ -23,6 +23,8 @@ import type { Cfg } from '../project-base'
 import type { RunResult } from './results'
 import type { ReadyOptions } from './run'
 
+import type { PostRunRequest_v3Type } from '../validations/cloudValidations'
+
 const debug = Debug('cypress:server:record')
 const debugCiInfo = Debug('cypress:server:record:ci-info')
 
@@ -204,7 +206,7 @@ const postInstanceResults = (options: any = {}) => {
   })
 }
 
-const getCommitFromGitOrCi = (git: any) => {
+const getCommitFromGitOrCi = (git: any): PostRunRequest_v3Type['commit'] => {
   la(_.isPlainObject(git), 'expected git information object', git)
 
   return ciProvider.commitDefaults({
@@ -215,7 +217,7 @@ const getCommitFromGitOrCi = (git: any) => {
     message: git.message,
     remoteOrigin: git.remote,
     defaultBranch: null,
-  })
+  }) as PostRunRequest_v3Type['commit']
 }
 
 const billingLink = (orgId: any) => {
@@ -546,7 +548,7 @@ async function createInstance (options: InstanceOptions) {
   }
 }
 
-const _postInstanceTests = ({
+async function _postInstanceTests ({
   runId,
   instanceId,
   config,
@@ -555,17 +557,18 @@ const _postInstanceTests = ({
   parallel,
   ciBuildId,
   group,
-}) => {
-  return api.postInstanceTests({
-    runId,
-    instanceId,
-    config,
-    tests,
-    hooks,
-  })
-  .catch((err: any) => {
-    throwCloudCannotProceed({ parallel, ciBuildId, group, err })
-  })
+}) {
+  try {
+    return await api.postInstanceTests({
+      runId,
+      instanceId,
+      config,
+      tests,
+      hooks,
+    })
+  } catch (err: unknown) {
+    throw cloudCannotProceedErr({ parallel, ciBuildId, group, err })
+  }
 }
 
 const createRunAndRecordSpecs = (options: any = {}) => {
@@ -789,42 +792,34 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         })
         .value()
 
-        const responseDidFail = {}
-        const response = await _postInstanceTests({
-          runId,
-          instanceId,
-          config: resolvedRuntimeConfig,
-          tests,
-          hooks,
-          parallel,
-          ciBuildId,
-          group,
-        })
-        .catch((err: any) => {
+        try {
+          const response = await _postInstanceTests({
+            runId,
+            instanceId,
+            config: resolvedRuntimeConfig,
+            tests,
+            hooks,
+            parallel,
+            ciBuildId,
+            group,
+          })
+
+          if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
+            errorsWarning('CLOUD_CANCEL_SKIPPED_SPEC')
+
+            // set a property on the response so the browser runner
+            // knows not to start executing tests
+            project.emit('end', { skippedSpec: true, stats: {} })
+
+            // dont call the cb, let the browser hang until it's killed
+            return
+          }
+
+          return cb(response)
+        } catch (err: unknown) {
           onError(err)
-
-          return responseDidFail
-        })
-
-        if (response === responseDidFail) {
-          debug('`responseDidFail` equals `response`, allowing browser to hang until it is killed: Response %o', { responseDidFail })
-
-          // dont call the cb, let the browser hang until it's killed
-          return
+          debug('postInstanceTests failed, allowing browser to hang until it is killed: Error %o', { err })
         }
-
-        if (_.some(response.actions, { type: 'SPEC', action: 'SKIP' })) {
-          errorsWarning('CLOUD_CANCEL_SKIPPED_SPEC')
-
-          // set a property on the response so the browser runner
-          // knows not to start executing tests
-          project.emit('end', { skippedSpec: true, stats: {} })
-
-          // dont call the cb, let the browser hang until it's killed
-          return
-        }
-
-        return cb(response)
       })
 
       return runAllSpecs({

@@ -9,6 +9,7 @@
     <button class="trigger-sync-error">Trigger Sync Error</button>
     <button class="trigger-async-error">Trigger Async Error</button>
     <button class="trigger-unhandled-rejection">Trigger Unhandled Rejection</button>
+    <button class="trigger-undefined-rejection">Trigger Undefined Rejection</button>
     <button class="define-window-onerror">Define window.onerror</button>
   </div>
   <p class="error-one"></p>
@@ -24,11 +25,11 @@
     })
 
     window.addEventListener('unhandledrejection', (event) => {
-      document.querySelector('.error-one').innerText = event.reason.message
+      document.querySelector('.error-one').innerText = event.reason?.message
     })
 
     window.addEventListener('unhandledrejection', (event) => {
-      document.querySelector('.error-two').innerText = event.reason.message
+      document.querySelector('.error-two').innerText = event.reason?.message
     })
 
     function one(message) {
@@ -59,6 +60,12 @@
 
     document.querySelector(".trigger-unhandled-rejection").addEventListener('click', function () {
       (async () => one('promise rejection'))()
+    })
+
+    document.querySelector(".trigger-undefined-rejection").addEventListener('click', function () {
+      new Promise(function (resolve, reject) {
+        reject()
+      })
     })
 
     document.querySelector(".define-window-onerror").addEventListener('click', function () {

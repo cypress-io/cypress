@@ -25,6 +25,7 @@ import { bidiGetUrl } from '../automation/commands/get_url'
 import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
+import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
 const BIDI_DEBUG_NAMESPACE = 'cypress:server:browsers:bidi_automation'
@@ -686,6 +687,18 @@ export class BidiAutomation {
             await bidiKeyPress(toSupportedKey(data.key), this.webDriverClient, this.autContextId, this.topLevelContextId)
           } else {
             throw new Error('Cannot emit key press: no AUT context initialized')
+          }
+
+          return
+        case 'perform:user:gesture':
+          // Firefox 93+ requires a transient user activation before display capture is allowed,
+          // which the driver needs in order to record video via getUserMedia. We grant it by
+          // synthesizing a trusted gesture in the top-level context (where getUserMedia is called).
+          // @see https://github.com/cypress-io/cypress/issues/18415
+          if (this.topLevelContextId) {
+            await bidiPerformUserGesture(this.webDriverClient, this.topLevelContextId)
+          } else {
+            throw new Error('Cannot perform user gesture: no top-level context initialized')
           }
 
           return

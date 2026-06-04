@@ -74,6 +74,7 @@ describe('lib/browsers/electron', () => {
           getUserAgent: sinon.stub(),
           clearCache: sinon.stub(),
         },
+        on: sinon.stub(),
         getOSProcessId: sinon.stub().returns(ELECTRON_PID),
       },
     })
@@ -503,6 +504,22 @@ describe('lib/browsers/electron', () => {
       return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
       .then((win) => {
         expect(win).to.eq(this.win)
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/2118
+    it('prevents the default beforeunload prompt on will-prevent-unload so navigation is not blocked', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        const call = this.win.webContents.on.getCalls().find((c) => c.args[0] === 'will-prevent-unload')
+
+        expect(call, 'a will-prevent-unload listener was registered').to.exist
+
+        const event = { preventDefault: sinon.stub() }
+
+        call.args[1](event)
+
+        expect(event.preventDefault).to.be.calledOnce
       })
     })
 
