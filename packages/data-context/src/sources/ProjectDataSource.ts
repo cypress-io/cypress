@@ -414,6 +414,11 @@ export class ProjectDataSource {
       ignoreInitial: true,
       ignorePermissionErrors: true,
       cwd: projectRoot,
+      // The watched path is always the literal '.', never a glob. Without this,
+      // chokidar resolves it against `cwd` and glob-interprets the absolute path,
+      // so a projectRoot containing glob characters (e.g. `[foo]`) silently breaks
+      // all spec file watching. See https://github.com/cypress-io/cypress/issues/5426
+      disableGlobbing: true,
       ignored: ['**/node_modules/**', ...excludeSpecPattern, ...additionalIgnorePattern, (file: string, stats?: fs.Stats) => {
         // Add a extra safe to prevent watching node_modules, in case the glob
         // pattern is not taken into account by the ignored

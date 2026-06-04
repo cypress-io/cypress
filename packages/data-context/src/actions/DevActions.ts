@@ -22,6 +22,10 @@ export class DevActions {
       this._chokidar = chokidar.watch(DevActions.CY_STATE_PATH, {
         ignoreInitial: true,
         ignorePermissionErrors: true,
+        // Watch the literal path; a Cypress install path containing glob
+        // characters (e.g. `[foo]`) would otherwise be glob-interpreted and fail.
+        // See https://github.com/cypress-io/cypress/issues/5426
+        disableGlobbing: true,
       })
 
       this._chokidar.on('change', () => {

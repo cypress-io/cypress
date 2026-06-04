@@ -574,6 +574,44 @@ describe('_makeSpecWatcher', () => {
     expect(Array.from(allFiles)).not.toContain(SPEC_FILE1)
     expect(Array.from(allFiles)).not.toContain(SUPPORT_FILE)
   })
+
+  // https://github.com/cypress-io/cypress/issues/5426
+  // chokidar glob-interprets the watched path, so a projectRoot containing glob
+  // characters (e.g. `[foo]`) would silently break all spec file watching unless
+  // `disableGlobbing` is set.
+  it('watches for changes when the projectRoot contains glob characters', async function () {
+    const bracketRoot = path.join(os.tmpdir(), `cy-[bracket] project-${Date.now()}`)
+    const bracketSpec = path.join('cypress', 'e2e', 'foo.cy.js')
+
+    await fs.outputFile(path.join(bracketRoot, bracketSpec), '// initial')
+
+    specWatcher = ctx.project._makeSpecWatcher({
+      projectRoot: bracketRoot,
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      excludeSpecPattern: ['**/ignore.spec.ts'],
+      additionalIgnorePattern: ['additional.ignore.cy.js'],
+    })
+
+    try {
+      await new Promise((resolve) => specWatcher.once('ready', resolve))
+
+      const changedFiles = new Set()
+
+      specWatcher.on('change', (filePath) => changedFiles.add(filePath))
+
+      await fs.appendFile(path.join(bracketRoot, bracketSpec), '\n// changed')
+
+      let attempt = 0
+
+      while (changedFiles.size < 1 && attempt++ <= 100) {
+        await delay(10)
+      }
+
+      expect(Array.from(changedFiles)).toEqual([bracketSpec])
+    } finally {
+      await fs.remove(bracketRoot)
+    }
+  })
 })
 
 describe('startSpecWatcher', () => {
@@ -687,6 +725,7 @@ describe('startSpecWatcher', () => {
         cwd: projectRoot,
         ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js', expect.any(Function)],
         ignorePermissionErrors: true,
+        disableGlobbing: true,
       })
 
       expect(onStub).toHaveBeenCalledWith('all', handleFsChange)

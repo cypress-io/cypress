@@ -361,6 +361,7 @@ describe('StudioLifecycleManager', () => {
       expect(StudioLifecycleManager['watcher']).to.be.present
       expect(watcherStub).to.be.calledWith(path.join('/path', 'to', 'studio', 'server', 'index.js'), {
         awaitWriteFinish: true,
+        disableGlobbing: true,
       })
 
       expect(watcherOnStub).to.be.calledWith('change')

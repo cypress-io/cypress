@@ -461,6 +461,11 @@ export class ProjectConfigManager {
       ignoreInitial: true,
       cwd: this.options.projectRoot,
       ignorePermissionErrors: true,
+      // The watched values are literal file paths, never globs. Without this,
+      // chokidar glob-interprets them, so a projectRoot/config path containing glob
+      // characters (e.g. `[foo]`) silently breaks config/env file watching.
+      // See https://github.com/cypress-io/cypress/issues/5426
+      disableGlobbing: true,
     })
 
     this._watchers.add(w)

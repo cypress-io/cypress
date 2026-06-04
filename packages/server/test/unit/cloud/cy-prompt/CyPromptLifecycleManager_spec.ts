@@ -482,6 +482,7 @@ describe('CyPromptLifecycleManager', () => {
       expect(CyPromptLifecycleManager['watcher']).to.be.present
       expect(watcherStub).to.be.calledWith(path.join('/path', 'to', 'cy-prompt', 'server', 'index.js'), {
         awaitWriteFinish: true,
+        disableGlobbing: true,
       })
 
       expect(watcherOnStub).to.be.calledWith('change')

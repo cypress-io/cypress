@@ -232,6 +232,10 @@ export class GitDataSource {
         this.#gitBaseDirWatcher = chokidar.watch(path.join(this.#gitBaseDir, '.git', 'HEAD'), {
           ignoreInitial: true,
           ignorePermissionErrors: true,
+          // Watch the literal HEAD path; without this a gitBaseDir containing glob
+          // characters (e.g. `[foo]`) would be glob-interpreted and silently fail.
+          // See https://github.com/cypress-io/cypress/issues/5426
+          disableGlobbing: true,
         })
 
         // Fires when we switch branches

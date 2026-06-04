@@ -378,6 +378,10 @@ export class StudioLifecycleManager {
     // Watch for changes to the studio bundle
     StudioLifecycleManager.watcher = chokidar.watch(path.join(process.env.CYPRESS_LOCAL_STUDIO_PATH, 'server', 'index.js'), {
       awaitWriteFinish: true,
+      // Watch the literal path; a path containing glob characters (e.g. `[foo]`)
+      // would otherwise be glob-interpreted and fail to watch.
+      // See https://github.com/cypress-io/cypress/issues/5426
+      disableGlobbing: true,
     }).on('change', async () => {
       await this.studioManager?.destroy()
       this.studioManager = undefined
