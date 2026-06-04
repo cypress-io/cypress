@@ -237,8 +237,6 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
         return
       }
 
-      hasResult = false
-
       let automationOptions: AutomationEventsAndOptions[CookieQuery]
 
       try {
@@ -279,8 +277,14 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
           handleBackendError(commandName, action, log)(err)
         } catch (cypressErr: any) {
           cypressErr.retry = false
-          fatalError = cypressErr
           mostRecentError = cypressErr
+
+          // only fail the command outright if we have nothing to yield yet. a
+          // failed background refresh (after we already have a result) should
+          // not turn a passing command into a failure.
+          if (!hasResult) {
+            fatalError = cypressErr
+          }
         }
       })
       .finally(() => {
@@ -294,12 +298,13 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
       }
 
       if (hasResult) {
-        // we have a result, but kick off a fresh read so the next assertion
-        // retry sees up-to-date cookie(s). this is required when assertions are
-        // chained through another query (e.g. `cy.getCookie('x').its('value')`),
-        // because this command's retry of getSubject - not its onFail handler -
-        // is what re-runs upstream. fetch() marks the cached result stale; we
-        // return it once for the current attempt.
+        // we have a result. kick off a background re-read (without discarding the
+        // current result) so subsequent assertion retries see up-to-date
+        // cookie(s). this is required when assertions are chained through another
+        // query (e.g. `cy.getCookie('x').its('value')`): this command's retry of
+        // getSubject - not an onFail handler - is what re-runs the read. we never
+        // throw once we have a result, so retrieving the final subject for a
+        // downstream command can't fail spuriously.
         fetch()
 
         return result
