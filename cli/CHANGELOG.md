@@ -25,6 +25,7 @@
 - Fixed an issue where `cy.wait('@alias')` could time out when the connection to the browser closed before an aliased intercepted request's response completed, including during navigation such as `cy.visit()`. Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 - Fixed an issue where a cross-origin navigation back to a previously-visited origin (for example, completing a login that redirects from an identity provider back to your application) could intermittently load the Cypress app interface instead of your application, causing flaky tests. Fixed in [#33991](https://github.com/cypress-io/cypress/pull/33991).
 - Fixed an issue where `cypress open --detached` blocked the CLI process until the GUI was closed rather than returning once Cypress was ready to use.
+- Fixed an issue where setting a request or response header to an empty string in a [`cy.intercept()`](https://on.cypress.io/intercept) handler (for example `req.headers['x-foo'] = ''`) would report the header as set on the intercepted request while silently dropping it from the request sent over the network. Empty-string header values are now preserved; headers are only removed when deleted or set to `undefined`. Fixes [#25767](https://github.com/cypress-io/cypress/issues/25767).
 
 **Misc:**
 
