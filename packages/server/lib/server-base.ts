@@ -13,7 +13,8 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { getRoutesForRequest, NetStubbingState } from '@packages/net-stubbing'
+import { DriverInterceptRegistrationAdapter, getRoutesForRequest, NetStubbingState } from '@packages/net-stubbing'
+import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
 import type { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
@@ -49,6 +50,7 @@ import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createProxyRuntime } from './network-runtime'
+import type { ForNetworkPolicyRegistration } from '@packages/network-interception'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -161,6 +163,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
+  protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -213,6 +216,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   get netStubbingState () {
     return this.ensureProp(this._netStubbingState, 'open')
+  }
+
+  get networkPolicyRegistration () {
+    return this.ensureProp(this._networkPolicyRegistration, 'open')
   }
 
   get httpsProxy () {
@@ -449,6 +456,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this._netStubbingState = runtime.netStubbingState
     this._networkProxy = runtime.networkProxy
+    this._networkPolicyRegistration = runtime.networkPolicyRegistration
   }
 
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {
@@ -456,7 +464,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
-    options.netStubbingState = this.netStubbingState
+    options.interceptRegistration = new DriverInterceptRegistrationAdapter({
+      state: this.netStubbingState,
+      socket: this.socket,
+      getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
+    })
+
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 

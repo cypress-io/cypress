@@ -47,6 +47,19 @@ const isVerbose = isVerboseTelemetry
 
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
 
+class BrowserConnectionClosedError extends Error {
+  code = 'ERR_BROWSER_CONNECTION_CLOSED'
+
+  constructor (message: string) {
+    super(message)
+    this.name = 'BrowserConnectionClosedError'
+  }
+}
+
+const createBrowserConnectionClosedError = () => {
+  return new BrowserConnectionClosedError('The browser closed the connection before the response completed.')
+}
+
 export enum HttpStages {
   IncomingRequest,
   IncomingResponse,
@@ -175,7 +188,7 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
       function onClose () {
         if (!ctx.res.writableFinished) {
-          _onError(new Error('Socket closed before finished writing response.'))
+          _onError(createBrowserConnectionClosedError())
         }
       }
 
@@ -407,7 +420,7 @@ export class Http {
       // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
       // In this case we don't want to run the response middleware and should just exit.
       if (res.destroyed) {
-        return onError(new Error('Socket closed before finished writing response'))
+        return onError(createBrowserConnectionClosedError())
       }
 
       if (ctx.incomingRes) {

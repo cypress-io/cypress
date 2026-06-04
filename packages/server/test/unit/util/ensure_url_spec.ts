@@ -63,5 +63,22 @@ describe('lib/util/ensure-url', function () {
         })
       })
     })
+
+    it('connects directly for URLs excluded from the proxy via NO_PROXY', function () {
+      // localhost is the component testing dev server and is excluded from the
+      // proxy by default - it should be verified via a direct TCP connection
+      // instead of being routed through the proxy (#27990)
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://localhost:12345'
+      process.env.NO_PROXY = 'localhost,127.0.0.1,::1'
+
+      const addRequest = sinon.stub(agent, 'addRequest').throws()
+      const getAddress = sinon.stub(connect, 'getAddress').withArgs(8080, 'localhost').resolves()
+
+      return isListening('http://localhost:8080')
+      .then(() => {
+        expect(getAddress).to.be.calledOnce
+        expect(addRequest).not.to.be.called
+      })
+    })
   })
 })

@@ -52,6 +52,15 @@ describe('exec open', function () {
       })
     })
 
+    it('calls spawn with detached when detached option is set', async () => {
+      await open.start({ detached: true })
+
+      expect(spawnStart).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ detached: true }),
+      )
+    })
+
     it('spawns with port', async () => {
       await open.start({ port: '1234' })
       expect(spawnStart).toHaveBeenCalledWith(['--port', '1234'], expect.anything())
