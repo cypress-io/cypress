@@ -66,7 +66,7 @@ export class NetworkInterceptionCore {
     const port = this.options.requestInterception
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.requestInterception is not configured')
+      throw new Error('NetworkInterceptionCore.requestInterception is not configured')
     }
 
     return port.correlateBrowserPreRequest(ctx)
@@ -79,7 +79,7 @@ export class NetworkInterceptionCore {
     const port = this.options.requestInterception
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.requestInterception is not configured')
+      throw new Error('NetworkInterceptionCore.requestInterception is not configured')
     }
 
     return port.forwardToOrigin(ctx)
@@ -89,7 +89,7 @@ export class NetworkInterceptionCore {
     const port = this.options.responseInterception
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.responseInterception is not configured')
+      throw new Error('NetworkInterceptionCore.responseInterception is not configured')
     }
 
     return port.interceptResponse(ctx)
