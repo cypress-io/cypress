@@ -743,11 +743,19 @@ describe('with proxy env vars', () => {
     expect(download.getProxyForUrlWithNpmConfig(testUriHttp)).toEqual('http://foo')
   })
 
-  it('ignores http_proxy on https request', () => {
+  it('falls back to http_proxy on https request when https_proxy is unset', () => {
+    // the binary is downloaded over https, so http_proxy must fall back for
+    // https urls to match the server's proxy normalization. See #18330.
     vi.stubEnv('http_proxy', 'http://foo')
-    expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).toEqual(null)
+    expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).toEqual('http://foo')
     vi.stubEnv('https_proxy', 'https://bar')
     expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).toEqual('https://bar')
+  })
+
+  it('respects no_proxy when falling back from http_proxy on https request', () => {
+    vi.stubEnv('NO_PROXY', 'localhost,.com')
+    vi.stubEnv('http_proxy', 'http://foo')
+    expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).toBeNull()
   })
 
   it('falls back to npm_config_proxy', () => {
