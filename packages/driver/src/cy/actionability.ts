@@ -536,15 +536,14 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         }
 
         if (options.ensure.visibility) {
-          // The modern strategy's visibility check is ancestor-aware, so it is a
-          // single check with no separate ancestor phase below. The legacy strategy
-          // checks the element in isolation here and defers the ancestor check until
-          // after the nudging algorithm. https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
+          // The legacy strategy checks visibility in two stages: the element here, then
+          // — after the covering/nudging algorithm below — whether it's hidden by ancestors.
+          // The modern strategy does it in one checkVisibility-based call here, so it has
+          // no second stage. https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
           if (Cypress.config('visibilityStrategy') === 'modern') {
-            // @ts-ignore
             Cypress.ensure.isVisible($el, name, _log)
           } else {
-            // @ts-ignore
+            // @ts-expect-error - isStrictlyVisible is not declared on the Cypress.ensure type
             Cypress.ensure.isStrictlyVisible($el, name, _log)
           }
         }
@@ -583,8 +582,9 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         // only care about fromElViewport coords
         $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
 
-        // the modern strategy already accounts for ancestors in its visibility
-        // check above, so only the legacy strategy needs this ancestor phase
+        // Only the legacy strategy runs this ancestor phase. The modern check above
+        // already covers ancestor display/visibility, and it intentionally omits the
+        // legacy overflow/out-of-bounds clipping check (matching modern `should('be.visible')`).
         if (Cypress.config('visibilityStrategy') !== 'modern') {
           Cypress.ensure.isNotHiddenByAncestors($el, name, _log)
         }
