@@ -4,6 +4,8 @@ Types and **port interfaces** for Cypress network interception (`cy.intercept`, 
 
 > **Stack stage 3 of 8.** **Core** extracted: `NetworkInterceptionCore` owns pure route matching, subscription planning, and handler merge. Net-stubbing and proxy middleware delegate through the core. Policy registry still not invoked from middleware.
 
+**Target architecture** for page injection (levels, CDP vs proxy, `ForPageInjection`): [`docs/page-injection.md`](docs/page-injection.md).
+
 ---
 
 ## Why this refactor uses ports and adapters

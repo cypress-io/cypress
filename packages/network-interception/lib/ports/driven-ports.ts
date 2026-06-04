@@ -13,10 +13,12 @@ export interface ForResponseInterception {
 }
 
 /**
- * Driven port: HTML/JS inject, CSP strip, rewriter application.
+ * Driven port: HTML/JS inject into AUT documents.
+ *
+ * Placeholder — see `ForPageInjection` in docs/page-injection.md.
  */
 export interface ForDocumentPreparation {
-  // Expanded in Stage 5a.
+  // Expanded in Stage 5a; target shape documented in docs/page-injection.md
 }
 
 /**
