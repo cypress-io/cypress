@@ -1,6 +1,8 @@
+import { createRequire } from 'module'
 import { defineConfig } from 'cypress'
-import { e2ePluginSetup } from '@packages/frontend-shared/cypress/e2e/e2ePluginSetup'
-import { setupCyInCyVariables } from '@packages/frontend-shared/cypress/tasks/cy-in-cy-variables'
+
+// @ts-expect-error — cypress.config is test-only; not included in the build tsconfig (import.meta requires ESM module settings, not node16)
+const require = createRequire(import.meta.url)
 
 export default defineConfig({
   projectId: 'ypt4pf',
@@ -17,12 +19,15 @@ export default defineConfig({
       process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF = 'true'
       process.env.CYPRESS_INTERNAL_VITE_OPEN_MODE_TESTING = 'true'
 
+      const { setupCyInCyVariables } = require('@packages/frontend-shared/cypress/tasks/cy-in-cy-variables') as typeof import('@packages/frontend-shared/cypress/tasks/cy-in-cy-variables')
       const { setCyInCyVariables, getCyInCyVariables } = setupCyInCyVariables()
 
       on('task', {
         setCyInCyVariables,
         getCyInCyVariables,
       })
+
+      const { e2ePluginSetup } = require('@packages/frontend-shared/cypress/e2e/e2ePluginSetup') as typeof import('@packages/frontend-shared/cypress/e2e/e2ePluginSetup')
 
       return await e2ePluginSetup(on, config)
     },
