@@ -656,10 +656,11 @@ describe('src/cy/commands/request', () => {
         })
         .then(() => {
           const { headers } = backend.firstCall.args[1]
-          const contentTypeKeys = Object.keys(headers).filter((key) => key.toLowerCase() === 'content-type')
 
-          // the capitalized header was removed, leaving only the generated one
-          expect(contentTypeKeys).to.deep.equal(['content-type'])
+          // the user-provided capitalized header is removed and replaced by a
+          // single generated lowercase `content-type` carrying the boundary
+          expect(headers).not.to.have.property('Content-Type')
+          expect(headers).to.have.property('content-type')
           expect(headers['content-type']).to.match(/^multipart\/form-data; boundary=/)
         })
       })
