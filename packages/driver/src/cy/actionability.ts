@@ -536,12 +536,17 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         }
 
         if (options.ensure.visibility) {
-          // ensure element is visible but do not check if hidden by ancestors
-          // until nudging algorithm occurs
-          // https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
-
-          // @ts-ignore
-          Cypress.ensure.isStrictlyVisible($el, name, _log)
+          // The modern strategy's visibility check is ancestor-aware, so it is a
+          // single check with no separate ancestor phase below. The legacy strategy
+          // checks the element in isolation here and defers the ancestor check until
+          // after the nudging algorithm. https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
+          if (Cypress.config('visibilityStrategy') === 'modern') {
+            // @ts-ignore
+            Cypress.ensure.isVisible($el, name, _log)
+          } else {
+            // @ts-ignore
+            Cypress.ensure.isStrictlyVisible($el, name, _log)
+          }
         }
 
         if (options.ensure.notReadonly) {
@@ -577,7 +582,12 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         // this calculation is relative from the viewport so we
         // only care about fromElViewport coords
         $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
-        Cypress.ensure.isNotHiddenByAncestors($el, name, _log)
+
+        // the modern strategy already accounts for ancestors in its visibility
+        // check above, so only the legacy strategy needs this ancestor phase
+        if (Cypress.config('visibilityStrategy') !== 'modern') {
+          Cypress.ensure.isNotHiddenByAncestors($el, name, _log)
+        }
       }
 
       // pass our final object into onReady
