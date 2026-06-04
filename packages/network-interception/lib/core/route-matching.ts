@@ -1,19 +1,23 @@
 import _ from 'lodash'
 import minimatch from 'minimatch'
 import url from 'url'
-
-import type { CypressIncomingRequest } from '@packages/proxy'
-import type { BackendRoute } from './types'
 import type { RouteMatcherOptions } from '../types'
-import { getAllStringMatcherFields } from './util'
+import type { BackendRoute } from '../types/backend-route'
+import { getAllStringMatcherFields } from './matcher-fields'
+
+export type RouteMatchableRequest = {
+  headers: Record<string, string | string[] | undefined>
+  method: string
+  proxiedUrl: string
+  resourceType?: string
+}
 
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
  */
-export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: CypressIncomingRequest) {
-  const matchable = _getMatchableForRequest(req)
+export function doesRouteMatch (routeMatcher: RouteMatcherOptions, req: RouteMatchableRequest) {
+  const matchable = getMatchableForRequest(req)
 
-  // get a list of all the fields which exist where a rule needs to be succeed
   const stringMatcherFields = getAllStringMatcherFields(routeMatcher)
   const booleanFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['https']))
   const numberFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['port']))
@@ -23,7 +27,6 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
     let matcher = _.get(routeMatcher, field)
     let value = _.get(matchable, field, '')
 
-    // for convenience, attempt to match `url` against `path`?
     const shouldTryMatchingPath = field === 'url'
 
     const stringMatch = (value: string, matcher: string) => {
@@ -31,7 +34,6 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
         value === matcher ||
         minimatch(value, matcher, { matchBase: true }) ||
         (field === 'url' && (
-          // be nice and match paths that are missing leading slashes
           (value[0] === '/' && matcher[0] !== '/' && stringMatch(value, `/${matcher}`))
         ))
       )
@@ -50,8 +52,6 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
     }
 
     if (field === 'method') {
-      // case-insensitively match on method
-      // @see https://github.com/cypress-io/cypress/issues/9313
       value = value.toLowerCase()
       matcher = matcher.toLowerCase()
     }
@@ -92,13 +92,14 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
   return true
 }
 
-export function _getMatchableForRequest (req: CypressIncomingRequest) {
+export function getMatchableForRequest (req: RouteMatchableRequest) {
   let matchable: any = _.pick(req, ['headers', 'method', 'resourceType'])
 
   const authorization = req.headers['authorization']
+  const authHeader = Array.isArray(authorization) ? authorization[0] : authorization
 
-  if (authorization) {
-    const [mechanism, credentials] = authorization.split(' ', 2)
+  if (authHeader) {
+    const [mechanism, credentials] = authHeader.split(' ', 2)
 
     if (mechanism && credentials && mechanism.toLowerCase() === 'basic') {
       const [username, password] = Buffer.from(credentials, 'base64').toString().split(':', 2)
@@ -122,31 +123,39 @@ export function _getMatchableForRequest (req: CypressIncomingRequest) {
   return matchable
 }
 
+/** @deprecated Use {@link doesRouteMatch} — kept for net-stubbing strangler re-exports. */
+export const _doesRouteMatch = doesRouteMatch
+
+/** @deprecated Use {@link getMatchableForRequest} */
+export const _getMatchableForRequest = getMatchableForRequest
+
 /**
  * Find all `BackendRoute`s that match the supplied request.
  */
-export function* getRoutesForRequest (routes: BackendRoute[], req: CypressIncomingRequest) {
+export function matchRoutes (routes: BackendRoute[], req: RouteMatchableRequest): BackendRoute[] {
   const [middleware, handlers] = _.partition(routes, (route) => route.routeMatcher.middleware === true)
-  // First, match the oldest matching route handler with `middleware: true`.
-  // Then, match the newest matching route handler.
   const orderedRoutes = middleware.concat(handlers.reverse())
 
-  for (const route of orderedRoutes) {
-    if (!route.disabled && _doesRouteMatch(route.routeMatcher, req)) {
-      yield route
-    }
+  return orderedRoutes.filter((route) => !route.disabled && doesRouteMatch(route.routeMatcher, req))
+}
+
+/** @deprecated Use {@link matchRoutes} */
+export function* getRoutesForRequest (routes: BackendRoute[], req: RouteMatchableRequest) {
+  for (const route of matchRoutes(routes, req)) {
+    yield route
   }
 }
 
-function isPreflightRequest (req: CypressIncomingRequest) {
+function isPreflightRequest (req: RouteMatchableRequest) {
   return req.method === 'OPTIONS' && req.headers['access-control-request-method']
 }
 
 /**
- * Is this a CORS preflight request that could be for an existing route?
- * If there is a matching route with method = 'OPTIONS', returns false.
+ * Whether the proxy should auto-respond to this CORS preflight OPTIONS request.
+ * Returns true when the request is a preflight, at least one route matches (ignoring
+ * method/headers/auth on the matcher), and no matching route explicitly handles OPTIONS.
  */
-export function matchesRoutePreflight (routes: BackendRoute[], req: CypressIncomingRequest) {
+export function matchesRoutePreflight (routes: BackendRoute[], req: RouteMatchableRequest) {
   if (!isPreflightRequest(req)) {
     return false
   }
@@ -154,10 +163,9 @@ export function matchesRoutePreflight (routes: BackendRoute[], req: CypressIncom
   let hasCorsOverride = false
 
   const matchingRoutes = _.filter(routes, ({ routeMatcher }) => {
-    // omit headers from matching since preflight req will not send headers
     const preflightMatcher = _.omit(routeMatcher, 'method', 'headers', 'auth')
 
-    if (!_doesRouteMatch(preflightMatcher, req)) {
+    if (!doesRouteMatch(preflightMatcher, req)) {
       return false
     }
 
@@ -168,5 +176,5 @@ export function matchesRoutePreflight (routes: BackendRoute[], req: CypressIncom
     return true
   })
 
-  return !hasCorsOverride && matchingRoutes.length
+  return !hasCorsOverride && matchingRoutes.length > 0
 }

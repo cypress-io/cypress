@@ -1,23 +1,10 @@
-import _ from 'lodash'
-import { concatStream } from '@packages/network'
-import url from 'url'
-
 import type {
   RequestMiddleware,
 } from '@packages/proxy'
 import {
-  CyHttpMessages,
-  SERIALIZABLE_REQ_PROPS,
-} from '../../types'
-import { getRoutesForRequest, matchesRoutePreflight } from '../route-matching'
-import {
   sendStaticResponse,
-  setDefaultHeaders,
-  mergeDeletedHeaders,
-  mergeWithPreservedBuffers,
-  getBodyEncoding,
 } from '../util'
-import { InterceptedRequest } from '../intercepted-request'
+import { handleInterceptRequest } from '../handle-intercept-request'
 import { telemetry } from '@packages/telemetry'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
@@ -28,17 +15,17 @@ const debug = null
 export const SetMatchingRoutes: RequestMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'set:matching:routes', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
 
-  const url = new URL(this.req.proxiedUrl)
+  const devServerUrl = new URL(this.req.proxiedUrl)
 
   // if this is a request to the dev server, do not match any routes as
   // we do not want to allow the user to intercept requests to the dev server
-  if (url.pathname.startsWith(this.config.devServerPublicPathRoute)) {
+  if (devServerUrl.pathname.startsWith(this.config.devServerPublicPathRoute)) {
     span?.end()
 
     return this.next()
   }
 
-  if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
+  if (this.networkInterceptionCore.matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
     return sendStaticResponse(this, {
       statusCode: 204,
@@ -52,7 +39,7 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
     })
   }
 
-  this.req.matchingRoutes = [...getRoutesForRequest(this.netStubbingState.routes, this.req)]
+  this.req.matchingRoutes = this.networkInterceptionCore.matchRoutes(this.netStubbingState.routes, this.req)
 
   span?.end()
   this.next()
@@ -62,139 +49,5 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
  * Called when a new request is received in the proxy layer.
  */
 export const InterceptRequest: RequestMiddleware = async function () {
-  const span = telemetry.startSpan({ name: 'intercept:request', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
-
-  if (!this.req.matchingRoutes?.length) {
-    // not intercepted, carry on normally...
-    span?.end()
-
-    return this.next()
-  }
-
-  const request = new InterceptedRequest({
-    continueRequest: this.next,
-    onError: this.onError,
-    onResponse: (incomingRes, resStream) => {
-      setDefaultHeaders(this.req, incomingRes)
-      this.onResponse(incomingRes, resStream)
-    },
-    req: this.req,
-    res: this.res,
-    socket: this.socket,
-    state: this.netStubbingState,
-  })
-
-  this.debug('cy.intercept: intercepting request')
-
-  // attach requestId to the original req object for later use
-  this.req.requestId = request.id
-
-  this.netStubbingState.requests[request.id] = request
-
-  const req = _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
-    url: request.req.proxiedUrl,
-  }) as CyHttpMessages.IncomingRequest
-
-  request.res.once('finish', async () => {
-    await request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
-      eventName: 'after:response',
-      data: request.includeBodyInAfterResponse ? {
-        finalResBody: request.res.body!,
-      } : {},
-      mergeChanges: _.noop,
-    })
-
-    this.debug('cy.intercept: request/response finished, cleaning up')
-    delete this.netStubbingState.requests[request.id]
-  })
-
-  const ensureBody = () => {
-    return new Promise<void>((resolve) => {
-      if (req.body) {
-        return resolve()
-      }
-
-      const onClose = (): void => {
-        req.body = ''
-
-        return resolve()
-      }
-
-      // If the response has been destroyed we won't be able to get the body from the stream.
-      if (request.res.destroyed) {
-        onClose()
-      }
-
-      // Also listen the response close in case it happens while we are piping the request stream.
-      request.res.once('close', onClose)
-
-      request.req.pipe(concatStream((reqBody) => {
-        req.body = reqBody
-        request.res.off('close', onClose)
-        resolve()
-      }))
-    })
-  }
-
-  await ensureBody()
-
-  // Note that this needs to happen after the `ensureBody` call to ensure that we proceed synchronously to
-  // where we update the state of the routes:
-  // https://github.com/cypress-io/cypress/blob/aafac6a6104b689a118f4c4f29f948d7d8a35aef/packages/net-stubbing/lib/server/intercepted-request.ts#L167-L169
-  request.addDefaultSubscriptions()
-
-  if (!_.isString(req.body) && !_.isBuffer(req.body)) {
-    throw new Error('req.body must be a string or a Buffer')
-  }
-
-  const bodyEncoding = getBodyEncoding(req)
-  const bodyIsBinary = bodyEncoding === 'binary'
-
-  if (bodyIsBinary) {
-    this.debug('cy.intercept: req.body contained non-utf8 characters, treating as binary content')
-  }
-
-  // leave the requests that send a binary buffer unchanged
-  // but we can work with the "normal" string requests
-  if (!bodyIsBinary) {
-    req.body = req.body.toString('utf8')
-  }
-
-  request.req.body = req.body
-
-  const mergeChanges = (before: CyHttpMessages.IncomingRequest, after: CyHttpMessages.IncomingRequest) => {
-    if ('content-length' in before.headers && before.headers['content-length'] === after.headers['content-length']) {
-      // user did not purposely override content-length, let's set it
-      after.headers['content-length'] = String(Buffer.from(after.body).byteLength)
-    }
-
-    // resolve and propagate any changes to the URL
-    request.req.proxiedUrl = after.url = url.resolve(request.req.proxiedUrl, after.url)
-
-    mergeWithPreservedBuffers(before, _.pick(after, SERIALIZABLE_REQ_PROPS))
-
-    mergeDeletedHeaders(before, after)
-  }
-
-  const modifiedReq = await request.handleSubscriptions<CyHttpMessages.IncomingRequest>({
-    eventName: 'before:request',
-    data: req,
-    mergeChanges,
-  })
-
-  mergeChanges(req, modifiedReq)
-  // @ts-ignore
-  mergeChanges(request.req, req)
-
-  if (request.responseSent) {
-    // request has been fulfilled with a response already, do not send the request outgoing
-    // @see https://github.com/cypress-io/cypress/issues/15841
-    span?.end()
-
-    return this.end()
-  }
-
-  span?.end()
-
-  return request.continueRequest()
+  return this.networkInterceptionCore.handleRequest((core) => handleInterceptRequest(this, core))
 }
