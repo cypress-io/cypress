@@ -219,10 +219,15 @@ describe('runnables', () => {
     it('adds a scroll listener in open mode', () => {
       appState.autoScrollingEnabled = false
       appState.startRunning()
-      cy.get('.container')
-      .trigger('scroll')
-      .trigger('scroll')
-      .trigger('scroll').then(() => {
+      cy.get('.container').then(($el) => {
+        // dispatch synchronously so the user-scroll threshold timer can't
+        // reset the counter between events under CI load
+        $el[0].dispatchEvent(new Event('scroll'))
+        $el[0].dispatchEvent(new Event('scroll'))
+        $el[0].dispatchEvent(new Event('scroll'))
+      })
+
+      cy.then(() => {
         expect(spy).to.have.been.calledWith(false)
       })
     })

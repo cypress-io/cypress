@@ -1,4 +1,4 @@
-import { type Writable } from 'stream'
+import type { Writable } from 'stream'
 import type { Debugger } from 'debug'
 import { START_TAG, END_TAG } from './constants'
 import { FilterPrefixedContent } from './FilterPrefixedContent'

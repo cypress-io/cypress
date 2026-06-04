@@ -1,4 +1,5 @@
 import { NetworkProxy } from '@packages/proxy'
+import { NetworkInterceptionCore } from '@packages/network-interception'
 import { createProxyRuntime } from '../../lib/network-runtime'
 import '../spec_helper'
 
@@ -29,6 +30,24 @@ describe('lib/network-runtime', () => {
     expect(runtime.networkProxy).to.be.instanceOf(NetworkProxy)
     expect(runtime.netStubbingState.routes).to.deep.equal([])
     expect(runtime.netStubbingState.requests).to.deep.equal({})
+  })
+
+  it('registers default configurator network policies at startup', () => {
+    const runtime = createProxyRuntime({
+      ...baseDeps(),
+      config: {
+        clientRoute: '/__/',
+        responseTimeout: 30000,
+        blockHosts: ['localhost:3131'],
+      } as Cypress.Config,
+    })
+
+    const policies = runtime.networkPolicyRegistration.getPolicies()
+
+    expect(policies).to.have.length(1)
+    expect(policies[0].name).to.eq('blocked-hosts')
+    expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
+    expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
   })
 
   it('handleHttpRequest delegates to networkProxy.handleHttpRequest', async () => {

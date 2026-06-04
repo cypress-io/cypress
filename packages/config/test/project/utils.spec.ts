@@ -1124,6 +1124,30 @@ describe('config/src/project/utils', () => {
       expect(cfg.isTextTerminal).toBe(true)
     })
 
+    // https://github.com/cypress-io/cypress/issues/20789
+    it('isInteractive=true in open mode', async function () {
+      const cfg = await defaults('isInteractive', true, { projectRoot: '/foo/bar/', supportFile: false })
+
+      expect(cfg.isInteractive).toBe(true)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20789
+    it('isInteractive=false in run mode (isTextTerminal=true)', async function () {
+      const cfg = await defaults('isInteractive', false, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+
+      expect(cfg.isInteractive).toBe(false)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20789
+    // since isInteractive is derived from the isTextTerminal mode option, its
+    // resolved value should still report `from: 'default'` in run mode rather
+    // than be mistaken for a user-provided config value.
+    it('resolves isInteractive=false from default in run mode', async function () {
+      const cfg = await defaults('isInteractive', false, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+
+      expect(cfg.resolved.isInteractive).toEqual({ value: false, from: 'default' })
+    })
+
     it('can override socketId in options', async function () {
       const cfg = await defaults('socketId', '1234', { projectRoot: '/foo/bar/', supportFile: false }, { socketId: '1234' })
 

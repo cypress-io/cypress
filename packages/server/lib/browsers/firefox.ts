@@ -389,7 +389,31 @@ export function clearInstanceState (options: GracefulShutdownOptions = {}) {
 
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   debug('connectToNewSpec bidi')
-  await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
+
+  // the browser is reused between specs in run mode, so we need to re-establish the video
+  // recording controller for each new spec. Without this, the per-spec videoRecording object
+  // created in run mode never gets its controller set, and video compression fails with
+  // "Cannot read properties of undefined (reading 'postProcessFfmpegOptions')".
+  //
+  // The controller must be created *before* navigation so that videoRecording.controller is set in
+  // time — a fast spec can otherwise finish (and start compression) before the async ffmpeg
+  // controller is ready. But frame capture must only begin *after* navigation: the previous spec's
+  // page and its in-browser MediaRecorder stay alive until navigation unloads them, and any
+  // trailing frames would otherwise bleed into this spec's video stream. So we create the
+  // controller, navigate, then subscribe to frames.
+  // @see https://github.com/cypress-io/cypress/issues/18415
+  const video = options.videoApi ? await createVideoController(options.videoApi) : undefined
+
+  try {
+    await firefoxUtil.connectToNewSpecBiDi(options, automation, browserBidiClient!)
+  } catch (err) {
+    // if navigation/BiDi setup fails, tear down the ffmpeg encoder we just started so it isn't
+    // left orphaned (and so a retry doesn't start a second one alongside it).
+    await video?.controller.endVideoCapture(false).catch(() => {})
+    throw err
+  }
+
+  video?.startCapturingFrames()
 }
 
 export function connectToExisting () {
@@ -416,6 +440,20 @@ async function recordVideo (videoApi: RunModeVideoApi) {
   const { writeVideoFrame } = await videoApi.useFfmpegVideoController({ webmInput: true })
 
   videoApi.onProjectCaptureVideoFrames(writeVideoFrame)
+}
+
+// Creates the ffmpeg video controller for a spec without yet subscribing to frames. Splitting this
+// out lets us create the controller *before* navigation (so the per-spec videoRecording object has
+// its controller set in time for compression) while deferring frame capture until *after*
+// navigation (so trailing frames from the previous spec don't bleed into this spec's video).
+// @see https://github.com/cypress-io/cypress/issues/18415
+async function createVideoController (videoApi: RunModeVideoApi) {
+  const controller = await videoApi.useFfmpegVideoController({ webmInput: true })
+
+  return {
+    controller,
+    startCapturingFrames: () => videoApi.onProjectCaptureVideoFrames(controller.writeVideoFrame),
+  }
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
