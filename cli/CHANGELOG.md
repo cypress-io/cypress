@@ -15,7 +15,7 @@
 
 **Misc:**
 
-- Improved TypeScript types for `cy.get('@alias')` and `cy.wait('@alias')` so that `@`-prefixed strings correctly resolve to `Chainable<S>` instead of `Chainable<JQuery<HTMLElement>>`. Users can now pass an explicit type parameter — for example `cy.get<MyType>('@alias')` — to get a properly typed alias value. Addresses [#8762](https://github.com/cypress-io/cypress/issues/8762).
+- Improved TypeScript types for `cy.get('@alias')` and `cy.wait('@alias')` so that `@`-prefixed strings correctly resolve to `Chainable<S>` instead of `Chainable<JQuery<HTMLElement>>`. Addresses [#8762](https://github.com/cypress-io/cypress/issues/8762).
 
 ## 15.16.0
 
