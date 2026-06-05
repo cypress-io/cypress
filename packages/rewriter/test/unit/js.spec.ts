@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import _ from 'lodash'
-import { _rewriteJsUnsafe } from '../../lib/js'
+import { _rewriteJsUnsafe, rewriteJs } from '../../lib/js'
 import fse from 'fs-extra'
 import Bluebird from 'bluebird'
 import rp from '@cypress/request-promise'
@@ -183,6 +183,31 @@ describe('js rewriter', function () {
         const actual = _rewriteJsUnsafe(URL, 'console.log()')
 
         expect(actual).toMatchSnapshot()
+      })
+
+      // The public `rewriteJs` must never surface a parse error into the AUT.
+      // When source rewriting was experimental, unparseable scripts caused the
+      // proxy to inject a `SyntaxError` (e.g. "Unexpected token") into the page,
+      // breaking otherwise-working applications. See cypress-io/cypress#14550.
+      describe('does not throw on input it cannot rewrite (fails soft)', () => {
+        [
+          // syntactically invalid JS
+          'var x = ; for in {',
+          // truncated/garbled minified source
+          'function(){ return l===l.parent',
+          // modern syntax the AST parser does not understand
+          'const y = a?.b?.top ?? window.top',
+        ]
+        .forEach((js) => {
+          it(`returns the original source unchanged: ${js}`, () => {
+            // if rewriteJs threw, this test would fail — the AUT receives the
+            // original script rather than a rewritten (or error-injecting) one,
+            // so a single unsupported script cannot crash the page
+            const actual = rewriteJs(URL, js)
+
+            expect(actual).toEqual(js)
+          })
+        })
       })
 
       it('replaces jira window getter', () => {
