@@ -363,6 +363,41 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/23300
+    it('disables pointer events during the screenshot and restores them after if disableTimersAndAnimations is true', function () {
+      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+
+      let disablerDuringScreenshot = null
+
+      cy
+      .screenshot('foo', {
+        onBeforeScreenshot () {
+          disablerDuringScreenshot = Cypress.$('#__cypress-pointer-events-disabler').length
+        },
+      })
+      .then(() => {
+        expect(disablerDuringScreenshot, 'pointer events disabled during screenshot').to.eq(1)
+        expect(Cypress.$('#__cypress-pointer-events-disabler'), 'pointer events restored after screenshot').to.have.length(0)
+      })
+    })
+
+    it('does not disable pointer events if disableTimersAndAnimations is false', function () {
+      this.screenshotConfig.disableTimersAndAnimations = false
+      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+
+      let disablerDuringScreenshot = null
+
+      cy
+      .screenshot('foo', {
+        onBeforeScreenshot () {
+          disablerDuringScreenshot = Cypress.$('#__cypress-pointer-events-disabler').length
+        },
+      })
+      .then(() => {
+        expect(disablerDuringScreenshot, 'pointer events not disabled during screenshot').to.eq(0)
+      })
+    })
+
     it('sends clip as userClip if specified', function () {
       Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
       cy.spy(Cypress, 'action').log(false)

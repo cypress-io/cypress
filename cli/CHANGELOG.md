@@ -10,6 +10,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where a screenshot could capture an unintended `:hover` state (or other pointer-driven styles) on the application under test. When the runner UI is hidden for a screenshot, the app can shift underneath the mouse cursor, applying hover styles right before the capture. Cypress now disables pointer events for the duration of the screenshot (unless `disableTimersAndAnimations` is `false`), so the captured image is not affected by where the cursor happens to be. Fixes [#23300](https://github.com/cypress-io/cypress/issues/23300).
 - Fixed an issue where Cypress could load the config file through the wrong module system (for example, treating an ESM config as CommonJS), so ESM-only APIs such as `import.meta.resolve` were unavailable in config and plugin code. Cypress now picks ESM or CJS before loading, using Node.js rules from the config file extension and the nearest `package.json` `"type"`, then loads only via `import()` or `require()` and fails outright on error instead of retrying the other format:
   - `.mjs` and `.mts` always load as ESM
   - `.cjs` and `.cts` always load as CJS

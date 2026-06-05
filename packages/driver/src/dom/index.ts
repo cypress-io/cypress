@@ -16,7 +16,7 @@ const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify,
 const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
 const { getSelectionBounds } = $selection
 const { addBlackouts, removeBlackouts } = $blackout
-const { removeCssAnimationDisabler, addCssAnimationDisabler } = $animation
+const { removeCssAnimationDisabler, addCssAnimationDisabler, addCssPointerEventsDisabler, removeCssPointerEventsDisabler } = $animation
 
 const isDom = (obj) => {
   return isElement(obj) || isWindow(obj) || isDocument(obj)
@@ -32,6 +32,8 @@ export default {
   addBlackouts,
   removeCssAnimationDisabler,
   addCssAnimationDisabler,
+  addCssPointerEventsDisabler,
+  removeCssPointerEventsDisabler,
   wrap,
   isW3CFocusable,
   isW3CRendered,

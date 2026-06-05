@@ -386,6 +386,9 @@ const takeScreenshot = (
       // could fail if iframe is cross-origin, so fail gracefully
       try {
         if (disableTimersAndAnimations) {
+          // disable pointer events first so the animation disabler <style>
+          // remains the immediate sibling of any blackout elements appended below
+          $dom.addCssPointerEventsDisabler($body)
           $dom.addCssAnimationDisabler($body)
         }
 
@@ -408,6 +411,7 @@ const takeScreenshot = (
     try {
       if (disableTimersAndAnimations) {
         $dom.removeCssAnimationDisabler($body)
+        $dom.removeCssPointerEventsDisabler($body)
       }
 
       $dom.removeBlackouts($body)
