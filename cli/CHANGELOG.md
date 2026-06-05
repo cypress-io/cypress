@@ -40,14 +40,11 @@
 
 - When Cypress cannot connect to a Chromium-based browser such as Chrome or Edge over the Chrome DevTools Protocol, the resulting error now suggests checking whether remote debugging has been disabled by an enterprise or group policy. Because Cypress relies on remote debugging to control the browser, the `RemoteDebuggingAllowed` policy being disabled prevents Cypress from connecting, and the error now points to `chrome://policy` or `edge://policy` to investigate. Addresses [#32526](https://github.com/cypress-io/cypress/issues/32526).
 - Improved TypeScript types for `cy.get('@alias')` and `cy.wait('@alias')` so that `@`-prefixed strings correctly resolve to `Chainable<S>` instead of `Chainable<JQuery<HTMLElement>>`. Addresses [#8762](https://github.com/cypress-io/cypress/issues/8762).
+- When running `cypress run --spec` with multiple patterns and one or more patterns do not match any spec files, Cypress now emits a warning identifying each unmatched pattern instead of silently skipping it. Addresses [#22645](https://github.com/cypress-io/cypress/issues/22645).
 
 **Dependency Updates:**
 
 - Upgraded `tsx` from `4.20.6` to `4.22.4`. Its bundled `esbuild` Go binary no longer reports [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in security scans, and loading TypeScript config files no longer emits the Node.js `[DEP0205] module.register() is deprecated` warning. Fixes [#33954](https://github.com/cypress-io/cypress/issues/33954) and [#33744](https://github.com/cypress-io/cypress/issues/33744).
-
-**Misc:**
-
-- When running `cypress run --spec` with multiple patterns and one or more patterns do not match any spec files, Cypress now emits a warning identifying each unmatched pattern instead of silently skipping it. Addresses [#22645](https://github.com/cypress-io/cypress/issues/22645).
 
 ## 15.16.0
 
