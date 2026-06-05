@@ -1558,6 +1558,11 @@ type Mutation {
     path: String
   ): Query
 
+  """
+  Clear the auto-provisioned project ID after the user dismisses the manual setup modal
+  """
+  clearAutoProvisionedProjectId: Boolean
+
   """Clears the currently active project"""
   clearCurrentProject: Query
   clearCurrentTestingType: Query
@@ -1866,6 +1871,11 @@ type PushFragmentPayload {
 type Query {
   """The latest state of the auth process"""
   authState: AuthState!
+
+  """
+  Project ID auto-provisioned during signup that could not be written to the config file automatically
+  """
+  autoProvisionedProjectId: String
   baseError: ErrorWrapper
   cachedUser: CachedUser
 
