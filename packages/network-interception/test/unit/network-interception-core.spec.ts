@@ -75,6 +75,55 @@ describe('core/merge-handler-result', () => {
     expect(resolved).toBe('http://example.com/base/relative')
     expect(before.url).toBe('http://example.com/base/relative')
   })
+
+  // https://github.com/cypress-io/cypress/issues/25767
+  it('preserves empty-string request header values set by handler', () => {
+    const before = {
+      url: 'http://example.com/',
+      headers: { foo: 'original', bar: 'keep' },
+      body: '',
+      method: 'GET',
+    } as any
+
+    const after = {
+      url: 'http://example.com/',
+      headers: { foo: '', bar: 'keep' },
+      body: '',
+      method: 'GET',
+    } as any
+
+    mergeIncomingRequestChanges(before, after, {
+      baseUrl: 'http://example.com/',
+      resolveUrl: (base, relative) => `${base}${relative}`,
+    })
+
+    expect(before.headers.foo).toBe('')
+    expect(before.headers.bar).toBe('keep')
+  })
+
+  it('removes request headers deleted or set to undefined by handler', () => {
+    const before = {
+      url: 'http://example.com/',
+      headers: { foo: 'original', bar: 'remove-me' },
+      body: '',
+      method: 'GET',
+    } as any
+
+    const after = {
+      url: 'http://example.com/',
+      headers: { foo: 'original' },
+      body: '',
+      method: 'GET',
+    } as any
+
+    mergeIncomingRequestChanges(before, after, {
+      baseUrl: 'http://example.com/',
+      resolveUrl: (base, relative) => `${base}${relative}`,
+    })
+
+    expect(before.headers.foo).toBe('original')
+    expect(before.headers.bar).toBeUndefined()
+  })
 })
 
 describe('NetworkInterceptionCore', () => {
