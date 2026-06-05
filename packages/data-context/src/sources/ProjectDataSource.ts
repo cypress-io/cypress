@@ -17,6 +17,7 @@ const debug = Debug('cypress:data-context:sources:ProjectDataSource')
 import assert from 'assert'
 
 import type { DataContext } from '..'
+import { normalizeGlobsForCwd } from './FileDataSource'
 import { toPosix } from '../util/file'
 import type { FilePartsShape } from '../../graphql/schemaTypes/objectTypes/gql-FileParts'
 import type { ProjectShape } from '../data'
@@ -306,9 +307,13 @@ export class ProjectDataSource {
     excludeSpecPattern,
     additionalIgnorePattern,
   }: FindSpecs<string[]>): Promise<SpecWithRelativeRoot[]> {
+    // We always glob the `configSpecPattern` (the project's configured spec pattern),
+    // which is the source of truth for "what is a spec". This pattern is typically
+    // scoped to the spec directory (e.g. `cypress/e2e/**/*.cy.ts`), so the filesystem
+    // traversal stays bounded.
     let specAbsolutePaths = await this.ctx.file.getFilesByGlob(
       projectRoot,
-      specPattern, {
+      configSpecPattern, {
         absolute: true,
         ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
       },
@@ -325,16 +330,19 @@ export class ProjectDataSource {
     // we do **not** want to capture `timers.ts` (source code) or a video in
     // cypress/videos/timers.cy.ts.mp4, so we take the intersection between specPattern
     // and --spec.
+    //
+    // Rather than running a second filesystem glob for `--spec` (which, for a broad
+    // pattern like `**/timers*`, forces a full-repository traversal) and intersecting
+    // the two result sets, we filter the already-globbed `configSpecPattern` matches
+    // in-memory against `--spec`. This yields the identical intersection while only
+    // touching the filesystem once. We reuse `normalizeGlobsForCwd` so the in-memory
+    // matching mirrors how `getFilesByGlob` normalizes patterns.
     if (!_.isEqual(specPattern, configSpecPattern)) {
-      const defaultSpecAbsolutePaths = await this.ctx.file.getFilesByGlob(
-        projectRoot,
-        configSpecPattern, {
-          absolute: true,
-          ignore: [...excludeSpecPattern, ...additionalIgnorePattern],
-        },
-      )
+      const normalizedSpecPattern = normalizeGlobsForCwd(projectRoot, specPattern)
 
-      specAbsolutePaths = _.intersection(specAbsolutePaths, defaultSpecAbsolutePaths)
+      specAbsolutePaths = specAbsolutePaths.filter((absolutePath) => {
+        return micromatch.isMatch(toPosix(path.relative(projectRoot, absolutePath)), normalizedSpecPattern)
+      })
     }
 
     const matched = matchedSpecs({

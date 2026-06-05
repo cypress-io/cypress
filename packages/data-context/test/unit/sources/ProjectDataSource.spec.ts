@@ -251,6 +251,46 @@ describe('findSpecs', () => {
 
     expect(specs).toHaveLength(0)
   })
+
+  it('narrows the configSpecPattern matches in-memory when --spec is passed', async () => {
+    // configSpecPattern matches all *.cy.{ts,js} (4 files), but --spec narrows to App*
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'component',
+      specPattern: ['**/App*'],
+      configSpecPattern: ['**/*.cy.{ts,js}'],
+      excludeSpecPattern: [],
+      additionalIgnorePattern: [],
+    })
+
+    expect(specs.map((s) => s.relative).sort()).toEqual([
+      'component/App.cy.js',
+      'component/App.cy.ts',
+    ])
+  })
+
+  it('only performs a single filesystem glob when --spec differs from the configured pattern', async () => {
+    const getFilesByGlob = jest.spyOn(ctx.file, 'getFilesByGlob')
+
+    const specs = await ctx.project.findSpecs({
+      projectRoot,
+      testingType: 'e2e',
+      specPattern: ['**/onboarding*'],
+      configSpecPattern: ['e2e/*.{spec,cy}.{ts,js}'],
+      excludeSpecPattern: [],
+      additionalIgnorePattern: [],
+    })
+
+    // The non-spec video (e2e/onboarding.cy.js.mp4) matches the broad --spec but not
+    // the configured pattern, so it must be excluded by the in-memory intersection.
+    expect(specs).toHaveLength(3)
+    // The broad --spec glob is no longer run against the filesystem; only the
+    // (scoped) configSpecPattern is globbed.
+    expect(getFilesByGlob).toHaveBeenCalledTimes(1)
+    expect(getFilesByGlob).toHaveBeenCalledWith(projectRoot, ['e2e/*.{spec,cy}.{ts,js}'], expect.anything())
+
+    getFilesByGlob.mockRestore()
+  })
 })
 
 describe('getLongestCommonPrefixFromPaths', () => {

@@ -13,6 +13,38 @@ export const matchGlobs = async (globs: string | string[], globbyOptions?: Globb
   return await globby(globs, globbyOptions)
 }
 
+// Normalizes glob patterns relative to `cwd` so they can be passed to globby (or
+// matched in-memory) consistently. If a pattern is prefixed with the working
+// directory it is stripped, since the working directory path may contain
+// characters that conflict with glob syntax (brackets, parentheses, etc.) and
+// we scope the search via the `cwd` globby option instead. On win32 the patterns
+// are converted to POSIX separators (globby can't work with backslashes).
+export const normalizeGlobsForCwd = (cwd: string, glob: string | string[]): string[] => {
+  const globs = ([] as string[]).concat(glob).map((globPattern) => {
+    const workingDirectoryPrefix = path.join(cwd, path.sep)
+
+    if (globPattern.startsWith(workingDirectoryPrefix)) {
+      return globPattern.replace(workingDirectoryPrefix, '')
+    }
+
+    return globPattern
+  })
+
+  if (os.platform() === 'win32') {
+    // globby can't work with backwards slashes
+    // https://github.com/sindresorhus/globby/issues/179
+    for (const i in globs) {
+      const cur = globs[i]
+
+      if (!cur) throw new Error('undefined glob received')
+
+      globs[i] = toPosix(cur)
+    }
+  }
+
+  return globs
+}
+
 export class FileDataSource {
   constructor (private ctx: DataContext) {}
 
@@ -35,36 +67,11 @@ export class FileDataSource {
   }
 
   async getFilesByGlob (cwd: string, glob: string | string[], globOptions: GlobbyOptions = {}): Promise<string[]> {
-    const globs = ([] as string[]).concat(glob).map((globPattern) => {
-      const workingDirectoryPrefix = path.join(cwd, path.sep)
-
-      // If the pattern includes the working directory, we strip it from the pattern.
-      // The working directory path may include characters that conflict with glob
-      // syntax (brackets, parentheses, etc.) and cause our searches to inadvertently fail.
-      // We scope our search to the working directory using the `cwd` globby option.
-      if (globPattern.startsWith(workingDirectoryPrefix)) {
-        return globPattern.replace(workingDirectoryPrefix, '')
-      }
-
-      return globPattern
-    })
+    const globs = normalizeGlobsForCwd(cwd, glob)
 
     const nodeModulesInGlobPath = ([] as string[]).concat(glob).some((globPattern) => globPattern.includes('node_modules'))
     const ignoreNodeModules = !!((cwd.includes('node_modules') || nodeModulesInGlobPath))
     const ignoreGlob = (globOptions.ignore ?? []).concat(ignoreNodeModules ? [] : '**/node_modules/**')
-
-    if (os.platform() === 'win32') {
-      // globby can't work with backwards slashes
-      // https://github.com/sindresorhus/globby/issues/179
-      debug('updating glob patterns to POSIX')
-      for (const i in globs) {
-        const cur = globs[i]
-
-        if (!cur) throw new Error('undefined glob received')
-
-        globs[i] = toPosix(cur)
-      }
-    }
 
     try {
       debug('globbing pattern(s): %o', globs)
