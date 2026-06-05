@@ -16,6 +16,58 @@ let counts: Counts | null = null
 
 sinon.setFormatter($utils.stringifyArg.bind($utils))
 
+// When a sinon assertion fails (e.g. `expect(spy).to.be.calledWith(...)`),
+// sinon builds the failure message by serializing *every* call the spy has
+// received (the `%C` printf token). When a spy is attached to a frequently
+// invoked method - e.g. `window.postMessage` - this call list can grow without
+// bound, so each retry of a failing assertion does progressively more work and
+// the command appears to hang for many minutes instead of failing once the
+// assertion times out.
+// https://github.com/cypress-io/cypress/issues/15005
+const MAX_FORMATTED_CALLS = 100
+
+// Cap the number of calls sinon enumerates when building assertion/log messages
+// so message construction stays bounded regardless of how many times the spy ran.
+const boundPrintf = (agent) => {
+  const { printf } = agent
+
+  if (!_.isFunction(printf) || printf._cyBound) {
+    return
+  }
+
+  const boundFn: any = function (format, ...args) {
+    const realCallCount = agent.callCount
+
+    // only the call-listing token (`%C`) scales with the number of calls, so we
+    // leave everything else untouched and only intervene when it's present and
+    // there are more calls than we're willing to serialize.
+    if (realCallCount <= MAX_FORMATTED_CALLS || !_.isString(format) || !format.includes('%C')) {
+      return printf.apply(this, [format, ...args])
+    }
+
+    try {
+      // temporarily lower callCount so sinon's `%C` token only serializes the
+      // first MAX_FORMATTED_CALLS calls instead of all of them. This only affects
+      // message construction - the pass/fail result is computed separately.
+      agent.callCount = MAX_FORMATTED_CALLS
+    } catch {
+      // callCount isn't writable in this sinon version; fall back to default behavior
+      return printf.apply(this, [format, ...args])
+    }
+
+    try {
+      const message = printf.apply(this, [format, ...args])
+
+      return `${message}\n    ...and ${realCallCount - MAX_FORMATTED_CALLS} more call(s)`
+    } finally {
+      agent.callCount = realCallCount
+    }
+  }
+
+  boundFn._cyBound = true
+  agent.printf = boundFn
+}
+
 const createSandbox = () => {
   return sinon.createSandbox().usingPromise(Promise)
 }
@@ -257,6 +309,10 @@ export default function (Commands, Cypress, cy, state) {
 
       return wrap(ctx, type, withArgs.apply(this, args), obj, method, `${count}.${childCount}`)
     }
+
+    // keep sinon's failure-message construction bounded for spies with very
+    // large call histories (https://github.com/cypress-io/cypress/issues/15005)
+    boundPrintf(agent)
 
     return agent
   }

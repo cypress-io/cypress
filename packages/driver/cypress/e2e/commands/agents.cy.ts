@@ -529,6 +529,34 @@ describe('src/cy/commands/agents', () => {
               expect(this.obj.foo).to.be.calledWith(false, false, false)
             })
           })
+
+          // https://github.com/cypress-io/cypress/issues/15005
+          // A spy on a frequently invoked method (e.g. window.postMessage) can
+          // accumulate a huge number of calls. Sinon lists every call in the
+          // failure message, which previously made each retry of a failing
+          // assertion grow without bound and the command appear to hang for
+          // many minutes instead of failing after the assertion timeout.
+          it('caps the number of calls listed when a spy has a large call history', function (done) {
+            // call the spy many more times than we're willing to serialize
+            for (let i = 0; i < 150; i++) {
+              this.obj.foo(i)
+            }
+
+            cy.on('fail', () => {
+              const message = this.lastLog.get('message')
+
+              // the listing is truncated rather than including every call
+              expect(message).to.include('more call(s)')
+              expect(message).to.include('foo(0) => "return value"')
+              expect(message).not.to.include('foo(149) => "return value"')
+
+              done()
+            })
+
+            cy.wrap(null).then(function () {
+              expect(this.obj.foo).to.be.calledWith('does-not-exist')
+            })
+          })
         })
       })
 
