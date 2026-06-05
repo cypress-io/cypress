@@ -28,6 +28,18 @@ describe('html rewriter', function () {
       expect(rewriteSriFour).toMatchSnapshot()
     })
 
+    // https://github.com/cypress-io/cypress/issues/21145
+    // parse5 drops its parsed input buffer past a 64KB waterline, which used to
+    // corrupt the raw offsets of any text node spanning that boundary and
+    // silently drop its text (e.g. form labels vanishing on large pages).
+    it('preserves text nodes that span parse5\'s internal buffer waterline', async function () {
+      const filler = `<div>${'x'.repeat(70000)}</div>`
+      const label = '<label class="classname">Job Announcement Type <span>*</span> Mandatory</label>'
+      const html = `<html><body><p>start</p>${filler}${label}</body></html>`
+
+      expect(await rewriteNoSourceMap(html)).toEqual(html)
+    })
+
     it('rewrites a real-ish document with sourcemaps for inline js', async () => {
       const actual: any = {}
 

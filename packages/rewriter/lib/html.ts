@@ -9,6 +9,17 @@ import type { DeferSourceMapRewriteFn } from './js'
 export function HtmlJsRewriter (url: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): stream.Transform {
   const rewriter = new RewritingStream()
 
+  // By default parse5 drops the already-parsed portion of its input buffer
+  // once it grows past a 64KB waterline. RewritingStream reconstructs each
+  // token's raw HTML by slicing that buffer using absolute source offsets, so
+  // any token that spans a drop boundary gets sliced with a now-invalid
+  // (negative) offset and its text is silently lost. On large pages this
+  // manifested as missing text nodes — e.g. form labels disappearing.
+  // Disabling buffer dropping keeps every offset valid; the full document is
+  // already held in memory by the rewriting pipeline regardless.
+  // @see https://github.com/cypress-io/cypress/issues/21145
+  ;(rewriter as any).tokenizer.preprocessor.bufferWaterline = Infinity
+
   htmlRules.install(url, rewriter, deferSourceMapRewrite)
 
   return rewriter
