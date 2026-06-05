@@ -80,10 +80,6 @@ describe('http/response-middleware', function () {
       return { ctx, cookie }
     }
 
-    // Regression for the stale `__cypress.unload` cookie that diverted cy.origin
-    // navigations to the client route. The flag must be expired whenever an
-    // injected app document is served - notably even when `isInitial` is false,
-    // which is how the first document of a newly switched super-domain is served.
     it('expires the __cypress.unload cookie when serving an injected document, even if not the initial request', async function () {
       const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
 

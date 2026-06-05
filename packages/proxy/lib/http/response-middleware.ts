@@ -211,10 +211,7 @@ function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value
 //
 // Whenever we serve an injected app document the primary app is loading -
 // definitively NOT in the "navigated away" state the flag exists to recover
-// from - so the flag is stale and is expired here. (We intentionally do NOT
-// gate on `res.isInitial`: when the runner switches super-domains, the first
-// document of the new super-domain is served with `isInitial === false`, and
-// that is exactly the window in which the stale flag bites.) The genuine
+// from - so the flag is stale and is expired here. The genuine
 // "navigated away" recovery is a redirect handled in the request middleware and
 // never reaches response injection, so clearing here cannot undermine it.
 function clearUnloadCookie (res: CypressOutgoingResponse, remoteState: any) {

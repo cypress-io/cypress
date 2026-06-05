@@ -10,7 +10,6 @@
 
 **Bugfixes:**
 
-- Fixed an issue where a [`cy.origin()`](https://on.cypress.io/origin) test could intermittently fail with `The command was expected to run against origin <x> but the application is at origin <y>` when a navigation (such as a login redirect) ran on the primary origin shortly after the runner switched super-domains. A stale internal `__cypress.unload` cookie could cause the proxy to redirect the navigation back to the Cypress runner instead of serving it; the cookie is now cleared whenever the application document is (re)served. Fixed in [#34020](https://github.com/cypress-io/cypress/pull/34020).
 - Fixed an issue where Cypress could load the config file through the wrong module system (for example, treating an ESM config as CommonJS), so ESM-only APIs such as `import.meta.resolve` were unavailable in config and plugin code. Cypress now picks ESM or CJS before loading, using Node.js rules from the config file extension and the nearest `package.json` `"type"`, then loads only via `import()` or `require()` and fails outright on error instead of retrying the other format:
   - `.mjs` and `.mts` always load as ESM
   - `.cjs` and `.cts` always load as CJS
@@ -33,6 +32,7 @@
 - Fixed an issue where `cy.wait('@alias')` could time out when the connection to the browser closed before an aliased intercepted request's response completed, including during navigation such as `cy.visit()`. Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 - Fixed an issue where a cross-origin navigation back to a previously-visited origin (for example, completing a login that redirects from an identity provider back to your application) could intermittently load the Cypress app interface instead of your application, causing flaky tests. Fixed in [#33991](https://github.com/cypress-io/cypress/pull/33991).
 - Fixed an issue where `cypress open --detached` blocked the CLI process until the GUI was closed rather than returning once Cypress was ready to use. Fixed in [#33972](https://github.com/cypress-io/cypress/pull/33972).
+- Fixed an issue where a [`cy.origin()`](https://on.cypress.io/origin) test could intermittently fail with `The command was expected to run against origin <x> but the application is at origin <y>` when a navigation (such as a login redirect) ran on the primary origin shortly after the runner switched super-domains. A stale internal `__cypress.unload` cookie could cause the proxy to redirect the navigation back to the Cypress runner instead of serving it; the cookie is now cleared whenever the application document is (re)served. Fixed in [#34020](https://github.com/cypress-io/cypress/pull/34020).
 
 **Misc:**
 
