@@ -1,4 +1,4 @@
-import type { ForDocumentPreparation } from '@packages/network-policy'
+import type { ForDocumentPreparation } from '@packages/network-interception'
 import { setInjectionLevel } from './set-injection-level'
 import { injectHtml } from './inject-html'
 import { removeSecurity } from './remove-security'
