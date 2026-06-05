@@ -536,12 +536,16 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         }
 
         if (options.ensure.visibility) {
-          // ensure element is visible but do not check if hidden by ancestors
-          // until nudging algorithm occurs
-          // https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
-
-          // @ts-ignore
-          Cypress.ensure.isStrictlyVisible($el, name, _log)
+          // The legacy strategy checks visibility in two stages: the element here, then
+          // — after the covering/nudging algorithm below — whether it's hidden by ancestors.
+          // The modern strategy does it in one checkVisibility-based call here, so it has
+          // no second stage. https://whimsical.com/actionability-J38eY9K2Y3vA6uCMWtmLVA
+          if (Cypress.config('visibilityStrategy') === 'modern') {
+            Cypress.ensure.isVisible($el, name, _log)
+          } else {
+            // @ts-expect-error - isStrictlyVisible is not declared on the Cypress.ensure type
+            Cypress.ensure.isStrictlyVisible($el, name, _log)
+          }
         }
 
         if (options.ensure.notReadonly) {
@@ -577,7 +581,13 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         // this calculation is relative from the viewport so we
         // only care about fromElViewport coords
         $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
-        Cypress.ensure.isNotHiddenByAncestors($el, name, _log)
+
+        // Only the legacy strategy runs this ancestor phase. The modern check above
+        // already covers ancestor display/visibility, and it intentionally omits the
+        // legacy overflow/out-of-bounds clipping check (matching modern `should('be.visible')`).
+        if (Cypress.config('visibilityStrategy') !== 'modern') {
+          Cypress.ensure.isNotHiddenByAncestors($el, name, _log)
+        }
       }
 
       // pass our final object into onReady
