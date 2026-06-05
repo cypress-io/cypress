@@ -175,6 +175,12 @@ const ensureIsDescendent = ($el1, $el2, name: string, onFail) => {
 const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, log, onScroll) {
   let $elAtCoords: JQuery<any> | null = null
 
+  // track whether we ended up scrolling a container to uncover the element.
+  // when we do, the element's coordinates change and the caller must
+  // recompute them; when we don't, the caller can safely reuse the coords
+  // it already measured and avoid a redundant reflow.
+  let didScroll = false
+
   const name = cy.state('current').get('name')
   const getElementAtPointFromViewport = function (fromElViewport) {
     // get the element at point from the viewport based
@@ -257,6 +263,8 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
         // we want to scroll in the opposite direction (up not down)
         // so just decrease the scrolled positions
         $container.scrollTop((currentScrollTop - height))
+
+        didScroll = true
 
         return $container.scrollLeft((currentScrollLeft - width))
       }
@@ -370,8 +378,9 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
     throw err
   }
 
-  // return the final $elAtCoords
-  return $elAtCoords
+  // return the final $elAtCoords along with whether a scroll occurred, so the
+  // caller knows if the element's coordinates need to be recomputed
+  return { $elAtCoords, didScroll }
 }
 
 const getCoordinatesForEl = function (cy, $el, options) {
@@ -510,6 +519,12 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
     const runAllChecks = function () {
       let $elAtCoords
 
+      // whether the covering check scrolled the element out from under a
+      // fixed/sticky element. if it did, the element moved and we must
+      // recompute its coordinates; otherwise the coords measured above are
+      // still accurate and we can skip a redundant reflow.
+      let coveringCheckScrolled = false
+
       if (force !== true) {
         // ensure it's attached
         Cypress.ensure.isElement($el, name, _log)
@@ -576,12 +591,25 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
         // to figure out if it's being covered by another element.
         // this calculation is relative from the viewport so we
         // only care about fromElViewport coords
-        $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
+        if (options.ensure.notCovered) {
+          const covered = ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)
+
+          $elAtCoords = covered.$elAtCoords
+          coveringCheckScrolled = covered.didScroll
+        } else {
+          // preserve prior behavior: when notCovered is falsy, $elAtCoords
+          // takes on that falsy value rather than running the covering check
+          $elAtCoords = options.ensure.notCovered
+        }
+
         Cypress.ensure.isNotHiddenByAncestors($el, name, _log)
       }
 
-      // pass our final object into onReady
-      const finalCoords = getCoordinatesForEl(cy, $el, options)
+      // pass our final object into onReady. the only step above that can move
+      // the element (and thus invalidate `coords`) is the covering check when
+      // it scrolls a container - so only recompute the coordinates in that
+      // case, otherwise reuse what we already measured to avoid an extra reflow
+      const finalCoords = coveringCheckScrolled ? getCoordinatesForEl(cy, $el, options) : coords
       let finalEl
 
       // When a contenteditable element is selected, we don't go deeper,
