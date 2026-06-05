@@ -618,21 +618,5 @@ describe('src/cypress/dom/visibility', {
         expect(reason).to.eq('This element `<div#multi-hidden>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
       })
     })
-
-    it('falls through to legacy reasons when modernIsHidden did not catch the element', () => {
-      // Defensive: under modern strategy, Cypress's own callers (chai, ensure) only invoke
-      // getReasonIsHidden when modernIsHidden has already returned true, so this branch is
-      // only reachable via direct user calls to `Cypress.dom.getReasonIsHidden()` on an
-      // element the modern algorithm considers visible but a legacy-only check (overflow
-      // clipping, fixed-position covering, etc.) would catch.
-      cy.visit('/fixtures/visibility/overflow.html')
-      prepareFixtureSection('overflow-hidden')
-      cy.get('[cy-section="overflow-hidden"] .testCase[cy-label="Element out of bounds right"]').then(($el) => {
-        const reason = dom.getReasonIsHidden($el)
-
-        expect(reason).to.include('content is being clipped by one of its parent elements')
-        expect(reason).to.not.include('Element.checkVisibility()')
-      })
-    })
   })
 })
