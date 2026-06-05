@@ -25,6 +25,16 @@ describe('e2e downloads', () => {
     return fs.pathExists(path.join(downloadsProject, 'cypress', 'dls', fileName))
   }
 
+  // https://github.com/cypress-io/cypress/issues/27342
+  // Chrome-only: the fix sets the `always_open_pdf_externally` Chrome
+  // preference so PDFs opened via window.open download instead of rendering
+  // inline in Chrome's PDF viewer (which stalls the run in new headless mode).
+  systemTests.it('downloads a pdf opened via window.open', {
+    browser: 'chrome',
+    project: 'downloads',
+    spec: 'download_pdf.cy.ts',
+  })
+
   systemTests.it('allows changing the downloads folder', {
     browser: '!webkit', // TODO(webkit): fix+unskip (implement downloads support)
     project: 'downloads',
