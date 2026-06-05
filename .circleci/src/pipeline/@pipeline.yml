@@ -2152,7 +2152,7 @@ jobs:
       - update_cached_system_tests_deps
 
   binary-system-tests:
-    parallelism: 5
+    parallelism: 4
     working_directory: ~/cypress
     environment:
       <<: *defaultsEnvironment
