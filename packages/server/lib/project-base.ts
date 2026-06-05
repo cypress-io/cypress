@@ -16,6 +16,7 @@ import { SocketCt } from './socket-ct'
 import { SocketE2E } from './socket-e2e'
 import { ensureProp } from './util/class-helpers'
 import * as system from './util/system'
+import { runnerDiscovery } from './runner-discovery'
 import type {
   BannersState,
   FoundBrowser,
@@ -250,6 +251,13 @@ export class ProjectBase extends EE {
       projectRoot: this.projectRoot,
     })
 
+    // Publish a discovery record so other processes can find this running
+    // Cypress by project root. Best-effort — never blocks or fails the run.
+    await runnerDiscovery.write({
+      projectRoot: this.projectRoot,
+      runnerOrigin: cfg.proxyServer || `http://localhost:${cfg.port}`,
+    })
+
     await this.saveState(stateToSave)
 
     if (cfg.isTextTerminal) {
@@ -319,6 +327,7 @@ export class ProjectBase extends EE {
 
     await Promise.all([
       this.server?.close(),
+      runnerDiscovery.remove(),
     ])
 
     this._isServerOpen = false

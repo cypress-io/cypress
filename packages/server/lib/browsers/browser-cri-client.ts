@@ -7,6 +7,7 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
+import { runnerDiscovery } from '../runner-discovery'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { CyPromptManagerShape, ProtocolManagerShape } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
@@ -255,6 +256,9 @@ export class BrowserCriClient {
       if (fullyManageTabs) {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
       }
+
+      // Record the live CDP endpoint so other processes can attach. Best-effort.
+      await runnerDiscovery.update({ cdpStatus: 'ready', cdpHost: host, cdpPort: port })
 
       return browserCriClient
     }, browserName, port)
@@ -716,6 +720,10 @@ export class BrowserCriClient {
     this.gracefulShutdown = gracefulShutdown
 
     this.onClose && this.onClose(gracefulShutdown)
+
+    // Browser is going away — clear the CDP endpoint from the discovery record
+    // while leaving the record itself (the server may still be running).
+    await runnerDiscovery.update({ cdpStatus: 'no_browser', cdpHost: null, cdpPort: null })
 
     if (this.connected === false) {
       debug('browser cri client is already closed')
