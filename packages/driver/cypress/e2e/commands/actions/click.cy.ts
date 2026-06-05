@@ -1610,6 +1610,60 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      // when an element is not covered, its coordinates do not change between the
+      // covering check and firing the event, so actionability measures them a
+      // single time per attempt rather than recomputing them redundantly.
+      it('computes the element coordinates a single time when no scroll is needed', () => {
+        const getCoords = cy.spy(Cypress.dom, 'getElementCoordinatesByPosition')
+
+        // disable waitForAnimations so actionability resolves in a single
+        // attempt, making the per-attempt coordinate count deterministic
+        cy.get('#button').click({ waitForAnimations: false }).then(() => {
+          expect(getCoords).to.be.calledOnce
+        })
+      })
+
+      // when the covering check scrolls a container to uncover the element, the
+      // element moves, so the coordinates MUST be recomputed - otherwise the
+      // event would fire at the stale, pre-scroll position.
+      it('recomputes the element coordinates after scrolling past a fixed covering element', () => {
+        const spy = cy.spy().as('mousedown')
+
+        $('<button>button covered</button>')
+        .attr('id', 'button-covered-in-nav')
+        .css({
+          width: 120,
+          height: 20,
+        })
+        .appendTo(cy.$$('#fixed-nav-test'))
+        .mousedown(spy)
+
+        $('<nav>nav on button</nav>').css({
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          padding: 20,
+          backgroundColor: 'yellow',
+          zIndex: 1,
+        }).prependTo(cy.$$('body'))
+
+        const getCoords = cy.spy(Cypress.dom, 'getElementCoordinatesByPosition')
+
+        cy.get('#button-covered-in-nav').click().then(($btn) => {
+          // the scroll path computes coordinates more than the single time an
+          // uncovered element would
+          expect(getCoords.callCount).to.be.greaterThan(1)
+
+          // the click must land at the post-scroll coordinates, which is only
+          // correct if the final coordinates were recomputed after the nudge
+          const { fromElViewport } = Cypress.dom.getElementCoordinatesByPosition($btn)
+          const obj = spy.firstCall.args[0]
+
+          expect(obj).property('clientX').closeTo(fromElViewport.leftCenter, 1)
+          expect(obj).property('clientY').closeTo(fromElViewport.topCenter, 1)
+        })
+      })
+
       it('waits until element becomes visible', () => {
         const $btn = cy.$$('#button').hide()
 
