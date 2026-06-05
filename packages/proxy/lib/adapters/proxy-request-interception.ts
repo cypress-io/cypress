@@ -1,4 +1,4 @@
-import type { ForRequestInterception } from '@packages/network-policy'
+import type { ForRequestInterception } from '@packages/network-interception'
 import { correlateBrowserPreRequest } from './correlate-browser-pre-request'
 import { sendRequestOutgoing } from './send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'

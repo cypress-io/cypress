@@ -99,7 +99,7 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
 }
 
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
-  return this.networkPolicyCore.correlateBrowserPreRequest(this)
+  return this.networkInterceptionCore.correlateBrowserPreRequest(this)
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
@@ -403,7 +403,7 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
 }
 
 const SendRequestOutgoing: RequestMiddleware = function () {
-  this.networkPolicyCore.forwardToOrigin(this)
+  this.networkInterceptionCore.forwardToOrigin(this)
 }
 
 export default {

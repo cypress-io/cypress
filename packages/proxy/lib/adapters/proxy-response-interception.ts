@@ -1,4 +1,4 @@
-import type { ForResponseInterception } from '@packages/network-policy'
+import type { ForResponseInterception } from '@packages/network-interception'
 import { handleInterceptResponse } from '@packages/net-stubbing/lib/server/handle-intercept-response'
 import type { ResponseInterceptionMiddlewareCtx } from './types'
 
