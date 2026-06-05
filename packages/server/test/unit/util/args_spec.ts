@@ -523,6 +523,7 @@ describe('lib/util/args', () => {
         config: 'config',
         configFile: 'configFile',
         cwd: 'cwd',
+        emitWhenReady: true,
         env: 'env',
         execPath: 'execPath',
         exit: 'exit',
@@ -562,6 +563,7 @@ describe('lib/util/args', () => {
         '--config=config',
         '--configFile=configFile',
         '--cwd=cwd',
+        '--emitWhenReady=true',
         '--env=env',
         '--execPath=execPath',
         '--exit=exit',
@@ -647,6 +649,10 @@ describe('lib/util/args', () => {
       expect(toObject(['--no-record']).record).to.be.false
 
       expect(toObject(['--record=false']).record).to.be.false
+    })
+
+    it('parses --emit-when-ready', function () {
+      expect(toObject(['--emit-when-ready']).emitWhenReady).to.be.true
     })
 
     it('backs up env, config, reporterOptions, spec', function () {

@@ -548,7 +548,7 @@ declare global {
       })
       ```
       */
-      wait<TRequest = any, TResponse = any>(alias: string, options?: Partial<WaitOptions>): Chainable<Interception<TRequest, TResponse>>
+      wait<TRequest = any, TResponse = any>(alias: `@${string}`, options?: Partial<WaitOptions>): Chainable<Interception<TRequest, TResponse>>
       /**
        * Wait for list of requests to complete.
        *
@@ -568,7 +568,7 @@ declare global {
         })
       ```
       */
-      wait(aliases: string[], options?: Partial<WaitOptions>): Chainable<Interception[]>
+      wait(aliases: `@${string}`[], options?: Partial<WaitOptions>): Chainable<Interception[]>
     }
   }
 }

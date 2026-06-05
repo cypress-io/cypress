@@ -2,7 +2,7 @@
 
 Types and **port interfaces** for Cypress network interception (`cy.intercept`, config policies, proxy middleware). Part of the stacked refactor in [#33919](https://github.com/cypress-io/cypress/issues/33919) to support HTTP/2 (CDP Fetch / BiDi) without rewriting intercept logic.
 
-> **Stack stage 0 of 8.** Package scaffold: shared types, port interface stubs, `createProxyRuntime()` composition root. **No behavior change.**
+> **Stack stage 3 of 8.** **Core** extracted: `NetworkInterceptionCore` owns pure route matching, subscription planning, and handler merge. Net-stubbing and proxy middleware delegate through the core. Policy registry still not invoked from middleware.
 
 ---
 
@@ -16,84 +16,52 @@ The codebase adopts **hexagonal architecture** (also called **ports and adapters
 
 ## Hexagonal terms → this repo
 
-In hexagonal architecture, a **port** is a boundary interface; an **adapter** is the code on the other side of that boundary that talks to the real world. We use normal TypeScript `interface` types as ports and prefix them with `For`.
-
 | Hex term | Role | In this monorepo |
 | --- | --- | --- |
 | **Port** | Contract at the edge of the interception "inside" | `For*` types in `lib/ports/` |
 | **Adapter** | Implements a port by delegating to existing Cypress code | `*Adapter` classes under `packages/*/lib/adapters/` |
-| **Driving port** (primary) | Outside actors **call into** interception — they drive the app | `ForInterceptRegistration` (driver IPC), `ForNetworkPolicyRegistration` (config) |
-| **Driven port** (secondary) | Interception **calls out** for I/O and side effects | `ForRequestInterception`, `ForCookieState`, `ForCommandLog`, … |
-| **Core** | Domain logic with no proxy/CDP imports; orchestrates ports | `NetworkPolicyCore` (stage 3; renamed `NetworkInterceptionCore` in stage 7) |
-| **Composition root** | Where concrete adapters are constructed and injected | `createProxyRuntime()` in `packages/server/lib/network-runtime.ts` |
+| **Driving port** (primary) | Outside actors **call into** interception | `ForInterceptRegistration`, `ForNetworkPolicyRegistration` |
+| **Driven port** (secondary) | Interception **calls out** for I/O | `ForRequestInterception`, `ForCookieState`, … |
+| **Core** | Domain orchestration without transport imports | **`NetworkInterceptionCore`** (`lib/core/`) — this stage |
+| **Composition root** | Constructs and injects adapters + core | `createProxyRuntime()` |
 
-**Direction mnemonic:** *Driving* = something external drives work **in**. *Driven* = the core drives work **out** to infrastructure.
-
-```
-                    DRIVING PORTS (inbound)
-              driver IPC          config policies
-                    │                    │
-                    ▼                    ▼
-         ┌──────────────────────────────────────┐
-         │  @packages/network-interception      │
-         │  types · port interfaces · (later)   │
-         │  core orchestration                  │
-         └──────────────────────────────────────┘
-                    │
-                    │ calls driven ports
-                    ▼
-              DRIVEN PORTS (outbound)
-    forward HTTP · cookies · HTML inject · command log · CDP (future)
-                    │
-                    ▼
-         adapters in proxy / net-stubbing / driver
-```
-
-This package holds **ports and (later) core** — not adapters. Adapters stay in the package that owns the legacy implementation so we wrap rather than relocate thousands of lines at once.
-
-**Dependency rule:** `@packages/network-interception` must not import `@packages/proxy` or `@packages/net-stubbing`. Adapters import ports; not the reverse.
+The **core** is the hexagonal "inside": it may call **driven ports** (once wired in stages 4–6) but must not import proxy or net-stubbing directly.
 
 ---
 
-## What stage 0 delivers
+## What stage 3 delivers
 
-### Shared types (`lib/types/`)
+### `NetworkInterceptionCore` (`lib/core/network-interception-core.ts`)
 
-`NetEvent`, route/handler types moved from net-stubbing. Net-stubbing re-exports for backward compatibility:
+Pure intercept orchestration moved out of net-stubbing middleware:
 
-```typescript
-export * from '@packages/network-interception/lib/types/external-types'
+| Module | Responsibility |
+| --- | --- |
+| `route-matching.ts` | `matchRoutes`, `doesRouteMatch`, preflight matching |
+| `plan-subscriptions.ts` | Which routes subscribe to which request events |
+| `merge-handler-result.ts` | Merge driver handler results into `IncomingHttpRequest` |
+| `matcher-fields.ts` | String matcher field metadata |
+
+Net-stubbing keeps **I/O** in `handle-intercept-request.ts` (body streaming, `InterceptedRequest` lifecycle). Middleware calls the core for decisions, then legacy I/O for side effects.
+
+### Wiring
+
+```
+createProxyRuntime()
+  → new NetworkInterceptionCore()
+  → passed to NetworkProxy as networkInterceptionCore on Http ctx
+
+net-stubbing request middleware
+  → ctx.networkInterceptionCore.matchRoutes / handleRequest / …
+  → handleInterceptRequest() for streaming I/O
 ```
 
-### Port stubs (`lib/ports/`)
+Driven ports on the core constructor exist but are **optional stubs** until stages 4–6 populate them via adapters.
 
-All driving and driven ports are **declared**; methods are empty or minimal until later stack PRs. The names and file split (`driving-ports.ts` vs `driven-ports.ts`) follow hex primary/secondary port layout.
+### Prior stages (unchanged behavior)
 
-| Port | Hex kind | First adapter (stage) |
-| --- | --- | --- |
-| `ForInterceptRegistration` | Driving | `DriverInterceptRegistrationAdapter` (1) |
-| `ForNetworkPolicyRegistration` | Driving | `ConfiguratorNetworkPolicyAdapter` (2) |
-| `ForRequestInterception` | Driven | `ProxyRequestInterceptionAdapter` (4) |
-| `ForResponseInterception` | Driven | (4) |
-| `ForDocumentPreparation` | Driven | (5) |
-| `ForNetworkCapture` | Driven | (6) |
-| `ForCookieState` | Driven | (6) |
-| `ForCommandLog` | Driven | (6) |
-| `ForBrowserNetworkAutomation` | Driven | HTTP/2 epic (stub) |
-
-### Runtime facade (`lib/runtime.ts`)
-
-`NetworkInterceptionRuntime` — server-level handle so the composition root can eventually swap proxy-default vs browser-automation runtimes without rewriting `ServerBase`.
-
-### Composition root extraction
-
-`ServerBase` no longer constructs `NetworkProxy` inline; it calls `createProxyRuntime()`. Middleware stack and behavior are unchanged — this PR only names the wiring point where adapters will be injected in later stages.
-
----
-
-## HTTP/2 and the driven-port boundary
-
-Today, outbound HTTP uses the MITM proxy and Node `http.request` (via `ForRequestInterception.forwardToOrigin` once implemented in stage 4). The HTTP/2 path will use **different driven-port adapters** (CDP Fetch) for the same core. Driving ports (`cy.intercept` registration) stay the same.
+- **Stage 1:** `ForInterceptRegistration` — [`packages/net-stubbing/lib/adapters/README.md`](../net-stubbing/lib/adapters/README.md)
+- **Stage 2:** `ForNetworkPolicyRegistration` + registry — [`packages/server/lib/adapters/README.md`](../../server/lib/adapters/README.md)
 
 ---
 
@@ -101,14 +69,12 @@ Today, outbound HTTP uses the MITM proxy and Node `http.request` (via `ForReques
 
 | Stage | Branch | Adds |
 | --- | --- | --- |
-| **0** | `refactor/ports-adapters-0` | Package, types, port stubs, composition root |
-| 1 | `refactor/ports-adapters-1` | First driving-port adapter (driver IPC) |
-| 2 | `refactor/ports-adapters-2` | Policy registry driving port |
-| 3 | `refactor/ports-adapters-3` | Core extraction |
-| 4–6 | … | Driven-port adapters (proxy, driver) |
-| 7 | `refactor/ports-adapters-7` | Core rename, policy enforcement wired |
+| 0–2 | … | Package, driving ports, policy registry |
+| **3** | **`refactor/ports-adapters-3`** | **`NetworkInterceptionCore`** |
+| 4 | `refactor/ports-adapters-4` | Driven-port adapters (request/response) |
+| 5–7 | … | Document prep, capture/cookies, enforcement |
 
-[#33919](https://github.com/cypress-io/cypress/issues/33919) has the full program diagram.
+[#33919](https://github.com/cypress-io/cypress/issues/33919)
 
 ---
 
@@ -116,6 +82,7 @@ Today, outbound HTTP uses the MITM proxy and Node `http.request` (via `ForReques
 
 ```bash
 yarn workspace @packages/network-interception test
-yarn workspace @packages/network-interception check-ts
+yarn workspace @packages/net-stubbing test
+yarn workspace @packages/proxy test
 yarn workspace @packages/server test-unit --grep network-runtime
 ```

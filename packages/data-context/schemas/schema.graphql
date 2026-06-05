@@ -1274,6 +1274,7 @@ enum ErrorTypeEnum {
   INJECT_DOCUMENT_DOMAIN_DEPRECATION
   INJECT_DOCUMENT_DOMAIN_E2E_ONLY
   INVALID_CONFIG_OPTION
+  INVALID_CYPRESS_ENV_OVERRIDE
   INVALID_CYPRESS_INTERNAL_ENV
   INVALID_REPORTER_NAME
   INVOKED_BINARY_OUTSIDE_NPM_MODULE
@@ -1556,6 +1557,11 @@ type Mutation {
     open: Boolean
     path: String
   ): Query
+
+  """
+  Clear the auto-provisioned project ID after the user dismisses the manual setup modal
+  """
+  clearAutoProvisionedProjectId: Boolean
 
   """Clears the currently active project"""
   clearCurrentProject: Query
@@ -1865,6 +1871,11 @@ type PushFragmentPayload {
 type Query {
   """The latest state of the auth process"""
   authState: AuthState!
+
+  """
+  Project ID auto-provisioned during signup that could not be written to the config file automatically
+  """
+  autoProvisionedProjectId: String
   baseError: ErrorWrapper
   cachedUser: CachedUser
 
