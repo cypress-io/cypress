@@ -5,21 +5,22 @@
 <body>
   <script>
     // Reproduces https://github.com/cypress-io/cypress/issues/26029:
-    // clicking the button dynamically creates a form, sets target="_top",
-    // and submits it programmatically via form.submit() — which does NOT
-    // dispatch a `submit` event, so it bypasses the capture-phase guard.
-    function submitDynamicForm () {
+    // clicking the button dynamically creates a form, sets an obstructive
+    // target, and submits it programmatically via form.submit() — which does
+    // NOT dispatch a `submit` event, so it bypasses the capture-phase guard.
+    function submitDynamicForm (target) {
       const form = document.createElement('form')
 
       form.method = 'GET'
       form.action = '/fixtures/dom.html'
-      form.target = '_top'
+      form.target = target
 
       document.body.appendChild(form)
       form.submit()
     }
   </script>
 
-  <button id="submit" onclick="submitDynamicForm()">Submit</button>
+  <button id="submit" onclick="submitDynamicForm('_top')">Submit _top</button>
+  <button id="submit-uppercase" onclick="submitDynamicForm('_TOP')">Submit _TOP</button>
 </body>
 </html>

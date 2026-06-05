@@ -70,7 +70,11 @@ export function handleInvalidTarget (el: HTMLFormElement | HTMLAnchorElement) {
   let targetValue = el.target
   let targetSet = el.hasAttribute('target')
 
-  if (invalidTargets.has(el.target)) {
+  // `_top` / `_parent` are matched ASCII case-insensitively at navigation time,
+  // so `<form target="_TOP">` is just as obstructive as the lowercase form. Compare
+  // against the lowercased value (mirroring `neutralizeUnsafeBaseTarget`) while
+  // leaving `targetValue` untouched to preserve the element's apparent casing.
+  if (invalidTargets.has(el.target.toLowerCase())) {
     el.target = ''
   }
 
@@ -138,6 +142,12 @@ type PatchableSubmit = HTMLFormElement['submit'] & { __cypressPatched?: boolean 
  * @see https://github.com/cypress-io/cypress/issues/26029
  */
 export const patchFormElementSubmit = (window: Window) => {
+  // Defensive: every browsing context exposes `HTMLFormElement`, but guard anyway
+  // so a malformed window can never throw here and abort the caller's setup.
+  if (!window.HTMLFormElement) {
+    return
+  }
+
   const originalSubmit = window.HTMLFormElement.prototype.submit as PatchableSubmit
 
   // The guards are (re)bound on every AUT load — and more than once per load in

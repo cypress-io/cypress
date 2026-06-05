@@ -1117,12 +1117,6 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
   private contentWindowListeners (contentWindow) {
     const cy = this
 
-    // The capture-phase submit guard in `bindToListeners` only fires for real
-    // `submit` events. Programmatic `form.submit()` skips that path, so patch
-    // the prototype to neutralize `_top`/`_parent` targets there too.
-    // https://github.com/cypress-io/cypress/issues/26029
-    patchFormElementSubmit(contentWindow)
-
     bindToListeners(contentWindow, {
       // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
       onError: (handlerType) => (event) => {
@@ -1184,6 +1178,13 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
         return ret
       },
     })
+
+    // The capture-phase submit guard above only fires for real `submit` events;
+    // programmatic `form.submit()` skips it. Patch the prototype to neutralize
+    // `_top`/`_parent` targets there too. Done after `bindToListeners` so the
+    // core listeners are always bound even if this best-effort patch were to fail.
+    // https://github.com/cypress-io/cypress/issues/26029
+    patchFormElementSubmit(contentWindow)
   }
 
   private enqueue (command: $Command) {
