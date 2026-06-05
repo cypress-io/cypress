@@ -448,28 +448,29 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if
-    // 1. we're a cross-origin log tracked on the primary origin (the log on that origin will send their snapshot!)
-    // 2. we're in headless mode
-    // 3. or we're not storing tests and the protocol is not enabled
+    // A snapshot is only worth taking when something will actually consume it:
+    // - the in-browser command-log reporter (interactive mode, while tests are
+    //   retained in memory for time-travel), or
+    // - the Test Replay capture protocol.
+    // Cross-origin logs tracked on the primary origin are skipped here because
+    // the secondary (spec bridge) origin sends its own snapshot.
     //
-    // PERF / Test Replay NOTE: because `&&` binds tighter than `||`, in headless
-    // run mode (`!isInteractive`, where `numTestsKeptInMemory` is forced to 0)
-    // this only bails when the protocol is disabled. With Test Replay enabled we
-    // fall through and call `cy.createSnapshot` for every command, which clones
-    // the entire DOM body (see `createSnapshotBody` in cy/snapshots.ts). That
-    // body is effectively redundant for Test Replay: the command-log snapshot's
-    // `body`/`htmlAttrs` are dropped at ingestion, the replayed DOM is captured
-    // via a separate path (cy:protocol-snapshot -> dom:full-snapshot), and the
-    // capture protocol may even replace `cy.createSnapshot` outright when
-    // `numTestsKeptInMemory === 0`. Skipping the clone here is a known
-    // optimization but must be coordinated with the Test Replay capture service
-    // (which can override this fn for some testing types). See
+    // PERF / Test Replay NOTE: in a headless run recorded with Test Replay,
+    // `protocolWillUseSnapshot` is true, so we take a per-command snapshot that
+    // clones the entire DOM body (see `createSnapshotBody` in cy/snapshots.ts).
+    // That body is effectively redundant for Test Replay — the command-log
+    // snapshot's `body`/`htmlAttrs` are dropped at ingestion, the replayed DOM is
+    // captured via a separate path (cy:protocol-snapshot -> dom:full-snapshot),
+    // and the capture protocol may even replace `cy.createSnapshot` outright when
+    // `numTestsKeptInMemory === 0`. Skipping the clone for headless protocol runs
+    // is a known optimization, but must be coordinated with the Test Replay
+    // capture service (which can override this fn for some testing types). See
     // https://github.com/cypress-io/cypress/pull/34026
-    if (
-      (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
-      || (!this.config('isInteractive')
-      || (this.config('numTestsKeptInMemory') === 0)) && !this.state('isProtocolEnabled')) {
+    const isCrossOriginLogOnPrimary = !Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog')
+    const reporterWillUseSnapshot = this.config('isInteractive') && this.config('numTestsKeptInMemory') !== 0
+    const protocolWillUseSnapshot = this.state('isProtocolEnabled')
+
+    if (isCrossOriginLogOnPrimary || (!reporterWillUseSnapshot && !protocolWillUseSnapshot)) {
       return this
     }
 
