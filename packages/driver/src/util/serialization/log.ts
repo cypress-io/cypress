@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import { isSerializableInCurrentBrowser, preprocessForSerialization } from './index'
 import $dom from '../../dom'
-import { shouldOmitSnapshotBody } from '../../cy/snapshots'
 
 interface PreprocessedHTMLElement {
   tagName: string
@@ -334,11 +333,10 @@ const reifyLogLikeFromSerialization = (props, matchElementsAgainstSnapshotDOM = 
  * @returns a serializable form of a snapshot, including a serializable <body> with styles
  */
 export const preprocessSnapshotForSerialization = (snapshot) => {
-  // in a headless protocol run the snapshot is already metadata-only and
-  // serializable, so there is nothing to preprocess. Outside that case (Open
-  // Mode, or driver tests that set numTestsKeptInMemory to 1 to verify the
-  // snapshots) the snapshot carries a body that must be preprocessed.
-  if (shouldOmitSnapshotBody()) {
+  // if the protocol is enabled, we don't need to preprocess the snapshot since it is serializable,
+  // also make sure numTestsKeptInMemory is 0, otherwise we will want to preprocess the snapshot
+  // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
+  if (Cypress.state('isProtocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0) {
     return snapshot
   }
 
@@ -423,11 +421,10 @@ export const preprocessLogForSerialization = (logAttrs) => {
 export const reifyLogFromSerialization = (logAttrs) => {
   let { snapshots, ... logAttrsRest } = logAttrs
 
-  // in a headless protocol run the snapshot came in metadata-only and already
-  // serializable, so there is nothing to reify. Outside that case (Open Mode,
-  // or driver tests that set numTestsKeptInMemory to 1 to verify the snapshots)
-  // the snapshot carries a body that must be reified.
-  if (snapshots && !shouldOmitSnapshotBody()) {
+  // if the protocol is enabled, we don't need to reify the snapshot since the snapshot was serializable coming into the primary instance of Cypress.
+  // also make sure numTestsKeptInMemory is 0, otherwise we will want to preprocess the snapshot
+  // (the driver test's set numTestsKeptInMemory to 1 in run mode to verify the snapshots)
+  if (snapshots && !(Cypress.state('isProtocolEnabled') && Cypress.config('numTestsKeptInMemory') === 0)) {
     snapshots = snapshots.filter((snapshot) => !!snapshot).map((snapshot) => reifySnapshotFromSerialization(snapshot))
   }
 

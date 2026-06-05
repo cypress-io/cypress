@@ -452,6 +452,20 @@ export class Log {
     // 1. we're a cross-origin log tracked on the primary origin (the log on that origin will send their snapshot!)
     // 2. we're in headless mode
     // 3. or we're not storing tests and the protocol is not enabled
+    //
+    // PERF / Test Replay NOTE: because `&&` binds tighter than `||`, in headless
+    // run mode (`!isInteractive`, where `numTestsKeptInMemory` is forced to 0)
+    // this only bails when the protocol is disabled. With Test Replay enabled we
+    // fall through and call `cy.createSnapshot` for every command, which clones
+    // the entire DOM body (see `createSnapshotBody` in cy/snapshots.ts). That
+    // body is effectively redundant for Test Replay: the command-log snapshot's
+    // `body`/`htmlAttrs` are dropped at ingestion, the replayed DOM is captured
+    // via a separate path (cy:protocol-snapshot -> dom:full-snapshot), and the
+    // capture protocol may even replace `cy.createSnapshot` outright when
+    // `numTestsKeptInMemory === 0`. Skipping the clone here is a known
+    // optimization but must be coordinated with the Test Replay capture service
+    // (which can override this fn for some testing types). See
+    // https://github.com/cypress-io/cypress/pull/34026
     if (
       (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
       || (!this.config('isInteractive')
