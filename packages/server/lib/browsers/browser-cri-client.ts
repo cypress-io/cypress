@@ -570,6 +570,15 @@ export class BrowserCriClient {
       throw new Error('Cannot close target because no target is currently attached')
     }
 
+    // Capture which auxiliary CDP targets were actually attached before the
+    // reset so we only recreate those afterwards. In a typical headless
+    // `cypress run`, cy-prompt and studio are never connected, so cloning them
+    // on every spec only creates and tears down CDP connections that nothing
+    // uses.
+    const hadProtocolTarget = !!this.currentlyAttachedProtocolTarget
+    const hadCyPromptTarget = !!this.currentlyAttachedCyPromptTarget
+    const hadStudioTarget = !!this.currentlyAttachedStudioTarget
+
     let target
 
     // If we are keeping a tab open, we need to first launch a new default tab prior to closing the existing one
@@ -625,23 +634,30 @@ export class BrowserCriClient {
 
       const currentTarget = this.currentlyAttachedTarget
 
-      const createProtocolTarget = async () => {
-        this.currentlyAttachedProtocolTarget = await currentTarget.clone()
+      // Only recreate the auxiliary CDP targets that were attached before the
+      // reset. The lazy `connect*ToBrowser` paths will recreate a clone on
+      // demand if one of these features connects later.
+      const recreateTargets: Promise<void>[] = []
+
+      if (hadProtocolTarget) {
+        recreateTargets.push((async () => {
+          this.currentlyAttachedProtocolTarget = await currentTarget.clone()
+        })())
       }
 
-      const createCyPromptTarget = async () => {
-        this.currentlyAttachedCyPromptTarget = await currentTarget.clone()
+      if (hadCyPromptTarget) {
+        recreateTargets.push((async () => {
+          this.currentlyAttachedCyPromptTarget = await currentTarget.clone()
+        })())
       }
 
-      const createStudioTarget = async () => {
-        this.currentlyAttachedStudioTarget = await currentTarget.clone()
+      if (hadStudioTarget) {
+        recreateTargets.push((async () => {
+          this.currentlyAttachedStudioTarget = await currentTarget.clone()
+        })())
       }
 
-      await Promise.all([
-        createProtocolTarget(),
-        createCyPromptTarget(),
-        createStudioTarget(),
-      ])
+      await Promise.all(recreateTargets)
     } else {
       this.currentlyAttachedTarget = undefined
       this.currentlyAttachedProtocolTarget = undefined

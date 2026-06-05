@@ -672,6 +672,63 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedStudioTarget.queue.subscriptions[0].cb)
     })
 
+    it('only recreates auxiliary targets that were attached before the reset', async function () {
+      const mockCurrentlyAttachedTarget = {
+        targetId: '100',
+        close: sinon.stub().resolves(sinon.stub().resolves()),
+        queue: {
+          subscriptions: [{
+            eventName: 'Network.requestWillBeSent',
+            cb: sinon.stub(),
+          }],
+        },
+      }
+
+      const mockCurrentlyAttachedProtocolTarget = {
+        targetId: '100',
+        close: sinon.stub().resolves(sinon.stub().resolves()),
+        queue: {
+          subscriptions: [{
+            eventName: 'Network.requestWillBeSent',
+            cb: sinon.stub(),
+          }],
+        },
+      }
+
+      const mockUpdatedCurrentlyAttachedProtocolTarget = {
+        targetId: '101',
+      }
+
+      const cloneStub = sinon.stub().returns(mockUpdatedCurrentlyAttachedProtocolTarget)
+
+      const mockUpdatedCurrentlyAttachedTarget = {
+        targetId: '101',
+        clone: cloneStub,
+      }
+
+      send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
+      send.withArgs('Target.closeTarget', { targetId: '100' }).resolves()
+
+      const browserClient = await getClient() as any
+
+      criClientCreateStub.withArgs({ target: '101', onAsynchronousError: onError, host: HOST, port: PORT, protocolManager: undefined, fullyManageTabs: undefined, browserClient: browserClient.browserClient }).resolves(mockUpdatedCurrentlyAttachedTarget)
+
+      // cy-prompt and studio are never attached in a typical headless run
+      browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+      browserClient.currentlyAttachedProtocolTarget = mockCurrentlyAttachedProtocolTarget
+      browserClient.currentlyAttachedCyPromptTarget = undefined
+      browserClient.currentlyAttachedStudioTarget = undefined
+      browserClient.browserClient.off = sinon.stub()
+
+      await browserClient.resetBrowserTargets(true)
+
+      // only the protocol target is recreated; cy-prompt and studio are left undefined
+      expect(cloneStub).to.be.calledOnce
+      expect(browserClient.currentlyAttachedProtocolTarget).to.eql(mockUpdatedCurrentlyAttachedProtocolTarget)
+      expect(browserClient.currentlyAttachedCyPromptTarget).to.be.undefined
+      expect(browserClient.currentlyAttachedStudioTarget).to.be.undefined
+    })
+
     it('closes the currently attached target without keeping a tab open', async function () {
       const mockCurrentlyAttachedTarget = {
         targetId: '100',
