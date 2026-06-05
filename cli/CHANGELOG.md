@@ -10,6 +10,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where tests in Chrome and Electron could fail when the application made cross-origin requests to local or private network addresses (for example, a login or OAuth flow that redirects between local development hosts). Chrome 141 began enforcing Local Network Access checks that gate such requests behind a permission prompt the automated browser cannot answer. Cypress now opts out of these checks so these requests succeed as they did in Chrome 140. Fixes [#32708](https://github.com/cypress-io/cypress/issues/32708).
 - Fixed an issue where Cypress could load the config file through the wrong module system (for example, treating an ESM config as CommonJS), so ESM-only APIs such as `import.meta.resolve` were unavailable in config and plugin code. Cypress now picks ESM or CJS before loading, using Node.js rules from the config file extension and the nearest `package.json` `"type"`, then loads only via `import()` or `require()` and fails outright on error instead of retrying the other format:
   - `.mjs` and `.mts` always load as ESM
   - `.cjs` and `.cts` always load as CJS
