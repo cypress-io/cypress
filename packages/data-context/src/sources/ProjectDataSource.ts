@@ -539,7 +539,7 @@ export class ProjectDataSource {
 
   getUnmatchedPatterns (patterns: string[], specs: SpecWithRelativeRoot[]): string[] {
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
-    const specRelativePaths = specs.map((s) => s.relative)
+    const specRelativePaths = specs.map((s) => s.relative).filter((p): p is string => typeof p === 'string')
 
     return patterns.filter((pattern) => {
       return !specRelativePaths.some((specPath) => minimatch(specPath, pattern, MINIMATCH_OPTIONS))
