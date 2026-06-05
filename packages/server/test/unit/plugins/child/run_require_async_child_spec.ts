@@ -24,7 +24,7 @@ describe('lib/plugins/child/run_require_async_child', () => {
         message: 'error message',
       }
 
-      return runRequireAsyncChild(this.ipc, 'cypress.config.js', 'proj-root')
+      return runRequireAsyncChild(this.ipc, 'cypress.config.js', 'proj-root', false)
     })
 
     it('sends the serialized error via ipc on process uncaughtException', function () {

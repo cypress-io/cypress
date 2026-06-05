@@ -141,4 +141,85 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
 
     cy.log('after')
   })
+
+  context('#consoleProps', () => {
+    const getOriginLog = (logs: any[]) => _.findLast(logs, (log) => log.get('name') === 'origin')
+
+    // capture the live log objects as they are added/changed so we can inspect
+    // the parent `origin` command's consoleProps. The assertions below use a
+    // retrying `.should()` since the final log:changed may not have flushed yet.
+    const captureLogs = (logs: any[]) => {
+      const capture = (_attrs, log) => logs.push(log)
+
+      cy.on('log:added', capture)
+      cy.on('log:changed', capture)
+    }
+
+    beforeEach(() => {
+      cy.visit('/fixtures/primary-origin.html')
+      cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+    })
+
+    it('includes the command name/type, origin, args, and serializable yielded subject', () => {
+      const logs: any[] = []
+
+      captureLogs(logs)
+
+      cy.origin('http://www.foobar.com:3500', { args: { foo: 'bar' } }, () => {
+        cy.wrap('foobar')
+      })
+
+      cy.wrap({}).should(() => {
+        const originLog = getOriginLog(logs)
+
+        expect(originLog, 'origin log').to.exist
+
+        const consoleProps = originLog.invoke('consoleProps')
+
+        expect(consoleProps.name).to.equal('origin')
+        expect(consoleProps.type).to.equal('command')
+        expect(consoleProps.props['Origin / Domain']).to.equal('http://www.foobar.com:3500')
+        expect(consoleProps.props.Args).to.deep.equal({ foo: 'bar' })
+        expect(consoleProps.props.Yielded).to.equal('foobar')
+
+        // the reporter deep clones consoleProps before printing - must not throw
+        expect(() => _.cloneDeep(consoleProps)).not.to.throw()
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/27385
+    // When the callback yields an unserializable subject, cy.origin yields an
+    // unserializable subject proxy that throws when accessed or cloned. Printing
+    // the consoleProps to the console (which deep clones them) must not throw.
+    it('does not throw when the yielded subject is unserializable', () => {
+      const logs: any[] = []
+
+      captureLogs(logs)
+
+      cy.origin('http://www.foobar.com:3500', () => {
+        // a Symbol cannot be structured-cloned back across origins, so cy.origin
+        // yields an unserializable subject proxy
+        return { key: Symbol('') }
+      })
+
+      cy.wrap({}).should(() => {
+        const originLog = getOriginLog(logs)
+
+        expect(originLog, 'origin log').to.exist
+
+        let consoleProps
+
+        expect(() => {
+          consoleProps = originLog.invoke('consoleProps')
+        }).not.to.throw()
+
+        // the reporter deep clones the consoleProps before printing them to the
+        // console - this is what threw against the unserializable subject proxy
+        expect(() => _.cloneDeep(consoleProps)).not.to.throw()
+
+        // the unserializable subject is represented by its type, never the proxy
+        expect(consoleProps.props.Yielded).to.equal('[unserializable: object]')
+      })
+    })
+  })
 })

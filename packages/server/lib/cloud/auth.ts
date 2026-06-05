@@ -132,7 +132,7 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
         return redirectToStatus('error')
       }
 
-      const { state, name, email, access_token } = req.query
+      const { state, name, email, access_token, project_slug } = req.query
 
       if (state === authState && access_token) {
         const userObj = {
@@ -141,9 +141,14 @@ const launchServer = (baseLoginUrl, sendMessage, utmSource, utmMedium, utmConten
           authToken: access_token,
         }
 
+        const callbackObj = {
+          ...userObj,
+          ...(project_slug ? { projectSlug: project_slug } : {}),
+        }
+
         return user.set(userObj)
         .then(() => {
-          authCallback(undefined, userObj)
+          authCallback(undefined, callbackObj)
           redirectToStatus('success')
         })
         .catch((err) => {
