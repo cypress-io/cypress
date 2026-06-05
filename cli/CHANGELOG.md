@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.17.0
 
+**Performance:**
+
+- Recorded `cypress run` executions with Test Replay enabled now run faster and use less memory. Cypress previously cloned the entire DOM on every command to build a command-log snapshot that Test Replay already captured through a separate mechanism and then discarded, so this redundant per-command work is now skipped in run mode without changing what Test Replay records or how it replays. The improvement is most noticeable on tests that run against large or style-heavy pages. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+
 **Features:**
 
 - When signing up to Cypress Cloud from the Cypress desktop app, if a project is auto-provisioned during signup, Cypress now automatically writes the `projectId` to the `cypress.config` file. If the file cannot be written, a modal is shown with the project ID as a copyable snippet and a link to open the config file directly in your IDE. Addressed in [#33976](https://github.com/cypress-io/cypress/pull/33976).
