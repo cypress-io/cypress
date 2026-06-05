@@ -18,22 +18,22 @@ const defaultBaseUrl = 'https://download.cypress.io/'
 const defaultMaxRedirects = 10
 
 const getProxyForUrlWithNpmConfig = (url: string): string | null => {
-  let proxy = getProxyForUrl(url)
-
   // proxy-from-env (like curl) only applies HTTP_PROXY to http urls and
   // HTTPS_PROXY to https urls. Since the binary is downloaded over https, a
   // user who only configured HTTP_PROXY would have it ignored (regression from
   // #17702, reported in #18330). The server normalizes proxy env vars so
   // HTTP_PROXY falls back for https urls (packages/server/lib/util/proxy.ts);
-  // mirror that here so the installer and runtime behave consistently.
-  // Resolving against the http-equivalent url keeps NO_PROXY honored without
-  // mutating the environment.
-  if (!proxy && url.startsWith('https:')) {
-    proxy = getProxyForUrl(`http:${url.slice('https:'.length)}`)
-  }
+  // mirror that here so the installer and runtime behave consistently. Like the
+  // server, the HTTP_PROXY fallback is only consulted after npm's https-proxy
+  // config. Resolving against the http-equivalent url keeps NO_PROXY honored
+  // without mutating the environment.
+  const httpProxyFallback = url.startsWith('https:')
+    ? getProxyForUrl(`http:${url.slice('https:'.length)}`)
+    : ''
 
-  return proxy ||
+  return getProxyForUrl(url) ||
     process.env.npm_config_https_proxy ||
+    httpProxyFallback ||
     process.env.npm_config_proxy ||
     null
 }

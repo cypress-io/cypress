@@ -758,6 +758,14 @@ describe('with proxy env vars', () => {
     expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).toBeNull()
   })
 
+  it('prefers npm_config_https_proxy over the http_proxy fallback on https request', () => {
+    // matches the server's precedence (packages/server/lib/util/proxy.ts), where
+    // npm's https-proxy config is resolved before HTTP_PROXY falls back to https
+    vi.stubEnv('http_proxy', 'http://foo')
+    vi.stubEnv('npm_config_https_proxy', 'https://bar')
+    expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).toEqual('https://bar')
+  })
+
   it('falls back to npm_config_proxy', () => {
     vi.stubEnv('npm_config_proxy', 'http://foo')
     expect(download.getProxyForUrlWithNpmConfig(testUriHttps)).toEqual('http://foo')
