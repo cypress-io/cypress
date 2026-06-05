@@ -627,5 +627,17 @@ describe('src/cypress/dom/visibility', {
 
       expect(reason).to.eq('This element `<div#detached-el>` is not visible because it is detached from the DOM')
     })
+
+    it('falls back to the generic message when modernIsHidden checks all pass', () => {
+      // If neither checkVisibility nor the zero-dimension guard rejects the element, the
+      // function falls back to the legacy generic "not visible." string rather than emitting
+      // a misleading dimension message.
+      cy.$$('body').append('<div id="actually-visible" style="width: 100px; height: 20px;">visible</div>')
+      cy.get('#actually-visible').then(($el) => {
+        const reason = dom.getReasonIsHidden($el)
+
+        expect(reason).to.eq('This element `<div#actually-visible>` is not visible.')
+      })
+    })
   })
 })
