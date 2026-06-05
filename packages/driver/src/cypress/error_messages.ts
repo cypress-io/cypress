@@ -2402,6 +2402,25 @@ export default {
         docsUrl: 'https://on.cypress.io/visit',
       }
     },
+    cross_origin_reload_loop (args) {
+      return {
+        message: stripIndent`\
+          ${cmd('visit')} failed because it entered an infinite reload loop trying to visit:
+
+          \`${args.url}\`
+
+          The URL above resolved to the origin \`${args.origin}\`, which is different from the current origin \`${args.existingOrigin}\`. Visiting a new origin reloads the entire test runner, which re-runs your spec. If your \`baseUrl\` (or the resolved URL) changes to a new origin on every run - for example, a \`baseUrl\` set dynamically inside a \`before\` or \`beforeEach\` hook - the run never settles and reloads forever.
+
+          As of Cypress 14, navigating between origins (including between different subdomains, such as \`app.example.com\` and \`tenant.example.com\`) is a cross-origin navigation because \`document.domain\` is no longer injected by default.
+
+          To resolve this, you can:
+
+           - Use fully-qualified URLs together with the ${cmd('origin')} command instead of changing \`baseUrl\` to interact with a different origin.
+           - Avoid changing \`baseUrl\` to a different origin inside a \`before\` or \`beforeEach\` hook.
+           - Set \`injectDocumentDomain: true\` in your config to restore the pre-14 behavior of treating subdomains of the same superdomain as same-origin. Note that this option is deprecated.`,
+        docsUrl: 'https://on.cypress.io/origin',
+      }
+    },
     no_duplicate_url: {
       message: stripIndent`\
         ${cmd('visit')} must be called with only one \`url\`. You specified two urls:

@@ -1335,6 +1335,7 @@ export default {
       ended: {},
     }
     let _startTime: string | null = null
+    let _originChangeCount = 0
     let _onlyTestId = null
     let _newTestLineNumber = null
     let _isStudioCreatedTest = false
@@ -1887,6 +1888,14 @@ export default {
 
       setStartTime (iso) {
         _startTime = iso
+      },
+
+      getOriginChangeCount () {
+        return _originChangeCount
+      },
+
+      setOriginChangeCount (count) {
+        _originChangeCount = count
       },
 
       countByTestState (tests, state) {

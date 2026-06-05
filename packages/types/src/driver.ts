@@ -10,6 +10,11 @@ interface MochaRunnerState {
   failed?: number
   pending?: number
   numLogs?: number
+  // the number of consecutive top-window origin changes a single `cy.visit()`
+  // has triggered without the page successfully loading. used to detect (and
+  // bail out of) the infinite reload loop that occurs when a dynamic `baseUrl`
+  // keeps resolving visits to a cross-origin location. see issue #33233.
+  originChangeCount?: number
 }
 
 export type RunState = MochaRunnerState & ReporterRunState & {

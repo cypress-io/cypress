@@ -538,6 +538,12 @@ export class EventManager {
             Cypress.runner.setStartTime(runState.startTime)
           }
 
+          if (runState.originChangeCount) {
+            // restore the cross-origin reload counter so cy.visit() can detect
+            // an infinite reload loop caused by a dynamic baseUrl (see #33233)
+            Cypress.runner.setOriginChangeCount(runState.originChangeCount)
+          }
+
           if (config.isTextTerminal && !runState.currentId) {
             // we are in run mode and it's the first load
             // store runnables in backend and maybe send to Cypress Cloud

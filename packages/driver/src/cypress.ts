@@ -910,6 +910,7 @@ class $Cypress {
       failed: this.runner.countByTestState(tests, 'failed'),
       pending: this.runner.countByTestState(tests, 'pending'),
       numLogs: LogUtils.countLogsByTests(tests),
+      originChangeCount: this.runner.getOriginChangeCount(),
     }
 
     return this.action('cy:collect:run:state').then((otherRunStates: ReporterRunState) => {

@@ -943,6 +943,9 @@ describe('src/cy/commands/navigation', () => {
         cy.stub(Cypress.runner, 'getEmissions').returns([])
         mockGetTestsState = cy.stub(Cypress.runner, 'getTestsState').returns([])
         cy.stub(Cypress.runner, 'getStartTime').returns('12345')
+        // isolate these reload-path tests from the cross-origin reload-loop
+        // counter (see #33233) so accumulated state can't trip the guard
+        cy.stub(Cypress.runner, 'getOriginChangeCount').returns(0)
         cy.stub(Cypress.Log, 'countLogsByTests').withArgs([]).returns(1)
         cy.stub(Cypress.runner, 'countByTestState')
         .withArgs([], 'passed').returns(2)

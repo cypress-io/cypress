@@ -17,6 +17,12 @@ let id = null
 let previouslyVisitedLocation: LocationObject | undefined
 let knownCommandCausedInstability: boolean = false
 
+// a single cross-origin `cy.visit()` should only ever reload the top window
+// once before the page loads at the new origin. if we exceed this many
+// consecutive reloads for the same test without converging, we're in an
+// infinite reload loop (e.g. a dynamic baseUrl) and bail out. see #33233.
+const MAX_CONSECUTIVE_ORIGIN_CHANGES = 3
+
 const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure retryIntervals method body headers'
 .split(' ')
 
@@ -1080,6 +1086,12 @@ export default (Commands, Cypress, cy, state, config) => {
               previouslyVisitedLocation = remote
             }
 
+            // the page is loading at the current top origin, so we've converged -
+            // reset the cross-origin reload counter (see the loop guard below)
+            if (!Cypress.isCrossOriginSpecBridge) {
+              Cypress.runner.setOriginChangeCount(0)
+            }
+
             url = $Location.fullyQualifyUrl(url)
 
             return changeIframeSrc(url, 'window:load')
@@ -1087,6 +1099,25 @@ export default (Commands, Cypress, cy, state, config) => {
               return onLoad(resp)
             })
           }
+
+          // changing to a new origin requires reloading the entire top window to
+          // the new origin and resuming the run. when a dynamic `baseUrl` keeps
+          // resolving visits to a cross-origin location, each reload re-runs the
+          // spec and re-triggers this path, looping forever. because every reload
+          // tears down the JS context, the command timeout never fires, so the
+          // run hangs silently. bail out with a clear error once we've reloaded
+          // too many times for the same test without the page loading. see #33233.
+          const originChangeCount = Cypress.runner.getOriginChangeCount() + 1
+
+          if (originChangeCount > MAX_CONSECUTIVE_ORIGIN_CHANGES) {
+            $errUtils.throwErrByPath('visit.cross_origin_reload_loop', {
+              onFail: options._log,
+              args: { url, origin: remote.origin, existingOrigin: existing.origin },
+              errProps: { isCrossOrigin: true },
+            })
+          }
+
+          Cypress.runner.setOriginChangeCount(originChangeCount)
 
           return Cypress.preserveRunState(id)
           .then(() => {
