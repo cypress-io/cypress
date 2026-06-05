@@ -9,5 +9,3 @@ import { handleInterceptResponse } from '../handle-intercept-response'
 export const InterceptResponse: ResponseMiddleware = async function () {
   return this.networkInterceptionCore.interceptResponse(this)
 }
-
-export { handleInterceptResponse }
