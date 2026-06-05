@@ -620,18 +620,6 @@ describe('src/cypress/dom/visibility', {
       })
     })
 
-    it('falls through to legacy reasons for an option inside a hidden select', () => {
-      // modernIsHidden recurses into the parent <select> for option/optgroup. The reason
-      // should attribute the failure to the select, not to the option's own properties.
-      cy.$$('body').append('<select id="hidden-select" style="display: none;"><option id="orphan-option">A</option></select>')
-      cy.get('#orphan-option').then(($el) => {
-        const reason = dom.getReasonIsHidden($el)
-
-        expect(reason).to.include('its parent `<select#hidden-select>` has CSS property: `display: none`')
-        expect(reason).to.not.include('Element.checkVisibility()')
-      })
-    })
-
     it('falls through to legacy reasons when modernIsHidden did not catch the element', () => {
       // Actionability commands (cy.click, etc.) still call `isStrictlyHidden` / `isHiddenByAncestors`,
       // which run legacy-only checks (overflow clipping, fixed-position covering, etc.) that
