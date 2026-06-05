@@ -542,6 +542,14 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
     return this.end()
   }
 
+  // When the origin response declared `Content-Length: 0`, short-circuit with an
+  // explicit Content-Length: 0 instead of streaming an empty body — otherwise
+  // OmitProblematicHeaders has stripped Content-Length and Node's HTTP layer
+  // adds `Transfer-Encoding: chunked`, which breaks clients that assume a
+  // response for chunked encoding. See cypress-io/cypress#16469.
+  // Skip when downstream middleware will rewrite the body or when a cy.intercept
+  // route matched (the interceptor may have replaced the body without updating
+  // the upstream Content-Length header).
   const wasIntercepted = !!this.netStubbingState?.requests?.[this.req.requestId]
 
   if (
