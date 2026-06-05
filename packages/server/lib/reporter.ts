@@ -366,10 +366,20 @@ export class Reporter {
     this.retriesConfig = config?.retries ?? {}
     this.runnables = {}
     rootRunnable = this._createRunnable(rootRunnable as RunnablePayload, 'suite')
-    const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
 
-    this.mocha = new Mocha({ reporter })
-    this.mocha.suite = rootRunnable as unknown as Mocha.Suite
+    // The reporter module and the Mocha facade used to resolve its constructor
+    // (`mocha._reporter`) are invariant for the lifetime of a run - the same
+    // reporter is used for every spec. Resolve them once and reuse across specs
+    // so we don't re-`require()` the reporter (notably custom reporters, which
+    // hit `path.resolve` + `require`) or build a throwaway Mocha per spec.
+    // The runner and reporter *instance* below are still recreated per spec so
+    // per-spec reporter output (e.g. junit/teamcity/spec stdout) is preserved.
+    if (!this.mocha) {
+      const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
+
+      this.mocha = new Mocha({ reporter })
+    }
+
     this.runner = new Mocha.Runner(rootRunnable as unknown as Mocha.Suite)
     mochaCreateStatsCollector(this.runner)
 

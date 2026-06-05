@@ -26,7 +26,7 @@ import type { Browser } from '../browsers/types'
 import type { Data } from '../util/fs'
 import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
-import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
+import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults, toLeanRunResult } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
@@ -62,7 +62,13 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
   const { specs, runEachSpec, beforeSpecRun, afterSpecRun, config } = options
 
   const serial = () => {
-    return Bluebird.mapSeries(specs, runEachSpec)
+    return Bluebird.mapSeries(specs, async (spec: SpecFile, index: number, length: number) => {
+      // trim the per-spec result down to what the end-of-run aggregate and the
+      // public result need, freeing the heavy per-spec payload (test bodies,
+      // attempt error stacks/code frames, hooks) that has already been consumed
+      // by per-spec reporting. See `toLeanRunResult`.
+      return toLeanRunResult(await runEachSpec(spec, index, length))
+    })
   }
 
   const ranSpecs: SpecFile[] = []
@@ -90,9 +96,14 @@ const iterateThroughSpecs = function (options: { specs: SpecFile[], runEachSpec:
       instanceId,
     )
 
-    runs.push(results)
-
+    // upload this spec's results to the Cloud while we still hold the full
+    // payload (Cloud needs the per-attempt errors and timings)
     await afterSpecRun(specObject, results, config)
+
+    // now that the per-spec sinks (Cloud upload above, plus the `after:spec`
+    // event and console reporting performed earlier) have consumed the full
+    // result, retain only the trimmed form to bound memory across the run.
+    runs.push(toLeanRunResult(results))
 
     // recurse
     return parallelAndSerialWithRecord(runs)

@@ -106,7 +106,7 @@ const createPublicTest = (test: TestResult): CypressCommandLine.TestResult => {
   }
 }
 
-const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
+export const createPublicRun = (run: RunResult): CypressCommandLine.RunResult => ({
   error: run.error,
   reporter: run.reporter,
   reporterStats: run.reporterStats,
@@ -236,4 +236,47 @@ export const createPublicSpec = (spec: SpecWithRelativeRoot): CypressCommandLine
  */
 export const createPublicSpecResults = (spec: SpecWithRelativeRoot, runResult: RunResult) => {
   return [createPublicSpec(spec), createPublicRun(runResult)]
+}
+
+/**
+ * Once a spec has finished, its full RunResult has already been consumed by the
+ * per-spec sinks: the Cloud upload (`afterSpecRun` -> `postInstanceResults`),
+ * the `after:spec` event, console reporting (`displayResults`), and video
+ * chapter generation. For the rest of the run we only need what feeds the
+ * end-of-run aggregate (`sumByProp` over `stats`), the summary table, the
+ * exit-code logic (`skippedSpec`/`totalFailed`), and `createPublicRunResults`.
+ *
+ * Retaining the full per-spec payload (test bodies, per-attempt error
+ * stacks/code frames, hook bodies, timings) for every spec causes server memory
+ * to grow unbounded across large multi-spec runs. This trims each retained
+ * RunResult down to exactly those fields, freeing the heavy data once it is no
+ * longer needed. The trimmed shape is a strict superset of what
+ * `createPublicRun` reads, so the public Module API result, the JSON report, and
+ * the `after:run` payload are unchanged.
+ */
+export const toLeanRunResult = (run: RunResult): RunResult => {
+  return {
+    ...run,
+    // hooks are not present in the public run result and are only used per-spec
+    hooks: [],
+    tests: _.map(run.tests, (test) => ({
+      title: test.title,
+      state: test.state,
+      displayError: test.displayError,
+      // `body` is not read after per-spec reporting - drop it to free memory
+      body: '',
+      attempts: _.map(test.attempts, (attempt) => ({
+        // only `state` and `wallClockDuration` survive into the public result
+        state: attempt.state,
+        wallClockDuration: attempt.wallClockDuration,
+        // the remaining fields carry the heavy data (error stacks, code frames,
+        // timings) and are not read post per-spec reporting
+        error: null,
+        failedFromHookId: null,
+        timings: null,
+        videoTimestamp: null,
+        wallClockStartedAt: null,
+      })),
+    })),
+  }
 }
