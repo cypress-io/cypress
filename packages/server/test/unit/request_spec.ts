@@ -869,6 +869,31 @@ describe('lib/request', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/31890
+      it('normalizes dot-segments in an absolute redirect location before following', function () {
+        nock('http://localhost:8080')
+        .get('/redirect-once')
+        .reply(302, '', {
+          location: 'http://localhost:8080/./hello',
+        })
+        .get('/hello')
+        .reply(200, 'hello')
+
+        return request.sendPromise({}, this.fn, {
+          url: 'http://localhost:8080/redirect-once',
+          cookies: false,
+          followRedirect: true,
+        })
+        .then((resp) => {
+          expect(resp.status).to.eq(200)
+          expect(resp.body).to.eq('hello')
+
+          expect(resp.redirects).to.deep.eq([
+            '302: http://localhost:8080/hello',
+          ])
+        })
+      })
+
       it('gets + attaches the cookies at each redirect', function () {
         return testAttachingCookiesWith(() => {
           return request.sendPromise({}, this.fn, {
@@ -1078,6 +1103,37 @@ describe('lib/request', () => {
         expect(request.create).to.be.calledOnce
 
         expect(request.create).to.be.calledWith(options)
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/31890
+    it('normalizes dot-segments in an absolute redirect location before following', function () {
+      this.fn.resolves({})
+
+      nock('http://localhost:8080')
+      .get('/redirect-once')
+      .reply(302, '', {
+        location: 'http://localhost:8080/./hello',
+      })
+      .get('/hello')
+      .reply(200, 'hello')
+
+      return request.sendStream({}, this.fn, {
+        url: 'http://localhost:8080/redirect-once',
+        cookies: false,
+        followRedirect: true,
+      })
+      .then((fn) => {
+        const req = fn()
+
+        return new Promise((resolve, reject) => {
+          req.on('response', resolve)
+
+          req.on('error', reject)
+        })
+      })
+      .then((resp: any) => {
+        expect(resp.statusCode).to.eq(200)
       })
     })
 

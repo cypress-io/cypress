@@ -689,7 +689,11 @@ export class Request {
       }).then(() => {
         currentUrl = newUrl
 
-        return true
+        // https://github.com/cypress-io/cypress/issues/31890
+        // Return the resolved & normalized url (e.g. dot-segments like `/./foo`
+        // collapsed) so @cypress/request follows the same url a browser would,
+        // rather than the raw, un-normalized location header.
+        return newUrl
       })
     }
 
@@ -801,7 +805,11 @@ export class Request {
           }).then(() => {
             currentUrl = newUrl
 
-            return true
+            // https://github.com/cypress-io/cypress/issues/31890
+            // Return the resolved & normalized url (e.g. dot-segments like `/./foo`
+            // collapsed) so @cypress/request follows the same url a browser would,
+            // rather than the raw, un-normalized location header.
+            return newUrl
           })
         }
       }
