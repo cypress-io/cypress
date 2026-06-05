@@ -420,7 +420,7 @@ describe('src/cypress/dom/visibility', {
     })
   }
 
-  context('#getReasonIsHidden', { visibilityStrategy: 'legacy' }, () => {
+  context('#getReasonIsHidden (legacy)', { visibilityStrategy: 'legacy' }, () => {
     const reasonIs = ($el: JQuery, str: string) => {
       expect(dom.getReasonIsHidden($el)).to.eq(str)
     }
