@@ -1,7 +1,7 @@
 import { GET_MAJOR_VERSION_FOR_CONTENT } from '@packages/types'
 import { getPathForPlatform } from './support/getPathForPlatform'
 
-function verifyScaffoldedFiles (testingType: string) {
+function verifyScaffoldedFiles (testingType: string, language: 'js' | 'ts' = 'js') {
   const expectedFileOrder = (testingType === 'e2e') ? [
     'cypress.config.',
     'support/e2e.',
@@ -14,6 +14,13 @@ function verifyScaffoldedFiles (testingType: string) {
     'support/component-index.',
     'fixtures/example.',
   ]
+
+  // TypeScript projects without a tsconfig.json get one scaffolded last so the
+  // bundled ts-loader can compile the scaffolded test files.
+  // @see https://github.com/cypress-io/cypress/issues/32442
+  if (language === 'ts') {
+    expectedFileOrder.push('tsconfig.json')
+  }
 
   cy.get('[data-cy="collapsible-header"] h2')
   .should(($elements) => expect($elements).to.have.length(expectedFileOrder.length)) // assert number of files
@@ -348,12 +355,13 @@ describe('Launchpad: Setup Project', () => {
         cy.get('@valid').containsPath('cypress/support/e2e.ts')
         cy.get('@valid').containsPath('cypress/support/commands.ts')
         cy.get('@valid').containsPath('cypress/fixtures/example.json')
+        cy.get('@valid').containsPath('cypress/tsconfig.json')
 
         cy.get('[data-cy=valid] [data-cy=collapsible-header]').each((element) => {
           cy.wrap(element).should('have.attr', 'aria-expanded', 'false')
         })
 
-        verifyScaffoldedFiles('e2e')
+        verifyScaffoldedFiles('e2e', 'ts')
 
         cy.findByRole('button', { name: 'Continue' })
         .should('not.be.disabled')

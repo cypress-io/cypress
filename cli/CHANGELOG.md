@@ -10,6 +10,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where scaffolding a TypeScript project (when the `typescript` package is installed but no `tsconfig.json` exists) produced an installation that could not run, failing with `TsConfigNotFoundError: No tsconfig.json found`. Cypress now scaffolds a default `cypress/tsconfig.json` for such projects so the example spec runs successfully out of the box. Fixes [#32442](https://github.com/cypress-io/cypress/issues/32442).
 - Fixed an issue where Cypress could load the config file through the wrong module system (for example, treating an ESM config as CommonJS), so ESM-only APIs such as `import.meta.resolve` were unavailable in config and plugin code. Cypress now picks ESM or CJS before loading, using Node.js rules from the config file extension and the nearest `package.json` `"type"`, then loads only via `import()` or `require()` and fails outright on error instead of retrying the other format:
   - `.mjs` and `.mts` always load as ESM
   - `.cjs` and `.cts` always load as CJS

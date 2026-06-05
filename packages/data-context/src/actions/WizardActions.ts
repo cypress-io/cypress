@@ -190,9 +190,10 @@ export class WizardActions {
       this.scaffoldSupport('e2e', this.ctx.lifecycleManager.fileExtensionToUse),
       this.scaffoldSupport('commands', this.ctx.lifecycleManager.fileExtensionToUse),
       this.scaffoldFixtures(),
+      this.scaffoldTsConfig(),
     ])
 
-    return scaffoldedFiles
+    return scaffoldedFiles.filter(isScaffoldedFile)
   }
 
   private async scaffoldComponent () {
@@ -330,6 +331,40 @@ export class WizardActions {
     }
   }
 
+  /**
+   * When a project uses TypeScript (i.e. we scaffold `.ts` files) but does not
+   * already provide a `tsconfig.json`, `ts-loader` is unable to compile the
+   * scaffolded spec/support files and the run fails with a `TsConfigNotFoundError`.
+   *
+   * To give first-time TypeScript users the same smooth setup as JavaScript users,
+   * we scaffold a minimal `cypress/tsconfig.json` when none can be discovered in
+   * the project root or the cypress directory.
+   *
+   * @see https://github.com/cypress-io/cypress/issues/32442
+   */
+  private async scaffoldTsConfig (): Promise<NexusGenObjects['ScaffoldedFile'] | undefined> {
+    if (this.ctx.lifecycleManager.fileExtensionToUse !== 'ts') {
+      return undefined
+    }
+
+    const rootTsConfigPath = path.join(this.projectRoot, 'tsconfig.json')
+    const cypressTsConfigPath = path.join(this.projectRoot, 'cypress', 'tsconfig.json')
+
+    // If the user already has a tsconfig.json that ts-loader can resolve (either
+    // at the project root or in the cypress directory), don't scaffold another one.
+    if (await this.ctx.fs.pathExists(rootTsConfigPath) || await this.ctx.fs.pathExists(cypressTsConfigPath)) {
+      return undefined
+    }
+
+    await this.ctx.fs.ensureDir(path.join(this.projectRoot, 'cypress'))
+
+    return this.scaffoldFile(
+      cypressTsConfigPath,
+      `${JSON.stringify(TS_CONFIG_DATA, null, 2)}\n`,
+      'Added a default tsconfig.json so your TypeScript test files can be compiled.',
+    )
+  }
+
   private async scaffoldComponentIndexHtml (chosenFramework: Cypress.ResolvedComponentFrameworkDefinition): Promise<NexusGenObjects['ScaffoldedFile']> {
     const componentIndexHtmlPath = path.join(this.projectRoot, 'cypress', 'support', 'component-index.html')
 
@@ -385,8 +420,26 @@ export class WizardActions {
   }
 }
 
+function isScaffoldedFile (file: NexusGenObjects['ScaffoldedFile'] | undefined): file is NexusGenObjects['ScaffoldedFile'] {
+  return file !== undefined
+}
+
 const FIXTURE_DATA = {
   'name': 'Using fixtures to represent data',
   'email': 'hello@cypress.io',
   'body': 'Fixtures are a great way to mock data for responses to routes',
+}
+
+// A minimal tsconfig.json scaffolded for TypeScript projects that don't already
+// have one, so the bundled `ts-loader` can compile the scaffolded test files.
+// `types: ['cypress']` is intentionally the only entry so the config does not
+// depend on type packages (e.g. `@types/node`) that may not be installed.
+// @see https://github.com/cypress-io/cypress/issues/32442
+const TS_CONFIG_DATA = {
+  'compilerOptions': {
+    'target': 'es2018',
+    'lib': ['es2018', 'dom'],
+    'types': ['cypress'],
+  },
+  'include': ['**/*.ts'],
 }
