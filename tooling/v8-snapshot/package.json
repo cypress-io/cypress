@@ -5,10 +5,11 @@
   "private": true,
   "main": "dist/v8-snapshot.js",
   "scripts": {
-    "build": "tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
+    "build": "yarn ensure-typedefs && tsc && (rimraf ./dist/blueprint && cpr ./src/blueprint ./dist/blueprint)",
     "check-ts": "tsc --noEmit",
     "clean": "rimraf dist",
     "clean-deps": "rimraf node_modules",
+    "ensure-typedefs": "yarn workspace @packages/server ensure-cloud-validations",
     "test": "yarn test-unit",
     "test-integration": "mocha test/integration/**/*.spec.ts --config ./test/.mocharc.js",
     "test-unit": "mocha test/unit/**/*.spec.ts --config ./test/.mocharc.js",
@@ -57,7 +58,8 @@
   },
   "nx": {
     "implicitDependencies": [
-      "@packages/data-context"
+      "@packages/data-context",
+      "@packages/server"
     ]
   }
 }

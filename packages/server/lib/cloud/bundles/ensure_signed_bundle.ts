@@ -1,12 +1,13 @@
-import { ensureDir, readFile, remove } from 'fs-extra'
+import { ensureDir, readFile, remove, writeFile } from 'fs-extra'
 import path from 'path'
 import Debug from 'debug'
 import { verifySignature } from '../encryption'
-import { getBundleCacheDir } from './cache_root'
+import { ensureWritableBundleCacheDir } from './cache_root'
 import { parseHashFromBundleUrl } from './parse_hash_from_bundle_url'
 import { sweepOrphanStaging } from './sweep_orphan_staging'
 import { streamDownloadVerifyExtract } from './stream_download_verify_extract'
 import { publishStagingToFinal } from './publish_staging_to_final'
+import { verifyBundleOnDisk, MANIFEST_SIG_FILE } from './verify_bundle_on_disk'
 import { BundleError, BundleKind } from './bundle_error'
 
 const debug = Debug('cypress:server:cloud:bundles:ensure-signed-bundle')
@@ -33,13 +34,21 @@ export const ensureSignedBundle = async ({
   kind,
 }: EnsureSignedBundleOptions): Promise<EnsureSignedBundleResult> => {
   const hash = parseHashFromBundleUrl(url)
-  const baseDir = getBundleCacheDir(kind)
+  const baseDir = await ensureWritableBundleCacheDir(kind)
   const finalDir = path.join(baseDir, hash)
   const staging = path.join(baseDir, `${STAGING_PREFIX}${randomSuffix()}`)
 
   debug('ensuring %s bundle hash=%s baseDir=%s', kind, hash, baseDir)
 
-  await ensureDir(baseDir)
+  // Reuse an already-cached bundle that still verifies, skipping download and publish.
+  const cachedManifest = await verifyBundleOnDisk(finalDir).catch(() => null)
+
+  if (cachedManifest) {
+    debug('%s bundle cache hit hash=%s', kind, hash)
+
+    return { manifest: cachedManifest, bundleDir: finalDir }
+  }
+
   await ensureDir(finalDir)
 
   const sweptCount = await sweepOrphanStaging(baseDir, ORPHAN_STAGING_TTL_MS).catch(() => 0)
@@ -72,6 +81,10 @@ export const ensureSignedBundle = async ({
         message: `Unable to verify ${kind} manifest signature`,
       })
     }
+
+    // Persist the signature before publish so it lands before manifest.json (the
+    // commit marker) and is always present whenever manifest.json is.
+    await writeFile(path.join(staging, MANIFEST_SIG_FILE), manifestSig, 'utf8')
 
     try {
       await publishStagingToFinal(staging, finalDir)

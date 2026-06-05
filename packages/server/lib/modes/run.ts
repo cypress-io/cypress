@@ -318,6 +318,12 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
         videoRecording.controller = videoController
       },
       onProjectCaptureVideoFrames (fn) {
+        // browsers that capture video through the project event emitter (e.g. Firefox via the
+        // driver's getUserMedia recorder) re-register a handler for each spec, since the browser
+        // — and thus the project — is reused across specs. Remove any previous handler first so
+        // frames are only ever written to the current spec's video controller and listeners don't
+        // accumulate across specs.
+        options.project.removeAllListeners('capture:video:frames')
         options.project.on('capture:video:frames', fn)
       },
     },

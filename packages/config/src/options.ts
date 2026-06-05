@@ -554,7 +554,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isPlainObject,
   }, {
     name: 'isInteractive',
-    defaultValue: true,
+    // `isInteractive` is the inverse of `isTextTerminal`, which run mode sets
+    // to `true`. Deriving it from the mode options ensures plugins /
+    // setupNodeEvents receive the correct value rather than a static default.
+    // https://github.com/cypress-io/cypress/issues/20789
+    defaultValue: (options: Record<string, any> = {}) => !options.isTextTerminal,
     validation: validate.isBoolean,
   }, {
     name: 'isTextTerminal',

@@ -554,15 +554,81 @@ describe('lib/exec/spawn', function () {
       }
     })
 
-    it('unrefs if options.detached is true', async () => {
-      const startPromise = start(null, { detached: true })
+    describe('detached mode', () => {
+      let stdoutDataHandler: ((data: Buffer) => void) | undefined
 
-      await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
-      spawnedProcess.emit('close', 0)
+      beforeEach(() => {
+        stdoutDataHandler = undefined
 
-      await startPromise
+        spawnedProcess.stdout = {
+          on: vi.fn().mockImplementation((event: string, handler: any) => {
+            if (event === 'data') stdoutDataHandler = handler
+          }),
+          destroy: vi.fn(),
+          pipe: vi.fn(),
+        }
 
-      expect(spawnedProcess.unref).toHaveBeenCalledOnce()
+        spawnedProcess.stderr = {
+          on: vi.fn(),
+          pipe: vi.fn(),
+          destroy: vi.fn(),
+        }
+      })
+
+      it('waits for ready sentinel before unreffing and resolving', async () => {
+        const startPromise = start(null, { detached: true })
+
+        await vi.waitFor(() => expect(stdoutDataHandler).toBeDefined())
+
+        expect(spawnedProcess.unref).not.toHaveBeenCalled()
+
+        stdoutDataHandler!(Buffer.from('Cypress is ready\n'))
+
+        await startPromise
+
+        expect(spawnedProcess.unref).toHaveBeenCalledOnce()
+        expect(spawnedProcess.stdout.destroy).toHaveBeenCalledOnce()
+        expect(spawnedProcess.stderr.destroy).toHaveBeenCalledOnce()
+      })
+
+      it('resolves with exit code if process exits before ready message', async () => {
+        const startPromise = start(null, { detached: true })
+
+        await vi.waitFor(() => expect(spawnedProcess.on).toHaveBeenCalledWith('close', expect.any(Function)))
+        spawnedProcess.emit('close', 1)
+
+        const code = await startPromise
+
+        expect(code).toBe(1)
+        expect(spawnedProcess.unref).not.toHaveBeenCalled()
+      })
+
+      it('uses piped stdio when detached so startup errors are visible', async () => {
+        const startPromise = start(null, { detached: true })
+
+        await vi.waitFor(() => expect(stdoutDataHandler).toBeDefined())
+        stdoutDataHandler!(Buffer.from('Cypress is ready\n'))
+        await startPromise
+
+        // @ts-expect-error - mock argument
+        const thirdArg = cp.spawn.mock.calls[0][2]
+
+        expect(thirdArg.stdio).toEqual(['ignore', 'pipe', 'pipe'])
+      })
+
+      it('passes --emit-when-ready to the Cypress process', async () => {
+        const startPromise = start(null, { detached: true })
+
+        await vi.waitFor(() => expect(stdoutDataHandler).toBeDefined())
+
+        // @ts-expect-error - vitest mock
+        const spawnArgs = cp.spawn.mock.calls[0][1]
+
+        expect(spawnArgs).toContain('--emit-when-ready')
+
+        stdoutDataHandler!(Buffer.from('Cypress is ready\n'))
+        await startPromise
+      })
     })
 
     it('does not unref by default', async () => {
