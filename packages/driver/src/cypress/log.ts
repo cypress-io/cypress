@@ -448,29 +448,25 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // A snapshot is only worth taking when something will actually consume it:
-    // - the in-browser command-log reporter (interactive mode, while tests are
-    //   retained in memory for time-travel), or
-    // - the Test Replay capture protocol.
-    // Cross-origin logs tracked on the primary origin are skipped here because
-    // the secondary (spec bridge) origin sends its own snapshot.
-    //
-    // PERF / Test Replay NOTE: in a headless run recorded with Test Replay,
-    // `protocolWillUseSnapshot` is true, so we take a per-command snapshot that
-    // clones the entire DOM body (see `createSnapshotBody` in cy/snapshots.ts).
-    // That body is effectively redundant for Test Replay — the command-log
-    // snapshot's `body`/`htmlAttrs` are dropped at ingestion, the replayed DOM is
-    // captured via a separate path (cy:protocol-snapshot -> dom:full-snapshot),
-    // and the capture protocol may even replace `cy.createSnapshot` outright when
-    // `numTestsKeptInMemory === 0`. Skipping the clone for headless protocol runs
-    // is a known optimization, but must be coordinated with the Test Replay
-    // capture service (which can override this fn for some testing types). See
-    // https://github.com/cypress-io/cypress/pull/34026
-    const isCrossOriginLogOnPrimary = !Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog')
-    const reporterWillUseSnapshot = this.config('isInteractive') && this.config('numTestsKeptInMemory') !== 0
-    const protocolWillUseSnapshot = this.state('isProtocolEnabled')
+    // Take a snapshot only when something will consume it: command-log time-travel
+    // (interactive mode with tests retained in memory) or Test Replay capture.
+    // Cross-origin logs on the primary origin defer to the spec bridge origin.
+    const shouldDeferSnapshotToSpecBridge =
+      !Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog')
 
-    if (isCrossOriginLogOnPrimary || (!reporterWillUseSnapshot && !protocolWillUseSnapshot)) {
+    const needsTimeTravelSnapshot =
+      this.config('isInteractive') && this.config('numTestsKeptInMemory') !== 0
+
+    // Protocol uses a portion of the snapshot for the replayed DOM.
+    // the command-log snapshot's `body`/`htmlAttrs` are dropped at ingestion
+    // via replacing `cy.createSnapshot` outright during consumption.
+    const needsProtocolSnapshot = this.state('isProtocolEnabled')
+
+    const shouldTakeSnapshot =
+      !shouldDeferSnapshotToSpecBridge
+      && (needsTimeTravelSnapshot || needsProtocolSnapshot)
+
+    if (!shouldTakeSnapshot) {
       return this
     }
 

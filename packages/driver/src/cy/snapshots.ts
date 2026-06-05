@@ -147,18 +147,6 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
   }
 
   const createSnapshotBody = ($elToHighlight) => {
-    // PERF / Test Replay NOTE: the `importNode` clone below copies the entire
-    // <body> for every command that snapshots. During a headless run recorded
-    // with Test Replay (`numTestsKeptInMemory === 0`) `Log.snapshot()` reaches
-    // here for every command, but the resulting `body`/`htmlAttrs` are not
-    // consumed by Test Replay — they are dropped at ingestion and the replayed
-    // DOM is built from the separate cy:protocol-snapshot -> dom:full-snapshot
-    // path, while the capture protocol may replace `cy.createSnapshot` outright
-    // in that mode. Avoiding this clone for headless protocol runs is a known
-    // optimization, pending coordination with the Test Replay capture service.
-    // See the gate in cypress/log.ts `snapshot()` and
-    // https://github.com/cypress-io/cypress/pull/34026
-
     // create a unique selector for this el
     // but only IF the subject is truly an element. For example
     // we might be wrapping a primitive like "$([1, 2]).first()"
@@ -244,6 +232,13 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     return $dom.isElement($el) && $dom.isJquery($el)
   }
 
+  // Test Replay NOTE: the `importNode` clone within `createSnapshotBody` copies the entire
+  // <body> for every command that snapshots. During a headless run recorded
+  // with Test Replay (`numTestsKeptInMemory === 0`) `Log.snapshot()` reaches
+  // here for every command, but the resulting `body`/`htmlAttrs` are not
+  // consumed by Test Replay — they are dropped at ingestion and the replayed
+  // DOM is built separately
+  // Protocol capture replaces `cy.createSnapshot` outright in that mode.
   const createSnapshot = (name?, $elToHighlight?, preprocessedSnapshot?, relatedLog?: Log) => {
     Cypress.action('cy:snapshot', name)
     // when using cy.origin() and in a transitionary state, state('document')
