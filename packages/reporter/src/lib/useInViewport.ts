@@ -7,6 +7,10 @@ interface UseInViewportOptions {
   // how far outside the viewport (in any direction) content should be
   // considered "in view" so that it is rendered just before it scrolls in.
   rootMargin?: string
+  // when false, the observer is not attached and the target is always reported
+  // as in the viewport. Used to limit windowing to run mode, where the command
+  // log is never interactively inspected.
+  enabled?: boolean
 }
 
 interface UseInViewportResult {
@@ -33,7 +37,7 @@ interface UseInViewportResult {
 export const useInViewport = (
   targetRef: RefObject<Element>,
   contentRef: RefObject<HTMLElement>,
-  { rootSelector = '.container', rootMargin = '300px' }: UseInViewportOptions = {},
+  { rootSelector = '.container', rootMargin = '300px', enabled = true }: UseInViewportOptions = {},
 ): UseInViewportResult => {
   const [isInViewport, setIsInViewport] = useState(true)
   const [placeholderHeight, setPlaceholderHeight] = useState<number | undefined>(undefined)
@@ -41,9 +45,10 @@ export const useInViewport = (
   useEffect(() => {
     const target = targetRef.current
 
-    // if IntersectionObserver isn't available (e.g. older test environments),
-    // fall back to always rendering so we never hide content unexpectedly.
-    if (!target || typeof IntersectionObserver === 'undefined') {
+    // if disabled (e.g. open mode) or IntersectionObserver isn't available
+    // (e.g. older test environments), fall back to always rendering so we never
+    // hide content unexpectedly.
+    if (!enabled || !target || typeof IntersectionObserver === 'undefined') {
       return
     }
 
@@ -62,7 +67,7 @@ export const useInViewport = (
     observer.observe(target)
 
     return () => observer.disconnect()
-  }, [targetRef, contentRef, rootSelector, rootMargin])
+  }, [enabled, targetRef, contentRef, rootSelector, rootMargin])
 
   return { isInViewport, placeholderHeight }
 }

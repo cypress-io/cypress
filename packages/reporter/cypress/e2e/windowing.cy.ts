@@ -69,6 +69,8 @@ function visitAndRenderReporter (runnables: RootRunnable) {
   })
 
   cy.visit('/').then((win) => {
+    // windowing out off-screen command logs only applies in run mode
+    win.__CYPRESS_MODE__ = 'run'
     win.render({ runner, runnerStore })
   })
 

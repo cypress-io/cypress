@@ -28,15 +28,20 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
     isStudioActive: appStateProps.studioActive,
   })
 
+  // Only window out command logs in run mode. Failed tests stay open and retain
+  // their logs for the run-mode video/screenshots, but keeping every prior
+  // failure's command nodes in the DOM makes the per-command auto-scroll reflow
+  // scale with the whole run (https://github.com/cypress-io/cypress/issues/6881).
+  // In open mode the command log is interactively inspected (hover/pin
+  // snapshots), so we leave it fully rendered.
+  const isRunMode = window.__CYPRESS_MODE__ === 'run'
+
   const contentRef = useRef<HTMLDivElement>(null)
-  const { isInViewport, placeholderHeight } = useInViewport(containerRef, contentRef)
+  const { isInViewport, placeholderHeight } = useInViewport(containerRef, contentRef, { enabled: isRunMode })
 
   // A finished test that has scrolled out of view doesn't need its (potentially
-  // large) command log mounted. Failed tests stay open and retain their logs for
-  // the run-mode video/screenshots, but keeping every prior failure's command
-  // nodes in the DOM makes the per-command auto-scroll reflow scale with the
-  // whole run (https://github.com/cypress-io/cypress/issues/6881). The active
-  // test is always rendered so its live updates and auto-scroll keep working.
+  // large) command log mounted. The active test is always rendered so its live
+  // updates and auto-scroll keep working.
   const shouldRenderContent = model.isActive || isInViewport
 
   const _launchStudio = useCallback((e: MouseEvent) => {
