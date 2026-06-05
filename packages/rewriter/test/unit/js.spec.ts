@@ -143,6 +143,15 @@ describe('js rewriter', function () {
             `${matchLocation()}.href = "bar"`,
           ],
           [
+            // test that a locally-scoped `location` assignment is not replaced (#7906)
+            'let location; location = "bar"',
+          ],
+          [
+            // test that `var location` hoisted in a function scope is not replaced (#7906)
+            // this is the pattern used by react-router's history.js that broke source rewriting
+            'function createLocation(path) { var location; location = parsePath(path); location.state = 1; return location }',
+          ],
+          [
             'window.location.href = "bar"',
             `${match('window', 'location')}.href = "bar"`,
           ],

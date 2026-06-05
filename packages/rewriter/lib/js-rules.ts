@@ -120,8 +120,10 @@ export const jsRules: Visitor<{}> = {
       // like `identifier = 'foo'`
       const isAssignee = n.AssignmentExpression.check(parentNode) && parentNode.left === node
 
-      if (isAssignee && node.name === 'location') {
-        // `location = 'something'`, rewrite to intercepted href setter since relative urls can break this
+      // `location = 'something'`, rewrite to intercepted href setter since relative urls can break this
+      // but only when `location` refers to the global - a locally-scoped `location` (e.g. `var location`
+      // inside a function) must be left alone, otherwise unrelated user code breaks (#7906)
+      if (isAssignee && node.name === 'location' && !path.scope.declares(node.name)) {
         path.replace(b.memberExpression(resolveLocationReference(), b.identifier('href')))
         this.reportChanged()
 
