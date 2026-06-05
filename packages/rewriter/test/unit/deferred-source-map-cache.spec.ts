@@ -61,6 +61,20 @@ describe('DeferredSourceMapCache', function () {
       await expect(cache.resolve('foo', {})).rejects.toThrow(/^Missing JS/)
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/7536
+    it('resolves for an empty (zero-length) JS file instead of throwing', async () => {
+      cache.defer({
+        uniqueId: 'foo',
+        url: 'bar',
+        js: '',
+        resHeaders: {},
+      })
+
+      const result = await cache.resolve('foo', {})
+
+      expect(result).toBeTruthy()
+    })
+
     describe('sourcemap generation', () => {
       it('for JS with no original sourcemap', async () => {
         cache.defer({

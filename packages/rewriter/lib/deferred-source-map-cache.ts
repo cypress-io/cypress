@@ -113,7 +113,10 @@ export class DeferredSourceMapCache {
       return request.sourceMap
     }
 
-    if (!request.js) {
+    // use == to catch both null and undefined, but not an empty string -
+    // a zero-length JS file is valid and should still generate a sourcemap
+    // @see https://github.com/cypress-io/cypress/issues/7536
+    if (request.js == null) {
       throw new Error('Missing JS for source map rewrite')
     }
 
