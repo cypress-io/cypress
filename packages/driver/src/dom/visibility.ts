@@ -535,11 +535,12 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
   let $select
 
   // Under the modern visibility strategy, only emit the modern reason when `modernIsHidden`
-  // actually caught the element. Actionability commands (cy.click, cy.type, etc.) still call
-  // `isStrictlyHidden` / `isHiddenByAncestors`, which run legacy-only checks (transform, overflow
-  // clipping, fixed-position covering); if one of those rejected the element while modernIsHidden
-  // did not, fall through to the legacy reason finder so the message describes the check that
-  // actually tripped.
+  // actually caught the element. Cypress's own call sites (chai assertions, ensure for action
+  // commands) invoke this function only after the modern algorithm rejected the element, so
+  // this gate normally always passes. It exists defensively for direct callers (e.g., user
+  // code calling `Cypress.dom.getReasonIsHidden()` on an element the modern algorithm
+  // considers visible) so the function falls through to the legacy reason finder instead of
+  // emitting a modern message that doesn't match what's actually wrong.
   if (Cypress.config('visibilityStrategy') === 'modern' && modernIsHidden($el, options)) {
     // for a multi-element subject, describe the first element that modernIsHidden actually caught —
     // checking only $el[0] would misattribute the cause when a later element is the hidden one.

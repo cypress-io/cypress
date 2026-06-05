@@ -608,24 +608,23 @@ describe('src/cypress/dom/visibility', {
 
     it('describes the first hidden element in a multi-element jQuery subject', () => {
       // modernIsHidden returns true if *any* element in the jQuery subject is hidden, so the
-      // message must describe the element that actually tripped — not blindly $el[0].
+      // message must describe the element that actually tripped.
       cy.$$('body').append('<div id="multi-visible" style="width: 100px; height: 20px;">visible</div>')
       cy.$$('body').append('<div id="multi-hidden" style="display: none;">hidden</div>')
       cy.then(() => {
         const $els = Cypress.$('#multi-visible, #multi-hidden')
         const reason = dom.getReasonIsHidden($els)
 
-        expect(reason).to.match(/^This element `<div#multi-hidden>` is not visible per `Element\.checkVisibility\(\)`\./)
-        expect(reason).to.include('`display: none`')
+        expect(reason).to.eq('This element `<div#multi-hidden>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
       })
     })
 
     it('falls through to legacy reasons when modernIsHidden did not catch the element', () => {
-      // Actionability commands (cy.click, etc.) still call `isStrictlyHidden` / `isHiddenByAncestors`,
-      // which run legacy-only checks (overflow clipping, fixed-position covering, etc.) that
-      // `modernIsHidden` does not perform. When such a legacy check rejects the element but
-      // modernIsHidden does not, the modern message would be misleading — the reason should
-      // describe the legacy check that actually tripped.
+      // Defensive: under modern strategy, Cypress's own callers (chai, ensure) only invoke
+      // getReasonIsHidden when modernIsHidden has already returned true, so this branch is
+      // only reachable via direct user calls to `Cypress.dom.getReasonIsHidden()` on an
+      // element the modern algorithm considers visible but a legacy-only check (overflow
+      // clipping, fixed-position covering, etc.) would catch.
       cy.visit('/fixtures/visibility/overflow.html')
       prepareFixtureSection('overflow-hidden')
       cy.get('[cy-section="overflow-hidden"] .testCase[cy-label="Element out of bounds right"]').then(($el) => {
