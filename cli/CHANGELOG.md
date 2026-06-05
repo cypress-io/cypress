@@ -3,7 +3,7 @@
 
 **Performance:**
 
-- Recorded `cypress run` executions with Test Replay enabled now run faster and use less memory. Cypress previously cloned the entire DOM on every command to build a command-log snapshot that Test Replay already captured through a separate mechanism and then discarded, so this redundant per-command work is now skipped in run mode without changing what Test Replay records or how it replays. The improvement is most noticeable on tests that run against large or style-heavy pages. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+- Recorded `cypress run` executions with Test Replay enabled now run faster and use less memory. A redundant DOM clone is now skipped in run mode without changing what Test Replay records or how it replays. The improvement is most noticeable on tests that run against large or style-heavy pages. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
 
 **Features:**
 
