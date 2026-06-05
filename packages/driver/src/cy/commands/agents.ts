@@ -31,7 +31,7 @@ const MAX_FORMATTED_CALLS = 100
 const boundPrintf = (agent) => {
   const { printf } = agent
 
-  if (!_.isFunction(printf) || printf._cyBound) {
+  if (!_.isFunction(printf) || (printf as any)._cyBound) {
     return
   }
 
