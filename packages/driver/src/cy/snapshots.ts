@@ -10,6 +10,24 @@ export const HIGHLIGHT_ATTR = 'data-cypress-el'
 
 export const FINAL_SNAPSHOT_NAME = 'final state'
 
+/**
+ * Whether the expensive DOM body clone should be skipped for a command-log
+ * snapshot. In a headless run with the capture protocol enabled and no
+ * in-memory test retention, the body is never consumed: Test Replay
+ * reconstructs the DOM from its own `cy:protocol-snapshot` -> `dom:full-snapshot`
+ * path, and the command-log snapshot's `body`/`htmlAttrs` are dropped at
+ * ingestion. In that case we emit a metadata-only snapshot (`name`/`timestamp`).
+ *
+ * The `isInteractive` guard keeps Open Mode (e.g. Studio AI, which enables the
+ * protocol) producing full-body snapshots for time-travel even if the user sets
+ * `numTestsKeptInMemory` to 0.
+ */
+export const shouldOmitSnapshotBody = () => {
+  return !Cypress.config('isInteractive') &&
+    Cypress.state('isProtocolEnabled') &&
+    Cypress.config('numTestsKeptInMemory') === 0
+}
+
 export const create = ($$: $Cy['$$'], state: StateFunc) => {
   const snapshotsCss = createSnapshotsCSS($$, state)
   const snapshotsMap = new WeakMap()
@@ -245,6 +263,39 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     }
 
     const timestamp = performance.now() + performance.timeOrigin
+
+    // In a headless protocol run the body clone is never consumed (Test Replay
+    // captures DOM via its own path and drops the command-log body at
+    // ingestion), so skip the expensive clone and emit a metadata-only
+    // snapshot. We still toggle the highlight attribute so the protocol's
+    // mutation tracking can resolve `elementsToHighlight`.
+    if (!preprocessedSnapshot && shouldOmitSnapshotBody()) {
+      if (isJqueryElement($elToHighlight)) {
+        // briefly toggle the highlight attribute on the live element so the
+        // capture protocol's mutation tracking records which element(s) the
+        // command acted on (same observable add/remove the body-clone path
+        // produces), without paying for the clone itself.
+        const $el = $elToHighlight as JQuery<HTMLElement>
+
+        $el.attr(HIGHLIGHT_ATTR, 'true')
+        $el.removeAttr(HIGHLIGHT_ATTR)
+      }
+
+      return {
+        name,
+        timestamp,
+      }
+    }
+
+    // a preprocessed snapshot from a spec bridge may itself be metadata-only
+    // (e.g. produced under the same headless-protocol condition); nothing to
+    // reify in that case.
+    if (preprocessedSnapshot && !preprocessedSnapshot.body) {
+      return {
+        name: name ?? preprocessedSnapshot.name,
+        timestamp,
+      }
+    }
 
     try {
       const {
