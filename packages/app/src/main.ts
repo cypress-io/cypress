@@ -7,6 +7,7 @@ import { makeUrqlClient } from '@packages/frontend-shared/src/graphql/urqlClient
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these
 import { createI18n } from '@cy/i18n'
 import { createRouter } from './router/router'
+import { TapManager } from './runner/tap/tap-manager'
 import { injectBundle } from './runner/injectBundle'
 import { createPinia } from './store'
 import Toast, { POSITION } from 'vue-toastification'
@@ -27,6 +28,11 @@ const app = createApp(App)
 const ws = createWebsocket(config)
 
 window.ws = ws
+
+// The typed callable surface external tooling (the Cypress CLI) drives over
+// CDP. Mounted as early as possible so callers can re-find it by name on
+// every invocation.
+window.__CYPRESS_TAP_BINDING__ = new TapManager(config.version)
 
 telemetry.attachWebSocket(ws)
 
