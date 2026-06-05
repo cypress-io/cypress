@@ -1302,12 +1302,13 @@ export const AllCypressErrors = {
 
       Remove the ${fmt.highlight('visibilityStrategy')} option from your configuration to use the modern algorithm.`
   },
-  CYPRESS_ENV_DEPRECATION: () => {
+  ALLOW_CYPRESS_ENV_REMOVED: () => {
     return errTemplate`\
-      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('allowCypressEnv')} configuration option is enabled. This allows any browser code to read values from ${fmt.highlight('Cypress.env()')}. This is insecure and will be removed in a future major version.
+      The ${fmt.highlight('allowCypressEnv')} configuration option was removed in ${fmt.cypressVersion('16.0.0')}.
 
-      1. Replace ${fmt.highlight('Cypress.env()')} calls with ${fmt.highlight('cy.env()')} (for sensitive values) or ${fmt.highlight('Cypress.expose()')} (for public configuration)
-      2. Set ${fmt.highlight('allowCypressEnv: false')} in your Cypress configuration to disable ${fmt.highlight('Cypress.env()')}
+      ${fmt.highlight('Cypress.env()')} has been removed. Replace ${fmt.highlight('Cypress.env()')} calls with ${fmt.highlight('cy.env()')} (for sensitive values) or ${fmt.highlight('Cypress.expose()')} (for public configuration).
+
+      You can safely remove ${fmt.highlight('allowCypressEnv')} from your configuration.
 
       Learn more: https://on.cypress.io/cypress-env-migration
     `
@@ -1608,7 +1609,6 @@ export const AllCypressErrors = {
   },
 } as const
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _typeCheck: Record<keyof AllCypressErrorObj, (...args: any[]) => ErrTemplateResult> = AllCypressErrors
 
 export type AllCypressErrorObj = typeof AllCypressErrors

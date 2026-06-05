@@ -48,6 +48,7 @@ export interface Cfg extends ReceivedCypressOptions {
   fileServerFolder?: Cypress.ResolvedConfigOptions['fileServerFolder']
   testingType: TestingType
   isDefaultProtocolEnabled?: boolean
+  isInteractive?: boolean
   hideCommandLog?: boolean
   hideRunnerUi?: boolean
   exit?: boolean
@@ -723,15 +724,22 @@ export class ProjectBase extends EE {
 
     const isDefaultProtocolEnabled = this._protocolManager?.isProtocolEnabled ?? false
 
+    const simulateOpenMode = !!process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+
     const hideRunnerUi = (
       (this.options?.args?.runnerUi === false ||
       (isDefaultProtocolEnabled && this._cfg.isTextTerminal && !this.options?.args?.runnerUi)) &&
-      !process.env.CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+      !simulateOpenMode
     )
 
     // hide the command log if explicitly requested or if we are hiding the runner
     const hideCommandLog = this._cfg.env?.NO_COMMAND_LOG === 1 || hideRunnerUi
 
+    // isInteractive must be computed here and serialized via HtmlDataSource (see
+    // getPropertiesFromServerConfig) because cfg.env is not sent to the browser.
+    // The driver reads this top-level value at bootstrap; it cannot rely on
+    // config.env.INTERNAL_SIMULATE_OPEN_MODE. When CYPRESS_INTERNAL_SIMULATE_OPEN_MODE
+    // is set, run mode should behave like open mode in the driver (retries, stack traces, etc.).
     return {
       ...this._cfg,
       remote: this.remoteStates?.current() ?? {} as Cypress.RemoteState,
@@ -739,6 +747,7 @@ export class ProjectBase extends EE {
       testingType: this.ctx.coreData.currentTestingType ?? 'e2e',
       specs: [],
       isDefaultProtocolEnabled,
+      isInteractive: !this._cfg.isTextTerminal || simulateOpenMode,
       hideCommandLog,
       hideRunnerUi,
     }

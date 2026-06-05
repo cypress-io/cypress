@@ -29,7 +29,7 @@ const BREAKING_OPTION_ERROR_KEY: Readonly<AllCypressErrorNames[]> = [
   'RENAMED_CONFIG_OPTION',
   'EXPERIMENTAL_STUDIO_REMOVED',
   'EXPERIMENTAL_PROMPT_COMMAND_REMOVED',
-  'CYPRESS_ENV_DEPRECATION',
+  'ALLOW_CYPRESS_ENV_REMOVED',
   'EXPERIMENTAL_FAST_VISIBILITY_RENAMED',
   'VISIBILITY_STRATEGY_DEPRECATION',
 ] as const
@@ -185,12 +185,6 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     defaultValue: 4000,
     validation: validate.isNumber,
     overrideLevel: 'any',
-  }, {
-    name: 'allowCypressEnv',
-    defaultValue: true,
-    validation: validate.isBoolean,
-    overrideLevel: 'never',
-    requireRestartOnChange: 'server',
   }, {
     name: 'downloadsFolder',
     defaultValue: 'cypress/downloads',
@@ -555,7 +549,11 @@ const runtimeOptions: Array<RuntimeConfigOption> = [
     validation: validate.isPlainObject,
   }, {
     name: 'isInteractive',
-    defaultValue: true,
+    // `isInteractive` is the inverse of `isTextTerminal`, which run mode sets
+    // to `true`. Deriving it from the mode options ensures plugins /
+    // setupNodeEvents receive the correct value rather than a static default.
+    // https://github.com/cypress-io/cypress/issues/20789
+    defaultValue: (options: Record<string, any> = {}) => !options.isTextTerminal,
     validation: validate.isBoolean,
   }, {
     name: 'isTextTerminal',
@@ -663,9 +661,7 @@ export const breakingOptions: Readonly<BreakingOption[]> = [
   },
   {
     name: 'allowCypressEnv',
-    errorKey: 'CYPRESS_ENV_DEPRECATION',
-    // Display this warning if the value is not present or is explicitly false
-    shouldDisplayOrThrow: (value: any) => value !== false,
+    errorKey: 'ALLOW_CYPRESS_ENV_REMOVED',
     isWarning: true,
   },
   {

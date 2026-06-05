@@ -281,14 +281,6 @@ export default {
       message: `The config passed to your {{overrideLevel}}-level overrides has the following validation error:\n\n{{errMsg}}`,
       docsUrl: 'https://on.cypress.io/config',
     },
-    invalid_test_override_with_allow_cypress_env: {
-      message: `overriding environment variables via suite or test configuration is not allowed when \`allowCypressEnv\` is set to \`false\`.`,
-      docsUrl: 'https://on.cypress.io/cypress-env-migration',
-    },
-    allow_cypress_env: {
-      message: `\`Cypress.env()\` does not work when \`allowCypressEnv\` is set to \`false\`. Please migrate to \`cy.env()\` or leverage other stateful methods to manage variables. The variable being accessed was: \`{{key}}\``,
-      docsUrl: 'https://on.cypress.io/cypress-env-migration',
-    },
   },
 
   contains: {
@@ -1158,6 +1150,18 @@ export default {
       network_error: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
           A callback was provided to intercept the upstream response, but a network error occurred while making the request:
+
+          ${$stackUtils.normalizedStack(innerErr)}
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`, 10)
+      },
+      connection_closed: ({ innerErr, req, route }) => {
+        return cyStripIndent(`\
+          A callback was provided to intercept the upstream response, but the connection to the browser closed before a response was received.
+
+          This connection commonly closes when the page navigates, the request is aborted, or the browser, tab, or window closes, including if the browser crashes.
 
           ${$stackUtils.normalizedStack(innerErr)}
 

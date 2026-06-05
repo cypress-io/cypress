@@ -1,6 +1,5 @@
 /**
- * Normalized request/response snapshot passed from adapters to NetworkPolicyCore.
- * Fields grow in Stage 3a/3b.
+ * Normalized request/response snapshot passed from adapters to NetworkInterceptionCore.
  */
 export interface NetworkExchange {
   requestId?: string

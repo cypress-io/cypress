@@ -6,7 +6,6 @@ describe('e2e viewport', () => {
       viewportWidth: 800,
       viewportHeight: 600,
       e2e: {
-        allowCypressEnv: false,
       },
     },
   })

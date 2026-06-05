@@ -1181,6 +1181,7 @@ type Editor {
 }
 
 enum ErrorTypeEnum {
+  ALLOW_CYPRESS_ENV_REMOVED
   AUTOMATION_SERVER_DISCONNECTED
   BAD_POLICY_WARNING
   BROWSER_CRASHED
@@ -1249,7 +1250,6 @@ enum ErrorTypeEnum {
   CONFIG_VALIDATION_ERROR
   CONFIG_VALIDATION_MSG_ERROR
   COULD_NOT_PARSE_ARGUMENTS
-  CYPRESS_ENV_DEPRECATION
   DEFAULT_SUPPORT_FILE_NOT_FOUND
   DEV_SERVER_CONFIG_FILE_NOT_FOUND
   DUPLICATE_TASK_KEY
@@ -1560,6 +1560,11 @@ type Mutation {
     path: String
   ): Query
 
+  """
+  Clear the auto-provisioned project ID after the user dismisses the manual setup modal
+  """
+  clearAutoProvisionedProjectId: Boolean
+
   """Clears the currently active project"""
   clearCurrentProject: Query
   clearCurrentTestingType: Query
@@ -1868,6 +1873,11 @@ type PushFragmentPayload {
 type Query {
   """The latest state of the auth process"""
   authState: AuthState!
+
+  """
+  Project ID auto-provisioned during signup that could not be written to the config file automatically
+  """
+  autoProvisionedProjectId: String
   baseError: ErrorWrapper
   cachedUser: CachedUser
 

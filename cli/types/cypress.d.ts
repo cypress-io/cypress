@@ -507,41 +507,6 @@ declare namespace Cypress {
      */
     config(Object: TestConfigOverrides): void
 
-    // no real way to type without generics
-    /**
-     * Returns all environment variables set with CYPRESS_ prefix or in "env" object in "cypress.config.{js,ts,mjs,cjs}"
-     *
-     * @see https://on.cypress.io/env
-     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
-     */
-    env(): ObjectLike
-    /**
-     * Returns specific environment variable or undefined
-     * @see https://on.cypress.io/env
-     * @example
-     *    // cypress.config.js
-     *    { "env": { "foo": "bar" } }
-     *    Cypress.env("foo") // => bar
-     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
-     */
-    env(key: string): any
-    /**
-     * Set value for a variable.
-     * Any value you change will be permanently changed for the remainder of your tests.
-     * @see https://on.cypress.io/env
-     * @example
-     *    Cypress.env("host", "http://server.dev.local")
-     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
-     */
-    env(key: string, value: any): void
-    /**
-     * Set values for multiple variables at once. Values are merged with existing values.
-     * @see https://on.cypress.io/env
-     * @example
-     *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
-     * @deprecated Use {@linkcode Chainable.env cy.env()} or {@linkcode expose Cypress.expose()} instead.
-     */
-    env(object: ObjectLike): void
     /**
      * Returns all exposed public configuration variables set with --expose in the CLI or in "expose" object in "cypress.config.{js,ts,mjs,cjs}"
      *
@@ -2983,17 +2948,6 @@ declare namespace Cypress {
     baseUrl: string | null
 
     /**
-     * Whether Cypress should allow [Cypress.env()](https://on.cypress.io/env) API to be available in the browser.
-     *
-     * Cypress recommends migrating to the cy.env() command and disabling this within your Cypress configuration.
-     *
-     * The use of Cypress.env() will warn and throw an error when this is set to false.
-     *
-     * This will be the default behavior in a future major version of Cypress and Cypress.env() will be removed.
-     * @default true
-     */
-    allowCypressEnv: boolean
-    /**
      * Any values to be set as [environment variables](https://on.cypress.io/environment-variables)
      * @default {}
      */
@@ -3434,7 +3388,7 @@ declare namespace Cypress {
   }
 
   interface SuiteConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'execTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
@@ -3442,7 +3396,7 @@ declare namespace Cypress {
   }
 
   interface TestConfigOverrides extends Partial<
-    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
+    Pick<ConfigOptions, 'animationDistanceThreshold' | 'blockHosts' | 'defaultCommandTimeout' | 'execTimeout' | 'visibilityStrategy' | 'includeShadowDom' | 'numTestsKeptInMemory' | 'pageLoadTimeout' | 'redirectionLimit' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'screenshotOnRunFailure' | 'slowTestThreshold' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number

@@ -536,6 +536,21 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('clearAutoProvisionedProjectId', {
+      description: 'Clear the auto-provisioned project ID after the user dismisses the manual setup modal',
+      type: 'Boolean',
+      resolve: (_, __, ctx) => {
+        ctx.update((coreData) => {
+          coreData.autoProvisionedProjectId = null
+        })
+
+        ctx.emitter.toApp()
+        ctx.emitter.toLaunchpad()
+
+        return true
+      },
+    })
+
     t.field('closeBrowser', {
       description: 'Close active browser',
       type: 'Boolean',

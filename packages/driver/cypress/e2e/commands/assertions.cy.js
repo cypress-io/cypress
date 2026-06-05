@@ -1458,11 +1458,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/205
-      describe('does not pass not.visible for non-dom', function () {
-        beforeEach(function () {
-          return Cypress.config('defaultCommandTimeout', 50)
-        })
-
+      describe('does not pass not.visible for non-dom', { defaultCommandTimeout: 50 }, function () {
         it('undefined', function (done) {
           let spy
 

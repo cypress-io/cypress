@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress'
-import type * as vite from 'vite'
 import viteConfig from './vite.config.mjs'
+import type * as vite from 'vite'
 
 declare global {
   namespace Cypress {
@@ -16,7 +16,6 @@ viteConfig.server ??= {}
 viteConfig.server.port = port
 
 export default defineConfig({
-  allowCypressEnv: false,
   env: {
     PORT_CHECK: port,
   },

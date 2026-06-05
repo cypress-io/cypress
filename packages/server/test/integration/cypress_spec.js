@@ -130,6 +130,7 @@ function mockEE () {
   ee.webContents = {
     getOSProcessId: sinon.stub(),
     setUserAgent: sinon.stub(),
+    on: sinon.stub(),
     session: {
       clearCache: sinon.stub().resolves(),
       setProxy: sinon.stub().resolves(),

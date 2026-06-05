@@ -282,6 +282,16 @@ const getProxyOrTargetOverrideForUrl = (href: string) => {
   return getProxyForUrl(href)
 }
 
+/**
+ * Returns true if a request to `href` would actually be routed through a
+ * configured proxy. This respects the `NO_PROXY` environment variable (which
+ * Cypress populates with `localhost`, `127.0.0.1`, and `::1` by default), so
+ * URLs excluded from the proxy return false even when `HTTP_PROXY` is set.
+ */
+export const shouldProxyForUrl = (href: string): boolean => {
+  return Boolean(getProxyOrTargetOverrideForUrl(href))
+}
+
 class HttpAgent extends http.Agent {
   httpsAgent: https.Agent
 

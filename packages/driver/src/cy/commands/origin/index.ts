@@ -5,7 +5,7 @@ import { Validator } from './validator'
 import { isFunction } from 'lodash'
 import { createUnserializableSubjectProxy } from './unserializable_subject_proxy'
 import { serializeRunnable } from './util'
-import { preprocessConfig, preprocessEnv, preprocessExpose, syncConfigToCurrentOrigin, syncEnvToCurrentOrigin, syncExposeToCurrentOrigin } from '../../../util/config'
+import { preprocessConfig, preprocessConfigForSpecBridge, preprocessExpose, syncConfigToCurrentOrigin, syncExposeToCurrentOrigin } from '../../../util/config'
 import { $Location } from '../../../cypress/location'
 import { LogUtils } from '../../../cypress/log'
 import logGroup from '../../logGroup'
@@ -63,11 +63,41 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
       let log
 
+      // Captured once the cross-origin callback resolves so the command's
+      // `consoleProps` can describe what was yielded. The yielded subject may be
+      // an unserializable subject proxy (e.g. the secondary origin's `window`),
+      // which throws when accessed or cloned - we must never expose it directly
+      // to the Command Log (see #27385), so we only record its type instead.
+      let yielded: any
+      let unserializableYieldedType: string | undefined
+
       logGroup(Cypress, {
         name: 'origin',
         type: 'parent',
         message: urlOrDomain,
         timeout,
+        consoleProps: () => {
+          // Everything here is guaranteed serializable: `urlOrDomain` is a
+          // string, `args` are structured-clone-validated before the command
+          // runs, and a yielded subject is only included when it was serialized
+          // back from the secondary origin. Unserializable subjects are
+          // represented by their type, never the throwing proxy.
+          const consoleProps: Record<string, any> = {
+            'Origin / Domain': urlOrDomain,
+          }
+
+          if (options?.args !== undefined) {
+            consoleProps['Args'] = options.args
+          }
+
+          if (unserializableYieldedType) {
+            consoleProps['Yielded'] = `[unserializable: ${unserializableYieldedType}]`
+          } else if (yielded !== undefined) {
+            consoleProps['Yielded'] = yielded
+          }
+
+          return consoleProps
+        },
         // @ts-ignore TODO: revisit once log-grouping has more implementations
       }, (_log) => {
         log = _log
@@ -109,6 +139,15 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
 
         const _resolve = ({ subject, unserializableSubjectType }) => {
           cleanup()
+
+          // record what was yielded so `consoleProps` can display it without
+          // ever exposing the unserializable subject proxy, which throws on access
+          if (unserializableSubjectType) {
+            unserializableYieldedType = unserializableSubjectType
+          } else {
+            yielded = subject
+          }
+
           resolve(unserializableSubjectType ? createUnserializableSubjectProxy(unserializableSubjectType) : subject)
         }
 
@@ -130,12 +169,9 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
           _resolve({ subject, unserializableSubjectType })
         }
 
-        const onSyncGlobals = ({ config, env, expose }) => {
+        const onSyncGlobals = ({ config, expose }) => {
           syncConfigToCurrentOrigin(config)
           syncExposeToCurrentOrigin(expose)
-          if (Cypress.config('allowCypressEnv')) {
-            syncEnvToCurrentOrigin(env)
-          }
         }
 
         communicator.once('sync:globals', onSyncGlobals)
@@ -192,8 +228,10 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
           clearTimeout(timeoutId)
           // now that the spec bridge is ready, instantiate Cypress with the current app config and environment variables for initial sync when creating the instance
           communicator.toSpecBridge(origin, 'initialize:cypress', {
-            config: preprocessConfig(Cypress.config()),
-            env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
+            config: preprocessConfigForSpecBridge(Cypress.config(), {
+              isInteractive: Cypress.originalConfig.isInteractive,
+              isTextTerminal: Cypress.originalConfig.isTextTerminal,
+            }),
             expose: preprocessExpose(Cypress.expose()),
             isProtocolEnabled: Cypress.state('isProtocolEnabled'),
           })
@@ -239,7 +277,6 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
                 originUserInvocationStack: userInvocationStack,
               },
               config: preprocessConfig(Cypress.config()),
-              env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,
               expose: preprocessExpose(Cypress.expose()),
               logCounter: LogUtils.getCounter(),
             })

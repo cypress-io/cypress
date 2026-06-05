@@ -4,11 +4,6 @@ import { writeMochaEventSnapshot, readMochaEventSnapshot } from './cypress/tasks
 import { setupCyInCyVariables } from '@packages/frontend-shared/cypress/tasks/cy-in-cy-variables'
 
 export default defineConfig({
-  /**
-   * NOTE: currently using Cypress.env() in the test config, so we need to set allowCypressEnv to true
-   * @percy/cypress: https://github.com/percy/percy-cypress/blob/master/index.js#L13
-   */
-  allowCypressEnv: true,
   projectId: 'ypt4pf',
   retries: {
     runMode: 2,

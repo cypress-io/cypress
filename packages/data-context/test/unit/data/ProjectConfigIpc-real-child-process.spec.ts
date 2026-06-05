@@ -1,4 +1,6 @@
-import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals'
+import { describe, expect, it, beforeAll, beforeEach, afterEach, jest } from '@jest/globals'
+import path from 'path'
+import { scaffoldCommonNodeModules } from '@tooling/system-tests/lib/dep-installer'
 import { scaffoldMigrationProject as scaffoldProject } from '../helper'
 import { ProjectConfigIpc } from '../../../src/data/ProjectConfigIpc'
 
@@ -28,14 +30,18 @@ describe('ProjectConfigIpc', () => {
   describe('real-child-process', () => {
     let projectConfigIpc
 
+    beforeAll(async () => {
+      await scaffoldCommonNodeModules()
+    })
+
     beforeEach(async () => {
       const projectPath = await scaffoldProject('e2e')
 
       projectConfigIpc = new ProjectConfigIpc(
         undefined,
         projectPath,
-        '',
-        false,
+        path.join(projectPath, 'cypress.config.js'),
+        'cypress.config.js',
         (error) => {},
         () => {},
         () => {},

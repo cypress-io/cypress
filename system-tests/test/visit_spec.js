@@ -122,7 +122,6 @@ describe('e2e visit', () => {
         responseTimeout: 500,
         pageLoadTimeout: 1000,
         e2e: {
-          allowCypressEnv: false,
         },
       },
       servers: {
@@ -187,7 +186,6 @@ describe('e2e visit', () => {
       settings: {
         responseTimeout: 2000,
         e2e: {
-          allowCypressEnv: false,
         },
       },
       servers: {
@@ -213,7 +211,6 @@ describe('e2e visit', () => {
       },
       settings: {
         e2e: {
-          allowCypressEnv: false,
         },
       },
     })
@@ -233,7 +230,6 @@ describe('e2e visit', () => {
       settings: {
         pageLoadTimeout: 1000,
         e2e: {
-          allowCypressEnv: false,
         },
       },
       servers: {

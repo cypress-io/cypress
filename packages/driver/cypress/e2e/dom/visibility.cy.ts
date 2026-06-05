@@ -220,7 +220,25 @@ describe('src/cypress/dom/visibility', {
       })
 
       describe('visibility scenarios', () => {
+        // The legacy strategy always treats <html>/<body> as visible. The modern
+        // strategy does not special-case them: they obey checkVisibility and the
+        // 0-dimension rule like any other element.
         describe('html and body overrides', () => {
+          const rootExpectation = mode === 'legacy' ? 'visible' : 'hidden'
+
+          const assertRoot = (selector: 'html' | 'body', expected: 'visible' | 'hidden') => {
+            const opposite = expected === 'visible' ? 'hidden' : 'visible'
+
+            expect(cy.$$(selector).is(`:${expected}`), `${selector} should be :${expected}`).to.be.true
+            expect(cy.$$(selector).is(`:${opposite}`), `${selector} should not be :${opposite}`).to.be.false
+
+            expect(cy.$$(selector)).to.be[expected]
+            expect(cy.$$(selector)).to.not.be[opposite]
+
+            cy.wrap(cy.$$(selector)).should(`be.${expected}`)
+            cy.wrap(cy.$$(selector)).should(`not.be.${opposite}`)
+          }
+
           beforeEach(() => {
             cy.visit('/fixtures/empty.html')
           })
@@ -236,44 +254,26 @@ describe('src/cypress/dom/visibility', {
               })
             })
 
-            it('is always visible', () => {
-              expect(cy.$$('html').is(':hidden')).to.be.false
-              expect(cy.$$('html').is(':visible')).to.be.true
-
-              expect(cy.$$('html')).not.to.be.hidden
-              expect(cy.$$('html')).to.be.visible
-
-              cy.wrap(cy.$$('html')).should('not.be.hidden')
-              cy.wrap(cy.$$('html')).should('be.visible')
-              expect(cy.$$('body').is(':hidden')).to.be.false
-              expect(cy.$$('body').is(':visible')).to.be.true
-
-              expect(cy.$$('body')).not.to.be.hidden
-              expect(cy.$$('body')).to.be.visible
-
-              cy.wrap(cy.$$('body')).should('not.be.hidden')
-              cy.wrap(cy.$$('body')).should('be.visible')
+            it(`is ${rootExpectation}`, () => {
+              assertRoot('html', rootExpectation)
+              assertRoot('body', rootExpectation)
             })
           })
 
-          describe('when not display none', () => {
+          describe('when empty', () => {
+            it(`body is ${rootExpectation}`, () => {
+              assertRoot('body', rootExpectation)
+            })
+          })
+
+          describe('when it has rendered dimensions', () => {
+            beforeEach(() => {
+              cy.get('body').invoke('html', '<div style="width: 100px; height: 100px;">content</div>')
+            })
+
             it('is visible', () => {
-              expect(cy.$$('html').is(':hidden')).to.be.false
-              expect(cy.$$('html').is(':visible')).to.be.true
-
-              expect(cy.$$('html')).not.to.be.hidden
-              expect(cy.$$('html')).to.be.visible
-
-              cy.wrap(cy.$$('html')).should('not.be.hidden')
-              cy.wrap(cy.$$('html')).should('be.visible')
-              expect(cy.$$('body').is(':hidden')).to.be.false
-              expect(cy.$$('body').is(':visible')).to.be.true
-
-              expect(cy.$$('body')).not.to.be.hidden
-              expect(cy.$$('body')).to.be.visible
-
-              cy.wrap(cy.$$('body')).should('not.be.hidden')
-              cy.wrap(cy.$$('body')).should('be.visible')
+              assertRoot('html', 'visible')
+              assertRoot('body', 'visible')
             })
           })
         })

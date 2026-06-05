@@ -64,7 +64,8 @@ describe(`React major versions with Webpack`, function () {
     it(`executes all of the tests for React v${majorVersion} with Webpack`, function () {
       return systemTests.exec(this, {
         project: `react${majorVersion}`,
-        configFile: 'cypress-webpack.config.ts',
+        // react19 is ESM ("type": "module") — bridge config re-exports cypress-webpack.config.ts via createRequire
+        configFile: majorVersion === '19' ? 'cypress-webpack-esm.config.ts' : 'cypress-webpack.config.ts',
         spec: 'src/App.cy.jsx,src/Unmount.cy.jsx,src/Rerendering.cy.jsx,src/mount.cy.jsx',
         testingType: 'component',
         browser: 'chrome',

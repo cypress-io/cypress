@@ -289,6 +289,37 @@ describe('lib/cloud/api/cy-prompt/report_cy_prompt_error', () => {
       expect(cloudRequestStub).to.be.called
     })
 
+    it('folds the underlying cause into the reported stack', () => {
+      const cause = Object.assign(new Error('EPERM: operation not permitted, rename'), {
+        code: 'EPERM',
+        errno: -4048,
+        syscall: 'rename',
+        path: '/staging/server/index.js',
+        dest: '/cache/final/server/index.js',
+        stack: 'Error: EPERM: operation not permitted, rename\n    at Object.rename',
+      })
+      const error = Object.assign(new Error('Failed to publish cy-prompt bundle'), { cause })
+
+      error.stack = 'BundleError: Failed to publish cy-prompt bundle\n    at ensureSignedBundle'
+
+      reportCyPromptError({
+        cloudApi,
+        cyPromptHash: 'abc123',
+        projectSlug: 'test-project',
+        error,
+        cyPromptMethod: 'testMethod',
+      })
+
+      const payload = cloudRequestStub.firstCall.args[1]
+      const { stack } = payload.errors[0]
+
+      expect(stack).to.include('Caused by:')
+      expect(stack).to.include('Object.rename')
+      expect(stack).to.include('code=EPERM')
+      expect(stack).to.include('errno=-4048')
+      expect(stack).to.include('syscall=rename')
+    })
+
     it('extracts last error from AggregateError', () => {
       const aggregateError = new AggregateError(
         [new Error('First error'), new Error('Second error')],
