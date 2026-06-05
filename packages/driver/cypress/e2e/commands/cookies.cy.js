@@ -1909,46 +1909,34 @@ describe('src/cy/commands/cookies', () => {
 
   context('#clearCookies', () => {
     it('returns null', () => {
-      Cypress.automation.withArgs('get:cookies').resolves([])
+      Cypress.automation.withArgs('clear:all:cookies').resolves([])
 
       cy.clearCookies().should('be.null')
     })
 
-    it('does not call \'clear:cookies\' when no cookies were returned', () => {
-      Cypress.automation.withArgs('get:cookies').resolves([])
+    it('issues a single \'clear:all:cookies\' request and no \'get:cookies\'/\'clear:cookies\'', () => {
+      Cypress.automation.withArgs('clear:all:cookies').resolves([])
 
       cy.clearCookies().then(() => {
-        expect(Cypress.automation).not.to.be.calledWith(
-          'clear:cookies',
-        )
+        expect(Cypress.automation).to.be.calledWith('clear:all:cookies')
+        expect(Cypress.automation).not.to.be.calledWith('get:cookies')
+        expect(Cypress.automation).not.to.be.calledWith('clear:cookies')
       })
     })
 
-    it('calls \'clear:cookies\' with all cookies', () => {
+    it('calls \'clear:all:cookies\' with the resolved domain', () => {
       Cypress.automation
-      .withArgs('get:cookies')
+      .withArgs('clear:all:cookies', { domain: 'localhost' })
       .resolves([
         { name: 'foo', domain: 'localhost' },
         { name: 'bar', domain: 'localhost' },
         { name: 'baz', domain: 'localhost' },
       ])
-      .withArgs('clear:cookies', [
-        { name: 'foo', domain: 'localhost' },
-        { name: 'bar', domain: 'localhost' },
-        { name: 'baz', domain: 'localhost' },
-      ])
-      .resolves({
-        name: 'foo',
-      })
 
       cy
       .clearCookies().should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
-          'clear:cookies', [
-            { name: 'foo', domain: 'localhost' },
-            { name: 'bar', domain: 'localhost' },
-            { name: 'baz', domain: 'localhost' },
-          ],
+          'clear:all:cookies', { domain: 'localhost' },
         )
       })
     })
@@ -1956,10 +1944,8 @@ describe('src/cy/commands/cookies', () => {
     describe('timeout', () => {
       beforeEach(() => {
         Cypress.automation
-        .withArgs('get:cookies')
+        .withArgs('clear:all:cookies')
         .resolves([{}])
-        .withArgs('clear:cookies')
-        .resolves({})
       })
 
       it('sets timeout to Cypress.config(responseTimeout)', {
@@ -1990,8 +1976,7 @@ describe('src/cy/commands/cookies', () => {
         cy.spy(cy, 'clearTimeout')
 
         cy.clearCookies().then(() => {
-          expect(cy.clearTimeout).to.be.calledWith('get:cookies')
-          expect(cy.clearTimeout).to.be.calledWith('clear:cookies')
+          expect(cy.clearTimeout).to.be.calledWith('clear:all:cookies')
 
           // restores the timeout afterwards
           expect(cy.timeout()).to.eq(100)
@@ -2029,7 +2014,7 @@ describe('src/cy/commands/cookies', () => {
         cy.clearCookies({ domain: true })
       })
 
-      it('logs once on \'get:cookies\' error', function (done) {
+      it('logs once on \'clear:all:cookies\' error', function (done) {
         const error = new Error('some err message')
 
         error.name = 'foo'
@@ -2053,7 +2038,7 @@ describe('src/cy/commands/cookies', () => {
 
       it('throws after timing out', function (done) {
         Cypress.automation.resolves([{ name: 'foo' }])
-        Cypress.automation.withArgs('clear:cookies').resolves(Promise.delay(1000))
+        Cypress.automation.withArgs('clear:all:cookies').resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -2071,32 +2056,6 @@ describe('src/cy/commands/cookies', () => {
 
         cy.clearCookies({ timeout: 50 })
       })
-
-      it('logs once on \'clear:cookies\' error', function (done) {
-        Cypress.automation.withArgs('get:cookies').resolves([
-          { name: 'foo' }, { name: 'bar' },
-        ])
-
-        const error = new Error('some err message')
-
-        error.name = 'foo'
-        error.stack = 'stack'
-
-        Cypress.automation.withArgs('clear:cookies').rejects(error)
-
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error').message).to.contain(`\`cy.clearCookies()\` had an unexpected error clearing cookies in ${Cypress.browser.displayName}.`)
-          expect(lastLog.get('error').message).to.contain('some err message')
-          expect(lastLog.get('error')).to.eq(err)
-
-          done()
-        })
-
-        cy.clearCookies()
-      })
     })
 
     describe('.log', () => {
@@ -2108,9 +2067,7 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-        .withArgs('get:cookies', { domain: 'localhost' })
-        .resolves([{ name: 'foo', domain: 'localhost' }])
-        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+        .withArgs('clear:all:cookies', { domain: 'localhost' })
         .resolves([
           { name: 'foo' },
         ])
@@ -2190,7 +2147,7 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-        .withArgs('get:cookies', { domain: 'localhost' })
+        .withArgs('clear:all:cookies', { domain: 'localhost' })
         .resolves([])
       })
 
@@ -2215,9 +2172,7 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-        .withArgs('get:cookies', { domain: 'localhost' })
-        .resolves([{ name: 'foo', domain: 'localhost' }])
-        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+        .withArgs('clear:all:cookies', { domain: 'localhost' })
         .resolves([])
       })
 
@@ -2236,34 +2191,24 @@ describe('src/cy/commands/cookies', () => {
 
   context('#clearAllCookies', () => {
     it('returns null', () => {
-      Cypress.automation.withArgs('get:cookies').resolves([])
+      Cypress.automation.withArgs('clear:all:cookies').resolves([])
 
       cy.clearAllCookies().should('be.null')
     })
 
-    it('does not call \'clear:cookies\' when no cookies were returned', () => {
-      Cypress.automation.withArgs('get:cookies').resolves([])
+    it('issues a single \'clear:all:cookies\' request and no \'get:cookies\'/\'clear:cookies\'', () => {
+      Cypress.automation.withArgs('clear:all:cookies').resolves([])
 
       cy.clearAllCookies().then(() => {
-        expect(Cypress.automation).not.to.be.calledWith(
-          'clear:cookies',
-        )
+        expect(Cypress.automation).to.be.calledWith('clear:all:cookies')
+        expect(Cypress.automation).not.to.be.calledWith('get:cookies')
+        expect(Cypress.automation).not.to.be.calledWith('clear:cookies')
       })
     })
 
-    it('calls \'clear:cookies\' with all cookies', () => {
+    it('calls \'clear:all:cookies\' with no domain filter', () => {
       Cypress.automation
-      .withArgs('get:cookies')
-      .resolves([
-        { name: 'foo', domain: 'localhost' },
-        { name: 'bar', domain: 'bar.com' },
-        { name: 'qux', domain: 'qux.com' },
-      ])
-      .withArgs('clear:cookies', [
-        { name: 'foo', domain: 'localhost' },
-        { name: 'bar', domain: 'bar.com' },
-        { name: 'qux', domain: 'qux.com' },
-      ])
+      .withArgs('clear:all:cookies', {})
       .resolves([
         { name: 'foo', domain: 'localhost' },
         { name: 'bar', domain: 'bar.com' },
@@ -2273,11 +2218,7 @@ describe('src/cy/commands/cookies', () => {
       cy
       .clearAllCookies().should('be.null').then(() => {
         expect(Cypress.automation).to.be.calledWith(
-          'clear:cookies', [
-            { name: 'foo', domain: 'localhost' },
-            { name: 'bar', domain: 'bar.com' },
-            { name: 'qux', domain: 'qux.com' },
-          ],
+          'clear:all:cookies', {},
         )
       })
     })
@@ -2285,10 +2226,8 @@ describe('src/cy/commands/cookies', () => {
     describe('timeout', () => {
       beforeEach(() => {
         Cypress.automation
-        .withArgs('get:cookies')
+        .withArgs('clear:all:cookies')
         .resolves([{}])
-        .withArgs('clear:cookies')
-        .resolves({})
       })
 
       it('sets timeout to Cypress.config(responseTimeout)', {
@@ -2319,8 +2258,7 @@ describe('src/cy/commands/cookies', () => {
         cy.spy(cy, 'clearTimeout')
 
         cy.clearAllCookies().then(() => {
-          expect(cy.clearTimeout).to.be.calledWith('get:cookies')
-          expect(cy.clearTimeout).to.be.calledWith('clear:cookies')
+          expect(cy.clearTimeout).to.be.calledWith('clear:all:cookies')
 
           // restores the timeout afterwards
           expect(cy.timeout()).to.eq(100)
@@ -2342,7 +2280,7 @@ describe('src/cy/commands/cookies', () => {
         return null
       })
 
-      it('logs once on \'get:cookies\' error', function (done) {
+      it('logs once on \'clear:all:cookies\' error', function (done) {
         const error = new Error('some err message')
 
         error.name = 'foo'
@@ -2366,7 +2304,7 @@ describe('src/cy/commands/cookies', () => {
 
       it('throws after timing out', function (done) {
         Cypress.automation.resolves([{ name: 'foo' }])
-        Cypress.automation.withArgs('clear:cookies').resolves(Promise.delay(1000))
+        Cypress.automation.withArgs('clear:all:cookies').resolves(Promise.delay(1000))
 
         cy.on('fail', (err) => {
           const { lastLog } = this
@@ -2384,32 +2322,6 @@ describe('src/cy/commands/cookies', () => {
 
         cy.clearAllCookies({ timeout: 50 })
       })
-
-      it('logs once on \'clear:cookies\' error', function (done) {
-        Cypress.automation.withArgs('get:cookies').resolves([
-          { name: 'foo' }, { name: 'bar' },
-        ])
-
-        const error = new Error('some err message')
-
-        error.name = 'foo'
-        error.stack = 'stack'
-
-        Cypress.automation.withArgs('clear:cookies').rejects(error)
-
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          assertLogLength(this.logs, 1)
-          expect(lastLog.get('error').message).to.contain(`\`cy.clearAllCookies()\` had an unexpected error clearing cookies in ${Cypress.browser.displayName}.`)
-          expect(lastLog.get('error').message).to.contain('some err message')
-          expect(lastLog.get('error')).to.eq(err)
-
-          done()
-        })
-
-        cy.clearAllCookies()
-      })
     })
 
     describe('.log', () => {
@@ -2421,9 +2333,7 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-        .withArgs('get:cookies', {})
-        .resolves([{ name: 'foo', domain: 'localhost' }])
-        .withArgs('clear:cookies', [{ name: 'foo', domain: 'localhost' }])
+        .withArgs('clear:all:cookies', {})
         .resolves([
           { name: 'foo' },
         ])
@@ -2503,7 +2413,7 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-        .withArgs('get:cookies')
+        .withArgs('clear:all:cookies')
         .resolves([])
       })
 
@@ -2528,7 +2438,7 @@ describe('src/cy/commands/cookies', () => {
         })
 
         Cypress.automation
-        .withArgs('get:cookies', {})
+        .withArgs('clear:all:cookies', {})
         .resolves([])
       })
 

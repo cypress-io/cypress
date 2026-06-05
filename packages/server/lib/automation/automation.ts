@@ -162,6 +162,12 @@ export class Automation {
             cookieJar.removeAllCookies(),
           ])
           .spread((automationResult) => automationResult)
+        case 'clear:all:cookies':
+          return Bluebird.all([
+            this.cookies.clearAllCookies(data, automate),
+            cookieJar.removeAllCookies(),
+          ])
+          .spread((automationResult) => automationResult)
         case 'clear:cookie':
           return Bluebird.all([
             this.cookies.clearCookie(data, automate),

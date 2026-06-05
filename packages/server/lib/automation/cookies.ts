@@ -241,6 +241,23 @@ export class Cookies {
     return normalizedCookies
   }
 
+  // Enumerates the cookies matching `data` (optionally domain-scoped) and clears
+  // them in a single driver round-trip. Previously the driver issued a `get:cookies`
+  // request followed by a separate `clear:cookies` request; collapsing that
+  // orchestration here keeps the browser-facing automation contract unchanged
+  // (`get:cookies` + `clear:cookies`) while halving the driver<->server IPC.
+  async clearAllCookies (data: { domain?: string }, automate: AutomationMessageFn<any, any>) {
+    const cookies = await this.getCookies(data, automate) as AutomationCookie[]
+
+    // bail early if there are no cookies to clear so we don't issue a
+    // needless `clear:cookies` request to the browser
+    if (!cookies.length) {
+      return cookies
+    }
+
+    return this.clearCookies(cookies, automate)
+  }
+
   changeCookie (data: {
     cause: string
     cookie: SerializableAutomationCookie

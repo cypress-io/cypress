@@ -134,6 +134,7 @@ export interface AutomationCommands {
   'set:cookies': CommandSignature
   'add:cookies': CommandSignature
   'clear:cookies': CommandSignature
+  'clear:all:cookies': CommandSignature
   'clear:cookie': CommandSignature
   'change:cookie': CommandSignature
   'create:download': CommandSignature

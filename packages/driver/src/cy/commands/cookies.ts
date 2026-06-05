@@ -82,6 +82,9 @@ interface AutomationEventsAndOptions {
     name: string
   }
   'clear:cookies': Cypress.Cookie[]
+  'clear:all:cookies': {
+    domain?: string
+  }
 }
 
 type CommandName = 'getCookie' | 'getCookies' | 'getAllCookies' | 'setCookie' | 'clearCookie' | 'clearCookies' | 'clearAllCookies'
@@ -97,7 +100,7 @@ interface AutomateOptions<T extends keyof AutomationEventsAndOptions> {
 interface GetAndClearOptions {
   commandName: CommandName
   log?: Cypress.Log
-  options: AutomationEventsAndOptions['get:cookies']
+  options: AutomationEventsAndOptions['clear:all:cookies']
   timeout: number
 }
 
@@ -147,26 +150,15 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
   }
 
   const getAndClear = ({ commandName, log, options, timeout }: GetAndClearOptions) => {
+    // a single automation request enumerates the matching cookies and clears
+    // them server-side (see Cookies#clearAllCookies), yielding the cleared
+    // cookies. this avoids a separate `get:cookies` round-trip from the driver.
     return automateCookies({
-      event: 'get:cookies',
+      event: 'clear:all:cookies',
       commandName,
       options,
       log,
       timeout,
-    })
-    .then((cookies: Cypress.Cookie[]) => {
-      // bail early if we got no cookies!
-      if (cookies && cookies.length === 0) {
-        return cookies
-      }
-
-      return automateCookies({
-        event: 'clear:cookies',
-        commandName,
-        options: cookies,
-        log,
-        timeout,
-      })
     })
     .then(pickCookieProps)
   }
