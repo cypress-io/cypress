@@ -1,12 +1,18 @@
 {
   "extends": "../ts/tsconfig.json",
   "include": [
-    "*.ts",
     "lib/*.ts",
-    "lib/**/*.ts",
-    "test/**/*.ts"
+    "lib/**/*.ts"
+  ],
+  "exclude": [
+    "test"
   ],
   "files": [
     "./../ts/index.d.ts"
-  ]
+  ],
+  "compilerOptions": {
+    "declaration": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  }
 }

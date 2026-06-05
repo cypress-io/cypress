@@ -127,6 +127,22 @@ const checkBuiltBinary = async () => {
   }
 }
 
+// Matches systemTests.it default (run.js sets Mocha CLI --timeout to 10s otherwise).
+const SYSTEM_TEST_TIMEOUT_MS = Number(process.env.SYSTEM_TEST_TIMEOUT || 120000)
+
+// Pre-pulls all images in parallel before tests run so per-test pulls hit the local cache.
+// Uses allSettled so a transient failure doesn't abort the suite — dockerSpawner retries individually.
+export const prePullImages = async (images: string[]): Promise<void> => {
+  await Promise.allSettled(images.map((image) => new DockerProcess(image).pull()))
+}
+
+export const beforePrePullImages = (images: string[]): void => {
+  before(async function () {
+    this.timeout(SYSTEM_TEST_TIMEOUT_MS)
+    await prePullImages(images)
+  })
+}
+
 export const dockerSpawner: Spawner = async (cmd, args, env, options) => {
   await checkBuiltBinary()
 
