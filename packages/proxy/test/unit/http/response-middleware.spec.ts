@@ -56,6 +56,51 @@ describe('http/response-middleware', function () {
     ])
   })
 
+  describe('ClearCyInitialCookie', function () {
+    const { ClearCyInitialCookie } = ResponseMiddleware
+
+    function prepareContext (resProps = {}) {
+      const cookie = vi.fn()
+
+      const ctx = {
+        req: { proxiedUrl: 'https://localhost:3502/fixtures/primary-origin.html', cookies: {} },
+        res: {
+          cookie,
+          wantsInjection: 'full',
+          isInitial: false,
+          on: () => {},
+          off: () => {},
+          ...resProps,
+        },
+        remoteStates: {
+          current: () => ({ domainName: 'localhost' }),
+        },
+      }
+
+      return { ctx, cookie }
+    }
+
+    // Regression for the stale `__cypress.unload` cookie that diverted cy.origin
+    // navigations to the client route. The flag must be expired whenever an
+    // injected app document is served - notably even when `isInitial` is false,
+    // which is how the first document of a newly switched super-domain is served.
+    it('expires the __cypress.unload cookie when serving an injected document, even if not the initial request', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { domain: 'localhost', expires: new Date(0) })
+    })
+
+    it('does not modify the __cypress.unload cookie when nothing is being injected', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: false, isInitial: false })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).not.toHaveBeenCalledWith('__cypress.unload', '', expect.anything())
+    })
+  })
+
   describe('multiple this.next invocations', () => {
     describe('within the same middleware', () => {
       it('throws an error', function () {
