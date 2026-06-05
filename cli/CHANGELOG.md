@@ -46,6 +46,7 @@
 **Dependency Updates:**
 
 - Upgraded `tsx` from `4.20.6` to `4.22.4`. Its bundled `esbuild` Go binary no longer reports [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in security scans, and loading TypeScript config files no longer emits the Node.js `[DEP0205] module.register() is deprecated` warning. Fixes [#33954](https://github.com/cypress-io/cypress/issues/33954) and [#33744](https://github.com/cypress-io/cypress/issues/33744).
+- Upgraded `watchpack` (a transitive dependency of `webpack`) from `2.4.2` to `2.5.1`. On Windows, running a spec in `cypress open` from an elevated (Administrator) shell no longer logs `Watchpack Error (initial scan): EINVAL` warnings for system files at the root of the drive such as `pagefile.sys`, `swapfile.sys`, and `DumpStack.log.tmp`. Fixes [#33586](https://github.com/cypress-io/cypress/issues/33586).
 
 ## 15.16.0
 
