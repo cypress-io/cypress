@@ -3450,7 +3450,7 @@ describe('network stubbing', { retries: 15 }, function () {
         cy.intercept('/should-err*', { times: 1 }, function (req) {
           req.reply(() => {})
         }).then(function () {
-          $.get('http://localhost:3333/should-err')
+          $.get('http://127.0.0.1:3333/should-err')
         })
       })
 
@@ -3464,7 +3464,7 @@ describe('network stubbing', { retries: 15 }, function () {
         .as('err')
         .then(function () {
           return new Promise((resolve) => {
-            $.get('http://localhost:3333/should-err')
+            $.get('http://127.0.0.1:3333/should-err')
             .fail((xhr) => {
               expect(xhr).to.include({
                 status: 0,
@@ -3823,6 +3823,43 @@ describe('network stubbing', { retries: 15 }, function () {
           }
 
           cy.wait('@createUser').its('state').should('eq', 'Errored')
+        })
+      })
+
+      it('should resolve a handler based intercept when navigation cancels the request', () => {
+        const alias = '🧪'
+
+        cy.visit('http://localhost:3500/fixtures/generic.html')
+
+        cy.intercept('POST', /users/, (req) => {
+          req.alias = alias
+          req.reply({
+            body: { name: 'b' },
+            delay: 2000,
+          })
+        })
+
+        cy.window().then((win) => {
+          const xhr = new win.XMLHttpRequest()
+
+          xhr.open('POST', '/users/')
+          xhr.send()
+        })
+
+        cy.visit('http://localhost:3500/fixtures/generic.html?navigation=1')
+        cy.wait(`@${alias}`).then(({ error, state }) => {
+          const interceptionError = error as Error & { code?: string }
+
+          expect(state).to.eq('Errored')
+          expect({
+            name: interceptionError.name,
+            code: interceptionError.code,
+            message: interceptionError.message,
+          }).to.deep.equal({
+            name: 'BrowserConnectionClosedError',
+            code: 'ERR_BROWSER_CONNECTION_CLOSED',
+            message: 'The browser closed the connection before the response completed.',
+          })
         })
       })
     })

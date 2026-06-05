@@ -148,6 +148,7 @@ while IFS= read -r file; do
     packages/server/*)
       server_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/proxy/*)
       server_tests=true
@@ -196,6 +197,7 @@ while IFS= read -r file; do
       launchpad_tests=true
       server_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/runner/*)
       driver_tests=true
