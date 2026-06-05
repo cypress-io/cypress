@@ -53,31 +53,15 @@ Cypress Version: 1.2.3"
 
 exports[`errors > getError > forms full message and creates Error object 1`] = `
 {
-  "description": "The Test Runner unexpectedly exited via a exit event with signal SIGKILL",
-  "solution": "Please search Cypress documentation for possible solutions:
-
-  https://on.cypress.io
-
-Check if there is a GitHub issue describing this crash:
-
-  https://github.com/cypress-io/cypress/issues
-
-Consider opening a new issue.",
+  "description": "Installed version does not match package version.",
+  "solution": "Install Cypress and verify app again",
 }
 `;
 
 exports[`errors > getError > forms full message and creates Error object 2`] = `
-"The Test Runner unexpectedly exited via a exit event with signal SIGKILL
+"Installed version does not match package version.
 
-Please search Cypress documentation for possible solutions:
-
-https://on.cypress.io
-
-Check if there is a GitHub issue describing this crash:
-
-https://github.com/cypress-io/cypress/issues
-
-Consider opening a new issue.
+Install Cypress and verify app again
 
 ----------
 
@@ -89,7 +73,6 @@ exports[`errors > individual > has the following errors 1`] = `
 [
   "CYPRESS_RUN_BINARY",
   "binaryNotExecutable",
-  "childProcessKilled",
   "failedDownload",
   "failedUnzip",
   "failedUnzipWindowsMaxPathLength",
