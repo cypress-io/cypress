@@ -135,11 +135,11 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
 }
 
 const MaybeAttachCrossOriginCookies: RequestMiddleware = async function () {
-  return this.networkPolicyCore.attachCrossOriginCookies(this)
+  return this.networkInterceptionCore.attachCrossOriginCookies(this)
 }
 
 const SendToDriver: RequestMiddleware = function () {
-  this.networkPolicyCore.notifyIncomingRequest(this)
+  this.networkInterceptionCore.notifyIncomingRequest(this)
 }
 
 const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
