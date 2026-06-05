@@ -637,13 +637,25 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
         .then(({ data }) => {
           return `data:image/png;base64,${data}`
         })
-      case 'reset:browser:state':
-        return Promise.all([
-          // Note that we are omitting `file_systems` as it is very non-performant to clear:
-          // https://github.com/cypress-io/cypress/pull/32703
+      case 'reset:browser:state': {
+        // Clearing browser-wide storage (cookies, localStorage, IndexedDB,
+        // service workers, etc.) is required for test isolation between specs.
+        // Note that we are omitting `file_systems` as it is very non-performant to clear:
+        // https://github.com/cypress-io/cypress/pull/32703
+        const resetState = [
           this.sendDebuggerCommandFn('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }),
-          this.sendDebuggerCommandFn('Network.clearBrowserCache'),
-        ])
+        ]
+
+        // Clearing the HTTP cache is not required for test isolation and forces
+        // the browser to re-download app assets on every spec, which is slow.
+        // Allow opting out of the per-spec cache clear for a performance win;
+        // defaults to clearing to preserve existing behavior.
+        if (!process.env.CYPRESS_INTERNAL_SKIP_BROWSER_CACHE_RESET) {
+          resetState.push(this.sendDebuggerCommandFn('Network.clearBrowserCache'))
+        }
+
+        return Promise.all(resetState)
+      }
       case 'reset:browser:tabs:for:next:spec':
         return this.sendCloseCommandFn(data.shouldKeepTabOpen)
       case 'focus:browser:window':

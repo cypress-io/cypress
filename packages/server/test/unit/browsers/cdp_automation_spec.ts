@@ -568,6 +568,21 @@ context('lib/browsers/cdp_automation', () => {
         expect(this.sendDebuggerCommand).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' })
         expect(this.sendDebuggerCommand).to.be.calledWith('Network.clearBrowserCache')
       })
+
+      it('skips Network.clearBrowserCache when CYPRESS_INTERNAL_SKIP_BROWSER_CACHE_RESET is set', async function () {
+        process.env.CYPRESS_INTERNAL_SKIP_BROWSER_CACHE_RESET = '1'
+
+        this.sendDebuggerCommand.withArgs('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }).resolves()
+
+        try {
+          await this.onRequest('reset:browser:state')
+        } finally {
+          delete process.env.CYPRESS_INTERNAL_SKIP_BROWSER_CACHE_RESET
+        }
+
+        expect(this.sendDebuggerCommand).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' })
+        expect(this.sendDebuggerCommand).not.to.be.calledWith('Network.clearBrowserCache')
+      })
     })
 
     describe('reset:browser:tabs:for:next:spec', function () {
