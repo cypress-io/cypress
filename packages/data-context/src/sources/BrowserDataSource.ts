@@ -100,7 +100,15 @@ export class BrowserDataSource {
   }
 
   idForBrowser (obj: FoundBrowser) {
-    return `${obj.name}-${obj.family}-${obj.channel}`
+    const id = `${obj.name}-${obj.family}-${obj.channel}`
+
+    // A custom browser supplied via `--browser <path>` inherits its
+    // name/family/channel from the matched known browser, so without the path
+    // it would share an identity with a same-family browser installed in the
+    // default location. Including the path keeps the two distinct so the GUI
+    // selects, displays, and launches the correct one.
+    // https://github.com/cypress-io/cypress/issues/25755
+    return obj.custom ? `${id}-${obj.path}` : id
   }
 
   isSelected (obj: FoundBrowser) {

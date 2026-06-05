@@ -117,7 +117,19 @@ export class ProjectLifecycleManager {
 
   get browsers () {
     if (this.loadedFullConfig) {
-      return this.loadedFullConfig.browsers as FoundBrowser[]
+      const configBrowsers = this.loadedFullConfig.browsers as FoundBrowser[]
+      const { activeBrowser } = this.ctx.coreData
+
+      // A custom browser supplied via `--browser <path>` is detected at runtime
+      // and is not part of the machine-detected config browsers. Surface it here
+      // so the GUI can display and re-select it, instead of silently falling back
+      // to a same-family browser installed in the default location.
+      // https://github.com/cypress-io/cypress/issues/25755
+      if (activeBrowser?.custom && !configBrowsers.some((browser) => this.ctx.browser.idForBrowser(browser) === this.ctx.browser.idForBrowser(activeBrowser))) {
+        return [activeBrowser, ...configBrowsers]
+      }
+
+      return configBrowsers
     }
 
     return null

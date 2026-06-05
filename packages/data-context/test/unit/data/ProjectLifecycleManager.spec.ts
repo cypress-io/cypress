@@ -225,6 +225,44 @@ describe('ProjectLifecycleManager', () => {
     })
   })
 
+  describe('#browsers', () => {
+    it('returns the machine-detected config browsers', () => {
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ browsers } as unknown as FullConfig)
+      ctx.coreData.activeBrowser = null
+
+      expect(ctx.lifecycleManager.browsers).toEqual(browsers)
+    })
+
+    it('surfaces a custom --browser <path> browser that is not among the config browsers', () => {
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ browsers } as unknown as FullConfig)
+
+      const customBrowser = { name: 'chrome', family: 'chromium', channel: 'stable', displayName: 'Custom Chrome', path: '/tmp/custom/chrome', version: '112', custom: true } as FoundBrowser
+
+      ctx.coreData.activeBrowser = customBrowser
+
+      const result = ctx.lifecycleManager.browsers
+
+      expect(result?.[0]).toEqual(customBrowser)
+      expect(result).toHaveLength(browsers.length + 1)
+    })
+
+    it('does not duplicate a custom browser that is already present in the config browsers', () => {
+      const customBrowser = { name: 'chrome', family: 'chromium', channel: 'stable', displayName: 'Custom Chrome', path: '/tmp/custom/chrome', version: '112', custom: true } as FoundBrowser
+
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue({ browsers: [...browsers, customBrowser] } as unknown as FullConfig)
+
+      ctx.coreData.activeBrowser = customBrowser
+
+      expect(ctx.lifecycleManager.browsers).toHaveLength(browsers.length + 1)
+    })
+
+    it('returns null when there is no loaded config', () => {
+      jest.spyOn(ctx.lifecycleManager, 'loadedFullConfig', 'get').mockReturnValue(null)
+
+      expect(ctx.lifecycleManager.browsers).toBeNull()
+    })
+  })
+
   describe('onFinalConfigLoaded', () => {
     it('returns early without throwing if the project was cleared mid-setup', async () => {
       // Simulates the user clearing the project (e.g. clicking "back to projects"

@@ -68,4 +68,21 @@ describe('BrowserDataSource', () => {
       expect(result).toEqual(allBrowsers)
     })
   })
+
+  describe('#idForBrowser', () => {
+    it('builds an id from name, family, and channel', () => {
+      const ctx = createTestDataContext('run')
+
+      expect(ctx.browser.idForBrowser(foundBrowserChrome)).toEqual('chrome-chromium-stable')
+    })
+
+    it('includes the path for custom browsers so they do not collide with a same-family browser', () => {
+      const ctx = createTestDataContext('run')
+      const customChrome = { ...foundBrowserChrome, custom: true, path: '/tmp/custom/chrome' }
+
+      // the custom browser must not share an identity with the default-location browser
+      expect(ctx.browser.idForBrowser(customChrome)).toEqual('chrome-chromium-stable-/tmp/custom/chrome')
+      expect(ctx.browser.idForBrowser(customChrome)).not.toEqual(ctx.browser.idForBrowser(foundBrowserChrome))
+    })
+  })
 })
