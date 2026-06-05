@@ -68,6 +68,30 @@ describe('lib/browsers/webkit', () => {
 
       expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
     })
+
+    // https://github.com/cypress-io/cypress/issues/27141
+    // Playwright registers a process `exit` listener that re-spawns the current binary to
+    // run a cleanup script. With Electron's binary this is interpreted as `cypress open`
+    // (no args), causing interactive mode to launch after a `cypress run` completes. The
+    // listener has been named `killProcessAndCleanup` (<= 1.34) and `exitHandler` (>= 1.35).
+    ;['killProcessAndCleanup', 'exitHandler'].forEach((listenerName) => {
+      it(`removes Playwright's '${listenerName}' exit listener`, async () => {
+        // create a listener whose function name matches the one Playwright registers
+        const badExitListener = { [listenerName]: () => {} }[listenerName]
+
+        process.on('exit', badExitListener)
+
+        try {
+          expect(process.rawListeners('exit')).to.include(badExitListener)
+
+          await webkit.open(browser as any, 'http://the.url', options as any, automation as any)
+
+          expect(process.rawListeners('exit')).not.to.include(badExitListener)
+        } finally {
+          process.removeListener('exit', badExitListener)
+        }
+      })
+    })
   })
 
   context('#connectProtocolToBrowser', () => {

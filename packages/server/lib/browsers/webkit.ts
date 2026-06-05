@@ -56,15 +56,20 @@ export function closeProtocolConnection (): Promise<void> {
  * Playwright adds an `exit` event listener to run a cleanup process. It tries to use the current binary to run a Node script by passing it as argv[1].
  * However, the Electron binary does not support an entrypoint, leading Cypress to think it's being opened in global mode (no args) when this fn is called.
  * Solution is to filter out the problematic function.
+ *
+ * The name of the registered listener has changed across Playwright versions: it was `killProcessAndCleanup` (<= 1.34) and is `exitHandler` (>= 1.35),
+ * so we match either to remain compatible. Cypress handles its own browser teardown via `WkInstance.kill()`, so Playwright's exit-time cleanup is not needed.
  * TODO(webkit): do we want to run this cleanup script another way?
+ * @see https://github.com/cypress-io/cypress/issues/27141
  * @see https://github.com/microsoft/playwright/blob/7e2aec7454f596af452b51a2866e86370291ac8b/packages/playwright-core/src/utils/processLauncher.ts#L191-L203
  */
 function removeBadExitListener () {
-  const killProcessAndCleanup = process.rawListeners('exit').find((fn) => fn.name === 'killProcessAndCleanup')
+  const badExitListenerNames = ['killProcessAndCleanup', 'exitHandler']
+  const badExitListener = process.rawListeners('exit').find((fn) => badExitListenerNames.includes(fn.name))
 
   // @ts-expect-error Electron's Process types override those of @types/node, leading to `exit` not being recognized as an event
-  if (killProcessAndCleanup) process.removeListener('exit', killProcessAndCleanup)
-  else debug('did not find killProcessAndCleanup, which may cause interactive mode to unexpectedly open')
+  if (badExitListener) process.removeListener('exit', badExitListener)
+  else debug('did not find a Playwright exit listener to remove, which may cause interactive mode to unexpectedly open')
 }
 
 export async function open (browser: Browser, url: string, options: BrowserLaunchOpts, automation: Automation): Promise<BrowserInstance> {
