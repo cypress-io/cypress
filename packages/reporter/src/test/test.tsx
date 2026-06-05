@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import React, { MouseEvent, useCallback } from 'react'
+import React, { MouseEvent, useCallback, useRef } from 'react'
 import { IconCypressStudio } from '@cypress-design/react-icon'
 
 import events, { Events } from '../lib/events'
@@ -10,6 +10,7 @@ import Attempts from '../attempts/attempts'
 import StateIcon from '../lib/state-icon'
 import { LaunchStudioIcon } from '../components/LaunchStudioIcon'
 import { useScrollIntoView } from '../lib/useScrollIntoView'
+import { useInViewport } from '../lib/useInViewport'
 import { SelfHealedBadge } from '../lib/selfHealedBadge'
 
 interface TestProps {
@@ -26,6 +27,17 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
     testState: model.state,
     isStudioActive: appStateProps.studioActive,
   })
+
+  const contentRef = useRef<HTMLDivElement>(null)
+  const { isInViewport, placeholderHeight } = useInViewport(containerRef, contentRef)
+
+  // A finished test that has scrolled out of view doesn't need its (potentially
+  // large) command log mounted. Failed tests stay open and retain their logs for
+  // the run-mode video/screenshots, but keeping every prior failure's command
+  // nodes in the DOM makes the per-command auto-scroll reflow scale with the
+  // whole run (https://github.com/cypress-io/cypress/issues/6881). The active
+  // test is always rendered so its live updates and auto-scroll keep working.
+  const shouldRenderContent = model.isActive || isInViewport
 
   const _launchStudio = useCallback((e: MouseEvent) => {
     e.preventDefault()
@@ -96,8 +108,14 @@ const Test: React.FC<TestProps> = observer(({ model, events: eventsProps = event
       onOpenStateChangeRequested={(isOpen: boolean) => model.setIsOpen(isOpen)}
       hideExpander
     >
-      <div>
-        <Attempts test={model} scrollIntoView={scrollIntoView} />
+      <div ref={contentRef}>
+        {shouldRenderContent ? (
+          <Attempts test={model} scrollIntoView={scrollIntoView} />
+        ) : (
+          // preserve the height of the windowed-out command log so scroll
+          // position stays stable while the heavy content is unmounted
+          <div className='windowed-out-content' style={{ height: placeholderHeight }} aria-hidden />
+        )}
       </div>
     </Collapsible>
   )
