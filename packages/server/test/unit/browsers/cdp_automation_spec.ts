@@ -482,6 +482,62 @@ context('lib/browsers/cdp_automation', () => {
       })
     })
 
+    // partitioned cookies (CHIPS) carry a `partitionKey` that must be preserved
+    // when getting, restoring, and clearing them - otherwise cross-site cookies
+    // (e.g. SSO tokens) are restored unpartitioned and stale partitioned cookies
+    // can never be cleared. https://github.com/cypress-io/cypress/issues/33302
+    describe('partitioned cookies (CHIPS)', () => {
+      const partitionKey = { topLevelSite: 'https://example.com', hasCrossSiteAncestor: true }
+
+      it('preserves the partitionKey when getting cookies', function () {
+        this.sendDebuggerCommand.withArgs('Network.getAllCookies')
+        .resolves({
+          cookies: [
+            { name: 'sso', value: 'key', path: '/', domain: 'example.com', secure: true, httpOnly: true, expires: 123, partitionKey },
+          ],
+        })
+
+        return this.onRequest('get:cookies', { domain: 'example.com' })
+        .then((resp) => {
+          expect(resp).to.deep.eq([
+            { name: 'sso', value: 'key', path: '/', domain: 'example.com', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined, hostOnly: true, partitionKey },
+          ])
+        })
+      })
+
+      it('restores a partitioned cookie into its partition via Network.setCookie', function () {
+        const setCookie = this.sendDebuggerCommand.withArgs('Network.setCookie').resolves({ success: true })
+
+        this.sendDebuggerCommand.withArgs('Network.getAllCookies')
+        .resolves({
+          cookies: [
+            { name: 'sso', value: 'key', path: '/', domain: '.example.com', secure: true, httpOnly: false, partitionKey },
+          ],
+        })
+
+        return this.onRequest('set:cookie', { domain: 'example.com', name: 'sso', value: 'key', path: '/', secure: true, partitionKey })
+        .then(() => {
+          expect(setCookie).to.have.been.calledWith('Network.setCookie', { domain: '.example.com', path: '/', secure: true, name: 'sso', value: 'key', partitionKey })
+        })
+      })
+
+      it('includes the partitionKey when clearing a partitioned cookie', function () {
+        this.sendDebuggerCommand.withArgs('Network.getAllCookies')
+        .resolves({
+          cookies: [
+            { name: 'sso', value: 'key', path: '/', domain: 'example.com', secure: true, httpOnly: true, expires: 123, partitionKey },
+          ],
+        })
+
+        const deleteCookies = this.sendDebuggerCommand.withArgs('Network.deleteCookies').resolves()
+
+        return this.onRequest('clear:cookie', { domain: 'example.com', name: 'sso' })
+        .then(() => {
+          expect(deleteCookies).to.have.been.calledWith('Network.deleteCookies', { name: 'sso', domain: 'example.com', partitionKey })
+        })
+      })
+    })
+
     describe('take:screenshot', () => {
       beforeEach(function () {
         this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })

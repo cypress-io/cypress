@@ -10,6 +10,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where [`cy.session()`](https://on.cypress.io/session) could fail to restore or clear partitioned cookies (CHIPS), causing sessions that rely on cross-site cookies (for example, SSO/identity-provider login) to fail validation and be unable to recreate. Cypress now preserves a cookie's partition when saving, restoring, and clearing it via the browser, so partitioned cookies are restored into their original partition and stale partitioned cookies are correctly removed. Fixes [#33302](https://github.com/cypress-io/cypress/issues/33302).
 - Fixed an issue where Cypress could load the config file through the wrong module system (for example, treating an ESM config as CommonJS), so ESM-only APIs such as `import.meta.resolve` were unavailable in config and plugin code. Cypress now picks ESM or CJS before loading, using Node.js rules from the config file extension and the nearest `package.json` `"type"`, then loads only via `import()` or `require()` and fails outright on error instead of retrying the other format:
   - `.mjs` and `.mts` always load as ESM
   - `.cjs` and `.cts` always load as CJS

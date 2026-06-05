@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
+import type { Protocol } from 'devtools-protocol'
 import { isHostOnlyCookie } from '../browsers/cdp_automation'
 import type { SerializableAutomationCookie } from '../util/cookies'
 
@@ -15,6 +16,10 @@ export interface AutomationCookie {
   hostOnly?: boolean
   name: string
   path: string | null
+  // the partition a partitioned cookie (CHIPS) belongs to. preserved so it can
+  // be round-tripped through CDP when restoring/clearing partitioned cookies.
+  // @see https://github.com/cypress-io/cypress/issues/33302
+  partitionKey?: Protocol.Network.CookiePartitionKey
   sameSite: string
   secure: boolean
   url?: string
@@ -23,7 +28,7 @@ export interface AutomationCookie {
 
 // match the w3c webdriver spec on return cookies
 // https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-const COOKIE_PROPERTIES = 'domain expiry httpOnly hostOnly name path sameSite secure value'.split(' ')
+const COOKIE_PROPERTIES = 'domain expiry httpOnly hostOnly name partitionKey path sameSite secure value'.split(' ')
 
 const debug = Debug('cypress:server:automation:cookies')
 

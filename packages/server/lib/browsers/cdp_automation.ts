@@ -107,6 +107,12 @@ const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRe
     httpOnly: cookie.httpOnly,
     sameSite: convertSameSiteExtensionToCdp(cookie.sameSite),
     expires: cookie.expirationDate,
+    // preserve the partition of partitioned cookies (CHIPS) so cross-site
+    // cookies (e.g. SSO tokens) are restored into the same partition they came
+    // from. without this they would be set as unpartitioned and not sent in the
+    // cross-site context, breaking cy.session() restore.
+    // @see https://github.com/cypress-io/cypress/issues/33302
+    partitionKey: cookie.partitionKey,
   })
   // Network.setCookie will error on any undefined/null parameters
   .omitBy(_.isNull)
@@ -595,7 +601,11 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
             return cookieToBeCleared
           }
 
-          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          // include `partitionKey` so partitioned cookies (CHIPS) are actually
+          // removed - Network.deleteCookies only matches a partitioned cookie
+          // when its partitionKey is supplied.
+          // @see https://github.com/cypress-io/cypress/issues/33302
+          return this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain', 'partitionKey'))
           .then(() => {
             return cookieToBeCleared
           })
@@ -610,7 +620,11 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
 
           if (!cookieToBeCleared) return
 
-          await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+          // include `partitionKey` so partitioned cookies (CHIPS) are actually
+          // removed - Network.deleteCookies only matches a partitioned cookie
+          // when its partitionKey is supplied.
+          // @see https://github.com/cypress-io/cypress/issues/33302
+          await this.sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain', 'partitionKey'))
 
           return cookieToBeCleared
         })
