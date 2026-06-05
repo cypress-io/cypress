@@ -2,7 +2,7 @@ import type {
   CommandLogInterceptionInput,
   CommandLogInterceptionResult,
   ForCommandLog,
-} from '@packages/network-policy'
+} from '@packages/network-interception'
 
 export type DriverCommandLogAdapterOptions = {
   logInterception: (interception: unknown, route: unknown) => CommandLogInterceptionResult

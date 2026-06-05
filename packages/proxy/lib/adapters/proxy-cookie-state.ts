@@ -1,4 +1,4 @@
-import type { ForCookieState } from '@packages/network-policy'
+import type { ForCookieState } from '@packages/network-interception'
 import { attachCrossOriginCookies } from './attach-cross-origin-cookies'
 import { copyCookiesFromResponse } from './copy-cookies-from-response'
 import type { RequestInterceptionMiddlewareCtx, ResponseInterceptionMiddlewareCtx } from './types'

@@ -1,4 +1,4 @@
-import { shouldLogRequest } from '@packages/network-policy'
+import { shouldLogRequest } from '@packages/network-interception'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '../http'
 import type { RequestInterceptionMiddlewareCtx } from './types'
