@@ -618,5 +618,14 @@ describe('src/cypress/dom/visibility', {
         expect(reason).to.eq('This element `<div#multi-hidden>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
       })
     })
+
+    it('surfaces the detached cause instead of the generic checkVisibility message', () => {
+      // detached elements fail `Element.checkVisibility()`, which would otherwise produce
+      // an unhelpful generic message. The reason should call out the structural cause.
+      const $detached = Cypress.$('<div id="detached-el">detached</div>')
+      const reason = dom.getReasonIsHidden($detached)
+
+      expect(reason).to.eq('This element `<div#detached-el>` is not visible because it is detached from the DOM')
+    })
   })
 })

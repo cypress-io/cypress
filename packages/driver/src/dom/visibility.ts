@@ -538,7 +538,14 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
     // for a multi-element subject, describe the first element that modernIsHidden actually caught —
     // checking only $el[0] would misattribute the cause when a later element is the hidden one.
     const hiddenEl = $el.toArray().find((e) => modernIsHidden(e, options)) ?? $el[0]
-    const hiddenNode = stringifyElement($jquery.wrap(hiddenEl), 'short')
+    const $hiddenEl = $jquery.wrap(hiddenEl)
+    const hiddenNode = stringifyElement($hiddenEl, 'short')
+
+    // detached elements fail `Element.checkVisibility()` because they are not rendered, but the
+    // generic checkVisibility message would be unhelpful — surface the structural cause instead.
+    if (isDetached($hiddenEl)) {
+      return `This element \`${hiddenNode}\` is not visible because it is detached from the DOM`
+    }
 
     // mirror modernIsHidden: checkVisibility() runs first, then a zero-dimension guard.
     // attribute the failure to whichever check actually rejected the element and report
