@@ -25,6 +25,7 @@
 - Fixed an issue where `cy.wait('@alias')` could time out when the connection to the browser closed before an aliased intercepted request's response completed, including during navigation such as `cy.visit()`. Fixes [#19326](https://github.com/cypress-io/cypress/issues/19326).
 - Fixed an issue where a cross-origin navigation back to a previously-visited origin (for example, completing a login that redirects from an identity provider back to your application) could intermittently load the Cypress app interface instead of your application, causing flaky tests. Fixed in [#33991](https://github.com/cypress-io/cypress/pull/33991).
 - Fixed an issue where `cypress open --detached` blocked the CLI process until the GUI was closed rather than returning once Cypress was ready to use.
+- Fixed a regression introduced in [`8.5.0`](https://docs.cypress.io/app/references/changelog#8-5-0) where setting only the `HTTP_PROXY` environment variable (without `HTTPS_PROXY`) was not respected when downloading the Cypress binary during installation, causing the download to fail behind a proxy. `HTTP_PROXY` is now used as a fallback for the binary download when `HTTPS_PROXY` is not set, while still honoring `NO_PROXY`, matching how proxies are resolved when running Cypress. Fixes [#18330](https://github.com/cypress-io/cypress/issues/18330).
 
 **Misc:**
 
