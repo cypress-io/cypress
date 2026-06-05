@@ -667,6 +667,35 @@ describe('src/cy/commands/screenshot', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/28674
+      // scroll-behavior: smooth makes our internal window.scrollTo animate,
+      // so without forcing instant scrolling the screenshot is captured before
+      // the page settles - resulting in clipped/blank images.
+      it('forces instant scrolling while capturing when scroll-behavior is smooth', () => {
+        const win = cy.state('window')
+        const doc = win.document
+
+        doc.documentElement.style.scrollBehavior = 'smooth'
+
+        const scrollBehaviorWhileScrolling = []
+
+        cy.stub(win, 'scrollTo').callsFake(() => {
+          scrollBehaviorWhileScrolling.push(doc.documentElement.style.scrollBehavior)
+        })
+
+        cy.get('.tall-element').screenshot()
+        .then(() => {
+          // every scroll performed during the capture must have been instant
+          expect(scrollBehaviorWhileScrolling).not.to.be.empty
+          scrollBehaviorWhileScrolling.forEach((behavior) => {
+            expect(behavior).to.equal('auto')
+          })
+
+          // the user's original scroll-behavior is restored afterwards
+          expect(doc.documentElement.style.scrollBehavior).to.equal('smooth')
+        })
+      })
+
       it('sends the right clip values for elements that need scrolling', () => {
         const scrollTo = cy.spy(cy.state('window'), 'scrollTo')
 

@@ -113,6 +113,8 @@ const automateScreenshot = (state: StateFunc, options: TakeScreenshotOptions) =>
 const scrollOverrides = (win: Window, doc: Document) => {
   const originalOverflow = doc.documentElement.style.overflow
   const originalBodyOverflowY = doc.body.style.overflowY
+  const originalScrollBehavior = doc.documentElement.style.scrollBehavior
+  const originalBodyScrollBehavior = doc.body.style.scrollBehavior
   const originalX = win.scrollX
   const originalY = win.scrollY
 
@@ -123,6 +125,18 @@ const scrollOverrides = (win: Window, doc: Document) => {
 
   // hide scrollbars
   doc.documentElement.style.overflow = 'hidden'
+
+  // CSS scroll-behavior: smooth turns our window.scrollTo calls into
+  // animated scrolls, so the screenshot can be captured mid-scroll (before
+  // the page has settled) - resulting in clipped/blank/misstitched images.
+  // Force instant scrolling while we capture, then restore. We set it on both
+  // the documentElement (standards mode viewport scroller) and the body
+  // (quirks mode scroller / sites that declare it there).
+  // https://github.com/cypress-io/cypress/issues/28674
+  doc.documentElement.style.scrollBehavior = 'auto'
+  if (doc.body) {
+    doc.body.style.scrollBehavior = 'auto'
+  }
 
   // this body class is used to set some other overflow-related CSS
   // around the resizable panels in the Runner
@@ -139,8 +153,10 @@ const scrollOverrides = (win: Window, doc: Document) => {
 
   return () => {
     doc.documentElement.style.overflow = originalOverflow
+    doc.documentElement.style.scrollBehavior = originalScrollBehavior
     if (doc.body) {
       doc.body.style.overflowY = originalBodyOverflowY
+      doc.body.style.scrollBehavior = originalBodyScrollBehavior
     }
 
     document.querySelector('body')?.classList.remove('screenshot-scrolling')
