@@ -1165,7 +1165,10 @@ async function ready (options: ReadyOptions) {
   }
 
   if (specPatternFromCli) {
-    const relativePatterns = Array.isArray(specPattern) ? specPattern : [specPattern as string]
+    const rawPatterns = Array.isArray(specPattern) ? specPattern : [specPattern as string]
+    // relativeSpecPattern uses a forward-slash concat and may not strip Windows absolute paths;
+    // fall back to path.relative for any pattern that remains absolute.
+    const relativePatterns = rawPatterns.map((p) => path.isAbsolute(p) ? path.relative(projectRoot, p) : p)
     const unmatchedPatterns = project.ctx.project.getUnmatchedPatterns(relativePatterns, specs)
 
     for (const pattern of unmatchedPatterns) {

@@ -539,10 +539,16 @@ export class ProjectDataSource {
 
   getUnmatchedPatterns (patterns: string[], specs: SpecWithRelativeRoot[]): string[] {
     const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
-    const specRelativePaths = specs.map((s) => s.relative).filter((p): p is string => typeof p === 'string')
+    // Normalize to forward slashes: path.relative may return backslashes on Windows and
+    // minimatch treats backslashes as escape characters rather than path separators.
+    const normalize = (p: string) => p.split(path.sep).join('/')
+    const specRelativePaths = specs
+    .map((s) => s.relative)
+    .filter((p): p is string => typeof p === 'string')
+    .map(normalize)
 
     return patterns.filter((pattern) => {
-      return !specRelativePaths.some((specPath) => minimatch(specPath, pattern, MINIMATCH_OPTIONS))
+      return !specRelativePaths.some((specPath) => minimatch(specPath, normalize(pattern), MINIMATCH_OPTIONS))
     })
   }
 
