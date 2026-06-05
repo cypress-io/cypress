@@ -191,11 +191,34 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
   })
 }
 
+function isAutOnAboutBlank () {
+  try {
+    // Read the raw location off the AUT window rather than going through
+    // cy.getRemoteLocation, which normalizes 'about:blank' to 'about://blank'
+    // (see the note in src/cypress/location.ts).
+    return cy.state('window')?.location?.href === 'about:blank'
+  } catch (e) {
+    // A SecurityError means the AUT is on a cross-origin page, which is by
+    // definition not about:blank.
+    return false
+  }
+}
+
 function navigateAboutBlank ({ inBetweenTestsAndNextTestHasTestIsolationOn }: { inBetweenTestsAndNextTestHasTestIsolationOn?: boolean } = {}) {
   // Component testing never supports navigating to about:blank as that is handled by its unmount mechanism
   // When test isolation is off we typically don't navigate to about blank; however if we are in between tests and the next
   // test has test isolation on, we need to navigate to about blank to ensure the next test is not affected by the previous test
   if (Cypress.testingType === 'component' || (!Cypress.config('testIsolation') && !inBetweenTestsAndNextTestHasTestIsolationOn)) {
+    return Promise.resolve()
+  }
+
+  // If the AUT is already on about:blank, there is nothing to navigate to.
+  // Re-assigning the iframe's src to 'about:blank' when it is already there is
+  // a no-op navigation that does not reliably fire a `load` event. Without that
+  // event, the `window:load` listener below never resolves and the surrounding
+  // cy.session `cy.then` times out (e.g. 20s).
+  // https://github.com/cypress-io/cypress/issues/31988
+  if (isAutOnAboutBlank()) {
     return Promise.resolve()
   }
 

@@ -195,16 +195,41 @@ describe('src/cy/commands/sessions/utils.ts', () => {
   })
 
   describe('.navigateAboutBlank', () => {
-    it('triggers test isolation blank page visit', () => {
-      const spy = cy.spy(Cypress, 'action').log(false)
-      .withArgs('cy:visit:blank')
+    it('triggers test isolation blank page visit when the AUT is not on about:blank', () => {
+      // ensure the AUT is on a real page so the guard below does not short-circuit
+      cy.visit('/fixtures/generic.html')
 
       cy.then(async () => {
+        const spy = cy.spy(Cypress, 'action').log(false)
+        .withArgs('cy:visit:blank')
+
         await navigateAboutBlank()
-        await navigateAboutBlank({ inBetweenTestsAndNextTestHasTestIsolationOn: true })
-        expect(spy).to.have.been.calledTwice
+        expect(spy).to.have.been.calledOnce
         expect(spy.args[0]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
-        expect(spy.args[1]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/31988
+    // Re-navigating to about:blank when the AUT is already there is a no-op that
+    // does not reliably fire a `load` event, which previously hung cy.session
+    // until its cy.then timeout. navigateAboutBlank should resolve immediately
+    // without re-triggering the visit in that case.
+    it('does not re-navigate when the AUT is already on about:blank', () => {
+      // ensure the AUT starts on a real page so the first call actually navigates
+      cy.visit('/fixtures/generic.html')
+
+      cy.then(async () => {
+        const spy = cy.spy(Cypress, 'action').log(false)
+        .withArgs('cy:visit:blank')
+
+        // AUT is on a real page -> navigates to about:blank
+        await navigateAboutBlank()
+        // AUT is now on about:blank -> subsequent calls short-circuit and resolve
+        // immediately without re-triggering the visit
+        await navigateAboutBlank({ inBetweenTestsAndNextTestHasTestIsolationOn: true })
+
+        expect(spy).to.have.been.calledOnce
+        expect(spy.args[0]).to.deep.eq(['cy:visit:blank', { testIsolation: true }])
       })
     })
   })

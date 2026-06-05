@@ -10,6 +10,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where [`cy.session()`](https://on.cypress.io/session) could intermittently fail with `cy.then() timed out after waiting 20000ms` and `Your callback function returned a promise that never resolved`, most often when test isolation was enabled. This happened when the application under test was already on `about:blank` and Cypress re-navigated to `about:blank` — a no-op navigation that does not reliably fire a `load` event, leaving the command waiting indefinitely. Cypress now skips this redundant navigation when the application is already on `about:blank`. Fixes [#31988](https://github.com/cypress-io/cypress/issues/31988).
 - Fixed an issue where Cypress could load the config file through the wrong module system (for example, treating an ESM config as CommonJS), so ESM-only APIs such as `import.meta.resolve` were unavailable in config and plugin code. Cypress now picks ESM or CJS before loading, using Node.js rules from the config file extension and the nearest `package.json` `"type"`, then loads only via `import()` or `require()` and fails outright on error instead of retrying the other format:
   - `.mjs` and `.mts` always load as ESM
   - `.cjs` and `.cts` always load as CJS
