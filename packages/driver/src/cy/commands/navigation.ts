@@ -18,10 +18,12 @@ let previouslyVisitedLocation: LocationObject | undefined
 let knownCommandCausedInstability: boolean = false
 
 // a single cross-origin `cy.visit()` should only ever reload the top window
-// once before the page loads at the new origin. if we exceed this many
-// consecutive reloads for the same test without converging, we're in an
-// infinite reload loop (e.g. a dynamic baseUrl) and bail out. see #33233.
-const MAX_CONSECUTIVE_ORIGIN_CHANGES = 3
+// once before the page loads at the new origin. allow a generous number of
+// consecutive reloads (to accommodate legitimate multi-origin redirect/login
+// flows), but if we exceed this many for the same test without ever loading
+// the page, we're in an infinite reload loop (e.g. a dynamic baseUrl) and bail
+// out. see #33233.
+const MAX_CONSECUTIVE_ORIGIN_CHANGES = 10
 
 const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure retryIntervals method body headers'
 .split(' ')
