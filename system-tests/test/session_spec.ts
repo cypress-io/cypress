@@ -30,6 +30,14 @@ const onServer = function (app) {
     res.send('<html><h1>cross origin</h1></html>')
   })
 
+  // sets a partitioned cookie (CHIPS). the `Partitioned` attribute makes Chrome
+  // store the cookie keyed to the top-level site, which Cypress must account for
+  // when clearing session data. https://github.com/cypress-io/cypress/issues/33302
+  app.get('/set-partitioned-cookie', (req, res) => {
+    res.append('Set-Cookie', 'pck=1; Secure; SameSite=None; Partitioned; Path=/')
+    res.send('<html><body><h1>set-partitioned-cookie</h1></body></html>')
+  })
+
   app.get('/cross_origin_iframe/:name', (req, res) => {
     res.send(`<html><body><h1>cross_origin_iframe ${req.params.name}</h1><iframe src="https://127.0.0.1:44665/set-localStorage/${req.params.name}"</body></html>`)
   })
@@ -197,5 +205,15 @@ describe('e2e sessions', () => {
     config: {
       env: { SYSTEM_TESTS: true },
     },
+  })
+
+  // https://github.com/cypress-io/cypress/issues/33302
+  // partitioned cookies (CHIPS) are Chromium-only; the spec asserts its own
+  // behavior, so no stdout snapshot is needed (a passing run is the assertion).
+  it('clears partitioned cookies (CHIPS) when clearing session data', {
+    project: 'session-and-origin-e2e-specs',
+    browser: 'chrome',
+    spec: 'session/partitioned_cookies.cy.js',
+    snapshot: false,
   })
 })

@@ -536,6 +536,56 @@ context('lib/browsers/cdp_automation', () => {
           expect(deleteCookies).to.have.been.calledWith('Network.deleteCookies', { name: 'sso', domain: 'example.com', partitionKey })
         })
       })
+
+      // set:cookies is the path cy.session() restore uses - it clears all
+      // cookies and then re-applies the saved ones in a single batch.
+      it('restores partitioned cookies in a batch via Network.setCookies (set:cookies)', function () {
+        this.sendDebuggerCommand.withArgs('Network.clearBrowserCookies').resolves()
+        const setCookies = this.sendDebuggerCommand.withArgs('Network.setCookies').resolves()
+
+        return this.onRequest('set:cookies', [
+          { domain: 'example.com', name: 'sso', value: 'key', path: '/', secure: true, partitionKey },
+        ])
+        .then(() => {
+          expect(setCookies).to.have.been.calledWith('Network.setCookies', {
+            cookies: [
+              { domain: '.example.com', path: '/', secure: true, name: 'sso', value: 'key', partitionKey },
+            ],
+          })
+        })
+      })
+
+      it('omits the partitionKey for unpartitioned cookies in a mixed batch', function () {
+        this.sendDebuggerCommand.withArgs('Network.clearBrowserCookies').resolves()
+        const setCookies = this.sendDebuggerCommand.withArgs('Network.setCookies').resolves()
+
+        return this.onRequest('set:cookies', [
+          { domain: 'example.com', name: 'sso', value: 'key', path: '/', secure: true, partitionKey },
+          { domain: 'example.com', name: 'plain', value: 'v', path: '/', secure: true },
+        ])
+        .then(() => {
+          const { cookies } = setCookies.getCall(0).args[1]
+
+          expect(cookies[0]).to.have.property('partitionKey').that.deep.equals(partitionKey)
+          expect(cookies[1]).not.to.have.property('partitionKey')
+        })
+      })
+
+      it('includes the partitionKey when clearing cookies in a batch (clear:cookies)', function () {
+        this.sendDebuggerCommand.withArgs('Network.getAllCookies')
+        .resolves({
+          cookies: [
+            { name: 'sso', value: 'key', path: '/', domain: 'example.com', secure: true, httpOnly: true, expires: 123, partitionKey },
+          ],
+        })
+
+        const deleteCookies = this.sendDebuggerCommand.withArgs('Network.deleteCookies').resolves()
+
+        return this.onRequest('clear:cookies', [{ domain: 'example.com', name: 'sso' }])
+        .then(() => {
+          expect(deleteCookies).to.have.been.calledWith('Network.deleteCookies', { name: 'sso', domain: 'example.com', partitionKey })
+        })
+      })
     })
 
     describe('take:screenshot', () => {
