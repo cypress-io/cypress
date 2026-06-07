@@ -42,10 +42,11 @@ describe('lib/util/chromium_flags', () => {
 
     // Chromium silently ignores unrecognized switches, so a typo'd or removed
     // flag becomes a no-op with no error. This guards against that by checking
-    // every flag against chrome-switches.json — an allowlist of switches
-    // defined by Chromium source (regenerate via scripts/generate-chrome-switches.mjs).
+    // every flag against chrome-switches.json — an allowlist of switches (keyed
+    // by switch name, valued by Chromium's description) defined by Chromium
+    // source (regenerate via scripts/generate-chrome-switches.mjs).
     it('only contains switches in the Chromium allowlist', () => {
-      const allowed = new Set<string>(readAllowlist().switches)
+      const allowed = new Set<string>(Object.keys(readAllowlist().switches))
       const unknown = DEFAULT_FLAGS.map(switchName).filter((name) => !allowed.has(name))
 
       expect(

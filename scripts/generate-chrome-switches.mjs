@@ -98,8 +98,12 @@ const BASE_URL = 'https://chromium.googlesource.com/chromium/src/+'
 // used only for diagnosis when a Cypress flag goes missing (see diagnoseMissingFlags).
 const PETER_SH_URL = 'https://peter.sh/experiments/chromium-command-line-switches/'
 
-// matches: const char kFoo[] = "switch-name";  (and constexpr/inline variants)
-const SWITCH_LITERAL_RE = /k\w+\[\]\s*=\s*"([a-z0-9][a-z0-9-]*)"/g
+// matches a switch definition `const char kFoo[] = "switch-name";` (and
+// constexpr/inline variants; the literal may wrap to the next line). Capture
+// group 1 is the switch name. Not global — applied per declaration window.
+const SWITCH_LITERAL_RE = /k\w+\[\]\s*=\s*"([a-z0-9][a-z0-9-]*)"/
+// cheap pre-filter to find the lines that start a switch definition
+const SWITCH_DECL_RE = /\bk\w+\[\]\s*=/
 
 const FETCH_TIMEOUT_MS = 30_000
 const MAX_FETCH_ATTEMPTS = 4
@@ -223,22 +227,53 @@ const fetchFile = async (ref, file) => {
   return content
 }
 
+// extracts each switch literal mapped to the description Chromium documents in
+// the `//` comment block directly above its definition. Anchors on the `kFoo[] =`
+// declaration line (so it also catches definitions whose string literal wraps to
+// the next line) and walks back over contiguous `//` lines for the description
+// (empty string when the switch has no comment).
 const extractSwitches = (source) => {
-  return new Set([...source.matchAll(SWITCH_LITERAL_RE)].map((m) => m[1]))
+  const switches = new Map()
+  const lines = source.split('\n')
+
+  for (let i = 0; i < lines.length; i++) {
+    if (!SWITCH_DECL_RE.test(lines[i])) continue
+
+    const match = lines.slice(i, i + 3).join(' ').match(SWITCH_LITERAL_RE)
+
+    if (!match) continue
+
+    const comment = []
+
+    for (let j = i - 1; j >= 0 && lines[j].trim().startsWith('//'); j--) {
+      comment.unshift(lines[j].trim().replace(/^\/+\s?/, ''))
+    }
+
+    switches.set(match[1], comment.join(' ').replace(/\s+/g, ' ').trim())
+  }
+
+  return switches
 }
 
-// fetches every subsystem for a ref and returns the union of switches it
-// defines. For each subsystem we union switches across all candidate paths
-// present at the ref. A subsystem that yields zero switches from *every*
-// candidate is fatal (rather than a silent WARN): dropping it would silently
-// shrink the allowlist and surface later as a confusing chromium_flags_spec
-// failure.
+// fetches every subsystem for a ref and returns a Map of switch name ->
+// description, unioned across all candidate paths present at the ref (the first
+// non-empty description for a switch wins). A subsystem that yields zero switches
+// from *every* candidate is fatal (rather than a silent WARN): dropping it would
+// silently shrink the allowlist and surface later as a confusing
+// chromium_flags_spec failure.
 const fetchSwitchSet = async (ref) => {
-  const all = new Set()
+  const all = new Map()
   const emptySubsystems = []
 
+  // keep a switch's existing description unless we don't have one yet
+  const merge = (target, source) => {
+    for (const [name, desc] of source) {
+      if (!target.get(name)) target.set(name, desc)
+    }
+  }
+
   for (const candidates of SWITCH_SOURCE_FILES) {
-    const subsystem = new Set()
+    const subsystem = new Map()
 
     for (const file of candidates) {
       const source = await fetchFile(ref, file)
@@ -248,12 +283,12 @@ const fetchSwitchSet = async (ref) => {
       // from a present-but-zero file, both of which fall back to siblings.
       console.log(`    ${file}: ${switches ? switches.size : '-'}`)
 
-      if (switches) for (const s of switches) subsystem.add(s)
+      if (switches) merge(subsystem, switches)
     }
 
     if (subsystem.size === 0) emptySubsystems.push(candidates.join(' | '))
 
-    for (const s of subsystem) all.add(s)
+    merge(all, subsystem)
   }
 
   if (emptySubsystems.length) {
@@ -374,15 +409,24 @@ const main = async () => {
   for (const c of chromes) console.log(`  ${c.channel}: ${c.version ?? '(custom ref)'} -> ${c.ref}`)
 
   // a flag must be recognized by *every* tested milestone (a switch present in
-  // stable but removed in beta would silently no-op there), so intersect the sets
+  // stable but removed in beta would silently no-op there), so intersect by name.
+  // descriptions are collected across milestones (first non-empty wins).
   let intersection = null
+  const descriptions = new Map()
 
   for (const chrome of chromes) {
     console.log(`\nfetching switches @ ${chrome.ref}:`)
     const set = await fetchSwitchSet(chrome.ref)
 
     console.log(`  total @ ${chrome.ref}: ${set.size} switches`)
-    intersection = intersection ? new Set([...intersection].filter((s) => set.has(s))) : set
+
+    for (const [name, desc] of set) {
+      if (desc && !descriptions.get(name)) descriptions.set(name, desc)
+    }
+
+    const names = new Set(set.keys())
+
+    intersection = intersection ? new Set([...intersection].filter((s) => names.has(s))) : names
   }
 
   const switches = [...intersection].sort()
@@ -396,12 +440,16 @@ const main = async () => {
   // surface any Cypress flag the allowlist doesn't cover, with a fix hint
   await diagnoseMissingFlags(intersection, chromes.map((c) => c.ref))
 
+  // sorted { switch-name: description } so each switch is self-documenting and
+  // the file stays diffable; description is '' when Chromium ships no comment
+  const switchesWithDescriptions = Object.fromEntries(switches.map((name) => [name, descriptions.get(name) ?? '']))
+
   if (args.write) {
     const committed = readCommitted()
 
     committed.versions = chromes.map(({ channel, version, ref }) => ({ channel, version, ref }))
     committed.generatedAt = new Date().toISOString()
-    committed.switches = switches
+    committed.switches = switchesWithDescriptions
     delete committed._seedNote
     delete committed.chromeVersion
     delete committed.ref
@@ -411,8 +459,10 @@ const main = async () => {
     return
   }
 
-  // --check: fail if the committed allowlist drifts from a fresh fetch
-  const committed = new Set(readCommitted().switches)
+  // --check: fail if the committed allowlist drifts from a fresh fetch. We compare
+  // the switch *names* (keys); descriptions are docs and refresh on --write, so a
+  // reworded upstream comment doesn't churn CI.
+  const committed = new Set(Object.keys(readCommitted().switches))
   const fresh = new Set(switches)
   const removed = [...committed].filter((s) => !fresh.has(s))
   const added = [...fresh].filter((s) => !committed.has(s))
