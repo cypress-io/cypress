@@ -50,14 +50,11 @@ const PIPELINE_CONFIG_PATH = path.join(__dirname, '..', '.circleci', 'src', 'pip
 // sibling defines the literals); zero switches from *all* candidates is fatal —
 // see fetchSwitchSet.
 const SWITCH_SOURCE_FILES = [
-  // base/ defines its switches inline in the header (disable-features,
-  // disable-breakpad, disable-dev-shm-usage, noerrdialogs, ...).
+  // base/ defines its switches inline in the header.
   ['base/base_switches.h', 'base/base_switches.cc'],
   ['content/public/common/content_switches.cc'],
-  // disable-hang-monitor moved out of content_switches into components/input.
   ['components/input/switches.cc'],
   ['chrome/common/chrome_switches.cc'],
-  // password-store moved out of chrome_switches into the password_manager component.
   ['components/password_manager/core/browser/password_manager_switches.cc'],
   ['components/autofill/core/common/autofill_switches.cc'],
   ['components/network_session_configurator/common/network_switches.cc'],
@@ -67,7 +64,6 @@ const SWITCH_SOURCE_FILES = [
   ['components/metrics/metrics_switches.h', 'components/metrics/metrics_switches.cc'],
   ['components/variations/variations_switches.cc'],
   ['components/embedder_support/switches.cc'],
-  // os_crypt was restructured (sync/ -> common/) and migrated to a header.
   ['components/os_crypt/common/os_crypt_switches.h', 'components/os_crypt/sync/os_crypt_switches.cc'],
   ['ui/base/ui_base_switches.h', 'ui/base/ui_base_switches.cc'],
   ['ui/gl/gl_switches.cc'],
@@ -75,8 +71,6 @@ const SWITCH_SOURCE_FILES = [
   ['media/base/media_switches.cc'],
   ['cc/base/switches.cc'],
   ['sandbox/policy/switches.cc'],
-  // blink declares switches in public/common/switches.h but defines the
-  // literals in the non-public impl dir; older milestones used public/common.
   ['third_party/blink/common/switches.cc', 'third_party/blink/public/common/switches.cc'],
 ]
 
