@@ -28,19 +28,36 @@
 // CircleCI pipeline config. Pass `--ref <git-ref>` to override with a single
 // ref (e.g. to test against `refs/heads/main`). Requires outbound network
 // access to chromium.googlesource.com.
+//
+// Self-diagnosis: Chromium periodically relocates a switch literal to a file
+// this script doesn't scrape, which silently drops it from the allowlist and
+// fails chromium_flags_spec. Rather than make you hunt for the new path, when
+// any Cypress DEFAULT_FLAG is missing from the freshly-built allowlist this
+// script consults peter.sh — which indexes every switch across the whole
+// Chromium tree, with its defining file — and prints, per flag, either the
+// file to add to SWITCH_SOURCE_FILES or that the switch is gone (so it should
+// be dropped from DEFAULT_FLAGS). This is best-effort: if peter.sh or the flags
+// module is unreachable it warns and continues without blocking generation.
 
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { execFileSync } from 'node:child_process'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const ALLOWLIST_PATH = path.join(__dirname, '..', 'packages', 'server', 'lib', 'util', 'chrome-switches.json')
+const SERVER_DIR = path.join(__dirname, '..', 'packages', 'server')
+const ALLOWLIST_PATH = path.join(SERVER_DIR, 'lib', 'util', 'chrome-switches.json')
+// the source of truth for the switches Cypress passes; the generated allowlist
+// exists to validate this list, so it's also what diagnoseMissingFlags checks.
+const FLAGS_MODULE_PATH = path.join(SERVER_DIR, 'lib', 'util', 'chromium_flags.ts')
 
 // the pinned Chrome version Cypress tests against lives here as a YAML anchor
 const PIPELINE_CONFIG_PATH = path.join(__dirname, '..', '.circleci', 'src', 'pipeline', '@pipeline.yml')
 
 // Chromium subsystems that define command-line switches, covering those whose
 // switches Cypress passes; extend it if a valid flag is reported as unknown.
+// You don't have to find the path by hand: when a Cypress flag goes missing
+// this script's diagnosis (see diagnoseMissingFlags) names the file to add here.
 //
 // Each subsystem is a list of *candidate* source paths. Chromium is mid-flight
 // migrating switch literals out of a `.cc` (`const char kFoo[] = "x";`) and into
@@ -85,6 +102,11 @@ const SWITCH_SOURCE_FILES = [
 ]
 
 const BASE_URL = 'https://chromium.googlesource.com/chromium/src/+'
+
+// peter.sh indexes every Chromium switch (across the entire tree) with its
+// defining source file, so it can locate a switch wherever its literal lives —
+// used only for diagnosis when a Cypress flag goes missing (see diagnoseMissingFlags).
+const PETER_SH_URL = 'https://peter.sh/experiments/chromium-command-line-switches/'
 
 // matches: const char kFoo[] = "switch-name";  (and constexpr/inline variants)
 const SWITCH_LITERAL_RE = /k\w+\[\]\s*=\s*"([a-z0-9][a-z0-9-]*)"/g
@@ -282,6 +304,96 @@ const readCommitted = () => {
   }
 }
 
+// loads Cypress's DEFAULT_FLAGS and reduces each to its switch name (the part
+// before any `=`), mirroring chromium_flags_spec. We evaluate the real module
+// via ts-node rather than parsing the source so this never drifts from what
+// Cypress actually passes — even for computed entries like `disable-features=...`.
+const loadCypressSwitchNames = () => {
+  const script = `process.stdout.write(JSON.stringify(require(${JSON.stringify(FLAGS_MODULE_PATH)}).DEFAULT_FLAGS))`
+  const stdout = execFileSync(process.execPath, ['-r', '@packages/ts/register', '-e', script], {
+    cwd: SERVER_DIR,
+    encoding: 'utf8',
+    timeout: FETCH_TIMEOUT_MS,
+    // capture stderr (ts-node deprecation noise) so it doesn't leak; surfaced on failure
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+
+  return JSON.parse(stdout).map((flag) => flag.split('=')[0])
+}
+
+// builds a map of switch-name -> defining source file from peter.sh. Each switch
+// is an `<tr id="switch-name">` whose row links to its source on source.chromium.org
+// (`.../+/<ref>:<path>?...`); we capture that path. A switch with no parseable
+// source link maps to null (present, but file unknown).
+const fetchPeterShSwitchMap = async (html) => {
+  const map = new Map()
+  const rowRe = /<tr id="([^"]+)">([\s\S]*?)<\/tr>/g
+  let row
+
+  while ((row = rowRe.exec(html)) !== null) {
+    const [, id, body] = row
+    const link = body.match(/source\.chromium\.org\/[^"]*\+\/[^:"]+:([^?"]+)/)
+
+    map.set(id, link ? link[1] : null)
+  }
+
+  if (map.size < MIN_EXPECTED_SWITCHES) {
+    throw new Error(`only parsed ${map.size} switches from peter.sh; its markup may have changed`)
+  }
+
+  return map
+}
+
+// when a Cypress DEFAULT_FLAG isn't in the freshly-built allowlist it's either a
+// switch whose literal Chromium moved to a file we don't scrape, or one Chromium
+// removed. Consult peter.sh to tell the two apart and print an actionable hint
+// per flag. Best-effort: any failure here warns and returns without throwing, so
+// it never blocks allowlist generation.
+const diagnoseMissingFlags = async (allowed, refs) => {
+  let cypressSwitches
+
+  try {
+    cypressSwitches = loadCypressSwitchNames()
+  } catch (err) {
+    console.warn(`\n[diagnose] skipped: could not load DEFAULT_FLAGS from ${FLAGS_MODULE_PATH} (${err.message})`)
+
+    return
+  }
+
+  const missing = [...new Set(cypressSwitches)].filter((name) => !allowed.has(name))
+
+  if (!missing.length) return
+
+  console.log(`\n[diagnose] ${missing.length} Cypress DEFAULT_FLAG(s) missing from the generated allowlist; consulting peter.sh to classify them:`)
+
+  let peterMap
+
+  try {
+    peterMap = await fetchPeterShSwitchMap(await fetchTextWithRetry(PETER_SH_URL))
+  } catch (err) {
+    console.warn(`[diagnose] could not consult peter.sh (${err.message}); classify these by hand: ${missing.join(', ')}`)
+
+    return
+  }
+
+  for (const flag of missing) {
+    if (!peterMap.has(flag)) {
+      // peter.sh tracks Chromium main, which can be ahead of the pinned branches,
+      // so flag the likely removal but tell the reader to confirm before dropping.
+      console.log(`  • ${flag}: not in current Chromium per peter.sh (tracks main; may be ahead of ${refs.join(' & ')}) — likely removed. Confirm against the pinned refs, then drop it from DEFAULT_FLAGS (or document it).`)
+      continue
+    }
+
+    const file = peterMap.get(flag)
+
+    if (file) {
+      console.log(`  • ${flag}: still defined by Chromium in ${file}. Add that path to SWITCH_SOURCE_FILES (confirm it's present at ${refs.join(' & ')}), then re-run with --write.`)
+    } else {
+      console.log(`  • ${flag}: present on peter.sh but its source file couldn't be parsed; look it up manually.`)
+    }
+  }
+}
+
 const main = async () => {
   const args = parseArgs(process.argv.slice(2))
   // default to the Chrome versions under test; allow --ref to override with a single ref
@@ -311,6 +423,9 @@ const main = async () => {
   if (switches.length < MIN_EXPECTED_SWITCHES) {
     throw new Error(`only ${switches.length} switches in the intersection (expected >= ${MIN_EXPECTED_SWITCHES}). Refusing to write a likely-corrupt allowlist; check the per-file counts above.`)
   }
+
+  // surface any Cypress flag the allowlist doesn't cover, with a fix hint
+  await diagnoseMissingFlags(intersection, chromes.map((c) => c.ref))
 
   if (args.write) {
     const committed = readCommitted()
