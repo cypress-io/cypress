@@ -29,20 +29,15 @@
 // ref (e.g. to test against `refs/heads/main`). Requires outbound network
 // access to chromium.googlesource.com.
 //
-// Self-diagnosis: Chromium periodically relocates a switch literal to a file
-// this script doesn't scrape, which silently drops it from the allowlist and
-// fails chromium_flags_spec. Rather than make you hunt for the new path, when
-// any Cypress DEFAULT_FLAG is missing from the freshly-built allowlist this
-// script consults peter.sh — which indexes every switch across the whole
-// Chromium tree, with its defining file — and prints, per flag, either the
-// file to add to SWITCH_SOURCE_FILES or that the switch is gone (so it should
-// be dropped from DEFAULT_FLAGS). This is best-effort: if peter.sh or the flags
-// module is unreachable it warns and continues without blocking generation.
+// Self-diagnosis: when a Cypress DEFAULT_FLAG is missing from the freshly-built
+// allowlist, this script consults peter.sh to say whether the switch moved (and
+// to which file) or was removed — see diagnoseMissingFlags.
 
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execFileSync } from 'node:child_process'
+import { parseArgs as nodeParseArgs } from 'node:util'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const SERVER_DIR = path.join(__dirname, '..', 'packages', 'server')
@@ -59,17 +54,12 @@ const PIPELINE_CONFIG_PATH = path.join(__dirname, '..', '.circleci', 'src', 'pip
 // You don't have to find the path by hand: when a Cypress flag goes missing
 // this script's diagnosis (see diagnoseMissingFlags) names the file to add here.
 //
-// Each subsystem is a list of *candidate* source paths. Chromium is mid-flight
-// migrating switch literals out of a `.cc` (`const char kFoo[] = "x";`) and into
-// the header inline (`inline constexpr char kFoo[] = "x";`), so the file that
-// holds the literals differs by milestone — e.g. `metrics_switches.cc` in M149
-// but `metrics_switches.h` in M150. Because the committed allowlist is the
-// intersection across several milestones, a subsystem may live in the `.cc` in
-// one tested milestone and the `.h` in another. For each subsystem we take the
-// union of switches from every candidate that's present at the ref; a candidate
-// that 404s or is declaration-only is fine as long as a sibling still defines
-// the literals. A subsystem that yields zero switches from *all* its candidates
-// is fatal (the paths truly moved) — see fetchSwitchSet.
+// Each subsystem is a list of *candidate* source paths because Chromium is
+// migrating switch literals from `.cc` files into inline headers (`.h`), and the
+// holding file can differ by milestone. We union the switches from every
+// candidate present at the ref (a 404 or declaration-only candidate is fine if a
+// sibling defines the literals); zero switches from *all* candidates is fatal —
+// see fetchSwitchSet.
 const SWITCH_SOURCE_FILES = [
   // base/ defines its switches inline in the header (disable-features,
   // disable-breakpad, disable-dev-shm-usage, noerrdialogs, ...).
@@ -120,29 +110,19 @@ const MIN_EXPECTED_SWITCHES = 50
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+// strict mode throws on unknown flags and on `--ref` with no value
 const parseArgs = (argv) => {
-  const args = { write: false, check: false, ref: null }
+  const { values } = nodeParseArgs({
+    args: argv,
+    options: {
+      write: { type: 'boolean', default: false },
+      check: { type: 'boolean', default: false },
+      ref: { type: 'string' },
+    },
+  })
 
-  for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i]
-
-    if (arg === '--write') {
-      args.write = true
-    } else if (arg === '--check') {
-      args.check = true
-    } else if (arg === '--ref') {
-      args.ref = argv[++i]
-      if (!args.ref || args.ref.startsWith('--')) {
-        throw new Error('--ref requires a value, e.g. --ref refs/heads/main')
-      }
-    } else {
-      throw new Error(`unknown argument: ${arg}. Usage: generate-chrome-switches [--write|--check] [--ref <git-ref>]`)
-    }
-  }
-
-  if (!args.write) args.check = true
-
-  return args
+  // default to --check when --write isn't given
+  return { ...values, check: values.check || !values.write, ref: values.ref ?? null }
 }
 
 // maps a Chrome version to its Chromium release-branch ref.
@@ -244,18 +224,7 @@ const fetchFile = async (ref, file) => {
 }
 
 const extractSwitches = (source) => {
-  const found = new Set()
-
-  // reset lastIndex defensively since the regex is reused across files
-  SWITCH_LITERAL_RE.lastIndex = 0
-
-  let match
-
-  while ((match = SWITCH_LITERAL_RE.exec(source)) !== null) {
-    found.add(match[1])
-  }
-
-  return found
+  return new Set([...source.matchAll(SWITCH_LITERAL_RE)].map((m) => m[1]))
 }
 
 // fetches every subsystem for a ref and returns the union of switches it
