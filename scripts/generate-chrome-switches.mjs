@@ -58,7 +58,11 @@ const SWITCH_SOURCE_FILES = [
   // disable-breakpad, disable-dev-shm-usage, noerrdialogs, ...).
   ['base/base_switches.h', 'base/base_switches.cc'],
   ['content/public/common/content_switches.cc'],
+  // disable-hang-monitor moved out of content_switches into components/input.
+  ['components/input/switches.cc'],
   ['chrome/common/chrome_switches.cc'],
+  // password-store moved out of chrome_switches into the password_manager component.
+  ['components/password_manager/core/browser/password_manager_switches.cc'],
   ['components/autofill/core/common/autofill_switches.cc'],
   ['components/network_session_configurator/common/network_switches.cc'],
   ['services/network/public/cpp/network_switches.cc'],

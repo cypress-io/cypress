@@ -39,9 +39,16 @@ const disabledFeatures = [
 // allowlist of valid switches (regenerated from Chromium source by
 // `scripts/generate-chrome-switches.mjs`); `chromium_flags_spec` asserts
 // every name below appears in it. Keep this in mind when editing this list.
+//
+// NOTE: the following legacy switches were removed because they no longer
+// exist in any Chromium version we support (the last 3 majors) — Chromium
+// deleted them years ago, so passing them was an inert no-op: `ignore-certificate-errors`
+// (use `ignore-certificate-errors-spki-list`), `disable-password-generation`,
+// `disable-single-click-autofill`, `disable-restore-session-state`,
+// `reduce-security-for-testing`, `disable-device-discovery-notifications`,
+// `safebrowsing-disable-download-protection`, `disable-client-side-phishing-detection`.
 export const DEFAULT_FLAGS = [
   'test-type',
-  'ignore-certificate-errors',
   'start-maximized',
   'silent-debugger-extension-api',
   'no-default-browser-check',
@@ -53,17 +60,12 @@ export const DEFAULT_FLAGS = [
   // Disable field trial tests configured in fieldtrial_testing_config.json.
   'disable-field-trial-config',
   'disable-popup-blocking',
-  'disable-password-generation',
-  'disable-single-click-autofill',
   'disable-background-timer-throttling',
   'disable-renderer-backgrounding',
   'disable-backgrounding-occluded-windows',
-  'disable-restore-session-state',
-  'reduce-security-for-testing',
   'enable-automation',
   'disable-print-preview',
   'disable-component-extensions-with-background-pages',
-  'disable-device-discovery-notifications',
 
   // https://github.com/cypress-io/cypress/issues/2376
   'autoplay-policy=no-user-gesture-required',
@@ -83,8 +85,6 @@ export const DEFAULT_FLAGS = [
   // It throttles XHR callbacks for as much as 30 seconds. If you VNC in and
   // open dev tools or click on a button, it'll "instantly" work. With that
   // option enabled, it times out some of our tests in CI.
-  'safebrowsing-disable-download-protection',
-  'disable-client-side-phishing-detection',
   'disable-component-update',
   // Simulate when chrome needs an update.
   // This prevents an 'update' from displaying til the given date
