@@ -35,11 +35,10 @@ const disabledFeatures = [
 // https://github.com/GoogleChrome/chrome-launcher/blob/master/docs/chrome-flags-for-tools.md
 //
 // NOTE: Chromium silently ignores unrecognized switches, so a typo'd or
-// removed flag is a no-op with no error. `chrome-switches.json` records which of
-// these flags are real Chromium switches in the pinned Chrome versions
-// (regenerated from Chromium source by `scripts/generate-chrome-switches.mjs`);
-// `chromium_flags_spec` asserts every name below appears in it. Keep this in
-// mind when editing this list.
+// removed flag is a no-op with no error. `chrome-switches.json` is an
+// allowlist of valid switches (regenerated from Chromium source by
+// `scripts/generate-chrome-switches.mjs`); `chromium_flags_spec` asserts
+// every name below appears in it. Keep this in mind when editing this list.
 //
 // NOTE: the following legacy switches were removed because they no longer
 // exist in any Chromium version we support (the last 3 majors) — Chromium
