@@ -92,6 +92,13 @@ jobs:
               latestBetaVersion: '${{ steps.get-versions.outputs.latest_beta_version }}',
               latestChromeForTestingStableVersion: '${{ steps.get-versions.outputs.latest_chrome_for_testing_stable_version }}',
             })
+      # Regenerate the Chrome switch allowlist from the now-updated pinned
+      # versions so chromium_flags_spec validates our flags against the new
+      # Chrome stable/beta on this PR. If a flag we pass was removed in the new
+      # version, that unit test fails here — surfacing the no-op at bump time.
+      - name: Regenerate Chrome switches allowlist
+        if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
+        run: node scripts/generate-chrome-switches.mjs --write
       - name: Commit and push via API
         if: ${{ steps.check-need-for-pr.outputs.needs_pr == 'true' || steps.check-need-for-branch-update.outputs.has_newer_update == 'true' }}
         uses: actions/github-script@v7
@@ -108,7 +115,7 @@ jobs:
               github,
               baseBranch: '${{ env.BASE_BRANCH }}',
               branchName: '${{ steps.check-branch.outputs.branch_name }}',
-              filePaths: ['.circleci/src/pipeline/@pipeline.yml'],
+              filePaths: ['.circleci/src/pipeline/@pipeline.yml', 'packages/server/lib/util/chrome-switches.json'],
               message: 'chore: ${{ steps.get-versions.outputs.description }}',
             })
       ## Update available and a branch/PR already exists
