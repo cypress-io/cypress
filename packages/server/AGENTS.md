@@ -50,6 +50,17 @@ yarn workspace @packages/server build-prod
 - `better-sqlite3` requires native compilation; run `yarn workspace @packages/server rebuild-better-sqlite3` after an Electron version upgrade.
 - Several dependencies (e.g., `axios`, `devtools-protocol`, `geckodriver`) are nohoisted to avoid version conflicts.
 
+**Chrome/Chromium command-line switches**
+
+When debugging browser launch behavior, adding/removing a Chrome flag, or checking whether a switch is real and what it does, use these in-repo sources of truth before searching the web:
+
+- `lib/util/chromium_flags.ts` — `DEFAULT_FLAGS`, the switches Cypress launches Chrome/Electron with. Many entries carry an inline comment + GitHub issue link explaining *why* Cypress passes (or deliberately omits) them — read those before changing the list. Edit here to add/remove a flag.
+- `lib/util/chrome-switches.json` — generated reference of valid switches: a sorted `{ "switch-name": "description" }` map where the description is Chromium's own source comment (`""` when none). It's the intersection of switches valid in **every** pinned Chrome version Cypress tests against (stable + beta), so you can look up whether a switch exists and what it does without leaving the repo. Do not hand-edit; it's regenerated.
+- `test/unit/util/chromium_flags_spec.ts` — asserts every `DEFAULT_FLAGS` switch name is a key in `chrome-switches.json`. Chromium silently ignores unrecognized switches, so a typo'd or removed flag is a silent no-op; this test catches it offline. A failure here means a flag is misspelled, was removed from Chromium, or its literal moved to a source file the generator doesn't scrape yet.
+- `../../scripts/generate-chrome-switches.mjs` — regenerates the JSON from Chromium source. Run `yarn workspace @packages/server generate-chrome-switches --write` to update, or `--check` to detect drift (needs network to `chromium.googlesource.com`; pins are read from `.circleci`). `SWITCH_SOURCE_FILES` lists the exact Chromium `*_switches.cc`/`.h` files scraped — add to it if a valid flag is reported unknown.
+- Authoritative external references for deeper digging: the scraped `*_switches.cc`/`.h` files on `chromium.googlesource.com`, and <https://peter.sh/experiments/chromium-command-line-switches/>, which indexes every switch tree-wide with its defining file (tracks Chromium `main`, so it may be ahead of the pinned stable/beta — confirm against the pinned branch refs recorded in `chrome-switches.json`).
+- Cypress officially supports only the last 3 major versions of any browser; the allowlist is intentionally scoped to the pinned tested versions, not all of Chromium history.
+
 **Integration Points**
 
 - Consumes virtually every other `@packages/*` package in the monorepo.
