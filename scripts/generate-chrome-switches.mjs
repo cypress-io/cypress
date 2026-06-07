@@ -39,24 +39,45 @@ const ALLOWLIST_PATH = path.join(__dirname, '..', 'packages', 'server', 'lib', '
 // the pinned Chrome version Cypress tests against lives here as a YAML anchor
 const PIPELINE_CONFIG_PATH = path.join(__dirname, '..', '.circleci', 'src', 'pipeline', '@pipeline.yml')
 
-// Chromium source files that define command-line switches as
-// `const char kFoo[] = "switch-name";`. This list covers the subsystems whose
+// Chromium subsystems that define command-line switches, covering those whose
 // switches Cypress passes; extend it if a valid flag is reported as unknown.
+//
+// Each subsystem is a list of *candidate* source paths. Chromium is mid-flight
+// migrating switch literals out of a `.cc` (`const char kFoo[] = "x";`) and into
+// the header inline (`inline constexpr char kFoo[] = "x";`), so the file that
+// holds the literals differs by milestone — e.g. `metrics_switches.cc` in M149
+// but `metrics_switches.h` in M150. Because the committed allowlist is the
+// intersection across several milestones, a subsystem may live in the `.cc` in
+// one tested milestone and the `.h` in another. For each subsystem we take the
+// union of switches from every candidate that's present at the ref; a candidate
+// that 404s or is declaration-only is fine as long as a sibling still defines
+// the literals. A subsystem that yields zero switches from *all* its candidates
+// is fatal (the paths truly moved) — see fetchSwitchSet.
 const SWITCH_SOURCE_FILES = [
-  'content/public/common/content_switches.cc',
-  'chrome/common/chrome_switches.cc',
-  'components/autofill/core/common/autofill_switches.cc',
-  'components/network_session_configurator/common/network_switches.cc',
-  'components/safe_browsing/core/common/safebrowsing_switches.cc',
-  'components/sync/base/command_line_switches.cc',
-  'components/metrics/metrics_switches.cc',
-  'ui/base/ui_base_switches.cc',
-  'ui/gl/gl_switches.cc',
-  'gpu/config/gpu_switches.cc',
-  'media/base/media_switches.cc',
-  'cc/base/switches.cc',
-  'sandbox/policy/switches.cc',
-  'third_party/blink/public/common/switches.cc',
+  // base/ defines its switches inline in the header (disable-features,
+  // disable-breakpad, disable-dev-shm-usage, noerrdialogs, ...).
+  ['base/base_switches.h', 'base/base_switches.cc'],
+  ['content/public/common/content_switches.cc'],
+  ['chrome/common/chrome_switches.cc'],
+  ['components/autofill/core/common/autofill_switches.cc'],
+  ['components/network_session_configurator/common/network_switches.cc'],
+  ['services/network/public/cpp/network_switches.cc'],
+  ['components/safe_browsing/core/common/safebrowsing_switches.cc'],
+  ['components/sync/base/command_line_switches.h', 'components/sync/base/command_line_switches.cc'],
+  ['components/metrics/metrics_switches.h', 'components/metrics/metrics_switches.cc'],
+  ['components/variations/variations_switches.cc'],
+  ['components/embedder_support/switches.cc'],
+  // os_crypt was restructured (sync/ -> common/) and migrated to a header.
+  ['components/os_crypt/common/os_crypt_switches.h', 'components/os_crypt/sync/os_crypt_switches.cc'],
+  ['ui/base/ui_base_switches.h', 'ui/base/ui_base_switches.cc'],
+  ['ui/gl/gl_switches.cc'],
+  ['gpu/config/gpu_switches.cc'],
+  ['media/base/media_switches.cc'],
+  ['cc/base/switches.cc'],
+  ['sandbox/policy/switches.cc'],
+  // blink declares switches in public/common/switches.h but defines the
+  // literals in the non-public impl dir; older milestones used public/common.
+  ['third_party/blink/common/switches.cc', 'third_party/blink/public/common/switches.cc'],
 ]
 
 const BASE_URL = 'https://chromium.googlesource.com/chromium/src/+'
@@ -153,7 +174,7 @@ const fetchTextWithRetry = async (url) => {
 
       const permanent = res.status >= 400 && res.status < 500 && res.status !== 429
 
-      lastErr = new Error(`HTTP ${res.status}`)
+      lastErr = Object.assign(new Error(`HTTP ${res.status}`), { status: res.status })
       if (permanent) break
     } catch (err) {
       lastErr = err
@@ -170,6 +191,10 @@ const fetchTextWithRetry = async (url) => {
   throw lastErr
 }
 
+// fetches a source file, returning its decoded text, or null if it 404s — a
+// candidate path may simply not exist in a given milestone (e.g. a subsystem
+// whose literals migrated between a .cc and a header). Any other failure is
+// fatal, since it would otherwise silently shrink the allowlist.
 const fetchFile = async (ref, file) => {
   const url = `${BASE_URL}/${ref}/${file}?format=TEXT`
   let base64
@@ -177,6 +202,8 @@ const fetchFile = async (ref, file) => {
   try {
     base64 = await fetchTextWithRetry(url)
   } catch (err) {
+    if (err.status === 404) return null
+
     throw new Error(`failed to fetch ${file} @ ${ref} (${url}): ${err.message}`)
   }
 
@@ -205,28 +232,39 @@ const extractSwitches = (source) => {
   return found
 }
 
-// fetches every source file for a ref and returns the union of switches it
-// defines. A fetch failure or a source file that yields zero switches is fatal
-// (rather than a silent WARN): dropping a file would silently shrink the
-// allowlist and surface later as a confusing chromium_flags_spec failure.
+// fetches every subsystem for a ref and returns the union of switches it
+// defines. For each subsystem we union switches across all candidate paths
+// present at the ref. A subsystem that yields zero switches from *every*
+// candidate is fatal (rather than a silent WARN): dropping it would silently
+// shrink the allowlist and surface later as a confusing chromium_flags_spec
+// failure.
 const fetchSwitchSet = async (ref) => {
   const all = new Set()
-  const emptyFiles = []
+  const emptySubsystems = []
 
-  for (const file of SWITCH_SOURCE_FILES) {
-    const switches = extractSwitches(await fetchFile(ref, file))
+  for (const candidates of SWITCH_SOURCE_FILES) {
+    const subsystem = new Set()
 
-    console.log(`    ${file}: ${switches.size}`)
+    for (const file of candidates) {
+      const source = await fetchFile(ref, file)
+      const switches = source ? extractSwitches(source) : null
 
-    if (switches.size === 0) emptyFiles.push(file)
+      // null source = candidate absent (404) at this ref; '-' distinguishes it
+      // from a present-but-zero file, both of which fall back to siblings.
+      console.log(`    ${file}: ${switches ? switches.size : '-'}`)
 
-    for (const s of switches) all.add(s)
+      if (switches) for (const s of switches) subsystem.add(s)
+    }
+
+    if (subsystem.size === 0) emptySubsystems.push(candidates.join(' | '))
+
+    for (const s of subsystem) all.add(s)
   }
 
-  if (emptyFiles.length) {
+  if (emptySubsystems.length) {
     const hint = 'The path(s) may have moved in this Chromium version, or SWITCH_LITERAL_RE no longer matches. Update SWITCH_SOURCE_FILES / the extraction regex in scripts/generate-chrome-switches.mjs.'
 
-    throw new Error(`extracted 0 switches from ${emptyFiles.length} source file(s) @ ${ref}: ${emptyFiles.join(', ')}. ${hint}`)
+    throw new Error(`extracted 0 switches from ${emptySubsystems.length} subsystem(s) @ ${ref}: ${emptySubsystems.join(', ')}. ${hint}`)
   }
 
   return all
