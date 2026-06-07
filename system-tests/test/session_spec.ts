@@ -198,4 +198,15 @@ describe('e2e sessions', () => {
       env: { SYSTEM_TESTS: true },
     },
   })
+
+  // https://github.com/cypress-io/cypress/issues/31988
+  // Before the fix, cy.session's navigateAboutBlank() hung for 20s on
+  // consecutive tests with test isolation when the AUT was already on
+  // about:blank, failing the run. No snapshot: the regression signal we want is
+  // simply that the run completes (default expected exit code 0).
+  it('does not hang creating sessions across consecutive tests on about:blank', {
+    project: 'session-and-origin-e2e-specs',
+    spec: 'session/session_about_blank.cy.js',
+    browser: 'chrome', // matches the primary session system test; the repro is browser-agnostic
+  })
 })
