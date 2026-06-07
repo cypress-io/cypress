@@ -207,6 +207,6 @@ describe('e2e sessions', () => {
   it('does not hang creating sessions across consecutive tests on about:blank', {
     project: 'session-and-origin-e2e-specs',
     spec: 'session/session_about_blank.cy.js',
-    browser: 'chrome', // matches the primary session system test; the repro is browser-agnostic
+    browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
   })
 })
