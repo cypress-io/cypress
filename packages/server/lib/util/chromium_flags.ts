@@ -39,14 +39,6 @@ const disabledFeatures = [
 // allowlist of valid switches (regenerated from Chromium source by
 // `scripts/generate-chrome-switches.mjs`); `chromium_flags_spec` asserts
 // every name below appears in it. Keep this in mind when editing this list.
-//
-// NOTE: the following legacy switches were removed because they no longer
-// exist in any Chromium version we support (the last 3 majors) — Chromium
-// deleted them years ago, so passing them was an inert no-op: `ignore-certificate-errors`
-// (use `ignore-certificate-errors-spki-list`), `disable-password-generation`,
-// `disable-single-click-autofill`, `disable-restore-session-state`,
-// `reduce-security-for-testing`, `disable-device-discovery-notifications`,
-// `safebrowsing-disable-download-protection`, `disable-client-side-phishing-detection`.
 export const DEFAULT_FLAGS = [
   'test-type',
   'start-maximized',
