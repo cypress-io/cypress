@@ -64,15 +64,33 @@ const BASE_URL = 'https://chromium.googlesource.com/chromium/src/+'
 // matches: const char kFoo[] = "switch-name";  (and constexpr/inline variants)
 const SWITCH_LITERAL_RE = /k\w+\[\]\s*=\s*"([a-z0-9][a-z0-9-]*)"/g
 
+const FETCH_TIMEOUT_MS = 30_000
+const MAX_FETCH_ATTEMPTS = 4
+// a single Chromium switch file (e.g. content_switches.cc) defines well over a
+// hundred switches; a healthy intersection across all sources is in the
+// hundreds. Anything below this almost certainly means extraction broke.
+const MIN_EXPECTED_SWITCHES = 50
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 const parseArgs = (argv) => {
   const args = { write: false, check: false, ref: null }
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
 
-    if (arg === '--write') args.write = true
-    else if (arg === '--check') args.check = true
-    else if (arg === '--ref') args.ref = argv[++i]
+    if (arg === '--write') {
+      args.write = true
+    } else if (arg === '--check') {
+      args.check = true
+    } else if (arg === '--ref') {
+      args.ref = argv[++i]
+      if (!args.ref || args.ref.startsWith('--')) {
+        throw new Error('--ref requires a value, e.g. --ref refs/heads/main')
+      }
+    } else {
+      throw new Error(`unknown argument: ${arg}. Usage: generate-chrome-switches [--write|--check] [--ref <git-ref>]`)
+    }
   }
 
   if (!args.write) args.check = true
@@ -98,7 +116,14 @@ const parseVersionAnchor = (config, key) => {
 // `chrome` and `chrome:beta` jobs launch different milestones), so a flag must
 // be valid in *every* tested milestone. Resolve each to its Chromium branch.
 const resolveTestedChromes = () => {
-  const config = fs.readFileSync(PIPELINE_CONFIG_PATH, 'utf8')
+  let config
+
+  try {
+    config = fs.readFileSync(PIPELINE_CONFIG_PATH, 'utf8')
+  } catch (err) {
+    throw new Error(`could not read pinned Chrome versions from ${PIPELINE_CONFIG_PATH}: ${err.message}`)
+  }
+
   const chromes = [
     { channel: 'stable', ...parseVersionAnchor(config, 'chrome-stable-version') },
     { channel: 'stable-cft', ...parseVersionAnchor(config, 'chrome-for-testing-stable-version') },
@@ -115,22 +140,62 @@ const resolveTestedChromes = () => {
   return [...byRef.values()]
 }
 
+// fetches a URL with a timeout and retry/backoff on transient failures.
+// 4xx (other than 429) are treated as permanent and fail fast.
+const fetchTextWithRetry = async (url) => {
+  let lastErr
+
+  for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt++) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
+
+      if (res.ok) return await res.text()
+
+      const permanent = res.status >= 400 && res.status < 500 && res.status !== 429
+
+      lastErr = new Error(`HTTP ${res.status}`)
+      if (permanent) break
+    } catch (err) {
+      lastErr = err
+    }
+
+    if (attempt < MAX_FETCH_ATTEMPTS) {
+      const backoff = 2 ** (attempt - 1) * 1000
+
+      console.log(`    attempt ${attempt}/${MAX_FETCH_ATTEMPTS} failed (${lastErr.message}); retrying in ${backoff}ms`)
+      await sleep(backoff)
+    }
+  }
+
+  throw lastErr
+}
+
 const fetchFile = async (ref, file) => {
   const url = `${BASE_URL}/${ref}/${file}?format=TEXT`
-  const res = await fetch(url)
+  let base64
 
-  if (!res.ok) {
-    throw new Error(`failed to fetch ${file} @ ${ref}: HTTP ${res.status}`)
+  try {
+    base64 = await fetchTextWithRetry(url)
+  } catch (err) {
+    throw new Error(`failed to fetch ${file} @ ${ref} (${url}): ${err.message}`)
   }
 
   // googlesource returns the file base64-encoded when ?format=TEXT
-  const base64 = await res.text()
+  const content = Buffer.from(base64, 'base64').toString('utf8')
 
-  return Buffer.from(base64, 'base64').toString('utf8')
+  if (!content.trim()) {
+    throw new Error(`empty or undecodable response for ${file} @ ${ref} (${url})`)
+  }
+
+  return content
 }
 
 const extractSwitches = (source) => {
   const found = new Set()
+
+  // reset lastIndex defensively since the regex is reused across files
+  SWITCH_LITERAL_RE.lastIndex = 0
+
   let match
 
   while ((match = SWITCH_LITERAL_RE.exec(source)) !== null) {
@@ -140,23 +205,40 @@ const extractSwitches = (source) => {
   return found
 }
 
+// fetches every source file for a ref and returns the union of switches it
+// defines. A fetch failure or a source file that yields zero switches is fatal
+// (rather than a silent WARN): dropping a file would silently shrink the
+// allowlist and surface later as a confusing chromium_flags_spec failure.
 const fetchSwitchSet = async (ref) => {
   const all = new Set()
+  const emptyFiles = []
 
   for (const file of SWITCH_SOURCE_FILES) {
-    try {
-      const source = await fetchFile(ref, file)
+    const switches = extractSwitches(await fetchFile(ref, file))
 
-      for (const s of extractSwitches(source)) all.add(s)
-    } catch (err) {
-      console.log(`  WARN: ${err.message}`)
-    }
+    console.log(`    ${file}: ${switches.size}`)
+
+    if (switches.size === 0) emptyFiles.push(file)
+
+    for (const s of switches) all.add(s)
+  }
+
+  if (emptyFiles.length) {
+    const hint = 'The path(s) may have moved in this Chromium version, or SWITCH_LITERAL_RE no longer matches. Update SWITCH_SOURCE_FILES / the extraction regex in scripts/generate-chrome-switches.mjs.'
+
+    throw new Error(`extracted 0 switches from ${emptyFiles.length} source file(s) @ ${ref}: ${emptyFiles.join(', ')}. ${hint}`)
   }
 
   return all
 }
 
-const readCommitted = () => JSON.parse(fs.readFileSync(ALLOWLIST_PATH, 'utf8'))
+const readCommitted = () => {
+  try {
+    return JSON.parse(fs.readFileSync(ALLOWLIST_PATH, 'utf8'))
+  } catch (err) {
+    throw new Error(`could not read/parse committed allowlist ${ALLOWLIST_PATH}: ${err.message}`)
+  }
+}
 
 const main = async () => {
   const args = parseArgs(process.argv.slice(2))
@@ -165,7 +247,7 @@ const main = async () => {
     ? [{ channel: 'custom', version: null, ref: args.ref }]
     : resolveTestedChromes()
 
-  console.log(`validating against ${chromes.length} Chrome version(s):`)
+  console.log(`[generate-chrome-switches] mode=${args.write ? 'write' : 'check'}, validating against ${chromes.length} Chrome version(s):`)
   for (const c of chromes) console.log(`  ${c.channel}: ${c.version ?? '(custom ref)'} -> ${c.ref}`)
 
   // a flag must be recognized by *every* tested milestone (a switch present in
@@ -173,20 +255,20 @@ const main = async () => {
   let intersection = null
 
   for (const chrome of chromes) {
+    console.log(`\nfetching switches @ ${chrome.ref}:`)
     const set = await fetchSwitchSet(chrome.ref)
 
-    if (set.size === 0) {
-      console.error(`error: extracted 0 switches @ ${chrome.ref} — refusing to continue (network or ref problem?)`)
-      process.exit(1)
-    }
-
-    console.log(`  ${chrome.ref}: ${set.size} switches`)
+    console.log(`  total @ ${chrome.ref}: ${set.size} switches`)
     intersection = intersection ? new Set([...intersection].filter((s) => set.has(s))) : set
   }
 
   const switches = [...intersection].sort()
 
-  console.log(`\n${switches.length} switches valid across all tested versions`)
+  console.log(`\n${switches.length} switches valid across all ${chromes.length} tested version(s)`)
+
+  if (switches.length < MIN_EXPECTED_SWITCHES) {
+    throw new Error(`only ${switches.length} switches in the intersection (expected >= ${MIN_EXPECTED_SWITCHES}). Refusing to write a likely-corrupt allowlist; check the per-file counts above.`)
+  }
 
   if (args.write) {
     const committed = readCommitted()
@@ -198,7 +280,7 @@ const main = async () => {
     delete committed.chromeVersion
     delete committed.ref
     fs.writeFileSync(ALLOWLIST_PATH, `${JSON.stringify(committed, null, 2)}\n`)
-    console.log(`wrote ${ALLOWLIST_PATH}`)
+    console.log(`wrote ${switches.length} switches to ${ALLOWLIST_PATH}`)
 
     return
   }
@@ -222,6 +304,8 @@ const main = async () => {
 }
 
 main().catch((err) => {
-  console.error(err)
+  // surface a clear, greppable failure line for CI logs, then the full stack
+  console.error(`\n[generate-chrome-switches] FAILED: ${err.message}`)
+  console.error(err.stack)
   process.exit(1)
 })
