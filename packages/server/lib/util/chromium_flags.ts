@@ -41,7 +41,6 @@ const DEFAULT_FLAGS = [
   'no-default-browser-check',
   'no-first-run',
   'noerrdialogs',
-  'enable-fixed-layout',
   // Disables Domain Reliability Monitoring, which tracks whether the browser has
   // difficulty contacting Google-owned sites and uploads reports to Google.
   'disable-domain-reliability',
@@ -50,20 +49,14 @@ const DEFAULT_FLAGS = [
   'disable-popup-blocking',
   'disable-password-generation',
   'disable-single-click-autofill',
-  'disable-prompt-on-repos',
   'disable-background-timer-throttling',
   'disable-renderer-backgrounding',
-  'disable-renderer-throttling',
   'disable-backgrounding-occluded-windows',
   'disable-restore-session-state',
-  'disable-new-profile-management',
-  'disable-new-avatar-menu',
-  'allow-insecure-localhost',
   'reduce-security-for-testing',
   'enable-automation',
   'disable-print-preview',
   'disable-component-extensions-with-background-pages',
-  'disable-infobars',
   'disable-device-discovery-notifications',
 
   // https://github.com/cypress-io/cypress/issues/2376
@@ -80,12 +73,10 @@ const DEFAULT_FLAGS = [
   'disable-prompt-on-repost',
   'disable-hang-monitor',
   'disable-sync',
-  // this flag is causing throttling of XHR callbacks for
-  // as much as 30 seconds. If you VNC in and open dev tools or
-  // click on a button, it'll "instantly" work. with this
-  // option enabled, it will time out some of our tests in circle
-  // "disable-background-networking"
-  'disable-web-resources',
+  // NOTE: we intentionally do NOT pass `disable-background-networking`.
+  // It throttles XHR callbacks for as much as 30 seconds. If you VNC in and
+  // open dev tools or click on a button, it'll "instantly" work. With that
+  // option enabled, it times out some of our tests in CI.
   'safebrowsing-disable-download-protection',
   'disable-client-side-phishing-detection',
   'disable-component-update',
@@ -108,7 +99,6 @@ const DEFAULT_FLAGS = [
 
   // misc. options puppeteer passes
   // https://github.com/cypress-io/cypress/issues/3633
-  'disable-backgrounding-occluded-window',
   'disable-breakpad',
   'password-store=basic',
   'use-mock-keychain',
