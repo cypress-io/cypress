@@ -33,7 +33,13 @@ const disabledFeatures = [
 
 // Common Chrome Flags for Automation
 // https://github.com/GoogleChrome/chrome-launcher/blob/master/docs/chrome-flags-for-tools.md
-const DEFAULT_FLAGS = [
+//
+// NOTE: Chromium silently ignores unrecognized switches, so a typo'd or
+// removed flag is a no-op with no error. `chrome-switches.json` is an
+// allowlist of valid switches (regenerated from Chromium source by
+// `scripts/generate-chrome-switches.mjs`); `chromium_flags_spec` asserts
+// every name below appears in it. Keep this in mind when editing this list.
+export const DEFAULT_FLAGS = [
   'test-type',
   'ignore-certificate-errors',
   'start-maximized',
