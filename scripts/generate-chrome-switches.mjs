@@ -15,9 +15,14 @@
 //   node scripts/generate-chrome-switches.mjs --write            # overwrite the committed allowlist
 //   node scripts/generate-chrome-switches.mjs --write --ref <git-ref>
 //
-// `--ref` should match the Chromium milestone Cypress tests against (e.g.
-// `refs/branch-heads/6478` for a milestone branch, or a tag/commit). Defaults
-// to `refs/heads/main`. Requires outbound network access to
+// By default the ref is derived from the Chrome version Cypress tests against,
+// so the allowlist always tracks the Chrome build under test (and re-pins
+// automatically when the browser-version updater bumps it). Chrome versions are
+// `MAJOR.MINOR.BUILD.PATCH`; the BUILD number is the name of the Chromium
+// release branch, so e.g. `149.0.7827.54` maps to `refs/branch-heads/7827`. The
+// version is read from the `chrome-for-testing-stable-version` anchor in the
+// CircleCI pipeline config. Pass `--ref <git-ref>` to override (e.g. to test
+// against `refs/heads/main`). Requires outbound network access to
 // chromium.googlesource.com.
 
 import fs from 'node:fs'
@@ -26,6 +31,9 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ALLOWLIST_PATH = path.join(__dirname, '..', 'packages', 'server', 'lib', 'util', 'chrome-switches.json')
+
+// the pinned Chrome version Cypress tests against lives here as a YAML anchor
+const PIPELINE_CONFIG_PATH = path.join(__dirname, '..', '.circleci', 'src', 'pipeline', '@pipeline.yml')
 
 // Chromium source files that define command-line switches as
 // `const char kFoo[] = "switch-name";`. This list covers the subsystems whose
@@ -53,7 +61,7 @@ const BASE_URL = 'https://chromium.googlesource.com/chromium/src/+'
 const SWITCH_LITERAL_RE = /k\w+\[\]\s*=\s*"([a-z0-9][a-z0-9-]*)"/g
 
 const parseArgs = (argv) => {
-  const args = { write: false, check: false, ref: 'refs/heads/main' }
+  const args = { write: false, check: false, ref: null }
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
@@ -66,6 +74,21 @@ const parseArgs = (argv) => {
   if (!args.write) args.check = true
 
   return args
+}
+
+// reads the Chrome version Cypress tests against and maps it to the Chromium
+// release-branch ref. Chrome `MAJOR.MINOR.BUILD.PATCH` -> `refs/branch-heads/BUILD`.
+const resolvePinnedChrome = () => {
+  const config = fs.readFileSync(PIPELINE_CONFIG_PATH, 'utf8')
+  const match = config.match(/chrome-for-testing-stable-version:\s*&\S+\s*["'](\d+\.\d+\.(\d+)\.\d+)["']/)
+
+  if (!match) {
+    throw new Error(`could not find chrome-for-testing-stable-version in ${PIPELINE_CONFIG_PATH}`)
+  }
+
+  const [, version, build] = match
+
+  return { version, ref: `refs/branch-heads/${build}` }
 }
 
 const fetchFile = async (ref, file) => {
@@ -116,19 +139,25 @@ const readCommitted = () => JSON.parse(fs.readFileSync(ALLOWLIST_PATH, 'utf8'))
 
 const main = async () => {
   const args = parseArgs(process.argv.slice(2))
-  const switches = await collectSwitches(args.ref)
+  // default to the Chrome build under test; allow --ref to override
+  const pinned = args.ref ? { version: null, ref: args.ref } : resolvePinnedChrome()
+
+  console.log(`using ref ${pinned.ref}${pinned.version ? ` (Chrome ${pinned.version})` : ''}`)
+
+  const switches = await collectSwitches(pinned.ref)
 
   if (switches.length === 0) {
     console.error('error: extracted 0 switches — refusing to continue (network or ref problem?)')
     process.exit(1)
   }
 
-  console.log(`\ncollected ${switches.length} unique switches @ ${args.ref}`)
+  console.log(`\ncollected ${switches.length} unique switches @ ${pinned.ref}`)
 
   if (args.write) {
     const committed = readCommitted()
 
-    committed.ref = args.ref
+    committed.chromeVersion = pinned.version
+    committed.ref = pinned.ref
     committed.generatedAt = new Date().toISOString()
     committed.switches = switches
     delete committed._seedNote

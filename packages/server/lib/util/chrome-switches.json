@@ -1,6 +1,7 @@
 {
-  "_comment": "Allowlist of valid Chromium command-line switches. Chromium silently ignores unrecognized switches, so this list exists to catch typo'd or removed flags in DEFAULT_FLAGS (see chromium_flags.ts). `chromium_flags_spec` asserts every default flag's switch name appears here. Regenerate from Chromium source with `yarn workspace @packages/server generate-chrome-switches --write --ref <git-ref>` (requires network; see scripts/generate-chrome-switches.mjs).",
+  "_comment": "Allowlist of valid Chromium command-line switches. Chromium silently ignores unrecognized switches, so this list exists to catch typo'd or removed flags in DEFAULT_FLAGS (see chromium_flags.ts). `chromium_flags_spec` asserts every default flag's switch name appears here. Regenerate from Chromium source with `yarn workspace @packages/server generate-chrome-switches --write` (requires network; defaults to the Chrome version pinned in .circleci; see scripts/generate-chrome-switches.mjs).",
   "_seedNote": "This seed contains only the switches Cypress currently passes. Run the generator to expand it to the full set of switches defined by the pinned Chromium version, after which adding a new valid switch will pass without editing this file and only typos/removed switches will fail the test.",
+  "chromeVersion": null,
   "ref": null,
   "generatedAt": null,
   "switches": [
