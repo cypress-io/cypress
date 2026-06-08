@@ -569,7 +569,6 @@ export const getReasonIsHidden = function ($el, options = { checkOpacity: true }
       return `This element \`${hiddenNode}\` is not visible because it has an effective width and height of: \`${rect.width} x ${rect.height}\` pixels.`
     }
 
-    // modernIsHidden's two checks both passed — fall back to the legacy generic message.
     return `This element \`${hiddenNode}\` is not visible.`
   }
 
