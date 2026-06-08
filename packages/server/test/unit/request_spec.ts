@@ -876,6 +876,37 @@ describe('lib/request', () => {
           })
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/23475
+      it('does not sync cookies with the browser when cookies are disabled', function () {
+        const set = sinon.spy(request, 'setCookiesOnBrowser')
+        const get = sinon.spy(request, 'setRequestCookieHeader')
+
+        nock('http://localhost:1234')
+        .get('/')
+        .reply(302, '', {
+          'set-cookie': 'one=1',
+          location: '/second',
+        })
+        .get('/second')
+        .reply(200, '', {
+          'set-cookie': 'two=2',
+        })
+
+        return request.sendPromise({}, this.fn, {
+          url: 'http://localhost:1234/',
+          cookies: false,
+        })
+        .then((resp) => {
+          expect(resp.status).to.eq(200)
+
+          // no cookie automation round-trips to the browser at any point
+          expect(set).not.to.be.called
+          expect(get).not.to.be.called
+          expect(this.fn).not.to.be.calledWith('get:cookies')
+          expect(this.fn).not.to.be.calledWith('set:cookie')
+        })
+      })
     })
 
     context('form=true', () => {

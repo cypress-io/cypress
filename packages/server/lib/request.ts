@@ -791,6 +791,14 @@ export class Request {
 
           push(incomingRes)
 
+          // when cookies are disabled we skip the browser cookie
+          // round-trips entirely and just follow the redirect
+          if (!options.cookies) {
+            currentUrl = newUrl
+
+            return true
+          }
+
           // and when we know we should follow the redirect
           // we need to override the init method and
           // first set the new cookies on the browser
@@ -820,6 +828,12 @@ export class Request {
           // resolve the new location head against
           // the current url
           resp.redirectedToUrl = url.resolve(options.url!, resp.headers.location)
+        }
+
+        // when cookies are disabled there is nothing to persist back
+        // to the browser, so skip the extra automation round-trip
+        if (!options.cookies) {
+          return resp
         }
 
         return this.setCookiesOnBrowser(resp, currentUrl!, automationFn)

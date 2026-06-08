@@ -1458,6 +1458,10 @@ export default {
       message: `${cmd('request')} requires the \`gzip\` option to be a boolean.`,
       docsUrl: 'https://on.cypress.io/request',
     },
+    cookies_invalid: {
+      message: `${cmd('request')} requires the \`cookies\` option to be a boolean.`,
+      docsUrl: 'https://on.cypress.io/request',
+    },
     headers_invalid: {
       message: `${cmd('request')} requires the \`headers\` option to be an object literal.`,
       docsUrl: 'https://on.cypress.io/request',

@@ -25,6 +25,7 @@ describe('src/cy/commands/request', () => {
             retryOnStatusCodeFailure: false,
             encoding: 'utf8',
             gzip: true,
+            cookies: true,
             followRedirect: true,
             timeout: RESPONSE_TIMEOUT,
             method: 'GET',

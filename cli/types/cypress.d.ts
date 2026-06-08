@@ -3763,6 +3763,15 @@ declare namespace Cypress {
   interface RequestOptions extends Loggable, Timeoutable, Failable {
     auth: object
     body: RequestBody
+    /**
+     * Whether to automatically sync the browser's cookies onto the request and
+     * persist any `Set-Cookie` response headers back to the browser. Disabling
+     * this skips the browser cookie round-trips and can speed up requests that
+     * do not rely on the browser's session.
+     *
+     * @default true
+     */
+    cookies: boolean
     encoding: Encodings
     followRedirect: boolean
     form: boolean

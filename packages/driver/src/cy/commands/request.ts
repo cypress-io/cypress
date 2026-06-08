@@ -25,6 +25,7 @@ const REQUEST_DEFAULTS = {
   form: null,
   encoding: 'utf8',
   gzip: true,
+  cookies: true,
   timeout: null,
   followRedirect: true,
   failOnStatusCode: true,
@@ -249,6 +250,10 @@ export default (Commands, Cypress, cy, state, config) => {
 
       if (!_.isBoolean(options.gzip)) {
         $errUtils.throwErrByPath('request.gzip_invalid')
+      }
+
+      if (!_.isBoolean(options.cookies)) {
+        $errUtils.throwErrByPath('request.cookies_invalid')
       }
 
       if (form) {
