@@ -6,7 +6,7 @@ export { InterceptError } from './middleware/error'
 
 export { SetMatchingRoutes, InterceptRequest } from './middleware/request'
 
-export { InterceptResponse } from './middleware/response'
+export { InterceptResponse, handleInterceptResponse } from './middleware/response'
 
 export { NetStubbingState, ResourceType } from './types'
 

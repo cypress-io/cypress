@@ -1,5 +1,5 @@
 import type { ForResponseInterception } from '@packages/network-policy'
-import { handleInterceptResponse } from '@packages/net-stubbing/lib/server/handle-intercept-response'
+import { handleInterceptResponse } from '@packages/net-stubbing'
 import type { ResponseInterceptionMiddlewareCtx } from './types'
 
 /** {@link ForResponseInterception} adapter — delegates to legacy net-stubbing response middleware. */
