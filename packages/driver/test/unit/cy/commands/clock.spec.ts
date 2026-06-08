@@ -160,6 +160,16 @@ describe('cy/commands/clock', () => {
     }
   })
 
+  it('should reject negative milliseconds', async () => {
+    const clock = commands.clock(undefined)
+
+    try {
+      await expect(commands.tick(undefined, -1)).rejects.toThrow('Negative ticks are not supported')
+    } finally {
+      clock.restore({ log: false })
+    }
+  })
+
   it('should fall back to a synchronous tick when async ticking is unavailable', async () => {
     const tick = vi.fn().mockReturnValue(250)
 

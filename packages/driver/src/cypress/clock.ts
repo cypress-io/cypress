@@ -31,6 +31,10 @@ export const create = (win, now, methods) => {
   }
 
   const tickAsync = async (ms: number) => {
+    if (ms < 0) {
+      return clock.tick(ms)
+    }
+
     const finalNow = clock.now + ms
 
     await flushPromises()
