@@ -8,6 +8,12 @@ export function createTestNetworkInterceptionCore () {
   })
 }
 
+export function createTestForHttpInterception () {
+  return {
+    handle: async (request, next) => next(request),
+  }
+}
+
 export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
   const fullCtx = {
     debug: () => {},
@@ -15,6 +21,8 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
     res: {},
     config: {},
     networkInterceptionCore: createTestNetworkInterceptionCore(),
+    httpInterception: createTestForHttpInterception(),
+    netStubbingState: { routes: [] },
 
     middleware: {
       0: middleware,

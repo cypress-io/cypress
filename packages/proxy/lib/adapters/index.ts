@@ -4,6 +4,10 @@ export type { CreateDefaultNetworkInterceptionCoreOptions } from './create-defau
 
 export { endRequestsToBlockedHosts } from './end-requests-to-blocked-hosts'
 
-export { ProxyRequestInterceptionAdapter } from './proxy-request-interception'
+export {
+  applyOutboundToProxiedRequest,
+  fetchOriginAsHttpResponse,
+  toHttpRequest,
+} from './proxy-http-interception'
 
-export { ProxyResponseInterceptionAdapter } from './proxy-response-interception'
+export { applyHttpResponseToCtx } from './apply-http-response'

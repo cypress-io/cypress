@@ -6,12 +6,13 @@ import {
   matchRoutes,
   planSubscriptions,
   mergeIncomingRequestChanges,
+  NetworkPolicyRegistry,
 } from '../../lib'
 import type { BackendRoute } from '../../lib/types/backend-route'
 import type { RouteMatcherOptions } from '../../lib/types/external-types'
 
 describe('core/route-matching', () => {
-  const tryMatch = (req: { proxiedUrl: string, method?: string, headers?: Record<string, string> }, matcher: RouteMatcherOptions, expected = true) => {
+  const tryMatch = (req: { url: string, method?: string, headers?: Record<string, string> }, matcher: RouteMatcherOptions, expected = true) => {
     expect(doesRouteMatch(matcher, {
       method: 'GET',
       headers: {},
@@ -20,11 +21,11 @@ describe('core/route-matching', () => {
   }
 
   it('matches exact URL', () => {
-    tryMatch({ proxiedUrl: 'https://google.com/foo' }, { url: 'https://google.com/foo' })
+    tryMatch({ url: 'https://google.com/foo' }, { url: 'https://google.com/foo' })
   })
 
   it('matches globs against path', () => {
-    tryMatch({ proxiedUrl: 'http://foo.com/bar/a1' }, { url: '/bar/*' })
+    tryMatch({ url: 'http://foo.com/bar/a1' }, { url: '/bar/*' })
   })
 
   it('orders middleware routes before handlers', () => {
@@ -38,7 +39,7 @@ describe('core/route-matching', () => {
     const matched = matchRoutes(routes, {
       method: 'GET',
       headers: {},
-      proxiedUrl: 'http://bar.baz/foo?_',
+      url: 'http://bar.baz/foo?_',
     })
 
     expect(matched.map((r) => r.id)).toEqual(['1', '3', '4', '2'])
@@ -48,7 +49,7 @@ describe('core/route-matching', () => {
     const matchable = getMatchableForRequest({
       headers: { authorization: 'basic Zm9vOmJhcg==' },
       method: 'GET',
-      proxiedUrl: 'https://google.com/asdf?1234=a',
+      url: 'https://google.com/asdf?1234=a',
     })
 
     expect(matchable.auth).toEqual({ username: 'foo', password: 'bar' })
@@ -91,7 +92,7 @@ describe('core/plan-subscriptions', () => {
     const planned = planSubscriptions({
       matchingRoutes: routes,
       isSyncRequest: true,
-      proxiedUrl: 'http://example.com',
+      url: 'http://example.com',
       onSyncInterceptSkipped,
     })
 
@@ -176,73 +177,6 @@ describe('core/merge-handler-result', () => {
 })
 
 describe('NetworkInterceptionCore', () => {
-  it('delegates matchRoutes and handleRequest to supplied runner', async () => {
-    const core = new NetworkInterceptionCore()
-    const run = vi.fn().mockResolvedValue(undefined)
-
-    await core.handleRequest(run)
-
-    expect(run).toHaveBeenCalledWith(core)
-  })
-
-  it('delegates correlateBrowserPreRequest to requestInterception port', async () => {
-    const correlateBrowserPreRequest = vi.fn().mockResolvedValue(undefined)
-    const core = new NetworkInterceptionCore({
-      requestInterception: {
-        correlateBrowserPreRequest,
-        forwardToOrigin: vi.fn(),
-        endRequestIfBlocked: vi.fn(),
-      },
-    })
-    const ctx = { req: {} }
-
-    await core.correlateBrowserPreRequest(ctx)
-
-    expect(correlateBrowserPreRequest).toHaveBeenCalledWith(ctx)
-  })
-
-  it('delegates forwardToOrigin to requestInterception port', () => {
-    const forwardToOrigin = vi.fn()
-    const core = new NetworkInterceptionCore({
-      requestInterception: {
-        correlateBrowserPreRequest: vi.fn(),
-        forwardToOrigin,
-        endRequestIfBlocked: vi.fn(),
-      },
-    })
-    const ctx = { req: {} }
-
-    core.forwardToOrigin(ctx)
-
-    expect(forwardToOrigin).toHaveBeenCalledWith(ctx)
-  })
-
-  it('delegates interceptResponse to responseInterception port', async () => {
-    const interceptResponse = vi.fn().mockResolvedValue(undefined)
-    const core = new NetworkInterceptionCore({
-      responseInterception: { interceptResponse },
-    })
-    const ctx = { req: {} }
-
-    await core.interceptResponse(ctx)
-
-    expect(interceptResponse).toHaveBeenCalledWith(ctx)
-  })
-
-  it('throws when requestInterception port is missing', async () => {
-    const core = new NetworkInterceptionCore()
-
-    await expect(core.correlateBrowserPreRequest({})).rejects.toThrow(/requestInterception/)
-    expect(() => core.forwardToOrigin({})).toThrow(/requestInterception/)
-    await expect(core.endRequestIfBlocked({})).rejects.toThrow(/requestInterception/)
-  })
-
-  it('throws when responseInterception port is missing', async () => {
-    const core = new NetworkInterceptionCore()
-
-    await expect(core.interceptResponse({})).rejects.toThrow(/responseInterception/)
-  })
-
   it('delegates document preparation methods to documentPreparation port', async () => {
     const setInjectionLevel = vi.fn().mockResolvedValue(undefined)
     const injectHtml = vi.fn().mockResolvedValue(undefined)
@@ -295,5 +229,18 @@ describe('NetworkInterceptionCore', () => {
     expect(copyCookiesFromResponse).toHaveBeenCalledWith(ctx)
     expect(notifyResponseStreamReceived).toHaveBeenCalledWith(ctx)
     expect(notifyResponseEndedWithEmptyBody).toHaveBeenCalledWith(ctx, { isCached: false })
+  })
+
+  it('runs request policies via policyRegistration port', () => {
+    const runPolicies = vi.fn().mockReturnValue({ action: 'continue' })
+    const core = new NetworkInterceptionCore({
+      policyRegistration: { runPolicies } as any,
+    })
+
+    const ctx = { req: { proxiedUrl: 'http://example.com', method: 'GET' } }
+    const result = core.runRequestPolicies(ctx)
+
+    expect(runPolicies).toHaveBeenCalledOnce()
+    expect(result).toEqual({ action: 'continue' })
   })
 })

@@ -36,3 +36,5 @@ export interface ForNetworkPolicyRegistration {
 
   runPolicies (options: RunPoliciesOptions): Promise<RunPoliciesResult>
 }
+
+export * from './http-interception'

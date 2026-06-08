@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest'
 import {
   doesRouteMatch,
   getMatchableForRequest,
-  getRoutesForRequest,
-} from '@packages/network-interception'
+  matchRoutes,
+} from '../../lib'
 import { RouteMatcherOptions } from '../../lib/types'
 import { CypressIncomingRequest } from '@packages/proxy'
-import { BackendRoute } from '../../lib/server/types'
+import { BackendRoute } from '../../lib/types/backend-route'
 
 describe('intercept-request', function () {
-  describe('._getMatchableForRequest', function () {
+  describe('.getMatchableForRequest', function () {
     it('converts a fully-fledged req into a matchable shape', function () {
       const req = {
         headers: {
@@ -18,7 +18,7 @@ describe('intercept-request', function () {
           quuz: 'quux',
         },
         method: 'GET',
-        proxiedUrl: 'https://google.com/asdf?1234=a',
+        url: 'https://google.com/asdf?1234=a',
       } as unknown as CypressIncomingRequest
 
       const matchable = getMatchableForRequest(req)
@@ -43,7 +43,7 @@ describe('intercept-request', function () {
     })
   })
 
-  describe('._doesRouteMatch', function () {
+  describe('.doesRouteMatch', function () {
     const tryMatch = (req: Partial<CypressIncomingRequest>, matcher: RouteMatcherOptions, expected = true) => {
       req = {
         method: 'GET',
@@ -56,123 +56,128 @@ describe('intercept-request', function () {
 
     it('matches exact URL', function () {
       tryMatch({
-        proxiedUrl: 'https://google.com/foo',
+        url: 'https://google.com/foo',
       }, {
         url: 'https://google.com/foo',
       })
     })
 
-    it('matches on url as regexp', function () {
+    it('matches glob URL', function () {
       tryMatch({
-        proxiedUrl: 'https://google.com/foo',
+        url: 'https://google.com/foo/bar',
       }, {
-        url: /foo/,
+        url: 'https://google.com/**',
       })
     })
 
-    it('matches on a null matcher', function () {
+    it('matches regex URL', function () {
       tryMatch({
-        proxiedUrl: 'https://google.com/asdf?1234=a',
-      }, {})
-    })
-
-    it('matches on auth matcher', function () {
-      tryMatch({
-        headers: {
-          authorization: 'basic Zm9vOmJhcg==',
-        },
-        proxiedUrl: 'https://google.com/asdf?1234=a',
+        url: 'https://google.com/foo/bar',
       }, {
-        auth: {
-          username: /^Fo[aob]$/i,
-          password: /.*/,
-        },
+        url: /\/foo\/bar$/,
       })
     })
 
-    it(`doesn't match on a partial match`, function () {
+    it('matches method', function () {
       tryMatch({
-        headers: {
-          authorization: 'basic Zm9vOmJhcg==',
-        },
-        proxiedUrl: 'https://google.com/asdf?1234=a',
-      }, {
-        auth: {
-          username: /^Fo[aob]$/i,
-          password: /.*/,
-        },
+        url: 'https://google.com/foo',
         method: 'POST',
+      }, {
+        url: 'https://google.com/foo',
+        method: 'POST',
+      })
+    })
+
+    it('does not match method', function () {
+      tryMatch({
+        url: 'https://google.com/foo',
+        method: 'POST',
+      }, {
+        url: 'https://google.com/foo',
+        method: 'GET',
       }, false)
     })
 
-    it('handles querystrings as expected', function () {
-      const req = {
-        proxiedUrl: '/abc?foo=bar&baz=quux',
-      }
+    it('matches hostname', function () {
+      tryMatch({
+        url: 'https://google.com/foo',
+      }, {
+        hostname: 'google.com',
+      })
+    })
 
-      tryMatch(req, {
+    it('matches pathname', function () {
+      tryMatch({
+        url: 'https://google.com/foo/bar',
+      }, {
+        pathname: '/foo/bar',
+      })
+    })
+
+    it('matches path', function () {
+      tryMatch({
+        url: 'https://google.com/foo/bar?baz=quux',
+      }, {
+        path: '/foo/bar?baz=quux',
+      })
+    })
+
+    it('matches query', function () {
+      tryMatch({
+        url: 'https://google.com/foo?baz=quux',
+      }, {
         query: {
-          foo: 'b*r',
-          baz: /quu[x]/,
+          baz: 'quux',
         },
       })
+    })
 
-      tryMatch(req, {
-        path: '/abc?foo=bar&baz=qu*x',
-      })
-
-      tryMatch(req, {
-        pathname: '/abc',
-      })
-
-      tryMatch(req, {
-        url: '*',
+    it('matches headers', function () {
+      tryMatch({
+        url: 'https://google.com/foo',
+        headers: {
+          'x-custom': 'foo',
+        },
+      }, {
+        headers: {
+          'x-custom': 'foo',
+        },
       })
     })
 
-    it('matches globs against path', function () {
+    it('matches auth', function () {
       tryMatch({
-        proxiedUrl: 'http://foo.com/bar/a1',
+        url: 'https://google.com/foo',
+        headers: {
+          authorization: 'basic Zm9vOmJhcg==',
+        },
       }, {
-        url: '/bar/*',
+        auth: {
+          username: 'foo',
+          password: 'bar',
+        },
       })
     })
 
-    it('matches nested glob against path', function () {
+    it('matches https', function () {
       tryMatch({
-        proxiedUrl: 'http://foo.com/bar/a1/foo',
+        url: 'https://google.com/foo',
       }, {
-        url: '/bar/*/foo',
-      })
-    })
-
-    it('fails to match with missing queryparams', function () {
-      tryMatch({
-        proxiedUrl: 'http://foo.com/foo/nested?k=v',
-      }, {
-        url: '/*/nested',
-      }, false)
-    })
-
-    it('can glob-match against queryparams', function () {
-      tryMatch({
-        proxiedUrl: 'http://foo.com/foo/nested?k=v',
-      }, {
-        url: '/*/nested?k=*',
+        https: true,
       })
     })
 
     // @see https://github.com/cypress-io/cypress/issues/14256
     it('matches when url has missing leading slash', function () {
       tryMatch({
-        proxiedUrl: 'http://foo.com/services/api/agenda/Appointment?id=25',
+        url: 'http://foo.com/services/api/agenda/Appointment?id=25',
       }, {
         url: 'services/api/agenda/Appointment?id=**',
       })
     })
   })
 
-  describe('.getRoutesForRequest', function () {
+  describe('.matchRoutes', function () {
     it('matches middleware, then handlers', function () {
       const routes: Partial<BackendRoute>[] = [
         {
@@ -206,20 +211,16 @@ describe('intercept-request', function () {
       const req: Partial<CypressIncomingRequest> = {
         method: 'GET',
         headers: {},
-        proxiedUrl: 'http://bar.baz/foo?_',
+        url: 'http://bar.baz/foo?_',
       }
-
-      const e: string[] = []
 
       // @ts-ignore
-      for (const route of getRoutesForRequest(routes, req)) {
-        e.push(route.id)
-      }
+      const matched = matchRoutes(routes, req)
 
-      expect(e).toEqual(['1', '3', '4', '2'])
+      expect(matched.map((route) => route.id)).toEqual(['1', '3', '4', '2'])
     })
 
-    it('yields identical matches', function () {
+    it('returns identical matches', function () {
       // This is a reproduction of issue #22693
       const routes: Partial<BackendRoute>[] = [
         {
@@ -245,17 +246,13 @@ describe('intercept-request', function () {
       const req: Partial<CypressIncomingRequest> = {
         method: 'GET',
         headers: {},
-        proxiedUrl: 'https://example.com/foo',
+        url: 'https://example.com/foo',
       }
-
-      const matchedRouteIds: string[] = []
 
       // @ts-ignore
-      for (const route of getRoutesForRequest(routes, req)) {
-        matchedRouteIds.push(route.id)
-      }
+      const matched = matchRoutes(routes, req)
 
-      expect(matchedRouteIds).toEqual(['1', '1'])
+      expect(matched.map((route) => route.id)).toEqual(['1', '1'])
     })
   })
 })

@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { PassThrough, Readable } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
-import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, httpUtils } from '@packages/network'
 import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
@@ -528,7 +527,7 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   // Skip when downstream middleware will rewrite the body or when a cy.intercept
   // route matched (the interceptor may have replaced the body without updating
   // the upstream Content-Length header).
-  const wasIntercepted = !!this.netStubbingState?.requests?.[this.req.requestId]
+  const wasIntercepted = !!this.req.hadIntercept
 
   if (
     this.incomingResHadEmptyBody
@@ -640,7 +639,6 @@ export default {
   LogResponse,
   FilterNonProxiedResponse,
   AttachPlainTextStreamFn,
-  InterceptResponse,
   PatchExpressSetHeader,
   OmitProblematicHeaders, // Since we might modify CSP headers, this middleware needs to come BEFORE SetInjectionLevel
   MaybeSetOriginAgentClusterHeader, // NOTE: only used in cypress-in-cypress testing. this is otherwise a no-op

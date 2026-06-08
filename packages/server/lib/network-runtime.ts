@@ -2,8 +2,13 @@ import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { createDefaultNetworkInterceptionCore } from '@packages/proxy/lib/adapters/create-default-network-interception-core'
 import { defaultMiddleware } from '@packages/proxy/lib/http'
-import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
+import { netStubbingState, NetStubbingState, DriverInterceptionEventsAdapter, applyInterceptWireRequestToHttpRequest, toInterceptWireRequest, toInterceptWireResponse } from '@packages/net-stubbing'
+import type {
+  NetworkInterceptionRuntime,
+  ForNetworkPolicyRegistration,
+  NetworkInterceptionCore,
+  HttpInterception,
+} from '@packages/network-interception'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar } from './util/cookies'
@@ -12,6 +17,8 @@ import type CyServer from '../index.d.ts'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import { ConfiguratorNetworkPolicyAdapter } from './adapters/configurator-network-policy'
 import { registerDefaultNetworkPolicies } from './register-default-network-policies'
+import { HttpInterception } from '@packages/network-interception'
+import * as errors from '@packages/errors'
 
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
@@ -30,6 +37,8 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   netStubbingState: NetStubbingState
   networkPolicyRegistration: ForNetworkPolicyRegistration
   networkInterceptionCore: NetworkInterceptionCore
+  httpInterception: HttpInterception
+  interceptionEvents: DriverInterceptionEventsAdapter
 }
 
 /**
@@ -45,6 +54,24 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     policyRegistration: networkPolicyRegistration,
   })
 
+  const interceptionEvents = new DriverInterceptionEventsAdapter({
+    state: stubbingState,
+    socket: deps.socket,
+  })
+
+  const httpInterception = new HttpInterception({
+    getRoutes: () => stubbingState.routes,
+    interceptionEvents,
+    wireMessages: {
+      toWireRequest: toInterceptWireRequest,
+      toWireResponse: toInterceptWireResponse,
+      applyWireRequestToHttpRequest: applyInterceptWireRequestToHttpRequest,
+    },
+    onSyncInterceptSkipped: (url) => {
+      errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
+    },
+  })
+
   const networkProxy = new NetworkProxy({
     config: deps.config,
     shouldCorrelatePreRequests: deps.shouldCorrelatePreRequests,
@@ -54,6 +81,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     socket: deps.socket,
     netStubbingState: stubbingState,
     networkInterceptionCore,
+    httpInterception,
     request: deps.request,
     serverBus: deps.serverBus,
     getCurrentBrowser: deps.getCurrentBrowser,
@@ -66,6 +94,8 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     netStubbingState: stubbingState,
     networkPolicyRegistration,
     networkInterceptionCore,
+    httpInterception,
+    interceptionEvents,
     handleHttpRequest (req, res) {
       return networkProxy.handleHttpRequest(req, res)
     },

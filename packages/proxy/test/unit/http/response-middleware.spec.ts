@@ -36,7 +36,6 @@ describe('http/response-middleware', function () {
       'LogResponse',
       'FilterNonProxiedResponse',
       'AttachPlainTextStreamFn',
-      'InterceptResponse',
       'PatchExpressSetHeader',
       'OmitProblematicHeaders',
       'MaybeSetOriginAgentClusterHeader',
@@ -2235,14 +2234,11 @@ describe('http/response-middleware', function () {
         const end = vi.fn()
 
         prepareContext({
-          req: { requestId: 'req-42' },
+          req: { requestId: 'req-42', hadIntercept: true },
           incomingRes: {
             statusCode: 200,
           },
           incomingResHadEmptyBody: true,
-          netStubbingState: {
-            requests: { 'req-42': {} },
-          },
           res: {
             on: (event, listener) => {},
             off: (event, listener) => {},

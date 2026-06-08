@@ -6,5 +6,12 @@
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "node"
-  }
+  },
+  "include": [
+    "lib/*.ts",
+    "lib/**/*.ts"
+  ],
+  "exclude": [
+    "test/**"
+  ]
 }

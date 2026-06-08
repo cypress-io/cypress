@@ -10,10 +10,6 @@ describe('testing/stub-driven-ports', () => {
       policyRegistration: new NetworkPolicyRegistry(),
     })
 
-    await core.correlateBrowserPreRequest({})
-    core.forwardToOrigin({})
-    await core.endRequestIfBlocked({ req: { proxiedUrl: 'http://example.com' } })
-    await core.interceptResponse({})
     await core.setInjectionLevel({})
     await core.injectHtml({})
     await core.removeSecurity({})
@@ -22,6 +18,10 @@ describe('testing/stub-driven-ports', () => {
     await core.copyCookiesFromResponse({})
     await core.notifyResponseStreamReceived({})
     core.notifyResponseEndedWithEmptyBody({}, { isCached: false })
+
+    await stubs.interceptionEvents.emitAndAwait('before:request', { eventId: '1' } as any)
+    stubs.interceptionEvents.emit('after:response', { eventId: '2' } as any)
+    stubs.interceptionEvents.resolveEventHandler({ eventId: '3', stopPropagation: false })
 
     expect(stubs.commandLog.logInterception({ interception: {}, route: {} })).toBeUndefined()
   })

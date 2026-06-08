@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { DriverInterceptRegistrationAdapter } from '../../../lib/adapters/driver-intercept-registration'
+import { DriverInterceptionEventsAdapter } from '../../../lib/adapters/driver-interception-events-adapter'
 import { onNetStubbingEvent } from '../../../lib/server/driver-events'
 import { state as netStubbingState } from '../../../lib/server/state'
-import { InterceptedRequest } from '../../../lib/server/intercepted-request'
-import type { InterceptRegistrationRequest } from '@packages/network-interception'
+import { HttpInterception, type ForInterceptionEvents, type InterceptRegistrationRequest } from '@packages/network-interception'
+import { applyInterceptWireRequestToHttpRequest, toInterceptWireRequest, toInterceptWireResponse } from '@packages/net-stubbing'
 
 vi.mock('../../../lib/server/driver-events', async (importOriginal) => {
   const original = await importOriginal<typeof import('../../../lib/server/driver-events')>()
@@ -18,11 +19,29 @@ describe('DriverInterceptRegistrationAdapter', () => {
   const getFixture = vi.fn(async () => '')
   const socket = { toDriver: vi.fn() }
   let state: ReturnType<typeof netStubbingState>
+  let httpInterception: HttpInterception
+  let interceptionEvents: ForInterceptionEvents
 
   beforeEach(() => {
     vi.mocked(onNetStubbingEvent).mockClear()
     state = netStubbingState()
     getFixture.mockClear()
+
+    interceptionEvents = {
+      emitAndAwait: vi.fn(async () => ({})),
+      emit: vi.fn(),
+      resolveEventHandler: vi.fn(),
+    }
+
+    httpInterception = new HttpInterception({
+      getRoutes: () => state.routes,
+      interceptionEvents,
+      wireMessages: {
+        toWireRequest: toInterceptWireRequest,
+        toWireResponse: toInterceptWireResponse,
+        applyWireRequestToHttpRequest: applyInterceptWireRequestToHttpRequest,
+      },
+    })
   })
 
   const createAdapter = () => {
@@ -30,6 +49,8 @@ describe('DriverInterceptRegistrationAdapter', () => {
       state,
       socket,
       getFixture,
+      httpInterception,
+      interceptionEvents,
     })
   }
 
@@ -53,6 +74,8 @@ describe('DriverInterceptRegistrationAdapter', () => {
       state,
       socket,
       getFixture,
+      httpInterception,
+      pendingHandlerResolution: interceptionEvents,
       args: ['route:added', request.frame],
     })
   })
@@ -73,47 +96,83 @@ describe('DriverInterceptRegistrationAdapter', () => {
     expect(state.routes[0].id).toBe('route-1')
   })
 
-  it('forwards subscribe to the matching intercepted request', async () => {
-    const adapter = createAdapter()
-    const interceptedRequest = new InterceptedRequest({
-      req: {
-        matchingRoutes: [{
-          id: 'route-1',
-          hasInterceptor: true,
-          routeMatcher: {},
-        }],
-      } as any,
-      res: {} as any,
-      continueRequest: vi.fn(),
-      onError: vi.fn(),
-      onResponse: vi.fn(),
-      state,
-      socket,
+  it('forwards route:added to net stubbing state', async () => {
+    let resolveBeforeRequest!: () => void
+
+    interceptionEvents = {
+      emitAndAwait: vi.fn(async (eventName) => {
+        if (eventName === 'before:request') {
+          await new Promise<void>((resolve) => {
+            resolveBeforeRequest = resolve
+          })
+        }
+
+        return {}
+      }),
+      emit: vi.fn(),
+      resolveEventHandler: vi.fn(),
+    }
+
+    httpInterception = new HttpInterception({
+      getRoutes: () => state.routes,
+      interceptionEvents,
+      wireMessages: {
+        toWireRequest: toInterceptWireRequest,
+        toWireResponse: toInterceptWireResponse,
+        applyWireRequestToHttpRequest: applyInterceptWireRequestToHttpRequest,
+      },
     })
 
-    interceptedRequest.id = 'req-1'
-    interceptedRequest.addDefaultSubscriptions()
-    state.requests[interceptedRequest.id] = interceptedRequest
+    const adapter = createAdapter()
 
-    const addSubscription = vi.spyOn(interceptedRequest, 'addSubscription')
+    state.routes.push({
+      id: 'route-1',
+      hasInterceptor: true,
+      routeMatcher: { url: 'http://example.com/*' },
+      getFixture,
+      matches: 0,
+    })
+
+    const handlePromise = httpInterception.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, async () => {
+      throw new Error('next should not be called')
+    })
 
     await adapter.handleEvent({
-      eventName: 'subscribe',
+      eventName: 'send:static:response',
       frame: {
-        requestId: 'req-1',
-        subscription: {
-          routeId: 'route-1',
-          eventName: 'before:request',
-          await: true,
+        requestId: 'intercept-1',
+        staticResponse: {
+          statusCode: 200,
+          body: 'response body',
         },
       },
     })
 
-    expect(addSubscription).toHaveBeenCalledTimes(1)
+    resolveBeforeRequest()
+
+    const response = await handlePromise
+
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toBe('response body')
   })
 
   it('forwards event:handler:resolved to pending handlers', async () => {
-    const adapter = createAdapter()
+    const interceptionEventsAdapter = new DriverInterceptionEventsAdapter({
+      state,
+      socket,
+    })
+    const adapter = new DriverInterceptRegistrationAdapter({
+      state,
+      socket,
+      getFixture,
+      httpInterception,
+      interceptionEvents: interceptionEventsAdapter,
+    })
     const handler = vi.fn()
 
     state.pendingEventHandlers['event-1'] = handler
@@ -135,42 +194,5 @@ describe('DriverInterceptRegistrationAdapter', () => {
     })
 
     expect(state.pendingEventHandlers['event-1']).toBeUndefined()
-  })
-
-  it('forwards send:static:response to the matching intercepted request', async () => {
-    const adapter = createAdapter()
-    const onResponse = vi.fn()
-    const interceptedRequest = new InterceptedRequest({
-      req: {
-        matchingRoutes: [{
-          id: 'route-1',
-          hasInterceptor: true,
-          routeMatcher: {},
-        }],
-      } as any,
-      res: {} as any,
-      continueRequest: vi.fn(),
-      onError: vi.fn(),
-      onResponse,
-      state,
-      socket,
-    })
-
-    interceptedRequest.id = 'req-1'
-    state.requests[interceptedRequest.id] = interceptedRequest
-
-    await adapter.handleEvent({
-      eventName: 'send:static:response',
-      frame: {
-        requestId: 'req-1',
-        staticResponse: {
-          statusCode: 200,
-          body: 'response body',
-        },
-      },
-    })
-
-    expect(onResponse).toHaveBeenCalledTimes(1)
-    expect(interceptedRequest.res.body).toBe('response body')
   })
 })

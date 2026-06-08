@@ -22,7 +22,7 @@ import type {
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
-import type { NetworkInterceptionCore } from '@packages/network-interception'
+import type { NetworkInterceptionCore, ForHttpInterception } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -112,6 +112,7 @@ export type ServerCtx = Readonly<{
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   networkInterceptionCore: NetworkInterceptionCore
+  httpInterception: ForHttpInterception
   middleware: HttpMiddlewareStacks
   socket: SocketBroadcaster
   request: ServerRequest
@@ -125,6 +126,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'getFileServerToken',
   'netStubbingState',
   'networkInterceptionCore',
+  'httpInterception',
   'next',
   'end',
   'onResponse',
@@ -289,6 +291,7 @@ export class Http {
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
   networkInterceptionCore: NetworkInterceptionCore
+  httpInterception: ForHttpInterception
   preRequests: PreRequests = new PreRequests()
   getCurrentBrowser: () => FoundBrowser
   request: ServerRequest
@@ -310,6 +313,7 @@ export class Http {
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
     this.networkInterceptionCore = opts.networkInterceptionCore
+    this.httpInterception = opts.httpInterception
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
@@ -340,6 +344,7 @@ export class Http {
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
       networkInterceptionCore: this.networkInterceptionCore,
+      httpInterception: this.httpInterception,
       socket: this.socket,
       serverBus: this.serverBus,
       getCookieJar: this.getCookieJar,

@@ -1,16 +1,16 @@
 export { onNetStubbingEvent } from './driver-events'
 
-export { DriverInterceptRegistrationAdapter } from '../adapters'
+export { DriverInterceptRegistrationAdapter, DriverInterceptionEventsAdapter } from '../adapters'
+
+export {
+  applyInterceptWireRequestToHttpRequest,
+  toInterceptWireRequest,
+  toInterceptWireResponse,
+} from '../http-handler-conversion'
 
 export { InterceptError } from './middleware/error'
 
-export { SetMatchingRoutes, InterceptRequest } from './middleware/request'
-
-export { InterceptResponse } from './middleware/response'
-
 export { NetStubbingState, ResourceType } from './types'
-
-export { getRoutesForRequest } from '@packages/network-interception'
 
 import { state } from './state'
 

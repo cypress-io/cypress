@@ -1,6 +1,7 @@
 import { describe, expect, beforeEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import RequestMiddleware from '../../../lib/http/request-middleware'
+import { sendRequestOutgoing } from '../../../lib/adapters/send-request-outgoing'
 import { testMiddleware } from './helpers'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
@@ -49,13 +50,12 @@ describe('http/request-middleware', () => {
       'FormatCookiesIfApplicable',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
-      'SetMatchingRoutes',
       'SendToDriver',
-      'InterceptRequest',
       'RedirectToClientRouteIfUnloaded',
       'EndRequestsToBlockedHosts',
       'StripUnsupportedAcceptEncoding',
       'MaybeSetBasicAuthHeaders',
+      'ApplyHttpInterception',
       'SendRequestOutgoing',
     ])
   })
@@ -978,13 +978,19 @@ describe('http/request-middleware', () => {
 
       ctx = {
         onError: vi.fn(),
+        onResponse: vi.fn(),
+        debug: vi.fn(),
         request: {
           create: (opts) => {
             return {
               inputArgs: opts,
               on: (event, callback) => {
                 if (event === 'response') {
-                  callback({ request: { timings: {} } })
+                  callback({
+                    request: { timings: {} },
+                    statusCode: 200,
+                    headers: {},
+                  })
                 }
               },
             }
@@ -994,6 +1000,9 @@ describe('http/request-middleware', () => {
           body: '{}',
           headers,
           socket: {
+            on: () => {},
+          },
+          res: {
             on: () => {},
           },
         },
@@ -1015,15 +1024,15 @@ describe('http/request-middleware', () => {
         } as any)
       })
 
-      it('adds `x-cypress-authorization` header', async () => {
-        await testMiddleware([SendRequestOutgoing], ctx)
+      it('adds `x-cypress-authorization` header', () => {
+        sendRequestOutgoing(ctx as any)
         expect(ctx.req.headers['x-cypress-authorization']).toEqual('abcd1234')
       })
 
-      it('handles nil fileServer token', async () => {
+      it('handles nil fileServer token', () => {
         ctx.getFileServerToken = () => undefined
 
-        await testMiddleware([SendRequestOutgoing], ctx)
+        sendRequestOutgoing(ctx as any)
         expect(ctx.req.headers['x-cypress-authorization']).toBeUndefined()
       })
     })

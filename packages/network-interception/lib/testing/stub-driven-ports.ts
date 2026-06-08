@@ -5,26 +5,18 @@ import type {
   ForCookieState,
   ForDocumentPreparation,
   ForNetworkCapture,
-  ForRequestInterception,
-  ForResponseInterception,
 } from '../ports/driven-ports'
-import type { RunPoliciesResult } from '../registry/network-policy-registry'
+import type { ForInterceptionEvents } from '../ports/interception-events'
 
 /** No-op driven ports for HTTP/2 browser-adapter unit tests and future composition roots. */
 export function createStubDrivenPorts () {
   const noopAsync = async () => {}
   const noop = () => {}
 
-  const requestInterception: ForRequestInterception = {
-    correlateBrowserPreRequest: noopAsync,
-    forwardToOrigin: noop,
-    endRequestIfBlocked: async (_ctx, runPolicies) => {
-      await runPolicies()
-    },
-  }
-
-  const responseInterception: ForResponseInterception = {
-    interceptResponse: noopAsync,
+  const interceptionEvents: ForInterceptionEvents = {
+    emitAndAwait: async () => ({}),
+    emit: noop,
+    resolveEventHandler: noop,
   }
 
   const documentPreparation: ForDocumentPreparation = {
@@ -51,8 +43,7 @@ export function createStubDrivenPorts () {
   const browserNetworkAutomation: ForBrowserNetworkAutomation = {}
 
   return {
-    requestInterception,
-    responseInterception,
+    interceptionEvents,
     documentPreparation,
     networkCapture,
     cookieState,
@@ -62,5 +53,3 @@ export function createStubDrivenPorts () {
 }
 
 export type StubDrivenPorts = ReturnType<typeof createStubDrivenPorts>
-
-export type StubRunPoliciesResult = RunPoliciesResult

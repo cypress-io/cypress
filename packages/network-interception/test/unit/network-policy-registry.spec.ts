@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { NetworkPolicy } from '../../lib'
-import { NetworkPolicyRegistry } from '../../lib'
+import { NetworkPolicyRegistry, BlockedHosts } from '../../lib'
 
 function testPolicy (overrides: Partial<NetworkPolicy> & Pick<NetworkPolicy, 'when' | 'apply'>): NetworkPolicy {
   return {

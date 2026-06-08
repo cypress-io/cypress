@@ -11,8 +11,8 @@ export type PlannedRouteSubscriptions = {
 export type PlanSubscriptionsOptions = {
   matchingRoutes: BackendRoute[]
   isSyncRequest?: boolean
-  proxiedUrl?: string
-  onSyncInterceptSkipped?: (proxiedUrl: string) => void
+  url?: string
+  onSyncInterceptSkipped?: (url: string) => void
 }
 
 const DEFAULT_NOTIFICATION_EVENTS = Object.freeze(['response:callback', 'after:response', 'network:error']) as readonly ['response:callback', 'after:response', 'network:error']
@@ -21,7 +21,7 @@ const DEFAULT_NOTIFICATION_EVENTS = Object.freeze(['response:callback', 'after:r
  * Pure subscription plan for matched intercept routes (from `InterceptedRequest.addDefaultSubscriptions`).
  */
 export function planSubscriptions (options: PlanSubscriptionsOptions): PlannedRouteSubscriptions[] {
-  const { matchingRoutes, isSyncRequest, proxiedUrl, onSyncInterceptSkipped } = options
+  const { matchingRoutes, isSyncRequest, url, onSyncInterceptSkipped } = options
   const planned: PlannedRouteSubscriptions[] = []
 
   for (const route of matchingRoutes) {
@@ -30,8 +30,8 @@ export function planSubscriptions (options: PlanSubscriptionsOptions): PlannedRo
     }
 
     if (isSyncRequest && route.hasInterceptor) {
-      if (proxiedUrl) {
-        onSyncInterceptSkipped?.(proxiedUrl)
+      if (url) {
+        onSyncInterceptSkipped?.(url)
       }
 
       continue

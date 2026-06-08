@@ -1,4 +1,4 @@
-import type { ForInterceptRegistration, InterceptRegistrationRequest } from '@packages/network-interception'
+import type { ForInterceptionEvents, ForInterceptRegistration, HttpInterception, InterceptRegistrationRequest } from '@packages/network-interception'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { GetFixtureFn, NetStubbingState } from '../server/types'
 import { onNetStubbingEvent } from '../server/driver-events'
@@ -8,6 +8,8 @@ type DriverInterceptRegistrationAdapterOptions = {
   state: NetStubbingState
   socket: SocketBroadcaster
   getFixture: GetFixtureFn
+  httpInterception: HttpInterception
+  interceptionEvents: ForInterceptionEvents
 }
 
 /**
@@ -23,6 +25,8 @@ export class DriverInterceptRegistrationAdapter implements ForInterceptRegistrat
       state: this.options.state,
       socket: this.options.socket,
       getFixture: this.options.getFixture,
+      httpInterception: this.options.httpInterception,
+      pendingHandlerResolution: this.options.interceptionEvents,
       args: [request.eventName, request.frame],
     })
   }

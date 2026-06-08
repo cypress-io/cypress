@@ -7,14 +7,13 @@ import type {
   BackendStaticResponse,
 } from '../types'
 
-export { getAllStringMatcherFields } from '@packages/network-interception'
+export { getAllStringMatcherFields } from '@packages/network-interception/lib/core/matcher-fields'
 
 import { Readable, PassThrough } from 'stream'
 import { Socket } from 'net'
 import type { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import type { CypressIncomingRequest } from '@packages/proxy'
-import type { InterceptedRequest } from './intercepted-request'
 import type { SocketBroadcaster } from '@packages/socket'
 import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 
@@ -153,36 +152,6 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
   staticResponse.body = getBody()
 }
 
-/**
- * Using an existing response object, send a response shaped by a StaticResponse object.
- * @param backendRequest BackendRequest object.
- * @param staticResponse BackendStaticResponse object.
- */
-export async function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'res' | 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
-  const { onError, onResponse } = backendRequest
-
-  if (staticResponse.forceNetworkError) {
-    debug('forcing network error')
-    const err = new Error('forceNetworkError called')
-
-    return onError(err)
-  }
-
-  const statusCode = staticResponse.statusCode || 200
-  const headers = staticResponse.headers || {}
-  const body = backendRequest.res.body = _.isUndefined(staticResponse.body) ? '' : staticResponse.body
-
-  const incomingRes = _getFakeClientResponse({
-    statusCode,
-    headers,
-    body,
-  })
-
-  const bodyStream = await getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delay'))
-
-  onResponse!(incomingRes, bodyStream)
-}
-
 export async function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Promise<Readable> {
   const { delay, throttleKbps } = options
   const pt = new PassThrough()
@@ -218,28 +187,6 @@ function wait (fn, ms) {
     setTimeout(() => {
       resolve(fn())
     }, ms)
-  })
-}
-
-export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: CyHttpMessages.BaseMessage) {
-  for (const k in before.headers) {
-    // a header was deleted from `after` but was present in `before`, delete it in `before` too.
-    // only treat `undefined` (deleted via `delete` or explicitly set to `undefined`) as removal -
-    // an empty string is a valid header value and must be preserved (#25767)
-    after.headers[k] === undefined && delete before.headers[k]
-  }
-}
-
-export function mergeWithPreservedBuffers (before: CyHttpMessages.BaseMessage, after: Partial<CyHttpMessages.BaseMessage>) {
-  // lodash merge converts Buffer into Array (by design)
-  // https://github.com/lodash/lodash/issues/2964
-  // @see https://github.com/cypress-io/cypress/issues/15898
-  _.mergeWith(before, after, (_a, b) => {
-    if (b instanceof Buffer) {
-      return b
-    }
-
-    return undefined
   })
 }
 

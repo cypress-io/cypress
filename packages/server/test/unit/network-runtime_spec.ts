@@ -29,7 +29,6 @@ describe('lib/network-runtime', () => {
 
     expect(runtime.networkProxy).to.be.instanceOf(NetworkProxy)
     expect(runtime.netStubbingState.routes).to.deep.equal([])
-    expect(runtime.netStubbingState.requests).to.deep.equal({})
   })
 
   it('registers default configurator network policies at startup', () => {
@@ -48,8 +47,8 @@ describe('lib/network-runtime', () => {
     expect(policies[0].name).to.eq('blocked-hosts')
     expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
     expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
-    expect(runtime.networkInterceptionCore.requestInterception).to.exist
-    expect(runtime.networkInterceptionCore.responseInterception).to.exist
+    expect(runtime.httpInterception).to.exist
+    expect(runtime.interceptionEvents).to.exist
     expect(runtime.networkInterceptionCore.documentPreparation).to.exist
     expect(runtime.networkInterceptionCore.networkCapture).to.exist
     expect(runtime.networkInterceptionCore.cookieState).to.exist

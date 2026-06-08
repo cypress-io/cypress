@@ -2,7 +2,7 @@
 
 Types and **port interfaces** for Cypress network interception (`cy.intercept`, config policies, proxy middleware). Part of the stacked refactor in [#33919](https://github.com/cypress-io/cypress/issues/33919) to support HTTP/2 (CDP Fetch / BiDi) without rewriting intercept logic.
 
-> **Stack stage 3 of 8.** **Core** extracted: `NetworkInterceptionCore` owns pure route matching, subscription planning, and handler merge. Net-stubbing and proxy middleware delegate through the core. Policy registry still not invoked from middleware.
+> **Stack stage 4.** **`ForHttpInterception.handle(request, next)`** is the driving port for per-request intercept. Proxy and future CDP adapters call it; core owns route matching, subscription orchestration, and handler merge. Cookies, injection, compression, and policy enforcement remain proxy driven ports.
 
 ---
 
@@ -20,61 +20,55 @@ The codebase adopts **hexagonal architecture** (also called **ports and adapters
 | --- | --- | --- |
 | **Port** | Contract at the edge of the interception "inside" | `For*` types in `lib/ports/` |
 | **Adapter** | Implements a port by delegating to existing Cypress code | `*Adapter` classes under `packages/*/lib/adapters/` |
-| **Driving port** (primary) | Outside actors **call into** interception | `ForInterceptRegistration`, `ForNetworkPolicyRegistration` |
-| **Driven port** (secondary) | Interception **calls out** for I/O | `ForRequestInterception`, `ForCookieState`, … |
-| **Core** | Domain orchestration without transport imports | **`NetworkInterceptionCore`** (`lib/core/`) — this stage |
+| **Driving port** (primary) | Outside actors **call into** interception | `ForHttpInterception`, `ForInterceptRegistration`, `ForNetworkPolicyRegistration` |
+| **Driven port** (secondary) | Interception **calls out** for I/O | `ForInterceptionEvents`, `ForCookieState`, … |
+| **Core** | Domain orchestration without transport imports | **`HttpInterception`**, **`NetworkInterceptionCore`** |
 | **Composition root** | Constructs and injects adapters + core | `createProxyRuntime()` |
 
-The **core** is the hexagonal "inside": it may call **driven ports** (once wired in stages 4–6) but must not import proxy or net-stubbing directly.
+The **core** is the hexagonal "inside": it may call **driven ports** but must not import proxy or net-stubbing directly.
 
 ---
 
-## What stage 3 delivers
+## `ForHttpInterception.handle(request, next)`
 
-### `NetworkInterceptionCore` (`lib/core/network-interception-core.ts`)
+Transport-neutral onion middleware for `cy.intercept`:
 
-Pure intercept orchestration moved out of net-stubbing middleware:
+```typescript
+type Interceptor = (
+  request: HttpRequest,
+  next: OriginForwarder,
+) => Promise<HttpResponse>
+```
 
-| Module | Responsibility |
+| Semantics | Behavior |
 | --- | --- |
-| `route-matching.ts` | `matchRoutes`, `doesRouteMatch`, preflight matching |
-| `plan-subscriptions.ts` | Which routes subscribe to which request events |
-| `merge-handler-result.ts` | Merge driver handler results into `IncomingHttpRequest` |
-| `matcher-fields.ts` | String matcher field metadata |
+| No matching routes | `return next(request)` |
+| CORS preflight match | Fulfill 204 without calling `next` |
+| Static stub / request-stage `req.reply` | Return synthetic response, never call `next` |
+| Pass-through / header mutate | `const res = await next(modified); return applyResponseIntercept(res)` |
+| `next` | Callable **at most once** — origin boundary (proxy Node HTTP fetch or future CDP continue) |
 
-Net-stubbing keeps **I/O** in `handle-intercept-request.ts` (body streaming, `InterceptedRequest` lifecycle). Middleware calls the core for decisions, then legacy I/O for side effects.
+`inFlightInterceptId` is **adapter-owned** (proxy generates uuid). Core correlates driver subscriptions via that id while an intercept is in flight.
 
-### Wiring
+`ForInterceptionEvents` keeps `@packages/socket` out of core: `emitAndAwait`, `emit`, `resolveEventHandler`.
+
+---
+
+## Wiring
 
 ```
 createProxyRuntime()
-  → new NetworkInterceptionCore()
-  → passed to NetworkProxy as networkInterceptionCore on Http ctx
+  → HttpInterception (ForHttpInterception)
+  → DriverInterceptionEventsAdapter (ForInterceptionEvents)
+  → NetworkInterceptionCore (policies, cookies, injection, capture)
+  → NetworkProxy.forHttpInterception
 
-net-stubbing request middleware
-  → ctx.networkInterceptionCore.matchRoutes / handleRequest / …
-  → handleInterceptRequest() for streaming I/O
+ApplyHttpInterception middleware
+  → forHttpInterception.handle(toHttpRequest(ctx), forwardToOrigin)
+  → applyHttpResponseToCtx
 ```
 
-Driven ports on the core constructor exist but are **optional stubs** until stages 4–6 populate them via adapters.
-
-### Prior stages (unchanged behavior)
-
-- **Stage 1:** `ForInterceptRegistration` — [`packages/net-stubbing/lib/adapters/README.md`](../net-stubbing/lib/adapters/README.md)
-- **Stage 2:** `ForNetworkPolicyRegistration` + registry — [`packages/server/lib/adapters/README.md`](../../server/lib/adapters/README.md)
-
----
-
-## Stack roadmap
-
-| Stage | Branch | Adds |
-| --- | --- | --- |
-| 0–2 | … | Package, driving ports, policy registry |
-| **3** | **`refactor/ports-adapters-3`** | **`NetworkInterceptionCore`** |
-| 4 | `refactor/ports-adapters-4` | Driven-port adapters (request/response) |
-| 5–7 | … | Document prep, capture/cookies, enforcement |
-
-[#33919](https://github.com/cypress-io/cypress/issues/33919)
+Non-intercept proxy stacks (cookies, document prep, compression, `blockHosts`) stay on existing middleware via driven ports on `NetworkInterceptionCore`.
 
 ---
 
@@ -86,3 +80,5 @@ yarn workspace @packages/net-stubbing test
 yarn workspace @packages/proxy test
 yarn workspace @packages/server test-unit --grep network-runtime
 ```
+
+[#33919](https://github.com/cypress-io/cypress/issues/33919)

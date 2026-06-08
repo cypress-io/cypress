@@ -4,6 +4,10 @@ import {
   netStubbingState as _netStubbingState,
   NetStubbingState,
   onNetStubbingEvent,
+  DriverInterceptionEventsAdapter,
+  applyInterceptWireRequestToHttpRequest,
+  toInterceptWireRequest,
+  toInterceptWireResponse,
 } from '@packages/net-stubbing'
 import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
@@ -11,7 +15,7 @@ import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
-import { NetworkPolicyRegistry } from '@packages/network-interception'
+import { NetworkPolicyRegistry, HttpInterception } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
 import { createDefaultNetworkInterceptionCore } from '../../lib/adapters/create-default-network-interception-core'
 import { Request as ServerRequest } from '@packages/server/lib/request'
@@ -27,6 +31,8 @@ describe('network stubbing', () => {
   let destinationPort
   let socket
   let documentDomainInjection: DocumentDomainInjection
+  let httpInterception: HttpInterception
+  let interceptionEvents: DriverInterceptionEventsAdapter
 
   const serverPort = 3030
   const fileServerPort = 3030
@@ -52,12 +58,28 @@ describe('network stubbing', () => {
     app = express()
     netStubbingState = _netStubbingState()
 
+    interceptionEvents = new DriverInterceptionEventsAdapter({
+      state: netStubbingState,
+      socket,
+    })
+
+    httpInterception = new HttpInterception({
+      getRoutes: () => netStubbingState.routes,
+      interceptionEvents,
+      wireMessages: {
+        toWireRequest: toInterceptWireRequest,
+        toWireResponse: toInterceptWireResponse,
+        applyWireRequestToHttpRequest: applyInterceptWireRequestToHttpRequest,
+      },
+    })
+
     const proxy = new NetworkProxy({
       socket,
       netStubbingState,
       networkInterceptionCore: createDefaultNetworkInterceptionCore({
         policyRegistration: new NetworkPolicyRegistry(),
       }),
+      httpInterception,
       config,
       middleware: defaultMiddleware,
       getCookieJar: () => new CookieJar(),
@@ -242,6 +264,8 @@ describe('network stubbing', () => {
           },
           state: netStubbingState,
           getFixture,
+          httpInterception,
+          pendingHandlerResolution: interceptionEvents,
           args: [],
           socket: {
             toDriver () {},
@@ -311,6 +335,8 @@ describe('network stubbing', () => {
           },
           state: netStubbingState,
           getFixture,
+          httpInterception,
+          pendingHandlerResolution: interceptionEvents,
           args: [],
           socket: {
             toDriver () {},
