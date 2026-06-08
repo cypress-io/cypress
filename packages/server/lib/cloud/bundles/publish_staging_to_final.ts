@@ -1,27 +1,9 @@
-import { readdir, stat, ensureDir } from 'fs-extra'
+import { ensureDir } from 'fs-extra'
 import path from 'path'
 import { renameAtomicWithRetry } from '../extract_atomic'
+import { walkFiles } from './walk_files'
 
 const MANIFEST_REL = 'manifest.json'
-
-const walkFiles = async (root: string, currentRel: string = ''): Promise<string[]> => {
-  const fullDir = path.join(root, currentRel)
-  const entries = await readdir(fullDir)
-
-  const nested = await Promise.all(entries.map(async (entry): Promise<string[]> => {
-    const entryRel = path.join(currentRel, entry)
-    const entryFull = path.join(root, entryRel)
-    const entryStat = await stat(entryFull)
-
-    if (entryStat.isDirectory()) return walkFiles(root, entryRel)
-
-    if (entryStat.isFile()) return [entryRel]
-
-    return []
-  }))
-
-  return nested.flat()
-}
 
 const publishOne = async (staging: string, finalDir: string, rel: string): Promise<void> => {
   const src = path.join(staging, rel)

@@ -2,7 +2,8 @@ import _, { DebouncedFunc } from 'lodash'
 import $ from 'jquery'
 import clone from 'clone'
 
-import { HIGHLIGHT_ATTR, type ISnapshots } from '../cy/snapshots'
+import { HIGHLIGHT_ATTR } from '../cy/snapshots'
+import type { ISnapshots } from '../cy/snapshots'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
@@ -447,14 +448,25 @@ export class Log {
   }
 
   snapshot (name?, options: any = {}) {
-    // bail early and don't snapshot if
-    // 1. we're a cross-origin log tracked on the primary origin (the log on that origin will send their snapshot!)
-    // 2. we're in headless mode
-    // 3. or we're not storing tests and the protocol is not enabled
-    if (
-      (!Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog'))
-      || (!this.config('isInteractive')
-      || (this.config('numTestsKeptInMemory') === 0)) && !this.state('isProtocolEnabled')) {
+    // Take a snapshot only when something will consume it: command-log time-travel
+    // (interactive mode with tests retained in memory) or Test Replay capture.
+    // Cross-origin logs on the primary origin defer to the spec bridge origin.
+    const shouldDeferSnapshotToSpecBridge =
+      !Cypress.isCrossOriginSpecBridge && this.get('isCrossOriginLog')
+
+    const needsTimeTravelSnapshot =
+      this.config('isInteractive') && this.config('numTestsKeptInMemory') !== 0
+
+    // Protocol uses a portion of the snapshot for the replayed DOM.
+    // the command-log snapshot's `body`/`htmlAttrs` are dropped at ingestion
+    // via replacing `cy.createSnapshot` outright during consumption.
+    const needsProtocolSnapshot = this.state('isProtocolEnabled')
+
+    const shouldTakeSnapshot =
+      !shouldDeferSnapshotToSpecBridge
+      && (needsTimeTravelSnapshot || needsProtocolSnapshot)
+
+    if (!shouldTakeSnapshot) {
       return this
     }
 
