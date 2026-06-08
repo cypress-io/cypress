@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.17.0
 
+**Performance:**
+
+- The Command Log no longer becomes progressively unresponsive when moving the mouse in and out of a test's command list during long tests. Hovering over the command area previously triggered a style recalculation across the entire list of commands, causing a delay that grew with the number of commands logged. Fixes [#33179](https://github.com/cypress-io/cypress/issues/33179).
+
 **Features:**
 
 - When signing up to Cypress Cloud from the Cypress desktop app, if a project is auto-provisioned during signup, Cypress now automatically writes the `projectId` to the `cypress.config` file. If the file cannot be written, a modal is shown with the project ID as a copyable snippet and a link to open the config file directly in your IDE. Addressed in [#33976](https://github.com/cypress-io/cypress/pull/33976).
@@ -10,6 +14,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where tests in Chrome and Electron could fail when the application made cross-origin requests to local or private network addresses (for example, a login or OAuth flow that redirects between local development hosts). Chrome 141 began enforcing Local Network Access checks that gate such requests behind a permission prompt the automated browser cannot answer. Cypress now opts out of these checks so these requests succeed as they did in Chrome 140. Fixes [#32708](https://github.com/cypress-io/cypress/issues/32708).
 - Fixed an issue where Cypress could load the config file through the wrong module system (for example, treating an ESM config as CommonJS), so ESM-only APIs such as `import.meta.resolve` were unavailable in config and plugin code. Cypress now picks ESM or CJS before loading, using Node.js rules from the config file extension and the nearest `package.json` `"type"`, then loads only via `import()` or `require()` and fails outright on error instead of retrying the other format:
   - `.mjs` and `.mts` always load as ESM
   - `.cjs` and `.cts` always load as CJS
@@ -36,6 +41,7 @@
 - Fixed an issue where `cypress open --detached` blocked the CLI process until the GUI was closed rather than returning once Cypress was ready to use. Fixed in [#33972](https://github.com/cypress-io/cypress/pull/33972).
 - Fixed an issue where setting a request or response header to an empty string in a [`cy.intercept()`](https://on.cypress.io/intercept) handler (for example `req.headers['x-foo'] = ''`) would report the header as set on the intercepted request while silently dropping it from the request sent over the network. Empty-string header values are now preserved; headers are only removed when deleted or set to `undefined`. Fixes [#25767](https://github.com/cypress-io/cypress/issues/25767).
 - Fixed an issue where [`cy.request()`](https://on.cypress.io/request) with a `FormData` body failed to upload when a `Content-Type` header was provided with non-lowercase casing (for example `'Content-Type': 'multipart/form-data'`). Cypress now correctly replaces the user-provided header with the generated `multipart/form-data` boundary instead of sending two conflicting `content-type` headers, which previously caused the server to reject the request with a `400` or empty body. Fixes [#21173](https://github.com/cypress-io/cypress/issues/21173).
+- Fixed an issue where a [`cy.origin()`](https://on.cypress.io/origin) test could intermittently fail with `The command was expected to run against origin <x> but the application is at origin <y>` when a navigation (such as a login redirect) ran on the primary origin shortly after the runner switched super-domains. A stale internal `__cypress.unload` cookie could cause the proxy to redirect the navigation back to the Cypress runner instead of serving it; the cookie is now cleared whenever the application document is (re)served. Fixed in [#34020](https://github.com/cypress-io/cypress/pull/34020).
 
 **Misc:**
 
@@ -46,6 +52,7 @@
 **Dependency Updates:**
 
 - Upgraded `tsx` from `4.20.6` to `4.22.4`. Its bundled `esbuild` Go binary no longer reports [CVE-2025-68121](https://www.cve.org/CVERecord?id=CVE-2025-68121) in security scans, and loading TypeScript config files no longer emits the Node.js `[DEP0205] module.register() is deprecated` warning. Fixes [#33954](https://github.com/cypress-io/cypress/issues/33954) and [#33744](https://github.com/cypress-io/cypress/issues/33744).
+- Upgraded `watchpack` (a transitive dependency of `webpack`) from `2.4.2` to `2.5.1`. On Windows, running a spec in `cypress open` from an elevated (Administrator) shell no longer logs `Watchpack Error (initial scan): EINVAL` warnings for root-of-drive system files such as `pagefile.sys`. Fixes [#33586](https://github.com/cypress-io/cypress/issues/33586).
 
 ## 15.16.0
 
