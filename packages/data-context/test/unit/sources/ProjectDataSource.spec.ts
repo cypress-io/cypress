@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, afterEach, jest } from '@jest/globals
 import os from 'os'
 import fs from 'fs-extra'
 
-import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern } from '../../../src/sources'
+import { matchedSpecs, transformSpec, SpecWithRelativeRoot, getLongestCommonPrefixFromPaths, getPathFromSpecPattern, getSpecWatchPaths } from '../../../src/sources'
 import path from 'path'
 import chokidar from 'chokidar'
 import _ from 'lodash'
@@ -576,6 +576,80 @@ describe('_makeSpecWatcher', () => {
   })
 })
 
+describe('getSpecWatchPaths', () => {
+  let projectRoot: string
+
+  beforeEach(() => {
+    projectRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'cy-watch-paths-'))
+  })
+
+  afterEach(() => {
+    fs.removeSync(projectRoot)
+  })
+
+  it('scopes the watch to the static base directory of a spec pattern', () => {
+    fs.mkdirpSync(path.join(projectRoot, 'cypress', 'e2e'))
+
+    const paths = getSpecWatchPaths(projectRoot, ['cypress/e2e/**/*.cy.{js,jsx,ts,tsx}'])
+
+    expect(paths).toEqual(['cypress/e2e'])
+  })
+
+  it('falls back to the nearest existing ancestor when the base directory does not exist yet', () => {
+    // only `cypress` exists, not `cypress/e2e`
+    fs.mkdirpSync(path.join(projectRoot, 'cypress'))
+
+    const paths = getSpecWatchPaths(projectRoot, ['cypress/e2e/**/*.cy.js'])
+
+    expect(paths).toEqual(['cypress'])
+  })
+
+  it('watches the project root when a pattern has no static base directory', () => {
+    fs.mkdirpSync(path.join(projectRoot, 'cypress', 'e2e'))
+
+    const paths = getSpecWatchPaths(projectRoot, ['**/*.cy.{js,jsx,ts,tsx}'])
+
+    expect(paths).toEqual(['.'])
+  })
+
+  it('watches the project root when no ancestor of the base exists within the project', () => {
+    const paths = getSpecWatchPaths(projectRoot, ['cypress/e2e/**/*.cy.js'])
+
+    expect(paths).toEqual(['.'])
+  })
+
+  it('returns the union of base directories across multiple patterns', () => {
+    fs.mkdirpSync(path.join(projectRoot, 'cypress', 'e2e'))
+    fs.mkdirpSync(path.join(projectRoot, 'tests', 'integration'))
+
+    const paths = getSpecWatchPaths(projectRoot, [
+      'cypress/e2e/**/*.cy.js',
+      'tests/integration/**/*.spec.ts',
+    ])
+
+    expect(paths).toEqual(['cypress/e2e', 'tests/integration'])
+  })
+
+  it('watches the project root if any pattern resolves to it', () => {
+    fs.mkdirpSync(path.join(projectRoot, 'cypress', 'e2e'))
+
+    const paths = getSpecWatchPaths(projectRoot, [
+      'cypress/e2e/**/*.cy.js',
+      '**/*.cy.js',
+    ])
+
+    expect(paths).toEqual(['.'])
+  })
+
+  it('handles non-glob (literal) spec patterns by watching the containing directory', () => {
+    fs.mkdirpSync(path.join(projectRoot, 'cypress', 'e2e'))
+
+    const paths = getSpecWatchPaths(projectRoot, ['cypress/e2e/login.cy.js'])
+
+    expect(paths).toEqual(['cypress/e2e'])
+  })
+})
+
 describe('startSpecWatcher', () => {
   const projectRoot = 'tmp'
 
@@ -682,7 +756,7 @@ describe('startSpecWatcher', () => {
 
       expect(_.debounce).toHaveBeenCalledWith(expect.any(Function), 250)
 
-      expect(chokidar.watch).toHaveBeenCalledWith('.', {
+      expect(chokidar.watch).toHaveBeenCalledWith(['.'], {
         ignoreInitial: true,
         cwd: projectRoot,
         ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js', expect.any(Function)],

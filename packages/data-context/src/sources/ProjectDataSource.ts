@@ -209,6 +209,70 @@ export function getPathFromSpecPattern ({
   return randExp.gen()
 }
 
+/**
+ * Walks up from `base` (relative to `projectRoot`) until it finds a directory
+ * that exists on disk, returning that directory relative to `projectRoot`.
+ *
+ * chokidar can only reliably watch a path whose parent directory already
+ * exists, so handing it the nearest existing ancestor guarantees the watcher
+ * is established and will still observe the eventual creation of the base
+ * directory and any specs nested beneath it.
+ *
+ * Returns `'.'` (the project root) when no scoped ancestor can be determined -
+ * e.g. an absolute/parent-escaping base, or a base whose directory chain does
+ * not exist within the project.
+ */
+function nearestExistingDir (projectRoot: string, base: string): string {
+  // An empty, current-dir, absolute, or parent-escaping base cannot be scoped
+  // beneath the project root, so watch the project root itself.
+  if (!base || base === '.' || path.isAbsolute(base) || base.startsWith('..')) {
+    return '.'
+  }
+
+  let rel = base
+
+  while (rel && rel !== '.') {
+    if (fs.existsSync(path.resolve(projectRoot, rel))) {
+      return rel
+    }
+
+    rel = path.posix.dirname(rel)
+  }
+
+  return '.'
+}
+
+/**
+ * Derives the set of directories the spec watcher should watch from the
+ * configured spec pattern(s).
+ *
+ * Recursively watching the entire project root is prohibitively slow for
+ * projects that contain a large number of unrelated files/folders (#26691).
+ * Instead we watch only the static base directory of each spec pattern. If any
+ * pattern has no static base - e.g. a leading globstar or brace expansion,
+ * meaning a spec could live anywhere in the project - we fall back to watching
+ * the whole project root to preserve the previous behavior.
+ */
+export function getSpecWatchPaths (projectRoot: string, specPattern: string[]): string[] {
+  const watchPaths = new Set<string>()
+
+  for (const pattern of specPattern) {
+    const parsed = parseGlob(toPosix(pattern))
+    const base = parsed.is.glob ? parsed.base : path.posix.dirname(toPosix(pattern))
+    const resolved = nearestExistingDir(projectRoot, base)
+
+    // The nearest existing directory is the project root, so scoping provides
+    // no benefit - watch everything (previous behavior).
+    if (resolved === '.') {
+      return ['.']
+    }
+
+    watchPaths.add(resolved)
+  }
+
+  return watchPaths.size > 0 ? [...watchPaths] : ['.']
+}
+
 export class ProjectDataSource {
   private _specWatcher: FSWatcher | null = null
   private _specs: SpecWithRelativeRoot[] = []
@@ -410,7 +474,14 @@ export class ProjectDataSource {
   }
 
   _makeSpecWatcher ({ projectRoot, specPattern, excludeSpecPattern, additionalIgnorePattern }: { projectRoot: string, excludeSpecPattern: string[], additionalIgnorePattern: string[], specPattern: string[] }) {
-    return chokidar.watch('.', {
+    // Rather than recursively watching the entire project root - which is
+    // extremely slow for projects containing many unrelated files (#26691) -
+    // scope the watcher to the base directories of the configured spec patterns.
+    const watchPaths = getSpecWatchPaths(projectRoot, specPattern)
+
+    debug('watching spec paths %o for spec pattern(s) %o', watchPaths, specPattern)
+
+    return chokidar.watch(watchPaths, {
       ignoreInitial: true,
       ignorePermissionErrors: true,
       cwd: projectRoot,
@@ -421,22 +492,13 @@ export class ProjectDataSource {
           return true
         }
 
-        // We need stats arg to make the determination of whether to watch it, because we need to watch directories
-        // chokidar is extremely inconsistent in whether or not it has the stats arg internally
-        if (!stats) {
-          try {
-            // TODO: find a way to avoid this sync call - might require patching chokidar
-            // eslint-disable-next-line no-restricted-syntax
-            stats = fs.statSync(file)
-          } catch {
-            // If the file/folder is removed do not ignore it, in case it is added
-            // again
-            return false
-          }
-        }
-
-        // don't ignore directories
-        if (stats.isDirectory()) {
+        // We need the stats arg to determine whether this is a directory, since
+        // directories must continue to be watched for nested specs. chokidar is
+        // inconsistent about whether it provides stats; when it does not, we err
+        // on the side of not ignoring (findSpecs is debounced and idempotent, so
+        // an occasional extra invocation is harmless) so that we never skip a
+        // directory that may contain specs.
+        if (!stats || stats.isDirectory()) {
           return false
         }
 
