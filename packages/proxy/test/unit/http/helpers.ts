@@ -1,8 +1,7 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import { ProxyDocumentPreparationAdapter } from '../../../lib/adapters/proxy-document-preparation'
-import { ProxyRequestInterceptionAdapter } from '../../../lib/adapters/proxy-request-interception'
-import { ProxyResponseInterceptionAdapter } from '../../../lib/adapters/proxy-response-interception'
+import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../../lib/adapters'
 
 export function createTestNetworkInterceptionCore () {
   return new NetworkInterceptionCore({

@@ -99,7 +99,7 @@ export class NetworkInterceptionCore {
     const port = this.options.documentPreparation
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.documentPreparation is not configured')
+      throw new Error('NetworkInterceptionCore.documentPreparation is not configured')
     }
 
     return port.setInjectionLevel(ctx)
@@ -109,7 +109,7 @@ export class NetworkInterceptionCore {
     const port = this.options.documentPreparation
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.documentPreparation is not configured')
+      throw new Error('NetworkInterceptionCore.documentPreparation is not configured')
     }
 
     return port.injectHtml(ctx)
@@ -119,7 +119,7 @@ export class NetworkInterceptionCore {
     const port = this.options.documentPreparation
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.documentPreparation is not configured')
+      throw new Error('NetworkInterceptionCore.documentPreparation is not configured')
     }
 
     return port.removeSecurity(ctx)
