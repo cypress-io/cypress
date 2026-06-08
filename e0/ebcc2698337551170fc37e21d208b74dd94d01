@@ -1,0 +1,30 @@
+packages/reporter/src/lib/app-state.ts
+  s_82a9696b9631d9::t_115049df70b9da 60
+  s_82a9696b9631d9::t_3108858b489237 37-41
+  s_82a9696b9631d9::t_434dd0b65c4450 161-164
+packages/reporter/src/commands/command.tsx
+  s_82a9696b9631d9::t_35860c549393f7 570
+packages/reporter/src/attempts/attempts.tsx
+  s_82a9696b9631d9::t_8ca1ae6103c363 114-117
+packages/reporter/cypress/e2e/commands.cy.ts
+  s_82a9696b9631d9::t_896c7647a0d2ab 5
+  s_82a9696b9631d9::t_bdc3f5734264bf 1317-1383
+packages/reporter/cypress/e2e/unit/app_state.cy.ts
+  s_82a9696b9631d9::t_ca3bbf3ab20ea9 242-266
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e0ebcc2698337551170fc37e21d208b74dd94d01",
+  "prompts": {},
+  "sessions": {
+    "s_82a9696b9631d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4e830f8-5435-4724-b5ff-5d5e2ce88153",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
