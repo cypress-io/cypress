@@ -1,7 +1,10 @@
 import type EventEmitter from 'events'
 import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '@packages/proxy/lib/adapters'
-import { defaultMiddleware } from '@packages/proxy/lib/http'
+import {
+  ProxyRequestInterceptionAdapter,
+  ProxyResponseInterceptionAdapter,
+  defaultMiddleware,
+} from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { NetworkPolicyRegistry, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionRuntime } from '@packages/network-interception'
