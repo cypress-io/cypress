@@ -1171,8 +1171,8 @@ async function ready (options: ReadyOptions) {
     const relativePatterns = rawPatterns.map((p) => path.isAbsolute(p) ? path.relative(projectRoot, p) : p)
     const unmatchedPatterns = project.ctx.project.getUnmatchedPatterns(relativePatterns, specs)
 
-    for (const pattern of unmatchedPatterns) {
-      errors.warning('SPEC_FILE_NOT_FOUND', projectRoot, pattern)
+    if (unmatchedPatterns.length > 0) {
+      errors.warning('SPEC_FILE_NOT_FOUND', projectRoot, unmatchedPatterns)
     }
   }
 

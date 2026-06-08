@@ -631,6 +631,7 @@ describe('visual error templates', () => {
     SPEC_FILE_NOT_FOUND: () => {
       return {
         default: ['/path/to/project/root', 'cypress/e2e/nonexistent.cy.ts'],
+        multiplePatterns: ['/path/to/project/root', ['cypress/e2e/nonexistent.cy.ts', 'cypress/e2e/also-not-found.cy.ts']],
       }
     },
     RENDERER_CRASHED: () => {
