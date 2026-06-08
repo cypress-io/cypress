@@ -33,6 +33,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs as nodeParseArgs } from 'node:util'
+import pRetry, { AbortError } from 'p-retry'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ALLOWLIST_PATH = path.join(__dirname, '..', 'packages', 'server', 'lib', 'util', 'chrome-switches.json')
@@ -89,8 +90,6 @@ const MAX_FETCH_ATTEMPTS = 4
 // hundred switches; a healthy intersection across all sources is in the
 // hundreds. Anything below this almost certainly means extraction broke.
 const MIN_EXPECTED_SWITCHES = 50
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // strict mode throws on unknown flags and on `--ref` with no value
 const parseArgs = (argv) => {
@@ -149,34 +148,27 @@ const resolveTestedChromes = () => {
   return [...byRef.values()]
 }
 
-// fetches a URL with a timeout and retry/backoff on transient failures.
-// 4xx (other than 429) are treated as permanent and fail fast.
-const fetchTextWithRetry = async (url) => {
-  let lastErr
+// fetches a URL with a timeout, retrying transient failures with exponential
+// backoff (1s, 2s, 4s). 4xx other than 429 are permanent: an AbortError stops
+// the retries and p-retry rejects with the underlying error (status preserved).
+const fetchTextWithRetry = (url) => {
+  return pRetry(async () => {
+    const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
 
-  for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt++) {
-    try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
+    if (res.ok) return res.text()
 
-      if (res.ok) return await res.text()
+    const err = Object.assign(new Error(`HTTP ${res.status}`), { status: res.status })
+    const permanent = res.status >= 400 && res.status < 500 && res.status !== 429
 
-      const permanent = res.status >= 400 && res.status < 500 && res.status !== 429
-
-      lastErr = Object.assign(new Error(`HTTP ${res.status}`), { status: res.status })
-      if (permanent) break
-    } catch (err) {
-      lastErr = err
-    }
-
-    if (attempt < MAX_FETCH_ATTEMPTS) {
-      const backoff = 2 ** (attempt - 1) * 1000
-
-      console.log(`    attempt ${attempt}/${MAX_FETCH_ATTEMPTS} failed (${lastErr.message}); retrying in ${backoff}ms`)
-      await sleep(backoff)
-    }
-  }
-
-  throw lastErr
+    throw permanent ? new AbortError(err) : err
+  }, {
+    retries: MAX_FETCH_ATTEMPTS - 1,
+    minTimeout: 1000,
+    factor: 2,
+    onFailedAttempt: (err) => {
+      console.log(`    attempt ${err.attemptNumber}/${MAX_FETCH_ATTEMPTS} failed (${err.message}); ${err.retriesLeft} left`)
+    },
+  })
 }
 
 // fetches a source file, returning its decoded text, or null if it 404s — a
