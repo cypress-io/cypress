@@ -252,6 +252,13 @@ function nearestExistingDir (projectRoot: string, base: string): string {
  * pattern has no static base - e.g. a leading globstar or brace expansion,
  * meaning a spec could live anywhere in the project - we fall back to watching
  * the whole project root to preserve the previous behavior.
+ *
+ * For a nested base (e.g. `cypress/e2e`) we watch its parent directory rather
+ * than the base itself. chokidar stops tracking a watched directory once it is
+ * removed, so watching the parent ensures that deleting and recreating the spec
+ * directory mid-session is still detected. A top-level base (whose parent is
+ * the project root) is watched directly to avoid widening the watch back to the
+ * entire project.
  */
 export function getSpecWatchPaths (projectRoot: string, specPattern: string[]): string[] {
   const watchPaths = new Set<string>()
@@ -259,7 +266,13 @@ export function getSpecWatchPaths (projectRoot: string, specPattern: string[]): 
   for (const pattern of specPattern) {
     const parsed = parseGlob(toPosix(pattern))
     const base = parsed.is.glob ? parsed.base : path.posix.dirname(toPosix(pattern))
-    const resolved = nearestExistingDir(projectRoot, base)
+
+    // Watch the parent of a nested base so the spec directory being removed and
+    // recreated is still observed; for a top-level base the parent is the
+    // project root, so watch the base itself instead.
+    const parent = path.posix.dirname(base)
+    const target = parent === '.' ? base : parent
+    const resolved = nearestExistingDir(projectRoot, target)
 
     // The nearest existing directory is the project root, so scoping provides
     // no benefit - watch everything (previous behavior).
@@ -476,7 +489,7 @@ export class ProjectDataSource {
   _makeSpecWatcher ({ projectRoot, specPattern, excludeSpecPattern, additionalIgnorePattern }: { projectRoot: string, excludeSpecPattern: string[], additionalIgnorePattern: string[], specPattern: string[] }) {
     // Rather than recursively watching the entire project root - which is
     // extremely slow for projects containing many unrelated files (#26691) -
-    // scope the watcher to the base directories of the configured spec patterns.
+    // scope the watcher to the directories derived from the spec pattern(s).
     const watchPaths = getSpecWatchPaths(projectRoot, specPattern)
 
     debug('watching spec paths %o for spec pattern(s) %o', watchPaths, specPattern)

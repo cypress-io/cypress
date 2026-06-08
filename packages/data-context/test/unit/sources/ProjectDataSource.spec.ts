@@ -587,21 +587,29 @@ describe('getSpecWatchPaths', () => {
     fs.removeSync(projectRoot)
   })
 
-  it('scopes the watch to the static base directory of a spec pattern', () => {
+  it('watches the parent of a nested base directory so its deletion/recreation is observed', () => {
     fs.mkdirpSync(path.join(projectRoot, 'cypress', 'e2e'))
 
     const paths = getSpecWatchPaths(projectRoot, ['cypress/e2e/**/*.cy.{js,jsx,ts,tsx}'])
 
-    expect(paths).toEqual(['cypress/e2e'])
+    expect(paths).toEqual(['cypress'])
   })
 
-  it('falls back to the nearest existing ancestor when the base directory does not exist yet', () => {
-    // only `cypress` exists, not `cypress/e2e`
+  it('resolves to the nearest existing ancestor when the target directory does not exist yet', () => {
+    // only `cypress` exists, not `cypress/e2e` or below
     fs.mkdirpSync(path.join(projectRoot, 'cypress'))
 
-    const paths = getSpecWatchPaths(projectRoot, ['cypress/e2e/**/*.cy.js'])
+    const paths = getSpecWatchPaths(projectRoot, ['cypress/e2e/sub/**/*.cy.js'])
 
     expect(paths).toEqual(['cypress'])
+  })
+
+  it('watches a top-level base directory directly rather than the project root', () => {
+    fs.mkdirpSync(path.join(projectRoot, 'tests'))
+
+    const paths = getSpecWatchPaths(projectRoot, ['tests/**/*.spec.ts'])
+
+    expect(paths).toEqual(['tests'])
   })
 
   it('watches the project root when a pattern has no static base directory', () => {
@@ -618,7 +626,7 @@ describe('getSpecWatchPaths', () => {
     expect(paths).toEqual(['.'])
   })
 
-  it('returns the union of base directories across multiple patterns', () => {
+  it('returns the union of watch directories across multiple patterns', () => {
     fs.mkdirpSync(path.join(projectRoot, 'cypress', 'e2e'))
     fs.mkdirpSync(path.join(projectRoot, 'tests', 'integration'))
 
@@ -627,7 +635,7 @@ describe('getSpecWatchPaths', () => {
       'tests/integration/**/*.spec.ts',
     ])
 
-    expect(paths).toEqual(['cypress/e2e', 'tests/integration'])
+    expect(paths).toEqual(['cypress', 'tests'])
   })
 
   it('watches the project root if any pattern resolves to it', () => {
@@ -641,12 +649,12 @@ describe('getSpecWatchPaths', () => {
     expect(paths).toEqual(['.'])
   })
 
-  it('handles non-glob (literal) spec patterns by watching the containing directory', () => {
+  it('handles non-glob (literal) spec patterns', () => {
     fs.mkdirpSync(path.join(projectRoot, 'cypress', 'e2e'))
 
     const paths = getSpecWatchPaths(projectRoot, ['cypress/e2e/login.cy.js'])
 
-    expect(paths).toEqual(['cypress/e2e'])
+    expect(paths).toEqual(['cypress'])
   })
 })
 
