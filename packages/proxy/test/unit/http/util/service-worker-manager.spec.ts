@@ -208,18 +208,84 @@ describe('lib/http/util/service-worker-manager', () => {
         })
 
         // https://github.com/cypress-io/cypress/issues/33296
-        it('does not leak pending controlled requests when the fetch event never arrives', async () => {
-          const pendingPotentiallyControlledRequests = (manager as any).pendingPotentiallyControlledRequests as Map<string, unknown[]>
+        describe('pending controlled request cleanup', () => {
+          beforeEach(() => {
+            vi.useFakeTimers()
+          })
 
-          // A potentially-controlled request whose matching `fetchRequest` event never arrives
-          // (e.g. a slow 404) must time out *and* be evicted, otherwise the deferred lingers until
-          // the next spec and accumulates on pages that issue many such requests.
-          const result = await manager.processBrowserPreRequest(createBrowserPreRequest({
-            url: 'http://localhost:8080/missing.js.map',
-          }))
+          afterEach(() => {
+            vi.useRealTimers()
+          })
 
-          expect(result).toBe(false)
-          expect(pendingPotentiallyControlledRequests.size).toBe(0)
+          it('evicts a potentially-controlled request whose fetch event never arrives', async () => {
+            const pending = manager['pendingPotentiallyControlledRequests']
+
+            // A potentially-controlled request whose matching `fetchRequest` event never arrives
+            // (e.g. a slow 404 such as a missing source map) buffers a deferred while it waits.
+            const request = manager.processBrowserPreRequest(createBrowserPreRequest({
+              url: 'http://localhost:8080/missing.js.map',
+            }))
+
+            expect(pending.size).toBe(1)
+
+            // When the 250ms race times out, the deferred must be evicted rather than left
+            // lingering until the next spec.
+            await vi.advanceTimersByTimeAsync(250)
+
+            expect(await request).toBe(false)
+            expect(pending.size).toBe(0)
+          })
+
+          it('does not accumulate entries when many requests time out', async () => {
+            const pending = manager['pendingPotentiallyControlledRequests']
+
+            const requests = Array.from({ length: 25 }, (_, i) => {
+              return manager.processBrowserPreRequest(createBrowserPreRequest({
+                url: `http://localhost:8080/asset-${i}.js.map`,
+              }))
+            })
+
+            expect(pending.size).toBe(25)
+
+            await vi.advanceTimersByTimeAsync(250)
+
+            expect(await Promise.all(requests)).toEqual(Array(25).fill(false))
+            expect(pending.size).toBe(0)
+          })
+
+          it('still matches a later request for a URL after an earlier one for the same URL timed out', async () => {
+            const url = 'http://localhost:8080/foo.js'
+            const pending = manager['pendingPotentiallyControlledRequests']
+
+            // Two requests for the same URL are queued in order.
+            const request1 = manager.processBrowserPreRequest(createBrowserPreRequest({ url }))
+
+            await vi.advanceTimersByTimeAsync(100)
+
+            const request2 = manager.processBrowserPreRequest(createBrowserPreRequest({ url }))
+
+            expect(pending.get(url)?.length).toBe(2)
+
+            // The first request times out and is spliced out of the queue, leaving the second.
+            await vi.advanceTimersByTimeAsync(150)
+
+            expect(await request1).toBe(false)
+            expect(pending.get(url)?.length).toBe(1)
+
+            // A fetch event arriving afterwards must still resolve the surviving second request,
+            // confirming the eviction did not corrupt the FIFO matching for the URL.
+            manager.handleServiceWorkerClientEvent({
+              type: 'fetchRequest',
+              payload: {
+                url,
+                isControlled: true,
+              },
+              scope: 'http://localhost:8080',
+            })
+
+            expect(await request2).toBe(true)
+            expect(pending.size).toBe(0)
+          })
         })
 
         it('will not detect requests when not controlled by an active service worker', async () => {
