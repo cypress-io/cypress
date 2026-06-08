@@ -259,6 +259,27 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
+    it('sends Runtime.runIfWaitingForDebugger if connecting to the target hangs so the run does not hang between tests (#32956)', async () => {
+      // a low timeout so the test doesn't have to wait the full default
+      process.env.CYPRESS_CONNECT_TO_EXTRA_TARGET_TIMEOUT = '10'
+
+      // simulate a connection to the extra target that never resolves or rejects
+      options.CriConstructor.returns(new Promise(() => {}))
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      try {
+        await BrowserCriClient._onAttachToTarget(options as any)
+      } finally {
+        delete process.env.CYPRESS_CONNECT_TO_EXTRA_TARGET_TIMEOUT
+      }
+
+      expect(options.CriConstructor).to.be.called
+      // the target was never successfully connected to, so it isn't tracked
+      expect(options.browserCriClient.addExtraTargetClient).not.to.be.called
+      // but it must still be resumed so the paused target doesn't hang the run
+      expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+    })
+
     it('connects to target and sends Fetch.enable', async () => {
       const criClient = {
         send: sinon.stub(),

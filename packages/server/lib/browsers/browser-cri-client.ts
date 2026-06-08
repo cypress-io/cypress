@@ -13,6 +13,17 @@ import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/se
 
 const debug = Debug('cypress:server:browsers:browser-cri-client')
 
+// The maximum amount of time to wait for the CDP connection to an extra target
+// (e.g. a popup or a new tab) to be established before giving up. Connecting is
+// normally near-instant, but it can occasionally hang indefinitely - for
+// example if the target is torn down mid-connection. Because extra targets are
+// auto-attached in a paused state (waitForDebuggerOnStart), a hung connection
+// would otherwise leave the target paused forever and hang the run between
+// tests. See https://github.com/cypress-io/cypress/issues/32956
+const getConnectToExtraTargetTimeout = () => {
+  return Number(process.env.CYPRESS_CONNECT_TO_EXTRA_TARGET_TIMEOUT) || 20000
+}
+
 interface Version {
   major: number
   minor: number
@@ -381,16 +392,33 @@ export class BrowserCriClient {
 
     let extraTargetCriClient
 
+    // Keep a handle to the underlying connection promise so that, if it times
+    // out below, we can still close the connection if it eventually resolves
+    // (rather than leaking it).
+    const connectToExtraTarget = Bluebird.resolve(CreateCRI({
+      host,
+      port,
+      target: targetId,
+      local: true,
+      useHostName: true,
+    }))
+
     try {
-      extraTargetCriClient = await CreateCRI({
-        host,
-        port,
-        target: targetId,
-        local: true,
-        useHostName: true,
-      })
+      // Never block resuming the target on this connection succeeding. The
+      // target was auto-attached in a paused state, so if the connection hangs
+      // we must still fall through to run() below - otherwise the target stays
+      // paused forever and the run hangs between tests (#32956).
+      extraTargetCriClient = await connectToExtraTarget.timeout(getConnectToExtraTargetTimeout())
     } catch (err: any) {
       debug('Errored connecting to target (id: %s): %s', targetId, err?.stack || err)
+
+      if (err instanceof Bluebird.TimeoutError) {
+        // if the connection eventually succeeds after timing out, close it so
+        // we don't leak the connection to the extra target
+        connectToExtraTarget
+        .then((client) => client?.close?.())
+        .catch(() => {})
+      }
 
       return await run()
     }
