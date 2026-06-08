@@ -1,9 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ProxyResponseInterceptionAdapter } from '../../../lib/adapters/proxy-response-interception'
-import { handleInterceptResponse } from '@packages/net-stubbing/lib/server/handle-intercept-response'
+import { handleInterceptResponse } from '@packages/net-stubbing'
 
-vi.mock('@packages/net-stubbing/lib/server/handle-intercept-response', () => {
+vi.mock('@packages/net-stubbing', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@packages/net-stubbing')>()
+
   return {
+    ...actual,
     handleInterceptResponse: vi.fn(),
   }
 })

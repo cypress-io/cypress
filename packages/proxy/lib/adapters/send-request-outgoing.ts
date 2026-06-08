@@ -10,8 +10,11 @@ import type { RequestInterceptionMiddlewareCtx } from './types'
  * requests terminate at CDP Fetch instead of MITM proxy forwarding.
  */
 export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void {
+  // End request-middleware telemetry before the outbound hop so TTFB is measured
+  // outside the internal Cypress middleware chain.
   mw.reqMiddlewareSpan?.end()
 
+  // Outbound req/resp timing from the proxy to the origin.
   const span = telemetry.startSpan({
     name: 'outgoing:request:ttfb',
     parentSpan: mw.handleHttpRequestSpan,
@@ -25,7 +28,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
     followRedirect: mw.req.followRedirect || false,
     retryIntervals: [],
     url: mw.req.proxiedUrl,
-    time: !!span,
+    time: !!span, // request library: include timingPhases on the response
   }
 
   const requestBodyBuffered = !!mw.req.body
@@ -52,6 +55,8 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
 
   const onSocketClose = () => {
     mw.debug('request aborted')
+    // Client disconnected before response middleware ran — close spans and abort
+    // the outgoing request so we do not leak handlers or pending state.
 
     const pendingRequest = mw.pendingRequest
 
@@ -97,6 +102,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
         'request.timing.tcp': timings.connect - timings.lookup,
         'request.timing.firstByte': timings.response - timings.connect,
         'request.timing.totalUntilFirstByte': timings.response,
+        // download/total timings are not available until the response body finishes
       })
 
       span.end()
@@ -105,6 +111,9 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
     mw.onResponse(incomingRes, req)
   })
 
+  // Remove the socket-close abort handler when the client response finishes.
+  // Unusual placement: we listen on req.res (outgoing to browser) to detach
+  // the handler registered on req.socket (incoming from browser).
   mw.req.res?.on('finish', () => {
     socket.removeListener('close', onSocketClose)
   })
@@ -112,6 +121,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
   mw.req.socket.on('close', onSocketClose)
 
   if (!requestBodyBuffered) {
+    // Stream the incoming request body and headers to the outgoing request.
     mw.req.pipe(req)
   }
 
