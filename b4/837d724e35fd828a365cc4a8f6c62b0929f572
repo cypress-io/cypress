@@ -1,0 +1,19 @@
+packages/reporter/src/sessions/sessions-model.ts
+  s_82a9696b9631d9::t_4a0f61f2b05bde 18-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b4837d724e35fd828a365cc4a8f6c62b0929f572",
+  "prompts": {},
+  "sessions": {
+    "s_82a9696b9631d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4e830f8-5435-4724-b5ff-5d5e2ce88153",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
