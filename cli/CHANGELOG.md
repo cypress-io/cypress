@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.17.0
 
+**Performance:**
+
+- The Command Log no longer becomes progressively unresponsive when moving the mouse in and out of a test's command list during long tests. Hovering over the command area previously triggered a style recalculation across the entire list of commands, causing a delay that grew with the number of commands logged. Fixes [#33179](https://github.com/cypress-io/cypress/issues/33179).
+
 **Features:**
 
 - When signing up to Cypress Cloud from the Cypress desktop app, if a project is auto-provisioned during signup, Cypress now automatically writes the `projectId` to the `cypress.config` file. If the file cannot be written, a modal is shown with the project ID as a copyable snippet and a link to open the config file directly in your IDE. Addressed in [#33976](https://github.com/cypress-io/cypress/pull/33976).
