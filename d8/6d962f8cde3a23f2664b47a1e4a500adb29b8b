@@ -1,0 +1,19 @@
+packages/reporter/src/sessions/sessions-model.ts
+  s_82a9696b9631d9::t_8c8576f46789d9 18-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d86d962f8cde3a23f2664b47a1e4a500adb29b8b",
+  "prompts": {},
+  "sessions": {
+    "s_82a9696b9631d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4e830f8-5435-4724-b5ff-5d5e2ce88153",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
