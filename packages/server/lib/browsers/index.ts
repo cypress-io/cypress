@@ -197,7 +197,29 @@ const browsers = {
 
     debug('opening browser %o', browser)
 
-    const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
+    let _instance: BrowserInstance | null
+
+    try {
+      _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
+    } catch (err: any) {
+      // The browser failed to launch or Cypress could not connect to it - for
+      // example, when remote debugging is blocked by the `RemoteDebuggingAllowed`
+      // enterprise/group policy, the browser opens but never exposes the CDP port.
+      // Reset the browser status so the launchpad stops showing the "opening"
+      // spinner indefinitely, and in open mode surface the error to the GUI
+      // (the mutation error plugin stores the error but does not push it to the
+      // client, so we route through ctx.onError to emit the change). In run mode
+      // we leave the existing error handling to report and retry.
+      // https://github.com/cypress-io/cypress/issues/32671
+      debug(`browser failed to open for launch ${thisLaunchAttempt} %o`, err)
+      ctx.actions.app.setBrowserStatus('closed')
+
+      if (!ctx.isRunMode) {
+        ctx.onError(err)
+      }
+
+      throw err
+    }
 
     debug(`browser opened for launch ${thisLaunchAttempt}`)
 

@@ -368,6 +368,50 @@ describe('lib/browsers/index', () => {
       expect(browserInstance1.isOrphanedBrowserProcess).to.be.true
       expect(currentInstance).to.equal(browserInstance2)
     })
+
+    // https://github.com/cypress-io/cypress/issues/32671
+    context('when the browser fails to launch', () => {
+      const url: TestUrl = 'http://localhost:3000'
+      let launchErr: Error
+
+      beforeEach(() => {
+        launchErr = new Error('could not connect to CDP')
+        sinon.stub(Promise, 'delay').resolves()
+      })
+
+      it('resets the browser status to closed and surfaces the error to the GUI in open mode', async () => {
+        const openCtx = createTestDataContext('open')
+
+        sinon.stub(chrome, 'open').rejects(launchErr)
+        sinon.spy(openCtx.actions.app, 'setBrowserStatus')
+        sinon.stub(openCtx, 'onError')
+
+        await expect(
+          browsers.open({ name: 'chrome', family: 'chromium' } as any, { url } as any, null, openCtx),
+        ).to.be.rejectedWith(launchErr)
+
+        const setBrowserStatus = openCtx.actions.app.setBrowserStatus as SetBrowserStatusSpy
+
+        expect(setBrowserStatus).to.have.been.calledWith('opening')
+        expect(setBrowserStatus).to.have.been.calledWith('closed')
+        expect(setBrowserStatus).not.to.have.been.calledWith('open')
+        expect(openCtx.onError).to.have.been.calledWith(launchErr)
+      })
+
+      it('does not route the error through onError in run mode', async () => {
+        // `ctx` is created in run mode by default
+        sinon.stub(chrome, 'open').rejects(launchErr)
+        sinon.spy(ctx.actions.app, 'setBrowserStatus')
+        sinon.stub(ctx, 'onError')
+
+        await expect(
+          browsers.open({ name: 'chrome', family: 'chromium' } as any, { url } as any, null, ctx),
+        ).to.be.rejectedWith(launchErr)
+
+        expect(ctx.actions.app.setBrowserStatus as SetBrowserStatusSpy).to.have.been.calledWith('closed')
+        expect(ctx.onError).not.to.have.been.called
+      })
+    })
   })
 
   context('.extendLaunchOptionsFromPlugins', () => {
