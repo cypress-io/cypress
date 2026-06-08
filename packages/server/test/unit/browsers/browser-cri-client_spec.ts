@@ -280,6 +280,37 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
     })
 
+    it('closes the extra target connection if it resolves after the connect timeout so it is not leaked (#32956)', async () => {
+      // a low timeout so the test doesn't have to wait the full default
+      process.env.CYPRESS_CONNECT_TO_EXTRA_TARGET_TIMEOUT = '10'
+
+      const lateExtraTargetCriClient = {
+        send: sinon.stub(),
+        on: sinon.stub(),
+        close: sinon.stub().resolves(),
+      }
+
+      // simulate a connection that resolves only after the timeout has fired
+      options.CriConstructor.returns(new Promise((resolve) => setTimeout(() => resolve(lateExtraTargetCriClient), 30)))
+      options.browserClient.send.withArgs('Runtime.runIfWaitingForDebugger').resolves()
+
+      try {
+        await BrowserCriClient._onAttachToTarget(options as any)
+
+        // the target is resumed without waiting for the late connection
+        expect(options.browserClient.send).to.be.calledWith('Runtime.runIfWaitingForDebugger', undefined, 'session-id')
+        // since the connect timed out, the target is never tracked as an extra target...
+        expect(options.browserCriClient.addExtraTargetClient).not.to.be.called
+        expect(lateExtraTargetCriClient.send).not.to.be.calledWith('Fetch.enable')
+
+        // ...and once the late connection resolves it is closed rather than leaked
+        await new Promise((resolve) => setTimeout(resolve, 50))
+        expect(lateExtraTargetCriClient.close).to.be.called
+      } finally {
+        delete process.env.CYPRESS_CONNECT_TO_EXTRA_TARGET_TIMEOUT
+      }
+    })
+
     it('connects to target and sends Fetch.enable', async () => {
       const criClient = {
         send: sinon.stub(),

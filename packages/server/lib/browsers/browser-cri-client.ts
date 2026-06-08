@@ -392,31 +392,34 @@ export class BrowserCriClient {
 
     let extraTargetCriClient
 
-    // Keep a handle to the underlying connection promise so that, if it times
-    // out below, we can still close the connection if it eventually resolves
-    // (rather than leaking it).
-    const connectToExtraTarget = Bluebird.resolve(CreateCRI({
+    // Keep a handle to the raw (un-wrapped) connection promise. Bluebird
+    // cancellation is enabled globally (see environment.ts), so timing out the
+    // wrapper below cancels the wrapper but not this underlying connection - we
+    // use this handle to close the connection if it resolves late.
+    const connectToExtraTarget = CreateCRI({
       host,
       port,
       target: targetId,
       local: true,
       useHostName: true,
-    }))
+    })
 
     try {
       // Never block resuming the target on this connection succeeding. The
       // target was auto-attached in a paused state, so if the connection hangs
       // we must still fall through to run() below - otherwise the target stays
       // paused forever and the run hangs between tests (#32956).
-      extraTargetCriClient = await connectToExtraTarget.timeout(getConnectToExtraTargetTimeout())
+      extraTargetCriClient = await Bluebird.resolve(connectToExtraTarget).timeout(getConnectToExtraTargetTimeout())
     } catch (err: any) {
       debug('Errored connecting to target (id: %s): %s', targetId, err?.stack || err)
 
       if (err instanceof Bluebird.TimeoutError) {
         // if the connection eventually succeeds after timing out, close it so
-        // we don't leak the connection to the extra target
-        connectToExtraTarget
-        .then((client) => client?.close?.())
+        // we don't leak the connection to the extra target. use a native
+        // promise here so Bluebird's cancellation of the timeout doesn't also
+        // suppress this cleanup.
+        Promise.resolve(connectToExtraTarget)
+        .then((client: any) => client?.close?.())
         .catch(() => {})
       }
 
