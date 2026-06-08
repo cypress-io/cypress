@@ -382,13 +382,45 @@ export class ServiceWorkerManager {
     debug('adding pending controlled request promise: %o', { url, requestId: browserPreRequest.requestId })
 
     let timer
-    // race the deferred promise with a timeout to prevent the pre-request from hanging indefinitely
+    // race the deferred promise with a timeout to prevent the pre-request from hanging indefinitely.
+    // If the timeout wins, evict the deferred from `pendingPotentiallyControlledRequests` as well. A
+    // matching service worker `fetchRequest` event may never arrive (e.g. for a slow 404), and without
+    // this cleanup the deferred would linger until the next spec, leaking memory on pages that issue
+    // many such requests. See https://github.com/cypress-io/cypress/issues/33296
     const racingPromises = Promise.race([
       deferred.promise,
-      new Promise<boolean>((_resolve, reject) => timer = setTimeout(reject, 250)),
+      new Promise<boolean>((_resolve, reject) => {
+        timer = setTimeout(() => {
+          this.removePendingPotentiallyControlledRequest(url, deferred)
+          reject(new Error('timed out waiting for service worker fetch event'))
+        }, 250)
+      }),
     ]).finally(() => clearTimeout(timer))
 
     return racingPromises
+  }
+
+  /**
+   * Removes a specific pending potentially-controlled request deferred for the given URL,
+   * deleting the URL's entry entirely once no deferreds remain. Used to evict deferreds
+   * that timed out and will never be resolved by a service worker fetch event.
+   */
+  private removePendingPotentiallyControlledRequest (url: string, deferred: pDefer.DeferredPromise<boolean>) {
+    const promises = this.pendingPotentiallyControlledRequests.get(url)
+
+    if (!promises) {
+      return
+    }
+
+    const index = promises.indexOf(deferred)
+
+    if (index !== -1) {
+      promises.splice(index, 1)
+    }
+
+    if (promises.length === 0) {
+      this.pendingPotentiallyControlledRequests.delete(url)
+    }
   }
 
   /**

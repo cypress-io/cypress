@@ -207,6 +207,21 @@ describe('lib/http/util/service-worker-manager', () => {
           }))).toBe(false)
         })
 
+        // https://github.com/cypress-io/cypress/issues/33296
+        it('does not leak pending controlled requests when the fetch event never arrives', async () => {
+          const pendingPotentiallyControlledRequests = (manager as any).pendingPotentiallyControlledRequests as Map<string, unknown[]>
+
+          // A potentially-controlled request whose matching `fetchRequest` event never arrives
+          // (e.g. a slow 404) must time out *and* be evicted, otherwise the deferred lingers until
+          // the next spec and accumulates on pages that issue many such requests.
+          const result = await manager.processBrowserPreRequest(createBrowserPreRequest({
+            url: 'http://localhost:8080/missing.js.map',
+          }))
+
+          expect(result).toBe(false)
+          expect(pendingPotentiallyControlledRequests.size).toBe(0)
+        })
+
         it('will not detect requests when not controlled by an active service worker', async () => {
           // remove the current service worker
           manager.updateServiceWorkerRegistrations({
