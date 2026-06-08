@@ -1,13 +1,12 @@
 const fs = require('fs')
 const yaml = require('yaml')
-const path = require('path')
 
-const CHROME_STABLE_KEY = 'chrome-stable-version'
-const CHROME_BETA_KEY = 'chrome-beta-version'
-const CHROME_FOR_TESTING_STABLE_KEY = 'chrome-for-testing-stable-version'
-
-// This is the path to the CircleCI file that contains the browser version anchors
-const CIRCLECI_WORKFLOWS_FILEPATH = path.join(__dirname, '../../.circleci/src/pipeline/@pipeline.yml')
+const {
+  PIPELINE_CONFIG_PATH: CIRCLECI_WORKFLOWS_FILEPATH,
+  CHROME_STABLE_KEY,
+  CHROME_BETA_KEY,
+  CHROME_FOR_TESTING_STABLE_KEY,
+} = require('./chrome-versions')
 
 const CHROME_FOR_TESTING_LAST_KNOWN_GOOD_URL = 'https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json'
 

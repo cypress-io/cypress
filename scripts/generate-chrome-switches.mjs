@@ -34,12 +34,10 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs as nodeParseArgs } from 'node:util'
 import pRetry, { AbortError } from 'p-retry'
+import { PIPELINE_CONFIG_PATH, branchRefForVersion, readPinnedChromeVersions } from './github-actions/chrome-versions.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ALLOWLIST_PATH = path.join(__dirname, '..', 'packages', 'server', 'lib', 'util', 'chrome-switches.json')
-
-// the pinned Chrome version Cypress tests against lives here as a YAML anchor
-const PIPELINE_CONFIG_PATH = path.join(__dirname, '..', '.circleci', 'src', 'pipeline', '@pipeline.yml')
 
 // Chromium subsystems that define command-line switches, covering those whose
 // switches Cypress passes; extend it if a valid flag is reported as unknown.
@@ -106,36 +104,22 @@ const parseArgs = (argv) => {
   return { ...values, check: values.check || !values.write, ref: values.ref ?? null }
 }
 
-// maps a Chrome version to its Chromium release-branch ref.
-// Chrome `MAJOR.MINOR.BUILD.PATCH` -> `refs/branch-heads/BUILD`.
-const parseVersionAnchor = (config, key) => {
-  const match = config.match(new RegExp(`${key}:\\s*&\\S+\\s*["'](\\d+\\.\\d+\\.(\\d+)\\.\\d+)["']`))
-
-  if (!match) {
-    throw new Error(`could not find ${key} in ${PIPELINE_CONFIG_PATH}`)
-  }
-
-  const [, version, build] = match
-
-  return { version, ref: `refs/branch-heads/${build}` }
-}
-
 // Cypress runs the test suite against both Chrome stable and Chrome beta (the
 // `chrome` and `chrome:beta` jobs launch different milestones), so a flag must
 // be valid in *every* tested milestone. Resolve each to its Chromium branch.
 const resolveTestedChromes = () => {
-  let config
+  let versions
 
   try {
-    config = fs.readFileSync(PIPELINE_CONFIG_PATH, 'utf8')
+    versions = readPinnedChromeVersions()
   } catch (err) {
     throw new Error(`could not read pinned Chrome versions from ${PIPELINE_CONFIG_PATH}: ${err.message}`)
   }
 
   const chromes = [
-    { channel: 'stable', ...parseVersionAnchor(config, 'chrome-stable-version') },
-    { channel: 'stable-cft', ...parseVersionAnchor(config, 'chrome-for-testing-stable-version') },
-    { channel: 'beta', ...parseVersionAnchor(config, 'chrome-beta-version') },
+    { channel: 'stable', version: versions.stable, ref: branchRefForVersion(versions.stable) },
+    { channel: 'stable-cft', version: versions.stableCft, ref: branchRefForVersion(versions.stableCft) },
+    { channel: 'beta', version: versions.beta, ref: branchRefForVersion(versions.beta) },
   ]
 
   // stable and chrome-for-testing-stable usually share a release branch; dedupe by ref

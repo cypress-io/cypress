@@ -13,7 +13,9 @@ const readAllowlist = () => JSON.parse(fs.readFileSync(allowlistPath, 'utf8'))
 
 // derive the set of Chromium release-branch refs the pinned Chrome versions map
 // to. Chrome `MAJOR.MINOR.BUILD.PATCH` -> `refs/branch-heads/BUILD`. Mirrors
-// resolveTestedChromes() in scripts/generate-chrome-switches.mjs.
+// readVersionAnchor()/branchRefForVersion() in scripts/github-actions/chrome-versions.js
+// (kept separate because this TS package can't import that CommonJS helper without
+// breaking check-ts).
 const pinnedChromeRefs = () => {
   const config = fs.readFileSync(pipelineConfigPath, 'utf8')
   const keys = ['chrome-stable-version', 'chrome-for-testing-stable-version', 'chrome-beta-version']
