@@ -1,17 +1,12 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
 import { NetworkPolicyRegistry } from '@packages/network-interception'
 import { createDefaultNetworkInterceptionCore } from '../../../lib/adapters/create-default-network-interception-core'
+import { createMockNetworkInterception } from '../../support/mock-network-interception'
 
 export function createTestNetworkInterceptionCore () {
   return createDefaultNetworkInterceptionCore({
     policyRegistration: new NetworkPolicyRegistry(),
   })
-}
-
-export function createTestForHttpInterception () {
-  return {
-    handle: async (request, next) => next(request),
-  }
 }
 
 export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
@@ -21,7 +16,7 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
     res: {},
     config: {},
     networkInterceptionCore: createTestNetworkInterceptionCore(),
-    httpInterception: createTestForHttpInterception(),
+    networkInterception: createMockNetworkInterception(),
     netStubbingState: { routes: [] },
 
     middleware: {

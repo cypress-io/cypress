@@ -79,7 +79,7 @@ describe('network stubbing', () => {
       networkInterceptionCore: createDefaultNetworkInterceptionCore({
         policyRegistration: new NetworkPolicyRegistry(),
       }),
-      httpInterception,
+      networkInterception,
       config,
       middleware: defaultMiddleware,
       getCookieJar: () => new CookieJar(),
@@ -264,7 +264,7 @@ describe('network stubbing', () => {
           },
           state: netStubbingState,
           getFixture,
-          httpInterception,
+          networkInterception,
           pendingHandlerResolution: interceptionEvents,
           args: [],
           socket: {
@@ -335,7 +335,7 @@ describe('network stubbing', () => {
           },
           state: netStubbingState,
           getFixture,
-          httpInterception,
+          networkInterception,
           pendingHandlerResolution: interceptionEvents,
           args: [],
           socket: {

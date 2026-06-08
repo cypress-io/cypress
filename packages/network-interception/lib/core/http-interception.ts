@@ -2,7 +2,7 @@ import _ from 'lodash'
 import url from 'url'
 import type { ForInterceptionEvents } from '../ports/interception-events'
 import type {
-  ForHttpInterception,
+  ForNetworkInterception,
   HttpRequest,
   HttpResponse,
   Interceptor,
@@ -50,7 +50,7 @@ export type HttpInterceptionOptions = {
 }
 
 /**
- * Default implementation of {@link ForHttpInterception} — transport-agnostic orchestration for
+ * Default implementation of {@link ForNetworkInterception} — transport-agnostic orchestration for
  * `cy.intercept` on a single HTTP exchange.
  *
  * ## Role in `@packages/network-interception`
@@ -71,7 +71,7 @@ export type HttpInterceptionOptions = {
  *
  * | Direction | Port | This class |
  * | --- | --- | --- |
- * | Driving (in) | {@link ForHttpInterception} | {@link HttpInterception.handle} |
+ * | Driving (in) | {@link ForNetworkInterception} | {@link HttpInterception.handle} |
  * | Driven (out) | {@link ForInterceptionEvents} | emits handler events, awaits replies |
  *
  * Route registration (`route:added`, etc.) is a separate driving port
@@ -86,10 +86,10 @@ export type HttpInterceptionOptions = {
  *   → ApplyHttpInterception middleware calls handle(request, forwardToOrigin)
  * ```
  *
- * @see {@link ForHttpInterception} — driving port contract (`handle` only)
+ * @see {@link ForNetworkInterception} — driving port contract (`handle` only)
  * @see {@link NetworkInterceptionCore} — shared matching/planning helpers and proxy-side policies
  */
-export class HttpInterception implements ForHttpInterception {
+export class HttpInterception implements ForNetworkInterception {
   private readonly inFlightIntercepts = new Map<string, InFlightIntercept>()
 
   constructor (private readonly options: HttpInterceptionOptions) {}

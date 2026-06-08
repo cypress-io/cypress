@@ -167,6 +167,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _netStubbingState?: NetStubbingState
   protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
   protected _networkInterceptionCore?: NetworkInterceptionCore
+  protected _networkInterception?: HttpInterception
+  /** @deprecated Use {@link _networkInterception} */
   protected _httpInterception?: HttpInterception
   protected _interceptionEvents?: DriverInterceptionEventsAdapter
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
@@ -476,7 +478,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     this._networkProxy = runtime.networkProxy
     this._networkPolicyRegistration = runtime.networkPolicyRegistration
     this._networkInterceptionCore = runtime.networkInterceptionCore
-    this._httpInterception = runtime.httpInterception
+    this._networkInterception = runtime.networkInterception
+    this._httpInterception = runtime.networkInterception
     this._interceptionEvents = runtime.interceptionEvents
   }
 
@@ -489,7 +492,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       state: this.netStubbingState,
       socket: this.socket,
       getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
-      httpInterception: this._httpInterception!,
+      networkInterception: this._networkInterception!,
       interceptionEvents: this._interceptionEvents!,
     })
 

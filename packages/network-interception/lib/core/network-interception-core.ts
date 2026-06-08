@@ -1,5 +1,4 @@
 import type {
-  ForBrowserNetworkAutomation,
   ForCommandLog,
   ForCookieState,
   ForDocumentPreparation,
@@ -14,7 +13,6 @@ export type NetworkInterceptionCoreOptions = {
   networkCapture?: ForNetworkCapture
   cookieState?: ForCookieState
   commandLog?: ForCommandLog
-  browserNetworkAutomation?: ForBrowserNetworkAutomation
 }
 
 /**

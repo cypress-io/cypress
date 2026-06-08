@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
-import { normalizeResourceType } from './cdp_automation'
+import { normalizeResourceType } from '@packages/browser-automation'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'

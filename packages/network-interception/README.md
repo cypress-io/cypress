@@ -2,7 +2,7 @@
 
 Types and **port interfaces** for Cypress network interception (`cy.intercept`, config policies, proxy middleware). Part of the stacked refactor in [#33919](https://github.com/cypress-io/cypress/issues/33919) to support HTTP/2 (CDP Fetch / BiDi) without rewriting intercept logic.
 
-> **Stack stage 4.** **`ForHttpInterception.handle(request, next)`** is the driving port for per-request intercept. Proxy and future CDP adapters call it; core owns route matching, subscription orchestration, and handler merge. Cookies, injection, compression, and policy enforcement remain proxy driven ports.
+> **Stack stage 4.** **`ForNetworkInterception.handle(request, next)`** is the driving port for per-request intercept. Proxy and future CDP adapters call it; core owns route matching, subscription orchestration, and handler merge. Cookies, injection, compression, and policy enforcement remain proxy driven ports.
 
 ---
 
@@ -20,7 +20,7 @@ The codebase adopts **hexagonal architecture** (also called **ports and adapters
 | --- | --- | --- |
 | **Port** | Contract at the edge of the interception "inside" | `For*` types in `lib/ports/` |
 | **Adapter** | Implements a port by delegating to existing Cypress code | `*Adapter` classes under `packages/*/lib/adapters/` |
-| **Driving port** (primary) | Outside actors **call into** interception | `ForHttpInterception`, `ForInterceptRegistration`, `ForNetworkPolicyRegistration` |
+| **Driving port** (primary) | Outside actors **call into** interception | `ForNetworkInterception`, `ForInterceptRegistration`, `ForNetworkPolicyRegistration` |
 | **Driven port** (secondary) | Interception **calls out** for I/O | `ForInterceptionEvents`, `ForCookieState`, … |
 | **Core** | Domain orchestration without transport imports | **`HttpInterception`**, **`NetworkInterceptionCore`** |
 | **Composition root** | Constructs and injects adapters + core | `createProxyRuntime()` |
@@ -29,7 +29,7 @@ The **core** is the hexagonal "inside": it may call **driven ports** but must no
 
 ---
 
-## `ForHttpInterception.handle(request, next)`
+## `ForNetworkInterception.handle(request, next)`
 
 Transport-neutral onion middleware for `cy.intercept`:
 
@@ -58,13 +58,13 @@ type Interceptor = (
 
 ```
 createProxyRuntime()
-  → HttpInterception (ForHttpInterception)
+  → HttpInterception (ForNetworkInterception)
   → DriverInterceptionEventsAdapter (ForInterceptionEvents)
   → NetworkInterceptionCore (policies, cookies, injection, capture)
-  → NetworkProxy.forHttpInterception
+  → NetworkProxy.networkInterception
 
 ApplyHttpInterception middleware
-  → forHttpInterception.handle(toHttpRequest(ctx), forwardToOrigin)
+  → networkInterception.handle(toHttpRequest(ctx), forwardToOrigin)
   → applyHttpResponseToCtx
 ```
 

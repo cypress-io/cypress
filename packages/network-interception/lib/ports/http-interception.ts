@@ -41,6 +41,6 @@ export type Interceptor = (
 /**
  * Driving port: implemented by {@link HttpInterception}, called by proxy/CDP adapters.
  */
-export interface ForHttpInterception {
+export interface ForNetworkInterception {
   handle: Interceptor
 }

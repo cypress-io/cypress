@@ -47,7 +47,7 @@ describe('lib/network-runtime', () => {
     expect(policies[0].name).to.eq('blocked-hosts')
     expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
     expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
-    expect(runtime.httpInterception).to.exist
+    expect(runtime.networkInterception).to.exist
     expect(runtime.interceptionEvents).to.exist
     expect(runtime.networkInterceptionCore.documentPreparation).to.exist
     expect(runtime.networkInterceptionCore.networkCapture).to.exist

@@ -1,6 +1,5 @@
 import type {
   CommandLogInterceptionResult,
-  ForBrowserNetworkAutomation,
   ForCommandLog,
   ForCookieState,
   ForDocumentPreparation,
@@ -40,15 +39,12 @@ export function createStubDrivenPorts () {
     logInterception: (): CommandLogInterceptionResult => undefined,
   }
 
-  const browserNetworkAutomation: ForBrowserNetworkAutomation = {}
-
   return {
     interceptionEvents,
     documentPreparation,
     networkCapture,
     cookieState,
     commandLog,
-    browserNetworkAutomation,
   }
 }
 

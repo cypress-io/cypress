@@ -37,8 +37,10 @@ export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   netStubbingState: NetStubbingState
   networkPolicyRegistration: ForNetworkPolicyRegistration
   networkInterceptionCore: NetworkInterceptionCore
-  httpInterception: HttpInterception
+  networkInterception: HttpInterception
   interceptionEvents: DriverInterceptionEventsAdapter
+  /** @deprecated Use {@link networkInterception} */
+  httpInterception: HttpInterception
 }
 
 /**
@@ -59,7 +61,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     socket: deps.socket,
   })
 
-  const httpInterception = new HttpInterception({
+  const networkInterception = new HttpInterception({
     getRoutes: () => stubbingState.routes,
     interceptionEvents,
     wireMessages: {
@@ -81,7 +83,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     socket: deps.socket,
     netStubbingState: stubbingState,
     networkInterceptionCore,
-    httpInterception,
+    networkInterception,
     request: deps.request,
     serverBus: deps.serverBus,
     getCurrentBrowser: deps.getCurrentBrowser,
@@ -94,7 +96,8 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     netStubbingState: stubbingState,
     networkPolicyRegistration,
     networkInterceptionCore,
-    httpInterception,
+    networkInterception,
+    httpInterception: networkInterception,
     interceptionEvents,
     handleHttpRequest (req, res) {
       return networkProxy.handleHttpRequest(req, res)

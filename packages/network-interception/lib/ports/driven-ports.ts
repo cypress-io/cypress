@@ -46,10 +46,3 @@ export interface ForCommandLog {
 
   logInterception (input: CommandLogInterceptionInput): CommandLogInterceptionResult
 }
-
-/**
- * Driven port: CDP/BiDi session hooks (HTTP/2 program).
- */
-export interface ForBrowserNetworkAutomation {
-  // Expanded in HTTP/2 epics.
-}

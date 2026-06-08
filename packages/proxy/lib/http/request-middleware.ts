@@ -310,7 +310,7 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
   this.req.requestId = httpRequest.inFlightInterceptId
 
   try {
-    const httpResponse = await this.httpInterception.handle(httpRequest, async (outbound) => {
+    const httpResponse = await this.networkInterception.handle(httpRequest, async (outbound) => {
       applyOutboundToProxiedRequest(this.req, outbound)
 
       return fetchOriginAsHttpResponse(this)
