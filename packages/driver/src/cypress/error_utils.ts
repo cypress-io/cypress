@@ -613,17 +613,56 @@ const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
     errorFromProjectRejectionEvent(event)
 }
 
+// Tracks the most recent uncaught-exception log so consecutive, identical
+// uncaught errors within the same test collapse into a single, updating log
+// entry rather than creating a brand new log for each occurrence. We key on the
+// runnable id so we never update a log belonging to a previous test. Only a
+// string id and a single log reference are retained, so this does not anchor
+// runnables, snapshots, or DOM across tests.
+let lastUncaughtErrorLog: any = null
+let lastUncaughtErrorMessage: string | null = null
+let lastUncaughtErrorRunnableId: string | undefined
+let lastUncaughtErrorCount = 0
+
 const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = false) => {
   const error = toLoggableError(err)
+  const message = `${error.name || 'Error'}: ${error.message}`
+  const runnable = typeof Cypress.state === 'function' ? Cypress.state('runnable') : undefined
+  const runnableId = runnable?.id
 
-  Cypress.log({
-    message: `${error.name || 'Error'}: ${error.message}`,
+  // Collapse consecutive identical uncaught exceptions within the same test into
+  // a single, updating log entry. A repeating uncaught error (e.g. a benign
+  // "ResizeObserver loop ..." notification fired every animation frame) would
+  // otherwise create a new log — and, when unhandled, a new DOM snapshot — on
+  // every occurrence, exhausting renderer memory and crashing the browser.
+  // See https://github.com/cypress-io/cypress/issues/27415
+  if (
+    lastUncaughtErrorLog &&
+    runnableId &&
+    lastUncaughtErrorMessage === message &&
+    lastUncaughtErrorRunnableId === runnableId
+  ) {
+    lastUncaughtErrorCount += 1
+
+    lastUncaughtErrorLog.set({
+      message: `${message} (${lastUncaughtErrorCount})`,
+    })
+
+    return
+  }
+
+  const log = Cypress.log({
+    message,
     name: 'uncaught exception',
     type: 'parent',
     // specifying the error causes the log to be red/failed
     // otherwise, if it's been handled, we omit the error so it is grey/passed
     error: handled ? undefined : err,
-    snapshot: true,
+    // only snapshot the DOM for unhandled exceptions. A handled (suppressed)
+    // exception does not fail the test, and snapshotting a high-frequency
+    // suppressed error can exhaust renderer memory and crash the browser.
+    // See https://github.com/cypress-io/cypress/issues/27415
+    snapshot: !handled,
     event: true,
     timeout: 0,
     end: true,
@@ -636,6 +675,11 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
       return consoleObj
     },
   })
+
+  lastUncaughtErrorLog = log ?? null
+  lastUncaughtErrorMessage = message
+  lastUncaughtErrorRunnableId = runnableId
+  lastUncaughtErrorCount = 1
 }
 
 interface LoggableError { name?: string, message: string }

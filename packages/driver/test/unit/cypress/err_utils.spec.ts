@@ -28,6 +28,95 @@ describe('err_utils', () => {
     vi.resetAllMocks()
   })
 
+  describe('logError', () => {
+    const createCypress = (runnableId: string | undefined = 'r1') => {
+      const log = { set: vi.fn() }
+
+      return {
+        cypress: {
+          log: vi.fn().mockReturnValue(log),
+          state: vi.fn((key: string) => (key === 'runnable' ? { id: runnableId } : undefined)),
+        },
+        log,
+      }
+    }
+
+    it('takes a DOM snapshot for an unhandled uncaught exception', () => {
+      const { cypress } = createCypress('snapshot-unhandled')
+
+      errUtils.logError(cypress, 'error', new Error('boom'), false)
+
+      expect(cypress.log).toHaveBeenCalledTimes(1)
+      expect(cypress.log.mock.calls[0][0]).toMatchObject({
+        name: 'uncaught exception',
+        snapshot: true,
+        error: expect.any(Error),
+      })
+    })
+
+    it('does NOT snapshot a handled (suppressed) uncaught exception', () => {
+      const { cypress } = createCypress('snapshot-handled')
+
+      errUtils.logError(cypress, 'error', new Error('boom'), true)
+
+      expect(cypress.log).toHaveBeenCalledTimes(1)
+      expect(cypress.log.mock.calls[0][0]).toMatchObject({
+        name: 'uncaught exception',
+        snapshot: false,
+        // handled errors omit the error so the log renders grey/passed
+        error: undefined,
+      })
+    })
+
+    it('collapses consecutive identical uncaught exceptions into one updating log', () => {
+      const { cypress, log } = createCypress('dedupe-collapse')
+      const err = () => new Error('ResizeObserver loop completed with undelivered notifications.')
+
+      errUtils.logError(cypress, 'error', err(), true)
+      errUtils.logError(cypress, 'error', err(), true)
+      errUtils.logError(cypress, 'error', err(), true)
+
+      // only the first occurrence creates a log; the rest update it in place
+      expect(cypress.log).toHaveBeenCalledTimes(1)
+      expect(log.set).toHaveBeenCalledTimes(2)
+    })
+
+    it('updates the deduped log message with the occurrence count', () => {
+      const { cypress, log } = createCypress('dedupe-count')
+      const err = () => new Error('ResizeObserver loop completed with undelivered notifications.')
+
+      errUtils.logError(cypress, 'error', err(), true)
+      errUtils.logError(cypress, 'error', err(), true)
+
+      expect(log.set).toHaveBeenCalledWith({
+        message: 'Error: ResizeObserver loop completed with undelivered notifications. (2)',
+      })
+    })
+
+    it('creates a new log when the message differs', () => {
+      const { cypress } = createCypress('message-differs')
+
+      errUtils.logError(cypress, 'error', new Error('first'), true)
+      errUtils.logError(cypress, 'error', new Error('second'), true)
+
+      expect(cypress.log).toHaveBeenCalledTimes(2)
+    })
+
+    it('does NOT dedupe identical messages across different runnables', () => {
+      const first = createCypress('r1')
+      const second = createCypress('r2')
+      const err = () => new Error('same message')
+
+      errUtils.logError(first.cypress, 'error', err(), true)
+      errUtils.logError(second.cypress, 'error', err(), true)
+
+      expect(first.cypress.log).toHaveBeenCalledTimes(1)
+      expect(second.cypress.log).toHaveBeenCalledTimes(1)
+      expect(first.log.set).not.toHaveBeenCalled()
+      expect(second.log.set).not.toHaveBeenCalled()
+    })
+  })
+
   describe('getUserInvocationStack', () => {
     const { invocationFile, line, column, scenarios } = stackFrameFixture
 
