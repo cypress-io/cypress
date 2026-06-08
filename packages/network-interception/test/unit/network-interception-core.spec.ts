@@ -189,7 +189,7 @@ describe('NetworkInterceptionCore', () => {
     const setInjectionLevel = vi.fn().mockResolvedValue(undefined)
     const injectHtml = vi.fn().mockResolvedValue(undefined)
     const removeSecurity = vi.fn().mockResolvedValue(undefined)
-    const core = new NetworkPolicyCore({
+    const core = new NetworkInterceptionCore({
       documentPreparation: { setInjectionLevel, injectHtml, removeSecurity },
     })
     const ctx = { res: {} }
@@ -204,7 +204,7 @@ describe('NetworkInterceptionCore', () => {
   })
 
   it('throws when documentPreparation port is missing', async () => {
-    const core = new NetworkPolicyCore()
+    const core = new NetworkInterceptionCore()
 
     await expect(core.setInjectionLevel({})).rejects.toThrow(/documentPreparation/)
     await expect(core.injectHtml({})).rejects.toThrow(/documentPreparation/)
