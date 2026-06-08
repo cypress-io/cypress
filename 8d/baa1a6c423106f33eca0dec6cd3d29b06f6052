@@ -1,0 +1,36 @@
+packages/reporter/src/attempts/attempts.tsx
+  s_82a9696b9631d9::t_38820b6a96b773 114
+  s_82a9696b9631d9::t_8ca1ae6103c363 115-116
+packages/reporter/cypress/e2e/commands.cy.ts
+  s_82a9696b9631d9::t_51ed2eba240938 1344
+  s_82a9696b9631d9::t_c139434279c0f5 1375
+  s_82a9696b9631d9::t_6735fdfa677874 1338
+  s_82a9696b9631d9::t_896c7647a0d2ab 5
+  s_82a9696b9631d9::t_bdc3f5734264bf 1317-1337,1339-1343,1345-1374,1376-1381
+packages/reporter/src/lib/app-state.ts
+  s_82a9696b9631d9::t_3108858b489237 39
+  s_82a9696b9631d9::t_115049df70b9da 58
+  s_82a9696b9631d9::t_9ac0f0d9b9c670 37-38
+  s_82a9696b9631d9::t_434dd0b65c4450 159-162
+packages/reporter/cypress/e2e/unit/app_state.cy.ts
+  s_82a9696b9631d9::t_ca3bbf3ab20ea9 242-245,247-265
+  s_82a9696b9631d9::t_c2b78b815a6e10 246
+packages/reporter/src/commands/command.tsx
+  s_82a9696b9631d9::t_35860c549393f7 570
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8dbaa1a6c423106f33eca0dec6cd3d29b06f6052",
+  "prompts": {},
+  "sessions": {
+    "s_82a9696b9631d9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4e830f8-5435-4724-b5ff-5d5e2ce88153",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
