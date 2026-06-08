@@ -1,6 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.17.0
 
+**Performance:**
+
+- Opening a project in `cypress open` is now significantly faster for projects that contain a large number of files and folders unrelated to Cypress, such as large monorepos. Previously, the time to open a project could grow with the total number of files in the project, even when those files were not test specs. Fixes [#26691](https://github.com/cypress-io/cypress/issues/26691).
+
 **Features:**
 
 - When signing up to Cypress Cloud from the Cypress desktop app, if a project is auto-provisioned during signup, Cypress now automatically writes the `projectId` to the `cypress.config` file. If the file cannot be written, a modal is shown with the project ID as a copyable snippet and a link to open the config file directly in your IDE. Addressed in [#33976](https://github.com/cypress-io/cypress/pull/33976).
