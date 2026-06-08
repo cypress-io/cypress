@@ -201,6 +201,13 @@ export default (Commands, Cypress, cy, state, config) => {
         })
       }
 
+      if (err.code === 'CYPRESS_FILE_TOO_LARGE') {
+        $errUtils.throwErrByPath('files.too_large', {
+          onFail: options._log,
+          args: { cmd: 'selectFile', file: err.originalFilePath, filePath: err.filePath, fileSize: err.fileSize, maxFileSize: err.maxFileSize },
+        })
+      }
+
       $errUtils.throwErrByPath('files.unexpected_error', {
         onFail: options._log,
         args: { cmd: 'selectFile', action: 'read', file: err.originalFilePath, filePath: err.filePath, error: err.message },

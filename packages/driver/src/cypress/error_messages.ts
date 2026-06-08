@@ -565,6 +565,19 @@ export default {
         docsUrl: `https://on.cypress.io/readfile`,
       }
     },
+    too_large (obj) {
+      const formatBytes = (bytes) => `${bytes} bytes (${(bytes / 1e6).toFixed(1)} MB)`
+
+      return {
+        message: stripIndent`
+          ${cmd('{{cmd}}', '"{{file}}"')} failed because the file at the following path is too large to send to the browser:
+
+            \`{{filePath}}\`
+
+          The file is ${formatBytes(obj.fileSize)}, but ${cmd('{{cmd}}')} can only process files up to ${formatBytes(obj.maxFileSize)}. Sending a file larger than this crashes the browser, so Cypress stopped before attempting to transfer it.`,
+        docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
+      }
+    },
     timed_out (obj) {
       return {
         message: `${cmd('{{cmd}}', '"{{file}}"')} timed out after waiting \`{{timeout}}ms\`.`,

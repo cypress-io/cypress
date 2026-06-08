@@ -1,4 +1,7 @@
-import { readFile, writeFile } from '../../lib/files'
+require('../spec_helper')
+
+import { readFile, readFiles, writeFile, MAX_FILE_SIZE } from '../../lib/files'
+import { fs } from '../../lib/util/fs'
 import FixturesHelper from '@tooling/system-tests'
 import { setCtx, makeDataContext, clearCtx } from '../../lib/makeDataContext'
 import { getCtx } from '@packages/data-context'
@@ -80,6 +83,50 @@ describe('lib/files', () => {
             name: 'jennifer',
           },
         ])
+      })
+    })
+  })
+
+  context('#readFiles', () => {
+    let statStub
+
+    afterEach(() => {
+      statStub?.restore()
+      statStub = undefined
+    })
+
+    it('reads multiple files within the size limit', function () {
+      return readFiles(this.projectRoot, { files: [{ path: 'tests/_fixtures/message.txt' }] }).then((files) => {
+        expect(files).to.have.length(1)
+        expect(files[0].contents).to.eq('foobarbaz')
+
+        expect(files[0].filePath).to.include('/cy-projects/todos/tests/_fixtures/message.txt')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24583
+    it('throws a CYPRESS_FILE_TOO_LARGE error when a file exceeds the max size', function () {
+      statStub = sinon.stub(fs, 'statAsync').resolves({ size: MAX_FILE_SIZE + 1 })
+
+      return readFiles(this.projectRoot, { files: [{ path: 'tests/_fixtures/message.txt' }] })
+      .then(() => {
+        throw new Error('should have thrown a CYPRESS_FILE_TOO_LARGE error')
+      })
+      .catch((err) => {
+        expect(err.code).to.eq('CYPRESS_FILE_TOO_LARGE')
+        expect(err.fileSize).to.eq(MAX_FILE_SIZE + 1)
+        expect(err.maxFileSize).to.eq(MAX_FILE_SIZE)
+        expect(err.originalFilePath).to.eq('tests/_fixtures/message.txt')
+        expect(err.filePath).to.include('/cy-projects/todos/tests/_fixtures/message.txt')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/24583
+    it('reads a file exactly at the max size', function () {
+      statStub = sinon.stub(fs, 'statAsync').resolves({ size: MAX_FILE_SIZE })
+
+      return readFiles(this.projectRoot, { files: [{ path: 'tests/_fixtures/message.txt' }] }).then((files) => {
+        expect(files[0].contents).to.eq('foobarbaz')
       })
     })
   })
