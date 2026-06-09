@@ -60,7 +60,10 @@ declare global {
        */
       Reporter: any
       shortcuts: {
+        start: () => void
         stop: () => void
+        addEventListeners: (doc: Document) => void
+        removeEventListeners: (doc: Document) => void
       }
     }
   }

@@ -749,6 +749,26 @@ export class EventManager {
       Cypress.primaryOriginCommunicator.toAllSpecBridges('before:unload', window.origin)
     })
 
+    // Forward keyboard shortcuts (e.g. "s" to stop, "r" to rerun) that are
+    // pressed while focus is inside the AUT to the reporter. The reporter only
+    // listens for keydowns on its own document, but the AUT is a separate
+    // document (a child iframe) and keydowns do not cross the iframe boundary.
+    // Without this, specs that leave an element focused inside the AUT (e.g.
+    // after cy.type() or cy.focus()) would swallow these key presses.
+    Cypress.on('window:load', (autWindow) => {
+      if (!Cypress.config('isInteractive')) {
+        return
+      }
+
+      try {
+        window.UnifiedRunner?.shortcuts?.addEventListeners(autWindow.document)
+      } catch {
+        // The AUT can be cross-origin, in which case its document is not
+        // accessible from the primary. Cross-origin shortcut forwarding is
+        // not supported, so we silently ignore the error.
+      }
+    })
+
     // Reflect back to the requesting origin the status of the 'duringUserTestExecution' state.
     // Prefer `toSource(source)` so replies work even when `crossOriginDriverWindows` was cleared
     // (e.g. after test isolation); `toSpecBridge(origin)` would no-op without a map entry.

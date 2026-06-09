@@ -6,11 +6,26 @@ import { action } from 'mobx'
 
 class Shortcuts {
   start () {
-    document.addEventListener('keydown', this._handleKeyDownEvent)
+    this.addEventListeners(document)
   }
 
   stop () {
-    document.removeEventListener('keydown', this._handleKeyDownEvent)
+    this.removeEventListeners(document)
+  }
+
+  // The reporter and the application under test (AUT) live in separate
+  // documents (the AUT is a child iframe). A keydown only fires in the
+  // document that owns the focused element and does not cross the iframe
+  // boundary, so when a spec leaves focus inside the AUT (e.g. after
+  // cy.type() or cy.focus()), shortcuts pressed there never reach the
+  // reporter's document. The app forwards the AUT's document here once it
+  // has loaded so these shortcuts keep working regardless of where focus is.
+  addEventListeners (doc: Document) {
+    doc.addEventListener('keydown', this._handleKeyDownEvent)
+  }
+
+  removeEventListeners (doc: Document) {
+    doc.removeEventListener('keydown', this._handleKeyDownEvent)
   }
 
   _handleKeyDownEvent (event: KeyboardEvent) {

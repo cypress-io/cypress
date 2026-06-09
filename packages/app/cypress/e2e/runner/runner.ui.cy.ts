@@ -308,5 +308,34 @@ describe('src/cypress/runner', () => {
       .should('not.contain', 'ran afterEach even though specs were stopped')
       .and('contain', 'Cypress test was stopped while running this command.')
     })
+
+    // https://github.com/cypress-io/cypress/issues/32029
+    // Reporter keyboard shortcuts must keep working even when focus is inside
+    // the AUT. Specs that leave an element focused in the AUT (e.g. after
+    // cy.type() or cy.focus()) would otherwise swallow these key presses since
+    // keydowns fire in the AUT's document and never reach the reporter's.
+    it('triggers reporter keyboard shortcuts when focus is inside the AUT', () => {
+      loadSpec({
+        filePath: 'runner/simple-cy-assert.runner.cy.js',
+        passCount: 1,
+      })
+
+      // the specs list starts collapsed (isSpecsListOpen is false in loadSpec)
+      cy.findByTestId('toggle-specs-button').should('have.attr', 'aria-expanded', 'false')
+
+      // simulate pressing "f" (toggle specs list) while focus is inside the
+      // AUT by dispatching the keydown from the AUT's own document
+      cy.get('iframe.aut-iframe').then(($iframe) => {
+        const autWindow = $iframe[0].contentWindow as Window
+
+        autWindow.document.body.dispatchEvent(new autWindow.KeyboardEvent('keydown', {
+          key: 'f',
+          bubbles: true,
+        }))
+      })
+
+      // the specs list opens, proving the shortcut reached the reporter
+      cy.findByTestId('toggle-specs-button').should('have.attr', 'aria-expanded', 'true')
+    })
   })
 })
