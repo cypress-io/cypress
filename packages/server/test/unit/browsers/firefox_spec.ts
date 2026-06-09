@@ -6,6 +6,7 @@ import os from 'os'
 import sinon from 'sinon'
 import fsExtra from 'fs-extra'
 import * as firefox from '../../../lib/browsers/firefox'
+import * as extension from '@packages/extension'
 import { type Client as WebDriverClient, default as webdriver } from 'webdriver'
 import { EventEmitter } from 'stream'
 import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
@@ -568,7 +569,7 @@ describe('lib/browsers/firefox', () => {
       // @see https://github.com/cypress-io/cypress/issues/31300
       it('grants write access to the copied extension so the profile can be cleaned up on exit', async function () {
         // the read-only source extension, as it would be installed in the Nix store
-        const extensionSrc = require('@packages/extension').getPathToExtension()
+        const extensionSrc = extension.getPathToExtension()
         // getExtensionDir resolves the real (un-stubbed) destination the extension is copied to
         const extensionDir = utils.getExtensionDir(this.browser, true)
 
