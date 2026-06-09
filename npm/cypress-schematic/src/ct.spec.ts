@@ -1,15 +1,9 @@
 import { describe, it, beforeEach, afterEach } from 'vitest'
 import Fixtures, { ProjectFixtureDir } from '@tooling/system-tests'
 import * as FixturesScaffold from '@tooling/system-tests/lib/dep-installer'
-import execa from 'execa'
 import path from 'path'
 import * as fs from 'fs-extra'
-
-const runCommandInProject = (command: string, projectPath: string) => {
-  const [ex, ...args] = command.split(' ')
-
-  return execa(ex, args, { cwd: projectPath, stdio: 'inherit' })
-}
+import { runCommandInProject } from './test-helpers/runCommandInProject'
 
 // Since the schematic downloads a new version of cypress, the latest changes of
 // @cypress/angular won't exist in the tmp project. To fix this, we replace the
@@ -37,6 +31,10 @@ const isZonelessAngularProject = (project: ProjectFixtureDir) => {
   return project === 'angular-21' || project === 'angular-22'
 }
 
+const needsIgnoreEngines = (project: ProjectFixtureDir) => {
+  return project === 'angular-22'
+}
+
 const timeout = 1000 * 60 * 5
 
 describe('ng add @cypress/schematic / e2e and ct', function () {
@@ -50,7 +48,11 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
         await fs.remove(path.join(projectPath, 'cypress.config.ts'))
         await fs.remove(path.join(projectPath, 'cypress'))
 
-        await runCommandInProject(`yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`, projectPath)
+        await runCommandInProject(
+          `yarn add @cypress/schematic@file:${cypressSchematicPackagePath}`,
+          projectPath,
+          { ignoreEngines: needsIgnoreEngines(project) },
+        )
       }, timeout)
 
       afterEach(() => {
@@ -58,24 +60,50 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
       }, timeout)
 
       it('should install ct files with option and no component specs', async () => {
-        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
+        await runCommandInProject(
+          'yarn ng add @cypress/schematic --e2e --component',
+          projectPath,
+          { ignoreEngines: needsIgnoreEngines(project) },
+        )
+
         await copyAngularMount(projectPath, { copyZonelessMount: isZonelessAngularProject(project) })
-        await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts', projectPath)
+        await runCommandInProject(
+          'yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts',
+          projectPath,
+          { ignoreEngines: needsIgnoreEngines(project) },
+        )
       }, timeout)
 
       it('should generate component alongside component spec', async () => {
-        await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
+        await runCommandInProject(
+          'yarn ng add @cypress/schematic --e2e --component',
+          projectPath,
+          { ignoreEngines: needsIgnoreEngines(project) },
+        )
+
         // make sure to copy the zoneless mount function for angular 21+
         await copyAngularMount(projectPath, { copyZonelessMount: isZonelessAngularProject(project) })
         if (isZonelessAngularProject(project)) {
           // our angular 21 project is a pure standalone project, so we need to pass in the --standalone flag to ignore module generation.
           // this may be no longer true if we update the schematic dependencies
-          await runCommandInProject('yarn ng generate c foo --standalone', projectPath)
+          await runCommandInProject(
+            'yarn ng generate c foo --standalone',
+            projectPath,
+            { ignoreEngines: needsIgnoreEngines(project) },
+          )
         } else {
-          await runCommandInProject('yarn ng generate c foo', projectPath)
+          await runCommandInProject(
+            'yarn ng generate c foo',
+            projectPath,
+            { ignoreEngines: needsIgnoreEngines(project) },
+          )
         }
 
-        await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/foo/foo.component.cy.ts', projectPath)
+        await runCommandInProject(
+          'yarn ng run angular:ct --watch false --spec src/app/foo/foo.component.cy.ts',
+          projectPath,
+          { ignoreEngines: needsIgnoreEngines(project) },
+        )
       }, timeout)
     })
   }
