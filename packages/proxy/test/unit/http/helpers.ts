@@ -1,4 +1,13 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
+import { NetworkInterceptionCore } from '@packages/network-interception'
+import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../../lib/adapters'
+
+export function createTestNetworkInterceptionCore () {
+  return new NetworkInterceptionCore({
+    requestInterception: new ProxyRequestInterceptionAdapter(),
+    responseInterception: new ProxyResponseInterceptionAdapter(),
+  })
+}
 
 export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
   const fullCtx = {
@@ -6,6 +15,7 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
     req: {},
     res: {},
     config: {},
+    networkInterceptionCore: createTestNetworkInterceptionCore(),
 
     middleware: {
       0: middleware,

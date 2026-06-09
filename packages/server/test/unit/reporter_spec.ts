@@ -215,5 +215,46 @@ describe('lib/reporter', () => {
         expect(result.attempts[0].error.stack).to.equal('')
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/27956
+    // The reporter UI derives non-terminal, display-only states (e.g. 'processing',
+    // 'active') for tests that have not reached a terminal state. These are invalid
+    // for Cypress Cloud and the Module API and are coerced to the terminal 'pending'
+    // state rather than being reported as-is.
+    describe('non-terminal test/attempt states', () => {
+      it('coerces a `processing` test state to `pending`', () => {
+        const result = reporter.normalizeTest({ id: 'r4', state: 'processing', prevAttempts: [] })
+
+        expect(result.state).to.equal('pending')
+      })
+
+      it('coerces a `processing` attempt state to `pending`', () => {
+        const result = reporter.normalizeTest({ id: 'r4', state: 'processing', prevAttempts: [{ state: 'processing' }] })
+
+        expect(result.attempts[0].state).to.equal('pending')
+        expect(result.attempts[1].state).to.equal('pending')
+      })
+
+      it('coerces an `active` test state to `pending`', () => {
+        const result = reporter.normalizeTest({ id: 'r4', state: 'active', prevAttempts: [] })
+
+        expect(result.state).to.equal('pending')
+      })
+
+      it('preserves terminal states', () => {
+        for (const state of ['passed', 'failed', 'pending', 'skipped']) {
+          const result = reporter.normalizeTest({ id: 'r4', state, prevAttempts: [{ state }] })
+
+          expect(result.state).to.equal(state)
+          expect(result.attempts[0].state).to.equal(state)
+          expect(result.attempts[1].state).to.equal(state)
+        }
+      })
+
+      it('normalizes an unknown/undefined state to null', () => {
+        expect(reporter.normalizeTest({ id: 'r4', prevAttempts: [] }).state).to.be.null
+        expect(reporter.normalizeTest({ id: 'r4', state: 'bogus', prevAttempts: [] }).state).to.be.null
+      })
+    })
   })
 })

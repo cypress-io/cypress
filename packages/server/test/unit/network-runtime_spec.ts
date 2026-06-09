@@ -48,6 +48,8 @@ describe('lib/network-runtime', () => {
     expect(policies[0].name).to.eq('blocked-hosts')
     expect(policies[0].when({ url: 'http://localhost:3131/' })).to.be.true
     expect(runtime.networkInterceptionCore).to.be.instanceOf(NetworkInterceptionCore)
+    expect(runtime.networkInterceptionCore.requestInterception).to.exist
+    expect(runtime.networkInterceptionCore.responseInterception).to.exist
   })
 
   it('handleHttpRequest delegates to networkProxy.handleHttpRequest', async () => {

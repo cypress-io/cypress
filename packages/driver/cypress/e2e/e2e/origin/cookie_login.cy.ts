@@ -117,9 +117,7 @@ describe('cy.origin - cookie login', { browser: '!webkit' }, () => {
       cy.visit('https://localhost:3502/fixtures/primary-origin.html')
       cy.get('[data-cy="cookie-login-override"]').click()
       cy.origin('https://www.foobar.com:3502', { args: { username } }, ({ username }) => {
-        // the https prelogin -> foobar.com redirect can exceed the default 4s
-        // timeout, so wait longer for the cross-origin page to be ready
-        cy.get('[data-cy="username"]', { timeout: 10000 }).type(username)
+        cy.get('[data-cy="username"]').type(username)
         cy.get('[data-cy="login"]').click()
       })
 

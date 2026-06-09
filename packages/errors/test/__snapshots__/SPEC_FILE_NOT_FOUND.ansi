@@ -1,0 +1,5 @@
+[31mThe following [95m--spec[39m[31m pattern did not match any spec files and will be ignored:[39m
+[31m[39m
+[31m[90m  > [39m[31m[94m/path/to/project/root/[33mcypress/e2e/nonexistent.cy.ts[39m[31m[94m[39m[31m[39m
+[31m[39m
+[31mOther spec files that matched will still run.[39m

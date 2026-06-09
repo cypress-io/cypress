@@ -156,10 +156,11 @@ jobs:
           set -e
           changed_files=()
           for platform in linux darwin win32; do
-            # upload-artifact@v4 preserves workspace-relative paths inside
-            # the artifact, so the file lands under the same tree it was
-            # uploaded from.
-            artifact_file="artifacts/v8-snapshot-cache-${platform}/tooling/v8-snapshot/cache/${platform}/snapshot-meta.json"
+            # upload-artifact@v4 uses the parent directory of a single-file
+            # `path:` as the artifact root, so only the bare filename is
+            # stored. With merge-multiple: false, download-artifact places it
+            # at artifacts/<artifact-name>/snapshot-meta.json.
+            artifact_file="artifacts/v8-snapshot-cache-${platform}/snapshot-meta.json"
             target_file="tooling/v8-snapshot/cache/${platform}/snapshot-meta.json"
             if [[ -f "${artifact_file}" ]]; then
               mkdir -p "$(dirname "${target_file}")"
