@@ -31,4 +31,29 @@ describe('lib/automation', () => {
       expect(this.automation.getMiddleware().onPush).to.eq(onPush)
     })
   })
+
+  describe('.response', () => {
+    it('deletes the pending request from the requests map after responding', function () {
+      let capturedId
+
+      const fn = (_message, _data, id) => {
+        capturedId = id
+      }
+
+      const promise = this.automation.requestAutomationResponse('take:screenshot', {}, fn)
+
+      // the pending request is tracked while awaiting the browser's response
+      expect(this.automation.getRequests()).to.have.property(capturedId)
+
+      this.automation.response(capturedId, { response: 'foo' })
+
+      // once responded to, the request (and anything it retains, e.g. a large
+      // screenshot data URL) must be released to avoid a memory leak
+      expect(this.automation.getRequests()).to.not.have.property(capturedId)
+
+      return promise.then((resp) => {
+        expect(resp).to.eq('foo')
+      })
+    })
+  })
 })
