@@ -4,6 +4,7 @@
 **Performance:**
 
 - The Command Log no longer becomes progressively unresponsive when moving the mouse in and out of a test's command list during long tests. Hovering over the command area previously triggered a style recalculation across the entire list of commands, causing a delay that grew with the number of commands logged. Fixes [#33179](https://github.com/cypress-io/cypress/issues/33179).
+- Fixed a memory leak where runs with `screenshotOnRunFailure` enabled slowed down progressively, as each failure screenshot was retained in memory for the rest of the run. Fixes [#33516](https://github.com/cypress-io/cypress/issues/33516).
 
 **Features:**
 
