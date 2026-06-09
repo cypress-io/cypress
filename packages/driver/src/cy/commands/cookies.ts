@@ -199,112 +199,220 @@ export default function (Commands, Cypress: InternalCypress.Cypress, cy, state, 
     }
   }
 
-  return Commands.addAll({
-    getCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
-      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
-        log: true,
-      })
+  // getCookie and getCookies are query commands: they re-pull the cookie(s)
+  // from the browser and re-run any attached assertions until they pass or the
+  // command times out. This allows `cy.getCookie('foo').should('exist')` to wait
+  // for a cookie that is set asynchronously (e.g. after a login request resolves).
+  // @see https://github.com/cypress-io/cypress/issues/4802
+  type CookieQuery = 'get:cookie' | 'get:cookies'
 
-      const responseTimeout = options.timeout || config('responseTimeout')
+  interface CookieQueryParams {
+    commandName: 'getCookie' | 'getCookies'
+    event: CookieQuery
+    action: string
+    buildOptions: () => AutomationEventsAndOptions[CookieQuery]
+    onResult: (result: any) => void
+    log?: Cypress.Log
+    // governs how long the query retries (re-reading + re-asserting) and how
+    // long a single automation round-trip may take. defaults to
+    // `defaultCommandTimeout`, consistent with other query commands.
+    timeout: number
+  }
 
-      options.timeout = options.timeout || config('defaultCommandTimeout')
+  // shared retry/automation plumbing for the getCookie(s) query commands.
+  // returns a `fetch` function that (re-)reads cookies in the background and a
+  // `getSubject` function suitable for returning from a query command.
+  function createCookieQuery ({ commandName, event, action, buildOptions, onResult, log, timeout }: CookieQueryParams) {
+    let hasResult = false
+    let result: any
+    let pending: Promise<void> | null = null
+    let fatalError: Error | null = null
+    let mostRecentError: Error = $errUtils.cypressErrByPath('cookies.timed_out', {
+      args: { cmd: commandName, timeout },
+    })
 
-      let cookie: Cypress.Cookie
-      const log: Cypress.Log | undefined = Cypress.log({
-        message: userOptions.domain ? [name, { domain: userOptions.domain }] : name,
-        hidden: !options.log,
-        timeout: responseTimeout,
-        consoleProps () {
-          const obj = {}
-
-          if (cookie) {
-            obj['Yielded'] = cookie
-          } else {
-            obj['Yielded'] = 'null'
-            obj['Note'] = `No cookie with the name: '${name}' was found.`
-          }
-
-          return obj
-        },
-      })
-
-      if (!_.isString(name)) {
-        $errUtils.throwErrByPath('getCookie.invalid_argument', { onFail: log })
+    const fetch = () => {
+      // if a request is already in flight, wait for it instead of starting a new one
+      if (pending) {
+        return
       }
 
-      validateDomainOption(userOptions.domain, 'getCookie', log)
+      let automationOptions: AutomationEventsAndOptions[CookieQuery]
 
-      return cy.retryIfCommandAUTOriginMismatch(() => {
-        return automateCookies({
-          event: 'get:cookie',
-          commandName: 'getCookie',
-          options: {
-            name,
-            // getDefaultDomain() needs to be called inside
-            // cy.retryIfCommandAUTOriginMismatch() (instead of above
-            // where default options are set) in case it errors
-            domain: options.domain || getDefaultDomain(),
-          },
-          timeout: responseTimeout,
-          log,
-        })
-        .then(pickCookieProps)
-        .tap((result) => {
-          cookie = result
-        })
-        .catch(handleBackendError('getCookie', 'reading the requested cookie from', log))
-      }, options.timeout)
-    },
+      try {
+        // ensure we can communicate with the AUT before reading its location
+        // (in getDefaultDomain, via buildOptions) or cookies. a cross-origin
+        // mismatch here is retryable - keep retrying until the AUT is reachable
+        // or the command times out (matching the previous
+        // retryIfCommandAUTOriginMismatch behavior).
+        // @ts-expect-error
+        Cypress.ensure.commandCanCommunicateWithAUT(cy)
+        automationOptions = buildOptions()
+      } catch (err: any) {
+        mostRecentError = err
 
-    getCookies (userOptions: Cypress.CookieOptions = {}) {
-      const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
-        log: true,
+        return
+      }
+
+      pending = Promise.try(() => {
+        return Cypress.automation(event, automationOptions)
       })
+      .timeout(timeout)
+      .then(pickCookieProps)
+      .then((res) => {
+        result = res
+        hasResult = true
+        onResult(res)
+      })
+      .catch(Promise.TimeoutError, () => {
+        mostRecentError = $errUtils.cypressErrByPath('cookies.timed_out', {
+          args: { cmd: commandName, timeout },
+        })
+      })
+      .catch((err) => {
+        // an automation failure is an unexpected backend error. handleBackendError
+        // re-throws CypressErrors as-is and wraps everything else - either way we
+        // surface it immediately rather than retrying until the command times out.
+        try {
+          handleBackendError(commandName, action, log)(err)
+        } catch (cypressErr: any) {
+          cypressErr.retry = false
+          mostRecentError = cypressErr
 
-      const responseTimeout = options.timeout || config('responseTimeout')
-
-      options.timeout = options.timeout || config('defaultCommandTimeout')
-
-      let cookies: Cypress.Cookie[] = []
-      const log: Cypress.Log | undefined = Cypress.log({
-        message: userOptions.domain ? { domain: userOptions.domain } : '',
-        hidden: !options.log,
-        timeout: responseTimeout,
-        consoleProps () {
-          const obj = {}
-
-          if (cookies.length) {
-            obj['Yielded'] = cookies
-            obj['Num Cookies'] = cookies.length
+          // only fail the command outright if we have nothing to yield yet. a
+          // failed background refresh (after we already have a result) should
+          // not turn a passing command into a failure.
+          if (!hasResult) {
+            fatalError = cypressErr
           }
-
-          return obj
-        },
+        }
       })
+      .finally(() => {
+        pending = null
+      })
+    }
 
-      validateDomainOption(userOptions.domain, 'getCookies', log)
+    const getSubject = () => {
+      if (fatalError) {
+        throw fatalError
+      }
 
-      return cy.retryIfCommandAUTOriginMismatch(() => {
-        return automateCookies({
-          event: 'get:cookies',
-          options: {
-            // getDefaultDomain() needs to be called inside
-            // cy.retryIfCommandAUTOriginMismatch() (instead of above
-            // where default options are set) in case it errors
-            domain: options.domain || getDefaultDomain(),
-          },
-          commandName: 'getCookies',
-          timeout: responseTimeout,
-          log,
-        })
-        .then(pickCookieProps)
-        .tap((result: Cypress.Cookie[]) => {
-          cookies = result
-        })
-        .catch(handleBackendError('getCookies', 'reading cookies from', log))
-      }, options.timeout)
-    },
+      if (hasResult) {
+        // we have a result. kick off a background re-read (without discarding the
+        // current result) so subsequent assertion retries see up-to-date
+        // cookie(s). this is required when assertions are chained through another
+        // query (e.g. `cy.getCookie('x').its('value')`): this command's retry of
+        // getSubject - not an onFail handler - is what re-runs the read. we never
+        // throw once we have a result, so retrieving the final subject for a
+        // downstream command can't fail spuriously.
+        fetch()
 
+        return result
+      }
+
+      fetch()
+
+      // no result yet - the request is pending. throw and wait for the promise
+      // to resolve on a future retry.
+      throw mostRecentError
+    }
+
+    return getSubject
+  }
+
+  Commands.addQuery('getCookie', function getCookie (name: string, userOptions: Cypress.CookieOptions = {}) {
+    const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+      log: true,
+    })
+
+    const timeout = options.timeout || config('defaultCommandTimeout')
+
+    this.set('timeout', timeout)
+
+    let cookie: Cypress.Cookie | null = null
+    const log: Cypress.Log | undefined = Cypress.log({
+      message: userOptions.domain ? [name, { domain: userOptions.domain }] : name,
+      hidden: !options.log,
+      timeout,
+      consoleProps () {
+        const obj = {}
+
+        if (cookie) {
+          obj['Yielded'] = cookie
+        } else {
+          obj['Yielded'] = 'null'
+          obj['Note'] = `No cookie with the name: '${name}' was found.`
+        }
+
+        return obj
+      },
+    })
+
+    if (!_.isString(name)) {
+      $errUtils.throwErrByPath('getCookie.invalid_argument', { onFail: log })
+    }
+
+    validateDomainOption(userOptions.domain, 'getCookie', log)
+
+    return createCookieQuery({
+      commandName: 'getCookie',
+      event: 'get:cookie',
+      action: 'reading the requested cookie from',
+      // getDefaultDomain() is called here (rather than above where default
+      // options are set) so a cross-origin access error is retried.
+      buildOptions: () => ({ name, domain: options.domain || getDefaultDomain() }),
+      onResult: (result) => {
+        cookie = result
+      },
+      log,
+      timeout,
+    })
+  })
+
+  Commands.addQuery('getCookies', function getCookies (userOptions: Cypress.CookieOptions = {}) {
+    const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
+      log: true,
+    })
+
+    const timeout = options.timeout || config('defaultCommandTimeout')
+
+    this.set('timeout', timeout)
+
+    let cookies: Cypress.Cookie[] = []
+    const log: Cypress.Log | undefined = Cypress.log({
+      message: userOptions.domain ? { domain: userOptions.domain } : '',
+      hidden: !options.log,
+      timeout,
+      consoleProps () {
+        const obj = {}
+
+        if (cookies.length) {
+          obj['Yielded'] = cookies
+          obj['Num Cookies'] = cookies.length
+        }
+
+        return obj
+      },
+    })
+
+    validateDomainOption(userOptions.domain, 'getCookies', log)
+
+    return createCookieQuery({
+      commandName: 'getCookies',
+      event: 'get:cookies',
+      action: 'reading cookies from',
+      // getDefaultDomain() is called here (rather than above where default
+      // options are set) so a cross-origin access error is retried.
+      buildOptions: () => ({ domain: options.domain || getDefaultDomain() }),
+      onResult: (result: Cypress.Cookie[]) => {
+        cookies = result
+      },
+      log,
+      timeout,
+    })
+  })
+
+  return Commands.addAll({
     getAllCookies (userOptions: Partial<Cypress.Loggable & Cypress.Timeoutable> = {}) {
       const options: Cypress.CookieOptions = _.defaults({}, userOptions, {
         log: true,
