@@ -73,7 +73,7 @@ export const formattedMessage = (message: string, name?: string) => {
     }
     // for assertions print the exact text so that characters like _ and *
     // are not escaped in the assertion display when comparing values
-    const result = assertionArray.flatMap((s, index) => [s, expectedActualArray()[index]])
+    const result = assertionArray.flatMap((s, index) => [_.escape(s), expectedActualArray()[index]])
 
     return result.join('')
   }
@@ -567,7 +567,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
                 <CommandControls model={model} commandName={commandName} />
               </div>
-              {model.isCyPrompt && (
+              {model.isCyPrompt && appState.cyPromptActionsEnabled && (
                 <div
                   className='command-prompt-get-code-feedback-container'
                   onClick={(e) => e.stopPropagation()}

@@ -1,6 +1,9 @@
 import { defineConfig } from 'cypress'
 import { devServer } from '@cypress/vite-dev-server'
 
+// import.meta.resolve must be present within an ESM context
+import.meta.resolve
+
 export default defineConfig({
   allowCypressEnv: false,
   component: {

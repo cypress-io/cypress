@@ -5,11 +5,11 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "148.0.7778.167"
-chrome-beta-version: &chrome-beta-version "149.0.7827.14"
+chrome-stable-version: &chrome-stable-version "149.0.7827.102"
+chrome-beta-version: &chrome-beta-version "150.0.7871.4"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "148.0.7778.167"
-firefox-stable-version: &firefox-stable-version "145.0.2"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.55"
+firefox-stable-version: &firefox-stable-version "151.0.1"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
@@ -21,6 +21,9 @@ parameters:
     type: string
     default: main
   force-persist-artifacts:
+    type: boolean
+    default: false
+  run-all-jobs:
     type: boolean
     default: false
   # Path-filtering parameters — set by generate-pipeline-parameters.sh on PRs.
@@ -104,7 +107,7 @@ defaults: &defaults
   parameters: &defaultsParameters
     executor:
       type: executor
-      default: cy-doc
+      default: cy-docker
     only-cache-for-root-user:
       type: boolean
       default: false
@@ -122,8 +125,7 @@ defaults: &defaults
     LINES: 24
 
 executors:
-  # the Docker image with Cypress dependencies and Chrome browser
-  cy-doc:
+  cy-docker:
     docker:
       - image: *base-internal-trixie
     # by default, we use "medium" to balance performance + CI costs. bump or reduce on a per-job basis if needed.
@@ -200,7 +202,7 @@ commands:
             if [[ "<< pipeline.parameters.force-persist-artifacts >>" == "true" ]]; then
               echo 'export SHOULD_PERSIST_ARTIFACTS=true' >> "$BASH_ENV"
             else
-              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* ]]; then
+              echo 'if ! [[ "$CIRCLE_BRANCH" != "develop" && "$CIRCLE_BRANCH" != "release/"* && "$CIRCLE_BRANCH" != "electron/"* ]]; then
                   export SHOULD_PERSIST_ARTIFACTS=true
               fi' >> "$BASH_ENV"
             fi
@@ -570,7 +572,7 @@ commands:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run: pwd
       ##- run:
@@ -613,7 +615,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
       install-chrome:
         description: whether or not to install google chrome
         type: boolean
@@ -822,20 +824,19 @@ commands:
           # TODO: How can we have preinstalled browsers on CircleCI?
           name: 'Install Chrome on Windows'
           command: |
-            # install with `--ignore-checksums` to avoid checksum error
-            # https://www.gep13.co.uk/blog/chocolatey-error-hashes-do-not-match
-            # Retry to tolerate 504s from the Chocolatey community feed. `choco install`
-            # exits 0 on "installed 0/0 packages", so gate the retry on whether chrome.exe
-            # actually exists, not on choco's exit code.
+            # Download Google's standalone enterprise MSI directly from dl.google.com.
             if [[ $PLATFORM == 'windows' && '<<parameters.browser>>' == 'chrome' ]]; then
               chrome_installed() {
                 [[ -f "/c/Program Files/Google/Chrome/Application/chrome.exe" || -f "/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" ]]
               }
+              msi_url="https://dl.google.com/chrome/install/GoogleChromeStandaloneEnterprise64.msi"
+              msi_path="$(mktemp -d)/googlechrome.msi"
               max_attempts=3
               n=0
               until [ $n -ge $max_attempts ]; do
-                choco install googlechrome -y --ignore-checksums --no-progress || true
-                if chrome_installed; then
+                if curl -fsSL --connect-timeout 30 --max-time 240 --retry 2 --retry-connrefused -o "$msi_path" "$msi_url" \
+                    && MSYS_NO_PATHCONV=1 msiexec.exe /i "$(cygpath -w "$msi_path")" /qn /norestart \
+                    && chrome_installed; then
                   break
                 fi
                 n=$((n+1))
@@ -847,7 +848,7 @@ commands:
                 fi
               done
               if ! chrome_installed; then
-                echo "ERROR: Chrome not installed after choco install"
+                echo "ERROR: Chrome not installed after MSI install"
                 exit 1
               fi
             fi
@@ -964,6 +965,11 @@ commands:
         description: set to false to skip this job (not relevant to changed files)
         type: boolean
         default: true
+      bun-release:
+        description: pinned Bun release tag passed to https://bun.sh/install (e.g.
+          bun-v1.2.22)
+        type: string
+        default: bun-v1.2.22
     steps:
       - halt-if-skipped:
           guard: << parameters.guard >>
@@ -978,6 +984,39 @@ commands:
           install-chrome: true
           install-chrome-for-testing: true
           install-firefox: true
+      - restore_cache:
+          name: Restore Bun install cache
+          keys:
+            - v1-bun-system-tests-<< parameters.bun-release >>
+      - run:
+          name: Install Bun for Bun package manager system tests
+          command: |
+            set -euo pipefail
+            BUN_RELEASE="<< parameters.bun-release >>"
+
+            if command -v bun >/dev/null 2>&1; then
+              bun --version
+              exit 0
+            fi
+
+            if [[ -x "${HOME}/.bun/bin/bun" ]]; then
+              echo 'export PATH="${HOME}/.bun/bin:${PATH}"' >> "${BASH_ENV}"
+              export PATH="${HOME}/.bun/bin:${PATH}"
+              command -v bun
+              bun --version
+              exit 0
+            fi
+
+            curl -fsSL https://bun.sh/install | bash -s "${BUN_RELEASE}"
+            echo 'export PATH="${HOME}/.bun/bin:${PATH}"' >> "${BASH_ENV}"
+            export PATH="${HOME}/.bun/bin:${PATH}"
+            command -v bun
+            bun --version
+      - save_cache:
+          name: Save Bun install cache
+          key: v1-bun-system-tests-<< parameters.bun-release >>
+          paths:
+            - ~/.bun
       - run:
           name: Run system tests
           environment:
@@ -1084,7 +1123,9 @@ commands:
             NEXT_VERSION=$(node ./cypress/scripts/get-next-version.js)
             cd -
 
-            git checkout $NEXT_VERSION || true
+            # Prefer a `release/<version>` branch (current convention) and
+            # fall back to a bare `<version>` branch for older versions.
+            git checkout "release/$NEXT_VERSION" || git checkout "$NEXT_VERSION" || true
       - when:
           condition: <<parameters.pull_request_id>>
           steps:
@@ -1250,7 +1291,7 @@ commands:
       executor:
         description: The executor in use. Only used if Windows for workaround purposes
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Install yarn if not already installed
@@ -1517,7 +1558,7 @@ commands:
     parameters:
       executor:
         type: executor
-        default: cy-doc
+        default: cy-docker
     steps:
       - run:
           name: Bump NPM version
@@ -2083,6 +2124,9 @@ jobs:
           install-firefox: true
       - run:
           command: yarn workspace @packages/server test-performance
+      - store_artifacts:
+          path: /tmp/artifacts
+          when: always
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
@@ -2108,7 +2152,7 @@ jobs:
       - update_cached_system_tests_deps
 
   binary-system-tests:
-    parallelism: 2
+    parallelism: 5
     working_directory: ~/cypress
     environment:
       <<: *defaultsEnvironment
@@ -2294,10 +2338,11 @@ jobs:
       <<: *defaultsParameters
       resource_class:
         type: string
-        default: medium+
+        default: large
       percy:
         type: boolean
         default: false
+    resource_class: << parameters.resource_class >>
     parallelism: 7
     steps:
       - run-new-ui-tests:
@@ -2493,7 +2538,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/webpack-preprocessor
+          command: node scripts/lerna-build.js --scope=@cypress/webpack-preprocessor
       - run:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
@@ -2544,7 +2589,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vue
+          command: node scripts/lerna-build.js --scope=@cypress/vue
       - run:
           name: Run tests
           command: yarn test
@@ -2560,7 +2605,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/angular
+          command: node scripts/lerna-build.js --scope=@cypress/angular
 
   npm-angular-zoneless:
     <<: *defaults
@@ -2570,7 +2615,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope @cypress/angular-zoneless
+          command: node scripts/lerna-build.js --scope @cypress/angular-zoneless
 
   npm-puppeteer-unit-tests:
     <<: *defaults
@@ -2580,7 +2625,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/puppeteer
+          command: node scripts/lerna-build.js --scope=@cypress/puppeteer
       - run:
           name: Run tests
           command: yarn test
@@ -2590,7 +2635,6 @@ jobs:
 
   npm-puppeteer-cypress-tests:
     <<: *defaults
-    resource_class: small
     steps:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-npm-puppeteer-tests >>
@@ -2611,7 +2655,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/react
+          command: node scripts/lerna-build.js --scope=@cypress/react
       - run:
           name: Run tests
           command: yarn test
@@ -2627,7 +2671,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/vite-plugin-cypress-esm
+          command: node scripts/lerna-build.js --scope=@cypress/vite-plugin-cypress-esm
       - run:
           name: Run tests
           command: yarn test
@@ -2643,7 +2687,7 @@ jobs:
       - restore_cached_workspace
       - run:
           name: Build
-          command: yarn lerna run build --scope=@cypress/mount-utils
+          command: node scripts/lerna-build.js --scope=@cypress/mount-utils
 
   npm-grep:
     <<: *defaults
@@ -2701,7 +2745,7 @@ jobs:
       - run:
           name: Build + Install
           command: |
-            yarn lerna run build --scope=@cypress/schematic
+            node scripts/lerna-build.js --scope=@cypress/schematic
       - run:
           name: Run unit tests
           command: |
@@ -2939,7 +2983,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
       wd:
         description: Working directory, should be OUTSIDE cypress monorepo folder
         type: string
@@ -2979,7 +3023,7 @@ jobs:
       executor:
         description: Executor name to use
         type: executor
-        default: cy-doc
+        default: cy-docker
     <<: *defaults
     resource_class: small
     steps:

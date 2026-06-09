@@ -340,6 +340,8 @@ const installCommand = computed(() => {
       return 'yarn add -D '
     case 'pnpm':
       return 'pnpm add -D '
+    case 'bun':
+      return 'bun add -D '
     default:
       return 'npm install -D '
   }

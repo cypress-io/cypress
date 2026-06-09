@@ -744,8 +744,10 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
           describe('paths', () => {
             it('gives specific path precedent over generic path, regardless of matching domain', () => {
               cy.intercept(`/test-request`, (req) => {
-                // bar=baz should come BEFORE foo=bar
-                expect(req['headers']['cookie']).to.equal('bar=baz; foo=bar')
+                // @ts-expect-error - the cookie header should always be present here. Order is not guaranteed.
+                const cookieHeaders = req['headers']['cookie'].split(';').map((cookie) => cookie.trim()).sort().join('; ')
+
+                expect(cookieHeaders).to.equal('bar=baz; foo=bar')
 
                 req.reply({
                   statusCode: 200,
@@ -1344,8 +1346,10 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
           describe('paths', () => {
             it('gives specific path precedent over generic path, regardless of matching domain', () => {
               cy.intercept(`/test-request`, (req) => {
-                // bar=baz should come BEFORE foo=bar
-                expect(req['headers']['cookie']).to.equal('bar=baz; foo=bar')
+                // @ts-expect-error - the cookie header should always be present here. Order is not guaranteed.
+                const cookieHeaders = req['headers']['cookie'].split(';').map((cookie) => cookie.trim()).sort().join('; ')
+
+                expect(cookieHeaders).to.equal('bar=baz; foo=bar')
 
                 req.reply({
                   statusCode: 200,

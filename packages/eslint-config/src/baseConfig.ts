@@ -270,4 +270,22 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       globals: globals.node,
     },
   },
+
+  // v8 snapshot bundling fails on mixed inline type + value imports
+  {
+    files: [
+      'packages/**/lib/**/*.{js,ts,tsx}',
+      'packages/**/src/**/*.{js,ts,tsx}',
+      'packages/server/**/*.{js,ts,tsx}',
+    ],
+    ignores: [
+      '**/test/**',
+      '**/*.spec.*',
+      '**/cypress/**',
+      '**/__snapshots__/**',
+    ],
+    rules: {
+      'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+    },
+  },
 ]

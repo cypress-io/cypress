@@ -21,6 +21,9 @@ import { getPathToDesktopIndex } from '@packages/resolve-dist'
 
 const debug = debugLib('cypress:server:interactive')
 
+// Must match CYPRESS_OPEN_READY_MESSAGE in cli/lib/exec/spawn.ts
+const CYPRESS_OPEN_READY_MESSAGE = 'Cypress is ready'
+
 const isDev = () => {
   return Boolean(process.env['CYPRESS_INTERNAL_ENV'] === 'development')
 }
@@ -195,6 +198,12 @@ export = {
 
     telemetry.getSpan('startup:time')?.end()
 
-    return this.ready(options, port)
+    const win = await this.ready(options, port)
+
+    if (options.emitWhenReady) {
+      process.stdout.write(`${CYPRESS_OPEN_READY_MESSAGE}\n`)
+    }
+
+    return win
   },
 }

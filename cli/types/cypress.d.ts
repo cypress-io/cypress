@@ -1487,6 +1487,22 @@ declare namespace Cypress {
      */
     get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
+     * Get aliased DOM elements, intercepts, spies, stubs, or wrapped values via `@` prefix.
+     * Use the `S` type parameter to specify the type of the aliased subject.
+     * @see https://on.cypress.io/get#Alias
+     * @example
+     *    // Get the aliased 'todos' elements
+     *    cy.get('ul#todos').as('todos')
+     *    cy.get<JQuery<HTMLLIElement>>('@todos')
+     *
+     *    // Alias a wrapped value and retrieve it with proper typing
+     *    cy.wrap({ name: 'Jane' }).as('user')
+     *    cy.get<{ name: string }>('@user').then((user) => {
+     *      // user is typed as { name: string }
+     *    })
+     */
+    get<S = any>(alias: `@${string}`, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
+    /**
      * Get one or more DOM elements by selector.
      * The querying behavior of this command matches exactly how $(…) works in jQuery.
      * @see https://on.cypress.io/get
@@ -1496,17 +1512,6 @@ declare namespace Cypress {
      *    cy.get('.dropdown-menu').click()
      */
     get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>
-    /**
-     * Get one or more DOM elements by alias.
-     * @see https://on.cypress.io/get#Alias
-     * @example
-     *    // Get the aliased 'todos' elements
-     *    cy.get('ul#todos').as('todos')
-     *    //...hack hack hack...
-     *    //later retrieve the todos
-     *    cy.get('@todos')
-     */
-    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
      * Get a browser cookie by its name.
@@ -3442,6 +3447,7 @@ declare namespace Cypress {
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl' | 'testIsolation'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
+    expose?: Record<string, any>
   }
 
   interface TestConfigOverrides extends Partial<
@@ -3449,6 +3455,7 @@ declare namespace Cypress {
   >, Partial<Pick<ResolvedConfigOptions, 'baseUrl'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
     keystrokeDelay?: number
+    expose?: Record<string, any>
   }
 
   /**

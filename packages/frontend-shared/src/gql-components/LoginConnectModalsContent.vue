@@ -1,8 +1,15 @@
 <template>
-  <template v-if="userProjectStatusStore.isLoginConnectOpen && gqlRef">
+  <AutoProvisionProjectIdModal
+    v-if="gqlRef?.autoProvisionedProjectId"
+    :project-id="gqlRef.autoProvisionedProjectId"
+    :config-file-path="gqlRef.currentProject?.configFileAbsolutePath ?? ''"
+    @close="clearAutoProvisionedProjectId"
+  />
+  <template v-else-if="userProjectStatusStore.isLoginConnectOpen && gqlRef">
     <LoginModal
       v-if="cloudStatusMatches('isLoggedOut') || keepLoginOpen"
       :gql="gqlRef"
+      :auth-flow="userProjectStatusStore.authFlow"
       :utm-medium="userProjectStatusStore.utmMedium"
       :utm-content="userProjectStatusStore.utmContent"
       @cancel="closeLoginConnectModal"
@@ -26,9 +33,10 @@
   </template>
 </template>
 <script setup lang="ts">
-import { gql } from '@urql/vue'
+import { gql, useMutation } from '@urql/vue'
 import type { LoginConnectModalsContentFragment } from '../generated/graphql'
 import LoginModal from './modals/LoginModal.vue'
+import AutoProvisionProjectIdModal from './modals/AutoProvisionProjectIdModal.vue'
 import { ref, watch } from 'vue'
 import { useUserProjectStatusStore } from '../store/user-project-status-store'
 import CloudConnectModals from './modals/CloudConnectModals.vue'
@@ -39,9 +47,11 @@ gql`
 fragment LoginConnectModalsContent on Query {
   ...LoginModal
   ...CloudConnectModals
+  autoProvisionedProjectId
   currentProject {
     id
     currentTestingType
+    configFileAbsolutePath
   }
 }
 `
@@ -52,6 +62,16 @@ const props = defineProps<{
 
 const userProjectStatusStore = useUserProjectStatusStore()
 const { closeLoginConnectModal, cloudStatusMatches } = userProjectStatusStore
+
+const clearAutoProvisionMutation = useMutation(gql`
+  mutation LoginConnectModalsContent_ClearAutoProvisionedProjectId {
+    clearAutoProvisionedProjectId
+  }
+`)
+
+const clearAutoProvisionedProjectId = () => {
+  clearAutoProvisionMutation.executeMutation({})
+}
 
 // use this to hold login open after the transition between logged out and logged in
 // this is to show the temporary "continue" state and its variations

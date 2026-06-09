@@ -30,6 +30,7 @@ jobs:
   main:
     name: Semantic Pull Request
     runs-on: ubuntu-latest
+    environment: ${{ github.event.pull_request.head.repo.full_name != github.repository && 'fork-pr-review' || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6

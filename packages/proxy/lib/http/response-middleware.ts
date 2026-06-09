@@ -199,6 +199,29 @@ function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value
   return setCookie(res, '__cypress.initial', value, remoteState.domainName)
 }
 
+// The `__cypress.unload` cookie is set browser-side on the runner's
+// `beforeunload` so the proxy can redirect a navigation back to the client
+// route if the primary app is navigated away from directly. It is meant to be
+// cleared on the corresponding `unload`/`pagehide` event, but that event is
+// unreliable (especially `unload` in Firefox), so under load the cookie can
+// linger past a super-domain reload. A stale flag then causes
+// `RedirectToClientRouteIfUnloaded` to bounce a later primary-origin
+// navigation (e.g. a cy.origin login redirect) to the client route, leaving
+// the AUT stranded and failing the test.
+//
+// Whenever we serve an injected app document the primary app is loading -
+// definitively NOT in the "navigated away" state the flag exists to recover
+// from - so the flag is stale and is expired here. The genuine
+// "navigated away" recovery is a redirect handled in the request middleware and
+// never reaches response injection, so clearing here cannot undermine it.
+function clearUnloadCookie (res: CypressOutgoingResponse, remoteState: any) {
+  if (!res.wantsInjection) {
+    return
+  }
+
+  return setCookie(res, '__cypress.unload', '', remoteState.domainName)
+}
+
 // "autoplay *; document-domain 'none'" => { autoplay: "*", "document-domain": "'none'" }
 const parseFeaturePolicy = (policy: string): any => {
   const pairs = policy.split('; ').map((directive) => directive.split(' '))
@@ -703,13 +726,13 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 
   const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
 
-  const areCookiesPresent = !cookies || !cookies.length
+  const areCookiesAbsent = !cookies || !cookies.length
 
   span?.setAttributes({
-    areCookiesPresent,
+    areCookiesAbsent,
   })
 
-  if (areCookiesPresent) {
+  if (areCookiesAbsent) {
     setSimulatedCookies(this)
 
     span?.end()
@@ -754,16 +777,6 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     }
   }
 
-  if (!doesTopNeedSimulating) {
-    ([] as string[]).concat(cookies).forEach((cookie) => {
-      appendCookie(cookie)
-    })
-
-    span?.end()
-
-    return this.next()
-  }
-
   const cookiesHelper = new CookiesHelper({
     cookieJar: this.getCookieJar(),
     currentAUTUrl: this.getAUTUrl(),
@@ -779,11 +792,29 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
 
   await cookiesHelper.capturePreviousCookies()
 
+  // Record the response's cookies in our server-side cookie jar (subject to the
+  // same rules the browser would apply via `CookiesHelper.setCookie`) and append
+  // them to the response so the browser sets them too. We update the jar even
+  // when top does not need to be simulated: otherwise a same-origin XHR/fetch
+  // that sets a cookie would update the browser but not the jar, leaving the jar
+  // stale. A later top-level navigation reads from the jar and would overwrite
+  // the request's fresh cookie with the stale value.
+  // See https://github.com/cypress-io/cypress/issues/25841
   ;([] as string[]).concat(cookies).forEach((cookie) => {
     cookiesHelper.setCookie(cookie)
 
     appendCookie(cookie)
   })
+
+  // When top does not need to be simulated, the AUT is the primary super domain
+  // origin and the browser sets the response's cookies itself, so there's no
+  // need to sync cookies into the browser via automation. The server-side cookie
+  // jar has already been kept in sync above.
+  if (!doesTopNeedSimulating) {
+    span?.end()
+
+    return this.next()
+  }
 
   setSimulatedCookies(this)
 
@@ -875,6 +906,7 @@ const CopyResponseStatusCode: ResponseMiddleware = function () {
 
 const ClearCyInitialCookie: ResponseMiddleware = function () {
   setInitialCookie(this.res, this.remoteStates.current(), false)
+  clearUnloadCookie(this.res, this.remoteStates.current())
   this.next()
 }
 

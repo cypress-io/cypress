@@ -1274,6 +1274,7 @@ enum ErrorTypeEnum {
   INJECT_DOCUMENT_DOMAIN_DEPRECATION
   INJECT_DOCUMENT_DOMAIN_E2E_ONLY
   INVALID_CONFIG_OPTION
+  INVALID_CYPRESS_ENV_OVERRIDE
   INVALID_CYPRESS_INTERNAL_ENV
   INVALID_REPORTER_NAME
   INVOKED_BINARY_OUTSIDE_NPM_MODULE
@@ -1299,6 +1300,7 @@ enum ErrorTypeEnum {
   RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR
   SETUP_NODE_EVENTS_IS_NOT_FUNCTION
+  SPEC_FILE_NOT_FOUND
   SUPPORT_FILE_NOT_FOUND
   SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_APPLIED
   SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_SET
@@ -1557,6 +1559,11 @@ type Mutation {
     path: String
   ): Query
 
+  """
+  Clear the auto-provisioned project ID after the user dismisses the manual setup modal
+  """
+  clearAutoProvisionedProjectId: Boolean
+
   """Clears the currently active project"""
   clearCurrentProject: Query
   clearCurrentTestingType: Query
@@ -1740,6 +1747,9 @@ type Mutation {
   """Show system notification via Electron"""
   showSystemNotification(body: String!, title: String!): Boolean
 
+  """Sign up and auth with Cypress Cloud"""
+  signup(utmContent: String, utmMedium: String!, utmSource: String!): Query
+
   """Switch Testing type and relaunch browser"""
   switchTestingTypeAndRelaunch(testingType: TestingTypeEnum!): Boolean
 
@@ -1774,6 +1784,7 @@ enum OverLimitActionTypeEnum {
 }
 
 enum PackageManagerEnum {
+  bun
   npm
   pnpm
   yarn
@@ -1861,6 +1872,11 @@ type PushFragmentPayload {
 type Query {
   """The latest state of the auth process"""
   authState: AuthState!
+
+  """
+  Project ID auto-provisioned during signup that could not be written to the config file automatically
+  """
+  autoProvisionedProjectId: String
   baseError: ErrorWrapper
   cachedUser: CachedUser
 

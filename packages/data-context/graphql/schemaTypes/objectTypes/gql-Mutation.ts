@@ -291,6 +291,21 @@ export const mutation = mutationType({
       },
     })
 
+    t.field('signup', {
+      type: Query,
+      description: 'Sign up and auth with Cypress Cloud',
+      args: {
+        utmMedium: nonNull(stringArg()),
+        utmContent: stringArg(),
+        utmSource: nonNull(stringArg()),
+      },
+      resolve: async (_, args, ctx) => {
+        await ctx.actions.auth.signup(args.utmSource, args.utmMedium, args.utmContent)
+
+        return {}
+      },
+    })
+
     t.field('logout', {
       type: Query,
       description: 'Log out of Cypress Cloud',
@@ -518,6 +533,21 @@ export const mutation = mutationType({
         await ctx.lifecycleManager.refreshLifecycle()
 
         return {}
+      },
+    })
+
+    t.field('clearAutoProvisionedProjectId', {
+      description: 'Clear the auto-provisioned project ID after the user dismisses the manual setup modal',
+      type: 'Boolean',
+      resolve: (_, __, ctx) => {
+        ctx.update((coreData) => {
+          coreData.autoProvisionedProjectId = null
+        })
+
+        ctx.emitter.toApp()
+        ctx.emitter.toLaunchpad()
+
+        return true
       },
     })
 

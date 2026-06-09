@@ -1,3 +1,5 @@
+# [@cypress/vite-dev-server-v7.3.3](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.2...@cypress/vite-dev-server-v7.3.3) (2026-05-20)
+
 # [@cypress/vite-dev-server-v7.3.2](https://github.com/cypress-io/cypress/compare/@cypress/vite-dev-server-v7.3.1...@cypress/vite-dev-server-v7.3.2) (2026-05-09)
 
 

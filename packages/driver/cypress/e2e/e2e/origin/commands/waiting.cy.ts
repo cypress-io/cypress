@@ -281,6 +281,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
         cy.intercept('/foo', {}).as('foo')
 
         cy.origin('http://www.foobar.com:3500', () => {
+          // @ts-expect-error intentionally omitting '@' to test runtime error message
           cy.wait('foo')
         })
       })

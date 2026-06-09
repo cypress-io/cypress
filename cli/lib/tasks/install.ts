@@ -3,7 +3,7 @@ import os from 'os'
 import path from 'path'
 import chalk from 'chalk'
 import Debug from 'debug'
-import { Listr } from 'listr2'
+import { Listr, PRESET_TIMESTAMP } from 'listr2'
 import type { ListrTask, ListrContext } from 'listr2'
 import logSymbols from 'log-symbols'
 import { stripIndent } from 'common-tags'
@@ -307,6 +307,10 @@ const start = async (options: StartOptions = {}): Promise<ListrContext | void> =
   const taskRunner = new Listr(
     tasks,
     {
+      // In CI we want timestamped, line-per-event output. Locally,
+      // the default in-place spinner is the better experience.
+      renderer: util.isCi() ? 'verbose' : 'default',
+      ...(util.isCi() && { rendererOptions: { timestamp: PRESET_TIMESTAMP } }),
       silentRendererCondition: () => logger.logLevel() === 'silent',
     },
   )

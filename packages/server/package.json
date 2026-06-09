@@ -4,8 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit",
+    "build-prod": "yarn ensure-cloud-validations && (tsc || echo 'built, with type errors')",
+    "check-ts": "yarn ensure-cloud-validations && tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "dev": "node index.js",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
@@ -17,7 +17,9 @@
     "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",
     "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
     "test-unit": "node ./test/scripts/run.js --glob-in-dir=test/unit",
-    "test-watch": "./test/scripts/watch test"
+    "test-watch": "./test/scripts/watch test",
+    "sync-cloud-validations": "./scripts/sync-cloud-validations.sh sync",
+    "ensure-cloud-validations": "./scripts/sync-cloud-validations.sh"
   },
   "dependencies": {
     "@cypress/get-windows-proxy": "1.6.3",
@@ -117,7 +119,7 @@
     "tough-cookie": "4.1.3",
     "trash": "7.2.0",
     "tslib": "2.3.1",
-    "tsx": "4.20.6",
+    "tsx": "4.22.4",
     "untildify": "^4.0.0",
     "url-parse": "1.5.10",
     "webdriver": "9.14.0",
@@ -141,6 +143,7 @@
     "@packages/https-proxy": "0.0.0-development",
     "@packages/launcher": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",
+    "@packages/network-interception": "0.0.0-development",
     "@packages/network": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
@@ -168,7 +171,7 @@
     "chai-uuid": "1.0.6",
     "chrome-har-capturer": "0.14.2",
     "devtools-protocol": "0.0.1575685",
-    "esbuild": "^0.25.2",
+    "esbuild": "^0.28.0",
     "eslint": "^9.31.0",
     "eventsource": "2.0.2",
     "globals": "^15.12.0",
@@ -194,7 +197,8 @@
     "tsconfig-paths": "3.10.1",
     "webpack": "^5.88.2",
     "ws": "5.2.4",
-    "xvfb-maybe": "0.2.1"
+    "xvfb-maybe": "0.2.1",
+    "zod": "^3.23.8"
   },
   "files": [
     "config",
