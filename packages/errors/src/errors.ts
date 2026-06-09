@@ -758,6 +758,21 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}`
   },
+  SPEC_FILE_NOT_FOUND: (folderPath: string, patterns: string | string[]) => {
+    const patternList = Array.isArray(patterns) ? patterns : [patterns]
+    const globPaths = patternList.map((pattern) => {
+      const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
+
+      return path.join(resolvedBasePath!, theme.yellow(resolvedPattern!))
+    })
+
+    return errTemplate`\
+        The following ${fmt.flag('--spec')} pattern did not match any spec files and will be ignored:
+
+        ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}
+
+        Other spec files that matched will still run.`
+  },
   RENDERER_CRASHED: (browserName: string) => {
     return errTemplate`\
         We detected that the ${fmt.highlight(browserName)} Renderer process just crashed.

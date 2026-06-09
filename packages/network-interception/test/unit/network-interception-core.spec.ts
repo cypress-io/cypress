@@ -135,4 +135,53 @@ describe('NetworkInterceptionCore', () => {
 
     expect(run).toHaveBeenCalledWith(core)
   })
+
+  it('delegates correlateBrowserPreRequest to requestInterception port', async () => {
+    const correlateBrowserPreRequest = vi.fn().mockResolvedValue(undefined)
+    const core = new NetworkInterceptionCore({
+      requestInterception: { correlateBrowserPreRequest, forwardToOrigin: vi.fn() },
+    })
+    const ctx = { req: {} }
+
+    await core.correlateBrowserPreRequest(ctx)
+
+    expect(correlateBrowserPreRequest).toHaveBeenCalledWith(ctx)
+  })
+
+  it('delegates forwardToOrigin to requestInterception port', () => {
+    const forwardToOrigin = vi.fn()
+    const core = new NetworkInterceptionCore({
+      requestInterception: { correlateBrowserPreRequest: vi.fn(), forwardToOrigin },
+    })
+    const ctx = { req: {} }
+
+    core.forwardToOrigin(ctx)
+
+    expect(forwardToOrigin).toHaveBeenCalledWith(ctx)
+  })
+
+  it('delegates interceptResponse to responseInterception port', async () => {
+    const interceptResponse = vi.fn().mockResolvedValue(undefined)
+    const core = new NetworkInterceptionCore({
+      responseInterception: { interceptResponse },
+    })
+    const ctx = { req: {} }
+
+    await core.interceptResponse(ctx)
+
+    expect(interceptResponse).toHaveBeenCalledWith(ctx)
+  })
+
+  it('throws when requestInterception port is missing', async () => {
+    const core = new NetworkInterceptionCore()
+
+    await expect(core.correlateBrowserPreRequest({})).rejects.toThrow(/requestInterception/)
+    expect(() => core.forwardToOrigin({})).toThrow(/requestInterception/)
+  })
+
+  it('throws when responseInterception port is missing', async () => {
+    const core = new NetworkInterceptionCore()
+
+    await expect(core.interceptResponse({})).rejects.toThrow(/responseInterception/)
+  })
 })

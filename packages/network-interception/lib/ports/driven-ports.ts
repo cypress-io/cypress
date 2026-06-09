@@ -2,14 +2,20 @@
  * Driven port: correlate pre-requests, continue/fulfill, forward to origin.
  */
 export interface ForRequestInterception {
-  // Expanded in Stage 4a.
+  correlateBrowserPreRequest (ctx: unknown): Promise<void>
+
+  /**
+   * HTTP/2 bypass boundary — sends the proxied request to the origin via Node HTTP.
+   * Not used on the browser-automation (CDP Fetch) path in the HTTP/2 program.
+   */
+  forwardToOrigin (ctx: unknown): void
 }
 
 /**
  * Driven port: response intercept continuation and stream plumbing.
  */
 export interface ForResponseInterception {
-  // Expanded in Stage 4a.
+  interceptResponse (ctx: unknown): Promise<void>
 }
 
 /**

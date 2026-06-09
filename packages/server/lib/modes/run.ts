@@ -1164,6 +1164,18 @@ async function ready (options: ReadyOptions) {
     errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
   }
 
+  if (specPatternFromCli) {
+    const rawPatterns = Array.isArray(specPattern) ? specPattern : [specPattern as string]
+    // relativeSpecPattern uses a forward-slash concat and may not strip Windows absolute paths;
+    // fall back to path.relative for any pattern that remains absolute.
+    const relativePatterns = rawPatterns.map((p) => path.isAbsolute(p) ? path.relative(projectRoot, p) : p)
+    const unmatchedPatterns = project.ctx.project.getUnmatchedPatterns(relativePatterns, specs)
+
+    if (unmatchedPatterns.length > 0) {
+      errors.warning('SPEC_FILE_NOT_FOUND', projectRoot, unmatchedPatterns)
+    }
+  }
+
   if (browser.unsupportedVersion && browser.warning) {
     errors.throwErr('UNSUPPORTED_BROWSER_VERSION', browser.warning)
   }

@@ -1,7 +1,7 @@
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { ProxyTimings } from '@packages/types'
-import type { BackendRoute } from '@packages/net-stubbing/lib/server/types'
+import type { BackendRoute } from '@packages/network-interception'
 import type { Protocol } from 'devtools-protocol'
 import type { RequestCredentialLevel, ResourceType } from './resourceTypeAndCredentialManager'
 

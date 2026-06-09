@@ -199,6 +199,29 @@ function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value
   return setCookie(res, '__cypress.initial', value, remoteState.domainName)
 }
 
+// The `__cypress.unload` cookie is set browser-side on the runner's
+// `beforeunload` so the proxy can redirect a navigation back to the client
+// route if the primary app is navigated away from directly. It is meant to be
+// cleared on the corresponding `unload`/`pagehide` event, but that event is
+// unreliable (especially `unload` in Firefox), so under load the cookie can
+// linger past a super-domain reload. A stale flag then causes
+// `RedirectToClientRouteIfUnloaded` to bounce a later primary-origin
+// navigation (e.g. a cy.origin login redirect) to the client route, leaving
+// the AUT stranded and failing the test.
+//
+// Whenever we serve an injected app document the primary app is loading -
+// definitively NOT in the "navigated away" state the flag exists to recover
+// from - so the flag is stale and is expired here. The genuine
+// "navigated away" recovery is a redirect handled in the request middleware and
+// never reaches response injection, so clearing here cannot undermine it.
+function clearUnloadCookie (res: CypressOutgoingResponse, remoteState: any) {
+  if (!res.wantsInjection) {
+    return
+  }
+
+  return setCookie(res, '__cypress.unload', '', remoteState.domainName)
+}
+
 // "autoplay *; document-domain 'none'" => { autoplay: "*", "document-domain": "'none'" }
 const parseFeaturePolicy = (policy: string): any => {
   const pairs = policy.split('; ').map((directive) => directive.split(' '))
@@ -883,6 +906,7 @@ const CopyResponseStatusCode: ResponseMiddleware = function () {
 
 const ClearCyInitialCookie: ResponseMiddleware = function () {
   setInitialCookie(this.res, this.remoteStates.current(), false)
+  clearUnloadCookie(this.res, this.remoteStates.current())
   this.next()
 }
 

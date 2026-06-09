@@ -63,7 +63,7 @@ describe('errors', function () {
 
   describe('getError', () => {
     it('forms full message and creates Error object', async () => {
-      const errObject = errors.childProcessKilled('exit', 'SIGKILL')
+      const errObject = errors.versionMismatch
 
       expect(errObject).toMatchSnapshot()
 
