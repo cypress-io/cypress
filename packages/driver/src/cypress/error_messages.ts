@@ -969,6 +969,29 @@ export default {
     },
     test_stopped: 'Cypress test was stopped while running this command.',
     cross_origin_command ({ commandOrigin, autOrigin, isSkipDomainInjectionEnabled }) {
+      // When the command origin and the AUT origin are identical, the failure
+      // is not because the user forgot to wrap their commands in `cy.origin()`.
+      // Cypress relies on being able to communicate with the AUT, and that
+      // check failed even though the origins match. This usually means the
+      // page was loaded in a way that bypassed the Cypress proxy (e.g. it was
+      // restored from the browser cache, opened in a separate window/tab, or
+      // served by a service worker), so the `document.domain` injection
+      // Cypress depends on to communicate with the application is missing.
+      // Suggesting `cy.origin()` here would be misleading, so we give targeted
+      // guidance instead.
+      if (commandOrigin === autOrigin) {
+        return {
+          message: stripIndent`\
+          The command was expected to run against origin \`${commandOrigin}\`, and while the application is at the same origin, Cypress was unable to communicate with it.
+
+          This usually happens when the application was loaded in a way that bypassed the Cypress proxy — for example, it was restored from the browser cache, opened in a separate window or tab, or served by a service worker — so the \`document.domain\` injection Cypress relies on to communicate with the application is missing.
+
+          To resolve this, make sure the application is loaded through a ${cmd('visit')} so that Cypress can inject the code it needs, and avoid interacting with pages that were opened outside of Cypress' control.
+          `,
+          docsUrl: 'https://on.cypress.io/cy-visit-succeeded-but-commands-fail',
+        }
+      }
+
       return {
         message: stripIndent`\
         The command was expected to run against origin \`${commandOrigin}\` but the application is at origin \`${autOrigin}\`.
