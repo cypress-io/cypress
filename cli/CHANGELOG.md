@@ -1,4 +1,9 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.18.0
+
+**Performance:**
+- Improved cypress open startup time for projects with large numbers of non-Cypress files. The spec watcher now only watches directories implied by specPattern rather than the entire project root. Fixes #26691 (https://github.com/cypress-io/cypress/issues/26691).
+
 ## 15.17.0
 
 **Performance:**

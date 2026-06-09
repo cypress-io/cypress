@@ -682,7 +682,8 @@ describe('startSpecWatcher', () => {
 
       expect(_.debounce).toHaveBeenCalledWith(expect.any(Function), 250)
 
-      expect(chokidar.watch).toHaveBeenCalledWith('.', {
+      // Root-anchored pattern (**) has no base directory → watch root is ['.']
+      expect(chokidar.watch).toHaveBeenCalledWith(['.'], {
         ignoreInitial: true,
         cwd: projectRoot,
         ignored: ['**/node_modules/**', '**/ignore.spec.ts', 'additional.ignore.cy.js', expect.any(Function)],
@@ -690,6 +691,29 @@ describe('startSpecWatcher', () => {
       })
 
       expect(onStub).toHaveBeenCalledWith('all', handleFsChange)
+    })
+
+    it('deduplicates watch roots across multiple specPatterns', async () => {
+      jest.spyOn(chokidar, 'watch').mockImplementation(() => {
+        return { on: jest.fn(), close: () => ({ catch: () => {} }) } as unknown as chokidar.FSWatcher
+      })
+
+      jest.spyOn(_, 'debounce').mockImplementation((fn) => (() => fn()) as _.DebouncedFunc<any>)
+
+      await ctx.project.startSpecWatcher({
+        projectRoot,
+        testingType: 'e2e',
+        // Both patterns have no base → both fall back to '.'; should produce a
+        // single deduplicated watch root rather than two copies.
+        specPattern: ['**/*.cy.ts', '**/*.spec.ts'],
+        configSpecPattern: ['**/*.cy.ts', '**/*.spec.ts'],
+        excludeSpecPattern: [],
+        additionalIgnorePattern: [],
+      })
+
+      const [watchPaths] = (chokidar.watch as jest.Mock).mock.calls[0]
+
+      expect(watchPaths).toEqual(['.'])
     })
 
     it('implements change handler with duplicate result handling', async () => {
