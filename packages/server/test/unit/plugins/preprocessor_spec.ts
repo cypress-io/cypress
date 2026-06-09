@@ -59,6 +59,36 @@ describe('lib/plugins/preprocessor', () => {
       expect(fileUpdated).to.be.calledWith(this.fullFilePath)
     })
 
+    it('watches the file in open mode (isTextTerminal: false)', function () {
+      this.config.isTextTerminal = false
+      preprocessor.getFile(this.filePath, this.config)
+
+      expect(this.plugin.lastCall.args[0].shouldWatch).to.be.true
+    })
+
+    it('does not watch the file in run mode (isTextTerminal: true)', function () {
+      this.config.isTextTerminal = true
+      preprocessor.getFile(this.filePath, this.config)
+
+      expect(this.plugin.lastCall.args[0].shouldWatch).to.be.false
+    })
+
+    it('does not watch the file when watchForFileChanges is false, even in open mode', function () {
+      this.config.isTextTerminal = false
+      this.config.watchForFileChanges = false
+      preprocessor.getFile(this.filePath, this.config)
+
+      expect(this.plugin.lastCall.args[0].shouldWatch).to.be.false
+    })
+
+    it('watches the file when watchForFileChanges is true in open mode', function () {
+      this.config.isTextTerminal = false
+      this.config.watchForFileChanges = true
+      preprocessor.getFile(this.filePath, this.config)
+
+      expect(this.plugin.lastCall.args[0].shouldWatch).to.be.true
+    })
+
     it('invokes plugin again when isTextTerminal: false', function () {
       this.config.isTextTerminal = false
       preprocessor.getFile(this.filePath, this.config)

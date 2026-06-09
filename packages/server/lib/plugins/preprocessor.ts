@@ -86,10 +86,12 @@ const API: PreprocessorAPI = {
 
     if (!(fileObject = fileObjects[filePath])) {
       // we should be watching the file if we are NOT
-      // in a text terminal aka cypress run
+      // in a text terminal aka cypress run, and the user
+      // has not disabled file watching via watchForFileChanges
       // TODO: rename this to config.isRunMode
       // vs config.isInteractiveMode
-      const shouldWatch = !config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
+      const shouldWatch = Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH) ||
+        (!config.isTextTerminal && config.watchForFileChanges !== false)
 
       const baseFilePath = filePath.replace(config.projectRoot, '')
 
