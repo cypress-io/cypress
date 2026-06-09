@@ -184,6 +184,7 @@ describe('NetworkInterceptionCore', () => {
 
     await expect(core.interceptResponse({})).rejects.toThrow(/responseInterception/)
   })
+
   it('delegates document preparation methods to documentPreparation port', async () => {
     const setInjectionLevel = vi.fn().mockResolvedValue(undefined)
     const injectHtml = vi.fn().mockResolvedValue(undefined)
