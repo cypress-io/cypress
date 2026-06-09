@@ -31,7 +31,7 @@ const PROJECT = '/projects/app'
 
 const makeRecord = (overrides: Record<string, any> = {}) => {
   return JSON.stringify({
-    schemaVersion: 1,
+    schemaVersion: 2,
     pid: 1234,
     cypressVersion: '1.2.3',
     projectRoot: PROJECT,
@@ -39,6 +39,7 @@ const makeRecord = (overrides: Record<string, any> = {}) => {
     cdpStatus: 'no_browser',
     cdpHost: null,
     cdpPort: null,
+    cdpBrowserWsUrl: null,
     createdAt: 1700000000000,
     ...overrides,
   })
@@ -161,7 +162,7 @@ describe('lib/runner-discovery', () => {
     it('returns a record with a live CDP endpoint', async () => {
       mockfs({
         [RUNNERS_DIR]: {
-          '111.json': makeRecord({ pid: 111, cdpStatus: 'ready', cdpHost: '127.0.0.1', cdpPort: 9222 }),
+          '111.json': makeRecord({ pid: 111, cdpStatus: 'ready', cdpHost: '127.0.0.1', cdpPort: 9222, cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' }),
         },
       })
 
@@ -171,10 +172,23 @@ describe('lib/runner-discovery', () => {
 
       expect(record.cdpHost).toBe('127.0.0.1')
       expect(record.cdpPort).toBe(9222)
+      expect(record.cdpBrowserWsUrl).toBe('ws://127.0.0.1:9222/devtools/browser/abc')
     })
 
     it('throws NO_BROWSER_ATTACHED when the runner is live but has no browser', async () => {
       mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, cdpStatus: 'no_browser' }) } })
+      stubKill({ alive: [111] })
+
+      await expect(findReadyRunner(PROJECT)).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })
+    })
+
+    it('throws NO_BROWSER_ATTACHED for a ready record missing cdpBrowserWsUrl (pre-v2)', async () => {
+      mockfs({
+        [RUNNERS_DIR]: {
+          '111.json': makeRecord({ pid: 111, cdpStatus: 'ready', cdpHost: '127.0.0.1', cdpPort: 9222, cdpBrowserWsUrl: null }),
+        },
+      })
+
       stubKill({ alive: [111] })
 
       await expect(findReadyRunner(PROJECT)).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })

@@ -257,8 +257,11 @@ export class BrowserCriClient {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
       }
 
-      // Record the live CDP endpoint so other processes can attach. Best-effort.
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpHost: host, cdpPort: port })
+      // Record the live CDP endpoint so other processes can attach. The browser
+      // ws URL lets the CLI connect directly without HTTP-listing targets;
+      // `useHostName` above means it already carries a connectable host.
+      // Best-effort.
+      await runnerDiscovery.update({ cdpStatus: 'ready', cdpHost: host, cdpPort: port, cdpBrowserWsUrl: versionInfo.webSocketDebuggerUrl })
 
       return browserCriClient
     }, browserName, port)
@@ -723,7 +726,7 @@ export class BrowserCriClient {
 
     // Browser is going away — clear the CDP endpoint from the discovery record
     // while leaving the record itself (the server may still be running).
-    await runnerDiscovery.update({ cdpStatus: 'no_browser', cdpHost: null, cdpPort: null })
+    await runnerDiscovery.update({ cdpStatus: 'no_browser', cdpHost: null, cdpPort: null, cdpBrowserWsUrl: null })
 
     if (this.connected === false) {
       debug('browser cri client is already closed')

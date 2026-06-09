@@ -53,7 +53,7 @@ describe('lib/runner-discovery', () => {
       const record = await fs.readJson(recordPath)
 
       expect(record).to.deep.include({
-        schemaVersion: 1,
+        schemaVersion: 2,
         pid: process.pid,
         cypressVersion: pkg.version,
         projectRoot: path.resolve('/some/project'),
@@ -61,6 +61,7 @@ describe('lib/runner-discovery', () => {
         cdpStatus: 'no_browser',
         cdpHost: null,
         cdpPort: null,
+        cdpBrowserWsUrl: null,
       })
 
       expect(record.createdAt).to.be.a('number')
@@ -99,7 +100,7 @@ describe('lib/runner-discovery', () => {
   describe('.update', () => {
     it('merge-patches cdp fields onto the existing record', async () => {
       await runnerDiscovery.write({ projectRoot: '/p', runnerOrigin: 'http://localhost:1' })
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpHost: '127.0.0.1', cdpPort: 9222 })
+      await runnerDiscovery.update({ cdpStatus: 'ready', cdpHost: '127.0.0.1', cdpPort: 9222, cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
 
       const record = await fs.readJson(recordPath)
 
@@ -107,6 +108,7 @@ describe('lib/runner-discovery', () => {
         cdpStatus: 'ready',
         cdpHost: '127.0.0.1',
         cdpPort: 9222,
+        cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
         runnerOrigin: 'http://localhost:1',
       })
     })

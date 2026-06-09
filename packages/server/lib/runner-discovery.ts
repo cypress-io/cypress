@@ -7,7 +7,9 @@ import { getCypressCacheRoot } from './util/cypress-cache'
 const debug = Debug('cypress:server:runner-discovery')
 
 const RUNNERS_DIRNAME = 'runners'
-const SCHEMA_VERSION = 1
+// v2 added cdpBrowserWsUrl; a reader seeing a lower version treats the record
+// as incompatible rather than guessing the missing field.
+const SCHEMA_VERSION = 2
 
 export type CdpStatus = 'no_browser' | 'ready'
 
@@ -31,6 +33,12 @@ export interface RunnerDiscoveryRecord {
   cdpStatus: CdpStatus
   cdpHost: string | null
   cdpPort: number | null
+  /**
+   * The browser-level CDP WebSocket URL (e.g. `ws://host:port/devtools/browser/<id>`).
+   * Non-null only while `cdpStatus` is `ready`. The CLI connects to this
+   * directly, so it never has to HTTP-list targets to discover an endpoint.
+   */
+  cdpBrowserWsUrl: string | null
   /** Wall-clock time of the initial write; a cheap PID-reuse heuristic. */
   createdAt: number
 }
@@ -96,6 +104,7 @@ export const runnerDiscovery = {
       cdpStatus: 'no_browser',
       cdpHost: null,
       cdpPort: null,
+      cdpBrowserWsUrl: null,
       createdAt: Date.now(),
     }
 
@@ -116,7 +125,7 @@ export const runnerDiscovery = {
    * the in-memory record, so a missing file (cleared cache, lost initial write)
    * is re-created rather than silently dropped.
    */
-  async update (patch: Partial<Pick<RunnerDiscoveryRecord, 'cdpStatus' | 'cdpHost' | 'cdpPort'>>): Promise<void> {
+  async update (patch: Partial<Pick<RunnerDiscoveryRecord, 'cdpStatus' | 'cdpHost' | 'cdpPort' | 'cdpBrowserWsUrl'>>): Promise<void> {
     if (isDisabled() || !currentRecord) {
       return
     }
