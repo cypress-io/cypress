@@ -2034,6 +2034,10 @@ export default {
         message: stripIndent`\
           ${cmd(obj.name)} failed because the page updated as a result of this command, but you tried to continue the command chain. The subject is no longer attached to the DOM, and Cypress cannot requery the page after commands such as ${cmd(obj.name)}.
 
+          The subject was found by this query:
+
+          > ${subjectChainToString(obj.subjectChain)}
+
           Common situations why this happens:
             - Your JS framework re-rendered asynchronously
             - Your app code reacted to an event firing and removed the element

@@ -685,6 +685,10 @@ describe('src/cy/commands/assertions', () => {
           // should is present here due to the retry
           expect(names).to.deep.eq(['get', 'click', 'assert'])
           expect(err.message).to.include('`cy.should()` failed because the page updated')
+          // the error should surface the query/subject used so users can
+          // identify which element detached (cypress-io/cypress#31586)
+          expect(err.message).to.include('The subject was found by this query:')
+          expect(err.message).to.include('<button')
 
           done()
         })
