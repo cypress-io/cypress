@@ -158,7 +158,11 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
 
   debug('detecting if the following browsers are present %o', goalBrowsers)
 
-  return Bluebird.mapSeries(goalBrowsers, checkBrowser)
+  // Each browser definition is detected independently (spawning `--version`,
+  // reading plists, or stat-ing install paths), so detect them concurrently
+  // rather than serially. `Bluebird.map` preserves input order in its results,
+  // so `removeDuplicateBrowsers` (keeps the first match) is unaffected.
+  return Bluebird.map(goalBrowsers, checkBrowser)
   .then((val) => _.flatten(val))
   .then(compactFalse)
   .then(removeDuplicateBrowsers)
