@@ -429,6 +429,60 @@ describe('Cookie Behavior', { browser: '!webkit' }, () => {
               })
             })
           })
+
+          // document-level requests (navigations, images, scripts, stylesheets, etc.) are not
+          // fetch/xhr, so they fall through to the "default" cookie-attachment branch. A real
+          // browser sends lax/strict/none cookies on these requests when they are same-site, so
+          // the server-side cookie jar (which simulates the AUT being top) must too - even when
+          // the request does not originate from the AUT frame. This is the multi-host SSO / OIDC
+          // pattern where, inside cy.origin(), the app hops between sibling subdomains.
+          // @see https://github.com/cypress-io/cypress/issues/29719
+          describe('document / sub-resource requests', () => {
+            it('attaches same-site cookies to a sub-resource request, even though it is cross-origin and not from the AUT frame', () => {
+              // the sub-resource is requested from a sibling subdomain (app.foobar.com) of the
+              // cy.origin under test (www.foobar.com): same site, different origin. an <img> is a
+              // document-level sub-resource (its resourceType is not fetch/xhr) and is never tagged
+              // as the AUT frame, so it exercises the exact code path as the failing SSO navigation
+              // in the linked issue, but deterministically.
+              cy.intercept(`${scheme}://app.foobar.com:${crossOriginPort}/test-sub-resource*`, (req) => {
+                expect(req['headers']['cookie']).to.equal('foo1=bar1')
+
+                req.reply({
+                  statusCode: 200,
+                  headers: { 'content-type': 'text/plain' },
+                  body: 'ok',
+                })
+              }).as('subResourceCheck')
+
+              cy.visit('/fixtures/primary-origin.html')
+              cy.get(`a[data-cy="cookie-${scheme}"]`).click()
+
+              // cookie jar should now mimic http://www.foobar.com:3500 / https://foobar.com:3502 as top
+              cy.origin(originUrl, {
+                args: {
+                  scheme,
+                  sameOriginPort,
+                  crossOriginPort,
+                },
+              }, ({ scheme, sameOriginPort, crossOriginPort }) => {
+                cy.window().then((win) => {
+                  // set a registrable-domain-scoped cookie via a same-origin request so it lives in
+                  // the server-side cookie jar. the browser withholds it from the third-party AUT
+                  // iframe, so it can only reach app.foobar.com if the cookie jar attaches it.
+                  return cy.wrap(window.makeRequest(win, `${scheme}://www.foobar.com:${sameOriginPort}/set-cookie?cookie=foo1=bar1; Domain=foobar.com`, 'xmlHttpRequest'))
+                })
+
+                cy.window().then((win) => {
+                  const img = win.document.createElement('img')
+
+                  img.src = `${scheme}://app.foobar.com:${crossOriginPort}/test-sub-resource?cachebust=${Date.now()}`
+                  win.document.body.appendChild(img)
+                })
+
+                cy.wait('@subResourceCheck')
+              })
+            })
+          })
         })
 
         describe('cross site / cross origin', () => {
