@@ -1,9 +1,9 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.17.1
 
-**Bugfixes:**
+**Misc:**
 
-- Fixed an issue where a `CYPRESS_BROWSERS` environment variable set to a plain string (for example `CYPRESS_BROWSERS=chrome`) crashed Cypress during startup with an opaque `TypeError: a.map is not a function`. Cypress now reports a clear error explaining that `browsers` must be an array and that a specific browser should be selected with `--browser` instead. Fixes [#33198](https://github.com/cypress-io/cypress/issues/33198).
+- Fixed an issue where a `CYPRESS_BROWSERS` environment variable set to a plain string (for example `CYPRESS_BROWSERS=chrome`) crashed Cypress during startup with an opaque `TypeError: a.map is not a function`. Cypress now reports a clear error explaining that `browsers` must be an array and that a specific browser should be selected with `--browser` instead. Addresses [#33198](https://github.com/cypress-io/cypress/issues/33198).
 
 ## 15.17.0
 
