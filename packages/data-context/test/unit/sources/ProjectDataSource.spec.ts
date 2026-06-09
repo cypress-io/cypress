@@ -574,6 +574,44 @@ describe('_makeSpecWatcher', () => {
     expect(Array.from(allFiles)).not.toContain(SPEC_FILE1)
     expect(Array.from(allFiles)).not.toContain(SUPPORT_FILE)
   })
+
+  it('does not watch folders passed via ignoreFolders (e.g. Cypress output folders)', async function () {
+    const DOWNLOADS_DIR = path.join('cypress', 'downloads')
+    const DOWNLOADED_SPEC = path.join(DOWNLOADS_DIR, 'downloaded.cy.js')
+
+    specWatcher = ctx.project._makeSpecWatcher({
+      projectRoot: specWatcherPath,
+      specPattern: ['**/*.{cy,spec}.{ts,js}'],
+      excludeSpecPattern: ['**/ignore.spec.ts'],
+      additionalIgnorePattern: [],
+      ignoreFolders: [path.resolve(specWatcherPath, DOWNLOADS_DIR)],
+    })
+
+    await new Promise((resolve) => specWatcher.once('ready', resolve))
+
+    const allFiles = new Set()
+
+    specWatcher.on('add', (filePath) => allFiles.add(filePath))
+    specWatcher.on('change', (filePath) => allFiles.add(filePath))
+
+    await Promise.all([
+      ctx.actions.file.writeFileInProject(SPEC_FILE1, '// foo'),
+      // a spec-shaped file living inside the ignored downloads folder
+      ctx.actions.file.writeFileInProject(DOWNLOADED_SPEC, '// foo'),
+    ])
+
+    let attempt = 0
+
+    while (!allFiles.has(SPEC_FILE1) && attempt++ <= 100) {
+      await delay(10)
+    }
+
+    // give the watcher a beat to (incorrectly) pick up the ignored file
+    await delay(250)
+
+    expect(Array.from(allFiles)).toContain(SPEC_FILE1)
+    expect(Array.from(allFiles)).not.toContain(DOWNLOADED_SPEC)
+  })
 })
 
 describe('startSpecWatcher', () => {
@@ -630,6 +668,15 @@ describe('startSpecWatcher', () => {
       ctx = createTestDataContext('open')
 
       ctx.coreData.currentProject = projectRoot
+
+      // startSpecWatcher reads the resolved config to determine which output
+      // folders to exclude from the watcher. The config manager isn't wired up
+      // in these unit tests, so stub it out.
+      jest.spyOn(ctx.project, 'getConfig').mockResolvedValue({
+        downloadsFolder: path.join(projectRoot, 'cypress', 'downloads'),
+        screenshotsFolder: path.join(projectRoot, 'cypress', 'screenshots'),
+        videosFolder: path.join(projectRoot, 'cypress', 'videos'),
+      } as any)
     })
 
     it('throws if no current project defined', async () => {

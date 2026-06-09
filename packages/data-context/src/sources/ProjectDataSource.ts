@@ -369,6 +369,18 @@ export class ProjectDataSource {
       throw new Error('Cannot start spec watcher without current project')
     }
 
+    // Cypress's own output folders (downloadsFolder, screenshotsFolder,
+    // videosFolder) never contain specs, so there is no reason to watch them.
+    // On Windows, chokidar keeps a directory handle open for every watched
+    // directory, which puts a folder into a delete-pending state if a user
+    // tries to remove it mid-test (e.g. clearing the downloadsFolder). The
+    // folder then becomes unreadable/unwritable until Cypress exits. Ignoring
+    // these folders keeps them deletable. See #32832.
+    const config = await this.getConfig()
+    const ignoreFolders = ([config.downloadsFolder, config.screenshotsFolder, config.videosFolder] as Array<string | false | undefined>)
+    .filter((folder): folder is string => typeof folder === 'string' && folder.length > 0)
+    .map((folder) => path.resolve(projectRoot, folder))
+
     // When file system changes are detected, we retrieve any spec files matching
     // the determined specPattern. This function is debounced to limit execution
     // during sequential file operations.
@@ -403,13 +415,14 @@ export class ProjectDataSource {
       specPattern,
       excludeSpecPattern,
       additionalIgnorePattern,
+      ignoreFolders,
     })
 
     // the 'all' event includes: add, addDir, change, unlink, unlinkDir
     this._specWatcher.on('all', onProjectFileSystemChange)
   }
 
-  _makeSpecWatcher ({ projectRoot, specPattern, excludeSpecPattern, additionalIgnorePattern }: { projectRoot: string, excludeSpecPattern: string[], additionalIgnorePattern: string[], specPattern: string[] }) {
+  _makeSpecWatcher ({ projectRoot, specPattern, excludeSpecPattern, additionalIgnorePattern, ignoreFolders = [] }: { projectRoot: string, excludeSpecPattern: string[], additionalIgnorePattern: string[], specPattern: string[], ignoreFolders?: string[] }) {
     return chokidar.watch('.', {
       ignoreInitial: true,
       ignorePermissionErrors: true,
@@ -418,6 +431,16 @@ export class ProjectDataSource {
         // Add a extra safe to prevent watching node_modules, in case the glob
         // pattern is not taken into account by the ignored
         if (file.includes('node_modules')) {
+          return true
+        }
+
+        // Never watch Cypress's own output folders (downloads, screenshots,
+        // videos). Holding a watch handle on them prevents a user from deleting
+        // them mid-test on Windows. See #32832. path.resolve tolerates both
+        // absolute and project-relative paths from chokidar.
+        const absoluteFile = path.resolve(projectRoot, file)
+
+        if (ignoreFolders.some((folder) => absoluteFile === folder || absoluteFile.startsWith(`${folder}${path.sep}`))) {
           return true
         }
 
