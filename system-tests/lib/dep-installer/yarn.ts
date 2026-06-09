@@ -1,14 +1,9 @@
 import path from 'path'
 import tempDir from 'temp-dir'
 import { homedir } from 'os'
-import type { InstallCommand } from './types'
+import type { InstallCommand, InstallCommandOpts } from './types'
 
-export function getYarnCommand (opts: {
-  yarnV311: boolean
-  updateLockFile: boolean
-  isCI: boolean
-  runScripts: boolean
-}): InstallCommand {
+export function getYarnCommand (opts: InstallCommandOpts): InstallCommand {
   let cmd = `yarn install`
 
   if (opts.yarnV311) {
@@ -20,7 +15,9 @@ export function getYarnCommand (opts: {
     return { cmd }
   }
 
-  cmd += ' --prefer-offline --ignore-engines'
+  cmd += ' --prefer-offline'
+
+  if (opts.ignoreEngines) cmd += ' --ignore-engines'
 
   if (!opts.runScripts) cmd += ' --ignore-scripts'
 

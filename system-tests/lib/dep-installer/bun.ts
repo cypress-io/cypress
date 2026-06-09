@@ -1,14 +1,9 @@
 import path from 'path'
 import tempDir from 'temp-dir'
 import { homedir } from 'os'
-import type { InstallCommand } from './types'
+import type { InstallCommand, InstallCommandOpts } from './types'
 
-export function getBunCommand (opts: {
-  yarnV311: boolean
-  updateLockFile: boolean
-  isCI: boolean
-  runScripts: boolean
-}): InstallCommand {
+export function getBunCommand (opts: InstallCommandOpts): InstallCommand {
   let cmd = 'bun install'
 
   if (opts.yarnV311) throw new Error('_cyYarnV311 is not supported with BUN.')

@@ -28,6 +28,11 @@ type SystemTestPkgJson = {
    * option, if set, will cause postinstall scripts to run for this project.
    */
   _cyRunScripts?: boolean
+  /**
+   * Pass `--ignore-engines` to `yarn install` for projects whose dependencies
+   * declare Node engine requirements that Cypress CI does not satisfy.
+   */
+  _cyIgnoreEngines?: boolean
   dependencies?: Dependencies
   devDependencies?: Dependencies
   optionalDependencies?: Dependencies
@@ -280,6 +285,7 @@ export async function scaffoldProjectNodeModules ({
       yarnV311: pkgJson._cyYarnV311,
       isCI: !!process.env.CI,
       runScripts: pkgJson._cyRunScripts,
+      ignoreEngines: pkgJson._cyIgnoreEngines,
     })
 
     await runCmd(cmd)

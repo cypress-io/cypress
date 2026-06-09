@@ -1,14 +1,9 @@
 import path from 'path'
 import tempDir from 'temp-dir'
 import { homedir } from 'os'
-import type { InstallCommand } from './types'
+import type { InstallCommand, InstallCommandOpts } from './types'
 
-export function getNpmCommand (opts: {
-  yarnV311: boolean
-  updateLockFile: boolean
-  isCI: boolean
-  runScripts: boolean
-}): InstallCommand {
+export function getNpmCommand (opts: InstallCommandOpts): InstallCommand {
   // `npm ci` is undesirable here since it won't use our `node_modules` cache
   // https://github.com/npm/cli/issues/564
   let cmd = 'npm install --force'

@@ -133,6 +133,7 @@ You can also set special properties in a test project's `package.json` to influe
 `_cySkipDepInstall` | `boolean` | If `true`, skip the automatic `yarn install` or `npm install` for this package, even though it has a `package.json`.
 `_cyYarnV311` | `boolean` | Run the yarn v3.1.1-style install command instead of yarn v1-style.
 `_cyRunScripts` | `boolean` | By default, the automatic install will not run postinstall scripts. This option, if set, will cause postinstall scripts to run for this project.
+`_cyIgnoreEngines` | `boolean` | Pass `--ignore-engines` to `yarn install` for projects whose dependencies declare Node engine requirements that Cypress CI does not satisfy.
 
 Run `yarn projects:yarn:install` to run `yarn install`/`npm install` for all applicable projects.
 
