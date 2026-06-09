@@ -4,6 +4,7 @@
 **Performance:**
 
 - The Command Log no longer becomes progressively unresponsive when moving the mouse in and out of a test's command list during long tests. Hovering over the command area previously triggered a style recalculation across the entire list of commands, causing a delay that grew with the number of commands logged. Fixes [#33179](https://github.com/cypress-io/cypress/issues/33179).
+- Browser detection on startup is now faster for `cypress open` and `cypress run`. The installed browsers Cypress knows about were previously probed one at a time; they are now detected in parallel, reducing the delay before the run starts or the launchpad appears, most noticeably on machines with several browsers installed. Addressed in [#XXXX](https://github.com/cypress-io/cypress/pull/XXXX).
 
 **Features:**
 
