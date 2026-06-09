@@ -623,6 +623,18 @@ export class Reporter {
       outerTest.err = test.err
     }
 
+    // When a test is ultimately skipped via `this.skip()`, it ends in a 'pending'
+    // state. If it previously failed and was retried (e.g. a conditional skip after
+    // a retry), those earlier failed attempts must not be reported to Cypress Cloud,
+    // otherwise the failed -> skipped transition is misread as flaky. A flaky test
+    // both fails AND passes within the same run, which never happens here. Drop the
+    // failed attempts so the test is recorded as pending/skipped, matching the state
+    // shown in the local Cypress app.
+    // https://github.com/cypress-io/cypress/issues/31782
+    const prevAttempts = outerTest.state === 'pending'
+      ? (outerTest.prevAttempts || []).filter((attempt) => attempt.state !== 'failed')
+      : (outerTest.prevAttempts || [])
+
     const normalizedTest = {
       testId: orNull(outerTest.id),
       title: getTitlePath(outerTest),
@@ -633,7 +645,7 @@ export class Reporter {
           ? outerTest.err.stack
           : null,
       ),
-      attempts: _.map((outerTest.prevAttempts || []).concat([test]), (attempt): ReporterTestAttempt => {
+      attempts: _.map(prevAttempts.concat([test]), (attempt): ReporterTestAttempt => {
         const errSource = attempt.err
         const err = errSource ? {
           name: typeof errSource === 'object' ? errSource.name : undefined,

@@ -256,5 +256,53 @@ describe('lib/reporter', () => {
         expect(reporter.normalizeTest({ id: 'r4', state: 'bogus', prevAttempts: [] }).state).to.be.null
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/31782
+    // A test that fails, is retried, and then is conditionally skipped via
+    // `this.skip()` ends in a 'pending' state. The earlier failed attempts must
+    // not be reported, otherwise Cypress Cloud misreads the failed -> skipped
+    // transition as flaky.
+    describe('skipped after a failed retry', () => {
+      it('drops failed prior attempts when the test ends pending', () => {
+        const result = reporter.normalizeTest({
+          id: 'r4',
+          state: 'pending',
+          prevAttempts: [{ state: 'failed', err: { name: 'Error', message: 'boom' } }],
+        })
+
+        expect(result.state).to.equal('pending')
+        expect(result.attempts).to.have.length(1)
+        expect(result.attempts[0].state).to.equal('pending')
+        expect(result.attempts[0].error).to.be.null
+        expect(result.displayError).to.be.null
+      })
+
+      it('preserves non-failed prior attempts when the test ends pending', () => {
+        const result = reporter.normalizeTest({
+          id: 'r4',
+          state: 'pending',
+          prevAttempts: [{ state: 'passed' }],
+        })
+
+        expect(result.state).to.equal('pending')
+        expect(result.attempts).to.have.length(2)
+        expect(result.attempts[0].state).to.equal('passed')
+        expect(result.attempts[1].state).to.equal('pending')
+      })
+
+      it('retains failed prior attempts for non-pending outcomes', () => {
+        const result = reporter.normalizeTest({
+          id: 'r4',
+          state: 'failed',
+          err: { name: 'Error', message: 'boom' },
+          prevAttempts: [{ state: 'failed', err: { name: 'Error', message: 'boom' } }],
+        })
+
+        expect(result.state).to.equal('failed')
+        expect(result.attempts).to.have.length(2)
+        expect(result.attempts[0].state).to.equal('failed')
+        expect(result.attempts[1].state).to.equal('failed')
+      })
+    })
   })
 })
