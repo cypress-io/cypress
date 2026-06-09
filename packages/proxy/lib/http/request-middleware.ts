@@ -123,15 +123,20 @@ const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
 
 const FormatCookiesIfApplicable: RequestMiddleware = function () {
   if (this.req.headers['x-cypress-is-webdriver-bidi'] && this.req.headers.cookie) {
-    const cookies = this.req.headers.cookie
-    // in the case of BiDi, cookies come in as foo=bar;bar=baz and not foo=bar; bar=baz,
-    // i.e. they are delimited differently, which impacts some of our tests and our cookie splicing.
-    // this regex is to help make sure the cookies are fed in consistently
-    const bidiStyleCookie = /;\S/gm
-
-    if (cookies.match(bidiStyleCookie)) {
-      this.req.headers.cookie = cookies.replaceAll(';', '; ')
-    }
+    // In the case of BiDi, cookies come in as `foo=bar;bar=baz` and not `foo=bar; bar=baz`,
+    // i.e. they are delimited differently, which impacts some of our tests and our cookie
+    // splicing (which splits on '; '). Normalize every pair delimiter to exactly '; '.
+    //
+    // We split on ';' — which can only be a pair delimiter in a Cookie header, since cookie
+    // values may not contain a bare ';' per RFC 6265 — and re-join. Unlike a blunt
+    // `replaceAll(';', '; ')`, this does not introduce a double space on pairs that already
+    // happen to be spaced (e.g. a mixed `foo=bar; bar=baz;qux=quux` header), which could
+    // otherwise yield a malformed cookie sent upstream.
+    this.req.headers.cookie = this.req.headers.cookie
+    .split(';')
+    .map((pair) => pair.trim())
+    .filter(Boolean)
+    .join('; ')
   }
 
   delete this.req.headers['x-cypress-is-webdriver-bidi']

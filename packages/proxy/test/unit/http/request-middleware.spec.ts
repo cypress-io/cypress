@@ -320,6 +320,26 @@ describe('http/request-middleware', () => {
         expect(ctx.req.headers['cookie']).toEqual('foo=bar; bar=baz; qux=quux')
         expect(ctx.req.headers!['x-cypress-is-webdriver-bidi']).toBeUndefined()
       })
+
+      it('normalizes a mixed-delimiter cookie header without introducing double spaces', async () => {
+        const ctx = {
+          req: {
+            headers: {
+              'x-cypress-is-webdriver-bidi': true,
+              cookie: 'foo=bar; bar=baz;qux=quux',
+            },
+          },
+          res: {
+            on: (event, listener) => {},
+            off: (event, listener) => {},
+          },
+        }
+
+        await testMiddleware([FormatCookiesIfApplicable], ctx)
+
+        expect(ctx.req.headers['cookie']).toEqual('foo=bar; bar=baz; qux=quux')
+        expect(ctx.req.headers!['x-cypress-is-webdriver-bidi']).toBeUndefined()
+      })
     })
   })
 
