@@ -3,6 +3,7 @@ import winVersionInfo from 'win-version-info'
 import _ from 'lodash'
 import * as windowsHelper from '../../lib/windows'
 import { knownBrowsers } from '../../lib/known-browsers'
+import { utils } from '../../lib/utils'
 import fs from 'fs-extra'
 import os from 'os'
 import type { Browser } from '@packages/types'
@@ -141,6 +142,10 @@ describe('windows browser detection', () => {
 
       return { FileVersion: browser?.version }
     })
+
+    // by default, no Microsoft Store package is installed - prevents
+    // accidentally spawning a real `powershell.exe` process during tests
+    vi.spyOn(utils, 'execa').mockResolvedValue({ stdout: '' } as any)
   })
 
   it('detects browsers as expected', async () => {
@@ -264,6 +269,43 @@ describe('windows browser detection', () => {
 
     expect(mappedBrowsers.map((browser) => browser.version).sort()).toEqual(['100', '200', '300'])
     expect(mappedBrowsers).toMatchSnapshot()
+  })
+
+  // @see https://github.com/cypress-io/cypress/issues/32256
+  it('detects Firefox installed from the Microsoft Store', async () => {
+    // mock uninstalling Firefox from all of the known static paths so that
+    // detection has to fall back to querying the Microsoft Store
+    const foundFirefoxInstalls = _.remove(mockBrowsers, (browser) => browser.path.includes('Firefox'))
+
+    expect(foundFirefoxInstalls).toHaveLength(4)
+
+    // `Get-AppxPackage -Name Mozilla.Firefox` resolves the versioned, access
+    // restricted install location under `WindowsApps`
+    const installLocation = 'C:/Program Files/WindowsApps/Mozilla.Firefox_141.0.3.0_x64__n80bbvh6b1yt2'
+
+    vi.mocked(utils.execa).mockResolvedValue({ stdout: `${installLocation}\n` } as any)
+
+    mockBrowsers.push({
+      path: `${installLocation}/VFS/ProgramFiles/Firefox Package Root/firefox.exe`,
+      version: '141.0.3.0',
+    })
+
+    const firefox = _.find(knownBrowsers, { name: 'firefox', channel: 'stable' })! as Browser
+
+    const foundBrowser = await windowsHelper.detect(firefox)
+
+    expect(foundBrowser.version).toEqual('141.0.3.0')
+    expect(utils.execa).toHaveBeenCalledWith('powershell.exe', expect.arrayContaining([expect.stringContaining('Get-AppxPackage -Name Mozilla.Firefox')]))
+  })
+
+  // @see https://github.com/cypress-io/cypress/issues/32256
+  it('does not query the Microsoft Store when Firefox is found at a known path', async () => {
+    const firefox = _.find(knownBrowsers, { name: 'firefox', channel: 'stable' })! as Browser
+
+    const foundBrowser = await windowsHelper.detect(firefox)
+
+    expect(foundBrowser.version).toEqual('72')
+    expect(utils.execa).not.toHaveBeenCalled()
   })
 
   it('detects Chromium 64-bit install', async () => {
