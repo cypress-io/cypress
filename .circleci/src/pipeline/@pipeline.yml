@@ -5,10 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "149.0.7827.53"
+chrome-stable-version: &chrome-stable-version "149.0.7827.102"
 chrome-beta-version: &chrome-beta-version "150.0.7871.4"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.54"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.55"
 firefox-stable-version: &firefox-stable-version "151.0.1"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
