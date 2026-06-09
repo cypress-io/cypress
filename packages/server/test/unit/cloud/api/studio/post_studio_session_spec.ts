@@ -1,9 +1,13 @@
 import { SystemError } from '../../../../../lib/cloud/network/system_error'
 import { proxyquire } from '../../../../spec_helper'
-import os from 'os'
-import pkg from '@packages/root'
 import { ParseKinds } from '../../../../../lib/cloud/network/fetch'
 import sinon from 'sinon'
+
+const standardHeaders = {
+  'x-os-name': 'test-os',
+  'x-cypress-version': 'test-version',
+  'x-machine-id': 'test-machine-id',
+}
 
 describe('postStudioSession', () => {
   let postStudioSession: typeof import('@packages/server/lib/cloud/api/studio/post_studio_session').postStudioSession
@@ -14,6 +18,9 @@ describe('postStudioSession', () => {
     postStudioSession = (proxyquire('@packages/server/lib/cloud/api/studio/post_studio_session', {
       '../../network/fetch': {
         postFetch: postFetchStub,
+      },
+      '../get_standard_headers': {
+        getStandardHeaders: sinon.stub().resolves(standardHeaders),
       },
     }) as typeof import('@packages/server/lib/cloud/api/studio/post_studio_session')).postStudioSession
   })
@@ -40,8 +47,7 @@ describe('postStudioSession', () => {
         parse: ParseKinds.JSON,
         headers: {
           'Content-Type': 'application/json',
-          'x-os-name': os.platform(),
-          'x-cypress-version': pkg.version,
+          ...standardHeaders,
         },
         body: JSON.stringify({ projectSlug: '12345', studioMountVersion: 1, protocolMountVersion: 2 }),
       },
