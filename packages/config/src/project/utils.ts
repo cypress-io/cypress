@@ -25,6 +25,15 @@ import { isPlainObject } from '../validation'
 
 const debug = Debug('cypress:config:project:utils')
 
+// In run mode we always force numTestsKeptInMemory to 0 because keeping tests
+// in memory prevents us from capturing snapshots properly when recording to
+// protocol. The CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY env var is an
+// escape hatch (used by the Cypress driver tests that exercise snapshotting)
+// to honor whatever value the user configured.
+export function shouldHonorNumTestsKeptInMemory () {
+  return process.env.CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY === 'true'
+}
+
 const hideSpecialVals = function (val: string, key: string) {
   if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
     return hideKeys(val)
@@ -481,9 +490,11 @@ export function mergeDefaults (
     // dont ever watch for file changes
     config.watchForFileChanges = false
 
-    // and forcibly reset numTestsKeptInMemory
-    // to zero
-    config.numTestsKeptInMemory = 0
+    // and forcibly reset numTestsKeptInMemory to zero unless the user has
+    // explicitly opted in to honoring the configured value via env var
+    if (!shouldHonorNumTestsKeptInMemory()) {
+      config.numTestsKeptInMemory = 0
+    }
   }
 
   config = setResolvedConfigValues(config, defaultsForRuntime, resolved)

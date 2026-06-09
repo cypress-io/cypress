@@ -1101,9 +1101,17 @@ describe('config/src/project/utils', () => {
     })
 
     it('resets numTestsKeptInMemory to 0 when runMode', async function () {
-      const cfg = await defaults('numTestsKeptInMemory', 0, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      const cfg = await defaults('numTestsKeptInMemory', 0, { projectRoot: '/foo/bar/', supportFile: false, numTestsKeptInMemory: 50 }, { isTextTerminal: true })
 
       expect(cfg.numTestsKeptInMemory).toEqual(0)
+    })
+
+    it('honors numTestsKeptInMemory in runMode when CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY=true', async function () {
+      vi.stubEnv('CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY', 'true')
+
+      const cfg = await defaults('numTestsKeptInMemory', 50, { projectRoot: '/foo/bar/', supportFile: false, numTestsKeptInMemory: 50 }, { isTextTerminal: true })
+
+      expect(cfg.numTestsKeptInMemory).toEqual(50)
     })
 
     it('resets watchForFileChanges to false when runMode', async function () {
