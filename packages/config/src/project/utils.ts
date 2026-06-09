@@ -21,7 +21,7 @@ import {
 } from '../browser'
 import { hideKeys, setUrls, coerce } from '../utils'
 import { options } from '../options'
-import { isPlainObject } from '../validation'
+import { isPlainObject, isValidBrowserList } from '../validation'
 
 const debug = Debug('cypress:config:project:utils')
 
@@ -502,6 +502,24 @@ export function mergeDefaults (
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   }, testingType)
+
+  // `browsers` is omitted from the validation above because it is typically an empty
+  // array at this point and is populated with the list of detected browsers later (see
+  // buildBaseFullConfig). A non-array value still needs to be rejected here though,
+  // otherwise it slips through and crashes when the browser list is mapped over - e.g.
+  // a `CYPRESS_BROWSERS=chrome` env var coerces `browsers` to a string.
+  // https://github.com/cypress-io/cypress/issues/33198
+  if (config.browsers != null && !Array.isArray(config.browsers)) {
+    const validationResult = isValidBrowserList('browsers', config.browsers)
+
+    if (_.isString(validationResult)) {
+      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
+    }
+
+    if (validationResult !== true) {
+      return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
+    }
+  }
 
   config = setAbsolutePaths(config)
 
