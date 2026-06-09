@@ -15,7 +15,7 @@
       @click="handleBrowserChoice(browser)"
     >
       <component
-        :is="allBrowsersIcons[browser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
+        :is="getBrowserIcon(browser.displayName)"
         class="mr-[16px] min-w-[26px] w-[26px] min-h-[45px]"
         :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
         alt=""
@@ -78,7 +78,7 @@ import { VerticalBrowserListItems_SetBrowserDocument } from '../../generated/gra
 import type { VerticalBrowserListItemsFragment } from '../../generated/graphql'
 import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { getBrowserIcon } from '@packages/frontend-shared/src/assets/browserLogos'
 import Tooltip from '../../components/Tooltip.vue'
 import _ from 'lodash'
 

@@ -49,7 +49,7 @@
           </Tooltip>
           <div class="text-center">
             <component
-              :is="allBrowsersIcons[browser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
+              :is="getBrowserIcon(browser.displayName)"
               alt=""
               class="h-[40px] w-[40px] inline"
               :class="{ 'filter grayscale': browser.disabled || !browser.isVersionSupported }"
@@ -158,7 +158,7 @@ import { useI18n } from '@cy/i18n'
 import Button from '@cypress-design/vue-button'
 import { computed } from 'vue'
 import { useMutation, gql, useSubscription } from '@urql/vue'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { getBrowserIcon } from '@packages/frontend-shared/src/assets/browserLogos'
 import TestingTypeComponentIcon from '~icons/cy/testing-type-component_x16'
 import TestingTypeE2EIcon from '~icons/cy/testing-type-e2e_x16'
 import ExportIcon from '~icons/cy/export_x16'

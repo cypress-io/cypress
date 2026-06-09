@@ -16,7 +16,7 @@
         >
           <template #heading>
             <component
-              :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
+              :is="getBrowserIcon(selectedBrowser.displayName)"
               class="min-w-[16px] w-[16px]"
               :alt="selectedBrowser.majorVersion ? `${selectedBrowser.displayName} ${selectedBrowser.majorVersion}` : selectedBrowser.displayName"
             />
@@ -133,7 +133,7 @@ import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 
 import VerticalBrowserListItems from '@packages/frontend-shared/src/gql-components/topnav/VerticalBrowserListItems.vue'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { getBrowserIcon } from '@packages/frontend-shared/src/assets/browserLogos'
 import { useStudioStore } from '../store/studio-store'
 import { useExternalLink } from '@cy/gql-components/useExternalLink'
 import StudioButton from '../studio/StudioButton.vue'

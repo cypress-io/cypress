@@ -106,7 +106,7 @@
   >
     <template #heading="{ open }">
       <component
-        :is="allBrowsersIcons[props.gql.currentProject.activeBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
+        :is="getBrowserIcon(props.gql.currentProject.activeBrowser.displayName)"
         v-if="props.gql?.currentProject?.activeBrowser?.displayName"
         class="w-[16px] filter group-hocus:grayscale-0"
         data-cy="top-nav-active-browser-icon"
@@ -197,7 +197,7 @@
 import TopNavListItem from './TopNavListItem.vue'
 import TopNavList from './TopNavList.vue'
 import PromptContent from './PromptContent.vue'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { getBrowserIcon } from '@packages/frontend-shared/src/assets/browserLogos'
 import { gql, useMutation } from '@urql/vue'
 import { TopNav_SetPromptShownDocument } from '../../generated/graphql'
 import type { TopNavFragment } from '../../generated/graphql'

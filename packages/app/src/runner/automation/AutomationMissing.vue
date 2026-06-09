@@ -21,7 +21,7 @@
         >
           <template #heading>
             <component
-              :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
+              :is="getBrowserIcon(selectedBrowser.displayName)"
               class="min-w-[16px] w-[16px]"
             />
             {{ selectedBrowser.displayName }} {{ selectedBrowser.majorVersion }}
@@ -56,7 +56,7 @@ import VerticalBrowserListItems from '@cy/gql-components/topnav/VerticalBrowserL
 import type { AutomationMissingFragment } from '../../generated/graphql'
 import SpecRunnerDropdown from '../SpecRunnerDropdown.vue'
 import { ref } from 'vue'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { getBrowserIcon } from '@packages/frontend-shared/src/assets/browserLogos'
 import Alert from '@packages/frontend-shared/src/components/Alert.vue'
 import ErrorOutlineIcon from '~icons/cy/status-errored-outline_x16.svg'
 

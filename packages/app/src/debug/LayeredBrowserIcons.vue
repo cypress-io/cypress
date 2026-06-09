@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { getBrowserIcon } from '@packages/frontend-shared/src/assets/browserLogos'
 
 interface LayeredProps {
   browsers: string[]
@@ -32,7 +32,7 @@ const results = computed(() => {
   if (props.browsers) {
     return props.browsers.map((browserType) => {
       return {
-        icon: allBrowsersIcons[browserType?.toLowerCase()] || allBrowsersIcons.generic,
+        icon: getBrowserIcon(browserType),
         name: `browser-icon-${browserType.toLowerCase().replaceAll(' ', '_')}`,
       }
     })

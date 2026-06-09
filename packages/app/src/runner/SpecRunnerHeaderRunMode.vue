@@ -13,7 +13,7 @@
         <SpecRunnerDropdown data-cy="select-browser">
           <template #heading>
             <component
-              :is="allBrowsersIcons[selectedBrowser.displayName?.toLowerCase()] || allBrowsersIcons.generic"
+              :is="getBrowserIcon(selectedBrowser.displayName)"
               v-if="selectedBrowser.displayName"
               class="min-w-[16px] w-[16px]"
               :alt="selectedBrowser.majorVersion ? `${selectedBrowser.displayName} ${selectedBrowser.majorVersion}` : selectedBrowser.displayName"
@@ -56,7 +56,7 @@ import { computed } from 'vue'
 import { useAutStore } from '../store'
 import Tag from '@cypress-design/vue-tag'
 import SpecRunnerDropdown from './SpecRunnerDropdown.vue'
-import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
+import { getBrowserIcon } from '@packages/frontend-shared/src/assets/browserLogos'
 import { useAutHeader } from './useAutHeader'
 
 const displayScale = computed(() => {
