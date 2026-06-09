@@ -225,8 +225,18 @@ describe('shouldAttachAndSetCookies', () => {
       expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', 'http://www.foobar.com:3500/index.html')).toBe(true)
     })
 
-    it('returns false if the resource type is unknown and the request does NOT come from the AUTFrame', () => {
-      // possibly a navigation request for a document or another resource. If this is the case, attach cookies based on the siteContext and cookies should be attached regardless
+    it('returns true if the resource type is unknown and the request is same-site, even when it does NOT come from the AUTFrame', () => {
+      // navigations/documents between sibling subdomains of the same site send lax/strict/none
+      // cookies in a real browser, so the cookie jar must attach them too. this is what makes
+      // multi-host SSO flows inside cy.origin() (e.g. idp.example.com -> api.example.com) work.
+      expect(shouldAttachAndSetCookies('https://api.google.com/authorize/consent', 'https://idp.google.com', undefined, undefined, false)).toBe(true)
+      // same-site even with a different scheme-allowed port and no AUT frame flag
+      expect(shouldAttachAndSetCookies('https://app.google.com/index.html', 'https://staging.google.com')).toBe(true)
+    })
+
+    it('returns false if the resource type is unknown and the request is cross-site and does NOT come from the AUTFrame', () => {
+      // a cross-site document request that is not the AUT frame navigating could be a genuine
+      // third-party iframe; the browser would withhold cookies, so the cookie jar should too
       expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl)).toBe(false)
     })
   })

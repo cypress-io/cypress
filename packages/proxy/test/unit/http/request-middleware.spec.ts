@@ -460,8 +460,20 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers['cookie']).toEqual('jar=cookie')
     })
 
-    it(`otherwise, does not allow setting cookies if request type cannot be determined and is not from the AUT and is cross-origin`, async function () {
+    // @see https://github.com/cypress-io/cypress/issues/29719
+    it(`allows setting cookies on request if resource type cannot be determined and is same-site, even when it does NOT come from the AUT frame (e.g. a script-initiated navigation between sibling subdomains in a multi-host SSO flow)`, async function () {
       const ctx = await getContext([], ['jar=cookie'], 'http://foobar.com/index.html', 'http://app.foobar.com/index.html')
+
+      ctx.req.resourceType = undefined
+      ctx.req.credentialsLevel = undefined
+      ctx.req.isAUTFrame = false
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      expect(ctx.req.headers['cookie']).toEqual('jar=cookie')
+    })
+
+    it(`otherwise, does not allow setting cookies if request type cannot be determined and is not from the AUT and is cross-site`, async function () {
+      const ctx = await getContext([], ['jar=cookie'], 'http://foobar.com/index.html', 'http://barbaz.com/index.html')
 
       ctx.req.resourceType = undefined
       ctx.req.credentialsLevel = undefined

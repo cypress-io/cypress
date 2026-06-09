@@ -59,8 +59,16 @@ export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | u
 
       return false
     default:
-      // if we cannot determine a resource level or it isn't applicable,, we likely should store the cookie as it is a navigation or another event as long as the context is same-origin
-      if (siteContext === 'same-origin' || isAutFrame) {
+      // if we cannot determine a resource type or it isn't applicable, this is likely a
+      // navigation or other document-level request. A browser attaches/sets lax, strict, and
+      // none cookies on same-origin AND same-site requests, so the cookie jar (which simulates
+      // the AUT being top) should too. This is critical for multi-host auth flows (e.g. OIDC/SSO)
+      // where, inside cy.origin(), the app navigates between sibling subdomains of the same
+      // site (idp.example.com -> api.example.com) - the session cookies set on one subdomain
+      // must travel to the other, just as they would if the AUT were the top-level page.
+      // For cross-site requests we still require the AUT frame (a top-level navigation being
+      // simulated as top), since the browser would otherwise withhold the cookies.
+      if (siteContext === 'same-origin' || siteContext === 'same-site' || isAutFrame) {
         return true
       }
 
