@@ -21,7 +21,7 @@ import {
 } from '../browser'
 import { hideKeys, setUrls, coerce } from '../utils'
 import { options } from '../options'
-import { isPlainObject, isValidBrowserList } from '../validation'
+import { isPlainObject } from '../validation'
 
 const debug = Debug('cypress:config:project:utils')
 
@@ -510,15 +510,7 @@ export function mergeDefaults (
   // a `CYPRESS_BROWSERS=chrome` env var coerces `browsers` to a string.
   // https://github.com/cypress-io/cypress/issues/33198
   if (config.browsers != null && !Array.isArray(config.browsers)) {
-    const validationResult = isValidBrowserList('browsers', config.browsers)
-
-    if (_.isString(validationResult)) {
-      return errors.throwErr('CONFIG_VALIDATION_MSG_ERROR', null, null, validationResult)
-    }
-
-    if (validationResult !== true) {
-      return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
-    }
+    return errors.throwErr('CONFIG_BROWSERS_INVALID', config.browsers)
   }
 
   config = setAbsolutePaths(config)

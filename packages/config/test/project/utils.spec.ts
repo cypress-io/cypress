@@ -903,12 +903,7 @@ describe('config/src/project/utils', () => {
         await mergeDefaults(cfg, { testingType: 'e2e' }, {}, getFilesByGlob)
         throw new Error('Expected error to be thrown')
       } catch (err: any) {
-        expect(errors.throwErr).toHaveBeenCalledWith(
-          'CONFIG_VALIDATION_MSG_ERROR',
-          null,
-          null,
-          'Browsers should be an array',
-        )
+        expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_BROWSERS_INVALID', 'chrome')
       }
     })
 

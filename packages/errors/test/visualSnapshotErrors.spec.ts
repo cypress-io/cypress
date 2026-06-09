@@ -746,6 +746,11 @@ describe('visual error templates', () => {
         noFileType: [null, null, '`something` was not right'],
       }
     },
+    CONFIG_BROWSERS_INVALID: () => {
+      return {
+        default: ['chrome'],
+      }
+    },
     RENAMED_CONFIG_OPTION: () => {
       return {
         default: [{ name: 'oldName', newName: 'newName' }],

@@ -963,6 +963,24 @@ export const AllCypressErrors = {
 
       Instead the value was: ${fmt.stringify(value)}`
   },
+  CONFIG_BROWSERS_INVALID: (browsers: any) => {
+    return errTemplate`\
+        The ${fmt.highlight(`browsers`)} configuration value must be an array of browser objects, but it was set to:
+
+        ${fmt.stringify(browsers)}
+
+        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine — it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
+
+        To run your tests in a specific browser, remove that value and pass the browser by name instead:
+
+        ${fmt.terminal(`cypress run --browser chrome`)}
+
+        ...or, with the Module API:
+
+        ${fmt.code(`cypress.run({ browser: 'chrome' })`)}
+
+        https://on.cypress.io/launching-browsers`
+  },
   RENAMED_CONFIG_OPTION: (arg1: { name: string, newName: string }) => {
     return errTemplate`\
         The ${fmt.highlight(arg1.name)} configuration option you have supplied has been renamed.
