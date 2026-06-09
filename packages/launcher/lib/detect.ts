@@ -166,6 +166,11 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   .then((val) => _.flatten(val))
   .then(compactFalse)
   .then(removeDuplicateBrowsers)
+  .then((browsers) => {
+    debug('detected browsers %o', browsers.map((b) => `${b.name}:${b.channel}@${b.version}`))
+
+    return browsers
+  })
 }
 
 export const detectByPath = (
