@@ -5,6 +5,10 @@
 
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
 
+**Misc:**
+
+- Cypress now shows a clear error explaining that `browsers` must be an array and that a specific browser should be selected with `--browser` when a `CYPRESS_BROWSERS` environment variable is set to a plain string (for example `CYPRESS_BROWSERS=chrome`) instead of showing an opaque `TypeError: a.map is not a function` error. Addresses [#33198](https://github.com/cypress-io/cypress/issues/33198).
+
 ## 15.17.0
 
 **Performance:**

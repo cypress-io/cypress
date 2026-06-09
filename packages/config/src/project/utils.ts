@@ -503,6 +503,16 @@ export function mergeDefaults (
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   }, testingType)
 
+  // `browsers` is omitted from the validation above because it is typically an empty
+  // array at this point and is populated with the list of detected browsers later (see
+  // buildBaseFullConfig). A non-array value still needs to be rejected here though,
+  // otherwise it slips through and crashes when the browser list is mapped over - e.g.
+  // a `CYPRESS_BROWSERS=chrome` env var coerces `browsers` to a string.
+  // https://github.com/cypress-io/cypress/issues/33198
+  if (config.browsers != null && !Array.isArray(config.browsers)) {
+    return errors.throwErr('CONFIG_BROWSERS_INVALID', config.browsers)
+  }
+
   config = setAbsolutePaths(config)
 
   config = setNodeBinary(config, options.userNodePath, options.userNodeVersion)
