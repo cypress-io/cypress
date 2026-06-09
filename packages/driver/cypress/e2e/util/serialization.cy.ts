@@ -750,6 +750,70 @@ describe('Log Serialization', () => {
         expect(consoleProps.props['Applied To']).to.be.instanceOf(HTMLInputElement)
         expect(consoleProps.props['Applied To'].getAttribute('pattern')).to.equal('^(([^<>()[\\]\\\\.,;:\\s@"]+))$')
       })
+
+      // https://github.com/cypress-io/cypress/issues/32827
+      it('reifies a log against the real DOM when attribute values contain double quotes (e.g. JSON)', () => {
+        // Attach a real element to the AUT document so reifyElement matches it against the rendered DOM
+        // via a generated attribute selector. Without escaping the double quotes in the value, the
+        // selector throws a "Syntax error, unrecognized expression" and the real element cannot be
+        // located, causing it to fall back to a synthetic, detached element.
+        cy.document().then((doc) => {
+          const button = doc.createElement('button')
+
+          button.id = 'testBtn'
+          button.setAttribute('data-prop1', '{"test": "str"}')
+          button.setAttribute('value', '')
+          doc.body.appendChild(button)
+
+          try {
+            const attributes = {
+              id: 'testBtn',
+              'data-prop1': '{"test": "str"}',
+              value: '',
+            }
+
+            const mockPreprocessedLogAttrs = {
+              $el: [
+                {
+                  attributes,
+                  innerHTML: '',
+                  serializationKey: 'dom',
+                  tagName: 'BUTTON',
+                },
+              ],
+              chainerId: 'mock-chainer-id',
+              consoleProps: {
+                name: 'get',
+                type: 'command',
+                props: {
+                  ['Applied To']: {
+                    attributes,
+                    innerHTML: '',
+                    serializationKey: 'dom',
+                    tagName: 'BUTTON',
+                  },
+                },
+              },
+              id: 'mock-log-id',
+              instrument: 'command',
+              name: 'get',
+              state: 'passed',
+              testId: 'r4',
+            }
+
+            const { $el, consoleProps } = reifyLogFromSerialization(mockPreprocessedLogAttrs)
+
+            expect($el.length).to.equal(1)
+            // the reified element should be the actual element on the page, not a synthetic detached copy
+            expect($el[0]).to.equal(button)
+            expect($el[0].isConnected).to.be.true
+            expect($el[0].getAttribute('data-prop1')).to.equal('{"test": "str"}')
+            expect(consoleProps.props['Applied To']).to.equal(button)
+          } finally {
+            button.remove()
+          }
+        })
+      })
     })
   })
 
