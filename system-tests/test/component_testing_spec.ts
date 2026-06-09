@@ -90,15 +90,19 @@ describe(`Angular CLI versions`, () => {
     })
   }
 
-  // NOTE: Angular 21 has to be tested separate because it uses the zoneless mount function,
+  // NOTE: Angular 21+ has to be tested separately because it uses the zoneless mount function,
   // which doesn't support zone.js any longer OR support autoDetectChanges or autoSpyOutputs
-  systemTests.it(`v21 with mount tests`, {
-    project: `angular-21`,
-    spec: 'src/**/*.cy.ts,!src/app/errors.cy.ts',
-    testingType: 'component',
-    browser: 'chrome',
-    expectedExitCode: 0,
-  })
+  const ZONELESS_ANGULAR_VERSIONS = ['21', '22'] as const
+
+  for (const version of ZONELESS_ANGULAR_VERSIONS) {
+    systemTests.it(`v${version} with mount tests`, {
+      project: `angular-${version}`,
+      spec: 'src/**/*.cy.ts,!src/app/errors.cy.ts',
+      testingType: 'component',
+      browser: 'chrome',
+      expectedExitCode: 0,
+    })
+  }
 
   systemTests.it('angular 19 custom config', {
     project: 'angular-custom-config',

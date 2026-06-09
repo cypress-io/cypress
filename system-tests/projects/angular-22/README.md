@@ -1,0 +1,1 @@
+NOTE: Angular 22 comes zoneless by default and uses `cypress/angular-zoneless` for component testing mount. This project is a standalone fixture (not merged from `project-fixtures/angular`).

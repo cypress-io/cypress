@@ -6,7 +6,7 @@ Mount Angular components in the open source [Cypress.io](https://www.cypress.io/
 
 ## Requirements
 
-- Angular 21.0.0 or Angular 20.0.0 with development preview of zoneless change detection
+- Angular 22.0.0, Angular 21.0.0, or Angular 20.0.0 with development preview of zoneless change detection
 
 ## Development
 

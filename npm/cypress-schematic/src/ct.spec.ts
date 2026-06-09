@@ -31,7 +31,11 @@ const copyAngularMount = async (projectPath: string, options: { copyZonelessMoun
 
 const cypressSchematicPackagePath = path.join(__dirname, '..')
 
-const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-20', 'angular-21']
+const ANGULAR_PROJECTS: ProjectFixtureDir[] = ['angular-20', 'angular-21', 'angular-22']
+
+const isZonelessAngularProject = (project: ProjectFixtureDir) => {
+  return project === 'angular-21' || project === 'angular-22'
+}
 
 const timeout = 1000 * 60 * 5
 
@@ -55,15 +59,15 @@ describe('ng add @cypress/schematic / e2e and ct', function () {
 
       it('should install ct files with option and no component specs', async () => {
         await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
-        await copyAngularMount(projectPath, { copyZonelessMount: project === 'angular-21' })
+        await copyAngularMount(projectPath, { copyZonelessMount: isZonelessAngularProject(project) })
         await runCommandInProject('yarn ng run angular:ct --watch false --spec src/app/app.component.cy.ts', projectPath)
       }, timeout)
 
       it('should generate component alongside component spec', async () => {
         await runCommandInProject('yarn ng add @cypress/schematic --e2e --component', projectPath)
         // make sure to copy the zoneless mount function for angular 21+
-        await copyAngularMount(projectPath, { copyZonelessMount: project === 'angular-21' })
-        if (project === 'angular-21') {
+        await copyAngularMount(projectPath, { copyZonelessMount: isZonelessAngularProject(project) })
+        if (isZonelessAngularProject(project)) {
           // our angular 21 project is a pure standalone project, so we need to pass in the --standalone flag to ignore module generation.
           // this may be no longer true if we update the schematic dependencies
           await runCommandInProject('yarn ng generate c foo --standalone', projectPath)

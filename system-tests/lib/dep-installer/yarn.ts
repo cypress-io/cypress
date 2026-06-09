@@ -20,7 +20,7 @@ export function getYarnCommand (opts: {
     return { cmd }
   }
 
-  cmd += ' --prefer-offline'
+  cmd += ' --prefer-offline --ignore-engines'
 
   if (!opts.runScripts) cmd += ' --ignore-scripts'
 

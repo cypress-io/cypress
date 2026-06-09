@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.18.0
+
+**Features:**
+
+- `Angular` version 22 is now supported within component testing, including Launchpad project detection and the `@cypress/schematic` Angular CLI integration. Addresses [#33753](https://github.com/cypress-io/cypress/issues/33753).
+
 ## 15.17.0
 
 **Performance:**
