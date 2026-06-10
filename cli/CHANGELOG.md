@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where the [`before:spec`](https://on.cypress.io/before-spec-api) plugin event fired twice for the same spec when a test navigated to a cross-origin URL via `cy.visit()`. The event now fires exactly once per spec run, regardless of how many times the runner page reloads internally during cross-origin navigation. Fixes [#26300](https://github.com/cypress-io/cypress/issues/26300).
 - Fixed an issue where setting [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) to a value greater than `0` from `setupNodeEvents` would take effect during `cypress run`, which could prevent snapshots from being captured correctly when recording Test Replay to Cypress Cloud. During `cypress run`, `numTestsKeptInMemory` is now always treated as `0` regardless of how it is configured. Fixes [#31167](https://github.com/cypress-io/cypress/issues/31167).
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
 
