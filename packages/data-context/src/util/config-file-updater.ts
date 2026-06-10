@@ -29,7 +29,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
 
   let objectLiteralNode: namedTypes.ObjectExpression | undefined
 
-  function handleExport (nodePath: NodePath<namedTypes.CallExpression, any> | NodePath<namedTypes.ObjectExpression, any>): void {
+  function handleExport (nodePath: NodePath<namedTypes.CallExpression, any> | NodePath<namedTypes.ObjectExpression, any>, unwrapDefault = false): void {
     if (nodePath.node.type === 'CallExpression'
         && nodePath.node.callee.type === 'Identifier') {
       const functionName = nodePath.node.callee.name
@@ -40,6 +40,20 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
     }
 
     if (nodePath.node.type === 'ObjectExpression' && !nodePath.node.properties.find((prop) => prop.type !== 'ObjectProperty')) {
+      // When the config is exported via CommonJS as `module.exports = { default: defineConfig({...}) }`,
+      // Cypress resolves the actual config from the `default` property (see `configFileExport.default || configFileExport`
+      // in run_require_async_child). Recurse into that property so values land inside the real config object
+      // rather than the outer interop wrapper.
+      if (unwrapDefault) {
+        const defaultPropertyIndex = nodePath.node.properties.findIndex((prop) => {
+          return prop.type === 'ObjectProperty' && matchKey(prop, 'default')
+        })
+
+        if (defaultPropertyIndex !== -1) {
+          return handleExport(nodePath.get('properties', defaultPropertyIndex, 'value'))
+        }
+      }
+
       objectLiteralNode = nodePath.node
       debug('found object literal %o', objectLiteralNode)
 
@@ -54,7 +68,7 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
       if (nodePath.node.left.type === 'MemberExpression') {
         if (nodePath.node.left.object.type === 'Identifier' && nodePath.node.left.object.name === 'module'
         && nodePath.node.left.property.type === 'Identifier' && nodePath.node.left.property.name === 'exports') {
-          handleExport(nodePath.get('right'))
+          handleExport(nodePath.get('right'), true)
         }
       }
 
@@ -74,8 +88,12 @@ export async function insertValueInJSString (fileContents: string, obj: Record<s
     throw errors.get('COULD_NOT_UPDATE_CONFIG_FILE', obj, 'No export could be found')
   }
 
-  setRootKeysSplicers(splicers, obj, objectLiteralNode, '  ', errors)
-  setSubKeysSplicers(splicers, obj, objectLiteralNode, '  ', '  ', errors)
+  // derive the indentation from the config object's location so inserted values
+  // align with the surrounding config (e.g. when nested inside `{ default: defineConfig({...}) }`)
+  const propertyIndentation = `${getNodeIndentation(fileContents, objectLiteralNode)}  `
+
+  setRootKeysSplicers(splicers, obj, objectLiteralNode, propertyIndentation, errors)
+  setSubKeysSplicers(splicers, obj, objectLiteralNode, '  ', propertyIndentation, errors)
 
   // sort splicers to keep the order of the original file
   const sortedSplicers = splicers.sort((a, b) => a.start === b.start ? 0 : a.start > b.start ? 1 : -1)
@@ -303,4 +321,14 @@ interface Splicer{
 function matchKey (prop: namedTypes.ObjectProperty, key: string): boolean {
   return prop.key.type === 'Identifier' && prop.key.name === key
     || prop.key.type === 'StringLiteral' && prop.key.value === key
+}
+
+// returns the leading whitespace of the line where the node begins, so newly
+// inserted values can be indented one level deeper than the config object itself
+function getNodeIndentation (fileContents: string, node: namedTypes.ObjectExpression): string {
+  const start = (node as any).start
+  const lineStart = fileContents.lastIndexOf('\n', start - 1) + 1
+  const leadingWhitespace = fileContents.slice(lineStart, start).match(/^\s*/)
+
+  return leadingWhitespace ? leadingWhitespace[0] : ''
 }

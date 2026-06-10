@@ -157,6 +157,74 @@ describe('lib/util/config-file-updater', () => {
 
           expect(output).toEqual(expectedOutput)
         })
+
+        it('inserts into the nested config when exported via a `default` interop wrapper (es5)', async () => {
+          const src = stripIndent`\
+              const { defineConfig } = require('cypress')
+              module.exports = {
+                default: defineConfig({
+                  foo: 42,
+                })
+              }
+            `
+
+          const expectedOutput = stripIndent`\
+              const { defineConfig } = require('cypress')
+              module.exports = {
+                default: defineConfig({
+                  projectId: 'id1234',
+                  viewportWidth: 400,
+                  foo: 42,
+                })
+              }
+            `
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234', viewportWidth: 400 }, errors)
+
+          expect(output).toEqual(expectedOutput)
+        })
+
+        it('inserts into the nested object when exported via a `default` interop wrapper without defineConfig (es5)', async () => {
+          const src = stripIndent`\
+              module.exports = {
+                default: {
+                  foo: 42,
+                }
+              }
+            `
+
+          const expectedOutput = stripIndent`\
+              module.exports = {
+                default: {
+                  projectId: 'id1234',
+                  foo: 42,
+                }
+              }
+            `
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234' }, errors)
+
+          expect(output).toEqual(expectedOutput)
+        })
+
+        it('does not unwrap a `default` key for an `export default` object literal (es6)', async () => {
+          const src = stripIndent`\
+              export default {
+                default: 42,
+              }
+            `
+
+          const expectedOutput = stripIndent`\
+              export default {
+                projectId: 'id1234',
+                default: 42,
+              }
+            `
+
+          const output = await insertValueInJSString(src, { projectId: 'id1234' }, errors)
+
+          expect(output).toEqual(expectedOutput)
+        })
       })
 
       describe('updates', () => {
