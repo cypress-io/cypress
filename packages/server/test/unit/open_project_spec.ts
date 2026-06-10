@@ -220,6 +220,22 @@ describe('lib/open_project', () => {
         openProject.getProject()._server = { socket: { changeToUrl: sinon.stub() }, setPreRequestTimeout: sinon.stub() }
       })
 
+      it('falls back to spec.name when relativeToCommonRoot is absent', async function () {
+        const specWithoutRelativeRoot = { name: 'basic.cy.ts', absolute: '/abs/basic.cy.ts', relative: 'cypress/e2e/basic.cy.ts' }
+
+        await openProject.launch(this.browser, specWithoutRelativeRoot)
+
+        const middlewareCall = this.automation.use.args.find((args) => args[0] && args[0].onBeforeRequest)
+
+        expect(middlewareCall, 'onBeforeRequest middleware should have been registered').to.exist
+
+        const { onBeforeRequest } = middlewareCall[0]
+        const data = {}
+
+        await onBeforeRequest('take:screenshot', data)
+        expect(data.specName).to.equal('basic.cy.ts')
+      })
+
       it('uses relativeToCommonRoot from the spec set by changeUrlToSpec, not from the stale launch closure', async function () {
         const emptySpec = { name: '', absolute: '', relative: '' }
 

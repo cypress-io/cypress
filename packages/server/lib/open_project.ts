@@ -126,7 +126,9 @@ export class OpenProject extends EventEmitter {
       automation.use({
         onBeforeRequest<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> {
           if (message === 'take:screenshot') {
-            data.specName = (projectBase?.spec as SpecWithRelativeRoot | null)?.relativeToCommonRoot ?? ''
+            const activeSpec = projectBase?.spec as SpecWithRelativeRoot | null
+
+            data.specName = activeSpec?.relativeToCommonRoot ?? activeSpec?.name ?? ''
 
             return data
           }
