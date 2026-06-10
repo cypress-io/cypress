@@ -25,7 +25,14 @@ const omitConfigReadOnlyDifferences = (objectLikeConfig: Cypress.ObjectLike) => 
       return
     }
 
-    if ((overrideLevels === 'never' && configKey !== 'isDefaultProtocolEnabled')) {
+    // Cross-origin syncing applies the diff via Cypress.config() at run-time, so omit any
+    // value that cannot be set that way. `never` values are read-only, and `suiteOrTest`
+    // values (e.g. viewportWidth/viewportHeight) can only be set via suite-/test-level
+    // overrides. Viewport is synced to spec bridges via state, not config, so it is safe to omit.
+    if (
+      (overrideLevels === 'never' && configKey !== 'isDefaultProtocolEnabled') ||
+      overrideLevels === 'suiteOrTest'
+    ) {
       delete objectLikeConfig[configKey]
     }
   })
@@ -115,15 +122,22 @@ export const validateConfig = (state: State, config: Record<string, any>, skipCo
   const mochaOverrideLevel = getMochaOverrideLevel(state)
 
   if (!skipConfigOverrideValidation && mochaOverrideLevel !== 'restoring') {
-    const isSuiteOverride = mochaOverrideLevel === 'suite'
+    // `mochaOverrideLevel` is 'suite'/'test' when applying suite-/test-level config
+    // overrides (describe/it). Any other value (e.g. undefined) means the config is being
+    // mutated at run-time via Cypress.config() during test execution.
+    const currentOverrideLevel = mochaOverrideLevel === 'suite' || mochaOverrideLevel === 'test'
+      ? mochaOverrideLevel
+      : undefined
 
-    validateOverridableAtRunTime(config, isSuiteOverride, (validationResult) => {
+    validateOverridableAtRunTime(config, currentOverrideLevel, (validationResult) => {
       let errKey = 'config.cypress_config_api.read_only'
 
       if (validationResult.supportedOverrideLevel === 'global_only') {
         errKey = 'config.invalid_mocha_config_override.global_only'
       } else if (validationResult.supportedOverrideLevel === 'suite') {
         errKey = 'config.invalid_mocha_config_override.suite_only'
+      } else if (validationResult.supportedOverrideLevel === 'suiteOrTest') {
+        errKey = 'config.cypress_config_api.suite_or_test_only'
       } else if (mochaOverrideLevel) {
         errKey = 'config.invalid_mocha_config_override.read_only'
       }

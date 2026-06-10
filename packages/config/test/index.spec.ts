@@ -225,7 +225,7 @@ describe('config/src/index', () => {
     it('calls onError handler if configuration override level=never', () => {
       const errorFn = vi.fn()
 
-      configUtil.validateOverridableAtRunTime({ chromeWebSecurity: false }, false, errorFn)
+      configUtil.validateOverridableAtRunTime({ chromeWebSecurity: false }, undefined, errorFn)
 
       expect(errorFn).toHaveBeenCalledTimes(1)
       expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
@@ -238,19 +238,27 @@ describe('config/src/index', () => {
       it('does not calls onError handler if validating level is suite', () => {
         const errorFn = vi.fn()
 
-        const isSuiteOverride = true
-
-        configUtil.validateOverridableAtRunTime({ testIsolation: true }, isSuiteOverride, errorFn)
+        configUtil.validateOverridableAtRunTime({ testIsolation: true }, 'suite', errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(0)
       })
 
-      it('calls onError handler if validating level is not suite', () => {
+      it('calls onError handler if validating level is test', () => {
         const errorFn = vi.fn()
 
-        const isSuiteOverride = false
+        configUtil.validateOverridableAtRunTime({ testIsolation: 'off' }, 'test', errorFn)
 
-        configUtil.validateOverridableAtRunTime({ testIsolation: 'off' }, isSuiteOverride, errorFn)
+        expect(errorFn).toHaveBeenCalledTimes(1)
+        expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
+          invalidConfigKey: 'testIsolation',
+          supportedOverrideLevel: 'suite',
+        }))
+      })
+
+      it('calls onError handler if validating level is run-time', () => {
+        const errorFn = vi.fn()
+
+        configUtil.validateOverridableAtRunTime({ testIsolation: 'off' }, undefined, errorFn)
 
         expect(errorFn).toHaveBeenCalledTimes(1)
         expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
@@ -260,10 +268,45 @@ describe('config/src/index', () => {
       })
     })
 
+    describe('configuration override level=suiteOrTest', () => {
+      it('does not call onError handler if validating level is suite', () => {
+        const errorFn = vi.fn()
+
+        configUtil.validateOverridableAtRunTime({ viewportWidth: 200 }, 'suite', errorFn)
+
+        expect(errorFn).toHaveBeenCalledTimes(0)
+      })
+
+      it('does not call onError handler if validating level is test', () => {
+        const errorFn = vi.fn()
+
+        configUtil.validateOverridableAtRunTime({ viewportHeight: 100 }, 'test', errorFn)
+
+        expect(errorFn).toHaveBeenCalledTimes(0)
+      })
+
+      it('calls onError handler if validating level is run-time', () => {
+        const errorFn = vi.fn()
+
+        configUtil.validateOverridableAtRunTime({ viewportWidth: 200, viewportHeight: 100 }, undefined, errorFn)
+
+        expect(errorFn).toHaveBeenCalledTimes(2)
+        expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
+          invalidConfigKey: 'viewportWidth',
+          supportedOverrideLevel: 'suiteOrTest',
+        }))
+
+        expect(errorFn).toHaveBeenCalledWith(expect.objectContaining({
+          invalidConfigKey: 'viewportHeight',
+          supportedOverrideLevel: 'suiteOrTest',
+        }))
+      })
+    })
+
     it(`does not call onErr if config override level=any`, () => {
       const errorFn = vi.fn()
 
-      configUtil.validateOverridableAtRunTime({ requestTimeout: 1000 }, false, errorFn)
+      configUtil.validateOverridableAtRunTime({ requestTimeout: 1000 }, undefined, errorFn)
 
       expect(errorFn).toHaveBeenCalledTimes(0)
     })
@@ -271,7 +314,7 @@ describe('config/src/index', () => {
     it('does not call onErr if configuration is a non-Cypress config option', () => {
       const errorFn = vi.fn()
 
-      configUtil.validateOverridableAtRunTime({ foo: 'bar' }, true, errorFn)
+      configUtil.validateOverridableAtRunTime({ foo: 'bar' }, 'suite', errorFn)
 
       expect(errorFn).toHaveBeenCalledTimes(0)
     })

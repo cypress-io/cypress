@@ -132,6 +132,42 @@ describe('driver/src/cypress/validate_config', () => {
         })
       })
 
+      describe('when config override level is suiteOrTest', () => {
+        ['test', 'suite'].forEach((mocha_runnable) => {
+          it(`does not throw when runtime level is ${mocha_runnable}`, () => {
+            const state = $SetterGetter.create({
+              duringUserTestExecution: false,
+              test: {
+                _testConfig: { applied: mocha_runnable },
+              },
+              specWindow: { Error },
+            })
+            const overrideLevel = getMochaOverrideLevel(state)
+
+            expect(overrideLevel).to.eq(mocha_runnable)
+
+            expect(() => {
+              validateConfig(state, { viewportWidth: 200, viewportHeight: 100 })
+            }).not.to.throw()
+          })
+        })
+
+        it('throws when mutated at run-time with Cypress.config()', () => {
+          const state = $SetterGetter.create({
+            duringUserTestExecution: true,
+            specWindow: { Error },
+            runnable: { type: 'test' },
+          })
+          const overrideLevel = getMochaOverrideLevel(state)
+
+          expect(overrideLevel).to.be.undefined
+
+          expect(() => {
+            validateConfig(state, { viewportWidth: 200 })
+          }).to.throw(`\`Cypress.config()\` cannot override \`viewportWidth\` during test execution`)
+        })
+      })
+
       describe('when config override level is suite', () => {
         it('and config override is read-only', () => {
           const state = $SetterGetter.create({

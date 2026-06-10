@@ -40,7 +40,23 @@ type ValidationOptions = {
 
 export type BreakingOptionErrorKey = typeof BREAKING_OPTION_ERROR_KEY[number]
 
-export type OverrideLevel = 'any' | 'suite' | 'never'
+/**
+ * Where a configuration option is allowed to be overridden at test time:
+ * - `any`: suite-level overrides, test-level overrides, and at run-time via `Cypress.config()`.
+ * - `suiteOrTest`: suite-level and test-level overrides only. Cannot be set at run-time via
+ *    `Cypress.config()` during test execution.
+ * - `suite`: suite-level overrides only.
+ * - `never`: cannot be overridden at test time.
+ */
+export type OverrideLevel = 'any' | 'suiteOrTest' | 'suite' | 'never'
+
+/**
+ * The current level at which a test-time override is being applied. `suite` and `test`
+ * correspond to `describe`/`context` and `it`/`test` config overrides respectively, while
+ * `undefined` indicates a run-time mutation via `Cypress.config()` during test execution
+ * (or while loading the support/spec file or in a `test:before:run` event).
+ */
+export type CurrentOverrideLevel = 'suite' | 'test' | undefined
 
 interface ConfigOption {
   name: string
@@ -477,12 +493,12 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     name: 'viewportHeight',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 660,
     validation: validate.isNumber,
-    overrideLevel: 'any',
+    overrideLevel: 'suiteOrTest',
   }, {
     name: 'viewportWidth',
     defaultValue: (options: Record<string, any> = {}) => options.testingType === 'component' ? 500 : 1000,
     validation: validate.isNumber,
-    overrideLevel: 'any',
+    overrideLevel: 'suiteOrTest',
   }, {
     name: 'waitForAnimations',
     defaultValue: true,

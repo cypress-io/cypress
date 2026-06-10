@@ -372,6 +372,28 @@ describe('cannot set override configuration options that', () => {
     Cypress.config('chromeWebSecurity', false)
   })
 
+  // https://github.com/cypress-io/cypress/issues/31592
+  it('throws if mutating viewportWidth with Cypress.config() during test execution', (done) => {
+    window.top.__cySkipValidateConfig = false
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('`Cypress.config()` cannot override `viewportWidth` during test execution')
+      done()
+    })
+
+    Cypress.config('viewportWidth', 200)
+  })
+
+  // https://github.com/cypress-io/cypress/issues/31592
+  it('throws if mutating viewportHeight with Cypress.config() during test execution', (done) => {
+    window.top.__cySkipValidateConfig = false
+    cy.once('fail', (err) => {
+      expect(err.message).to.include('`Cypress.config()` cannot override `viewportHeight` during test execution')
+      done()
+    })
+
+    Cypress.config('viewportHeight', 100)
+  })
+
   it('does not throw for non-Cypress config values', () => {
     expect(() => {
       Cypress.config('foo', 'bar')
