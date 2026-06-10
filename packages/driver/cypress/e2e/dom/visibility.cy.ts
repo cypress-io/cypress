@@ -588,6 +588,15 @@ describe('src/cypress/dom/visibility', {
       })
     })
 
+    it('returns the generic checkVisibility message when checkOpacity: false', () => {
+      prepareFixtureSection('display-property')
+      cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        const reason = dom.getReasonIsHidden($el, { checkOpacity: false })
+
+        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
+      })
+    })
+
     it('does not branch on specific css properties (always generic)', () => {
       prepareFixtureSection('opacity-property')
       cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
@@ -616,18 +625,6 @@ describe('src/cypress/dom/visibility', {
         const reason = dom.getReasonIsHidden($els)
 
         expect(reason).to.eq('This element `<div#multi-hidden>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
-      })
-    })
-
-    it('reports a meaningful reason on the action-command path (checkOpacity: false)', () => {
-      // action commands (e.g. cy.click) reach this via ensure.ts -> getReasonIsHidden(subject, { checkOpacity: false }).
-      // checkOpacity only flips `opacityProperty` on checkVisibility(); a non-opacity cause must still
-      // produce the computed message rather than the bare "not visible." fallback.
-      prepareFixtureSection('display-property')
-      cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
-        const reason = dom.getReasonIsHidden($el, { checkOpacity: false })
-
-        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
       })
     })
 
