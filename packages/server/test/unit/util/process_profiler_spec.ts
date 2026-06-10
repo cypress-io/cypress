@@ -11,9 +11,11 @@ import {
 } from '../../../lib/util/process_profiler'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
+import { clearCtx, setCtx } from '@packages/data-context'
 
 const browsers = require('../../../lib/browsers').default
 const plugins = require('../../../lib/plugins')
+const { makeDataContext } = require('../../../lib/makeDataContext')
 
 const BROWSER_PID = 11111
 const SUB_BROWSER_PID = 11112
@@ -143,6 +145,28 @@ describe('lib/util/process_profiler', function () {
       checkGroup(SHARED_BROKER_PID, 'electron-shared')
       checkGroup(SHARED_UTILITY_PID, 'electron-shared')
       checkGroup(SHARED_ZYGOTE_PID, 'electron-shared')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/30670
+    // the profiler runs on its own timer and can fire when the DataContext
+    // has not been set (or has been torn down), which previously caused
+    // `getPluginPid` to throw "Expected DataContext to already have been set"
+    it('does not throw when the DataContext has not been set', async () => {
+      sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
+
+      // tear down the context that spec_helper sets up so getPluginPid
+      // exercises the real, un-stubbed code path with no context
+      await clearCtx()
+
+      try {
+        expect(plugins.getPluginPid()).to.be.undefined
+
+        // @ts-ignore
+        expect(() => groupCyProcesses({ list: PROCESSES })).not.to.throw()
+      } finally {
+        // restore a context so spec_helper's afterEach teardown can run cleanly
+        setCtx(makeDataContext({}))
+      }
     })
   })
 
