@@ -48,27 +48,22 @@ describe('lib/runner-discovery', () => {
 
   describe('.write', () => {
     it('writes a record named by pid with no browser attached', async () => {
-      await runnerDiscovery.write({ projectRoot: '/some/project', runnerOrigin: 'http://localhost:1234' })
+      await runnerDiscovery.write({ projectRoot: '/some/project' })
 
       const record = await fs.readJson(recordPath)
 
-      expect(record).to.deep.include({
+      expect(record).to.deep.eq({
         schemaVersion: 2,
         pid: process.pid,
         cypressVersion: pkg.version,
         projectRoot: path.resolve('/some/project'),
-        runnerOrigin: 'http://localhost:1234',
         cdpStatus: 'no_browser',
-        cdpHost: null,
-        cdpPort: null,
         cdpBrowserWsUrl: null,
       })
-
-      expect(record.createdAt).to.be.a('number')
     })
 
     it('leaves no temp files behind (atomic write)', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p', runnerOrigin: 'http://localhost:1' })
+      await runnerDiscovery.write({ projectRoot: '/p' })
 
       const entries = await fs.readdir(getRunnerDiscoveryDir())
 
@@ -78,7 +73,7 @@ describe('lib/runner-discovery', () => {
     it('does nothing when disabled via env', async () => {
       process.env.CYPRESS_INTERNAL_RUNNER_DISCOVERY = '0'
 
-      await runnerDiscovery.write({ projectRoot: '/p', runnerOrigin: 'http://localhost:1' })
+      await runnerDiscovery.write({ projectRoot: '/p' })
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
@@ -91,7 +86,7 @@ describe('lib/runner-discovery', () => {
       process.env.CYPRESS_CACHE_FOLDER = filePath
 
       // Resolves rather than throwing — the run must survive a failed write.
-      await runnerDiscovery.write({ projectRoot: '/p', runnerOrigin: 'http://localhost:1' })
+      await runnerDiscovery.write({ projectRoot: '/p' })
 
       expect(await fs.pathExists(path.join(filePath, 'runners'))).to.be.false
     })
@@ -99,25 +94,23 @@ describe('lib/runner-discovery', () => {
 
   describe('.update', () => {
     it('merge-patches cdp fields onto the existing record', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p', runnerOrigin: 'http://localhost:1' })
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpHost: '127.0.0.1', cdpPort: 9222, cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
+      await runnerDiscovery.write({ projectRoot: '/p' })
+      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
 
       const record = await fs.readJson(recordPath)
 
       expect(record).to.deep.include({
         cdpStatus: 'ready',
-        cdpHost: '127.0.0.1',
-        cdpPort: 9222,
         cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-        runnerOrigin: 'http://localhost:1',
+        projectRoot: path.resolve('/p'),
       })
     })
 
     it('re-creates a record whose file was deleted out from under it', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p', runnerOrigin: 'http://localhost:1' })
+      await runnerDiscovery.write({ projectRoot: '/p' })
       await fs.remove(recordPath)
 
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpHost: '127.0.0.1', cdpPort: 9222 })
+      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
 
       expect(await fs.pathExists(recordPath)).to.be.true
 
@@ -127,7 +120,7 @@ describe('lib/runner-discovery', () => {
     })
 
     it('is a no-op when no record has been written yet', async () => {
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpHost: '127.0.0.1', cdpPort: 9222 })
+      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
@@ -135,14 +128,14 @@ describe('lib/runner-discovery', () => {
 
   describe('.remove', () => {
     it('deletes the record file', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p', runnerOrigin: 'http://localhost:1' })
+      await runnerDiscovery.write({ projectRoot: '/p' })
       await runnerDiscovery.remove()
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
 
     it('is idempotent and never throws', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p', runnerOrigin: 'http://localhost:1' })
+      await runnerDiscovery.write({ projectRoot: '/p' })
       await runnerDiscovery.remove()
       await runnerDiscovery.remove()
 

@@ -253,10 +253,7 @@ export class ProjectBase extends EE {
 
     // Publish a discovery record so other processes can find this running
     // Cypress by project root. Best-effort — never blocks or fails the run.
-    await runnerDiscovery.write({
-      projectRoot: this.projectRoot,
-      runnerOrigin: cfg.proxyServer || `http://localhost:${cfg.port}`,
-    })
+    await runnerDiscovery.write({ projectRoot: this.projectRoot })
 
     await this.saveState(stateToSave)
 

@@ -22,23 +22,16 @@ export interface RunnerDiscoveryRecord {
   pid: number
   cypressVersion: string
   projectRoot: string
-  runnerOrigin: string
   cdpStatus: 'no_browser' | 'ready'
-  cdpHost: string | null
-  cdpPort: number | null
   /** Browser-level CDP WebSocket URL; non-null only while `cdpStatus` is `ready`. */
   cdpBrowserWsUrl: string | null
-  createdAt: number
 }
 
 /**
- * A record narrowed to a live CDP connection — cdpHost/cdpPort/cdpBrowserWsUrl
- * are non-null.
+ * A record narrowed to a live CDP connection — cdpBrowserWsUrl is non-null.
  */
 export interface ReadyRunnerDiscoveryRecord extends RunnerDiscoveryRecord {
   cdpStatus: 'ready'
-  cdpHost: string
-  cdpPort: number
   cdpBrowserWsUrl: string
 }
 
@@ -161,8 +154,8 @@ export const findLiveRunner = async (projectRoot: string, options: FindRunnerOpt
 
 /**
  * Like {@link findLiveRunner}, but requires a browser with a live CDP
- * connection and narrows the return type so callers never defend against null
- * cdpHost/cdpPort/cdpBrowserWsUrl. A pre-v2 record (no `cdpBrowserWsUrl`) also
+ * connection and narrows the return type so callers never defend against a
+ * null cdpBrowserWsUrl. A record from a build without `cdpBrowserWsUrl` also
  * fails this guard, so the CLI never tries to connect without an endpoint.
  *
  * @throws {RunnerDiscoveryError} `NO_BROWSER_ATTACHED` when the runner is live but no browser is connected
@@ -170,7 +163,7 @@ export const findLiveRunner = async (projectRoot: string, options: FindRunnerOpt
 export const findReadyRunner = async (projectRoot: string, options: FindRunnerOptions = {}): Promise<ReadyRunnerDiscoveryRecord> => {
   const record = await findLiveRunner(projectRoot, options)
 
-  if (record.cdpStatus !== 'ready' || record.cdpHost === null || record.cdpPort === null || !record.cdpBrowserWsUrl) {
+  if (record.cdpStatus !== 'ready' || !record.cdpBrowserWsUrl) {
     throw new RunnerDiscoveryError(
       'NO_BROWSER_ATTACHED',
       `Cypress is running for ${projectRoot}, but no browser is attached yet. Open a browser in Cypress, then try again.`,

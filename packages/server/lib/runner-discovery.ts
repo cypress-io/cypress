@@ -25,22 +25,20 @@ export interface RunnerDiscoveryRecord {
   schemaVersion: number
   /** The server process id — also the record's filename. */
   pid: number
+  /** Informational only — the CLI version-checks via the tap binding's getSchema. */
   cypressVersion: string
   /** Absolute, resolved project root the server is running against. */
   projectRoot: string
-  /** Origin the runner is served from, e.g. `http://localhost:<port>`. */
-  runnerOrigin: string
   cdpStatus: CdpStatus
-  cdpHost: string | null
-  cdpPort: number | null
   /**
    * The browser-level CDP WebSocket URL (e.g. `ws://host:port/devtools/browser/<id>`).
    * Non-null only while `cdpStatus` is `ready`. The CLI connects to this
    * directly, so it never has to HTTP-list targets to discover an endpoint.
+   * Deliberately the only address in the record: the runner page itself is
+   * found by probing targets for the tap binding, since the runner's origin
+   * changes on the first cross-origin cy.visit of a test.
    */
   cdpBrowserWsUrl: string | null
-  /** Wall-clock time of the initial write; a cheap PID-reuse heuristic. */
-  createdAt: number
 }
 
 /**
@@ -66,8 +64,8 @@ const isDisabled = (): boolean => {
 
 // In-memory copy of *this* process's record. Holding it here lets update()
 // re-write a record whose file was deleted (e.g. `cypress cache clear` while
-// running, or a lost initial write) without threading projectRoot/runnerOrigin
-// down into the browser layer — the browser only knows the CDP host/port.
+// running, or a lost initial write) without threading projectRoot down into
+// the browser layer — the browser only knows its own CDP endpoint.
 let currentRecord: RunnerDiscoveryRecord | null = null
 
 // Distinguishes concurrent atomic writes so their temp files never collide.
@@ -90,7 +88,7 @@ export const runnerDiscovery = {
    * Initial write at server / websocket boot. Seeds the record with no browser
    * attached; the browser CDP lifecycle flips `cdpStatus` later via update().
    */
-  async write ({ projectRoot, runnerOrigin }: { projectRoot: string, runnerOrigin: string }): Promise<void> {
+  async write ({ projectRoot }: { projectRoot: string }): Promise<void> {
     if (isDisabled()) {
       return
     }
@@ -100,12 +98,8 @@ export const runnerDiscovery = {
       pid: process.pid,
       cypressVersion: pkg.version,
       projectRoot: path.resolve(projectRoot),
-      runnerOrigin,
       cdpStatus: 'no_browser',
-      cdpHost: null,
-      cdpPort: null,
       cdpBrowserWsUrl: null,
-      createdAt: Date.now(),
     }
 
     // Set the in-memory truth first; a transient disk failure must not stop a
@@ -125,7 +119,7 @@ export const runnerDiscovery = {
    * the in-memory record, so a missing file (cleared cache, lost initial write)
    * is re-created rather than silently dropped.
    */
-  async update (patch: Partial<Pick<RunnerDiscoveryRecord, 'cdpStatus' | 'cdpHost' | 'cdpPort' | 'cdpBrowserWsUrl'>>): Promise<void> {
+  async update (patch: Partial<Pick<RunnerDiscoveryRecord, 'cdpStatus' | 'cdpBrowserWsUrl'>>): Promise<void> {
     if (isDisabled() || !currentRecord) {
       return
     }
