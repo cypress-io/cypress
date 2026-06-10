@@ -65,6 +65,21 @@ export class InterceptedRequest {
     this._onResponse(incomingRes, resStream)
   }
 
+  /**
+   * Whether resolving this request still depends on a driver-side interceptor
+   * callback (e.g. a function passed to `cy.intercept`, `req.reply`, or
+   * `res.continue`). Such requests cannot be completed once the test that
+   * defined them has ended, so they are destroyed during
+   * {@link NetStubbingState#reset}. Requests that resolve without a callback —
+   * static responses and spies — are left to finish on their own so the browser
+   * receives the response instead of retrying it into the next test.
+   *
+   * @see https://github.com/cypress-io/cypress/issues/20397
+   */
+  requiresInterceptorCallback (): boolean {
+    return Boolean(this.req.matchingRoutes?.some((route) => route.hasInterceptor && !route.disabled))
+  }
+
   addDefaultSubscriptions () {
     if (this.subscriptionsByRoute.length) {
       throw new Error('cannot add default subscriptions to non-empty array')
