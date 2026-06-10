@@ -374,6 +374,36 @@ toolbox {
 
 let browserBidiClient: BidiAutomation | undefined
 
+const isProcessStillRunning = (pid: number): boolean => {
+  try {
+    // signal 0 tests for the existence of the process without killing it
+    return process.kill(pid, 0)
+  } catch (error: unknown) {
+    // EPERM means the process exists but we aren't permitted to signal it
+    return (error as CypressError)?.code === 'EPERM'
+  }
+}
+
+// process.kill only sends a termination signal; the OS tears the process down
+// asynchronously afterwards. This polls until the given processes no longer
+// exist (bounded by timeoutMs) so callers know any file locks they held have
+// been released.
+export const _waitForProcessesToExit = async (pids: number[], timeoutMs = 2000, intervalMs = 50): Promise<void> => {
+  const deadline = Date.now() + timeoutMs
+  let runningPids = pids.filter(isProcessStillRunning)
+
+  while (runningPids.length > 0) {
+    if (Date.now() >= deadline) {
+      debug('timed out waiting for processes to exit: %o', runningPids)
+
+      return
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, intervalMs))
+    runningPids = runningPids.filter(isProcessStillRunning)
+  }
+}
+
 /**
 * Clear instance state for the chrome instance, this is normally called in on kill or on exit.
 */
@@ -728,9 +758,20 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
         }
       }
 
-      // needed for closing the browser when switching browsers in open mode to signal
-      // the browser is done closing
-      browserInstanceWrapper.emit('exit')
+      // the kill signals above don't wait for the processes to actually
+      // terminate. Firefox holds locks on sqlite files (cookies.sqlite-shm,
+      // cert9.db, etc.) inside the profile until it has fully exited, and the
+      // profile directory is deleted (via firefox-profile's process exit
+      // handler) as soon as Cypress exits. Deleting the profile while Firefox
+      // is still shutting down fails with EPERM/EBUSY on Windows, so wait for
+      // both processes to actually be gone before signaling that the browser
+      // has closed.
+      // @see https://github.com/cypress-io/cypress/issues/31324
+      _waitForProcessesToExit([browserPID, driverPID]).then(() => {
+        // needed for closing the browser when switching browsers in open mode to signal
+        // the browser is done closing
+        browserInstanceWrapper.emit('exit')
+      })
 
       return browserReturnStatus || driverReturnStatus
     }

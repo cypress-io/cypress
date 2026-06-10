@@ -615,10 +615,21 @@ describe('lib/browsers/firefox', () => {
       })
 
       it('kills the driver and browser PIDs when the kill method is called and emits the exit event', async function () {
-        sinon.stub(process, 'kill').returns(true)
+        const ESRCHErr: Error & { code?: string } = new Error('BOOM')
+
+        ESRCHErr.code = 'ESRCH'
+        const killStub = sinon.stub(process, 'kill')
+
+        killStub.returns(true)
+        // signal 0 is the liveness probe polled after the kill signals are
+        // sent. Throwing ESRCH means the processes have fully exited.
+        killStub.withArgs(sinon.match.any, 0).throws(ESRCHErr)
+
         const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
 
         sinon.spy(instance, 'emit')
+
+        const exited = new Promise<void>((resolve) => instance.once('exit', () => resolve()))
         const killResult = instance.kill()
 
         expect(killResult).to.be.true
@@ -626,8 +637,50 @@ describe('lib/browsers/firefox', () => {
         expect(process.kill).to.have.been.calledWith(1234)
         // kills the webdriver process/ geckodriver process
         expect(process.kill).to.have.been.calledWith(5678)
+
         // makes sure the exit event is called to signal to the rest of cypress server that the processes are killed
+        await exited
         expect(instance.emit).to.have.been.calledWith('exit')
+      })
+
+      it('waits to emit the exit event until the browser and driver processes have exited', async function () {
+        const ESRCHErr: Error & { code?: string } = new Error('BOOM')
+
+        ESRCHErr.code = 'ESRCH'
+        const killStub = sinon.stub(process, 'kill')
+
+        killStub.returns(true)
+
+        // processes are still running on the first liveness probe and gone on
+        // subsequent probes
+        const browserProbe = killStub.withArgs(1234, 0)
+        const driverProbe = killStub.withArgs(5678, 0)
+
+        browserProbe.throws(ESRCHErr)
+        browserProbe.onFirstCall().returns(true)
+        driverProbe.throws(ESRCHErr)
+        driverProbe.onFirstCall().returns(true)
+
+        const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        let exited = false
+
+        instance.once('exit', () => {
+          exited = true
+        })
+
+        const exitedPromise = new Promise<void>((resolve) => instance.once('exit', () => resolve()))
+
+        instance.kill()
+
+        // flush the first liveness probe, which still sees both processes running
+        await Promise.resolve()
+        await Promise.resolve()
+
+        expect(exited).to.be.false
+
+        await exitedPromise
+        expect(exited).to.be.true
       })
 
       it('swallows ESRCH in kill method if thrown', async function () {
@@ -638,6 +691,8 @@ describe('lib/browsers/firefox', () => {
         const instance = await firefox.open(this.browser, 'http://', this.options, this.automation)
 
         sinon.spy(instance, 'emit')
+
+        const exited = new Promise<void>((resolve) => instance.once('exit', () => resolve()))
         const killResult = instance.kill()
 
         expect(killResult).to.be.true
@@ -645,7 +700,9 @@ describe('lib/browsers/firefox', () => {
         expect(process.kill).to.have.been.calledWith(1234)
         // kills the webdriver process/ geckodriver process
         expect(process.kill).to.have.been.calledWith(5678)
+
         // makes sure the exit event is called to signal to the rest of cypress server that the processes are killed
+        await exited
         expect(instance.emit).to.have.been.calledWith('exit')
       })
     })
