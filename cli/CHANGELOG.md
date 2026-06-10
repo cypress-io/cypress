@@ -4,7 +4,7 @@
 **Bugfixes:**
 
 - Fixed an issue where setting [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) to a value greater than `0` from `setupNodeEvents` would take effect during `cypress run`, which could prevent snapshots from being captured correctly when recording Test Replay to Cypress Cloud. During `cypress run`, `numTestsKeptInMemory` is now always treated as `0` regardless of how it is configured. Fixes [#31167](https://github.com/cypress-io/cypress/issues/31167).
-- Fixed an issue where connecting a project to Cypress Cloud wrote the `projectId` to the wrong place in config files that export their configuration through a `default` interop wrapper (for example `module.exports = { default: defineConfig({ ... }) }`). The `projectId` was previously added above the wrapper object instead of inside the actual config, so it was never registered. The `projectId` is now written inside the resolved config object. Fixes [#31678](https://github.com/cypress-io/cypress/issues/31678).
+- Fixed an issue where connecting a project to Cypress Cloud could write the `projectId` to the config file in a location that prevented it from being registered, so the project would not record runs to Cypress Cloud. The `projectId` is now written to the correct location. Fixes [#31678](https://github.com/cypress-io/cypress/issues/31678).
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
 
 **Misc:**
