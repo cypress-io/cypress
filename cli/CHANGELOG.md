@@ -4,7 +4,7 @@
 **Bugfixes:**
 
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
-- Fixed an issue on Windows where Firefox runs could sporadically log a `cannot delete profileDir on exit` error (`EPERM`/`EBUSY` on files such as `cookies.sqlite-shm`) and leave the temporary browser profile directory behind. Cypress now waits for the Firefox and geckodriver processes to fully exit — releasing their file locks — before the profile directory is removed. Fixes [#31324](https://github.com/cypress-io/cypress/issues/31324).
+- Fixed an issue on Windows where Firefox runs could sporadically log a `cannot delete profileDir on exit` error (`EPERM`/`EBUSY`) and leave the temporary browser profile directory behind. Fixes [#31324](https://github.com/cypress-io/cypress/issues/31324).
 
 **Misc:**
 
