@@ -34,6 +34,8 @@ export interface CommandProps extends InstrumentProps {
   timeout?: number
   visible?: boolean
   wallClockStartedAt?: string
+  method?: string
+  url?: string
   hookId: string
   group?: number
   groupLevel?: number
@@ -52,6 +54,8 @@ export default class Command extends Instrument {
   timeout?: number
   visible?: boolean
   wallClockStartedAt?: string
+  method?: string
+  url?: string
   children: Array<Command> = []
   hookId: string
   group?: number
@@ -145,6 +149,8 @@ export default class Command extends Instrument {
       timeout: observable,
       visible: observable,
       wallClockStartedAt: observable,
+      method: observable,
+      url: observable,
       children: observable,
       hookId: observable,
       group: observable,
@@ -176,6 +182,8 @@ export default class Command extends Instrument {
     // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
     this.visible = props.visible === undefined || props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
+    this.method = props.method
+    this.url = props.url
     this.hookId = props.hookId
     this.group = props.group
     this.hasSnapshot = !!props.hasSnapshot
@@ -204,6 +212,8 @@ export default class Command extends Instrument {
     // attribute set. i.e. cy.visit(), cy.readFile() or cy.log()
     this.visible = props.visible === undefined || props.visible
     this.timeout = props.timeout
+    this.method = props.method
+    this.url = props.url
     this.hasSnapshot = props.hasSnapshot
     this.hasConsoleProps = props.hasConsoleProps
 
@@ -228,11 +238,21 @@ export default class Command extends Instrument {
   }
 
   matches (command: Command) {
-    return (
-      command.type === this.type &&
-      command.name === this.name &&
-      command.displayMessage === this.displayMessage
-    )
+    if (command.type !== this.type || command.name !== this.name) {
+      return false
+    }
+
+    // Network request event logs (e.g. from cy.intercept) embed the response
+    // status code in their displayMessage (e.g. `GET 200 /test/1`). Because the
+    // status arrives asynchronously, the displayMessage is not a stable key for
+    // grouping - two identical requests can fail to match if one has received a
+    // response and the other has not. Match on the stable method + url instead.
+    // https://github.com/cypress-io/cypress/issues/28903
+    if (this.name === 'request') {
+      return command.method === this.method && command.url === this.url
+    }
+
+    return command.displayMessage === this.displayMessage
   }
 
   // the following several methods track if the command's state has been

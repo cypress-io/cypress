@@ -172,4 +172,56 @@ describe('Command model', () => {
       })
     })
   })
+
+  context('.matches', () => {
+    it('matches commands with the same type, name and displayMessage', () => {
+      const command = new CommandModel(commandProps({ name: 'get', type: 'parent', message: '#foo' }))
+      const other = new CommandModel(commandProps({ name: 'get', type: 'parent', message: '#foo' }))
+
+      expect(command.matches(other)).to.be.true
+    })
+
+    it('does not match commands with different displayMessages', () => {
+      const command = new CommandModel(commandProps({ name: 'get', type: 'parent', message: '#foo' }))
+      const other = new CommandModel(commandProps({ name: 'get', type: 'parent', message: '#bar' }))
+
+      expect(command.matches(other)).to.be.false
+    })
+
+    // https://github.com/cypress-io/cypress/issues/28903
+    context('request event logs', () => {
+      const requestProps = (props?: Partial<CommandProps>) => {
+        return commandProps(Object.assign({
+          name: 'request',
+          type: 'parent',
+          event: true,
+          method: 'GET',
+          url: 'http://localhost/test/1',
+        }, props))
+      }
+
+      it('matches on method and url regardless of the response status in the message', () => {
+        // the response has been received for one request but not the other, so
+        // the status is only present in one of the display messages
+        const command = new CommandModel(requestProps({ renderProps: { message: 'GET 200 /test/1' } }))
+        const other = new CommandModel(requestProps({ renderProps: { message: 'GET /test/1' } }))
+
+        expect(command.matches(other)).to.be.true
+      })
+
+      it('does not match requests to different urls', () => {
+        const command = new CommandModel(requestProps({ url: 'http://localhost/test/1' }))
+        const other = new CommandModel(requestProps({ url: 'http://localhost/test/2' }))
+
+        expect(command.matches(other)).to.be.false
+      })
+
+      it('does not match requests with different methods', () => {
+        const command = new CommandModel(requestProps({ method: 'GET' }))
+        const other = new CommandModel(requestProps({ method: 'POST' }))
+
+        expect(command.matches(other)).to.be.false
+      })
+    })
+  })
 })
