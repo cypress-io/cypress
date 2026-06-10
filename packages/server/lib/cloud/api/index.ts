@@ -689,7 +689,6 @@ export default {
   },
 
   async getCaptureProtocolScript (url: string, options: { displayRetryErrors?: boolean } = { displayRetryErrors: true }) {
-    // TODO(protocol): Ensure this is removed in production
     if (process.env.CYPRESS_LOCAL_PROTOCOL_PATH) {
       debugProtocol(`Loading protocol via script at local path %s`, process.env.CYPRESS_LOCAL_PROTOCOL_PATH)
 
