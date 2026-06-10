@@ -4,7 +4,7 @@ import type {
   ForCommandLog,
 } from '@packages/network-interception'
 
-export type DriverCommandLogAdapterOptions = {
+type DriverCommandLogAdapterOptions = {
   logInterception: (interception: unknown, route: unknown) => CommandLogInterceptionResult
 }
 
