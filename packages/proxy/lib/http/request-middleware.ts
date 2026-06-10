@@ -161,10 +161,29 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
 
   // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
   const currentAUTUrl = this.getAUTUrl()
-  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.resourceType, this.req.credentialsLevel, this.req.isAUTFrame)
+
+  // When navigating back to the primary origin from a cross-origin context (e.g. an
+  // OAuth provider redirecting to /auth/callback), the Chrome CDP frame-tree may not
+  // yet reflect the AUT frame's new identity at the moment Fetch.requestPaused fires,
+  // so the X-Cypress-Is-AUT-Frame header can be absent even though this is genuinely
+  // a top-level AUT frame navigation.  We detect this case explicitly: if we are
+  // currently simulating top (AUT is on an external origin) and the request URL
+  // targets the primary super-domain origin, treat the request as an AUT frame
+  // navigation so that the primary-domain session cookies are attached.
+  // Note: isAUTFrame only affects the `default` (navigation) branch of
+  // shouldAttachAndSetCookies; XHR/fetch requests use credential-level logic and
+  // are therefore unaffected by this override.
+  const isNavigatingBackToPrimaryOrigin = !this.req.isAUTFrame &&
+    this.remoteStates.isPrimarySuperDomainOrigin(this.req.proxiedUrl)
+
+  const effectiveIsAUTFrame = this.req.isAUTFrame || isNavigatingBackToPrimaryOrigin
+
+  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.resourceType, this.req.credentialsLevel, effectiveIsAUTFrame)
 
   span?.setAttributes({
     currentAUTUrl,
+    isNavigatingBackToPrimaryOrigin,
+    effectiveIsAUTFrame,
     shouldCookiesBeAttachedToRequest,
   })
 
@@ -178,13 +197,13 @@ const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
   const sameSiteContext = getSameSiteContext(
     currentAUTUrl,
     this.req.proxiedUrl,
-    this.req.isAUTFrame,
+    effectiveIsAUTFrame,
   )
 
   span?.setAttributes({
     sameSiteContext,
     currentAUTUrl,
-    isAUTFrame: this.req.isAUTFrame,
+    isAUTFrame: effectiveIsAUTFrame,
   })
 
   const applicableCookiesInCookieJar = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)

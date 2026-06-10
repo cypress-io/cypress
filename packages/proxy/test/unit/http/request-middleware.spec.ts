@@ -471,6 +471,63 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers['cookie']).toBeUndefined()
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/XXXXX
+    // OAuth / SSO flows redirect from an external IdP back to the primary origin
+    // (e.g. onelogin.com → myapp.com/auth/callback). Chrome's CDP frame-tree can
+    // be transiently stale during a cross-origin navigation, so the
+    // X-Cypress-Is-AUT-Frame header may not be present on the redirect-follow
+    // request even though it is a top-level AUT frame navigation. In that case
+    // Cypress must still attach primary-domain cookies to the callback request.
+    it('attaches primary-origin cookies when navigating back to the primary origin during cy.origin (OAuth redirect-back scenario)', async function () {
+      // Simulate AUT currently on the IdP (onelogin.com) while the primary origin
+      // is myapp.com. The jar holds the session cookie for myapp.com.
+      const ctx = await getContext(
+        [],
+        ['session=abc123'],
+        'http://onelogin.com/callback', // current AUT URL (still the IdP)
+        'http://myapp.com/auth/callback', // the redirect-follow request target (primary origin)
+      )
+
+      ctx.req.resourceType = undefined
+      ctx.req.credentialsLevel = undefined
+      // isAUTFrame is false because the CDP frame tree hadn't updated yet
+      ctx.req.isAUTFrame = false
+      // isPrimarySuperDomainOrigin returns false for onelogin.com (so top simulation is active)
+      // but true for myapp.com (so we detect the redirect-back scenario)
+      ctx.remoteStates.isPrimarySuperDomainOrigin = vi.fn().mockImplementation((url: string) => {
+        return url.startsWith('http://myapp.com')
+      })
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      // Session cookie must be attached so the OAuth callback succeeds
+      expect(ctx.req.headers['cookie']).toEqual('session=abc123')
+    })
+
+    it('does NOT attach primary-origin cookies for XHR requests to the primary origin when isAUTFrame is false (CORS requests must use explicit credentials)', async function () {
+      // A cross-origin XHR from onelogin.com to myapp.com should still require
+      // explicit credentials — the redirect-back shortcut only applies to navigations.
+      const ctx = await getContext(
+        [],
+        ['session=abc123'],
+        'http://onelogin.com/page', // current AUT URL (IdP)
+        'http://myapp.com/api/whoami', // XHR to primary origin
+      )
+
+      ctx.req.resourceType = 'xhr'
+      ctx.req.credentialsLevel = false // withCredentials not set
+      ctx.req.isAUTFrame = false
+      // Same realistic mock: myapp.com is primary, onelogin.com is not
+      ctx.remoteStates.isPrimarySuperDomainOrigin = vi.fn().mockImplementation((url: string) => {
+        return url.startsWith('http://myapp.com')
+      })
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      // No credentials on a cross-origin XHR without withCredentials — cookies must NOT be attached
+      expect(ctx.req.headers['cookie']).toBeUndefined()
+    })
+
     it('sets the cookie header to undefined if no cookies exist on the request, none in the jar, but cookies should be attached', async () => {
       const ctx = await getContext([], [], 'http://foobar.com', 'http://app.foobar.com')
 
