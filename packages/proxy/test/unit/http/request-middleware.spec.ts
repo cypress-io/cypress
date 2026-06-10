@@ -611,15 +611,11 @@ describe('http/request-middleware', () => {
       const ctx = await getContext()
       const onError = vi.fn()
 
-      ctx.onError = onError
       ctx.networkInterceptionCore = new NetworkInterceptionCore()
 
-      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx, onError)
 
-      await vi.waitFor(() => {
-        expect(onError).toHaveBeenCalledOnce()
-      })
-
+      expect(onError).toHaveBeenCalledOnce()
       expect(onError.mock.calls[0][0].message).toMatch(/cookieState/)
     })
 

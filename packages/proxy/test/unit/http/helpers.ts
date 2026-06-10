@@ -17,7 +17,7 @@ export function createTestNetworkInterceptionCore () {
   })
 }
 
-export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
+export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onErrorHandler?: (error: Error) => void) {
   const fullCtx = {
     debug: () => {},
     req: {},
@@ -32,9 +32,9 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
     ...ctx,
   }
 
-  const onError = (error) => {
+  const onError = onErrorHandler ?? ((error) => {
     throw error
-  }
+  })
 
   return _runStage(HttpStages.IncomingRequest, fullCtx, onError).then(() => {
     Object.assign(ctx, fullCtx)
