@@ -162,6 +162,15 @@ describe('e2e record', () => {
       expect(secondInstancePostTests.hooks).length(1)
       expect(secondInstancePostTests.config).is.an('object')
 
+      // the spec has a `beforeEach` hook that applies to both tests - ensure
+      // each test is associated with that hook so the Cloud can accurately
+      // detect modifications. This association must happen regardless of
+      // whether the reporter UI is initialized (#28119).
+      const secondInstanceHookId = secondInstancePostTests.hooks[0].clientId
+
+      expect(secondInstancePostTests.tests[0].hookIds).to.include(secondInstanceHookId)
+      expect(secondInstancePostTests.tests[1].hookIds).to.include(secondInstanceHookId)
+
       const secondInstancePostResults = requests[8]
 
       expect(secondInstancePostResults.body.exception).to.be.null
