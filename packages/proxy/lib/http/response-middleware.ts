@@ -85,8 +85,6 @@ const zlibBrotliCompressOptions = {
   },
 }
 
-// https://github.com/cypress-io/cypress/issues/1543
-
 const SUPPORTED_CONTENT_ENCODINGS = ['gzip', 'br'] as const
 
 type SupportedContentEncoding = typeof SUPPORTED_CONTENT_ENCODINGS[number]

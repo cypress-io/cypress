@@ -8,7 +8,6 @@ type RegisterDefaultNetworkPoliciesConfig = {
   experimentalCspAllowList?: boolean | string[] | null
   modifyObstructiveCode?: boolean
   experimentalModifyObstructiveThirdPartyCode?: boolean
-  experimentalSourceRewriting?: boolean
 }
 
 /**
@@ -32,6 +31,5 @@ export function registerDefaultNetworkPolicies (
   policies.add(DocumentRewrite({
     modifyObstructiveCode: config.modifyObstructiveCode,
     experimentalModifyObstructiveThirdPartyCode: config.experimentalModifyObstructiveThirdPartyCode,
-    experimentalSourceRewriting: config.experimentalSourceRewriting,
   }))
 }

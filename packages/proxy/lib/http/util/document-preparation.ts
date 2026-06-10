@@ -23,11 +23,18 @@ export function reqMatchesPolicyBasedOnDomain (
 }
 
 export function reqWillRenderHtml (req: CypressIncomingRequest, res: IncomingMessage) {
+  // will this request be rendered in the browser, necessitating injection?
+  // https://github.com/cypress-io/cypress/issues/288
+
+  // don't inject if this is an XHR from jquery
   if (req.headers['x-requested-with']) {
     return
   }
 
+  // don't inject if we didn't find both text/html and application/xhtml+xml,
   const accept = req.headers['accept']
+
+  // only check the content-type value, if it exists, to contains some type of html mimetype
   const contentType = res?.headers['content-type'] || ''
   const contentTypeIsHtmlIfExists = contentType ? contentType.includes('html') : true
 

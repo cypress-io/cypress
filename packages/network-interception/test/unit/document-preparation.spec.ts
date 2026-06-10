@@ -88,5 +88,29 @@ describe('core/document-preparation', () => {
         isJavaScript: false,
       })).toBe(true)
     })
+
+    it('returns true for fullCrossOrigin injection when modifyObstructiveCode is enabled', () => {
+      expect(resolveWantsSecurityRemoved({
+        modifyObstructiveCode: true,
+        experimentalModifyObstructiveThirdPartyCode: false,
+        wantsInjection: 'fullCrossOrigin',
+        isHTML: true,
+        isRenderedHTML: true,
+        isReqMatchSuperDomainOrigin: false,
+        isJavaScript: false,
+      })).toBe(true)
+    })
+
+    it('returns true for fullCrossOrigin injection when experimentalModifyObstructiveThirdPartyCode is enabled', () => {
+      expect(resolveWantsSecurityRemoved({
+        modifyObstructiveCode: false,
+        experimentalModifyObstructiveThirdPartyCode: true,
+        wantsInjection: 'fullCrossOrigin',
+        isHTML: true,
+        isRenderedHTML: true,
+        isReqMatchSuperDomainOrigin: false,
+        isJavaScript: false,
+      })).toBe(true)
+    })
   })
 })

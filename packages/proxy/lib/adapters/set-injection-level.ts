@@ -47,6 +47,7 @@ export async function setInjectionLevel (mw: ResponseInterceptionMiddlewareCtx):
     isReqMatchSuperDomainOrigin,
   })
 
+  // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
   const urlDoesNotMatchPolicyBasedOnDomain = !reqMatchesPolicyBasedOnDomain(
     mw.req,
     mw.remoteStates.getPrimary(),
@@ -82,7 +83,7 @@ export async function setInjectionLevel (mw: ResponseInterceptionMiddlewareCtx):
       mw.debug('- partial injection (x-cypress-file-server-error)')
     } else if (level === 'fullCrossOrigin') {
       mw.debug('- cross origin injection')
-    } else if (level === false && !isHTML) {
+    } else if (level === false && (!isHTML || (!isReqMatchSuperDomainOrigin && !isAUTFrame))) {
       mw.debug('- no injection (not html)')
     } else if (level === 'full') {
       mw.debug('- full injection')
@@ -96,22 +97,38 @@ export async function setInjectionLevel (mw: ResponseInterceptionMiddlewareCtx):
   }
 
   if (mw.res.wantsInjection) {
+    // Chrome plans to make document.domain immutable in Chrome 109, with the default value
+    // of the Origin-Agent-Cluster header becoming 'true'. We explicitly disable this header
+    // so that we can continue to support tests that visit multiple subdomains in a single spec.
+    // https://github.com/cypress-io/cypress/issues/20147
+    //
+    // We set the header here only for proxied requests that have scripts injected that set the domain.
+    // Other proxied requests are ignored.
     mw.res.setHeader('Origin-Agent-Cluster', '?0')
 
+    // In order to allow the injected script to run on sites with a CSP header
+    // we must add a generated `nonce` into the response headers
     const nonce = crypto.randomBytes(16).toString('base64')
 
+    // Iterate through each CSP header
     cspHeaderNames.forEach((headerName) => {
       const policyArray = parseCspHeaders(mw.res.getHeaders(), headerName)
       const usedNonceDirectives = nonceDirectives
+      // If there are no used CSP directives that restrict script src execution, our script will run
+      // without the nonce, so we will not add it to the response
       .filter((directive) => policyArray.some((policyMap) => policyMap.has(directive)))
 
       if (usedNonceDirectives.length) {
+        // If there is a CSP directive that that restrict script src execution, we must add the
+        // nonce policy to each supported directive of each CSP header. This is due to the effect
+        // of [multiple policies](https://w3c.github.io/webappsec-csp/#multiple-policies) in CSP.
         mw.res.injectionNonce = nonce
         const modifiedCspHeader = policyArray.map((policies) => {
           usedNonceDirectives.forEach((availableNonceDirective) => {
             if (policies.has(availableNonceDirective)) {
               const cspScriptSrc = policies.get(availableNonceDirective) || []
 
+              // We are mutating the policy map, and we will set it back to the response headers later
               policies.set(availableNonceDirective, [...cspScriptSrc, `'nonce-${nonce}'`])
             }
           })
@@ -119,6 +136,7 @@ export async function setInjectionLevel (mw: ResponseInterceptionMiddlewareCtx):
           return policies
         }).map(generateCspDirectives)
 
+        // To replicate original response CSP headers, we must apply all header values as an array
         mw.res.setHeader(headerName, modifiedCspHeader)
       }
     })

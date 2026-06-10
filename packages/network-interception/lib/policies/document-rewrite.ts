@@ -3,7 +3,6 @@ import type { NetworkPolicy } from './types'
 export type DocumentRewriteConfig = {
   modifyObstructiveCode?: boolean
   experimentalModifyObstructiveThirdPartyCode?: boolean
-  experimentalSourceRewriting?: boolean
 }
 
 /**

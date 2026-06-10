@@ -30,6 +30,7 @@ export function resolveInjectionLevel (facts: InjectionLevelFacts): InjectionLev
 
   const isHTMLLike = facts.isHTML || facts.isRenderedHTML
 
+  // NOTE: Only inject fullCrossOrigin if the super domain origins do not match in order to keep parity with cypress application reloads
   if (facts.urlDoesNotMatchPolicyBasedOnDomain && facts.isAUTFrame && isHTMLLike) {
     return 'fullCrossOrigin'
   }
@@ -54,9 +55,11 @@ export function resolveInjectionLevel (facts: InjectionLevelFacts): InjectionLev
  */
 export function resolveWantsSecurityRemoved (facts: SecurityRemovalFacts): boolean {
   return (facts.modifyObstructiveCode || facts.experimentalModifyObstructiveThirdPartyCode) &&
+    // if experimentalModifyObstructiveThirdPartyCode is enabled, we want to modify all framebusting code that is html or javascript that passes through the proxy
     ((facts.experimentalModifyObstructiveThirdPartyCode
       && (facts.isHTML || facts.isRenderedHTML || facts.isJavaScript)) ||
      facts.wantsInjection === 'full' ||
      facts.wantsInjection === 'fullCrossOrigin' ||
+     // only modify JavasScript if matching the current origin policy or if experimentalModifyObstructiveThirdPartyCode is enabled (above)
      (facts.isJavaScript && facts.isReqMatchSuperDomainOrigin))
 }
