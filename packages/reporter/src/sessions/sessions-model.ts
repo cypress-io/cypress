@@ -15,7 +15,11 @@ export interface SessionProps extends InstrumentProps {
 }
 
 export default class Session extends Instrument {
-  name: string
+  // `name` is inherited from Instrument (and made observable in its
+  // constructor). Do NOT redeclare it as a class field: under
+  // useDefineForClassFields a subclass field re-defines the inherited
+  // observable and throws "Cannot redefine property: name" when
+  // reporter is embedded into test-replay as a submodule.
   status: string
   isGlobalSession: boolean = false
   tagType: string
