@@ -3,6 +3,7 @@
 
 **Bugfixes:**
 
+- Fixed an issue where a command that failed immediately after a `.then()` callback containing an assertion could display a code frame that pointed at the previous `.then()` instead of the command that actually failed. Fixes [#31505](https://github.com/cypress-io/cypress/issues/31505).
 - Fixed an issue where setting [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) to a value greater than `0` from `setupNodeEvents` would take effect during `cypress run`, which could prevent snapshots from being captured correctly when recording Test Replay to Cypress Cloud. During `cypress run`, `numTestsKeptInMemory` is now always treated as `0` regardless of how it is configured. Fixes [#31167](https://github.com/cypress-io/cypress/issues/31167).
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
 
