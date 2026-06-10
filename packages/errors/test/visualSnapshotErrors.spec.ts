@@ -939,6 +939,11 @@ describe('visual error templates', () => {
         ],
       }
     },
+    BEFORE_BROWSER_LAUNCH_ERROR: () => {
+      return {
+        default: [makeErr()],
+      }
+    },
     COULD_NOT_PARSE_ARGUMENTS: () => {
       return {
         default: ['spec', '1', 'spec must be a string or comma-separated list'],

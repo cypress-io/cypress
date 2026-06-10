@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import type { FoundBrowser } from '@packages/types'
+import { getCtx } from '@packages/data-context'
 import * as errors from '../errors'
 import * as plugins from '../plugins'
 import * as launcher from '@packages/launcher'
@@ -172,9 +173,25 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
       isHeadless: browser.isHeadless,
     })
 
-    const pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
+    let pluginConfigResult
 
-    span?.end()
+    try {
+      pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
+    } catch (err) {
+      // In run mode, preserve the existing behavior of surfacing the raw error
+      // (the run aborts and the error is printed). In open mode, the rejection
+      // would otherwise be swallowed and leave the launcher hanging without any
+      // indication of what went wrong, so wrap it in a descriptive Cypress error
+      // that gets surfaced to the user when the browser fails to launch.
+      // @see https://github.com/cypress-io/cypress/issues/32775
+      if (getCtx().isRunMode) {
+        throw err
+      }
+
+      errors.throwErr('BEFORE_BROWSER_LAUNCH_ERROR', err)
+    } finally {
+      span?.end()
+    }
 
     if (pluginConfigResult) {
       extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)

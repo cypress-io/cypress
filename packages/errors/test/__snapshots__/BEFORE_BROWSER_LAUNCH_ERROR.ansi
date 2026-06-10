@@ -1,0 +1,9 @@
+[31mCypress encountered an error while executing the handler registered for the [95mbefore:browser:launch[39m[31m event.[39m
+[31m[39m
+[31mThe browser was not launched. Fix the error in your plugin handler and try again.[39m
+[31m[39m
+[31mhttps://on.cypress.io/browser-launch-api[39m
+[35m[39m
+[35mError: fail whale[39m
+[35m    at makeErr (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m
+[35m    at BEFORE_BROWSER_LAUNCH_ERROR (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m

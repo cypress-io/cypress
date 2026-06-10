@@ -1243,6 +1243,16 @@ export const AllCypressErrors = {
 
         https://on.cypress.io/browser-launch-api`
   },
+  BEFORE_BROWSER_LAUNCH_ERROR: (err: ErrorLike) => {
+    return errTemplate`\
+        Cypress encountered an error while executing the handler registered for the ${fmt.highlightSecondary(`before:browser:launch`)} event.
+
+        The browser was not launched. Fix the error in your plugin handler and try again.
+
+        ${fmt.stackTrace(err)}
+
+        https://on.cypress.io/browser-launch-api`
+  },
   // TODO: test this
   COULD_NOT_PARSE_ARGUMENTS: (argName: string, argValue: string, errMsg: string) => {
     return errTemplate`\

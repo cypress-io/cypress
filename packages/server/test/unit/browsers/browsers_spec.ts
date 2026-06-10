@@ -5,10 +5,12 @@ import os from 'os'
 import chalk from 'chalk'
 import browsers from '../../../lib/browsers'
 import utils from '../../../lib/browsers/utils'
+import * as plugins from '../../../lib/plugins'
 import snapshot from 'snap-shot-it'
 import { EventEmitter } from 'events'
 import { exec } from 'child_process'
 import util from 'util'
+import { getCtx } from '@packages/data-context'
 import { createTestDataContext } from '../../support/helpers/data-context-helper'
 import electron from '../../../lib/browsers/electron'
 import chrome from '../../../lib/browsers/chrome'
@@ -368,6 +370,39 @@ describe('lib/browsers/index', () => {
       expect(browserInstance1.isOrphanedBrowserProcess).to.be.true
       expect(currentInstance).to.equal(browserInstance2)
     })
+
+    // https://github.com/cypress-io/cypress/issues/32775
+    context('when the browser fails to launch', () => {
+      it('rethrows the error in run mode after resetting the browser status', async () => {
+        const runCtx = createTestDataContext('run')
+        const launchErr = new Error('before:browser:launch blew up')
+
+        sinon.stub(chrome, 'open').rejects(launchErr)
+        sinon.spy(runCtx.actions.app, 'setBrowserStatus')
+        sinon.spy(runCtx, 'onError')
+
+        await expect(browsers.open({ family: 'chromium' } as any, { url: 'http://example.com' } as any, null, runCtx))
+        .to.be.rejectedWith(launchErr)
+
+        expect(runCtx.onError).not.to.be.called
+        expect((runCtx.actions.app.setBrowserStatus as SetBrowserStatusSpy).lastCall.args[0]).to.eq('closed')
+      })
+
+      it('surfaces the error via onError in open mode instead of hanging', async () => {
+        const openCtx = createTestDataContext('open')
+        const launchErr = Object.assign(new Error('before:browser:launch blew up'), { isCypressErr: true })
+
+        sinon.stub(chrome, 'open').rejects(launchErr)
+        sinon.spy(openCtx.actions.app, 'setBrowserStatus')
+        sinon.spy(openCtx, 'onError')
+
+        const instance = await browsers.open({ family: 'chromium' } as any, { url: 'http://example.com' } as any, null, openCtx)
+
+        expect(instance).to.be.null
+        expect((openCtx.actions.app.setBrowserStatus as SetBrowserStatusSpy).lastCall.args[0]).to.eq('closed')
+        expect(openCtx.onError).to.be.calledWith(launchErr)
+      })
+    })
   })
 
   context('.extendLaunchOptionsFromPlugins', () => {
@@ -378,6 +413,36 @@ describe('lib/browsers/index', () => {
 
       // this error is snapshotted in an e2e test, no need to do it here
       expect(fn).to.throw({ type: 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES' } as any)
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/32775
+  context('.executeBeforeBrowserLaunch', () => {
+    const browser = { name: 'chrome', channel: 'stable', version: '1' }
+
+    beforeEach(() => {
+      sinon.stub(plugins, 'has').withArgs('before:browser:launch').returns(true)
+    })
+
+    it('rethrows the raw error in run mode', async () => {
+      const launchErr = new Error('before:browser:launch blew up')
+
+      sinon.stub(plugins, 'execute').rejects(launchErr)
+      sinon.stub(getCtx(), 'isRunMode').get(() => true)
+
+      await expect(utils.executeBeforeBrowserLaunch(browser, utils.defaultLaunchOptions, {}))
+      .to.be.rejectedWith(launchErr)
+    })
+
+    it('wraps the error as BEFORE_BROWSER_LAUNCH_ERROR in open mode', async () => {
+      sinon.stub(plugins, 'execute').rejects(new Error('before:browser:launch blew up'))
+      sinon.stub(getCtx(), 'isRunMode').get(() => false)
+
+      await expect(utils.executeBeforeBrowserLaunch(browser, utils.defaultLaunchOptions, {}))
+      .to.be.rejected
+      .then((err) => {
+        expect(err).to.have.property('type', 'BEFORE_BROWSER_LAUNCH_ERROR')
+      })
     })
   })
 

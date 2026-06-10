@@ -197,7 +197,29 @@ const browsers = {
 
     debug('opening browser %o', browser)
 
-    const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
+    let _instance: BrowserInstance
+
+    try {
+      _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
+    } catch (err: any) {
+      // If the browser fails to launch (for example, an error thrown in a
+      // `before:browser:launch` plugin handler), reset the browser status so
+      // the UI doesn't hang on an "opening" spinner indefinitely.
+      // @see https://github.com/cypress-io/cypress/issues/32775
+      ctx.actions.app.setBrowserStatus('closed')
+
+      // In run mode, rethrow so the existing run-mode error handling reports the
+      // failure and exits. In open mode, surface the error to the launcher so
+      // the user gets feedback about why the browser failed to launch instead
+      // of being left without any indication of what went wrong.
+      if (ctx.isRunMode) {
+        throw err
+      }
+
+      ctx.onError(err.isCypressErr ? err : errors.get('UNEXPECTED_INTERNAL_ERROR', err), 'Error launching browser')
+
+      return null
+    }
 
     debug(`browser opened for launch ${thisLaunchAttempt}`)
 
