@@ -17,6 +17,7 @@ import type { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
 import type { NetEvent } from '@packages/net-stubbing/lib/types'
 import Debug from 'debug'
+import { DriverCommandLogAdapter } from '../adapters'
 
 const debug = Debug('cypress:driver:net-stubbing:events:before-request')
 
@@ -306,7 +307,11 @@ export const onBeforeRequest: HandlerFn<CyHttpMessages.IncomingRequest> = (Cypre
     resolve = _resolve
   })
 
-  request.setLogFlag = Cypress.ProxyLogging.logInterception(request, route)?.setFlag || (() => {})
+  const commandLog = new DriverCommandLogAdapter({
+    logInterception: (interception, route) => Cypress.ProxyLogging.logInterception(interception as Interception, route),
+  })
+
+  request.setLogFlag = commandLog.logInterception({ interception: request, route })?.setFlag || (() => {})
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)

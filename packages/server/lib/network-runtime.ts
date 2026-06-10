@@ -6,7 +6,10 @@ import {
   ProxyResponseInterceptionAdapter,
   defaultMiddleware,
 } from '@packages/proxy'
+import { ProxyCommandLogAdapter } from '@packages/proxy/lib/adapters/proxy-command-log'
+import { ProxyCookieStateAdapter } from '@packages/proxy/lib/adapters/proxy-cookie-state'
 import { ProxyDocumentPreparationAdapter } from '@packages/proxy/lib/adapters/proxy-document-preparation'
+import { ProxyNetworkCaptureAdapter } from '@packages/proxy/lib/adapters/proxy-network-capture'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { NetworkPolicyRegistry, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionRuntime } from '@packages/network-interception'
@@ -47,6 +50,9 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     requestInterception: new ProxyRequestInterceptionAdapter(),
     responseInterception: new ProxyResponseInterceptionAdapter(),
     documentPreparation: new ProxyDocumentPreparationAdapter(),
+    networkCapture: new ProxyNetworkCaptureAdapter(),
+    cookieState: new ProxyCookieStateAdapter(),
+    commandLog: new ProxyCommandLogAdapter(),
   })
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)
