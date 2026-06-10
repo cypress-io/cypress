@@ -25,10 +25,20 @@ export function parseDomain (domain: string, options = {}) {
 }
 
 export function parseUrlIntoHostProtocolDomainTldPort (str: string) {
-  let { hostname, port, protocol } = new URL(str)
+  let hostname = ''
+  let port = ''
+  let protocol = ''
 
-  if (!hostname) {
-    hostname = ''
+  try {
+    const parsed = new URL(str)
+
+    hostname = parsed.hostname
+    port = parsed.port
+    protocol = parsed.protocol
+  } catch {
+    // the WHATWG URL parser throws on relative or otherwise invalid urls that
+    // the legacy parser tolerated; fall back to a degraded result rather than
+    // throwing so CORS helpers can still return a sensible (non-matching) value
   }
 
   if (!port) {

@@ -84,6 +84,11 @@ describe('lib/uri', () => {
       expect(addDefaultPort('ftp://example.com/foo')).toEqual('ftp://example.com/foo')
     })
 
+    it('preserves IPv6 host brackets', () => {
+      expect(addDefaultPort('http://[::1]/foo')).toEqual('http://[::1]:80/foo')
+      expect(addDefaultPort('http://[::1]:4444/foo')).toEqual('http://[::1]:4444/foo')
+    })
+
     it('returns relative urls unchanged', () => {
       expect(addDefaultPort('/foo/bar?baz=quux')).toEqual('/foo/bar?baz=quux')
     })
@@ -136,6 +141,11 @@ describe('lib/uri', () => {
       expect(
         origin('https://app.foobar.co.uk:1234/a=b'),
       ).toEqual('https://app.foobar.co.uk:1234')
+    })
+
+    it('returns invalid/unparseable urls unchanged instead of throwing', () => {
+      // out-of-range port is invalid per the WHATWG URL parser
+      expect(origin('https://example.com:99999')).toEqual('https://example.com:99999')
     })
   })
 })

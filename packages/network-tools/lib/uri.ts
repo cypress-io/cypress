@@ -87,7 +87,13 @@ export function isLocalhost (url: URL) {
 }
 
 export function origin (urlStr: string) {
-  // URL.origin is the scheme + host (and non-default port) with no path,
-  // search, or hash — exactly the "origin" portion of the url
-  return new URL(urlStr).origin
+  try {
+    // URL.origin is the scheme + host (and non-default port) with no path,
+    // search, or hash — exactly the "origin" portion of the url
+    return new URL(urlStr).origin
+  } catch {
+    // the WHATWG URL parser throws on invalid urls (e.g. out-of-range ports)
+    // that the legacy parser tolerated; fall back to the original string
+    return urlStr
+  }
 }
