@@ -619,6 +619,18 @@ describe('src/cypress/dom/visibility', {
       })
     })
 
+    it('reports a meaningful reason on the action-command path (checkOpacity: false)', () => {
+      // action commands (e.g. cy.click) reach this via ensure.ts -> getReasonIsHidden(subject, { checkOpacity: false }).
+      // checkOpacity only flips `opacityProperty` on checkVisibility(); a non-opacity cause must still
+      // produce the computed message rather than the bare "not visible." fallback.
+      prepareFixtureSection('display-property')
+      cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        const reason = dom.getReasonIsHidden($el, { checkOpacity: false })
+
+        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
+      })
+    })
+
     it('surfaces the detached cause instead of the generic checkVisibility message', () => {
       // detached elements fail `Element.checkVisibility()`, which would otherwise produce
       // an unhelpful generic message. The reason should call out the structural cause.
