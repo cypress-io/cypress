@@ -71,8 +71,36 @@ const getDefaultLaunchOptions = (options) => {
   return _.defaultsDeep(options, defaultLaunchOptions)
 }
 
-const copyExtension = (src, dest) => {
-  return fs.copyAsync(src, dest)
+// When Cypress is installed in a read-only location (e.g. the Nix store), the
+// source extension files and directories are read-only. fs.copy preserves those
+// permissions on the copied extension, which later prevents Cypress from removing
+// the browser profile directory on exit (EACCES/EPERM when unlinking files inside
+// a read-only directory). Recursively granting owner write access ensures the
+// profile can be cleaned up. See https://github.com/cypress-io/cypress/issues/31300
+const ensureWritable = async (entryPath: string) => {
+  const stats = await fs.stat(entryPath)
+
+  // chmod(path, mode) sets the file's permission bits to `mode`.
+  // `stats.mode` is the current mode (e.g. 0o555 for a read-only dir, 0o444 for a
+  // read-only file). 0o200 is the octal bit for "owner write" (the `w` in `-w-`
+  // under `rwx` triplets owner/group/other). OR-ing them (`stats.mode | 0o200`)
+  // turns on the owner write bit while leaving every other bit untouched — so
+  // 0o555 -> 0o755 and 0o444 -> 0o644. We only grant owner write (not group/other)
+  // because the Cypress process owns these copies and that's all it needs to
+  // remove them later.
+  await fs.chmod(entryPath, stats.mode | 0o200)
+
+  if (stats.isDirectory()) {
+    const entries = await fs.readdir(entryPath)
+
+    await Promise.all(entries.map((entry) => ensureWritable(path.join(entryPath, entry))))
+  }
+}
+
+const copyExtension = async (src, dest) => {
+  await fs.copyAsync(src, dest)
+
+  await ensureWritable(dest)
 }
 
 const getPartition = function (isTextTerminal) {

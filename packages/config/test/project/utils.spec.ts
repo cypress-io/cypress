@@ -888,6 +888,25 @@ describe('config/src/project/utils', () => {
       await defaults('slowTestThreshold', 250, {}, { testingType: 'component' })
     })
 
+    // https://github.com/cypress-io/cypress/issues/33198
+    // A `CYPRESS_BROWSERS=chrome` env var coerces `browsers` to a string, which used to
+    // slip past validation and crash later when the browser list was mapped over.
+    it('throws a clear validation error when browsers is coerced to a non-array via env', async function () {
+      vi.stubEnv('CYPRESS_BROWSERS', 'chrome')
+
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+      }
+
+      try {
+        await mergeDefaults(cfg, { testingType: 'e2e' }, {}, getFilesByGlob)
+        throw new Error('Expected error to be thrown')
+      } catch (err: any) {
+        expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_BROWSERS_INVALID', 'chrome')
+      }
+    })
+
     it('port=null', async function () {
       await defaults('port', null)
     })
