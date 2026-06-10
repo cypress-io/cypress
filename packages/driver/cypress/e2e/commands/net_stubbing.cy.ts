@@ -3792,9 +3792,18 @@ describe('network stubbing', { retries: 15 }, function () {
       it('stops waiting when an xhr request is canceled', () => {
         cy.visit('http://localhost:3500/fixtures/generic.html')
 
-        cy.intercept('POST', /users/, {
-          body: { name: 'b' },
-          delay: 2000,
+        let resolveRequestReceived = () => {}
+        const requestReceived = new Cypress.Promise<void>((resolve) => {
+          resolveRequestReceived = resolve
+        })
+
+        cy.intercept('POST', /users/, (req) => {
+          resolveRequestReceived()
+
+          req.reply({
+            body: { name: 'b' },
+            delay: 2000,
+          })
         }).as('createUser')
 
         cy.window()
@@ -3805,18 +3814,29 @@ describe('network stubbing', { retries: 15 }, function () {
 
           xhr.send()
 
-          win.location.reload()
-
-          cy.wait('@createUser').its('state').should('eq', 'Errored')
+          return requestReceived.then(() => {
+            win.location.reload()
+          })
         })
+
+        cy.wait('@createUser').its('state').should('eq', 'Errored')
       })
 
       it('stops waiting when an fetch request is canceled', () => {
         cy.visit('http://localhost:3500/fixtures/generic.html')
 
-        cy.intercept('POST', /users/, {
-          body: { name: 'b' },
-          delay: 2000,
+        let resolveRequestReceived = () => {}
+        const requestReceived = new Cypress.Promise<void>((resolve) => {
+          resolveRequestReceived = resolve
+        })
+
+        cy.intercept('POST', /users/, (req) => {
+          resolveRequestReceived()
+
+          req.reply({
+            body: { name: 'b' },
+            delay: 2000,
+          })
         }).as('createUser')
 
         cy.window()
@@ -3824,21 +3844,16 @@ describe('network stubbing', { retries: 15 }, function () {
           const controller = new AbortController()
           const { signal } = controller
 
-          fetch('/users/', { signal, method: 'POST' }).catch((e) => {
-          // do nothing on an abort
+          fetch('/users/', { signal, method: 'POST' }).catch(() => {
+            // do nothing on an abort
           })
 
-          // if you abort too fast in firefox or safari, the fetch is never sent to the server for us to intercept
-          if (!Cypress.isBrowser({ family: 'chromium' })) {
-            setTimeout(() => {
-              controller.abort()
-            }, 100)
-          } else {
+          return requestReceived.then(() => {
             controller.abort()
-          }
-
-          cy.wait('@createUser').its('state').should('eq', 'Errored')
+          })
         })
+
+        cy.wait('@createUser').its('state').should('eq', 'Errored')
       })
 
       it('should resolve a handler based intercept when navigation cancels the request', () => {
