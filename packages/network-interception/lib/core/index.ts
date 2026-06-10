@@ -6,4 +6,6 @@ export * from './plan-subscriptions'
 
 export * from './merge-handler-result'
 
+export * from './document-preparation'
+
 export * from './network-interception-core'

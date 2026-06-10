@@ -95,11 +95,45 @@ export class NetworkInterceptionCore {
     return port.interceptResponse(ctx)
   }
 
+  async setInjectionLevel (ctx: unknown): Promise<void> {
+    const port = this.options.documentPreparation
+
+    if (!port) {
+      throw new Error('NetworkInterceptionCore.documentPreparation is not configured')
+    }
+
+    return port.setInjectionLevel(ctx)
+  }
+
+  async injectHtml (ctx: unknown): Promise<void> {
+    const port = this.options.documentPreparation
+
+    if (!port) {
+      throw new Error('NetworkInterceptionCore.documentPreparation is not configured')
+    }
+
+    return port.injectHtml(ctx)
+  }
+
+  async removeSecurity (ctx: unknown): Promise<void> {
+    const port = this.options.documentPreparation
+
+    if (!port) {
+      throw new Error('NetworkInterceptionCore.documentPreparation is not configured')
+    }
+
+    return port.removeSecurity(ctx)
+  }
+
   get requestInterception (): ForRequestInterception | undefined {
     return this.options.requestInterception
   }
 
   get responseInterception (): ForResponseInterception | undefined {
     return this.options.responseInterception
+  }
+
+  get documentPreparation (): ForDocumentPreparation | undefined {
+    return this.options.documentPreparation
   }
 }
