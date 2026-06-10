@@ -8,7 +8,7 @@ import type { RequestInterceptionMiddlewareCtx } from './types'
 /**
  * Attach cross-origin cookies from the server-side cookie jar to proxied requests.
  */
-export async function attachCrossOriginCookies (mw: RequestInterceptionMiddlewareCtx): Promise<void> {
+export function attachCrossOriginCookies (mw: RequestInterceptionMiddlewareCtx): void {
   const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: mw.reqMiddlewareSpan, isVerbose })
 
   const doesTopNeedSimulation = doesTopNeedToBeSimulated(mw)

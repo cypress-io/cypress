@@ -256,7 +256,16 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       }
 
       try {
-        middleware.call(fullCtx)
+        const returnValue = middleware.call(fullCtx)
+
+        if (returnValue != null && typeof returnValue.then === 'function') {
+          Bluebird.resolve(returnValue).catch((err: Error) => {
+            err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
+
+            errorUtils.logError(err)
+            fullCtx.onError(err)
+          })
+        }
       } catch (err) {
         err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
 

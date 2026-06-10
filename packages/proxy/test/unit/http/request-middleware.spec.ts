@@ -6,6 +6,7 @@ import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
 import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
 import { CookieJar } from '@packages/server/lib/util/cookies'
+import { NetworkInterceptionCore } from '@packages/network-interception'
 import { HttpMiddlewareThis } from '../../../lib/http'
 import { resourceTypeAndCredentialManager } from '../../../lib/resourceTypeAndCredentialManager'
 
@@ -604,6 +605,22 @@ describe('http/request-middleware', () => {
           expect(ctx.req.headers['cookie']).toEqual('jar=cookie7; jar=cookie8; jar=cookie5; jar=cookie4; jar=cookie1; jar=cookie2; request=cookie')
         })
       })
+    })
+
+    it('routes missing cookieState port failures to onError', async () => {
+      const ctx = await getContext()
+      const onError = vi.fn()
+
+      ctx.onError = onError
+      ctx.networkInterceptionCore = new NetworkInterceptionCore()
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx)
+
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledOnce()
+      })
+
+      expect(onError.mock.calls[0][0].message).toMatch(/cookieState/)
     })
 
     async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autUrl = 'http://foobar.com', requestUrl = 'http://foobar.com') {

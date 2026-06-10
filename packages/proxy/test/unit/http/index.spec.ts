@@ -1,9 +1,33 @@
 import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
-import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx } from '../../../lib/http'
+import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx, _runStage } from '../../../lib/http'
 import { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
 
 describe('http', function () {
+  describe('_runStage', function () {
+    it('routes async middleware rejections to onError', async function () {
+      const onError = vi.fn()
+      const asyncMiddleware = vi.fn().mockRejectedValue(new Error('async oops'))
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingRequest]: { asyncMiddleware },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingRequest, ctx, onError)
+
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledOnce()
+      })
+
+      expect(onError.mock.calls[0][0].message).toEqual('Internal error while proxying "GET url" in asyncMiddleware:\nasync oops')
+    })
+  })
+
   describe('Http.handle', function () {
     let config: CyServer.Config & Cypress.Config
     let middleware: HttpMiddlewareStacks

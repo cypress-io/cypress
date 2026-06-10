@@ -6,7 +6,9 @@ import type { RequestInterceptionMiddlewareCtx, ResponseInterceptionMiddlewareCt
 /** {@link ForCookieState} adapter — delegates to legacy proxy cookie jar middleware. */
 export class ProxyCookieStateAdapter implements ForCookieState {
   attachCrossOriginCookies (ctx: unknown): Promise<void> {
-    return attachCrossOriginCookies(ctx as RequestInterceptionMiddlewareCtx)
+    attachCrossOriginCookies(ctx as RequestInterceptionMiddlewareCtx)
+
+    return Promise.resolve()
   }
 
   copyCookiesFromResponse (ctx: unknown): Promise<void> {
