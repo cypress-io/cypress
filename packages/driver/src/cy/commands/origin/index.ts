@@ -276,6 +276,12 @@ export default (Commands, Cypress: InternalCypress.Cypress, cy: Cypress.cy, stat
                 crossOriginCookies: Cypress.state('crossOriginCookies'),
                 isProtocolEnabled: Cypress.state('isProtocolEnabled'),
                 originUserInvocationStack: userInvocationStack,
+                // Seed the secondary origin's log group stack with the primary's
+                // (which includes this `origin` command's group) so commands in
+                // the callback nest under `origin` and compute their group level
+                // relative to it. This keeps the secondary as the source of truth
+                // for its own group lifecycle (see #33162).
+                logGroupIds: Cypress.state('logGroupIds'),
               },
               config: preprocessConfig(Cypress.config()),
               env: Cypress.config('allowCypressEnv') ? preprocessEnv(Cypress.env()) : undefined,

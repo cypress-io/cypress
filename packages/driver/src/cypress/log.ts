@@ -273,19 +273,31 @@ const defaults = function (state: StateFunc, config, obj) {
     },
   })
 
-  const logGroupIds = state('logGroupIds') || []
+  // Cross-origin logs arrive in the primary already carrying the `group` and
+  // `groupLevel` computed in the secondary origin, whose `logGroupIds` stack is
+  // seeded from the primary when the `cy.origin` callback starts. The primary
+  // must not recompute these values or mutate its own `logGroupIds` for them:
+  // the secondary owns the lifecycle of those groups (including ending them),
+  // and the primary never observes a group ending in the secondary. Letting the
+  // primary push onto its stack without a matching pop leaks the group level
+  // across sibling groups inside `cy.origin` (see #33162).
+  const isCrossOriginLogInPrimary = obj.isCrossOriginLog && !Cypress.isCrossOriginSpecBridge
 
-  if (logGroupIds.length) {
-    obj.group = _.last(logGroupIds)
-    obj.groupLevel = logGroupIds.length
-  }
+  if (!isCrossOriginLogInPrimary) {
+    const logGroupIds = state('logGroupIds') || []
 
-  if (obj.groupEnd) {
-    state('logGroupIds', _.slice(logGroupIds, 0, -1))
-  }
+    if (logGroupIds.length) {
+      obj.group = _.last(logGroupIds)
+      obj.groupLevel = logGroupIds.length
+    }
 
-  if (obj.groupStart) {
-    state('logGroupIds', (logGroupIds).concat(obj.id))
+    if (obj.groupEnd) {
+      state('logGroupIds', _.slice(logGroupIds, 0, -1))
+    }
+
+    if (obj.groupStart) {
+      state('logGroupIds', (logGroupIds).concat(obj.id))
+    }
   }
 
   return obj

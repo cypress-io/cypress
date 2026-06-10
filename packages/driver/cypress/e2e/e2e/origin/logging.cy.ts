@@ -142,6 +142,53 @@ describe('cy.origin logging', { browser: '!webkit' }, () => {
     cy.log('after')
   })
 
+  // https://github.com/cypress-io/cypress/issues/33162
+  it('resets the group level after a nested grouped command finishes', () => {
+    const logs: any[] = []
+
+    cy.on('log:added', (attrs) => {
+      logs.push(attrs)
+    })
+
+    cy.visit('/fixtures/primary-origin.html')
+    cy.get('a[data-cy="cross-origin-secondary-link"]').click()
+
+    cy.origin('http://www.foobar.com:3500', () => {
+      cy.get('body').within(() => {
+        cy.get('[data-cy="dom-check"]')
+      })
+
+      cy.get('body').within(() => {
+        cy.get('[data-cy="dom-check"]')
+      })
+    })
+
+    cy.wrap({}).should(() => {
+      const originLog = _.find(logs, { name: 'origin' })
+      const withinLogs = _.filter(logs, { name: 'within' })
+
+      expect(withinLogs, 'two within groups').to.have.length(2)
+
+      const [firstWithin, secondWithin] = withinLogs
+
+      // both `within` groups are direct children of the `origin` group - the
+      // second must NOT nest under the first once the first group is done
+      expect(firstWithin.group).to.equal(originLog.id)
+      expect(firstWithin.groupLevel).to.equal(1)
+      expect(secondWithin.group).to.equal(originLog.id)
+      expect(secondWithin.groupLevel).to.equal(1)
+
+      // the queries inside each `within` nest one level deeper, under their group
+      const getLogs = _.filter(logs, { name: 'get', message: '[data-cy="dom-check"]' })
+
+      expect(getLogs, 'two nested get commands').to.have.length(2)
+      getLogs.forEach((getLog, index) => {
+        expect(getLog.group).to.equal(withinLogs[index].id)
+        expect(getLog.groupLevel).to.equal(2)
+      })
+    })
+  })
+
   context('#consoleProps', () => {
     const getOriginLog = (logs: any[]) => _.findLast(logs, (log) => log.get('name') === 'origin')
 
