@@ -213,6 +213,73 @@ describe('lib/open_project', () => {
         expect(browsers.open).to.have.been.calledOnce
       })
     })
+
+    describe('after:screenshot specName', function () {
+      beforeEach(function () {
+        // _server is protected but accessible in JS; set it to a minimal mock so changeUrlToSpec doesn't throw
+        openProject.getProject()._server = { socket: { changeToUrl: sinon.stub() }, setPreRequestTimeout: sinon.stub() }
+      })
+
+      it('uses relativeToCommonRoot from the spec set by changeUrlToSpec, not from the stale launch closure', async function () {
+        const emptySpec = { name: '', absolute: '', relative: '' }
+
+        await openProject.launch(this.browser, emptySpec)
+
+        const middlewareCall = this.automation.use.args.find((args) => args[0] && args[0].onBeforeRequest)
+
+        expect(middlewareCall, 'onBeforeRequest middleware should have been registered').to.exist
+
+        const { onBeforeRequest } = middlewareCall[0]
+
+        // Before navigating to a spec, specName is empty
+        const data = {}
+
+        await onBeforeRequest('take:screenshot', data)
+        expect(data.specName).to.equal('')
+
+        // Simulate the user clicking a spec in the sidebar — changeUrlToSpec is called, not launch()
+        const realSpec = { name: 'auth.cy.ts', relativeToCommonRoot: 'login/auth.cy.ts', absolute: '/abs/login/auth.cy.ts', relative: 'cypress/e2e/login/auth.cy.ts' }
+
+        openProject.changeUrlToSpec(realSpec)
+
+        // The middleware now reads relativeToCommonRoot from the updated projectBase.spec
+        const data2 = {}
+
+        await onBeforeRequest('take:screenshot', data2)
+        expect(data2.specName).to.equal('login/auth.cy.ts')
+      })
+    })
+  })
+
+  context('#changeUrlToSpec', () => {
+    beforeEach(async function () {
+      await openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
+      openProject.getProject().__setConfig({
+        browserUrl: 'http://localhost:8888/__/',
+        projectRoot: todosPath,
+      })
+
+      openProject.getProject().options = { onError: this.onError }
+      openProject.getProject().spec = { name: 'original-spec.cy.ts' }
+      // _server is protected but accessible in JS; set it to a minimal mock so the getter doesn't throw
+      openProject.getProject()._server = { socket: { changeToUrl: sinon.stub() }, setPreRequestTimeout: sinon.stub() }
+    })
+
+    it('updates projectBase.spec when given a spec with a name', function () {
+      const realSpec = { name: 'auth.cy.ts', relativeToCommonRoot: 'login/auth.cy.ts', absolute: '/abs/login/auth.cy.ts', relative: 'cypress/e2e/login/auth.cy.ts' }
+
+      openProject.changeUrlToSpec(realSpec)
+
+      expect(openProject.getProject().spec).to.deep.include({ name: 'auth.cy.ts', relativeToCommonRoot: 'login/auth.cy.ts' })
+    })
+
+    it('does not update projectBase.spec when given an empty spec', function () {
+      const emptySpec = { name: '', absolute: '', relative: '' }
+
+      openProject.changeUrlToSpec(emptySpec)
+
+      expect(openProject.getProject().spec.name).to.equal('original-spec.cy.ts')
+    })
   })
 
   describe('#sendFocusBrowserMessage', () => {
