@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>scroll events</title>
+    <style>
+      html, body { margin: 0; padding: 0; }
+      #scroller { height: 100vh; overflow-y: scroll; }
+      #content { height: 200000px; }
+    </style>
+  </head>
+  <body>
+    <div id="scroller"><div id="content"></div></div>
+    <script>
+      // Issue #29385: on an *idle* page in Electron/Linux with the runner UI
+      // hidden (--no-runner-ui), the compositor stops producing BeginFrames at
+      // ~60fps. Anything gated on a frame -- requestAnimationFrame callbacks and
+      // the delivery of coalesced scroll/wheel input -- then stalls for hundreds
+      // of ms. With the runner UI present, its constant repaints keep frames
+      // flowing so the same work happens within ~one frame (~16ms).
+      //
+      // Crucially this page does NOT run a continuous rAF loop -- that would keep
+      // the compositor busy and hide the bug. Instead it stays idle and the spec
+      // probes a single rAF latency at a time, waiting in between so the page
+      // returns to idle before each probe.
+      const scroller = document.getElementById('scroller')
+
+      scroller.addEventListener('scroll', () => {
+        window.__lastScrollAt = performance.now()
+      }, { passive: true })
+
+      // Probe how long a single requestAnimationFrame takes to fire from an idle
+      // state. Also nudges scrollTop so a scroll event is generated, and reports
+      // how long after the frame the scroll event was delivered.
+      window.__probeFrame = function () {
+        return new Promise((resolve) => {
+          const t0 = performance.now()
+
+          requestAnimationFrame(() => {
+            const rafLatency = performance.now() - t0
+
+            window.__lastScrollAt = 0
+            scroller.scrollTop += 10
+
+            // give the scroll event a moment, then report
+            requestAnimationFrame(() => {
+              resolve({ rafLatency: Math.round(rafLatency) })
+            })
+          })
+        })
+      }
+    </script>
+  </body>
+</html>
