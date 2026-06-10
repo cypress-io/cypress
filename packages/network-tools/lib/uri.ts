@@ -2,9 +2,8 @@
 // - https://nodejs.org/api/url.html#url_strings_and_url_objects
 // - https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Examples
 //
-// This module uses the WHATWG URL API (the global `URL` class) rather than the
-// legacy Node.js `url` API so that parsing and percent-encoding match what
-// browsers (and CDP) produce.
+// This module uses the WHATWG URL API (the global `URL` class) so that parsing
+// and percent-encoding match what browsers (and CDP) produce.
 // - https://nodejs.org/api/url.html#the-whatwg-url-api
 
 // yup, protocol contains a: ':' colon
