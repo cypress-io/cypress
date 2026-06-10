@@ -12,84 +12,165 @@ export type RouteMatchableRequest = {
   resourceType?: string
 }
 
+type Matchable = ReturnType<typeof getMatchableForRequest>
+
 /**
- * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
+ * A `StringMatcher` field compiled into a directly-executable form. Route
+ * matchers are evaluated against every request flowing through the proxy, so
+ * deriving the field list and compiling glob patterns must not be repeated
+ * per request.
  */
-export function doesRouteMatch (routeMatcher: RouteMatcherOptions, req: RouteMatchableRequest) {
-  const matchable = getMatchableForRequest(req)
+type CompiledStringField = {
+  field: string
+  // a regex-like matcher (anything with a `.test` method), used as-is
+  regex?: { test: (value: string) => boolean }
+  matcher?: string
+  mm?: minimatch.IMinimatch
+  // precompiled `/${matcher}` fallback for url/path values that begin with a
+  // slash when the matcher does not (e.g. `cy.intercept('services/api/*')`)
+  slashMatcher?: string
+  slashMm?: minimatch.IMinimatch
+}
 
-  const stringMatcherFields = getAllStringMatcherFields(routeMatcher)
-  const booleanFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['https']))
-  const numberFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['port']))
+type CompiledRouteMatcher = {
+  stringFields: CompiledStringField[]
+  hasHttps: boolean
+  https?: RouteMatcherOptions['https']
+  hasPort: boolean
+  port?: RouteMatcherOptions['port']
+}
 
-  for (let i = 0; i < stringMatcherFields.length; i++) {
-    const field = stringMatcherFields[i]
-    let matcher = _.get(routeMatcher, field)
-    let value = _.get(matchable, field, '')
+function compileStringField (routeMatcher: RouteMatcherOptions, field: string): CompiledStringField {
+  let matcher = _.get(routeMatcher, field)
 
-    const shouldTryMatchingPath = field === 'url'
+  if (matcher.test) {
+    return { field, regex: matcher }
+  }
 
-    const stringMatch = (value: string, matcher: string) => {
-      return (
-        value === matcher ||
-        minimatch(value, matcher, { matchBase: true }) ||
-        (field === 'url' && (
-          (value[0] === '/' && matcher[0] !== '/' && stringMatch(value, `/${matcher}`))
-        ))
-      )
-    }
+  if (field === 'method') {
+    matcher = matcher.toLowerCase()
+  }
+
+  const compiled: CompiledStringField = {
+    field,
+    matcher,
+    mm: new minimatch.Minimatch(matcher, { matchBase: true }),
+  }
+
+  if (field === 'url' && matcher[0] !== '/') {
+    compiled.slashMatcher = `/${matcher}`
+    compiled.slashMm = new minimatch.Minimatch(compiled.slashMatcher, { matchBase: true })
+  }
+
+  return compiled
+}
+
+function compileRouteMatcher (routeMatcher: RouteMatcherOptions): CompiledRouteMatcher {
+  return {
+    stringFields: getAllStringMatcherFields(routeMatcher).map((field) => {
+      return compileStringField(routeMatcher, field)
+    }),
+    hasHttps: _.has(routeMatcher, 'https'),
+    https: routeMatcher.https,
+    hasPort: _.has(routeMatcher, 'port'),
+    port: routeMatcher.port,
+  }
+}
+
+// Route matchers are never mutated once registered, so compiled forms are
+// cached per matcher object for the lifetime of the route.
+const compiledMatchers = new WeakMap<RouteMatcherOptions, CompiledRouteMatcher>()
+// `matchesRoutePreflight` evaluates a reduced form of each matcher (without
+// method/headers/auth), cached separately under the same key.
+const compiledPreflightMatchers = new WeakMap<RouteMatcherOptions, CompiledRouteMatcher>()
+
+function getCompiledMatcher (routeMatcher: RouteMatcherOptions) {
+  let compiled = compiledMatchers.get(routeMatcher)
+
+  if (!compiled) {
+    compiled = compileRouteMatcher(routeMatcher)
+    compiledMatchers.set(routeMatcher, compiled)
+  }
+
+  return compiled
+}
+
+function getCompiledPreflightMatcher (routeMatcher: RouteMatcherOptions) {
+  let compiled = compiledPreflightMatchers.get(routeMatcher)
+
+  if (!compiled) {
+    compiled = compileRouteMatcher(_.omit(routeMatcher, 'method', 'headers', 'auth'))
+    compiledPreflightMatchers.set(routeMatcher, compiled)
+  }
+
+  return compiled
+}
+
+function globMatch (entry: CompiledStringField, value: string) {
+  return (
+    value === entry.matcher ||
+    entry.mm!.match(value) ||
+    (entry.field === 'url' && value[0] === '/' && entry.slashMatcher !== undefined && (
+      value === entry.slashMatcher || entry.slashMm!.match(value)
+    ))
+  )
+}
+
+function doesCompiledRouteMatch (compiled: CompiledRouteMatcher, matchable: Matchable) {
+  const { stringFields } = compiled
+
+  for (let i = 0; i < stringFields.length; i++) {
+    const entry = stringFields[i]
+    let value = _.get(matchable, entry.field, '')
+
+    const shouldTryMatchingPath = entry.field === 'url'
 
     if (typeof value !== 'string') {
       value = String(value)
     }
 
-    if (matcher.test) {
-      if (!matcher.test(value) && (!shouldTryMatchingPath || !matcher.test(matchable.path))) {
+    if (entry.regex) {
+      if (!entry.regex.test(value) && (!shouldTryMatchingPath || !entry.regex.test(matchable.path))) {
         return false
       }
 
       continue
     }
 
-    if (field === 'method') {
+    if (entry.field === 'method') {
       value = value.toLowerCase()
-      matcher = matcher.toLowerCase()
     }
 
-    if (!stringMatch(value, matcher) && (!shouldTryMatchingPath || !stringMatch(matchable.path, matcher))) {
+    if (!globMatch(entry, value) && (!shouldTryMatchingPath || !globMatch(entry, matchable.path))) {
       return false
     }
   }
 
-  for (let i = 0; i < booleanFields.length; i++) {
-    const field = booleanFields[i]
-    const matcher = _.get(routeMatcher, field)
-    const value = _.get(matchable, field)
-
-    if (matcher !== value) {
-      return false
-    }
+  if (compiled.hasHttps && compiled.https !== matchable.https) {
+    return false
   }
 
-  for (let i = 0; i < numberFields.length; i++) {
-    const field = numberFields[i]
-    const matcher = _.get(routeMatcher, field)
-    const value = _.get(matchable, field)
+  if (compiled.hasPort) {
+    const matcher = compiled.port as any
+    const value = matchable.port
 
     if (matcher.length) {
       if (!matcher.includes(value)) {
         return false
       }
-
-      continue
-    }
-
-    if (matcher !== value) {
+    } else if (matcher !== value) {
       return false
     }
   }
 
   return true
+}
+
+/**
+ * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
+ */
+export function doesRouteMatch (routeMatcher: RouteMatcherOptions, req: RouteMatchableRequest) {
+  return doesCompiledRouteMatch(getCompiledMatcher(routeMatcher), getMatchableForRequest(req))
 }
 
 export function getMatchableForRequest (req: RouteMatchableRequest) {
@@ -133,10 +214,23 @@ export const _getMatchableForRequest = getMatchableForRequest
  * Find all `BackendRoute`s that match the supplied request.
  */
 export function matchRoutes (routes: BackendRoute[], req: RouteMatchableRequest): BackendRoute[] {
-  const [middleware, handlers] = _.partition(routes, (route) => route.routeMatcher.middleware === true)
+  if (!routes.length) {
+    return []
+  }
+
+  // parse the request into its matchable form once, not once per route
+  const matchable = getMatchableForRequest(req)
+
+  const middleware: BackendRoute[] = []
+  const handlers: BackendRoute[] = []
+
+  for (const route of routes) {
+    (route.routeMatcher.middleware === true ? middleware : handlers).push(route)
+  }
+
   const orderedRoutes = middleware.concat(handlers.reverse())
 
-  return orderedRoutes.filter((route) => !route.disabled && doesRouteMatch(route.routeMatcher, req))
+  return orderedRoutes.filter((route) => !route.disabled && doesCompiledRouteMatch(getCompiledMatcher(route.routeMatcher), matchable))
 }
 
 /** @deprecated Use {@link matchRoutes} */
@@ -156,16 +250,16 @@ function isPreflightRequest (req: RouteMatchableRequest) {
  * method/headers/auth on the matcher), and no matching route explicitly handles OPTIONS.
  */
 export function matchesRoutePreflight (routes: BackendRoute[], req: RouteMatchableRequest) {
-  if (!isPreflightRequest(req)) {
+  if (!routes.length || !isPreflightRequest(req)) {
     return false
   }
+
+  const matchable = getMatchableForRequest(req)
 
   let hasCorsOverride = false
 
   const matchingRoutes = _.filter(routes, ({ routeMatcher }) => {
-    const preflightMatcher = _.omit(routeMatcher, 'method', 'headers', 'auth')
-
-    if (!doesRouteMatch(preflightMatcher, req)) {
+    if (!doesCompiledRouteMatch(getCompiledPreflightMatcher(routeMatcher), matchable)) {
       return false
     }
 
