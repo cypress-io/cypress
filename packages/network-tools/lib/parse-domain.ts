@@ -8,10 +8,12 @@ export type ParsedDomainParts = {
 
 export type ParseDomainOptions = {
   privateTlds?: boolean
-  /** Ignored for compatibility with the old parse-domain API; unknown suffixes use tldts plus the legacy default `customTlds` rule from the former cors wrapper. */
-  customTlds?: RegExp | string[]
 }
 
+// `extractHostname: false` means tldts parses the input verbatim as a hostname —
+// it does NOT pull the host out of a URL. Callers must pass a hostname (e.g.
+// `www.example.com`), not a full URL (`https://www.example.com`), or tldts will
+// silently return wrong results.
 const TLDT_OPTS_BASE = {
   extractHostname: false,
   mixedInputs: false,
@@ -30,6 +32,10 @@ function legacyCustomTldSplit (hostname: string): ParsedDomainParts | null {
     return null
   }
 
+  // Real IPv4 addresses are already handled by `tldtsToLegacy` via tldts' `isIp`
+  // flag and never reach here. This only catches malformed digit/dot strings such
+  // as `'12.'` that tldts does not recognize as an IP but the legacy default
+  // `customTlds` rule still treated as a host-only "tld".
   if (/^[\d.]+$/.test(hostname)) {
     return {
       subdomain: '',

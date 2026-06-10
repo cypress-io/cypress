@@ -115,14 +115,13 @@ describe('lib/parse-domain', () => {
       })
     })
 
-    it('accepts customTlds in options without throwing (compat; option is ignored)', () => {
-      expect(parseDomain('www.example.com', {
-        customTlds: /\.local$/,
-      })).toEqual({
-        subdomain: 'www',
-        domain: 'example',
-        tld: 'com',
-      })
+    // The wrapper strips leading dots but intentionally leaves trailing dots in
+    // place: with `extractHostname: false` tldts reports an empty public suffix
+    // for a trailing-dot FQDN, and the legacy `customTlds` rule does not match it,
+    // so `parseDomain` returns null. Stripping trailing dots universally would
+    // break the digit-dot legacy case above (e.g. `'12.'`).
+    it('returns null for a trailing-dot FQDN (trailing dots are not normalized)', () => {
+      expect(parseDomain('example.com.')).toBeNull()
     })
   })
 })
