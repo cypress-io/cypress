@@ -1,12 +1,11 @@
 // useful links for describing the parts that make up a URL:
-// - https://nodejs.org/api/url.html#url_url_strings_and_url_objects
+// - https://nodejs.org/api/url.html#url_strings_and_url_objects
 // - https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Examples
 //
-// node's url formatting algorithm (which acts pretty unexpectedly)
-// - https://nodejs.org/api/url.html#url_url_format_urlobject
-
-import _ from 'lodash'
-import url from 'url'
+// This module uses the WHATWG URL API (the global `URL` class) rather than the
+// legacy Node.js `url` API so that parsing and percent-encoding match what
+// browsers (and CDP) produce.
+// - https://nodejs.org/api/url.html#the-whatwg-url-api
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)
@@ -17,73 +16,51 @@ const DEFAULT_PROTOCOL_PORTS = {
 
 type Protocols = keyof typeof DEFAULT_PROTOCOL_PORTS
 
-const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS) as string[]
-
-const portIsDefault = (port: string | null) => {
-  return port && DEFAULT_PORTS.includes(port)
-}
-
-const parseClone = (urlObject: any) => {
-  return url.parse(_.clone(urlObject))
-}
-
-export const parse = url.parse
+const DEFAULT_PORTS: string[] = Object.values(DEFAULT_PROTOCOL_PORTS)
 
 export function stripProtocolAndDefaultPorts (urlToCheck: string) {
-  // grab host which is 'hostname:port' only
-  const { host, hostname, port } = url.parse(urlToCheck)
+  try {
+    const { hostname, port } = new URL(urlToCheck)
 
-  // if we have a default port for 80 or 443
-  // then just return the hostname
-  if (portIsDefault(port)) {
-    return hostname
-  }
-
-  // else return the host
-  return host
-}
-
-function removePort (urlObject: any) {
-  const parsed = parseClone(urlObject)
-
-  // set host to undefined else url.format(...) will ignore the port property
-  // https://nodejs.org/api/url.html#url_url_format_urlobject
-  // Additionally, the types are incorrect (don't include undefined), so we add TS exceptions
-  /* @ts-ignore */
-  delete parsed.host
-  /* @ts-ignore */
-  delete parsed.port
-
-  return parsed
-}
-
-export function removeDefaultPort (urlToCheck: any) {
-  let parsed = parseClone(urlToCheck)
-
-  if (portIsDefault(parsed.port)) {
-    parsed = removePort(parsed)
-  }
-
-  return parsed
-}
-
-export function addDefaultPort (urlToCheck: any) {
-  const parsed = parseClone(urlToCheck)
-
-  if (!parsed.port) {
-    // unset host...
-    // see above for reasoning
-    /* @ts-ignore */
-    delete parsed.host
-    if (parsed.protocol) {
-      parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol as Protocols]
-    } else {
-      /* @ts-ignore */
-      delete parsed.port
+    // strip a default port (80 or 443) regardless of the protocol. Note this is
+    // intentionally protocol-agnostic (e.g. http://host:443 -> host) to preserve
+    // the existing block-host matching behavior.
+    if (!port || DEFAULT_PORTS.includes(port)) {
+      return hostname
     }
-  }
 
-  return parsed
+    return `${hostname}:${port}`
+  } catch {
+    // not a valid absolute url (e.g. relative, or an out-of-range port); fall
+    // back to the original string so block-host matching can still run on it
+    return urlToCheck
+  }
+}
+
+export function removeDefaultPort (urlToCheck: string) {
+  try {
+    // the WHATWG URL API automatically strips the default port (80/443)
+    return new URL(urlToCheck).href
+  } catch {
+    // relative urls have no host/port, so there is nothing to strip
+    return urlToCheck
+  }
+}
+
+export function addDefaultPort (urlToCheck: string) {
+  try {
+    const parsed = new URL(urlToCheck)
+
+    // the WHATWG URL API omits default ports and will not let us set them via
+    // `.port`, so we build the href manually to include the explicit port
+    const port = parsed.port || DEFAULT_PROTOCOL_PORTS[parsed.protocol as Protocols]
+    const host = port ? `${parsed.hostname}:${port}` : parsed.hostname
+
+    return `${parsed.protocol}//${host}${parsed.pathname}${parsed.search}${parsed.hash}`
+  } catch {
+    // relative urls have no host/port, so there is nothing to add
+    return urlToCheck
+  }
 }
 
 export function getPath (urlToCheck: string) {
@@ -111,13 +88,7 @@ export function isLocalhost (url: URL) {
 }
 
 export function origin (urlStr: string) {
-  const parsed = url.parse(urlStr)
-
-  parsed.hash = null
-  parsed.search = null
-  parsed.query = null
-  parsed.path = null
-  parsed.pathname = null
-
-  return url.format(parsed)
+  // URL.origin is the scheme + host (and non-default port) with no path,
+  // search, or hash — exactly the "origin" portion of the url
+  return new URL(urlStr).origin
 }

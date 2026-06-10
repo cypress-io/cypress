@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { URL } from 'url'
 
-import { getPath, isLocalhost, origin } from '../../lib'
+import { addDefaultPort, getPath, isLocalhost, origin, removeDefaultPort, stripProtocolAndDefaultPorts } from '../../lib'
 
 describe('lib/uri', () => {
   describe('.getPath', () => {
@@ -19,6 +19,73 @@ describe('lib/uri', () => {
 
     it('works with relative urls', () => {
       expect(getPath('/foo/bar?foo=bar|baz')).toEqual('/foo/bar?foo=bar|baz')
+    })
+  })
+
+  describe('.stripProtocolAndDefaultPorts', () => {
+    it('strips the protocol', () => {
+      expect(stripProtocolAndDefaultPorts('http://example.com/foo/bar')).toEqual('example.com')
+      expect(stripProtocolAndDefaultPorts('https://example.com/foo/bar')).toEqual('example.com')
+    })
+
+    it('strips the default port for the protocol', () => {
+      expect(stripProtocolAndDefaultPorts('http://example.com:80/foo')).toEqual('example.com')
+      expect(stripProtocolAndDefaultPorts('https://example.com:443/foo')).toEqual('example.com')
+    })
+
+    it('keeps a non-default port', () => {
+      expect(stripProtocolAndDefaultPorts('http://example.com:8080/foo')).toEqual('example.com:8080')
+      expect(stripProtocolAndDefaultPorts('https://example.com:1234/foo')).toEqual('example.com:1234')
+    })
+
+    it('strips a default port regardless of the protocol', () => {
+      // 443 is not the default for http, but is still stripped to preserve
+      // existing block-host matching behavior
+      expect(stripProtocolAndDefaultPorts('http://example.com:443/foo')).toEqual('example.com')
+      expect(stripProtocolAndDefaultPorts('https://example.com:80/foo')).toEqual('example.com')
+    })
+
+    it('returns invalid/unparseable urls unchanged', () => {
+      // out-of-range port is invalid per the WHATWG URL parser
+      expect(stripProtocolAndDefaultPorts('http://localhost:66667')).toEqual('http://localhost:66667')
+    })
+  })
+
+  describe('.removeDefaultPort', () => {
+    it('removes the default port for the protocol', () => {
+      expect(removeDefaultPort('http://example.com:80/foo')).toEqual('http://example.com/foo')
+      expect(removeDefaultPort('https://example.com:443/foo')).toEqual('https://example.com/foo')
+    })
+
+    it('keeps a non-default port', () => {
+      expect(removeDefaultPort('http://example.com:8080/foo')).toEqual('http://example.com:8080/foo')
+    })
+
+    it('does not encode the "|" character', () => {
+      expect(removeDefaultPort('http://example.com:80/?foo=bar|baz')).toEqual('http://example.com/?foo=bar|baz')
+    })
+
+    it('returns relative urls unchanged', () => {
+      expect(removeDefaultPort('/foo/bar?baz=quux')).toEqual('/foo/bar?baz=quux')
+    })
+  })
+
+  describe('.addDefaultPort', () => {
+    it('adds the default port for the protocol', () => {
+      expect(addDefaultPort('http://example.com/foo')).toEqual('http://example.com:80/foo')
+      expect(addDefaultPort('https://example.com/foo')).toEqual('https://example.com:443/foo')
+    })
+
+    it('keeps an existing non-default port', () => {
+      expect(addDefaultPort('http://example.com:8080/foo')).toEqual('http://example.com:8080/foo')
+    })
+
+    it('does not add a port for protocols without a known default', () => {
+      expect(addDefaultPort('ftp://example.com/foo')).toEqual('ftp://example.com/foo')
+    })
+
+    it('returns relative urls unchanged', () => {
+      expect(addDefaultPort('/foo/bar?baz=quux')).toEqual('/foo/bar?baz=quux')
     })
   })
 
