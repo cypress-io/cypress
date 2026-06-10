@@ -5,6 +5,7 @@
 
 - Fixed an issue where setting [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) to a value greater than `0` from `setupNodeEvents` would take effect during `cypress run`, which could prevent snapshots from being captured correctly when recording Test Replay to Cypress Cloud. During `cypress run`, `numTestsKeptInMemory` is now always treated as `0` regardless of how it is configured. Fixes [#31167](https://github.com/cypress-io/cypress/issues/31167).
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
+- Fixed an issue where an intercepted request that was still in flight when a test ended could be retried by the browser and picked up by the following test, causing a [`cy.intercept()`](https://on.cypress.io/intercept) in that test to record a duplicate or unexpected request. Requests that do not depend on an intercept handler callback (such as static-response stubs and spies) are now allowed to finish instead of being aborted between tests. Fixes [#20397](https://github.com/cypress-io/cypress/issues/20397).
 
 **Misc:**
 
