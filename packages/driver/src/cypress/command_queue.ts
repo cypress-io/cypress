@@ -243,6 +243,15 @@ export class CommandQueue extends Queue<$Command> {
     this.state('current', command)
     this.state('chainerId', command.get('chainerId'))
 
+    // Clear the invocation stack from any assertion that ran in a previous
+    // command (e.g. an `expect()` inside a `.then()` callback). Otherwise a
+    // later command that fails with a non-assertion error (thrown via
+    // `throwErrByPath`, which doesn't set `err.userInvocationStack`) would
+    // incorrectly pick up this stale stack in `getUserInvocationStack`,
+    // pointing the code frame at the previous command instead of the one that
+    // actually failed. See https://github.com/cypress-io/cypress/issues/31505
+    this.state('currentAssertionUserInvocationStack', undefined)
+
     return this.stability.whenStable(() => {
       this.state('nestedIndex', this.index)
 
