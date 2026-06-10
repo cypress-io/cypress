@@ -83,8 +83,15 @@ describe('cookies', () => {
 
     const hostName = new Cypress.Location(httpUrl).getHostName()
 
-    // TODO(origin): remove 'if' check once https://github.com/cypress-io/cypress/issues/24332 is resolved
-    if (!['localhost', '127.0.0.1'].includes(hostName)) {
+    // localhost and the 127.0.0.0/8 loopback range are treated as secure
+    // contexts by the browser, so secure cookies are still attached to http
+    // requests for those hosts. For any other host, secure cookies must not be
+    // attached to an http request.
+    if (['localhost', '127.0.0.1'].includes(hostName)) {
+      // secure cookies should have been attached (secure context)
+      cy.request(`${httpUrl}/requestCookies`)
+      .its('body').should('deep.eq', { shouldExpire: 'oneHour' })
+    } else {
       // secure cookies should not have been attached
       cy.request(`${httpUrl}/requestCookies`)
       .its('body').should('deep.eq', {})
