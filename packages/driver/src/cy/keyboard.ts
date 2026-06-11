@@ -1258,10 +1258,10 @@ export class Keyboard {
 
     this.simulatedKeydown(el, key.key, options)
 
-    const elToKeyup = this.getActiveEl(options)
-
     return globalThis.Promise.resolve().then(() => {
       this.simulatedKeyup(el, key.key, options)
+
+      const elToKeyup = this.getActiveEl(options)
 
       options.id = _.uniqueId('char')
 

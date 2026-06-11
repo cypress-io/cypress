@@ -87,4 +87,65 @@ describe('src/cy/keyboard', () => {
 
     expect(keyupFired).toBe(true)
   })
+
+  it('resolves modifier keyup target after main shortcut keyup', async () => {
+    const keyboard = new Keyboard(createState())
+    const input = document.createElement('input')
+    const modifierTarget = document.createElement('input')
+
+    document.body.append(input, modifierTarget)
+
+    const shortcut = {
+      type: 'shortcut' as const,
+      key: {
+        type: 'key' as const,
+        key: 'a',
+        text: 'a',
+        code: 'KeyA',
+        keyCode: 65,
+        location: 0,
+        events: {
+          keydown: true,
+          keypress: true,
+          input: true,
+          keyup: true,
+        },
+      },
+      modifiers: [{
+        type: 'key' as const,
+        key: 'Meta',
+        text: 'Meta',
+        code: 'MetaLeft',
+        keyCode: 91,
+        location: 0,
+        events: {
+          keydown: true,
+          keypress: false,
+          input: false,
+          keyup: true,
+        },
+      }],
+    }
+
+    const callOrder: string[] = []
+
+    vi.spyOn(keyboard, 'getActiveEl').mockImplementation(() => {
+      callOrder.push('getActiveEl')
+
+      return modifierTarget
+    })
+
+    vi.spyOn(keyboard, 'simulatedKeyup').mockImplementation((_el, key) => {
+      callOrder.push(key === shortcut.key ? 'mainKeyup' : 'modifierKeyup')
+    })
+
+    vi.spyOn(keyboard, 'simulatedKeydown').mockImplementation(() => {})
+
+    await keyboard.simulateShortcut(input, shortcut, {
+      $el: $dom.wrap(input),
+      force: true,
+    })
+
+    expect(callOrder).toEqual(['mainKeyup', 'getActiveEl', 'modifierKeyup'])
+  })
 })
