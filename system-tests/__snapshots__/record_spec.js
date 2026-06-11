@@ -56,22 +56,9 @@ Fix the error in your code and re-run your tests.
   (Video)
 
   -  Started compressing: Compressing to 32 CRF                                                     
-  -  Finished compressing: X second(s)                                               
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
 
-
-  (Uploading Cloud Artifacts)
-
-  - Video - 1 kB /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
-  - Screenshot - Nothing to upload 
-  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
-
-  (Uploaded Cloud Artifacts)
-
-  - Video - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -121,23 +108,9 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   (Video)
 
   -  Started compressing: Compressing to 32 CRF                                                     
-  -  Finished compressing: X second(s)                                               
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
 
-
-  (Uploading Cloud Artifacts)
-
-  - Video - 1 kB /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
-  - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
-  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
-
-  (Uploaded Cloud Artifacts)
-
-  - Video - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
-  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2 /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -175,18 +148,6 @@ plugin stdout
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-
-  (Uploading Cloud Artifacts)
-
-  - Video - Nothing to upload 
-  - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
-
-  (Uploaded Cloud Artifacts)
-
-  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -239,18 +200,46 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started compressing: Compressing to 32 CRF                                                     
-  -  Finished compressing: X second(s)                                               
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4
 
 
   (Uploading Cloud Artifacts)
 
+  - Video - 1 kB /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
+  - Screenshot - Nothing to upload 
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
+
+  (Uploaded Cloud Artifacts)
+
+  - Video - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/videos/record_error.cy.js.mp4
+
+  (Uploading Cloud Artifacts)
+
+  - Video - 1 kB /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
+  - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
+
+  (Uploaded Cloud Artifacts)
+
+  - Video - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/videos/record_fail.cy.js.mp4
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2 /XXX/XXX/XXX/cypress/screenshots/record_fail.cy.js/record fails -- fails 1 -- before each hook (failed).png
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
+
+  (Uploaded Cloud Artifacts)
+
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+
+  (Uploading Cloud Artifacts)
+
   - Video - 1 kB /XXX/XXX/XXX/cypress/videos/record_uncaught.cy.js.mp4
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_uncaught.cy.js/An uncaught error was detected outside of a test (failed).png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -291,8 +280,8 @@ exports['e2e record passing passes 2'] = [
       'pending': 0,
       'skipped': 1,
       'failures': 1,
-      'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
       'wallClockDuration': 1234,
+      'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
       'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
     },
     'tests': [
@@ -383,8 +372,8 @@ exports['e2e record passing passes 2'] = [
       'pending': 1,
       'skipped': 0,
       'failures': 0,
-      'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
       'wallClockDuration': 1234,
+      'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
       'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
     },
     'tests': [
@@ -459,8 +448,8 @@ exports['e2e record passing passes 2'] = [
       'pending': 0,
       'skipped': 0,
       'failures': 1,
-      'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
       'wallClockDuration': 1234,
+      'wallClockStartedAt': '2018-02-01T20:14:19.323Z',
       'wallClockEndedAt': '2018-02-01T20:14:19.323Z',
     },
     'tests': [
@@ -597,12 +586,6 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
-  (Uploading Cloud Artifacts)
-
-  - Video - Nothing to upload 
-  - Screenshot - Nothing to upload 
-  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  empty.cy.js                                                                     (2 of 2)
@@ -627,6 +610,12 @@ exports['e2e record empty specs succeeds when empty spec file 1'] = `
   │ Spec Ran:     empty.cy.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - Nothing to upload 
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
   (Uploading Cloud Artifacts)
 
@@ -1055,8 +1044,6 @@ plugin stdout
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -1570,18 +1557,6 @@ exports['e2e record api interaction errors update instance stdout warns but proc
 
   -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
 
-
-  (Uploading Cloud Artifacts)
-
-  - Video - Nothing to upload 
-  - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
-
-  (Uploaded Cloud Artifacts)
-
-  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 Warning: We encountered an error communicating with our servers.
 
 This run will proceed, but will not be recorded.
@@ -1589,6 +1564,16 @@ This run will proceed, but will not be recorded.
 This error will not affect or change the exit code.
 
 StatusCodeError: 500 - "Internal Server Error"
+
+  (Uploading Cloud Artifacts)
+
+  - Video - Nothing to upload 
+  - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
+
+  (Uploaded Cloud Artifacts)
+
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
 ====================================================================================================
 
@@ -1671,8 +1656,6 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   - Video - 1 kB /XXX/XXX/XXX/cypress/videos/record_pass.cy.js.mp4
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -1918,8 +1901,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -2007,8 +1988,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -2093,8 +2072,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2181,8 +2158,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -2268,8 +2243,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -2354,8 +2327,6 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2448,8 +2419,6 @@ Details:
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -2531,8 +2500,6 @@ exports['e2e record capture-protocol disabled messaging displays disabled messag
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is only supported in Chromium browsers
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -2557,141 +2524,24 @@ exports['e2e record capture-protocol disabled messaging displays disabled messag
 `
 
 exports['e2e record capture-protocol enabled when the tab crashes in chrome posts accurate test results 1'] = `
+Can't run because you've entered an invalid browser name.
 
-====================================================================================================
+Browser: chrome was not found on your system or is not supported by Cypress.
 
-  (Run Starting)
+Cypress supports the following browsers:
+ - electron
+ - chrome
+ - chromium
+ - chrome-for-testing
+ - edge
+ - firefox
 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (chrome_tab_crash.cy.js, record_pass.cy.js)                                │
-  │ Searched:   cypress/e2e/chrome_tab_crash*, cypress/e2e/record_pass*                            │
-  │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+You can also use a custom browser: https://on.cypress.io/customize-browsers
 
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  chrome_tab_crash.cy.js                                                          (1 of 2)
-  Estimated: X second(s)
-
-
-  a test suite with a browser crash
-    ✓ navigates to about:blank
-
-We detected that the Chrome Renderer process just crashed.
-
-We have failed the current spec but will continue running the next spec.
-
-This can happen for a number of different reasons.
-
-If you're running lots of tests on a memory intense application.
-  - Try increasing the CPU/memory on the machine you're running on.
-  - Try enabling experimentalMemoryManagement in your config file.
-  - Try lowering numTestsKeptInMemory in your config file during 'cypress open'.
-
-You can learn more here:
-
-https://on.cypress.io/renderer-process-crashed
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Estimated:    X second(s)                                                                      │
-  │ Spec Ran:     chrome_tab_crash.cy.js                                                           │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Uploading Cloud Artifacts)
-
-  - Video - Nothing to upload 
-  - Screenshot - Nothing to upload 
-  - Test Replay - 1 kB
-
-  Uploading Cloud Artifacts: . . . . .
-
-  (Uploaded Cloud Artifacts)
-
-  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  record_pass.cy.js                                                               (2 of 2)
-  Estimated: X second(s)
-
-
-  record pass
-    ✓ passes
-    - is pending
-
-
-  1 passing
-  1 pending
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      1                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Estimated:    X second(s)                                                                      │
-  │ Spec Ran:     record_pass.cy.js                                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png                 (400x1022)
-
-
-  (Uploading Cloud Artifacts)
-
-  - Video - Nothing to upload 
-  - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay 
-
-  Uploading Cloud Artifacts: . . . . .
-
-  (Uploaded Cloud Artifacts)
-
-  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
-  - Test Replay - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 2/2
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  chrome_tab_crash.cy.js                   XX:XX        2        1        1        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  record_pass.cy.js                        XX:XX        2        1        -        1        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 2 failed (50%)                      XX:XX        4        2        1        1        -  
-
-
-───────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                       
-  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12
-
-
+Available browsers found on your system are:
+- browser1
+- browser2
+- browser3
 `
 
 exports['e2e record capture-protocol enabled protocol runtime errors db size too large displays error and does not upload if db size is too large 1'] = `
@@ -2751,8 +2601,6 @@ exports['e2e record capture-protocol enabled protocol runtime errors db size too
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -2852,11 +2700,10 @@ Error: Error instantiating Protocol Capture
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - Error instantiating Protocol Capture
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Uploading 2/2 - Error instantiating Protocol Capture
 
 ====================================================================================================
 
@@ -2942,11 +2789,10 @@ Error: Error in beforeSpec
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - Error in beforeSpec
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Uploading 2/2 - Error in beforeSpec
 
 ====================================================================================================
 
@@ -3037,11 +2883,10 @@ Error: error in beforeTest
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - error in beforeTest
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Uploading 2/2 - error in beforeTest
 
 ====================================================================================================
 
@@ -3119,8 +2964,6 @@ exports['e2e record capture-protocol enabled protocol runtime errors non-fatal e
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3217,11 +3060,10 @@ Error: Error downloading capture code: 500 - "500 - Internal Server Error"
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - Error downloading capture code: 500 - "500 - Internal Server Error"
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Uploading 2/2 - Error downloading capture code: 500 - "500 - Internal Server Error"
 
 ====================================================================================================
 
@@ -3299,8 +3141,6 @@ exports['capture-protocol api errors error report 500 continues 1'] = `
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3394,8 +3234,6 @@ exports['e2e record capture-protocol enabled passing retrieves the capture proto
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -3477,8 +3315,6 @@ exports['capture-protocol api errors upload 500 - tries 3 times and fails contin
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay 
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3569,8 +3405,6 @@ exports['capture-protocol api errors upload 503 - tries 3 times and fails contin
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay 
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3698,11 +3532,10 @@ Error: File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae31
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Failed Capturing - File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae3161435a6.tar
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
-  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/1 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
+  - Test Replay - Failed Uploading 2/2 - File not found: /os/tmpdir/cypress/protocol/e9e81b5e-cc58-4026-b2ff-8ae3161435a6.tar
 
 Warning: We encountered an error while uploading the Test Replay recording of this spec.
 
@@ -3789,8 +3622,6 @@ exports['capture-protocol api errors upload network error retries 3 times, warns
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay 
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -3883,8 +3714,6 @@ exports['e2e record api interaction errors update instance artifacts warns but p
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
@@ -4148,8 +3977,6 @@ exports['capture-protocol api errors upload 400 - does not retry, as 400 is not 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - 1 kB
 
-  Uploading Cloud Artifacts: . . . . .
-
   (Uploaded Cloud Artifacts)
 
   - Screenshot - Done Uploading 1 kB in Xm, Ys ZZ.ZZms 1/2 /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
@@ -4271,8 +4098,6 @@ We will retry 3 more times in X second(s)...
   - Video - Nothing to upload 
   - Screenshot - 1 kB /XXX/XXX/XXX/cypress/screenshots/record_pass.cy.js/yay it passes.png
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 
