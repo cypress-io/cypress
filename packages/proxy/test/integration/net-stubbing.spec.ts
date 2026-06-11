@@ -13,10 +13,10 @@ import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
+import { ProxyDocumentPreparationAdapter } from '../../lib/adapters/proxy-document-preparation'
 import {
   ProxyCommandLogAdapter,
   ProxyCookieStateAdapter,
-  ProxyDocumentPreparationAdapter,
   ProxyNetworkCaptureAdapter,
   ProxyRequestInterceptionAdapter,
   ProxyResponseInterceptionAdapter,

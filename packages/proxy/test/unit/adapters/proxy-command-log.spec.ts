@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ProxyCommandLogAdapter } from '../../../lib/adapters/proxy-command-log'
+import { ProxyCommandLogAdapter } from '@packages/proxy'
 import { sendToDriver } from '../../../lib/adapters/send-to-driver'
 
 vi.mock('../../../lib/adapters/send-to-driver', () => {

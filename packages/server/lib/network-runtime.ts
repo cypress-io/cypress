@@ -4,12 +4,12 @@ import {
   BrowserPreRequest,
   ProxyRequestInterceptionAdapter,
   ProxyResponseInterceptionAdapter,
-  ProxyDocumentPreparationAdapter,
   ProxyNetworkCaptureAdapter,
   ProxyCookieStateAdapter,
   ProxyCommandLogAdapter,
   defaultMiddleware,
 } from '@packages/proxy'
+import { ProxyDocumentPreparationAdapter } from '@packages/proxy/lib/adapters/proxy-document-preparation'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { NetworkPolicyRegistry, NetworkInterceptionCore } from '@packages/network-interception'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionRuntime } from '@packages/network-interception'

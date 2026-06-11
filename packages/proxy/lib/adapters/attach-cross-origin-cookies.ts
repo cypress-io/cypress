@@ -28,6 +28,7 @@ export function attachCrossOriginCookies (mw: RequestInterceptionMiddlewareCtx):
     errors.warning('SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_APPLIED', mw.req.proxiedUrl)
   }
 
+  // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
   const currentAUTUrl = mw.getAUTUrl()
   const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(mw.req.proxiedUrl, currentAUTUrl, mw.req.resourceType, mw.req.credentialsLevel, mw.req.isAUTFrame)
 
@@ -64,6 +65,7 @@ export function attachCrossOriginCookies (mw: RequestInterceptionMiddlewareCtx):
   mw.debug('existing cookies on request from cookie jar: %s', existingCookiesInJar)
   mw.debug('add cookies to request from header: %s', addedCookiesFromHeader)
 
+  // if the cookie header is empty (i.e. ''), set it to undefined for expected behavior
   mw.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
 
   span?.setAttributes({

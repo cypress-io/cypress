@@ -1,9 +1,9 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
 import { NetworkInterceptionCore } from '@packages/network-interception'
+import { ProxyDocumentPreparationAdapter } from '../../../lib/adapters/proxy-document-preparation'
 import {
   ProxyCommandLogAdapter,
   ProxyCookieStateAdapter,
-  ProxyDocumentPreparationAdapter,
   ProxyNetworkCaptureAdapter,
   ProxyRequestInterceptionAdapter,
   ProxyResponseInterceptionAdapter,

@@ -7,7 +7,6 @@ export { ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentia
 export {
   ProxyRequestInterceptionAdapter,
   ProxyResponseInterceptionAdapter,
-  ProxyDocumentPreparationAdapter,
   ProxyNetworkCaptureAdapter,
   ProxyCookieStateAdapter,
   ProxyCommandLogAdapter,
