@@ -4,6 +4,7 @@ import type { ProjectFixtureDir } from '@tooling/system-tests/lib/fixtureDirs'
 
 const WEBPACK_ANGULAR: ProjectFixtureDir[] = [
   'angular-21',
+  'angular-22',
 ]
 
 // Add to this list to focus on a particular permutation
