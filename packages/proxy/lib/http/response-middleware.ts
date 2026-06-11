@@ -622,6 +622,20 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
     return this.next()
   }
 
+  const cookiesEmittedAt = Date.now()
+  let cookiesReceivedLogTimeout: NodeJS.Timeout | undefined
+
+  // this wait has no timeout; when debug logging is enabled, log if the
+  // event has not arrived after CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS
+  // (the response remains held until the event arrives)
+  if (this.debug.enabled) {
+    cookiesReceivedLogTimeout = setTimeout(() => {
+      this.debug('cross:origin:cookies:received has not been received within %dms of emitting cross:origin:cookies for url %s', CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS, this.req.proxiedUrl)
+    }, CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS)
+
+    cookiesReceivedLogTimeout.unref?.()
+  }
+
   // we want to set the cookies via automation so they exist in the browser
   // itself. however, firefox will hang if we try to use the extension
   // to set cookies on a url that's in-flight, so we send the cookies down to
@@ -629,12 +643,22 @@ const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
   // from the driver once the page has loaded but before we run any further
   // commands
   this.serverBus.once('cross:origin:cookies:received', () => {
+    if (cookiesReceivedLogTimeout) {
+      clearTimeout(cookiesReceivedLogTimeout)
+    }
+
+    this.debug('cross:origin:cookies:received %dms after emitting cross:origin:cookies for url %s', Date.now() - cookiesEmittedAt, this.req.proxiedUrl)
+
     span?.end()
     this.next()
   })
 
+  this.debug('emitting cross:origin:cookies with %d cookie(s) for url %s', addedCookies.length, this.req.proxiedUrl)
+
   this.serverBus.emit('cross:origin:cookies', addedCookies)
 }
+
+const CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS = 5000
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
