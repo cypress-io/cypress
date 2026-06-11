@@ -28,6 +28,7 @@ import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
+import { createFrameFlushDetector } from '../util/video_frame_flush'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
@@ -46,7 +47,6 @@ let currentSetScreenshotMetadata: SetScreenshotMetadata
 let isRunCancelled = false
 
 const debug = Debug('cypress:server:run')
-const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
 let earlyExitTerminator = new EarlyExitTerminator()
 
@@ -287,7 +287,10 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
   let ffmpegController: BrowserVideoController
   let _ffmpegOpts: Pick<videoCapture.StartOptions, 'webmInput'>
 
+  const frameFlush = createFrameFlushDetector()
+
   const videoRecording: VideoRecording = {
+    waitForFrameFlush: frameFlush.waitForFrameFlush,
     api: {
       onError,
       videoName,
@@ -302,6 +305,7 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
           writeVideoFrame: function writeVideoFrameWrap (data) {
             if (!ffmpegController) throw new Error('missing ffmpegController in writeVideoFrameWrap')
 
+            frameFlush.markFrameWritten()
             ffmpegController.writeVideoFrame(data)
           },
           async restart () {
@@ -632,9 +636,9 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   const skippedSpec = results.skippedSpec
 
   // https://github.com/cypress-io/cypress/issues/2370
-  // delay 1 second if we're recording a video to give
-  // the browser padding to render the final frames
-  // to avoid chopping off the end of the video
+  // if we're recording a video, give the browser padding to render the
+  // final frames so the end of the video is not chopped off - rather than
+  // a fixed delay, wait until frames stop arriving (bounded by a max wait)
   const videoController = videoRecording?.controller
 
   debug('received videoController %o', { videoController })
@@ -642,8 +646,9 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (videoController && !skippedSpec) {
     const span = telemetry.startSpan({ name: 'video:capture:delayToLetFinish' })
 
-    debug('delaying to extend video %o', { DELAY_TO_LET_VIDEO_FINISH_MS })
-    await Bluebird.delay(DELAY_TO_LET_VIDEO_FINISH_MS)
+    debug('waiting for video frames to flush')
+    await videoRecording!.waitForFrameFlush()
+    debug('video frames flushed')
     span?.end()
   }
 

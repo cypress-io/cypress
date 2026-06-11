@@ -16,6 +16,12 @@ export type WriteVideoFrame = (data: Buffer) => void
 export type VideoRecording = {
   api: RunModeVideoApi
   controller?: BrowserVideoController
+  /**
+   * Resolves once the browser has stopped delivering video frames after the spec ends -
+   * a quiet period with no new frames, bounded by a maximum wait - so the final frames
+   * are not chopped off the end of the video.
+   */
+  waitForFrameFlush: () => Promise<void>
 }
 
 /**
