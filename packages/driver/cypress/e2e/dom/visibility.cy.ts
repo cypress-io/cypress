@@ -597,6 +597,18 @@ describe('src/cypress/dom/visibility', {
       })
     })
 
+    it('treats opacity: 0 as visible when checkOpacity: false (bare reason)', () => {
+      // with checkOpacity: false, opacity is excluded from the hidden decision, so an
+      // opacity: 0-only element passes checkVisibility and the dimension guard. it is not
+      // considered hidden, so the function falls through to the generic "not visible." string.
+      prepareFixtureSection('opacity-property')
+      cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+        const reason = dom.getReasonIsHidden($el, { checkOpacity: false })
+
+        expect(reason).to.eq('This element `<div.testCase>` is not visible.')
+      })
+    })
+
     it('does not branch on specific css properties (always generic)', () => {
       prepareFixtureSection('opacity-property')
       cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
