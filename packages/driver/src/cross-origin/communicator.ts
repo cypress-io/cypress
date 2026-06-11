@@ -40,9 +40,11 @@ const sharedPromiseSetup = ({
   let timeoutId
 
   const responseEvent = `${event}:${Date.now()}`
+  const sentAt = Date.now()
 
   const handler = (result) => {
     clearTimeout(timeoutId)
+    debug('%s received a response from %s spec bridge %dms after setup (timeout %dms)', event, specBridgeName, Date.now() - sentAt, timeout)
     resolve(result)
   }
 

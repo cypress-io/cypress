@@ -99,6 +99,7 @@ const ensureElIsNotAnimating = ($el, coords = [], threshold, name: string) => {
 
   // bail if we dont yet have two points
   if (lastTwo.length !== 2) {
+    debug('animation check for `%s` has %d coordinate sample(s); 2 are required', name, lastTwo.length)
     $errUtils.throwErrByPath('dom.animation_check_failed')
   }
 
@@ -107,8 +108,12 @@ const ensureElIsNotAnimating = ($el, coords = [], threshold, name: string) => {
   // verify that there is not a distance
   // greater than a default of '5' between
   // the points
-  if ($utils.getDistanceBetween(point1, point2) > threshold) {
+  const distance = $utils.getDistanceBetween(point1, point2)
+
+  if (distance > threshold) {
     const node = $dom.stringify($el)
+
+    debug('distance between coordinate samples %o and %o is %d with threshold %d for `%s` on %s', point1, point2, distance, threshold, name, node)
 
     $errUtils.throwErrByPath('dom.animating', {
       args: { cmd: name, node },
@@ -146,6 +151,8 @@ const ensureIsDescendent = ($el1, $el2, name: string, onFail) => {
     if ($el2) {
       const element1 = $dom.stringify($el1)
       const element2 = $dom.stringify($el2)
+
+      debug('element at the checked coordinates is %s, which is not a descendent of %s, the target of `%s`', element2, element1, name)
 
       $errUtils.throwErrByPath('dom.covered', {
         onFail,
@@ -607,6 +614,8 @@ const verify = function (cy, $el, config, options, callbacks: VerifyCallbacks) {
           if ($el.length === 0 || $dom.isDetached($el)) {
             const current = cy.state('current')
             const subjectChain = cy.subjectChain(current.get('chainerId'))
+
+            debug('re-queried subject for `%s` has length %d, isDetached %o', current.get('name'), $el.length, $dom.isDetached($el))
 
             $errUtils.throwErrByPath('subject.detached_during_actionability', {
               args: { name: current.get('name'), subjectChain },

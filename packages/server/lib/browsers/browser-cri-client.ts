@@ -435,7 +435,10 @@ export class BrowserCriClient {
     if (targetId !== browserCriClient.currentlyAttachedTarget?.targetId) {
       if (browserCriClient.hasExtraTargetClient(targetId)) {
         debug('Close extra target client (id: %s)')
-        browserCriClient.getExtraTargetClient(targetId)!.client.close().catch(() => { })
+        browserCriClient.getExtraTargetClient(targetId)!.client.close().catch((err) => {
+          debug('error closing extra target client %s: %o', targetId, err)
+        })
+
         browserCriClient.removeExtraTargetClient(targetId)
       }
 
@@ -454,11 +457,17 @@ export class BrowserCriClient {
     //
     // otherwise it means the the browser itself was closed
 
+    const debugCloseError = (targetName: string) => {
+      return (err: Error) => {
+        debug('error closing %s target client after Target.targetDestroyed for %s: %o', targetName, targetId, err)
+      }
+    }
+
     // always close the connection to the page targets because it was destroyed
-    browserCriClient.currentlyAttachedTarget.close().catch(() => { })
-    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(() => { })
-    browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(() => { })
-    browserCriClient.currentlyAttachedStudioTarget?.close().catch(() => { })
+    browserCriClient.currentlyAttachedTarget.close().catch(debugCloseError('page'))
+    browserCriClient.currentlyAttachedProtocolTarget?.close().catch(debugCloseError('protocol'))
+    browserCriClient.currentlyAttachedCyPromptTarget?.close().catch(debugCloseError('cy-prompt'))
+    browserCriClient.currentlyAttachedStudioTarget?.close().catch(debugCloseError('studio'))
 
     const targetDestroyedAt = Date.now()
 
@@ -593,11 +602,17 @@ export class BrowserCriClient {
 
       debug('target closed', this.currentlyAttachedTarget.targetId)
 
+      const debugResetCloseError = (targetName: string) => {
+        return (err: Error) => {
+          debug('error closing %s target client while resetting browser targets: %o', targetName, err)
+        }
+      }
+
       await Promise.all([
-        this.currentlyAttachedTarget.close().catch(() => {}),
-        this.currentlyAttachedProtocolTarget?.close().catch(() => {}),
-        this.currentlyAttachedCyPromptTarget?.close().catch(() => {}),
-        this.currentlyAttachedStudioTarget?.close().catch(() => {}),
+        this.currentlyAttachedTarget.close().catch(debugResetCloseError('page')),
+        this.currentlyAttachedProtocolTarget?.close().catch(debugResetCloseError('protocol')),
+        this.currentlyAttachedCyPromptTarget?.close().catch(debugResetCloseError('cy-prompt')),
+        this.currentlyAttachedStudioTarget?.close().catch(debugResetCloseError('studio')),
       ])
 
       debug('target client closed', this.currentlyAttachedTarget.targetId)

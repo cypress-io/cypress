@@ -240,7 +240,9 @@ const _disableRestorePagesPrompt = function (userDir) {
 
     return
   })
-  .catch(() => { })
+  .catch((err) => {
+    debug('error reading or writing the preferences file %s: %o', prefsPath, err)
+  })
 }
 
 async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi, browserMajorVersion: number) {
