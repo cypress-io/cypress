@@ -55,6 +55,10 @@ export async function handleInterceptRequest (
   }) as CyHttpMessages.IncomingRequest
 
   request.res.once('finish', async () => {
+    // response notifications may have been emitted lazily, in the background - ensure they
+    // have been sent before `after:response` so the driver receives events in order
+    await request.pendingResponseNotifications
+
     await request.handleSubscriptions<CyHttpMessages.ResponseComplete>({
       eventName: 'after:response',
       data: request.includeBodyInAfterResponse ? {

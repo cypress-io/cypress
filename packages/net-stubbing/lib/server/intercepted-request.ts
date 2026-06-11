@@ -26,6 +26,11 @@ export class InterceptedRequest {
   includeBodyInAfterResponse: boolean = false
   responseSent: boolean = false
   lastEvent?: string
+  /**
+   * Set when response notifications are emitted lazily (no subscriptions can modify the
+   * response) - resolves once the buffered response body notifications have been emitted.
+   */
+  pendingResponseNotifications?: Promise<void>
   onError: (err: Error) => void
   /**
    * A callback that can be used to make the request go outbound through the rest of the request proxy steps.
@@ -94,6 +99,18 @@ export class InterceptedRequest {
     delete state.pendingEventHandlers[options.eventId]
 
     pendingEventHandler(options)
+  }
+
+  /*
+   * Returns true if any active subscription for one of the given events awaits a response
+   * from the driver, meaning the event's data can be modified by a driver handler.
+   */
+  hasAwaitedSubscription (eventNames: string[]): boolean {
+    return this.subscriptionsByRoute.some(({ subscriptions }) => {
+      return subscriptions.some((subscription) => {
+        return !subscription.skip && subscription.await && eventNames.includes(subscription.eventName)
+      })
+    })
   }
 
   addSubscription (subscription: Subscription) {
