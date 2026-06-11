@@ -30,7 +30,11 @@ interface RequestDetails {
  * @returns {boolean}
  */
 export const shouldAttachAndSetCookies = (requestUrl: string, AUTUrl: string | undefined, resourceType?: ResourceType, credentialLevel?: RequestCredentialLevel, isAutFrame?: boolean): boolean => {
-  if (!AUTUrl) return false
+  // If there is no AUT URL yet (e.g. the very first navigation in a test), we cannot
+  // compute a site context.  For an AUT frame navigation this is always a top-level
+  // document request to the primary origin, so cookies should be stored/attached.
+  // For any other request type we have no basis for allowing cookies.
+  if (!AUTUrl) return isAutFrame ?? false
 
   const siteContext = calculateSiteContext(requestUrl, AUTUrl)
 

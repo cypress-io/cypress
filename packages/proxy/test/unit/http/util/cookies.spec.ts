@@ -230,6 +230,19 @@ describe('shouldAttachAndSetCookies', () => {
       expect(shouldAttachAndSetCookies('http://www.foobar.com:3500/index.html', autUrl)).toBe(false)
     })
   })
+
+  describe('no AUT URL (first visit)', () => {
+    it('returns true when isAUTFrame is true and there is no AUT URL yet (first page load sets a cookie)', () => {
+      // The very first cy.visit sets currentAUTUrl=undefined until the response is delivered.
+      // Cookies set by that response must still land in the server-side jar so the proxy
+      // can re-attach them on a later cross-origin redirect back to the primary origin.
+      expect(shouldAttachAndSetCookies('http://localhost:3000/login', undefined, undefined, undefined, true)).toBe(true)
+    })
+
+    it('returns false when isAUTFrame is false and there is no AUT URL yet', () => {
+      expect(shouldAttachAndSetCookies('http://localhost:3000/api/data', undefined, 'xhr', false, false)).toBe(false)
+    })
+  })
 })
 
 describe('.calculateSiteContext', () => {
