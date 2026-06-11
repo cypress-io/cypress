@@ -241,20 +241,6 @@ const invalidConfigFile = {
   solution: 'Either pass a relative path to a valid Cypress config file or remove this option.',
 }
 
-/**
- * This error happens when CLI detects that the child Test Runner process
- * was killed with a signal, like SIGBUS
- * @see https://github.com/cypress-io/cypress/issues/5808
- * @param {'close'|'event'} eventName Child close event name
- * @param {string} signal Signal that closed the child process, like "SIGBUS"
-*/
-const childProcessKilled = (eventName: string, signal: NodeJS.Signals | null): any => {
-  return {
-    description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(signal)}`,
-    solution: solutionUnknown,
-  }
-}
-
 const CYPRESS_RUN_BINARY = {
   notValid: (value: string): any => {
     const properFormat = `**/${state.getPlatformExecutable()}`
@@ -274,7 +260,7 @@ const CYPRESS_RUN_BINARY = {
  * @example
   ```js
   // inside a Promise with "resolve" and "reject"
-  const errorObject = childProcessKilled('exit', 'SIGKILL')
+  const errorObject = errors.versionMismatch
   return getError(errorObject).then(reject)
   ```
  */
@@ -436,7 +422,6 @@ export const errors = {
   invalidCacheDirectory,
   CYPRESS_RUN_BINARY,
   smokeTestFailure,
-  childProcessKilled,
   incompatibleHeadlessFlags,
   invalidRunProjectPath,
   invalidTestingType,

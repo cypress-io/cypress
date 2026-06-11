@@ -501,7 +501,11 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
   if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
     // reset browser state to match default behavior when opening/closing a new tab
+    const resetBrowserStateStartedAt = Date.now()
+
     await openProject.resetBrowserState()
+
+    debug('resetBrowserState completed in %dms', Date.now() - resetBrowserStateStartedAt)
 
     // Send the new telemetry context to the browser to set the parent/child relationship appropriately for tests
     if (telemetry.isEnabled()) {
@@ -728,7 +732,11 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (!usingExperimentalSingleTabMode || isLastSpec) {
     debug('attempting to close the browser tab')
 
+    const resetTabsStartedAt = Date.now()
+
     await openProject.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
+
+    debug('resetBrowserTabsForNextSpec completed in %dms', Date.now() - resetTabsStartedAt)
 
     debug('resetting server state')
 
@@ -1162,6 +1170,18 @@ async function ready (options: ReadyOptions) {
     }
 
     errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+  }
+
+  if (specPatternFromCli) {
+    const rawPatterns = Array.isArray(specPattern) ? specPattern : [specPattern as string]
+    // relativeSpecPattern uses a forward-slash concat and may not strip Windows absolute paths;
+    // fall back to path.relative for any pattern that remains absolute.
+    const relativePatterns = rawPatterns.map((p) => path.isAbsolute(p) ? path.relative(projectRoot, p) : p)
+    const unmatchedPatterns = project.ctx.project.getUnmatchedPatterns(relativePatterns, specs)
+
+    if (unmatchedPatterns.length > 0) {
+      errors.warning('SPEC_FILE_NOT_FOUND', projectRoot, unmatchedPatterns)
+    }
   }
 
   if (browser.unsupportedVersion && browser.warning) {

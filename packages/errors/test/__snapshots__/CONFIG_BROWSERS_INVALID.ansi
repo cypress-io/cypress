@@ -1,0 +1,15 @@
+[31mThe [33mbrowsers[39m[31m configuration value must be an array of browser objects, but it was set to:[39m
+[31m[39m
+[31m[95m"chrome"[39m[31m[39m
+[31m[39m
+[31m[33mbrowsers[39m[31m is the list of browsers Cypress detected on your machine — it does not choose which browser to run. The most common cause of this error is a [95mCYPRESS_BROWSERS[39m[31m environment variable, which Cypress applies to this configuration value.[39m
+[31m[39m
+[31mTo run your tests in a specific browser, remove that value and pass the browser by name instead:[39m
+[31m[39m
+[31m[90m$[39m[31m [94mcypress run --browser chrome[39m[31m[39m
+[31m[39m
+[31m...or, with the Module API:[39m
+[31m[39m
+[31m[94mcypress.run({ browser: 'chrome' })[39m[31m[39m
+[31m[39m
+[31mhttps://on.cypress.io/launching-browsers[39m

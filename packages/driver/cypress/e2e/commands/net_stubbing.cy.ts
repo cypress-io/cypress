@@ -1758,6 +1758,21 @@ describe('network stubbing', { retries: 15 }, function () {
       .wait('@get')
     })
 
+    // https://github.com/cypress-io/cypress/issues/25767
+    it('can set a request header to an empty string', function () {
+      cy.intercept('/dump-headers*', function (req) {
+        req.headers['foo'] = ''
+      }).as('get')
+      .then(() => {
+        return $.get('/dump-headers')
+      })
+      // the server received the header with an empty value rather than it being dropped
+      .should('include', '"foo":""')
+      .wait('@get')
+      .its('request.headers')
+      .should('have.property', 'foo', '')
+    })
+
     it('can modify the request method', function (done) {
       cy.intercept('/dump-method', function (req) {
         expect(req.method).to.eq('POST')
@@ -3787,12 +3802,14 @@ describe('network stubbing', { retries: 15 }, function () {
           const xhr = new win.XMLHttpRequest()
 
           xhr.open('POST', '/users/')
-
           xhr.send()
 
-          win.location.reload()
+          // Firefox/Safari can cancel too quickly on reload unless the request is observed first.
+          cy.wait('@createUser.request').then((interception) => {
+            win.location.reload()
 
-          cy.wait('@createUser').its('state').should('eq', 'Errored')
+            cy.wrap(interception).its('state').should('eq', 'Errored')
+          })
         })
       })
 

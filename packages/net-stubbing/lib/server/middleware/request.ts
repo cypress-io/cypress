@@ -41,6 +41,10 @@ export const SetMatchingRoutes: RequestMiddleware = async function () {
 
   this.req.matchingRoutes = this.networkInterceptionCore.matchRoutes(this.netStubbingState.routes, this.req)
 
+  if (!this.req.matchingRoutes?.length && this.netStubbingState.routes.length) {
+    this.debug('%s %s with resourceType %o matched 0 of %d registered route(s)', this.req.method, this.req.proxiedUrl, this.req.resourceType, this.netStubbingState.routes.length)
+  }
+
   span?.end()
   this.next()
 }

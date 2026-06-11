@@ -594,6 +594,19 @@ cy.spy().withArgs('').log(false).as('foo')
 
 cy.get('something').as('foo', { type: 'static' })
 
+// Alias typing: cy.get('@alias') returns Chainable<any> by default
+cy.get('@foo') // $ExpectType Chainable<any>
+
+// Alias typing: explicit type parameter narrows the return type
+interface TodoItem { id: number, text: string }
+cy.wrap([{ id: 1, text: 'Buy milk' }] as TodoItem[]).as('todos')
+cy.get<TodoItem[]>('@todos').then((todos) => {
+  todos // $ExpectType TodoItem[]
+})
+
+// Alias typing: cy.get with non-alias string still returns JQuery-wrapped type
+cy.get('.list>li') // $ExpectType Chainable<JQuery<HTMLElement>>
+
 cy.wrap('foo').then((subject) => {
   subject // $ExpectType string
 

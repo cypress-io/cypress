@@ -5,10 +5,10 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "149.0.7827.53"
-chrome-beta-version: &chrome-beta-version "150.0.7871.4"
+chrome-stable-version: &chrome-stable-version "149.0.7827.102"
+chrome-beta-version: &chrome-beta-version "150.0.7871.13"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.54"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.55"
 # Pin from https://product-details.mozilla.org/1.0/firefox_versions.json (LATEST_FIREFOX_VERSION, LATEST_FIREFOX_RELEASED_DEVEL_VERSION).
 # Mozilla's product-details field name uses "DEVEL"; their public-facing channel is called Beta.
 firefox-stable-version: &firefox-stable-version "151.0.1"

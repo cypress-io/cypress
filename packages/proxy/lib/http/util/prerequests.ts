@@ -222,6 +222,8 @@ export class PreRequests {
         return
       }
 
+      debug('Received pre-request for %s after the request had already timed out at %sms. The request proceeded without it. %o', key, this.requestTimeout, browserPreRequest)
+
       this.protocolManager?.responseStreamTimedOut({
         requestId: browserPreRequest.requestId,
         timings,
@@ -330,8 +332,8 @@ export class PreRequests {
       callback,
       proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
       timeout: setTimeout(() => {
-        ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
-        debug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
+        ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one. The request has no browser pre-request data (no resourceType).', key, this.requestTimeout)
+        debug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one. The request has no browser pre-request data (no resourceType).', key, this.requestTimeout)
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
         callback({
@@ -362,13 +364,18 @@ export class PreRequests {
   }
 
   reset () {
+    if (this.pendingRequests.length > 0) {
+      debug('Resetting pre-request state with %d pending request(s); each is resolved without a pre-request.', this.pendingRequests.length)
+    }
+
     this.pendingPreRequests = new QueueMap<PendingPreRequest>()
 
     // Clear out the pending requests timeout callbacks first then clear the queue
-    this.pendingRequests.forEach(({ callback, timeout, timedOut }) => {
+    this.pendingRequests.forEach(({ key, callback, timeout, timedOut }) => {
       // If the request has already timed out, just return
       if (timedOut) return
 
+      debugVerbose('Pending request %s resolved without a pre-request during reset', key)
       clearTimeout(timeout)
       metrics.unmatchedRequests++
       callback?.({

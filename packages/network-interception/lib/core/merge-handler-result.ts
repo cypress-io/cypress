@@ -4,7 +4,10 @@ import { SERIALIZABLE_REQ_PROPS } from '../types/internal-types'
 
 export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: CyHttpMessages.BaseMessage) {
   for (const k in before.headers) {
-    !after.headers[k] && delete before.headers[k]
+    // a header was deleted from `after` but was present in `before`, delete it in `before` too.
+    // only treat `undefined` (deleted via `delete` or explicitly set to `undefined`) as removal -
+    // an empty string is a valid header value and must be preserved (#25767)
+    after.headers[k] === undefined && delete before.headers[k]
   }
 }
 

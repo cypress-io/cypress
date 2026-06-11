@@ -75,6 +75,55 @@ describe('core/merge-handler-result', () => {
     expect(resolved).toBe('http://example.com/base/relative')
     expect(before.url).toBe('http://example.com/base/relative')
   })
+
+  // https://github.com/cypress-io/cypress/issues/25767
+  it('preserves empty-string request header values set by handler', () => {
+    const before = {
+      url: 'http://example.com/',
+      headers: { foo: 'original', bar: 'keep' },
+      body: '',
+      method: 'GET',
+    } as any
+
+    const after = {
+      url: 'http://example.com/',
+      headers: { foo: '', bar: 'keep' },
+      body: '',
+      method: 'GET',
+    } as any
+
+    mergeIncomingRequestChanges(before, after, {
+      baseUrl: 'http://example.com/',
+      resolveUrl: (base, relative) => `${base}${relative}`,
+    })
+
+    expect(before.headers.foo).toBe('')
+    expect(before.headers.bar).toBe('keep')
+  })
+
+  it('removes request headers deleted or set to undefined by handler', () => {
+    const before = {
+      url: 'http://example.com/',
+      headers: { foo: 'original', bar: 'remove-me' },
+      body: '',
+      method: 'GET',
+    } as any
+
+    const after = {
+      url: 'http://example.com/',
+      headers: { foo: 'original' },
+      body: '',
+      method: 'GET',
+    } as any
+
+    mergeIncomingRequestChanges(before, after, {
+      baseUrl: 'http://example.com/',
+      resolveUrl: (base, relative) => `${base}${relative}`,
+    })
+
+    expect(before.headers.foo).toBe('original')
+    expect(before.headers.bar).toBeUndefined()
+  })
 })
 
 describe('NetworkInterceptionCore', () => {
@@ -85,5 +134,80 @@ describe('NetworkInterceptionCore', () => {
     await core.handleRequest(run)
 
     expect(run).toHaveBeenCalledWith(core)
+  })
+
+  it('delegates correlateBrowserPreRequest to requestInterception port', async () => {
+    const correlateBrowserPreRequest = vi.fn().mockResolvedValue(undefined)
+    const core = new NetworkInterceptionCore({
+      requestInterception: { correlateBrowserPreRequest, forwardToOrigin: vi.fn() },
+    })
+    const ctx = { req: {} }
+
+    await core.correlateBrowserPreRequest(ctx)
+
+    expect(correlateBrowserPreRequest).toHaveBeenCalledWith(ctx)
+  })
+
+  it('delegates forwardToOrigin to requestInterception port', () => {
+    const forwardToOrigin = vi.fn()
+    const core = new NetworkInterceptionCore({
+      requestInterception: { correlateBrowserPreRequest: vi.fn(), forwardToOrigin },
+    })
+    const ctx = { req: {} }
+
+    core.forwardToOrigin(ctx)
+
+    expect(forwardToOrigin).toHaveBeenCalledWith(ctx)
+  })
+
+  it('delegates interceptResponse to responseInterception port', async () => {
+    const interceptResponse = vi.fn().mockResolvedValue(undefined)
+    const core = new NetworkInterceptionCore({
+      responseInterception: { interceptResponse },
+    })
+    const ctx = { req: {} }
+
+    await core.interceptResponse(ctx)
+
+    expect(interceptResponse).toHaveBeenCalledWith(ctx)
+  })
+
+  it('throws when requestInterception port is missing', async () => {
+    const core = new NetworkInterceptionCore()
+
+    await expect(core.correlateBrowserPreRequest({})).rejects.toThrow(/requestInterception/)
+    expect(() => core.forwardToOrigin({})).toThrow(/requestInterception/)
+  })
+
+  it('throws when responseInterception port is missing', async () => {
+    const core = new NetworkInterceptionCore()
+
+    await expect(core.interceptResponse({})).rejects.toThrow(/responseInterception/)
+  })
+
+  it('delegates document preparation methods to documentPreparation port', async () => {
+    const setInjectionLevel = vi.fn().mockResolvedValue(undefined)
+    const injectHtml = vi.fn().mockResolvedValue(undefined)
+    const removeSecurity = vi.fn().mockResolvedValue(undefined)
+    const core = new NetworkInterceptionCore({
+      documentPreparation: { setInjectionLevel, injectHtml, removeSecurity },
+    })
+    const ctx = { res: {} }
+
+    await core.setInjectionLevel(ctx)
+    await core.injectHtml(ctx)
+    await core.removeSecurity(ctx)
+
+    expect(setInjectionLevel).toHaveBeenCalledWith(ctx)
+    expect(injectHtml).toHaveBeenCalledWith(ctx)
+    expect(removeSecurity).toHaveBeenCalledWith(ctx)
+  })
+
+  it('throws when documentPreparation port is missing', async () => {
+    const core = new NetworkInterceptionCore()
+
+    await expect(core.setInjectionLevel({})).rejects.toThrow(/documentPreparation/)
+    await expect(core.injectHtml({})).rejects.toThrow(/documentPreparation/)
+    await expect(core.removeSecurity({})).rejects.toThrow(/documentPreparation/)
   })
 })
