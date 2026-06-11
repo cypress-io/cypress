@@ -13,11 +13,14 @@ import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
-import { ProxyCommandLogAdapter } from '../../lib/adapters/proxy-command-log'
-import { ProxyCookieStateAdapter } from '../../lib/adapters/proxy-cookie-state'
-import { ProxyDocumentPreparationAdapter } from '../../lib/adapters/proxy-document-preparation'
-import { ProxyNetworkCaptureAdapter } from '../../lib/adapters/proxy-network-capture'
-import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../lib/adapters'
+import {
+  ProxyCommandLogAdapter,
+  ProxyCookieStateAdapter,
+  ProxyDocumentPreparationAdapter,
+  ProxyNetworkCaptureAdapter,
+  ProxyRequestInterceptionAdapter,
+  ProxyResponseInterceptionAdapter,
+} from '../../lib/adapters'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 

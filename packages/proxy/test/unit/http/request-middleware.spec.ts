@@ -616,7 +616,7 @@ describe('http/request-middleware', () => {
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx, onError)
 
       expect(onError).toHaveBeenCalledOnce()
-      expect(onError.mock.calls[0][0].message).toMatch(/cookieState/)
+      expect(onError.mock.calls[0][0].message).toMatch(/NetworkInterceptionCore\.cookieState is not configured/)
     })
 
     async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autUrl = 'http://foobar.com', requestUrl = 'http://foobar.com') {

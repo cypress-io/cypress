@@ -185,6 +185,12 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
           return
         }
 
+        // If the middleware already completed (e.g. it called `next()` before an
+        // async rejection surfaced), do not re-enter the error stage.
+        if (ended) {
+          return
+        }
+
         ctx.res.off('close', onClose)
         _end(onError(error))
       }

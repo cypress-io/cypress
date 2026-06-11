@@ -129,7 +129,7 @@ export class NetworkInterceptionCore {
     const port = this.options.commandLog
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.commandLog is not configured')
+      throw new Error('NetworkInterceptionCore.commandLog is not configured')
     }
 
     return port.notifyIncomingRequest(ctx)
@@ -139,7 +139,7 @@ export class NetworkInterceptionCore {
     const port = this.options.cookieState
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.cookieState is not configured')
+      throw new Error('NetworkInterceptionCore.cookieState is not configured')
     }
 
     return port.attachCrossOriginCookies(ctx)
@@ -149,7 +149,7 @@ export class NetworkInterceptionCore {
     const port = this.options.cookieState
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.cookieState is not configured')
+      throw new Error('NetworkInterceptionCore.cookieState is not configured')
     }
 
     return port.copyCookiesFromResponse(ctx)
@@ -159,7 +159,7 @@ export class NetworkInterceptionCore {
     const port = this.options.networkCapture
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.networkCapture is not configured')
+      throw new Error('NetworkInterceptionCore.networkCapture is not configured')
     }
 
     return port.notifyResponseStreamReceived(ctx)
@@ -169,7 +169,7 @@ export class NetworkInterceptionCore {
     const port = this.options.networkCapture
 
     if (!port) {
-      throw new Error('NetworkPolicyCore.networkCapture is not configured')
+      throw new Error('NetworkInterceptionCore.networkCapture is not configured')
     }
 
     return port.notifyResponseEndedWithEmptyBody(ctx, options)
