@@ -372,6 +372,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
       // If this request is still pending after the test run, resolve it, no commands were waiting on its result.
       cy.once('test:after:run', () => {
         if (promise.isPending()) {
+          debug('test:after:run fired while the page load promise was still pending; resolving it without window:load')
           options._log?.set('message', '').end()
           resolve()
         }

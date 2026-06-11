@@ -27,7 +27,11 @@ export class HttpBuffers {
   buffer: Optional<HttpBuffer> | undefined = undefined
 
   reset (): void {
-    debug('resetting buffers')
+    if (this.buffer) {
+      debug('resetting buffers; discarding buffer %o', _.pick(this.buffer, 'url'))
+    } else {
+      debug('resetting buffers')
+    }
 
     delete this.buffer
   }
@@ -61,6 +65,10 @@ export class HttpBuffers {
       debug('found request buffer %o', { buffer: _.pick(foundBuffer, 'url') })
 
       return foundBuffer
+    }
+
+    if (this.buffer) {
+      debug('requested url %o did not match buffered url %o; buffer not taken', stripPort(str), this.buffer.url)
     }
   }
 }
