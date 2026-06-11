@@ -1,7 +1,14 @@
 import _ from 'lodash'
 import $ from 'jquery'
 import Bluebird from 'bluebird'
+import Debug from 'debug'
 import { $Location } from '../../../cypress/location'
+
+const debug = Debug('cypress:driver:sessions')
+
+// How long to wait for each cross-origin iframe to post its storage data back
+// before giving up and continuing with incomplete session data.
+const postMessageStorageTimeoutMs = 2000
 
 const getSessionDetailsByDomain = (sessState: Cypress.SessionData) => {
   return _.merge(
@@ -83,12 +90,14 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
     specWindow.addEventListener('message', onPostMessage)
   })
   // timeout just in case something goes wrong and the iframe never loads in
-  .timeout(2000)
+  .timeout(postMessageStorageTimeoutMs)
   .finally(() => {
     specWindow.removeEventListener('message', onPostMessage)
     $iframeContainer.remove()
   })
-  .catch(() => {
+  .catch((err) => {
+    debug('did not receive set:storage:complete from origin(s) %o within %dms: %o', _.xor(origins, successOrigins), postMessageStorageTimeoutMs, err)
+
     Cypress.log({
       name: 'warning',
       message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,
@@ -176,12 +185,14 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
     specWindow.addEventListener('message', onPostMessage)
   })
   // timeout just in case something goes wrong and the iframe never loads in
-  .timeout(2000)
+  .timeout(postMessageStorageTimeoutMs)
   .finally(() => {
     specWindow.removeEventListener('message', onPostMessage)
     $iframeContainer.remove()
   })
   .catch((err) => {
+    debug('did not receive localStorage data from origin(s) %o within %dms: %o', _.xor(origins, successOrigins), postMessageStorageTimeoutMs, err)
+
     Cypress.log({
       name: 'warning',
       message: `failed to access session localStorage data on origin(s): ${_.xor(origins, successOrigins).join(', ')}`,

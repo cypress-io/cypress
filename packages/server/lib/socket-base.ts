@@ -7,7 +7,7 @@ import { handleGraphQLSocketRequest } from '@packages/data-context/graphql/makeG
 import type { ForInterceptRegistration } from '@packages/network-interception'
 import * as socketIo from '@packages/socket'
 import { CDPSocketServer } from '@packages/socket'
-import type { SocketBroadcaster } from '@packages/socket'
+import type { SocketBroadcaster, Socket } from '@packages/socket'
 import * as errors from './errors'
 import { get as fixtureGet } from './fixture'
 import { ensureProp } from './util/class-helpers'
@@ -21,8 +21,6 @@ import type { OTLPTraceExporterCloud } from '@packages/telemetry'
 import { telemetry } from '@packages/telemetry'
 import type { Automation } from './automation'
 import { openExternal } from './gui/links'
-
-import type { Socket } from '@packages/socket'
 
 import type { RunState, CachedTestState, ProtocolManagerShape, AutomationCommands } from '@packages/types'
 import { RUN_ALL_SPECS_KEY } from '@packages/types'
@@ -250,22 +248,30 @@ export class SocketBase implements SocketBroadcaster {
           automationClient.on('disconnect', () => {
             const { activeBrowser } = getCtx().coreData
 
+            debug('automation client disconnected %o', { ended: this.ended, connectedBrowser: connectedBrowser?.path, activeBrowser: activeBrowser?.path })
+
             // if we've stopped or if we've switched to another browser then don't do anything
             if (this.ended || (connectedBrowser?.path !== activeBrowser?.path)) {
               return
             }
+
+            const disconnectedAt = Date.now()
 
             // if we are in headless mode then log out an error and maybe exit with process.exit(1)?
             return Bluebird.delay(2000)
             .then(() => {
               // bail if we've swapped to a new automationClient
               if (automationClient !== socket) {
+                debug('a different automation client connected %dms after the disconnect', Date.now() - disconnectedAt)
+
                 return
               }
 
               // give ourselves about 2000ms to reconnect
               // and if we're connected its all good
               if (automationClient.connected) {
+                debug('automation client socket is connected %dms after the disconnect', Date.now() - disconnectedAt)
+
                 return
               }
 

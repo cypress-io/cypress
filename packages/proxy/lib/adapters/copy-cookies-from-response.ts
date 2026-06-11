@@ -7,6 +7,8 @@ import { isVerboseTelemetry as isVerbose } from '../http'
 import * as errors from '@packages/errors'
 import type { ResponseInterceptionMiddlewareCtx } from './types'
 
+const CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS = 5000
+
 function setSimulatedCookies (mw: ResponseInterceptionMiddlewareCtx) {
   if (mw.res.wantsInjection !== 'fullCrossOrigin') return
 
@@ -142,6 +144,20 @@ export async function copyCookiesFromResponse (mw: ResponseInterceptionMiddlewar
     return mw.next()
   }
 
+  const cookiesEmittedAt = Date.now()
+  let cookiesReceivedLogTimeout: NodeJS.Timeout | undefined
+
+  // this wait has no timeout; when debug logging is enabled, log if the
+  // event has not arrived after CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS
+  // (the response remains held until the event arrives)
+  if (mw.debug.enabled) {
+    cookiesReceivedLogTimeout = setTimeout(() => {
+      mw.debug('cross:origin:cookies:received has not been received within %dms of emitting cross:origin:cookies for url %s', CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS, mw.req.proxiedUrl)
+    }, CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS)
+
+    cookiesReceivedLogTimeout.unref?.()
+  }
+
   // we want to set the cookies via automation so they exist in the browser
   // itself. however, firefox will hang if we try to use the extension
   // to set cookies on a url that's in-flight, so we send the cookies down to
@@ -149,9 +165,17 @@ export async function copyCookiesFromResponse (mw: ResponseInterceptionMiddlewar
   // from the driver once the page has loaded but before we run any further
   // commands
   mw.serverBus.once('cross:origin:cookies:received', () => {
+    if (cookiesReceivedLogTimeout) {
+      clearTimeout(cookiesReceivedLogTimeout)
+    }
+
+    mw.debug('cross:origin:cookies:received %dms after emitting cross:origin:cookies for url %s', Date.now() - cookiesEmittedAt, mw.req.proxiedUrl)
+
     span?.end()
     mw.next()
   })
+
+  mw.debug('emitting cross:origin:cookies with %d cookie(s) for url %s', addedCookies.length, mw.req.proxiedUrl)
 
   mw.serverBus.emit('cross:origin:cookies', addedCookies)
 }
