@@ -1,5 +1,6 @@
 # Contributing to Cypress
 
+
 Thanks for taking the time to contribute! :smile:
 
 **Once you learn how to use Cypress, you can contribute in many ways:**
