@@ -7,9 +7,9 @@ import $sourceMapUtils from './source_map_utils'
 // being evaluated. Tests are stamped with it at registration time (see mocha.ts)
 // to give exact per-spec attribution during experimentalRunAllSpecs, independent
 // of bundler source map quality.
-let currentlyLoadingScript: Script | null = null
+let scriptBeingLoaded: Script | null = null
 
-export const getCurrentlyLoadingScript = () => currentlyLoadingScript
+export const getScriptBeingLoaded = () => scriptBeingLoaded
 
 const fetchScript = (scriptWindow, script) => {
   return $networkUtils.fetch(script.relativeUrl, scriptWindow)
@@ -43,6 +43,8 @@ const evalScripts = (specWindow, scripts: any = []) => {
   return Bluebird.each(scripts, (_script: any) => {
     const [script, contents] = _script
 
+    scriptBeingLoaded = script
+
     if (script.load) {
       return script.load()
     }
@@ -50,7 +52,7 @@ const evalScripts = (specWindow, scripts: any = []) => {
     return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
   })
   .finally(() => {
-    currentlyLoadingScript = null
+    scriptBeingLoaded = null
   })
 }
 
@@ -70,7 +72,7 @@ const appendScripts = (specWindow, scripts) => {
     const firstScript = specWindow.document.querySelector('script')
     const specScript = specWindow.document.createElement('script')
 
-    currentlyLoadingScript = script
+    scriptBeingLoaded = script
 
     return new Promise<void>((resolve) => {
       specScript.addEventListener('load', () => {
@@ -82,7 +84,7 @@ const appendScripts = (specWindow, scripts) => {
     })
   })
   .finally(() => {
-    currentlyLoadingScript = null
+    scriptBeingLoaded = null
   })
 }
 
@@ -104,7 +106,7 @@ interface RunScriptsOptions {
 
 // Supports either scripts as objects or as async import functions
 export default {
-  getCurrentlyLoadingScript,
+  getScriptBeingLoaded,
 
   runScripts: ({ browser, scripts, specWindow, testingType, projectRoot, specRelativePath, specAbsolutePath }: RunScriptsOptions) => {
     // if scripts contains at least one promise

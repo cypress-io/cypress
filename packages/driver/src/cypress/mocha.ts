@@ -4,7 +4,7 @@ import $errUtils, { CypressError } from './error_utils'
 import $utils from './utils'
 import $stackUtils from './stack_utils'
 import $sourceMapUtils from './source_map_utils'
-import { getCurrentlyLoadingScript } from './script_utils'
+import { getScriptBeingLoaded } from './script_utils'
 
 // in the browser mocha is coming back
 // as window
@@ -543,7 +543,7 @@ const patchSuiteAddTest = (specWindow) => {
     // per-spec attribution during experimentalRunAllSpecs (used to update
     // Cypress.spec per-test), independent of bundler source map quality —
     // e.g. Vite source maps resolve invocationDetails paths to basenames only.
-    const loadingScript = getCurrentlyLoadingScript()
+    const loadingScript = getScriptBeingLoaded()
 
     if (loadingScript && !test._cypressSpec) {
       test._cypressSpec = {
