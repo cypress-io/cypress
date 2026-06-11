@@ -112,7 +112,6 @@ Learn more: https://on.cypress.io/cypress-env-migration
   (Video)
 
   -  Started compressing: Compressing to 32 CRF                                                     
-  -  Finished compressing: X second(s)                                               
 
   -  Video output: /XXX/XXX/XXX/cypress/videos/video_compression.cy.js.mp4
 
@@ -122,8 +121,6 @@ Learn more: https://on.cypress.io/cypress-env-migration
   - Video - 1 kB /XXX/XXX/XXX/cypress/videos/video_compression.cy.js.mp4
   - Screenshot - Nothing to upload 
   - Test Replay - Nothing to upload - Test Replay is disabled for this project. Enable Test Replay in Cloud project settings
-
-  Uploading Cloud Artifacts: . . . . .
 
   (Uploaded Cloud Artifacts)
 

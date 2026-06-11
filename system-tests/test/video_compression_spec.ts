@@ -63,8 +63,6 @@ describe('e2e video compression', () => {
           this.retries(15)
         }
 
-        process.env.VIDEO_COMPRESSION_THROTTLE = '10'
-
         const { stdout } = await exec()
         const videosPath = Fixtures.projectPath('e2e/cypress/videos/*')
         const files = await glob(videosPath)
@@ -104,7 +102,10 @@ describe('e2e video compression', () => {
         expect(chapters[0].end_time).to.be.a('number')
         expect(Number.isNaN(chapters[0].end_time)).to.be.false
 
-        expect(stdout).to.match(/Compression progress:\s+\d{1,3}%/)
+        // compression runs in the background of the spec loop, so there is no
+        // progress output - the compressed video's chapters and duration are
+        // asserted above instead
+        expect(stdout).to.include('Compressing to 32 CRF')
       },
     })
   })

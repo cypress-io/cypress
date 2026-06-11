@@ -28,6 +28,7 @@ import * as printResults from '../util/print-run'
 import { telemetry } from '@packages/telemetry'
 import { CypressRunResult, createPublicBrowser, createPublicConfig, createPublicRunResults, createPublicSpec, createPublicSpecResults } from './results'
 import { EarlyExitTerminator } from '../util/graceful_crash_handling'
+import { artifactQueue, setVideoCompressionTask } from '../util/artifact_queue'
 import { passWithNoTests } from './pass-with-no-tests'
 import type { EmptyRunOptions } from './pass-with-no-tests'
 import type { CypressError } from '@packages/errors'
@@ -735,47 +736,70 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     project.server.reset()
   }
 
-  let videoCompressionFailed = false
-
   if (videoExists && !skippedSpec && !videoCaptureFailed) {
-    const span = telemetry.startSpan({ name: 'video:compression' })
     const chaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
+
+    // snapshot the ffmpeg options now: in single-tab mode the next spec
+    // reassigns the video paths on the shared videoRecording api
+    const processOptions: Omit<ProcessOptions, 'videoCompression'> = {
+      compressedVideoName: videoRecording!.api.compressedVideoName,
+      videoName,
+      chaptersConfig,
+      ...(videoController?.postProcessFfmpegOptions || {}),
+    }
 
     printResults.printVideoHeader()
 
-    try {
-      debug('compressing recording')
+    if (!quiet && videoCompression !== false && videoCompression !== 0) {
+      // a user-supplied `true` is coerced to the default CRF by compressRecording
+      printResults.printVideoCompressionStarted(videoCompression === true ? 32 : videoCompression)
+    }
+
+    // compress in the background while subsequent specs run, instead of on
+    // the spec loop's critical path; awaited via artifactQueue.drain() in
+    // runSpecs before the run's results are finalized
+    const compressionTask = artifactQueue.enqueueVideoCompression(`video:compression ${spec.relative}`, async () => {
+      const span = telemetry.startSpan({ name: 'video:compression' })
 
       span?.setAttributes({
         videoName,
         videoCompressionString: videoCompression.toString(),
-        compressedVideoName: videoRecording.api.compressedVideoName,
+        compressedVideoName: processOptions.compressedVideoName,
       })
 
-      await compressRecording({
-        quiet,
-        videoCompression,
-        processOptions: {
-          compressedVideoName: videoRecording.api.compressedVideoName,
-          videoName,
-          chaptersConfig,
-          ...(videoRecording.controller!.postProcessFfmpegOptions || {}),
-        },
-      })
-    } catch (err) {
-      videoCompressionFailed = true
-      warnVideoCompressionFailed(err)
-    }
-    span?.end()
+      try {
+        debug('compressing recording')
+
+        // quiet - compression progress can't be rendered while later specs
+        // are writing to stdout
+        await compressRecording({
+          quiet: true,
+          videoCompression,
+          processOptions,
+        })
+      } catch (err) {
+        results.video = null
+
+        // deferred so the warning prints at the end of the run instead of
+        // interleaving with the output of the currently running spec
+        return () => warnVideoCompressionFailed(err)
+      } finally {
+        span?.end()
+      }
+
+      return undefined
+    })
+
+    setVideoCompressionTask(results, compressionTask)
   }
 
-  // only fail to print the video if capturing the video fails.
-  // otherwise, print the video path to the console if it exists regardless of whether compression fails or not
+  // only fail to print the video if capturing the video fails. the path is
+  // printed immediately - background compression replaces the file in place
   if (!videoCaptureFailed && videoExists) {
     printResults.printVideoPath(videoName)
   }
 
-  if (videoCaptureFailed || videoCompressionFailed) {
+  if (videoCaptureFailed) {
     results.video = null
   }
 
@@ -917,13 +941,31 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
   await runEvents.execute('before:run', beforeRunDetails)
   beforeRunSpan?.end()
 
-  const runs = await iterateThroughSpecs({
-    specs,
-    config,
-    runEachSpec,
-    afterSpecRun,
-    beforeSpecRun,
-  })
+  let runs
+
+  try {
+    runs = await iterateThroughSpecs({
+      specs,
+      config,
+      runEachSpec,
+      afterSpecRun,
+      beforeSpecRun,
+    })
+  } finally {
+    // wait for backgrounded artifact work (video compression and cloud
+    // artifact uploads) to finish, then flush its deferred output - even
+    // when the spec iteration fails, so completed specs' artifacts are
+    // never abandoned
+    if (artifactQueue.hasPendingTasks && !options.quiet) {
+      console.log('')
+      console.log('  Waiting for video compression and artifact uploads to finish...')
+    }
+
+    const drainSpan = telemetry.startSpan({ name: 'artifacts:drain' })
+
+    await artifactQueue.drain()
+    drainSpan?.end()
+  }
 
   const results: CypressRunResult = {
     status: 'finished',

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import type ProtocolManager from '../protocol'
+import type { ProtocolUploadStateShape } from '@packages/types'
 import { isProtocolInitializationError } from '@packages/types'
 import api from '../api'
 import { logUploadManifest, logUploadResults, beginUploadActivityOutput } from '../../util/print-run'
@@ -66,7 +66,7 @@ const toUploadReportPayload = (acc: {
 }
 
 type UploadArtifactOptions = {
-  protocolManager?: ProtocolManager
+  protocolManager?: ProtocolUploadStateShape
   videoUploadUrl?: string
   video?: string | null // filepath to the video artifact
   screenshots?: {
@@ -83,6 +83,12 @@ type UploadArtifactOptions = {
     disabledMessage?: string
   }
   quiet?: boolean
+  /**
+   * when uploads run in the background while subsequent specs execute, their
+   * console output is collected instead of printed, and returned as a
+   * callback the caller flushes once the spec loop has finished
+   */
+  deferredOutput?: boolean
   runId: string
   instanceId: string
   spec: any
@@ -149,8 +155,18 @@ const extractArtifactsFromOptions = async ({
   return artifacts
 }
 
-export const uploadArtifacts = async (options: UploadArtifactOptions) => {
-  const { protocolManager, protocolCaptureMeta, quiet, runId, instanceId, spec, platform, projectId } = options
+export const uploadArtifacts = async (options: UploadArtifactOptions): Promise<(() => void) | undefined> => {
+  const { protocolManager, protocolCaptureMeta, quiet, deferredOutput, runId, instanceId, spec, platform, projectId } = options
+
+  const deferredPrints: (() => void)[] = []
+
+  const print = (printFn: () => void) => {
+    if (deferredOutput) {
+      deferredPrints.push(printFn)
+    } else {
+      printFn()
+    }
+  }
 
   const priority = {
     [ArtifactKinds.VIDEO]: 0,
@@ -187,30 +203,36 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
   const postArtifactExtractionFatalError = protocolManager?.getFatalError()
 
   if (postArtifactExtractionFatalError) {
-    if (postArtifactExtractionFatalError.captureMethod === 'protocolUploadUrl') {
-      errors.warning('CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT', postArtifactExtractionFatalError.error)
-    } else if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
-      errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error)
-    } else {
-      errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', postArtifactExtractionFatalError.error)
-    }
+    print(() => {
+      if (postArtifactExtractionFatalError.captureMethod === 'protocolUploadUrl') {
+        errors.warning('CLOUD_PROTOCOL_CANNOT_UPLOAD_ARTIFACT', postArtifactExtractionFatalError.error)
+      } else if (isProtocolInitializationError(postArtifactExtractionFatalError)) {
+        errors.warning('CLOUD_PROTOCOL_INITIALIZATION_FAILURE', postArtifactExtractionFatalError.error)
+      } else {
+        errors.warning('CLOUD_PROTOCOL_CAPTURE_FAILURE', postArtifactExtractionFatalError.error)
+      }
+    })
   }
 
   if (!quiet) {
+    const manifestFatalError = protocolManager?.getFatalError()
+
     debug('logging upload manifest: %o', {
       artifacts,
       protocolCaptureMeta,
-      fatalProtocolError: protocolManager?.getFatalError(),
+      fatalProtocolError: manifestFatalError,
     })
 
-    logUploadManifest(artifacts, protocolCaptureMeta, protocolManager?.getFatalError())
+    print(() => logUploadManifest(artifacts, protocolCaptureMeta, manifestFatalError))
   }
 
   debug('preparing to upload artifacts: %o', artifacts)
 
   let stopUploadActivityOutput: () => void | undefined
 
-  if (!quiet && artifacts.length) {
+  // the periodic activity output cannot be rendered while a subsequent spec
+  // is writing to stdout, so it is skipped when output is deferred
+  if (!quiet && !deferredOutput && artifacts.length) {
     stopUploadActivityOutput = beginUploadActivityOutput()
   }
 
@@ -221,16 +243,16 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
       }
     })
 
-    if (!quiet && uploadResults.length) {
-      logUploadResults(uploadResults, protocolManager?.getFatalError())
-    }
-
     const postUploadProtocolFatalError = protocolManager?.getFatalError()
+
+    if (!quiet && uploadResults.length) {
+      print(() => logUploadResults(uploadResults, postUploadProtocolFatalError))
+    }
 
     if (postUploadProtocolFatalError && postUploadProtocolFatalError.captureMethod === 'uploadCaptureArtifact') {
       const error = postUploadProtocolFatalError.error
 
-      printProtocolUploadError(error)
+      print(() => printProtocolUploadError(error))
     }
 
     // there is no upload results entry for protocol if we did not attempt to upload protocol due to a fatal error
@@ -246,7 +268,7 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
     uploadReport = uploadResults.reduce(toUploadReportPayload, { video: undefined, screenshots: [], protocol: undefined })
   } catch (err) {
     debug('primary try/catch failure, ', err.stack)
-    errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err)
+    print(() => errors.warning('CLOUD_CANNOT_UPLOAD_ARTIFACTS', err))
 
     await exception.create(err)
   }
@@ -267,22 +289,32 @@ export const uploadArtifacts = async (options: UploadArtifactOptions) => {
 
   try {
     debug('upload report: %o', uploadReport)
-    const res = await api.updateInstanceArtifacts({
+    await api.updateInstanceArtifacts({
       runId, instanceId,
     }, uploadReport)
-
-    return res
   } catch (err) {
     debug('failed updating artifact status %o', {
       stack: err.stack,
     })
 
-    // eslint-disable-next-line no-console
-    console.log('')
-    errors.warning('CLOUD_CANNOT_CONFIRM_ARTIFACTS', err)
+    print(() => {
+      // eslint-disable-next-line no-console
+      console.log('')
+      errors.warning('CLOUD_CANNOT_CONFIRM_ARTIFACTS', err)
+    })
 
     if (err.statusCode !== 503) {
-      return exception.create(err)
+      await exception.create(err)
     }
   }
+
+  if (deferredOutput && deferredPrints.length) {
+    return () => {
+      for (const printFn of deferredPrints) {
+        printFn()
+      }
+    }
+  }
+
+  return undefined
 }

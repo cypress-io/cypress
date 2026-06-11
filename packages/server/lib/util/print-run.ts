@@ -478,7 +478,7 @@ function displayScreenshots (screenshots: Screenshot[] = []) {
   console.log('')
 }
 
-export function displayVideoCompressionProgress (opts: { videoName: string, videoCompression: number | boolean }) {
+export function printVideoCompressionStarted (videoCompression: number | boolean) {
   console.log('')
 
   const table = terminal.table({
@@ -497,10 +497,14 @@ export function displayVideoCompressionProgress (opts: { videoName: string, vide
   table.push([
     gray('-'),
     gray('Started compressing:'),
-    chalk.cyan(`Compressing to ${opts.videoCompression} CRF`),
+    chalk.cyan(`Compressing to ${videoCompression} CRF`),
   ])
 
   console.log(table.toString())
+}
+
+export function displayVideoCompressionProgress (opts: { videoName: string, videoCompression: number | boolean }) {
+  printVideoCompressionStarted(opts.videoCompression)
 
   const started = Date.now()
   let progress = Date.now()

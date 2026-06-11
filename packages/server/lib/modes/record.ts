@@ -18,6 +18,7 @@ import * as env from '../util/env'
 import * as ciProvider from '../util/ci_provider'
 import { flattenSuiteIntoRunnables } from '../util/tests_utils'
 import { uploadArtifacts } from '../cloud/artifacts/upload_artifacts'
+import { artifactQueue, getVideoCompressionTask } from '../util/artifact_queue'
 
 import type { Cfg } from '../project-base'
 import type { RunResult } from './results'
@@ -166,7 +167,7 @@ const updateInstanceStdout = async (options: any = {}) => {
     }
 
     return undefined
-  }).finally(capture.restore)
+  })
 }
 
 const postInstanceResults = (options: any = {}) => {
@@ -695,49 +696,81 @@ const createRunAndRecordSpecs = (options: any = {}) => {
 
         debug('after spec run %o', { spec })
 
+        // the next beforeSpecRun reassigns these closure variables, so
+        // capture them for the backgrounded artifact upload
+        const currentInstanceId = instanceId
+        const currentCaptured = captured
+
         return postInstanceResults({
           group,
           config,
           results,
           parallel,
           ciBuildId,
-          instanceId,
+          instanceId: currentInstanceId,
         })
         .then((resp: any) => {
           if (!resp) {
+            telemetry.getSpan('record:afterSpecRun')?.end()
+
             return
           }
 
           debug('postInstanceResults resp %o', resp)
-          const { video, screenshots } = results
+          const { screenshots } = results
           const { videoUploadUrl, captureUploadUrl, screenshotUploadUrls } = resp
 
-          return uploadArtifacts({
-            runId,
-            // @ts-expect-error TODO: Fix this saying instanceId cannot be null here - we returned earlier if null
-            instanceId,
-            video,
-            screenshots,
-            videoUploadUrl,
-            captureUploadUrl,
-            platform,
-            projectId,
-            spec,
-            protocolCaptureMeta,
-            protocolManager: project.protocolManager,
-            screenshotUploadUrls,
-            quiet,
+          // snapshot the per-spec Test Replay upload state before the next
+          // spec's beforeSpec resets it on the live protocol manager
+          const protocolManager = project.protocolManager?.snapshotUploadState?.()
+
+          // upload artifacts in the background while the next spec runs; the
+          // spec loop drains the queue and flushes the deferred upload output
+          // before the run completes
+          const uploadTask = artifactQueue.enqueue(`record:artifacts ${spec.relative}`, async () => {
+            // the video can't upload until its backgrounded compression has
+            // replaced the recording (or failed and nulled results.video)
+            await getVideoCompressionTask(results)
+
+            try {
+              return await uploadArtifacts({
+                runId,
+                instanceId: currentInstanceId,
+                video: results.video,
+                screenshots,
+                videoUploadUrl,
+                captureUploadUrl,
+                platform,
+                projectId,
+                spec,
+                protocolCaptureMeta,
+                protocolManager,
+                screenshotUploadUrls,
+                quiet,
+                deferredOutput: true,
+              })
+            } finally {
+              // always attempt to upload stdout
+              // even if uploading failed
+              await updateInstanceStdout({
+                captured: currentCaptured,
+                instanceId: currentInstanceId,
+              })
+            }
           })
-          .finally(() => {
-            // always attempt to upload stdout
-            // even if uploading failed
-            return updateInstanceStdout({
-              captured,
-              instanceId,
-            }).finally(() => {
-              telemetry.getSpan('record:afterSpecRun')?.end()
-            })
-          })
+
+          telemetry.getSpan('record:afterSpecRun')?.end()
+
+          // the system-test suite asserts on the exact order in which the
+          // stubbed cloud receives requests, so wait for this spec's uploads
+          // before the next spec claims its instance to keep that order
+          // deterministic. NOTE: migrating those assertions to be
+          // order-insensitive would let this path be exercised there too.
+          if (runningInternalTests()) {
+            return uploadTask
+          }
+
+          return undefined
         })
       }
 
@@ -822,12 +855,19 @@ const createRunAndRecordSpecs = (options: any = {}) => {
         }
       })
 
-      return runAllSpecs({
+      return Promise.resolve(runAllSpecs({
         runUrl,
         parallel,
         onTestsReceived,
         beforeSpecRun,
         afterSpecRun,
+      }))
+      .finally(() => {
+        // updateInstanceStdout runs in the background while later specs are
+        // still capturing stdout, so it no longer restores the capture
+        // itself - restore it once the entire run (including the drained
+        // background uploads) has finished
+        capture.restore()
       })
     })
   })

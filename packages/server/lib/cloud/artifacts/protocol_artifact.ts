@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
 import { existsSync } from 'fs'
-import type { ProtocolManager } from '../protocol'
+import type { ProtocolUploadStateShape } from '@packages/types'
 import { IArtifact, ArtifactUploadStrategy, ArtifactUploadResult, Artifact, ArtifactKinds } from './artifact'
 import Debug from 'debug'
 const debug = Debug('cypress:server:cloud:artifacts:protocol')
@@ -14,7 +14,7 @@ interface ProtocolUploadStrategyResult {
   }
 }
 
-const createProtocolUploadStrategy = (protocolManager: ProtocolManager) => {
+const createProtocolUploadStrategy = (protocolManager: ProtocolUploadStateShape) => {
   const strategy: ArtifactUploadStrategy<Promise<ProtocolUploadStrategyResult | {}>> =
     async (filePath, uploadUrl, fileSize) => {
       const fatalError = protocolManager.getFatalError()
@@ -31,7 +31,7 @@ const createProtocolUploadStrategy = (protocolManager: ProtocolManager) => {
   return strategy
 }
 
-export const createProtocolArtifact = async (filePath: string, uploadUrl: string, protocolManager: ProtocolManager): Promise<IArtifact | undefined> => {
+export const createProtocolArtifact = async (filePath: string, uploadUrl: string, protocolManager: ProtocolUploadStateShape): Promise<IArtifact | undefined> => {
   let size: number | undefined
 
   debug('statting file path', filePath)
@@ -53,7 +53,7 @@ export const composeProtocolErrorReportFromOptions = async ({
   protocolCaptureMeta,
   captureUploadUrl,
 }: {
-  protocolManager?: ProtocolManager
+  protocolManager?: ProtocolUploadStateShape
   protocolCaptureMeta: { url?: string, disabledMessage?: string }
   captureUploadUrl?: string
 }): Promise<ArtifactUploadResult> => {

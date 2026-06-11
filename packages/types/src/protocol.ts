@@ -109,11 +109,28 @@ export type ProtocolManagerOptions = {
   mode?: 'record' | 'studio'
 }
 
-type UploadCaptureArtifactResult = {
+export type UploadCaptureArtifactResult = {
   success: boolean
   fileSize: number | bigint
   specAccess: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
   afterSpecDurations?: AfterSpecDurations
+}
+
+/**
+ * The per-spec state that uploading a spec's artifacts reads from (and
+ * writes to) the protocol manager. Artifact uploads run in the background
+ * while the next spec resets per-spec state on the live manager, so uploads
+ * operate on a snapshot of this state taken when their spec finished.
+ * Implemented by both `ProtocolManager` and its per-spec upload snapshots.
+ */
+export interface ProtocolUploadStateShape {
+  getArchivePath (): string | undefined
+  hasErrors (): boolean
+  hasFatalError (): boolean
+  getFatalError (): ProtocolError | undefined
+  addFatalError (captureMethod: ProtocolCaptureMethod, error: Error, args?: any): void
+  reportNonFatalErrors (context?: { osName: string, projectSlug?: string, specName?: string, mode?: 'record' | 'studio' }): Promise<void>
+  uploadCaptureArtifact (artifact: CaptureArtifact): Promise<UploadCaptureArtifactResult | undefined>
 }
 
 export type AfterSpecDurations = {
@@ -134,6 +151,7 @@ export interface ProtocolManagerShape extends AppCaptureProtocolCommon {
   afterSpec (): Promise<{ durations: AfterSpecDurations } | undefined>
   reportNonFatalErrors (clientMetadata: any): Promise<void>
   uploadCaptureArtifact(artifact: CaptureArtifact): Promise<UploadCaptureArtifactResult | undefined>
+  snapshotUploadState? (): ProtocolUploadStateShape
   connectToBrowser (cdpClient: CDPClient): Promise<void>
   close (): void
   dbPath?: string

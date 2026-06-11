@@ -730,4 +730,68 @@ describe('lib/cloud/protocol', () => {
       })
     })
   })
+
+  describe('.snapshotUploadState()', () => {
+    const specShape = (instanceId: string) => {
+      return { instanceId, absolute: '/path/to/spec', relative: 'spec', specFileExtension: '.ts', fileExtension: '.ts', specType: 'integration' as const, baseName: 'spec', name: 'spec', fileName: 'spec.ts' }
+    }
+
+    // the manager's per-spec error/archive accessors aren't part of
+    // ProtocolManagerShape
+    let manager: any
+
+    beforeEach(() => {
+      manager = protocolManager
+      sinon.stub(protocol, 'getDbMetadata').returns({ offset: 10, size: 100 })
+      protocolManager.beforeSpec(specShape('instance-1'))
+    })
+
+    it('preserves the spec archive path and errors after beforeSpec resets the manager for the next spec', () => {
+      const error = new Error('capture failed')
+
+      manager.addFatalError('uploadCaptureArtifact', error)
+
+      const snapshot = manager.snapshotUploadState()
+      const archivePath = manager.getArchivePath()
+
+      // the next spec resets the live manager's per-spec state
+      protocolManager.beforeSpec(specShape('instance-2'))
+
+      expect(manager.getArchivePath()).not.to.eq(archivePath)
+      expect(manager.hasFatalError()).to.be.false
+
+      expect(snapshot.getArchivePath()).to.eq(archivePath)
+      expect(snapshot.hasFatalError()).to.be.true
+      expect(snapshot.getFatalError()?.error).to.eq(error)
+    })
+
+    it('does not leak errors added to the snapshot back into the manager', () => {
+      const snapshot = manager.snapshotUploadState()
+
+      snapshot.addFatalError('uploadCaptureArtifact', new Error('upload failed'))
+
+      expect(snapshot.hasFatalError()).to.be.true
+      expect(manager.hasFatalError()).to.be.false
+      expect(manager.hasErrors()).to.be.false
+    })
+
+    it('uploads the capture artifact with the db metadata captured at snapshot time', async () => {
+      // clear behaviors that earlier tests configured on this shared stub
+      mockPutProtocolArtifact.reset()
+      mockPutProtocolArtifact.resolves()
+      sinon.stub(fs, 'unlink').resolves()
+
+      const snapshot = manager.snapshotUploadState()
+
+      // simulate the next spec changing the live manager's metadata
+      ;(protocol.getDbMetadata as SinonStub).returns({ offset: 999, size: 999 })
+
+      const result = await snapshot.uploadCaptureArtifact({ uploadUrl: 'http://fake.test/upload_url', filePath: '/foo/bar', fileSize: 1000 })
+
+      expect(mockPutProtocolArtifact).to.be.calledWith('/foo/bar', DB_SIZE_LIMIT, 'http://fake.test/upload_url', DEFAULT_STREAM_SAMPLING_INTERVAL)
+      expect(result.fileSize).to.eq(1000)
+      expect(result.success).to.be.true
+      expect(result.specAccess).to.deep.eq({ offset: 10, size: 100 })
+    })
+  })
 })

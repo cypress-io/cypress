@@ -14,7 +14,7 @@ import { requireScript } from './require_script'
 import * as routes from './routes'
 
 import type { Readable } from 'stream'
-import type { ProtocolManagerShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, FoundSpec } from '@packages/types'
+import type { ProtocolManagerShape, ProtocolUploadStateShape, AppCaptureProtocolInterface, CDPClient, ProtocolError, CaptureArtifact, ProtocolErrorReport, ProtocolCaptureMethod, ProtocolManagerOptions, ResponseStreamOptions, ResponseEndedWithEmptyBodyOptions, ResponseStreamTimedOutOptions, AfterSpecDurations, FoundSpec } from '@packages/types'
 
 const debug = Debug('cypress:server:protocol')
 const debugVerbose = Debug('cypress-verbose:server:protocol')
@@ -32,6 +32,183 @@ const dbSizeLimit = () => {
 }
 
 type AppCaptureProtocolConstructor = new (options: ProtocolManagerOptions) => AppCaptureProtocolInterface
+
+type ProtocolErrorReportContext = {
+  osName: string
+  projectSlug?: string
+  specName?: string
+  mode?: 'record' | 'studio'
+}
+
+type ProtocolErrorReportIdentity = {
+  runId?: string
+  instanceId?: string
+  captureHash?: string
+}
+
+const stringifyArg = (val: any) => {
+  try {
+    return JSON.stringify(val)
+  } catch (e) {
+    return `Unserializable ${typeof val}`
+  }
+}
+
+/**
+ * Transmit protocol errors to the cloud.
+ */
+async function dispatchProtocolErrors (identity: ProtocolErrorReportIdentity, errors: ProtocolError[], context?: ProtocolErrorReportContext) {
+  if (errors.length === 0) {
+    return
+  }
+
+  try {
+    const payload: ProtocolErrorReport = {
+      runId: identity.runId,
+      instanceId: identity.instanceId,
+      captureHash: identity.captureHash,
+      errors: errors.map((e) => {
+        return {
+          name: e.error.name ?? `Unknown name`,
+          stack: e.error.stack ?? `Unknown stack`,
+          message: e.error.message ?? `Unknown message`,
+          captureMethod: e.captureMethod,
+          args: e.args ? stringifyArg(e.args) : undefined,
+          runnableId: e.runnableId,
+        }
+      }),
+      context,
+    }
+
+    const body = JSON.stringify(payload)
+
+    await fetch(routes.apiRoutes.captureProtocolErrors() as string, {
+      // @ts-expect-error - this is supported
+      agent: strictAgent,
+      method: 'POST',
+      body,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-cypress-version': pkg.version,
+        'x-os-name': os.platform(),
+        'x-arch': os.arch(),
+      },
+    })
+  } catch (e) {
+    debug(`Error dispatching protocol errors: %o, original errors %o`, e, errors)
+  }
+}
+
+type ProtocolUploadState = {
+  errors: ProtocolError[]
+  archivePath: string | undefined
+  afterSpecDurations: (AfterSpecDurations & { afterSpecTotal: number }) | undefined
+  canUpload: boolean
+  dbMetadata: ReturnType<AppCaptureProtocolInterface['getDbMetadata']>
+  protocolSamplingInterval: number | undefined
+  runId: string | undefined
+  instanceId: string | undefined
+  captureHash: string | undefined
+  runnableId: string | undefined
+}
+
+/**
+ * A point-in-time copy of the per-spec state that uploading a spec's
+ * artifacts reads from (and writes to) the protocol manager. Artifact
+ * uploads run in the background while the next spec's beforeSpec resets the
+ * manager's per-spec state (archive path, errors, db), so each spec's upload
+ * operates on a snapshot taken when the spec finished instead of on the live
+ * manager.
+ */
+export class ProtocolUploadStateSnapshot implements ProtocolUploadStateShape {
+  constructor (private state: ProtocolUploadState) {}
+
+  getArchivePath (): string | undefined {
+    return this.state.archivePath
+  }
+
+  hasErrors (): boolean {
+    return !!this.state.errors.length
+  }
+
+  hasFatalError (): boolean {
+    return !!this.state.errors.filter((e) => e.fatal).length
+  }
+
+  getFatalError (): ProtocolError | undefined {
+    return this.state.errors.find((e) => e.fatal)
+  }
+
+  addFatalError (captureMethod: ProtocolCaptureMethod, error: Error, args?: any): void {
+    this.state.errors.push({
+      fatal: true,
+      error,
+      captureMethod,
+      runnableId: this.state.runnableId,
+      args,
+    })
+  }
+
+  async reportNonFatalErrors (context?: ProtocolErrorReportContext): Promise<void> {
+    const errors = this.state.errors.filter(({ fatal }) => !fatal)
+
+    await dispatchProtocolErrors(this.state, errors, context)
+
+    this.state.errors = []
+  }
+
+  async uploadCaptureArtifact ({ uploadUrl, fileSize, filePath }: CaptureArtifact) {
+    if (!this.state.canUpload || !filePath) {
+      debug('not uploading captured protocol artifact %o', {
+        canUpload: this.state.canUpload,
+        archivePath: !!filePath,
+      })
+
+      return
+    }
+
+    const captureErrors = !process.env.CYPRESS_LOCAL_PROTOCOL_PATH
+
+    debug(`uploading %s to %s with a file size of %s`, filePath, uploadUrl, fileSize)
+
+    try {
+      const environmentSuppliedInterval = parseInt(process.env.CYPRESS_TEST_REPLAY_UPLOAD_SAMPLING_INTERVAL || '', 10)
+      const samplingInterval = !Number.isNaN(environmentSuppliedInterval) ?
+        environmentSuppliedInterval :
+        this.state.protocolSamplingInterval ?? DEFAULT_STREAM_SAMPLING_INTERVAL
+
+      await putProtocolArtifact(filePath, dbSizeLimit(), uploadUrl, samplingInterval)
+
+      return {
+        fileSize,
+        success: true,
+        specAccess: this.state.dbMetadata,
+        ...(this.state.afterSpecDurations ? {
+          afterSpecDurations: this.state.afterSpecDurations,
+        } : {}),
+      }
+    } catch (e) {
+      if (captureErrors) {
+        this.state.errors.push({
+          error: e,
+          captureMethod: 'uploadCaptureArtifact',
+          fatal: true,
+          isUploadError: true,
+        })
+
+        throw e
+      }
+
+      return
+    } finally {
+      if (DELETE_DB) {
+        await fs.unlink(filePath).catch((e) => {
+          debug('Error unlinking db %o', e)
+        })
+      }
+    }
+  }
+}
 
 export class ProtocolManager implements ProtocolManagerShape {
   private _runId?: string
@@ -451,51 +628,32 @@ export class ProtocolManager implements ProtocolManagerShape {
    * @param context
    * @returns
    */
-  private async dispatchErrors (errors: ProtocolError[], context?: {
-    osName: string
-    projectSlug?: string
-    specName?: string
-    mode?: 'record' | 'studio'
-  }) {
-    if (errors.length === 0) {
-      return
-    }
+  private async dispatchErrors (errors: ProtocolError[], context?: ProtocolErrorReportContext) {
+    return dispatchProtocolErrors({
+      runId: this._runId,
+      instanceId: this._instanceId,
+      captureHash: this._captureHash,
+    }, errors, context)
+  }
 
-    try {
-      const payload: ProtocolErrorReport = {
-        runId: this._runId,
-        instanceId: this._instanceId,
-        captureHash: this._captureHash,
-        errors: errors.map((e) => {
-          return {
-            name: e.error.name ?? `Unknown name`,
-            stack: e.error.stack ?? `Unknown stack`,
-            message: e.error.message ?? `Unknown message`,
-            captureMethod: e.captureMethod,
-            args: e.args ? this.stringify(e.args) : undefined,
-            runnableId: e.runnableId,
-          }
-        }),
-        context,
-      }
-
-      const body = JSON.stringify(payload)
-
-      await fetch(routes.apiRoutes.captureProtocolErrors() as string, {
-        // @ts-expect-error - this is supported
-        agent: strictAgent,
-        method: 'POST',
-        body,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-cypress-version': pkg.version,
-          'x-os-name': os.platform(),
-          'x-arch': os.arch(),
-        },
-      })
-    } catch (e) {
-      debug(`Error calling ProtocolManager.sendErrors: %o, original errors %o`, e, errors)
-    }
+  /**
+   * Captures the per-spec upload state so this spec's artifacts can be
+   * uploaded in the background while beforeSpec resets this manager's state
+   * for the next spec.
+   */
+  snapshotUploadState (): ProtocolUploadStateSnapshot {
+    return new ProtocolUploadStateSnapshot({
+      errors: [...this._errors],
+      archivePath: this._archivePath,
+      afterSpecDurations: this._afterSpecDurations,
+      canUpload: !!this._protocol && !!this._db,
+      dbMetadata: this._protocol?.getDbMetadata(),
+      protocolSamplingInterval: this._protocol?.uploadStallSamplingInterval ? this._protocol.uploadStallSamplingInterval() : undefined,
+      runId: this._runId,
+      instanceId: this._instanceId,
+      captureHash: this._captureHash,
+      runnableId: this._runnableId,
+    })
   }
 
   close (): void {
@@ -566,14 +724,6 @@ export class ProtocolManager implements ProtocolManagerShape {
       }
 
       return undefined
-    }
-  }
-
-  private stringify (val: any) {
-    try {
-      return JSON.stringify(val)
-    } catch (e) {
-      return `Unserializable ${typeof val}`
     }
   }
 }
