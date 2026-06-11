@@ -588,14 +588,25 @@ describe('src/cypress/dom/visibility', {
       })
     })
 
-    it('reports the computed opacity value even when checkOpacity: false', () => {
-      // checkOpacity: false excludes opacity from the hidden decision, but when the element is
-      // hidden for another reason the message still reports the actual computed opacity.
-      cy.$$('body').append('<div id="display-and-opacity" style="display: none; opacity: 0;">hidden</div>')
-      cy.get('#display-and-opacity').then(($el) => {
-        const reason = dom.getReasonIsHidden($el, { checkOpacity: false })
+    it('passes opacityProperty: true to checkVisibility by default', () => {
+      cy.$$('body').append('<div id="opacity-property-default" style="display: none;">hidden</div>')
+      cy.get('#opacity-property-default').then(($el) => {
+        const spy = cy.spy($el[0], 'checkVisibility')
 
-        expect(reason).to.eq('This element `<div#display-and-opacity>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 0`, `content-visibility: visible`.')
+        dom.getReasonIsHidden($el)
+
+        expect(spy).to.be.calledWith(Cypress.sinon.match({ opacityProperty: true }))
+      })
+    })
+
+    it('passes opacityProperty: false to checkVisibility when checkOpacity is false', () => {
+      cy.$$('body').append('<div id="opacity-property-false" style="display: none;">hidden</div>')
+      cy.get('#opacity-property-false').then(($el) => {
+        const spy = cy.spy($el[0], 'checkVisibility')
+
+        dom.getReasonIsHidden($el, { checkOpacity: false })
+
+        expect(spy).to.be.calledWith(Cypress.sinon.match({ opacityProperty: false }))
       })
     })
 
