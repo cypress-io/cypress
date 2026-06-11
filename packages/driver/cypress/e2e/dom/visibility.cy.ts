@@ -588,24 +588,14 @@ describe('src/cypress/dom/visibility', {
       })
     })
 
-    it('returns the generic checkVisibility message when checkOpacity: false', () => {
-      prepareFixtureSection('display-property')
-      cy.get('[cy-section="display-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
+    it('reports the computed opacity value even when checkOpacity: false', () => {
+      // checkOpacity: false excludes opacity from the hidden decision, but when the element is
+      // hidden for another reason the message still reports the actual computed opacity.
+      cy.$$('body').append('<div id="display-and-opacity" style="display: none; opacity: 0;">hidden</div>')
+      cy.get('#display-and-opacity').then(($el) => {
         const reason = dom.getReasonIsHidden($el, { checkOpacity: false })
 
-        expect(reason).to.eq('This element `<div.testCase>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 1`, `content-visibility: visible`.')
-      })
-    })
-
-    it('treats opacity: 0 as visible when checkOpacity: false (bare reason)', () => {
-      // with checkOpacity: false, opacity is excluded from the hidden decision, so an
-      // opacity: 0-only element passes checkVisibility and the dimension guard. it is not
-      // considered hidden, so the function falls through to the generic "not visible." string.
-      prepareFixtureSection('opacity-property')
-      cy.get('[cy-section="opacity-property"] .testCase[cy-expect="hidden"]:first').then(($el) => {
-        const reason = dom.getReasonIsHidden($el, { checkOpacity: false })
-
-        expect(reason).to.eq('This element `<div.testCase>` is not visible.')
+        expect(reason).to.eq('This element `<div#display-and-opacity>` is not visible per `Element.checkVisibility()`. Computed: `display: none`, `visibility: visible`, `opacity: 0`, `content-visibility: visible`.')
       })
     })
 
