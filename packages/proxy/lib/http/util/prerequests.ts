@@ -222,6 +222,8 @@ export class PreRequests {
         return
       }
 
+      debug('Pre-request for %s arrived after the request had already timed out waiting %sms for it. The request proceeded without correlation data. %o', key, this.requestTimeout, browserPreRequest)
+
       this.protocolManager?.responseStreamTimedOut({
         requestId: browserPreRequest.requestId,
         timings,
@@ -330,8 +332,8 @@ export class PreRequests {
       callback,
       proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
       timeout: setTimeout(() => {
-        ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
-        debug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one.', key, this.requestTimeout)
+        ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one. The request will be missing correlation data (e.g. resourceType), which can prevent cy.intercept routes that rely on it from matching this request.', key, this.requestTimeout)
+        debug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one. The request will be missing correlation data (e.g. resourceType), which can prevent cy.intercept routes that rely on it from matching this request.', key, this.requestTimeout)
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
         callback({
@@ -362,13 +364,18 @@ export class PreRequests {
   }
 
   reset () {
+    if (this.pendingRequests.length > 0) {
+      debug('Resetting pre-request state with %d pending request(s). They will proceed without pre-requests and will be missing correlation data (e.g. resourceType).', this.pendingRequests.length)
+    }
+
     this.pendingPreRequests = new QueueMap<PendingPreRequest>()
 
     // Clear out the pending requests timeout callbacks first then clear the queue
-    this.pendingRequests.forEach(({ callback, timeout, timedOut }) => {
+    this.pendingRequests.forEach(({ key, callback, timeout, timedOut }) => {
       // If the request has already timed out, just return
       if (timedOut) return
 
+      debugVerbose('Pending request %s proceeding without a pre-request due to reset', key)
       clearTimeout(timeout)
       metrics.unmatchedRequests++
       callback?.({

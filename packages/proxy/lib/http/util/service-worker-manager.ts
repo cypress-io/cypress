@@ -5,6 +5,11 @@ import type Protocol from 'devtools-protocol'
 
 const debug = Debug('cypress:proxy:service-worker-manager')
 
+// How long to wait for the service worker fetch event to determine whether the
+// service worker controls a request before falling back to treating the
+// request as uncontrolled.
+const isControlledByServiceWorkerTimeoutMs = 250
+
 type ServiceWorkerRegistration = {
   registrationId: string
   scopeURL: string
@@ -251,7 +256,7 @@ export class ServiceWorkerManager {
         try {
           isControlled = await this.isURLControlledByServiceWorker(browserPreRequest)
         } catch (e) {
-          debug('timed out checking if pre-request is controlled by service worker: %o', { url: browserPreRequest.url, requestId: browserPreRequest.requestId })
+          debug('timed out after %dms checking if pre-request is controlled by service worker. Treating the request as NOT controlled by the service worker, which may be incorrect on a slow or heavily loaded system: %o', isControlledByServiceWorkerTimeoutMs, { url: browserPreRequest.url, requestId: browserPreRequest.requestId })
         }
 
         if (isControlled) {
@@ -385,7 +390,7 @@ export class ServiceWorkerManager {
     // race the deferred promise with a timeout to prevent the pre-request from hanging indefinitely
     const racingPromises = Promise.race([
       deferred.promise,
-      new Promise<boolean>((_resolve, reject) => timer = setTimeout(reject, 250)),
+      new Promise<boolean>((_resolve, reject) => timer = setTimeout(reject, isControlledByServiceWorkerTimeoutMs)),
     ]).finally(() => clearTimeout(timer))
 
     return racingPromises

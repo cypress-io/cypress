@@ -432,7 +432,7 @@ export class CriClient implements ICriClient {
         debug('uncaught error in CriClient reconnect callback: ', e)
       }
     } catch (e) {
-      debug('error re-establishing state on reconnection: ', e)
+      debug('error re-establishing state on reconnection to target %s. CDP domain enablements and enqueued commands may not have been fully restored, so CDP events (e.g. network traffic used by cy.intercept) may no longer be received: ', this.targetId, e)
     }
   }
 
