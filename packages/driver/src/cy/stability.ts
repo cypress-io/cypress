@@ -16,7 +16,7 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
     const pending = whenStableQueue.splice(0)
 
     if (pending.length) {
-      debug('clearing %d stability waiter(s) that were never released before test reset', pending.length)
+      debug('rejecting %d stability waiter(s) still queued at reset', pending.length)
     }
 
     // reject each waiter so they don't run in the next test
@@ -61,7 +61,7 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
         // released anyway, so their commands may run while the page is
         // transitioning
         if (state('isStable') === false) {
-          debug('releasing %d stability waiter(s) although the page became unstable again before the release ran; their commands may run while the page is transitioning', waitersToRelease.length)
+          debug('releasing %d stability waiter(s) while state(\'isStable\') is false', waitersToRelease.length)
         }
 
         // release the waiters

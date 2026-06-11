@@ -256,7 +256,7 @@ export class ServiceWorkerManager {
         try {
           isControlled = await this.isURLControlledByServiceWorker(browserPreRequest)
         } catch (e) {
-          debug('timed out after %dms checking if pre-request is controlled by service worker. Treating the request as NOT controlled by the service worker, which may be incorrect on a slow or heavily loaded system: %o', isControlledByServiceWorkerTimeoutMs, { url: browserPreRequest.url, requestId: browserPreRequest.requestId })
+          debug('no service worker fetch event received within %dms; treating the request as not controlled by a service worker: %o', isControlledByServiceWorkerTimeoutMs, { url: browserPreRequest.url, requestId: browserPreRequest.requestId })
         }
 
         if (isControlled) {

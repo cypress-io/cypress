@@ -125,13 +125,13 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       // in time, so log it to make any resulting cross-test contamination
       // diagnosable
       if (state('canceled')) {
-        debug('retry of command `%s` (retry #%d) ran after its test was canceled; bailing without retrying', options._name, options._retries)
+        debug('retry #%d of `%s` ran while state(\'canceled\') was true; not retrying', options._retries, options._name)
 
         return true
       }
 
       if (runnableHasChanged()) {
-        debug('retry of command `%s` (retry #%d) from runnable %o leaked into runnable %o because its promise was not canceled in time; bailing without retrying', options._name, options._retries, options._runnable?.title, state('runnable')?.title)
+        debug('retry #%d of `%s` ran after the runnable changed from %o to %o; not retrying', options._retries, options._name, options._runnable?.title, state('runnable')?.title)
 
         return true
       }

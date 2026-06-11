@@ -96,7 +96,7 @@ const setPostMessageLocalStorage = async (specWindow, originOptions) => {
     $iframeContainer.remove()
   })
   .catch((err) => {
-    debug('failed to set session storage data within %dms on origin(s) %o. Session data will be incomplete for those origins: %o', postMessageStorageTimeoutMs, _.xor(origins, successOrigins), err)
+    debug('did not receive set:storage:complete from origin(s) %o within %dms: %o', _.xor(origins, successOrigins), postMessageStorageTimeoutMs, err)
 
     Cypress.log({
       name: 'warning',
@@ -191,7 +191,7 @@ const getPostMessageLocalStorage = (specWindow, origins): Promise<any[]> => {
     $iframeContainer.remove()
   })
   .catch((err) => {
-    debug('failed to get session storage data within %dms on origin(s) %o. Session data will be incomplete for those origins: %o', postMessageStorageTimeoutMs, _.xor(origins, successOrigins), err)
+    debug('did not receive localStorage data from origin(s) %o within %dms: %o', _.xor(origins, successOrigins), postMessageStorageTimeoutMs, err)
 
     Cypress.log({
       name: 'warning',

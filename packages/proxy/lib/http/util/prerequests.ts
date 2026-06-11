@@ -222,7 +222,7 @@ export class PreRequests {
         return
       }
 
-      debug('Pre-request for %s arrived after the request had already timed out waiting %sms for it. The request proceeded without correlation data. %o', key, this.requestTimeout, browserPreRequest)
+      debug('Received pre-request for %s after the request had already timed out at %sms. The request proceeded without it. %o', key, this.requestTimeout, browserPreRequest)
 
       this.protocolManager?.responseStreamTimedOut({
         requestId: browserPreRequest.requestId,
@@ -332,8 +332,8 @@ export class PreRequests {
       callback,
       proxyRequestReceivedTimestamp: performance.now() + performance.timeOrigin,
       timeout: setTimeout(() => {
-        ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one. The request will be missing correlation data (e.g. resourceType), which can prevent cy.intercept routes that rely on it from matching this request.', key, this.requestTimeout)
-        debug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one. The request will be missing correlation data (e.g. resourceType), which can prevent cy.intercept routes that rely on it from matching this request.', key, this.requestTimeout)
+        ctxDebug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one. The request has no browser pre-request data (no resourceType).', key, this.requestTimeout)
+        debug('Never received pre-request or url without pre-request for request %s after waiting %sms. Continuing without one. The request has no browser pre-request data (no resourceType).', key, this.requestTimeout)
         metrics.unmatchedRequests++
         pendingRequest.timedOut = true
         callback({
@@ -365,7 +365,7 @@ export class PreRequests {
 
   reset () {
     if (this.pendingRequests.length > 0) {
-      debug('Resetting pre-request state with %d pending request(s). They will proceed without pre-requests and will be missing correlation data (e.g. resourceType).', this.pendingRequests.length)
+      debug('Resetting pre-request state with %d pending request(s); each is resolved without a pre-request.', this.pendingRequests.length)
     }
 
     this.pendingPreRequests = new QueueMap<PendingPreRequest>()
@@ -375,7 +375,7 @@ export class PreRequests {
       // If the request has already timed out, just return
       if (timedOut) return
 
-      debugVerbose('Pending request %s proceeding without a pre-request due to reset', key)
+      debugVerbose('Pending request %s resolved without a pre-request during reset', key)
       clearTimeout(timeout)
       metrics.unmatchedRequests++
       callback?.({
