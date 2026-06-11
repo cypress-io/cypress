@@ -162,6 +162,9 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(/\r/g, '')
   // normalizes upload indicator to a consistent number of dots
   .replace(/(Uploading Cloud Artifacts\: )([\. ]*)/g, replaceUploadActivityIndicator)
+  // whether the run has to wait on backgrounded video compression / artifact
+  // uploads at the end of the spec loop depends on timing, so strip the notice
+  .replace(/\n {2}Waiting for video compression and artifact uploads to finish\.\.\.\n/g, '')
   // fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
   // Different browsers have different cross-origin error messages
