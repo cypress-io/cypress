@@ -4,7 +4,6 @@
   "private": true,
   "main": "cjs/index.js",
   "scripts": {
-    "bench": "vitest bench --run",
     "build": "yarn build:esm && yarn build:cjs",
     "build-prod": "yarn build",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
