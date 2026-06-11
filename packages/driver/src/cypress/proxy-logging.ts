@@ -5,6 +5,8 @@ import $errUtils from './error_utils'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:proxy-logging')
+// for logs emitted once per request on expected paths
+const debugVerbose = Debug('cypress-verbose:driver:proxy-logging')
 
 function formatInterception ({ route, interception }: ProxyRequest['interceptions'][number]) {
   const ret = {
@@ -244,7 +246,7 @@ export default class ProxyLogging {
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
-      debug('no proxy request found for interception with browserRequestId %s for url %s; %d proxy request(s) in list', interception.browserRequestId, interception.request.url, this.proxyRequests.length)
+      debugVerbose('no proxy request found for interception with browserRequestId %s for url %s; %d proxy request(s) in list', interception.browserRequestId, interception.request.url, this.proxyRequests.length)
 
       // request was never logged
       return undefined

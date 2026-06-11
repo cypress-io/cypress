@@ -6,6 +6,8 @@ import { $Location } from '../cypress/location'
 import { preprocessLogForSerialization, reifyLogFromSerialization, preprocessSnapshotForSerialization, reifySnapshotFromSerialization } from '../util/serialization/log'
 
 const debug = debugFn('cypress:driver:multi-origin')
+// for logs emitted on every promisified cross-origin message
+const debugVerbose = debugFn('cypress-verbose:driver:multi-origin')
 
 const CROSS_ORIGIN_PREFIX = 'cross:origin:'
 const LOG_EVENTS = [`${CROSS_ORIGIN_PREFIX}log:added`, `${CROSS_ORIGIN_PREFIX}log:changed`]
@@ -44,7 +46,7 @@ const sharedPromiseSetup = ({
 
   const handler = (result) => {
     clearTimeout(timeoutId)
-    debug('%s received a response from %s spec bridge %dms after setup (timeout %dms)', event, specBridgeName, Date.now() - sentAt, timeout)
+    debugVerbose('%s received a response from %s spec bridge %dms after setup (timeout %dms)', event, specBridgeName, Date.now() - sentAt, timeout)
     resolve(result)
   }
 

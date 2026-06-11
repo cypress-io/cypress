@@ -5,6 +5,8 @@ import type { Readable } from 'stream'
 import type { IncomingMessage } from 'http'
 
 const debug = debugModule('cypress:proxy:http:util:buffers')
+// for logs emitted on every request while a buffer is held
+const debugVerbose = debugModule('cypress-verbose:proxy:http:util:buffers')
 
 export type HttpBuffer = {
   details: object
@@ -68,7 +70,7 @@ export class HttpBuffers {
     }
 
     if (this.buffer) {
-      debug('requested url %o did not match buffered url %o; buffer not taken', stripPort(str), this.buffer.url)
+      debugVerbose('requested url %o did not match buffered url %o; buffer not taken', stripPort(str), this.buffer.url)
     }
   }
 }
