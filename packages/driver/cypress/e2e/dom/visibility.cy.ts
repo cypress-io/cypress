@@ -589,8 +589,7 @@ describe('src/cypress/dom/visibility', {
     })
 
     it('passes opacityProperty: true to checkVisibility by default', () => {
-      cy.$$('body').append('<div id="opacity-property-default" style="display: none;">hidden</div>')
-      cy.get('#opacity-property-default').then(($el) => {
+      cy.get('h1').then(($el) => {
         const spy = cy.spy($el[0], 'checkVisibility')
 
         dom.getReasonIsHidden($el)
@@ -600,8 +599,7 @@ describe('src/cypress/dom/visibility', {
     })
 
     it('passes opacityProperty: false to checkVisibility when checkOpacity is false', () => {
-      cy.$$('body').append('<div id="opacity-property-false" style="display: none;">hidden</div>')
-      cy.get('#opacity-property-false').then(($el) => {
+      cy.get('h1').then(($el) => {
         const spy = cy.spy($el[0], 'checkVisibility')
 
         dom.getReasonIsHidden($el, { checkOpacity: false })
