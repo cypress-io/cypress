@@ -22,8 +22,7 @@ type Matchable = ReturnType<typeof getMatchableForRequest>
  * glob patterns, normalizing the method) is done once per matcher and cached,
  * and the work that depends only on the request (URL parsing via
  * `getMatchableForRequest`) is done once per request rather than once per
- * route. The matching semantics themselves are unchanged; each compiled step
- * mirrors a branch of the original per-request implementation.
+ * route.
  */
 
 /**
@@ -130,8 +129,8 @@ function getCompiledPreflightMatcher (routeMatcher: RouteMatcherOptions) {
 
 function globMatch (entry: CompiledStringField, value: string) {
   // exact equality is checked first so that common literal matchers
-  // short-circuit without touching minimatch; the slash-prefixed fallback only
-  // applies to url/path values, matching the original recursive `stringMatch`
+  // short-circuit without touching minimatch; the slash-prefixed fallback
+  // only applies to url/path values
   return (
     value === entry.matcher ||
     entry.mm!.match(value) ||
