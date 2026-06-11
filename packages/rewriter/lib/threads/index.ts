@@ -5,7 +5,9 @@ import * as path from 'path'
 import os from 'os'
 import { MessageChannel, Worker } from 'worker_threads'
 import type { RewriteRequest, RewriteResponse } from './types'
+import { hasPossibleRewriteTargets } from '../js'
 import type { DeferSourceMapRewriteFn } from '../js'
+import * as sourceMaps from '../util/source-maps'
 
 const debug = Debug('cypress:rewriter:threads')
 
@@ -226,7 +228,38 @@ function getFreeWorker (): WorkerInfo | undefined {
   return _.find(workers, { isBusy: false })
 }
 
+// ids generated on the main thread are prefixed with `0`, which cannot
+// collide with worker-generated ids since worker threadIds start at 1
+let _mainThreadIdCounter = 0
+
+// mirrors the no-rewrite tail of `_rewriteJsUnsafe` - since the source has no
+// possible rewrite targets, only the sourcemap bookkeeping needs to happen,
+// so the worker round-trip + AST parse can be skipped entirely
+function _passthroughJsRewrite (opts: RewriteOpts): string {
+  if (!opts.deferSourceMapRewrite) {
+    // no sourcemaps
+    return sourceMaps.stripMappingUrl(opts.source)
+  }
+
+  const sourceMapId = `0.${_mainThreadIdCounter++}`
+
+  opts.deferSourceMapRewrite({ uniqueId: sourceMapId, url: opts.url, js: opts.source })
+
+  return sourceMaps.urlFormatter(
+    `/__cypress/source-maps/${sourceMapId}.map`,
+    opts.source,
+  )
+}
+
 export function queueRewriting (opts: RewriteOpts): Promise<string> {
+  // when the pre-scan proves no rewrite is possible for plain JS, skip the
+  // worker entirely
+  if (!opts.isHtml && !opts.sourceMap && !hasPossibleRewriteTargets(opts.source)) {
+    debug('source has no possible rewrite targets, skipping worker %o', { opts: _debugOpts(opts) })
+
+    return Promise.resolve(_passthroughJsRewrite(opts))
+  }
+
   // if a worker is free now, use it
   const freeWorker = getFreeWorker()
 

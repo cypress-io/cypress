@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import _ from 'lodash'
-import { _rewriteJsUnsafe } from '../../lib/js'
+import { _rewriteJsUnsafe, hasPossibleRewriteTargets } from '../../lib/js'
 import fse from 'fs-extra'
 import Bluebird from 'bluebird'
 import rp from '@cypress/request-promise'
@@ -59,6 +59,8 @@ describe('js rewriter', function () {
           ['foowindow.top', match('foowindow', 'top')],
           ['foowindow[\'top\']', match('foowindow', 'top')],
           ['window.topfoo'],
+          // unicode escapes in identifiers are resolved by the parser
+          ['window.\\u0074op', match('window', 'top')],
           ['window[\'topfoo\']'],
           ['window[\'top\'].foo', `${match('window', 'top')}.foo`],
           ['window.top.foo', `${match('window', 'top')}.foo`],
@@ -180,9 +182,33 @@ describe('js rewriter', function () {
           throw err
         })
 
-        const actual = _rewriteJsUnsafe(URL, 'console.log()')
+        const actual = _rewriteJsUnsafe(URL, 'console.log(top)')
 
         expect(actual).toMatchSnapshot()
+      })
+
+      describe('pre-scan', () => {
+        it('skips AST parsing entirely when the source has no possible rewrite targets', () => {
+          vi.mocked(astTypes.PathVisitor.fromMethodsObject).mockClear()
+
+          const source = 'console.log("foo"); const add = (a, b) => a + b'
+
+          expect(_rewriteJsUnsafe(URL, source)).toEqual(source)
+          expect(vi.mocked(astTypes.PathVisitor.fromMethodsObject)).not.toHaveBeenCalled()
+        })
+
+        it('does not skip sources with unicode escape sequences', () => {
+          expect(hasPossibleRewriteTargets('window.\\u0074op')).toBe(true)
+        })
+
+        it('detects rewrite targets as whole words only', () => {
+          expect(hasPossibleRewriteTargets('window.top')).toBe(true)
+          expect(hasPossibleRewriteTargets('window["parent"]')).toBe(true)
+          expect(hasPossibleRewriteTargets('location.href')).toBe(true)
+          expect(hasPossibleRewriteTargets('window.topfoo')).toBe(false)
+          expect(hasPossibleRewriteTargets('stop()')).toBe(false)
+          expect(hasPossibleRewriteTargets('relocation')).toBe(false)
+        })
       })
 
       it('replaces jira window getter', () => {

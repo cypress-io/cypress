@@ -11,7 +11,19 @@ const defaultPrintOpts: recast.Options = {
   quote: 'single',
 }
 
-type OriginalSourceInfo = { url: string, js: string }
+type OriginalSourceInfo = { url: string, js: string, uniqueId?: string }
+
+// the AST rules in `js-rules.ts` only ever rewrite code that references
+// `top`, `parent`, or `location` - if none of those appear as whole words in
+// the source, parsing it into an AST is guaranteed to be a no-op, so the
+// expensive parse + visit can be skipped entirely. `\u` is also matched,
+// since a unicode escape sequence could disguise one of those identifiers
+// (e.g. `window.\u0074op` is `window.top`)
+const possibleRewriteTargetsRe = /\b(?:top|parent|location)\b|\\u/
+
+export function hasPossibleRewriteTargets (js: string): boolean {
+  return possibleRewriteTargetsRe.test(js)
+}
 
 function _generateDriverError (url: string, err: Error) {
   const args = JSON.stringify({
@@ -28,6 +40,11 @@ export type DeferSourceMapRewriteFn = (sourceInfo: OriginalSourceInfo) => string
 
 export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any): any {
   try {
+    if (inputSourceMap && !hasPossibleRewriteTargets(js)) {
+      // the rewriter could not have changed the source, so the original sourcemap is still accurate
+      return inputSourceMap
+    }
+
     const { sourceFileName, sourceMapName, sourceRoot } = sourceMaps.getPaths(url)
 
     const ast = recast.parse(js, { sourceFileName })
@@ -54,29 +71,29 @@ export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any
 }
 
 export function _rewriteJsUnsafe (url: string, js: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
-  const ast = recast.parse(js)
+  let rewritten = js
 
-  let didRewrite: boolean
+  if (hasPossibleRewriteTargets(js)) {
+    const ast = recast.parse(js)
 
-  try {
-    const visitor = astTypes.PathVisitor.fromMethodsObject(jsRules)
+    let didRewrite: boolean
 
-    visitor.visit(ast)
+    try {
+      const visitor = astTypes.PathVisitor.fromMethodsObject(jsRules)
 
-    didRewrite = visitor.wasChangeReported()
-  } catch (err: any) {
-    // if visiting fails, it points to a bug in our rewriting logic, so raise the error to the driver
-    return _generateDriverError(url, err)
-  }
+      visitor.visit(ast)
 
-  let rewritten: string
+      didRewrite = visitor.wasChangeReported()
+    } catch (err: any) {
+      // if visiting fails, it points to a bug in our rewriting logic, so raise the error to the driver
+      return _generateDriverError(url, err)
+    }
 
-  if (didRewrite) {
-    const { code } = recast.print(ast, defaultPrintOpts)
+    if (didRewrite) {
+      const { code } = recast.print(ast, defaultPrintOpts)
 
-    rewritten = code
-  } else {
-    rewritten = js
+      rewritten = code
+    }
   }
 
   if (!deferSourceMapRewrite) {
