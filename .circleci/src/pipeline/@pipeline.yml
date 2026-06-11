@@ -9,7 +9,10 @@ chrome-stable-version: &chrome-stable-version "149.0.7827.102"
 chrome-beta-version: &chrome-beta-version "150.0.7871.13"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.55"
+# Pin from https://product-details.mozilla.org/1.0/firefox_versions.json (LATEST_FIREFOX_VERSION, LATEST_FIREFOX_RELEASED_DEVEL_VERSION).
+# Mozilla's product-details field name uses "DEVEL"; their public-facing channel is called Beta.
 firefox-stable-version: &firefox-stable-version "151.0.1"
+firefox-beta-version: &firefox-beta-version "152.0b1"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
 # Lowest Node.js version we support of the minimum major version supported
@@ -775,6 +778,13 @@ commands:
             - install-browsers:
                 install-firefox: true
                 firefox-version: << parameters.firefox-version >>
+      - when:
+          condition:
+            equal: [ firefox:beta, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-firefox: true
+                firefox-version: *firefox-beta-version
       - when:
           condition:
             equal: [ webkit, << parameters.browser >> ]
@@ -2423,6 +2433,15 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: firefox
+          guard: << pipeline.parameters.run-driver-tests >>
+
+  driver-integration-tests-firefox-beta:
+    <<: *defaults
+    resource_class: medium+
+    parallelism: 5
+    steps:
+      - run-driver-integration-tests:
+          browser: firefox:beta
           guard: << pipeline.parameters.run-driver-tests >>
 
   driver-integration-tests-electron:

@@ -1,6 +1,7 @@
 import { findApp, FindAppParams } from './util'
 import type { Browser, DetectedBrowser } from '@packages/types'
 import * as linuxHelper from '../linux'
+import { notInstalledErr } from '../errors'
 import Debug from 'debug'
 import { get } from 'lodash'
 
@@ -51,6 +52,15 @@ export const browsers: Detectors = {
   },
   firefox: {
     stable: {
+      appName: 'Firefox.app',
+      executable: 'Contents/MacOS/firefox',
+      bundleId: 'org.mozilla.firefox',
+      versionProperty: 'CFBundleShortVersionString',
+    },
+    beta: {
+      // Mozilla's macOS Beta installer reuses the stable Firefox.app bundle. The plist's
+      // CFBundleShortVersionString (e.g. "152.0b6" for Beta vs "151.0.1" for stable) is what
+      // distinguishes the channels — see the versionRegex check in detect() below.
       appName: 'Firefox.app',
       executable: 'Contents/MacOS/firefox',
       bundleId: 'org.mozilla.firefox',
@@ -114,10 +124,22 @@ export function detect (browser: Browser): Promise<DetectedBrowser> {
   }
 
   return findApp(findAppParams)
-  .then((val) => ({ name: browser.name, ...val }))
   .catch((err) => {
     debugVerbose('could not detect %s using findApp %o, falling back to linux detection method', browser.name, err)
 
     return linuxHelper.detect(browser)
+  })
+  .then((val) => {
+    // When two channels share the same app bundle (Mozilla's macOS Beta installer reuses
+    // Firefox.app and org.mozilla.firefox), the plist version is the only signal that
+    // distinguishes them. Run the channel's versionRegex against a synthesized
+    // `Mozilla Firefox <version>` line so darwin matches the same rules as
+    // `firefox --version` parsing on linux.
+    if (browser.family === 'firefox' && browser.versionRegex && val.version &&
+        !browser.versionRegex.test(`Mozilla Firefox ${val.version}`)) {
+      throw notInstalledErr(browser.name)
+    }
+
+    return { name: browser.name, ...val }
   })
 }
