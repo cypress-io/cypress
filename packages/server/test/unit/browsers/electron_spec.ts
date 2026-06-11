@@ -1,0 +1,1313 @@
+import '../../spec_helper'
+import _ from 'lodash'
+import EE from 'events'
+import la from 'lazy-ass'
+import sinon from 'sinon'
+import { Automation } from '../../../lib/automation'
+import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
+import * as electronApp from '../../../lib/util/electron-app'
+import utils from '../../../lib/browsers/utils'
+import { screencastOpts } from '../../../lib/browsers/cdp_automation'
+import menu from '../../../lib/gui/menu'
+import * as plugins from '../../../lib/plugins'
+import * as Windows from '../../../lib/gui/windows'
+import electron from '../../../lib/browsers/electron'
+import * as savedState from '../../../lib/saved_state'
+import type { BrowserLaunchOpts } from '@packages/types'
+const ELECTRON_PID = 10001
+
+describe('lib/browsers/electron', () => {
+  beforeEach(function () {
+    this.protocolManager = {
+      connectToBrowser: sinon.stub().resolves(),
+    }
+
+    this.cyPromptManager = {
+      connectToBrowser: sinon.stub().resolves(),
+    }
+
+    this.studioManager = {
+      connectToBrowser: sinon.stub().resolves(),
+    }
+
+    this.url = 'https://foo.com'
+    this.state = {}
+    this.options = {
+      isTextTerminal: false,
+      some: 'var',
+      projectRoot: '/foo/',
+      onWarning: sinon.stub().returns(undefined),
+      browser: {
+        isHeadless: false,
+      },
+      onError: () => {},
+    } as unknown as BrowserLaunchOpts & { some: string }
+
+    this.automation = new Automation({
+      cyNamespace: 'foo',
+      cookieNamespace: 'bar',
+      screenshotsFolder: 'baz',
+      onServiceWorkerClientEvent: sinon.stub(),
+    })
+
+    this.win = _.extend(new EE(), {
+      isDestroyed () {
+        return false
+      },
+      close: sinon.stub(),
+      loadURL: sinon.stub(),
+      focusOnWebView: sinon.stub(),
+      show: sinon.stub(),
+      destroy: sinon.stub(),
+      webContents: {
+        session: {
+          cookies: {
+            get: sinon.stub(),
+            set: sinon.stub(),
+            remove: sinon.stub(),
+          },
+          on: sinon.stub(),
+          webRequest: {
+            onBeforeSendHeaders () {},
+          },
+          setUserAgent: sinon.stub(),
+          getUserAgent: sinon.stub(),
+          clearCache: sinon.stub(),
+        },
+        on: sinon.stub(),
+        getOSProcessId: sinon.stub().returns(ELECTRON_PID),
+      },
+    })
+
+    sinon.stub(Windows, 'installExtension').returns()
+    sinon.stub(Windows, 'removeAllExtensions').returns()
+    sinon.stub(electronApp, 'getRemoteDebuggingPort').resolves('1234')
+    sinon.stub(utils, 'initializeCDP').resolves()
+
+    // mock CRI client during testing
+    this.pageCriClient = {
+      send: sinon.stub().resolves(),
+      on: sinon.stub(),
+      clone: sinon.stub().resolves(),
+    }
+
+    this.browserCriClient = {
+      attachToTargetUrl: sinon.stub().resolves(this.pageCriClient),
+      currentlyAttachedTarget: this.pageCriClient,
+      close: sinon.stub().resolves(),
+      getWebSocketDebuggerUrl: sinon.stub().returns('ws://debugger'),
+    }
+
+    sinon.stub(BrowserCriClient, 'create').resolves(this.browserCriClient)
+
+    this.stubForOpen = function () {
+      sinon.stub(electron, '_render').resolves(this.win)
+      sinon.stub(plugins, 'has')
+      sinon.stub(plugins, 'execute')
+
+      return savedState.create()
+      .then((state) => {
+        la(_.isFunction(state.get), 'state is missing .get to stub', state)
+
+        return sinon.stub(state, 'get').resolves(this.state)
+      })
+    }
+  })
+
+  afterEach(function () {
+    electron.clearInstanceState()
+  })
+
+  context('.connectToNewSpec', () => {
+    it('throws an error', async function () {
+      expect(() => {
+        // @ts-expect-error
+        electron.connectToNewSpec({ isHeaded: true }, { url: 'http://www.example.com' }, this.automation)
+      }).to.throw('Attempting to connect to a new spec is not supported for electron, use open instead')
+    })
+  })
+
+  context('.open', () => {
+    beforeEach(async function () {
+      // shortcut to set the browserCriClient singleton variable
+      // @ts-expect-error
+      await electron._getAutomation({}, { onError: () => {} }, {})
+
+      await this.stubForOpen()
+    })
+
+    it('calls render with url, state, and options', function () {
+      // @ts-expect-error
+      return electron.open('electron', this.url, this.options, this.automation)
+      .then(() => {
+        // @ts-expect-error
+        let options = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
+
+        options = Windows.defaults(options)
+
+        // @ts-expect-error
+        const preferencesKeys = _.keys(electron._render.firstCall.args[2])
+
+        expect(_.keys(options)).to.deep.eq(preferencesKeys)
+
+        // @ts-expect-error
+        const electronOptionsArg = electron._render.firstCall.args[3]
+
+        expect(electronOptionsArg.projectRoot).to.eq(this.options.projectRoot)
+        expect(electronOptionsArg.isTextTerminal).to.eq(this.options.isTextTerminal)
+
+        expect(electron._render).to.be.calledWith(
+          this.url,
+          this.automation,
+        )
+      })
+    })
+
+    it('returns custom object emitter interface', function () {
+      // @ts-expect-error
+      return electron.open('electron', this.url, this.options, this.automation)
+      .then((obj) => {
+        // @ts-expect-error
+        expect(obj.browserWindow).to.eq(this.win)
+        expect(obj.kill).to.be.a('function')
+        expect(obj.removeAllListeners).to.be.a('function')
+
+        expect(this.win.webContents.getOSProcessId).to.be.calledOnce
+
+        expect(obj.pid).to.eq(ELECTRON_PID)
+        expect(obj.allPids).to.deep.eq([ELECTRON_PID])
+      })
+    })
+
+    it('executeBeforeBrowserLaunch is noop when before:browser:launch yields null', function () {
+      // @ts-expect-error
+      plugins.has.returns(true)
+      // @ts-expect-error
+      plugins.execute.resolves(null)
+
+      // @ts-expect-error
+      return electron.open('electron', this.url, this.options, this.automation)
+      .then(() => {
+        // @ts-expect-error
+        const options = electron._render.firstCall.args[2]
+
+        expect(options).to.include.keys('onFocus', 'onNewWindow', 'onCrashed')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/1992
+    it('it merges in user preferences without removing essential options', function () {
+      // @ts-expect-error
+      plugins.has.returns(true)
+      // @ts-expect-error
+      plugins.execute.withArgs('before:browser:launch').resolves({
+        preferences: {
+          foo: 'bar',
+        },
+      })
+
+      // @ts-expect-error
+      return electron.open('electron', this.url, this.options, this.automation)
+      .then(() => {
+        // @ts-expect-error
+        const options = electron._render.firstCall.args[2]
+
+        expect(options).to.include.keys('foo', 'onFocus', 'onNewWindow', 'onCrashed')
+      })
+    })
+
+    it('installs supplied extensions from before:browser:launch and warns on failure', function () {
+      // @ts-expect-error
+      plugins.has.returns(true)
+      // @ts-expect-error
+      plugins.execute.resolves({ extensions: ['foo', 'bar'] })
+
+      // @ts-expect-error
+      Windows.installExtension.withArgs(sinon.match.any, 'bar').throws()
+
+      // @ts-expect-error
+      return electron.open('electron', this.url, this.options, this.automation)
+      .then(() => {
+        expect(Windows.removeAllExtensions).to.be.calledOnce
+
+        expect(Windows.installExtension).to.be.calledTwice
+        expect(Windows.installExtension).to.be.calledWith(sinon.match.any, 'foo')
+        expect(Windows.installExtension).to.be.calledWith(sinon.match.any, 'bar')
+
+        expect(this.options.onWarning).to.be.calledOnce
+
+        const warning = this.options.onWarning.firstCall.args[0].message
+
+        expect(warning).to.contain('Electron').and.contain('bar')
+
+        this.win.emit('closed')
+
+        // called once before installing extensions, once on exit
+        expect(Windows.removeAllExtensions).to.be.calledTwice
+      })
+    })
+
+    it('sends after:browser:launch with debugger url', function () {
+      // @ts-expect-error
+      plugins.has.returns(true)
+      // @ts-expect-error
+      plugins.execute.resolves(null)
+
+      // @ts-expect-error
+      return electron.open('electron', this.url, this.options, this.automation)
+      .then(() => {
+        expect(plugins.execute).to.be.calledWith('after:browser:launch', 'electron', {
+          webSocketDebuggerUrl: 'ws://debugger',
+        })
+      })
+    })
+
+    it('executeAfterBrowserLaunch is noop if after:browser:launch is not registered', function () {
+      // @ts-expect-error
+      return electron.open('electron', this.url, this.options, this.automation)
+      .then(() => {
+        expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
+      })
+    })
+  })
+
+  context('.connectProtocolToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const mockCurrentlyAttachedProtocolTarget = {}
+
+      this.browserCriClient.currentlyAttachedProtocolTarget = mockCurrentlyAttachedProtocolTarget
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })
+      expect(this.pageCriClient.clone).not.to.be.called
+      expect(this.protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
+    })
+
+    it('connects to the browser cri client when the protocol target has not been created', async function () {
+      const mockCurrentlyAttachedProtocolTarget = {}
+
+      this.pageCriClient.clone.resolves(mockCurrentlyAttachedProtocolTarget)
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })
+      expect(this.pageCriClient.clone).to.be.called
+      expect(this.protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
+      expect(this.browserCriClient.currentlyAttachedProtocolTarget).to.eq(mockCurrentlyAttachedProtocolTarget)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      sinon.stub(electron, '_getBrowserCriClient').returns(null)
+
+      expect(electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
+      expect(this.protocolManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', async function () {
+      this.browserCriClient.currentlyAttachedTarget = null
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      expect(electron.connectProtocolToBrowser({ protocolManager: this.protocolManager })).to.be.rejectedWith('Missing pageCriClient in connectProtocolToBrowser')
+      expect(this.protocolManager.connectToBrowser).not.to.be.called
+    })
+  })
+
+  context('.connectCyPromptToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const mockCurrentlyAttachedCyPromptTarget = {}
+
+      this.browserCriClient.currentlyAttachedCyPromptTarget = mockCurrentlyAttachedCyPromptTarget
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })
+      expect(this.pageCriClient.clone).not.to.be.called
+      expect(this.cyPromptManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedCyPromptTarget)
+    })
+
+    it('connects to the browser cri client when the cy prompt target has not been created', async function () {
+      const mockCurrentlyAttachedCyPromptTarget = {}
+
+      this.pageCriClient.clone.resolves(mockCurrentlyAttachedCyPromptTarget)
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })
+      expect(this.pageCriClient.clone).to.be.called
+      expect(this.cyPromptManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedCyPromptTarget)
+      expect(this.browserCriClient.currentlyAttachedCyPromptTarget).to.eq(mockCurrentlyAttachedCyPromptTarget)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      sinon.stub(electron, '_getBrowserCriClient').returns(null)
+
+      expect(electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
+      expect(this.cyPromptManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', async function () {
+      this.browserCriClient.currentlyAttachedTarget = null
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      expect(electron.connectCyPromptToBrowser({ cyPromptManager: this.cyPromptManager })).to.be.rejectedWith('Missing pageCriClient in connectCyPromptToBrowser')
+      expect(this.cyPromptManager.connectToBrowser).not.to.be.called
+    })
+  })
+
+  context('.connectStudioToBrowser', () => {
+    it('connects to the browser cri client', async function () {
+      const mockCurrentlyAttachedStudioTarget = {}
+
+      this.browserCriClient.currentlyAttachedStudioTarget = mockCurrentlyAttachedStudioTarget
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectStudioToBrowser({ studioManager: this.studioManager })
+      expect(this.pageCriClient.clone).not.to.be.called
+      expect(this.studioManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedStudioTarget)
+    })
+
+    it('connects to the browser cri client when the studio target has not been created', async function () {
+      const mockCurrentlyAttachedStudioTarget = {}
+
+      this.pageCriClient.clone.resolves(mockCurrentlyAttachedStudioTarget)
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      await electron.connectStudioToBrowser({ studioManager: this.studioManager })
+      expect(this.pageCriClient.clone).to.be.called
+      expect(this.studioManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedStudioTarget)
+      expect(this.browserCriClient.currentlyAttachedStudioTarget).to.eq(mockCurrentlyAttachedStudioTarget)
+    })
+
+    it('throws error if there is no browser cri client', function () {
+      sinon.stub(electron, '_getBrowserCriClient').returns(null)
+
+      expect(electron.connectStudioToBrowser({ studioManager: this.studioManager })).to.be.rejectedWith('Missing pageCriClient in connectStudioToBrowser')
+      expect(this.studioManager.connectToBrowser).not.to.be.called
+    })
+
+    it('throws error if there is no page cri client', async function () {
+      this.browserCriClient.currentlyAttachedTarget = null
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+
+      expect(electron.connectStudioToBrowser({ studioManager: this.studioManager })).to.be.rejectedWith('Missing pageCriClient in connectStudioToBrowser')
+      expect(this.studioManager.connectToBrowser).not.to.be.called
+    })
+  })
+
+  context('#closeProtocolConnection', () => {
+    it('closes the protocol connection', async function () {
+      const mockCurrentlyAttachedProtocolTarget = {
+        close: sinon.stub().resolves(),
+      }
+
+      const browserCriClient = {
+        currentlyAttachedProtocolTarget: mockCurrentlyAttachedProtocolTarget,
+      }
+
+      // @ts-expect-error
+      sinon.stub(electron, '_getBrowserCriClient').returns(browserCriClient)
+
+      await electron.closeProtocolConnection()
+
+      expect(mockCurrentlyAttachedProtocolTarget.close).to.be.called
+      expect(browserCriClient.currentlyAttachedProtocolTarget).to.be.undefined
+    })
+  })
+
+  context('.kill', () => {
+    beforeEach(async function () {
+      // @ts-expect-error
+      await electron._getAutomation({}, { onError: () => {} }, {})
+
+      await this.stubForOpen()
+
+      sinon.stub(electron, '_getBrowserCriClient').returns(this.browserCriClient)
+    })
+
+    it('does not terminate the browserCriClient if the instance is an orphaned process', async function () {
+      // @ts-expect-error
+      const instance = await electron.open('electron', this.url, this.options, this.automation)
+
+      instance.isOrphanedBrowserProcess = true
+      instance.kill()
+
+      expect(this.browserCriClient.close).not.to.be.called
+    })
+
+    it('terminates the browserCriClient otherwise', async function () {
+      // @ts-expect-error
+      const instance = await electron.open('electron', this.url, this.options, this.automation)
+
+      instance.kill()
+
+      expect(this.browserCriClient.close).to.be.called
+    })
+  })
+
+  context('._launch', () => {
+    beforeEach(() => {
+      sinon.stub(menu, 'set')
+      sinon.stub(electron, '_clearCache').resolves()
+      sinon.stub(electron, '_setProxy').resolves()
+      sinon.stub(electron, '_setUserAgent')
+      sinon.stub(electron, '_getUserAgent')
+    })
+
+    it('sets menu.set whether or not its in headless mode', function () {
+      // @ts-expect-error
+      return electron._launch(this.win, this.url, this.automation, { show: true, onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
+      }).then(() => {
+        // @ts-expect-error
+        menu.set.reset()
+
+        // @ts-expect-error
+        return electron._launch(this.win, this.url, this.automation, { show: false, onError: () => {} })
+      }).then(() => {
+        expect(menu.set).not.to.be.called
+      })
+    })
+
+    it('sets user agent if options.userAgent', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(electron._setUserAgent).not.to.be.called
+      }).then(() => {
+        // @ts-expect-error
+        return electron._launch(this.win, this.url, this.automation, { userAgent: 'foo', onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
+      }).then(() => {
+        expect(electron._setUserAgent).to.be.calledWith(this.win.webContents, 'foo')
+      })
+    })
+
+    it('sets proxy if options.proxyServer', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(electron._setProxy).not.to.be.called
+      }).then(() => {
+        // @ts-expect-error
+        return electron._launch(this.win, this.url, this.automation, { proxyServer: 'foo', onError: () => {} }, undefined, undefined, { attachCDPClient: sinon.stub() })
+      }).then(() => {
+        expect(electron._setProxy).to.be.calledWith(this.win.webContents, 'foo')
+      })
+    })
+
+    it('calls win.loadURL with url', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.win.loadURL).to.be.calledWith(this.url)
+      })
+    })
+
+    it('resolves with win', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then((win) => {
+        expect(win).to.eq(this.win)
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/2118
+    it('prevents the default beforeunload prompt on will-prevent-unload so navigation is not blocked', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        const call = this.win.webContents.on.getCalls().find((c) => c.args[0] === 'will-prevent-unload')
+
+        expect(call, 'a will-prevent-unload listener was registered').to.exist
+
+        const event = { preventDefault: sinon.stub() }
+
+        call.args[1](event)
+
+        expect(event.preventDefault).to.be.calledOnce
+      })
+    })
+
+    it('pushes create:download when download begins', function () {
+      const downloadItem = {
+        getETag: () => '1',
+        getFilename: () => 'file.csv',
+        getMimeType: () => 'text/csv',
+        getURL: () => 'http://localhost:1234/file.csv',
+        once: sinon.stub(),
+      }
+
+      this.win.webContents.session.on.withArgs('will-download').yields({}, downloadItem)
+      this.options.downloadsFolder = 'downloads'
+      sinon.stub(this.automation, 'push')
+
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.automation.push).to.be.calledWith('create:download', {
+          id: '1',
+          filePath: 'downloads/file.csv',
+          mime: 'text/csv',
+          url: 'http://localhost:1234/file.csv',
+        })
+      })
+    })
+
+    it('pushes complete:download when download is done', function () {
+      const downloadItem = {
+        getETag: () => '1',
+        getFilename: () => 'file.csv',
+        getMimeType: () => 'text/csv',
+        getURL: () => 'http://localhost:1234/file.csv',
+        once: sinon.stub().yields({}, 'completed'),
+      }
+
+      this.win.webContents.session.on.withArgs('will-download').yields({}, downloadItem)
+      this.options.downloadsFolder = 'downloads'
+      sinon.stub(this.automation, 'push')
+
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.automation.push).to.be.calledWith('complete:download', {
+          id: '1',
+        })
+      })
+    })
+
+    it('pushes canceled:download when download is incomplete', function () {
+      const downloadItem = {
+        getETag: () => '1',
+        getFilename: () => 'file.csv',
+        getMimeType: () => 'text/csv',
+        getURL: () => 'http://localhost:1234/file.csv',
+        once: sinon.stub().yields({}, 'canceled'),
+      }
+
+      this.win.webContents.session.on.withArgs('will-download').yields({}, downloadItem)
+      this.options.downloadsFolder = 'downloads'
+      sinon.stub(this.automation, 'push')
+
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.automation.push).to.be.calledWith('canceled:download', {
+          id: '1',
+        })
+      })
+    })
+
+    it('sets download behavior', function () {
+      this.options.downloadsFolder = 'downloads'
+
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.pageCriClient.send).to.be.calledWith('Page.setDownloadBehavior', {
+          behavior: 'allow',
+          downloadPath: 'downloads',
+        })
+      })
+    })
+
+    it('handles download links via cdp', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(utils.initializeCDP).to.be.calledWith(this.pageCriClient, this.automation)
+      })
+    })
+
+    it('expects the browser to be reset', function () {
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.pageCriClient.send).to.be.calledWith('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' })
+        expect(this.pageCriClient.send).to.be.calledWith('Network.clearBrowserCache')
+      })
+    })
+
+    it('expects the video to be fully enabled if specified in the config', async function () {
+      const mockWriteVideoFrame = sinon.stub()
+      const mockVideoApi = {
+        useFfmpegVideoController: sinon.stub().resolves({
+          writeVideoFrame: mockWriteVideoFrame,
+        }),
+      }
+
+      await electron._launch(this.win, this.url, this.automation, this.options, mockVideoApi, undefined, { attachCDPClient: sinon.stub() })
+
+      expect(mockVideoApi.useFfmpegVideoController).to.be.called
+      expect(this.pageCriClient.on).to.be.calledWith('Page.screencastFrame', sinon.match.func)
+      expect(this.pageCriClient.send).to.be.calledWith('Page.startScreencast', screencastOpts())
+    })
+
+    it('starts the screencast but does not capture the frames if video is not enabled but the app is in run mode', async function () {
+      this.options.isTextTerminal = true
+
+      await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+      expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
+      expect(this.pageCriClient.send).to.be.calledWith('Page.startScreencast', {
+        format: 'jpeg',
+        everyNthFrame: 2 ** 31 - 1,
+        quality: 0,
+      })
+    })
+
+    it('does not start the screencast if video is not enabled and the app is not in run mode', async function () {
+      await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+      expect(this.pageCriClient.on).not.to.be.calledWith('Page.screencastFrame', sinon.match.func)
+      expect(this.pageCriClient.send).not.to.be.calledWith('Page.startScreencast', sinon.match.any)
+    })
+
+    it('registers onRequest automation middleware and calls show when requesting to be focused', function () {
+      sinon.spy(this.automation, 'use')
+
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(() => {
+        expect(this.automation.use).to.be.called
+        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        this.automation.use.lastCall.args[0].onRequest('focus:browser:window')
+
+        expect(this.win.show).to.be.called
+      })
+    })
+
+    it('registers onRequest automation middleware and calls destroy when requesting to close the browser tabs', function () {
+      sinon.spy(this.automation, 'use')
+
+      return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+      .then(async () => {
+        expect(this.automation.use).to.be.called
+        expect(this.automation.use.lastCall.args[0].onRequest).to.be.a('function')
+
+        await this.automation.use.lastCall.args[0].onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: true })
+
+        expect(this.win.destroy).to.be.called
+      })
+    })
+
+    describe('adding header to AUT iframe request', function () {
+      beforeEach(function () {
+        const frameTree = {
+          frameTree: {
+            childFrames: [
+              {
+                frame: {
+                  id: 'aut-frame-id',
+                  name: 'Your project: "FakeBlock"',
+                },
+              },
+              {
+                frame: {
+                  id: 'spec-frame-id',
+                  name: 'Your Spec: "spec.js"',
+                },
+              },
+            ],
+          },
+        }
+
+        this.pageCriClient.send.withArgs('Page.getFrameTree').resolves(frameTree)
+      })
+
+      it('sends Fetch.enable only for Document ResourceType', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+        expect(this.pageCriClient.send).to.have.been.calledWith('Fetch.enable', {
+          patterns: [{
+            resourceType: 'Document',
+          }],
+        })
+      })
+
+      it('does not add header when not a document', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+        this.pageCriClient.on.withArgs('Fetch.requestPaused').yield({
+          requestId: '1234',
+          resourceType: 'Script',
+        })
+
+        expect(this.pageCriClient.send).not.to.be.calledWith('Fetch.continueRequest')
+      })
+
+      it('does not add header when it is a spec frame request', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
+
+        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
+          frameId: 'spec-frame-id',
+          requestId: '1234',
+          resourceType: 'Document',
+          request: {
+            url: '/__cypress/integration/spec.js',
+          },
+        })
+
+        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
+        })
+      })
+
+      it('appends X-Cypress-Is-AUT-Frame header to AUT iframe request', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
+
+        await this.pageCriClient.on.withArgs('Fetch.requestPaused').args[0][1]({
+          frameId: 'aut-frame-id',
+          requestId: '1234',
+          resourceType: 'Document',
+          request: {
+            url: 'http://localhost:3000/index.html',
+            headers: {
+              'X-Foo': 'Bar',
+            },
+          },
+        })
+
+        expect(this.pageCriClient.send).to.be.calledWith('Fetch.continueRequest', {
+          requestId: '1234',
+          headers: [
+            {
+              name: 'X-Foo',
+              value: 'Bar',
+            },
+            {
+              name: 'X-Cypress-Is-AUT-Frame',
+              value: 'true',
+            },
+          ],
+        })
+      })
+
+      it('gets frame tree on Page.frameAttached', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+        this.pageCriClient.on.withArgs('Page.frameAttached').yield()
+
+        expect(this.pageCriClient.send).to.be.calledWith('Page.getFrameTree')
+      })
+
+      it('gets frame tree on Page.frameDetached', async function () {
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+        this.pageCriClient.on.withArgs('Page.frameDetached').yield()
+
+        expect(this.pageCriClient.send).to.be.calledWith('Page.getFrameTree')
+      })
+
+      it('connects the protocol manager to the browser', async function () {
+        const mockCurrentlyAttachedProtocolTarget = {}
+
+        this.pageCriClient.clone.resolves(mockCurrentlyAttachedProtocolTarget)
+
+        await electron._launch(this.win, this.url, this.automation, this.options, undefined, this.protocolManager, { attachCDPClient: sinon.stub() })
+
+        expect(this.protocolManager.connectToBrowser).to.be.calledWith(mockCurrentlyAttachedProtocolTarget)
+      })
+    })
+  })
+
+  describe('setUserAgent with experimentalModifyObstructiveThirdPartyCode', () => {
+    let userAgent
+
+    beforeEach(function () {
+      userAgent = ''
+      this.win.webContents.session.getUserAgent.callsFake(() => userAgent)
+    })
+
+    describe('disabled', function () {
+      it('does not attempt to replace the user agent', function () {
+        this.options.experimentalModifyObstructiveThirdPartyCode = false
+
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        .then(() => {
+          expect(this.win.webContents.session.setUserAgent).not.to.be.called
+          expect(this.pageCriClient.send).not.to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent,
+          })
+        })
+      })
+    })
+
+    describe('enabled and attempts to replace obstructive user agent string containing:', function () {
+      beforeEach(function () {
+        this.options.experimentalModifyObstructiveThirdPartyCode = true
+      })
+
+      it('does not attempt to replace the user agent if the user passes in an explicit user agent', function () {
+        userAgent = 'barbaz'
+        this.options.experimentalModifyObstructiveThirdPartyCode = false
+        this.options.userAgent = 'foobar'
+
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        .then(() => {
+          expect(this.win.webContents.session.setUserAgent).to.be.calledWith('foobar')
+          expect(this.win.webContents.session.setUserAgent).not.to.be.calledWith('barbaz')
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: 'foobar',
+          })
+        })
+      })
+
+      it('versioned cypress', function () {
+        userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/10.0.3 Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
+
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
+          })
+        })
+      })
+
+      it('development cypress', function () {
+        userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0-development Chrome/100.0.4896.75 Electron/18.0.4 Safari/537.36'
+
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
+          })
+        })
+      })
+
+      it('older Windows user agent', function () {
+        userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) electron/1.0.0 Chrome/53.0.2785.113 Electron/1.4.3 Safari/537.36'
+
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.113 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
+          })
+        })
+      })
+
+      it('newer Windows user agent', function () {
+        userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Electron/10.4.7 Safari/537.36'
+
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Teams/1.5.00.4689 Chrome/85.0.4183.121 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
+          })
+        })
+      })
+
+      it('Linux user agent', function () {
+        userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Electron/9.0.5 Safari/E7FBAF'
+
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Typora/0.9.93 Chrome/83.0.4103.119 Safari/E7FBAF'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
+          })
+        })
+      })
+
+      it('older MacOS user agent', function () {
+        // this user agent containing Cypress was actually a common UA found on a website for Electron purposes...
+        userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/8.3.0 Chrome/91.0.4472.124 Electron/13.1.7 Safari/537.36'
+
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
+          })
+        })
+      })
+
+      it('newer MacOS user agent', function () {
+        userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
+
+        return electron._launch(this.win, this.url, this.automation, this.options, undefined, undefined, { attachCDPClient: sinon.stub() })
+        .then(() => {
+          const expectedUA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
+
+          expect(this.win.webContents.session.setUserAgent).to.have.been.calledWith(expectedUA)
+          expect(this.pageCriClient.send).to.be.calledWith('Network.setUserAgentOverride', {
+            userAgent: expectedUA,
+          })
+        })
+      })
+    })
+  })
+
+  context('._render', () => {
+    beforeEach(function () {
+      this.newWin = {
+        maximize: sinon.stub(),
+        setSize: sinon.stub(),
+        show: sinon.stub(),
+        destroy: sinon.stub(),
+        webContents: this.win.webContents,
+      }
+
+      this.preferences = { ...this.options }
+
+      sinon.stub(menu, 'set')
+      sinon.stub(electron, '_setProxy').resolves()
+      sinon.stub(electron, '_launch').resolves()
+
+      return sinon.stub(Windows, 'create')
+      .returns(this.newWin)
+    })
+
+    it('creates window instance and calls launch with window', function () {
+      return electron._render(this.url, this.automation, this.preferences, this.options)
+      .then(() => {
+        expect(Windows.create).to.be.calledWith(this.options.projectRoot, this.options)
+        expect(this.newWin.setSize).not.called
+        expect(electron._launch).to.be.calledWith(this.newWin, this.url, this.automation, this.preferences)
+      })
+    })
+
+    it('calls setSize on electron window if headless', function () {
+      const preferences = { ...this.preferences, browser: { isHeadless: true }, width: 100, height: 200 }
+
+      return electron._render(this.url, this.automation, preferences, this.options)
+      .then(() => {
+        expect(this.newWin.maximize).not.called
+        expect(this.newWin.setSize).calledWith(100, 200)
+      })
+    })
+
+    it('maximizes electron window if headed and not interactive', function () {
+      this.options.isTextTerminal = true
+
+      return electron._render(this.url, this.automation, this.preferences, this.options)
+      .then(() => {
+        expect(this.newWin.maximize).to.be.called
+      })
+    })
+
+    it('does not maximize electron window if interactive', function () {
+      this.options.isTextTerminal = false
+
+      return electron._render(this.url, this.automation, this.preferences, this.options)
+      .then(() => {
+        expect(this.newWin.maximize).not.to.be.called
+      })
+    })
+  })
+
+  context('._defaultOptions', () => {
+    beforeEach(() => {
+      return sinon.stub(menu, 'set')
+    })
+
+    it('uses default width if there isn\'t one saved', function () {
+      // @ts-expect-error
+      const opts = electron._defaultOptions('/foo', this.state, this.options)
+
+      expect(opts.width).to.eq(1280)
+    })
+
+    it('uses saved width if there is one', function () {
+      // @ts-expect-error
+      const opts = electron._defaultOptions('/foo', { browserWidth: 1024 }, this.options)
+
+      expect(opts.width).to.eq(1024)
+    })
+
+    it('uses default height if there isn\'t one saved', function () {
+      // @ts-expect-error
+      const opts = electron._defaultOptions('/foo', this.state, this.options)
+
+      expect(opts.height).to.eq(720)
+    })
+
+    it('uses saved height if there is one', function () {
+      // @ts-expect-error
+      const opts = electron._defaultOptions('/foo', { browserHeight: 768 }, this.options)
+
+      expect(opts.height).to.eq(768)
+    })
+
+    it('uses saved x if there is one', function () {
+      // @ts-expect-error
+      const opts = electron._defaultOptions('/foo', { browserX: 200 }, this.options)
+
+      expect(opts.x).to.eq(200)
+    })
+
+    it('uses saved y if there is one', function () {
+      // @ts-expect-error
+      const opts = electron._defaultOptions('/foo', { browserY: 300 }, this.options)
+
+      expect(opts.y).to.eq(300)
+    })
+
+    it('tracks browser state', function () {
+      // @ts-expect-error
+      const opts = electron._defaultOptions('/foo', { browserY: 300 }, this.options)
+
+      const args = _.pick(opts.trackState, 'width', 'height', 'x', 'y', 'devTools')
+
+      expect(args).to.deep.eq({
+        width: 'browserWidth',
+        height: 'browserHeight',
+        x: 'browserX',
+        y: 'browserY',
+        devTools: 'isBrowserDevToolsOpen',
+      })
+    })
+
+    it('.onFocus', function () {
+      const headlessOpts = electron._defaultOptions('/foo', this.state, { browser: { isHeadless: false } }, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+      headlessOpts.onFocus()
+      expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
+
+      // @ts-expect-error
+      menu.set.reset()
+
+      const headedOpts = electron._defaultOptions('/foo', this.state, { browser: { isHeadless: true } }, undefined, undefined, { attachCDPClient: sinon.stub() })
+
+      headedOpts.onFocus()
+
+      expect(menu.set).not.to.be.called
+    })
+
+    describe('.onNewWindow', () => {
+      beforeEach(function () {
+        return sinon.stub(electron, '_launchChild').resolves(this.win)
+      })
+
+      it('passes along url, parent window and options', function () {
+        const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options, this.automation)
+
+        const parentWindow = {
+          on: sinon.stub(),
+        }
+
+        opts.onNewWindow.call(parentWindow, { url: this.url })
+
+        expect(electron._launchChild).to.be.calledWith(this.url, parentWindow, this.options.projectRoot, this.state, this.options, this.automation)
+      })
+
+      it('adds pid of new BrowserWindow to allPids list', async function () {
+        // shortcut to set the browserCriClient singleton variable
+        // @ts-expect-error
+        await electron._getAutomation({}, { onError: () => {} }, {})
+
+        // @ts-expect-error
+        const opts = electron._defaultOptions(this.options.projectRoot, this.state, this.options)
+
+        const NEW_WINDOW_PID = ELECTRON_PID * 2
+
+        const child = _.cloneDeep(this.win)
+
+        child.webContents.getOSProcessId = sinon.stub().returns(NEW_WINDOW_PID)
+
+        // @ts-expect-error
+        electron._launchChild.resolves(child)
+
+        return this.stubForOpen()
+        .then(() => {
+          // @ts-expect-error
+          return electron.open('electron', this.url, opts, this.automation)
+        }).then((instance) => {
+          return opts.onNewWindow.call(this.win, {}, this.url)
+          .then(() => {
+            expect(instance.allPids).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
+          })
+        })
+      })
+    })
+  })
+
+  // TODO: these all need to be updated
+  context.skip('._launchChild', () => {
+    beforeEach(function () {
+      this.childWin = _.extend(new EE(), {
+        close: sinon.stub(),
+        isDestroyed: sinon.stub().returns(false),
+        webContents: new EE(),
+      })
+
+      // @ts-expect-error
+      Windows.create.onCall(1).resolves(this.childWin)
+
+      this.event = { preventDefault: sinon.stub() }
+      this.win.getPosition = () => {
+        return [4, 2]
+      }
+
+      this.openNewWindow = (options) => {
+        // @ts-expect-error
+        return launcher.launch('electron', this.url, options).then(() => {
+          return this.win.webContents.emit('new-window', this.event, 'some://other.url')
+        })
+      }
+    })
+
+    it('prevents default', function () {
+      return this.openNewWindow().then(() => {
+        expect(this.event.preventDefault).to.be.called
+      })
+    })
+
+    it('creates child window', function () {
+      return this.openNewWindow().then(() => {
+        // @ts-expect-error
+        const args = Windows.create.lastCall.args[0]
+
+        expect(Windows.create).to.be.calledTwice
+        expect(args.url).to.equal('some://other.url')
+        expect(args.minWidth).to.equal(100)
+
+        expect(args.minHeight).to.equal(100)
+      })
+    })
+
+    it('offsets it from parent by 100px', function () {
+      return this.openNewWindow().then(() => {
+        // @ts-expect-error
+        const args = Windows.create.lastCall.args[0]
+
+        expect(args.x).to.equal(104)
+
+        expect(args.y).to.equal(102)
+      })
+    })
+
+    it('passes along web security', function () {
+      return this.openNewWindow({ chromeWebSecurity: false }).then(() => {
+        // @ts-expect-error
+        const args = Windows.create.lastCall.args[0]
+
+        expect(args.chromeWebSecurity).to.be.false
+      })
+    })
+
+    it('sets unique PROJECT type on each new window', function () {
+      return this.openNewWindow().then(() => {
+        // @ts-expect-error
+        const firstArgs = Windows.create.lastCall.args[0]
+
+        expect(firstArgs.type).to.match(/^PROJECT-CHILD-\d/)
+        this.win.webContents.emit('new-window', this.event, 'yet://another.url')
+        // @ts-expect-error
+        const secondArgs = Windows.create.lastCall.args[0]
+
+        expect(secondArgs.type).to.match(/^PROJECT-CHILD-\d/)
+
+        expect(firstArgs.type).not.to.equal(secondArgs.type)
+      })
+    })
+
+    it('set newGuest on child window', function () {
+      return this.openNewWindow()
+      .then(() => {
+        // @ts-expect-error
+        return Promise.delay(1)
+      }).then(() => {
+        expect(this.event.newGuest).to.equal(this.childWin)
+      })
+    })
+
+    it('sets menu with dev tools on creation', function () {
+      return this.openNewWindow().then(() => {
+        // once for main window, once for child
+        expect(menu.set).to.be.calledTwice
+
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
+      })
+    })
+
+    it('sets menu with dev tools on focus', function () {
+      return this.openNewWindow().then(() => {
+        // @ts-expect-error
+        Windows.create.lastCall.args[0].onFocus()
+        // once for main window, once for child, once for focus
+        expect(menu.set).to.be.calledThrice
+
+        expect(menu.set).to.be.calledWith({ withInternalDevTools: true })
+      })
+    })
+
+    it('it closes the child window when the parent window is closed', function () {
+      return this.openNewWindow()
+      .then(() => {
+        // @ts-expect-error
+        return Promise.delay(1)
+      }).then(() => {
+        this.win.emit('close')
+
+        expect(this.childWin.close).to.be.called
+      })
+    })
+
+    it('does not close the child window when it is already destroyed', function () {
+      return this.openNewWindow()
+      .then(() => {
+        // @ts-expect-error
+        return Promise.delay(1)
+      }).then(() => {
+        this.childWin.isDestroyed.returns(true)
+        this.win.emit('close')
+
+        expect(this.childWin.close).not.to.be.called
+      })
+    })
+
+    it('does the same things for children of the child window', function () {
+      this.grandchildWin = _.extend(new EE(), {
+        close: sinon.stub(),
+        isDestroyed: sinon.stub().returns(false),
+        webContents: new EE(),
+      })
+
+      // @ts-expect-error
+      Windows.create.onCall(2).resolves(this.grandchildWin)
+      this.childWin.getPosition = () => {
+        return [104, 102]
+      }
+
+      return this.openNewWindow().then(() => {
+        this.childWin.webContents.emit('new-window', this.event, 'yet://another.url')
+        // @ts-expect-error
+        const args = Windows.create.lastCall.args[0]
+
+        expect(Windows.create).to.be.calledThrice
+        expect(args.url).to.equal('yet://another.url')
+        expect(args.type).to.match(/^PROJECT-CHILD-\d/)
+        expect(args.x).to.equal(204)
+
+        expect(args.y).to.equal(202)
+      })
+    })
+  })
+
+  context('._setProxy', () => {
+    it('sets proxy rules for webContents', () => {
+      const webContents = {
+        session: {
+          setProxy: sinon.stub().resolves(),
+        },
+      }
+
+      return electron._setProxy(webContents, 'proxy rules')
+      .then(() => {
+        expect(webContents.session.setProxy).to.be.calledWith({
+          proxyRules: 'proxy rules',
+          proxyBypassRules: '<-loopback>',
+        })
+      })
+    })
+  })
+})

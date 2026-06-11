@@ -21,8 +21,18 @@ import {
 } from '../browser'
 import { hideKeys, setUrls, coerce } from '../utils'
 import { options } from '../options'
+import { isPlainObject } from '../validation'
 
 const debug = Debug('cypress:config:project:utils')
+
+// In run mode we always force numTestsKeptInMemory to 0 because keeping tests
+// in memory prevents us from capturing snapshots properly when recording to
+// protocol. The CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY env var is an
+// escape hatch (used by the Cypress driver tests that exercise snapshotting)
+// to honor whatever value the user configured.
+export function shouldHonorNumTestsKeptInMemory () {
+  return process.env.CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY === 'true'
+}
 
 const hideSpecialVals = function (val: string, key: string) {
   if (_.includes(CYPRESS_SPECIAL_ENV_VARS, key)) {
@@ -88,6 +98,10 @@ const CYPRESS_SPECIAL_ENV_VARS = [
   'RECORD_KEY',
 ]
 
+// CYPRESS_env and CYPRESS_expose must be JSON objects. Invalid strings are coerced
+// then spread via _.extend, producing indexed keys that pass isPlainObject validation.
+const PLAIN_OBJECT_CONFIG_KEYS_FROM_ENV = new Set(['env', 'expose'])
+
 const isCypressEnvLike = (key: string) => {
   return _.chain(key)
   .invoke('toUpperCase')
@@ -123,6 +137,17 @@ export function parseEnv (cfg: Record<string, any>, cliEnvs: Record<string, any>
     const cfgKey = matchesConfigKey(key)
 
     if (cfgKey) {
+      if (PLAIN_OBJECT_CONFIG_KEYS_FROM_ENV.has(cfgKey)) {
+        const validationResult = isPlainObject(cfgKey, val)
+
+        if (validationResult !== true) {
+          errors.warning('INVALID_CYPRESS_ENV_OVERRIDE', cfgKey, val)
+          memo.push(key)
+
+          return memo
+        }
+      }
+
       // only change the value if it hasn't been
       // set by the CLI. override default + config
       if (resolved[cfgKey] !== 'cli') {
@@ -465,9 +490,11 @@ export function mergeDefaults (
     // dont ever watch for file changes
     config.watchForFileChanges = false
 
-    // and forcibly reset numTestsKeptInMemory
-    // to zero
-    config.numTestsKeptInMemory = 0
+    // and forcibly reset numTestsKeptInMemory to zero unless the user has
+    // explicitly opted in to honoring the configured value via env var
+    if (!shouldHonorNumTestsKeptInMemory()) {
+      config.numTestsKeptInMemory = 0
+    }
   }
 
   config = setResolvedConfigValues(config, defaultsForRuntime, resolved)
@@ -486,6 +513,16 @@ export function mergeDefaults (
 
     return errors.throwErr('CONFIG_VALIDATION_ERROR', null, null, validationResult)
   }, testingType)
+
+  // `browsers` is omitted from the validation above because it is typically an empty
+  // array at this point and is populated with the list of detected browsers later (see
+  // buildBaseFullConfig). A non-array value still needs to be rejected here though,
+  // otherwise it slips through and crashes when the browser list is mapped over - e.g.
+  // a `CYPRESS_BROWSERS=chrome` env var coerces `browsers` to a string.
+  // https://github.com/cypress-io/cypress/issues/33198
+  if (config.browsers != null && !Array.isArray(config.browsers)) {
+    return errors.throwErr('CONFIG_BROWSERS_INVALID', config.browsers)
+  }
 
   config = setAbsolutePaths(config)
 

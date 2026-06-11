@@ -898,4 +898,58 @@ describe('ProjectDataSource', () => {
       })
     })
   })
+
+  describe('#getUnmatchedPatterns', () => {
+    const makeSpec = (relative: string) => ({ relative } as import('@packages/types').SpecWithRelativeRoot)
+
+    it('returns empty array when all patterns match found specs', () => {
+      const specs = [
+        makeSpec('cypress/e2e/foo.cy.ts'),
+        makeSpec('cypress/e2e/bar.cy.ts'),
+      ]
+
+      const unmatched = ctx.project.getUnmatchedPatterns(
+        ['cypress/e2e/foo.cy.ts', 'cypress/e2e/bar.cy.ts'],
+        specs,
+      )
+
+      expect(unmatched).toEqual([])
+    })
+
+    it('returns patterns that did not match any spec', () => {
+      const specs = [
+        makeSpec('cypress/e2e/foo.cy.ts'),
+      ]
+
+      const unmatched = ctx.project.getUnmatchedPatterns(
+        ['cypress/e2e/foo.cy.ts', 'cypress/e2e/nonexistent.cy.ts'],
+        specs,
+      )
+
+      expect(unmatched).toEqual(['cypress/e2e/nonexistent.cy.ts'])
+    })
+
+    it('returns all patterns when no specs are found', () => {
+      const unmatched = ctx.project.getUnmatchedPatterns(
+        ['cypress/e2e/foo.cy.ts', 'cypress/e2e/bar.cy.ts'],
+        [],
+      )
+
+      expect(unmatched).toEqual(['cypress/e2e/foo.cy.ts', 'cypress/e2e/bar.cy.ts'])
+    })
+
+    it('correctly matches glob patterns against found specs', () => {
+      const specs = [
+        makeSpec('cypress/e2e/foo.cy.ts'),
+        makeSpec('cypress/e2e/bar.cy.ts'),
+      ]
+
+      const unmatched = ctx.project.getUnmatchedPatterns(
+        ['cypress/e2e/**/*.cy.ts', 'cypress/e2e/nonexistent.cy.ts'],
+        specs,
+      )
+
+      expect(unmatched).toEqual(['cypress/e2e/nonexistent.cy.ts'])
+    })
+  })
 })

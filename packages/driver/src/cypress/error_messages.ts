@@ -1165,6 +1165,18 @@ export default {
 
           Intercepted request: ${format(req)}`, 10)
       },
+      connection_closed: ({ innerErr, req, route }) => {
+        return cyStripIndent(`\
+          A callback was provided to intercept the upstream response, but the connection to the browser closed before a response was received.
+
+          This connection commonly closes when the page navigates, the request is aborted, or the browser, tab, or window closes, including if the browser crashes.
+
+          ${$stackUtils.normalizedStack(innerErr)}
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`, 10)
+      },
       timeout: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
           A callback was provided to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.

@@ -34,6 +34,9 @@ class AppState {
   studioActive = defaults.studioActive
   studioSingleTestActive = defaults.studioSingleTestActive
   showFetchRequests = true
+  // Gates the cy.prompt Feedback / Get Code buttons; read-only hosts disable it.
+  // Omitted from `defaults` so it survives `reset()`.
+  cyPromptActionsEnabled = true
   isStopped = false
   hasBeenPaused = defaults.hasBeenPaused
   _resetAutoScrollingEnabledTo = true
@@ -52,6 +55,7 @@ class AppState {
       studioActive: observable,
       studioSingleTestActive: observable,
       showFetchRequests: observable,
+      cyPromptActionsEnabled: observable,
       hasBeenPaused: observable,
       codeEditorLineWrap: observable,
     })
@@ -150,6 +154,10 @@ class AppState {
 
   setShowFetchRequests (showFetchRequests: boolean) {
     this.showFetchRequests = showFetchRequests
+  }
+
+  setCyPromptActionsEnabled (cyPromptActionsEnabled: boolean) {
+    this.cyPromptActionsEnabled = cyPromptActionsEnabled
   }
 
   reset () {

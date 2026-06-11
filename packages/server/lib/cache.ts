@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import { globalPubSub } from '@packages/data-context'
 import { fs } from './util/fs'
-import appData from './util/app_data'
+import * as appData from './util/app_data'
 import { File as FileUtil } from './util/file'
 import type { Cache, CachedUser, Preferences, Cohort } from '@packages/types'
 
@@ -142,14 +142,14 @@ export const cache = {
   },
 
   removeProjectPreferences (projectTitle: string): Promise<void> {
-    const preferences = fileUtil.get('PROJECT_PREFERENCES', {})
-
+   return fileUtil.get('PROJECT_PREFERENCES', {}).then((preferences) => {
     const updatedPreferences = {
-      ...preferences.PROJECT_PREFERENCES,
+      ...preferences,
       [projectTitle]: null,
     }
 
     return fileUtil.set({ PROJECT_PREFERENCES: updatedPreferences })
+   })
   },
 
   getCohorts (): Promise<Record<string, Cohort>> {

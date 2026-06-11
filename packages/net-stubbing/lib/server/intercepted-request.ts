@@ -10,10 +10,11 @@ import type {
   Subscription,
 } from '../types'
 import type { BackendRoute, NetStubbingState } from './types'
+import { planSubscriptions } from '@packages/network-interception'
+import * as errors from '@packages/errors'
 import { emit, sendStaticResponse } from './util'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { BackendStaticResponse } from '../internal-types'
-import * as errors from '@packages/errors'
 
 export class InterceptedRequest {
   id: string
@@ -73,35 +74,14 @@ export class InterceptedRequest {
       return
     }
 
-    for (const route of this.req.matchingRoutes) {
-      if (route.disabled) {
-        continue
-      }
-
-      // if the request is sync and the route has an interceptor (i.e. routeHandler), then skip the intercept
-      // because the we cannot wait on the before:request event when the sync request is blocking
-      if (this.req.isSyncRequest && route.hasInterceptor) {
-        errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', this.req.proxiedUrl)
-
-        continue
-      }
-
-      const subscriptionsByRoute = {
-        routeId: route.id,
-        immediateStaticResponse: route.staticResponse,
-        subscriptions: [{
-          eventName: 'before:request',
-          await: !!route.hasInterceptor,
-          routeId: route.id,
-        },
-        ...(['response:callback', 'after:response', 'network:error'].map((eventName) => {
-          // notification-only default event
-          return { eventName, await: false, routeId: route.id }
-        }))],
-      }
-
-      this.subscriptionsByRoute.push(subscriptionsByRoute)
-    }
+    this.subscriptionsByRoute = planSubscriptions({
+      matchingRoutes: this.req.matchingRoutes,
+      isSyncRequest: this.req.isSyncRequest,
+      proxiedUrl: this.req.proxiedUrl,
+      onSyncInterceptSkipped: (url) => {
+        errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
+      },
+    })
   }
 
   static resolveEventHandler (state: NetStubbingState, options: { eventId: string, changedData: any, stopPropagation: boolean }) {

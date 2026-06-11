@@ -11,7 +11,10 @@ import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
+import { NetworkInterceptionCore } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
+import { ProxyDocumentPreparationAdapter } from '../../lib/adapters/proxy-document-preparation'
+import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../lib/adapters'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
@@ -53,6 +56,11 @@ describe('network stubbing', () => {
     const proxy = new NetworkProxy({
       socket,
       netStubbingState,
+      networkInterceptionCore: new NetworkInterceptionCore({
+        requestInterception: new ProxyRequestInterceptionAdapter(),
+        responseInterception: new ProxyResponseInterceptionAdapter(),
+        documentPreparation: new ProxyDocumentPreparationAdapter(),
+      }),
       config,
       middleware: defaultMiddleware,
       getCookieJar: () => new CookieJar(),

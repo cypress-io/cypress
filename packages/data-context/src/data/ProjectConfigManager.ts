@@ -26,6 +26,10 @@ const debug = debugLib(`cypress:lifecycle:ProjectConfigManager`)
 
 const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
+// how long to wait for a reply to an execute:plugins ipc message before
+// logging (when debug logging is enabled)
+const EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS = 10000
+
 export type OnFinalConfigLoadedOptions = {
   shouldRestartBrowser: boolean
 }
@@ -299,12 +303,28 @@ export class ProjectConfigManager {
       this.options.eventRegistrar.registerEvent(event, function (...args: any[]) {
         return new Promise((resolve, reject) => {
           const invocationId = _.uniqueId('inv')
+          const sentAt = Date.now()
+          let replyLogTimeout: NodeJS.Timeout | undefined
 
           debug('call event', event, 'for invocation id', invocationId)
 
+          // this reply has no timeout; when debug logging is enabled, log if
+          // it has not arrived after EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS
+          if (debug.enabled) {
+            replyLogTimeout = setTimeout(() => {
+              debug('no promise:fulfilled received for invocation id %s (event %s) within %dms of sending execute:plugins', invocationId, event, EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS)
+            }, EXECUTE_PLUGINS_REPLY_LOG_TIMEOUT_MS)
+
+            replyLogTimeout.unref?.()
+          }
+
           ipc.once(`promise:fulfilled:${invocationId}`, (err: any, value: any) => {
+            if (replyLogTimeout) {
+              clearTimeout(replyLogTimeout)
+            }
+
             if (err) {
-              debug('promise rejected for id %s %o', invocationId, ':', err.stack)
+              debug('promise rejected for id %s after %dms %o', invocationId, Date.now() - sentAt, ':', err.stack)
               reject(_.extend(new Error(err.message), err))
 
               return
@@ -314,7 +334,7 @@ export class ProjectConfigManager {
               value = undefined
             }
 
-            debug(`promise resolved for id '${invocationId}' with value`, value)
+            debug(`promise resolved for id '${invocationId}' after ${Date.now() - sentAt}ms with value`, value)
 
             return resolve(value)
           })

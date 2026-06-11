@@ -29,10 +29,11 @@ const cwd = require(`../../lib/cwd`).getCwd
 const user = require(`../../lib/cloud/user`).default
 const cache = require(`../../lib/cache`).cache
 const errors = require(`../../lib/errors`)
+const errorsPkg = require('@packages/errors')
 const cypress = require(`../../lib/cypress`)
 const ProjectBase = require(`../../lib/project-base`).ProjectBase
 const { ServerBase } = require(`../../lib/server-base`)
-const Reporter = require(`../../lib/reporter`)
+const { Reporter } = require(`../../lib/reporter`)
 const browsers = require(`../../lib/browsers`).default
 const videoCapture = require(`../../lib/video_capture`)
 const browserUtils = require(`../../lib/browsers/utils`).default
@@ -129,6 +130,7 @@ function mockEE () {
   ee.webContents = {
     getOSProcessId: sinon.stub(),
     setUserAgent: sinon.stub(),
+    on: sinon.stub(),
     session: {
       clearCache: sinon.stub().resolves(),
       setProxy: sinon.stub().resolves(),
@@ -199,10 +201,17 @@ describe('lib/cypress', () => {
     sinon.stub(detect, 'detect').resolves([...TYPICAL_BROWSERS])
     sinon.stub(process, 'exit')
     sinon.stub(ServerBase.prototype, 'reset')
-    sinon.stub(errors, 'warning')
-    .callThrough()
-    .withArgs('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
-    .returns(null)
+    const originalWarning = errorsPkg.default.warning
+
+    sinon.stub(errorsPkg.default, 'warning').callsFake((type, ...args) => {
+      if (type === 'INVOKED_BINARY_OUTSIDE_NPM_MODULE') {
+        return null
+      }
+
+      return originalWarning(type, ...args)
+    })
+
+    sinon.stub(errors, 'warning').callsFake((type, ...args) => errorsPkg.default.warning(type, ...args))
 
     sinon.spy(errors, 'log')
     sinon.spy(errors, 'logException')
@@ -461,10 +470,10 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('throws an error if both --headed and --headless are true', function () {
-      // error is thrown synchronously
-      expect(() => cypress.start([`--run-project=${this.todosPath}`, '--headless', '--headed']))
-      .to.throw('Impossible options: both headless and headed are true')
+    it('rejects if both --headed and --headless are true', function () {
+      return expect(
+        cypress.start([`--run-project=${this.todosPath}`, '--headless', '--headed']),
+      ).to.be.rejectedWith('Impossible options: both headless and headed are true')
     })
 
     describe('strips --', () => {
@@ -887,8 +896,23 @@ describe('lib/cypress', () => {
 
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
+        delete process.env.CYPRESS_BASE_URL
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'localhost:9999')
         this.expectExitWithErr('CONFIG_VALIDATION_ERROR', 'An invalid configuration value was set.')
+      })
+    })
+
+    it('logs warning and continues when CYPRESS_env is set to a non-object value', function () {
+      process.env.CYPRESS_env = 'invalid-string'
+
+      return cypress.start([`--run-project=${this.todosPath}`])
+      .then(() => {
+        delete process.env.CYPRESS_env
+        expect(errorsPkg.default.warning).to.be.calledWith('INVALID_CYPRESS_ENV_OVERRIDE', 'env', 'invalid-string')
+        expect(console.log).to.be.calledWithMatch('CYPRESS_env')
+        expect(console.log).to.be.calledWithMatch('must be a valid JSON object')
+        expect(console.log).to.be.calledWithMatch('--env')
+        this.expectExitWith(0)
       })
     })
 

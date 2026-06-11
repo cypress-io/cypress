@@ -7,6 +7,13 @@ import type { Automation } from '../automation'
 import type { Browser } from './types'
 import type { CriClient } from './cri-client'
 import * as profileCleaner from '../util/profile_cleaner'
+import * as appData from '../util/app_data'
+import path from 'path'
+import Debug from 'debug'
+import { telemetry } from '@packages/telemetry'
+import { fs } from '../util/fs'
+import * as extension from '@packages/extension'
+import getPort from 'get-port'
 
 declare global {
   interface Window {
@@ -17,13 +24,7 @@ declare global {
   }
 }
 
-const path = require('path')
-const debug = require('debug')('cypress:server:browsers:utils')
-const getPort = require('get-port')
-const { fs } = require('../util/fs')
-const extension = require('@packages/extension')
-const appData = require('../util/app_data')
-const { telemetry } = require('@packages/telemetry')
+const debug = Debug('cypress:server:browsers:utils')
 
 const pathToBrowsers = appData.path('browsers')
 const legacyProfilesWildcard = path.join(pathToBrowsers, '*')
@@ -70,8 +71,36 @@ const getDefaultLaunchOptions = (options) => {
   return _.defaultsDeep(options, defaultLaunchOptions)
 }
 
-const copyExtension = (src, dest) => {
-  return fs.copyAsync(src, dest)
+// When Cypress is installed in a read-only location (e.g. the Nix store), the
+// source extension files and directories are read-only. fs.copy preserves those
+// permissions on the copied extension, which later prevents Cypress from removing
+// the browser profile directory on exit (EACCES/EPERM when unlinking files inside
+// a read-only directory). Recursively granting owner write access ensures the
+// profile can be cleaned up. See https://github.com/cypress-io/cypress/issues/31300
+const ensureWritable = async (entryPath: string) => {
+  const stats = await fs.stat(entryPath)
+
+  // chmod(path, mode) sets the file's permission bits to `mode`.
+  // `stats.mode` is the current mode (e.g. 0o555 for a read-only dir, 0o444 for a
+  // read-only file). 0o200 is the octal bit for "owner write" (the `w` in `-w-`
+  // under `rwx` triplets owner/group/other). OR-ing them (`stats.mode | 0o200`)
+  // turns on the owner write bit while leaving every other bit untouched — so
+  // 0o555 -> 0o755 and 0o444 -> 0o644. We only grant owner write (not group/other)
+  // because the Cypress process owns these copies and that's all it needs to
+  // remove them later.
+  await fs.chmod(entryPath, stats.mode | 0o200)
+
+  if (stats.isDirectory()) {
+    const entries = await fs.readdir(entryPath)
+
+    await Promise.all(entries.map((entry) => ensureWritable(path.join(entryPath, entry))))
+  }
+}
+
+const copyExtension = async (src, dest) => {
+  await fs.copyAsync(src, dest)
+
+  await ensureWritable(dest)
 }
 
 const getPartition = function (isTextTerminal) {
@@ -136,7 +165,7 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
   if (plugins.has('before:browser:launch')) {
     const span = telemetry.startSpan({ name: 'lifecycle:before:browser:launch' })
 
-    span?.setAttribute({
+    span?.setAttributes({
       name: browser.name,
       channel: browser.channel,
       version: browser.version,
@@ -163,7 +192,7 @@ async function executeAfterBrowserLaunch (browser: Browser, options: AfterBrowse
   if (plugins.has('after:browser:launch')) {
     const span = telemetry.startSpan({ name: 'lifecycle:after:browser:launch' })
 
-    span?.setAttribute({
+    span?.setAttributes({
       name: browser.name,
       channel: browser.channel,
       version: browser.version,
@@ -208,20 +237,21 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const wkBrowserVersionRe = /BROWSER_VERSION\s*=\s*(['"])(?<version>[\d.]+)\1/gm
-
 const getWebKitBrowserVersion = async () => {
   try {
-    // this seems to be the only way to accurately capture the WebKit version - it's not exported, and invoking the webkit binary with `--version` does not give the correct result
-    // after launching the browser, this is available at browser.version(), but we don't have a browser instance til later
     const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
-    const wkBrowserPath = path.join(pwCorePath, 'lib', 'server', 'webkit', 'wkBrowser.js')
-    const wkBrowserContents = await fs.readFile(wkBrowserPath)
-    const result = wkBrowserVersionRe.exec(wkBrowserContents)
+    const browsersJsonPath = path.join(pwCorePath, 'browsers.json')
+    const browsersJsonContents = await fs.readFile(browsersJsonPath, 'utf8')
+    const browsersJson = JSON.parse(browsersJsonContents)
+    const webkitEntry = browsersJson.browsers.find((b) => b.name === 'webkit')
 
-    if (!result || !result.groups!.version) return '0'
+    if (!webkitEntry || !webkitEntry.browserVersion) {
+      debug('Could not find webkit browserVersion in playwright-core browsers.json %o', { webkitEntry })
 
-    return result.groups!.version
+      return '0'
+    }
+
+    return webkitEntry.browserVersion
   } catch (err) {
     debug('Error detecting WebKit browser version %o', err)
 
@@ -295,7 +325,7 @@ const getBrowsers = async () => {
 }
 
 const isValidPathToBrowser = (str) => {
-  return path.basename(str) !== str
+  return typeof str === 'string' && path.basename(str) !== str
 }
 
 const parseBrowserOption = (opt) => {

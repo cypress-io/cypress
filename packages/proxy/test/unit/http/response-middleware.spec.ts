@@ -56,6 +56,47 @@ describe('http/response-middleware', function () {
     ])
   })
 
+  describe('ClearCyInitialCookie', function () {
+    const { ClearCyInitialCookie } = ResponseMiddleware
+
+    function prepareContext (resProps = {}) {
+      const cookie = vi.fn()
+
+      const ctx = {
+        req: { proxiedUrl: 'https://localhost:3502/fixtures/primary-origin.html', cookies: {} },
+        res: {
+          cookie,
+          wantsInjection: 'full',
+          isInitial: false,
+          on: () => {},
+          off: () => {},
+          ...resProps,
+        },
+        remoteStates: {
+          current: () => ({ domainName: 'localhost' }),
+        },
+      }
+
+      return { ctx, cookie }
+    }
+
+    it('expires the __cypress.unload cookie when serving an injected document, even if not the initial request', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: 'full', isInitial: false })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).toHaveBeenCalledWith('__cypress.unload', '', { domain: 'localhost', expires: new Date(0) })
+    })
+
+    it('does not modify the __cypress.unload cookie when nothing is being injected', async function () {
+      const { ctx, cookie } = prepareContext({ wantsInjection: false, isInitial: false })
+
+      await testMiddleware([ClearCyInitialCookie], ctx)
+
+      expect(cookie).not.toHaveBeenCalledWith('__cypress.unload', '', expect.anything())
+    })
+  })
+
   describe('multiple this.next invocations', () => {
     describe('within the same middleware', () => {
       it('throws an error', function () {
@@ -1156,11 +1197,12 @@ describe('http/response-middleware', function () {
       expect(appendStub).not.toHaveBeenCalled()
     })
 
-    it('is a noop in the cookie jar when top does NOT need simulating', async function () {
+    it('records cookie in jar but skips browser automation sync when top does not need simulating', async function () {
       const appendStub = vi.fn()
 
       const cookieJar = {
         getAllCookies: () => [{ key: 'cookie', value: 'value' }],
+        getCookies: () => [],
         setCookie: vi.fn(),
       }
 
@@ -1182,8 +1224,73 @@ describe('http/response-middleware', function () {
 
       await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
 
-      expect(cookieJar.setCookie).not.toHaveBeenCalled()
+      // the cookie is still recorded in the server-side cookie jar so it does not
+      // go stale and overwrite fresh browser cookies on a later top-level
+      // navigation. See https://github.com/cypress-io/cypress/issues/25841
+      expect(cookieJar.setCookie).toHaveBeenCalledWith(expect.objectContaining({
+        key: 'cookie',
+        value: 'value',
+      }), 'http://www.foobar.com/login', 'strict')
+
+      // the browser sets the cookie itself since the AUT is the primary origin,
+      // so we do not need to sync the cookie into the browser via automation
+      expect(ctx.serverBus.emit).not.toHaveBeenCalled()
       expect(appendStub).toHaveBeenCalledExactlyOnceWith('Set-Cookie', 'cookie=value')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/25841
+    // A same-origin fetch/XHR response that sets a cookie does not need top to be
+    // simulated (the AUT is the primary origin and is not the AUT frame), but the
+    // cookie must still be recorded in the server-side jar. Otherwise the jar
+    // keeps a stale value and overwrites the browser's fresh cookie on the next
+    // top-level navigation (e.g. a reload following the request).
+    ;['fetch', 'xhr'].forEach((resourceType) => {
+      it(`records same-origin ${resourceType} response cookie in jar without browser automation sync`, async function () {
+        const appendStub = vi.fn()
+
+        const cookieJar = {
+          getAllCookies: () => [],
+          getCookies: () => [],
+          setCookie: vi.fn(),
+        }
+
+        const ctx = prepareContext({
+          cookieJar,
+          res: {
+            append: appendStub,
+          },
+          req: {
+            // a same-origin, non-AUT-frame request: top does not need simulating
+            resourceType,
+            credentialsLevel: resourceType === 'fetch' ? 'same-origin' : true,
+            proxiedUrl: 'http://www.foobar.com/messages',
+            isAUTFrame: false,
+          },
+          incomingRes: {
+            headers: {
+              'set-cookie': '_venuu_flash=fresh-value',
+            },
+          },
+        })
+
+        ctx.getAUTUrl = () => 'http://www.foobar.com/index.html'
+        // the AUT is the primary super domain origin, so top does NOT need simulating
+        ctx.remoteStates.isPrimarySuperDomainOrigin = () => true
+
+        await testMiddleware([MaybeCopyCookiesFromIncomingRes], ctx)
+
+        // the fresh cookie is recorded in the jar so a subsequent navigation does
+        // not reuse a stale value
+        expect(cookieJar.setCookie).toHaveBeenCalledWith(expect.objectContaining({
+          key: '_venuu_flash',
+          value: 'fresh-value',
+        }), 'http://www.foobar.com/messages', 'strict')
+
+        // the browser sets the cookie natively for a same-origin request, so no
+        // automation sync is needed
+        expect(ctx.serverBus.emit).not.toHaveBeenCalled()
+        expect(appendStub).toHaveBeenCalledExactlyOnceWith('Set-Cookie', '_venuu_flash=fresh-value')
+      })
     })
 
     const getCookieJarStub = () => {
