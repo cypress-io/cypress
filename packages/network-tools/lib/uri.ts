@@ -29,9 +29,16 @@ export function stripProtocolAndDefaultPorts (urlToCheck: string) {
     }
 
     return `${hostname}:${port}`
-  } catch {
-    // not a valid absolute url (e.g. relative, or an out-of-range port); fall
-    // back to the original string so block-host matching can still run on it
+  } catch (err) {
+    // the WHATWG URL parser throws a TypeError on relative urls or out-of-range
+    // ports that the legacy parser tolerated; fall back to the original string
+    // so block-host matching can still run on it, but let anything unexpected
+    // propagate. Use `instanceof TypeError` (not `err.code`) since this package
+    // is isomorphic and the browser's URL throws a TypeError with no `.code`.
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
+
     return urlToCheck
   }
 }
@@ -40,8 +47,13 @@ export function removeDefaultPort (urlToCheck: string) {
   try {
     // the WHATWG URL API automatically strips the default port (80/443)
     return new URL(urlToCheck).href
-  } catch {
-    // relative urls have no host/port, so there is nothing to strip
+  } catch (err) {
+    // a relative url has no host/port, so there is nothing to strip; degrade to
+    // the original string for those (a TypeError) but let anything else throw
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
+
     return urlToCheck
   }
 }
@@ -56,8 +68,13 @@ export function addDefaultPort (urlToCheck: string) {
     const host = port ? `${parsed.hostname}:${port}` : parsed.hostname
 
     return `${parsed.protocol}//${host}${parsed.pathname}${parsed.search}${parsed.hash}`
-  } catch {
-    // relative urls have no host/port, so there is nothing to add
+  } catch (err) {
+    // a relative url has no host/port, so there is nothing to add; degrade to
+    // the original string for those (a TypeError) but let anything else throw
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
+
     return urlToCheck
   }
 }
@@ -91,9 +108,14 @@ export function origin (urlStr: string) {
     // URL.origin is the scheme + host (and non-default port) with no path,
     // search, or hash — exactly the "origin" portion of the url
     return new URL(urlStr).origin
-  } catch {
-    // the WHATWG URL parser throws on invalid urls (e.g. out-of-range ports)
-    // that the legacy parser tolerated; fall back to the original string
+  } catch (err) {
+    // the WHATWG URL parser throws a TypeError on invalid urls (e.g. out-of-range
+    // ports) that the legacy parser tolerated; fall back to the original string
+    // for those, but let anything unexpected propagate
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
+
     return urlStr
   }
 }

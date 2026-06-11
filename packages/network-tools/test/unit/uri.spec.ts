@@ -143,6 +143,21 @@ describe('lib/uri', () => {
       ).toEqual('https://app.foobar.co.uk:1234')
     })
 
+    it('strips an explicit default port (WHATWG URL.origin behavior)', () => {
+      // NOTE: the legacy url.format path preserved an explicit ':80'/':443'; the
+      // WHATWG URL.origin strips it, matching what the browser reports as
+      // location.origin. This pins that contract for the published
+      // RemoteState.origin type.
+      expect(origin('http://example.com:80/foo')).toEqual('http://example.com')
+      expect(origin('https://example.com:443/foo')).toEqual('https://example.com')
+    })
+
+    it('strips userinfo (WHATWG URL.origin behavior)', () => {
+      // the legacy url.format path preserved userinfo; the WHATWG URL.origin
+      // omits it, which is the standards-compliant origin
+      expect(origin('http://user:pass@example.com/foo')).toEqual('http://example.com')
+    })
+
     it('returns invalid/unparseable urls unchanged instead of throwing', () => {
       // out-of-range port is invalid per the WHATWG URL parser
       expect(origin('https://example.com:99999')).toEqual('https://example.com:99999')

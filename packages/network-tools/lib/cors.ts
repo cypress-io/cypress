@@ -35,10 +35,16 @@ export function parseUrlIntoHostProtocolDomainTldPort (str: string) {
     hostname = parsed.hostname
     port = parsed.port
     protocol = parsed.protocol
-  } catch {
-    // the WHATWG URL parser throws on relative or otherwise invalid urls that
-    // the legacy parser tolerated; fall back to a degraded result rather than
-    // throwing so CORS helpers can still return a sensible (non-matching) value
+  } catch (err) {
+    // the WHATWG URL parser throws a TypeError on relative or otherwise invalid
+    // urls that the legacy parser tolerated; fall back to a degraded (non-matching)
+    // result for those so CORS helpers (e.g. getSuperDomain via cy.location())
+    // keep working, but let anything unexpected propagate. Use `instanceof
+    // TypeError` (not `err.code`) since this package is isomorphic and the
+    // browser's URL throws a TypeError with no `.code`.
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
   }
 
   if (!port) {
