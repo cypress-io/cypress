@@ -14,11 +14,20 @@ export type RouteMatchableRequest = {
 
 type Matchable = ReturnType<typeof getMatchableForRequest>
 
+/*
+ * Route matching runs for EVERY request that flows through the proxy — not
+ * just requests that end up intercepted — so its per-request cost is paid by
+ * static assets and third-party traffic too. To keep that cost low, the work
+ * that depends only on the route matcher (deriving the field list, compiling
+ * glob patterns, normalizing the method) is done once per matcher and cached,
+ * and the work that depends only on the request (URL parsing via
+ * `getMatchableForRequest`) is done once per request rather than once per
+ * route. The matching semantics themselves are unchanged; each compiled step
+ * mirrors a branch of the original per-request implementation.
+ */
+
 /**
- * A `StringMatcher` field compiled into a directly-executable form. Route
- * matchers are evaluated against every request flowing through the proxy, so
- * deriving the field list and compiling glob patterns must not be repeated
- * per request.
+ * A `StringMatcher` field compiled into a directly-executable form.
  */
 type CompiledStringField = {
   field: string
@@ -43,10 +52,15 @@ type CompiledRouteMatcher = {
 function compileStringField (routeMatcher: RouteMatcherOptions, field: string): CompiledStringField {
   let matcher = _.get(routeMatcher, field)
 
+  // anything with a `.test` method is treated as a regex and used as-is —
+  // duck-typing rather than `instanceof RegExp` so that regexes deserialized
+  // across process boundaries (and user-supplied regex-likes) keep working
   if (matcher.test) {
     return { field, regex: matcher }
   }
 
+  // methods match case-insensitively; the request value is lowercased at
+  // match time, the matcher only needs lowercasing once
   if (field === 'method') {
     matcher = matcher.toLowerCase()
   }
@@ -57,6 +71,10 @@ function compileStringField (routeMatcher: RouteMatcherOptions, field: string): 
     mm: new minimatch.Minimatch(matcher, { matchBase: true }),
   }
 
+  // a url matcher without a leading slash (e.g. `cy.intercept('services/api/*')`)
+  // must still match a request path like `/services/api/foo`, so the
+  // slash-prefixed variant is compiled ahead of time too
+  // @see https://github.com/cypress-io/cypress/issues/14256
   if (field === 'url' && matcher[0] !== '/') {
     compiled.slashMatcher = `/${matcher}`
     compiled.slashMm = new minimatch.Minimatch(compiled.slashMatcher, { matchBase: true })
@@ -77,8 +95,12 @@ function compileRouteMatcher (routeMatcher: RouteMatcherOptions): CompiledRouteM
   }
 }
 
-// Route matchers are never mutated once registered, so compiled forms are
-// cached per matcher object for the lifetime of the route.
+// Compiled forms are cached lazily, keyed by matcher object identity. This is
+// safe because route matchers are deserialized once when the driver registers
+// the route and never mutated afterwards (the driver normalizes header casing
+// before serialization). Using WeakMaps means no registration or teardown
+// hooks are needed: entries are garbage-collected along with their routes
+// when the state is reset between tests/specs.
 const compiledMatchers = new WeakMap<RouteMatcherOptions, CompiledRouteMatcher>()
 // `matchesRoutePreflight` evaluates a reduced form of each matcher (without
 // method/headers/auth), cached separately under the same key.
@@ -107,6 +129,9 @@ function getCompiledPreflightMatcher (routeMatcher: RouteMatcherOptions) {
 }
 
 function globMatch (entry: CompiledStringField, value: string) {
+  // exact equality is checked first so that common literal matchers
+  // short-circuit without touching minimatch; the slash-prefixed fallback only
+  // applies to url/path values, matching the original recursive `stringMatch`
   return (
     value === entry.matcher ||
     entry.mm!.match(value) ||
@@ -123,6 +148,9 @@ function doesCompiledRouteMatch (compiled: CompiledRouteMatcher, matchable: Matc
     const entry = stringFields[i]
     let value = _.get(matchable, entry.field, '')
 
+    // a `url` matcher is allowed to match either the full proxied URL or just
+    // its path, so users can write `cy.intercept('/api/*')` and still match
+    // `http://host/api/foo`
     const shouldTryMatchingPath = entry.field === 'url'
 
     if (typeof value !== 'string') {
@@ -214,6 +242,8 @@ export const _getMatchableForRequest = getMatchableForRequest
  * Find all `BackendRoute`s that match the supplied request.
  */
 export function matchRoutes (routes: BackendRoute[], req: RouteMatchableRequest): BackendRoute[] {
+  // suites with no `cy.intercept` calls hit this for every proxied request —
+  // skip URL parsing entirely in that case
   if (!routes.length) {
     return []
   }
@@ -221,6 +251,9 @@ export function matchRoutes (routes: BackendRoute[], req: RouteMatchableRequest)
   // parse the request into its matchable form once, not once per route
   const matchable = getMatchableForRequest(req)
 
+  // middleware routes are applied in registration order, then regular
+  // handlers in reverse registration order — the most recently registered
+  // handler wins, matching documented `cy.intercept` override behavior
   const middleware: BackendRoute[] = []
   const handlers: BackendRoute[] = []
 
