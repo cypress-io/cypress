@@ -22,7 +22,11 @@ export interface ForResponseInterception {
  * Driven port: HTML/JS inject, CSP strip, rewriter application.
  */
 export interface ForDocumentPreparation {
-  // Expanded in Stage 5a.
+  setInjectionLevel (ctx: unknown): Promise<void>
+
+  injectHtml (ctx: unknown): Promise<void>
+
+  removeSecurity (ctx: unknown): Promise<void>
 }
 
 /**

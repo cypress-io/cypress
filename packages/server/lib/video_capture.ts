@@ -136,8 +136,14 @@ export function start (options: StartOptions) {
       })
       .then(() => endVideoCapture())
       .timeout(3000)
-      .catch(() => endVideoCapture(false))
+      .catch((err) => {
+        debug('wait for additional frames failed or timed out after 3000ms with %d frame(s) written; ending capture without waiting: %o', writtenFramesCount, err)
+
+        return endVideoCapture(false)
+      })
     }
+
+    debug('ending video capture with %d frame(s) written and %d frame(s) skipped', writtenFramesCount, skippedFramesCount)
 
     doneCapturing = true
 

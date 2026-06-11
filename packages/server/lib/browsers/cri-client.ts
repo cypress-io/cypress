@@ -42,6 +42,10 @@ export const DEFAULT_NETWORK_ENABLE_OPTIONS = {
   maxPostDataSize: 0,
 }
 
+// How long a sent CDP command can go unresolved before we log it as
+// potentially hung (debug logging only - the command is not aborted)
+const SEND_HANG_DETECTION_MS = 10000
+
 export interface ICriClient {
   /**
    * The target id attached to by this client
@@ -168,7 +172,12 @@ export class CriClient implements ICriClient {
           return
         }
 
-        debug('crash detected')
+        if (this._crashed) {
+          debug('Target.targetCrashed received for target %s; _crashed was already true (set via markCrashed before this event was delivered on this connection)', this.targetId)
+        } else {
+          debug('crash detected for target %s', this.targetId)
+        }
+
         this._crashed = true
       })
 
@@ -240,6 +249,10 @@ export class CriClient implements ICriClient {
    * the renderer is dead and will never respond.
    */
   public markCrashed = () => {
+    if (!this._crashed) {
+      debug('markCrashed called for target %s; no Target.targetCrashed event had been received on this connection', this.targetId)
+    }
+
     this._crashed = true
   }
 
@@ -265,6 +278,8 @@ export class CriClient implements ICriClient {
     sessionId?: string,
   ): Promise<ProtocolMapping.Commands[TCmd]['returnType']> => {
     if (this._crashed) {
+      debug('not sending %s to target %s; _crashed is true', command, this.targetId)
+
       return Promise.reject(new Error(`${command} will not run as the target browser or tab CRI connection has crashed`))
     }
 
@@ -288,6 +303,20 @@ export class CriClient implements ICriClient {
     }
 
     if (this._connected && this.cdpConnection) {
+      // a send to a renderer that crashed without this connection observing
+      // Target.targetCrashed will never resolve. When debug logging is
+      // enabled, surface commands that go unresolved so that hang can be
+      // diagnosed (the command itself is not aborted)
+      let hangDetectionTimer: NodeJS.Timeout | undefined
+
+      if (debug.enabled) {
+        hangDetectionTimer = setTimeout(() => {
+          debug('command %s to target %s has not resolved after %dms (_crashed: %o)', command, this.targetId, SEND_HANG_DETECTION_MS, this._crashed)
+        }, SEND_HANG_DETECTION_MS)
+
+        hangDetectionTimer.unref?.()
+      }
+
       try {
         return await this.cdpConnection.send(command, params, sessionId)
       } catch (err) {
@@ -312,6 +341,10 @@ export class CriClient implements ICriClient {
         }
 
         return p
+      } finally {
+        if (hangDetectionTimer) {
+          clearTimeout(hangDetectionTimer)
+        }
       }
     }
 
@@ -432,7 +465,7 @@ export class CriClient implements ICriClient {
         debug('uncaught error in CriClient reconnect callback: ', e)
       }
     } catch (e) {
-      debug('error re-establishing state on reconnection: ', e)
+      debug('error re-establishing state on reconnection to target %s; %d enablement(s) registered, %d command(s) still enqueued: ', this.targetId, this.enableCommands.length, this._commandQueue.entries.length, e)
     }
   }
 
@@ -462,6 +495,14 @@ export class CriClient implements ICriClient {
 
           throw err
         } else {
+          if (!inFlightCommand) {
+            // with no in-flight command to receive the rejection, this failure is
+            // otherwise invisible: events from this domain silently stop arriving
+            // on this connection (e.g. a Network.enable failure means network
+            // traffic used by cy.intercept is no longer observed)
+            debug('re-enabling %s on target %s after reconnect failed with a non-connection error and no in-flight command was in the queue to receive the rejection: ', command, this.targetId, err)
+          }
+
           // non-connection errors are appropriate for rejecting the original command promise
           inFlightCommand?.deferred.reject(err)
         }
