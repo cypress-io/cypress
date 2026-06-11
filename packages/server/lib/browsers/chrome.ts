@@ -537,6 +537,8 @@ export = {
     pageCriClient.on('Target.targetCrashed', async (event) => {
       debug('target crashed!', event)
       if (event.targetId !== browserCriClient?.currentlyAttachedTarget?.targetId) {
+        debug('ignoring Target.targetCrashed for target %s because the currently attached target is %s. No sibling CRI clients will be marked as crashed for this event; if the comparison target is stale, sends to the crashed target may hang', event.targetId, browserCriClient?.currentlyAttachedTarget?.targetId)
+
         return
       }
 
