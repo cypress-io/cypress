@@ -3,6 +3,14 @@ import Bluebird from 'bluebird'
 import $networkUtils from './network_utils'
 import $sourceMapUtils from './source_map_utils'
 
+// Scripts are loaded sequentially, so this tracks which spec file is currently
+// being evaluated. Tests are stamped with it at registration time (see mocha.ts)
+// to give exact per-spec attribution during experimentalRunAllSpecs, independent
+// of bundler source map quality.
+let currentlyLoadingScript: Script | null = null
+
+export const getCurrentlyLoadingScript = () => currentlyLoadingScript
+
 const fetchScript = (scriptWindow, script) => {
   return $networkUtils.fetch(script.relativeUrl, scriptWindow)
   .then((contents) => {
@@ -41,6 +49,9 @@ const evalScripts = (specWindow, scripts: any = []) => {
 
     return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
   })
+  .finally(() => {
+    currentlyLoadingScript = null
+  })
 }
 
 const runScriptsFromUrls = (specWindow, scripts, projectRoot, specRelativePath, specAbsolutePath) => {
@@ -59,6 +70,8 @@ const appendScripts = (specWindow, scripts) => {
     const firstScript = specWindow.document.querySelector('script')
     const specScript = specWindow.document.createElement('script')
 
+    currentlyLoadingScript = script
+
     return new Promise<void>((resolve) => {
       specScript.addEventListener('load', () => {
         resolve()
@@ -67,6 +80,9 @@ const appendScripts = (specWindow, scripts) => {
       specScript.src = script.relativeUrl
       firstScript.after(specScript)
     })
+  })
+  .finally(() => {
+    currentlyLoadingScript = null
   })
 }
 
@@ -88,6 +104,8 @@ interface RunScriptsOptions {
 
 // Supports either scripts as objects or as async import functions
 export default {
+  getCurrentlyLoadingScript,
+
   runScripts: ({ browser, scripts, specWindow, testingType, projectRoot, specRelativePath, specAbsolutePath }: RunScriptsOptions) => {
     // if scripts contains at least one promise
     if (scripts.length && typeof scripts[0] === 'function') {

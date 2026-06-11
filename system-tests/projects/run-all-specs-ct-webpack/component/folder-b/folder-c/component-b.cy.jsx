@@ -5,5 +5,9 @@ describe('<ComponentB />', () => {
   it('renders', () => {
     cy.mount(<ComponentB />)
     cy.get('h1').should('have.text', 'I am Component B')
+
+    // Cypress.spec must identify this file even when running via "Run All Specs" (#3090)
+    expect(Cypress.spec.relative.replace(/\\/g, '/')).to.eq('component/folder-b/folder-c/component-b.cy.jsx')
+    expect(Cypress.spec.name).to.eq('component-b.cy.jsx')
   })
 })

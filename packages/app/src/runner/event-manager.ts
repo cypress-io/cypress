@@ -5,6 +5,7 @@ import type { MobxRunnerStore } from '../store/mobx-runner-store'
 import type MobX from 'mobx'
 import type { LocalBusEmitsMap, LocalBusEventMap, DriverToLocalBus, SocketToDriverMap } from './event-manager-types'
 import type { RunState, CachedTestState, AutomationElementId, FileDetails, ReporterStartInfo, ReporterRunState } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 
 import { logger } from './logger'
 import type { SocketShape } from '@packages/socket/browser/client'
@@ -67,6 +68,8 @@ export class EventManager {
   promptStore: ReturnType<typeof usePromptStore>
   specDirtyDataStore: ReturnType<typeof useSpecDirtyDataStore>
   _deferCleanupToUnload = false
+  // Tracks the last spec path notified to the server, used to avoid redundant spec:changed events
+  private _lastNotifiedSpecAbsolute: string | undefined = undefined
 
   constructor (
     // import '@packages/driver'
@@ -414,17 +417,22 @@ export class EventManager {
     this.ws.emit('watch:test:file', config.spec)
 
     if (config.isTextTerminal || config.experimentalInteractiveRunEvents) {
-      await new Promise((resolve, reject) => {
-        this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
-          // FIXME: handle surfacing the error to the browser instead of hanging with
-          // 'Your tests are loading...' message. Fix in https://github.com/cypress-io/cypress/issues/23627
-          if (res && res.error) {
-            reject(res.error)
-          }
+      // For run-all-specs, before:spec is fired per-spec by the server whenever spec:changed
+      // arrives. Calling it here with the synthetic RUN_ALL_SPECS object would pass a useless
+      // value to the user's plugin and the real per-spec calls would be swallowed.
+      if (config.spec?.relative !== RUN_ALL_SPECS_KEY) {
+        await new Promise((resolve, reject) => {
+          this.ws.emit('plugins:before:spec', config.spec, (res?: { error: Error }) => {
+            // FIXME: handle surfacing the error to the browser instead of hanging with
+            // 'Your tests are loading...' message. Fix in https://github.com/cypress-io/cypress/issues/23627
+            if (res && res.error) {
+              reject(res.error)
+            }
 
-          resolve(null)
+            resolve(null)
+          })
         })
-      })
+      }
     }
 
     Cypress = this.Cypress = this.$CypressDriver.create(config)
@@ -660,6 +668,8 @@ export class EventManager {
 
     Cypress.on('run:start', async () => {
       hasMochaRunEnded = false
+      // Reset so the first test of every run triggers a spec:changed notification to the server
+      this._lastNotifiedSpecAbsolute = undefined
       if (Cypress.config('experimentalMemoryManagement') && Cypress.isBrowser({ family: 'chromium' })) {
         await Cypress.backend('start:memory:profiling', Cypress.config('spec'))
       }
@@ -741,6 +751,21 @@ export class EventManager {
     handlePausing(this.getCypress, this.reporterBus)
 
     Cypress.on('test:before:run', (...args) => {
+      // When running all specs, the driver has already updated Cypress.spec to the actual
+      // spec file (via invocationDetails) before emitting test:before:run. Notify the server
+      // each time the resolved spec path changes so screenshots and run events are attributed
+      // to the correct spec. Cypress.config('spec') keeps the original synthetic '__all' value,
+      // so use it to scope this to run-all-specs sessions only. Skip if invocationDetails were
+      // missing and Cypress.spec is still the synthetic '__all' path.
+      const isRunAllSpecs = Cypress.config('spec')?.relative === RUN_ALL_SPECS_KEY
+      const currentSpecAbsolute = Cypress.spec?.absolute
+      const isResolved = currentSpecAbsolute && currentSpecAbsolute !== RUN_ALL_SPECS_KEY
+
+      if (isRunAllSpecs && isResolved && currentSpecAbsolute !== this._lastNotifiedSpecAbsolute) {
+        this._lastNotifiedSpecAbsolute = currentSpecAbsolute
+        this.notifyRunningSpec(Cypress.spec)
+      }
+
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run', ...args)
     })
 

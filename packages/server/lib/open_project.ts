@@ -12,6 +12,7 @@ import * as session from './session'
 import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser, AutomationCommands } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
@@ -121,10 +122,14 @@ export class OpenProject extends EventEmitter {
     }
 
     if (!am || !am.onBeforeRequest) {
+      const projectBase = this.projectBase
+
       automation.use({
         onBeforeRequest<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> {
           if (message === 'take:screenshot') {
-            data.specName = spec.name
+            // Use projectBase.spec so that during experimentalRunAllSpecs runs the
+            // screenshot is attributed to the actual spec file, not "All E2E Specs".
+            data.specName = projectBase?.spec?.name ?? spec.name
 
             return data
           }
@@ -139,7 +144,16 @@ export class OpenProject extends EventEmitter {
         return Promise.resolve()
       }
 
-      return runEvents.execute('after:spec', spec)
+      // For run-all-specs, projectBase.spec tracks the last real spec that ran.
+      // The launch-time `spec` is the synthetic RUN_ALL_SPECS object, so we must
+      // not use it here. For normal runs the two are the same.
+      const specToClose = this.projectBase.spec ?? spec
+
+      if (!specToClose || specToClose.absolute === RUN_ALL_SPECS_KEY) {
+        return Promise.resolve()
+      }
+
+      return runEvents.execute('after:spec', specToClose)
     }
 
     const { onBrowserClose } = options

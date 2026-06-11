@@ -29,6 +29,7 @@ import type {
   VideoRecording,
   AutomationCommands,
 } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac, randomUUID } from 'crypto'
 import { ServerBase } from './server-base'
@@ -448,7 +449,38 @@ export class ProjectBase extends EE {
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
-      onSpecChanged: options.onSpecChanged,
+      onSpecChanged: (spec) => {
+        // Keep this.spec in sync so that the screenshot automation middleware
+        // uses the correct spec name during experimentalRunAllSpecs runs.
+        if (spec && spec.absolute) {
+          const previousSpec = this.spec
+
+          this.spec = spec
+
+          const cfg = this.getConfig()
+
+          if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents && spec.absolute !== RUN_ALL_SPECS_KEY) {
+            if (previousSpec?.absolute === RUN_ALL_SPECS_KEY) {
+              // First real spec in a run-all-specs session: before:spec was skipped in setup(),
+              // so fire it now.
+              runEvents.execute('before:spec', spec).catch((err) => {
+                this.options.onError?.(err)
+              })
+            } else if (previousSpec && previousSpec.absolute !== spec.absolute) {
+              // Transitioning between two real specs: close the previous, open the next.
+              runEvents.execute('after:spec', previousSpec)
+              .then(() => runEvents.execute('before:spec', spec))
+              .catch((err) => {
+                this.options.onError?.(err)
+              })
+            }
+            // If previousSpec.absolute === spec.absolute (single-spec re-notification),
+            // before:spec was already called from setup() — nothing to do.
+          }
+        }
+
+        options.onSpecChanged?.(spec)
+      },
       getSavedState: this.getSavedState.bind(this),
       onSavedStateChanged: this.saveState.bind(this),
       closeExtraTargets: this.closeExtraTargets,

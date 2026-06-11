@@ -1331,6 +1331,110 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         cyPromptManager: mockCyPromptManager,
       })
     })
+
+    describe('onSpecChanged', () => {
+      let capturedOnSpecChanged
+
+      beforeEach(function () {
+        this.project.server.startWebsockets.callsFake((automation, config, callbacks) => {
+          capturedOnSpecChanged = callbacks.onSpecChanged
+        })
+      })
+
+      it('fires before:spec for the first real spec when transitioning from run-all-specs', async function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: true, isTextTerminal: false })
+        this.project.spec = { absolute: '__all', relative: '__all' }
+        this.project.startWebsockets({ onSpecChanged: sinon.stub() }, {})
+
+        const spec1 = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+
+        capturedOnSpecChanged(spec1)
+
+        await new Promise((resolve) => setTimeout(resolve, 0))
+
+        expect(runEvents.execute).to.be.calledWith('before:spec', spec1)
+        expect(runEvents.execute).not.to.be.calledWith('after:spec')
+      })
+
+      it('fires after:spec then before:spec when transitioning between two real specs', async function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: true, isTextTerminal: false })
+        const spec1 = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+        const spec2 = { absolute: '/project/e2e/bar.cy.ts', relative: 'e2e/bar.cy.ts' }
+
+        this.project.spec = spec1
+        this.project.startWebsockets({ onSpecChanged: sinon.stub() }, {})
+
+        capturedOnSpecChanged(spec2)
+
+        await new Promise((resolve) => setTimeout(resolve, 0))
+
+        expect(runEvents.execute).to.be.calledWith('after:spec', spec1)
+        expect(runEvents.execute).to.be.calledWith('before:spec', spec2)
+      })
+
+      it('does not fire spec events when notified of the same spec (single-spec re-notification)', async function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: true, isTextTerminal: false })
+        const spec = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+
+        this.project.spec = spec
+        this.project.startWebsockets({ onSpecChanged: sinon.stub() }, {})
+
+        capturedOnSpecChanged(spec)
+
+        await new Promise((resolve) => setTimeout(resolve, 0))
+
+        expect(runEvents.execute).not.to.be.calledWith('before:spec')
+        expect(runEvents.execute).not.to.be.calledWith('after:spec')
+      })
+
+      it('does not fire spec events when experimentalInteractiveRunEvents is false', async function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: false, isTextTerminal: false })
+        this.project.spec = { absolute: '__all', relative: '__all' }
+        this.project.startWebsockets({ onSpecChanged: sinon.stub() }, {})
+
+        capturedOnSpecChanged({ absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' })
+
+        await new Promise((resolve) => setTimeout(resolve, 0))
+
+        expect(runEvents.execute).not.to.be.calledWith('before:spec')
+      })
+
+      it('does not fire spec events when isTextTerminal is true', async function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: true, isTextTerminal: true })
+        this.project.spec = { absolute: '__all', relative: '__all' }
+        this.project.startWebsockets({ onSpecChanged: sinon.stub() }, {})
+
+        capturedOnSpecChanged({ absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' })
+
+        await new Promise((resolve) => setTimeout(resolve, 0))
+
+        expect(runEvents.execute).not.to.be.calledWith('before:spec')
+      })
+
+      it('always calls the outer onSpecChanged callback', function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: false })
+        const outerCallback = sinon.stub()
+
+        this.project.startWebsockets({ onSpecChanged: outerCallback }, {})
+
+        const spec = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+
+        capturedOnSpecChanged(spec)
+
+        expect(outerCallback).to.be.calledWith(spec)
+      })
+
+      it('does not throw when the outer onSpecChanged is not provided (run mode)', function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: false })
+
+        this.project.startWebsockets({}, {})
+
+        const spec = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+
+        expect(() => capturedOnSpecChanged(spec)).not.to.throw()
+        expect(this.project.spec).to.eq(spec)
+      })
+    })
   })
 
   describe('#getProjectId', () => {

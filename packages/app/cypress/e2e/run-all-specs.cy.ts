@@ -2,6 +2,10 @@ import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 import { getPathForPlatform } from '../../src/paths'
 
 describe('run-all-specs', () => {
+  // NOTE: Each spec in the run-all-specs fixture project asserts that Cypress.spec
+  // identifies its own file (see #3090). If Cypress.spec were stuck on the synthetic
+  // "All E2E Specs" value, the inner specs would fail and the passCount assertions
+  // below would catch it.
   const ALL_SPECS = {
     spec1: { relative: getPathForPlatform('cypress/e2e/folder-a/spec-a.cy.ts'), name: 'runs folder-a/spec-a' },
     spec2: { relative: getPathForPlatform('cypress/e2e/folder-a/spec-b.cy.ts'), name: 'runs folder-a/spec-b' },

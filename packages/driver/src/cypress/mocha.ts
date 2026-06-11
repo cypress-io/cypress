@@ -4,6 +4,7 @@ import $errUtils, { CypressError } from './error_utils'
 import $utils from './utils'
 import $stackUtils from './stack_utils'
 import $sourceMapUtils from './source_map_utils'
+import { getCurrentlyLoadingScript } from './script_utils'
 
 // in the browser mocha is coming back
 // as window
@@ -536,6 +537,19 @@ const patchSuiteAddTest = (specWindow) => {
 
     if (!test.invocationDetails) {
       test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
+    }
+
+    // Stamp the test with the spec file currently being loaded. This gives exact
+    // per-spec attribution during experimentalRunAllSpecs (used to update
+    // Cypress.spec per-test), independent of bundler source map quality —
+    // e.g. Vite source maps resolve invocationDetails paths to basenames only.
+    const loadingScript = getCurrentlyLoadingScript()
+
+    if (loadingScript && !test._cypressSpec) {
+      test._cypressSpec = {
+        absolute: loadingScript.absolute,
+        relative: loadingScript.relative,
+      }
     }
 
     const ret = suiteAddTest.apply(this, args)

@@ -45,6 +45,7 @@ import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origi
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState, ReporterRunState, RunState } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 import { DocumentDomainInjection } from '@packages/network-tools'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
@@ -656,6 +657,43 @@ class $Cypress {
         return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
+        // When running all specs, update Cypress.spec to reflect the actual spec file
+        // so that test code and plugins can reliably read the current spec's path.
+        // Check config('spec') rather than this.spec: this.spec is mutated per-test
+        // below, while config('spec') retains the synthetic RUN_ALL_SPECS value.
+        if (this.config('spec')?.relative === RUN_ALL_SPECS_KEY) {
+          // args[0] is the serialized test (whitelisted props only); args[1] is the
+          // raw mocha test, which carries the _cypressSpec stamp applied at
+          // registration time (see mocha.ts). Prefer the stamp — it is exact for
+          // any bundler — and fall back to invocationDetails (source-map-derived)
+          // for loaders that pass bare import functions without spec metadata.
+          const stampedSpec = args[1]?._cypressSpec
+          const test = args[0]
+          const absoluteFile = stampedSpec?.absolute ?? test?.invocationDetails?.absoluteFile
+          const relativeFile = stampedSpec?.relative ?? test?.invocationDetails?.relativeFile
+
+          if (absoluteFile && relativeFile && absoluteFile !== this.spec.absolute) {
+            const baseName = absoluteFile.split(/[/\\]/).pop() || ''
+            const lastDot = baseName.lastIndexOf('.')
+            const fileExtension = lastDot > 0 ? baseName.slice(lastDot) : ''
+            // match transformSpec in @packages/data-context so fileName is identical
+            // to what single-spec mode produces (e.g. 'spec-a.cy.ts' -> 'spec-a')
+            const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
+            .map((ext) => ext + fileExtension)
+            .find((ext) => baseName.endsWith(ext)) || fileExtension
+            const fileName = specFileExtension ? baseName.slice(0, -specFileExtension.length) : baseName
+
+            this.spec = {
+              ...this.spec,
+              name: baseName,
+              absolute: absoluteFile,
+              relative: relativeFile,
+              baseName,
+              fileName,
+            }
+          }
+        }
+
         this.maybeEmitCypressInCypress('mocha', 'test:before:run', args[0])
 
         if (this.config('isTextTerminal')) {
