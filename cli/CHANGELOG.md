@@ -12,6 +12,10 @@
 - Running Cypress with process profiler debug logs enabled (for example `DEBUG=cypress*process_profiler`) no longer intermittently prints an `Expected DataContext to already have been set via setCtx` error to the logs. Addresses [#30670](https://github.com/cypress-io/cypress/issues/30670).
 - Cypress now shows a clear error explaining that `browsers` must be an array and that a specific browser should be selected with `--browser` when a `CYPRESS_BROWSERS` environment variable is set to a plain string (for example `CYPRESS_BROWSERS=chrome`) instead of showing an opaque `TypeError: a.map is not a function` error. Addresses [#33198](https://github.com/cypress-io/cypress/issues/33198).
 
+**Dependency Updates:**
+
+- Upgraded `webdriver` from `9.14.0` to `9.28.0`, `geckodriver` from `5.0.0` to `6.1.0`, and `edgedriver` from `6.1.1` to `6.3.0`. These packages are used to launch and automate Firefox during `cypress run` and `cypress open`. Addresses [#34072](https://github.com/cypress-io/cypress/issues/34072).
+
 ## 15.17.0
 
 **Performance:**
