@@ -191,6 +191,7 @@ import StatusRunningIcon from '~icons/cy/status-running_x16'
 import { RadioGroup, RadioGroupOption, RadioGroupLabel } from '@headlessui/vue'
 import Tooltip from '@packages/frontend-shared/src/components/Tooltip.vue'
 import DeprecatedRibbon from '@packages/frontend-shared/src/components/DeprecatedRibbon.vue'
+import { sortBrowsersByDeprecation } from '@packages/frontend-shared/src/utils/sortBrowsersByDeprecation'
 import ExternalLink from '@cy/gql-components/ExternalLink.vue'
 
 import type { OpenBrowserListFragment } from '../generated/graphql'
@@ -253,32 +254,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-// Sorts browsers into tiers so deprecated browsers (e.g. Electron) appear after
-// supported browsers, and disabled/unsupported browsers always sort last. Within
-// each tier, browsers remain alphabetical by displayName.
-const browserSortTier = (browser: NonNullable<OpenBrowserListFragment['browsers']>[number]) => {
-  if (browser.disabled || !browser.isVersionSupported) {
-    return 2
-  }
-
-  if (browser.isDeprecated) {
-    return 1
-  }
-
-  return 0
-}
-
 const browsers = computed(() => {
-  // Need to slice(). `sort()` mutates, and props are supposed to be `readonly`.
-  return (props.gql.browsers ?? []).slice().sort((a, b) => {
-    const tierDiff = browserSortTier(a) - browserSortTier(b)
-
-    if (tierDiff !== 0) {
-      return tierDiff
-    }
-
-    return a.displayName > b.displayName ? 1 : -1
-  })
+  return sortBrowsersByDeprecation(props.gql.browsers ?? [])
 })
 
 const setBrowser = useMutation(OpenBrowserList_SetBrowserDocument)

@@ -21,6 +21,7 @@ import { id as randomId } from '../util/random'
 import * as system from '../util/system'
 import { run as runChromePolicyCheck } from '../util/chrome_policy_check'
 import type { SpecWithRelativeRoot, SpecFile, TestingType, OpenProjectLaunchOpts, FoundBrowser, BrowserVideoController, VideoRecording, ProcessOptions, ProtocolManagerShape, AutomationCommands } from '@packages/types'
+import { isDeprecatedBrowser } from '@packages/types'
 import type { Cfg, ProjectBase } from '../project-base'
 import type { Browser } from '../browsers/types'
 import type { Data } from '../util/fs'
@@ -826,7 +827,10 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       autoCancelAfterFailures,
     })
 
-    if (browser.name === 'electron') {
+    // Surface the Electron deprecation alongside the run header. Gated by
+    // `--quiet` deliberately: --quiet is an explicit opt-out of advisory
+    // output, and the same notice is shown in the App and the docs.
+    if (isDeprecatedBrowser(browser)) {
       errors.warning('BROWSER_ELECTRON_DEPRECATED')
     }
   }

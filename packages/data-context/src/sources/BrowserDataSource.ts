@@ -3,6 +3,7 @@ import _ from 'lodash'
 import os from 'os'
 
 import type { FoundBrowser } from '@packages/types'
+import { isDeprecatedBrowser } from '@packages/types'
 import type { DataContext } from '..'
 
 let isPowerShellAvailable: undefined | boolean
@@ -133,6 +134,6 @@ export class BrowserDataSource {
   }
 
   isDeprecated (obj: FoundBrowser) {
-    return obj.name === 'electron'
+    return isDeprecatedBrowser(obj)
   }
 }

@@ -87,6 +87,7 @@ import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import Tooltip from '../../components/Tooltip.vue'
 import Badge from '../../components/Badge.vue'
+import { sortBrowsersByDeprecation } from '../../utils/sortBrowsersByDeprecation'
 import _ from 'lodash'
 
 const { t } = useI18n()
@@ -129,31 +130,8 @@ const props = withDefaults(defineProps <{
   specPath: '',
 })
 
-// Sorts browsers into tiers so deprecated browsers (e.g. Electron) appear after
-// supported browsers, and disabled/unsupported browsers always sort last. Within
-// each tier, browsers remain alphabetical by displayName.
-const browserSortTier = (browser: NonNullable<VerticalBrowserListItemsFragment['browsers']>[number]) => {
-  if (browser.disabled || !browser.isVersionSupported) {
-    return 2
-  }
-
-  if (browser.isDeprecated) {
-    return 1
-  }
-
-  return 0
-}
-
 const browsers = computed(() => {
-  const sortedBrowsers = (props.gql.browsers ?? []).slice().sort((a, b) => {
-    const tierDiff = browserSortTier(a) - browserSortTier(b)
-
-    if (tierDiff !== 0) {
-      return tierDiff
-    }
-
-    return a.displayName > b.displayName ? 1 : -1
-  })
+  const sortedBrowsers = sortBrowsersByDeprecation(props.gql.browsers ?? [])
 
   const [selectedBrowser] = _.remove(sortedBrowsers, (browser) => browser.isSelected)
 
