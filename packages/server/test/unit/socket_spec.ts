@@ -824,66 +824,64 @@ describe('lib/socket', () => {
   describe('run events (experimentalInteractiveRunEvents)', () => {
     let runEventsStub
 
-    beforeEach(function (done) {
+    beforeEach(async function () {
       runEventsStub = sinon.stub(runEvents, 'execute').resolves()
 
       this.cfg.experimentalInteractiveRunEvents = true
 
-      this.server.open(this.cfg, {
+      await this.server.open(this.cfg, {
         SocketCtor: SocketE2E,
         createRoutes,
         testingType: 'e2e',
         getCurrentBrowser: () => null,
       })
-      .then(() => {
-        const options = {
-          getSavedState: sinon.stub(),
-          onSavedStateChanged: sinon.spy(),
-          onStudioInit: sinon.stub(),
-          onStudioDestroy: sinon.stub(),
-          onCyPromptReady: sinon.stub(),
-        }
 
-        const automation = new Automation({
-          cyNamespace: this.cfg.namespace,
-          cookieNamespace: this.cfg.socketIoCookie,
-          screenshotsFolder: this.cfg.screenshotsFolder,
-        })
+      const options = {
+        getSavedState: sinon.stub(),
+        onSavedStateChanged: sinon.spy(),
+        onStudioInit: sinon.stub(),
+        onStudioDestroy: sinon.stub(),
+        onCyPromptReady: sinon.stub(),
+      }
 
-        const mockCyPrompt = {
-          addSocketListeners: sinon.stub(),
-          status: 'INITIALIZED',
-          reset: sinon.stub(),
-        }
+      const automation = new Automation({
+        cyNamespace: this.cfg.namespace,
+        cookieNamespace: this.cfg.socketIoCookie,
+        screenshotsFolder: this.cfg.screenshotsFolder,
+      })
 
-        ctx.coreData.studioLifecycleManager = {
-          registerStudioReadyListener: sinon.stub().callsFake((callback) => {
-            callback({ addSocketListeners: sinon.stub() })
+      const mockCyPrompt = {
+        addSocketListeners: sinon.stub(),
+        status: 'INITIALIZED',
+        reset: sinon.stub(),
+      }
 
-            return () => {}
-          }),
-        }
+      ctx.coreData.studioLifecycleManager = {
+        registerStudioReadyListener: sinon.stub().callsFake((callback) => {
+          callback({ addSocketListeners: sinon.stub() })
 
-        ctx.coreData.cyPromptLifecycleManager = {
-          getCyPrompt: sinon.stub().resolves({ cyPromptManager: mockCyPrompt }),
-          resetCyPrompt: sinon.stub(),
-          registerCyPromptReadyListener: sinon.stub().callsFake((callback) => {
-            callback(mockCyPrompt)
+          return () => {}
+        }),
+      }
 
-            return () => {}
-          }),
-        }
+      ctx.coreData.cyPromptLifecycleManager = {
+        getCyPrompt: sinon.stub().resolves({ cyPromptManager: mockCyPrompt }),
+        resetCyPrompt: sinon.stub(),
+        registerCyPromptReadyListener: sinon.stub().callsFake((callback) => {
+          callback(mockCyPrompt)
 
-        this.server.startWebsockets(automation, this.cfg, options)
-        this.socket = this.server._socket
+          return () => {}
+        }),
+      }
 
-        done = _.once(done)
+      this.server.startWebsockets(automation, this.cfg, options)
+      this.socket = this.server._socket
 
-        this.socket.socketIo.on('connection', () => done())
+      const { proxyUrl, socketIoRoute } = this.cfg
+      const agent = new httpsAgent(`http://localhost:${this.cfg.port}`)
 
-        const { proxyUrl, socketIoRoute } = this.cfg
-        const agent = new httpsAgent(`http://localhost:${this.cfg.port}`)
-
+      await new Promise((resolve) => {
+        this.socket.socketIo.on('connection', () => resolve(null))
         this.client = socketIo.client(proxyUrl, {
           agent,
           path: socketIoRoute,

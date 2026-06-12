@@ -701,9 +701,9 @@ export class SocketBase implements SocketBroadcaster {
 
         if (this.supportsRunEvents) {
           socket.on('plugins:before:spec', (spec, cb) => {
-            // When `runState` is set, Cypress is reloading the page mid-test due to a
-            // cross-origin navigation (cy.visit() changing top). In that case, before:spec
-            // has already been fired for this spec run and should not be fired again.
+            // When `runState` is set, the runner is reloading `top` because cy.visit()
+            // navigated to a different origin. before:spec has already fired for this spec
+            // run and must not fire again.
             if (runState) {
               return cb()
             }
