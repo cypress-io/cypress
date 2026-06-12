@@ -5,6 +5,7 @@
 
 - Fixed an issue where setting [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) to a value greater than `0` from `setupNodeEvents` would take effect during `cypress run`, which could prevent snapshots from being captured correctly when recording Test Replay to Cypress Cloud. During `cypress run`, `numTestsKeptInMemory` is now always treated as `0` regardless of how it is configured. Fixes [#31167](https://github.com/cypress-io/cypress/issues/31167).
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
+- Fixed an issue where running all specs in open mode with ([`experimentalRunAllSpecs`](https://docs.cypress.io/app/references/experiments)) enabled, `Cypress.spec` was incorrectly set. `Cypress.spec` now reflects the spec file each test belongs to as the run progresses, screenshots saved under the corresponding spec's path and the `before:spec` and `after:spec` events fire with the correct spec information when ([`experimentalInteractiveRunEvents`](https://docs.cypress.io/app/references/experiments)) is enabled. Fixes [#3090](https://github.com/cypress-io/cypress/issues/3090) and [#3323](https://github.com/cypress-io/cypress/issues/3323).
 
 **Misc:**
 
