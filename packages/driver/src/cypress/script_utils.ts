@@ -3,10 +3,6 @@ import Bluebird from 'bluebird'
 import $networkUtils from './network_utils'
 import $sourceMapUtils from './source_map_utils'
 
-// Scripts are loaded sequentially, so this tracks which spec file is currently
-// being evaluated. Tests are stamped with it at registration time (see mocha.ts)
-// to give exact per-spec attribution during experimentalRunAllSpecs, independent
-// of bundler source map quality.
 let scriptBeingLoaded: Script | null = null
 
 export const getScriptBeingLoaded = () => scriptBeingLoaded

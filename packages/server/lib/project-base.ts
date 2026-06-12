@@ -450,8 +450,6 @@ export class ProjectBase extends EE {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
       onSpecChanged: (spec) => {
-        // Keep this.spec in sync so that the screenshot automation middleware
-        // uses the correct spec name during experimentalRunAllSpecs runs.
         if (spec && spec.absolute) {
           const previousSpec = this.spec
 
@@ -461,21 +459,16 @@ export class ProjectBase extends EE {
 
           if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents && spec.absolute !== RUN_ALL_SPECS_KEY) {
             if (previousSpec?.absolute === RUN_ALL_SPECS_KEY) {
-              // First real spec in a run-all-specs session: before:spec was skipped in setup(),
-              // so fire it now.
               runEvents.execute('before:spec', spec).catch((err) => {
                 this.options.onError?.(err)
               })
             } else if (previousSpec && previousSpec.absolute !== spec.absolute) {
-              // Transitioning between two real specs: close the previous, open the next.
               runEvents.execute('after:spec', previousSpec)
               .then(() => runEvents.execute('before:spec', spec))
               .catch((err) => {
                 this.options.onError?.(err)
               })
             }
-            // If previousSpec.absolute === spec.absolute (single-spec re-notification),
-            // before:spec was already called from setup() — nothing to do.
           }
         }
 

@@ -22,8 +22,6 @@ describe('$Cypress', () => {
         fileName: '__all',
       }
 
-      // stubs Cypress.config so config('spec') returns the launch-time spec
-      // (which stays '__all' for run-all sessions even as Cypress.spec updates)
       const stubConfig = (configSpec: any) => {
         Cypress.config = vi.fn().mockImplementation((key: string) => {
           return key === 'spec' ? configSpec : false
@@ -78,8 +76,6 @@ describe('$Cypress', () => {
         stubConfig(RUN_ALL_SPEC)
         Cypress.spec = { ...RUN_ALL_SPEC }
 
-        // Vite source maps resolve invocationDetails to basenames only; the raw
-        // mocha test (2nd action arg) carries the exact stamp from mocha.ts
         Cypress.action('runner:test:before:run', {
           invocationDetails: {
             absoluteFile: '/project/component-a.cy.tsx',

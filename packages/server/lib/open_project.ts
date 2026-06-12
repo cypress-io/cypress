@@ -127,8 +127,6 @@ export class OpenProject extends EventEmitter {
       automation.use({
         onBeforeRequest<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> {
           if (message === 'take:screenshot') {
-            // Use projectBase.spec so that during experimentalRunAllSpecs runs the
-            // screenshot is attributed to the actual spec file, not "All E2E Specs".
             data.specName = projectBase?.spec?.name ?? spec.name
 
             return data
@@ -144,9 +142,6 @@ export class OpenProject extends EventEmitter {
         return Promise.resolve()
       }
 
-      // For run-all-specs, projectBase.spec tracks the last real spec that ran.
-      // The launch-time `spec` is the synthetic RUN_ALL_SPECS object, so we must
-      // not use it here. For normal runs the two are the same.
       const specToClose = this.projectBase.spec ?? spec
 
       if (!specToClose || specToClose.absolute === RUN_ALL_SPECS_KEY) {

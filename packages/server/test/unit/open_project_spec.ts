@@ -241,7 +241,6 @@ describe('lib/open_project', () => {
         const singleSpec = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts', name: 'foo.cy.ts' }
 
         await openProject.launch(this.browser, singleSpec)
-        // projectBase.spec is not set — falls back to the launch-time spec parameter
 
         const middleware = this.automation.use.lastCall.args[0]
         const data: any = {}

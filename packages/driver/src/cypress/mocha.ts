@@ -539,10 +539,6 @@ const patchSuiteAddTest = (specWindow) => {
       test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
     }
 
-    // Stamp the test with the spec file currently being loaded. This gives exact
-    // per-spec attribution during experimentalRunAllSpecs (used to update
-    // Cypress.spec per-test), independent of bundler source map quality —
-    // e.g. Vite source maps resolve invocationDetails paths to basenames only.
     const loadingScript = getScriptBeingLoaded()
 
     if (loadingScript && !test._cypressSpec) {
