@@ -176,11 +176,12 @@ export class CDPConnection {
     }
 
     let attempt = 0
+    const reconnectionStartedAt = Date.now()
 
     this._reconnection = asyncRetry(async () => {
       attempt++
 
-      this.debug('Reconnection attempt %d for Target %s', attempt, this._options.target)
+      this.debug('Reconnection attempt %d for Target %s, %dms after reconnection started', attempt, this._options.target, Date.now() - reconnectionStartedAt)
 
       if (this._terminated) {
         this.debug('Not reconnecting, connection to %s has been terminated', this._options.target)
@@ -204,7 +205,7 @@ export class CDPConnection {
       await this._reconnection
       this._emitter.emit('cdp-connection-reconnect')
     } catch (err) {
-      this.debug('error(s) on reconnecting: ', err)
+      this.debug('reconnection to target %s did not succeed after %d attempt(s) over %dms: ', this._options.target, attempt, Date.now() - reconnectionStartedAt, err)
       const significantError: Error = err.errors ? (err as AggregateError).errors[err.errors.length - 1] : err
 
       const retryHaltedDueToClosed = CDPTerminatedError.isCDPTerminatedError(err) ||

@@ -26,6 +26,7 @@
     "@packages/config": "0.0.0-development",
     "@packages/errors": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",
+    "@packages/network-interception": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
     "@packages/rewriter": "0.0.0-development",

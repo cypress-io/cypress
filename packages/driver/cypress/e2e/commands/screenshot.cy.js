@@ -363,6 +363,23 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
+    it('should call onAfterScreenshot before timers are resumed', function () {
+      Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
+      cy.spy(Cypress, 'action').log(false)
+
+      const onAfterScreenshot = cy.stub().callsFake(() => {
+        expect(cy.pauseTimers).to.be.calledOnceWithExactly(true)
+        expect(cy.pauseTimers).not.to.be.calledWith(false)
+      })
+
+      cy
+      .screenshot('foo', { onAfterScreenshot })
+      .then(() => {
+        expect(onAfterScreenshot).to.be.calledOnce
+        expect(cy.pauseTimers).to.be.calledWith(false)
+      })
+    })
+
     it('sends clip as userClip if specified', function () {
       Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
       cy.spy(Cypress, 'action').log(false)

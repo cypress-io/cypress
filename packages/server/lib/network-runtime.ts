@@ -4,6 +4,9 @@ import {
   BrowserPreRequest,
   ProxyRequestInterceptionAdapter,
   ProxyResponseInterceptionAdapter,
+  ProxyNetworkCaptureAdapter,
+  ProxyCookieStateAdapter,
+  ProxyCommandLogAdapter,
   defaultMiddleware,
 } from '@packages/proxy'
 import { ProxyDocumentPreparationAdapter } from '@packages/proxy/lib/adapters/proxy-document-preparation'
@@ -47,6 +50,9 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     requestInterception: new ProxyRequestInterceptionAdapter(),
     responseInterception: new ProxyResponseInterceptionAdapter(),
     documentPreparation: new ProxyDocumentPreparationAdapter(),
+    networkCapture: new ProxyNetworkCaptureAdapter(),
+    cookieState: new ProxyCookieStateAdapter(),
+    commandLog: new ProxyCommandLogAdapter(),
   })
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)
