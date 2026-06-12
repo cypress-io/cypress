@@ -47,7 +47,7 @@ describe('lib/runner-discovery', () => {
   })
 
   describe('.write', () => {
-    it('writes a record named by pid with no browser attached', async () => {
+    it('writes a record named by pid with only immutable identity fields', async () => {
       await runnerDiscovery.write({ projectRoot: '/some/project', serverPort: 4455 })
 
       const record = await fs.readJson(recordPath)
@@ -58,12 +58,14 @@ describe('lib/runner-discovery', () => {
         cypressVersion: pkg.version,
         projectRoot: path.resolve('/some/project'),
         serverPort: 4455,
-        cdpStatus: 'no_browser',
-        cdpBrowserWsUrl: null,
       })
 
       // Random per-process token backing the liveness probe.
       expect(record.instanceId).to.be.a('string').and.match(/^[0-9a-f-]{36}$/)
+
+      // Browser CDP state is memory-only: it travels in the probe response,
+      // never in the file.
+      expect(record).to.not.have.property('cdpBrowserWsUrl')
     })
 
     it('leaves no temp files behind (atomic write)', async () => {
@@ -96,47 +98,35 @@ describe('lib/runner-discovery', () => {
     })
   })
 
-  describe('.update', () => {
-    it('merge-patches cdp fields onto the existing record', async () => {
+  describe('.setCdpBrowserWsUrl', () => {
+    it('updates the live state without touching the disk record', async () => {
       await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
 
-      const record = await fs.readJson(recordPath)
+      const onDiskBefore = await fs.readJson(recordPath)
 
-      expect(record).to.deep.include({
-        cdpStatus: 'ready',
+      runnerDiscovery.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+
+      expect(runnerDiscovery.getCurrent()).to.deep.include({
+        serverPort: 4455,
         cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc',
-        projectRoot: path.resolve('/p'),
       })
+
+      expect(await fs.readJson(recordPath)).to.deep.eq(onDiskBefore)
     })
 
-    it('preserves the instanceId across updates', async () => {
+    it('clears the endpoint when the browser goes away', async () => {
       await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
 
-      const before = (await fs.readJson(recordPath)).instanceId
+      runnerDiscovery.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
+      runnerDiscovery.setCdpBrowserWsUrl(null)
 
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
-
-      expect((await fs.readJson(recordPath)).instanceId).to.eq(before)
+      expect(runnerDiscovery.getCurrent()!.cdpBrowserWsUrl).to.be.null
     })
 
-    it('re-creates a record whose file was deleted out from under it', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
-      await fs.remove(recordPath)
+    it('is a no-op when no record has been written yet', () => {
+      runnerDiscovery.setCdpBrowserWsUrl('ws://127.0.0.1:9222/devtools/browser/abc')
 
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
-
-      expect(await fs.pathExists(recordPath)).to.be.true
-
-      const record = await fs.readJson(recordPath)
-
-      expect(record.cdpStatus).to.eq('ready')
-    })
-
-    it('is a no-op when no record has been written yet', async () => {
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
-
-      expect(await fs.pathExists(recordPath)).to.be.false
+      expect(runnerDiscovery.getCurrent()).to.be.null
     })
   })
 
@@ -150,17 +140,15 @@ describe('lib/runner-discovery', () => {
       expect(runnerDiscovery.getCurrent()).to.be.null
     })
 
-    it('reflects the live record, including update patches', async () => {
+    it('is the disk record plus the memory-only browser CDP state', async () => {
       await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
 
-      expect(runnerDiscovery.getCurrent()).to.deep.include({
-        serverPort: 4455,
-        cdpStatus: 'ready',
+      // The probe route answers from this object; it must agree with the
+      // disk record on every persisted field.
+      expect(runnerDiscovery.getCurrent()).to.deep.eq({
+        ...await fs.readJson(recordPath),
+        cdpBrowserWsUrl: null,
       })
-
-      // The probe route answers from this object; it must match the disk record.
-      expect(runnerDiscovery.getCurrent()).to.deep.eq(await fs.readJson(recordPath))
     })
   })
 

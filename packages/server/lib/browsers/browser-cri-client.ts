@@ -253,7 +253,7 @@ export class BrowserCriClient {
         onServiceWorkerClientEvent,
       })
 
-      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: versionInfo.webSocketDebuggerUrl })
+      runnerDiscovery.setCdpBrowserWsUrl(versionInfo.webSocketDebuggerUrl)
 
       if (fullyManageTabs) {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
@@ -720,7 +720,7 @@ export class BrowserCriClient {
 
     this.onClose && this.onClose(gracefulShutdown)
 
-    await runnerDiscovery.update({ cdpStatus: 'no_browser', cdpBrowserWsUrl: null })
+    runnerDiscovery.setCdpBrowserWsUrl(null)
 
     if (this.connected === false) {
       debug('browser cri client is already closed')

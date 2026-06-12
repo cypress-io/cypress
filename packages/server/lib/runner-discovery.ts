@@ -8,21 +8,24 @@ import { resolveCypressCacheRoot } from './util/cypress-cache'
 const debug = Debug('cypress:server:runner-discovery')
 
 const RUNNERS_DIRNAME = 'runners'
-// v2 added cdpBrowserWsUrl; v3 added serverPort + instanceId so readers verify
-// liveness by probing the server (`GET /__cypress/runner-discovery/<instanceId>`)
-// instead of trusting the pid, which the OS can recycle. A reader seeing a
-// lower version treats the record as incompatible rather than guessing.
+// v3 introduced serverPort + instanceId so readers verify liveness by probing
+// the server (`GET /__cypress/runner-discovery/<instanceId>`) instead of
+// trusting the pid, which the OS can recycle. A reader seeing a lower version
+// treats the record as incompatible rather than guessing.
 const SCHEMA_VERSION = 3
-
-export type CdpStatus = 'no_browser' | 'ready'
 
 /**
  * A record published by a running Cypress server so that other processes (the
  * CLI, tooling) can discover it. One file per Cypress process, named by the
  * server PID, dropped at `<cypressCacheRoot>/runners/<pid>.json`.
  *
+ * Every field is fixed for the life of the process, so the file is written
+ * once at boot and removed at shutdown. Anything that changes while Cypress
+ * runs — the browser CDP state — is never persisted; it travels in the
+ * discovery probe response instead (see {@link LiveRunnerState}).
+ *
  * This shape is the cross-process contract; the CLI mirrors it in
- * `cli/lib/runner-discovery.ts`.
+ * `cli/lib/runner-discovery/record.ts`.
  */
 export interface RunnerDiscoveryRecord {
   schemaVersion: number
@@ -45,14 +48,23 @@ export interface RunnerDiscoveryRecord {
    * and port re-use after a crash.
    */
   instanceId: string
-  cdpStatus: CdpStatus
+}
+
+/**
+ * What the discovery probe route returns: the published record plus the live
+ * browser CDP state. The CDP endpoint is deliberately memory-only — a disk
+ * copy would go stale the moment the browser attaches or exits, while a
+ * reader holding this object has just proven the runner is alive, so the
+ * answer is fresh by construction.
+ */
+export interface LiveRunnerState extends RunnerDiscoveryRecord {
   /**
-   * The browser-level CDP WebSocket URL (e.g. `ws://host:port/devtools/browser/<id>`).
-   * Non-null only while `cdpStatus` is `ready`. The CLI connects to this
-   * directly, so it never has to HTTP-list targets to discover an endpoint.
-   * Deliberately the only browser address in the record: the runner page
-   * itself is found by probing targets for the tap binding, since the
-   * runner's origin changes on the first cross-origin cy.visit of a test.
+   * The browser-level CDP WebSocket URL (e.g. `ws://host:port/devtools/browser/<id>`);
+   * null while no browser is attached. The CLI connects to this directly, so
+   * it never has to HTTP-list targets to discover an endpoint. Deliberately
+   * the only browser address exposed: the runner page itself is found by
+   * probing targets for the tap binding, since the runner's origin changes on
+   * the first cross-origin cy.visit of a test.
    */
   cdpBrowserWsUrl: string | null
 }
@@ -78,20 +90,15 @@ const isDisabled = (): boolean => {
   return flag === '0' || flag === 'false'
 }
 
-// In-memory copy of *this* process's record. Holding it here lets update()
-// re-write a record whose file was deleted (e.g. `cypress cache clear` while
-// running, or a lost initial write) without threading projectRoot down into
-// the browser layer — the browser only knows its own CDP endpoint. It also
-// backs the discovery probe route, which must answer from live state, not disk.
-let currentRecord: RunnerDiscoveryRecord | null = null
+// In-memory state for *this* process. Backs the discovery probe route — which
+// must answer from live state, not disk — and is the only home of the CDP
+// endpoint, which is never persisted.
+let currentState: LiveRunnerState | null = null
 
-// Distinguishes concurrent atomic writes so their temp files never collide.
-let writeSeq = 0
-
-// All persists run through this chain so writes never interleave and remove()
-// can wait out an in-flight write before deleting — otherwise a persist racing
-// remove() would re-create the record file after close, leaving a phantom
-// record with a live pid for as long as the process stays up (`cypress open`).
+// Persists are chained so remove() can wait out an in-flight write before
+// deleting — otherwise a write racing remove() would re-create the record
+// file after close, leaving a phantom record with a live pid for as long as
+// the process stays up (`cypress open`).
 let persistChain: Promise<void> = Promise.resolve()
 
 const persist = (record: RunnerDiscoveryRecord): Promise<void> => {
@@ -101,8 +108,9 @@ const persist = (record: RunnerDiscoveryRecord): Promise<void> => {
     // Write to a temp sibling then rename so a reader never sees a partial
     // file. Plain rename (not fs-extra move, which removes-then-renames and
     // opens an ENOENT window) — same-directory rename replaces atomically.
-    // The `.tmp` suffix keeps it out of the reader's `<pid>.json` match.
-    const tmpPath = `${finalPath}.${writeSeq += 1}.tmp`
+    // The `.tmp` suffix keeps it out of the reader's `<pid>.json` match, and
+    // the pid in the path keeps concurrent processes' temp files apart.
+    const tmpPath = `${finalPath}.tmp`
 
     await fs.ensureDir(dir)
     await fs.writeJson(tmpPath, record)
@@ -120,10 +128,10 @@ const persist = (record: RunnerDiscoveryRecord): Promise<void> => {
 
 export const runnerDiscovery = {
   /**
-   * Initial write at server boot, after the HTTP server's port is bound (the
-   * record must never advertise a port that isn't accepting connections yet).
-   * Seeds the record with no browser attached; the browser CDP lifecycle flips
-   * `cdpStatus` later via update().
+   * The record's one disk write, at server boot, after the HTTP server's port
+   * is bound (the record must never advertise a port that isn't accepting
+   * connections yet). Every persisted field is fixed for as long as the
+   * record is published, so nothing ever re-writes the file.
    */
   async write ({ projectRoot, serverPort }: { projectRoot: string, serverPort: number }): Promise<void> {
     if (isDisabled()) {
@@ -137,13 +145,9 @@ export const runnerDiscovery = {
       projectRoot: path.resolve(projectRoot),
       serverPort,
       instanceId: crypto.randomUUID(),
-      cdpStatus: 'no_browser',
-      cdpBrowserWsUrl: null,
     }
 
-    // Set the in-memory truth first; a transient disk failure must not stop a
-    // later update() from re-publishing the full record.
-    currentRecord = record
+    currentState = { ...record, cdpBrowserWsUrl: null }
 
     try {
       await persist(record)
@@ -154,32 +158,28 @@ export const runnerDiscovery = {
   },
 
   /**
-   * Merge-patch the record as the browser CDP lifecycle moves. Re-writes from
-   * the in-memory record, so a missing file (cleared cache, lost initial write)
-   * is re-created rather than silently dropped.
+   * Track where the browser's CDP endpoint currently lives (null when the
+   * browser goes away). Memory-only: readers receive it in the probe
+   * response, so the on-disk record never needs a re-write as browsers come
+   * and go.
    */
-  async update (patch: Partial<Pick<RunnerDiscoveryRecord, 'cdpStatus' | 'cdpBrowserWsUrl'>>): Promise<void> {
-    if (isDisabled() || !currentRecord) {
+  setCdpBrowserWsUrl (cdpBrowserWsUrl: string | null): void {
+    if (!currentState) {
       return
     }
 
-    currentRecord = { ...currentRecord, ...patch }
-
-    try {
-      await persist(currentRecord)
-      debug('updated runner discovery record %o', currentRecord)
-    } catch (err) {
-      debug('failed to update runner discovery record: %o', err)
-    }
+    currentState = { ...currentState, cdpBrowserWsUrl }
+    debug('runner discovery cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
   },
 
   /**
-   * The live record for this process, or null when none is published. Backs
+   * The live state for this process, or null when none is published. Backs
    * the `/__cypress/runner-discovery/:instanceId` probe route — readers treat
-   * a matching instanceId echo as the proof of liveness.
+   * a matching instanceId echo as the proof of liveness, and take the browser
+   * CDP state from the same response.
    */
-  getCurrent (): RunnerDiscoveryRecord | null {
-    return currentRecord
+  getCurrent (): LiveRunnerState | null {
+    return currentState
   },
 
   /**
@@ -188,20 +188,20 @@ export const runnerDiscovery = {
    * and `cypress cache prune` reaps them.
    */
   async remove (): Promise<void> {
-    const record = currentRecord
+    const state = currentState
 
-    currentRecord = null
+    currentState = null
 
-    if (!record) {
+    if (!state) {
       return
     }
 
     try {
       // Wait out any in-flight persist so it can't re-create the file after
-      // we delete it. New persists can't start: currentRecord is now null.
+      // we delete it. New persists can't start: currentState is now null.
       await persistChain
-      await fs.remove(getRecordPath(record.pid))
-      debug('removed runner discovery record for pid %d', record.pid)
+      await fs.remove(getRecordPath(state.pid))
+      debug('removed runner discovery record for pid %d', state.pid)
     } catch (err) {
       debug('failed to remove runner discovery record: %o', err)
     }
@@ -210,7 +210,6 @@ export const runnerDiscovery = {
 
 // Test-only: reset the in-memory singleton between cases.
 export const _resetForTesting = (): void => {
-  currentRecord = null
-  writeSeq = 0
+  currentState = null
   persistChain = Promise.resolve()
 }
