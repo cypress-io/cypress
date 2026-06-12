@@ -11,7 +11,7 @@ export type { ReadyRunnerDiscoveryRecord, RunnerDiscoveryErrorCode, RunnerDiscov
 
 export { isPidAlive, verifyRunnerRecord } from './liveness'
 
-export { getRunnerDiscoveryDir, pruneDeadRecords, readRunnerRecords } from './store'
+export { getRunnerDiscoveryDir, pruneDeadDiscoveryRecords, readRunnerRecords } from './store'
 
 export interface FindRunnerOptions {
   /**

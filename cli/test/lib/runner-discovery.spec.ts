@@ -12,7 +12,7 @@ import {
   findLiveRunner,
   findReadyRunner,
   getRunnerDiscoveryDir,
-  pruneDeadRecords,
+  pruneDeadDiscoveryRecords,
   RunnerDiscoveryError,
 } from '../../lib/runner-discovery'
 
@@ -333,7 +333,7 @@ describe('lib/runner-discovery', () => {
     })
   })
 
-  describe('.pruneDeadRecords', () => {
+  describe('.pruneDeadDiscoveryRecords', () => {
     it('removes dead-pid and unverified live-pid records, keeps verified ones and non-record files', async () => {
       const livePort = await startFakeRunner()
       const closedPort = await getClosedPort()
@@ -352,7 +352,7 @@ describe('lib/runner-discovery', () => {
 
       stubKill({ alive: [111, 333] })
 
-      expect(await pruneDeadRecords()).toBe(2)
+      expect(await pruneDeadDiscoveryRecords()).toBe(2)
       expect(await fs.pathExists(`${RUNNERS_DIR}/111.json`)).toBe(true)
       expect(await fs.pathExists(`${RUNNERS_DIR}/222.json`)).toBe(false)
       expect(await fs.pathExists(`${RUNNERS_DIR}/333.json`)).toBe(false)
@@ -369,7 +369,7 @@ describe('lib/runner-discovery', () => {
 
       stubKill({ alive: [111, 222] })
 
-      expect(await pruneDeadRecords()).toBe(0)
+      expect(await pruneDeadDiscoveryRecords()).toBe(0)
       expect(await fs.pathExists(`${RUNNERS_DIR}/111.json`)).toBe(true)
       expect(await fs.pathExists(`${RUNNERS_DIR}/222.json`)).toBe(true)
     })
@@ -377,7 +377,7 @@ describe('lib/runner-discovery', () => {
     it('returns 0 when the runners dir does not exist', async () => {
       mockfs({ [CACHE_DIR]: {} })
 
-      expect(await pruneDeadRecords()).toBe(0)
+      expect(await pruneDeadDiscoveryRecords()).toBe(0)
     })
   })
 })

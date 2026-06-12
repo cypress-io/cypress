@@ -68,7 +68,7 @@ export const readRunnerRecords = async (): Promise<RunnerDiscoveryRecord[]> => {
  * pid liveness is the best remaining signal, and deleting is irreversible.
  * Returns the number of records removed.
  */
-export const pruneDeadRecords = async (probeTimeoutMs?: number): Promise<number> => {
+export const pruneDeadDiscoveryRecords = async (probeTimeoutMs?: number): Promise<number> => {
   const dir = getRunnerDiscoveryDir()
 
   let removed = 0
@@ -101,6 +101,8 @@ export const pruneDeadRecords = async (probeTimeoutMs?: number): Promise<number>
       removed += 1
     }
   }
+
+  debug('pruned %d dead runner discovery record(s)', removed)
 
   return removed
 }

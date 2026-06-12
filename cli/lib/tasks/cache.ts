@@ -10,7 +10,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import chalk from 'chalk'
 import _ from 'lodash'
 import getFolderSize from './get-folder-size'
-import { pruneDeadRecords } from '../runner-discovery'
+import { pruneDeadDiscoveryRecords } from '../runner-discovery'
 
 dayjs.extend(relativeTime)
 
@@ -62,11 +62,7 @@ const prune = async (): Promise<void> => {
       logger.always(`No binary caches found to prune.`)
     }
 
-    const removedRecords = await pruneDeadRecords()
-
-    if (removedRecords > 0) {
-      logger.always(`Removed ${removedRecords} stale Cypress runner discovery record${removedRecords === 1 ? '' : 's'}.`)
-    }
+    await pruneDeadDiscoveryRecords()
   } catch (e: any) {
     if (e.code === 'ENOENT') {
       logger.always(`No Cypress cache was found at ${cacheDir}. Nothing to prune.`)
