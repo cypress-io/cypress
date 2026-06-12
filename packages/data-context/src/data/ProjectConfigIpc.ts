@@ -397,7 +397,9 @@ export class ProjectConfigIpc extends EventEmitter {
 
     // require_async_child removes this from NODE_OPTIONS once the loader has been applied
     // https://github.com/cypress-io/cypress/issues/34076
-    childOptions.env.CYPRESS_INTERNAL_TSX_LOADER_OPTIONS = tsxLoader
+    // must use the --key=value form: minimist would parse the loader value as a
+    // separate flag otherwise, since it begins with dashes (--import/--loader)
+    configProcessArgs.push(`--tsxLoaderOptions=${tsxLoader}`)
 
     const telemetryCtx = encodeTelemetryContext({ context: telemetry.getActiveContextObject(), version: pkg.version })
 

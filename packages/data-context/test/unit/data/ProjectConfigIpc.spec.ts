@@ -225,11 +225,9 @@ describe('ProjectConfigIpc', () => {
 
               // require_async_child uses this marker to remove the loader from NODE_OPTIONS
               // https://github.com/cypress-io/cypress/issues/34076
-              expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
-                env: expect.objectContaining({
-                  CYPRESS_INTERNAL_TSX_LOADER_OPTIONS: expect.stringMatching(/cypress\/node_modules\/tsx\/dist\/loader.mjs/),
-                }),
-              }))
+              expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining([
+                expect.stringMatching(/^--tsxLoaderOptions=--(import|loader) ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"$/),
+              ]), expect.any(Object))
 
               if (project.includes('config-with-ts-module') || project.includes('config-with-module-resolution-bundler')) {
                 // these projects have typescript installed and have a tsconfig, so the TSX_TSCONFIG_PATH should be set to the project path
