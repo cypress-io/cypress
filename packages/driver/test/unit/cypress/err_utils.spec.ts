@@ -29,17 +29,21 @@ describe('err_utils', () => {
   })
 
   describe('logError', () => {
-    const createCypress = (runnableId: string | undefined = 'r1') => {
+    const createCypress = (runnableId: string | undefined = 'r1', retry = 0) => {
       const log = { set: vi.fn() }
 
       return {
         cypress: {
           log: vi.fn().mockReturnValue(log),
-          state: vi.fn((key: string) => (key === 'runnable' ? { id: runnableId } : undefined)),
+          state: vi.fn((key: string) => (key === 'runnable' ? { id: runnableId, type: 'test', _currentRetry: retry } : undefined)),
         },
         log,
       }
     }
+
+    beforeEach(() => {
+      errUtils.resetUncaughtErrorLogState()
+    })
 
     it('takes a DOM snapshot for an unhandled uncaught exception', () => {
       const { cypress } = createCypress('snapshot-unhandled')
@@ -114,6 +118,51 @@ describe('err_utils', () => {
       expect(second.cypress.log).toHaveBeenCalledTimes(1)
       expect(first.log.set).not.toHaveBeenCalled()
       expect(second.log.set).not.toHaveBeenCalled()
+    })
+
+    it('does NOT dedupe identical messages across test retries', () => {
+      const firstAttempt = createCypress('retry-test', 0)
+      const secondAttempt = createCypress('retry-test', 1)
+      const err = () => new Error('same message')
+
+      errUtils.logError(firstAttempt.cypress, 'error', err(), true)
+      errUtils.logError(secondAttempt.cypress, 'error', err(), true)
+
+      expect(firstAttempt.cypress.log).toHaveBeenCalledTimes(1)
+      expect(secondAttempt.cypress.log).toHaveBeenCalledTimes(1)
+      expect(firstAttempt.log.set).not.toHaveBeenCalled()
+      expect(secondAttempt.log.set).not.toHaveBeenCalled()
+    })
+
+    it('creates a new failing log when a suppressed error becomes unhandled', () => {
+      const { cypress, log } = createCypress('handled-to-unhandled')
+      const err = new Error('same message')
+
+      errUtils.logError(cypress, 'error', err, true)
+      errUtils.logError(cypress, 'error', err, false)
+
+      expect(cypress.log).toHaveBeenCalledTimes(2)
+      expect(cypress.log.mock.calls[1][0]).toMatchObject({
+        name: 'uncaught exception',
+        snapshot: true,
+        error: err,
+      })
+
+      expect(log.set).not.toHaveBeenCalled()
+    })
+
+    it('clears dedup state on resetUncaughtErrorLogState', () => {
+      const { cypress, log } = createCypress('reset-dedup')
+      const err = () => new Error('same message')
+
+      errUtils.logError(cypress, 'error', err(), true)
+      errUtils.logError(cypress, 'error', err(), true)
+      errUtils.resetUncaughtErrorLogState()
+      errUtils.logError(cypress, 'error', err(), true)
+      errUtils.logError(cypress, 'error', err(), true)
+
+      expect(cypress.log).toHaveBeenCalledTimes(2)
+      expect(log.set).toHaveBeenCalledTimes(2)
     })
   })
 

@@ -668,6 +668,7 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
       this.queue.clear()
       this.resetTimer()
       this.resetStability()
+      $errUtils.resetUncaughtErrorLogState()
       this.removeAllListeners()
       this.testConfigOverride.restoreAndSetTestConfigOverrides(test, this.Cypress.config, this.Cypress.env, this.Cypress.expose)
     } catch (err) {

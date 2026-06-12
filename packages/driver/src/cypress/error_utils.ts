@@ -614,21 +614,43 @@ const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
 }
 
 // Tracks the most recent uncaught-exception log so consecutive, identical
-// uncaught errors within the same test collapse into a single, updating log
-// entry rather than creating a brand new log for each occurrence. We key on the
-// runnable id so we never update a log belonging to a previous test. Only a
-// string id and a single log reference are retained, so this does not anchor
-// runnables, snapshots, or DOM across tests.
+// uncaught errors within the same test attempt collapse into a single, updating
+// log entry rather than creating a brand new log for each occurrence. We key
+// on the runnable id and retry attempt so we never update a log belonging to a
+// previous test or retry. Only a string id and a single log reference are
+// retained, so this does not anchor runnables, snapshots, or DOM across tests.
 let lastUncaughtErrorLog: any = null
 let lastUncaughtErrorMessage: string | null = null
 let lastUncaughtErrorRunnableId: string | undefined
+let lastUncaughtErrorRetry = 0
 let lastUncaughtErrorCount = 0
+let lastUncaughtErrorHandled = false
+
+const getUncaughtErrorRetry = (runnable: { _currentRetry?: number, ctx?: { currentTest?: { _currentRetry?: number } }, type?: string } | undefined) => {
+  if (!runnable) {
+    return 0
+  }
+
+  const test = runnable.ctx?.currentTest || (runnable.type === 'test' ? runnable : undefined)
+
+  return test?._currentRetry || 0
+}
+
+const resetUncaughtErrorLogState = () => {
+  lastUncaughtErrorLog = null
+  lastUncaughtErrorMessage = null
+  lastUncaughtErrorRunnableId = undefined
+  lastUncaughtErrorRetry = 0
+  lastUncaughtErrorCount = 0
+  lastUncaughtErrorHandled = false
+}
 
 const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = false) => {
   const error = toLoggableError(err)
   const message = `${error.name || 'Error'}: ${error.message}`
   const runnable = typeof Cypress.state === 'function' ? Cypress.state('runnable') : undefined
   const runnableId = runnable?.id
+  const retry = getUncaughtErrorRetry(runnable)
 
   // Collapse consecutive identical uncaught exceptions within the same test into
   // a single, updating log entry. A repeating uncaught error (e.g. a benign
@@ -640,13 +662,21 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
     lastUncaughtErrorLog &&
     runnableId &&
     lastUncaughtErrorMessage === message &&
-    lastUncaughtErrorRunnableId === runnableId
+    lastUncaughtErrorRunnableId === runnableId &&
+    lastUncaughtErrorRetry === retry &&
+    // do not collapse an unhandled error into a previously suppressed log
+    !(!handled && lastUncaughtErrorHandled)
   ) {
     lastUncaughtErrorCount += 1
 
     lastUncaughtErrorLog.set({
       message: `${message} (${lastUncaughtErrorCount})`,
+      ...(!handled ? { error: err } : {}),
     })
+
+    if (!handled) {
+      lastUncaughtErrorHandled = false
+    }
 
     return
   }
@@ -679,7 +709,9 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
   lastUncaughtErrorLog = log ?? null
   lastUncaughtErrorMessage = message
   lastUncaughtErrorRunnableId = runnableId
+  lastUncaughtErrorRetry = retry
   lastUncaughtErrorCount = 1
+  lastUncaughtErrorHandled = handled
 }
 
 interface LoggableError { name?: string, message: string }
@@ -742,6 +774,7 @@ export default {
   isCypressErr,
   isSpecError,
   logError,
+  resetUncaughtErrorLogState,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,
