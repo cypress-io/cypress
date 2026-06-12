@@ -13,10 +13,8 @@ import { run as runRequireAsyncChild } from './run_require_async_child'
 
 const argv = minimist(process.argv.slice(2))
 
-// remove the injected tsx loader from NODE_OPTIONS so it does not re-execute in worker
+// strip the injected tsx loader from NODE_OPTIONS so it does not re-execute in worker
 // threads spawned by user dependencies (https://github.com/cypress-io/cypress/issues/34076)
-// NOTE: the loader string contains spaces/quotes; it arrives as a single atomic argv
-// element because fork/spawn take an args array (no shell parsing)
 if (argv.tsxLoaderOptions && process.env.NODE_OPTIONS) {
   const scrubbed = process.env.NODE_OPTIONS.replace(argv.tsxLoaderOptions, '').trim()
 

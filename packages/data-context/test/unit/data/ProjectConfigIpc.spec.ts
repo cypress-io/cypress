@@ -223,8 +223,7 @@ describe('ProjectConfigIpc', () => {
                 }))
               }
 
-              // require_async_child uses this marker to remove the loader from NODE_OPTIONS
-              // https://github.com/cypress-io/cypress/issues/34076
+              // the marker require_async_child uses to strip the loader from NODE_OPTIONS
               expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining([
                 expect.stringMatching(/^--tsxLoaderOptions=--(import|loader) ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"$/),
               ]), expect.any(Object))
