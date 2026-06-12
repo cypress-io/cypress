@@ -1,13 +1,13 @@
 import path from 'path'
 
 import { RunnerDiscoveryError } from './record'
-import type { ReadyRunnerDiscoveryRecord, RunnerDiscoveryRecord } from './record'
+import type { LiveRunnerState, ReadyRunnerState, RunnerDiscoveryRecord } from './record'
 import { isPidAlive, verifyRunnerRecord } from './liveness'
 import { readRunnerRecords } from './store'
 
 export { RunnerDiscoveryError } from './record'
 
-export type { ReadyRunnerDiscoveryRecord, RunnerDiscoveryErrorCode, RunnerDiscoveryRecord } from './record'
+export type { LiveRunnerState, ReadyRunnerState, RunnerDiscoveryErrorCode, RunnerDiscoveryRecord } from './record'
 
 export { isPidAlive, verifyRunnerRecord } from './liveness'
 
@@ -30,12 +30,14 @@ const matchesProject = (record: RunnerDiscoveryRecord, projectRoot: string): boo
 /**
  * Find the first verified-live Cypress runner for a project. A record only
  * counts as live when its writer echoes the record's instanceId from the
- * recorded server port — see {@link verifyRunnerRecord}.
+ * recorded server port — see {@link verifyRunnerRecord}. Resolves to the
+ * record merged with the runner's live browser CDP state, which the probe
+ * response carries.
  *
  * @throws {RunnerDiscoveryError} `NO_DISCOVERY_FILE` when no record matches the project
  * @throws {RunnerDiscoveryError} `STALE_DISCOVERY_FILE` when records match but none verify as alive
  */
-export const findLiveRunner = async (projectRoot: string, options: FindRunnerOptions = {}): Promise<RunnerDiscoveryRecord> => {
+export const findLiveRunner = async (projectRoot: string, options: FindRunnerOptions = {}): Promise<LiveRunnerState> => {
   const records = await readRunnerRecords()
 
   let matches = records.filter((record) => matchesProject(record, projectRoot))
@@ -57,8 +59,10 @@ export const findLiveRunner = async (projectRoot: string, options: FindRunnerOpt
       continue
     }
 
-    if (await verifyRunnerRecord(record, options.probeTimeoutMs)) {
-      return record
+    const live = await verifyRunnerRecord(record, options.probeTimeoutMs)
+
+    if (live) {
+      return live
     }
   }
 
@@ -75,15 +79,15 @@ export const findLiveRunner = async (projectRoot: string, options: FindRunnerOpt
  *
  * @throws {RunnerDiscoveryError} `NO_BROWSER_ATTACHED` when the runner is live but no browser is connected
  */
-export const findReadyRunner = async (projectRoot: string, options: FindRunnerOptions = {}): Promise<ReadyRunnerDiscoveryRecord> => {
-  const record = await findLiveRunner(projectRoot, options)
+export const findReadyRunner = async (projectRoot: string, options: FindRunnerOptions = {}): Promise<ReadyRunnerState> => {
+  const runner = await findLiveRunner(projectRoot, options)
 
-  if (record.cdpStatus !== 'ready' || !record.cdpBrowserWsUrl) {
+  if (!runner.cdpBrowserWsUrl) {
     throw new RunnerDiscoveryError(
       'NO_BROWSER_ATTACHED',
       `Cypress is running for ${projectRoot}, but no browser is attached yet. Open a browser in Cypress, then try again.`,
     )
   }
 
-  return record as ReadyRunnerDiscoveryRecord
+  return runner as ReadyRunnerState
 }

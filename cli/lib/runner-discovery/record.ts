@@ -6,6 +6,11 @@ const MIN_SCHEMA_VERSION = 3
  * Mirror of `@packages/server`'s `RunnerDiscoveryRecord`. The `cypress` CLI is
  * published separately and cannot import server code at runtime, so the shape
  * is duplicated here; it is the cross-process contract.
+ *
+ * The record holds only identity fields, all fixed for as long as it is
+ * published — anything that changes while Cypress runs (the browser CDP
+ * state) arrives in the liveness probe response instead, never from disk
+ * (see {@link LiveRunnerState}).
  */
 export interface RunnerDiscoveryRecord {
   schemaVersion: number
@@ -18,16 +23,23 @@ export interface RunnerDiscoveryRecord {
   serverPort: number
   /** Random per-process token echoed by the runner's probe route. */
   instanceId: string
-  cdpStatus: 'no_browser' | 'ready'
-  /** Browser-level CDP WebSocket URL; non-null only while `cdpStatus` is `ready`. */
+}
+
+/**
+ * A verified-live runner: its discovery record plus the live browser CDP
+ * state carried by the probe response. The probe is the sole source of
+ * `cdpBrowserWsUrl` — only the runner's own memory knows whether (and where)
+ * a browser is attached right now.
+ */
+export interface LiveRunnerState extends RunnerDiscoveryRecord {
+  /** Browser-level CDP WebSocket URL; null while no browser is attached. */
   cdpBrowserWsUrl: string | null
 }
 
 /**
- * A record narrowed to a live CDP connection — cdpBrowserWsUrl is non-null.
+ * A live runner narrowed to an attached browser — cdpBrowserWsUrl is non-null.
  */
-export interface ReadyRunnerDiscoveryRecord extends RunnerDiscoveryRecord {
-  cdpStatus: 'ready'
+export interface ReadyRunnerState extends LiveRunnerState {
   cdpBrowserWsUrl: string
 }
 

@@ -41,11 +41,11 @@ const makeRecord = (overrides: Record<string, any> = {}) => {
     projectRoot: PROJECT,
     serverPort: 1,
     instanceId: INSTANCE_ID,
-    cdpStatus: 'no_browser',
-    cdpBrowserWsUrl: null,
     ...overrides,
   })
 }
+
+const CDP_WS_URL = 'ws://127.0.0.1:9222/devtools/browser/abc'
 
 // Deterministically control PID liveness regardless of the host machine.
 const stubKill = ({ alive = [], eperm = [] }: { alive?: number[], eperm?: number[] }) => {
@@ -146,31 +146,40 @@ describe('lib/runner-discovery', () => {
       return JSON.parse(makeRecord({ serverPort, instanceId }))
     }
 
-    it('is true when the runner echoes the instanceId', async () => {
-      const port = await startFakeRunner()
+    it('resolves the record with the live CDP state when the runner echoes the instanceId', async () => {
+      const port = await startFakeRunner({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL } })
 
-      expect(await verifyRunnerRecord(recordFor(port))).toBe(true)
+      expect(await verifyRunnerRecord(recordFor(port))).toEqual({
+        ...recordFor(port),
+        cdpBrowserWsUrl: CDP_WS_URL,
+      })
     })
 
-    it('is false when nothing is listening on the recorded port', async () => {
+    it('normalizes a missing or junk cdpBrowserWsUrl in the probe response to null', async () => {
+      const port = await startFakeRunner({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: 42 } })
+
+      expect((await verifyRunnerRecord(recordFor(port)))!.cdpBrowserWsUrl).toBeNull()
+    })
+
+    it('is null when nothing is listening on the recorded port', async () => {
       const port = await getClosedPort()
 
-      expect(await verifyRunnerRecord(recordFor(port))).toBe(false)
+      expect(await verifyRunnerRecord(recordFor(port))).toBeNull()
     })
 
-    it('is false when the responder does not know the instanceId (recycled port)', async () => {
+    it('is null when the responder does not know the instanceId (recycled port)', async () => {
       const port = await startFakeRunner({ instanceId: 'some-other-instance' })
 
-      expect(await verifyRunnerRecord(recordFor(port))).toBe(false)
+      expect(await verifyRunnerRecord(recordFor(port))).toBeNull()
     })
 
-    it('is false when the echoed instanceId does not match', async () => {
+    it('is null when the echoed instanceId does not match', async () => {
       const port = await startFakeRunner({ respondWith: { instanceId: 'impostor' } })
 
-      expect(await verifyRunnerRecord(recordFor(port))).toBe(false)
+      expect(await verifyRunnerRecord(recordFor(port))).toBeNull()
     })
 
-    it('is false when the response is not JSON', async () => {
+    it('is null when the response is not JSON', async () => {
       const server = http.createServer((_req, res) => res.end('<html>not a runner</html>'))
 
       servers.push(server)
@@ -178,13 +187,13 @@ describe('lib/runner-discovery', () => {
 
       const { port } = server.address() as AddressInfo
 
-      expect(await verifyRunnerRecord(recordFor(port))).toBe(false)
+      expect(await verifyRunnerRecord(recordFor(port))).toBeNull()
     })
 
-    it('is false when the probe times out', async () => {
+    it('is null when the probe times out', async () => {
       const port = await startFakeRunner({ hang: true })
 
-      expect(await verifyRunnerRecord(recordFor(port), 100)).toBe(false)
+      expect(await verifyRunnerRecord(recordFor(port), 100)).toBeNull()
     })
   })
 
@@ -214,15 +223,17 @@ describe('lib/runner-discovery', () => {
   })
 
   describe('.findLiveRunner', () => {
-    it('returns the record once its runner echoes the instanceId', async () => {
+    it('returns the live runner state once its runner echoes the instanceId', async () => {
       const port = await startFakeRunner()
 
       mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
       stubKill({ alive: [111] })
 
-      const record = await findLiveRunner(PROJECT)
+      const runner = await findLiveRunner(PROJECT)
 
-      expect(record.pid).toBe(111)
+      expect(runner.pid).toBe(111)
+      // The probe response carried no endpoint — no browser is attached.
+      expect(runner.cdpBrowserWsUrl).toBeNull()
     })
 
     it('throws NO_DISCOVERY_FILE when no record matches the project', async () => {
@@ -287,40 +298,23 @@ describe('lib/runner-discovery', () => {
   })
 
   describe('.findReadyRunner', () => {
-    it('returns a record with a live CDP endpoint', async () => {
-      const port = await startFakeRunner()
+    it('takes the live CDP endpoint from the probe response, not the disk record', async () => {
+      const port = await startFakeRunner({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL } })
 
-      mockfs({
-        [RUNNERS_DIR]: {
-          '111.json': makeRecord({ pid: 111, serverPort: port, cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' }),
-        },
-      })
-
+      // The disk record carries no CDP state at all — only the runner's
+      // memory knows where the browser is.
+      mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
       stubKill({ alive: [111] })
 
-      const record = await findReadyRunner(PROJECT)
+      const runner = await findReadyRunner(PROJECT)
 
-      expect(record.cdpBrowserWsUrl).toBe('ws://127.0.0.1:9222/devtools/browser/abc')
+      expect(runner.cdpBrowserWsUrl).toBe(CDP_WS_URL)
     })
 
     it('throws NO_BROWSER_ATTACHED when the runner is live but has no browser', async () => {
-      const port = await startFakeRunner()
+      const port = await startFakeRunner({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: null } })
 
-      mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port, cdpStatus: 'no_browser' }) } })
-      stubKill({ alive: [111] })
-
-      await expect(findReadyRunner(PROJECT)).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })
-    })
-
-    it('throws NO_BROWSER_ATTACHED for a ready record missing cdpBrowserWsUrl', async () => {
-      const port = await startFakeRunner()
-
-      mockfs({
-        [RUNNERS_DIR]: {
-          '111.json': makeRecord({ pid: 111, serverPort: port, cdpStatus: 'ready', cdpBrowserWsUrl: null }),
-        },
-      })
-
+      mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
       stubKill({ alive: [111] })
 
       await expect(findReadyRunner(PROJECT)).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })

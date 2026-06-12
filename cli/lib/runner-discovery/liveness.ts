@@ -1,7 +1,7 @@
 import http from 'http'
 import Debug from 'debug'
 
-import type { RunnerDiscoveryRecord } from './record'
+import type { LiveRunnerState, RunnerDiscoveryRecord } from './record'
 
 const debug = Debug('cypress:cli:runner-discovery')
 
@@ -33,10 +33,13 @@ export const isPidAlive = (pid: number): boolean => {
  * route on the recorded server port and require it to echo the record's
  * random instanceId. A recycled pid — or even a recycled port — cannot
  * produce a matching echo, so this never reports a crashed runner as live.
- * Any failure (refused, timeout, non-200, junk body, token mismatch) means
- * "not verified"; it never throws.
+ *
+ * A matching echo also carries the runner's live browser CDP state — the
+ * probe response is its only source — so verification resolves to the record
+ * merged with that state. Any failure (refused, timeout, non-200, junk body,
+ * token mismatch) resolves null; it never throws.
  */
-export const verifyRunnerRecord = (record: RunnerDiscoveryRecord, timeoutMs: number = DEFAULT_PROBE_TIMEOUT_MS): Promise<boolean> => {
+export const verifyRunnerRecord = (record: RunnerDiscoveryRecord, timeoutMs: number = DEFAULT_PROBE_TIMEOUT_MS): Promise<LiveRunnerState | null> => {
   return new Promise((resolve) => {
     const request = http.get({
       host: PROBE_HOST,
@@ -48,25 +51,36 @@ export const verifyRunnerRecord = (record: RunnerDiscoveryRecord, timeoutMs: num
 
       response.setEncoding('utf8')
       response.on('data', (chunk) => body += chunk)
-      response.on('error', () => resolve(false))
+      response.on('error', () => resolve(null))
       response.on('end', () => {
         if (response.statusCode !== 200) {
-          return resolve(false)
+          return resolve(null)
         }
 
         try {
-          resolve(JSON.parse(body).instanceId === record.instanceId)
+          const live = JSON.parse(body)
+
+          if (live.instanceId !== record.instanceId) {
+            return resolve(null)
+          }
+
+          // Keep the already-validated record authoritative for its own
+          // fields; the probe response contributes only the live CDP state.
+          resolve({
+            ...record,
+            cdpBrowserWsUrl: typeof live.cdpBrowserWsUrl === 'string' ? live.cdpBrowserWsUrl : null,
+          })
         } catch (err) {
-          resolve(false)
+          resolve(null)
         }
       })
     })
 
-    // Destroying on timeout surfaces as an 'error', resolving false below.
+    // Destroying on timeout surfaces as an 'error', resolving null below.
     request.on('timeout', () => request.destroy())
     request.on('error', (err) => {
       debug('liveness probe failed for pid %d on port %d: %o', record.pid, record.serverPort, err)
-      resolve(false)
+      resolve(null)
     })
   })
 }
