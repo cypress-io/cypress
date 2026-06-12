@@ -405,6 +405,7 @@ system-tests/lib/validations
 .cursor/*
 !.cursor/BUGBOT.md
 !.cursor/skills
+!.cursor/automations
 !.cursor/environment.json
 !.cursor/Dockerfile
 

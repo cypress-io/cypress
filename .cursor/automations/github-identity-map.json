@@ -1,0 +1,21 @@
+{
+  "team_slack_tag": "@app-foundations",
+  "automerge_bots": [
+    "cypress-bot",
+    "cypress-bot[bot]",
+    "dependabot",
+    "dependabot[bot]",
+    "github-actions",
+    "github-actions[bot]"
+  ],
+  "users": {
+    "cacieprins": {
+      "slack": "@cacieprins",
+      "circleci": "cacieprins"
+    },
+    "AtofStryker": {
+      "slack": "@AtofStryker",
+      "circleci": "AtofStryker"
+    }
+  }
+}
