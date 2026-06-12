@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import pkg from '@packages/root'
-import { getCypressCacheRoot } from './util/cypress-cache'
+import { resolveCypressCacheRoot } from './util/cypress-cache'
 
 const debug = Debug('cypress:server:runner-discovery')
 
@@ -47,7 +47,7 @@ export interface RunnerDiscoveryRecord {
  * through the same CYPRESS_CACHE_FOLDER logic, so they agree by construction.
  */
 export const getRunnerDiscoveryDir = (): string => {
-  return path.join(getCypressCacheRoot(), RUNNERS_DIRNAME)
+  return path.join(resolveCypressCacheRoot(), RUNNERS_DIRNAME)
 }
 
 const getRecordPath = (pid: number): string => {

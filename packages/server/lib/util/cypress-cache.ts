@@ -41,7 +41,7 @@ const readEnvVar = (varName: string): string | undefined => {
  * binaries, bundles, runner discovery records — resolves to the same path
  * whether it's the server or the CLI doing the lookup.
  */
-export const getCypressCacheRoot = (): string => {
+export const resolveCypressCacheRoot = (): string => {
   const override = readEnvVar('CYPRESS_CACHE_FOLDER')
 
   if (override) {

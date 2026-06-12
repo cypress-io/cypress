@@ -2,14 +2,14 @@ import path from 'path'
 import os from 'os'
 import { ensureDir, remove } from 'fs-extra'
 import Debug from 'debug'
-import { getCypressCacheRoot } from '../../util/cypress-cache'
+import { resolveCypressCacheRoot } from '../../util/cypress-cache'
 
 const debug = Debug('cypress:server:cloud:bundles:cache-root')
 
 const BUNDLES_DIRNAME = 'bundles'
 
 const getBundleCacheRoot = (): string => {
-  return path.join(getCypressCacheRoot(), BUNDLES_DIRNAME)
+  return path.join(resolveCypressCacheRoot(), BUNDLES_DIRNAME)
 }
 
 export const getBundleCacheDir = (kind: 'cy-prompt' | 'studio'): string => {
