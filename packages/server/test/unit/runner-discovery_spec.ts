@@ -48,22 +48,26 @@ describe('lib/runner-discovery', () => {
 
   describe('.write', () => {
     it('writes a record named by pid with no browser attached', async () => {
-      await runnerDiscovery.write({ projectRoot: '/some/project' })
+      await runnerDiscovery.write({ projectRoot: '/some/project', serverPort: 4455 })
 
       const record = await fs.readJson(recordPath)
 
-      expect(record).to.deep.eq({
-        schemaVersion: 2,
+      expect(record).to.deep.include({
+        schemaVersion: 3,
         pid: process.pid,
         cypressVersion: pkg.version,
         projectRoot: path.resolve('/some/project'),
+        serverPort: 4455,
         cdpStatus: 'no_browser',
         cdpBrowserWsUrl: null,
       })
+
+      // Random per-process token backing the liveness probe.
+      expect(record.instanceId).to.be.a('string').and.match(/^[0-9a-f-]{36}$/)
     })
 
     it('leaves no temp files behind (atomic write)', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p' })
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
 
       const entries = await fs.readdir(getRunnerDiscoveryDir())
 
@@ -73,7 +77,7 @@ describe('lib/runner-discovery', () => {
     it('does nothing when disabled via env', async () => {
       process.env.CYPRESS_INTERNAL_RUNNER_DISCOVERY = '0'
 
-      await runnerDiscovery.write({ projectRoot: '/p' })
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
@@ -86,7 +90,7 @@ describe('lib/runner-discovery', () => {
       process.env.CYPRESS_CACHE_FOLDER = filePath
 
       // Resolves rather than throwing — the run must survive a failed write.
-      await runnerDiscovery.write({ projectRoot: '/p' })
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
 
       expect(await fs.pathExists(path.join(filePath, 'runners'))).to.be.false
     })
@@ -94,7 +98,7 @@ describe('lib/runner-discovery', () => {
 
   describe('.update', () => {
     it('merge-patches cdp fields onto the existing record', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p' })
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
       await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
 
       const record = await fs.readJson(recordPath)
@@ -106,8 +110,18 @@ describe('lib/runner-discovery', () => {
       })
     })
 
+    it('preserves the instanceId across updates', async () => {
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
+
+      const before = (await fs.readJson(recordPath)).instanceId
+
+      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
+
+      expect((await fs.readJson(recordPath)).instanceId).to.eq(before)
+    })
+
     it('re-creates a record whose file was deleted out from under it', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p' })
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
       await fs.remove(recordPath)
 
       await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
@@ -126,18 +140,52 @@ describe('lib/runner-discovery', () => {
     })
   })
 
+  describe('.getCurrent', () => {
+    it('is null before write and after remove', async () => {
+      expect(runnerDiscovery.getCurrent()).to.be.null
+
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
+      await runnerDiscovery.remove()
+
+      expect(runnerDiscovery.getCurrent()).to.be.null
+    })
+
+    it('reflects the live record, including update patches', async () => {
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
+      await runnerDiscovery.update({ cdpStatus: 'ready', cdpBrowserWsUrl: 'ws://127.0.0.1:9222/devtools/browser/abc' })
+
+      expect(runnerDiscovery.getCurrent()).to.deep.include({
+        serverPort: 4455,
+        cdpStatus: 'ready',
+      })
+
+      // The probe route answers from this object; it must match the disk record.
+      expect(runnerDiscovery.getCurrent()).to.deep.eq(await fs.readJson(recordPath))
+    })
+  })
+
   describe('.remove', () => {
     it('deletes the record file', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p' })
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
       await runnerDiscovery.remove()
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
 
     it('is idempotent and never throws', async () => {
-      await runnerDiscovery.write({ projectRoot: '/p' })
+      await runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
       await runnerDiscovery.remove()
       await runnerDiscovery.remove()
+
+      expect(await fs.pathExists(recordPath)).to.be.false
+    })
+
+    it('waits out an in-flight persist so the file cannot be resurrected', async () => {
+      // Don't await: the persist is still in flight when remove() starts.
+      const writing = runnerDiscovery.write({ projectRoot: '/p', serverPort: 4455 })
+
+      await runnerDiscovery.remove()
+      await writing
 
       expect(await fs.pathExists(recordPath)).to.be.false
     })
