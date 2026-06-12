@@ -372,6 +372,7 @@ const stabilityChanged = async (Cypress, state, config, stable) => {
       // If this request is still pending after the test run, resolve it, no commands were waiting on its result.
       cy.once('test:after:run', () => {
         if (promise.isPending()) {
+          debug('test:after:run fired while the page load promise was still pending; resolving it without window:load')
           options._log?.set('message', '').end()
           resolve()
         }
@@ -598,6 +599,8 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
         .delay(100)
         .then(() => {
           knownCommandCausedInstability = false
+
+          debug('go(%d): didUnload is %o 100ms after navigating history', num, didUnload)
 
           // if we've didUnload then we know we're
           // doing a full page refresh and we need

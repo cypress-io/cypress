@@ -152,6 +152,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
      */
     private suppressUnhandledEconnreset () {
       unhandledExceptions.handle((err: NodeJS.ErrnoException) => {
+        debug('unhandled exception with code %o observed while WebKit is running: %o', err.code, err)
+
         return err.code === 'ECONNRESET'
       })
 
