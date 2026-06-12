@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { cdpFetch } from '../../lib/cdp/fetch-codec'
-import { createFetchPausedEvent } from '../../lib/testing/fake-cri-client'
+import { createFetchPausedEvent, createFetchResponsePausedEvent, FakeCriClient } from '../../lib/testing/fake-cri-client'
 
 describe('cdpFetch', () => {
   describe('toHttpRequest', () => {
@@ -100,6 +100,67 @@ describe('cdpFetch', () => {
         { name: 'set-cookie', value: 'a=1' },
         { name: 'set-cookie', value: 'b=2' },
       ])
+    })
+  })
+
+  describe('toHttpResponse', () => {
+    it('maps response-stage pause metadata and decodes base64 bodies', () => {
+      const paused = createFetchResponsePausedEvent({
+        responseStatusCode: 201,
+        responseStatusText: 'Created',
+        responseHeaders: [
+          { name: 'content-type', value: 'text/plain' },
+          { name: 'set-cookie', value: 'a=1' },
+          { name: 'set-cookie', value: 'b=2' },
+        ],
+      })
+
+      const response = cdpFetch.toHttpResponse(paused, Buffer.from('hello').toString('base64'), true)
+
+      expect(response).toEqual({
+        statusCode: 201,
+        statusMessage: 'Created',
+        headers: {
+          'content-type': 'text/plain',
+          'set-cookie': ['a=1', 'b=2'],
+        },
+        body: Buffer.from('hello'),
+      })
+    })
+
+    it('keeps plain string bodies when not base64 encoded', () => {
+      const response = cdpFetch.toHttpResponse(createFetchResponsePausedEvent(), 'plain', false)
+
+      expect(response.body).toBe('plain')
+    })
+  })
+
+  describe('materializeResponse', () => {
+    it('reads the body via Fetch.getResponseBody', async () => {
+      const client = new FakeCriClient()
+
+      client.setResponseBody('req-1', 'origin-body')
+
+      const response = await cdpFetch.materializeResponse(client, createFetchResponsePausedEvent())
+
+      expect(client.getCommands('Fetch.getResponseBody')).toHaveLength(1)
+      expect(response.statusCode).toBe(200)
+      expect(response.body).toBe('origin-body')
+    })
+
+    it('skips the body read for redirects and tolerates an empty body', async () => {
+      const client = new FakeCriClient()
+
+      const response = await cdpFetch.materializeResponse(client, createFetchResponsePausedEvent({
+        responseStatusCode: 302,
+        responseStatusText: 'Found',
+        responseHeaders: [{ name: 'location', value: 'https://example.com/next' }],
+      }))
+
+      expect(client.getCommands('Fetch.getResponseBody')).toHaveLength(0)
+      expect(response.statusCode).toBe(302)
+      expect(response.body).toBe('')
+      expect(response.headers).toEqual({ location: 'https://example.com/next' })
     })
   })
 })

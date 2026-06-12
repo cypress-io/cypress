@@ -13,10 +13,24 @@ export class FakeCriClient implements CriClient {
   readonly sent: SentCommand[] = []
   private readonly listeners = new Map<string, Set<(params: unknown) => void>>()
 
+  /** Canned `Fetch.getResponseBody` results keyed by requestId. */
+  private readonly responseBodies = new Map<string, Protocol.Fetch.GetResponseBodyResponse>()
+
   send: SendDebuggerCommand = async (command, params) => {
     this.sent.push({ command, params: params as object | undefined })
 
+    if (command === 'Fetch.getResponseBody') {
+      const { requestId } = (params ?? {}) as Protocol.Fetch.GetResponseBodyRequest
+
+      return (this.responseBodies.get(requestId) ?? { body: '', base64Encoded: false }) as any
+    }
+
     return undefined as any
+  }
+
+  /** Register the body that `Fetch.getResponseBody` should return for a given requestId. */
+  setResponseBody (requestId: string, body: string, base64Encoded = false): void {
+    this.responseBodies.set(requestId, { body, base64Encoded })
   }
 
   on: OnFn = (eventName, cb) => {
@@ -71,4 +85,21 @@ export function createFetchPausedEvent (
     resourceType: 'Document',
     ...overrides,
   }
+}
+
+/**
+ * Build a response-stage `Fetch.requestPaused` event (the second pause for a forwarded request).
+ * Defaults to a 200 with the same `requestId` as {@link createFetchPausedEvent}.
+ */
+export function createFetchResponsePausedEvent (
+  overrides: Partial<Protocol.Fetch.RequestPausedEvent> & {
+    request?: Partial<Protocol.Fetch.RequestPausedEvent['request']>
+  } = {},
+): Protocol.Fetch.RequestPausedEvent {
+  return createFetchPausedEvent({
+    responseStatusCode: 200,
+    responseStatusText: 'OK',
+    responseHeaders: [{ name: 'content-type', value: 'text/html' }],
+    ...overrides,
+  })
 }

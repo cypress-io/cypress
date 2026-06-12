@@ -19,8 +19,10 @@
   },
   "dependencies": {
     "@packages/network-interception": "0.0.0-development",
+    "debug": "^4.3.4",
     "devtools-protocol": "0.0.1575685",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "p-defer": "^3.0.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.168",
