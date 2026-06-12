@@ -131,4 +131,8 @@ export class BrowserDataSource {
   isVersionSupported (obj: FoundBrowser) {
     return Boolean(!obj.unsupportedVersion)
   }
+
+  isDeprecated (obj: FoundBrowser) {
+    return obj.name === 'electron'
+  }
 }

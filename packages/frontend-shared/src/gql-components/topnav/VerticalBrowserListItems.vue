@@ -31,6 +31,12 @@
         >
           {{ browser.displayName }}
         </button>
+        <Badge
+          v-if="browser.isDeprecated"
+          :label="t('topNav.deprecated')"
+          status="warning"
+          data-cy="deprecated-browser-badge"
+        />
         <div
           class="font-normal mr-[20px] text-gray-500 text-[14px] filter whitespace-nowrap group-focus-within:mix-blend-luminosity
           group-hover:mix-blend-luminosity
@@ -80,6 +86,7 @@ import { computed } from 'vue'
 import { gql, useMutation } from '@urql/vue'
 import { allBrowsersIcons } from '@packages/frontend-shared/src/assets/browserLogos'
 import Tooltip from '../../components/Tooltip.vue'
+import Badge from '../../components/Badge.vue'
 import _ from 'lodash'
 
 const { t } = useI18n()
@@ -94,6 +101,7 @@ fragment VerticalBrowserListItems on CurrentProject {
     version
     majorVersion
     isVersionSupported
+    isDeprecated
     warning
     disabled
   }
@@ -121,15 +129,38 @@ const props = withDefaults(defineProps <{
   specPath: '',
 })
 
-const browsers = computed(() => {
-  const alphaSortedBrowser = _.sortBy(props.gql.browsers ?? [], 'displayName')
+// Sorts browsers into tiers so deprecated browsers (e.g. Electron) appear after
+// supported browsers, and disabled/unsupported browsers always sort last. Within
+// each tier, browsers remain alphabetical by displayName.
+const browserSortTier = (browser: NonNullable<VerticalBrowserListItemsFragment['browsers']>[number]) => {
+  if (browser.disabled || !browser.isVersionSupported) {
+    return 2
+  }
 
-  const [selectedBrowser] = _.remove(alphaSortedBrowser, (browser) => browser.isSelected)
+  if (browser.isDeprecated) {
+    return 1
+  }
+
+  return 0
+}
+
+const browsers = computed(() => {
+  const sortedBrowsers = (props.gql.browsers ?? []).slice().sort((a, b) => {
+    const tierDiff = browserSortTier(a) - browserSortTier(b)
+
+    if (tierDiff !== 0) {
+      return tierDiff
+    }
+
+    return a.displayName > b.displayName ? 1 : -1
+  })
+
+  const [selectedBrowser] = _.remove(sortedBrowsers, (browser) => browser.isSelected)
 
   // move the selected browser to the top to easily see selected browser version at the top when opening the dropdown
-  alphaSortedBrowser.unshift(selectedBrowser)
+  sortedBrowsers.unshift(selectedBrowser)
 
-  return alphaSortedBrowser
+  return sortedBrowsers
 })
 
 const setBrowser = useMutation(VerticalBrowserListItems_SetBrowserDocument)

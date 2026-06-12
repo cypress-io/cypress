@@ -62,7 +62,8 @@ describe('Launchpad: Setup Project', () => {
 
     cy.findByRole('radio', { name: 'Chrome v1' })
     cy.findByRole('radio', { name: 'Firefox v6' })
-    cy.findByRole('radio', { name: 'Electron v13' })
+    // Electron's accessible name includes its deprecated ribbon text.
+    cy.findByRole('radio', { name: /Electron v13/ })
     cy.findByRole('radio', { name: 'Edge v9' })
   }
 

@@ -1131,6 +1131,11 @@ describe('visual error templates', () => {
         default: [],
       }
     },
+    BROWSER_ELECTRON_DEPRECATED: () => {
+      return {
+        default: [],
+      }
+    },
     SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED: () => {
       return {
         default: ['http://localhost:8080'],

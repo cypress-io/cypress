@@ -825,6 +825,10 @@ async function runSpecs (options: { config: Cfg, browser: Browser, sys: any, hea
       specPattern,
       autoCancelAfterFailures,
     })
+
+    if (browser.name === 'electron') {
+      errors.warning('BROWSER_ELECTRON_DEPRECATED')
+    }
   }
 
   let isFirstSpecInBrowser = true

@@ -29,6 +29,11 @@ type Browser implements Node {
 
   """Relay style Node ID field for the Browser field"""
   id: ID!
+
+  """
+  Whether the browser is deprecated and will be removed in a future version of Cypress
+  """
+  isDeprecated: Boolean!
   isFocusSupported: Boolean!
   isSelected: Boolean!
   isVersionSupported: Boolean!
@@ -1185,6 +1190,7 @@ enum ErrorTypeEnum {
   AUTOMATION_SERVER_DISCONNECTED
   BAD_POLICY_WARNING
   BROWSER_CRASHED
+  BROWSER_ELECTRON_DEPRECATED
   BROWSER_NOT_FOUND_BY_NAME
   BROWSER_NOT_FOUND_BY_PATH
   BROWSER_PAGE_CLOSED_UNEXPECTEDLY
