@@ -14,7 +14,13 @@ import { EventEmitter } from 'events'
 import { NetworkInterceptionCore } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
 import { ProxyDocumentPreparationAdapter } from '../../lib/adapters/proxy-document-preparation'
-import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../lib/adapters'
+import {
+  ProxyCommandLogAdapter,
+  ProxyCookieStateAdapter,
+  ProxyNetworkCaptureAdapter,
+  ProxyRequestInterceptionAdapter,
+  ProxyResponseInterceptionAdapter,
+} from '../../lib/adapters'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
@@ -60,6 +66,9 @@ describe('network stubbing', () => {
         requestInterception: new ProxyRequestInterceptionAdapter(),
         responseInterception: new ProxyResponseInterceptionAdapter(),
         documentPreparation: new ProxyDocumentPreparationAdapter(),
+        networkCapture: new ProxyNetworkCaptureAdapter(),
+        cookieState: new ProxyCookieStateAdapter(),
+        commandLog: new ProxyCommandLogAdapter(),
       }),
       config,
       middleware: defaultMiddleware,

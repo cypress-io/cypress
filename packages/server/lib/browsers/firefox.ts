@@ -409,7 +409,10 @@ export async function connectToNewSpec (browser: Browser, options: BrowserNewTab
   } catch (err) {
     // if navigation/BiDi setup fails, tear down the ffmpeg encoder we just started so it isn't
     // left orphaned (and so a retry doesn't start a second one alongside it).
-    await video?.controller.endVideoCapture(false).catch(() => {})
+    await video?.controller.endVideoCapture(false).catch((endVideoCaptureErr) => {
+      debug('error ending video capture during BiDi connect failure teardown: %o', endVideoCaptureErr)
+    })
+
     throw err
   }
 

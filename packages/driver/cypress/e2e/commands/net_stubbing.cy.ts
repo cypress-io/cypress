@@ -3802,12 +3802,14 @@ describe('network stubbing', { retries: 15 }, function () {
           const xhr = new win.XMLHttpRequest()
 
           xhr.open('POST', '/users/')
-
           xhr.send()
 
-          win.location.reload()
+          // Firefox/Safari can cancel too quickly on reload unless the request is observed first.
+          cy.wait('@createUser.request').then((interception) => {
+            win.location.reload()
 
-          cy.wait('@createUser').its('state').should('eq', 'Errored')
+            cy.wrap(interception).its('state').should('eq', 'Errored')
+          })
         })
       })
 
