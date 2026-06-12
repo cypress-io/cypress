@@ -14,15 +14,15 @@ describe('issue 27415', () => {
   // renderer memory and crash the browser. Consecutive identical uncaught
   // exceptions within a test should now collapse into a single, updating log.
   it('collapses repeated identical uncaught exceptions into one updating log', () => {
-    const message = 'issue-27415 ResizeObserver loop completed with undelivered notifications.'
+    const message = 'Fake Error:ResizeObserver loop completed with undelivered notifications.'
 
     // suppress the error so the repeated occurrences do not fail the test
-    cy.on('uncaught:exception', (err) => !err.message.includes('issue-27415'))
+    cy.on('uncaught:exception', (err) => !err.message.includes('Fake Error'))
 
     const uncaughtLogs = []
 
     cy.on('log:added', (attrs, log) => {
-      if (attrs.name === 'uncaught exception' && attrs.message.includes('issue-27415')) {
+      if (attrs.name === 'uncaught exception' && attrs.message.includes('Fake Error')) {
         uncaughtLogs.push(log)
       }
     })
@@ -47,12 +47,12 @@ describe('issue 27415', () => {
 
   // distinct uncaught error messages should each still create their own log
   it('does not collapse uncaught exceptions with different messages', () => {
-    cy.on('uncaught:exception', (err) => !err.message.includes('issue-27415'))
+    cy.on('uncaught:exception', (err) => !err.message.includes('Fake Error'))
 
     const uncaughtLogs = []
 
     cy.on('log:added', (attrs, log) => {
-      if (attrs.name === 'uncaught exception' && attrs.message.includes('issue-27415')) {
+      if (attrs.name === 'uncaught exception' && attrs.message.includes('Fake Error')) {
         uncaughtLogs.push(log)
       }
     })
@@ -60,8 +60,8 @@ describe('issue 27415', () => {
     cy.visit('/fixtures/errors.html')
 
     cy.window().then((win) => {
-      dispatchError(win, 'issue-27415 first')
-      dispatchError(win, 'issue-27415 second')
+      dispatchError(win, 'Fake Error: first')
+      dispatchError(win, 'Fake Error: second')
     })
 
     cy.wrap(null).should(() => {
