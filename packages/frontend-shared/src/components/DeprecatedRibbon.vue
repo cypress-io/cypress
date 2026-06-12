@@ -1,6 +1,6 @@
 <template>
   <div
-    class="deprecated-ribbon font-medium leading-[16px] text-[12px] text-center text-warning-700 bg-warning-200 absolute select-none top-[20px] right-[-30px] w-[130px] rotate-45 py-[2px]"
+    class="deprecated-ribbon font-medium leading-[24px] text-[14px] text-center text-orange-600 bg-orange-100 absolute select-none top-[24px] right-[-26px] w-[124px] rotate-45"
     data-cy="deprecated-ribbon"
   >
     <slot>{{ t('openBrowser.deprecatedRibbon') }}</slot>
