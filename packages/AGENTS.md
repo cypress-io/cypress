@@ -89,3 +89,4 @@ yarn build
 - Many packages use `vitest` for unit tests; the front-end packages (`app`, `launchpad`, `frontend-shared`) use Cypress component tests and E2E tests (cypress-in-cypress pattern).
 - The `nohoist` workspace option is set in `driver` and `frontend-shared` to prevent specific dependencies from being hoisted to the monorepo root.
 - Packages that depend on generated GraphQL types (from `data-context`) must run `yarn build:graphql` before type-checking will pass.
+- **When adding or removing a package under `packages/`**, regenerate the path map with `yarn gulp makePathMap` (from the repo root). This rewrites the auto-generated [`scripts/gulp/monorepoPaths.ts`](../scripts/gulp/monorepoPaths.ts) — do not hand-edit that file. It is also regenerated as part of `yarn dev`, but run the task explicitly so the change is committed alongside the package addition.
