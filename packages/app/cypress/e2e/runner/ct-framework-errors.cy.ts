@@ -338,7 +338,7 @@ describe.skip('Svelte', {
   })
 })
 
-const angularVersions = [21] as const
+const angularVersions = [21, 22] as const
 
 angularVersions.forEach((angularVersion) => {
   describe(`Angular ${angularVersion}`, {

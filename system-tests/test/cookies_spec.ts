@@ -405,7 +405,6 @@ describe('cookie jar stays in sync after same-origin requests', () => {
     browser: '!webkit', // TODO(webkit): fix+unskip (needs multidomain support)
     config: {
       baseUrl: `http://localhost:${httpPort}`,
-      allowCypressEnv: false,
     },
     spec: 'stale_cookie.cy.js',
   })
