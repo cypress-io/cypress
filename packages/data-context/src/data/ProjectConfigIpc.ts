@@ -395,6 +395,10 @@ export class ProjectConfigIpc extends EventEmitter {
       childOptions.env.NODE_OPTIONS = tsxLoader
     }
 
+    // require_async_child removes this from NODE_OPTIONS once the loader has been applied
+    // https://github.com/cypress-io/cypress/issues/34076
+    childOptions.env.CYPRESS_INTERNAL_TSX_LOADER_OPTIONS = tsxLoader
+
     const telemetryCtx = encodeTelemetryContext({ context: telemetry.getActiveContextObject(), version: pkg.version })
 
     // Pass the active context from the main process to the child process as the --telemetryCtx flag.

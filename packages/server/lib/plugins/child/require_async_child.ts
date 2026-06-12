@@ -11,6 +11,22 @@ import { gracefulify } from 'graceful-fs'
 import { suppress as suppressWarnings } from '../../util/suppress_warnings'
 import { run as runRequireAsyncChild } from './run_require_async_child'
 
+// remove the injected tsx loader from NODE_OPTIONS so it does not re-execute in worker
+// threads spawned by user dependencies (https://github.com/cypress-io/cypress/issues/34076)
+const tsxLoaderOptions = process.env.CYPRESS_INTERNAL_TSX_LOADER_OPTIONS
+
+if (tsxLoaderOptions && process.env.NODE_OPTIONS) {
+  const scrubbed = process.env.NODE_OPTIONS.replace(tsxLoaderOptions, '').trim()
+
+  if (scrubbed) {
+    process.env.NODE_OPTIONS = scrubbed
+  } else {
+    delete process.env.NODE_OPTIONS
+  }
+}
+
+delete process.env.CYPRESS_INTERNAL_TSX_LOADER_OPTIONS
+
 const debug = Debug('cypress:lifecycle:require_async_child')
 
 const argv = minimist(process.argv.slice(2))
