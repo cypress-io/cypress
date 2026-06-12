@@ -26,15 +26,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          ref: ${{ env.BASE_BRANCH }}
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
-      - name: Setup CircleCI CLI
-        run: |
-          sudo snap install circleci
-      - name: Checkout base branch
-        run: |
-          git fetch origin
-          git checkout ${{ env.BASE_BRANCH }}
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:

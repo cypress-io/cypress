@@ -46,8 +46,6 @@ jobs:
         run: yarn
       - name: Run build
         run: yarn build
-      - name: Installing snyk-delta and dependencies
-        run: npm i -g snyk-delta
       - uses: snyk/actions/setup@master
       - name: Perform SCA Scan
         continue-on-error: false
