@@ -63,12 +63,6 @@ commands:
           name: Pack workflows
           command: |
             ./scripts/pack-ci.sh --all
-  validate-workflows:
-    steps:
-      - run:
-          name: Validate workflows
-          command: |
-            ./scripts/pack-ci.sh --validate --pack=false
 
   # Retrieving and saving packed workflows based on the checksum of the hash
   # of the yml files in ./.circleci/src
