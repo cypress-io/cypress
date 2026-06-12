@@ -8,6 +8,8 @@ export { SetMatchingRoutes, InterceptRequest } from './middleware/request'
 
 export { InterceptResponse } from './middleware/response'
 
+export { handleInterceptResponse } from './handle-intercept-response'
+
 export { NetStubbingState, ResourceType } from './types'
 
 import { state } from './state'

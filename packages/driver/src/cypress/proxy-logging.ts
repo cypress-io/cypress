@@ -5,6 +5,8 @@ import $errUtils from './error_utils'
 import Debug from 'debug'
 
 const debug = Debug('cypress:driver:proxy-logging')
+// for logs emitted once per request on expected paths
+const debugVerbose = Debug('cypress-verbose:driver:proxy-logging')
 
 function formatInterception ({ route, interception }: ProxyRequest['interceptions'][number]) {
   const ret = {
@@ -244,6 +246,8 @@ export default class ProxyLogging {
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === interception.browserRequestId)
 
     if (!proxyRequest) {
+      debugVerbose('no proxy request found for interception with browserRequestId %s for url %s; %d proxy request(s) in list', interception.browserRequestId, interception.request.url, this.proxyRequests.length)
+
       // request was never logged
       return undefined
     }
@@ -262,7 +266,7 @@ export default class ProxyLogging {
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === responseReceived.requestId)
 
     if (!proxyRequest) {
-      return debug('unmatched responseReceived event %o', responseReceived)
+      return debug('no proxy request found for responseReceived with requestId %s; %d proxy request(s) in list %o', responseReceived.requestId, this.proxyRequests.length, responseReceived)
     }
 
     proxyRequest.responseReceived = responseReceived
@@ -281,7 +285,7 @@ export default class ProxyLogging {
     const proxyRequest = _.find(this.proxyRequests, ({ preRequest }) => preRequest.requestId === error.requestId)
 
     if (!proxyRequest) {
-      return debug('unmatched error event %o', error)
+      return debug('no proxy request found for error event with requestId %s; %d proxy request(s) in list %o', error.requestId, this.proxyRequests.length, error)
     }
 
     proxyRequest.error = $errUtils.makeErrFromObj(error.error)

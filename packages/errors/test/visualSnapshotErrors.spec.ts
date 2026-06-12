@@ -628,6 +628,12 @@ describe('visual error templates', () => {
         noPattern: ['/path/to/project/root'],
       }
     },
+    SPEC_FILE_NOT_FOUND: () => {
+      return {
+        default: ['/path/to/project/root', 'cypress/e2e/nonexistent.cy.ts'],
+        multiplePatterns: ['/path/to/project/root', ['cypress/e2e/nonexistent.cy.ts', 'cypress/e2e/also-not-found.cy.ts']],
+      }
+    },
     RENDERER_CRASHED: () => {
       return {
         default: ['Electron'],
@@ -738,6 +744,11 @@ describe('visual error templates', () => {
       return {
         default: ['configFile', 'cypress.config.js', '`something` was not right'],
         noFileType: [null, null, '`something` was not right'],
+      }
+    },
+    CONFIG_BROWSERS_INVALID: () => {
+      return {
+        default: ['chrome'],
       }
     },
     RENAMED_CONFIG_OPTION: () => {
