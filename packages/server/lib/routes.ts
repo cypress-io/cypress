@@ -22,6 +22,7 @@ import client from './controllers/client'
 import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import { runnerDiscovery } from './runner-discovery'
 
 const debug = Debug('cypress:server:routes')
 
@@ -209,6 +210,24 @@ export const createCommonRoutes = ({
     privilegedCommandsManager.addVerifiedCommand(req.body)
 
     res.sendStatus(204)
+  })
+
+  // Liveness probe for the discovery record this server published (see
+  // lib/runner-discovery.ts). The record's random instanceId acts as a bearer
+  // token: only a reader that has already read the record can construct this
+  // URL, and only the record's writer can echo it — so a recycled pid or port
+  // can never impersonate a runner. Mismatches get the same 404 as any unknown
+  // path to give local port scanners nothing to distinguish. Literal
+  // `__cypress` prefix (like the assets route below) — the CLI builds this
+  // URL without access to the project's resolved config.
+  router.get('/__cypress/runner-discovery/:instanceId', (req, res) => {
+    const record = runnerDiscovery.getCurrent()
+
+    if (!record || req.params.instanceId !== record.instanceId) {
+      return res.sendStatus(404)
+    }
+
+    return res.json(record)
   })
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {

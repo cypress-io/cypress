@@ -89,6 +89,16 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
     `/${namespace}/runner/favicon.ico`,
   ]
 
+  // The discovery liveness probe (see lib/runner-discovery.ts) arrives as a
+  // direct request from the Cypress CLI, never through the proxy. Literal
+  // `__cypress` prefix to mirror the route registration in lib/routes.ts —
+  // the CLI builds the URL without access to the resolved namespace config.
+  // Safe to bypass: the route is read-only and 404s without the record's
+  // random instanceId token.
+  const isAllowedProxyBypass = (trimmedUrl: string) => {
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || trimmedUrl.startsWith('/__cypress/runner-discovery/')
+  }
+
   // normalize clientRoute to help with comparison
   const trimmedClientRoute = _.trimEnd(clientRoute, '/')
 
@@ -105,7 +115,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
       return next()
     }
 
-    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+    if (_isNonProxiedRequest(req) && !isAllowedProxyBypass(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
       // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }
