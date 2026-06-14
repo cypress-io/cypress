@@ -6,6 +6,7 @@
 - Fixed an issue where setting [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) to a value greater than `0` from `setupNodeEvents` would take effect during `cypress run`, which could prevent snapshots from being captured correctly when recording Test Replay to Cypress Cloud. During `cypress run`, `numTestsKeptInMemory` is now always treated as `0` regardless of how it is configured. Fixes [#31167](https://github.com/cypress-io/cypress/issues/31167).
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
 - Fixed an issue where `cy.screenshot()` could still capture changing pixels from some running web animations. Fixes [#29144](https://github.com/cypress-io/cypress/issues/29144).
+- Fixed an issue where a custom reporter (such as `mochawesome`) installed in a parent directory's `node_modules` could not be loaded in nested projects or monorepos, causing the run to fail with `Could not load reporter by name`. Reporters are now resolved by walking up the directory tree from the project root, the same way Node.js resolves modules. Fixes [#4536](https://github.com/cypress-io/cypress/issues/4536).
 
 **Misc:**
 
