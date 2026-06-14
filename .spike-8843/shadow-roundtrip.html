@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>shadow-roundtrip-spike</title></head>
+<body>
+<!--
+  Spike for cypress-io/cypress#8843 — feasibility of "Approach B":
+  serialize the AUT DOM (including open shadow roots) to declarative shadow DOM
+  via Element.getHTML({ serializableShadowRoots, shadowRoots }), then re-hydrate
+  on snapshot restore via Element.setHTMLUnsafe().
+
+  This mirrors what packages/driver/src/cy/snapshots.ts would need to do, but in
+  isolation so we can confirm the browser APIs preserve shadow content + styles.
+-->
+<div id="source"></div>
+<div id="restored"></div>
+<pre id="result"></pre>
+<script>
+const report = { browser: navigator.userAgent, features: {}, cases: {} }
+
+// --- 0. Feature detection ----------------------------------------------------
+report.features.getHTML = typeof Element.prototype.getHTML === 'function'
+report.features.setHTMLUnsafe = typeof Element.prototype.setHTMLUnsafe === 'function'
+report.features.parseHTMLUnsafe = typeof Document.parseHTMLUnsafe === 'function'
+
+// --- Build a representative AUT subtree --------------------------------------
+const source = document.getElementById('source')
+
+// (a) open shadow root with a scoped <style> + nested open shadow root
+const openHost = document.createElement('div')
+openHost.id = 'open-host'
+const openRoot = openHost.attachShadow({ mode: 'open' })
+openRoot.innerHTML = `
+  <style>.scoped { color: rgb(1, 2, 3); }</style>
+  <p class="scoped">OPEN_SHADOW_TEXT</p>
+  <nested-host></nested-host>
+`
+const nestedHost = openRoot.querySelector('nested-host')
+const nestedRoot = nestedHost.attachShadow({ mode: 'open' })
+nestedRoot.innerHTML = `<span>NESTED_SHADOW_TEXT</span>`
+
+// (b) open shadow root that uses a slot to project light DOM
+const slotHost = document.createElement('div')
+slotHost.id = 'slot-host'
+const slotRoot = slotHost.attachShadow({ mode: 'open' })
+slotRoot.innerHTML = `<slot></slot>`
+slotHost.innerHTML = `<b>SLOTTED_LIGHT_TEXT</b>`
+
+// (c) open shadow root using adoptedStyleSheets (constructable stylesheet)
+const adoptHost = document.createElement('div')
+adoptHost.id = 'adopt-host'
+const adoptRoot = adoptHost.attachShadow({ mode: 'open' })
+adoptRoot.innerHTML = `<p class="adopted">ADOPTED_STYLE_TEXT</p>`
+const sheet = new CSSStyleSheet()
+sheet.replaceSync('.adopted { color: rgb(4, 5, 6); }')
+adoptRoot.adoptedStyleSheets = [sheet]
+
+// (d) CLOSED shadow root — Cypress cannot read this from the outside
+const closedHost = document.createElement('div')
+closedHost.id = 'closed-host'
+closedHost.attachShadow({ mode: 'closed' }).innerHTML = `<p>CLOSED_SHADOW_TEXT</p>`
+
+source.append(openHost, slotHost, adoptHost, closedHost)
+
+// --- 1. Collect OPEN shadow roots (what findAllShadowRoots() already does) ----
+function collectOpenShadowRoots (root) {
+  const found = []
+  const walk = (node) => {
+    const walker = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT)
+    let el = walker.currentNode.nodeType === 1 ? walker.currentNode : walker.nextNode()
+    for (; el; el = walker.nextNode()) {
+      if (el.shadowRoot) { // only OPEN roots are reachable
+        found.push(el.shadowRoot)
+        walk(el.shadowRoot) // recurse into nested shadow trees
+      }
+    }
+  }
+  walk(root)
+  return found
+}
+const openRoots = collectOpenShadowRoots(source)
+report.cases.openRootsCollected = openRoots.length // expect 3 (open, nested, slot, adopt) minus closed
+
+// --- 2. Serialize to declarative shadow DOM ----------------------------------
+let serialized = ''
+try {
+  serialized = source.getHTML({ serializableShadowRoots: true, shadowRoots: openRoots })
+} catch (e) {
+  report.cases.serializeError = String(e)
+}
+report.cases.serializedHasTemplateShadowrootmode = /<template[^>]*shadowrootmode/.test(serialized)
+report.cases.serializedHasClosedText = serialized.includes('CLOSED_SHADOW_TEXT')
+report.cases.serializedHasAdoptedRule = serialized.includes('rgb(4, 5, 6)') || serialized.includes('.adopted')
+
+// --- 3. Re-hydrate via setHTMLUnsafe (the "restore" half) --------------------
+const restored = document.getElementById('restored')
+try {
+  restored.setHTMLUnsafe(serialized)
+} catch (e) {
+  report.cases.restoreError = String(e)
+}
+
+// --- 4. Assert shadow content survived the round-trip ------------------------
+const rOpen = restored.querySelector('#open-host')
+report.cases.restoredOpenText =
+  !!rOpen?.shadowRoot && rOpen.shadowRoot.querySelector('.scoped')?.textContent.trim() === 'OPEN_SHADOW_TEXT'
+report.cases.restoredScopedStylePresent =
+  !!rOpen?.shadowRoot?.querySelector('style')
+report.cases.restoredNestedText =
+  rOpen?.shadowRoot?.querySelector('nested-host')?.shadowRoot?.querySelector('span')?.textContent.trim() === 'NESTED_SHADOW_TEXT'
+
+// computed style proves the scoped <style> actually applies after restore
+let openComputed = ''
+if (rOpen?.shadowRoot) {
+  const p = rOpen.shadowRoot.querySelector('.scoped')
+  openComputed = p ? getComputedStyle(p).color : ''
+}
+report.cases.restoredScopedStyleApplies = openComputed === 'rgb(1, 2, 3)'
+
+const rSlot = restored.querySelector('#slot-host')
+report.cases.restoredSlotShadow = !!rSlot?.shadowRoot?.querySelector('slot')
+report.cases.restoredSlottedLight = rSlot?.querySelector('b')?.textContent.trim() === 'SLOTTED_LIGHT_TEXT'
+
+// adoptedStyleSheets is NOT serialized by getHTML — expected to be lost
+const rAdopt = restored.querySelector('#adopt-host')
+let adoptComputed = ''
+if (rAdopt?.shadowRoot) {
+  const p = rAdopt.shadowRoot.querySelector('.adopted')
+  adoptComputed = p ? getComputedStyle(p).color : ''
+}
+report.cases.restoredAdoptedStyleApplies = adoptComputed === 'rgb(4, 5, 6)' // expected FALSE (limitation)
+
+// closed root content never reachable — expected absent
+const rClosed = restored.querySelector('#closed-host')
+report.cases.restoredClosedShadowPresent = !!(rClosed && rClosed.shadowRoot) // expected FALSE
+
+document.getElementById('result').textContent = 'SPIKE_RESULT_JSON=' + JSON.stringify(report)
+</script>
+</body>
+</html>
