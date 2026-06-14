@@ -137,6 +137,9 @@ export interface RunnablePayload {
   suites?: RunnablePayload[]
   start?: number | Date
   end?: number | Date
+  // additional context attached to a test by reporters such as mochawesome
+  // via their `addContext()` helper. Cypress passes it through untouched.
+  context?: unknown
 }
 
 export type RetriesConfig = {
@@ -203,4 +206,7 @@ export interface InternalRunnable {
   fullTitle?: () => string
   speed?: string
   retries?: number
+  // additional context attached to a test by reporters such as mochawesome
+  // via their `addContext()` helper. Cypress passes it through untouched.
+  context?: unknown
 }

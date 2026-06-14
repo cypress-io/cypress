@@ -159,6 +159,17 @@ describe('lib/reporter', () => {
       expect(this.emit).not.to.be.called
     })
 
+    // https://github.com/cypress-io/cypress/issues/3654
+    // mochawesome's `addContext(this, ...)` attaches a `context` property to the
+    // test runnable. Ensure that property survives the merge and is forwarded on
+    // the emitted mocha event so custom reporters can read it.
+    it('forwards a test\'s context to the reporter', function () {
+      this.reporter.emit('pass', { id: 'r5', state: 'passed', context: 'some context' })
+      expect(this.emit).to.be.calledWith('pass')
+
+      expect(this.emit.getCall(0).args[1].context).to.eq('some context')
+    })
+
     it('sends suites with updated properties and nested subtree', function () {
       this.reporter.emit('suite', { id: 'r3', state: 'passed' })
       expect(this.emit).to.be.calledWith('suite')
