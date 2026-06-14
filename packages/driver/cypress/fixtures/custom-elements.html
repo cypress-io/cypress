@@ -10,6 +10,8 @@
       // define empty functions to stub in tests
       window.customElementConstructor = function () {}
       window.customElementAttributeChanged = function () {}
+      window.customElementConnected = function () {}
+      window.customElementDisconnected = function () {}
 
       if (window.customElements) {
         window.customElements.define('cy-custom-element', class extends HTMLElement {
@@ -21,6 +23,14 @@
 
           attributeChangedCallback () {
             window.customElementAttributeChanged()
+          }
+
+          connectedCallback () {
+            window.customElementConnected()
+          }
+
+          disconnectedCallback () {
+            window.customElementDisconnected()
           }
         })
       }

@@ -191,5 +191,44 @@ describe('driver/src/cy/snapshots', () => {
 
       expect(attributeChanged).not.to.be.called
     })
+
+    // capturing the original/final state (used to restore the AUT after a
+    // command snapshot is un-hovered) must not mutate the live DOM, otherwise
+    // the user's running application is reset on hover
+    // https://github.com/cypress-io/cypress/issues/8787
+    describe('detachDom does not mutate the live DOM', () => {
+      it('does not detach the live body or strip its scripts', () => {
+        const $liveBody = cy.$$('body')
+        const scriptCount = $liveBody.find('script').length
+
+        // sanity check: the fixture has a <script> in the body
+        expect(scriptCount).to.be.greaterThan(0)
+
+        cy.detachDom(cy.$$(cy.state('document')))
+
+        // the live body is still attached to the document
+        expect(cy.$$('body')[0]).to.equal(cy.state('document').body)
+        // and its scripts were not removed
+        expect(cy.$$('body').find('script').length).to.equal(scriptCount)
+      })
+
+      it('does not disconnect or reconnect live custom elements', () => {
+        const connected = cy.stub(cy.state('window'), 'customElementConnected')
+        const disconnected = cy.stub(cy.state('window'), 'customElementDisconnected')
+
+        cy.detachDom(cy.$$(cy.state('document')))
+
+        expect(connected, 'connectedCallback').not.to.be.called
+        expect(disconnected, 'disconnectedCallback').not.to.be.called
+      })
+
+      it('still captures the custom element in the snapshot body', () => {
+        const { body } = cy.detachDom(cy.$$(cy.state('document')))
+
+        expect(body.get().find('cy-custom-element').length).to.equal(1)
+        // scripts are stripped from the captured (cloned) body, not the live one
+        expect(body.get().find('script').length).to.equal(0)
+      })
+    })
   })
 })

@@ -121,18 +121,47 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     }
   }
 
+  // Captures the AUT's current ("original"/final) DOM state so it can be
+  // restored after the user stops hovering/pinning a command snapshot.
+  //
+  // Previously this detached the live <body> and stripped its
+  // <script>/<style>/<link> tags in place. Detaching disconnects every node
+  // from the document, so restoring it later reconnected the user's custom
+  // elements and re-ran their connectedCallback — resetting application state
+  // the moment a command was hovered. https://github.com/cypress-io/cypress/issues/8787
+  //
+  // Instead, clone the <body> into the transient snapshotDocument (which has no
+  // browsing context, so cloning has no side effects — see createSnapshotBody)
+  // and leave the live DOM untouched. This mirrors the cross origin path, which
+  // already captures its final snapshot via cy.createSnapshot().
   const detachDom = (iframeContents) => {
     const { headStyleIds, bodyStyleIds } = snapshotsCss.getStyleIds()
     const htmlAttrs = getHtmlAttrs(iframeContents.find('html')[0])
-    const $body = iframeContents.find('body')
+    const $body = $$(snapshotDocument.importNode(iframeContents.find('body')[0], true))
 
+    // replace iframes with placeholders so restoring doesn't make extra requests
+    replaceIframes($body)
+
+    // remove tags we don't want in the body — operating on the clone, not the
+    // live DOM
     $body.find('script,link[rel="stylesheet"],style').remove()
 
+    let attachedBody
     const snapshot = {
       name: FINAL_SNAPSHOT_NAME,
       htmlAttrs,
       body: {
-        get: () => $body.detach(),
+        get: () => {
+          // lazily adopt the cloned body into the AUT document only when it's
+          // actually needed for restoration. see createSnapshot for details.
+          if (!attachedBody) {
+            const doc = state('document') || window.document
+
+            attachedBody = $$(doc.adoptNode($body[0]))
+          }
+
+          return attachedBody
+        },
       },
     }
 
