@@ -1,0 +1,119 @@
+diff --git a/lib/browser-runtime.ts b/lib/browser-runtime.ts
+index 21af60a..f4d98a9 100644
+--- a/lib/browser-runtime.ts
++++ b/lib/browser-runtime.ts
+@@ -1470,9 +1470,14 @@ export default function createTests(
+     const pickleStepToTestStep = (
+       pickleStep: messages.PickleStep,
+     ): messages.TestStep => {
+-      const stepDefinitions = registry.getMatchingStepDefinitions(
+-        pickleStep.text,
+-      );
++      // The matched step definitions are only used to populate report envelopes
++      // (stepDefinitionIds / stepMatchArgumentsLists), which are consumed solely
++      // when state tracking is enabled. Skipping this eager matching pass when
++      // tracking is off avoids an O(steps x stepDefinitions) scan at spec load.
++      // The test-step id is still generated below, so execution is unaffected.
++      const stepDefinitions = isTrackingState
++        ? registry.getMatchingStepDefinitions(pickleStep.text)
++        : [];
+ 
+       return {
+         id: createTestStepId({
+diff --git a/lib/registry.ts b/lib/registry.ts
+index 8458d89..502cfcb 100644
+--- a/lib/registry.ts
++++ b/lib/registry.ts
+@@ -112,6 +112,13 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
+ 
+   public parameterTypeOrdering: Map<ParameterType<unknown>, number> = new Map();
+ 
++  // Memoizes step matching by step text. Safe because stepDefinitions are
++  // immutable after finalize() and a Registry instance is scoped to a single
++  // spec. Matching is otherwise an O(stepDefinitions) scan repeated for every
++  // step, both eagerly at load and again at run time.
++  private matchingStepDefinitionsCache: Map<string, IStepDefinition<T, C>[]> =
++    new Map();
++
+   constructor(private experimentalSourceMap: boolean = true) {
+     this.defineStep = this.defineStep.bind(this);
+     this.runStepDefinition = this.runStepDefinition.bind(this);
+@@ -272,9 +279,17 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
+   }
+ 
+   public getMatchingStepDefinitions(text: string) {
+-    return this.stepDefinitions.filter((stepDefinition) =>
+-      stepDefinition.expression.match(text),
+-    );
++    let cached = this.matchingStepDefinitionsCache.get(text);
++
++    if (cached === undefined) {
++      cached = this.stepDefinitions.filter((stepDefinition) =>
++        stepDefinition.expression.match(text),
++      );
++
++      this.matchingStepDefinitionsCache.set(text, cached);
++    }
++
++    return cached;
+   }
+ 
+   public resolveStepDefinition(text: string) {
+@@ -357,6 +372,13 @@ export class Registry<C extends Mocha.Context, T extends unknown[]> {
+   }
+ 
+   public resolveStepHooks(keyword: StepHookKeyword, tags: string[]) {
++    // Fast path: the common case is no step hooks at all, yet this is invoked
++    // for every step (twice, before and after). Avoid the filter/sort/reverse
++    // and the empty cy.wrap reduce chains when there is nothing to run.
++    if (this.stepHooks.length === 0) {
++      return [];
++    }
++
+     return this.stepHooks
+       .filter((hook) => hook.keyword === keyword && hook.node.evaluate(tags))
+       .sort((a, b) => {
+diff --git a/lib/step-definitions.ts b/lib/step-definitions.ts
+index 578b687..7b65f49 100644
+--- a/lib/step-definitions.ts
++++ b/lib/step-definitions.ts
+@@ -7,12 +7,22 @@ import * as glob from "glob";
+ import debug from "./helpers/debug";
+ import { IPreprocessorConfiguration } from "./preprocessor-configuration";
+ 
++// Step-definition discovery is invoked once per feature during bundling. With a
++// global pattern the same glob is resolved for every feature; memoizing by
++// (projectRoot + patterns) collapses that to a single filesystem scan per
++// distinct pattern set for the lifetime of the process.
++const stepDefinitionPathsCache = new Map<string, Promise<string[]>>();
++
+ export async function getStepDefinitionPaths(
+   projectRoot: string,
+   stepDefinitionPatterns: string[],
+ ): Promise<string[]> {
+-  return (
+-    await Promise.all(
++  const cacheKey = [projectRoot, ...stepDefinitionPatterns].join("\n");
++
++  let cached = stepDefinitionPathsCache.get(cacheKey);
++
++  if (!cached) {
++    cached = Promise.all(
+       stepDefinitionPatterns.map((pattern) =>
+         glob.glob(pattern, {
+           cwd: projectRoot,
+@@ -21,8 +31,12 @@ export async function getStepDefinitionPaths(
+           windowsPathsNoEscape: true,
+         }),
+       ),
+-    )
+-  ).reduce((acum, el) => acum.concat(el), []);
++    ).then((results) => results.reduce((acum, el) => acum.concat(el), []));
++
++    stepDefinitionPathsCache.set(cacheKey, cached);
++  }
++
++  return cached;
+ }
+ 
+ function trimFeatureExtension(filepath: string) {

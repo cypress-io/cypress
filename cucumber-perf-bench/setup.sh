@@ -26,4 +26,15 @@ echo "==> Symlinking preprocessor into node_modules"
 mkdir -p node_modules/@badeball
 ln -sfn "$HERE/preprocessor-src" node_modules/@badeball/cypress-cucumber-preprocessor
 
+# Optional: build a patched copy for the before/after comparison (compare.js).
+if [ "${1:-}" = "--patched" ]; then
+  echo "==> Preparing patched build"
+  if [ ! -d preprocessor-patched ]; then
+    cp -r preprocessor-src preprocessor-patched
+    ( cd preprocessor-patched && git apply "$HERE/preprocessor-perf.patch" )
+  fi
+  ( cd preprocessor-patched && npm run build )
+  echo "==> Patched build ready. Run: node compare.js"
+fi
+
 echo "==> Done. Run: npm run bench"

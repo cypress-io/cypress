@@ -22,9 +22,16 @@ levers.
 ## Setup & run
 
 ```bash
-./setup.sh          # clones + builds the preprocessor, installs esbuild/webpack
-npm run bench       # runs all benchmarks, prints a report, writes RESULTS.md
+./setup.sh           # clones + builds the preprocessor, installs esbuild/webpack
+npm run bench        # runs all benchmarks, prints a report, writes RESULTS.md
+
+./setup.sh --patched # additionally builds a patched copy (applies preprocessor-perf.patch)
+node compare.js      # before/after of the real patched source, writes COMPARE.md
 ```
+
+The candidate source improvements and their measured before/after impact are
+documented in [`PATCHES.md`](./PATCHES.md); the diff is
+[`preprocessor-perf.patch`](./preprocessor-perf.patch).
 
 Tunables (env vars, with defaults):
 
