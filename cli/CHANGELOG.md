@@ -6,6 +6,7 @@
 - Fixed an issue where setting [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) to a value greater than `0` from `setupNodeEvents` would take effect during `cypress run`, which could prevent snapshots from being captured correctly when recording Test Replay to Cypress Cloud. During `cypress run`, `numTestsKeptInMemory` is now always treated as `0` regardless of how it is configured. Fixes [#31167](https://github.com/cypress-io/cypress/issues/31167).
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
 - Fixed an issue where `cy.screenshot()` could still capture changing pixels from some running web animations. Fixes [#29144](https://github.com/cypress-io/cypress/issues/29144).
+- Fixed an issue where typing `{enter}` with [`cy.type()`](https://on.cypress.io/type) on a focused anchor (`<a>`) element did not fire a `click` event, so keyboard and accessibility tests that focused a link and pressed Enter would not activate it. Pressing Enter on a focused anchor now fires a `click`, matching real browser activation behavior. Fixes [#8267](https://github.com/cypress-io/cypress/issues/8267).
 
 **Misc:**
 

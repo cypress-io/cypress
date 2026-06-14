@@ -594,6 +594,9 @@ describe('src/cy/commands/actions/type - #type events', () => {
         'input-image',
         'input-reset',
         'input-submit',
+        // https://github.com/cypress-io/cypress/issues/8267
+        // pressing {enter} on a focused anchor should activate it (fire click)
+        'anchor',
       ]
 
       targets.forEach((target) => {

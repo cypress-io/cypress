@@ -425,10 +425,16 @@ export default function (Commands, Cypress, cy, state, config) {
             return
           }
 
-          // click event is only fired on button, image, submit, reset elements.
+          // In a real browser, pressing {enter} while a button-like element
+          // or an anchor is focused fires a click event as the element's
+          // default activation behavior. <button> and
+          // <input type="button|image|submit|reset"> are matched via their
+          // `type` (a <button> defaults to type="submit"), while anchors are
+          // checked separately since they have no `type`.
           // That's why we cannot use $elements.isButtonLike() here.
+          // https://github.com/cypress-io/cypress/issues/8267
           const type = (type) => $elements.isInputType(el, type)
-          const sendClickEvent = type('button') || type('image') || type('submit') || type('reset')
+          const sendClickEvent = type('button') || type('image') || type('submit') || type('reset') || $elements.isAnchor(el)
 
           // https://github.com/cypress-io/cypress/issues/19541
           // Send click event on type('{enter}')

@@ -36,6 +36,10 @@ export const isButton = (el): el is HTMLButtonElement => {
   return getTagName(el) === 'button'
 }
 
+export const isAnchor = (el): el is HTMLAnchorElement => {
+  return getTagName(el) === 'a'
+}
+
 export const isSelect = (el): el is HTMLSelectElement => {
   return getTagName(el) === 'select'
 }
