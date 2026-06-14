@@ -36,6 +36,23 @@ describe('async timeouts', () => {
   })
 })
 
+// https://github.com/cypress-io/cypress/issues/3654
+// reporters such as mochawesome attach a `context` property to the test
+// runnable (via `addContext`). It must survive serialization so it is
+// available to the reporter in the `test:after:run` payload.
+describe('serializes added test context', () => {
+  it('test with context', function () {
+    // mimic what mochawesome's `addContext(this, ...)` does under the hood
+    this.test.context = 'some context'
+  })
+
+  it('includes the added context in the test:after:run payload', () => {
+    const wrappedTest = testAfterRunEvents.find((t) => t.title === 'test with context')
+
+    expect(wrappedTest.context).to.eq('some context')
+  })
+})
+
 // NOTE: this test must remain the last test in the spec
 // so we can test the root after hook
 // https://github.com/cypress-io/cypress/issues/2296
