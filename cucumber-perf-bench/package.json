@@ -1,0 +1,13 @@
+{
+  "name": "cucumber-perf-harness",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Benchmark harness for cypress-cucumber-preprocessor performance work",
+  "scripts": {
+    "bench": "node run.js"
+  },
+  "dependencies": {
+    "esbuild": "^0.21.5",
+    "webpack": "^5.107.2"
+  }
+}
