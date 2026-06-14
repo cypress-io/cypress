@@ -753,8 +753,6 @@ export class Reporter {
   }
 
   static loadReporter (reporterName: string, projectRoot?: string): string | unknown {
-    let p
-
     debug('trying to load reporter:', reporterName)
 
     // Explicitly require this here (rather than dynamically) so that it gets included in the v8 snapshot
@@ -777,34 +775,46 @@ export class Reporter {
       return reporterName
     }
 
-    // it's likely a custom reporter
-    // that is local (./custom-reporter.js)
-    // or one installed by the user through npm
-    try {
-      p = path.resolve(projectRoot ?? '', reporterName)
+    // it's likely a custom reporter that is local (./custom-reporter.js)
+    // or one installed by the user through npm. We try a series of strategies,
+    // in order, and return the first one that resolves.
+    const resolvers: Array<() => string> = [
+      // a local file/path relative to the project root (this also handles
+      // absolute paths, since path.resolve ignores projectRoot in that case)
+      () => path.resolve(projectRoot ?? '', reporterName),
+      // an installed module, resolved by walking up the directory tree from the
+      // project root the same way Node's `require` does. This finds reporters
+      // installed in a parent directory's node_modules, e.g. in nested projects
+      // or monorepos - https://github.com/cypress-io/cypress/issues/4536
+      () => require.resolve(reporterName, { paths: [projectRoot ?? process.cwd()] }),
+      // the project's own node_modules. Tried last so that a genuinely missing
+      // reporter produces an error pointing at the expected install location.
+      () => path.resolve(projectRoot ?? '', 'node_modules', reporterName),
+    ]
 
-      // try local
-      debug('trying to require local reporter with path:', p)
+    let lastErr: unknown
 
-      // using path.resolve() here so we can just pass an
-      // absolute path as the reporterName which avoids
-      // joining projectRoot unnecessarily
-      return require(p)
-    } catch (err: unknown) {
-      if ((err as NodeJS.ErrnoException).code !== 'MODULE_NOT_FOUND') {
-        // bail early if the error wasn't MODULE_NOT_FOUND
-        // because that means theres something actually wrong
-        // with the found reporter
-        throw err
+    for (const resolve of resolvers) {
+      try {
+        const p = resolve()
+
+        debug('trying to require reporter with path:', p)
+
+        return require(p)
+      } catch (err: unknown) {
+        if ((err as NodeJS.ErrnoException).code !== 'MODULE_NOT_FOUND') {
+          // bail early if the error wasn't MODULE_NOT_FOUND
+          // because that means there's something actually wrong
+          // with the found reporter
+          throw err
+        }
+
+        lastErr = err
       }
-
-      p = path.resolve(projectRoot ?? '', 'node_modules', reporterName)
-
-      // try npm. if this fails, we're out of options, so let it throw
-      debug('trying to require local reporter with path:', p)
-
-      return require(p)
     }
+
+    // we're out of options, so throw the last error we encountered
+    throw lastErr
   }
 
   static getSearchPathsForReporter (reporterName: string, projectRoot?: string): string[] {

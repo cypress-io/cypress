@@ -1,5 +1,8 @@
 import '../spec_helper'
 
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
 import { Reporter } from '../../lib/reporter'
 import snapshot from 'snap-shot-it'
 
@@ -93,6 +96,54 @@ describe('lib/reporter', () => {
       expect(reporter.reporterName).to.eq('junit')
 
       expect(junitFn).to.be.calledWith(reporter.runner)
+    })
+  })
+
+  context('.loadReporter', () => {
+    let tmpDir: string
+
+    const writeReporter = (dir: string) => {
+      const reporterDir = path.join(dir, 'node_modules', 'my-custom-reporter')
+
+      fs.mkdirSync(reporterDir, { recursive: true })
+      fs.writeFileSync(path.join(reporterDir, 'package.json'), JSON.stringify({ name: 'my-custom-reporter', main: 'index.js' }))
+      fs.writeFileSync(path.join(reporterDir, 'index.js'), 'module.exports = { custom: true }')
+    }
+
+    beforeEach(() => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cy-reporter-'))
+    })
+
+    afterEach(() => {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    })
+
+    it('loads a reporter installed in the project node_modules', () => {
+      writeReporter(tmpDir)
+
+      expect(Reporter.loadReporter('my-custom-reporter', tmpDir)).to.deep.eq({ custom: true })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/4536
+    it('loads a reporter installed in a parent project node_modules (nested projects)', () => {
+      // install the reporter at the root, run from a nested project that has no
+      // node_modules of its own - this mirrors the cypress-test-nested-projects setup
+      writeReporter(tmpDir)
+
+      const nestedProjectRoot = path.join(tmpDir, 'foo')
+
+      fs.mkdirSync(nestedProjectRoot, { recursive: true })
+
+      expect(Reporter.loadReporter('my-custom-reporter', nestedProjectRoot)).to.deep.eq({ custom: true })
+    })
+
+    it('throws a MODULE_NOT_FOUND error pointing at the project node_modules when the reporter cannot be found', () => {
+      const projectRoot = path.join(tmpDir, 'foo')
+
+      fs.mkdirSync(projectRoot, { recursive: true })
+
+      expect(() => Reporter.loadReporter('does-not-exist', projectRoot))
+      .to.throw(`Cannot find module '${path.resolve(projectRoot, 'node_modules', 'does-not-exist')}'`)
     })
   })
 
