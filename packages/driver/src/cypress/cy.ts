@@ -1063,7 +1063,23 @@ export class $Cy extends EventEmitter2 implements ITimeouts, IStability, IAssert
             cy.warnMixingPromisesAndCommands()
           }
 
-          return ret
+          // The runnable returned a promise (e.g. an `async` test body). Commands
+          // may be enqueued either synchronously or *after* an `await`. In the
+          // latter case the command queue is kicked off independently of this
+          // promise, so returning `ret` alone would let mocha resolve the test as
+          // soon as the body's promise settles - before the command queue (and
+          // any failing assertions within it) has finished. Chain the queue
+          // promise after the returned promise so mocha awaits both, ensuring a
+          // failing command properly fails the test.
+          // https://github.com/cypress-io/cypress/issues/4742
+          if (fn.length) {
+            // a done callback was provided alongside the returned promise; let
+            // mocha surface its 'overspecified' error rather than swallowing it
+            // by returning the queue promise here
+            return ret
+          }
+
+          return ret.then(() => cy.state('promise'))
         }
 
         // if we're cy or we've enqueued commands
