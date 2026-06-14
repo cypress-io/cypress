@@ -17,6 +17,18 @@ type Protocols = keyof typeof DEFAULT_PROTOCOL_PORTS
 
 const DEFAULT_PORTS: string[] = Object.values(DEFAULT_PROTOCOL_PORTS)
 
+const schemeRe = /^[a-z][a-z0-9+.-]*:\/\//i
+
+// WHATWG `new URL()` throws on some inputs the legacy `url` parser tolerated
+// (relative urls, out-of-range ports, etc.). When that happens we recover a
+// best-effort authority (host[:port], without scheme/path/query/hash) so the
+// helpers below can degrade the way the legacy parser did rather than echoing
+// the raw input — which would otherwise leak the scheme/path into block-host
+// matching or collapse distinct hosts together in same-origin checks.
+export const getAuthority = (urlStr: string) => {
+  return urlStr.replace(schemeRe, '').replace(/[/?#].*$/, '')
+}
+
 export function stripProtocolAndDefaultPorts (urlToCheck: string) {
   try {
     const { hostname, port } = new URL(urlToCheck)
@@ -31,15 +43,16 @@ export function stripProtocolAndDefaultPorts (urlToCheck: string) {
     return `${hostname}:${port}`
   } catch (err) {
     // the WHATWG URL parser throws a TypeError on relative urls or out-of-range
-    // ports that the legacy parser tolerated; fall back to the original string
-    // so block-host matching can still run on it, but let anything unexpected
-    // propagate. Use `instanceof TypeError` (not `err.code`) since this package
-    // is isomorphic and the browser's URL throws a TypeError with no `.code`.
+    // ports that the legacy parser tolerated; fall back to a bare host[:port]
+    // fragment (no scheme) so block-host matching still behaves as it did, but
+    // let anything unexpected propagate. Use `instanceof TypeError` (not
+    // `err.code`) since this package is isomorphic and the browser's URL throws
+    // a TypeError with no `.code`.
     if (!(err instanceof TypeError)) {
       throw err
     }
 
-    return urlToCheck
+    return getAuthority(urlToCheck)
   }
 }
 
@@ -110,12 +123,15 @@ export function origin (urlStr: string) {
     return new URL(urlStr).origin
   } catch (err) {
     // the WHATWG URL parser throws a TypeError on invalid urls (e.g. out-of-range
-    // ports) that the legacy parser tolerated; fall back to the original string
-    // for those, but let anything unexpected propagate
+    // ports) that the legacy parser tolerated; fall back to scheme + authority
+    // (no path/query/hash, mirroring the successful URL.origin path) for those,
+    // but let anything unexpected propagate
     if (!(err instanceof TypeError)) {
       throw err
     }
 
-    return urlStr
+    const scheme = urlStr.match(schemeRe)
+
+    return `${scheme ? scheme[0] : ''}${getAuthority(urlStr)}`
   }
 }

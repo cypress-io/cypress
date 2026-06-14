@@ -45,9 +45,10 @@ describe('lib/uri', () => {
       expect(stripProtocolAndDefaultPorts('https://example.com:80/foo')).toEqual('example.com')
     })
 
-    it('returns invalid/unparseable urls unchanged', () => {
-      // out-of-range port is invalid per the WHATWG URL parser
-      expect(stripProtocolAndDefaultPorts('http://localhost:66667')).toEqual('http://localhost:66667')
+    it('strips the scheme/path from invalid/unparseable urls (legacy-compatible fragment)', () => {
+      // out-of-range port is invalid per the WHATWG URL parser; fall back to a
+      // bare host[:port] fragment (no scheme) so block-host matching still works
+      expect(stripProtocolAndDefaultPorts('http://localhost:66667/foo')).toEqual('localhost:66667')
     })
   })
 
@@ -158,9 +159,10 @@ describe('lib/uri', () => {
       expect(origin('http://user:pass@example.com/foo')).toEqual('http://example.com')
     })
 
-    it('returns invalid/unparseable urls unchanged instead of throwing', () => {
-      // out-of-range port is invalid per the WHATWG URL parser
-      expect(origin('https://example.com:99999')).toEqual('https://example.com:99999')
+    it('reduces invalid/unparseable urls to scheme + authority instead of throwing', () => {
+      // out-of-range port is invalid per the WHATWG URL parser; the fallback
+      // still strips path/query/hash like the successful URL.origin path does
+      expect(origin('https://example.com:99999/foo?bar#baz')).toEqual('https://example.com:99999')
     })
   })
 })

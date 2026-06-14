@@ -118,6 +118,14 @@ describe('lib/cors', () => {
     })
   })
 
+  describe('.urlOriginsMatch with invalid urls', () => {
+    it('does not treat distinct invalid urls as same-origin', () => {
+      // both urls fail WHATWG parsing (out-of-range port); they must not collapse
+      // to the same degraded parse and be reported as same-origin
+      expect(urlOriginsMatch('http://a.example.com:99999', 'http://b.example.com:99999')).toBe(false)
+    })
+  })
+
   describe('.urlOriginsMatch', () => {
     const assertOriginsDoNotMatch = (url1: string, url2: string) => {
       expect(urlOriginsMatch(url1, url2)).toBe(false)
