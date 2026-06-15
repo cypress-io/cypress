@@ -3,15 +3,10 @@ import { blocked } from '@packages/network'
 import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
-import {
-  addCookieJarCookiesToRequest, getSameSiteContext, shouldAttachAndSetCookies,
-} from './util/cookies'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
-import type { CypressIncomingRequest } from '../types'
 import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
-import * as errors from '@packages/errors'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -139,113 +134,12 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
   return this.next()
 }
 
-const MaybeAttachCrossOriginCookies: RequestMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'maybe:attach:cross:origin:cookies', parentSpan: this.reqMiddlewareSpan, isVerbose })
-
-  const doesTopNeedSimulation = doesTopNeedToBeSimulated(this)
-
-  span?.setAttributes({
-    doesTopNeedToBeSimulated: doesTopNeedSimulation,
-    resourceType: this.req.resourceType,
-  })
-
-  if (!doesTopNeedSimulation) {
-    span?.end()
-
-    return this.next()
-  }
-
-  if (this.req.isSyncRequest) {
-    errors.warning('SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_APPLIED', this.req.proxiedUrl)
-  }
-
-  // Top needs to be simulated since the AUT is in a cross origin state. Get the "requested with" and credentials and see what cookies need to be attached
-  const currentAUTUrl = this.getAUTUrl()
-  const shouldCookiesBeAttachedToRequest = shouldAttachAndSetCookies(this.req.proxiedUrl, currentAUTUrl, this.req.resourceType, this.req.credentialsLevel, this.req.isAUTFrame)
-
-  span?.setAttributes({
-    currentAUTUrl,
-    shouldCookiesBeAttachedToRequest,
-  })
-
-  this.debug(`should cookies be attached to request?: ${shouldCookiesBeAttachedToRequest}`)
-  if (!shouldCookiesBeAttachedToRequest) {
-    span?.end()
-
-    return this.next()
-  }
-
-  const sameSiteContext = getSameSiteContext(
-    currentAUTUrl,
-    this.req.proxiedUrl,
-    this.req.isAUTFrame,
-  )
-
-  span?.setAttributes({
-    sameSiteContext,
-    currentAUTUrl,
-    isAUTFrame: this.req.isAUTFrame,
-  })
-
-  const applicableCookiesInCookieJar = this.getCookieJar().getCookies(this.req.proxiedUrl, sameSiteContext)
-  const cookiesOnRequest = (this.req.headers['cookie'] || '').split('; ')
-
-  const existingCookiesInJar = applicableCookiesInCookieJar.join('; ')
-  const addedCookiesFromHeader = cookiesOnRequest.join('; ')
-
-  this.debug('existing cookies on request from cookie jar: %s', existingCookiesInJar)
-  this.debug('add cookies to request from header: %s', addedCookiesFromHeader)
-
-  // if the cookie header is empty (i.e. ''), set it to undefined for expected behavior
-  this.req.headers['cookie'] = addCookieJarCookiesToRequest(applicableCookiesInCookieJar, cookiesOnRequest) || undefined
-
-  span?.setAttributes({
-    existingCookiesInJar,
-    addedCookiesFromHeader,
-    cookieHeader: this.req.headers['cookie'],
-  })
-
-  this.debug('cookies being sent with request: %s', this.req.headers['cookie'])
-
-  span?.end()
-  this.next()
-}
-
-function shouldLog (req: CypressIncomingRequest) {
-  // 1. Any matching `cy.intercept()` should cause `req` to be logged by default, unless `log: false` is passed explicitly.
-  if (req.matchingRoutes?.length) {
-    const lastMatchingRoute = req.matchingRoutes[0]
-
-    if (!lastMatchingRoute.staticResponse) {
-      // No StaticResponse is set, therefore the request must be logged.
-      return true
-    }
-
-    if (lastMatchingRoute.staticResponse.log !== undefined) {
-      return Boolean(lastMatchingRoute.staticResponse.log)
-    }
-  }
-
-  // 2. Otherwise, only log if it is an XHR or fetch.
-  return req.resourceType === 'fetch' || req.resourceType === 'xhr'
+const MaybeAttachCrossOriginCookies: RequestMiddleware = async function () {
+  return this.networkInterceptionCore.attachCrossOriginCookies(this)
 }
 
 const SendToDriver: RequestMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'send:to:driver', parentSpan: this.reqMiddlewareSpan, isVerbose })
-
-  const shouldLogReq = shouldLog(this.req)
-
-  if (shouldLogReq && this.req.browserPreRequest) {
-    this.socket.toDriver('request:event', 'incoming:request', this.req.browserPreRequest)
-  }
-
-  span?.setAttributes({
-    shouldLogReq,
-    hasBrowserPreRequest: !!this.req.browserPreRequest,
-  })
-
-  span?.end()
-  this.next()
+  this.networkInterceptionCore.notifyIncomingRequest(this)
 }
 
 const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {

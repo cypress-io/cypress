@@ -10,8 +10,8 @@
 
 ### Batch 2: Framework adapters
 - [x] npm/react ✅ **COMPLETED**
-- [ ] npm/vue
-- [ ] npm/svelte
+- [x] npm/vue ✅ **COMPLETED**
+- [x] npm/svelte ✅ **COMPLETED**
 
 ### Batch 3: Build-related
 - [x] npm/webpack-batteries-included-preprocessor
@@ -293,6 +293,10 @@ ESLint 9.x auto-detects file extensions, so `--ext` flag is no longer needed.
   }
 }
 ```
+
+**Why `jiti`?** ESLint 9 loads TypeScript flat config files (`eslint.config.ts`) at runtime via [jiti](https://github.com/unjs/jiti), not via a static import in package source. Add it as an explicit `devDependency` in each migrated package so Yarn resolves `jiti@^2.4.2` locally instead of a hoisted older version (see troubleshooting §1).
+
+**Why doesn't `yarn health-check` / knip flag `jiti`?** Knip ties the `eslint` binary to `eslint.config.ts` as config infrastructure and does not treat jiti as an unused dependency in migrated npm packages. It is still required at lint runtime even though no source file imports it.
 
 #### 7. **Custom Package Rules**
 If a package needs custom rules, extend the base config:

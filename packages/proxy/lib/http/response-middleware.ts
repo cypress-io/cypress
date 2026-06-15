@@ -4,17 +4,12 @@ import { URL } from 'url'
 import zlib from 'zlib'
 import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, httpUtils } from '@packages/network'
-import { toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
-import { CookiesHelper } from './util/cookies'
-import { doesTopNeedToBeSimulated } from './util/top-simulation'
-import * as errors from '@packages/errors'
 
 import type { CookieOptions } from 'express'
-import type { ResponseStreamOptions } from '@packages/types'
 import type { CypressOutgoingResponse } from '../types'
-import type { HttpMiddleware, HttpMiddlewareThis } from '.'
+import type { HttpMiddleware } from '.'
 import type { IncomingMessage } from 'http'
 
 import { cspHeaderNames, generateCspDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
@@ -169,18 +164,6 @@ const stringifyFeaturePolicy = (policy: any): string => {
   const pairs = _.toPairs(policy)
 
   return pairs.map((directive) => directive.join(' ')).join('; ')
-}
-
-const requestIdRegEx = /^(.*)-retry-([\d]+)$/
-const getOriginalRequestId = (requestId: string) => {
-  let originalRequestId = requestId
-  const match = requestIdRegEx.exec(requestId)
-
-  if (match) {
-    [, originalRequestId] = match
-  }
-
-  return originalRequestId
 }
 
 const LogResponse: ResponseMiddleware = function () {
@@ -490,175 +473,9 @@ const MaybePreventCaching: ResponseMiddleware = function () {
   this.next()
 }
 
-const setSimulatedCookies = (ctx: HttpMiddlewareThis<ResponseMiddlewareProps>) => {
-  if (ctx.res.wantsInjection !== 'fullCrossOrigin') return
-
-  const defaultDomain = (new URL(ctx.req.proxiedUrl)).hostname
-  const allCookiesForRequest = ctx.getCookieJar()
-  .getCookies(ctx.req.proxiedUrl)
-  .map((cookie) => toughCookieToAutomationCookie(cookie, defaultDomain))
-
-  ctx.simulatedCookies = allCookiesForRequest
-}
-
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
-  const span = telemetry.startSpan({ name: 'maybe:copy:cookies:from:incoming:res', parentSpan: this.resMiddlewareSpan, isVerbose })
-
-  const cookies: string | string[] | undefined = this.incomingRes.headers['set-cookie']
-
-  const areCookiesAbsent = !cookies || !cookies.length
-
-  span?.setAttributes({
-    areCookiesAbsent,
-  })
-
-  if (areCookiesAbsent) {
-    setSimulatedCookies(this)
-
-    span?.end()
-
-    return this.next()
-  }
-
-  // Simulated Top Cookie Handling
-  // ---------------------------
-  // - We capture cookies sent by responses and add them to our own server-side
-  //   tough-cookie cookie jar. All request cookies are captured, since any
-  //   future request could be cross-origin in the context of top, even if the response that sets them
-  //   is not.
-  // - If we sent the cookie header, it may fail to be set by the browser
-  //   (in most cases). However, we cannot determine all the cases in which Set-Cookie
-  //   will currently fail. We try to address this in our tough cookie jar
-  //   by only setting cookies that would otherwise work in the browser if the AUT url was top
-  // - We also set the cookies through automation so they are available in the
-  //   browser via document.cookie and via Cypress cookie APIs
-  //   (e.g. cy.getCookie). This is only done when the AUT url and top do not match responses,
-  //   since AUT and Top being same origin will be successfully set in the browser
-  //   automatically as expected.
-  // - In the request middleware, we retrieve the cookies for a given URL
-  //   and attach them to the request, like the browser normally would.
-  //   tough-cookie handles retrieving the correct cookies based on domain,
-  //   path, etc. It also removes cookies from the cookie jar if they've expired.
-  const doesTopNeedSimulating = doesTopNeedToBeSimulated(this)
-
-  span?.setAttributes({
-    doesTopNeedSimulating,
-  })
-
-  const appendCookie = (cookie: string) => {
-    // always call 'Set-Cookie' in the browser as cross origin or same site requests
-    // can effectively set cookies in the browser if given correct credential permissions
-    const headerName = 'Set-Cookie'
-
-    try {
-      this.res.append(headerName, cookie)
-    } catch (err) {
-      this.debug(`failed to append header ${headerName}, continuing %o`, { err, cookie })
-    }
-  }
-
-  const cookiesHelper = new CookiesHelper({
-    cookieJar: this.getCookieJar(),
-    currentAUTUrl: this.getAUTUrl(),
-    debug: this.debug,
-    request: {
-      url: this.req.proxiedUrl,
-      isAUTFrame: this.req.isAUTFrame,
-      doesTopNeedSimulating,
-      resourceType: this.req.resourceType,
-      credentialLevel: this.req.credentialsLevel,
-    },
-  })
-
-  await cookiesHelper.capturePreviousCookies()
-
-  // Record the response's cookies in our server-side cookie jar (subject to the
-  // same rules the browser would apply via `CookiesHelper.setCookie`) and append
-  // them to the response so the browser sets them too. We update the jar even
-  // when top does not need to be simulated: otherwise a same-origin XHR/fetch
-  // that sets a cookie would update the browser but not the jar, leaving the jar
-  // stale. A later top-level navigation reads from the jar and would overwrite
-  // the request's fresh cookie with the stale value.
-  // See https://github.com/cypress-io/cypress/issues/25841
-  ;([] as string[]).concat(cookies).forEach((cookie) => {
-    cookiesHelper.setCookie(cookie)
-
-    appendCookie(cookie)
-  })
-
-  // When top does not need to be simulated, the AUT is the primary super domain
-  // origin and the browser sets the response's cookies itself, so there's no
-  // need to sync cookies into the browser via automation. The server-side cookie
-  // jar has already been kept in sync above.
-  if (!doesTopNeedSimulating) {
-    span?.end()
-
-    return this.next()
-  }
-
-  setSimulatedCookies(this)
-
-  const addedCookies = await cookiesHelper.getAddedCookies()
-  const wereSimCookiesAdded = addedCookies.length
-
-  span?.setAttributes({
-    wereSimCookiesAdded,
-  })
-
-  if (!wereSimCookiesAdded) {
-    span?.end()
-
-    return this.next()
-  }
-
-  // if the request is sync, we cannot wait on the cross:origin:cookies:received
-  // event since the sync request is blocking. This means that the cross-origin cookies
-  // may not have been applied.
-  if (this.req.isSyncRequest) {
-    errors.warning('SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_SET', this.req.proxiedUrl)
-
-    span?.end()
-
-    return this.next()
-  }
-
-  const cookiesEmittedAt = Date.now()
-  let cookiesReceivedLogTimeout: NodeJS.Timeout | undefined
-
-  // this wait has no timeout; when debug logging is enabled, log if the
-  // event has not arrived after CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS
-  // (the response remains held until the event arrives)
-  if (this.debug.enabled) {
-    cookiesReceivedLogTimeout = setTimeout(() => {
-      this.debug('cross:origin:cookies:received has not been received within %dms of emitting cross:origin:cookies for url %s', CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS, this.req.proxiedUrl)
-    }, CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS)
-
-    cookiesReceivedLogTimeout.unref?.()
-  }
-
-  // we want to set the cookies via automation so they exist in the browser
-  // itself. however, firefox will hang if we try to use the extension
-  // to set cookies on a url that's in-flight, so we send the cookies down to
-  // the driver, let the response go, and set the cookies via automation
-  // from the driver once the page has loaded but before we run any further
-  // commands
-  this.serverBus.once('cross:origin:cookies:received', () => {
-    if (cookiesReceivedLogTimeout) {
-      clearTimeout(cookiesReceivedLogTimeout)
-    }
-
-    this.debug('cross:origin:cookies:received %dms after emitting cross:origin:cookies for url %s', Date.now() - cookiesEmittedAt, this.req.proxiedUrl)
-
-    span?.end()
-    this.next()
-  })
-
-  this.debug('emitting cross:origin:cookies with %d cookie(s) for url %s', addedCookies.length, this.req.proxiedUrl)
-
-  this.serverBus.emit('cross:origin:cookies', addedCookies)
+  return this.networkInterceptionCore.copyCookiesFromResponse(this)
 }
-
-const CROSS_ORIGIN_COOKIES_RECEIVED_LOG_TIMEOUT_MS = 5000
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
 
@@ -715,26 +532,10 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 }
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
-  const notifyProtocolManagerOfEmptyBody = (isCached: boolean) => {
-    if (this.protocolManager && this.req.browserPreRequest?.requestId) {
-      const requestId = getOriginalRequestId(this.req.browserPreRequest.requestId)
-
-      this.protocolManager.responseEndedWithEmptyBody({
-        requestId,
-        isCached,
-        timings: {
-          cdpRequestWillBeSentTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentTimestamp,
-          cdpRequestWillBeSentReceivedTimestamp: this.req.browserPreRequest.cdpRequestWillBeSentReceivedTimestamp,
-          proxyRequestReceivedTimestamp: this.req.browserPreRequest.proxyRequestReceivedTimestamp,
-          cdpLagDuration: this.req.browserPreRequest.cdpLagDuration,
-          proxyRequestCorrelationDuration: this.req.browserPreRequest.proxyRequestCorrelationDuration,
-        },
-      })
-    }
-  }
-
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
-    notifyProtocolManagerOfEmptyBody(this.incomingRes.statusCode === 304)
+    this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, {
+      isCached: this.incomingRes.statusCode === 304,
+    })
 
     this.res.end()
 
@@ -757,7 +558,7 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
     && !this.res.wantsInjection
     && !this.res.wantsSecurityRemoved
   ) {
-    notifyProtocolManagerOfEmptyBody(false)
+    this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, { isCached: false })
     this.res.setHeader('Content-Length', '0')
     this.res.end()
 
@@ -809,38 +610,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 }
 
 const CompressBody: ResponseMiddleware = async function () {
-  if (this.protocolManager && this.req.browserPreRequest?.requestId) {
-    const preRequest = this.req.browserPreRequest
-    const requestId = getOriginalRequestId(preRequest.requestId)
-
-    const span = telemetry.startSpan({ name: 'gzip:body:protocol-notification', parentSpan: this.resMiddlewareSpan, isVerbose })
-
-    const streamOptions: ResponseStreamOptions = {
-      requestId,
-      responseHeaders: this.incomingRes.headers,
-      isAlreadyGunzipped: this.isGunzipped,
-      isAlreadyBrotliDecompressed: this.isBrotliDecompressed,
-      responseStream: this.incomingResStream,
-      res: this.res,
-      timings: {
-        cdpRequestWillBeSentTimestamp: preRequest.cdpRequestWillBeSentTimestamp,
-        cdpRequestWillBeSentReceivedTimestamp: preRequest.cdpRequestWillBeSentReceivedTimestamp,
-        proxyRequestReceivedTimestamp: preRequest.proxyRequestReceivedTimestamp,
-        cdpLagDuration: preRequest.cdpLagDuration,
-        proxyRequestCorrelationDuration: preRequest.proxyRequestCorrelationDuration,
-      },
-    }
-
-    const resultingStream = this.protocolManager.responseStreamReceived(streamOptions)
-
-    if (resultingStream) {
-      this.incomingResStream = resultingStream.on('error', this.onError).once('close', () => {
-        span?.end()
-      })
-    } else {
-      span?.end()
-    }
-  }
+  await this.networkInterceptionCore.notifyResponseStreamReceived(this)
 
   // Re-compress in the same order as the original content-encoding (innermost first).
   const order = this.contentEncodingOrder ?? []
