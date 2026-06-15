@@ -94,6 +94,12 @@ export class WebKitAutomation {
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
+      // Set a standard devicePixelRatio so that screenshots are consistent
+      // regardless of the host machine's DPI (e.g. 2x locally vs 1x in CI) and
+      // to avoid fuzzy text on high-DPI displays. This mirrors the behavior of
+      // Chrome (`--force-device-scale-factor=1`) and Electron.
+      // https://github.com/cypress-io/cypress/issues/23808
+      deviceScaleFactor: 1,
       recordVideo: options.videoApi && {
         dir: os.tmpdir(),
         size: { width: 1280, height: 720 },
