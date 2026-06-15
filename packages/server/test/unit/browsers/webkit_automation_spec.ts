@@ -1,5 +1,5 @@
-import '../../spec_helper'
 import { expect } from 'chai'
+import sinon from 'sinon'
 import { WebKitAutomation } from '../../../lib/browsers/webkit-automation'
 
 // Builds a minimal Playwright-like request object for exercising the
@@ -41,6 +41,10 @@ describe('lib/browsers/webkit-automation', () => {
 
       wkAutomation.page = page
       wkAutomation.handleRequestEvents()
+    })
+
+    afterEach(() => {
+      sinon.restore()
     })
 
     it('registers request, requestfinished, and requestfailed handlers', () => {
