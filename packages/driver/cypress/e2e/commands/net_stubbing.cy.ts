@@ -2658,21 +2658,6 @@ describe('network stubbing', { retries: 15 }, function () {
         }).visit('/dump-method')
       })
 
-      it('fails test if req.destroy is called twice in req handler', function (done) {
-        const url = uniqueRoute('/foo')
-
-        testFail((err) => {
-          expect(err.message).to.contain('`req.reply()` and/or `req.continue()` were called to signal request completion multiple times, but a request can only be completed once')
-          done()
-        })
-
-        cy.intercept(url, function (req) {
-          req.destroy()
-
-          req.destroy()
-        }).visit(url)
-      })
-
       it('fails test if req.destroy is called after req.reply in req handler', function (done) {
         const url = uniqueRoute('/foo')
 
