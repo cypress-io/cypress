@@ -53,13 +53,21 @@ describe('cookies', () => {
     .its('body').should('deep.eq', { shouldExpire: 'oneHour' })
 
     const hostName = new Cypress.Location(httpUrl).getHostName()
+    const isLoopbackHost = ['localhost', '127.0.0.1'].includes(hostName)
 
-    // TODO(origin): remove 'if' check once https://github.com/cypress-io/cypress/issues/24332 is resolved
-    if (!['localhost', '127.0.0.1'].includes(hostName)) {
-      // secure cookies should not have been attached
-      cy.request(`${httpUrl}/requestCookies`)
-      .its('body').should('deep.eq', {})
+    // localhost and the 127.0.0.0/8 loopback range are secure contexts, so
+    // Chromium-based browsers still attach secure cookies to http requests for
+    // those hosts. Firefox does not make this loopback exception and omits
+    // secure cookies from every http request. For any other host, secure
+    // cookies must never be attached to an http request.
+    let expectedHttpCookies = {}
+
+    if (isLoopbackHost && !Cypress.isBrowser('firefox')) {
+      expectedHttpCookies = { shouldExpire: 'oneHour' }
     }
+
+    cy.request(`${httpUrl}/requestCookies`)
+    .its('body').should('deep.eq', expectedHttpCookies)
 
     cy.visit(`${httpsUrl}/expirationMaxAge`)
     cy.getCookies().should('be.empty')
