@@ -373,11 +373,12 @@ describe('src/cypress/dom/visibility', {
 
           assertVisibilityForSections([
             // https://github.com/cypress-io/cypress/issues/20706
-            // In Chromium, content inside a closed <details> keeps a non-zero
-            // bounding box (https://crbug.com/1276028), so the legacy algorithm
-            // reports it visible while the fast algorithm correctly reports it
-            // hidden. Firefox/WebKit report a zero-dimension box, so the legacy
-            // expectation differs there - restrict this divergent case to chromium.
+            // In Chromium, the auto-expand-details behavior causes content inside
+            // a closed <details> to keep a non-zero bounding box, so the legacy
+            // algorithm reports it visible while the fast algorithm correctly
+            // reports it hidden. Firefox/WebKit report a zero-dimension box, so
+            // the legacy expectation differs there - restrict this divergent case
+            // to chromium.
             Cypress.browser.family === 'chromium' ? 'details-collapsed' : undefined,
             'details-open',
           ])

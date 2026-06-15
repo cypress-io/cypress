@@ -10,11 +10,11 @@
 
   <!--
     https://github.com/cypress-io/cypress/issues/20706
-    In Chromium, content inside a closed <details> still reports a non-zero
-    bounding box (https://crbug.com/1276028), so the legacy algorithm
-    incorrectly considers the collapsed content visible. The fast algorithm
-    relies on Element.checkVisibility(), which correctly reports the collapsed
-    content as hidden.
+    In Chromium, the auto-expand-details behavior causes content inside a closed
+    <details> to report a non-zero bounding box, so the legacy algorithm
+    considers the collapsed content visible. The fast algorithm relies on
+    Element.checkVisibility(), which correctly reports the collapsed content as
+    hidden.
   -->
   <div class="test-section" cy-section="details-collapsed">
     <h3>Collapsed details</h3>
