@@ -641,13 +641,13 @@ interface UncaughtErrorRecord {
 // renderer memory and crashing the browser.
 // See https://github.com/cypress-io/cypress/issues/27415
 const canCollapseUncaughtError = (previous: UncaughtErrorSignature | undefined, current: UncaughtErrorSignature): boolean => {
-  if (!previous || !current.runnableId) {
-    return false
-  }
-
   return (
-    previous.message === current.message &&
+    previous !== undefined &&
+    // only collapse errors scoped to a test, so two test-less errors
+    // (both with an undefined runnableId) are never treated as the same log
+    current.runnableId !== undefined &&
     previous.runnableId === current.runnableId &&
+    previous.message === current.message &&
     previous.retry === current.retry &&
     // a previously suppressed error that now throws unhandled should fail the
     // test, so it gets its own (red) log rather than collapsing into the grey one
