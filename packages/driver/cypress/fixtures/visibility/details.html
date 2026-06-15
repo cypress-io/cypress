@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Details/Summary Visibility Tests</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./ux.js"></script>
+</head>
+<body>
+  <h1>Details/Summary Visibility Tests</h1>
+
+  <!--
+    https://github.com/cypress-io/cypress/issues/20706
+    In Chromium, content inside a closed <details> still reports a non-zero
+    bounding box (https://crbug.com/1276028), so the legacy algorithm
+    incorrectly considers the collapsed content visible. The fast algorithm
+    relies on Element.checkVisibility(), which correctly reports the collapsed
+    content as hidden.
+  -->
+  <div class="test-section" cy-section="details-collapsed">
+    <h3>Collapsed details</h3>
+    <details>
+      <summary class="testCase" cy-expect="visible" cy-label="Summary of collapsed details">this is a question</summary>
+      <div class="testCase" cy-legacy-expect="visible" cy-fast-expect="hidden" cy-label="Content of collapsed details">this is the answer</div>
+    </details>
+  </div>
+
+  <div class="test-section" cy-section="details-open">
+    <h3>Open details</h3>
+    <details open>
+      <summary class="testCase" cy-expect="visible" cy-label="Summary of open details">this is a question</summary>
+      <div class="testCase" cy-expect="visible" cy-label="Content of open details">this is the answer</div>
+    </details>
+  </div>
+</body>
+</html>

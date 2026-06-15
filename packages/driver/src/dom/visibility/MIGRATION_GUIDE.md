@@ -61,6 +61,7 @@ While comprehensive, this list may not be complete. Additional discrepancies may
 | **[contain](../../../cypress/fixtures/visibility/basic-css-properties.html)** | Element with CSS contain:paint property | ✅ Yes | ❌ No | ❌ No | Element positioned outside of a parent that has the `contain: paint` property |
 | **[backdrop-filter](../../../cypress/fixtures/visibility/basic-css-properties.html)** | Element covered by an element with with backdrop-filter opacity(0) | ✅ Yes | ❌ No | ❌ No|  |
 | **[pointer-events-none](../../../cypress/fixtures/visibility/basic-css-properties.html)** | Element with pointer-events: none | ✅ Yes | ❌ No | ❌ No | Element has dimensions and is visible to the user, but cannot receive pointer events. |
+| **[details-collapsed](../../../cypress/fixtures/visibility/details.html)** | Content of collapsed details | ✅ Yes | ❌ No | ❌ No | Content inside a closed `<details>` element. In Chromium it retains a non-zero bounding box ([crbug.com/1276028](https://crbug.com/1276028)), so the legacy algorithm considers it visible. The fast algorithm relies on `Element.checkVisibility()`, which correctly reports it as hidden. See [#20706](https://github.com/cypress-io/cypress/issues/20706). |
 
 ## Migration Steps
 

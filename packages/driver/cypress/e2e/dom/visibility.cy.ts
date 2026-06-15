@@ -365,6 +365,23 @@ describe('src/cypress/dom/visibility', {
             'backface-visibility',
           ])
         })
+
+        describe('details and summary', () => {
+          beforeEach(() => {
+            cy.visit('/fixtures/visibility/details.html')
+          })
+
+          assertVisibilityForSections([
+            // https://github.com/cypress-io/cypress/issues/20706
+            // In Chromium, content inside a closed <details> keeps a non-zero
+            // bounding box (https://crbug.com/1276028), so the legacy algorithm
+            // reports it visible while the fast algorithm correctly reports it
+            // hidden. Firefox/WebKit report a zero-dimension box, so the legacy
+            // expectation differs there - restrict this divergent case to chromium.
+            Cypress.browser.family === 'chromium' ? 'details-collapsed' : undefined,
+            'details-open',
+          ])
+        })
       })
     })
   }
