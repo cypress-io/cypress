@@ -1,7 +1,5 @@
 import type EventEmitter from 'events'
-import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
-import { createDefaultNetworkInterceptionCore } from '@packages/proxy/lib/adapters/create-default-network-interception-core'
-import { defaultMiddleware } from '@packages/proxy/lib/http'
+import { NetworkProxy, BrowserPreRequest, createProxyNetworkInterception, defaultMiddleware } from '@packages/proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
@@ -44,7 +42,7 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
     matchesBlockedHost: blocked.matches,
   })
 
-  const networkInterceptionCore = createDefaultNetworkInterceptionCore({
+  const networkInterceptionCore = createProxyNetworkInterception({
     policyRegistration: networkPolicyRegistration,
   })
 

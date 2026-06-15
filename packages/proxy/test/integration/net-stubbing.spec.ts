@@ -13,7 +13,7 @@ import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import { NetworkPolicyRegistry } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
-import { createDefaultNetworkInterceptionCore } from '../../lib/adapters/create-default-network-interception-core'
+import { createProxyNetworkInterception } from '../../lib/adapters/create-proxy-network-interception'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
@@ -55,7 +55,7 @@ describe('network stubbing', () => {
     const proxy = new NetworkProxy({
       socket,
       netStubbingState,
-      networkInterceptionCore: createDefaultNetworkInterceptionCore({
+      networkInterceptionCore: createProxyNetworkInterception({
         policyRegistration: new NetworkPolicyRegistry(),
       }),
       config,

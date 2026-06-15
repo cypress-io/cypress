@@ -1,9 +1,9 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
 import { NetworkPolicyRegistry } from '@packages/network-interception'
-import { createDefaultNetworkInterceptionCore } from '../../../lib/adapters/create-default-network-interception-core'
+import { createProxyNetworkInterception } from '../../../lib/adapters/create-proxy-network-interception'
 
 export function createTestNetworkInterceptionCore () {
-  return createDefaultNetworkInterceptionCore({
+  return createProxyNetworkInterception({
     policyRegistration: new NetworkPolicyRegistry(),
   })
 }

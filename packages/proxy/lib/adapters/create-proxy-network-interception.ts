@@ -7,15 +7,15 @@ import { ProxyNetworkCaptureAdapter } from './proxy-network-capture'
 import { ProxyRequestInterceptionAdapter } from './proxy-request-interception'
 import { ProxyResponseInterceptionAdapter } from './proxy-response-interception'
 
-export type CreateDefaultNetworkInterceptionCoreOptions = {
+export type CreateProxyNetworkInterceptionOptions = {
   policyRegistration?: ForNetworkPolicyRegistration
 }
 
 /**
  * Composition-root helper: wire all default proxy driven-port adapters into {@link NetworkInterceptionCore}.
  */
-export function createDefaultNetworkInterceptionCore (
-  options: CreateDefaultNetworkInterceptionCoreOptions = {},
+export function createProxyNetworkInterception (
+  options: CreateProxyNetworkInterceptionOptions = {},
 ): NetworkInterceptionCore {
   return new NetworkInterceptionCore({
     policyRegistration: options.policyRegistration,

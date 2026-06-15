@@ -291,6 +291,7 @@
     },
     "packages/proxy": {
       "entry": [
+        "lib/index.ts",
         "lib/http/util/rewriter.ts",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
@@ -842,13 +843,6 @@
     ],
     "packages/proxy/lib/http/util/ast-rewriter.ts": [
       "exports"
-    ],
-    "packages/proxy/lib/adapters/index.ts": [
-      "exports",
-      "types"
-    ],
-    "packages/proxy/lib/adapters/create-default-network-interception-core.ts": [
-      "types"
     ],
     "packages/errors/src/errTemplate.ts": [
       "exports"
