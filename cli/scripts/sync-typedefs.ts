@@ -6,10 +6,7 @@ import fs from 'fs-extra'
 import { includeTypes } from './utils'
 import shell from 'shelljs'
 import { join } from 'path'
-import { createRequire } from 'module'
 import resolvePkg from 'resolve-pkg'
-
-const require = createRequire(import.meta.url)
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
