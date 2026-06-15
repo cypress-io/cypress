@@ -183,7 +183,11 @@ class ProxyRequest {
     // details on request
     consoleProps['Request Headers'] = this.preRequest.headers
 
-    const reqBody = _.chain(this.interceptions).last().get('interception.request.body').value()
+    // prefer the body captured by a matching `cy.intercept()`, but fall back to
+    // the body from the browser pre-request so the request body is displayed
+    // even when the request is not intercepted
+    // @see https://github.com/cypress-io/cypress/issues/21421
+    const reqBody = _.chain(this.interceptions).last().get('interception.request.body').value() ?? this.preRequest.postData
 
     if (reqBody) consoleProps['Request Body'] = reqBody
 

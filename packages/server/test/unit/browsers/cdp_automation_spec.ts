@@ -108,9 +108,10 @@ context('lib/browsers/cdp_automation', () => {
           requestId: '0',
           type: 'other',
           request: {
-            method: 'GET',
+            method: 'POST',
             url: 'https://www.google.com',
             headers: {},
+            postData: 'foo=bar',
           },
           wallTime: 100.100100,
         }
@@ -125,6 +126,7 @@ context('lib/browsers/cdp_automation', () => {
         expect(arg.method).to.eq(browserPreRequest.request.method)
         expect(arg.url).to.eq(browserPreRequest.request.url)
         expect(arg.headers).to.eq(browserPreRequest.request.headers)
+        expect(arg.postData).to.eq(browserPreRequest.request.postData)
         expect(arg.resourceType).to.eq(browserPreRequest.type)
         expect(arg.originalResourceType).to.eq(browserPreRequest.type)
         expect(arg.cdpRequestWillBeSentTimestamp).to.be.closeTo(100100.100, 0.001)

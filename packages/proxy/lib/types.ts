@@ -60,6 +60,7 @@ export type BrowserPreRequest = {
   method: string
   url: string
   headers: { [key: string]: string | string[] }
+  postData?: string
   resourceType: ResourceType
   originalResourceType: string | undefined
   errorHandled?: boolean

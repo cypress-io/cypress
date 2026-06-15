@@ -107,6 +107,27 @@ describe('Proxy Logging', () => {
       })
     })
 
+    // request body comes from the browser pre-request (CDP postData), so this
+    // is only available in chromium-family browsers
+    // @see https://github.com/cypress-io/cypress/issues/21421
+    it('shows the request body in consoleProps for an unintercepted request', {
+      browser: { family: 'chromium' },
+    }, (done) => {
+      // tslint:disable:no-floating-promises
+      fetch('/some-url', { method: 'POST', body: 'foo=bar' })
+
+      cy.once('log:added', (log) => {
+        try {
+          expect(log.consoleProps.props).to.not.have.property('Matched `cy.intercept()`')
+          expect(log.consoleProps.props['Request Body']).to.eq('foo=bar')
+          done()
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error('assertion error', err)
+        }
+      })
+    })
+
     it('does not log an unintercepted non-xhr/fetch request', (done) => {
       const img = new Image()
       const logs: any[] = []

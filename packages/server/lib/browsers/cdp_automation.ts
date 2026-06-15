@@ -292,6 +292,9 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
       method: params.request.method,
       url,
       headers: params.request.headers,
+      // postData is omitted by CDP when the request body is too large; in that
+      // case `hasPostData` is set instead and the body is not displayed.
+      postData: params.request.postData,
       resourceType: normalizeResourceType(params.type),
       originalResourceType: params.type,
       initiator: params.initiator,
