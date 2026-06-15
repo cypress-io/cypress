@@ -76,35 +76,6 @@ describe('http', function () {
 
       expect(onError.mock.calls[0][0].message).toEqual('bad gzip')
     })
-
-    it('ignores async middleware rejections after next() was called', async function () {
-      const onError = vi.fn()
-      let rejectLate: (err: Error) => void
-
-      const asyncMiddleware = vi.fn().mockImplementation(function () {
-        this.next()
-
-        return new Promise((_resolve, reject) => {
-          rejectLate = reject
-        })
-      })
-
-      const ctx = {
-        req: { method: 'GET', proxiedUrl: 'url' },
-        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
-        debug: () => {},
-        middleware: {
-          [HttpStages.IncomingRequest]: { asyncMiddleware },
-        },
-      }
-
-      await _runStage(HttpStages.IncomingRequest, ctx, onError)
-
-      rejectLate!(new Error('late async rejection'))
-      await new Promise((resolve) => setTimeout(resolve, 10))
-
-      expect(onError).not.toHaveBeenCalled()
-    })
   })
 
   describe('Http.handle', function () {

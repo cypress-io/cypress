@@ -12,6 +12,8 @@ export { handleInterceptResponse } from './handle-intercept-response'
 
 export { NetStubbingState, ResourceType } from './types'
 
+export { getRoutesForRequest } from '@packages/network-interception'
+
 import { state } from './state'
 
 export { state as netStubbingState }

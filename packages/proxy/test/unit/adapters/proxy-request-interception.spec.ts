@@ -1,11 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ProxyRequestInterceptionAdapter } from '../../../lib/adapters/proxy-request-interception'
 import { correlateBrowserPreRequest } from '../../../lib/adapters/correlate-browser-pre-request'
+import { endRequestsToBlockedHosts } from '../../../lib/adapters/end-requests-to-blocked-hosts'
 import { sendRequestOutgoing } from '../../../lib/adapters/send-request-outgoing'
 
 vi.mock('../../../lib/adapters/correlate-browser-pre-request', () => {
   return {
     correlateBrowserPreRequest: vi.fn(),
+  }
+})
+
+vi.mock('../../../lib/adapters/end-requests-to-blocked-hosts', () => {
+  return {
+    endRequestsToBlockedHosts: vi.fn(),
   }
 })
 
@@ -18,6 +25,7 @@ vi.mock('../../../lib/adapters/send-request-outgoing', () => {
 describe('ProxyRequestInterceptionAdapter', () => {
   beforeEach(() => {
     vi.mocked(correlateBrowserPreRequest).mockReset()
+    vi.mocked(endRequestsToBlockedHosts).mockReset()
     vi.mocked(sendRequestOutgoing).mockReset()
   })
 
@@ -41,5 +49,18 @@ describe('ProxyRequestInterceptionAdapter', () => {
 
     expect(sendRequestOutgoing).toHaveBeenCalledOnce()
     expect(sendRequestOutgoing).toHaveBeenCalledWith(ctx)
+  })
+
+  it('delegates endRequestIfBlocked to endRequestsToBlockedHosts helper', async () => {
+    const adapter = new ProxyRequestInterceptionAdapter()
+    const ctx = { req: { proxiedUrl: 'http://evil.com' } }
+    const runPolicies = vi.fn().mockResolvedValue({ ended: false, state: {} })
+
+    vi.mocked(endRequestsToBlockedHosts).mockResolvedValue(undefined)
+
+    await adapter.endRequestIfBlocked(ctx, runPolicies)
+
+    expect(endRequestsToBlockedHosts).toHaveBeenCalledOnce()
+    expect(endRequestsToBlockedHosts).toHaveBeenCalledWith(ctx, runPolicies)
   })
 })

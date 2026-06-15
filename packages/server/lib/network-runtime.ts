@@ -1,27 +1,19 @@
 import type EventEmitter from 'events'
-import {
-  NetworkProxy,
-  BrowserPreRequest,
-  ProxyRequestInterceptionAdapter,
-  ProxyResponseInterceptionAdapter,
-  ProxyNetworkCaptureAdapter,
-  ProxyCookieStateAdapter,
-  ProxyCommandLogAdapter,
-  defaultMiddleware,
-} from '@packages/proxy'
-import { ProxyDocumentPreparationAdapter } from '@packages/proxy/lib/adapters/proxy-document-preparation'
+import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
+import { createDefaultNetworkInterceptionCore } from '@packages/proxy/lib/adapters/create-default-network-interception-core'
+import { defaultMiddleware } from '@packages/proxy/lib/http'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
-import { NetworkPolicyRegistry, NetworkInterceptionCore } from '@packages/network-interception'
-import type { ForNetworkPolicyRegistration, NetworkInterceptionRuntime } from '@packages/network-interception'
+import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar } from './util/cookies'
 import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
+import { ConfiguratorNetworkPolicyAdapter } from './adapters/configurator-network-policy'
 import { registerDefaultNetworkPolicies } from './register-default-network-policies'
 
-type CreateProxyRuntimeDeps = {
+export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
   remoteStates: RemoteStates
@@ -33,7 +25,7 @@ type CreateProxyRuntimeDeps = {
   getCurrentBrowser: () => FoundBrowser
 }
 
-type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
+export type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
   networkProxy: NetworkProxy
   netStubbingState: NetStubbingState
   networkPolicyRegistration: ForNetworkPolicyRegistration
@@ -45,17 +37,13 @@ type ProxyNetworkRuntime = NetworkInterceptionRuntime & {
  */
 export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkRuntime {
   const stubbingState = netStubbingState()
-  const networkPolicyRegistration: ForNetworkPolicyRegistration = new NetworkPolicyRegistry()
-  const networkInterceptionCore = new NetworkInterceptionCore({
-    requestInterception: new ProxyRequestInterceptionAdapter(),
-    responseInterception: new ProxyResponseInterceptionAdapter(),
-    documentPreparation: new ProxyDocumentPreparationAdapter(),
-    networkCapture: new ProxyNetworkCaptureAdapter(),
-    cookieState: new ProxyCookieStateAdapter(),
-    commandLog: new ProxyCommandLogAdapter(),
-  })
+  const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
   registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)
+
+  const networkInterceptionCore = createDefaultNetworkInterceptionCore({
+    policyRegistration: networkPolicyRegistration,
+  })
 
   const networkProxy = new NetworkProxy({
     config: deps.config,

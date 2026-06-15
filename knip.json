@@ -115,6 +115,8 @@
         "lib/capture.ts",
         "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
+        "lib/network-runtime.ts",
+        "lib/register-default-network-policies.ts",
         "lib/privileged-commands/privileged-channel.js",
         "lib/util/**/*.{ts,js}",
         "test/**/*.{ts,js}"
@@ -845,6 +847,13 @@
     ],
     "packages/proxy/lib/http/util/ast-rewriter.ts": [
       "exports"
+    ],
+    "packages/proxy/lib/adapters/index.ts": [
+      "exports",
+      "types"
+    ],
+    "packages/proxy/lib/adapters/create-default-network-interception-core.ts": [
+      "types"
     ],
     "packages/errors/src/errTemplate.ts": [
       "exports"

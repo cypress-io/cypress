@@ -1,5 +1,6 @@
-import type { ForRequestInterception } from '@packages/network-interception'
+import type { ForRequestInterception, RunPoliciesResult } from '@packages/network-interception'
 import { correlateBrowserPreRequest } from './correlate-browser-pre-request'
+import { endRequestsToBlockedHosts } from './end-requests-to-blocked-hosts'
 import { sendRequestOutgoing } from './send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
 
@@ -11,5 +12,12 @@ export class ProxyRequestInterceptionAdapter implements ForRequestInterception {
 
   forwardToOrigin (ctx: unknown): void {
     sendRequestOutgoing(ctx as RequestInterceptionMiddlewareCtx)
+  }
+
+  endRequestIfBlocked (
+    ctx: unknown,
+    runPolicies: () => Promise<RunPoliciesResult>,
+  ): Promise<void> {
+    return endRequestsToBlockedHosts(ctx as RequestInterceptionMiddlewareCtx, runPolicies)
   }
 }

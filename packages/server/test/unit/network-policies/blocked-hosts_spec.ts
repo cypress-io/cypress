@@ -1,15 +1,15 @@
-import { createBlockedHosts } from '../../../lib/network-policies/blocked-hosts'
+import { BlockedHosts } from '@packages/network-interception'
 import '../../spec_helper'
 
-describe('lib/network-policies/blocked-hosts', () => {
+describe('BlockedHosts policy', () => {
   it('does not match without a matcher or blockHosts config', () => {
-    const policy = createBlockedHosts({})
+    const policy = BlockedHosts({})
 
     expect(policy.when({ url: 'http://evil.com/' })).to.be.false
   })
 
   it('matches blocked URLs via injected matcher', () => {
-    const policy = createBlockedHosts({
+    const policy = BlockedHosts({
       blockHosts: ['*.evil.com'],
       matchesBlockedHost: (url, hosts) => {
         expect(hosts).to.deep.equal(['*.evil.com'])
