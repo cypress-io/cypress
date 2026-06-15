@@ -735,6 +735,7 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
     // and stored credentials. Skipping it in single-tab mode allowed that state to
     // accumulate over long runs, producing rare, order-dependent failures.
     // See: https://github.com/cypress-io/cypress/issues/24146
+    debug('resetting server state between specs in single-tab run mode')
     project.server.reset()
   }
 
