@@ -1243,8 +1243,6 @@ export const AllCypressErrors = {
 
           ${fmt.highlightSecondary('cypress run --browser chrome')}
 
-        Alternatively, ensure the user running Cypress has an active graphical session (for example, by enabling automatic login and running your CI agent as a ${fmt.highlightSecondary('LaunchAgent')} rather than a ${fmt.highlightSecondary('LaunchDaemon')}).
-
         ${fmt.stackTrace(originalError)}`
   },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
