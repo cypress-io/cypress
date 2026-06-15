@@ -91,16 +91,18 @@ const isCypressErr = (err: Error): boolean => {
 }
 
 const isSpecError = (spec, err) => {
-  // Errors whose stack was synthesized from an `error` event (rather than a
-  // real thrown Error) must not be attributed to the spec. Browser-generated
-  // errors like "ResizeObserver loop limit exceeded" arrive with no Error
-  // object, so we fabricate a single-frame stack from the event's filename. In
-  // headless mode that filename is the runner URL, which embeds the spec path
-  // as a query param (e.g. `.../runner?file=<spec.relative>`), causing a false
-  // positive here and bypassing the user's `uncaught:exception` handler. See #22113.
-  if (err.hasSynthesizedStack) return false
+  if (!err.stack) return false
 
-  return _.includes(err.stack, spec.relative)
+  // The runner UI navigates to a spec via `#/specs/runner?file=<spec.relative>`
+  // (see server `getSpecUrl`). When a browser-generated error such as
+  // "ResizeObserver loop limit exceeded" is caught on the top frame, its stack
+  // is synthesized from that runner URL, so the spec path shows up only as the
+  // `file` query param rather than a real source location. Strip that segment
+  // before matching so we don't misclassify the error as originating from the
+  // spec, which would bypass the user's `uncaught:exception` handler. See #22113.
+  const stack = err.stack.replace(/#\/specs\/runner\?file=[^\s)]*/g, '')
+
+  return _.includes(stack, spec.relative)
 }
 
 const mergeErrProps = (origErr: Error, ...newProps): Error => {
@@ -550,18 +552,11 @@ const convertErrorEventPropertiesToObject = (args) => {
   message = _.isString(err) ? err : message
   const stack = getStackFromErrArgs({ filename, lineno, colno })
 
-  const error: any = makeErrFromObj({
+  return makeErrFromObj({
     name: 'Error',
     message,
     stack,
   })
-
-  // Flag that this error's stack was synthesized from the error event's
-  // filename/lineno/colno rather than a real thrown Error, so frame
-  // classification (see `isSpecError`) doesn't misattribute it to the spec.
-  error.hasSynthesizedStack = true
-
-  return error
 }
 
 interface ErrorFromErrorEvent {
