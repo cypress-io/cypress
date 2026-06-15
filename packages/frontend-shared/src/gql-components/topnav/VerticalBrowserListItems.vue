@@ -50,7 +50,7 @@
           </span>
         </div>
       </div>
-      <div>
+      <div class="pl-[16px]">
         <div class="flex items-center h-full align-middle">
           <template v-if="browser.isSelected">
             <div data-cy="top-nav-browser-list-selected-item">
