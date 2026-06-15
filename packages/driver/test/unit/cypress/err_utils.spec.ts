@@ -92,6 +92,19 @@ describe('err_utils', () => {
       expect(log.set).toHaveBeenCalledTimes(2)
     })
 
+    it('snapshots the DOM only once when unhandled errors collapse', () => {
+      const { cypress, log } = createCypress()
+      const err = () => new Error('boom')
+
+      errUtils.logError(cypress, 'error', err(), false)
+      errUtils.logError(cypress, 'error', err(), false)
+      errUtils.logError(cypress, 'error', err(), false)
+
+      expect(cypress.log).toHaveBeenCalledTimes(1)
+      expect(cypress.log.mock.calls[0][0]).toMatchObject({ snapshot: true })
+      expect(log.set).toHaveBeenCalledTimes(2)
+    })
+
     it('updates the deduped log message with the occurrence count', () => {
       const { cypress, log } = createCypress()
       const err = () => new Error('ResizeObserver loop completed with undelivered notifications.')
@@ -180,7 +193,7 @@ describe('err_utils', () => {
       errUtils.logError(cypress, 'error', err(), true)
       errUtils.logError(cypress, 'error', err(), true)
       // cy.reset() wipes Cypress.state before each test
-      delete store.uncaughtErrorLog
+      delete store[errUtils.UNCAUGHT_ERROR_STATE_KEY]
       errUtils.logError(cypress, 'error', err(), true)
       errUtils.logError(cypress, 'error', err(), true)
 

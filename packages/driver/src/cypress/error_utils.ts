@@ -613,8 +613,10 @@ const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
     errorFromProjectRejectionEvent(event)
 }
 
-// The identifying fingerprint of an uncaught-exception log. Two consecutive
-// uncaught exceptions with the same signature can collapse into one log.
+// #27415 — Repeated identical uncaught exceptions within a test collapse into one
+// updating log (consecutive occurrences only). Handled (suppressed) exceptions
+// skip DOM snapshots. State is cleared with each test via `cy.reset()`.
+// https://github.com/cypress-io/cypress/issues/27415
 interface UncaughtErrorSignature {
   runnableId?: string
   message: string
@@ -622,11 +624,6 @@ interface UncaughtErrorSignature {
   handled: boolean
 }
 
-// The most recent uncaught-exception log, retained so repeated identical errors
-// can update it in place instead of creating a new log each time. Stored on
-// `Cypress.state` (rather than module scope) so it is scoped to — and cleared
-// with — the current test: `cy.reset()` wipes state before each test, so this
-// never anchors a log, snapshot, or runnable across tests.
 const UNCAUGHT_ERROR_STATE_KEY = 'uncaughtErrorLog'
 
 interface UncaughtErrorRecord {
@@ -635,11 +632,12 @@ interface UncaughtErrorRecord {
   count: number
 }
 
-// A repeating uncaught error (e.g. a benign "ResizeObserver loop ..."
-// notification fired every animation frame) would otherwise create a new log —
-// and, when unhandled, a new DOM snapshot — on every occurrence, exhausting
-// renderer memory and crashing the browser.
-// See https://github.com/cypress-io/cypress/issues/27415
+// Collapse unless a previously suppressed error later throws unhandled (it needs
+// its own failing log rather than updating the grey suppressed one).
+const canCollapseHandledTransition = (previousHandled: boolean, currentHandled: boolean): boolean => {
+  return currentHandled || !previousHandled
+}
+
 const canCollapseUncaughtError = (previous: UncaughtErrorSignature | undefined, current: UncaughtErrorSignature): boolean => {
   return (
     previous !== undefined &&
@@ -649,9 +647,7 @@ const canCollapseUncaughtError = (previous: UncaughtErrorSignature | undefined, 
     previous.runnableId === current.runnableId &&
     previous.message === current.message &&
     previous.retry === current.retry &&
-    // a previously suppressed error that now throws unhandled should fail the
-    // test, so it gets its own (red) log rather than collapsing into the grey one
-    (current.handled || !previous.handled)
+    canCollapseHandledTransition(previous.handled, current.handled)
   )
 }
 
@@ -698,10 +694,6 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
     // specifying the error causes the log to be red/failed
     // otherwise, if it's been handled, we omit the error so it is grey/passed
     error: handled ? undefined : err,
-    // only snapshot the DOM for unhandled exceptions. A handled (suppressed)
-    // exception does not fail the test, and snapshotting a high-frequency
-    // suppressed error can exhaust renderer memory and crash the browser.
-    // See https://github.com/cypress-io/cypress/issues/27415
     snapshot: !handled,
     event: true,
     timeout: 0,
@@ -781,6 +773,7 @@ export default {
   isCypressErr,
   isSpecError,
   logError,
+  UNCAUGHT_ERROR_STATE_KEY,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,

@@ -380,6 +380,8 @@ export default {
   },
 
   getTestAttemptFromRunnable (r: Mocha.Runnable | undefined) {
+    // Returns 0 (not undefined) when there is no runnable; log consumers treat
+    // missing retry as the first attempt.
     if (!r) {
       return 0
     }

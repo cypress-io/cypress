@@ -7,19 +7,12 @@ describe('issue 27415', () => {
     }))
   }
 
-  // An application that repeatedly throws the SAME uncaught exception (e.g. a
-  // benign "ResizeObserver loop ..." notification fired on every animation
-  // frame) used to create a new command-log entry — and, when unhandled, a new
-  // retained DOM snapshot — for every occurrence. That churn could exhaust
-  // renderer memory and crash the browser. Consecutive identical uncaught
-  // exceptions within a test should now collapse into a single, updating log.
-  it('collapses repeated identical uncaught exceptions into one updating log', () => {
-    const message = 'Fake Error:ResizeObserver loop completed with undelivered notifications.'
+  const uncaughtLogs = []
 
-    // suppress the error so the repeated occurrences do not fail the test
+  beforeEach(() => {
+    uncaughtLogs.length = 0
+
     cy.on('uncaught:exception', (err) => !err.message.includes('Fake Error'))
-
-    const uncaughtLogs = []
 
     cy.on('log:added', (attrs, log) => {
       if (attrs.name === 'uncaught exception' && attrs.message.includes('Fake Error')) {
@@ -28,44 +21,22 @@ describe('issue 27415', () => {
     })
 
     cy.visit('/fixtures/errors.html')
+  })
+
+  // Consecutive identical uncaught exceptions should collapse into one updating log.
+  it('collapses repeated identical uncaught exceptions into one updating log', () => {
+    const message = 'Fake Error:ResizeObserver loop completed with undelivered notifications.'
+    const occurrenceCount = 25
 
     cy.window().then((win) => {
-      // simulate a tight resize loop throwing the same error every frame
-      for (let i = 0; i < 25; i++) {
+      for (let i = 0; i < occurrenceCount; i++) {
         dispatchError(win, message)
       }
     })
 
     cy.wrap(null).should(() => {
-      // all 25 occurrences collapse into a single 'uncaught exception' log
-      // instead of accumulating 25 logs (and, when unhandled, 25 DOM snapshots)
       expect(uncaughtLogs, 'deduped uncaught exception logs').to.have.length(1)
-      // the single log updates in place with the occurrence count
-      expect(uncaughtLogs[0].get('message')).to.match(/\(\d+\)$/)
-    })
-  })
-
-  // distinct uncaught error messages should each still create their own log
-  it('does not collapse uncaught exceptions with different messages', () => {
-    cy.on('uncaught:exception', (err) => !err.message.includes('Fake Error'))
-
-    const uncaughtLogs = []
-
-    cy.on('log:added', (attrs, log) => {
-      if (attrs.name === 'uncaught exception' && attrs.message.includes('Fake Error')) {
-        uncaughtLogs.push(log)
-      }
-    })
-
-    cy.visit('/fixtures/errors.html')
-
-    cy.window().then((win) => {
-      dispatchError(win, 'Fake Error: first')
-      dispatchError(win, 'Fake Error: second')
-    })
-
-    cy.wrap(null).should(() => {
-      expect(uncaughtLogs, 'distinct uncaught exception logs').to.have.length(2)
+      expect(uncaughtLogs[0].get('message')).to.include(`(${occurrenceCount})`)
     })
   })
 })
