@@ -547,6 +547,9 @@
     "npm/svelte": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "jiti"
       ]
     },
     "npm/react": {
