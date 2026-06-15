@@ -89,7 +89,7 @@ export class NetworkInterceptionCore {
     const registration = this.options.policyRegistration
 
     if (!registration) {
-      throw new Error('NetworkInterceptionCore.policyRegistration is not configured')
+      return { ended: false, state: {} }
     }
 
     return registration.runPolicies({

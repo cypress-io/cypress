@@ -237,6 +237,28 @@ describe('NetworkInterceptionCore', () => {
     await expect(core.endRequestIfBlocked({})).rejects.toThrow(/requestInterception/)
   })
 
+  it('skips request policies when policyRegistration is not configured', async () => {
+    const endRequestIfBlocked = vi.fn(async (_ctx, runPolicies) => {
+      await runPolicies()
+    })
+    const core = new NetworkInterceptionCore({
+      requestInterception: {
+        endRequestIfBlocked,
+        correlateBrowserPreRequest: vi.fn(),
+        forwardToOrigin: vi.fn(),
+      },
+    })
+
+    await expect(core.runRequestPolicies({ req: { proxiedUrl: 'http://example.com' } })).resolves.toEqual({
+      ended: false,
+      state: {},
+    })
+
+    await core.endRequestIfBlocked({ req: { proxiedUrl: 'http://example.com' } })
+
+    expect(endRequestIfBlocked).toHaveBeenCalledOnce()
+  })
+
   it('throws when responseInterception port is missing', async () => {
     const core = new NetworkInterceptionCore()
 
