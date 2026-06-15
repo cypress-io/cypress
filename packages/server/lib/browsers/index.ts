@@ -201,9 +201,12 @@ const browsers = {
     // the UI (ribbon + tag), so a terminal warning there would be redundant.
     // Run mode emits this alongside the "Run Starting" header
     // (see displayRunStarting), so `!isTextTerminal` also avoids double-printing.
+    // `--browser` / `defaultBrowser` can be a bare name (`electron`) or a
+    // `name:channel` form (`electron:stable`), so compare against the name part.
     const requestedBrowser = ctx.modeOptions.browser || ctx.lifecycleManager.loadedFullConfig?.defaultBrowser
+    const requestedBrowserName = requestedBrowser?.split(':')[0]
 
-    if (!options.isTextTerminal && isDeprecatedBrowser(browser) && requestedBrowser === browser.name) {
+    if (!options.isTextTerminal && isDeprecatedBrowser(browser) && requestedBrowserName === browser.name) {
       errors.warning('BROWSER_ELECTRON_DEPRECATED')
     }
 
