@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.17.1
+
+**Bugfixes:**
+
+- Fixed an issue where calling `req.destroy()` or using `{ forceNetworkError: true }` inside a `cy.intercept()` handler in experimental WebKit caused infinite request loops. Fixes [#23810](https://github.com/cypress-io/cypress/issues/23810). Fixed in [#33948](https://github.com/cypress-io/cypress/pull/33948).
+
 ## 15.17.0
 
 **Performance:**
@@ -27,7 +33,6 @@
   - `.cjs` and `.cts` always load as CJS
   - `.js` and `.ts` load as ESM when the nearest `package.json` has `"type": "module"`; CJS is loaded otherwise
   Fixes [#33801](https://github.com/cypress-io/cypress/issues/33801). Addresses [#33892](https://github.com/cypress-io/cypress/issues/33892).
-- Fixed an issue where calling `req.destroy()` or using `{ forceNetworkError: true }` inside a `cy.intercept()` handler in experimental WebKit caused infinite request loops. Fixes [#23810](https://github.com/cypress-io/cypress/issues/23810). Fixed in [#33948](https://github.com/cypress-io/cypress/pull/33948).
 - Fixed an issue where a recorded Chrome or Electron run could hang for the duration of the spec timeout when the renderer crashed mid-spec, instead of failing the affected spec and continuing. Fixed in [#33943](https://github.com/cypress-io/cypress/pull/33943).
 - Fixed an issue where tests in Chrome and Electron could fail when the application made cross-origin requests to local or private network addresses (for example, a login or OAuth flow that redirects between local development hosts). Chrome 141 began enforcing Local Network Access checks that gate such requests behind a permission prompt the automated browser cannot answer. Cypress now opts out of these checks so these requests succeed as they did in Chrome 140. Fixes [#32708](https://github.com/cypress-io/cypress/issues/32708).
 - Fixed an issue where, after a same-origin `fetch` or XHR request updated a cookie, a subsequent page navigation or reload could send the previous (stale) cookie value to the server instead of the updated one. Fixes [#25841](https://github.com/cypress-io/cypress/issues/25841).
