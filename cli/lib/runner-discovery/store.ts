@@ -10,27 +10,92 @@ import { isPidAlive, verifyRunnerRecord } from './liveness'
 const debug = Debug('cypress:cli:runner-discovery')
 
 const RUNNERS_DIRNAME = 'runners'
-
-// Matches `<pid>.json` only — skips the `.tmp` files left by the server's
-// atomic writes and anything else that lands in the directory.
-const RECORD_FILENAME = /^\d+\.json$/
+const RECORD_EXTENSION = '.json'
 
 export const getRunnerDiscoveryDir = (): string => {
   return path.join(state.getCacheDir(), RUNNERS_DIRNAME)
 }
 
-// List the record filenames in the runners directory. A missing directory
-// just means no runner has ever written a record.
-const listRecordEntries = async (dir: string): Promise<string[]> => {
+const isErrnoException = (err: unknown): err is NodeJS.ErrnoException => {
+  return err instanceof Error
+}
+
+/**
+ * A discovery record is written by the server as `<pid>.json`. Parse the pid
+ * back out of a directory entry, returning null for anything that is not a
+ * record file.
+ */
+const parseRecordPid = (entry: string): number | null => {
+  if (path.extname(entry) !== RECORD_EXTENSION) {
+    return null
+  }
+
+  const pid = Number(path.basename(entry, RECORD_EXTENSION))
+
+  return Number.isInteger(pid) ? pid : null
+}
+
+interface RecordFile {
+  /** Absolute path to the record on disk. */
+  path: string
+  /** The writer's pid, taken from the `<pid>.json` filename. */
+  pid: number
+}
+
+/**
+ * List the discovery record files in the runners directory, each paired with
+ * the pid encoded in its filename. A missing directory just means no runner
+ * has ever written a record.
+ */
+const listRecordFiles = async (dir: string): Promise<RecordFile[]> => {
+  let entries: string[]
+
   try {
-    return (await fs.readdir(dir)).filter((entry) => RECORD_FILENAME.test(entry))
-  } catch (err: any) {
-    if (err?.code === 'ENOENT') {
+    entries = await fs.readdir(dir)
+  } catch (err: unknown) {
+    if (isErrnoException(err) && err.code === 'ENOENT') {
       return []
     }
 
     throw err
   }
+
+  const files: RecordFile[] = []
+
+  for (const entry of entries) {
+    const pid = parseRecordPid(entry)
+
+    if (pid !== null) {
+      files.push({ path: path.join(dir, entry), pid })
+    }
+  }
+
+  return files
+}
+
+/**
+ * Read and validate one discovery record. Resolves null for a record that is
+ * unreadable (missing, partially written, not JSON) or whose schema this
+ * reader cannot probe — both are unusable, never fatal.
+ */
+const readCompatibleRecord = async (filePath: string): Promise<RunnerDiscoveryRecord | null> => {
+  let record: unknown
+
+  try {
+    record = await fs.readJson(filePath)
+  } catch (err) {
+    debug('skipping unreadable runner discovery record %s: %o', filePath, err)
+
+    return null
+  }
+
+  if (!isCompatibleRecord(record)) {
+    debug('skipping incompatible runner discovery record %s', filePath)
+
+    return null
+  }
+
+  return record
 }
 
 /**
@@ -39,21 +104,13 @@ const listRecordEntries = async (dir: string): Promise<string[]> => {
  * not thrown on.
  */
 export const readRunnerRecords = async (): Promise<RunnerDiscoveryRecord[]> => {
-  const dir = getRunnerDiscoveryDir()
   const records: RunnerDiscoveryRecord[] = []
 
-  for (const entry of await listRecordEntries(dir)) {
-    try {
-      const record = await fs.readJson(path.join(dir, entry))
+  for (const file of await listRecordFiles(getRunnerDiscoveryDir())) {
+    const record = await readCompatibleRecord(file.path)
 
-      if (!isCompatibleRecord(record)) {
-        debug('skipping incompatible runner discovery record %s (schemaVersion %o)', entry, record?.schemaVersion)
-        continue
-      }
-
+    if (record) {
       records.push(record)
-    } catch (err) {
-      debug('skipping unreadable runner discovery record %s: %o', entry, err)
     }
   }
 
@@ -69,35 +126,26 @@ export const readRunnerRecords = async (): Promise<RunnerDiscoveryRecord[]> => {
  * Returns the number of records removed.
  */
 export const pruneDeadDiscoveryRecords = async (probeTimeoutMs?: number): Promise<number> => {
-  const dir = getRunnerDiscoveryDir()
-
   let removed = 0
 
-  for (const entry of await listRecordEntries(dir)) {
-    const filePath = path.join(dir, entry)
-    const pid = Number(path.basename(entry, '.json'))
-
-    if (!isPidAlive(pid)) {
-      await fs.remove(filePath)
+  for (const file of await listRecordFiles(getRunnerDiscoveryDir())) {
+    // A dead pid proves the writer is gone — remove without reading or probing.
+    if (!isPidAlive(file.pid)) {
+      await fs.remove(file.path)
       removed += 1
       continue
     }
 
-    let record: any
+    // Unreadable or incompatible records are kept while the pid is taken:
+    // pid liveness is the best remaining signal and deletion is irreversible.
+    const record = await readCompatibleRecord(file.path)
 
-    try {
-      record = await fs.readJson(filePath)
-    } catch (err) {
-      debug('not pruning unreadable record %s with live pid: %o', entry, err)
-      continue
-    }
-
-    if (!isCompatibleRecord(record)) {
+    if (!record) {
       continue
     }
 
     if (!(await verifyRunnerRecord(record, probeTimeoutMs))) {
-      await fs.remove(filePath)
+      await fs.remove(file.path)
       removed += 1
     }
   }
