@@ -758,6 +758,21 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}`
   },
+  SPEC_FILE_NOT_FOUND: (folderPath: string, patterns: string | string[]) => {
+    const patternList = Array.isArray(patterns) ? patterns : [patterns]
+    const globPaths = patternList.map((pattern) => {
+      const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
+
+      return path.join(resolvedBasePath!, theme.yellow(resolvedPattern!))
+    })
+
+    return errTemplate`\
+        The following ${fmt.flag('--spec')} pattern did not match any spec files and will be ignored:
+
+        ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}
+
+        Other spec files that matched will still run.`
+  },
   RENDERER_CRASHED: (browserName: string) => {
     return errTemplate`\
         We detected that the ${fmt.highlight(browserName)} Renderer process just crashed.
@@ -948,6 +963,24 @@ export const AllCypressErrors = {
 
       Instead the value was: ${fmt.stringify(value)}`
   },
+  CONFIG_BROWSERS_INVALID: (browsers: any) => {
+    return errTemplate`\
+        The ${fmt.highlight(`browsers`)} configuration value must be an array of browser objects, but it was set to:
+
+        ${fmt.stringify(browsers)}
+
+        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine — it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
+
+        To run your tests in a specific browser, remove that value and pass the browser by name instead:
+
+        ${fmt.terminal(`cypress run --browser chrome`)}
+
+        ...or, with the Module API:
+
+        ${fmt.code(`cypress.run({ browser: 'chrome' })`)}
+
+        https://on.cypress.io/launching-browsers`
+  },
   RENAMED_CONFIG_OPTION: (arg1: { name: string, newName: string }) => {
     return errTemplate`\
         The ${fmt.highlight(arg1.name)} configuration option you have supplied has been renamed.
@@ -1127,10 +1160,36 @@ export const AllCypressErrors = {
 
         CYPRESS_INTERNAL_ENV is reserved for internal use and cannot be modified.`
   },
+  INVALID_CYPRESS_ENV_OVERRIDE: (cfgKey: string, val: any) => {
+    return errTemplate`\
+        The ${fmt.highlightSecondary(`CYPRESS_${cfgKey}`)} environment variable must be a valid JSON object, but received: ${fmt.highlight(String(val))}
+
+        To pass individual key-value pairs, use the ${fmt.highlightSecondary(`--${cfgKey}`)} CLI flag instead:
+        ${fmt.highlightSecondary(`cypress run --${cfgKey} key=value`)}
+
+        The ${fmt.highlightSecondary(`CYPRESS_${cfgKey}`)} override will be ignored.`
+  },
   CDP_COULD_NOT_CONNECT: (browserName: string, port: number, err: Error) => {
     // we include a stack trace here because it may contain useful information
     // to debug since this is an "uncontrolled" error even though it doesn't
     // come from a user
+
+    // The RemoteDebuggingAllowed enterprise/group policy only applies to
+    // standalone Chromium-based browsers (Chrome, Edge), not Electron, so only
+    // surface that hint for those browsers.
+    if (browserName.toLowerCase() !== 'electron') {
+      return errTemplate`\
+          Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
+
+          This usually indicates there was a problem opening the ${fmt.off(_.capitalize(browserName))} browser.
+
+          The CDP port requested was ${fmt.highlight(port)}.
+
+          This can also happen when remote debugging is disabled by an enterprise or group policy. Cypress relies on remote debugging to control the browser, so it is worth checking whether the ${fmt.highlightSecondary('RemoteDebuggingAllowed')} policy has been set to disabled in your environment. You can review the applied policies by visiting ${fmt.url('chrome://policy')} (or ${fmt.url('edge://policy')} for Edge) in the affected browser.
+
+          ${fmt.stackTrace(err)}`
+    }
+
     return errTemplate`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 

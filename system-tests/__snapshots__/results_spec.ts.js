@@ -82,7 +82,7 @@ exports['module api and after:run results'] = `
     ],
     "cypressBinaryRoot": "/path/to/cypressBinaryRoot",
     "hosts": null,
-    "isInteractive": true,
+    "isInteractive": false,
     "version": "X.Y.Z",
     "testingType": "e2e",
     "browser": null,

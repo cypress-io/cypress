@@ -180,6 +180,17 @@ export = {
       // causing screenshots/videos to be off by 1px
       resizable: !options.browser.isHeadless,
       async onCrashed () {
+        // Synchronously mark sibling CRI clients (which share the same targetId)
+        // as crashed. Each sibling has its own websocket and its own listener for
+        // Target.targetCrashed, but those listeners fire when Chromium happens
+        // to deliver the event on that connection — which can be after spec
+        // cleanup runs. Without this propagation, the protocol's `afterSpec`
+        // hook can call `cdpClient.send` on a crashed page and hang forever.
+        // See the chrome.ts handler for the analogous case.
+        browserCriClient?.currentlyAttachedProtocolTarget?.markCrashed()
+        browserCriClient?.currentlyAttachedCyPromptTarget?.markCrashed()
+        browserCriClient?.currentlyAttachedStudioTarget?.markCrashed()
+
         const err = errors.get('RENDERER_CRASHED', 'Electron')
 
         await memory.endProfiling()
@@ -286,6 +297,20 @@ export = {
       win.on(e, () => {
         debug('%s fired on the BrowserWindow %o', e, { browserWindowUrl: url })
       })
+    })
+
+    // When the page under test registers a `beforeunload` handler that requests a
+    // confirmation prompt (e.g. `window.onbeforeunload = () => 'msg'` or setting
+    // `event.returnValue`), Electron fires `will-prevent-unload` instead of showing
+    // the native panel. Cypress always proceeds with navigation during a test run,
+    // so we preventDefault here to dismiss the would-be prompt and allow the unload.
+    // Without this, the prompt is never answered, the page never unloads, and
+    // navigation hangs until pageLoadTimeout. This is scoped to the AUT/test
+    // browser windows (`_launch` runs for the main window and child windows) so
+    // the Cypress GUI window created via `Windows.create` is left untouched.
+    // @see https://github.com/cypress-io/cypress/issues/2118
+    win.webContents.on('will-prevent-unload', (event) => {
+      event.preventDefault()
     })
 
     let cdpAutomation

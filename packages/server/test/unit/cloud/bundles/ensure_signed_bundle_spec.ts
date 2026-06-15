@@ -42,6 +42,7 @@ describe('ensureSignedBundle', () => {
   const setup = (overrides: Partial<{
     streamImpl: (opts: { staging: string }) => Promise<string>
     verifyResult: boolean
+    verifyOnDisk: sinon.SinonStub
   }> = {}): SetupResult => {
     const streamStub = sinon.stub().callsFake(async (opts: { staging: string }) => {
       if (overrides.streamImpl) return overrides.streamImpl(opts)
@@ -53,14 +54,23 @@ describe('ensureSignedBundle', () => {
 
     const verifySignatureStub = sinon.stub().resolves(overrides.verifyResult ?? true)
 
-    const ensureSignedBundleModule = proxyquire('../lib/cloud/bundles/ensure_signed_bundle', {
+    const stubs: Record<string, unknown> = {
       './stream_download_verify_extract': {
         streamDownloadVerifyExtract: streamStub,
       },
       '../encryption': {
         verifySignature: verifySignatureStub,
       },
-    })
+    }
+
+    // Only override the on-disk verifier when a test needs a deterministic
+    // cache hit/miss; otherwise the real module runs (and a fresh cacheRoot is
+    // always a miss).
+    if (overrides.verifyOnDisk) {
+      stubs['./verify_bundle_on_disk'] = { verifyBundleOnDisk: overrides.verifyOnDisk }
+    }
+
+    const ensureSignedBundleModule = proxyquire('../lib/cloud/bundles/ensure_signed_bundle', stubs)
 
     return {
       ensureSignedBundle: ensureSignedBundleModule.ensureSignedBundle,
@@ -95,6 +105,46 @@ describe('ensureSignedBundle', () => {
     const remaining: string[] = await fs.readdir(baseDir)
 
     expect(remaining.filter((n: string) => n.startsWith('.staging-'))).to.deep.equal([])
+  })
+
+  it('persists the manifest signature sidecar alongside the published bundle', async () => {
+    const { ensureSignedBundle } = setup()
+
+    await ensureSignedBundle({
+      url: 'https://cdn.cypress.io/cy-prompt/sigfile.tar',
+      kind: 'cy-prompt',
+    })
+
+    const finalDir = path.join(cacheRoot, 'bundles', 'cy-prompt', 'sigfile')
+
+    expect(await readFile(path.join(finalDir, '.manifest-sig'), 'utf8')).to.equal('fake-manifest-sig')
+  })
+
+  it('reuses a verified on-disk bundle and skips the download entirely', async () => {
+    const verifyOnDisk = sinon.stub().resolves(FIXTURE_MANIFEST)
+    const { ensureSignedBundle, streamStub } = setup({ verifyOnDisk })
+
+    const result = await ensureSignedBundle({
+      url: 'https://cdn.cypress.io/cy-prompt/cached.tar',
+      kind: 'cy-prompt',
+    })
+
+    expect(result.bundleDir).to.equal(path.join(cacheRoot, 'bundles', 'cy-prompt', 'cached'))
+    expect(result.manifest).to.deep.equal(FIXTURE_MANIFEST)
+    expect(streamStub).not.to.be.called
+    expect(verifyOnDisk).to.be.calledOnce
+  })
+
+  it('falls through to download when the on-disk bundle fails verification', async () => {
+    const verifyOnDisk = sinon.stub().resolves(null)
+    const { ensureSignedBundle, streamStub } = setup({ verifyOnDisk })
+
+    await ensureSignedBundle({
+      url: 'https://cdn.cypress.io/cy-prompt/invalid-cache.tar',
+      kind: 'cy-prompt',
+    })
+
+    expect(streamStub).to.be.calledOnce
   })
 
   it('throws BundleError(stage=manifest) when the manifest signature fails to verify', async () => {

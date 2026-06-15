@@ -18,6 +18,15 @@ const extract = (envKeys) => {
   return _.transform(envKeys, toCamelObject, {})
 }
 
+// The Jenkins Git plugin populates GIT_BRANCH with the remote-qualified
+// branch name (e.g. "origin/main" or "refs/remotes/origin/main"). Recording
+// the remote prefix causes the branch to not match the actual branch name in
+// Cypress Cloud, so strip the default "origin" remote prefix.
+// https://github.com/cypress-io/cypress/issues/20833
+const stripGitRemotePrefix = (branch?: string) => {
+  return branch && branch.replace(/^(refs\/remotes\/)?origin\//, '')
+}
+
 /**
  * Returns true if running on Azure CI pipeline.
  * See environment variables in the issue #3657
@@ -703,7 +712,10 @@ const _providerCommitParams = () => {
     },
     jenkins: {
       sha: env.GIT_COMMIT,
-      branch: env.GIT_BRANCH || env.BRANCH_NAME || env.CHANGE_BRANCH,
+      // GIT_LOCAL_BRANCH and BRANCH_NAME (multibranch pipeline plugin) hold the
+      // unprefixed branch name, so prefer them over GIT_BRANCH, which the Git
+      // plugin prefixes with the remote name (e.g. "origin/main").
+      branch: env.GIT_LOCAL_BRANCH || env.BRANCH_NAME || stripGitRemotePrefix(env.GIT_BRANCH) || env.CHANGE_BRANCH,
       // message: ??,
       authorName: env.GIT_AUTHOR_NAME || env.CHANGE_AUTHOR_DISPLAY_NAME,
       authorEmail: env.GIT_AUTHOR_EMAIL || env.CHANGE_AUTHOR_EMAIL,

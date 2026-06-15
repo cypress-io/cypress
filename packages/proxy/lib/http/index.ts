@@ -22,6 +22,7 @@ import type {
 } from '../types'
 import type { IncomingMessage } from 'http'
 import type { NetStubbingState } from '@packages/net-stubbing'
+import type { NetworkInterceptionCore } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -46,6 +47,19 @@ export const isVerboseTelemetry = true
 const isVerbose = isVerboseTelemetry
 
 export const debugVerbose = Debug('cypress-verbose:proxy:http')
+
+class BrowserConnectionClosedError extends Error {
+  code = 'ERR_BROWSER_CONNECTION_CLOSED'
+
+  constructor (message: string) {
+    super(message)
+    this.name = 'BrowserConnectionClosedError'
+  }
+}
+
+const createBrowserConnectionClosedError = () => {
+  return new BrowserConnectionClosedError('The browser closed the connection before the response completed.')
+}
 
 export enum HttpStages {
   IncomingRequest,
@@ -97,6 +111,7 @@ export type ServerCtx = Readonly<{
   remoteStates: RemoteStates
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
+  networkInterceptionCore: NetworkInterceptionCore
   middleware: HttpMiddlewareStacks
   socket: SocketBroadcaster
   request: ServerRequest
@@ -109,6 +124,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'config',
   'getFileServerToken',
   'netStubbingState',
+  'networkInterceptionCore',
   'next',
   'end',
   'onResponse',
@@ -170,12 +186,23 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
         }
 
         ctx.res.off('close', onClose)
+
+        // If this middleware already completed (e.g. it called `next()` before a
+        // stream error surfaced), still propagate to the stage error handler so
+        // late response stream failures (gzip/br decode, piping) can reset the
+        // client connection. Do not call `_end` again — the stack has moved on.
+        if (ended) {
+          onError(error)
+
+          return
+        }
+
         _end(onError(error))
       }
 
       function onClose () {
         if (!ctx.res.writableFinished) {
-          _onError(new Error('Socket closed before finished writing response.'))
+          _onError(createBrowserConnectionClosedError())
         }
       }
 
@@ -240,7 +267,21 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
       }
 
       try {
-        middleware.call(fullCtx)
+        const returnValue = middleware.call(fullCtx)
+
+        if (returnValue != null && typeof returnValue.then === 'function') {
+          Bluebird.resolve(returnValue).catch((err: Error) => {
+            // If the middleware already completed successfully, ignore late rejections.
+            if (ended) {
+              return
+            }
+
+            err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
+
+            errorUtils.logError(err)
+            fullCtx.onError(err)
+          })
+        }
       } catch (err) {
         err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
 
@@ -272,6 +313,7 @@ export class Http {
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
+  networkInterceptionCore: NetworkInterceptionCore
   preRequests: PreRequests = new PreRequests()
   getCurrentBrowser: () => FoundBrowser
   request: ServerRequest
@@ -292,6 +334,7 @@ export class Http {
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
+    this.networkInterceptionCore = opts.networkInterceptionCore
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
@@ -321,6 +364,7 @@ export class Http {
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
+      networkInterceptionCore: this.networkInterceptionCore,
       socket: this.socket,
       serverBus: this.serverBus,
       getCookieJar: this.getCookieJar,
@@ -407,7 +451,7 @@ export class Http {
       // If the response has been destroyed after handling the incoming request, it implies the that request was canceled by the browser.
       // In this case we don't want to run the response middleware and should just exit.
       if (res.destroyed) {
-        return onError(new Error('Socket closed before finished writing response'))
+        return onError(createBrowserConnectionClosedError())
       }
 
       if (ctx.incomingRes) {

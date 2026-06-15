@@ -139,7 +139,7 @@ while IFS= read -r file; do
     .percy.yml|.releaserc.js|renovate.json|docker-compose.yml|lerna.json|\
     electron-builder.json|knip.json|nx.json|jsconfig.json|autobarrel.json|\
     mocha-reporter-config.json|apollo.config.js|\
-    .husky/*|.vscode/*|__snapshots__/*)
+    .husky/*|.vscode/*|.cursor/*|__snapshots__/*)
       ;;
     packages/driver/*)
       driver_tests=true
@@ -148,12 +148,18 @@ while IFS= read -r file; do
     packages/server/*)
       server_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/proxy/*)
       server_tests=true
       system_tests=true
       ;;
     packages/net-stubbing/*)
+      server_tests=true
+      driver_tests=true
+      system_tests=true
+      ;;
+    packages/network-interception/*)
       server_tests=true
       driver_tests=true
       system_tests=true
@@ -191,6 +197,7 @@ while IFS= read -r file; do
       launchpad_tests=true
       server_tests=true
       system_tests=true
+      unit_tests=true
       ;;
     packages/runner/*)
       driver_tests=true

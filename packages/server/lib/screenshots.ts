@@ -136,6 +136,10 @@ const hasHelperPixels = function (image, pixelRatio) {
   )
 }
 
+// the maximum time captureAndCheck keeps capturing before resolving with the
+// most recent capture regardless of the condition fn
+const MAX_CAPTURE_AND_CHECK_DURATION_MS = 1500
+
 const captureAndCheck = function (data: Data, automate, conditionFn) {
   let attempt
   const start = new Date()
@@ -157,8 +161,14 @@ const captureAndCheck = function (data: Data, automate, conditionFn) {
     }).then((image) => {
       debug(`read buffer to image ${image.bitmap.width} x ${image.bitmap.height}`)
 
-      if ((totalDuration > 1500) || conditionFn(data, image)) {
-        debug('resolving with image %o', { tries, totalDuration })
+      if (totalDuration > MAX_CAPTURE_AND_CHECK_DURATION_MS) {
+        debug('totalDuration %dms exceeded %dms after %d tries; resolving with the last capture without evaluating the condition fn', totalDuration, MAX_CAPTURE_AND_CHECK_DURATION_MS, tries)
+
+        return { image, takenAt }
+      }
+
+      if (conditionFn(data, image)) {
+        debug('condition fn returned true; resolving with image %o', { tries, totalDuration })
 
         return { image, takenAt }
       }

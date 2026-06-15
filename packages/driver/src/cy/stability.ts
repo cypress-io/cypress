@@ -1,9 +1,9 @@
 import Promise from 'bluebird'
-import debugFn from 'debug'
+import Debug from 'debug'
 import type { ICypress } from '../cypress'
 import type { StateFunc } from '../cypress/state'
 
-const debug = debugFn('cypress:driver:stability')
+const debug = Debug('cypress:driver:stability')
 
 export const create = (Cypress: ICypress, state: StateFunc) => {
   const whenStableQueue: Array<{
@@ -15,7 +15,9 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
   const reset = () => {
     const pending = whenStableQueue.splice(0)
 
-    debug('reset: rejecting %d pending waiters', pending.length)
+    if (pending.length) {
+      debug('rejecting %d stability waiter(s) still queued at reset', pending.length)
+    }
 
     // reject each waiter so they don't run in the next test
     for (const waiter of pending) {
@@ -58,6 +60,14 @@ export const create = (Cypress: ICypress, state: StateFunc) => {
         // if there are no waiters to release, return
         if (!waitersToRelease.length) {
           return
+        }
+
+        // detect the race where the page became unstable again between the
+        // stability change and this asynchronous release - the waiters are
+        // released anyway, so their commands may run while the page is
+        // transitioning
+        if (state('isStable') === false) {
+          debug('releasing %d stability waiter(s) while state(\'isStable\') is false', waitersToRelease.length)
         }
 
         // release the waiters

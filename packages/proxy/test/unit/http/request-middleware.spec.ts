@@ -6,6 +6,7 @@ import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
 import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
 import { CookieJar } from '@packages/server/lib/util/cookies'
+import { NetworkInterceptionCore } from '@packages/network-interception'
 import { HttpMiddlewareThis } from '../../../lib/http'
 import { resourceTypeAndCredentialManager } from '../../../lib/resourceTypeAndCredentialManager'
 
@@ -606,6 +607,18 @@ describe('http/request-middleware', () => {
       })
     })
 
+    it('routes missing cookieState port failures to onError', async () => {
+      const ctx = await getContext()
+      const onError = vi.fn()
+
+      ctx.networkInterceptionCore = new NetworkInterceptionCore()
+
+      await testMiddleware([MaybeAttachCrossOriginCookies], ctx, onError)
+
+      expect(onError).toHaveBeenCalledOnce()
+      expect(onError.mock.calls[0][0].message).toMatch(/NetworkInterceptionCore\.cookieState is not configured/)
+    })
+
     async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autUrl = 'http://foobar.com', requestUrl = 'http://foobar.com') {
       const cookieJar = new CookieJar()
 
@@ -1026,6 +1039,59 @@ describe('http/request-middleware', () => {
         await testMiddleware([SendRequestOutgoing], ctx)
         expect(ctx.req.headers['x-cypress-authorization']).toBeUndefined()
       })
+    })
+  })
+
+  describe('RedirectToClientRouteIfUnloaded', () => {
+    const { RedirectToClientRouteIfUnloaded } = RequestMiddleware
+    const clientRoute = '/__/'
+
+    function prepareContext ({ hasAppUnloaded, isPrimarySuperDomainOrigin }: { hasAppUnloaded: boolean, isPrimarySuperDomainOrigin: boolean }) {
+      return {
+        req: {
+          proxiedUrl: 'http://localhost:3500/fixtures/auth/index.html',
+          cookies: hasAppUnloaded ? { '__cypress.unload': 'true' } : {},
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: vi.fn(),
+          off: vi.fn(),
+          redirect: vi.fn(),
+        } as any,
+        config: {
+          clientRoute,
+        },
+        remoteStates: {
+          isPrimarySuperDomainOrigin: vi.fn().mockReturnValue(isPrimarySuperDomainOrigin),
+        },
+      }
+    }
+
+    it('redirects to the client route when the app has unloaded and the request is the primary super domain origin', async () => {
+      const ctx = prepareContext({ hasAppUnloaded: true, isPrimarySuperDomainOrigin: true })
+
+      await testMiddleware([RedirectToClientRouteIfUnloaded], ctx)
+
+      expect(ctx.res.redirect).toHaveBeenCalledWith(clientRoute)
+    })
+
+    it('does NOT redirect when the app has unloaded but the request is NOT the primary super domain origin', async () => {
+      // a stale `__cypress.unload` cookie can linger on a previously-primary
+      // domain (Firefox's `unload` event is unreliable). A later cross-origin
+      // AUT navigation back to that domain must be served, not redirected to
+      // the client route, otherwise the AUT is bounced to the Cypress specs UI.
+      const ctx = prepareContext({ hasAppUnloaded: true, isPrimarySuperDomainOrigin: false })
+
+      await testMiddleware([RedirectToClientRouteIfUnloaded], ctx)
+
+      expect(ctx.res.redirect).not.toHaveBeenCalled()
+    })
+
+    it('does NOT redirect when the app has not unloaded', async () => {
+      const ctx = prepareContext({ hasAppUnloaded: false, isPrimarySuperDomainOrigin: true })
+
+      await testMiddleware([RedirectToClientRouteIfUnloaded], ctx)
+
+      expect(ctx.res.redirect).not.toHaveBeenCalled()
     })
   })
 })

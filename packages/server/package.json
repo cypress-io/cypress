@@ -4,15 +4,17 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "tsc || echo 'built, with type errors'",
-    "check-ts": "tsc --noEmit",
+    "build-prod": "yarn ensure-cloud-validations && (tsc || echo 'built, with type errors')",
+    "check-ts": "yarn ensure-cloud-validations && tsc --noEmit",
     "clean-deps": "rimraf node_modules",
     "dev": "node index.js",
     "docker": "cd ../.. && WORKING_DIR=/packages/server ./scripts/run-docker-local.sh",
+    "ensure-cloud-validations": "tsx ./scripts/sync-cloud-validations.ts",
     "postinstall": "patch-package",
     "lint": "eslint",
     "rebuild-better-sqlite3": "electron-rebuild -f -o better-sqlite3",
     "start": "node ../../scripts/cypress open --dev --global",
+    "sync-cloud-validations": "tsx ./scripts/sync-cloud-validations.ts sync",
     "test": "node ./test/scripts/run.js",
     "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",
     "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
@@ -117,7 +119,7 @@
     "tough-cookie": "4.1.3",
     "trash": "7.2.0",
     "tslib": "2.3.1",
-    "tsx": "4.20.6",
+    "tsx": "4.22.4",
     "untildify": "^4.0.0",
     "url-parse": "1.5.10",
     "webdriver": "9.14.0",
@@ -142,6 +144,7 @@
     "@packages/launcher": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",
     "@packages/network": "0.0.0-development",
+    "@packages/network-interception": "0.0.0-development",
     "@packages/network-tools": "0.0.0-development",
     "@packages/proxy": "0.0.0-development",
     "@packages/resolve-dist": "0.0.0-development",
@@ -186,15 +189,16 @@
     "semver": "^7.7.3",
     "sinon": "17.0.1",
     "snap-shot-it": "7.9.10",
-    "stealthy-require": "^1.1.1",
     "socket.io": "4.8.3",
     "ssestream": "1.0.1",
+    "stealthy-require": "^1.1.1",
     "supertest": "4.0.2",
     "ts-loader": "^9.5.7",
     "tsconfig-paths": "3.10.1",
     "webpack": "^5.88.2",
     "ws": "5.2.4",
-    "xvfb-maybe": "0.2.1"
+    "xvfb-maybe": "0.2.1",
+    "zod": "^3.23.8"
   },
   "files": [
     "config",
@@ -206,6 +210,7 @@
   ],
   "types": "index.d.ts",
   "productName": "Cypress",
+  "license": "MIT",
   "workspaces": {
     "nohoist": [
       "axios",
@@ -224,6 +229,5 @@
     "fsevents": "^2.3.3",
     "registry-js": "1.15.0"
   },
-  "license": "MIT",
   "nx": {}
 }

@@ -318,6 +318,12 @@ async function startVideoRecording (options: { previous?: VideoRecording, projec
         videoRecording.controller = videoController
       },
       onProjectCaptureVideoFrames (fn) {
+        // browsers that capture video through the project event emitter (e.g. Firefox via the
+        // driver's getUserMedia recorder) re-register a handler for each spec, since the browser
+        // — and thus the project — is reused across specs. Remove any previous handler first so
+        // frames are only ever written to the current spec's video controller and listeners don't
+        // accumulate across specs.
+        options.project.removeAllListeners('capture:video:frames')
         options.project.on('capture:video:frames', fn)
       },
     },
@@ -495,7 +501,11 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
   if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
     // reset browser state to match default behavior when opening/closing a new tab
+    const resetBrowserStateStartedAt = Date.now()
+
     await openProject.resetBrowserState()
+
+    debug('resetBrowserState completed in %dms', Date.now() - resetBrowserStateStartedAt)
 
     // Send the new telemetry context to the browser to set the parent/child relationship appropriately for tests
     if (telemetry.isEnabled()) {
@@ -722,7 +732,11 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   if (!usingExperimentalSingleTabMode || isLastSpec) {
     debug('attempting to close the browser tab')
 
+    const resetTabsStartedAt = Date.now()
+
     await openProject.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
+
+    debug('resetBrowserTabsForNextSpec completed in %dms', Date.now() - resetTabsStartedAt)
 
     debug('resetting server state')
 
@@ -1041,6 +1055,7 @@ export interface ReadyOptions {
   browser: string
   browsers?: FoundBrowser[]
   ciBuildId: string
+  cwd?: string
   exit: boolean
   group: string
   headed: boolean
@@ -1048,7 +1063,7 @@ export interface ReadyOptions {
   onError?: (err: Error) => void
   outputPath: string
   parallel: boolean
-  projectRoot: string
+  projectRoot?: string
   quiet: boolean
   record: boolean
   socketId: string
@@ -1072,7 +1087,14 @@ async function ready (options: ReadyOptions) {
     quiet: false,
   })
 
-  const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
+  // projectRoot can be undefined when --project/--run-project is omitted, or when
+  // argv parsing leaves project as a boolean (for example `--project` with no
+  // path). Fall back to cwd here rather than in args.ts, which would
+  // incorrectly set currentProject in global open mode and bypass the Launchpad
+  // project picker.
+  options.projectRoot = options.projectRoot ?? String(options.cwd ?? process.cwd())
+  const projectRoot = options.projectRoot
+  const { record, key, ciBuildId, parallel, group, browser: browserName, tag, testingType, socketId, autoCancelAfterFailures } = options
 
   assert(socketId)
 
@@ -1148,6 +1170,18 @@ async function ready (options: ReadyOptions) {
     }
 
     errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+  }
+
+  if (specPatternFromCli) {
+    const rawPatterns = Array.isArray(specPattern) ? specPattern : [specPattern as string]
+    // relativeSpecPattern uses a forward-slash concat and may not strip Windows absolute paths;
+    // fall back to path.relative for any pattern that remains absolute.
+    const relativePatterns = rawPatterns.map((p) => path.isAbsolute(p) ? path.relative(projectRoot, p) : p)
+    const unmatchedPatterns = project.ctx.project.getUnmatchedPatterns(relativePatterns, specs)
+
+    if (unmatchedPatterns.length > 0) {
+      errors.warning('SPEC_FILE_NOT_FOUND', projectRoot, unmatchedPatterns)
+    }
   }
 
   if (browser.unsupportedVersion && browser.warning) {
