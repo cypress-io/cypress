@@ -12,19 +12,28 @@ export async function endRequestsToBlockedHosts (
 ): Promise<void> {
   const span = telemetry.startSpan({ name: 'end:requests:to:block:hosts', parentSpan: mw.reqMiddlewareSpan, isVerbose })
 
+  span?.setAttributes({
+    areBlockHostsConfigured: !!mw.config.blockHosts,
+  })
+
   const result = await runPolicies()
   const blockedHostMatch = result.state.blockedHostMatch
 
-  span?.setAttributes({
-    areBlockHostsConfigured: result.ended || !!blockedHostMatch,
-    didUrlMatchBlockedHosts: !!blockedHostMatch,
-  })
+  if (blockedHostMatch) {
+    span?.setAttributes({
+      didUrlMatchBlockedHosts: true,
+    })
+  }
 
-  if (result.ended && blockedHostMatch) {
-    mw.res.set('x-cypress-matched-blocked-host', blockedHostMatch as string)
-    mw.debug('blocking request %o', { matches: blockedHostMatch })
+  if (result.ended) {
+    if (blockedHostMatch) {
+      mw.res.set('x-cypress-matched-blocked-host', blockedHostMatch as string)
+      mw.debug('blocking request %o', { matches: blockedHostMatch })
 
-    mw.res.status(503).end()
+      mw.res.status(503).end()
+    } else {
+      mw.debug('request ended by policy without blockedHostMatch %o', { state: result.state })
+    }
 
     span?.end()
 

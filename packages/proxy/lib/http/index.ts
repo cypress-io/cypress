@@ -271,6 +271,11 @@ export function _runStage (type: HttpStages, ctx: any, onError: Function) {
 
         if (returnValue != null && typeof returnValue.then === 'function') {
           Bluebird.resolve(returnValue).catch((err: Error) => {
+            // If the middleware already completed successfully, ignore late rejections.
+            if (ended) {
+              return
+            }
+
             err.message = `Internal error while proxying "${ctx.req.method} ${ctx.req.proxiedUrl}" in ${middlewareName}:\n${err.message}`
 
             errorUtils.logError(err)
