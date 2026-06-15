@@ -49,7 +49,10 @@ yarn workspace @packages/config test -- <path-to-spec>
 yarn workspace @packages/net-stubbing test -- "<glob-pattern>"
 
 # Target a specific mocha spec file (packages that use mocha)
-yarn workspace @packages/server test-unit -- <path-to-spec>
+# NOTE: Pass the path to the bare `test` script. Do NOT use `test-unit`/`test-integration`
+# for a single file — those wrap the path in their directory glob (test/unit/**/*<path>*)
+# and find no test files. `test-unit`/`test-integration` are for running a whole directory.
+yarn workspace @packages/server test <path-to-spec>
 
 # Filter mocha tests by name pattern
 yarn workspace @packages/server test-unit -- --grep "<pattern>"
