@@ -48,6 +48,12 @@ let isRunCancelled = false
 const debug = Debug('cypress:server:run')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
+// WebKit records video via Playwright, which writes one file per page and only finalizes it
+// when the page closes (https://github.com/cypress-io/cypress/issues/23815).
+function isWebKitRecordingVideo (browser: Browser, videoRecording?: VideoRecording) {
+  return browser.family === 'webkit' && !!videoRecording
+}
+
 let earlyExitTerminator = new EarlyExitTerminator()
 
 const relativeSpecPattern = (projectRoot, pattern) => {
@@ -506,9 +512,7 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
   // recycle the tab per spec via the standard new-tab path (connectToNewSpec), which gives each
   // spec its own page/video while still reusing the browser and dev server. With video disabled,
   // the faster in-place navigation below is kept since it works fine for WebKit.
-  const isWebKitRecordingVideo = browser.family === 'webkit' && !!options.videoRecording
-
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser && !isWebKitRecordingVideo) {
+  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser && !isWebKitRecordingVideo(browser, options.videoRecording)) {
     // reset browser state to match default behavior when opening/closing a new tab
     const resetBrowserStateStartedAt = Date.now()
 
@@ -701,11 +705,8 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
 
   await runEvents.execute('after:spec', publicSpec, publicResults)
   afterSpecSpan?.end()
-  debug('after:spec completed')
 
-  debug('running protocolManager afterSpec')
   await protocolManager?.afterSpec()
-  debug('protocolManager afterSpec completed')
 
   const videoName = videoRecording?.api.videoName
   const videoExists = videoName && await fs.pathExists(videoName)
@@ -730,7 +731,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
   }
 
   if (!quiet && !skippedSpec) {
-    debug('displaying spec results')
     printResults.displayResults(results, estimated)
   }
 
@@ -742,14 +742,12 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
   // forever for an 'aut:destroy:complete' reply that the now-closed runner can never send, hanging
   // the run (https://github.com/cypress-io/cypress/issues/23815). WebKit recreates the whole
   // tab/context for the next spec via connectToNewSpec anyway, so destroying the AUT is unnecessary.
-  const isWebKitRecordingVideo = browser.family === 'webkit' && !!videoRecording
 
-  debug('post-spec teardown %o', { usingExperimentalSingleTabMode, isLastSpec, testingType, videoExists, isWebKitRecordingVideo })
+  debug('post-spec teardown %o', { usingExperimentalSingleTabMode, isLastSpec, testingType, videoExists, isWebKitRecordingVideo: isWebKitRecordingVideo(browser, videoRecording) })
 
-  if (usingExperimentalSingleTabMode && !isLastSpec && !isWebKitRecordingVideo) {
+  if (usingExperimentalSingleTabMode && !isLastSpec && !isWebKitRecordingVideo(browser, videoRecording)) {
     debug('single-tab mode: destroying AUT before next spec')
     await project.server.destroyAut()
-    debug('single-tab mode: destroyed AUT')
   }
 
   // we do not support experimentalSingleTabRunMode for e2e. We always want to close the tab on the last spec to ensure that things get cleaned up properly at the end of the run
@@ -794,8 +792,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
           ...(videoRecording.controller!.postProcessFfmpegOptions || {}),
         },
       })
-
-      debug('finished compressing recording')
     } catch (err) {
       videoCompressionFailed = true
       warnVideoCompressionFailed(err)
@@ -819,8 +815,6 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
   // on closure, but threading through fn props via options is also not
   // great.
   earlyExitTerminator = new EarlyExitTerminator()
-
-  debug('waitForTestsToFinishRunning completed for spec %s', spec.relative)
 
   return results
 }
@@ -1027,7 +1021,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
     // records to a page-scoped Playwright video that is finalized on page close, so restarting it
     // is not possible (https://github.com/cypress-io/cypress/issues/23815). Instead, WebKit recycles
     // the tab per spec (see waitForBrowserToConnect), so each spec creates a fresh videoRecording.
-    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording && browser.family !== 'webkit') {
+    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording && !isWebKitRecordingVideo(browser, project.videoRecording)) {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
       return await startVideoRecording({ ...opts, previous: project.videoRecording })
