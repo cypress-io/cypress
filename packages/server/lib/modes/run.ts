@@ -623,10 +623,10 @@ function waitForSocketConnection (project: Project, id: string) {
   })
 }
 
-async function waitForTestsToFinishRunning (options: { project: Project, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, isLastSpec: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManagerShape }) {
+async function waitForTestsToFinishRunning (options: { project: Project, browser: Browser, screenshots: ScreenshotMetadata[], videoCompression: number | boolean, exit: boolean, spec: SpecWithRelativeRoot, estimated: number, quiet: boolean, config: Cfg, shouldKeepTabOpen: boolean, isLastSpec: boolean, testingType: TestingType, videoRecording?: VideoRecording, protocolManager?: ProtocolManagerShape }) {
   if (globalThis.CY_TEST_MOCK?.waitForTestsToFinishRunning) return Promise.resolve(globalThis.CY_TEST_MOCK.waitForTestsToFinishRunning)
 
-  const { project, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
+  const { project, browser, screenshots, videoRecording, videoCompression, exit, spec, estimated, quiet, config, shouldKeepTabOpen, isLastSpec, testingType, protocolManager } = options
 
   const results = await listenForProjectEnd(project, exit)
 
@@ -737,9 +737,16 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
   const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
-  debug('post-spec teardown %o', { usingExperimentalSingleTabMode, isLastSpec, testingType, videoExists })
+  // WebKit records video by closing the page (see webkit-automation endVideoCapture), which also
+  // tears down the runner socket. In that case destroyAut would emit 'aut:destroy:init' and wait
+  // forever for an 'aut:destroy:complete' reply that the now-closed runner can never send, hanging
+  // the run (https://github.com/cypress-io/cypress/issues/23815). WebKit recreates the whole
+  // tab/context for the next spec via connectToNewSpec anyway, so destroying the AUT is unnecessary.
+  const isWebKitRecordingVideo = browser.family === 'webkit' && !!videoRecording
 
-  if (usingExperimentalSingleTabMode && !isLastSpec) {
+  debug('post-spec teardown %o', { usingExperimentalSingleTabMode, isLastSpec, testingType, videoExists, isWebKitRecordingVideo })
+
+  if (usingExperimentalSingleTabMode && !isLastSpec && !isWebKitRecordingVideo) {
     debug('single-tab mode: destroying AUT before next spec')
     await project.server.destroyAut()
     debug('single-tab mode: destroyed AUT')
@@ -1040,6 +1047,7 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
       spec,
       config,
       project,
+      browser,
       estimated,
       screenshots,
       videoRecording,
