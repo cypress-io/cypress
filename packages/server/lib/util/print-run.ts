@@ -12,7 +12,9 @@ import * as env from './env'
 import * as terminal from './terminal'
 import { getIsCi } from './ci_provider'
 import * as experiments from '../experiments'
+import { isDeprecatedBrowser } from '@packages/types'
 import type { SpecFile, ProtocolError } from '@packages/types'
+import * as errors from '@packages/errors'
 import type { Cfg } from '../project-base'
 import type { Browser } from '../browsers/types'
 import type { HorizontalAlignment, Table } from 'cli-table3'
@@ -251,6 +253,13 @@ export function displayRunStarting (options: { browser: Browser, config: Cfg, gr
   console.log(heading)
 
   console.log('')
+
+  // Surface the Electron deprecation alongside the run header. Emitted here so
+  // every code path that prints the run header (runSpecs and passWithNoTests)
+  // shows it; both call this only when not `--quiet`, so quiet runs stay quiet.
+  if (isDeprecatedBrowser(browser)) {
+    errors.warning('BROWSER_ELECTRON_DEPRECATED')
+  }
 
   return heading
 }
