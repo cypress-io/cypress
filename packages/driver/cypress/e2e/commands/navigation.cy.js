@@ -45,6 +45,21 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/7598
+    it('preserves localStorage and sessionStorage across the reload', () => {
+      cy.window().then((win) => {
+        win.localStorage.setItem('reload-local', 'persisted')
+        win.sessionStorage.setItem('reload-session', 'persisted')
+      })
+
+      cy.reload()
+
+      cy.window().then((win) => {
+        expect(win.localStorage.getItem('reload-local'), 'localStorage').to.eq('persisted')
+        expect(win.sessionStorage.getItem('reload-session'), 'sessionStorage').to.eq('persisted')
+      })
+    })
+
     it('removes window:load listeners', () => {
       const listeners = cy.listeners('window:load')
 
