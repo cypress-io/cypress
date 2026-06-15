@@ -1,1 +1,1 @@
-export * from '@packages/network-interception/lib/types'
+export * from '@packages/network-interception/types'

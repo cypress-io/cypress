@@ -1,7 +1,7 @@
 import Debug from 'debug'
 
 import type { ErrorMiddleware } from '@packages/proxy'
-import type { CyHttpMessages } from '@packages/network-interception/lib/types/external-types'
+import type { CyHttpMessages } from '@packages/network-interception/types/external'
 import _ from 'lodash'
 import errors from '@packages/errors'
 

@@ -3,7 +3,7 @@ import _ from 'lodash'
 import type {
   RouteMatcherOptions,
   StaticResponse,
-} from '@packages/network-interception/lib/types'
+} from '@packages/network-interception/types'
 import $utils from '../../cypress/utils'
 
 // properties that, if they are the only ones set, make sense to display as the display url

@@ -33,6 +33,34 @@
   ],
   "types": "cjs/index.d.ts",
   "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./cjs/index.d.ts",
+      "import": "./esm/index.js",
+      "require": "./cjs/index.js"
+    },
+    "./types": {
+      "types": "./cjs/types/index.d.ts",
+      "import": "./esm/types/index.js",
+      "require": "./cjs/types/index.js"
+    },
+    "./types/external": {
+      "types": "./cjs/types/external-types.d.ts",
+      "import": "./esm/types/external-types.js",
+      "require": "./cjs/types/external-types.js"
+    },
+    "./package.json": "./package.json"
+  },
   "module": "esm/index.js",
+  "typesVersions": {
+    "*": {
+      "types": [
+        "cjs/types/index.d.ts"
+      ],
+      "types/external": [
+        "cjs/types/external-types.d.ts"
+      ]
+    }
+  },
   "nx": {}
 }

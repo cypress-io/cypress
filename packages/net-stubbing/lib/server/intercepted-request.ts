@@ -9,7 +9,7 @@ import type {
   NetEvent,
   Subscription,
   BackendStaticResponse,
-} from '@packages/network-interception/lib/types'
+} from '@packages/network-interception/types'
 import type { BackendRoute } from '@packages/network-interception'
 import type { NetStubbingState } from './types'
 import { planSubscriptions } from '@packages/network-interception'

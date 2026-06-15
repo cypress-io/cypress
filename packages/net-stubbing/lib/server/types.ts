@@ -3,7 +3,7 @@ import type {
   InterceptedRequest,
 } from './intercepted-request'
 
-export type { ResourceType } from '@packages/network-interception/lib/types/external-types'
+export type { ResourceType } from '@packages/network-interception/types/external'
 
 export interface NetStubbingState {
   pendingEventHandlers: {

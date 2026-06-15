@@ -9,7 +9,7 @@ import {
   RouteMatcherOptions,
   NetEvent,
   BackendStaticResponse,
-} from '@packages/network-interception/lib/types'
+} from '@packages/network-interception/types'
 import {
   sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,

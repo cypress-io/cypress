@@ -5,7 +5,7 @@ import isHtml from 'is-html'
 import { IncomingMessage } from 'http'
 import type {
   BackendStaticResponse,
-} from '@packages/network-interception/lib/types'
+} from '@packages/network-interception/types'
 
 import { Readable, PassThrough } from 'stream'
 import { Socket } from 'net'
@@ -16,7 +16,7 @@ import type { InterceptedRequest } from './intercepted-request'
 import type { SocketBroadcaster } from '@packages/socket'
 import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 
-import type { CyHttpMessages } from '@packages/network-interception/lib/types/external-types'
+import type { CyHttpMessages } from '@packages/network-interception/types/external'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
