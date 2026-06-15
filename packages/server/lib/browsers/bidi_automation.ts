@@ -452,6 +452,7 @@ export class BidiAutomation {
       // and https://bugzilla.mozilla.org/show_bug.cgi?id=1648993), matching the
       // Chromium/CDP behavior in getCookiesByUrl. Exclude those hosts from the
       // secure filter so cy.request receives the same cookies the browser would.
+      // @see https://github.com/cypress-io/cypress/pull/34095 for the full rationale.
       if (url.protocol === 'http:' && !isLocalhost(url)) {
         secure = false
       }
