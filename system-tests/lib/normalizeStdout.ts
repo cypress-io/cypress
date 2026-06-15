@@ -11,6 +11,11 @@ export const pathUpToProjectName = Fixtures.projectPath('')
 export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(\w+\))?(\s+)/
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
+// The Electron browser deprecation warning is printed for every run-mode run
+// that uses Electron (the default browser). Strip the whole block so existing
+// run snapshots don't need to capture it. Matches the BROWSER_ELECTRON_DEPRECATED
+// error template in packages/errors/src/errors.ts.
+const electronDeprecationWarningRe = /Warning: The Electron browser is deprecated as a test browser and will be removed in a future version of Cypress\.\n\nSwitch to Chrome or another installed browser to avoid a breaking change when you upgrade\.\n\nRead more about supported browsers: https:\/\/on\.cypress\.io\/launching-browsers\n\n/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g
@@ -168,6 +173,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
+  // Strip the Electron deprecation warning so run-mode snapshots don't need to capture it
+  .replace(electronDeprecationWarningRe, '')
   // Replaces "new dependencies optimized" message from vite as it does not respect the logLevel='silent' option
   .replace(/^.*Re-optimizing dependencies.*?\n$/gm, '')
   .replace(/\).*new dependencies optimized.*?\n/gm, ')\n')
