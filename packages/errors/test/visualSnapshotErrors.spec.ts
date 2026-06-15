@@ -932,7 +932,7 @@ describe('visual error templates', () => {
         default: ['chrome'],
       }
     },
-    ELECTRON_PROCESS_GUI_REQUIRED: () => {
+    ELECTRON_PROCESS_FAILED_TO_LAUNCH: () => {
       const err = makeErr()
 
       return {

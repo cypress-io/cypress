@@ -610,11 +610,16 @@ export = {
       // On macOS, the Electron browser requires an active graphical (window
       // server) session to launch - even in headless mode. When Cypress runs
       // without one (e.g. over SSH, from a LaunchDaemon, or on a logged-out CI
-      // machine), the launch fails with cryptic, low-level errors. Surface a
-      // friendlier, actionable error that points users at the Chromium-based
-      // workaround. https://github.com/cypress-io/cypress/issues/7467
+      // machine), the renderer never connects and the launch fails downstream
+      // with a generic, hard-to-interpret error (the WindowServer/CGS messages
+      // only appear on the native process's stderr, not in this thrown error).
+      // Because we can't reliably attribute the failure here, we don't replace
+      // the error: we wrap it so the original is still surfaced, and add the
+      // Chromium-based workaround as a hint. Only done on darwin since that's
+      // where the window-server requirement applies.
+      // https://github.com/cypress-io/cypress/issues/7467
       if (os.platform() === 'darwin') {
-        throw errors.get('ELECTRON_PROCESS_GUI_REQUIRED', err)
+        throw errors.get('ELECTRON_PROCESS_FAILED_TO_LAUNCH', err)
       }
 
       throw err

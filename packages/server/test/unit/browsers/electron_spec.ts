@@ -280,7 +280,7 @@ describe('lib/browsers/electron', () => {
         renderStub.rejects(this.renderError)
       })
 
-      it('throws a friendly error recommending Chromium on macOS', function () {
+      it('wraps the error with a Chromium hint and preserves the original on macOS', function () {
         sinon.stub(os, 'platform').returns('darwin')
 
         // @ts-expect-error
@@ -289,8 +289,10 @@ describe('lib/browsers/electron', () => {
           throw new Error('should have thrown')
         })
         .catch((err) => {
-          expect(err.type).to.eq('ELECTRON_PROCESS_GUI_REQUIRED')
+          expect(err.type).to.eq('ELECTRON_PROCESS_FAILED_TO_LAUNCH')
           expect(err.message).to.contain('cypress run --browser chrome')
+          // the original error should still be surfaced for debugging
+          expect(err.originalError).to.eq(this.renderError)
         })
       })
 

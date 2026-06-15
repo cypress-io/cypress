@@ -1231,17 +1231,18 @@ export const AllCypressErrors = {
 
       We have failed the current spec and aborted the run.`
   },
-  ELECTRON_PROCESS_GUI_REQUIRED: (originalError: Error) => {
-    // we include the original error's stack trace since this is an
-    // "uncontrolled" error from Electron that may contain useful debugging info
+  ELECTRON_PROCESS_FAILED_TO_LAUNCH: (originalError: Error) => {
+    // we surface the original error's stack trace since we can't determine the
+    // exact cause of the failure here - the macOS guidance below is a hint, not
+    // a definitive diagnosis. See https://github.com/cypress-io/cypress/issues/7467
     return errTemplate`\
         Cypress failed to launch the ${fmt.highlight('Electron')} browser.
 
-        On macOS, the ${fmt.highlight('Electron')} browser requires an active graphical (window server) session to run, even in headless mode. This commonly fails when Cypress is run from a context with no logged-in desktop session, such as over SSH, from a ${fmt.highlightSecondary('LaunchDaemon')}, or on a CI machine where no user is logged in.
-
-        We recommend running your tests in a Chromium-based browser instead, which does not have this requirement:
+        On macOS, the ${fmt.highlight('Electron')} browser requires an active graphical (window server) session, even when running headlessly. If Cypress is running without one - for example over SSH, from a ${fmt.highlightSecondary('LaunchDaemon')}, or on a CI machine where no user is logged in - we recommend running your tests in a Chromium-based browser instead, which does not have this requirement:
 
           ${fmt.highlightSecondary('cypress run --browser chrome')}
+
+        The underlying error is included below:
 
         ${fmt.stackTrace(originalError)}`
   },
