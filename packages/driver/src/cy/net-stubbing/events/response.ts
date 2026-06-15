@@ -3,7 +3,7 @@ import _ from 'lodash'
 import {
   CyHttpMessages,
   SERIALIZABLE_RES_PROPS,
-} from '@packages/net-stubbing/lib/types'
+} from '@packages/network-interception/lib/types'
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,

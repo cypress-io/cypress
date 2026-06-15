@@ -1,4 +1,4 @@
-import type { CyHttpMessages } from '@packages/net-stubbing/lib/types'
+import type { CyHttpMessages } from '@packages/network-interception/lib/types'
 import type { HandlerFn } from '.'
 import { parseJsonBody } from './utils'
 

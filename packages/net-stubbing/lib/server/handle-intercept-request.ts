@@ -6,7 +6,7 @@ import type { NetworkInterceptionCore } from '@packages/network-interception'
 import {
   CyHttpMessages,
   SERIALIZABLE_REQ_PROPS,
-} from '../types'
+} from '@packages/network-interception/lib/types'
 import {
   setDefaultHeaders,
   getBodyEncoding,

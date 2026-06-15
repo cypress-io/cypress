@@ -3,9 +3,7 @@ import type {
   InterceptedRequest,
 } from './intercepted-request'
 
-export type { BackendRoute, GetFixtureFn } from '@packages/network-interception'
-
-export { ResourceType } from '../types'
+export type { ResourceType } from '@packages/network-interception/lib/types/external-types'
 
 export interface NetStubbingState {
   pendingEventHandlers: {

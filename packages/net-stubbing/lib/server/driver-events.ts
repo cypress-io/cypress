@@ -1,24 +1,21 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import type {
-  NetStubbingState,
-  GetFixtureFn,
-  BackendRoute,
-} from './types'
+import { getAllStringMatcherFields } from '@packages/network-interception'
+import type { BackendRoute, GetFixtureFn } from '@packages/network-interception'
+import type { NetStubbingState } from './types'
 import {
   PLAIN_FIELDS,
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
   NetEvent,
-} from '../types'
+  BackendStaticResponse,
+} from '@packages/network-interception/lib/types'
 import {
-  getAllStringMatcherFields,
   sendStaticResponse as _sendStaticResponse,
   setResponseFromFixture,
 } from './util'
 import { InterceptedRequest } from './intercepted-request'
 import type { SocketBroadcaster } from '@packages/socket'
-import type { BackendStaticResponse } from '../internal-types'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 

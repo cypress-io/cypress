@@ -7,7 +7,7 @@ import type { ResponseMiddleware } from '@packages/proxy'
 import {
   CyHttpMessages,
   SERIALIZABLE_RES_PROPS,
-} from '../types'
+} from '@packages/network-interception/lib/types'
 import {
   getBodyStream,
   mergeDeletedHeaders,
