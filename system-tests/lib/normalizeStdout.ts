@@ -8,10 +8,12 @@ export const DEFAULT_BROWSERS = ['electron', 'chrome', 'chrome-for-testing', 'fi
 
 export const pathUpToProjectName = Fixtures.projectPath('')
 
-// The trailing `((?:\s\(\w+\))*)` group consumes any parenthetical markers
-// appended after the version — e.g. `(headless)` and/or `(deprecated)` — so
-// the whole browser segment normalizes to a single placeholder.
-export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)((?:\s\(\w+\))*)(\s+)/
+// The optional `(\s\(headless\))?` and `(\s\(deprecated\))?` groups consume the
+// markers appended after the version so the whole browser segment normalizes to
+// a single placeholder. They are kept as separate groups (rather than a single
+// repeating group) so the `headless` capture stays `undefined` when absent —
+// the harness asserts on it directly in system-tests.ts.
+export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(headless\))?(\s\(deprecated\))?(\s+)/
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 // The Electron browser deprecation warning is printed for every run-mode run
@@ -26,9 +28,9 @@ const escapedRetryDuration = /TORA(\d+)/g
 
 export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
 
-const replaceBrowserName = function (str: string, key: string, customBrowserPath: string, browserName: string, version: string, headless: boolean, whitespace: string) {
+const replaceBrowserName = function (str: string, key: string, customBrowserPath: string, browserName: string, version: string, headless: boolean, deprecated: boolean, whitespace: string) {
   // get the padding for the existing browser string
-  const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, 'length', 0), whitespace.length])
+  const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, 'length', 0), _.get(deprecated, 'length', 0), whitespace.length])
 
   // this ensures we add whitespace so the border is not shifted
   return key + customBrowserPath + _.padEnd('FooBrowser 88', lengthOfExistingBrowserString)
