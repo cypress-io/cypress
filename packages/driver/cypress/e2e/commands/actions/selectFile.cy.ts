@@ -263,11 +263,11 @@ describe('src/cy/commands/actions/selectFile', () => {
       // was aliased in a subsequent test, since the cache hit skipped recording it.
       it('preserves the file name when an aliased fixture is cached', () => {
         // prime the fixture cache
-        cy.fixture('valid.json', { encoding: null })
+        cy.fixture('valid.json', null)
 
         // a subsequent alias of the same fixture reads from the cache, and should
         // still carry the inferred file name through to selectFile
-        cy.fixture('valid.json', { encoding: null }).as('myCachedFixture')
+        cy.fixture('valid.json', null).as('myCachedFixture')
 
         cy.get('#basic').selectFile('@myCachedFixture')
         .then((input) => {
