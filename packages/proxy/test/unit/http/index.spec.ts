@@ -1,9 +1,112 @@
 import { describe, expect, it, beforeEach, vi, Mock } from 'vitest'
-import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx } from '../../../lib/http'
+import { Http, HttpMiddleware, HttpMiddlewareStacks, HttpStages, ServerCtx, _runStage } from '../../../lib/http'
 import { BrowserPreRequest } from '../../../lib'
 import type CyServer from '@packages/server'
 
 describe('http', function () {
+  describe('_runStage', function () {
+    it('routes async middleware rejections to onError', async function () {
+      const onError = vi.fn()
+      const asyncMiddleware = vi.fn().mockRejectedValue(new Error('async oops'))
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingRequest]: { asyncMiddleware },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingRequest, ctx, onError)
+
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledOnce()
+      })
+
+      expect(onError.mock.calls[0][0].message).toEqual('Internal error while proxying "GET url" in asyncMiddleware:\nasync oops')
+    })
+
+    it('propagates stream errors after middleware has called next()', async function () {
+      const onError = vi.fn()
+      const { PassThrough } = await import('stream')
+      const { EventEmitter } = await import('events')
+
+      const res = Object.assign(new EventEmitter(), {
+        off: vi.fn(),
+        on: vi.fn(),
+        writableFinished: false,
+        destroyed: false,
+      })
+
+      const streamMiddleware = vi.fn().mockImplementation(function () {
+        const pt = new PassThrough()
+
+        this.incomingResStream = pt
+        this.makeResStreamPlainText = () => {
+          pt.on('error', this.onError)
+        }
+
+        this.next()
+      })
+
+      const useStreamMiddleware = vi.fn().mockImplementation(function () {
+        this.makeResStreamPlainText()
+        this.incomingResStream.emit('error', new Error('bad gzip'))
+        this.end()
+      })
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res,
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingResponse]: {
+            streamMiddleware,
+            useStreamMiddleware,
+          },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingResponse, ctx, onError)
+
+      await vi.waitFor(() => {
+        expect(onError).toHaveBeenCalledOnce()
+      })
+
+      expect(onError.mock.calls[0][0].message).toEqual('bad gzip')
+    })
+
+    it('ignores async middleware rejections after next() was called', async function () {
+      const onError = vi.fn()
+      let rejectLate: (err: Error) => void
+
+      const asyncMiddleware = vi.fn().mockImplementation(function () {
+        this.next()
+
+        return new Promise((_resolve, reject) => {
+          rejectLate = reject
+        })
+      })
+
+      const ctx = {
+        req: { method: 'GET', proxiedUrl: 'url' },
+        res: { off: vi.fn(), on: vi.fn(), writableFinished: true },
+        debug: () => {},
+        middleware: {
+          [HttpStages.IncomingRequest]: { asyncMiddleware },
+        },
+      }
+
+      await _runStage(HttpStages.IncomingRequest, ctx, onError)
+
+      rejectLate!(new Error('late async rejection'))
+      await new Promise((resolve) => setTimeout(resolve, 10))
+
+      expect(onError).not.toHaveBeenCalled()
+    })
+  })
+
   describe('Http.handle', function () {
     let config: CyServer.Config & Cypress.Config
     let middleware: HttpMiddlewareStacks
