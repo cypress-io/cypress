@@ -670,7 +670,9 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
 
   const previous: UncaughtErrorRecord | undefined = state?.(UNCAUGHT_ERROR_STATE_KEY)
 
-  if (previous && canCollapseUncaughtError(previous.signature, signature)) {
+  // previous.log can be undefined if the prior Cypress.log was suppressed
+  // (e.g. onBeforeLog returned false); never try to update a missing log
+  if (previous?.log && canCollapseUncaughtError(previous.signature, signature)) {
     const count = previous.count + 1
 
     previous.log.set({
@@ -714,7 +716,9 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
     },
   })
 
-  state?.(UNCAUGHT_ERROR_STATE_KEY, { signature, log, count: 1 })
+  // Cypress.log returns undefined when the log is suppressed; only retain a
+  // record we can actually update, otherwise clear any stale prior record.
+  state?.(UNCAUGHT_ERROR_STATE_KEY, log ? { signature, log, count: 1 } : undefined)
 }
 
 interface LoggableError { name?: string, message: string }

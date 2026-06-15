@@ -156,6 +156,23 @@ describe('err_utils', () => {
       expect(log.set).not.toHaveBeenCalled()
     })
 
+    it('does not throw or dedupe into a suppressed (undefined) log', () => {
+      const { cypress } = createCypress()
+      const err = () => new Error('same message')
+
+      // Cypress.log returns undefined when the log is suppressed
+      // (e.g. onBeforeLog returns false)
+      cypress.log.mockReturnValue(undefined)
+
+      expect(() => {
+        errUtils.logError(cypress, 'error', err(), true)
+        errUtils.logError(cypress, 'error', err(), true)
+      }).not.toThrow()
+
+      // each occurrence retries Cypress.log rather than updating a missing log
+      expect(cypress.log).toHaveBeenCalledTimes(2)
+    })
+
     it('does NOT dedupe once the test state has been reset', () => {
       const { cypress, log, store } = createCypress()
       const err = () => new Error('same message')
