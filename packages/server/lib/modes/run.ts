@@ -701,8 +701,11 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   await runEvents.execute('after:spec', publicSpec, publicResults)
   afterSpecSpan?.end()
+  debug('after:spec completed')
 
+  debug('running protocolManager afterSpec')
   await protocolManager?.afterSpec()
+  debug('protocolManager afterSpec completed')
 
   const videoName = videoRecording?.api.videoName
   const videoExists = videoName && await fs.pathExists(videoName)
@@ -727,14 +730,19 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   }
 
   if (!quiet && !skippedSpec) {
+    debug('displaying spec results')
     printResults.displayResults(results, estimated)
   }
 
   // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
   const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
+  debug('post-spec teardown %o', { usingExperimentalSingleTabMode, isLastSpec, testingType, videoExists })
+
   if (usingExperimentalSingleTabMode && !isLastSpec) {
+    debug('single-tab mode: destroying AUT before next spec')
     await project.server.destroyAut()
+    debug('single-tab mode: destroyed AUT')
   }
 
   // we do not support experimentalSingleTabRunMode for e2e. We always want to close the tab on the last spec to ensure that things get cleaned up properly at the end of the run
@@ -779,6 +787,8 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
           ...(videoRecording.controller!.postProcessFfmpegOptions || {}),
         },
       })
+
+      debug('finished compressing recording')
     } catch (err) {
       videoCompressionFailed = true
       warnVideoCompressionFailed(err)
@@ -802,6 +812,8 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
   // on closure, but threading through fn props via options is also not
   // great.
   earlyExitTerminator = new EarlyExitTerminator()
+
+  debug('waitForTestsToFinishRunning completed for spec %s', spec.relative)
 
   return results
 }

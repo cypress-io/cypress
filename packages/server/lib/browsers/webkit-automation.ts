@@ -123,11 +123,19 @@ export class WebKitAutomation {
 
     promises.push(this.markAutIframeRequests())
 
-    if (oldPwPage) promises.push(oldPwPage.context().close())
+    if (oldPwPage) {
+      debug('reset: closing previous page context')
+      promises.push(oldPwPage.context().close().then(() => debug('reset: previous page context closed')))
+    }
 
-    if (options.newUrl) promises.push(this.page.goto(options.newUrl))
+    if (options.newUrl) {
+      debug('reset: navigating new page to %s', options.newUrl)
+      promises.push(this.page.goto(options.newUrl).then(() => debug('reset: navigated new page to %s', options.newUrl)))
+    }
 
     if (promises.length) await Promise.all(promises)
+
+    debug('reset complete')
   }
 
   private recordVideo (videoApi: RunModeVideoApi, startedVideoCapture: Date) {
@@ -139,13 +147,15 @@ export class WebKitAutomation {
 
         if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
 
-        debug('ending video capture, closing page...')
+        debug('ending video capture: closing page and saving video to %s', videoApi.videoName)
 
         await Promise.all([
           // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
-          _this.page.close(),
-          pwVideo.saveAs(videoApi.videoName),
+          _this.page.close().then(() => debug('endVideoCapture: page closed')),
+          pwVideo.saveAs(videoApi.videoName).then(() => debug('endVideoCapture: video saved to %s', videoApi.videoName)),
         ])
+
+        debug('endVideoCapture complete')
       },
       writeVideoFrame: () => {
         throw new Error('writeVideoFrame called, but WebKit does not support streaming frame data.')
@@ -382,9 +392,15 @@ export class WebKitAutomation {
 
         return
       case 'reset:browser:tabs:for:next:spec':
+        debug('reset:browser:tabs:for:next:spec %o', data)
+
         if (data.shouldKeepTabOpen) return await this.reset({})
 
-        return await this.context.browser()?.close()
+        debug('closing browser for next spec')
+        await this.context.browser()?.close()
+        debug('browser closed for next spec')
+
+        return
       default:
         throw new Error(`No automation handler registered for: '${message}'`)
     }
