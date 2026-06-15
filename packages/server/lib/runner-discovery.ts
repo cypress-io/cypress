@@ -2,17 +2,12 @@ import crypto from 'crypto'
 import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
-import pkg from '@packages/root'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
 
 const debug = Debug('cypress:server:runner-discovery')
 
 const RUNNERS_DIRNAME = 'runners'
-// v3 introduced serverPort + instanceId so readers verify liveness by probing
-// the server (`GET /__cypress/runner-discovery/<instanceId>`) instead of
-// trusting the pid, which the OS can recycle. A reader seeing a lower version
-// treats the record as incompatible rather than guessing.
-const SCHEMA_VERSION = 3
+const SCHEMA_VERSION = 1
 
 /**
  * A record published by a running Cypress server so that other processes (the
@@ -20,9 +15,7 @@ const SCHEMA_VERSION = 3
  * server PID, dropped at `<cypressCacheRoot>/runners/<pid>.json`.
  *
  * Every field is fixed for the life of the process, so the file is written
- * once at boot and removed at shutdown. Anything that changes while Cypress
- * runs — the browser CDP state — is never persisted; it travels in the
- * discovery probe response instead (see {@link LiveRunnerState}).
+ * once at boot and removed at shutdown. (see {@link LiveRunnerState}).
  *
  * This shape is the cross-process contract; the CLI mirrors it in
  * `cli/lib/runner-discovery/record.ts`.
@@ -33,8 +26,6 @@ export interface RunnerDiscoveryRecord {
    * PIDs are recycled by the OS, so readers verify liveness via the
    * instanceId probe, never by signalling this pid. */
   pid: number
-  /** Informational only — the CLI version-checks via the tap binding's getSchema. */
-  cypressVersion: string
   /** Absolute, resolved project root the server is running against. */
   projectRoot: string
   /** Port of this Cypress server's HTTP server, where the discovery probe
@@ -141,7 +132,6 @@ export const runnerDiscovery = {
     const record: RunnerDiscoveryRecord = {
       schemaVersion: SCHEMA_VERSION,
       pid: process.pid,
-      cypressVersion: pkg.version,
       projectRoot: path.resolve(projectRoot),
       serverPort,
       instanceId: crypto.randomUUID(),

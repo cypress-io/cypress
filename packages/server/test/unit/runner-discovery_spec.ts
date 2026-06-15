@@ -2,7 +2,6 @@ import '../spec_helper'
 import path from 'path'
 import os from 'os'
 import fs from 'fs-extra'
-import pkg from '@packages/root'
 import { runnerDiscovery, getRunnerDiscoveryDir, _resetForTesting } from '../../lib/runner-discovery'
 
 const ENV_KEYS = [
@@ -53,9 +52,8 @@ describe('lib/runner-discovery', () => {
       const record = await fs.readJson(recordPath)
 
       expect(record).to.deep.include({
-        schemaVersion: 3,
+        schemaVersion: 1,
         pid: process.pid,
-        cypressVersion: pkg.version,
         projectRoot: path.resolve('/some/project'),
         serverPort: 4455,
       })

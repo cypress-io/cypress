@@ -1,6 +1,4 @@
-// Oldest record schema this reader can verify: v3 introduced serverPort and
-// instanceId, which the liveness probe depends on.
-const MIN_SCHEMA_VERSION = 3
+const MIN_SCHEMA_VERSION = 1
 
 /**
  * Mirror of `@packages/server`'s `RunnerDiscoveryRecord`. The `cypress` CLI is
@@ -17,7 +15,6 @@ export interface RunnerDiscoveryRecord {
   /** Informational/disambiguation only — pids are recycled by the OS, so
    * liveness is established by the instanceId probe, never by this pid. */
   pid: number
-  cypressVersion: string
   projectRoot: string
   /** Port of the runner's HTTP server, where the discovery probe route lives. */
   serverPort: number

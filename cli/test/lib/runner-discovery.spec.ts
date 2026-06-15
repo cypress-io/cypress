@@ -35,9 +35,8 @@ const INSTANCE_ID = 'a1b2c3d4-0000-4000-8000-000000000000'
 
 const makeRecord = (overrides: Record<string, any> = {}) => {
   return JSON.stringify({
-    schemaVersion: 3,
+    schemaVersion: 1,
     pid: 1234,
-    cypressVersion: '1.2.3',
     projectRoot: PROJECT,
     serverPort: 1,
     instanceId: INSTANCE_ID,
@@ -211,8 +210,8 @@ describe('lib/runner-discovery', () => {
           '222.json.tmp': 'partial write',
           'notes.txt': 'not a record',
           '333.json': '{ not valid json',
-          // pre-v3 schema: no serverPort/instanceId, so liveness can't be verified
-          '444.json': JSON.stringify({ schemaVersion: 2, pid: 444, projectRoot: PROJECT, cdpStatus: 'no_browser', cdpBrowserWsUrl: null }),
+          // pre-v1 schema: no serverPort/instanceId, so liveness can't be verified
+          '444.json': JSON.stringify({ schemaVersion: 0, pid: 444, projectRoot: PROJECT, cdpStatus: 'no_browser', cdpBrowserWsUrl: null }),
         },
       })
 
@@ -357,7 +356,7 @@ describe('lib/runner-discovery', () => {
       mockfs({
         [RUNNERS_DIR]: {
           '111.json': '{ not valid json',
-          '222.json': JSON.stringify({ schemaVersion: 2, pid: 222, projectRoot: PROJECT }),
+          '222.json': JSON.stringify({ schemaVersion: 0, pid: 222, projectRoot: PROJECT }),
         },
       })
 
