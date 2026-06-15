@@ -1,0 +1,13 @@
+[31mCypress failed to launch the [33mElectron[39m[31m browser.[39m
+[31m[39m
+[31mOn macOS, the [33mElectron[39m[31m browser requires an active graphical (window server) session to run, even in headless mode. This commonly fails when Cypress is run from a context with no logged-in desktop session, such as over SSH, from a [95mLaunchDaemon[39m[31m, or on a CI machine where no user is logged in.[39m
+[31m[39m
+[31mWe recommend running your tests in a Chromium-based browser instead, which does not have this requirement:[39m
+[31m[39m
+[31m  [95mcypress run --browser chrome[39m[31m[39m
+[31m[39m
+[31mAlternatively, ensure the user running Cypress has an active graphical session (for example, by enabling automatic login and running your CI agent as a [95mLaunchAgent[39m[31m rather than a [95mLaunchDaemon[39m[31m).[39m
+[35m[39m
+[35mError: fail whale[39m
+[35m    at makeErr (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m
+[35m    at ELECTRON_PROCESS_GUI_REQUIRED (cypress/packages/errors/test/visualSnapshotErrors.spec.ts)[39m

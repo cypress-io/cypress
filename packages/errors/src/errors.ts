@@ -1231,6 +1231,22 @@ export const AllCypressErrors = {
 
       We have failed the current spec and aborted the run.`
   },
+  ELECTRON_PROCESS_GUI_REQUIRED: (originalError: Error) => {
+    // we include the original error's stack trace since this is an
+    // "uncontrolled" error from Electron that may contain useful debugging info
+    return errTemplate`\
+        Cypress failed to launch the ${fmt.highlight('Electron')} browser.
+
+        On macOS, the ${fmt.highlight('Electron')} browser requires an active graphical (window server) session to run, even in headless mode. This commonly fails when Cypress is run from a context with no logged-in desktop session, such as over SSH, from a ${fmt.highlightSecondary('LaunchDaemon')}, or on a CI machine where no user is logged in.
+
+        We recommend running your tests in a Chromium-based browser instead, which does not have this requirement:
+
+          ${fmt.highlightSecondary('cypress run --browser chrome')}
+
+        Alternatively, ensure the user running Cypress has an active graphical session (for example, by enabling automatic login and running your CI agent as a ${fmt.highlightSecondary('LaunchAgent')} rather than a ${fmt.highlightSecondary('LaunchDaemon')}).
+
+        ${fmt.stackTrace(originalError)}`
+  },
   UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: (arg1: string[], arg2: string[]) => {
     return errTemplate`\
         The ${fmt.highlight('launchOptions')} object returned by your plugin's ${fmt.highlightSecondary(`before:browser:launch`)} handler contained unexpected properties:

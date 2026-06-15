@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import EE from 'events'
+import os from 'os'
 import path from 'path'
 import Debug from 'debug'
 import menu from '../gui/menu'
@@ -601,7 +602,23 @@ export = {
 
     debug('launching browser window to url: %s', url)
 
-    const win = await this._render(url, automation, preferences, electronOptions, cdpSocketServer)
+    let win: BrowserWindow
+
+    try {
+      win = await this._render(url, automation, preferences, electronOptions, cdpSocketServer)
+    } catch (err: any) {
+      // On macOS, the Electron browser requires an active graphical (window
+      // server) session to launch - even in headless mode. When Cypress runs
+      // without one (e.g. over SSH, from a LaunchDaemon, or on a logged-out CI
+      // machine), the launch fails with cryptic, low-level errors. Surface a
+      // friendlier, actionable error that points users at the Chromium-based
+      // workaround. https://github.com/cypress-io/cypress/issues/7467
+      if (os.platform() === 'darwin') {
+        throw errors.get('ELECTRON_PROCESS_GUI_REQUIRED', err)
+      }
+
+      throw err
+    }
 
     await _installExtensions(win, launchOptions.extensions, electronOptions)
 

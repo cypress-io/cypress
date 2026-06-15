@@ -932,6 +932,13 @@ describe('visual error templates', () => {
         default: ['chrome'],
       }
     },
+    ELECTRON_PROCESS_GUI_REQUIRED: () => {
+      const err = makeErr()
+
+      return {
+        default: [err],
+      }
+    },
     UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES: () => {
       return {
         default: [

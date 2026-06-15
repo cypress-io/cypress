@@ -1,5 +1,6 @@
 import '../../spec_helper'
 import _ from 'lodash'
+import os from 'os'
 import EE from 'events'
 import la from 'lazy-ass'
 import sinon from 'sinon'
@@ -267,6 +268,43 @@ describe('lib/browsers/electron', () => {
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
         expect(plugins.execute).not.to.be.calledWith('after:browser:launch')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7467
+    describe('when _render fails to launch', function () {
+      beforeEach(function () {
+        this.renderError = new Error('FAILED TO establish the default connection to the WindowServer')
+        const renderStub = electron._render as sinon.SinonStub
+
+        renderStub.rejects(this.renderError)
+      })
+
+      it('throws a friendly error recommending Chromium on macOS', function () {
+        sinon.stub(os, 'platform').returns('darwin')
+
+        // @ts-expect-error
+        return electron.open('electron', this.url, this.options, this.automation)
+        .then(() => {
+          throw new Error('should have thrown')
+        })
+        .catch((err) => {
+          expect(err.type).to.eq('ELECTRON_PROCESS_GUI_REQUIRED')
+          expect(err.message).to.contain('cypress run --browser chrome')
+        })
+      })
+
+      it('rethrows the original error on non-macOS platforms', function () {
+        sinon.stub(os, 'platform').returns('linux')
+
+        // @ts-expect-error
+        return electron.open('electron', this.url, this.options, this.automation)
+        .then(() => {
+          throw new Error('should have thrown')
+        })
+        .catch((err) => {
+          expect(err).to.eq(this.renderError)
+        })
       })
     })
   })
