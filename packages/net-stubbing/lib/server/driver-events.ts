@@ -1,13 +1,14 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { getAllStringMatcherFields } from '@packages/network-interception'
+import { getAllStringMatcherFields,
+  PLAIN_FIELDS,
+  NetEvent,
+} from '@packages/network-interception'
 import type { BackendRoute, GetFixtureFn } from '@packages/network-interception'
 import type { NetStubbingState } from './types'
-import {
-  PLAIN_FIELDS,
+import type {
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
-  NetEvent,
   BackendStaticResponse,
 } from '@packages/network-interception/types'
 import {
