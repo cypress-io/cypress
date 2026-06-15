@@ -195,10 +195,15 @@ const browsers = {
 
     if (!options.url) throw new Error('Missing url in browsers.open')
 
-    // Surface the Electron deprecation when launching in open mode. Run mode
-    // emits this alongside the "Run Starting" header (see displayRunStarting),
-    // so we gate on `!isTextTerminal` to avoid printing it twice.
-    if (!options.isTextTerminal && isDeprecatedBrowser(browser)) {
+    // Surface the Electron deprecation in open mode only when Electron was
+    // explicitly requested via `--browser` or the `defaultBrowser` config —
+    // an interactive pick in the launchpad already shows the deprecation in
+    // the UI (ribbon + tag), so a terminal warning there would be redundant.
+    // Run mode emits this alongside the "Run Starting" header
+    // (see displayRunStarting), so `!isTextTerminal` also avoids double-printing.
+    const requestedBrowser = ctx.modeOptions.browser || ctx.lifecycleManager.loadedFullConfig?.defaultBrowser
+
+    if (!options.isTextTerminal && isDeprecatedBrowser(browser) && requestedBrowser === browser.name) {
       errors.warning('BROWSER_ELECTRON_DEPRECATED')
     }
 
