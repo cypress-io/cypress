@@ -22,41 +22,23 @@ const SCHEMA_VERSION = 1
  */
 export interface RunnerDiscoveryRecord {
   schemaVersion: number
-  /** The server process id — also the record's filename. Informational only:
-   * PIDs are recycled by the OS, so readers verify liveness via the
-   * instanceId probe, never by signalling this pid. */
+  /** The server process id */
   pid: number
   /** Absolute, resolved project root the server is running against. */
   projectRoot: string
-  /** Port of this Cypress server's HTTP server, where the discovery probe
-   * route lives. Bound before the record is written, so a record on disk
-   * always names a connectable port for as long as its writer is alive. */
+  /** Port of this Cypress server's HTTP server. */
   serverPort: number
   /**
-   * Random per-process token. The server echoes it from
-   * `GET /__cypress/runner-discovery/<instanceId>`, so a reader that gets a
-   * matching echo has proof the record's writer is alive — immune to both pid
-   * and port re-use after a crash.
+   * Random per-process token. Prevents pid reuse issues.
    */
   instanceId: string
 }
 
 /**
  * What the discovery probe route returns: the published record plus the live
- * browser CDP state. The CDP endpoint is deliberately memory-only — a disk
- * copy would go stale the moment the browser attaches or exits, while a
- * reader holding this object has just proven the runner is alive, so the
- * answer is fresh by construction.
+ * browser CDP state.
  */
 export interface LiveRunnerState extends RunnerDiscoveryRecord {
-  /**
-   * The browser-level CDP WebSocket URL (e.g. `ws://host:port/devtools/browser/<id>`);
-   * null while no browser is attached. The CLI connects to this directly, so
-   * it never has to HTTP-list targets to discover an endpoint. Deliberately
-   * the only browser address exposed: the runner page itself is found by
-   * probing targets for the tap binding, since the runner's origin changes on
-   * the first cross-origin cy.visit of a test.
-   */
   cdpBrowserWsUrl: string | null
 }
 
@@ -73,8 +55,6 @@ const getRecordPath = (pid: number): string => {
   return path.join(getRunnerDiscoveryDir(), `${pid}.json`)
 }
 
-// Discovery is a best-effort convenience: a failed write must never take down
-// a real test run, so the env flag exists purely as a kill switch.
 const isDisabled = (): boolean => {
   const flag = process.env.CYPRESS_INTERNAL_RUNNER_DISCOVERY
 
@@ -91,7 +71,6 @@ let currentState: LiveRunnerState | null = null
 // file after close, leaving a phantom record with a live pid for as long as
 // the process stays up (`cypress open`).
 let persistChain: Promise<void> = Promise.resolve()
-
 const persist = (record: RunnerDiscoveryRecord): Promise<void> => {
   const run = async () => {
     const dir = getRunnerDiscoveryDir()

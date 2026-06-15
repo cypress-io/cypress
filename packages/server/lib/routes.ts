@@ -216,12 +216,7 @@ export const createCommonRoutes = ({
   // lib/runner-discovery.ts). The record's random instanceId acts as a bearer
   // token: only a reader that has already read the record can construct this
   // URL, and only the record's writer can echo it — so a recycled pid or port
-  // can never impersonate a runner. The response is also the sole source of
-  // the live browser CDP state (cdpBrowserWsUrl), which is never written to
-  // disk. Mismatches get the same 404 as any unknown path to give local port
-  // scanners nothing to distinguish. Literal `__cypress` prefix (like the
-  // assets route below) — the CLI builds this URL without access to the
-  // project's resolved config.
+  // can not impersonate a runner.
   router.get('/__cypress/runner-discovery/:instanceId', (req, res) => {
     const state = runnerDiscovery.getCurrent()
 
