@@ -11,9 +11,12 @@ import type { ForNetworkPolicyRegistration } from '../ports/driving-ports'
 import type { NetworkExchange } from '../exchange/network-exchange'
 import type { BackendRoute } from '../types/backend-route'
 import type { CyHttpMessages } from '../types/external-types'
-import { mergeIncomingRequestChanges, type MergeIncomingRequestChangesOptions } from './merge-handler-result'
-import { planSubscriptions, type PlanSubscriptionsOptions, type PlannedRouteSubscriptions } from './plan-subscriptions'
-import { matchRoutes, matchesRoutePreflight, type RouteMatchableRequest } from './route-matching'
+import type { MergeIncomingRequestChangesOptions } from './merge-handler-result'
+import type { PlanSubscriptionsOptions, PlannedRouteSubscriptions } from './plan-subscriptions'
+import type { RouteMatchableRequest } from './route-matching'
+import { mergeIncomingRequestChanges } from './merge-handler-result'
+import { planSubscriptions } from './plan-subscriptions'
+import { matchRoutes, matchesRoutePreflight } from './route-matching'
 
 export type NetworkInterceptionCoreOptions = {
   policyRegistration?: ForNetworkPolicyRegistration
