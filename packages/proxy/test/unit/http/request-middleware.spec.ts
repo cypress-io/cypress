@@ -45,6 +45,7 @@ describe('http/request-middleware', () => {
       'LogRequest',
       'ExtractCypressMetadataHeaders',
       'MaybeSimulateSecHeaders',
+      'MaybeRestoreObstructedOriginHeader',
       'CorrelateBrowserPreRequest',
       'CalculateCredentialLevelIfApplicable',
       'FormatCookiesIfApplicable',
@@ -412,6 +413,110 @@ describe('http/request-middleware', () => {
       await testMiddleware([MaybeSimulateSecHeaders], ctx)
 
       expect(ctx.req.headers['sec-fetch-dest']).toEqual('document')
+    })
+  })
+
+  describe('MaybeRestoreObstructedOriginHeader', () => {
+    const { MaybeRestoreObstructedOriginHeader } = RequestMiddleware
+
+    const prepareContext = (config, req) => {
+      return {
+        config,
+        debug: vi.fn(),
+        req: {
+          method: 'POST',
+          ...req,
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+        },
+      }
+    }
+
+    it('is a noop if experimental modify third party code is off', async () => {
+      const ctx = prepareContext({ experimentalModifyObstructiveThirdPartyCode: false }, {
+        headers: {
+          referer: 'https://js.stripe.com/v3',
+        },
+      })
+
+      await testMiddleware([MaybeRestoreObstructedOriginHeader], ctx)
+
+      expect(ctx.req.headers['origin']).toBeUndefined()
+    })
+
+    it('restores the origin header from the referer when missing', async () => {
+      const ctx = prepareContext({ experimentalModifyObstructiveThirdPartyCode: true }, {
+        headers: {
+          referer: 'https://js.stripe.com/v3/',
+        },
+      })
+
+      await testMiddleware([MaybeRestoreObstructedOriginHeader], ctx)
+
+      expect(ctx.req.headers['origin']).toEqual('https://js.stripe.com')
+    })
+
+    it('does not overwrite an origin header that is already present', async () => {
+      const ctx = prepareContext({ experimentalModifyObstructiveThirdPartyCode: true }, {
+        headers: {
+          origin: 'https://example.com',
+          referer: 'https://js.stripe.com/v3/',
+        },
+      })
+
+      await testMiddleware([MaybeRestoreObstructedOriginHeader], ctx)
+
+      expect(ctx.req.headers['origin']).toEqual('https://example.com')
+    })
+
+    it('is a noop for GET requests', async () => {
+      const ctx = prepareContext({ experimentalModifyObstructiveThirdPartyCode: true }, {
+        method: 'GET',
+        headers: {
+          referer: 'https://js.stripe.com/v3/',
+        },
+      })
+
+      await testMiddleware([MaybeRestoreObstructedOriginHeader], ctx)
+
+      expect(ctx.req.headers['origin']).toBeUndefined()
+    })
+
+    it('is a noop for HEAD requests', async () => {
+      const ctx = prepareContext({ experimentalModifyObstructiveThirdPartyCode: true }, {
+        method: 'HEAD',
+        headers: {
+          referer: 'https://js.stripe.com/v3/',
+        },
+      })
+
+      await testMiddleware([MaybeRestoreObstructedOriginHeader], ctx)
+
+      expect(ctx.req.headers['origin']).toBeUndefined()
+    })
+
+    it('is a noop when there is no referer to derive the origin from', async () => {
+      const ctx = prepareContext({ experimentalModifyObstructiveThirdPartyCode: true }, {
+        headers: {},
+      })
+
+      await testMiddleware([MaybeRestoreObstructedOriginHeader], ctx)
+
+      expect(ctx.req.headers['origin']).toBeUndefined()
+    })
+
+    it('is a noop when the referer is not a valid url', async () => {
+      const ctx = prepareContext({ experimentalModifyObstructiveThirdPartyCode: true }, {
+        headers: {
+          referer: 'not-a-valid-url',
+        },
+      })
+
+      await testMiddleware([MaybeRestoreObstructedOriginHeader], ctx)
+
+      expect(ctx.req.headers['origin']).toBeUndefined()
     })
   })
 

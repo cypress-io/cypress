@@ -93,6 +93,45 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
   this.next()
 }
 
+const MaybeRestoreObstructedOriginHeader: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'maybe:restore:obstructed:origin:header', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
+  // When experimentalModifyObstructiveThirdPartyCode is enabled, Cypress alters the
+  // security context of third-party frames (e.g. document.domain injection for a
+  // fullCrossOrigin injection). Some browsers then omit the `Origin` header on
+  // cross-origin sub-resource requests originating from those frames, which breaks
+  // servers that require it (e.g. third-party analytics/telemetry endpoints such as
+  // Stripe's). When we can derive the originating origin from the `Referer`, restore
+  // the `Origin` header so the request mirrors what an uninstrumented browser sends.
+  // @see https://github.com/cypress-io/cypress/issues/23772
+  const { method, headers } = this.req
+
+  const canRestoreOrigin = !!this.config.experimentalModifyObstructiveThirdPartyCode &&
+    // GET/HEAD requests do not carry an Origin header, so there is nothing to restore
+    method !== 'GET' && method !== 'HEAD' &&
+    !headers['origin'] &&
+    !!headers['referer']
+
+  span?.setAttributes({
+    experimentalModifyObstructiveThirdPartyCode: !!this.config.experimentalModifyObstructiveThirdPartyCode,
+    canRestoreOrigin,
+  })
+
+  if (canRestoreOrigin) {
+    try {
+      const origin = new URL(headers['referer'] as string).origin
+
+      headers['origin'] = origin
+      this.debug('restored missing origin header from referer: %s', origin)
+    } catch (err) {
+      this.debug('failed to restore origin header from referer %o', { referer: headers['referer'], err })
+    }
+  }
+
+  span?.end()
+  this.next()
+}
+
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
   return this.networkInterceptionCore.correlateBrowserPreRequest(this)
 }
@@ -304,6 +343,7 @@ export default {
   LogRequest,
   ExtractCypressMetadataHeaders,
   MaybeSimulateSecHeaders,
+  MaybeRestoreObstructedOriginHeader,
   CorrelateBrowserPreRequest,
   CalculateCredentialLevelIfApplicable,
   FormatCookiesIfApplicable,
