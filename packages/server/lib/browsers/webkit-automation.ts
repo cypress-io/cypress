@@ -2,6 +2,7 @@ import Debug from 'debug'
 import type playwright from 'playwright-webkit'
 import type { Automation } from '../automation'
 import { normalizeResourceType } from './cdp_automation'
+import { AUT_FRAME_NAME_IDENTIFIER } from '../automation/helpers/aut_identifier'
 import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
@@ -60,6 +61,31 @@ const normalizeSetCookieProps = (cookie: CyCookie): playwright.Cookie => {
 let requestIdCounter = 1
 const requestIdMap = new WeakMap<playwright.Request, string>()
 let downloadIdCounter = 1
+
+/**
+ * Resolves the AUT (application under test) frame within the Playwright page,
+ * including when the AUT is on a different origin than the top frame (i.e.
+ * during `cy.origin()`). Mirrors the CDP automation's `_getAutFrame`.
+ *
+ * Playwright's `frame.name()` returns the iframe's `name` attribute, falling back
+ * to the `id` attribute when `name` is empty. The AUT iframe is created with
+ * `id: "Your project: '<projectName>'"`, so it resolves via the same
+ * `AUT_FRAME_NAME_IDENTIFIER` used by the CDP automation.
+ */
+export function resolveAutFrame (page: Pick<playwright.Page, 'frames' | 'mainFrame'>): playwright.Frame {
+  const frame = page.frames().find((frame) => {
+    return frame.name().startsWith(AUT_FRAME_NAME_IDENTIFIER)
+  })
+  // if we cannot identify the AUT frame by name, fall back to the first child
+  // frame of the top frame, which should always be the AUT frame
+  ?? page.mainFrame().childFrames()[0]
+
+  if (!frame) {
+    throw new Error('Could not find AUT frame')
+  }
+
+  return frame
+}
 
 type WebKitAutomationOpts = {
   automation: Automation
@@ -369,6 +395,8 @@ export class WebKitAutomation {
         return await this.clearCookies(data)
       case 'clear:cookie':
         return await this.clearCookie(data)
+      case 'get:aut:url':
+        return resolveAutFrame(this.page).url()
       case 'take:screenshot':
         return await this.takeScreenshot(data)
       case 'focus:browser:window':
