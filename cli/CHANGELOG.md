@@ -15,7 +15,7 @@
 
 **Deprecations:**
 
-- Deprecated the Electron browser as a test browser. On the "Choose a browser" screen the Electron card is now marked with a `Deprecated` ribbon (with a tooltip linking to the supported browsers), the browser dropdown shows a `Deprecated` tag next to Electron, and `cypress run` prints a warning when the Electron browser is used. The Electron browser will be removed in a future major version of Cypress; switch to Chrome or another installed browser to avoid a breaking change when you upgrade. Addresses [#33560](https://github.com/cypress-io/cypress/issues/33560). Addressed in [#34074](https://github.com/cypress-io/cypress/pull/34074).
+- Deprecated the Electron browser as a test browser. The Electron browser will be removed in a future major version of Cypress; switch to Chrome or another installed browser to avoid a breaking change when you upgrade. Addresses [#33560](https://github.com/cypress-io/cypress/issues/33560). Addressed in [#34074](https://github.com/cypress-io/cypress/pull/34074).
 
 **Features:**
 
