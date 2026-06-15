@@ -7,11 +7,16 @@
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
 - Fixed an issue where `cy.screenshot()` could still capture changing pixels from some running web animations. Fixes [#29144](https://github.com/cypress-io/cypress/issues/29144).
 - Fixed an issue where WebKit used the host machine's `devicePixelRatio` instead of a standard value of `1`. WebKit now matches Chrome and Electron, so screenshots are consistent regardless of the host's DPI (for example 2x locally versus 1x in CI) and text is no longer fuzzy on high-DPI displays. Applies when [`experimentalWebKitSupport`](https://docs.cypress.io/app/references/experiments) is enabled. Fixes [#23808](https://github.com/cypress-io/cypress/issues/23808).
+- Fixed a regression in [15.17.0](#15-17-0) where loading the Cypress configuration could fail with `TransformError: Internal error: Expected id N but got id M` when the project has the same `esbuild` version installed that Cypress bundles internally (currently `0.28.0`) and a dependency loaded during config processing registers its own `tsx` loader. The `tsx` loader Cypress uses to load the configuration file is now removed from `NODE_OPTIONS` before the configuration file is sourced, so it no longer executes inside worker threads spawned by the project's own dependencies. Fixes [#34076](https://github.com/cypress-io/cypress/issues/34076).
 
 **Misc:**
 
 - Running Cypress with process profiler debug logs enabled (for example `DEBUG=cypress*process_profiler`) no longer intermittently prints an `Expected DataContext to already have been set via setCtx` error to the logs. Addresses [#30670](https://github.com/cypress-io/cypress/issues/30670).
 - Cypress now shows a clear error explaining that `browsers` must be an array and that a specific browser should be selected with `--browser` when a `CYPRESS_BROWSERS` environment variable is set to a plain string (for example `CYPRESS_BROWSERS=chrome`) instead of showing an opaque `TypeError: a.map is not a function` error. Addresses [#33198](https://github.com/cypress-io/cypress/issues/33198).
+
+**Dependency Updates:**
+
+- Upgraded `webdriver` from `9.14.0` to `9.28.0`, `geckodriver` from `5.0.0` to `6.1.0`, and `edgedriver` from `6.1.1` to `6.3.0`. These packages are used to launch and automate Firefox during `cypress run` and `cypress open`. Addresses [#34072](https://github.com/cypress-io/cypress/issues/34072).
 
 ## 15.17.0
 
