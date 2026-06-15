@@ -1,11 +1,11 @@
 import { ConfiguratorNetworkPolicyAdapter } from '../../../lib/adapters/configurator-network-policy'
-import { BlockedHosts } from '@packages/network-interception'
+import { createBlockedHosts } from '@packages/network-interception'
 import '../../spec_helper'
 
 describe('lib/adapters/configurator-network-policy', () => {
   it('delegates add and getPolicies to the underlying registry', () => {
     const adapter = new ConfiguratorNetworkPolicyAdapter()
-    const policy = BlockedHosts({
+    const policy = createBlockedHosts({
       blockHosts: ['*.blocked.com'],
       matchesBlockedHost: () => 'blocked.com',
     })

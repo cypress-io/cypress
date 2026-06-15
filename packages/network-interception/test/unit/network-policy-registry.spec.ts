@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { NetworkPolicy } from '../../lib'
-import { BlockedHosts, NetworkPolicyRegistry } from '../../lib'
+import { createBlockedHosts, NetworkPolicyRegistry } from '../../lib'
 
 function testPolicy (overrides: Partial<NetworkPolicy> & Pick<NetworkPolicy, 'when' | 'apply'>): NetworkPolicy {
   return {
@@ -48,7 +48,7 @@ describe('NetworkPolicyRegistry', () => {
   it('runPolicies returns blockedHostMatch in state when blocked', async () => {
     const registry = new NetworkPolicyRegistry()
 
-    registry.add(BlockedHosts({
+    registry.add(createBlockedHosts({
       blockHosts: ['*.evil.com'],
       matchesBlockedHost: () => 'evil.com',
     }))

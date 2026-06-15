@@ -3,7 +3,9 @@ import { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import { createDefaultNetworkInterceptionCore } from '@packages/proxy/lib/adapters/create-default-network-interception-core'
 import { defaultMiddleware } from '@packages/proxy/lib/http'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import { registerDefaultNetworkPolicies } from '@packages/network-interception'
 import type { NetworkInterceptionRuntime, ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
+import { blocked } from '@packages/network'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { RemoteStates } from '@packages/network-tools'
 import type { CookieJar } from './util/cookies'
@@ -11,7 +13,6 @@ import type { Request as ServerRequest } from './request'
 import type CyServer from '../index.d.ts'
 import type { FoundBrowser, ProtocolManagerShape } from '@packages/types'
 import { ConfiguratorNetworkPolicyAdapter } from './adapters/configurator-network-policy'
-import { registerDefaultNetworkPolicies } from './register-default-network-policies'
 
 export type CreateProxyRuntimeDeps = {
   config: CyServer.Config & Cypress.Config
@@ -39,7 +40,9 @@ export function createProxyRuntime (deps: CreateProxyRuntimeDeps): ProxyNetworkR
   const stubbingState = netStubbingState()
   const networkPolicyRegistration = new ConfiguratorNetworkPolicyAdapter()
 
-  registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config)
+  registerDefaultNetworkPolicies(networkPolicyRegistration, deps.config, {
+    matchesBlockedHost: blocked.matches,
+  })
 
   const networkInterceptionCore = createDefaultNetworkInterceptionCore({
     policyRegistration: networkPolicyRegistration,
