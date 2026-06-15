@@ -293,7 +293,7 @@ export class WebKitAutomation {
 
     if (!cookie) {
       cookie = cookies.find((cookie) => {
-          // if unable to match closest via strict domain, then return a cookie that matches the apex domain
+        // if unable to match closest via strict domain, then return a cookie that matches the apex domain
         return cookieMatches(cookie, filter)
       })
 
