@@ -379,6 +379,15 @@ export default {
     return r.ctx?.currentTest || r
   },
 
+  getTestAttemptFromRunnable (r: Mocha.Runnable | undefined) {
+    if (!r) {
+      return 0
+    }
+
+    // @ts-ignore - _currentRetry is an internal mocha property
+    return this.getTestFromRunnable(r)._currentRetry || 0
+  },
+
   memoize (func, cacheInstance = new Map()) {
     const memoized = function (...args) {
       const key = args[0]

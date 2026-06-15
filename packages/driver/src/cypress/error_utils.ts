@@ -613,70 +613,78 @@ const errorFromUncaughtEvent = (handlerType: HandlerType, event) => {
     errorFromProjectRejectionEvent(event)
 }
 
-// Tracks the most recent uncaught-exception log so consecutive, identical
-// uncaught errors within the same test attempt collapse into a single, updating
-// log entry rather than creating a brand new log for each occurrence. We key
-// on the runnable id and retry attempt so we never update a log belonging to a
-// previous test or retry. Only a string id and a single log reference are
-// retained, so this does not anchor runnables, snapshots, or DOM across tests.
-let lastUncaughtErrorLog: any = null
-let lastUncaughtErrorMessage: string | null = null
-let lastUncaughtErrorRunnableId: string | undefined
-let lastUncaughtErrorRetry = 0
-let lastUncaughtErrorCount = 0
-let lastUncaughtErrorHandled = false
-
-const getUncaughtErrorRetry = (runnable: { _currentRetry?: number, ctx?: { currentTest?: { _currentRetry?: number } }, type?: string } | undefined) => {
-  if (!runnable) {
-    return 0
-  }
-
-  const test = runnable.ctx?.currentTest || (runnable.type === 'test' ? runnable : undefined)
-
-  return test?._currentRetry || 0
+// The identifying fingerprint of an uncaught-exception log. Two consecutive
+// uncaught exceptions with the same signature can collapse into one log.
+interface UncaughtErrorSignature {
+  runnableId?: string
+  message: string
+  retry: number
+  handled: boolean
 }
 
-const resetUncaughtErrorLogState = () => {
-  lastUncaughtErrorLog = null
-  lastUncaughtErrorMessage = null
-  lastUncaughtErrorRunnableId = undefined
-  lastUncaughtErrorRetry = 0
-  lastUncaughtErrorCount = 0
-  lastUncaughtErrorHandled = false
+// The most recent uncaught-exception log, retained so repeated identical errors
+// can update it in place instead of creating a new log each time. Stored on
+// `Cypress.state` (rather than module scope) so it is scoped to — and cleared
+// with — the current test: `cy.reset()` wipes state before each test, so this
+// never anchors a log, snapshot, or runnable across tests.
+const UNCAUGHT_ERROR_STATE_KEY = 'uncaughtErrorLog'
+
+interface UncaughtErrorRecord {
+  signature: UncaughtErrorSignature
+  log: any
+  count: number
+}
+
+// A repeating uncaught error (e.g. a benign "ResizeObserver loop ..."
+// notification fired every animation frame) would otherwise create a new log —
+// and, when unhandled, a new DOM snapshot — on every occurrence, exhausting
+// renderer memory and crashing the browser.
+// See https://github.com/cypress-io/cypress/issues/27415
+const canCollapseUncaughtError = (previous: UncaughtErrorSignature | undefined, current: UncaughtErrorSignature): boolean => {
+  if (!previous || !current.runnableId) {
+    return false
+  }
+
+  return (
+    previous.message === current.message &&
+    previous.runnableId === current.runnableId &&
+    previous.retry === current.retry &&
+    // a previously suppressed error that now throws unhandled should fail the
+    // test, so it gets its own (red) log rather than collapsing into the grey one
+    (current.handled || !previous.handled)
+  )
 }
 
 const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = false) => {
   const error = toLoggableError(err)
   const message = `${error.name || 'Error'}: ${error.message}`
-  const runnable = typeof Cypress.state === 'function' ? Cypress.state('runnable') : undefined
-  const runnableId = runnable?.id
-  const retry = getUncaughtErrorRetry(runnable)
+  const state = typeof Cypress.state === 'function' ? Cypress.state : undefined
+  const runnable = state?.('runnable')
 
-  // Collapse consecutive identical uncaught exceptions within the same test into
-  // a single, updating log entry. A repeating uncaught error (e.g. a benign
-  // "ResizeObserver loop ..." notification fired every animation frame) would
-  // otherwise create a new log — and, when unhandled, a new DOM snapshot — on
-  // every occurrence, exhausting renderer memory and crashing the browser.
-  // See https://github.com/cypress-io/cypress/issues/27415
-  if (
-    lastUncaughtErrorLog &&
-    runnableId &&
-    lastUncaughtErrorMessage === message &&
-    lastUncaughtErrorRunnableId === runnableId &&
-    lastUncaughtErrorRetry === retry &&
-    // do not collapse an unhandled error into a previously suppressed log
-    !(!handled && lastUncaughtErrorHandled)
-  ) {
-    lastUncaughtErrorCount += 1
+  const signature: UncaughtErrorSignature = {
+    runnableId: runnable?.id,
+    message,
+    retry: $utils.getTestAttemptFromRunnable(runnable),
+    handled,
+  }
 
-    lastUncaughtErrorLog.set({
-      message: `${message} (${lastUncaughtErrorCount})`,
-      ...(!handled ? { error: err } : {}),
+  const previous: UncaughtErrorRecord | undefined = state?.(UNCAUGHT_ERROR_STATE_KEY)
+
+  if (previous && canCollapseUncaughtError(previous.signature, signature)) {
+    const count = previous.count + 1
+
+    previous.log.set({
+      message: `${message} (${count})`,
+      // an unhandled occurrence turns the collapsed log red/failed
+      ...(handled ? {} : { error: err }),
     })
 
-    if (!handled) {
-      lastUncaughtErrorHandled = false
-    }
+    state?.(UNCAUGHT_ERROR_STATE_KEY, {
+      log: previous.log,
+      count,
+      // once a collapsed log is unhandled (red), it stays unhandled
+      signature: { ...signature, handled: previous.signature.handled && handled },
+    })
 
     return
   }
@@ -706,12 +714,7 @@ const logError = (Cypress, handlerType: HandlerType, err: unknown, handled = fal
     },
   })
 
-  lastUncaughtErrorLog = log ?? null
-  lastUncaughtErrorMessage = message
-  lastUncaughtErrorRunnableId = runnableId
-  lastUncaughtErrorRetry = retry
-  lastUncaughtErrorCount = 1
-  lastUncaughtErrorHandled = handled
+  state?.(UNCAUGHT_ERROR_STATE_KEY, { signature, log, count: 1 })
 }
 
 interface LoggableError { name?: string, message: string }
@@ -774,7 +777,6 @@ export default {
   isCypressErr,
   isSpecError,
   logError,
-  resetUncaughtErrorLogState,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,

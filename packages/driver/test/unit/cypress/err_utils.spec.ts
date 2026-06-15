@@ -29,24 +29,31 @@ describe('err_utils', () => {
   })
 
   describe('logError', () => {
+    // Mocks a Cypress instance with a stateful `Cypress.state` get/set store,
+    // mirroring how the dedup record is persisted on (and cleared with) state.
     const createCypress = (runnableId: string | undefined = 'r1', retry = 0) => {
       const log = { set: vi.fn() }
+      const runnable = runnableId ? { id: runnableId, type: 'test', _currentRetry: retry } : undefined
+      const store: Record<string, any> = { runnable }
 
-      return {
-        cypress: {
-          log: vi.fn().mockReturnValue(log),
-          state: vi.fn((key: string) => (key === 'runnable' ? { id: runnableId, type: 'test', _currentRetry: retry } : undefined)),
-        },
-        log,
+      const cypress = {
+        log: vi.fn().mockReturnValue(log),
+        state: vi.fn((key: string, value?: any) => {
+          if (value !== undefined) {
+            store[key] = value
+
+            return value
+          }
+
+          return store[key]
+        }),
       }
+
+      return { cypress, log, runnable, store }
     }
 
-    beforeEach(() => {
-      errUtils.resetUncaughtErrorLogState()
-    })
-
     it('takes a DOM snapshot for an unhandled uncaught exception', () => {
-      const { cypress } = createCypress('snapshot-unhandled')
+      const { cypress } = createCypress()
 
       errUtils.logError(cypress, 'error', new Error('boom'), false)
 
@@ -59,7 +66,7 @@ describe('err_utils', () => {
     })
 
     it('does NOT snapshot a handled (suppressed) uncaught exception', () => {
-      const { cypress } = createCypress('snapshot-handled')
+      const { cypress } = createCypress()
 
       errUtils.logError(cypress, 'error', new Error('boom'), true)
 
@@ -73,7 +80,7 @@ describe('err_utils', () => {
     })
 
     it('collapses consecutive identical uncaught exceptions into one updating log', () => {
-      const { cypress, log } = createCypress('dedupe-collapse')
+      const { cypress, log } = createCypress()
       const err = () => new Error('ResizeObserver loop completed with undelivered notifications.')
 
       errUtils.logError(cypress, 'error', err(), true)
@@ -86,7 +93,7 @@ describe('err_utils', () => {
     })
 
     it('updates the deduped log message with the occurrence count', () => {
-      const { cypress, log } = createCypress('dedupe-count')
+      const { cypress, log } = createCypress()
       const err = () => new Error('ResizeObserver loop completed with undelivered notifications.')
 
       errUtils.logError(cypress, 'error', err(), true)
@@ -98,7 +105,7 @@ describe('err_utils', () => {
     })
 
     it('creates a new log when the message differs', () => {
-      const { cypress } = createCypress('message-differs')
+      const { cypress } = createCypress()
 
       errUtils.logError(cypress, 'error', new Error('first'), true)
       errUtils.logError(cypress, 'error', new Error('second'), true)
@@ -107,35 +114,33 @@ describe('err_utils', () => {
     })
 
     it('does NOT dedupe identical messages across different runnables', () => {
-      const first = createCypress('r1')
-      const second = createCypress('r2')
+      const { cypress, log, runnable } = createCypress('r1')
       const err = () => new Error('same message')
 
-      errUtils.logError(first.cypress, 'error', err(), true)
-      errUtils.logError(second.cypress, 'error', err(), true)
+      errUtils.logError(cypress, 'error', err(), true)
+      // simulate moving to a different test within the same shared state
+      runnable!.id = 'r2'
+      errUtils.logError(cypress, 'error', err(), true)
 
-      expect(first.cypress.log).toHaveBeenCalledTimes(1)
-      expect(second.cypress.log).toHaveBeenCalledTimes(1)
-      expect(first.log.set).not.toHaveBeenCalled()
-      expect(second.log.set).not.toHaveBeenCalled()
+      expect(cypress.log).toHaveBeenCalledTimes(2)
+      expect(log.set).not.toHaveBeenCalled()
     })
 
     it('does NOT dedupe identical messages across test retries', () => {
-      const firstAttempt = createCypress('retry-test', 0)
-      const secondAttempt = createCypress('retry-test', 1)
+      const { cypress, log, runnable } = createCypress('retry-test', 0)
       const err = () => new Error('same message')
 
-      errUtils.logError(firstAttempt.cypress, 'error', err(), true)
-      errUtils.logError(secondAttempt.cypress, 'error', err(), true)
+      errUtils.logError(cypress, 'error', err(), true)
+      // simulate the next retry attempt of the same test
+      runnable!._currentRetry = 1
+      errUtils.logError(cypress, 'error', err(), true)
 
-      expect(firstAttempt.cypress.log).toHaveBeenCalledTimes(1)
-      expect(secondAttempt.cypress.log).toHaveBeenCalledTimes(1)
-      expect(firstAttempt.log.set).not.toHaveBeenCalled()
-      expect(secondAttempt.log.set).not.toHaveBeenCalled()
+      expect(cypress.log).toHaveBeenCalledTimes(2)
+      expect(log.set).not.toHaveBeenCalled()
     })
 
     it('creates a new failing log when a suppressed error becomes unhandled', () => {
-      const { cypress, log } = createCypress('handled-to-unhandled')
+      const { cypress, log } = createCypress()
       const err = new Error('same message')
 
       errUtils.logError(cypress, 'error', err, true)
@@ -151,13 +156,14 @@ describe('err_utils', () => {
       expect(log.set).not.toHaveBeenCalled()
     })
 
-    it('clears dedup state on resetUncaughtErrorLogState', () => {
-      const { cypress, log } = createCypress('reset-dedup')
+    it('does NOT dedupe once the test state has been reset', () => {
+      const { cypress, log, store } = createCypress()
       const err = () => new Error('same message')
 
       errUtils.logError(cypress, 'error', err(), true)
       errUtils.logError(cypress, 'error', err(), true)
-      errUtils.resetUncaughtErrorLogState()
+      // cy.reset() wipes Cypress.state before each test
+      delete store.uncaughtErrorLog
       errUtils.logError(cypress, 'error', err(), true)
       errUtils.logError(cypress, 'error', err(), true)
 
