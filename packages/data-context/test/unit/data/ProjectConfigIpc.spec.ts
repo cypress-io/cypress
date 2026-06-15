@@ -223,6 +223,11 @@ describe('ProjectConfigIpc', () => {
                 }))
               }
 
+              // the marker require_async_child uses to strip the loader from NODE_OPTIONS
+              expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining([
+                expect.stringMatching(/^--tsxLoaderOptions=--(import|loader) ".*cypress\/node_modules\/tsx\/dist\/loader.mjs"$/),
+              ]), expect.any(Object))
+
               if (project.includes('config-with-ts-module') || project.includes('config-with-module-resolution-bundler')) {
                 // these projects have typescript installed and have a tsconfig, so the TSX_TSCONFIG_PATH should be set to the project path
                 expect(childProcess.fork).toHaveBeenCalledWith(expect.any(String), expect.any(Array), expect.objectContaining({
