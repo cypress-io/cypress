@@ -17,6 +17,8 @@ describe('e2e electron browser deprecation', () => {
       const { stdout } = await exec()
 
       expect(stdout).to.include(DEPRECATION_MESSAGE)
+      // the Run Starting "Browser:" line is also marked as deprecated
+      expect(stdout).to.include('(deprecated)')
     },
   })
 
@@ -29,6 +31,7 @@ describe('e2e electron browser deprecation', () => {
       const { stdout } = await exec()
 
       expect(stdout).not.to.include(DEPRECATION_MESSAGE)
+      expect(stdout).not.to.include('(deprecated)')
     },
   })
 })

@@ -8,7 +8,10 @@ export const DEFAULT_BROWSERS = ['electron', 'chrome', 'chrome-for-testing', 'fi
 
 export const pathUpToProjectName = Fixtures.projectPath('')
 
-export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(\w+\))?(\s+)/
+// The trailing `((?:\s\(\w+\))*)` group consumes any parenthetical markers
+// appended after the version — e.g. `(headless)` and/or `(deprecated)` — so
+// the whole browser segment normalizes to a single placeholder.
+export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)((?:\s\(\w+\))*)(\s+)/
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 // The Electron browser deprecation warning is printed for every run-mode run

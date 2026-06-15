@@ -71,6 +71,7 @@ function formatBrowser (browser: Browser) {
     browser.displayName,
     browser.majorVersion,
     browser.isHeadless && gray('(headless)'),
+    isDeprecatedBrowser(browser) && color('(deprecated)', 'yellow'),
   ]).join(' ')
 }
 
