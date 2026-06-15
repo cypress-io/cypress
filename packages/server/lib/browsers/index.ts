@@ -6,7 +6,7 @@ import * as errors from '../errors'
 import { exec } from 'child_process'
 import util from 'util'
 import os from 'os'
-import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
+import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, isDeprecatedBrowser } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
@@ -194,6 +194,13 @@ const browsers = {
     const browserLauncher = await getBrowserLauncher(browser, options.browsers)
 
     if (!options.url) throw new Error('Missing url in browsers.open')
+
+    // Surface the Electron deprecation when launching in open mode. Run mode
+    // emits this alongside the "Run Starting" header (see displayRunStarting),
+    // so we gate on `!isTextTerminal` to avoid printing it twice.
+    if (!options.isTextTerminal && isDeprecatedBrowser(browser)) {
+      errors.warning('BROWSER_ELECTRON_DEPRECATED')
+    }
 
     debug('opening browser %o', browser)
 

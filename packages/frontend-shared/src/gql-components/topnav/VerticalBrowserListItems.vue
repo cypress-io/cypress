@@ -21,22 +21,24 @@
         alt=""
       />
       <div class="grow">
-        <button
-          class="box-border font-medium focus:outline-none text-left"
-          :class="{
-            'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
-            'text-jade-700': browser.isSelected,
-            'text-gray-500': browser.disabled || !browser.isVersionSupported
-          }"
-        >
-          {{ browser.displayName }}
-        </button>
-        <Badge
-          v-if="browser.isDeprecated"
-          :label="t('topNav.deprecated')"
-          status="warning"
-          data-cy="deprecated-browser-badge"
-        />
+        <div class="flex items-center">
+          <button
+            class="box-border font-medium focus:outline-none text-left whitespace-nowrap"
+            :class="{
+              'text-indigo-500 group-hover:text-indigo-700': !browser.isSelected && !browser.disabled && browser.isVersionSupported,
+              'text-jade-700': browser.isSelected,
+              'text-gray-500': browser.disabled || !browser.isVersionSupported
+            }"
+          >
+            {{ browser.displayName }}
+          </button>
+          <Badge
+            v-if="browser.isDeprecated"
+            :label="t('topNav.deprecated')"
+            status="warning"
+            data-cy="deprecated-browser-badge"
+          />
+        </div>
         <div
           class="font-normal mr-[20px] text-gray-500 text-[14px] filter whitespace-nowrap group-focus-within:mix-blend-luminosity
           group-hover:mix-blend-luminosity

@@ -52,6 +52,7 @@
             color="dark"
             placement="top"
             popper-class="max-w-sm"
+            :popper-triggers="['hover']"
           >
             <DeprecatedRibbon />
             <template #popper>
