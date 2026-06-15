@@ -91,6 +91,15 @@ const isCypressErr = (err: Error): boolean => {
 }
 
 const isSpecError = (spec, err) => {
+  // Errors whose stack was synthesized from an `error` event (rather than a
+  // real thrown Error) must not be attributed to the spec. Browser-generated
+  // errors like "ResizeObserver loop limit exceeded" arrive with no Error
+  // object, so we fabricate a single-frame stack from the event's filename. In
+  // headless mode that filename is the runner URL, which embeds the spec path
+  // as a query param (e.g. `.../runner?file=<spec.relative>`), causing a false
+  // positive here and bypassing the user's `uncaught:exception` handler. See #22113.
+  if (err.hasSynthesizedStack) return false
+
   return _.includes(err.stack, spec.relative)
 }
 
@@ -541,11 +550,18 @@ const convertErrorEventPropertiesToObject = (args) => {
   message = _.isString(err) ? err : message
   const stack = getStackFromErrArgs({ filename, lineno, colno })
 
-  return makeErrFromObj({
+  const error: any = makeErrFromObj({
     name: 'Error',
     message,
     stack,
   })
+
+  // Flag that this error's stack was synthesized from the error event's
+  // filename/lineno/colno rather than a real thrown Error, so frame
+  // classification (see `isSpecError`) doesn't misattribute it to the spec.
+  error.hasSynthesizedStack = true
+
+  return error
 }
 
 interface ErrorFromErrorEvent {

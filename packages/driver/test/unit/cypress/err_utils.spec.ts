@@ -64,4 +64,65 @@ describe('err_utils', () => {
       })
     }
   })
+
+  describe('isSpecError', () => {
+    const spec = { relative: 'cypress/e2e/foo.cy.ts' }
+
+    it('returns true when the error stack contains the spec path', () => {
+      const err = new Error('boom')
+
+      err.stack = 'Error: boom\n    at fn (cypress/e2e/foo.cy.ts:1:1)'
+
+      expect(errUtils.isSpecError(spec, err)).toBe(true)
+    })
+
+    it('returns false when the error stack does not contain the spec path', () => {
+      const err = new Error('boom')
+
+      err.stack = 'Error: boom\n    at fn (app.js:1:1)'
+
+      expect(errUtils.isSpecError(spec, err)).toBe(false)
+    })
+
+    it('returns false for a synthesized stack even when it contains the spec path', () => {
+      // simulates a browser-generated error (e.g. ResizeObserver) in headless
+      // mode whose synthesized "stack" is the runner URL embedding the spec path
+      const err: any = new Error('ResizeObserver loop limit exceeded')
+
+      err.stack = '  at <unknown> (http://localhost:3001/__/#/specs/runner?file=cypress/e2e/foo.cy.ts:0:0)'
+      err.hasSynthesizedStack = true
+
+      expect(errUtils.isSpecError(spec, err)).toBe(false)
+    })
+  })
+
+  describe('errorFromUncaughtEvent', () => {
+    it('flags errors synthesized from an error event without an error object', () => {
+      // ResizeObserver loop errors fire an `error` event with no `error` object
+      const { err } = errUtils.errorFromUncaughtEvent('error', {
+        message: 'ResizeObserver loop limit exceeded',
+        filename: 'http://localhost:3001/__/#/specs/runner?file=cypress/e2e/foo.cy.ts',
+        lineno: 0,
+        colno: 0,
+        error: null,
+      }) as { err: any }
+
+      expect(err.hasSynthesizedStack).toBe(true)
+      expect(errUtils.isSpecError({ relative: 'cypress/e2e/foo.cy.ts' }, err)).toBe(false)
+    })
+
+    it('does not flag errors that carry a real error object', () => {
+      const realError = new Error('real boom')
+
+      realError.stack = 'Error: real boom\n    at fn (cypress/e2e/foo.cy.ts:1:1)'
+
+      const { err } = errUtils.errorFromUncaughtEvent('error', {
+        message: 'real boom',
+        error: realError,
+      }) as { err: any }
+
+      expect(err.hasSynthesizedStack).toBeUndefined()
+      expect(errUtils.isSpecError({ relative: 'cypress/e2e/foo.cy.ts' }, err)).toBe(true)
+    })
+  })
 })
