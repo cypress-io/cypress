@@ -155,7 +155,7 @@ export class WebKitAutomation {
         // single controller cannot be restarted to record a second spec. Instead of re-using the
         // controller, WebKit recycles the tab per spec and creates a fresh recording each time (see
         // run.ts), so this should never be reached. It remains as a defensive guard.
-        throw new Error('Cannot restart WebKit video - WebKit cannot record video on multiple specs in single-tab mode.')
+        throw new Error('Cannot restart WebKit video controller - its recording is tied to the page. WebKit records each spec to its own video by recreating the tab instead.')
       },
       postProcessFfmpegOptions: {
         // WebKit seems to record at the highest possible frame rate, so filter out duplicate frames before compressing
