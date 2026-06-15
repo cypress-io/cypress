@@ -499,7 +499,16 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     return currentSetScreenshotMetadata(data)
   }
 
-  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
+  // WebKit records video via Playwright, which writes one file per page and only finalizes it
+  // when the page closes. Single-tab mode reuses a single page across specs (navigating it in
+  // place), so the page is never closed between specs and only the first spec's video is ever
+  // saved (https://github.com/cypress-io/cypress/issues/23815). When video is enabled we instead
+  // recycle the tab per spec via the standard new-tab path (connectToNewSpec), which gives each
+  // spec its own page/video while still reusing the browser and dev server. With video disabled,
+  // the faster in-place navigation below is kept since it works fine for WebKit.
+  const isWebKitRecordingVideo = browser.family === 'webkit' && !!options.videoRecording
+
+  if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser && !isWebKitRecordingVideo) {
     // reset browser state to match default behavior when opening/closing a new tab
     const resetBrowserStateStartedAt = Date.now()
 
@@ -995,7 +1004,11 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
     telemetry.startSpan({ name: 'video:capture' })
 
-    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording) {
+    // WebKit cannot re-use a videoRecording across specs in single-tab mode - its controller
+    // records to a page-scoped Playwright video that is finalized on page close, so restarting it
+    // is not possible (https://github.com/cypress-io/cypress/issues/23815). Instead, WebKit recycles
+    // the tab per spec (see waitForBrowserToConnect), so each spec creates a fresh videoRecording.
+    if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording && browser.family !== 'webkit') {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
       return await startVideoRecording({ ...opts, previous: project.videoRecording })

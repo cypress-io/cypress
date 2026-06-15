@@ -151,6 +151,10 @@ export class WebKitAutomation {
         throw new Error('writeVideoFrame called, but WebKit does not support streaming frame data.')
       },
       async restart () {
+        // WebKit records to a page-scoped Playwright video that is finalized on page close, so a
+        // single controller cannot be restarted to record a second spec. Instead of re-using the
+        // controller, WebKit recycles the tab per spec and creates a fresh recording each time (see
+        // run.ts), so this should never be reached. It remains as a defensive guard.
         throw new Error('Cannot restart WebKit video - WebKit cannot record video on multiple specs in single-tab mode.')
       },
       postProcessFfmpegOptions: {
