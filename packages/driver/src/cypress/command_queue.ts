@@ -13,6 +13,7 @@ import type { $Cy } from './cy'
 import type { IStability } from '../cy/stability'
 
 const debugErrors = Debug('cypress:driver:errors')
+const debug = Debug('cypress:driver:command_queue')
 
 const __stackReplacementMarker = (fn, args) => {
   return fn(...args)
@@ -222,6 +223,10 @@ export class CommandQueue extends Queue<$Command> {
     // and forcibly move the index needle to the
     // end in case we have after / afterEach hooks
     // which need to run
+    if (this.index < this.length) {
+      debug('cleanup called with %d of %d command(s) not yet run: %o', this.length - this.index, this.length, this.names().slice(this.index))
+    }
+
     this.index = this.length
 
     // Mark the state as stable, so that any cypress commands can be re-queued during the after / afterEach hooks

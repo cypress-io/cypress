@@ -111,9 +111,8 @@ export class RemoteStates {
   }
 
   private _stateFromUrl (url: string): RemoteState {
-    const remoteOrigin = origin(url)
-    const remoteProps = parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
-
+    // non fully-qualified urls (e.g. '<root>' or a local file path) have no
+    // origin to parse, so short-circuit before reaching the WHATWG URL parser
     if ((url === '<root>') || !fullyQualifiedRe.test(url)) {
       return {
         origin: `http://${DEFAULT_DOMAIN_NAME}:${this.ports.server}`,
@@ -123,6 +122,9 @@ export class RemoteStates {
         props: null,
       }
     }
+
+    const remoteOrigin = origin(url)
+    const remoteProps = parseUrlIntoHostProtocolDomainTldPort(remoteOrigin)
 
     return {
       origin: remoteOrigin,

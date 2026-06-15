@@ -1,9 +1,13 @@
 import _ from 'lodash'
+import Debug from 'debug'
 import $dom from '../dom'
 import $utils from './utils'
 import $errUtils from './error_utils'
 import type { $Cy } from './cy'
 import { isRunnerAbleToCommunicateWithAut } from '../util/commandAUTCommunication'
+
+// verbose since subject validation runs on every retry of a query
+const debugVerbose = Debug('cypress-verbose:driver:ensure')
 
 // TODO: in 4.0 we should accept a new validation type called 'elements'
 // which accepts an array of elements (and they all have to be elements!!)
@@ -162,6 +166,8 @@ const isAttached = (subject, name: string, cy: $Cy, onFail?) => {
     const current = cy.state('current')
 
     const subjectChain = cy.subjectChain(current.get('chainerId'))
+
+    debugVerbose('subject %s is detached after `%s`', $dom.stringify(subject), name)
 
     $errUtils.throwErrByPath('subject.detached_after_command', {
       onFail,

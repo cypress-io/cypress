@@ -46,7 +46,7 @@
     "postinstall": "node ./scripts/run-postInstall.js",
     "lint": "lerna run lint --no-bail --concurrency 2",
     "lint:base": "lerna run lint --no-bail",
-    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=@cypress/{grep,mount-utils,schematic,puppeteer} -- --fix",
+    "lint:fix": "lerna run lint --no-bail --concurrency 2 --scope=@cypress/{grep,mount-utils,schematic,puppeteer,react,vue,svelte} -- --fix",
     "npm-release": "node scripts/npm-release.js",
     "pack-ci": "./scripts/pack-ci.sh",
     "prepare": "husky install",
@@ -253,7 +253,16 @@
     ]
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "npm/vue/**/*.{js,jsx,ts,tsx,vue}": "yarn workspace @cypress/vue eslint --fix",
+    "npm/svelte/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/svelte eslint --fix",
+    "npm/react/**/*.{js,jsx,ts,tsx}": "yarn workspace @cypress/react eslint --fix",
+    "npm/!(vue|svelte|react)/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "cli/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "packages/**/*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
+    "scripts/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
+    "system-tests/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
+    "tooling/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
+    "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
     ".circleci/*.yml": "circleci config validate"
   },
   "resolutions": {

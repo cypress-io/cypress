@@ -49,6 +49,10 @@ The changelog should include anything that was merged into the `develop` branch 
     - For other issues: "Addresses [#12]([https://github.com/cypress-io/cypress/issues/12](https://github.com/cypress-io/cypress/issues/1234))."
     - When no issues, but PR: "Addressed in [#12]([https://github.com/cypress-io/cypress/issues/12](https://github.com/cypress-io/cypress/issues/1234))."
     - When multiple issues: "Fixes [#12]([https://github.com/cypress-io/cypress/issues/12](https://github.com/cypress-io/cypress/issues/1234)), [#13]([https://github.com/cypress-io/cypress/issues/13](https://github.com/cypress-io/cypress/issues/1234)) and [#14]([https://github.com/cypress-io/cypress/issues/14](https://github.com/cypress-io/cypress/issues/1234))."
+10. When a changelog item references a Cypress command, plugin event, or configuration option, link the first mention to its documentation for consistency with existing entries. Either link form is acceptable: the `https://on.cypress.io/<slug>` short link or an absolute `https://docs.cypress.io/<path>` URL.
+    - _Example (`on.cypress.io`):_ `` [`cy.visit()`](https://on.cypress.io/visit) ``, `` [`before:spec`](https://on.cypress.io/before-spec-api) ``.
+    - _Example (`docs.cypress.io`):_ `` [`before:spec`](https://docs.cypress.io/api/plugins/before-spec-api) ``, `` [`numTestsKeptInMemory`](https://docs.cypress.io/app/references/configuration#Global) ``.
+11. If a change is only observable under a specific run context (e.g. `cypress run` vs. `cypress open`, or behind an experimental flag), state which context is affected so users can tell whether the change applies to them.
 
 ## Formatting
 
