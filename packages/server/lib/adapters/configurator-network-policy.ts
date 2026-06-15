@@ -20,11 +20,6 @@ export class ConfiguratorNetworkPolicyAdapter implements ForNetworkPolicyRegistr
     return this.registry.getPolicies()
   }
 
-  /** Exposed for policy registry access and unit tests. */
-  getRegistry (): NetworkPolicyRegistry {
-    return this.registry
-  }
-
   runPolicies (options: RunPoliciesOptions): Promise<RunPoliciesResult> {
     return this.registry.runPolicies(options)
   }
