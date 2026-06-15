@@ -177,6 +177,57 @@ describe('Web Sockets', () => {
       })
     })
 
+    // a WebSocket upgrade hijacks its underlying socket, so it must never be
+    // served from a keep-alive pool. this exercises sequential connections to
+    // the same host to ensure a stale pooled socket is never reused (which made
+    // the browser report the connection closed before the handshake response).
+    // https://github.com/cypress-io/cypress/issues/7664
+    it('proxies sequential ws connections to the same host without reusing a pooled socket', function (done) {
+      const agent = new httpsProxyAgent(`http://localhost:${cyPort}`)
+
+      this.server.remoteStates.set(`http://localhost:${wsPort}`)
+
+      this.ws.on('connection', (c) => {
+        return c.on('message', (msg) => {
+          return c.send(`response:${msg}`)
+        })
+      })
+
+      const connectAndEcho = (payload) => {
+        return new Promise((resolve, reject) => {
+          const client = new ws(`ws://localhost:${wsPort}`, {
+            agent,
+          })
+
+          client.on('error', reject)
+          client.on('message', (data) => {
+            client.close()
+
+            resolve(data)
+          })
+
+          client.on('open', () => {
+            return client.send(payload)
+          })
+        })
+      }
+
+      // open, use, and close one connection, then open a second one. the second
+      // connection must succeed rather than reuse the now-closed first socket.
+      connectAndEcho('first')
+      .then((data) => {
+        expect(data).to.eq('response:first')
+
+        return connectAndEcho('second')
+      })
+      .then((data) => {
+        expect(data).to.eq('response:second')
+
+        return done()
+      })
+      .catch(done)
+    })
+
     it('proxies through subdomain by using host header', function (done) {
       // we specifically only allow remote connections
       // to ws.foobar.com since that is where the websocket

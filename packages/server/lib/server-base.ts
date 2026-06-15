@@ -16,7 +16,7 @@ import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { getRoutesForRequest } from '@packages/network-interception'
 import { DriverInterceptRegistrationAdapter, NetStubbingState } from '@packages/net-stubbing'
 import { get as fixtureGet } from './fixture'
-import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
+import { websocketsAgent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
 import type { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
@@ -645,7 +645,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         headers: {
           'x-cypress-forwarded-from-cypress': true,
         },
-        agent,
+        // a WebSocket upgrade hijacks its socket for the lifetime of the
+        // connection, so it must never be pulled from a keep-alive pool - a
+        // stale pooled socket makes the browser report that the connection
+        // closed before the handshake response. https://github.com/cypress-io/cypress/issues/7664
+        agent: websocketsAgent,
       }, onProxyErr)
     }
 

@@ -296,10 +296,10 @@ class HttpAgent extends http.Agent {
   httpsAgent: https.Agent
 
   constructor (opts: http.AgentOptions = {}) {
-    opts.keepAlive = true
+    opts.keepAlive = opts.keepAlive ?? true
     super(opts)
     // we will need this if they wish to make http requests over an https proxy
-    this.httpsAgent = new https.Agent({ keepAlive: true })
+    this.httpsAgent = new https.Agent({ keepAlive: opts.keepAlive })
   }
 
   addRequest (req: http.ClientRequest, options: http.RequestOptions) {
@@ -354,7 +354,7 @@ class HttpAgent extends http.Agent {
 
 class HttpsAgent extends https.Agent {
   constructor (opts: https.AgentOptions = {}) {
-    opts.keepAlive = true
+    opts.keepAlive = opts.keepAlive ?? true
     super(opts)
   }
 
@@ -493,6 +493,15 @@ const strictAgent = new CombinedAgent({}, {
   rejectUnauthorized: true,
 })
 
+// A WebSocket upgrade permanently hijacks its underlying TCP socket, so it must
+// never be served out of a keep-alive connection pool. Reusing a pooled socket -
+// one the upstream server or an idle timeout may have already closed - causes the
+// browser to see the connection close before the handshake response is received.
+// This agent disables keep-alive so every proxied upgrade gets a fresh socket while
+// still retaining the upstream-proxy and TLS handling of the shared `agent`.
+// See https://github.com/cypress-io/cypress/issues/7664
+const websocketsAgent = new CombinedAgent({ keepAlive: false }, { keepAlive: false })
+
 export default agent
 
-export { strictAgent }
+export { strictAgent, websocketsAgent }

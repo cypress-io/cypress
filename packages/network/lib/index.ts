@@ -1,4 +1,4 @@
-import agent, { strictAgent } from './agent'
+import agent, { strictAgent, websocketsAgent } from './agent'
 import * as blocked from './blocked'
 import * as connect from './connect'
 import * as httpUtils from './http-utils'
@@ -11,6 +11,7 @@ export {
   httpUtils,
   clientCertificates,
   strictAgent,
+  websocketsAgent,
 }
 
 export { allowDestroy } from './allow-destroy'
