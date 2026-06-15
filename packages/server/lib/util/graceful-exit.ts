@@ -161,7 +161,7 @@ export class GracefulExit {
       finalExitCode = await this.flushSteps(code)
       this.debug('steps flushed successfully', code, finalExitCode)
     } catch (error) {
-     this.debug('Error flushing steps: ', error)
+      this.debug('Error flushing steps: ', error)
       finalExitCode = 1
     } finally {
       this.processTeardown = null

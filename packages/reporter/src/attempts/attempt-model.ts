@@ -1,17 +1,22 @@
 import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
 
-import Agent, { AgentProps } from '../agents/agent-model'
-import Command, { CommandProps } from '../commands/command-model'
+import type { AgentProps } from '../agents/agent-model'
+import Agent from '../agents/agent-model'
+import type { CommandProps } from '../commands/command-model'
+import Command from '../commands/command-model'
 import Err from '../errors/err-model'
-import Route, { RouteProps } from '../routes/route-model'
+import type { RouteProps } from '../routes/route-model'
+import Route from '../routes/route-model'
 import type Test from '../test/test-model'
 import type { UpdatableTestProps, TestProps } from '../test/test-model'
 import type { TestState, FileDetails } from '@packages/types'
-import Hook, { HookName } from '../hooks/hook-model'
+import type { HookName } from '../hooks/hook-model'
+import Hook from '../hooks/hook-model'
 import type { LogProps } from '../runnables/runnables-store'
 import type Log from '../instruments/instrument-model'
-import Session, { SessionProps } from '../sessions/sessions-model'
+import type { SessionProps } from '../sessions/sessions-model'
+import Session from '../sessions/sessions-model'
 
 export default class Attempt {
   agents: Agent[] = []

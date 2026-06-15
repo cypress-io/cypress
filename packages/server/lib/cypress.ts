@@ -75,9 +75,9 @@ async function exitErr (err: unknown, posixExitCodes?: boolean) {
   if (isCypressError(err)) {
     if (
       posixExitCodes && (
-      err.type === 'CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK' ||
+        err.type === 'CLOUD_CANNOT_PROCEED_IN_PARALLEL_NETWORK' ||
       err.type === 'CLOUD_CANNOT_PROCEED_IN_SERIAL_NETWORK'
-    )) {
+      )) {
       return GracefulExit.exitGracefully(112)
     }
   }
@@ -241,7 +241,9 @@ export = {
 
           if (!this.isCurrentlyRunningElectron()) {
             return GracefulExit.exitGracefully(code)
-          } else if (pong !== options.ping) {
+          }
+
+          if (pong !== options.ping) {
             return GracefulExit.exitGracefully(1)
           }
 
@@ -265,10 +267,10 @@ export = {
             isCypressRunResult(results) &&
             (results.runs.filter((run) => run.skippedSpec).length)
           ) {
-              // eslint-disable-next-line no-console
-              console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
+            // eslint-disable-next-line no-console
+            console.log(require('chalk').magenta('\n  Exiting with non-zero exit code because the run was canceled.'))
 
-              return GracefulExit.exitGracefully(1)
+            return GracefulExit.exitGracefully(1)
           }
 
           if (isCypressRunResult(results) || isMinimalRunResult(results)) {
@@ -277,9 +279,9 @@ export = {
             // them to 0/1.
             if (options.posixExitCodes && results.totalFailed !== 112) {
               return GracefulExit.exitGracefully(results.totalFailed ? 1 : 0)
-            } else {
-              return GracefulExit.exitGracefully(results.totalFailed ?? 0)
             }
+
+            return GracefulExit.exitGracefully(results.totalFailed ?? 0)
           }
 
           if (typeof results === 'number') {

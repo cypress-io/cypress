@@ -1,6 +1,8 @@
 import { gql, useMutation, useQuery } from '@urql/vue'
-import { Ref, computed, onMounted, onUnmounted } from 'vue'
-import { RunsDocument, RunsContainer_FetchNewerRunsDocument, RunCardFragment } from '../generated/graphql'
+import type { Ref } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
+import type { RunCardFragment } from '../generated/graphql'
+import { RunsDocument, RunsContainer_FetchNewerRunsDocument } from '../generated/graphql'
 import type { RunsComposable } from './RunsComposable'
 
 gql`

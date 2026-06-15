@@ -1,4 +1,5 @@
-import { ErrorWrapperSource, stackUtils } from '@packages/errors'
+import type { ErrorWrapperSource } from '@packages/errors'
+import { stackUtils } from '@packages/errors'
 import path from 'path'
 import _ from 'lodash'
 import { codeFrameColumns } from '@babel/code-frame'

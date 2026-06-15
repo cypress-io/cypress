@@ -1,6 +1,7 @@
 import debug from 'debug'
 import path from 'path'
-import { MappedPosition, RawSourceMap, SourceMapConsumer } from 'source-map-js'
+import type { MappedPosition, RawSourceMap } from 'source-map-js'
+import { SourceMapConsumer } from 'source-map-js'
 import type {
   MapAndSourceContent,
   TranspileCache,

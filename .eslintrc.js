@@ -76,9 +76,19 @@ module.exports = {
         '**/*.spec.*',
         '**/cypress/**',
         '**/__snapshots__/**',
+        '**/*.d.ts',
       ],
       rules: {
         'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+        '@typescript-eslint/consistent-type-imports': [
+          'error',
+          {
+            prefer: 'type-imports',
+            fixStyle: 'separate-type-imports',
+            disallowTypeAnnotations: false,
+          },
+        ],
+        '@typescript-eslint/no-import-type-side-effects': 'error',
       },
     },
   ],

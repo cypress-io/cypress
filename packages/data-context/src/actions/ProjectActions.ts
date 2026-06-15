@@ -1,5 +1,6 @@
 import type { MutationSetProjectPreferencesInGlobalCacheArgs } from '../gen/nxs.gen'
-import { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts, RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
+import type { InitializeProjectOptions, FoundBrowser, OpenProjectLaunchOptions, Preferences, TestingType, ReceivedCypressOptions, AddProject, FullConfig, AllowedState, SpecWithRelativeRoot, OpenProjectLaunchOpts } from '@packages/types'
+import { RUN_ALL_SPECS, RUN_ALL_SPECS_KEY } from '@packages/types'
 import type { EventEmitter } from 'events'
 import execa from 'execa'
 import path from 'path'

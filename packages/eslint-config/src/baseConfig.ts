@@ -1,5 +1,6 @@
 import js from '@eslint/js'
-import { InfiniteDepthConfigWithExtends, configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
+import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
+import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
 
 import cy from 'eslint-plugin-cypress'
 
@@ -283,9 +284,19 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
       '**/*.spec.*',
       '**/cypress/**',
       '**/__snapshots__/**',
+      '**/*.d.ts',
     ],
     rules: {
       'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'separate-type-imports',
+          disallowTypeAnnotations: false,
+        },
+      ],
+      '@typescript-eslint/no-import-type-side-effects': 'error',
     },
   },
 ]

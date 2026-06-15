@@ -13,9 +13,9 @@ export const addNewlineAtEveryNChar = (str: string, n: number) => {
   if (printableString.length !== str.length) {
     if (printableString.length <= n) {
       return str
-    } else {
-      str = printableString
     }
+
+    str = printableString
   }
 
   while (idx < str.length) {

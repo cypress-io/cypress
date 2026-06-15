@@ -272,7 +272,7 @@ const setDate = function (obj: RunnablePayload, _runnables: Record<string, Inter
   return []
 }
 
-const orNull = function <T>(prop: T | null | undefined): T | null {
+const orNull = function <T> (prop: T | null | undefined): T | null {
   if (prop == null) return null
 
   return prop

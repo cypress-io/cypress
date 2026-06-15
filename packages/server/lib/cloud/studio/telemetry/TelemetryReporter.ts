@@ -1,7 +1,8 @@
 import Debug from 'debug'
+import type {
+  TelemetryGroupName } from './TelemetryManager'
 import {
   TELEMETRY_GROUPS,
-  TelemetryGroupName,
   telemetryManager,
 } from './TelemetryManager'
 import type { CloudDataSource } from '@packages/data-context/src/sources/CloudDataSource'

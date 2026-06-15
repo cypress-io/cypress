@@ -4,8 +4,7 @@ import * as util from '../util'
 import { RunPlugins } from './run_plugins'
 import type { ConfigFileExport, DevServerInfo, PluginChildIpc, SetupNodeEventsFn } from './types'
 import { getError } from '@packages/errors'
-import type { TestingType } from '@packages/types'
-import type { TransformError } from '@packages/types'
+import type { TestingType, TransformError } from '@packages/types'
 
 const debug = debugLib(`cypress:lifecycle:child:run_require_async_child:${process.pid}`)
 

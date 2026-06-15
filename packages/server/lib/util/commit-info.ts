@@ -121,12 +121,12 @@ function getGitValue (
 
   // Execute git command
   return Promise.resolve(execa('git', gitCmd, { cwd }))
-    .then((result) => {
-      const value = result.stdout.trim()
+  .then((result) => {
+    const value = result.stdout.trim()
 
-      return transform ? transform(value) : value
-    })
-    .catch(() => null)
+    return transform ? transform(value) : value
+  })
+  .catch(() => null)
 }
 
 function getRemoteOrigin (folder?: string): Promise<string | null> {

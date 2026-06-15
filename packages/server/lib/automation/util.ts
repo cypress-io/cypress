@@ -14,8 +14,9 @@ export type CyCookieFilter = chrome.cookies.GetAllDetails
 
 export const cookieMatches = (cookie: CyCookie | playwright.Cookie, filter?: CyCookieFilter, options?: { strictDomain: boolean }) => {
   if (filter?.domain) {
-    if (options?.strictDomain ? filter?.domain !== cookie.domain : !domainMatch(filter?.domain, cookie.domain))
-    return false
+    if (options?.strictDomain ? filter?.domain !== cookie.domain : !domainMatch(filter?.domain, cookie.domain)) {
+      return false
+    }
   }
 
   if (filter?.path && !pathMatch(filter.path, cookie.path)) {

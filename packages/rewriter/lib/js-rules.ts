@@ -1,5 +1,6 @@
+import type {
+  Visitor } from 'ast-types'
 import {
-  Visitor,
   namedTypes as n,
   builders as b,
 } from 'ast-types'

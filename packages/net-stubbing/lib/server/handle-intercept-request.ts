@@ -3,8 +3,9 @@ import url from 'url'
 import { concatStream } from '@packages/network'
 import type { RequestMiddleware } from '@packages/proxy'
 import type { NetworkInterceptionCore } from '@packages/network-interception'
+import type {
+  CyHttpMessages } from '../types'
 import {
-  CyHttpMessages,
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
 import {

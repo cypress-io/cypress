@@ -8,13 +8,17 @@ import _ from 'lodash'
 
 import 'server-destroy'
 
-import { AppApiShape, CohortsApiShape, DataEmitterActions, LocalSettingsApiShape, ProjectApiShape } from './actions'
+import type { AppApiShape, CohortsApiShape, LocalSettingsApiShape, ProjectApiShape } from './actions'
+import { DataEmitterActions } from './actions'
 import type { NexusGenAbstractTypeMembers } from './gen/nxs.gen'
 import type { AuthApiShape } from './actions/AuthActions'
 import type { ElectronApiShape } from './actions/ElectronActions'
 import debugLib from 'debug'
-import { CoreDataShape, makeCoreData } from './data/coreDataShape'
+import type { CoreDataShape } from './data/coreDataShape'
+import { makeCoreData } from './data/coreDataShape'
 import { DataActions } from './DataActions'
+import type {
+  BrowserApiShape } from './sources'
 import {
   FileDataSource,
   ProjectDataSource,
@@ -24,7 +28,6 @@ import {
   EnvDataSource,
   HtmlDataSource,
   UtilDataSource,
-  BrowserApiShape,
   RelevantRunsDataSource,
   RelevantRunSpecsDataSource,
   VersionsDataSource,

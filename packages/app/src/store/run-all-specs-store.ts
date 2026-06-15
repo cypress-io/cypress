@@ -4,7 +4,8 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { RunAllSpecsDataDocument, RunAllSpecsDocument } from '../generated/graphql'
-import { getSeparator, SpecTreeNode, UseCollapsibleTreeNode } from '../specs/tree/useCollapsibleTree'
+import type { SpecTreeNode, UseCollapsibleTreeNode } from '../specs/tree/useCollapsibleTree'
+import { getSeparator } from '../specs/tree/useCollapsibleTree'
 import { isRunMode } from '@packages/frontend-shared/src/utils/isRunMode'
 
 type ResolvedConfig = Array<{ value: any, from: string, field: string }>

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
-import { TestState } from '../test/test-model'
+import type { TestState } from '../test/test-model'
 import type { IntervalID } from '../lib/types'
 
 import type { StatsStoreStartInfo } from '@packages/types'

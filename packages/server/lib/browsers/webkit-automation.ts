@@ -6,9 +6,9 @@ import os from 'os'
 import type { RunModeVideoApi } from '@packages/types'
 import path from 'path'
 import mime from 'mime'
-import { cookieMatches, CyCookieFilter } from '../automation/util'
+import { cookieMatches } from '../automation/util'
 import utils from './utils'
-import type { CyCookie } from '../automation/util'
+import type { CyCookie, CyCookieFilter } from '../automation/util'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -277,7 +277,7 @@ export class WebKitAutomation {
 
     if (!cookie) {
       cookie = cookies.find((cookie) => {
-          // if unable to match closest via strict domain, then return a cookie that matches the apex domain
+        // if unable to match closest via strict domain, then return a cookie that matches the apex domain
         return cookieMatches(cookie, filter)
       })
 

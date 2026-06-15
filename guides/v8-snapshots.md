@@ -106,7 +106,49 @@ If the build v8 snapshot command is taking a long time to run on Circle CI, the 
 
 ![Update V8 SnapshotCache](https://user-images.githubusercontent.com/4873279/206541239-1afb1d29-4d66-4593-92a7-5a5961a12137.png)
 
-If the build v8 snapshot command fails, you can sometimes see which file is causing the problem via the stack trace. Running the build snapshot command with `DEBUG=*snap*` set will give you more information. Sometimes you can narrow the issue down to a specific file. If this is the case, you can try removing that file from the snapshot cache at `tooling/v8-snapshot/cache/<platform>/snapshot-meta.json`. If this works, check in the changes and the file will get properly updated in the cache during the next automatic update.
+If the build v8 snapshot command fails, you can sometimes see which file is causing the problem via the stack trace. Running the build snapshot command with `DEBUG=*snap*` set will give you more information. Snapshot build failures now print a **diagnostic code** and suggested fix before recovery hints. Sometimes you can narrow the issue down to a specific file. If this is the case, you can try removing that file from the snapshot cache at `tooling/v8-snapshot/cache/<platform>/snapshot-meta.json`. If this works, check in the changes and the file will get properly updated in the cache during the next automatic update.
+
+#### Common source-code failures
+
+Some TypeScript import patterns break the snapshot bundler (`esbuild-snap`) and cause snapshot generation to fail. ESLint rules in `packages/eslint-config` catch most of these before a snapshot build runs (scoped to `packages/**/src`, `packages/**/lib`, and `packages/server`, excluding tests).
+
+**Mixed inline type + value imports** (`MIXED_INLINE_TYPE_IMPORT`)
+
+The snapshot bundler cannot handle inline `type` specifiers in a value import:
+
+```typescript
+// Bad — breaks snapshot bundling
+import { Foo, type Bar } from 'baz'
+
+// Good — use separate top-level type imports
+import type { Bar } from 'baz'
+import { Foo } from 'baz'
+```
+
+ESLint rules: `import-x/consistent-type-specifier-style` and `@typescript-eslint/consistent-type-imports`. Run `eslint --fix` to auto-correct.
+
+**Type-only imports used as values** (`TYPE_ONLY_AS_VALUE`)
+
+Importing a type-only binding (or a type-only namespace) and using it at runtime breaks snapshot bundling:
+
+```typescript
+// Bad — MyType is type-only but used at runtime
+import { MyType } from './types'
+const x: MyType = ...
+
+// Good
+import type { MyType } from './types'
+```
+
+ESLint rules: `@typescript-eslint/consistent-type-imports` and `@typescript-eslint/no-import-type-side-effects`.
+
+**Other diagnostic codes**
+
+| Code | Meaning |
+|------|---------|
+| `SNAPSHOT_CACHE_VIOLATION` | Module accesses forbidden globals during snapshot init (e.g. `Buffer`, Node core modules) — usually needs deferral |
+| `SNAPSHOT_REWRITE_FAILURE` | Module code cannot be rewritten for snapshot bundling — usually needs norewrite |
+| `UNKNOWN` | Unclassified error — run with `DEBUG=cypress:snapgen:*` and see [If a Full Snapshot Rebuild Still Fails](#if-a-full-snapshot-rebuild-still-fails) below |
 
 ### If a Full Snapshot Rebuild Still Fails
 
