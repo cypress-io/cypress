@@ -6,7 +6,7 @@ describe('lib/adapters/configurator-network-policy', () => {
   it('delegates add and getPolicies to the underlying registry', () => {
     const adapter = new ConfiguratorNetworkPolicyAdapter()
     const policy = createBlockedHosts({
-      blockHosts: ['*.blocked.com'],
+      config: { blockHosts: ['*.blocked.com'] },
       matchesBlockedHost: () => 'blocked.com',
     })
 

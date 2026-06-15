@@ -26,7 +26,7 @@ export function registerDefaultNetworkPolicies (
   deps: RegisterDefaultNetworkPoliciesDeps,
 ): void {
   policies.add(createBlockedHosts({
-    blockHosts: config.blockHosts,
+    config,
     matchesBlockedHost: deps.matchesBlockedHost,
   }))
 

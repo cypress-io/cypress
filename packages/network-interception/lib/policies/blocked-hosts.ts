@@ -1,7 +1,11 @@
 import type { NetworkPolicy } from './types'
 
 export type BlockedHostsConfig = {
-  blockHosts?: string | string[] | null
+  /**
+   * Live config object shared with the proxy runtime.
+   * `blockHosts` is read at enforcement time, not snapshot at registration.
+   */
+  config: { blockHosts?: string | string[] | null }
   /**
    * Host matcher injected by the composition root (e.g. `blocked.matches` from proxy).
    * Keeps `@packages/network-interception` free of proxy dependencies.
@@ -15,14 +19,18 @@ export function createBlockedHosts (config: BlockedHostsConfig): NetworkPolicy {
     provenance: 'config',
     phases: ['request'],
     when (exchange) {
-      if (!config.blockHosts || !config.matchesBlockedHost || !exchange.url) {
+      const blockHosts = config.config.blockHosts
+
+      if (!blockHosts || !config.matchesBlockedHost || !exchange.url) {
         return false
       }
 
-      return !!config.matchesBlockedHost(exchange.url, config.blockHosts)
+      return !!config.matchesBlockedHost(exchange.url, blockHosts)
     },
     apply (ctx) {
-      const match = config.matchesBlockedHost!(ctx.exchange.url!, config.blockHosts!)
+      const blockHosts = config.config.blockHosts!
+
+      const match = config.matchesBlockedHost!(ctx.exchange.url!, blockHosts)
 
       ctx.state.blockedHostMatch = match
       ctx.end()

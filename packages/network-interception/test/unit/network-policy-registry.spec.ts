@@ -49,7 +49,7 @@ describe('NetworkPolicyRegistry', () => {
     const registry = new NetworkPolicyRegistry()
 
     registry.add(createBlockedHosts({
-      blockHosts: ['*.evil.com'],
+      config: { blockHosts: ['*.evil.com'] },
       matchesBlockedHost: () => 'evil.com',
     }))
 
