@@ -5,7 +5,7 @@ import type {
   StaticResponseWithOptions,
   BackendStaticResponseWithArrayBuffer,
   FixtureOpts,
-} from '@packages/network-interception/types'
+} from '@packages/network-interception'
 import {
   caseInsensitiveHas,
 } from '@packages/net-stubbing/lib/util'
