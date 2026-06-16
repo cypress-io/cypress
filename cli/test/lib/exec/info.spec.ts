@@ -154,11 +154,25 @@ describe('exec info', () => {
     expect(output()).toMatchSnapshot('cypress info with proxy and vars')
   })
 
+  it('redacts proxy credentials', async () => {
+    vi.stubEnv('HTTP_PROXY', 'http://username:password@proxy.example.com:8080')
+    vi.stubEnv('HTTPS_PROXY', 'https://token@secure-proxy.example.com')
+    vi.stubEnv('NO_PROXY', 'localhost,127.0.0.1')
+
+    const output = createStdoutCapture()
+
+    await info.start()
+
+    expect(output()).toMatchSnapshot('cypress redacts proxy credentials')
+  })
+
   it('redacts sensitive cypress variables', async () => {
     vi.stubEnv('CYPRESS_ENV_VAR1', 'my Cypress variable')
     vi.stubEnv('CYPRESS_ENV_VAR2', 'my other Cypress variable')
     vi.stubEnv('CYPRESS_PROJECT_ID', 'abc123') // not sensitive
     vi.stubEnv('CYPRESS_RECORD_KEY', 'really really secret stuff') // should not be printed
+    vi.stubEnv('CYPRESS_AUTH_TOKEN', 'another secret value')
+    vi.stubEnv('CYPRESS_PASSWORD', 'password value')
 
     const output = createStdoutCapture()
 

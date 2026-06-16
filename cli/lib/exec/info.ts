@@ -22,12 +22,41 @@ methods.findProxyEnvironmentVariables = (): any => {
   return _.pick(process.env, ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'])
 }
 
+const proxyUrlCredentialsRe = /^([a-z][a-z\d+.-]*:\/\/)([^@/?#]*@)/i
+const sensitiveVariableNameRe = /KEY|TOKEN|SECRET|PASSWORD|AUTH|CREDENTIAL/i
+
+const redactUrlCredentials = (value: any): any => {
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  try {
+    const url = new URL(value)
+
+    if (!url.username && !url.password) {
+      return value
+    }
+
+    return value.replace(proxyUrlCredentialsRe, '$1<redacted>@')
+  } catch {
+    return value
+  }
+}
+
+const formatProxyVariables = (): any => {
+  const vars = methods.findProxyEnvironmentVariables()
+
+  return _.mapValues(vars, redactUrlCredentials)
+}
+
 const maskSensitiveVariables = (obj: any): any => {
   const masked = { ...obj }
 
-  if (masked.CYPRESS_RECORD_KEY) {
-    masked.CYPRESS_RECORD_KEY = '<redacted>'
-  }
+  Object.keys(masked).forEach((key: string) => {
+    if (sensitiveVariableNameRe.test(key)) {
+      masked[key] = '<redacted>'
+    }
+  })
 
   return masked
 }
@@ -52,7 +81,7 @@ methods.start = async (options: any = {}): Promise<void> => {
   })
 
   console.log()
-  const proxyVars = methods.findProxyEnvironmentVariables()
+  const proxyVars = formatProxyVariables()
 
   if (_.isEmpty(proxyVars)) {
     console.log('Proxy Settings: none detected')
