@@ -48,7 +48,7 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
   try {
     folders = await glob(path.join(projectsRoot, '*'), { absolute: true })
   } catch (err) {
-    debug('could not read projects bundle root %s: %o', projectsRoot, err)
+    debug('skipping project bundle prune; failed to read projects root %s: %o', projectsRoot, err)
 
     return
   }
@@ -97,6 +97,6 @@ export const pruneStaleBundles = async (projectRoot: string): Promise<void> => {
   try {
     await removeStaleBundles(appData.projectsPath(), appData.projectBundlePath(projectRoot))
   } catch (err) {
-    debug('failed to prune stale project bundles: %o', err)
+    debug('skipping project bundle prune: %o', err)
   }
 }
