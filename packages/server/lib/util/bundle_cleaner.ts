@@ -107,9 +107,10 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
   }))
 
   const stale = staleness.filter((folder): folder is string => folder !== null)
-  const toRemove = stale.slice(0, getMaxRemovals())
+  const maxRemovals = getMaxRemovals()
+  const toRemove = stale.slice(0, maxRemovals)
 
-  debug('removing %d of %d stale project bundles', toRemove.length, stale.length)
+  debug('removing %d of %d stale project bundles (max %d per run)', toRemove.length, stale.length, maxRemovals)
 
   // remove in bounded batches so a large backlog cannot spike disk I/O or block
   // the run for too long; any remaining stale bundles are removed on later runs
