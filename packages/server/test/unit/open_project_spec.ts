@@ -5,6 +5,8 @@ import { ProjectBase } from '../../lib/project-base'
 import { openProject } from '../../lib/open_project'
 import preprocessor from '../../lib/plugins/preprocessor'
 import runEvents from '../../lib/plugins/run_events'
+import * as appData from '../../lib/util/app_data'
+import * as bundleCleaner from '../../lib/util/bundle_cleaner'
 import Fixtures from '@tooling/system-tests'
 import delay from 'lodash/delay'
 
@@ -36,9 +38,28 @@ describe('lib/open_project', () => {
     sinon.stub(ProjectBase.prototype, 'getConfig').returns(this.config)
     sinon.stub(ProjectBase.prototype, 'getAutomation').returns(this.automation)
     sinon.stub(preprocessor, 'removeFile')
+    sinon.stub(bundleCleaner, 'removeStaleBundles').resolves()
 
     return Fixtures.scaffoldProject('todos').then(() => {
       return openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
+    })
+  })
+
+  describe('#create', () => {
+    it('prunes stale project bundles, preserving the opened project', function () {
+      expect(bundleCleaner.removeStaleBundles).to.be.calledWith(
+        appData.projectsPath(),
+        appData.projectBundlePath(todosPath),
+      )
+    })
+
+    it('does not fail to open the project if pruning bundles throws', function () {
+      (bundleCleaner.removeStaleBundles as sinon.SinonStub).rejects(new Error('prune failed'))
+
+      return openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
+      .then((result) => {
+        expect(result).to.eq(openProject)
+      })
     })
   })
 
