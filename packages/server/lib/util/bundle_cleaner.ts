@@ -2,6 +2,7 @@ import path from 'path'
 import Debug from 'debug'
 import { fs } from './fs'
 import { globAsync as glob } from './glob'
+import * as appData from './app_data'
 
 const debug = Debug('cypress:server:bundlecleaner')
 
@@ -87,4 +88,15 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
 
   // keep the current project fresh so it survives the next prune
   await touchProjectBundle(normalizedCurrent)
+}
+
+// resolve the app data paths for the given project and prune its stale sibling
+// bundles. never throws, so it is safe to call at run start or when opening a
+// project without it breaking a run or blocking the project from opening.
+export const pruneStaleBundles = async (projectRoot: string): Promise<void> => {
+  try {
+    await removeStaleBundles(appData.projectsPath(), appData.projectBundlePath(projectRoot))
+  } catch (err) {
+    debug('failed to prune stale project bundles: %o', err)
+  }
 }

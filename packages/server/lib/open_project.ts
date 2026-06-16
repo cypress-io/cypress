@@ -9,7 +9,6 @@ import * as errors from './errors'
 import preprocessor from './plugins/preprocessor'
 import runEvents from './plugins/run_events'
 import * as session from './session'
-import * as appData from './util/app_data'
 import * as bundleCleaner from './util/bundle_cleaner'
 import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
@@ -302,13 +301,7 @@ export class OpenProject extends EventEmitter {
     // prune stale per-project spec bundles left behind by other projects so the
     // app data directory does not grow unbounded over time. the current project
     // is always preserved and refreshed. @see https://github.com/cypress-io/cypress/issues/20435
-    await bundleCleaner.removeStaleBundles(
-      appData.projectsPath(),
-      appData.projectBundlePath(path),
-    ).catch((err) => {
-      // dont let pruning stale spec bundles prevent opening the project
-      debug('failed to remove stale project bundles: %o', err)
-    })
+    await bundleCleaner.pruneStaleBundles(path)
 
     _.defaults(options, {
       onReloadBrowser: () => {

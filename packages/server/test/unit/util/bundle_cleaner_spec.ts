@@ -3,6 +3,7 @@ import os from 'os'
 import path from 'path'
 import { fs } from '../../../lib/util/fs'
 import * as globModule from '../../../lib/util/glob'
+import * as appData from '../../../lib/util/app_data'
 import * as bundleCleaner from '../../../lib/util/bundle_cleaner'
 
 const tmpDir = os.tmpdir()
@@ -100,6 +101,29 @@ describe('lib/util/bundle_cleaner', () => {
 
       // glob failed, so nothing was removed
       expect(await exists('stale-abc')).to.eq(true)
+    })
+  })
+
+  describe('.pruneStaleBundles', () => {
+    it('resolves the app data paths for the project and prunes stale bundles', async () => {
+      sinon.stub(appData, 'projectsPath').returns(projectsRoot)
+      sinon.stub(appData, 'projectBundlePath').returns(projectPath('current-xyz'))
+
+      await createBundle('stale-abc', 30 * DAY_MS)
+      await createBundle('current-xyz', 30 * DAY_MS)
+
+      await bundleCleaner.pruneStaleBundles('/some/project')
+
+      expect(appData.projectBundlePath).to.be.calledWith('/some/project')
+      expect(await exists('stale-abc'), 'stale bundle removed').to.eq(false)
+      expect(await exists('current-xyz'), 'current project preserved').to.eq(true)
+    })
+
+    it('never throws when pruning fails', async () => {
+      sinon.stub(appData, 'projectsPath').throws(new Error('boom'))
+
+      // should resolve without throwing
+      await bundleCleaner.pruneStaleBundles('/some/project')
     })
   })
 })
