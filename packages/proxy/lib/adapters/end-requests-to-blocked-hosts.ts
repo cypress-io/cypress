@@ -33,6 +33,9 @@ export async function endRequestsToBlockedHosts (
       mw.res.status(503).end()
     } else {
       mw.debug('request ended by policy without blockedHostMatch %o', { state: result.state })
+      span?.end()
+
+      return mw.next()
     }
 
     span?.end()

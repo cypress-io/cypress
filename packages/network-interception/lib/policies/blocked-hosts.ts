@@ -28,9 +28,17 @@ export function createBlockedHosts (config: BlockedHostsConfig): NetworkPolicy {
       return !!config.matchesBlockedHost(exchange.url, blockHosts)
     },
     apply (ctx) {
-      const blockHosts = config.config.blockHosts!
+      const blockHosts = config.config.blockHosts
 
-      const match = config.matchesBlockedHost!(ctx.exchange.url!, blockHosts)
+      if (!blockHosts || !config.matchesBlockedHost || !ctx.exchange.url) {
+        return
+      }
+
+      const match = config.matchesBlockedHost(ctx.exchange.url, blockHosts)
+
+      if (!match) {
+        return
+      }
 
       ctx.state.blockedHostMatch = match
       ctx.end()
