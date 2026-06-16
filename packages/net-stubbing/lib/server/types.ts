@@ -3,8 +3,6 @@ import type {
   InterceptedRequest,
 } from './intercepted-request'
 
-export type { ResourceType } from '@packages/network-interception'
-
 export interface NetStubbingState {
   pendingEventHandlers: {
     [eventId: string]: (opts: { changedData: any, stopPropagation: boolean }) => void
