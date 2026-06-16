@@ -511,6 +511,8 @@ const listenForDownload = (binding) => {
 
 const browserUtils = {
 
+  getWebKitBrowserVersion,
+
   extendLaunchOptionsFromPlugins,
 
   executeAfterBrowserLaunch,
