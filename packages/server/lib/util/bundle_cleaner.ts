@@ -18,10 +18,37 @@ const debug = Debug('cypress:server:bundlecleaner')
 // remove project bundle directories that have not been used in 7 days by default
 const DEFAULT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 
+// cap how many stale bundles are removed per invocation so a large first-run
+// backlog (potentially many GB) cannot block the run for too long; whatever is
+// left over is removed on subsequent runs
+const DEFAULT_MAX_REMOVALS = 25
+
+// remove a handful of bundles at a time to avoid spiking disk I/O or exhausting
+// file handles when clearing a large backlog
+const REMOVAL_CONCURRENCY = 5
+
 const getMaxAgeMs = (): number => {
   const override = Number(process.env.CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_AGE_MS)
 
   return Number.isFinite(override) && override >= 0 ? override : DEFAULT_MAX_AGE_MS
+}
+
+const getMaxRemovals = (): number => {
+  const override = Number(process.env.CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_REMOVALS)
+
+  return Number.isInteger(override) && override >= 0 ? override : DEFAULT_MAX_REMOVALS
+}
+
+const removeBundle = async (folder: string): Promise<void> => {
+  try {
+    debug('removing stale project bundle %s', folder)
+
+    await fs.removeAsync(folder)
+  } catch (err) {
+    // e.g. the directory is not writable, or is locked by another process;
+    // leave it for a future run rather than failing the prune
+    debug('skipping project bundle %s; failed to remove: %o', folder, err)
+  }
 }
 
 // touch the active project's bundle directory so it is always considered "in
@@ -77,14 +104,15 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
   }))
 
   const stale = staleness.filter((folder): folder is string => folder !== null)
+  const toRemove = stale.slice(0, getMaxRemovals())
 
-  debug('removing %d stale project bundles of %d total', stale.length, folders.length)
+  debug('removing %d of %d stale project bundles', toRemove.length, stale.length)
 
-  await Promise.all(stale.map((folder) => {
-    debug('removing stale project bundle %s', folder)
-
-    return fs.removeAsync(folder)
-  }))
+  // remove in bounded batches so a large backlog cannot spike disk I/O or block
+  // the run for too long; any remaining stale bundles are removed on later runs
+  for (let i = 0; i < toRemove.length; i += REMOVAL_CONCURRENCY) {
+    await Promise.all(toRemove.slice(i, i + REMOVAL_CONCURRENCY).map(removeBundle))
+  }
 
   // keep the current project fresh so it survives the next prune
   await touchProjectBundle(normalizedCurrent)

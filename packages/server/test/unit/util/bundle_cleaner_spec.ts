@@ -102,6 +102,47 @@ describe('lib/util/bundle_cleaner', () => {
       // glob failed, so nothing was removed
       expect(await exists('stale-abc')).to.eq(true)
     })
+
+    it('caps how many stale bundles are removed per run', async () => {
+      process.env.CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_REMOVALS = '2'
+
+      await createBundle('stale-a', 30 * DAY_MS)
+      await createBundle('stale-b', 30 * DAY_MS)
+      await createBundle('stale-c', 30 * DAY_MS)
+
+      try {
+        await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+      } finally {
+        delete process.env.CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_REMOVALS
+      }
+
+      const remaining = await fs.readdir(projectsRoot)
+
+      // only 2 of the 3 stale bundles are removed this run
+      expect(remaining).to.have.length(1)
+    })
+
+    it('continues pruning when a bundle cannot be removed', async () => {
+      const lockedPath = projectPath('locked-abc')
+      const actualRemove = fs.removeAsync
+
+      sinon.stub(fs, 'removeAsync').callsFake((target) => {
+        if (target === lockedPath) {
+          return Promise.reject(Object.assign(new Error('permission denied'), { code: 'EACCES' })) as any
+        }
+
+        return actualRemove(target)
+      })
+
+      await createBundle('locked-abc', 30 * DAY_MS)
+      await createBundle('removable-def', 30 * DAY_MS)
+
+      // does not throw despite the failed removal
+      await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+
+      expect(await exists('locked-abc'), 'unremovable bundle left in place').to.eq(true)
+      expect(await exists('removable-def'), 'removable bundle still pruned').to.eq(false)
+    })
   })
 
   describe('.pruneStaleBundles', () => {
