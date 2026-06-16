@@ -44,10 +44,13 @@ const removeBundle = async (folder: string): Promise<void> => {
     debug('removing stale project bundle %s', folder)
 
     await fs.removeAsync(folder)
-  } catch (err) {
-    // e.g. the directory is not writable, or is locked by another process;
-    // leave it for a future run rather than failing the prune
-    debug('skipping project bundle %s; failed to remove: %o', folder, err)
+  } catch (err: any) {
+    // leave the directory for a future run rather than failing the prune
+    if (err?.code === 'EACCES' || err?.code === 'EPERM') {
+      debug('skipping project bundle %s; no permission to remove: %o', folder, err)
+    } else {
+      debug('skipping project bundle %s; failed to remove: %o', folder, err)
+    }
   }
 }
 
