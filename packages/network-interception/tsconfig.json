@@ -3,7 +3,7 @@
   "include": [
     "lib/*.ts",
     "lib/**/*.ts"
-  ],
+, "test/unit/__stubs__/stub-driven-ports.ts"  ],
   "exclude": [
     "test"
   ],

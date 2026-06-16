@@ -11,5 +11,3 @@ export * from './policies'
 export * from './registry/network-policy-registry'
 
 export * from './core'
-
-export * from './testing/stub-driven-ports'
