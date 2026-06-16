@@ -15,6 +15,22 @@ function makePwRequest (url = 'https://www.foobar.com/foo') {
   }
 }
 
+// Shape of the WebKitAutomation instance fields the tests need to reach.
+// Scoped narrowly so a rename of `page` or `handleRequestEvents` is caught
+// by the type checker rather than silently passing.
+interface WebKitAutomationInternals {
+  page: { on: (event: string, cb: (request: any) => void) => void }
+  handleRequestEvents (): void
+}
+
+// The real constructor is private (entry point is the async `create()` factory,
+// which needs a live Playwright browser). Cast the class to a plain constructor
+// so we can build a bare instance and exercise the handlers in isolation.
+const WebKitAutomationCtor = WebKitAutomation as unknown as new (opts: {
+  automation: unknown
+  browser: unknown
+}) => WebKitAutomationInternals
+
 describe('lib/browsers/webkit-automation', () => {
   context('#handleRequestEvents', () => {
     let automation
@@ -35,9 +51,7 @@ describe('lib/browsers/webkit-automation', () => {
         onRemoveBrowserPreRequest: sinon.stub(),
       }
 
-      // The constructor only assigns `automation`/`browser`, so we can bypass
-      // the heavy async `reset()` setup and exercise the handlers directly.
-      const wkAutomation = new (WebKitAutomation as any)({ automation, browser: {} })
+      const wkAutomation = new WebKitAutomationCtor({ automation, browser: {} })
 
       wkAutomation.page = page
       wkAutomation.handleRequestEvents()
