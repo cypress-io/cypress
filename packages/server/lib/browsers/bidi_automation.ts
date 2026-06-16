@@ -10,7 +10,8 @@ import { AutomationNotImplemented } from '../automation/automation_not_implement
 import type Protocol from 'devtools-protocol'
 import type { Automation } from '../automation'
 import type { BrowserPreRequest, BrowserResponseReceived, ResourceType } from '@packages/proxy'
-import { AutomationMiddleware, AutomationCommands, toSupportedKey } from '@packages/types'
+import type { AutomationMiddleware, AutomationCommands } from '@packages/types'
+import { toSupportedKey } from '@packages/types'
 import type { Client as WebDriverClient } from 'webdriver'
 import type {
   NetworkBeforeRequestSentParameters,

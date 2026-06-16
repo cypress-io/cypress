@@ -1,7 +1,8 @@
 import _ from 'lodash'
 import type Debug from 'debug'
 import { URL } from 'url'
-import { SerializableAutomationCookie, Cookie, CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
+import type { SerializableAutomationCookie, Cookie } from '@packages/server/lib/util/cookies'
+import { CookieJar, toughCookieToAutomationCookie } from '@packages/server/lib/util/cookies'
 import type { RequestCredentialLevel, ResourceType } from '../../resourceTypeAndCredentialManager'
 
 import { urlOriginsMatch, urlSameSiteMatch } from '@packages/network-tools'

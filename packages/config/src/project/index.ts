@@ -3,7 +3,8 @@ import Debug from 'debug'
 // @ts-ignore
 import deepDiff from 'return-deep-diff'
 
-import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
+import type { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
+import errors from '@packages/errors'
 import type {
   ResolvedFromConfig, TestingType, FullConfig,
 } from '@packages/types'

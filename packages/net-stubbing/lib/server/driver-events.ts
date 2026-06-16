@@ -5,11 +5,12 @@ import type {
   GetFixtureFn,
   BackendRoute,
 } from './types'
-import {
-  PLAIN_FIELDS,
+import type {
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
-  NetEvent,
+  NetEvent } from '../types'
+import {
+  PLAIN_FIELDS,
 } from '../types'
 import {
   getAllStringMatcherFields,

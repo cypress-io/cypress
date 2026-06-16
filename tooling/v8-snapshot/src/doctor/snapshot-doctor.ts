@@ -19,6 +19,10 @@ import {
   WarningConsequence,
   WarningsProcessor,
 } from './warnings-processor'
+import {
+  classifySnapshotError,
+  formatSnapshotDiagnostic,
+} from './snapshot-diagnostics'
 
 const logInfo = debug('cypress:snapgen:info')
 const logDebug = debug('cypress:snapgen:debug')
@@ -572,10 +576,19 @@ export class SnapshotDoctor {
                     break
                   }
                   case WarningConsequence.None: {
+                    const diagnostic = classifySnapshotError(result.error!, key)
+
                     // eslint-disable-next-line no-console
-                    console.error(result.error)
-                    assert.fail('I do not know what to do with this error')
-                    break
+                    console.error(formatSnapshotDiagnostic(diagnostic, key))
+
+                    if (result.error?.stack != null) {
+                      // eslint-disable-next-line no-console
+                      console.error(result.error.stack)
+                    }
+
+                    throw new Error(
+                      `Snapshot doctor failed for "${key}": ${diagnostic.code}`,
+                    )
                   }
                   default:
                     break

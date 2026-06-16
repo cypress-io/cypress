@@ -12,8 +12,10 @@ import { performance } from 'perf_hooks'
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
 import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
 import type { Automation } from '../automation'
-import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
-import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
+import type { CyCookie, CyCookieFilter } from '../automation/util'
+import { cookieMatches } from '../automation/util'
+import type { CriClient } from './cri-client'
+import { DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import { AUT_FRAME_NAME_IDENTIFIER } from '../automation/helpers/aut_identifier'
 import { cdpKeyPress } from '../automation/commands/key_press'
 
@@ -403,21 +405,23 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     })
   }
 
-  private _updateFrameTree = (client: CriClient, eventName) => async () => {
-    debugVerbose(`update frame tree for ${eventName}`)
+  private _updateFrameTree = (client: CriClient, eventName) => {
+    return async () => {
+      debugVerbose(`update frame tree for ${eventName}`)
 
-    this.gettingFrameTree = new Promise<void>(async (resolve) => {
-      try {
-        this.frameTree = (await client.send('Page.getFrameTree')).frameTree
-        debugVerbose('frame tree updated')
-      } catch (err) {
-        debugVerbose('failed to update frame tree:', err.stack)
-      } finally {
-        this.gettingFrameTree = null
+      this.gettingFrameTree = new Promise<void>(async (resolve) => {
+        try {
+          this.frameTree = (await client.send('Page.getFrameTree')).frameTree
+          debugVerbose('frame tree updated')
+        } catch (err) {
+          debugVerbose('failed to update frame tree:', err.stack)
+        } finally {
+          this.gettingFrameTree = null
 
-        resolve()
-      }
-    })
+          resolve()
+        }
+      })
+    }
   }
 
   private _continueRequest = (client, params, header?) => {

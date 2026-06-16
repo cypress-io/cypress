@@ -7,7 +7,8 @@ import type {
   ResolvedFromConfig,
   ResolvedConfigurationOptionSource,
 } from '@packages/types'
-import errors, { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
+import type { ConfigValidationFailureInfo, CypressError } from '@packages/errors'
+import errors from '@packages/errors'
 
 import type { Config } from './types'
 

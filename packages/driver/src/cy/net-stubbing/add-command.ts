@@ -1,9 +1,6 @@
 import _ from 'lodash'
 
-import {
-  PLAIN_FIELDS,
-  STRING_MATCHER_FIELDS,
-  DICT_STRING_MATCHER_FIELDS,
+import type {
   RouteHandler,
   RouteMatcherOptions,
   RouteMatcher,
@@ -15,7 +12,11 @@ import {
   StringMatcher,
   NumberMatcher,
   BackendStaticResponseWithArrayBuffer,
-  StaticResponseWithOptions,
+  StaticResponseWithOptions } from '@packages/net-stubbing/lib/types'
+import {
+  PLAIN_FIELDS,
+  STRING_MATCHER_FIELDS,
+  DICT_STRING_MATCHER_FIELDS,
 } from '@packages/net-stubbing/lib/types'
 import {
   validateStaticResponse,

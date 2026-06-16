@@ -1,4 +1,5 @@
-import { URL, Url } from 'url'
+import type { Url } from 'url'
+import { URL } from 'url'
 import debugModule from 'debug'
 import minimatch from 'minimatch'
 import fs from 'fs-extra'

@@ -146,15 +146,15 @@ export class Cookies {
 
     let cookie = await automate(data)
 
-      if (this.isNamespaced(cookie)) {
-        throw new Error('Sorry, you cannot get a Cypress namespaced cookie.')
-      } else {
-        cookie = normalizeGetCookieProps(cookie)
+    if (this.isNamespaced(cookie)) {
+      throw new Error('Sorry, you cannot get a Cypress namespaced cookie.')
+    } else {
+      cookie = normalizeGetCookieProps(cookie)
 
-        debug('received get:cookie %o', cookie)
+      debug('received get:cookie %o', cookie)
 
-        return cookie
-      }
+      return cookie
+    }
   }
 
   async setCookie (data: SerializableAutomationCookie, automate: AutomationFn<AutomationCookie, AutomationCookie | null>) {
@@ -171,9 +171,9 @@ export class Cookies {
 
     automationCookie = normalizeGetCookieProps(automationCookie)
 
-      debug('received set:cookie %o', automationCookie)
+    debug('received set:cookie %o', automationCookie)
 
-      return automationCookie
+    return automationCookie
   }
 
   async setCookies (

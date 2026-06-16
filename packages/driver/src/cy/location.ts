@@ -1,5 +1,6 @@
 import Debug from 'debug'
-import { $Location, LocationObject } from '../cypress/location'
+import type { LocationObject } from '../cypress/location'
+import { $Location } from '../cypress/location'
 import type { StateFunc } from '../cypress/state'
 import $utils from '../cypress/utils'
 

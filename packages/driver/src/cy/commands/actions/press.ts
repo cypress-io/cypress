@@ -1,6 +1,7 @@
 import type { $Cy } from '../../../cypress/cy'
 import type { StateFunc } from '../../../cypress/state'
-import { isSupportedKey, SupportedKey, AutomationCommands } from '@packages/types'
+import type { SupportedKey, AutomationCommands } from '@packages/types'
+import { isSupportedKey } from '@packages/types'
 import { defaults } from 'lodash'
 import $errUtils from '../../../cypress/error_utils'
 import $utils from '../../../cypress/utils'

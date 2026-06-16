@@ -127,7 +127,11 @@ export const ensure = (): Promise<void> => {
 
   // try twice to ensure the dir
   return ensureInner()
-  .catch((err) => delay(100).then(() => { throw err }))
+  .catch((err) => {
+    return delay(100).then(() => {
+      throw err
+    })
+  })
   .catch(ensureInner)
 }
 

@@ -1,6 +1,7 @@
 import FileList from './FileList.vue'
 import data from '../../../cypress/fixtures/FileList.json'
-import { ref, Ref } from 'vue'
+import type { Ref } from 'vue'
+import { ref } from 'vue'
 import type { FileListItemFragment } from '../../generated/graphql-test'
 
 const difficultFile = {

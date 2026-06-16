@@ -275,7 +275,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMa
       return state.set(newState)
     })
   },
-   500))
+  500))
 
   win.on('moved', _.debounce(() => {
     if (isDestroyed()) {
@@ -293,7 +293,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys: TrackStateMa
       return state.set(newState)
     })
   },
-   500))
+  500))
 
   win.webContents.on('devtools-opened', () => {
     const newState = {}

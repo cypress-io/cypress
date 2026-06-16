@@ -1,6 +1,7 @@
 import buffer from 'buffer'
 import type http from 'http'
-import { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
+import type { ServerOptions } from 'socket.io'
+import { Server as SocketIOBaseServer } from 'socket.io'
 import { cypressParser } from '../utils'
 
 // TODO: this will need to be updated to use an ESM version of the package

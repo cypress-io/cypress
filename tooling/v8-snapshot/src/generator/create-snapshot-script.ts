@@ -15,6 +15,11 @@ import {
 import { dependencyMapArrayFromInputs } from '../meta/dependency-map'
 import { writeConfigJSON } from './write-config-json'
 import { tryRemoveFileSync } from '../utils'
+import {
+  classifySnapshotError,
+  formatSnapshotDiagnostic,
+  SnapshotDiagnosticCode,
+} from '../doctor/snapshot-diagnostics'
 
 const logInfo = debug('cypress:snapgen:info')
 const logDebug = debug('cypress:snapgen:debug')
@@ -365,7 +370,13 @@ const makePackherdCreateBundle: (opts: CreateBundleOpts) => CreateBundle =
 
         logError(err)
 
-        return Promise.reject(new Error(`Failed command: "${cmd}"`))
+        const underlying = err instanceof Error ? err : new Error(String(err))
+        const diagnostic = classifySnapshotError(underlying)
+        const suggestion = diagnostic.code !== SnapshotDiagnosticCode.Unknown
+          ? `\n${formatSnapshotDiagnostic(diagnostic)}`
+          : ''
+
+        return Promise.reject(new Error(`Failed command: "${cmd}"${suggestion}`))
       } finally {
         if (!keepConfig) {
           const err = tryRemoveFileSync(configPath)

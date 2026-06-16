@@ -1,6 +1,7 @@
 import { gql, useMutation } from '@urql/vue'
 import { UsePromptManager_SetProjectPreferencesDocument, UsePromptManager_SetGlobalPreferencesDocument } from '../../generated/graphql'
-import { CloudStatus, ProjectStatus, useUserProjectStatusStore } from '../../store/user-project-status-store'
+import type { CloudStatus, ProjectStatus } from '../../store/user-project-status-store'
+import { useUserProjectStatusStore } from '../../store/user-project-status-store'
 import { isAllowedFeature } from '../../utils/isAllowedFeature'
 
 gql`

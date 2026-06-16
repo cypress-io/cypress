@@ -29,7 +29,8 @@ import type {
   VideoRecording,
   AutomationCommands,
 } from '@packages/types'
-import { DataContext, getCtx } from '@packages/data-context'
+import type { DataContext } from '@packages/data-context'
+import { getCtx } from '@packages/data-context'
 import { createHmac, randomUUID } from 'crypto'
 import { ServerBase } from './server-base'
 import type Protocol from 'devtools-protocol'

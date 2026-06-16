@@ -4,6 +4,7 @@ import { generateMetadata } from './generate-metadata'
 import minimist from 'minimist'
 import { generateEntry } from './generate-entry'
 import { installSnapshot } from './install-snapshot'
+import { prettyPrintError } from '../utils'
 
 const setupV8Snapshots = async ({ cypressAppPath, integrityCheckSource, supportCypressInCypress, useExistingSnapshotScript, updateSnapshotScriptContents }: { cypressAppPath?: string, integrityCheckSource?: string, supportCypressInCypress?: boolean, useExistingSnapshotScript?: boolean, updateSnapshotScriptContents?: (contents: string) => string } = {}) => {
   try {
@@ -19,6 +20,13 @@ const setupV8Snapshots = async ({ cypressAppPath, integrityCheckSource, supportC
 
     return snapshotFileLocation
   } catch (err) {
+    if (err instanceof Error) {
+      prettyPrintError(err, process.cwd())
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(err)
+    }
+
     // eslint-disable-next-line no-console
     console.error(`Snapshot generation has failed. If you continue to see this error, you can generate snapshots from scratch by running:
 

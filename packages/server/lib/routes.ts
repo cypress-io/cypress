@@ -1,6 +1,7 @@
 import httpProxy from 'http-proxy'
 import Debug from 'debug'
-import { ErrorRequestHandler, Request, Router } from 'express'
+import type { ErrorRequestHandler, Request } from 'express'
+import { Router } from 'express'
 import send from 'send'
 import { getPathToDist } from '@packages/resolve-dist'
 import { domainPropsToHostname } from '@packages/network-tools'

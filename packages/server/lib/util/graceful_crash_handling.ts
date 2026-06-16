@@ -2,7 +2,8 @@ import type { ProjectBase } from '../project-base'
 import type { BaseReporterResults, ReporterResults, ReporterTestError } from '../types/reporter'
 import { log, stackUtils, stripAnsi } from '@packages/errors'
 import Debug from 'debug'
-import pDefer, { DeferredPromise } from 'p-defer'
+import type { DeferredPromise } from 'p-defer'
+import pDefer from 'p-defer'
 
 const debug = Debug('cypress:util:crash_handling')
 

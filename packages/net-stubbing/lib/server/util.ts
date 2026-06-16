@@ -9,7 +9,8 @@ import type {
 
 export { getAllStringMatcherFields } from '@packages/network-interception'
 
-import { Readable, PassThrough } from 'stream'
+import type { Readable } from 'stream'
+import { PassThrough } from 'stream'
 import { Socket } from 'net'
 import type { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'

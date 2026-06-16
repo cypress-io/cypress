@@ -1,4 +1,5 @@
-import { DocumentNode, FieldNode, FragmentDefinitionNode, GraphQLResolveInfo, VariableDefinitionNode, visit } from 'graphql'
+import type { DocumentNode, FieldNode, FragmentDefinitionNode, GraphQLResolveInfo, VariableDefinitionNode } from 'graphql'
+import { visit } from 'graphql'
 
 type DocumentNodeBuilderParams = Pick<GraphQLResolveInfo, 'fieldNodes' | 'parentType'> & {isNode?: boolean, isRemoteFetchable?: boolean, variableDefinitions: readonly VariableDefinitionNode[] | undefined, operationName: string}
 

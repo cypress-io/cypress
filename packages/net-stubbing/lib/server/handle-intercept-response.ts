@@ -4,8 +4,9 @@ import Debug from 'debug'
 import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
 import type { ResponseMiddleware } from '@packages/proxy'
+import type {
+  CyHttpMessages } from '../types'
 import {
-  CyHttpMessages,
   SERIALIZABLE_RES_PROPS,
 } from '../types'
 import {

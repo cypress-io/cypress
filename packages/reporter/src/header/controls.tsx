@@ -4,7 +4,8 @@ import Button from '@cypress-design/react-button'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import defaultEvents, { Events } from '../lib/events'
+import type { Events } from '../lib/events'
+import defaultEvents from '../lib/events'
 import type { AppState } from '../lib/app-state'
 
 import { IconActionNext, IconActionPlayLarge, IconActionRestart, IconActionStopCircle } from '@cypress-design/react-icon'

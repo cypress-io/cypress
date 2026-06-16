@@ -1,12 +1,12 @@
-import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, StudioConfig, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions, StudioCDPClient } from '@packages/types'
+import type { StudioManagerShape, StudioStatus, StudioServerDefaultShape, StudioServerShape, StudioConfig, ProtocolManagerShape, StudioCloudApi, StudioAIInitializeOptions, StudioEvent, StudioAddSocketListenersOptions, StudioServerOptions, StudioCDPClient, DebugData } from '@packages/types'
 import type { Router } from 'express'
 import Debug from 'debug'
 import { requireScript } from '../require_script'
 import path from 'path'
-import crypto, { BinaryLike } from 'crypto'
+import type { BinaryLike } from 'crypto'
+import crypto from 'crypto'
 import { StudioElectron } from './StudioElectron'
 import exception from '../exception'
-import type { DebugData } from '@packages/types'
 
 interface StudioServer { default: StudioServerDefaultShape }
 

@@ -1,5 +1,9 @@
 import type { CreateBundleResult } from '@tooling/packherd'
 import path from 'path'
+import {
+  classifySnapshotError,
+  SnapshotDiagnosticCode,
+} from './snapshot-diagnostics'
 
 /**
  * Marker that the
@@ -162,11 +166,24 @@ export class WarningsProcessor {
         || REFERENCE_ERROR_DEFER.test(text) ? WarningConsequence.Defer
                : WarningConsequence.None
 
+    let enrichedText = text
+
+    if (consequence === WarningConsequence.None) {
+      const diagnostic = classifySnapshotError(new Error(text))
+
+      if (
+        diagnostic.code === SnapshotDiagnosticCode.MixedInlineTypeImport
+        || diagnostic.code === SnapshotDiagnosticCode.TypeOnlyAsValue
+      ) {
+        enrichedText = `${text}\n[${diagnostic.code}] ${diagnostic.suggestion}`
+      }
+    }
+
     // We don't know what this warning means, just pass it along with no consequence
     return this._nullIfAlreadyProcessed(
       {
         location,
-        text,
+        text: enrichedText,
         consequence,
       },
       hist,

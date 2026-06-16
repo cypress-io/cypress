@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AppState } from './app-state'
+import type { AppState } from './app-state'
 import scroller from './scroller'
 
 interface UseScrollIntoViewOptions {
