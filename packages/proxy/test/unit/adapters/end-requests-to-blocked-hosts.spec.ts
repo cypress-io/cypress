@@ -56,7 +56,7 @@ describe('endRequestsToBlockedHosts', () => {
     expect(mw.res.status).not.toHaveBeenCalled()
   })
 
-  it('honors result.ended without blockedHostMatch', async () => {
+  it('continues when result.ended without blockedHostMatch', async () => {
     const mw = createMiddlewareCtx()
     const runPolicies = vi.fn().mockResolvedValue({
       ended: true,
@@ -70,8 +70,8 @@ describe('endRequestsToBlockedHosts', () => {
       { state: {} },
     )
 
-    expect(mw.end).toHaveBeenCalledOnce()
-    expect(mw.next).not.toHaveBeenCalled()
+    expect(mw.next).toHaveBeenCalledOnce()
+    expect(mw.end).not.toHaveBeenCalled()
     expect(mw.res.status).not.toHaveBeenCalled()
     expect(mw.res.end).not.toHaveBeenCalled()
   })
