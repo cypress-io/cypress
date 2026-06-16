@@ -1,5 +1,6 @@
 import { proxyquire } from '../../spec_helper'
 import { expect } from 'chai'
+import os from 'os'
 import path from 'path'
 import utils from '../../../lib/browsers/utils'
 import { fs } from '../../../lib/util/fs'
@@ -116,6 +117,20 @@ describe('lib/browsers/webkit', () => {
 
       expect(expectedVersion).not.to.equal('0')
       expect(await utils.getWebKitBrowserVersion()).to.equal(expectedVersion)
+    })
+
+    // regression: in system tests the project runs from a temp dir outside the
+    // monorepo where only playwright-webkit is symlinked, so playwright-core is
+    // not resolvable from process.cwd() and the version used to fall back to '0'
+    // (displaying "WebKit 0"). Resolving playwright-core via the playwright-webkit
+    // module path fixes this. See cypress-io/cypress#34101.
+    it('resolves playwright-core via the playwright-webkit module path when cwd cannot resolve it', async () => {
+      const pwWebkitModulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
+
+      // simulate the project running outside the monorepo (a system-test temp dir)
+      sinon.stub(process, 'cwd').returns(os.tmpdir())
+
+      expect(await utils.getWebKitBrowserVersion(pwWebkitModulePath)).not.to.equal('0')
     })
   })
 
