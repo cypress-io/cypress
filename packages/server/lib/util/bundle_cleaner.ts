@@ -70,7 +70,7 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
 
       return (now - Number(stat.mtimeMs)) > maxAgeMs ? folder : null
     } catch (err) {
-      debug('could not stat project bundle %s: %o', folder, err)
+      debug('skipping project bundle %s; failed to stat: %o', folder, err)
 
       return null
     }
