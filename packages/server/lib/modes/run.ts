@@ -16,6 +16,8 @@ import * as videoCapture from '../video_capture'
 import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
 import * as env from '../util/env'
+import * as appData from '../util/app_data'
+import * as bundleCleaner from '../util/bundle_cleaner'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
 import * as system from '../util/system'
@@ -209,6 +211,17 @@ const removeOldProfiles = (browser) => {
   .catch((err) => {
     // dont make removing old browsers profiles break the build
     return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err)
+  })
+}
+
+const removeStaleBundles = (config: Cfg) => {
+  return bundleCleaner.removeStaleBundles(
+    appData.projectsPath(),
+    appData.projectBundlePath(config.projectRoot),
+  )
+  .catch((err) => {
+    // dont let pruning stale spec bundles break the build
+    debug('failed to remove stale project bundles: %o', err)
   })
 }
 
@@ -1150,6 +1163,7 @@ async function ready (options: ReadyOptions) {
       return browser
     })(),
     trashAssets(config),
+    removeStaleBundles(config),
   ])
 
   const specs = project.ctx.project.specs

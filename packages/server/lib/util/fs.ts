@@ -27,6 +27,7 @@ interface PromisifiedFsExtra {
   pathExistsAsync: Promisified<typeof fsExtra.pathExistsSync>
   outputFileAsync: Promisified<typeof fsExtra.outputFileSync>
   readJsonAsync: Promisified<typeof fsExtra.readJsonSync>
+  utimesAsync: (path: string | Buffer, atime: string | number | Date, mtime: string | number | Date) => Bluebird<void>
   /** Added by Bluebird.promisifyAll on fs-extra's promise-based helpers */
   ensureDirAsync: (dir: string) => Bluebird<void>
   ensureSymlinkAsync: (src: string, dest: string, type?: 'dir' | 'file' | 'junction') => Bluebird<void>

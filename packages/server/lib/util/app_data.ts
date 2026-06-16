@@ -174,6 +174,10 @@ export const projectsPath = (...paths: string[]): string => {
   return path('projects', ...paths)
 }
 
+export const projectBundlePath = (projectRoot: string): string => {
+  return projectsPath(toHashName(projectRoot))
+}
+
 export const remove = (): Promise<[void, void]> => {
   return Promise.all([
     fs.removeAsync(path()),
