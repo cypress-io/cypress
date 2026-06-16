@@ -15,6 +15,7 @@
 - Fixed an issue where, in the experimental WebKit browser, a request to focus the browser window was silently ignored, so the window could remain in the background. The active page is now correctly brought to the front. Addressed in [#34137](https://github.com/cypress-io/cypress/pull/34137).
 - Fixed an issue where opening an unconfigured project from a git repository sub-directory (such as a monorepo package) skipped project setup. Fixes [#27410](https://github.com/cypress-io/cypress/issues/27410) and [#29544](https://github.com/cypress-io/cypress/issues/29544).
 - Fixed an issue where interacting with an element inside a horizontally-scrollable container could scroll the element to the container's right edge, placing it underneath a right-floating `position: sticky` or `position: fixed` element and causing the action to fail or land on the wrong element. Elements are now scrolled to their top, leftmost point as documented. Fixes [#33884](https://github.com/cypress-io/cypress/issues/33884). Fixed in [#34108](https://github.com/cypress-io/cypress/pull/34108).
+- Fixed an issue where [`experimentalMemoryManagement`](https://on.cypress.io/experiments) could fail to prevent the browser from running out of memory and crashing when Cypress was running inside a memory-limited container. Memory is now managed correctly in these environments. Fixes [#34104](https://github.com/cypress-io/cypress/issues/34104). Addressed in [#34123](https://github.com/cypress-io/cypress/pull/34123).
 
 ## 15.18.0
 
