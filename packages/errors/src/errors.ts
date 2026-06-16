@@ -144,7 +144,7 @@ export const AllCypressErrors = {
     return errTemplate`The browser never connected. Something is wrong. The tests cannot run. Aborting...`
   },
   CLOUD_CANCEL_SKIPPED_SPEC: () => {
-    return errTemplate`${fmt.off(`\n  `)}This spec and its tests were skipped because the run has been canceled.`
+    return errTemplate`${fmt.off(`\n  `)}This spec and its tests were skipped because the run has been cancelled.`
   },
   CLOUD_API_RESPONSE_FAILED_RETRYING: (
     arg1: { tries: number, delay: string, response: Error },

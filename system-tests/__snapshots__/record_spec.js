@@ -856,7 +856,7 @@ exports['e2e record api skips specs records tests and exits without executing 1'
   Running:  a_record_instantfail.cy.js                                                      (1 of 2)
   Estimated: X second(s)
 
-  This spec and its tests were skipped because the run has been canceled.
+  This spec and its tests were skipped because the run has been cancelled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -937,7 +937,7 @@ exports['e2e record api skips specs records tests and exits without executing in
   Running:  a_record_instantfail.cy.js                                                      (1 of 2)
   Estimated: X second(s)
 
-  This spec and its tests were skipped because the run has been canceled.
+  This spec and its tests were skipped because the run has been cancelled.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
