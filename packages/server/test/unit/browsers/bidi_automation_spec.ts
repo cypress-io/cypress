@@ -642,6 +642,72 @@ describe('lib/browsers/bidi_automation', () => {
               } })
             })
 
+            // localhost and the loopback range are "potentially trustworthy" origins, so they are
+            // treated as secure contexts and secure cookies are still sent over http for those hosts.
+            // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1618113
+            // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1648993
+            it('data.url / loopback host does not filter out secure cookies', async () => {
+              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+                cookies: [{
+                  domain: 'localhost',
+                  expiry: 123456789,
+                  httpOnly: false,
+                  name: 'secureKey',
+                  path: '/',
+                  sameSite: 'lax',
+                  secure: true,
+                  size: 10,
+                  value: {
+                    type: 'string',
+                    value: 'secureValue',
+                  },
+                }, {
+                  domain: 'localhost',
+                  expiry: 123456789,
+                  httpOnly: false,
+                  name: 'insecureKey',
+                  path: '/',
+                  sameSite: 'lax',
+                  secure: false,
+                  size: 10,
+                  value: {
+                    type: 'string',
+                    value: 'insecureValue',
+                  },
+                }],
+              })
+
+              const cookies = await bidiAutomationInstance.automationMiddleware.onRequest('get:cookies', {
+                url: 'http://localhost:3500/index.html',
+              })
+
+              // the secure cookie is returned even though this is an http url
+              expect(cookies).to.deep.equal([{
+                domain: 'localhost',
+                expirationDate: 123456789,
+                httpOnly: false,
+                hostOnly: false,
+                name: 'secureKey',
+                path: '/',
+                sameSite: 'lax',
+                secure: true,
+                value: 'secureValue',
+              }, {
+                domain: 'localhost',
+                expirationDate: 123456789,
+                httpOnly: false,
+                hostOnly: false,
+                name: 'insecureKey',
+                path: '/',
+                sameSite: 'lax',
+                secure: false,
+                value: 'insecureValue',
+              }])
+
+              // the secure filter is NOT applied for loopback hosts
+              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+            })
+
             it('data.url / path', async () => {
               mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
                 cookies: [{
