@@ -231,17 +231,6 @@ const defaults = function (state: StateFunc, config, obj) {
 
   const runnable = state('runnable')
 
-  const getTestAttemptFromRunnable = (runnable) => {
-    if (!runnable) {
-      return
-    }
-
-    const t = $utils.getTestFromRunnable(runnable)
-
-    // @ts-ignore
-    return t._currentRetry || 0
-  }
-
   counter++
   _.defaults(obj, {
     isCrossOriginLog: Cypress.isCrossOriginSpecBridge,
@@ -254,7 +243,7 @@ const defaults = function (state: StateFunc, config, obj) {
     url: state('url'),
     hookId: state('hookId'),
     testId: runnable ? runnable.id : undefined,
-    testCurrentRetry: getTestAttemptFromRunnable(state('runnable')),
+    testCurrentRetry: $utils.getTestAttemptFromRunnable(state('runnable')),
     viewportWidth: state('viewportWidth'),
     viewportHeight: state('viewportHeight'),
     referencesAlias: undefined,
