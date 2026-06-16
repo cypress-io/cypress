@@ -131,7 +131,7 @@ const setProxiedUrl = function (req) {
   // and only leave the path which is
   // how browsers would normally send
   // use their url
-  req.proxiedUrl = removeDefaultPort(req.url).format()
+  req.proxiedUrl = removeDefaultPort(req.url)
 
   req.url = getPath(req.url)
 }
