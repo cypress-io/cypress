@@ -21,7 +21,7 @@ describe('lib/util/bundle_cleaner', () => {
     .then(() => {
       const time = new Date(Date.now() - ageMs)
 
-      return fs.utimesAsync(dir, time, time)
+      return fs.utimes(dir, time, time)
     })
   }
 
