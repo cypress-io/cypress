@@ -31,8 +31,6 @@ export const touchProjectBundle = async (projectBundlePath: string): Promise<voi
   try {
     const now = new Date()
 
-    // use fs-extra's native promise directly; this method isn't exposed on the
-    // Bluebird-promisified `fs` wrapper
     await fs.utimes(projectBundlePath, now, now)
   } catch (err) {
     // the directory may not exist yet on the very first run, which is fine: it
