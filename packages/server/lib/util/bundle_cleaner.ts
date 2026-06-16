@@ -35,7 +35,7 @@ export const touchProjectBundle = async (projectBundlePath: string): Promise<voi
   } catch (err) {
     // the directory may not exist yet on the very first run, which is fine: it
     // will be created with a current mtime while the run generates its bundles
-    debug('could not touch project bundle %s: %o', projectBundlePath, err)
+    debug('could not refresh last-used time for project bundle %s (it likely does not exist yet): %o', projectBundlePath, err)
   }
 }
 
