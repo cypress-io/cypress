@@ -1,0 +1,25 @@
+packages/server/test/unit/file_server_spec.ts
+  s_b5e059020b4a70::t_324e9cda3a60f9 7,105-106
+  s_b5e059020b4a70::t_3e51586966b76d 103-104,107-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "5340856fd22eb24ba234d746a3c5f28eac1d3822",
+  "prompts": {},
+  "humans": {
+    "h_5f6e5bd5f4342d": {
+      "author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  },
+  "sessions": {
+    "s_b5e059020b4a70": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc639e8b-078d-46cb-89be-ccaee86c12fb",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
