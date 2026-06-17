@@ -79,9 +79,17 @@ export const create = (fileServerFolder: string, { maxAttempts = MAX_LISTEN_ATTE
 
       // A bind failure surfaces as an 'error' event; with no listener Node
       // re-throws it as an uncaught exception, crashing the run before it
-      // starts. Owning the handler lets us retry, then reject if it persists.
+      // starts. Owning the handler lets us reject cleanly instead.
       const onError = (err: NodeJS.ErrnoException) => {
         debug('file server listen error on attempt %d of %d: %o', attempts, maxAttempts, err)
+
+        // Only an in-use ephemeral port is worth retrying — listen(0) draws a
+        // fresh port each attempt. Other bind errors (EACCES, EADDRNOTAVAIL, …)
+        // won't be fixed by retrying, so surface them as-is rather than dress
+        // them up as a port conflict.
+        if (err.code !== 'EADDRINUSE') {
+          return reject(err)
+        }
 
         if (attempts < maxAttempts) {
           return listen()

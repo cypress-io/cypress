@@ -8,9 +8,10 @@ import { stripAnsi } from '@packages/errors'
 import * as fileServer from '../../lib/file_server'
 
 // Builds a fake http.Server that fails its first `failCount` listen() calls
-// with an EADDRINUSE 'error' event (mirroring a transient loopback bind race),
-// then succeeds. Each fake exposes `listenAttempts` so tests can assert retries.
-function fakeServerFactory (failCount: number) {
+// with a bind 'error' event (defaulting to EADDRINUSE, mirroring a transient
+// loopback bind race), then succeeds. Each fake exposes `listenAttempts` so
+// tests can assert retries.
+function fakeServerFactory (failCount: number, code = 'EADDRINUSE') {
   const srv: any = new EventEmitter()
 
   srv.listenAttempts = 0
@@ -19,9 +20,9 @@ function fakeServerFactory (failCount: number) {
     srv.listenAttempts++
 
     if (srv.listenAttempts <= failCount) {
-      const err = new Error('listen EADDRINUSE: address already in use 127.0.0.1') as NodeJS.ErrnoException
+      const err = new Error(`listen ${code}: address bind failed 127.0.0.1`) as NodeJS.ErrnoException
 
-      err.code = 'EADDRINUSE'
+      err.code = code
 
       // emit asynchronously, as Node does for a real bind failure
       process.nextTick(() => srv.emit('error', err))
@@ -107,6 +108,27 @@ describe('lib/file_server', () => {
 
       expect(message).to.include('3 times')
       expect(message).to.include('EADDRINUSE')
+    })
+
+    it('rejects a non-EADDRINUSE bind error immediately without retrying or wrapping it', async () => {
+      // retrying a fresh port can't fix a permission error, and the branded
+      // "port already in use" copy would be wrong — so surface it as-is
+      const srv = fakeServerFactory(Infinity, 'EACCES')
+
+      sinon.stub(http, 'createServer').returns(srv)
+
+      let caught: any
+
+      try {
+        await fileServer.create('/dev/null', { maxAttempts: 3 })
+      } catch (err) {
+        caught = err
+      }
+
+      expect(srv.listenAttempts, 'should not retry a non-EADDRINUSE error').to.eq(1)
+      expect(caught, 'create() should reject, not throw uncaught').to.exist
+      expect(caught.type, 'should reject the raw error, not the branded one').to.be.undefined
+      expect(caught.code).to.eq('EACCES')
     })
   })
 

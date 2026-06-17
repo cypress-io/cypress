@@ -730,7 +730,7 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(err.message)}
 
-        This is usually temporary and caused by port pressure on the machine — for example, many processes competing for ports, or a process from a previous run that has not yet released its ports. It is most common on reused CI agents.
+        This is usually temporary and caused by port pressure on the machine — for example, many processes competing for ports, or a process from a previous run that has not yet released its ports.
 
         Try running Cypress again. If this keeps happening, reduce the number of Cypress instances running in parallel on this machine and confirm that previous runs have fully exited.`
   },
