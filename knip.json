@@ -115,6 +115,7 @@
         "lib/capture.ts",
         "lib/runner-ct.ts",
         "lib/cloud/artifacts/upload_artifacts.ts",
+        "lib/network-runtime.ts",
         "lib/privileged-commands/privileged-channel.js",
         "lib/util/**/*.{ts,js}",
         "test/**/*.{ts,js}"
@@ -290,6 +291,7 @@
     },
     "packages/proxy": {
       "entry": [
+        "lib/index.ts",
         "lib/http/util/rewriter.ts",
         "test/**/*.{ts,tsx,js,jsx}"
       ],
@@ -545,6 +547,9 @@
     "npm/svelte": {
       "project": [
         "src/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignoreDependencies": [
+        "jiti"
       ]
     },
     "npm/react": {
@@ -786,10 +791,6 @@
       "exports"
     ],
     "packages/data-context/graphql/index.ts": [
-      "exports",
-      "types"
-    ],
-    "packages/net-stubbing/lib/external-types.ts": [
       "exports",
       "types"
     ],
