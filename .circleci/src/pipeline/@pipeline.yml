@@ -505,6 +505,11 @@ commands:
               # If we are on arm64 we need to install setuptools as it no longer comes standard with the latest version of python
               pip install setuptools
             fi
+            if [[ `node ./scripts/get-platform-key.js` == 'darwin-arm64' ]]; then
+              # Playwright 1.61+ no longer ships WebKit for macOS 13 (CircleCI M1 runners).
+              # darwin-arm64 jobs do not run WebKit system tests; skip browser download during install.
+              export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+            fi
             source ./scripts/ensure-node.sh
             # avoid installing Percy's Chromium every time we use @percy/cli
             # https://docs.percy.io/docs/caching-asset-discovery-browser-in-ci
