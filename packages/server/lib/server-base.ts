@@ -271,9 +271,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     debug('createServer connecting to server')
 
-    if (!isProxyDisabled()) {
-      this.server.on('connect', this.onConnect.bind(this))
-    }
+    this.server.on('connect', this.onConnect.bind(this))
 
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
