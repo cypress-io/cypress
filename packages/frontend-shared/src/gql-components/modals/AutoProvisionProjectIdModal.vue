@@ -2,6 +2,7 @@
   <StandardModal
     model-value
     :title="t('runs.connect.modal.autoProvision.title')"
+    help-link="https://on.cypress.io/what-is-a-project-id"
     @update:model-value="emit('close')"
   >
     <div class="w-[640px]">

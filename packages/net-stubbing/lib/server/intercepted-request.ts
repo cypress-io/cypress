@@ -8,13 +8,13 @@ import type {
 import type {
   NetEvent,
   Subscription,
-} from '../types'
-import type { BackendRoute, NetStubbingState } from './types'
+  BackendStaticResponse,
+  BackendRoute } from '@packages/network-interception'
+import type { NetStubbingState } from './types'
 import { planSubscriptions } from '@packages/network-interception'
 import * as errors from '@packages/errors'
 import { emit, sendStaticResponse } from './util'
 import type { SocketBroadcaster } from '@packages/socket'
-import type { BackendStaticResponse } from '../internal-types'
 
 export class InterceptedRequest {
   id: string

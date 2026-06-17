@@ -239,5 +239,29 @@ describe('app state', () => {
       instance.reset()
       expect(instance.studioActive).to.be.false
     })
+
+    it('preserves cyPromptActionsEnabled', () => {
+      const instance = new AppState()
+
+      // intentionally excluded from reset defaults
+      instance.setCyPromptActionsEnabled(false)
+      instance.reset()
+      expect(instance.cyPromptActionsEnabled).to.be.false
+    })
+  })
+
+  context('#setCyPromptActionsEnabled', () => {
+    it('defaults to true', () => {
+      const instance = new AppState()
+
+      expect(instance.cyPromptActionsEnabled).to.be.true
+    })
+
+    it('sets cyPromptActionsEnabled', () => {
+      const instance = new AppState()
+
+      instance.setCyPromptActionsEnabled(false)
+      expect(instance.cyPromptActionsEnabled).to.be.false
+    })
   })
 })

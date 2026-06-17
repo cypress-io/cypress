@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import Promise from 'bluebird'
+import Debug from 'debug'
 
 import $errUtils, { CypressError } from '../cypress/error_utils'
 import type { ICypress } from '../cypress'
@@ -9,9 +10,12 @@ import type { Log } from '../cypress/log'
 
 const { errByPath, modifyErrMsg, throwErr, mergeErrProps } = $errUtils
 
+const debug = Debug('cypress:driver:retries')
+
 type retryOptions = {
   _interval?: number
   _log?: Log
+  _name?: string
   _retries?: number
   _runnable?: any
   _runnableTimeout?: number
@@ -115,7 +119,24 @@ export const create = (Cypress: ICypress, state: StateFunc, timeout: $Cy['timeou
       // bug in bluebird with not propagating cancellations
       // fast enough in a series of promises
       // https://github.com/petkaantonov/bluebird/issues/1424
-      return state('canceled') || runnableHasChanged()
+
+      // reaching this code at all after cancellation or after the runnable
+      // has changed means bluebird did not cancel this retry's promise chain
+      // in time, so log it to make any resulting cross-test contamination
+      // diagnosable
+      if (state('canceled')) {
+        debug('retry #%d of `%s` ran while state(\'canceled\') was true; not retrying', options._retries, options._name)
+
+        return true
+      }
+
+      if (runnableHasChanged()) {
+        debug('retry #%d of `%s` ran after the runnable changed from %o to %o; not retrying', options._retries, options._name, options._runnable?.title, state('runnable')?.title)
+
+        return true
+      }
+
+      return false
     }
 
     return Promise

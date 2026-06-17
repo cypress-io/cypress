@@ -22,6 +22,7 @@ This workspace (`internal-scripts`) contains the monorepo's build tooling, relea
 **Gotchas / Notes**
 
 - The gulp tasks in `gulp/gulpfile.ts` are the canonical way to drive local development; most developers run `yarn dev` from the monorepo root rather than invoking scripts here directly.
+- `gulp/monorepoPaths.ts` is **auto-generated** by `gulp/utils/makePathMap.ts` (which enumerates `packages/*`); do not hand-edit it. After adding or removing a package under `packages/`, regenerate it with `yarn gulp makePathMap` so the path map stays in sync.
 - `binary/build.ts` calls into `../../packages/electron` and depends on `electron-builder`; it must be run with the full monorepo installed and the `@packages/electron` package present.
 - Scripts that interact with S3 or CloudFlare require the appropriate environment variables (`AWS_*`, `CF_*`) to be set; they are intended for CI use, not local runs.
 - `github-actions/semantic-pull-request/` has its own `package.json` and is deployed as a standalone GitHub Action — do not modify it without understanding the action's deployment model.
