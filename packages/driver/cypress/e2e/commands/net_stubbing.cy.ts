@@ -1,5 +1,5 @@
 import { getDisplayUrlMatcher } from '../../../src/cy/net-stubbing/route-matcher-log'
-import type { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
+import type { RouteMatcherOptions } from '@packages/network-interception'
 
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   cy.on('fail', (err) => {

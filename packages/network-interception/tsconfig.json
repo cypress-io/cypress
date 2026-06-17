@@ -2,13 +2,9 @@
   "extends": "../ts/tsconfig.json",
   "include": [
     "lib/*.ts",
-    "lib/**/*.ts"
-  ],
+    "lib/**/*.ts" ],
   "exclude": [
     "test"
-  ],
-  "files": [
-    "./../ts/index.d.ts"
   ],
   "compilerOptions": {
     "declaration": true,
