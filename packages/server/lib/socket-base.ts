@@ -707,6 +707,13 @@ export class SocketBase implements SocketBroadcaster {
 
         if (this.supportsRunEvents) {
           socket.on('plugins:before:spec', (spec, cb) => {
+            // When `runState` is set, the runner is reloading `top` because cy.visit()
+            // navigated to a different origin. before:spec has already fired for this spec
+            // run and must not fire again.
+            if (runState) {
+              return cb()
+            }
+
             const beforeSpecSpan = telemetry.startSpan({ name: 'lifecycle:before:spec' })
 
             beforeSpecSpan?.setAttributes({ spec })

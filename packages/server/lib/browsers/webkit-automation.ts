@@ -253,6 +253,22 @@ export class WebKitAutomation {
 
       this.automation.onRequestEvent?.('response:received', responseReceived)
     })
+
+    // When a request fails (e.g. `req.destroy()` / `forceNetworkError` resets the
+    // connection), the pre-request emitted on 'request' is never matched to a
+    // response and would otherwise leak in the proxy's pre-request queue, causing
+    // infinite request loops. Mirror the CDP (`Network.loadingFailed`) and BiDi
+    // (`network.fetchError`) behavior by removing the orphaned pre-request.
+    // @see https://github.com/cypress-io/cypress/issues/23810
+    this.page.on('requestfailed', (request) => {
+      const requestId = requestIdMap.get(request)
+
+      if (!requestId) return
+
+      debug('received requestfailed, removing pre-request %o', { requestId })
+
+      this.automation.onRemoveBrowserPreRequest?.(requestId)
+    })
   }
 
   private async getCookies (filter: CyCookieFilter): Promise<CyCookie[]> {
@@ -277,7 +293,7 @@ export class WebKitAutomation {
 
     if (!cookie) {
       cookie = cookies.find((cookie) => {
-          // if unable to match closest via strict domain, then return a cookie that matches the apex domain
+        // if unable to match closest via strict domain, then return a cookie that matches the apex domain
         return cookieMatches(cookie, filter)
       })
 

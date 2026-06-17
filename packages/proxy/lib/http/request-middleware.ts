@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { blocked } from '@packages/network'
 import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
@@ -215,35 +214,8 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   this.next()
 }
 
-const EndRequestsToBlockedHosts: RequestMiddleware = function () {
-  const span = telemetry.startSpan({ name: 'end:requests:to:block:hosts', parentSpan: this.reqMiddlewareSpan, isVerbose })
-
-  const { blockHosts } = this.config
-
-  span?.setAttributes({
-    areBlockHostsConfigured: !!blockHosts,
-  })
-
-  if (blockHosts) {
-    const matches = blocked.matches(this.req.proxiedUrl, blockHosts as string[])
-
-    span?.setAttributes({
-      didUrlMatchBlockedHosts: !!matches,
-    })
-
-    if (matches) {
-      this.res.set('x-cypress-matched-blocked-host', matches)
-      this.debug('blocking request %o', { matches })
-
-      this.res.status(503).end()
-
-      span?.end()
-
-      return this.end()
-    }
-  }
-
-  this.next()
+const EndRequestsToBlockedHosts: RequestMiddleware = async function () {
+  return this.networkInterceptionCore.endRequestIfBlocked(this)
 }
 
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {

@@ -237,9 +237,20 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   return launchOptions
 }
 
-const getWebKitBrowserVersion = async () => {
+const getWebKitBrowserVersion = async (pwWebkitModulePath?: string) => {
   try {
-    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths: [process.cwd()] }))
+    // Resolve `playwright-core` relative to the resolved `playwright-webkit`
+    // module first, then fall back to the project's working directory.
+    //
+    // In system tests the project runs from a temp dir outside the monorepo
+    // where only `playwright-webkit` is symlinked into `node_modules` (see
+    // `scaffoldCommonNodeModules`). Its transitive `playwright-core` dependency
+    // is not resolvable from `process.cwd()`, so detection used to fall back to
+    // '0' and display "WebKit 0". Since `playwright-webkit` always depends on
+    // `playwright-core`, resolving from the webkit module's location finds the
+    // correct `browsers.json`.
+    const paths = pwWebkitModulePath ? [path.dirname(pwWebkitModulePath), process.cwd()] : [process.cwd()]
+    const pwCorePath = path.dirname(require.resolve('playwright-core', { paths }))
     const browsersJsonPath = path.join(pwCorePath, 'browsers.json')
     const browsersJsonContents = await fs.readFile(browsersJsonPath, 'utf8')
     const browsersJson = JSON.parse(browsersJsonContents)
@@ -263,7 +274,7 @@ async function getWebKitBrowser () {
   try {
     const modulePath = require.resolve('playwright-webkit', { paths: [process.cwd()] })
     const mod = await import(modulePath) as typeof import('playwright-webkit')
-    const version = await getWebKitBrowserVersion()
+    const version = await getWebKitBrowserVersion(modulePath)
 
     const browser: FoundBrowser = {
       name: 'webkit',
@@ -510,6 +521,8 @@ const listenForDownload = (binding) => {
 }
 
 const browserUtils = {
+
+  getWebKitBrowserVersion,
 
   extendLaunchOptionsFromPlugins,
 
