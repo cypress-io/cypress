@@ -1342,6 +1342,15 @@ export const AllCypressErrors = {
       Read the documentation for the injectDocumentDomain configuration option: https://on.cypress.io/inject-document-domain-configuration
     `
   },
+  BROWSER_ELECTRON_DEPRECATED: () => {
+    return errTemplate`\
+      ${fmt.highlightSecondary('Warning:')} The ${fmt.highlight('Electron')} browser is deprecated as a test browser and will be removed in a future version of Cypress.
+
+      Switch to Chrome or another installed browser to avoid a breaking change when you upgrade.
+
+      Read more about supported browsers: https://on.cypress.io/launching-browsers
+    `
+  },
   INVALID_CONFIG_OPTION: (arg1: string[]) => {
     const phrase = arg1.length > 1 ? 'options are' : 'option is'
 

@@ -8,9 +8,19 @@ export const DEFAULT_BROWSERS = ['electron', 'chrome', 'chrome-for-testing', 'fi
 
 export const pathUpToProjectName = Fixtures.projectPath('')
 
-export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(\w+\))?(\s+)/
+// The optional `(\s\(headless\))?` and `(\s\(deprecated\))?` groups consume the
+// markers appended after the version so the whole browser segment normalizes to
+// a single placeholder. They are kept as separate groups (rather than a single
+// repeating group) so the `headless` capture stays `undefined` when absent —
+// the harness asserts on it directly in system-tests.ts.
+export const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Chrome for Testing|Canary|Chromium|Firefox|WebKit)(\s\d+)(\s\(headless\))?(\s\(deprecated\))?(\s+)/
 
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
+// The Electron browser deprecation warning is printed for every run-mode run
+// that uses Electron (the default browser). Strip the whole block so existing
+// run snapshots don't need to capture it. Matches the BROWSER_ELECTRON_DEPRECATED
+// error template in packages/errors/src/errors.ts.
+const electronDeprecationWarningRe = /Warning: The Electron browser is deprecated as a test browser and will be removed in a future version of Cypress\.\n\nSwitch to Chrome or another installed browser to avoid a breaking change when you upgrade\.\n\nRead more about supported browsers: https:\/\/on\.cypress\.io\/launching-browsers\n\n/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 const retryDuration = /Timed out retrying after (\d+)ms/g
@@ -18,9 +28,9 @@ const escapedRetryDuration = /TORA(\d+)/g
 
 export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
 
-const replaceBrowserName = function (str: string, key: string, customBrowserPath: string, browserName: string, version: string, headless: boolean, whitespace: string) {
+const replaceBrowserName = function (str: string, key: string, customBrowserPath: string, browserName: string, version: string, headless: boolean, deprecated: boolean, whitespace: string) {
   // get the padding for the existing browser string
-  const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, 'length', 0), whitespace.length])
+  const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, 'length', 0), _.get(deprecated, 'length', 0), whitespace.length])
 
   // this ensures we add whitespace so the border is not shifted
   return key + customBrowserPath + _.padEnd('FooBrowser 88', lengthOfExistingBrowserString)
@@ -168,6 +178,8 @@ export const normalizeStdout = function (str: string, options: any = {}) {
   .replace(crossOriginErrorRe, '[Cross origin error message]')
   // Replaces connection warning since Chrome or Firefox sometimes take longer to connect
   .replace(/Still waiting to connect to .+, retrying in 1 second \(attempt .+\/.+\)\n/g, '')
+  // Strip the Electron deprecation warning so run-mode snapshots don't need to capture it
+  .replace(electronDeprecationWarningRe, '')
   // Replaces "new dependencies optimized" message from vite as it does not respect the logLevel='silent' option
   .replace(/^.*Re-optimizing dependencies.*?\n$/gm, '')
   .replace(/\).*new dependencies optimized.*?\n/gm, ')\n')
