@@ -1,10 +1,59 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
   NetworkInterceptionCore,
+  doesRouteMatch,
+  getMatchableForRequest,
+  matchRoutes,
   planSubscriptions,
   mergeIncomingRequestChanges,
 } from '../../lib'
 import type { BackendRoute } from '../../lib/types/backend-route'
+import type { RouteMatcherOptions } from '../../lib/types/external-types'
+
+describe('core/route-matching', () => {
+  const tryMatch = (req: { proxiedUrl: string, method?: string, headers?: Record<string, string> }, matcher: RouteMatcherOptions, expected = true) => {
+    expect(doesRouteMatch(matcher, {
+      method: 'GET',
+      headers: {},
+      ...req,
+    })).toEqual(expected)
+  }
+
+  it('matches exact URL', () => {
+    tryMatch({ proxiedUrl: 'https://google.com/foo' }, { url: 'https://google.com/foo' })
+  })
+
+  it('matches globs against path', () => {
+    tryMatch({ proxiedUrl: 'http://foo.com/bar/a1' }, { url: '/bar/*' })
+  })
+
+  it('orders middleware routes before handlers', () => {
+    const routes = [
+      { id: '1', routeMatcher: { middleware: true, pathname: '/foo' }, hasInterceptor: false, getFixture: async () => {}, matches: 0 },
+      { id: '2', routeMatcher: { pathname: '/foo' }, hasInterceptor: false, getFixture: async () => {}, matches: 0 },
+      { id: '3', routeMatcher: { middleware: true, pathname: '/foo' }, hasInterceptor: false, getFixture: async () => {}, matches: 0 },
+      { id: '4', routeMatcher: { pathname: '/foo' }, hasInterceptor: false, getFixture: async () => {}, matches: 0 },
+    ] as BackendRoute[]
+
+    const matched = matchRoutes(routes, {
+      method: 'GET',
+      headers: {},
+      proxiedUrl: 'http://bar.baz/foo?_',
+    })
+
+    expect(matched.map((r) => r.id)).toEqual(['1', '3', '4', '2'])
+  })
+
+  it('getMatchableForRequest extracts auth from basic header', () => {
+    const matchable = getMatchableForRequest({
+      headers: { authorization: 'basic Zm9vOmJhcg==' },
+      method: 'GET',
+      proxiedUrl: 'https://google.com/asdf?1234=a',
+    })
+
+    expect(matchable.auth).toEqual({ username: 'foo', password: 'bar' })
+  })
+})
 
 describe('core/plan-subscriptions', () => {
   it('plans default subscriptions for matched routes', () => {
@@ -139,7 +188,11 @@ describe('NetworkInterceptionCore', () => {
   it('delegates correlateBrowserPreRequest to requestInterception port', async () => {
     const correlateBrowserPreRequest = vi.fn().mockResolvedValue(undefined)
     const core = new NetworkInterceptionCore({
-      requestInterception: { correlateBrowserPreRequest, forwardToOrigin: vi.fn() },
+      requestInterception: {
+        correlateBrowserPreRequest,
+        forwardToOrigin: vi.fn(),
+        endRequestIfBlocked: vi.fn(),
+      },
     })
     const ctx = { req: {} }
 
@@ -151,7 +204,11 @@ describe('NetworkInterceptionCore', () => {
   it('delegates forwardToOrigin to requestInterception port', () => {
     const forwardToOrigin = vi.fn()
     const core = new NetworkInterceptionCore({
-      requestInterception: { correlateBrowserPreRequest: vi.fn(), forwardToOrigin },
+      requestInterception: {
+        correlateBrowserPreRequest: vi.fn(),
+        forwardToOrigin,
+        endRequestIfBlocked: vi.fn(),
+      },
     })
     const ctx = { req: {} }
 
@@ -177,6 +234,29 @@ describe('NetworkInterceptionCore', () => {
 
     await expect(core.correlateBrowserPreRequest({})).rejects.toThrow(/requestInterception/)
     expect(() => core.forwardToOrigin({})).toThrow(/requestInterception/)
+    await expect(core.endRequestIfBlocked({})).rejects.toThrow(/requestInterception/)
+  })
+
+  it('skips request policies when policyRegistration is not configured', async () => {
+    const endRequestIfBlocked = vi.fn(async (_ctx, runPolicies) => {
+      await runPolicies()
+    })
+    const core = new NetworkInterceptionCore({
+      requestInterception: {
+        endRequestIfBlocked,
+        correlateBrowserPreRequest: vi.fn(),
+        forwardToOrigin: vi.fn(),
+      },
+    })
+
+    await expect(core.runRequestPolicies({ req: { proxiedUrl: 'http://example.com' } })).resolves.toEqual({
+      ended: false,
+      state: {},
+    })
+
+    await core.endRequestIfBlocked({ req: { proxiedUrl: 'http://example.com' } })
+
+    expect(endRequestIfBlocked).toHaveBeenCalledOnce()
   })
 
   it('throws when responseInterception port is missing', async () => {

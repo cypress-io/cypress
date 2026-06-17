@@ -30,6 +30,7 @@
     "@packages/data-context": "0.0.0-development",
     "@packages/frontend-shared": "0.0.0-development",
     "@packages/net-stubbing": "0.0.0-development",
+    "@packages/network-interception": "0.0.0-development",
     "@packages/root": "0.0.0-development",
     "@packages/scaffold-config": "0.0.0-development",
     "@packages/types": "0.0.0-development",
