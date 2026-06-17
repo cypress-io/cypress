@@ -1,0 +1,31 @@
+packages/server/lib/file_server.ts
+  s_b5e059020b4a70::t_754fa09249d8b7 82,86-92
+packages/errors/src/errors.ts
+  s_b5e059020b4a70::t_c692017f23a5b2 733
+packages/server/test/unit/file_server_spec.ts
+  s_b5e059020b4a70::t_465117fe93c6bc 112-132
+  s_b5e059020b4a70::t_0c26e321e29a84 11-14,23,25
+packages/errors/test/__snapshots__/FILE_SERVER_COULD_NOT_LISTEN.ansi
+  s_b5e059020b4a70::t_3857cbe7dd64a4 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "74443cc51f93e8bd4b69e27c33cc7f43390fc835",
+  "prompts": {},
+  "humans": {
+    "h_5f6e5bd5f4342d": {
+      "author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  },
+  "sessions": {
+    "s_b5e059020b4a70": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc639e8b-078d-46cb-89be-ccaee86c12fb",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
