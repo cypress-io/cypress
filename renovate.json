@@ -5,6 +5,7 @@
     ":semanticPrefixFixDepsChoreOthers",
     "group:monorepos",
     "group:recommended",
+    "helpers:pinGitHubActionDigests",
     "replacements:all",
     "workarounds:all"
   ],
@@ -24,6 +25,14 @@
         "pin",
         "digest"
       ]
+    },
+    {
+      "description": "Cooldown before updating pinned GitHub Action SHAs so a moved/compromised tag isn't merged immediately",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "minimumReleaseAge": "7 days",
+      "internalChecksFilter": "strict"
     }
   ],
   "postUpdateOptions": [

@@ -39,7 +39,7 @@ jobs:
         run: yarn
       - name: Run build
         run: yarn build
-      - uses: snyk/actions/setup@master
+      - uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04 # v1
       - name: Perform Static Analysis Test
         continue-on-error: true
         run: |
