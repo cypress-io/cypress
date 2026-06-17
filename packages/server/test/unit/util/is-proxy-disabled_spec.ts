@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const { isProxyDisabled } = require('../../lib/util/is-proxy-disabled')
+const { isProxyDisabled } = require('../../../lib/util/is-proxy-disabled')
 
 describe('lib/util/is-proxy-disabled', () => {
   afterEach(() => {
