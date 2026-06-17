@@ -29,6 +29,8 @@ jobs:
           ref: ${{ env.BASE_BRANCH }}
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
+      - name: Fetch remote branches
+        run: git fetch origin
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
