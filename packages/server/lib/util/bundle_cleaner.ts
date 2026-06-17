@@ -27,16 +27,10 @@ const DEFAULT_MAX_REMOVALS = 25
 // file handles when clearing a large backlog
 const REMOVAL_CONCURRENCY = 5
 
-const getMaxAgeMs = (): number => {
-  const override = Number(process.env.CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_AGE_MS)
+const envNumber = (name: string, fallback: number): number => {
+  const value = Number(process.env[name])
 
-  return Number.isFinite(override) && override >= 0 ? override : DEFAULT_MAX_AGE_MS
-}
-
-const getMaxRemovals = (): number => {
-  const override = Number(process.env.CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_REMOVALS)
-
-  return Number.isInteger(override) && override >= 0 ? override : DEFAULT_MAX_REMOVALS
+  return Number.isFinite(value) && value >= 0 ? value : fallback
 }
 
 const removeBundle = async (folder: string): Promise<void> => {
@@ -57,7 +51,7 @@ const removeBundle = async (folder: string): Promise<void> => {
 // touch the active project's bundle directory so it is always considered "in
 // use" and is never pruned on a subsequent run, regardless of whether the
 // bundler overwrote files in place (which would not update the directory mtime)
-export const touchProjectBundle = async (projectBundlePath: string): Promise<void> => {
+const touchProjectBundle = async (projectBundlePath: string): Promise<void> => {
   try {
     const now = new Date()
 
@@ -70,7 +64,7 @@ export const touchProjectBundle = async (projectBundlePath: string): Promise<voi
 }
 
 export const removeStaleBundles = async (projectsRoot: string, currentProjectBundlePath: string): Promise<void> => {
-  const maxAgeMs = getMaxAgeMs()
+  const maxAgeMs = envNumber('CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_AGE_MS', DEFAULT_MAX_AGE_MS)
   const normalizedCurrent = path.resolve(currentProjectBundlePath)
 
   let folders: string[]
@@ -107,7 +101,7 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
   }))
 
   const stale = staleness.filter((folder): folder is string => folder !== null)
-  const maxRemovals = getMaxRemovals()
+  const maxRemovals = envNumber('CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_REMOVALS', DEFAULT_MAX_REMOVALS)
   const toRemove = stale.slice(0, maxRemovals)
 
   debug('removing %d of %d stale project bundles (max %d per run)', toRemove.length, stale.length, maxRemovals)
