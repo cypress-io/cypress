@@ -1,5 +1,5 @@
 import os from 'os'
-import { parse, normalize, join, dirname, relative, basename, isAbsolute } from 'path'
+import { parse, normalize, join, dirname, relative, basename, isAbsolute, resolve } from 'path'
 import ospath from 'ospath'
 import la from 'lazy-ass'
 import Debug from 'debug'
@@ -175,7 +175,9 @@ export const projectsPath = (...paths: string[]): string => {
 }
 
 export const projectBundlePath = (projectRoot: string): string => {
-  return projectsPath(toHashName(projectRoot))
+  // resolve so the hash matches the cache directory the preprocessor writes to,
+  // which is keyed off the resolved projectRoot (see ProjectBase)
+  return projectsPath(toHashName(resolve(projectRoot)))
 }
 
 export const remove = (): Promise<[void, void]> => {

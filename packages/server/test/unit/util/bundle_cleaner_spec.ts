@@ -14,15 +14,16 @@ const DAY_MS = 24 * 60 * 60 * 1000
 describe('lib/util/bundle_cleaner', () => {
   const projectPath = (folder: string) => path.join(projectsRoot, folder)
 
-  const createBundle = (folder: string, ageMs: number) => {
+  const createBundle = async (folder: string, ageMs: number) => {
     const dir = projectPath(folder)
 
-    return fs.ensureDir(dir)
-    .then(() => {
-      const time = new Date(Date.now() - ageMs)
+    // a real project cache contains a `bundles/` subdir; set the age on the
+    // top-level dir after creating the child so its mtime reflects `ageMs`
+    await fs.ensureDir(path.join(dir, 'bundles'))
 
-      return fs.utimes(dir, time, time)
-    })
+    const time = new Date(Date.now() - ageMs)
+
+    await fs.utimes(dir, time, time)
   }
 
   const exists = (folder: string) => fs.pathExists(projectPath(folder))
@@ -47,6 +48,24 @@ describe('lib/util/bundle_cleaner', () => {
 
       expect(await exists('stale-abc'), 'stale bundle removed').to.eq(false)
       expect(await exists('fresh-def'), 'fresh bundle kept').to.eq(true)
+    })
+
+    it('does not remove non-bundle directories like __global__', async () => {
+      // __global__ holds global saved state, not a bundle cache (no bundles/ subdir)
+      const globalDir = projectPath('__global__')
+
+      await fs.ensureDir(globalDir)
+      await fs.writeFile(path.join(globalDir, 'state.json'), '{}')
+      const old = new Date(Date.now() - 30 * DAY_MS)
+
+      await fs.utimes(globalDir, old, old)
+
+      await createBundle('stale-abc', 30 * DAY_MS)
+
+      await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+
+      expect(await exists('__global__'), 'global state preserved').to.eq(true)
+      expect(await exists('stale-abc'), 'stale bundle removed').to.eq(false)
     })
 
     it('never removes the current project bundle even when stale', async () => {

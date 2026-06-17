@@ -92,6 +92,12 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
         return null
       }
 
+      // only prune actual bundle caches; this leaves non-bundle dirs like
+      // `__global__` (which holds global saved state, not bundles) untouched
+      if (!(await fs.pathExistsAsync(path.join(folder, 'bundles')))) {
+        return null
+      }
+
       return (now - Number(stat.mtimeMs)) > maxAgeMs ? folder : null
     } catch (err) {
       debug('skipping project bundle %s; failed to stat: %o', folder, err)

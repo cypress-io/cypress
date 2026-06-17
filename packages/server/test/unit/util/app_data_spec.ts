@@ -87,6 +87,13 @@ describe('lib/util/app_data', () => {
       expect(result).to.contain(path.join('projects', expectedPrefix))
       expect(result).not.to.contain('bundles')
     })
+
+    it('normalizes the project root so equivalent paths resolve to the same dir', () => {
+      const expected = AppData.projectBundlePath('/foo/bar')
+
+      expect(AppData.projectBundlePath('/foo/bar/')).to.equal(expected)
+      expect(AppData.projectBundlePath('/foo/baz/../bar')).to.equal(expected)
+    })
   })
 
   context('#getBundledFilePath', () => {
