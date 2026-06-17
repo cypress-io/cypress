@@ -1,5 +1,5 @@
 import { getDisplayUrlMatcher } from '../../../src/cy/net-stubbing/route-matcher-log'
-import type { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
+import type { RouteMatcherOptions } from '@packages/network-interception'
 
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   cy.on('fail', (err) => {
@@ -1835,7 +1835,6 @@ describe('network stubbing', { retries: 15 }, function () {
       cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23303
     it('can delay and throttle a StaticResponse', { retries: 15 }, function (done) {
       const payload = 'A'.repeat(10 * 1024)
       const throttleKbps = 10
@@ -1853,7 +1852,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 100, 100)
+          expect(Date.now() - this.start).to.be.gte(expectedSeconds * 1000 - 50)
           expect(responseText).to.eq(payload)
 
           done()

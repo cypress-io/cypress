@@ -726,6 +726,17 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   if (usingExperimentalSingleTabMode && !isLastSpec) {
     await project.server.destroyAut()
+
+    // Even though single-tab mode intentionally keeps the same browser tab open
+    // between specs, we still need to reset the server's network/proxy state so it
+    // does not leak across specs. The default per-tab flow does this (below) via
+    // project.server.reset() after the tab is closed, which clears the pre-request
+    // correlation queue, response buffers, service worker manager, remote states,
+    // and stored credentials. Skipping it in single-tab mode allowed that state to
+    // accumulate over long runs, producing rare, order-dependent failures.
+    // See: https://github.com/cypress-io/cypress/issues/24146
+    debug('resetting server state between specs in single-tab run mode')
+    project.server.reset()
   }
 
   // we do not support experimentalSingleTabRunMode for e2e. We always want to close the tab on the last spec to ensure that things get cleaned up properly at the end of the run
