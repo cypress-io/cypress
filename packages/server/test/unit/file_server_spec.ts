@@ -4,6 +4,7 @@ import os from 'os'
 import path from 'path'
 import fs from 'fs'
 import { EventEmitter } from 'events'
+import { stripAnsi } from '@packages/errors'
 import * as fileServer from '../../lib/file_server'
 
 // Builds a fake http.Server that fails its first `failCount` listen() calls
@@ -99,9 +100,13 @@ describe('lib/file_server', () => {
       expect(caught, 'create() should reject, not throw uncaught').to.exist
       expect(caught.type).to.eq('FILE_SERVER_COULD_NOT_LISTEN')
       expect(caught.isCypressErr).to.be.true
-      // surfaces the attempt count and the underlying error to the user
-      expect(caught.message).to.include('3 times')
-      expect(caught.message).to.include('EADDRINUSE')
+
+      // surfaces the attempt count and the underlying error to the user.
+      // strip ANSI since the highlighted count is wrapped in color codes.
+      const message = stripAnsi(caught.message)
+
+      expect(message).to.include('3 times')
+      expect(message).to.include('EADDRINUSE')
     })
   })
 
