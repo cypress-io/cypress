@@ -3829,16 +3829,18 @@ describe('network stubbing', { retries: 15 }, function () {
           // do nothing on an abort
           })
 
-          // if you abort too fast in firefox or safari, the fetch is never sent to the server for us to intercept
-          if (!Cypress.isBrowser({ family: 'chromium' })) {
-            setTimeout(() => {
+          // Firefox/Safari can cancel too quickly unless the request is observed first.
+          cy.wait('@createUser.request').then((interception) => {
+            if (!Cypress.isBrowser({ family: 'chromium' })) {
+              setTimeout(() => {
+                controller.abort()
+              }, 100)
+            } else {
               controller.abort()
-            }, 100)
-          } else {
-            controller.abort()
-          }
+            }
 
-          cy.wait('@createUser').its('state').should('eq', 'Errored')
+            cy.wrap(interception).its('state').should('eq', 'Errored')
+          })
         })
       })
 
