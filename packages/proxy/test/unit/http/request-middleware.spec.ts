@@ -471,7 +471,7 @@ describe('http/request-middleware', () => {
       expect(ctx.req.headers['cookie']).toBeUndefined()
     })
 
-    // @see https://github.com/cypress-io/cypress/issues/XXXXX
+    // @see https://github.com/cypress-io/cypress/issues/29719
     // OAuth / SSO flows redirect from an external IdP back to the primary origin
     // (e.g. onelogin.com → myapp.com/auth/callback). Chrome's CDP frame-tree can
     // be transiently stale during a cross-origin navigation, so the
