@@ -1,0 +1,43 @@
+packages/errors/src/errors.ts
+  s_b5e059020b4a70::t_8c78e4c0cfc9c0 723-736,738
+  s_b5e059020b4a70::t_074fbfea57dad5 737
+packages/errors/test/__snapshots__/FILE_SERVER_COULD_NOT_LISTEN.ansi
+  s_b5e059020b4a70::t_715144481f8a4e 1-13
+packages/data-context/schemas/schema.graphql
+  s_b5e059020b4a70::t_a59a8b0343ce6e 1267
+packages/server/test/unit/file_server_spec.ts
+  s_b5e059020b4a70::t_e0e07aba38b16f 107-157
+  s_b5e059020b4a70::t_37a4e16126203b 1-2,6-106,158
+  s_b5e059020b4a70::t_315a9ece0dcd71 3-5
+packages/errors/test/visualSnapshotErrors.spec.ts
+  s_b5e059020b4a70::t_ea40ae187bc3a7 614
+  s_b5e059020b4a70::t_4564415105348d 612-613,615-616
+packages/server/lib/file_server.ts
+  s_b5e059020b4a70::t_27955c367beb57 9
+  s_b5e059020b4a70::t_579ea72c53a40a 80,82
+  s_b5e059020b4a70::t_9c4f066d1e88cc 90
+  s_b5e059020b4a70::t_0ba61cb1a23980 96
+  s_b5e059020b4a70::t_6751f8c84d801f 63-66,75-79,81,83-88,93-95,97-117
+  s_b5e059020b4a70::t_951668f436aee3 61-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "3875ecd90c060c0c2d98eab598093c7755a0d8dd",
+  "prompts": {},
+  "humans": {
+    "h_5f6e5bd5f4342d": {
+      "author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  },
+  "sessions": {
+    "s_b5e059020b4a70": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc639e8b-078d-46cb-89be-ccaee86c12fb",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
