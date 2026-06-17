@@ -8,7 +8,7 @@ export type CspAllowListConfig = {
  * Configurator policy: CSP directive allow-list from `experimentalCspAllowList`.
  * Registered at startup; enforcement remains in proxy response middleware until fully wired.
  */
-export function CspAllowList (config: CspAllowListConfig): NetworkPolicy {
+export function createCspAllowList (config: CspAllowListConfig): NetworkPolicy {
   return {
     name: 'csp-allow-list',
     provenance: 'config',
