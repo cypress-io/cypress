@@ -720,6 +720,22 @@ export const AllCypressErrors = {
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
   },
+  FILE_SERVER_COULD_NOT_LISTEN: (attempts: number, err: Error) => {
+    return errTemplate`\
+        Cypress could not start its internal file server.
+
+        Cypress attempted to listen on an available port on ${fmt.highlightSecondary('127.0.0.1')} ${fmt.highlight(attempts)} times, but each attempt failed because the port was already in use.
+
+        The underlying error was:
+
+        ${fmt.highlightSecondary(err.message)}
+
+        This is usually temporary and caused by port pressure on the machine — for example, many processes competing for ports, or a process from a previous run that has not yet released its ports. It is most common on reused CI agents.
+
+        Try running Cypress again. If this keeps happening, reduce the number of Cypress instances running in parallel on this machine and confirm that previous runs have fully exited.
+
+        https://on.cypress.io/file-server-could-not-listen`
+  },
   ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
         Error reading from: ${fmt.path(filePath)}
