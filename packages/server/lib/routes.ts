@@ -112,6 +112,8 @@ export const createCommonRoutes = ({
       }
 
       await networkProxy.handleHttpRequest(req, res)
+
+      return
     })
 
     router.get('/__cypress-cy-prompt/*', async (req, res) => {
@@ -120,6 +122,8 @@ export const createCommonRoutes = ({
       }
 
       await networkProxy.handleHttpRequest(req, res)
+
+      return
     })
 
     router.get('/status-code-test/:num', (req, res) => {
@@ -189,6 +193,8 @@ export const createCommonRoutes = ({
     networkProxy.http.getRenderedHTMLOrigins()[origin] = true
 
     res.sendFile(path.join(__dirname, './html/set-local-storage.html'))
+
+    return
   })
 
   router.get(`/${config.namespace}/source-maps/:id.map`, async (req, res) => {
@@ -197,6 +203,8 @@ export const createCommonRoutes = ({
     }
 
     await networkProxy.handleSourceMapRequest(req, res)
+
+    return
   })
 
   // special fallback - serve dist'd (bundled/static) files from the project path folder
