@@ -19,6 +19,7 @@ import { cdpKeyPress } from '../automation/commands/key_press'
 
 import { toSupportedKey } from '@packages/types'
 
+import { CdpAutBridgeAdapter } from '@packages/browser-automation'
 import { cdpGetUrl } from '../automation/commands/get_url'
 import { cdpReloadFrame } from '../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../automation/commands/navigate_history'
@@ -215,6 +216,14 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
+
+    // SPIKE (#33849): install the Cypress bridge via CDP instead of proxy HTML rewriting.
+    // Register ONCE here — addScriptToEvaluateOnNewDocument replays the source on every
+    // document/reload, and registering at create() precedes the first cy.visit.
+    const autBridge = new CdpAutBridgeAdapter(sendDebuggerCommandFn)
+
+    await sendDebuggerCommandFn('Page.enable')
+    await autBridge.installAutBridge()
 
     return cdpAutomation
   }

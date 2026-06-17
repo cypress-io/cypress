@@ -36,6 +36,10 @@ export class AutIframe {
   create (): { autIframe: JQuery<HTMLIFrameElement>, autSnapshotIframes: JQuery<HTMLIFrameElement>[] } {
     const $iframe = this.$('<iframe>', {
       id: `Your project: '${this.projectName}'`,
+      // seeds window.name so the injected bridge can identify the AUT frame from
+      // inside the document — readable cross-origin (unlike frameElement.id) and
+      // persists across navigations. See #33849.
+      name: `Your project: '${this.projectName}'`,
       title: `Your project: '${this.projectName}'`,
       class: 'aut-iframe',
     })

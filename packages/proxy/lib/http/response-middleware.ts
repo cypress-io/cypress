@@ -430,7 +430,8 @@ const MaybeSetOriginAgentClusterHeader: ResponseMiddleware = function () {
 }
 
 const SetInjectionLevel: ResponseMiddleware = async function () {
-  return this.networkInterceptionCore.setInjectionLevel(this)
+  // return this.networkInterceptionCore.setInjectionLevel(this)
+  this.next()
 }
 
 // https://github.com/cypress-io/cypress/issues/6480
@@ -569,7 +570,8 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
 }
 
 const MaybeInjectHtml: ResponseMiddleware = async function () {
-  return this.networkInterceptionCore.injectHtml(this)
+  this.next()
+  // return this.networkInterceptionCore.injectHtml(this)
 }
 
 const MaybeRemoveSecurity: ResponseMiddleware = async function () {
