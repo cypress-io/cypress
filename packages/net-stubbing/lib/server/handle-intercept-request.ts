@@ -2,11 +2,8 @@ import _ from 'lodash'
 import url from 'url'
 import { concatStream } from '@packages/network'
 import type { RequestMiddleware } from '@packages/proxy'
-import type { NetworkInterceptionCore } from '@packages/network-interception'
-import {
-  CyHttpMessages,
-  SERIALIZABLE_REQ_PROPS,
-} from '../types'
+import type { NetworkInterceptionCore, CyHttpMessages } from '@packages/network-interception'
+import { SERIALIZABLE_REQ_PROPS } from '@packages/network-interception'
 import {
   setDefaultHeaders,
   getBodyEncoding,

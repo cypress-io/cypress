@@ -12,4 +12,8 @@ export {
   ProxyCommandLogAdapter,
 } from './adapters'
 
+export { createProxyNetworkInterception } from './adapters/create-proxy-network-interception'
+
+export type { CreateProxyNetworkInterceptionOptions } from './adapters/create-proxy-network-interception'
+
 export { defaultMiddleware } from './http'

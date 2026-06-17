@@ -103,6 +103,12 @@ export default (Commands, Cypress, cy, state, config) => {
       const cacheKey = `${fixture}${NULL_SEP}${options.encoding}`
       const cachedContent = cache[cacheKey]
 
+      // Add the filename as a symbol, in case we need it later (such as when storing an alias).
+      // This must be set on every invocation - including cache hits - so that aliasing a cached
+      // fixture (e.g. when the same fixture is used across multiple tests) still records the
+      // file name. https://github.com/cypress-io/cypress/issues/21936
+      state('current').set('fileName', basename(fixture))
+
       if (cachedContent) {
         // Clone the cached content to prevent accidental mutation.
         return Promise.resolve(clone(cachedContent))
@@ -136,9 +142,6 @@ export default (Commands, Cypress, cy, state, config) => {
         // add the fixture to the cache
         // so it can just be returned next time
         cache[cacheKey] = response
-
-        // Add the filename as a symbol, in case we need it later (such as when storing an alias)
-        state('current').set('fileName', basename(fixture))
 
         // return the cloned response
         return clone(response)
