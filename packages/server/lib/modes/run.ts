@@ -16,7 +16,6 @@ import * as videoCapture from '../video_capture'
 import { fs, getPath } from '../util/fs'
 import runEvents from '../plugins/run_events'
 import * as env from '../util/env'
-import * as bundleCleaner from '../util/bundle_cleaner'
 import trash from '../util/trash'
 import { id as randomId } from '../util/random'
 import * as system from '../util/system'
@@ -1162,7 +1161,6 @@ async function ready (options: ReadyOptions) {
       return browser
     })(),
     trashAssets(config),
-    bundleCleaner.pruneStaleBundles(projectRoot),
   ])
 
   const specs = project.ctx.project.specs

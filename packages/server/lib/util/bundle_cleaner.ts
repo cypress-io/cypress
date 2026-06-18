@@ -67,10 +67,13 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
   const maxAgeMs = envNumber('CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_AGE_MS', DEFAULT_MAX_AGE_MS)
   const normalizedCurrent = path.resolve(currentProjectBundlePath)
 
-  let folders: string[]
+  let bundleDirs: string[]
 
   try {
-    folders = await glob(path.join(projectsRoot, '*'), { absolute: true })
+    // target only the per-project `bundles/` caches. This never removes the
+    // parent project dir (which also holds `state.json` saved UI state) and
+    // skips non-bundle dirs like `__global__` (no `bundles/` subdir)
+    bundleDirs = await glob(path.join(projectsRoot, '*', 'bundles'), { absolute: true })
   } catch (err) {
     debug('skipping project bundle prune; failed to read projects root %s: %o', projectsRoot, err)
 
@@ -79,34 +82,28 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
 
   const now = Date.now()
 
-  const staleness = await Promise.all(folders.map(async (folder): Promise<string | null> => {
-    // never remove the project we're about to run
-    if (path.resolve(folder) === normalizedCurrent) {
+  const staleness = await Promise.all(bundleDirs.map(async (bundleDir): Promise<string | null> => {
+    // never remove the bundles for the project we're about to run
+    if (path.resolve(bundleDir) === normalizedCurrent) {
       return null
     }
 
     try {
-      const stat = await fs.statAsync(folder)
+      const stat = await fs.statAsync(bundleDir)
 
       if (!stat || !stat.isDirectory()) {
         return null
       }
 
-      // only prune actual bundle caches; this leaves non-bundle dirs like
-      // `__global__` (which holds global saved state, not bundles) untouched
-      if (!(await fs.pathExistsAsync(path.join(folder, 'bundles')))) {
-        return null
-      }
-
-      return (now - Number(stat.mtimeMs)) > maxAgeMs ? folder : null
+      return (now - Number(stat.mtimeMs)) > maxAgeMs ? bundleDir : null
     } catch (err) {
-      debug('skipping project bundle %s; failed to stat: %o', folder, err)
+      debug('skipping project bundle %s; failed to stat: %o', bundleDir, err)
 
       return null
     }
   }))
 
-  const stale = staleness.filter((folder): folder is string => folder !== null)
+  const stale = staleness.filter((dir): dir is string => dir !== null)
   const maxRemovals = envNumber('CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_REMOVALS', DEFAULT_MAX_REMOVALS)
   const toRemove = stale.slice(0, maxRemovals)
 

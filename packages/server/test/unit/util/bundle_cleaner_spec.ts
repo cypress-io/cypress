@@ -13,20 +13,22 @@ const DAY_MS = 24 * 60 * 60 * 1000
 
 describe('lib/util/bundle_cleaner', () => {
   const projectPath = (folder: string) => path.join(projectsRoot, folder)
+  const bundlesPath = (folder: string) => path.join(projectPath(folder), 'bundles')
 
+  // a real project cache is a `bundles/` subdir; staleness is read from its
+  // mtime, so set the age on the bundles dir itself
   const createBundle = async (folder: string, ageMs: number) => {
-    const dir = projectPath(folder)
+    const bundlesDir = bundlesPath(folder)
 
-    // a real project cache contains a `bundles/` subdir; set the age on the
-    // top-level dir after creating the child so its mtime reflects `ageMs`
-    await fs.ensureDir(path.join(dir, 'bundles'))
+    await fs.ensureDir(bundlesDir)
 
     const time = new Date(Date.now() - ageMs)
 
-    await fs.utimes(dir, time, time)
+    await fs.utimes(bundlesDir, time, time)
   }
 
-  const exists = (folder: string) => fs.pathExists(projectPath(folder))
+  const bundleExists = (folder: string) => fs.pathExists(bundlesPath(folder))
+  const projectExists = (folder: string) => fs.pathExists(projectPath(folder))
 
   beforeEach(() => {
     return fs.removeAsync(projectsRoot)
@@ -44,44 +46,52 @@ describe('lib/util/bundle_cleaner', () => {
       await createBundle('stale-abc', 30 * DAY_MS)
       await createBundle('fresh-def', 1 * DAY_MS)
 
-      await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+      await bundleCleaner.removeStaleBundles(projectsRoot, bundlesPath('current-xyz'))
 
-      expect(await exists('stale-abc'), 'stale bundle removed').to.eq(false)
-      expect(await exists('fresh-def'), 'fresh bundle kept').to.eq(true)
+      expect(await bundleExists('stale-abc'), 'stale bundle removed').to.eq(false)
+      expect(await bundleExists('fresh-def'), 'fresh bundle kept').to.eq(true)
+    })
+
+    it('removes only the bundles dir, preserving the project saved state', async () => {
+      const stateFile = path.join(projectPath('stale-abc'), 'state.json')
+
+      await createBundle('stale-abc', 30 * DAY_MS)
+      await fs.writeFile(stateFile, '{}')
+
+      await bundleCleaner.removeStaleBundles(projectsRoot, bundlesPath('current-xyz'))
+
+      expect(await bundleExists('stale-abc'), 'stale bundle removed').to.eq(false)
+      expect(await fs.pathExists(stateFile), 'state.json preserved').to.eq(true)
     })
 
     it('does not remove non-bundle directories like __global__', async () => {
       // __global__ holds global saved state, not a bundle cache (no bundles/ subdir)
-      const globalDir = projectPath('__global__')
+      const globalState = path.join(projectPath('__global__'), 'state.json')
 
-      await fs.ensureDir(globalDir)
-      await fs.writeFile(path.join(globalDir, 'state.json'), '{}')
-      const old = new Date(Date.now() - 30 * DAY_MS)
-
-      await fs.utimes(globalDir, old, old)
+      await fs.outputFile(globalState, '{}')
 
       await createBundle('stale-abc', 30 * DAY_MS)
 
-      await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+      await bundleCleaner.removeStaleBundles(projectsRoot, bundlesPath('current-xyz'))
 
-      expect(await exists('__global__'), 'global state preserved').to.eq(true)
-      expect(await exists('stale-abc'), 'stale bundle removed').to.eq(false)
+      expect(await fs.pathExists(globalState), 'global state preserved').to.eq(true)
+      expect(await bundleExists('stale-abc'), 'stale bundle removed').to.eq(false)
     })
 
     it('never removes the current project bundle even when stale', async () => {
       await createBundle('current-xyz', 30 * DAY_MS)
 
-      await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+      await bundleCleaner.removeStaleBundles(projectsRoot, bundlesPath('current-xyz'))
 
-      expect(await exists('current-xyz')).to.eq(true)
+      expect(await bundleExists('current-xyz')).to.eq(true)
     })
 
     it('refreshes the current project bundle so it survives the next prune', async () => {
       await createBundle('current-xyz', 30 * DAY_MS)
 
-      await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+      await bundleCleaner.removeStaleBundles(projectsRoot, bundlesPath('current-xyz'))
 
-      const stat = await fs.statAsync(projectPath('current-xyz'))
+      const stat = await fs.statAsync(bundlesPath('current-xyz'))
 
       expect(Date.now() - stat.mtimeMs).to.be.lessThan(DAY_MS)
     })
@@ -93,13 +103,13 @@ describe('lib/util/bundle_cleaner', () => {
       await createBundle('newer-def', 1 * DAY_MS)
 
       try {
-        await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+        await bundleCleaner.removeStaleBundles(projectsRoot, bundlesPath('current-xyz'))
       } finally {
         delete process.env.CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_AGE_MS
       }
 
-      expect(await exists('older-abc'), 'older than override removed').to.eq(false)
-      expect(await exists('newer-def'), 'newer than override kept').to.eq(true)
+      expect(await bundleExists('older-abc'), 'older than override removed').to.eq(false)
+      expect(await bundleExists('newer-def'), 'newer than override kept').to.eq(true)
     })
 
     it('does not throw when the projects root does not exist', async () => {
@@ -108,7 +118,7 @@ describe('lib/util/bundle_cleaner', () => {
       await fs.removeAsync(missing)
 
       // should resolve without throwing
-      await bundleCleaner.removeStaleBundles(missing, path.join(missing, 'current-xyz'))
+      await bundleCleaner.removeStaleBundles(missing, path.join(missing, 'current-xyz', 'bundles'))
     })
 
     it('swallows errors when glob throws', async () => {
@@ -116,10 +126,10 @@ describe('lib/util/bundle_cleaner', () => {
 
       await createBundle('stale-abc', 30 * DAY_MS)
 
-      await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+      await bundleCleaner.removeStaleBundles(projectsRoot, bundlesPath('current-xyz'))
 
       // glob failed, so nothing was removed
-      expect(await exists('stale-abc')).to.eq(true)
+      expect(await bundleExists('stale-abc')).to.eq(true)
     })
 
     it('caps how many stale bundles are removed per run', async () => {
@@ -130,19 +140,19 @@ describe('lib/util/bundle_cleaner', () => {
       await createBundle('stale-c', 30 * DAY_MS)
 
       try {
-        await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+        await bundleCleaner.removeStaleBundles(projectsRoot, bundlesPath('current-xyz'))
       } finally {
         delete process.env.CYPRESS_INTERNAL_BUNDLE_CACHE_MAX_REMOVALS
       }
 
-      const remaining = await fs.readdir(projectsRoot)
+      const remaining = await globModule.globAsync(path.join(projectsRoot, '*', 'bundles'), { absolute: true })
 
       // only 2 of the 3 stale bundles are removed this run
       expect(remaining).to.have.length(1)
     })
 
     it('continues pruning when a bundle cannot be removed', async () => {
-      const lockedPath = projectPath('locked-abc')
+      const lockedPath = bundlesPath('locked-abc')
       const actualRemove = fs.removeAsync
 
       sinon.stub(fs, 'removeAsync').callsFake((target) => {
@@ -157,17 +167,17 @@ describe('lib/util/bundle_cleaner', () => {
       await createBundle('removable-def', 30 * DAY_MS)
 
       // does not throw despite the failed removal
-      await bundleCleaner.removeStaleBundles(projectsRoot, projectPath('current-xyz'))
+      await bundleCleaner.removeStaleBundles(projectsRoot, bundlesPath('current-xyz'))
 
-      expect(await exists('locked-abc'), 'unremovable bundle left in place').to.eq(true)
-      expect(await exists('removable-def'), 'removable bundle still pruned').to.eq(false)
+      expect(await bundleExists('locked-abc'), 'unremovable bundle left in place').to.eq(true)
+      expect(await bundleExists('removable-def'), 'removable bundle still pruned').to.eq(false)
     })
   })
 
   describe('.pruneStaleBundles', () => {
     it('resolves the app data paths for the project and prunes stale bundles', async () => {
       sinon.stub(appData, 'projectsPath').returns(projectsRoot)
-      sinon.stub(appData, 'projectBundlePath').returns(projectPath('current-xyz'))
+      sinon.stub(appData, 'projectBundlePath').returns(bundlesPath('current-xyz'))
 
       await createBundle('stale-abc', 30 * DAY_MS)
       await createBundle('current-xyz', 30 * DAY_MS)
@@ -175,8 +185,9 @@ describe('lib/util/bundle_cleaner', () => {
       await bundleCleaner.pruneStaleBundles('/some/project')
 
       expect(appData.projectBundlePath).to.be.calledWith('/some/project')
-      expect(await exists('stale-abc'), 'stale bundle removed').to.eq(false)
-      expect(await exists('current-xyz'), 'current project preserved').to.eq(true)
+      expect(await bundleExists('stale-abc'), 'stale bundle removed').to.eq(false)
+      expect(await bundleExists('current-xyz'), 'current project preserved').to.eq(true)
+      expect(await projectExists('stale-abc'), 'stale project dir preserved').to.eq(true)
     })
 
     it('never throws when pruning fails', async () => {

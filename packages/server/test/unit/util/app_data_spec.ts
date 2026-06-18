@@ -79,13 +79,12 @@ describe('lib/util/app_data', () => {
   })
 
   context('#projectBundlePath', () => {
-    it('points to the per-project bundle directory under projects', () => {
+    it('points to the per-project bundles cache directory under projects', () => {
       const projectRoot = '/foo/bar'
       const expectedPrefix = 'bar-1df481b1ec67d4d8bec721f521d4937d'
       const result = AppData.projectBundlePath(projectRoot)
 
-      expect(result).to.contain(path.join('projects', expectedPrefix))
-      expect(result).not.to.contain('bundles')
+      expect(result).to.contain(path.join('projects', expectedPrefix, 'bundles'))
     })
 
     it('normalizes the project root so equivalent paths resolve to the same dir', () => {

@@ -177,7 +177,7 @@ export const projectsPath = (...paths: string[]): string => {
 export const projectBundlePath = (projectRoot: string): string => {
   // resolve so the hash matches the cache directory the preprocessor writes to,
   // which is keyed off the resolved projectRoot (see ProjectBase)
-  return projectsPath(toHashName(resolve(projectRoot)))
+  return projectsPath(toHashName(resolve(projectRoot)), 'bundles')
 }
 
 export const remove = (): Promise<[void, void]> => {
