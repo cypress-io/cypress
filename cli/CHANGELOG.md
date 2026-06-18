@@ -26,7 +26,7 @@
 **Dependency Updates:**
 
 - Upgraded `webdriver` from `9.14.0` to `9.28.0`, `geckodriver` from `5.0.0` to `6.1.0`, and `edgedriver` from `6.1.1` to `6.3.0`. These packages are used to launch and automate Firefox during `cypress run` and `cypress open`. Addresses [#34072](https://github.com/cypress-io/cypress/issues/34072).
-- Upgraded `undici` from `6.26.0` to `6.27.0` to address a [CRLF Injection](https://security.snyk.io/vuln/SNYK-JS-UNDICI-17372658) vulnerability reported in security scans.
+- Upgraded `undici` from `6.26.0` to `6.27.0` to address a [CRLF Injection](https://security.snyk.io/vuln/SNYK-JS-UNDICI-17372658) vulnerability reported in security scans. Addressed in [#34121](https://github.com/cypress-io/cypress/pull/34121).
 
 ## 15.17.0
 
