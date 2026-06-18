@@ -6,7 +6,7 @@ export function isProxyEnabled (): boolean {
   return !isProxyDisabled()
 }
 
-export function ensureProxyServer (cfg: any): string {
+export function ensureProxyServer (cfg: { proxyServer?: string }): string {
   if (cfg.proxyServer) {
     return cfg.proxyServer
   }

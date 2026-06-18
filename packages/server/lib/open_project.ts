@@ -15,7 +15,7 @@ import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOpti
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
-import { isProxyDisabled, isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
+import { isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
 
 const debug = Debug('cypress:server:open_project')
 

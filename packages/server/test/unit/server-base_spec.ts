@@ -543,6 +543,10 @@ describe('lib/server-base', () => {
   })
 
   describe('#onConnect', () => {
+    afterEach(function () {
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+    })
+
     it('responds 403 when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
       process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
 
@@ -555,8 +559,6 @@ describe('lib/server-base', () => {
 
       expect(socket.write).to.have.been.calledWith('HTTP/1.1 403 Forbidden\r\n\r\nProxy is disabled\r\n')
       expect(socket.end).to.have.been.called
-
-      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
     })
   })
 })
