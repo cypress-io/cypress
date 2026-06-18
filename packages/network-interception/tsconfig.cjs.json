@@ -5,6 +5,14 @@
     "outDir": "./cjs",
     "target": "ES2022",
     "module": "CommonJS",
-    "moduleResolution": "node"
-  }
+    "moduleResolution": "node",
+    "noEmit": false
+  },
+  "include": [
+    "lib/*.ts",
+    "lib/**/*.ts"
+  ],
+  "exclude": [
+    "test/**"
+  ]
 }

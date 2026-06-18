@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ProxyCommandLogAdapter } from '../../../lib/adapters/proxy-command-log'
+import { createProxyNetworkServices } from '../../../lib/adapters/create-proxy-network-services'
 import { sendToDriver } from '../../../lib/adapters/send-to-driver'
 
 vi.mock('../../../lib/adapters/send-to-driver', () => {
@@ -8,31 +8,30 @@ vi.mock('../../../lib/adapters/send-to-driver', () => {
   }
 })
 
-describe('ProxyCommandLogAdapter', () => {
+describe('createProxyNetworkServices commandLog', () => {
   beforeEach(() => {
     vi.mocked(sendToDriver).mockReset()
   })
 
   it('delegates notifyIncomingRequest to sendToDriver helper', () => {
-    const adapter = new ProxyCommandLogAdapter()
+    const services = createProxyNetworkServices()
     const ctx = { req: { browserPreRequest: { requestId: '1' } } }
 
-    adapter.notifyIncomingRequest(ctx)
+    services.commandLog.notifyIncomingRequest(ctx)
 
     expect(sendToDriver).toHaveBeenCalledWith(ctx)
   })
 
   it('returns undefined from logInterception on the server', () => {
-    const adapter = new ProxyCommandLogAdapter()
+    const services = createProxyNetworkServices()
 
-    expect(adapter.logInterception({ interception: {}, route: {} })).toBeUndefined()
+    expect(services.commandLog.logInterception({ interception: {}, route: {} })).toBeUndefined()
   })
 
   it('is exported from the @packages/proxy barrel', async () => {
-    const { ProxyCommandLogAdapter: exportedAdapter } = await import('@packages/proxy')
+    const { createProxyNetworkServices: exportedFactory } = await import('@packages/proxy')
 
-    expect(exportedAdapter).toEqual(expect.any(Function))
-    expect(exportedAdapter.name).toBe('ProxyCommandLogAdapter')
-    expect(new exportedAdapter().notifyIncomingRequest).toEqual(expect.any(Function))
+    expect(exportedFactory).toEqual(expect.any(Function))
+    expect(exportedFactory().commandLog.notifyIncomingRequest).toEqual(expect.any(Function))
   })
 })

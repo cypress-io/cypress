@@ -1,15 +1,11 @@
-import type { BackendRoute } from '@packages/network-interception'
-import type {
-  InterceptedRequest,
-} from './intercepted-request'
+import type { BackendRoute, ForStubbing, GetFixtureFn, ResourceType } from '@packages/network-interception'
+import type { PendingEventHandler } from '../driver-intercept-bridge'
 
-export interface NetStubbingState {
+export type { BackendRoute, GetFixtureFn, ResourceType }
+
+export interface NetStubbingState extends ForStubbing {
   pendingEventHandlers: {
-    [eventId: string]: (opts: { changedData: any, stopPropagation: boolean }) => void
+    [eventId: string]: PendingEventHandler
   }
-  requests: {
-    [requestId: string]: InterceptedRequest
-  }
-  routes: BackendRoute[]
   reset: () => void
 }

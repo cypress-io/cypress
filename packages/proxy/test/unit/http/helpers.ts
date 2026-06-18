@@ -1,20 +1,20 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
-import { NetworkPolicyRegistry } from '@packages/network-interception'
-import { createProxyNetworkInterception } from '../../../lib/adapters/create-proxy-network-interception'
+import { createProxyNetworkServices } from '../../../lib/adapters/create-proxy-network-services'
+import { createMockNetworkInterception } from '../../support/mock-network-interception'
 
-export function createTestNetworkInterceptionCore () {
-  return createProxyNetworkInterception({
-    policyRegistration: new NetworkPolicyRegistry(),
-  })
+export function createTestNetworkServices () {
+  return createProxyNetworkServices()
 }
 
-export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onErrorHandler?: (error: Error) => void) {
+export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onError?: (error: unknown) => void) {
   const fullCtx = {
     debug: () => {},
     req: {},
     res: {},
     config: {},
-    networkInterceptionCore: createTestNetworkInterceptionCore(),
+    networkServices: createTestNetworkServices(),
+    networkInterception: createMockNetworkInterception(),
+    netStubbingState: { routes: [] },
 
     middleware: {
       0: middleware,
@@ -23,11 +23,11 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onE
     ...ctx,
   }
 
-  const onError = onErrorHandler ?? ((error) => {
+  const handleError = onError ?? ((error) => {
     throw error
   })
 
-  return _runStage(HttpStages.IncomingRequest, fullCtx, onError).then(() => {
+  return _runStage(HttpStages.IncomingRequest, fullCtx, handleError).then(() => {
     Object.assign(ctx, fullCtx)
   })
 }

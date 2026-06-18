@@ -32,7 +32,7 @@ const { getRunnerInjectionContents } = require(`@packages/resolve-dist`)
 const { createRoutes } = require(`../../lib/routes`)
 const { getCtx } = require(`../../lib/makeDataContext`)
 const dedent = require('dedent')
-const { unsupportedCSPDirectives } = require('@packages/proxy/lib/http/util/csp-header')
+const { unsupportedCSPDirectives } = require('@packages/network-interception')
 
 zlib = Promise.promisifyAll(zlib)
 

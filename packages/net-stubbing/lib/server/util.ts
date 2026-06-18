@@ -1,20 +1,19 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import mime from 'mime'
-import isHtml from 'is-html'
-import { IncomingMessage } from 'http'
-import type {
-  BackendStaticResponse,
-  GetFixtureFn, CyHttpMessages } from '@packages/network-interception'
+import type { IncomingMessage } from 'http'
+import type { BackendStaticResponse } from '@packages/network-interception'
+
+export { getAllStringMatcherFields } from '@packages/network-interception'
 
 import { Readable, PassThrough } from 'stream'
-import { Socket } from 'net'
+import type { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import type { CypressIncomingRequest } from '@packages/proxy'
-import type { InterceptedRequest } from './intercepted-request'
 import type { SocketBroadcaster } from '@packages/socket'
 import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 
+import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
@@ -54,31 +53,6 @@ export function emit (socket: SocketBroadcaster, eventName: string, data: object
   }
 
   socket.toDriver('net:stubbing:event', eventName, data)
-}
-
-/**
- * Generate a "response object" that looks like a real Node HTTP response.
- * Instead of directly manipulating the response by using `res.status`, `res.setHeader`, etc.,
- * generating an IncomingMessage allows us to treat the response the same as any other "real"
- * HTTP response, which means the proxy layer can apply response middleware to it.
- */
-function _getFakeClientResponse (opts: {
-  statusCode: number
-  headers: {
-    [k: string]: string
-  }
-  body: string
-}) {
-  const clientResponse = new IncomingMessage(new Socket)
-
-  // be nice and infer this content-type for the user
-  if (!caseInsensitiveGet(opts.headers || {}, 'content-type') && isHtml(opts.body)) {
-    opts.headers['content-type'] = 'text/html'
-  }
-
-  _.merge(clientResponse, opts)
-
-  return clientResponse
 }
 
 export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMessage) {
@@ -149,36 +123,6 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
   staticResponse.body = getBody()
 }
 
-/**
- * Using an existing response object, send a response shaped by a StaticResponse object.
- * @param backendRequest BackendRequest object.
- * @param staticResponse BackendStaticResponse object.
- */
-export async function sendStaticResponse (backendRequest: Pick<InterceptedRequest, 'res' | 'onError' | 'onResponse'>, staticResponse: BackendStaticResponse) {
-  const { onError, onResponse } = backendRequest
-
-  if (staticResponse.forceNetworkError) {
-    debug('forcing network error')
-    const err = new Error('forceNetworkError called')
-
-    return onError(err)
-  }
-
-  const statusCode = staticResponse.statusCode || 200
-  const headers = staticResponse.headers || {}
-  const body = backendRequest.res.body = _.isUndefined(staticResponse.body) ? '' : staticResponse.body
-
-  const incomingRes = _getFakeClientResponse({
-    statusCode,
-    headers,
-    body,
-  })
-
-  const bodyStream = await getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'delay'))
-
-  onResponse!(incomingRes, bodyStream)
-}
-
 export async function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Promise<Readable> {
   const { delay, throttleKbps } = options
   const pt = new PassThrough()
@@ -214,28 +158,6 @@ function wait (fn, ms) {
     setTimeout(() => {
       resolve(fn())
     }, ms)
-  })
-}
-
-export function mergeDeletedHeaders (before: CyHttpMessages.BaseMessage, after: CyHttpMessages.BaseMessage) {
-  for (const k in before.headers) {
-    // a header was deleted from `after` but was present in `before`, delete it in `before` too.
-    // only treat `undefined` (deleted via `delete` or explicitly set to `undefined`) as removal -
-    // an empty string is a valid header value and must be preserved (#25767)
-    after.headers[k] === undefined && delete before.headers[k]
-  }
-}
-
-export function mergeWithPreservedBuffers (before: CyHttpMessages.BaseMessage, after: Partial<CyHttpMessages.BaseMessage>) {
-  // lodash merge converts Buffer into Array (by design)
-  // https://github.com/lodash/lodash/issues/2964
-  // @see https://github.com/cypress-io/cypress/issues/15898
-  _.mergeWith(before, after, (_a, b) => {
-    if (b instanceof Buffer) {
-      return b
-    }
-
-    return undefined
   })
 }
 

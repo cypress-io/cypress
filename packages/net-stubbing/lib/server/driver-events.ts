@@ -1,25 +1,21 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import { getAllStringMatcherFields, PLAIN_FIELDS } from '@packages/network-interception'
-import type {
-  BackendRoute,
-  GetFixtureFn,
+import type { BackendRoute, BackendStaticResponse, ForPendingHandlerResolution, ForStubbing, GetFixtureFn } from '@packages/network-interception'
+import {
+  PLAIN_FIELDS,
   AnnotatedRouteMatcherOptions,
   RouteMatcherOptions,
-  BackendStaticResponse,
   NetEvent,
 } from '@packages/network-interception'
-import type { NetStubbingState } from './types'
 import {
-  sendStaticResponse as _sendStaticResponse,
+  getAllStringMatcherFields,
   setResponseFromFixture,
 } from './util'
-import { InterceptedRequest } from './intercepted-request'
-import type { SocketBroadcaster } from '@packages/socket'
+import type { CyInterceptIntercepter } from '../intercepters/cy-intercept-intercepter'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
-async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.AddRoute<BackendStaticResponse>) {
+async function onRouteAdded (state: ForStubbing, getFixture: GetFixtureFn, options: NetEvent.ToServer.AddRoute<BackendStaticResponse>) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
   const { staticResponse } = options
 
@@ -37,40 +33,6 @@ async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, 
   }
 
   state.routes.push(route)
-}
-
-function getRequest (state: NetStubbingState, requestId: string) {
-  return Object.values(state.requests).find(({ id }) => {
-    return requestId === id
-  })
-}
-
-function subscribe (state: NetStubbingState, options: NetEvent.ToServer.Subscribe) {
-  const request = getRequest(state, options.requestId)
-
-  if (!request) {
-    return
-  }
-
-  request.addSubscription(options.subscription)
-}
-
-async function sendStaticResponse (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEvent.ToServer.SendStaticResponse) {
-  const request = getRequest(state, options.requestId)
-
-  if (!request) {
-    return
-  }
-
-  if (options.staticResponse.fixture && ['before:response', 'response:callback', 'response'].includes(request.lastEvent!)) {
-    // if we're already in a response phase, it's possible that the fixture body will never be sent to the browser
-    // so include the fixture body in `after:response`
-    request.includeBodyInAfterResponse = true
-  }
-
-  await setResponseFromFixture(getFixture, options.staticResponse)
-
-  await _sendStaticResponse(request, options.staticResponse)
 }
 
 export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
@@ -107,27 +69,37 @@ export type OnNetStubbingEventFrame = NetEvent.ToServer.AddRoute<BackendStaticRe
 
 type OnNetStubbingEventOpts = {
   eventName: string
-  state: NetStubbingState
-  socket: SocketBroadcaster
+  state: ForStubbing
   getFixture: GetFixtureFn
-  args: any[]
   frame: OnNetStubbingEventFrame
+  cyIntercept: CyInterceptIntercepter
+  pendingHandlerResolution: ForPendingHandlerResolution
 }
 
 export async function onNetStubbingEvent (opts: OnNetStubbingEventOpts): Promise<any> {
-  const { state, getFixture, args, eventName, frame } = opts
+  const { getFixture, eventName, frame, state, cyIntercept, pendingHandlerResolution } = opts
 
-  debug('received driver event %o', { eventName, args })
+  debug('received driver event %o', { eventName, frame })
 
   switch (eventName) {
     case 'route:added':
       return onRouteAdded(state, getFixture, <NetEvent.ToServer.AddRoute<BackendStaticResponse>>frame)
     case 'subscribe':
-      return subscribe(state, <NetEvent.ToServer.Subscribe>frame)
+      return cyIntercept.addSubscription(
+        (<NetEvent.ToServer.Subscribe>frame).requestId,
+        (<NetEvent.ToServer.Subscribe>frame).subscription,
+      )
     case 'event:handler:resolved':
-      return InterceptedRequest.resolveEventHandler(state, <NetEvent.ToServer.EventHandlerResolved>frame)
-    case 'send:static:response':
-      return sendStaticResponse(state, getFixture, <NetEvent.ToServer.SendStaticResponse>frame)
+      return pendingHandlerResolution.resolveEventHandler(<NetEvent.ToServer.EventHandlerResolved>frame)
+    case 'send:static:response': {
+      const sendStaticResponseFrame = <NetEvent.ToServer.SendStaticResponse>frame
+
+      return cyIntercept.fulfillStaticResponse(
+        sendStaticResponseFrame.requestId,
+        sendStaticResponseFrame.staticResponse,
+        getFixture,
+      )
+    }
     default:
       throw new Error(`Unrecognized net event: ${eventName}`)
   }

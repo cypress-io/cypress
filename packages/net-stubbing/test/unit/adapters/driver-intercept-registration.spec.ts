@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { DriverInterceptRegistrationAdapter } from '../../../lib/adapters/driver-intercept-registration'
+import { createDriverAdapter } from '../../../lib/adapters/create-driver-adapter'
+import { DriverInterceptionEventsAdapter } from '../../../lib/adapters/driver-interception-events-adapter'
 import { onNetStubbingEvent } from '../../../lib/server/driver-events'
 import { state as netStubbingState } from '../../../lib/server/state'
-import { InterceptedRequest } from '../../../lib/server/intercepted-request'
 import type { InterceptRegistrationRequest } from '@packages/network-interception'
 
 vi.mock('../../../lib/server/driver-events', async (importOriginal) => {
@@ -14,27 +14,29 @@ vi.mock('../../../lib/server/driver-events', async (importOriginal) => {
   }
 })
 
-describe('DriverInterceptRegistrationAdapter', () => {
+describe('createDriverAdapter intercept registration', () => {
   const getFixture = vi.fn(async () => '')
   const socket = { toDriver: vi.fn() }
   let state: ReturnType<typeof netStubbingState>
+  let driverAdapter: ReturnType<typeof createDriverAdapter>
 
   beforeEach(() => {
     vi.mocked(onNetStubbingEvent).mockClear()
     state = netStubbingState()
     getFixture.mockClear()
+
+    driverAdapter = createDriverAdapter({
+      stubbing: state,
+      socket,
+    })
   })
 
-  const createAdapter = () => {
-    return new DriverInterceptRegistrationAdapter({
-      state,
-      socket,
-      getFixture,
-    })
+  const createRegistration = () => {
+    return driverAdapter.createInterceptRegistration({ getFixture })
   }
 
   it('delegates handleEvent to onNetStubbingEvent with adapter context', async () => {
-    const adapter = createAdapter()
+    const registration = createRegistration()
     const request: InterceptRegistrationRequest = {
       eventName: 'route:added',
       frame: {
@@ -44,23 +46,23 @@ describe('DriverInterceptRegistrationAdapter', () => {
       },
     }
 
-    await adapter.handleEvent(request)
+    await registration.handleEvent(request)
 
     expect(onNetStubbingEvent).toHaveBeenCalledOnce()
     expect(onNetStubbingEvent).toHaveBeenCalledWith({
       eventName: 'route:added',
       frame: request.frame,
       state,
-      socket,
       getFixture,
-      args: ['route:added', request.frame],
+      cyIntercept: driverAdapter.cyIntercept,
+      pendingHandlerResolution: driverAdapter.interceptionEvents,
     })
   })
 
   it('forwards route:added to net stubbing state', async () => {
-    const adapter = createAdapter()
+    const registration = createRegistration()
 
-    await adapter.handleEvent({
+    await registration.handleEvent({
       eventName: 'route:added',
       frame: {
         routeId: 'route-1',
@@ -73,96 +75,42 @@ describe('DriverInterceptRegistrationAdapter', () => {
     expect(state.routes[0].id).toBe('route-1')
   })
 
-  it('forwards subscribe to the matching intercepted request', async () => {
-    const adapter = createAdapter()
-    const interceptedRequest = new InterceptedRequest({
-      req: {
-        matchingRoutes: [{
-          id: 'route-1',
-          hasInterceptor: true,
-          routeMatcher: {},
-        }],
-      } as any,
-      res: {} as any,
-      continueRequest: vi.fn(),
-      onError: vi.fn(),
-      onResponse: vi.fn(),
-      state,
-      socket,
+  it('fulfills send:static:response while before:request is in flight', async () => {
+    let resolveBeforeRequest!: () => void
+
+    vi.spyOn(driverAdapter.interceptionEvents, 'emitAndAwait').mockImplementation(async (eventName) => {
+      if (eventName === 'before:request') {
+        await new Promise<void>((resolve) => {
+          resolveBeforeRequest = resolve
+        })
+      }
+
+      return {}
     })
 
-    interceptedRequest.id = 'req-1'
-    interceptedRequest.addDefaultSubscriptions()
-    state.requests[interceptedRequest.id] = interceptedRequest
+    const registration = createRegistration()
 
-    const addSubscription = vi.spyOn(interceptedRequest, 'addSubscription')
-
-    await adapter.handleEvent({
-      eventName: 'subscribe',
-      frame: {
-        requestId: 'req-1',
-        subscription: {
-          routeId: 'route-1',
-          eventName: 'before:request',
-          await: true,
-        },
-      },
+    state.routes.push({
+      id: 'route-1',
+      hasInterceptor: true,
+      routeMatcher: { url: 'http://example.com/*' },
+      getFixture,
+      matches: 0,
     })
 
-    expect(addSubscription).toHaveBeenCalledTimes(1)
-  })
-
-  it('forwards event:handler:resolved to pending handlers', async () => {
-    const adapter = createAdapter()
-    const handler = vi.fn()
-
-    state.pendingEventHandlers['event-1'] = handler
-
-    await adapter.handleEvent({
-      eventName: 'event:handler:resolved',
-      frame: {
-        eventId: 'event-1',
-        changedData: { url: 'http://example.com' },
-        stopPropagation: false,
-      },
+    const handlePromise = driverAdapter.httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, async () => {
+      throw new Error('next should not be called')
     })
 
-    expect(handler).toHaveBeenCalledTimes(1)
-    expect(handler).toHaveBeenCalledWith({
-      eventId: 'event-1',
-      changedData: { url: 'http://example.com' },
-      stopPropagation: false,
-    })
-
-    expect(state.pendingEventHandlers['event-1']).toBeUndefined()
-  })
-
-  it('forwards send:static:response to the matching intercepted request', async () => {
-    const adapter = createAdapter()
-    const onResponse = vi.fn()
-    const interceptedRequest = new InterceptedRequest({
-      req: {
-        matchingRoutes: [{
-          id: 'route-1',
-          hasInterceptor: true,
-          routeMatcher: {},
-        }],
-      } as any,
-      res: {} as any,
-      continueRequest: vi.fn(),
-      onError: vi.fn(),
-      onResponse,
-      state,
-      socket,
-    })
-
-    interceptedRequest.id = 'req-1'
-    state.requests[interceptedRequest.id] = interceptedRequest
-
-    await adapter.handleEvent({
+    await registration.handleEvent({
       eventName: 'send:static:response',
       frame: {
-        requestId: 'req-1',
+        requestId: 'intercept-1',
         staticResponse: {
           statusCode: 200,
           body: 'response body',
@@ -170,7 +118,69 @@ describe('DriverInterceptRegistrationAdapter', () => {
       },
     })
 
-    expect(onResponse).toHaveBeenCalledTimes(1)
-    expect(interceptedRequest.res.body).toBe('response body')
+    resolveBeforeRequest()
+
+    const response = await handlePromise
+
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toBe('response body')
+  })
+
+  it('forwards event:handler:resolved to pending handlers', async () => {
+    const interceptionEvents = new DriverInterceptionEventsAdapter({
+      state,
+      socket,
+    })
+    const cyIntercept = driverAdapter.cyIntercept
+    const registration = {
+      handleEvent (request: InterceptRegistrationRequest): Promise<unknown> {
+        return onNetStubbingEvent({
+          eventName: request.eventName,
+          frame: request.frame as any,
+          state,
+          getFixture,
+          cyIntercept,
+          pendingHandlerResolution: interceptionEvents,
+        })
+      },
+    }
+    const handler = vi.fn()
+
+    state.pendingEventHandlers['event-1'] = {
+      eventName: 'before:request',
+      complete: handler,
+    }
+
+    await registration.handleEvent({
+      eventName: 'event:handler:resolved',
+      frame: {
+        eventId: 'event-1',
+        changedData: {
+          url: 'http://example.com',
+          method: 'GET',
+          headers: {},
+          body: '',
+          query: {},
+          httpVersion: '1.1',
+          resourceType: 'other',
+        },
+        stopPropagation: false,
+      },
+    })
+
+    expect(handler).toHaveBeenCalledTimes(1)
+    expect(handler).toHaveBeenCalledWith({
+      changedData: {
+        inFlightInterceptId: '',
+        url: 'http://example.com',
+        method: 'GET',
+        headers: {},
+        body: '',
+        resourceType: 'other',
+      },
+      stopPropagation: false,
+    })
+
+    expect(state.pendingEventHandlers['event-1']).toBeUndefined()
   })
 })

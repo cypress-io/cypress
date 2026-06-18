@@ -29,6 +29,8 @@ export type CypressIncomingRequest = Request & {
    */
   matchingRoutes?: BackendRoute[]
   isSyncRequest: boolean
+  /** Set when cy.intercept applied during ApplyHttpInterception. */
+  hadIntercept?: boolean
 }
 
 export type CypressWantsInjection = 'full' | 'fullCrossOrigin' | 'partial' | false

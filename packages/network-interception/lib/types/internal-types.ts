@@ -2,9 +2,9 @@ import type {
   RouteMatcherOptionsGeneric,
   GenericStaticResponse,
   Subscription,
-  CyHttpMessages,
   InterceptOptions,
 } from './external-types'
+import type { HttpResponse } from '../ports/http-interception'
 
 export type FixtureOpts = {
   encoding: string | null
@@ -79,7 +79,7 @@ export declare namespace NetEvent {
       data: D
     }
 
-    export interface Response extends Event<CyHttpMessages.IncomingResponse> {}
+    export interface Response extends Event<HttpResponse & { url?: string }> {}
   }
 
   export namespace ToServer {

@@ -1,6 +1,4 @@
 import type { NetEvent } from '../types'
-import type { NetworkPolicy } from '../policies/types'
-import type { RunPoliciesOptions, RunPoliciesResult } from '../registry/network-policy-registry'
 
 export type InterceptRegistrationEventName =
   | 'route:added'
@@ -23,16 +21,4 @@ export interface ForInterceptRegistration {
   handleEvent (request: InterceptRegistrationRequest): Promise<unknown>
 }
 
-/**
- * Driving port: composition root registers configurator policies (blockHosts, CSP, rewrites).
- *
- * Implemented by {@link NetworkPolicyRegistry}. `@packages/server` calls `add()` at startup;
- * policy definitions and config mapping live in server, not inside network-interception.
- */
-export interface ForNetworkPolicyRegistration {
-  add (policy: NetworkPolicy): void
-
-  getPolicies (): ReadonlyArray<NetworkPolicy>
-
-  runPolicies (options: RunPoliciesOptions): Promise<RunPoliciesResult>
-}
+export * from './http-interception'

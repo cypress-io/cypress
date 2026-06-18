@@ -8,6 +8,7 @@ import { connect } from '@packages/network'
 import { setupFullConfigWithDefaults } from '@packages/config'
 import { ServerBase } from '../../lib/server-base'
 import { SocketE2E } from '../../lib/socket-e2e'
+import { createDriverAdapter } from '@packages/net-stubbing'
 import * as fileServer from '../../lib/file_server'
 import * as ensureUrl from '../../lib/util/ensure-url'
 import { getCtx } from '@packages/data-context'
@@ -172,6 +173,10 @@ describe('lib/server-base', () => {
         expect(this.server.createNetworkProxy).not.to.have.been.called
         expect(this.server._networkProxy).to.be.undefined
         expect(this.server._netStubbingState).to.exist
+        expect(this.server.networkInterception).to.exist
+        expect(this.server._driverAdapter).to.exist
+        expect(this.server.networkInterception).to.equal(this.server._driverAdapter.httpIntercept)
+        expect(this.server._driverAdapter.interceptionEvents).to.exist
       })
       .finally(() => {
         delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
@@ -400,6 +405,35 @@ describe('lib/server-base', () => {
         this.server.startWebsockets(1, 2, arg2)
 
         expect(this.startListening).to.be.calledWith(this.server.getHttpServer(), 1, 2, arg2)
+      })
+    })
+
+    it('wires intercept registration to the driver cy.intercept middleware when proxy is disabled', function () {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+      _.extend(this.config, { port: 54321 })
+      const app = { use: sinon.stub() }
+      const mockHttpServer = { on: sinon.stub(), close: sinon.stub(), listeners: sinon.stub().returns([]) }
+
+      sinon.stub(this.server, 'createExpressApp').returns(app)
+      sinon.stub(this.server, 'createServer').callsFake(async function (this: ServerBase) {
+        this._server = mockHttpServer as any
+
+        return [54321]
+      })
+
+      return this.server.open(this.config, getOpenOptions())
+      .then(() => {
+        sinon.stub(this.server, '_normalizeReqUrl')
+        this.server.startWebsockets(1, 2, {})
+
+        const wsOptions = this.startListening.lastCall.args[3]
+
+        expect(wsOptions.interceptRegistration).to.have.property('handleEvent').that.is.a('function')
+        expect(this.server._driverAdapter.cyIntercept).to.exist
+        expect(this.server._driverAdapter.interceptionEvents).to.exist
+      })
+      .finally(() => {
+        delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
       })
     })
   })

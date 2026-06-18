@@ -50,6 +50,18 @@ describe('core/document-preparation', () => {
         urlDoesNotMatchPolicyBasedOnDomain: false,
       })).toBe(false)
     })
+
+    it('returns partial for rendered HTML on non-initial loads', () => {
+      expect(resolveInjectionLevel({
+        hasFileServerError: false,
+        isInitial: false,
+        isHTML: true,
+        isRenderedHTML: true,
+        isReqMatchSuperDomainOrigin: true,
+        isAUTFrame: true,
+        urlDoesNotMatchPolicyBasedOnDomain: false,
+      })).toBe('partial')
+    })
   })
 
   describe('resolveWantsSecurityRemoved', () => {
@@ -110,6 +122,42 @@ describe('core/document-preparation', () => {
         isRenderedHTML: true,
         isReqMatchSuperDomainOrigin: false,
         isJavaScript: false,
+      })).toBe(true)
+    })
+
+    it('returns false for partial injection when only modifyObstructiveCode is enabled', () => {
+      expect(resolveWantsSecurityRemoved({
+        modifyObstructiveCode: true,
+        experimentalModifyObstructiveThirdPartyCode: false,
+        wantsInjection: 'partial',
+        isHTML: true,
+        isRenderedHTML: true,
+        isReqMatchSuperDomainOrigin: true,
+        isJavaScript: false,
+      })).toBe(false)
+    })
+
+    it('returns true for same-origin JavaScript when modifyObstructiveCode is enabled', () => {
+      expect(resolveWantsSecurityRemoved({
+        modifyObstructiveCode: true,
+        experimentalModifyObstructiveThirdPartyCode: false,
+        wantsInjection: false,
+        isHTML: false,
+        isRenderedHTML: false,
+        isReqMatchSuperDomainOrigin: true,
+        isJavaScript: true,
+      })).toBe(true)
+    })
+
+    it('returns true for third-party JavaScript when experimentalModifyObstructiveThirdPartyCode is enabled', () => {
+      expect(resolveWantsSecurityRemoved({
+        modifyObstructiveCode: false,
+        experimentalModifyObstructiveThirdPartyCode: true,
+        wantsInjection: false,
+        isHTML: false,
+        isRenderedHTML: false,
+        isReqMatchSuperDomainOrigin: false,
+        isJavaScript: true,
       })).toBe(true)
     })
   })

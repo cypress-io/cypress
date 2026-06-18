@@ -3,6 +3,7 @@ import type { ReceivedCypressOptions } from './config'
 import type { PlatformName } from './platform'
 import type { RunModeVideoApi } from './video'
 import type { ProtocolManagerShape } from './protocol'
+import type { ForNetworkInterception } from '@packages/network-interception'
 import type Protocol from 'devtools-protocol'
 import type { SupportedKey } from './automation'
 
@@ -73,6 +74,7 @@ export type OpenProjectLaunchOpts = {
   onWarning: (err: Error) => void
   onError: (err: Error) => void
   protocolManager?: ProtocolManagerShape
+  networkInterception?: ForNetworkInterception
 }
 
 export type BrowserLaunchOpts = {
@@ -85,6 +87,7 @@ export type BrowserLaunchOpts = {
   onBrowserOpen?: (...args: unknown[]) => void
   relaunchBrowser?: () => Promise<any>
   protocolManager?: ProtocolManagerShape
+  networkInterception?: ForNetworkInterception
 } & Partial<OpenProjectLaunchOpts> // TODO: remove the `Partial` here by making it impossible for openProject.launch to be called w/o OpenProjectLaunchOpts
 & Pick<ReceivedCypressOptions, 'userAgent' | 'proxyUrl' | 'socketIoRoute' | 'chromeWebSecurity' | 'downloadsFolder' | 'experimentalModifyObstructiveThirdPartyCode' | 'experimentalWebKitSupport'>
 

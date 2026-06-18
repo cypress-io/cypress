@@ -1,28 +1,14 @@
-import type { RunPoliciesResult } from '../registry/network-policy-registry'
+export * from './interception-events'
+
+import type { BackendRoute } from '../types/backend-route'
 
 /**
- * Driven port: correlate pre-requests, continue/fulfill, forward to origin.
+ * Driven port: minimum net-stubbing surface the cy.intercept interceptor needs.
+ *
+ * Implemented by `NetStubbingState` in `@packages/net-stubbing`.
  */
-export interface ForRequestInterception {
-  correlateBrowserPreRequest (ctx: unknown): Promise<void>
-
-  /**
-   * HTTP/2 bypass boundary — sends the proxied request to the origin via Node HTTP.
-   * Not used on the browser-automation (CDP Fetch) path in the HTTP/2 program.
-   */
-  forwardToOrigin (ctx: unknown): void
-
-  endRequestIfBlocked (
-    ctx: unknown,
-    runPolicies: () => Promise<RunPoliciesResult>,
-  ): Promise<void>
-}
-
-/**
- * Driven port: response intercept continuation and stream plumbing.
- */
-export interface ForResponseInterception {
-  interceptResponse (ctx: unknown): Promise<void>
+export interface ForStubbing {
+  routes: BackendRoute[]
 }
 
 /**
@@ -70,11 +56,4 @@ export interface ForCommandLog {
   notifyIncomingRequest (ctx: unknown): void
 
   logInterception (input: CommandLogInterceptionInput): CommandLogInterceptionResult
-}
-
-/**
- * Driven port: CDP/BiDi session hooks (HTTP/2 program).
- */
-export interface ForBrowserNetworkAutomation {
-  // Expanded in HTTP/2 epics.
 }

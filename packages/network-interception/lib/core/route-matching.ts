@@ -1,16 +1,13 @@
 import _ from 'lodash'
 import minimatch from 'minimatch'
 import url from 'url'
+import type { HttpRequest } from '../ports/http-interception'
 import type { RouteMatcherOptions } from '../types'
 import type { BackendRoute } from '../types/backend-route'
 import { getAllStringMatcherFields } from './matcher-fields'
 
-export type RouteMatchableRequest = {
-  headers: Record<string, string | string[] | undefined>
-  method: string
-  proxiedUrl: string
-  resourceType?: string
-}
+/** Minimal request facts used by `cy.intercept` route matching. */
+export type RouteMatchableRequest = Pick<HttpRequest, 'url' | 'method' | 'headers' | 'resourceType'>
 
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
@@ -108,13 +105,13 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
     }
   }
 
-  const proxiedUrl = url.parse(req.proxiedUrl, true)
+  const parsedUrl = url.parse(req.url, true)
 
-  _.assign(matchable, _.pick(proxiedUrl, ['hostname', 'path', 'pathname', 'port', 'query']))
+  _.assign(matchable, _.pick(parsedUrl, ['hostname', 'path', 'pathname', 'port', 'query']))
 
-  matchable.url = req.proxiedUrl
+  matchable.url = req.url
 
-  matchable.https = proxiedUrl.protocol && (proxiedUrl.protocol.indexOf('https') === 0)
+  matchable.https = parsedUrl.protocol && (parsedUrl.protocol.indexOf('https') === 0)
 
   if (!matchable.port) {
     matchable.port = matchable.https ? 443 : 80
@@ -123,27 +120,11 @@ export function getMatchableForRequest (req: RouteMatchableRequest) {
   return matchable
 }
 
-/** @deprecated Use {@link doesRouteMatch} — kept for net-stubbing strangler re-exports. */
-export const _doesRouteMatch = doesRouteMatch
-
-/** @deprecated Use {@link getMatchableForRequest} */
-export const _getMatchableForRequest = getMatchableForRequest
-
-/**
- * Find all `BackendRoute`s that match the supplied request.
- */
 export function matchRoutes (routes: BackendRoute[], req: RouteMatchableRequest): BackendRoute[] {
   const [middleware, handlers] = _.partition(routes, (route) => route.routeMatcher.middleware === true)
   const orderedRoutes = middleware.concat(handlers.reverse())
 
   return orderedRoutes.filter((route) => !route.disabled && doesRouteMatch(route.routeMatcher, req))
-}
-
-/** @deprecated Use {@link matchRoutes} */
-export function* getRoutesForRequest (routes: BackendRoute[], req: RouteMatchableRequest) {
-  for (const route of matchRoutes(routes, req)) {
-    yield route
-  }
 }
 
 function isPreflightRequest (req: RouteMatchableRequest) {

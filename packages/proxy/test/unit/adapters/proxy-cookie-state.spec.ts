@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ProxyCookieStateAdapter } from '../../../lib/adapters/proxy-cookie-state'
+import { createProxyNetworkServices } from '../../../lib/adapters/create-proxy-network-services'
 import { attachCrossOriginCookies } from '../../../lib/adapters/attach-cross-origin-cookies'
 import { copyCookiesFromResponse } from '../../../lib/adapters/copy-cookies-from-response'
 
@@ -15,30 +15,30 @@ vi.mock('../../../lib/adapters/copy-cookies-from-response', () => {
   }
 })
 
-describe('ProxyCookieStateAdapter', () => {
+describe('createProxyNetworkServices cookieState', () => {
   beforeEach(() => {
     vi.mocked(attachCrossOriginCookies).mockReset()
     vi.mocked(copyCookiesFromResponse).mockReset()
   })
 
   it('delegates attachCrossOriginCookies to helper', async () => {
-    const adapter = new ProxyCookieStateAdapter()
+    const services = createProxyNetworkServices()
     const ctx = { req: {} }
 
     vi.mocked(attachCrossOriginCookies).mockResolvedValue(undefined)
 
-    await adapter.attachCrossOriginCookies(ctx)
+    await services.cookieState.attachCrossOriginCookies(ctx)
 
     expect(attachCrossOriginCookies).toHaveBeenCalledWith(ctx)
   })
 
   it('delegates copyCookiesFromResponse to helper', async () => {
-    const adapter = new ProxyCookieStateAdapter()
+    const services = createProxyNetworkServices()
     const ctx = { req: {} }
 
     vi.mocked(copyCookiesFromResponse).mockResolvedValue(undefined)
 
-    await adapter.copyCookiesFromResponse(ctx)
+    await services.cookieState.copyCookiesFromResponse(ctx)
 
     expect(copyCookiesFromResponse).toHaveBeenCalledWith(ctx)
   })

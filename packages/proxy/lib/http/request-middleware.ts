@@ -1,11 +1,19 @@
 import _ from 'lodash'
-import { InterceptRequest, SetMatchingRoutes } from '@packages/net-stubbing'
+import { concatStream } from '@packages/network'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
 import { resourceTypeAndCredentialManager } from '../resourceTypeAndCredentialManager'
 import type { HttpMiddleware } from './'
 import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
+import { correlateBrowserPreRequest } from '../adapters/correlate-browser-pre-request'
+import {
+  applyOutboundToProxiedRequest,
+  fetchOriginAsHttpResponse,
+  toHttpRequest,
+} from '../adapters/proxy-http-interception'
+import { applyHttpResponseToCtx } from '../adapters/apply-http-response'
+import { getBodyEncoding } from '@packages/net-stubbing/lib/server/util'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -93,7 +101,7 @@ const MaybeSimulateSecHeaders: RequestMiddleware = function () {
 }
 
 const CorrelateBrowserPreRequest: RequestMiddleware = async function () {
-  return this.networkInterceptionCore.correlateBrowserPreRequest(this)
+  return correlateBrowserPreRequest(this)
 }
 
 const CalculateCredentialLevelIfApplicable: RequestMiddleware = function () {
@@ -134,11 +142,11 @@ const FormatCookiesIfApplicable: RequestMiddleware = function () {
 }
 
 const MaybeAttachCrossOriginCookies: RequestMiddleware = async function () {
-  return this.networkInterceptionCore.attachCrossOriginCookies(this)
+  return this.networkServices.cookieState.attachCrossOriginCookies(this)
 }
 
 const SendToDriver: RequestMiddleware = function () {
-  this.networkInterceptionCore.notifyIncomingRequest(this)
+  this.networkServices.commandLog.notifyIncomingRequest(this)
 }
 
 const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
@@ -214,10 +222,6 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   this.next()
 }
 
-const EndRequestsToBlockedHosts: RequestMiddleware = async function () {
-  return this.networkInterceptionCore.endRequestIfBlocked(this)
-}
-
 const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'strip:unsupported:accept:encoding', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
@@ -268,8 +272,93 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   this.next()
 }
 
-const SendRequestOutgoing: RequestMiddleware = function () {
-  this.networkInterceptionCore.forwardToOrigin(this)
+const ApplyHttpInterception: RequestMiddleware = async function () {
+  const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
+
+  const devServerUrl = new URL(this.req.proxiedUrl)
+
+  if (devServerUrl.pathname.startsWith(this.config.devServerPublicPathRoute)) {
+    span?.end()
+
+    try {
+      const httpResponse = await fetchOriginAsHttpResponse(this)
+
+      return applyHttpResponseToCtx(this, httpResponse)
+    } catch (err) {
+      return this.onError(err)
+    }
+  }
+
+  await ensureRequestBody(this)
+
+  const bodyEncoding = getBodyEncoding({
+    body: this.req.body,
+    headers: this.req.headers,
+  } as any)
+
+  if (bodyEncoding !== 'binary' && this.req.body && Buffer.isBuffer(this.req.body)) {
+    this.req.body = this.req.body.toString('utf8')
+  }
+
+  const httpRequest = toHttpRequest(this)
+
+  this.req.requestId = httpRequest.inFlightInterceptId
+
+  try {
+    const httpResponse = await this.networkInterception.handle(httpRequest, async (outbound) => {
+      applyOutboundToProxiedRequest(this.req, outbound)
+
+      return fetchOriginAsHttpResponse(this)
+    })
+
+    if (httpRequest.hadIntercept) {
+      this.req.hadIntercept = true
+    }
+
+    span?.end()
+
+    return applyHttpResponseToCtx(this, httpResponse)
+  } catch (err) {
+    span?.end()
+
+    return this.onError(err)
+  }
+}
+
+const SendRequestOutgoing: RequestMiddleware = async function () {
+  try {
+    const httpResponse = await fetchOriginAsHttpResponse(this)
+
+    return applyHttpResponseToCtx(this, httpResponse)
+  } catch (err) {
+    return this.onError(err)
+  }
+}
+
+async function ensureRequestBody (mw: RequestMiddleware extends (this: infer T) => any ? T : never): Promise<void> {
+  if (mw.req.body) {
+    return
+  }
+
+  return new Promise<void>((resolve) => {
+    const onClose = (): void => {
+      mw.req.body = ''
+
+      resolve()
+    }
+
+    if (mw.res.destroyed) {
+      onClose()
+    }
+
+    mw.res.once('close', onClose)
+
+    mw.req.pipe(concatStream((reqBody) => {
+      mw.req.body = reqBody
+      mw.res.off('close', onClose)
+      resolve()
+    }))
+  })
 }
 
 export default {
@@ -281,12 +370,10 @@ export default {
   FormatCookiesIfApplicable,
   MaybeAttachCrossOriginCookies,
   MaybeEndRequestWithBufferedResponse,
-  SetMatchingRoutes,
   SendToDriver,
-  InterceptRequest,
   RedirectToClientRouteIfUnloaded,
-  EndRequestsToBlockedHosts,
   StripUnsupportedAcceptEncoding,
   MaybeSetBasicAuthHeaders,
+  ApplyHttpInterception,
   SendRequestOutgoing,
 }

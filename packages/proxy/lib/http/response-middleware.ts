@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { PassThrough, Readable } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
-import { InterceptResponse } from '@packages/net-stubbing'
 import { concatStream, httpUtils } from '@packages/network'
 import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
@@ -12,7 +11,7 @@ import type { CypressOutgoingResponse } from '../types'
 import type { HttpMiddleware } from '.'
 import type { IncomingMessage } from 'http'
 
-import { cspHeaderNames, generateCspDirectives, parseCspHeaders, problematicCspDirectives, unsupportedCSPDirectives } from './util/csp-header'
+import { applyCspAllowListToHeaders, cspHeaderNames } from '@packages/network-interception'
 import { injectIntoServiceWorker } from './util/service-worker-injector'
 import { validateHeaderName, validateHeaderValue } from 'http'
 import error from '@packages/errors'
@@ -370,37 +369,23 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
 
   this.debug('the new response headers are %o', this.res.getHeaderNames())
 
-  span?.setAttributes({
+  const cspStrippedHeaders = applyCspAllowListToHeaders(filteredHeaders, {
     experimentalCspAllowList: this.config.experimentalCspAllowList,
   })
 
-  if (this.config.experimentalCspAllowList) {
-    const allowedDirectives = this.config.experimentalCspAllowList === true ? [] : this.config.experimentalCspAllowList as Cypress.experimentalCspAllowedDirectives[]
-
-    // If the user has specified CSP directives to allow, we must not remove them from the CSP headers
-    const stripDirectives = [...unsupportedCSPDirectives, ...problematicCspDirectives.filter((directive) => !allowedDirectives.includes(directive))]
-
-    // Iterate through each CSP header
-    cspHeaderNames.forEach((headerName) => {
-      const modifiedCspHeaders = parseCspHeaders(this.incomingRes.headers, headerName, stripDirectives)
-      .map(generateCspDirectives)
-      .filter(Boolean)
-
-      if (modifiedCspHeaders.length === 0) {
-        // If there are no CSP policies after stripping directives, we will remove it from the response
-        // Altering the CSP headers using the native response header methods is case-insensitive
-        this.res.removeHeader(headerName)
-      } else {
-        // To replicate original response CSP headers, we must apply all header values as an array
-        this.res.setHeader(headerName, modifiedCspHeaders)
-      }
-    })
-  } else {
-    cspHeaderNames.forEach((headerName) => {
-      // Altering the CSP headers using the native response header methods is case-insensitive
-      this.res.removeHeader(headerName)
-    })
+  for (const headerName of cspHeaderNames) {
+    this.res.removeHeader(headerName)
   }
+
+  for (const [headerName, value] of Object.entries(cspStrippedHeaders)) {
+    if (cspHeaderNames.includes(headerName as typeof cspHeaderNames[number])) {
+      this.res.setHeader(headerName, value)
+    }
+  }
+
+  span?.setAttributes({
+    experimentalCspAllowList: this.config.experimentalCspAllowList,
+  })
 
   span?.end()
 
@@ -430,7 +415,7 @@ const MaybeSetOriginAgentClusterHeader: ResponseMiddleware = function () {
 }
 
 const SetInjectionLevel: ResponseMiddleware = async function () {
-  return this.networkInterceptionCore.setInjectionLevel(this)
+  return this.networkServices.documentPreparation.setInjectionLevel(this)
 }
 
 // https://github.com/cypress-io/cypress/issues/6480
@@ -474,7 +459,7 @@ const MaybePreventCaching: ResponseMiddleware = function () {
 }
 
 const MaybeCopyCookiesFromIncomingRes: ResponseMiddleware = async function () {
-  return this.networkInterceptionCore.copyCookiesFromResponse(this)
+  return this.networkServices.cookieState.copyCookiesFromResponse(this)
 }
 
 const REDIRECT_STATUS_CODES: any[] = [301, 302, 303, 307, 308]
@@ -533,7 +518,7 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
-    this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, {
+    this.networkServices.networkCapture.notifyResponseEndedWithEmptyBody(this, {
       isCached: this.incomingRes.statusCode === 304,
     })
 
@@ -550,7 +535,7 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   // Skip when downstream middleware will rewrite the body or when a cy.intercept
   // route matched (the interceptor may have replaced the body without updating
   // the upstream Content-Length header).
-  const wasIntercepted = !!this.netStubbingState?.requests?.[this.req.requestId]
+  const wasIntercepted = !!this.req.hadIntercept
 
   if (
     this.incomingResHadEmptyBody
@@ -558,7 +543,7 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
     && !this.res.wantsInjection
     && !this.res.wantsSecurityRemoved
   ) {
-    this.networkInterceptionCore.notifyResponseEndedWithEmptyBody(this, { isCached: false })
+    this.networkServices.networkCapture.notifyResponseEndedWithEmptyBody(this, { isCached: false })
     this.res.setHeader('Content-Length', '0')
     this.res.end()
 
@@ -569,11 +554,11 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
 }
 
 const MaybeInjectHtml: ResponseMiddleware = async function () {
-  return this.networkInterceptionCore.injectHtml(this)
+  return this.networkServices.documentPreparation.injectHtml(this)
 }
 
 const MaybeRemoveSecurity: ResponseMiddleware = async function () {
-  return this.networkInterceptionCore.removeSecurity(this)
+  return this.networkServices.documentPreparation.removeSecurity(this)
 }
 
 const MaybeInjectServiceWorker: ResponseMiddleware = function () {
@@ -610,7 +595,7 @@ const MaybeInjectServiceWorker: ResponseMiddleware = function () {
 }
 
 const CompressBody: ResponseMiddleware = async function () {
-  await this.networkInterceptionCore.notifyResponseStreamReceived(this)
+  await this.networkServices.networkCapture.notifyResponseStreamReceived(this)
 
   // Re-compress in the same order as the original content-encoding (innermost first).
   const order = this.contentEncodingOrder ?? []
@@ -662,7 +647,6 @@ export default {
   LogResponse,
   FilterNonProxiedResponse,
   AttachPlainTextStreamFn,
-  InterceptResponse,
   PatchExpressSetHeader,
   OmitProblematicHeaders, // Since we might modify CSP headers, this middleware needs to come BEFORE SetInjectionLevel
   MaybeSetOriginAgentClusterHeader, // NOTE: only used in cypress-in-cypress testing. this is otherwise a no-op

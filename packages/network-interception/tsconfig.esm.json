@@ -5,6 +5,14 @@
     "outDir": "./esm",
     "target": "ES2022",
     "module": "ES2022",
-    "moduleResolution": "node"
-  }
+    "moduleResolution": "node",
+    "noEmit": false
+  },
+  "include": [
+    "lib/*.ts",
+    "lib/**/*.ts"
+  ],
+  "exclude": [
+    "test/**"
+  ]
 }

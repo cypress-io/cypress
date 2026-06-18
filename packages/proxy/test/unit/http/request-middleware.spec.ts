@@ -1,12 +1,12 @@
 import { describe, expect, beforeEach, it, vi } from 'vitest'
 import _ from 'lodash'
 import RequestMiddleware from '../../../lib/http/request-middleware'
-import { testMiddleware } from './helpers'
+import { sendRequestOutgoing } from '../../../lib/adapters/send-request-outgoing'
+import { testMiddleware, createTestNetworkServices } from './helpers'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '../../../lib'
 import { HttpBuffer, HttpBuffers } from '../../../lib/http/util/buffers'
 import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
 import { CookieJar } from '@packages/server/lib/util/cookies'
-import { NetworkInterceptionCore } from '@packages/network-interception'
 import { HttpMiddlewareThis } from '../../../lib/http'
 import { resourceTypeAndCredentialManager } from '../../../lib/resourceTypeAndCredentialManager'
 
@@ -50,13 +50,11 @@ describe('http/request-middleware', () => {
       'FormatCookiesIfApplicable',
       'MaybeAttachCrossOriginCookies',
       'MaybeEndRequestWithBufferedResponse',
-      'SetMatchingRoutes',
       'SendToDriver',
-      'InterceptRequest',
       'RedirectToClientRouteIfUnloaded',
-      'EndRequestsToBlockedHosts',
       'StripUnsupportedAcceptEncoding',
       'MaybeSetBasicAuthHeaders',
+      'ApplyHttpInterception',
       'SendRequestOutgoing',
     ])
   })
@@ -607,16 +605,22 @@ describe('http/request-middleware', () => {
       })
     })
 
-    it('routes missing cookieState port failures to onError', async () => {
+    it('routes cookieState port failures to onError', async () => {
       const ctx = await getContext()
       const onError = vi.fn()
 
-      ctx.networkInterceptionCore = new NetworkInterceptionCore()
+      ctx.networkServices = {
+        ...createTestNetworkServices(),
+        cookieState: {
+          attachCrossOriginCookies: () => Promise.reject(new Error('cookie attach failed')),
+          copyCookiesFromResponse: vi.fn(),
+        },
+      }
 
       await testMiddleware([MaybeAttachCrossOriginCookies], ctx, onError)
 
       expect(onError).toHaveBeenCalledOnce()
-      expect(onError.mock.calls[0][0].message).toMatch(/NetworkInterceptionCore\.cookieState is not configured/)
+      expect(onError.mock.calls[0][0].message).toMatch(/cookie attach failed/)
     })
 
     async function getContext (requestCookieStrings = ['request=cookie'], cookieJarStrings = ['jar=cookie'], autUrl = 'http://foobar.com', requestUrl = 'http://foobar.com') {
@@ -982,8 +986,6 @@ describe('http/request-middleware', () => {
   })
 
   describe('SendRequestOutgoing', () => {
-    const { SendRequestOutgoing } = RequestMiddleware
-
     let ctx
 
     beforeEach(() => {
@@ -991,13 +993,19 @@ describe('http/request-middleware', () => {
 
       ctx = {
         onError: vi.fn(),
+        onResponse: vi.fn(),
+        debug: vi.fn(),
         request: {
           create: (opts) => {
             return {
               inputArgs: opts,
               on: (event, callback) => {
                 if (event === 'response') {
-                  callback({ request: { timings: {} } })
+                  callback({
+                    request: { timings: {} },
+                    statusCode: 200,
+                    headers: {},
+                  })
                 }
               },
             }
@@ -1007,6 +1015,9 @@ describe('http/request-middleware', () => {
           body: '{}',
           headers,
           socket: {
+            on: () => {},
+          },
+          res: {
             on: () => {},
           },
         },
@@ -1028,15 +1039,15 @@ describe('http/request-middleware', () => {
         } as any)
       })
 
-      it('adds `x-cypress-authorization` header', async () => {
-        await testMiddleware([SendRequestOutgoing], ctx)
+      it('adds `x-cypress-authorization` header', () => {
+        sendRequestOutgoing(ctx as any)
         expect(ctx.req.headers['x-cypress-authorization']).toEqual('abcd1234')
       })
 
-      it('handles nil fileServer token', async () => {
+      it('handles nil fileServer token', () => {
         ctx.getFileServerToken = () => undefined
 
-        await testMiddleware([SendRequestOutgoing], ctx)
+        sendRequestOutgoing(ctx as any)
         expect(ctx.req.headers['x-cypress-authorization']).toBeUndefined()
       })
     })

@@ -4,16 +4,19 @@ import {
   netStubbingState as _netStubbingState,
   NetStubbingState,
   onNetStubbingEvent,
+  DriverInterceptionEventsAdapter,
+  createDriverAdapter,
 } from '@packages/net-stubbing'
+import * as errors from '@packages/errors'
 import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
 import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
-import { NetworkPolicyRegistry } from '@packages/network-interception'
+import { type ForHttpIntercept } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
-import { createProxyNetworkInterception } from '../../lib/adapters/create-proxy-network-interception'
+import { createProxyNetworkServices } from '../../lib/adapters/create-proxy-network-services'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
@@ -27,6 +30,9 @@ describe('network stubbing', () => {
   let destinationPort
   let socket
   let documentDomainInjection: DocumentDomainInjection
+  let networkInterception: ForHttpIntercept
+  let interceptionEvents: DriverInterceptionEventsAdapter
+  let driverAdapter: ReturnType<typeof createDriverAdapter>
 
   const serverPort = 3030
   const fileServerPort = 3030
@@ -52,12 +58,23 @@ describe('network stubbing', () => {
     app = express()
     netStubbingState = _netStubbingState()
 
+    const createdDriverAdapter = createDriverAdapter({
+      stubbing: netStubbingState,
+      socket,
+      onSyncInterceptSkipped: (url) => {
+        errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
+      },
+    })
+
+    driverAdapter = createdDriverAdapter
+    networkInterception = driverAdapter.httpIntercept
+    interceptionEvents = driverAdapter.interceptionEvents as DriverInterceptionEventsAdapter
+
     const proxy = new NetworkProxy({
       socket,
       netStubbingState,
-      networkInterceptionCore: createProxyNetworkInterception({
-        policyRegistration: new NetworkPolicyRegistry(),
-      }),
+      networkServices: createProxyNetworkServices(),
+      networkInterception,
       config,
       middleware: defaultMiddleware,
       getCookieJar: () => new CookieJar(),
@@ -242,10 +259,8 @@ describe('network stubbing', () => {
           },
           state: netStubbingState,
           getFixture,
-          args: [],
-          socket: {
-            toDriver () {},
-          },
+          cyIntercept: driverAdapter.cyIntercept,
+          pendingHandlerResolution: interceptionEvents,
         })
       }
     })
@@ -311,10 +326,8 @@ describe('network stubbing', () => {
           },
           state: netStubbingState,
           getFixture,
-          args: [],
-          socket: {
-            toDriver () {},
-          },
+          cyIntercept: driverAdapter.cyIntercept,
+          pendingHandlerResolution: interceptionEvents,
         })
       }
     })

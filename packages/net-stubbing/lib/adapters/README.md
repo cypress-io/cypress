@@ -6,12 +6,12 @@ See [`packages/network-interception/README.md`](../../../network-interception/RE
 
 ---
 
-## Stage 1 — `DriverInterceptRegistrationAdapter`
+## `createDriverAdapter`
 
 | Hex role | Name |
 | --- | --- |
 | **Driving port** | `ForInterceptRegistration` |
-| **Adapter** | `DriverInterceptRegistrationAdapter` (`driver-intercept-registration.ts`) |
+| **Factory** | `createDriverAdapter` (`create-driver-adapter.ts`) |
 | **Legacy delegate** | `onNetStubbingEvent` (`lib/server/driver-events.ts`) |
 
 ### Call path
@@ -19,20 +19,26 @@ See [`packages/network-interception/README.md`](../../../network-interception/RE
 ```
 SocketBase ('net' events from driver)
   → ForInterceptRegistration.handleEvent()
-  → DriverInterceptRegistrationAdapter
+  → createDriverAdapter().createInterceptRegistration()
   → onNetStubbingEvent()
 ```
 
-Constructed with `NetStubbingState`, `SocketBroadcaster`, `getFixture` — same dependencies the direct call path used.
-
-### Tests
-
-`packages/net-stubbing/test/unit/adapters/driver-intercept-registration.spec.ts`
+Constructed with `ForStubbing`, `SocketBroadcaster`, optional shared `HttpIntercept`, and optional `onSyncInterceptSkipped`. Registers `CyInterceptIntercepter` on the stack and returns socket adapters plus `createInterceptRegistration`.
 
 ---
 
-## Later stages
+## `DriverInterceptionEventsAdapter`
 
-Request/response I/O (`handle-intercept-request.ts`, middleware) remains in net-stubbing until stage 3 extracts orchestration into the core.
+| Hex role | Name |
+| --- | --- |
+| **Driven port** | `ForInterceptionEvents` (`ForDriverNotification` + `ForPendingHandlerResolution`) |
+| **Adapter** | `DriverInterceptionEventsAdapter` (`driver-interception-events-adapter.ts`) |
+
+Wraps socket `emit` and `pendingEventHandlers` resolution. Used by `HttpIntercept` for `before:request`, response subscriptions, and `after:response` driver events.
+
+### Tests
+
+- `packages/net-stubbing/test/unit/adapters/driver-intercept-registration.spec.ts`
+- `packages/net-stubbing/test/unit/adapters/driver-interception-events-adapter.spec.ts`
 
 [#33919](https://github.com/cypress-io/cypress/issues/33919)

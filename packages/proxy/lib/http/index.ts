@@ -21,8 +21,7 @@ import type {
   BrowserPreRequest,
 } from '../types'
 import type { IncomingMessage } from 'http'
-import type { NetStubbingState } from '@packages/net-stubbing'
-import type { NetworkInterceptionCore } from '@packages/network-interception'
+import type { ForNetworkInterception, ForStubbing, ForCommandLog, ForCookieState, ForDocumentPreparation, ForNetworkCapture } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -103,6 +102,13 @@ export const defaultMiddleware = {
   [HttpStages.Error]: ErrorMiddleware,
 }
 
+export type ProxyNetworkServices = {
+  cookieState: ForCookieState
+  documentPreparation: ForDocumentPreparation
+  networkCapture: ForNetworkCapture
+  commandLog: ForCommandLog
+}
+
 export type ServerCtx = Readonly<{
   config: CyServer.Config & Cypress.Config
   shouldCorrelatePreRequests?: () => boolean
@@ -110,8 +116,9 @@ export type ServerCtx = Readonly<{
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
-  netStubbingState: NetStubbingState
-  networkInterceptionCore: NetworkInterceptionCore
+  netStubbingState: ForStubbing
+  networkServices: ProxyNetworkServices
+  networkInterception: ForNetworkInterception
   middleware: HttpMiddlewareStacks
   socket: SocketBroadcaster
   request: ServerRequest
@@ -124,7 +131,8 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'config',
   'getFileServerToken',
   'netStubbingState',
-  'networkInterceptionCore',
+  'networkServices',
+  'networkInterception',
   'next',
   'end',
   'onResponse',
@@ -312,8 +320,9 @@ export class Http {
   getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
-  netStubbingState: NetStubbingState
-  networkInterceptionCore: NetworkInterceptionCore
+  netStubbingState: ForStubbing
+  networkServices: ProxyNetworkServices
+  networkInterception: ForNetworkInterception
   preRequests: PreRequests = new PreRequests()
   getCurrentBrowser: () => FoundBrowser
   request: ServerRequest
@@ -334,7 +343,8 @@ export class Http {
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
-    this.networkInterceptionCore = opts.networkInterceptionCore
+    this.networkServices = opts.networkServices
+    this.networkInterception = opts.networkInterception
     this.socket = opts.socket
     this.request = opts.request
     this.serverBus = opts.serverBus
@@ -364,7 +374,8 @@ export class Http {
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
-      networkInterceptionCore: this.networkInterceptionCore,
+      networkServices: this.networkServices,
+      networkInterception: this.networkInterception,
       socket: this.socket,
       serverBus: this.serverBus,
       getCookieJar: this.getCookieJar,

@@ -2,10 +2,16 @@ import crypto from 'crypto'
 import _ from 'lodash'
 import { URL } from 'url'
 import { DocumentDomainInjection } from '@packages/network-tools'
-import { resolveInjectionLevel, resolveWantsSecurityRemoved } from '@packages/network-interception'
+import {
+  cspHeaderNames,
+  generateCspDirectives,
+  nonceDirectives,
+  parseCspHeaders,
+  resolveInjectionLevel,
+  resolveWantsSecurityRemoved,
+} from '@packages/network-interception'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '../http'
-import { cspHeaderNames, generateCspDirectives, nonceDirectives, parseCspHeaders } from '../http/util/csp-header'
 import {
   reqMatchesPolicyBasedOnDomain,
   reqWillRenderHtml,

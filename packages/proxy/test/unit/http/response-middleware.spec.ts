@@ -8,7 +8,7 @@ import { testMiddleware } from './helpers'
 import { RemoteStates, DocumentDomainInjection } from '@packages/network-tools'
 import { Readable } from 'stream'
 import * as rewriter from '../../../lib/http/util/rewriter'
-import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '../../../lib/http/util/csp-header'
+import { nonceDirectives, problematicCspDirectives, unsupportedCSPDirectives } from '@packages/network-interception'
 import * as serviceWorkerInjector from '../../../lib/http/util/service-worker-injector'
 
 async function flushPromises () {
@@ -36,7 +36,6 @@ describe('http/response-middleware', function () {
       'LogResponse',
       'FilterNonProxiedResponse',
       'AttachPlainTextStreamFn',
-      'InterceptResponse',
       'PatchExpressSetHeader',
       'OmitProblematicHeaders',
       'MaybeSetOriginAgentClusterHeader',
@@ -2276,14 +2275,11 @@ describe('http/response-middleware', function () {
         const end = vi.fn()
 
         prepareContext({
-          req: { requestId: 'req-42' },
+          req: { requestId: 'req-42', hadIntercept: true },
           incomingRes: {
             statusCode: 200,
           },
           incomingResHadEmptyBody: true,
-          netStubbingState: {
-            requests: { 'req-42': {} },
-          },
           res: {
             on: (event, listener) => {},
             off: (event, listener) => {},
