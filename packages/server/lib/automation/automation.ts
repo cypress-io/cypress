@@ -225,7 +225,7 @@ export class Automation {
     const request = this.requests[id]
 
     if (request) {
-      delete request[id]
+      delete this.requests[id]
 
       return request(resp)
     }

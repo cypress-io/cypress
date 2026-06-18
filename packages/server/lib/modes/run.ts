@@ -501,7 +501,11 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
 
   if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser) {
     // reset browser state to match default behavior when opening/closing a new tab
+    const resetBrowserStateStartedAt = Date.now()
+
     await openProject.resetBrowserState()
+
+    debug('resetBrowserState completed in %dms', Date.now() - resetBrowserStateStartedAt)
 
     // Send the new telemetry context to the browser to set the parent/child relationship appropriately for tests
     if (telemetry.isEnabled()) {
@@ -722,13 +726,28 @@ async function waitForTestsToFinishRunning (options: { project: Project, screens
 
   if (usingExperimentalSingleTabMode && !isLastSpec) {
     await project.server.destroyAut()
+
+    // Even though single-tab mode intentionally keeps the same browser tab open
+    // between specs, we still need to reset the server's network/proxy state so it
+    // does not leak across specs. The default per-tab flow does this (below) via
+    // project.server.reset() after the tab is closed, which clears the pre-request
+    // correlation queue, response buffers, service worker manager, remote states,
+    // and stored credentials. Skipping it in single-tab mode allowed that state to
+    // accumulate over long runs, producing rare, order-dependent failures.
+    // See: https://github.com/cypress-io/cypress/issues/24146
+    debug('resetting server state between specs in single-tab run mode')
+    project.server.reset()
   }
 
   // we do not support experimentalSingleTabRunMode for e2e. We always want to close the tab on the last spec to ensure that things get cleaned up properly at the end of the run
   if (!usingExperimentalSingleTabMode || isLastSpec) {
     debug('attempting to close the browser tab')
 
+    const resetTabsStartedAt = Date.now()
+
     await openProject.resetBrowserTabsForNextSpec(shouldKeepTabOpen)
+
+    debug('resetBrowserTabsForNextSpec completed in %dms', Date.now() - resetTabsStartedAt)
 
     debug('resetting server state')
 
@@ -1162,6 +1181,18 @@ async function ready (options: ReadyOptions) {
     }
 
     errors.throwErr('NO_SPECS_FOUND', projectRoot, String(specPattern))
+  }
+
+  if (specPatternFromCli) {
+    const rawPatterns = Array.isArray(specPattern) ? specPattern : [specPattern as string]
+    // relativeSpecPattern uses a forward-slash concat and may not strip Windows absolute paths;
+    // fall back to path.relative for any pattern that remains absolute.
+    const relativePatterns = rawPatterns.map((p) => path.isAbsolute(p) ? path.relative(projectRoot, p) : p)
+    const unmatchedPatterns = project.ctx.project.getUnmatchedPatterns(relativePatterns, specs)
+
+    if (unmatchedPatterns.length > 0) {
+      errors.warning('SPEC_FILE_NOT_FOUND', projectRoot, unmatchedPatterns)
+    }
   }
 
   if (browser.unsupportedVersion && browser.warning) {

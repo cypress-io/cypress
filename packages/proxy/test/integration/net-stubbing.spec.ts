@@ -11,8 +11,9 @@ import supertest from 'supertest'
 import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
-import { NetworkInterceptionCore } from '@packages/network-interception'
+import { NetworkPolicyRegistry } from '@packages/network-interception'
 import { CookieJar } from '@packages/server/lib/util/cookies'
+import { createProxyNetworkInterception } from '../../lib/adapters/create-proxy-network-interception'
 import { Request as ServerRequest } from '@packages/server/lib/request'
 const getFixture = async () => {}
 
@@ -54,7 +55,9 @@ describe('network stubbing', () => {
     const proxy = new NetworkProxy({
       socket,
       netStubbingState,
-      networkInterceptionCore: new NetworkInterceptionCore(),
+      networkInterceptionCore: createProxyNetworkInterception({
+        policyRegistration: new NetworkPolicyRegistry(),
+      }),
       config,
       middleware: defaultMiddleware,
       getCookieJar: () => new CookieJar(),

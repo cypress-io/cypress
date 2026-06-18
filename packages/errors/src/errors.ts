@@ -758,6 +758,21 @@ export const AllCypressErrors = {
 
         ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}`
   },
+  SPEC_FILE_NOT_FOUND: (folderPath: string, patterns: string | string[]) => {
+    const patternList = Array.isArray(patterns) ? patterns : [patterns]
+    const globPaths = patternList.map((pattern) => {
+      const [resolvedBasePath, resolvedPattern] = parseResolvedPattern(folderPath, pattern)
+
+      return path.join(resolvedBasePath!, theme.yellow(resolvedPattern!))
+    })
+
+    return errTemplate`\
+        The following ${fmt.flag('--spec')} pattern did not match any spec files and will be ignored:
+
+        ${fmt.listItems(globPaths, { color: 'blue', prefix: '  > ' })}
+
+        Other spec files that matched will still run.`
+  },
   RENDERER_CRASHED: (browserName: string) => {
     return errTemplate`\
         We detected that the ${fmt.highlight(browserName)} Renderer process just crashed.
@@ -947,6 +962,24 @@ export const AllCypressErrors = {
       Expected ${fmt.highlight(key)} to be ${fmt.off(type)}.
 
       Instead the value was: ${fmt.stringify(value)}`
+  },
+  CONFIG_BROWSERS_INVALID: (browsers: any) => {
+    return errTemplate`\
+        The ${fmt.highlight(`browsers`)} configuration value must be an array of browser objects, but it was set to:
+
+        ${fmt.stringify(browsers)}
+
+        ${fmt.highlight(`browsers`)} is the list of browsers Cypress detected on your machine — it does not choose which browser to run. The most common cause of this error is a ${fmt.highlightSecondary(`CYPRESS_BROWSERS`)} environment variable, which Cypress applies to this configuration value.
+
+        To run your tests in a specific browser, remove that value and pass the browser by name instead:
+
+        ${fmt.terminal(`cypress run --browser chrome`)}
+
+        ...or, with the Module API:
+
+        ${fmt.code(`cypress.run({ browser: 'chrome' })`)}
+
+        https://on.cypress.io/launching-browsers`
   },
   RENAMED_CONFIG_OPTION: (arg1: { name: string, newName: string }) => {
     return errTemplate`\

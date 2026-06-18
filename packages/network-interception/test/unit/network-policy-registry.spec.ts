@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { NetworkPolicy } from '../../lib'
-import { NetworkPolicyRegistry } from '../../lib'
+import { createBlockedHosts, NetworkPolicyRegistry } from '../../lib'
 
 function testPolicy (overrides: Partial<NetworkPolicy> & Pick<NetworkPolicy, 'when' | 'apply'>): NetworkPolicy {
   return {
@@ -43,6 +43,23 @@ describe('NetworkPolicyRegistry', () => {
 
     expect(onEnd).toHaveBeenCalledTimes(1)
     expect(onContinue).not.toHaveBeenCalled()
+  })
+
+  it('runPolicies returns blockedHostMatch in state when blocked', async () => {
+    const registry = new NetworkPolicyRegistry()
+
+    registry.add(createBlockedHosts({
+      config: { blockHosts: ['*.evil.com'] },
+      matchesBlockedHost: () => 'evil.com',
+    }))
+
+    const result = await registry.runPolicies({
+      phase: 'request',
+      exchange: { url: 'http://evil.com/' },
+    })
+
+    expect(result.ended).toBe(true)
+    expect(result.state.blockedHostMatch).toBe('evil.com')
   })
 
   it('runPolicies calls onContinue when no policy matches', async () => {

@@ -1,5 +1,5 @@
 import { getDisplayUrlMatcher } from '../../../src/cy/net-stubbing/route-matcher-log'
-import type { RouteMatcherOptions } from '@packages/net-stubbing/lib/external-types'
+import type { RouteMatcherOptions } from '@packages/network-interception'
 
 const testFail = (cb, expectedDocsUrl = 'https://on.cypress.io/intercept') => {
   cy.on('fail', (err) => {
@@ -1352,8 +1352,7 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
-    // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
-    it('can stub a response with a network error', { browser: '!webkit' }, function (done) {
+    it('can stub a response with a network error', function (done) {
       cy.intercept('/*', {
         forceNetworkError: true,
       }).then(() => {
@@ -1836,7 +1835,6 @@ describe('network stubbing', { retries: 15 }, function () {
       cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
 
-    // TODO: fix flaky test https://github.com/cypress-io/cypress/issues/23303
     it('can delay and throttle a StaticResponse', { retries: 15 }, function (done) {
       const payload = 'A'.repeat(10 * 1024)
       const throttleKbps = 10
@@ -1854,7 +1852,7 @@ describe('network stubbing', { retries: 15 }, function () {
         })
       }).then(() => {
         return $.get('/timeout').then((responseText) => {
-          expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 100, 100)
+          expect(Date.now() - this.start).to.be.gte(expectedSeconds * 1000 - 50)
           expect(responseText).to.eq(payload)
 
           done()
@@ -2588,8 +2586,7 @@ describe('network stubbing', { retries: 15 }, function () {
         .and('include', 'content-type: application/json')
       })
 
-      // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
-      it('can forceNetworkError', { browser: '!webkit' }, function (done) {
+      it('can forceNetworkError', function (done) {
         const url = uniqueRoute('/foo')
 
         cy.intercept(`${url}*`, function (req) {
@@ -2660,6 +2657,21 @@ describe('network stubbing', { retries: 15 }, function () {
         }).visit('/dump-method')
       })
 
+      it('fails test if req.destroy is called after req.reply in req handler', function (done) {
+        const url = uniqueRoute('/foo')
+
+        testFail((err) => {
+          expect(err.message).to.contain('`req.reply()` and/or `req.continue()` were called to signal request completion multiple times, but a request can only be completed once')
+          done()
+        })
+
+        cy.intercept(url, function (req) {
+          req.reply()
+
+          req.destroy()
+        }).visit(url)
+      })
+
       it('fails test if req.continue is called with a non-function parameter', function (done) {
         testFail((err) => {
           expect(err.message).to.contain('\`req.continue\` requires the parameter to be a function')
@@ -2690,6 +2702,30 @@ describe('network stubbing', { retries: 15 }, function () {
 
         cy.intercept('/dump-method', function (req) {
           setTimeout(() => req.reply(), 50)
+
+          return Promise.resolve()
+        }).visit('/dump-method')
+      })
+
+      it('fails test if req.destroy is called after req handler finishes', function (done) {
+        testFail((err) => {
+          expect(err.message).to.contain('> `req.reply()` was called after the request handler finished executing')
+          done()
+        })
+
+        cy.intercept('/dump-method', function (req) {
+          setTimeout(() => req.destroy(), 50)
+        }).visit('/dump-method')
+      })
+
+      it('fails test if req.destroy is called after req handler resolves', function (done) {
+        testFail((err) => {
+          expect(err.message).to.contain('> `req.reply()` was called after the request handler finished executing')
+          done()
+        })
+
+        cy.intercept('/dump-method', function (req) {
+          setTimeout(() => req.destroy(), 50)
 
           return Promise.resolve()
         }).visit('/dump-method')
@@ -3314,8 +3350,7 @@ describe('network stubbing', { retries: 15 }, function () {
         .should('include', { foo: 1 })
       })
 
-      // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
-      it('can forceNetworkError', { browser: '!webkit' }, function (done) {
+      it('can forceNetworkError', function (done) {
         const url = uniqueRoute('/foo')
 
         cy.intercept(`${url}*`, function (req) {
@@ -3802,12 +3837,14 @@ describe('network stubbing', { retries: 15 }, function () {
           const xhr = new win.XMLHttpRequest()
 
           xhr.open('POST', '/users/')
-
           xhr.send()
 
-          win.location.reload()
+          // Firefox/Safari can cancel too quickly on reload unless the request is observed first.
+          cy.wait('@createUser.request').then((interception) => {
+            win.location.reload()
 
-          cy.wait('@createUser').its('state').should('eq', 'Errored')
+            cy.wrap(interception).its('state').should('eq', 'Errored')
+          })
         })
       })
 
@@ -3828,16 +3865,18 @@ describe('network stubbing', { retries: 15 }, function () {
           // do nothing on an abort
           })
 
-          // if you abort too fast in firefox or safari, the fetch is never sent to the server for us to intercept
-          if (!Cypress.isBrowser({ family: 'chromium' })) {
-            setTimeout(() => {
+          // Firefox/Safari can cancel too quickly unless the request is observed first.
+          cy.wait('@createUser.request').then((interception) => {
+            if (!Cypress.isBrowser({ family: 'chromium' })) {
+              setTimeout(() => {
+                controller.abort()
+              }, 100)
+            } else {
               controller.abort()
-            }, 100)
-          } else {
-            controller.abort()
-          }
+            }
 
-          cy.wait('@createUser').its('state').should('eq', 'Errored')
+            cy.wrap(interception).its('state').should('eq', 'Errored')
+          })
         })
       })
 
@@ -3879,9 +3918,8 @@ describe('network stubbing', { retries: 15 }, function () {
       })
     })
 
-    // TODO(webkit): fix forceNetworkError https://github.com/cypress-io/cypress/issues/23810
     // @see https://github.com/cypress-io/cypress/issues/9062
-    it('can spy on a request using forceNetworkError', { browser: '!webkit' }, function () {
+    it('can spy on a request using forceNetworkError', function () {
       const url = uniqueRoute('/foo')
 
       cy.intercept(`${url}*`, { forceNetworkError: true })

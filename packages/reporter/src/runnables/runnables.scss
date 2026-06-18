@@ -193,17 +193,6 @@ $dotted-line-left-padding: 19px;
       }
     }
 
-    .attempt-item:hover {
-      > .runnable-wrapper .runnable-controls i.fa-redo {
-        visibility: visible !important;
-      }
-
-      .hooks-container,
-      .runnable-err-wrapper {
-        border-color: $gray-500;
-      }
-    }
-
     .runnable-state,
     .attempt-state {
       display: inline-block;
