@@ -22,6 +22,7 @@ import client from './controllers/client'
 import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import { isProxyDisabled } from './util/is-proxy-disabled'
 
 const debug = Debug('cypress:server:routes')
 
@@ -276,7 +277,11 @@ export const createCommonRoutes = ({
   }
 
   router.get(clientRoute, (req: Request & { proxiedUrl?: string }, res) => {
-    const nonProxied = req.proxiedUrl?.startsWith('/') ?? false
+    // When the proxy is disabled (CDP path), Chrome makes direct requests to the
+    // Cypress server. The request arrives with a path-only URL, so proxiedUrl
+    // starts with '/' — the same signature as a non-proxied browser visit to an
+    // app URL. Guard against serving the non-proxied error page in that case.
+    const nonProxied = !isProxyDisabled() && (req.proxiedUrl?.startsWith('/') ?? false)
 
     getCtx().actions.app.setBrowserUserAgent(req.headers['user-agent'])
 

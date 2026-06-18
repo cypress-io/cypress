@@ -1504,4 +1504,138 @@ describe('lib/browsers/chrome', () => {
       )
     })
   })
+
+  describe('#attachListeners CDP network interception', () => {
+    it('attaches CDP network interception before navigate when proxy is disabled', async () => {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const pageCriClient = {
+        targetId: 'page-1',
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+
+      const browserCriClient = {
+        attachCdpNetworkInterception: sinon.stub().resolves(),
+        currentlyAttachedProtocolTarget: undefined,
+        currentlyAttachedCyPromptTarget: undefined,
+        currentlyAttachedStudioTarget: undefined,
+        resetBrowserTargets: sinon.stub().resolves(),
+      }
+
+      const automation = { use: sinon.stub() }
+      const cdpAutomation = {
+        _handlePausedRequests: sinon.stub().resolves(),
+        _listenForFrameTreeChanges: sinon.stub(),
+      }
+
+      const networkInterception = { handle: sinon.stub() }
+      const options = {
+        ...openOpts,
+        networkInterception,
+        browser: { displayName: 'Chrome' },
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+      sinon.stub(chrome, '_setAutomation').resolves(cdpAutomation)
+      const navigateStub = sinon.stub(chrome, '_navigateUsingCRI').resolves()
+
+      sinon.stub(chrome, '_handleDownloads').resolves()
+      sinon.stub(chrome, '_recordVideo').resolves()
+
+      await chrome.attachListeners('http://example.com', pageCriClient as any, automation as any, options as any, { displayName: 'Chrome' } as any)
+
+      expect(cdpAutomation._handlePausedRequests).to.have.been.calledBefore(navigateStub)
+      expect(browserCriClient.attachCdpNetworkInterception).to.have.been.calledBefore(navigateStub)
+      expect(browserCriClient.attachCdpNetworkInterception).to.have.been.calledWith(networkInterception, pageCriClient)
+
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      sinon.restore()
+    })
+
+    it('does not attach CDP network interception when proxy is enabled', async () => {
+      const pageCriClient = {
+        targetId: 'page-1',
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+
+      const browserCriClient = {
+        attachCdpNetworkInterception: sinon.stub().resolves(),
+        currentlyAttachedProtocolTarget: undefined,
+        currentlyAttachedCyPromptTarget: undefined,
+        currentlyAttachedStudioTarget: undefined,
+        resetBrowserTargets: sinon.stub().resolves(),
+      }
+
+      const automation = { use: sinon.stub() }
+      const cdpAutomation = {
+        _handlePausedRequests: sinon.stub().resolves(),
+        _listenForFrameTreeChanges: sinon.stub(),
+      }
+
+      const options = {
+        ...openOpts,
+        networkInterception: { handle: sinon.stub() },
+        browser: { displayName: 'Chrome' },
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+      sinon.stub(chrome, '_setAutomation').resolves(cdpAutomation)
+      sinon.stub(chrome, '_navigateUsingCRI').resolves()
+      sinon.stub(chrome, '_handleDownloads').resolves()
+      sinon.stub(chrome, '_recordVideo').resolves()
+
+      await chrome.attachListeners('http://example.com', pageCriClient as any, automation as any, options as any, { displayName: 'Chrome' } as any)
+
+      expect(browserCriClient.attachCdpNetworkInterception).not.to.have.been.called
+
+      sinon.restore()
+    })
+
+    it('does not attach CDP network interception when networkInterception is missing', async () => {
+      process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+
+      const pageCriClient = {
+        targetId: 'page-1',
+        send: sinon.stub().resolves(),
+        on: sinon.stub(),
+        off: sinon.stub(),
+      }
+
+      const browserCriClient = {
+        attachCdpNetworkInterception: sinon.stub().resolves(),
+        currentlyAttachedProtocolTarget: undefined,
+        currentlyAttachedCyPromptTarget: undefined,
+        currentlyAttachedStudioTarget: undefined,
+        resetBrowserTargets: sinon.stub().resolves(),
+      }
+
+      const automation = { use: sinon.stub() }
+      const cdpAutomation = {
+        _handlePausedRequests: sinon.stub().resolves(),
+        _listenForFrameTreeChanges: sinon.stub(),
+      }
+
+      const options = {
+        ...openOpts,
+        browser: { displayName: 'Chrome' },
+      }
+
+      sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
+      sinon.stub(chrome, '_setAutomation').resolves(cdpAutomation)
+      sinon.stub(chrome, '_navigateUsingCRI').resolves()
+      sinon.stub(chrome, '_handleDownloads').resolves()
+      sinon.stub(chrome, '_recordVideo').resolves()
+
+      await chrome.attachListeners('http://example.com', pageCriClient as any, automation as any, options as any, { displayName: 'Chrome' } as any)
+
+      expect(browserCriClient.attachCdpNetworkInterception).not.to.have.been.called
+
+      delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+      sinon.restore()
+    })
+  })
 })

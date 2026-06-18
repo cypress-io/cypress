@@ -14,6 +14,7 @@ import type { BrowserWindow } from 'electron'
 import type { Automation } from '../automation'
 import type { BrowserLaunchOpts, Preferences, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape, RunModeVideoApi } from '@packages/types'
 import type { CDPSocketServer } from '@packages/socket'
+import { isProxyDisabled } from '../util/is-proxy-disabled'
 import memory from './memory'
 import { BrowserCriClient } from './browser-cri-client'
 import { getRemoteDebuggingPort } from '../util/electron-app'
@@ -371,16 +372,19 @@ export = {
         pageCriClient.send('Storage.clearDataForOrigin', { origin: '*', storageTypes: 'cookies,indexeddb,local_storage,shader_cache,service_workers,cache_storage,interest_groups,shared_storage' }),
         pageCriClient.send('Network.clearBrowserCache'),
       ])
-    }
 
-    // enabling can only happen once the window has loaded
-    await this._enableDebugger()
+      // enabling can only happen once the window has loaded
+      await this._enableDebugger()
 
-    // Note that these calls have to happen before we load the page so that we don't miss out on any events that happen quickly
-    if (cdpAutomation) {
       // These calls need to happen prior to loading the URL so we can be sure to get the frames as they come in
-      await cdpAutomation._handlePausedRequests(browserCriClient?.currentlyAttachedTarget)
-      cdpAutomation._listenForFrameTreeChanges(browserCriClient?.currentlyAttachedTarget)
+      await cdpAutomation._handlePausedRequests(pageCriClient)
+      cdpAutomation._listenForFrameTreeChanges(pageCriClient)
+
+      if (isProxyDisabled() && options.networkInterception) {
+        await browserCriClient.attachCdpNetworkInterception(options.networkInterception, pageCriClient)
+      }
+    } else {
+      await this._enableDebugger()
     }
 
     await win.loadURL(url)

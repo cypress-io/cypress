@@ -216,6 +216,7 @@ describe('lib/open_project', () => {
       it('does not pass proxyServer to browser when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
         process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
         delete this.config.proxyServer
+        openProject.getProject()._server = { setPreRequestTimeout: sinon.stub() } as any
 
         return openProject.launch(this.browser, this.spec)
         .then(() => {
@@ -223,6 +224,31 @@ describe('lib/open_project', () => {
         })
         .finally(() => {
           delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+        })
+      })
+
+      it('passes networkInterception from server to browser when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
+        const networkInterception = { handle: sinon.stub() }
+
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+        openProject.getProject()._server = {
+          networkInterception,
+          setPreRequestTimeout: sinon.stub(),
+        } as any
+
+        return openProject.launch(this.browser, this.spec)
+        .then(() => {
+          expect(browsers.open.lastCall.args[1].networkInterception).to.eq(networkInterception)
+        })
+        .finally(() => {
+          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+        })
+      })
+
+      it('does not pass networkInterception when proxy is enabled', function () {
+        return openProject.launch(this.browser, this.spec)
+        .then(() => {
+          expect(browsers.open.lastCall.args[1].networkInterception).to.be.undefined
         })
       })
     })

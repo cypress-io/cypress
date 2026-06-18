@@ -6,6 +6,8 @@ import type { Protocol } from 'devtools-protocol'
 import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
+import { CDPNetworkInterception } from '@packages/browser-automation'
+import type { ForNetworkInterception } from '@packages/network-interception'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { CyPromptManagerShape, ProtocolManagerShape } from '@packages/types'
@@ -187,6 +189,7 @@ export class BrowserCriClient {
   gracefulShutdown?: Boolean
   extraTargetClients: Map<TargetId, ExtraTarget> = new Map()
   onClose: Function | null = null
+  private cdpNetworkInterception?: CDPNetworkInterception
 
   private constructor (options: BrowserCriClientOptions) {
     this.browserClient = options.browserClient
@@ -582,6 +585,8 @@ export class BrowserCriClient {
 
     this.resettingBrowserTargets = true
 
+    await this.detachCdpNetworkInterception()
+
     if (!this.currentlyAttachedTarget) {
       throw new Error('Cannot close target because no target is currently attached')
     }
@@ -703,6 +708,37 @@ export class BrowserCriClient {
   }
 
   /**
+   * Enable CDP Fetch network interception on the page client (proxy-disabled mode).
+   */
+  async attachCdpNetworkInterception (
+    networkInterception: ForNetworkInterception,
+    pageCriClient: CriClient,
+    skipOrigins: string[] = [],
+  ): Promise<void> {
+    await this.detachCdpNetworkInterception()
+
+    this.cdpNetworkInterception = new CDPNetworkInterception(
+      networkInterception,
+      pageCriClient,
+      skipOrigins,
+    )
+
+    await this.cdpNetworkInterception.enable()
+  }
+
+  /**
+   * Tear down CDP Fetch network interception (spec change, tab reset, browser close).
+   */
+  async detachCdpNetworkInterception (): Promise<void> {
+    if (!this.cdpNetworkInterception) {
+      return
+    }
+
+    await this.cdpNetworkInterception.disable()
+    this.cdpNetworkInterception = undefined
+  }
+
+  /**
    * @returns the websocket debugger URL for the currently connected browser
    */
   getWebSocketDebuggerUrl () {
@@ -725,6 +761,8 @@ export class BrowserCriClient {
 
     this.closing = true
     this.connected = false
+
+    await this.detachCdpNetworkInterception()
 
     if (this.currentlyAttachedTarget) {
       await Promise.all([

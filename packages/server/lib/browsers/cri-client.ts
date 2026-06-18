@@ -86,6 +86,8 @@ export interface ICriClient {
    * Unregisters callback for particular event.
    */
   off: OffFn
+  /** Whether Fetch.enable is currently active on this session (false after Fetch.disable). */
+  isFetchDomainEnabled?: () => boolean
 }
 
 type DeferredPromise = { resolve: Function, reject: Function }
@@ -106,6 +108,18 @@ export class CriClient implements ICriClient {
   // subscriptions are recorded, but this may no longer be necessary. cdp event listeners
   // need only be added to the connection instance, not the (ephemeral) underlying
   // CDP.Client instances
+  /**
+   * Whether Fetch.enable is currently active on this session (false after Fetch.disable).
+   */
+  isFetchDomainEnabled (): boolean {
+    return this.fetchDomainEnabled
+  }
+
+  /**
+   * Whether Fetch.enable is currently active on this session (false after Fetch.disable).
+   */
+  private fetchDomainEnabled = false
+
   private subscriptions: Subscription[] = []
   private enableCommands: EnableCommand[] = []
   private enqueuedCommands: EnqueuedCommand[] = []
@@ -300,6 +314,14 @@ export class CriClient implements ICriClient {
       }
 
       this.enableCommands.push(obj)
+    }
+
+    if (command === 'Fetch.enable') {
+      this.fetchDomainEnabled = true
+    }
+
+    if (command === 'Fetch.disable') {
+      this.fetchDomainEnabled = false
     }
 
     if (this._connected && this.cdpConnection) {

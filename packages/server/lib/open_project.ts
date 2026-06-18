@@ -15,7 +15,7 @@ import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOpti
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
-import { isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
+import { isProxyDisabled, isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -96,6 +96,9 @@ export class OpenProject extends EventEmitter {
       experimentalModifyObstructiveThirdPartyCode: cfg.experimentalModifyObstructiveThirdPartyCode,
       experimentalWebKitSupport: cfg.experimentalWebKitSupport,
       ...prevOptions || {},
+      networkInterception: isProxyDisabled()
+        ? this.projectBase.server.networkInterception
+        : prevOptions?.networkInterception,
     }
 
     // if we don't have the isHeaded property

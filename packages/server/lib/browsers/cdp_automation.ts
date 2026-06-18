@@ -23,6 +23,7 @@ import { cdpGetUrl } from '../automation/commands/get_url'
 import { cdpReloadFrame } from '../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../automation/commands/navigate_history'
 import { cdpGetFrameTitle } from '../automation/commands/get_frame_title'
+import { normalizeResourceType } from '@packages/browser-automation'
 
 export type CdpCommand = keyof ProtocolMapping.Commands
 
@@ -136,19 +137,6 @@ const normalizeSetCookieProps = (cookie: CyCookie): Protocol.Network.SetCookieRe
   return setCookieRequest
 }
 
-export const normalizeResourceType = (resourceType: string | undefined): ResourceType => {
-  resourceType = resourceType ? resourceType.toLowerCase() : 'unknown'
-  if (validResourceTypes.includes(resourceType as ResourceType)) {
-    return resourceType as ResourceType
-  }
-
-  if (resourceType === 'img') {
-    return 'image'
-  }
-
-  return ffToStandardResourceTypeMap[resourceType] || 'other'
-}
-
 export type SendDebuggerCommand = <T extends CdpCommand>(message: T, data?: ProtocolMapping.Commands[T]['paramsType'][0], sessionId?: string) => Promise<ProtocolMapping.Commands[T]['returnType']>
 
 export type OnFn = <T extends CdpEvent>(eventName: T, cb: (data: ProtocolMapping.Events[T][0], sessionId?: string) => void) => void
@@ -158,16 +146,6 @@ export type OffFn = <T extends CdpEvent>(eventName: T, cb: (data: any) => void) 
 type SendCloseCommand = (shouldKeepTabOpen: boolean) => Promise<any> | void
 interface HasFrame {
   frame: Protocol.Page.Frame
-}
-
-// the intersection of what's valid in CDP and what's valid in FFCDP
-// Firefox: https://searchfox.org/mozilla-central/rev/98a9257ca2847fad9a19631ac76199474516b31e/remote/cdp/domains/parent/Network.jsm#22
-// CDP: https://chromedevtools.github.io/devtools-protocol/tot/Network/#type-ResourceType
-const validResourceTypes: ResourceType[] = ['fetch', 'xhr', 'websocket', 'stylesheet', 'script', 'image', 'font', 'cspviolationreport', 'ping', 'manifest', 'other']
-const ffToStandardResourceTypeMap: { [ff: string]: ResourceType } = {
-  'img': 'image',
-  'csp': 'cspviolationreport',
-  'webmanifest': 'manifest',
 }
 
 export class CdpAutomation implements CDPClient, AutomationMiddleware {
@@ -523,6 +501,15 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     // adds a header to the request to mark it as a request for the AUT frame
     // itself, so the proxy can utilize that for injection purposes
     client.on('Fetch.requestPaused', async (params: Protocol.Fetch.RequestPausedEvent) => {
+      // This listener is responsible only for Document requests (AUT-frame tagging).
+      // When another Fetch consumer (e.g. CDPNetworkInterception) later expands the
+      // Fetch.enable pattern to urlPattern:'*', non-Document requests will also
+      // arrive here. Ignore them so the dedicated consumer can handle them without
+      // a race condition.
+      if (params.resourceType !== 'Document') {
+        return
+      }
+
       if (await this._isAUTFrame(params.frameId)) {
         debugVerbose('add X-Cypress-Is-AUT-Frame header to: %s', params.request.url)
 

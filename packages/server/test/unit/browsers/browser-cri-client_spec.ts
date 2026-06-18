@@ -2,11 +2,11 @@ import { BrowserCriClient } from '../../../lib/browsers/browser-cri-client'
 import { CriClient } from '../../../lib/browsers/cri-client'
 import { expect, proxyquire, sinon } from '../../spec_helper'
 import * as protocol from '../../../lib/browsers/protocol'
-import { stripAnsi } from '@packages/errors'
 import net from 'net'
-import { ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
+import { ProtocolManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
+import { FakeCriClient } from '@packages/browser-automation/lib/testing/fake-cri-client'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -641,9 +641,9 @@ describe('lib/browsers/browser-cri-client', function () {
       const mockUpdatedCurrentlyAttachedTarget = {
         targetId: '101',
         clone: sinon.stub()
-          .onFirstCall().returns(mockUpdatedCurrentlyAttachedProtocolTarget)
-          .onSecondCall().returns(mockUpdatedCurrentlyAttachedCyPromptTarget)
-          .onThirdCall().returns(mockUpdatedCurrentlyAttachedStudioTarget),
+        .onFirstCall().returns(mockUpdatedCurrentlyAttachedProtocolTarget)
+        .onSecondCall().returns(mockUpdatedCurrentlyAttachedCyPromptTarget)
+        .onThirdCall().returns(mockUpdatedCurrentlyAttachedStudioTarget),
       }
 
       send.withArgs('Target.createTarget', { url: 'about:blank' }).resolves(mockUpdatedCurrentlyAttachedTarget)
@@ -670,6 +670,25 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedProtocolTarget.queue.subscriptions[0].cb)
       expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedCyPromptTarget.queue.subscriptions[0].cb)
       expect(browserClient.browserClient.off).to.be.calledWith('Network.requestWillBeSent', mockCurrentlyAttachedStudioTarget.queue.subscriptions[0].cb)
+    })
+
+    it('calls detachCdpNetworkInterception on resetBrowserTargets', async function () {
+      const mockCurrentlyAttachedTarget = {
+        targetId: '100',
+        closed: false,
+        close: sinon.stub().resolves(),
+        queue: { subscriptions: [] },
+      }
+
+      const browserClient = await getClient() as any
+      const detach = sinon.stub(browserClient, 'detachCdpNetworkInterception').resolves()
+
+      browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+      browserClient.browserClient.off = sinon.stub()
+
+      await browserClient.resetBrowserTargets(false)
+
+      expect(detach).to.have.been.calledOnce
     })
 
     it('closes the currently attached target without keeping a tab open', async function () {
@@ -798,12 +817,74 @@ describe('lib/browsers/browser-cri-client', function () {
       expect(mockCurrentlyAttachedStudioTarget.close).to.be.called
     })
 
+    it('calls detachCdpNetworkInterception on close', async function () {
+      const mockCurrentlyAttachedTarget = {
+        close: sinon.stub().resolves(),
+      }
+
+      const browserClient = await getClient() as any
+      const detach = sinon.stub(browserClient, 'detachCdpNetworkInterception').resolves()
+
+      browserClient.connected = true
+      browserClient.closed = false
+      browserClient.currentlyAttachedTarget = mockCurrentlyAttachedTarget
+
+      await browserClient.close()
+
+      expect(detach).to.have.been.calledOnce
+    })
+
     it('just the browser client with no currently attached target', async function () {
       const browserClient = await getClient() as any
 
       await browserClient.close()
 
       expect(close).to.be.called
+    })
+  })
+
+  context('#attachCdpNetworkInterception', function () {
+    const networkInterception = () => ({ handle: sinon.stub().resolves({ statusCode: 200, headers: {}, body: '' }) })
+
+    it('enables Fetch and registers a pause listener on the page client', async function () {
+      const browserClient = await getClient()
+      const pageCriClient = new FakeCriClient()
+
+      await browserClient.attachCdpNetworkInterception(networkInterception(), pageCriClient as any)
+
+      expect(pageCriClient.getCommands('Fetch.enable')).to.have.length(1)
+      expect(pageCriClient.listenerCount('Fetch.requestPaused')).to.eq(1)
+    })
+
+    it('tears down the previous interception before attaching a new one', async function () {
+      const browserClient = await getClient()
+      const firstPageClient = new FakeCriClient()
+      const secondPageClient = new FakeCriClient()
+
+      await browserClient.attachCdpNetworkInterception(networkInterception(), firstPageClient as any)
+      await browserClient.attachCdpNetworkInterception(networkInterception(), secondPageClient as any)
+
+      expect(firstPageClient.listenerCount('Fetch.requestPaused')).to.eq(0)
+      expect(secondPageClient.listenerCount('Fetch.requestPaused')).to.eq(1)
+    })
+  })
+
+  context('#detachCdpNetworkInterception', function () {
+    it('removes the Fetch pause listener from the page client', async function () {
+      const browserClient = await getClient()
+      const pageCriClient = new FakeCriClient()
+
+      await browserClient.attachCdpNetworkInterception({ handle: sinon.stub() } as any, pageCriClient as any)
+
+      await browserClient.detachCdpNetworkInterception()
+
+      expect(pageCriClient.listenerCount('Fetch.requestPaused')).to.eq(0)
+    })
+
+    it('is a no-op when nothing is attached', async function () {
+      const browserClient = await getClient()
+
+      await browserClient.detachCdpNetworkInterception()
     })
   })
 })
