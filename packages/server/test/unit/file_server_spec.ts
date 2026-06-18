@@ -106,7 +106,7 @@ describe('lib/file_server', () => {
       // strip ANSI since the highlighted count is wrapped in color codes.
       const message = stripAnsi(caught.message)
 
-      expect(message).to.include('3 times')
+      expect(message).to.include('3 attempts')
       expect(message).to.include('EADDRINUSE')
     })
 

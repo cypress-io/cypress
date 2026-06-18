@@ -724,15 +724,11 @@ export const AllCypressErrors = {
     return errTemplate`\
         Cypress could not start its internal file server.
 
-        Cypress attempted to listen on an available port on ${fmt.highlightSecondary('127.0.0.1')} ${fmt.highlight(attempts)} times, but each attempt failed because the port was already in use.
-
-        The underlying error was:
+        After ${fmt.highlight(attempts)} attempts to listen on an available port on ${fmt.highlightSecondary('127.0.0.1')}, the last attempt failed with:
 
         ${fmt.highlightSecondary(err.message)}
 
-        This is usually temporary and caused by port pressure on the machine — for example, many processes competing for ports, or a process from a previous run that has not yet released its ports.
-
-        Try running Cypress again. If this keeps happening, reduce the number of Cypress instances running in parallel on this machine and confirm that previous runs have fully exited.`
+        Please run Cypress again.`
   },
   ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
