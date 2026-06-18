@@ -48,8 +48,10 @@ let isRunCancelled = false
 const debug = Debug('cypress:server:run')
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
-// WebKit records video via Playwright, which writes one file per page and only finalizes it
-// when the page closes (https://github.com/cypress-io/cypress/issues/23815).
+// WebKit records video through Playwright, which ties each recording to a single page and only
+// finalizes the file when that page closes (https://github.com/cypress-io/cypress/issues/23815).
+// That conflicts with single-tab mode reusing one page across specs, so when video is enabled
+// WebKit recycles the tab per spec instead. See the call sites for each per-spec consequence.
 function isWebKitRecordingVideo (browser: Browser, videoRecording?: VideoRecording) {
   return browser.family === 'webkit' && !!videoRecording
 }
@@ -505,13 +507,8 @@ async function waitForBrowserToConnect (options: { project: Project, socketId: s
     return currentSetScreenshotMetadata(data)
   }
 
-  // WebKit records video via Playwright, which writes one file per page and only finalizes it
-  // when the page closes. Single-tab mode reuses a single page across specs (navigating it in
-  // place), so the page is never closed between specs and only the first spec's video is ever
-  // saved (https://github.com/cypress-io/cypress/issues/23815). When video is enabled we instead
-  // recycle the tab per spec via the standard new-tab path (connectToNewSpec), which gives each
-  // spec its own page/video while still reusing the browser and dev server. With video disabled,
-  // the faster in-place navigation below is kept since it works fine for WebKit.
+  // WebKit + video recycles the tab per spec via the standard new-tab path (connectToNewSpec, see
+  // isWebKitRecordingVideo), so skip the in-place single-tab navigation and fall through to it.
   if (options.experimentalSingleTabRunMode && options.testingType === 'component' && !options.isFirstSpecInBrowser && !isWebKitRecordingVideo(browser, options.videoRecording)) {
     // reset browser state to match default behavior when opening/closing a new tab
     const resetBrowserStateStartedAt = Date.now()
@@ -737,14 +734,11 @@ async function waitForTestsToFinishRunning (options: { project: Project, browser
   // @ts-expect-error experimentalSingleTabRunMode only exists on the CT-specific config type
   const usingExperimentalSingleTabMode = testingType === 'component' && config.experimentalSingleTabRunMode
 
-  // WebKit records video by closing the page (see webkit-automation endVideoCapture), which also
-  // tears down the runner socket. In that case destroyAut would emit 'aut:destroy:init' and wait
-  // forever for an 'aut:destroy:complete' reply that the now-closed runner can never send, hanging
-  // the run (https://github.com/cypress-io/cypress/issues/23815). WebKit recreates the whole
-  // tab/context for the next spec via connectToNewSpec anyway, so destroying the AUT is unnecessary.
-
   debug('post-spec teardown %o', { usingExperimentalSingleTabMode, isLastSpec, testingType, videoExists, isWebKitRecordingVideo: isWebKitRecordingVideo(browser, videoRecording) })
 
+  // WebKit + video already closed the page (and the runner socket) in endVideoCapture, so destroyAut
+  // would wait forever for an 'aut:destroy:complete' reply that never arrives. The tab is recreated
+  // per spec anyway (see isWebKitRecordingVideo), so skip it.
   if (usingExperimentalSingleTabMode && !isLastSpec && !isWebKitRecordingVideo(browser, videoRecording)) {
     debug('single-tab mode: destroying AUT before next spec')
     await project.server.destroyAut()
@@ -1028,10 +1022,8 @@ async function runSpec (config, spec: SpecWithRelativeRoot, options: { project: 
 
     telemetry.startSpan({ name: 'video:capture' })
 
-    // WebKit cannot re-use a videoRecording across specs in single-tab mode - its controller
-    // records to a page-scoped Playwright video that is finalized on page close, so restarting it
-    // is not possible (https://github.com/cypress-io/cypress/issues/23815). Instead, WebKit recycles
-    // the tab per spec (see waitForBrowserToConnect), so each spec creates a fresh videoRecording.
+    // WebKit + video can't reuse a controller across specs (its page-scoped video is finalized on
+    // close), so create a fresh recording per spec (see isWebKitRecordingVideo).
     if (config.experimentalSingleTabRunMode && !isFirstSpecInBrowser && project.videoRecording && !isWebKitRecordingVideo(browser, project.videoRecording)) {
       // in single-tab mode, only the first spec needs to create a videoRecording object
       // which is then re-used between specs
