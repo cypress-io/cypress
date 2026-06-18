@@ -240,7 +240,9 @@ const _disableRestorePagesPrompt = function (userDir) {
 
     return
   })
-  .catch(() => { })
+  .catch((err) => {
+    debug('error reading or writing the preferences file %s: %o', prefsPath, err)
+  })
 }
 
 async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi, browserMajorVersion: number) {
@@ -537,6 +539,8 @@ export = {
     pageCriClient.on('Target.targetCrashed', async (event) => {
       debug('target crashed!', event)
       if (event.targetId !== browserCriClient?.currentlyAttachedTarget?.targetId) {
+        debug('Target.targetCrashed received for target %s while the currently attached target is %s; event ignored, no sibling CRI clients marked as crashed', event.targetId, browserCriClient?.currentlyAttachedTarget?.targetId)
+
         return
       }
 

@@ -24,13 +24,13 @@ jobs:
     environment: ${{ github.event_name == 'pull_request_target' && 'fork-pr-review' || '' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: false
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22
           # Cache only on pull_request (internal PRs) — pull_request_target writes scope to the base branch and could be poisoned by an approved fork PR.
@@ -39,7 +39,7 @@ jobs:
         run: yarn
       - name: Run build
         run: yarn build
-      - uses: snyk/actions/setup@master
+      - uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04 # v1
       - name: Perform Static Analysis Test
         continue-on-error: true
         run: |

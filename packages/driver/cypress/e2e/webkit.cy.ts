@@ -9,13 +9,19 @@ describe('WebKit-specific behavior', { browser: 'webkit' }, () => {
     cy.origin('foo', () => {})
   })
 
-  it('forceNetworkError intercept option is disabled', (done) => {
-    cy.on('fail', (err) => {
-      expect(err.message).to.include('`forceNetworkError` was passed, but it is not currently supported in experimental WebKit.')
-      expect(err.docsUrl).to.equal('https://on.cypress.io/intercept')
-      done()
-    })
+  it('req.destroy() works in intercept handler', (done) => {
+    cy.intercept('/foo', (req) => {
+      req.destroy()
+    }).then(() => {
+      $.get('/foo').fail((xhr) => {
+        expect(xhr).to.include({
+          status: 0,
+          statusText: 'error',
+          readyState: 0,
+        })
 
-    cy.intercept('http://foo.com', { forceNetworkError: true })
+        done()
+      })
+    })
   })
 })

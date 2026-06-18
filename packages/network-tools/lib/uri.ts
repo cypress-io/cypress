@@ -1,12 +1,10 @@
 // useful links for describing the parts that make up a URL:
-// - https://nodejs.org/api/url.html#url_url_strings_and_url_objects
+// - https://nodejs.org/api/url.html#url_strings_and_url_objects
 // - https://en.wikipedia.org/wiki/Uniform_Resource_Identifier#Examples
 //
-// node's url formatting algorithm (which acts pretty unexpectedly)
-// - https://nodejs.org/api/url.html#url_url_format_urlobject
-
-import _ from 'lodash'
-import url from 'url'
+// This module uses the WHATWG URL API (the global `URL` class) so that parsing
+// and percent-encoding match what browsers (and CDP) produce.
+// - https://nodejs.org/api/url.html#the-whatwg-url-api
 
 // yup, protocol contains a: ':' colon
 // at the end of it (-______________-)
@@ -17,73 +15,81 @@ const DEFAULT_PROTOCOL_PORTS = {
 
 type Protocols = keyof typeof DEFAULT_PROTOCOL_PORTS
 
-const DEFAULT_PORTS = _.values(DEFAULT_PROTOCOL_PORTS) as string[]
+const DEFAULT_PORTS: string[] = Object.values(DEFAULT_PROTOCOL_PORTS)
 
-const portIsDefault = (port: string | null) => {
-  return port && DEFAULT_PORTS.includes(port)
+const schemeRe = /^[a-z][a-z0-9+.-]*:\/\//i
+
+// WHATWG `new URL()` throws on some inputs the legacy `url` parser tolerated
+// (relative urls, out-of-range ports, etc.). When that happens we recover a
+// best-effort authority (host[:port], without scheme/path/query/hash) so the
+// helpers below can degrade the way the legacy parser did rather than echoing
+// the raw input — which would otherwise leak the scheme/path into block-host
+// matching or collapse distinct hosts together in same-origin checks.
+export const getAuthority = (urlStr: string) => {
+  return urlStr.replace(schemeRe, '').replace(/[/?#].*$/, '')
 }
-
-const parseClone = (urlObject: any) => {
-  return url.parse(_.clone(urlObject))
-}
-
-export const parse = url.parse
 
 export function stripProtocolAndDefaultPorts (urlToCheck: string) {
-  // grab host which is 'hostname:port' only
-  const { host, hostname, port } = url.parse(urlToCheck)
+  try {
+    const { hostname, port } = new URL(urlToCheck)
 
-  // if we have a default port for 80 or 443
-  // then just return the hostname
-  if (portIsDefault(port)) {
-    return hostname
-  }
-
-  // else return the host
-  return host
-}
-
-function removePort (urlObject: any) {
-  const parsed = parseClone(urlObject)
-
-  // set host to undefined else url.format(...) will ignore the port property
-  // https://nodejs.org/api/url.html#url_url_format_urlobject
-  // Additionally, the types are incorrect (don't include undefined), so we add TS exceptions
-  /* @ts-ignore */
-  delete parsed.host
-  /* @ts-ignore */
-  delete parsed.port
-
-  return parsed
-}
-
-export function removeDefaultPort (urlToCheck: any) {
-  let parsed = parseClone(urlToCheck)
-
-  if (portIsDefault(parsed.port)) {
-    parsed = removePort(parsed)
-  }
-
-  return parsed
-}
-
-export function addDefaultPort (urlToCheck: any) {
-  const parsed = parseClone(urlToCheck)
-
-  if (!parsed.port) {
-    // unset host...
-    // see above for reasoning
-    /* @ts-ignore */
-    delete parsed.host
-    if (parsed.protocol) {
-      parsed.port = DEFAULT_PROTOCOL_PORTS[parsed.protocol as Protocols]
-    } else {
-      /* @ts-ignore */
-      delete parsed.port
+    // strip a default port (80 or 443) regardless of the protocol. Note this is
+    // intentionally protocol-agnostic (e.g. http://host:443 -> host) to preserve
+    // the existing block-host matching behavior.
+    if (!port || DEFAULT_PORTS.includes(port)) {
+      return hostname
     }
-  }
 
-  return parsed
+    return `${hostname}:${port}`
+  } catch (err) {
+    // the WHATWG URL parser throws a TypeError on relative urls or out-of-range
+    // ports that the legacy parser tolerated; fall back to a bare host[:port]
+    // fragment (no scheme) so block-host matching still behaves as it did, but
+    // let anything unexpected propagate. Use `instanceof TypeError` (not
+    // `err.code`) since this package is isomorphic and the browser's URL throws
+    // a TypeError with no `.code`.
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
+
+    return getAuthority(urlToCheck)
+  }
+}
+
+export function removeDefaultPort (urlToCheck: string) {
+  try {
+    // the WHATWG URL API automatically strips the default port (80/443)
+    return new URL(urlToCheck).href
+  } catch (err) {
+    // a relative url has no host/port, so there is nothing to strip; degrade to
+    // the original string for those (a TypeError) but let anything else throw
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
+
+    return urlToCheck
+  }
+}
+
+export function addDefaultPort (urlToCheck: string) {
+  try {
+    const parsed = new URL(urlToCheck)
+
+    // the WHATWG URL API omits default ports and will not let us set them via
+    // `.port`, so we build the href manually to include the explicit port
+    const port = parsed.port || DEFAULT_PROTOCOL_PORTS[parsed.protocol as Protocols]
+    const host = port ? `${parsed.hostname}:${port}` : parsed.hostname
+
+    return `${parsed.protocol}//${host}${parsed.pathname}${parsed.search}${parsed.hash}`
+  } catch (err) {
+    // a relative url has no host/port, so there is nothing to add; degrade to
+    // the original string for those (a TypeError) but let anything else throw
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
+
+    return urlToCheck
+  }
 }
 
 export function getPath (urlToCheck: string) {
@@ -111,13 +117,21 @@ export function isLocalhost (url: URL) {
 }
 
 export function origin (urlStr: string) {
-  const parsed = url.parse(urlStr)
+  try {
+    // URL.origin is the scheme + host (and non-default port) with no path,
+    // search, or hash — exactly the "origin" portion of the url
+    return new URL(urlStr).origin
+  } catch (err) {
+    // the WHATWG URL parser throws a TypeError on invalid urls (e.g. out-of-range
+    // ports) that the legacy parser tolerated; fall back to scheme + authority
+    // (no path/query/hash, mirroring the successful URL.origin path) for those,
+    // but let anything unexpected propagate
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
 
-  parsed.hash = null
-  parsed.search = null
-  parsed.query = null
-  parsed.path = null
-  parsed.pathname = null
+    const scheme = urlStr.match(schemeRe)
 
-  return url.format(parsed)
+    return `${scheme ? scheme[0] : ''}${getAuthority(urlStr)}`
+  }
 }
