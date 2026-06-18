@@ -208,26 +208,7 @@ yarn clean-deps && yarn
 
 ## Pull Requests
 
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) is the source of truth for PR conventions. The essentials:
-
-### Title Prefix (semantic-release)
-
-Prefix the PR title using [semantic-release](https://github.com/semantic-release/semantic-release) format with one of the types below. Once merged to `develop`, this prefix determines the next version of Cypress or the corresponding npm module.
-
-- **User-facing impact** (affects the published Cypress / npm module):
-  - `breaking` — A breaking change that will require an MVB (major version bump)
-  - `dependency` — A change to a dependency that impacts the user
-  - `deprecation` — An API deprecation notice for users
-  - `feat` — A new feature
-  - `fix` — A bug fix or regression fix
-  - `misc` — A miscellaneous user-facing change, like a UI update which is not a fix or enhancement to how Cypress works
-  - `perf` — A code change that improves performance
-- **No user-facing impact** (improves the codebase or system only):
-  - `chore` — Changes to the build process or auxiliary tools and libraries such as documentation generation
-  - `docs` — Documentation only changes
-  - `refactor` — A code change that neither fixes a bug nor adds a feature
-  - `revert` — Reverts a previous commit
-  - `test` — Adding missing or correcting existing tests
+[`CONTRIBUTING.md`](./CONTRIBUTING.md) is the source of truth for PR conventions, including the semantic-release title prefix that determines the next version. The other essentials:
 
 ### Changelog & Template
 
