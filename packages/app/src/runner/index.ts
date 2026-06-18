@@ -27,6 +27,7 @@ import type { AutomationElementId } from '@packages/types'
 import { useSnapshotStore } from './snapshot-store'
 import { useStudioStore } from '../store/studio-store'
 import { getRunnerConfigFromWindow } from './get-runner-config-from-window'
+import { waitForDevServerSpecUpdate } from './wait-for-dev-server-spec-update'
 
 let _eventManager: EventManager | undefined
 
@@ -373,15 +374,13 @@ async function initialize () {
 }
 
 async function updateDevServerWithSpec (spec: SpecFile) {
-  return new Promise<void>((resolve, _reject) => {
-    // currently, we don't have criteria to reject the promise
-    // as the dev-server can take a long time to compile, which is variable per user.
-    Cypress.once('dev-server:on-spec-updated', () => {
-      resolve()
-    })
+  const config = getRunnerConfigFromWindow() as Cypress.Config & {
+    devServerConfig?: { bundler?: string }
+  }
 
-    Cypress.emit('dev-server:on-spec-update', spec)
-  })
+  const bundler = config.devServer?.bundler ?? config.devServerConfig?.bundler
+
+  return waitForDevServerSpecUpdate(spec, Cypress, { bundler })
 }
 
 /**
