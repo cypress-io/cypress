@@ -567,7 +567,7 @@ const Command: React.FC<CommandProps> = observer(({ model, aliasesWithDuplicates
                 <CommandDetails model={model} groupId={groupId} aliasesWithDuplicates={aliasesWithDuplicates} />
                 <CommandControls model={model} commandName={commandName} />
               </div>
-              {model.isCyPrompt && (
+              {model.isCyPrompt && appState.cyPromptActionsEnabled && (
                 <div
                   className='command-prompt-get-code-feedback-container'
                   onClick={(e) => e.stopPropagation()}

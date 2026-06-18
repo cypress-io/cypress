@@ -111,4 +111,7 @@ const Attempts: React.FC<AttemptsProps> = observer(({ test, isSingleStudioTest, 
 
 Attempts.displayName = 'Attempts'
 
+/** @public - consumed by the external test-replay viewer */
+export { Attempt }
+
 export default Attempts

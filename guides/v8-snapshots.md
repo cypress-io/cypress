@@ -108,6 +108,12 @@ If the build v8 snapshot command is taking a long time to run on Circle CI, the 
 
 If the build v8 snapshot command fails, you can sometimes see which file is causing the problem via the stack trace. Running the build snapshot command with `DEBUG=*snap*` set will give you more information. Sometimes you can narrow the issue down to a specific file. If this is the case, you can try removing that file from the snapshot cache at `tooling/v8-snapshot/cache/<platform>/snapshot-meta.json`. If this works, check in the changes and the file will get properly updated in the cache during the next automatic update.
 
+### Package `exports` Subpaths
+
+Our custom snapshot engine cannot resolve named subpath exports in `package.json` (for example `"exports": { "./types": "./cjs/types/index.js" }`).
+
+Do not add package subpath exports until the snapshot engine supports them.
+
 ### If a Full Snapshot Rebuild Still Fails
 
 Occasionally, a full rebuild will still fail. This is typically a sign that there is a problem with the code we are generating, with Electron's `mksnapshot` or even deeper with the pure v8 `mksnapshot`. The first thing to be done is to figure out where the problem actually is.
