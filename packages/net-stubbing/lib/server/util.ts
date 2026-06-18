@@ -5,20 +5,16 @@ import isHtml from 'is-html'
 import { IncomingMessage } from 'http'
 import type {
   BackendStaticResponse,
-} from '../types'
-
-export { getAllStringMatcherFields } from '@packages/network-interception'
+  GetFixtureFn, CyHttpMessages } from '@packages/network-interception'
 
 import { Readable, PassThrough } from 'stream'
 import { Socket } from 'net'
-import type { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
 import type { CypressIncomingRequest } from '@packages/proxy'
 import type { InterceptedRequest } from './intercepted-request'
 import type { SocketBroadcaster } from '@packages/socket'
 import { caseInsensitiveGet, caseInsensitiveHas } from '../util'
 
-import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')

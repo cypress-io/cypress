@@ -7,7 +7,7 @@ import type { MountOptions, Component } from 'svelte'
 
 const DEFAULT_COMP_NAME = 'unknown'
 
-export interface MountReturn{
+export interface MountReturn {
   component: Record<string, any>
 }
 
@@ -50,7 +50,7 @@ const getComponentDisplayName = (Component: Component<Record<string, any>, Recor
  */
 export function mount (
   Component: Component<Record<string, any>, Record<string, any>, any>,
-  options: Omit<MountOptions, 'target'> & {log?: boolean} = {},
+  options: Omit<MountOptions, 'target'> & { log?: boolean } = {},
 ): Cypress.Chainable<MountReturn> {
   // In Svelte 5, the component name is no longer easily discoverable and logs as "wrapper"
   // so we default the logging of it to false as it doesn't provide a lot of value

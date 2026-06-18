@@ -34,7 +34,7 @@ lib/
 
 - This package must remain isomorphic — do not import Node.js built-ins (`fs`, `net`, `tls`, etc.) here. For Node.js-only networking, use **@packages/network**.
 - Builds to both `cjs/` and `esm/`; the ESM build is consumed by browser-bundled packages.
-- Uses `@cypress/parse-domain` for domain parsing, which handles edge cases like public-suffix-aware eTLD+1 extraction.
+- Uses **`tldts`** for public-suffix-aware hostname parsing (ICANN + private rules, IPv4/IPv6).
 
 ## Integration Points
 

@@ -189,7 +189,11 @@ export class ProtocolManager implements ProtocolManagerShape {
     this._errors = []
 
     try {
+      const beforeSpecStartedAt = performance.now() + performance.timeOrigin
+
       this._beforeSpec(spec)
+
+      debug('beforeSpec for %s completed in %dms', spec.name, (performance.now() + performance.timeOrigin) - beforeSpecStartedAt)
     } catch (error) {
       // Clear out protocol since we will not have a valid state when spec has failed
       this.cleanup()

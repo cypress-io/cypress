@@ -1,1 +1,4 @@
+cjs/
+esm/
+**/*.d.ts
 **/tsconfig.json

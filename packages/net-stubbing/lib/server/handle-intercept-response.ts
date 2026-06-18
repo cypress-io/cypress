@@ -4,10 +4,8 @@ import Debug from 'debug'
 import type { Readable } from 'stream'
 import { getEncoding } from 'istextorbinary'
 import type { ResponseMiddleware } from '@packages/proxy'
-import {
-  CyHttpMessages,
-  SERIALIZABLE_RES_PROPS,
-} from '../types'
+import { SERIALIZABLE_RES_PROPS } from '@packages/network-interception'
+import type { CyHttpMessages } from '@packages/network-interception'
 import {
   getBodyStream,
   mergeDeletedHeaders,

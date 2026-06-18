@@ -1,5 +1,6 @@
 import '../../spec_helper'
 import os from 'os'
+import path from 'path'
 import mockfs from 'mock-fs'
 import * as extension from '@packages/extension'
 import * as launch from '@packages/launcher/lib/browsers'
@@ -541,6 +542,42 @@ describe('lib/browsers/chrome', () => {
 
         expect(this.pageCriClient.send).to.be.calledWith('Page.getFrameTree')
       })
+    })
+  })
+
+  describe('#_writeExtension', () => {
+    afterEach(() => {
+      mockfs.restore()
+    })
+
+    // when Cypress is installed in a read-only location (e.g. the Nix store), the
+    // source extension is read-only and fs.copy preserves those permissions. The
+    // copied extension must be made writable, otherwise rimraf cannot unlink the
+    // files when cleaning up the profile on exit.
+    // @see https://github.com/cypress-io/cypress/issues/31300
+    it('grants write access to the copied extension so the profile can be cleaned up on exit', async () => {
+      const browser = { name: 'chrome', channel: 'stable', isHeadless: false }
+      // the read-only source extension, as it would be installed in the Nix store
+      // (Chrome uses the Manifest V3 extension)
+      const extensionSrc = extension.getPathToV3Extension()
+      // the real destination the extension is copied to
+      const extensionDir = utils.getExtensionDir(browser, true)
+
+      mockfs({
+        [extensionSrc]: mockfs.directory({
+          mode: 0o555,
+          items: {
+            'background.js': mockfs.file({ content: 'abc', mode: 0o444 }),
+          },
+        }),
+      })
+
+      await chrome._writeExtension(browser, { isTextTerminal: true })
+
+      // the owner write bit must be set on both the directory and its contents,
+      // otherwise rimraf cannot unlink the files when removing the profile on exit
+      expect((await fs.stat(extensionDir)).mode & 0o200, 'extension directory is writable').to.equal(0o200)
+      expect((await fs.stat(path.join(extensionDir, 'background.js'))).mode & 0o200, 'background.js is writable').to.equal(0o200)
     })
   })
 
