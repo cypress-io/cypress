@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.17.1
+
+**Bugfixes:**
+
+- Fixed an issue where deleting the `downloadsFolder` during a test in `cypress open` could leave the folder unwritable and undeletable until Cypress exited. Fixes [#32832](https://github.com/cypress-io/cypress/issues/32832).
+
 ## 15.17.0
 
 **Performance:**
@@ -38,7 +44,6 @@
 - Fixed an issue where `cypress run` could crash with `TypeError: The "path" argument must be of type string. Received undefined` when the project path was not resolved (for example, due to an unset CI environment variable) or when `--browser` was passed without a value. Cypress now falls back to the current working directory in the first case and emits a clear "browser not found" error in the second. Fixes [#15418](https://github.com/cypress-io/cypress/issues/15418). Fixed in [#33958](https://github.com/cypress-io/cypress/pull/33958).
 - Fixed an issue where HTML markup passed as a Sinon spy argument (for example `expect(spy).to.have.been.calledOnceWith('<svg>...</svg>')`) was rendered as live DOM in the Cypress command log, truncating the assertion message and breaking the log layout. The assertion message is now HTML-escaped and the markup is shown as literal text. Fixes [#33416](https://github.com/cypress-io/cypress/issues/33416). Fixed in [#33941](https://github.com/cypress-io/cypress/pull/33941).
 - Fixed a regression in [14.4.0](#14-4-0) where Cypress incorrectly logged `Warning: We failed to trash the existing run results.` on Windows when the Recycle Bin is configured with "Don't move files to the Recycle Bin. Remove files immediately when deleted.", even though the assets were actually removed. Fixes [#32691](https://github.com/cypress-io/cypress/issues/32691).
-- Fixed an issue where deleting the `downloadsFolder` (or `screenshotsFolder` / `videosFolder`) during a test in `cypress open` could leave the folder in an unwritable, undeletable state on Windows until Cypress exited. The open-mode spec watcher no longer watches Cypress's own output folders, so it no longer holds an open directory handle that blocks their removal. Fixes [#32832](https://github.com/cypress-io/cypress/issues/32832).
 - Fixed an issue where a test or attempt that had not reached a terminal state (for example, after an interrupted or crashed run) could be reported to Cypress Cloud with an internal, display-only `processing` state that the Cloud rejects. Such in-flight states are now reported as `pending`. Fixes [#27956](https://github.com/cypress-io/cypress/issues/27956).
 - Fixed an issue where the version of `WebKit` was incorrectly displayed as version 0 when `playwright` version `1.60.0` was installed. Fixes [#33953](https://github.com/cypress-io/cypress/issues/33953).
 - Fixed an issue where clicking a [`cy.origin`](https://docs.cypress.io/api/commands/origin) command in the Command Log to print its details to the console threw an error when the callback yielded a value that could not be serialized across origins (for example, the page's `window` after a `cy.visit`). The command now prints its origin, arguments, and yielded subject to the console without erroring; an unserializable yielded subject is shown by its type instead of throwing. Fixes [#27385](https://github.com/cypress-io/cypress/issues/27385). Fixed in [#33983](https://github.com/cypress-io/cypress/pull/33983).
