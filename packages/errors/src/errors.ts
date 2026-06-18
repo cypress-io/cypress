@@ -728,7 +728,7 @@ export const AllCypressErrors = {
 
         ${fmt.highlightSecondary(err.message)}
 
-        Please run Cypress again.`
+        Please try again later.`
   },
   ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
