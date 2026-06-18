@@ -206,6 +206,35 @@ yarn clean-deps && yarn
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
 
+## Pull Requests
+
+### Title Prefix (semantic-release)
+
+Prefix the PR title using [semantic-release](https://github.com/semantic-release/semantic-release) format with one of the types below. Once merged to `develop`, this prefix determines the next version of Cypress or the corresponding npm module.
+
+- **User-facing impact** (affects the published Cypress / npm module):
+  - `breaking` — A breaking change that will require an MVB (major version bump)
+  - `dependency` — A change to a dependency that impacts the user
+  - `deprecation` — An API deprecation notice for users
+  - `feat` — A new feature
+  - `fix` — A bug fix or regression fix
+  - `misc` — A miscellaneous user-facing change, like a UI update which is not a fix or enhancement to how Cypress works
+  - `perf` — A code change that improves performance
+- **No user-facing impact** (improves the codebase or system only):
+  - `chore` — Changes to the build process or auxiliary tools and libraries such as documentation generation
+  - `docs` — Documentation only changes
+  - `refactor` — A code change that neither fixes a bug nor adds a feature
+  - `revert` — Reverts a previous commit
+  - `test` — Adding missing or correcting existing tests
+
+### Changelog
+
+For user-facing changes that will ship with the next Cypress version, add a changelog entry to the appropriate section in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md). See the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) for details.
+
+### Pull Request Template
+
+REQUIREMENT: Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If a section is not relevant, write `N/A` rather than deleting it. PRs will not be reviewed if this template is not filled in.
+
 ## CI/CD
 
 - **Primary CI**: CircleCI. Config lives in `.circleci/src/` (modular) and is compiled to `.circleci/packed/pipeline.yml`. See [`.circleci/AGENTS.md`](.circleci/AGENTS.md) for when to add a branch to the full-CI allowlist (binary tests, Windows jobs, v8 snapshot validation).
