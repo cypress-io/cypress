@@ -1,0 +1,26 @@
+packages/errors/src/errors.ts
+  s_b5e059020b4a70::t_26ea3223161179 731
+packages/errors/test/__snapshots__/FILE_SERVER_COULD_NOT_LISTEN.ansi
+  s_b5e059020b4a70::t_474ea0cdf476b6 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "6a4bad44863817bbb15db7e874302aa67178b66d",
+  "prompts": {},
+  "humans": {
+    "h_5f6e5bd5f4342d": {
+      "author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  },
+  "sessions": {
+    "s_b5e059020b4a70": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc639e8b-078d-46cb-89be-ccaee86c12fb",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Ryan Manuel <ryanm@cypress.io>"
+    }
+  }
+}
