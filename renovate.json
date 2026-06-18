@@ -5,8 +5,24 @@
     ":semanticPrefixFixDepsChoreOthers",
     "group:monorepos",
     "group:recommended",
+    "helpers:pinGitHubActionDigests",
     "replacements:all",
     "workarounds:all"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Keep the pinned cypress-io/release-automations checkout ref updated to the latest master commit",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.+\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "repository: 'cypress-io/release-automations'\\s+ref: '(?<currentDigest>[0-9a-f]+)' # (?<currentValue>\\S+)"
+      ],
+      "depNameTemplate": "cypress-io/release-automations",
+      "packageNameTemplate": "https://github.com/cypress-io/release-automations",
+      "datasourceTemplate": "git-refs"
+    }
   ],
   "ignorePaths": [
     "**/node_modules/**",
@@ -24,6 +40,15 @@
         "pin",
         "digest"
       ]
+    },
+    {
+      "description": "Cooldown before updating pinned GitHub Action SHAs so a moved/compromised tag isn't merged immediately",
+      "matchManagers": [
+        "github-actions",
+        "custom.regex"
+      ],
+      "minimumReleaseAge": "7 days",
+      "internalChecksFilter": "strict"
     }
   ],
   "postUpdateOptions": [
