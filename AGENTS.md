@@ -208,6 +208,8 @@ yarn clean-deps && yarn
 
 ## Pull Requests
 
+[`CONTRIBUTING.md`](./CONTRIBUTING.md) is the source of truth for PR conventions. The essentials:
+
 ### Title Prefix (semantic-release)
 
 Prefix the PR title using [semantic-release](https://github.com/semantic-release/semantic-release) format with one of the types below. Once merged to `develop`, this prefix determines the next version of Cypress or the corresponding npm module.
@@ -227,13 +229,10 @@ Prefix the PR title using [semantic-release](https://github.com/semantic-release
   - `revert` — Reverts a previous commit
   - `test` — Adding missing or correcting existing tests
 
-### Changelog
+### Changelog & Template
 
-For user-facing changes that will ship with the next Cypress version, add a changelog entry to the appropriate section in [`cli/CHANGELOG.md`](./cli/CHANGELOG.md). See the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md) for details.
-
-### Pull Request Template
-
-REQUIREMENT: Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If a section is not relevant, write `N/A` rather than deleting it. PRs will not be reviewed if this template is not filled in.
+- For user-facing changes shipping with the next Cypress version, add a changelog entry to [`cli/CHANGELOG.md`](./cli/CHANGELOG.md) — see the [Writing the Cypress Changelog Guide](./guides/writing-the-cypress-changelog.md).
+- Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely. Use `N/A` for irrelevant sections rather than deleting them — PRs will not be reviewed if the template is not filled in.
 
 ## CI/CD
 
