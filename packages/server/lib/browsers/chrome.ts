@@ -29,7 +29,6 @@ const debug = debugModule('cypress:server:browsers:chrome')
 const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
 const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
-const CHROME_VERSION_WITH_FPS_INCREASE = 89
 const CHROME_VERSION_INTRODUCING_HEADLESS_NEW = 112
 
 const CHROME_PREFERENCE_PATHS = {
@@ -245,12 +244,10 @@ const _disableRestorePagesPrompt = function (userDir) {
   })
 }
 
-async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi, browserMajorVersion: number) {
-  const screencastOptions = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
-
+async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi) {
   const { writeVideoFrame } = await videoOptions.useFfmpegVideoController()
 
-  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOptions)
+  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOpts())
 }
 
 // a utility function that navigates to the given URL
@@ -586,7 +583,7 @@ export = {
 
     await Promise.all([
       pageCriClient.send('ServiceWorker.enable'),
-      options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
+      options.videoApi && this._recordVideo(cdpAutomation, options.videoApi),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
       utils.initializeCDP(pageCriClient, automation),
     ])

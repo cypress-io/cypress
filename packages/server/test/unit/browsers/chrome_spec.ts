@@ -624,7 +624,7 @@ describe('lib/browsers/chrome', () => {
       }
 
       sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
-      sinon.stub(chrome, '_recordVideo').withArgs(sinon.match.object, options.writeVideoFrame, 354).resolves()
+      sinon.stub(chrome, '_recordVideo').withArgs(sinon.match.object, options.writeVideoFrame).resolves()
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
 
