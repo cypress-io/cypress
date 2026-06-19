@@ -5,6 +5,10 @@
 
 - Fixed an issue where an application that repeatedly threw the same uncaught exception (for example, a benign `ResizeObserver loop ...` notification fired on every animation frame) could exhaust renderer memory and crash the browser. Consecutive identical uncaught exceptions within a test now collapse into a single, updating command-log entry, and a handled (suppressed) uncaught exception no longer captures a DOM snapshot. Addresses [#27415](https://github.com/cypress-io/cypress/issues/27415).
 
+**Features:**
+
+- Added a `removeSRIAttributes` configuration option. When enabled, Cypress strips the `integrity` attribute from `<script>` and `<link>` elements on first-party resources so they are not blocked by Subresource Integrity (SRI) enforcement after Cypress rewrites them. Addresses [#34124](https://github.com/cypress-io/cypress/issues/34124).
+
 **Bugfixes:**
 
 - Fixed an issue where calling `req.destroy()` or using `{ forceNetworkError: true }` inside a [`cy.intercept()`](https://on.cypress.io/intercept) handler in experimental WebKit caused infinite request loops. Fixes [#23810](https://github.com/cypress-io/cypress/issues/23810). Fixed in [#33948](https://github.com/cypress-io/cypress/pull/33948).
