@@ -4,7 +4,7 @@
 **Performance:**
 
 - Fixed an issue where an application that repeatedly threw the same uncaught exception (for example, a benign `ResizeObserver loop ...` notification fired on every animation frame) could exhaust renderer memory and crash the browser. Consecutive identical uncaught exceptions within a test now collapse into a single, updating command-log entry, and a handled (suppressed) uncaught exception no longer captures a DOM snapshot. Addresses [#27415](https://github.com/cypress-io/cypress/issues/27415).
-- Verifying that the Cypress binary can run — which happens the first time a newly installed version is used, before `cypress open` or `cypress run`, and whenever `cypress verify` is invoked — now completes more quickly.
+- Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly.
 
 **Bugfixes:**
 
