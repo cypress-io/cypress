@@ -375,6 +375,7 @@ async function initialize () {
 
 async function updateDevServerWithSpec (spec: SpecFile) {
   const config = getRunnerConfigFromWindow() as Cypress.Config & {
+    devServer?: { bundler?: string }
     devServerConfig?: { bundler?: string }
   }
 
