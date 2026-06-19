@@ -549,6 +549,75 @@ describe('lib/browsers/index', () => {
       })
     })
 
+    it('marks the browser crashed before clearing instance state when the process crashes', async () => {
+      const onError = sinon.stub()
+      const url: TestUrl = 'http://localhost:3000'
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      const instance = browserInstance
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      const markBrowserCrashed = sinon.spy(electron, 'markBrowserCrashed')
+      const clearInstanceState = sinon.spy(electron, 'clearInstanceState')
+
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      await browsers.open({ name: 'electron', family: 'chromium' } as any, { url, onError, onBrowserClose: sinon.stub() } as any, null, ctx)
+
+      // Simulate a browser *process* crash (exits with SIGTRAP and no code)
+      browserInstance.emit('exit', null, 'SIGTRAP')
+
+      // the exit handler awaits onError, so flush microtasks before asserting
+      await Promise.delay(0)
+
+      expect(markBrowserCrashed, 'marks the browser crashed').to.be.calledOnce
+      // crucially, the CRI client must be marked crashed *before* it is torn down so
+      // that in-flight/subsequent teardown CDP commands reject instead of hanging
+      expect(markBrowserCrashed).to.be.calledBefore(clearInstanceState)
+      expect(onError, 'reports the crash').to.be.calledOnce
+    })
+
+    it('does not mark the browser crashed on a graceful (non-crash) exit', async () => {
+      const onError = sinon.stub()
+      const url: TestUrl = 'http://localhost:3000'
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      const instance = browserInstance
+
+      browsers._setInstance(instance)
+
+      sinon.stub(electron, 'open').resolves(instance)
+      const markBrowserCrashed = sinon.spy(electron, 'markBrowserCrashed')
+
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
+
+      // Stub to speed up test, we don't care about the delay
+      sinon.stub(Promise, 'delay').resolves()
+
+      await browsers.open({ name: 'electron', family: 'chromium' } as any, { url, onError, onBrowserClose: sinon.stub() } as any, null, ctx)
+
+      // SIGTERM is an intentional/graceful exit, not a crash
+      browserInstance.emit('exit', null, 'SIGTERM')
+
+      await Promise.delay(0)
+
+      expect(markBrowserCrashed).not.to.be.called
+      expect(onError).not.to.be.called
+    })
+
     it('calls onBrowserOpen callback', async () => {
       const onBrowserOpen = sinon.stub()
       const url: TestUrl = 'http://localhost:3000'
