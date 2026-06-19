@@ -935,48 +935,15 @@ describe('lib/browsers/chrome', () => {
       expect(args).not.to.include('--user-agent=foo')
     })
 
-    it('disables RootLayerScrolling in versions 66 or 67', () => {
-      const arg = '--disable-blink-features=RootLayerScrolling'
-
-      const disabledRootLayerScrolling = function (version, bool) {
-        const args = chrome._getArgs({
-          majorVersion: version,
-        }, {})
-
-        if (bool) {
-          return expect(args).to.include(arg)
-        }
-
-        expect(args).not.to.include(arg)
-      }
-
-      disabledRootLayerScrolling('65', false)
-      disabledRootLayerScrolling('66', true)
-      disabledRootLayerScrolling('67', true)
-
-      disabledRootLayerScrolling('68', false)
-    })
-
     // https://github.com/cypress-io/cypress/issues/1872
-    it('adds <-loopback> proxy bypass rule in version 72+', () => {
+    it('adds <-loopback> proxy bypass rule', () => {
       const arg = '--proxy-bypass-list=<-loopback>'
 
-      const chromeVersionHasLoopback = function (version, bool) {
-        const args = chrome._getArgs({
-          majorVersion: version,
-        }, {})
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {})
 
-        if (bool) {
-          return expect(args).to.include(arg)
-        }
-
-        expect(args).not.to.include(arg)
-      }
-
-      chromeVersionHasLoopback('71', false)
-      chromeVersionHasLoopback('72', true)
-
-      return chromeVersionHasLoopback('73', true)
+      expect(args).to.include(arg)
     })
   })
 

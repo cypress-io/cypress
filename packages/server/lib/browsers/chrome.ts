@@ -27,8 +27,6 @@ import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 const debug = debugModule('cypress:server:browsers:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
-const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
-const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 const CHROME_VERSION_INTRODUCING_HEADLESS_NEW = 112
 
 const CHROME_PREFERENCE_PATHS = {
@@ -386,21 +384,11 @@ export = {
       args.push('--allow-running-insecure-content')
     }
 
-    // prevent AUT shaking in 66 & 67, but flag breaks chrome in 68+
-    // https://github.com/cypress-io/cypress/issues/2037
-    // https://github.com/cypress-io/cypress/issues/2215
-    // https://github.com/cypress-io/cypress/issues/2223
     const { majorVersion, isHeadless } = browser
-
-    if (CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING.includes(majorVersion)) {
-      args.push('--disable-blink-features=RootLayerScrolling')
-    }
 
     // https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
     // https://github.com/cypress-io/cypress/issues/1872
-    if (Number(majorVersion) >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK) {
-      args.push('--proxy-bypass-list=<-loopback>')
-    }
+    args.push('--proxy-bypass-list=<-loopback>')
 
     if (isHeadless) {
       if (Number(majorVersion) >= CHROME_VERSION_INTRODUCING_HEADLESS_NEW) {
