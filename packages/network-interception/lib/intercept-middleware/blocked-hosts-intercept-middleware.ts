@@ -16,7 +16,7 @@ export type BlockedHostsConfig = {
 /**
  * Config middleware: return 503 when `blockHosts` matches the request URL.
  *
- * Registered on {@link HttpIntercept} before the cy.intercept intercepter.
+ * Registered on {@link HttpIntercept} before the cy.intercept interceptor.
  */
 export function createBlockedHostsInterceptMiddleware (
   options: BlockedHostsConfig,

@@ -15,7 +15,7 @@ export type HttpRequest = {
   responseTimeout?: number
   followRedirect?: boolean
   /**
-   * Set by a cy.intercept intercepter when at least one `cy.intercept` route matched.
+   * Set by a cy.intercept interceptor when at least one `cy.intercept` route matched.
    * Adapters copy this onto the transport request (e.g. proxy `hadIntercept`).
    */
   hadIntercept?: boolean

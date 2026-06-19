@@ -10,7 +10,7 @@ import type {
  * Connection-agnostic middleware composer for network interception.
  *
  * Transport adapters (proxy, CDP) call {@link HttpIntercept.handle} with a fulfillment
- * function. Config middleware and the cy.intercept intercepter register via {@link HttpIntercept.use}.
+ * function. Config middleware and the cy.intercept interceptor register via {@link HttpIntercept.use}.
  */
 export class HttpIntercept implements ForHttpIntercept {
   private readonly middlewares: InterceptMiddleware[] = []

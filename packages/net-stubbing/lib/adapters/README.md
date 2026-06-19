@@ -23,7 +23,7 @@ SocketBase ('net' events from driver)
   → onNetStubbingEvent()
 ```
 
-Constructed with `ForStubbing`, `SocketBroadcaster`, optional shared `HttpIntercept`, and optional `onSyncInterceptSkipped`. Registers `CyInterceptIntercepter` on the stack and returns socket adapters plus `createInterceptRegistration`.
+Constructed with `ForStubbing`, `SocketBroadcaster`, optional shared `HttpIntercept`, and optional `onSyncInterceptSkipped`. Registers `CyInterceptInterceptor` on the stack and returns socket adapters plus `createInterceptRegistration`.
 
 ---
 

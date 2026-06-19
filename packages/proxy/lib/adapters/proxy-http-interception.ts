@@ -60,33 +60,22 @@ function materializeResponseBody (
  */
 export function fetchOriginAsHttpResponse (mw: RequestInterceptionMiddlewareCtx): Promise<HttpResponse> {
   return new Promise((resolve, reject) => {
-    const originalOnResponse = mw.onResponse
-    const originalOnError = mw.onError
+    sendRequestOutgoing(mw, {
+      onError: reject,
+      onResponse: async (incomingRes, incomingResStream) => {
+        try {
+          const body = await materializeResponseBody(mw.req, incomingRes, incomingResStream)
 
-    mw.onError = (error: Error) => {
-      mw.onError = originalOnError
-      mw.onResponse = originalOnResponse
-      reject(error)
-    }
-
-    mw.onResponse = async (incomingRes, incomingResStream) => {
-      mw.onError = originalOnError
-      mw.onResponse = originalOnResponse
-
-      try {
-        const body = await materializeResponseBody(mw.req, incomingRes, incomingResStream)
-
-        resolve({
-          statusCode: incomingRes.statusCode || 200,
-          statusMessage: incomingRes.statusMessage,
-          headers: incomingRes.headers as Record<string, string | string[]>,
-          body,
-        })
-      } catch (err) {
-        reject(err)
-      }
-    }
-
-    sendRequestOutgoing(mw)
+          resolve({
+            statusCode: incomingRes.statusCode || 200,
+            statusMessage: incomingRes.statusMessage,
+            headers: incomingRes.headers as Record<string, string | string[]>,
+            body,
+          })
+        } catch (err) {
+          reject(err)
+        }
+      },
+    })
   })
 }

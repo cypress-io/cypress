@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import type { BackendRoute, ForInterceptionEvents } from '@packages/network-interception'
 import { createDriverAdapter } from '../../../lib/adapters/create-driver-adapter'
 
-describe('createCyInterceptIntercepter', () => {
+describe('createCyInterceptInterceptor', () => {
   const createStack = (options: {
     routes?: BackendRoute[]
     interceptionEvents?: Partial<ForInterceptionEvents>

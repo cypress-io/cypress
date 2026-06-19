@@ -2,15 +2,15 @@ import type { ForHttpIntercept, ForInterceptRegistration, ForInterceptionEvents,
 import { HttpIntercept } from '@packages/network-interception'
 import type { SocketBroadcaster } from '@packages/socket'
 import type { GetFixtureFn } from '../server/types'
-import { createCyInterceptIntercepter } from '../intercepters/cy-intercept-intercepter'
-import type { CyInterceptIntercepter } from '../intercepters/cy-intercept-intercepter'
+import { createCyInterceptInterceptor } from '../interceptors/cy-intercept-interceptor'
+import type { CyInterceptInterceptor } from '../interceptors/cy-intercept-interceptor'
 import { DriverInterceptionEventsAdapter } from './driver-interception-events-adapter'
 import { onNetStubbingEvent } from '../server/driver-events'
 import type { OnNetStubbingEventFrame } from '../server/driver-events'
 
 export type DriverAdapter = {
   interceptionEvents: ForInterceptionEvents
-  cyIntercept: CyInterceptIntercepter
+  cyIntercept: CyInterceptInterceptor
   httpIntercept: ForHttpIntercept
   createInterceptRegistration (options: { getFixture: GetFixtureFn }): ForInterceptRegistration
 }
@@ -23,7 +23,7 @@ export type CreateDriverAdapterOptions = {
 }
 
 /**
- * Wires driver socket adapters and registers the cy.intercept intercepter on {@link HttpIntercept}.
+ * Wires driver socket adapters and registers the cy.intercept interceptor on {@link HttpIntercept}.
  */
 export function createDriverAdapter (options: CreateDriverAdapterOptions): DriverAdapter {
   const interceptionEvents = new DriverInterceptionEventsAdapter({
@@ -31,7 +31,7 @@ export function createDriverAdapter (options: CreateDriverAdapterOptions): Drive
     socket: options.socket,
   })
 
-  const cyIntercept = createCyInterceptIntercepter({
+  const cyIntercept = createCyInterceptInterceptor({
     stubbing: options.stubbing,
     interceptionEvents,
     onSyncInterceptSkipped: options.onSyncInterceptSkipped,
@@ -39,7 +39,7 @@ export function createDriverAdapter (options: CreateDriverAdapterOptions): Drive
 
   const httpIntercept: ForHttpIntercept = options.httpIntercept ?? new HttpIntercept()
 
-  httpIntercept.use(cyIntercept.intercepter)
+  httpIntercept.use(cyIntercept.interceptor)
 
   const createInterceptRegistration = ({ getFixture }: { getFixture: GetFixtureFn }): ForInterceptRegistration => {
     return {

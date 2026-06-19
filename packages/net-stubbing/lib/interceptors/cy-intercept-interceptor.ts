@@ -29,14 +29,14 @@ import {
   SERIALIZABLE_RES_PROPS,
 } from '@packages/network-interception'
 
-export type CyInterceptIntercepterOptions = {
+export type CyInterceptInterceptorOptions = {
   stubbing: ForStubbing
   interceptionEvents: ForInterceptionEvents
   onSyncInterceptSkipped?: (url: string) => void
 }
 
-export type CyInterceptIntercepter = {
-  intercepter: InterceptMiddleware
+export type CyInterceptInterceptor = {
+  interceptor: InterceptMiddleware
   addSubscription (inFlightInterceptId: string, subscription: Subscription): void
   fulfillStaticResponse (
     inFlightInterceptId: string,
@@ -46,11 +46,11 @@ export type CyInterceptIntercepter = {
 }
 
 /**
- * Driver-backed `cy.intercept` intercepter registered on {@link HttpIntercept}.
+ * Driver-backed `cy.intercept` interceptor registered on {@link HttpIntercept}.
  */
-export function createCyInterceptIntercepter (
-  options: CyInterceptIntercepterOptions,
-): CyInterceptIntercepter {
+export function createCyInterceptInterceptor (
+  options: CyInterceptInterceptorOptions,
+): CyInterceptInterceptor {
   const inFlightIntercepts = new Map<string, InFlightIntercept>()
 
   const addSubscription = (inFlightInterceptId: string, subscription: Subscription): void => {
@@ -103,7 +103,7 @@ export function createCyInterceptIntercepter (
     }
   }
 
-  const intercepter: InterceptMiddleware = async (
+  const interceptor: InterceptMiddleware = async (
     request: HttpRequest,
     next: OriginForwarder,
   ): Promise<HttpResponse> => {
@@ -223,7 +223,7 @@ export function createCyInterceptIntercepter (
   }
 
   return {
-    intercepter,
+    interceptor,
     addSubscription,
     fulfillStaticResponse,
   }

@@ -31,7 +31,7 @@ The **core** is the hexagonal "inside": it may call **driven ports** but must no
 
 ## `HttpIntercept.use(middleware)` and `handle(request, next)`
 
-Transport-neutral onion stack for config middleware and the cy.intercept intercepter:
+Transport-neutral onion stack for config middleware and the cy.intercept interceptor:
 
 ```typescript
 type InterceptMiddleware = (
@@ -60,7 +60,7 @@ type InterceptMiddleware = (
 flowchart TB
   subgraph compositionRoot["server-base open"]
     REG["registerDefaultInterceptMiddleware<br/>blockHosts + CSP"]
-    DRV["createDriverAdapter<br/>cy.intercept intercepter"]
+    DRV["createDriverAdapter<br/>cy.intercept interceptor"]
     REG --> HI[HttpIntercept]
     DRV --> HI
   end
@@ -79,7 +79,7 @@ flowchart TB
 ```
 server-base.open()
   → createHttpInterceptWithDefaultMiddleware() (blockHosts + CSP middleware)
-  → createDriverAdapter() (registers cy.intercept intercepter via use())
+  → createDriverAdapter() (registers cy.intercept interceptor via use())
   → if proxy enabled: createNetworkProxy() with Proxy*Adapter driven ports
   → if proxy disabled: open_project passes same HttpIntercept to CDPNetworkInterception
 
@@ -92,7 +92,7 @@ CDPNetworkInterception (CDP path)
   → Fetch.fulfillRequest / Fetch.continueRequest
 ```
 
-Config middleware (`blockHosts`, CSP) and the cy.intercept intercepter share one `HttpIntercept` onion chain. Cookies, document prep, and compression stay on proxy middleware via driven ports wired at the composition root.
+Config middleware (`blockHosts`, CSP) and the cy.intercept interceptor share one `HttpIntercept` onion chain. Cookies, document prep, and compression stay on proxy middleware via driven ports wired at the composition root.
 
 ---
 
@@ -104,7 +104,7 @@ Use this when a concern can run on materialized `HttpRequest` / `HttpResponse` (
 | --- | --- | --- | --- |
 | `blockHosts` | `createBlockedHostsInterceptMiddleware` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
 | CSP allow-list | `createCspAllowListInterceptMiddleware` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
-| `cy.intercept` | `CyInterceptIntercepter` (`net-stubbing`) | `server-base.open()` via `createDriverAdapter` | Yes |
+| `cy.intercept` | `CyInterceptInterceptor` (`net-stubbing`) | `server-base.open()` via `createDriverAdapter` | Yes |
 | Document rewrite | `SetInjectionLevel` → `MaybeInjectHtml` → `MaybeRemoveSecurity` (`proxy` streaming) | `server-base` wires `createProxyNetworkServices()` driven ports | No (intentional) |
 
 **Keep on proxy streaming middleware** when the concern needs the response byte stream (gzip/br), multiple response-stage hooks, or is proxy-only for now:

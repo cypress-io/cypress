@@ -11,7 +11,7 @@ import {
   getAllStringMatcherFields,
   setResponseFromFixture,
 } from './util'
-import type { CyInterceptIntercepter } from '../intercepters/cy-intercept-intercepter'
+import type { CyInterceptInterceptor } from '../interceptors/cy-intercept-interceptor'
 
 const debug = Debug('cypress:net-stubbing:server:driver-events')
 
@@ -72,7 +72,7 @@ type OnNetStubbingEventOpts = {
   state: ForStubbing
   getFixture: GetFixtureFn
   frame: OnNetStubbingEventFrame
-  cyIntercept: CyInterceptIntercepter
+  cyIntercept: CyInterceptInterceptor
   pendingHandlerResolution: ForPendingHandlerResolution
 }
 

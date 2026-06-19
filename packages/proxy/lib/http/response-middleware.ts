@@ -336,7 +336,9 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
 
   // Filter for invalid headers
   const filteredHeaders = Object.fromEntries(
-    Object.entries(headers).filter(([key, value]) => {
+    Object.entries(headers).filter((entry): entry is [string, string | string[]] => {
+      const [key, value] = entry
+
       try {
         validateHeaderName(key)
         if (Array.isArray(value)) {

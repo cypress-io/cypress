@@ -1,7 +1,14 @@
 import _ from 'lodash'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '../http'
+import type { IncomingMessage } from 'http'
+import type { Readable } from 'stream'
 import type { RequestInterceptionMiddlewareCtx } from './types'
+
+export interface OutgoingRequestHandlers {
+  onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
+  onError: (error: Error) => void
+}
 
 /**
  * Send the proxied request to the origin via Node HTTP.
@@ -9,7 +16,7 @@ import type { RequestInterceptionMiddlewareCtx } from './types'
  * HTTP/2 bypass boundary: the browser-automation path must not call this —
  * requests terminate at CDP Fetch instead of MITM proxy forwarding.
  */
-export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void {
+export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx, { onResponse, onError }: OutgoingRequestHandlers): void {
   // End request-middleware telemetry before the outbound hop so TTFB is measured
   // outside the internal Cypress middleware chain.
   mw.reqMiddlewareSpan?.end()
@@ -75,7 +82,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
     req.abort()
   }
 
-  req.on('error', mw.onError)
+  req.on('error', onError)
   req.on('response', (incomingRes) => {
     if (span) {
       const { timings } = incomingRes.request
@@ -108,7 +115,7 @@ export function sendRequestOutgoing (mw: RequestInterceptionMiddlewareCtx): void
       span.end()
     }
 
-    mw.onResponse(incomingRes, req)
+    onResponse(incomingRes, req)
   })
 
   // Remove the socket-close abort handler when the client response finishes.

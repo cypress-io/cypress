@@ -17,7 +17,7 @@ export type RegisterDefaultInterceptMiddlewareDeps = {
 /**
  * Register config-driven middleware on {@link HttpIntercept} at the composition root.
  *
- * Order: BlockHosts (outer) → CSP allow-list → cy.intercept intercepter (inner, DriverAdapter).
+ * Order: BlockHosts (outer) → CSP allow-list → cy.intercept interceptor (inner, DriverAdapter).
  *
  * `DocumentRewriteConfig` fields are listed for composition-root typing only; enforcement
  * stays on proxy response middleware (`ForDocumentPreparation` via `ProxyNetworkServices`).

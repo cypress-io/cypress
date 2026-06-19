@@ -29,7 +29,7 @@ flowchart LR
 | Step | Code | Result |
 | --- | --- | --- |
 | 1. Config middleware | `createHttpInterceptWithDefaultMiddleware(config, { matchesBlockedHost })` | `HttpIntercept` with `blockHosts` + CSP `use()` layers |
-| 2. Driver wiring | `createDriverAdapter({ stubbing, socket, httpIntercept })` | Registers `CyInterceptIntercepter` on the same `HttpIntercept` |
+| 2. Driver wiring | `createDriverAdapter({ stubbing, socket, httpIntercept })` | Registers `CyInterceptInterceptor` on the same `HttpIntercept` |
 | 3a. Proxy path | `createNetworkProxy()` when proxy enabled | `NetworkProxy.networkInterception` = shared `HttpIntercept`; `Proxy*Adapter` driven ports on `networkServices` |
 | 3b. CDP path | `open_project.launch()` when `CYPRESS_INTERNAL_DISABLE_PROXY=1` | Passes `server.networkInterception` to browser launch; `BrowserCriClient.attachCdpNetworkInterception()` wraps `CDPNetworkInterception` |
 
