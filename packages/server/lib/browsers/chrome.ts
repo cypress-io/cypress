@@ -27,7 +27,6 @@ import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 const debug = debugModule('cypress:server:browsers:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
-const CHROME_VERSION_INTRODUCING_HEADLESS_NEW = 112
 
 const CHROME_PREFERENCE_PATHS = {
   default: path.join('Default', 'Preferences'),
@@ -384,18 +383,14 @@ export = {
       args.push('--allow-running-insecure-content')
     }
 
-    const { majorVersion, isHeadless } = browser
+    const { isHeadless } = browser
 
     // https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
     // https://github.com/cypress-io/cypress/issues/1872
     args.push('--proxy-bypass-list=<-loopback>')
 
     if (isHeadless) {
-      if (Number(majorVersion) >= CHROME_VERSION_INTRODUCING_HEADLESS_NEW) {
-        args.push('--headless=new')
-      } else {
-        args.push('--headless')
-      }
+      args.push('--headless=new')
 
       // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
