@@ -133,6 +133,57 @@ describe('lib/reporter', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/7139
+  // Reporters that need to perform asynchronous work on completion must use
+  // Mocha's `done(failures, callback)` hook (not the synchronous `end` event,
+  // which Cypress cannot await). `Reporter#end` must wait for that callback
+  // before resolving so the async work is not torn down by the run exiting.
+  context('#end', () => {
+    it('waits for the reporter\'s async done() callback before resolving', function () {
+      let doneFinished = false
+
+      this.reporter.reporter.done = (failures, cb) => {
+        setTimeout(() => {
+          doneFinished = true
+          cb()
+        }, 50)
+      }
+
+      const endResult = this.reporter.end()
+
+      // end() must return a promise (not resolve synchronously) when done() exists
+      expect(endResult).to.be.an.instanceOf(Promise)
+
+      return endResult.then((results) => {
+        // if end() resolved before the callback fired, the async work would be lost
+        expect(doneFinished, 'done() callback completed before end() resolved').to.be.true
+        expect(results).to.have.property('stats')
+      })
+    })
+
+    it('passes the runner\'s failure count to done()', function () {
+      this.reporter.runner.failures = 3
+
+      const done = sinon.stub().callsFake((failures, cb) => cb())
+
+      this.reporter.reporter.done = done
+
+      return this.reporter.end().then(() => {
+        expect(done).to.be.calledWith(3)
+      })
+    })
+
+    it('returns results synchronously when the reporter has no done() method', function () {
+      // the default spec reporter does not implement done()
+      expect(this.reporter.reporter.done).to.be.undefined
+
+      const results = this.reporter.end()
+
+      expect(results).not.to.be.an.instanceOf(Promise)
+      expect(results).to.have.property('stats')
+    })
+  })
+
   context('#emit', () => {
     beforeEach(function () {
       this.emit = sinon.spy(this.reporter.runner, 'emit')
