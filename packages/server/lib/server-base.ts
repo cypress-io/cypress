@@ -14,7 +14,7 @@ import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { getRoutesForRequest } from '@packages/network-interception'
-import { DriverInterceptRegistrationAdapter, NetStubbingState } from '@packages/net-stubbing'
+import { DriverInterceptRegistrationAdapter, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
@@ -51,6 +51,7 @@ import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createProxyRuntime } from './network-runtime'
+import { isProxyDisabled } from './util/is-proxy-disabled'
 import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 
 const debug = Debug('cypress:server:server-base')
@@ -271,6 +272,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     debug('createServer connecting to server')
 
     this.server.on('connect', this.onConnect.bind(this))
+
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
     // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
@@ -288,10 +290,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
-    this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
-      onRequest: this.callListeners.bind(this),
-      onUpgrade: this.onSniUpgrade.bind(this),
-    }) as HttpsProxyServer
+    if (!isProxyDisabled()) {
+      this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
+        onRequest: this.callListeners.bind(this),
+        onUpgrade: this.onSniUpgrade.bind(this),
+      }) as HttpsProxyServer
+    }
 
     let warning: WarningErr | undefined
 
@@ -348,14 +352,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this.createNetworkProxy({
-      config,
-      remoteStates: this._remoteStates,
-      shouldCorrelatePreRequests,
-      getCurrentBrowser,
-    })
+    if (isProxyDisabled()) {
+      this._netStubbingState = netStubbingState()
+    } else {
+      this.createNetworkProxy({
+        config,
+        remoteStates: this._remoteStates,
+        shouldCorrelatePreRequests,
+        getCurrentBrowser,
+      })
+    }
 
-    if (config.experimentalSourceRewriting) {
+    if (config.experimentalSourceRewriting && !isProxyDisabled()) {
       createInitialWorkers()
     }
 
@@ -365,7 +373,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       config,
       remoteStates: this._remoteStates,
       nodeProxy: this.nodeProxy,
-      networkProxy: this._networkProxy!,
+      networkProxy: this._networkProxy,
       onError,
       getSpec,
       testingType,
@@ -481,10 +489,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
-      this.networkProxy.reset({ resetBetweenSpecs: false })
+      this._networkProxy?.reset({ resetBetweenSpecs: false })
       this.netStubbingState.reset()
       this._remoteStates.reset()
-      this.networkProxy.clearCredentials()
+      this._networkProxy?.clearCredentials()
     }
 
     const ios = this.socket.startListening(this.server, automation, config, options)
@@ -501,11 +509,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   async addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    await this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+    await this._networkProxy?.addPendingBrowserPreRequest(browserPreRequest)
   }
 
   removeBrowserPreRequest (requestId: string) {
-    this.networkProxy.removePendingBrowserPreRequest(requestId)
+    this._networkProxy?.removePendingBrowserPreRequest(requestId)
   }
 
   getBrowserPreRequests () {
@@ -517,23 +525,23 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   addPendingUrlWithoutPreRequest (downloadUrl: string) {
-    this.networkProxy.addPendingUrlWithoutPreRequest(downloadUrl)
+    this._networkProxy?.addPendingUrlWithoutPreRequest(downloadUrl)
   }
 
   updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
-    this.networkProxy.updateServiceWorkerRegistrations(data)
+    this._networkProxy?.updateServiceWorkerRegistrations(data)
   }
 
   updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
-    this.networkProxy.updateServiceWorkerVersions(data)
+    this._networkProxy?.updateServiceWorkerVersions(data)
   }
 
   updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
-    this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
+    this._networkProxy?.updateServiceWorkerClientSideRegistrations(data)
   }
 
   handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
-    this.networkProxy.handleServiceWorkerClientEvent(event)
+    this._networkProxy?.handleServiceWorkerClientEvent(event)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
@@ -748,6 +756,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   onConnect (req, socket, head) {
     debug('Got CONNECT request from %s', req.url)
+
+    if (isProxyDisabled()) {
+      socket.write('HTTP/1.1 403 Forbidden\r\n\r\nProxy is disabled\r\n')
+      socket.end()
+
+      return
+    }
 
     socket.once('upstream-connected', this.socketAllowed.add)
 

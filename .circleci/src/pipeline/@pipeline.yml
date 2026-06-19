@@ -6,9 +6,9 @@ version: 2.1
 # - ./scripts/github-actions/update-browser-versions.js
 
 chrome-stable-version: &chrome-stable-version "149.0.7827.155"
-chrome-beta-version: &chrome-beta-version "150.0.7871.13"
+chrome-beta-version: &chrome-beta-version "150.0.7871.24"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
-chrome-for-testing-stable-version: &chrome-for-testing-stable-version "149.0.7827.155"
+chrome-for-testing-stable-version: &chrome-for-testing-stable-version "150.0.7871.24"
 firefox-stable-version: &firefox-stable-version "151.0.1"
 base-internal-trixie: &base-internal-trixie cypress/base-internal:22.19.0-trixie
 base-internal-yarn-berry: &base-internal-yarn-berry cypress/base-internal:22.19.0-yarn-berry
