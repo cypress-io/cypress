@@ -37,7 +37,7 @@ describe('cy/commands/location', () => {
   })
 
   describe('url', () => {
-    it('returns the url href from the automation client', () => {
+    it('returns the url href from the automation client, including for webkit', () => {
       // @ts-expect-error
       getUrlFromAutomation.mockReturnValue(() => {
         return {
@@ -45,11 +45,14 @@ describe('cy/commands/location', () => {
         }
       })
 
-      const url = urlQueryCommand.call(mockContext, mockCypress, {})()
+      expect(urlQueryCommand.call(mockContext, mockCypress, {})()).toBe('https://www.example.com/#foobar')
 
-      expect(url).toBe('https://www.example.com/#foobar')
+      // the command path is browser-agnostic - webkit uses the automation client too
+      mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
 
-      expect(getUrlFromAutomation).toHaveBeenCalledOnce()
+      expect(urlQueryCommand.call(mockContext, mockCypress, {})()).toBe('https://www.example.com/#foobar')
+
+      expect(getUrlFromAutomation).toHaveBeenCalledTimes(2)
     })
 
     it('supports the decode option', () => {
@@ -68,27 +71,10 @@ describe('cy/commands/location', () => {
 
       expect(getUrlFromAutomation).toHaveBeenCalledOnce()
     })
-
-    it('uses the automation client for webkit', () => {
-      mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
-
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
-        return {
-          href: 'https://www.example.com/#foobar',
-        }
-      })
-
-      const url = urlQueryCommand.call(mockContext, mockCypress, {})()
-
-      expect(url).toBe('https://www.example.com/#foobar')
-
-      expect(getUrlFromAutomation).toHaveBeenCalledOnce()
-    })
   })
 
   describe('hash', () => {
-    it('returns the hash of the url from the automation client', () => {
+    it('returns the hash of the url from the automation client, including for webkit', () => {
       // @ts-expect-error
       getUrlFromAutomation.mockReturnValue(() => {
         return {
@@ -96,33 +82,19 @@ describe('cy/commands/location', () => {
         }
       })
 
-      const hash = hashQueryCommand.call(mockContext, mockCypress, {})()
+      expect(hashQueryCommand.call(mockContext, mockCypress, {})()).toBe('foobar')
 
-      expect(hash).toBe('foobar')
-
-      expect(getUrlFromAutomation).toHaveBeenCalledOnce()
-    })
-
-    it('uses the automation client for webkit', () => {
+      // the command path is browser-agnostic - webkit uses the automation client too
       mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
 
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
-        return {
-          hash: 'foobar',
-        }
-      })
+      expect(hashQueryCommand.call(mockContext, mockCypress, {})()).toBe('foobar')
 
-      const hash = hashQueryCommand.call(mockContext, mockCypress, {})()
-
-      expect(hash).toBe('foobar')
-
-      expect(getUrlFromAutomation).toHaveBeenCalledOnce()
+      expect(getUrlFromAutomation).toHaveBeenCalledTimes(2)
     })
   })
 
   describe('location', () => {
-    it('returns the location of the url from the automation client', () => {
+    it('returns the location of the url from the automation client, including for webkit', () => {
       // @ts-expect-error
       getUrlFromAutomation.mockReturnValue(() => {
         return {
@@ -139,9 +111,7 @@ describe('cy/commands/location', () => {
         }
       })
 
-      const urlObj = locationQueryCommand.call(mockContext, mockCypress, undefined, {})()
-
-      expect(urlObj).toEqual({
+      const expectedLocation = {
         protocol: 'https:',
         host: 'www.example.com',
         hostname: 'www.example.com',
@@ -152,9 +122,16 @@ describe('cy/commands/location', () => {
         origin: 'https://www.example.com',
         href: 'https://www.example.com/#foobar',
         searchParams: expect.any(Object),
-      })
+      }
 
-      expect(getUrlFromAutomation).toHaveBeenCalledOnce()
+      expect(locationQueryCommand.call(mockContext, mockCypress, undefined, {})()).toEqual(expectedLocation)
+
+      // the command path is browser-agnostic - webkit uses the automation client too
+      mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
+
+      expect(locationQueryCommand.call(mockContext, mockCypress, undefined, {})()).toEqual(expectedLocation)
+
+      expect(getUrlFromAutomation).toHaveBeenCalledTimes(2)
 
       expect(mockCypress.log).toHaveBeenCalledWith({
         message: '',
@@ -302,34 +279,6 @@ describe('cy/commands/location', () => {
       })
 
       expect(getUrlFromAutomation).toHaveBeenCalledTimes(2)
-    })
-
-    it('uses the automation client for webkit', () => {
-      mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
-
-      // @ts-expect-error
-      getUrlFromAutomation.mockReturnValue(() => {
-        return {
-          protocol: 'https:',
-          host: 'www.example.com',
-          hostname: 'www.example.com',
-          hash: '#foobar',
-          search: '',
-          pathname: '/',
-          port: '',
-          origin: 'https://www.example.com',
-          href: 'https://www.example.com/#foobar',
-          searchParams: expect.any(Object),
-        }
-      })
-
-      const urlObj = locationQueryCommand.call(mockContext, mockCypress, undefined, {})()
-
-      expect(urlObj).toMatchObject({
-        href: 'https://www.example.com/#foobar',
-      })
-
-      expect(getUrlFromAutomation).toHaveBeenCalledOnce()
     })
   })
 })

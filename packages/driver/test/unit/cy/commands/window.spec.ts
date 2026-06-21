@@ -37,28 +37,18 @@ describe('cy/commands/window', () => {
   })
 
   describe('title', () => {
-    it('returns the title from the automation client', () => {
+    it('returns the title from the automation client, including for webkit', () => {
       // @ts-expect-error
       getTitleFromAutomation.mockReturnValue(() => 'This is the frame title')
 
-      const title = getTitleQueryCommand.call(mockContext, mockCypress, {})()
+      expect(getTitleQueryCommand.call(mockContext, mockCypress, {})()).toBe('This is the frame title')
 
-      expect(title).toBe('This is the frame title')
-
-      expect(getTitleFromAutomation).toHaveBeenCalledOnce()
-    })
-
-    it('uses the automation client for webkit', () => {
+      // the command path is browser-agnostic - webkit uses the automation client too
       mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
 
-      // @ts-expect-error
-      getTitleFromAutomation.mockReturnValue(() => 'This is the frame title')
+      expect(getTitleQueryCommand.call(mockContext, mockCypress, {})()).toBe('This is the frame title')
 
-      const title = getTitleQueryCommand.call(mockContext, mockCypress, {})()
-
-      expect(title).toBe('This is the frame title')
-
-      expect(getTitleFromAutomation).toHaveBeenCalledOnce()
+      expect(getTitleFromAutomation).toHaveBeenCalledTimes(2)
     })
   })
 })
