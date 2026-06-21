@@ -435,6 +435,24 @@ describe('lib/browsers/index', () => {
       expect(util.promisify).to.be.calledWith(exec)
       expect(mockExec).to.be.calledWith(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '3333'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
     })
+
+    it('calls xdotool to activate the window when running Linux', () => {
+      const mockExec = sinon.stub()
+
+      sinon.stub(os, 'platform').returns('linux')
+      sinon.stub(util, 'promisify').returns(mockExec)
+
+      const browserData: MinimalBrowserData = {
+        pid: 3333,
+      }
+
+      browsers._setInstance(browserData as any)
+
+      browsers.setFocus()
+
+      expect(util.promisify).to.be.calledWith(exec)
+      expect(mockExec).to.be.calledWith(`xdotool search --onlyvisible --pid 3333 windowactivate`)
+    })
   })
 
   context('kill', () => {

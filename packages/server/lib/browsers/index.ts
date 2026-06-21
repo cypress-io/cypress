@@ -83,8 +83,16 @@ async function setFocus () {
 
         return
       }
+      case 'linux':
+        // On Linux (X11), use xdotool to raise and focus the browser window
+        // associated with the running browser process. This is best-effort:
+        // if xdotool is not installed or the session is running under Wayland,
+        // the command will fail and focus will be left unchanged.
+        await execAsync(`xdotool search --onlyvisible --pid ${instance.pid} windowactivate`)
+
+        return
       default:
-        debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows and MacOS`)
+        debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows, MacOS, and Linux`)
     }
   } catch (error) {
     debug(`Failure to set focus. ${error}`)
