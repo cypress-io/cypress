@@ -83,6 +83,9 @@ linux-x64:
     - server-integration-tests:
         requires:
           - build
+    - server-integration-tests-webkit:
+        requires:
+          - build
     - server-performance-tests:
         requires:
           - build
@@ -296,6 +299,7 @@ linux-x64:
           - system-tests-webkit
           - server-performance-tests
           - server-integration-tests
+          - server-integration-tests-webkit
           - server-unit-tests
           - "test binary as a non-root user"
           - "test binary as a root user"

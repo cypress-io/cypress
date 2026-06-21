@@ -96,6 +96,11 @@ jobs:
         - internal-pr-build
         - external-pr-build
         - approve-contributor-pr
+  - server-integration-tests-webkit:
+      requires:
+        - internal-pr-build
+        - external-pr-build
+        - approve-contributor-pr
   - server-performance-tests:
       requires:
         - internal-pr-build
@@ -455,6 +460,7 @@ jobs:
         - unit-tests
         - server-unit-tests
         - server-integration-tests
+        - server-integration-tests-webkit
         - server-performance-tests
         - system-tests-chrome
         - system-tests-electron

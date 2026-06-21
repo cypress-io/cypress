@@ -2113,6 +2113,21 @@ jobs:
       - sanitize-verify-and-store-mocha-results:
           expectedResultCount: 1
 
+  # Runs only the server integration specs that require a real WebKit browser. Kept separate from
+  # server-integration-tests so the WebKit binary + host deps are not installed for the main job,
+  # which already runs every other browser's integration specs.
+  server-integration-tests-webkit:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - halt-if-skipped:
+          guard: << pipeline.parameters.run-server-tests >>
+      - restore_cached_workspace
+      - install-webkit-deps
+      - run: yarn workspace @packages/server test-integration -- webkit_automation_spec.ts
+      - sanitize-verify-and-store-mocha-results:
+          expectedResultCount: 1
+
   server-performance-tests:
     <<: *defaults
     steps:
