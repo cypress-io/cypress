@@ -138,15 +138,10 @@ describe('cy/commands/actions/press', () => {
   })
 
   describe('when in webkit', () => {
-    it('throws an unsupported browser error', async () => {
+    it('dispatches a key:press automation command', async () => {
       Cypress.browser.family = 'webkit'
-      await expect(press('Tab')).rejects.toThrow('`cy.press()` is not supported in webkit browsers.')
-      expect($errUtils.throwErrByPath).toHaveBeenCalledWith('press.unsupported_browser', {
-        onFail: logReturnValue,
-        args: {
-          family: Cypress.browser.family,
-        },
-      })
+      await press('Tab')
+      expect(automation).toHaveBeenCalledWith('key:press', { key: 'Tab' })
     })
   })
 

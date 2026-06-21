@@ -9,6 +9,8 @@ import mime from 'mime'
 import { cookieMatches, CyCookieFilter } from '../automation/util'
 import utils from './utils'
 import type { CyCookie } from '../automation/util'
+import { webkitKeyPress } from '../automation/commands/key_press'
+import { toSupportedKey } from '@packages/types'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -391,6 +393,8 @@ export class WebKitAutomation {
         return await this.clearCookie(data)
       case 'take:screenshot':
         return await this.takeScreenshot(data)
+      case 'key:press':
+        return await webkitKeyPress(toSupportedKey(data.key), this.page)
       case 'focus:browser:window':
         return await this.context.pages[0]?.bringToFront()
       case 'reset:browser:state':

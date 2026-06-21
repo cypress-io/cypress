@@ -2,7 +2,8 @@ import type Sinon from 'sinon'
 import type { expect as Expect } from 'chai'
 import { SupportedKey, NamedKeys, toSupportedKey, SpaceKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../../../lib/browsers/cdp_automation'
-import { cdpKeyPress, bidiKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
+import { cdpKeyPress, bidiKeyPress, webkitKeyPress, BidiOverrideCodepoints } from '../../../../lib/automation/commands/key_press'
+import type playwright from 'playwright-webkit'
 import { Client as WebdriverClient } from 'webdriver'
 import type { Protocol } from 'devtools-protocol'
 const { expect, sinon }: { expect: typeof Expect, sinon: Sinon.SinonSandbox } = require('../../../spec_helper')
@@ -429,6 +430,110 @@ describe('key:press automation command', () => {
             ],
           }],
         })
+      })
+    })
+  })
+
+  describe('webkit', () => {
+    let keyboard: { press: Sinon.SinonStub, insertText: Sinon.SinonStub }
+    let autFrame: { evaluate: Sinon.SinonStub }
+    let autIframe: { contentFrame: Sinon.SinonStub }
+    let page: playwright.Page
+
+    beforeEach(() => {
+      keyboard = {
+        press: sinon.stub().resolves(),
+        insertText: sinon.stub().resolves(),
+      }
+
+      autFrame = { evaluate: sinon.stub().resolves() }
+      autIframe = { contentFrame: sinon.stub().resolves(autFrame) }
+
+      page = {
+        $: sinon.stub().resolves(autIframe),
+        // default to the AUT frame not being the active element
+        evaluate: sinon.stub().resolves(false),
+        keyboard,
+      } as unknown as playwright.Page
+    })
+
+    describe('when the aut frame does not have focus', () => {
+      it('focuses the aut frame and presses the key', async () => {
+        await webkitKeyPress(tab, page)
+
+        expect(autFrame.evaluate).to.have.been.calledOnce
+        expect(keyboard.press).to.have.been.calledWith('Tab')
+      })
+    })
+
+    describe('when the aut frame has focus', () => {
+      beforeEach(() => {
+        (page.evaluate as Sinon.SinonStub).resolves(true)
+      })
+
+      it('does not focus the aut frame and presses the key', async () => {
+        await webkitKeyPress(tab, page)
+
+        expect(autFrame.evaluate).not.to.have.been.called
+        expect(keyboard.press).to.have.been.calledWith('Tab')
+      })
+
+      it('presses named keys directly', async () => {
+        for (const key of NamedKeys.filter((k) => k !== SpaceKey)) {
+          await webkitKeyPress(toSupportedKey(key), page)
+          expect(keyboard.press).to.have.been.calledWith(key)
+        }
+      })
+
+      it(`presses the Space named key as a literal space`, async () => {
+        await webkitKeyPress(toSupportedKey(SpaceKey), page)
+        expect(keyboard.press).to.have.been.calledWith(' ')
+      })
+
+      it('presses single character keys', async () => {
+        await webkitKeyPress(toSupportedKey('a'), page)
+        expect(keyboard.press).to.have.been.calledWith('a')
+      })
+
+      it('presses each code point of a multi-code-point key', async () => {
+        const codeOne = 'e'
+        const codeTwo = '\u0301' // combining acute accent
+        // decomposed form of é: 'e' followed by a combining acute accent
+        const key = toSupportedKey(`${codeOne}${codeTwo}`)
+
+        await webkitKeyPress(key, page)
+
+        expect(keyboard.press).to.have.been.calledWith(codeOne)
+        expect(keyboard.press).to.have.been.calledWith(codeTwo)
+      })
+
+      it('falls back to insertText when keyboard.press throws for an unknown key', async () => {
+        const euro = toSupportedKey('€')
+
+        keyboard.press.withArgs('€').rejects(new Error('Unknown key: "€"'))
+
+        await webkitKeyPress(euro, page)
+
+        expect(keyboard.press).to.have.been.calledWith('€')
+        expect(keyboard.insertText).to.have.been.calledWith('€')
+      })
+    })
+
+    describe('when the aut iframe cannot be found', () => {
+      beforeEach(() => {
+        (page.$ as Sinon.SinonStub).resolves(null)
+      })
+
+      it('throws an error', async () => {
+        let thrown: any
+
+        try {
+          await webkitKeyPress(tab, page)
+        } catch (e) {
+          thrown = e
+        }
+
+        expect(thrown?.message).to.include('Could not find AUT iframe')
       })
     })
   })

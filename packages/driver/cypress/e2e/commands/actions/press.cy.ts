@@ -1,9 +1,4 @@
 describe('src/cy/commands/actions/press', () => {
-  // TODO: Webkit is not supported. https://github.com/cypress-io/cypress/issues/31054
-  if (Cypress.isBrowser('webkit')) {
-    return
-  }
-
   beforeEach(() => {
     cy.visit('/fixtures/input_events.html')
   })
@@ -45,5 +40,11 @@ describe('src/cy/commands/actions/press', () => {
   ;['a', 'z'].forEach(testKeyDownUp)
 
   // // Special characters
-  ;['!', ' ', '€', 'é'].forEach(testKeyDownUp)
+  // NOTE: WebKit (via Playwright) can only dispatch key events for characters
+  // present in its keyboard layout. Characters outside the layout ('€', 'é') are
+  // inserted as text without a keydown event, so they're excluded from this
+  // keydown assertion in WebKit.
+  const specialChars = Cypress.isBrowser('webkit') ? ['!', ' '] : ['!', ' ', '€', 'é']
+
+  specialChars.forEach(testKeyDownUp)
 })

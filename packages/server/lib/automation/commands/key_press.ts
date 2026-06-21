@@ -1,4 +1,5 @@
 import type { Protocol } from 'devtools-protocol'
+import type playwright from 'playwright-webkit'
 import { NamedKeys, SupportedKey, SupportedNamedKey, toSupportedKey, isSupportedKey, SpaceKey } from '@packages/types'
 import type { SendDebuggerCommand } from '../../browsers/cdp_automation'
 import type { Client } from 'webdriver'
@@ -196,5 +197,56 @@ export async function bidiKeyPress (inKey: any, client: Client, autContext: stri
     const err = new Error(`Unable to perform key press command for '${key}' key: ${e?.message || 'Unknown Error Occurred'}. DEBUG namespace cypress:server:automation:command:keypress for more information.`)
 
     throw err
+  }
+}
+
+export async function webkitKeyPress (inKey: SupportedKey, page: playwright.Page): Promise<void> {
+  const key = toSupportedKey(inKey)
+
+  debug('webkit keypress', { key })
+
+  // Locate the AUT iframe so we can ensure it has focus before dispatching the
+  // key, mirroring the CDP and BiDi implementations.
+  const autIframe = await page.$('iframe.aut-iframe')
+
+  if (!autIframe) {
+    throw new Error('Could not find AUT iframe')
+  }
+
+  const autFrame = await autIframe.contentFrame()
+
+  if (!autFrame) {
+    throw new Error('Could not find AUT frame')
+  }
+
+  // If the AUT iframe isn't already the active element, focus it so the key
+  // press is dispatched to the application under test.
+  const autFrameIsActive = await page.evaluate(() => {
+    return document.activeElement?.classList.contains('aut-iframe') ?? false
+  })
+
+  if (!autFrameIsActive) {
+    await autFrame.evaluate(() => window.focus())
+  }
+
+  // Named keys are dispatched as a single key. Other keys are split into their
+  // individual code points so that multi-code-point characters (e.g. emoji) are
+  // each dispatched in turn, matching the CDP/BiDi behavior.
+  const chars = NamedKeys.includes(key) ? [key] : [...key]
+
+  for (const char of chars) {
+    // Playwright represents the Space named key as a literal space character.
+    const pwKey = char === SpaceKey ? ' ' : char
+
+    try {
+      // keyboard.press dispatches full keydown/keyup events for any key present
+      // in the keyboard layout (named keys and standard characters).
+      await page.keyboard.press(pwKey)
+    } catch (e) {
+      // Characters outside the keyboard layout (e.g. '€' or combining/emoji code
+      // points) cannot be represented as key events, so insert them as text.
+      debug('keyboard.press failed for %o, falling back to insertText: %o', char, e)
+      await page.keyboard.insertText(char)
+    }
   }
 }
