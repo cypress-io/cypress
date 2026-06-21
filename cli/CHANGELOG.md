@@ -4,6 +4,7 @@
 **Performance:**
 
 - Fixed an issue where an application that repeatedly threw the same uncaught exception (for example, a benign `ResizeObserver loop ...` notification fired on every animation frame) could exhaust renderer memory and crash the browser. Consecutive identical uncaught exceptions within a test now collapse into a single, updating command-log entry, and a handled (suppressed) uncaught exception no longer captures a DOM snapshot. Addresses [#27415](https://github.com/cypress-io/cypress/issues/27415).
+- Reduced excess memory and CPU usage during experimental WebKit runs against applications that serve responses from a service worker.
 
 **Bugfixes:**
 
@@ -19,7 +20,6 @@
 - Fixed a regression in [15.17.0](#15-17-0) where loading the Cypress configuration could fail with `TransformError: Internal error: Expected id N but got id M` when the project has the same `esbuild` version installed that Cypress bundles internally (currently `0.28.0`) and a dependency loaded during config processing registers its own `tsx` loader. The `tsx` loader Cypress uses to load the configuration file is now removed from `NODE_OPTIONS` before the configuration file is sourced, so it no longer executes inside worker threads spawned by the project's own dependencies. Fixes [#34076](https://github.com/cypress-io/cypress/issues/34076).
 - Fixed an issue where [`cy.request()`](https://on.cypress.io/request) in Firefox did not send `Secure` cookies to `localhost` or loopback addresses such as `127.0.0.1` over `http`, even though browsers treat those origins as secure contexts. A `Secure` cookie set over `https` on such a host is now included on subsequent `http` requests to that host in Firefox, matching the browser's own behavior and how Cypress already behaves in Chrome. Fixes [#24332](https://github.com/cypress-io/cypress/issues/24332).
 - Fixed an issue where a transient failure to bind Cypress's internal file server to an available port (for example, an intermittent `EADDRINUSE` under port pressure on a reused CI machine) could crash the run with an uncaught exception before any tests started. Cypress now retries on a fresh port and, if it still cannot bind, fails with a clear error instead of crashing. Fixes [#34109](https://github.com/cypress-io/cypress/issues/34109).
-- Reduced excess memory and CPU usage during experimental WebKit runs against applications that serve responses from a service worker.
 
 **Misc:**
 
