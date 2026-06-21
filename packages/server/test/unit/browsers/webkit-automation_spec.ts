@@ -128,7 +128,7 @@ describe('lib/browsers/webkit-automation', () => {
       }
     }
 
-    it('clear:cookie deletes exactly the matched cookie without clearing all cookies', async () => {
+    it('clear:cookie deletes exactly the matched cookie', async () => {
       const wk = await createAutomation()
       const ctx = mock.getLastContext()
       const stored = cookie()
