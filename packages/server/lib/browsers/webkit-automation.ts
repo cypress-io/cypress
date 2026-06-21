@@ -385,7 +385,10 @@ export class WebKitAutomation {
       autFrame = childFrames[0]
     }
 
-    if (!autFrame) throw new Error('Could not find AUT frame')
+    if (!autFrame) {
+      debug('could not find AUT frame: the runner page has no child frames')
+      throw new Error('Could not find AUT frame')
+    }
 
     return autFrame
   }
