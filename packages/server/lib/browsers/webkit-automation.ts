@@ -67,7 +67,7 @@ type WebKitAutomationOpts = {
   initialUrl: string
   downloadsFolder: string
   videoApi?: RunModeVideoApi
-  userAgent?: string
+  userAgent?: string | null
 }
 
 export class WebKitAutomation {
@@ -75,7 +75,7 @@ export class WebKitAutomation {
   private browser: playwright.Browser
   private context!: playwright.BrowserContext
   private page!: playwright.Page
-  private userAgent?: string
+  private userAgent?: string | null
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
