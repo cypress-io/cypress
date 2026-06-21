@@ -321,9 +321,6 @@ export class WebKitAutomation {
     const allCookies = await this.context.cookies()
     const cookieToClear = allCookies.find((cookie) => cookieMatches(cookie, filter))
 
-    // Playwright's clearCookies supports name/domain/path filters (since 1.43),
-    // so we can delete exactly the matched cookie instead of clearing every
-    // cookie and re-adding the survivors.
     if (cookieToClear) {
       await this.context.clearCookies({
         name: cookieToClear.name,
