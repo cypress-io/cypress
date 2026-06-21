@@ -29,6 +29,7 @@ function createMockBrowser () {
       addCookies: sinon.stub().resolves(),
       browser: () => browser,
       close: sinon.stub().resolves(),
+      pages: () => [page],
     }
 
     lastContext = context
@@ -110,6 +111,18 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(mock.getLastPage().close, 'page should be closed to flush the video').to.be.called
       expect(pwVideo.saveAs).to.be.calledWith(videoApi.videoName)
+    })
+  })
+
+  context('focus:browser:window', () => {
+    it('brings the active page to the front', async () => {
+      const wk = await createAutomation()
+
+      await wk.onRequest('focus:browser:window', {})
+
+      // context.pages() is a method on Playwright's BrowserContext - accessing it as a
+      // property (this.context.pages[0]) yields undefined and silently no-ops
+      expect(mock.getLastPage().bringToFront).to.be.calledOnce
     })
   })
 
