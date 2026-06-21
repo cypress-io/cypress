@@ -122,6 +122,14 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(mock.getLastPage().bringToFront).to.be.calledOnce
     })
+
+    it('resolves without error when there are no open pages', async () => {
+      const wk = await createAutomation()
+
+      mock.getLastContext().pages = () => []
+
+      await wk.onRequest('focus:browser:window', {})
+    })
   })
 
   context('reset:browser:tabs:for:next:spec', () => {
