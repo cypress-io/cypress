@@ -56,7 +56,7 @@ describe('cy/commands/location', () => {
       // @ts-expect-error
       getUrlFromAutomation.mockReturnValue(() => {
         return {
-          href: 'https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B',
+          href: 'https://www.example.com/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B',
         }
       })
 
@@ -64,7 +64,7 @@ describe('cy/commands/location', () => {
         decode: true,
       })()
 
-      expect(url).toBe('https://mozilla.org/?x=шеллы')
+      expect(url).toBe('https://www.example.com/?x=шеллы')
 
       expect(getUrlFromAutomation).toHaveBeenCalledOnce()
     })
