@@ -435,7 +435,7 @@ describe('key:press automation command', () => {
   })
 
   describe('webkit', () => {
-    let keyboard: { press: Sinon.SinonStub, insertText: Sinon.SinonStub }
+    let keyboard: { press: Sinon.SinonStub }
     let autFrame: { evaluate: Sinon.SinonStub }
     let autIframe: { contentFrame: Sinon.SinonStub }
     let page: playwright.Page
@@ -443,7 +443,6 @@ describe('key:press automation command', () => {
     beforeEach(() => {
       keyboard = {
         press: sinon.stub().resolves(),
-        insertText: sinon.stub().resolves(),
       }
 
       autFrame = { evaluate: sinon.stub().resolves() }
@@ -521,7 +520,6 @@ describe('key:press automation command', () => {
         }
 
         expect(keyboard.press).to.have.been.calledWith('\u20AC')
-        expect(keyboard.insertText).not.to.have.been.called
         expect(thrown?.message).to.include(`is not supported by 'cy.press()' in the experimental WebKit browser`)
       })
     })
