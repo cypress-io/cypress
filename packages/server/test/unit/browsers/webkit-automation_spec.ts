@@ -70,13 +70,14 @@ describe('lib/browsers/webkit-automation', () => {
     } as unknown as RunModeVideoApi
   })
 
-  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi }> = { videoApi }) => {
+  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, userAgent: string }> = { videoApi }) => {
     return WebKitAutomation.create({
       automation,
       browser: mock.browser as any,
       initialUrl: 'http://localhost/__cypress',
       downloadsFolder: '/tmp/downloads',
       videoApi: opts.videoApi,
+      userAgent: opts.userAgent,
     })
   }
 
@@ -110,6 +111,28 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(mock.getLastPage().close, 'page should be closed to flush the video').to.be.called
       expect(pwVideo.saveAs).to.be.calledWith(videoApi.videoName)
+    })
+  })
+
+  context('userAgent', () => {
+    it('passes the configured userAgent to every context it creates', async () => {
+      const userAgent = 'Mozilla/5.0 (custom) Cypress'
+
+      const wk = await createAutomation({ userAgent })
+
+      expect(mock.browser.newContext).to.be.calledWithMatch({ userAgent })
+
+      // the userAgent should persist when the tab is recycled for the next spec (see #33349)
+      await wk.onRequest('reset:browser:tabs:for:next:spec', { shouldKeepTabOpen: true })
+
+      expect(mock.browser.newContext.lastCall).to.be.calledWithMatch({ userAgent })
+    })
+
+    it('does not set a userAgent when none is configured', async () => {
+      await createAutomation({})
+
+      expect(mock.browser.newContext).to.be.calledOnce
+      expect(mock.browser.newContext.firstCall.args[0]).to.not.have.property('userAgent')
     })
   })
 

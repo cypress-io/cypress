@@ -67,6 +67,7 @@ type WebKitAutomationOpts = {
   initialUrl: string
   downloadsFolder: string
   videoApi?: RunModeVideoApi
+  userAgent?: string
 }
 
 export class WebKitAutomation {
@@ -74,10 +75,12 @@ export class WebKitAutomation {
   private browser: playwright.Browser
   private context!: playwright.BrowserContext
   private page!: playwright.Page
+  private userAgent?: string
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
     this.browser = opts.browser
+    this.userAgent = opts.userAgent
   }
 
   // static initializer to avoid "not definitively declared"
@@ -94,6 +97,7 @@ export class WebKitAutomation {
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
+      ...(this.userAgent ? { userAgent: this.userAgent } : {}),
       recordVideo: options.videoApi && {
         dir: os.tmpdir(),
         size: { width: 1280, height: 720 },
