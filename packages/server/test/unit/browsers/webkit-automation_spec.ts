@@ -173,6 +173,8 @@ describe('lib/browsers/webkit-automation', () => {
       expect(ctx.clearCookies).to.be.calledWith({ name: 'a', domain: '.example.com', path: '/' })
       expect(ctx.clearCookies).to.be.calledWith({ name: 'b', domain: 'localhost', path: '/foo' })
 
+      // never wipe the entire jar - the old hack called clearCookies() with no filter
+      expect(ctx.clearCookies).not.to.be.calledWithExactly()
       expect(ctx.addCookies).not.to.be.called
     })
   })
