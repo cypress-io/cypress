@@ -95,6 +95,27 @@ describe('lib/project-base', () => {
     expect(p.projectRoot).to.eq(path.resolve(path.join('..', 'foo', 'bar')))
   })
 
+  describe('#sendFocusBrowserMessage', function () {
+    // Every browser focuses its window through the server's automation client.
+    // Firefox previously relied on an OS-level shell-out instead, which never
+    // worked on Linux. https://github.com/cypress-io/cypress/issues/21703
+    const families = ['firefox', 'chromium', 'webkit']
+
+    beforeEach(function () {
+      this.project._server.sendFocusBrowserMessage = sinon.stub().resolves()
+    })
+
+    families.forEach((family) => {
+      it(`focuses the browser window via the server automation for the ${family} family`, async function () {
+        this.project.browser = { family }
+
+        await this.project.sendFocusBrowserMessage()
+
+        expect(this.project._server.sendFocusBrowserMessage).to.have.been.calledOnce
+      })
+    })
+  })
+
   describe('#getSavedState', () => {
     beforeEach(async function () {
       const globalState = await savedState.create()
