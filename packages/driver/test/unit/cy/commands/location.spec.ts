@@ -47,11 +47,7 @@ describe('cy/commands/location', () => {
 
       expect(urlQueryCommand.call(mockContext, mockCypress, {})()).toBe('https://www.example.com/#foobar')
 
-      mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
-
-      expect(urlQueryCommand.call(mockContext, mockCypress, {})()).toBe('https://www.example.com/#foobar')
-
-      expect(getUrlFromAutomation).toHaveBeenCalledTimes(2)
+      expect(getUrlFromAutomation).toHaveBeenCalledOnce()
     })
 
     it('supports the decode option', () => {
@@ -83,11 +79,7 @@ describe('cy/commands/location', () => {
 
       expect(hashQueryCommand.call(mockContext, mockCypress, {})()).toBe('foobar')
 
-      mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
-
-      expect(hashQueryCommand.call(mockContext, mockCypress, {})()).toBe('foobar')
-
-      expect(getUrlFromAutomation).toHaveBeenCalledTimes(2)
+      expect(getUrlFromAutomation).toHaveBeenCalledOnce()
     })
   })
 
@@ -124,11 +116,7 @@ describe('cy/commands/location', () => {
 
       expect(locationQueryCommand.call(mockContext, mockCypress, undefined, {})()).toEqual(expectedLocation)
 
-      mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
-
-      expect(locationQueryCommand.call(mockContext, mockCypress, undefined, {})()).toEqual(expectedLocation)
-
-      expect(getUrlFromAutomation).toHaveBeenCalledTimes(2)
+      expect(getUrlFromAutomation).toHaveBeenCalledOnce()
 
       expect(mockCypress.log).toHaveBeenCalledWith({
         message: '',

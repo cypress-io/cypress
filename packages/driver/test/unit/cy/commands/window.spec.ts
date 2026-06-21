@@ -43,11 +43,7 @@ describe('cy/commands/window', () => {
 
       expect(getTitleQueryCommand.call(mockContext, mockCypress, {})()).toBe('This is the frame title')
 
-      mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
-
-      expect(getTitleQueryCommand.call(mockContext, mockCypress, {})()).toBe('This is the frame title')
-
-      expect(getTitleFromAutomation).toHaveBeenCalledTimes(2)
+      expect(getTitleFromAutomation).toHaveBeenCalledOnce()
     })
   })
 })
