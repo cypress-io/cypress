@@ -47,7 +47,6 @@ describe('cy/commands/location', () => {
 
       expect(urlQueryCommand.call(mockContext, mockCypress, {})()).toBe('https://www.example.com/#foobar')
 
-      // the command path is browser-agnostic - webkit uses the automation client too
       mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
 
       expect(urlQueryCommand.call(mockContext, mockCypress, {})()).toBe('https://www.example.com/#foobar')
@@ -84,7 +83,6 @@ describe('cy/commands/location', () => {
 
       expect(hashQueryCommand.call(mockContext, mockCypress, {})()).toBe('foobar')
 
-      // the command path is browser-agnostic - webkit uses the automation client too
       mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
 
       expect(hashQueryCommand.call(mockContext, mockCypress, {})()).toBe('foobar')
@@ -126,7 +124,6 @@ describe('cy/commands/location', () => {
 
       expect(locationQueryCommand.call(mockContext, mockCypress, undefined, {})()).toEqual(expectedLocation)
 
-      // the command path is browser-agnostic - webkit uses the automation client too
       mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
 
       expect(locationQueryCommand.call(mockContext, mockCypress, undefined, {})()).toEqual(expectedLocation)

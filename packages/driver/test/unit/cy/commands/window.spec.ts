@@ -43,7 +43,6 @@ describe('cy/commands/window', () => {
 
       expect(getTitleQueryCommand.call(mockContext, mockCypress, {})()).toBe('This is the frame title')
 
-      // the command path is browser-agnostic - webkit uses the automation client too
       mockCypress.isBrowser.mockImplementation((browserName) => browserName === 'webkit')
 
       expect(getTitleQueryCommand.call(mockContext, mockCypress, {})()).toBe('This is the frame title')
