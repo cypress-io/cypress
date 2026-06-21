@@ -43,7 +43,8 @@ describe('src/cy/commands/actions/press', () => {
   // NOTE: WebKit (via Playwright) can only dispatch key events for characters
   // present in its keyboard layout. Characters outside the layout ('€', 'é') are
   // inserted as text without a keydown event, so they're excluded from this
-  // keydown assertion in WebKit.
+  // keydown assertion in WebKit. This diverges from Chrome/Firefox, which
+  // dispatch keydown/keyup events for these characters (via CDP/BiDi).
   const specialChars = Cypress.isBrowser('webkit') ? ['!', ' '] : ['!', ' ', '€', 'é']
 
   specialChars.forEach(testKeyDownUp)
