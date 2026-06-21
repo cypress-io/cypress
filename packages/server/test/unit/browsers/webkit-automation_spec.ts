@@ -19,6 +19,7 @@ function createMockBrowser () {
       screenshot: sinon.stub().resolves(Buffer.from('')),
       bringToFront: sinon.stub().resolves(),
       evaluate: sinon.stub().resolves(),
+      url: sinon.stub().returns('http://localhost/__cypress'),
     }
 
     const context: any = {

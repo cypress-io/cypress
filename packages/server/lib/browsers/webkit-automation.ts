@@ -379,15 +379,13 @@ export class WebKitAutomation {
       // storage that is reachable through the open pages.
       ...this.context.pages().map((page) => {
         return page.evaluate(() => {
-          try {
-            window.localStorage.clear()
-            window.sessionStorage.clear()
-          } catch (e) {
-            // accessing storage can throw (e.g. on about:blank or when storage is disabled);
-            // ignore so a single page does not fail the whole reset
-          }
-        }).catch(() => {
-          // the page may have navigated or closed mid-reset; ignore
+          window.localStorage.clear()
+          window.sessionStorage.clear()
+        }).catch((err) => {
+          // best-effort: accessing storage can throw (e.g. on about:blank or when storage is
+          // disabled), and the page may navigate or close mid-reset. Log and move on so a single
+          // page does not fail the whole reset.
+          debug('failed to clear web storage for page %s: %o', page.url(), err)
         })
       }),
     ])
