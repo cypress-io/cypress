@@ -22,7 +22,7 @@
 
 **Misc:**
 
-- Running `cypress install` when Cypress is installed globally no longer prints a warning recommending that Cypress be installed as a per-project devDependency. A global install is a valid, supported configuration (for example, in the `cypress/included` Docker image), so the warning was a false positive in that case. Addresses [#34134](https://github.com/cypress-io/cypress/issues/34134).
+- Running `cypress install` when Cypress is installed globally no longer prints a warning recommending that Cypress be installed as a per-project devDependency. Addresses [#34134](https://github.com/cypress-io/cypress/issues/34134).
 - Running Cypress with process profiler debug logs enabled (for example `DEBUG=cypress*process_profiler`) no longer intermittently prints an `Expected DataContext to already have been set via setCtx` error to the logs. Addresses [#30670](https://github.com/cypress-io/cypress/issues/30670).
 - Cypress now shows a clear error explaining that `browsers` must be an array and that a specific browser should be selected with `--browser` when a `CYPRESS_BROWSERS` environment variable is set to a plain string (for example `CYPRESS_BROWSERS=chrome`) instead of showing an opaque `TypeError: a.map is not a function` error. Addresses [#33198](https://github.com/cypress-io/cypress/issues/33198).
 
