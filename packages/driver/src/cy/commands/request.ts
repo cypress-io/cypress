@@ -330,7 +330,7 @@ export default (Commands, Cypress, cy, state, config) => {
 
           // reset content-type
           if (requestOpts.headers) {
-            const contentTypeKey = Object.keys(requestOpts).find((key) => key.toLowerCase() === 'content-type')
+            const contentTypeKey = Object.keys(requestOpts.headers).find((key) => key.toLowerCase() === 'content-type')
 
             if (contentTypeKey) {
               delete requestOpts.headers[contentTypeKey]

@@ -642,6 +642,72 @@ describe('lib/browsers/bidi_automation', () => {
               } })
             })
 
+            // localhost and the loopback range are "potentially trustworthy" origins, so they are
+            // treated as secure contexts and secure cookies are still sent over http for those hosts.
+            // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1618113
+            // @see https://bugzilla.mozilla.org/show_bug.cgi?id=1648993
+            it('data.url / loopback host does not filter out secure cookies', async () => {
+              mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
+                cookies: [{
+                  domain: 'localhost',
+                  expiry: 123456789,
+                  httpOnly: false,
+                  name: 'secureKey',
+                  path: '/',
+                  sameSite: 'lax',
+                  secure: true,
+                  size: 10,
+                  value: {
+                    type: 'string',
+                    value: 'secureValue',
+                  },
+                }, {
+                  domain: 'localhost',
+                  expiry: 123456789,
+                  httpOnly: false,
+                  name: 'insecureKey',
+                  path: '/',
+                  sameSite: 'lax',
+                  secure: false,
+                  size: 10,
+                  value: {
+                    type: 'string',
+                    value: 'insecureValue',
+                  },
+                }],
+              })
+
+              const cookies = await bidiAutomationInstance.automationMiddleware.onRequest('get:cookies', {
+                url: 'http://localhost:3500/index.html',
+              })
+
+              // the secure cookie is returned even though this is an http url
+              expect(cookies).to.deep.equal([{
+                domain: 'localhost',
+                expirationDate: 123456789,
+                httpOnly: false,
+                hostOnly: false,
+                name: 'secureKey',
+                path: '/',
+                sameSite: 'lax',
+                secure: true,
+                value: 'secureValue',
+              }, {
+                domain: 'localhost',
+                expirationDate: 123456789,
+                httpOnly: false,
+                hostOnly: false,
+                name: 'insecureKey',
+                path: '/',
+                sameSite: 'lax',
+                secure: false,
+                value: 'insecureValue',
+              }])
+
+              // the secure filter is NOT applied for loopback hosts
+              expect(mockWebdriverClient.storageGetCookies).to.have.been.calledWith({ filter: {} })
+            })
+
             it('data.url / path', async () => {
               mockWebdriverClient.storageGetCookies = sinon.stub().resolves({
                 cookies: [{
@@ -2262,6 +2328,46 @@ describe('lib/browsers/bidi_automation', () => {
           expect(mockWebdriverClient.browsingContextActivate).to.have.been.calledWith({
             context: '123',
           })
+        })
+      })
+
+      describe('perform:user:gesture', () => {
+        it('synthesizes a trusted pointer click in the top-level context to grant transient activation', async () => {
+          mockWebdriverClient.inputPerformActions = sinon.stub().resolves()
+          mockWebdriverClient.inputReleaseActions = sinon.stub().resolves()
+
+          bidiAutomationInstance.setTopLevelContextId('123')
+
+          const returnValue = await bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})
+
+          expect(returnValue).to.be.undefined
+          expect(mockWebdriverClient.inputPerformActions).to.have.been.calledOnce
+
+          // the `id` is non-deterministic (timestamped) so assert on the meaningful shape directly
+          const performArgs = (mockWebdriverClient.inputPerformActions as sinon.SinonStub).firstCall.args[0]
+
+          expect(performArgs.context).to.equal('123')
+          expect(performArgs.actions).to.have.length(1)
+          expect(performArgs.actions[0]).to.include({
+            type: 'pointer',
+          })
+
+          expect(performArgs.actions[0].parameters).to.deep.equal({ pointerType: 'mouse' })
+          expect(performArgs.actions[0].actions).to.deep.equal([
+            { type: 'pointerMove', x: 0, y: 0 },
+            { type: 'pointerDown', button: 0 },
+            { type: 'pointerUp', button: 0 },
+          ])
+
+          expect(mockWebdriverClient.inputReleaseActions).to.have.been.calledWith({
+            context: '123',
+          })
+        })
+
+        it('fails gracefully if no top-level context is initialized', async () => {
+          bidiAutomationInstance.setTopLevelContextId(undefined)
+
+          await expect(bidiAutomationInstance.automationMiddleware.onRequest('perform:user:gesture', {})).to.be.rejectedWith('Cannot perform user gesture: no top-level context initialized')
         })
       })
 

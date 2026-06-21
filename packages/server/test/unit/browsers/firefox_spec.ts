@@ -6,6 +6,7 @@ import os from 'os'
 import sinon from 'sinon'
 import fsExtra from 'fs-extra'
 import * as firefox from '../../../lib/browsers/firefox'
+import * as extension from '@packages/extension'
 import { type Client as WebDriverClient, default as webdriver } from 'webdriver'
 import { EventEmitter } from 'stream'
 import { BidiAutomation } from '../../../lib/browsers/bidi_automation'
@@ -121,6 +122,69 @@ describe('lib/browsers/firefox', () => {
         })
 
         expect(this.automation.use).to.have.been.calledWith(bidiAutomationClient.automationMiddleware)
+      })
+
+      it('re-establishes video recording for the new spec when a videoApi is provided', async function () {
+        const writeVideoFrame = sinon.stub()
+        const videoApi = {
+          useFfmpegVideoController: sinon.stub().resolves({ writeVideoFrame, endVideoCapture: sinon.stub().resolves() }),
+          onProjectCaptureVideoFrames: sinon.stub(),
+        }
+
+        this.options.videoApi = videoApi
+
+        await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        // reset call history so we only assert on what connectToNewSpec does (open() also
+        // records video and navigates)
+        videoApi.useFfmpegVideoController.resetHistory()
+        videoApi.onProjectCaptureVideoFrames.resetHistory()
+        wdInstance.browsingContextNavigate.resetHistory()
+
+        this.options.url = 'next-spec-url'
+        await firefox.connectToNewSpec(this.browser, this.options, this.automation)
+
+        // the browser is reused across specs, so the per-spec video controller must be
+        // re-created or compression fails with a missing controller.
+        // @see https://github.com/cypress-io/cypress/issues/18415
+        expect(videoApi.useFfmpegVideoController).to.have.been.calledWith({ webmInput: true })
+        expect(videoApi.onProjectCaptureVideoFrames).to.have.been.calledWith(writeVideoFrame)
+
+        // the ffmpeg controller must be created *before* navigation so the per-spec videoRecording
+        // object has its controller set in time for compression — a fast spec could otherwise
+        // finish before the async controller is ready.
+        expect(videoApi.useFfmpegVideoController).to.have.been.calledBefore(wdInstance.browsingContextNavigate)
+
+        // but frame capture must only begin *after* navigation unloads the previous page, otherwise
+        // trailing frames from the finished spec's MediaRecorder bleed into the new spec's video.
+        expect(videoApi.onProjectCaptureVideoFrames).to.have.been.calledAfter(wdInstance.browsingContextNavigate)
+      })
+
+      it('tears down the video controller and does not capture frames if BiDi setup fails', async function () {
+        const endVideoCapture = sinon.stub().resolves()
+        const videoApi = {
+          useFfmpegVideoController: sinon.stub().resolves({ writeVideoFrame: sinon.stub(), endVideoCapture }),
+          onProjectCaptureVideoFrames: sinon.stub(),
+        }
+
+        this.options.videoApi = videoApi
+
+        await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        // open() also records video; only assert on what connectToNewSpec does
+        videoApi.onProjectCaptureVideoFrames.resetHistory()
+
+        // fail navigation/BiDi setup for the next spec
+        wdInstance.browsingContextNavigate.rejects(new Error('navigation failed'))
+
+        this.options.url = 'next-spec-url'
+
+        await expect(firefox.connectToNewSpec(this.browser, this.options, this.automation)).to.be.rejectedWith('navigation failed')
+
+        // the ffmpeg encoder we started must be torn down so it isn't left orphaned
+        expect(endVideoCapture).to.have.been.calledWith(false)
+        // and we must never subscribe to frames for a spec that failed to start
+        expect(videoApi.onProjectCaptureVideoFrames).not.to.have.been.called
       })
     })
 
@@ -496,6 +560,43 @@ describe('lib/browsers/firefox', () => {
 
         await firefox.open(this.browser, 'http://', this.options, this.automation)
         expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).to.be.undefined
+      })
+
+      // when Cypress is installed in a read-only location (e.g. the Nix store), the
+      // source extension is read-only and fs.copy preserves those permissions. The
+      // copied extension must be made writable, otherwise rimraf cannot unlink the
+      // files when cleaning up the profile on exit.
+      // @see https://github.com/cypress-io/cypress/issues/31300
+      it('grants write access to the copied extension so the profile can be cleaned up on exit', async function () {
+        // the read-only source extension, as it would be installed in the Nix store
+        const extensionSrc = extension.getPathToExtension()
+        // getExtensionDir resolves the real (un-stubbed) destination the extension is copied to
+        const extensionDir = utils.getExtensionDir(this.browser, true)
+
+        mockfs({
+          [extensionSrc]: mockfs.directory({
+            mode: 0o555,
+            items: {
+              'background.js': mockfs.file({ content: 'CHANGE_ME_HOST CHANGE_ME_PATH', mode: 0o444 }),
+            },
+          }),
+          '/path/to/appData/firefox-stable/interactive': {
+            'chrome': { 'userChrome.css': '[foo userChrome.css]' },
+          },
+        })
+
+        utils.writeExtension.restore()
+        // @ts-expect-error
+        fsExtra.writeFile.restore()
+
+        this.options.isTextTerminal = true
+
+        await firefox.open(this.browser, 'http://', this.options, this.automation)
+
+        // the owner write bit must be set on both the directory and its contents,
+        // otherwise rimraf cannot unlink the files when removing the profile on exit
+        expect((await fsExtra.stat(extensionDir)).mode & 0o200, 'extension directory is writable').to.equal(0o200)
+        expect((await fsExtra.stat(path.join(extensionDir, 'background.js'))).mode & 0o200, 'background.js is writable').to.equal(0o200)
       })
     })
 

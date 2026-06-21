@@ -130,6 +130,11 @@ export const Query = objectType({
       resolve: async (source, args, ctx) => await ctx.coreData.machineId,
     })
 
+    t.nullable.string('autoProvisionedProjectId', {
+      description: 'Project ID auto-provisioned during signup that could not be written to the config file automatically',
+      resolve: (_, __, ctx) => ctx.coreData.autoProvisionedProjectId,
+    })
+
     t.list.nonNull.field('cloudAppMessages', {
       type: 'CloudAppMessage',
       description: 'Cloud-driven in-app banner content. Local override of the merged cloud field so we can inject the current project slug for per-project feature-flag scoping.',

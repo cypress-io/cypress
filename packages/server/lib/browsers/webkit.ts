@@ -15,6 +15,8 @@ let wkAutomation: WebKitAutomation | undefined
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   if (!wkAutomation) throw new Error('connectToNewSpec called without wkAutomation')
 
+  debug('connecting to new spec %o', { url: options.url, hasVideoApi: !!options.videoApi })
+
   automation.use(wkAutomation)
   wkAutomation.automation = automation
   await options.onInitializeNewBrowserTab()
@@ -23,6 +25,8 @@ export async function connectToNewSpec (browser: Browser, options: BrowserNewTab
     downloadsFolder: options.downloadsFolder,
     videoApi: options.videoApi,
   })
+
+  debug('connected to new spec')
 }
 
 /**
@@ -152,6 +156,8 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
      */
     private suppressUnhandledEconnreset () {
       unhandledExceptions.handle((err: NodeJS.ErrnoException) => {
+        debug('unhandled exception with code %o observed while WebKit is running: %o', err.code, err)
+
         return err.code === 'ECONNRESET'
       })
 

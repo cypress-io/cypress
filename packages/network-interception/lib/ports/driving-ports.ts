@@ -1,19 +1,38 @@
 import type { NetEvent } from '../types'
+import type { NetworkPolicy } from '../policies/types'
+import type { RunPoliciesOptions, RunPoliciesResult } from '../registry/network-policy-registry'
+
+export type InterceptRegistrationEventName =
+  | 'route:added'
+  | 'subscribe'
+  | 'event:handler:resolved'
+  | 'send:static:response'
+
+/**
+ * Driver → server IPC for `cy.intercept` registration and handler round-trips.
+ */
+export interface InterceptRegistrationRequest {
+  eventName: InterceptRegistrationEventName
+  frame: NetEvent.ToServer.DriverEvent
+}
 
 /**
  * Driving port: test definition (`cy.intercept`, driver handler resolution).
  */
 export interface ForInterceptRegistration {
-  handleEvent (event: NetEvent.ToServer.DriverEvent): Promise<unknown>
+  handleEvent (request: InterceptRegistrationRequest): Promise<unknown>
 }
 
 /**
- * Driving port: Cypress configurator (CSP, default rewrites, blockHosts).
+ * Driving port: composition root registers configurator policies (blockHosts, CSP, rewrites).
+ *
+ * Implemented by {@link NetworkPolicyRegistry}. `@packages/server` calls `add()` at startup;
+ * policy definitions and config mapping live in server, not inside network-interception.
  */
-export interface NetworkPolicyHooks {
-  // Expanded in Stage 2a/2b.
-}
-
 export interface ForNetworkPolicyRegistration {
-  registerPolicy (hooks: NetworkPolicyHooks): void
+  add (policy: NetworkPolicy): void
+
+  getPolicies (): ReadonlyArray<NetworkPolicy>
+
+  runPolicies (options: RunPoliciesOptions): Promise<RunPoliciesResult>
 }

@@ -18,6 +18,9 @@ const debug = Debug('cypress:cli')
 const debugElectron = Debug('cypress:electron')
 const debugStderr = Debug('cypress:internal-stderr')
 
+// Must match CYPRESS_OPEN_READY_MESSAGE in packages/server/lib/modes/interactive.ts
+const CYPRESS_OPEN_READY_MESSAGE = 'Cypress is ready'
+
 function isPlatform (platform: string): boolean {
   return os.platform() === platform
 }
@@ -109,6 +112,14 @@ function createSpawnFunction (
         stdioOptions.env.DISPLAY = process.env.DISPLAY
       }
 
+      if (stdioOptions.detached) {
+        // Ask interactive mode to print a ready sentinel on stdout; pipe stdio during
+        // startup so errors are visible and we can detect it. Streams are destroyed
+        // once it arrives so they don't keep the parent event loop alive.
+        args.push('--emit-when-ready')
+        stdioOptions.stdio = ['ignore', 'pipe', 'pipe']
+      }
+
       if (stdioOptions.env.ELECTRON_RUN_AS_NODE) {
         // Since we are running electron as node, we need to add an entry point file.
         startScriptPath = path.join(state.getBinaryPkgPath(path.dirname(executable)), '..', 'index.js')
@@ -194,6 +205,33 @@ function createSpawnFunction (
         }
       }
 
+      if (stdioOptions.detached) {
+        child.stdout!.on('data', (data: Buffer) => {
+          const str = data.toString()
+          const readyMessageIndex = str.indexOf(CYPRESS_OPEN_READY_MESSAGE)
+          const isReady = readyMessageIndex !== -1
+
+          if (isReady) {
+            const outputBeforeReady = str.slice(0, readyMessageIndex)
+
+            if (outputBeforeReady) stdout.write(outputBeforeReady)
+
+            child.stdout!.destroy()
+            child.stderr!.destroy()
+            child.unref()
+            resolve(0)
+
+            return
+          }
+
+          stdout.write(data)
+        })
+
+        child.stderr!.pipe(stderr, { end: false })
+
+        return
+      }
+
       // if stdio options is set to 'pipe', then
       //   we should set up pipes:
       //  process STDIN (read stream) => child STDIN (writeable)
@@ -258,10 +296,6 @@ function createSpawnFunction (
 
         reject(err)
       })
-
-      if (stdioOptions.detached) {
-        child.unref()
-      }
     })
   }
 }

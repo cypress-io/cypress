@@ -232,6 +232,13 @@ export const create = ($$: $Cy['$$'], state: StateFunc) => {
     return $dom.isElement($el) && $dom.isJquery($el)
   }
 
+  // Test Replay NOTE: the `importNode` clone within `createSnapshotBody` copies the entire
+  // <body> for every command that snapshots. During a headless run recorded
+  // with Test Replay (`numTestsKeptInMemory === 0`) `Log.snapshot()` reaches
+  // here for every command, but the resulting `body`/`htmlAttrs` are not
+  // consumed by Test Replay — they are dropped at ingestion and the replayed
+  // DOM is built separately
+  // Protocol capture replaces `cy.createSnapshot` outright in that mode.
   const createSnapshot = (name?, $elToHighlight?, preprocessedSnapshot?, relatedLog?: Log) => {
     Cypress.action('cy:snapshot', name)
     // when using cy.origin() and in a transitionary state, state('document')

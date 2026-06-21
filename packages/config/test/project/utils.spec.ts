@@ -888,6 +888,25 @@ describe('config/src/project/utils', () => {
       await defaults('slowTestThreshold', 250, {}, { testingType: 'component' })
     })
 
+    // https://github.com/cypress-io/cypress/issues/33198
+    // A `CYPRESS_BROWSERS=chrome` env var coerces `browsers` to a string, which used to
+    // slip past validation and crash later when the browser list was mapped over.
+    it('throws a clear validation error when browsers is coerced to a non-array via env', async function () {
+      vi.stubEnv('CYPRESS_BROWSERS', 'chrome')
+
+      const cfg = {
+        projectRoot: '/foo/bar/',
+        supportFile: false,
+      }
+
+      try {
+        await mergeDefaults(cfg, { testingType: 'e2e' }, {}, getFilesByGlob)
+        throw new Error('Expected error to be thrown')
+      } catch (err: any) {
+        expect(errors.throwErr).toHaveBeenCalledWith('CONFIG_BROWSERS_INVALID', 'chrome')
+      }
+    })
+
     it('port=null', async function () {
       await defaults('port', null)
     })
@@ -1101,9 +1120,17 @@ describe('config/src/project/utils', () => {
     })
 
     it('resets numTestsKeptInMemory to 0 when runMode', async function () {
-      const cfg = await defaults('numTestsKeptInMemory', 0, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+      const cfg = await defaults('numTestsKeptInMemory', 0, { projectRoot: '/foo/bar/', supportFile: false, numTestsKeptInMemory: 50 }, { isTextTerminal: true })
 
       expect(cfg.numTestsKeptInMemory).toEqual(0)
+    })
+
+    it('honors numTestsKeptInMemory in runMode when CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY=true', async function () {
+      vi.stubEnv('CYPRESS_INTERNAL_HONOR_NUM_TESTS_KEPT_IN_MEMORY', 'true')
+
+      const cfg = await defaults('numTestsKeptInMemory', 50, { projectRoot: '/foo/bar/', supportFile: false, numTestsKeptInMemory: 50 }, { isTextTerminal: true })
+
+      expect(cfg.numTestsKeptInMemory).toEqual(50)
     })
 
     it('resets watchForFileChanges to false when runMode', async function () {
@@ -1122,6 +1149,30 @@ describe('config/src/project/utils', () => {
       const cfg = await defaults('isTextTerminal', true, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
 
       expect(cfg.isTextTerminal).toBe(true)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20789
+    it('isInteractive=true in open mode', async function () {
+      const cfg = await defaults('isInteractive', true, { projectRoot: '/foo/bar/', supportFile: false })
+
+      expect(cfg.isInteractive).toBe(true)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20789
+    it('isInteractive=false in run mode (isTextTerminal=true)', async function () {
+      const cfg = await defaults('isInteractive', false, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+
+      expect(cfg.isInteractive).toBe(false)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/20789
+    // since isInteractive is derived from the isTextTerminal mode option, its
+    // resolved value should still report `from: 'default'` in run mode rather
+    // than be mistaken for a user-provided config value.
+    it('resolves isInteractive=false from default in run mode', async function () {
+      const cfg = await defaults('isInteractive', false, { projectRoot: '/foo/bar/', supportFile: false }, { isTextTerminal: true })
+
+      expect(cfg.resolved.isInteractive).toEqual({ value: false, from: 'default' })
     })
 
     it('can override socketId in options', async function () {

@@ -25,7 +25,16 @@ export function processArgsFromFile (
       return !arg.match(newlineRegEx) && arg !== ''
     })
 
-    // TODO: Figure out why we need to filter this out: https://github.com/cypress-io/cypress/issues/24092
+    // The `mksnapshot_args` file shipped inside Electron's mksnapshot zip records the exact
+    // args Electron used to build its own V8 snapshot, so we re-run mksnapshot with matching
+    // settings. Some Electron builds enable V8 builtins PGO (profile-guided optimization),
+    // which adds `--turbo-profiling-input <file>` pointing at a basic-block profiling log that
+    // existed in Electron's build environment but is NOT included in the redistributed zip.
+    // Re-running mksnapshot with that arg makes it try to open the missing profile file and
+    // abort. We strip the flag and its value so snapshot generation succeeds. Upstream Electron
+    // removed this arg from the Linux mksnapshot_args (electron/electron#36531), so on newer
+    // versions the flag is typically absent and this is a no-op.
+    // See https://github.com/cypress-io/cypress/issues/24092
     const turboProfilingInputIndex = mksnapshotArgsFromFile.indexOf('--turbo-profiling-input')
 
     if (turboProfilingInputIndex > -1) {

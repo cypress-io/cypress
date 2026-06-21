@@ -1234,6 +1234,7 @@ enum ErrorTypeEnum {
   CLOUD_UNKNOWN_CREATE_RUN_WARNING
   CLOUD_UNKNOWN_INVALID_REQUEST
   COMPONENT_TESTING_MISMATCHED_DEPENDENCIES
+  CONFIG_BROWSERS_INVALID
   CONFIG_FILES_LANGUAGE_CONFLICT
   CONFIG_FILE_DEV_SERVER_INVALID_RETURN
   CONFIG_FILE_DEV_SERVER_IS_NOT_VALID
@@ -1263,6 +1264,7 @@ enum ErrorTypeEnum {
   EXPERIMENTAL_SKIP_DOMAIN_INJECTION_REMOVED
   EXPERIMENTAL_STUDIO_REMOVED
   EXTENSION_NOT_LOADED
+  FILE_SERVER_COULD_NOT_LISTEN
   FIREFOX_COULD_NOT_CONNECT
   FIXTURE_NOT_FOUND
   FOLDER_NOT_WRITABLE
@@ -1300,6 +1302,7 @@ enum ErrorTypeEnum {
   RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN
   SETUP_NODE_EVENTS_INVALID_EVENT_NAME_ERROR
   SETUP_NODE_EVENTS_IS_NOT_FUNCTION
+  SPEC_FILE_NOT_FOUND
   SUPPORT_FILE_NOT_FOUND
   SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_APPLIED
   SYNCHRONOUS_XHR_REQUEST_COOKIES_NOT_SET
@@ -1557,6 +1560,11 @@ type Mutation {
     open: Boolean
     path: String
   ): Query
+
+  """
+  Clear the auto-provisioned project ID after the user dismisses the manual setup modal
+  """
+  clearAutoProvisionedProjectId: Boolean
 
   """Clears the currently active project"""
   clearCurrentProject: Query
@@ -1866,6 +1874,11 @@ type PushFragmentPayload {
 type Query {
   """The latest state of the auth process"""
   authState: AuthState!
+
+  """
+  Project ID auto-provisioned during signup that could not be written to the config file automatically
+  """
+  autoProvisionedProjectId: String
   baseError: ErrorWrapper
   cachedUser: CachedUser
 

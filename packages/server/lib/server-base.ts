@@ -13,7 +13,9 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { getRoutesForRequest, NetStubbingState } from '@packages/net-stubbing'
+import { getRoutesForRequest } from '@packages/network-interception'
+import { DriverInterceptRegistrationAdapter, netStubbingState, NetStubbingState } from '@packages/net-stubbing'
+import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
 import type { NetworkProxy, BrowserPreRequest } from '@packages/proxy'
@@ -49,6 +51,8 @@ import type { AutomationCookie } from './automation/cookies'
 import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { createProxyRuntime } from './network-runtime'
+import { isProxyDisabled } from './util/is-proxy-disabled'
+import type { ForNetworkPolicyRegistration, NetworkInterceptionCore } from '@packages/network-interception'
 
 const debug = Debug('cypress:server:server-base')
 
@@ -128,7 +132,7 @@ const setProxiedUrl = function (req) {
   // and only leave the path which is
   // how browsers would normally send
   // use their url
-  req.proxiedUrl = removeDefaultPort(req.url).format()
+  req.proxiedUrl = removeDefaultPort(req.url)
 
   req.url = getPath(req.url)
 }
@@ -161,6 +165,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
   protected _netStubbingState?: NetStubbingState
+  protected _networkPolicyRegistration?: ForNetworkPolicyRegistration
+  protected _networkInterceptionCore?: NetworkInterceptionCore
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -215,6 +221,14 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.ensureProp(this._netStubbingState, 'open')
   }
 
+  get networkPolicyRegistration () {
+    return this.ensureProp(this._networkPolicyRegistration, 'open')
+  }
+
+  get networkInterceptionCore () {
+    return this.ensureProp(this._networkInterceptionCore, 'open')
+  }
+
   get httpsProxy () {
     return this.ensureProp(this._httpsProxy, 'open')
   }
@@ -258,6 +272,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     debug('createServer connecting to server')
 
     this.server.on('connect', this.onConnect.bind(this))
+
     this.server.on('upgrade', (req, socket, head) => this.onUpgrade(req, socket, head, socketIoRoute))
 
     // enforceOrigin is disabled here because upgrades arrive via the cypress proxy with Origin reflecting the AUT host — never the runner port. Inbound connections are gated by socketAllowed.isRequestAllowed in proxyWebsockets.
@@ -275,10 +290,12 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this._remoteStates.set(baseUrl != null ? baseUrl : '<root>')
 
-    this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
-      onRequest: this.callListeners.bind(this),
-      onUpgrade: this.onSniUpgrade.bind(this),
-    }) as HttpsProxyServer
+    if (!isProxyDisabled()) {
+      this._httpsProxy = await createHttpsProxy(appData.path('proxy'), listenedPort, {
+        onRequest: this.callListeners.bind(this),
+        onUpgrade: this.onSniUpgrade.bind(this),
+      }) as HttpsProxyServer
+    }
 
     let warning: WarningErr | undefined
 
@@ -335,14 +352,18 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this.createNetworkProxy({
-      config,
-      remoteStates: this._remoteStates,
-      shouldCorrelatePreRequests,
-      getCurrentBrowser,
-    })
+    if (isProxyDisabled()) {
+      this._netStubbingState = netStubbingState()
+    } else {
+      this.createNetworkProxy({
+        config,
+        remoteStates: this._remoteStates,
+        shouldCorrelatePreRequests,
+        getCurrentBrowser,
+      })
+    }
 
-    if (config.experimentalSourceRewriting) {
+    if (config.experimentalSourceRewriting && !isProxyDisabled()) {
       createInitialWorkers()
     }
 
@@ -352,7 +373,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       config,
       remoteStates: this._remoteStates,
       nodeProxy: this.nodeProxy,
-      networkProxy: this._networkProxy!,
+      networkProxy: this._networkProxy,
       onError,
       getSpec,
       testingType,
@@ -449,6 +470,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     this._netStubbingState = runtime.netStubbingState
     this._networkProxy = runtime.networkProxy
+    this._networkPolicyRegistration = runtime.networkPolicyRegistration
+    this._networkInterceptionCore = runtime.networkInterceptionCore
   }
 
   startWebsockets (automation: Automation, config, options: Record<string, unknown> = {}) {
@@ -456,15 +479,20 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
-    options.netStubbingState = this.netStubbingState
+    options.interceptRegistration = new DriverInterceptRegistrationAdapter({
+      state: this.netStubbingState,
+      socket: this.socket,
+      getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
+    })
+
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()
 
     options.onResetServerState = () => {
-      this.networkProxy.reset({ resetBetweenSpecs: false })
+      this._networkProxy?.reset({ resetBetweenSpecs: false })
       this.netStubbingState.reset()
       this._remoteStates.reset()
-      this.networkProxy.clearCredentials()
+      this._networkProxy?.clearCredentials()
     }
 
     const ios = this.socket.startListening(this.server, automation, config, options)
@@ -481,11 +509,11 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   async addBrowserPreRequest (browserPreRequest: BrowserPreRequest) {
-    await this.networkProxy.addPendingBrowserPreRequest(browserPreRequest)
+    await this._networkProxy?.addPendingBrowserPreRequest(browserPreRequest)
   }
 
   removeBrowserPreRequest (requestId: string) {
-    this.networkProxy.removePendingBrowserPreRequest(requestId)
+    this._networkProxy?.removePendingBrowserPreRequest(requestId)
   }
 
   getBrowserPreRequests () {
@@ -497,23 +525,23 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   addPendingUrlWithoutPreRequest (downloadUrl: string) {
-    this.networkProxy.addPendingUrlWithoutPreRequest(downloadUrl)
+    this._networkProxy?.addPendingUrlWithoutPreRequest(downloadUrl)
   }
 
   updateServiceWorkerRegistrations (data: Protocol.ServiceWorker.WorkerRegistrationUpdatedEvent) {
-    this.networkProxy.updateServiceWorkerRegistrations(data)
+    this._networkProxy?.updateServiceWorkerRegistrations(data)
   }
 
   updateServiceWorkerVersions (data: Protocol.ServiceWorker.WorkerVersionUpdatedEvent) {
-    this.networkProxy.updateServiceWorkerVersions(data)
+    this._networkProxy?.updateServiceWorkerVersions(data)
   }
 
   updateServiceWorkerClientSideRegistrations (data: { scriptURL: string, initiatorOrigin: string }) {
-    this.networkProxy.updateServiceWorkerClientSideRegistrations(data)
+    this._networkProxy?.updateServiceWorkerClientSideRegistrations(data)
   }
 
   handleServiceWorkerClientEvent (event: ServiceWorkerClientEvent) {
-    this.networkProxy.handleServiceWorkerClientEvent(event)
+    this._networkProxy?.handleServiceWorkerClientEvent(event)
   }
 
   _createHttpServer (app): DestroyableHttpServer {
@@ -728,6 +756,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
   onConnect (req, socket, head) {
     debug('Got CONNECT request from %s', req.url)
+
+    if (isProxyDisabled()) {
+      socket.write('HTTP/1.1 403 Forbidden\r\n\r\nProxy is disabled\r\n')
+      socket.end()
+
+      return
+    }
 
     socket.once('upstream-connected', this.socketAllowed.add)
 

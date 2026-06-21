@@ -15,6 +15,7 @@ import {
 import {
   setPluginResolvedOn,
   mergeDefaults,
+  shouldHonorNumTestsKeptInMemory,
 } from './utils'
 
 const debug = Debug('cypress:config:project')
@@ -135,6 +136,14 @@ export function updateWithPluginValues (cfg: FullConfig, modifiedConfig: any, te
     if (originalResolvedBrowsers) {
       merged.resolved.browsers = originalResolvedBrowsers
     }
+  }
+
+  // setupNodeEvents may have returned a non-zero numTestsKeptInMemory, which
+  // would otherwise stick after merging. In run mode we force it back to 0
+  // (unless explicitly honored via env var) so that snapshots can be captured
+  // properly when recording to protocol.
+  if (merged.isTextTerminal && !shouldHonorNumTestsKeptInMemory()) {
+    merged.numTestsKeptInMemory = 0
   }
 
   debug('merged plugins config %o', merged)

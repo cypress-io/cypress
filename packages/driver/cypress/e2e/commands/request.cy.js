@@ -628,6 +628,42 @@ describe('src/cy/commands/request', () => {
           expect(result).to.contain('upload.txt')
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/21173
+      // When a user sets a `Content-Type` header with non-lowercase casing, the
+      // existing header must be stripped so the generated `content-type` with the
+      // multipart boundary is the only one sent. Otherwise two conflicting
+      // content-type headers are produced and the server fails to parse the body.
+      // We assert on the options sent to the backend (rather than the response)
+      // because downstream case-insensitive header de-duplication can mask the
+      // bug end-to-end.
+      it('strips a user-provided capitalized Content-Type header and sends a single lowercase content-type with the boundary', () => {
+        const backend = Cypress.backend
+        .withArgs('http:request')
+        .resolves({ isOkStatusCode: true, status: 200 })
+
+        const formData = new FormData()
+
+        formData.set('file', new File(['1,2,3,4'], 'upload.txt'), 'upload.txt')
+        formData.set('name', 'Tony Stark')
+        cy.request({
+          method: 'POST',
+          url: 'http://localhost:3500/dump-form-data',
+          body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        .then(() => {
+          const { headers } = backend.firstCall.args[1]
+
+          // the user-provided capitalized header is removed and replaced by a
+          // single generated lowercase `content-type` carrying the boundary
+          expect(headers).not.to.have.property('Content-Type')
+          expect(headers).to.have.property('content-type')
+          expect(headers['content-type']).to.match(/^multipart\/form-data; boundary=/)
+        })
+      })
     })
 
     describe('subjects', () => {

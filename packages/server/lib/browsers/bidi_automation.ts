@@ -2,6 +2,7 @@ import debugModule from 'debug'
 import toInteger from 'lodash/toInteger'
 import isNumber from 'lodash/isNumber'
 import { isHostOnlyCookie } from './cdp_automation'
+import { isLocalhost } from '@packages/network-tools'
 import { cookieMatches } from '../automation/util'
 import { bidiKeyPress } from '../automation/commands/key_press'
 import { AutomationNotImplemented } from '../automation/automation_not_implemented'
@@ -25,6 +26,7 @@ import { bidiGetUrl } from '../automation/commands/get_url'
 import { bidiReloadFrame } from '../automation/commands/reload_frame'
 import { bidiNavigateHistory } from '../automation/commands/navigate_history'
 import { bidiGetFrameTitle } from '../automation/commands/get_frame_title'
+import { bidiPerformUserGesture } from '../automation/commands/user_gesture'
 import type { StorageCookieFilter, StoragePartialCookie as BidiStoragePartialCookie } from 'webdriver/build/bidi/remoteTypes'
 
 const BIDI_DEBUG_NAMESPACE = 'cypress:server:browsers:bidi_automation'
@@ -442,7 +444,16 @@ export class BidiAutomation {
       filter.domain = url.hostname
       // if we are in a non-secure context, we do NOT want to get secure cookies and apply them,
       // but non-secure cookies can be applied in a secure context.
-      if (url.protocol === 'http:') {
+      //
+      // localhost and the loopback range (127.0.0.0/8, ::1) are "potentially
+      // trustworthy" origins, so browsers treat them as secure contexts and
+      // still send secure cookies over http for those hosts. Firefox has done
+      // this since Firefox 75 (see https://bugzilla.mozilla.org/show_bug.cgi?id=1618113
+      // and https://bugzilla.mozilla.org/show_bug.cgi?id=1648993), matching the
+      // Chromium/CDP behavior in getCookiesByUrl. Exclude those hosts from the
+      // secure filter so cy.request receives the same cookies the browser would.
+      // @see https://github.com/cypress-io/cypress/pull/34095 for the full rationale.
+      if (url.protocol === 'http:' && !isLocalhost(url)) {
         secure = false
       }
 
@@ -686,6 +697,18 @@ export class BidiAutomation {
             await bidiKeyPress(toSupportedKey(data.key), this.webDriverClient, this.autContextId, this.topLevelContextId)
           } else {
             throw new Error('Cannot emit key press: no AUT context initialized')
+          }
+
+          return
+        case 'perform:user:gesture':
+          // Firefox 93+ requires a transient user activation before display capture is allowed,
+          // which the driver needs in order to record video via getUserMedia. We grant it by
+          // synthesizing a trusted gesture in the top-level context (where getUserMedia is called).
+          // @see https://github.com/cypress-io/cypress/issues/18415
+          if (this.topLevelContextId) {
+            await bidiPerformUserGesture(this.webDriverClient, this.topLevelContextId)
+          } else {
+            throw new Error('Cannot perform user gesture: no top-level context initialized')
           }
 
           return

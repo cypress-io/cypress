@@ -133,6 +133,57 @@ describe('lib/reporter', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/7139
+  // Reporters that need to perform asynchronous work on completion must use
+  // Mocha's `done(failures, callback)` hook (not the synchronous `end` event,
+  // which Cypress cannot await). `Reporter#end` must wait for that callback
+  // before resolving so the async work is not torn down by the run exiting.
+  context('#end', () => {
+    it('waits for the reporter\'s async done() callback before resolving', function () {
+      let doneFinished = false
+
+      this.reporter.reporter.done = (failures, cb) => {
+        setTimeout(() => {
+          doneFinished = true
+          cb()
+        }, 50)
+      }
+
+      const endResult = this.reporter.end()
+
+      // end() must return a promise (not resolve synchronously) when done() exists
+      expect(endResult).to.be.an.instanceOf(Promise)
+
+      return endResult.then((results) => {
+        // if end() resolved before the callback fired, the async work would be lost
+        expect(doneFinished, 'done() callback completed before end() resolved').to.be.true
+        expect(results).to.have.property('stats')
+      })
+    })
+
+    it('passes the runner\'s failure count to done()', function () {
+      this.reporter.runner.failures = 3
+
+      const done = sinon.stub().callsFake((failures, cb) => cb())
+
+      this.reporter.reporter.done = done
+
+      return this.reporter.end().then(() => {
+        expect(done).to.be.calledWith(3)
+      })
+    })
+
+    it('returns results synchronously when the reporter has no done() method', function () {
+      // the default spec reporter does not implement done()
+      expect(this.reporter.reporter.done).to.be.undefined
+
+      const results = this.reporter.end()
+
+      expect(results).not.to.be.an.instanceOf(Promise)
+      expect(results).to.have.property('stats')
+    })
+  })
+
   context('#emit', () => {
     beforeEach(function () {
       this.emit = sinon.spy(this.reporter.runner, 'emit')
@@ -213,6 +264,47 @@ describe('lib/reporter', () => {
         const result = reporter.normalizeTest(test)
 
         expect(result.attempts[0].error.stack).to.equal('')
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/27956
+    // The reporter UI derives non-terminal, display-only states (e.g. 'processing',
+    // 'active') for tests that have not reached a terminal state. These are invalid
+    // for Cypress Cloud and the Module API and are coerced to the terminal 'pending'
+    // state rather than being reported as-is.
+    describe('non-terminal test/attempt states', () => {
+      it('coerces a `processing` test state to `pending`', () => {
+        const result = reporter.normalizeTest({ id: 'r4', state: 'processing', prevAttempts: [] })
+
+        expect(result.state).to.equal('pending')
+      })
+
+      it('coerces a `processing` attempt state to `pending`', () => {
+        const result = reporter.normalizeTest({ id: 'r4', state: 'processing', prevAttempts: [{ state: 'processing' }] })
+
+        expect(result.attempts[0].state).to.equal('pending')
+        expect(result.attempts[1].state).to.equal('pending')
+      })
+
+      it('coerces an `active` test state to `pending`', () => {
+        const result = reporter.normalizeTest({ id: 'r4', state: 'active', prevAttempts: [] })
+
+        expect(result.state).to.equal('pending')
+      })
+
+      it('preserves terminal states', () => {
+        for (const state of ['passed', 'failed', 'pending', 'skipped']) {
+          const result = reporter.normalizeTest({ id: 'r4', state, prevAttempts: [{ state }] })
+
+          expect(result.state).to.equal(state)
+          expect(result.attempts[0].state).to.equal(state)
+          expect(result.attempts[1].state).to.equal(state)
+        }
+      })
+
+      it('normalizes an unknown/undefined state to null', () => {
+        expect(reporter.normalizeTest({ id: 'r4', prevAttempts: [] }).state).to.be.null
+        expect(reporter.normalizeTest({ id: 'r4', state: 'bogus', prevAttempts: [] }).state).to.be.null
       })
     })
   })

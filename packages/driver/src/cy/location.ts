@@ -1,12 +1,30 @@
+import Debug from 'debug'
 import { $Location, LocationObject } from '../cypress/location'
 import type { StateFunc } from '../cypress/state'
 import $utils from '../cypress/utils'
 
+const debug = Debug('cypress:driver:location')
+
+// this wait has no timeout; when debug logging is enabled, log if no message
+// has arrived on the channel after this long
+const locationResponseLogTimeoutMs = 2000
+
 const getRemoteLocationFromCrossOriginWindow = (autWindow: Window): Promise<LocationObject> => {
   return new Promise((resolve, reject) => {
     const channel = new MessageChannel()
+    let responseLogTimeout: ReturnType<typeof setTimeout> | undefined
+
+    if (debug.enabled) {
+      responseLogTimeout = setTimeout(() => {
+        debug('no message received on the channel within %dms of posting aut:cypress:location', locationResponseLogTimeoutMs)
+      }, locationResponseLogTimeoutMs)
+    }
 
     channel.port1.onmessage = ({ data }) => {
+      if (responseLogTimeout) {
+        clearTimeout(responseLogTimeout)
+      }
+
       channel.port1.close()
       resolve($Location.create(data))
     }
