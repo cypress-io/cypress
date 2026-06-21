@@ -1,14 +1,11 @@
 import '../../spec_helper'
 
 import stripAnsi from 'strip-ansi'
-import os from 'os'
 import chalk from 'chalk'
 import browsers from '../../../lib/browsers'
 import utils from '../../../lib/browsers/utils'
 import snapshot from 'snap-shot-it'
 import { EventEmitter } from 'events'
-import { exec } from 'child_process'
-import util from 'util'
 import { createTestDataContext } from '../../support/helpers/data-context-helper'
 import electron from '../../../lib/browsers/electron'
 import chrome from '../../../lib/browsers/chrome'
@@ -32,11 +29,6 @@ type TestUrl = 'http://localhost:3000'
 
 // Type for sinon spy on setBrowserStatus
 type SetBrowserStatusSpy = sinon.SinonSpy<[BrowserStatus], void>
-
-// Type for minimal browser instance data used in setFocus tests
-type MinimalBrowserData = {
-  pid: number
-}
 
 // Type for electron browser objects used in tests
 type TestElectronBrowser = {
@@ -396,62 +388,6 @@ describe('lib/browsers/index', () => {
       const vers = 'VMware Fusion 12.1.0'
 
       expect(utils.getMajorVersion(vers)).to.eq(vers)
-    })
-  })
-
-  context('setFocus', () => {
-    it('calls open when running MacOS', () => {
-      const mockExec = sinon.stub()
-
-      sinon.stub(os, 'platform').returns('darwin')
-      sinon.stub(util, 'promisify').returns(mockExec)
-
-      const browserData: MinimalBrowserData = {
-        pid: 3333,
-      }
-
-      browsers._setInstance(browserData as any)
-
-      browsers.setFocus()
-
-      expect(util.promisify).to.be.calledWith(exec)
-      expect(mockExec).to.be.calledWith(`open -a "$(ps -p 3333 -o comm=)"`)
-    })
-
-    it('calls WScript AppActivate to activate the window when running Windows', () => {
-      const mockExec = sinon.stub()
-
-      sinon.stub(os, 'platform').returns('win32')
-      sinon.stub(util, 'promisify').returns(mockExec)
-
-      const browserData: MinimalBrowserData = {
-        pid: 3333,
-      }
-
-      browsers._setInstance(browserData as any)
-
-      browsers.setFocus()
-
-      expect(util.promisify).to.be.calledWith(exec)
-      expect(mockExec).to.be.calledWith(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '3333'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
-    })
-
-    it('calls xdotool to activate the window when running Linux', () => {
-      const mockExec = sinon.stub()
-
-      sinon.stub(os, 'platform').returns('linux')
-      sinon.stub(util, 'promisify').returns(mockExec)
-
-      const browserData: MinimalBrowserData = {
-        pid: 3333,
-      }
-
-      browsers._setInstance(browserData as any)
-
-      browsers.setFocus()
-
-      expect(util.promisify).to.be.calledWith(exec)
-      expect(mockExec).to.be.calledWith(`xdotool search --onlyvisible --pid 3333 windowactivate`)
     })
   })
 

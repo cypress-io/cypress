@@ -658,11 +658,10 @@ export class ProjectBase extends EE {
   }
 
   async sendFocusBrowserMessage () {
-    if (this.browser.family === 'firefox') {
-      await browsers.setFocus()
-    } else {
-      await this.server.sendFocusBrowserMessage()
-    }
+    // All browsers focus the active window through their automation client.
+    // For Firefox this is handled over WebDriver BiDi via `browsingContext.activate`,
+    // and for Chromium/WebKit/Electron via CDP `Page.bringToFront`.
+    await this.server.sendFocusBrowserMessage()
   }
 
   shouldCorrelatePreRequests = () => {

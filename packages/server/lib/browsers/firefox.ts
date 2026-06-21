@@ -693,10 +693,6 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
 
     debug(`firefox running on pid: ${browserPID}`)
 
-    // expose the browser process id so consumers (e.g. browsers.setFocus) can
-    // identify and interact with the running Firefox window.
-    browserInstanceWrapper.pid = browserPID
-
     const driverPID: number = webdriverClient.capabilities['wdio:driverPID'] as number
 
     debug(`webdriver running on pid: ${driverPID}`)

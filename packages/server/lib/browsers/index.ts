@@ -3,9 +3,6 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import utils from './utils'
 import * as errors from '../errors'
-import { exec } from 'child_process'
-import util from 'util'
-import os from 'os'
 import { BROWSER_FAMILY, BrowserLaunchOpts, BrowserNewTabOpts, FoundBrowser, ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
 import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
@@ -66,39 +63,6 @@ const kill = (options: KillOptions = {}) => {
   })
 }
 
-async function setFocus () {
-  const platform = os.platform()
-  const execAsync = util.promisify(exec)
-
-  try {
-    if (!instance) throw new Error('No instance in setFocus!')
-
-    switch (platform) {
-      case 'darwin':
-        await execAsync(`open -a "$(ps -p ${instance.pid} -o comm=)"`)
-
-        return
-      case 'win32': {
-        await execAsync(`(New-Object -ComObject WScript.Shell).AppActivate(((Get-WmiObject -Class win32_process -Filter "ParentProcessID = '${instance.pid}'") | Select -ExpandProperty ProcessId))`, { shell: 'powershell.exe' })
-
-        return
-      }
-      case 'linux':
-        // On Linux (X11), use xdotool to raise and focus the browser window
-        // associated with the running browser process. This is best-effort:
-        // if xdotool is not installed or the session is running under Wayland,
-        // the command will fail and focus will be left unchanged.
-        await execAsync(`xdotool search --onlyvisible --pid ${instance.pid} windowactivate`)
-
-        return
-      default:
-        debug(`Unexpected os platform ${platform}. Set focus is only functional on Windows, MacOS, and Linux`)
-    }
-  } catch (error) {
-    debug(`Failure to set focus. ${error}`)
-  }
-}
-
 async function getBrowserLauncher (browser: Browser, browsers: FoundBrowser[]): Promise<BrowserLauncher> {
   debug('getBrowserLauncher %o', { browser })
 
@@ -127,8 +91,6 @@ const browsers = {
   close: kill,
 
   formatBrowsersToOptions: utils.formatBrowsersToOptions,
-
-  setFocus,
 
   _setInstance (_instance: BrowserInstance) {
     // for testing
