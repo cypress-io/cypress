@@ -360,6 +360,24 @@ export class WebKitAutomation {
     return cookiesToClear
   }
 
+  /**
+   * Closes any extra pages (e.g. popups or tabs opened during a spec) that
+   * are not the primary Cypress page, so they don't leak into the next spec.
+   */
+  public async closeExtraTargets () {
+    await Promise.all(this.context.pages().map(async (page) => {
+      if (page === this.page) return
+
+      debug('closing extra target')
+
+      try {
+        await page.close()
+      } catch (err: any) {
+        debug('closing extra target errored: %s', err?.stack || err)
+      }
+    }))
+  }
+
   private async takeScreenshot (data) {
     const buffer = await this.page.screenshot({
       fullPage: data.capture === 'fullPage',

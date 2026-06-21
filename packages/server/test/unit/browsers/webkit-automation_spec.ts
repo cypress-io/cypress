@@ -29,6 +29,9 @@ function createMockBrowser () {
       addCookies: sinon.stub().resolves(),
       browser: () => browser,
       close: sinon.stub().resolves(),
+      // by default the context only holds the primary page; tests can push extras
+      pages: sinon.stub().callsFake(() => context._pages),
+      _pages: [page],
     }
 
     lastContext = context
@@ -110,6 +113,38 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(mock.getLastPage().close, 'page should be closed to flush the video').to.be.called
       expect(pwVideo.saveAs).to.be.calledWith(videoApi.videoName)
+    })
+  })
+
+  context('closeExtraTargets', () => {
+    it('closes extra pages but keeps the primary Cypress page open', async () => {
+      const wk = await createAutomation({ videoApi: undefined })
+
+      const context = mock.getLastContext()
+      const primaryPage = mock.getLastPage()
+      const extraPage = { close: sinon.stub().resolves() }
+
+      context._pages = [primaryPage, extraPage]
+
+      await wk.closeExtraTargets()
+
+      expect(extraPage.close, 'extra page should be closed').to.be.calledOnce
+      expect(primaryPage.close, 'primary page should not be closed').not.to.be.called
+    })
+
+    it('swallows errors thrown while closing an extra page', async () => {
+      const wk = await createAutomation({ videoApi: undefined })
+
+      const context = mock.getLastContext()
+      const primaryPage = mock.getLastPage()
+      const extraPage = { close: sinon.stub().rejects(new Error('already closed')) }
+
+      context._pages = [primaryPage, extraPage]
+
+      // should resolve despite the extra page rejecting
+      await wk.closeExtraTargets()
+
+      expect(extraPage.close).to.be.calledOnce
     })
   })
 
