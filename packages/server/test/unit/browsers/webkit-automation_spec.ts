@@ -18,6 +18,7 @@ function createMockBrowser () {
       goto: sinon.stub().resolves(),
       screenshot: sinon.stub().resolves(Buffer.from('')),
       bringToFront: sinon.stub().resolves(),
+      evaluate: sinon.stub().resolves(),
     }
 
     const context: any = {
@@ -26,7 +27,9 @@ function createMockBrowser () {
       route: sinon.stub().resolves(),
       cookies: sinon.stub().resolves([]),
       clearCookies: sinon.stub().resolves(),
+      clearPermissions: sinon.stub().resolves(),
       addCookies: sinon.stub().resolves(),
+      pages: () => [page],
       browser: () => browser,
       close: sinon.stub().resolves(),
     }
@@ -110,6 +113,31 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(mock.getLastPage().close, 'page should be closed to flush the video').to.be.called
       expect(pwVideo.saveAs).to.be.calledWith(videoApi.videoName)
+    })
+  })
+
+  context('reset:browser:state', () => {
+    it('clears cookies, permissions, and web storage for the open pages', async () => {
+      const wk = await createAutomation()
+
+      const context = mock.getLastContext()
+      const page = mock.getLastPage()
+
+      await wk.onRequest('reset:browser:state', {})
+
+      expect(context.clearCookies).to.be.calledOnce
+      expect(context.clearPermissions).to.be.calledOnce
+      // web storage is cleared by evaluating in the page context
+      expect(page.evaluate).to.be.calledOnce
+    })
+
+    it('does not reject if clearing a page\'s storage fails', async () => {
+      const wk = await createAutomation()
+
+      mock.getLastPage().evaluate.rejects(new Error('page navigated'))
+
+      // a single page failing to clear storage should not fail the whole reset
+      await wk.onRequest('reset:browser:state', {})
     })
   })
 

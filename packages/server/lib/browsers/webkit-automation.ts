@@ -360,6 +360,39 @@ export class WebKitAutomation {
     return cookiesToClear
   }
 
+  /**
+   * Clears browser state (cookies, permissions, and web storage) for the current context.
+   *
+   * WebKit creates a fresh context per spec, so cache + storage are already isolated between
+   * specs. This handler honors the explicit `reset:browser:state` automation command (e.g. from
+   * `Cypress.clearAllSessionStorage`, navigation between tests) by clearing what Playwright
+   * exposes: cookies and permission overrides at the context level, and `localStorage` /
+   * `sessionStorage` for any open pages.
+   */
+  private async resetBrowserState (): Promise<void> {
+    debug('resetting browser state')
+
+    await Promise.all([
+      this.context.clearCookies(),
+      this.context.clearPermissions(),
+      // Playwright does not expose a cross-origin storage clear for WebKit, so clear the web
+      // storage that is reachable through the open pages.
+      ...this.context.pages().map((page) => {
+        return page.evaluate(() => {
+          try {
+            window.localStorage.clear()
+            window.sessionStorage.clear()
+          } catch (e) {
+            // accessing storage can throw (e.g. on about:blank or when storage is disabled);
+            // ignore so a single page does not fail the whole reset
+          }
+        }).catch(() => {
+          // the page may have navigated or closed mid-reset; ignore
+        })
+      }),
+    ])
+  }
+
   private async takeScreenshot (data) {
     const buffer = await this.page.screenshot({
       fullPage: data.capture === 'fullPage',
@@ -394,9 +427,7 @@ export class WebKitAutomation {
       case 'focus:browser:window':
         return await this.context.pages[0]?.bringToFront()
       case 'reset:browser:state':
-        debug('stubbed reset:browser:state')
-
-        return
+        return await this.resetBrowserState()
       case 'reset:browser:tabs:for:next:spec':
         if (data.shouldKeepTabOpen) return await this.reset({})
 
