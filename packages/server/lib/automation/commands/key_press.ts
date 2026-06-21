@@ -243,10 +243,13 @@ export async function webkitKeyPress (inKey: SupportedKey, page: playwright.Page
       // in the keyboard layout (named keys and standard characters).
       await page.keyboard.press(pwKey)
     } catch (e) {
-      // Characters outside the keyboard layout (e.g. '€' or combining/emoji code
-      // points) cannot be represented as key events, so insert them as text.
-      debug('keyboard.press failed for %o, falling back to insertText: %o', char, e)
-      await page.keyboard.insertText(char)
+      // Characters outside WebKit's keyboard layout (e.g. '€' or combining/emoji
+      // code points) cannot be dispatched as native key events. We deliberately
+      // do not fall back to inserting text, as that would emit an `input` event
+      // without the `keydown`/`keyup` events `cy.press()` guarantees - diverging
+      // from the CDP/BiDi behavior - so surface a clear error instead.
+      debug('keyboard.press failed for %o: %o', char, e)
+      throw new Error(`The key '${key}' is not supported by 'cy.press()' in the experimental WebKit browser, because WebKit can only dispatch native key events for characters in its keyboard layout. DEBUG namespace cypress:server:automation:command:keypress for more information.`)
     }
   }
 }

@@ -40,10 +40,11 @@ describe('src/cy/commands/actions/press', () => {
   ;['a', 'z'].forEach(testKeyDownUp)
 
   // // Special characters
-  // NOTE: WebKit (via Playwright) can only dispatch key events for characters
-  // present in its keyboard layout. Characters outside the layout ('€', 'é') are
-  // inserted as text without a keydown event, so they're excluded from this
-  // keydown assertion in WebKit.
+  // NOTE: WebKit (via Playwright) can only dispatch native key events for
+  // characters present in its keyboard layout. Characters outside the layout
+  // ('€', 'é') are not supported by cy.press() in WebKit - it throws rather than
+  // silently inserting text without keydown/keyup events - so they're excluded
+  // here.
   const specialChars = Cypress.isBrowser('webkit') ? ['!', ' '] : ['!', ' ', '€', 'é']
 
   specialChars.forEach(testKeyDownUp)

@@ -507,15 +507,22 @@ describe('key:press automation command', () => {
         expect(keyboard.press).to.have.been.calledWith(codeTwo)
       })
 
-      it('falls back to insertText when keyboard.press throws for an unknown key', async () => {
-        const euro = toSupportedKey('€')
+      it('throws a clear error when keyboard.press fails for a character outside the keyboard layout', async () => {
+        const euro = toSupportedKey('\u20AC')
 
-        keyboard.press.withArgs('€').rejects(new Error('Unknown key: "€"'))
+        keyboard.press.withArgs('\u20AC').rejects(new Error('Unknown key: "\u20AC"'))
 
-        await webkitKeyPress(euro, page)
+        let thrown: any
 
-        expect(keyboard.press).to.have.been.calledWith('€')
-        expect(keyboard.insertText).to.have.been.calledWith('€')
+        try {
+          await webkitKeyPress(euro, page)
+        } catch (e) {
+          thrown = e
+        }
+
+        expect(keyboard.press).to.have.been.calledWith('\u20AC')
+        expect(keyboard.insertText).not.to.have.been.called
+        expect(thrown?.message).to.include(`is not supported by 'cy.press()' in the experimental WebKit browser`)
       })
     })
 
