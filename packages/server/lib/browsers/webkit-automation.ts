@@ -339,10 +339,6 @@ export class WebKitAutomation {
   private async clearCookies (cookiesToClear: CyCookie[]): Promise<CyCookie[]> {
     debug('clear cookies: %o', cookiesToClear)
 
-    // Playwright's clearCookies supports name/domain/path filters (since 1.43),
-    // so we can delete exactly the cookies we want instead of clearing every
-    // cookie and re-adding the survivors. The cookies originate from
-    // `get:cookies`, so their name/domain/path already match what is stored.
     await Promise.all(cookiesToClear.map((cookie) => {
       return this.context.clearCookies({
         name: cookie.name,
