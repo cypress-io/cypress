@@ -567,7 +567,7 @@ describe('/lib/tasks/install', function () {
       })
 
       describe('as a global install', function () {
-        it('does not log a global install warning and downloads', async function () {
+        it('a global install warning and downloads', async function () {
           const output = createStdoutCapture()
 
           vi.mocked(util.isInstalledGlobally).mockReturnValue(true)
