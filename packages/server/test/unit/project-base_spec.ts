@@ -96,9 +96,6 @@ describe('lib/project-base', () => {
   })
 
   describe('#sendFocusBrowserMessage', function () {
-    // Every browser focuses its window through the server's automation client.
-    // Firefox previously relied on an OS-level shell-out instead, which never
-    // worked on Linux. https://github.com/cypress-io/cypress/issues/21703
     const families = ['firefox', 'chromium', 'webkit']
 
     beforeEach(function () {
