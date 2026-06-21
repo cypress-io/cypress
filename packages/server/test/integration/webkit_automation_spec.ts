@@ -36,9 +36,11 @@ describe('lib/browsers/webkit-automation - reset:browser:state (real WebKit)', f
 
     origin = `http://127.0.0.1:${port}`
 
-    // playwright-webkit (or its host system libraries) may not be installed in every environment.
-    // Skip rather than fail so unrelated suites are unaffected; CI's install-webkit-deps step
-    // ensures this actually runs in the webkit jobs.
+    // The playwright-webkit npm module is always installed (it's a server dependency), but the
+    // WebKit browser binary and its host system libraries are not - only the dedicated
+    // server-integration-tests-webkit CI job installs them (via install-webkit-deps). Everywhere
+    // else (the main integration job, most local runs) launch() throws, so skip rather than fail
+    // to keep unrelated suites unaffected.
     try {
       const playwright = require('playwright-webkit')
 
