@@ -658,9 +658,8 @@ export class ProjectBase extends EE {
   }
 
   async sendFocusBrowserMessage () {
-    // All browsers focus the active window through their automation client.
-    // For Firefox this is handled over WebDriver BiDi via `browsingContext.activate`,
-    // and for Chromium/WebKit/Electron via CDP `Page.bringToFront`.
+    // Every browser focuses its active window through the automation client,
+    // each of which handles the request natively for its automation protocol.
     await this.server.sendFocusBrowserMessage()
   }
 
