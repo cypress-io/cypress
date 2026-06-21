@@ -6,13 +6,11 @@ import { WebKitAutomation } from '../../lib/browsers/webkit-automation'
 
 // Real-WebKit integration coverage for the `reset:browser:state` automation handler.
 //
-// The unit test (test/unit/browsers/webkit-automation_spec.ts) stubs Playwright, so it can only
-// assert which APIs are called. This launches an actual WebKit browser via `playwright-webkit`,
-// seeds cookies / web storage / a permission on a live origin, sends `reset:browser:state`, and
-// asserts the state is cleared *in place on the same Playwright context*. That distinction
-// matters: between specs WebKit normally gets a brand-new context (fresh cookies + storage),
-// which masks whether the explicit command does anything. Reusing the context here proves the
-// handler itself clears state rather than relying on that recreation.
+// Launches an actual WebKit browser via `playwright-webkit`, seeds cookies / web storage / a
+// permission on a live origin, sends `reset:browser:state`, and asserts the state is cleared
+// *in place on the same Playwright context*. Reusing the context is the point: between specs
+// WebKit normally gets a brand-new context (fresh cookies + storage), so asserting against the
+// same context proves the handler itself clears state.
 describe('lib/browsers/webkit-automation - reset:browser:state (real WebKit)', function () {
   // launching a real browser is slow; give it room beyond the default mocha timeout
   this.timeout(60000)
