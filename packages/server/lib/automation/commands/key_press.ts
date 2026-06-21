@@ -249,7 +249,7 @@ export async function webkitKeyPress (inKey: SupportedKey, page: playwright.Page
       // without the `keydown`/`keyup` events `cy.press()` guarantees - diverging
       // from the CDP/BiDi behavior - so surface a clear error instead.
       debug('keyboard.press failed for %o: %o', char, e)
-      throw new Error(`The key '${key}' is not supported by 'cy.press()' in the experimental WebKit browser. DEBUG namespace cypress:server:automation:command:keypress for more information.`)
+      throw new Error(`The key '${key}' is not supported by 'cy.press()' in the experimental WebKit browser. Learn more: https://on.cypress.io/press`)
     }
   }
 }
