@@ -7,7 +7,7 @@
 
 **Features:**
 
-- [`cy.press()`](https://on.cypress.io/press) is now supported in the experimental WebKit browser. Addresses [#31054](https://github.com/cypress-io/cypress/issues/31054).
+- [`cy.press()`](https://on.cypress.io/press) is now supported in the experimental WebKit browser. Fixes [#31054](https://github.com/cypress-io/cypress/issues/31054).
 
 **Bugfixes:**
 
