@@ -145,7 +145,6 @@ describe('lib/browsers/webkit-automation', () => {
         path: stored.path,
       })
 
-      // the clear-all-and-re-add hack is gone
       expect(ctx.addCookies).not.to.be.called
     })
 
@@ -174,7 +173,6 @@ describe('lib/browsers/webkit-automation', () => {
       expect(ctx.clearCookies).to.be.calledWith({ name: 'a', domain: '.example.com', path: '/' })
       expect(ctx.clearCookies).to.be.calledWith({ name: 'b', domain: 'localhost', path: '/foo' })
 
-      // the clear-all-and-re-add hack is gone
       expect(ctx.addCookies).not.to.be.called
     })
   })
