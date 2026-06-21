@@ -37,7 +37,7 @@ describe('cy/commands/location', () => {
   })
 
   describe('url', () => {
-    it('returns the url href from the automation client, including for webkit', () => {
+    it('returns the url href from the automation client', () => {
       // @ts-expect-error
       getUrlFromAutomation.mockReturnValue(() => {
         return {
@@ -73,7 +73,7 @@ describe('cy/commands/location', () => {
   })
 
   describe('hash', () => {
-    it('returns the hash of the url from the automation client, including for webkit', () => {
+    it('returns the hash of the url from the automation client', () => {
       // @ts-expect-error
       getUrlFromAutomation.mockReturnValue(() => {
         return {
@@ -92,7 +92,7 @@ describe('cy/commands/location', () => {
   })
 
   describe('location', () => {
-    it('returns the location of the url from the automation client, including for webkit', () => {
+    it('returns the location of the url from the automation client', () => {
       // @ts-expect-error
       getUrlFromAutomation.mockReturnValue(() => {
         return {

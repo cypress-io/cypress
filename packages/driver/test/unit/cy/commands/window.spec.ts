@@ -37,7 +37,7 @@ describe('cy/commands/window', () => {
   })
 
   describe('title', () => {
-    it('returns the title from the automation client, including for webkit', () => {
+    it('returns the title from the automation client', () => {
       // @ts-expect-error
       getTitleFromAutomation.mockReturnValue(() => 'This is the frame title')
 
