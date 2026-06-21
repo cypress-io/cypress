@@ -113,6 +113,72 @@ describe('lib/browsers/webkit-automation', () => {
     })
   })
 
+  context('clearing cookies', () => {
+    const cookie = (overrides: Record<string, any> = {}) => {
+      return {
+        name: 'foo',
+        value: 'bar',
+        domain: '.example.com',
+        path: '/',
+        secure: false,
+        httpOnly: false,
+        expires: -1,
+        sameSite: 'Lax',
+        ...overrides,
+      }
+    }
+
+    it('clear:cookie deletes exactly the matched cookie without clearing all cookies', async () => {
+      const wk = await createAutomation()
+      const ctx = mock.getLastContext()
+      const stored = cookie()
+
+      ctx.cookies.resolves([stored])
+
+      // the filter domain is the apex domain, which does not string-match the
+      // stored leading-dot domain - the matched cookie must still be deleted
+      await wk.onRequest('clear:cookie', { name: 'foo', domain: 'example.com' })
+
+      expect(ctx.clearCookies).to.be.calledOnceWith({
+        name: stored.name,
+        domain: stored.domain,
+        path: stored.path,
+      })
+
+      // the clear-all-and-re-add hack is gone
+      expect(ctx.addCookies).not.to.be.called
+    })
+
+    it('clear:cookie does nothing when no cookie matches', async () => {
+      const wk = await createAutomation()
+      const ctx = mock.getLastContext()
+
+      ctx.cookies.resolves([cookie({ name: 'other' })])
+
+      await wk.onRequest('clear:cookie', { name: 'foo', domain: 'example.com' })
+
+      expect(ctx.clearCookies).not.to.be.called
+      expect(ctx.addCookies).not.to.be.called
+    })
+
+    it('clear:cookies deletes each cookie by its exact attributes without clearing all cookies', async () => {
+      const wk = await createAutomation()
+      const ctx = mock.getLastContext()
+
+      const a = { name: 'a', domain: '.example.com', path: '/' }
+      const b = { name: 'b', domain: 'localhost', path: '/foo' }
+
+      await wk.onRequest('clear:cookies', [a, b])
+
+      expect(ctx.clearCookies).to.be.calledTwice
+      expect(ctx.clearCookies).to.be.calledWith({ name: 'a', domain: '.example.com', path: '/' })
+      expect(ctx.clearCookies).to.be.calledWith({ name: 'b', domain: 'localhost', path: '/foo' })
+
+      // the clear-all-and-re-add hack is gone
+      expect(ctx.addCookies).not.to.be.called
+    })
+  })
+
   context('reset:browser:tabs:for:next:spec', () => {
     it('closes the browser when the tab should not be kept open', async () => {
       const wk = await createAutomation()

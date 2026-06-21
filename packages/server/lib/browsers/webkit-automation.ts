@@ -313,25 +313,24 @@ export class WebKitAutomation {
    * @returns the cleared cookie
    */
   private async clearCookie (filter: CyCookieFilter): Promise<CyCookieFilter> {
-    // webkit doesn't have a way to only clear certain cookies, so we have
-    // to clear all cookies and put back the ones we don't want cleared
+    // Resolve the actual stored cookie first so we delete it by its exact
+    // attributes. The filter's domain is typically an apex/host domain that may
+    // not string-match the stored cookie domain (e.g. a leading-dot domain
+    // cookie), so we reuse the same matching used elsewhere - mirroring how the
+    // CDP automation looks up the cookie before deleting it.
     const allCookies = await this.context.cookies()
-    // persist everything but the first cookie that matches
-    const persistCookies = allCookies.reduce((memo, cookie) => {
-      if (memo.matched || !cookieMatches(cookie, filter)) {
-        memo.cookies.push(cookie)
+    const cookieToClear = allCookies.find((cookie) => cookieMatches(cookie, filter))
 
-        return memo
-      }
-
-      memo.matched = true
-
-      return memo
-    }, { matched: false, cookies: [] as playwright.Cookie[] }).cookies
-
-    await this.context.clearCookies()
-
-    if (persistCookies.length) await this.context.addCookies(persistCookies)
+    // Playwright's clearCookies supports name/domain/path filters (since 1.43),
+    // so we can delete exactly the matched cookie instead of clearing every
+    // cookie and re-adding the survivors.
+    if (cookieToClear) {
+      await this.context.clearCookies({
+        name: cookieToClear.name,
+        domain: cookieToClear.domain,
+        path: cookieToClear.path,
+      })
+    }
 
     return filter
   }
@@ -341,21 +340,19 @@ export class WebKitAutomation {
    * @returns cookies cleared
    */
   private async clearCookies (cookiesToClear: CyCookie[]): Promise<CyCookie[]> {
-    // webkit doesn't have a way to only clear certain cookies, so we have
-    // to clear all cookies and put back the ones we don't want cleared
-    const allCookies = await this.context.cookies()
-    const persistCookies = allCookies.filter((cookie) => {
-      return !cookiesToClear.find((cookieToClear) => {
-        return cookieMatches(cookie, cookieToClear)
-      })
-    })
-
     debug('clear cookies: %o', cookiesToClear)
-    debug('put back cookies: %o', persistCookies)
 
-    await this.context.clearCookies()
-
-    if (persistCookies.length) await this.context.addCookies(persistCookies)
+    // Playwright's clearCookies supports name/domain/path filters (since 1.43),
+    // so we can delete exactly the cookies we want instead of clearing every
+    // cookie and re-adding the survivors. The cookies originate from
+    // `get:cookies`, so their name/domain/path already match what is stored.
+    await Promise.all(cookiesToClear.map((cookie) => {
+      return this.context.clearCookies({
+        name: cookie.name,
+        domain: cookie.domain,
+        path: cookie.path,
+      })
+    }))
 
     return cookiesToClear
   }
