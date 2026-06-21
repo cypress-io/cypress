@@ -380,7 +380,10 @@ export class WebKitAutomation {
 
     // If for whatever reason we cannot identify the AUT frame by name, fall back
     // to the first child frame, which should always be the AUT frame.
-    if (!autFrame) autFrame = childFrames[0]
+    if (!autFrame) {
+      debug('could not identify AUT frame by name, falling back to first child frame %o', { childFrameNames: childFrames.map((frame) => frame.name()) })
+      autFrame = childFrames[0]
+    }
 
     if (!autFrame) throw new Error('Could not find AUT frame')
 
