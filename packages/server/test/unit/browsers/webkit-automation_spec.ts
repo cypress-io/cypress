@@ -120,8 +120,6 @@ describe('lib/browsers/webkit-automation', () => {
 
       await wk.onRequest('focus:browser:window', {})
 
-      // context.pages() is a method on Playwright's BrowserContext - accessing it as a
-      // property (this.context.pages[0]) yields undefined and silently no-ops
       expect(mock.getLastPage().bringToFront).to.be.calledOnce
     })
   })
