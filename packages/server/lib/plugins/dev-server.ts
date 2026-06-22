@@ -28,6 +28,10 @@ plugins.registerHandler((ipc: PluginIpcHandler) => {
   ipc.on('dev-server:compile:success', ({ specFile }: CompileSuccessData = {}) => {
     baseEmitter.emit('dev-server:compile:success', { specFile })
   })
+
+  ipc.on('dev-server:specs:unchanged', () => {
+    baseEmitter.emit('dev-server:specs:unchanged')
+  })
 })
 
 // for simpler stubbing from unit tests

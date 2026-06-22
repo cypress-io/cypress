@@ -19,6 +19,10 @@ export const wrap = (
     ipc.send('dev-server:compile:success', { specFile })
   })
 
+  devServerEvents.on('dev-server:specs:unchanged', () => {
+    ipc.send('dev-server:specs:unchanged')
+  })
+
   options.devServerEvents = devServerEvents
 
   util.wrapChildPromise(ipc, invoke, ids, args)

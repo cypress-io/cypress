@@ -46,6 +46,21 @@ describe('waitForDevServerSpecUpdate', () => {
     expect(resolved).toBe(true)
   })
 
+  it('resolves when webpack reports the spec list is already up to date', async () => {
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+
+    let resolved = false
+    const promise = waitForDevServerSpecUpdate(spec, events as any, { bundler: 'webpack' }).then(() => {
+      resolved = true
+    })
+
+    events.emit('dev-server:specs:unchanged')
+    await promise
+
+    expect(resolved).toBe(true)
+  })
+
   it('resolves after spec update for non-webpack bundlers without waiting for compile success', async () => {
     const events = new EventEmitter()
     const spec = { absolute: '/project/src/App.cy.jsx' }

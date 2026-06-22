@@ -15,6 +15,10 @@ export class SocketCt extends SocketBase {
     super(config)
 
     // should we use this option at all for component testing 😕?
+    devServer.emitter.on('dev-server:specs:unchanged', () => {
+      this.toRunner('dev-server:specs:unchanged')
+    })
+
     if (config.watchForFileChanges) {
       devServer.emitter.on('dev-server:compile:success', ({ specFile }) => {
         this.toRunner('dev-server:compile:success', { specFile })

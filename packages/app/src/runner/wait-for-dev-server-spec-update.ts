@@ -1,5 +1,5 @@
 export type DevServerSpecUpdateEvents = {
-  once (event: 'dev-server:on-spec-updated', handler: () => void): void
+  once (event: 'dev-server:on-spec-updated' | 'dev-server:specs:unchanged', handler: () => void): void
   on (event: 'dev-server:compile:success', handler: (data?: { specFile?: string }) => void): void
   off (event: 'dev-server:compile:success', handler: (data?: { specFile?: string }) => void): void
   emit (event: 'dev-server:on-spec-update', spec: { absolute: string }): void
@@ -28,14 +28,26 @@ export function waitForDevServerSpecUpdate (
       return
     }
 
+    const cleanup = () => {
+      events.off('dev-server:compile:success', onCompileSuccess)
+      events.off('dev-server:specs:unchanged', onSpecsUnchanged)
+    }
+
     const onCompileSuccess = ({ specFile }: { specFile?: string } = {}) => {
       if (specFile && specFile !== spec.absolute) {
         return
       }
 
-      events.off('dev-server:compile:success', onCompileSuccess)
+      cleanup()
       resolve()
     }
+
+    const onSpecsUnchanged = () => {
+      cleanup()
+      resolve()
+    }
+
+    events.once('dev-server:specs:unchanged', onSpecsUnchanged)
 
     events.once('dev-server:on-spec-updated', () => {
       events.on('dev-server:compile:success', onCompileSuccess)
