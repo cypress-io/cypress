@@ -896,9 +896,6 @@ commands:
       - install-browsers:
           install-chrome: true
           executor: << parameters.executor >>
-      # only install firefox when the job actually targets it. Every current
-      # caller runs --browser chrome, so installing firefox just wastes time
-      # across the ~30 parallel containers per run.
       - when:
           condition:
             equal: [ firefox, << parameters.browser >> ]
