@@ -720,6 +720,16 @@ export const AllCypressErrors = {
   PORT_IN_USE_SHORT: (arg1: string | number) => {
     return errTemplate`Port ${fmt.highlight(arg1)} is already in use.`
   },
+  FILE_SERVER_COULD_NOT_LISTEN: (attempts: number, err: Error) => {
+    return errTemplate`\
+        Cypress could not start its internal file server.
+
+        After ${fmt.highlight(attempts)} attempts to listen on an available port on ${fmt.highlightSecondary('127.0.0.1')}, the last attempt failed with:
+
+        ${fmt.highlightSecondary(err.message)}
+
+        Please try again later.`
+  },
   ERROR_READING_FILE: (filePath: string, err: Error) => {
     return errTemplate`\
         Error reading from: ${fmt.path(filePath)}

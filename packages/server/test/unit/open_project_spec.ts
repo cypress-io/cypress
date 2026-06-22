@@ -212,6 +212,19 @@ describe('lib/open_project', () => {
         await openProject.launch({ name: 'electron' }, this.spec, { shouldLaunchNewTab: true })
         expect(browsers.open).to.have.been.calledOnce
       })
+
+      it('does not pass proxyServer to browser when CYPRESS_INTERNAL_DISABLE_PROXY=1', function () {
+        process.env.CYPRESS_INTERNAL_DISABLE_PROXY = '1'
+        delete this.config.proxyServer
+
+        return openProject.launch(this.browser, this.spec)
+        .then(() => {
+          expect(browsers.open.lastCall.args[1].proxyServer).to.be.undefined
+        })
+        .finally(() => {
+          delete process.env.CYPRESS_INTERNAL_DISABLE_PROXY
+        })
+      })
     })
   })
 
