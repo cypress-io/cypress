@@ -185,11 +185,23 @@ describe('Launchpad: Open Mode', () => {
     })
   })
 
-  // Chrome is installed on all CI platforms (including Windows), so these
-  // browser auto-selection assertions can run everywhere.
+  // We stub the detected browser list (via cy.findBrowsers) rather than rely on
+  // what's installed on CI, so we can assert against firefox — a browser that is
+  // NOT the default selection (chrome is first in the detected list). This proves
+  // the `--browser` flag actually drives the selection, and lets these run on all
+  // platforms (including Windows) without needing firefox installed.
+  const stubFirefoxAvailable = () => {
+    cy.findBrowsers({
+      filter: (browser) => {
+        return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
+      },
+    })
+  }
+
   it('auto-selects the browser when launched with --browser', () => {
     cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--browser', 'chrome'])
+    stubFirefoxAvailable()
+    cy.openProject('launchpad', ['--browser', 'firefox'])
     cy.withCtx((ctx, o) => {
       o.sinon.stub(ctx._apis.projectApi, 'launchProject').rejects(new Error('should not launch project'))
     })
@@ -198,13 +210,14 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
     cy.contains('E2E Testing').click()
     cy.get('h1').should('contain', 'Choose a browser')
-    cy.get('[data-cy-browser=chrome]').should('have.attr', 'aria-checked', 'true')
-    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Chrome')
+    cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
+    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
   })
 
   it('auto-launches the browser when launched with --browser --testingType --project, after Major Version Welcome is dismissed', () => {
     cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--browser', 'chrome', '--e2e'])
+    stubFirefoxAvailable()
+    cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
     cy.withCtx((ctx, o) => {
       o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
     })
@@ -213,8 +226,8 @@ describe('Launchpad: Open Mode', () => {
     cy.visitLaunchpad()
 
     cy.get('h1').should('contain', 'Choose a browser')
-    cy.get('[data-cy-browser=chrome]').should('have.attr', 'aria-checked', 'true')
-    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Chrome')
+    cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
+    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
 
     cy.withRetryableCtx((ctx) => {
       expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
@@ -232,14 +245,15 @@ describe('Launchpad: Open Mode', () => {
     })
 
     cy.scaffoldProject('launchpad')
-    cy.openProject('launchpad', ['--browser', 'chrome', '--e2e'])
+    stubFirefoxAvailable()
+    cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
 
     // Need to visit after args have been configured, todo: fix in #18776
     cy.visitLaunchpad()
 
     cy.get('h1').should('contain', 'Choose a browser')
-    cy.get('[data-cy-browser=chrome]').should('have.attr', 'aria-checked', 'true')
-    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Chrome')
+    cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
+    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
 
     cy.withRetryableCtx((ctx) => {
       expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
