@@ -185,70 +185,66 @@ describe('Launchpad: Open Mode', () => {
     })
   })
 
-  // since circle cannot have firefox installed by default,
-  // we need to skip this test relying on it
-  // It is very unlikely that it would only fail on Windows though
-  // (tested manually on Windows and it works fine)
-  if (Cypress.platform !== 'win32') {
-    it('auto-selects the browser when launched with --browser', () => {
-      cy.scaffoldProject('launchpad')
-      cy.openProject('launchpad', ['--browser', 'firefox'])
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx._apis.projectApi, 'launchProject').rejects(new Error('should not launch project'))
-      })
-
-      // Need to visit after args have been configured, todo: fix in #18776
-      cy.visitLaunchpad()
-      cy.contains('E2E Testing').click()
-      cy.get('h1').should('contain', 'Choose a browser')
-      cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
-      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
+  // Chrome is installed on all CI platforms (including Windows), so these
+  // browser auto-selection assertions can run everywhere.
+  it('auto-selects the browser when launched with --browser', () => {
+    cy.scaffoldProject('launchpad')
+    cy.openProject('launchpad', ['--browser', 'chrome'])
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx._apis.projectApi, 'launchProject').rejects(new Error('should not launch project'))
     })
 
-    it('auto-launches the browser when launched with --browser --testingType --project, after Major Version Welcome is dismissed', () => {
-      cy.scaffoldProject('launchpad')
-      cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
-      })
+    // Need to visit after args have been configured, todo: fix in #18776
+    cy.visitLaunchpad()
+    cy.contains('E2E Testing').click()
+    cy.get('h1').should('contain', 'Choose a browser')
+    cy.get('[data-cy-browser=chrome]').should('have.attr', 'aria-checked', 'true')
+    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Chrome')
+  })
 
-      // Need to visit after args have been configured, todo: fix in #18776
-      cy.visitLaunchpad()
-
-      cy.get('h1').should('contain', 'Choose a browser')
-      cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
-      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
-
-      cy.withRetryableCtx((ctx) => {
-        expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
-      })
+  it('auto-launches the browser when launched with --browser --testingType --project, after Major Version Welcome is dismissed', () => {
+    cy.scaffoldProject('launchpad')
+    cy.openProject('launchpad', ['--browser', 'chrome', '--e2e'])
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
     })
 
-    it('auto-launches the browser when launched with --browser --testingType --project if there is no major version welcome screen', () => {
-      cy.withCtx((ctx, o) => {
-        o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
-        o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
-          [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
-        } })
-      }, {
-        MAJOR_VERSION_FOR_CONTENT: GET_MAJOR_VERSION_FOR_CONTENT(),
-      })
+    // Need to visit after args have been configured, todo: fix in #18776
+    cy.visitLaunchpad()
 
-      cy.scaffoldProject('launchpad')
-      cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
+    cy.get('h1').should('contain', 'Choose a browser')
+    cy.get('[data-cy-browser=chrome]').should('have.attr', 'aria-checked', 'true')
+    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Chrome')
 
-      // Need to visit after args have been configured, todo: fix in #18776
-      cy.visitLaunchpad()
-
-      cy.get('h1').should('contain', 'Choose a browser')
-      cy.get('[data-cy-browser=firefox]').should('have.attr', 'aria-checked', 'true')
-      cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Firefox')
-
-      cy.withRetryableCtx((ctx) => {
-        expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
-      })
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
     })
-  }
+  })
+
+  it('auto-launches the browser when launched with --browser --testingType --project if there is no major version welcome screen', () => {
+    cy.withCtx((ctx, o) => {
+      o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
+      o.sinon.stub(ctx._apis.localSettingsApi, 'getPreferences').resolves({ majorVersionWelcomeDismissed: {
+        [o.MAJOR_VERSION_FOR_CONTENT]: Date.now(),
+      } })
+    }, {
+      MAJOR_VERSION_FOR_CONTENT: GET_MAJOR_VERSION_FOR_CONTENT(),
+    })
+
+    cy.scaffoldProject('launchpad')
+    cy.openProject('launchpad', ['--browser', 'chrome', '--e2e'])
+
+    // Need to visit after args have been configured, todo: fix in #18776
+    cy.visitLaunchpad()
+
+    cy.get('h1').should('contain', 'Choose a browser')
+    cy.get('[data-cy-browser=chrome]').should('have.attr', 'aria-checked', 'true')
+    cy.get('button[data-cy=launch-button]').invoke('text').should('include', 'Start E2E Testing in Chrome')
+
+    cy.withRetryableCtx((ctx) => {
+      expect(ctx._apis.projectApi.launchProject).to.be.calledOnce
+    })
+  })
 
   describe('when there is a list of projects', () => {
     it('goes to an active project if one is added', () => {
