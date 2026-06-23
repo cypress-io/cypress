@@ -2,13 +2,15 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import _ from 'lodash'
 import { _rewriteJsUnsafe } from '../../lib/js'
 import fse from 'fs-extra'
-import Bluebird from 'bluebird'
-import rp from '@cypress/request-promise'
+import { createRequire } from 'module'
 import * as astTypes from 'ast-types'
 import {
   testSourceWithExternalSourceMap,
   testSourceWithInlineSourceMap,
 } from '../fixtures'
+
+// resolve fixture libraries from node_modules (works in vitest's ESM context)
+const nodeRequire = createRequire(import.meta.url)
 
 vi.mock('ast-types', async (importActual) => {
   const actual = await importActual<typeof import('ast-types')>()
@@ -252,80 +254,40 @@ describe('js rewriter', function () {
       })
 
       describe('libs', () => {
-        const cdnUrl = 'https://cdnjs.cloudflare.com/ajax/libs'
-
-        const needsDash = ['backbone', 'underscore']
-
-        let libs = {
-          jquery: `${cdnUrl}/jquery/3.3.1/jquery.js`,
-          jqueryui: `${cdnUrl}/jqueryui/1.12.1/jquery-ui.js`,
-          angular: `${cdnUrl}/angular.js/1.6.5/angular.js`,
-          bootstrap: `${cdnUrl}/twitter-bootstrap/4.0.0/js/bootstrap.js`,
-          moment: `${cdnUrl}/moment.js/2.20.1/moment.js`,
-          lodash: `${cdnUrl}/lodash.js/4.17.5/lodash.js`,
-          vue: `${cdnUrl}/vue/2.5.13/vue.js`,
-          backbone: `${cdnUrl}/backbone.js/1.3.3/backbone.js`,
-          cycle: `${cdnUrl}/cyclejs-core/7.0.0/cycle.js`,
-          d3: `${cdnUrl}/d3/4.13.0/d3.js`,
-          underscore: `${cdnUrl}/underscore.js/1.8.3/underscore.js`,
-          foundation: `${cdnUrl}/foundation/6.4.3/js/foundation.js`,
-          require: `${cdnUrl}/require.js/2.3.5/require.js`,
-          rxjs: `${cdnUrl}/rxjs/5.5.6/Rx.js`,
-          bluebird: `${cdnUrl}/bluebird/3.5.1/bluebird.js`,
+        // Run real-world library bundles through the rewriter to ensure it never
+        // corrupts otherwise-valid JavaScript. These bundles are resolved from
+        // node_modules (pinned via the lockfile) rather than downloaded from a
+        // CDN at test time, so the suite is deterministic and needs no network
+        // access. A mix of minified and unminified UMD/CJS bundles is used to
+        // exercise a wide variety of real-world code shapes and sizes.
+        const libs = {
+          jquery: 'jquery/dist/jquery.js',
+          jqueryMin: 'jquery/dist/jquery.min.js',
+          lodash: 'lodash/lodash.js',
+          lodashMin: 'lodash/lodash.min.js',
+          bluebird: 'bluebird/js/release/bluebird.js',
+          bluebirdMin: 'bluebird/js/browser/bluebird.min.js',
+          vue: 'vue/dist/vue.global.js',
+          vueMin: 'vue/dist/vue.global.prod.js',
+          react: 'react/cjs/react.development.js',
+          reactProd: 'react/cjs/react.production.min.js',
         }
 
-        libs = _
-        .chain(libs)
-        .clone()
-        .reduce((memo, url, lib) => {
-          memo[lib] = url
-          memo[`${lib}Min`] = url
-          .replace(/js$/, 'min.js')
-          .replace(/css$/, 'min.css')
+        _.each(libs, (modulePath, lib) => {
+          it(`does not corrupt code from '${lib}'`, async () => {
+            // the URL is only used as a label for sourcemaps, no request is made
+            const url = `http://example.com/${lib}.js`
+            const libCode = await fse.readFile(nodeRequire.resolve(modulePath), 'utf8')
 
-          if (needsDash.includes(lib)) {
-            memo[`${lib}Min`] = url.replace('min', '-min')
-          }
+            const stripped = _rewriteJsUnsafe(url, libCode)
 
-          return memo
-        }
-        , {})
-        .extend({
-          knockoutDebug: `${cdnUrl}/knockout/3.4.2/knockout-debug.js`,
-          knockoutMin: `${cdnUrl}/knockout/3.4.2/knockout-min.js`,
-          emberMin: `${cdnUrl}/ember.js/2.18.2/ember.min.js`,
-          emberProd: `${cdnUrl}/ember.js/2.18.2/ember.prod.js`,
-          reactDev: `${cdnUrl}/react/16.2.0/umd/react.development.js`,
-          reactProd: `${cdnUrl}/react/16.2.0/umd/react.production.min.js`,
-          vendorBundle: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/vendor.bundle.js',
-          hugeApp: 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js',
-        })
-        .value() as unknown as typeof libs
+            // a successful rewrite never falls back to injecting a driver error
+            expect(stripped, `rewriting '${lib}' should not fail`).not.toContain('js_rewriting_failed')
 
-        _.each(libs, (url, lib) => {
-          it(`does not corrupt code from '${lib}'`, function () {
-            const pathToLib = `/tmp/${lib}`
-
-            const downloadFile = () => {
-              return rp(url)
-              .then((resp) => {
-                return Bluebird.fromCallback((cb) => {
-                  fse.writeFile(pathToLib, resp, cb)
-                })
-                .return(resp)
-              })
-            }
-
-            return fse
-            .readFile(pathToLib, 'utf8')
-            .catch(downloadFile)
-            .then((libCode) => {
-              const stripped = _rewriteJsUnsafe(url, libCode)
-
-              expect(() => eval(stripped), 'is valid JS').to.not.throw
-            })
-            // may have to download and rewrite large files
-            // hence 30 second timeout
+            // `new Function` compiles (but does not execute) the rewritten source,
+            // so a thrown SyntaxError means the rewriter produced invalid JS
+            expect(() => new Function(stripped), `rewritten '${lib}' is valid JS`).not.toThrow()
+          // large bundles can take a moment to parse + reprint, hence 30s timeout
           }, 30000)
         })
       })

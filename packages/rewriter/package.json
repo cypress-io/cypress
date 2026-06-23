@@ -26,7 +26,10 @@
     "@cypress/request-promise": "^5.0.0",
     "@types/parse5-html-rewriting-stream": "5.1.2",
     "fs-extra": "9.1.0",
-    "vitest": "^3.2.4"
+    "jquery": "3.7.1",
+    "react": "18.3.1",
+    "vitest": "^3.2.4",
+    "vue": "3.2.47"
   },
   "files": [
     "lib"
