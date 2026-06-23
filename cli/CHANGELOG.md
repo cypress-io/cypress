@@ -1,9 +1,13 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.17.1
+## 15.18.0
 
 **Performance:**
 
 - Fixed an issue where an application that repeatedly threw the same uncaught exception (for example, a benign `ResizeObserver loop ...` notification fired on every animation frame) could exhaust renderer memory and crash the browser. Consecutive identical uncaught exceptions within a test now collapse into a single, updating command-log entry, and a handled (suppressed) uncaught exception no longer captures a DOM snapshot. Addresses [#27415](https://github.com/cypress-io/cypress/issues/27415).
+
+**Features:**
+
+- Added a `removeSRIAttributes` configuration option. When enabled, Cypress strips the `integrity` attribute from `<script>` and `<link>` elements on first-party resources so they are not blocked by Subresource Integrity (SRI) enforcement after Cypress rewrites them. This covers `integrity` set via static HTML, a JavaScript string literal, and runtime DOM assignment (including the `webpack-subresource-integrity` pattern used for lazily-loaded chunks). Addresses [#34124](https://github.com/cypress-io/cypress/issues/34124) and [#18315](https://github.com/cypress-io/cypress/issues/18315).
 
 **Bugfixes:**
 
@@ -22,12 +26,14 @@
 
 **Misc:**
 
+- Running `cypress install` when Cypress is installed globally no longer prints a warning recommending that Cypress be installed as a per-project devDependency. Addresses [#34134](https://github.com/cypress-io/cypress/issues/34134).
 - Running Cypress with process profiler debug logs enabled (for example `DEBUG=cypress*process_profiler`) no longer intermittently prints an `Expected DataContext to already have been set via setCtx` error to the logs. Addresses [#30670](https://github.com/cypress-io/cypress/issues/30670).
 - Cypress now shows a clear error explaining that `browsers` must be an array and that a specific browser should be selected with `--browser` when a `CYPRESS_BROWSERS` environment variable is set to a plain string (for example `CYPRESS_BROWSERS=chrome`) instead of showing an opaque `TypeError: a.map is not a function` error. Addresses [#33198](https://github.com/cypress-io/cypress/issues/33198).
 
 **Dependency Updates:**
 
 - Upgraded `webdriver` from `9.14.0` to `9.28.0`, `geckodriver` from `5.0.0` to `6.1.0`, and `edgedriver` from `6.1.1` to `6.3.0`. These packages are used to launch and automate Firefox during `cypress run` and `cypress open`. Addresses [#34072](https://github.com/cypress-io/cypress/issues/34072).
+- Upgraded `undici` from `6.26.0` to `6.27.0` to address a [CRLF Injection](https://security.snyk.io/vuln/SNYK-JS-UNDICI-17372658) vulnerability reported in security scans. Addressed in [#34121](https://github.com/cypress-io/cypress/pull/34121).
 
 ## 15.17.0
 
