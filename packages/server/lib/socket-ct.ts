@@ -19,32 +19,11 @@ export class SocketCt extends SocketBase {
       this.toRunner('dev-server:specs:unchanged')
     })
 
-    if (config.watchForFileChanges) {
-      devServer.emitter.on('dev-server:compile:success', ({ specFile }) => {
-        this.toRunner('dev-server:compile:success', { specFile })
-      })
-    }
-  }
-
-  onBeforeSave (config) {
-    // even if the user has turned off file watching
-    // we want to force a reload on save
-    if (!config.watchForFileChanges) {
-      devServer.emitter.on('dev-server:compile:success', this.onCloudTestFileChange)
-    }
-  }
-
-  onAfterSave (config, error) {
-    // even if the user has turned off file watching
-    // we want to force a reload on save
-    if (error && !config.watchForFileChanges) {
-      devServer.emitter.off('dev-server:compile:success', this.onCloudTestFileChange)
-    }
-  }
-
-  onCloudTestFileChange = ({ specFile }) => {
-    this.toRunner('dev-server:compile:success', { specFile })
-    devServer.emitter.off('dev-server:compile:success', this.onCloudTestFileChange)
+    // Always forward compile success so JIT spec updates can wait for webpack
+    // even when watchForFileChanges is disabled.
+    devServer.emitter.on('dev-server:compile:success', ({ specFile }) => {
+      this.toRunner('dev-server:compile:success', { specFile })
+    })
   }
 
   startListening (server: DestroyableHttpServer, automation: Automation, config, options) {

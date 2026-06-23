@@ -28,9 +28,21 @@ export function waitForDevServerSpecUpdate (
       return
     }
 
+    let resolved = false
+
     const cleanup = () => {
       events.off('dev-server:compile:success', onCompileSuccess)
       events.off('dev-server:specs:unchanged', onSpecsUnchanged)
+    }
+
+    const tryResolve = () => {
+      if (resolved) {
+        return
+      }
+
+      resolved = true
+      cleanup()
+      resolve()
     }
 
     const onCompileSuccess = ({ specFile }: { specFile?: string } = {}) => {
@@ -38,18 +50,20 @@ export function waitForDevServerSpecUpdate (
         return
       }
 
-      cleanup()
-      resolve()
+      tryResolve()
     }
 
     const onSpecsUnchanged = () => {
-      cleanup()
-      resolve()
+      tryResolve()
     }
 
     events.once('dev-server:specs:unchanged', onSpecsUnchanged)
 
     events.once('dev-server:on-spec-updated', () => {
+      if (resolved) {
+        return
+      }
+
       events.on('dev-server:compile:success', onCompileSuccess)
     })
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { EventEmitter } from 'events'
 import { waitForDevServerSpecUpdate } from '../../../packages/app/src/runner/wait-for-dev-server-spec-update'
 
@@ -59,6 +59,20 @@ describe('waitForDevServerSpecUpdate', () => {
     await promise
 
     expect(resolved).toBe(true)
+  })
+
+  it('does not register a compile listener when specs are unchanged before on-spec-updated', async () => {
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+    const onSpy = vi.spyOn(events, 'on')
+
+    const promise = waitForDevServerSpecUpdate(spec, events as any, { bundler: 'webpack' })
+
+    events.emit('dev-server:specs:unchanged')
+    events.emit('dev-server:on-spec-updated')
+    await promise
+
+    expect(onSpy).not.toHaveBeenCalledWith('dev-server:compile:success', expect.any(Function))
   })
 
   it('resolves after spec update for non-webpack bundlers without waiting for compile success', async () => {
