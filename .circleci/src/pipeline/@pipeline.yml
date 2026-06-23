@@ -133,7 +133,7 @@ executors:
     environment:
       PLATFORM: linux
 
-  # Slim Node image for pure-Node jobs (check-ts, lint-types, health-check) that
+  # Slim Node image for pure-Node jobs (check-ts, lint-types, health-check)
   node-slim:
     docker:
       - image: cimg/node:22.19.0
