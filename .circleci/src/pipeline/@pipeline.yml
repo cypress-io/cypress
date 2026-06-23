@@ -703,6 +703,10 @@ commands:
     description: Build better-sqlite3 for glibc 2.31
     steps:
       - setup_remote_docker
+      - restore_cache:
+          name: Restore cached better-sqlite3 build for glibc 2.31
+          keys:
+            - better-sqlite3-{{ checksum "node_modules/better-sqlite3/package.json" }}-{{ checksum "node_modules/electron/package.json" }}
       - run:
           name: Build better-sqlite3 for glibc 2.31
           command: |
