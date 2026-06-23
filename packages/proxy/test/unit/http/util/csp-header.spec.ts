@@ -130,6 +130,15 @@ describe('http/util/csp-header', () => {
   })
 
   describe('generateCspDirectives', () => {
+    it('should generate a CSP directive string including style-src', () => {
+      const policyMap = new Map<string, string[]>()
+
+      policyMap.set('style-src', ['self', 'https://fonts.googleapis.com'])
+
+      expect(generateCspDirectives(policyMap))
+        .toEqual('style-src self https://fonts.googleapis.com')
+    })
+
     it(`should generate a CSP directive string from a policy map`, () => {
       const policyMap = new Map<string, string[]>()
 

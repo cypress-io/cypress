@@ -4,7 +4,7 @@ const cspRegExp = /[; ]*([^\n\r; ]+) ?([^\n\r;]+)*/g
 
 export const cspHeaderNames = ['content-security-policy', 'content-security-policy-report-only'] as const
 
-export const nonceDirectives = ['script-src-elem', 'script-src', 'default-src']
+export const nonceDirectives = ['script-src-elem', 'script-src', 'default-src', 'style-src']
 
 export const problematicCspDirectives = [
   ...nonceDirectives,
