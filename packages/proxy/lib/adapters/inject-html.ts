@@ -47,6 +47,7 @@ export async function injectHtml (mw: ResponseInterceptionMiddlewareCtx): Promis
       modifyObstructiveThirdPartyCode: mw.config.experimentalModifyObstructiveThirdPartyCode && !mw.remoteStates.isPrimarySuperDomainOrigin(mw.req.proxiedUrl),
       shouldInjectDocumentDomain: DocumentDomainInjection.InjectionBehavior(mw.config).shouldInjectDocumentDomain(mw.req.proxiedUrl),
       modifyObstructiveCode: mw.config.modifyObstructiveCode,
+      removeSRIAttributes: mw.config.removeSRIAttributes && mw.remoteStates.isPrimarySuperDomainOrigin(mw.req.proxiedUrl),
       url: mw.req.proxiedUrl,
       deferSourceMapRewrite: mw.deferSourceMapRewrite,
       simulatedCookies: mw.simulatedCookies,
