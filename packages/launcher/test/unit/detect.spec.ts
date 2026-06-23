@@ -74,11 +74,6 @@ describe('detect', () => {
   // making simple to debug tests
   // using DEBUG=... flag
 
-  // This is a unit test: the platform-specific detect helpers are stubbed so it
-  // does not depend on which browsers are actually installed on the machine.
-  // Detection of browsers actually installed on the system is exercised by the
-  // e2e/system test `system-tests/test/browser_path_spec.js`, which runs in the
-  // browser-enabled jobs.
   it('returns the browsers reported by the platform helper', async () => {
     const stubDetect = (browser: Browser) => {
       return Promise.resolve({
