@@ -980,10 +980,21 @@ commands:
             equal: [ webkit, << parameters.browser >> ]
           steps:
             - install-webkit-deps
-      - install-browsers:
-          install-chrome: true
-          install-chrome-for-testing: true
-          install-firefox: true
+      # Each system-tests job targets a single browser, so only install the
+      # browser binary that this job actually needs. electron is bundled and
+      # webkit is provided via playwright, so neither requires a browser install here.
+      - when:
+          condition:
+            equal: [ chrome, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-chrome: true
+      - when:
+          condition:
+            equal: [ firefox, << parameters.browser >> ]
+          steps:
+            - install-browsers:
+                install-firefox: true
       - restore_cache:
           name: Restore Bun install cache
           keys:

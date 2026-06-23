@@ -38,6 +38,16 @@ describe('e2e launching browsers by path', () => {
   })
 
   it('works with an installed browser path', function () {
+    // This test always launches a chromium-family browser by its absolute path, regardless of
+    // the browser the job is targeting. In CI we only install the job's target browser, so skip
+    // this when targeting a non-chromium browser (a chromium browser may not be installed). It
+    // still runs in the chrome job, so there is no loss of coverage.
+    const specifiedBrowser = process.env.BROWSER
+
+    if (specifiedBrowser && !['chrome', 'chrome-for-testing', 'chromium'].includes(specifiedBrowser)) {
+      this.skip()
+    }
+
     return launcher.detect().then((browsers) => {
       return browsers.find((browser) => {
         return browser.family === 'chromium'
