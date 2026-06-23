@@ -981,8 +981,7 @@ commands:
           steps:
             - install-webkit-deps
       # Each system-tests job targets a single browser, so only install the
-      # browser binary that this job actually needs. electron is bundled and
-      # webkit is provided via playwright, so neither requires a browser install here.
+      # browser binary that this job actually needs.
       - when:
           condition:
             equal: [ chrome, << parameters.browser >> ]
