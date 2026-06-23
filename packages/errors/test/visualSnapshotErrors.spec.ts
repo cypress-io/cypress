@@ -609,6 +609,11 @@ describe('visual error templates', () => {
         default: [2020],
       }
     },
+    FILE_SERVER_COULD_NOT_LISTEN: () => {
+      return {
+        default: [3, makeErr()],
+      }
+    },
     ERROR_READING_FILE: () => {
       return {
         default: ['/path/to/read/file.ts', makeErr()],

@@ -10,6 +10,7 @@ export type SecurityOpts = {
   useAstSourceRewriting: boolean
   modifyObstructiveThirdPartyCode: boolean
   modifyObstructiveCode: boolean
+  removeSRIAttributes: boolean
   deferSourceMapRewrite: (opts: any) => string
 }
 

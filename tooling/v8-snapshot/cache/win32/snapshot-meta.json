@@ -1179,16 +1179,6 @@
     "./node_modules/@babel/types/lib/validators/validate.js",
     "./node_modules/@cypress/get-windows-proxy/node_modules/debug/src/common.js",
     "./node_modules/@cypress/get-windows-proxy/src/index.js",
-    "./node_modules/@cypress/parse-domain/build/tries/icann.complete.json",
-    "./node_modules/@cypress/parse-domain/build/tries/private.complete.json",
-    "./node_modules/@cypress/parse-domain/lib/normalize.js",
-    "./node_modules/@cypress/parse-domain/lib/parseDomain.js",
-    "./node_modules/@cypress/parse-domain/lib/trie/characters.js",
-    "./node_modules/@cypress/parse-domain/lib/trie/lookUp.js",
-    "./node_modules/@cypress/parse-domain/lib/trie/nodes.js",
-    "./node_modules/@cypress/parse-domain/lib/trie/parse.js",
-    "./node_modules/@cypress/parse-domain/lists/icann.complete.js",
-    "./node_modules/@cypress/parse-domain/lists/private.complete.js",
     "./node_modules/@cypress/request-promise/errors.js",
     "./node_modules/@cypress/request-promise/node_modules/tough-cookie/lib/memstore.js",
     "./node_modules/@cypress/request-promise/node_modules/tough-cookie/lib/pathMatch.js",
@@ -3547,6 +3537,7 @@
     "./packages/network-interception/cjs/types/index.js",
     "./packages/network-interception/cjs/types/internal-types.js",
     "./packages/network-tools/cjs/accept-encoding.js",
+    "./packages/network-tools/cjs/parse-domain.js",
     "./packages/network-tools/cjs/types.js",
     "./packages/network-tools/cjs/uri.js",
     "./packages/network/cjs/allow-destroy.js",
@@ -3963,5 +3954,5 @@
     "./tooling/v8-snapshot/cache/win32/snapshot-entry.js"
   ],
   "deferredHashFile": "yarn.lock",
-  "deferredHash": "a409b78b8f0868ec48b643721b1a6ee169609be671e08af4746ad13d8c17a457"
+  "deferredHash": "9d0e641aadedf54b2693db74d397076d479ac08bdafee54aa71aa0370bb959f5"
 }
