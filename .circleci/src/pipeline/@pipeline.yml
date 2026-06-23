@@ -134,10 +134,7 @@ executors:
       PLATFORM: linux
 
   # Slim Node image for pure-Node jobs (check-ts, lint-types, health-check) that
-  # need neither browsers nor the Electron build toolchain. Pulls/decompresses
-  # much faster than base-internal. Stays glibc-based (Ubuntu) and pins the same
-  # Node version, so the cached node_modules remain ABI-compatible.
-  cy-node-slim:
+  node-slim:
     docker:
       - image: cimg/node:22.19.0
     resource_class: medium
@@ -1738,8 +1735,7 @@ jobs:
 
   check-ts:
     <<: *defaults
-    # Pure-Node type check — no browsers/Electron libs needed, so use the slim image.
-    executor: cy-node-slim
+    executor: node-slim
     steps:
       - restore_cached_workspace
       - install-required-node
@@ -1749,8 +1745,7 @@ jobs:
 
   health-check:
     <<: *defaults
-    # Pure-Node Knip analysis — no browsers/Electron libs needed, so use the slim image.
-    executor: cy-node-slim
+    executor: node-slim
     steps:
       - restore_cached_workspace
       - install-required-node
@@ -2060,8 +2055,7 @@ jobs:
 
   lint-types:
     <<: *defaults
-    # Pure-Node dtslint run — no browsers/Electron libs needed, so use the slim image.
-    executor: cy-node-slim
+    executor: node-slim
     parallelism: 1
     steps:
       - restore_cached_workspace
