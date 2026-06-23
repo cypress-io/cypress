@@ -185,12 +185,11 @@ describe('Launchpad: Open Mode', () => {
     })
   })
 
-  // We stub the detected browser list (via cy.findBrowsers) rather than rely on
-  // what's installed on CI, so we can assert against firefox — a browser that is
-  // NOT the default selection (chrome is first in the detected list). This proves
-  // the `--browser` flag actually drives the selection, and lets these run on all
-  // platforms (including Windows) without needing firefox installed.
-  const stubFirefoxAvailable = () => {
+  // Stub the detected browser list so these assertions don't depend on which
+  // browsers are installed on the runner. We assert against firefox below
+  // because it is not the default selection (chrome is first in the list),
+  // which proves the `--browser` flag drives the selection.
+  const stubAvailableBrowsers = () => {
     cy.findBrowsers({
       filter: (browser) => {
         return Cypress._.includes(['chrome', 'firefox', 'electron', 'edge'], browser.name) && browser.channel === 'stable'
@@ -200,7 +199,7 @@ describe('Launchpad: Open Mode', () => {
 
   it('auto-selects the browser when launched with --browser', () => {
     cy.scaffoldProject('launchpad')
-    stubFirefoxAvailable()
+    stubAvailableBrowsers()
     cy.openProject('launchpad', ['--browser', 'firefox'])
     cy.withCtx((ctx, o) => {
       o.sinon.stub(ctx._apis.projectApi, 'launchProject').rejects(new Error('should not launch project'))
@@ -216,7 +215,7 @@ describe('Launchpad: Open Mode', () => {
 
   it('auto-launches the browser when launched with --browser --testingType --project, after Major Version Welcome is dismissed', () => {
     cy.scaffoldProject('launchpad')
-    stubFirefoxAvailable()
+    stubAvailableBrowsers()
     cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
     cy.withCtx((ctx, o) => {
       o.sinon.stub(ctx._apis.projectApi, 'launchProject').resolves()
@@ -245,7 +244,7 @@ describe('Launchpad: Open Mode', () => {
     })
 
     cy.scaffoldProject('launchpad')
-    stubFirefoxAvailable()
+    stubAvailableBrowsers()
     cy.openProject('launchpad', ['--browser', 'firefox', '--e2e'])
 
     // Need to visit after args have been configured, todo: fix in #18776
