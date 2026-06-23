@@ -347,6 +347,11 @@ const driverConfigOptions: Array<DriverConfigOption> = [
     validation: validate.isNumber,
     overrideLevel: 'any',
   }, {
+    name: 'removeSRIAttributes',
+    defaultValue: false,
+    validation: validate.isBoolean,
+    requireRestartOnChange: 'server',
+  }, {
     name: 'reporter',
     defaultValue: 'spec',
     validation: validate.isString,

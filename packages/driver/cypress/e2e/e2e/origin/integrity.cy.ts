@@ -94,6 +94,29 @@ describe('Integrity Preservation', { browser: '!webkit' }, () => {
           cy.get('#dynamic-set-integrity-script').should('have.attr', 'cypress-stripped-integrity')
         })
       })
+
+      it(`preserves integrity with a <script> whose integrity property is set at runtime with ${algo} integrity.`, () => {
+        cy.then(() => {
+          const compiledTemplate = templateExecutor({
+            dynamicScriptPropertyInjection: true,
+            integrityValue: `${algo.toLowerCase()}-${integrityJSDigests[algo]}`,
+          })
+
+          cy.intercept('http://www.foobar.com:3500/fixtures/scripts-with-integrity.html', compiledTemplate)
+        })
+
+        cy.visit('fixtures/primary-origin.html')
+        cy.get('[data-cy="integrity-link"]').click()
+        cy.origin('http://www.foobar.com:3500', () => {
+          // The added script, if integrity matches, should execute and
+          // add a <p> element with 'integrity script loaded' as the text
+          cy.get('#integrity', {
+            timeout: 1000,
+          }).should('contain', 'integrity script loaded')
+
+          cy.get('#dynamic-set-integrity-script').should('have.attr', 'cypress-stripped-integrity')
+        })
+      })
     })
   })
 
@@ -147,6 +170,97 @@ describe('Integrity Preservation', { browser: '!webkit' }, () => {
 
           cy.get('#dynamic-set-integrity-link').should('have.attr', 'cypress-stripped-integrity')
         })
+      })
+
+      it(`preserves integrity with a <link> whose integrity property is set at runtime with ${algo} integrity.`, () => {
+        cy.then(() => {
+          const compiledTemplate = templateExecutor({
+            dynamicLinkPropertyInjection: true,
+            integrityValue: `${algo.toLowerCase()}-${integrityCSSDigests[algo]}`,
+          })
+
+          cy.intercept('http://www.foobar.com:3500/fixtures/scripts-with-integrity.html', compiledTemplate)
+        })
+
+        cy.visit('fixtures/primary-origin.html')
+        cy.get('[data-cy="integrity-link"]').click()
+        cy.origin('http://www.foobar.com:3500', () => {
+          cy.get('[data-cy="integrity-header"]', {
+            timeout: 1000,
+          }).then((integrityHeader) => {
+            // The added link, if integrity matches, should execute and
+            // add a color 'red' to the data-cy="integrity-header" element
+            expect(window.getComputedStyle(integrityHeader[0]).getPropertyValue('color')).to.equal('rgb(255, 0, 0)')
+          })
+
+          cy.get('#dynamic-set-integrity-link').should('have.attr', 'cypress-stripped-integrity')
+        })
+      })
+    })
+  })
+
+  // The cases above run cross-origin (handled by experimentalModifyObstructiveThirdPartyCode).
+  // These exercise removeSRIAttributes: the resource is served first-party (rewritten by
+  // modifyObstructiveCode, invalidating any pinned hash) in the primary AUT frame.
+  describe('first-party resources (removeSRIAttributes)', () => {
+    availableDigests.forEach((algo) => {
+      it(`preserves integrity with static <script> in first-party HTML with ${algo} integrity.`, () => {
+        cy.then(() => {
+          const compiledTemplate = templateExecutor({
+            staticScriptInjection: true,
+            integrityValue: `${algo.toLowerCase()}-${integrityJSDigests[algo]}`,
+          })
+
+          cy.intercept('http://localhost:3500/fixtures/scripts-with-integrity.html', compiledTemplate)
+        })
+
+        cy.visit('fixtures/scripts-with-integrity.html')
+        // The added script, if integrity matches, should execute and
+        // add a <p> element with 'integrity script loaded' as the text
+        cy.get('#integrity', {
+          timeout: 1000,
+        }).should('contain', 'integrity script loaded')
+
+        cy.get('#static-set-integrity-script').should('have.attr', 'cypress-stripped-integrity')
+      })
+
+      it(`preserves integrity with a first-party <script> whose integrity property is set at runtime with ${algo} integrity.`, () => {
+        cy.then(() => {
+          const compiledTemplate = templateExecutor({
+            dynamicScriptPropertyInjection: true,
+            integrityValue: `${algo.toLowerCase()}-${integrityJSDigests[algo]}`,
+          })
+
+          cy.intercept('http://localhost:3500/fixtures/scripts-with-integrity.html', compiledTemplate)
+        })
+
+        cy.visit('fixtures/scripts-with-integrity.html')
+        cy.get('#integrity', {
+          timeout: 1000,
+        }).should('contain', 'integrity script loaded')
+
+        cy.get('#dynamic-set-integrity-script').should('have.attr', 'cypress-stripped-integrity')
+      })
+
+      it(`preserves integrity with a first-party <link> whose integrity property is set at runtime with ${algo} integrity.`, () => {
+        cy.then(() => {
+          const compiledTemplate = templateExecutor({
+            dynamicLinkPropertyInjection: true,
+            integrityValue: `${algo.toLowerCase()}-${integrityCSSDigests[algo]}`,
+          })
+
+          cy.intercept('http://localhost:3500/fixtures/scripts-with-integrity.html', compiledTemplate)
+        })
+
+        cy.visit('fixtures/scripts-with-integrity.html')
+        cy.get('[data-cy="integrity-header"]', {
+          timeout: 1000,
+        }).then((integrityHeader) => {
+          // The added link, if integrity matches, should apply a color 'red' to the header
+          expect(window.getComputedStyle(integrityHeader[0]).getPropertyValue('color')).to.equal('rgb(255, 0, 0)')
+        })
+
+        cy.get('#dynamic-set-integrity-link').should('have.attr', 'cypress-stripped-integrity')
       })
     })
   })
