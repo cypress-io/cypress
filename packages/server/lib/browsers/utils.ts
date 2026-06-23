@@ -289,7 +289,7 @@ async function getWebKitBrowser () {
 
     return browser
   } catch (err) {
-    debug('WebKit is enabled, but there was an error constructing the WebKit browser: %o', { err })
+    debug('There was an error constructing the WebKit browser: %o', { err })
 
     return
   }
