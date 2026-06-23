@@ -177,7 +177,13 @@ describe('encoding', () => {
 
       // in firefox, the browser displays the encoded response whereas in other browsers, it fails to load the page
       if (Cypress.isBrowser({ family: 'firefox' })) {
-        cy.get('body').should('contain.text', '�������t�Ѓ�*��z').then(() => done())
+        cy.get('body')
+        // firefox renders the raw, undecoded brotli bytes as text rather than failing to load.
+        // Assert on that garbled state rather than the exact compressed bytes, which vary with
+        // the proxy-injected runner bundle.
+        .should('contain.text', '\uFFFD')
+        .and('not.contain.text', 'encoding-br-html')
+        .then(() => done())
       } else {
         cy.on('fail', (err) => {
           expect(err.message).to.contain('Timed out after waiting `500ms` for your remote page to load.')
@@ -191,7 +197,13 @@ describe('encoding', () => {
 
       // in firefox, the browser displays the encoded response whereas in other browsers, it fails to load the page
       if (Cypress.isBrowser({ family: 'firefox' })) {
-        cy.get('body').should('contain.text', '�������t�Ѓ�*��z').then(() => done())
+        cy.get('body')
+        // firefox renders the raw, undecoded brotli bytes as text rather than failing to load.
+        // Assert on that garbled state rather than the exact compressed bytes, which vary with
+        // the proxy-injected runner bundle.
+        .should('contain.text', '\uFFFD')
+        .and('not.contain.text', 'encoding-br-html')
+        .then(() => done())
       } else {
         cy.on('fail', (err) => {
           expect(err.message).to.contain('Timed out after waiting `500ms` for your remote page to load.')

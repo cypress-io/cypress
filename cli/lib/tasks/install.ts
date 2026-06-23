@@ -56,24 +56,6 @@ const alreadyInstalledMsg = (): void => {
 }
 
 const displayCompletionMsg = (): void => {
-  // check here to see if we are globally installed
-  if (util.isInstalledGlobally()) {
-    // if we are display a warning
-    logger.log()
-    logger.warn(stripIndent`
-      ${logSymbols.warning} Warning: It looks like you\'ve installed Cypress globally.
-
-        The recommended way to install Cypress is as a devDependency per project.
-
-        You should probably run these commands:
-
-        - ${chalk.cyan('npm uninstall -g cypress')}
-        - ${chalk.cyan('npm install --save-dev cypress')}
-    `)
-
-    return
-  }
-
   logger.log()
   logger.log(
     'You can now open Cypress by running one of the following, depending on your package manager:',
