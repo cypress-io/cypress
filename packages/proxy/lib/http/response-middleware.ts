@@ -108,17 +108,15 @@ function getOrderedContentEncodings (res: IncomingMessage): SupportedContentEnco
   return order
 }
 
-// A cookie's Domain attribute must be a domain name, not an IP literal. RFC 6265
-// forbids it and `cookie`'s serializer throws "option domain is invalid" on a
-// bracketed IPv6 host such as `[::1]`, crashing the proxy. Browsers scope
-// cookies for IP hosts to that exact host anyway, so drop the Domain attribute
-// for IPv6 literals and let the cookie default to host-only.
-// See https://github.com/cypress-io/cypress/issues/34143
+// Whether `domain` is an IPv6 literal, with or without the surrounding brackets.
 function isIPv6Host (domain: string): boolean {
   return !!domain && isIP(domain.replace(/^\[|\]$/g, '')) === 6
 }
 
 function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
+  // `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
+  // the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
+  // Domain and let the cookie default to host-only. See #34143.
   let opts: CookieOptions = isIPv6Host(domain) ? {} : { domain }
 
   if (!v) {
