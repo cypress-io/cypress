@@ -5,11 +5,10 @@
   "main": "cjs/node/index.js",
   "browser": "browser/client/index.js",
   "scripts": {
-    "build": "yarn build:browser && yarn build:node && yarn build:node:esm",
+    "build": "yarn build:browser && yarn build:node",
     "build-prod": "yarn build",
     "build:browser": "rimraf browser && tsc -p tsconfig.browser.json",
     "build:node": "rimraf cjs && tsc -p tsconfig.cjs.json",
-    "build:node:esm": "rimraf esm && tsc -p tsconfig.esm.json",
     "check-ts": "tsc -p tsconfig.browser.json --noEmit && tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint",
     "clean-deps": "rimraf node_modules",
     "postinstall": "patch-package",

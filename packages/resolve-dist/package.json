@@ -4,10 +4,9 @@
   "private": true,
   "main": "cjs/index.js",
   "scripts": {
-    "build": "yarn build:cjs && yarn build:esm",
+    "build": "yarn build:cjs",
     "build-prod": "yarn build",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
-    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
     "clean": "rimraf cjs esm",
     "clean-deps": "rimraf node_modules",

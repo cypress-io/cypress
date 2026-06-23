@@ -5,11 +5,10 @@
   "private": true,
   "main": "cjs/node.js",
   "scripts": {
-    "build": "yarn build:esm && yarn build:cjs && yarn build:browser",
+    "build": "yarn build:cjs && yarn build:browser",
     "build-prod": "yarn build",
     "build:browser": "rimraf browser && rollup -c rollup.config.mjs",
     "build:cjs": "rimraf cjs && tsc -p tsconfig.cjs.json",
-    "build:esm": "rimraf esm && tsc -p tsconfig.esm.json",
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
     "clean": "rimraf esm cjs",
     "clean-deps": "rimraf node_modules",
@@ -17,7 +16,7 @@
     "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
     "test-unit": "vitest run",
     "tslint": "tslint --config ../ts/tslint.json --project .",
-    "watch": "yarn build:cjs --watch & yarn build:esm --watch & yarn build:browser -w"
+    "watch": "yarn build:cjs --watch & yarn build:browser -w"
   },
   "dependencies": {
     "@opentelemetry/api": "1.4.1",

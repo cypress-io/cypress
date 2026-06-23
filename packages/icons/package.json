@@ -5,11 +5,10 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "yarn build-assets && yarn build:cjs && yarn build:esm",
+    "build": "yarn build-assets && yarn build:cjs",
     "build-assets": "tsx ./scripts/build.ts && tsx ./scripts/ico.ts",
     "build-prod": "yarn build",
     "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
     "check-ts": "tsc -p tsconfig.cjs.json --noEmit && yarn -s tslint -p tsconfig.cjs.json",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json, .",
     "test": "yarn test-unit",
