@@ -126,3 +126,47 @@ export const serializeTestCommands = (attempt: SerializedTest): CommandEntry[] =
     }
   })
 }
+
+/**
+ * The active run's test counts, bucketed by outcome — the rollup a tap caller
+ * needs to follow run progress at a glance. Every bucket is always a number
+ * (0 when empty), so the result already equals its JSON wire form. A test that
+ * has not run yet has no `state` and counts as `pending`, matching how
+ * `serializeTestsState` defaults it.
+ */
+export interface RunResults {
+  passed: number
+  failed: number
+  pending: number
+  skipped: number
+}
+
+/**
+ * Fold every test of the run into its outcome counts plus the total. Reads the
+ * same `getTestsState('__never__')` snapshot the `tests` command serializes, so
+ * the rollup and the per-test list can never disagree.
+ */
+export const aggregateResults = (runner: TapTestsRunner): { results: RunResults, totalTests: number } => {
+  const tests = Object.values(runner.getTestsState('__never__'))
+  const results: RunResults = { passed: 0, failed: 0, pending: 0, skipped: 0 }
+
+  for (const test of tests) {
+    // The serialized type enumerates only passed/failed/pending, but the driver
+    // also marks tests 'skipped' at runtime, so widen before comparing.
+    const state = test.state as string | undefined
+
+    if (state === 'passed') {
+      results.passed++
+    } else if (state === 'failed') {
+      results.failed++
+    } else if (state === 'skipped') {
+      results.skipped++
+    } else {
+      // No state yet (not run) or an explicit 'pending' both count as pending,
+      // matching serializeTestsState's default.
+      results.pending++
+    }
+  }
+
+  return { results, totalTests: tests.length }
+}
