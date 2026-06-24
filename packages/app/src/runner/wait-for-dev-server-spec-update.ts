@@ -1,7 +1,12 @@
+export type DevServerCompileSuccessData = {
+  specFile?: string
+  jitRecompile?: boolean
+}
+
 export type DevServerSpecUpdateEvents = {
   once (event: 'dev-server:on-spec-updated' | 'dev-server:specs:unchanged', handler: () => void): void
-  on (event: 'dev-server:compile:success', handler: (data?: { specFile?: string }) => void): void
-  off (event: 'dev-server:compile:success', handler: (data?: { specFile?: string }) => void): void
+  on (event: 'dev-server:compile:success', handler: (data?: DevServerCompileSuccessData) => void): void
+  off (event: 'dev-server:compile:success', handler: (data?: DevServerCompileSuccessData) => void): void
   emit (event: 'dev-server:on-spec-update', spec: { absolute: string }): void
 }
 
@@ -45,8 +50,14 @@ export function waitForDevServerSpecUpdate (
       resolve()
     }
 
-    const onCompileSuccess = ({ specFile }: { specFile?: string } = {}) => {
+    const onCompileSuccess = ({ specFile, jitRecompile }: DevServerCompileSuccessData = {}) => {
       if (specFile && specFile !== spec.absolute) {
+        return
+      }
+
+      // Webpack emits compile success for every build. Ignore in-flight compiles
+      // that started before this spec update unless they include a matching spec file.
+      if (!specFile && !jitRecompile) {
         return
       }
 

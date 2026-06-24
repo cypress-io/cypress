@@ -166,7 +166,13 @@ export class EventManager {
 
     this.ws.on('watched:file:changed', rerun)
 
-    this.ws.on('dev-server:compile:success', ({ specFile }) => {
+    this.ws.on('dev-server:compile:success', ({ specFile, studioCompileRerun }) => {
+      const config = getRunnerConfigFromWindow()
+
+      if (!config?.watchForFileChanges && !studioCompileRerun) {
+        return
+      }
+
       if (!specFile || specFile === state?.spec?.absolute) {
         rerun()
       }

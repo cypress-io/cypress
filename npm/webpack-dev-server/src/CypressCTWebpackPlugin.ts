@@ -29,6 +29,7 @@ export class CypressCTWebpackPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string | false
   private compilation: Compilation | null = null
+  private pendingJitRecompile = false
   private webpack: Function
   private indexHtmlFile: string
 
@@ -91,16 +92,17 @@ export class CypressCTWebpackPlugin {
    * See https://github.com/cypress-io/cypress/issues/24398
    */
   private onSpecsChange = async ({ specs, options }: { specs: Cypress.Cypress['spec'][], options?: { neededForJustInTimeCompile: boolean}}) => {
-    if (!this.compilation) {
-      return
-    }
-
     if (_.isEqual(specs, this.files)) {
       this.devServerEvents.emit('dev-server:specs:unchanged')
 
       return
     }
 
+    if (!this.compilation) {
+      return
+    }
+
+    this.pendingJitRecompile = true
     this.files = specs
     const inputFileSystem = this.compilation.inputFileSystem
     // TODO: don't use a sync fs method here
@@ -135,7 +137,10 @@ export class CypressCTWebpackPlugin {
     _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation))
     _compiler.hooks.done.tap('CypressCTPlugin', () => {
-      this.devServerEvents.emit('dev-server:compile:success')
+      const jitRecompile = this.pendingJitRecompile
+
+      this.pendingJitRecompile = false
+      this.devServerEvents.emit('dev-server:compile:success', { jitRecompile })
     })
   }
 }

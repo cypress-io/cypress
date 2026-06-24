@@ -18,6 +18,7 @@ interface SpecsChangedData {
 
 interface CompileSuccessData {
   specFile?: string
+  jitRecompile?: boolean
 }
 
 plugins.registerHandler((ipc: PluginIpcHandler) => {
@@ -25,8 +26,8 @@ plugins.registerHandler((ipc: PluginIpcHandler) => {
     ipc.send('dev-server:specs:changed', specsAndOptions)
   })
 
-  ipc.on('dev-server:compile:success', ({ specFile }: CompileSuccessData = {}) => {
-    baseEmitter.emit('dev-server:compile:success', { specFile })
+  ipc.on('dev-server:compile:success', ({ specFile, jitRecompile }: CompileSuccessData = {}) => {
+    baseEmitter.emit('dev-server:compile:success', { specFile, jitRecompile })
   })
 
   ipc.on('dev-server:specs:unchanged', () => {

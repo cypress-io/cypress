@@ -19,7 +19,28 @@ describe('waitForDevServerSpecUpdate', () => {
 
     expect(resolved).toBe(false)
 
+    events.emit('dev-server:compile:success', { jitRecompile: true })
+    await promise
+
+    expect(resolved).toBe(true)
+  })
+
+  it('ignores stale webpack compile success events without jitRecompile or matching spec file', async () => {
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+
+    let resolved = false
+    const promise = waitForDevServerSpecUpdate(spec, events as any, { bundler: 'webpack' }).then(() => {
+      resolved = true
+    })
+
+    events.emit('dev-server:on-spec-updated')
     events.emit('dev-server:compile:success')
+    await tick()
+
+    expect(resolved).toBe(false)
+
+    events.emit('dev-server:compile:success', { jitRecompile: true })
     await promise
 
     expect(resolved).toBe(true)

@@ -1279,9 +1279,52 @@ describe('lib/socket', () => {
           const handler = compileSuccessCall.args[1]
 
           sinon.stub(this.socket, 'toRunner')
-          handler({ specFile: 'foo/bar.js' })
+          handler({ specFile: 'foo/bar.js', jitRecompile: true })
 
-          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', { specFile: 'foo/bar.js' })
+          expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+            specFile: 'foo/bar.js',
+            jitRecompile: true,
+            studioCompileRerun: false,
+          }))
+        })
+
+        describe('#onBeforeSave', () => {
+          it('marks the next compile success for rerun when config.watchForFileChanges is false', function () {
+            this.cfg.watchForFileChanges = false
+
+            this.socket.onBeforeSave(this.cfg)
+
+            const compileSuccessCall = devServer.emitter.on.getCalls().find((call) => call.args[0] === 'dev-server:compile:success')
+            const handler = compileSuccessCall.args[1]
+
+            sinon.stub(this.socket, 'toRunner')
+            handler({ specFile: 'foo/bar.js' })
+
+            expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+              specFile: 'foo/bar.js',
+              studioCompileRerun: true,
+            }))
+          })
+        })
+
+        describe('#onAfterSave', () => {
+          it('clears the studio rerun flag when there is an error and config.watchForFileChanges is false', function () {
+            this.cfg.watchForFileChanges = false
+
+            this.socket.onBeforeSave(this.cfg)
+            this.socket.onAfterSave(this.cfg, new Error('test error'))
+
+            const compileSuccessCall = devServer.emitter.on.getCalls().find((call) => call.args[0] === 'dev-server:compile:success')
+            const handler = compileSuccessCall.args[1]
+
+            sinon.stub(this.socket, 'toRunner')
+            handler({ specFile: 'foo/bar.js' })
+
+            expect(this.socket.toRunner).to.be.calledWith('dev-server:compile:success', sinon.match({
+              specFile: 'foo/bar.js',
+              studioCompileRerun: false,
+            }))
+          })
         })
       })
     })
