@@ -16,7 +16,7 @@ describe('tap binding', () => {
       const schema = await binding.getSchema()
 
       expect(schema.schemaVersion).to.eq(1)
-      expect(schema.commands.map((command) => command.name)).to.include.members(['specs', 'run', 'tests'])
+      expect(schema.commands.map((command) => command.name)).to.include.members(['specs', 'run', 'tests', 'commands'])
 
       const unknown = await binding.exec('not-a-command')
 
@@ -26,6 +26,11 @@ describe('tap binding', () => {
       const testsBeforeRun = await binding.exec('tests')
 
       expect((testsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
+
+      // The commands command reads the same runner, so it is NO_RUN too.
+      const commandsBeforeRun = await binding.exec('commands', {}, { test: 'r1' })
+
+      expect((commandsBeforeRun as { error: { code: string } }).error.code).to.eq('NO_RUN')
 
       const outcome = await binding.exec('specs')
 
@@ -104,6 +109,27 @@ describe('tap binding', () => {
       const missingDetail = await getBinding(win).exec('tests', { test: 'not-a-test' })
 
       expect((missingDetail as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
+
+      // The commands command reads that same test's command log from the runner.
+      const testId = tests[0].id as string
+
+      const commandsOutcome = await getBinding(win).exec('commands', {}, { test: testId })
+
+      expect('result' in commandsOutcome).to.eq(true)
+
+      const commands = (commandsOutcome as { result: Array<Record<string, unknown>> }).result
+
+      expect(commands).to.have.length.greaterThan(0)
+
+      for (const command of commands) {
+        expect(Object.keys(command), `command ${command.id}`).to.include.members(['id', 'name'])
+        expect(Object.keys(command)).to.satisfy((keys: string[]) => keys.every((key) => ['id', 'name', 'message', 'state', 'type'].includes(key)))
+      }
+
+      // An unknown test id is a domain failure surfaced as { error }.
+      const missing = await getBinding(win).exec('commands', {}, { test: 'not-a-test' })
+
+      expect((missing as { error: { code: string } }).error.code).to.eq('TEST_NOT_FOUND')
     })
 
     // Rerunning advances the nonce, so the query changes even though the spec is unchanged.
