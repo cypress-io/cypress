@@ -1,5 +1,4 @@
-import type { App, StyleValue } from 'vue'
-import { createApp } from 'vue'
+import { App, createApp, StyleValue } from 'vue'
 import AssertionsMenu from './AssertionsMenu.ce.vue'
 import AssertionType from './AssertionType.ce.vue'
 import AssertionOptions from './AssertionOptions.ce.vue'

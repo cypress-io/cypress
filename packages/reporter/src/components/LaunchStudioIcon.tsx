@@ -1,5 +1,4 @@
-import type { MouseEvent } from 'react'
-import React from 'react'
+import React, { MouseEvent } from 'react'
 
 import Tooltip from '@cypress/react-tooltip'
 import { IconChevronRightMedium } from '@cypress-design/react-icon'

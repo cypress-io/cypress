@@ -1,8 +1,6 @@
 import { gql, useQuery } from '@urql/vue'
-import type { Ref } from 'vue'
-import { computed } from 'vue'
-import type { RunCardFragment } from '../generated/graphql'
-import { RunsGitTreeDocument } from '../generated/graphql'
+import { Ref, computed } from 'vue'
+import { RunsGitTreeDocument, RunCardFragment } from '../generated/graphql'
 import { useRelevantRun } from '../composables/useRelevantRun'
 import type { RunsComposable } from './RunsComposable'
 

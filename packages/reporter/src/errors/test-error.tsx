@@ -1,6 +1,5 @@
 import _ from 'lodash'
-import type { MouseEvent } from 'react'
-import React, { useCallback } from 'react'
+import React, { MouseEvent, useCallback } from 'react'
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'

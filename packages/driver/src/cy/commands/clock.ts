@@ -1,7 +1,6 @@
 import _ from 'lodash'
 
-import type { Clock } from '../../cypress/clock'
-import { create as createClock } from '../../cypress/clock'
+import { create as createClock, Clock } from '../../cypress/clock'
 import $errUtils from '../../cypress/error_utils'
 
 type CyClock = Clock & {

@@ -1,9 +1,8 @@
 import { observer } from 'mobx-react'
-import type { ReactElement } from 'react'
-import React from 'react'
+import React, { ReactElement } from 'react'
 
 import type { StatsStore } from '../header/stats-store'
-import type { RunnablesStore } from './runnables-store'
+import { RunnablesStore } from './runnables-store'
 import { DebugDismiss } from '../header/DebugDismiss'
 import { Duration } from '../duration/duration'
 import { SpecFileName } from '../shared/SpecFileName'

@@ -1,7 +1,6 @@
 import Button from '@cypress-design/react-button'
 import { IconActionAddMedium } from '@cypress-design/react-icon'
-import type { MouseEvent } from 'react'
-import React, { useCallback } from 'react'
+import React, { MouseEvent, useCallback } from 'react'
 import events from '../lib/events'
 import cs from 'classnames'
 

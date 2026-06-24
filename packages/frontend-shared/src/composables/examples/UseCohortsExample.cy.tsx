@@ -1,5 +1,4 @@
-import type { CopyOption } from './UseCohortsExample.vue'
-import UseCohortsExample from './UseCohortsExample.vue'
+import UseCohortsExample, { CopyOption } from './UseCohortsExample.vue'
 import { UseCohorts_DetermineCohortDocument } from '../../generated/graphql'
 
 describe('useCohorts example', () => {

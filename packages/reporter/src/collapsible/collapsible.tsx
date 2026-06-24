@@ -1,6 +1,5 @@
 import cs from 'classnames'
-import type { CSSProperties, MouseEvent, ReactNode, RefObject } from 'react'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { CSSProperties, MouseEvent, ReactNode, RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { onEnterOrSpace } from '../lib/util'
 import DocumentBlankIcon from '@packages/frontend-shared/src/assets/icons/document-blank_x16.svg'
 import { IconChevronDownSmall } from '@cypress-design/react-icon'

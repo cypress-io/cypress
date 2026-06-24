@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import type { ReactElement } from 'react'
-import React from 'react'
+import React, { ReactElement } from 'react'
 
 import FileNameOpener from '../lib/file-name-opener'
 import type Err from './err-model'

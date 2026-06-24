@@ -1,13 +1,12 @@
-import type {
+import {
   Exchange,
   Client,
-  CombinedError } from '@urql/core'
-import {
   createClient,
   dedupExchange,
   errorExchange,
   fetchExchange,
   subscriptionExchange,
+  CombinedError,
 } from '@urql/core'
 import { devtoolsExchange } from '@urql/devtools'
 import { useToast } from 'vue-toastification'

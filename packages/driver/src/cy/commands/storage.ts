@@ -2,8 +2,7 @@ import _ from 'lodash'
 
 import $errUtils from '../../cypress/error_utils'
 import $LocalStorage from '../../cypress/local_storage'
-import type { StorageType } from './sessions/storage'
-import { clearStorage, getStorage } from './sessions/storage'
+import { clearStorage, getStorage, StorageType } from './sessions/storage'
 
 type Options = Partial<Cypress.Loggable>
 

@@ -1,10 +1,8 @@
 import _ from 'lodash'
 import { action, computed, observable, makeObservable } from 'mobx'
 
-import type { ErrProps } from '../errors/err-model'
-import Err from '../errors/err-model'
-import type { InstrumentProps } from '../instruments/instrument-model'
-import Instrument from '../instruments/instrument-model'
+import Err, { ErrProps } from '../errors/err-model'
+import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 import type { TimeoutID } from '../lib/types'
 import type { SessionProps } from '../sessions/sessions-model'
 

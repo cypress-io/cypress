@@ -1,6 +1,5 @@
 import DebugRunNavigation from './DebugRunNavigation.vue'
-import type { DebugRunNavigationFragment } from '../generated/graphql-test'
-import { DebugRunNavigationFragmentDoc } from '../generated/graphql-test'
+import { DebugRunNavigationFragment, DebugRunNavigationFragmentDoc } from '../generated/graphql-test'
 import { createRun } from '../../cypress/support/fixtures'
 import type { CommitInfo } from '@packages/frontend-shared/cypress/support/generated/test-graphql-types.gen'
 

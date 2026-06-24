@@ -1,5 +1,4 @@
-import type { ButtonVariants } from './Button.vue'
-import Button from './Button.vue'
+import Button, { ButtonVariants } from './Button.vue'
 // tslint:disable-next-line: no-implicit-dependencies - unsure how to handle these module imports
 import IconCoffee from '~icons/mdi/coffee'
 import { createRouter, createWebHistory } from 'vue-router'

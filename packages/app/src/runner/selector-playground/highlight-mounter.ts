@@ -1,5 +1,4 @@
-import type { App } from 'vue'
-import { createApp } from 'vue'
+import { App, createApp } from 'vue'
 import HighlightApp from './HighlightApp.ce.vue'
 
 let app: App<Element> | null = null

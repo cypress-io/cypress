@@ -1,9 +1,9 @@
 import React from 'react'
 import { StudioTest } from './StudioTest'
-import type { AppState } from '../lib/app-state'
-import type { RunnablesStore } from '../runnables/runnables-store'
-import type { StatsStore } from '../header/stats-store'
-import type Test from '../test/test-model'
+import { AppState } from '../lib/app-state'
+import { RunnablesStore } from '../runnables/runnables-store'
+import { StatsStore } from '../header/stats-store'
+import Test from '../test/test-model'
 import scroller from '../lib/scroller'
 import events from '../lib/events'
 

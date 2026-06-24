@@ -1,8 +1,6 @@
 import { gql, useSubscription } from '@urql/vue'
-import type { Ref } from 'vue'
-import { computed, ref, unref, watchEffect } from 'vue'
-import type { DebugProgress_DebugTestsFragment } from '../generated/graphql'
-import { DebugProgress_SpecsDocument } from '../generated/graphql'
+import { computed, Ref, ref, unref, watchEffect } from 'vue'
+import { DebugProgress_DebugTestsFragment, DebugProgress_SpecsDocument } from '../generated/graphql'
 
 gql`
 subscription DebugProgress_Specs($id: ID!) {

@@ -1,6 +1,5 @@
 import { observable, makeObservable } from 'mobx'
-import type { InstrumentProps } from '../instruments/instrument-model'
-import Instrument from '../instruments/instrument-model'
+import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 import { determineTagType } from './utils'
 import type { SessionStatus } from './utils'
 

@@ -1,5 +1,4 @@
-import type { MobxRunnerStore } from '../store'
-import { getMobxRunnerStore, useSpecStore } from '../store'
+import { getMobxRunnerStore, MobxRunnerStore, useSpecStore } from '../store'
 import { getReporterElement } from './utils'
 import { getEventManager } from '.'
 import type { EventManager } from './event-manager'

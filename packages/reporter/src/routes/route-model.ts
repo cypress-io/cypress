@@ -1,6 +1,5 @@
 import { observable, makeObservable } from 'mobx'
-import type { InstrumentProps } from '../instruments/instrument-model'
-import Instrument from '../instruments/instrument-model'
+import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 
 export interface RouteProps extends InstrumentProps {
   isStubbed: boolean
