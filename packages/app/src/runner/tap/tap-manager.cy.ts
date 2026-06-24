@@ -153,6 +153,21 @@ describe('tap/tap-manager', () => {
       })
     })
 
+    it('includes run with its required spec param', async () => {
+      const manager = new TapManager(CYPRESS_VERSION)
+      const schema = await manager.getSchema()
+      const run = schema.commands.find((command) => command.name === 'run')
+
+      expect(run).to.deep.eq({
+        name: 'run',
+        description: tapCommands.run.description,
+        params: [
+          { name: 'spec', type: 'string', required: true, description: 'project-relative spec path, as listed by the specs command' },
+        ],
+        options: [],
+      })
+    })
+
     it('round-trips through JSON (the CDP returnByValue boundary)', async () => {
       const manager = new TapManager(CYPRESS_VERSION)
       const schema = await manager.getSchema()
