@@ -3,8 +3,8 @@ import {
   inferFixtureContentType,
   resolveStaticResponseFixture,
   sniffFixtureContentType,
-} from '../../lib/core/resolve-static-response-fixture'
-import { buildHttpResponseFromStatic } from '../../lib/core/static-response'
+} from '../../../lib/core/resolve-static-response-fixture'
+import { buildHttpResponseFromStatic } from '../../../lib/core/static-response'
 
 describe('sniffFixtureContentType', () => {
   it('returns application/json for JSON strings', () => {

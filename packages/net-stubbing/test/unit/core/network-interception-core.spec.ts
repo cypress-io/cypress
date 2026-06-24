@@ -3,12 +3,13 @@ import {
   doesRouteMatch,
   getMatchableForRequest,
   matchRoutes,
-  planSubscriptions,
+} from '../../../lib/core/route-matching'
+import { planSubscriptions } from '../../../lib/core/plan-subscriptions'
+import {
   mergeIncomingRequestChanges,
   mergeIncomingResponseChanges,
-} from '../../lib'
-import type { BackendRoute } from '../../lib/types/backend-route'
-import type { RouteMatcherOptions } from '../../lib/types/external-types'
+} from '../../../lib/core/merge-handler-result'
+import type { BackendRoute, RouteMatcherOptions } from '@packages/network-interception'
 
 describe('core/route-matching', () => {
   const tryMatch = (req: { url: string, method?: string, headers?: Record<string, string> }, matcher: RouteMatcherOptions, expected = true) => {

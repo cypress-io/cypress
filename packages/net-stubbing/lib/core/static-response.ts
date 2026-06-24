@@ -1,7 +1,5 @@
 import _ from 'lodash'
-import type { BackendStaticResponse } from '../types/internal-types'
-import type { GetFixtureFn } from '../types/backend-route'
-import type { HttpResponse } from '../ports/http-interception'
+import type { BackendStaticResponse, GetFixtureFn, HttpResponse } from '@packages/network-interception'
 import { resolveStaticResponseFixture } from './resolve-static-response-fixture'
 
 /**

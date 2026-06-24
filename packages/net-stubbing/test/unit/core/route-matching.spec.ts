@@ -3,10 +3,9 @@ import {
   doesRouteMatch,
   getMatchableForRequest,
   matchRoutes,
-} from '../../lib'
-import { RouteMatcherOptions } from '../../lib/types'
+} from '../../../lib/core/route-matching'
+import type { BackendRoute, RouteMatcherOptions } from '@packages/network-interception'
 import { CypressIncomingRequest } from '@packages/proxy'
-import { BackendRoute } from '../../lib/types/backend-route'
 
 describe('intercept-request', function () {
   describe('.getMatchableForRequest', function () {

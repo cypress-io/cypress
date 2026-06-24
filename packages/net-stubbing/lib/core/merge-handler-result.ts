@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type { HttpRequest, HttpResponse } from '../ports/http-interception'
+import type { HttpRequest, HttpResponse } from '@packages/network-interception'
 
 type HandlerMessage = {
   body?: string | Buffer

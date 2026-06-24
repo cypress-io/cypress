@@ -2,9 +2,9 @@ import _ from 'lodash'
 import Debug from 'debug'
 import type { IncomingMessage } from 'http'
 import type { BackendStaticResponse } from '@packages/network-interception'
-import { resolveStaticResponseFixture, sniffFixtureContentType } from '@packages/network-interception'
+import { resolveStaticResponseFixture, sniffFixtureContentType } from '../core/resolve-static-response-fixture'
 
-export { getAllStringMatcherFields } from '@packages/network-interception'
+export { getAllStringMatcherFields } from '../core/matcher-fields'
 
 import { Readable, PassThrough } from 'stream'
 import type { GetFixtureFn } from './types'

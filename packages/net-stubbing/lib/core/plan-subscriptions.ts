@@ -1,6 +1,4 @@
-import type { BackendStaticResponse } from '../types/internal-types'
-import type { Subscription } from '../types/external-types'
-import type { BackendRoute } from '../types/backend-route'
+import type { BackendStaticResponse, BackendRoute, Subscription } from '@packages/network-interception'
 
 export type PlannedRouteSubscriptions = {
   routeId: string

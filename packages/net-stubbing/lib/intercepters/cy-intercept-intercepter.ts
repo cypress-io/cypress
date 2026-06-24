@@ -12,24 +12,25 @@ import type {
   HttpResponse,
   InterceptMiddleware,
   OriginForwarder,
-  InFlightIntercept, Subscription } from '@packages/network-interception'
+  Subscription } from '@packages/network-interception'
+import { SERIALIZABLE_RES_PROPS } from '@packages/network-interception'
+import type { InFlightIntercept } from '../core/in-flight-intercept'
 import {
   addInFlightInterceptSubscription,
-  applyHandlerRequestToRequest,
-  buildHttpResponseFromStatic,
-  buildPreflightHttpResponse,
-  cloneHandlerRequest,
-  cloneHandlerResponse,
   createInFlightIntercept,
   markInFlightInterceptStaticResponse,
-  matchRoutes,
-  matchesRoutePreflight,
+} from '../core/in-flight-intercept'
+import {
+  applyHandlerRequestToRequest,
+  cloneHandlerRequest,
+  cloneHandlerResponse,
   mergeIncomingRequestChanges,
   mergeIncomingResponseChanges,
-  planSubscriptions,
-  runSubscriptions,
-  SERIALIZABLE_RES_PROPS,
-} from '@packages/network-interception'
+} from '../core/merge-handler-result'
+import { planSubscriptions } from '../core/plan-subscriptions'
+import { matchRoutes, matchesRoutePreflight } from '../core/route-matching'
+import { buildHttpResponseFromStatic, buildPreflightHttpResponse } from '../core/static-response'
+import { runSubscriptions } from '../core/subscription-runner'
 
 export type CyInterceptIntercepterOptions = {
   stubbing: ForStubbing

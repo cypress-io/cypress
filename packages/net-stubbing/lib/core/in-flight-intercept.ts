@@ -1,9 +1,12 @@
 import _ from 'lodash'
-import type { Subscription } from '../types/external-types'
-import type { BackendRoute } from '../types/backend-route'
-import type { BackendStaticResponse } from '../types/internal-types'
+import type {
+  BackendRoute,
+  BackendStaticResponse,
+  HttpRequest,
+  HttpResponse,
+  Subscription,
+} from '@packages/network-interception'
 import type { PlannedRouteSubscriptions } from './plan-subscriptions'
-import type { HttpRequest, HttpResponse } from '../ports/http-interception'
 
 export type InFlightIntercept = {
   request: HttpRequest

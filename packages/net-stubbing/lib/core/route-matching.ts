@@ -1,9 +1,7 @@
 import _ from 'lodash'
 import minimatch from 'minimatch'
 import url from 'url'
-import type { HttpRequest } from '../ports/http-interception'
-import type { RouteMatcherOptions } from '../types'
-import type { BackendRoute } from '../types/backend-route'
+import type { HttpRequest, RouteMatcherOptions, BackendRoute } from '@packages/network-interception'
 import { getAllStringMatcherFields } from './matcher-fields'
 
 /** Minimal request facts used by `cy.intercept` route matching. */

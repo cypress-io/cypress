@@ -1,7 +1,5 @@
 import _ from 'lodash'
-import type { ForDriverNotification } from '../ports/interception-events'
-import type { Subscription } from '../types/external-types'
-import type { NetEvent } from '../types/internal-types'
+import type { ForDriverNotification, NetEvent, Subscription } from '@packages/network-interception'
 import type { InFlightIntercept } from './in-flight-intercept'
 import { markInFlightInterceptStaticResponse } from './in-flight-intercept'
 import { buildHttpResponseFromStatic } from './static-response'

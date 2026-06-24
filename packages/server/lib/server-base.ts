@@ -13,7 +13,8 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { matchRoutes, createHttpInterceptWithDefaultMiddleware, type ForHttpIntercept, type ForStubbing } from '@packages/network-interception'
+import { createHttpInterceptWithDefaultMiddleware, type ForHttpIntercept, type ForStubbing } from '@packages/network-interception'
+import { matchRoutes } from '@packages/net-stubbing/lib/core/route-matching'
 import { createDriverAdapter, netStubbingState, resetStubbingState } from '@packages/net-stubbing'
 import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream, blocked } from '@packages/network'
@@ -851,7 +852,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     const matchesNetStubbingRoute = (requestOptions) => {
       const proxiedReq = {
         url: requestOptions.url,
-        resourceType: 'document',
+        resourceType: 'document' as const,
         ..._.pick(requestOptions, ['headers', 'method']),
         // TODO: add `body` here once bodies can be statically matched
       }

@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import type { RouteMatcherOptionsGeneric } from '../types'
-import { DICT_STRING_MATCHER_FIELDS, STRING_MATCHER_FIELDS } from '../types/internal-types'
+import type { RouteMatcherOptionsGeneric } from '@packages/network-interception'
+import { DICT_STRING_MATCHER_FIELDS, STRING_MATCHER_FIELDS } from '@packages/network-interception'
 
 export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<any>) {
   return _.concat(

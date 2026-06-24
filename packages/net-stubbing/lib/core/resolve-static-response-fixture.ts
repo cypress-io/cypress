@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import mime from 'mime'
-import type { BackendStaticResponse } from '../types/internal-types'
-import type { GetFixtureFn } from '../types/backend-route'
+import type { BackendStaticResponse, GetFixtureFn } from '@packages/network-interception'
 
 const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
 
