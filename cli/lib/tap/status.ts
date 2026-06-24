@@ -40,12 +40,6 @@ const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
   }
 }
 
-/**
- * The CLI-native `status` command. Like `instances`, it is a reserved command
- * that reports the discovery layer (and the in-app run state when a browser is
- * attached) rather than dispatching to a binding, so it must work before any
- * browser exists and short-circuits before a session is opened.
- */
 export const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
   if (wantsHelp) {
     renderStatusHelp()
