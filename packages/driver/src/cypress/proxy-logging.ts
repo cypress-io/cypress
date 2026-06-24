@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import type { Interception, Route } from '@packages/net-stubbing/lib/types'
+import type { Interception, Route } from '@packages/network-interception'
 import type { BrowserPreRequest, BrowserResponseReceived, RequestError } from '@packages/proxy/lib/types'
 import $errUtils from './error_utils'
 import Debug from 'debug'

@@ -1,17 +1,14 @@
 import { HttpMiddleware, HttpStages, _runStage } from '../../../lib/http'
-import { NetworkInterceptionCore } from '@packages/network-interception'
-import { ProxyDocumentPreparationAdapter } from '../../../lib/adapters/proxy-document-preparation'
-import { ProxyRequestInterceptionAdapter, ProxyResponseInterceptionAdapter } from '../../../lib/adapters'
+import { NetworkPolicyRegistry } from '@packages/network-interception'
+import { createProxyNetworkInterception } from '../../../lib/adapters/create-proxy-network-interception'
 
 export function createTestNetworkInterceptionCore () {
-  return new NetworkInterceptionCore({
-    requestInterception: new ProxyRequestInterceptionAdapter(),
-    responseInterception: new ProxyResponseInterceptionAdapter(),
-    documentPreparation: new ProxyDocumentPreparationAdapter(),
+  return createProxyNetworkInterception({
+    policyRegistration: new NetworkPolicyRegistry(),
   })
 }
 
-export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
+export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}, onErrorHandler?: (error: Error) => void) {
   const fullCtx = {
     debug: () => {},
     req: {},
@@ -26,9 +23,9 @@ export function testMiddleware (middleware: HttpMiddleware<any>[], ctx = {}) {
     ...ctx,
   }
 
-  const onError = (error) => {
+  const onError = onErrorHandler ?? ((error) => {
     throw error
-  }
+  })
 
   return _runStage(HttpStages.IncomingRequest, fullCtx, onError).then(() => {
     Object.assign(ctx, fullCtx)

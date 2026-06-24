@@ -139,7 +139,7 @@ export class WebKitAutomation {
 
         if (!pwVideo) throw new Error('pw.page missing video in endVideoCapture, cannot save video')
 
-        debug('ending video capture, closing page...')
+        debug('ending video capture: closing page and saving video to %s', videoApi.videoName)
 
         await Promise.all([
           // pwVideo.saveAs will not resolve until the page closes, presumably we do want to close it
@@ -151,7 +151,11 @@ export class WebKitAutomation {
         throw new Error('writeVideoFrame called, but WebKit does not support streaming frame data.')
       },
       async restart () {
-        throw new Error('Cannot restart WebKit video - WebKit cannot record video on multiple specs in single-tab mode.')
+        // WebKit records to a page-scoped Playwright video that is finalized on page close, so a
+        // single controller cannot be restarted to record a second spec. Instead of re-using the
+        // controller, WebKit recycles the tab per spec and creates a fresh recording each time (see
+        // run.ts), so this should never be reached. It remains as a defensive guard.
+        throw new Error('Cannot restart WebKit video controller - its recording is tied to the page. WebKit records each spec to its own video by recreating the tab instead.')
       },
       postProcessFfmpegOptions: {
         // WebKit seems to record at the highest possible frame rate, so filter out duplicate frames before compressing
@@ -253,6 +257,22 @@ export class WebKitAutomation {
 
       this.automation.onRequestEvent?.('response:received', responseReceived)
     })
+
+    // When a request fails (e.g. `req.destroy()` / `forceNetworkError` resets the
+    // connection), the pre-request emitted on 'request' is never matched to a
+    // response and would otherwise leak in the proxy's pre-request queue, causing
+    // infinite request loops. Mirror the CDP (`Network.loadingFailed`) and BiDi
+    // (`network.fetchError`) behavior by removing the orphaned pre-request.
+    // @see https://github.com/cypress-io/cypress/issues/23810
+    this.page.on('requestfailed', (request) => {
+      const requestId = requestIdMap.get(request)
+
+      if (!requestId) return
+
+      debug('received requestfailed, removing pre-request %o', { requestId })
+
+      this.automation.onRemoveBrowserPreRequest?.(requestId)
+    })
   }
 
   private async getCookies (filter: CyCookieFilter): Promise<CyCookie[]> {
@@ -277,7 +297,7 @@ export class WebKitAutomation {
 
     if (!cookie) {
       cookie = cookies.find((cookie) => {
-          // if unable to match closest via strict domain, then return a cookie that matches the apex domain
+        // if unable to match closest via strict domain, then return a cookie that matches the apex domain
         return cookieMatches(cookie, filter)
       })
 

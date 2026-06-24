@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'cypress-io/cypress'
     steps:
-      - uses: actions/stale@v8
+      - uses: actions/stale@1160a2240286f5da8ec72b1c0816ce2481aabf84 # v8
         with:
           days-before-stale: ${{ github.event.inputs.days-before-stale || env.DEFAULT_DAYS_BEFORE_STALE }}
           days-before-close: ${{ github.event.inputs.days-before-close || env.DEFAULT_DAYS_BEFORE_CLOSE }}

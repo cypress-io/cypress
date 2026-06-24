@@ -1,15 +1,12 @@
 import _ from 'lodash'
-import { addDefaultPort, parse as parseUrl } from './uri'
+import { addDefaultPort, getAuthority } from './uri'
 import debugModule from 'debug'
-import _parseDomain from '@cypress/parse-domain'
+import { parseDomain } from './parse-domain'
 import type { ParsedHost, ParsedHostWithProtocolAndHost } from './types'
 
 export type Policy = 'same-origin' | 'same-super-domain-origin' | 'schemeful-same-site'
 
 const debug = debugModule('cypress:network:cors')
-
-// match IP addresses or anything following the last .
-const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
 
 export function getSuperDomain (url: string) {
   const parsed = parseUrlIntoHostProtocolDomainTldPort(url)
@@ -17,18 +14,31 @@ export function getSuperDomain (url: string) {
   return _.compact([parsed.domain, parsed.tld]).join('.')
 }
 
-export function parseDomain (domain: string, options = {}) {
-  return _parseDomain(domain, _.defaults(options, {
-    privateTlds: true,
-    customTlds: customTldsRe,
-  }))
-}
-
 export function parseUrlIntoHostProtocolDomainTldPort (str: string) {
-  let { hostname, port, protocol } = parseUrl(str)
+  let hostname = ''
+  let port = ''
+  let protocol = ''
 
-  if (!hostname) {
-    hostname = ''
+  try {
+    const parsed = new URL(str)
+
+    hostname = parsed.hostname
+    port = parsed.port
+    protocol = parsed.protocol
+  } catch (err) {
+    // the WHATWG URL parser throws a TypeError on relative or otherwise invalid
+    // urls that the legacy parser tolerated; fall back to a degraded result for
+    // those so CORS helpers (e.g. getSuperDomain via cy.location()) keep working,
+    // but let anything unexpected propagate. Use `instanceof TypeError` (not
+    // `err.code`) since this package is isomorphic and the browser's URL throws
+    // a TypeError with no `.code`.
+    if (!(err instanceof TypeError)) {
+      throw err
+    }
+
+    // keep the recovered authority as the hostname so distinct invalid urls do
+    // not collapse to the same parsed object (and thus be treated as same-origin)
+    hostname = getAuthority(str)
   }
 
   if (!port) {
@@ -173,15 +183,9 @@ export const policyFromConfig = (config: { injectDocumentDomain: boolean }): Pol
     'same-origin'
 }
 
-declare module 'url' {
-  interface UrlWithStringQuery {
-    format(): string
-  }
-}
-
 export function urlMatchesOriginProtectionSpace (urlStr: string, origin: string) {
-  const normalizedUrl = addDefaultPort(urlStr).format()
-  const normalizedOrigin = addDefaultPort(origin).format()
+  const normalizedUrl = addDefaultPort(urlStr)
+  const normalizedOrigin = addDefaultPort(origin)
 
   return _.startsWith(normalizedUrl, normalizedOrigin)
 }

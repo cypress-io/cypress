@@ -44,9 +44,14 @@ const javaScriptIntegrityReplacementRe = new RegExp(`[\\.](${STRIPPED_INTEGRITY_
  */
 const generalIntegrityReplacementRe = new RegExp(`(?:(?<!(var|let|nst)\\s)[^\\.\\s'"]?)(${STRIPPED_INTEGRITY_TAG}|integrity)((?:'|")?\\]?(\\s?=|["|'],)\\s?(?:"|')sha(?:256|384|512)-.*?(?:"|'))`, 'g')
 
-export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
+export function strip (html: string, { modifyObstructiveThirdPartyCode, removeSRIAttributes }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
+  removeSRIAttributes: false,
 }) {
+  // Both flags are origin-scoped by the caller: experimentalModifyObstructiveThirdPartyCode for
+  // third-party resources, removeSRIAttributes for first-party.
+  const stripIntegrity = modifyObstructiveThirdPartyCode || removeSRIAttributes
+
   let rewrittenHTML = html
   .replace(modifyObstructiveThirdPartyCode ? topOrParentExpandedEqualityBeforeRe : topOrParentEqualityBeforeRe, '$1self')
   .replace(modifyObstructiveThirdPartyCode ? topOrParentExpandedEqualityAfterRe : topOrParentEqualityAfterRe, 'self$2')
@@ -56,7 +61,7 @@ export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partia
   .replace(topWindowLocationRe, 'self$2')
   .replace(baseTagTargetRe, '$1$2')
 
-  if (modifyObstructiveThirdPartyCode) {
+  if (stripIntegrity) {
     rewrittenHTML = rewrittenHTML.replace(javaScriptIntegrityReplacementRe, `['${STRIPPED_INTEGRITY_TAG}']$2`)
     rewrittenHTML = rewrittenHTML.replace(generalIntegrityReplacementRe, `${STRIPPED_INTEGRITY_TAG}$3`)
   }
@@ -64,9 +69,14 @@ export function strip (html: string, { modifyObstructiveThirdPartyCode }: Partia
   return rewrittenHTML
 }
 
-export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<SecurityOpts> = {
+export function stripStream ({ modifyObstructiveThirdPartyCode, removeSRIAttributes }: Partial<SecurityOpts> = {
   modifyObstructiveThirdPartyCode: false,
+  removeSRIAttributes: false,
 }) {
+  // Both flags are origin-scoped by the caller: experimentalModifyObstructiveThirdPartyCode for
+  // third-party resources, removeSRIAttributes for first-party.
+  const stripIntegrity = modifyObstructiveThirdPartyCode || removeSRIAttributes
+
   return pumpify(
     utf8Stream(),
     replaceStream(
@@ -78,7 +88,7 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         jiraTopWindowGetterUnMinifiedRe,
         topWindowLocationRe,
         baseTagTargetRe,
-        ...(modifyObstructiveThirdPartyCode ? [
+        ...(stripIntegrity ? [
           javaScriptIntegrityReplacementRe,
           generalIntegrityReplacementRe,
         ] : []),
@@ -91,7 +101,7 @@ export function stripStream ({ modifyObstructiveThirdPartyCode }: Partial<Securi
         '$1 || $2.parent.__Cypress__$3',
         'self$2',
         '$1$2',
-        ...(modifyObstructiveThirdPartyCode ? [
+        ...(stripIntegrity ? [
           `['${STRIPPED_INTEGRITY_TAG}']$2`,
           `${STRIPPED_INTEGRITY_TAG}$3`,
         ] : []),
