@@ -8,7 +8,8 @@ import $errUtils from './error_utils'
 import $stackUtils from './stack_utils'
 import { getResolvedTestConfigOverride } from '../cy/testConfigOverrides'
 import debugFn from 'debug'
-import type { Emissions, TestFilter } from '@packages/types'
+import { RUNNABLE_LOGS, RUNNABLE_PROPS } from '@packages/types'
+import type { Emissions, SerializedTest, TestFilter } from '@packages/types'
 import { SKIPPED_DUE_TO_BROWSER_MESSAGE } from './mocha'
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
@@ -22,11 +23,6 @@ const TEST_BEFORE_AFTER_RUN_ASYNC_EVENT = 'runner:test:before:after:run:async'
 const TEST_AFTER_RUN_ASYNC_EVENT = 'runner:test:after:run:async'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 const RUNNABLE_AFTER_RUN_ASYNC_EVENT = 'runner:runnable:after:run:async'
-
-const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
-const RUNNABLE_PROPS = [
-  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'failedFromHookName', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
-] as const
 
 const debug = debugFn('cypress:driver:runner')
 const debugErrors = debugFn('cypress:driver:errors')
@@ -1905,9 +1901,9 @@ export default {
         return _emissions
       },
 
-      getTestsState (testId?: string) {
+      getTestsState (testId?: string): Record<string, SerializedTest> {
         const id = testId ?? (_test != null ? _test.id : undefined)
-        const tests = {}
+        const tests: Record<string, SerializedTest> = {}
 
         // bail if we dont have a current test
         if (!id) {
@@ -2095,10 +2091,12 @@ const mixinLogs = (test) => {
   })
 }
 
-const serializeTest = (test) => {
+const serializeTest = (test): SerializedTest => {
   const wrappedTest = wrapAll(test)
 
   mixinLogs(wrappedTest)
 
-  return wrappedTest
+  // wrapAll assembles the object dynamically from the RUNNABLE_PROPS
+  // allowlist, so its type carries no named properties to check against.
+  return wrappedTest as SerializedTest
 }
