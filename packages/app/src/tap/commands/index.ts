@@ -1,3 +1,4 @@
+import { commandsCommand } from './commands'
 import type { TapCommandDefinition } from './definition'
 import { runCommand } from './run'
 import { specsCommand } from './specs'
@@ -9,4 +10,5 @@ export const tapCommands = {
   specs: specsCommand,
   run: runCommand,
   tests: testsCommand,
+  commands: commandsCommand,
 } satisfies Record<string, TapCommandDefinition>
