@@ -1,11 +1,12 @@
 import Debug from 'debug'
 import commander from 'commander'
 
-import { CypressInstanceError, listLiveInstances, resolveInstance } from '../cypress-instances'
+import { CypressInstanceError, listLiveInstances, resolveLiveInstance, resolveInstance } from '../cypress-instances'
+import type { ReadyInstanceState } from '../cypress-instances'
 import { withTapSession, throwTapError } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram } from '../tap/build-program'
-import { renderFailure, renderKnownFailure, renderInstancesHelp, renderResult, renderGenericHelp, renderSchemaHelp } from '../tap/output'
+import { renderFailure, renderKnownFailure, renderInstancesHelp, renderResult, renderGenericHelp, renderSchemaHelp, renderStatusHelp } from '../tap/output'
 import { TAP_EXEC_METHOD, TAP_SCHEMA_VERSION, TAP_SCHEMA_METHOD } from '@packages/cypress-instances'
 import type { TapExecResult, TapSchema } from '@packages/cypress-instances'
 import { errors } from '../errors'
@@ -102,6 +103,133 @@ const listInstances = async (options: TapCliOptions, wantsHelp: boolean): Promis
   return 0
 }
 
+// The in-app run slice the `run-state` binding command returns — opaque JSON
+// the CLI merges into the status, never interprets. `state` is present exactly
+// when a spec is mounted (it gates the run-only fields); its absence is the
+// spec-list stage.
+interface TapRunState {
+  spec: string | null
+  totalSpecs: number
+  state?: 'running' | 'passed' | 'failed'
+  totalTests?: number
+  results?: { passed: number, failed: number, pending: number, skipped: number }
+}
+
+// The status object rendered to stdout. A superset that grows as the instance
+// advances through its lifecycle, so a poller reads one `status` field and the
+// detail fills in. Identity fields are absent only for `not connected`.
+interface TapStatus {
+  status: string
+  pid?: number
+  projectRoot?: string
+  testingType?: 'e2e' | 'component' | null
+  browserAttached?: boolean
+  totalSpecs?: number
+  spec?: string
+  totalTests?: number
+  results?: { passed: number, failed: number, pending: number, skipped: number }
+}
+
+// Fold the binding's run state into the discovery-derived base. No mounted spec
+// (`state` absent) is the spec-list stage; otherwise the run `state` IS the
+// reported status, with the active spec and result counts alongside.
+const mergeRunState = (base: TapStatus, runState: TapRunState): TapStatus => {
+  if (runState.state === undefined) {
+    return { ...base, status: 'spec not selected', totalSpecs: runState.totalSpecs }
+  }
+
+  return {
+    ...base,
+    status: runState.state,
+    totalSpecs: runState.totalSpecs,
+    ...(runState.spec !== null ? { spec: runState.spec } : {}),
+    totalTests: runState.totalTests,
+    results: runState.results,
+  }
+}
+
+/**
+ * The CLI-native `status` command. Like `instances` it reports the discovery
+ * layer and so must work before any browser exists; unlike it, it targets a
+ * single resolved instance and — once a browser is attached — enriches the
+ * report with the in-app run state from the `run-state` binding command.
+ *
+ * It is a reporter, not a gate: every determinable lifecycle stage (including
+ * `not connected`) renders a status and exits 0, so polling scripts get a
+ * stable success and branch on the JSON. Only a genuine transport fault (a
+ * browser is attached but the instance is unreachable) exits non-zero.
+ */
+const reportStatus = async (options: TapCliOptions, wantsHelp: boolean): Promise<number> => {
+  if (wantsHelp) {
+    renderStatusHelp()
+
+    return 0
+  }
+
+  let selection
+
+  try {
+    selection = await resolveLiveInstance({ project: options.project, instance: options.instance, cwd: process.cwd() })
+  } catch (err) {
+    // No live instance is itself a status a poller waits on, not a failure.
+    if (err instanceof CypressInstanceError) {
+      renderResult({ status: 'not connected' } satisfies TapStatus)
+
+      return 0
+    }
+
+    throw err
+  }
+
+  const { instance } = selection
+  const browserAttached = instance.cdpBrowserWsUrl !== null
+  // testingType joined the discovery record after this branch's base; read it
+  // defensively and omit it until the field propagates up the stack.
+  const testingType = (instance as { testingType?: 'e2e' | 'component' | null }).testingType
+
+  const base: TapStatus = {
+    status: 'browser not selected',
+    pid: instance.pid,
+    projectRoot: instance.projectRoot,
+    ...(testingType !== undefined ? { testingType } : {}),
+    browserAttached,
+  }
+
+  if (!browserAttached) {
+    renderResult(base)
+
+    return 0
+  }
+
+  try {
+    const runState = await withTapSession(instance as ReadyInstanceState, async (session) => {
+      const outcome = validateExecResult(await session.call(TAP_EXEC_METHOD, ['run-state', {}, {}]))
+
+      if ('error' in outcome) {
+        // run-state has no domain failures, so an { error } envelope means the
+        // running Cypress lacks the command — a binding mismatch, not a stage.
+        throw new TapTransportError('INVALID_EXEC_RESULT', `${outcome.error.code}: ${outcome.error.message}`)
+      }
+
+      return outcome.result as TapRunState
+    })
+
+    renderResult(mergeRunState(base, runState))
+
+    return 0
+  } catch (err: any) {
+    // A browser is attached but the instance is unreachable (still loading, tab
+    // closed, CDP gone) — a transport fault, surfaced like other commands.
+    if (err instanceof TapTransportError) {
+      renderFailure(err)
+
+      return 1
+    }
+
+    throw err
+  }
+}
+
 const tapModule = {
   async start (operands: string[] = [], options: TapCliOptions = {}): Promise<number> {
     debug('tap invocation %o with options %o', operands, options)
@@ -110,6 +238,14 @@ const tapModule = {
 
     if (command === 'instances') {
       return listInstances(options, wantsHelp)
+    }
+
+    // `status` is the CLI's other reserved command: it reports the discovery
+    // layer (and the in-app run state when a browser is attached) and must work
+    // before any browser exists, so it short-circuits before the session too.
+    // (A running instance that advertised `status` would be shadowed here.)
+    if (command === 'status') {
+      return reportStatus(options, wantsHelp)
     }
 
     try {
