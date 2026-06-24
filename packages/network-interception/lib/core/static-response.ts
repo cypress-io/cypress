@@ -2,6 +2,7 @@ import _ from 'lodash'
 import type { BackendStaticResponse } from '../types/internal-types'
 import type { GetFixtureFn } from '../types/backend-route'
 import type { HttpResponse } from '../ports/http-interception'
+import { resolveStaticResponseFixture } from './resolve-static-response-fixture'
 
 /**
  * Build a materialized {@link HttpResponse} from a route static stub or driver reply.
@@ -12,20 +13,8 @@ export async function buildHttpResponseFromStatic (
 ): Promise<HttpResponse> {
   const response = _.cloneDeep(staticResponse)
 
-  if (response.fixture) {
-    const data = await getFixture(response.fixture.filePath, { encoding: response.fixture.encoding })
-
-    if (!response.headers || !response.headers['content-type']) {
-      _.set(response, 'headers.content-type', 'application/json')
-    }
-
-    if (data === null) {
-      response.body = JSON.stringify('')
-    } else if (!_.isBuffer(data) && !_.isString(data)) {
-      response.body = JSON.stringify(data)
-    } else {
-      response.body = data
-    }
+  if (response.fixture && _.isUndefined(response.body)) {
+    await resolveStaticResponseFixture(response, getFixture)
   }
 
   return {

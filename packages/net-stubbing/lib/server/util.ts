@@ -1,8 +1,8 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import mime from 'mime'
 import type { IncomingMessage } from 'http'
 import type { BackendStaticResponse } from '@packages/network-interception'
+import { resolveStaticResponseFixture, sniffFixtureContentType } from '@packages/network-interception'
 
 export { getAllStringMatcherFields } from '@packages/network-interception'
 
@@ -17,34 +17,9 @@ import type { CyHttpMessages } from '../external-types'
 import { getEncoding } from 'istextorbinary'
 
 const debug = Debug('cypress:net-stubbing:server:util')
-const htmlLikeRe = /<.+>[\s\S]+<\/.+>/
-
-const isValidJSON = function (text: unknown) {
-  if (_.isObject(text)) {
-    return true
-  }
-
-  try {
-    const o = JSON.parse(text as string)
-
-    return _.isObject(o)
-  } catch (error) {
-    false
-  }
-
-  return false
-}
 
 export function parseContentType (response?: string) {
-  if (isValidJSON(response)) {
-    return mime.getType('json')
-  }
-
-  if (response && htmlLikeRe.test(response)) {
-    return mime.getType('html')
-  }
-
-  return mime.getType('text')
+  return sniffFixtureContentType(response)
 }
 
 export function emit (socket: SocketBroadcaster, eventName: string, data: object) {
@@ -89,38 +64,7 @@ export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMes
 }
 
 export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {
-  const { fixture } = staticResponse
-
-  if (!fixture) {
-    return
-  }
-
-  const data = await getFixtureFn(fixture.filePath, { encoding: fixture.encoding })
-
-  const { headers } = staticResponse
-
-  if (!headers || !caseInsensitiveGet(headers, 'content-type')) {
-    // attempt to detect mimeType based on extension, fall back to regular cy.fixture inspection otherwise
-    const mimeType = mime.getType(fixture.filePath) || parseContentType(data)
-
-    _.set(staticResponse, 'headers.content-type', mimeType)
-  }
-
-  function getBody (): string {
-    // NOTE: for backwards compatibility with cy.route
-    if (data === null) {
-      return JSON.stringify('')
-    }
-
-    if (!_.isBuffer(data) && !_.isString(data)) {
-      // TODO: probably we can use another function in fixtures.js that doesn't require us to remassage the fixture
-      return JSON.stringify(data)
-    }
-
-    return data
-  }
-
-  staticResponse.body = getBody()
+  return resolveStaticResponseFixture(staticResponse, getFixtureFn)
 }
 
 export async function getBodyStream (body: Buffer | string | Readable | undefined, options: { delay?: number, throttleKbps?: number }): Promise<Readable> {
