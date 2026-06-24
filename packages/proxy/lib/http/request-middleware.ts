@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { concatStream } from '@packages/network'
 import { telemetry } from '@packages/telemetry'
 import { isVerboseTelemetry as isVerbose } from '.'
 import { doesTopNeedToBeSimulated } from './util/top-simulation'
@@ -289,17 +288,6 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
     }
   }
 
-  await ensureRequestBody(this)
-
-  const bodyEncoding = getBodyEncoding({
-    body: this.req.body,
-    headers: this.req.headers,
-  } as any)
-
-  if (bodyEncoding !== 'binary' && this.req.body && Buffer.isBuffer(this.req.body)) {
-    this.req.body = this.req.body.toString('utf8')
-  }
-
   const httpRequest = toHttpRequest(this)
 
   this.req.requestId = httpRequest.inFlightInterceptId
@@ -307,6 +295,17 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
   try {
     const httpResponse = await this.networkInterception.handle(httpRequest, async (outbound) => {
       applyOutboundToProxiedRequest(this.req, outbound)
+
+      if (outbound.body !== undefined) {
+        const bodyEncoding = getBodyEncoding({
+          body: this.req.body,
+          headers: this.req.headers,
+        } as any)
+
+        if (bodyEncoding !== 'binary' && this.req.body && Buffer.isBuffer(this.req.body)) {
+          this.req.body = this.req.body.toString('utf8')
+        }
+      }
 
       return fetchOriginAsHttpResponse(this)
     })
@@ -333,32 +332,6 @@ const SendRequestOutgoing: RequestMiddleware = async function () {
   } catch (err) {
     return this.onError(err)
   }
-}
-
-async function ensureRequestBody (mw: RequestMiddleware extends (this: infer T) => any ? T : never): Promise<void> {
-  if (mw.req.body) {
-    return
-  }
-
-  return new Promise<void>((resolve) => {
-    const onClose = (): void => {
-      mw.req.body = ''
-
-      resolve()
-    }
-
-    if (mw.res.destroyed) {
-      onClose()
-    }
-
-    mw.res.once('close', onClose)
-
-    mw.req.pipe(concatStream((reqBody) => {
-      mw.req.body = reqBody
-      mw.res.off('close', onClose)
-      resolve()
-    }))
-  })
 }
 
 export default {

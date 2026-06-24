@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import url from 'url'
 import errors from '@packages/errors'
+import { getBodyEncoding } from '../server/util'
 import type {
   BackendRoute,
   BackendStaticResponse,
@@ -136,6 +137,22 @@ export function createCyInterceptIntercepter (
     inFlightIntercepts.set(inFlightIntercept.request.inFlightInterceptId, inFlightIntercept)
 
     try {
+      const needsRequestBody = matchingRoutes.some((route) => route.hasInterceptor)
+
+      if (needsRequestBody && request.materializeRequestBody) {
+        request.body = await request.materializeRequestBody()
+        request.requestBodyMaterialized = true
+
+        const bodyEncoding = getBodyEncoding({
+          body: request.body ?? '',
+          headers: request.headers,
+        } as any)
+
+        if (bodyEncoding !== 'binary' && request.body && Buffer.isBuffer(request.body)) {
+          request.body = request.body.toString('utf8')
+        }
+      }
+
       const handlerRequest = cloneHandlerRequest(request)
 
       const mergeRequestChanges = (before: HttpRequest, after: HttpRequest) => {
@@ -179,6 +196,12 @@ export function createCyInterceptIntercepter (
         throw error
       }
 
+      const needsResponseBody = matchingRoutes.some((route) => route.hasInterceptor)
+
+      if (needsResponseBody && originResponse.materializeResponseBody) {
+        originResponse.body = await originResponse.materializeResponseBody()
+      }
+
       const handlerResponse = cloneHandlerResponse(originResponse, request.url)
 
       const mergeResponseChanges = (
@@ -205,6 +228,12 @@ export function createCyInterceptIntercepter (
         body: modifiedResponse.body,
         delay: modifiedResponse.delay,
         throttleKbps: modifiedResponse.throttleKbps,
+        materializeResponseBody: modifiedResponse.body === undefined
+          ? originResponse.materializeResponseBody
+          : undefined,
+        consumePassthroughResponse: modifiedResponse.body === undefined
+          ? originResponse.consumePassthroughResponse
+          : undefined,
       }
 
       await runSubscriptions({

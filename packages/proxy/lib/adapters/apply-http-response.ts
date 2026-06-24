@@ -8,7 +8,7 @@ import type { RequestInterceptionMiddlewareCtx } from './types'
 function getFakeClientResponse (opts: {
   statusCode: number
   headers: Record<string, string | string[]>
-  body: string | Buffer
+  body?: string | Buffer
   statusMessage?: string
 }) {
   const clientResponse = new IncomingMessage(new Socket)
@@ -23,13 +23,25 @@ function getFakeClientResponse (opts: {
 }
 
 /**
- * Convert a materialized intercept response into proxy ctx and end the request stage.
+ * Convert an intercept response into proxy ctx and end the request stage.
  */
 export async function applyHttpResponseToCtx (
   mw: RequestInterceptionMiddlewareCtx,
   response: HttpResponse,
 ): Promise<void> {
   mw.req.requestId = mw.req.requestId || _.uniqueId('interceptedRequest')
+
+  if (response.body === undefined && response.consumePassthroughResponse) {
+    const { incomingRes, stream } = response.consumePassthroughResponse()
+
+    if (mw.req.hadIntercept) {
+      setDefaultHeaders(mw.req, incomingRes)
+    }
+
+    mw.onResponse(incomingRes, stream)
+
+    return
+  }
 
   const incomingRes = getFakeClientResponse({
     statusCode: response.statusCode,

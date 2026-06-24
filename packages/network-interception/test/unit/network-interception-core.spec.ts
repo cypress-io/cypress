@@ -5,6 +5,7 @@ import {
   matchRoutes,
   planSubscriptions,
   mergeIncomingRequestChanges,
+  mergeIncomingResponseChanges,
 } from '../../lib'
 import type { BackendRoute } from '../../lib/types/backend-route'
 import type { RouteMatcherOptions } from '../../lib/types/external-types'
@@ -171,5 +172,53 @@ describe('core/merge-handler-result', () => {
 
     expect(before.headers.foo).toBe('original')
     expect(before.headers.bar).toBeUndefined()
+  })
+
+  it('merges requestBodyMaterialized without body when handler leaves body unset', () => {
+    const before = {
+      url: 'http://example.com/',
+      headers: {},
+      body: undefined,
+      requestBodyMaterialized: true,
+      method: 'GET',
+    } as any
+
+    const after = {
+      url: 'http://example.com/',
+      headers: { 'x-test': 'changed' },
+      body: undefined,
+      requestBodyMaterialized: true,
+      method: 'GET',
+    } as any
+
+    mergeIncomingRequestChanges(before, after, {
+      baseUrl: 'http://example.com/',
+      resolveUrl: (base, relative) => `${base}${relative}`,
+    })
+
+    expect(before.body).toBeUndefined()
+    expect(before.requestBodyMaterialized).toBe(true)
+    expect(before.headers['x-test']).toBe('changed')
+  })
+
+  it('does not merge response body when handler leaves body unset', () => {
+    const before = {
+      statusCode: 200,
+      headers: {},
+      body: undefined,
+    } as any
+
+    const after = {
+      statusCode: 200,
+      headers: { 'x-test': 'changed' },
+      body: undefined,
+    } as any
+
+    mergeIncomingResponseChanges(before, after, {
+      serializableProps: ['headers', 'body', 'statusCode'],
+    })
+
+    expect(before.body).toBeUndefined()
+    expect(before.headers['x-test']).toBe('changed')
   })
 })

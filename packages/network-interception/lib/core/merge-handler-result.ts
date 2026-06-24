@@ -47,15 +47,24 @@ export function mergeIncomingRequestChanges (
 
   after.url = resolvedUrl
 
-  mergeWithPreservedBuffers(before, _.pick(after, [
+  const requestPick: (keyof HttpRequest)[] = [
     'headers',
-    'body',
     'url',
     'method',
     'responseTimeout',
     'followRedirect',
     'resourceType',
-  ]))
+  ]
+
+  if (after.body !== undefined) {
+    requestPick.push('body')
+  }
+
+  if (after.requestBodyMaterialized) {
+    requestPick.push('requestBodyMaterialized')
+  }
+
+  mergeWithPreservedBuffers(before, _.pick(after, requestPick))
 
   mergeDeletedHeaders(before, after)
 
@@ -74,7 +83,11 @@ export function mergeIncomingResponseChanges (
   after: HttpResponse,
   options: MergeIncomingResponseChangesOptions,
 ): void {
-  mergeWithPreservedBuffers(before, _.pick(after, options.serializableProps) as Partial<HttpResponse>)
+  const props = options.serializableProps.filter((prop) => {
+    return prop !== 'body' || after.body !== undefined
+  })
+
+  mergeWithPreservedBuffers(before, _.pick(after, props) as Partial<HttpResponse>)
 
   mergeDeletedHeaders(before, after)
 }
@@ -87,7 +100,15 @@ export function applyHandlerRequestToRequest (
   target.url = resolvedUrl
   target.method = source.method
   target.headers = source.headers
-  target.body = source.body
+
+  if (source.body !== undefined) {
+    target.body = source.body
+  }
+
+  if (source.requestBodyMaterialized) {
+    target.requestBodyMaterialized = true
+  }
+
   target.responseTimeout = source.responseTimeout
   target.followRedirect = source.followRedirect
 }
@@ -99,7 +120,9 @@ export function cloneHandlerRequest (request: HttpRequest): HttpRequest {
     url: request.url,
     method: request.method,
     headers: { ...request.headers },
-    body: request.body ?? '',
+    body: request.body,
+    requestBodyMaterialized: request.requestBodyMaterialized,
+    materializeRequestBody: request.materializeRequestBody,
     resourceType: request.resourceType,
     isSyncRequest: request.isSyncRequest,
     responseTimeout: request.responseTimeout,
@@ -115,6 +138,8 @@ export function cloneHandlerResponse (response: HttpResponse, requestUrl: string
     body: response.body,
     delay: response.delay,
     throttleKbps: response.throttleKbps,
+    materializeResponseBody: response.materializeResponseBody,
+    consumePassthroughResponse: response.consumePassthroughResponse,
     url: requestUrl,
   }
 }

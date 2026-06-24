@@ -1013,6 +1013,7 @@ describe('http/request-middleware', () => {
         },
         req: {
           body: '{}',
+          requestBodyMaterialized: true,
           headers,
           socket: {
             on: () => {},

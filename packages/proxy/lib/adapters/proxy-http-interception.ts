@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { concatStream, httpUtils } from '@packages/network'
 import { getEncoding } from 'istextorbinary'
 import type { IncomingMessage } from 'http'
+import type { Readable } from 'stream'
 import type { HttpRequest, HttpResponse } from '@packages/network-interception'
 import { sendRequestOutgoing } from './send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
@@ -16,9 +17,48 @@ export function applyOutboundToProxiedRequest (
   proxiedReq.proxiedUrl = outbound.url
   proxiedReq.method = outbound.method
   proxiedReq.headers = outbound.headers as typeof proxiedReq.headers
-  proxiedReq.body = outbound.body as string | undefined
   proxiedReq.responseTimeout = outbound.responseTimeout
   proxiedReq.followRedirect = outbound.followRedirect
+
+  if (outbound.requestBodyMaterialized) {
+    proxiedReq.requestBodyMaterialized = true
+  }
+
+  if (outbound.body !== undefined) {
+    proxiedReq.body = outbound.body as string
+  }
+}
+
+export async function ensureRequestBody (
+  mw: RequestInterceptionMiddlewareCtx,
+): Promise<void> {
+  if (mw.req.requestBodyMaterialized) {
+    return
+  }
+
+  return new Promise<void>((resolve) => {
+    const onClose = (): void => {
+      mw.req.body = ''
+      mw.req.requestBodyMaterialized = true
+
+      resolve()
+    }
+
+    if (mw.res.destroyed) {
+      onClose()
+
+      return
+    }
+
+    mw.res.once('close', onClose)
+
+    mw.req.pipe(concatStream((reqBody) => {
+      mw.req.body = reqBody
+      mw.req.requestBodyMaterialized = true
+      mw.res.off('close', onClose)
+      resolve()
+    }))
+  })
 }
 
 export function toHttpRequest (mw: RequestInterceptionMiddlewareCtx): HttpRequest {
@@ -28,15 +68,17 @@ export function toHttpRequest (mw: RequestInterceptionMiddlewareCtx): HttpReques
     url: mw.req.proxiedUrl,
     method: mw.req.method,
     headers: mw.req.headers as Record<string, string | string[]>,
-    body: mw.req.body,
     resourceType: mw.req.resourceType,
     isSyncRequest: mw.req.isSyncRequest,
     responseTimeout: mw.req.responseTimeout,
     followRedirect: mw.req.followRedirect,
+    materializeRequestBody: () => {
+      return ensureRequestBody(mw).then(() => mw.req.body)
+    },
   }
 }
 
-function materializeResponseBody (
+function readResponseBody (
   req: RequestInterceptionMiddlewareCtx['req'],
   incomingRes: IncomingMessage,
   incomingResStream: NodeJS.ReadableStream,
@@ -56,7 +98,7 @@ function materializeResponseBody (
 }
 
 /**
- * Fetch the origin via Node HTTP and return a materialized {@link HttpResponse}.
+ * Fetch the origin via Node HTTP and return a lazy {@link HttpResponse}.
  */
 export function fetchOriginAsHttpResponse (mw: RequestInterceptionMiddlewareCtx): Promise<HttpResponse> {
   return new Promise((resolve, reject) => {
@@ -69,22 +111,42 @@ export function fetchOriginAsHttpResponse (mw: RequestInterceptionMiddlewareCtx)
       reject(error)
     }
 
-    mw.onResponse = async (incomingRes, incomingResStream) => {
+    mw.onResponse = (incomingRes, incomingResStream) => {
       mw.onError = originalOnError
       mw.onResponse = originalOnResponse
 
-      try {
-        const body = await materializeResponseBody(mw.req, incomingRes, incomingResStream)
+      let materializedBody: Buffer | string | undefined
+      let passthroughConsumed = false
 
-        resolve({
-          statusCode: incomingRes.statusCode || 200,
-          statusMessage: incomingRes.statusMessage,
-          headers: incomingRes.headers as Record<string, string | string[]>,
-          body,
-        })
-      } catch (err) {
-        reject(err)
+      const materializeResponseBody = async (): Promise<string | Buffer> => {
+        if (materializedBody !== undefined) {
+          return materializedBody
+        }
+
+        materializedBody = await readResponseBody(mw.req, incomingRes, incomingResStream)
+        passthroughConsumed = true
+
+        return materializedBody
       }
+
+      resolve({
+        statusCode: incomingRes.statusCode || 200,
+        statusMessage: incomingRes.statusMessage,
+        headers: incomingRes.headers as Record<string, string | string[]>,
+        materializeResponseBody,
+        consumePassthroughResponse: () => {
+          if (passthroughConsumed) {
+            throw new Error('Origin response body was already materialized')
+          }
+
+          passthroughConsumed = true
+
+          return {
+            incomingRes,
+            stream: incomingResStream as Readable,
+          }
+        },
+      })
     }
 
     sendRequestOutgoing(mw)
