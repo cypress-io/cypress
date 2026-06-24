@@ -27,6 +27,7 @@ export const baseConfig: Cypress.ConfigOptions = {
   e2e: {
     experimentalOriginDependencies: true,
     experimentalModifyObstructiveThirdPartyCode: true,
+    removeSRIAttributes: true,
     setupNodeEvents: (on, config) => {
       on('task', {
         log (message) {

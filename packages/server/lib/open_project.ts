@@ -15,6 +15,7 @@ import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOpti
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
+import { isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
 
 const debug = Debug('cypress:server:open_project')
 
@@ -80,8 +81,6 @@ export class OpenProject extends EventEmitter {
 
     const cfg = this.projectBase.getConfig()
 
-    if (!cfg.proxyServer) throw new Error('Missing proxyServer in launch')
-
     const options: BrowserLaunchOpts = {
       browser: browser as FoundBrowser & { isHeadless: boolean },
       url,
@@ -89,7 +88,7 @@ export class OpenProject extends EventEmitter {
       browsers: cfg.browsers as FoundBrowser[],
       userAgent: cfg.userAgent,
       proxyUrl: cfg.proxyUrl,
-      proxyServer: cfg.proxyServer,
+      ...(isProxyEnabled() ? { proxyServer: ensureProxyServer(cfg) } : {}),
       socketIoRoute: cfg.socketIoRoute,
       chromeWebSecurity: cfg.chromeWebSecurity,
       isTextTerminal: !!cfg.isTextTerminal,

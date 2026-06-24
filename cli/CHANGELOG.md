@@ -1,17 +1,46 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
-## 15.17.1
+## 15.18.1
 
 **Bugfixes:**
 
 - Fixed an issue in `cypress open` where the `specName` field in `after:screenshot` event details was either an empty string or a stale value from a previously-launched spec. `specName` now always reflects the spec that was active when the screenshot was taken, including after navigating to a new spec via the sidebar without relaunching the browser. Fixed in [#34056](https://github.com/cypress-io/cypress/pull/34056).
+
+## 15.18.0
+
+**Performance:**
+
+- Fixed an issue where an application that repeatedly threw the same uncaught exception (for example, a benign `ResizeObserver loop ...` notification fired on every animation frame) could exhaust renderer memory and crash the browser. Consecutive identical uncaught exceptions within a test now collapse into a single, updating command-log entry, and a handled (suppressed) uncaught exception no longer captures a DOM snapshot. Addresses [#27415](https://github.com/cypress-io/cypress/issues/27415).
+
+**Features:**
+
+- Added a `removeSRIAttributes` configuration option. When enabled, Cypress strips the `integrity` attribute from `<script>` and `<link>` elements on first-party resources so they are not blocked by Subresource Integrity (SRI) enforcement after Cypress rewrites them. This covers `integrity` set via static HTML, a JavaScript string literal, and runtime DOM assignment (including the `webpack-subresource-integrity` pattern used for lazily-loaded chunks). Addresses [#34124](https://github.com/cypress-io/cypress/issues/34124) and [#18315](https://github.com/cypress-io/cypress/issues/18315).
+
+**Bugfixes:**
+
+- Fixed an issue where calling `req.destroy()` or using `{ forceNetworkError: true }` inside a [`cy.intercept()`](https://on.cypress.io/intercept) handler in experimental WebKit caused infinite request loops. Fixes [#23810](https://github.com/cypress-io/cypress/issues/23810). Fixed in [#33948](https://github.com/cypress-io/cypress/pull/33948).
+- Fixed an issue where the [`before:spec`](https://on.cypress.io/before-spec-api) plugin event fired twice for the same spec when a test navigated to a cross-origin URL via [`cy.visit()`](https://on.cypress.io/visit). Affects `cypress run` and `cypress open` with `experimentalInteractiveRunEvents` enabled. The event now fires exactly once per spec run, regardless of how many times the runner page reloads internally during cross-origin navigation. Fixes [#26300](https://github.com/cypress-io/cypress/issues/26300).
 - Fixed an issue where setting [`numTestsKeptInMemory`](https://on.cypress.io/configuration#Global) to a value greater than `0` from `setupNodeEvents` would take effect during `cypress run`, which could prevent snapshots from being captured correctly when recording Test Replay to Cypress Cloud. During `cypress run`, `numTestsKeptInMemory` is now always treated as `0` regardless of how it is configured. Fixes [#31167](https://github.com/cypress-io/cypress/issues/31167).
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
+- Fixed an issue where the resolved remote origin (for example, `Cypress.config('remote').origin`) could include an explicit default port (`:80` for HTTP or `:443` for HTTPS) or embedded credentials when the visited URL contained them, which did not match the origin reported by the browser. The reported origin now always matches the browser's `location.origin`, omitting default ports and any embedded credentials. Fixes [#28369](https://github.com/cypress-io/cypress/issues/28369). Fixed in [#34050](https://github.com/cypress-io/cypress/pull/34050).
 - Fixed an issue where `cy.screenshot()` could still capture changing pixels from some running web animations. Fixes [#29144](https://github.com/cypress-io/cypress/issues/29144).
+- Fixed an issue where, during `cypress run` with [`experimentalSingleTabRunMode`](https://docs.cypress.io/app/references/experiments) and the experimental WebKit browser, component test runs with video recording enabled would only record the first spec's video and could then hang without exiting. Each spec is now recorded to its own video and the run exits normally. Fixes [#23815](https://github.com/cypress-io/cypress/issues/23815).
+- Fixed an issue where running component tests with the [`experimentalSingleTabRunMode`](https://on.cypress.io/experiments) experiment enabled could cause a spec to fail intermittently after many other specs had run in the same browser tab, even though that spec passed when run on its own. Fixes [#24146](https://github.com/cypress-io/cypress/issues/24146).
+- Fixed an issue where passing a [`cy.fixture()`](https://on.cypress.io/fixture) alias to [`cy.selectFile()`](https://on.cypress.io/selectfile) attached the file without its name in a second or later test that loaded the same fixture (for example, when the same fixture is reused across multiple tests), causing servers to reject the upload as a missing file. The file name is now preserved every time the fixture is used. Fixes [#21936](https://github.com/cypress-io/cypress/issues/21936).
+- Fixed a regression in [15.17.0](#15-17-0) where loading the Cypress configuration could fail with `TransformError: Internal error: Expected id N but got id M` when the project has the same `esbuild` version installed that Cypress bundles internally (currently `0.28.0`) and a dependency loaded during config processing registers its own `tsx` loader. The `tsx` loader Cypress uses to load the configuration file is now removed from `NODE_OPTIONS` before the configuration file is sourced, so it no longer executes inside worker threads spawned by the project's own dependencies. Fixes [#34076](https://github.com/cypress-io/cypress/issues/34076).
+- Fixed an issue where [`cy.request()`](https://on.cypress.io/request) in Firefox did not send `Secure` cookies to `localhost` or loopback addresses such as `127.0.0.1` over `http`, even though browsers treat those origins as secure contexts. A `Secure` cookie set over `https` on such a host is now included on subsequent `http` requests to that host in Firefox, matching the browser's own behavior and how Cypress already behaves in Chrome. Fixes [#24332](https://github.com/cypress-io/cypress/issues/24332).
+- Fixed an issue where a transient failure to bind Cypress's internal file server to an available port (for example, an intermittent `EADDRINUSE` under port pressure on a reused CI machine) could crash the run with an uncaught exception before any tests started. Cypress now retries on a fresh port and, if it still cannot bind, fails with a clear error instead of crashing. Fixes [#34109](https://github.com/cypress-io/cypress/issues/34109).
+- Fixed a regression in [15.17.0](#15-17-0) where visiting a URL with an IPv6 literal host, such as [`cy.visit('http://[::1]:3000')`](https://on.cypress.io/visit), crashed the proxy with an `Internal error while proxying ... option domain is invalid` error. Cypress no longer sets a `Domain` attribute on its internal cookies for IPv6 hosts, so such URLs work as expected. Fixes [#34143](https://github.com/cypress-io/cypress/issues/34143). Fixed in [#34146](https://github.com/cypress-io/cypress/pull/34146).
 
 **Misc:**
 
+- Running `cypress install` when Cypress is installed globally no longer prints a warning recommending that Cypress be installed as a per-project devDependency. Addresses [#34134](https://github.com/cypress-io/cypress/issues/34134).
 - Running Cypress with process profiler debug logs enabled (for example `DEBUG=cypress*process_profiler`) no longer intermittently prints an `Expected DataContext to already have been set via setCtx` error to the logs. Addresses [#30670](https://github.com/cypress-io/cypress/issues/30670).
 - Cypress now shows a clear error explaining that `browsers` must be an array and that a specific browser should be selected with `--browser` when a `CYPRESS_BROWSERS` environment variable is set to a plain string (for example `CYPRESS_BROWSERS=chrome`) instead of showing an opaque `TypeError: a.map is not a function` error. Addresses [#33198](https://github.com/cypress-io/cypress/issues/33198).
+
+**Dependency Updates:**
+
+- Upgraded `webdriver` from `9.14.0` to `9.28.0`, `geckodriver` from `5.0.0` to `6.1.0`, and `edgedriver` from `6.1.1` to `6.3.0`. These packages are used to launch and automate Firefox during `cypress run` and `cypress open`. Addresses [#34072](https://github.com/cypress-io/cypress/issues/34072).
+- Upgraded `undici` from `6.26.0` to `6.27.0` to address a [CRLF Injection](https://security.snyk.io/vuln/SNYK-JS-UNDICI-17372658) vulnerability reported in security scans. Addressed in [#34121](https://github.com/cypress-io/cypress/pull/34121).
 
 ## 15.17.0
 

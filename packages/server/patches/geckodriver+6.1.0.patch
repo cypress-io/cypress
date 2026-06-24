@@ -1,13 +1,13 @@
 diff --git a/node_modules/geckodriver/README.md b/node_modules/geckodriver/README.md
 deleted file mode 100644
-index 95e3ef0..0000000
+index f1cc841..0000000
 --- a/node_modules/geckodriver/README.md
 +++ /dev/null
 @@ -1,239 +0,0 @@
 -Geckodriver [![CI](https://github.com/webdriverio-community/node-geckodriver/actions/workflows/ci.yml/badge.svg)](https://github.com/webdriverio-community/node-geckodriver/actions/workflows/ci.yml) [![Audit](https://github.com/webdriverio-community/node-geckodriver/actions/workflows/audit.yml/badge.svg)](https://github.com/webdriverio-community/node-geckodriver/actions/workflows/audit.yml)
 -==========
 -
--An NPM wrapper for Mozilla's [Geckodriver](https://github.com/mozilla/geckodriver). It manages to download various (or the latest) Geckodriver versions and provides a programmatic interface to start and stop it within Node.js. __Note:__ this is a wrapper module. If you discover any bugs with Geckodriver, please report them in the [official repository](https://github.com/mozilla/geckodriver).
+-An npm wrapper for Mozilla's [Geckodriver](https://github.com/mozilla/geckodriver). It manages to download various (or the latest) Geckodriver versions and provides a programmatic interface to start and stop it within Node.js. __Note:__ this is a wrapper module. If you discover any bugs with Geckodriver, please report them in the [official repository](https://github.com/mozilla/geckodriver).
 -
 -# Installing
 -
@@ -23,7 +23,7 @@ index 95e3ef0..0000000
 -npm install -g geckodriver
 -```
 -
--__Note:__ This installs a `geckodriver` shell script that runs the executable, but on Windows, [`selenium-webdriver`](https://www.npmjs.com/package/selenium-webdriver) looks for `geckodriver.exe`. To use a global installation of this package with [`selenium-webdriver`](https://www.npmjs.com/package/selenium-webdriver) on Windows, copy or link `geckodriver.exe` to a location on your `PATH` (such as the NPM bin directory) after installing this package:
+-__Note:__ This installs a `geckodriver` shell script that runs the executable, but on Windows, [`selenium-webdriver`](https://www.npmjs.com/package/selenium-webdriver) looks for `geckodriver.exe`. To use a global installation of this package with [`selenium-webdriver`](https://www.npmjs.com/package/selenium-webdriver) on Windows, copy or link `geckodriver.exe` to a location on your `PATH` (such as the npm bin directory) after installing this package:
 -
 -```sh
 -mklink %USERPROFILE%\AppData\Roaming\npm\geckodriver.exe %USERPROFILE%\AppData\Roaming\npm\node_modules\geckodriver\geckodriver.exe
@@ -35,7 +35,7 @@ index 95e3ef0..0000000
 -npx geckodriver --port=4444
 -```
 -
--By default, this package downloads Geckodriver when used for the first time through the CLI or the programmatic interface. If you like to download it as part of the NPM install process, set the `GECKODRIVER_AUTO_INSTALL` environment flag, e.g.:
+-By default, this package downloads Geckodriver when used for the first time through the CLI or the programmatic interface. If you like to download it as part of the npm install process, set the `GECKODRIVER_AUTO_INSTALL` environment flag, e.g.:
 -
 -```sh
 -GECKODRIVER_AUTO_INSTALL=1 npm i
@@ -234,7 +234,7 @@ index 95e3ef0..0000000
 -
 -# Other Browser Driver
 -
--If you also look for other browser driver NPM wrappers, you can find them here:
+-If you also look for other browser driver npm wrappers, you can find them here:
 -
 -- Chrome: [giggio/node-chromedriver](https://github.com/giggio/node-chromedriver)
 -- Microsoft Edge: [webdriverio-community/node-edgedriver](https://github.com/webdriverio-community/node-edgedriver)
@@ -263,13 +263,13 @@ index 2edc6d2..a24617e 100644
      let geckoDriverPath = (customGeckoDriverPath ||
          process.env.GECKODRIVER_PATH ||
 diff --git a/node_modules/geckodriver/dist/install.js b/node_modules/geckodriver/dist/install.js
-index c27c805..ac53518 100644
+index 6c7e67a..1345615 100644
 --- a/node_modules/geckodriver/dist/install.js
 +++ b/node_modules/geckodriver/dist/install.js
-@@ -70,6 +70,8 @@ async function downloadZip(res, cacheDir) {
-  * download on install
-  */
- if (process.argv[1] && process.argv[1].endsWith('/dist/install.js') && process.env.GECKODRIVER_AUTO_INSTALL) {
+@@ -72,6 +72,8 @@ const installJsPath = path.join('dist', 'install.js');
+ if (process.argv[1] &&
+     path.normalize(process.argv[1]).endsWith(path.sep + installJsPath) &&
+     process.env.GECKODRIVER_AUTO_INSTALL) {
 -    await download().then(() => log.info('Success!'), (err) => log.error(`Failed to install Geckodriver: ${err.stack}`));
 +    // removing the await here as packherd cannot bundle with a top-level await.
 +    // This only has an impact if invoking from a CLI context, which cypress is not.

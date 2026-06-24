@@ -9,7 +9,7 @@ export type DocumentRewriteConfig = {
  * Configurator policy: document rewrite / framebusting flags from Cypress config.
  * Registered at startup; {@link resolveWantsSecurityRemoved} consumes equivalent facts at runtime.
  */
-export function DocumentRewrite (config: DocumentRewriteConfig): NetworkPolicy {
+export function createDocumentRewrite (config: DocumentRewriteConfig): NetworkPolicy {
   const enabled = !!(config.modifyObstructiveCode || config.experimentalModifyObstructiveThirdPartyCode)
 
   return {

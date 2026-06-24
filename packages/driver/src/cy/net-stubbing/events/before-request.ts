@@ -15,7 +15,7 @@ import {
 import $errUtils from '../../../cypress/error_utils'
 import type { HandlerFn, HandlerResult } from '.'
 import Bluebird from 'bluebird'
-import type { NetEvent } from '@packages/net-stubbing/lib/types'
+import type { NetEvent } from '@packages/network-interception'
 import Debug from 'debug'
 import { DriverCommandLogAdapter } from '../adapters'
 
