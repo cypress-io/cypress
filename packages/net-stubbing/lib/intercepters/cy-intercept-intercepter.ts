@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import url from 'url'
+import errors from '@packages/errors'
 import type {
   BackendRoute,
   BackendStaticResponse,
@@ -170,7 +171,7 @@ export function createCyInterceptIntercepter (
         await runSubscriptions({
           inFlightIntercept,
           eventName: 'network:error',
-          data: { error },
+          data: { error: errors.cloneErr(error as Error) },
           mergeChanges: _.noop,
           driverNotification: options.interceptionEvents,
         })

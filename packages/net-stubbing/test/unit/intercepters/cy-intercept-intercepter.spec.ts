@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
+import errors from '@packages/errors'
 import type { BackendRoute, ForInterceptionEvents } from '@packages/network-interception'
 import { createDriverAdapter } from '../../../lib/adapters/create-driver-adapter'
 
@@ -148,5 +149,43 @@ describe('createCyInterceptIntercepter', () => {
 
     expect(next).toHaveBeenCalledOnce()
     expect(emitAndAwait).toHaveBeenCalled()
+  })
+
+  it('clones origin errors before emitting network:error to the driver', async () => {
+    const emit = vi.fn()
+    const originError = Object.assign(new Error('connection reset'), { code: 'ECONNRESET' })
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture: async () => '',
+        matches: 0,
+      }],
+      interceptionEvents: {
+        emit,
+        emitAndAwait: vi.fn(async () => ({})),
+        resolveEventHandler: vi.fn(),
+      },
+    })
+
+    const next = vi.fn(async () => {
+      throw originError
+    })
+
+    await expect(httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, next)).rejects.toThrow('connection reset')
+
+    const networkErrorEmit = emit.mock.calls.find(([eventName]) => eventName === 'network:error')
+
+    expect(networkErrorEmit).toBeDefined()
+    expect(networkErrorEmit![1].data.error).toEqual(errors.cloneErr(originError))
+    expect(networkErrorEmit![1].data.error.message).toBe('connection reset')
+    expect(networkErrorEmit![1].data.error.code).toBe('ECONNRESET')
   })
 })
