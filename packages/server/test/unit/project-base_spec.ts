@@ -1424,6 +1424,20 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(outerCallback).to.be.calledWith(spec)
       })
 
+      it('calls the outer onSpecChanged callback even when experimentalInteractiveRunEvents fires before:spec', async function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: true, isTextTerminal: false })
+        this.project.spec = { absolute: '__all', relative: '__all' }
+        const outerCallback = sinon.stub()
+
+        this.project.startWebsockets({ onSpecChanged: outerCallback }, {})
+
+        const spec1 = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+
+        await capturedOnSpecChanged(spec1)
+
+        expect(outerCallback).to.be.calledWith(spec1)
+      })
+
       it('does not throw when the outer onSpecChanged is not provided (run mode)', function () {
         this.project.__setConfig({ experimentalInteractiveRunEvents: false })
 

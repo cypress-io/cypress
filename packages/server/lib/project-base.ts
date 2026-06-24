@@ -462,10 +462,14 @@ export class ProjectBase extends EE {
 
           if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents && spec.absolute !== RUN_ALL_SPECS_KEY) {
             if (previousSpec?.absolute === RUN_ALL_SPECS_KEY) {
+              options.onSpecChanged?.(spec)
+
               return runEvents.execute('before:spec', spec).catch((err) => {
                 this.options.onError?.(err)
               })
             } else if (previousSpec && previousSpec.absolute !== spec.absolute) {
+              options.onSpecChanged?.(spec)
+
               return runEvents.execute('after:spec', previousSpec)
               .then(() => runEvents.execute('before:spec', spec))
               .catch((err) => {
