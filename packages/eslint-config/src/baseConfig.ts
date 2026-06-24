@@ -1,6 +1,5 @@
 import js from '@eslint/js'
-import type { InfiniteDepthConfigWithExtends } from 'typescript-eslint'
-import { configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
+import { InfiniteDepthConfigWithExtends, configs as tsConfigs, parser as tsParser } from 'typescript-eslint'
 
 import cy from 'eslint-plugin-cypress'
 
@@ -273,11 +272,10 @@ export const baseConfig = <InfiniteDepthConfigWithExtends[]>[
   },
 
   // v8 snapshot bundling fails on mixed inline type + value imports
+  // Scoped to packages bundled into the v8 snapshot (see tooling/v8-snapshot/cache/*/snapshot-meta.json)
   {
     files: [
-      'packages/**/lib/**/*.{js,ts,tsx}',
-      'packages/**/src/**/*.{js,ts,tsx}',
-      'packages/server/**/*.{js,ts,tsx}',
+      'packages/{config,data-context,electron,errors,extension,https-proxy,launcher,net-stubbing,network,network-interception,network-tools,proxy,resolve-dist,rewriter,scaffold-config,server,socket,stderr-filtering,telemetry,types}/**/*.{js,ts,tsx}',
     ],
     ignores: [
       '**/test/**',

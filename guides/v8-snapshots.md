@@ -110,7 +110,7 @@ If the build v8 snapshot command fails, you can sometimes see which file is caus
 
 #### Common source-code failures
 
-Some TypeScript import patterns break the snapshot bundler (`esbuild-snap`) and cause snapshot generation to fail. ESLint rules in `packages/eslint-config` catch most of these before a snapshot build runs (scoped to `packages/**/src`, `packages/**/lib`, and `packages/server`, excluding tests).
+Some TypeScript import patterns break the snapshot bundler (`esbuild-snap`) and cause snapshot generation to fail. ESLint rules in `packages/eslint-config` catch most of these before a snapshot build runs (scoped to packages bundled into the v8 snapshot — see `tooling/v8-snapshot/cache/*/snapshot-meta.json` — excluding tests).
 
 **Mixed inline type + value imports** (`MIXED_INLINE_TYPE_IMPORT`)
 

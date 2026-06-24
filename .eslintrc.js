@@ -24,6 +24,11 @@ const validators = specifiedRules
   },
 )
 
+// Packages bundled into the v8 snapshot (see tooling/v8-snapshot/cache/*/snapshot-meta.json)
+const v8SnapshotPackageGlobs = [
+  'packages/{config,data-context,electron,errors,extension,https-proxy,launcher,net-stubbing,network,network-interception,network-tools,proxy,resolve-dist,rewriter,scaffold-config,server,socket,stderr-filtering,telemetry,types}/**/*.{js,ts,tsx}',
+]
+
 module.exports = {
   root: true,
   plugins: [
@@ -66,11 +71,7 @@ module.exports = {
       extends: 'plugin:@cypress/dev/general',
     },
     {
-      files: [
-        'packages/**/lib/**/*.{js,ts,tsx}',
-        'packages/**/src/**/*.{js,ts,tsx}',
-        'packages/server/**/*.{js,ts,tsx}',
-      ],
+      files: v8SnapshotPackageGlobs,
       excludedFiles: [
         '**/test/**',
         '**/*.spec.*',
