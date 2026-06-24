@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { isIP } from 'net'
 import { PassThrough, Readable } from 'stream'
 import { URL } from 'url'
 import zlib from 'zlib'
@@ -107,8 +108,16 @@ function getOrderedContentEncodings (res: IncomingMessage): SupportedContentEnco
   return order
 }
 
+// Whether `domain` is an IPv6 literal, with or without the surrounding brackets.
+function isIPv6Host (domain: string): boolean {
+  return !!domain && isIP(domain.replace(/^\[|\]$/g, '')) === 6
+}
+
 function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
-  let opts: CookieOptions = { domain }
+  // `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
+  // the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
+  // Domain and let the cookie default to host-only. See #34143.
+  let opts: CookieOptions = isIPv6Host(domain) ? {} : { domain }
 
   if (!v) {
     v = ''

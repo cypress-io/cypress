@@ -17,7 +17,7 @@ jobs:
       contents: write
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       - name: Download Fossa binary and install
 # This step utilizes a curl of the latest install pkg from Fossa.  Using a git action from 
 # Fossa doesn't produce the SBOM artifact needed. This manual approach is the only way to 
@@ -33,7 +33,7 @@ jobs:
           ls -lht|head
           cat SBOM.rpt      
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./SBOM.rpt
