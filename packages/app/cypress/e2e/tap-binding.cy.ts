@@ -18,11 +18,23 @@ describe('tap binding', () => {
       const schema = await binding.getSchema()
 
       expect(schema.protocolVersion).to.eq(1)
-      expect(schema.commands.map((command) => command.name)).to.include('health')
+      expect(schema.commands.map((command) => command.name)).to.include.members(['health', 'specs'])
 
       const unknown = await binding.exec('not-a-command')
 
       expect(unknown).to.deep.include({ ok: false, code: 'UNKNOWN_COMMAND' })
+
+      const outcome = await binding.exec('specs')
+
+      expect(outcome.ok).to.eq(true)
+
+      const specs = (outcome as { ok: true, result: Array<{ relative: string, specType: string }> }).result
+
+      expect(specs).to.deep.include({ relative: 'cypress/e2e/dom-content.spec.js', specType: 'integration' })
+
+      for (const spec of specs) {
+        expect(Object.keys(spec), `entry ${spec.relative}`).to.deep.eq(['relative', 'specType'])
+      }
     })
   })
 })
