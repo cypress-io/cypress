@@ -35,10 +35,15 @@ Lifecycle stages it must distinguish:
 | Stage | `status` value | Key fields available |
 |---|---|---|
 | Cypress not running / record stale | `not connected` | (none — nothing is live) |
-| Running, no testing type chosen | `testing type not selected` | pid, projectRoot, testingType:null, browserAttached |
-| Testing type chosen, no browser | `browser not selected` | + testingType |
+| Running, no browser attached | `browser not selected` | pid, projectRoot, testingType |
 | Browser attached, on spec list | `spec not selected` | + browserAttached:true, totalSpecs |
 | On a spec | `running` \| `passed` \| `failed` | + spec, results, totalTests |
+
+> **Not in scope:** the "testing type not selected" stage. Cypress does not
+> support reaching a live-but-no-testing-type state for us to report yet, so
+> `status` does not gate on it. `testingType` is still reported as a passthrough
+> field (always `e2e` or `component` in practice); we never branch on it being
+> `null`.
 
 ---
 
@@ -61,10 +66,10 @@ The stack already establishes two patterns in `cli/lib/exec/tap.ts`:
 
 ### Why `status` cannot be an ordinary binding command
 
-`status` must report `not connected`, `testing type not selected`, and
-`browser not selected` — all stages where the binding is unreachable (no runner
-page, often no browser). A pure schema-discovered command routed through
-`resolveRunner()` would throw before it could ever report those stages.
+`status` must report `not connected` and `browser not selected` — stages where
+the binding is unreachable (no runner page, often no browser). A pure
+schema-discovered command routed through `resolveRunner()` would throw before it
+could ever report those stages.
 
 ### Decision: `status` is a CLI-native command with an optional binding enrichment
 
@@ -79,7 +84,6 @@ cypress tap status
         │
         ├─ listLiveRunners / resolve (browser-optional)   ← discovery + probe
         │     • not live              → { status: 'not connected' }
-        │     • testingType === null  → 'testing type not selected'
         │     • browserAttached false → 'browser not selected'
         │
         └─ browserAttached === true
@@ -90,8 +94,9 @@ cypress tap status
 ```
 
 **Rejected alternative — pure binding `status`:** the binding is unreachable for
-three of the five stages, so the CLI would have to synthesize them anyway. That
-collapses back into this hybrid; making `status` CLI-native is the honest model.
+the `not connected` and `browser not selected` stages, so the CLI would have to
+synthesize them anyway. That collapses back into this hybrid; making `status`
+CLI-native is the honest model.
 
 Everything the CLI already has without the binding (confirmed in code):
 `LiveRunnerState` = the on-disk record (`pid`, `projectRoot`, `serverPort`,
@@ -110,7 +115,6 @@ fill in as the lifecycle advances). Recommended single shape:
 interface TapStatus {
   status:
     | 'not connected'
-    | 'testing type not selected'
     | 'browser not selected'
     | 'spec not selected'
     | 'running' | 'passed' | 'failed'
@@ -146,7 +150,7 @@ machinery.
 |---|---|---|
 | `status` | derived in the CLI from the stage gates | the orchestration in §2 |
 | `pid`, `projectRoot`, `serverPort` | discovery record (`LiveRunnerState`) | already read today |
-| `testingType` | discovery record | **see §7 dependency** |
+| `testingType` | discovery record | passthrough field, not gated on — see §7 |
 | `browserAttached` | `cdpBrowserWsUrl !== null` from probe | as `instances` computes it |
 | `totalSpecs` | binding: `readRunModeSpecs().length` | same source as `specs` command |
 | `spec` | binding: active spec path | from the app runner/route — **§6 open item** |
@@ -174,14 +178,13 @@ the existing `resolveRunner()` wrap it by adding the browser-readiness check.
     1. `resolveLiveRunner` with `{ project, instance, cwd }`. Catch
        `NO_DISCOVERY_FILE` / `STALE_DISCOVERY_FILE` → `{ status: 'not connected' }`.
     2. Build base from the `LiveRunnerState` (`pid`, `projectRoot`,
-       `testingType`, `browserAttached`).
-    3. `testingType == null` → `'testing type not selected'`, return.
-    4. `!browserAttached` → `'browser not selected'`, return.
-    5. Else `withTapSession(runner, session => session.call(TAP_EXEC_METHOD,
+       `testingType` as a passthrough field, `browserAttached`).
+    3. `!browserAttached` → `'browser not selected'`, return.
+    4. Else `withTapSession(runner, session => session.call(TAP_EXEC_METHOD,
        ['run-state', {}, {}]))`, validate the envelope, merge:
        - `spec === null` → `'spec not selected'` + `totalSpecs`.
        - else → run `state` + `spec` + `results` + `totalTests` + `totalSpecs`.
-    6. `renderResult(status)`.
+    5. `renderResult(status)`.
 
 ### 5c. Help & exit semantics
 - `cli/lib/tap/output.ts` — add `status` to `GENERIC_TAP_USAGE` (it is reachable
@@ -241,30 +244,29 @@ else `passed`.
 
 ---
 
-## 7. Stack dependency — `testingType`
+## 7. Stack dependency — `testingType` (passthrough only)
 
 `status.testingType` reads from the discovery record. The record on this base
 (`command-implementations`) **does not yet carry `testingType`** — that field
 was added on `13627-instance-discovery` (commit "feat: record testing type in
 runner discovery record") and has not propagated up the stack.
 
-**Action:** `gh stack rebase` so `13627`'s latest commits flow through
-`13629-cli-handshake` → `command-implementations` → this branch *before*
-implementation. Until then `status` would have to treat `testingType` as `null`
-(it would never distinguish `testing type not selected` from
-`browser not selected`). Confirm `cli/lib/runner-discovery/record.ts` and
-`packages/server/lib/runner-discovery.ts` both carry `testingType` on this
-branch after the rebase.
+Because we dropped the "testing type not selected" gate (§1), this is **no
+longer a blocker** — `status` never branches on `testingType`. It is only needed
+to *populate* the passthrough `testingType` field. Run `gh stack rebase` so
+`13627`'s commits flow up to this branch and the field is present; until then,
+`status` simply omits it (or reports `null`). Confirm
+`cli/lib/runner-discovery/record.ts` carries `testingType` after the rebase.
 
 ---
 
 ## 8. Testing plan
 
 - **CLI unit** (`cli/test/lib/exec/tap.spec.ts`, +
-  `cli/test/lib/runner-discovery.spec.ts`): all five stages — not connected
-  (no record / stale), no testing type, no browser, spec list, and
-  running/passed/failed — by stubbing discovery + the tap session. Cover the
-  reserved-name short-circuit and the chosen exit-code semantics.
+  `cli/test/lib/runner-discovery.spec.ts`): all four stages — not connected
+  (no record / stale), no browser, spec list, and running/passed/failed — by
+  stubbing discovery + the tap session. Cover the reserved-name short-circuit
+  and the chosen exit-code semantics.
 - **Binding component** (`packages/app/src/runner/tap/commands/run-state.cy.ts`):
   mirror `tests.cy.ts` / `specs.cy.ts` — stub `tapRunnerSource` and
   `window.__RUN_MODE_SPECS__`; assert the spec-list (no-run, no-throw) case,
@@ -291,7 +293,8 @@ branch after the rebase.
 
 ## 10. Sequencing
 
-1. `gh stack rebase` to bring `testingType` into this branch (§7).
+1. `gh stack rebase` to bring `testingType` into this branch (§7) — optional;
+   only populates the passthrough field, not a blocker.
 2. `resolveLiveRunner` refactor (§5a).
 3. Binding `run-state` command + `aggregateResults` (§6) — resolve the two open
    items first.
