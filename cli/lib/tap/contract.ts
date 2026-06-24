@@ -15,9 +15,10 @@
  *
  * Every value MUST round-trip through JSON cleanly: the CLI invokes binding
  * methods over CDP `Runtime.callFunctionOn` with `returnByValue: true` +
- * `awaitPromise: true`, which serializes arguments and return values.
- * Failures are returned values, never thrown — a thrown error is treated as
- * a binding bug.
+ * `awaitPromise: true`, which serializes arguments and return values. Both
+ * dispatch and domain failures come back as `{ ok: false }` values (see
+ * `TapExecResult`); a binding method that actually throws is treated as a
+ * binding bug.
  */
 
 /** The runner-window global the binding is mounted on. */
@@ -74,11 +75,12 @@ export interface TapSchema {
 }
 
 /**
- * The wire envelope `exec` resolves with. `ok: false` covers dispatch-level
- * failures only (unknown command, positionals that do not satisfy the param
- * schema) — the CLI unwraps the envelope, so command results stay
- * envelope-free on stdout. Domain failures are values inside `ok: true`
- * results, shaped by each command.
+ * The wire envelope `exec` resolves with. On `ok: true` the CLI unwraps
+ * `result` to stdout, so command results stay envelope-free. `ok: false`
+ * covers both dispatch-level failures (unknown command, args that do not
+ * satisfy the schema) and domain failures a command raised (e.g. no run yet,
+ * no such spec); the CLI renders the message on stderr and exits non-zero for
+ * either, telling them apart only by `code`.
  */
 export type TapExecResult =
   | { ok: true, result: unknown }

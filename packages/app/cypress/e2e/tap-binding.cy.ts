@@ -18,7 +18,7 @@ describe('tap binding', () => {
       const schema = await binding.getSchema()
 
       expect(schema.protocolVersion).to.eq(1)
-      expect(schema.commands.map((command) => command.name)).to.include.members(['health', 'specs', 'run', 'tests'])
+      expect(schema.commands.map((command) => command.name)).to.include.members(['health', 'specs', 'run', 'tests', 'commands'])
 
       const unknown = await binding.exec('not-a-command')
 
@@ -29,6 +29,11 @@ describe('tap binding', () => {
       const testsBeforeRun = await binding.exec('tests')
 
       expect(testsBeforeRun).to.deep.include({ ok: false, code: 'NO_RUN' })
+
+      // The commands command reads the same runner, so it is NO_RUN too.
+      const commandsBeforeRun = await binding.exec('commands', {}, { test: 'r1' })
+
+      expect(commandsBeforeRun).to.deep.include({ ok: false, code: 'NO_RUN' })
 
       const outcome = await binding.exec('specs')
 
@@ -109,10 +114,31 @@ describe('tap binding', () => {
       expect(detail.timings).to.be.an('object')
       expect(detail.error).to.be.undefined
 
-      // An unknown test id details nothing — a domain failure.
+      // An unknown test id details nothing — same domain failure as commands.
       const missingDetail = await getBinding(win).exec('tests', { test: 'not-a-test' })
 
       expect(missingDetail).to.deep.include({ ok: false, code: 'TEST_NOT_FOUND' })
+
+      // The commands command reads that same test's command log from the runner.
+      const testId = tests[0].id as string
+
+      const commandsOutcome = await getBinding(win).exec('commands', {}, { test: testId })
+
+      expect(commandsOutcome.ok).to.eq(true)
+
+      const commands = (commandsOutcome as { ok: true, result: Array<Record<string, unknown>> }).result
+
+      expect(commands).to.have.length.greaterThan(0)
+
+      for (const command of commands) {
+        expect(Object.keys(command), `command ${command.id}`).to.include.members(['id', 'name'])
+        expect(Object.keys(command)).to.satisfy((keys: string[]) => keys.every((key) => ['id', 'name', 'message', 'state', 'type'].includes(key)))
+      }
+
+      // An unknown test id is a domain failure surfaced as ok: false.
+      const missing = await getBinding(win).exec('commands', {}, { test: 'not-a-test' })
+
+      expect(missing).to.deep.include({ ok: false, code: 'TEST_NOT_FOUND' })
     })
 
     // Rerunning the same spec advances the tapRun nonce, so the query change

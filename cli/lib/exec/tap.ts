@@ -6,7 +6,7 @@ import { withTapSession, TapTransportError } from '../tap/tap-session'
 import type { TapSession } from '../tap/tap-session'
 import { buildTapProgram } from '../tap/build-program'
 import { renderFailure, renderInstancesHelp, renderResult, respondToHelp } from '../tap/output'
-import { TAP_BINDING_GLOBAL, TAP_EXEC_METHOD, TAP_PROTOCOL_VERSION, TAP_SCHEMA_METHOD } from '../tap/contract'
+import { TAP_EXEC_METHOD, TAP_PROTOCOL_VERSION, TAP_SCHEMA_METHOD } from '../tap/contract'
 import type { TapExecResult, TapSchema } from '../tap/contract'
 
 const debug = Debug('cypress:cli:tap')

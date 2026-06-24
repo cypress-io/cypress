@@ -53,6 +53,24 @@ export interface TestDetailEntry {
 }
 
 /**
+ * One command-log entry of a test, trimmed to the fields a tap caller needs to
+ * follow what a test did — the reporter's command list. Optional fields are
+ * absent (never `null` — JSON drops `undefined` keys at the CDP boundary) when
+ * the serialized log did not carry them.
+ */
+export interface CommandEntry {
+  id: string
+  /** Command name, e.g. `visit`, `get`, `click`. */
+  name?: string
+  /** The command's argument summary, e.g. the URL, selector, or assertion text. */
+  message?: string
+  /** `passed` | `failed` | `pending` once the command has settled. */
+  state?: string
+  /** `parent` | `child` | `dual`. */
+  type?: string
+}
+
+/**
  * The slice of the driver's `Cypress.runner` the tap commands consume.
  * `getTestsState(testId)` serializes the run's tests up to (excluding) the
  * one whose id matches, so a never-matching sentinel yields every test.
@@ -150,4 +168,35 @@ export const serializeTestDetail = (runner: TapTestsRunner, testId: string): Tes
     ...(timings !== undefined ? { timings } : {}),
     ...(err !== undefined ? { error: serializeTestError(err) } : {}),
   }
+}
+
+/**
+ * Serialize the command log of one test into lean, JSON-clean entries.
+ * Returns `undefined` when no test of the run has that id (the command turns
+ * this into a `testNotFound` result); a known test that has not run yet has no
+ * command log, which serializes to an empty array, not a failure.
+ */
+export const serializeTestCommands = (runner: TapTestsRunner, testId: string): CommandEntry[] | undefined => {
+  // '__never__' serializes every test with its logs. We must NOT pass testId:
+  // getTestsState serializes tests UP TO (excluding) the matching id, so it
+  // would never include the test we are after.
+  const test = runner.getTestsState('__never__')[testId]
+
+  if (!test) {
+    return undefined
+  }
+
+  // `commands` is one of the serialized RUNNABLE_LOGS; it is absent until the
+  // test runs and is otherwise an array of serialized command logs.
+  const commands = (test.commands ?? []) as Array<Record<string, unknown>>
+
+  return commands.map(({ id, name, message, state, type }): CommandEntry => {
+    return {
+      id: id as string,
+      ...(name !== undefined ? { name: name as string } : {}),
+      ...(message !== undefined ? { message: message as string } : {}),
+      ...(state !== undefined ? { state: state as string } : {}),
+      ...(type !== undefined ? { type: type as string } : {}),
+    }
+  })
 }

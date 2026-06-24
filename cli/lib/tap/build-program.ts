@@ -15,7 +15,7 @@ type TapDispatch = (command: string, args: Record<string, string>, options: Reco
 
 // `run <spec>` for one required param, `foo <bar> [baz]` with an optional
 // second — commander's positional-argument grammar, derived from the schema.
-const argumentsOf = (params: readonly TapCommandParamSchema[]): string => {
+const argumentsFrom = (params: readonly TapCommandParamSchema[]): string => {
   return params.map(({ name, required }) => required ? `<${name}>` : `[${name}]`).join(' ')
 }
 
@@ -28,7 +28,7 @@ const argumentDescriptions = (params: readonly TapCommandParamSchema[]): Record<
 // alias. A required value option uses `requiredOption` so commander enforces
 // presence; the binding re-checks app-side regardless. No custom parser is
 // attached, so commander yields raw strings and coercion stays app-side.
-const declareOptions = (command: commander.Command, options: readonly TapCommandOptionSchema[]): void => {
+const addCommandOptions = (command: commander.Command, options: readonly TapCommandOptionSchema[]): void => {
   for (const { name, alias, type, required, description } of options) {
     const lead = alias ? `-${alias}, ` : ''
     const flags = type === 'boolean' ? `${lead}--${name}` : `${lead}--${name} <${name}>`
@@ -131,13 +131,13 @@ export const buildTapProgram = (schema: TapSchema, dispatch: TapDispatch): comma
     const command = program.command(name)
 
     if (params.length) {
-      command.arguments(argumentsOf(params))
+      command.arguments(argumentsFrom(params))
       command.description(description, argumentDescriptions(params))
     } else {
       command.description(description)
     }
 
-    declareOptions(command, options)
+    addCommandOptions(command, options)
 
     command.action(() => {
       // Read the matched command from the closure, not the action's varargs:
