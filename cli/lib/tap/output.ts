@@ -23,6 +23,7 @@ const GENERIC_TAP_USAGE = [
   '',
   'Commands:',
   '  instances  list the running Cypress instances this CLI can reach',
+  '  status     report where a running Cypress instance is in its lifecycle',
   '',
   'Other commands are discovered from the running Cypress instance — start',
   'Cypress (e.g. `cypress open`), then run `cypress tap` to see them.',
@@ -44,6 +45,27 @@ const INSTANCES_USAGE = [
 
 export const renderInstancesHelp = (): void => {
   logger.always(INSTANCES_USAGE)
+}
+
+// Static usage for the CLI-native `status` command. Like `instances` it never
+// reaches a binding to discover its grammar, so its help is hardcoded.
+const STATUS_USAGE = [
+  'Usage: cypress tap status [options]',
+  '',
+  'Reports where a running Cypress instance is in its lifecycle, as JSON — for',
+  'polling and "where am I?" checks. Always exits 0 for a determinable stage',
+  '(including "not connected"); a poller branches on the `status` field.',
+  '',
+  'Stages: not connected, browser not selected, spec not selected, running,',
+  'passed, failed.',
+  '',
+  'Options:',
+  '  -P, --project <project-path>  report the runner for this project',
+  '  --instance <pid>              report the runner with this pid',
+].join('\n')
+
+export const renderStatusHelp = (): void => {
+  logger.always(STATUS_USAGE)
 }
 
 const unknownCommandMessage = (schema: TapSchema, command: string): string => {
