@@ -2,6 +2,7 @@
 ## 15.18.1
 
 **Bugfixes:**
+
 - Fixed an issue where running all specs in open mode with ([`experimentalRunAllSpecs`](https://docs.cypress.io/app/references/experiments)) enabled, `Cypress.spec` was incorrectly set. `Cypress.spec` now reflects the spec file each test belongs to as the run progresses, screenshots saved under the corresponding spec's path and the `before:spec` and `after:spec` events fire with the correct spec information when ([`experimentalInteractiveRunEvents`](https://docs.cypress.io/app/references/experiments)) is enabled. Fixes [#3090](https://github.com/cypress-io/cypress/issues/3090) and [#3323](https://github.com/cypress-io/cypress/issues/3323). Fixed in [#34071](https://github.com/cypress-io/cypress/pull/34071).
 
 ## 15.18.0
