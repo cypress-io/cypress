@@ -353,8 +353,8 @@ export class SocketBase implements SocketBroadcaster {
         })
 
         // TODO: what to do about runner disconnections?
-        socket.on('spec:changed', (spec) => {
-          return options.onSpecChanged(spec)
+        socket.on('spec:changed', (spec, ack?: () => void) => {
+          Promise.resolve(options.onSpecChanged(spec)).then(() => ack?.()).catch(() => ack?.())
         })
 
         socket.on('app:connect', (socketId) => {

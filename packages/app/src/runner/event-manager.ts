@@ -716,6 +716,15 @@ export class EventManager {
       crossOriginLogs = {}
       const [attributes, test] = args
 
+      const isRunAllSpecs = Cypress.config('spec')?.relative === RUN_ALL_SPECS_KEY
+      const currentSpecAbsolute = Cypress.spec?.absolute
+      const isResolved = currentSpecAbsolute && currentSpecAbsolute !== RUN_ALL_SPECS_KEY
+
+      if (isRunAllSpecs && isResolved && currentSpecAbsolute !== this._lastNotifiedSpecAbsolute) {
+        this._lastNotifiedSpecAbsolute = currentSpecAbsolute
+        await this.notifyRunningSpec(Cypress.spec)
+      }
+
       this.reporterBus.emit('test:before:run:async', attributes)
 
       this.studioStore.interceptTest(test)
@@ -746,15 +755,6 @@ export class EventManager {
     handlePausing(this.getCypress, this.reporterBus)
 
     Cypress.on('test:before:run', (...args) => {
-      const isRunAllSpecs = Cypress.config('spec')?.relative === RUN_ALL_SPECS_KEY
-      const currentSpecAbsolute = Cypress.spec?.absolute
-      const isResolved = currentSpecAbsolute && currentSpecAbsolute !== RUN_ALL_SPECS_KEY
-
-      if (isRunAllSpecs && isResolved && currentSpecAbsolute !== this._lastNotifiedSpecAbsolute) {
-        this._lastNotifiedSpecAbsolute = currentSpecAbsolute
-        this.notifyRunningSpec(Cypress.spec)
-      }
-
       Cypress.primaryOriginCommunicator.toAllSpecBridges('test:before:run', ...args)
     })
 
@@ -1015,8 +1015,10 @@ export class EventManager {
     this.localBus.removeAllListeners(event)
   }
 
-  notifyRunningSpec (specFile) {
-    this.ws.emit('spec:changed', specFile)
+  notifyRunningSpec (specFile): Promise<void> {
+    return new Promise((resolve) => {
+      this.ws.emit('spec:changed', specFile, resolve)
+    })
   }
 
   notifyCrossOriginBridgeReady (origin) {

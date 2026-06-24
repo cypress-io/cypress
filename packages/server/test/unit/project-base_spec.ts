@@ -1434,6 +1434,81 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(() => capturedOnSpecChanged(spec)).not.to.throw()
         expect(this.project.spec).to.eq(spec)
       })
+
+      it('resolves only after before:spec completes when first transitioning from run-all-specs', async function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: true, isTextTerminal: false })
+        this.project.spec = { absolute: '__all', relative: '__all' }
+        this.project.startWebsockets({ onSpecChanged: sinon.stub() }, {})
+
+        let resolveBeforeSpec
+
+        runEvents.execute.callsFake(() => new Promise((resolve) => { resolveBeforeSpec = resolve }))
+
+        const spec1 = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+        const specChangedPromise = capturedOnSpecChanged(spec1)
+
+        let settled = false
+
+        specChangedPromise.then(() => { settled = true })
+
+        await Promise.resolve()
+        expect(settled, 'should still be waiting for before:spec').to.be.false
+
+        resolveBeforeSpec()
+        await specChangedPromise
+        expect(settled, 'should resolve after before:spec completes').to.be.true
+      })
+
+      it('resolves only after after:spec then before:spec chain when transitioning between real specs', async function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: true, isTextTerminal: false })
+        const spec1 = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+        const spec2 = { absolute: '/project/e2e/bar.cy.ts', relative: 'e2e/bar.cy.ts' }
+
+        this.project.spec = spec1
+        this.project.startWebsockets({ onSpecChanged: sinon.stub() }, {})
+
+        let callCount = 0
+        let resolveAfterSpec
+        let resolveBeforeSpec
+
+        runEvents.execute.callsFake(() => {
+          callCount++
+
+          if (callCount === 1) {
+            return new Promise((resolve) => { resolveAfterSpec = resolve })
+          }
+
+          return new Promise((resolve) => { resolveBeforeSpec = resolve })
+        })
+
+        const specChangedPromise = capturedOnSpecChanged(spec2)
+        let settled = false
+
+        specChangedPromise.then(() => { settled = true })
+
+        await Promise.resolve()
+        expect(settled, 'waiting for after:spec').to.be.false
+
+        resolveAfterSpec()
+        await Promise.resolve() // let .then(() => execute('before:spec')) run
+        expect(settled, 'still waiting for before:spec').to.be.false
+
+        resolveBeforeSpec()
+        await specChangedPromise
+        expect(settled, 'should resolve after full after:spec → before:spec chain').to.be.true
+      })
+
+      it('resolves immediately when no spec lifecycle events need to fire', async function () {
+        this.project.__setConfig({ experimentalInteractiveRunEvents: false, isTextTerminal: false })
+        this.project.spec = { absolute: '__all', relative: '__all' }
+        this.project.startWebsockets({ onSpecChanged: sinon.stub() }, {})
+
+        const spec1 = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+
+        await capturedOnSpecChanged(spec1)
+
+        expect(runEvents.execute).not.to.have.been.calledWith('before:spec')
+      })
     })
   })
 

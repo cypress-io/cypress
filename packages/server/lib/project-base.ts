@@ -462,11 +462,11 @@ export class ProjectBase extends EE {
 
           if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents && spec.absolute !== RUN_ALL_SPECS_KEY) {
             if (previousSpec?.absolute === RUN_ALL_SPECS_KEY) {
-              runEvents.execute('before:spec', spec).catch((err) => {
+              return runEvents.execute('before:spec', spec).catch((err) => {
                 this.options.onError?.(err)
               })
             } else if (previousSpec && previousSpec.absolute !== spec.absolute) {
-              runEvents.execute('after:spec', previousSpec)
+              return runEvents.execute('after:spec', previousSpec)
               .then(() => runEvents.execute('before:spec', spec))
               .catch((err) => {
                 this.options.onError?.(err)
@@ -476,6 +476,8 @@ export class ProjectBase extends EE {
         }
 
         options.onSpecChanged?.(spec)
+
+        return Promise.resolve()
       },
       getSavedState: this.getSavedState.bind(this),
       onSavedStateChanged: this.saveState.bind(this),
