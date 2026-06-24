@@ -1,13 +1,9 @@
-export { onNetStubbingEvent } from './driver-events'
+export { CyIntercept, INTERCEPT_HEADERS, _restoreMatcherOptionsTypes } from '../cy-intercept'
 
-export { DriverInterceptionEventsAdapter, createDriverAdapter } from '../adapters'
-
-export type { DriverAdapter } from '../adapters'
+export type { CyInterceptConfig, CyInterceptOptions, DriverEventFrame } from '../cy-intercept'
 
 export { InterceptError } from './middleware/error'
 
-export { NetStubbingState, ResourceType } from './types'
+export { ResourceType } from './types'
 
-import { state, resetStubbingState } from './state'
-
-export { state as netStubbingState, resetStubbingState }
+export { resetStubbingState } from './state'

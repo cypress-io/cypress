@@ -1,17 +1,10 @@
 import type { ForStubbing } from '@packages/network-interception'
-import type { NetStubbingState } from './types'
+import type { CyIntercept } from '../cy-intercept'
 
-export function state (): NetStubbingState {
-  return {
-    routes: [],
-    pendingEventHandlers: {},
-    reset () {
-      this.pendingEventHandlers = {}
-      this.routes = []
-    },
+export function resetStubbingState (stubbing: ForStubbing | CyIntercept): void {
+  if ('reset' in stubbing && typeof stubbing.reset === 'function') {
+    stubbing.reset()
+  } else {
+    stubbing.routes = []
   }
-}
-
-export function resetStubbingState (stubbing: ForStubbing): void {
-  (stubbing as NetStubbingState).reset()
 }

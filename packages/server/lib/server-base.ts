@@ -14,8 +14,7 @@ import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { createHttpInterceptWithDefaultMiddleware, type ForHttpIntercept, type ForStubbing } from '@packages/network-interception'
-import { matchRoutes } from '@packages/net-stubbing/lib/core/route-matching'
-import { createDriverAdapter, netStubbingState, resetStubbingState } from '@packages/net-stubbing'
+import { CyIntercept, INTERCEPT_HEADERS, resetStubbingState } from '@packages/net-stubbing'
 import { get as fixtureGet } from './fixture'
 import { agent, clientCertificates, httpUtils, concatStream, blocked } from '@packages/network'
 import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
@@ -169,9 +168,9 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   protected _socket?: TSocket
   protected _nodeProxy?: httpProxy
   protected _networkProxy?: NetworkProxy
-  protected _netStubbingState?: ForStubbing
   protected _networkServices?: ProxyNetworkServices
-  protected _driverAdapter?: ReturnType<typeof createDriverAdapter>
+  protected _cyIntercept?: CyIntercept
+  protected _httpIntercept?: ForHttpIntercept
   // @ts-ignore - this is currently affecting the v8-snapshot type checking job as we are importing the file directly from the server package
   // After some package refactoring, we should be able to remove this.
   protected _httpsProxy?: httpsProxy
@@ -223,19 +222,15 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   get netStubbingState () {
-    return this.ensureProp(this._netStubbingState, 'open')
+    return this.ensureProp(this._cyIntercept, 'open')
   }
 
   get networkServices () {
     return this.ensureProp(this._networkServices, 'open')
   }
 
-  get driverAdapter () {
-    return this.ensureProp(this._driverAdapter, 'open')
-  }
-
   get networkInterception () {
-    return this.driverAdapter.httpIntercept
+    return this.ensureProp(this._httpIntercept, 'open')
   }
 
   get httpsProxy () {
@@ -361,19 +356,22 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this._netStubbingState = netStubbingState()
-    const httpIntercept = createHttpInterceptWithDefaultMiddleware(config, {
+    this._httpIntercept = createHttpInterceptWithDefaultMiddleware(config, {
       matchesBlockedHost: blocked.matches,
     })
 
-    this._driverAdapter = createDriverAdapter({
-      stubbing: this._netStubbingState,
+    this._cyIntercept = new CyIntercept({
       socket: this._socket,
-      httpIntercept,
       onSyncInterceptSkipped: (url) => {
         errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
       },
+      config: {
+        devServerPublicPathRoute: config.devServerPublicPathRoute,
+        exclusionHeaders: INTERCEPT_HEADERS,
+      },
     })
+
+    this._httpIntercept.use(this._cyIntercept.middleware)
 
     if (!isProxyDisabled()) {
       this.createNetworkProxy({
@@ -503,7 +501,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
-    options.interceptRegistration = this.driverAdapter.createInterceptRegistration({
+    options.interceptRegistration = this._cyIntercept!.createInterceptRegistration({
       getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
     })
 
@@ -857,7 +855,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
         // TODO: add `body` here once bodies can be statically matched
       }
 
-      return matchRoutes(this.netStubbingState?.routes ?? [], proxiedReq).length > 0
+      return this._cyIntercept?.matchesUrl(proxiedReq) ?? false
     }
 
     let p

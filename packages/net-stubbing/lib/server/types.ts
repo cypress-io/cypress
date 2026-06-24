@@ -1,11 +1,6 @@
-import type { BackendRoute, ForStubbing, GetFixtureFn, ResourceType } from '@packages/network-interception'
-import type { PendingEventHandler } from '../driver-intercept-bridge'
+import type { BackendRoute, GetFixtureFn, ResourceType } from '@packages/network-interception'
+import type { CyIntercept } from '../cy-intercept'
 
 export type { BackendRoute, GetFixtureFn, ResourceType }
 
-export interface NetStubbingState extends ForStubbing {
-  pendingEventHandlers: {
-    [eventId: string]: PendingEventHandler
-  }
-  reset: () => void
-}
+export type NetStubbingState = CyIntercept

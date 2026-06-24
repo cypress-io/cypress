@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   _restoreMatcherOptionsTypes,
-} from '../../lib/server/driver-events'
+} from '../../lib/cy-intercept'
 
 describe('driver events', function () {
   describe('._restoreMatcherOptionsTypes', function () {
