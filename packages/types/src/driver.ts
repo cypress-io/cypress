@@ -29,6 +29,38 @@ export interface CachedTestState {
   activeSessions: StoredSessions
 }
 
+/**
+ * The own-property allowlists the driver keeps when serializing a runnable
+ * (`wrapAll`/`mixinLogs` in driver `src/cypress/runner.ts`): RUNNABLE_PROPS
+ * are the runnable's own fields, RUNNABLE_LOGS the serialized log
+ * collections mixed in alongside them. They live here so consumers of the
+ * serialized shape (e.g. `Cypress.runner.getTestsState`) can share one
+ * key source with the driver.
+ */
+export const RUNNABLE_LOGS = ['routes', 'agents', 'commands', 'hooks'] as const
+
+export const RUNNABLE_PROPS = [
+  '_cypressTestStatusInfo', '_testConfig', 'id', 'order', 'title', '_titlePath', 'root', 'hookName', 'hookId', 'err', 'state', 'pending', 'failedFromHookId', 'failedFromHookName', 'body', 'speed', 'type', 'duration', 'wallClockStartedAt', 'wallClockDuration', 'timings', 'file', 'originalTitle', 'invocationDetails', 'final', 'currentRetry', 'retries', '_slow',
+] as const
+
+/**
+ * A test as the driver serializes it: only keys from the two allowlists
+ * (absent rather than undefined when the runnable lacks them), plus the
+ * previous attempts serialized the same way. Values are typed only where
+ * stable and consumed; the rest stay `unknown`.
+ */
+export type SerializedTest =
+  & { [K in typeof RUNNABLE_PROPS[number] | typeof RUNNABLE_LOGS[number]]?: unknown }
+  & {
+    id: string
+    title: string
+    state?: 'passed' | 'failed' | 'pending'
+    duration?: number
+    currentRetry?: number
+    retries?: number
+    prevAttempts?: SerializedTest[]
+  }
+
 export type Instrument = 'agent' | 'command' | 'route'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing' | 'warned'
