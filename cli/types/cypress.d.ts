@@ -3075,6 +3075,15 @@ declare namespace Cypress {
      */
     modifyObstructiveCode: boolean
     /**
+     * Whether Cypress will strip the `integrity` attribute from `<script>` and `<link>` elements
+     * on first-party resources so they are not blocked by Subresource Integrity (SRI) enforcement
+     * after the proxy rewrites them (under `modifyObstructiveCode`). Covers `integrity` set via
+     * static HTML, a JavaScript string literal, or runtime DOM assignment. Third-party resources
+     * are only rewritten — and have their SRI stripped — under `experimentalModifyObstructiveThirdPartyCode`.
+     * @default false
+     */
+    removeSRIAttributes: boolean
+    /**
      * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
      * @default 5000
      */
@@ -3233,7 +3242,8 @@ declare namespace Cypress {
     experimentalInteractiveRunEvents: boolean
     /**
      * Whether Cypress will search for and replace obstructive code in third party .js or .html files.
-     * NOTE: Setting this flag to true removes Subresource Integrity (SRI).
+     * NOTE: Setting this flag to true removes Subresource Integrity (SRI) from third-party resources.
+     * To strip SRI from first-party resources as well, use `removeSRIAttributes`.
      * Please see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity.
      * This option has no impact on experimentalSourceRewriting and is only used with the
      * non-experimental source rewriter.

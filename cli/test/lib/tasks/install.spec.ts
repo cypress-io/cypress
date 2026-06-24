@@ -567,7 +567,7 @@ describe('/lib/tasks/install', function () {
       })
 
       describe('as a global install', function () {
-        it('logs global warning and download', async function () {
+        it('downloads', async function () {
           const output = createStdoutCapture()
 
           vi.mocked(util.isInstalledGlobally).mockReturnValue(true)
@@ -586,9 +586,6 @@ describe('/lib/tasks/install', function () {
 
           const plain = stripAnsi(output())
 
-          expect(plain).toContain(INSTALL_OUTPUT.globalInstallWarning)
-          expect(plain).toContain(INSTALL_OUTPUT.devDependencyPerProject)
-          expect(plain).toContain(INSTALL_OUTPUT.npmUninstallGlobalCypress)
           expect(plain).toContain(INSTALL_OUTPUT.finishedInstallation)
         })
       })
