@@ -207,7 +207,10 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
       })
 
       if (inFlightIntercept.forceNetworkError) {
-        throw new Error('forceNetworkError called')
+        const error = new Error('forceNetworkError called')
+
+        await this.emitNetworkError(inFlightIntercept, error)
+        throw error
       }
 
       if (inFlightIntercept.fulfilledAtRequestStage && inFlightIntercept.stubResponse) {
@@ -224,14 +227,7 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
       try {
         originResponse = await next(request)
       } catch (error) {
-        await runSubscriptions({
-          inFlightIntercept,
-          eventName: 'network:error',
-          data: { error: errors.cloneErr(error as Error) },
-          mergeChanges: _.noop,
-          driverNotification: this,
-        })
-
+        await this.emitNetworkError(inFlightIntercept, error as Error)
         throw error
       }
 
@@ -288,6 +284,26 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
 
   matchesUrl (req: RouteMatchableRequest): boolean {
     return matchRoutes(this.routes, req).length > 0
+  }
+
+  async emitNetworkErrorByRequestId (requestId: string, error: Error): Promise<void> {
+    const inFlightIntercept = this.inFlightIntercepts.get(requestId)
+
+    if (!inFlightIntercept) {
+      return
+    }
+
+    await this.emitNetworkError(inFlightIntercept, error)
+  }
+
+  private async emitNetworkError (inFlightIntercept: InFlightIntercept, error: Error): Promise<void> {
+    await runSubscriptions({
+      inFlightIntercept,
+      eventName: 'network:error',
+      data: { error: errors.cloneErr(error) },
+      mergeChanges: _.noop,
+      driverNotification: this,
+    })
   }
 
   private attachAfterResponseOnWritten (
@@ -446,7 +462,6 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
 
     if (staticResponse.forceNetworkError) {
       inFlightIntercept.forceNetworkError = true
-      inFlightIntercept.fulfilledAtRequestStage = true
 
       return
     }

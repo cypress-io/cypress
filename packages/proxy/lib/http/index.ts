@@ -123,6 +123,7 @@ export type ServerCtx = Readonly<{
   request: ServerRequest
   serverBus: EventEmitter
   getCurrentBrowser: () => FoundBrowser
+  onInterceptNetworkError?: (requestId: string, error: Error) => Promise<void>
 }>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
@@ -131,6 +132,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'getFileServerToken',
   'networkServices',
   'networkInterception',
+  'onInterceptNetworkError',
   'next',
   'end',
   'onResponse',
@@ -329,6 +331,7 @@ export class Http {
   autUrl?: string
   getCookieJar: () => CookieJar
   protocolManager?: ProtocolManagerShape
+  onInterceptNetworkError?: (requestId: string, error: Error) => Promise<void>
   serviceWorkerManager: ServiceWorkerManager = new ServiceWorkerManager()
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
@@ -346,6 +349,7 @@ export class Http {
     this.serverBus = opts.serverBus
     this.getCookieJar = opts.getCookieJar
     this.getCurrentBrowser = opts.getCurrentBrowser
+    this.onInterceptNetworkError = opts.onInterceptNetworkError
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = defaultMiddleware
@@ -371,6 +375,7 @@ export class Http {
       middleware: _.cloneDeep(this.middleware),
       networkServices: this.networkServices,
       networkInterception: this.networkInterception,
+      onInterceptNetworkError: this.onInterceptNetworkError,
       socket: this.socket,
       serverBus: this.serverBus,
       getCookieJar: this.getCookieJar,

@@ -24,9 +24,9 @@ export async function runSubscriptions<D> (options: RunSubscriptionsOptions<D>):
   outerLoop: for (const currentEventName of eventNames) {
     inFlightIntercept.lastEvent = currentEventName
 
-    const handleSubscription = async (subscription: Subscription): Promise<void> => {
+    const handleSubscription = async (subscription: Subscription): Promise<boolean> => {
       if (subscription.skip || subscription.eventName !== currentEventName) {
-        return
+        return false
       }
 
       const eventId = _.uniqueId('event')
@@ -55,7 +55,7 @@ export async function runSubscriptions<D> (options: RunSubscriptionsOptions<D>):
       if (!subscription.await) {
         driverNotification.emit(currentEventName, eventFrame)
 
-        return
+        return true
       }
 
       inFlightIntercept.inFlightEventId = eventId
@@ -64,10 +64,10 @@ export async function runSubscriptions<D> (options: RunSubscriptionsOptions<D>):
 
       delete inFlightIntercept.inFlightEventId
 
-      if (inFlightIntercept.fulfilledAtRequestStage || inFlightIntercept.responseOverride) {
+      if (inFlightIntercept.fulfilledAtRequestStage || inFlightIntercept.responseOverride || inFlightIntercept.forceNetworkError) {
         abortSubscriptions = true
 
-        return
+        return true
       }
 
       stopPropagationNow = result.stopPropagation
@@ -75,13 +75,15 @@ export async function runSubscriptions<D> (options: RunSubscriptionsOptions<D>):
       if (result.changedData) {
         mergeChanges(data, result.changedData as D)
       }
+
+      return true
     }
 
     for (const { routeId, subscriptions, immediateStaticResponse } of inFlightIntercept.subscriptionsByRoute) {
       for (const subscription of subscriptions) {
-        await handleSubscription(subscription)
+        const handled = await handleSubscription(subscription)
 
-        if (abortSubscriptions || stopPropagationNow || inFlightIntercept.fulfilledAtRequestStage || inFlightIntercept.responseOverride) {
+        if (handled && (abortSubscriptions || stopPropagationNow || inFlightIntercept.fulfilledAtRequestStage || inFlightIntercept.responseOverride || inFlightIntercept.forceNetworkError)) {
           break
         }
       }
@@ -108,7 +110,7 @@ export async function runSubscriptions<D> (options: RunSubscriptionsOptions<D>):
         }
       }
 
-      if (abortSubscriptions || stopPropagationNow || inFlightIntercept.fulfilledAtRequestStage || inFlightIntercept.responseOverride) {
+      if (abortSubscriptions || stopPropagationNow || inFlightIntercept.fulfilledAtRequestStage || inFlightIntercept.responseOverride || inFlightIntercept.forceNetworkError) {
         break outerLoop
       }
     }

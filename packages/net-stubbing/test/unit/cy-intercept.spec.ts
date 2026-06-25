@@ -184,6 +184,89 @@ describe('CyIntercept', () => {
     expect(networkErrorEmit![1].data.error).toEqual(errors.cloneErr(originError))
   })
 
+  it('emits network:error before forceNetworkError throw', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const emit = vi.spyOn(cyIntercept, 'emit')
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async (eventName) => {
+      if (eventName === 'before:request') {
+        await cyIntercept.handleDriverEvent('send:static:response', {
+          requestId: 'intercept-1',
+          staticResponse: { forceNetworkError: true },
+        }, getFixture)
+      }
+
+      return {}
+    })
+
+    await expect(httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn())).rejects.toThrow('forceNetworkError called')
+
+    const networkErrorEmit = emit.mock.calls.find(([eventName]) => eventName === 'network:error')
+
+    expect(networkErrorEmit).toBeDefined()
+    expect(networkErrorEmit![1].data.error.message).toBe('forceNetworkError called')
+  })
+
+  it('emitNetworkErrorByRequestId emits network:error for in-flight intercepts', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const emit = vi.spyOn(cyIntercept, 'emit')
+
+    vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async (eventName) => {
+      if (eventName === 'before:request') {
+        const proxyError = new Error('stream failed')
+
+        await cyIntercept.emitNetworkErrorByRequestId('intercept-1', proxyError)
+      }
+
+      return {}
+    })
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    await httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn(async () => {
+      return {
+        statusCode: 200,
+        headers: {},
+        body: 'origin',
+      }
+    }))
+
+    const networkErrorEmit = emit.mock.calls.find(([eventName]) => eventName === 'network:error')
+
+    expect(networkErrorEmit).toBeDefined()
+    expect(networkErrorEmit![1].data.error.message).toBe('stream failed')
+  })
+
   it('registers pending handlers on emitAndAwait and resolves them', async () => {
     const cyIntercept = new CyIntercept({ socket })
 

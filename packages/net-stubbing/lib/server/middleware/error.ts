@@ -9,7 +9,11 @@ export const InterceptError: ErrorMiddleware = async function () {
     return this.next()
   }
 
-  debug('network error for intercepted request handled in HttpIntercept %o', {
+  if (this.onInterceptNetworkError) {
+    await this.onInterceptNetworkError(this.req.requestId, this.error)
+  }
+
+  debug('network error for intercepted request %o', {
     req: this.req.proxiedUrl,
     error: this.error,
   })

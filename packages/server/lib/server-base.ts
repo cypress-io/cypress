@@ -504,6 +504,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getCurrentBrowser,
       middleware: defaultMiddleware,
       getRenderedHTMLOrigins: () => ({}),
+      onInterceptNetworkError: (requestId, error) =>
+        this._cyIntercept!.emitNetworkErrorByRequestId(requestId, error),
     })
   }
 
