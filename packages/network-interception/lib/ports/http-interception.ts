@@ -56,6 +56,11 @@ export type HttpResponse = {
   materializeResponseBody?: () => Promise<string | Buffer>
   /** Stream the origin response without buffering when {@link body} is unset. */
   consumePassthroughResponse?: () => PassthroughOriginResponse
+  /**
+   * Proxy adapter invokes after the response body has been written to the client.
+   * Used to defer `after:response` driver subscriptions until `res` `finish`.
+   */
+  onResponseWrittenToClient?: () => Promise<void>
 }
 
 export type OriginForwarder = (request: HttpRequest) => Promise<HttpResponse>

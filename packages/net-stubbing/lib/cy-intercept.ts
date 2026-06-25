@@ -168,6 +168,8 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
 
     this.inFlightIntercepts.set(inFlightIntercept.request.inFlightInterceptId, inFlightIntercept)
 
+    let deferCleanup = false
+
     try {
       const needsRequestBody = matchingRoutes.some((route) => route.hasInterceptor)
 
@@ -209,7 +211,12 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
       }
 
       if (inFlightIntercept.fulfilledAtRequestStage && inFlightIntercept.stubResponse) {
-        return inFlightIntercept.stubResponse
+        const stubResponse = inFlightIntercept.stubResponse
+
+        this.attachAfterResponseOnWritten(stubResponse, inFlightIntercept)
+        deferCleanup = true
+
+        return stubResponse
       }
 
       let originResponse: HttpResponse
@@ -268,24 +275,42 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
           : undefined,
       }
 
-      await runSubscriptions({
-        inFlightIntercept,
-        eventName: 'after:response',
-        data: inFlightIntercept.includeBodyInAfterResponse ? {
-          finalResBody: finalResponse.body!,
-        } : {},
-        mergeChanges: _.noop,
-        driverNotification: this,
-      })
+      this.attachAfterResponseOnWritten(finalResponse, inFlightIntercept)
+      deferCleanup = true
 
       return finalResponse
     } finally {
-      this.inFlightIntercepts.delete(inFlightIntercept.request.inFlightInterceptId)
+      if (!deferCleanup) {
+        this.inFlightIntercepts.delete(inFlightIntercept.request.inFlightInterceptId)
+      }
     }
   }
 
   matchesUrl (req: RouteMatchableRequest): boolean {
     return matchRoutes(this.routes, req).length > 0
+  }
+
+  private attachAfterResponseOnWritten (
+    response: HttpResponse,
+    inFlightIntercept: InFlightIntercept,
+  ): void {
+    const inFlightInterceptId = inFlightIntercept.request.inFlightInterceptId
+
+    response.onResponseWrittenToClient = async () => {
+      try {
+        await runSubscriptions({
+          inFlightIntercept,
+          eventName: 'after:response',
+          data: inFlightIntercept.includeBodyInAfterResponse ? {
+            finalResBody: response.body!,
+          } : {},
+          mergeChanges: _.noop,
+          driverNotification: this,
+        })
+      } finally {
+        this.inFlightIntercepts.delete(inFlightInterceptId)
+      }
+    }
   }
 
   reset (): void {

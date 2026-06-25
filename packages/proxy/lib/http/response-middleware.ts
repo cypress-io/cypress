@@ -648,6 +648,17 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
   this.incomingResStream.pipe(this.res).on('error', this.onError)
 
   this.res.once('finish', () => {
+    const onWritten = this.req.onInterceptResponseWritten
+
+    if (onWritten) {
+      void onWritten().finally(() => {
+        this.req.onInterceptResponseWritten = undefined
+        this.end()
+      })
+
+      return
+    }
+
     this.end()
   })
 }

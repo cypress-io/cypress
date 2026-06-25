@@ -30,6 +30,7 @@ export async function applyHttpResponseToCtx (
   response: HttpResponse,
 ): Promise<void> {
   mw.req.requestId = mw.req.requestId || _.uniqueId('interceptedRequest')
+  mw.req.onInterceptResponseWritten = response.onResponseWrittenToClient
 
   if (response.body === undefined && response.consumePassthroughResponse) {
     const { incomingRes, stream } = response.consumePassthroughResponse()
