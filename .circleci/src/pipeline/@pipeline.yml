@@ -1985,9 +1985,6 @@ jobs:
       - halt-if-skipped:
           guard: << pipeline.parameters.run-unit-tests >>
       - restore_cached_workspace
-      - install-browsers:
-          install-chrome: true
-          executor: << parameters.executor >>
       - when:
           condition:
             # several snapshots fails for windows due to paths.
