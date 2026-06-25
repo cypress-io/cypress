@@ -57,6 +57,71 @@ const onServer = (app) => {
     res.setHeader('Set-Cookie', 'h2-cookie=set; Path=/')
     res.json({ ok: true })
   })
+
+  app.get('/api/item/:id', (req, res) => {
+    const delayMs = Number(req.query.ms) || 0
+    const id = Number(req.params.id)
+    const body = JSON.stringify({ id })
+
+    if (delayMs > 0) {
+      return setTimeout(() => {
+        res.type('json').send(body)
+      }, delayMs)
+    }
+
+    res.type('json').send(body)
+  })
+
+  app.get('/multiplex', (req, res) => {
+    res.type('html').send(`\
+<html>
+  <body>
+    <div id="count">0</div>
+    <div id="sum">0</div>
+    <script>
+      const total = 20
+      let completed = 0
+      let sum = 0
+
+      for (let i = 0; i < total; i++) {
+        fetch('/api/item/' + i)
+          .then((res) => res.json())
+          .then((body) => {
+            completed += 1
+            sum += body.id
+            document.getElementById('count').textContent = String(completed)
+            document.getElementById('sum').textContent = String(sum)
+          })
+      }
+    </script>
+  </body>
+</html>`)
+  })
+
+  app.get('/multiplex-interleaved', (req, res) => {
+    res.type('html').send(`\
+<html>
+  <body>
+    <div id="order"></div>
+    <script>
+      const order = []
+
+      function complete (id) {
+        order.push(id)
+        document.getElementById('order').textContent = order.join(',')
+      }
+
+      ;[0, 1, 2].forEach((id) => {
+        fetch('/api/item/' + id + '?ms=300').then(() => complete(id))
+      })
+
+      ;[3, 4, 5].forEach((id) => {
+        fetch('/api/item/' + id).then(() => complete(id))
+      })
+    </script>
+  </body>
+</html>`)
+  })
 }
 
 /**
@@ -76,6 +141,9 @@ const HTTP2_CASES = [
   { title: 'cy.request', spec: 'cy_request.cy.js' },
   { title: 'page resources', spec: 'page_resources.cy.js' },
   { title: 'cookies', spec: 'cookies.cy.js' },
+  { title: 'multiplex parallel fetch', spec: 'multiplex_parallel_fetch.cy.js' },
+  { title: 'multiplex intercept', spec: 'multiplex_intercept.cy.js' },
+  { title: 'multiplex interleaved', spec: 'multiplex_interleaved.cy.js' },
 ] as const
 
 const proxyEnabledEnv = {
