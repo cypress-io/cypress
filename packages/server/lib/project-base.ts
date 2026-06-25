@@ -30,6 +30,7 @@ import type {
   VideoRecording,
   AutomationCommands,
 } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 import { DataContext, getCtx } from '@packages/data-context'
 import { createHmac, randomUUID } from 'crypto'
 import { ServerBase } from './server-base'
@@ -451,7 +452,37 @@ export class ProjectBase extends EE {
     const ios = this.server.startWebsockets(this.automation, this.cfg, {
       onReloadBrowser: options.onReloadBrowser,
       onFocusTests: options.onFocusTests,
-      onSpecChanged: options.onSpecChanged,
+      onSpecChanged: (spec) => {
+        if (spec && spec.absolute) {
+          const previousSpec = this.spec
+
+          this.spec = spec
+
+          const cfg = this.getConfig()
+
+          if (!cfg.isTextTerminal && cfg.experimentalInteractiveRunEvents && spec.absolute !== RUN_ALL_SPECS_KEY) {
+            if (previousSpec?.absolute === RUN_ALL_SPECS_KEY) {
+              options.onSpecChanged?.(spec)
+
+              return runEvents.execute('before:spec', spec).catch((err) => {
+                this.options.onError?.(err)
+              })
+            } else if (previousSpec && previousSpec.absolute !== spec.absolute) {
+              options.onSpecChanged?.(spec)
+
+              return runEvents.execute('after:spec', previousSpec)
+              .then(() => runEvents.execute('before:spec', spec))
+              .catch((err) => {
+                this.options.onError?.(err)
+              })
+            }
+          }
+        }
+
+        options.onSpecChanged?.(spec)
+
+        return Promise.resolve()
+      },
       getSavedState: this.getSavedState.bind(this),
       onSavedStateChanged: this.saveState.bind(this),
       closeExtraTargets: this.closeExtraTargets,

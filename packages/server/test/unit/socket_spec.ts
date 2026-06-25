@@ -836,12 +836,13 @@ describe('lib/socket', () => {
         getCurrentBrowser: () => null,
       })
 
-      const options = {
+      this.socketOptions = {
         getSavedState: sinon.stub(),
         onSavedStateChanged: sinon.spy(),
         onStudioInit: sinon.stub(),
         onStudioDestroy: sinon.stub(),
         onCyPromptReady: sinon.stub(),
+        onSpecChanged: sinon.stub().resolves(),
       }
 
       const automation = new Automation({
@@ -874,7 +875,7 @@ describe('lib/socket', () => {
         }),
       }
 
-      this.server.startWebsockets(automation, this.cfg, options)
+      this.server.startWebsockets(automation, this.cfg, this.socketOptions)
       this.socket = this.server._socket
 
       const { proxyUrl, socketIoRoute } = this.cfg
@@ -942,6 +943,57 @@ describe('lib/socket', () => {
         })
 
         expect(runEventsStub).to.have.been.calledOnceWith('before:spec', spec)
+      })
+    })
+
+    describe('on(spec:changed)', () => {
+      it('calls the ack only after onSpecChanged resolves', async function () {
+        let resolveOnSpecChangedInvoked
+        const onSpecChangedInvoked = new Promise((resolve) => { resolveOnSpecChangedInvoked = resolve })
+        let resolveOnSpecChanged
+
+        this.socketOptions.onSpecChanged = sinon.stub().callsFake(() => {
+          resolveOnSpecChangedInvoked()
+
+          return new Promise((resolve) => { resolveOnSpecChanged = resolve })
+        })
+
+        const spec = { relative: 'e2e/spec.cy.ts', absolute: '/project/e2e/spec.cy.ts' }
+        let ackCalled = false
+        const ackPromise = new Promise((resolve) => {
+          this.client.emit('spec:changed', spec, () => {
+            ackCalled = true
+            resolve(null)
+          })
+        })
+
+        await onSpecChangedInvoked
+        expect(ackCalled, 'ack should not fire before onSpecChanged resolves').to.be.false
+
+        resolveOnSpecChanged()
+        await ackPromise
+        expect(ackCalled, 'ack should fire after onSpecChanged resolves').to.be.true
+      })
+
+      it('calls the ack even when onSpecChanged rejects', async function () {
+        this.socketOptions.onSpecChanged = sinon.stub().rejects(new Error('plugin error'))
+
+        const spec = { relative: 'e2e/spec.cy.ts', absolute: '/project/e2e/spec.cy.ts' }
+
+        await new Promise((resolve) => {
+          this.client.emit('spec:changed', spec, resolve)
+        })
+      })
+
+      it('does not throw when no ack is provided', async function () {
+        this.socketOptions.onSpecChanged = sinon.stub().resolves()
+        const spec = { relative: 'e2e/spec.cy.ts', absolute: '/project/e2e/spec.cy.ts' }
+
+        this.client.emit('spec:changed', spec)
+
+        await new Promise((resolve) => setTimeout(resolve, 50))
+
+        expect(this.socketOptions.onSpecChanged).to.have.been.calledWith(spec)
       })
     })
   })

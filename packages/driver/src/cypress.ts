@@ -45,6 +45,7 @@ import { PrimaryOriginCommunicator, SpecBridgeCommunicator } from './cross-origi
 import { setupAutEventHandlers } from './cypress/aut_event_handlers'
 
 import type { CachedTestState, ReporterRunState, RunState } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 import { DocumentDomainInjection } from '@packages/network-tools'
 import { setSpecContentSecurityPolicy } from './util/privileged_channel'
 
@@ -656,6 +657,32 @@ class $Cypress {
         return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
+        if (this.config('spec')?.relative === RUN_ALL_SPECS_KEY) {
+          const stampedSpec = args[1]?._cypressSpec
+          const test = args[0]
+          const absoluteFile = stampedSpec?.absolute ?? test?.invocationDetails?.absoluteFile
+          const relativeFile = stampedSpec?.relative ?? test?.invocationDetails?.relativeFile
+
+          if (absoluteFile && relativeFile && absoluteFile !== this.spec.absolute) {
+            const baseName = absoluteFile.split(/[/\\]/).pop() || ''
+            const lastDot = baseName.lastIndexOf('.')
+            const fileExtension = lastDot > 0 ? baseName.slice(lastDot) : ''
+            const specFileExtension = ['.spec', '.test', '-spec', '-test', '.cy']
+            .map((ext) => ext + fileExtension)
+            .find((ext) => baseName.endsWith(ext)) || fileExtension
+            const fileName = specFileExtension ? baseName.slice(0, -specFileExtension.length) : baseName
+
+            this.spec = {
+              ...this.spec,
+              name: baseName,
+              absolute: absoluteFile,
+              relative: relativeFile,
+              baseName,
+              fileName,
+            }
+          }
+        }
+
         this.maybeEmitCypressInCypress('mocha', 'test:before:run', args[0])
 
         if (this.config('isTextTerminal')) {

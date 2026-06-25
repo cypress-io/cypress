@@ -31,7 +31,7 @@ it('has correct invocation details for a test at root level', () => {
     at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts:16:1)
     at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts:155:12)
     at eval (<anonymous>)
-    at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)
+    at eval (cypress:///../driver/src/cypress/script_utils.ts:42:23)
     at tryCatcher (cypress:///../../node_modules/bluebird/js/release/util.js:17:23)`)
   } else if (isFirefox) {
     expect(details.column).to.equal(3)
@@ -65,7 +65,7 @@ myIt('has correct invocation details for myIt test at root level', function () {
     at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts:50:1)
     at eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts:155:12)
     at eval (<anonymous>)
-    at eval (cypress:///../driver/src/cypress/script_utils.ts:38:23)`)
+    at eval (cypress:///../driver/src/cypress/script_utils.ts:42:23)`)
   } else if (isFirefox) {
     expect(details.column).to.equal(5)
     expect(details.function).to.equal('<unknown>')
@@ -101,8 +101,8 @@ describe('outer describe block', () => {
     at Suite.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts:85:5)
     at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)
     at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)
-    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)
-    at eval (cypress:///../driver/src/cypress/mocha.ts:189:14)`)
+    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:130:31)
+    at eval (cypress:///../driver/src/cypress/mocha.ts:191:14)`)
       } else if (isFirefox) {
         expect(details.column).to.equal(7)
         expect(details.function).to.equal('<unknown>')
@@ -135,7 +135,7 @@ describe('outer describe block', () => {
     at Suite.eval (http://localhost:3500/__cypress/tests?p=cypress/e2e/cypress/stack_utils-invocationDetails.cy.ts:120:5)
     at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)
     at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)
-    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)`)
+    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:130:31)`)
       } else if (isFirefox) {
         expect(details.column).to.equal(9)
 

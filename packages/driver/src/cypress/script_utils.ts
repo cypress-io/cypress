@@ -3,6 +3,10 @@ import Bluebird from 'bluebird'
 import $networkUtils from './network_utils'
 import $sourceMapUtils from './source_map_utils'
 
+let scriptBeingLoaded: Script | null = null
+
+export const getScriptBeingLoaded = () => scriptBeingLoaded
+
 const fetchScript = (scriptWindow, script) => {
   return $networkUtils.fetch(script.relativeUrl, scriptWindow)
   .then((contents) => {
@@ -35,11 +39,16 @@ const evalScripts = (specWindow, scripts: any = []) => {
   return Bluebird.each(scripts, (_script: any) => {
     const [script, contents] = _script
 
+    scriptBeingLoaded = script
+
     if (script.load) {
       return script.load()
     }
 
     return specWindow.eval(`${contents}\n//# sourceURL=${script.fullyQualifiedUrl}`)
+  })
+  .finally(() => {
+    scriptBeingLoaded = null
   })
 }
 
@@ -59,6 +68,8 @@ const appendScripts = (specWindow, scripts) => {
     const firstScript = specWindow.document.querySelector('script')
     const specScript = specWindow.document.createElement('script')
 
+    scriptBeingLoaded = script
+
     return new Promise<void>((resolve) => {
       specScript.addEventListener('load', () => {
         resolve()
@@ -67,6 +78,9 @@ const appendScripts = (specWindow, scripts) => {
       specScript.src = script.relativeUrl
       firstScript.after(specScript)
     })
+  })
+  .finally(() => {
+    scriptBeingLoaded = null
   })
 }
 
@@ -88,6 +102,8 @@ interface RunScriptsOptions {
 
 // Supports either scripts as objects or as async import functions
 export default {
+  getScriptBeingLoaded,
+
   runScripts: ({ browser, scripts, specWindow, testingType, projectRoot, specRelativePath, specAbsolutePath }: RunScriptsOptions) => {
     // if scripts contains at least one promise
     if (scripts.length && typeof scripts[0] === 'function') {

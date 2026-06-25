@@ -203,6 +203,68 @@ describe('lib/open_project', () => {
         })
       })
 
+      it('uses the last-tracked projectBase.spec for after:spec during run-all-specs', function () {
+        this.config.experimentalInteractiveRunEvents = true
+        this.config.isTextTerminal = false
+        const onBrowserClose = () => Promise.resolve()
+        const runAllSpec = { absolute: '__all', relative: '__all' }
+        const realSpec = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts' }
+
+        return openProject.launch(this.browser, runAllSpec, { onBrowserClose })
+        .then(() => {
+          openProject.getProject().spec = realSpec
+
+          return browsers.open.lastCall.args[1].onBrowserClose()
+        })
+        .then(() => {
+          expect(runEvents.execute).to.be.calledWith('after:spec', realSpec)
+          expect(runEvents.execute).not.to.be.calledWith('after:spec', runAllSpec)
+        })
+      })
+
+      it('attributes screenshots to the real spec during run-all-specs', async function () {
+        const runAllSpec = { absolute: '__all', relative: '__all', name: 'All E2E Specs' }
+        const realSpec = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts', name: 'foo.cy.ts' }
+
+        await openProject.launch(this.browser, runAllSpec)
+        openProject.getProject().spec = realSpec
+
+        const middleware = this.automation.use.lastCall.args[0]
+        const data: any = {}
+
+        middleware.onBeforeRequest('take:screenshot', data)
+
+        expect(data.specName).to.equal('foo.cy.ts')
+      })
+
+      it('uses the launch-time spec.name for screenshots when projectBase.spec is not yet set', async function () {
+        const singleSpec = { absolute: '/project/e2e/foo.cy.ts', relative: 'e2e/foo.cy.ts', name: 'foo.cy.ts' }
+
+        await openProject.launch(this.browser, singleSpec)
+
+        const middleware = this.automation.use.lastCall.args[0]
+        const data: any = {}
+
+        middleware.onBeforeRequest('take:screenshot', data)
+
+        expect(data.specName).to.equal('foo.cy.ts')
+      })
+
+      it('skips after:spec if projectBase.spec is still the synthetic run-all-specs object', function () {
+        this.config.experimentalInteractiveRunEvents = true
+        this.config.isTextTerminal = false
+        const onBrowserClose = () => Promise.resolve()
+        const runAllSpec = { absolute: '__all', relative: '__all' }
+
+        return openProject.launch(this.browser, runAllSpec, { onBrowserClose })
+        .then(() => {
+          return browsers.open.lastCall.args[1].onBrowserClose()
+        })
+        .then(() => {
+          expect(runEvents.execute).not.to.be.calledWith('after:spec')
+        })
+      })
+
       it('calls connectToNewSpec when shouldLaunchNewTab is set and the browser is not electron', async function () {
         await openProject.launch(this.browser, this.spec, { shouldLaunchNewTab: true })
         expect(browsers.connectToNewSpec.lastCall.args[0]).to.be.equal(this.browser)

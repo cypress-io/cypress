@@ -12,6 +12,7 @@ import * as session from './session'
 import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
 import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser, AutomationCommands } from '@packages/types'
+import { RUN_ALL_SPECS_KEY } from '@packages/types/src'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
@@ -120,10 +121,12 @@ export class OpenProject extends EventEmitter {
     }
 
     if (!am || !am.onBeforeRequest) {
+      const projectBase = this.projectBase
+
       automation.use({
         onBeforeRequest<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> {
           if (message === 'take:screenshot') {
-            data.specName = spec.name
+            data.specName = projectBase?.spec?.name ?? spec.name
 
             return data
           }
@@ -138,7 +141,13 @@ export class OpenProject extends EventEmitter {
         return Promise.resolve()
       }
 
-      return runEvents.execute('after:spec', spec)
+      const specToClose = this.projectBase.spec ?? spec
+
+      if (!specToClose || specToClose.absolute === RUN_ALL_SPECS_KEY) {
+        return Promise.resolve()
+      }
+
+      return runEvents.execute('after:spec', specToClose)
     }
 
     const { onBrowserClose } = options

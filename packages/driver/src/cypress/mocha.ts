@@ -4,6 +4,7 @@ import $errUtils, { CypressError } from './error_utils'
 import $utils from './utils'
 import $stackUtils from './stack_utils'
 import $sourceMapUtils from './source_map_utils'
+import { getScriptBeingLoaded } from './script_utils'
 
 // in the browser mocha is coming back
 // as window
@@ -536,6 +537,15 @@ const patchSuiteAddTest = (specWindow) => {
 
     if (!test.invocationDetails) {
       test.invocationDetails = $stackUtils.getInvocationDetails(specWindow, $sourceMapUtils.getSourceMapProjectRoot(), 'test')
+    }
+
+    const loadingScript = getScriptBeingLoaded()
+
+    if (loadingScript && !test._cypressSpec) {
+      test._cypressSpec = {
+        absolute: loadingScript.absolute,
+        relative: loadingScript.relative,
+      }
     }
 
     const ret = suiteAddTest.apply(this, args)

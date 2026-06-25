@@ -35,7 +35,7 @@ describe('component testing stack utils', () => {
     at Suite.<anonymous> (http://localhost:8080/__cypress/src/spec-0.js:28:3)
     at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)
     at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)
-    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)`)
+    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:130:31)`)
     } else if (isFirefox) {
       // the firefox traces are really long, so just validate the first line
       const firstLine = details.stack.split('\n')[0]
@@ -62,8 +62,8 @@ describe('component testing stack utils', () => {
     at Suite.<anonymous> (http://localhost:8080/__cypress/src/spec-0.js:55:3)
     at Object.create (cypress:///../driver/node_modules/mocha/lib/interfaces/common.js:141:19)
     at context.describe.context.context (cypress:///../driver/node_modules/mocha/lib/interfaces/bdd.js:42:27)
-    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:128:31)
-    at eval (cypress:///../driver/src/cypress/mocha.ts:189:14)`)
+    at createRunnable (cypress:///../driver/src/cypress/mocha.ts:130:31)
+    at eval (cypress:///../driver/src/cypress/mocha.ts:191:14)`)
     } else if (isFirefox) {
       // the firefox traces are really long, so just validate the first line
       const firstLine = details.stack.split('\n')[0]
