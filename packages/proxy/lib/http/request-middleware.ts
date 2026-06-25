@@ -274,20 +274,6 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
 const ApplyHttpInterception: RequestMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
 
-  const devServerUrl = new URL(this.req.proxiedUrl)
-
-  if (devServerUrl.pathname.startsWith(this.config.devServerPublicPathRoute)) {
-    span?.end()
-
-    try {
-      const httpResponse = await fetchOriginAsHttpResponse(this)
-
-      return applyHttpResponseToCtx(this, httpResponse)
-    } catch (err) {
-      return this.onError(err)
-    }
-  }
-
   const httpRequest = toHttpRequest(this)
 
   this.req.requestId = httpRequest.inFlightInterceptId

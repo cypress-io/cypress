@@ -139,14 +139,14 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
     request: HttpRequest,
     next: OriginForwarder,
   ): Promise<HttpResponse> => {
+    if (isExcludedFromCyIntercept(request, this.config)) {
+      return next(request)
+    }
+
     if (matchesRoutePreflight(this.routes, request)) {
       request.hadIntercept = true
 
       return buildPreflightHttpResponse(request)
-    }
-
-    if (isExcludedFromCyIntercept(request, this.config)) {
-      return next(request)
     }
 
     const matchingRoutes = matchRoutes(this.routes, request)

@@ -329,6 +329,42 @@ describe('CyIntercept', () => {
     expect(response.body).toBe('origin')
   })
 
+  it('skips CORS preflight handling for excluded dev-server paths', async () => {
+    const cyIntercept = new CyIntercept({
+      socket,
+      config: { devServerPublicPathRoute: '/__cypress/src' },
+    })
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: false,
+        routeMatcher: { url: '*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+    const next = vi.fn(async () => {
+      return {
+        statusCode: 200,
+        headers: {},
+        body: 'origin',
+      }
+    })
+
+    const response = await httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://localhost/__cypress/src/main.js',
+      method: 'OPTIONS',
+      headers: {
+        'access-control-request-method': 'GET',
+      },
+    }, next)
+
+    expect(next).toHaveBeenCalledOnce()
+    expect(response.body).toBe('origin')
+  })
+
   describe('._restoreMatcherOptionsTypes', () => {
     it('rehydrates regexes properly', () => {
       const { url } = _restoreMatcherOptionsTypes({

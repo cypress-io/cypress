@@ -1,12 +1,12 @@
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import { NetworkProxy } from '../../'
 import { CyIntercept } from '@packages/net-stubbing'
-import { HttpIntercept } from '@packages/network-interception'
+import { createHttpInterceptWithDefaultMiddleware } from '@packages/network-interception'
 import * as errors from '@packages/errors'
 import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
 import supertest from 'supertest'
-import { allowDestroy } from '@packages/network'
+import { allowDestroy, blocked } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import { type ForHttpIntercept } from '@packages/network-interception'
@@ -20,6 +20,7 @@ describe('network stubbing', () => {
   let remoteStates: RemoteStates
   let cyIntercept: CyIntercept
   let networkInterception: ForHttpIntercept
+  let proxy: NetworkProxy
   let app
   let destinationApp
   let server
@@ -38,6 +39,30 @@ describe('network stubbing', () => {
     return new RemoteStates(remoteStateConfig, documentDomainInjection)
   }
 
+  const setupInterceptStack = () => {
+    cyIntercept = new CyIntercept({
+      socket,
+      onSyncInterceptSkipped: (url) => {
+        errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
+      },
+      config: {
+        devServerPublicPathRoute: config.devServerPublicPathRoute,
+      },
+    })
+
+    networkInterception = createHttpInterceptWithDefaultMiddleware(config, {
+      matchesBlockedHost: blocked.matches,
+    })
+
+    networkInterception.use(cyIntercept.middleware)
+
+    if (proxy) {
+      proxy.http.networkInterception = networkInterception
+    }
+
+    return networkInterception
+  }
+
   beforeEach(() => {
     config = {
       experimentalCspAllowList: false,
@@ -49,17 +74,10 @@ describe('network stubbing', () => {
     socket = new EventEmitter()
     socket.toDriver = vi.fn()
     app = express()
-    cyIntercept = new CyIntercept({
-      socket,
-      onSyncInterceptSkipped: (url) => {
-        errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
-      },
-    })
 
-    networkInterception = new HttpIntercept()
-    networkInterception.use(cyIntercept.middleware)
+    setupInterceptStack()
 
-    const proxy = new NetworkProxy({
+    proxy = new NetworkProxy({
       socket,
       networkServices: createProxyNetworkServices(),
       networkInterception,
@@ -316,8 +334,9 @@ describe('network stubbing', () => {
   it('does not intercept requests to the dev server', async () => {
     destinationApp.get('/__cypress/src/main.js', (req, res) => res.send('it worked'))
 
-    // setup an intercept that matches all requests
-    // and has a static response
+    config.devServerPublicPathRoute = '/__cypress/src'
+    setupInterceptStack()
+
     cyIntercept.routes.push({
       id: '1',
       routeMatcher: {
@@ -331,9 +350,6 @@ describe('network stubbing', () => {
       matches: 1,
     })
 
-    config.devServerPublicPathRoute = '/__cypress/src'
-
-    // request to the dev server does NOT get intercepted
     const resp = await supertest(app)
     .get(`/http://localhost:${destinationPort}/__cypress/src/main.js`)
 
@@ -346,6 +362,29 @@ describe('network stubbing', () => {
 
     expect(resp2.status).toEqual(200)
     expect(resp2.text).toEqual('foo')
+  })
+
+  it('still applies blockHosts to dev server URLs', async () => {
+    destinationApp.get('/__cypress/src/main.js', (req, res) => res.send('it worked'))
+
+    config.blockHosts = [`localhost:${destinationPort}`]
+    config.devServerPublicPathRoute = '/__cypress/src'
+    setupInterceptStack()
+
+    cyIntercept.routes.push({
+      id: '1',
+      routeMatcher: { url: '*' },
+      hasInterceptor: false,
+      staticResponse: { body: 'stubbed' },
+      getFixture,
+      matches: 1,
+    })
+
+    const resp = await supertest(app)
+    .get(`/http://localhost:${destinationPort}/__cypress/src/main.js`)
+
+    expect(resp.status).toEqual(503)
+    expect(resp.headers['x-cypress-matched-blocked-host']).toBe(`localhost:${destinationPort}`)
   })
 
   describe('CSP Headers', () => {
