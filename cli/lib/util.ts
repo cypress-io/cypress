@@ -27,6 +27,12 @@ const debug = Debug('cypress:cli')
 
 const issuesUrl = 'https://github.com/cypress-io/cypress/issues'
 
+// `si.osInfo()` shells out to OS utilities (e.g. wmic/PowerShell on Windows,
+// sw_vers/system_profiler on macOS). When a security/EDR agent intercepts those
+// child processes they can hang indefinitely, freezing every Cypress command.
+// Cap the wait so we degrade to `os.release()` instead of blocking forever.
+const OS_INFO_TIMEOUT_MS = 10000
+
 /**
  * Returns SHA512 of a file
  */
@@ -418,7 +424,7 @@ const util = {
 
   async getOsVersionAsync (): Promise<any> {
     try {
-      const osInfo = await si.osInfo()
+      const osInfo = await Bluebird.resolve(si.osInfo()).timeout(OS_INFO_TIMEOUT_MS)
 
       if (osInfo.distro && osInfo.release) {
         return `${osInfo.distro} - ${osInfo.release}`

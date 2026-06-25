@@ -546,6 +546,34 @@ describe('util', () => {
       expect(si.osInfo).toHaveBeenCalled()
       expect(os.release).toHaveBeenCalled()
     })
+
+    it('falls back to os.release when systeminformation hangs', async () => {
+      vi.useFakeTimers()
+
+      try {
+        const os = (await import('os')).default
+        const si = (await import('systeminformation')).default
+
+        vi.mocked(os.release).mockReturnValue('hung-release')
+        // never resolves - simulates a child process (wmic/PowerShell/sw_vers)
+        // hanging, e.g. when blocked by an endpoint security agent
+        vi.mocked(si.osInfo).mockReturnValue(new Promise(() => {}) as Promise<Systeminformation.OsData>)
+
+        const util = (await import('../../lib/util')).default
+
+        const resultPromise = util.getOsVersionAsync()
+
+        await vi.advanceTimersByTimeAsync(10000)
+
+        const result = await resultPromise
+
+        expect(result).toEqual('hung-release')
+        expect(si.osInfo).toHaveBeenCalled()
+        expect(os.release).toHaveBeenCalled()
+      } finally {
+        vi.useRealTimers()
+      }
+    })
   })
 
   describe('dequote', () => {
