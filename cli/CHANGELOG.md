@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.18.1
+
+**Bugfixes:**
+
+- Fixed an issue where [`cy.type()`](https://on.cypress.io/type) fired the simulated `keyup` event in the same turn as `keydown` and `input`, so `keyup` handlers that read state updated asynchronously in an `input` listener could observe stale values. `keyup` is now deferred to the next microtask, matching real browser event ordering. Fixes [#14864](https://github.com/cypress-io/cypress/issues/14864). Fixed in [#34068](https://github.com/cypress-io/cypress/pull/34068).
+
 ## 15.18.0
 
 **Performance:**
