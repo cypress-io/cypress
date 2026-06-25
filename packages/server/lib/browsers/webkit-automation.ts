@@ -67,6 +67,7 @@ type WebKitAutomationOpts = {
   initialUrl: string
   downloadsFolder: string
   videoApi?: RunModeVideoApi
+  isHeadless: boolean
 }
 
 export class WebKitAutomation {
@@ -74,10 +75,12 @@ export class WebKitAutomation {
   private browser: playwright.Browser
   private context!: playwright.BrowserContext
   private page!: playwright.Page
+  private isHeadless: boolean
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
     this.browser = opts.browser
+    this.isHeadless = opts.isHeadless
   }
 
   // static initializer to avoid "not definitively declared"
@@ -94,6 +97,12 @@ export class WebKitAutomation {
     // new context comes with new cache + storage
     const newContext = await this.browser.newContext({
       ignoreHTTPSErrors: true,
+      // In headless mode, set a standard devicePixelRatio so that screenshots
+      // are consistent regardless of the host machine's DPI (e.g. 2x locally
+      // vs 1x in CI) and to avoid fuzzy text on high-DPI displays. This mirrors
+      // Chrome, which only forces `--force-device-scale-factor=1` when headless.
+      // https://github.com/cypress-io/cypress/issues/23808
+      ...(this.isHeadless ? { deviceScaleFactor: 1 } : {}),
       recordVideo: options.videoApi && {
         dir: os.tmpdir(),
         size: { width: 1280, height: 720 },
