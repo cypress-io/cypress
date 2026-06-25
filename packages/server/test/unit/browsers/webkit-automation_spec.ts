@@ -70,15 +70,36 @@ describe('lib/browsers/webkit-automation', () => {
     } as unknown as RunModeVideoApi
   })
 
-  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi }> = { videoApi }) => {
+  const createAutomation = (opts: Partial<{ videoApi: RunModeVideoApi, isHeadless: boolean }> = { videoApi }) => {
     return WebKitAutomation.create({
       automation,
       browser: mock.browser as any,
       initialUrl: 'http://localhost/__cypress',
       downloadsFolder: '/tmp/downloads',
       videoApi: opts.videoApi,
+      isHeadless: opts.isHeadless ?? true,
     })
   }
+
+  context('devicePixelRatio', () => {
+    // https://github.com/cypress-io/cypress/issues/23808
+    // Headless WebKit forces a standard devicePixelRatio so screenshots are
+    // consistent regardless of host DPI, mirroring headless Chrome. Headed
+    // WebKit keeps the host's native DPR (also matching Chrome).
+    it('forces deviceScaleFactor to 1 when headless', async () => {
+      await createAutomation({ isHeadless: true })
+
+      expect(mock.browser.newContext).to.be.called
+      expect(mock.browser.newContext.firstCall.args[0]).to.include({ deviceScaleFactor: 1 })
+    })
+
+    it('does not set deviceScaleFactor when headed', async () => {
+      await createAutomation({ isHeadless: false })
+
+      expect(mock.browser.newContext).to.be.called
+      expect(mock.browser.newContext.firstCall.args[0]).not.to.have.property('deviceScaleFactor')
+    })
+  })
 
   context('video recording', () => {
     it('registers a video controller that cannot be restarted', async () => {

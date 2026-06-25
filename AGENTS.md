@@ -206,6 +206,31 @@ yarn clean-deps && yarn
 - **Blank line before `return`** — Enforced via `padding-line-between-statements`.
 - **Sync FS calls** — Flagged with a warning (except `existsSync`); prefer async variants.
 
+### Code Comments
+
+- **Prefer none** — Always prefer no code comment if the code is self-explanatory.
+- **Explain the why** — When a comment is necessary, use it to explain the *why* and anything relevant that is not directly expressed by the code itself.
+- **Don't repeat yourself** — Do not restate the same comment multiple times in a file as the code flows through each step.
+- **Present state only** — Keep comments relevant to the current state of the code. Do not describe what changed or how the code used to be different.
+
+Bad examples:
+
+```js
+// never wipe the entire jar - the old hack called clearCookies() with no filter
+// we no longer need to clear the state here, CDP added automatically clearing
+// Firefox previously relied on os-level focus, now we use WebDrive BiDi to focus
+```
+
+Good examples:
+
+```js
+// Close any extra pages so they don't leak into other tests
+// Firefox doesn't support this in native BiDi, so we pull remote.location from current frame
+// `cookie`'s serializer rejects an IPv6 literal Domain (e.g. `[::1]`), crashing
+// the proxy. Browsers scope cookies for IP hosts to that host anyway, so omit
+// Domain and let the cookie default to host-only.
+```
+
 ## Pull Requests
 
 [`CONTRIBUTING.md`](./CONTRIBUTING.md) is the source of truth for PR conventions, including the semantic-release title prefix that determines the next version. The other essentials:
