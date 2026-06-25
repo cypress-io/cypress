@@ -399,17 +399,19 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
 
   this.debug('the new response headers are %o', this.res.getHeaderNames())
 
-  const cspStrippedHeaders = applyCspAllowListToHeaders(filteredHeaders, {
-    experimentalCspAllowList: this.config.experimentalCspAllowList,
-  })
+  if (this.req.isFromExtraTarget) {
+    const cspStrippedHeaders = applyCspAllowListToHeaders(filteredHeaders, {
+      experimentalCspAllowList: this.config.experimentalCspAllowList,
+    })
 
-  for (const headerName of cspHeaderNames) {
-    this.res.removeHeader(headerName)
-  }
+    for (const headerName of cspHeaderNames) {
+      this.res.removeHeader(headerName)
+    }
 
-  for (const [headerName, value] of Object.entries(cspStrippedHeaders)) {
-    if (cspHeaderNames.includes(headerName as typeof cspHeaderNames[number])) {
-      this.res.setHeader(headerName, value)
+    for (const [headerName, value] of Object.entries(cspStrippedHeaders)) {
+      if (cspHeaderNames.includes(headerName as typeof cspHeaderNames[number])) {
+        this.res.setHeader(headerName, value)
+      }
     }
   }
 

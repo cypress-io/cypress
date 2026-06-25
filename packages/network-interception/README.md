@@ -59,10 +59,8 @@ type InterceptMiddleware = (
 ```mermaid
 flowchart TB
   subgraph compositionRoot["server-base open"]
-    REG["registerDefaultInterceptMiddleware<br/>blockHosts + CSP"]
-    CI["CyIntercept<br/>cy.intercept middleware"]
-    REG --> HI[HttpIntercept]
-    CI --> HI
+    STACK["createHttpInterceptStack<br/>blockHosts + CSP + CyIntercept"]
+    STACK --> HI[HttpIntercept]
   end
   subgraph transportLayer["transport adapters"]
     MITM["ApplyHttpInterception<br/>packages/proxy"]
@@ -78,14 +76,13 @@ flowchart TB
 
 ```
 server-base.open()
-  → createHttpInterceptWithDefaultMiddleware() (blockHosts + CSP middleware)
-  → new CyIntercept() + httpIntercept.use(cyIntercept.middleware)
+  → createHttpInterceptStack(config, socket) — blockHosts, CSP, CyIntercept on one HttpIntercept
   → if proxy enabled: createNetworkProxy() with proxy driven ports
   → if proxy disabled: open_project passes same HttpIntercept to CDPNetworkInterception
 
 ApplyHttpInterception middleware (proxy path)
-  → networkInterception.handle(toHttpRequest(ctx), forwardToOrigin)
-  → HttpResponseCodec.toProxyResponse / commitInterceptResponse
+  → networkInterception.handle(toHttpRequest(ctx), createFetchOrigin)
+  → HttpResponseCodec.toProxyResponse / commitHttpResponseToProxy
 
 CDPNetworkInterception (CDP path)
   → networkInterception.handle(toHttpRequest(pause), forwardViaFetch)
@@ -102,9 +99,9 @@ Use this when a concern can run on materialized `HttpRequest` / `HttpResponse` (
 
 | Concern | Where middleware is defined | Where it is registered | Runs on CDP? |
 | --- | --- | --- | --- |
-| `blockHosts` | `createBlockConfiguredHosts` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
-| CSP allow-list | `createCspConfiguredAllowList` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
-| `cy.intercept` | `CyIntercept` (`net-stubbing`) | `server-base.open()` via `httpIntercept.use()` | Yes |
+| `blockHosts` | `createBlockConfiguredHosts` (`network-interception`) | `createHttpInterceptStack` (`server`) | Yes (same stack) |
+| CSP allow-list | `createCspConfiguredAllowList` (`network-interception`) | `createHttpInterceptStack` (`server`) | Yes (same stack) |
+| `cy.intercept` | `CyIntercept` (`net-stubbing`) | `createHttpInterceptStack` (`server`) | Yes |
 | Document rewrite | `SetInjectionLevel` → `MaybeInjectHtml` → `MaybeRemoveSecurity` (`proxy` streaming) | `server-base` wires `createProxyNetworkServices()` driven ports | No (intentional) |
 
 **Keep on proxy streaming middleware** when the concern needs the response byte stream (gzip/br), multiple response-stage hooks, or is proxy-only for now:

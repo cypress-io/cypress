@@ -18,20 +18,17 @@ yarn workspace @packages/net-stubbing check-ts
 
 **Architecture**
 
-- `lib/server/` — Server-side interception logic
-  - `index.ts` — Entry point; registers the net-stubbing plugin with the proxy
-  - `route-matching.ts` — Matches incoming requests against registered routes
-  - `intercepted-request.ts` — Represents a request currently being intercepted
-  - `driver-events.ts` — Handles events from the driver (browser) to the server
-  - `state.ts` — Manages the server-side route and handler state
-  - `util.ts`, `types.ts` — Server-specific utilities and types
+- `lib/cy-intercept.ts` — `CyIntercept` class: route state, in-flight intercepts, driver socket I/O, and `HttpIntercept` middleware
+- `lib/core/` — Route matching, subscriptions, static responses, merge-handler-result, in-flight intercept lifecycle
+- `lib/driver-http-conversion.ts` — Driver socket message shapes and HTTP conversions
+- `lib/server/` — Shared utilities (`util.ts`), `InterceptError`, and middleware helpers still used by the proxy path
 - Shared protocol and public API types live in `@packages/network-interception` (public API types are copied to `cypress/types/net-stubbing` at CLI build time)
 
 **Gotchas / Notes**
 
 - Do not build `.js` files manually during development; `@packages/ts` provides require-time transpilation.
 - End-to-end behavioral tests live in `@packages/driver` (`net_stubbing_spec`), not in this package's `test/` directory.
-- The `lib/server/` entry point is what gets imported by `@packages/server`; the browser side is in `@packages/driver`.
+- `createHttpInterceptStack` in `@packages/server` wires `CyIntercept.middleware` onto the shared `HttpIntercept` onion.
 
 **Integration Points**
 

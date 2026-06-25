@@ -396,7 +396,7 @@ describe('http/response-middleware', function () {
         'content-security-policy': 'default-src \'self\'',
       }, {
         experimentalCspAllowList: false,
-      })
+      }, { isFromExtraTarget: true })
 
       await testMiddleware([OmitProblematicHeaders], ctx)
       expect(ctx.res.set).toHaveBeenCalledWith(expect.objectContaining({ 'good-header': 'value' }))
@@ -411,10 +411,14 @@ describe('http/response-middleware', function () {
       'Content-Security-Policy-Report-Only',
     ]
 
+    const prepareCspContext = (additionalHeaders = {}, config = {}) => {
+      prepareContext(additionalHeaders, config, { isFromExtraTarget: true })
+    }
+
     unsupportedCSPDirectives.forEach((directive) => {
       validCspHeaderNames.forEach((headerName) => {
         it(`always removes "${directive}" directive from "${headerName}" headers 'when experimentalCspAllowList is true`, async () => {
-          prepareContext({
+          prepareCspContext({
             [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
           }, {
             experimentalCspAllowList: true,
@@ -427,7 +431,7 @@ describe('http/response-middleware', function () {
         })
 
         it(`always removes "${directive}" from "${headerName}" headers when experimentalCspAllowList is an empty array`, async () => {
-          prepareContext({
+          prepareCspContext({
             [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
           }, {
             experimentalCspAllowList: [],
@@ -440,7 +444,7 @@ describe('http/response-middleware', function () {
         })
 
         it(`always removes "${directive}" from "${headerName}" headers when experimentalCspAllowList is an array including "${directive}"`, async () => {
-          prepareContext({
+          prepareCspContext({
             [`${headerName}`]: `${directive} 'fake-csp-${directive}-value'; fake-csp-directive fake-csp-value`,
           }, {
             experimentalCspAllowList: [`${directive}`],
@@ -456,7 +460,7 @@ describe('http/response-middleware', function () {
 
     validCspHeaderNames.forEach((headerName) => {
       it(`removes "${headerName}" headers when experimentalCspAllowList is false`, async () => {
-        prepareContext({
+        prepareCspContext({
           [`${headerName}`]: `fake-csp-directive fake-csp-value`,
         }, {
           experimentalCspAllowList: false,
@@ -469,7 +473,7 @@ describe('http/response-middleware', function () {
 
     validCspHeaderNames.forEach((headerName) => {
       it(`will not remove invalid problematicCspDirectives directives provided from "${headerName}" headers when experimentalCspAllowList is an array of directives`, async () => {
-        prepareContext({
+        prepareCspContext({
           [`${headerName}`]: `fake-csp-directive-0 fake-csp-value-0; fake-csp-directive-1 fake-csp-value-1; fake-csp-directive-2 fake-csp-value-2`,
         }, {
           experimentalCspAllowList: ['fake-csp-directive-1'],
@@ -485,7 +489,7 @@ describe('http/response-middleware', function () {
     validCspHeaderNames.forEach((headerName) => {
       problematicCspDirectives.forEach((directive) => {
         it(`will allow problematicCspDirectives provided from "${headerName}" headers when experimentalCspAllowList is an array including "${directive}"`, async () => {
-          prepareContext({
+          prepareCspContext({
             [`${headerName}`]: `fake-csp-directive fake-csp-value; ${directive} fake-csp-${directive}-value`,
           }, {
             experimentalCspAllowList: [directive],
@@ -501,7 +505,7 @@ describe('http/response-middleware', function () {
           if (directive === otherDirective) return
 
           it(`will still remove other problematicCspDirectives provided from "${headerName}" headers when experimentalCspAllowList is an array including singe directives "${directive}"`, async () => {
-            prepareContext({
+            prepareCspContext({
               [`${headerName}`]: `${directive} fake-csp-${directive}-value; fake-csp-directive fake-csp-value; ${otherDirective} fake-csp-${otherDirective}-value`,
             }, {
               experimentalCspAllowList: [directive],
@@ -514,7 +518,7 @@ describe('http/response-middleware', function () {
           })
 
           it(`will allow both problematicCspDirectives provided from "${headerName}" headers when experimentalCspAllowList is an array including multiple directives ["${directive}","${otherDirective}"]`, async () => {
-            prepareContext({
+            prepareCspContext({
               [`${headerName}`]: `${directive} fake-csp-${directive}-value; fake-csp-directive fake-csp-value; ${otherDirective} fake-csp-${otherDirective}-value`,
             }, {
               experimentalCspAllowList: [directive, otherDirective],
@@ -529,7 +533,7 @@ describe('http/response-middleware', function () {
       })
     })
 
-    function prepareContext (additionalHeaders = {}, config = {}) {
+    function prepareContext (additionalHeaders = {}, config = {}, req = {}) {
       const headers = {
         'content-type': 'text/html',
         'content-length': '123',
@@ -541,6 +545,10 @@ describe('http/response-middleware', function () {
       }
 
       ctx = {
+        req: {
+          isFromExtraTarget: false,
+          ...req,
+        },
         config: {
           experimentalCspAllowList: false,
           ...config,

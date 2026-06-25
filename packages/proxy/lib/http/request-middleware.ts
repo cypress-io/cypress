@@ -10,6 +10,8 @@ import {
   createFetchOrigin,
   toHttpRequest,
 } from '../adapters/proxy-http-interception'
+import type { RequestInterceptionMiddlewareCtx } from '../adapters/types'
+import type { HttpResponse } from '@packages/network-interception'
 import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
 import { HttpResponseCodec } from '../adapters/http-response-codec'
 
@@ -270,6 +272,22 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   this.next()
 }
 
+async function commitHttpResponseToProxy (
+  mw: RequestInterceptionMiddlewareCtx,
+  httpResponse: HttpResponse,
+): Promise<void> {
+  mw.req.requestId = mw.req.requestId || _.uniqueId('interceptedRequest')
+  mw.req.onInterceptResponseWritten = httpResponse.onResponseWrittenToClient
+
+  const { incomingRes, bodyStream } = await HttpResponseCodec.toProxyResponse(httpResponse)
+
+  if (mw.req.hadIntercept) {
+    setDefaultHeaders(mw.req, incomingRes)
+  }
+
+  return mw.onResponse(incomingRes, bodyStream)
+}
+
 const ApplyHttpInterception: RequestMiddleware = async function () {
   const span = telemetry.startSpan({ name: 'apply:http:interception', parentSpan: this.reqMiddlewareSpan, isVerbose: true })
 
@@ -286,16 +304,7 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
 
     span?.end()
 
-    this.req.requestId = this.req.requestId || _.uniqueId('interceptedRequest')
-    this.req.onInterceptResponseWritten = httpResponse.onResponseWrittenToClient
-
-    const { incomingRes, bodyStream } = await HttpResponseCodec.toProxyResponse(httpResponse)
-
-    if (this.req.hadIntercept) {
-      setDefaultHeaders(this.req, incomingRes)
-    }
-
-    return this.onResponse(incomingRes, bodyStream)
+    return commitHttpResponseToProxy(this, httpResponse)
   } catch (err) {
     span?.end()
 
@@ -307,16 +316,7 @@ const SendRequestOutgoing: RequestMiddleware = async function () {
   try {
     const httpResponse = await createFetchOrigin(this)(toHttpRequest(this))
 
-    this.req.requestId = this.req.requestId || _.uniqueId('interceptedRequest')
-    this.req.onInterceptResponseWritten = httpResponse.onResponseWrittenToClient
-
-    const { incomingRes, bodyStream } = await HttpResponseCodec.toProxyResponse(httpResponse)
-
-    if (this.req.hadIntercept) {
-      setDefaultHeaders(this.req, incomingRes)
-    }
-
-    return this.onResponse(incomingRes, bodyStream)
+    return commitHttpResponseToProxy(this, httpResponse)
   } catch (err) {
     return this.onError(err)
   }

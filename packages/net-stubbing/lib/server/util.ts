@@ -105,6 +105,22 @@ function wait (fn, ms) {
   })
 }
 
+export function normalizeTextRequestBody (
+  body: unknown,
+  headers: Record<string, string | string[]>,
+): unknown {
+  const bodyEncoding = getBodyEncoding({
+    body: body ?? '',
+    headers,
+  } as CyHttpMessages.IncomingRequest)
+
+  if (bodyEncoding !== 'binary' && body && Buffer.isBuffer(body)) {
+    return body.toString('utf8')
+  }
+
+  return body
+}
+
 type BodyEncoding = 'utf8' | 'binary' | null
 
 export function getBodyEncoding (req: CyHttpMessages.IncomingRequest): BodyEncoding {

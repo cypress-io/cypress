@@ -4,7 +4,7 @@ import { getEncoding } from 'istextorbinary'
 import type { IncomingMessage } from 'http'
 import type { Readable } from 'stream'
 import type { ForOriginForwarding, HttpRequest, HttpResponse } from '@packages/network-interception'
-import { getBodyEncoding } from '@packages/net-stubbing/lib/server/util'
+import { normalizeTextRequestBody } from '@packages/net-stubbing/lib/server/util'
 import { HttpResponseCodec } from './http-response-codec'
 import { sendRequestOutgoing } from './send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
@@ -111,14 +111,7 @@ export function createFetchOrigin (mw: RequestInterceptionMiddlewareCtx): ForOri
     applyOutboundToProxiedRequest(mw.req, outbound)
 
     if (outbound.body !== undefined) {
-      const bodyEncoding = getBodyEncoding({
-        body: mw.req.body,
-        headers: mw.req.headers,
-      } as any)
-
-      if (bodyEncoding !== 'binary' && mw.req.body && Buffer.isBuffer(mw.req.body)) {
-        mw.req.body = mw.req.body.toString('utf8')
-      }
+      mw.req.body = normalizeTextRequestBody(mw.req.body, mw.req.headers)
     }
 
     return new Promise((resolve, reject) => {

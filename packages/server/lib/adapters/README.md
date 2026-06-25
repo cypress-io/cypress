@@ -28,14 +28,13 @@ flowchart LR
 
 | Step | Code | Result |
 | --- | --- | --- |
-| 1. Config middleware | `createHttpInterceptWithDefaultMiddleware(config, { matchesBlockedHost })` | `HttpIntercept` with `blockHosts` + CSP `use()` layers |
-| 2. Driver wiring | `new CyIntercept({ socket, config, onSyncInterceptSkipped })` then `httpIntercept.use(cyIntercept.middleware)` | Strips internal headers, runs `cy.intercept`, restores them on responses |
+| 1. Intercept stack | `createHttpInterceptStack(config, socket)` | `HttpIntercept` with blockHosts, CSP, and `CyIntercept.middleware` |
 | 2a. Proxy path | `createNetworkProxy()` when proxy enabled | `NetworkProxy.networkInterception` = shared `HttpIntercept`; driven ports on `networkServices` |
 | 2b. CDP path | `open_project.launch()` when `CYPRESS_INTERNAL_DISABLE_PROXY=1` | Passes `server.networkInterception` to browser launch |
 
 | Concern | Wiring |
 | --- | --- |
-| `HttpIntercept` + config middleware | `createHttpInterceptWithDefaultMiddleware()` in `open()` |
+| `HttpIntercept` stack | `createHttpInterceptStack()` in `open()` |
 | `cy.intercept` routes + driver events | `CyIntercept` on the stack; `socket-base` calls `cyIntercept.handleDriverEvent` |
 | Proxy driven ports | `createProxyNetworkServices()` when proxy is enabled |
 | CDP transport | Same `HttpIntercept` instance — no second stack |
@@ -44,8 +43,7 @@ Config middleware (`blockHosts`, CSP) registers on `HttpIntercept` via `use()`. 
 
 ### Tests
 
-- `packages/network-interception/test/unit/register-default-intercept-middleware.spec.ts`
-- `packages/server/test/unit/intercept-middleware/strip-internal-headers_spec.ts`
+- `packages/network-interception/test/unit/config-intercept-middleware.spec.ts`
 - `packages/server/test/unit/server-base_spec.ts`
 - `packages/server/test/unit/browsers/cdp-cy-intercept-integration_spec.ts`
 - `packages/server/test/unit/open_project_spec.ts`

@@ -40,15 +40,11 @@ import { runSubscriptions } from './core/subscription-runner'
 import {
   fromDriverInterceptChangedData,
   toDriverInterceptEventData,
-} from './driver-intercept-bridge'
-import type { PendingEventHandler } from './driver-intercept-bridge'
-import { getAllStringMatcherFields, getBodyEncoding, setResponseFromFixture, emit } from './server/util'
+} from './driver-http-conversion'
+import type { PendingEventHandler } from './driver-http-conversion'
+import { getAllStringMatcherFields, normalizeTextRequestBody, setResponseFromFixture, emit } from './server/util'
 
 const debug = Debug('cypress:net-stubbing:cy-intercept')
-
-export const INTERCEPT_HEADERS = [
-  'x-cypress-is-from-extra-target',
-] as const
 
 export type CyInterceptConfig = {
   devServerPublicPathRoute?: string
@@ -65,26 +61,6 @@ export type DriverEventFrame =
   | NetEvent.ToServer.Subscribe
   | NetEvent.ToServer.EventHandlerResolved
   | NetEvent.ToServer.SendStaticResponse
-
-function stripInternalHeaders (
-  request: HttpRequest,
-  internalHeaders: readonly string[],
-): Record<string, string | string[]> {
-  const stashed = { ..._.pick(request.headers, internalHeaders) }
-
-  request.headers = _.omit(request.headers, internalHeaders) as Record<string, string | string[]>
-
-  return stashed
-}
-
-function restoreInternalHeaders (
-  response: HttpResponse,
-  stashed: Record<string, string | string[]>,
-): HttpResponse {
-  response.headers = { ...response.headers, ...stashed }
-
-  return response
-}
 
 export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
   const stringMatcherFields = getAllStringMatcherFields(options)
@@ -154,20 +130,11 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
     request: HttpRequest,
     next: ForOriginForwarding,
   ): Promise<HttpResponse> => {
-    const stashedInternalHeaders = stripInternalHeaders(request, INTERCEPT_HEADERS)
-    const excludedByHeader = INTERCEPT_HEADERS.some((header) => stashedInternalHeaders[header])
-
-    const withRestoredInternalHeaders = async (
-      run: () => Promise<HttpResponse>,
-    ): Promise<HttpResponse> => {
-      return restoreInternalHeaders(await run(), stashedInternalHeaders)
+    if (this.isExcludedByDevServerPath(request)) {
+      return next(request)
     }
 
-    if (excludedByHeader || this.isExcludedByDevServerPath(request)) {
-      return withRestoredInternalHeaders(() => next(request))
-    }
-
-    return withRestoredInternalHeaders(() => this.handleIntercept(request, next))
+    return this.handleIntercept(request, next)
   }
 
   private async handleIntercept (
@@ -207,15 +174,7 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
       if (needsRequestBody && request.materializeRequestBody) {
         request.body = await request.materializeRequestBody()
         request.requestBodyMaterialized = true
-
-        const bodyEncoding = getBodyEncoding({
-          body: request.body ?? '',
-          headers: request.headers,
-        } as any)
-
-        if (bodyEncoding !== 'binary' && request.body && Buffer.isBuffer(request.body)) {
-          request.body = request.body.toString('utf8')
-        }
+        request.body = normalizeTextRequestBody(request.body, request.headers)
       }
 
       const handlerRequest = cloneHandlerRequest(request)
