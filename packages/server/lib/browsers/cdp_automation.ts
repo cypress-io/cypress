@@ -5,20 +5,21 @@ import Bluebird from 'bluebird'
 import type { Protocol } from 'devtools-protocol'
 import type ProtocolMapping from 'devtools-protocol/types/protocol-mapping'
 import { parseDomain, isLocalhost as isLocalhostNetworkTools } from '@packages/network-tools'
+import type { DocumentDomainInjectionConfig } from '@packages/network-tools'
 import debugModule from 'debug'
 import { URL } from 'url'
 import { performance } from 'perf_hooks'
 
 import type { ResourceType, BrowserPreRequest, BrowserResponseReceived } from '@packages/proxy'
-import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands } from '@packages/types'
+import type { CDPClient, ProtocolManagerShape, WriteVideoFrame, AutomationMiddleware, AutomationCommands, BrowserLaunchOpts } from '@packages/types'
 import type { Automation } from '../automation'
 import { cookieMatches, CyCookie, CyCookieFilter } from '../automation/util'
 import { DEFAULT_NETWORK_ENABLE_OPTIONS, CriClient } from './cri-client'
-import { AUT_FRAME_NAME_IDENTIFIER } from '../automation/helpers/aut_identifier'
 import { cdpKeyPress } from '../automation/commands/key_press'
 
-import { toSupportedKey } from '@packages/types'
+import { toSupportedKey, AUT_FRAME_NAME_IDENTIFIER } from '@packages/types'
 
+import { CdpBridgeInjectionAdapter } from '@packages/browser-automation'
 import { cdpGetUrl } from '../automation/commands/get_url'
 import { cdpReloadFrame } from '../automation/commands/reload_frame'
 import { cdpNavigateHistory } from '../automation/commands/navigate_history'
@@ -211,10 +212,32 @@ export class CdpAutomation implements CDPClient, AutomationMiddleware {
     await this.sendDebuggerCommandFn('Page.startScreencast', screencastOpts)
   }
 
-  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {
+  static async create (sendDebuggerCommandFn: SendDebuggerCommand, onFn: OnFn, offFn: OffFn, sendCloseCommandFn: SendCloseCommand, automation: Automation, browserLaunchOpts: BrowserLaunchOpts, protocolManager?: ProtocolManagerShape, focusTabOnScreenshot: boolean = false, isHeadless?: boolean): Promise<CdpAutomation> {
     const cdpAutomation = new CdpAutomation(sendDebuggerCommandFn, onFn, offFn, sendCloseCommandFn, automation, focusTabOnScreenshot, isHeadless)
 
     await sendDebuggerCommandFn('Network.enable', protocolManager?.networkEnableOptions ?? DEFAULT_NETWORK_ENABLE_OPTIONS)
+
+    // pick only the config keys the page-context injection needs. BrowserLaunchOpts doesn't type
+    // these, but open_project merges the resolved Cypress config into the launch options at runtime.
+    const { injectDocumentDomain, testingType, modifyObstructiveCode, experimentalModifyObstructiveThirdPartyCode } =
+      browserLaunchOpts as BrowserLaunchOpts & DocumentDomainInjectionConfig & { modifyObstructiveCode?: boolean, experimentalModifyObstructiveThirdPartyCode?: boolean }
+
+    const documentDomainConfig: DocumentDomainInjectionConfig = { injectDocumentDomain, testingType }
+
+    // cross-origin spec-bridge `cypressConfig` (mirrors the proxy's fullCrossOrigin options).
+    // simulatedCookies is hardcoded empty for now — it needs to be wired from the cookie jar
+    // separately (https://github.com/cypress-io/cypress/issues/33860).
+    const crossOriginConfig = {
+      shouldInjectDocumentDomain: !!injectDocumentDomain && testingType !== 'component',
+      modifyObstructiveThirdPartyCode: !!experimentalModifyObstructiveThirdPartyCode,
+      modifyObstructiveCode: !!modifyObstructiveCode,
+      simulatedCookies: [],
+    }
+
+    const autBridge = new CdpBridgeInjectionAdapter(sendDebuggerCommandFn, documentDomainConfig, crossOriginConfig)
+
+    await sendDebuggerCommandFn('Page.enable')
+    await autBridge.inject()
 
     return cdpAutomation
   }
