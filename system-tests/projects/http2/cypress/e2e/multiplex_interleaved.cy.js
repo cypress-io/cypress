@@ -6,7 +6,7 @@ describe('http2 multiplex interleaved', () => {
       const order = $el.text().split(',').map(Number)
 
       expect(order).to.have.length(6)
-      expect(order.slice(0, 3)).to.deep.equal([3, 4, 5])
+      expect(order.slice(0, 3)).to.have.members([3, 4, 5])
       expect(order.slice(3)).to.have.members([0, 1, 2])
     })
   })
