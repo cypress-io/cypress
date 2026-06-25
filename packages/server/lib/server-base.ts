@@ -13,17 +13,30 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { createHttpInterceptWithDefaultMiddleware, type ForHttpIntercept, type ForStubbing } from '@packages/network-interception'
 import { CyIntercept, INTERCEPT_HEADERS, resetStubbingState } from '@packages/net-stubbing'
-import { get as fixtureGet } from './fixture'
+import { createHttpInterceptWithDefaultMiddleware } from '@packages/network-interception'
+import type { ForHttpIntercept } from '@packages/network-interception'
+import { createStripInternalHeaders } from './intercept-middleware/strip-internal-headers'
 import { agent, clientCertificates, httpUtils, concatStream, blocked } from '@packages/network'
-import { DocumentDomainInjection, getPath, getSupportedAcceptEncoding, parseUrlIntoHostProtocolDomainTldPort, removeDefaultPort } from '@packages/network-tools'
+import {
+  DocumentDomainInjection,
+  getPath,
+  getSupportedAcceptEncoding,
+  parseUrlIntoHostProtocolDomainTldPort,
+  removeDefaultPort,
+  RemoteStates,
+} from '@packages/network-tools'
+import type { RemoteState } from '@packages/network-tools'
 import {
   NetworkProxy,
   defaultMiddleware,
   createProxyNetworkServices,
-  type BrowserPreRequest,
-  type ProxyNetworkServices,
+} from '@packages/proxy'
+import type {
+  BrowserPreRequest,
+  ProxyNetworkServices,
+  ResourceType,
+  RequestCredentialLevel,
 } from '@packages/proxy'
 import type { SocketCt } from './socket-ct'
 import * as errors from './errors'
@@ -38,8 +51,6 @@ import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
-import { RemoteStates } from '@packages/network-tools'
-import type { RemoteState } from '@packages/network-tools'
 import { cookieJar, SerializableAutomationCookie } from './util/cookies'
 import * as fileServer from './file_server'
 import type { FileServer } from './file_server'
@@ -54,7 +65,6 @@ import type Protocol from 'devtools-protocol'
 import type { ServiceWorkerClientEvent } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { Automation } from './automation'
 import type { AutomationCookie } from './automation/cookies'
-import type { ResourceType, RequestCredentialLevel } from '@packages/proxy'
 import { GracefulExit } from './util/graceful-exit'
 import { isProxyDisabled } from './util/is-proxy-disabled'
 
@@ -360,6 +370,8 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       matchesBlockedHost: blocked.matches,
     })
 
+    this._httpIntercept.use(createStripInternalHeaders(INTERCEPT_HEADERS))
+
     this._cyIntercept = new CyIntercept({
       socket: this._socket,
       onSyncInterceptSkipped: (url) => {
@@ -501,9 +513,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
     options.onRequest = this._onRequest.bind(this)
-    options.interceptRegistration = this._cyIntercept!.createInterceptRegistration({
-      getFixture: (path, opts) => fixtureGet(config.fixturesFolder, path, opts as Parameters<typeof fixtureGet>[2]),
-    })
+    options.cyIntercept = this._cyIntercept
 
     options.getRenderedHTMLOrigins = this._networkProxy?.http.getRenderedHTMLOrigins
     options.getCurrentBrowser = () => this.getCurrentBrowser?.()

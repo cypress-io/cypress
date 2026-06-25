@@ -426,7 +426,7 @@ describe('lib/server-base', () => {
 
         const wsOptions = this.startListening.lastCall.args[3]
 
-        expect(wsOptions.interceptRegistration).to.have.property('handleEvent').that.is.a('function')
+        expect(wsOptions.cyIntercept).to.exist
         expect(this.server._cyIntercept).to.exist
       })
       .finally(() => {
