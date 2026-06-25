@@ -3,7 +3,9 @@ import { concatStream, httpUtils } from '@packages/network'
 import { getEncoding } from 'istextorbinary'
 import type { IncomingMessage } from 'http'
 import type { Readable } from 'stream'
-import type { HttpRequest, HttpResponse } from '@packages/network-interception'
+import type { ForOriginForwarding, HttpRequest, HttpResponse } from '@packages/network-interception'
+import { getBodyEncoding } from '@packages/net-stubbing/lib/server/util'
+import { HttpResponseCodec } from './http-response-codec'
 import { sendRequestOutgoing } from './send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
 
@@ -98,61 +100,62 @@ function readResponseBody (
 }
 
 /**
- * Fetch the origin via Node HTTP and return a lazy {@link HttpResponse}.
+ * Proxy-side implementation of {@link ForOriginForwarding}.
+ * Returns a closure that applies outbound intercept mutations onto the live request,
+ * sends it to the origin via Node HTTP, and resolves with a transport-neutral
+ * {@link HttpResponse}. When `outbound.materializeOriginResponse` is set the body is
+ * buffered onto `response.body`; otherwise `response.stream()` returns the live origin stream.
  */
-export function fetchOriginAsHttpResponse (mw: RequestInterceptionMiddlewareCtx): Promise<HttpResponse> {
-  return new Promise((resolve, reject) => {
-    const originalOnResponse = mw.onResponse
-    const originalOnError = mw.onError
-    const callbacks = mw as RequestInterceptionMiddlewareCtx & {
-      onError: (error: Error) => void
-      onResponse: (incomingRes: IncomingMessage, incomingResStream: Readable) => void
+export function createFetchOrigin (mw: RequestInterceptionMiddlewareCtx): ForOriginForwarding {
+  return (outbound: HttpRequest): Promise<HttpResponse> => {
+    applyOutboundToProxiedRequest(mw.req, outbound)
+
+    if (outbound.body !== undefined) {
+      const bodyEncoding = getBodyEncoding({
+        body: mw.req.body,
+        headers: mw.req.headers,
+      } as any)
+
+      if (bodyEncoding !== 'binary' && mw.req.body && Buffer.isBuffer(mw.req.body)) {
+        mw.req.body = mw.req.body.toString('utf8')
+      }
     }
 
-    callbacks.onError = (error: Error) => {
-      callbacks.onError = originalOnError
-      callbacks.onResponse = originalOnResponse
-      reject(error)
-    }
-
-    callbacks.onResponse = (incomingRes, incomingResStream) => {
-      callbacks.onError = originalOnError
-      callbacks.onResponse = originalOnResponse
-
-      let materializedBody: Buffer | string | undefined
-      let passthroughConsumed = false
-
-      const materializeResponseBody = async (): Promise<string | Buffer> => {
-        if (materializedBody !== undefined) {
-          return materializedBody
-        }
-
-        materializedBody = await readResponseBody(mw.req, incomingRes, incomingResStream)
-        passthroughConsumed = true
-
-        return materializedBody
+    return new Promise((resolve, reject) => {
+      const originalOnResponse = mw.onResponse
+      const originalOnError = mw.onError
+      const callbacks = mw as RequestInterceptionMiddlewareCtx & {
+        onError: (error: Error) => void
+        onResponse: (incomingRes: IncomingMessage, incomingResStream: Readable) => void
       }
 
-      resolve({
-        statusCode: incomingRes.statusCode || 200,
-        statusMessage: incomingRes.statusMessage,
-        headers: incomingRes.headers as Record<string, string | string[]>,
-        materializeResponseBody,
-        consumePassthroughResponse: () => {
-          if (passthroughConsumed) {
-            throw new Error('Origin response body was already materialized')
-          }
+      callbacks.onError = (error: Error) => {
+        callbacks.onError = originalOnError
+        callbacks.onResponse = originalOnResponse
+        reject(error)
+      }
 
-          passthroughConsumed = true
+      callbacks.onResponse = (incomingRes, incomingResStream) => {
+        callbacks.onError = originalOnError
+        callbacks.onResponse = originalOnResponse
 
-          return {
-            incomingRes,
-            stream: incomingResStream as Readable,
-          }
-        },
-      })
-    }
+        const httpResponse = HttpResponseCodec.fromOrigin(incomingRes, incomingResStream as Readable)
 
-    sendRequestOutgoing(mw)
-  })
+        if (!outbound.materializeOriginResponse) {
+          resolve(httpResponse)
+
+          return
+        }
+
+        readResponseBody(mw.req, incomingRes, incomingResStream)
+        .then((body) => {
+          httpResponse.body = body
+          resolve(httpResponse)
+        })
+        .catch(reject)
+      }
+
+      sendRequestOutgoing(mw)
+    })
+  }
 }

@@ -138,8 +138,7 @@ export function cloneHandlerResponse (response: HttpResponse, requestUrl: string
     body: response.body,
     delay: response.delay,
     throttleKbps: response.throttleKbps,
-    materializeResponseBody: response.materializeResponseBody,
-    consumePassthroughResponse: response.consumePassthroughResponse,
+    stream: response.stream,
     url: requestUrl,
   }
 }

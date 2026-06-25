@@ -7,12 +7,11 @@ import type { HttpMiddleware } from './'
 import { getSupportedAcceptEncoding, urlMatchesOriginProtectionSpace } from '@packages/network-tools'
 import { correlateBrowserPreRequest } from '../adapters/correlate-browser-pre-request'
 import {
-  applyOutboundToProxiedRequest,
-  fetchOriginAsHttpResponse,
+  createFetchOrigin,
   toHttpRequest,
 } from '../adapters/proxy-http-interception'
-import { applyHttpResponseToCtx } from '../adapters/apply-http-response'
-import { getBodyEncoding } from '@packages/net-stubbing/lib/server/util'
+import { setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
+import { HttpResponseCodec } from '../adapters/http-response-codec'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead
 // available as cypress-verbose:proxy:http
@@ -279,22 +278,7 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
   this.req.requestId = httpRequest.inFlightInterceptId
 
   try {
-    const httpResponse = await this.networkInterception.handle(httpRequest, async (outbound) => {
-      applyOutboundToProxiedRequest(this.req, outbound)
-
-      if (outbound.body !== undefined) {
-        const bodyEncoding = getBodyEncoding({
-          body: this.req.body,
-          headers: this.req.headers,
-        } as any)
-
-        if (bodyEncoding !== 'binary' && this.req.body && Buffer.isBuffer(this.req.body)) {
-          this.req.body = this.req.body.toString('utf8')
-        }
-      }
-
-      return fetchOriginAsHttpResponse(this)
-    })
+    const httpResponse = await this.networkInterception.handle(httpRequest, createFetchOrigin(this))
 
     if (httpRequest.hadIntercept) {
       this.req.hadIntercept = true
@@ -302,7 +286,16 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
 
     span?.end()
 
-    return applyHttpResponseToCtx(this, httpResponse)
+    this.req.requestId = this.req.requestId || _.uniqueId('interceptedRequest')
+    this.req.onInterceptResponseWritten = httpResponse.onResponseWrittenToClient
+
+    const { incomingRes, bodyStream } = await HttpResponseCodec.toProxyResponse(httpResponse)
+
+    if (this.req.hadIntercept) {
+      setDefaultHeaders(this.req, incomingRes)
+    }
+
+    return this.onResponse(incomingRes, bodyStream)
   } catch (err) {
     span?.end()
 
@@ -312,9 +305,18 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
 
 const SendRequestOutgoing: RequestMiddleware = async function () {
   try {
-    const httpResponse = await fetchOriginAsHttpResponse(this)
+    const httpResponse = await createFetchOrigin(this)(toHttpRequest(this))
 
-    return applyHttpResponseToCtx(this, httpResponse)
+    this.req.requestId = this.req.requestId || _.uniqueId('interceptedRequest')
+    this.req.onInterceptResponseWritten = httpResponse.onResponseWrittenToClient
+
+    const { incomingRes, bodyStream } = await HttpResponseCodec.toProxyResponse(httpResponse)
+
+    if (this.req.hadIntercept) {
+      setDefaultHeaders(this.req, incomingRes)
+    }
+
+    return this.onResponse(incomingRes, bodyStream)
   } catch (err) {
     return this.onError(err)
   }

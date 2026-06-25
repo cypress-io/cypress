@@ -2,9 +2,11 @@ export { createProxyNetworkServices } from './create-proxy-network-services'
 
 export {
   applyOutboundToProxiedRequest,
+  createFetchOrigin,
   ensureRequestBody,
-  fetchOriginAsHttpResponse,
   toHttpRequest,
 } from './proxy-http-interception'
 
-export { applyHttpResponseToCtx } from './apply-http-response'
+export { HttpResponseCodec } from './http-response-codec'
+
+export type { ProxyResponsePair } from './http-response-codec'

@@ -1,12 +1,5 @@
-import type { IncomingMessage } from 'http'
 import type { Readable } from 'stream'
 import type { ResourceType } from '../types/external-types'
-
-/** Origin response handles for proxy streaming when {@link HttpResponse.body} is unset. */
-export type PassthroughOriginResponse = {
-  incomingRes: IncomingMessage
-  stream: Readable
-}
 
 /** Transport-neutral request; adapter maps from CypressIncomingRequest or CDP Fetch pause. */
 export type HttpRequest = {
@@ -29,6 +22,11 @@ export type HttpRequest = {
   requestBodyMaterialized?: boolean
   /** Lazily read the incoming request body when a driver handler must inspect or mutate it. */
   materializeRequestBody?: () => Promise<string | Buffer | undefined>
+  /**
+   * When true, the origin forwarder should buffer the origin response body onto
+   * {@link HttpResponse.body} before returning to the intercept layer.
+   */
+  materializeOriginResponse?: boolean
   resourceType?: ResourceType
   isSyncRequest?: boolean
   responseTimeout?: number
@@ -52,10 +50,12 @@ export type HttpResponse = {
   body?: string | Buffer
   delay?: number
   throttleKbps?: number
-  /** Lazily read the origin response body when a handler must inspect or mutate it. */
-  materializeResponseBody?: () => Promise<string | Buffer>
-  /** Stream the origin response without buffering when {@link body} is unset. */
-  consumePassthroughResponse?: () => PassthroughOriginResponse
+  /**
+   * Returns a readable stream for the response body. Set by the proxy transport layer after
+   * fetching the origin; consumers must not call this more than once per response lifecycle.
+   * When `body` is set by an intercept handler, implementations must return a stream of `body`.
+   */
+  stream?: () => Promise<Readable>
   /**
    * Proxy adapter invokes after the response body has been written to the client.
    * Used to defer `after:response` driver subscriptions until `res` `finish`.
@@ -63,11 +63,13 @@ export type HttpResponse = {
   onResponseWrittenToClient?: () => Promise<void>
 }
 
-export type OriginForwarder = (request: HttpRequest) => Promise<HttpResponse>
+export interface ForOriginForwarding {
+  (request: HttpRequest): Promise<HttpResponse>
+}
 
 export type InterceptMiddleware = (
   request: HttpRequest,
-  next: OriginForwarder,
+  next: ForOriginForwarding,
 ) => Promise<HttpResponse>
 
 /**

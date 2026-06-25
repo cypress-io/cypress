@@ -4,11 +4,11 @@ import { IncomingMessage } from 'http'
 import { Socket } from 'net'
 import {
   applyOutboundToProxiedRequest,
+  createFetchOrigin,
   ensureRequestBody,
-  fetchOriginAsHttpResponse,
   toHttpRequest,
 } from '../../../lib/adapters/proxy-http-interception'
-import { applyHttpResponseToCtx } from '../../../lib/adapters/apply-http-response'
+import { HttpResponseCodec } from '../../../lib/adapters/http-response-codec'
 import { sendRequestOutgoing } from '../../../lib/adapters/send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from '../../../lib/adapters/types'
 
@@ -174,23 +174,9 @@ describe('proxy-http-interception lazy passthrough', () => {
     })
   })
 
-  describe('fetchOriginAsHttpResponse', () => {
-    it('returns lazy response with consumePassthroughResponse', async () => {
-      const incomingRes = new IncomingMessage(new Socket)
-
-      incomingRes.statusCode = 200
-      incomingRes.headers = { 'content-type': 'text/plain' }
-
-      const outgoingBody = PassThrough.from(['origin-body'])
-      const outgoingReq = Object.assign(outgoingBody, {
-        on (event: string, cb: (res: IncomingMessage) => void) {
-          if (event === 'response') {
-            cb(incomingRes)
-          }
-        },
-      })
-
-      const mw = {
+  describe('createFetchOrigin', () => {
+    function makeMw (outgoingReq: any) {
+      return {
         req: {
           proxiedUrl: 'https://example.com/',
           method: 'GET',
@@ -211,16 +197,50 @@ describe('proxy-http-interception lazy passthrough', () => {
         reqMiddlewareSpan: { end: vi.fn() },
         handleHttpRequestSpan: undefined,
       } as unknown as RequestInterceptionMiddlewareCtx
+    }
 
-      const httpResponse = await fetchOriginAsHttpResponse(mw)
+    it('attaches stream() for passthrough without buffering', async () => {
+      const incomingRes = new IncomingMessage(new Socket)
+
+      incomingRes.statusCode = 200
+      incomingRes.headers = { 'content-type': 'text/plain' }
+
+      const outgoingBody = new PassThrough()
+      const mw = makeMw(outgoingBody)
+
+      // Emit 'response' after sendRequestOutgoing registers its listener
+      setImmediate(() => outgoingBody.emit('response', incomingRes))
+
+      const httpResponse = await createFetchOrigin(mw)(toHttpRequest(mw))
 
       expect(httpResponse.body).toBeUndefined()
-      expect(httpResponse.consumePassthroughResponse).toBeTypeOf('function')
+      expect(typeof httpResponse.stream).toBe('function')
+      expect(await httpResponse.stream!()).toBe(outgoingBody)
+    })
 
-      const passthrough = httpResponse.consumePassthroughResponse!()
+    it('materializes body when materializeOriginResponse is set', async () => {
+      const incomingRes = new IncomingMessage(new Socket)
 
-      expect(passthrough.incomingRes).toBe(incomingRes)
-      expect(passthrough.stream).toBe(outgoingBody)
+      incomingRes.statusCode = 200
+      incomingRes.headers = { 'content-type': 'text/plain' }
+
+      const outgoingBody = new PassThrough()
+
+      outgoingBody.end('origin-body')
+      const mw = makeMw(outgoingBody)
+
+      setImmediate(() => outgoingBody.emit('response', incomingRes))
+
+      const httpResponse = await createFetchOrigin(mw)({
+        inFlightInterceptId: 'id',
+        url: 'https://example.com/',
+        method: 'GET',
+        headers: {},
+        materializeOriginResponse: true,
+      })
+
+      expect(httpResponse.body).toBe('origin-body')
+      expect(typeof httpResponse.stream).toBe('function')
     })
 
     it('restores onError and onResponse after origin failure', async () => {
@@ -258,92 +278,60 @@ describe('proxy-http-interception lazy passthrough', () => {
         handleHttpRequestSpan: undefined,
       } as unknown as RequestInterceptionMiddlewareCtx
 
-      await expect(fetchOriginAsHttpResponse(mw)).rejects.toThrow('connection refused')
+      await expect(createFetchOrigin(mw)(toHttpRequest(mw))).rejects.toThrow('connection refused')
       expect(mw.onError).toBe(originalOnError)
       expect(mw.onResponse).toBe(originalOnResponse)
     })
   })
 })
 
-describe('applyHttpResponseToCtx passthrough', () => {
-  it('calls onResponse with origin stream when body is unset', async () => {
-    const stream = PassThrough.from(['streamed'])
-    const incomingRes = new IncomingMessage(new Socket)
+describe('HttpResponseCodec', () => {
+  it('decodes passthrough responses via stream()', async () => {
+    const originStream = new PassThrough()
 
-    incomingRes.statusCode = 200
-    incomingRes.headers = { 'content-type': 'text/plain' }
-
-    const onResponse = vi.fn()
-
-    await applyHttpResponseToCtx({
-      req: { hadIntercept: false },
-      onResponse,
-    } as any, {
+    const { incomingRes, bodyStream } = await HttpResponseCodec.toProxyResponse({
       statusCode: 200,
       headers: { 'content-type': 'text/plain' },
-      consumePassthroughResponse: () => ({ incomingRes, stream }),
+      stream: () => Promise.resolve(originStream),
     })
 
-    expect(onResponse).toHaveBeenCalledWith(incomingRes, stream)
+    expect(incomingRes.statusCode).toBe(200)
+    expect(incomingRes.headers['content-type']).toBe('text/plain')
+    expect(bodyStream).toBe(originStream)
   })
 
-  it('uses getBodyStream when body is set', async () => {
-    const onResponse = vi.fn()
-
-    await applyHttpResponseToCtx({
-      req: { hadIntercept: true, headers: {} },
-      onResponse,
-    } as any, {
+  it('decodes stub bodies', async () => {
+    const { incomingRes, bodyStream } = await HttpResponseCodec.toProxyResponse({
       statusCode: 200,
       headers: {},
       body: 'stubbed',
     })
 
-    expect(onResponse).toHaveBeenCalled()
-    const [, bodyStream] = onResponse.mock.calls[0]
-
+    expect(incomingRes.statusCode).toBe(200)
     expect(bodyStream).toBeDefined()
   })
 
   it('infers text/html for HTML stub bodies without content-type', async () => {
-    const onResponse = vi.fn()
-
-    await applyHttpResponseToCtx({
-      req: { hadIntercept: true, headers: {} },
-      onResponse,
-    } as any, {
+    const { incomingRes } = await HttpResponseCodec.toProxyResponse({
       statusCode: 200,
       headers: {},
       body: '<html><body>hi</body></html>',
     })
 
-    const [incomingRes] = onResponse.mock.calls[0]
-
     expect(incomingRes.headers['content-type']).toBe('text/html')
   })
 
-  it('applies intercept status and headers on passthrough responses', async () => {
-    const stream = PassThrough.from(['streamed'])
-    const incomingRes = new IncomingMessage(new Socket)
+  it('merges intercept status and headers onto a synthetic IncomingMessage', async () => {
+    const originStream = new PassThrough()
 
-    incomingRes.statusCode = 200
-    incomingRes.headers = { 'content-type': 'text/plain' }
-
-    const onResponse = vi.fn()
-
-    await applyHttpResponseToCtx({
-      req: { hadIntercept: true, headers: {} },
-      onResponse,
-    } as any, {
+    const { incomingRes } = await HttpResponseCodec.toProxyResponse({
       statusCode: 418,
-      headers: { 'x-test': 'changed' },
-      consumePassthroughResponse: () => ({ incomingRes, stream }),
+      headers: { 'content-type': 'text/plain', 'x-test': 'changed' },
+      stream: () => Promise.resolve(originStream),
     })
 
-    const [mergedRes] = onResponse.mock.calls[0]
-
-    expect(mergedRes.statusCode).toBe(418)
-    expect(mergedRes.headers['x-test']).toBe('changed')
-    expect(mergedRes.headers['content-type']).toBe('text/plain')
+    expect(incomingRes.statusCode).toBe(418)
+    expect(incomingRes.headers['x-test']).toBe('changed')
+    expect(incomingRes.headers['content-type']).toBe('text/plain')
   })
 })

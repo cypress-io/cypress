@@ -1,10 +1,10 @@
 import _ from 'lodash'
-import type { HttpRequest, HttpResponse, InterceptMiddleware, OriginForwarder } from '@packages/network-interception'
+import type { HttpRequest, HttpResponse, InterceptMiddleware, ForOriginForwarding } from '@packages/network-interception'
 
 export function createStripInternalHeaders (
   headers: readonly string[],
 ): InterceptMiddleware {
-  return async (request: HttpRequest, next: OriginForwarder): Promise<HttpResponse> => {
+  return async (request: HttpRequest, next: ForOriginForwarding): Promise<HttpResponse> => {
     const stashed = { ..._.pick(request.headers, headers) }
 
     request.headers = _.omit(request.headers, headers)

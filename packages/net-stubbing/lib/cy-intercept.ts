@@ -13,7 +13,7 @@ import type {
   HttpResponse,
   InterceptMiddleware,
   NetEvent,
-  OriginForwarder,
+  ForOriginForwarding,
   RouteMatcherOptions,
   Subscription,
 } from '@packages/network-interception'
@@ -152,7 +152,7 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
 
   readonly middleware: InterceptMiddleware = async (
     request: HttpRequest,
-    next: OriginForwarder,
+    next: ForOriginForwarding,
   ): Promise<HttpResponse> => {
     const stashedInternalHeaders = stripInternalHeaders(request, INTERCEPT_HEADERS)
     const excludedByHeader = INTERCEPT_HEADERS.some((header) => stashedInternalHeaders[header])
@@ -172,7 +172,7 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
 
   private async handleIntercept (
     request: HttpRequest,
-    next: OriginForwarder,
+    next: ForOriginForwarding,
   ): Promise<HttpResponse> {
     if (matchesRoutePreflight(this.routes, request)) {
       request.hadIntercept = true
@@ -251,6 +251,12 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
         return stubResponse
       }
 
+      const needsResponseBody = matchingRoutes.some((route) => route.hasInterceptor)
+
+      if (needsResponseBody) {
+        request.materializeOriginResponse = true
+      }
+
       let originResponse: HttpResponse
 
       try {
@@ -258,12 +264,6 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
       } catch (error) {
         await this.emitNetworkError(inFlightIntercept, error as Error)
         throw error
-      }
-
-      const needsResponseBody = matchingRoutes.some((route) => route.hasInterceptor)
-
-      if (needsResponseBody && originResponse.materializeResponseBody) {
-        originResponse.body = await originResponse.materializeResponseBody()
       }
 
       const handlerResponse = cloneHandlerResponse(originResponse, request.url)
@@ -292,12 +292,7 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
         body: modifiedResponse.body,
         delay: modifiedResponse.delay,
         throttleKbps: modifiedResponse.throttleKbps,
-        materializeResponseBody: modifiedResponse.body === undefined
-          ? originResponse.materializeResponseBody
-          : undefined,
-        consumePassthroughResponse: modifiedResponse.body === undefined
-          ? originResponse.consumePassthroughResponse
-          : undefined,
+        stream: modifiedResponse.stream,
       }
 
       this.attachAfterResponseOnWritten(finalResponse, inFlightIntercept)
