@@ -25,6 +25,7 @@ let cp = require('child_process')
 const fs = require('fs-extra')
 const path = require('path')
 const http = require('http')
+const http2 = require('http2')
 const human = require('human-interval')
 const morgan = require('morgan')
 const Bluebird = require('bluebird')
@@ -33,6 +34,7 @@ const treeKill = require('tree-kill')
 const { once } = require('events')
 const os = require('os')
 const { create: createHttpsServer } = require('@packages/https-proxy/test/helpers/https_server')
+const { options: httpsServerTlsOptions } = require('@packages/https-proxy/test/helpers/certs')
 
 const { allowDestroy } = require(`@packages/server/lib/util/server_destroy`)
 const settings = require(`@packages/server/lib/util/settings`)
@@ -278,6 +280,10 @@ type Server = {
    * If set, use `@packages/https-proxy`'s CA to set up self-signed HTTPS.
    */
   https?: boolean
+  /**
+   * If set, serve over HTTP/2 (requires TLS; implies `https`).
+   */
+  http2?: boolean
   /**
    * If set, use `express.static` middleware to serve the e2e project's static assets.
    */
@@ -647,13 +653,25 @@ const ensurePort = function (port) {
 }
 
 const startServer = function (obj) {
-  const { onServer, port, https } = obj
+  const { onServer, port, https, http2: useHttp2 } = obj
 
   ensurePort(port)
 
   const app = Express()
 
-  const srv = https ? createHttpsServer(app) : new http.Server(app)
+  let srv
+
+  if (useHttp2) {
+    srv = http2.createSecureServer(httpsServerTlsOptions)
+
+    srv.on('request', (req, res) => {
+      app(req, res)
+    })
+  } else if (https) {
+    srv = createHttpsServer(app)
+  } else {
+    srv = new http.Server(app)
+  }
 
   allowDestroy(srv)
 
