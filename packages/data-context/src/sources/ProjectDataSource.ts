@@ -538,10 +538,7 @@ export class ProjectDataSource {
   }
 
   getUnmatchedPatterns (patterns: string[], specs: SpecWithRelativeRoot[]): string[] {
-    // Use micromatch (the matcher backing `globby`/`fast-glob` used to discover specs) so this
-    // check agrees with the spec patterns Cypress actually globbed. minimatch and fast-glob disagree
-    // on some syntaxes (e.g. regex-style alternation groups like `(a|b)`), which previously caused
-    // a spurious "did not match any spec files" warning for patterns that did match specs (#34160).
+    // Use micromatch (the matcher backing `globby`/`fast-glob` used to discover specs)
     const MICROMATCH_OPTIONS = { dot: true }
     // Normalize to forward slashes: path.relative may return backslashes on Windows and
     // micromatch treats backslashes as escape characters rather than path separators.
