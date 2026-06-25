@@ -18,7 +18,7 @@ export type BlockedHostsConfig = {
  *
  * Registered on {@link HttpIntercept} before the cy.intercept intercepter.
  */
-export function createBlockedHostsInterceptMiddleware (
+export function createBlockConfiguredHosts (
   options: BlockedHostsConfig,
 ): InterceptMiddleware {
   return async (request, next) => {

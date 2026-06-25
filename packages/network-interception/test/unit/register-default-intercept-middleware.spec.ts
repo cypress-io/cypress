@@ -1,15 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import {
   applyCspAllowListToHeaders,
-  createBlockedHostsInterceptMiddleware,
-  createCspAllowListInterceptMiddleware,
+  createBlockConfiguredHosts,
+  createCspConfiguredAllowList,
   HttpIntercept,
-  registerDefaultInterceptMiddleware,
 } from '../../lib'
 
-describe('createBlockedHostsInterceptMiddleware', () => {
+describe('createBlockConfiguredHosts', () => {
   it('passes through when blockHosts is not configured', async () => {
-    const middleware = createBlockedHostsInterceptMiddleware({ config: {} })
+    const middleware = createBlockConfiguredHosts({ config: {} })
     const next = vi.fn(async () => {
       return {
         statusCode: 200,
@@ -30,7 +29,7 @@ describe('createBlockedHostsInterceptMiddleware', () => {
   })
 
   it('returns 503 with matched-host header when blocked', async () => {
-    const middleware = createBlockedHostsInterceptMiddleware({
+    const middleware = createBlockConfiguredHosts({
       config: { blockHosts: ['*.evil.com'] },
       matchesBlockedHost: () => 'evil.com',
     })
@@ -52,7 +51,7 @@ describe('createBlockedHostsInterceptMiddleware', () => {
     const httpIntercept = new HttpIntercept()
     const order: string[] = []
 
-    httpIntercept.use(createBlockedHostsInterceptMiddleware({
+    httpIntercept.use(createBlockConfiguredHosts({
       config: { blockHosts: ['*.evil.com'] },
       matchesBlockedHost: () => 'evil.com',
     }))
@@ -82,9 +81,9 @@ describe('createBlockedHostsInterceptMiddleware', () => {
   })
 })
 
-describe('createCspAllowListInterceptMiddleware', () => {
+describe('createCspConfiguredAllowList', () => {
   it('removes CSP headers when experimentalCspAllowList is false', async () => {
-    const middleware = createCspAllowListInterceptMiddleware({ experimentalCspAllowList: false })
+    const middleware = createCspConfiguredAllowList({ experimentalCspAllowList: false })
     const next = vi.fn(async () => {
       return {
         statusCode: 200,
@@ -106,7 +105,7 @@ describe('createCspAllowListInterceptMiddleware', () => {
   })
 
   it('strips unsupported directives when experimentalCspAllowList is true', async () => {
-    const middleware = createCspAllowListInterceptMiddleware({ experimentalCspAllowList: true })
+    const middleware = createCspConfiguredAllowList({ experimentalCspAllowList: true })
     const next = vi.fn(async () => {
       return {
         statusCode: 200,
@@ -128,7 +127,7 @@ describe('createCspAllowListInterceptMiddleware', () => {
   })
 
   it('allows listed directives when experimentalCspAllowList is an array', async () => {
-    const middleware = createCspAllowListInterceptMiddleware({ experimentalCspAllowList: ['script-src'] })
+    const middleware = createCspConfiguredAllowList({ experimentalCspAllowList: ['script-src'] })
     const next = vi.fn(async () => {
       return {
         statusCode: 200,
@@ -157,46 +156,5 @@ describe('applyCspAllowListToHeaders', () => {
     const twice = applyCspAllowListToHeaders(once, { experimentalCspAllowList: false })
 
     expect(twice).toEqual(once)
-  })
-})
-
-describe('registerDefaultInterceptMiddleware', () => {
-  it('registers blocked-hosts and csp middleware on HttpIntercept', async () => {
-    const httpIntercept = new HttpIntercept()
-    const next = vi.fn()
-
-    registerDefaultInterceptMiddleware(httpIntercept, {
-      blockHosts: ['*.evil.com'],
-      experimentalCspAllowList: false,
-    }, {
-      matchesBlockedHost: () => 'evil.com',
-    })
-
-    httpIntercept.use(async (request, innerNext) => innerNext(request))
-
-    const blockedResponse = await httpIntercept.handle({
-      inFlightInterceptId: 'req-1',
-      url: 'http://evil.com/',
-      method: 'GET',
-      headers: {},
-    }, next)
-
-    expect(next).not.toHaveBeenCalled()
-    expect(blockedResponse.statusCode).toBe(503)
-
-    const cspResponse = await httpIntercept.handle({
-      inFlightInterceptId: 'req-2',
-      url: 'http://example.com/',
-      method: 'GET',
-      headers: {},
-    }, async () => {
-      return {
-        statusCode: 200,
-        headers: { 'content-security-policy': 'default-src \'self\'' },
-        body: '',
-      }
-    })
-
-    expect(cspResponse.headers['content-security-policy']).toBeUndefined()
   })
 })

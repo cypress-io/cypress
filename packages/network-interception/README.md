@@ -85,7 +85,7 @@ server-base.open()
 
 ApplyHttpInterception middleware (proxy path)
   → networkInterception.handle(toHttpRequest(ctx), forwardToOrigin)
-  → applyHttpResponseToCtx
+  → HttpResponseCodec.toProxyResponse / commitInterceptResponse
 
 CDPNetworkInterception (CDP path)
   → networkInterception.handle(toHttpRequest(pause), forwardViaFetch)
@@ -102,8 +102,8 @@ Use this when a concern can run on materialized `HttpRequest` / `HttpResponse` (
 
 | Concern | Where middleware is defined | Where it is registered | Runs on CDP? |
 | --- | --- | --- | --- |
-| `blockHosts` | `createBlockedHostsInterceptMiddleware` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
-| CSP allow-list | `createCspAllowListInterceptMiddleware` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
+| `blockHosts` | `createBlockConfiguredHosts` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
+| CSP allow-list | `createCspConfiguredAllowList` (`network-interception`) | `registerDefaultInterceptMiddleware` | Yes (same stack) |
 | `cy.intercept` | `CyIntercept` (`net-stubbing`) | `server-base.open()` via `httpIntercept.use()` | Yes |
 | Document rewrite | `SetInjectionLevel` → `MaybeInjectHtml` → `MaybeRemoveSecurity` (`proxy` streaming) | `server-base` wires `createProxyNetworkServices()` driven ports | No (intentional) |
 

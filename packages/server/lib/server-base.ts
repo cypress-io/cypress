@@ -14,8 +14,8 @@ import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
 import { CyIntercept } from '@packages/net-stubbing'
-import { createHttpInterceptWithDefaultMiddleware } from '@packages/network-interception'
 import type { ForHttpIntercept } from '@packages/network-interception'
+import { createHttpInterceptStack } from './create-http-intercept-stack'
 import { agent, clientCertificates, httpUtils, concatStream, blocked } from '@packages/network'
 import {
   DocumentDomainInjection,
@@ -365,21 +365,16 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     clientCertificates.loadClientCertificateConfig(config)
 
-    this._httpIntercept = createHttpInterceptWithDefaultMiddleware(config, {
-      matchesBlockedHost: blocked.matches,
-    })
-
-    this._cyIntercept = new CyIntercept({
-      socket: this._socket,
-      onSyncInterceptSkipped: (url) => {
+    const { httpIntercept, cyIntercept } = createHttpInterceptStack(
+      config,
+      this._socket,
+      (url) => {
         errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
       },
-      config: {
-        devServerPublicPathRoute: config.devServerPublicPathRoute,
-      },
-    })
+    )
 
-    this._httpIntercept.use(this._cyIntercept.middleware)
+    this._httpIntercept = httpIntercept
+    this._cyIntercept = cyIntercept
 
     if (!isProxyDisabled()) {
       this.createNetworkProxy({

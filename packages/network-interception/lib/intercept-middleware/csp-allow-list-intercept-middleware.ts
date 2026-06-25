@@ -5,7 +5,7 @@ import { applyCspAllowListToHeaders } from '../csp/strip-csp-headers'
 /**
  * Response middleware: strip or rewrite CSP headers after fulfillment.
  */
-export function createCspAllowListInterceptMiddleware (
+export function createCspConfiguredAllowList (
   config: CspAllowListConfig,
 ): InterceptMiddleware {
   return async (request, next) => {

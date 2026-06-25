@@ -1,12 +1,12 @@
 import { describe, expect, beforeEach, afterEach, it, vi } from 'vitest'
 import { NetworkProxy } from '../../'
 import { CyIntercept } from '@packages/net-stubbing'
-import { createHttpInterceptWithDefaultMiddleware } from '@packages/network-interception'
+import { createHttpInterceptStack } from '@packages/server/lib/create-http-intercept-stack'
 import * as errors from '@packages/errors'
 import { defaultMiddleware } from '../../lib/http'
 import express from 'express'
 import supertest from 'supertest'
-import { allowDestroy, blocked } from '@packages/network'
+import { allowDestroy } from '@packages/network'
 import { DocumentDomainInjection, RemoteStates } from '@packages/network-tools'
 import { EventEmitter } from 'events'
 import { type ForHttpIntercept } from '@packages/network-interception'
@@ -40,21 +40,16 @@ describe('network stubbing', () => {
   }
 
   const setupInterceptStack = () => {
-    cyIntercept = new CyIntercept({
+    const stack = createHttpInterceptStack(
+      config,
       socket,
-      onSyncInterceptSkipped: (url) => {
+      (url) => {
         errors.warning('SYNCHRONOUS_XHR_REQUEST_NOT_INTERCEPTED', url)
       },
-      config: {
-        devServerPublicPathRoute: config.devServerPublicPathRoute,
-      },
-    })
+    )
 
-    networkInterception = createHttpInterceptWithDefaultMiddleware(config, {
-      matchesBlockedHost: blocked.matches,
-    })
-
-    networkInterception.use(cyIntercept.middleware)
+    cyIntercept = stack.cyIntercept
+    networkInterception = stack.httpIntercept
 
     if (proxy) {
       proxy.http.networkInterception = networkInterception
