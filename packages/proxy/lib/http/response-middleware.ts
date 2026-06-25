@@ -372,7 +372,7 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
         return false
       }
     }),
-  )
+  ) as Record<string, string | string[]>
 
   this.res.set(filteredHeaders)
 

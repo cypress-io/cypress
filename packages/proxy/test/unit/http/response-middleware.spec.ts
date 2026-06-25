@@ -389,6 +389,21 @@ describe('http/response-middleware', function () {
       expect(ctx.res.set).toHaveBeenCalledWith(expect.objectContaining({ 'good-header': 'value' }))
     })
 
+    it('drops undefined header values before applying CSP allow list', async function () {
+      prepareContext({
+        'good-header': 'value',
+        'undefined-header': undefined,
+        'content-security-policy': 'default-src \'self\'',
+      }, {
+        experimentalCspAllowList: false,
+      })
+
+      await testMiddleware([OmitProblematicHeaders], ctx)
+      expect(ctx.res.set).toHaveBeenCalledWith(expect.objectContaining({ 'good-header': 'value' }))
+      expect(ctx.res.set).toHaveBeenCalledWith(expect.not.objectContaining({ 'undefined-header': undefined }))
+      expect(ctx.res.removeHeader).toHaveBeenCalledWith('content-security-policy')
+    })
+
     const validCspHeaderNames = [
       'content-security-policy',
       'Content-Security-Policy',

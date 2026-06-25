@@ -104,16 +104,20 @@ export function fetchOriginAsHttpResponse (mw: RequestInterceptionMiddlewareCtx)
   return new Promise((resolve, reject) => {
     const originalOnResponse = mw.onResponse
     const originalOnError = mw.onError
+    const callbacks = mw as RequestInterceptionMiddlewareCtx & {
+      onError: (error: Error) => void
+      onResponse: (incomingRes: IncomingMessage, incomingResStream: Readable) => void
+    }
 
-    mw.onError = (error: Error) => {
-      mw.onError = originalOnError
-      mw.onResponse = originalOnResponse
+    callbacks.onError = (error: Error) => {
+      callbacks.onError = originalOnError
+      callbacks.onResponse = originalOnResponse
       reject(error)
     }
 
-    mw.onResponse = (incomingRes, incomingResStream) => {
-      mw.onError = originalOnError
-      mw.onResponse = originalOnResponse
+    callbacks.onResponse = (incomingRes, incomingResStream) => {
+      callbacks.onError = originalOnError
+      callbacks.onResponse = originalOnResponse
 
       let materializedBody: Buffer | string | undefined
       let passthroughConsumed = false

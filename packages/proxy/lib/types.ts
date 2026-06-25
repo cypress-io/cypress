@@ -35,6 +35,7 @@ export type CypressIncomingRequest = Request & {
    * True once the incoming request body was read via concatStream (or replaced by intercept).
    * When true, {@link sendRequestOutgoing} must send the buffered body and must not pipe.
    */
+  requestBodyMaterialized?: boolean
   /**
    * Invoked on `res` `finish` to run deferred `after:response` driver subscriptions.
    */

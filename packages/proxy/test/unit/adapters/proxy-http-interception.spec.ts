@@ -222,6 +222,46 @@ describe('proxy-http-interception lazy passthrough', () => {
       expect(passthrough.incomingRes).toBe(incomingRes)
       expect(passthrough.stream).toBe(outgoingBody)
     })
+
+    it('restores onError and onResponse after origin failure', async () => {
+      const originalOnError = vi.fn()
+      const originalOnResponse = vi.fn()
+      const originError = new Error('connection refused')
+
+      const outgoingReq = {
+        on (event: string, cb: (error: Error) => void) {
+          if (event === 'error') {
+            cb(originError)
+          }
+        },
+      }
+
+      const mw = {
+        req: {
+          proxiedUrl: 'https://example.com/',
+          method: 'GET',
+          headers: {},
+          pipe: vi.fn(),
+          socket: { on: vi.fn() },
+          res: { on: vi.fn() },
+        },
+        onError: originalOnError,
+        onResponse: originalOnResponse,
+        request: {
+          create: () => outgoingReq,
+        },
+        remoteStates: {
+          current: () => ({ strategy: 'http', origin: 'https://example.com' }),
+        },
+        debug: vi.fn(),
+        reqMiddlewareSpan: { end: vi.fn() },
+        handleHttpRequestSpan: undefined,
+      } as unknown as RequestInterceptionMiddlewareCtx
+
+      await expect(fetchOriginAsHttpResponse(mw)).rejects.toThrow('connection refused')
+      expect(mw.onError).toBe(originalOnError)
+      expect(mw.onResponse).toBe(originalOnResponse)
+    })
   })
 })
 
