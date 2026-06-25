@@ -11,7 +11,7 @@ import runEvents from './plugins/run_events'
 import * as session from './session'
 import { cookieJar } from './util/cookies'
 import { getSpecUrl } from './project_utils'
-import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser, AutomationCommands } from '@packages/types'
+import type { BrowserLaunchOpts, OpenProjectLaunchOptions, InitializeProjectOptions, OpenProjectLaunchOpts, FoundBrowser, AutomationCommands, FoundSpec, SpecWithRelativeRoot } from '@packages/types'
 import { DataContext, getCtx } from '@packages/data-context'
 import { autoBindDebug } from '@packages/data-context/src/util'
 import type { BrowserInstance, Browser } from './browsers/types'
@@ -120,10 +120,14 @@ export class OpenProject extends EventEmitter {
     }
 
     if (!am || !am.onBeforeRequest) {
+      const projectBase = this.projectBase
+
       automation.use({
         onBeforeRequest<T extends keyof AutomationCommands> (message: T, data: AutomationCommands[T]['dataType']): Promise<AutomationCommands[T]['returnType']> {
           if (message === 'take:screenshot') {
-            data.specName = spec.name
+            const activeSpec = projectBase?.spec as SpecWithRelativeRoot | null
+
+            data.specName = activeSpec?.relativeToCommonRoot ?? activeSpec?.name ?? ''
 
             return data
           }
@@ -244,6 +248,12 @@ export class OpenProject extends EventEmitter {
       debug('No projectBase, cannot change url')
 
       return
+    }
+
+    // Keep projectBase.spec current so the onBeforeRequest middleware (registered in launch())
+    // always has the real spec name when the browser navigates to a spec without re-calling launch()
+    if (spec.name) {
+      this.projectBase.spec = spec as unknown as FoundSpec
     }
 
     const newSpecUrl = getSpecUrl({

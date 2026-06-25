@@ -1,4 +1,10 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
+## 15.18.1
+
+**Bugfixes:**
+
+- Fixed an issue in `cypress open` where the `specName` field in `after:screenshot` event details was either an empty string or a stale value from a previously-launched spec. `specName` now always reflects the spec that was active when the screenshot was taken, including after navigating to a new spec via the sidebar without relaunching the browser. Fixed in [#34056](https://github.com/cypress-io/cypress/pull/34056).
+
 ## 15.18.0
 
 **Performance:**
