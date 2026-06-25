@@ -547,7 +547,7 @@ describe('util', () => {
       expect(os.release).toHaveBeenCalled()
     })
 
-    it('falls back to os.release when systeminformation hangs', async () => {
+    it('falls back to os.release if systeminformation hangs', async () => {
       vi.useFakeTimers()
 
       try {
