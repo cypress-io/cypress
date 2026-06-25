@@ -17,8 +17,10 @@ import type { ParsedHostWithProtocolAndHost } from './types'
 
 const debug = Debug('cypress:network:document-domain-injection')
 
+export type DocumentDomainInjectionConfig = { injectDocumentDomain?: boolean, testingType?: 'e2e' | 'component'}
+
 export abstract class DocumentDomainInjection {
-  public static InjectionBehavior (config: { injectDocumentDomain?: boolean, testingType?: 'e2e' | 'component'}): DocumentDomainInjection {
+  public static InjectionBehavior (config: DocumentDomainInjectionConfig): DocumentDomainInjection {
     debug('Determining injection behavior for config values: %o', {
       injectDocumentDomain: config.injectDocumentDomain,
       testingType: config.testingType,

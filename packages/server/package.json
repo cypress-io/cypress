@@ -133,6 +133,7 @@
     "@cypress/sinon-chai": "2.9.1",
     "@cypress/webpack-dev-server": "0.0.0-development",
     "@electron/rebuild": "4.0.4",
+    "@packages/browser-automation": "0.0.0-development",
     "@packages/config": "0.0.0-development",
     "@packages/data-context": "0.0.0-development",
     "@packages/electron": "0.0.0-development",

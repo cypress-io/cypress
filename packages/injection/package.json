@@ -1,0 +1,40 @@
+{
+  "name": "@packages/injection",
+  "version": "0.0.0-development",
+  "description": "contains the Cypress driver injection code that is needed to automate the browser with http/2",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "yarn build:browser",
+    "build-prod": "yarn build",
+    "build:browser": "rimraf dist&& rollup -c rollup.config.mts",
+    "check-ts": "tsc -p tsconfig.browser.json --noEmit && yarn -s tslint",
+    "clean": "rimraf dist",
+    "clean-deps": "rimraf node_modules",
+    "lint": "eslint --ext .ts,.json, .",
+    "test": "vitest",
+    "test-debug": "vitest --inspect-brk --no-file-parallelism --test-timeout=0",
+    "test-watch": "vitest watch",
+    "watch": "rollup -c rollup.config.mts -w"
+  },
+  "devDependencies": {
+    "@packages/network-tools": "0.0.0-development",
+    "@packages/types": "0.0.0-development",
+    "@rollup/plugin-commonjs": "29.0.0",
+    "@rollup/plugin-json": "6.1.0",
+    "@rollup/plugin-node-resolve": "16.0.3",
+    "@rollup/plugin-typescript": "12.0.0",
+    "rimraf": "6.1.1",
+    "rollup": "4.52.0",
+    "terser": "5.39.0",
+    "typescript": "5.6.3",
+    "vitest": "^3.2.4"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "license": "MIT",
+  "module": "dist/index.js",
+  "nx": {}
+}
