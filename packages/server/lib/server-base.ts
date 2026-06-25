@@ -13,10 +13,9 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { CyIntercept, INTERCEPT_HEADERS } from '@packages/net-stubbing'
+import { CyIntercept } from '@packages/net-stubbing'
 import { createHttpInterceptWithDefaultMiddleware } from '@packages/network-interception'
 import type { ForHttpIntercept } from '@packages/network-interception'
-import { createStripInternalHeaders } from './intercept-middleware/strip-internal-headers'
 import { agent, clientCertificates, httpUtils, concatStream, blocked } from '@packages/network'
 import {
   DocumentDomainInjection,
@@ -370,8 +369,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       matchesBlockedHost: blocked.matches,
     })
 
-    this._httpIntercept.use(createStripInternalHeaders(INTERCEPT_HEADERS))
-
     this._cyIntercept = new CyIntercept({
       socket: this._socket,
       onSyncInterceptSkipped: (url) => {
@@ -379,7 +376,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       },
       config: {
         devServerPublicPathRoute: config.devServerPublicPathRoute,
-        exclusionHeaders: INTERCEPT_HEADERS,
       },
     })
 

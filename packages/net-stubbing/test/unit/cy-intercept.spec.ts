@@ -412,6 +412,71 @@ describe('CyIntercept', () => {
     expect(response.body).toBe('origin')
   })
 
+  it('reset clears stale in-flight intercept state', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const emit = vi.spyOn(cyIntercept, 'emit')
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(() => new Promise(() => {}))
+
+    void httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn())
+
+    cyIntercept.reset()
+
+    await cyIntercept.emitNetworkErrorByRequestId('intercept-1', new Error('late'))
+
+    expect(emit).not.toHaveBeenCalledWith('network:error', expect.anything())
+  })
+
+  it('skips cy.intercept when internal exclusion headers are present', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: '*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    const next = vi.fn(async (request) => {
+      expect(request.headers['x-cypress-is-from-extra-target']).toBeUndefined()
+
+      return {
+        statusCode: 200,
+        headers: {},
+        body: 'origin',
+      }
+    })
+
+    const response = await httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: { 'x-cypress-is-from-extra-target': '1' },
+    }, next)
+
+    expect(next).toHaveBeenCalledOnce()
+    expect(response.body).toBe('origin')
+  })
+
   it('skips CORS preflight handling for excluded dev-server paths', async () => {
     const cyIntercept = new CyIntercept({
       socket,

@@ -304,4 +304,46 @@ describe('applyHttpResponseToCtx passthrough', () => {
 
     expect(bodyStream).toBeDefined()
   })
+
+  it('infers text/html for HTML stub bodies without content-type', async () => {
+    const onResponse = vi.fn()
+
+    await applyHttpResponseToCtx({
+      req: { hadIntercept: true, headers: {} },
+      onResponse,
+    } as any, {
+      statusCode: 200,
+      headers: {},
+      body: '<html><body>hi</body></html>',
+    })
+
+    const [incomingRes] = onResponse.mock.calls[0]
+
+    expect(incomingRes.headers['content-type']).toBe('text/html')
+  })
+
+  it('applies intercept status and headers on passthrough responses', async () => {
+    const stream = PassThrough.from(['streamed'])
+    const incomingRes = new IncomingMessage(new Socket)
+
+    incomingRes.statusCode = 200
+    incomingRes.headers = { 'content-type': 'text/plain' }
+
+    const onResponse = vi.fn()
+
+    await applyHttpResponseToCtx({
+      req: { hadIntercept: true, headers: {} },
+      onResponse,
+    } as any, {
+      statusCode: 418,
+      headers: { 'x-test': 'changed' },
+      consumePassthroughResponse: () => ({ incomingRes, stream }),
+    })
+
+    const [mergedRes] = onResponse.mock.calls[0]
+
+    expect(mergedRes.statusCode).toBe(418)
+    expect(mergedRes.headers['x-test']).toBe('changed')
+    expect(mergedRes.headers['content-type']).toBe('text/plain')
+  })
 })

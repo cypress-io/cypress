@@ -2,7 +2,8 @@ import _ from 'lodash'
 import { IncomingMessage } from 'http'
 import { Socket } from 'net'
 import type { HttpResponse } from '@packages/network-interception'
-import { getBodyStream, setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
+import { getBodyStream, parseContentType, setDefaultHeaders } from '@packages/net-stubbing/lib/server/util'
+import { caseInsensitiveGet } from '@packages/net-stubbing/lib/util'
 import type { RequestInterceptionMiddlewareCtx } from './types'
 
 function getFakeClientResponse (opts: {
@@ -11,12 +12,22 @@ function getFakeClientResponse (opts: {
   body?: string | Buffer
   statusMessage?: string
 }) {
+  const headers = { ...opts.headers }
+
+  if (!caseInsensitiveGet(headers, 'content-type') && typeof opts.body === 'string') {
+    const contentType = parseContentType(opts.body)
+
+    if (contentType) {
+      headers['content-type'] = contentType
+    }
+  }
+
   const clientResponse = new IncomingMessage(new Socket)
 
   _.merge(clientResponse, {
     statusCode: opts.statusCode,
     statusMessage: opts.statusMessage,
-    headers: opts.headers,
+    headers,
   })
 
   return clientResponse
@@ -35,11 +46,24 @@ export async function applyHttpResponseToCtx (
   if (response.body === undefined && response.consumePassthroughResponse) {
     const { incomingRes, stream } = response.consumePassthroughResponse()
 
+    incomingRes.statusCode = response.statusCode ?? incomingRes.statusCode ?? 200
+
+    if (response.statusMessage !== undefined) {
+      incomingRes.statusMessage = response.statusMessage
+    }
+
+    incomingRes.headers = {
+      ...(incomingRes.headers as Record<string, string | string[]>),
+      ...response.headers,
+    }
+
     if (mw.req.hadIntercept) {
       setDefaultHeaders(mw.req, incomingRes)
     }
 
-    mw.onResponse(incomingRes, stream)
+    const bodyStream = await getBodyStream(stream, _.pick(response, ['throttleKbps', 'delay']) as any)
+
+    mw.onResponse(incomingRes, bodyStream)
 
     return
   }

@@ -2108,6 +2108,31 @@ describe('http/response-middleware', function () {
       )
     })
 
+    it('runs onInterceptResponseWritten before ending empty intercepted responses', async function () {
+      const onInterceptResponseWritten = vi.fn(async () => {})
+      const end = vi.fn()
+
+      prepareContext({
+        req: {
+          hadIntercept: true,
+          onInterceptResponseWritten,
+        },
+        incomingRes: {
+          statusCode: 204,
+        },
+        res: {
+          on: (event, listener) => {},
+          off: (event, listener) => {},
+          end,
+        },
+      })
+
+      await testMiddleware([MaybeEndWithEmptyBody], ctx)
+
+      expect(onInterceptResponseWritten).toHaveBeenCalledOnce()
+      expect(end).toHaveBeenCalledOnce()
+    })
+
     it('calls responseEndedWithEmptyBody on protocolManager if protocolManager present and retried request is correlated and response must have empty body and response is not cached', async function () {
       prepareContext({
         protocolManager: {

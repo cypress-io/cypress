@@ -29,10 +29,9 @@ flowchart LR
 | Step | Code | Result |
 | --- | --- | --- |
 | 1. Config middleware | `createHttpInterceptWithDefaultMiddleware(config, { matchesBlockedHost })` | `HttpIntercept` with `blockHosts` + CSP `use()` layers |
-| 2. Header strip | `createStripInternalHeaders(INTERCEPT_HEADERS)` | Removes Cypress-internal headers before `cy.intercept` |
-| 3. Driver wiring | `new CyIntercept({ socket, config, onSyncInterceptSkipped })` then `httpIntercept.use(cyIntercept.middleware)` | Registers `cy.intercept` on the shared stack |
-| 3a. Proxy path | `createNetworkProxy()` when proxy enabled | `NetworkProxy.networkInterception` = shared `HttpIntercept`; driven ports on `networkServices` |
-| 3b. CDP path | `open_project.launch()` when `CYPRESS_INTERNAL_DISABLE_PROXY=1` | Passes `server.networkInterception` to browser launch |
+| 2. Driver wiring | `new CyIntercept({ socket, config, onSyncInterceptSkipped })` then `httpIntercept.use(cyIntercept.middleware)` | Strips internal headers, runs `cy.intercept`, restores them on responses |
+| 2a. Proxy path | `createNetworkProxy()` when proxy enabled | `NetworkProxy.networkInterception` = shared `HttpIntercept`; driven ports on `networkServices` |
+| 2b. CDP path | `open_project.launch()` when `CYPRESS_INTERNAL_DISABLE_PROXY=1` | Passes `server.networkInterception` to browser launch |
 
 | Concern | Wiring |
 | --- | --- |

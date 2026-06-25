@@ -8,7 +8,7 @@ import { telemetry } from '@packages/telemetry'
 import { hasServiceWorkerHeader, isVerboseTelemetry as isVerbose } from '.'
 
 import type { CookieOptions } from 'express'
-import type { CypressOutgoingResponse } from '../types'
+import type { CypressOutgoingResponse, CypressIncomingRequest } from '../types'
 import type { HttpMiddleware } from '.'
 import type { IncomingMessage } from 'http'
 
@@ -16,6 +16,27 @@ import { applyCspAllowListToHeaders, cspHeaderNames } from '@packages/network-in
 import { injectIntoServiceWorker } from './util/service-worker-injector'
 import { validateHeaderName, validateHeaderValue } from 'http'
 import error from '@packages/errors'
+
+async function finishInterceptResponseWritten (
+  req: CypressIncomingRequest,
+  end: () => void,
+): Promise<void> {
+  const onWritten = req.onInterceptResponseWritten
+
+  if (!onWritten) {
+    end()
+
+    return
+  }
+
+  req.onInterceptResponseWritten = undefined
+
+  try {
+    await onWritten()
+  } finally {
+    end()
+  }
+}
 
 interface ResponseMiddlewareProps {
   /**
@@ -525,15 +546,18 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
+const MaybeEndWithEmptyBody: ResponseMiddleware = async function () {
   if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
     this.networkServices.networkCapture.notifyResponseEndedWithEmptyBody(this, {
       isCached: this.incomingRes.statusCode === 304,
     })
 
-    this.res.end()
+    await finishInterceptResponseWritten(this.req, () => {
+      this.res.end()
+      this.end()
+    })
 
-    return this.end()
+    return
   }
 
   // When the origin response declared `Content-Length: 0`, short-circuit with an
@@ -553,10 +577,14 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
     && !this.res.wantsSecurityRemoved
   ) {
     this.networkServices.networkCapture.notifyResponseEndedWithEmptyBody(this, { isCached: false })
-    this.res.setHeader('Content-Length', '0')
-    this.res.end()
 
-    return this.end()
+    await finishInterceptResponseWritten(this.req, () => {
+      this.res.setHeader('Content-Length', '0')
+      this.res.end()
+      this.end()
+    })
+
+    return
   }
 
   this.next()

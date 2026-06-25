@@ -52,7 +52,6 @@ export const INTERCEPT_HEADERS = [
 
 export type CyInterceptConfig = {
   devServerPublicPathRoute?: string
-  exclusionHeaders?: readonly string[]
 }
 
 export type CyInterceptOptions = {
@@ -67,24 +66,24 @@ export type DriverEventFrame =
   | NetEvent.ToServer.EventHandlerResolved
   | NetEvent.ToServer.SendStaticResponse
 
-function isExcludedFromCyIntercept (request: HttpRequest, config: CyInterceptConfig): boolean {
-  const { devServerPublicPathRoute, exclusionHeaders = [] } = config
+function stripInternalHeaders (
+  request: HttpRequest,
+  internalHeaders: readonly string[],
+): Record<string, string | string[]> {
+  const stashed = { ..._.pick(request.headers, internalHeaders) }
 
-  if (devServerPublicPathRoute) {
-    try {
-      const pathname = new URL(request.url).pathname
+  request.headers = _.omit(request.headers, internalHeaders) as Record<string, string | string[]>
 
-      if (pathname.startsWith(devServerPublicPathRoute)) {
-        return true
-      }
-    } catch {
-      // ignore invalid URLs
-    }
-  }
+  return stashed
+}
 
-  return exclusionHeaders.some((header) => {
-    return !!request.headers[header]
-  })
+function restoreInternalHeaders (
+  response: HttpResponse,
+  stashed: Record<string, string | string[]>,
+): HttpResponse {
+  response.headers = { ...response.headers, ...stashed }
+
+  return response
 }
 
 export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
@@ -135,14 +134,46 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
     this.config = options.config ?? {}
   }
 
+  private isExcludedByDevServerPath (request: HttpRequest): boolean {
+    const { devServerPublicPathRoute } = this.config
+
+    if (!devServerPublicPathRoute) {
+      return false
+    }
+
+    try {
+      const pathname = new URL(request.url).pathname
+
+      return pathname.startsWith(devServerPublicPathRoute)
+    } catch {
+      return false
+    }
+  }
+
   readonly middleware: InterceptMiddleware = async (
     request: HttpRequest,
     next: OriginForwarder,
   ): Promise<HttpResponse> => {
-    if (isExcludedFromCyIntercept(request, this.config)) {
-      return next(request)
+    const stashedInternalHeaders = stripInternalHeaders(request, INTERCEPT_HEADERS)
+    const excludedByHeader = INTERCEPT_HEADERS.some((header) => stashedInternalHeaders[header])
+
+    const withRestoredInternalHeaders = async (
+      run: () => Promise<HttpResponse>,
+    ): Promise<HttpResponse> => {
+      return restoreInternalHeaders(await run(), stashedInternalHeaders)
     }
 
+    if (excludedByHeader || this.isExcludedByDevServerPath(request)) {
+      return withRestoredInternalHeaders(() => next(request))
+    }
+
+    return withRestoredInternalHeaders(() => this.handleIntercept(request, next))
+  }
+
+  private async handleIntercept (
+    request: HttpRequest,
+    next: OriginForwarder,
+  ): Promise<HttpResponse> {
     if (matchesRoutePreflight(this.routes, request)) {
       request.hadIntercept = true
 
@@ -189,20 +220,18 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
 
       const handlerRequest = cloneHandlerRequest(request)
 
-      const mergeRequestChanges = (before: HttpRequest, after: HttpRequest) => {
-        const resolvedUrl = mergeIncomingRequestChanges(before, after, {
-          baseUrl: request.url,
-          resolveUrl: (baseUrl, relativeUrl) => url.resolve(baseUrl, relativeUrl),
-        })
-
-        applyHandlerRequestToRequest(request, before, resolvedUrl)
-      }
-
       await runSubscriptions({
         inFlightIntercept,
         eventName: 'before:request',
         data: handlerRequest,
-        mergeChanges: mergeRequestChanges,
+        mergeChanges: (before: HttpRequest, after: HttpRequest) => {
+          const resolvedUrl = mergeIncomingRequestChanges(before, after, {
+            baseUrl: request.url,
+            resolveUrl: (baseUrl, relativeUrl) => url.resolve(baseUrl, relativeUrl),
+          })
+
+          applyHandlerRequestToRequest(request, before, resolvedUrl)
+        },
         driverNotification: this,
       })
 
@@ -332,6 +361,7 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
   reset (): void {
     this.pendingEventHandlers = {}
     this.routes = []
+    this.inFlightIntercepts.clear()
   }
 
   emitAndAwait<D, R = unknown> (
