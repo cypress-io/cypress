@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import errors from '@packages/errors'
 import { HttpIntercept } from '@packages/network-interception'
 import type { BackendRoute } from '@packages/network-interception'
-import { CyIntercept } from '../../lib/cy-intercept'
+import { CyIntercept, _restoreMatcherOptionsTypes } from '../../lib/cy-intercept'
 
 describe('CyIntercept', () => {
   const getFixture = vi.fn(async () => '')
@@ -327,5 +327,22 @@ describe('CyIntercept', () => {
 
     expect(next).toHaveBeenCalledOnce()
     expect(response.body).toBe('origin')
+  })
+
+  describe('._restoreMatcherOptionsTypes', () => {
+    it('rehydrates regexes properly', () => {
+      const { url } = _restoreMatcherOptionsTypes({
+        url: {
+          type: 'regex',
+          value: '/aaa/igm',
+        },
+      })
+
+      expect(url).toBeInstanceOf(RegExp)
+      expect(url).toMatchObject({
+        flags: 'gim',
+        source: 'aaa',
+      })
+    })
   })
 })
