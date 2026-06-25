@@ -6,14 +6,12 @@ import type {
   AnnotatedRouteMatcherOptions,
   BackendRoute,
   BackendStaticResponse,
-  ForInterceptRegistration,
   ForInterceptionEvents,
   ForStubbing,
   GetFixtureFn,
   HttpRequest,
   HttpResponse,
   InterceptMiddleware,
-  InterceptRegistrationRequest,
   NetEvent,
   OriginForwarder,
   RouteMatcherOptions,
@@ -374,14 +372,6 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
       }
       default:
         throw new Error(`Unrecognized net event: ${eventName}`)
-    }
-  }
-
-  createInterceptRegistration (options: { getFixture: GetFixtureFn }): ForInterceptRegistration {
-    return {
-      handleEvent: (request: InterceptRegistrationRequest): Promise<unknown> => {
-        return this.handleDriverEvent(request.eventName, request.frame as DriverEventFrame, options.getFixture)
-      },
     }
   }
 

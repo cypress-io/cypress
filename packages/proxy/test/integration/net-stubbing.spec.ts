@@ -61,7 +61,6 @@ describe('network stubbing', () => {
 
     const proxy = new NetworkProxy({
       socket,
-      netStubbingState: cyIntercept,
       networkServices: createProxyNetworkServices(),
       networkInterception,
       config,

@@ -2,7 +2,7 @@
   "name": "@packages/net-stubbing",
   "version": "0.0.0-development",
   "private": true,
-  "main": "./lib/server",
+  "main": "./lib/index",
   "scripts": {
     "build-prod": "tsc --project .",
     "check-ts": "tsc --noEmit && yarn -s tslint",

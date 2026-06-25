@@ -2325,7 +2325,6 @@ describe('http/response-middleware', function () {
         protocolManager: props.protocolManager,
         req: props.req,
         incomingResHadEmptyBody: props.incomingResHadEmptyBody,
-        netStubbingState: props.netStubbingState,
         res: props.res || {
           on: (event, listener) => {},
           off: (event, listener) => {},

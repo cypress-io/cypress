@@ -13,7 +13,7 @@ import url from 'url'
 import la from 'lazy-ass'
 import { createProxy as createHttpsProxy } from '@packages/https-proxy'
 import type { Server as HttpsProxyServer } from '@packages/https-proxy'
-import { CyIntercept, INTERCEPT_HEADERS, resetStubbingState } from '@packages/net-stubbing'
+import { CyIntercept, INTERCEPT_HEADERS } from '@packages/net-stubbing'
 import { createHttpInterceptWithDefaultMiddleware } from '@packages/network-interception'
 import type { ForHttpIntercept } from '@packages/network-interception'
 import { createStripInternalHeaders } from './intercept-middleware/strip-internal-headers'
@@ -231,7 +231,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this.ensureProp(this._networkProxy, 'open')
   }
 
-  get netStubbingState () {
+  get cyIntercept () {
     return this.ensureProp(this._cyIntercept, 'open')
   }
 
@@ -497,7 +497,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
       getFileServerToken,
       getCookieJar: () => cookieJar,
       socket: this.socket,
-      netStubbingState: this.netStubbingState,
       networkServices,
       networkInterception: this.networkInterception!,
       request: this.request,
@@ -520,7 +519,7 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     options.onResetServerState = () => {
       this._networkProxy?.reset({ resetBetweenSpecs: false })
-      resetStubbingState(this.netStubbingState)
+      this._cyIntercept?.reset()
       this._remoteStates.reset()
       this._networkProxy?.clearCredentials()
     }

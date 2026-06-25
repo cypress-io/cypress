@@ -21,7 +21,7 @@ import type {
   BrowserPreRequest,
 } from '../types'
 import type { IncomingMessage } from 'http'
-import type { ForNetworkInterception, ForStubbing, ForCommandLog, ForCookieState, ForDocumentPreparation, ForNetworkCapture } from '@packages/network-interception'
+import type { ForNetworkInterception, ForCommandLog, ForCookieState, ForDocumentPreparation, ForNetworkCapture } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -116,7 +116,6 @@ export type ServerCtx = Readonly<{
   getCookieJar: () => CookieJar
   remoteStates: RemoteStates
   getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
-  netStubbingState: ForStubbing
   networkServices: ProxyNetworkServices
   networkInterception: ForNetworkInterception
   middleware: HttpMiddlewareStacks
@@ -130,7 +129,6 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
   'getFileServerToken',
-  'netStubbingState',
   'networkServices',
   'networkInterception',
   'next',
@@ -320,7 +318,6 @@ export class Http {
   getFileServerToken: () => string | undefined
   remoteStates: RemoteStates
   middleware: HttpMiddlewareStacks
-  netStubbingState: ForStubbing
   networkServices: ProxyNetworkServices
   networkInterception: ForNetworkInterception
   preRequests: PreRequests = new PreRequests()
@@ -342,7 +339,6 @@ export class Http {
     this.getFileServerToken = opts.getFileServerToken
     this.remoteStates = opts.remoteStates
     this.middleware = opts.middleware
-    this.netStubbingState = opts.netStubbingState
     this.networkServices = opts.networkServices
     this.networkInterception = opts.networkInterception
     this.socket = opts.socket
@@ -373,7 +369,6 @@ export class Http {
       remoteStates: this.remoteStates,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
-      netStubbingState: this.netStubbingState,
       networkServices: this.networkServices,
       networkInterception: this.networkInterception,
       socket: this.socket,

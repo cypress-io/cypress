@@ -2,7 +2,7 @@ import errors from '@packages/errors'
 
 import type { HttpMiddleware } from '.'
 import type { Readable } from 'stream'
-import { InterceptError } from '@packages/net-stubbing'
+import { InterceptError } from '@packages/net-stubbing/lib/server/middleware/error'
 import type { Request } from '@cypress/request'
 
 // do not use a debug namespace in this file - use the per-request `this.debug` instead

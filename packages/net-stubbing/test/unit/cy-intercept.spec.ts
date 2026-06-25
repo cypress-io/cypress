@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import errors from '@packages/errors'
 import { HttpIntercept } from '@packages/network-interception'
-import type { BackendRoute, InterceptRegistrationRequest } from '@packages/network-interception'
+import type { BackendRoute } from '@packages/network-interception'
 import { CyIntercept } from '../../lib/cy-intercept'
 
 describe('CyIntercept', () => {
@@ -269,8 +269,6 @@ describe('CyIntercept', () => {
       matches: 0,
     })
 
-    const registration = cyIntercept.createInterceptRegistration({ getFixture })
-
     const handlePromise = httpIntercept.handle({
       inFlightInterceptId: 'intercept-1',
       url: 'http://example.com/foo',
@@ -280,16 +278,13 @@ describe('CyIntercept', () => {
       throw new Error('next should not be called')
     })
 
-    await registration.handleEvent({
-      eventName: 'send:static:response',
-      frame: {
-        requestId: 'intercept-1',
-        staticResponse: {
-          statusCode: 200,
-          body: 'response body',
-        },
+    await cyIntercept.handleDriverEvent('send:static:response', {
+      requestId: 'intercept-1',
+      staticResponse: {
+        statusCode: 200,
+        body: 'response body',
       },
-    })
+    }, getFixture)
 
     resolveBeforeRequest()
 
@@ -297,25 +292,6 @@ describe('CyIntercept', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.body).toBe('response body')
-  })
-
-  it('createInterceptRegistration delegates to handleDriverEvent', async () => {
-    const cyIntercept = new CyIntercept({ socket })
-    const handleDriverEvent = vi.spyOn(cyIntercept, 'handleDriverEvent')
-    const registration = cyIntercept.createInterceptRegistration({ getFixture })
-    const request: InterceptRegistrationRequest = {
-      eventName: 'route:added',
-      frame: {
-        routeId: 'route-1',
-        hasInterceptor: false,
-        routeMatcher: { url: { type: 'glob', value: '**/api/*' } },
-      },
-    }
-
-    await registration.handleEvent(request)
-
-    expect(handleDriverEvent).toHaveBeenCalledOnce()
-    expect(handleDriverEvent).toHaveBeenCalledWith('route:added', request.frame, getFixture)
   })
 
   it('skips intercept for excluded dev-server paths', async () => {
