@@ -7,6 +7,7 @@ export type DevServerSpecUpdateEvents = {
   once (event: 'dev-server:on-spec-updated' | 'dev-server:specs:unchanged', handler: () => void): void
   on (event: 'dev-server:compile:success', handler: (data?: DevServerCompileSuccessData) => void): void
   off (event: 'dev-server:compile:success', handler: (data?: DevServerCompileSuccessData) => void): void
+  off (event: 'dev-server:specs:unchanged', handler: () => void): void
   emit (event: 'dev-server:on-spec-update', spec: { absolute: string }): void
 }
 
