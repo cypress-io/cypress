@@ -317,7 +317,11 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
       return
     }
 
-    await this.emitNetworkError(inFlightIntercept, error)
+    try {
+      await this.emitNetworkError(inFlightIntercept, error)
+    } finally {
+      this.inFlightIntercepts.delete(requestId)
+    }
   }
 
   private async emitNetworkError (inFlightIntercept: InFlightIntercept, error: Error): Promise<void> {

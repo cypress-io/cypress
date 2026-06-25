@@ -267,6 +267,80 @@ describe('CyIntercept', () => {
     expect(networkErrorEmit![1].data.error.message).toBe('stream failed')
   })
 
+  it('emitNetworkErrorByRequestId clears the in-flight intercept entry', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const emit = vi.spyOn(cyIntercept, 'emit')
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(() => new Promise(() => {}))
+
+    void httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn())
+
+    await cyIntercept.emitNetworkErrorByRequestId('intercept-1', new Error('proxy abort'))
+
+    emit.mockClear()
+
+    await cyIntercept.emitNetworkErrorByRequestId('intercept-1', new Error('late'))
+
+    expect(emit).not.toHaveBeenCalledWith('network:error', expect.anything())
+  })
+
+  it('emitNetworkErrorByRequestId clears deferred in-flight intercept after handle returns', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const emit = vi.spyOn(cyIntercept, 'emit')
+
+    vi.spyOn(cyIntercept, 'emitAndAwait').mockResolvedValue({})
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    const response = await httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn(async () => {
+      return {
+        statusCode: 200,
+        headers: {},
+        body: 'origin',
+      }
+    }))
+
+    expect(response.onResponseWrittenToClient).toBeDefined()
+
+    await cyIntercept.emitNetworkErrorByRequestId('intercept-1', new Error('stream failed'))
+
+    emit.mockClear()
+
+    await cyIntercept.emitNetworkErrorByRequestId('intercept-1', new Error('late'))
+
+    expect(emit).not.toHaveBeenCalledWith('network:error', expect.anything())
+  })
+
   it('registers pending handlers on emitAndAwait and resolves them', async () => {
     const cyIntercept = new CyIntercept({ socket })
 
