@@ -305,7 +305,7 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
 
       it('throws when foo cannot resolve', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('for the 1st request to the route: `foo`. No request ever occurred.')
+          expect(err.message).to.include('`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `foo`. No request ever occurred.')
 
           done()
         })
