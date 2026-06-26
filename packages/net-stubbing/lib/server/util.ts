@@ -107,8 +107,8 @@ function wait (fn, ms) {
 
 export function normalizeTextRequestBody (
   body: unknown,
-  headers: Record<string, string | string[]>,
-): unknown {
+  headers: Record<string, string | string[] | undefined>,
+): string | Buffer | undefined {
   const bodyEncoding = getBodyEncoding({
     body: body ?? '',
     headers,
@@ -118,7 +118,11 @@ export function normalizeTextRequestBody (
     return body.toString('utf8')
   }
 
-  return body
+  if (body === undefined) {
+    return undefined
+  }
+
+  return body as string | Buffer
 }
 
 type BodyEncoding = 'utf8' | 'binary' | null

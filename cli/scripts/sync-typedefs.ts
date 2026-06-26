@@ -73,7 +73,33 @@ shell.sed('-i', 'from "sinon";', 'from "../sinon";', sinonChaiFilename)
 
 // copy experimental network stubbing type definitions
 // so users can import: `import 'cypress/types/net-stubbing'`
-fs.copySync(resolvePkg('@packages/network-interception/lib/types/external-types.ts', { cwd: __dirname }), 'types/net-stubbing.d.ts')
+function stripImportLines (content: string): string {
+  return content.replace(/^import\s[\s\S]*?from\s+['"][^'"]+['"]\s*;?\s*\n/gm, '')
+}
+
+function extractDriverInterceptTypes (content: string): string {
+  const lines = content.split('\n')
+  const start = lines.findIndex((line) => line.includes('export type DriverInterceptMessage'))
+  const end = lines.findIndex((line, i) => i > start && line.startsWith('export type PendingEventHandler'))
+
+  return lines.slice(start, end).join('\n')
+}
+
+const netStubbingTypeSources = [
+  resolvePkg('@packages/network-interception/lib/types/external-types.ts', { cwd: __dirname }),
+  resolvePkg('@packages/net-stubbing/lib/driver-http-conversion.ts', { cwd: __dirname }),
+  resolvePkg('@packages/net-stubbing/lib/cy-http-messages.ts', { cwd: __dirname }),
+  resolvePkg('@packages/net-stubbing/lib/intercept-api-types.ts', { cwd: __dirname }),
+]
+
+const netStubbingTypes = [
+  fs.readFileSync(netStubbingTypeSources[0], 'utf8'),
+  extractDriverInterceptTypes(fs.readFileSync(netStubbingTypeSources[1], 'utf8')),
+  stripImportLines(fs.readFileSync(netStubbingTypeSources[2], 'utf8')),
+  stripImportLines(fs.readFileSync(netStubbingTypeSources[3], 'utf8')),
+].join('\n\n')
+
+fs.writeFileSync(join(__dirname, '..', 'types', 'net-stubbing.d.ts'), netStubbingTypes)
 
 // https://github.com/cypress-io/cypress/issues/18069
 // To avoid type clashes, some files should be commented out entirely by patch-package

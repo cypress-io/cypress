@@ -16,6 +16,7 @@
     "watch": "yarn build:cjs --watch & yarn build:esm --watch"
   },
   "dependencies": {
+    "@packages/network-interception": "0.0.0-development",
     "semver": "^7.7.3"
   },
   "devDependencies": {

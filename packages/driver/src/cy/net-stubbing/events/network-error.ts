@@ -1,5 +1,5 @@
 import { get } from 'lodash'
-import type { CyHttpMessages } from '@packages/network-interception'
+import type { CyHttpMessages } from '../types'
 import $errUtils from '../../../cypress/error_utils'
 import type { HandlerFn } from '.'
 
