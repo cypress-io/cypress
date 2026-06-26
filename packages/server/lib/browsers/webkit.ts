@@ -126,6 +126,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     initialUrl: url,
     downloadsFolder: options.downloadsFolder,
     videoApi: options.videoApi,
+    isHeadless: !!browser.isHeadless,
   })
 
   automation.use(wkAutomation)
