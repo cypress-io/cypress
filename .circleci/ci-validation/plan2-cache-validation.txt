@@ -8,4 +8,4 @@
 #
 # Remove this file after validation completes.
 
-validation_state=cold
+validation_state=warm
