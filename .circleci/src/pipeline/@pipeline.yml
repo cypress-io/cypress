@@ -333,19 +333,9 @@ commands:
           paths:
             - cypress
 
-  install_cache_helpers_dependencies:
-    steps:
-      - run:
-          # Dependencies needed by circle-cache.js, before we "yarn" or unpack cached node_modules
-          name: Cache Helper Dependencies
-          working_directory: ~/
-          command: npm i glob@7.1.6 fs-extra@10.0.0 minimist@1.2.5
-            fast-json-stable-stringify@2.1.0
-
   unpack-dependencies:
     description: 'Unpacks dependencies associated with the current workflow'
     steps:
-      - install_cache_helpers_dependencies
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
@@ -448,7 +438,6 @@ commands:
         type: boolean
         default: false
     steps:
-      - install_cache_helpers_dependencies
       - run:
           name: Generate Circle Cache Key
           command: node scripts/circle-cache.js --action cacheKey > circle_cache_key
