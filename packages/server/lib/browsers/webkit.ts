@@ -15,6 +15,8 @@ let wkAutomation: WebKitAutomation | undefined
 export async function connectToNewSpec (browser: Browser, options: BrowserNewTabOpts, automation: Automation) {
   if (!wkAutomation) throw new Error('connectToNewSpec called without wkAutomation')
 
+  debug('connecting to new spec %o', { url: options.url, hasVideoApi: !!options.videoApi })
+
   automation.use(wkAutomation)
   wkAutomation.automation = automation
   await options.onInitializeNewBrowserTab()
@@ -23,6 +25,8 @@ export async function connectToNewSpec (browser: Browser, options: BrowserNewTab
     downloadsFolder: options.downloadsFolder,
     videoApi: options.videoApi,
   })
+
+  debug('connected to new spec')
 }
 
 /**
@@ -122,6 +126,7 @@ export async function open (browser: Browser, url: string, options: BrowserLaunc
     initialUrl: url,
     downloadsFolder: options.downloadsFolder,
     videoApi: options.videoApi,
+    isHeadless: !!browser.isHeadless,
   })
 
   automation.use(wkAutomation)
