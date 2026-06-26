@@ -58,7 +58,9 @@ async function main () {
     log('Scaffolding node_modules for', project)
 
     await Fixtures.scaffoldProject(project)
-    await scaffoldProjectNodeModules({ project })
+    // always persist back to the cache here - this step exists to (re)populate the cache, so a
+    // warm-but-stale cache (e.g. after a lockfile change) must still be updated.
+    await scaffoldProjectNodeModules({ project, persistCache: true })
     console.timeEnd(timeTag)
   }
 

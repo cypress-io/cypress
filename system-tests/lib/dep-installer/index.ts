@@ -42,12 +42,20 @@ function pathToPackage (pkg: string): string {
   return path.dirname(require.resolve(`${pkg}/package.json`))
 }
 
-async function ensureCacheDir (cacheDir: string) {
+/**
+ * Ensure the cache dir exists. Returns `true` when the cache is "cold" (just
+ * created or empty) and still needs to be populated by the upcoming install.
+ */
+async function ensureCacheDir (cacheDir: string): Promise<boolean> {
   try {
     await fs.stat(cacheDir)
+
+    return (await fs.readdir(cacheDir)).length === 0
   } catch (err) {
     log(`Creating a new node_modules cache dir at ${cacheDir}`)
     await fs.mkdirp(cacheDir)
+
+    return true
   }
 }
 
@@ -192,10 +200,18 @@ export async function scaffoldProjectNodeModules ({
   project,
   updateLockFile = !!process.env.UPDATE_LOCK_FILE,
   forceCopyDependencies = false,
+  persistCache,
 }: {
   project: string
   updateLockFile?: boolean
   forceCopyDependencies?: boolean
+  /**
+   * For copy-based (non-yarn) projects, whether to copy `node_modules` back to the cache after
+   * installing. When unset, the cache is only seeded while cold - on a warm cache the install is a
+   * no-op against the frozen lockfile, so the copy-back is skipped as wasted I/O. The cache-warming
+   * step (`projects:yarn:install`) passes `true` so lockfile updates always make it into the cache.
+   */
+  persistCache?: boolean
 }): Promise<void> {
   const projectDir = projectPath(project)
   const relativePathToMonorepoRoot = path.relative(
@@ -246,7 +262,7 @@ export async function scaffoldProjectNodeModules ({
     const hasBunLock = lockFilename === 'bun.lock' || lockFilename === 'bun.lockb'
 
     // 1. Ensure there is a cache directory set up for this test project's `node_modules`.
-    await ensureCacheDir(cacheNodeModulesDir)
+    const cacheIsCold = await ensureCacheDir(cacheNodeModulesDir)
 
     let persistCacheCb: () => Promise<void>
 
@@ -302,8 +318,12 @@ export async function scaffoldProjectNodeModules ({
       await fs.symlink(targetDir, destDir, 'junction')
     }
 
-    // 8. If necessary, ensure that the `node_modules` cache is updated by copying `node_modules` back.
-    if (persistCacheCb) await persistCacheCb()
+    // 8. Persist `node_modules` back to the cache. Against a warm cache the install is a no-op
+    // (frozen lockfile), so copying the identical tree back on every test run is wasted I/O - skip
+    // it unless the cache was cold (seed it once) or the caller explicitly opted in (cache warming).
+    const shouldPersistCache = persistCache ?? cacheIsCold
+
+    if (persistCacheCb && shouldPersistCache) await persistCacheCb()
   } catch (err) {
     if (err.code === 'MODULE_NOT_FOUND') return
 
