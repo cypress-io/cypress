@@ -157,21 +157,6 @@ describe('lib/browsers/chrome', () => {
       })
     })
 
-    it('sets headless in the old style for versions lower than 112', function () {
-      chrome._writeExtension.restore()
-
-      return chrome.open({ isHeadless: true, majorVersion: 111 }, 'http://', openOpts, this.automation)
-      .then(() => {
-        const args = launch.launch.firstCall.args[3]
-
-        expect(args).to.include.members([
-          '--headless',
-          '--window-size=1280,720',
-          '--force-device-scale-factor=1',
-        ])
-      })
-    })
-
     it('does not load extension in headless mode', function () {
       chrome._writeExtension.restore()
 
@@ -624,7 +609,7 @@ describe('lib/browsers/chrome', () => {
       }
 
       sinon.stub(chrome, '_getBrowserCriClient').returns(browserCriClient)
-      sinon.stub(chrome, '_recordVideo').withArgs(sinon.match.object, options.writeVideoFrame, 354).resolves()
+      sinon.stub(chrome, '_recordVideo').withArgs(sinon.match.object, options.writeVideoFrame).resolves()
       sinon.stub(chrome, '_navigateUsingCRI').withArgs(pageCriClient, options.url, 354).resolves()
       sinon.stub(chrome, '_handleDownloads').withArgs(pageCriClient, options.downloadFolder, automation).resolves()
 
@@ -935,48 +920,15 @@ describe('lib/browsers/chrome', () => {
       expect(args).not.to.include('--user-agent=foo')
     })
 
-    it('disables RootLayerScrolling in versions 66 or 67', () => {
-      const arg = '--disable-blink-features=RootLayerScrolling'
-
-      const disabledRootLayerScrolling = function (version, bool) {
-        const args = chrome._getArgs({
-          majorVersion: version,
-        }, {})
-
-        if (bool) {
-          return expect(args).to.include(arg)
-        }
-
-        expect(args).not.to.include(arg)
-      }
-
-      disabledRootLayerScrolling('65', false)
-      disabledRootLayerScrolling('66', true)
-      disabledRootLayerScrolling('67', true)
-
-      disabledRootLayerScrolling('68', false)
-    })
-
     // https://github.com/cypress-io/cypress/issues/1872
-    it('adds <-loopback> proxy bypass rule in version 72+', () => {
+    it('adds <-loopback> proxy bypass rule', () => {
       const arg = '--proxy-bypass-list=<-loopback>'
 
-      const chromeVersionHasLoopback = function (version, bool) {
-        const args = chrome._getArgs({
-          majorVersion: version,
-        }, {})
+      const args = chrome._getArgs({
+        majorVersion: '89',
+      }, {})
 
-        if (bool) {
-          return expect(args).to.include(arg)
-        }
-
-        expect(args).not.to.include(arg)
-      }
-
-      chromeVersionHasLoopback('71', false)
-      chromeVersionHasLoopback('72', true)
-
-      return chromeVersionHasLoopback('73', true)
+      expect(args).to.include(arg)
     })
   })
 

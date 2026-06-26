@@ -27,10 +27,6 @@ import { DEFAULT_CHROME_FLAGS } from '../util/chromium_flags'
 const debug = debugModule('cypress:server:browsers:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
-const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
-const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
-const CHROME_VERSION_WITH_FPS_INCREASE = 89
-const CHROME_VERSION_INTRODUCING_HEADLESS_NEW = 112
 
 const CHROME_PREFERENCE_PATHS = {
   default: path.join('Default', 'Preferences'),
@@ -245,12 +241,10 @@ const _disableRestorePagesPrompt = function (userDir) {
   })
 }
 
-async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi, browserMajorVersion: number) {
-  const screencastOptions = browserMajorVersion >= CHROME_VERSION_WITH_FPS_INCREASE ? screencastOpts() : screencastOpts(1)
-
+async function _recordVideo (cdpAutomation: CdpAutomation, videoOptions: RunModeVideoApi) {
   const { writeVideoFrame } = await videoOptions.useFfmpegVideoController()
 
-  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOptions)
+  await cdpAutomation.startVideoRecording(writeVideoFrame, screencastOpts())
 }
 
 // a utility function that navigates to the given URL
@@ -389,28 +383,14 @@ export = {
       args.push('--allow-running-insecure-content')
     }
 
-    // prevent AUT shaking in 66 & 67, but flag breaks chrome in 68+
-    // https://github.com/cypress-io/cypress/issues/2037
-    // https://github.com/cypress-io/cypress/issues/2215
-    // https://github.com/cypress-io/cypress/issues/2223
-    const { majorVersion, isHeadless } = browser
-
-    if (CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING.includes(majorVersion)) {
-      args.push('--disable-blink-features=RootLayerScrolling')
-    }
+    const { isHeadless } = browser
 
     // https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
     // https://github.com/cypress-io/cypress/issues/1872
-    if (Number(majorVersion) >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK) {
-      args.push('--proxy-bypass-list=<-loopback>')
-    }
+    args.push('--proxy-bypass-list=<-loopback>')
 
     if (isHeadless) {
-      if (Number(majorVersion) >= CHROME_VERSION_INTRODUCING_HEADLESS_NEW) {
-        args.push('--headless=new')
-      } else {
-        args.push('--headless')
-      }
+      args.push('--headless=new')
 
       // set default headless size to 1280x720
       // https://github.com/cypress-io/cypress/issues/6210
@@ -586,7 +566,7 @@ export = {
 
     await Promise.all([
       pageCriClient.send('ServiceWorker.enable'),
-      options.videoApi && this._recordVideo(cdpAutomation, options.videoApi, Number(options.browser.majorVersion)),
+      options.videoApi && this._recordVideo(cdpAutomation, options.videoApi),
       this._handleDownloads(pageCriClient, options.downloadsFolder, automation),
       utils.initializeCDP(pageCriClient, automation),
     ])
