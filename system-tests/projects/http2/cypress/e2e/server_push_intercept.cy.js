@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 // NOTE: Chrome is deprecating HTTP/2 server push in favor of preload / 103 Early Hints.
-// @see https://developer.chrome.com/blog/removing-push
+// https://developer.chrome.com/blog/removing-push
 const ORIGIN = 'https://www.h2test.local:44701'
 
 describe('http2 server push intercept', () => {

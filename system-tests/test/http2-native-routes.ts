@@ -6,8 +6,9 @@ export const HTTP2_NATIVE_PORT = 44701
 export const HTTP2_NATIVE_ORIGIN = `https://www.h2test.local:${HTTP2_NATIVE_PORT}`
 
 export function registerHttp2NativeRoutes (register: Http2NativeRegister) {
-  // NOTE: HTTP/2 server push is deprecated in Chrome (preload / 103 Early Hints instead).
-  // @see https://developer.chrome.com/blog/removing-push
+  // NOTE: HTTP/2 server push is deprecated in Chromium in favor of `<link rel="preload">`
+  // and 103 Early Hints (https://developer.chrome.com/blog/removing-push). These routes
+  // still validate push handling for the CDP Fetch program while browsers honor push.
   register('GET', '/push-page', (stream) => {
     stream.pushStream({ ':path': '/push/pushed.js' }, (err, pushStream) => {
       if (err) {
