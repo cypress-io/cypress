@@ -82,6 +82,10 @@ function extractDriverInterceptTypes (content: string): string {
   const start = lines.findIndex((line) => line.includes('export type DriverInterceptMessage'))
   const end = lines.findIndex((line, i) => i > start && line.startsWith('export type PendingEventHandler'))
 
+  if (start === -1 || end === -1) {
+    throw new Error(`extractDriverInterceptTypes: could not locate expected markers in driver-http-conversion.ts (start=${start}, end=${end})`)
+  }
+
   return lines.slice(start, end).join('\n')
 }
 

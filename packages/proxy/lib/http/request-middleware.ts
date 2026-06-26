@@ -308,6 +308,10 @@ const ApplyHttpInterception: RequestMiddleware = async function () {
   } catch (err) {
     span?.end()
 
+    if (httpRequest.hadIntercept) {
+      this.req.hadIntercept = true
+    }
+
     return this.onError(err)
   }
 }
