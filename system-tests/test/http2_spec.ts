@@ -1,4 +1,5 @@
 import systemTests from '../lib/system-tests'
+import { HTTP2_NATIVE_PORT, registerHttp2NativeRoutes } from './http2-native-routes'
 
 const PORT = 44700
 
@@ -133,6 +134,11 @@ const onServer = (app) => {
  * Phase 2 (skipped): After CDP Fetch / BiDi interception lands, unskip the
  * `with proxy disabled` block — those runs use `CYPRESS_INTERNAL_DISABLE_PROXY=1`
  * and should pass with `expectedExitCode: 0`.
+ *
+ * Server push (`server_push*`) runs on the native stream server (port 44701). Chrome is
+ * removing HTTP/2 server push in favor of preload and 103 Early Hints — see
+ * https://developer.chrome.com/blog/removing-push — so those specs may need to migrate
+ * when push is no longer accepted in CI browsers.
  */
 const HTTP2_CASES = [
   { title: 'visit', spec: 'visit.cy.js' },
@@ -144,6 +150,10 @@ const HTTP2_CASES = [
   { title: 'multiplex parallel fetch', spec: 'multiplex_parallel_fetch.cy.js' },
   { title: 'multiplex intercept', spec: 'multiplex_intercept.cy.js' },
   { title: 'multiplex interleaved', spec: 'multiplex_interleaved.cy.js' },
+  { title: 'server push', spec: 'server_push.cy.js' },
+  { title: 'server push intercept', spec: 'server_push_intercept.cy.js' },
+  { title: 'stream priority', spec: 'stream_priority.cy.js' },
+  { title: 'settings', spec: 'settings.cy.js' },
 ] as const
 
 const proxyEnabledEnv = {
@@ -170,6 +180,11 @@ describe('e2e http2', () => {
       port: PORT,
       http2: true,
       onServer,
+    }, {
+      port: HTTP2_NATIVE_PORT,
+      http2: true,
+      http2Native: true,
+      onHttp2NativeServer: registerHttp2NativeRoutes,
     }],
     settings: {
       hosts: {
