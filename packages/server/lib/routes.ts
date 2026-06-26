@@ -23,6 +23,7 @@ import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
 import { runnerDiscovery } from './runner-discovery'
+import { RUNNER_DISCOVERY_ROUTE_PREFIX } from '@packages/runner-discovery'
 
 const debug = Debug('cypress:server:routes')
 
@@ -240,7 +241,7 @@ export const createCommonRoutes = ({
   // external tool can attach to; the record is only written in open mode, so don't
   // expose the probe route for headless `cypress run`.
   if (!config.isTextTerminal) {
-    router.get('/__cypress/runner-discovery/:instanceId', (req, res) => {
+    router.get(`${RUNNER_DISCOVERY_ROUTE_PREFIX}:instanceId`, (req, res) => {
       const state = runnerDiscovery.getCurrent()
 
       if (!state || req.params.instanceId !== state.instanceId) {

@@ -31,6 +31,7 @@ import { createInitialWorkers } from '@packages/rewriter'
 import type { Cfg } from './project-base'
 import type { Browser } from './browsers/types'
 import { InitializeRoutes, createCommonRoutes } from './routes'
+import { RUNNER_DISCOVERY_ROUTE_PREFIX } from '@packages/runner-discovery'
 import type { FoundSpec, ProtocolManagerShape, TestingType } from '@packages/types'
 import { RemoteStates } from '@packages/network-tools'
 import type { RemoteState } from '@packages/network-tools'
@@ -91,7 +92,7 @@ const _forceProxyMiddleware = function (clientRoute, namespace = '__cypress') {
   ]
 
   const isAllowedProxyBypass = (trimmedUrl: string) => {
-    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || trimmedUrl.startsWith('/__cypress/runner-discovery/')
+    return ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) || trimmedUrl.startsWith(RUNNER_DISCOVERY_ROUTE_PREFIX)
   }
 
   // normalize clientRoute to help with comparison

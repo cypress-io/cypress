@@ -3,39 +3,24 @@ import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import type { TestingType } from '@packages/types'
+// This is the producer side of the runner-discovery contract. The record schema,
+// the `instances/` dir name, and the `<pid>.json` filename all come from
+// @packages/runner-discovery, which the consumer (the cypress CLI) shares — so the
+// two sides stay in sync by construction rather than by hand-mirrored constants.
+import { INSTANCES_DIRNAME, SCHEMA_VERSION, recordFileName } from '@packages/runner-discovery'
+import type { RunnerDiscoveryRecord, LiveRunnerState } from '@packages/runner-discovery'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
 
+export type { RunnerDiscoveryRecord, LiveRunnerState } from '@packages/runner-discovery'
+
 const debug = Debug('cypress:server:runner-discovery')
-
-// NOTE: This is the producer side of a cross-process on-disk contract. The
-// directory name and the `<pid>.json` record filename (see getRecordPath) are
-// mirrored in the consumer at cli/lib/runner-discovery/store.ts and MUST stay
-// in sync — the server writes these records and the CLI reads them.
-const INSTANCES_DIRNAME = 'instances'
-const SCHEMA_VERSION = 1
-
-export interface RunnerDiscoveryRecord {
-  schemaVersion: number
-  pid: number
-  projectRoot: string
-  serverPort: number
-  // App-assigned identity for this run, distinct from the OS-assigned pid: a reader
-  // probes the server and only trusts it if the echoed instanceId matches, which
-  // guards against pid reuse handing the record to an unrelated process.
-  instanceId: string
-  testingType: TestingType | null
-}
-
-export interface LiveRunnerState extends RunnerDiscoveryRecord {
-  cdpBrowserWsUrl: string | null
-}
 
 export const getRunnerDiscoveryDir = (): string => {
   return path.join(resolveCypressCacheRoot(), INSTANCES_DIRNAME)
 }
 
 const getRecordPath = (pid: number): string => {
-  return path.join(getRunnerDiscoveryDir(), `${pid}.json`)
+  return path.join(getRunnerDiscoveryDir(), recordFileName(pid))
 }
 
 let currentState: LiveRunnerState | null = null
