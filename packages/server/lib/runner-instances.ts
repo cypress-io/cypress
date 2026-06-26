@@ -3,39 +3,24 @@ import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import type { TestingType } from '@packages/types'
+// This is the producer side of the runner-instances contract. The record schema,
+// the `instances/` dir name, and the `<pid>.json` filename all come from
+// @packages/runner-instances, which the consumer (the cypress CLI) shares — so the
+// two sides stay in sync by construction rather than by hand-mirrored constants.
+import { INSTANCES_DIRNAME, SCHEMA_VERSION, recordFileName } from '@packages/runner-instances'
+import type { RunnerInstance, LiveRunnerState } from '@packages/runner-instances'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
 
+export type { RunnerInstance, LiveRunnerState } from '@packages/runner-instances'
+
 const debug = Debug('cypress:server:runner-instances')
-
-// NOTE: This is the producer side of a cross-process on-disk contract. The
-// directory name and the `<pid>.json` record filename (see getRecordPath) are
-// mirrored in the consumer at cli/lib/runner-instances/store.ts and MUST stay
-// in sync — the server writes these records and the CLI reads them.
-const INSTANCES_DIRNAME = 'instances'
-const SCHEMA_VERSION = 1
-
-export interface RunnerInstance {
-  schemaVersion: number
-  pid: number
-  projectRoot: string
-  serverPort: number
-  // App-assigned identity for this run, distinct from the OS-assigned pid: a reader
-  // probes the server and only trusts it if the echoed instanceId matches, which
-  // guards against pid reuse handing the record to an unrelated process.
-  instanceId: string
-  testingType: TestingType | null
-}
-
-export interface LiveRunnerState extends RunnerInstance {
-  cdpBrowserWsUrl: string | null
-}
 
 export const getRunnerInstancesDir = (): string => {
   return path.join(resolveCypressCacheRoot(), INSTANCES_DIRNAME)
 }
 
 const getRecordPath = (pid: number): string => {
-  return path.join(getRunnerInstancesDir(), `${pid}.json`)
+  return path.join(getRunnerInstancesDir(), recordFileName(pid))
 }
 
 let currentState: LiveRunnerState | null = null
@@ -76,9 +61,9 @@ export const runnerInstances = {
 
     try {
       await persist(record)
-      debug('wrote runner instance record %o', record)
+      debug('wrote runner instances record %o', record)
     } catch (err) {
-      debug('failed to write runner instance record: %o', err)
+      debug('failed to write runner instances record: %o', err)
     }
   },
 
@@ -88,7 +73,7 @@ export const runnerInstances = {
     }
 
     currentState = { ...currentState, cdpBrowserWsUrl }
-    debug('runner instance cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
+    debug('runner instances cdpBrowserWsUrl is now %o', cdpBrowserWsUrl)
   },
 
   getCurrent (): LiveRunnerState | null {
@@ -108,15 +93,15 @@ export const runnerInstances = {
       await persistChain
 
       if (currentState) {
-        debug('skipping runner instance removal; a newer record is live')
+        debug('skipping runner instances removal; a newer record is live')
 
         return
       }
 
       await fs.remove(getRecordPath(state.pid))
-      debug('removed runner instance record for pid %d', state.pid)
+      debug('removed runner instances record for pid %d', state.pid)
     } catch (err) {
-      debug('failed to remove runner instance record: %o', err)
+      debug('failed to remove runner instances record: %o', err)
     }
   },
 }
