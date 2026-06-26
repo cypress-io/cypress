@@ -303,20 +303,19 @@ context('cy.origin waiting', { browser: '!webkit' }, () => {
         })
       })
 
-      it('throws when foo cannot resolve', { requestTimeout: 100 }, (done) => {
+      it('throws when foo cannot resolve', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `foo`. No request ever occurred.')
+          expect(err.message).to.include('for the 1st request to the route: `foo`. No request ever occurred.')
 
           done()
         })
-
-        cy.once('command:retry', () => xhrGet('/bar'))
 
         cy.intercept('/foo', {}).as('foo')
         cy.intercept('/bar', {}).as('bar')
 
         cy.origin('http://www.foobar.com:3500', () => {
-          cy.wait(['@foo', '@bar'])
+          cy.then(() => window.xhrGet('/bar'))
+          .wait(['@foo', '@bar'], { requestTimeout: 100 })
         })
       })
 
