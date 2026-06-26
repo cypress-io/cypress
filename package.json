@@ -263,7 +263,7 @@
     "system-tests/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
     "tooling/**/*.{js,jsx,ts,tsx,json,vue}": "eslint --fix",
     "*.{js,jsx,ts,tsx,json,eslintrc,vue}": "eslint --fix",
-    ".circleci/*.yml": "circleci config validate"
+    ".circleci/!(test-suites).yml": "circleci config validate"
   },
   "resolutions": {
     "**/@electron/get": "^4.0.1",

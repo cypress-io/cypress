@@ -1,0 +1,54 @@
+{
+  "commands": [
+    {
+      "name": "install",
+      "run": "yarn install --frozen-lockfile --ignore-scripts"
+    },
+    {
+      "name": "patch-deps",
+      "run": "for p in patches cli/patches packages/*/patches; do [ -d \"$p\" ] || continue; (cd \"$(dirname \"$p\")\" && npx patch-package) || true; done"
+    },
+    {
+      "name": "sync-cloud-validations",
+      "run": "yarn workspace @packages/server sync-cloud-validations"
+    },
+    {
+      "name": "test",
+      "run": "yarn test",
+      "role": "gate",
+      "timeout": 300,
+      "limit": 3
+    }
+  ],
+  "validation": {
+    "sidecarImage": "bdac1d8b-275b-4b76-b2ea-299aa49c8766"
+  },
+  "orgID": "474786b4-5d73-42f1-9e21-ee4b7ffc188b",
+  "environment": {
+    "stack": "typescript",
+    "setup": [
+      {
+        "name": "system",
+        "command": "curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt-get install -y nodejs --no-install-recommends && sudo rm -rf /var/lib/apt/lists/* && sudo npm install -g yarn"
+      },
+      {
+        "name": "install",
+        "command": "yarn install --frozen-lockfile --ignore-scripts"
+      },
+      {
+        "name": "patch-deps",
+        "command": "for p in patches cli/patches packages/*/patches; do [ -d \"$p\" ] || continue; (cd \"$(dirname \"$p\")\" && npx patch-package) || true; done"
+      },
+      {
+        "name": "sync-cloud-validations",
+        "command": "yarn workspace @packages/server sync-cloud-validations"
+      },
+      {
+        "name": "test",
+        "command": "yarn test"
+      }
+    ],
+    "image": "cimg/node",
+    "image_version": "22.23.1"
+  }
+}
