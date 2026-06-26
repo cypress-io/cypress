@@ -9,11 +9,15 @@ import { isPidAlive, verifyRunnerRecord } from './liveness'
 
 const debug = Debug('cypress:cli:runner-instances')
 
-const RUNNERS_DIRNAME = 'runners'
+// NOTE: This is the consumer side of a cross-process on-disk contract. The
+// directory name and the `<pid>.json` record filename are mirrored in the
+// producer at packages/server/lib/runner-instances.ts and MUST stay in sync —
+// the server writes these records and the CLI reads them.
+const INSTANCES_DIRNAME = 'instances'
 const RECORD_EXTENSION = '.json'
 
 export const getRunnerInstancesDir = (): string => {
-  return path.join(state.getCacheDir(), RUNNERS_DIRNAME)
+  return path.join(state.getCacheDir(), INSTANCES_DIRNAME)
 }
 
 const parseRecordPid = (entry: string): number | null => {
@@ -63,13 +67,13 @@ const readCompatibleRecord = async (filePath: string): Promise<RunnerInstance | 
   try {
     record = await fs.readJson(filePath)
   } catch (err) {
-    debug('skipping unreadable runner instances record %s: %o', filePath, err)
+    debug('could not read runner instances record %s: %o', filePath, err)
 
     return null
   }
 
   if (!isCompatibleRecord(record)) {
-    debug('skipping incompatible runner instances record %s', filePath)
+    debug('incompatible runner instances record %s', filePath)
 
     return null
   }

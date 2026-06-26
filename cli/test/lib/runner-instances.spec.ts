@@ -29,7 +29,7 @@ vi.mock('../../lib/tasks/state', async (importActual) => {
 })
 
 const CACHE_DIR = '/.cache/Cypress'
-const RUNNERS_DIR = `${CACHE_DIR}/runners`
+const INSTANCES_DIR = `${CACHE_DIR}/instances`
 const PROJECT = '/projects/app'
 const INSTANCE_ID = 'a1b2c3d4-0000-4000-8000-000000000000'
 
@@ -111,8 +111,8 @@ describe('lib/runner-instances', () => {
   })
 
   describe('.getRunnerInstancesDir', () => {
-    it('joins the cache dir with runners/', () => {
-      expect(getRunnerInstancesDir()).to.equal(RUNNERS_DIR)
+    it('joins the cache dir with instances/', () => {
+      expect(getRunnerInstancesDir()).to.equal(INSTANCES_DIR)
     })
   })
 
@@ -191,7 +191,7 @@ describe('lib/runner-instances', () => {
   })
 
   describe('.readRunnerRecords', () => {
-    it('returns [] when the runners dir does not exist', async () => {
+    it('returns [] when the instances dir does not exist', async () => {
       mockfs({ [CACHE_DIR]: {} })
 
       expect(await readRunnerRecords()).toEqual([])
@@ -199,7 +199,7 @@ describe('lib/runner-instances', () => {
 
     it('parses <pid>.json records and skips temp/junk/corrupt/incompatible files', async () => {
       mockfs({
-        [RUNNERS_DIR]: {
+        [INSTANCES_DIR]: {
           '111.json': makeRecord({ pid: 111 }),
           '222.json.tmp': 'partial write',
           'notes.txt': 'not a record',
@@ -216,7 +216,7 @@ describe('lib/runner-instances', () => {
 
     it('reads e2e, component, and null testing types', async () => {
       mockfs({
-        [RUNNERS_DIR]: {
+        [INSTANCES_DIR]: {
           '111.json': makeRecord({ pid: 111, testingType: 'e2e' }),
           '222.json': makeRecord({ pid: 222, testingType: 'component' }),
           '333.json': makeRecord({ pid: 333, testingType: null }),
@@ -233,7 +233,7 @@ describe('lib/runner-instances', () => {
     it('returns the live runner state once its runner echoes the instanceId', async () => {
       const port = await startFakeRunner()
 
-      mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
       stubKill({ alive: [111] })
 
       const runner = await findLiveRunner(PROJECT)
@@ -243,14 +243,14 @@ describe('lib/runner-instances', () => {
     })
 
     it('throws NO_DISCOVERY_FILE when no record matches the project', async () => {
-      mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, projectRoot: '/other/project' }) } })
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, projectRoot: '/other/project' }) } })
       stubKill({ alive: [111] })
 
       await expect(findLiveRunner(PROJECT)).rejects.toMatchObject({ code: 'NO_DISCOVERY_FILE' })
     })
 
     it('throws STALE_DISCOVERY_FILE when a match exists but its process is dead', async () => {
-      mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
       stubKill({ alive: [] })
 
       const err = await findLiveRunner(PROJECT).catch((e) => e)
@@ -262,7 +262,7 @@ describe('lib/runner-instances', () => {
     it('throws STALE_DISCOVERY_FILE when the pid is taken but nothing answers the probe (recycled pid)', async () => {
       const port = await getClosedPort()
 
-      mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
       stubKill({ alive: [111] })
 
       await expect(findLiveRunner(PROJECT)).rejects.toMatchObject({ code: 'STALE_DISCOVERY_FILE' })
@@ -273,7 +273,7 @@ describe('lib/runner-instances', () => {
       const livePort = await startFakeRunner({ instanceId: 'live-instance' })
 
       mockfs({
-        [RUNNERS_DIR]: {
+        [INSTANCES_DIR]: {
           '111.json': makeRecord({ pid: 111, serverPort: closedPort }),
           '222.json': makeRecord({ pid: 222, serverPort: livePort, instanceId: 'live-instance' }),
         },
@@ -288,7 +288,7 @@ describe('lib/runner-instances', () => {
       const port = await startFakeRunner()
 
       mockfs({
-        [RUNNERS_DIR]: {
+        [INSTANCES_DIR]: {
           '111.json': makeRecord({ pid: 111, serverPort: port }),
           '222.json': makeRecord({ pid: 222, serverPort: port }),
         },
@@ -305,7 +305,7 @@ describe('lib/runner-instances', () => {
     it('takes the live CDP endpoint from the probe response, not the disk record', async () => {
       const port = await startFakeRunner({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: CDP_WS_URL } })
 
-      mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
       stubKill({ alive: [111] })
 
       const runner = await findReadyRunner(PROJECT)
@@ -316,7 +316,7 @@ describe('lib/runner-instances', () => {
     it('throws NO_BROWSER_ATTACHED when the runner is live but has no browser', async () => {
       const port = await startFakeRunner({ respondWith: { instanceId: INSTANCE_ID, cdpBrowserWsUrl: null } })
 
-      mockfs({ [RUNNERS_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, serverPort: port }) } })
       stubKill({ alive: [111] })
 
       await expect(findReadyRunner(PROJECT)).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })
@@ -335,7 +335,7 @@ describe('lib/runner-instances', () => {
       const closedPort = await getClosedPort()
 
       mockfs({
-        [RUNNERS_DIR]: {
+        [INSTANCES_DIR]: {
           '111.json': makeRecord({ pid: 111, serverPort: livePort }),
           '222.json': makeRecord({ pid: 222 }),
           '333.json': makeRecord({ pid: 333, serverPort: closedPort }),
@@ -346,15 +346,15 @@ describe('lib/runner-instances', () => {
       stubKill({ alive: [111, 333] })
 
       expect(await pruneDeadDiscoveryRecords()).toBe(2)
-      expect(await fs.pathExists(`${RUNNERS_DIR}/111.json`)).toBe(true)
-      expect(await fs.pathExists(`${RUNNERS_DIR}/222.json`)).toBe(false)
-      expect(await fs.pathExists(`${RUNNERS_DIR}/333.json`)).toBe(false)
-      expect(await fs.pathExists(`${RUNNERS_DIR}/keep.txt`)).toBe(true)
+      expect(await fs.pathExists(`${INSTANCES_DIR}/111.json`)).toBe(true)
+      expect(await fs.pathExists(`${INSTANCES_DIR}/222.json`)).toBe(false)
+      expect(await fs.pathExists(`${INSTANCES_DIR}/333.json`)).toBe(false)
+      expect(await fs.pathExists(`${INSTANCES_DIR}/keep.txt`)).toBe(true)
     })
 
     it('keeps unreadable or incompatible records while their pid is taken', async () => {
       mockfs({
-        [RUNNERS_DIR]: {
+        [INSTANCES_DIR]: {
           '111.json': '{ not valid json',
           '222.json': JSON.stringify({ schemaVersion: 0, pid: 222, projectRoot: PROJECT }),
         },
@@ -363,11 +363,11 @@ describe('lib/runner-instances', () => {
       stubKill({ alive: [111, 222] })
 
       expect(await pruneDeadDiscoveryRecords()).toBe(0)
-      expect(await fs.pathExists(`${RUNNERS_DIR}/111.json`)).toBe(true)
-      expect(await fs.pathExists(`${RUNNERS_DIR}/222.json`)).toBe(true)
+      expect(await fs.pathExists(`${INSTANCES_DIR}/111.json`)).toBe(true)
+      expect(await fs.pathExists(`${INSTANCES_DIR}/222.json`)).toBe(true)
     })
 
-    it('returns 0 when the runners dir does not exist', async () => {
+    it('returns 0 when the instances dir does not exist', async () => {
       mockfs({ [CACHE_DIR]: {} })
 
       expect(await pruneDeadDiscoveryRecords()).toBe(0)

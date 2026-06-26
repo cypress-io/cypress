@@ -31,7 +31,7 @@ export const findLiveRunner = async (projectRoot: string, options: FindRunnerOpt
   if (matches.length === 0) {
     throw new RunnerDiscoveryError(
       'NO_DISCOVERY_FILE',
-      `No running Cypress was found for ${projectRoot}. Start Cypress, then try again.`,
+      `No Cypress instance found for ${projectRoot}. This command requires Cypress running in open mode. Start Cypress in open mode, open a browser, and try again.`,
     )
   }
 
@@ -49,7 +49,7 @@ export const findLiveRunner = async (projectRoot: string, options: FindRunnerOpt
 
   throw new RunnerDiscoveryError(
     'STALE_DISCOVERY_FILE',
-    `A Cypress discovery record exists for ${projectRoot}, but no running Cypress answered for it. Cypress likely exited uncleanly; restart it and try again.`,
+    `Cypress was previously running for ${projectRoot}, but is no longer responding. Cypress likely exited uncleanly; start Cypress in open mode, open a browser, and try again.`,
   )
 }
 
@@ -59,7 +59,7 @@ export const findReadyRunner = async (projectRoot: string, options: FindRunnerOp
   if (!runner.cdpBrowserWsUrl) {
     throw new RunnerDiscoveryError(
       'NO_BROWSER_ATTACHED',
-      `Cypress is running for ${projectRoot}, but no browser is attached yet. Open a browser in Cypress, then try again.`,
+      `Cypress is running for ${projectRoot}, but no test browser is open. Open a browser in Cypress and try again.`,
     )
   }
 

@@ -7,6 +7,10 @@ import { resolveCypressCacheRoot } from './util/cypress-cache'
 
 const debug = Debug('cypress:server:runner-instances')
 
+// NOTE: This is the producer side of a cross-process on-disk contract. The
+// directory name and the `<pid>.json` record filename (see getRecordPath) are
+// mirrored in the consumer at cli/lib/runner-instances/store.ts and MUST stay
+// in sync — the server writes these records and the CLI reads them.
 const INSTANCES_DIRNAME = 'instances'
 const SCHEMA_VERSION = 1
 
