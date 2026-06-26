@@ -1,6 +1,3 @@
-// The record schema, on-disk layout, and probe route are the cross-process
-// contract shared with the producer (@packages/server) via @packages/runner-instances,
-// so the CLI reads exactly what the server writes without re-deriving it here.
 export {
   INSTANCES_DIRNAME,
   SCHEMA_VERSION,
@@ -19,9 +16,6 @@ export type {
   RunnerTestingType,
 } from '@packages/runner-instances'
 
-// RunnerDiscoveryError is consumer-side error reporting (how the CLI surfaces a
-// missing/stale/browserless runner to the user), not part of the on-disk
-// contract, so it lives here rather than in the shared package.
 export type RunnerDiscoveryErrorCode =
   | 'NO_DISCOVERY_FILE'
   | 'STALE_DISCOVERY_FILE'

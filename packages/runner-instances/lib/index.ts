@@ -1,16 +1,5 @@
 import path from 'path'
 
-// The cross-process contract for runner instances, shared by the producer
-// (@packages/server, which writes the records and serves the liveness probe)
-// and the consumer (the `cypress` CLI, which reads the records and probes).
-//
-// This module is deliberately dependency-free pure logic — schema, on-disk
-// layout, and probe route only — so the CLI can bundle it without taking on any
-// new runtime dependency, while both sides agree on the contract by construction
-// rather than by hand-mirrored constants and interfaces.
-
-// Bump SCHEMA_VERSION when the record shape changes incompatibly. MIN_SCHEMA_VERSION
-// is the oldest version a reader will still trust; a reader skips anything older.
 export const SCHEMA_VERSION = 1
 
 export const MIN_SCHEMA_VERSION = 1
@@ -20,9 +9,6 @@ export const INSTANCES_DIRNAME = 'instances'
 
 const RECORD_EXTENSION = '.json'
 
-// Route the server exposes (open mode only) for a reader to probe liveness. The
-// reader hits `${PREFIX}<instanceId>` and trusts the response only if the echoed
-// instanceId matches the record, which guards against pid/port reuse.
 export const RUNNER_INSTANCES_ROUTE_PREFIX = '/__cypress/runner-instances/'
 
 export type RunnerTestingType = 'e2e' | 'component' | null
@@ -32,16 +18,10 @@ export interface RunnerInstance {
   pid: number
   projectRoot: string
   serverPort: number
-  // App-assigned identity for this run, distinct from the OS-assigned pid: a reader
-  // probes the server and only trusts it if the echoed instanceId matches, which
-  // guards against pid reuse handing the record to an unrelated process.
   instanceId: string
   testingType: RunnerTestingType
 }
 
-// The probe response: the persisted record plus the live CDP endpoint, which is
-// never written to disk (it changes as browsers open/close) and only travels in
-// the probe response.
 export interface LiveRunnerState extends RunnerInstance {
   cdpBrowserWsUrl: string | null
 }
