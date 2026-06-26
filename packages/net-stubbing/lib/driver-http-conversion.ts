@@ -2,11 +2,9 @@ import _ from 'lodash'
 import type {
   HttpRequest,
   HttpResponse,
-  InterceptAfterResponseData,
   InterceptHandlerEventData,
   InterceptHandlerEventName,
   InterceptHandlerResponse,
-  InterceptNetworkErrorData,
   ResourceType,
 } from '@packages/network-interception'
 import { SERIALIZABLE_REQ_PROPS } from '@packages/network-interception'
@@ -36,11 +34,13 @@ export type DriverInterceptResponse<T = any> = DriverInterceptMessage<T> & {
   delay?: number
 }
 
-export type DriverInterceptResponseComplete<T = any> = InterceptAfterResponseData & {
+export type DriverInterceptResponseComplete<T = any> = {
   finalResBody?: DriverInterceptMessage<T>['body']
 }
 
-export type DriverInterceptNetworkError = InterceptNetworkErrorData
+export type DriverInterceptNetworkError = {
+  error: any
+}
 
 export type PendingEventHandler = {
   eventName: InterceptHandlerEventName
