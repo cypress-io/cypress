@@ -25,6 +25,7 @@
   "dependencies": {
     "@cypress/request": "^4.0.0",
     "@cypress/xvfb": "^1.2.4",
+    "@packages/runner-discovery": "0.0.0-development",
     "@packages/stderr-filtering": "0.0.0-development",
     "@types/sinonjs__fake-timers": "8.1.1",
     "@types/sizzle": "^2.3.2",

@@ -3,32 +3,14 @@ import path from 'path'
 import Debug from 'debug'
 
 import state from '../tasks/state'
-import { isCompatibleRecord } from './record'
+import { isCompatibleRecord, INSTANCES_DIRNAME, parseRecordPid } from './record'
 import type { RunnerDiscoveryRecord } from './record'
 import { isPidAlive, verifyRunnerRecord } from './liveness'
 
 const debug = Debug('cypress:cli:runner-discovery')
 
-// NOTE: This is the consumer side of a cross-process on-disk contract. The
-// directory name and the `<pid>.json` record filename are mirrored in the
-// producer at packages/server/lib/runner-discovery.ts and MUST stay in sync —
-// the server writes these records and the CLI reads them.
-export const INSTANCES_DIRNAME = 'instances'
-
-const RECORD_EXTENSION = '.json'
-
 export const getRunnerDiscoveryDir = (): string => {
   return path.join(state.getCacheDir(), INSTANCES_DIRNAME)
-}
-
-const parseRecordPid = (entry: string): number | null => {
-  if (path.extname(entry) !== RECORD_EXTENSION) {
-    return null
-  }
-
-  const pid = Number(path.basename(entry, RECORD_EXTENSION))
-
-  return Number.isInteger(pid) ? pid : null
 }
 
 interface RecordFile {

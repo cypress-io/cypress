@@ -1,22 +1,27 @@
-const MIN_SCHEMA_VERSION = 1
+// The record schema, on-disk layout, and probe route are the cross-process
+// contract shared with the producer (@packages/server) via @packages/runner-discovery,
+// so the CLI reads exactly what the server writes without re-deriving it here.
+export {
+  INSTANCES_DIRNAME,
+  SCHEMA_VERSION,
+  MIN_SCHEMA_VERSION,
+  isCompatibleRecord,
+  recordFileName,
+  parseRecordPid,
+  runnerDiscoveryProbePath,
+  RUNNER_DISCOVERY_ROUTE_PREFIX,
+} from '@packages/runner-discovery'
 
-export interface RunnerDiscoveryRecord {
-  schemaVersion: number
-  pid: number
-  projectRoot: string
-  serverPort: number
-  instanceId: string
-  testingType: 'e2e' | 'component' | null
-}
+export type {
+  RunnerDiscoveryRecord,
+  LiveRunnerState,
+  ReadyRunnerState,
+  RunnerTestingType,
+} from '@packages/runner-discovery'
 
-export interface LiveRunnerState extends RunnerDiscoveryRecord {
-  cdpBrowserWsUrl: string | null
-}
-
-export interface ReadyRunnerState extends LiveRunnerState {
-  cdpBrowserWsUrl: string
-}
-
+// RunnerDiscoveryError is consumer-side error reporting (how the CLI surfaces a
+// missing/stale/browserless runner to the user), not part of the on-disk
+// contract, so it lives here rather than in the shared package.
 export type RunnerDiscoveryErrorCode =
   | 'NO_DISCOVERY_FILE'
   | 'STALE_DISCOVERY_FILE'
@@ -30,20 +35,4 @@ export class RunnerDiscoveryError extends Error {
     this.name = 'RunnerDiscoveryError'
     this.code = code
   }
-}
-
-const isValidTestingType = (value: any): value is RunnerDiscoveryRecord['testingType'] => {
-  return value === 'e2e' || value === 'component' || value === null
-}
-
-export const isCompatibleRecord = (record: any): record is RunnerDiscoveryRecord => {
-  return Boolean(record)
-    && typeof record.schemaVersion === 'number'
-    && record.schemaVersion >= MIN_SCHEMA_VERSION
-    && typeof record.pid === 'number'
-    && typeof record.projectRoot === 'string'
-    && Number.isInteger(record.serverPort)
-    && typeof record.instanceId === 'string'
-    && record.instanceId.length > 0
-    && isValidTestingType(record.testingType)
 }
