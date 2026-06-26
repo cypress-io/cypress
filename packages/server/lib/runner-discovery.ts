@@ -107,10 +107,6 @@ export const runnerDiscovery = {
     try {
       await persistChain
 
-      // A project switch within the same process (same pid → same record path) can
-      // call write() for the new runner while this close()'s remove() is still in
-      // flight. If a newer record has since taken over the live state, it now owns the
-      // file on disk — deleting it would hide a live runner, so leave it in place.
       if (currentState) {
         debug('skipping runner discovery removal; a newer record is live')
 

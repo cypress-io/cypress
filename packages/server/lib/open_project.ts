@@ -216,13 +216,6 @@ export class OpenProject extends EventEmitter {
   }
 
   closeOpenProjectAndBrowsers () {
-    // Fire-and-forget the project teardown: awaiting projectBase.close() here makes
-    // the run-mode/teardown path wait on the full server + proxy shutdown, which
-    // regresses Firefox's process exit (it holds connections to the proxy) and makes
-    // passing runs exit non-zero. The switch race it was meant to guard against — a
-    // still-in-flight close() deleting a freshly written runner-discovery record — is
-    // instead handled at the source in runnerDiscovery.remove(), which no-ops once a
-    // newer record has taken over.
     this.projectBase?.close().catch((e) => {
       this._ctx?.logTraceError(e)
     })
