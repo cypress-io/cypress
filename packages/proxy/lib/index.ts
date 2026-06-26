@@ -6,4 +6,6 @@ export { ResourceType, RequestCredentialLevel } from './resourceTypeAndCredentia
 
 export { createProxyNetworkServices } from './adapters'
 
-export { defaultMiddleware, type ProxyNetworkServices } from './http'
+export { defaultMiddleware } from './http'
+
+export type { ProxyNetworkServices } from './http'
