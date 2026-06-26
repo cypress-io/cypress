@@ -3,10 +3,6 @@ import path from 'path'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import type { TestingType } from '@packages/types'
-// This is the producer side of the runner-instances contract. The record schema,
-// the `instances/` dir name, and the `<pid>.json` filename all come from
-// @packages/runner-instances, which the consumer (the cypress CLI) shares — so the
-// two sides stay in sync by construction rather than by hand-mirrored constants.
 import { INSTANCES_DIRNAME, SCHEMA_VERSION, recordFileName } from '@packages/runner-instances'
 import type { RunnerInstance, LiveRunnerState } from '@packages/runner-instances'
 import { resolveCypressCacheRoot } from './util/cypress-cache'
