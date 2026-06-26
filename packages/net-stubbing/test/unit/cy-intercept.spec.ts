@@ -141,6 +141,42 @@ describe('CyIntercept', () => {
     })
   })
 
+  it('emits response:callback with request body for static stub routes without interceptors', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const emit = vi.spyOn(cyIntercept, 'emit')
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: false,
+        routeMatcher: { url: '/users', method: 'POST' },
+        getFixture,
+        matches: 0,
+        staticResponse: {
+          statusCode: 201,
+          body: { name: 'b' },
+        },
+      }],
+      cyIntercept,
+    })
+
+    await httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/users',
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      materializeRequestBody: async () => Buffer.from('{"some":"data"}'),
+    }, vi.fn())
+
+    const beforeRequestEmit = emit.mock.calls.find(([eventName]) => eventName === 'before:request')
+
+    expect(beforeRequestEmit).toBeDefined()
+    expect(beforeRequestEmit![1].data).toMatchObject({
+      body: '{"some":"data"}',
+      method: 'POST',
+    })
+  })
+
   it('emits response:callback with origin body for alias-only intercepts (react users scenario)', async () => {
     const cyIntercept = new CyIntercept({ socket })
     const emit = vi.spyOn(cyIntercept, 'emit')

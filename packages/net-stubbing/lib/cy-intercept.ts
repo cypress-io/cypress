@@ -175,9 +175,7 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
     let deferCleanup = false
 
     try {
-      const needsRequestBody = matchingRoutes.some((route) => route.hasInterceptor)
-
-      if (needsRequestBody && request.materializeRequestBody) {
+      if (request.materializeRequestBody) {
         request.body = await request.materializeRequestBody()
         request.requestBodyMaterialized = true
         request.body = normalizeTextRequestBody(request.body, request.headers)
