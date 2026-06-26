@@ -1,6 +1,7 @@
 import http from 'http'
 import Debug from 'debug'
 
+import { runnerInstancesProbePath } from './record'
 import type { LiveRunnerState, RunnerInstance } from './record'
 
 const debug = Debug('cypress:cli:runner-instances')
@@ -23,7 +24,7 @@ export const verifyRunnerRecord = (record: RunnerInstance, timeoutMs: number = D
     const request = http.get({
       host: PROBE_HOST,
       port: record.serverPort,
-      path: `/__cypress/runner-instances/${record.instanceId}`,
+      path: runnerInstancesProbePath(record.instanceId),
       timeout: timeoutMs,
     }, (response) => {
       let body = ''

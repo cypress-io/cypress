@@ -5,13 +5,13 @@ import type { LiveRunnerState, ReadyRunnerState } from './record'
 import { isPidAlive, verifyRunnerRecord } from './liveness'
 import { readRunnerRecords } from './store'
 
-export { RunnerDiscoveryError } from './record'
+export { RunnerDiscoveryError, INSTANCES_DIRNAME } from './record'
 
 export type { LiveRunnerState, ReadyRunnerState, RunnerDiscoveryErrorCode, RunnerInstance } from './record'
 
 export { isPidAlive, verifyRunnerRecord } from './liveness'
 
-export { INSTANCES_DIRNAME, getRunnerInstancesDir, pruneDeadDiscoveryRecords, readRunnerRecords } from './store'
+export { getRunnerInstancesDir, pruneDeadDiscoveryRecords, readRunnerRecords } from './store'
 
 export interface FindRunnerOptions {
   instance?: number
