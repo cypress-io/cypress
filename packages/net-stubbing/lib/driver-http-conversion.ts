@@ -56,8 +56,6 @@ export type ToDriverInterceptEventData = {
   'network:error': DriverInterceptNetworkError
 }
 
-export type ToDriverInterceptEventName = InterceptHandlerEventName
-
 const RESPONSE_STAGE_EVENTS = new Set<InterceptHandlerEventName>([
   'before:response',
   'response:callback',
