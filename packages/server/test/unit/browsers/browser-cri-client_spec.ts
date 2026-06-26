@@ -7,6 +7,7 @@ import net from 'net'
 import { ProtocolManagerShape, CyPromptManagerShape, StudioManagerShape } from '@packages/types'
 import type { Protocol } from 'devtools-protocol'
 import { serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
+import { runnerDiscovery } from '../../../lib/runner-discovery'
 
 const HOST = '127.0.0.1'
 const PORT = 50505
@@ -49,7 +50,10 @@ describe('lib/browsers/browser-cri-client', function () {
     on = sinon.stub()
     send = sinon.stub()
     close = sinon.stub()
-    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs({ target: 'http://web/socket/url', onAsynchronousError: onError, onReconnect: undefined, protocolManager: undefined, fullyManageTabs: undefined }).resolves({
+    onError = sinon.stub()
+    // the browser-level client wraps onAsynchronousError and passes an
+    // onCriConnectionClosed handler, so match loosely on the stable fields
+    criClientCreateStub = sinon.stub(CriClient, 'create').withArgs(sinon.match({ target: 'http://web/socket/url', protocolManager: undefined, fullyManageTabs: undefined })).resolves({
       send,
       on,
       close,
@@ -60,7 +64,7 @@ describe('lib/browsers/browser-cri-client', function () {
     })
 
     getClient = ({ protocolManager, fullyManageTabs } = {}) => {
-      criClientCreateStub = criClientCreateStub.withArgs({ target: 'http://web/socket/url', onAsynchronousError: onError, onReconnect: undefined, protocolManager, fullyManageTabs }).resolves({
+      criClientCreateStub = criClientCreateStub.withArgs(sinon.match({ target: 'http://web/socket/url', protocolManager, fullyManageTabs })).resolves({
         send,
         on,
         close,
@@ -129,6 +133,38 @@ describe('lib/browsers/browser-cri-client', function () {
       await expect(browserCriClient.BrowserCriClient.create({ hosts: ['127.0.0.1'], port: THROWS_PORT, browserName: 'Chrome', onAsynchronousError: onError, onServiceWorkerClientEvent })).to.be.rejected
 
       expect(criImport.Version).to.be.calledTwice
+    })
+
+    it('advertises the browser websocket url to runner discovery once connected', async function () {
+      const setCdpBrowserWsUrl = sinon.stub(runnerDiscovery, 'setCdpBrowserWsUrl')
+
+      await getClient()
+
+      expect(setCdpBrowserWsUrl).to.be.calledWith('http://web/socket/url')
+    })
+
+    it('clears the runner discovery cdp url when the browser connection is lost', async function () {
+      const setCdpBrowserWsUrl = sinon.stub(runnerDiscovery, 'setCdpBrowserWsUrl')
+
+      await getClient()
+
+      const createArgs = criClientCreateStub.getCall(0).args[0]
+
+      setCdpBrowserWsUrl.resetHistory()
+
+      // a graceful disconnect, or reconnection halting due to closure
+      createArgs.onCriConnectionClosed()
+      expect(setCdpBrowserWsUrl).to.be.calledWith(null)
+
+      setCdpBrowserWsUrl.resetHistory()
+
+      // the browser crashed or was quit externally: reconnection ultimately failed
+      const err = new Error('reconnect failed')
+
+      createArgs.onAsynchronousError(err)
+      expect(setCdpBrowserWsUrl).to.be.calledWith(null)
+      // the original error handler still runs
+      expect(onError).to.be.calledWith(err)
     })
   })
 

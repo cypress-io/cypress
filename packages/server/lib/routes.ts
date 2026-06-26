@@ -22,6 +22,7 @@ import client from './controllers/client'
 import files from './controllers/files'
 import * as plugins from './plugins'
 import { privilegedCommandsManager } from './privileged-commands/privileged-commands-manager'
+import { runnerDiscovery } from './runner-discovery'
 
 const debug = Debug('cypress:server:routes')
 
@@ -233,6 +234,16 @@ export const createCommonRoutes = ({
     privilegedCommandsManager.addVerifiedCommand(req.body)
 
     res.sendStatus(204)
+  })
+
+  router.get('/__cypress/runner-discovery/:instanceId', (req, res) => {
+    const state = runnerDiscovery.getCurrent()
+
+    if (!state || req.params.instanceId !== state.instanceId) {
+      return res.sendStatus(404)
+    }
+
+    return res.json(state)
   })
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {

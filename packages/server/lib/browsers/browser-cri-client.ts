@@ -7,6 +7,7 @@ import { _connectAsync, _getDelayMsForRetry } from './protocol'
 import * as errors from '../errors'
 import type { CypressError } from '@packages/errors'
 import { CriClient, DEFAULT_NETWORK_ENABLE_OPTIONS } from './cri-client'
+import { runnerDiscovery } from '../runner-discovery'
 import { serviceWorkerClientEventHandler, serviceWorkerClientEventHandlerName } from '@packages/proxy/lib/http/util/service-worker-manager'
 import type { CyPromptManagerShape, ProtocolManagerShape } from '@packages/types'
 import type { ServiceWorkerEventHandler } from '@packages/proxy/lib/http/util/service-worker-manager'
@@ -232,12 +233,18 @@ export class BrowserCriClient {
     return retryWithIncreasingDelay(async () => {
       const versionInfo = await CRI.Version({ host, port, useHostName: true })
 
+      const clearRunnerDiscoveryCdpUrl = () => runnerDiscovery.setCdpBrowserWsUrl(null)
+
       const browserClient = await CriClient.create({
         target: versionInfo.webSocketDebuggerUrl,
-        onAsynchronousError,
+        onAsynchronousError: (err) => {
+          clearRunnerDiscoveryCdpUrl()
+          onAsynchronousError(err)
+        },
         onReconnect,
         protocolManager,
         fullyManageTabs,
+        onCriConnectionClosed: clearRunnerDiscoveryCdpUrl,
       })
 
       const browserCriClient = new BrowserCriClient({
@@ -251,6 +258,8 @@ export class BrowserCriClient {
         fullyManageTabs,
         onServiceWorkerClientEvent,
       })
+
+      runnerDiscovery.setCdpBrowserWsUrl(versionInfo.webSocketDebuggerUrl)
 
       if (fullyManageTabs) {
         await this._manageTabs({ browserClient, browserCriClient, browserName, host, onAsynchronousError, port, protocolManager })
@@ -716,6 +725,8 @@ export class BrowserCriClient {
     this.gracefulShutdown = gracefulShutdown
 
     this.onClose && this.onClose(gracefulShutdown)
+
+    runnerDiscovery.setCdpBrowserWsUrl(null)
 
     if (this.connected === false) {
       debug('browser cri client is already closed')

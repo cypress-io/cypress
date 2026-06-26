@@ -287,4 +287,26 @@ describe('lib/open_project', () => {
       await openProject.connectCyPromptToBrowser(options)
     })
   })
+
+  describe('#closeActiveProject', () => {
+    // The project teardown is intentionally fire-and-forget: blocking on the full
+    // projectBase.close() (server + proxy shutdown) regresses Firefox's process exit.
+    // The runner-discovery switch race is guarded at the source in
+    // runnerDiscovery.remove(), so closeActiveProject only awaits the browser close.
+    it('initiates the project teardown without blocking on it', async () => {
+      let closeResolved = false
+
+      sinon.stub(browsers, 'close').resolves()
+      sinon.stub(ProjectBase.prototype, 'close').callsFake(async () => {
+        await Bluebird.delay(20)
+        closeResolved = true
+      })
+
+      await openProject.closeActiveProject()
+
+      expect(ProjectBase.prototype.close).to.have.been.calledOnce
+      // resolved before the slow projectBase.close() finished
+      expect(closeResolved).to.be.false
+    })
+  })
 })

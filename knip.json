@@ -769,6 +769,9 @@
     "unresolved": "off"
   },
   "ignoreIssues": {
+    "packages/server/lib/runner-discovery.ts": [
+      "types"
+    ],
     "cli/types/cy-blob-util.d.ts": [
       "exports"
     ],
