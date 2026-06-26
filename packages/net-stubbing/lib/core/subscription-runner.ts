@@ -1,12 +1,12 @@
 import _ from 'lodash'
-import type { ForDriverNotification, NetEvent, Subscription } from '@packages/network-interception'
+import type { ForDriverNotification, InterceptHandlerEventName, NetEvent, Subscription } from '@packages/network-interception'
 import type { InFlightIntercept } from './in-flight-intercept'
 import { markInFlightInterceptStaticResponse } from './in-flight-intercept'
 import { buildHttpResponseFromStatic } from './static-response'
 
 type RunSubscriptionsOptions<D> = {
   inFlightIntercept: InFlightIntercept
-  eventName: string | string[]
+  eventName: InterceptHandlerEventName | InterceptHandlerEventName[]
   data: D
   mergeChanges: (before: D, after: D) => void
   driverNotification: ForDriverNotification
@@ -23,6 +23,14 @@ export async function runSubscriptions<D> (options: RunSubscriptionsOptions<D>):
 
   outerLoop: for (const currentEventName of eventNames) {
     inFlightIntercept.lastEvent = currentEventName
+
+    const shouldStopSubscriptions = () => {
+      return abortSubscriptions
+        || stopPropagationNow
+        || inFlightIntercept.responseOverride
+        || inFlightIntercept.forceNetworkError
+        || (currentEventName === 'before:request' && inFlightIntercept.fulfilledAtRequestStage)
+    }
 
     const handleSubscription = async (subscription: Subscription): Promise<boolean> => {
       if (subscription.skip || subscription.eventName !== currentEventName) {
@@ -83,7 +91,7 @@ export async function runSubscriptions<D> (options: RunSubscriptionsOptions<D>):
       for (const subscription of subscriptions) {
         const handled = await handleSubscription(subscription)
 
-        if (handled && (abortSubscriptions || stopPropagationNow || inFlightIntercept.fulfilledAtRequestStage || inFlightIntercept.responseOverride || inFlightIntercept.forceNetworkError)) {
+        if (handled && shouldStopSubscriptions()) {
           break
         }
       }
@@ -110,7 +118,7 @@ export async function runSubscriptions<D> (options: RunSubscriptionsOptions<D>):
         }
       }
 
-      if (abortSubscriptions || stopPropagationNow || inFlightIntercept.fulfilledAtRequestStage || inFlightIntercept.responseOverride || inFlightIntercept.forceNetworkError) {
+      if (shouldStopSubscriptions()) {
         break outerLoop
       }
     }

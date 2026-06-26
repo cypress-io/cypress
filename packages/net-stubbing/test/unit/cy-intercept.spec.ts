@@ -104,6 +104,97 @@ describe('CyIntercept', () => {
     expect(response.body).toBe('stubbed')
   })
 
+  it('emits response:callback with url for request-stage static stubs', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const emit = vi.spyOn(cyIntercept, 'emit')
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: false,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+        staticResponse: {
+          statusCode: 201,
+          body: 'stubbed',
+        },
+      }],
+      cyIntercept,
+    })
+
+    await httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn())
+
+    const callbackEmit = emit.mock.calls.find(([eventName]) => eventName === 'response:callback')
+
+    expect(callbackEmit).toBeDefined()
+    expect(callbackEmit![1].data).toMatchObject({
+      url: 'http://example.com/foo',
+      body: 'stubbed',
+      statusCode: 201,
+    })
+  })
+
+  it('emits response:callback with origin body for alias-only intercepts (react users scenario)', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const emit = vi.spyOn(cyIntercept, 'emit')
+
+    const requestUrl = 'https://jsonplaceholder.typicode.com/users?_limit=3'
+    const users = [
+      { id: 1, name: 'Leanne Graham', username: 'Bret', email: 'Sincere@april.biz' },
+      { id: 2, name: 'Ervin Howell', username: 'Antonette', email: 'Shanna@melissa.tv' },
+      { id: 3, name: 'Clementine Bauch', username: 'Samantha', email: 'Nathan@yesenia.net' },
+    ]
+    const usersJson = JSON.stringify(users)
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: false,
+        routeMatcher: { url: '/users?_limit=3' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    const next = vi.fn(async (request) => {
+      expect(request.materializeOriginResponse).toBe(true)
+
+      return {
+        statusCode: 200,
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        body: usersJson,
+      }
+    })
+
+    const response = await httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: requestUrl,
+      method: 'GET',
+      headers: {},
+    }, next)
+
+    expect(next).toHaveBeenCalledOnce()
+    expect(response.body).toBe(usersJson)
+
+    const callbackEmit = emit.mock.calls.find(([eventName]) => eventName === 'response:callback')
+
+    expect(callbackEmit).toBeDefined()
+    expect(callbackEmit![1].data).toMatchObject({
+      url: requestUrl,
+      body: usersJson,
+      statusCode: 200,
+    })
+
+    expect(JSON.parse(callbackEmit![1].data.body as string)).toHaveLength(3)
+  })
+
   it('merges request handler changes before calling next', async () => {
     const cyIntercept = new CyIntercept({ socket })
     const emitAndAwait = vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async () => {

@@ -2,9 +2,14 @@ import _ from 'lodash'
 import type {
   HttpRequest,
   HttpResponse,
+  InterceptAfterResponseData,
+  InterceptHandlerEventData,
+  InterceptHandlerEventName,
+  InterceptHandlerResponse,
+  InterceptNetworkErrorData,
   ResourceType,
 } from '@packages/network-interception'
-import { SERIALIZABLE_REQ_PROPS, SERIALIZABLE_RES_PROPS } from '@packages/network-interception'
+import { SERIALIZABLE_REQ_PROPS } from '@packages/network-interception'
 
 /** Serializable payload sent to the driver over the socket. */
 export type DriverInterceptMessage<T = any> = {
@@ -24,26 +29,36 @@ export type DriverInterceptRequest<T = any> = DriverInterceptMessage<T> & {
 }
 
 export type DriverInterceptResponse<T = any> = DriverInterceptMessage<T> & {
+  url: string
   statusCode: number
   statusMessage: string
   throttleKbps?: number
   delay?: number
 }
 
-export type DriverInterceptResponseComplete<T = any> = {
+export type DriverInterceptResponseComplete<T = any> = InterceptAfterResponseData & {
   finalResBody?: DriverInterceptMessage<T>['body']
 }
 
-export type DriverInterceptNetworkError = {
-  error: any
-}
+export type DriverInterceptNetworkError = InterceptNetworkErrorData
 
 export type PendingEventHandler = {
-  eventName: string
+  eventName: InterceptHandlerEventName
   complete: (opts: { changedData?: unknown, stopPropagation: boolean }) => void
 }
 
-const RESPONSE_STAGE_EVENTS = new Set([
+export type ToDriverInterceptEventData = {
+  'before:request': DriverInterceptRequest
+  'before:response': DriverInterceptResponse
+  'response:callback': DriverInterceptResponse
+  'response': DriverInterceptResponse
+  'after:response': DriverInterceptResponseComplete
+  'network:error': DriverInterceptNetworkError
+}
+
+export type ToDriverInterceptEventName = InterceptHandlerEventName
+
+const RESPONSE_STAGE_EVENTS = new Set<InterceptHandlerEventName>([
   'before:response',
   'response:callback',
   'response',
@@ -60,11 +75,15 @@ function toDriverInterceptRequest (request: HttpRequest): DriverInterceptRequest
 }
 
 function toDriverInterceptResponse (response: HttpResponse, requestUrl: string): DriverInterceptResponse {
-  return _.extend(_.pick(response, SERIALIZABLE_RES_PROPS), {
+  return {
     url: requestUrl,
-    body: response.body ?? '',
+    statusCode: response.statusCode,
     statusMessage: response.statusMessage ?? '',
-  }) as DriverInterceptResponse
+    headers: response.headers,
+    body: response.body ?? '',
+    delay: response.delay,
+    throttleKbps: response.throttleKbps,
+  }
 }
 
 function driverInterceptRequestToHttpRequest (driverRequest: DriverInterceptRequest): HttpRequest {
@@ -91,28 +110,41 @@ function driverInterceptResponseToHttpResponse (driverResponse: DriverInterceptR
   }
 }
 
-export function toDriverInterceptEventData (eventName: string, data: unknown): unknown {
-  if (eventName === 'before:request') {
-    return toDriverInterceptRequest(data as HttpRequest)
+function driverInterceptResponseToHandlerResponse (driverResponse: DriverInterceptResponse): InterceptHandlerResponse {
+  return {
+    ...driverInterceptResponseToHttpResponse(driverResponse),
+    url: driverResponse.url,
   }
-
-  if (RESPONSE_STAGE_EVENTS.has(eventName)) {
-    const response = data as HttpResponse & { url?: string }
-
-    return toDriverInterceptResponse(response, response.url ?? '')
-  }
-
-  return data
 }
 
-export function fromDriverInterceptChangedData (eventName: string, changedData: unknown): unknown {
+export function toDriverInterceptEventData<K extends InterceptHandlerEventName> (
+  eventName: K,
+  data: InterceptHandlerEventData[K],
+): ToDriverInterceptEventData[K] {
   if (eventName === 'before:request') {
-    return driverInterceptRequestToHttpRequest(changedData as DriverInterceptRequest)
+    return toDriverInterceptRequest(data as HttpRequest) as unknown as ToDriverInterceptEventData[K]
   }
 
   if (RESPONSE_STAGE_EVENTS.has(eventName)) {
-    return driverInterceptResponseToHttpResponse(changedData as DriverInterceptResponse)
+    const response = data as InterceptHandlerResponse
+
+    return toDriverInterceptResponse(response, response.url) as unknown as ToDriverInterceptEventData[K]
   }
 
-  return changedData
+  return data as unknown as ToDriverInterceptEventData[K]
+}
+
+export function fromDriverInterceptChangedData<K extends InterceptHandlerEventName> (
+  eventName: K,
+  changedData: ToDriverInterceptEventData[K],
+): InterceptHandlerEventData[K] {
+  if (eventName === 'before:request') {
+    return driverInterceptRequestToHttpRequest(changedData as DriverInterceptRequest) as unknown as InterceptHandlerEventData[K]
+  }
+
+  if (RESPONSE_STAGE_EVENTS.has(eventName)) {
+    return driverInterceptResponseToHandlerResponse(changedData as DriverInterceptResponse) as unknown as InterceptHandlerEventData[K]
+  }
+
+  return changedData as unknown as InterceptHandlerEventData[K]
 }

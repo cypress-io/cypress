@@ -79,7 +79,7 @@ export declare namespace NetEvent {
       data: D
     }
 
-    export interface Response extends Event<HttpResponse & { url?: string }> {}
+    export interface Response extends Event<HttpResponse & { url: string }> {}
   }
 
   export namespace ToServer {

@@ -8,7 +8,7 @@ import {
   RouteHandlerController,
   RouteMap,
   RouteMatcher,
-  StringMatcher
+  StringMatcher,
 } from 'cypress/types/net-stubbing'
 
 interface CustomRequest {
@@ -23,11 +23,13 @@ describe('net stubbing types', () => {
   describe('BaseMessage', () => {
     it('has any body by default', () => {
       const sut: CyHttpMessages.BaseMessage = undefined!
+
       sut.body // $ExpectType any
     })
 
     it('has typed body if given', () => {
       const sut: CyHttpMessages.BaseMessage<CustomRequest> = undefined!
+
       sut.body // $ExpectType CustomRequest
     })
   })
@@ -35,11 +37,13 @@ describe('net stubbing types', () => {
   describe('IncomingResponse', () => {
     it('has any body by default', () => {
       const sut: CyHttpMessages.IncomingResponse = undefined!
+
       sut.body // $ExpectType any
     })
 
     it('has typed body if given', () => {
       const sut: CyHttpMessages.IncomingResponse<CustomResponse> = undefined!
+
       sut.body // $ExpectType CustomResponse
     })
   })
@@ -47,21 +51,31 @@ describe('net stubbing types', () => {
   describe('IncomingHttpResponse', () => {
     it('has any body by default', () => {
       const sut: CyHttpMessages.IncomingHttpResponse = undefined!
+
       sut.body // $ExpectType any
     })
 
     it('has typed body if given', () => {
       const sut: CyHttpMessages.IncomingHttpResponse<CustomResponse> = undefined!
+
       sut.body // $ExpectType CustomResponse
+    })
+
+    it('has url', () => {
+      const sut: CyHttpMessages.IncomingHttpResponse = undefined!
+
+      sut.url // $ExpectType string
     })
 
     it('returns the typed body from setDelay', () => {
       const sut: CyHttpMessages.IncomingHttpResponse<CustomResponse> = undefined!
+
       sut.setDelay(0) // $ExpectType IncomingHttpResponse<CustomResponse>
     })
 
     it('returns the typed body from setThrottle', () => {
       const sut: CyHttpMessages.IncomingHttpResponse<CustomResponse> = undefined!
+
       sut.setThrottle(0) // $ExpectType IncomingHttpResponse<CustomResponse>
     })
   })
@@ -69,11 +83,13 @@ describe('net stubbing types', () => {
   describe('IncomingRequest', () => {
     it('has any body by default', () => {
       const sut: CyHttpMessages.IncomingRequest = undefined!
+
       sut.body // $ExpectType any
     })
 
     it('has typed body if given', () => {
       const sut: CyHttpMessages.IncomingRequest<CustomRequest> = undefined!
+
       sut.body // $ExpectType CustomRequest
     })
   })
@@ -81,11 +97,13 @@ describe('net stubbing types', () => {
   describe('IncomingHttpRequest', () => {
     it('has any body by default', () => {
       const sut: CyHttpMessages.IncomingHttpRequest = undefined!
+
       sut.body // $ExpectType any
     })
 
     it('has typed body if given', () => {
       const sut: CyHttpMessages.IncomingHttpRequest<CustomRequest> = undefined!
+
       sut.body // $ExpectType CustomRequest
     })
 
@@ -107,11 +125,13 @@ describe('net stubbing types', () => {
   describe('ResponseComplete', () => {
     it('has any finalResBody by default', () => {
       const sut: CyHttpMessages.ResponseComplete = undefined!
+
       sut.finalResBody // $ExpectType any
     })
 
     it('has typed finalResBody if given', () => {
       const sut: CyHttpMessages.ResponseComplete<CustomResponse> = undefined!
+
       sut.finalResBody // $ExpectType CustomResponse | undefined
     })
   })
@@ -260,11 +280,13 @@ describe('net stubbing types', () => {
 
     it('contains requests with interceptions of any req/res body by default', () => {
       const sut: Route = undefined!
+
       sut.requests['r'] // $ExpectType Interception<any, any>
     })
 
     it('contains requests with interceptions of typed req/res body if given', () => {
       const sut: Route<CustomRequest, CustomResponse> = undefined!
+
       sut.requests['r'] // $ExpectType Interception<CustomRequest, CustomResponse>
     })
 

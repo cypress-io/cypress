@@ -14,6 +14,8 @@ import type {
   InterceptMiddleware,
   NetEvent,
   ForOriginForwarding,
+  InterceptHandlerEventData,
+  InterceptHandlerEventName,
   RouteMatcherOptions,
   Subscription,
 } from '@packages/network-interception'
@@ -41,7 +43,10 @@ import {
   fromDriverInterceptChangedData,
   toDriverInterceptEventData,
 } from './driver-http-conversion'
-import type { PendingEventHandler } from './driver-http-conversion'
+import type {
+  PendingEventHandler,
+  ToDriverInterceptEventData,
+} from './driver-http-conversion'
 import { getAllStringMatcherFields, normalizeTextRequestBody, setResponseFromFixture, emit } from './server/util'
 
 const debug = Debug('cypress:net-stubbing:cy-intercept')
@@ -201,23 +206,22 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
         throw error
       }
 
-      if (inFlightIntercept.fulfilledAtRequestStage && inFlightIntercept.stubResponse) {
-        const stubResponse = inFlightIntercept.stubResponse
+      const stubResponse = inFlightIntercept.fulfilledAtRequestStage
+        ? inFlightIntercept.stubResponse
+        : undefined
 
-        this.attachAfterResponseOnWritten(stubResponse, inFlightIntercept)
-        deferCleanup = true
+      const forward: ForOriginForwarding = stubResponse
+        ? async () => stubResponse
+        : next
 
-        return stubResponse
-      }
-
-      if (matchingRoutes.length > 0) {
+      if (!stubResponse) {
         request.materializeOriginResponse = true
       }
 
       let originResponse: HttpResponse
 
       try {
-        originResponse = await next(request)
+        originResponse = await forward(request)
       } catch (error) {
         await this.emitNetworkError(inFlightIntercept, error as Error)
         throw error
@@ -327,16 +331,16 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
     this.inFlightIntercepts.clear()
   }
 
-  emitAndAwait<D, R = unknown> (
-    eventName: string,
-    frame: NetEvent.ToDriver.Event<D>,
-  ): Promise<{ changedData?: R, stopPropagation?: boolean }> {
+  emitAndAwait<K extends InterceptHandlerEventName> (
+    eventName: K,
+    frame: NetEvent.ToDriver.Event<InterceptHandlerEventData[K]>,
+  ): Promise<{ changedData?: InterceptHandlerEventData[K], stopPropagation?: boolean }> {
     return new Promise((resolve) => {
       const pending: PendingEventHandler = {
         eventName,
         complete: ({ changedData, stopPropagation }) => {
           resolve({
-            changedData: changedData as R,
+            changedData: changedData as InterceptHandlerEventData[K],
             stopPropagation,
           })
         },
@@ -350,7 +354,10 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
     })
   }
 
-  emit<D> (eventName: string, frame: NetEvent.ToDriver.Event<D>): void {
+  emit<K extends InterceptHandlerEventName> (
+    eventName: K,
+    frame: NetEvent.ToDriver.Event<InterceptHandlerEventData[K]>,
+  ): void {
     emit(this.socket, eventName, {
       ...frame,
       data: toDriverInterceptEventData(eventName, frame.data),
@@ -373,7 +380,10 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
     pending.complete({
       changedData: options.changedData === undefined
         ? undefined
-        : fromDriverInterceptChangedData(pending.eventName, options.changedData),
+        : fromDriverInterceptChangedData(
+          pending.eventName,
+          options.changedData as ToDriverInterceptEventData[typeof pending.eventName],
+        ),
       stopPropagation: options.stopPropagation,
     })
   }
