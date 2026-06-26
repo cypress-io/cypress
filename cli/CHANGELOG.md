@@ -1,16 +1,20 @@
 <!-- See ../guides/writing-the-cypress-changelog.md for details on writing the changelog. -->
 ## 15.18.1
 
+**Performance:**
+
+- Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly. Addressed in [#34133](https://github.com/cypress-io/cypress/pull/34133).
+
 **Bugfixes:**
 
 - Fixed an issue where [`cy.type()`](https://on.cypress.io/type) fired the simulated `keyup` event in the same turn as `keydown` and `input`, so `keyup` handlers that read state updated asynchronously in an `input` listener could observe stale values. `keyup` is now deferred to the next microtask, matching real browser event ordering. Fixes [#14864](https://github.com/cypress-io/cypress/issues/14864). Fixed in [#34068](https://github.com/cypress-io/cypress/pull/34068).
+- Fixed an issue where headless WebKit used the host machine's `devicePixelRatio` instead of a standard value of `1`. Headless WebKit now matches headless Chrome, so screenshots taken during `cypress run` are consistent regardless of the host's DPI (for example 2x locally versus 1x in CI) and text is no longer fuzzy on high-DPI displays. Applies when [`experimentalWebKitSupport`](https://docs.cypress.io/app/references/experiments) is enabled. Fixes [#23808](https://github.com/cypress-io/cypress/issues/23808). Fixed in [#34088](https://github.com/cypress-io/cypress/pull/34088).
 
 ## 15.18.0
 
 **Performance:**
 
 - Fixed an issue where an application that repeatedly threw the same uncaught exception (for example, a benign `ResizeObserver loop ...` notification fired on every animation frame) could exhaust renderer memory and crash the browser. Consecutive identical uncaught exceptions within a test now collapse into a single, updating command-log entry, and a handled (suppressed) uncaught exception no longer captures a DOM snapshot. Addresses [#27415](https://github.com/cypress-io/cypress/issues/27415).
-- Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly. Addressed in [#34133](https://github.com/cypress-io/cypress/pull/34133).
 
 **Features:**
 
@@ -24,7 +28,6 @@
 - Fixed an issue where, when Cypress was installed in a read-only location, running tests in Firefox or Chrome could log a `cannot delete profileDir on exit` error (`EACCES`/`EPERM`) and leave the browser profile directory behind, requiring manual cleanup before the next run. Cypress now removes the profile directory on exit as expected. Fixes [#31300](https://github.com/cypress-io/cypress/issues/31300).
 - Fixed an issue where the resolved remote origin (for example, `Cypress.config('remote').origin`) could include an explicit default port (`:80` for HTTP or `:443` for HTTPS) or embedded credentials when the visited URL contained them, which did not match the origin reported by the browser. The reported origin now always matches the browser's `location.origin`, omitting default ports and any embedded credentials. Fixes [#28369](https://github.com/cypress-io/cypress/issues/28369). Fixed in [#34050](https://github.com/cypress-io/cypress/pull/34050).
 - Fixed an issue where `cy.screenshot()` could still capture changing pixels from some running web animations. Fixes [#29144](https://github.com/cypress-io/cypress/issues/29144).
-- Fixed an issue where headless WebKit used the host machine's `devicePixelRatio` instead of a standard value of `1`. Headless WebKit now matches headless Chrome, so screenshots taken during `cypress run` are consistent regardless of the host's DPI (for example 2x locally versus 1x in CI) and text is no longer fuzzy on high-DPI displays. Applies when [`experimentalWebKitSupport`](https://docs.cypress.io/app/references/experiments) is enabled. Fixes [#23808](https://github.com/cypress-io/cypress/issues/23808).
 - Fixed an issue where, during `cypress run` with [`experimentalSingleTabRunMode`](https://docs.cypress.io/app/references/experiments) and the experimental WebKit browser, component test runs with video recording enabled would only record the first spec's video and could then hang without exiting. Each spec is now recorded to its own video and the run exits normally. Fixes [#23815](https://github.com/cypress-io/cypress/issues/23815).
 - Fixed an issue where running component tests with the [`experimentalSingleTabRunMode`](https://on.cypress.io/experiments) experiment enabled could cause a spec to fail intermittently after many other specs had run in the same browser tab, even though that spec passed when run on its own. Fixes [#24146](https://github.com/cypress-io/cypress/issues/24146).
 - Fixed an issue where passing a [`cy.fixture()`](https://on.cypress.io/fixture) alias to [`cy.selectFile()`](https://on.cypress.io/selectfile) attached the file without its name in a second or later test that loaded the same fixture (for example, when the same fixture is reused across multiple tests), causing servers to reject the upload as a missing file. The file name is now preserved every time the fixture is used. Fixes [#21936](https://github.com/cypress-io/cypress/issues/21936).
