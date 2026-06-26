@@ -769,6 +769,12 @@
     "unresolved": "off"
   },
   "ignoreIssues": {
+    "cli/lib/runner-discovery/index.ts": [
+      "types"
+    ],
+    "cli/lib/runner-discovery/record.ts": [
+      "types"
+    ],
     "packages/server/lib/runner-discovery.ts": [
       "types"
     ],

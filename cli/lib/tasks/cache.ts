@@ -10,11 +10,12 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import chalk from 'chalk'
 import _ from 'lodash'
 import getFolderSize from './get-folder-size'
+import { pruneDeadDiscoveryRecords } from '../runner-discovery'
 
 dayjs.extend(relativeTime)
 
 // Subdirs under the cache root that are not binary version dirs.
-const EXTERNAL_CACHE_ENTRIES = new Set(['bundles'])
+const EXTERNAL_CACHE_ENTRIES = new Set(['bundles', 'runners'])
 
 // output colors for the table
 const colors = {
@@ -60,6 +61,8 @@ const prune = async (): Promise<void> => {
     } else {
       logger.always(`No binary caches found to prune.`)
     }
+
+    await pruneDeadDiscoveryRecords()
   } catch (e: any) {
     if (e.code === 'ENOENT') {
       logger.always(`No Cypress cache was found at ${cacheDir}. Nothing to prune.`)
