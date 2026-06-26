@@ -49,7 +49,7 @@ const RESPONSE_STAGE_EVENTS = new Set([
   'response',
 ])
 
-export function toDriverInterceptRequest (request: HttpRequest): DriverInterceptRequest {
+function toDriverInterceptRequest (request: HttpRequest): DriverInterceptRequest {
   return _.extend(_.pick(request, SERIALIZABLE_REQ_PROPS), {
     url: request.url,
     body: request.body ?? '',
@@ -59,7 +59,7 @@ export function toDriverInterceptRequest (request: HttpRequest): DriverIntercept
   }) as DriverInterceptRequest
 }
 
-export function toDriverInterceptResponse (response: HttpResponse, requestUrl: string): DriverInterceptResponse {
+function toDriverInterceptResponse (response: HttpResponse, requestUrl: string): DriverInterceptResponse {
   return _.extend(_.pick(response, SERIALIZABLE_RES_PROPS), {
     url: requestUrl,
     body: response.body ?? '',
@@ -67,7 +67,7 @@ export function toDriverInterceptResponse (response: HttpResponse, requestUrl: s
   }) as DriverInterceptResponse
 }
 
-export function driverInterceptRequestToHttpRequest (driverRequest: DriverInterceptRequest): HttpRequest {
+function driverInterceptRequestToHttpRequest (driverRequest: DriverInterceptRequest): HttpRequest {
   return {
     inFlightInterceptId: '',
     url: driverRequest.url,
@@ -80,7 +80,7 @@ export function driverInterceptRequestToHttpRequest (driverRequest: DriverInterc
   }
 }
 
-export function driverInterceptResponseToHttpResponse (driverResponse: DriverInterceptResponse): HttpResponse {
+function driverInterceptResponseToHttpResponse (driverResponse: DriverInterceptResponse): HttpResponse {
   return {
     statusCode: driverResponse.statusCode,
     statusMessage: driverResponse.statusMessage,

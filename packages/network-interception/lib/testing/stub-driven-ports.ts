@@ -47,5 +47,3 @@ export function createStubDrivenPorts () {
     commandLog,
   }
 }
-
-export type StubDrivenPorts = ReturnType<typeof createStubDrivenPorts>

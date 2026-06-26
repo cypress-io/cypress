@@ -210,9 +210,7 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
         return stubResponse
       }
 
-      const needsResponseBody = matchingRoutes.some((route) => route.hasInterceptor)
-
-      if (needsResponseBody) {
+      if (matchingRoutes.length > 0) {
         request.materializeOriginResponse = true
       }
 

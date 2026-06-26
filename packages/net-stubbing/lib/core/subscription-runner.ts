@@ -4,7 +4,7 @@ import type { InFlightIntercept } from './in-flight-intercept'
 import { markInFlightInterceptStaticResponse } from './in-flight-intercept'
 import { buildHttpResponseFromStatic } from './static-response'
 
-export type RunSubscriptionsOptions<D> = {
+type RunSubscriptionsOptions<D> = {
   inFlightIntercept: InFlightIntercept
   eventName: string | string[]
   data: D

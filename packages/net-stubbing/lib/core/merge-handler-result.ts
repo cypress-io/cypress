@@ -6,7 +6,7 @@ type HandlerMessage = {
   headers: Record<string, string | string[]>
 }
 
-export function mergeDeletedHeaders (before: HandlerMessage, after: HandlerMessage) {
+function mergeDeletedHeaders (before: HandlerMessage, after: HandlerMessage) {
   for (const k in before.headers) {
     // a header was deleted from `after` but was present in `before`, delete it in `before` too.
     // only treat `undefined` (deleted via `delete` or explicitly set to `undefined`) as removal -
@@ -15,7 +15,7 @@ export function mergeDeletedHeaders (before: HandlerMessage, after: HandlerMessa
   }
 }
 
-export function mergeWithPreservedBuffers (before: HandlerMessage, after: Partial<HandlerMessage>) {
+function mergeWithPreservedBuffers (before: HandlerMessage, after: Partial<HandlerMessage>) {
   _.mergeWith(before, after, (_a, b) => {
     if (b instanceof Buffer) {
       return b
@@ -25,7 +25,7 @@ export function mergeWithPreservedBuffers (before: HandlerMessage, after: Partia
   })
 }
 
-export type MergeIncomingRequestChangesOptions = {
+type MergeIncomingRequestChangesOptions = {
   baseUrl: string
   resolveUrl: (baseUrl: string, relativeUrl: string) => string
 }
@@ -71,7 +71,7 @@ export function mergeIncomingRequestChanges (
   return resolvedUrl
 }
 
-export type MergeIncomingResponseChangesOptions = {
+type MergeIncomingResponseChangesOptions = {
   serializableProps: readonly string[]
 }
 

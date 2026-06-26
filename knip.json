@@ -282,7 +282,9 @@
     },
     "packages/net-stubbing": {
       "entry": [
-        "lib/server/index.ts"
+        "lib/index.ts",
+        "lib/server/index.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}"
@@ -417,7 +419,8 @@
     },
     "packages/network-interception": {
       "entry": [
-        "lib/index.ts"
+        "lib/index.ts",
+        "test/**/*.{ts,tsx,js,jsx}"
       ],
       "project": [
         "lib/**/*.{ts,tsx,js,jsx}"
@@ -795,6 +798,19 @@
     ],
     "packages/network-interception/lib/types/external-types.ts": [
       "exports",
+      "types"
+    ],
+    "packages/net-stubbing/lib/intercept-api-types.ts": [
+      "exports",
+      "types"
+    ],
+    "packages/net-stubbing/lib/cy-http-messages.ts": [
+      "types"
+    ],
+    "packages/net-stubbing/lib/cy-intercept.ts": [
+      "types"
+    ],
+    "packages/net-stubbing/lib/server/types.ts": [
       "types"
     ],
     "packages/network-interception/lib/ports/driven-ports.ts": [

@@ -96,12 +96,16 @@ const netStubbingTypeSources = [
   resolvePkg('@packages/net-stubbing/lib/intercept-api-types.ts', { cwd: __dirname }),
 ]
 
-const netStubbingTypes = [
+function collapseBlankLines (content: string): string {
+  return content.replace(/\n{3,}/g, '\n\n')
+}
+
+const netStubbingTypes = collapseBlankLines([
   fs.readFileSync(netStubbingTypeSources[0], 'utf8'),
   extractDriverInterceptTypes(fs.readFileSync(netStubbingTypeSources[1], 'utf8')),
   stripImportLines(fs.readFileSync(netStubbingTypeSources[2], 'utf8')),
   stripImportLines(fs.readFileSync(netStubbingTypeSources[3], 'utf8')),
-].join('\n\n')
+].join('\n\n'))
 
 fs.writeFileSync(join(__dirname, '..', 'types', 'net-stubbing.d.ts'), netStubbingTypes)
 

@@ -6,7 +6,7 @@ export type PlannedRouteSubscriptions = {
   subscriptions: Subscription[]
 }
 
-export type PlanSubscriptionsOptions = {
+type PlanSubscriptionsOptions = {
   matchingRoutes: BackendRoute[]
   isSyncRequest?: boolean
   url?: string

@@ -6,7 +6,7 @@ import { getBodyStream, parseContentType } from '@packages/net-stubbing/lib/serv
 import { caseInsensitiveGet } from '@packages/net-stubbing/lib/util'
 import type { Readable } from 'stream'
 
-export type ProxyResponsePair = {
+type ProxyResponsePair = {
   incomingRes: IncomingMessage
   bodyStream: Readable
 }
