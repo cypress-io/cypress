@@ -9,8 +9,21 @@ function createMockBrowser () {
   let lastPage: any
 
   const makeContextAndPage = () => {
+    // by default, expose a single AUT child frame off of the main frame
+    const autFrame: any = {
+      name: () => `Your project: 'some-project'`,
+      url: () => 'http://localhost:3000/index.html',
+      title: sinon.stub().resolves('My App'),
+      childFrames: () => [],
+    }
+
+    const mainFrame: any = {
+      childFrames: () => [autFrame],
+    }
+
     const page: any = {
       context: () => context,
+      mainFrame: () => mainFrame,
       addInitScript: sinon.stub().resolves(),
       on: sinon.stub(),
       video: sinon.stub(),
@@ -154,6 +167,56 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(mock.browser.newContext).to.be.calledOnce
       expect(mock.browser.newContext.firstCall.args[0]).to.not.have.property('userAgent')
+    })
+  })
+
+  context('get:aut:url / get:aut:title', () => {
+    it('returns the AUT frame url for get:aut:url', async () => {
+      const wk = await createAutomation()
+
+      const url = await wk.onRequest('get:aut:url', {})
+
+      expect(url).to.eq('http://localhost:3000/index.html')
+    })
+
+    it('returns the AUT frame title for get:aut:title', async () => {
+      const wk = await createAutomation()
+
+      const title = await wk.onRequest('get:aut:title', {})
+
+      expect(title).to.eq('My App')
+    })
+
+    it('falls back to the first child frame when the AUT frame cannot be identified by name', async () => {
+      const wk = await createAutomation()
+
+      const firstChild: any = {
+        name: () => '',
+        url: () => 'http://localhost:3000/fallback.html',
+        title: sinon.stub().resolves('Fallback'),
+        childFrames: () => [],
+      }
+
+      mock.getLastPage().mainFrame = () => ({ childFrames: () => [firstChild] })
+
+      expect(await wk.onRequest('get:aut:url', {})).to.eq('http://localhost:3000/fallback.html')
+      expect(await wk.onRequest('get:aut:title', {})).to.eq('Fallback')
+    })
+
+    it('throws when no AUT frame can be found', async () => {
+      const wk = await createAutomation()
+
+      mock.getLastPage().mainFrame = () => ({ childFrames: () => [] })
+
+      let error: Error | undefined
+
+      try {
+        await wk.onRequest('get:aut:url', {})
+      } catch (err) {
+        error = err
+      }
+
+      expect(error?.message).to.include('Could not find AUT frame')
     })
   })
 

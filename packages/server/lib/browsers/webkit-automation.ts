@@ -9,6 +9,7 @@ import mime from 'mime'
 import { cookieMatches, CyCookieFilter } from '../automation/util'
 import utils from './utils'
 import type { CyCookie } from '../automation/util'
+import { AUT_FRAME_NAME_IDENTIFIER } from '../automation/helpers/aut_identifier'
 
 const debug = Debug('cypress:server:browsers:webkit-automation')
 
@@ -373,6 +374,38 @@ export class WebKitAutomation {
     return cookiesToClear
   }
 
+  /**
+   * Locates the AUT (application under test) frame within the runner page.
+   * Playwright's `frame.name()` returns the frame's `name` attribute, falling
+   * back to its `id` attribute, both of which the runner sets to
+   * `Your project: '<projectName>'` (see AUT_FRAME_NAME_IDENTIFIER).
+   */
+  private getAutFrame (): playwright.Frame {
+    const childFrames = this.page.mainFrame().childFrames()
+
+    let autFrame = childFrames.find((frame) => frame.name().startsWith(AUT_FRAME_NAME_IDENTIFIER))
+
+    // When running Cypress-in-Cypress E2E tests, the AUT frame is nested one
+    // level deeper inside the outer AUT frame.
+    if (process.env.CYPRESS_INTERNAL_E2E_TESTING_SELF && autFrame) {
+      autFrame = autFrame.childFrames().find((frame) => frame.name().startsWith(AUT_FRAME_NAME_IDENTIFIER)) ?? autFrame
+    }
+
+    // If for whatever reason we cannot identify the AUT frame by name, fall back
+    // to the first child frame, which should always be the AUT frame.
+    if (!autFrame) {
+      debug('could not identify AUT frame by name, falling back to first child frame %o', { childFrameNames: childFrames.map((frame) => frame.name()) })
+      autFrame = childFrames[0]
+    }
+
+    if (!autFrame) {
+      debug('could not find AUT frame: the runner page has no child frames')
+      throw new Error('Could not find AUT frame')
+    }
+
+    return autFrame
+  }
+
   private async takeScreenshot (data) {
     const buffer = await this.page.screenshot({
       fullPage: data.capture === 'fullPage',
@@ -404,6 +437,10 @@ export class WebKitAutomation {
         return await this.clearCookie(data)
       case 'take:screenshot':
         return await this.takeScreenshot(data)
+      case 'get:aut:url':
+        return this.getAutFrame().url()
+      case 'get:aut:title':
+        return await this.getAutFrame().title()
       case 'focus:browser:window':
         return await this.context.pages[0]?.bringToFront()
       case 'reset:browser:state':
