@@ -589,6 +589,13 @@ commands:
           name: Install Node
           command: |
             source ./scripts/ensure-node.sh
+            if [[ "$PLATFORM" != 'windows' && -n "${BASH_ENV:-}" ]]; then
+              {
+                echo 'export NVM_DIR="${HOME}/.nvm"'
+                echo '[ -s "${NVM_DIR}/nvm.sh" ] && . "${NVM_DIR}/nvm.sh"'
+                echo 'nvm use "$(cat .node-version)" >/dev/null'
+              } >> "$BASH_ENV"
+            fi
             echo "Installing Yarn"
             npm install yarn --location=global # ensure yarn is installed with the correct node engine
             yarn check-node-version

@@ -1,6 +1,7 @@
 const path = require('path')
 const crypto = require('crypto')
 const fs = require('fs')
+const { globSync } = require('fs')
 
 const rootPackageJson = require('../package.json')
 
@@ -67,67 +68,21 @@ function stableStringify (value) {
   return `{${keys.map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`).join(',')}}`
 }
 
-function expandWorkspaceGlob (globPattern) {
-  if (!globPattern.endsWith('/*')) {
-    return [globPattern]
-  }
-
-  const base = globPattern.slice(0, -2)
-  const absBase = path.join(BASE_DIR, base)
-
-  if (!fs.existsSync(absBase)) {
-    return []
-  }
-
-  return fs.readdirSync(absBase, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => `${base}/${entry.name}`)
+function globPaths (pattern) {
+  return globSync(pattern, {
+    cwd: BASE_DIR,
+  }).map((match) => `${BASE_DIR}/${match}`.replaceAll(/\\/g, '/'))
 }
 
 function collectPackageJsonPaths () {
-  const packageJsonPaths = new Set([p('package.json')])
+  const pattern = `{.,${workspacePaths.join(',')}}/package.json`
 
-  for (const workspacePath of workspacePaths) {
-    if (workspacePath.endsWith('/*')) {
-      for (const subPath of expandWorkspaceGlob(workspacePath)) {
-        packageJsonPaths.add(p(`${subPath}/package.json`))
-      }
-    } else {
-      packageJsonPaths.add(p(`${workspacePath}/package.json`))
-    }
-  }
-
-  return [...packageJsonPaths].filter((filePath) => fs.existsSync(filePath)).sort()
-}
-
-function walkFiles (dir, shouldInclude) {
-  const results = []
-
-  if (!fs.existsSync(dir)) {
-    return results
-  }
-
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const fullPath = path.join(dir, entry.name)
-
-    if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name.startsWith('.')) {
-        continue
-      }
-
-      results.push(...walkFiles(fullPath, shouldInclude))
-    } else if (shouldInclude(fullPath)) {
-      results.push(fullPath.replaceAll(/\\/g, '/'))
-    }
-  }
-
-  return results
+  return globPaths(pattern).sort()
 }
 
 function collectPatchFiles () {
-  return walkFiles(BASE_DIR, (filePath) => {
-    return filePath.endsWith('.patch')
-      && !filePath.includes('/node_modules/')
+  return globPaths('**/*.patch').filter((filePath) => {
+    return !filePath.includes('/node_modules/')
       && !filePath.includes('_node_modules')
       && !filePath.includes('/dist-app/')
       && !filePath.includes('/dist-launchpad/')
@@ -139,43 +94,9 @@ function collectWorkspaceNodeModulePaths () {
     return []
   }
 
-  const nodeModulePaths = []
+  const pattern = `{${packageGlobs.join(',')}}/node_modules`
 
-  for (const packageGlob of packageGlobs) {
-    for (const subPath of expandWorkspaceGlob(packageGlob)) {
-      const nodeModulesPath = p(`${subPath}/node_modules/`)
-
-      if (fs.existsSync(nodeModulesPath)) {
-        nodeModulePaths.push(nodeModulesPath)
-      }
-    }
-  }
-
-  return nodeModulePaths.sort()
-}
-
-function globGlobbedNodeModules () {
-  if (!fs.existsSync(CACHE_DIR)) {
-    return []
-  }
-
-  const results = []
-
-  for (const workspaceEntry of fs.readdirSync(CACHE_DIR, { withFileTypes: true })) {
-    if (!workspaceEntry.isDirectory()) {
-      continue
-    }
-
-    const workspaceDir = path.join(CACHE_DIR, workspaceEntry.name)
-
-    for (const packageEntry of fs.readdirSync(workspaceDir, { withFileTypes: true })) {
-      if (packageEntry.isDirectory()) {
-        results.push(`${path.join(workspaceDir, packageEntry.name)}/`.replaceAll(/\\/g, '/'))
-      }
-    }
-  }
-
-  return results
+  return globPaths(`${pattern}/`).sort()
 }
 
 async function removePath (target) {
@@ -243,7 +164,7 @@ async function prepareCircleCache () {
 }
 
 async function unpackCircleCache () {
-  const paths = globGlobbedNodeModules()
+  const paths = globPaths('globbed_node_modules/*/*/')
 
   if (paths.length === 0) {
     throw new Error('Should have found globbed node_modules to unpack')
