@@ -458,6 +458,13 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
     if (staticResponse.forceNetworkError) {
       inFlightIntercept.forceNetworkError = true
 
+      if (inFlightIntercept.inFlightEventId) {
+        this.resolveEventHandler({
+          eventId: inFlightIntercept.inFlightEventId,
+          stopPropagation: true,
+        })
+      }
+
       return
     }
 

@@ -184,6 +184,53 @@ describe('CyIntercept', () => {
     expect(networkErrorEmit![1].data.error).toEqual(errors.cloneErr(originError))
   })
 
+  it('resolves pending handler when forceNetworkError arrives during an in-flight event', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const resolveEventHandler = vi.spyOn(cyIntercept, 'resolveEventHandler')
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    // The real emitAndAwait registers a pending handler and waits. Simulate the driver
+    // sending forceNetworkError while the before:request emitAndAwait is suspended.
+    vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async (eventName, frame: any) => {
+      if (eventName === 'before:request') {
+        // Register a fake pending handler so inFlightEventId is set
+        const eventId = frame.eventId
+
+        cyIntercept.pendingEventHandlers[eventId] = {
+          eventName,
+          complete: vi.fn(),
+        }
+
+        await cyIntercept.handleDriverEvent('send:static:response', {
+          requestId: frame.requestId,
+          staticResponse: { forceNetworkError: true },
+        }, getFixture)
+      }
+
+      return {}
+    })
+
+    await expect(httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn())).rejects.toThrow('forceNetworkError called')
+
+    // resolveEventHandler must have been called to unblock the pending await
+    expect(resolveEventHandler).toHaveBeenCalledWith(expect.objectContaining({ stopPropagation: true }))
+  })
+
   it('emits network:error before forceNetworkError throw', async () => {
     const cyIntercept = new CyIntercept({ socket })
     const emit = vi.spyOn(cyIntercept, 'emit')
