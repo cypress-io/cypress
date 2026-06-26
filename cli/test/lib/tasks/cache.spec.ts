@@ -298,7 +298,7 @@ describe('lib/tasks/cache', () => {
       mockfs({
         '/.cache/Cypress': {
           '1.2.3': { 'Cypress': { 'file1': 'current' } },
-          'runners': {
+          'instances': {
             [`${process.pid}.json`]: JSON.stringify({ pid: process.pid }),
             '999999.json': JSON.stringify({ pid: 999999 }),
             'notes.txt': 'not a record',
@@ -319,19 +319,19 @@ describe('lib/tasks/cache', () => {
 
       await cache.prune()
 
-      expect(await fs.pathExists(`/.cache/Cypress/runners/${process.pid}.json`)).toEqual(true)
-      expect(await fs.pathExists('/.cache/Cypress/runners/999999.json')).toEqual(false)
-      expect(await fs.pathExists('/.cache/Cypress/runners/notes.txt')).toEqual(true)
+      expect(await fs.pathExists(`/.cache/Cypress/instances/${process.pid}.json`)).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/instances/999999.json')).toEqual(false)
+      expect(await fs.pathExists('/.cache/Cypress/instances/notes.txt')).toEqual(true)
       expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
     })
 
-    it('preserves the runners/ subdir while pruning old binary versions', async function () {
+    it('preserves the instances/ subdir while pruning old binary versions', async function () {
       mockfs.restore()
       mockfs({
         '/.cache/Cypress': {
           '1.2.3': { 'Cypress': { 'file1': 'current' } },
           '2.3.4': { 'Cypress.app': {} },
-          'runners': { [`${process.pid}.json`]: JSON.stringify({ pid: process.pid }) },
+          'instances': { [`${process.pid}.json`]: JSON.stringify({ pid: process.pid }) },
         },
       })
 
@@ -344,7 +344,7 @@ describe('lib/tasks/cache', () => {
 
       expect(await fs.pathExists('/.cache/Cypress/2.3.4')).toEqual(false)
       expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
-      expect(await fs.pathExists('/.cache/Cypress/runners')).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/instances')).toEqual(true)
     })
   })
 
