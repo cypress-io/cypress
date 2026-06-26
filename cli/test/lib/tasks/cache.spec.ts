@@ -54,7 +54,7 @@ describe('lib/tasks/cache', () => {
 
     const originalOut = process.stdout.write
 
-    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array<ArrayBufferLike>) => {
+    vi.spyOn(process.stdout, 'write').mockImplementation((strOrBugger: string | Uint8Array) => {
       logs.push(strOrBugger as string)
 
       return originalOut(strOrBugger)
@@ -81,6 +81,7 @@ describe('lib/tasks/cache', () => {
   afterEach(() => {
     globalThis.console = originalConsole // Restore original console
     chalk.level = previousChalkLevel
+    vi.restoreAllMocks()
   })
 
   beforeEach(async function () {
@@ -291,6 +292,60 @@ describe('lib/tasks/cache', () => {
       expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
       expect(await fs.pathExists('/.cache/Cypress/bundles/cy-prompt/abc123/manifest.json')).toEqual(true)
     })
+
+    it('sweeps stale (dead-pid) runner instances records while keeping live ones', async function () {
+      mockfs.restore()
+      mockfs({
+        '/.cache/Cypress': {
+          '1.2.3': { 'Cypress': { 'file1': 'current' } },
+          'runners': {
+            [`${process.pid}.json`]: JSON.stringify({ pid: process.pid }),
+            '999999.json': JSON.stringify({ pid: 999999 }),
+            'notes.txt': 'not a record',
+          },
+        },
+      })
+
+      vi.mocked(state.getCacheDir).mockReturnValue('/.cache/Cypress')
+      vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
+
+      vi.spyOn(process, 'kill').mockImplementation(((pid: number) => {
+        if (pid === process.pid) {
+          return true
+        }
+
+        throw Object.assign(new Error('ESRCH'), { code: 'ESRCH' })
+      }) as any)
+
+      await cache.prune()
+
+      expect(await fs.pathExists(`/.cache/Cypress/runners/${process.pid}.json`)).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/runners/999999.json')).toEqual(false)
+      expect(await fs.pathExists('/.cache/Cypress/runners/notes.txt')).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
+    })
+
+    it('preserves the runners/ subdir while pruning old binary versions', async function () {
+      mockfs.restore()
+      mockfs({
+        '/.cache/Cypress': {
+          '1.2.3': { 'Cypress': { 'file1': 'current' } },
+          '2.3.4': { 'Cypress.app': {} },
+          'runners': { [`${process.pid}.json`]: JSON.stringify({ pid: process.pid }) },
+        },
+      })
+
+      vi.mocked(state.getCacheDir).mockReturnValue('/.cache/Cypress')
+      vi.mocked(util.pkgVersion).mockReturnValue('1.2.3')
+
+      vi.spyOn(process, 'kill').mockReturnValue(true as any)
+
+      await cache.prune()
+
+      expect(await fs.pathExists('/.cache/Cypress/2.3.4')).toEqual(false)
+      expect(await fs.pathExists('/.cache/Cypress/1.2.3')).toEqual(true)
+      expect(await fs.pathExists('/.cache/Cypress/runners')).toEqual(true)
+    })
   })
 
   describe('.list', () => {
@@ -353,6 +408,7 @@ describe('lib/tasks/cache', () => {
       })
 
       // the second binary has never been accessed
+      // @ts-ignore
       vi.mocked(fs.stat).mockResolvedValueOnce(undefined)
 
       await cache.list()
@@ -368,6 +424,7 @@ describe('lib/tasks/cache', () => {
       })
 
       // the second binary has never been accessed
+      // @ts-ignore
       vi.mocked(fs.stat).mockResolvedValueOnce(undefined)
 
       await cache.list(true)

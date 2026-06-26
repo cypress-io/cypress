@@ -769,6 +769,12 @@
     "unresolved": "off"
   },
   "ignoreIssues": {
+    "cli/lib/runner-instances/index.ts": [
+      "types"
+    ],
+    "cli/lib/runner-instances/record.ts": [
+      "types"
+    ],
     "packages/server/lib/runner-instances.ts": [
       "types"
     ],
