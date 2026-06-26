@@ -197,4 +197,26 @@ describe('lib/util/bundle_cleaner', () => {
       await bundleCleaner.pruneStaleBundles('/some/project')
     })
   })
+
+  describe('.touchProjectBundle', () => {
+    it('refreshes the bundle cache mtime for the project', async () => {
+      sinon.stub(appData, 'projectBundlePath').returns(bundlesPath('proj-abc'))
+
+      await createBundle('proj-abc', 30 * DAY_MS)
+
+      await bundleCleaner.touchProjectBundle('/some/project')
+
+      const stat = await fs.statAsync(bundlesPath('proj-abc'))
+
+      expect(appData.projectBundlePath).to.be.calledWith('/some/project')
+      expect(Date.now() - stat.mtimeMs).to.be.lessThan(DAY_MS)
+    })
+
+    it('never throws when the bundle dir does not exist', async () => {
+      sinon.stub(appData, 'projectBundlePath').returns(bundlesPath('missing'))
+
+      // should resolve without throwing
+      await bundleCleaner.touchProjectBundle('/some/project')
+    })
+  })
 })

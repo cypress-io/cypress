@@ -48,19 +48,25 @@ const removeBundle = async (folder: string): Promise<void> => {
   }
 }
 
-// touch the active project's bundle directory so it is always considered "in
-// use" and is never pruned on a subsequent run, regardless of whether the
-// bundler overwrote files in place (which would not update the directory mtime)
-const touchProjectBundle = async (projectBundlePath: string): Promise<void> => {
+// touch a project's bundles dir so it is considered "in use" and is never pruned
+// on a subsequent run, regardless of whether the bundler overwrote files in place
+// (which would not update the directory mtime)
+const touchBundleDir = async (bundleDir: string): Promise<void> => {
   try {
     const now = new Date()
 
-    await fs.utimes(projectBundlePath, now, now)
+    await fs.utimes(bundleDir, now, now)
   } catch (err) {
     // the directory may not exist yet on the very first run, which is fine: it
     // will be created with a current mtime while the run generates its bundles
-    debug('could not refresh last-used time for project bundle %s: %o', projectBundlePath, err)
+    debug('could not refresh last-used time for project bundle %s: %o', bundleDir, err)
   }
+}
+
+// refresh a project's bundle cache mtime so a concurrent prune for another
+// project does not treat an actively-used cache as stale. never throws.
+export const touchProjectBundle = async (projectRoot: string): Promise<void> => {
+  await touchBundleDir(appData.projectBundlePath(projectRoot))
 }
 
 export const removeStaleBundles = async (projectsRoot: string, currentProjectBundlePath: string): Promise<void> => {
@@ -116,7 +122,7 @@ export const removeStaleBundles = async (projectsRoot: string, currentProjectBun
   }
 
   // keep the current project fresh so it survives the next prune
-  await touchProjectBundle(normalizedCurrent)
+  await touchBundleDir(normalizedCurrent)
 }
 
 // resolve the app data paths for the given project and prune its stale sibling

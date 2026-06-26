@@ -38,6 +38,7 @@ describe('lib/open_project', () => {
     sinon.stub(ProjectBase.prototype, 'getAutomation').returns(this.automation)
     sinon.stub(preprocessor, 'removeFile')
     sinon.stub(bundleCleaner, 'pruneStaleBundles').resolves()
+    sinon.stub(bundleCleaner, 'touchProjectBundle').resolves()
 
     return Fixtures.scaffoldProject('todos').then(() => {
       return openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError })
@@ -47,6 +48,34 @@ describe('lib/open_project', () => {
   describe('#create', () => {
     it('prunes stale bundles for the opened project', function () {
       expect(bundleCleaner.pruneStaleBundles).to.be.calledWith(todosPath)
+    })
+  })
+
+  describe('#create bundle cache heartbeat', () => {
+    afterEach(function () {
+      this.clock?.restore()
+    })
+
+    it('periodically refreshes the open project bundle in interactive mode', async function () {
+      this.clock = sinon.useFakeTimers()
+
+      await openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError, isTextTerminal: false })
+
+      expect(bundleCleaner.touchProjectBundle).not.to.be.called
+
+      await this.clock.tickAsync(60 * 60 * 1000)
+
+      expect(bundleCleaner.touchProjectBundle).to.be.calledWith(todosPath)
+    })
+
+    it('does not start the heartbeat in run mode', async function () {
+      this.clock = sinon.useFakeTimers()
+
+      await openProject.create(todosPath, { testingType: 'e2e' }, { onError: this.onError, isTextTerminal: true })
+
+      await this.clock.tickAsync(60 * 60 * 1000)
+
+      expect(bundleCleaner.touchProjectBundle).not.to.be.called
     })
   })
 

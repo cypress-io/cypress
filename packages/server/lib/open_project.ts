@@ -20,8 +20,15 @@ import { isProxyEnabled, ensureProxyServer } from './util/is-proxy-disabled'
 
 const debug = Debug('cypress:server:open_project')
 
+// while a project is open, periodically refresh its bundle cache mtime so a
+// concurrent prune (for a different project) cannot treat the in-use cache as
+// stale, no matter how long the session stays open.
+// @see https://github.com/cypress-io/cypress/issues/20435
+const BUNDLE_TOUCH_INTERVAL_MS = 60 * 60 * 1000
+
 export class OpenProject extends EventEmitter {
   private projectBase: ProjectBase | null = null
+  private bundleTouchInterval: NodeJS.Timeout | undefined
   relaunchBrowser: (() => Promise<BrowserInstance | null>) = () => {
     throw new Error('bad relaunch')
   }
@@ -33,10 +40,29 @@ export class OpenProject extends EventEmitter {
   }
 
   resetOpenProject () {
+    this.stopBundleTouchHeartbeat()
     this.projectBase?.__reset()
     this.projectBase = null
     this.relaunchBrowser = () => {
       throw new Error('bad relaunch after reset')
+    }
+  }
+
+  private startBundleTouchHeartbeat (projectRoot: string) {
+    this.stopBundleTouchHeartbeat()
+
+    this.bundleTouchInterval = setInterval(() => {
+      void bundleCleaner.touchProjectBundle(projectRoot)
+    }, BUNDLE_TOUCH_INTERVAL_MS)
+
+    // don't let the heartbeat keep the process alive
+    this.bundleTouchInterval.unref()
+  }
+
+  private stopBundleTouchHeartbeat () {
+    if (this.bundleTouchInterval) {
+      clearInterval(this.bundleTouchInterval)
+      this.bundleTouchInterval = undefined
     }
   }
 
@@ -353,6 +379,12 @@ export class OpenProject extends EventEmitter {
         // rethrow and handle elsewhere
         throw (err)
       }
+    }
+
+    // in an interactive session the process is long-lived and keeps using this
+    // project's bundle cache, so keep it fresh against concurrent prunes
+    if (!options.isTextTerminal) {
+      this.startBundleTouchHeartbeat(path)
     }
 
     this.emit('ready')
