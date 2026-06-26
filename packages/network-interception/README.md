@@ -59,7 +59,7 @@ type InterceptMiddleware = (
 ```mermaid
 flowchart TB
   subgraph compositionRoot["server-base open"]
-    STACK["createHttpInterceptStack<br/>blockHosts + CSP + CyIntercept"]
+    STACK["createHttpInterceptStack<br/>blockHosts + CyIntercept"]
     STACK --> HI[HttpIntercept]
   end
   subgraph transportLayer["transport adapters"]
@@ -76,7 +76,7 @@ flowchart TB
 
 ```
 server-base.open()
-  → createHttpInterceptStack(config, socket) — blockHosts, CSP, CyIntercept on one HttpIntercept
+  → createHttpInterceptStack(config, socket) — blockHosts and CyIntercept on one HttpIntercept
   → if proxy enabled: createNetworkProxy() with proxy driven ports
   → if proxy disabled: open_project passes same HttpIntercept to CDPNetworkInterception
 
@@ -89,7 +89,7 @@ CDPNetworkInterception (CDP path)
   → Fetch.fulfillRequest / Fetch.continueRequest
 ```
 
-Config middleware (`blockHosts`, CSP) and the cy.intercept intercepter share one `HttpIntercept` onion chain. Cookies, document prep, and compression stay on proxy middleware via driven ports wired at the composition root.
+Config middleware (`blockHosts`) and the cy.intercept intercepter share one `HttpIntercept` onion chain. CSP allow-list runs in proxy response middleware (`OmitProblematicHeaders` via `applyCspAllowListToHeaders`). Cookies, document prep, and compression stay on proxy middleware via driven ports wired at the composition root.
 
 ---
 
@@ -100,7 +100,7 @@ Use this when a concern can run on materialized `HttpRequest` / `HttpResponse` (
 | Concern | Where middleware is defined | Where it is registered | Runs on CDP? |
 | --- | --- | --- | --- |
 | `blockHosts` | `createBlockConfiguredHosts` (`network-interception`) | `createHttpInterceptStack` (`server`) | Yes (same stack) |
-| CSP allow-list | `createCspConfiguredAllowList` (`network-interception`) | `createHttpInterceptStack` (`server`) | Yes (same stack) |
+| CSP allow-list | `applyCspAllowListToHeaders` (`network-interception`) | `OmitProblematicHeaders` (`proxy` response middleware) | No (proxy streaming) |
 | `cy.intercept` | `CyIntercept` (`net-stubbing`) | `createHttpInterceptStack` (`server`) | Yes |
 | Document rewrite | `SetInjectionLevel` → `MaybeInjectHtml` → `MaybeRemoveSecurity` (`proxy` streaming) | `server-base` wires `createProxyNetworkServices()` driven ports | No (intentional) |
 

@@ -396,7 +396,7 @@ describe('http/response-middleware', function () {
         'content-security-policy': 'default-src \'self\'',
       }, {
         experimentalCspAllowList: false,
-      }, { isFromExtraTarget: true })
+      })
 
       await testMiddleware([OmitProblematicHeaders], ctx)
       expect(ctx.res.set).toHaveBeenCalledWith(expect.objectContaining({ 'good-header': 'value' }))
@@ -412,7 +412,7 @@ describe('http/response-middleware', function () {
     ]
 
     const prepareCspContext = (additionalHeaders = {}, config = {}) => {
-      prepareContext(additionalHeaders, config, { isFromExtraTarget: true })
+      prepareContext(additionalHeaders, config)
     }
 
     unsupportedCSPDirectives.forEach((directive) => {

@@ -28,7 +28,7 @@ flowchart LR
 
 | Step | Code | Result |
 | --- | --- | --- |
-| 1. Intercept stack | `createHttpInterceptStack(config, socket)` | `HttpIntercept` with blockHosts, CSP, and `CyIntercept.middleware` |
+| 1. Intercept stack | `createHttpInterceptStack(config, socket)` | `HttpIntercept` with blockHosts and `CyIntercept.middleware` |
 | 2a. Proxy path | `createNetworkProxy()` when proxy enabled | `NetworkProxy.networkInterception` = shared `HttpIntercept`; driven ports on `networkServices` |
 | 2b. CDP path | `open_project.launch()` when `CYPRESS_INTERNAL_DISABLE_PROXY=1` | Passes `server.networkInterception` to browser launch |
 
@@ -39,7 +39,7 @@ flowchart LR
 | Proxy driven ports | `createProxyNetworkServices()` when proxy is enabled |
 | CDP transport | Same `HttpIntercept` instance — no second stack |
 
-Config middleware (`blockHosts`, CSP) registers on `HttpIntercept` via `use()`. Document rewrite (`modifyObstructiveCode`, `experimentalModifyObstructiveThirdPartyCode`) is typed via {@link DocumentRewriteConfig} but enforced only on proxy response streaming middleware — not on CDP Fetch. See [CDP vs proxy](../../network-interception/README.md#cdp-vs-proxy-cypress_internal_disable_proxy1) in `@packages/network-interception`.
+Config middleware (`blockHosts`) registers on `HttpIntercept` via `use()`. CSP allow-list runs in proxy response middleware (`OmitProblematicHeaders`). Document rewrite (`modifyObstructiveCode`, `experimentalModifyObstructiveThirdPartyCode`) is typed via {@link DocumentRewriteConfig} but enforced only on proxy response streaming middleware — not on CDP Fetch. See [CDP vs proxy](../../network-interception/README.md#cdp-vs-proxy-cypress_internal_disable_proxy1) in `@packages/network-interception`.
 
 ### Tests
 

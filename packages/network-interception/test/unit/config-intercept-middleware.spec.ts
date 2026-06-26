@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest'
 import {
   applyCspAllowListToHeaders,
   createBlockConfiguredHosts,
-  createCspConfiguredAllowList,
   HttpIntercept,
 } from '../../lib'
 
@@ -78,74 +77,6 @@ describe('createBlockConfiguredHosts', () => {
     })
 
     expect(order).toEqual([])
-  })
-})
-
-describe('createCspConfiguredAllowList', () => {
-  it('removes CSP headers when experimentalCspAllowList is false', async () => {
-    const middleware = createCspConfiguredAllowList({ experimentalCspAllowList: false })
-    const next = vi.fn(async () => {
-      return {
-        statusCode: 200,
-        headers: {
-          'content-security-policy': 'default-src \'self\'',
-        },
-        body: 'ok',
-      }
-    })
-
-    const response = await middleware({
-      inFlightInterceptId: 'req-1',
-      url: 'http://example.com/',
-      method: 'GET',
-      headers: {},
-    }, next)
-
-    expect(response.headers['content-security-policy']).toBeUndefined()
-  })
-
-  it('strips unsupported directives when experimentalCspAllowList is true', async () => {
-    const middleware = createCspConfiguredAllowList({ experimentalCspAllowList: true })
-    const next = vi.fn(async () => {
-      return {
-        statusCode: 200,
-        headers: {
-          'content-security-policy': 'img-src \'self\'; frame-ancestors \'none\'',
-        },
-        body: 'ok',
-      }
-    })
-
-    const response = await middleware({
-      inFlightInterceptId: 'req-1',
-      url: 'http://example.com/',
-      method: 'GET',
-      headers: {},
-    }, next)
-
-    expect(response.headers['content-security-policy']).toEqual(['img-src \'self\''])
-  })
-
-  it('allows listed directives when experimentalCspAllowList is an array', async () => {
-    const middleware = createCspConfiguredAllowList({ experimentalCspAllowList: ['script-src'] })
-    const next = vi.fn(async () => {
-      return {
-        statusCode: 200,
-        headers: {
-          'content-security-policy': 'script-src \'self\'; child-src \'none\'',
-        },
-        body: 'ok',
-      }
-    })
-
-    const response = await middleware({
-      inFlightInterceptId: 'req-1',
-      url: 'http://example.com/',
-      method: 'GET',
-      headers: {},
-    }, next)
-
-    expect(response.headers['content-security-policy']).toEqual(['script-src \'self\''])
   })
 })
 
