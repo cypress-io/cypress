@@ -1,10 +1,12 @@
 export type DevServerCompileSuccessData = {
   specFile?: string
   jitRecompile?: boolean
+  jitRecompileGeneration?: number
 }
 
 export type DevServerSpecUpdateEvents = {
   once (event: 'dev-server:on-spec-updated' | 'dev-server:specs:unchanged', handler: () => void): void
+  once (event: 'dev-server:jit-recompile:queued', handler: (data: { generation: number }) => void): void
   on (event: 'dev-server:compile:success', handler: (data?: DevServerCompileSuccessData) => void): void
   off (event: 'dev-server:compile:success', handler: (data?: DevServerCompileSuccessData) => void): void
   off (event: 'dev-server:specs:unchanged', handler: () => void): void
@@ -35,6 +37,7 @@ export function waitForDevServerSpecUpdate (
     }
 
     let resolved = false
+    let expectedJitRecompileGeneration: number | undefined
 
     const cleanup = () => {
       events.off('dev-server:compile:success', onCompileSuccess)
@@ -51,7 +54,15 @@ export function waitForDevServerSpecUpdate (
       resolve()
     }
 
-    const onCompileSuccess = ({ specFile, jitRecompile }: DevServerCompileSuccessData = {}) => {
+    const onCompileSuccess = ({ specFile, jitRecompile, jitRecompileGeneration }: DevServerCompileSuccessData = {}) => {
+      if (expectedJitRecompileGeneration !== undefined) {
+        if (jitRecompileGeneration === expectedJitRecompileGeneration) {
+          tryResolve()
+        }
+
+        return
+      }
+
       if (specFile && specFile !== spec.absolute) {
         return
       }
@@ -69,10 +80,20 @@ export function waitForDevServerSpecUpdate (
       tryResolve()
     }
 
+    const onJitRecompileQueued = ({ generation }: { generation: number }) => {
+      if (resolved) {
+        return
+      }
+
+      expectedJitRecompileGeneration = generation
+      events.on('dev-server:compile:success', onCompileSuccess)
+    }
+
     events.once('dev-server:specs:unchanged', onSpecsUnchanged)
+    events.once('dev-server:jit-recompile:queued', onJitRecompileQueued)
 
     events.once('dev-server:on-spec-updated', () => {
-      if (resolved) {
+      if (resolved || expectedJitRecompileGeneration !== undefined) {
         return
       }
 

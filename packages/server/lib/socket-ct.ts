@@ -20,16 +20,20 @@ export class SocketCt extends SocketBase {
       this.toRunner('dev-server:specs:unchanged')
     })
 
+    devServer.emitter.on('dev-server:jit-recompile:queued', (data) => {
+      this.toRunner('dev-server:jit-recompile:queued', data)
+    })
+
     // Always forward compile success so JIT spec updates can wait for webpack
     // even when watchForFileChanges is disabled.
-    devServer.emitter.on('dev-server:compile:success', ({ specFile, jitRecompile }) => {
+    devServer.emitter.on('dev-server:compile:success', ({ specFile, jitRecompile, jitRecompileGeneration }) => {
       const studioCompileRerun = this.#studioCompileRerunPending
 
       if (studioCompileRerun) {
         this.#studioCompileRerunPending = false
       }
 
-      this.toRunner('dev-server:compile:success', { specFile, jitRecompile, studioCompileRerun })
+      this.toRunner('dev-server:compile:success', { specFile, jitRecompile, jitRecompileGeneration, studioCompileRerun })
     })
   }
 

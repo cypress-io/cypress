@@ -5,7 +5,7 @@ import { waitForDevServerSpecUpdate } from '../../../packages/app/src/runner/wai
 const tick = () => new Promise<void>((resolve) => setImmediate(resolve))
 
 describe('waitForDevServerSpecUpdate', () => {
-  it('waits for webpack compile success after the dev server acknowledges a spec update', async () => {
+  it('waits for webpack compile success after the dev server queues a JIT recompile', async () => {
     const events = new EventEmitter()
     const spec = { absolute: '/project/src/App.cy.jsx' }
 
@@ -14,12 +14,12 @@ describe('waitForDevServerSpecUpdate', () => {
       resolved = true
     })
 
-    events.emit('dev-server:on-spec-updated')
+    events.emit('dev-server:jit-recompile:queued', { generation: 1 })
     await tick()
 
     expect(resolved).toBe(false)
 
-    events.emit('dev-server:compile:success', { jitRecompile: true })
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
     await promise
 
     expect(resolved).toBe(true)
@@ -94,6 +94,27 @@ describe('waitForDevServerSpecUpdate', () => {
     await promise
 
     expect(onSpy).not.toHaveBeenCalledWith('dev-server:compile:success', expect.any(Function))
+  })
+
+  it('waits for the matching JIT recompile generation when compiles overlap', async () => {
+    const events = new EventEmitter()
+    const spec = { absolute: '/project/src/App.cy.jsx' }
+
+    let resolved = false
+    const promise = waitForDevServerSpecUpdate(spec, events as any, { bundler: 'webpack' }).then(() => {
+      resolved = true
+    })
+
+    events.emit('dev-server:jit-recompile:queued', { generation: 2 })
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 1 })
+    await tick()
+
+    expect(resolved).toBe(false)
+
+    events.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: 2 })
+    await promise
+
+    expect(resolved).toBe(true)
   })
 
   it('resolves after spec update for non-webpack bundlers without waiting for compile success', async () => {

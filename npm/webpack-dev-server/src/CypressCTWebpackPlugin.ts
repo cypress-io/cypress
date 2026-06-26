@@ -29,7 +29,8 @@ export class CypressCTWebpackPlugin {
   private files: Cypress.Cypress['spec'][] = []
   private supportFile: string | false
   private compilation: Compilation | null = null
-  private pendingJitRecompile = false
+  private jitRecompileGeneration = 0
+  private pendingJitRecompileGenerations: number[] = []
   private webpack: Function
   private indexHtmlFile: string
 
@@ -102,7 +103,10 @@ export class CypressCTWebpackPlugin {
       return
     }
 
-    this.pendingJitRecompile = true
+    const generation = ++this.jitRecompileGeneration
+
+    this.pendingJitRecompileGenerations.push(generation)
+    this.devServerEvents.emit('dev-server:jit-recompile:queued', { generation })
     this.files = specs
     const inputFileSystem = this.compilation.inputFileSystem
     // TODO: don't use a sync fs method here
@@ -136,11 +140,16 @@ export class CypressCTWebpackPlugin {
     this.devServerEvents.on('dev-server:specs:changed', this.onSpecsChange)
     _compiler.hooks.beforeCompile.tapAsync('CypressCTPlugin', this.beforeCompile)
     _compiler.hooks.compilation.tap('CypressCTPlugin', (compilation) => this.addCompilationHooks(compilation))
-    _compiler.hooks.done.tap('CypressCTPlugin', () => {
-      const jitRecompile = this.pendingJitRecompile
+    _compiler.hooks.done.tap('CypressCTWebpackPlugin', () => {
+      if (!this.pendingJitRecompileGenerations.length) {
+        this.devServerEvents.emit('dev-server:compile:success', { jitRecompile: false })
 
-      this.pendingJitRecompile = false
-      this.devServerEvents.emit('dev-server:compile:success', { jitRecompile })
+        return
+      }
+
+      const generation = this.pendingJitRecompileGenerations.shift()
+
+      this.devServerEvents.emit('dev-server:compile:success', { jitRecompile: true, jitRecompileGeneration: generation })
     })
   }
 }

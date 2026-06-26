@@ -15,8 +15,12 @@ export const wrap = (
     devServerEvents.emit('dev-server:specs:changed', specsAndOptions)
   })
 
-  devServerEvents.on('dev-server:compile:success', ({ specFile, jitRecompile }: { specFile?: string, jitRecompile?: boolean } = {}) => {
-    ipc.send('dev-server:compile:success', { specFile, jitRecompile })
+  devServerEvents.on('dev-server:compile:success', ({ specFile, jitRecompile, jitRecompileGeneration }: { specFile?: string, jitRecompile?: boolean, jitRecompileGeneration?: number } = {}) => {
+    ipc.send('dev-server:compile:success', { specFile, jitRecompile, jitRecompileGeneration })
+  })
+
+  devServerEvents.on('dev-server:jit-recompile:queued', (data: { generation: number }) => {
+    ipc.send('dev-server:jit-recompile:queued', data)
   })
 
   devServerEvents.on('dev-server:specs:unchanged', () => {
