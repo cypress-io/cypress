@@ -13,7 +13,8 @@ const debug = Debug('cypress:cli:runner-instances')
 // directory name and the `<pid>.json` record filename are mirrored in the
 // producer at packages/server/lib/runner-instances.ts and MUST stay in sync —
 // the server writes these records and the CLI reads them.
-const INSTANCES_DIRNAME = 'instances'
+export const INSTANCES_DIRNAME = 'instances'
+
 const RECORD_EXTENSION = '.json'
 
 export const getRunnerInstancesDir = (): string => {

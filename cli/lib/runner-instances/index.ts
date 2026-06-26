@@ -11,7 +11,7 @@ export type { LiveRunnerState, ReadyRunnerState, RunnerDiscoveryErrorCode, Runne
 
 export { isPidAlive, verifyRunnerRecord } from './liveness'
 
-export { getRunnerInstancesDir, pruneDeadDiscoveryRecords, readRunnerRecords } from './store'
+export { INSTANCES_DIRNAME, getRunnerInstancesDir, pruneDeadDiscoveryRecords, readRunnerRecords } from './store'
 
 export interface FindRunnerOptions {
   instance?: number
