@@ -5,7 +5,7 @@ version: 2.1
 # the new location and/or names:
 # - ./scripts/github-actions/update-browser-versions.js
 
-chrome-stable-version: &chrome-stable-version "149.0.7827.196"
+chrome-stable-version: &chrome-stable-version "149.0.7827.200"
 chrome-beta-version: &chrome-beta-version "150.0.7871.46"
 # Pin from https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions.json (channels.Stable)
 chrome-for-testing-stable-version: &chrome-for-testing-stable-version "150.0.7871.24"
