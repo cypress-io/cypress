@@ -223,6 +223,64 @@ describe('CyIntercept', () => {
     expect(networkErrorEmit![1].data.error.message).toBe('forceNetworkError called')
   })
 
+  it('emits network:error before forceNetworkError throw at response stage', async () => {
+    const cyIntercept = new CyIntercept({ socket })
+    const emit = vi.spyOn(cyIntercept, 'emit')
+
+    const { httpIntercept } = createStack({
+      routes: [{
+        id: 'route-1',
+        hasInterceptor: true,
+        routeMatcher: { url: 'http://example.com/*' },
+        getFixture,
+        matches: 0,
+      }],
+      cyIntercept,
+    })
+
+    vi.spyOn(cyIntercept, 'emitAndAwait').mockImplementation(async (eventName) => {
+      if (eventName === 'before:request') {
+        await cyIntercept.handleDriverEvent('subscribe', {
+          requestId: 'intercept-1',
+          subscription: {
+            routeId: 'route-1',
+            eventName: 'response',
+            await: true,
+          },
+        }, getFixture)
+
+        return {}
+      }
+
+      if (eventName === 'response') {
+        await cyIntercept.handleDriverEvent('send:static:response', {
+          requestId: 'intercept-1',
+          staticResponse: { forceNetworkError: true },
+        }, getFixture)
+      }
+
+      return {}
+    })
+
+    await expect(httpIntercept.handle({
+      inFlightInterceptId: 'intercept-1',
+      url: 'http://example.com/foo',
+      method: 'GET',
+      headers: {},
+    }, vi.fn(async () => {
+      return {
+        statusCode: 200,
+        headers: {},
+        body: 'origin',
+      }
+    }))).rejects.toThrow('forceNetworkError called')
+
+    const networkErrorEmit = emit.mock.calls.find(([eventName]) => eventName === 'network:error')
+
+    expect(networkErrorEmit).toBeDefined()
+    expect(networkErrorEmit![1].data.error.message).toBe('forceNetworkError called')
+  })
+
   it('emitNetworkErrorByRequestId emits network:error for in-flight intercepts', async () => {
     const cyIntercept = new CyIntercept({ socket })
     const emit = vi.spyOn(cyIntercept, 'emit')

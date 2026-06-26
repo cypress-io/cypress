@@ -244,6 +244,13 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
         driverNotification: this,
       })
 
+      if (inFlightIntercept.forceNetworkError) {
+        const error = new Error('forceNetworkError called')
+
+        await this.emitNetworkError(inFlightIntercept, error)
+        throw error
+      }
+
       const finalResponse = inFlightIntercept.responseOverride ?? {
         statusCode: modifiedResponse.statusCode,
         statusMessage: modifiedResponse.statusMessage,
