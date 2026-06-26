@@ -3,11 +3,88 @@ import { concatStream, httpUtils } from '@packages/network'
 import { getEncoding } from 'istextorbinary'
 import type { IncomingMessage } from 'http'
 import type { Readable } from 'stream'
+import zlib from 'zlib'
 import type { ForOriginForwarding, HttpRequest, HttpResponse } from '@packages/network-interception'
 import { normalizeTextRequestBody } from '@packages/net-stubbing/lib/server/util'
 import { HttpResponseCodec } from './http-response-codec'
 import { sendRequestOutgoing } from './send-request-outgoing'
 import type { RequestInterceptionMiddlewareCtx } from './types'
+
+const SUPPORTED_CONTENT_ENCODINGS = ['gzip', 'br'] as const
+
+type SupportedContentEncoding = typeof SUPPORTED_CONTENT_ENCODINGS[number]
+
+type MaterializeResponseCtx = RequestInterceptionMiddlewareCtx & {
+  isGunzipped?: boolean
+  isBrotliDecompressed?: boolean
+  contentEncodingOrder?: SupportedContentEncoding[]
+}
+
+// Match response-middleware flush options for layered encoding edge cases (#1756).
+const zlibGzipDecompressOptions = {
+  flush: zlib.constants.Z_SYNC_FLUSH,
+  finishFlush: zlib.constants.Z_SYNC_FLUSH,
+}
+
+const zlibBrotliDecompressOptions = {
+  flush: zlib.constants.BROTLI_OPERATION_FLUSH,
+  finishFlush: zlib.constants.BROTLI_OPERATION_FLUSH,
+}
+
+function getOrderedContentEncodings (res: IncomingMessage): SupportedContentEncoding[] {
+  const raw = (res.headers['content-encoding'] || '').toLowerCase()
+
+  if (!raw) {
+    return []
+  }
+
+  const order: SupportedContentEncoding[] = []
+
+  for (const part of raw.split(',')) {
+    const enc = part.trim()
+
+    if ((enc === 'gzip' || enc === 'br') && !order.includes(enc)) {
+      order.push(enc)
+    }
+  }
+
+  return order
+}
+
+function decompressResponseStreamForMaterialization (
+  mw: MaterializeResponseCtx,
+  incomingRes: IncomingMessage,
+  incomingResStream: NodeJS.ReadableStream,
+): NodeJS.ReadableStream {
+  const order = getOrderedContentEncodings(incomingRes)
+
+  if (!order.length) {
+    return incomingResStream
+  }
+
+  mw.contentEncodingOrder = order
+
+  let stream = incomingResStream as Readable
+
+  // Decompress outermost first: reverse order (e.g. "gzip, br" → un-br then un-gzip).
+  for (let i = order.length - 1; i >= 0; i--) {
+    const enc = order[i]
+
+    if (enc === 'gzip' && !mw.isGunzipped) {
+      const gunzip = zlib.createGunzip(zlibGzipDecompressOptions)
+
+      stream = stream.pipe(gunzip).on('error', mw.onError) as Readable
+      mw.isGunzipped = true
+    } else if (enc === 'br' && !mw.isBrotliDecompressed) {
+      const brotliDecompress = zlib.createBrotliDecompress(zlibBrotliDecompressOptions)
+
+      stream = stream.pipe(brotliDecompress).on('error', mw.onError) as Readable
+      mw.isBrotliDecompressed = true
+    }
+  }
+
+  return stream
+}
 
 /**
  * Apply outbound intercept mutations onto the live proxied request.
@@ -81,10 +158,13 @@ export function toHttpRequest (mw: RequestInterceptionMiddlewareCtx): HttpReques
 }
 
 function readResponseBody (
+  mw: MaterializeResponseCtx,
   req: RequestInterceptionMiddlewareCtx['req'],
   incomingRes: IncomingMessage,
   incomingResStream: NodeJS.ReadableStream,
 ): Promise<Buffer | string> {
+  const plainStream = decompressResponseStreamForMaterialization(mw, incomingRes, incomingResStream)
+
   return new Promise<Buffer>((resolve, reject) => {
     if (httpUtils.responseMustHaveEmptyBody(req, incomingRes)) {
       resolve(Buffer.from(''))
@@ -92,8 +172,8 @@ function readResponseBody (
       return
     }
 
-    incomingResStream.pipe(concatStream(resolve))
-    incomingResStream.on('error', reject)
+    plainStream.pipe(concatStream(resolve))
+    plainStream.on('error', reject)
   }).then((buf) => {
     return getEncoding(buf) !== 'binary' ? buf.toString('utf8') : buf
   })
@@ -140,7 +220,7 @@ export function createFetchOrigin (mw: RequestInterceptionMiddlewareCtx): ForOri
           return
         }
 
-        readResponseBody(mw.req, incomingRes, incomingResStream)
+        readResponseBody(mw, mw.req, incomingRes, incomingResStream)
         .then((body) => {
           httpResponse.body = body
           resolve(httpResponse)

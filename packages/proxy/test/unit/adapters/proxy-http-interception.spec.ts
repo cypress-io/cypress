@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { PassThrough } from 'stream'
 import { IncomingMessage } from 'http'
 import { Socket } from 'net'
+import zlib from 'zlib'
 import {
   applyOutboundToProxiedRequest,
   createFetchOrigin,
@@ -241,6 +242,110 @@ describe('proxy-http-interception lazy passthrough', () => {
 
       expect(httpResponse.body).toBe('origin-body')
       expect(typeof httpResponse.stream).toBe('function')
+    })
+
+    it('materializes and gunzips body when materializeOriginResponse is set', async () => {
+      const usersJson = JSON.stringify([
+        { id: 1, name: 'Leanne Graham' },
+        { id: 2, name: 'Ervin Howell' },
+        { id: 3, name: 'Clementine Bauch' },
+      ])
+      const gzipped = zlib.gzipSync(Buffer.from(usersJson))
+      const incomingRes = new IncomingMessage(new Socket)
+
+      incomingRes.statusCode = 200
+      incomingRes.headers = {
+        'content-type': 'application/json; charset=utf-8',
+        'content-encoding': 'gzip',
+      }
+
+      const outgoingBody = new PassThrough()
+      const mw = makeMw(outgoingBody) as RequestInterceptionMiddlewareCtx & {
+        isGunzipped?: boolean
+        contentEncodingOrder?: string[]
+      }
+
+      setImmediate(() => {
+        outgoingBody.emit('response', incomingRes)
+        outgoingBody.end(gzipped)
+      })
+
+      const httpResponse = await createFetchOrigin(mw)({
+        inFlightInterceptId: 'id',
+        url: 'https://example.com/users?_limit=3',
+        method: 'GET',
+        headers: {},
+        materializeOriginResponse: true,
+      })
+
+      expect(httpResponse.body).toBe(usersJson)
+      expect(JSON.parse(httpResponse.body as string)).toHaveLength(3)
+      expect(mw.isGunzipped).toBe(true)
+      expect(mw.contentEncodingOrder).toEqual(['gzip'])
+    })
+
+    it('materializes layered gzip, br body when materializeOriginResponse is set', async () => {
+      const plaintext = '[{"id":1,"name":"foo"}]'
+      const inner = zlib.gzipSync(Buffer.from(plaintext))
+      const layered = zlib.brotliCompressSync(inner)
+      const incomingRes = new IncomingMessage(new Socket)
+
+      incomingRes.statusCode = 200
+      incomingRes.headers = {
+        'content-type': 'application/json',
+        'content-encoding': 'gzip, br',
+      }
+
+      const outgoingBody = new PassThrough()
+      const mw = makeMw(outgoingBody) as RequestInterceptionMiddlewareCtx & {
+        isGunzipped?: boolean
+        isBrotliDecompressed?: boolean
+        contentEncodingOrder?: string[]
+      }
+
+      setImmediate(() => {
+        outgoingBody.emit('response', incomingRes)
+        outgoingBody.end(layered)
+      })
+
+      const httpResponse = await createFetchOrigin(mw)({
+        inFlightInterceptId: 'id',
+        url: 'https://example.com/',
+        method: 'GET',
+        headers: {},
+        materializeOriginResponse: true,
+      })
+
+      expect(httpResponse.body).toBe(plaintext)
+      expect(mw.isGunzipped).toBe(true)
+      expect(mw.isBrotliDecompressed).toBe(true)
+      expect(mw.contentEncodingOrder).toEqual(['gzip', 'br'])
+    })
+
+    it('does not gunzip when materializeOriginResponse is false', async () => {
+      const gzipped = zlib.gzipSync(Buffer.from('origin-body'))
+      const incomingRes = new IncomingMessage(new Socket)
+
+      incomingRes.statusCode = 200
+      incomingRes.headers = {
+        'content-type': 'text/plain',
+        'content-encoding': 'gzip',
+      }
+
+      const outgoingBody = new PassThrough()
+      const mw = makeMw(outgoingBody) as RequestInterceptionMiddlewareCtx & {
+        isGunzipped?: boolean
+      }
+
+      setImmediate(() => {
+        outgoingBody.emit('response', incomingRes)
+        outgoingBody.end(gzipped)
+      })
+
+      const httpResponse = await createFetchOrigin(mw)(toHttpRequest(mw))
+
+      expect(httpResponse.body).toBeUndefined()
+      expect(mw.isGunzipped).toBeUndefined()
     })
 
     it('restores onError and onResponse after origin failure', async () => {

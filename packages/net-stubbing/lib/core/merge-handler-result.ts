@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { getEncoding } from 'istextorbinary'
 import type { HttpRequest, HttpResponse } from '@packages/network-interception'
 
 type HandlerMessage = {
@@ -141,4 +142,30 @@ export function cloneHandlerResponse (response: HttpResponse, requestUrl: string
     stream: response.stream,
     url: requestUrl,
   }
+}
+
+/**
+ * Buffer `response.stream()` onto `response.body` when the origin forwarder returned
+ * a passthrough stream (e.g. proxy before materializeOriginResponse was honored).
+ */
+export async function materializeResponseBody (response: HttpResponse): Promise<void> {
+  if (response.body !== undefined || !response.stream) {
+    return
+  }
+
+  const stream = await response.stream()
+  const chunks: Buffer[] = []
+
+  await new Promise<void>((resolve, reject) => {
+    stream.on('data', (chunk: Buffer | string) => {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    })
+
+    stream.on('end', () => resolve())
+    stream.on('error', reject)
+  })
+
+  const buf = Buffer.concat(chunks)
+
+  response.body = getEncoding(buf) !== 'binary' ? buf.toString('utf8') : buf
 }

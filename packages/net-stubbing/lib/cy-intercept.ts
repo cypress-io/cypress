@@ -31,6 +31,7 @@ import {
   applyHandlerRequestToRequest,
   cloneHandlerRequest,
   cloneHandlerResponse,
+  materializeResponseBody,
   mergeIncomingRequestChanges,
   mergeIncomingResponseChanges,
 } from './core/merge-handler-result'
@@ -226,6 +227,8 @@ export class CyIntercept implements ForStubbing, ForInterceptionEvents {
         await this.emitNetworkError(inFlightIntercept, error as Error)
         throw error
       }
+
+      await materializeResponseBody(originResponse)
 
       const handlerResponse = cloneHandlerResponse(originResponse, request.url)
 
