@@ -7,7 +7,7 @@ import { resolveCypressCacheRoot } from './util/cypress-cache'
 
 const debug = Debug('cypress:server:runner-discovery')
 
-const RUNNERS_DIRNAME = 'runners'
+const INSTANCES_DIRNAME = 'instances'
 const SCHEMA_VERSION = 1
 
 export interface RunnerDiscoveryRecord {
@@ -15,6 +15,9 @@ export interface RunnerDiscoveryRecord {
   pid: number
   projectRoot: string
   serverPort: number
+  // App-assigned identity for this run, distinct from the OS-assigned pid: a reader
+  // probes the server and only trusts it if the echoed instanceId matches, which
+  // guards against pid reuse handing the record to an unrelated process.
   instanceId: string
   testingType: TestingType | null
 }
@@ -24,17 +27,11 @@ export interface LiveRunnerState extends RunnerDiscoveryRecord {
 }
 
 export const getRunnerDiscoveryDir = (): string => {
-  return path.join(resolveCypressCacheRoot(), RUNNERS_DIRNAME)
+  return path.join(resolveCypressCacheRoot(), INSTANCES_DIRNAME)
 }
 
 const getRecordPath = (pid: number): string => {
   return path.join(getRunnerDiscoveryDir(), `${pid}.json`)
-}
-
-const isDisabled = (): boolean => {
-  const flag = process.env.CYPRESS_INTERNAL_RUNNER_DISCOVERY
-
-  return flag === '0' || flag === 'false'
 }
 
 let currentState: LiveRunnerState | null = null
@@ -45,6 +42,9 @@ const persist = (record: RunnerDiscoveryRecord): Promise<void> => {
     const finalPath = getRecordPath(record.pid)
     const tmpPath = `${finalPath}.tmp`
 
+    // Write to a temp file then rename: rename is atomic, so a concurrent reader
+    // (e.g. the CLI discovering live runners) always sees either the old record or
+    // the fully-written new one, never a partially-written/corrupt JSON file.
     await fs.ensureDir(path.dirname(finalPath))
     await fs.writeJson(tmpPath, record)
     await fs.rename(tmpPath, finalPath)
@@ -58,11 +58,7 @@ const persist = (record: RunnerDiscoveryRecord): Promise<void> => {
 }
 
 export const runnerDiscovery = {
-  async write ({ projectRoot, serverPort, testingType = null }: { projectRoot: string, serverPort: number, testingType?: TestingType | null }): Promise<void> {
-    if (isDisabled()) {
-      return
-    }
-
+  async captureRecord ({ projectRoot, serverPort, testingType = null }: { projectRoot: string, serverPort: number, testingType?: TestingType | null }): Promise<void> {
     const record: RunnerDiscoveryRecord = {
       schemaVersion: SCHEMA_VERSION,
       pid: process.pid,

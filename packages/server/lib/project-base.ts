@@ -254,7 +254,11 @@ export class ProjectBase extends EE {
       projectRoot: this.projectRoot,
     })
 
-    await runnerDiscovery.write({ projectRoot: this.projectRoot, serverPort: port, testingType: this.testingType })
+    // Runner discovery only applies to an interactive (`cypress open`) session that an
+    // external tool can attach to; skip it for headless `cypress run`.
+    if (!cfg.isTextTerminal) {
+      await runnerDiscovery.captureRecord({ projectRoot: this.projectRoot, serverPort: port, testingType: this.testingType })
+    }
 
     await this.saveState(stateToSave)
 

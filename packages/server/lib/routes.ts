@@ -236,15 +236,20 @@ export const createCommonRoutes = ({
     res.sendStatus(204)
   })
 
-  router.get('/__cypress/runner-discovery/:instanceId', (req, res) => {
-    const state = runnerDiscovery.getCurrent()
+  // Runner discovery only applies to an interactive (`cypress open`) session that an
+  // external tool can attach to; the record is only written in open mode, so don't
+  // expose the probe route for headless `cypress run`.
+  if (!config.isTextTerminal) {
+    router.get('/__cypress/runner-discovery/:instanceId', (req, res) => {
+      const state = runnerDiscovery.getCurrent()
 
-    if (!state || req.params.instanceId !== state.instanceId) {
-      return res.sendStatus(404)
-    }
+      if (!state || req.params.instanceId !== state.instanceId) {
+        return res.sendStatus(404)
+      }
 
-    return res.json(state)
-  })
+      return res.json(state)
+    })
+  }
 
   if (process.env.CYPRESS_INTERNAL_VITE_DEV) {
     const proxy = httpProxy.createProxyServer({
