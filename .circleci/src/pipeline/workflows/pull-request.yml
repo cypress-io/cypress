@@ -57,21 +57,21 @@ jobs:
           only: /^pull\/[0-9]+/
   - check-ts:
       requires:
-        - internal-pr-build
-        - external-pr-build
+        - node_modules_install
+        - contributor-node-modules-install
   - health-check:
       requires:
-        - internal-pr-build
-        - external-pr-build
+        - node_modules_install
+        - contributor-node-modules-install
   - lint:
       name: linux-lint
       requires:
-        - internal-pr-build
-        - external-pr-build
+        - node_modules_install
+        - contributor-node-modules-install
   - lint-types:
       requires:
-        - internal-pr-build
-        - external-pr-build
+        - node_modules_install
+        - contributor-node-modules-install
   # The following jobs are only run for contributor PRs once they are approved.
   # Each job checks its pipeline parameter at startup and halts early if the
   # changed files don't require it to run.
