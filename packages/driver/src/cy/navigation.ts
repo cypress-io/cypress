@@ -39,3 +39,34 @@ export const historyNavigationTriggeredHashChange = (state): boolean => {
 
   return bothUrlsMatchAndOneHasHash(currentUrl, nextUrl, true)
 }
+
+// Predicts whether navigating the browser history by `delta` will land on a
+// different (super domain) origin. We can only compare against the history
+// entries Cypress observed during the test, so when the destination is unknown
+// we report `false` and fall back to the existing behavior.
+export const historyNavigationChangesSuperDomainOrigin = (Cypress, state, delta: number): boolean => {
+  if (!delta) {
+    return false
+  }
+
+  const urls = state('urls')
+  const urlPosition = state('urlPosition')
+
+  if (_.isEmpty(urls) || urlPosition === undefined) {
+    return false
+  }
+
+  const currentUrl = urls[urlPosition]
+  const nextUrl = urls[urlPosition + delta]
+
+  if (!currentUrl || !nextUrl) {
+    return false
+  }
+
+  const current = $Location.create(currentUrl)
+  const next = $Location.create(nextUrl)
+
+  const originFor = (location) => Cypress.config('injectDocumentDomain') ? location.superDomainOrigin : location.origin
+
+  return originFor(current) !== originFor(next)
+}

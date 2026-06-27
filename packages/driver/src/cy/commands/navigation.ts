@@ -5,7 +5,7 @@ import Promise from 'bluebird'
 import $utils from '../../cypress/utils'
 import $errUtils from '../../cypress/error_utils'
 import type { Log } from '../../cypress/log'
-import { bothUrlsMatchAndOneHasHash } from '../navigation'
+import { bothUrlsMatchAndOneHasHash, historyNavigationChangesSuperDomainOrigin } from '../navigation'
 import { $Location, LocationObject } from '../../cypress/location'
 import { isRunnerAbleToCommunicateWithAut } from '../../util/commandAUTCommunication'
 import { whatIsCircular } from '../../util/what-is-circular'
@@ -592,25 +592,36 @@ export const go = (Cypress: Cypress.Cypress, cy: Cypress.Cypress, state: StateFu
         // with the remove window (just like cy.visit)
         const retWin = () => state('window')
 
-        // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to navigate the history
-        Cypress.isBrowser('webkit') ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
+        const navigateHistory = () => {
+          // Since webkit doesn't have an automation client and doesn't support cy.origin(), we need to use the legacy method to navigate the history
+          Cypress.isBrowser('webkit') ? state('window').history.go(num) : Cypress.automation('navigate:aut:history', { historyNumber: num })
 
-        Promise
-        .delay(100)
-        .then(() => {
-          knownCommandCausedInstability = false
+          Promise
+          .delay(100)
+          .then(() => {
+            knownCommandCausedInstability = false
 
-          debug('go(%d): didUnload is %o 100ms after navigating history', num, didUnload)
+            debug('go(%d): didUnload is %o 100ms after navigating history', num, didUnload)
 
-          // if we've didUnload then we know we're
-          // doing a full page refresh and we need
-          // to wait until
-          if (didUnload) {
-            return didLoad.then(retWin)
-          }
+            // if we've didUnload then we know we're
+            // doing a full page refresh and we need
+            // to wait until
+            if (didUnload) {
+              return didLoad.then(retWin)
+            }
 
-          return retWin()
-        })
+            return retWin()
+          })
+        }
+
+        // If navigating the browser history changes the super domain origin, the
+        // runner reloads on the new origin. Preserve the current run state first
+        // (like cy.visit) so the run resumes instead of restarting from the top.
+        if (!Cypress.isCrossOriginSpecBridge && historyNavigationChangesSuperDomainOrigin(Cypress, state, num)) {
+          return Cypress.preserveRunState(id).then(navigateHistory)
+        }
+
+        return navigateHistory()
       })
     }
 

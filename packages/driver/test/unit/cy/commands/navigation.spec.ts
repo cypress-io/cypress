@@ -177,5 +177,88 @@ describe('cy/commands/navigation', () => {
         })
       })
     })
+
+    describe('preserving run state on origin change', () => {
+      beforeEach(() => {
+        mockCypress.preserveRunState = vi.fn().mockResolvedValue(undefined)
+
+        mockState.mockImplementation((key) => {
+          switch (key) {
+            case 'window':
+              return mockWindow
+            case 'urlPosition':
+              return 1
+            default:
+              return undefined
+          }
+        })
+      })
+
+      it('preserves run state before navigating when the super domain origin changes', async () => {
+        mockState.mockImplementation((key) => {
+          switch (key) {
+            case 'window':
+              return mockWindow
+            case 'urls':
+              return ['http://app.foobar.com:3500/a', 'http://localhost:3500/b']
+            case 'urlPosition':
+              return 1
+            default:
+              return undefined
+          }
+        })
+
+        await go.call(mockContext, mockCypress, mockCy, mockState, mockCypress.config, -1, {})
+
+        expect(mockCypress.preserveRunState).toHaveBeenCalledTimes(1)
+        expect(mockCypress.automation).toHaveBeenCalledWith('navigate:aut:history', {
+          historyNumber: -1,
+        })
+      })
+
+      it('does not preserve run state when the super domain origin is unchanged', async () => {
+        mockState.mockImplementation((key) => {
+          switch (key) {
+            case 'window':
+              return mockWindow
+            case 'urls':
+              return ['http://localhost:3500/a', 'http://localhost:3500/b']
+            case 'urlPosition':
+              return 1
+            default:
+              return undefined
+          }
+        })
+
+        await go.call(mockContext, mockCypress, mockCy, mockState, mockCypress.config, -1, {})
+
+        expect(mockCypress.preserveRunState).not.toHaveBeenCalled()
+        expect(mockCypress.automation).toHaveBeenCalledWith('navigate:aut:history', {
+          historyNumber: -1,
+        })
+      })
+
+      it('does not preserve run state when the destination history entry is unknown', async () => {
+        mockState.mockImplementation((key) => {
+          switch (key) {
+            case 'window':
+              return mockWindow
+            case 'urls':
+              return ['http://localhost:3500/a', 'http://localhost:3500/b']
+            case 'urlPosition':
+              return 0
+            default:
+              return undefined
+          }
+        })
+
+        await go.call(mockContext, mockCypress, mockCy, mockState, mockCypress.config, -1, {})
+
+        expect(mockCypress.preserveRunState).not.toHaveBeenCalled()
+        expect(mockCypress.automation).toHaveBeenCalledWith('navigate:aut:history', {
+          historyNumber: -1,
+        })
+      })
+    })
   })
 })
