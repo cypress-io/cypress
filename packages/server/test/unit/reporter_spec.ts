@@ -229,9 +229,6 @@ describe('lib/reporter', () => {
     }
 
     // https://github.com/cypress-io/cypress/issues/26143
-    // When both the test attempt (e.g. a failing beforeEach) and an afterEach hook
-    // fail within the same attempt, the driver emits a 'retry' for each failure.
-    // The attempt line should only be printed once.
     it('only logs an attempt line once per attempt', function () {
       this.reporter.emit('retry', { id: 'r4', title: 'fails', currentRetry: 0, retries: 2 })
       this.reporter.emit('retry', { id: 'r4', title: 'fails', currentRetry: 0, retries: 2 })

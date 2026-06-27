@@ -22,13 +22,9 @@ describe('retries', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/26143
-  // When an attempt fails in both the beforeEach and afterEach hooks, the
-  // reporter should only print a single attempt line for that attempt.
-  // screenshotOnRunFailure is disabled because screenshots are irrelevant here
-  // and would otherwise add browser-size-dependent output to the snapshot.
   it('only prints one attempt line when beforeEach and afterEach both fail', {
     project: 'retries-2',
-    spec: 'both-hooks.cy.js',
+    spec: 'failure-in-beforeeach-aftereach-hooks.cy.js',
     snapshot: true,
     config: {
       screenshotOnRunFailure: false,

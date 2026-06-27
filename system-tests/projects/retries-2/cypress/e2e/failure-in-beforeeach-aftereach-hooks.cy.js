@@ -1,6 +1,4 @@
 // https://github.com/cypress-io/cypress/issues/26143
-// When the first attempt fails in BOTH the beforeEach and afterEach hooks, the
-// reporter should still print a single `(Attempt 1 of 3)` line for that attempt.
 let firstAttempt = true
 
 beforeEach(() => {

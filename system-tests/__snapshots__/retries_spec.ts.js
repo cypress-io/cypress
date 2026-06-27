@@ -131,14 +131,14 @@ exports['retries / only prints one attempt line when beforeEach and afterEach bo
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (both-hooks.cy.js)                                                         │
-  │ Searched:   cypress/e2e/both-hooks.cy.js                                                       │
+  │ Specs:      1 found (failure-in-beforeeach-aftereach-hooks.cy.js)                              │
+  │ Searched:   cypress/e2e/failure-in-beforeeach-aftereach-hooks.cy.js                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  both-hooks.cy.js                                                                (1 of 1)
+  Running:  failure-in-beforeeach-aftereach-hooks.cy.js                                     (1 of 1)
 
 
   (Attempt 1 of 3) fails beforeEach and afterEach on the first attempt
@@ -158,7 +158,7 @@ exports['retries / only prints one attempt line when beforeEach and afterEach bo
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     both-hooks.cy.js                                                                 │
+  │ Spec Ran:     failure-in-beforeeach-aftereach-hooks.cy.js                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -169,7 +169,8 @@ exports['retries / only prints one attempt line when beforeEach and afterEach bo
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  both-hooks.cy.js                         XX:XX        1        1        -        -        - │
+  │ ✔  failure-in-beforeeach-aftereach-hoo      XX:XX        1        1        -        -        - │
+  │    ks.cy.js                                                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
