@@ -518,6 +518,13 @@ export class CommandQueue extends Queue<$Command> {
         return
       }
 
+      // a command can reject with a non-object value (e.g. a promise rejected
+      // with `undefined`, `null`, or a primitive). normalize it into an Error
+      // so downstream failure handling doesn't crash reading properties off it.
+      if (!_.isObject(err)) {
+        err = $errUtils.makeErrFromObj(err)
+      }
+
       if (this.state('onQueueFailed')) {
         err = this.state('onQueueFailed')(err, this)
 
