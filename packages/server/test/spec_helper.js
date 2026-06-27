@@ -6,6 +6,12 @@ const { configureLongStackTraces } = require('../lib/environment')
 configureLongStackTraces()
 const chai = require('chai')
 
+// chai 4 wraps assertions in a Proxy that throws on access to a non-existent
+// assertion property. Some specs use chained words that were silent no-ops in
+// chai 3 (e.g. `.to.be.defined`); keep that behavior so this is a dependency
+// bump and not a test-logic change.
+chai.config.useProxy = false
+
 chai.use(require('chai-subset'))
 
 global.IS_TEST = true
