@@ -205,7 +205,8 @@ const expectLoadsAngularBuildOptions = (buildOptions: BuildOptions) => {
 }
 const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerConfig, buildOptions: any, hasPolyfillsConfigured: boolean = false) => {
   const { projectRoot } = devServerConfig.cypressConfig
-  let tsConfigPath = await generateTsConfig(devServerConfig, buildOptions)
+  const sourceRoot = 'src'
+  let tsConfigPath = await generateTsConfig(devServerConfig, buildOptions, sourceRoot)
   const tempDir = await getTempDir(path.basename(projectRoot), projectRoot)
 
   expect(tsConfigPath).toEqual(path.join(tempDir, 'tsconfig.json'))
@@ -228,6 +229,9 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
     },
     include: [
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
+      // verifies the project's ambient declaration files are preserved so global
+      // augmentations survive the generated `include` overwrite. See issue #23940
+      toPosix(path.join(projectRoot, 'src/**/*.d.ts')),
       ...(hasPolyfillsConfigured ? [toPosix(path.join(projectRoot, 'src/polyfills.ts'))] : []),
     ],
   })
@@ -242,7 +246,7 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
 
   modifiedDevServerConfig.cypressConfig.supportFile = supportFile
 
-  tsConfigPath = await generateTsConfig(modifiedDevServerConfig, modifiedBuildOptions)
+  tsConfigPath = await generateTsConfig(modifiedDevServerConfig, modifiedBuildOptions, sourceRoot)
   tsConfig = JSON.parse(await fs.readFile(tsConfigPath, 'utf8'))
 
   expect(tsConfig).toEqual({
@@ -261,6 +265,7 @@ const expectGeneratesTsConfig = async (devServerConfig: AngularWebpackDevServerC
     },
     include: [
       toPosix(path.join(projectRoot, 'src/**/*.cy.ts')),
+      toPosix(path.join(projectRoot, 'src/**/*.d.ts')),
       toPosix(supportFile),
     ],
   })

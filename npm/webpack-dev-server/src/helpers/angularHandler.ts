@@ -112,7 +112,7 @@ export function getAngularBuildOptions (buildOptions: BuildOptions, tsConfig: st
   }
 }
 
-export async function generateTsConfig (devServerConfig: AngularWebpackDevServerConfig, buildOptions: BuildOptions): Promise<string> {
+export async function generateTsConfig (devServerConfig: AngularWebpackDevServerConfig, buildOptions: BuildOptions, sourceRoot?: string): Promise<string> {
   const { cypressConfig } = devServerConfig
   const { projectRoot } = cypressConfig
   const { workspaceRoot = projectRoot } = buildOptions
@@ -122,6 +122,15 @@ export async function generateTsConfig (devServerConfig: AngularWebpackDevServer
   const getProjectFilePath = (...fileParts: string[]): string => toPosix(path.join(...fileParts))
 
   const includePaths = [...specPattern.map((pattern) => getProjectFilePath(projectRoot, pattern))]
+
+  // Re-add the project's ambient declaration files. Angular's default `tsconfig.app.json`
+  // includes `<sourceRoot>/**/*.d.ts`, but because our generated `include` overwrites the
+  // extended config's `include`, global augmentations (e.g. `interface Window { Cypress }`)
+  // would otherwise be dropped from the program and fail to type-check the app code.
+  // https://github.com/cypress-io/cypress/issues/23940
+  if (sourceRoot) {
+    includePaths.push(getProjectFilePath(projectRoot, sourceRoot, '**/*.d.ts'))
+  }
 
   if (cypressConfig.supportFile) {
     includePaths.push(toPosix(cypressConfig.supportFile))
@@ -272,7 +281,7 @@ async function getAngularCliWebpackConfig (devServerConfig: AngularWebpackDevSer
   // normalize
   const projectConfig = devServerConfig.options?.projectConfig || await getProjectConfig(projectRoot)
 
-  const tsConfig = await generateTsConfig(devServerConfig, projectConfig.buildOptions)
+  const tsConfig = await generateTsConfig(devServerConfig, projectConfig.buildOptions, projectConfig.sourceRoot)
 
   const buildOptions = getAngularBuildOptions(projectConfig.buildOptions, tsConfig)
 
