@@ -59,8 +59,6 @@ describe('CyPromptLifecycleManager', () => {
       },
       'chokidar': {
         watch: watcherStub.returns({
-          // chokidar's `.on()` is chainable and returns the watcher, which the
-          // production code assigns to `watcher`; mirror that so the stub does too
           on: watcherOnStub.returnsThis(),
           close: watcherCloseStub,
         }),
