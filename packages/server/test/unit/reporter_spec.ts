@@ -219,6 +219,37 @@ describe('lib/reporter', () => {
     })
   })
 
+  context('#_logRetry', () => {
+    beforeEach(function () {
+      this.log = sinon.stub(console, 'log')
+    })
+
+    const attemptLines = (log) => {
+      return log.getCalls().filter((call) => /Attempt/.test(String(call.args[0])))
+    }
+
+    // https://github.com/cypress-io/cypress/issues/26143
+    // When both the test attempt (e.g. a failing beforeEach) and an afterEach hook
+    // fail within the same attempt, the driver emits a 'retry' for each failure.
+    // The attempt line should only be printed once.
+    it('only logs an attempt line once per attempt', function () {
+      this.reporter.emit('retry', { id: 'r4', title: 'fails', currentRetry: 0, retries: 2 })
+      this.reporter.emit('retry', { id: 'r4', title: 'fails', currentRetry: 0, retries: 2 })
+
+      expect(attemptLines(this.log)).to.have.length(1)
+      expect(this.log).to.be.calledWithMatch(/Attempt 1 of 3/)
+    })
+
+    it('logs a new line for each distinct attempt', function () {
+      this.reporter.emit('retry', { id: 'r4', title: 'fails', currentRetry: 0, retries: 2 })
+      this.reporter.emit('retry', { id: 'r4', title: 'fails', currentRetry: 1, retries: 2 })
+
+      expect(attemptLines(this.log)).to.have.length(2)
+      expect(this.log).to.be.calledWithMatch(/Attempt 1 of 3/)
+      expect(this.log).to.be.calledWithMatch(/Attempt 2 of 3/)
+    })
+  })
+
   context('#normalizeTest', () => {
     let reporter
     let test

@@ -334,6 +334,7 @@ export class Reporter {
   stats!: ReporterStats
   retriesConfig!: RetriesConfig
   runnables!: Record<string, InternalRunnable>
+  loggedAttempts!: Set<string>
   mocha!: Mocha
   runner!: Mocha.Runner
   reporter!: Mocha.reporters.Base & { done?: (failures: number, resolve: () => void) => void }
@@ -365,6 +366,7 @@ export class Reporter {
     this.stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0, wallClockDuration: 0 }
     this.retriesConfig = config?.retries ?? {}
     this.runnables = {}
+    this.loggedAttempts = new Set()
     rootRunnable = this._createRunnable(rootRunnable as RunnablePayload, 'suite')
     const reporter = Reporter.loadReporter(this.reporterName, this.projectRoot)
 
@@ -563,6 +565,18 @@ export class Reporter {
 
     // Merge the runnable with the updated test props to gain most recent status from the app runnable (in the case a passed test is retried).
     _.extend(runnable, test)
+
+    // When both the test attempt (e.g. a failing beforeEach) and an afterEach hook
+    // fail within the same attempt, the driver emits a 'retry' for each failure,
+    // which would print the same attempt line twice. Only log each attempt once.
+    // See https://github.com/cypress-io/cypress/issues/26143
+    const attemptKey = `${test.id}:${test.currentRetry ?? 0}`
+
+    if (this.loggedAttempts.has(attemptKey)) {
+      return
+    }
+
+    this.loggedAttempts.add(attemptKey)
     const padding = '  '.repeat(runnable.titlePath!().length)
 
     // Don't display a pass/fail symbol if we don't know the status.
