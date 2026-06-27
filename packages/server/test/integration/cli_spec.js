@@ -115,7 +115,7 @@ describe('CLI Interface', () => {
         .then((version) => {
           npmVersion = version
 
-          expect(npmVersion).to.be.a.string
+          expect(npmVersion).to.be.a('string')
         })
       })
 
