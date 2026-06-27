@@ -1034,26 +1034,58 @@ describe('lib/socket', () => {
           return sinon.stub(preprocessor, 'getFile').resolves()
         })
 
-        it('returns undefined if trying to watch special path __all', function () {
-          const result = this.socket.watchTestFileByPath(this.cfg, {
-            relative: 'integration/__all',
-          })
+        it('watches the run-all-specs subset for special path __all', function () {
+          ctx.project.setSpecs([
+            { relative: 'integration/test1.js' },
+            { relative: 'integration/test2.js' },
+            { relative: 'integration/test3.js' },
+          ])
 
-          expect(result).to.be.undefined
+          // test3.js was deleted from disk, so it should not be watched
+          ctx.project.setRunAllSpecs(['integration/test1.js', 'integration/test2.js'])
+
+          return this.socket.watchTestFileByPath(this.cfg, {
+            relative: 'integration/__all',
+          }).then(() => {
+            expect(preprocessor.getFile).to.be.calledWith('integration/test1.js', this.cfg)
+            expect(preprocessor.getFile).to.be.calledWith('integration/test2.js', this.cfg)
+            expect(preprocessor.getFile).not.to.be.calledWith('integration/test3.js', this.cfg)
+          })
         })
 
-        it('returns undefined if #testFilePath matches arguments', function () {
-          this.socket.testFilePath = path.join('integration', 'test1.js')
-          const result = this.socket.watchTestFileByPath(this.cfg, {
+        it('removes watchers for specs no longer in the run-all-specs subset', function () {
+          sinon.stub(preprocessor, 'removeFile')
+
+          ctx.project.setSpecs([
+            { relative: 'integration/test1.js' },
+            { relative: 'integration/test2.js' },
+          ])
+
+          ctx.project.setRunAllSpecs(['integration/test1.js', 'integration/test2.js'])
+
+          return this.socket.watchTestFileByPath(this.cfg, { relative: 'integration/__all' }).then(() => {
+            // narrow the subset to exclude test2.js, then re-run all specs
+            ctx.project.setRunAllSpecs(['integration/test1.js'])
+
+            return this.socket.watchTestFileByPath(this.cfg, { relative: 'integration/__all' })
+          }).then(() => {
+            expect(preprocessor.removeFile).to.be.calledWith('integration/test2.js', this.cfg)
+            expect(preprocessor.removeFile).not.to.be.calledWith('integration/test1.js', this.cfg)
+          })
+        })
+
+        it('does not re-watch a spec that is already being watched', function () {
+          this.socket.watchedSpecPaths.add(path.join('integration', 'test1.js'))
+          this.socket.watchTestFileByPath(this.cfg, {
             relative: path.join('integration', 'test1.js'),
           })
 
-          expect(result).to.be.undefined
+          expect(preprocessor.getFile).not.to.be.called
         })
 
         it('closes existing watched test file', function () {
           sinon.stub(preprocessor, 'removeFile')
-          this.socket.testFilePath = 'tests/test1.js'
+          this.socket.watchedSpecPaths.add('tests/test1.js')
 
           return this.socket.watchTestFileByPath(this.cfg, {
             relative: 'test2.js',
@@ -1062,11 +1094,11 @@ describe('lib/socket', () => {
           })
         })
 
-        it('sets #testFilePath', function () {
+        it('tracks the watched spec path', function () {
           return this.socket.watchTestFileByPath(this.cfg, {
             relative: `${path.sep}test1.js`,
           }).then(() => {
-            expect(this.socket.testFilePath).to.eq(`test1.js`)
+            expect(this.socket.watchedSpecPaths.has(`test1.js`)).to.be.true
           })
         })
 
@@ -1074,7 +1106,7 @@ describe('lib/socket', () => {
           return this.socket.watchTestFileByPath(this.cfg, {
             relative: `${path.sep}integration${path.sep}test1.js`,
           }).then(() => {
-            expect(this.socket.testFilePath).to.eq(`integration${path.sep}test1.js`)
+            expect(this.socket.watchedSpecPaths.has(`integration${path.sep}test1.js`)).to.be.true
           })
         })
 

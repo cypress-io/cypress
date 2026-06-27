@@ -2,6 +2,7 @@ import Debug from 'debug'
 import preprocessor from './plugins/preprocessor'
 import { SocketBase } from './socket-base'
 import { fs } from './util/fs'
+import { getCtx } from '@packages/data-context'
 import type { DestroyableHttpServer } from './util/server_destroy'
 import type { FoundSpec } from '@packages/types'
 
@@ -12,12 +13,12 @@ const isSpecialSpec = (name) => {
 }
 
 export class SocketE2E extends SocketBase {
-  private testFilePath: string | null
+  private watchedSpecPaths: Set<string>
 
   constructor (config: Record<string, any>) {
     super(config)
 
-    this.testFilePath = null
+    this.watchedSpecPaths = new Set()
 
     this.onTestFileChange = this.onTestFileChange.bind(this)
 
@@ -66,41 +67,56 @@ export class SocketE2E extends SocketBase {
     })
   }
 
+  // Resolve the set of spec files that should be watched for the given spec.
+  // For "Run All Specs" (`__all`) this is the current subset of specs the user
+  // selected; for any other spec it is just that single file. We resolve the
+  // run-all subset the same way the spec controller serves it so the watched
+  // files stay in sync with what is actually bundled.
+  private getSpecsToWatch (specConfig: FoundSpec): string[] {
+    if (isSpecialSpec(specConfig.relative)) {
+      const ctx = getCtx()
+
+      // In case the user clicked "Run All Specs" and then deleted a spec in the
+      // list, only watch specs we know to exist.
+      const existingSpecs = new Set(ctx.project.specs.map(({ relative }) => relative))
+
+      return ctx.project.runAllSpecs.filter((relative) => existingSpecs.has(relative))
+    }
+
+    const relative = specConfig.relative.startsWith('/') ? specConfig.relative.slice(1) : specConfig.relative
+
+    return [relative]
+  }
+
   watchTestFileByPath (config, specConfig: FoundSpec) {
     debug('watching spec with config %o', specConfig)
 
-    // previously we have assumed that we pass integration spec path with "integration/" prefix
-    // now we pass spec config object that tells what kind of spec it is, has relative path already
-    // so the only special handling remains for special paths like "integration/__all"
+    const specsToWatch = new Set(this.getSpecsToWatch(specConfig))
 
-    // bail if this is special path like "__all"
-    // maybe the client should not ask to watch non-spec files?
-    if (isSpecialSpec(specConfig.relative)) {
-      return
+    // remove watchers for specs that are no longer part of the active run so that
+    // changing a file outside the current subset does not trigger a reload
+    for (const relative of this.watchedSpecPaths) {
+      if (!specsToWatch.has(relative)) {
+        debug('removing watcher for test file path %o', relative)
+        preprocessor.removeFile(relative, config)
+        this.watchedSpecPaths.delete(relative)
+      }
     }
 
-    if (specConfig.relative.startsWith('/')) {
-      specConfig.relative = specConfig.relative.slice(1)
-    }
+    // set up watchers for any newly active specs
+    return Promise.all([...specsToWatch].map((relative) => {
+      if (this.watchedSpecPaths.has(relative)) {
+        return
+      }
 
-    // bail if we're already watching this exact file
-    if (specConfig.relative === this.testFilePath) {
-      return
-    }
+      this.watchedSpecPaths.add(relative)
+      debug('will watch test file path %o', relative)
 
-    // remove the existing file by its path
-    if (this.testFilePath) {
-      preprocessor.removeFile(this.testFilePath, config)
-    }
-
-    // store this location
-    this.testFilePath = specConfig.relative
-    debug('will watch test file path %o', specConfig.relative)
-
-    return preprocessor.getFile(specConfig.relative, config)
-    // ignore errors b/c we're just setting up the watching. errors
-    // are handled by the spec controller
-    .catch(() => {})
+      return preprocessor.getFile(relative, config)
+      // ignore errors b/c we're just setting up the watching. errors
+      // are handled by the spec controller
+      .catch(() => {})
+    }))
   }
 
   startListening (server: DestroyableHttpServer, automation, config, options) {
