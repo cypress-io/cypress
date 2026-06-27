@@ -1431,6 +1431,22 @@ describe('src/cy/commands/assertions', () => {
 
         cy.get('#does-not-exist').should('not.exist')
       })
+
+      // https://github.com/cypress-io/cypress/issues/25491
+      it('allows chaining another assertion after exist on a raw DOM element', () => {
+        cy.document().then((doc) => {
+          cy.wrap(doc.body).should('exist').and('exist')
+        })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/25491
+      it('yields the raw DOM element (not null) after asserting it exists', () => {
+        cy.document().then((doc) => {
+          cy.wrap(doc.body).should('exist').then((subject) => {
+            expect(subject).to.eq(doc.body)
+          })
+        })
+      })
     })
 
     describe('#be.visible', () => {
