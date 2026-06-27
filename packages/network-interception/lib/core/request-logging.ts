@@ -1,5 +1,5 @@
 export type ShouldLogRequestFacts = {
-  matchingRoutes?: Array<{ staticResponse?: { log?: boolean } }>
+  matchingRoutes?: Array<{ log?: boolean, staticResponse?: { log?: boolean } }>
   resourceType?: string
 }
 
@@ -11,13 +11,18 @@ export function shouldLogRequest (facts: ShouldLogRequestFacts): boolean {
   if (facts.matchingRoutes?.length) {
     const lastMatchingRoute = facts.matchingRoutes[0]
 
+    // An explicit `log` option on the route matcher (`cy.intercept({ log: false })`)
+    // or the static response (`cy.intercept(url, { log: false })`) takes precedence
+    // and applies whether or not the request is stubbed.
+    const log = lastMatchingRoute.log ?? lastMatchingRoute.staticResponse?.log
+
+    if (log !== undefined) {
+      return Boolean(log)
+    }
+
     if (!lastMatchingRoute.staticResponse) {
       // No StaticResponse is set, therefore the request must be logged.
       return true
-    }
-
-    if (lastMatchingRoute.staticResponse.log !== undefined) {
-      return Boolean(lastMatchingRoute.staticResponse.log)
     }
   }
 

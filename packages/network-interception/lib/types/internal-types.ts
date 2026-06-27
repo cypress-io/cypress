@@ -88,6 +88,7 @@ export declare namespace NetEvent {
       staticResponse?: StaticResponse
       hasInterceptor: boolean
       routeId: string
+      log?: boolean
     }
 
     export interface Subscribe {

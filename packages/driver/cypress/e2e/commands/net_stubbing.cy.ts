@@ -939,6 +939,16 @@ describe('network stubbing', { retries: 15 }, function () {
           .intercept({ times: 9.75 })
         })
 
+        it('log must be a boolean', function (done) {
+          testFail((err) => {
+            expect(err.message).to.include('`log` must be a boolean.')
+            done()
+          })
+
+          // @ts-ignore
+          cy.intercept({ url: '/foo', log: 'nope' })
+        })
+
         it('string hostname must be a valid domain name', function (done) {
           testFail((err) => {
             expect(err.message).to.include('`hostname` must be a valid host name or domain name.')

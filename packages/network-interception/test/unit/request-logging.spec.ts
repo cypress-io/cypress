@@ -16,6 +16,25 @@ describe('core/request-logging', () => {
     })).toBe(false)
   })
 
+  it('respects a route-level log option for spied (non-stubbed) intercepts', () => {
+    expect(shouldLogRequest({
+      matchingRoutes: [{ log: false, staticResponse: undefined }],
+      resourceType: 'xhr',
+    })).toBe(false)
+
+    expect(shouldLogRequest({
+      matchingRoutes: [{ log: true, staticResponse: undefined }],
+      resourceType: 'image',
+    })).toBe(true)
+  })
+
+  it('prefers the route-level log option over staticResponse.log', () => {
+    expect(shouldLogRequest({
+      matchingRoutes: [{ log: false, staticResponse: { log: true } }],
+      resourceType: 'xhr',
+    })).toBe(false)
+  })
+
   it('logs xhr and fetch when no intercept routes match', () => {
     expect(shouldLogRequest({ resourceType: 'xhr' })).toBe(true)
     expect(shouldLogRequest({ resourceType: 'fetch' })).toBe(true)

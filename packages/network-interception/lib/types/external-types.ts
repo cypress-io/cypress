@@ -356,6 +356,13 @@ export interface RouteMatcherOptionsGeneric<S> {
    */
   https?: boolean
   /**
+   * If set to `false`, matching requests will not be shown in the Command Log
+   * and no DOM snapshots will be taken for them. Unlike passing `{ log: false }`
+   * as a static response, this works for spied (non-stubbed) intercepts as well.
+   * @default true
+   */
+  log?: boolean
+  /**
    * Match against the request's HTTP method.
    * @default '*'
    */

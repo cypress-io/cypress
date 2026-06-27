@@ -463,6 +463,29 @@ describe('Proxy Logging', () => {
             expect(logs).to.have.length(0)
           })
         })
+
+        it('can hide a spied (non-stubbed) request via a route matcher log option', () => {
+          const logs: any[] = []
+
+          // a matcher object with `log: false` and no handler spies on the request
+          // without stubbing it, while suppressing the Command Log entry + snapshot
+          cy.intercept({ url: '**/cypress.png*', log: false }).as('spy-image')
+          .then(() => {
+            cy.on('log:added', (log) => {
+              if (log.name !== 'request') return
+
+              logs.push(log)
+            })
+
+            const img = new Image()
+
+            img.src = `/fixtures/media/cypress.png?spy-${Date.now()}`
+          })
+          .wait('@spy-image')
+          .then(() => {
+            expect(logs).to.have.length(0)
+          })
+        })
       })
     })
   })

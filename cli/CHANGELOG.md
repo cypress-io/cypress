@@ -5,6 +5,10 @@
 
 - Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly. Addressed in [#34133](https://github.com/cypress-io/cypress/pull/34133).
 
+**Features:**
+
+- The [`cy.intercept()`](https://on.cypress.io/intercept) route matcher now accepts a `log` option (for example, `cy.intercept({ url: '/api/**', log: false })`). When set to `false`, matching requests are not shown in the Command Log and no DOM snapshots are captured for them. Unlike passing `{ log: false }` as a static response, this works for spied (non-stubbed) intercepts, which is useful for suppressing high-volume background requests that would otherwise degrade `cypress open` performance. Addresses [#25466](https://github.com/cypress-io/cypress/issues/25466).
+
 **Bugfixes:**
 
 - Fixed an issue where [`cy.type()`](https://on.cypress.io/type) fired the simulated `keyup` event in the same turn as `keydown` and `input`, so `keyup` handlers that read state updated asynchronously in an `input` listener could observe stale values. `keyup` is now deferred to the next microtask, matching real browser event ordering. Fixes [#14864](https://github.com/cypress-io/cypress/issues/14864). Fixed in [#34068](https://github.com/cypress-io/cypress/pull/34068).

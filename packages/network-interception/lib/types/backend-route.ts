@@ -11,4 +11,9 @@ export interface BackendRoute {
   getFixture: GetFixtureFn
   matches: number
   disabled?: boolean
+  /**
+   * Explicit `log` option from the route matcher. When `false`, matching requests
+   * are not logged or snapshotted, even for spied (non-stubbed) intercepts.
+   */
+  log?: boolean
 }

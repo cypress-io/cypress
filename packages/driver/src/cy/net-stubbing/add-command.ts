@@ -105,7 +105,7 @@ function isNumberMatcher (obj): obj is NumberMatcher {
   return Array.isArray(obj) ? _.every(obj, _.isNumber) : _.isNumber(obj)
 }
 
-const allRouteMatcherFields = _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS, 'auth')
+const allRouteMatcherFields = _.concat(PLAIN_FIELDS, STRING_MATCHER_FIELDS, DICT_STRING_MATCHER_FIELDS, 'auth', 'log')
 
 function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isValid: boolean, message?: string } {
   const err = (message) => {
@@ -126,7 +126,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  const booleanProps = ['https', 'middleware']
+  const booleanProps = ['https', 'middleware', 'log']
 
   for (const prop of booleanProps) {
     if (_.has(routeMatcher, prop) && !_.isBoolean(routeMatcher[prop])) {
@@ -215,6 +215,10 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       routeId,
       hasInterceptor,
       routeMatcher,
+    }
+
+    if (!_.isUndefined(matcher.log)) {
+      frame.log = !!matcher.log
     }
 
     if (staticResponse) {

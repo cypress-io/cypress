@@ -34,6 +34,7 @@ async function onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, 
     routeMatcher,
     getFixture,
     matches: 0,
+    log: options.log,
   }
 
   state.routes.push(route)
