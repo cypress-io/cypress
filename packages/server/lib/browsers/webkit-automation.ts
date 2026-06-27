@@ -77,13 +77,13 @@ export class WebKitAutomation {
   private browser: playwright.Browser
   private context!: playwright.BrowserContext
   private page!: playwright.Page
-  private userAgent?: string | null
+  private userAgent: string | null
   private isHeadless: boolean
 
   private constructor (opts: WebKitAutomationOpts) {
     this.automation = opts.automation
     this.browser = opts.browser
-    this.userAgent = opts.userAgent
+    this.userAgent = opts.userAgent ?? null
     this.isHeadless = opts.isHeadless
   }
 
@@ -442,7 +442,7 @@ export class WebKitAutomation {
       case 'get:aut:title':
         return await this.getAutFrame().title()
       case 'focus:browser:window':
-        return await this.context.pages[0]?.bringToFront()
+        return await this.context.pages()[0]?.bringToFront()
       case 'reset:browser:state':
         debug('stubbed reset:browser:state')
 

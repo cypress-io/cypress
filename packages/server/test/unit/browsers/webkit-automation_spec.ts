@@ -42,6 +42,7 @@ function createMockBrowser () {
       addCookies: sinon.stub().resolves(),
       browser: () => browser,
       close: sinon.stub().resolves(),
+      pages: () => [page],
     }
 
     lastContext = context
@@ -167,6 +168,24 @@ describe('lib/browsers/webkit-automation', () => {
 
       expect(mock.browser.newContext).to.be.calledOnce
       expect(mock.browser.newContext.firstCall.args[0]).to.not.have.property('userAgent')
+    })
+  })
+
+  context('focus:browser:window', () => {
+    it('brings the active page to the front', async () => {
+      const wk = await createAutomation()
+
+      await wk.onRequest('focus:browser:window', {})
+
+      expect(mock.getLastPage().bringToFront).to.be.calledOnce
+    })
+
+    it('resolves without error when there are no open pages', async () => {
+      const wk = await createAutomation()
+
+      mock.getLastContext().pages = () => []
+
+      await wk.onRequest('focus:browser:window', {})
     })
   })
 
