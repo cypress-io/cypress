@@ -1096,6 +1096,28 @@ describe('src/cy/commands/querying', () => {
       cy.get('ul').contains('li', 'asdf 3')
     })
 
+    // https://github.com/cypress-io/cypress/issues/24178
+    describe('inside cy.document().within()', () => {
+      it('finds content within the document', () => {
+        cy.document().within(() => {
+          cy.contains('li 0').should('exist')
+        })
+      })
+
+      it('throws an assertion error rather than a type error when content is not found', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.name).to.eq('AssertionError')
+          expect(err.message).to.include('Expected to find content: \'Cannot find me\' but never did.')
+
+          done()
+        })
+
+        cy.document().within(() => {
+          cy.contains('Cannot find me')
+        })
+      })
+    })
+
     it('resets the subject between chain invocations', () => {
       const span = cy.$$('.k-in:contains(Quality Control):last')
       const label = cy.$$('#complex-contains label')

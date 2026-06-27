@@ -335,7 +335,14 @@ export default (Commands, Cypress, cy, state) => {
       Cypress.ensure.isType(subject, ['optional', 'element', 'window', 'document'], this.get('name'), cy)
 
       if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
-        subject = cy.getSubjectFromChain(withinSubject || [cy.$$('body')])
+        subject = cy.getSubjectFromChain(withinSubject)
+      }
+
+      // The within subject can resolve to a non-element such as the document
+      // (e.g. inside cy.document().within()). contains() searches for text
+      // within elements, so fall back to the body in that case.
+      if (!subject || (!$dom.isElement(subject) && !$elements.isShadowRoot(subject[0]))) {
+        subject = cy.$$('body')
       }
 
       let $el = cy.$$()
