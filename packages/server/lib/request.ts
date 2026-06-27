@@ -782,6 +782,12 @@ export class Request {
 
       let currentUrl = options.url
 
+      // @cypress/request strips the content-type header when following a
+      // redirect because the request body is normally dropped. Callers of
+      // cy.request expect headers they explicitly set to be sent with every
+      // request, so capture the original content-type and re-apply it below.
+      const originalContentType = caseInsensitiveGet(options.headers!, 'content-type')
+
       if (options.followRedirect) {
         options.followRedirect = function (incomingRes) {
           const newUrl = url.resolve(currentUrl!, incomingRes.headers.location)
@@ -790,6 +796,15 @@ export class Request {
           redirects.push([incomingRes.statusCode, newUrl].join(': '))
 
           push(incomingRes)
+
+          if (originalContentType) {
+            // the 'redirect' event fires after @cypress/request removes the
+            // content-type header and before it initializes the follow-up
+            // request, so this is where we restore the caller's header
+            this.once('redirect', () => {
+              this.setHeader('content-type', originalContentType)
+            })
+          }
 
           // and when we know we should follow the redirect
           // we need to override the init method and

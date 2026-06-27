@@ -504,6 +504,47 @@ describe('lib/request', () => {
       })
     })
 
+    it('preserves the content-type header when following redirects', function () {
+      this.fn.resolves()
+
+      nock('http://www.github.com')
+      .get('/dashboard')
+      .reply(301, null, {
+        'location': '/auth',
+      })
+      .get('/auth')
+      .reply(302, null, {
+        'location': '/login',
+      })
+      .get('/login')
+      .reply(200, 'log in', {
+        'Content-Type': 'text/html',
+      })
+
+      return request.sendPromise(undefined, this.fn, {
+        url: 'http://www.github.com/dashboard',
+        cookies: false,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then((resp) => {
+        expect(resp.status).to.eq(200)
+
+        const getContentType = (headers) => _.mapKeys(headers, (v, k) => k.toLowerCase())['content-type']
+
+        // the content-type set by the caller should be present on the
+        // original request and on every redirected request
+        expect(resp.allRequestResponses).to.have.length(3)
+
+        resp.allRequestResponses.forEach((reqRes) => {
+          expect(getContentType(reqRes['Request Headers'])).to.eq('application/json')
+        })
+
+        expect(getContentType(resp.requestHeaders)).to.eq('application/json')
+      })
+    })
+
     it('catches errors', function () {
       nock.enableNetConnect()
 
