@@ -1225,6 +1225,46 @@ describe('src/cy/commands/assertions', () => {
       )
     })
 
+    // https://github.com/cypress-io/cypress/issues/25443
+    // Comparing large strings (e.g. base64-encoded files via
+    // cy.readFile().should('eq', ...)) used to rebuild the entire assertion
+    // message on every retry, which could hang the browser. The formatted
+    // message is now memoized and reused across retries.
+    describe('large string operands', () => {
+      const largeString = (char) => char.repeat(5000)
+
+      it('preserves the full message for a passing assertion', (done) => {
+        const text = largeString('a')
+
+        expectMarkdown(
+          () => expect(text).to.equal(text),
+          `expected **${text}** to equal **${text}**`,
+          done,
+        )
+      })
+
+      it('builds the message once and reuses it across retries', { defaultCommandTimeout: 200 }, (done) => {
+        const actual = largeString('a')
+        const expected = largeString('b')
+        const getMessage = cy.spy(chai.util, 'getMessage')
+        let retries = 0
+
+        cy.on('command:retry', () => {
+          retries++
+        })
+
+        cy.on('fail', (err) => {
+          expect(retries, 'assertion retried multiple times').to.be.greaterThan(1)
+          expect(getMessage.callCount, 'message built far fewer times than retries').to.be.lessThan(retries)
+          expect(err.message).to.contain('to equal')
+
+          done()
+        })
+
+        cy.wrap(actual).should('eq', expected)
+      })
+    })
+
     describe('messages with quotation marks', () => {
       it('preserves quotation marks in number strings', (done) => {
         expectMarkdown(() => {

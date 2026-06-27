@@ -35,6 +35,21 @@ const imageMarkdown = /!\[.*?\]\(.*?\)/g
 const doubleslashRe = /\\\\/g
 const escapedDoubleslashRe = /__double_slash__/g
 
+// Building an assertion's display message requires formatting (inspecting) the
+// subject, actual, and expected values. For very large string operands — e.g.
+// comparing base64-encoded files via `cy.readFile().should('eq', ...)` — this is
+// expensive, and a failing assertion re-runs on every retry, rebuilding the
+// identical message each time until the command times out. We memoize the
+// formatted message and reuse it across retries when the operands are unchanged.
+// The message is a pure function of the operands, and string equality is by
+// value, so a freshly re-read file with identical contents still hits the cache.
+const LARGE_STRING_OPERAND_LENGTH = 1024
+const MAX_CACHED_ASSERTION_MESSAGES = 8
+
+const hasLargeStringOperand = (...values) => {
+  return values.some((value) => typeof value === 'string' && value.length >= LARGE_STRING_OPERAND_LENGTH)
+}
+
 type CreateFunc = (specWindow: SpecWindow, state: StateFunc, assertFn: $Cy['assert']) => ({
   chai: Chai.ChaiStatic
   expect: (val: any, message?: string) => Chai.Assertion
@@ -469,13 +484,52 @@ chai.use((chai, u) => {
 
       const customArgs = replaceArgMessages(args, this._obj)
 
-      let message = chaiUtils.getMessage(this, customArgs as Chai.AssertionArgs)
       const actual = chaiUtils.getActual(this, customArgs as Chai.AssertionArgs)
 
-      message = escapeDoubleSlash(message)
-      message = removeOrKeepSingleQuotesBetweenStars(message)
-      message = restoreDoubleSlash(message)
-      message = escapeMarkdown(message)
+      const buildMessage = () => {
+        let message = chaiUtils.getMessage(this, customArgs as Chai.AssertionArgs)
+
+        message = escapeDoubleSlash(message)
+        message = removeOrKeepSingleQuotesBetweenStars(message)
+        message = restoreDoubleSlash(message)
+        message = escapeMarkdown(message)
+
+        return message
+      }
+
+      let message
+
+      // Only memoize for large string operands, so the common (small) assertion
+      // path is unaffected and we don't retain large values longer than needed.
+      if (hasLargeStringOperand(value, actual, expected)) {
+        const negate = chaiUtils.flag(this, 'negate')
+        const flagMsg = chaiUtils.flag(this, 'message')
+        const cache = state('assertionMessageCache') || []
+        const cached = cache.find((entry) => {
+          return entry.value === value &&
+            entry.actual === actual &&
+            entry.expected === expected &&
+            entry.negate === negate &&
+            entry.flagMsg === flagMsg &&
+            entry.posTemplate === customArgs[1] &&
+            entry.negTemplate === customArgs[2]
+        })
+
+        if (cached) {
+          message = cached.message
+        } else {
+          message = buildMessage()
+
+          cache.push({ value, actual, expected, negate, flagMsg, posTemplate: customArgs[1], negTemplate: customArgs[2], message })
+          if (cache.length > MAX_CACHED_ASSERTION_MESSAGES) {
+            cache.shift()
+          }
+
+          state('assertionMessageCache', cache)
+        }
+      } else {
+        message = buildMessage()
+      }
 
       try {
         assertProto.apply(this, args as Chai.AssertionArgs)
