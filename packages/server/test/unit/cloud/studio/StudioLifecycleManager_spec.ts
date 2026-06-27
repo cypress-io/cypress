@@ -358,7 +358,7 @@ describe('StudioLifecycleManager', () => {
         mode: 'studio',
       })
 
-      expect(StudioLifecycleManager['watcher']).to.be.present
+      expect(StudioLifecycleManager['watcher']).to.exist
       expect(watcherStub).to.be.calledWith(path.join('/path', 'to', 'studio', 'server', 'index.js'), {
         awaitWriteFinish: true,
       })
@@ -385,7 +385,7 @@ describe('StudioLifecycleManager', () => {
 
       expect(studioManagerDestroyStub).to.be.called
 
-      expect(mockStudioManagerPromise).to.be.present
+      expect(mockStudioManagerPromise).to.exist
       expect(await mockStudioManagerPromise).to.equal(updatedStudioManager)
     })
 
