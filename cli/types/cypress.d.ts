@@ -2546,6 +2546,26 @@ declare namespace Cypress {
     /**
      * Scopes all subsequent cy commands to within this element.
      * Useful when working within a particular group of elements such as a `<form>`.
+     *
+     * `.within()` always yields the same subject it was given. It groups the
+     * commands inside its callback to a scope — it does not change what is
+     * yielded to the next command, even when the callback returns an inner
+     * element. To traverse into a parent and yield a child element (for example,
+     * from a custom command), use `.find()` instead of a nested `.within()`:
+     *
+    ```
+    // ✗ yields the parent, not the input
+    cy.get('.row').within(() => {
+      cy.get('.cell').first().within(() => {
+        cy.get('input')
+      })
+    }) // yields '.row'
+
+    // ✓ yields the input
+    cy.get('.row')
+      .find('.cell').first()
+      .find('input')
+    ```
      * @see https://on.cypress.io/within
      * @example
     ```
