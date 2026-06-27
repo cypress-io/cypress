@@ -245,6 +245,27 @@ describe('lib/reporter', () => {
       expect(this.log).to.be.calledWithMatch(/Attempt 1 of 3/)
       expect(this.log).to.be.calledWithMatch(/Attempt 2 of 3/)
     })
+
+    // Experimental retries log via 'test:after:run' (once per attempt) rather
+    // than the doubled 'retry' events, so the dedup must be strategy-agnostic:
+    // it must not suppress a legitimate attempt line on the experimental path.
+    describe('with experimental retries', () => {
+      beforeEach(function () {
+        this.reporter.retriesConfig = {
+          experimentalStrategy: 'detect-flake-and-pass-on-threshold',
+          experimentalOptions: { maxRetries: 9, passesRequired: 5 },
+        }
+      })
+
+      it('logs each attempt once', function () {
+        this.reporter.emit('test:after:run', { id: 'r4', title: 'fails', state: 'failed', currentRetry: 0, retries: 2, final: false })
+        this.reporter.emit('test:after:run', { id: 'r4', title: 'fails', state: 'failed', currentRetry: 1, retries: 2, final: false })
+
+        expect(attemptLines(this.log)).to.have.length(2)
+        expect(this.log).to.be.calledWithMatch(/Attempt 1 of 3/)
+        expect(this.log).to.be.calledWithMatch(/Attempt 2 of 3/)
+      })
+    })
   })
 
   context('#normalizeTest', () => {
