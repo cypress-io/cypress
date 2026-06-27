@@ -246,9 +246,6 @@ describe('lib/reporter', () => {
       expect(this.log).to.be.calledWithMatch(/Attempt 2 of 3/)
     })
 
-    // Experimental retries log via 'test:after:run' (once per attempt) rather
-    // than the doubled 'retry' events, so the dedup must be strategy-agnostic:
-    // it must not suppress a legitimate attempt line on the experimental path.
     describe('with experimental retries', () => {
       beforeEach(function () {
         this.reporter.retriesConfig = {
