@@ -89,13 +89,42 @@ describe('lib/util/trash', () => {
       fs.rmdirSync(basePath)
     })
 
-    it('rethrows when trash fails and the item still exists', async () => {
-      sinon.stub(os, 'platform').returns('win32')
+    it('falls back to permanently removing items when trash fails', async () => {
+      // Simulates environments where the native trash helper cannot run at all,
+      // e.g. macOS on Apple Silicon without Rosetta (`spawn Unknown system
+      // error -86`) or Windows refusing to trash nested folders. Cleanup should
+      // still succeed by deleting the items directly. See
+      // https://github.com/cypress-io/cypress/issues/2876
+      sinon.stub(os, 'platform').returns('darwin')
       const basePath = path.join(tempDir, 'foo')
 
       populateDirectories(basePath)
 
-      const trashStub = sinon.stub().rejects(new Error('Command failed: windows-trash.exe'))
+      const trashStub = sinon.stub().rejects(new Error('spawn Unknown system error -86'))
+
+      const trashModule = proxyquire(path.resolve(__dirname, '../../../lib/util/trash'), {
+        trash: trashStub,
+      })
+
+      await trashModule.folder(basePath)
+      expect(trashStub).to.have.been.called
+      expectDirectoriesExist(basePath)
+      fs.rmdirSync(basePath)
+    })
+
+    it('rethrows when trash fails and the item cannot be removed', async () => {
+      sinon.stub(os, 'platform').returns('darwin')
+      const basePath = path.join(tempDir, 'foo')
+
+      populateDirectories(basePath)
+
+      const trashStub = sinon.stub().rejects(new Error('spawn Unknown system error -86'))
+      const removeError = new Error('EBUSY: resource busy or locked')
+
+      // `trash` shares the promisified fs singleton; force its remove() to fail
+      const trashFs = require('../../../lib/util/fs').fs
+
+      sinon.stub(trashFs, 'remove').rejects(removeError)
 
       const trashModule = proxyquire(path.resolve(__dirname, '../../../lib/util/trash'), {
         trash: trashStub,
@@ -109,7 +138,7 @@ describe('lib/util/trash', () => {
         thrown = err as Error
       }
 
-      expect(thrown).to.be.an('error')
+      expect(thrown).to.equal(removeError)
       fs.rmSync(basePath, { recursive: true, force: true })
     })
 

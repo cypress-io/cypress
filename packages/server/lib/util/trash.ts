@@ -3,19 +3,21 @@ import os from 'os'
 import path from 'path'
 import trash from 'trash'
 
-// Trashes a single item, tolerating the case where the underlying trash
-// implementation reports a failure even though the item was actually removed.
-// On Windows, when the Recycle Bin is configured with "Don't move files to the
-// Recycle Bin. Remove files immediately when deleted.", windows-trash.exe
-// deletes the file but exits with a non-zero code, which `trash` surfaces as an
-// error. If the item no longer exists, the removal succeeded and we should not
-// warn.
+// Trashes a single item, falling back to a permanent delete when trashing
+// fails. `trash` shells out to native helpers (`macos-trash`, `win-trash.exe`)
+// that fail in many environments: macOS on Apple Silicon without Rosetta
+// (`spawn Unknown system error -86`), Windows refusing to trash nested folders,
+// root-owned directories, and so on. Since the only goal here is to clear stale
+// run results before a run, a trash failure should never block cleanup or
+// surface a stack trace. If the item is already gone (e.g. Windows configured to
+// delete immediately makes win-trash.exe exit non-zero after removing it) we're
+// done; otherwise remove it permanently.
 const trashItem = async (itemPath: string): Promise<void> => {
   try {
     await trash([itemPath])
   } catch (error) {
     if (await fs.pathExists(itemPath)) {
-      throw error
+      await fs.remove(itemPath)
     }
   }
 }
