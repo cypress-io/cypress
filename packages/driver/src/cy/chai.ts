@@ -12,7 +12,7 @@ import { escapeBackslashes, escapeQuotes } from '../util/escape'
 import $errUtils from '../cypress/error_utils'
 import $stackUtils from '../cypress/stack_utils'
 import $chaiJquery from '../cypress/chai_jquery'
-import * as chaiInspect from './chai/inspect'
+import loupe from 'loupe'
 import type { StateFunc } from '../cypress/state'
 import type { $Cy } from '../cypress/cy'
 
@@ -102,14 +102,67 @@ chai.use((chai, u) => {
   const getMessage = chai.util.getMessage
   const _inspect = chai.util.inspect
 
-  const { inspect, setFormatValueHook } = chaiInspect.create(chai)
+  // Returns true if object is a DOM element.
+  const isDOMElement = (object): boolean => {
+    if (typeof HTMLElement === 'object') {
+      return object instanceof HTMLElement
+    }
 
-  // prevent tunneling into Window objects (can throw cross-origin errors)
-  setFormatValueHook((ctx, val) => {
+    return object &&
+      typeof object === 'object' &&
+      'nodeType' in object &&
+      object.nodeType === 1 &&
+      typeof object.nodeName === 'string'
+  }
+
+  // We can't just check if object instanceof ShadowRoot, because it might be the document of an iframe,
+  // which in Chrome 99+ is a separate class, and instanceof ShadowRoot returns false.
+  const isShadowRoot = (object): boolean => {
+    return isDOMElement(object.host) && object.host.shadowRoot === object
+  }
+
+  // We can't just check if object instanceof Document, because it might be the document of an iframe,
+  // which in Chrome 99+ is a separate class, and instanceof Document returns false.
+  const isDocument = (object): boolean => {
+    return object.defaultView && object.defaultView === object.defaultView.window
+  }
+
+  const serializeDOMElement = (value): string | undefined => {
+    if ('outerHTML' in value) {
+      return value.outerHTML
+    }
+
+    // This value does not have an outerHTML attribute; it could still be an XML element.
+    try {
+      // @ts-ignore
+      if (document.xmlVersion) {
+        return new XMLSerializer().serializeToString(value)
+      }
+
+      const ns = 'http://www.w3.org/1999/xhtml'
+      const container = document.createElementNS(ns, '_')
+
+      container.appendChild(value.cloneNode(false))
+      const html = container.innerHTML.replace('><', `>${value.innerHTML}<`)
+
+      container.innerHTML = ''
+
+      return html
+    } catch (err) {
+      return undefined
+    }
+  }
+
+  // loupe handles generic value formatting (including bounded string truncation
+  // via `truncate`). This hook runs for every value loupe visits — top-level and
+  // nested — and replaces the values loupe can't/shouldn't format itself:
+  // cross-origin Window objects (tunneling into them throws) and DOM nodes (which
+  // we render as their HTML). Returning undefined lets loupe format the value.
+  const formatValueHook = (val) => {
     // https://github.com/cypress-io/cypress/issues/5270
-    // When name attribute exists in <iframe>,
-    // Firefox returns [object Window] but Chrome returns [object Object]
-    // So, we try throwing an error and check the error message.
+    // When a name attribute exists on an <iframe>, Firefox returns [object Window]
+    // but Chrome returns [object Object], so we probe the value and detect the
+    // cross-origin access error rather than relying on the type.
     try {
       val && val.document
       val && val.inspect
@@ -120,8 +173,40 @@ chai.use((chai, u) => {
       }
     }
 
-    return
-  })
+    if (!val || typeof val !== 'object') {
+      return undefined
+    }
+
+    if (isDOMElement(val)) {
+      return serializeDOMElement(val)
+    }
+
+    if (isShadowRoot(val)) {
+      return val.innerHTML
+    }
+
+    if (isDocument(val)) {
+      return val.documentElement.outerHTML
+    }
+
+    return undefined
+  }
+
+  const inspect = (obj, showHidden?, depth?) => {
+    return loupe(obj, {
+      showHidden,
+      depth: typeof depth === 'undefined' ? 2 : depth,
+      // Behavior-preserving for now: the previous custom inspector never
+      // truncated values. Switching this to `chai.config.truncateThreshold`
+      // enables loupe's bounded string/collection truncation, which is the
+      // per-build cost fix for large operands (see issue #25443). That should
+      // land together with a "window around the first difference" change so
+      // truncation doesn't hide the differing region in diffs.
+      truncate: Infinity,
+      // @ts-ignore - `formatValueHook` is added via patches/loupe+2.3.7.patch
+      formatValueHook,
+    })
+  }
 
   const escapeDoubleSlash = (str: string) => str.replace(doubleslashRe, '__double_slash__')
   const restoreDoubleSlash = (str: string) => str.replace(escapedDoubleslashRe, '\\\\')

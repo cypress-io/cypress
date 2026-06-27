@@ -1,0 +1,37 @@
+diff --git a/node_modules/loupe/loupe.js b/node_modules/loupe/loupe.js
+index 5e1c239..9c88092 100644
+--- a/node_modules/loupe/loupe.js
++++ b/node_modules/loupe/loupe.js
+@@ -150,7 +150,8 @@
+         _ref$truncate = _ref.truncate,
+         truncate = _ref$truncate === void 0 ? Infinity : _ref$truncate,
+         _ref$stylize = _ref.stylize,
+-        stylize = _ref$stylize === void 0 ? String : _ref$stylize;
++        stylize = _ref$stylize === void 0 ? String : _ref$stylize,
++        formatValueHook = _ref.formatValueHook;
+ 
+     var options = {
+       showHidden: Boolean(showHidden),
+@@ -162,7 +163,8 @@
+       breakLength: Number(breakLength),
+       truncate: Number(truncate),
+       seen: seen,
+-      stylize: stylize
++      stylize: stylize,
++      formatValueHook: formatValueHook
+     };
+ 
+     if (options.colors) {
+@@ -809,6 +811,12 @@
+   function inspect(value, options) {
+     options = normaliseOptions(options);
+     options.inspect = inspect;
++
++    if (typeof options.formatValueHook === 'function') {
++      var hooked = options.formatValueHook(value, options);
++      if (hooked !== undefined) return hooked;
++    }
++
+     var _options = options,
+         customInspect = _options.customInspect;
+     var type = value === null ? 'null' : _typeof(value);
