@@ -203,9 +203,8 @@ const browsers = {
     try {
       _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
     } catch (err: any) {
-      // When a browser fails to launch (e.g. WebKit on an unsupported macOS
-      // version), reset the browser status so the launchpad doesn't stay stuck
-      // on the "opening" state.
+      // When a browser fails to launch, reset the browser status so the
+      // launchpad doesn't stay stuck on the "opening" state.
       ctx.actions.app.setBrowserStatus('closed')
 
       // In run mode, re-throw so the existing retry and error logging can
