@@ -1357,6 +1357,37 @@ describe('src/cy/commands/assertions', () => {
         )
       })
     })
+
+    // Cypress renders values in assertion messages with its own inspector
+    // rather than chai's built-in one. These values render differently under
+    // chai's inspector (e.g. `[Function foo]`, ISO-8601 dates), so these
+    // assertions catch a regression that would change failure messages.
+    describe('uses Cypress value inspection', () => {
+      const getAssertionError = (test) => {
+        try {
+          test()
+        } catch (err) {
+          return err
+        }
+
+        throw new Error('expected the assertion to throw, but it did not')
+      }
+
+      it('renders functions as [Function: name]', () => {
+        const foo = function foo () {}
+        const bar = function bar () {}
+
+        const err = getAssertionError(() => expect(foo).to.equal(bar))
+
+        expect(err.message).to.eq('expected [Function: foo] to equal [Function: bar]')
+      })
+
+      it('renders dates with toUTCString', () => {
+        const err = getAssertionError(() => expect(new Date(0)).to.equal(new Date(1)))
+
+        expect(err.message).to.eq('expected Thu, 01 Jan 1970 00:00:00 GMT to equal Thu, 01 Jan 1970 00:00:00 GMT')
+      })
+    })
   })
 
   context('chai overrides', () => {
