@@ -5,6 +5,10 @@
 
 - Verifying that the Cypress binary can run, which happens the first time a newly installed version is used (before `cypress open` or `cypress run`) and whenever `cypress verify` is invoked, now completes more quickly. Addressed in [#34133](https://github.com/cypress-io/cypress/pull/34133).
 
+**Features:**
+
+- Added support for additional assertion aliases: `.exists` (alias of `.exist`), `.greaterThanOrEqual` and `.lessThanOrEqual` (aliases of `.least` and `.most`), and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`). These can be used anywhere Cypress assertions are written, such as `expect`, `assert`, and `cy.get(...).should(...)`. This comes from upgrading the bundled `chai` assertion library from `4.2.0` to `4.5.0`; all existing assertions and their messages behave the same. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+
 **Bugfixes:**
 
 - Fixed an issue where asserting focus with Chai's property syntax, such as `expect($el).to.have.focus` or `expect($el).to.be.focused`, raised a TypeScript error (`Property 'focus' does not exist on type 'Assertion'`) even though the assertion works at runtime. Fixes [#23905](https://github.com/cypress-io/cypress/issues/23905). Fixed in [#34177](https://github.com/cypress-io/cypress/pull/34177).
@@ -12,10 +16,6 @@
 - Fixed an issue where headless WebKit used the host machine's `devicePixelRatio` instead of a standard value of `1`. Headless WebKit now matches headless Chrome, so screenshots taken during `cypress run` are consistent regardless of the host's DPI (for example 2x locally versus 1x in CI) and text is no longer fuzzy on high-DPI displays. Applies when [`experimentalWebKitSupport`](https://docs.cypress.io/app/references/experiments) is enabled. Fixes [#23808](https://github.com/cypress-io/cypress/issues/23808). Fixed in [#34088](https://github.com/cypress-io/cypress/pull/34088).
 - Fixed an issue where the [`userAgent`](https://on.cypress.io/configuration#Browser) configuration option was not applied when running tests in the experimental WebKit browser. Fixes [#33349](https://github.com/cypress-io/cypress/issues/33349).
 - Fixed an issue where, in the experimental WebKit browser, a request to focus the browser window was silently ignored, so the window could remain in the background. The active page is now correctly brought to the front. Addressed in [#34137](https://github.com/cypress-io/cypress/pull/34137).
-
-**Dependency Updates:**
-
-- Upgraded `chai` from `4.2.0` to `4.5.0`, the latest 4.x release of the assertion library that powers Cypress assertions (`expect`, `assert`, `should`, and chainers like `cy.get(...).should(...)`). Existing assertions and their messages behave the same. The upgrade additionally makes the `.exists` alias for `.exist`, the `.greaterThanOrEqual` and `.lessThanOrEqual` aliases for `.least` and `.most`, and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`) available in assertions. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
 
 ## 15.18.0
 
