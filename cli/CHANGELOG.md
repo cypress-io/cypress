@@ -13,6 +13,10 @@
 - Fixed an issue where the [`userAgent`](https://on.cypress.io/configuration#Browser) configuration option was not applied when running tests in the experimental WebKit browser. Fixes [#33349](https://github.com/cypress-io/cypress/issues/33349).
 - Fixed an issue where, in the experimental WebKit browser, a request to focus the browser window was silently ignored, so the window could remain in the background. The active page is now correctly brought to the front. Addressed in [#34137](https://github.com/cypress-io/cypress/pull/34137).
 
+**Dependency Updates:**
+
+- Upgraded `chai` from `4.2.0` to `4.5.0`, the latest 4.x release of the assertion library that powers Cypress assertions (`expect`, `assert`, `should`, and chainers like `cy.get(...).should(...)`). Existing assertions and their messages behave the same. The upgrade additionally makes the `.exists` alias for `.exist`, the `.greaterThanOrEqual` and `.lessThanOrEqual` aliases for `.least` and `.most`, and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`) available in assertions. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+
 ## 15.18.0
 
 **Performance:**
