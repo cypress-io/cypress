@@ -1358,10 +1358,12 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    // Cypress renders values in assertion messages with its own inspector
-    // rather than chai's built-in one. These values render differently under
-    // chai's inspector (e.g. `[Function foo]`, ISO-8601 dates), so these
-    // assertions catch a regression that would change failure messages.
+    // Cypress renders and truncates values in assertion messages with its own
+    // inspector rather than chai's built-in one. These render differently under
+    // chai's inspector (e.g. `[Function foo]`, ISO-8601 dates, and
+    // `{ name: 'Joe', …(1) }` instead of `{ Object (name, ...) }` once past the
+    // truncateThreshold), so these assertions catch a regression that would
+    // change failure messages.
     describe('uses Cypress value inspection', () => {
       const getAssertionError = (test) => {
         try {
@@ -1386,6 +1388,18 @@ describe('src/cy/commands/assertions', () => {
         const err = getAssertionError(() => expect(new Date(0)).to.equal(new Date(1)))
 
         expect(err.message).to.eq('expected Thu, 01 Jan 1970 00:00:00 GMT to equal Thu, 01 Jan 1970 00:00:00 GMT')
+      })
+
+      it('truncates long objects past the truncateThreshold', () => {
+        const err = getAssertionError(() => expect({ name: 'Joe', age: 20, email: 'joe@example.com' }).to.equal(null))
+
+        expect(err.message).to.eq('expected { Object (name, age, ...) } to equal null')
+      })
+
+      it('truncates long arrays past the truncateThreshold', () => {
+        const err = getAssertionError(() => expect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]).to.equal(null))
+
+        expect(err.message).to.eq('expected [ Array(15) ] to equal null')
       })
     })
   })
