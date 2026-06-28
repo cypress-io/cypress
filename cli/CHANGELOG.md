@@ -7,7 +7,7 @@
 
 **Features:**
 
-- Added support for additional assertion aliases: `.exists` (alias of `.exist`), `.greaterThanOrEqual` and `.lessThanOrEqual` (aliases of `.least` and `.most`), and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`). These can be used anywhere Cypress assertions are written, such as `expect`, `assert`, and `cy.get(...).should(...)`. This comes from upgrading the bundled `chai` assertion library from `4.2.0` to `4.5.0`; all existing assertions and their messages behave the same. Addressed in [#XXXXX](https://github.com/cypress-io/cypress/pull/XXXXX).
+- Added support for additional assertion aliases: `.exists` (alias of `.exist`), `.greaterThanOrEqual` and `.lessThanOrEqual` (aliases of `.least` and `.most`), and `.oneOf` chained with `.contain` (for example `expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])`). These can be used anywhere Cypress assertions are written, such as `expect`, `assert`, and `cy.get(...).should(...)`. This comes from upgrading the bundled `chai` assertion library from `4.2.0` to `4.5.0`; all existing assertions and their messages behave the same. Addressed in [#34178](https://github.com/cypress-io/cypress/pull/34178).
 
 **Bugfixes:**
 
