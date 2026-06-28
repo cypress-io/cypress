@@ -494,6 +494,44 @@ describe('lib/browsers/index', () => {
         })
       })
     })
+
+    it('resets the browser status to closed and re-throws when the browser fails to launch in run mode', () => {
+      const url: TestUrl = 'http://localhost:3000'
+      const launchError = new Error('failed to launch')
+
+      sinon.stub(electron, 'open').rejects(launchError)
+      sinon.spy(ctx.actions.app, 'setBrowserStatus')
+
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' } as any, { url } as any, null, ctx)
+      .then(() => {
+        throw new Error('should have thrown')
+      })
+      .catch((err) => {
+        expect(err).to.eq(launchError)
+        expect(ctx.actions.app.setBrowserStatus as SetBrowserStatusSpy).to.be.calledWith('closed')
+      })
+    })
+
+    it('resets the browser status and surfaces the error via ctx.onError when the browser fails to launch in open mode', () => {
+      const openCtx = createTestDataContext('open')
+      const url: TestUrl = 'http://localhost:3000'
+      const launchError = new Error('failed to launch')
+
+      sinon.stub(electron, 'open').rejects(launchError)
+      sinon.spy(openCtx.actions.app, 'setBrowserStatus')
+      sinon.spy(openCtx, 'onError')
+
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open({ name: 'electron', family: 'chromium' } as any, { url } as any, null, openCtx)
+      .then((instance) => {
+        expect(instance).to.be.null
+        expect(openCtx.actions.app.setBrowserStatus as SetBrowserStatusSpy).to.be.calledWith('closed')
+        expect(openCtx.onError).to.be.calledWith(launchError)
+      })
+    })
   })
 
   context('didBrowserPreviouslyHaveUnexpectedExit', () => {

@@ -11,6 +11,7 @@ import type { Browser, BrowserInstance, BrowserLauncher } from './types'
 import type { Automation } from '../automation'
 import type { DataContext } from '@packages/data-context'
 import type { CDPSocketServer } from '@packages/socket'
+import type { CypressError } from '@packages/errors'
 
 const debug = Debug('cypress:server:browsers')
 const isBrowserFamily = (browser: string) => BROWSER_FAMILY.includes(browser)
@@ -197,7 +198,28 @@ const browsers = {
 
     debug('opening browser %o', browser)
 
-    const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
+    let _instance: BrowserInstance | null
+
+    try {
+      _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
+    } catch (err: any) {
+      // When a browser fails to launch (e.g. WebKit on an unsupported macOS
+      // version), reset the browser status so the launchpad doesn't stay stuck
+      // on the "opening" state.
+      ctx.actions.app.setBrowserStatus('closed')
+
+      // In run mode, re-throw so the existing retry and error logging can
+      // surface the failure on the command line. In open mode, surface the
+      // error to the app so the user sees why the browser didn't launch
+      // instead of the UI hanging silently.
+      if (ctx.isRunMode) {
+        throw err
+      }
+
+      ctx.onError(err as CypressError, 'Error Launching Browser')
+
+      return null
+    }
 
     debug(`browser opened for launch ${thisLaunchAttempt}`)
 
