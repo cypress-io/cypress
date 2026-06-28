@@ -1,0 +1,9 @@
+{
+  "include": ["**/*.ts"],
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0"
+  }
+}

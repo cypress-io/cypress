@@ -86,6 +86,18 @@ describe('webpack-batteries-included-preprocessor features', () => {
       await runAndEval('tsx_spec.tsx', { ...options })
     })
 
+    // https://github.com/cypress-io/cypress/issues/26554
+    it('downlevels ES2022 private fields and optional chaining to the browser baseline', async () => {
+      const outputPath = await run('es2022/private_fields_spec.ts', { ...options })
+      const contents = (await fs.readFile(outputPath)).toString()
+
+      // ts-loader emits native private fields for an ES2022 target; the babel
+      // pass must transpile them away so older supported browsers can run them.
+      expect(contents).not.to.match(/#hours/)
+
+      await runAndEval('es2022/private_fields_spec.ts', { ...options })
+    })
+
     it('handles importing .ts and .tsx', async () => {
       await runAndEval('typescript_imports_spec.js', { ...options })
     })

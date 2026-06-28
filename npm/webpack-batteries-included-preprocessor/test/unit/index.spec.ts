@@ -47,7 +47,10 @@ describe('webpack-batteries-included-preprocessor', () => {
       const result = getFullWebpackOptions('file/path', 'typescript/path')
 
       expect(result.module.rules).toHaveLength(4)
-      expect(result.module.rules[3].use[0].loader).toContain('ts-loader')
+      // ts-loader strips types first (last in the use array), then babel-loader
+      // downlevels the emitted JavaScript. @see https://github.com/cypress-io/cypress/issues/26554
+      expect(result.module.rules[3].use[0].loader).toContain('babel-loader')
+      expect(result.module.rules[3].use[1].loader).toContain('ts-loader')
     })
 
     it('adds the BundleAnalyzerPlugin if the user is trying to debug their bundle', async () => {
@@ -101,8 +104,10 @@ describe('webpack-batteries-included-preprocessor', () => {
         outputPath: '.js',
       } as any)
 
-      const tsLoader = webpackOptions.module.rules[0].use[0]
+      const babelLoader = webpackOptions.module.rules[0].use[0]
+      const tsLoader = webpackOptions.module.rules[0].use[1]
 
+      expect(babelLoader.loader).toContain('babel-loader')
       expect(tsLoader.loader).toContain('ts-loader')
 
       expect(tsLoader.options.compiler).toEqual(require.resolve('typescript'))
@@ -138,7 +143,7 @@ describe('webpack-batteries-included-preprocessor', () => {
         outputPath: '.js',
       } as any)
 
-      const tsLoader = webpackOptions.module.rules[0].use[0]
+      const tsLoader = webpackOptions.module.rules[0].use[1]
 
       expect(tsLoader.options.compilerOptions).toEqual({
         module: 'commonjs',
@@ -225,7 +230,7 @@ describe('webpack-batteries-included-preprocessor', () => {
           outputPath: '.js',
         } as any)
 
-        const tsLoader = webpackOptions.module.rules[0].use[0]
+        const tsLoader = webpackOptions.module.rules[0].use[1]
 
         expect(tsLoader.loader).toContain('ts-loader')
         expect(tsLoader.options.configFile).toBeUndefined()
@@ -266,7 +271,7 @@ describe('webpack-batteries-included-preprocessor', () => {
             outputPath: '.js',
           } as any)
 
-          const tsLoader = webpackOptions.module.rules[0].use[0]
+          const tsLoader = webpackOptions.module.rules[0].use[1]
 
           expect(tsLoader.loader).toContain('ts-loader')
           expect(tsLoader.options.configFile).toBe(fixtureTsconfigPath)
@@ -297,7 +302,7 @@ describe('webpack-batteries-included-preprocessor', () => {
           outputPath: '.js',
         } as any)
 
-        const tsLoader = webpackOptions.module.rules[0].use[0]
+        const tsLoader = webpackOptions.module.rules[0].use[1]
 
         expect(tsLoader.options.configFile).toBeUndefined()
         expect(tsLoader.options.compilerOptions).toBeUndefined()

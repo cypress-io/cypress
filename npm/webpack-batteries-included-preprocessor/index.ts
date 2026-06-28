@@ -33,6 +33,47 @@ class TypeScriptNotFoundError extends Error {
 
 const typescriptExtensionRegex = /\.m?tsx?$/
 
+// The babel-loader configuration shared by the JavaScript rule and the
+// TypeScript rule. ts-loader only strips types and emits JavaScript at the
+// `target` declared in the user's tsconfig.json (Angular 15+ defaults this to
+// ES2022). Running that output back through babel downlevels modern syntax —
+// private fields, optional chaining, etc. — to the same browser baseline we
+// apply to plain JavaScript specs, so TypeScript specs are not bound by the
+// browser's native support for whatever ES target the project compiles to.
+// @see https://github.com/cypress-io/cypress/issues/26554
+//
+// For TypeScript we pass `modules: false` so babel only downlevels syntax and
+// leaves the module/interop transform to ts-loader and webpack. ts-loader honors
+// the tsconfig's `esModuleInterop` semantics; letting babel re-wrap the modules
+// would override them (e.g. `import * as fn` from a CommonJS export would stop
+// being callable).
+const getBabelLoader = ({ transformModules = true } = {}) => {
+  return {
+    loader: require.resolve('babel-loader'),
+    options: {
+      plugins: [
+        ...[
+          'babel-plugin-add-module-exports',
+          '@babel/plugin-transform-class-properties',
+          '@babel/plugin-transform-object-rest-spread',
+        ].map((plugin) => require.resolve(plugin)),
+        [require.resolve('@babel/plugin-transform-runtime'), {
+          absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
+        }],
+      ],
+      presets: [
+        // the chrome version should be synced with
+        // packages/web-config/webpack.config.base.ts and
+        // packages/server/lib/browsers/chrome.ts
+        [require.resolve('@babel/preset-env'), { modules: transformModules ? 'commonjs' : false, targets: { 'chrome': '64' } }],
+        require.resolve('@babel/preset-react'),
+      ],
+      configFile: false,
+      babelrc: false,
+    },
+  }
+}
+
 const hasTsLoader = (rules: any[]) => {
   return rules.some((rule) => {
     if (!rule.use || !Array.isArray(rule.use)) return false
@@ -117,10 +158,14 @@ const addTypeScriptConfig = (file: { filePath: string }, options: {
     ? require('tsconfig-paths-webpack-plugin-v3')
     : require('tsconfig-paths-webpack-plugin')
 
+  // webpack applies loaders right-to-left, so ts-loader strips the types first
+  // and babel-loader then downlevels the emitted JavaScript to our browser
+  // baseline regardless of the tsconfig `target`. @see getBabelLoader
   webpackOptions.module.rules.push({
     test: typescriptExtensionRegex,
     exclude: [/node_modules/],
     use: [
+      getBabelLoader({ transformModules: false }),
       {
         loader: require.resolve('ts-loader'),
         options: {
@@ -177,30 +222,7 @@ const getDefaultWebpackOptions = () => {
         test: /(\.jsx?|\.mjs)$/,
         exclude: [/node_modules/, /browserslist/],
         type: 'javascript/auto',
-        use: [{
-          loader: require.resolve('babel-loader'),
-          options: {
-            plugins: [
-              ...[
-                'babel-plugin-add-module-exports',
-                '@babel/plugin-transform-class-properties',
-                '@babel/plugin-transform-object-rest-spread',
-              ].map((plugin) => require.resolve(plugin)),
-              [require.resolve('@babel/plugin-transform-runtime'), {
-                absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
-              }],
-            ],
-            presets: [
-              // the chrome version should be synced with
-              // packages/web-config/webpack.config.base.ts and
-              // packages/server/lib/browsers/chrome.ts
-              [require.resolve('@babel/preset-env'), { modules: 'commonjs', targets: { 'chrome': '64' } }],
-              require.resolve('@babel/preset-react'),
-            ],
-            configFile: false,
-            babelrc: false,
-          },
-        }],
+        use: [getBabelLoader()],
       }, {
         test: /\.coffee$/,
         exclude: [/node_modules/, /browserslist/],
