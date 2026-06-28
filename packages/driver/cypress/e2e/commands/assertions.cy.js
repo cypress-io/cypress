@@ -800,6 +800,37 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
+  // Smoke tests for assertion aliases added by the chai 4.5 upgrade. These are
+  // vanilla chai aliases (chai owns their behavior); we only verify they're
+  // reachable through Cypress's expect/assert/should surfaces.
+  context('chai 4.5 aliases', () => {
+    it('exists is an alias of exist', () => {
+      expect(0).to.exists
+      expect(null).to.not.exists
+      cy.wrap('foo').should('exist')
+    })
+
+    it('greaterThanOrEqual is an alias of least/gte', () => {
+      expect(2).to.be.greaterThanOrEqual(1)
+      expect(2).to.be.greaterThanOrEqual(2)
+      expect(2).to.not.be.greaterThanOrEqual(3)
+      cy.wrap(2).should('be.greaterThanOrEqual', 2)
+    })
+
+    it('lessThanOrEqual is an alias of most/lte', () => {
+      expect(1).to.be.lessThanOrEqual(2)
+      expect(2).to.be.lessThanOrEqual(2)
+      expect(2).to.not.be.lessThanOrEqual(1)
+      cy.wrap(1).should('be.lessThanOrEqual', 2)
+    })
+
+    it('oneOf can be chained with contain', () => {
+      expect('Today is sunny').to.contain.oneOf(['sunny', 'cloudy'])
+      expect([1, 2, 3]).to.contain.oneOf([3, 4, 5])
+      expect([1, 2, 3]).to.not.contain.oneOf([4, 5, 6])
+    })
+  })
+
   context('#assert', () => {
     beforeEach(function () {
       this.logs = []
