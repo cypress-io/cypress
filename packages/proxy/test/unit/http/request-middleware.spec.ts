@@ -56,6 +56,7 @@ describe('http/request-middleware', () => {
       'RedirectToClientRouteIfUnloaded',
       'EndRequestsToBlockedHosts',
       'StripUnsupportedAcceptEncoding',
+      'RemoveProxyConnectionHeader',
       'MaybeSetBasicAuthHeaders',
       'SendRequestOutgoing',
     ])
@@ -113,7 +114,7 @@ describe('http/request-middleware', () => {
 
         expect(ctx.req.headers!['x-cypress-is-from-extra-target']).toBeUndefined()
         expect(ctx.req.isFromExtraTarget).toBe(true)
-        expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith(['MaybeSetBasicAuthHeaders', 'SendRequestOutgoing'])
+        expect(ctx['onlyRunMiddleware']).toHaveBeenCalledWith(['RemoveProxyConnectionHeader', 'MaybeSetBasicAuthHeaders', 'SendRequestOutgoing'])
       })
 
       it('when it does not exist, removes header and sets in on the req', async () => {
@@ -767,6 +768,45 @@ describe('http/request-middleware', () => {
 
       await testMiddleware([StripUnsupportedAcceptEncoding], ctx)
       expect(ctx.req.headers!['accept-encoding']).toBe('gzip,identity')
+    })
+  })
+
+  describe('RemoveProxyConnectionHeader', () => {
+    const { RemoveProxyConnectionHeader } = RequestMiddleware
+
+    function prepareContext (headers = {}) {
+      return {
+        req: {
+          headers: { ...headers },
+        } as Partial<CypressIncomingRequest>,
+        res: {
+          on: (_event, _listener) => {},
+          off: (_event, _listener) => {},
+        } as Partial<CypressOutgoingResponse>,
+      }
+    }
+
+    // https://github.com/cypress-io/cypress/issues/7290
+    it('removes the proxy-connection header so it is not forwarded to the origin', async () => {
+      const ctx = prepareContext({ 'proxy-connection': 'keep-alive' })
+
+      await testMiddleware([RemoveProxyConnectionHeader], ctx)
+      expect(ctx.req.headers!['proxy-connection']).toBeUndefined()
+    })
+
+    it('leaves other headers untouched', async () => {
+      const ctx = prepareContext({ 'proxy-connection': 'keep-alive', 'accept-encoding': 'gzip' })
+
+      await testMiddleware([RemoveProxyConnectionHeader], ctx)
+      expect(ctx.req.headers!['proxy-connection']).toBeUndefined()
+      expect(ctx.req.headers!['accept-encoding']).toBe('gzip')
+    })
+
+    it('is a noop when the proxy-connection header is not present', async () => {
+      const ctx = prepareContext({ 'accept-encoding': 'gzip' })
+
+      await testMiddleware([RemoveProxyConnectionHeader], ctx)
+      expect(ctx.req.headers!['accept-encoding']).toBe('gzip')
     })
   })
 

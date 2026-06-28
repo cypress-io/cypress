@@ -53,6 +53,7 @@ const ExtractCypressMetadataHeaders: RequestMiddleware = function () {
     delete this.req.headers['x-cypress-is-from-extra-target']
 
     this.onlyRunMiddleware([
+      'RemoveProxyConnectionHeader',
       'MaybeSetBasicAuthHeaders',
       'SendRequestOutgoing',
     ])
@@ -245,6 +246,28 @@ function reqNeedsBasicAuthHeaders (req, { auth, origin }: Cypress.RemoteState) {
   return auth && !req.headers['authorization'] && urlMatchesOriginProtectionSpace(req.proxiedUrl, origin)
 }
 
+const RemoveProxyConnectionHeader: RequestMiddleware = function () {
+  const span = telemetry.startSpan({ name: 'remove:proxy:connection:header', parentSpan: this.reqMiddlewareSpan, isVerbose })
+
+  // Browsers configured to route through a proxy add a `Proxy-Connection`
+  // header to HTTP requests. It is a hop-by-hop header meant to be consumed by
+  // the proxy itself and must not be forwarded to the origin, where some
+  // servers reject the request because of it. Strip it before forwarding.
+  // https://github.com/cypress-io/cypress/issues/7290
+  const hadProxyConnectionHeader = 'proxy-connection' in this.req.headers
+
+  if (hadProxyConnectionHeader) {
+    delete this.req.headers['proxy-connection']
+  }
+
+  span?.setAttributes({
+    hadProxyConnectionHeader,
+  })
+
+  span?.end()
+  this.next()
+}
+
 const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
   const span = telemetry.startSpan({ name: 'maybe:set:basic:auth:headers', parentSpan: this.reqMiddlewareSpan, isVerbose })
 
@@ -287,6 +310,7 @@ export default {
   RedirectToClientRouteIfUnloaded,
   EndRequestsToBlockedHosts,
   StripUnsupportedAcceptEncoding,
+  RemoveProxyConnectionHeader,
   MaybeSetBasicAuthHeaders,
   SendRequestOutgoing,
 }
