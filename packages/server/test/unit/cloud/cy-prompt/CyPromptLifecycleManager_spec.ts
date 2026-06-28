@@ -60,7 +60,8 @@ describe('CyPromptLifecycleManager', () => {
       'chokidar': {
         watch: watcherStub.returns({
           on: watcherOnStub.returnsThis(),
-          close: watcherCloseStub,
+          close: watcherCloseStub.resolves(),
+          removeAllListeners: sinon.stub(),
         }),
       },
     }).CyPromptLifecycleManager
