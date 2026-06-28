@@ -156,7 +156,7 @@ expect(Cypress.$('#result')).to.be.focused
 expect(Cypress.$('#result')).to.not.have.focus
 expect(Cypress.$('#result')).to.not.be.focused
 
-// Ensure the chai 4.5 assertion aliases are typed
+// Ensure the chai assertion aliases are typed
 expect(1).to.exists
 expect(2).to.be.greaterThanOrEqual(1)
 expect(1).to.be.lessThanOrEqual(2)

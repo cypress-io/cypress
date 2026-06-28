@@ -800,10 +800,10 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
-  // Smoke tests for assertion aliases added by the chai 4.5 upgrade. These are
-  // vanilla chai aliases (chai owns their behavior); we only verify they're
-  // reachable through Cypress's expect/assert/should surfaces.
-  context('chai 4.5 aliases', () => {
+  // Smoke tests for vanilla chai assertion aliases (chai owns their behavior);
+  // we only verify they're reachable through Cypress's expect/assert/should
+  // surfaces.
+  context('chai aliases', () => {
     it('exists is an alias of exist', () => {
       expect(0).to.exists
       expect(null).to.not.exists
