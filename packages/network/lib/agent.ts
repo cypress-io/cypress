@@ -5,7 +5,7 @@ import _ from 'lodash'
 import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
-import { createRetryingSocket, getAddress } from './connect'
+import { createRetryingSocket, getAddress, lookup } from './connect'
 import { lenientOptions } from './http-utils'
 import { clientCertificateStoreSingleton } from './client-certificates'
 import { CaOptions, getCaOptions } from './ca'
@@ -254,6 +254,10 @@ export class CombinedAgent {
 
     return getFirstWorkingFamily(options, this.familyCache, (family?: net.family) => {
       options.family = family
+      // resolve `localhost`/`*.localhost` to loopback when the OS resolver can't,
+      // matching how the browser reaches these virtual hosts
+      // https://github.com/cypress-io/cypress/issues/24458
+      options.lookup = lookup
 
       debug('got family %o', _.pick(options, 'family', 'href'))
 

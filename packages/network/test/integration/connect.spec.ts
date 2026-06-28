@@ -33,6 +33,33 @@ describe('lib/connect', function () {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/24458
+    it('resolves a *.localhost virtual host to loopback', {
+      timeout: 50,
+    }, async () => {
+      const server = net.createServer(_.partialRight(_.invoke, 'close'))
+
+      // start the server
+      await new Promise<void>((resolve) => {
+        server.listen({
+          port: 0,
+          host: '127.0.0.1',
+        }, resolve)
+      })
+
+      const address = await connect.getAddress((server.address() as AddressInfo).port, 'myapp.localhost')
+
+      expect(address).toEqual({
+        family: 4,
+        address: '127.0.0.1',
+      })
+
+      // stop the server
+      await new Promise<Error>((resolve) => {
+        server.close(resolve)
+      })
+    })
+
     // Error: listen EADDRNOTAVAIL ::1
     // NOTE: add an ipv6 lo if to the docker container
     it('resolves localhost on ::1 immediately', {
