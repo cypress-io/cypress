@@ -7,6 +7,9 @@ import type { TapBindingContract, TapExecResult, TapSchema } from './contract'
 export class TapManager implements TapBindingContract {
   constructor (private cypressVersion: string) {}
 
+  // Describes this Cypress to the CLI: the protocol version, the Cypress
+  // version, and the full command registry (params/options) it can call via
+  // exec. The CLI reads this to build its interface and validate input.
   async getSchema (): Promise<TapSchema> {
     return {
       protocolVersion: TAP_PROTOCOL_VERSION,
@@ -19,6 +22,10 @@ export class TapManager implements TapBindingContract {
     }
   }
 
+  // Runs a single CLI command. Looks up the command, coerces the raw string
+  // args/options into typed values per its schema, then invokes the handler.
+  // Always resolves to a TapExecResult: { ok: true, result } on success, or
+  // { ok: false, code, message } for an unknown command or invalid arguments.
   async exec (command: string, args: Record<string, string> = {}, options: Record<string, string> = {}): Promise<TapExecResult> {
     const definition: TapCommandDefinition | undefined = Object.prototype.hasOwnProperty.call(tapCommands, command)
       ? tapCommands[command as keyof typeof tapCommands]
