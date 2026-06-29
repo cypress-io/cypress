@@ -8,6 +8,10 @@ const debug = Debug('cypress:driver:proxy-logging')
 // for logs emitted once per request on expected paths
 const debugVerbose = Debug('cypress-verbose:driver:proxy-logging')
 
+function getInterceptionResponse (interception: Interception) {
+  return interception.response ?? interception.pendingResponse
+}
+
 function formatInterception ({ route, interception }: ProxyRequest['interceptions'][number]) {
   const ret = {
     'RouteMatcher': route.options,
@@ -16,8 +20,10 @@ function formatInterception ({ route, interception }: ProxyRequest['interception
     'Request': interception.request,
   }
 
-  if (interception.response) {
-    ret['Response'] = _.omitBy(interception.response, _.isNil)
+  const response = getInterceptionResponse(interception)
+
+  if (response) {
+    ret['Response'] = _.omitBy(response, _.isNil)
   }
 
   const alias = interception.request.alias || route.alias
@@ -197,7 +203,9 @@ class ProxyRequest {
     // details on response
     let resBody
 
-    if ((resBody = _.chain(this.interceptions).last().get('interception.response.body').value())) {
+    const interception = _.chain(this.interceptions).last().get('interception').value()
+
+    if (interception && (resBody = getInterceptionResponse(interception)?.body)) {
       consoleProps['Response Body'] = resBody
     }
 
