@@ -1,13 +1,9 @@
 export {
   INSTANCES_DIRNAME,
-  SCHEMA_VERSION,
-  MIN_SCHEMA_VERSION,
   isCompatibleRecord,
-  recordFileName,
   parseRecordPid,
   runnerDiscoveryDir,
   runnerDiscoveryProbePath,
-  RUNNER_DISCOVERY_ROUTE_PREFIX,
 } from '@packages/runner-discovery'
 
 export type {
