@@ -21,7 +21,7 @@ import type {
   BrowserPreRequest,
 } from '../types'
 import type { IncomingMessage } from 'http'
-import type { ForNetworkInterception, ForCommandLog, ForCookieState, ForDocumentPreparation, ForNetworkCapture, BackendRoute } from '@packages/network-interception'
+import type { ForNetworkInterception, ForCommandLog, ForCookieState, ForDocumentPreparation, ForNetworkCapture, BackendRoute, ResourceType } from '@packages/network-interception'
 import type { Readable } from 'stream'
 import type { Request, Response } from 'express'
 import type { RemoteStates } from '@packages/network-tools'
@@ -128,7 +128,7 @@ export type ServerCtx = Readonly<{
     url: string
     method: string
     headers: Record<string, string | string[]>
-    resourceType?: string
+    resourceType?: ResourceType
   }) => BackendRoute[]
 }>
 
