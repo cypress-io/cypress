@@ -445,10 +445,7 @@ chai.use((chai, u) => {
       })
     }
 
-    // _super is not documented.
-    // @ts-ignore
     chai.Assertion.overwriteProperty('exist', existAssertion)
-    // @ts-ignore
     chai.Assertion.overwriteProperty('exists', existAssertion)
   }
 
