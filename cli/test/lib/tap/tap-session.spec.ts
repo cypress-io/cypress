@@ -4,9 +4,6 @@ import CRI from 'chrome-remote-interface'
 import type { ReadyRunnerState } from '../../../lib/runner-instances'
 import { withTapSession, TapTransportError } from '../../../lib/tap/tap-session'
 
-// Drive `chrome-remote-interface` at the SDK boundary: the factory and the
-// client it returns are stubbed, so the transport (WebSocket, JSON-RPC,
-// sessionId routing) is the SDK's concern and never exercised here.
 vi.mock('chrome-remote-interface', () => ({ default: vi.fn() }))
 
 const RUNNER_ORIGIN = 'http://localhost:5555'
@@ -27,8 +24,6 @@ interface FakeClientOverrides {
   attachToTarget?: ReturnType<typeof vi.fn>
 }
 
-// A fake CRI client with healthy defaults: one runner page with the binding,
-// a flat session, an objectId from evaluate, and an 'ok' from callFunctionOn.
 const makeClient = (overrides: FakeClientOverrides = {}) => {
   const client = {
     Target: {
@@ -58,13 +53,8 @@ const makeRecord = (overrides: Partial<ReadyRunnerState> = {}): ReadyRunnerState
   }
 }
 
-// The runner the session is opened against, set by `setup` and reused by
-// `callOnce`. withTapSession takes an already-resolved runner now, so picking
-// one is resolveRunner's job (covered in runner-instances.spec), not this one's.
 let runner: ReadyRunnerState
 
-// Point the fake CRI client at a runner for one run. Returns both so tests can
-// assert against the runner and the client's stubbed methods.
 const setup = (client = makeClient(), overrides: Partial<ReadyRunnerState> = {}) => {
   runner = makeRecord(overrides)
   mockConnect.mockResolvedValue(client)
@@ -72,7 +62,6 @@ const setup = (client = makeClient(), overrides: Partial<ReadyRunnerState> = {})
   return { runner, client }
 }
 
-// The single-call shape most tests need: one session, one binding invocation.
 const callOnce = (method = 'health', args: unknown[] = []) => {
   return withTapSession(runner, (session) => session.call(method, args))
 }
@@ -101,10 +90,8 @@ describe('lib/tap/tap-session', () => {
     })
 
     expect(result).toBe('ok')
-    // Connected straight to the resolved runner's browser ws URL — no HTTP discovery.
     expect(mockConnect).toHaveBeenCalledWith({ target: BROWSER_WS_URL })
 
-    // Once to probe the page for the binding, once to acquire the call handle.
     expect(client.Runtime.evaluate).toHaveBeenCalledTimes(2)
     expect(client.Runtime.evaluate.mock.calls[0][0]).toEqual({ expression: 'window.__CYPRESS_TAP_BINDING__' })
     expect(client.Runtime.evaluate.mock.calls[0][1]).toBe('SID1')
@@ -139,7 +126,6 @@ describe('lib/tap/tap-session', () => {
 
     expect(results).toEqual([{ protocolVersion: 1, commands: [] }, 'ok'])
 
-    // One connection, one page attach — both calls share the session.
     expect(mockConnect).toHaveBeenCalledOnce()
     expect(client.Target.attachToTarget).toHaveBeenCalledOnce()
 
@@ -156,7 +142,6 @@ describe('lib/tap/tap-session', () => {
     await expectCode(callOnce('a.b'), 'INVALID_METHOD')
     await expectCode(callOnce(''), 'INVALID_METHOD')
 
-    // The trampoline template was never built from hostile input.
     expect(client.Runtime.callFunctionOn).not.toHaveBeenCalled()
   })
 
@@ -185,15 +170,12 @@ describe('lib/tap/tap-session', () => {
     const { client } = setup(makeClient({ evaluate, callFunctionOn }))
 
     expect(await callOnce()).toBe('ok')
-    // probe + acquire + re-acquire
     expect(client.Runtime.evaluate).toHaveBeenCalledTimes(3)
     expect(client.Runtime.callFunctionOn).toHaveBeenCalledTimes(2)
     expect(client.Runtime.callFunctionOn.mock.calls[1][0].objectId).toBe('OBJ2')
   })
 
   it('re-acquires and retries once when the execution context was destroyed mid-call', async () => {
-    // The reply when the first cross-origin cy.visit reloads the runner top
-    // frame while a call is in flight — same recovery as a stale handle.
     const evaluate = vi.fn()
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE' } })
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ1' } })
@@ -228,15 +210,11 @@ describe('lib/tap/tap-session', () => {
 
     await expectCode(callOnce(), 'STALE_HANDLE')
 
-    // exactly one re-acquire (plus the probe) — no unbounded retry loops
     expect(client.Runtime.evaluate).toHaveBeenCalledTimes(3)
     expect(client.Runtime.callFunctionOn).toHaveBeenCalledTimes(2)
   })
 
   it('re-attaches to the runner page and retries when the session was severed by a cross-process navigation', async () => {
-    // The first cross-origin cy.visit moves the runner top frame to the AUT
-    // origin — a cross-process navigation that kills the flattened session,
-    // not just the object handle. The page target survives.
     const attachToTarget = vi.fn()
     .mockResolvedValueOnce({ sessionId: 'SID1' })
     .mockResolvedValueOnce({ sessionId: 'SID2' })
@@ -249,16 +227,12 @@ describe('lib/tap/tap-session', () => {
 
     expect(await callOnce()).toBe('ok')
 
-    // Re-attach means a fresh target listing and a fresh page session; the
-    // retried call rides the new sessionId.
     expect(client.Target.getTargets).toHaveBeenCalledTimes(2)
     expect(client.Target.attachToTarget).toHaveBeenCalledTimes(2)
     expect(client.Runtime.callFunctionOn.mock.calls[1][1]).toBe('SID2')
   })
 
   it('throws BINDING_NOT_FOUND from the re-attach while the reloaded runner is still mounting', async () => {
-    // After the severed session, the new page exists but the binding has not
-    // mounted yet — long-polling callers treat this as retryable.
     const evaluate = vi.fn()
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ_PROBE' } })
     .mockResolvedValueOnce({ result: { type: 'object', objectId: 'OBJ1' } })
@@ -278,7 +252,6 @@ describe('lib/tap/tap-session', () => {
 
     await expectCode(callOnce(), 'BINDING_NOT_FOUND')
     expect(client.Runtime.callFunctionOn).not.toHaveBeenCalled()
-    // the probed page wasn't the runner, so its session was released
     expect(client.Target.detachFromTarget).toHaveBeenCalledWith({ sessionId: 'SID1' })
   })
 
@@ -296,8 +269,6 @@ describe('lib/tap/tap-session', () => {
   })
 
   it('finds the runner page at a foreign origin (after a cy.visit origin swap)', async () => {
-    // After the first cross-origin cy.visit, the runner is re-served under the
-    // AUT's origin — the page URL no longer carries the recorded runnerOrigin.
     const client = makeClient({
       targetInfos: [pageTarget('T1', 'http://localhost:8080/__/#/specs/runner?file=app.cy.ts')],
     })
@@ -345,9 +316,7 @@ describe('lib/tap/tap-session', () => {
     setup(client)
 
     expect(await callOnce()).toBe('ok')
-    // the binding call ran against the page that probed positive
     expect(client.Runtime.callFunctionOn.mock.calls[0][1]).toBe('SID_RUNNER')
-    // the non-runner page's probe session was released
     expect(client.Target.detachFromTarget).toHaveBeenCalledWith({ sessionId: 'SID_AUT' })
   })
 
@@ -396,7 +365,6 @@ describe('lib/tap/tap-session', () => {
 
     await expectCode(callOnce(), 'CDP_UNREACHABLE')
 
-    // a non-stale error is not retried
     expect(client.Runtime.callFunctionOn).toHaveBeenCalledOnce()
   })
 
