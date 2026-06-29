@@ -252,10 +252,10 @@ describe('lib/cypress-instances', () => {
     })
 
     it('throws NO_INSTANCE when no record matches the filters', async () => {
-      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111, projectRoot: '/other/project' }) } })
+      mockfs({ [INSTANCES_DIR]: { '111.json': makeRecord({ pid: 111 }) } })
       stubKill({ alive: [111] })
 
-      await expect(resolveInstance({ project: PROJECT, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
+      await expect(resolveInstance({ instance: 999, cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_INSTANCE' })
     })
 
     it('throws STALE_INSTANCE when a match exists but its process is dead', async () => {
@@ -286,7 +286,7 @@ describe('lib/cypress-instances', () => {
       await expect(resolveInstance({ cwd: PROJECT })).rejects.toMatchObject({ code: 'NO_BROWSER_ATTACHED' })
     })
 
-    it('skips a stale record and resolves the live one matching the same project', async () => {
+    it('skips a stale record and resolves the live one', async () => {
       const closedPort = await getClosedPort()
       const livePort = await startReadyInstance('live-instance')
 
@@ -299,7 +299,7 @@ describe('lib/cypress-instances', () => {
 
       stubKill({ alive: [111, 222] })
 
-      const selection = await resolveInstance({ project: PROJECT, cwd: PROJECT })
+      const selection = await resolveInstance({ cwd: PROJECT })
 
       expect(selection.instance.pid).toBe(222)
       // Only the verified-live record counts as a candidate.
@@ -413,21 +413,6 @@ describe('lib/cypress-instances', () => {
       stubKill({ alive: [111, 333] })
 
       expect((await listLiveInstances()).map((instance) => instance.pid)).toEqual([111])
-    })
-
-    it('filters by project root', async () => {
-      const port = await startFakeInstance()
-
-      mockfs({
-        [INSTANCES_DIR]: {
-          '111.json': makeRecord({ pid: 111, projectRoot: '/projects/app', serverPort: port }),
-          '222.json': makeRecord({ pid: 222, projectRoot: '/projects/other', serverPort: port }),
-        },
-      })
-
-      stubKill({ alive: [111, 222] })
-
-      expect((await listLiveInstances({ projectRoot: '/projects/app' })).map((instance) => instance.pid)).toEqual([111])
     })
 
     it('filters by pid', async () => {
