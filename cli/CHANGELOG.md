@@ -12,6 +12,7 @@
 - Fixed an issue where headless WebKit used the host machine's `devicePixelRatio` instead of a standard value of `1`. Headless WebKit now matches headless Chrome, so screenshots taken during `cypress run` are consistent regardless of the host's DPI (for example 2x locally versus 1x in CI) and text is no longer fuzzy on high-DPI displays. Applies when [`experimentalWebKitSupport`](https://docs.cypress.io/app/references/experiments) is enabled. Fixes [#23808](https://github.com/cypress-io/cypress/issues/23808). Fixed in [#34088](https://github.com/cypress-io/cypress/pull/34088).
 - Fixed an issue where the [`userAgent`](https://on.cypress.io/configuration#Browser) configuration option was not applied when running tests in the experimental WebKit browser. Fixes [#33349](https://github.com/cypress-io/cypress/issues/33349).
 - Fixed an issue where, in the experimental WebKit browser, a request to focus the browser window was silently ignored, so the window could remain in the background. The active page is now correctly brought to the front. Addressed in [#34137](https://github.com/cypress-io/cypress/pull/34137).
+- Fixed an issue in `cypress open` where the Launchpad would sometimes show the browser as open after the browser had been closed, requiring an extra click on the "Close" button before another browser could be launched. Fixes [#23798](https://github.com/cypress-io/cypress/issues/23798).
 
 ## 15.18.0
 

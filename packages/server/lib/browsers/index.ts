@@ -197,9 +197,33 @@ const browsers = {
 
     debug('opening browser %o', browser)
 
-    const _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
+    if (!ctx.isRunMode) {
+      const originalOnError = options.onError
 
-    debug(`browser opened for launch ${thisLaunchAttempt}`)
+      options.onError = (err) => {
+        if (ctx.coreData.app.browserStatus !== 'closed') {
+          ctx.actions.app.setBrowserStatus('closed')
+          options.onBrowserClose?.()
+        }
+
+        return originalOnError?.(err)
+      }
+    }
+
+    let _instance: BrowserInstance
+
+    try {
+      _instance = await browserLauncher.open(browser, options.url, options, automation, ctx.coreData.servers.cdpSocketServer)
+      debug(`browser opened for launch ${thisLaunchAttempt}`)
+    } catch (err) {
+      debug('error while opening browser %o', err)
+      ctx.actions.app.setBrowserStatus('closed')
+      options.onBrowserClose?.()
+      browserLauncher.clearInstanceState()
+      if (ctx.isRunMode) throw err
+
+      return null
+    }
 
     // in most cases, we'll kill any running browser instance before launching
     // a new one when we call `await kill()` early in this function.

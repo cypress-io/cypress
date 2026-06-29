@@ -494,6 +494,87 @@ describe('lib/browsers/index', () => {
         })
       })
     })
+
+    it('resets status to closed and returns null when browserLauncher.open throws in open mode', async () => {
+      const url: TestUrl = 'http://localhost:3000'
+      const openCtx = createTestDataContext('open')
+      const expectedError = new Error('browser failed to open')
+
+      sinon.stub(electron, 'open').rejects(expectedError)
+      sinon.stub(electron, 'clearInstanceState')
+      sinon.spy(openCtx.actions.app, 'setBrowserStatus')
+      sinon.stub(Promise, 'delay').resolves()
+
+      const result = await browsers.open(
+        { name: 'electron', family: 'chromium' } as any,
+        { url } as any,
+        null,
+        openCtx,
+      )
+
+      expect(result).to.be.null
+      expect((openCtx.actions.app.setBrowserStatus as SetBrowserStatusSpy).getCall(0).args[0]).eq('opening')
+      expect((openCtx.actions.app.setBrowserStatus as SetBrowserStatusSpy).getCall(1).args[0]).eq('closed')
+    })
+
+    it('rethrows the error when browserLauncher.open throws in run mode', () => {
+      const url: TestUrl = 'http://localhost:3000'
+      const expectedError = new Error('browser failed to open in run mode')
+
+      sinon.stub(electron, 'open').rejects(expectedError)
+      sinon.stub(electron, 'clearInstanceState')
+      sinon.stub(Promise, 'delay').resolves()
+
+      return browsers.open(
+        { name: 'electron', family: 'chromium' } as any,
+        { url } as any,
+        null,
+        ctx,
+      ).then(() => {
+        throw new Error('should have thrown')
+      }).catch((err) => {
+        expect(err).to.eq(expectedError)
+        expect(ctx.coreData.app.browserStatus).to.eq('closed')
+      })
+    })
+
+    it('resets status to closed when onError is called in open mode (e.g. Chrome window closed without process exit)', async () => {
+      const url: TestUrl = 'http://localhost:3000'
+      const openCtx = createTestDataContext('open')
+      const browserInstance = new EventEmitter() as BrowserInstance
+
+      browserInstance.kill = () => {
+        browserInstance.emit('exit')
+      }
+
+      // Capture the options passed to electron.open so we can invoke the wrapped onError
+      let capturedOnError: ((err: Error) => void) | undefined
+
+      sinon.stub(electron, 'open').callsFake((_browser, _url, opts) => {
+        capturedOnError = opts.onError
+
+        return Promise.resolve(browserInstance)
+      })
+
+      sinon.spy(openCtx.actions.app, 'setBrowserStatus')
+      sinon.stub(Promise, 'delay').resolves()
+
+      const onBrowserClose = sinon.stub()
+      const onError = sinon.stub()
+
+      await browsers.open(
+        { name: 'electron', family: 'chromium' } as any,
+        { url, onBrowserClose, onError } as any,
+        null,
+        openCtx,
+      )
+
+      capturedOnError!(new Error('BROWSER_PROCESS_CLOSED_UNEXPECTEDLY'))
+
+      expect(openCtx.coreData.app.browserStatus).to.eq('closed')
+      expect(onBrowserClose).to.have.been.calledOnce
+      expect(onError).to.have.been.calledOnce
+    })
   })
 
   context('didBrowserPreviouslyHaveUnexpectedExit', () => {
