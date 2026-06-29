@@ -82,6 +82,7 @@ chai.use((chai, u) => {
   const lengthProto = (chai.Assertion.prototype as any).__methods.length.method
   const containProto = (chai.Assertion.prototype as any).__methods.contain.method
   const existProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exist')!.get
+  const existsProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exists')!.get
   const { objDisplay } = chai.util
 
   const getMessage = chai.util.getMessage
@@ -172,8 +173,9 @@ chai.use((chai, u) => {
     (chai.Assertion.prototype as any).match = matchProto;
     (chai.Assertion.prototype as any).__methods.length.method = lengthProto;
     (chai.Assertion.prototype as any).__methods.contain.method = containProto
+    Object.defineProperty(chai.Assertion.prototype, 'exist', { get: existProto })
 
-    return Object.defineProperty(chai.Assertion.prototype, 'exist', { get: existProto })
+    return Object.defineProperty(chai.Assertion.prototype, 'exists', { get: existsProto })
   }
 
   const overrideChaiInspect = () => {
@@ -387,9 +389,9 @@ chai.use((chai, u) => {
       // @ts-ignore
       makeMethodChainable)
 
-    // _super is not documented.
-    // @ts-ignore
-    chai.Assertion.overwriteProperty('exist', (_super) => {
+    // chai registers `exist` and its `exists` alias as separate properties, so
+    // overwrite both to keep Cypress's DOM-aware existence behavior consistent.
+    const existAssertion = (_super) => {
       return (function () {
         const obj = this._obj
 
@@ -441,7 +443,13 @@ chai.use((chai, u) => {
           }
         }
       })
-    })
+    }
+
+    // _super is not documented.
+    // @ts-ignore
+    chai.Assertion.overwriteProperty('exist', existAssertion)
+    // @ts-ignore
+    chai.Assertion.overwriteProperty('exists', existAssertion)
   }
 
   const captureUserInvocationStack = (specWindow: SpecWindow, state: StateFunc, ssfi) => {

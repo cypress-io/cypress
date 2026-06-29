@@ -1507,6 +1507,28 @@ describe('src/cy/commands/assertions', () => {
 
         cy.get('#does-not-exist').should('not.exist')
       })
+
+      // chai's `exists` alias is a separate property from `exist`, so verify it
+      // gets Cypress's DOM-aware existence behavior and not chai's nullish check
+      // (an empty jQuery object is non-null, so vanilla chai would pass `exists`).
+      it('uses DOM existence behavior for the exists alias', (done) => {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            cy.removeAllListeners('log:added')
+
+            expect(log.get('message')).to.eq('expected **#does-not-exist** not to exist in the DOM')
+
+            done()
+          }
+        })
+
+        cy.get('#does-not-exist').should('not.exists')
+      })
+
+      it('fails the exists alias for a detached jQuery subject', () => {
+        cy.wrap(cy.$$('<div></div>').appendTo('body')).should('exists')
+        cy.wrap(cy.$$('.non-existent')).should('not.exists')
+      })
     })
 
     describe('#be.visible', () => {
